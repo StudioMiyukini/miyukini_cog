@@ -1,0 +1,55 @@
+Miyukini Framework - Screens
+
+## Contexte
+
+Les apps mobiles doivent reprendre la logique métier sans embarquer le routing web. Ce document rassemble les enseignements du prompt anti-dette mobile : il rappelle que **1 page = 1 écran**, mais que l’écran est indépendant des hooks `useParams`/`useNavigate`, des appels Supabase ou du DOM.
+
+## Portée / Scope
+
+- Lister la correspondance page Web ↔ screen durable.
+- Réexposer les règles critiques du prompt (ScreenContract, interdits, TODO markers).
+- Indiquer où placer les prompts guardrails en repo.
+
+
+## 1. Pages jetables vs Screens
+
+- Chaque page Web injecte un `<Screen>` (ex : `BookingCreateScreen`) qui devient le contrat UX portable.
+- Le Screen ne contient **que** la vue : pas de fetch, pas de logique métier, pas de router hooks.
+- `AppShellScreen`, `ContentStack`, `FAB` sont les briques de layout à conserver.
+- `Une page livre, un écran conçoit`.
+
+
+## 2. Exemple de mappings
+
+- **HomePage** → `HomeScreen` : hero + modules + CTA (reuse `HeroModule`, `StatsGrid`).
+- **Layout / GestionLayout** → `BackOfficeScreen` : header rôle + body multi-colonnes + bottom nav (catégories 1-8).
+- **SuperAdmin** → `SuperAdminScreen` : dashboards, audit, impersonate.
+- **Auth** → `AuthScreen` : formulaire, MFA; usecases injectés via props.
+
+
+## 3. Règles du prompt IA anti-dette mobile
+
+- Situé dans `docs/framework/guardrails/ia_anti_mobile_debt.md`.
+- Impose : ScreenContract (screenName, module, intent, primaryAction, layout, scrollAllowed).
+- Obligatoire : TODO markers (data binding, usecase injection, navigation handling).
+- Interdit : router hooks, fetch, Supabase, window, document.
+- En cas de violation : refuser, demander clarification.
+
+Utiliser ce prompt comme system prompt ou mentionner “Apply the IA Anti-Mobile Debt rules”.
+
+
+## 4. Conséquences pratiques
+
+- Ship 70-80% de la logique vers React Native (même JSX), ou juste l’architecture mentale en Flutter/Kotlin.
+- Tests ciblés : coverage des contracts, pas du routing.
+- Documenter chaque screen via ScreenContract + TODO (data/usecase/navigation).
+
+
+## 5. Actions recommandées
+
+- Maintenir `src/features/**/ui/screens` = screens sans router/logic.
+- Ajouter le prompt guardrail dans le repo (`docs/framework/guardrails/ia_anti_mobile_debt.md`).
+- Faire une revue (audit) pour détecter les screens violant les règles.
+- Donner la règle “A Page is a delivery mechanism, a Screen is a product artifact” aux équipes et à l’IA.
+
+> Ce résumé reprend les explications de ChatGPT. Tu as maintenant un guide clair pour garder ton socle web compatible avec une app Android native et un prompt anti-dette prêt à l’emploi.
