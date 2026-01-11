@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 /**
  * AdminSidebar - Menu latéral du Back-Office
@@ -54,6 +55,18 @@ const menuSections = [
         href: '/admin/categories',
       },
       {
+        id: 'budget',
+        label: 'Budget',
+        icon: 'icon-[tabler--wallet]',
+        href: '/admin/budget',
+      },
+      {
+        id: 'quotes',
+        label: 'Devis',
+        icon: 'icon-[tabler--file-invoice]',
+        href: '/admin/quotes',
+      },
+      {
         id: 'content',
         label: 'Contenu',
         icon: 'icon-[tabler--article]',
@@ -76,10 +89,20 @@ const menuSections = [
         ]
       },
       {
+        id: 'modules',
+        label: 'Modules',
+        icon: 'icon-[tabler--puzzle]',
+        href: '/admin/modules',
+      },
+      {
         id: 'appearance',
         label: 'Apparence',
         icon: 'icon-[tabler--palette]',
         href: '/admin/appearance',
+        children: [
+          { label: 'Homepage', href: '/admin/appearance/homepage' },
+          { label: 'Thèmes', href: '/admin/appearance', badge: 'Bientôt' },
+        ],
       },
     ]
   },
@@ -180,6 +203,8 @@ function MenuItem({ item, pathname }: MenuItemProps) {
 
 export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname()
+  const { profile } = useAuth()
+  const isSuperAdmin = profile?.role === 'super_admin'
 
   // Fermer le sidebar mobile lors des changements de route
   useEffect(() => {
@@ -233,6 +258,30 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             </ul>
           </div>
         ))}
+
+        {/* Super Admin (visible uniquement super_admin) */}
+        {isSuperAdmin && (
+          <div className="mt-4">
+            <h4 className="px-3 py-2 text-xs font-semibold uppercase text-base-content/50 tracking-wider">
+              Super Admin
+            </h4>
+            <ul className="space-y-1">
+              <MenuItem
+                item={{
+                  id: 'superadmin-integrations',
+                  label: 'Intégrations',
+                  icon: 'icon-[tabler--plug]',
+                  href: '/admin/superadmin/integrations/smtp',
+                  children: [
+                    { label: 'SMTP', href: '/admin/superadmin/integrations/smtp' },
+                    { label: 'PayPal', href: '/admin/superadmin/integrations/paypal' },
+                  ],
+                }}
+                pathname={pathname}
+              />
+            </ul>
+          </div>
+        )}
       </nav>
 
       {/* Footer avec workspace */}

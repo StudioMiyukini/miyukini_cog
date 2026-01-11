@@ -1,0 +1,2 @@
+export { agendaProModuleManifest } from './manifest'
+

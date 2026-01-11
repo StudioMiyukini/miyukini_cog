@@ -1,14 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 /**
  * SignInScreen - Écran de connexion
  * 
  * @layer screens (portable vers Android/iOS)
  * @contract ScreenContract { render, props, navigation }
- * @dependencies FlyonUI
+ * @dependencies FlyonUI, Supabase Auth
  * 
  * Portabilité native:
  * - Aucune dépendance Next.js directe (Link remplaçable)
@@ -27,11 +29,21 @@ export function SignInScreen({
   onNavigateToSignUp,
   onNavigateToForgotPassword 
 }: SignInScreenProps) {
+  const router = useRouter()
+  const { signIn, isAuthenticated, isLoading: authLoading } = useAuth()
+  
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Rediriger si déjà connecté
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      router.push('/')
+    }
+  }, [isAuthenticated, authLoading, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,9 +54,20 @@ export function SignInScreen({
       if (onSignIn) {
         await onSignIn(email, password)
       } else {
-        // Mock sign in pour démo
-        console.log('Sign in:', { email, password })
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Connexion via Supabase
+        const { error: authError } = await signIn(email, password)
+        
+        if (authError) {
+          if (authError.message.includes('Invalid login')) {
+            setError('Identifiants incorrects. Veuillez réessayer.')
+          } else {
+            setError(authError.message)
+          }
+          return
+        }
+        
+        // Redirection après connexion réussie
+        router.push('/')
       }
     } catch (err) {
       setError('Identifiants incorrects. Veuillez réessayer.')

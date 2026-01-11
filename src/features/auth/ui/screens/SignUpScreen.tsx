@@ -1,14 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 /**
  * SignUpScreen - Écran d'inscription
  * 
  * @layer screens (portable vers Android/iOS)
  * @contract ScreenContract { render, props, navigation }
- * @dependencies FlyonUI
+ * @dependencies FlyonUI, Supabase Auth
  */
 
 export interface SignUpScreenProps {
@@ -17,6 +19,9 @@ export interface SignUpScreenProps {
 }
 
 export function SignUpScreen({ onSignUp, onNavigateToSignIn }: SignUpScreenProps) {
+  const router = useRouter()
+  const { signUp, isAuthenticated, isLoading: authLoading } = useAuth()
+  
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -25,6 +30,14 @@ export function SignUpScreen({ onSignUp, onNavigateToSignIn }: SignUpScreenProps
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+
+  // Rediriger si déjà connecté
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      router.push('/')
+    }
+  }, [isAuthenticated, authLoading, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,8 +49,8 @@ export function SignUpScreen({ onSignUp, onNavigateToSignIn }: SignUpScreenProps
       return
     }
 
-    if (password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractères.')
+    if (password.length < 6) {
+      setError('Le mot de passe doit contenir au moins 6 caractères.')
       return
     }
 
@@ -52,15 +65,51 @@ export function SignUpScreen({ onSignUp, onNavigateToSignIn }: SignUpScreenProps
       if (onSignUp) {
         await onSignUp({ name, email, password })
       } else {
-        // Mock sign up pour démo
-        console.log('Sign up:', { name, email, password })
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Inscription via Supabase
+        const { error: authError } = await signUp(email, password, name)
+        
+        if (authError) {
+          if (authError.message.includes('already registered')) {
+            setError('Cet email est déjà utilisé.')
+          } else {
+            setError(authError.message)
+          }
+          return
+        }
+        
+        // Afficher le message de succès
+        setSuccess(true)
       }
     } catch (err) {
       setError('Une erreur est survenue. Veuillez réessayer.')
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Écran de succès
+  if (success) {
+    return (
+      <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
+        <div className="card bg-base-100 shadow-xl w-full max-w-md">
+          <div className="card-body text-center">
+            <div className="avatar avatar-placeholder mx-auto mb-4">
+              <div className="bg-success text-success-content rounded-full size-16 flex items-center justify-center">
+                <span className="icon-[tabler--check] size-8" />
+              </div>
+            </div>
+            <h1 className="text-2xl font-bold text-base-content">Compte créé !</h1>
+            <p className="text-base-content/60 mt-2">
+              Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.
+            </p>
+            <Link href="/signin" className="btn btn-primary mt-6">
+              <span className="icon-[tabler--login] size-5" />
+              Se connecter
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

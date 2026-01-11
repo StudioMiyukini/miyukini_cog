@@ -1,67 +1,104 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { AppShellScreen } from '@/components/layouts/AppShellScreen'
 import { ContentStack } from '@/components/layouts/ContentStack'
 import { BottomNav } from '@/components/navigation/BottomNav'
 import { Card, CardHeader, CardBody } from '@/components/atoms/card'
 import { Avatar } from '@/components/atoms/avatar'
 import { Badge } from '@/components/atoms/badge'
+import { useAuth } from '@/contexts/AuthContext'
 
 /**
  * ProfileScreen - Écran de profil utilisateur
  * 
  * @layer screens (portable vers Android/iOS)
  * @contract ScreenContract { render, props, navigation }
- * @dependencies FlyonUI, Card, Avatar, Badge
+ * @dependencies FlyonUI, Card, Avatar, Badge, Supabase Auth
  */
 
-export interface UserProfile {
-  id: string
-  name: string
-  email: string
-  avatar?: string
-  role: string
-  bio?: string
-  joinedAt: string
-  stats: {
-    posts: number
-    followers: number
-    following: number
-  }
-}
-
 export interface ProfileScreenProps {
-  user?: UserProfile
-  isCurrentUser?: boolean
-  onEditProfile?: () => void
-  onLogout?: () => void
   onNavigate?: (path: string) => void
 }
 
-// Mock user data
-const mockUser: UserProfile = {
-  id: '1',
-  name: 'Jean Dupont',
-  email: 'jean.dupont@exemple.com',
-  role: 'Utilisateur Premium',
-  bio: 'Passionné de technologie et développement. Amateur de café et de bons livres.',
-  joinedAt: '2024-01-15',
-  stats: {
-    posts: 42,
-    followers: 1234,
-    following: 567
-  }
-}
-
-export function ProfileScreen({ 
-  user = mockUser, 
-  isCurrentUser = true,
-  onEditProfile,
-  onLogout,
-  onNavigate 
-}: ProfileScreenProps) {
+export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
+  const router = useRouter()
+  const { user, profile, isAuthenticated, isLoading, signOut, refreshProfile } = useAuth()
   const [activeTab, setActiveTab] = useState<'activity' | 'settings'>('activity')
+
+  // Rediriger si non connecté
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/signin')
+    }
+  }, [isAuthenticated, isLoading, router])
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push('/')
+  }
+
+  const handleNavigate = (path: string) => {
+    if (onNavigate) {
+      onNavigate(path)
+    } else {
+      router.push(path)
+    }
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <AppShellScreen>
+        <ContentStack>
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <span className="loading loading-spinner loading-lg text-primary" />
+          </div>
+        </ContentStack>
+        <BottomNav />
+      </AppShellScreen>
+    )
+  }
+
+  // Non connecté
+  if (!isAuthenticated || !user) {
+    return null // La redirection est gérée par useEffect
+  }
+
+  // Données du profil
+  const displayName = profile?.display_name || profile?.first_name || user.email?.split('@')[0] || 'Utilisateur'
+  const email = profile?.email || user.email || ''
+  const avatarUrl = profile?.avatar_url || undefined
+  const role = profile?.role || 'user'
+  const tier = profile?.tier || 'free'
+  const joinedAt = profile?.created_at || user.created_at
+
+  // Badges de rôle
+  const getRoleBadge = () => {
+    switch (role) {
+      case 'super_admin':
+        return <Badge variant="error" style="soft">Super Admin</Badge>
+      case 'admin':
+        return <Badge variant="warning" style="soft">Admin</Badge>
+      default:
+        return <Badge variant="primary" style="soft">Utilisateur</Badge>
+    }
+  }
+
+  // Badges de tier
+  const getTierBadge = () => {
+    switch (tier) {
+      case 'enterprise':
+        return <Badge variant="secondary" style="soft">Enterprise</Badge>
+      case 'pro':
+        return <Badge variant="success" style="soft">Pro</Badge>
+      case 'starter':
+        return <Badge variant="info" style="soft">Starter</Badge>
+      default:
+        return <Badge variant="neutral" style="soft">Gratuit</Badge>
+    }
+  }
 
   return (
     <AppShellScreen>
@@ -72,56 +109,55 @@ export function ProfileScreen({
             {/* Avatar & Basic Info */}
             <div className="flex flex-col items-center text-center -mt-16">
               <Avatar 
-                src={user.avatar} 
+                src={avatarUrl} 
                 size="xl" 
                 className="ring-4 ring-base-100 shadow-lg"
               />
-              <h1 className="text-2xl font-bold text-base-content mt-4">{user.name}</h1>
-              <p className="text-base-content/60">{user.email}</p>
-              <Badge variant="primary" style="soft" className="mt-2">
-                {user.role}
-              </Badge>
+              <h1 className="text-2xl font-bold text-base-content mt-4">{displayName}</h1>
+              <p className="text-base-content/60">{email}</p>
+              <div className="flex gap-2 mt-2">
+                {getRoleBadge()}
+                {getTierBadge()}
+              </div>
             </div>
 
             {/* Bio */}
-            {user.bio && (
+            {profile?.metadata && typeof profile.metadata === 'object' && 'bio' in profile.metadata && (
               <p className="text-center text-base-content/80 mt-4 max-w-md mx-auto">
-                {user.bio}
+                {String(profile.metadata.bio)}
               </p>
             )}
 
-            {/* Stats */}
+            {/* Status */}
             <div className="flex justify-center gap-8 mt-6 pt-6 border-t border-base-content/10">
               <div className="text-center">
-                <div className="text-2xl font-bold text-base-content">{user.stats.posts}</div>
-                <div className="text-sm text-base-content/60">Publications</div>
+                <div className={`w-3 h-3 rounded-full mx-auto mb-1 ${profile?.email_verified ? 'bg-success' : 'bg-warning'}`} />
+                <div className="text-sm text-base-content/60">
+                  Email {profile?.email_verified ? 'vérifié' : 'non vérifié'}
+                </div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-base-content">{user.stats.followers.toLocaleString()}</div>
-                <div className="text-sm text-base-content/60">Abonnés</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-base-content">{user.stats.following}</div>
-                <div className="text-sm text-base-content/60">Abonnements</div>
+                <div className={`w-3 h-3 rounded-full mx-auto mb-1 ${profile?.onboarding_completed ? 'bg-success' : 'bg-warning'}`} />
+                <div className="text-sm text-base-content/60">
+                  Onboarding {profile?.onboarding_completed ? 'complété' : 'en cours'}
+                </div>
               </div>
             </div>
 
             {/* Actions */}
-            {isCurrentUser && (
-              <div className="flex gap-3 mt-6 justify-center">
-                <button 
-                  className="btn btn-primary btn-soft"
-                  onClick={onEditProfile}
-                >
-                  <span className="icon-[tabler--edit] size-5" />
-                  Modifier le profil
-                </button>
-                <button className="btn btn-outline">
-                  <span className="icon-[tabler--share] size-5" />
-                  Partager
-                </button>
-              </div>
-            )}
+            <div className="flex gap-3 mt-6 justify-center">
+              <button 
+                className="btn btn-primary btn-soft"
+                onClick={() => handleNavigate('/profile/edit')}
+              >
+                <span className="icon-[tabler--edit] size-5" />
+                Modifier le profil
+              </button>
+              <button className="btn btn-outline">
+                <span className="icon-[tabler--share] size-5" />
+                Partager
+              </button>
+            </div>
           </CardBody>
         </Card>
 
@@ -148,23 +184,10 @@ export function ProfileScreen({
           <Card>
             <CardHeader>Activité récente</CardHeader>
             <CardBody>
-              <ul className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <li key={i} className="flex items-start gap-3 pb-4 border-b border-base-content/10 last:border-0">
-                    <div className="avatar avatar-placeholder">
-                      <div className="bg-primary/20 text-primary rounded-full size-10 flex items-center justify-center">
-                        <span className="icon-[tabler--message] size-5" />
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-base-content">
-                        <span className="font-medium">Nouveau commentaire</span> sur votre publication
-                      </p>
-                      <p className="text-sm text-base-content/60">Il y a {i} heure{i > 1 ? 's' : ''}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <div className="text-center py-8 text-base-content/60">
+                <span className="icon-[tabler--activity] size-12 opacity-30 block mx-auto mb-2" />
+                <p>Aucune activité récente</p>
+              </div>
             </CardBody>
           </Card>
         ) : (
@@ -173,7 +196,7 @@ export function ProfileScreen({
               {/* Settings Menu */}
               <button 
                 className="btn btn-ghost btn-block justify-start"
-                onClick={() => onNavigate?.('/settings/account')}
+                onClick={() => handleNavigate('/profile/edit')}
               >
                 <span className="icon-[tabler--user] size-5" />
                 Informations du compte
@@ -181,7 +204,7 @@ export function ProfileScreen({
               </button>
               <button 
                 className="btn btn-ghost btn-block justify-start"
-                onClick={() => onNavigate?.('/settings/notifications')}
+                onClick={() => handleNavigate('/settings/notifications')}
               >
                 <span className="icon-[tabler--bell] size-5" />
                 Notifications
@@ -189,7 +212,7 @@ export function ProfileScreen({
               </button>
               <button 
                 className="btn btn-ghost btn-block justify-start"
-                onClick={() => onNavigate?.('/settings/privacy')}
+                onClick={() => handleNavigate('/settings/privacy')}
               >
                 <span className="icon-[tabler--lock] size-5" />
                 Confidentialité
@@ -197,18 +220,33 @@ export function ProfileScreen({
               </button>
               <button 
                 className="btn btn-ghost btn-block justify-start"
-                onClick={() => onNavigate?.('/settings/appearance')}
+                onClick={() => handleNavigate('/settings/appearance')}
               >
                 <span className="icon-[tabler--palette] size-5" />
                 Apparence
                 <span className="icon-[tabler--chevron-right] size-5 ml-auto" />
               </button>
               
+              {/* Admin link */}
+              {(role === 'admin' || role === 'super_admin') && (
+                <>
+                  <div className="divider" />
+                  <button 
+                    className="btn btn-ghost btn-block justify-start text-warning"
+                    onClick={() => handleNavigate('/admin')}
+                  >
+                    <span className="icon-[tabler--dashboard] size-5" />
+                    Administration
+                    <span className="icon-[tabler--chevron-right] size-5 ml-auto" />
+                  </button>
+                </>
+              )}
+              
               <div className="divider" />
               
               <button 
                 className="btn btn-ghost btn-block justify-start text-error"
-                onClick={onLogout}
+                onClick={handleSignOut}
               >
                 <span className="icon-[tabler--logout] size-5" />
                 Déconnexion
@@ -219,7 +257,7 @@ export function ProfileScreen({
 
         {/* Member Since */}
         <p className="text-center text-sm text-base-content/50">
-          Membre depuis {new Date(user.joinedAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+          Membre depuis {new Date(joinedAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
         </p>
       </ContentStack>
       <BottomNav />

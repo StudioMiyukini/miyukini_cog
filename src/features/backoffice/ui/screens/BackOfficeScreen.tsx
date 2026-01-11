@@ -1,48 +1,158 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { AdminLayout } from '@/components/layouts/AdminLayout'
 import { Card, CardHeader, CardBody } from '@/components/atoms/card'
 import { Badge } from '@/components/atoms/badge'
 import { Avatar } from '@/components/atoms/avatar'
 import { useCategories } from '@/contexts/CategoriesContext'
+import { useAuth } from '@/contexts/AuthContext'
+import { getSupabaseClient } from '@/lib/supabase/client'
+import type { Profile } from '@/lib/supabase/database.types'
 
 /**
  * BackOfficeScreen - Dashboard d'administration
- * Utilise AdminLayout avec menu latéral
+ * Protégé par RLS : seuls les admins peuvent accéder aux données
  * 
  * @layer screens (portable vers Android/iOS)
  * @contract ScreenContract { render, props, navigation }
+ * @rls profiles_select_admin - Admins peuvent voir tous les profils
  */
 
 export interface BackOfficeScreenProps {
   onNavigate?: (path: string) => void
 }
 
-// Mock data
-const mockUsers = [
-  { id: '1', name: 'Jean Dupont', email: 'jean@exemple.com', status: 'Actif', role: 'Admin', date: '2026-01-08' },
-  { id: '2', name: 'Marie Martin', email: 'marie@exemple.com', status: 'En attente', role: 'User', date: '2026-01-07' },
-  { id: '3', name: 'Pierre Durand', email: 'pierre@exemple.com', status: 'Actif', role: 'User', date: '2026-01-06' },
-  { id: '4', name: 'Sophie Bernard', email: 'sophie@exemple.com', status: 'Inactif', role: 'User', date: '2026-01-05' },
-]
-
-const mockMeetings = [
-  { id: '1', title: 'Revue de sprint', date: '10 Jan', time: '09:00-10:00', category: 'Dev', variant: 'primary' as const },
-  { id: '2', title: 'Point client', date: '10 Jan', time: '14:00-15:00', category: 'Business', variant: 'warning' as const },
-  { id: '3', title: 'Design review', date: '11 Jan', time: '11:00-12:00', category: 'Design', variant: 'info' as const },
-  { id: '4', title: 'Formation équipe', date: '12 Jan', time: '10:00-11:30', category: 'RH', variant: 'success' as const },
-]
-
-const recentActivity = [
-  { action: 'Nouvel utilisateur inscrit', user: 'Marie M.', time: 'Il y a 5 min', icon: 'icon-[tabler--user-plus]' },
-  { action: 'Contenu publié', user: 'Admin', time: 'Il y a 15 min', icon: 'icon-[tabler--article]' },
-  { action: 'Paramètres modifiés', user: 'Jean D.', time: 'Il y a 1h', icon: 'icon-[tabler--settings]' },
-]
-
 export function BackOfficeScreen({ onNavigate }: BackOfficeScreenProps) {
+  const router = useRouter()
+  const { user, profile, isAuthenticated, isLoading: authLoading } = useAuth()
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'categories'>('overview')
   const { categories, enabledCategories, toggleCategory, resetCategories } = useCategories()
+  
+  // État pour les données admin
+  const [users, setUsers] = useState<Profile[]>([])
+  const [usersLoading, setUsersLoading] = useState(true)
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    pendingUsers: 0,
+  })
+
+  const supabase = getSupabaseClient()
+
+  // Vérifier si l'utilisateur est admin
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin'
+
+  // Rediriger si non admin
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/signin')
+    } else if (!authLoading && isAuthenticated && !isAdmin) {
+      router.push('/')
+    }
+  }, [authLoading, isAuthenticated, isAdmin, router])
+
+  // Charger les utilisateurs (RLS filtre automatiquement)
+  useEffect(() => {
+    const loadUsers = async () => {
+      if (!isAdmin) return
+      
+      setUsersLoading(true)
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50)
+
+        if (error) {
+          console.error('Erreur chargement utilisateurs:', error)
+          return
+        }
+
+        setUsers(data || [])
+        
+        // Calculer les stats
+        const total = data?.length || 0
+        const active = data?.filter((u: Profile) => u.email_verified && !u.deleted_at).length || 0
+        const pending = data?.filter((u: Profile) => !u.email_verified && !u.deleted_at).length || 0
+        
+        setStats({
+          totalUsers: total,
+          activeUsers: active,
+          pendingUsers: pending,
+        })
+      } catch (err) {
+        console.error('Erreur loadUsers:', err)
+      } finally {
+        setUsersLoading(false)
+      }
+    }
+
+    if (isAdmin) {
+      loadUsers()
+    }
+  }, [isAdmin, supabase])
+
+  // Loading state
+  if (authLoading || (!isAuthenticated && !authLoading)) {
+    return (
+      <div className="min-h-screen bg-base-200 flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg text-primary" />
+      </div>
+    )
+  }
+
+  // Non admin - ne devrait pas arriver grâce à la redirection
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-base-200 flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardBody className="text-center py-8">
+            <div className="avatar avatar-placeholder mx-auto mb-4">
+              <div className="bg-error/20 text-error rounded-full size-16 flex items-center justify-center">
+                <span className="icon-[tabler--lock] size-8" />
+              </div>
+            </div>
+            <h1 className="text-xl font-bold text-base-content">Accès refusé</h1>
+            <p className="text-base-content/60 mt-2">
+              Vous n'avez pas les permissions nécessaires pour accéder au back-office.
+            </p>
+            <button 
+              className="btn btn-primary mt-4"
+              onClick={() => router.push('/')}
+            >
+              Retour à l'accueil
+            </button>
+          </CardBody>
+        </Card>
+      </div>
+    )
+  }
+
+  // Fonction pour obtenir le badge de statut
+  const getStatusBadge = (user: Profile) => {
+    if (user.deleted_at) {
+      return <Badge variant="error" size="xs">Supprimé</Badge>
+    }
+    if (!user.email_verified) {
+      return <Badge variant="warning" size="xs">En attente</Badge>
+    }
+    return <Badge variant="success" size="xs">Actif</Badge>
+  }
+
+  // Fonction pour obtenir le badge de rôle
+  const getRoleBadge = (role: string) => {
+    switch (role) {
+      case 'super_admin':
+        return <Badge variant="error" size="xs">Super Admin</Badge>
+      case 'admin':
+        return <Badge variant="warning" size="xs">Admin</Badge>
+      default:
+        return <Badge variant="info" size="xs">User</Badge>
+    }
+  }
 
   return (
     <AdminLayout>
@@ -51,7 +161,10 @@ export function BackOfficeScreen({ onNavigate }: BackOfficeScreenProps) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-base-content">Dashboard</h1>
-            <p className="text-base-content/60 mt-1">Bienvenue dans le back-office Miyukini</p>
+            <p className="text-base-content/60 mt-1">
+              Bienvenue, {profile?.display_name || 'Admin'} 
+              <span className="ml-2">{getRoleBadge(profile?.role || 'user')}</span>
+            </p>
           </div>
           <button className="btn btn-primary">
             <span className="icon-[tabler--plus] size-5" />
@@ -62,7 +175,7 @@ export function BackOfficeScreen({ onNavigate }: BackOfficeScreenProps) {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        {/* Stat Card 1 */}
+        {/* Stat Card 1 - Total Users */}
         <Card className="bg-base-100">
           <CardBody className="p-5">
             <div className="flex items-center gap-4">
@@ -73,17 +186,56 @@ export function BackOfficeScreen({ onNavigate }: BackOfficeScreenProps) {
               </div>
               <div>
                 <p className="text-base-content/60 text-sm">Utilisateurs</p>
-                <p className="text-2xl font-bold text-base-content">1,234</p>
-                <p className="text-xs text-success flex items-center gap-1">
-                  <span className="icon-[tabler--arrow-up] size-3" />
-                  12.5%
+                <p className="text-2xl font-bold text-base-content">
+                  {usersLoading ? '...' : stats.totalUsers}
                 </p>
+                <p className="text-xs text-base-content/50">total</p>
               </div>
             </div>
           </CardBody>
         </Card>
 
-        {/* Stat Card 2 */}
+        {/* Stat Card 2 - Active Users */}
+        <Card className="bg-base-100">
+          <CardBody className="p-5">
+            <div className="flex items-center gap-4">
+              <div className="avatar avatar-placeholder">
+                <div className="bg-success/20 text-success rounded-xl size-12 flex items-center justify-center">
+                  <span className="icon-[tabler--user-check] size-6" />
+                </div>
+              </div>
+              <div>
+                <p className="text-base-content/60 text-sm">Actifs</p>
+                <p className="text-2xl font-bold text-base-content">
+                  {usersLoading ? '...' : stats.activeUsers}
+                </p>
+                <p className="text-xs text-success">vérifiés</p>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Stat Card 3 - Pending */}
+        <Card className="bg-base-100">
+          <CardBody className="p-5">
+            <div className="flex items-center gap-4">
+              <div className="avatar avatar-placeholder">
+                <div className="bg-warning/20 text-warning rounded-xl size-12 flex items-center justify-center">
+                  <span className="icon-[tabler--user-question] size-6" />
+                </div>
+              </div>
+              <div>
+                <p className="text-base-content/60 text-sm">En attente</p>
+                <p className="text-2xl font-bold text-base-content">
+                  {usersLoading ? '...' : stats.pendingUsers}
+                </p>
+                <p className="text-xs text-warning">non vérifiés</p>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Stat Card 4 - Categories */}
         <Card className="bg-base-100">
           <CardBody className="p-5">
             <div className="flex items-center gap-4">
@@ -96,48 +248,6 @@ export function BackOfficeScreen({ onNavigate }: BackOfficeScreenProps) {
                 <p className="text-base-content/60 text-sm">Catégories</p>
                 <p className="text-2xl font-bold text-base-content">{enabledCategories.length}/8</p>
                 <p className="text-xs text-base-content/50">actives</p>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Stat Card 3 */}
-        <Card className="bg-base-100">
-          <CardBody className="p-5">
-            <div className="flex items-center gap-4">
-              <div className="avatar avatar-placeholder">
-                <div className="bg-accent/20 text-accent rounded-xl size-12 flex items-center justify-center">
-                  <span className="icon-[tabler--eye] size-6" />
-                </div>
-              </div>
-              <div>
-                <p className="text-base-content/60 text-sm">Visites</p>
-                <p className="text-2xl font-bold text-base-content">45.2K</p>
-                <p className="text-xs text-error flex items-center gap-1">
-                  <span className="icon-[tabler--arrow-down] size-3" />
-                  3.1%
-                </p>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Stat Card 4 */}
-        <Card className="bg-base-100">
-          <CardBody className="p-5">
-            <div className="flex items-center gap-4">
-              <div className="avatar avatar-placeholder">
-                <div className="bg-success/20 text-success rounded-xl size-12 flex items-center justify-center">
-                  <span className="icon-[tabler--chart-bar] size-6" />
-                </div>
-              </div>
-              <div>
-                <p className="text-base-content/60 text-sm">Conversion</p>
-                <p className="text-2xl font-bold text-base-content">4.8%</p>
-                <p className="text-xs text-success flex items-center gap-1">
-                  <span className="icon-[tabler--arrow-up] size-3" />
-                  1.2%
-                </p>
               </div>
             </div>
           </CardBody>
@@ -174,130 +284,93 @@ export function BackOfficeScreen({ onNavigate }: BackOfficeScreenProps) {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Meeting Schedules */}
-            <Card className="bg-base-100">
-              <CardHeader action={
-                <button className="btn btn-ghost btn-sm">Voir tout</button>
-              }>
-                <h3 className="text-lg font-semibold">Réunions planifiées</h3>
-              </CardHeader>
-              <CardBody>
-                <ul className="space-y-4">
-                  {mockMeetings.map((meeting) => (
-                    <li key={meeting.id} className="flex items-center gap-4">
-                      <Avatar size="sm" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-base-content truncate">{meeting.title}</p>
-                        <p className="text-sm text-base-content/50 flex items-center gap-1">
-                          <span className="icon-[tabler--calendar] size-4" />
-                          {meeting.date} | {meeting.time}
-                        </p>
-                      </div>
-                      <Badge variant={meeting.variant} size="sm">{meeting.category}</Badge>
-                    </li>
-                  ))}
-                </ul>
-              </CardBody>
-            </Card>
-
             {/* Users Table */}
             <Card className="bg-base-100">
               <CardHeader action={
-                <button className="btn btn-ghost btn-sm">Gérer</button>
+                <button 
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => setActiveTab('users')}
+                >
+                  Voir tout
+                </button>
               }>
                 <h3 className="text-lg font-semibold">Utilisateurs récents</h3>
               </CardHeader>
               <CardBody className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Nom</th>
-                        <th>Email</th>
-                        <th>Statut</th>
-                        <th>Rôle</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {mockUsers.map((user) => (
-                        <tr key={user.id}>
-                          <td className="font-medium">{user.name}</td>
-                          <td className="text-base-content/70">{user.email}</td>
-                          <td>
-                            <Badge 
-                              variant={user.status === 'Actif' ? 'success' : user.status === 'En attente' ? 'warning' : 'error'}
-                              size="xs"
-                            >
-                              {user.status}
-                            </Badge>
-                          </td>
-                          <td>{user.role}</td>
-                          <td>
-                            <button className="btn btn-ghost btn-circle btn-sm">
-                              <span className="icon-[tabler--dots-vertical] size-4" />
-                            </button>
-                          </td>
+                {usersLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <span className="loading loading-spinner loading-md" />
+                  </div>
+                ) : users.length === 0 ? (
+                  <div className="text-center py-8 text-base-content/60">
+                    Aucun utilisateur trouvé
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Nom</th>
+                          <th>Email</th>
+                          <th>Statut</th>
+                          <th>Rôle</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {users.slice(0, 5).map((user) => (
+                          <tr key={user.id}>
+                            <td className="font-medium">
+                              {user.display_name || user.first_name || 'N/A'}
+                            </td>
+                            <td className="text-base-content/70">{user.email}</td>
+                            <td>{getStatusBadge(user)}</td>
+                            <td>{getRoleBadge(user.role)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </CardBody>
             </Card>
           </div>
 
           {/* Right Column */}
           <div className="space-y-6">
-            {/* Recent Activity */}
+            {/* Quick Info */}
             <Card className="bg-base-100">
               <CardHeader>
-                <h3 className="text-lg font-semibold">Activité récente</h3>
+                <h3 className="text-lg font-semibold">Informations</h3>
               </CardHeader>
               <CardBody>
-                <ul className="space-y-4">
-                  {recentActivity.map((item, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <div className="avatar avatar-placeholder">
-                        <div className="bg-base-200 rounded-lg size-8 flex items-center justify-center">
-                          <span className={`${item.icon} size-4 text-base-content/70`} />
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-base-content">{item.action}</p>
-                        <p className="text-xs text-base-content/50">{item.user} • {item.time}</p>
-                      </div>
-                    </li>
-                  ))}
+                <ul className="space-y-3">
+                  <li className="flex items-center justify-between text-sm">
+                    <span className="text-base-content/60">Rôle actuel</span>
+                    <span>{getRoleBadge(profile?.role || 'user')}</span>
+                  </li>
+                  <li className="flex items-center justify-between text-sm">
+                    <span className="text-base-content/60">Tier</span>
+                    <Badge variant="info" size="xs">{profile?.tier || 'free'}</Badge>
+                  </li>
+                  <li className="flex items-center justify-between text-sm">
+                    <span className="text-base-content/60">Catégories actives</span>
+                    <span className="font-medium">{enabledCategories.length}</span>
+                  </li>
                 </ul>
               </CardBody>
             </Card>
 
-            {/* Quick Stats */}
-            <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-none">
+            {/* RLS Info */}
+            <Card className="bg-info/10 border border-info/20">
               <CardBody>
-                <h3 className="font-semibold text-base-content mb-4">Progression mensuelle</h3>
-                <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <span className="icon-[tabler--shield-check] size-6 text-info flex-shrink-0 mt-0.5" />
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-base-content/70">Objectif utilisateurs</span>
-                      <span className="font-medium">78%</span>
-                    </div>
-                    <progress className="progress progress-primary h-2" value="78" max="100"></progress>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-base-content/70">Contenu créé</span>
-                      <span className="font-medium">45%</span>
-                    </div>
-                    <progress className="progress progress-secondary h-2" value="45" max="100"></progress>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-base-content/70">Engagement</span>
-                      <span className="font-medium">92%</span>
-                    </div>
-                    <progress className="progress progress-accent h-2" value="92" max="100"></progress>
+                    <h4 className="font-medium text-info">Protection RLS active</h4>
+                    <p className="text-sm text-info/80 mt-1">
+                      Les données sont protégées par Row Level Security. 
+                      Seuls les administrateurs peuvent voir tous les profils.
+                    </p>
                   </div>
                 </div>
               </CardBody>
@@ -309,56 +382,75 @@ export function BackOfficeScreen({ onNavigate }: BackOfficeScreenProps) {
       {activeTab === 'users' && (
         <Card className="bg-base-100">
           <CardHeader action={
-            <button className="btn btn-primary btn-sm">
-              <span className="icon-[tabler--plus] size-4" />
-              Ajouter
-            </button>
+            <div className="flex gap-2">
+              <button className="btn btn-ghost btn-sm">
+                <span className="icon-[tabler--download] size-4" />
+                Exporter
+              </button>
+              <button className="btn btn-primary btn-sm">
+                <span className="icon-[tabler--plus] size-4" />
+                Ajouter
+              </button>
+            </div>
           }>
             <h3 className="text-lg font-semibold">Gestion des utilisateurs</h3>
           </CardHeader>
           <CardBody className="p-0">
-            <div className="overflow-x-auto">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Nom</th>
-                    <th>Email</th>
-                    <th>Statut</th>
-                    <th>Rôle</th>
-                    <th>Inscription</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {mockUsers.map((user) => (
-                    <tr key={user.id}>
-                      <td className="font-medium">{user.name}</td>
-                      <td className="text-base-content/70">{user.email}</td>
-                      <td>
-                        <Badge 
-                          variant={user.status === 'Actif' ? 'success' : user.status === 'En attente' ? 'warning' : 'error'}
-                          size="xs"
-                        >
-                          {user.status}
-                        </Badge>
-                      </td>
-                      <td>{user.role}</td>
-                      <td className="text-base-content/70">{user.date}</td>
-                      <td>
-                        <div className="flex gap-1">
-                          <button className="btn btn-ghost btn-circle btn-sm">
-                            <span className="icon-[tabler--pencil] size-4" />
-                          </button>
-                          <button className="btn btn-ghost btn-circle btn-sm text-error">
-                            <span className="icon-[tabler--trash] size-4" />
-                          </button>
-                        </div>
-                      </td>
+            {usersLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <span className="loading loading-spinner loading-md" />
+              </div>
+            ) : users.length === 0 ? (
+              <div className="text-center py-8 text-base-content/60">
+                Aucun utilisateur trouvé
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Nom</th>
+                      <th>Email</th>
+                      <th>Statut</th>
+                      <th>Rôle</th>
+                      <th>Tier</th>
+                      <th>Inscription</th>
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {users.map((user) => (
+                      <tr key={user.id}>
+                        <td className="font-medium">
+                          {user.display_name || user.first_name || 'N/A'}
+                        </td>
+                        <td className="text-base-content/70">{user.email}</td>
+                        <td>{getStatusBadge(user)}</td>
+                        <td>{getRoleBadge(user.role)}</td>
+                        <td>
+                          <Badge variant="neutral" size="xs">{user.tier}</Badge>
+                        </td>
+                        <td className="text-base-content/70">
+                          {new Date(user.created_at).toLocaleDateString('fr-FR')}
+                        </td>
+                        <td>
+                          <div className="flex gap-1">
+                            <button className="btn btn-ghost btn-circle btn-sm" title="Modifier">
+                              <span className="icon-[tabler--pencil] size-4" />
+                            </button>
+                            {user.id !== profile?.id && (
+                              <button className="btn btn-ghost btn-circle btn-sm text-error" title="Supprimer">
+                                <span className="icon-[tabler--trash] size-4" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardBody>
         </Card>
       )}

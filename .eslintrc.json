@@ -7,6 +7,8 @@
   "ignorePatterns": [
     "node_modules/",
     ".next/",
-    "flyonui-dashboard-free/"
+    "flyonui-dashboard-free/",
+    "docs/framework/inspiration/**",
+    "catakana_orga/**"
   ]
 }

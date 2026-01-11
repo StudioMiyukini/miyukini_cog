@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { useAuth } from '@/contexts/AuthContext'
 
 /**
  * Header - Navigation supérieure sticky
@@ -9,6 +10,7 @@ import Link from 'next/link'
  * 
  * @layer organisms
  * @responsive Desktop: nav complète, Mobile: burger menu
+ * @dependencies Supabase Auth
  */
 
 export interface HeaderProps {
@@ -17,10 +19,40 @@ export interface HeaderProps {
 
 export function Header({ title = 'Miyukini' }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement | null>(null)
+  const { user, profile, isAuthenticated, isLoading, signOut } = useAuth()
+
+  const handleSignOut = async () => {
+    await signOut()
+    setDropdownOpen(false)
+  }
+
+  useEffect(() => {
+    if (!dropdownOpen) {
+      return
+    }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [dropdownOpen])
+
+  // Déterminer le nom à afficher
+  const displayName = profile?.display_name || profile?.first_name || user?.email?.split('@')[0] || 'Utilisateur'
+  const avatarUrl = profile?.avatar_url
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin'
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-base-content/10 bg-base-100/95 backdrop-blur-sm">
-      <nav className="navbar mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b border-base-content/10 bg-base-100/90 backdrop-blur-sm shadow-sm">
+      <nav className="navbar mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-2 lg:py-0">
         <div className="w-full lg:flex lg:items-center lg:gap-2">
           {/* Logo & Mobile toggle */}
           <div className="navbar-start items-center justify-between max-lg:w-full">
@@ -33,9 +65,15 @@ export function Header({ title = 'Miyukini' }: HeaderProps) {
               {title}
             </Link>
             <div className="flex items-center gap-4 lg:hidden">
-              <Link href="/signin" className="btn btn-primary btn-sm">
-                Connexion
-              </Link>
+              {isAuthenticated ? (
+                <Link href="/profile" className="btn btn-ghost btn-circle btn-sm">
+                  <span className="icon-[tabler--settings] size-5" />
+                </Link>
+              ) : (
+                <Link href="/signin" className="btn btn-primary btn-sm">
+                  Connexion
+                </Link>
+              )}
               <button 
                 type="button" 
                 className="btn btn-outline btn-secondary btn-square btn-sm"
@@ -48,28 +86,108 @@ export function Header({ title = 'Miyukini' }: HeaderProps) {
 
           {/* Navigation links */}
           <div className={`lg:navbar-center grow font-medium lg:flex ${isOpen ? 'block' : 'hidden'}`}>
-            <div className="flex gap-6 text-base text-base-content max-lg:mt-4 max-lg:flex-col lg:items-center">
+            <div className="flex gap-6 text-base text-base-content max-lg:mt-3 max-lg:flex-col lg:items-center">
               <Link href="/" className="hover:text-primary transition-colors">
                 Accueil
               </Link>
               <Link href="/mockcontent" className="hover:text-primary transition-colors">
                 Contenu
               </Link>
-              <Link href="/admin" className="hover:text-primary transition-colors">
-                Admin
-              </Link>
-              <Link href="/profile" className="hover:text-primary transition-colors">
-                Profil
-              </Link>
+              {isAdmin && (
+                <Link href="/admin" className="hover:text-primary transition-colors">
+                  Admin
+                </Link>
+              )}
+              {isAuthenticated && (
+                <Link href="/profile" className="hover:text-primary transition-colors lg:hidden">
+                  Profil
+                </Link>
+              )}
             </div>
           </div>
 
-          {/* Desktop CTA */}
+          {/* Desktop CTA - Authentifié ou non */}
           <div className="navbar-end max-lg:hidden">
-            <Link href="/signin" className="btn btn-primary">
-              <span className="icon-[tabler--login] size-5" />
-              Connexion
-            </Link>
+            {isAuthenticated ? (
+              <div
+                ref={dropdownRef}
+                className={`dropdown dropdown-end relative ${dropdownOpen ? 'dropdown-open' : ''}`}
+              >
+                <button
+                  tabIndex={0}
+                  className="btn btn-ghost gap-2"
+                  onClick={() => setDropdownOpen(prev => !prev)}
+                >
+                  {avatarUrl ? (
+                    <div className="avatar">
+                      <div className="w-8 rounded-full">
+                        <img src={avatarUrl} alt={displayName} />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="avatar avatar-placeholder">
+                      <div className="bg-primary text-primary-content rounded-full size-8 flex items-center justify-center text-sm">
+                        {displayName.charAt(0).toUpperCase()}
+                      </div>
+                    </div>
+                  )}
+                  <span className="max-w-24 truncate">{displayName}</span>
+                  <span className="icon-[tabler--chevron-down] size-4" />
+                </button>
+                {dropdownOpen && (
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content menu rounded-box absolute right-0 top-full mt-2 w-56 bg-base-100/90 border border-base-content/10 shadow-lg"
+                  >
+                  <li className="dropdown-header">
+                    <span className="block text-sm font-medium">{displayName}</span>
+                    <span className="block text-xs text-base-content/60">{user?.email}</span>
+                  </li>
+                  <li className="dropdown-divider" role="separator"></li>
+                  <li>
+                    <Link href="/profile" className="dropdown-item">
+                      <span className="icon-[tabler--user] size-5" />
+                      Mon profil
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/profile" className="dropdown-item">
+                      <span className="icon-[tabler--settings] size-5" />
+                      Paramètres
+                    </Link>
+                  </li>
+                  {isAdmin && (
+                    <>
+                      <li className="dropdown-divider" role="separator"></li>
+                      <li>
+                        <Link href="/admin" className="dropdown-item">
+                          <span className="icon-[tabler--dashboard] size-5" />
+                          Administration
+                        </Link>
+                      </li>
+                    </>
+                  )}
+                  <li className="dropdown-divider" role="separator"></li>
+                  <li>
+                    <button onClick={handleSignOut} className="dropdown-item text-error">
+                      <span className="icon-[tabler--logout] size-5" />
+                      Déconnexion
+                    </button>
+                  </li>
+                </ul>
+                )}
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Link href="/signin" className="btn btn-ghost">
+                  Connexion
+                </Link>
+                <Link href="/signup" className="btn btn-primary">
+                  <span className="icon-[tabler--user-plus] size-5" />
+                  S'inscrire
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </nav>

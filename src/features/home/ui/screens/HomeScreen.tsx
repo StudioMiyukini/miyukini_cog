@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AppShellScreen } from '@/components/layouts/AppShellScreen'
 import { BottomNav } from '@/components/navigation/BottomNav'
 import { Accordion } from '@/components/molecules/accordion'
+import { getSupabaseClient } from '@/lib/supabase/client'
+import type { Tables } from '@/lib/supabase/database.types'
 
 /**
  * HomeScreen - Page d'accueil
@@ -14,6 +16,23 @@ import { Accordion } from '@/components/molecules/accordion'
 
 export interface HomeScreenProps {
   onNavigate?: (path: string) => void
+}
+
+type HomepageRow = Tables<'homepage_content'>
+
+type HomepageConfig = {
+  hero?: {
+    badgeText?: string
+    title?: { line1?: string; line2?: string; highlight?: boolean }
+    subtitle?: string
+    primaryCta?: { label?: string; href?: string }
+    secondaryCta?: { label?: string; href?: string }
+  }
+  sectionsEnabled?: { stats?: boolean; quickActions?: boolean; faq?: boolean; onboarding?: boolean }
+  stats?: Array<{ value?: string; label?: string }>
+  quickActions?: Array<{ id?: string; label?: string; icon?: string; path?: string; description?: string }>
+  faq?: Array<{ title?: string; content?: string; defaultOpen?: boolean }>
+  onboardingSteps?: Array<{ id?: number; title?: string; description?: string; icon?: string }>
 }
 
 // Onboarding steps
@@ -72,16 +91,18 @@ const stats = [
 
 function OnboardingModal({ 
   onComplete,
-  onClose 
+  onClose,
+  steps,
 }: { 
   onComplete: () => void
-  onClose: () => void 
+  onClose: () => void
+  steps: Array<{ id: number; title: string; description: string; icon: string }>
 }) {
   const [currentStep, setCurrentStep] = useState(0)
-  const step = onboardingSteps[currentStep]
+  const step = steps[currentStep]
 
   const handleNext = () => {
-    if (currentStep < onboardingSteps.length - 1) {
+    if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
     } else {
       onComplete()
@@ -112,7 +133,7 @@ function OnboardingModal({
 
           {/* Progress */}
           <div className="flex justify-center gap-2 mb-6">
-            {onboardingSteps.map((_, index) => (
+            {steps.map((_, index) => (
               <div
                 key={index}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
@@ -162,6 +183,60 @@ function OnboardingModal({
 
 export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const supabase = useMemo(() => getSupabaseClient(), [])
+  const [dbConfig, setDbConfig] = useState<HomepageConfig | null>(null)
+
+  const navigate = useCallback(
+    (path: string) => {
+      if (onNavigate) return onNavigate(path)
+      if (typeof window !== 'undefined') window.location.href = path
+    },
+    [onNavigate]
+  )
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const { data, error } = await supabase.from('homepage_content').select('*').eq('id', 'home').maybeSingle()
+        if (error) throw error
+        const row = data as HomepageRow | null
+        const cfg = (row?.config ?? null) as unknown as HomepageConfig | null
+        if (!cancelled) setDbConfig(cfg)
+      } catch {
+        if (!cancelled) setDbConfig(null)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [supabase])
+
+  const hero = dbConfig?.hero
+  const enabled = dbConfig?.sectionsEnabled ?? {}
+  const pageStats =
+    (dbConfig?.stats ?? []).map((s) => ({ value: s.value ?? '', label: s.label ?? '' })) || []
+  const pageQuickActions =
+    (dbConfig?.quickActions ?? []).map((a) => ({
+      id: a.id ?? '',
+      label: a.label ?? '',
+      icon: a.icon ?? 'icon-[tabler--sparkles]',
+      path: a.path ?? '/',
+      description: a.description ?? '',
+    })) || []
+  const pageFaqItems =
+    (dbConfig?.faq ?? []).map((f) => ({
+      title: f.title ?? '',
+      content: f.content ?? '',
+      defaultOpen: !!f.defaultOpen,
+    })) || []
+  const pageOnboardingSteps =
+    (dbConfig?.onboardingSteps ?? []).map((s, idx) => ({
+      id: typeof s.id === 'number' ? s.id : idx + 1,
+      title: s.title ?? '—',
+      description: s.description ?? '',
+      icon: s.icon ?? 'icon-[tabler--sparkles]',
+    })) || []
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false)
@@ -173,6 +248,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         <OnboardingModal 
           onComplete={handleOnboardingComplete} 
           onClose={() => setShowOnboarding(false)}
+          steps={pageOnboardingSteps.length ? pageOnboardingSteps : onboardingSteps}
         />
       )}
       
@@ -185,36 +261,37 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
                 {/* Badge */}
                 <div className="bg-base-200 border border-base-content/10 w-fit rounded-full px-4 py-1.5">
                   <span className="text-sm text-base-content/80">
-                    🚀 Framework modulaire depuis 2016
+                    {hero?.badgeText ?? '🚀 Framework modulaire depuis 2016'}
                   </span>
                 </div>
 
                 {/* Title */}
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-base-content leading-tight max-w-3xl">
-                  Créez. Déployez.
+                  {hero?.title?.line1 ?? 'Créez. Déployez.'}
                   <br />
-                  <span className="text-primary">Impressionnez.</span>
+                  <span className="text-primary">{hero?.title?.line2 ?? 'Impressionnez.'}</span>
                 </h1>
 
                 {/* Subtitle */}
                 <p className="text-base-content/70 text-lg max-w-2xl">
-                  Miyukini est un framework modulaire pensé pour créer des applications web et mobiles modernes, performantes et portables.
+                  {hero?.subtitle ??
+                    'Miyukini est un framework modulaire pensé pour créer des applications web et mobiles modernes, performantes et portables.'}
                 </p>
 
                 {/* CTA */}
                 <div className="flex gap-4 flex-wrap justify-center">
                   <button 
                     className="btn btn-primary btn-lg"
-                    onClick={() => onNavigate?.('/mockcontent')}
+                    onClick={() => navigate(hero?.primaryCta?.href ?? '/mockcontent')}
                   >
-                    Explorer les fonctionnalités
+                    {hero?.primaryCta?.label ?? 'Explorer les fonctionnalités'}
                     <span className="icon-[tabler--arrow-right] size-5" />
                   </button>
                   <button 
                     className="btn btn-outline btn-lg"
-                    onClick={() => onNavigate?.('/admin')}
+                    onClick={() => navigate(hero?.secondaryCta?.href ?? '/admin')}
                   >
-                    Voir le dashboard
+                    {hero?.secondaryCta?.label ?? 'Voir le dashboard'}
                   </button>
                 </div>
               </div>
@@ -222,10 +299,11 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           </section>
 
           {/* Stats Section */}
-          <section className="py-12 bg-base-200">
+          {enabled.stats !== false && (
+            <section className="py-12 bg-base-200">
             <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat) => (
+                {(pageStats.length ? pageStats : stats).map((stat) => (
                   <div key={stat.label} className="text-center">
                     <p className="text-3xl lg:text-4xl font-bold text-primary">{stat.value}</p>
                     <p className="text-base-content/70 mt-1">{stat.label}</p>
@@ -234,9 +312,11 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
               </div>
             </div>
           </section>
+          )}
 
           {/* Services / Quick Actions */}
-          <section className="py-12 sm:py-16 lg:py-24">
+          {enabled.quickActions !== false && (
+            <section className="py-12 sm:py-16 lg:py-24">
             <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
               {/* Section Header */}
               <div className="text-center mb-12">
@@ -250,15 +330,15 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
 
               {/* Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {quickActions.map((action) => (
+                {(pageQuickActions.length ? pageQuickActions : quickActions).map((action) => (
                   <button
                     key={action.id}
                     className="card bg-base-100 border border-base-300 hover:border-primary transition-colors text-left"
-                    onClick={() => onNavigate?.(action.path)}
+                    onClick={() => navigate(action.path)}
                   >
                     <div className="card-body">
                       <div className="bg-primary/10 text-primary rounded-lg size-12 flex items-center justify-center mb-4">
-                        <span className={`${action.icon} size-6`} />
+                        <span className={`${action.icon ?? 'icon-[tabler--sparkles]'} size-6`} />
                       </div>
                       <h3 className="card-title text-lg text-base-content">{action.label}</h3>
                       <p className="text-base-content/70">{action.description}</p>
@@ -274,6 +354,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
               </div>
             </div>
           </section>
+          )}
 
           {/* Activity Section */}
           <section className="py-12 bg-base-200">
@@ -306,7 +387,8 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           </section>
 
           {/* FAQ Section */}
-          <section className="py-12 sm:py-16 lg:py-24">
+          {enabled.faq !== false && (
+            <section className="py-12 sm:py-16 lg:py-24">
             <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
                 <h2 className="text-2xl sm:text-3xl font-semibold text-base-content mb-4">
@@ -317,10 +399,11 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
                 </p>
               </div>
               <div className="max-w-2xl mx-auto">
-                <Accordion items={faqItems} />
+                <Accordion items={pageFaqItems.length ? pageFaqItems : faqItems} />
               </div>
             </div>
           </section>
+          )}
 
           {/* CTA Section */}
           <section className="py-12 sm:py-16">
@@ -335,7 +418,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
                 <div className="flex gap-4 justify-center flex-wrap">
                   <button 
                     className="btn btn-primary"
-                    onClick={() => onNavigate?.('/signup')}
+                    onClick={() => navigate('/signup')}
                   >
                     Créer un compte
                     <span className="icon-[tabler--arrow-right] size-5" />
