@@ -13,7 +13,7 @@ export default function PricingCancelPage() {
         <Card>
           <CardBody className="text-center py-12">
             <div className="mb-6">
-              <span className="icon-[tabler--x-circle] size-16 text-error mx-auto" />
+              <span className="icon-[tabler--circle-x] size-16 text-error mx-auto" />
             </div>
             <h2 className="text-2xl font-bold mb-2">Abonnement annulé</h2>
             <p className="text-base-content/60 mb-6">

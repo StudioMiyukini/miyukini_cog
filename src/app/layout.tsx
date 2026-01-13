@@ -10,6 +10,9 @@ export const metadata = {
   description: 'Foundation pour le framework modulaire Miyukini'
 }
 
+// Forcer le rendu dynamique pour éviter les erreurs de pré-rendu avec Supabase
+export const dynamic = 'force-dynamic'
+
 const RootLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <html lang="fr" suppressHydrationWarning data-theme="light">
