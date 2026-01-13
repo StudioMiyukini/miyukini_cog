@@ -280,6 +280,18 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                 }}
                 pathname={pathname}
               />
+              <MenuItem
+                item={{
+                  id: 'superadmin-paywall',
+                  label: 'Abonnements',
+                  icon: 'icon-[tabler--credit-card]',
+                  href: '/admin/superadmin/paywall/plans',
+                  children: [
+                    { label: 'Plans', href: '/admin/superadmin/paywall/plans' },
+                  ],
+                }}
+                pathname={pathname}
+              />
             </ul>
           </div>
         )}
