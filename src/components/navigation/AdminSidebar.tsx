@@ -100,6 +100,7 @@ const menuSections = [
         icon: 'icon-[tabler--palette]',
         href: '/admin/appearance',
         children: [
+          { label: 'Branding', href: '/admin/appearance/branding' },
           { label: 'Homepage', href: '/admin/appearance/homepage' },
           { label: 'Thèmes', href: '/admin/appearance', badge: 'Bientôt' },
         ],

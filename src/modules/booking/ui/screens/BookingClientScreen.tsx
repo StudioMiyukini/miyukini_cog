@@ -23,6 +23,8 @@ export function BookingClientScreen() {
   const { isAuthenticated, user } = useAuth()
 
   const [loading, setLoading] = useState(true)
+  const [bookingError, setBookingError] = useState<string | null>(null)
+  const [bookingSuccess, setBookingSuccess] = useState<string | null>(null)
   const [providers, setProviders] = useState<BookingProvider[]>([])
   const [services, setServices] = useState<BookingService[]>([])
   const [slots, setSlots] = useState<Slot[]>([])
@@ -73,18 +75,27 @@ export function BookingClientScreen() {
     }
     setLoading(true)
     try {
+      // Tolérance: on démarre 1h avant "maintenant" pour éviter les effets de fuseau/latence
+      // (sinon un créneau tout juste créé peut disparaître si l'horloge client est décalée).
       const now = new Date()
+      const rangeStart = new Date(now.getTime() - 60 * 60 * 1000)
       const end = new Date()
       end.setDate(end.getDate() + 21)
 
-      const { data, error } = await supabase.rpc('booking_list_available_slots', {
+      const { data, error } = await supabase.rpc('booking_list_slots_public', {
         p_provider_id: providerId,
         p_service_id: serviceId,
-        p_range_start: now.toISOString(),
+        p_range_start: rangeStart.toISOString(),
         p_range_end: end.toISOString(),
-        p_quantity: 1,
       })
       if (error) throw error
+      console.info('[Booking] booking_list_available_slots', {
+        providerId,
+        serviceId,
+        rangeStart: rangeStart.toISOString(),
+        rangeEnd: end.toISOString(),
+        count: (data as any[])?.length ?? 0,
+      })
       setSlots((data ?? []) as Slot[])
     } finally {
       setLoading(false)
@@ -110,6 +121,8 @@ export function BookingClientScreen() {
   const book = async (slotId: string) => {
     if (!providerId || !serviceId) return
     setLoading(true)
+    setBookingError(null)
+    setBookingSuccess(null)
     try {
       const { data, error } = await supabase.rpc('booking_create_booking', {
         provider_id: providerId,
@@ -122,8 +135,12 @@ export function BookingClientScreen() {
       if (error) throw error
 
       // Option: data = booking_id
+      setBookingSuccess('Réservation créée. Le créneau peut disparaître s’il est complet.')
       console.log('Booking créé:', data)
       await loadSlots()
+    } catch (e: any) {
+      const msg = e?.message ?? 'Impossible de réserver ce créneau.'
+      setBookingError(msg)
     } finally {
       setLoading(false)
     }
@@ -215,6 +232,22 @@ export function BookingClientScreen() {
             </Badge>
           </CardHeader>
           <CardBody className="p-0">
+            {(bookingError || bookingSuccess) && (
+              <div className="p-4">
+                {bookingError && (
+                  <div className="alert alert-error">
+                    <span className="icon-[tabler--alert-circle] size-5" />
+                    <span>{bookingError}</span>
+                  </div>
+                )}
+                {bookingSuccess && (
+                  <div className="alert alert-success">
+                    <span className="icon-[tabler--check] size-5" />
+                    <span>{bookingSuccess}</span>
+                  </div>
+                )}
+              </div>
+            )}
             {loading ? (
               <div className="p-6 flex items-center justify-center">
                 <span className="loading loading-spinner text-primary" />
@@ -265,21 +298,35 @@ export function BookingClientScreen() {
                     const slot = s as unknown as Slot & { startAt: string; endAt: string }
                     const cap = slot.capacity ?? 1
                     const remaining = cap - slot.participants_count
+                    const isReserved = slot.participants_count > 0
+                    const isPast = new Date(slot.start_at).getTime() < Date.now()
                     return (
-                      <div className="rounded-lg border border-base-300 bg-base-100 p-2 hover:bg-base-200 transition-colors">
+                      <div
+                        className={[
+                          'rounded-lg border border-base-300 p-2 transition-colors',
+                          // Fond coloré (opacité 60%) : Libre=vert, Occupé=bleu
+                          isReserved ? 'bg-blue-500/60 hover:bg-blue-500/70' : 'bg-green-500/60 hover:bg-green-500/70',
+                        ].join(' ')}
+                      >
                         <div className="flex items-center justify-between">
                           <div className="text-xs font-semibold text-base-content">
                             {new Date(slot.start_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                           </div>
-                          <span className="text-[11px] text-base-content/60">
-                            {remaining}/{cap}
-                          </span>
+                        </div>
+                        <div className="mt-2 flex items-center gap-2">
+                          <Badge
+                            variant={isReserved ? 'info' : 'success'}
+                            style="soft"
+                            size="xs"
+                          >
+                            {isReserved ? 'Réservé' : 'Libre'}
+                          </Badge>
                         </div>
                         <div className="mt-2">
                           <button
                             className="btn btn-primary btn-xs"
                             onClick={() => book(slot.id)}
-                            disabled={loading || (!isAuthenticated && !customerEmail) || !providerId || !serviceId}
+                            disabled={isPast || remaining <= 0 || loading || (!isAuthenticated && !customerEmail) || !providerId || !serviceId}
                           >
                             Réserver
                           </button>

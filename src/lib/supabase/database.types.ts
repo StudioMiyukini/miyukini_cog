@@ -152,33 +152,164 @@ export type Database = {
           },
         ]
       }
+      booking_provider_photos: {
+        Row: {
+          alt: string | null
+          created_at: string
+          id: string
+          is_public: boolean
+          path: string | null
+          provider_id: string
+          sort_order: number
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          alt?: string | null
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          path?: string | null
+          provider_id: string
+          sort_order?: number
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          alt?: string | null
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          path?: string | null
+          provider_id?: string
+          sort_order?: number
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_provider_photos_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "booking_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_provider_reviews: {
+        Row: {
+          author_name: string | null
+          booking_id: string | null
+          comment: string | null
+          created_at: string
+          id: string
+          is_published: boolean
+          provider_id: string
+          rating: number
+        }
+        Insert: {
+          author_name?: string | null
+          booking_id?: string | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          provider_id: string
+          rating: number
+        }
+        Update: {
+          author_name?: string | null
+          booking_id?: string | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          provider_id?: string
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_provider_reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "booking_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_provider_reviews_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "booking_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_providers: {
         Row: {
+          address_line1: string | null
+          address_line2: string | null
+          city: string | null
+          contact_email: string | null
+          country: string | null
           created_at: string
+          description: string | null
           display_name: string | null
           id: string
           is_active: boolean
+          lat: number | null
+          lng: number | null
+          opening_hours: Json
+          phone: string | null
+          postal_code: string | null
+          social_links: Json
           tags: string[] | null
           timezone: string | null
           updated_at: string
+          website: string | null
         }
         Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          contact_email?: string | null
+          country?: string | null
           created_at?: string
+          description?: string | null
           display_name?: string | null
           id: string
           is_active?: boolean
+          lat?: number | null
+          lng?: number | null
+          opening_hours?: Json
+          phone?: string | null
+          postal_code?: string | null
+          social_links?: Json
           tags?: string[] | null
           timezone?: string | null
           updated_at?: string
+          website?: string | null
         }
         Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          contact_email?: string | null
+          country?: string | null
           created_at?: string
+          description?: string | null
           display_name?: string | null
           id?: string
           is_active?: boolean
+          lat?: number | null
+          lng?: number | null
+          opening_hours?: Json
+          phone?: string | null
+          postal_code?: string | null
+          social_links?: Json
           tags?: string[] | null
           timezone?: string | null
           updated_at?: string
+          website?: string | null
         }
         Relationships: [
           {
@@ -193,6 +324,8 @@ export type Database = {
       booking_services: {
         Row: {
           cancellation_policy: Json | null
+          category: string | null
+          category_sort: number | null
           created_at: string
           currency: string | null
           default_capacity: number
@@ -209,6 +342,8 @@ export type Database = {
         }
         Insert: {
           cancellation_policy?: Json | null
+          category?: string | null
+          category_sort?: number | null
           created_at?: string
           currency?: string | null
           default_capacity?: number
@@ -225,6 +360,8 @@ export type Database = {
         }
         Update: {
           cancellation_policy?: Json | null
+          category?: string | null
+          category_sort?: number | null
           created_at?: string
           currency?: string | null
           default_capacity?: number
@@ -909,6 +1046,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      app_branding: {
+        Row: {
+          id: string
+          app_title: string
+          logo_path: string | null
+          logo_url: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          app_title?: string
+          logo_path?: string | null
+          logo_url?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          app_title?: string
+          logo_path?: string | null
+          logo_url?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_branding_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       homepage_content: {
         Row: {

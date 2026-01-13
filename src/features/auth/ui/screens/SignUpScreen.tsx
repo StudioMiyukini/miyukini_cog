@@ -22,7 +22,9 @@ export function SignUpScreen({ onSignUp, onNavigateToSignIn }: SignUpScreenProps
   const router = useRouter()
   const { signUp, isAuthenticated, isLoading: authLoading } = useAuth()
   
-  const [name, setName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -44,13 +46,18 @@ export function SignUpScreen({ onSignUp, onNavigateToSignIn }: SignUpScreenProps
     setError(null)
 
     // Validation
+    if (!firstName.trim() || !lastName.trim() || !phone.trim()) {
+      setError('Prénom, nom et téléphone sont obligatoires.')
+      return
+    }
+
     if (password !== confirmPassword) {
       setError('Les mots de passe ne correspondent pas.')
       return
     }
 
-    if (password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères.')
+    if (password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères.')
       return
     }
 
@@ -63,10 +70,14 @@ export function SignUpScreen({ onSignUp, onNavigateToSignIn }: SignUpScreenProps
 
     try {
       if (onSignUp) {
-        await onSignUp({ name, email, password })
+        await onSignUp({ name: `${firstName} ${lastName}`.trim(), email, password })
       } else {
         // Inscription via Supabase
-        const { error: authError } = await signUp(email, password, name)
+        const { error: authError } = await signUp(email, password, {
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          phone: phone.trim(),
+        })
         
         if (authError) {
           if (authError.message.includes('already registered')) {
@@ -139,22 +150,55 @@ export function SignUpScreen({ onSignUp, onNavigateToSignIn }: SignUpScreenProps
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name */}
+            {/* Identité */}
             <div className="form-control">
-              <label className="label" htmlFor="name">
-                <span className="label-text">Nom complet</span>
+              <label className="label">
+                <span className="label-text">Identité</span>
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="input input-bordered flex items-center gap-2">
+                  <span className="icon-[tabler--user] size-5 text-base-content/50" />
+                  <input
+                    type="text"
+                    placeholder="Prénom"
+                    className="grow bg-transparent border-none focus:outline-none"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    required
+                    autoComplete="given-name"
+                  />
+                </div>
+                <div className="input input-bordered flex items-center gap-2">
+                  <span className="icon-[tabler--id] size-5 text-base-content/50" />
+                  <input
+                    type="text"
+                    placeholder="Nom"
+                    className="grow bg-transparent border-none focus:outline-none"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    required
+                    autoComplete="family-name"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Téléphone */}
+            <div className="form-control">
+              <label className="label" htmlFor="phone">
+                <span className="label-text">Téléphone</span>
               </label>
               <div className="input input-bordered flex items-center gap-2">
-                <span className="icon-[tabler--user] size-5 text-base-content/50" />
+                <span className="icon-[tabler--phone] size-5 text-base-content/50" />
                 <input
-                  type="text"
-                  id="name"
-                  placeholder="Jean Dupont"
+                  type="tel"
+                  id="phone"
+                  placeholder="06 12 34 56 78"
                   className="grow bg-transparent border-none focus:outline-none"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   required
-                  autoComplete="name"
+                  autoComplete="tel"
                 />
               </div>
             </div>

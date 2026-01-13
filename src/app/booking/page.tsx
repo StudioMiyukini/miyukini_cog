@@ -2,12 +2,15 @@
 
 import dynamic from 'next/dynamic'
 
-const BookingClientScreen = dynamic(
-  () => import('@/modules/booking/ui/screens/BookingClientScreen').then((m) => ({ default: m.BookingClientScreen })),
+const BookingProvidersDirectoryScreen = dynamic(
+  () =>
+    import('@/modules/booking/ui/screens/BookingProvidersDirectoryScreen').then((m) => ({
+      default: m.BookingProvidersDirectoryScreen,
+    })),
   { ssr: false }
 )
 
 export default function BookingPage() {
-  return <BookingClientScreen />
+  return <BookingProvidersDirectoryScreen />
 }
 

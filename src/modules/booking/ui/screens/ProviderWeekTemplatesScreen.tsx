@@ -46,6 +46,26 @@ function safeJsonParse<T>(value: unknown, fallback: T): T {
   }
 }
 
+function normalizeTime(input: string, fallback: string) {
+  const raw = (input ?? '').trim()
+  if (!raw) return fallback
+  // "9" => "09:00"
+  if (/^\d{1,2}$/.test(raw)) {
+    const h = Math.max(0, Math.min(23, Number(raw)))
+    return `${String(h).padStart(2, '0')}:00`
+  }
+  // "9:5" => "09:05"
+  const m = raw.match(/^(\d{1,2}):(\d{1,2})$/)
+  if (m) {
+    const h = Math.max(0, Math.min(23, Number(m[1])))
+    const min = Math.max(0, Math.min(59, Number(m[2])))
+    return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`
+  }
+  // Already "HH:MM"
+  if (/^\d{2}:\d{2}$/.test(raw)) return raw
+  return fallback
+}
+
 export function ProviderWeekTemplatesScreen() {
   const { isLoading: modulesLoading, enabled } = useRequireEnabledModule('booking', '/')
   const supabase = useMemo(() => getSupabaseClient(), [])
@@ -148,7 +168,13 @@ export function ProviderWeekTemplatesScreen() {
 
     const next: TemplateRules = { ...rules }
     const list = Array.from(next[day] ?? [])
-    list.push({ start, end, slot, capacity, service_ids: serviceIds })
+    list.push({
+      start: normalizeTime(start, '09:00'),
+      end: normalizeTime(end, '10:00'),
+      slot,
+      capacity,
+      service_ids: serviceIds,
+    })
     next[day] = list
     await saveRules(selectedTemplate.id, next)
   }
@@ -297,13 +323,13 @@ export function ProviderWeekTemplatesScreen() {
                         <label className="label">
                           <span className="label-text">Début</span>
                         </label>
-                        <input className="input input-bordered w-full" value={start} onChange={(e) => setStart(e.target.value)} />
+                        <input type="time" className="input input-bordered w-full" value={start} onChange={(e) => setStart(e.target.value)} />
                       </div>
                       <div>
                         <label className="label">
                           <span className="label-text">Fin</span>
                         </label>
-                        <input className="input input-bordered w-full" value={end} onChange={(e) => setEnd(e.target.value)} />
+                        <input type="time" className="input input-bordered w-full" value={end} onChange={(e) => setEnd(e.target.value)} />
                       </div>
                     </div>
                   </div>

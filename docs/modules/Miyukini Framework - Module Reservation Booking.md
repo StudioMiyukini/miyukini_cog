@@ -287,7 +287,8 @@ Recommandation :
 
 - **Client** : accès à ses réservations uniquement.
 - **Prestataire** : accès à ses services/slots/bookings uniquement.
-- **Admin/SuperAdmin** : accès global “plateforme” **sans** accès au back-office privé prestataire.
+- **Admin** : accès global “plateforme” **sans** accès au back-office privé prestataire.
+- **SuperAdmin** : accès global “plateforme” **avec** accès au back-office privé prestataire.
 - **Slots publics** : lecture des disponibilités “publiques” uniquement.
 
 ### 8.2 Règles (pseudo)

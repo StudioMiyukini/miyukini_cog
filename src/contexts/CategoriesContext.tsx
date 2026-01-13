@@ -59,16 +59,14 @@ const CategoriesContext = createContext<CategoriesContextType | undefined>(undef
 export function CategoriesProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES)
   const [isLoading, setIsLoading] = useState(true)
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { user, profile, isAuthenticated, isLoading: authLoading } = useAuth()
   
   const supabase = getSupabaseClient()
 
-  // Charger les catégories depuis Supabase
+  // Charger les catégories depuis Supabase (public) + préférences (si connecté)
   const loadCategoriesFromDB = useCallback(async () => {
-    if (!user) return null
-
     try {
-      // Charger les catégories globales
+      // Charger les catégories globales (public)
       const { data: dbCategories, error: catError } = await supabase
         .from('categories')
         .select('*')
@@ -79,14 +77,18 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
         return null
       }
 
-      // Charger les préférences utilisateur
-      const { data: userPrefs, error: prefsError } = await supabase
-        .from('user_category_preferences')
-        .select('*')
-        .eq('user_id', user.id)
-
-      if (prefsError) {
-        console.error('Erreur chargement préférences:', prefsError)
+      // Charger les préférences utilisateur (optionnel)
+      let userPrefs: UserCategoryPreference[] | null = null
+      if (user?.id) {
+        const { data: prefsData, error: prefsError } = await supabase
+          .from('user_category_preferences')
+          .select('*')
+          .eq('user_id', user.id)
+        if (prefsError) {
+          console.error('Erreur chargement préférences:', prefsError)
+        } else {
+          userPrefs = (prefsData ?? []) as UserCategoryPreference[]
+        }
       }
 
       // Fusionner catégories et préférences
@@ -108,7 +110,7 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
       console.error('Erreur loadCategoriesFromDB:', error)
       return null
     }
-  }, [user, supabase])
+  }, [supabase, user?.id])
 
   // Sauvegarder une préférence dans Supabase
   const savePreferenceToDB = useCallback(async (categoryId: string, enabled: boolean, order?: number) => {
@@ -138,27 +140,30 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
     }
   }, [user, supabase])
 
-  // Charger depuis localStorage (fallback pour non-connectés)
+  // Charger overrides depuis localStorage (fallback pour non-connectés)
+  // Important: on ne persiste PAS name/icon/path en local, uniquement enabled/order.
   const loadFromLocalStorage = useCallback(() => {
-    if (typeof window === 'undefined') return DEFAULT_CATEGORIES
-
+    if (typeof window === 'undefined') return new Map<string, { enabled?: boolean; order?: number }>()
     const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored)
-        return DEFAULT_CATEGORIES.map(defaultCat => {
-          const storedCat = parsed.find((c: Category) => c.id === defaultCat.id)
-          return storedCat ? { ...defaultCat, ...storedCat } : defaultCat
+    if (!stored) return new Map()
+    try {
+      const parsed = JSON.parse(stored) as Array<{ id: string; enabled?: boolean; order?: number }>
+      const map = new Map<string, { enabled?: boolean; order?: number }>()
+      for (const row of parsed ?? []) {
+        if (!row?.id) continue
+        map.set(row.id, {
+          ...(row.enabled !== undefined ? { enabled: Boolean(row.enabled) } : null),
+          ...(row.order !== undefined ? { order: Number(row.order) } : null),
         })
-      } catch {
-        return DEFAULT_CATEGORIES
       }
+      return map
+    } catch {
+      return new Map()
     }
-    return DEFAULT_CATEGORIES
   }, [])
 
   // Sauvegarder dans localStorage (fallback)
-  const saveToLocalStorage = useCallback((cats: Category[]) => {
+  const saveToLocalStorage = useCallback((cats: Array<{ id: string; enabled?: boolean; order?: number }>) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cats))
     }
@@ -168,18 +173,33 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
   const refreshCategories = useCallback(async () => {
     setIsLoading(true)
     try {
-      if (isAuthenticated && user) {
-        const dbCategories = await loadCategoriesFromDB()
-        if (dbCategories) {
+      const dbCategories = await loadCategoriesFromDB()
+      if (dbCategories) {
+        // Non connectés: on applique uniquement les overrides localStorage (enabled/order),
+        // mais on conserve name/icon/path depuis la DB.
+        if (!isAuthenticated || !user) {
+          const overrides = loadFromLocalStorage()
+          const merged = dbCategories.map((cat) => {
+            const o = overrides.get(cat.id)
+            return {
+              ...cat,
+              ...(o?.enabled !== undefined ? { enabled: o.enabled } : null),
+              ...(o?.order !== undefined ? { order: o.order } : null),
+            }
+          })
+          setCategories(merged)
+        } else {
           setCategories(dbCategories)
         }
-      } else {
-        setCategories(loadFromLocalStorage())
+        return
       }
+
+      // Fallback ultime: defaults en mémoire
+      setCategories(DEFAULT_CATEGORIES)
     } finally {
       setIsLoading(false)
     }
-  }, [isAuthenticated, user, loadCategoriesFromDB, loadFromLocalStorage])
+  }, [isAuthenticated, loadCategoriesFromDB, loadFromLocalStorage, user])
 
   // Charger au mount et quand l'auth change
   useEffect(() => {
@@ -201,6 +221,34 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
     ))
 
     // Sauvegarder
+    // - admin/super_admin : toggle GLOBAL (categories.is_default) => impact tous les utilisateurs
+    // - user : préférence personnelle (user_category_preferences)
+    const isAdminLike = profile?.role === 'admin' || profile?.role === 'super_admin'
+
+    if (isAuthenticated && user && isAdminLike) {
+      try {
+        const { error: updateError } = await supabase
+          .from('categories')
+          .update({ is_default: newEnabled, updated_at: new Date().toISOString() })
+          .eq('id', id)
+        if (updateError) throw updateError
+
+        // Optionnel: supprimer la préférence utilisateur pour éviter qu’elle override le global
+        await supabase
+          .from('user_category_preferences')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('category_id', id)
+      } catch (e) {
+        console.error('Erreur toggleCategory (global):', e)
+        // Rollback
+        setCategories(prev => prev.map(cat =>
+          cat.id === id ? { ...cat, enabled: !newEnabled } : cat
+        ))
+      }
+      return
+    }
+
     if (isAuthenticated && user) {
       const success = await savePreferenceToDB(id, newEnabled, category.order)
       if (!success) {
@@ -209,14 +257,15 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
           cat.id === id ? { ...cat, enabled: !newEnabled } : cat
         ))
       }
-    } else {
-      // localStorage pour non-connectés
-      const updated = categories.map(cat =>
-        cat.id === id ? { ...cat, enabled: newEnabled } : cat
-      )
-      saveToLocalStorage(updated)
+      return
     }
-  }, [categories, isAuthenticated, user, savePreferenceToDB, saveToLocalStorage])
+
+    // localStorage pour non-connectés
+    const updated = categories.map((cat) =>
+      cat.id === id ? { id: cat.id, enabled: newEnabled, order: cat.order } : { id: cat.id, enabled: cat.enabled, order: cat.order }
+    )
+    saveToLocalStorage(updated)
+  }, [categories, isAuthenticated, profile?.role, savePreferenceToDB, saveToLocalStorage, supabase, user])
 
   // Mettre à jour une catégorie
   const updateCategory = useCallback(async (id: string, updates: Partial<Category>) => {
@@ -236,9 +285,10 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
         updates.order ?? category.order
       )
     } else {
-      const updated = categories.map(cat =>
-        cat.id === id ? { ...cat, ...updates } : cat
-      )
+      const updated = categories.map((cat) => {
+        if (cat.id !== id) return { id: cat.id, enabled: cat.enabled, order: cat.order }
+        return { id: cat.id, enabled: updates.enabled ?? cat.enabled, order: updates.order ?? cat.order }
+      })
       saveToLocalStorage(updated)
     }
   }, [categories, isAuthenticated, user, savePreferenceToDB, saveToLocalStorage])
@@ -278,7 +328,7 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
         }
       } else {
         // fallback localStorage (mode non connecté)
-        saveToLocalStorage(next)
+        saveToLocalStorage(next.map((c) => ({ id: c.id, enabled: c.enabled, order: c.order })))
       }
     },
     [categories, isAuthenticated, saveToLocalStorage, supabase, user]

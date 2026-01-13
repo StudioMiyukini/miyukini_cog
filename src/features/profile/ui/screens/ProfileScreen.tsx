@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { AppShellScreen } from '@/components/layouts/AppShellScreen'
 import { ContentStack } from '@/components/layouts/ContentStack'
@@ -9,6 +9,7 @@ import { Card, CardHeader, CardBody } from '@/components/atoms/card'
 import { Avatar } from '@/components/atoms/avatar'
 import { Badge } from '@/components/atoms/badge'
 import { useAuth } from '@/contexts/AuthContext'
+import { getSupabaseClient } from '@/lib/supabase/client'
 
 /**
  * ProfileScreen - Écran de profil utilisateur
@@ -26,6 +27,11 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
   const router = useRouter()
   const { user, profile, isAuthenticated, isLoading, signOut, refreshProfile } = useAuth()
   const [activeTab, setActiveTab] = useState<'activity' | 'settings'>('activity')
+  const supabase = useMemo(() => getSupabaseClient(), [])
+  const [phone, setPhone] = useState('')
+  const [phoneSaving, setPhoneSaving] = useState(false)
+  const [phoneSaved, setPhoneSaved] = useState(false)
+  const [phoneError, setPhoneError] = useState<string | null>(null)
 
   // Rediriger si non connecté
   useEffect(() => {
@@ -73,6 +79,28 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
   const role = profile?.role || 'user'
   const tier = profile?.tier || 'free'
   const joinedAt = profile?.created_at || user.created_at
+
+  useEffect(() => {
+    setPhone(profile?.phone ?? '')
+  }, [profile?.phone])
+
+  const savePhone = async () => {
+    setPhoneSaved(false)
+    setPhoneError(null)
+    setPhoneSaving(true)
+    try {
+      const normalized = phone.trim()
+      const { error } = await supabase.from('profiles').update({ phone: normalized || null }).eq('id', user.id)
+      if (error) throw error
+      await refreshProfile()
+      setPhoneSaved(true)
+      setTimeout(() => setPhoneSaved(false), 1500)
+    } catch (e: any) {
+      setPhoneError(e?.message ?? 'Impossible de mettre à jour le téléphone.')
+    } finally {
+      setPhoneSaving(false)
+    }
+  }
 
   // Badges de rôle
   const getRoleBadge = () => {
@@ -193,6 +221,34 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
         ) : (
           <Card>
             <CardBody className="space-y-2">
+              {/* Téléphone */}
+              <div className="p-3 rounded-xl border border-base-300 bg-base-100">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="font-medium text-base-content">Téléphone</div>
+                    <div className="text-xs text-base-content/60">Modifiez votre numéro (obligatoire à l’inscription).</div>
+                  </div>
+                  {phoneSaved && (
+                    <Badge variant="success" style="soft" size="sm">
+                      Enregistré
+                    </Badge>
+                  )}
+                </div>
+                <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                  <input
+                    className="input input-bordered w-full"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="06 12 34 56 78"
+                    autoComplete="tel"
+                  />
+                  <button className="btn btn-primary" onClick={() => void savePhone()} disabled={phoneSaving}>
+                    {phoneSaving ? 'Enregistrement…' : 'Enregistrer'}
+                  </button>
+                </div>
+                {phoneError && <div className="mt-2 text-sm text-error">{phoneError}</div>}
+              </div>
+
               {/* Settings Menu */}
               <button 
                 className="btn btn-ghost btn-block justify-start"

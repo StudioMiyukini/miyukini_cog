@@ -1,6 +1,6 @@
-export function ContentStack({ children }: { children: React.ReactNode }) {
+export function ContentStack({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className="content-stack">
+    <div className={['content-stack', className].filter(Boolean).join(' ')}>
       {children}
     </div>
   )

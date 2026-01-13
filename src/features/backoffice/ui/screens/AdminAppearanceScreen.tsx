@@ -15,6 +15,24 @@ export function AdminAppearanceScreen() {
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader className="flex items-center justify-between">
+            <span className="font-semibold">Branding</span>
+            <span className="badge badge-success badge-soft badge-sm">Actif</span>
+          </CardHeader>
+          <CardBody>
+            <p className="text-sm text-base-content/60">
+              Titre et logo de l’application (affichés dans le header).
+            </p>
+            <div className="mt-4">
+              <Link href="/admin/appearance/branding" className="btn btn-primary btn-sm">
+                Ouvrir
+                <span className="icon-[tabler--arrow-right] size-4" />
+              </Link>
+            </div>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex items-center justify-between">
             <span className="font-semibold">Homepage</span>
             <span className="badge badge-success badge-soft badge-sm">Actif</span>
           </CardHeader>

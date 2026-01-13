@@ -17,6 +17,7 @@ type Agenda = Tables<'agendas'>
 type Slot = Tables<'slots'>
 type BookingService = Tables<'booking_services'>
 type BookingSlotService = Tables<'booking_slot_services'>
+type BookingBooking = Tables<'booking_bookings'>
 
 export function ProviderPlanningScreen() {
   const { isLoading: modulesLoading, enabled } = useRequireEnabledModule('booking', '/')
@@ -28,29 +29,65 @@ export function ProviderPlanningScreen() {
   const [slots, setSlots] = useState<Slot[]>([])
   const [services, setServices] = useState<BookingService[]>([])
   const [slotServices, setSlotServices] = useState<Record<string, string[]>>({})
+  const [slotBookings, setSlotBookings] = useState<
+    Record<
+      string,
+      Array<
+        Pick<BookingBooking, 'id' | 'status' | 'quantity' | 'customer_id' | 'customer_email'> & {
+          customer?: { first_name: string | null; last_name: string | null; display_name: string | null } | null
+        }
+      >
+    >
+  >({})
 
   const [startAt, setStartAt] = useState('')
   const [durationMinutes, setDurationMinutes] = useState<number>(30)
   const [capacity, setCapacity] = useState<number>(1)
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
-  const [viewMode, setViewMode] = useState<'week' | 'day'>('week')
+  const [viewMode, setViewMode] = useState<'week' | '3days' | 'day'>('week')
   const [anchorDate, setAnchorDate] = useState<Date>(new Date())
   const [editOpen, setEditOpen] = useState(false)
   const [editSlotId, setEditSlotId] = useState<string | null>(null)
   const [editCapacity, setEditCapacity] = useState<number>(1)
   const [editStatus, setEditStatus] = useState<'confirmed' | 'draft' | 'cancelled'>('confirmed')
+  const [editDurationMinutes, setEditDurationMinutes] = useState<number>(60)
   const [editServiceIds, setEditServiceIds] = useState<string[]>([])
 
   const ensureBookingAgenda = useCallback(
     async (providerId: string) => {
-      const { data: existing, error } = await supabase
+      // NOTE: on évite maybeSingle() ici car on peut avoir des doublons historiques
+      // (PostgREST renvoie alors PGRST116). On prend l'agenda le plus récent.
+      const { data: existingRows, error } = await supabase
         .from('agendas')
         .select('*')
         .eq('module_id', 'booking')
         .eq('created_by', providerId)
-        .maybeSingle()
+        // On privilégie un agenda déjà public (sinon l'agenda public ne voit aucun créneau)
+        .order('is_public', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(2)
       if (error) throw error
-      if (existing) return existing
+      if ((existingRows?.length ?? 0) > 1) {
+        console.warn(
+          '[Booking] Plusieurs agendas trouvés pour ce prestataire. Utilisation du plus récent.',
+          { providerId, agendaIds: existingRows?.map((a: any) => a.id) }
+        )
+      }
+      if (existingRows?.[0]) {
+        const picked = existingRows[0] as any
+        // MVP: l'agenda Booking doit être public pour exposer les créneaux au client
+        if (picked.is_public !== true) {
+          const { data: updated, error: upErr } = await supabase
+            .from('agendas')
+            .update({ is_public: true, updated_at: new Date().toISOString() })
+            .eq('id', picked.id)
+            .select('*')
+            .single()
+          if (upErr) throw upErr
+          return updated as any
+        }
+        return picked
+      }
 
       const payload = {
         module_id: 'booking',
@@ -58,7 +95,8 @@ export function ProviderPlanningScreen() {
         description: 'Agenda prestataire (Booking)',
         created_by: providerId,
         timezone: 'Europe/Paris',
-        is_public: false,
+        // MVP: agenda public (sinon aucun créneau ne remonte côté /booking)
+        is_public: true,
         allow_overbooking: false,
       }
       const { data: created, error: insertError } = await supabase.from('agendas').insert(payload).select('*').single()
@@ -105,6 +143,7 @@ export function ProviderPlanningScreen() {
       const slotIds = slotsList.map((s: Slot) => s.id)
       if (slotIds.length === 0) {
         setSlotServices({})
+        setSlotBookings({})
         return
       }
       const { data: ssData, error: ssError } = await supabase
@@ -120,6 +159,22 @@ export function ProviderPlanningScreen() {
         mapping[row.slot_id].push(row.service_id)
       }
       setSlotServices(mapping)
+
+      // Charger les bookings pour afficher "Réservé + Prénom Nom"
+      const { data: bbData, error: bbError } = await supabase
+        .from('booking_bookings')
+        .select('id,status,quantity,customer_id,customer_email,slot_id, customer:profiles(first_name,last_name,display_name,phone)')
+        .eq('provider_id', prov.id)
+        .in('slot_id', slotIds)
+        .in('status', ['requested', 'confirmed'])
+      if (bbError) throw bbError
+      const bySlot: Record<string, any[]> = {}
+      for (const row of (bbData ?? []) as any[]) {
+        const sid = row.slot_id as string
+        bySlot[sid] ??= []
+        bySlot[sid].push(row)
+      }
+      setSlotBookings(bySlot as any)
     } finally {
       setLoading(false)
     }
@@ -217,6 +272,9 @@ export function ProviderPlanningScreen() {
     setEditSlotId(slotId)
     setEditCapacity(slot.capacity ?? 1)
     setEditStatus(slot.status as any)
+    setEditDurationMinutes(
+      Math.max(5, Math.round((new Date(slot.end_at).getTime() - new Date(slot.start_at).getTime()) / 60000))
+    )
     setEditServiceIds(slotServices[slotId] ?? [])
     setEditOpen(true)
   }
@@ -225,14 +283,50 @@ export function ProviderPlanningScreen() {
     if (!editSlotId) return
     setLoading(true)
     try {
+      const slot = slots.find((s) => s.id === editSlotId)
+      if (!slot) return
+      const start = new Date(slot.start_at)
+      const nextEnd = new Date(start.getTime() + Math.max(5, editDurationMinutes) * 60000)
       const { error } = await supabase
         .from('slots')
-        .update({ capacity: editCapacity, status: editStatus })
+        .update({ capacity: editCapacity, status: editStatus, end_at: nextEnd.toISOString() })
         .eq('id', editSlotId)
       if (error) throw error
       await updateAllowedServices(editSlotId, editServiceIds)
       setEditOpen(false)
       setEditSlotId(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const cancelEdit = () => {
+    setEditOpen(false)
+    setEditSlotId(null)
+  }
+
+  const deleteSlot = async () => {
+    if (!editSlotId) return
+    setLoading(true)
+    try {
+      const { error } = await supabase.from('slots').delete().eq('id', editSlotId)
+      if (error) throw error
+      await load()
+      setEditOpen(false)
+      setEditSlotId(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const cancelReservation = async () => {
+    if (!editSlotId) return
+    setLoading(true)
+    try {
+      const { data, error } = await supabase.rpc('booking_cancel_reservations_for_slot', { p_slot_id: editSlotId })
+      if (error) throw error
+      console.info('[Booking] Réservations annulées:', data)
+      await load()
     } finally {
       setLoading(false)
     }
@@ -274,111 +368,167 @@ export function ProviderPlanningScreen() {
 
   return (
     <AppShellScreen>
-      <ContentStack>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-base-content">Planning</h1>
-            <p className="text-base-content/60 mt-1">
-              Créneaux Agenda + prestations disponibles par créneau (Booking).
-            </p>
+      <ContentStack className="max-w-none">
+        <div className="mx-auto w-full max-w-none space-y-4 px-2 lg:px-6">
+          <div className="flex flex-col gap-3 rounded-3xl border border-base-200 bg-base-100 p-4 shadow-lg md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-base-content mb-1">Planning</h1>
+              <p className="text-base-content/60 text-sm">
+                Agenda Booking avec aperçu rapide de vos réservations (mobile friendly).
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button className="btn btn-ghost btn-sm" onClick={() => void load()} disabled={loading}>
+                <span className="icon-[tabler--refresh] size-4" />
+                Rafraîchir
+              </button>
+              <Link href="/pro/booking" className="btn btn-ghost btn-sm">
+                <span className="icon-[tabler--arrow-left] size-4" />
+                Retour
+              </Link>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <button className="btn btn-ghost btn-sm" onClick={() => void load()} disabled={loading}>
-              <span className="icon-[tabler--refresh] size-4" />
-              Rafraîchir
-            </button>
-            <Link href="/pro/booking" className="btn btn-ghost btn-sm">
-              <span className="icon-[tabler--arrow-left] size-4" />
-              Retour
-            </Link>
-          </div>
-        </div>
 
-        <Card className="mt-6">
-          <CardHeader className="flex items-center justify-between">
-            <span className="font-semibold text-base-content">Calendrier</span>
-            <div className="flex items-center gap-2">
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => setAnchorDate((d) => new Date(d.getTime() - 7 * 24 * 60 * 60 * 1000))}
-              >
-                <span className="icon-[tabler--chevron-left] size-4" />
-              </button>
-              <button className="btn btn-ghost btn-sm" onClick={() => setAnchorDate(new Date())}>
-                Aujourd’hui
-              </button>
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => setAnchorDate((d) => new Date(d.getTime() + 7 * 24 * 60 * 60 * 1000))}
-              >
-                <span className="icon-[tabler--chevron-right] size-4" />
-              </button>
-              <div className="join">
-                <button className={`btn btn-sm join-item ${viewMode === 'week' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setViewMode('week')}>
+          <Card className="mx-auto w-full max-w-none shadow-xl">
+            <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-3">
+                <button
+                  className="btn btn-ghost btn-xs"
+                  onClick={() => {
+                    const stepDays = viewMode === 'week' ? 7 : viewMode === '3days' ? 3 : 1
+                    setAnchorDate((d) => new Date(d.getTime() - stepDays * 24 * 60 * 60 * 1000))
+                  }}
+                >
+                  <span className="icon-[tabler--chevron-left] size-4" />
+                </button>
+                <span className="text-base-content/80 text-sm font-semibold">
+                  {anchorDate.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' })}
+                </span>
+                <button className="btn btn-ghost btn-xs" onClick={() => setAnchorDate(new Date())}>
+                  Aujourd’hui
+                </button>
+                <button
+                  className="btn btn-ghost btn-xs"
+                  onClick={() => {
+                    const stepDays = viewMode === 'week' ? 7 : viewMode === '3days' ? 3 : 1
+                    setAnchorDate((d) => new Date(d.getTime() + stepDays * 24 * 60 * 60 * 1000))
+                  }}
+                >
+                  <span className="icon-[tabler--chevron-right] size-4" />
+                </button>
+              </div>
+              <div className="flex gap-1 text-xs font-semibold uppercase">
+                <button
+                  className={`btn btn-sm btn-outline ${viewMode === 'week' ? 'btn-primary' : 'btn-ghost'}`}
+                  onClick={() => setViewMode('week')}
+                >
                   Semaine
                 </button>
-                <button className={`btn btn-sm join-item ${viewMode === 'day' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setViewMode('day')}>
+                <button
+                  className={`btn btn-sm btn-outline ${viewMode === '3days' ? 'btn-primary' : 'btn-ghost'}`}
+                  onClick={() => setViewMode('3days')}
+                >
+                  3 jours
+                </button>
+                <button
+                  className={`btn btn-sm btn-outline ${viewMode === 'day' ? 'btn-primary' : 'btn-ghost'}`}
+                  onClick={() => setViewMode('day')}
+                >
                   Jour
                 </button>
               </div>
-            </div>
-          </CardHeader>
-          <CardBody>
-            <CalendarGrid
-              mode={viewMode}
-              anchorDate={anchorDate}
-              slots={slots.map((s) => ({ ...s, startAt: s.start_at, endAt: s.end_at }))}
-              renderSlot={(s) => {
-                const slot = s as unknown as Slot & { startAt: string; endAt: string }
-                const cap = slot.capacity ?? 1
-                const remaining = cap - slot.participants_count
-                const allowed = slotServices[slot.id] ?? []
-                return (
-                  <div className="rounded-lg border border-base-300 bg-base-100 p-2 hover:bg-base-200 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="text-xs font-semibold text-base-content">
-                        {new Date(slot.start_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+            </CardHeader>
+            <CardBody className="px-0">
+              <div className="overflow-hidden rounded-2xl border border-base-200 bg-base-50 shadow-inner">
+                <CalendarGrid
+                  mode={viewMode}
+                  anchorDate={anchorDate}
+                  slots={slots.map((s) => ({ ...s, startAt: s.start_at, endAt: s.end_at }))}
+                  renderSlot={(s) => {
+                    const slot = s as unknown as Slot & { startAt: string; endAt: string }
+                    const isReserved = slot.participants_count > 0
+                    const booking = (slotBookings[slot.id]?.[0] as any) ?? null
+                    const customerName = booking?.customer
+                      ? `${booking.customer.first_name ?? ''} ${booking.customer.last_name ?? ''}`.trim() || booking.customer.display_name
+                      : null
+                    return (
+                      <div
+                        className={[
+                          'rounded-lg border border-base-200 p-1.5 md:p-2 transition-colors',
+                          isReserved ? 'bg-blue-500/70 hover:bg-blue-500/80' : 'bg-green-500/70 hover:bg-green-500/80',
+                        ].join(' ')}
+                      >
+                        {/* Desktop: heure + badge. Mobile: on laisse la couleur faire le job */}
+                        <div className="hidden md:flex items-center justify-between text-[11px] font-semibold text-base-content">
+                          <span>
+                            {new Date(slot.start_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+
+                        <div className="hidden md:flex mt-1 items-center gap-2 text-xs">
+                          <Badge variant={isReserved ? 'info' : 'success'} style="soft" size="xs">
+                            {isReserved ? 'Réservé' : 'Libre'}
+                          </Badge>
+                          {isReserved && customerName && (
+                            <span className="text-xs text-base-content/80 truncate">{customerName}</span>
+                          )}
+                        </div>
+
+                        <div className="md:hidden">
+                          <span className="sr-only">{isReserved ? 'Réservé' : 'Libre'}</span>
+                          {isReserved && customerName ? (
+                            <span className="block truncate text-[11px] font-semibold text-base-content/90">{customerName}</span>
+                          ) : (
+                            <span className="block h-4" />
+                          )}
+                        </div>
                       </div>
-                      <span className="text-[11px] text-base-content/60">
-                        {remaining}/{cap}
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-base-content/60 mt-1 truncate">
-                      {allowed.length
-                        ? allowed.map((id) => serviceLabel.get(id) ?? id).join(', ')
-                        : '—'}
-                    </div>
-                    <div className="mt-2">
-                      <Badge variant="neutral" style="soft" size="xs">
-                        {slot.status}
-                      </Badge>
-                    </div>
-                  </div>
-                )
-              }}
-              onSlotClick={(s) => {
-                const slot = s as unknown as Slot & { startAt: string; endAt: string }
-                openEditor(slot.id)
-              }}
-            />
-          </CardBody>
-        </Card>
+                    )
+                  }}
+                  onSlotClick={(s) => {
+                    const slot = s as unknown as Slot & { startAt: string; endAt: string }
+                    openEditor(slot.id)
+                  }}
+                />
+              </div>
+            </CardBody>
+          </Card>
 
         <Modal
           open={editOpen}
           title="Éditer le créneau"
           onClose={() => {
-            setEditOpen(false)
-            setEditSlotId(null)
+            cancelEdit()
           }}
           footer={
-            <div className="flex items-center justify-end gap-2">
-              <button className="btn btn-ghost btn-sm" onClick={() => setEditOpen(false)} disabled={loading}>
-                Fermer
-              </button>
-              <button className="btn btn-primary btn-sm" onClick={() => void saveEditor()} disabled={loading || !editSlotId}>
-                Enregistrer
-              </button>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-2">
+                <button className="btn btn-error btn-sm" onClick={() => void deleteSlot()} disabled={loading || !editSlotId}>
+                  Supprimer
+                </button>
+                {(() => {
+                  const slot = slots.find((s) => s.id === editSlotId)
+                  const occupied = (slot?.participants_count ?? 0) > 0
+                  if (!occupied) return null
+                  return (
+                    <button
+                      className="btn btn-warning btn-sm"
+                      onClick={() => void cancelReservation()}
+                      disabled={loading || !editSlotId}
+                    >
+                      Annuler réservation
+                    </button>
+                  )
+                })()}
+              </div>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <button className="btn btn-ghost btn-sm" onClick={() => cancelEdit()} disabled={loading}>
+                  Annuler
+                </button>
+                <button className="btn btn-primary btn-sm" onClick={() => void saveEditor()} disabled={loading || !editSlotId}>
+                  Enregistrer
+                </button>
+              </div>
             </div>
           }
         >
@@ -386,55 +536,34 @@ export function ProviderPlanningScreen() {
             <div className="text-base-content/60">Aucun créneau sélectionné.</div>
           ) : (
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="md:col-span-2">
-                  <div className="text-sm font-medium text-base-content">Créneau</div>
-                  <div className="text-sm text-base-content/70 mt-1">
-                    {new Date(slots.find((s) => s.id === editSlotId)?.start_at ?? '').toLocaleString('fr-FR')}
+              {(() => {
+                const slot = slots.find((s) => s.id === editSlotId)
+                const booking = slot ? (slotBookings[slot.id]?.[0] as any) : null
+                if (!booking) return null
+                const customerName = booking.customer
+                  ? `${booking.customer.first_name ?? ''} ${booking.customer.last_name ?? ''}`.trim() || booking.customer.display_name
+                  : booking.customer_email
+                return (
+                  <div className="space-y-1 border border-base-300 rounded-2xl bg-base-100 p-4">
+                    <div className="text-xs text-base-content/60 uppercase tracking-[0.2em]">Réservation</div>
+                    <div className="text-xl font-semibold text-base-content leading-snug">
+                      {customerName ?? 'Nom inconnu'}
+                    </div>
+                    <div className="flex flex-wrap gap-2 text-xs text-base-content/70">
+                      <Badge variant="info" style="soft" size="xs">
+                        {booking.status === 'requested' ? 'En attente' : 'Confirmée'}
+                      </Badge>
+                      <span>{booking.quantity} personne{booking.quantity > 1 ? 's' : ''}</span>
+                      {booking.customer_email && <span>📧 {booking.customer_email}</span>}
+                      {booking.customer?.phone && <span>📞 {booking.customer.phone}</span>}
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <label className="label">
-                    <span className="label-text">Capacité</span>
-                  </label>
-                  <input
-                    type="number"
-                    className="input input-bordered w-full"
-                    min={1}
-                    value={editCapacity}
-                    onChange={(e) => setEditCapacity(Number(e.target.value))}
-                  />
-                </div>
-              </div>
+                )
+              })()}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="label">
-                    <span className="label-text">Statut</span>
-                  </label>
-                  <select
-                    className="select select-bordered w-full"
-                    value={editStatus}
-                    onChange={(e) => setEditStatus(e.target.value as any)}
-                  >
-                    <option value="confirmed">Publié (confirmed)</option>
-                    <option value="draft">Masqué (draft)</option>
-                    <option value="cancelled">Annulé (cancelled)</option>
-                  </select>
-                </div>
-                <div className="text-sm text-base-content/60 flex items-center">
-                  “Publié” = visible côté client.
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between">
-                  <div className="font-medium text-base-content">Prestations autorisées</div>
-                  <Badge variant="neutral" style="soft" size="sm">
-                    {editServiceIds.length}
-                  </Badge>
-                </div>
-                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="space-y-3 border border-base-300 rounded-2xl bg-base-100 p-4">
+                <div className="text-sm font-medium text-base-content">Prestations autorisées</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {services
                     .filter((sv) => sv.is_active)
                     .map((sv) => (
@@ -452,6 +581,62 @@ export function ProviderPlanningScreen() {
                         <span className="label-text">{sv.name}</span>
                       </label>
                     ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                  <div className="md:col-span-2">
+                    <div className="text-sm font-medium text-base-content">Créneau</div>
+                    <div className="text-sm text-base-content/70 mt-1">
+                      {new Date(slots.find((s) => s.id === editSlotId)?.start_at ?? '').toLocaleString('fr-FR')}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="label">
+                      <span className="label-text">Capacité</span>
+                    </label>
+                    <input
+                      type="number"
+                      className="input input-bordered w-full"
+                      min={1}
+                      value={editCapacity}
+                      onChange={(e) => setEditCapacity(Number(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label className="label">
+                      <span className="label-text">Durée (min)</span>
+                    </label>
+                    <input
+                      type="number"
+                      className="input input-bordered w-full"
+                      min={5}
+                      step={5}
+                      value={editDurationMinutes}
+                      onChange={(e) => setEditDurationMinutes(Number(e.target.value))}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="label">
+                      <span className="label-text">Publication</span>
+                    </label>
+                    <select
+                      className="select select-bordered w-full"
+                      value={editStatus}
+                      onChange={(e) => setEditStatus(e.target.value as any)}
+                    >
+                      <option value="confirmed">Publié</option>
+                      <option value="draft">Masqué</option>
+                      <option value="cancelled">Annulé</option>
+                    </select>
+                  </div>
+                  <div className="text-sm text-base-content/60 flex items-center">
+                    Visible côté client uniquement si “Publié”.
+                  </div>
                 </div>
               </div>
             </div>
@@ -581,6 +766,7 @@ export function ProviderPlanningScreen() {
                     {slots.map((s) => {
                       const allowed = slotServices[s.id] ?? []
                       const label = allowed.map((id) => serviceLabel.get(id) ?? id)
+                      const isOccupied = s.participants_count > 0
                       return (
                         <tr key={s.id}>
                           <td className="text-base-content">
@@ -590,7 +776,18 @@ export function ProviderPlanningScreen() {
                             {Math.round((new Date(s.end_at).getTime() - new Date(s.start_at).getTime()) / 60000)} min
                           </td>
                           <td className="text-base-content/70">{s.capacity ?? '-'}</td>
-                          <td className="text-base-content/70">{s.participants_count}</td>
+                          <td className="text-base-content/70">
+                            <div className="flex items-center gap-2">
+                              <span>{s.participants_count}</span>
+                              <Badge
+                                variant={isOccupied ? 'info' : 'success'}
+                                style="soft"
+                                size="xs"
+                              >
+                                {isOccupied ? 'Occupé' : 'Libre'}
+                              </Badge>
+                            </div>
+                          </td>
                           <td>
                             <Badge
                               variant={s.status === 'confirmed' ? 'success' : s.status === 'pending' ? 'warning' : 'neutral'}
@@ -665,6 +862,7 @@ export function ProviderPlanningScreen() {
             )}
           </CardBody>
         </Card>
+        </div>
       </ContentStack>
     </AppShellScreen>
   )

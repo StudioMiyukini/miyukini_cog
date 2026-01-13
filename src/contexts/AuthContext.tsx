@@ -1,9 +1,9 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react'
-import { User, Session, AuthError } from '@supabase/supabase-js'
-import { createBrowserClient } from '@supabase/ssr'
-import type { Profile, Database } from '@/lib/supabase/database.types'
+import { User, Session, AuthError, type AuthChangeEvent } from '@supabase/supabase-js'
+import { getSupabaseClient } from '@/lib/supabase/client'
+import type { Profile } from '@/lib/supabase/database.types'
 
 /**
  * AuthContext - Gestion de l'authentification Supabase
@@ -19,24 +19,20 @@ interface AuthContextType {
   isLoading: boolean
   isAuthenticated: boolean
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>
-  signUp: (email: string, password: string, displayName?: string) => Promise<{ error: AuthError | null }>
+  signUp: (
+    email: string,
+    password: string,
+    profileData?: { firstName: string; lastName: string; phone: string }
+  ) => Promise<{ error: AuthError | null }>
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Client Supabase singleton
-let supabaseClient: ReturnType<typeof createBrowserClient<Database>> | null = null
-
 function getSupabase() {
-  if (!supabaseClient) {
-    supabaseClient = createBrowserClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-  }
-  return supabaseClient
+  // Singleton partagé sur toute l'app
+  return getSupabaseClient() as any
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -107,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Écouter les changements d'auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, newSession) => {
+      async (_event: AuthChangeEvent, newSession: Session | null) => {
         setSession(newSession)
         setUser(newSession?.user ?? null)
 
@@ -145,16 +141,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // Inscription
-  const signUp = useCallback(async (email: string, password: string, displayName?: string) => {
+  const signUp = useCallback(async (email: string, password: string, profileData?: { firstName: string; lastName: string; phone: string }) => {
     const supabase = getSupabase()
     setIsLoading(true)
     try {
+      const displayName =
+        profileData?.firstName && profileData?.lastName
+          ? `${profileData.firstName} ${profileData.lastName}`.trim()
+          : undefined
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             display_name: displayName || email.split('@')[0],
+            first_name: profileData?.firstName ?? null,
+            last_name: profileData?.lastName ?? null,
+            phone: profileData?.phone ?? null,
           },
         },
       })

@@ -97,6 +97,7 @@
   padding-bottom: calc(var(--bottom-nav-height) + var(--spacing-md));
   padding-left: var(--spacing-md);
   padding-right: var(--spacing-md);
+  overflow-x: hidden;
 }
 
 /* ========================================

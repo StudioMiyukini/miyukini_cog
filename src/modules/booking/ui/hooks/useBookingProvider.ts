@@ -2,10 +2,11 @@
 
 import { useCallback, useMemo, useState } from 'react'
 import { getSupabaseClient } from '@/lib/supabase/client'
-import type { Tables } from '@/lib/supabase/database.types'
+import type { Tables, TablesInsert } from '@/lib/supabase/database.types'
 import { useAuth } from '@/contexts/AuthContext'
 
 type BookingProvider = Tables<'booking_providers'>
+type BookingProviderInsert = TablesInsert<'booking_providers'>
 
 export function useBookingProvider() {
   const { isAuthenticated, profile, user } = useAuth()
@@ -36,14 +37,12 @@ export function useBookingProvider() {
         return existing
       }
 
-      const payload: BookingProvider = {
+      const payload: BookingProviderInsert = {
         id: user.id,
         display_name: profile?.display_name ?? profile?.email ?? null,
         timezone: 'Europe/Paris',
         tags: null,
         is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       }
 
       const { data: created, error: insertError } = await supabase

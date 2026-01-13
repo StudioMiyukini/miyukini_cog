@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 
-export type CalendarViewMode = 'week' | 'day'
+export type CalendarViewMode = 'week' | 'day' | '3days'
 
 export type CalendarSlotLike = {
   id: string
@@ -71,6 +71,10 @@ export function CalendarGrid<TSlot extends CalendarSlotLike>({
 }: CalendarGridProps<TSlot>) {
   const days = useMemo(() => {
     if (mode === 'day') return [startOfDay(anchorDate)]
+    if (mode === '3days') {
+      const start = startOfDay(anchorDate)
+      return Array.from({ length: 3 }).map((_, i) => addDays(start, i))
+    }
     const start = startOfISOWeek(anchorDate)
     return Array.from({ length: 7 }).map((_, i) => addDays(start, i))
   }, [anchorDate, mode])
@@ -115,47 +119,71 @@ export function CalendarGrid<TSlot extends CalendarSlotLike>({
   )
 
   return (
-    <div className="rounded-xl border border-base-300 bg-base-100 overflow-hidden">
-      {/* Header days */}
-      <div className="grid" style={{ gridTemplateColumns: `120px repeat(${days.length}, minmax(140px, 1fr))` }}>
-        <div className="p-3 border-b border-base-300 bg-base-200" />
-        {days.map((d) => (
-          <div key={d.toISOString()} className="p-3 border-b border-base-300 bg-base-200">
-            <div className="text-sm font-semibold text-base-content">
-              {d.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' })}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Grid */}
-      <div className="grid" style={{ gridTemplateColumns: `120px repeat(${days.length}, minmax(140px, 1fr))` }}>
-        {hours.map((h) => (
-          <div key={h} className="contents">
-            <div className="border-b border-base-300 p-3 text-xs text-base-content/60 bg-base-100">
-              {String(h).padStart(2, '0')}:00
-            </div>
+    <div className="rounded-xl border border-base-300 bg-base-100 overflow-hidden [--cg-time-col:44px] md:[--cg-time-col:96px] [--cg-day-min:120px] md:[--cg-day-min:110px] lg:[--cg-day-min:140px]">
+      {/* IMPORTANT: en mode semaine, 7 colonnes ne rentrent pas en mobile.
+          On rend la grille scrollable horizontalement sans élargir la page. */}
+      <div className="max-w-full overflow-x-auto md:overflow-visible overscroll-x-contain">
+        <div className="min-w-max md:min-w-0 md:w-full">
+          {/* Header days */}
+          <div
+            className="grid"
+            style={{ gridTemplateColumns: `var(--cg-time-col) repeat(${days.length}, minmax(var(--cg-day-min), 1fr))` }}
+          >
+            <div className="p-2 md:p-3 border-b border-base-300 bg-base-200" />
             {days.map((d) => (
-              <div key={`${d.toISOString()}-${h}`} className="border-b border-base-300 border-l border-base-300 p-2 min-h-16">
-                {/* Slots that start within this hour */}
-                <div className="space-y-2">
-                  {(slotsByDay.get(d.toDateString()) ?? [])
-                    .filter((s) => new Date(s.startAt).getHours() === h)
-                    .map((s) => (
-                      <button
-                        key={s.id}
-                        type="button"
-                        className="w-full text-left"
-                        onClick={() => onSlotClick?.(s)}
-                      >
-                        {renderSlot(s)}
-                      </button>
-                    ))}
+              <div key={d.toISOString()} className="p-2 md:p-3 border-b border-base-300 bg-base-200">
+                <div className="text-sm font-semibold text-base-content">
+                  {d.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' })}
                 </div>
               </div>
             ))}
           </div>
-        ))}
+
+          {/* Grid */}
+          <div
+            className="grid"
+            style={{ gridTemplateColumns: `var(--cg-time-col) repeat(${days.length}, minmax(var(--cg-day-min), 1fr))` }}
+          >
+            {hours.map((h) => (
+              <div key={h} className="contents">
+                <div className="border-b border-base-300 p-2 md:p-3 text-[11px] md:text-xs text-base-content/60 bg-base-100 tabular-nums">
+                  <span className="md:hidden">{String(h).padStart(2, '0')}</span>
+                  <span className="hidden md:inline">{String(h).padStart(2, '0')}:00</span>
+                </div>
+                {days.map((d) => (
+                  <div
+                    key={`${d.toISOString()}-${h}`}
+                    className="border-b border-base-300 border-l border-base-300 p-1.5 md:p-2 min-h-16"
+                  >
+                    {/* Slots that start within this hour */}
+                    <div className="space-y-2">
+                      {(slotsByDay.get(d.toDateString()) ?? [])
+                        .filter((s) => new Date(s.startAt).getHours() === h)
+                        .map((s) => (
+                          <div
+                            key={s.id}
+                            role={onSlotClick ? 'button' : undefined}
+                            tabIndex={onSlotClick ? 0 : undefined}
+                            className={onSlotClick ? 'w-full text-left cursor-pointer' : 'w-full text-left'}
+                            onClick={() => onSlotClick?.(s)}
+                            onKeyDown={(e) => {
+                              if (!onSlotClick) return
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault()
+                                onSlotClick(s)
+                              }
+                            }}
+                          >
+                            {renderSlot(s)}
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )

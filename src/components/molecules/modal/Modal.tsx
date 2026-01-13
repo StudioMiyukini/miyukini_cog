@@ -13,11 +13,16 @@ export type ModalProps = {
 export function Modal({ open, title, children, footer, onClose }: ModalProps) {
   useEffect(() => {
     if (!open) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
     document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = prevOverflow
+      document.removeEventListener('keydown', onKeyDown)
+    }
   }, [onClose, open])
 
   if (!open) return null
@@ -26,7 +31,7 @@ export function Modal({ open, title, children, footer, onClose }: ModalProps) {
     <div className="fixed inset-0 z-[100]">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="absolute inset-0 flex items-end sm:items-center justify-center p-3">
-        <div className="w-full max-w-2xl bg-base-100 rounded-2xl shadow-xl border border-base-300 overflow-hidden">
+        <div className="w-full max-w-[95vw] sm:max-w-2xl max-h-[92vh] bg-base-100 rounded-t-2xl sm:rounded-2xl shadow-xl border border-base-300 overflow-hidden overflow-x-hidden flex flex-col">
           {(title || footer) && (
             <div className="p-4 border-b border-base-300 flex items-center justify-between gap-3">
               <div className="min-w-0">
@@ -38,9 +43,9 @@ export function Modal({ open, title, children, footer, onClose }: ModalProps) {
             </div>
           )}
 
-          <div className="p-4 max-h-[75vh] overflow-auto">{children}</div>
+          <div className="p-4 overflow-auto overflow-x-hidden min-h-0 flex-1">{children}</div>
 
-          {footer && <div className="p-4 border-t border-base-300 bg-base-200/40">{footer}</div>}
+          {footer && <div className="p-4 border-t border-base-300 bg-base-200/40 shrink-0">{footer}</div>}
         </div>
       </div>
     </div>

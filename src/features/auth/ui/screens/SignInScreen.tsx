@@ -30,7 +30,7 @@ export function SignInScreen({
   onNavigateToForgotPassword 
 }: SignInScreenProps) {
   const router = useRouter()
-  const { signIn, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { signIn, isAuthenticated, isLoading: authLoading, session } = useAuth()
   
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -38,12 +38,16 @@ export function SignInScreen({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Rediriger si déjà connecté
+  // Rediriger si déjà connecté (on attend que la session soit vraiment chargée)
   useEffect(() => {
-    if (isAuthenticated && !authLoading) {
-      router.push('/')
+    if (isAuthenticated && !authLoading && session) {
+      // Petit délai pour s'assurer que tout est synchronisé
+      const timer = setTimeout(() => {
+        router.replace('/')
+      }, 100)
+      return () => clearTimeout(timer)
     }
-  }, [isAuthenticated, authLoading, router])
+  }, [isAuthenticated, authLoading, session, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,6 +57,7 @@ export function SignInScreen({
     try {
       if (onSignIn) {
         await onSignIn(email, password)
+        // Redirection gérée par le callback ou l'effet
       } else {
         // Connexion via Supabase
         const { error: authError } = await signIn(email, password)
@@ -66,8 +71,9 @@ export function SignInScreen({
           return
         }
         
-        // Redirection après connexion réussie
-        router.push('/')
+        // Ne pas rediriger ici: on attend que `isAuthenticated` soit effectivement true
+        // via onAuthStateChange dans AuthContext, puis le useEffect ci-dessus redirigera.
+        // Cela évite un état "connecté seulement après refresh".
       }
     } catch (err) {
       setError('Identifiants incorrects. Veuillez réessayer.')

@@ -185,6 +185,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const [showOnboarding, setShowOnboarding] = useState(false)
   const supabase = useMemo(() => getSupabaseClient(), [])
   const [dbConfig, setDbConfig] = useState<HomepageConfig | null>(null)
+  const [loading, setLoading] = useState(true)
 
   const navigate = useCallback(
     (path: string) => {
@@ -196,15 +197,22 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
 
   useEffect(() => {
     let cancelled = false
+    setLoading(true)
     ;(async () => {
       try {
         const { data, error } = await supabase.from('homepage_content').select('*').eq('id', 'home').maybeSingle()
         if (error) throw error
         const row = data as HomepageRow | null
         const cfg = (row?.config ?? null) as unknown as HomepageConfig | null
-        if (!cancelled) setDbConfig(cfg)
+        if (!cancelled) {
+          setDbConfig(cfg)
+          setLoading(false)
+        }
       } catch {
-        if (!cancelled) setDbConfig(null)
+        if (!cancelled) {
+          setDbConfig(null)
+          setLoading(false)
+        }
       }
     })()
     return () => {
@@ -212,34 +220,78 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
     }
   }, [supabase])
 
-  const hero = dbConfig?.hero
-  const enabled = dbConfig?.sectionsEnabled ?? {}
-  const pageStats =
-    (dbConfig?.stats ?? []).map((s) => ({ value: s.value ?? '', label: s.label ?? '' })) || []
-  const pageQuickActions =
-    (dbConfig?.quickActions ?? []).map((a) => ({
-      id: a.id ?? '',
-      label: a.label ?? '',
-      icon: a.icon ?? 'icon-[tabler--sparkles]',
-      path: a.path ?? '/',
-      description: a.description ?? '',
-    })) || []
-  const pageFaqItems =
-    (dbConfig?.faq ?? []).map((f) => ({
-      title: f.title ?? '',
-      content: f.content ?? '',
-      defaultOpen: !!f.defaultOpen,
-    })) || []
-  const pageOnboardingSteps =
-    (dbConfig?.onboardingSteps ?? []).map((s, idx) => ({
-      id: typeof s.id === 'number' ? s.id : idx + 1,
-      title: s.title ?? '—',
-      description: s.description ?? '',
-      icon: s.icon ?? 'icon-[tabler--sparkles]',
-    })) || []
+  // Utiliser les données de la DB si disponibles, sinon les valeurs par défaut
+  // Mais seulement après le chargement initial pour éviter le clignotement
+  const hero = loading ? null : (dbConfig?.hero ?? {
+    badgeText: '🚀 Framework modulaire depuis 2016',
+    title: { line1: 'Créez. Déployez.', line2: 'Impressionnez.', highlight: true },
+    subtitle: 'Miyukini est un framework modulaire pensé pour créer des applications web et mobiles modernes, performantes et portables.',
+    primaryCta: { label: 'Explorer les fonctionnalités', href: '/mockcontent' },
+    secondaryCta: { label: 'Voir le dashboard', href: '/admin' },
+  })
+  const enabled = loading ? {} : (dbConfig?.sectionsEnabled ?? {})
+  const pageStats = loading ? [] : (
+    (dbConfig?.stats && dbConfig.stats.length > 0) 
+      ? dbConfig.stats.map((s) => ({ value: s.value ?? '', label: s.label ?? '' }))
+      : stats
+  )
+  const pageQuickActions = loading ? [] : (
+    (dbConfig?.quickActions && dbConfig.quickActions.length > 0)
+      ? dbConfig.quickActions.map((a) => ({
+          id: a.id ?? '',
+          label: a.label ?? '',
+          icon: a.icon ?? 'icon-[tabler--sparkles]',
+          path: a.path ?? '/',
+          description: a.description ?? '',
+        }))
+      : quickActions
+  )
+  const pageFaqItems = loading ? [] : (
+    (dbConfig?.faq && dbConfig.faq.length > 0)
+      ? dbConfig.faq.map((f) => ({
+          title: f.title ?? '',
+          content: f.content ?? '',
+          defaultOpen: !!f.defaultOpen,
+        }))
+      : faqItems
+  )
+  const pageOnboardingSteps = loading ? [] : (
+    (dbConfig?.onboardingSteps && dbConfig.onboardingSteps.length > 0)
+      ? dbConfig.onboardingSteps.map((s, idx) => ({
+          id: typeof s.id === 'number' ? s.id : idx + 1,
+          title: s.title ?? '—',
+          description: s.description ?? '',
+          icon: s.icon ?? 'icon-[tabler--sparkles]',
+        }))
+      : onboardingSteps
+  )
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false)
+  }
+
+  // Si en chargement, afficher un skeleton minimal
+  if (loading) {
+    return (
+      <AppShellScreen>
+        <main className="bg-base-100">
+          <section className="pt-24 pb-12 sm:pt-32 sm:pb-16 lg:pb-24">
+            <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+              <div className="flex flex-col items-center gap-6 text-center">
+                <div className="h-8 w-48 bg-base-200 rounded-full animate-pulse" />
+                <div className="h-16 w-full max-w-3xl bg-base-200 rounded-lg animate-pulse" />
+                <div className="h-6 w-full max-w-2xl bg-base-200 rounded-lg animate-pulse" />
+                <div className="flex gap-4">
+                  <div className="h-12 w-48 bg-base-200 rounded-lg animate-pulse" />
+                  <div className="h-12 w-40 bg-base-200 rounded-lg animate-pulse" />
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+        <BottomNav />
+      </AppShellScreen>
+    )
   }
 
   return (
@@ -248,7 +300,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         <OnboardingModal 
           onComplete={handleOnboardingComplete} 
           onClose={() => setShowOnboarding(false)}
-          steps={pageOnboardingSteps.length ? pageOnboardingSteps : onboardingSteps}
+          steps={pageOnboardingSteps.length > 0 ? pageOnboardingSteps : onboardingSteps}
         />
       )}
       
@@ -259,51 +311,62 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
               <div className="flex flex-col items-center gap-6 text-center">
                 {/* Badge */}
-                <div className="bg-base-200 border border-base-content/10 w-fit rounded-full px-4 py-1.5">
-                  <span className="text-sm text-base-content/80">
-                    {hero?.badgeText ?? '🚀 Framework modulaire depuis 2016'}
-                  </span>
-                </div>
+                {hero && (
+                  <div className="bg-base-200 border border-base-content/10 w-fit rounded-full px-4 py-1.5">
+                    <span className="text-sm text-base-content/80">
+                      {hero.badgeText}
+                    </span>
+                  </div>
+                )}
 
                 {/* Title */}
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-base-content leading-tight max-w-3xl">
-                  {hero?.title?.line1 ?? 'Créez. Déployez.'}
-                  <br />
-                  <span className="text-primary">{hero?.title?.line2 ?? 'Impressionnez.'}</span>
-                </h1>
+                {hero && (
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-base-content leading-tight max-w-3xl">
+                    {hero.title?.line1}
+                    <br />
+                    <span className="text-primary">{hero.title?.line2}</span>
+                  </h1>
+                )}
 
                 {/* Subtitle */}
-                <p className="text-base-content/70 text-lg max-w-2xl">
-                  {hero?.subtitle ??
-                    'Miyukini est un framework modulaire pensé pour créer des applications web et mobiles modernes, performantes et portables.'}
-                </p>
+                {hero && (
+                  <p className="text-base-content/70 text-lg max-w-2xl">
+                    {hero.subtitle}
+                  </p>
+                )}
 
                 {/* CTA */}
-                <div className="flex gap-4 flex-wrap justify-center">
-                  <button 
-                    className="btn btn-primary btn-lg"
-                    onClick={() => navigate(hero?.primaryCta?.href ?? '/mockcontent')}
-                  >
-                    {hero?.primaryCta?.label ?? 'Explorer les fonctionnalités'}
-                    <span className="icon-[tabler--arrow-right] size-5" />
-                  </button>
-                  <button 
-                    className="btn btn-outline btn-lg"
-                    onClick={() => navigate(hero?.secondaryCta?.href ?? '/admin')}
-                  >
-                    {hero?.secondaryCta?.label ?? 'Voir le dashboard'}
-                  </button>
-                </div>
+                {hero && (
+                  <div className="flex gap-4 flex-wrap justify-center">
+                    {hero.primaryCta && (
+                      <button 
+                        className="btn btn-primary btn-lg"
+                        onClick={() => navigate(hero.primaryCta!.href ?? '/mockcontent')}
+                      >
+                        {hero.primaryCta.label}
+                        <span className="icon-[tabler--arrow-right] size-5" />
+                      </button>
+                    )}
+                    {hero.secondaryCta && (
+                      <button 
+                        className="btn btn-outline btn-lg"
+                        onClick={() => navigate(hero.secondaryCta!.href ?? '/admin')}
+                      >
+                        {hero.secondaryCta.label}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </section>
 
           {/* Stats Section */}
-          {enabled.stats !== false && (
+          {!loading && enabled.stats !== false && pageStats.length > 0 && (
             <section className="py-12 bg-base-200">
             <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                {(pageStats.length ? pageStats : stats).map((stat) => (
+                {pageStats.map((stat) => (
                   <div key={stat.label} className="text-center">
                     <p className="text-3xl lg:text-4xl font-bold text-primary">{stat.value}</p>
                     <p className="text-base-content/70 mt-1">{stat.label}</p>
@@ -315,7 +378,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           )}
 
           {/* Services / Quick Actions */}
-          {enabled.quickActions !== false && (
+          {!loading && enabled.quickActions !== false && pageQuickActions.length > 0 && (
             <section className="py-12 sm:py-16 lg:py-24">
             <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
               {/* Section Header */}
@@ -330,7 +393,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
 
               {/* Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {(pageQuickActions.length ? pageQuickActions : quickActions).map((action) => (
+                {pageQuickActions.map((action) => (
                   <button
                     key={action.id}
                     className="card bg-base-100 border border-base-300 hover:border-primary transition-colors text-left"
@@ -387,7 +450,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           </section>
 
           {/* FAQ Section */}
-          {enabled.faq !== false && (
+          {!loading && enabled.faq !== false && pageFaqItems.length > 0 && (
             <section className="py-12 sm:py-16 lg:py-24">
             <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
@@ -399,7 +462,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
                 </p>
               </div>
               <div className="max-w-2xl mx-auto">
-                <Accordion items={pageFaqItems.length ? pageFaqItems : faqItems} />
+                <Accordion items={pageFaqItems} />
               </div>
             </div>
           </section>

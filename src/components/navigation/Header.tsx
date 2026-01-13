@@ -1,8 +1,13 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
+import { getSupabaseClient } from '@/lib/supabase/client'
+import type { Tables } from '@/lib/supabase/database.types'
+
+type AppBranding = Tables<'app_branding'>
+const BRANDING_BUCKET = 'app-branding'
 
 /**
  * Header - Navigation supérieure sticky
@@ -18,10 +23,29 @@ export interface HeaderProps {
 }
 
 export function Header({ title = 'Miyukini' }: HeaderProps) {
+  const supabase = useMemo(() => getSupabaseClient(), [])
   const [isOpen, setIsOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement | null>(null)
   const { user, profile, isAuthenticated, isLoading, signOut } = useAuth()
+  const [branding, setBranding] = useState<AppBranding | null>(null)
+
+  // Charger le branding (titre + logo)
+  useEffect(() => {
+    const loadBranding = async () => {
+      const { data } = await supabase.from('app_branding').select('*').eq('id', 'main').single()
+      if (data) setBranding(data as AppBranding)
+    }
+    void loadBranding()
+  }, [supabase])
+
+  const displayTitle = useMemo(() => branding?.app_title ?? title, [branding, title])
+  const logoUrl = useMemo(() => {
+    if (!branding) return null
+    if (branding.logo_url) return branding.logo_url
+    if (branding.logo_path) return supabase.storage.from(BRANDING_BUCKET).getPublicUrl(branding.logo_path).data.publicUrl
+    return null
+  }, [branding, supabase])
 
   const handleSignOut = async () => {
     await signOut()
@@ -57,12 +81,17 @@ export function Header({ title = 'Miyukini' }: HeaderProps) {
           {/* Logo & Mobile toggle */}
           <div className="navbar-start items-center justify-between max-lg:w-full">
             <Link href="/" className="flex items-center gap-3 text-xl font-semibold text-base-content">
-              <span className="text-primary">
-                <div className="bg-primary text-primary-content rounded-lg size-9 flex items-center justify-center">
-                  <span className="icon-[tabler--brand-tabler] size-5" />
-                </div>
-              </span>
-              {title}
+              {logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logoUrl} alt={displayTitle} className="size-9 rounded-lg object-contain" />
+              ) : (
+                <span className="text-primary">
+                  <div className="bg-primary text-primary-content rounded-lg size-9 flex items-center justify-center">
+                    <span className="icon-[tabler--brand-tabler] size-5" />
+                  </div>
+                </span>
+              )}
+              {displayTitle}
             </Link>
             <div className="flex items-center gap-4 lg:hidden">
               {isAuthenticated ? (

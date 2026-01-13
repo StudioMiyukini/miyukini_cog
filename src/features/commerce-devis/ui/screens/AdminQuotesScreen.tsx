@@ -8,7 +8,6 @@ import { Badge } from '@/components/atoms/badge'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import type { Tables } from '@/lib/supabase/database.types'
 import { useRequireAdmin } from '@/features/backoffice/ui/hooks/useRequireAdmin'
-import Link from 'next/link'
 
 type QuoteRequest = Tables<'commerce_quote_requests'>
 type Quote = Tables<'commerce_quotes'>
