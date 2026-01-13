@@ -40,6 +40,13 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
     }
   }, [isAuthenticated, isLoading, router])
 
+  // Initialiser le téléphone depuis le profil
+  useEffect(() => {
+    if (profile?.phone !== undefined) {
+      setPhone(profile.phone ?? '')
+    }
+  }, [profile?.phone])
+
   const handleSignOut = async () => {
     await signOut()
     router.push('/')
@@ -79,10 +86,6 @@ export function ProfileScreen({ onNavigate }: ProfileScreenProps) {
   const role = profile?.role || 'user'
   const tier = profile?.tier || 'free'
   const joinedAt = profile?.created_at || user.created_at
-
-  useEffect(() => {
-    setPhone(profile?.phone ?? '')
-  }, [profile?.phone])
 
   const savePhone = async () => {
     setPhoneSaved(false)
