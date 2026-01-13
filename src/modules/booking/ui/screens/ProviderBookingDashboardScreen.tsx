@@ -5,18 +5,23 @@ import { ContentStack } from '@/components/layouts/ContentStack'
 import { Card, CardBody } from '@/components/atoms/card'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRequireEnabledModule } from '../hooks/useRequireEnabledModule'
+import { SubscriptionGate } from '@/components/paywall/SubscriptionGate'
+import { useRequireSubscription } from '@/hooks/useRequireSubscription'
 import Link from 'next/link'
 
 export function ProviderBookingDashboardScreen() {
   const { isLoading, enabled } = useRequireEnabledModule('booking', '/')
   const { isAuthenticated, profile } = useAuth()
+  const { hasSubscription, subscription, isLoading: isLoadingSubscription } = useRequireSubscription({
+    redirectToPaywall: false,
+  })
   const mustDenyProviderBackOffice = profile?.role === 'admin' || profile?.role === 'super_admin'
   const displayName =
     profile?.display_name ??
     `${profile?.first_name ?? ''} ${profile?.last_name ?? ''}`.trim() ??
     null
 
-  if (isLoading) {
+  if (isLoading || isLoadingSubscription) {
     return (
       <div className="min-h-screen bg-base-200 flex items-center justify-center">
         <span className="loading loading-spinner loading-lg text-primary" />
@@ -45,23 +50,47 @@ export function ProviderBookingDashboardScreen() {
   }
 
   return (
-    <AppShellScreen>
-      <ContentStack>
-        <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-base-content">Back-office prestataire</h1>
-          <p className="text-base-content/60">
-            {displayName ? (
-              <>
-                Bonjour <span className="font-semibold text-base-content">{displayName}</span>. Ici tu gères tes prestations,
-                tes créneaux et tes réservations.
-              </>
-            ) : (
-              <>Ici tu gères tes prestations, tes créneaux et tes réservations.</>
-            )}
-          </p>
-        </div>
+    <SubscriptionGate
+      message="Un abonnement actif est requis pour accéder à l'espace prestataire. Abonnez-vous pour commencer à gérer vos prestations."
+      paywallPath="/pricing"
+    >
+      <AppShellScreen>
+        <ContentStack>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-base-content">Back-office prestataire</h1>
+            <p className="text-base-content/60">
+              {displayName ? (
+                <>
+                  Bonjour <span className="font-semibold text-base-content">{displayName}</span>. Ici tu gères tes prestations,
+                  tes créneaux et tes réservations.
+                </>
+              ) : (
+                <>Ici tu gères tes prestations, tes créneaux et tes réservations.</>
+              )}
+            </p>
+          </div>
 
-        <Card>
+          {/* Avertissement si abonnement suspendu ou en attente */}
+          {subscription && subscription.status !== 'ACTIVE' && (
+            <div className="alert alert-warning">
+              <span className="icon-[tabler--alert-triangle] size-5" />
+              <div className="flex-1">
+                <h3 className="font-semibold">
+                  Abonnement {subscription.status === 'APPROVAL_PENDING' ? 'en attente' : subscription.status === 'SUSPENDED' ? 'suspendu' : 'non actif'}
+                </h3>
+                <p className="text-sm">
+                  {subscription.status === 'APPROVAL_PENDING' && "Votre abonnement est en attente d'approbation PayPal."}
+                  {subscription.status === 'SUSPENDED' && 'Votre abonnement est suspendu. Veuillez vérifier votre moyen de paiement.'}
+                  {subscription.status === 'APPROVED' && 'Votre abonnement est approuvé et sera activé prochainement.'}
+                </p>
+              </div>
+              <Link href="/subscription" className="btn btn-sm btn-outline">
+                Voir mon abonnement
+              </Link>
+            </div>
+          )}
+
+          <Card>
           <CardBody className="space-y-5">
             <div className="space-y-2">
               <div className="text-sm font-semibold text-base-content">Démarrage rapide (recommandé)</div>
@@ -200,6 +229,7 @@ export function ProviderBookingDashboardScreen() {
         </Card>
       </ContentStack>
     </AppShellScreen>
+    </SubscriptionGate>
   )
 }
 

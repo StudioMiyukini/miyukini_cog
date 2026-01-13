@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRequireEnabledModule } from '../hooks/useRequireEnabledModule'
 import { useBookingProvider } from '../hooks/useBookingProvider'
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { SubscriptionGate } from '@/components/paywall/SubscriptionGate'
 
 type BookingProvider = Tables<'booking_providers'>
 type BookingService = Tables<'booking_services'>
@@ -123,8 +124,12 @@ export function ProviderServicesScreen() {
   }
 
   return (
-    <AppShellScreen>
-      <ContentStack>
+    <SubscriptionGate
+      message="Un abonnement actif est requis pour gérer vos prestations."
+      paywallPath="/pricing"
+    >
+      <AppShellScreen>
+        <ContentStack>
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-base-content">Prestations</h1>
@@ -243,6 +248,7 @@ export function ProviderServicesScreen() {
         </Card>
       </ContentStack>
     </AppShellScreen>
+    </SubscriptionGate>
   )
 }
 
