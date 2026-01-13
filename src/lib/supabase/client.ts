@@ -4,16 +4,17 @@ import type { Database } from './database.types'
 /**
  * Client Supabase côté navigateur (client-side)
  * À utiliser dans les composants React côté client
+ * 
+ * ⚠️ Ne pas appeler directement cette fonction. Utilisez getSupabaseClient() à la place.
  */
 export function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    // Ne pas lancer d'erreur ici, laisser getSupabaseClient gérer
-    throw new Error(
-      'Missing Supabase environment variables. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY'
-    )
+    // Ne pas lancer d'erreur, retourner null et laisser getSupabaseClient gérer
+    // Cela évite les erreurs si cette fonction est appelée directement
+    return null as any
   }
 
   return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey)
@@ -56,11 +57,9 @@ export function getSupabaseClient() {
   }
   
   if (!browserClient) {
-    try {
-      browserClient = createClient()
-    } catch (error) {
-      console.error('Failed to create Supabase client:', error)
-      // Retourner le mock en cas d'erreur
+    browserClient = createClient()
+    // Si createClient retourne null (variables manquantes), utiliser le mock
+    if (!browserClient) {
       return createMockClient()
     }
   }
