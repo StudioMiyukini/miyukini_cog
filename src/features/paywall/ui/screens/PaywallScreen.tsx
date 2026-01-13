@@ -170,9 +170,9 @@ export function PaywallScreen() {
           }
         } else {
           // Paiement manuel (virement bancaire)
-          console.log('[Paywall] Calling Edge Function (manual):', `${supabaseUrl}/functions/v1/paywall-create-subscription-manual`)
+          console.log('[Paywall] Calling API route for manual payment')
 
-          const response = await fetch(`${supabaseUrl}/functions/v1/paywall-create-subscription-manual`, {
+          const response = await fetch('/api/edge-functions/paywall-create-subscription-manual', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

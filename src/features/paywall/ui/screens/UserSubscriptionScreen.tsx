@@ -68,7 +68,8 @@ export function UserSubscriptionScreen() {
         .select(
           `
           *,
-          plan:saas_paywall_plans(id, name, price_monthly, currency)
+          plan:saas_paywall_plans(id, name, price_monthly, currency),
+          manual_payments:saas_paywall_manual_payments(id, status, amount, due_date, confirmed_at, rejected_at, rejection_reason)
         `
         )
         .eq('user_id', user.id)
@@ -216,6 +217,11 @@ export function UserSubscriptionScreen() {
                 <Badge variant={statusColors[subscription.status] || 'secondary'} className="mt-2">
                   {statusLabels[subscription.status] || subscription.status}
                 </Badge>
+                {(subscription as any).payment_method && (subscription as any).payment_method !== 'paypal' && (
+                  <Badge variant="info" className="mt-2 ml-2">
+                    Paiement: {(subscription as any).payment_method === 'bank_transfer' ? 'Virement bancaire' : (subscription as any).payment_method}
+                  </Badge>
+                )}
               </div>
               <div className="text-right">
                 <p className="text-2xl font-bold">
@@ -226,6 +232,21 @@ export function UserSubscriptionScreen() {
             </div>
           </CardHeader>
           <CardBody>
+            {/* Avertissement si paiement manuel en attente */}
+            {(subscription as any).payment_method && (subscription as any).payment_method !== 'paypal' && subscription.status === 'APPROVAL_PENDING' && (
+              <div className="alert alert-warning mb-4">
+                <span className="icon-[tabler--clock] size-5" />
+                <div className="flex-1">
+                  <h3 className="font-semibold">Paiement en attente de confirmation</h3>
+                  <p className="text-sm">
+                    Votre demande d'abonnement avec paiement par virement bancaire est en attente de confirmation par un administrateur.
+                    {((subscription as any).manual_payments?.[0] as any)?.due_date && (
+                      <> Date d'échéance : {new Date(((subscription as any).manual_payments?.[0] as any)?.due_date).toLocaleDateString('fr-FR')}</>
+                    )}
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="grid gap-4 md:grid-cols-2">
               {subscription.start_date && (
                 <div>
