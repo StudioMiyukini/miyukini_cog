@@ -22,29 +22,37 @@ export function createClient() {
 // Export singleton pour usage simple
 let browserClient: ReturnType<typeof createBrowserClient> | null = null
 
+// Client mock pour quand Supabase n'est pas configuré
+function createMockClient() {
+  return {
+    from: () => ({
+      select: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured', code: 'PGRST116' } }),
+      insert: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured', code: 'PGRST116' } }),
+      update: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured', code: 'PGRST116' } }),
+      delete: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured', code: 'PGRST116' } }),
+      upsert: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured', code: 'PGRST116' } }),
+    }),
+    auth: {
+      getUser: () => Promise.resolve({ data: { user: null }, error: { message: 'Supabase not configured' } }),
+      getSession: () => Promise.resolve({ data: { session: null }, error: { message: 'Supabase not configured' } }),
+      signInWithPassword: () => Promise.resolve({ data: { user: null, session: null }, error: { message: 'Supabase not configured' } }),
+      signOut: () => Promise.resolve({ error: null }),
+      onAuthStateChange: () => ({ data: { subscription: null }, error: null }),
+    },
+  } as any
+}
+
 export function getSupabaseClient() {
   // Vérifier que les variables d'environnement sont disponibles
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     // Retourner un client mock qui ne fera rien (build time ou runtime sans config)
-    console.warn(
-      '⚠️ Supabase environment variables not configured. Using mock client. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY'
-    )
-    return {
-      from: () => ({
-        select: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured', code: 'PGRST116' } }),
-        insert: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured', code: 'PGRST116' } }),
-        update: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured', code: 'PGRST116' } }),
-        delete: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured', code: 'PGRST116' } }),
-        upsert: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured', code: 'PGRST116' } }),
-      }),
-      auth: {
-        getUser: () => Promise.resolve({ data: { user: null }, error: { message: 'Supabase not configured' } }),
-        getSession: () => Promise.resolve({ data: { session: null }, error: { message: 'Supabase not configured' } }),
-        signInWithPassword: () => Promise.resolve({ data: { user: null, session: null }, error: { message: 'Supabase not configured' } }),
-        signOut: () => Promise.resolve({ error: null }),
-        onAuthStateChange: () => ({ data: { subscription: null }, error: null }),
-      },
-    } as any
+    if (typeof window !== 'undefined') {
+      // Seulement logger côté client pour éviter les logs serveur
+      console.warn(
+        '⚠️ Supabase environment variables not configured. Using mock client. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY'
+      )
+    }
+    return createMockClient()
   }
   
   if (!browserClient) {
@@ -53,7 +61,7 @@ export function getSupabaseClient() {
     } catch (error) {
       console.error('Failed to create Supabase client:', error)
       // Retourner le mock en cas d'erreur
-      return getSupabaseClient() // Récursion mais avec les variables manquantes, retournera le mock
+      return createMockClient()
     }
   }
   return browserClient
