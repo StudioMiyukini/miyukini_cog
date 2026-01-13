@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user, fetchProfile])
 
-  // Initialiser l'auth une seule fois
+    // Initialiser l'auth une seule fois
   useEffect(() => {
     if (initialized.current) return
     initialized.current = true
@@ -83,8 +83,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Récupérer la session actuelle
     const initAuth = async () => {
       try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession()
+        const { data, error } = await supabase.auth.getSession()
         
+        // Si erreur et que c'est un client mock, continuer quand même
+        if (error && error.message?.includes('Supabase not configured')) {
+          console.warn('⚠️ Supabase not configured, continuing with mock client')
+          setIsLoading(false)
+          return
+        }
+        
+        const currentSession = data?.session ?? null
         setSession(currentSession)
         setUser(currentSession?.user ?? null)
 
@@ -102,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth()
 
     // Écouter les changements d'auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const authStateChangeResult = supabase.auth.onAuthStateChange(
       async (_event: AuthChangeEvent, newSession: Session | null) => {
         setSession(newSession)
         setUser(newSession?.user ?? null)
@@ -120,8 +128,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     )
 
+    // Gérer le cleanup de manière sécurisée
     return () => {
-      subscription.unsubscribe()
+      if (authStateChangeResult?.data?.subscription) {
+        authStateChangeResult.data.subscription.unsubscribe()
+      }
     }
   }, [fetchProfile])
 
