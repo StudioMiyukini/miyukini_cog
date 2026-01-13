@@ -59,8 +59,11 @@ export function FlyonUIProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Nettoyer au changement de route
+  // Nettoyer au changement de route (uniquement côté client après hydratation)
   useEffect(() => {
+    // Attendre que le composant soit monté côté client pour éviter les erreurs d'hydratation
+    if (typeof window === 'undefined') return
+
     cleanupOverlays()
     
     // Petit délai pour s'assurer que le DOM est prêt
@@ -74,15 +77,19 @@ export function FlyonUIProvider({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, cleanupOverlays, initFlyonUI])
 
-  // Nettoyer au démontage du composant
+  // Nettoyer au démontage du composant (uniquement côté client)
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     return () => {
       cleanupOverlays()
     }
   }, [cleanupOverlays])
 
-  // Écouter l'événement popstate (bouton retour)
+  // Écouter l'événement popstate (bouton retour) - uniquement côté client
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     const handlePopState = () => {
       cleanupOverlays()
     }
