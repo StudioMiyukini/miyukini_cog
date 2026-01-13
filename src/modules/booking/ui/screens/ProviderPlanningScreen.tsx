@@ -12,6 +12,7 @@ import { getSupabaseClient } from '@/lib/supabase/client'
 import type { Tables } from '@/lib/supabase/database.types'
 import { useRequireEnabledModule } from '../hooks/useRequireEnabledModule'
 import { useBookingProvider } from '../hooks/useBookingProvider'
+import { SubscriptionGate } from '@/components/paywall/SubscriptionGate'
 
 type Agenda = Tables<'agendas'>
 type Slot = Tables<'slots'>
@@ -367,7 +368,11 @@ export function ProviderPlanningScreen() {
   }
 
   return (
-    <AppShellScreen>
+    <SubscriptionGate
+      message="Un abonnement actif est requis pour gérer votre planning."
+      paywallPath="/pricing"
+    >
+      <AppShellScreen>
       <ContentStack className="max-w-none">
         <div className="mx-auto w-full max-w-none space-y-4 px-2 lg:px-6">
           <div className="flex flex-col gap-3 rounded-3xl border border-base-200 bg-base-100 p-4 shadow-lg md:flex-row md:items-center md:justify-between">
@@ -865,6 +870,7 @@ export function ProviderPlanningScreen() {
         </div>
       </ContentStack>
     </AppShellScreen>
+    </SubscriptionGate>
   )
 }
 

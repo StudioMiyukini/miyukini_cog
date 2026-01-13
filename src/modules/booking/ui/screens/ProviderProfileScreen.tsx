@@ -10,6 +10,7 @@ import { getSupabaseClient } from '@/lib/supabase/client'
 import type { Tables } from '@/lib/supabase/database.types'
 import { useRequireEnabledModule } from '../hooks/useRequireEnabledModule'
 import { useBookingProvider } from '../hooks/useBookingProvider'
+import { SubscriptionGate } from '@/components/paywall/SubscriptionGate'
 
 type BookingProvider = Tables<'booking_providers'>
 type BookingProviderPhoto = Tables<'booking_provider_photos'>
@@ -364,8 +365,12 @@ export function ProviderProfileScreen() {
   }
 
   return (
-    <AppShellScreen>
-      <ContentStack>
+    <SubscriptionGate
+      message="Un abonnement actif est requis pour gérer votre profil prestataire."
+      paywallPath="/pricing"
+    >
+      <AppShellScreen>
+        <ContentStack>
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1 min-w-0">
             <div className="text-sm text-base-content/60">
@@ -720,6 +725,7 @@ export function ProviderProfileScreen() {
         </div>
       </ContentStack>
     </AppShellScreen>
+    </SubscriptionGate>
   )
 }
 

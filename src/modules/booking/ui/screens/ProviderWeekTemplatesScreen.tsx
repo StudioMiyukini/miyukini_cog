@@ -10,6 +10,7 @@ import { getSupabaseClient } from '@/lib/supabase/client'
 import type { Tables } from '@/lib/supabase/database.types'
 import { useRequireEnabledModule } from '../hooks/useRequireEnabledModule'
 import { useBookingProvider } from '../hooks/useBookingProvider'
+import { SubscriptionGate } from '@/components/paywall/SubscriptionGate'
 
 type BookingWeekTemplate = Tables<'booking_week_templates'>
 type BookingService = Tables<'booking_services'>
@@ -236,7 +237,11 @@ export function ProviderWeekTemplatesScreen() {
   }
 
   return (
-    <AppShellScreen>
+    <SubscriptionGate
+      message="Un abonnement actif est requis pour gérer vos semaines types."
+      paywallPath="/pricing"
+    >
+      <AppShellScreen>
       <ContentStack>
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -457,6 +462,7 @@ export function ProviderWeekTemplatesScreen() {
         </div>
       </ContentStack>
     </AppShellScreen>
+    </SubscriptionGate>
   )
 }
 

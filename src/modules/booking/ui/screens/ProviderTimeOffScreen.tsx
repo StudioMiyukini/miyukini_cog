@@ -10,6 +10,7 @@ import { getSupabaseClient } from '@/lib/supabase/client'
 import type { Tables, BookingTimeOffMode } from '@/lib/supabase/database.types'
 import { useRequireEnabledModule } from '../hooks/useRequireEnabledModule'
 import { useBookingProvider } from '../hooks/useBookingProvider'
+import { SubscriptionGate } from '@/components/paywall/SubscriptionGate'
 
 type BookingTimeOff = Tables<'booking_time_off'>
 
@@ -119,7 +120,11 @@ export function ProviderTimeOffScreen() {
   }
 
   return (
-    <AppShellScreen>
+    <SubscriptionGate
+      message="Un abonnement actif est requis pour gérer vos vacances et indisponibilités."
+      paywallPath="/pricing"
+    >
+      <AppShellScreen>
       <ContentStack>
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -248,6 +253,7 @@ export function ProviderTimeOffScreen() {
         </Card>
       </ContentStack>
     </AppShellScreen>
+    </SubscriptionGate>
   )
 }
 

@@ -12,6 +12,7 @@ import { CalendarGrid } from '@/components/molecules/calendar-grid'
 import { Modal } from '@/components/molecules/modal'
 import { useRequireEnabledModule } from '../hooks/useRequireEnabledModule'
 import { useBookingProvider } from '../hooks/useBookingProvider'
+import { SubscriptionGate } from '@/components/paywall/SubscriptionGate'
 
 type BookingBooking = Tables<'booking_bookings'>
 type BookingService = Tables<'booking_services'>
@@ -157,7 +158,11 @@ export function ProviderBookingsScreen() {
   }
 
   return (
-    <AppShellScreen>
+    <SubscriptionGate
+      message="Un abonnement actif est requis pour gérer vos réservations."
+      paywallPath="/pricing"
+    >
+      <AppShellScreen>
       <ContentStack>
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -414,6 +419,7 @@ export function ProviderBookingsScreen() {
         </Modal>
       </ContentStack>
     </AppShellScreen>
+    </SubscriptionGate>
   )
 }
 
