@@ -42,17 +42,19 @@ export function PaywallScreen() {
   const [error, setError] = useState<string | null>(null)
   const [plans, setPlans] = useState<PlanRow[]>([])
   const [activeSubscription, setActiveSubscription] = useState<SubscriptionRow | null>(null)
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'paypal' | 'bank_transfer'>('paypal')
+  const [showPaymentMethodModal, setShowPaymentMethodModal] = useState(false)
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      // Charger les plans actifs
+      // Charger les plans actifs (avec ou sans PayPal)
       const { data: plansData, error: plansError } = await supabase
         .from('saas_paywall_plans')
         .select('*')
         .eq('status', 'active')
-        .not('paypal_plan_id', 'is', null)
         .order('sort_order', { ascending: true })
 
       if (plansError) throw new Error(plansError.message)
@@ -82,17 +84,38 @@ export function PaywallScreen() {
     void load()
   }, [load])
 
+  const handleSubscribeClick = useCallback(
+    (planId: string) => {
+      if (!user?.id) {
+        router.push('/signin?redirect=/pricing')
+        return
+      }
+
+      // Si le plan a un paypal_plan_id, proposer le choix du mode de paiement
+      const plan = plans.find((p) => p.id === planId)
+      if (plan?.paypal_plan_id) {
+        setSelectedPlanId(planId)
+        setShowPaymentMethodModal(true)
+      } else {
+        // Sinon, uniquement paiement manuel
+        subscribe(planId, 'bank_transfer')
+      }
+    },
+    [user, router, plans]
+  )
+
   const subscribe = useCallback(
-    async (planId: string) => {
+    async (planId: string, paymentMethod: 'paypal' | 'bank_transfer' = 'paypal') => {
       if (!user?.id) {
         console.log('[Paywall] User not authenticated, redirecting to signin')
         router.push('/signin?redirect=/pricing')
         return
       }
 
-      console.log('[Paywall] Starting subscription for plan_id:', planId)
+      console.log('[Paywall] Starting subscription for plan_id:', planId, 'payment_method:', paymentMethod)
       setSubscribing(planId)
       setError(null)
+      setShowPaymentMethodModal(false)
 
       try {
         const { data: session, error: sessionError } = await supabase.auth.getSession()
@@ -111,37 +134,64 @@ export function PaywallScreen() {
           throw new Error('supabase_url_not_configured')
         }
 
-        const returnUrl = `${window.location.origin}/pricing/success`
-        const cancelUrl = `${window.location.origin}/pricing/cancel`
+        if (paymentMethod === 'paypal') {
+          // Paiement PayPal (existant)
+          const returnUrl = `${window.location.origin}/pricing/success`
+          const cancelUrl = `${window.location.origin}/pricing/cancel`
 
-        console.log('[Paywall] Calling Edge Function:', `${supabaseUrl}/functions/v1/paywall-create-subscription`)
-        console.log('[Paywall] Request payload:', { plan_id: planId, return_url: returnUrl, cancel_url: cancelUrl })
+          console.log('[Paywall] Calling Edge Function:', `${supabaseUrl}/functions/v1/paywall-create-subscription`)
+          console.log('[Paywall] Request payload:', { plan_id: planId, return_url: returnUrl, cancel_url: cancelUrl })
 
-        const response = await fetch(`${supabaseUrl}/functions/v1/paywall-create-subscription`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.session.access_token}`,
-          },
-          body: JSON.stringify({ plan_id: planId, return_url: returnUrl, cancel_url: cancelUrl }),
-        })
+          const response = await fetch(`${supabaseUrl}/functions/v1/paywall-create-subscription`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${session.session.access_token}`,
+            },
+            body: JSON.stringify({ plan_id: planId, return_url: returnUrl, cancel_url: cancelUrl }),
+          })
 
-        console.log('[Paywall] Response status:', response.status)
-        const result = await response.json()
-        console.log('[Paywall] Response data:', result)
-        
-        if (!response.ok) {
-          console.error('[Paywall] Error response:', result)
-          throw new Error(result.error || result.details || 'subscription_creation_failed')
-        }
+          console.log('[Paywall] Response status:', response.status)
+          const result = await response.json()
+          console.log('[Paywall] Response data:', result)
 
-        // Rediriger vers PayPal
-        if (result.approve_url) {
-          console.log('[Paywall] Redirecting to PayPal:', result.approve_url)
-          window.location.href = result.approve_url
+          if (!response.ok) {
+            console.error('[Paywall] Error response:', result)
+            throw new Error(result.error || result.details || 'subscription_creation_failed')
+          }
+
+          // Rediriger vers PayPal
+          if (result.approve_url) {
+            console.log('[Paywall] Redirecting to PayPal:', result.approve_url)
+            window.location.href = result.approve_url
+          } else {
+            console.error('[Paywall] No approve_url in response')
+            throw new Error('approve_url_not_found')
+          }
         } else {
-          console.error('[Paywall] No approve_url in response')
-          throw new Error('approve_url_not_found')
+          // Paiement manuel (virement bancaire)
+          console.log('[Paywall] Calling Edge Function (manual):', `${supabaseUrl}/functions/v1/paywall-create-subscription-manual`)
+
+          const response = await fetch(`${supabaseUrl}/functions/v1/paywall-create-subscription-manual`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${session.session.access_token}`,
+            },
+            body: JSON.stringify({ plan_id: planId, payment_method: paymentMethod }),
+          })
+
+          console.log('[Paywall] Response status:', response.status)
+          const result = await response.json()
+          console.log('[Paywall] Response data:', result)
+
+          if (!response.ok) {
+            console.error('[Paywall] Error response:', result)
+            throw new Error(result.error || result.details || 'subscription_creation_failed')
+          }
+
+          // Rediriger vers la page de succès avec message
+          router.push('/pricing/success?method=manual')
         }
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e)
@@ -198,7 +248,7 @@ export function PaywallScreen() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => {
             const isSubscribing = subscribing === plan.id
-            const canSubscribe = !activeSubscription && plan.paypal_plan_id
+            const canSubscribe = !activeSubscription
 
             return (
               <Card key={plan.id} className={plan.is_featured ? 'ring-2 ring-primary' : ''}>
@@ -231,16 +281,14 @@ export function PaywallScreen() {
                   )}
                   <button
                     className={`w-full btn ${plan.is_featured ? 'btn-primary' : 'btn-outline'}`}
-                    onClick={() => subscribe(plan.id)}
+                    onClick={() => handleSubscribeClick(plan.id)}
                     disabled={!canSubscribe || isSubscribing}
                   >
                     {isSubscribing
-                      ? 'Redirection...'
+                      ? 'Traitement...'
                       : activeSubscription
                         ? 'Déjà abonné'
-                        : !plan.paypal_plan_id
-                          ? 'Indisponible'
-                          : 'S\'abonner'}
+                        : 'S\'abonner'}
                   </button>
                 </CardBody>
               </Card>
@@ -254,6 +302,73 @@ export function PaywallScreen() {
           </div>
         )}
       </div>
+
+      {/* Modal choix mode de paiement */}
+      {showPaymentMethodModal && selectedPlanId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-md w-full">
+            <CardHeader>
+              <h2 className="text-2xl font-bold">Choisir le mode de paiement</h2>
+            </CardHeader>
+            <CardBody className="space-y-4">
+              <div className="space-y-3">
+                <label className="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-base-200">
+                  <input
+                    type="radio"
+                    name="payment_method"
+                    value="paypal"
+                    checked={selectedPaymentMethod === 'paypal'}
+                    onChange={(e) => setSelectedPaymentMethod(e.target.value as 'paypal' | 'bank_transfer')}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <div className="font-semibold">PayPal</div>
+                    <div className="text-sm text-base-content/60">
+                      Paiement sécurisé et automatique. Votre abonnement sera activé immédiatement.
+                    </div>
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-base-200">
+                  <input
+                    type="radio"
+                    name="payment_method"
+                    value="bank_transfer"
+                    checked={selectedPaymentMethod === 'bank_transfer'}
+                    onChange={(e) => setSelectedPaymentMethod(e.target.value as 'paypal' | 'bank_transfer')}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <div className="font-semibold">Virement bancaire</div>
+                    <div className="text-sm text-base-content/60">
+                      Paiement par virement. Votre abonnement sera activé après confirmation par un administrateur.
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  className="btn btn-ghost flex-1"
+                  onClick={() => {
+                    setShowPaymentMethodModal(false)
+                    setSelectedPlanId(null)
+                  }}
+                >
+                  Annuler
+                </button>
+                <button
+                  className="btn btn-primary flex-1"
+                  onClick={() => subscribe(selectedPlanId, selectedPaymentMethod)}
+                  disabled={subscribing === selectedPlanId}
+                >
+                  {subscribing === selectedPlanId ? 'Traitement...' : 'Continuer'}
+                </button>
+              </div>
+            </CardBody>
+          </Card>
+        </div>
+      )}
     </AppShellScreen>
   )
 }

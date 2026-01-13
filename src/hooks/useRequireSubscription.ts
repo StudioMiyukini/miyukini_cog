@@ -76,6 +76,7 @@ export function useRequireSubscription(options: UseRequireSubscriptionOptions = 
           id,
           status,
           plan_id,
+          payment_method,
           current_period_end,
           next_billing_date,
           plan:saas_paywall_plans(id, name)
@@ -108,6 +109,35 @@ export function useRequireSubscription(options: UseRequireSubscriptionOptions = 
       }
 
       const subscriptionStatus = subData.status as SubscriptionStatus
+      
+      // Pour les paiements manuels en attente, vérifier s'il y a un paiement confirmé
+      if (subscriptionStatus === 'APPROVAL_PENDING' && subData.payment_method !== 'paypal') {
+        // Vérifier s'il y a un paiement manuel confirmé
+        const { data: paymentData } = await supabase
+          .from('saas_paywall_manual_payments')
+          .select('id, status')
+          .eq('subscription_id', subData.id)
+          .eq('status', 'confirmed')
+          .limit(1)
+          .maybeSingle()
+
+        // Si un paiement est confirmé, l'abonnement devrait être ACTIVE (mais on accepte quand même)
+        if (paymentData) {
+          setSubscription({
+            id: subData.id,
+            status: subscriptionStatus,
+            plan_id: subData.plan_id,
+            plan_name: (subData.plan as any)?.name || null,
+            current_period_end: subData.current_period_end,
+            next_billing_date: subData.next_billing_date,
+          })
+          // Accepter les paiements manuels en attente (l'admin confirmera)
+          setHasSubscription(true)
+          setIsLoading(false)
+          return
+        }
+      }
+
       const isValid = validStatuses.includes(subscriptionStatus)
 
       setSubscription({

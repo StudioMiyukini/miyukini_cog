@@ -288,6 +288,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                   href: '/admin/superadmin/paywall/plans',
                   children: [
                     { label: 'Plans', href: '/admin/superadmin/paywall/plans' },
+                    { label: 'Paiements manuels', href: '/admin/superadmin/paywall/manual-payments' },
                   ],
                 }}
                 pathname={pathname}
