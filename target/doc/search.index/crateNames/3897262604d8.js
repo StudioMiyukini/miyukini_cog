@@ -1,0 +1,1 @@
+rd_("fcfg_ifigetrandomclogomiyukini_kernelduuid")

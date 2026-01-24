@@ -1,0 +1,12 @@
+[package]
+name = "miyukini-spm-cms-content"
+version = "0.1.0"
+edition = "2021"
+description = "Module Contenu du SPM CMS — Gestion des entités de contenu (CRUD, statuts, relations, versioning)"
+
+[dependencies]
+miyukini-kernel = { path = "../miyukini-kernel" }
+
+[features]
+default = []
+memory = []  # Implémentation en mémoire pour tests/démo

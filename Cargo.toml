@@ -1,0 +1,10 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/miyukini-kernel",
+    "crates/demo-logging-lifecycle",
+    "crates/miyukini-spm-cms-content",
+    "crates/miyukini-spm-cms-hierarchy",
+    "crates/miyukini-spm-cms-taxonomies",
+    "crates/mini-cms"
+]

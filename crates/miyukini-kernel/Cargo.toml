@@ -1,0 +1,10 @@
+[package]
+name = "miyukini-kernel"
+version = "0.1.0"
+edition = "2021"
+description = "Noyau technique minimal de la fondation Miyukini Core System"
+
+[dependencies]
+# Façade standard ; le kernel ne configure aucun backend global.
+log_facade = { package = "log", version = "0.4" }
+uuid = { version = "0.8", default-features = false, features = ["v4"] }

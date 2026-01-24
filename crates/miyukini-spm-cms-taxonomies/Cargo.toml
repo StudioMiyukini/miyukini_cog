@@ -1,0 +1,12 @@
+[package]
+name = "miyukini-spm-cms-taxonomies"
+version = "0.1.0"
+edition = "2021"
+description = "Module Taxonomies du SPM CMS — Système de classification générique d'entités (Phase 0)"
+
+[dependencies]
+miyukini-kernel = { path = "../miyukini-kernel" }
+
+[features]
+default = []
+memory = []  # Implémentation en mémoire pour tests/démo

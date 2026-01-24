@@ -1,0 +1,12 @@
+[package]
+name = "miyukini-spm-cms-hierarchy"
+version = "0.1.0"
+edition = "2021"
+description = "Module Hiérarchie du SPM CMS — Organisation générique d'entités en arbre (Phase 0)"
+
+[dependencies]
+miyukini-kernel = { path = "../miyukini-kernel" }
+
+[features]
+default = []
+memory = []  # Implémentation en mémoire pour tests/démo

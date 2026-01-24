@@ -1,2 +1,0 @@
-export { commerceDevisModuleManifest } from './manifest'
-

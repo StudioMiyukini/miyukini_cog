@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Generate and parse UUIDs."><title>uuid - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-ca0dd0c4.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="uuid" data-themes="" data-resource-suffix="" data-rustdoc-version="1.93.0 (254b59607 2026-01-19)" data-channel="1.93.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-a3946164.js" data-settings-js="settings-c38705f0.js" ><script src="../static.files/storage-e2aeef58.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-a410ff4d.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-263c88ec.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Crate uuid</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../uuid/index.html"><img src="https://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png" alt="logo"></a><h2><a href="../uuid/index.html">uuid</a><span class="version">0.8.2</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#dependencies" title="Dependencies">Dependencies</a></li><li><a href="#examples" title="Examples">Examples</a></li><li><a href="#strings" title="Strings">Strings</a></li><li><a href="#references" title="References">References</a></li></ul><h3><a href="#modules">Crate Items</a></h3><ul class="block"><li><a href="#modules" title="Modules">Modules</a></li><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li><li><a href="#types" title="Type Aliases">Type Aliases</a></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>uuid</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/uuid/lib.rs.html#12-1070">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Generate and parse UUIDs.</p>
+<p>Provides support for Universally Unique Identifiers (UUIDs). A UUID is a
+unique 128-bit number, stored as 16 octets. UUIDs are used to  assign
+unique identifiers to entities without requiring a central allocating
+authority.</p>
+<p>They are particularly useful in distributed systems, though can be used in
+disparate areas, such as databases and network protocols.  Typically a UUID
+is displayed in a readable string form as a sequence of hexadecimal digits,
+separated into groups by hyphens.</p>
+<p>The uniqueness property is not strictly guaranteed, however for all
+practical purposes, it can be assumed that an unintentional collision would
+be extremely unlikely.</p>
+<h2 id="dependencies"><a class="doc-anchor" href="#dependencies">§</a>Dependencies</h2>
+<p>By default, this crate depends on nothing but <code>std</code> and cannot generate
+UUIDs. You need to enable the following Cargo features to enable
+various pieces of functionality:</p>
+<ul>
+<li><code>v1</code> - adds the <a href="struct.Uuid.html#method.new_v1"><code>Uuid::new_v1</code></a> function and the ability to create a V1
+using an implementation of <a href="v1/trait.ClockSequence.html"><code>v1::ClockSequence</code></a> (usually
+<a href="v1/struct.Context.html"><code>v1::Context</code></a>) and a timestamp from <code>time::timespec</code>.</li>
+<li><code>v3</code> - adds the <a href="struct.Uuid.html#method.new_v3"><code>Uuid::new_v3</code></a> function and the ability to create a V3
+UUID based on the MD5 hash of some data.</li>
+<li><code>v4</code> - adds the <a href="struct.Uuid.html#method.new_v4"><code>Uuid::new_v4</code></a> function and the ability to randomly
+generate a UUID.</li>
+<li><code>v5</code> - adds the <a href="struct.Uuid.html#method.new_v5"><code>Uuid::new_v5</code></a> function and the ability to create a V5
+UUID based on the SHA1 hash of some data.</li>
+<li><code>serde</code> - adds the ability to serialize and deserialize a UUID using the
+<code>serde</code> crate.</li>
+</ul>
+<p>For WebAssembly, enable one of the following features depending
+on your JavaScript interop toolchain of choice:</p>
+<ul>
+<li><code>stdweb</code> - for <a href="https://crates.io/crates/stdweb"><code>stdweb</code></a> combined with <a href="https://crates.io/crates/cargo-web"><code>cargo-web</code></a></li>
+<li><code>wasm-bindgen</code> - for <a href="https://crates.io/crates/wasm-bindgen"><code>wasm-bindgen</code></a></li>
+</ul>
+<p>By default, <code>uuid</code> can be depended on with:</p>
+<div class="example-wrap"><pre class="language-toml"><code>[dependencies]
+uuid = &quot;0.8&quot;</code></pre></div>
+<p>To activate various features, use syntax like:</p>
+<div class="example-wrap"><pre class="language-toml"><code>[dependencies]
+uuid = { version = &quot;0.8&quot;, features = [&quot;serde&quot;, &quot;v4&quot;] }</code></pre></div>
+<p>You can disable default features with:</p>
+<div class="example-wrap"><pre class="language-toml"><code>[dependencies]
+uuid = { version = &quot;0.8&quot;, default-features = false }</code></pre></div><h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>To parse a UUID given in the simple format and print it as a urn:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>uuid::Uuid;
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), uuid::Error&gt; {
+    <span class="kw">let </span>my_uuid =
+        Uuid::parse_str(<span class="string">"936DA01F9ABD4d9d80C702AF85C822A8"</span>)<span class="question-mark">?</span>;
+    <span class="macro">println!</span>(<span class="string">"{}"</span>, my_uuid.to_urn());
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>To create a new random (V4) UUID and print it out in hexadecimal form:</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="comment">// Note that this requires the `v4` feature enabled in the uuid crate.
+
+</span><span class="kw">use </span>uuid::Uuid;
+
+<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), Box&lt;<span class="kw">dyn </span>std::error::Error&gt;&gt; {
+    <span class="attr">#[cfg(feature = <span class="string">"v4"</span>)] </span>{
+        <span class="kw">let </span>my_uuid = Uuid::new_v4()<span class="question-mark">?</span>;
+        <span class="macro">println!</span>(<span class="string">"{}"</span>, my_uuid);
+    }
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div><h2 id="strings"><a class="doc-anchor" href="#strings">§</a>Strings</h2>
+<p>Examples of string representations:</p>
+<ul>
+<li>simple: <code>936DA01F9ABD4d9d80C702AF85C822A8</code></li>
+<li>hyphenated: <code>550e8400-e29b-41d4-a716-446655440000</code></li>
+<li>urn: <code>urn:uuid:F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4</code></li>
+</ul>
+<h2 id="references"><a class="doc-anchor" href="#references">§</a>References</h2>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Universally_unique_identifier">Wikipedia: Universally Unique Identifier</a></li>
+<li><a href="http://tools.ietf.org/html/rfc4122">RFC4122: A Universally Unique IDentifier (UUID) URN Namespace</a></li>
+</ul>
+</div></details><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><dl class="item-table"><dt><a class="mod" href="adapter/index.html" title="mod uuid::adapter">adapter</a></dt><dd>Adapters for various formats for UUIDs</dd></dl><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.Builder.html" title="struct uuid::Builder">Builder</a></dt><dd>A builder struct for creating a UUID.</dd><dt><a class="struct" href="struct.Error.html" title="struct uuid::Error">Error</a></dt><dd>A general error that can occur when working with UUIDs.</dd><dt><a class="struct" href="struct.Uuid.html" title="struct uuid::Uuid">Uuid</a></dt><dd>A Universally Unique Identifier (UUID).</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.Variant.html" title="enum uuid::Variant">Variant</a></dt><dd>The reserved variants of UUIDs.</dd><dt><a class="enum" href="enum.Version.html" title="enum uuid::Version">Version</a></dt><dd>The version of the UUID, denoting the generating algorithm.</dd></dl><h2 id="types" class="section-header">Type Aliases<a href="#types" class="anchor">§</a></h2><dl class="item-table"><dt><a class="type" href="type.Bytes.html" title="type uuid::Bytes">Bytes</a></dt><dd>A 128-bit (16 byte) buffer containing the ID.</dd></dl></section></div></main></body></html>
