@@ -6,5 +6,7 @@ members = [
     "crates/miyukini-spm-cms-content",
     "crates/miyukini-spm-cms-hierarchy",
     "crates/miyukini-spm-cms-taxonomies",
+    "crates/miyukini-spm-cms-media",
+    "crates/miyukini-spm-cms-publication",
     "crates/mini-cms"
 ]

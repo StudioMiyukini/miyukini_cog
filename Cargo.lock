@@ -71,6 +71,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "miyukini-spm-cms-media"
+version = "0.1.0"
+dependencies = [
+ "miyukini-kernel",
+]
+
+[[package]]
+name = "miyukini-spm-cms-publication"
+version = "0.1.0"
+dependencies = [
+ "miyukini-kernel",
+]
+
+[[package]]
 name = "miyukini-spm-cms-taxonomies"
 version = "0.1.0"
 dependencies = [
