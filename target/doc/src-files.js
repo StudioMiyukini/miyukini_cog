@@ -1,2 +1,0 @@
-createSrcSidebar('[["cfg_if",["",[],["lib.rs"]]],["getrandom",["",[],["error.rs","lib.rs","util.rs","windows.rs"]]],["log",["",[],["__private_api.rs","lib.rs","macros.rs"]]],["miyukini_kernel",["",[],["config.rs","id.rs","lib.rs","lifecycle.rs","log.rs","time.rs"]]],["uuid",["",[["adapter",[],["mod.rs"]],["builder",[],["error.rs","mod.rs"]],["parser",[],["error.rs","mod.rs"]]],["error.rs","lib.rs","prelude.rs","v4.rs"]]]]');
-//{"start":19,"fragment_lengths":[29,67,58,93,158]}

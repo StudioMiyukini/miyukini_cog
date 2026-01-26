@@ -180,12 +180,10 @@ impl MemoryTaxonomyManager {
     #[allow(dead_code)] // Utilisée dans les tests
     pub fn remove_taxonomy(&mut self, taxonomy_id: TaxonomyId) -> Result<(), TaxonomyError> {
         // Vérifier que la taxonomie existe
-        let taxonomy = self.taxonomies.remove(&taxonomy_id);
-        if taxonomy.is_none() {
-            return Err(TaxonomyError::TaxonomyNotFound);
-        }
-
-        let taxonomy = taxonomy.unwrap();
+        let taxonomy = match self.taxonomies.remove(&taxonomy_id) {
+            Some(t) => t,
+            None => return Err(TaxonomyError::TaxonomyNotFound),
+        };
 
         // Supprimer tous les termes de la taxonomie
         for term_id in taxonomy.terms {

@@ -8,5 +8,8 @@ members = [
     "crates/miyukini-spm-cms-taxonomies",
     "crates/miyukini-spm-cms-media",
     "crates/miyukini-spm-cms-publication",
-    "crates/mini-cms"
+    "crates/miyukini-spm-cms-search",
+    "crates/mini-cms",
+    "crates/kindmother",
+    "crates/miyukini-strongfather"
 ]

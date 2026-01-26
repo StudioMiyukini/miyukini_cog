@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":["Id","IdParseError","UuidIdGenerator"],"trait":["IdGenerator"]};

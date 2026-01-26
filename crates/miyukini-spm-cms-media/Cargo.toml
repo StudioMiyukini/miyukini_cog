@@ -1,0 +1,12 @@
+[package]
+name = "miyukini-spm-cms-media"
+version = "0.1.0"
+edition = "2021"
+description = "Module Médias du SPM CMS — Gestion générique des assets (images, vidéos, fichiers) et de leurs métadonnées"
+
+[dependencies]
+miyukini-kernel = { path = "../miyukini-kernel" }
+
+[features]
+default = []
+memory = []  # Implémentation en mémoire pour tests/démo

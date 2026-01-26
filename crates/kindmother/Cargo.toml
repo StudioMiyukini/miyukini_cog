@@ -1,0 +1,12 @@
+[package]
+name = "kindmother"
+version = "0.1.0"
+edition = "2021"
+description = "KindMother - Moteur interne de données du Miyukini Core System v2.4 (Skeleton)"
+
+[dependencies]
+miyukini-kernel = { path = "../miyukini-kernel" }
+log_facade = { package = "log", version = "0.4" }
+
+[dev-dependencies]
+env_logger = "0.11"

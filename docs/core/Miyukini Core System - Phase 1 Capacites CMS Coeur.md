@@ -103,9 +103,11 @@ Composition structurelle de contenu par blocs.
 3. Tests unitaires obligatoires (≥10)
 4. Aucune UI, aucun rendu
 5. Aucune auth, permission, SEO
-6. Aucun accès réseau
+6. Aucun accès réseau (conforme **LOI-1** : aucune dépendance externe critique, voir [Lois d'Autonomie Système](../../reference/Miyukini%20Framework%20-%20Lois%20Autonomie%20Systeme.md))
 7. Aucun ajout au kernel
 8. Si une règle métier apparaît → STOP
+
+**Conformité autonomie :** Les modules Phase 1 respectent **LOI-1** (aucune dépendance externe), **LOI-5** (coût proportionnel au hardware via implémentation mémoire optimisée), et **LOI-2** (fonctionnement en isolement normal).
 
 ---
 

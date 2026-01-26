@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["config","id","lifecycle","log","time"]};

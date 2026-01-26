@@ -106,11 +106,11 @@ impl HierarchyManager for MemoryHierarchyManager {
 
     fn ancestors(&self, node: NodeId) -> Vec<NodeId> {
         let mut ancestors = Vec::new();
-        let mut current = self.parent(node);
+        let mut current = self.nodes.get(&node).and_then(|n| n.parent);
 
         while let Some(parent_id) = current {
             ancestors.push(parent_id);
-            current = self.parent(parent_id);
+            current = self.nodes.get(&parent_id).and_then(|n| n.parent);
         }
 
         ancestors
@@ -118,11 +118,11 @@ impl HierarchyManager for MemoryHierarchyManager {
 
     fn path_to_root(&self, node: NodeId) -> Vec<NodeId> {
         let mut path = vec![node];
-        let mut current = self.parent(node);
+        let mut current = self.nodes.get(&node).and_then(|n| n.parent);
 
         while let Some(parent_id) = current {
             path.push(parent_id);
-            current = self.parent(parent_id);
+            current = self.nodes.get(&parent_id).and_then(|n| n.parent);
         }
 
         path
@@ -171,16 +171,15 @@ impl HierarchyManager for MemoryHierarchyManager {
     }
 
     fn remove_node(&mut self, node: NodeId) -> Result<(), HierarchyError> {
-        // Vérifier que le nœud existe
-        if !self.nodes.contains_key(&node) {
-            return Err(HierarchyError::NodeNotFound);
-        }
-
-        // Récupérer les enfants avant suppression
-        let children = self.children(node);
+        // Vérifier que le nœud existe et récupérer ses données
+        let node_data = self.nodes.get(&node).ok_or(HierarchyError::NodeNotFound)?;
+        
+        // Récupérer les enfants et le parent directement depuis le nœud
+        let children = node_data.children.clone();
+        let parent_id = node_data.parent;
 
         // Retirer le nœud de la liste des enfants de son parent
-        if let Some(parent_id) = self.parent(node) {
+        if let Some(parent_id) = parent_id {
             if let Some(parent_node) = self.nodes.get_mut(&parent_id) {
                 parent_node.children.retain(|&child_id| child_id != node);
             }
@@ -216,7 +215,7 @@ impl MemoryHierarchyManager {
             if ancestor_id == node {
                 return true; // Cycle détecté
             }
-            current = self.parent(ancestor_id);
+            current = self.nodes.get(&ancestor_id).and_then(|n| n.parent);
         }
 
         false

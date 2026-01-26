@@ -1,0 +1,12 @@
+[package]
+name = "miyukini-spm-cms-search"
+version = "0.1.0"
+edition = "2021"
+description = "Module Recherche & Indexation du SPM CMS — Indexation fonctionnelle et recherche générique d'entités"
+
+[dependencies]
+miyukini-kernel = { path = "../miyukini-kernel" }
+
+[features]
+default = ["memory"]
+memory = []  # Implémentation en mémoire pour tests/démo

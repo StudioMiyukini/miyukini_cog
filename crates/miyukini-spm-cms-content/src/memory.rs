@@ -147,46 +147,43 @@ impl ContentManager for MemoryContentManager {
     ) -> Result<ContentListResult, ContentError> {
         let contents = self.contents.lock().unwrap();
 
-        // Filtrer les contenus
-        let mut filtered: Vec<Content> = contents
-            .values()
-            .filter(|content| {
-                if let Some(ref content_type) = filters.content_type {
-                    if content.content_type != *content_type {
-                        return false;
-                    }
+        // Filtrer et compter sans cloner d'abord
+        let mut count = 0;
+        let mut items = Vec::with_capacity(limit.min(contents.len()));
+        
+        for content in contents.values() {
+            // Vérifier les filtres
+            if let Some(ref content_type) = filters.content_type {
+                if content.content_type != *content_type {
+                    continue;
                 }
-                if let Some(status) = filters.status {
-                    if content.status != status {
-                        return false;
-                    }
+            }
+            if let Some(status) = filters.status {
+                if content.status != status {
+                    continue;
                 }
-                if let Some(created_after) = filters.created_after {
-                    if content.created_at < created_after {
-                        return false;
-                    }
+            }
+            if let Some(created_after) = filters.created_after {
+                if content.created_at < created_after {
+                    continue;
                 }
-                if let Some(created_before) = filters.created_before {
-                    if content.created_at > created_before {
-                        return false;
-                    }
+            }
+            if let Some(created_before) = filters.created_before {
+                if content.created_at > created_before {
+                    continue;
                 }
-                true
-            })
-            .cloned()
-            .collect();
+            }
+            
+            // Compter tous les éléments filtrés
+            count += 1;
+            
+            // Cloner uniquement les éléments dans la fenêtre de pagination
+            if count > offset && items.len() < limit {
+                items.push(content.clone());
+            }
+        }
 
-        let total = filtered.len();
-
-        // Pagination
-        let end = (offset + limit).min(filtered.len());
-        let items = if offset < filtered.len() {
-            filtered.drain(offset..end).collect()
-        } else {
-            Vec::new()
-        };
-
-        Ok(ContentListResult::new(items, total, offset, limit))
+        Ok(ContentListResult::new(items, count, offset, limit))
     }
 
     fn add_relation(
@@ -256,14 +253,11 @@ impl ContentManager for MemoryContentManager {
         version_id: miyukini_kernel::Id,
     ) -> Result<ContentVersion, ContentError> {
         let versions = self.versions.lock().unwrap();
-        if let Some(vers) = versions.get(&content_id) {
-            vers.iter()
-                .find(|v| v.version_id == version_id)
-                .cloned()
-                .ok_or(ContentError::VersionNotFound)
-        } else {
-            Err(ContentError::VersionNotFound)
-        }
+        versions
+            .get(&content_id)
+            .and_then(|vers| vers.iter().find(|v| v.version_id == version_id))
+            .cloned()
+            .ok_or(ContentError::VersionNotFound)
     }
 
     fn list_versions(
