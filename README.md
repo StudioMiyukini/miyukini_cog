@@ -12,10 +12,11 @@
 8. [MiyukiniAdmin](#8-miyukiniadmin)
 9. [Comparatif avec l'existant](#9-comparatif-avec-lexistant)
 10. [Apports inédits](#10-apports-inédits)
-11. [À qui Miyukini n'est PAS destiné](#11-à-qui-miyukini-nest-pas-destiné)
-12. [État du projet](#12-état-du-projet)
-13. [Conclusion](#13-conclusion)
-14. [Mini log de rédaction](#14-mini-log-de-rédaction)
+11. [Personal Vibe Coding Gouverné](#11-personal-vibe-coding-gouverné)
+12. [À qui Miyukini n'est PAS destiné](#12-à-qui-miyukini-nest-pas-destiné)
+13. [État du projet](#13-état-du-projet)
+14. [Conclusion](#14-conclusion)
+15. [Mini log de rédaction](#15-mini-log-de-rédaction)
 
 ---
 
@@ -838,7 +839,87 @@ La sécurité Miyukini n'est pas une couche ajoutée :
 
 ---
 
-## 11. À qui Miyukini n'est PAS destiné
+## 11. Personal Vibe Coding Gouverné
+
+### Une approche inédite
+
+Miyukini est développé selon une approche expérimentale : le **Personal Vibe Coding Gouverné**.
+
+Le concept : utiliser le vibe coding (développement intuitif, rapide, assisté par IA) pour construire un écosystème logiciel complet — du Kernel jusqu'aux Opérateurs — mais encadré par une architecture contractuelle stricte.
+
+> **"L'IA génère. Les contrats gouvernent. Les invariants ne négocient pas."**
+
+### Qu'est-ce que le vibe coding ?
+
+Le vibe coding est une approche de développement où le développeur :
+- Utilise l'IA comme partenaire de génération de code
+- Avance rapidement, par intuition
+- Itère sans friction
+- Accepte l'imperfection temporaire
+
+**Le problème du vibe coding classique** : il produit souvent du code jetable, difficile à maintenir, sans architecture cohérente.
+
+### Ce qui rend l'approche inédite
+
+Le Personal Vibe Coding Gouverné inverse le paradigme :
+
+| Vibe Coding classique | Personal Vibe Coding Gouverné |
+|----------------------|------------------------------|
+| Intuition pure | Intuition + Contrats |
+| Prototype jetable | Système de production |
+| "Ça marche" suffit | Invariants vérifiables |
+| Refacto plus tard | Architecture dès le départ |
+| Code = produit | Code = instance d'architecture |
+| L'IA génère librement | L'IA génère, l'architecture valide |
+
+**La thèse** : Si on peut vibe coder un écosystème complet avec une architecture rigoureuse, alors le vibe coding devient une méthode de production sérieuse — pas juste un outil de prototypage.
+
+### Comparatif avec les approches traditionnelles
+
+| Aspect | Développement traditionnel | Vibe Coding classique | Personal Vibe Coding Gouverné |
+|--------|---------------------------|----------------------|------------------------------|
+| Vitesse | Lente, méthodique | Très rapide | Rapide |
+| Architecture | Définie en amont | Absente ou émergente | Définie en amont, respectée |
+| IA | Outil ponctuel | Partenaire principal | Partenaire gouverné |
+| Qualité | Contrôlée | Variable | Garantie par contrats |
+| Scalabilité | Planifiée | Problématique | Structurelle |
+| Maintenabilité | Élevée | Faible | Élevée |
+
+### Le pari de Miyukini
+
+Construire un écosystème logiciel complet :
+- **Du plus bas niveau** (Kernel : Id, Logger, Clock)
+- **Au plus haut niveau** (Opérateurs, produits finis)
+- **En solo**, avec l'assistance de l'IA
+- **Sans jamais violer** les invariants architecturaux
+
+C'est la première fois qu'on tente cette approche sur un projet de cette envergure.
+
+### L'enjeu
+
+**Si l'expérimentation fonctionne**, cela pourrait changer l'approche de la programmation :
+
+1. **Le vibe coding devient légitime** : Plus synonyme de "code jetable", mais méthode de production viable
+2. **L'architecture prime** : L'IA peut générer du code à l'infini — sans architecture, c'est du bruit ; avec architecture, c'est un système
+3. **L'abstraction devient critique** : Les développeurs qui maîtrisent l'abstraction et les contrats pourront produire des systèmes entiers assistés par IA
+4. **Le solo devient viable** : Un développeur avec une architecture solide peut rivaliser avec des équipes entières
+
+> **"L'IA peut générer du code à l'infini. Mais sans architecture, c'est du bruit. Avec architecture, c'est un système."**
+
+### Ce que cela implique pour le futur
+
+Si le Personal Vibe Coding Gouverné prouve sa viabilité :
+
+- **L'architecture et l'abstraction seront plus que jamais importantes**
+- Les développeurs devront maîtriser les contrats, les invariants, les frontières
+- La capacité à gouverner la génération IA deviendra une compétence clé
+- Les systèmes complexes pourront être construits plus rapidement, sans sacrifier la qualité
+
+**Miyukini est autant un produit qu'une expérimentation méthodologique.**
+
+---
+
+## 12. À qui Miyukini n'est PAS destiné
 
 La crédibilité exige d'identifier les cas où Miyukini n'est **pas** la bonne solution.
 
@@ -889,7 +970,7 @@ Miyukini convient aux systèmes dont les fondations sont stabilisées.
 
 ---
 
-## 12. État du projet
+## 13. État du projet
 
 ### Maturité conceptuelle
 
@@ -936,9 +1017,21 @@ L'ordre de construction suit la logique architecturale :
 
 L'étape 4 (Produits Intermédiaires) est la **clé stratégique** qui différencie Miyukini d'un simple framework.
 
+### Statut expérimental
+
+Miyukini est autant un **produit** qu'une **expérimentation méthodologique**.
+
+L'approche Personal Vibe Coding Gouverné est testée en conditions réelles :
+- Construction bottom-up (Kernel → Cores → Opérateurs)
+- Assistance IA intensive
+- Respect strict des contrats et invariants
+- Développement solo
+
+Les résultats de cette expérimentation seront documentés et partagés.
+
 ---
 
-## 13. Conclusion
+## 14. Conclusion
 
 ### Positionnement clair
 
@@ -972,9 +1065,37 @@ Cet investissement n'est pas une barrière artificielle. C'est la contrepartie d
 
 Les architectes et développeurs qui partagent cette vision trouveront dans Miyukini une fondation solide pour leurs systèmes les plus critiques.
 
+### L'enjeu de l'expérimentation
+
+Si le Personal Vibe Coding Gouverné prouve sa viabilité avec Miyukini, cela démontrera que :
+
+1. **L'architecture domestique l'IA** : La génération de code assistée peut produire des systèmes de qualité production
+2. **Le vibe coding mûrit** : D'un outil de prototypage à une méthode de développement légitime
+3. **L'abstraction devient la compétence clé** : Ceux qui maîtrisent les contrats et les invariants pourront produire plus, mieux, plus vite
+
+> **"L'architecture et l'abstraction seront plus que jamais importantes. C'est la condition pour que le vibe coding devienne une méthode de production, pas juste un raccourci."**
+
+L'expérimentation est en cours.
+
 ---
 
-## 14. Mini log de rédaction
+## 15. Mini log de rédaction
+
+### Mise à jour 2026-01-27
+
+**Ajout de la section 11 : Personal Vibe Coding Gouverné**
+
+Cette section documente l'approche de développement inédite utilisée pour construire Miyukini. Elle explique :
+- La différence entre vibe coding classique et vibe coding gouverné
+- Le comparatif avec les approches traditionnelles
+- L'enjeu de l'expérimentation pour le futur de la programmation
+
+**Raison de l'ajout** : Miyukini est autant un produit qu'une expérimentation méthodologique. Documenter cette approche permet de :
+- Partager la méthodologie avec la communauté
+- Valider ou invalider l'hypothèse du vibe coding gouverné
+- Contribuer à la réflexion sur le futur du développement assisté par IA
+
+---
 
 ### Ambiguïtés rencontrées
 
@@ -1038,6 +1159,7 @@ Refusé. MiyukiniAdmin est une exception volontaire, hors de la pyramide produit
 
 ---
 
-**Document rédigé le :** 2026-01-26  
-**Basé sur :** Documentation Miyukini Core System v2.4  
-**Statut :** README racine officiel
+**Document rédigé le :** 2026-01-27  
+**Basé sur :** Documentation Miyukini Core System v2.5  
+**Statut :** README racine officiel  
+**Approche :** Personal Vibe Coding Gouverné (expérimental)

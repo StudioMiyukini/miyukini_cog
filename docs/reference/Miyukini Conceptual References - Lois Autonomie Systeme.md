@@ -431,3 +431,4 @@ Les 6 lois d'autonomie sont **non négociables**. Toute exception doit être :
 - [Miyukini Conceptual References - Integrity & Degradation System](Miyukini%20Framework%20-%20Integrity%20Degradation%20System.md) : Dégradation graduée conforme aux lois d'autonomie
 - [Miyukini Conceptual References - External Signal & Trust Reinforcement Contract](Miyukini%20Framework%20-%20External%20Signal%20Trust%20Reinforcement%20Contract.md) : Internet comme signal, pas comme dépendance (LOI-1)
 - [Miyukini Conceptual References - Carte Optimisation](Miyukini%20Conceptual%20References%20-%20Carte%20Optimisation.md) : Leviers d'optimisation par zone sans violer les invariants
+- [Miyukini Conceptual References - Kernel Maintenance Observability Contract](Miyukini%20Conceptual%20References%20-%20Kernel%20Maintenance%20Observability%20Contract.md) : Capacités bas niveau de maintenance (observation sans correction)

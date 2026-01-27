@@ -275,3 +275,4 @@ Contrôle ultime, fiabilité, installation rapide.
 - [Security Performance Impact](./Miyukini%20Conceptual%20References%20-%20Security%20Performance%20Impact.md)
 - [Lois Autonomie Systeme](./Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
 - [Ecosystem Dependency Contract](./Miyukini%20Conceptual%20References%20-%20Ecosystem%20Dependency%20Contract.md)
+- [Kernel Maintenance Observability Contract](./Miyukini%20Conceptual%20References%20-%20Kernel%20Maintenance%20Observability%20Contract.md) : Capacités bas niveau de maintenance

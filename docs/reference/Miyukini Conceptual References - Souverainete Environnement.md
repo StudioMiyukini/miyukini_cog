@@ -340,5 +340,6 @@ Les environnements COG peuvent échanger des données **si et seulement si** cel
 - [Miyukini Conceptual References - Lois Autonomie Systeme](./Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) : Contraintes d'autonomie
 - [Miyukini Conceptual References - Vision Strategique](./Miyukini%20Conceptual%20References%20-%20Vision%20Strategique.md) : Stratégie globale
 - [Miyukini Conceptual References - Pyramide Architecture Complete](./Miyukini%20Conceptual%20References%20-%20Pyramide%20Architecture%20Complete.md) : Architecture en strates
+- [Miyukini Conceptual References - Kernel Maintenance Observability Contract](./Miyukini%20Conceptual%20References%20-%20Kernel%20Maintenance%20Observability%20Contract.md) : Capacités bas niveau de maintenance (compatible isolation)
 - [BondingBrother - Migration & Compatibility Contract](../core/BondingBrother/BondingBrother%20-%20Migration%20%26%20Compatibility%20Contract.md) : Contrat de migration
 - [Border Guard - Documentation Fondatrice](../core/BorderGuard/Border%20Guard%20-%20Documentation%20Fondatrice.md) : Frontières et confiance

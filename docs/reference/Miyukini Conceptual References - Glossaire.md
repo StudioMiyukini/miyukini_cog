@@ -50,6 +50,23 @@ Ce document constitue le **dictionnaire officiel** de l'écosystème Miyukini. I
 
 ---
 
+### Bridge inter-COG
+
+**Canal diplomatique** entre COG, extension de BondingBrother pour les communications inter-environnements.
+
+**Rôle :**
+- Transport des identités, intentions et autorisations
+- **Aucun pouvoir décisionnel**
+- **Aucun état métier**
+
+**Règle fondamentale :**
+
+> **Le bridge ne fait jamais confiance, il transporte.**
+
+**Voir aussi :** BondingBrother, COG Hébergeur, COG Origine, Visite gouvernée inter-COG
+
+---
+
 ## C
 
 ### Capacité (Capability)
@@ -145,6 +162,49 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
+### COG Hébergeur (Host COG)
+
+**COG souverain qui accueille un Utilisateur Visiteur** provenant d'un autre environnement.
+
+**Rôle :**
+- Souverain exécutif de la session
+- Unique source de vérité de l'état
+- Autorité de sécurité et d'arbitrage
+
+**Responsabilités :**
+- Vérifier le visiteur
+- Accorder ou refuser l'accès
+- Encadrer strictement l'exécution
+- Surveiller la session (WorrySentinel)
+- Révoquer à tout moment
+
+**Règle fondamentale :**
+
+> **Un COG n'accueille jamais une gouvernance étrangère. Il n'accueille que des visiteurs, sous visa, dans un cadre qu'il définit seul.**
+
+**Voir aussi :** COG Origine, Visa de Connexion, Visite gouvernée inter-COG
+
+---
+
+### COG Origine (Home COG)
+
+**COG d'appartenance d'un Utilisateur Visiteur**, qui atteste de son identité.
+
+**Rôle :**
+- Autorité d'identité de l'utilisateur
+- Garant de la conformité de l'environnement d'origine
+- Émetteur du Passeport Utilisateur
+
+**Responsabilités :**
+- Vérifier l'intégrité locale
+- Attester la version de la strate Core
+- Fournir une identité vérifiable
+- **Ne participe PAS à l'exécution distante**
+
+**Voir aussi :** COG Hébergeur, Passeport Utilisateur, Visite gouvernée inter-COG
+
+---
+
 ### Cores
 
 **Moteurs conceptuels** (Strate 4) qui gouvernent le comportement du système. Chaque core a une autorité exclusive dans son domaine.
@@ -170,6 +230,28 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ## D
 
+### Demande de Visite (Visit Intent)
+
+**Intention d'accès** émise par un Utilisateur Visiteur vers un COG Hébergeur.
+
+**Émise par :** Utilisateur Visiteur
+
+**Contient :**
+| Champ | Description |
+|-------|-------------|
+| `requested_services` | Liste des Services demandés |
+| `usage_nature` | Nature de l'usage (lecture, interaction, temps réel, etc.) |
+| `security_level` | Niveau de sécurité requis |
+| `terminal_context` | Contexte terminal (PC, mobile, web…) |
+
+**Règle fondamentale :**
+
+> **C'est une intention, pas une permission.**
+
+**Voir aussi :** Passeport Utilisateur, Visa de Connexion, Visite gouvernée inter-COG
+
+---
+
 ### DÉPRÉCIÉ (DEPRECATED) — état de vie
 
 État d'un élément toujours fonctionnel mais dont l'usage est découragé. Un successeur existe ou est en préparation.
@@ -181,6 +263,29 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 - Passage obligatoire avant RETIRÉ
 
 **Voir aussi :** ACTIF, RETIRÉ, Ever Buddy
+
+---
+
+### Divergence silencieuse (Silent Divergence)
+
+**Situation détectable par le Kernel** où un système déclare une version mais présente une empreinte comportementale différente.
+
+**Causes typiques :**
+- Build recompilé différemment
+- Dépendance modifiée silencieusement
+- Compilation non reproductible
+- Injection de code ou modification post-build
+
+**Caractéristiques :**
+- Signal de maintenance, pas d'erreur
+- Détectable sans réseau
+- Déterministe et rejouable
+
+**Règle fondamentale :**
+
+> **Le Kernel signale la divergence mais ne la corrige jamais.**
+
+**Voir aussi :** Empreinte comportementale, Maintenance explicable, Kernel Maintenance Observability Contract
 
 ---
 
@@ -205,6 +310,38 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 ---
 
 ## E
+
+### Empreinte comportementale (Behavior Fingerprint)
+
+**Signature structurelle** du système chargé, produite par le Kernel.
+
+**Éléments capturés :**
+
+| Élément | Description |
+|---------|-------------|
+| Ordre de chargement | Séquence d'initialisation des composants |
+| Graphe d'appel structurel | Relations entre composants (pas métier) |
+| Contrats invoqués | Liste des contrats activés |
+| Invariants sollicités | Invariants vérifiés au chargement |
+
+**Caractéristiques :**
+- C'est une signature, pas un log
+- Aucun contenu métier
+- Aucune donnée runtime
+- Déterministe et rejouable
+
+**Utilité :**
+- Comparer deux versions du système
+- Détecter une dérive silencieuse
+- Prouver l'équivalence fonctionnelle de builds
+
+**Règle fondamentale :**
+
+> **L'empreinte observe et atteste, mais ne corrige jamais.**
+
+**Voir aussi :** Divergence silencieuse, Maintenance explicable, Kernel Maintenance Observability Contract
+
+---
 
 ### Environnement (COG)
 
@@ -287,6 +424,57 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
+### Façade Publique Gouvernée (Public Exposure Surface)
+
+**Zone tampon d'exposition** permettant aux utilisateurs externes d'interagir avec un COG sans y entrer.
+
+**Caractéristiques :**
+- Strictement unidirectionnelle
+- Sans identité persistante obligatoire
+- Sans accès aux cores
+- Sans accès à la logique interne
+- Sans état souverain
+
+**Règle fondamentale :**
+
+> **C'est le COG qui sort vers l'utilisateur externe, jamais l'inverse.**
+
+**Voir aussi :** Utilisateur Externe, Mandat Public d'Accès, BorderGuard
+
+---
+
+## G
+
+### Gel local (Local Freeze)
+
+**Capacité du Kernel** à marquer un composant comme gelé structurellement, sans affecter le reste du système.
+
+**Actions permises :**
+- Marquer un composant comme gelé
+- Refuser son remplacement ou rechargement
+- Laisser le reste du système évoluer
+
+**Utilité :**
+- Stabiliser une zone critique pendant une intervention
+- Corriger ailleurs sans risque de régression
+- Maintenir des SLA forts sur des composants spécifiques
+
+**Gouvernance :**
+
+| Acteur | Rôle |
+|--------|------|
+| StrongFather | Décide l'autorisation du gel |
+| EverBuddy | Valide la compatibilité du gel |
+| Kernel | Exécute le gel et l'applique |
+
+**Règle fondamentale :**
+
+> **Le gel est décidé par la gouvernance, exécuté par le Kernel, jamais inversé.**
+
+**Voir aussi :** Kernel Maintenance Observability, StrongFather, Ever Buddy
+
+---
+
 ## I
 
 ### Opérateur d'Interface (Interface Operator)
@@ -324,6 +512,35 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 - Pas de protocole applicatif
 
 **Voir aussi :** Pyramide, Cores
+
+---
+
+### Kernel Maintenance Observability
+
+**Ensemble de capacités bas niveau du Kernel** pour assister la maintenance du code sans jamais exécuter de correction automatique.
+
+**Capacités incluses :**
+
+| Capacité | Description |
+|----------|-------------|
+| Empreinte comportementale | Signature structurelle du système |
+| Détection de divergence | Même version, comportement différent |
+| Carte de complexité | Zones de couplage et fragilité |
+| Gel local | Stabilisation par composant |
+| Détection d'ambiguïté | Contrats incomplets ou code mort |
+| Maintenance explicable | Traçabilité gouvernée des incidents |
+
+**Ce que le Kernel PEUT faire :**
+- Observer, attester, comparer, signaler, expliquer
+
+**Ce que le Kernel ne peut JAMAIS faire :**
+- Corriger, muter, auto-réparer
+
+**Phrase fondatrice :**
+
+> **Miyukini ne maintient pas le code à la place de l'humain. Il rend le code maintenable sans ambiguïté.**
+
+**Voir aussi :** Empreinte comportementale, Divergence silencieuse, Maintenance explicable, Gel local
 
 ---
 
@@ -375,6 +592,33 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 ---
 
 ## M
+
+### Maintenance explicable (Explainable Maintenance)
+
+**Mode de diagnostic du Kernel** pour fournir une traçabilité gouvernée lors d'incidents, sans exposer de données techniques sensibles.
+
+**Informations fournies :**
+- Pourquoi une décision est arrivée jusqu'ici
+- Quels contrats ont été traversés
+- Où la gouvernance s'est arrêtée
+
+**Ce qui n'est JAMAIS fourni :**
+- Stacktrace classique (fuite d'information technique)
+- Dump mémoire (fuite de données sensibles)
+- Données utilisateur (protection vie privée)
+
+**Caractéristiques :**
+- Traçabilité gouvernée, pas technique
+- Compréhensible par un humain sans connaissance du code source
+- Fonctionne offline
+
+**Règle fondamentale :**
+
+> **Le diagnostic explique le chemin de gouvernance, jamais l'implémentation.**
+
+**Voir aussi :** Kernel Maintenance Observability, Caring Nanny
+
+---
 
 ### Master Butler
 
@@ -436,6 +680,38 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 - Environnement change
 
 **Voir aussi :** StrongFather, Équipe d'Opérateurs, Contrat d'Équipe
+
+---
+
+### Mandat Public d'Accès (Public Access Mandate)
+
+**Autorisation attachée à un service public** pour encadrer l'accès des utilisateurs externes non certifiés.
+
+**Défini par :** Host COG
+
+**Contient :**
+| Champ | Description |
+|-------|-------------|
+| `public_services` | Services publics accessibles |
+| `allowed_methods` | Méthodes autorisées |
+| `quotas` | Quotas d'utilisation |
+| `rate_limits` | Limitations de fréquence |
+| `security_level` | Niveau de sécurité (S1-S3) |
+| `expected_behavior` | Comportement attendu |
+
+**Différence avec le Visa de Connexion :**
+
+| Aspect | Visa de Connexion | Mandat Public |
+|--------|------------------|---------------|
+| Destinataire | Utilisateur Visiteur | Service exposé |
+| Identité requise | ✅ Passeport | ❌ Non |
+| Accès cores | Indirect | ❌ Jamais |
+
+**Règle fondamentale :**
+
+> **Le mandat est attaché au service, pas à l'utilisateur.**
+
+**Voir aussi :** Utilisateur Externe, Façade Publique Gouvernée, Visa de Connexion
 
 ---
 
@@ -554,6 +830,36 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 
 **Voir aussi :** Capability, Master Butler
+
+---
+
+### Passeport Utilisateur (User Passport)
+
+**Attestation d'identité** émise par un COG Origine pour permettre à un utilisateur de visiter d'autres COG.
+
+**Émis par :** COG Origine
+
+**Contient :**
+| Champ | Description |
+|-------|-------------|
+| `user_id` | Identité utilisateur unique |
+| `cog_origin_id` | ID du COG d'origine |
+| `core_version` | Version exacte de la strate Core |
+| `integrity_hash` | Empreinte d'intégrité (Core + Kernel) |
+| `issued_at` | Timestamp d'émission |
+| `valid_until` | Durée de validité |
+| `signature` | Signature du COG Origine |
+
+**Garanties :**
+- Non falsifiable
+- Non transférable
+- Lisible mais non modifiable
+
+**Règle fondamentale :**
+
+> **Le passeport ne donne aucun droit. Il prouve seulement qui tu es et d'où tu viens.**
+
+**Voir aussi :** COG Origine, Visa de Connexion, Visite gouvernée inter-COG
 
 ---
 
@@ -783,6 +1089,68 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
+## U
+
+### Utilisateur Externe (Public User / Anonymous User / Web Visitor)
+
+**Consommateur non certifié** de services exposés par un COG, sans aucune gouvernance propre.
+
+**Ce qu'un utilisateur externe N'EST PAS :**
+- ❌ Un citoyen
+- ❌ Un visiteur inter-COG
+- ❌ Un participant au système
+
+**Caractéristiques :**
+- Sans identité souveraine
+- Sans COG d'origine
+- Sans Passeport ni Visa
+- Accès uniquement via Façade Publique Gouvernée
+- Soumis à un Mandat Public d'Accès
+
+**Dégradation agressive possible :**
+
+| Action | Description |
+|--------|-------------|
+| Throttle | Ralentissement |
+| Downgrade | Moins de fonctionnalités |
+| Freeze | Lecture seule |
+| Block | IP / session / pattern |
+| Blackhole | Réponse neutre, pas d'erreur exploitable |
+
+**Règle fondamentale :**
+
+> **Un utilisateur externe n'entre jamais dans un COG. Il interagit uniquement avec une façade d'exposition gouvernée.**
+
+**Phrase de synthèse :**
+
+> **Les utilisateurs externes ne sont pas des visiteurs. Ce sont des consommateurs de surfaces exposées, sous mandat public.**
+
+**Voir aussi :** Façade Publique Gouvernée, Mandat Public d'Accès, Utilisateur Visiteur
+
+---
+
+### Utilisateur Visiteur (Visitor User)
+
+**Utilisateur accédant temporairement à un COG étranger** via un mécanisme de visite gouvernée.
+
+**Statut :**
+- Citoyen dans son COG d'origine
+- Visiteur gouverné dans le COG hôte
+
+**Caractéristiques :**
+- Conserve son identité
+- Perd toute souveraineté d'exécution
+- Agit uniquement via un Visa de Connexion
+- Ne transporte aucun core, aucune logique, aucun état
+
+**Règle fondamentale :**
+
+> **L'utilisateur n'est jamais souverain hors de son COG.**
+
+**Voir aussi :** COG Origine, COG Hébergeur, Visa de Connexion, Passeport Utilisateur
+
+---
+
 ## V
 
 ### Verified ID (VID)
@@ -808,6 +1176,85 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 **Confiance :** Témoignée — d'autres environnements attestent.
 
 **Voir aussi :** Local Sovereign ID, Verified ID
+
+---
+
+### Visa de Connexion (Connection Visa)
+
+**Autorisation temporaire** émise par un COG Hébergeur pour encadrer la session d'un Utilisateur Visiteur.
+
+**Émis par :** Host COG
+
+**Contient :**
+| Champ | Description |
+|-------|-------------|
+| `authorized_services` | Services autorisés |
+| `accessible_cores` | Cores accessibles (indirectement) |
+| `security_level` | Niveau de sécurité accordé |
+| `execution_rules` | Règles d'exécution |
+| `time_limits` | Limites temporelles |
+| `functional_limits` | Limites fonctionnelles |
+| `terminal_constraints` | Contraintes terminal |
+| `revocation_conditions` | Conditions de révocation |
+
+**Caractéristiques :**
+- Temporaire
+- Révocable
+- Non transférable
+- Auditée
+- Strictement interprétée
+
+**Niveaux de sécurité du Visa :**
+
+| Niveau | Nom | Usage typique |
+|--------|-----|---------------|
+| **S1** | Observation | Lecture, spectateur |
+| **S2** | Interaction contrôlée | UI, formulaires |
+| **S3** | Temps réel | Jeu, collaboration |
+| **S4** | Sensible | Admin, finance |
+| **S5** | Critique | MiyukiniAdmin |
+
+**Règle fondamentale :**
+
+> **Le Visa définit l'univers légal du visiteur. Un utilisateur = un Visa = un niveau unique.**
+
+**Voir aussi :** COG Hébergeur, Utilisateur Visiteur, Visite gouvernée inter-COG
+
+---
+
+### Visite gouvernée inter-COG (Inter-COG Governed Visit)
+
+**Modèle d'accès temporaire** permettant à un utilisateur d'un COG d'accéder aux services d'un autre COG sans importer sa gouvernance.
+
+**Acteurs :**
+| Acteur | Rôle |
+|--------|------|
+| **COG Origine** | Autorité d'identité, émetteur du Passeport |
+| **Utilisateur Visiteur** | Citoyen visitant sous gouvernance étrangère |
+| **COG Hébergeur** | Souverain exécutif, émetteur du Visa |
+| **Bridge inter-COG** | Canal diplomatique (BondingBrother étendu) |
+
+**Séquence :**
+1. Pré-validation locale (COG Origine)
+2. Présentation au Bridge (Passeport + Demande de Visite)
+3. Douane du Host COG (vérification)
+4. Émission du Visa
+5. Session active (gouvernée)
+6. Fin ou rupture
+
+**Principes non négociables :**
+- ❌ Aucun core n'est partagé
+- ❌ Aucun état n'est migré en direct
+- ❌ Aucun pouvoir n'est délégué
+- ✅ Une seule gouvernance active
+- ✅ Identité ≠ autorité
+- ✅ Sécurité avant fluidité
+
+**Phrase fondatrice :**
+
+> **Un COG n'accueille jamais une gouvernance étrangère. Il n'accueille que des visiteurs, sous visa, dans un cadre qu'il définit seul.**
+
+**Voir aussi :** COG Hébergeur, COG Origine, Passeport Utilisateur, Visa de Connexion, Utilisateur Visiteur, Bridge inter-COG
 
 ---
 
@@ -889,6 +1336,16 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 > **Risque segmenté, pas sécurité uniforme.**
 
+### Visite inter-COG
+
+> **Un COG n'accueille jamais une gouvernance étrangère. Il n'accueille que des visiteurs, sous visa, dans un cadre qu'il définit seul.**
+
+### Utilisateurs externes
+
+> **Les utilisateurs externes ne sont pas des visiteurs. Ce sont des consommateurs de surfaces exposées, sous mandat public.**
+
+> **Un utilisateur externe n'entre jamais dans un COG. C'est le COG qui sort vers lui, jamais l'inverse.**
+
 ---
 
 ## Tableau de correspondance terminologique
@@ -911,12 +1368,24 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 | Tool                            | **Outil**                                  |
 | Toolkit                         | **Kit d'Outils**                           |
 | Operator                        | **Opérateur**                              |
+| User Passport                   | **Passeport Utilisateur**                  |
+| Connection Visa                 | **Visa de Connexion**                      |
+| Visit Intent                    | **Demande de Visite**                      |
+| Visitor User                    | **Utilisateur Visiteur**                   |
+| Host COG                        | **COG Hébergeur**                          |
+| Home COG                        | **COG Origine**                            |
+| Inter-COG Bridge                | **Bridge inter-COG**                       |
+| Public User                     | **Utilisateur Externe**                    |
+| Anonymous User                  | **Utilisateur Externe**                    |
+| Web Visitor                     | **Utilisateur Externe**                    |
+| Public Exposure Surface         | **Façade Publique Gouvernée**              |
+| Public Access Mandate           | **Mandat Public d'Accès**                  |
 
 
 ---
 
 **Date de création :** 2026-01-27  
-**Version :** 1.4 (ajout équivalents anglais aux titres)  
+**Version :** 1.7 (ajout terminologie Kernel Maintenance Observability)  
 **Statut :** Document de référence normatif — GLOSSAIRE OFFICIEL
 
 **Références croisées :**
@@ -929,4 +1398,6 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 - [Miyukini Conceptual References - Lois Autonomie Systeme](./Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
 - [Miyukini Conceptual References - Pyramide Architecture Complete](./Miyukini%20Conceptual%20References%20-%20Pyramide%20Architecture%20Complete.md)
 - [Miyukini Conceptual References - Objectif Final](./Miyukini%20Conceptual%20References%20-%20Objectif%20Final.md)
+- [Miyukini Conceptual References - Connexion Inter-COG](./Miyukini%20Conceptual%20References%20-%20Connexion%20Inter-COG.md) : **Architecture de visite gouvernée**
+- [Miyukini Conceptual References - Kernel Maintenance Observability Contract](./Miyukini%20Conceptual%20References%20-%20Kernel%20Maintenance%20Observability%20Contract.md) : **Capacités bas niveau de maintenance**
 
