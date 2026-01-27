@@ -23,7 +23,7 @@ Ce document est **contractuel, normatif, non discutable, et de statut FONDATION*
 
 ### Doctrine fondamentale
 
-**"Miyukini n'est pas une bibliothèque. C'est un environnement gouverné dans lequel des produits existent."**
+**"Miyukini n'est pas une bibliothèque. C'est un environnement gouverné dans lequel des Opérateurs existent."**
 
 **👉 Ce n'est pas un framework "open-ended".**  
 **👉 C'est un écosystème gouverné.**
@@ -37,7 +37,7 @@ Ce document est **contractuel, normatif, non discutable, et de statut FONDATION*
 ```
 ┌──────────────────────────────────────────────┐
 │ 🔺 STRATES 6-7 : EXTENSION AUTORISÉE          │
-│ (Produits Intermédiaires & Finis)            │
+│ (Outils, Kits d'Outils & Opérateurs)         │
 │ → Développeurs tiers autorisés                │
 │ → Cadre Miyukini imposé                       │
 └──────────────────────────────────────────────┘
@@ -77,13 +77,13 @@ Ce document est **contractuel, normatif, non discutable, et de statut FONDATION*
 
 ### 2.3 Strates 6 → 7 : Extension Autorisée, Cadre Imposé
 
-**Règle fondamentale :** Les développeurs tiers peuvent créer des produits, mais **dans le cadre strict de Miyukini**.
+**Règle fondamentale :** Les développeurs tiers peuvent créer des Outils et Opérateurs, mais **dans le cadre strict de Miyukini**.
 
 #### Autorisations
 
 **Développeurs tiers PEUVENT :**
-- ✅ Créer des produits intermédiaires (Strate 6)
-- ✅ Créer des produits finis (Strate 7)
+- ✅ Créer des Outils et Kits d'Outils (Strate 6)
+- ✅ Créer des Opérateurs (Strate 7)
 - ✅ Créer les deux
 - ✅ Composer des modules existants
 - ✅ Définir des UX
@@ -136,12 +136,12 @@ Développeur tiers
         │
         ▼
 ┌─────────────────────────┐
-│  Produit final          │ ──┐
+│  Opérateur              │ ──┐
 │  (Strate 7)             │   │
 └─────────────────────────┘   │
                               ├─► via Interfaces Miyukini
 ┌─────────────────────────┐   │   (Strate 5)
-│  Produit intermédiaire  │ ──┘
+│  Outils & Kits d'Outils │ ──┘
 │  (Strate 6)             │
 └─────────────────────────┘
         │
@@ -299,7 +299,7 @@ Développeur tiers
 - API REST/GraphQL personnalisée
 
 **Contraintes :**
-- Doivent utiliser les produits intermédiaires ou finis (Strates 6-7)
+- Doivent utiliser les Outils, Kits d'Outils ou Opérateurs (Strates 6-7)
 - Ne peuvent pas accéder directement aux cores
 
 ---
@@ -332,7 +332,7 @@ Développeur tiers
 
 ### 5.3 Autonomie Matérielle
 
-**Garantie :** L'autonomie matérielle est préservée même avec des produits tiers.
+**Garantie :** L'autonomie matérielle est préservée même avec des Outils et Opérateurs tiers.
 
 **Bénéfices :**
 - ✅ Pas de dépendance cloud imposée
@@ -340,7 +340,7 @@ Développeur tiers
 - ✅ Tout peut tourner local / isolé
 - ✅ Compatible hardware faible
 
-**Mécanisme :** Les produits tiers utilisent les mêmes interfaces que les produits Miyukini, garantissant que l'autonomie structurelle est préservée.
+**Mécanisme :** Les Outils et Opérateurs tiers utilisent les mêmes interfaces que ceux de Miyukini, garantissant que l'autonomie structurelle est préservée.
 
 ---
 
@@ -348,7 +348,7 @@ Développeur tiers
 
 ### 6.1 Vérification de Conformité
 
-**Pour vérifier qu'un produit tiers est conforme :**
+**Pour vérifier qu'un Outil ou Opérateur tiers est conforme :**
 
 1. **Vérifier l'utilisation de BondingBrother**
    - Toute interaction avec les cores passe-t-elle par BondingBrother ?
@@ -363,14 +363,14 @@ Développeur tiers
    - Y a-t-il des contournements ?
 
 4. **Vérifier l'absence de dépendances inverses**
-   - Les cores dépendent-ils des produits ?
+   - Les cores dépendent-ils des Outils ou Opérateurs ?
    - Y a-t-il des couplages interdits ?
 
 ### 6.2 Non-Conformité
 
 **En cas de non-conformité :**
 
-- Le produit ne peut pas être intégré à l'écosystème
+- L'Outil ou Opérateur ne peut pas être intégré à l'écosystème
 - Les violations doivent être corrigées avant intégration
 - Aucune exception n'est autorisée
 
@@ -387,8 +387,8 @@ Le Ecosystem Dependency Contract établit que Miyukini est un **environnement go
 
 - **Sécurité structurelle** : Même les mauvaises implémentations ne peuvent pas casser le système
 - **Scalabilité humaine** : L'écosystème peut être ouvert sans perdre le contrôle
-- **Autonomie matérielle** : L'autonomie est préservée même avec des produits tiers
-- **Cohérence globale** : Tous les produits respectent les mêmes règles et protocoles
+- **Autonomie matérielle** : L'autonomie est préservée même avec des Outils et Opérateurs tiers
+- **Cohérence globale** : Tous les Outils et Opérateurs respectent les mêmes règles et protocoles
 
 Cette gouvernance est la garantie que l'écosystème reste cohérent, sécurisé, et évolutif, même avec des contributions externes.
 
@@ -405,4 +405,4 @@ Cette gouvernance est la garantie que l'écosystème reste cohérent, sécurisé
 - [Miyukini Conceptual References - External Signal & Trust Reinforcement Contract](Miyukini%20Framework%20-%20External%20Signal%20Trust%20Reinforcement%20Contract.md) : Intégration Internet comme signal externe
 - [Miyukini Conceptual References - Security Protocols](Miyukini%20Framework%20-%20Security%20Protocols.md) : Protocoles de sécurité pour développeurs tiers
 - [Miyukini Conceptual References - Security Performance Impact](Miyukini%20Framework%20-%20Security%20Performance%20Impact.md) : Impact performance des protocoles de sécurité
-- [Miyukini Conceptual References - Security Levels](Miyukini%20Framework%20-%20Security%20Levels.md) : Niveaux de sécurité (0-4) - produits déclarent, cores gouvernent
+- [Miyukini Conceptual References - Security Levels](Miyukini%20Framework%20-%20Security%20Levels.md) : Niveaux de sécurité (0-4) - Opérateurs déclarent, cores gouvernent

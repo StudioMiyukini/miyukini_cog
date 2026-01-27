@@ -479,9 +479,90 @@ La **découverte** est le processus par lequel un composant interroge Master But
 
 Un **rôle** est un ensemble nommé de permissions. Master Butler connaît les associations entre rôles et permissions, mais ne gère pas les attributions de rôles aux utilisateurs (qui appartiennent au système d'identité).
 
+### Tool (Outil)
+
+Un **Tool** est une capacité exécutable, sans autorité, sans décision métier, sans connaissance du produit appelant, gouvernée par les Cores.
+
+**Caractéristiques d'un Tool :**
+- Capacité exécutable atomique
+- Sans autorité (ne décide jamais)
+- Sans logique métier
+- Gouverné par les Cores
+
+**👉 Un Tool fait, mais ne décide jamais.**
+
+### Toolkit
+
+Un **Toolkit** est une composition officielle de Tools, validée et déclarée par l'environnement, optimisée pour efficience, cohérence et performance.
+
+**Caractéristiques d'un Toolkit :**
+- Agrège des Tools existants
+- Ne crée pas de capacité nouvelle
+- Sans logique métier
+- Validé par l'environnement
+
+**👉 Un Toolkit orchestre, mais n'ajoute pas de capacité.**
+
+**Documentation complète :** [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)
+
 ---
 
-## 10. Conformité aux Lois d'Autonomie Système
+## 10. Responsabilité spécifique : Gouvernance des Tools et Toolkits
+
+### Rôle de Master Butler dans la gouvernance des Tools
+
+Master Butler est le **catalogue central** des Tools et Toolkits. Il est responsable de :
+
+| Responsabilité | Description |
+|----------------|-------------|
+| **Déclarer** | Quels Tools existent dans l'environnement |
+| **Lier** | Capability → Tool |
+| **Définir les Toolkits** | Quels Tools composent chaque Toolkit |
+| **Autoriser** | Qui peut appeler quel Tool/Toolkit |
+
+### Ce que Master Butler fait pour les Tools
+
+| Action | Oui/Non |
+|--------|---------|
+| Déclare l'existence des Tools | ✅ Oui |
+| Lie les capacités aux Tools | ✅ Oui |
+| Définit les permissions d'accès | ✅ Oui |
+| Catalogue les Toolkits | ✅ Oui |
+
+### Ce que Master Butler NE fait PAS pour les Tools
+
+| Action | Oui/Non | Pourquoi |
+|--------|---------|----------|
+| Implémenter les Tools | ❌ Non | Master Butler catalogue, n'implémente pas |
+| Exécuter les Tools | ❌ Non | L'exécution appartient aux Tools eux-mêmes |
+| Décider de l'usage | ❌ Non | StrongFather décide |
+| Gérer le cycle de vie | ❌ Non | Ever Buddy gère le cycle de vie |
+
+### Question à laquelle Master Butler répond
+
+> *"Qu'est-ce qui est possible dans cet environnement ?"*
+
+Pour les Tools, cela se traduit par :
+- Quels Tools sont disponibles ?
+- Quels Toolkits sont déclarés ?
+- Qui peut appeler quel Tool ?
+- Quelles permissions sont requises pour un Tool ?
+
+### Règle ABSOLUE
+
+> **Un environnement Miyukini possède une bibliothèque d'outils finie, déclarée, gouvernée.**
+
+| Règle | Description |
+|-------|-------------|
+| **Pas d'injection sauvage** | Aucun Tool ne peut être ajouté sans déclaration dans Master Butler |
+| **Pas de Tool "local"** | Tout Tool doit être déclaré dans l'environnement |
+| **Pas de dépendance externe cachée** | Aucune librairie externe non gouvernée |
+
+**👉 C'est une souveraineté applicative.**
+
+---
+
+## 11. Conformité aux Lois d'Autonomie Système
 
 Ce core respecte les Lois d'Autonomie Système définies dans [Miyukini Framework - Lois Autonomie Systeme.md](../../reference/Miyukini%20Framework%20-%20Lois%20Autonomie%20Systeme.md).
 
@@ -556,7 +637,7 @@ Aucune contradiction n'existe entre ces documents. Ils forment un ensemble cohé
 
 ---
 
-**Version :** 1.3  
-**Date :** 2026-01-26  
+**Version :** 1.4  
+**Date :** 2026-01-27  
 **Statut :** FONDATION — Non négociable  
-**Référence :** Miyukini Core System v2.4, [Miyukini Framework - External Signal & Trust Reinforcement Contract](../../reference/Miyukini%20Framework%20-%20External%20Signal%20Trust%20Reinforcement%20Contract.md) (capacités exposées lors du bootstrap Internet), [Miyukini Framework - Security Protocols](../../reference/Miyukini%20Framework%20-%20Security%20Protocols.md) (authentification en couches RT-SEC-2, validation permission RT-SEC-3, revalidation AS-SEC-3), [Miyukini Framework - Security Levels](../../reference/Miyukini%20Framework%20-%20Security%20Levels.md) (adaptation permissions selon niveau sécurité 0-4)
+**Référence :** Miyukini Core System v2.4, [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) (gouvernance des Tools et Toolkits), [Miyukini Framework - External Signal & Trust Reinforcement Contract](../../reference/Miyukini%20Framework%20-%20External%20Signal%20Trust%20Reinforcement%20Contract.md) (capacités exposées lors du bootstrap Internet), [Miyukini Framework - Security Protocols](../../reference/Miyukini%20Framework%20-%20Security%20Protocols.md) (authentification en couches RT-SEC-2, validation permission RT-SEC-3, revalidation AS-SEC-3), [Miyukini Framework - Security Levels](../../reference/Miyukini%20Framework%20-%20Security%20Levels.md) (adaptation permissions selon niveau sécurité 0-4)

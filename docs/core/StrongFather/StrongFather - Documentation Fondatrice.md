@@ -403,6 +403,121 @@ Les produits définissent les politiques que StrongFather applique, mais ne modi
 
 ---
 
+## 9bis. Mandats de Permission (Allow Mandate)
+
+### Définition
+
+Un **Mandat de Permission** est une autorisation déléguée, temporaire et encadrée, émise par StrongFather, qui permet à des Operators de collaborer sans repasser en permanence par la gouvernance centrale.
+
+**Définition canonique :**
+
+> **An Allow Mandate is a bounded authorization issued by StrongFather that allows a defined set of Operators to collaborate under explicit conditions without requiring repeated governance checks.**
+
+### Pourquoi les Mandats de Permission existent
+
+Sans Mandats de Permission, chaque micro-interaction entre Operators nécessiterait un passage par StrongFather. Cela créerait :
+
+- **Goulot d'étranglement** : StrongFather deviendrait un point de contention
+- **Latence excessive** : Chaque appel nécessiterait une évaluation complète
+- **Inefficacité** : Les mêmes règles seraient réévaluées en boucle
+
+### Principe fondamental
+
+> **StrongFather ne décide pas "chaque fois". Il décide des cadres dans lesquels on peut agir.**
+
+### Ce qu'un Mandat de Permission N'EST PAS
+
+| ❌ N'est pas | Pourquoi |
+|--------------|----------|
+| Une optimisation | C'est un acte de gouvernance délégué |
+| Un token libre | Cadre strict et révocable |
+| Une session classique | Pas une authentification |
+| Un cache de décision | Pas une technique de performance |
+| Un droit implicite | Toujours explicite |
+| Une permission globale | Toujours borné |
+
+### Phrase fondatrice
+
+> **An Allow Mandate is not an optimization. It is a delegated act of governance.**
+
+### Contenu d'un Mandat de Permission
+
+Un Mandat de Permission contient obligatoirement :
+
+| Élément | Description |
+|---------|-------------|
+| **ID unique** | Identifiant du mandat |
+| **Operators autorisés** | Liste des Operators mandatés |
+| **Flux autorisés** | Qui peut parler à qui |
+| **Types de données** | Données échangeables sous ce mandat |
+| **Niveau de sécurité maximum** | Plafond de sécurité |
+| **Conditions de validité** | Quand le mandat reste valide |
+| **Règles de révocation** | Quand le mandat expire |
+
+### Cycle de vie d'un Mandat
+
+**Phase 1 : Émission**
+
+Lorsqu'un Service est demandé, StrongFather :
+1. Identifie les Operators impliqués
+2. Vérifie leurs niveaux de sécurité
+3. Vérifie la cohérence de l'équipe (via Contrat d'Équipe)
+4. Consulte WorrySentinel pour les règles de sécurité
+5. Émet le Mandat de Permission
+
+**Phase 2 : Exécution mandatée**
+
+Pendant que le Mandat est valide :
+- Les Operators communiquent via BondingBrother
+- Sans reconsulter StrongFather
+- En respectant strictement le mandat
+
+**Phase 3 : Révocation**
+
+Le Mandat est immédiatement révoqué si :
+- Le Service se termine normalement
+- Une condition sort du cadre défini
+- Un Operator viole une règle
+- WorrySentinel déclenche une alerte
+- L'utilisateur quitte le flux
+- L'environnement change
+
+### Invariants des Mandats de Permission
+
+**INV-AM-1 : Aucun Mandat sans validation préalable**
+
+Un Mandat de Permission n'est jamais émis sans validation complète par StrongFather des politiques et des contraintes.
+
+**INV-AM-2 : Aucun Mandat illimité**
+
+Un Mandat de Permission a toujours des conditions de validité et des règles de révocation explicites.
+
+**INV-AM-3 : Révocation immédiate possible**
+
+StrongFather (ou WorrySentinel) peut révoquer un Mandat à tout moment, sans préavis.
+
+**INV-AM-4 : Traçabilité complète**
+
+Tout Mandat émis, actif, ou révoqué est traçable avec son contexte complet.
+
+### Relation avec les Équipes d'Operators
+
+Une **Équipe d'Operators** ne peut exister opérationnellement que sous un Mandat de Permission valide.
+
+| Élément | Nature | Rôle |
+|---------|--------|------|
+| **Contrat d'Équipe** | Statique | Décrit la collaboration possible |
+| **Mandat de Permission** | Dynamique | Autorise une instance réelle |
+
+Le Contrat d'Équipe définit ce qui est possible.
+Le Mandat de Permission autorise ce qui se passe maintenant.
+
+### Documentation complète
+
+Voir [Miyukini Conceptual References - Mandats et Équipes Operators](../../reference/Miyukini%20Conceptual%20References%20-%20Mandats%20et%20Equipes%20Operators.md)
+
+---
+
 ## 10. Glossaire
 
 ### Décision
@@ -516,7 +631,7 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
 ---
 
 **Document créé le :** 2026-01-25  
-**Version :** 1.4  
+**Version :** 1.5 (ajout Mandats de Permission)  
 **Statut :** FONDATION — Contrat normatif validé  
 **Référence :** Miyukini Core System v2.4, KindMother Documentation Fondatrice, [Miyukini Framework - Integrity & Degradation System](../../reference/Miyukini%20Framework%20-%20Integrity%20Degradation%20System.md), [Miyukini Framework - External Signal & Trust Reinforcement Contract](../../reference/Miyukini%20Framework%20-%20External%20Signal%20Trust%20Reinforcement%20Contract.md), [Miyukini Framework - Mobile & WebApp Strategy](../../reference/Miyukini%20Framework%20-%20Mobile%20WebApp%20Strategy.md) (décisions différées si réseau instable), [Miyukini Framework - Security Protocols](../../reference/Miyukini%20Framework%20-%20Security%20Protocols.md) (validation systématique RT-SEC-3, revalidation AS-SEC-3), [Miyukini Framework - Security Levels](../../reference/Miyukini%20Framework%20-%20Security%20Levels.md) (adaptation décisions selon niveau sécurité 0-4)  
 **Type :** Documentation fondatrice non négociable

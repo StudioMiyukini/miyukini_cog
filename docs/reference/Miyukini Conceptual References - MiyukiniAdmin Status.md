@@ -2,7 +2,7 @@
 
 ## 1. Contexte
 
-Ce document définit le **statut officiel et canonique de MiyukiniAdmin** dans l'écosystème Miyukini : un produit autonome, souverain et non réutilisable qui constitue une exception volontaire à la logique produit standard.
+Ce document définit le **statut officiel et canonique de MiyukiniAdmin** dans l'écosystème Miyukini : un **Opérateur Souverain** autonome et non réutilisable qui constitue une exception volontaire à la logique Opérateur standard.
 
 **Principe fondamental :**
 
@@ -31,22 +31,22 @@ Ce document **ne couvre pas** :
 
 ### 3.1 Déclaration Canonique
 
-**MiyukiniAdmin est un produit autonome, souverain et non réutilisable.**
+**MiyukiniAdmin est un Opérateur Souverain, autonome et non réutilisable.**
 
 Il constitue :
-- ✅ Une exception volontaire à la logique produit standard
-- ✅ Un outil d'orchestration et de contrôle, pas un produit métier
+- ✅ Une exception volontaire à la logique Opérateur standard
+- ✅ Un outil d'orchestration et de contrôle, pas un Opérateur métier
 - ✅ Une autorité quasi ultime, strictement encadrée
 
 ### 3.2 Règles Absolues
 
-**❌ Aucun autre produit ne peut dépendre de MiyukiniAdmin**
+**❌ Aucun autre Opérateur ne peut dépendre de MiyukiniAdmin**
 
-**❌ MiyukiniAdmin ne consomme aucun produit intermédiaire**
+**❌ MiyukiniAdmin ne consomme aucun Outil ou Kit d'Outils**
 
 **❌ MiyukiniAdmin n'expose aucune API publique**
 
-**❌ MiyukiniAdmin n'est jamais embarqué dans un produit client**
+**❌ MiyukiniAdmin n'est jamais embarqué dans un Opérateur client**
 
 **👉 Il n'est ni B2B, ni B2C, ni B2B2C**  
 **👉 Il est out-of-band, comme un BIOS / hyperviseur / console root**
@@ -77,7 +77,7 @@ Il constitue :
 - Lecture passive de métriques système
 - Accès aux traces kernel
 - Statistiques de décision (StrongFather)
-- États produits (CaringNanny)
+- États Opérateurs (CaringNanny)
 - Santé DB / SQL engine
 - Charge, latence, files internes
 
@@ -138,11 +138,11 @@ Il constitue :
 **MiyukiniAdmin embarque en interne :**
 - ✅ Toute sa logique métier propre
 - ✅ Toute son interface utilisateur (UI/UX)
-- ✅ Sans dépendre d'aucun autre produit
+- ✅ Sans dépendre d'aucun autre Opérateur
 
 **👉 Il est auto-suffisant fonctionnellement et visuellement.**
 
-### 5.2 Logique Métier Interne ≠ Logique Métier Produit
+### 5.2 Logique Métier Interne ≠ Logique Métier Opérateur
 
 **La logique métier de MiyukiniAdmin est strictement limitée à :**
 - ✅ Installation de l'écosystème
@@ -157,11 +157,11 @@ Il constitue :
 **❌ Interdit :**
 - ❌ Règles métier applicatives
 - ❌ Workflows utilisateurs finaux
-- ❌ Logique produit (B2B / B2C)
+- ❌ Logique Opérateur métier (B2B / B2C)
 - ❌ Toute logique réutilisable ailleurs
 
 **👉 Sa logique métier est administrative, technique, souveraine**  
-**👉 Jamais fonctionnelle au sens "produit"**
+**👉 Jamais fonctionnelle au sens "Opérateur métier"**
 
 ### 5.3 UI Propre, Isolée, Non Réutilisable
 
@@ -174,17 +174,17 @@ Il constitue :
 
 **❌ Aucun composant UI partagé**  
 **❌ Aucun thème hérité**  
-**❌ Aucun framework UI "produit"**
+**❌ Aucun framework UI "Opérateur"**
 
 **👉 Même s'il ressemble à PHPMyAdmin :**
-- Ce n'est pas une UI produit
+- Ce n'est pas une UI Opérateur
 - Ce n'est pas un frontend client
 - C'est une console d'administration
 
 ### 5.4 Conséquence Architecturale Majeure
 
 **MiyukiniAdmin devient :**
-- ✅ Un produit complet techniquement, mais fermé fonctionnellement
+- ✅ Un Opérateur complet techniquement, mais fermé fonctionnellement
 
 **Il est :**
 - ✅ Un binaire / app / bundle autonome
@@ -216,11 +216,11 @@ Il constitue :
 - ❌ Ne peut être appelée
 - ❌ Ne peut être copiée
 
-**Par un autre produit.**
+**Par un autre Opérateur.**
 
 #### Règle B — Non-dépendance Inverse
 
-**Aucun core, module ou produit :**
+**Aucun core, Outil ou Opérateur :**
 - ❌ Ne dépend de MiyukiniAdmin
 - ❌ Ne suppose son existence
 
@@ -235,7 +235,7 @@ Il constitue :
 
 **Aucun humain n'accède au système hors :**
 - ✅ UI MiyukiniAdmin (admin)
-- ✅ UI produit final (clients)
+- ✅ UI Opérateur (clients)
 
 ---
 
@@ -263,7 +263,7 @@ Il constitue :
 
 - ✅ Écriture temporaire
 - ✅ Mode maintenance
-- ✅ Blocage des produits pendant l'opération
+- ✅ Blocage des Opérateurs pendant l'opération
 - ✅ Retour obligatoire via KindMother après
 
 **👉 Ce mode est exceptionnel, pas un fallback normal**  
@@ -318,31 +318,28 @@ MiyukiniAdmin
 ```
 ┌──────────────────────────────────────────┐
 │ STRATE 9 — MiyukiniAdmin (EXCEPTION)     │
-│ Console souveraine d'administration      │
+│ Opérateur Souverain d'administration     │
 └──────────────────────────────────────────┘
 ┌──────────────────────────────────────────┐
-│ STRATE 8 — Produits finaux                │
+│ STRATE 7 — Opérateurs                    │
 └──────────────────────────────────────────┘
 ┌──────────────────────────────────────────┐
-│ STRATE 7 — Produits intermédiaires        │
+│ STRATE 6 — Outils & Kits d'Outils        │
 └──────────────────────────────────────────┘
 ┌──────────────────────────────────────────┐
-│ STRATE 6 — BondingBrother (Adaptateur)   │
+│ STRATE 5 — BondingBrother (Adaptateur)   │
 └──────────────────────────────────────────┘
 ┌──────────────────────────────────────────┐
-│ STRATE 5 — Cores fonctionnels             │
+│ STRATE 4 — Cores Système                 │
 └──────────────────────────────────────────┘
 ┌──────────────────────────────────────────┐
-│ STRATE 4 — WorrySentinel                  │
+│ STRATE 3 — Invariants & Contrats         │
 └──────────────────────────────────────────┘
 ┌──────────────────────────────────────────┐
-│ STRATE 3 — Kernel                         │
+│ STRATE K — Kernel                        │
 └──────────────────────────────────────────┘
 ┌──────────────────────────────────────────┐
-│ STRATE 2 — OS                             │
-└──────────────────────────────────────────┘
-┌──────────────────────────────────────────┐
-│ STRATE 1 — Hardware                       │
+│ STRATE 0 — Hardware & OS                 │
 └──────────────────────────────────────────┘
 ```
 
@@ -387,7 +384,7 @@ MiyukiniAdmin
 
 **Responsabilités :**
 - Exposition des métriques système
-- États des produits
+- États des Opérateurs
 - Santé globale du système
 
 ### 8.5 WorrySentinel
@@ -409,7 +406,7 @@ MiyukiniAdmin
 
 ### 10.2 Ce que MiyukiniAdmin EST
 
-**C'est un produit système autonome, hors hiérarchie produit**
+**C'est un Opérateur Souverain autonome, hors hiérarchie Opérateur**
 
 **Il est :**
 - ✅ Au-dessus de la pyramide
@@ -435,7 +432,7 @@ MiyukiniAdmin
 
 ✅ **Console root**
 
-✅ **Produit autonome, souverain, non réutilisable**
+✅ **Opérateur Souverain, autonome, non réutilisable**
 
 ✅ **Auto-suffisant fonctionnellement et visuellement**
 
@@ -443,7 +440,7 @@ MiyukiniAdmin
 
 ✅ **UI propre, isolée, non réutilisable**
 
-✅ **Aucun produit ne dépend de lui**
+✅ **Aucun Opérateur ne dépend de lui**
 
 ✅ **Niveau de sécurité maximal**
 
@@ -460,9 +457,9 @@ MiyukiniAdmin
 
 ### 11.2 Ce que MiyukiniAdmin N'EST PAS
 
-❌ **Un produit métier**
+❌ **Un Opérateur métier**
 
-❌ **Un produit intermédiaire**
+❌ **Un Outil ou Kit d'Outils**
 
 ❌ **Une API publique**
 
@@ -480,7 +477,7 @@ MiyukiniAdmin
 
 ## 12. Conclusion
 
-MiyukiniAdmin est la console root de l'écosystème Miyukini. Il constitue une exception volontaire et strictement encadrée à la logique produit standard, permettant :
+MiyukiniAdmin est la console root de l'écosystème Miyukini. Il constitue une exception volontaire et strictement encadrée à la logique Opérateur standard, permettant :
 
 - ✅ **Installation et bootstrap** : Mise en place complète de l'environnement
 - ✅ **Monitoring et diagnostic** : Observation passive du système
@@ -494,10 +491,11 @@ MiyukiniAdmin est la console root de l'écosystème Miyukini. Il constitue une e
 ---
 
 **Date de création :** 2026-01-26  
-**Version :** 1.1 (ajout logique métier & UI)  
+**Version :** 1.3 (terminologie Opérateur)  
 **Statut :** Document de référence contractuel
 
 **Documentation associée :**
+- [Miyukini Conceptual References - Objectif Final](Miyukini%20Conceptual%20References%20-%20Objectif%20Final.md) : Vision synthèse et piliers fondamentaux (MiyukiniAdmin = clé de voûte)
 - [Miyukini Conceptual References - Pyramide Architecture Complete](Miyukini%20Conceptual%20References%20-%20Pyramide%20Architecture%20Complete.md) : Architecture détaillée des strates
 - [BondingBrother - Documentation Fondatrice](../core/BondingBrother/BondingBrother%20-%20Documentation%20Fondatrice.md) : Médiation administrative
 - [StrongFather - Documentation Fondatrice](../core/StrongFather/StrongFather%20-%20Documentation%20Fondatrice.md) : Autorité sur les décisions

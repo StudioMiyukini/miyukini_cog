@@ -127,6 +127,41 @@ La relation est descriptive :
 - **Master Butler** : Expose les capacités disponibles.
 - **Ever Buddy** : Fournit l'état de vie de chaque capacité.
 
+### Responsabilité spécifique : Cycle de vie des Tools et Toolkits
+
+Ever Buddy est responsable du **cycle de vie** des Tools et Toolkits :
+
+| Responsabilité | Description |
+|----------------|-------------|
+| **Versions** | Gère les versions de chaque Tool |
+| **Dépréciation** | Marque les Tools comme DEPRECATED |
+| **Compatibilité** | Vérifie Tool ↔ Environnement |
+| **Migration** | Gère la transition Tool → nouvelle version |
+
+**Question à laquelle Ever Buddy répond pour les Tools :**
+
+> *"Est-ce que cet outil existe encore, est compatible, ou doit être migré ?"*
+
+**États de vie des Tools :**
+
+| État | Description |
+|------|-------------|
+| **DRAFT** | Tool en développement, non disponible |
+| **ACTIVE** | Tool disponible et supporté |
+| **DEPRECATED** | Tool fonctionnel mais usage découragé |
+| **RETIRED** | Tool retiré, non disponible |
+
+**Règles de gouvernance :**
+
+| Règle | Description |
+|-------|-------------|
+| **RÈGLE-TOOL-EV-1** | Tout Tool a un état de vie explicite |
+| **RÈGLE-TOOL-EV-2** | Un Tool DEPRECATED a un successeur identifié |
+| **RÈGLE-TOOL-EV-3** | La transition vers RETIRED passe obligatoirement par DEPRECATED |
+| **RÈGLE-TOOL-EV-4** | La compatibilité Tool ↔ Environnement est vérifiée |
+
+**Documentation complète :** [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)
+
 ### Relation avec TAMR
 
 Ever Buddy peut recommander des interventions humaines lors de transitions critiques. Quand une évolution nécessite une validation humaine (migration majeure, rupture de compatibilité), Ever Buddy signale ce besoin à TAMR.
@@ -804,8 +839,8 @@ Ever Buddy respecte intégralement LOI-6 :
 
 ---
 
-**Version :** 1.2  
-**Date :** 2026-01-26  
+**Version :** 1.3  
+**Date :** 2026-01-27  
 **Statut :** FONDATION — Non négociable  
-**Référence :** Miyukini Core System v2.4, [Miyukini Framework - External Signal & Trust Reinforcement Contract](../../reference/Miyukini%20Framework%20-%20External%20Signal%20Trust%20Reinforcement%20Contract.md) (vérification compatibilité mises à jour), [Miyukini Framework - Security Protocols](../../reference/Miyukini%20Framework%20-%20Security%20Protocols.md) (revalidation version AS-SEC-3, handshake conformité NET-SEC-1, mise à jour sécurisée NET-SEC-2)  
+**Référence :** Miyukini Core System v2.4, [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) (cycle de vie des Tools), [Miyukini Framework - External Signal & Trust Reinforcement Contract](../../reference/Miyukini%20Framework%20-%20External%20Signal%20Trust%20Reinforcement%20Contract.md) (vérification compatibilité mises à jour), [Miyukini Framework - Security Protocols](../../reference/Miyukini%20Framework%20-%20Security%20Protocols.md) (revalidation version AS-SEC-3, handshake conformité NET-SEC-1, mise à jour sécurisée NET-SEC-2)  
 **Type :** Documentation fondatrice non négociable

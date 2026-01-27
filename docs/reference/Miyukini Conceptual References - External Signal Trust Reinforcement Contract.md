@@ -318,11 +318,11 @@ L'admin voit :
 
 ### 11.5 BondingBrother
 
-**Rôle :** Transport des signaux externes vers les produits.
+**Rôle :** Transport des signaux externes vers les Opérateurs.
 
 **Responsabilités :**
-- Transporte les signaux ECS vers les produits
-- Rend visible l'état réseau aux produits
+- Transporte les signaux ECS vers les Opérateurs
+- Rend visible l'état réseau aux Opérateurs
 - N'interprète jamais, ne décide jamais
 
 ---

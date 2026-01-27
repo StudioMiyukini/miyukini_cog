@@ -1,18 +1,20 @@
-# Catalogue des capacités produit génériques
+# Catalogue des Capacités Fonctionnelles (Opérateurs)
 
-> Document de référence produit.
-> Niveau : **produit fonctionnel** (hors kernel, hors infra, hors implémentation).
+> Document de référence pour la conception des Opérateurs.
+> Niveau : **fonctionnel** (hors kernel, hors infra, hors implémentation).
 > Objectif : servir de base durable (5–10 ans) pour la conception de SaaS, sites web et applications.
 
 ---
 
 ## Contexte
 
-Ce catalogue s'inscrit dans un écosystème produit construit **au-dessus d'un kernel technique minimal** (infra uniquement). Le kernel reste gelé, sans métier, sans auth, sans base de données, sans framework applicatif. Les produits sont construits sous forme de **modules fonctionnels** qui consomment le kernel.
+Ce catalogue s'inscrit dans l'écosystème Miyukini. Le kernel reste gelé, sans métier, sans auth, sans base de données, sans framework applicatif. Les **Opérateurs** sont construits sous forme de **Outils et Kits d'Outils** (Strate 6) qui consomment les Cores et le kernel.
+
+**Note terminologique :** Dans ce document, "produit" au sens commercial (SaaS, app, site) désigne ce que Miyukini appelle un **Opérateur** (Strate 7).
 
 ## Portée
 
-- **Capacités indépendantes de toute techno** : formulées au niveau produit, pas d'implémentation.
+- **Capacités indépendantes de toute techno** : formulées au niveau fonctionnel, pas d'implémentation.
 - **Génériques et réutilisables** : applicables à la majorité des SaaS, sites web dynamiques, applications métier, plateformes interactives.
 - **Usages réels** : pas de features théoriques ; chaque capacité correspond à des besoins répétés sur le terrain.
 
@@ -20,8 +22,8 @@ Ce catalogue s'inscrit dans un écosystème produit construit **au-dessus d'un k
 
 Servir de **catalogue de référence** pour :
 
-- la conception de plusieurs produits (SaaS, sites, apps) ;
-- la définition de modules produits ;
+- la conception de plusieurs Opérateurs (SaaS, sites, apps) ;
+- la définition d'Outils et Kits d'Outils ;
 - les roadmaps et les choix de scope ;
 - sans jamais polluer le kernel.
 

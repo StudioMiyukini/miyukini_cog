@@ -6,7 +6,7 @@ Ce document présente la **Pyramide Miyukini** : l'architecture complète de l'�
 
 Cette pyramide définit les **7 strates architecturales** plus le **Kernel** qui constituent la fondation technique et conceptuelle de l'écosystème. Chaque strate a des responsabilités distinctes, des invariants spécifiques, et des relations clairement définies avec les strates adjacentes.
 
-**Vision stratégique :** Cette pyramide permet de maîtriser du hardware jusqu'à l'UX, de livrer n'importe quelle couche seule ou combinée, de servir B2B / B2C / B2B2C, de fonctionner offline/isolé/low-resource, tout en restant modulaire, scalable et autonome. La clé réside dans la **Strate 6 — Produits Intermédiaires** : des capacités produits prêtes à l'emploi, recomposables, indépendantes du contexte business.
+**Vision stratégique :** Cette pyramide permet de maîtriser du hardware jusqu'à l'UX, de livrer n'importe quelle couche seule ou combinée, de servir B2B / B2C / B2B2C, de fonctionner offline/isolé/low-resource, tout en restant modulaire, scalable et autonome. La clé réside dans la **Strate 6 — Outils & Kits d'Outils** : des capacités prêtes à l'emploi, recomposables, indépendantes du contexte business.
 
 **Principe fondamental :** La dépendance est strictement unidirectionnelle, de haut en bas. Chaque strate dépend uniquement des strates inférieures, jamais l'inverse.
 
@@ -36,17 +36,17 @@ Ce document **ne couvre pas** :
 └──────────────────────────────────────────────┘
                     ▲
 ┌──────────────────────────────────────────────┐
-│ 🟩 STRATE 7 — PRODUITS FINIS                  │
-│ SaaS · Apps · Jeux · CMS · Outils métier     │
+│ 🟩 STRATE 7 — OPERATORS                       │
+│ Service · Interface · Automation · Domain    │
 │ B2C · B2B · B2B2C                             │
-│ → Livrables clients                          │
+│ → Entités fonctionnelles gouvernées          │
 └──────────────────────────────────────────────┘
                     ▲
 ┌──────────────────────────────────────────────┐
-│ 🟦 STRATE 6 — PRODUITS INTERMÉDIAIRES         │
+│ 🟦 STRATE 6 — TOOLS & TOOLKITS                │
 │ Auth · Billing · Content · Realtime · Admin  │
 │ Monitoring · Workflow · Notification         │
-│ → Transverses & recomposables                │
+│ → Capacités & compositions gouvernées        │
 └──────────────────────────────────────────────┘
                     ▲
 ┌──────────────────────────────────────────────┐
@@ -80,7 +80,7 @@ Ce document **ne couvre pas** :
 └──────────────────────────────────────────────┘
 ```
 
-**Note importante :** MiyukiniAdmin (Strate 9) est une **exception volontaire** à la logique produit standard. Il est au-dessus de la pyramide, pas dedans. Il observe, installe, arbitre, mais ne vit pas dans le flux normal. Voir [Miyukini Conceptual References - MiyukiniAdmin Status](Miyukini%20Conceptual%20References%20-%20MiyukiniAdmin%20Status.md) pour les détails.
+**Note importante :** MiyukiniAdmin (Strate 9) est une **exception volontaire** à la logique Opérateur standard. Il est au-dessus de la pyramide, pas dedans. Il observe, installe, arbitre, mais ne vit pas dans le flux normal. Voir [Miyukini Conceptual References - MiyukiniAdmin Status](Miyukini%20Conceptual%20References%20-%20MiyukiniAdmin%20Status.md) pour les détails.
 
 ---
 
@@ -114,7 +114,7 @@ Ce document **ne couvre pas** :
 
 ### ⚙️ KERNEL — SUBSTRAT TECHNIQUE NEUTRE
 
-**Rôle :** Fondation technique réutilisable, agnostique produit, sans logique métier.
+**Rôle :** Fondation technique réutilisable, agnostique, sans logique métier.
 
 **Éléments constitutifs :**
 - **Id** : Génération et gestion d'identifiants uniques
@@ -247,17 +247,17 @@ Ce document **ne couvre pas** :
 - **Edge** : Déploiement en périphérie du réseau
 
 #### BondingBrother
-- **Rôle :** Interface fraternelle de médiation entre produits et autorités
-- **Fonction :** Traduit les intentions des produits en demandes pour les cores, et traduit les réponses en résultats pour les produits
+- **Rôle :** Interface fraternelle de médiation entre Opérateurs et autorités
+- **Fonction :** Traduit les intentions des Opérateurs en demandes pour les cores, et traduit les réponses en résultats pour les Opérateurs
 - **Principe :** Médiation uniquement, jamais d'autorité
 
-#### Adaptateurs Produits
+#### Adaptateurs Opérateurs
 - **Rôle :** Traduction entre modules SPM CMS et KindMother
 - **Fonction :** Implémentent les traits fonctionnels des modules SPM en utilisant KindMother
-- **Principe :** Un adaptateur par produit, isolation complète
+- **Principe :** Un adaptateur par Opérateur, isolation complète
 
 **Invariants :**
-- Toutes les interfaces utilisent les produits intermédiaires (Strate 6) ou les produits finis (Strate 7)
+- Toutes les interfaces utilisent les Outils & Kits d'Outils (Strate 6) ou les Opérateurs (Strate 7)
 - Aucune interface n'accède directement aux cores (Strate 4)
 - BondingBrother ne prend jamais de décision
 - BondingBrother ne possède jamais d'autorité
@@ -266,7 +266,7 @@ Ce document **ne couvre pas** :
 **Relation avec les strates :**
 - Utilise les cores de la Strate 4 (StrongFather, KindMother, etc.)
 - Utilise le Kernel pour les primitives techniques
-- Est utilisé par la Strate 6 (Produits Intermédiaires) et Strate 7 (Produits Finis)
+- Est utilisé par la Strate 6 (Outils & Kits d'Outils) et Strate 7 (Opérateurs)
 
 **Documentation associée :**
 - [BondingBrother - Documentation Fondatrice](../core/BondingBrother/BondingBrother%20-%20Documentation%20Fondatrice.md)
@@ -274,13 +274,15 @@ Ce document **ne couvre pas** :
 
 ---
 
-### 🟦 STRATE 6 — PRODUITS INTERMÉDIAIRES
+### 🟦 STRATE 6 — TOOLS & TOOLKITS
 
-**Rôle :** Capacités produits prêtes à l'emploi, recomposables, indépendantes du contexte business. **C'est la couche clé stratégique** qui évite les produits monolithiques jetables.
+**Rôle :** Capacités exécutables gouvernées, recomposables, indépendantes du contexte business. **C'est la couche clé stratégique** qui fournit les compétences aux Opérateurs.
+
+**Note terminologique :** Cette strate était anciennement appelée "Produits Intermédiaires". La terminologie correcte est **Outils & Kits d'Outils (Tools & Toolkits)**. Voir [Miyukini Conceptual References - Operators et Terminologie](Miyukini%20Conceptual%20References%20-%20Operators%20et%20Terminologie.md).
 
 **Éléments constitutifs :**
 
-#### Produits Intermédiaires Transverses
+#### Outils & Kits d'Outils Transverses
 - **Auth / Identity** : Authentification, gestion des identités, rôles, tokens
 - **Billing Core** : Facturation, plans tarifaires, abonnements
 - **Content Engine** : Gestion de contenu, pages, blocs, médias
@@ -291,7 +293,7 @@ Ce document **ne couvre pas** :
 - **MiyukiniAdmin** : Supervision système, administration, monitoring
 
 **Caractéristiques fondamentales :**
-- **Recomposables** : Peuvent être combinés pour créer des produits finis
+- **Recomposables** : Peuvent être combinés pour créer des Opérateurs
 - **Transverses** : Utilisables dans différents contextes (B2B, B2C, B2B2C)
 - **Indépendants du contexte business** : Pas de logique métier spécifique
 - **Exploitent les cores** : Utilisent StrongFather, KindMother, etc. via BondingBrother
@@ -299,7 +301,7 @@ Ce document **ne couvre pas** :
 - **Prêts à l'emploi** : Fonctionnels sans configuration métier complexe
 
 **Invariants :**
-- Aucun produit intermédiaire ne contient de logique métier spécifique client
+- Aucun Outil ou Kit d'Outils ne contient de logique métier spécifique client
 - Tous exploitent les cores via BondingBrother (Strate 5)
 - Tous sont utilisables partout (B2B, B2C, B2B2C)
 - Aucun ne prend de décision stratégique (déléguée à StrongFather)
@@ -308,12 +310,12 @@ Ce document **ne couvre pas** :
 **Relation avec les strates :**
 - Utilisent les interfaces et BondingBrother de la Strate 5
 - Utilisent les cores de la Strate 4
-- Sont consommés par la Strate 7 (Produits Finis)
+- Sont consommés par la Strate 7 (Opérateurs)
 - Utilisent le Kernel pour les primitives techniques
 
 **Pourquoi cette strate est stratégique :**
 - **Évite le piège WordPress/SaaS monolithique** : On ne fait pas "un CMS avec des plugins", on fait "un système qui peut produire un CMS"
-- **Permet de vendre à tous les niveaux** : B2B (briques), B2C (produit fini), B2B2C (produit + briques sous licence)
+- **Permet de vendre à tous les niveaux** : B2B (briques), B2C (Opérateur), B2B2C (Opérateur + Outils sous licence)
 - **Reste compatible hardware faible** : Logique pure, pas de dépendance cloud, déploiement local possible
 - **Parfait pour** : Collectivités, événements, IoT, edge computing, zones isolées
 
@@ -327,7 +329,7 @@ Ce document **ne couvre pas** :
 
 **Rôle :** Console souveraine d'administration, outil d'orchestration et de contrôle.
 
-**Statut :** Exception volontaire à la logique produit standard.
+**Statut :** Exception volontaire à la logique Opérateur standard.
 
 **Éléments constitutifs :**
 - **Installation & Bootstrap** : Installation complète de l'environnement Miyukini
@@ -338,10 +340,10 @@ Ce document **ne couvre pas** :
 - **Recovery Exceptionnel** : Écriture DB directe en mode maintenance (cas extrême)
 
 **Invariants :**
-- ❌ Aucun autre produit ne peut dépendre de MiyukiniAdmin
-- ❌ MiyukiniAdmin ne consomme aucun produit intermédiaire
+- ❌ Aucun autre Opérateur ne peut dépendre de MiyukiniAdmin
+- ❌ MiyukiniAdmin ne consomme aucun Outil ou Kit d'Outils
 - ❌ MiyukiniAdmin n'expose aucune API publique
-- ❌ MiyukiniAdmin n'est jamais embarqué dans un produit client
+- ❌ MiyukiniAdmin n'est jamais embarqué dans un Opérateur client
 - ✅ Toujours via BondingBrother
 - ✅ Jamais silencieux, jamais implicite
 
@@ -355,35 +357,50 @@ Ce document **ne couvre pas** :
 
 ---
 
-### 🟩 STRATE 7 — PRODUITS FINIS
+### 🟩 STRATE 7 — OPÉRATEURS (OPERATORS)
 
-**Rôle :** Produits livrables aux clients finaux, combinant des produits intermédiaires avec une logique métier spécifique.
+**Rôle :** Entités fonctionnelles gouvernées qui exécutent des rôles pour le compte de l'utilisateur.
 
-**Éléments constitutifs :**
-- **SaaS** : Applications SaaS complètes (CRM, ERP, etc.)
-- **Apps** : Applications mobiles, desktop, web
-- **Jeux** : Jeux multijoueurs, jeux solo
-- **CMS** : Systèmes de gestion de contenu complets
-- **Outils métier** : Outils spécialisés par domaine (événementiel, e-commerce, etc.)
+**Note terminologique :** Cette strate était anciennement appelée "Produits Finis". La terminologie correcte est **Opérateurs (Operators)**. Voir [Miyukini Conceptual References - Operators et Terminologie](Miyukini%20Conceptual%20References%20-%20Operators%20et%20Terminologie.md).
+
+**Définition canonique :**
+
+> **An Operator is a governed functional entity that performs a role on behalf of the user within a Miyukini environment.**
+
+**Types d'Opérateurs :**
+
+| Type | Rôle | Exemples |
+|------|------|----------|
+| **Opérateur de Service** | Gère un domaine fonctionnel | CMS, Auth, E-commerce, CRM |
+| **Opérateur d'Interface** | Expose les services | UI web, App mobile, Dashboard |
+| **Opérateur d'Automatisation** | Agit automatiquement | Workflows, Agents, Batch |
+| **Opérateur de Domaine** | Exerce un métier | Blog, Catalogue, Support |
+| **Opérateur Souverain** | Autorité système (exception) | MiyukiniAdmin |
 
 **Modèles de livraison :**
-- **B2C** : Produits finis pour consommateurs finaux
-- **B2B** : Produits finis pour entreprises
-- **B2B2C** : Produits finis + produits intermédiaires sous licence pour revendeurs
+- **B2C** : Opérateurs pour consommateurs finaux
+- **B2B** : Opérateurs pour entreprises
+- **B2B2C** : Opérateurs + Outils sous licence pour revendeurs
 
 **Invariants :**
-- Les produits finis combinent des produits intermédiaires (Strate 6)
-- Peuvent contenir de la logique métier spécifique
+- Les Opérateurs orchestrent des Outils & Kits d'Outils (Strate 6)
+- Les Opérateurs ne codent pas, ils orchestrent
 - Utilisent les interfaces de la Strate 5
 - Respectent les contraintes d'autonomie (Strate 3)
+- Sont gouvernés par les Cores (Strate 4)
 
 **Relation avec les strates :**
-- Combinent des produits intermédiaires de la Strate 6
+- Orchestrent des Outils & Kits d'Outils de la Strate 6
 - Utilisent les interfaces de la Strate 5
 - Respectent les invariants de la Strate 3
 - Fonctionnent sur le Kernel et la Strate 0
 
+**Phrase fondatrice :**
+
+> **In Miyukini, users do not install applications. They interact with governed Operators that perform roles on their behalf.**
+
 **Documentation associée :**
+- [Miyukini Conceptual References - Operators et Terminologie](Miyukini%20Conceptual%20References%20-%20Operators%20et%20Terminologie.md)
 - [Miyukini Conceptual References - Lois Autonomie Système](Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
 
 ---
@@ -397,13 +414,21 @@ Ce document **ne couvre pas** :
 **Implications :**
 - La Strate 7 ne peut pas dépendre directement de la Strate 4
 - Le Kernel ne peut pas dépendre d'une strate supérieure
-- Les cores (Strate 4) ne peuvent pas dépendre des produits (Strate 6 ou 7)
+- Les cores (Strate 4) ne peuvent pas dépendre des Outils ou Opérateurs (Strate 6 ou 7)
 
 **Vérification :** Pour chaque dépendance, poser la question : *"Cette dépendance va-t-elle vers une strate inférieure ?"* Si non, il y a violation architecturale.
 
 ### 5.2 Gouvernance d'Écosystème — Dépendance Verticale
 
 **Principe :** Les strates 0 à 5 constituent un socle non substituable, strictement gouverné par Miyukini. Les strates 6 et 7 autorisent l'extension externe, mais dans le cadre strict de Miyukini.
+
+**Règle fondatrice (LOI-7) :**
+
+> **Dans Miyukini, la strate Cores est immuable.**  
+> **Toute évolution se fait par la création d'un nouvel environnement complet.**  
+> **Les Opérateurs sont liés à un environnement unique et ne peuvent exister hors de celui-ci.**
+
+**Documentation complète :** [Miyukini Conceptual References - Souveraineté Environnement](Miyukini%20Conceptual%20References%20-%20Souverainete%20Environnement.md)
 
 #### 🔻 Strates 0 → 5 : Socle Non Substituable
 
@@ -420,8 +445,8 @@ Ce document **ne couvre pas** :
 #### 🔺 Strates 6 → 7 : Extension Autorisée, Cadre Imposé
 
 **Autorisations pour développeurs tiers :**
-- ✅ Créer des produits intermédiaires (Strate 6)
-- ✅ Créer des produits finis (Strate 7)
+- ✅ Créer des Outils et Kits d'Outils (Strate 6)
+- ✅ Créer des Opérateurs (Strate 7)
 - ✅ Créer les deux
 
 **Contraintes obligatoires :**
@@ -460,7 +485,40 @@ Ce document **ne couvre pas** :
 **Documentation associée :**
 - [Miyukini Conceptual References - Lois Autonomie Système](Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) — LOI-1, LOI-2, LOI-3
 
-### 5.5 Traçabilité et Auditabilité
+### 5.5 Coexistence Multi-Environnement
+
+**Principe :** Plusieurs environnements COG peuvent coexister sur un même hardware physique, sans conflit.
+
+**Schéma d'architecture :**
+
+```
+Hardware Physique
+ │
+ ├─ Miyukini Env A (COG v1.2 LTS)
+ │   ├─ Opérateurs A1, A2
+ │   └─ [ID: env-a-uuid]
+ │
+ ├─ Miyukini Env B (COG v2.0)
+ │   ├─ Produits B1
+ │   └─ [ID: env-b-uuid]
+ │
+ └─ Miyukini Env C (isolé / offline)
+     ├─ Produits C1
+     └─ [ID: env-c-uuid]
+```
+
+**Pourquoi aucun conflit :**
+- Pas de patch partagé entre environnements
+- Pas de core mutualisé entre environnements
+- Pas de dépendance transversale
+- Isolation complète (chaque environnement a ses propres cores)
+
+**Documentation associée :**
+- [Miyukini Conceptual References - Souveraineté Environnement](Miyukini%20Conceptual%20References%20-%20Souverainete%20Environnement.md) — Section 4
+
+---
+
+### 5.6 Traçabilité et Auditabilité
 
 **Principe :** Toute action à travers les strates doit être traçable et auditable.
 
@@ -481,9 +539,9 @@ Ce document **ne couvre pas** :
 ### 6.1 Flux Utilisateur → Action
 
 ```
-Strate 7 (Produit Fini - Utilisateur)
+Strate 7 (Opérateur - Utilisateur)
     ↓
-Strate 6 (Produit Intermédiaire - Auth, Content, etc.)
+Strate 6 (Outils & Kits d'Outils - Auth, Content, etc.)
     ↓
 Strate 5 (Interface API/UI + BondingBrother)
     ↓
@@ -513,7 +571,7 @@ Strate 7 (Produits Finis affichent)
 ### 6.3 Flux Décision Stratégique
 
 ```
-Strate 6 (Produit Intermédiaire exprime intention)
+Strate 6 (Outil exprime intention)
     ↓
 Strate 5 (BondingBrother traduit)
     ↓
@@ -570,16 +628,22 @@ Cette pyramide est la référence architecturale pour tout développement dans l
 
 **Documentation associée :**
 - [Miyukini Conceptual References - Vision Stratégique](Miyukini%20Conceptual%20References%20-%20Vision%20Strategique.md) : Objectifs stratégiques et vision de l'écosystème
-- [Miyukini Conceptual References - MiyukiniAdmin Status](Miyukini%20Conceptual%20References%20-%20MiyukiniAdmin%20Status.md) : Statut officiel et canonique (Strate 9 - Exception)
+- [Miyukini Conceptual References - Definition COG](Miyukini%20Conceptual%20References%20-%20Definition%20COG.md) : Définition officielle COG (Core-Orchestrated Governance Environment)
+- [Miyukini Conceptual References - Souveraineté Environnement](Miyukini%20Conceptual%20References%20-%20Souverainete%20Environnement.md) : Règles de souveraineté, versioning et migration (LOI-7, LOI-8)
+- [Miyukini Conceptual References - Tools et Toolkits](Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) : Gouvernance des capacités exécutables (Strate 6)
+- [Miyukini Conceptual References - Operators et Terminologie](Miyukini%20Conceptual%20References%20-%20Operators%20et%20Terminologie.md) : Terminologie officielle Operators (Strate 7)
+- [Miyukini Conceptual References - MiyukiniAdmin Status](Miyukini%20Conceptual%20References%20-%20MiyukiniAdmin%20Status.md) : Statut officiel et canonique (Strate 9 - Sovereign Operator)
 - [Miyukini Conceptual References - Integrity & Degradation System](Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md) : Système de dégradation graduée (T0-T4)
 - [Miyukini Conceptual References - External Signal & Trust Reinforcement Contract](Miyukini%20Conceptual%20References%20-%20External%20Signal%20Trust%20Reinforcement%20Contract.md) : Intégration Internet comme signal externe
 - [Miyukini Conceptual References - Mobile & WebApp Strategy](Miyukini%20Conceptual%20References%20-%20Mobile%20WebApp%20Strategy.md) : Architecture mobile et WebApp (Strate 5 - Interfaces)
 - [Miyukini Conceptual References - Security Protocols](Miyukini%20Conceptual%20References%20-%20Security%20Protocols.md) : Protocoles de sécurité (temps réel et asynchrone)
 - [Miyukini Conceptual References - Security Performance Impact](Miyukini%20Conceptual%20References%20-%20Security%20Performance%20Impact.md) : Impact réel sur les performances
 - [Miyukini Conceptual References - Security Levels](Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) : Niveaux de sécurité (0-4) - adaptation des cores selon niveau
+- [Miyukini Conceptual References - Carte Optimisation](Miyukini%20Conceptual%20References%20-%20Carte%20Optimisation.md) : Leviers d'optimisation autorisés par zone
+- [Miyukini Conceptual References - Objectif Final](Miyukini%20Conceptual%20References%20-%20Objectif%20Final.md) : Vision synthèse et piliers fondamentaux
 
 ---
 
 **Date de création :** 2026-01-26  
-**Version :** 2.1 (ajout systèmes d'intégrité et signaux externes)  
+**Version :** 2.7 (terminologie Opérateur complète)  
 **Statut :** Document de référence contractuel

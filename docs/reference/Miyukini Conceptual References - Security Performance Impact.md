@@ -373,3 +373,4 @@ L'impact des protocoles de sécurité sur les performances dans Miyukini est :
 - [Master Butler - Documentation Fondatrice](../core/MasterButler/Master%20Butler%20-%20Documentation%20Fondatrice.md) : Registre local
 - [Border Guard - Documentation Fondatrice](../core/BorderGuard/Border%20Guard%20-%20Documentation%20Fondatrice.md) : Classification simple
 - [BondingBrother - Documentation Fondatrice](../core/BondingBrother/BondingBrother%20-%20Documentation%20Fondatrice.md) : Médiation légère
+- [Miyukini Conceptual References - Carte Optimisation](Miyukini%20Conceptual%20References%20-%20Carte%20Optimisation.md) : Leviers d'optimisation autorisés par zone

@@ -347,7 +347,7 @@ Le cache mobile est :
 - Observation de l'état réseau
 - Détection des dégradations
 - Calcul du niveau de confiance (T0-T4)
-- Propagation de l'état aux produits
+- Propagation de l'état aux Opérateurs
 
 ### 10.4 TAMR
 

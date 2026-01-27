@@ -1,7 +1,9 @@
-# Capacités mutualisables — Analyse produit
+# Capacités Mutualisables — Analyse Opérateurs
 
 > Capacités apparaissant dans ≥3 domaines distincts.
-> Candidats à la mutualisation en modules produit réutilisables.
+> Candidats à la mutualisation en Outils et Kits d'Outils réutilisables.
+
+**Note terminologique :** Dans ce document, "produit" au sens commercial (SaaS, app, site) désigne ce que Miyukini appelle un **Opérateur** (Strate 7). "Module produit" désigne un **Outil** ou **Kit d'Outils** (Strate 6).
 
 ---
 
@@ -162,15 +164,15 @@ Les capacités génériques 1-18 sont **déjà mutualisables** par définition. 
 
 ## Synthèse décisionnelle
 
-**Modules produit à créer :**
-- Module Médias
-- Module Notifications transactionnelles
-- Module Prix
-- Module Stocks / Inventaire
-- Module Historique / Traçabilité
-- Module Réservations (si ≥3 produits en ont besoin)
-- Module Ressources (si ≥3 produits en ont besoin)
+**Outils / Kits d'Outils à créer :**
+- Outil Médias
+- Outil Notifications transactionnelles
+- Outil Prix
+- Outil Stocks / Inventaire
+- Outil Historique / Traçabilité
+- Outil Réservations (si ≥3 Opérateurs en ont besoin)
+- Outil Ressources (si ≥3 Opérateurs en ont besoin)
 
 **Capacités génériques 1-18 :** Déjà mutualisables, à réutiliser directement.
 
-**Capacités spécifiques :** Laisser dans chaque produit, sauf celles listées ci-dessus.
+**Capacités spécifiques :** Laisser dans chaque Opérateur, sauf celles listées ci-dessus.

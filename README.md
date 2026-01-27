@@ -23,9 +23,17 @@
 
 ### Qu'est-ce que Miyukini
 
+**Miyukini est un COG — Core-Orchestrated Governance Environment.**
+
+> 🇫🇷 Un environnement de gouvernance orchestré par des cores. Il coordonne, sécurise et fait fonctionner des systèmes logiciels complets, du noyau jusqu'à l'utilisateur final.
+>
+> 🇬🇧 *A Core-Orchestrated Governance Environment. It governs, coordinates and operates software systems from the core to the end user.*
+
 Miyukini Core System (MCS) est un **écosystème logiciel gouverné** conçu pour produire des applications autonomes, sécurisées structurellement, et capables de fonctionner dans des conditions de contrainte extrême (offline, ressources limitées, environnements isolés).
 
 Miyukini n'est pas un framework. Ce n'est pas une bibliothèque. C'est un **environnement gouverné dans lequel des produits existent**.
+
+> *"Miyukini is not an OS. It's the cog that makes digital systems work together."*
 
 La distinction est fondamentale : un framework fournit des outils que le développeur utilise comme bon lui semble. Miyukini fournit un **cadre non négociable** dans lequel les produits opèrent selon des règles strictes, des invariants vérifiables, et une gouvernance centralisée.
 

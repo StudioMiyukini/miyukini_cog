@@ -31,14 +31,14 @@ Ce document **ne couvre pas** :
 
 ### 3.1 Échelle de Confiance
 
-Chaque core et chaque produit opère avec un niveau de confiance courant :
+Chaque core et chaque Opérateur opère avec un niveau de confiance courant :
 
 | Niveau | État | Signification | Capacités |
 |--------|------|---------------|-----------|
 | **T0** | Normal | Système sain | Toutes les capacités disponibles |
 | **T1** | Instable | Anomalie détectée | Log renforcé, traçabilité étendue |
 | **T2** | Dégradé | Incohérence persistante | Certaines capacités désactivées |
-| **T3** | Restreint | Suspicion forte | Gel des produits non essentiels |
+| **T3** | Restreint | Suspicion forte | Gel des Opérateurs non essentiels |
 | **T4** | Bloqué | Intégrité rompue | Uniquement diagnostics |
 
 **📌 Ce n'est pas binaire**  
@@ -324,21 +324,21 @@ BondingBrother devient :
 - Transporte les signaux d'intégrité
 - N'interprète jamais
 - Ne décide jamais
-- Rend visible les dégradations aux produits
+- Rend visible les dégradations aux Opérateurs
 
-**➡️ Les produits ne peuvent pas ignorer l'état du système**
+**➡️ Les Opérateurs ne peuvent pas ignorer l'état du système**
 
 ### 8.2 Visibilité Obligatoire
 
-**Tout produit :**
+**Tout Opérateur :**
 - Reçoit le niveau de confiance courant (T0-T4)
 - Ne peut pas ignorer les dégradations
 - Doit adapter son comportement selon le niveau
 
 **Exemples :**
-- Produit en T2 : Désactive certaines fonctionnalités
-- Produit en T3 : Mode minimal uniquement
-- Produit en T4 : Arrêt propre
+- Opérateur en T2 : Désactive certaines fonctionnalités
+- Opérateur en T3 : Mode minimal uniquement
+- Opérateur en T4 : Arrêt propre
 
 ---
 

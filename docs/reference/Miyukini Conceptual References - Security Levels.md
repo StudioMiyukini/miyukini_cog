@@ -2,15 +2,15 @@
 
 ## 1. Contexte
 
-Ce document définit les **5 niveaux de sécurité Miyukini** : un système de profils de sécurité où les produits déclarent leur niveau de risque, et les cores adaptent leur comportement en conséquence.
+Ce document définit les **5 niveaux de sécurité Miyukini** : un système de profils de sécurité où les Opérateurs déclarent leur niveau de risque, et les cores adaptent leur comportement en conséquence.
 
 **Principe fondamental :**
 
 **"La sécurité est un paramètre de gouvernance, pas un choix applicatif."**
 
-👉 Un produit déclare son profil de risque  
-👉 Un produit n'implémente jamais sa propre sécurité  
-👉 Un produit subit le niveau imposé par l'écosystème
+👉 Un Opérateur déclare son profil de risque  
+👉 Un Opérateur n'implémente jamais sa propre sécurité  
+👉 Un Opérateur subit le niveau imposé par l'écosystème
 
 Les cores (StrongFather, MasterButler, BorderGuard, TAMR, etc.) adaptent leur comportement selon le niveau déclaré.
 
@@ -35,7 +35,7 @@ Ce document **ne couvre pas** :
 
 ### 3.1 La Sécurité est un Paramètre de Gouvernance
 
-**Un produit :**
+**Un Opérateur :**
 - ✅ Déclare son profil de risque
 - ❌ N'implémente jamais sa propre sécurité
 - ✅ Subit le niveau imposé par l'écosystème
@@ -49,7 +49,7 @@ Ce document **ne couvre pas** :
 
 ### 3.2 Où le Niveau est Déclaré
 
-**👉 Dans le produit, mais validé par les cores.**
+**👉 Dans l'Opérateur, mais validé par les cores.**
 
 **Exemple conceptuel (non technique) :**
 
@@ -106,7 +106,7 @@ Product Security Profile:
 - CMS
 - Backoffice simple
 - Contenu éditorial
-- Produits B2C classiques
+- Opérateurs B2C classiques
 
 #### Sécurité Appliquée
 
@@ -237,7 +237,7 @@ Product Security Profile:
 
 ### 5.1 Principe
 
-**Un produit ne passe jamais brutalement de OK → BLOQUÉ.**
+**Un Opérateur ne passe jamais brutalement de OK → BLOQUÉ.**
 
 ### 5.2 États de Dégradation par Niveau
 
@@ -275,12 +275,12 @@ Product Security Profile:
 
 Les niveaux de sécurité (0-4) sont **indépendants** des niveaux de confiance (T0-T4) :
 
-- **Niveaux de sécurité (0-4)** : Profil de risque du produit
+- **Niveaux de sécurité (0-4)** : Profil de risque de l'Opérateur
 - **Niveaux de confiance (T0-T4)** : État d'intégrité du système
 
 **Exemple :**
-- Produit Niveau 2 (Sensitive Data) en T0 (Normal) → Fonctionnement normal
-- Produit Niveau 2 (Sensitive Data) en T2 (Dégradé) → Restrictions selon niveau sécurité
+- Opérateur Niveau 2 (Sensitive Data) en T0 (Normal) → Fonctionnement normal
+- Opérateur Niveau 2 (Sensitive Data) en T2 (Dégradé) → Restrictions selon niveau sécurité
 
 **Documentation associée :**
 - [Miyukini Conceptual References - Integrity & Degradation System](Miyukini%20Framework%20-%20Integrity%20Degradation%20System.md) : Niveaux de confiance (T0-T4)
@@ -395,8 +395,8 @@ Les niveaux de sécurité (0-4) sont **indépendants** des niveaux de confiance 
 ### 8.2 Sécurité Adaptative
 
 **La sécurité n'est pas uniforme :**
-- Produit public (Niveau 0) : Sécurité minimale, performance maximale
-- Produit critique (Niveau 3) : Sécurité maximale, performance secondaire
+- Opérateur public (Niveau 0) : Sécurité minimale, performance maximale
+- Opérateur critique (Niveau 3) : Sécurité maximale, performance secondaire
 
 **👉 Impact performance proportionnel au risque**
 

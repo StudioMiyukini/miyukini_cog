@@ -4,7 +4,7 @@
 
 Ce document définit la **contrainte d'autonomie** comme contrainte architecturale de premier rang du Miyukini Core System. Cette contrainte stipule que l'écosystème doit fonctionner correctement sur du hardware simple, parfois isolé, sans dépendance externe critique.
 
-Cette contrainte n'est pas un détail d'implémentation. C'est un **invariant architectural non négociable** qui influence toutes les décisions de conception, de l'écosystème jusqu'aux produits.
+Cette contrainte n'est pas un détail d'implémentation. C'est un **invariant architectural non négociable** qui influence toutes les décisions de conception, de l'écosystème jusqu'aux Opérateurs.
 
 L'autonomie est ce qui distingue Miyukini des architectures "cloud-native" modernes qui présupposent une connectivité permanente. Miyukini adopte une posture inverse : **la déconnexion est un état normal du système**, pas une erreur à corriger.
 
@@ -59,7 +59,7 @@ Ces 6 lois constituent des **invariants architecturaux**. Toute décision de con
 
 ### LOI-1 : Aucune dépendance externe critique à l'exécution
 
-**Énoncé :** Un produit Miyukini doit pouvoir démarrer, décider, fonctionner, et être audité sans aucun appel externe obligatoire.
+**Énoncé :** Un Opérateur Miyukini doit pouvoir démarrer, décider, fonctionner, et être audité sans aucun appel externe obligatoire.
 
 **Implications :**
 - Les APIs externes sont **optionnelles**, pas fondamentales
@@ -89,7 +89,7 @@ Ces 6 lois constituent des **invariants architecturaux**. Toute décision de con
 **Vérification :** Pour chaque opération, poser la question : *"Cette opération bloque-t-elle en attente d'une ressource externe ?"* Si oui, il y a violation de LOI-2.
 
 **Relation avec les cores :**
-- **StrongFather** : Produit des décisions avec le contexte local disponible. Ne refuse jamais une décision au motif d'un contexte externe manquant.
+- **StrongFather** : Génère des décisions avec le contexte local disponible. Ne refuse jamais une décision au motif d'un contexte externe manquant.
 - **KindMother** : Les WriteIntent sont acceptés localement et synchronisés plus tard. Pas de blocage en attente de validation distante.
 - **Caring Nanny** : Reconnaît et signale l'état "isolé" comme un état normal, pas comme une anomalie.
 
@@ -247,7 +247,7 @@ Le système reconnaît explicitement les états d'isolement suivants. Caring Nan
 | **Politiques actives StrongFather** | Souveraineté locale | Chaque nœud définit ses propres politiques |
 | **Règles de permissions locales** | Souveraineté locale | Permissions évaluées localement uniquement |
 | **État système temps réel** | Volatile et local | Caring Nanny observe localement |
-| **Sessions et tokens d'authentification** | Sécurité et volatilité | Gérés localement par le produit |
+| **Sessions et tokens d'authentification** | Sécurité et volatilité | Gérés localement par l'Opérateur |
 | **Cache et données transitoires** | Nature éphémère | Non persisté, non synchronisé |
 
 ### 6.3 Synchronisable conditionnellement
@@ -256,7 +256,7 @@ Le système reconnaît explicitement les états d'isolement suivants. Caring Nan
 |-----------|-----------|--------------|
 | **Politiques (templates)** | Si fédération autorise le partage de politiques | Bonding Brother + Border Guard |
 | **Schémas de données** | Si versions compatibles | Vérification de compatibilité Ever Buddy |
-| **Règles métier (déclaratives)** | Si explicitement partagées | Configuration produit |
+| **Règles métier (déclaratives)** | Si explicitement partagées | Configuration Opérateur |
 
 ---
 
@@ -427,5 +427,7 @@ Les 6 lois d'autonomie sont **non négociables**. Toute exception doit être :
 - Master Butler - Documentation Fondatrice v1.1
 
 **Documents de référence associés :**
+- [Miyukini Conceptual References - Objectif Final](Miyukini%20Conceptual%20References%20-%20Objectif%20Final.md) : Vision synthèse et pilier 6 "Autonomie opérationnelle"
 - [Miyukini Conceptual References - Integrity & Degradation System](Miyukini%20Framework%20-%20Integrity%20Degradation%20System.md) : Dégradation graduée conforme aux lois d'autonomie
 - [Miyukini Conceptual References - External Signal & Trust Reinforcement Contract](Miyukini%20Framework%20-%20External%20Signal%20Trust%20Reinforcement%20Contract.md) : Internet comme signal, pas comme dépendance (LOI-1)
+- [Miyukini Conceptual References - Carte Optimisation](Miyukini%20Conceptual%20References%20-%20Carte%20Optimisation.md) : Leviers d'optimisation par zone sans violer les invariants

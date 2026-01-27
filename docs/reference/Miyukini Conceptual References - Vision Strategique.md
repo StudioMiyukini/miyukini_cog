@@ -22,6 +22,18 @@ Ce document **ne couvre pas** :
 
 ---
 
+## 2.1 Définition officielle — COG
+
+**Miyukini est un COG — Core-Orchestrated Governance Environment.**
+
+| 🇫🇷 | 🇬🇧 |
+|-----|-----|
+| Un environnement de gouvernance orchestré par des cores. Il coordonne, sécurise et fait fonctionner des systèmes logiciels complets, du noyau jusqu'à l'utilisateur final. | A Core-Orchestrated Governance Environment. It governs, coordinates and operates software systems from the core to the end user. |
+
+> *"Miyukini is not an OS. It's the cog that makes digital systems work together."*
+
+---
+
 ## 3. Objectifs Stratégiques Fondamentaux
 
 ### 3.1 Maîtriser du Hardware jusqu'à l'UX
@@ -63,17 +75,17 @@ Ce document **ne couvre pas** :
 **Modèles de livraison :**
 
 #### B2B (Business to Business)
-- **Livrable :** Produits intermédiaires (Strate 6)
+- **Livrable :** Outils et Kits d'Outils (Strate 6)
 - **Exemples :** Auth, Billing, Realtime Engine vendus comme briques
-- **Client :** Entreprises qui intègrent les briques dans leurs produits
+- **Client :** Entreprises qui intègrent les briques dans leurs Opérateurs
 
 #### B2C (Business to Consumer)
-- **Livrable :** Produits finis (Strate 7)
+- **Livrable :** Opérateurs (Strate 7)
 - **Exemples :** CMS complet, SaaS, Apps
 - **Client :** Utilisateurs finaux
 
 #### B2B2C (Business to Business to Consumer)
-- **Livrable :** Produits finis + produits intermédiaires sous licence
+- **Livrable :** Opérateurs + Outils sous licence
 - **Exemples :** CMS + Auth/Billing sous licence pour revendeurs
 - **Client :** Revendeurs qui personnalisent et revendent
 
@@ -118,24 +130,24 @@ Ce document **ne couvre pas** :
 - Déploiement flexible
 - Coûts proportionnels à l'usage
 
-### 3.6 Éviter les Produits Monolithiques Jetables
+### 3.6 Éviter les Opérateurs Monolithiques Jetables
 
-**Objectif :** Ne pas créer de produits monolithiques qui deviennent obsolètes et doivent être jetés.
+**Objectif :** Ne pas créer d'Opérateurs monolithiques qui deviennent obsolètes et doivent être jetés.
 
 **Problème évité :**
 - WordPress : Monolithique, difficile à faire évoluer
 - SaaS monolithiques : Lock-in, dépendance totale
-- Produits jetables : Refonte complète à chaque évolution majeure
+- Opérateurs jetables : Refonte complète à chaque évolution majeure
 
 **Solution :**
 - Architecture en strates indépendantes
-- Produits intermédiaires recomposables
+- Outils et Kits d'Outils recomposables
 - Évolution progressive sans rupture
 - Réutilisabilité maximale
 
 ---
 
-## 4. La Clé Stratégique : Produits Intermédiaires (Strate 6)
+## 4. La Clé Stratégique : Outils & Kits d'Outils (Strate 6)
 
 ### 4.1 Pourquoi cette Strate est Cruciale
 
@@ -147,13 +159,13 @@ Ce document **ne couvre pas** :
 - Pas de couche intermédiaire recomposable
 
 **Ce que Miyukini fait :**
-- **Produits intermédiaires** : Capacités produits prêtes à l'emploi, recomposables, indépendantes du contexte business
+- **Outils & Kits d'Outils** : Capacités prêtes à l'emploi, recomposables, indépendantes du contexte business
 
-### 4.2 Ce que SONT les Produits Intermédiaires
+### 4.2 Ce que SONT les Outils & Kits d'Outils
 
 **Caractéristiques :**
-- ✅ **Capacités produits prêtes à l'emploi** : Fonctionnels sans configuration métier complexe
-- ✅ **Recomposables** : Peuvent être combinés pour créer des produits finis
+- ✅ **Capacités prêtes à l'emploi** : Fonctionnels sans configuration métier complexe
+- ✅ **Recomposables** : Peuvent être combinés pour créer des Opérateurs
 - ✅ **Indépendants du contexte business** : Pas de logique métier spécifique
 - ✅ **Exploitent les cores** : Utilisent StrongFather, KindMother, etc.
 - ✅ **Ne décident jamais seuls** : Délèguent les décisions aux cores
@@ -161,7 +173,7 @@ Ce document **ne couvre pas** :
 
 **Exemples concrets :**
 
-| Produit Intermédiaire | Sert à |
+| Outil / Kit d'Outils | Sert à |
 |----------------------|--------|
 | **Auth / Identity** | Login, rôles, tokens, gestion des identités |
 | **Realtime Engine** | WebSocket, événements, état live |
@@ -172,11 +184,11 @@ Ce document **ne couvre pas** :
 | **Search / Index** | Requêtes rapides, indexation |
 | **MiyukiniAdmin** | Supervision système, administration, monitoring |
 
-### 4.3 Ce que NE SONT PAS les Produits Intermédiaires
+### 4.3 Ce que NE SONT PAS les Outils & Kits d'Outils
 
 **Distinctions importantes :**
-- ❌ **Pas des cores** : Les cores (Strate 4) sont des moteurs conceptuels, pas des produits
-- ❌ **Pas des apps finales** : Les produits finis (Strate 7) contiennent de la logique métier spécifique
+- ❌ **Pas des cores** : Les cores (Strate 4) sont des moteurs conceptuels, pas des Outils
+- ❌ **Pas des apps finales** : Les Opérateurs (Strate 7) contiennent de la logique métier spécifique
 - ❌ **Pas du métier client** : Aucune logique métier spécifique à un client ou domaine
 
 ### 4.4 Pourquoi c'est LA Bonne Stratégie
@@ -187,7 +199,7 @@ Ce document **ne couvre pas** :
 - "Un CMS avec des plugins" (monolithique avec extensions)
 
 **Ce qu'on FAIT :**
-- "Un système qui peut produire un CMS" (recomposable)
+- "Un système qui peut créer un CMS" (recomposable)
 
 **Bénéfice :** Pas de refonte complète, évolution progressive, réutilisabilité maximale.
 
@@ -195,13 +207,13 @@ Ce document **ne couvre pas** :
 
 **B2B → Briques :**
 - Vendre Auth, Realtime, Admin comme briques
-- Client intègre dans son produit
+- Client intègre dans son Opérateur
 
-**B2C → Produit fini :**
+**B2C → Opérateur :**
 - Vendre un CMS complet
 - Client utilise directement
 
-**B2B2C → Produit + Briques sous licence :**
+**B2B2C → Opérateur + Briques sous licence :**
 - Vendre CMS + Auth/Billing sous licence
 - Revendeur personnalise et revend
 
@@ -243,7 +255,7 @@ Ce document **ne couvre pas** :
 | **Site** | **Plateforme autonome** |
 | **Outils monolithiques** | **Écosystème modulaire** |
 | **Dépendance cloud** | **Autonomie structurelle** |
-| **Produits jetables** | **Produits évolutifs** |
+| **Opérateurs jetables** | **Opérateurs évolutifs** |
 
 ### 5.3 Implications
 
@@ -286,14 +298,14 @@ Ce document **ne couvre pas** :
 
 ### 6.2 Ordre à Suivre
 
-**🔜 Étape 4 : Produits Intermédiaires**
+**🔜 Étape 4 : Outils & Kits d'Outils**
 - Auth, Billing, Content, Realtime, etc.
 - **⚠️ Ne pas sauter cette étape**
 - C'est la clé stratégique
 
-**🔜 Étape 5 : Produits Finis**
+**🔜 Étape 5 : Opérateurs**
 - CMS, SaaS, Apps, Jeux
-- Combinaison de produits intermédiaires
+- Combinaison d'Outils et Kits d'Outils
 - Logique métier spécifique
 
 ### 6.3 Pourquoi cet Ordre
@@ -306,16 +318,16 @@ Ce document **ne couvre pas** :
 - Supervision nécessaire pour valider les cores
 - Outil de diagnostic et monitoring
 
-**MiyukiniAdmin → Produits Intermédiaires :**
-- Les produits intermédiaires exploitent les cores
+**MiyukiniAdmin → Outils & Kits d'Outils :**
+- Les Outils et Kits d'Outils exploitent les cores
 - Validation progressive de l'architecture
 
-**Produits Intermédiaires → Produits Finis :**
-- Les produits finis combinent les intermédiaires
+**Outils & Kits d'Outils → Opérateurs :**
+- Les Opérateurs combinent les Outils et Kits d'Outils
 - Réutilisabilité maximale
 
-**⚠️ Ne JAMAIS sauter l'étape 4 (Produits Intermédiaires)**
-- C'est la différence entre un outil et un écosystème
+**⚠️ Ne JAMAIS sauter l'étape 4 (Outils & Kits d'Outils)**
+- C'est la différence entre un outil simple et un écosystème
 - C'est ce qui permet la recomposition
 - C'est ce qui évite les monolithes
 
@@ -370,7 +382,7 @@ Ce document **ne couvre pas** :
 
 **Principe clé (formulation contractuelle) :**
 
-Toutes les strates jusqu'à la strate 5 sont strictement dépendantes de l'écosystème Miyukini. Toute production logicielle externe (produits intermédiaires ou finaux) s'exécute **DANS** le cadre Miyukini, selon ses protocoles, ses interfaces et ses règles.
+Toutes les strates jusqu'à la strate 5 sont strictement dépendantes de l'écosystème Miyukini. Toute production logicielle externe (Outils, Kits d'Outils ou Opérateurs) s'exécute **DANS** le cadre Miyukini, selon ses protocoles, ses interfaces et ses règles.
 
 **👉 Ce n'est pas un framework "open-ended".**  
 **👉 C'est un écosystème gouverné.**
@@ -392,8 +404,8 @@ Toutes les strates jusqu'à la strate 5 sont strictement dépendantes de l'écos
 #### 🔺 Strates 6 → 7 : Extension Autorisée, Cadre Imposé
 
 **D'autres développeurs peuvent :**
-- Créer des produits intermédiaires
-- Créer des produits finaux
+- Créer des Outils et Kits d'Outils
+- Créer des Opérateurs
 - Créer les deux
 
 **MAIS :**
@@ -427,8 +439,8 @@ Tu construis l'équivalent conceptuel de :
 **Un développeur tiers ne peut pas décider. Il peut proposer, composer, orchestrer.**
 
 #### Ce qu'il PEUT faire :
-- ✅ Composer des modules
-- ✅ Créer des produits
+- ✅ Composer des Outils
+- ✅ Créer des Opérateurs
 - ✅ Définir des UX
 - ✅ Gérer du métier
 
@@ -446,9 +458,9 @@ Tu construis l'équivalent conceptuel de :
 Développeur tiers
         │
         ▼
-[ Produit final ] ──┐
+[ Opérateur ] ──────┐
                      ├─► via Interfaces Miyukini (Strate 5)
-[ Produit interm. ] ─┘
+[ Outils & Kits ] ──┘
         │
         ▼
    Miyukini Ecosystem
@@ -508,17 +520,21 @@ Cette vision guide toutes les décisions architecturales, techniques, et commerc
 ---
 
 **Documentation associée :**
+- [Miyukini Conceptual References - Definition COG](Miyukini%20Conceptual%20References%20-%20Definition%20COG.md) : Définition officielle COG (Core-Orchestrated Governance Environment)
+- [Miyukini Conceptual References - Souveraineté Environnement](Miyukini%20Conceptual%20References%20-%20Souverainete%20Environnement.md) : Règles de souveraineté, versioning et migration
 - [Miyukini Conceptual References - Pyramide Architecture Complète](Miyukini%20Framework%20-%20Pyramide%20Architecture%20Complete.md) : Architecture détaillée des 7 strates + Kernel
-- [Miyukini Conceptual References - Lois Autonomie Système](Miyukini%20Framework%20-%20Lois%20Autonomie%20Systeme.md) : Contraintes d'autonomie structurelle
+- [Miyukini Conceptual References - Lois Autonomie Système](Miyukini%20Framework%20-%20Lois%20Autonomie%20Systeme.md) : Contraintes d'autonomie structurelle (8 lois)
 - [Miyukini Conceptual References - Integrity & Degradation System](Miyukini%20Framework%20-%20Integrity%20Degradation%20System.md) : Système de dégradation graduée et niveaux de confiance
 - [Miyukini Conceptual References - External Signal & Trust Reinforcement Contract](Miyukini%20Framework%20-%20External%20Signal%20Trust%20Reinforcement%20Contract.md) : Intégration Internet comme signal externe
 - [Miyukini Conceptual References - Mobile & WebApp Strategy](Miyukini%20Framework%20-%20Mobile%20WebApp%20Strategy.md) : Stratégie mobile et WebApp
 - [Miyukini Conceptual References - Security Protocols](Miyukini%20Framework%20-%20Security%20Protocols.md) : Protocoles de sécurité temps réel et asynchrone
 - [Miyukini Conceptual References - Security Performance Impact](Miyukini%20Framework%20-%20Security%20Performance%20Impact.md) : Impact réel sur les performances
 - [Miyukini Conceptual References - Security Levels](Miyukini%20Framework%20-%20Security%20Levels.md) : Niveaux de sécurité (0-4) - paramètre de gouvernance
+- [Miyukini Conceptual References - Objectif Final](Miyukini%20Conceptual%20References%20-%20Objectif%20Final.md) : Vision synthèse et piliers fondamentaux
+- [Miyukini Conceptual References - Carte Optimisation](Miyukini%20Conceptual%20References%20-%20Carte%20Optimisation.md) : Leviers d'optimisation autorisés par zone
 
 ---
 
 **Date de création :** 2026-01-26  
-**Version :** 1.0  
+**Version :** 1.3 (ajout référence souveraineté)  
 **Statut :** Document de référence stratégique

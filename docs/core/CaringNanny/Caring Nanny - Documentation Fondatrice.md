@@ -131,6 +131,40 @@ Caring Nanny collabore avec BondingBrother pour la propagation des états aux pr
 
 Caring Nanny informe, BondingBrother propage. La distinction est fondamentale.
 
+### Responsabilité spécifique : Cohérence d'état pour les Tools et Toolkits
+
+Caring Nanny est responsable de la **cohérence globale de l'environnement** pour l'usage des Tools et Toolkits :
+
+| Responsabilité | Description |
+|----------------|-------------|
+| **États autorisés** | Définit dans quels états un Tool peut être utilisé |
+| **Blocage conditionnel** | Bloque si l'environnement est dégradé |
+| **Observation** | Surveille l'état système pour les Tools |
+
+**Question à laquelle Caring Nanny répond pour les Tools :**
+
+> *"L'état actuel du système permet-il cet appel de Tool ?"*
+
+**Exemple de blocage :**
+
+```
+UI Toolkit indisponible car environnement en état SECURITY_LOCKDOWN
+```
+
+**Ce que Caring Nanny connaît pour les Tools :**
+- État actuel de l'environnement (healthy, degraded, offline, etc.)
+- États qui bloquent certains Tools
+- Règles de dégradation appliquées aux Tools
+
+**Ce que Caring Nanny NE fait PAS pour les Tools :**
+- Décider si un Tool doit être appelé (→ StrongFather)
+- Exécuter un Tool (→ Tool lui-même)
+- Définir les permissions (→ Master Butler)
+- Gérer les versions (→ Ever Buddy)
+- Définir le niveau de sécurité (→ WorrySentinel)
+
+**Documentation complète :** [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)
+
 ### La famille Miyukini
 
 Dans la famille Miyukini, Caring Nanny est la **nounou attentive** : elle observe, elle surveille, elle rapporte, mais elle n'agit jamais directement. Son rôle est de savoir ce qui se passe, de détecter les anomalies, et d'informer ceux qui ont l'autorité d'agir.
@@ -578,7 +612,7 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
 
 ---
 
-**Version :** 1.5  
-**Date :** 2026-01-26  
+**Version :** 1.6  
+**Date :** 2026-01-27  
 **Statut :** FONDATION — Contrat normatif non négociable  
-**Référence :** Miyukini Core System, KindMother Documentation Fondatrice, StrongFather Documentation Fondatrice, BondingBrother Documentation Fondatrice, Miyukini Framework - Lois Autonomie Systeme, [Miyukini Framework - Integrity & Degradation System](../../reference/Miyukini%20Framework%20-%20Integrity%20Degradation%20System.md), [Miyukini Framework - External Signal & Trust Reinforcement Contract](../../reference/Miyukini%20Framework%20-%20External%20Signal%20Trust%20Reinforcement%20Contract.md), [Miyukini Framework - Mobile & WebApp Strategy](../../reference/Miyukini%20Framework%20-%20Mobile%20WebApp%20Strategy.md) (état réseau et dégradation mobile), [Miyukini Framework - Security Protocols](../../reference/Miyukini%20Framework%20-%20Security%20Protocols.md) (authentification en couches RT-SEC-2, détection anomalie RT-SEC-4, dégradation AS-SEC-5), [Miyukini Framework - Security Levels](../../reference/Miyukini%20Framework%20-%20Security%20Levels.md) (adaptation monitoring selon niveau sécurité 0-4)
+**Référence :** Miyukini Core System, KindMother Documentation Fondatrice, StrongFather Documentation Fondatrice, BondingBrother Documentation Fondatrice, Miyukini Framework - Lois Autonomie Systeme, [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) (cohérence d'état pour les Tools), [Miyukini Framework - Integrity & Degradation System](../../reference/Miyukini%20Framework%20-%20Integrity%20Degradation%20System.md), [Miyukini Framework - External Signal & Trust Reinforcement Contract](../../reference/Miyukini%20Framework%20-%20External%20Signal%20Trust%20Reinforcement%20Contract.md), [Miyukini Framework - Mobile & WebApp Strategy](../../reference/Miyukini%20Framework%20-%20Mobile%20WebApp%20Strategy.md) (état réseau et dégradation mobile), [Miyukini Framework - Security Protocols](../../reference/Miyukini%20Framework%20-%20Security%20Protocols.md) (authentification en couches RT-SEC-2, détection anomalie RT-SEC-4, dégradation AS-SEC-5), [Miyukini Framework - Security Levels](../../reference/Miyukini%20Framework%20-%20Security%20Levels.md) (adaptation monitoring selon niveau sécurité 0-4)

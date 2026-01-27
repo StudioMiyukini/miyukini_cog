@@ -325,6 +325,39 @@ WorrySentinel garantit la cohérence des niveaux de sécurité entre composants 
 - Un composant de niveau N ne peut pas accéder directement à un composant de niveau > N sans médiation
 - Les interactions entre niveaux différents sont gouvernées par des règles explicites
 
+### Gouvernance de sécurité des Tools et Toolkits
+
+WorrySentinel gouverne la sécurité des Tools et Toolkits en définissant :
+
+| Responsabilité | Description |
+|----------------|-------------|
+| **Niveau de sécurité par Tool** | Chaque Tool a un niveau de sécurité requis (0-4) |
+| **Dégradation** | Gère la dégradation sécuritaire des Tools |
+| **Blocage** | Bloque les Tools en cas de menace (état T2+) |
+| **Audit** | Trace les appels aux Tools pour audit |
+| **Autorisation conditionnelle** | Autorise les Tools sous conditions de sécurité |
+
+**Question à laquelle WorrySentinel répond pour les Tools :**
+
+> *"Le niveau de sécurité actuel permet-il cet appel de Tool ?"*
+
+**Exemple de blocage :**
+
+```
+UI Toolkit indisponible car environnement en état SECURITY_LOCKDOWN (T3)
+```
+
+**Règles de gouvernance Tools :**
+
+| Règle | Description |
+|-------|-------------|
+| **RÈGLE-TOOL-SEC-1** | Chaque Tool a un niveau de sécurité défini |
+| **RÈGLE-TOOL-SEC-2** | Un Tool de niveau N ne peut être appelé que si le niveau de sécurité le permet |
+| **RÈGLE-TOOL-SEC-3** | En état de confiance T2+, certains Tools peuvent être bloqués |
+| **RÈGLE-TOOL-SEC-4** | Tout appel de Tool est auditable |
+
+**Documentation complète :** [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)
+
 ---
 
 ## 7. États de confiance du système
@@ -809,9 +842,9 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
 ---
 
 **Document créé le :** 2026-01-26  
-**Version :** 1.1  
+**Version :** 1.2  
 **Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice, [Miyukini Framework - Integrity Degradation System](../../reference/Miyukini%20Framework%20-%20Integrity%20Degradation%20System.md), [Miyukini Framework - Security Levels](../../reference/Miyukini%20Framework%20-%20Security%20Levels.md), [Miyukini Framework - Pyramide Architecture Complete](../../reference/Miyukini%20Framework%20-%20Pyramide%20Architecture%20Complete.md)  
+**Référence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice, [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md), [Miyukini Framework - Integrity Degradation System](../../reference/Miyukini%20Framework%20-%20Integrity%20Degradation%20System.md), [Miyukini Framework - Security Levels](../../reference/Miyukini%20Framework%20-%20Security%20Levels.md), [Miyukini Framework - Pyramide Architecture Complete](../../reference/Miyukini%20Framework%20-%20Pyramide%20Architecture%20Complete.md)  
 **Type :** Documentation fondatrice non négociable
 
 ---
