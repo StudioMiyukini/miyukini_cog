@@ -6,7 +6,7 @@
 
 ## 1. Contexte
 
-Ce protocole complète le [Protocole d'implémentation générale](./Miyukini%20Framework%20-%20Protocole%20d'implémentation%20générale.md) en définissant les règles spécifiques à la **rédaction de documentation** (et non de code).
+Ce protocole complète le [Protocole d'implémentation générale](./Miyukini%20Framework%20-%20Protocole%20d'implémentation%20générale.md) en définissant les règles spécifiques à la **rédaction de documentation** (et non de code). Il guide l'agents IA *"planificateur"* en mode PLAN pour composer une to-do liste complète qui faciletera l'allocation des tâches aux agents IA.
 
 ### 1.1 Portée / Scope
 
@@ -19,17 +19,7 @@ Le processus :
 - autorise le **travail en parallèle**, sous contraintes,
 - intègre la **gestion des limites de contexte et de coûts LLM**,
 - interdit toute dérive implicite ou interprétation libre.
-
-### 1.2 Différence avec le protocole d'implémentation
-
-| Aspect | Implémentation | Documentation |
-|--------|----------------|---------------|
-| Unité de travail | 1 agent = 1 fichier code | 1 agent = 1 document |
-| En cas de blocage | Rend la main à l'humain | Informe l'agent planificateur |
-| Agents simultanés | Défini à l'avance | Maximum 4 |
-| Tests | Tests unitaires console | Recherche d'incohérences/ambiguïtés |
-
----
+- Définie les règles de nomenclature des tâches
 
 ## 2. Cycle global d'écriture (obligatoire)
 
@@ -97,11 +87,7 @@ Les dépendances doivent être :
 - ❌ Ne pas fusionner plusieurs documents
 - ❌ Ne pas corriger hors périmètre
 
-#### e) Tests
-- Tests unitaires pour recherche d'incohérence ou d'ambiguïté si nécessaires
-- Sinon : justification explicite de leur absence
-
-#### f) Mini log de planification
+#### e) Mini log de planification
 - Ambiguïtés détectées
 - Dépendances critiques
 - Décisions structurantes
@@ -113,16 +99,18 @@ Les dépendances doivent être :
 Chaque tâche issue du plan est **déléguée par l'agent de planification** à un nouvel agent si les conditions sont réunies.
 
 Contexte vierge obligatoire.
-**Pas de tâche mutualisation**
+**Pas de tâche impliquant plusieurs documents à écrire**
 **Pas de batch/vague/groupe de tâches**
 **1 agent = 1 document**
 
-Chaque tâche du plan ou to-do a une nomenclature défini : [xx] - [du document à produire]
-Le [xx] est préfixe de regroupement d'écriture parallèle. Je peux lancer toutes les tâches "01" en même temps avec des agents différents.
+*Chaque tâche du plan ou to-do a une nomenclature défini* : [xx] - [du document à produire]
+Le [xx] est préfixe de regroupement d'écriture parallèle. Je peux lancer toutes les tâches "01" en même temps avec des agents différents pour chaque tâche.
 
 Une limite maximale d'agents simultanés est définie à **4**. Donc aucun groupement de préfixe ne doit avoir plus de 4 itérations.
 
 Lance les agents automatiquement en suivant le plan jusqu'à un arret ou la fin de la tâche
+
+Il est interdit d'avoir des tâches qui demande l'écriture de plusieurs fichiers.
 
 ### 4.1 Règle d'arrêt stricte
 

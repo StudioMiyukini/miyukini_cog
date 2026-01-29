@@ -42,33 +42,39 @@ Contrats FONDATION normatifs et non négociables.
 
 | Document | Description |
 |----------|-------------|
-| *KindMother Integration Contract* | Relation d'observation avec KindMother (à créer) |
-| *StrongFather Integration Contract* | Relation d'information avec StrongFather (à créer) |
-| *BondingBrother Integration Contract* | Collaboration pour la propagation des états (à créer) |
+| [KindMother Integration Contract](./contracts/integration/Caring%20Nanny%20-%20KindMother%20Integration%20Contract.md) | Relation d'observation avec KindMother |
+| [StrongFather Integration Contract](./contracts/integration/Caring%20Nanny%20-%20StrongFather%20Integration%20Contract.md) | Relation d'information avec StrongFather |
+| [BondingBrother Integration Contract](./contracts/integration/Caring%20Nanny%20-%20BondingBrother%20Integration%20Contract.md) | Collaboration pour la propagation des états |
 
 #### Observability
 
 | Document | Description |
 |----------|-------------|
-| *State Model Contract* | Modèle formel des états (à créer) |
-| *Observation Flow Contract* | Flux d'observation : détection → évaluation → agrégation → transition (à créer) |
-| *Propagation Flow Contract* | Flux de propagation : changement → destinataires → message → dispatch (à créer) |
+| [State Model Contract](./contracts/observability/Caring%20Nanny%20-%20State%20Model%20Contract.md) | Modèle formel des états |
+| [Observation Flow Contract](./contracts/observability/Caring%20Nanny%20-%20Observation%20Flow%20Contract.md) | Flux d'observation : détection → évaluation → agrégation → transition |
+| [Propagation Flow Contract](./contracts/observability/Caring%20Nanny%20-%20Propagation%20Flow%20Contract.md) | Flux de propagation : changement → destinataires → message → dispatch |
 
 #### Governance
 
 | Document | Description |
 |----------|-------------|
 | [Invariants et Garanties](./contracts/governance/Caring%20Nanny%20-%20Invariants%20et%20Garanties.md) | Catalogue consolidé des invariants INV-CN-1 à INV-CN-7 |
-| *Violations & Anti-Patterns* | Violations cataloguées, anti-patterns (à créer) |
-| *Error & Rejection Model* | Modèle d'erreur et de rejet (à créer) |
+| [Violations & Anti-Patterns](./contracts/governance/Caring%20Nanny%20-%20Violations%20%26%20Anti-Patterns.md) | Violations cataloguées, anti-patterns |
+| [Error & Rejection Model](./contracts/governance/Caring%20Nanny%20-%20Error%20%26%20Rejection%20Model.md) | Modèle d'erreur et de rejet |
 
 #### Lifecycle
 
 | Document | Description |
 |----------|-------------|
-| *Performance & Scalability Contract* | Garanties de performance (à créer) |
-| *Testing & Validation Contract* | Stratégie de test et validation (à créer) |
-| *Versioning & Evolution Contract* | Règles d'évolution et compatibilité (à créer) |
+| [Performance & Scalability Contract](./contracts/lifecycle/Caring%20Nanny%20-%20Performance%20%26%20Scalability%20Contract.md) | Garanties de performance |
+| [Testing & Validation Contract](./contracts/lifecycle/Caring%20Nanny%20-%20Testing%20%26%20Validation%20Contract.md) | Stratégie de test et validation |
+| [Versioning & Evolution Contract](./contracts/lifecycle/Caring%20Nanny%20-%20Versioning%20%26%20Evolution%20Contract.md) | Règles d'évolution et compatibilité |
+
+#### Security
+
+| Document | Description |
+|----------|-------------|
+| [Security Implications Contract](./contracts/security/Caring%20Nanny%20-%20Security%20Implications%20Contract.md) | Implications securitaires, protocoles RT-SEC/AS-SEC/NET-SEC, adaptation T0-T4 |
 
 ---
 
@@ -78,7 +84,7 @@ Guides d'implémentation.
 
 | Document | Description |
 |----------|-------------|
-| *Reference Implementation Guidelines* | Guidelines d'implémentation de référence (à créer) |
+| [Reference Implementation Guidelines](./implementation/Caring%20Nanny%20-%20Reference%20Implementation%20Guidelines.md) | Guidelines d'implémentation de référence |
 
 ---
 
@@ -89,8 +95,8 @@ Documentation de référence et exemples.
 | Document | Description |
 |----------|-------------|
 | [Glossaire et Terminologie](./reference/Caring%20Nanny%20-%20Glossaire%20et%20Terminologie.md) | Vocabulaire canonique de Caring Nanny |
-| *FAQ & Common Questions* | Questions fréquentes (à créer) |
-| *Examples & Use Cases* | Exemples et cas d'usage (à créer) |
+| [FAQ & Common Questions](./reference/Caring%20Nanny%20-%20FAQ%20%26%20Common%20Questions.md) | Questions fréquentes |
+| [Examples & Use Cases](./reference/Caring%20Nanny%20-%20Examples%20%26%20Use%20Cases.md) | Exemples et cas d'usage |
 
 ---
 
@@ -206,6 +212,41 @@ Caring Nanny est **entièrement conforme** aux [Lois d'Autonomie Système](../..
 
 ---
 
+## Protocoles applicables
+
+Toute évolution de la documentation Caring Nanny et tout code dérivé sont soumis aux protocoles Miyukini suivants :
+
+| Protocole | Description |
+|-----------|-------------|
+| [Miyukini Prompt Protocol — Écriture Documentation Conceptuelle](../../protocols/Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md) | Cycle planification → distribution → vérification → gel ; usage obligatoire pour toute évolution de la doc Caring Nanny. |
+| [Miyukini Prompt Protocol — MIP v1 MSCM Index Protocol](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md) | Indexation du code (MSCM → MIP) ; tout code Caring Nanny doit être balisé MSCM ; l'index MIP est la structure de gouvernance. |
+
+---
+
+## Références conceptuelles
+
+Références [docs/reference](../../reference) pertinentes pour Caring Nanny :
+
+| Document | Description |
+|----------|-------------|
+| [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) | Terminologie officielle |
+| [Miyukini Conceptual References - Lois Autonomie Systeme](../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) | Conformité LOI-1 à LOI-6 |
+| [Miyukini Conceptual References - Doctrine Securite Fondamentale](../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md) | Principes fondateurs de la sécurité |
+| [Miyukini Conceptual References - Integrity Degradation System](../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md) | Niveaux T0–T4 (contexte observation) |
+| [Miyukini Conceptual References - Security Levels](../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) | Niveaux 0–4 |
+| [Miyukini Conceptual References - Security Protocols](../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Protocols.md) | RT-SEC, AS-SEC, NET-SEC |
+| [Miyukini Conceptual References - Kernel Maintenance Observability Contract](../../reference/Miyukini%20Conceptual%20References%20-%20Kernel%20Maintenance%20Observability%20Contract.md) | Observabilité kernel (alignement observation) |
+
+---
+
+## Audit et qualité
+
+**Référence :** [Audit - Qualite et Risques Derive Implementation v1](../../qa/Audit%20-%20Qualite%20et%20Risques%20Derive%20Implementation%20v1.md)
+
+Caring Nanny présente un **score documentation 60/100** et un **risque élevé** de dérive. Principaux gaps : contrats d'intégration (StrongFather, KindMother, BondingBrother), contrats observability (State Model, Observation Flow, Propagation Flow), FAQ & Common Questions, Examples & Use Cases. Voir les actions **A-05** (contrats d'intégration CN), **A-09** (contrats observability CN) et la **Phase 2 — Observabilité et Intervention** du plan d'action de l'audit.
+
+---
+
 ## Concepts clés
 
 | Concept | Description |
@@ -226,6 +267,24 @@ Caring Nanny est **entièrement conforme** aux [Lois d'Autonomie Système](../..
 
 ---
 
+## Documentation Security Associée
+
+Caring Nanny joue un rôle critique dans la sécurité de l'écosystème Miyukini en tant que **Gardienne de la Santé**. Voir la documentation Security pour les détails :
+
+| Document | Description |
+|----------|-------------|
+| [Security - Core Integration Map](../../security/architecture/Security%20-%20Core%20Integration%20Map.md) | Cartographie des responsabilités sécuritaires par Core |
+| [Security - Documentation Fondatrice](../../security/foundation/Security%20-%20Documentation%20Fondatrice.md) | Vision opérationnelle de la sécurité Miyukini |
+| [Doctrine Securite Fondamentale](../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md) | Principes fondateurs de la sécurité |
+
+**Responsabilités sécuritaires clés :**
+- Détection d'anomalies et consolidation des signaux
+- Calcul du niveau de confiance global (T0-T4)
+- Participation aux protocoles RT-SEC-2, RT-SEC-3, RT-SEC-4, AS-SEC-5, NET-SEC-1, NET-SEC-3
+
+---
+
 **Date de création :** 2026-01-27  
-**Version :** 1.0  
+**Dernière mise à jour :** 2026-01-28  
+**Version :** 1.1  
 **Statut :** Index de navigation

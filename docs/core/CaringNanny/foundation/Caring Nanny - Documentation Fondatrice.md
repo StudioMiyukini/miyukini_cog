@@ -38,6 +38,10 @@ Ce contrat complète et respecte les documents contractuels existants :
 
 Il n'introduit aucune contradiction et constitue la définition formelle de ce que signifie observer l'état dans Caring Nanny.
 
+### Références normatives
+
+Les évolutions de cette documentation suivent le [Protocole d'écriture de la documentation conceptuelle](../../protocols/Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md). Le code dérivé de Caring Nanny respecte le [MIP v1 MSCM Index Protocol](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+
 ---
 
 ## 2. Raison d'être

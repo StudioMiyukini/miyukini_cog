@@ -57,6 +57,7 @@ Contrats FONDATION normatifs et non négociables.
 |----------|-------------|
 | [StrongFather Integration Contract](./contracts/integration/Master%20Butler%20-%20StrongFather%20Integration%20Contract.md) | Intégration avec StrongFather pour les décisions |
 | [BondingBrother Integration Contract](./contracts/integration/Master%20Butler%20-%20BondingBrother%20Integration%20Contract.md) | Intégration avec BondingBrother pour la médiation |
+| [LogisticsSteward Integration Contract](./contracts/integration/Master%20Butler%20-%20LogisticsSteward%20Integration%20Contract.md) | Intégration avec LogisticsSteward pour la gouvernance des ressources |
 | [Operator Declaration Contract](./contracts/integration/Master%20Butler%20-%20Operator%20Declaration%20Contract.md) | Déclaration des capacités par les Opérateurs |
 
 #### Boundaries
@@ -164,6 +165,7 @@ Documentation de référence et exemples.
 | **WorrySentinel** | Sécurité — Validation des niveaux de sécurité pour les Tools |
 | **Caring Nanny** | État — Cohérence d'état pour l'utilisation des Tools |
 | **Ever Buddy** | Lifecycle — Gestion du cycle de vie des Tools et versions |
+| **LogisticsSteward** | Gouvernance — Master Butler expose les capacités, LogisticsSteward limite leur usage |
 
 ### Diagramme de relations
 
@@ -180,7 +182,8 @@ graph TB
         BB[BondingBrother<br/>Médiation]
     end
 
-    subgraph Strate3[Strate 3 - Supervision]
+    subgraph Strate3[Strate 3 - Gouvernance Ressources]
+        LS[LogisticsSteward<br/>Arbitrage]
         CN[Caring Nanny<br/>État]
         EB[Ever Buddy<br/>Lifecycle]
     end
@@ -191,18 +194,22 @@ graph TB
     WS -.->|"Valide niveaux sécurité"| MB
     EB -.->|"Gère versions Tools"| MB
     CN -.->|"États système"| MB
+    LS -->|"Interroge capacités disponibles"| MB
+    LS -.->|"Limite usage capacités"| MB
 
     classDef coreCapability fill:#fff9c4
     classDef coreData fill:#e1f5fe
     classDef coreDecision fill:#fff3e0
     classDef liaison fill:#f3e5f5
     classDef supervision fill:#e8f5e9
+    classDef gouvernance fill:#ffe0b2
 
     class MB coreCapability
     class KM coreData
     class SF coreDecision
     class BB liaison
     class CN,EB supervision
+    class LS gouvernance
 ```
 
 ---

@@ -1,0 +1,24 @@
+---
+title: Empty States
+description: Empty state components for Tailwind CSS. Task-oriented UI patterns for workspaces and dashboards with clear primary actions, helping users create, import, or populate content in their applications.
+category: application
+emoji: 📭
+slug: empty-states
+terms:
+  - placeholder
+  - cta
+components:
+  - { title: 'Create first item', dark: true }
+  - { title: 'Import or create', dark: true }
+  - { title: 'Upload data', dark: true }
+  - { title: 'Get started', dark: true }
+  - { title: 'No results found', dark: true }
+---
+
+import CollectionHeader from '../../../components/CollectionHeader.astro'
+
+<CollectionHeader>
+  # Empty State Components
+
+  <p>{frontmatter.description}</p>
+</CollectionHeader>

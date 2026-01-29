@@ -1,221 +1,230 @@
-//! Storage interne autoritaire de KindMother
+//! Module d'abstraction de la persistance de KindMother
 //!
-//! Implémente la persistance interne selon le contrat FONDATION :
-//! "KindMother — Persistence & Storage Contract"
-//!
-//! CARACTÉRISTIQUES :
-//! - Persistance UNIQUEMENT après transition vers Applied
-//! - Atomicité garantie (tout ou rien)
-//! - Détection de corruption → passage en Degraded
-//! - Isolation par domaine
-//! - Aucun accès externe
+//! Ce module fournit une abstraction complète de la persistance. SQLite est utilisé en interne
+//! mais n'est jamais exposé aux adaptateurs ou aux modules.
 
-use crate::core::WriteIntent;
-use crate::errors::KMError;
-use crate::lifecycle::WriteIntentState;
-use std::collections::HashMap;
+use crate::state::InstanceIdentity;
 
-/// Storage interne autoritaire
+/// @id: kindmother_storage_trait
+/// @role: infrastructure
+/// @layer: core
+/// @human: Trait d'abstraction de la persistance. Masque les détails d'implémentation (SQLite) et fournit une interface conceptuelle.
+/// @do: define_storage_contract
+/// Trait d'abstraction de la persistance.
 ///
-/// Stockage opaque accessible uniquement depuis KindMother.
-/// Aucune structure exposée publiquement.
-pub struct InternalStorage {
-    /// Stockage par domaine (isolation stricte)
-    /// domain_id -> intent_id -> WriteIntent
-    data: HashMap<String, HashMap<String, WriteIntent>>,
-    /// État de corruption détectée
-    corrupted: bool,
-    /// Raison de la corruption (si détectée)
-    corruption_reason: Option<String>,
-}
-
-impl InternalStorage {
-    /// Crée un nouveau storage interne
-    pub fn new() -> Self {
-        println!("[InternalStorage] Création d'un nouveau storage interne");
-        Self {
-            data: HashMap::new(),
-            corrupted: false,
-            corruption_reason: None,
-        }
-    }
-
-    /// Vérifie si le storage est corrompu
-    pub fn is_corrupted(&self) -> bool {
-        self.corrupted
-    }
-
-    /// Obtient la raison de la corruption (si détectée)
-    pub fn corruption_reason(&self) -> Option<&str> {
-        self.corruption_reason.as_deref()
-    }
-
-    /// Marque le storage comme corrompu
-    fn mark_corrupted(&mut self, reason: String) {
-        println!("[InternalStorage] Corruption détectée: {}", reason);
-        self.corrupted = true;
-        self.corruption_reason = Some(reason);
-    }
-
-    /// Vérifie la cohérence du storage
+/// Ce trait définit l'interface conceptuelle pour la persistance sans exposer SQLite.
+/// Les adaptateurs utilisent cette interface pour stocker et récupérer des données.
+pub trait Storage {
+    /// @id: kindmother_storage_read
+    /// @role: accessor
+    /// @layer: core
+    /// @human: Lit une entité depuis la persistance par son identifiant.
+    /// @do: read_entity_by_id
+    /// @depends: kindmother_storage_trait
+    /// Lit une entité depuis la persistance.
     ///
-    /// Détecte les corruptions conceptuelles :
-    /// - WriteIntent en état non-Applied dans le storage
-    /// - Duplications d'intent_id
-    /// - Incohérences structurelles
-    fn check_consistency(&self) -> Result<(), String> {
-        for (domain_id, domain_data) in &self.data {
-            for (intent_id, intent) in domain_data {
-                // Vérification 1: Seules les intentions Applied doivent être persistées
-                if intent.state() != WriteIntentState::Applied {
-                    return Err(format!(
-                        "Corruption détectée: intention {} dans le domaine {} est en état {} au lieu de APPLIQUÉE",
-                        intent_id,
-                        domain_id,
-                        intent.state().to_string()
-                    ));
-                }
-
-                // Vérification 2: Cohérence de l'intent_id
-                if intent.intent_id() != intent_id {
-                    return Err(format!(
-                        "Corruption détectée: intention {} dans le domaine {} a un intent_id incohérent",
-                        intent_id,
-                        domain_id
-                    ));
-                }
-            }
-        }
-
-        Ok(())
-    }
-
-    /// Persiste une WriteIntent
+    /// # Arguments
     ///
-    /// UNIQUEMENT si l'intention est en état Applied.
-    /// Atomicité garantie : toute erreur annule la persistance.
-    pub fn persist_intent(
+    /// * `instance` - Identité de l'instance
+    /// * `entity_id` - Identifiant de l'entité à lire
+    ///
+    /// # Returns
+    ///
+    /// Les données de l'entité si elle existe, None sinon.
+    fn read(&self, instance: &InstanceIdentity, entity_id: &str) -> Option<Vec<u8>>;
+
+    /// @id: kindmother_storage_write
+    /// @role: mutator
+    /// @layer: core
+    /// @human: Écrit une entité dans la persistance.
+    /// @do: write_entity
+    /// @depends: kindmother_storage_trait
+    /// Écrit une entité dans la persistance.
+    ///
+    /// # Arguments
+    ///
+    /// * `instance` - Identité de l'instance
+    /// * `entity_id` - Identifiant de l'entité
+    /// * `data` - Données de l'entité à écrire
+    ///
+    /// # Returns
+    ///
+    /// Résultat de l'opération (succès ou erreur).
+    fn write(
         &mut self,
-        intent: WriteIntent,
-        domain_id: &str,
-    ) -> Result<(), KMError> {
-        println!(
-            "[InternalStorage] Tentative de persistance de l'intention {} dans le domaine {}",
-            intent.intent_id(),
-            domain_id
-        );
+        instance: &InstanceIdentity,
+        entity_id: &str,
+        data: &[u8],
+    ) -> Result<(), StorageError>;
 
-        // Vérification 1: Storage non corrompu
-        if self.corrupted {
-            return Err(KMError::ConsistencyViolation {
-                reason: format!(
-                    "Le storage est corrompu. Raison: {}",
-                    self.corruption_reason.as_deref().unwrap_or("inconnue")
-                ),
-            });
-        }
-
-        // Vérification 2: Intention UNIQUEMENT en état Applied
-        if intent.state() != WriteIntentState::Applied {
-            return Err(KMError::IllegalOperation {
-                reason: format!(
-                    "Persistance refusée: l'intention {} n'est pas en état APPLIQUÉE (état actuel: {}). Seules les intentions APPLIQUÉES peuvent être persistées.",
-                    intent.intent_id(),
-                    intent.state().to_string()
-                ),
-            });
-        }
-
-        // Vérification 3: Cohérence avant persistance
-        if let Err(reason) = self.check_consistency() {
-            self.mark_corrupted(reason.clone());
-            return Err(KMError::ConsistencyViolation {
-                reason: format!("Corruption détectée avant persistance: {}", reason),
-            });
-        }
-
-        // Persistance atomique
-        let intent_id = intent.intent_id().to_string();
-        let domain_id_str = domain_id.to_string();
-
-        // Vérification 4: Pas de duplication (invariant)
-        if let Some(domain_data) = self.data.get(&domain_id_str) {
-            if domain_data.contains_key(&intent_id) {
-                let reason = format!(
-                    "Corruption détectée: intention {} déjà présente dans le domaine {}",
-                    intent_id, domain_id
-                );
-                self.mark_corrupted(reason.clone());
-                return Err(KMError::ConsistencyViolation {
-                    reason: format!("Corruption détectée: {}", reason),
-                });
-            }
-        }
-
-        // Persistance effective (atomique)
-        let domain_data = self.data.entry(domain_id_str).or_insert_with(HashMap::new);
-        domain_data.insert(intent_id.clone(), intent);
-
-        // Vérification 5: Cohérence après persistance
-        if let Err(reason) = self.check_consistency() {
-            // Rollback atomique en cas d'erreur
-            if let Some(domain_data) = self.data.get_mut(domain_id) {
-                domain_data.remove(&intent_id);
-            }
-            self.mark_corrupted(reason.clone());
-            return Err(KMError::ConsistencyViolation {
-                reason: format!("Corruption détectée après persistance: {}", reason),
-            });
-        }
-
-        println!(
-            "[InternalStorage] Intention {} persistée avec succès dans le domaine {}",
-            intent_id,
-            domain_id
-        );
-        Ok(())
-    }
-
-    /// Vérifie la cohérence du storage (appel externe pour détection proactive)
+    /// @id: kindmother_storage_delete
+    /// @role: mutator
+    /// @layer: core
+    /// @human: Supprime une entité de la persistance.
+    /// @do: delete_entity
+    /// @depends: kindmother_storage_trait
+    /// Supprime une entité de la persistance.
     ///
-    /// Retourne true si le storage est cohérent, false si une corruption est détectée.
-    pub fn verify_consistency(&mut self) -> bool {
-        if self.corrupted {
-            return false;
-        }
-
-        match self.check_consistency() {
-            Ok(()) => {
-                println!("[InternalStorage] Vérification de cohérence: OK");
-                true
-            }
-            Err(reason) => {
-                self.mark_corrupted(reason);
-                false
-            }
-        }
-    }
-
-    /// Obtient le nombre d'intentions persistées dans un domaine
+    /// # Arguments
     ///
-    /// Utilisé uniquement pour les tests et la vérification interne.
-    pub(crate) fn count_persisted_intents(&self, domain_id: &str) -> usize {
-        self.data
-            .get(domain_id)
-            .map(|domain_data| domain_data.len())
-            .unwrap_or(0)
-    }
-
-    /// Simule un crash (pour les tests)
+    /// * `instance` - Identité de l'instance
+    /// * `entity_id` - Identifiant de l'entité à supprimer
     ///
-    /// Marque le storage comme corrompu pour simuler un crash.
-    pub fn simulate_crash(&mut self) {
-        self.mark_corrupted("Crash simulé pour test".to_string());
+    /// # Returns
+    ///
+    /// Résultat de l'opération (succès ou erreur).
+    fn delete(&mut self, instance: &InstanceIdentity, entity_id: &str) -> Result<(), StorageError>;
+}
+
+/// @id: kindmother_storage_error
+/// @role: error
+/// @layer: core
+/// @human: Erreur de persistance. Masque les détails d'implémentation SQLite.
+/// @do: represent_storage_error
+/// Erreur de persistance.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum StorageError {
+    /// @id: kindmother_storage_error_not_found
+    /// @role: error
+    /// @layer: core
+    /// @human: Entité non trouvée dans la persistance.
+    /// @do: represent_not_found_error
+    /// @depends: kindmother_storage_error
+    NotFound,
+    /// @id: kindmother_storage_error_corruption
+    /// @role: error
+    /// @layer: core
+    /// @human: Corruption détectée dans la persistance.
+    /// @do: represent_corruption_error
+    /// @depends: kindmother_storage_error
+    Corruption,
+    /// @id: kindmother_storage_error_io
+    /// @role: error
+    /// @layer: core
+    /// @human: Erreur d'entrée/sortie lors de l'accès à la persistance.
+    /// @do: represent_io_error
+    /// @depends: kindmother_storage_error
+    Io(String),
+}
+
+impl std::fmt::Display for StorageError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            StorageError::NotFound => write!(f, "Entity not found"),
+            StorageError::Corruption => write!(f, "Storage corruption detected"),
+            StorageError::Io(msg) => write!(f, "IO error: {}", msg),
+        }
     }
 }
 
-impl Default for InternalStorage {
-    fn default() -> Self {
-        Self::new()
+impl std::error::Error for StorageError {}
+
+/// @id: kindmother_storage_memory
+/// @role: infrastructure
+/// @layer: core
+/// @human: Implémentation mémoire de Storage pour les tests. Utilise une HashMap en mémoire.
+/// @do: provide_memory_storage
+/// Implémentation mémoire de Storage pour les tests.
+#[derive(Debug, Default)]
+pub struct MemoryStorage {
+    /// @id: kindmother_storage_memory_data
+    /// @role: data
+    /// @layer: core
+    /// @human: Données stockées en mémoire (instance_id -> entity_id -> data).
+    /// @do: store_memory_data
+    /// @depends: kindmother_storage_memory
+    data: std::collections::HashMap<String, std::collections::HashMap<String, Vec<u8>>>,
+}
+
+impl MemoryStorage {
+    /// @id: kindmother_storage_memory_new
+    /// @role: infrastructure
+    /// @layer: core
+    /// @human: Crée un nouveau stockage mémoire.
+    /// @do: create_memory_storage
+    /// @depends: kindmother_storage_memory
+    /// Crée un nouveau stockage mémoire.
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl Storage for MemoryStorage {
+    fn read(&self, instance: &InstanceIdentity, entity_id: &str) -> Option<Vec<u8>> {
+        let instance_key = format!("{}", instance.id);
+        self.data
+            .get(&instance_key)?
+            .get(entity_id)
+            .cloned()
+    }
+
+    fn write(
+        &mut self,
+        instance: &InstanceIdentity,
+        entity_id: &str,
+        data: &[u8],
+    ) -> Result<(), StorageError> {
+        let instance_key = format!("{}", instance.id);
+        self.data
+            .entry(instance_key)
+            .or_insert_with(std::collections::HashMap::new)
+            .insert(entity_id.to_string(), data.to_vec());
+        Ok(())
+    }
+
+    fn delete(&mut self, instance: &InstanceIdentity, entity_id: &str) -> Result<(), StorageError> {
+        let instance_key = format!("{}", instance.id);
+        if let Some(instance_data) = self.data.get_mut(&instance_key) {
+            instance_data.remove(entity_id);
+            Ok(())
+        } else {
+            Err(StorageError::NotFound)
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::state::{InstanceState, InstanceType};
+
+    /// @id: kindmother_storage_test_read_write
+    /// @role: test
+    /// @layer: core
+    /// @human: Test lecture/écriture dans le stockage mémoire.
+    /// @do: verify_read_write_operations
+    /// @depends: kindmother_storage_memory_new, kindmother_storage_write, kindmother_storage_read
+    #[test]
+    fn test_read_write() {
+        let mut storage = MemoryStorage::new();
+        let instance = InstanceState::new(InstanceType::Mother);
+        let entity_id = "test-entity";
+        let data = b"test data";
+
+        storage
+            .write(&instance.identity, entity_id, data)
+            .unwrap();
+        let read_data = storage.read(&instance.identity, entity_id).unwrap();
+        assert_eq!(read_data, data);
+    }
+
+    /// @id: kindmother_storage_test_delete
+    /// @role: test
+    /// @layer: core
+    /// @human: Test suppression dans le stockage mémoire.
+    /// @do: verify_delete_operation
+    /// @depends: kindmother_storage_memory_new, kindmother_storage_write, kindmother_storage_delete
+    #[test]
+    fn test_delete() {
+        let mut storage = MemoryStorage::new();
+        let instance = InstanceState::new(InstanceType::Mother);
+        let entity_id = "test-entity";
+        let data = b"test data";
+
+        storage
+            .write(&instance.identity, entity_id, data)
+            .unwrap();
+        storage.delete(&instance.identity, entity_id).unwrap();
+        assert!(storage.read(&instance.identity, entity_id).is_none());
     }
 }

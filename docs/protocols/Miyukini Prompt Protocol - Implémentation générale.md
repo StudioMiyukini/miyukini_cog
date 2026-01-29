@@ -18,6 +18,18 @@ Le processus :
 
 Certaines étapes nécessitent explicitement une **intervention humaine**.
 
+### 1.1 Dépendances normatives
+
+Ce protocole s'appuie sur les standards suivants :
+
+| Standard | Rôle | Référence |
+|----------|------|-----------|
+| **MSCM v1** | Balisage sémantique du code | Miyukini Semantic Code Markup |
+| **MIP v1** | Indexation structurelle globale | [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md) |
+
+👉 Tout code produit DOIT être conforme MSCM.  
+👉 Tout projet DOIT maintenir un index MIP valide.
+
 ---
 
 ## 2. Cycle global d'implémentation (obligatoire)
@@ -98,13 +110,24 @@ Les dépendances doivent être :
 - ❌ Ne pas corriger hors périmètre
 
 #### e) Tests
-- Tests unitaires console si nécessaires
+- Tests unitaires console si possible
 - Sinon : justification explicite de leur absence
 
 #### f) Mini log de planification
 - Ambiguïtés détectées
 - Dépendances critiques
 - Décisions structurantes
+
+#### g) Définition du balisage MSCM attendu
+
+Le plan DOIT inclure pour chaque fichier à produire :
+
+- Les **blocs MSCM obligatoires** à créer
+- Les **rôles sémantiques** (`@role`) attendus
+- Les **couches architecturales** (`@layer`) concernées
+- Les **dépendances inter-blocs** à déclarer
+
+👉 Cette définition préalable garantit la cohérence du balisage et facilite la régénération de l'index MIP.
 
 ---
 
@@ -122,7 +145,30 @@ Le [xx] est préfixe de regroupement d'écriture parallèle. Je peux lancer tout
 
 Une limite maximale d'agents simultanés est définie à **4**. Donc aucun groupement de préfixe ne doit avoir plus de 4 itérations.
 
-### 4.1 Règle d'arrêt stricte
+### 4.1 Obligation de balisage MSCM
+
+Chaque fichier produit DOIT respecter le protocole MSCM v1 :
+
+**Obligations minimales :**
+- Chaque bloc fonctionnel DOIT avoir un identifiant unique (`@id`)
+- Chaque bloc DOIT avoir une description fonctionnelle (`@do`)
+
+**Méta-données optionnelles :**
+- Le rôle sémantique peut être explicite (`@role`) — optionnel
+- La couche architecturale peut être déclarée (`@layer`) — optionnel
+- Une description humaine peut accompagner le bloc (`@human` ou `@humain`) — optionnel
+
+**Vérifications avant livraison :**
+- [ ] Les identifiants sont uniques globalement
+- [ ] Les rôles sont cohérents avec la documentation de référence
+- [ ] Les couches respectent l'architecture définie
+- [ ] Les dépendances inter-blocs sont déclarées
+
+👉 Un fichier sans balisage MSCM conforme est considéré comme **non livrable**.
+
+---
+
+### 4.2 Règle d'arrêt stricte
 
 Un agent DOIT S'ARRÊTER IMMÉDIATEMENT si :
 
@@ -160,13 +206,35 @@ Aucune correction "rapide" hors protocole n'est autorisée
 - Validation fonctionnelle complète
 - Aucune validation partielle n'est acceptée
 
-### 5.4 Audit du système
+### 5.4 Vérification de conformité MSCM
+
+Avant passage en Phase 4, vérification obligatoire :
+
+**Contrôles MSCM :**
+- [ ] Tous les blocs critiques sont balisés MSCM
+- [ ] Les identifiants sont uniques globalement
+- [ ] Les couches (`@layer`) sont cohérentes avec l'architecture
+- [ ] Aucun bloc orphelin (sans `@id` ou `@role`)
+- [ ] Les dépendances inter-blocs sont déclarées
+
+**Régénération de l'index MIP :**
+- L'index MIP DOIT être régénéré après chaque cycle de corrections
+- La régénération DOIT réussir sans erreur
+- Le graphe de dépendances DOIT être cohérent
+- La hiérarchie DOIT être valide
+
+👉 Toute erreur MIP bloque le passage en Phase 4.
+
+---
+
+### 5.5 Audit du système
 
 Rédaction d'un audit formel incluant :
 - erreurs rencontrées,
 - corrections appliquées,
 - risques évités,
-- points de vigilance futurs.
+- points de vigilance futurs,
+- **rapport de conformité MSCM/MIP**.
 
 ---
 
@@ -178,12 +246,40 @@ Rédaction d'un audit formel incluant :
 - Liste exhaustive des éléments gelés
 - Interdiction de toute modification implicite
 
-### 6.2 Versionnement
+### 6.2 Génération de l'index MIP final
+
+**Livrable obligatoire :** L'index MIP final DOIT être généré et inclus dans le gel.
+
+**Contenu de l'index MIP :**
+```
+mscm_index/
+├── registry.json      # Métadonnées et intégrité
+├── blocks.json        # Identité sémantique des blocs
+├── hierarchy.json     # Structure hiérarchique
+├── graph.json         # Relations transverses
+├── flows.json         # Processus métier
+├── domains.json       # Vision métier
+├── layers.json        # Architecture technique
+├── dependencies.json  # Dépendances logiques
+├── files.json         # Cartographie code
+└── stats.json         # Métriques
+```
+
+**Vérifications avant gel :**
+- [ ] L'index MIP peut être régénéré sans erreur
+- [ ] Aucun bloc orphelin détecté
+- [ ] Aucun cycle invalide dans le graphe
+- [ ] Intégrité validée (`registry.json → integrity: "ok"`)
+
+👉 Un projet sans index MIP valide ne peut pas être gelé.
+
+### 6.3 Versionnement
 
 - Attribution d'une version explicite (ex : v1.2.0)
 - Distinction versions majeures / mineures
 - Règles d'évolution futures
 - Conditions de dégel et de migration
+- **Version de l'index MIP associée**
 
 👉 Après gel :
 

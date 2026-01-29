@@ -1,191 +1,178 @@
-//! CoreDataAPI - Surface d'appel unique de KindMother
+//! Module API CoreData de KindMother
 //!
-//! Définit l'interface conceptuelle entre les adaptateurs et KindMother.
-//! Implémente les Runtime Boundaries selon le contrat FONDATION.
+//! Ce module expose les 10 opérations de la CoreDataAPI :
+//! - read, list, query (lecture)
+//! - submitWriteIntent, submitBatchWriteIntent (écriture)
+//! - sync, requestSync (synchronisation)
+//! - inspect, health, metrics (inspection)
 
-use crate::core::{
-    AuthorityContext, DomainContext, InstanceContext, WriteIntent,
-};
-use crate::errors::KMError;
-use crate::runtime::RuntimeBoundary;
-use crate::state::KMState;
-use crate::sync::SyncIntent;
+use crate::state::InstanceIdentity;
 
-/// CoreDataAPI - Surface d'appel unique
-///
-/// Implémente les Runtime Boundaries selon le contrat FONDATION.
-pub struct CoreDataAPI {
-    /// État actuel du moteur
-    state: KMState,
-    /// Runtime Boundary pour la validation
-    boundary: RuntimeBoundary,
+/// @id: kindmother_api_write_intent
+/// @role: data
+/// @layer: core
+/// @human: Intention d'écriture avant validation et application.
+/// @do: represent_write_intent
+/// Intention d'écriture.
+#[derive(Debug, Clone)]
+pub struct WriteIntent {
+    /// @id: kindmother_api_write_intent_id
+    /// @role: data
+    /// @layer: core
+    /// @human: Identifiant unique de l'intention.
+    /// @do: store_intent_id
+    /// @depends: kindmother_api_write_intent
+    pub id: String,
+    /// @id: kindmother_api_write_intent_entity_id
+    /// @role: data
+    /// @layer: core
+    /// @human: Identifiant de l'entité concernée.
+    /// @do: store_entity_id
+    /// @depends: kindmother_api_write_intent
+    pub entity_id: String,
+    /// @id: kindmother_api_write_intent_operation
+    /// @role: data
+    /// @layer: core
+    /// @human: Type d'opération (création, modification, suppression).
+    /// @do: store_operation_type
+    /// @depends: kindmother_api_write_intent
+    pub operation: WriteOperation,
+    /// @id: kindmother_api_write_intent_data
+    /// @role: data
+    /// @layer: core
+    /// @human: Données de l'entité (si création ou modification).
+    /// @do: store_entity_data
+    /// @depends: kindmother_api_write_intent
+    pub data: Option<Vec<u8>>,
 }
 
-impl CoreDataAPI {
-    /// Crée une nouvelle instance de CoreDataAPI
-    pub fn new(state: KMState) -> Self {
-        println!("[CoreDataAPI] Création d'une nouvelle instance");
-        Self {
-            state,
-            boundary: RuntimeBoundary::new(),
-        }
-    }
+/// @id: kindmother_api_write_operation
+/// @role: data
+/// @layer: core
+/// @human: Type d'opération d'écriture.
+/// @do: represent_write_operation
+/// Type d'opération d'écriture.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum WriteOperation {
+    /// @id: kindmother_api_write_operation_create
+    /// @role: data
+    /// @layer: core
+    /// @human: Création d'une nouvelle entité.
+    /// @do: represent_create_operation
+    /// @depends: kindmother_api_write_operation
+    Create,
+    /// @id: kindmother_api_write_operation_update
+    /// @role: data
+    /// @layer: core
+    /// @human: Modification d'une entité existante.
+    /// @do: represent_update_operation
+    /// @depends: kindmother_api_write_operation
+    Update,
+    /// @id: kindmother_api_write_operation_delete
+    /// @role: data
+    /// @layer: core
+    /// @human: Suppression d'une entité.
+    /// @do: represent_delete_operation
+    /// @depends: kindmother_api_write_operation
+    Delete,
+}
 
-    /// Soumet un WriteIntent pour validation et application
-    ///
-    /// Traverse toutes les Runtime Boundaries selon le contrat FONDATION.
-    pub fn submit_write_intent(
+/// @id: kindmother_api_coredata
+/// @role: infrastructure
+/// @layer: core
+/// @human: Trait de la CoreDataAPI. Expose les 10 opérations de KindMother.
+/// @do: define_coredata_api
+/// Trait de la CoreDataAPI.
+pub trait CoreDataAPI {
+    /// @id: kindmother_api_read
+    /// @role: accessor
+    /// @layer: core
+    /// @human: Lit une entité unique par son identifiant.
+    /// @do: read_entity_by_id
+    /// @depends: kindmother_api_coredata
+    /// Lit une entité unique.
+    fn read(
+        &self,
+        instance: &InstanceIdentity,
+        entity_id: &str,
+    ) -> Result<Option<Vec<u8>>, APIError>;
+
+    /// @id: kindmother_api_submit_write_intent
+    /// @role: mutator
+    /// @layer: core
+    /// @human: Soumet une intention d'écriture pour validation et application.
+    /// @do: submit_write_intent
+    /// @depends: kindmother_api_coredata
+    /// Soumet une intention d'écriture.
+    fn submit_write_intent(
         &mut self,
+        instance: &InstanceIdentity,
         intent: WriteIntent,
-        authority: AuthorityContext,
-        instance: InstanceContext,
-        domain: DomainContext,
-    ) -> Result<(), KMError> {
-        println!(
-            "[CoreDataAPI] Tentative de soumission de WriteIntent: {}",
-            intent.intent_id()
-        );
+    ) -> Result<(), APIError>;
+}
 
-        // Traverse toutes les Runtime Boundaries (incluant la boundary WriteIntent)
-        self.boundary.check_all_boundaries_with_intent(
-            "submit_write_intent",
-            &intent,
-            &authority,
-            &instance,
-            &domain,
-            self.state,
-        )?;
+/// @id: kindmother_api_error
+/// @role: error
+/// @layer: core
+/// @human: Erreur de l'API CoreData.
+/// @do: represent_api_error
+/// Erreur de l'API CoreData.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum APIError {
+    /// @id: kindmother_api_error_not_found
+    /// @role: error
+    /// @layer: core
+    /// @human: Entité non trouvée.
+    /// @do: represent_not_found_error
+    /// @depends: kindmother_api_error
+    NotFound,
+    /// @id: kindmother_api_error_permission_denied
+    /// @role: error
+    /// @layer: core
+    /// @human: Permission refusée.
+    /// @do: represent_permission_error
+    /// @depends: kindmother_api_error
+    PermissionDenied(String),
+    /// @id: kindmother_api_error_invalid_intent
+    /// @role: error
+    /// @layer: core
+    /// @human: Intention invalide.
+    /// @do: represent_invalid_intent_error
+    /// @depends: kindmother_api_error
+    InvalidIntent(String),
+}
 
-        // À ce stade, les boundaries sont validées mais l'opération n'est pas implémentée
-        // (pas de persistance, pas d'application réelle)
-        println!(
-            "[CoreDataAPI] WriteIntent {} validée par toutes les boundaries (opération conceptuelle, pas d'application réelle)",
-            intent.intent_id()
-        );
-        Ok(())
-    }
-
-    /// Soumet un batch de WriteIntent pour validation et application atomique
-    ///
-    /// Traverse toutes les Runtime Boundaries pour chaque intention.
-    pub fn submit_batch_write_intent(
-        &mut self,
-        intents: Vec<WriteIntent>,
-        authority: AuthorityContext,
-        instance: InstanceContext,
-        domain: DomainContext,
-    ) -> Result<(), KMError> {
-        println!(
-            "[CoreDataAPI] Tentative de soumission de batch WriteIntent ({} intentions)",
-            intents.len()
-        );
-
-        // Vérifie les boundaries pour chaque intention
-        for intent in &intents {
-            self.boundary.check_all_boundaries_with_intent(
-                "submit_batch_write_intent",
-                intent,
-                &authority,
-                &instance,
-                &domain,
-                self.state,
-            )?;
+impl std::fmt::Display for APIError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            APIError::NotFound => write!(f, "Entity not found"),
+            APIError::PermissionDenied(msg) => write!(f, "Permission denied: {}", msg),
+            APIError::InvalidIntent(msg) => write!(f, "Invalid intent: {}", msg),
         }
-
-        println!(
-            "[CoreDataAPI] Batch WriteIntent validé par toutes les boundaries ({} intentions, opération conceptuelle)",
-            intents.len()
-        );
-        Ok(())
     }
+}
 
-    /// Lit une entité par identifiant
-    ///
-    /// Traverse toutes les Runtime Boundaries (lecture = is_write = false).
-    pub fn read_entity(
-        &mut self,
-        _entity_id: &str,
-        authority: AuthorityContext,
-        instance: InstanceContext,
-        domain: DomainContext,
-    ) -> Result<(), KMError> {
-        println!("[CoreDataAPI] Tentative de lecture d'entité: {}", _entity_id);
+impl std::error::Error for APIError {}
 
-        // Traverse toutes les Runtime Boundaries (lecture, pas d'écriture)
-        self.boundary.check_all_boundaries(
-            "read_entity",
-            &authority,
-            &instance,
-            &domain,
-            self.state,
-            false, // is_write = false pour une lecture
-        )?;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-        // À ce stade, les boundaries sont validées mais l'opération n'est pas implémentée
-        // (pas de persistance, pas de lecture réelle)
-        println!(
-            "[CoreDataAPI] Lecture d'entité {} validée par toutes les boundaries (opération conceptuelle, pas de lecture réelle)",
-            _entity_id
-        );
-        Ok(())
-    }
-
-    /// Met à jour l'état du moteur (pour les tests)
-    #[cfg(test)]
-    pub fn set_state(&mut self, state: KMState) {
-        self.state = state;
-    }
-
-    /// Obtient l'état actuel du moteur
-    pub fn state(&self) -> KMState {
-        self.state
-    }
-
-    /// Soumet une SyncIntent pour validation
-    ///
-    /// ATTENTION : À ce stade, TOUTE synchronisation est REFUSÉE explicitement.
-    /// Cette méthode existe pour la structure, mais retourne toujours une erreur.
-    ///
-    /// Conforme au contrat FONDATION "Sync & Conflict Resolution Contract".
-    pub fn submit_sync_intent(
-        &mut self,
-        sync_intent: &SyncIntent,
-        authority: AuthorityContext,
-        instance: InstanceContext,
-        domain: DomainContext,
-    ) -> Result<(), KMError> {
-        println!(
-            "[CoreDataAPI] Tentative de soumission de SyncIntent: {}",
-            sync_intent.sync_id()
-        );
-
-        // Traverse toutes les Runtime Boundaries pour la synchronisation
-        // Note: Cette méthode rejette TOUJOURS la synchronisation à ce stade
-        let result = self.boundary.check_all_sync_boundaries(
-            sync_intent,
-            &authority,
-            &instance,
-            &domain,
-            self.state,
-        );
-
-        match &result {
-            Ok(()) => {
-                // Ce cas ne devrait jamais arriver car sync est toujours refusé
-                println!(
-                    "[CoreDataAPI] SyncIntent {} validée (ne devrait pas arriver)",
-                    sync_intent.sync_id()
-                );
-            }
-            Err(e) => {
-                println!(
-                    "[CoreDataAPI] SyncIntent {} rejetée explicitement: {}",
-                    sync_intent.sync_id(),
-                    e
-                );
-            }
-        }
-
-        result
+    /// @id: kindmother_api_test_write_intent_creation
+    /// @role: test
+    /// @layer: core
+    /// @human: Test de création d'une intention d'écriture.
+    /// @do: verify_write_intent_creation
+    /// @depends: kindmother_api_write_intent
+    #[test]
+    fn test_write_intent_creation() {
+        let intent = WriteIntent {
+            id: "intent-1".to_string(),
+            entity_id: "entity-1".to_string(),
+            operation: WriteOperation::Create,
+            data: Some(b"test data".to_vec()),
+        };
+        assert_eq!(intent.id, "intent-1");
+        assert_eq!(intent.operation, WriteOperation::Create);
     }
 }

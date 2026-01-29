@@ -636,7 +636,38 @@ Ce document est purement informatif et ne crée aucune nouvelle obligation contr
 
 ---
 
-## 9. Mini log — erreurs / warnings / arbitrages rencontrés
+## 9. Conformité MSCM/MIP
+
+### 9.1 Obligation de balisage MSCM
+
+Tout code implémenté pour Ever Buddy DOIT être balisé selon le protocole MSCM v1.
+
+**Référence :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md)
+
+**Obligations minimales :**
+- Chaque bloc fonctionnel DOIT avoir un identifiant unique (`@id`)
+- Le rôle sémantique DOIT être explicite (`@role`)
+- La couche architecturale DOIT être déclarée (`@layer`)
+- Une description humaine DOIT accompagner chaque bloc (`@human`)
+
+### 9.2 Intégration MIP
+
+Après implémentation, l'index MIP DOIT être régénéré pour :
+- Valider l'intégrité des blocs MSCM
+- Mettre à jour le graphe de dépendances
+- Vérifier la cohérence hiérarchique
+
+### 9.3 Check-list MSCM
+
+Avant toute livraison, vérifier :
+- [ ] Tous les blocs critiques sont balisés MSCM
+- [ ] Les identifiants sont uniques globalement
+- [ ] Les couches (layer) sont cohérentes avec l'architecture
+- [ ] L'index MIP peut être régénéré sans erreur
+
+---
+
+## 10. Mini log — erreurs / warnings / arbitrages rencontrés
 
 ### Arbitrage A1 : Niveau de détail des exemples
 

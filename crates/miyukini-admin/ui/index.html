@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiyukiniAdmin — Console souveraine</title>
+  <link rel="stylesheet" href="/ui/css/theme.css" />
+  <script src="/ui/js/theme.js" defer></script>
+  <script src="/ui/js/app.js" defer></script>
+</head>
+<body>
+  <button type="button" class="menu-btn" id="menu-toggle" aria-label="Menu">Menu</button>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h1 class="sidebar-title">Miyukini<span>Admin</span></h1>
+      </div>
+      <ul class="nav">
+        <li><a href="/" class="active">Dashboard</a></li>
+        <li><a href="/database">Database</a></li>
+        <li><a href="/tests">Tests</a></li>
+        <li><a href="/api/status" target="_blank">API Status</a></li>
+        <li><a href="/health" target="_blank">Health</a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Changer le thème">Mode clair</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Console souveraine d'administration — Miyukini Core System</p>
+
+      <div class="stats">
+        <div class="stat-card">
+          <h3>État</h3>
+          <p class="accent">En ligne</p>
+        </div>
+        <div class="stat-card">
+          <h3>Version</h3>
+          <p>0.1.0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Cores</h3>
+          <p>11</p>
+        </div>
+      </div>
+
+      <div class="cards">
+        <section class="card">
+          <h2>État du système</h2>
+          <p><span class="badge ok">● En ligne</span> Backend MiyukiniAdmin v0.1.0</p>
+          <p>API disponible sur <a href="/api/status">/api/status</a> — Santé sur <a href="/health">/health</a></p>
+        </section>
+
+        <section class="card">
+          <h2>Cores système</h2>
+          <div class="badges">
+            <span class="badge">Kernel</span>
+            <span class="badge">StrongFather</span>
+            <span class="badge">KindMother</span>
+            <span class="badge">BorderGuard</span>
+            <span class="badge">CaringNanny</span>
+            <span class="badge">MasterButler</span>
+            <span class="badge">BondingBrother</span>
+            <span class="badge">EverBuddy</span>
+            <span class="badge">WorrySentinel</span>
+            <span class="badge">TAMR</span>
+            <span class="badge">LogisticsSteward</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Navigation</h2>
+          <p><a href="/database">► Database</a> — CRUD tables et manipulation des données</p>
+          <p><a href="/tests">► Tests</a> — Page de test avec flux de test des cores</p>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

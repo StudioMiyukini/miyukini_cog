@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiyukiniAdmin — Database</title>
+  <link rel="stylesheet" href="/ui/css/theme.css" />
+  <script src="/ui/js/theme.js" defer></script>
+  <script src="/ui/js/app.js" defer></script>
+</head>
+<body>
+  <button type="button" class="menu-btn" id="menu-toggle" aria-label="Menu">Menu</button>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h1 class="sidebar-title">Miyukini<span>Admin</span></h1>
+      </div>
+      <ul class="nav">
+        <li><a href="/">Dashboard</a></li>
+        <li><a href="/database" class="active">Database</a></li>
+        <li><a href="/tests">Tests</a></li>
+        <li><a href="/api/status" target="_blank">API Status</a></li>
+        <li><a href="/health" target="_blank">Health</a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Changer le thème">Mode clair</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <h1 class="page-title">Database</h1>
+      <p class="page-subtitle">CRUD tables et manipulation des données</p>
+
+      <div class="cards">
+        <section class="card">
+          <h2>Tables</h2>
+          <div id="table-list">Chargement…</div>
+          <p style="margin-top: 0.75rem;"><button type="button" class="btn" id="btn-refresh-tables">Rafraîchir</button></p>
+        </section>
+
+        <section class="card" id="rows-container">
+          <h2>Données : <span id="current-table"></span></h2>
+          <p><button type="button" class="btn" id="btn-back-tables">← Retour aux tables</button></p>
+          <div id="rows-list"></div>
+          <p style="margin-top: 0.75rem;"><button type="button" class="btn btn-primary" id="btn-add-row">Ajouter une ligne</button></p>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const API = '/api';
+    async function loadTables() {
+      const r = await fetch(API + '/tables');
+      const j = await r.json();
+      const el = document.getElementById('table-list');
+      if (j.tables && j.tables.length) {
+        el.innerHTML = j.tables.map(t => '<a href="#" class="btn" data-table="' + t + '">' + t + '</a> ').join('');
+        el.querySelectorAll('[data-table]').forEach(a => { a.onclick = (e) => { e.preventDefault(); showTable(a.dataset.table); }; });
+      } else {
+        el.innerHTML = '<span class="err">Aucune table</span>';
+      }
+    }
+    async function showTable(name) {
+      document.getElementById('current-table').textContent = name;
+      document.getElementById('rows-container').style.display = 'block';
+      const r = await fetch(API + '/tables/' + encodeURIComponent(name) + '/rows?per_page=100');
+      const j = await r.json();
+      const el = document.getElementById('rows-list');
+      if (j.rows && j.rows.length) {
+        const cols = Object.keys(j.rows[0]);
+        let html = '<div class="table-wrap"><table><tr>' + cols.map(c => '<th>' + c + '</th>').join('') + '<th>Actions</th></tr>';
+        j.rows.forEach((row, i) => {
+          const id = (row.id !== undefined ? row.id : (i + 1)).toString();
+          html += '<tr>' + cols.map(c => '<td>' + (row[c] !== undefined ? String(row[c]) : '') + '</td>').join('') +
+            '<td><a href="#" class="btn btn-danger btn-delete" data-table="' + name + '" data-id="' + id + '">Supprimer</a></td></tr>';
+        });
+        html += '</table></div>';
+        el.innerHTML = html;
+        el.querySelectorAll('.btn-delete').forEach(b => { b.onclick = (e) => { e.preventDefault(); deleteRow(b.dataset.table, b.dataset.id); }; });
+      } else {
+        el.innerHTML = '<p>Aucune ligne. Cliquez sur "Ajouter une ligne" pour créer.</p>';
+      }
+      document.getElementById('btn-add-row').onclick = () => addRow(name);
+    }
+    async function deleteRow(table, id) {
+      if (!confirm('Supprimer la ligne ' + id + ' ?')) return;
+      await fetch(API + '/tables/' + encodeURIComponent(table) + '/rows/' + id, { method: 'DELETE' });
+      showTable(table);
+    }
+    async function addRow(table) {
+      const email = prompt('Email (nouvelle ligne):', 'new@miyukini.local');
+      if (email === null) return;
+      await fetch(API + '/tables/' + encodeURIComponent(table) + '/rows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, created_at: new Date().toISOString() })
+      });
+      showTable(table);
+    }
+    document.getElementById('btn-back-tables').onclick = () => {
+      document.getElementById('rows-container').style.display = 'none';
+    };
+    document.getElementById('btn-refresh-tables').onclick = loadTables;
+    loadTables();
+  </script>
+</body>
+</html>

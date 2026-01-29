@@ -771,7 +771,31 @@ Les identifiants de capacités et permissions sont **immuables**. Un identifiant
 
 ---
 
-## 10. Conclusion contractuelle
+## 10. Documentation de securite associee
+
+### Documents de reference conceptuels
+
+| Document | Description |
+|----------|-------------|
+| [Security - Core Integration Map](../../../../security/architecture/Security%20-%20Core%20Integration%20Map.md) | Cartographie des roles securite des Cores, points de controle |
+| [Doctrine Securite Fondamentale](../../../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md) | Fondation philosophique et architecturale de la securite |
+| [Security - Invariants & Guarantees](../../../../security/contracts/governance/Security%20-%20Invariants%20&%20Guarantees.md) | Lois L1-L6, contraintes C1-C4, garanties par niveau |
+
+### Role de MasterButler dans le dispositif de securite
+
+Selon le [Core Integration Map](../../../../security/architecture/Security%20-%20Core%20Integration%20Map.md), MasterButler est le **Gardien des Capacites** avec :
+- Gestion des capacites : Definit ce que chaque composant peut faire (INV-MB-1)
+- Controle des permissions : Verifie les autorisations (INV-MB-2)
+- Scoping : Limite la portee des actions (INV-MB-3)
+- Audit des acces : Trace les utilisations de capacites (INV-MB-4)
+
+**Protocoles concernes :** RT-SEC-2, RT-SEC-3, AS-SEC-3
+
+**Point de controle :** Couche CORES → avant attribution de capacites
+
+---
+
+## 11. Conclusion contractuelle
 
 Ce contrat établit de manière définitive et non négociable le modèle de menace de Master Butler.
 
@@ -798,7 +822,7 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
 
 ---
 
-## 11. Mini log — erreurs / warnings / ambiguïtés rencontrées et corrigées
+## 12. Mini log — erreurs / warnings / ambiguites rencontrees et corrigees
 
 ### Ambiguïté A1 : Nature passive de Master Butler
 

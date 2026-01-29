@@ -1,0 +1,26 @@
+[package]
+name = "worrysentinel"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "WorrySentinel - Détecteur de menaces et dégradation du Miyukini Core System"
+
+[dependencies]
+miyukini-kernel = { path = "../miyukini-kernel" }
+caringnanny = { path = "../caringnanny" }
+
+[dev-dependencies]
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"

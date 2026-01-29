@@ -1,0 +1,25 @@
+[package]
+name = "strongfather"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "StrongFather - Moteur de décision stratégique et politique du Miyukini Core System"
+
+[dependencies]
+miyukini-kernel = { path = "../miyukini-kernel" }
+
+[dev-dependencies]
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"

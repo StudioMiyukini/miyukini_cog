@@ -11,7 +11,7 @@ L'autonomie est ce qui distingue Miyukini des architectures "cloud-native" moder
 ## 2. Portée / Scope
 
 Ce document définit :
-- Les 6 lois d'autonomie non négociables
+- Les 8 lois d'autonomie non négociables
 - La définition opérationnelle de l'autonomie dans Miyukini
 - Les implications pour chaque core de l'écosystème
 - Les états d'isolement reconnus du système
@@ -51,9 +51,9 @@ L'autonomie Miyukini n'est pas :
 
 ---
 
-## 4. Les 6 lois d'autonomie (non négociables)
+## 4. Les 8 lois d'autonomie (non négociables)
 
-Ces 6 lois constituent des **invariants architecturaux**. Toute décision de conception, d'implémentation, ou d'évolution doit respecter ces lois. Une violation de l'une de ces lois est une violation architecturale.
+Ces 8 lois constituent des **invariants architecturaux**. Toute décision de conception, d'implémentation, ou d'évolution doit respecter ces lois. Une violation de l'une de ces lois est une violation architecturale.
 
 ---
 
@@ -174,6 +174,50 @@ Si une réponse est non, il y a violation de LOI-6.
 **Relation avec les cores :**
 - **Bonding Brother** : Devient le **pont de synchronisation** et le médiateur de fédération. C'est le point d'entrée/sortie contrôlé pour les échanges inter-nœuds.
 - **Border Guard** : Contrôle ce qui entre et sort du système. Rien d'implicite.
+
+---
+
+### LOI-7 : La strate Cores est immuable — évolution par environnement
+
+**Énoncé :** Dans Miyukini, la strate Cores (Strate 4) n'est jamais patchée individuellement. Toute évolution se fait par la création d'un nouvel environnement complet. Les Opérateurs sont liés à un environnement unique et ne peuvent exister hors de celui-ci.
+
+**Implications :**
+- Pas de micro-patch sur la strate Cores
+- Versions complètes d'environnement uniquement
+- Pas de hotfix sauvage en production
+- Un COG (Core Operating Group) est une entité souveraine liée à un environnement
+
+**Vérification :** Pour toute évolution, poser les questions :
+- *"Modifie-t-on un core existant en place ou déploie-t-on un nouvel environnement ?"*
+- *"Un Opérateur peut-il exister dans plus d'un environnement à la fois ?"*
+
+Si l'évolution patch un core en place ou qu'un Opérateur est partagé entre environnements, il y a violation de LOI-7.
+
+**Relation avec les cores :**
+- **Tous les cores (Strate 4)** : Évoluent par version d'environnement, jamais par patch isolé.
+- **Voir :** [Miyukini Conceptual References - Souveraineté Environnement](Miyukini%20Conceptual%20References%20-%20Souverainete%20Environnement.md), [Pyramide Architecture Complete](Miyukini%20Conceptual%20References%20-%20Pyramide%20Architecture%20Complete.md).
+
+---
+
+### LOI-8 : Migration = diplomatie entre environnements
+
+**Énoncé :** La migration d'un Opérateur ou de données entre environnements est une opération explicite, négociée et traçable — jamais automatique ni implicite.
+
+**Implications :**
+- La migration est une décision consciente, pas un effet de bord
+- Les protocoles de migration sont documentés et gouvernés
+- Chaque environnement reste souverain ; l'échange est diplomatique
+- Pas de "sync magique" qui déplace des Opérateurs entre environnements sans accord
+
+**Vérification :** Pour tout mécanisme de déplacement entre environnements, poser les questions :
+- *"La migration est-elle explicitement déclenchée et autorisée ?"*
+- *"Les deux environnements (source et cible) participent-ils à la décision ?"*
+
+Si la migration est implicite, automatique ou non traçable, il y a violation de LOI-8.
+
+**Relation avec les cores :**
+- **Bonding Brother** : Peut faciliter les échanges entre environnements, mais selon des règles explicites (LOI-6, LOI-8).
+- **Voir :** [Miyukini Conceptual References - Souveraineté Environnement](Miyukini%20Conceptual%20References%20-%20Souverainete%20Environnement.md).
 
 ---
 
@@ -406,7 +450,7 @@ Miyukini cherche :
 
 Ce document est **contractuel, normatif, et de statut RÉFÉRENCE**. Il établit des contraintes architecturales de premier rang qui s'appliquent à tous les composants de l'écosystème Miyukini.
 
-Les 6 lois d'autonomie sont **non négociables**. Toute exception doit être :
+Les 8 lois d'autonomie sont **non négociables**. Toute exception doit être :
 1. Explicitement documentée
 2. Justifiée par une contrainte technique insurmontable
 3. Approuvée comme exception, pas comme règle
@@ -432,3 +476,4 @@ Les 6 lois d'autonomie sont **non négociables**. Toute exception doit être :
 - [Miyukini Conceptual References - External Signal & Trust Reinforcement Contract](Miyukini%20Framework%20-%20External%20Signal%20Trust%20Reinforcement%20Contract.md) : Internet comme signal, pas comme dépendance (LOI-1)
 - [Miyukini Conceptual References - Carte Optimisation](Miyukini%20Conceptual%20References%20-%20Carte%20Optimisation.md) : Leviers d'optimisation par zone sans violer les invariants
 - [Miyukini Conceptual References - Kernel Maintenance Observability Contract](Miyukini%20Conceptual%20References%20-%20Kernel%20Maintenance%20Observability%20Contract.md) : Capacités bas niveau de maintenance (observation sans correction)
+- [Miyukini Conceptual References - Souveraineté Environnement](Miyukini%20Conceptual%20References%20-%20Souverainete%20Environnement.md) : Règles de souveraineté, versioning et migration (LOI-7, LOI-8)

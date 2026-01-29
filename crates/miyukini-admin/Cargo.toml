@@ -1,0 +1,49 @@
+[package]
+name = "miyukini-admin"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "MiyukiniAdmin - Console souveraine d'administration du Miyukini Core System"
+
+[dependencies]
+miyukini-kernel = { path = "../miyukini-kernel" }
+axum = { version = "0.7", features = ["json"] }
+tokio = { version = "1", features = ["full"] }
+tower-http = { version = "0.5", features = ["cors", "fs"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+strongfather = { path = "../strongfather" }
+kindmother = { path = "../kindmother" }
+borderguard = { path = "../borderguard" }
+caringnanny = { path = "../caringnanny" }
+masterbutler = { path = "../masterbutler" }
+bondingbrother = { path = "../bondingbrother" }
+everbuddy = { path = "../everbuddy" }
+worrysentinel = { path = "../worrysentinel" }
+tamr = { path = "../tamr" }
+logisticssteward = { path = "../logisticssteward" }
+argon2 = "0.5"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.10", features = ["v4", "serde"] }
+base64 = "0.22"
+aes-gcm = "0.10"
+
+[dev-dependencies]
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"
+
+[[bin]]
+name = "miyukini-admin"
+path = "src/main.rs"

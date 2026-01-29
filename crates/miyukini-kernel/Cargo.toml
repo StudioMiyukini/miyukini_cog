@@ -1,10 +1,25 @@
 [package]
 name = "miyukini-kernel"
-version = "0.1.0"
-edition = "2021"
-description = "Noyau technique minimal de la fondation Miyukini Core System"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Kernel minimal de la fondation Miyukini - Fondation technique réutilisable (config, id, time, log, lifecycle)"
 
 [dependencies]
-# Façade standard ; le kernel ne configure aucun backend global.
-log_facade = { package = "log", version = "0.4" }
-uuid = { version = "0.8", default-features = false, features = ["v4"] }
+uuid = { version = "1.10", features = ["v4", "serde"] }
+
+[dev-dependencies]
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"

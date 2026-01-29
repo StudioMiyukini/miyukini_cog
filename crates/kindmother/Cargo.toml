@@ -1,12 +1,25 @@
 [package]
 name = "kindmother"
-version = "0.1.0"
-edition = "2021"
-description = "KindMother - Moteur interne de données du Miyukini Core System v2.4 (Skeleton)"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "KindMother - Moteur de données et persistance du Miyukini Core System"
 
 [dependencies]
 miyukini-kernel = { path = "../miyukini-kernel" }
-log_facade = { package = "log", version = "0.4" }
 
 [dev-dependencies]
-env_logger = "0.11"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"

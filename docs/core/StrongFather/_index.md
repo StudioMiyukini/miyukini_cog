@@ -61,6 +61,16 @@ Contrats FONDATION normatifs et non négociables.
 | [Violations & Anti-Patterns](./contracts/governance/StrongFather%20-%20Violations%20&%20Anti-Patterns.md) | Violations cataloguées, anti-patterns |
 | [Conformance & Certification Rules](./contracts/governance/StrongFather%20-%20Conformance%20&%20Certification%20Rules.md) | Critères de conformité, certification |
 
+#### Integration
+| Document | Description |
+|----------|-------------|
+| [LogisticsSteward Integration Contract](./contracts/integration/StrongFather%20-%20LogisticsSteward%20Integration%20Contract.md) | Validation des arbitrages de LogisticsSteward, résolution des conflits de règles |
+
+#### Security
+| Document | Description |
+|----------|-------------|
+| [Security & Threat Model Contract](./contracts/security/StrongFather%20—%20Security%20&%20Threat%20Model%20Contract.md) | Modèle de menace, implications sécurité, adaptation niveaux T0-T4 |
+
 ---
 
 ### Architecture
@@ -94,7 +104,6 @@ Documentation opérationnelle.
 |----------|-------------|
 | [Operational Runbook](./operations/StrongFather%20—%20Operational%20Runbook.md) | Guide SRE/Ops, déploiement, monitoring |
 | [Performance & Scalability Contract](./operations/StrongFather%20—%20Performance%20&%20Scalability%20Contract.md) | Contraintes de performance, optimisations |
-| [Security & Threat Model Contract](./operations/StrongFather%20—%20Security%20&%20Threat%20Model%20Contract.md) | Modèle de menace, sécurité |
 
 ---
 
@@ -143,6 +152,7 @@ Documentation de référence et exemples.
 | **KindMother** | Complémentaire — StrongFather décide, KindMother persiste |
 | **WorrySentinel** | Collaboration — Règles de sécurité, révocation de mandats |
 | **BondingBrother** | Interface — Communication mandatée entre Opérateurs |
+| **LogisticsSteward** | Autorité — StrongFather valide/invalide les décisions d'arbitrage de LogisticsSteward, tranche les conflits de règles |
 
 ---
 

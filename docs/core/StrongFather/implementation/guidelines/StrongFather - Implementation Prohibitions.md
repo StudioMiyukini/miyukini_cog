@@ -554,6 +554,37 @@ Implémenter de la logique métier spécifique dans les politiques, violant Poli
 
 ---
 
+## 6. Conformité MSCM/MIP
+
+### 6.1 Obligation de balisage MSCM
+
+Tout code implémenté pour StrongFather DOIT être balisé selon le protocole MSCM v1.
+
+**Référence :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md)
+
+**Obligations minimales :**
+- Chaque bloc fonctionnel DOIT avoir un identifiant unique (`@id`)
+- Le rôle sémantique DOIT être explicite (`@role`)
+- La couche architecturale DOIT être déclarée (`@layer`)
+- Une description humaine DOIT accompagner chaque bloc (`@human`)
+
+### 6.2 Intégration MIP
+
+Après implémentation, l'index MIP DOIT être régénéré pour :
+- Valider l'intégrité des blocs MSCM
+- Mettre à jour le graphe de dépendances
+- Vérifier la cohérence hiérarchique
+
+### 6.3 Check-list MSCM
+
+Avant toute livraison, vérifier :
+- [ ] Tous les blocs critiques sont balisés MSCM
+- [ ] Les identifiants sont uniques globalement
+- [ ] Les couches (layer) sont cohérentes avec l'architecture
+- [ ] L'index MIP peut être régénéré sans erreur
+
+---
+
 **Conclusion :** Ce document guide l'implémentation de StrongFather en respectant strictement tous les contrats FONDATION v1.1. Toute interprétation qui contredit un contrat FONDATION est invalide. Les contrats FONDATION priment toujours sur ce guide.
 
 ---

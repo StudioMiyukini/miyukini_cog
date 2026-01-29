@@ -695,3 +695,34 @@ Les cas suivants **violent** ce contrat :
 ---
 
 *Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+
+---
+
+## 13. Conformite MSCM/MIP
+
+### 13.1 Obligation de balisage MSCM
+
+Tout code implemente pour StrongFather DOIT etre balise selon le protocole MSCM v1.
+
+**Reference :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md)
+
+**Obligations minimales :**
+- Chaque bloc fonctionnel DOIT avoir un identifiant unique (`@id`)
+- Le role semantique DOIT etre explicite (`@role`)
+- La couche architecturale DOIT etre declaree (`@layer`)
+- Une description humaine DOIT accompagner chaque bloc (`@human`)
+
+### 13.2 Integration MIP
+
+Apres implementation, l'index MIP DOIT etre regenere pour :
+- Valider l'integrite des blocs MSCM
+- Mettre a jour le graphe de dependances
+- Verifier la coherence hierarchique
+
+### 13.3 Check-list MSCM
+
+Avant toute livraison, verifier :
+- [ ] Tous les blocs critiques sont balises MSCM
+- [ ] Les identifiants sont uniques globalement
+- [ ] Les couches (layer) sont coherentes avec l'architecture
+- [ ] L'index MIP peut etre regenere sans erreur

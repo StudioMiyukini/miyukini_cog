@@ -1,7 +1,0 @@
-[package]
-name = "demo-logging-lifecycle"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-miyukini-kernel = { path = "../miyukini-kernel" }

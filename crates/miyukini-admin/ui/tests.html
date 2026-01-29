@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiyukiniAdmin — Tests</title>
+  <link rel="stylesheet" href="/ui/css/theme.css" />
+  <script src="/ui/js/theme.js" defer></script>
+  <script src="/ui/js/app.js" defer></script>
+</head>
+<body>
+  <button type="button" class="menu-btn" id="menu-toggle" aria-label="Menu">Menu</button>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h1 class="sidebar-title">Miyukini<span>Admin</span></h1>
+      </div>
+      <ul class="nav">
+        <li><a href="/">Dashboard</a></li>
+        <li><a href="/database">Database</a></li>
+        <li><a href="/tests" class="active">Tests</a></li>
+        <li><a href="/api/status" target="_blank">API Status</a></li>
+        <li><a href="/health" target="_blank">Health</a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Changer le thème">Mode clair</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <h1 class="page-title">Tests</h1>
+      <p class="page-subtitle">Flux de test des cores et des endpoints MiyukiniAdmin</p>
+
+      <div class="cards">
+        <section class="card">
+          <h2>Tests de flux</h2>
+          <p>Exécute plusieurs tests pour vérifier le comportement des cores et des endpoints MiyukiniAdmin.</p>
+          <p><button type="button" class="btn btn-primary" id="btn-run-flow">Lancer les tests de flux</button></p>
+          <div id="results"></div>
+        </section>
+
+        <section class="card">
+          <h2>Tests individuels</h2>
+          <p>
+            <button type="button" class="btn" id="btn-health">Test /health</button>
+            <button type="button" class="btn" id="btn-status">Test /api/status</button>
+            <button type="button" class="btn" id="btn-tables">Test /api/tables</button>
+          </p>
+          <pre id="single-result"></pre>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const API = '/api';
+    async function runFlow() {
+      const el = document.getElementById('results');
+      el.innerHTML = 'Exécution…';
+      try {
+        const r = await fetch(API + '/tests/flow');
+        const j = await r.json();
+        let html = '<p><strong>Résultat : ' + j.passed + '/' + j.total + ' passés</strong></p>';
+        if (j.results) {
+          j.results.forEach(t => {
+            html += '<div class="test-item ' + (t.passed ? 'passed' : 'failed') + '">' +
+              (t.passed ? '✓' : '✗') + ' ' + t.name + ': ' + (t.detail || '') + '</div>';
+          });
+        }
+        el.innerHTML = html;
+      } catch (e) {
+        el.innerHTML = '<span class="err">Erreur: ' + e.message + '</span>';
+      }
+    }
+    async function testEndpoint(name, url) {
+      const el = document.getElementById('single-result');
+      el.textContent = 'Chargement…';
+      try {
+        const r = await fetch(url);
+        const j = await r.json();
+        el.textContent = JSON.stringify(j, null, 2);
+      } catch (e) {
+        el.textContent = 'Erreur: ' + e.message;
+      }
+    }
+    document.getElementById('btn-run-flow').onclick = runFlow;
+    document.getElementById('btn-health').onclick = () => testEndpoint('health', '/health');
+    document.getElementById('btn-status').onclick = () => testEndpoint('status', API + '/status');
+    document.getElementById('btn-tables').onclick = () => testEndpoint('tables', API + '/tables');
+    runFlow();
+  </script>
+</body>
+</html>

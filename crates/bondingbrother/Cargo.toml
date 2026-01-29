@@ -1,0 +1,27 @@
+[package]
+name = "bondingbrother"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "BondingBrother - Stratégie de liaison gouvernée du Miyukini Core System"
+
+[dependencies]
+miyukini-kernel = { path = "../miyukini-kernel" }
+strongfather = { path = "../strongfather" }
+kindmother = { path = "../kindmother" }
+
+[dev-dependencies]
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"

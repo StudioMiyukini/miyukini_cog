@@ -56,6 +56,12 @@ Contrats FONDATION normatifs et non négociables.
 | [Debt Tracking Contract](./contracts/observability/Ever%20Buddy%20-%20Debt%20Tracking%20Contract.md) | Surveillance de la dette structurelle, debt ratio, alertes |
 | [Metrics & Alerting Contract](./contracts/observability/Ever%20Buddy%20-%20Metrics%20&%20Alerting%20Contract.md) | Métriques d'état, de transition, et d'alerte |
 
+#### Security
+
+| Document | Description |
+|----------|-------------|
+| [Security Implications Contract](./contracts/security/Ever%20Buddy%20-%20Security%20Implications%20Contract.md) | Responsabilités sécuritaires, protocoles AS-SEC-3, NET-SEC-1, NET-SEC-2, adaptation T0-T4 |
+
 ---
 
 ### Architecture
@@ -182,6 +188,32 @@ graph TB
     class CN supervision
     class BG,MB frontier
 ```
+
+---
+
+## Sécurité
+
+Ever Buddy porte une **responsabilité sécuritaire spécifique** en tant que Gardien de la Continuité. Pour les détails complets, voir le [Security Implications Contract](./contracts/security/Ever%20Buddy%20-%20Security%20Implications%20Contract.md).
+
+### Protocoles de sécurité concernés
+
+| Protocole | Rôle | Description |
+|-----------|------|-------------|
+| **AS-SEC-3** | Responsable | Revalidation complète à la reconnexion |
+| **NET-SEC-1** | Responsable | Handshake de conformité |
+| **NET-SEC-2** | Responsable | Mise à jour sécurisée |
+
+### Rôle dans la chaîne de confiance
+
+Ever Buddy est responsable du maillon **STA → OSV** : certification des versions comme Official Secure Version.
+
+### Documentation sécurité associée
+
+| Document | Description |
+|----------|-------------|
+| [Security - Core Integration Map](../../security/architecture/Security%20-%20Core%20Integration%20Map.md) | Cartographie des responsabilités sécuritaires par Core |
+| [Security - Documentation Fondatrice](../../security/foundation/Security%20-%20Documentation%20Fondatrice.md) | Vision opérationnelle de la sécurité |
+| [Doctrine Securite Fondamentale](../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md) | Principes fondateurs |
 
 ---
 

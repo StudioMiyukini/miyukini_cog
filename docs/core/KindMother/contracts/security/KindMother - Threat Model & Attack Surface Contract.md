@@ -640,7 +640,33 @@ Les domaines sont isolés. Toute communication directe hors Intentions Certifié
 
 ---
 
-## 10. Conclusion contractuelle
+## 10. Documentation de securite associee
+
+### Documents de reference conceptuels
+
+| Document | Description |
+|----------|-------------|
+| [Security - Core Integration Map](../../../../security/architecture/Security%20-%20Core%20Integration%20Map.md) | Cartographie des roles securite des Cores, points de controle |
+| [Doctrine Securite Fondamentale](../../../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md) | Fondation philosophique et architecturale de la securite |
+| [Security - Invariants & Guarantees](../../../../security/contracts/governance/Security%20-%20Invariants%20&%20Guarantees.md) | Lois L1-L6, contraintes C1-C4, garanties par niveau |
+
+### Role de KindMother dans le dispositif de securite
+
+Selon le [Core Integration Map](../../../../security/architecture/Security%20-%20Core%20Integration%20Map.md), KindMother est la **Gardienne de la Persistance** avec :
+- Integrite des donnees : Garantit la coherence des donnees persistees (INV-KM-1)
+- Synchronisation securisee : Maintient la coherence inter-instances (INV-KM-2)
+- Validation des ecritures : Controle toute modification (INV-KM-3)
+- Audit de persistance : Trace toute operation de donnees (INV-KM-4)
+
+**Protocoles concernes :** AS-SEC-4 (Anti-Replay & Anti-Ordre)
+
+**Point de controle :** Couche INFRASTRUCTURE SYSTEMIQUE → Kernel (persistance)
+
+**Role dans la chaine de confiance :** Maintien de l'integrite MIP → GRAPH
+
+---
+
+## 11. Conclusion contractuelle
 
 Ce contrat établit de manière définitive et non négociable le modèle de menace de KindMother.
 
@@ -665,7 +691,7 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
 
 ---
 
-## 11. Mini log — erreurs / warnings / ambiguïtés rencontrées et corrigées
+## 12. Mini log — erreurs / warnings / ambiguites rencontrees et corrigees
 
 ### Ambiguïté A1 : Distinction entre attaque et erreur
 
