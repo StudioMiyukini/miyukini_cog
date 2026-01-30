@@ -76,6 +76,14 @@ pub mod threat;
 /// Module d'observabilité
 pub mod observability;
 
+/// @id: kindmother_module_miyusql_bridge
+/// @role: infrastructure
+/// @layer: core
+/// @human: Pont KindMother ↔ MiyuSQL. Délégation de l'exécution SQL sous mandat.
+/// @do: expose_miyusql_bridge
+/// Module pont MiyuSQL
+pub mod miyusql_bridge;
+
 // Ré-exports des types principaux pour faciliter l'usage
 
 /// @id: kindmother_reexport_state
@@ -127,3 +135,4 @@ pub use threat::{DefaultThreatDetector, ThreatDetector, ThreatLevel};
 pub use observability::{
     DefaultObservability, HealthStatus, Metrics, Observability,
 };
+pub use miyusql_bridge::{MiyuSQLBridgeImpl, MiyuSQLExecutionBridge};

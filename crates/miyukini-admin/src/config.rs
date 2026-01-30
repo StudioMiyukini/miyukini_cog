@@ -58,7 +58,7 @@ impl BackendConfig {
         let port = config
             .get("MIYUKINIADMIN_PORT")
             .and_then(|s| s.parse().ok())
-            .unwrap_or(8080);
+            .unwrap_or(8181);
         let host = config
             .get("MIYUKINIADMIN_HOST")
             .map(|s| s.to_string())
@@ -95,6 +95,6 @@ mod tests {
     fn test_from_env() {
         let env_config = EnvConfig::from_env();
         let config = BackendConfig::from_env(&env_config);
-        assert_eq!(config.port, 8080);
+        assert_eq!(config.port, 8181);
     }
 }

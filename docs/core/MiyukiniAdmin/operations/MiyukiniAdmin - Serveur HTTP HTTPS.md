@@ -37,7 +37,7 @@ Ce document **ne couvre pas** :
 - Le serveur écoute en **HTTP** sur une adresse et un port configurables.
 - **Variables d’environnement :**
   - `MIYUKINIADMIN_HOST` : adresse d’écoute (défaut : `127.0.0.1`).
-  - `MIYUKINIADMIN_PORT` : port (défaut : `8080`).
+  - `MIYUKINIADMIN_PORT` : port (défaut : `8181`).
 
 ### 4.2 Accès
 
@@ -80,7 +80,7 @@ Ce document **ne couvre pas** :
 | Variable | Défaut | Description |
 |----------|--------|-------------|
 | `MIYUKINIADMIN_HOST` | `127.0.0.1` | Adresse d’écoute |
-| `MIYUKINIADMIN_PORT` | `8080` | Port d’écoute (HTTP ou HTTPS selon config) |
+| `MIYUKINIADMIN_PORT` | `8181` | Port d’écoute (HTTP ou HTTPS selon config) |
 | `MIYUKINIADMIN_HTTPS` | — | `1` ou `true` pour activer HTTPS |
 | `MIYUKINIADMIN_TLS_CERT` | — | Chemin vers le certificat PEM |
 | `MIYUKINIADMIN_TLS_KEY` | — | Chemin vers la clé privée PEM |

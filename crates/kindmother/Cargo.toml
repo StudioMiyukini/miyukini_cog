@@ -13,6 +13,7 @@ description = "KindMother - Moteur de données et persistance du Miyukini Core S
 
 [dependencies]
 miyukini-kernel = { path = "../miyukini-kernel" }
+miyusql = { path = "../miyusql" }
 
 [dev-dependencies]
 

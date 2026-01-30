@@ -50,6 +50,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "crates/worrysentinel/src",
         "crates/tamr/src",
         "crates/logisticssteward/src",
+        "crates/miyusql/src",
         "crates/miyukini-admin/src",
     ];
 

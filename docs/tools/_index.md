@@ -16,8 +16,10 @@ Les Tools sont des capacités exécutables gouvernées ; les Toolkits sont des c
 Ce dossier documente les Kits d'Outils disponibles (ou en cours de documentation). Au minimum :
 
 - **MiyuSQL** — Kit d'outils de gestion de données en base (requêtes, transactions, cache)
+- **MiyuAuth** — Kit d'outils d'identité utilisateur (résolution rôle, attestation, vérification Passeport/Visa)
+- **MiyuWeb** — Kit d'outils d'affichage de contenu web (rendu HTML, layout, thème, scripts, assets, formulaires, événements)
 
-D'autres kits pourront être ajoutés ultérieurement (ex. stockage médias, UI, hardware).
+D'autres kits pourront être ajoutés ultérieurement (ex. stockage médias, hardware).
 
 ---
 
@@ -26,6 +28,8 @@ D'autres kits pourront être ajoutés ultérieurement (ex. stockage médias, UI,
 | Kit | Description | Lien |
 |-----|-------------|------|
 | **MiyuSQL** | Kit d'outils de manipulation de données DB (query, transaction, cache) ; ToolkitId `toolkit.data.miyusql` | [MiyuSQL — Index de navigation](./MiyuSQL/_index.md) |
+| **MiyuAuth** | Kit d'outils d'identité utilisateur (résolution rôle, attestation, vérification Passeport/Visa) ; ToolkitId `toolkit.identity.miyauth` | [MiyuAuth — Index de navigation](./MiyuAuth/_index.md) |
+| **MiyuWeb** | Kit d'outils d'affichage de contenu web (rendu HTML, layout, thème, scripts, assets, formulaires, événements) ; ToolkitId `toolkit.web.miyuweb` | [MiyuWeb — Index de navigation](./MiyuWeb/_index.md) |
 
 ---
 

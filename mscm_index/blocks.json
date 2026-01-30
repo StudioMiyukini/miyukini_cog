@@ -3040,64 +3040,104 @@
     "start_line": 71
   },
   {
+    "do": "expose_miyusql_bridge",
+    "end_line": 84,
+    "file": "crates/kindmother/src/lib.rs",
+    "human": "Pont KindMother ↔ MiyuSQL. Délégation de l'exécution SQL sous mandat.",
+    "id": "kindmother_module_miyusql_bridge",
+    "layer": "core",
+    "role": "infrastructure",
+    "start_line": 79
+  },
+  {
     "do": "reexport_state_types",
-    "end_line": 86,
+    "end_line": 94,
     "file": "crates/kindmother/src/lib.rs",
     "human": "Ré-export des types d'état pour faciliter l'usage.",
     "id": "kindmother_reexport_state",
     "layer": "core",
     "role": "infrastructure",
-    "start_line": 81
+    "start_line": 89
   },
   {
     "do": "reexport_storage_types",
-    "end_line": 94,
+    "end_line": 102,
     "file": "crates/kindmother/src/lib.rs",
     "human": "Ré-export des types de stockage pour faciliter l'usage.",
     "id": "kindmother_reexport_storage",
     "layer": "core",
     "role": "infrastructure",
-    "start_line": 89
+    "start_line": 97
   },
   {
     "do": "reexport_sync_types",
-    "end_line": 102,
+    "end_line": 110,
     "file": "crates/kindmother/src/lib.rs",
     "human": "Ré-export des types de synchronisation pour faciliter l'usage.",
     "id": "kindmother_reexport_sync",
     "layer": "core",
     "role": "infrastructure",
-    "start_line": 97
+    "start_line": 105
   },
   {
     "do": "reexport_api_types",
-    "end_line": 110,
+    "end_line": 118,
     "file": "crates/kindmother/src/lib.rs",
     "human": "Ré-export des types d'API pour faciliter l'usage.",
     "id": "kindmother_reexport_api",
     "layer": "core",
     "role": "infrastructure",
-    "start_line": 105
+    "start_line": 113
   },
   {
     "do": "reexport_threat_types",
-    "end_line": 118,
+    "end_line": 126,
     "file": "crates/kindmother/src/lib.rs",
     "human": "Ré-export des types de détection de menaces pour faciliter l'usage.",
     "id": "kindmother_reexport_threat",
     "layer": "core",
     "role": "infrastructure",
-    "start_line": 113
+    "start_line": 121
   },
   {
     "do": "reexport_observability_types",
-    "end_line": 129,
+    "end_line": 137,
     "file": "crates/kindmother/src/lib.rs",
     "human": "Ré-export des types d'observabilité pour faciliter l'usage.",
     "id": "kindmother_reexport_observability",
     "layer": "core",
     "role": "infrastructure",
-    "start_line": 121
+    "start_line": 129
+  },
+  {
+    "do": "delegate_execution_to_miyusql",
+    "end_line": 23,
+    "file": "crates/kindmother/src/miyusql_bridge.rs",
+    "human": "Trait de délégation d'exécution SQL à MiyuSQL sous mandat KindMother.",
+    "id": "kindmother_miyusql_bridge",
+    "layer": "core",
+    "role": "infrastructure",
+    "start_line": 12
+  },
+  {
+    "do": "define_miyusql_bridge_trait",
+    "end_line": 23,
+    "file": "crates/kindmother/src/miyusql_bridge.rs",
+    "human": "Interface de délégation SQL vers MiyuSQL (mandat, execute, prepare, tx, cache, schema).",
+    "id": "kindmother_miyusql_bridge_trait",
+    "layer": "core",
+    "role": "infrastructure",
+    "start_line": 19
+  },
+  {
+    "do": "implement_miyusql_bridge",
+    "end_line": 95,
+    "file": "crates/kindmother/src/miyusql_bridge.rs",
+    "human": "Implémentation du bridge qui délègue à un exécuteur unique (Query + Transaction + Schema).",
+    "id": "kindmother_miyusql_bridge_impl",
+    "layer": "core",
+    "role": "infrastructure",
+    "start_line": 78
   },
   {
     "do": "represent_health_status",
@@ -5710,6 +5750,580 @@
     "start_line": 75
   },
   {
+    "do": "expose_admin_cell",
+    "end_line": 21,
+    "file": "crates/miyusql/src/admin_cell.rs",
+    "human": "Cellule Admin MiyuSQL : identification, manifeste (MiyukiniSQLtest), intégrité.",
+    "id": "miyusql_admin_cell",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 8
+  },
+  {
+    "do": "store_identification",
+    "end_line": 21,
+    "file": "crates/miyusql/src/admin_cell.rs",
+    "human": "Identification du module (toolkit.data.miyusql).",
+    "id": "miyusql_admin_identification",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 15
+  },
+  {
+    "do": "store_test_criteria",
+    "end_line": 39,
+    "file": "crates/miyusql/src/admin_cell.rs",
+    "human": "Critères de succès/échec pour un test embarqué.",
+    "id": "miyusql_admin_test_criteria",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 33
+  },
+  {
+    "do": "store_embedded_test_def",
+    "end_line": 50,
+    "file": "crates/miyusql/src/admin_cell.rs",
+    "human": "Définition d'un test dans le manifeste (MiyukiniSQLtest).",
+    "id": "miyusql_admin_embedded_test_def",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 45
+  },
+  {
+    "do": "store_test_manifest",
+    "end_line": 67,
+    "file": "crates/miyusql/src/admin_cell.rs",
+    "human": "Manifeste de test embarqué (MiyukiniSQLtest E2E).",
+    "id": "miyusql_admin_test_manifest",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 62
+  },
+  {
+    "do": "store_integrity_metadata",
+    "end_line": 85,
+    "file": "crates/miyusql/src/admin_cell.rs",
+    "human": "Métadonnées d'intégrité pour vérification TAMR.",
+    "id": "miyusql_admin_integrity",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 80
+  },
+  {
+    "do": "represent_admin_cell",
+    "end_line": 102,
+    "file": "crates/miyusql/src/admin_cell.rs",
+    "human": "Cellule Admin complète MiyuSQL.",
+    "id": "miyusql_admin_cell_struct",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 96
+  },
+  {
+    "do": "build_miyusql_admin_cell",
+    "end_line": 154,
+    "file": "crates/miyusql/src/admin_cell.rs",
+    "human": "Construit la Cellule Admin MiyuSQL (identification, manifeste MiyukiniSQLtest, intégrité).",
+    "id": "miyusql_admin_cell_build",
+    "layer": "toolkit",
+    "role": "mutator",
+    "start_line": 118
+  },
+  {
+    "do": "get_cache_entry",
+    "end_line": 13,
+    "file": "crates/miyusql/src/cache.rs",
+    "human": "Récupère une entrée depuis le cache gouverné (clé fournie).",
+    "id": "miyusql_tool_cache_get",
+    "layer": "tool",
+    "role": "accessor",
+    "start_line": 8
+  },
+  {
+    "do": "set_cache_entry",
+    "end_line": 26,
+    "file": "crates/miyusql/src/cache.rs",
+    "human": "Enregistre une entrée dans le cache gouverné (clé, valeur, TTL optionnel).",
+    "id": "miyusql_tool_cache_set",
+    "layer": "tool",
+    "role": "mutator",
+    "start_line": 21
+  },
+  {
+    "do": "invalidate_cache_entries",
+    "end_line": 45,
+    "file": "crates/miyusql/src/cache.rs",
+    "human": "Invalide une ou plusieurs entrées du cache (par clé ou motif).",
+    "id": "miyusql_tool_cache_invalidate",
+    "layer": "tool",
+    "role": "mutator",
+    "start_line": 40
+  },
+  {
+    "do": "define_cache_executor",
+    "end_line": 57,
+    "file": "crates/miyusql/src/cache.rs",
+    "human": "Trait d'exécution cache (abstraction backend).",
+    "id": "miyusql_cache_executor_trait",
+    "layer": "tool",
+    "role": "infrastructure",
+    "start_line": 53
+  },
+  {
+    "do": "get_value",
+    "end_line": 85,
+    "file": "crates/miyusql/src/cache.rs",
+    "human": "Récupère la valeur pour la clé.",
+    "id": "miyusql_cache_get_impl",
+    "layer": "tool",
+    "role": "accessor",
+    "start_line": 59
+  },
+  {
+    "do": "set_value",
+    "end_line": 85,
+    "file": "crates/miyusql/src/cache.rs",
+    "human": "Enregistre la valeur avec TTL optionnel.",
+    "id": "miyusql_cache_set_impl",
+    "layer": "tool",
+    "role": "mutator",
+    "start_line": 66
+  },
+  {
+    "do": "invalidate_entries",
+    "end_line": 85,
+    "file": "crates/miyusql/src/cache.rs",
+    "human": "Invalide les entrées correspondant à la clé ou au motif.",
+    "id": "miyusql_cache_invalidate_impl",
+    "layer": "tool",
+    "role": "mutator",
+    "start_line": 79
+  },
+  {
+    "do": "represent_governed_context",
+    "end_line": 18,
+    "file": "crates/miyusql/src/context.rs",
+    "human": "Contexte gouverné pour l'exécution MiyuSQL (mandat, niveau sécurité, pas d'identité Opérateur).",
+    "id": "miyusql_governed_context",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 5
+  },
+  {
+    "do": "hold_governed_context",
+    "end_line": 18,
+    "file": "crates/miyusql/src/context.rs",
+    "human": "Contexte d'exécution gouverné.",
+    "id": "miyusql_governed_context_struct",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 12
+  },
+  {
+    "do": "store_mandate_id",
+    "end_line": 25,
+    "file": "crates/miyusql/src/context.rs",
+    "human": "Identifiant du mandat d'exécution.",
+    "id": "miyusql_context_mandate_id",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 20
+  },
+  {
+    "do": "store_security_level",
+    "end_line": 33,
+    "file": "crates/miyusql/src/context.rs",
+    "human": "Niveau de sécurité (0-4, WorrySentinel).",
+    "id": "miyusql_context_security_level",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 28
+  },
+  {
+    "do": "build_governed_context",
+    "end_line": 43,
+    "file": "crates/miyusql/src/context.rs",
+    "human": "Construit un contexte gouverné.",
+    "id": "miyusql_context_new",
+    "layer": "toolkit",
+    "role": "mutator",
+    "start_line": 38
+  },
+  {
+    "do": "check_mandate_valid",
+    "end_line": 60,
+    "file": "crates/miyusql/src/context.rs",
+    "human": "Indique si le contexte a un mandat valide.",
+    "id": "miyusql_context_has_mandate",
+    "layer": "toolkit",
+    "role": "accessor",
+    "start_line": 51
+  },
+  {
+    "do": "represent_execution_errors",
+    "end_line": 18,
+    "file": "crates/miyusql/src/errors.rs",
+    "human": "Types d'erreur contractuels MiyuSQL.",
+    "id": "miyusql_errors",
+    "layer": "toolkit",
+    "role": "infrastructure",
+    "start_line": 5
+  },
+  {
+    "do": "represent_miyusql_error",
+    "end_line": 18,
+    "file": "crates/miyusql/src/errors.rs",
+    "human": "Erreur d'exécution MiyuSQL.",
+    "id": "miyusql_error_enum",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 12
+  },
+  {
+    "do": "signal_no_mandate",
+    "end_line": 60,
+    "file": "crates/miyusql/src/errors.rs",
+    "human": "Exécution refusée : pas de mandat gouverné.",
+    "id": "miyusql_error_no_mandate",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 20
+  },
+  {
+    "do": "signal_timeout",
+    "end_line": 60,
+    "file": "crates/miyusql/src/errors.rs",
+    "human": "Timeout d'exécution.",
+    "id": "miyusql_error_timeout",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 28
+  },
+  {
+    "do": "signal_connection_error",
+    "end_line": 60,
+    "file": "crates/miyusql/src/errors.rs",
+    "human": "Erreur de connexion (sans détail métier).",
+    "id": "miyusql_error_connection",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 36
+  },
+  {
+    "do": "signal_syntax_error",
+    "end_line": 60,
+    "file": "crates/miyusql/src/errors.rs",
+    "human": "Requête invalide (syntaxe).",
+    "id": "miyusql_error_syntax",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 44
+  },
+  {
+    "do": "signal_execution_error",
+    "end_line": 60,
+    "file": "crates/miyusql/src/errors.rs",
+    "human": "Erreur d'exécution technique (sans contenu métier).",
+    "id": "miyusql_error_execution",
+    "layer": "toolkit",
+    "role": "data",
+    "start_line": 52
+  },
+  {
+    "do": "expose_miyusql_toolkit",
+    "end_line": 25,
+    "file": "crates/miyusql/src/lib.rs",
+    "human": "Point d'entrée du toolkit MiyuSQL ; expose les modules tools, pas de capacité nouvelle.",
+    "id": "miyusql_toolkit_lib",
+    "layer": "toolkit",
+    "role": "infrastructure",
+    "start_line": 18
+  },
+  {
+    "do": "implement_memory_executor",
+    "end_line": 31,
+    "file": "crates/miyusql/src/memory.rs",
+    "human": "Exécuteur en mémoire pour tests (tables, cache, transactions).",
+    "id": "miyusql_memory_executor",
+    "layer": "tool",
+    "role": "infrastructure",
+    "start_line": 15
+  },
+  {
+    "do": "represent_query_result",
+    "end_line": 14,
+    "file": "crates/miyusql/src/query.rs",
+    "human": "Résultat d'une requête (lignes, count).",
+    "id": "miyusql_query_result",
+    "layer": "tool",
+    "role": "data",
+    "start_line": 9
+  },
+  {
+    "do": "store_rows",
+    "end_line": 20,
+    "file": "crates/miyusql/src/query.rs",
+    "human": "Lignes retournées (liste de maps colonne -> valeur).",
+    "id": "miyusql_query_result_rows",
+    "layer": "tool",
+    "role": "data",
+    "start_line": 16
+  },
+  {
+    "do": "store_count",
+    "end_line": 26,
+    "file": "crates/miyusql/src/query.rs",
+    "human": "Nombre de lignes affectées (pour INSERT/UPDATE/DELETE).",
+    "id": "miyusql_query_result_count",
+    "layer": "tool",
+    "role": "data",
+    "start_line": 22
+  },
+  {
+    "do": "execute_query_under_governance",
+    "end_line": 35,
+    "file": "crates/miyusql/src/query.rs",
+    "human": "Exécute une requête (lecture ou écriture) selon le contexte gouverné.",
+    "id": "miyusql_tool_query_execute",
+    "layer": "tool",
+    "role": "mutator",
+    "start_line": 30
+  },
+  {
+    "do": "prepare_query_without_execute",
+    "end_line": 53,
+    "file": "crates/miyusql/src/query.rs",
+    "human": "Prépare ou valide une requête sans l'exécuter.",
+    "id": "miyusql_tool_query_prepare",
+    "layer": "tool",
+    "role": "accessor",
+    "start_line": 48
+  },
+  {
+    "do": "define_query_executor",
+    "end_line": 70,
+    "file": "crates/miyusql/src/query.rs",
+    "human": "Trait d'exécution de requêtes (abstraction backend).",
+    "id": "miyusql_query_executor_trait",
+    "layer": "tool",
+    "role": "infrastructure",
+    "start_line": 66
+  },
+  {
+    "do": "run_query",
+    "end_line": 101,
+    "file": "crates/miyusql/src/query.rs",
+    "human": "Exécute la requête sous contexte gouverné.",
+    "id": "miyusql_executor_execute",
+    "layer": "tool",
+    "role": "mutator",
+    "start_line": 72
+  },
+  {
+    "do": "validate_query",
+    "end_line": 101,
+    "file": "crates/miyusql/src/query.rs",
+    "human": "Valide la requête sans exécution.",
+    "id": "miyusql_executor_prepare",
+    "layer": "tool",
+    "role": "accessor",
+    "start_line": 84
+  },
+  {
+    "do": "represent_table_metadata",
+    "end_line": 13,
+    "file": "crates/miyusql/src/schema.rs",
+    "human": "Métadonnées d'une table.",
+    "id": "miyusql_schema_table_meta",
+    "layer": "tool",
+    "role": "data",
+    "start_line": 8
+  },
+  {
+    "do": "store_table_name",
+    "end_line": 19,
+    "file": "crates/miyusql/src/schema.rs",
+    "human": "Nom de la table.",
+    "id": "miyusql_schema_table_name",
+    "layer": "tool",
+    "role": "data",
+    "start_line": 15
+  },
+  {
+    "do": "store_columns",
+    "end_line": 25,
+    "file": "crates/miyusql/src/schema.rs",
+    "human": "Colonnes (nom, type).",
+    "id": "miyusql_schema_columns",
+    "layer": "tool",
+    "role": "data",
+    "start_line": 21
+  },
+  {
+    "do": "represent_column_metadata",
+    "end_line": 34,
+    "file": "crates/miyusql/src/schema.rs",
+    "human": "Métadonnées d'une colonne.",
+    "id": "miyusql_schema_column_meta",
+    "layer": "tool",
+    "role": "data",
+    "start_line": 29
+  },
+  {
+    "end_line": 38,
+    "file": "crates/miyusql/src/schema.rs",
+    "id": "miyusql_schema_column_name",
+    "layer": "tool",
+    "role": "data",
+    "start_line": 36
+  },
+  {
+    "end_line": 42,
+    "file": "crates/miyusql/src/schema.rs",
+    "id": "miyusql_schema_column_type",
+    "layer": "tool",
+    "role": "data",
+    "start_line": 40
+  },
+  {
+    "do": "represent_schema_result",
+    "end_line": 51,
+    "file": "crates/miyusql/src/schema.rs",
+    "human": "Résultat de lecture schéma (tables ou colonnes d'une table).",
+    "id": "miyusql_schema_result",
+    "layer": "tool",
+    "role": "data",
+    "start_line": 46
+  },
+  {
+    "end_line": 55,
+    "file": "crates/miyusql/src/schema.rs",
+    "id": "miyusql_schema_tables",
+    "layer": "tool",
+    "role": "data",
+    "start_line": 53
+  },
+  {
+    "do": "read_schema_metadata",
+    "end_line": 64,
+    "file": "crates/miyusql/src/schema.rs",
+    "human": "Lit les métadonnées du schéma (tables, colonnes) sans modifier.",
+    "id": "miyusql_tool_schema_read",
+    "layer": "tool",
+    "role": "accessor",
+    "start_line": 59
+  },
+  {
+    "do": "read_table_columns",
+    "end_line": 76,
+    "file": "crates/miyusql/src/schema.rs",
+    "human": "Lit les colonnes d'une table.",
+    "id": "miyusql_tool_schema_read_table",
+    "layer": "tool",
+    "role": "accessor",
+    "start_line": 72
+  },
+  {
+    "do": "define_schema_executor",
+    "end_line": 92,
+    "file": "crates/miyusql/src/schema.rs",
+    "human": "Trait de lecture schéma (abstraction backend).",
+    "id": "miyusql_schema_executor_trait",
+    "layer": "tool",
+    "role": "infrastructure",
+    "start_line": 88
+  },
+  {
+    "do": "list_tables",
+    "end_line": 107,
+    "file": "crates/miyusql/src/schema.rs",
+    "human": "Liste les tables du schéma.",
+    "id": "miyusql_schema_read_tables_impl",
+    "layer": "tool",
+    "role": "accessor",
+    "start_line": 94
+  },
+  {
+    "do": "get_table_meta",
+    "end_line": 107,
+    "file": "crates/miyusql/src/schema.rs",
+    "human": "Lit les métadonnées d'une table.",
+    "id": "miyusql_schema_read_table_impl",
+    "layer": "tool",
+    "role": "accessor",
+    "start_line": 101
+  },
+  {
+    "do": "begin_transaction_under_governance",
+    "end_line": 13,
+    "file": "crates/miyusql/src/transaction.rs",
+    "human": "Démarre une transaction sur la connexion gouvernée.",
+    "id": "miyusql_tool_tx_begin",
+    "layer": "tool",
+    "role": "mutator",
+    "start_line": 8
+  },
+  {
+    "do": "commit_transaction",
+    "end_line": 26,
+    "file": "crates/miyusql/src/transaction.rs",
+    "human": "Valide (commit) la transaction en cours.",
+    "id": "miyusql_tool_tx_commit",
+    "layer": "tool",
+    "role": "mutator",
+    "start_line": 21
+  },
+  {
+    "do": "rollback_transaction",
+    "end_line": 39,
+    "file": "crates/miyusql/src/transaction.rs",
+    "human": "Annule (rollback) la transaction en cours.",
+    "id": "miyusql_tool_tx_rollback",
+    "layer": "tool",
+    "role": "mutator",
+    "start_line": 34
+  },
+  {
+    "do": "define_transaction_executor",
+    "end_line": 51,
+    "file": "crates/miyusql/src/transaction.rs",
+    "human": "Trait d'exécution de transactions (abstraction backend).",
+    "id": "miyusql_transaction_executor_trait",
+    "layer": "tool",
+    "role": "infrastructure",
+    "start_line": 47
+  },
+  {
+    "do": "start_transaction",
+    "end_line": 73,
+    "file": "crates/miyusql/src/transaction.rs",
+    "human": "Démarre une transaction, retourne un identifiant.",
+    "id": "miyusql_tx_begin_impl",
+    "layer": "tool",
+    "role": "mutator",
+    "start_line": 53
+  },
+  {
+    "do": "commit_transaction",
+    "end_line": 73,
+    "file": "crates/miyusql/src/transaction.rs",
+    "human": "Valide la transaction.",
+    "id": "miyusql_tx_commit_impl",
+    "layer": "tool",
+    "role": "mutator",
+    "start_line": 60
+  },
+  {
+    "do": "rollback_transaction",
+    "end_line": 73,
+    "file": "crates/miyusql/src/transaction.rs",
+    "human": "Annule la transaction.",
+    "id": "miyusql_tx_rollback_impl",
+    "layer": "tool",
+    "role": "mutator",
+    "start_line": 67
+  },
+  {
     "do": "define_api_handler_contract",
     "end_line": 7,
     "file": "crates/miyukini-admin/src/api_handlers.rs",
@@ -6250,6 +6864,26 @@
     "start_line": 88
   },
   {
+    "do": "run_cycle_tests",
+    "end_line": 22,
+    "file": "crates/miyukini-admin/src/cycle_tests_runner.rs",
+    "human": "Runner des tests de cycle (PERF, LAT, LOAD, RES).",
+    "id": "miyukiniadmin_cycle_runner",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 8
+  },
+  {
+    "do": "run_miyukinisqltest",
+    "end_line": 22,
+    "file": "crates/miyukini-admin/src/cycle_tests_runner.rs",
+    "human": "Runner du test MiyukiniSQLtest (chemin complet 8 étapes).",
+    "id": "miyukiniadmin_miyukinisqltest_runner",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 14
+  },
+  {
     "do": "define_database_service_contract",
     "end_line": 9,
     "file": "crates/miyukini-admin/src/database_service.rs",
@@ -6300,6 +6934,88 @@
     "start_line": 42
   },
   {
+    "do": "expose_db_unit_tests",
+    "end_line": 21,
+    "file": "crates/miyukini-admin/src/db_unit_tests.rs",
+    "human": "Module des tests unitaires DB (cohérence, conformité, structure, sécurité).",
+    "id": "miyukiniadmin_db_unit_tests_module",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 10
+  },
+  {
+    "end_line": 21,
+    "file": "crates/miyukini-admin/src/db_unit_tests.rs",
+    "id": "COH_001",
+    "layer": "operator",
+    "role": "test",
+    "start_line": 16
+  },
+  {
+    "end_line": 40,
+    "file": "crates/miyukini-admin/src/db_unit_tests.rs",
+    "id": "COH_002",
+    "layer": "operator",
+    "role": "test",
+    "start_line": 35
+  },
+  {
+    "end_line": 53,
+    "file": "crates/miyukini-admin/src/db_unit_tests.rs",
+    "id": "COH_003",
+    "layer": "operator",
+    "role": "test",
+    "start_line": 49
+  },
+  {
+    "end_line": 68,
+    "file": "crates/miyukini-admin/src/db_unit_tests.rs",
+    "id": "COH_004",
+    "layer": "operator",
+    "role": "test",
+    "start_line": 64
+  },
+  {
+    "end_line": 83,
+    "file": "crates/miyukini-admin/src/db_unit_tests.rs",
+    "id": "COH_005",
+    "layer": "operator",
+    "role": "test",
+    "start_line": 79
+  },
+  {
+    "end_line": 97,
+    "file": "crates/miyukini-admin/src/db_unit_tests.rs",
+    "id": "COH_006",
+    "layer": "operator",
+    "role": "test",
+    "start_line": 93
+  },
+  {
+    "end_line": 113,
+    "file": "crates/miyukini-admin/src/db_unit_tests.rs",
+    "id": "CONF_001",
+    "layer": "operator",
+    "role": "test",
+    "start_line": 109
+  },
+  {
+    "end_line": 382,
+    "file": "crates/miyukini-admin/src/db_unit_tests.rs",
+    "id": "miyukiniadmin_db_unit_tests_run_single",
+    "layer": "operator",
+    "role": "mutator",
+    "start_line": 379
+  },
+  {
+    "end_line": 508,
+    "file": "crates/miyukini-admin/src/db_unit_tests.rs",
+    "id": "miyukiniadmin_db_unit_tests_run_suite",
+    "layer": "operator",
+    "role": "mutator",
+    "start_line": 438
+  },
+  {
     "do": "expose_config_module",
     "end_line": 12,
     "file": "crates/miyukini-admin/src/lib.rs",
@@ -6340,294 +7056,482 @@
     "start_line": 29
   },
   {
-    "do": "expose_testing_service",
+    "do": "expose_admin_cell_types",
     "end_line": 40,
     "file": "crates/miyukini-admin/src/lib.rs",
-    "human": "Service d'exécution de tests.",
-    "id": "miyukiniadmin_module_testing_service",
+    "human": "Types Cellule Admin, manifeste de test, cycle de vie (Module Testing and Lifecycle Contract).",
+    "id": "miyukiniadmin_module_admin_cell",
     "layer": "operator",
-    "role": "infrastructure",
+    "role": "data",
     "start_line": 36
   },
   {
-    "do": "expose_bonding_brother_bridge",
+    "do": "expose_module_testing_service",
     "end_line": 47,
     "file": "crates/miyukini-admin/src/lib.rs",
-    "human": "Pont vers BondingBrother pour les connexions.",
-    "id": "miyukiniadmin_module_bonding_brother_bridge",
+    "human": "Service de tests des modules (découverte, cellule Admin, tests embarqués, intégrité TAMR).",
+    "id": "miyukiniadmin_module_module_testing_service",
     "layer": "operator",
     "role": "infrastructure",
     "start_line": 43
   },
   {
-    "do": "expose_audit_logger",
+    "do": "expose_module_lifecycle_service",
     "end_line": 54,
     "file": "crates/miyukini-admin/src/lib.rs",
-    "human": "Journalisation d'audit de toutes les actions.",
-    "id": "miyukiniadmin_module_audit_logger",
+    "human": "Service de cycle de vie des modules (add, lock, unlock, delete).",
+    "id": "miyukiniadmin_module_module_lifecycle_service",
     "layer": "operator",
     "role": "infrastructure",
     "start_line": 50
   },
   {
-    "do": "expose_api_handlers",
+    "do": "expose_testing_service",
     "end_line": 61,
     "file": "crates/miyukini-admin/src/lib.rs",
-    "human": "Handlers API pour les requêtes backend.",
-    "id": "miyukiniadmin_module_api_handlers",
+    "human": "Service d'exécution de tests.",
+    "id": "miyukiniadmin_module_testing_service",
     "layer": "operator",
     "role": "infrastructure",
     "start_line": 57
   },
   {
-    "do": "expose_api_routes",
+    "do": "expose_db_unit_tests",
     "end_line": 68,
     "file": "crates/miyukini-admin/src/lib.rs",
-    "human": "Routes API backend.",
-    "id": "miyukiniadmin_module_api_routes",
+    "human": "Tests unitaires DB (COH, CONF, STRUCT, SEC) — Unit Tests Contract.",
+    "id": "miyukiniadmin_module_db_unit_tests",
     "layer": "operator",
     "role": "infrastructure",
     "start_line": 64
   },
   {
-    "do": "expose_crud_state",
+    "do": "expose_cycle_tests_runner",
     "end_line": 75,
     "file": "crates/miyukini-admin/src/lib.rs",
-    "human": "État partagé CRUD tables/données (demo).",
-    "id": "miyukiniadmin_module_crud_state",
+    "human": "Runner des tests de cycle (PERF, LAT, LOAD, RES, MiyukiniSQLtest).",
+    "id": "miyukiniadmin_module_cycle_tests_runner",
     "layer": "operator",
     "role": "infrastructure",
     "start_line": 71
   },
   {
-    "do": "expose_migration_service",
+    "do": "expose_testing_suites",
     "end_line": 82,
     "file": "crates/miyukini-admin/src/lib.rs",
-    "human": "Service de gestion des migrations de schéma (DB Operations §9.3).",
-    "id": "miyukiniadmin_module_migration_service",
+    "human": "Suites Quick/Standard/Full (unit + cycle) et rapports.",
+    "id": "miyukiniadmin_module_testing_suites",
     "layer": "operator",
     "role": "infrastructure",
     "start_line": 78
   },
   {
-    "do": "expose_backup_service",
-    "end_line": 90,
+    "do": "expose_bonding_brother_bridge",
+    "end_line": 89,
     "file": "crates/miyukini-admin/src/lib.rs",
-    "human": "Service de sauvegarde et restauration (Backup Restore Contract).",
-    "id": "miyukiniadmin_module_backup_service",
+    "human": "Pont vers BondingBrother pour les connexions.",
+    "id": "miyukiniadmin_module_bonding_brother_bridge",
     "layer": "operator",
     "role": "infrastructure",
     "start_line": 85
   },
   {
-    "do": "hold_shared_app_state",
-    "end_line": 26,
-    "file": "crates/miyukini-admin/src/main.rs",
-    "human": "État partagé de l'application (CRUD, migrations, backups).",
-    "id": "miyukiniadmin_backend_app_state",
-    "layer": "operator",
-    "role": "data",
-    "start_line": 21
-  },
-  {
-    "do": "store_crud_state",
-    "end_line": 160,
-    "file": "crates/miyukini-admin/src/main.rs",
-    "human": "État CRUD tables.",
-    "id": "miyukiniadmin_app_state_crud",
-    "layer": "operator",
-    "role": "data",
-    "start_line": 28
-  },
-  {
-    "do": "store_migration_service",
-    "end_line": 160,
-    "file": "crates/miyukini-admin/src/main.rs",
-    "human": "Service migrations (stub).",
-    "id": "miyukiniadmin_app_state_migrations",
-    "layer": "operator",
-    "role": "data",
-    "start_line": 35
-  },
-  {
-    "do": "store_backup_service",
-    "end_line": 160,
-    "file": "crates/miyukini-admin/src/main.rs",
-    "human": "Service backups (stub).",
-    "id": "miyukiniadmin_app_state_backups",
-    "layer": "operator",
-    "role": "data",
-    "start_line": 42
-  },
-  {
-    "do": "start_backend_server",
-    "end_line": 160,
-    "file": "crates/miyukini-admin/src/main.rs",
-    "human": "Point d'entrée principal du backend MiyukiniAdmin.",
-    "id": "miyukiniadmin_backend_main",
+    "do": "expose_audit_logger",
+    "end_line": 96,
+    "file": "crates/miyukini-admin/src/lib.rs",
+    "human": "Journalisation d'audit de toutes les actions.",
+    "id": "miyukiniadmin_module_audit_logger",
     "layer": "operator",
     "role": "infrastructure",
-    "start_line": 51
+    "start_line": 92
   },
   {
-    "do": "serve_dashboard_html",
-    "end_line": 160,
-    "file": "crates/miyukini-admin/src/main.rs",
-    "human": "Sert la page d'accueil MiyukiniAdmin (dashboard minimal).",
-    "id": "miyukiniadmin_backend_serve_dashboard",
+    "do": "expose_api_handlers",
+    "end_line": 103,
+    "file": "crates/miyukini-admin/src/lib.rs",
+    "human": "Handlers API pour les requêtes backend.",
+    "id": "miyukiniadmin_module_api_handlers",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 99
+  },
+  {
+    "do": "expose_api_routes",
+    "end_line": 110,
+    "file": "crates/miyukini-admin/src/lib.rs",
+    "human": "Routes API backend.",
+    "id": "miyukiniadmin_module_api_routes",
     "layer": "operator",
     "role": "infrastructure",
     "start_line": 106
   },
   {
+    "do": "expose_crud_state",
+    "end_line": 117,
+    "file": "crates/miyukini-admin/src/lib.rs",
+    "human": "État partagé CRUD tables/données (demo).",
+    "id": "miyukiniadmin_module_crud_state",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 113
+  },
+  {
+    "do": "expose_migration_service",
+    "end_line": 124,
+    "file": "crates/miyukini-admin/src/lib.rs",
+    "human": "Service de gestion des migrations de schéma (DB Operations §9.3).",
+    "id": "miyukiniadmin_module_migration_service",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 120
+  },
+  {
+    "do": "expose_backup_service",
+    "end_line": 131,
+    "file": "crates/miyukini-admin/src/lib.rs",
+    "human": "Service de sauvegarde et restauration (Backup Restore Contract).",
+    "id": "miyukiniadmin_module_backup_service",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 127
+  },
+  {
+    "do": "expose_models",
+    "end_line": 138,
+    "file": "crates/miyukini-admin/src/lib.rs",
+    "human": "Modèles (environment_state, admin_account, session, corruption_memory).",
+    "id": "miyukiniadmin_module_models",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 134
+  },
+  {
+    "do": "expose_services",
+    "end_line": 146,
+    "file": "crates/miyukini-admin/src/lib.rs",
+    "human": "Services (environment_state, auth, permission, recovery).",
+    "id": "miyukiniadmin_module_services",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 141
+  },
+  {
+    "do": "hold_shared_app_state",
+    "end_line": 41,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "human": "État partagé de l'application (CRUD, migrations, backups, état environnement, auth).",
+    "id": "miyukiniadmin_backend_app_state",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 36
+  },
+  {
+    "do": "store_environment_state",
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "human": "État détecté au démarrage (Vierge, Initialise, Compromis).",
+    "id": "miyukiniadmin_app_state_environment_state",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 43
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_app_state_crud",
+    "start_line": 49
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_app_state_migrations",
+    "start_line": 51
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_app_state_backups",
+    "start_line": 53
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_app_state_environment_state_svc (réservé pour middleware / re-détection)",
+    "start_line": 55
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_app_state_auth_svc",
+    "start_line": 58
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_app_state_permission_svc (réservé pour middleware permission)",
+    "start_line": 60
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_app_state_module_testing_svc",
+    "start_line": 63
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_app_state_module_lifecycle_svc",
+    "start_line": 66
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_app_state_module_discovery",
+    "start_line": 69
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_app_state_admin_cell_reader",
+    "start_line": 72
+  },
+  {
+    "do": "start_backend_server",
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "human": "Point d'entrée principal du backend MiyukiniAdmin (détection état + routage conditionnel).",
+    "id": "miyukiniadmin_backend_main",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 77
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_backend_router_setup_only",
+    "start_line": 163
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_backend_router_full",
+    "start_line": 175
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_backend_router_compromised_only",
+    "start_line": 206
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_backend_serve_setup_redirect",
+    "start_line": 216
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_backend_serve_setup",
+    "start_line": 222
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_backend_serve_compromised",
+    "start_line": 228
+  },
+  {
+    "end_line": 240,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_backend_serve_login_page",
+    "start_line": 234
+  },
+  {
+    "end_line": 337,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "id": "miyukiniadmin_backend_api_auth_login",
+    "start_line": 247
+  },
+  {
+    "do": "serve_dashboard_html",
+    "end_line": 337,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "human": "Sert la page d'accueil MiyukiniAdmin (Daynight dashboard depuis ui/index.html).",
+    "id": "miyukiniadmin_backend_serve_dashboard",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 272
+  },
+  {
     "do": "health_check",
-    "end_line": 160,
+    "end_line": 337,
     "file": "crates/miyukini-admin/src/main.rs",
     "human": "Endpoint de santé pour le monitoring.",
     "id": "miyukiniadmin_backend_health",
     "layer": "operator",
     "role": "infrastructure",
-    "start_line": 115
+    "start_line": 285
   },
   {
     "do": "api_status",
-    "end_line": 160,
+    "end_line": 337,
     "file": "crates/miyukini-admin/src/main.rs",
     "human": "Statut API pour l'administration.",
     "id": "miyukiniadmin_backend_api_status",
     "layer": "operator",
     "role": "infrastructure",
-    "start_line": 124
+    "start_line": 294
   },
   {
     "do": "api_list_tables",
-    "end_line": 160,
+    "end_line": 337,
     "file": "crates/miyukini-admin/src/main.rs",
     "human": "Liste des tables (CRUD).",
     "id": "miyukiniadmin_backend_api_tables_list",
     "layer": "operator",
     "role": "infrastructure",
-    "start_line": 146
+    "start_line": 323
   },
   {
     "do": "api_table_rows",
-    "end_line": 372,
+    "end_line": 549,
     "file": "crates/miyukini-admin/src/main.rs",
     "human": "Lignes d'une table (paginées).",
     "id": "miyukiniadmin_backend_api_table_rows",
     "layer": "operator",
     "role": "infrastructure",
-    "start_line": 166
+    "start_line": 343
   },
   {
     "do": "api_create_row",
-    "end_line": 372,
+    "end_line": 549,
     "file": "crates/miyukini-admin/src/main.rs",
     "human": "Création d'une ligne.",
     "id": "miyukiniadmin_backend_api_table_create_row",
     "layer": "operator",
     "role": "infrastructure",
-    "start_line": 196
+    "start_line": 373
   },
   {
     "do": "api_get_row",
-    "end_line": 372,
+    "end_line": 549,
     "file": "crates/miyukini-admin/src/main.rs",
     "human": "Une ligne par ID (index 1-based).",
     "id": "miyukiniadmin_backend_api_table_get_row",
     "layer": "operator",
     "role": "infrastructure",
-    "start_line": 219
+    "start_line": 396
   },
   {
     "do": "api_update_row",
-    "end_line": 372,
+    "end_line": 549,
     "file": "crates/miyukini-admin/src/main.rs",
     "human": "Mise à jour d'une ligne.",
     "id": "miyukiniadmin_backend_api_table_update_row",
     "layer": "operator",
     "role": "infrastructure",
-    "start_line": 242
+    "start_line": 419
   },
   {
     "do": "api_delete_row",
-    "end_line": 372,
+    "end_line": 549,
     "file": "crates/miyukini-admin/src/main.rs",
     "human": "Suppression d'une ligne.",
     "id": "miyukiniadmin_backend_api_table_delete_row",
     "layer": "operator",
     "role": "infrastructure",
-    "start_line": 273
+    "start_line": 450
   },
   {
     "do": "api_migrations_list",
-    "end_line": 372,
+    "end_line": 549,
     "file": "crates/miyukini-admin/src/main.rs",
     "human": "Liste des migrations (appliquées et en attente).",
     "id": "miyukiniadmin_backend_api_migrations_list",
     "layer": "operator",
     "role": "infrastructure",
-    "start_line": 296
+    "start_line": 473
   },
   {
     "do": "api_migrations_history",
-    "end_line": 372,
+    "end_line": 549,
     "file": "crates/miyukini-admin/src/main.rs",
     "human": "Historique complet des migrations.",
     "id": "miyukiniadmin_backend_api_migrations_history",
     "layer": "operator",
     "role": "infrastructure",
-    "start_line": 311
+    "start_line": 488
   },
   {
     "do": "api_migrations_apply",
-    "end_line": 372,
+    "end_line": 549,
     "file": "crates/miyukini-admin/src/main.rs",
     "human": "Applique les migrations en attente (stub ; StrongFather + KindMother en production).",
     "id": "miyukiniadmin_backend_api_migrations_apply",
     "layer": "operator",
     "role": "infrastructure",
-    "start_line": 324
+    "start_line": 501
   },
   {
     "do": "api_backups_list",
-    "end_line": 372,
+    "end_line": 549,
     "file": "crates/miyukini-admin/src/main.rs",
     "human": "Liste des sauvegardes.",
     "id": "miyukiniadmin_backend_api_backups_list",
     "layer": "operator",
     "role": "infrastructure",
-    "start_line": 339
+    "start_line": 516
   },
   {
     "do": "api_backups_create",
-    "end_line": 372,
+    "end_line": 549,
     "file": "crates/miyukini-admin/src/main.rs",
     "human": "Crée une sauvegarde (stub ; KindMother en production).",
     "id": "miyukiniadmin_backend_api_backups_create",
     "layer": "operator",
     "role": "infrastructure",
-    "start_line": 352
+    "start_line": 529
   },
   {
     "do": "represent_restore_request",
-    "end_line": 372,
+    "end_line": 549,
     "file": "crates/miyukini-admin/src/main.rs",
     "human": "Corps de la requête restore.",
     "id": "miyukiniadmin_backend_api_backups_restore_body",
     "layer": "operator",
     "role": "data",
-    "start_line": 367
+    "start_line": 544
   },
   {
     "do": "api_backups_restore",
-    "end_line": 699,
+    "end_line": 584,
     "file": "crates/miyukini-admin/src/main.rs",
     "human": "Restaure depuis un backup (StrongFather + KindMother en production).",
     "id": "miyukiniadmin_backend_api_backups_restore",
     "layer": "operator",
     "role": "infrastructure",
-    "start_line": 378
+    "start_line": 555
+  },
+  {
+    "do": "serve_database_html",
+    "end_line": 816,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "human": "Sert la page Database (Daynight) depuis ui/database.html.",
+    "id": "miyukiniadmin_backend_serve_database",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 779
+  },
+  {
+    "do": "serve_tests_html",
+    "end_line": 816,
+    "file": "crates/miyukini-admin/src/main.rs",
+    "human": "Sert la page Tests (Daynight) depuis ui/tests.html.",
+    "id": "miyukiniadmin_backend_serve_tests",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 792
   },
   {
     "do": "represent_migration_history_entry",
@@ -6890,6 +7794,322 @@
     "start_line": 255
   },
   {
+    "do": "represent_admin_account",
+    "end_line": 13,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "human": "Compte administrateur MiyukiniAdmin (registre admin).",
+    "id": "miyukiniadmin_admin_account",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 8
+  },
+  {
+    "do": "store_account_identity",
+    "end_line": 19,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "human": "Identifiant unique du compte.",
+    "id": "miyukiniadmin_admin_account_id",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 15
+  },
+  {
+    "do": "store_username",
+    "end_line": 26,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "human": "Nom d'utilisateur (unique).",
+    "id": "miyukiniadmin_admin_account_username",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 22
+  },
+  {
+    "do": "store_password_hash",
+    "end_line": 34,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "human": "Hash mot de passe (Argon2id).",
+    "id": "miyukiniadmin_admin_account_password_hash",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 29
+  },
+  {
+    "do": "store_role",
+    "end_line": 41,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "human": "Rôle RBAC (Admin, Recovery, Audit).",
+    "id": "miyukiniadmin_admin_account_role",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 37
+  },
+  {
+    "do": "store_mfa_flag",
+    "end_line": 48,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "human": "MFA activée (TOTP ou WebAuthn).",
+    "id": "miyukiniadmin_admin_account_mfa_enabled",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 44
+  },
+  {
+    "do": "store_mfa_secret",
+    "end_line": 56,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "human": "Secret MFA chiffré (AES-256-GCM) si TOTP.",
+    "id": "miyukiniadmin_admin_account_mfa_secret_encrypted",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 51
+  },
+  {
+    "do": "store_created_at",
+    "end_line": 63,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "human": "Date de création du compte.",
+    "id": "miyukiniadmin_admin_account_created_at",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 59
+  },
+  {
+    "do": "store_updated_at",
+    "end_line": 70,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "human": "Dernière mise à jour.",
+    "id": "miyukiniadmin_admin_account_updated_at",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 66
+  },
+  {
+    "do": "store_last_login",
+    "end_line": 77,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "human": "Dernière connexion réussie.",
+    "id": "miyukiniadmin_admin_account_last_login_at",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 73
+  },
+  {
+    "do": "store_locked_until",
+    "end_line": 84,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "human": "Verrouillage jusqu'à (rate limit).",
+    "id": "miyukiniadmin_admin_account_locked_until",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 80
+  },
+  {
+    "do": "store_failed_attempts",
+    "end_line": 91,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "human": "Nombre d'échecs de connexion (fenêtre).",
+    "id": "miyukiniadmin_admin_account_failed_attempts",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 87
+  },
+  {
+    "do": "represent_admin_role",
+    "end_line": 101,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "human": "Rôle RBAC MiyukiniAdmin (Permission Contract §3).",
+    "id": "miyukiniadmin_admin_role_enum",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 95
+  },
+  {
+    "end_line": 115,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "id": "miyukiniadmin_role_admin",
+    "start_line": 104
+  },
+  {
+    "end_line": 115,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "id": "miyukiniadmin_role_recovery",
+    "start_line": 108
+  },
+  {
+    "end_line": 115,
+    "file": "crates/miyukini-admin/src/models/admin_account.rs",
+    "id": "miyukiniadmin_role_audit",
+    "start_line": 112
+  },
+  {
+    "do": "represent_corruption_memory",
+    "end_line": 13,
+    "file": "crates/miyukini-admin/src/models/corruption_memory.rs",
+    "human": "Mémoire de corruption après destruction et réinit (vierge avec mémoire).",
+    "id": "miyukiniadmin_corruption_memory",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 8
+  },
+  {
+    "do": "store_reinit_timestamp",
+    "end_line": 19,
+    "file": "crates/miyukini-admin/src/models/corruption_memory.rs",
+    "human": "Date de réinitialisation.",
+    "id": "miyukiniadmin_corruption_memory_reinitialised_at",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 15
+  },
+  {
+    "do": "store_reason",
+    "end_line": 26,
+    "file": "crates/miyukini-admin/src/models/corruption_memory.rs",
+    "human": "Raison (ex. recovery_automatic_failed).",
+    "id": "miyukiniadmin_corruption_memory_reason",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 22
+  },
+  {
+    "do": "store_previous_state",
+    "end_line": 36,
+    "file": "crates/miyukini-admin/src/models/corruption_memory.rs",
+    "human": "État précédent (ex. compromised).",
+    "id": "miyukiniadmin_corruption_memory_previous_state",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 29
+  },
+  {
+    "do": "represent_environment_state",
+    "end_line": 13,
+    "file": "crates/miyukini-admin/src/models/environment_state.rs",
+    "human": "État de l'environnement : Vierge, Initialisé, ou Compromis.",
+    "id": "miyukiniadmin_environment_state_enum",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 7
+  },
+  {
+    "end_line": 29,
+    "file": "crates/miyukini-admin/src/models/environment_state.rs",
+    "id": "miyukiniadmin_env_state_vierge",
+    "start_line": 17
+  },
+  {
+    "end_line": 29,
+    "file": "crates/miyukini-admin/src/models/environment_state.rs",
+    "id": "miyukiniadmin_env_state_initialise",
+    "start_line": 21
+  },
+  {
+    "end_line": 29,
+    "file": "crates/miyukini-admin/src/models/environment_state.rs",
+    "id": "miyukiniadmin_env_state_compromis",
+    "start_line": 26
+  },
+  {
+    "do": "expose_models",
+    "end_line": 12,
+    "file": "crates/miyukini-admin/src/models/mod.rs",
+    "human": "Module modèles (environment_state, admin_account, session, corruption_memory).",
+    "id": "miyukiniadmin_models_mod",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 5
+  },
+  {
+    "do": "represent_admin_session",
+    "end_line": 15,
+    "file": "crates/miyukini-admin/src/models/session.rs",
+    "human": "Session administrateur (après login réussi + MFA si requis).",
+    "id": "miyukiniadmin_admin_session",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 10
+  },
+  {
+    "do": "store_session_identity",
+    "end_line": 21,
+    "file": "crates/miyukini-admin/src/models/session.rs",
+    "human": "Identifiant unique de la session.",
+    "id": "miyukiniadmin_session_id",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 17
+  },
+  {
+    "do": "store_account_ref",
+    "end_line": 28,
+    "file": "crates/miyukini-admin/src/models/session.rs",
+    "human": "Compte associé.",
+    "id": "miyukiniadmin_session_account_id",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 24
+  },
+  {
+    "do": "store_role_snapshot",
+    "end_line": 35,
+    "file": "crates/miyukini-admin/src/models/session.rs",
+    "human": "Rôle au moment de la création (snapshot).",
+    "id": "miyukiniadmin_session_role",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 31
+  },
+  {
+    "do": "store_expiry",
+    "end_line": 42,
+    "file": "crates/miyukini-admin/src/models/session.rs",
+    "human": "Expiration (idle + absolu).",
+    "id": "miyukiniadmin_session_expires_at",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 38
+  },
+  {
+    "do": "store_created_at",
+    "end_line": 49,
+    "file": "crates/miyukini-admin/src/models/session.rs",
+    "human": "Création de la session.",
+    "id": "miyukiniadmin_session_created_at",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 45
+  },
+  {
+    "do": "store_ip",
+    "end_line": 56,
+    "file": "crates/miyukini-admin/src/models/session.rs",
+    "human": "IP d'origine (optionnel, pour audit).",
+    "id": "miyukiniadmin_session_ip",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 52
+  },
+  {
+    "do": "store_user_agent",
+    "end_line": 63,
+    "file": "crates/miyukini-admin/src/models/session.rs",
+    "human": "User-Agent (optionnel, pour audit).",
+    "id": "miyukiniadmin_session_user_agent",
+    "layer": "operator",
+    "role": "data",
+    "start_line": 59
+  },
+  {
+    "do": "check_session_valid",
+    "end_line": 77,
+    "file": "crates/miyukini-admin/src/models/session.rs",
+    "human": "Indique si la session est valide.",
+    "id": "miyukiniadmin_session_is_valid",
+    "layer": "operator",
+    "role": "accessor",
+    "start_line": 69
+  },
+  {
     "do": "define_monitoring_service_contract",
     "end_line": 7,
     "file": "crates/miyukini-admin/src/monitoring_service.rs",
@@ -6970,6 +8190,332 @@
     "start_line": 25
   },
   {
+    "do": "authenticate_admin",
+    "end_line": 25,
+    "file": "crates/miyukini-admin/src/services/auth.rs",
+    "human": "Authentification : login, session, rate limit (stub).",
+    "id": "miyukiniadmin_auth_service",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 19
+  },
+  {
+    "do": "create_auth_service",
+    "end_line": 42,
+    "file": "crates/miyukini-admin/src/services/auth.rs",
+    "human": "Construit le service d'authentification.",
+    "id": "miyukiniadmin_auth_service_new",
+    "layer": "operator",
+    "role": "constructor",
+    "start_line": 38
+  },
+  {
+    "end_line": 75,
+    "file": "crates/miyukini-admin/src/services/auth.rs",
+    "id": "miyukiniadmin_auth_hash_password",
+    "start_line": 58
+  },
+  {
+    "end_line": 75,
+    "file": "crates/miyukini-admin/src/services/auth.rs",
+    "id": "miyukiniadmin_auth_verify_password",
+    "start_line": 68
+  },
+  {
+    "end_line": 87,
+    "file": "crates/miyukini-admin/src/services/auth.rs",
+    "id": "miyukiniadmin_auth_load_registry",
+    "start_line": 75
+  },
+  {
+    "end_line": 103,
+    "file": "crates/miyukini-admin/src/services/auth.rs",
+    "id": "miyukiniadmin_auth_save_registry",
+    "start_line": 87
+  },
+  {
+    "do": "login_admin",
+    "end_line": 103,
+    "file": "crates/miyukini-admin/src/services/auth.rs",
+    "human": "Authentifie un admin et crée une session.",
+    "id": "miyukiniadmin_auth_login",
+    "layer": "operator",
+    "role": "mutator",
+    "start_line": 99
+  },
+  {
+    "do": "validate_session",
+    "end_line": 151,
+    "file": "crates/miyukini-admin/src/services/auth.rs",
+    "human": "Vérifie qu'une session est valide et non expirée.",
+    "id": "miyukiniadmin_auth_validate_session",
+    "layer": "operator",
+    "role": "accessor",
+    "start_line": 147
+  },
+  {
+    "end_line": 175,
+    "file": "crates/miyukini-admin/src/services/auth.rs",
+    "id": "miyukiniadmin_auth_logout",
+    "start_line": 167
+  },
+  {
+    "end_line": 212,
+    "file": "crates/miyukini-admin/src/services/auth.rs",
+    "id": "miyukiniadmin_auth_create_account",
+    "start_line": 175
+  },
+  {
+    "end_line": 212,
+    "file": "crates/miyukini-admin/src/services/auth.rs",
+    "id": "miyukiniadmin_auth_login_error",
+    "start_line": 211
+  },
+  {
+    "end_line": 232,
+    "file": "crates/miyukini-admin/src/services/auth.rs",
+    "id": "miyukiniadmin_auth_create_account_error",
+    "start_line": 221
+  },
+  {
+    "do": "run_auto_recovery",
+    "end_line": 16,
+    "file": "crates/miyukini-admin/src/services/auto_recovery.rs",
+    "human": "Tente recovery/rollback ; si échec, pre-destruction backup puis destruction/réinit.",
+    "id": "miyukiniadmin_auto_recovery_service",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 10
+  },
+  {
+    "do": "create_auto_recovery_service",
+    "end_line": 30,
+    "file": "crates/miyukini-admin/src/services/auto_recovery.rs",
+    "human": "Construit le service auto-recovery.",
+    "id": "miyukiniadmin_auto_recovery_new",
+    "layer": "operator",
+    "role": "constructor",
+    "start_line": 26
+  },
+  {
+    "do": "run_auto_recovery",
+    "end_line": 47,
+    "file": "crates/miyukini-admin/src/services/auto_recovery.rs",
+    "human": "Exécute la recovery automatique (rollback stub puis destruction si échec).",
+    "id": "miyukiniadmin_auto_recovery_run",
+    "layer": "operator",
+    "role": "mutator",
+    "start_line": 43
+  },
+  {
+    "end_line": 84,
+    "file": "crates/miyukini-admin/src/services/auto_recovery.rs",
+    "id": "miyukiniadmin_auto_recovery_result",
+    "start_line": 81
+  },
+  {
+    "do": "run_destruction_and_reinit",
+    "end_line": 18,
+    "file": "crates/miyukini-admin/src/services/destruction_reinit.rs",
+    "human": "Destruction des artefacts et réinit vers VIERGE avec mémoire de corruption.",
+    "id": "miyukiniadmin_destruction_reinit_service",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 12
+  },
+  {
+    "do": "create_destruction_reinit_service",
+    "end_line": 32,
+    "file": "crates/miyukini-admin/src/services/destruction_reinit.rs",
+    "human": "Construit le service destruction/réinit.",
+    "id": "miyukiniadmin_destruction_reinit_new",
+    "layer": "operator",
+    "role": "constructor",
+    "start_line": 28
+  },
+  {
+    "end_line": 88,
+    "file": "crates/miyukini-admin/src/services/destruction_reinit.rs",
+    "id": "miyukiniadmin_destruction_write_corruption_memory",
+    "start_line": 46
+  },
+  {
+    "do": "run_destruction_and_reinit",
+    "end_line": 105,
+    "file": "crates/miyukini-admin/src/services/destruction_reinit.rs",
+    "human": "Sauvegarde si besoin, wipe artefacts, écrit mémoire corruption, réinit.",
+    "id": "miyukiniadmin_destruction_reinit_run",
+    "layer": "operator",
+    "role": "mutator",
+    "start_line": 84
+  },
+  {
+    "do": "detect_environment_state",
+    "end_line": 16,
+    "file": "crates/miyukini-admin/src/services/environment_state.rs",
+    "human": "Détection état environnement (VIERGE, INITIALISE, COMPROMIS) via artefacts locaux.",
+    "id": "miyukiniadmin_environment_state_service",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 10
+  },
+  {
+    "end_line": 22,
+    "file": "crates/miyukini-admin/src/services/environment_state.rs",
+    "id": "miyukiniadmin_env_state_service_data_dir",
+    "start_line": 19
+  },
+  {
+    "do": "create_environment_state_service",
+    "end_line": 29,
+    "file": "crates/miyukini-admin/src/services/environment_state.rs",
+    "human": "Construit le service avec le répertoire de données.",
+    "id": "miyukiniadmin_env_state_service_new",
+    "layer": "operator",
+    "role": "constructor",
+    "start_line": 25
+  },
+  {
+    "end_line": 109,
+    "file": "crates/miyukini-admin/src/services/environment_state.rs",
+    "id": "miyukiniadmin_env_state_verify_eip",
+    "start_line": 56
+  },
+  {
+    "end_line": 109,
+    "file": "crates/miyukini-admin/src/services/environment_state.rs",
+    "id": "miyukiniadmin_env_state_verify_registry",
+    "start_line": 70
+  },
+  {
+    "end_line": 109,
+    "file": "crates/miyukini-admin/src/services/environment_state.rs",
+    "id": "miyukiniadmin_env_state_verify_schema",
+    "start_line": 85
+  },
+  {
+    "end_line": 109,
+    "file": "crates/miyukini-admin/src/services/environment_state.rs",
+    "id": "miyukiniadmin_env_state_verify_consistency",
+    "start_line": 97
+  },
+  {
+    "do": "detect_environment_state",
+    "end_line": 142,
+    "file": "crates/miyukini-admin/src/services/environment_state.rs",
+    "human": "Détecte VIERGE / INITIALISE / COMPROMIS selon artefacts et intégrité.",
+    "id": "miyukiniadmin_env_state_detect",
+    "layer": "operator",
+    "role": "accessor",
+    "start_line": 104
+  },
+  {
+    "do": "expose_services",
+    "end_line": 12,
+    "file": "crates/miyukini-admin/src/services/mod.rs",
+    "human": "Module services (environment_state, auth, permission, recovery).",
+    "id": "miyukiniadmin_services_mod",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 5
+  },
+  {
+    "do": "check_capability_for_role",
+    "end_line": 15,
+    "file": "crates/miyukini-admin/src/services/permission.rs",
+    "human": "Vérification des capacités par rôle (RBAC).",
+    "id": "miyukiniadmin_permission_service",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 9
+  },
+  {
+    "end_line": 73,
+    "file": "crates/miyukini-admin/src/services/permission.rs",
+    "id": "miyukiniadmin_capabilities_admin",
+    "start_line": 19
+  },
+  {
+    "end_line": 73,
+    "file": "crates/miyukini-admin/src/services/permission.rs",
+    "id": "miyukiniadmin_capabilities_recovery_extra",
+    "start_line": 55
+  },
+  {
+    "end_line": 73,
+    "file": "crates/miyukini-admin/src/services/permission.rs",
+    "id": "miyukiniadmin_capabilities_audit",
+    "start_line": 59
+  },
+  {
+    "do": "create_permission_service",
+    "end_line": 80,
+    "file": "crates/miyukini-admin/src/services/permission.rs",
+    "human": "Crée le service RBAC.",
+    "id": "miyukiniadmin_permission_service_new",
+    "layer": "operator",
+    "role": "constructor",
+    "start_line": 76
+  },
+  {
+    "do": "has_capability",
+    "end_line": 91,
+    "file": "crates/miyukini-admin/src/services/permission.rs",
+    "human": "Vérifie si le rôle a la capacité demandée.",
+    "id": "miyukiniadmin_permission_has_capability",
+    "layer": "operator",
+    "role": "accessor",
+    "start_line": 86
+  },
+  {
+    "end_line": 110,
+    "file": "crates/miyukini-admin/src/services/permission.rs",
+    "id": "miyukiniadmin_permission_capabilities_for_role",
+    "start_line": 98
+  },
+  {
+    "do": "run_pre_destruction_backup_if_needed",
+    "end_line": 16,
+    "file": "crates/miyukini-admin/src/services/pre_destruction_backup.rs",
+    "human": "Sauvegarde comprimée avant destruction si pas de sauvegarde locale antérieure.",
+    "id": "miyukiniadmin_pre_destruction_backup_service",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 10
+  },
+  {
+    "do": "create_pre_destruction_backup_service",
+    "end_line": 31,
+    "file": "crates/miyukini-admin/src/services/pre_destruction_backup.rs",
+    "human": "Construit le service pre-destruction backup.",
+    "id": "miyukiniadmin_pre_destruction_backup_new",
+    "layer": "operator",
+    "role": "constructor",
+    "start_line": 27
+  },
+  {
+    "end_line": 50,
+    "file": "crates/miyukini-admin/src/services/pre_destruction_backup.rs",
+    "id": "miyukiniadmin_pre_destruction_has_prior",
+    "start_line": 40
+  },
+  {
+    "do": "run_pre_destruction_backup_if_needed",
+    "end_line": 50,
+    "file": "crates/miyukini-admin/src/services/pre_destruction_backup.rs",
+    "human": "Crée un backup avant destruction si aucun backup existant.",
+    "id": "miyukiniadmin_pre_destruction_run_if_needed",
+    "layer": "operator",
+    "role": "mutator",
+    "start_line": 46
+  },
+  {
+    "end_line": 80,
+    "file": "crates/miyukini-admin/src/services/pre_destruction_backup.rs",
+    "id": "miyukiniadmin_pre_destruction_result",
+    "start_line": 77
+  },
+  {
     "do": "define_testing_service_contract",
     "end_line": 7,
     "file": "crates/miyukini-admin/src/testing_service.rs",
@@ -7028,5 +8574,25 @@
     "layer": "operator",
     "role": "test",
     "start_line": 46
+  },
+  {
+    "do": "run_suites_and_report",
+    "end_line": 19,
+    "file": "crates/miyukini-admin/src/testing_suites.rs",
+    "human": "Suites de tests Quick/Standard/Full (unit + cycle).",
+    "id": "miyukiniadmin_testing_suites",
+    "layer": "operator",
+    "role": "infrastructure",
+    "start_line": 13
+  },
+  {
+    "do": "run_suites_and_report",
+    "end_line": 109,
+    "file": "crates/miyukini-admin/src/testing_suites.rs",
+    "human": "Exécute les suites (unit + MiyukiniSQLtest) et produit un rapport combiné.",
+    "id": "miyukiniadmin_testing_suites_run_and_report",
+    "layer": "operator",
+    "role": "mutator",
+    "start_line": 67
   }
 ]

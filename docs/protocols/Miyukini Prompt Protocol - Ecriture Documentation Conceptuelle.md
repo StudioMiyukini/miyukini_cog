@@ -96,6 +96,8 @@ Les dépendances doivent être :
 
 ## 4. Phase 2 — Distribution des tâches
 
+**Une to-do liste est généré** et **géré**en fonction de ce qui suit :
+
 Chaque tâche issue du plan est **déléguée par l'agent de planification** à un nouvel agent si les conditions sont réunies.
 
 Contexte vierge obligatoire.

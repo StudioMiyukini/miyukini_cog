@@ -61,6 +61,27 @@ pub mod module_lifecycle_service;
 /// @do: expose_testing_service
 pub mod testing_service;
 
+/// @id: miyukiniadmin_module_db_unit_tests
+/// @role: infrastructure
+/// @layer: operator
+/// @human: Tests unitaires DB (COH, CONF, STRUCT, SEC) — Unit Tests Contract.
+/// @do: expose_db_unit_tests
+pub mod db_unit_tests;
+
+/// @id: miyukiniadmin_module_cycle_tests_runner
+/// @role: infrastructure
+/// @layer: operator
+/// @human: Runner des tests de cycle (PERF, LAT, LOAD, RES, MiyukiniSQLtest).
+/// @do: expose_cycle_tests_runner
+pub mod cycle_tests_runner;
+
+/// @id: miyukiniadmin_module_testing_suites
+/// @role: infrastructure
+/// @layer: operator
+/// @human: Suites Quick/Standard/Full (unit + cycle) et rapports.
+/// @do: expose_testing_suites
+pub mod testing_suites;
+
 /// @id: miyukiniadmin_module_bonding_brother_bridge
 /// @role: infrastructure
 /// @layer: operator

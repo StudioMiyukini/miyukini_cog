@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/miyukini-kernel", "crates/strongfather", "crates/kindmother", "crates/borderguard", "crates/caringnanny", "crates/masterbutler", "crates/bondingbrother", "crates/everbuddy", "crates/worrysentinel", "crates/tamr", "crates/logisticssteward", "crates/miyukini-admin", "tools/mip-generator"]
+members = ["crates/miyukini-kernel", "crates/strongfather", "crates/kindmother", "crates/borderguard", "crates/caringnanny", "crates/masterbutler", "crates/bondingbrother", "crates/everbuddy", "crates/worrysentinel", "crates/tamr", "crates/logisticssteward", "crates/miyusql", "crates/miyukini-admin", "tools/mip-generator"]
 resolver = "2"
 
 [workspace.package]

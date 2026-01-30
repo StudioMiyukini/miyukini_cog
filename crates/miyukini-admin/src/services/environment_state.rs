@@ -143,4 +143,38 @@ impl EnvironmentStateService {
     pub fn data_dir(&self) -> &PathBuf {
         &self.data_dir
     }
+
+    /// Crée le blob EIP minimal (First-boot — Auth and First-Boot §5).
+    /// Stub : contenu non vide pour que verify_eip_integrity soit valide.
+    /// @id: miyukiniadmin_env_state_write_eip_stub
+    /// @role: mutator
+    /// @layer: operator
+    /// @human: Génère l'artefact EIP initial pour passage à INITIALISE.
+    /// @do: write_eip_stub
+    pub async fn write_eip_stub(&self) -> Result<(), std::io::Error> {
+        let path = self.eip_path();
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent).await?;
+        }
+        // Stub : marqueur EIP minimal (en production : clé dérivée, AEAD, integrity_hash).
+        let stub = br#"{"eip_version":"1.0","created_at_first_boot":true}"#;
+        fs::write(&path, stub).await
+    }
+
+    /// Crée le schéma bootstrap initial (First-boot — Auth and First-Boot §5).
+    /// Contenu minimal avec "version" pour que verify_schema_integrity soit valide.
+    /// @id: miyukiniadmin_env_state_write_bootstrap_schema_initial
+    /// @role: mutator
+    /// @layer: operator
+    /// @human: Génère l'artefact schéma bootstrap pour passage à INITIALISE.
+    /// @do: write_bootstrap_schema_initial
+    pub async fn write_bootstrap_schema_initial(&self) -> Result<(), std::io::Error> {
+        let path = self.bootstrap_schema_path();
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent).await?;
+        }
+        let schema = serde_json::json!({ "version": "1.0", "created_at_first_boot": true });
+        let content = serde_json::to_string_pretty(&schema).unwrap_or_default();
+        fs::write(&path, content).await
+    }
 }

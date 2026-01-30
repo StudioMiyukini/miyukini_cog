@@ -7,9 +7,11 @@
 #[allow(unused_imports)]
 use axum::{
     extract::{Path, Query, State},
+    http::{header, status::StatusCode, HeaderValue},
+    middleware,
     routing::{delete, get, post, put},
     Router,
-    response::{Html, IntoResponse, Json},
+    response::{Html, IntoResponse, Json, Redirect, Response},
     Json as JsonExtract,
 };
 use miyukini_admin::admin_cell::{AdminCell, ModuleType};
@@ -17,7 +19,7 @@ use miyukini_admin::backup_service::{BackupServiceImpl, BackupService};
 use miyukini_admin::config::BackendConfig;
 use miyukini_admin::crud_state::CrudState;
 use miyukini_admin::migration_service::{MigrationServiceImpl, MigrationService};
-use miyukini_admin::models::EnvironmentState;
+use miyukini_admin::models::{AdminRole, EnvironmentState};
 use miyukini_admin::module_lifecycle_service::{AddModuleParams, ModuleLifecycleService};
 use miyukini_admin::module_testing_service::{
     ModuleTestingService, StubAdminCellReader, StubIntegrityVerifier, StubModuleDiscovery,
@@ -72,6 +74,59 @@ struct AppState {
     /// @id: miyukiniadmin_app_state_admin_cell_reader
     /// Stub reader cellule Admin (pour enregistrement après add).
     admin_cell_reader: Arc<StubAdminCellReader>,
+}
+
+/// Nom du cookie de session (HttpOnly, Path=/).
+const SESSION_COOKIE_NAME: &str = "miyukini_admin_session";
+
+/// Extrait la valeur du cookie de session depuis l'en-tête Cookie.
+fn session_id_from_headers(headers: &axum::http::HeaderMap) -> Option<String> {
+    let cookie_header = headers.get(header::COOKIE)?.to_str().ok()?;
+    cookie_header
+        .split(';')
+        .filter_map(|s| {
+            let s = s.trim();
+            let prefix = format!("{}=", SESSION_COOKIE_NAME);
+            s.starts_with(prefix.as_str()).then(|| s[prefix.len()..].trim().to_string())
+        })
+        .next()
+}
+
+/// Chemins publics (pas de session requise) en environnement INITIALISE.
+fn is_public_path(path: &str) -> bool {
+    matches!(
+        path,
+        "/login" | "/api/auth/login" | "/api/auth/logout" | "/health" | "/api/status"
+    ) || path.starts_with("/ui/")
+}
+
+/// Middleware : exige une session valide pour les routes protégées ; sinon redirection ou 401.
+/// @id: miyukiniadmin_backend_require_session_layer
+async fn require_session_layer(
+    State(state): State<Arc<AppState>>,
+    req: axum::extract::Request,
+    next: axum::middleware::Next,
+) -> Response {
+    if is_public_path(req.uri().path()) {
+        return next.run(req).await;
+    }
+    let session_id = session_id_from_headers(req.headers());
+    let valid = match session_id.as_ref() {
+        Some(id) => state.auth_svc.validate_session(id).await.is_some(),
+        None => false,
+    };
+    if valid {
+        return next.run(req).await;
+    }
+    if req.uri().path().starts_with("/api/") {
+        let body = Json(serde_json::json!({
+            "error": "Non authentifié",
+            "message": "Connexion requise. Utilisez POST /api/auth/login."
+        }));
+        (StatusCode::UNAUTHORIZED, body).into_response()
+    } else {
+        Redirect::to("/login").into_response()
+    }
 }
 
 /// @id: miyukiniadmin_backend_main
@@ -139,7 +194,11 @@ async fn main() {
 
     let app = match env_state {
         EnvironmentState::Vierge => router_setup_only(state_for_router, ui_path),
-        EnvironmentState::Initialise => router_full(state_for_router, ui_path),
+        EnvironmentState::Initialise => router_full(state_for_router.clone(), ui_path)
+            .layer(middleware::from_fn_with_state(
+                state_for_router,
+                require_session_layer,
+            )),
         EnvironmentState::Compromis => router_compromised_only(state_for_router, ui_path),
     }
     .layer(cors);
@@ -159,15 +218,16 @@ async fn main() {
     axum::serve(listener, app).await.expect("serve");
 }
 
-/// Routes lorsque l'environnement est VIERGE : /setup, /health uniquement (Auth and First-Boot §5).
+/// Routes lorsque l'environnement est VIERGE : uniquement /setup, /health, /api/status, /api/setup/create-admin (Auth and First-Boot §5).
+/// Cores et kernel actifs ; outils opérateurs et services désactivés. Seule la page de création du premier profil Admin est accessible.
 /// @id: miyukiniadmin_backend_router_setup_only
-fn router_setup_only(state: Arc<AppState>, ui_path: PathBuf) -> Router {
+fn router_setup_only(state: Arc<AppState>, _ui_path: PathBuf) -> Router {
     Router::new()
         .route("/", get(serve_setup_redirect))
         .route("/setup", get(serve_setup))
         .route("/health", get(health))
         .route("/api/status", get(api_status))
-        .nest_service("/ui", ServeDir::new(ui_path))
+        .route("/api/setup/create-admin", post(api_setup_create_admin))
         .with_state(state)
 }
 
@@ -182,6 +242,7 @@ fn router_full(state: Arc<AppState>, ui_path: PathBuf) -> Router {
         .route("/health", get(health))
         .route("/api/status", get(api_status))
         .route("/api/auth/login", post(api_auth_login))
+        .route("/api/auth/logout", post(api_auth_logout))
         .route("/api/tables", get(api_tables_list))
         .route("/api/tables/:name/rows", get(api_table_rows).post(api_table_create_row))
         .route("/api/tables/:name/rows/:id", get(api_table_get_row).put(api_table_update_row).delete(api_table_delete_row))
@@ -243,7 +304,86 @@ struct LoginBody {
     password: String,
 }
 
-/// POST /api/auth/login : authentification admin (réponse générique en cas d'échec).
+/// Corps POST /api/setup/create-admin (First-boot — Auth and First-Boot §5).
+#[derive(serde::Deserialize)]
+struct CreateAdminBody {
+    username: String,
+    password: String,
+    password_confirm: String,
+}
+
+/// POST /api/setup/create-admin : création du premier compte admin et génération EIP (First-boot).
+/// Accepté uniquement en état VIERGE. Crée admin_registry, EIP stub et bootstrap_schema puis demande redémarrage.
+/// @id: miyukiniadmin_backend_api_setup_create_admin
+async fn api_setup_create_admin(
+    State(state): State<Arc<AppState>>,
+    JsonExtract(body): JsonExtract<CreateAdminBody>,
+) -> impl IntoResponse {
+    if state.environment_state != EnvironmentState::Vierge {
+        return Json(serde_json::json!({
+            "success": false,
+            "message": "Environnement déjà initialisé. Cette action n'est possible qu'au premier démarrage."
+        }));
+    }
+    let username = body.username.trim();
+    if username.is_empty() {
+        return Json(serde_json::json!({
+            "success": false,
+            "message": "Le nom d'utilisateur est requis."
+        }));
+    }
+    if body.password != body.password_confirm {
+        return Json(serde_json::json!({
+            "success": false,
+            "message": "Les mots de passe ne correspondent pas."
+        }));
+    }
+    if body.password.len() < 12 {
+        return Json(serde_json::json!({
+            "success": false,
+            "message": "Le mot de passe doit contenir au moins 12 caractères."
+        }));
+    }
+    match state.auth_svc.create_account(username, &body.password, AdminRole::Admin).await {
+        Ok(_) => {}
+        Err(e) => {
+            let message = match e {
+                miyukini_admin::services::auth::CreateAccountError::PolicyViolation => {
+                    "Politique non respectée (mot de passe trop court ou nom invalide)."
+                }
+                miyukini_admin::services::auth::CreateAccountError::UsernameExists => {
+                    "Ce nom d'utilisateur existe déjà."
+                }
+                miyukini_admin::services::auth::CreateAccountError::HashError => {
+                    "Erreur interne lors du hachage du mot de passe."
+                }
+                miyukini_admin::services::auth::CreateAccountError::Io => {
+                    "Erreur d'écriture du registre admin."
+                }
+            };
+            return Json(serde_json::json!({ "success": false, "message": message }));
+        }
+    }
+    if let Err(_) = state.environment_state_svc.write_eip_stub().await {
+        return Json(serde_json::json!({
+            "success": false,
+            "message": "Profil admin créé mais échec de la génération EIP. Consultez les logs."
+        }));
+    }
+    if let Err(_) = state.environment_state_svc.write_bootstrap_schema_initial().await {
+        return Json(serde_json::json!({
+            "success": false,
+            "message": "Profil admin et EIP créés mais échec du schéma bootstrap. Consultez les logs."
+        }));
+    }
+    Json(serde_json::json!({
+        "success": true,
+        "message": "Profil administrateur créé. Redémarrez MiyukiniAdmin pour accéder au tableau de bord.",
+        "next_step": "restart"
+    }))
+}
+
+/// POST /api/auth/login : authentification admin ; en cas de succès, pose le cookie de session (HttpOnly).
 /// @id: miyukiniadmin_backend_api_auth_login
 async fn api_auth_login(
     State(state): State<Arc<AppState>>,
@@ -256,23 +396,53 @@ async fn api_auth_login(
         .login(&body.username, &body.password, ip, user_agent)
         .await
     {
-        Ok(session) => Json(serde_json::json!({
-            "success": true,
-            "session_id": session.session_id,
-            "role": serde_json::to_value(session.role).unwrap_or(serde_json::Value::Null),
-            "expires_at": session.expires_at.to_rfc3339()
-        })),
+        Ok(session) => {
+            let json = Json(serde_json::json!({
+                "success": true,
+                "session_id": session.session_id,
+                "role": serde_json::to_value(session.role).unwrap_or(serde_json::Value::Null),
+                "expires_at": session.expires_at.to_rfc3339()
+            }));
+            let mut res = json.into_response();
+            let cookie_value = format!(
+                "{}={}; HttpOnly; Path=/; SameSite=Lax",
+                SESSION_COOKIE_NAME,
+                session.session_id
+            );
+            if let Ok(hv) = HeaderValue::try_from(cookie_value) {
+                res.headers_mut().append(header::SET_COOKIE, hv);
+            }
+            res
+        }
         Err(_) => Json(serde_json::json!({
             "success": false,
             "message": "Identifiants invalides."
-        })),
+        }))
+            .into_response(),
     }
+}
+
+/// POST /api/auth/logout : invalide la session et efface le cookie.
+/// @id: miyukiniadmin_backend_api_auth_logout
+async fn api_auth_logout(
+    State(state): State<Arc<AppState>>,
+    req: axum::extract::Request,
+) -> impl IntoResponse {
+    if let Some(sid) = session_id_from_headers(req.headers()) {
+        state.auth_svc.logout(&sid).await;
+    }
+    let mut res = Json(serde_json::json!({ "success": true, "message": "Déconnecté." })).into_response();
+    let clear_cookie = format!("{}=; Max-Age=0; Path=/; SameSite=Lax", SESSION_COOKIE_NAME);
+    if let Ok(hv) = HeaderValue::try_from(clear_cookie) {
+        res.headers_mut().append(header::SET_COOKIE, hv);
+    }
+    res
 }
 
 /// @id: miyukiniadmin_backend_serve_dashboard
 /// @role: infrastructure
 /// @layer: operator
-/// @human: Sert la page d'accueil MiyukiniAdmin (Daynight dashboard depuis ui/index.html).
+/// @human: Sert la page d'accueil MiyukiniAdmin (protégée par session).
 /// @do: serve_dashboard_html
 async fn serve_dashboard() -> impl IntoResponse {
     let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("ui").join("index.html");
@@ -294,30 +464,52 @@ async fn health() -> Json<serde_json::Value> {
 /// @id: miyukiniadmin_backend_api_status
 /// @role: infrastructure
 /// @layer: operator
-/// @human: Statut API pour l'administration.
+/// @human: Statut API pour l'administration. En VIERGE, seuls les endpoints du parcours setup sont listés.
 /// @do: api_status
-async fn api_status() -> Json<serde_json::Value> {
-    Json(serde_json::json!({
+async fn api_status(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
+    let env_state = state.environment_state.to_string();
+    let (endpoints, note) = if state.environment_state == EnvironmentState::Vierge {
+        (
+            serde_json::json!({
+                "setup": "/setup",
+                "health": "/health",
+                "api_status": "/api/status",
+                "api_setup_create_admin": "POST /api/setup/create-admin"
+            }),
+            "First-boot : seuls le parcours d'installation et le monitoring sont actifs. Cores et kernel actifs ; outils opérateurs et services désactivés."
+        )
+    } else {
+        (
+            serde_json::json!({
+                "dashboard": "/",
+                "database": "/database",
+                "tests": "/tests",
+                "health": "/health",
+                "api_status": "/api/status",
+                "api_tables": "/api/tables",
+                "api_tests_flow": "/api/tests/flow",
+                "api_modules": "/api/modules",
+                "api_modules_admin_cell": "/api/modules/:id/admin-cell",
+                "api_modules_tests_run": "/api/modules/:id/tests/run",
+                "api_modules_integrity": "/api/modules/:id/integrity",
+                "api_modules_lock": "/api/modules/:id/lock",
+                "api_modules_unlock": "/api/modules/:id/unlock",
+                "api_modules_delete": "/api/modules/:id"
+            }),
+            ""
+        )
+    };
+    let mut payload = serde_json::json!({
         "version": "0.1.0",
         "service": "MiyukiniAdmin",
+        "environment_state": env_state,
         "cores": ["kernel", "strongfather", "kindmother", "borderguard", "caringnanny", "masterbutler", "bondingbrother", "everbuddy", "worrysentinel", "tamr", "logisticssteward"],
-        "endpoints": {
-            "dashboard": "/",
-            "database": "/database",
-            "tests": "/tests",
-            "health": "/health",
-            "api_status": "/api/status",
-            "api_tables": "/api/tables",
-            "api_tests_flow": "/api/tests/flow",
-            "api_modules": "/api/modules",
-            "api_modules_admin_cell": "/api/modules/:id/admin-cell",
-            "api_modules_tests_run": "/api/modules/:id/tests/run",
-            "api_modules_integrity": "/api/modules/:id/integrity",
-            "api_modules_lock": "/api/modules/:id/lock",
-            "api_modules_unlock": "/api/modules/:id/unlock",
-            "api_modules_delete": "/api/modules/:id"
-        }
-    }))
+        "endpoints": endpoints
+    });
+    if !note.is_empty() {
+        payload["note"] = serde_json::Value::String(note.to_string());
+    }
+    Json(payload)
 }
 
 /// @id: miyukiniadmin_backend_api_tables_list
@@ -476,7 +668,9 @@ async fn api_table_delete_row(
 /// @human: Liste des migrations (appliquées et en attente).
 /// @do: api_migrations_list
 /// @depends: miyukiniadmin_backend_app_state
-async fn api_migrations_list(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
+async fn api_migrations_list(
+    State(state): State<Arc<AppState>>,
+) -> Json<serde_json::Value> {
     let applied = state.migrations.list_applied();
     let pending = state.migrations.list_pending();
     Json(serde_json::json!({
@@ -491,7 +685,9 @@ async fn api_migrations_list(State(state): State<Arc<AppState>>) -> Json<serde_j
 /// @human: Historique complet des migrations.
 /// @do: api_migrations_history
 /// @depends: miyukiniadmin_backend_app_state
-async fn api_migrations_history(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
+async fn api_migrations_history(
+    State(state): State<Arc<AppState>>,
+) -> Json<serde_json::Value> {
     let history = state.migrations.history();
     Json(serde_json::json!({
         "history": serde_json::to_value(&history).unwrap_or(serde_json::Value::Array(vec![]))
@@ -519,7 +715,9 @@ async fn api_migrations_apply(State(state): State<Arc<AppState>>) -> Json<serde_
 /// @human: Liste des sauvegardes.
 /// @do: api_backups_list
 /// @depends: miyukiniadmin_backend_app_state
-async fn api_backups_list(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
+async fn api_backups_list(
+    State(state): State<Arc<AppState>>,
+) -> Json<serde_json::Value> {
     let backups = state.backups.list();
     Json(serde_json::json!({
         "backups": serde_json::to_value(&backups).unwrap_or(serde_json::Value::Array(vec![]))
@@ -532,7 +730,9 @@ async fn api_backups_list(State(state): State<Arc<AppState>>) -> Json<serde_json
 /// @human: Crée une sauvegarde (stub ; KindMother en production).
 /// @do: api_backups_create
 /// @depends: miyukiniadmin_backend_app_state
-async fn api_backups_create(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
+async fn api_backups_create(
+    State(state): State<Arc<AppState>>,
+) -> Json<serde_json::Value> {
     let result = state.backups.create();
     Json(serde_json::json!({
         "success": result.success,
@@ -573,7 +773,9 @@ async fn api_backups_restore(
 }
 
 /// GET /api/modules : liste des modules (découverte via Master Butler / BondingBrother).
-async fn api_modules_list(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
+async fn api_modules_list(
+    State(state): State<Arc<AppState>>,
+) -> Json<serde_json::Value> {
     let modules = state.module_testing_svc.discover_modules();
     Json(serde_json::json!({
         "modules": serde_json::to_value(&modules).unwrap_or(serde_json::Value::Array(vec![]))
@@ -803,11 +1005,161 @@ async fn serve_tests() -> impl IntoResponse {
 }
 
 /// Page parcours Futur Admin (installation) — environnement VIERGE (Auth and First-Boot §5).
-const SETUP_HTML: &str = r#"<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>MiyukiniAdmin — Installation</title></head><body style="font-family:system-ui;background:#0f172a;color:#e2e8f0;padding:2rem;"><h1>MiyukiniAdmin — Installation</h1><p>Environnement vierge. Parcours Futur Admin : configuration minimale, création du premier compte admin, génération EIP.</p><p><a href="/health" style="color:#38bdf8;">Health</a> | <a href="/api/status" style="color:#38bdf8;">API Status</a></p></body></html>"#;
+/// Seule page accessible en First-boot : création du premier profil Admin, génération EIP.
+const SETUP_HTML: &str = r#"<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MiyukiniAdmin — Installation</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; padding: 2rem; max-width: 28rem; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .intro { color: #94a3b8; font-size: 0.9rem; margin-bottom: 1.5rem; }
+    label { display: block; margin-top: 1rem; font-size: 0.875rem; }
+    input { width: 100%; padding: 0.5rem 0.75rem; margin-top: 0.25rem; border: 1px solid #334155; border-radius: 0.375rem; background: #1e293b; color: #e2e8f0; box-sizing: border-box; }
+    input:focus { outline: none; border-color: #38bdf8; }
+    button { margin-top: 1.25rem; padding: 0.5rem 1rem; background: #38bdf8; color: #0f172a; border: none; border-radius: 0.375rem; font-weight: 600; cursor: pointer; }
+    button:hover { background: #7dd3fc; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .message { margin-top: 1rem; padding: 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; }
+    .message.success { background: #14532d; color: #86efac; }
+    .message.error { background: #7f1d1d; color: #fca5a5; }
+    .links { margin-top: 2rem; font-size: 0.875rem; }
+    .links a { color: #38bdf8; text-decoration: none; }
+    .links a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>MiyukiniAdmin — Installation</h1>
+  <p class="intro">Environnement vierge. Parcours Futur Admin : configuration minimale, création du premier compte admin, génération EIP. Cores et kernel actifs ; outils opérateurs et services sont désactivés jusqu'à la fin de l'installation.</p>
+  <form id="setup-form">
+    <label for="username">Nom d'utilisateur</label>
+    <input type="text" id="username" name="username" required autocomplete="username" placeholder="admin">
+    <label for="password">Mot de passe (min. 12 caractères)</label>
+    <input type="password" id="password" name="password" required minlength="12" autocomplete="new-password" placeholder="">
+    <label for="password_confirm">Confirmer le mot de passe</label>
+    <input type="password" id="password_confirm" name="password_confirm" required minlength="12" autocomplete="new-password" placeholder="">
+    <button type="submit" id="submit-btn">Créer le profil administrateur</button>
+  </form>
+  <div id="message" class="message" role="alert" style="display: none;"></div>
+  <p class="links"><a href="/health">Health</a> | <a href="/api/status">API Status</a></p>
+  <script>
+    (function() {
+      var form = document.getElementById('setup-form');
+      var message = document.getElementById('message');
+      var submitBtn = document.getElementById('submit-btn');
+      function showMessage(text, isError) {
+        message.textContent = text;
+        message.className = 'message ' + (isError ? 'error' : 'success');
+        message.style.display = 'block';
+      }
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var username = document.getElementById('username').value.trim();
+        var password = document.getElementById('password').value;
+        var password_confirm = document.getElementById('password_confirm').value;
+        if (password !== password_confirm) {
+          showMessage('Les mots de passe ne correspondent pas.', true);
+          return;
+        }
+        if (password.length < 12) {
+          showMessage('Le mot de passe doit contenir au moins 12 caractères.', true);
+          return;
+        }
+        submitBtn.disabled = true;
+        fetch('/api/setup/create-admin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username, password: password, password_confirm: password_confirm })
+        }).then(function(r) { return r.json(); }).then(function(data) {
+          if (data.success) {
+            showMessage(data.message + ' Redémarrez l\'application pour accéder au tableau de bord.', false);
+            form.reset();
+          } else {
+            showMessage(data.message || 'Erreur lors de la création du profil.', true);
+          }
+        }).catch(function() {
+          showMessage('Erreur de connexion. Vérifiez que le serveur est démarré.', true);
+        }).finally(function() { submitBtn.disabled = false; });
+      });
+    })();
+  </script>
+</body>
+</html>"#;
 /// Page « Environnement compromis » (Auth and First-Boot §7).
 const COMPROMISED_HTML: &str = r#"<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>MiyukiniAdmin — Environnement compromis</title></head><body style="font-family:system-ui;background:#1e293b;color:#e2e8f0;padding:2rem;"><h1>Environnement compromis</h1><p>L'environnement est en état de sécurité. Une procédure de recovery est requise (ou recovery automatique en cours selon politique).</p><p>Aucun formulaire de login ni lien vers l'installation ne sont fournis.</p><p><a href="/health" style="color:#38bdf8;">Health</a></p></body></html>"#;
 /// Page login (environnement INITIALISE).
-const LOGIN_HTML: &str = r#"<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>MiyukiniAdmin — Connexion</title></head><body style="font-family:system-ui;background:#0f172a;color:#e2e8f0;padding:2rem;"><h1>Connexion</h1><p>Formulaire login (à brancher sur POST /api/auth/login).</p><p><a href="/" style="color:#38bdf8;">Dashboard</a> | <a href="/health" style="color:#38bdf8;">Health</a></p></body></html>"#;
+/// Page de connexion MiyukiniAdmin (environnement INITIALISE). Protège l'accès au tableau de bord.
+const LOGIN_HTML: &str = r#"<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MiyukiniAdmin — Connexion</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; padding: 2rem; max-width: 28rem; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .intro { color: #94a3b8; font-size: 0.9rem; margin-bottom: 1.5rem; }
+    label { display: block; margin-top: 1rem; font-size: 0.875rem; }
+    input { width: 100%; padding: 0.5rem 0.75rem; margin-top: 0.25rem; border: 1px solid #334155; border-radius: 0.375rem; background: #1e293b; color: #e2e8f0; box-sizing: border-box; }
+    input:focus { outline: none; border-color: #38bdf8; }
+    button { margin-top: 1.25rem; padding: 0.5rem 1rem; background: #38bdf8; color: #0f172a; border: none; border-radius: 0.375rem; font-weight: 600; cursor: pointer; }
+    button:hover { background: #7dd3fc; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .message { margin-top: 1rem; padding: 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; }
+    .message.error { background: #7f1d1d; color: #fca5a5; }
+    .links { margin-top: 2rem; font-size: 0.875rem; }
+    .links a { color: #38bdf8; text-decoration: none; }
+    .links a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>MiyukiniAdmin — Connexion</h1>
+  <p class="intro">Identifiez-vous pour accéder au tableau de bord et à l'administration.</p>
+  <form id="login-form">
+    <label for="username">Nom d'utilisateur</label>
+    <input type="text" id="username" name="username" required autocomplete="username" placeholder="admin">
+    <label for="password">Mot de passe</label>
+    <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="">
+    <button type="submit" id="submit-btn">Se connecter</button>
+  </form>
+  <div id="message" class="message" role="alert" style="display: none;"></div>
+  <p class="links"><a href="/health">Health</a> | <a href="/api/status">API Status</a></p>
+  <script>
+    (function() {
+      var form = document.getElementById('login-form');
+      var message = document.getElementById('message');
+      var submitBtn = document.getElementById('submit-btn');
+      function showError(text) {
+        message.textContent = text;
+        message.className = 'message error';
+        message.style.display = 'block';
+      }
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var username = document.getElementById('username').value.trim();
+        var password = document.getElementById('password').value;
+        submitBtn.disabled = true;
+        fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ username: username, password: password })
+        }).then(function(r) { return r.json(); }).then(function(data) {
+          if (data.success) {
+            window.location.href = '/';
+          } else {
+            showError(data.message || 'Identifiants invalides.');
+          }
+        }).catch(function() {
+          showError('Erreur de connexion. Vérifiez que le serveur est démarré.');
+        }).finally(function() { submitBtn.disabled = false; });
+      });
+    })();
+  </script>
+</body>
+</html>"#;
 /// Fallback si ui/index.html est introuvable (ex. tests, mauvais répertoire).
 const DASHBOARD_FALLBACK_HTML: &str = r#"<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>MiyukiniAdmin</title></head><body style="font-family:system-ui;background:#0f172a;color:#e2e8f0;padding:2rem;"><h1>MiyukiniAdmin</h1><p>Index non trouvé. <a href="/api/status" style="color:#38bdf8;">API Status</a> | <a href="/health" style="color:#38bdf8;">Health</a></p></body></html>"#;
 /// Fallback si ui/database.html est introuvable.
