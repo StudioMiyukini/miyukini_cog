@@ -2,6 +2,8 @@
 
 ## 1. Contexte
 
+Conformité aux obligations communes : [Master Butler - Tool Governance Compliance Template](../../../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
+
 Ce document definit la **conformite de MiyuSQL** aux contrats de gouvernance des Outils et Kits d'Outils de Master Butler. MiyuSQL est un **Kit d'Outils (Toolkit)** declare et gouverne par l'environnement ; ce contrat etablit la declaration formelle du ToolkitId, des ToolIds composants, et des capabilities associees.
 
 **Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)

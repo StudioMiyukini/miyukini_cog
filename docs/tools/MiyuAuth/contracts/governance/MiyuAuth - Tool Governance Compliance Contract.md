@@ -2,6 +2,8 @@
 
 ## 1. Contexte
 
+Conformité aux obligations communes : [Master Butler - Tool Governance Compliance Template](../../../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
+
 Ce document définit la **conformité de MiyuAuth** aux contrats de gouvernance des Outils et Kits d'Outils de Master Butler. MiyuAuth est un **Kit d'Outils (Toolkit)** déclaré et gouverné par l'environnement ; ce contrat établit la déclaration formelle du ToolkitId, des ToolIds composants, et des capabilities associées.
 
 **Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)

@@ -68,19 +68,7 @@ MiyuAuth est composé des Tools suivants (format canonique `tool.<domain>.<actio
 
 ## 6. Gouvernance
 
-Tout appel à un outil du kit MiyuAuth (ou au kit lui-même) suit le flux de gouvernance suivant :
-
-1. **Opérateur** (Strate 7) — demande d'utilisation d'un Tool ou du Toolkit
-2. **BondingBrother** — médiation, traduction de l'intention, préparation du contexte
-3. **Master Butler** — vérification de l'existence du Tool/Toolkit, permissions requises, niveau de sécurité
-4. **WorrySentinel** — vérification que le niveau de sécurité actuel permet cet appel
-5. **Caring Nanny** — vérification que l'état système (HEALTHY, DEGRADED, etc.) permet cet appel
-6. **StrongFather** — décision finale ALLOW ou DENY
-7. **Exécution** — si autorisé, le Tool (ou les Tools du Toolkit) exécute l'action ; toute confiance utilisée pour l'identité est **validée par KindMother** (Identity & Cross-Domain Trust).
-
-Le Toolkit MiyuAuth est **déclaré** dans Master Butler et **compatibilisé** par Ever Buddy (cycle de vie, versions des Outils) selon le [Master Butler - Toolkit Composition Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Toolkit%20Composition%20Contract.md).
-
-**Référence :** [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) (schéma de flux complet).
+Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : toute confiance utilisée pour l'identité est **validée par KindMother** (Identity & Cross-Domain Trust) ; MiyuAuth opère sur données fournies dans le flux (pas d'accès direct à la base). Le Toolkit est déclaré dans Master Butler et compatibilisé par Ever Buddy ([Toolkit Composition Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Toolkit%20Composition%20Contract.md)).
 
 ---
 

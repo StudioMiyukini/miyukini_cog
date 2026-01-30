@@ -205,6 +205,25 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
+### COG Tracker (Webway Tracker)
+
+**COG dont l'administrateur a choisi d'endosser le rôle de Tracker** : exposer volontairement une adresse (IP ou nom de domaine) pour participer au maillage Miyukini Webway System (MWS) et servir de point de rendez-vous pour la découverte.
+
+**Port officiel :** les COGs Tracker MWS exposent leur endpoint sur le **port 21000**. Les COGs participants se connectent aux Trackers sur ce port par défaut.
+
+**Rôle :**
+- Point de rendez-vous pour la découverte (annonces de présence, requêtes de découverte)
+- **Devoir de protection du réseau** par des mécanismes passifs et actifs (à créer)
+
+**Ce qu'un COG Tracker N'EST PAS :**
+- ❌ Un super-COG qui gouverne les autres
+- ❌ Un transporteur de données métier
+- ❌ Une autorité de Visa ou de Passeport
+
+**Voir aussi :** Miyukini Webway System, COG Hébergeur, Bridge inter-COG
+
+---
+
 ### Cores
 
 **Moteurs conceptuels** (Strate 4) qui gouvernent le comportement du système. Chaque core a une autorité exclusive dans son domaine.
@@ -229,6 +248,16 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 ---
 
 ## D
+
+### Déclaration d'hébergement de session (Webway Host Session Declaration)
+
+**Annonce par un COG Hébergeur au réseau MWS** indiquant qu'il héberge une session d'un service donné et qu'il attend des connexions vers lui (adresse et port).
+
+**Contenu minimal (orientation) :** identifiant du service ou type de session, identifiant du COG Hébergeur, adresse de connexion (IP ou nom de domaine, port). La déclaration **ne donne aucun droit d'accès** ; elle indique où se présenter pour demander un Visa.
+
+**Voir aussi :** Miyukini Webway System, COG Hébergeur, Norme de déclaration sécurisée (MWS)
+
+---
 
 ### Demande de Visite (Visit Intent)
 
@@ -570,6 +599,16 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
+### Liste de COGs avec statuts (Webway COG List)
+
+**Liste maintenue par chaque COG participant au Miyukini Webway System (MWS)** associant à chaque COG connu un **statut** (Trusted, Neutral, Under review, Distrusted, Rejected). Permet d'analyser et, le cas échéant, de rejeter un COG ou une connexion considérée comme malveillante ou non fiable.
+
+**Échange :** les COGs se transfèrent des listes ou des mises à jour de statuts selon le protocole MWS ; chaque COG reste souverain dans l'usage qu'il en fait.
+
+**Voir aussi :** Miyukini Webway System, COG Tracker
+
+---
+
 ### LOI-1 à LOI-8 (Lois d'Autonomie)
 
 **8 lois d'autonomie non négociables** qui régissent l'architecture Miyukini.
@@ -732,6 +771,25 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
+### Miyukini Webway System (MWS)
+
+**Couche de présence et de découverte** des environnements COG disposant d'un accès réseau. Permet aux COGs de se déclarer, de savoir qui est présent sur le maillage, et de faciliter l'initiation des visites gouvernées (Passeport, Visa) sans transférer de données métier.
+
+**Rôle :**
+- Normaliser *qui est là* et *où se présenter* pour demander un Visa
+- Système de sécurité fondé sur l'échange de listes de COGs avec statuts (Webway COG List)
+- Les COGs Tracker ont le devoir de protéger le réseau par des mécanismes passifs et actifs (à créer)
+
+**Règle fondamentale :**
+
+> **Le Webway normalise la présence et facilite l'échange ; il ne transporte pas la gouvernance ni les données.**
+
+**Développement Outils et Opérateurs :** voir [Miyukini Webway System - Outils et Operateurs](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Outils%20et%20Operateurs.md) (annexe conceptuelle).
+
+**Voir aussi :** COG Tracker, Liste de COGs avec statuts, Connexion Inter-COG, Bridge inter-COG
+
+---
+
 ### MiyukiniAdmin
 
 **Opérateur Souverain** — Console souveraine d'administration (Strate 9).
@@ -750,6 +808,16 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 ---
 
 ## N
+
+### Norme de déclaration sécurisée (MWS)
+
+**Norme à créer et à appliquer** pour les annonces MWS : services exposés, adresses (IP/ports) et sessions hébergées. Elle vise l'authentification de l'origine des déclarations, l'intégrité, un format unifié et la limitation des abus. Les COGs Tracker peuvent exiger la conformité pour accepter ou relayer les annonces.
+
+**Développement :** voir [Miyukini Webway System - Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) (document conceptuel annexe).
+
+**Voir aussi :** Miyukini Webway System, Déclaration d'hébergement de session, COG Tracker
+
+---
 
 ### Niveaux de sécurité (0-4)
 
@@ -1380,17 +1448,21 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 | Web Visitor                     | **Utilisateur Externe**                    |
 | Public Exposure Surface         | **Façade Publique Gouvernée**              |
 | Public Access Mandate           | **Mandat Public d'Accès**                  |
+| Tracker (rôle Webway)           | **COG Tracker**                           |
 
 
 ---
 
 **Date de création :** 2026-01-27  
-**Version :** 1.7 (ajout terminologie Kernel Maintenance Observability)  
+**Version :** 1.9 (ajout Déclaration d'hébergement de session, Norme de déclaration sécurisée MWS)  
 **Statut :** Document de référence normatif — GLOSSAIRE OFFICIEL
 
 **Références croisées :**
 
 - [Miyukini Conceptual References - Definition COG](./Miyukini%20Conceptual%20References%20-%20Definition%20COG.md)
+- [Miyukini Conceptual References - Miyukini Webway System](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) : **Couche de présence et découverte (MWS)**
+- [Miyukini Conceptual References - Miyukini Webway System Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) : **Annexe MWS — normes, formats, protocole, matrice des statuts**
+- [Miyukini Conceptual References - Miyukini Webway System Outils et Operateurs](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Outils%20et%20Operateurs.md) : **Annexe MWS — Outils, Kits d'Outils, Opérateurs MWS**
 - [Miyukini Conceptual References - Operators et Terminologie](./Miyukini%20Conceptual%20References%20-%20Operators%20et%20Terminologie.md)
 - [Miyukini Conceptual References - Mandats et Équipes Operators](./Miyukini%20Conceptual%20References%20-%20Mandats%20et%20Equipes%20Operators.md) : **Mandats de Permission et Équipes**
 - [Miyukini Conceptual References - Tools et Toolkits](./Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)

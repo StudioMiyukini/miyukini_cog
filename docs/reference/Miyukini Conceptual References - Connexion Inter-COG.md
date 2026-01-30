@@ -504,11 +504,13 @@ Pour les utilisateurs externes, la dégradation est **beaucoup plus agressive** 
 - [ ] Définir les **SLA de session visiteur**
 - [ ] Spécifier les **quotas standards par niveau de Mandat Public**
 - [ ] Définir le **protocole de blackhole**
+- [ ] Intégrer la couche de présence **Miyukini Webway System (MWS)** pour la découverte des COGs → voir [Miyukini Webway System](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md)
 
 ---
 
 ## Références croisées
 
+- [Miyukini Webway System (MWS)](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) — couche de présence et découverte
 - [Ecosystem Dependency Contract](./Miyukini%20Conceptual%20References%20-%20Ecosystem%20Dependency%20Contract.md)
 - [Security Levels](./Miyukini%20Conceptual%20References%20-%20Security%20Levels.md)
 - [Souverainete Environnement](./Miyukini%20Conceptual%20References%20-%20Souverainete%20Environnement.md)

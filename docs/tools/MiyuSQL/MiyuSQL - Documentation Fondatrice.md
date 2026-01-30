@@ -73,17 +73,7 @@ MiyuSQL est composé des Tools suivants (format canonique `tool.<domain>.<action
 
 ## 6. Gouvernance
 
-Tout appel à un outil du kit MiyuSQL (ou au kit lui-même) suit le flux de gouvernance suivant :
-
-1. **Opérateur** (Strate 7) — demande d'utilisation d'un Tool ou du Toolkit
-2. **BondingBrother** — médiation, traduction de l'intention, préparation du contexte
-3. **Master Butler** — vérification de l'existence du Tool/Toolkit, permissions requises, niveau de sécurité
-4. **WorrySentinel** — vérification que le niveau de sécurité actuel permet cet appel
-5. **Caring Nanny** — vérification que l'état système (HEALTHY, DEGRADED, etc.) permet cet appel
-6. **StrongFather** — décision finale ALLOW ou DENY
-7. **Exécution** — si autorisé, le Tool (ou les Tools du Toolkit) exécute l'action ; les opérations de données sont réalisées sous autorité **KindMother** (persistance).
-
-**Référence :** [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) (schéma de flux complet).
+Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : les opérations de données (requêtes, transactions, cache) sont réalisées sous autorité **KindMother** (persistance).
 
 ---
 

@@ -8,46 +8,23 @@
 
 ## Table des matières
 
-### Partie I — Vue d'ensemble
 1. [Introduction](#1-introduction)
-2. [À qui s'adresse le projet](#2-à-qui-sadresse-le-projet)
-3. [Pourquoi Miyukini existe](#3-pourquoi-miyukini-existe)
-
-### Partie II — Structure du dépôt
-4. [Arborescence du projet](#4-arborescence-du-projet)
-5. [Cartographie des crates](#5-cartographie-des-crates)
-6. [Documentation](#6-documentation)
-
-### Partie III — Concepts fondamentaux
-7. [Vision et philosophie](#7-vision-et-philosophie)
-8. [La pyramide Miyukini](#8-la-pyramide-miyukini)
-9. [Lois d'autonomie](#9-lois-dautonomie)
-10. [Cores système (résumé)](#10-cores-système-résumé)
-
-### Partie IV — Gouvernance et sécurité
-11. [Sécurité et gouvernance](#11-sécurité-et-gouvernance)
-12. [MiyukiniAdmin](#12-miyukiniadmin)
-
-### Partie V — Positionnement
-13. [Cas d'usage](#13-cas-dusage)
-14. [Comparatif avec l'existant](#14-comparatif-avec-lexistant)
-15. [Apports inédits](#15-apports-inédits)
-16. [À qui Miyukini n'est PAS destiné](#16-à-qui-miyukini-nest-pas-destiné)
-
-### Partie VI — État et référence
-17. [État du projet](#17-état-du-projet)
-18. [Documentation de référence](#18-documentation-de-référence)
-19. [Personal Vibe Coding Gouverné](#19-personal-vibe-coding-gouverné)
-20. [Conclusion](#20-conclusion)
-21. [Mini log de rédaction](#21-mini-log-de-rédaction)
+2. [Vision et philosophie](#2-vision-et-philosophie)
+3. [Mécaniques générales](#3-mécaniques-générales)
+4. [Environnements, fédération et sécurité](#4-environnements-fédération-et-sécurité)
+5. [Méthodologie de développement](#5-méthodologie-de-développement)
+6. [État actuel et roadmap](#6-état-actuel-et-roadmap)
+7. [Gouvernance et sécurité](#7-gouvernance-et-sécurité)
+8. [À qui s'adresse Miyukini](#8-à-qui-sadresse-miyukini)
+9. [Documentation de référence](#9-documentation-de-référence)
+10. [Conclusion](#10-conclusion)
+11. [Log de rédaction](#11-log-de-rédaction)
 
 ---
 
-## Partie I — Vue d'ensemble
+## 1. Introduction
 
-### 1. Introduction
-
-**Qu'est-ce que Miyukini**
+### Qu'est-ce que Miyukini
 
 Miyukini Core System (MCS) est un **écosystème logiciel gouverné** conçu pour produire des applications autonomes, sécurisées structurellement, et capables de fonctionner dans des conditions de contrainte extrême (offline, ressources limitées, environnements isolés).
 
@@ -55,19 +32,7 @@ Miyukini n'est pas un framework. Ce n'est pas une bibliothèque. C'est un **envi
 
 La distinction est fondamentale : un framework fournit des outils que le développeur utilise comme bon lui semble. Miyukini fournit un **cadre non négociable** dans lequel les Opérateurs opèrent selon des règles strictes, des invariants vérifiables, et une gouvernance centralisée.
 
----
-
-### 2. À qui s'adresse le projet
-
-| Acteur | Besoin |
-|--------|--------|
-| **Architectes système** | Autonomie structurelle, sécurité par conception, traçabilité auditable, fonctionnement déterministe en isolation |
-| **Développeurs d'Opérateurs** | Collectivités, événements sans réseau fiable, IoT/edge, contextes réglementés |
-| **Décideurs techniques** | Projets long terme (5–10 ans), systèmes critiques, contrôle total non négociable |
-
----
-
-### 3. Pourquoi Miyukini existe
+### Pourquoi Miyukini existe
 
 Les architectures logicielles modernes reposent sur des hypothèses implicites : connectivité permanente, ressources cloud élastiques, services tiers toujours accessibles. Ces hypothèses excluent une part significative des cas d'usage réels.
 
@@ -77,166 +42,27 @@ Résultat : systèmes qui démarrent sans réseau, fonctionnent sans cloud, dég
 
 ---
 
-## Partie II — Structure du dépôt
+## 2. Vision et philosophie
 
-### 4. Arborescence du projet
-
-```
-miyukini_kernel/
-├── Cargo.toml              # Workspace Rust (crates + tools)
-├── README.md               # Ce document
-├── crates/                 # Composants Miyukini (Kernel + Cores + MiyukiniAdmin)
-│   ├── miyukini-kernel/    # Substrat technique (Strate K)
-│   ├── strongfather/       # Core décision (Strate 4)
-│   ├── kindmother/         # Core données (Strate 4)
-│   ├── borderguard/        # Core frontières (Strate 4)
-│   ├── caringnanny/        # Core observation d'état (Strate 4)
-│   ├── masterbutler/       # Core capacités (Strate 4)
-│   ├── bondingbrother/    # Médiation (Strate 5)
-│   ├── everbuddy/          # Core cycle de vie (Strate 4)
-│   ├── worrysentinel/      # Core gouvernance sécurité (Strate 4)
-│   ├── tamr/               # Core intervention humaine (Strate 4)
-│   ├── logisticssteward/  # Gestion ressources (Strate 4)
-│   └── miyukini-admin/     # Opérateur Souverain (Strate 9)
-├── tools/
-│   └── mip-generator/      # Génération index MIP (MSCM)
-├── docs/                   # Documentation conceptuelle et contractuelle
-│   ├── core/               # Documentation par Core (StrongFather, KindMother, …)
-│   ├── reference/          # Références conceptuelles (Glossaire, Pyramide, Lois)
-│   ├── protocols/          # Protocoles (MIP, écriture doc, implémentation)
-│   ├── kernel/             # Kernel (architecture, contrats, tests)
-│   ├── implementation/    # Implémentation COG 0.1
-│   ├── security/           # Sécurité
-│   └── tools/              # Outils (MiyuSQL, etc.)
-├── mscm_index/             # Index MIP (généré, ne pas modifier à la main)
-└── .cursor/                # Plans et contexte Cursor
-```
-
-**Règles de lecture :**
-
-- **Code** = dans `crates/` et `tools/`.
-- **Documentation normative** = dans `docs/` (conceptuelle, contrats, protocoles).
-- **Index structurel** = `mscm_index/` (reconstruit, jamais édité manuellement).
-
----
-
-### 5. Cartographie des crates
-
-Chaque crate du workspace correspond à une strate ou à un Core de la pyramide Miyukini.
-
-| Crate | Rôle conceptuel | Strate |
-|-------|-----------------|--------|
-| `miyukini-kernel` | Substrat technique (Id, Logger, Clock, Config, Lifecycle) | K (Kernel) |
-| `strongfather` | Moteur de décision ; émetteur des Mandats de Permission | 4 |
-| `kindmother` | Autorité données et persistance ; WriteIntent, sync | 4 |
-| `borderguard` | Définition des frontières et niveaux de confiance | 4 |
-| `caringnanny` | Observation d'état ; santé, métriques | 4 |
-| `masterbutler` | Registre des capacités et permissions | 4 |
-| `everbuddy` | Cycle de vie, versions, compatibilité, migration | 4 |
-| `worrysentinel` | Gouvernance sécurité ; niveaux de confiance (T0–T4) | 4 |
-| `tamr` | Intervention humaine ; classification, métadonnées | 4 |
-| `logisticssteward` | Gestion des ressources (allocation, optimisation) | 4 |
-| `bondingbrother` | Médiation ; traduction intentions ↔ cores | 5 |
-| `miyukini-admin` | Opérateur Souverain ; administration, diagnostic | 9 |
-
-**Outillage :**
-
-| Outil | Rôle |
-|-------|------|
-| `mip-generator` | Génère l'index MIP (registry, blocks, hierarchy, graph, etc.) à partir du code balisé MSCM |
-
----
-
-### 6. Documentation
-
-La documentation suit la [nomenclature Miyukini](docs/) et est organisée par **cadre** (core, reference, protocols) et **sujet**.
-
-| Dossier | Contenu |
-|---------|---------|
-| `docs/core/` | Par Core : fondation, contrats, implémentation, référence (StrongFather, KindMother, MiyukiniAdmin, etc.) |
-| `docs/reference/` | Références conceptuelles transverses : Glossaire, Pyramide, Lois d'autonomie, COG, Opérateurs, Tools, Souveraineté |
-| `docs/protocols/` | Protocoles (MIP, écriture documentation conceptuelle, implémentation générale) |
-| `docs/kernel/` | Kernel : architecture, contrats, tests |
-| `docs/implementation/` | Implémentation COG 0.1 (gel, conformité, quick reference) |
-| `docs/security/` | Politiques et contrats de sécurité |
-| `docs/tools/` | Documentation des outils (ex. MiyuSQL) |
-
-**Entrée recommandée :** [Glossaire officiel](docs/reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) (source de vérité terminologique).
-
----
-
-## Partie III — Concepts fondamentaux
-
-### 7. Vision et philosophie
-
-**Systèmes autonomes**
+### Systèmes autonomes
 
 Un système Miyukini est **autonome** au sens strict : démarrable sans réseau, fonctionnel sans cloud, dégradé proprement en isolation, prévisible sans synchronisation, administrable localement, évolutif à la reconnexion. Cette autonomie est structurelle et vérifiable.
 
-**Séparation stricte des responsabilités**
+### Séparation stricte des responsabilités
 
-- **Décision** (StrongFather) ≠ **Exécution** (Opérateurs, adaptateurs) ≠ **Persistance** (KindMother). Aucun core n’empiète sur les autres.
+- **Décision** (StrongFather) ≠ **Exécution** (Opérateurs, Outils) ≠ **Persistance** (KindMother). Aucun core n'empiète sur les autres.
+- *« Un Outil fait, mais ne décide jamais. »*
+- *« Un Mandat de Permission n'est pas une optimisation. C'est un acte de gouvernance délégué. »*
 
-**IA gouvernée, non magique**
+### Complexité par collaboration
 
-Si une IA intervient : elle propose, les cores valident ; contrats explicites ; décisions traçables et auditables ; pas de contournement des invariants.
+> **Dans Miyukini, la complexité est gérée par la collaboration, pas par l'accumulation.**
 
-**Environnement isolé**
+Les Services sont portés par des Opérateurs seuls ou par des Équipes d'Opérateurs ; les Opérateurs orchestrent des Outils et des Kits d'Outils. La complexité ne s'empile pas — elle se répartit sous gouvernance explicite.
 
-Conçu pour réseau intermittent ou absent, hardware contraint, temps non synchronisé. Les **8 lois d'autonomie** (voir ci-dessous) codifient ces contraintes.
+### Lois d'autonomie (LOI-1 à LOI-8)
 
----
-
-### 8. La pyramide Miyukini
-
-L'écosystème est organisé en **strates hiérarchiques**, dépendance strictement unidirectionnelle (de haut en bas).
-
-```
-┌──────────────────────────────────────────────────┐
-│ 🔧 STRATE 9 — MiyukiniAdmin (EXCEPTION)            │
-│ Opérateur Souverain d'administration               │
-└──────────────────────────────────────────────────┘
-                      ▲
-┌──────────────────────────────────────────────────┐
-│ 🟩 STRATE 7 — OPÉRATEURS                           │
-│ Entités fonctionnelles gouvernées                  │
-└──────────────────────────────────────────────────┘
-                      ▲
-┌──────────────────────────────────────────────────┐
-│ 🟦 STRATE 6 — TOOLS & TOOLKITS                     │
-│ Capacités exécutables gouvernées                   │
-└──────────────────────────────────────────────────┘
-                      ▲
-┌──────────────────────────────────────────────────┐
-│ 🟨 STRATE 5 — INTERFACES & ADAPTATION              │
-│ BondingBrother                                     │
-└──────────────────────────────────────────────────┘
-                      ▲
-┌──────────────────────────────────────────────────┐
-│ 🟥 STRATE 4 — CORES SYSTÈME                        │
-│ StrongFather · KindMother · Caring Nanny · …       │
-└──────────────────────────────────────────────────┘
-                      ▲
-┌──────────────────────────────────────────────────┐
-│ 🟪 STRATE 3 — INVARIANTS & CONTRATS                │
-└──────────────────────────────────────────────────┘
-                      ▲
-┌──────────────────────────────────────────────────┐
-│ ⚙️  KERNEL — Id · Logger · Clock · Config · Lifecycle │
-└──────────────────────────────────────────────────┘
-                      ▲
-┌──────────────────────────────────────────────────┐
-│ 🟫 STRATE 0 — HARDWARE & OS                        │
-└──────────────────────────────────────────────────┘
-```
-
-Le **Kernel** fournit : Id, Logger, Clock (trace only), Config, Lifecycle. Il ne contient ni logique métier ni protocole applicatif ni dépendance externe critique.
-
----
-
-### 9. Lois d'autonomie
-
-Les **8 lois d'autonomie** sont des invariants architecturaux non négociables.
+Les **8 lois d'autonomie** sont des invariants architecturaux non négociables :
 
 | Loi | Énoncé |
 |-----|--------|
@@ -251,113 +77,184 @@ Les **8 lois d'autonomie** sont des invariants architecturaux non négociables.
 
 Question de conception : *« Est-ce que ça fonctionne encore si le système est seul, lent, et isolé ? »*
 
----
+### Pyramide et Cores
 
-### 10. Cores système (résumé)
+L'écosystème est organisé en **strates** hiérarchiques ; la dépendance est strictement unidirectionnelle (de haut en bas).
 
-| Core | Question fondamentale | Rôle en une phrase |
-|------|------------------------|---------------------|
-| **StrongFather** | Devrait-on faire cette action ? | Décision pure ; émetteur des Mandats de Permission |
-| **KindMother** | Comment les données sont-elles persistées et synchronisées ? | Autorité données et persistance |
-| **Caring Nanny** | Dans quel état se trouve le système ? | Observation d'état, pas de modification |
-| **Master Butler** | Qu'est-ce qui peut être fait, et qui a le droit ? | Registre capacités et permissions |
-| **Border Guard** | Où sont les frontières et les règles de franchissement ? | Définition des frontières |
-| **Ever Buddy** | Comment le système évolue-t-il sans se rompre ? | Cycle de vie, versions, compatibilité |
-| **TAMR** | Quand l'humain a-t-il le droit d'intervenir ? | Intervention humaine gouvernée |
-| **WorrySentinel** | Quel niveau de sécurité et quel état de confiance ? | Gouvernance sécurité (T0–T4, niveaux 0–4) |
-| **BondingBrother** | Comment traduire les intentions pour les autorités ? | Médiation uniquement, jamais d'autorité |
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 🔧 STRATE 9 — MiyukiniAdmin (EXCEPTION)                      │
+│    Opérateur Souverain d'administration                      │
+└─────────────────────────────────────────────────────────────┘
+                              ▲
+┌─────────────────────────────────────────────────────────────┐
+│ 🟧 STRATE 8 — SERVICES                                       │
+│    Capacités perçues par l'utilisateur (facturation, caisse, │
+│    réservation…) — délivrées par les Opérateurs (Strate 7)   │
+└─────────────────────────────────────────────────────────────┘
+                              ▲
+┌─────────────────────────────────────────────────────────────┐
+│ 🟩 STRATE 7 — OPÉRATEURS                                     │
+│    Entités fonctionnelles gouvernées (exécutent des rôles)   │
+└─────────────────────────────────────────────────────────────┘
+                              ▲
+┌─────────────────────────────────────────────────────────────┐
+│ 🟦 STRATE 6 — TOOLS & TOOLKITS                               │
+│    Capacités exécutables gouvernées (Outils, Kits d'Outils)  │
+└─────────────────────────────────────────────────────────────┘
+                              ▲
+┌─────────────────────────────────────────────────────────────┐
+│ 🟨 STRATE 5 — INTERFACES & ADAPTATION                        │
+│    BondingBrother (médiation intentions ↔ Cores)             │
+└─────────────────────────────────────────────────────────────┘
+                              ▲
+┌─────────────────────────────────────────────────────────────┐
+│ 🟥 STRATE 4 — CORES SYSTÈME                                  │
+│    StrongFather · KindMother · Caring Nanny · Master Butler  │
+│    Border Guard · Ever Buddy · WorrySentinel · TAMR · …       │
+└─────────────────────────────────────────────────────────────┘
+                              ▲
+┌─────────────────────────────────────────────────────────────┐
+│ 🟪 STRATE 3 — INVARIANTS & CONTRATS                          │
+│    Principes architecturaux                                   │
+└─────────────────────────────────────────────────────────────┘
+                              ▲
+┌─────────────────────────────────────────────────────────────┐
+│ ⚙️  KERNEL — Id · Logger · Clock · Config · Lifecycle         │
+│    Substrat technique neutre (aucune logique métier)          │
+└─────────────────────────────────────────────────────────────┘
+                              ▲
+┌─────────────────────────────────────────────────────────────┐
+│ 🟫 STRATE 0 — HARDWARE & OS                                  │
+│    Réalité physique                                           │
+└─────────────────────────────────────────────────────────────┘
+```
 
-Détail de chaque Core : voir `docs/core/<NomDuCore>/`.
-
----
-
-## Partie IV — Gouvernance et sécurité
-
-### 11. Sécurité et gouvernance
-
-- **Zero-trust** : invariant architectural ; aucun appelant présumé valide ; toute intention évaluée selon les politiques.
-- **Niveaux de sécurité** (0–4) : profil de risque du produit ; gouvernés par WorrySentinel.
-- **États de confiance** (T0–T4) : Normal, Instable, Dégradé, Restreint, Bloqué ; dégradation progressive, pas de blocage brutal.
-- **Offline-first** : invariant ; WriteIntent acceptés localement, réconciliation explicite à la reconnexion.
-
----
-
-### 12. MiyukiniAdmin
-
-**MiyukiniAdmin** est un **Opérateur Souverain** (Strate 9), exception à la logique Opérateur standard. Rôle : installation, diagnostic, arbitrage, accès exceptionnel. Il n'est pas utilisé par les autres Opérateurs ; il n'expose pas d'API publique.
-
-Pouvoirs : installer et configurer l'écosystème, consulter états et métriques, modifier niveaux de sécurité, intervenir en maintenance. Toute action est traçable, horodatée, justifiable, auditable. Mal utilisé, il peut compromettre l'intégrité ; il est strictement encadré (niveau de sécurité maximal, journalisation obligatoire).
-
-Documentation : `docs/core/MiyukiniAdmin/`.
-
----
-
-## Partie V — Positionnement
-
-### 13. Cas d'usage
-
-- **B2B** : livrable = Outils & Kits d'Outils (Strate 6) ; briques recomposables, contrats stables.
-- **B2C** : livrable = Opérateurs (Strate 7) ; opérateur clé en main, offline, administration via MiyukiniAdmin.
-- **B2B2C** : Opérateurs + Outils sous licence ; revendeurs personnalisent et revendent.
-- **Environnements contraints** : collectivités, événements, IoT/edge, zones blanches, réglementation, long terme.
-- **Temps réel critique** (<100 ms) : non adapté (latence des contrôles). **Asynchrone** : adapté.
-
----
-
-### 14. Comparatif avec l'existant
-
-| Critère | Frameworks classiques | Cloud-native | Miyukini |
-|---------|------------------------|--------------|----------|
-| Autonomie | Dépendante | Cloud requis | Offline-first |
-| Sécurité | Configuration | Service | Architecture |
-| Gouvernance | Développeur | Plateforme | Cores |
-| Évolution | Breaking changes | Versions | Souveraineté environnement |
-| Complexité | Accumulée | Distribuée | Collaboration gouvernée |
-| Traçabilité | Optionnelle | Service externe | Structurelle |
-
-Miyukini ne concurrence pas WordPress, Laravel ou Kubernetes ; il répond à un autre problème : systèmes autonomes, sécurisés par conception, capables de fonctionner en contrainte extrême.
+Les **Cores** (Strate 4) gouvernent ; ils ne décident pas à la place de l'exécution, ils n'exécutent jamais. BondingBrother (Strate 5) assure la médiation entre les intentions et les Cores.
 
 ---
 
-### 15. Apports inédits
+## 3. Mécaniques générales
 
-- **Décision pure sans exécution** (StrongFather) : élimination d’une classe de bugs et failles.
-- **IA gouvernée par contrats** : pas de boîte noire ; tout comportement explicable.
-- **Architecture modulaire réelle** : autorité exclusive par core, frontières explicites et vérifiables.
-- **Dégradation progressive** : T0→T4 sans blocage brutal.
-- **Sécurité structurelle** : zero-trust et niveaux de sécurité comme paramètres de gouvernance, pas choix applicatif.
+### Du besoin utilisateur au résultat
 
----
+1. **Service** — Ce que l'utilisateur perçoit et consomme (ex. « facturation », « réservation », « caisse »).
+2. **Opérateur(s)** — Entité(s) fonctionnelle(s) gouvernée(s) qui portent le service. Un service peut être délivré par un seul Opérateur ou par une **Équipe d'Opérateurs** (collaboration mandatée sous Contrat d'équipe et Mandat de Permission).
+3. **Outils et Kits d'Outils** — Capacités exécutables que les Opérateurs appellent. Les Outils sont atomiques et sans autorité ; les Kits d'Outils sont des compositions officielles d'Outils, optimisées pour l'efficience.
+4. **Gouvernance** — Toute action passe par BondingBrother ; les décisions (autoriser/refuser) par StrongFather ; les écritures par KindMother (WriteIntent). Master Butler tient le registre des capacités et permissions ; WorrySentinel gouverne les niveaux de sécurité et les états de confiance.
 
-### 16. À qui Miyukini n'est PAS destiné
+### Règle fondamentale
 
-- Projets nécessitant une mise en production immédiate sans comprendre l’architecture.
-- Applications **temps réel critique** (latence <100 ms).
-- Équipes refusant les contraintes de gouvernance et d’invariants.
-- Projets sans exigence d’autonomie (connectivité permanente, dépendance cloud assumée).
-- Startups en phase d’exploration pure où l’architecture structurée serait un frein.
+> **Dans Miyukini, les utilisateurs n'installent pas d'applications. Ils interagissent avec des Opérateurs gouvernés qui exécutent des rôles pour leur compte.**
+
+Les Opérateurs, grâce à leur savoir-faire et leurs compétences, **orchestrent les Outils** — seuls ou en équipe — en fonction des besoins des services consommés par les utilisateurs.
 
 ---
 
-## Partie VI — État et référence
+## 4. Environnements, fédération et sécurité
 
-### 17. État du projet
+### Environnements (COG) : identification et souveraineté
 
-**Maturité conceptuelle** : Pyramide, Cores, Lois d'autonomie, contrats de sécurité et gouvernance d’écosystème sont stabilisés et documentés.
+Un **environnement Miyukini (COG)** est une **entité souveraine, versionnée, isolée et identifiée de manière unique**. Ce n'est pas un simple runtime : c'est une instance de gouvernance.
 
-**Implémentation (workspace actuel)** :
+| Propriété | Description |
+|-----------|-------------|
+| **Version complète des Cores** | Ensemble cohérent et figé de tous les Cores (Strate 4) |
+| **ID d'environnement unique** | Identifiant généré à la création par le kernel |
+| **Frontières strictes** | Limites claires entre l'environnement et l'extérieur |
+| **Opérateurs assujettis** | Chaque Opérateur est lié à un environnement unique |
 
-- **Kernel** : `miyukini-kernel` (Id, Logger, Clock, Config, Lifecycle).
-- **Cores Strate 4** : `strongfather`, `kindmother`, `borderguard`, `caringnanny`, `masterbutler`, `everbuddy`, `worrysentinel`, `tamr`, `logisticssteward`.
-- **Médiation** : `bondingbrother`.
-- **Opérateur Souverain** : `miyukini-admin`.
-- **Outil** : `mip-generator` (index MIP).
+**Règle fondatrice (LOI-7)** : *« La strate Cores est immuable. Toute évolution se fait par la création d'un nouvel environnement complet. »* Pas de micro-patch, pas de hotfix sauvage — uniquement des environnements complets, auditable et versionnés.
 
-**Roadmap implicite** : Kernel → Cores → MiyukiniAdmin → Outils & Kits d'Outils → Opérateurs. L’étape Outils & Kits d’Outils reste la clé stratégique qui différencie Miyukini d’un simple framework.
+**Identification des environnements** : selon le contexte, un COG peut être identifié par une **LSI** (Local Sovereign ID, générée localement), une **VID** (Verified ID, vérifiée par un registre global en contexte fédéré) ou une **WID** (Witnessed ID, attestée par échange indirect — clé USB, QR, signature). L'identité d'environnement est la base de toute relation inter-COG.
+
+### Échanges entre environnements fédérés
+
+L'autonomie n'empêche pas la fédération (LOI-6). Les échanges entre COG ne sont **jamais** une fusion de gouvernance : ils passent par une **visite gouvernée**.
+
+- **COG Origine** — Atteste l'identité de l'utilisateur (émetteur du **Passeport Utilisateur**). Ne participe pas à l'exécution distante.
+- **COG Hébergeur** — Souverain exécutif de la session. Vérifie le visiteur, accorde ou refuse l'accès, émet un **Visa de Connexion**, surveille et peut révoquer à tout moment.
+- **Utilisateur Visiteur** — Citoyen dans son COG d'origine, visiteur gouverné dans le COG hôte. Agit uniquement via le Visa ; ne transporte aucun core, aucune logique, aucun état.
+- **Bridge inter-COG** — Canal diplomatique (BondingBrother étendu). Transporte identités, intentions et autorisations. **Aucun pouvoir décisionnel, aucun état métier.**
+
+> **Le bridge ne fait jamais confiance, il transporte.**
+
+**Migration** (LOI-8) = diplomatie entre environnements : processus formel, contrat explicite, frontière contrôlée, traduction (pas copie brute). Acteurs : Border Guard (règles), BondingBrother (traduction), StrongFather (décision), KindMother (persistance), Ever Buddy (compatibilité).
+
+### Logique de sécurité sous-jacente
+
+- **Identité ≠ autorité** — Le Passeport prouve qui tu es et d'où tu viens ; il ne donne aucun droit. L'autorité reste au COG Hébergeur (Visa).
+- **Un seul souverain par session** — Le COG Hébergeur est l'unique source de vérité de l'état pendant la visite. Aucun core n'est partagé ; aucun état n'est migré en direct.
+- **Sécurité avant fluidité** — *« Un COG n'accueille jamais une gouvernance étrangère. Il n'accueille que des visiteurs, sous visa, dans un cadre qu'il définit seul. »*
+- **Zero-trust** — Aucun appelant (environnement, utilisateur, Opérateur) n'est présumé valide ; toute intention est évaluée selon les politiques (WorrySentinel, StrongFather).
+
+Cette logique s'applique aussi en interne : chaque environnement est souverain sur son périmètre ; la fédération repose sur des protocoles explicites (Passeport, Demande de Visite, Visa, Bridge), jamais sur une confiance implicite.
 
 ---
 
-### 18. Documentation de référence
+## 5. Méthodologie de développement
+
+Le projet suit un **cycle strict**, de l'idée jusqu'à l'audit, sans court-circuit.
+
+### Enchaînement des phases
+
+1. **Idée** — Besoin ou fonctionnalité cible (ex. compta indépendants, caisse PoS, réservation, CMS).
+2. **Analyse d'équivalents (PR)** — Étude des produits / logiciels existants du marché (Indy, Pennylane, logiciels caisse, moteurs forum, CMS boutique + réservation SaaS, etc.) pour en extraire les périmètres fonctionnels et les cas d'usage.
+3. **Transcription conceptuelle dans la référence** — Rédaction ou mise à jour de documents **Miyukini Conceptual References — Équivalents …** (ex. Équivalents Comptabilité Indépendants, Équivalents PoS Logiciel Caisse, Équivalents Moteur Forum). La sémantique Miyukini (Outil, Kit d'Outils, Opérateur, Service, KindMother, StrongFather, etc.) est appliquée ; aucun code à ce stade.
+4. **Documentation enrichie** — Rédaction de la **documentation fondatrice** des Tools/Toolkits ou Opérateurs : définition canonique, identifiants, liste d'outils, **contrats** (gouvernance, sécurité, intégration KindMother, tests), implémentation, alignement MIP. Planification et **bornage** de l'implémentation (périmètre, limites, livrables).
+5. **Implémentation** — Développement selon le [protocole d'implémentation générale](docs/protocols/Miyukini%20Prompt%20Protocol%20-%20Implémentation%20générale.md) : planification → distribution des tâches → vérification, corrections et tests → gel et versionnement. Conformité MSCM/MIP.
+6. **Test et audit** — Vérification des contrats, qualité, sécurité ; audit documentation si nécessaire.
+
+### Principes
+
+- **La référence conceptuelle précède le code.** On ne code pas un « équivalent Pennylane » sans avoir transposé le périmètre en termes Miyukini (Tools, Toolkits, Opérateurs, Services).
+- **La documentation est normative.** Contrats, gouvernance et sécurité sont écrits et gelés avant ou en parallèle de l'implémentation.
+- **Planification et bornage** évitent la dérive de périmètre et permettent un suivi explicite (y compris avec des agents IA en mode PLAN / Auto).
+
+---
+
+## 6. État actuel et roadmap
+
+### Travail en cours : Kits d'Outils (Toolkits)
+
+L'effort actuel se concentre sur les **Toolkits** pour couvrir le spectre des besoins le plus large possible. Chaque Toolkit est documenté (documentation fondatrice, contrats de gouvernance, référence outils, intégration KindMother, sécurité) et positionné dans la pyramide (Strate 6).
+
+**Domaines couverts (extrait)** : données (MiyuSQL), identité (MiyuAuth), web (MiyuWeb), horloge (MiyuClock), contenu (MiyuCMS, MiyuMedia), widgets, boutique (MiyuStore), livraison (MiyuShipping), réservation (MiyuBooking), facturation SaaS (MiyuBilling), caisse et PoS (MiyuPosSales, MiyuPosInventory, MiyuPosAnalytics, MiyuPosLoyalty, MiyuPosKitchen, MiyuPosPayment), RH (MiyuHR), facturation métier (MiyuInvoice), comptabilité (MiyuComptaLedger, MiyuComptaReports, MiyuDeclarations), notes de frais (MiyuExpense), trésorerie (MiyuTreasury), etc.
+
+L'objectif est d'avoir un **catalogue de capacités gouvernées** (Tools & Toolkits) stable et documenté, sur lequel s'appuyer pour la phase suivante.
+
+### Phase suivante : Opérateurs
+
+Une fois le spectre des Toolkits suffisamment couvert, le travail se déplacera vers les **Opérateurs** (Strate 7). Les Opérateurs, grâce à leur savoir-faire et leurs compétences, **orchestreront les Outils** — seuls ou en équipe — en fonction des besoins des **services** consommés par les utilisateurs. Les Opérateurs ne décident pas ; ils exécutent des rôles sous gouvernance (StrongFather, Mandats de Permission, Contrats d'équipe).
+
+### Maturité conceptuelle
+
+La pyramide, les Cores, les Lois d'autonomie, les contrats de sécurité et de gouvernance d'écosystème sont **stabilisés et documentés**. Le Kernel et les Cores du workspace sont en place ; l'outillage MIP (index structurel MSCM) est disponible.
+
+---
+
+## 7. Gouvernance et sécurité
+
+- **Zero-trust** : aucun appelant présumé valide ; toute intention évaluée selon les politiques.
+- **Niveaux de sécurité** (0–4) et **états de confiance** (T0–T4) : gouvernés par WorrySentinel ; dégradation progressive, pas de blocage brutal.
+- **Offline-first** : WriteIntent acceptés localement ; réconciliation explicite à la reconnexion.
+- **MiyukiniAdmin** : Opérateur Souverain (Strate 9), exception — installation, diagnostic, arbitrage, accès exceptionnel ; strictement encadré.
+
+---
+
+## 8. À qui s'adresse Miyukini
+
+| Acteur | Besoin |
+|--------|--------|
+| **Architectes système** | Autonomie structurelle, sécurité par conception, traçabilité auditable, fonctionnement déterministe en isolation |
+| **Développeurs d'Opérateurs** | Collectivités, événements sans réseau fiable, IoT/edge, contextes réglementés |
+| **Décideurs techniques** | Projets long terme (5–10 ans), systèmes critiques, contrôle total non négociable |
+
+**Miyukini n'est pas destiné** aux projets exigeant une mise en production immédiate sans comprendre l'architecture, aux applications temps réel critique (&lt;100 ms), aux équipes refusant les contraintes de gouvernance, ou aux contextes où la connectivité permanente et la dépendance cloud sont assumées sans exigence d'autonomie.
+
+---
+
+## 9. Documentation de référence
 
 | Thème | Document principal |
 |-------|--------------------|
@@ -365,24 +262,19 @@ Miyukini ne concurrence pas WordPress, Laravel ou Kubernetes ; il répond à un 
 | **Architecture** | [Pyramide Architecture Complete](docs/reference/Miyukini%20Conceptual%20References%20-%20Pyramide%20Architecture%20Complete.md) |
 | **Autonomie** | [Lois Autonomie Système](docs/reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) |
 | **COG** | [Definition COG](docs/reference/Miyukini%20Conceptual%20References%20-%20Definition%20COG.md) |
+| **Souveraineté environnement** | [Souverainete Environnement](docs/reference/Miyukini%20Conceptual%20References%20-%20Souverainete%20Environnement.md) |
+| **Connexion inter-COG** | [Connexion Inter-COG](docs/reference/Miyukini%20Conceptual%20References%20-%20Connexion%20Inter-COG.md) |
 | **Opérateurs** | [Operators et Terminologie](docs/reference/Miyukini%20Conceptual%20References%20-%20Operators%20et%20Terminologie.md) |
-| **Tools** | [Tools et Toolkits](docs/reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
+| **Tools et Toolkits** | [Tools et Toolkits](docs/reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
+| **Objectif final** | [Objectif Final](docs/reference/Miyukini%20Conceptual%20References%20-%20Objectif%20Final.md) |
 
-**Protocoles** : `docs/protocols/` (MIP, écriture documentation conceptuelle, implémentation générale).
-
-**Cores** : `docs/core/<NomDuCore>/` (fondation, contrats, implémentation).
-
----
-
-### 19. Personal Vibe Coding Gouverné
-
-Miyukini est développé selon une approche expérimentale : **Personal Vibe Coding Gouverné**. Le vibe coding (développement assisté par IA, rapide, intuitif) est encadré par une architecture contractuelle stricte. L’IA génère ; les contrats gouvernent ; les invariants ne négocient pas.
-
-**Thèse** : si on peut « vibe coder » un écosystème complet en respectant une architecture rigoureuse, le vibe coding devient une méthode de production viable, pas seulement un outil de prototypage. Miyukini est autant un produit qu’une expérimentation méthodologique.
+**Kits d'Outils** : [docs/tools/_index.md](docs/tools/_index.md) — index des Toolkits documentés.  
+**Protocoles** : [docs/protocols/](docs/protocols/) — MIP, écriture documentation conceptuelle, implémentation générale.  
+**Cores** : [docs/core/](docs/core/) — par Core (StrongFather, KindMother, Master Butler, MiyukiniAdmin, etc.).
 
 ---
 
-### 20. Conclusion
+## 10. Conclusion
 
 Miyukini ne vise pas à être le plus rapide ni le plus flexible, mais **prévisible, traçable, autonome et structurellement sécurisé**. Il demande un investissement initial (architecture en strates, contraintes de gouvernance, invariants) en échange de garanties : fonctionnement déterministe en isolation, sécurité par conception, évolution sans rupture, traçabilité complète.
 
@@ -390,25 +282,23 @@ Miyukini ne vise pas à être le plus rapide ni le plus flexible, mais **prévis
 
 ---
 
-### 21. Mini log de rédaction
+## 11. Log de rédaction
 
-**2026-01-29 — Réorganisation README racine**
+**2026-01-30 — Refonte README racine**
 
-- Structure en **6 parties** : Vue d’ensemble, Structure du dépôt, Concepts fondamentaux, Gouvernance et sécurité, Positionnement, État et référence.
-- **Nouvelles sections** : Arborescence du projet (4), Cartographie des crates (5), Documentation (6) avec mapping dossiers / contenu.
-- **État du projet** aligné sur le workspace actuel (Cargo.toml) : suppression des références aux crates SPM-CMS et démos retirées ; ajout de `logisticssteward`, `mip-generator`.
-- Table des matières réorganisée avec ancres par partie.
+- Suppression de l'arborescence du projet et de la cartographie des crates (aspects purement techniques).
+- Ajout section **Environnements, fédération et sécurité** : identification des environnements (COG, LSI/VID/WID), échanges entre environnements fédérés (visite gouvernée, Passeport, Visa, Bridge), logique de sécurité sous-jacente (identité ≠ autorité, un seul souverain, zero-trust).
+- Recentrage sur la **vision**, la **philosophie**, les **mécaniques générales** (Service → Opérateur(s) → Tools/Toolkits → Gouvernance).
+- Ajout de la **méthodologie de développement** : Idée → Analyse PR équivalent → Transcription conceptuelle (référence) → Documentation enrichie (contrats, implémentation, sécurité, planification et bornage) → Implémentation → Test et audit.
+- Ajout de l'**état actuel** : travail concentré sur les Toolkits pour couvrir le spectre des besoins ; **phase suivante** : Opérateurs qui orchestrent les Outils seuls ou en équipe selon les services consommés par les utilisateurs.
+- Table des matières simplifiée ; documentation de référence conservée sous forme de liens, sans arborescence détaillée.
 
-**2026-01-28 — Alignement Glossaire v1.7**
+**2026-01-29 — Réorganisation README racine (version précédente)**
 
-- Terminologie : Opérateurs, Outils & Kits d’Outils, Lois LOI-7 et LOI-8, section Documentation de référence.
-
-**2026-01-27 — Section Personal Vibe Coding Gouverné**
-
-- Ajout de la section 11 (devenant 19) et clarification de l’expérimentation méthodologique.
+- Structure en 6 parties ; arborescence, cartographie crates, documentation avec mapping dossiers.
 
 ---
 
 **Document** : README racine officiel  
-**Dernière mise à jour** : 2026-01-29  
-**Références** : Glossaire officiel, Pyramide Architecture Complete, Lois d’autonomie
+**Dernière mise à jour** : 2026-01-30  
+**Références** : Glossaire officiel, Pyramide Architecture Complete, Lois d'autonomie, Objectif Final, Tools et Toolkits
