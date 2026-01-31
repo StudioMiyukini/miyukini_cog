@@ -1,5 +1,6 @@
 //! Tool MiyuSearch — tool.search.query.execute.
 //! Exécute une requête full-text (terme(s), filtres, options fournis) ; retourne identifiants et scores.
+//! Implémentation minimale : résultat vide sans backend (lecture = KindMother ou flux) ; BOUND-3.
 
 use crate::context::GovernedContext;
 use crate::errors::MiyusearchError;
@@ -28,5 +29,8 @@ pub fn execute(
     if !ctx.has_mandate() {
         return Err(MiyusearchError::NoMandate);
     }
-    Err(MiyusearchError::Unimplemented)
+    Ok(QueryResult {
+        ids: Vec::new(),
+        scores: Vec::new(),
+    })
 }

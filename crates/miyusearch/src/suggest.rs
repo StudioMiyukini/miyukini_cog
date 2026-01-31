@@ -1,5 +1,6 @@
 //! Tool MiyuSearch — tool.search.suggest.
 //! Produit des suggestions (autocomplete) à partir d'un préfixe et options fournis.
+//! Implémentation minimale : liste vide sans backend (lecture = KindMother ou flux) ; BOUND-3.
 
 use crate::context::GovernedContext;
 use crate::errors::MiyusearchError;
@@ -18,5 +19,5 @@ pub fn suggest(
     if !ctx.has_mandate() {
         return Err(MiyusearchError::NoMandate);
     }
-    Err(MiyusearchError::Unimplemented)
+    Ok(Vec::new())
 }

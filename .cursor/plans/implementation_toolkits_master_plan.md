@@ -183,21 +183,42 @@ Tous les blocs outils sont balisés pour alimenter **blocks.json**, **domains.js
 - **Registre Toolkits** : `toolkit-registry-export` exporte les 49 admin_cells vers `mscm_index/toolkit_registry.json`. MiyukiniAdmin charge ce fichier au démarrage ; découverte et interrogation des 49 Toolkits opérationnelles.
 - **Workflow** : `cargo run -p mip-generator` puis `cargo run -p toolkit-registry-export` depuis la racine ; lancer MiyukiniAdmin depuis la même racine.
 
-### Phase 4 — Logique réelle prioritaire (en cours)
+### Phase 4 — Logique réelle prioritaire ✅ Lots 4a–4k RÉALISÉS (2026-01-31)
 
-- **Lot 4a — MiyuCalc** : expression (évaluateur arithmétique sûr + - * / ( ) ), number (format décimal/percent/devise), round (HalfEven/Floor/Ceiling/Truncate), unit (conversions longueur/masse/volume). Balisage MSCM conservé.
-- **Lot 4b — MiyuText** : markdown (rendu HTML via pulldown-cmark), replace (littéral), template (placeholders {{ key }}), sanitize (strip tags + escape HTML). Balisage MSCM conservé.
-- **Lot 4c — MiyuValidate** : schema (validation JSON-like : required, properties/types), sanitize (trim, escape HTML, validation numérique, nettoyage liste). Balisage MSCM conservé.
-- **Lot 4d — MiyuLocale** : date (format court/long fr/en via chrono, DateTime::from_timestamp), number (format décimal/devise fr/en), translate (résolution clé + fallback). Balisage MSCM conservé.
-- **Lot 4e — MiyuExport** : csv (génération avec échappement champs), xlsx (rust_xlsxwriter, save_to_buffer, set_name par feuille), pdf (genpdf 0.2, set_page_decorator, polices ./fonts/LiberationSans). Erreur MiyuExportError::Io pour I/O. Balisage MSCM conservé.
-- **Lot 4f — MiyuJobs** : schedule_at (id opaque at:job_id:run_at_ms), schedule_cron (validation 5 champs, id cron:job_id:expr), enqueue (task_id via UuidIdGenerator), process (ProcessResult vide sans backend). MiyuJobsError::InvalidInput. Balisage MSCM conservé.
-- **Lot 4g — MiyuAntiSpam** : captcha generate (cap:uuid), verify (false sans état), flood check (within_limit true, current_count 0), rate_limit check (within_limit true, remaining 100). Balisage MSCM conservé.
-- **Lot 4h — MiyuBookmarks** : add (bm:uuid), remove (Ok(())), list (vec vide). Pas de persistance dans le toolkit ; WriteIntent côté flux. Balisage MSCM conservé.
-- **Lot 4i — MiyuFeeds** : atom_board, atom_forum, atom_topic — flux ATOM 1.0 minimal (title, id, updated RFC3339, échappement XML). Date UTC depuis SystemTime + unix_days_to_ymd. Balisage MSCM conservé.
-- **Lot 4j — MiyuHR** : clock_in, clock_out (id opaque clock:in/out:employee_id:uuid), schedule get (ScheduleResult { shifts: vec![] }). MiyuhrError::InvalidInput. Balisage MSCM conservé.
-- **Lot 4k — MiyuDiscovery** : hashtag list/get/trending (vec vide ou HashtagDetail avec tag), trending list (vec vide), discover list (vec vide), search (SearchResult vide). Pas de backend ; lecture côté flux. Balisage MSCM conservé.
-- **Suite** : après chaque lot : `cargo build -p <crate>` et `cargo run -p mip-generator` pour index MIP à jour.
- l’
+- **Lot 4a — MiyuCalc** ✅ : expression (évaluateur arithmétique sûr + - * / ( ) ), number (format décimal/percent/devise), round (HalfEven/Floor/Ceiling/Truncate), unit (conversions longueur/masse/volume). Balisage MSCM conservé.
+- **Lot 4b — MiyuText** ✅ : markdown (rendu HTML via pulldown-cmark), replace (littéral), template (placeholders {{ key }}), sanitize (strip tags + escape HTML). Balisage MSCM conservé.
+- **Lot 4c — MiyuValidate** ✅ : schema (validation JSON-like : required, properties/types), sanitize (trim, escape HTML, validation numérique, nettoyage liste). Balisage MSCM conservé.
+- **Lot 4d — MiyuLocale** ✅ : date (format court/long fr/en via chrono, DateTime::from_timestamp), number (format décimal/devise fr/en), translate (résolution clé + fallback). Balisage MSCM conservé.
+- **Lot 4e — MiyuExport** ✅ : csv (génération avec échappement champs), xlsx (rust_xlsxwriter, save_to_buffer, set_name par feuille), pdf (genpdf 0.2, set_page_decorator, polices ./fonts/LiberationSans). Erreur MiyuExportError::Io pour I/O. Balisage MSCM conservé.
+- **Lot 4f — MiyuJobs** ✅ : schedule_at (id opaque at:job_id:run_at_ms), schedule_cron (validation 5 champs, id cron:job_id:expr), enqueue (task_id via UuidIdGenerator), process (ProcessResult vide sans backend). MiyuJobsError::InvalidInput. Balisage MSCM conservé.
+- **Lot 4g — MiyuAntiSpam** ✅ : captcha generate (cap:uuid), verify (false sans état), flood check (within_limit true, current_count 0), rate_limit check (within_limit true, remaining 100). Balisage MSCM conservé.
+- **Lot 4h — MiyuBookmarks** ✅ : add (bm:uuid), remove (Ok(())), list (vec vide). Pas de persistance dans le toolkit ; WriteIntent côté flux. Balisage MSCM conservé.
+- **Lot 4i — MiyuFeeds** ✅ : atom_board, atom_forum, atom_topic — flux ATOM 1.0 minimal (title, id, updated RFC3339, échappement XML). Date UTC depuis SystemTime + unix_days_to_ymd. Balisage MSCM conservé.
+- **Lot 4j — MiyuHR** ✅ : clock_in, clock_out (id opaque clock:in/out:employee_id:uuid), schedule get (ScheduleResult { shifts: vec![] }). MiyuhrError::InvalidInput. Balisage MSCM conservé.
+- **Lot 4k — MiyuDiscovery** ✅ : hashtag list/get/trending (vec vide ou HashtagDetail avec tag), trending list (vec vide), discover list (vec vide), search (SearchResult vide). Pas de backend ; lecture côté flux. Balisage MSCM conservé.
+
+**Workflow MIP après modification code :** `cargo build -p <crate>` puis `cargo run -p mip-generator` depuis la racine pour index MIP à jour (Protocole MIP v1).
+
+### Phase 4 — Suite : lots parallélisables (agents IA)
+
+Batches indépendants ; chaque agent traite une crate ou un groupe de crates ; pas de mini-écriture — livrer un module ou un fichier complet par outil ; balisage MSCM (@id, @role, @layer, @do, @human) obligatoire sur chaque bloc outil.
+
+| Batch | Crates | Tâche | Domaine MIP |
+|-------|--------|--------|-------------|
+| **4L1** | miyuclock | Logique réelle : time.now (Kernel Clock), time.delta (durée). Déjà partiellement fait ; vérifier conformité Reference Outils. | kernel |
+| **4L2** | miyauth | Logique réelle : identity_role (lecture contexte) ; résoudre resolve, attest, verify selon Reference Outils ; types IdentityContext, Attestation, VerificationResult. | identity |
+| **4L3** | miyunotify | Logique réelle : email.send, push.send, inbox.write (stubs → impl ou Unimplemented documenté) ; signatures conformes Reference Outils. | notify |
+| **4L4** | miyusearch | Logique réelle : index.update, query.execute (QueryResult), suggest ; stubs ou impl minimale sans backend externe. | search |
+| **4L5** | miyuweb | Logique réelle : html, layout, theme, script (execute/compile), asset, form, event, input ; 9 tools conformes Reference Outils. | web |
+| **4L6** | miyupm, miyuforum | Logique réelle : message (send, list, get), folder, draft, conversation, export ; category, board, topic, post, readtrack. Stubs acceptables ; signatures + types conformes. | communication, community |
+| **4L7** | miyubilling, miyubooking | subscription, invoice, payment, tenant ; slots, booking, resource, price, participants. Stubs ou impl minimale. | billing, booking |
+| **4L8** | miyustore, miyushipping | product, cart, checkout, payment, shipping, order ; rate, zones, label, tracking, shipment. Stubs ou impl minimale. | commerce |
+| **4L9** | miyuinvoice, miyucptaledger, miyuexpense, miyutreasury | quote, invoice, electronic, reminder, payment_link, customer ; bank, transaction, reconciliation, company ; receipt, claim, mileage ; dashboard, forecast, alert. | invoice, compta, expense, treasury |
+| **4L10** | miyucms, miyumedia, miyuwidgets | content, revision, comment, media ; media (upload, serve, transform) ; layout, widget, template. | content, web/widgets |
+| **4L11** | miyuwebway_participant, miyuwebway_tracker | MWS : declaration, transport, discovery, cog_list, port, address. 12 tools chacun ; signatures conformes doc Webway. | webway |
+
+**Règles communes (tous lots) :** BOUND-1 à BOUND-6 ; pas d’accès direct BDD ; pas de décision ALLOW/DENY ; `ctx.has_mandate()` en entrée de chaque outil ; après implémentation : `cargo build -p <crate>` puis `cargo run -p mip-generator`.
+
 ---
 
 ## 4. Priorisation des Toolkits

@@ -1,53 +1,64 @@
 {
-  "crates/miyusocialmoderation/src/lib.rs": [
-    "miyusocialmoderation_toolkit_lib"
+  "crates/miyukini-kernel/src/config.rs": [
+    "config_get",
+    "envconfig_struct",
+    "envconfig_values",
+    "envconfig_from_env",
+    "envconfig_get_impl",
+    "test_config_get_existing_key",
+    "test_config_get_missing_key",
+    "test_config_get_empty_key",
+    "test_config_get_case_sensitive",
+    "test_config_envconfig_from_env",
+    "test_config_no_business_logic",
+    "test_config_no_external_dependency",
+    "test_config_deterministic",
+    "test_config_multiple_keys",
+    "test_config_empty_value"
   ],
-  "crates/miyusearch/src/index.rs": [
-    "miyusearch_tool_search_index_update"
+  "crates/miyusocialmoderation/src/report.rs": [
+    "miyusocialmoderation_tool_report_create",
+    "miyusocialmoderation_tool_report_list"
   ],
-  "crates/miyupm/src/conversation.rs": [
-    "miyupm_tool_pm_conversation_list",
-    "miyupm_tool_pm_conversation_get"
+  "crates/miyukini-admin/src/models/mod.rs": [
+    "miyukiniadmin_models_mod"
   ],
-  "crates/miyuprofile/src/field.rs": [
-    "miyuprofile_tool_field_list",
-    "miyuprofile_tool_field_get",
-    "miyuprofile_tool_field_set"
+  "crates/miyuantispam/src/rate_limit.rs": [
+    "miyuantispam_tool_rate_limit_check"
   ],
-  "crates/miyumedia/src/media.rs": [
-    "miyumedia_tool_media_upload",
-    "miyumedia_tool_media_serve",
-    "miyumedia_tool_media_transform"
+  "crates/miyumoderationforum/src/post.rs": [
+    "miyumoderationforum_tool_post_edit",
+    "miyumoderationforum_tool_post_lock",
+    "miyumoderationforum_tool_post_delete"
   ],
-  "crates/miyunotify/src/push.rs": [
-    "miyunotify_tool_push_send"
+  "crates/kindmother/src/lib.rs": [
+    "kindmother_module_state",
+    "kindmother_module_storage",
+    "kindmother_module_sync",
+    "kindmother_module_api",
+    "kindmother_module_threat",
+    "kindmother_module_observability",
+    "kindmother_module_miyusql_bridge",
+    "kindmother_reexport_state",
+    "kindmother_reexport_storage",
+    "kindmother_reexport_sync",
+    "kindmother_reexport_api",
+    "kindmother_reexport_threat",
+    "kindmother_reexport_observability"
   ],
-  "crates/miyumoderationforum/src/report.rs": [
-    "miyumoderationforum_tool_report_create",
-    "miyumoderationforum_tool_report_list"
+  "crates/worrysentinel/src/threat_detector.rs": [
+    "worrysentinel_threat_level",
+    "worrysentinel_threat_level_none",
+    "worrysentinel_threat_level_low",
+    "worrysentinel_threat_level_medium",
+    "worrysentinel_threat_level_high",
+    "worrysentinel_threat_level_critical",
+    "worrysentinel_threat_detector_trait",
+    "worrysentinel_threat_detector_detect",
+    "worrysentinel_threat_test_level_ordering"
   ],
-  "crates/miyudeclarations/src/tva.rs": [
-    "miyudeclarations_tool_tva_prepare",
-    "miyudeclarations_tool_tva_submit"
-  ],
-  "crates/miyuposinventory/src/history.rs": [
-    "miyuposinventory_tool_history_list"
-  ],
-  "crates/miyutreasury/src/alert.rs": [
-    "miyutreasury_tool_treasury_alert_check"
-  ],
-  "crates/miyuforum/src/post.rs": [
-    "miyuforum_tool_forum_post_create",
-    "miyuforum_tool_forum_post_list",
-    "miyuforum_tool_forum_post_get",
-    "miyuforum_tool_forum_post_update"
-  ],
-  "crates/miyukini-admin/src/monitoring_service.rs": [
-    "miyukiniadmin_monitoring_service_trait",
-    "miyukiniadmin_monitoring_service_collect_metrics",
-    "miyukiniadmin_monitoring_system_metrics",
-    "miyukiniadmin_monitoring_system_metrics_cores_health",
-    "miyukiniadmin_monitoring_test_system_metrics"
+  "crates/miyudeclarations/src/deadline.rs": [
+    "miyudeclarations_tool_deadline_list"
   ],
   "crates/tamr/src/taxonomy.rs": [
     "tamr_taxonomy",
@@ -58,607 +69,21 @@
     "tamr_taxonomy_manager_get",
     "tamr_taxonomy_test_creation"
   ],
-  "crates/miyauth/src/verify.rs": [
-    "miyauth_tool_identity_verify"
-  ],
-  "crates/miyupm/src/export.rs": [
-    "miyupm_tool_pm_export"
-  ],
-  "crates/miyucalc/src/lib.rs": [
-    "miyucalc_toolkit_lib"
-  ],
-  "crates/miyupossales/src/discount.rs": [
-    "miyupossales_tool_discount_apply"
-  ],
-  "crates/miyuhr/src/time_clock.rs": [
-    "miyuhr_tool_time_clock_in",
-    "miyuhr_tool_time_clock_out"
-  ],
-  "crates/miyucontacts/src/foe.rs": [
-    "miyucontacts_tool_foe_add",
-    "miyucontacts_tool_foe_remove",
-    "miyucontacts_tool_foe_list"
-  ],
-  "crates/borderguard/src/trust_level.rs": [
-    "borderguard_trust_level",
-    "borderguard_trust_level_trusted",
-    "borderguard_trust_level_verified",
-    "borderguard_trust_level_unknown",
-    "borderguard_trust_level_hostile",
-    "borderguard_trust_level_classifier",
-    "borderguard_trust_level_classifier_classify",
-    "borderguard_trust_level_test_ordering"
-  ],
-  "crates/miyulocale/src/date.rs": [
-    "miyulocale_tool_date_format"
-  ],
-  "crates/miyulocale/src/number.rs": [
-    "miyulocale_tool_number_format"
-  ],
-  "crates/miyuinvoice/src/reminder.rs": [
-    "miyuinvoice_tool_invoice_reminder_send"
-  ],
-  "crates/miyuposinventory/src/stock.rs": [
-    "miyuposinventory_tool_stock_get",
-    "miyuposinventory_tool_stock_adjust"
-  ],
-  "crates/miyuweb/src/form.rs": [
-    "miyuweb_tool_web_form_validate"
-  ],
-  "crates/miyuweb/src/layout.rs": [
-    "miyuweb_tool_web_layout_render"
-  ],
-  "crates/strongfather/src/policy_engine.rs": [
-    "strongfather_policy_engine_error",
-    "strongfather_policy_engine_error_consistency",
-    "strongfather_policy_engine_error_invariant",
-    "strongfather_policy_engine_error_reason",
-    "strongfather_policy_engine_error_display",
-    "strongfather_policy_engine",
-    "strongfather_policy_engine_policies",
-    "strongfather_policy_engine_new",
-    "strongfather_policy_engine_apply",
-    "strongfather_policy_engine_select_applicable",
-    "strongfather_policy_engine_evaluate_policy",
-    "strongfather_policy_engine_test_create",
-    "strongfather_policy_engine_test_apply_permission",
-    "strongfather_policy_engine_test_priority_order"
-  ],
-  "crates/miyuexport/src/lib.rs": [
-    "miyuexport_toolkit_lib"
-  ],
-  "crates/miyukini-admin/src/migration_service.rs": [
-    "miyukiniadmin_migration_service_migration_record",
-    "miyukiniadmin_migration_record_id",
-    "miyukiniadmin_migration_record_applied_at",
-    "miyukiniadmin_migration_record_checksum",
-    "miyukiniadmin_migration_record_duration_ms",
-    "miyukiniadmin_migration_record_result",
-    "miyukiniadmin_migration_record_operator_id",
-    "miyukiniadmin_migration_service_pending_migration",
-    "miyukiniadmin_pending_migration_id",
-    "miyukiniadmin_pending_migration_description",
-    "miyukiniadmin_migration_service_trait",
-    "miyukiniadmin_migration_service_list_applied",
-    "miyukiniadmin_migration_service_list_pending",
-    "miyukiniadmin_migration_service_history",
-    "miyukiniadmin_migration_service_apply",
-    "miyukiniadmin_migration_service_apply_result",
-    "miyukiniadmin_apply_result_status",
-    "miyukiniadmin_apply_result_applied_count",
-    "miyukiniadmin_apply_result_message",
-    "miyukiniadmin_migration_service_impl",
-    "miyukiniadmin_migration_impl_applied",
-    "miyukiniadmin_migration_impl_pending",
-    "miyukiniadmin_migration_impl_new",
-    "miyukiniadmin_migration_impl_with_seed",
-    "miyukiniadmin_migration_test_list",
-    "miyukiniadmin_migration_test_apply_result"
-  ],
-  "crates/logisticssteward/src/optimization.rs": [
-    "logisticssteward_optimization",
-    "logisticssteward_optimization_recommendations",
-    "logisticssteward_optimizer_trait",
-    "logisticssteward_optimizer_optimize",
-    "logisticssteward_optimization_test_creation"
-  ],
-  "crates/miyuposanalytics/src/sales.rs": [
-    "miyuposanalytics_tool_sales_trend",
-    "miyuposanalytics_tool_sales_by_item",
-    "miyuposanalytics_tool_sales_by_employee"
-  ],
-  "crates/miyucontacts/src/friend.rs": [
-    "miyucontacts_tool_friend_add",
-    "miyucontacts_tool_friend_remove",
-    "miyucontacts_tool_friend_list"
-  ],
-  "crates/miyuposinventory/src/production.rs": [
-    "miyuposinventory_tool_production_record"
-  ],
-  "crates/miyuinvoice/src/payment_link.rs": [
-    "miyuinvoice_tool_invoice_payment_link_generate"
-  ],
-  "crates/miyustory/src/lib.rs": [
-    "miyustory_toolkit_lib"
-  ],
-  "crates/miyuwebway_tracker/src/declaration.rs": [
-    "miyuwebway_tracker_mws_declaration_validate",
-    "miyuwebway_tracker_mws_declaration_verify"
-  ],
-  "crates/miyuhr/src/lib.rs": [
-    "miyuhr_toolkit_lib"
-  ],
-  "crates/miyushipping/src/rate.rs": [
-    "miyushipping_tool_commerce_shipping_rate",
-    "miyushipping_tool_commerce_shipping_rates_compare"
-  ],
-  "crates/miyukini-admin/src/security_service.rs": [
-    "miyukiniadmin_security_service_trait",
-    "miyukiniadmin_security_service_get_security_level",
-    "miyukiniadmin_security_test_service_structure"
-  ],
-  "crates/miyuposkitchen/src/ticket.rs": [
-    "miyuposkitchen_tool_ticket_preset_assign"
-  ],
-  "crates/miyutext/src/markdown.rs": [
-    "miyutext_tool_markdown_render"
-  ],
-  "crates/miyukini-admin/src/api_routes.rs": [
-    "miyukiniadmin_api_routes_router",
-    "miyukiniadmin_api_routes_router_handlers",
-    "miyukiniadmin_api_routes_router_new",
-    "miyukiniadmin_api_routes_router_register",
-    "miyukiniadmin_api_routes_router_route",
-    "miyukiniadmin_api_routes_test_router_creation"
-  ],
   "crates/miyucalc/src/unit.rs": [
     "miyucalc_tool_unit_convert"
-  ],
-  "crates/miyumoderationforum/src/usernote.rs": [
-    "miyumoderationforum_tool_usernote_create",
-    "miyumoderationforum_tool_usernote_list"
-  ],
-  "crates/miyupossales/src/store.rs": [
-    "miyupossales_tool_store_resolve"
-  ],
-  "crates/miyuwebway_participant/src/cog_list.rs": [
-    "miyuwebway_participant_mws_cog_list_get",
-    "miyuwebway_participant_mws_cog_list_update",
-    "miyuwebway_participant_mws_cog_list_merge"
-  ],
-  "crates/tamr/src/classification.rs": [
-    "tamr_classification",
-    "tamr_classification_entity_id",
-    "tamr_classification_taxonomy_id",
-    "tamr_classification_terms",
-    "tamr_classifier_trait",
-    "tamr_classifier_classify",
-    "tamr_classification_test_creation"
-  ],
-  "crates/miyauth/src/role.rs": [
-    "miyauth_tool_identity_role"
-  ],
-  "crates/borderguard/src/crossing.rs": [
-    "borderguard_crossing_rule",
-    "borderguard_crossing_rule_boundary_id",
-    "borderguard_crossing_rule_min_trust_level",
-    "borderguard_crossing_rule_allowed",
-    "borderguard_crossing_rule_new",
-    "borderguard_crossing_rules",
-    "borderguard_crossing_rules_rules",
-    "borderguard_crossing_rules_add",
-    "borderguard_crossing_test_rule_creation"
-  ],
-  "crates/miyubilling/src/subscription.rs": [
-    "miyubilling_tool_billing_subscription_create",
-    "miyubilling_tool_billing_subscription_update",
-    "miyubilling_tool_billing_subscription_cancel",
-    "miyubilling_tool_billing_subscription_status"
-  ],
-  "crates/miyucptaledger/src/company.rs": [
-    "miyucptaledger_tool_company_structure_resolve",
-    "miyucptaledger_tool_company_structure_register",
-    "miyucptaledger_tool_company_siret_resolve"
-  ],
-  "crates/miyuposinventory/src/alert.rs": [
-    "miyuposinventory_tool_alert_low_evaluate"
-  ],
-  "crates/miyushipping/src/shipment.rs": [
-    "miyushipping_tool_commerce_shipping_shipment_create",
-    "miyushipping_tool_commerce_shipping_shipment_list"
-  ],
-  "crates/miyusocialmoderation/src/post.rs": [
-    "miyusocialmoderation_tool_post_delete"
-  ],
-  "crates/miyuweb/src/input.rs": [
-    "miyuweb_tool_web_input_capture"
-  ],
-  "crates/miyudiscovery/src/trending.rs": [
-    "miyudiscovery_tool_trending_list"
-  ],
-  "crates/miyumoderationforum/src/queue.rs": [
-    "miyumoderationforum_tool_queue_list",
-    "miyumoderationforum_tool_queue_get"
-  ],
-  "crates/bondingbrother/src/sync.rs": [
-    "bondingbrother_sync_strategy",
-    "bondingbrother_sync_strategy_immediate",
-    "bondingbrother_sync_strategy_deferred",
-    "bondingbrother_sync_manager_trait",
-    "bondingbrother_sync_manager_sync",
-    "bondingbrother_sync_error",
-    "bondingbrother_sync_error_failed",
-    "bondingbrother_sync_test_strategy"
-  ],
-  "crates/miyucms/src/comment.rs": [
-    "miyucms_tool_content_comment_create",
-    "miyucms_tool_content_comment_moderate",
-    "miyucms_tool_content_comment_list"
-  ],
-  "crates/miyukini-kernel/src/id.rs": [
-    "kernel_id_type",
-    "kernel_id_parse",
-    "kernel_id_display",
-    "kernel_id_parse_error",
-    "kernel_id_generator_trait",
-    "kernel_id_generator_generate",
-    "kernel_id_generator_uuid",
-    "kernel_id_generator_uuid_struct",
-    "test_id_generate_unique",
-    "test_id_display_roundtrip",
-    "test_id_parse_valid_uuid",
-    "test_id_parse_invalid_format",
-    "test_id_equality",
-    "test_id_hash",
-    "test_id_no_business_logic",
-    "test_id_no_external_dependency",
-    "test_id_deterministic_parse"
-  ],
-  "crates/miyusocialfeed/src/reaction.rs": [
-    "miyusocialfeed_tool_reaction_add",
-    "miyusocialfeed_tool_reaction_remove",
-    "miyusocialfeed_tool_reaction_list"
-  ],
-  "crates/miyusql/src/errors.rs": [
-    "miyusql_errors",
-    "miyusql_error_enum",
-    "miyusql_error_no_mandate",
-    "miyusql_error_timeout",
-    "miyusql_error_connection",
-    "miyusql_error_syntax",
-    "miyusql_error_execution"
-  ],
-  "crates/miyupolls/src/lib.rs": [
-    "miyupolls_toolkit_lib"
-  ],
-  "crates/miyuposinventory/src/lib.rs": [
-    "miyuposinventory_toolkit_lib"
-  ],
-  "crates/miyuantispam/src/lib.rs": [
-    "miyuantispam_toolkit_lib"
-  ],
-  "crates/miyumoderationforum/src/topic.rs": [
-    "miyumoderationforum_tool_topic_lock",
-    "miyumoderationforum_tool_topic_move",
-    "miyumoderationforum_tool_topic_merge",
-    "miyumoderationforum_tool_topic_split",
-    "miyumoderationforum_tool_topic_delete",
-    "miyumoderationforum_tool_topic_copy"
-  ],
-  "crates/miyuposloyalty/src/lib.rs": [
-    "miyuposloyalty_toolkit_lib"
-  ],
-  "crates/miyuweb/src/script.rs": [
-    "miyuweb_tool_web_script_execute",
-    "miyuweb_tool_web_script_compile"
-  ],
-  "crates/miyusocialfeed/src/post.rs": [
-    "miyusocialfeed_tool_post_create",
-    "miyusocialfeed_tool_post_update",
-    "miyusocialfeed_tool_post_delete",
-    "miyusocialfeed_tool_post_get"
-  ],
-  "crates/miyusearch/src/suggest.rs": [
-    "miyusearch_tool_search_suggest"
-  ],
-  "crates/kindmother/src/sync.rs": [
-    "kindmother_sync_delta",
-    "kindmother_sync_delta_entity_id",
-    "kindmother_sync_delta_operation",
-    "kindmother_sync_delta_data",
-    "kindmother_sync_delta_operation",
-    "kindmother_sync_delta_operation_create",
-    "kindmother_sync_delta_operation_update",
-    "kindmother_sync_delta_operation_delete",
-    "kindmother_sync_trait",
-    "kindmother_sync_compute_delta",
-    "kindmother_sync_apply_delta",
-    "kindmother_sync_error",
-    "kindmother_sync_error_conflict",
-    "kindmother_sync_error_invalid_delta",
-    "kindmother_sync_error_io",
-    "kindmother_sync_test_delta_creation"
-  ],
-  "crates/miyustore/src/cart.rs": [
-    "miyustore_tool_commerce_cart_add",
-    "miyustore_tool_commerce_cart_update",
-    "miyustore_tool_commerce_cart_remove",
-    "miyustore_tool_commerce_cart_compute"
-  ],
-  "crates/kindmother/src/miyusql_bridge.rs": [
-    "kindmother_miyusql_bridge",
-    "kindmother_miyusql_bridge_trait",
-    "kindmother_miyusql_bridge_impl"
-  ],
-  "crates/miyuexpense/src/mileage.rs": [
-    "miyuexpense_tool_expense_mileage_calculate",
-    "miyuexpense_tool_expense_mileage_export"
-  ],
-  "crates/miyukini-admin/src/lib.rs": [
-    "miyukiniadmin_module_config",
-    "miyukiniadmin_module_monitoring_service",
-    "miyukiniadmin_module_database_service",
-    "miyukiniadmin_module_security_service",
-    "miyukiniadmin_module_admin_cell",
-    "miyukiniadmin_module_module_testing_service",
-    "miyukiniadmin_module_module_lifecycle_service",
-    "miyukiniadmin_module_testing_service",
-    "miyukiniadmin_module_db_unit_tests",
-    "miyukiniadmin_module_cycle_tests_runner",
-    "miyukiniadmin_module_testing_suites",
-    "miyukiniadmin_module_bonding_brother_bridge",
-    "miyukiniadmin_module_audit_logger",
-    "miyukiniadmin_module_api_handlers",
-    "miyukiniadmin_module_api_routes",
-    "miyukiniadmin_module_crud_state",
-    "miyukiniadmin_module_migration_service",
-    "miyukiniadmin_module_backup_service",
-    "miyukiniadmin_module_models",
-    "miyukiniadmin_module_services"
-  ],
-  "crates/miyuposkitchen/src/service_type.rs": [
-    "miyuposkitchen_tool_service_type_set"
-  ],
-  "crates/miyusocialprofile/src/profile.rs": [
-    "miyusocialprofile_tool_profile_get",
-    "miyusocialprofile_tool_profile_update"
-  ],
-  "crates/miyupossales/src/display.rs": [
-    "miyupossales_tool_display_push"
-  ],
-  "crates/strongfather/src/validator.rs": [
-    "strongfather_validator_error",
-    "strongfather_validator_error_missing_components",
-    "strongfather_validator_error_violated_rules",
-    "strongfather_validator_error_message",
-    "strongfather_validator_error_new",
-    "strongfather_validator_error_display",
-    "strongfather_intent_validator",
-    "strongfather_intent_validator_new",
-    "strongfather_intent_validator_validate",
-    "strongfather_intent_validator_validate_structure_only",
-    "strongfather_intent_validator_default",
-    "strongfather_validator_test_valid_intent",
-    "strongfather_validator_test_missing_intent_id",
-    "strongfather_validator_test_missing_subject",
-    "strongfather_validator_test_incomplete_context"
-  ],
-  "crates/miyucptaledger/src/bank.rs": [
-    "miyucptaledger_tool_compta_bank_sync"
-  ],
-  "crates/miyuposinventory/src/transfer.rs": [
-    "miyuposinventory_tool_transfer_create",
-    "miyuposinventory_tool_transfer_execute",
-    "miyuposinventory_tool_transfer_list"
-  ],
-  "crates/miyucptaledger/src/transaction.rs": [
-    "miyucptaledger_tool_compta_transaction_categorize",
-    "miyucptaledger_tool_compta_transaction_vat_resolve"
-  ],
-  "crates/miyusql/src/schema.rs": [
-    "miyusql_schema_table_meta",
-    "miyusql_schema_table_name",
-    "miyusql_schema_columns",
-    "miyusql_schema_column_meta",
-    "miyusql_schema_column_name",
-    "miyusql_schema_column_type",
-    "miyusql_schema_result",
-    "miyusql_schema_tables",
-    "miyusql_tool_schema_read",
-    "miyusql_tool_schema_read_table",
-    "miyusql_schema_executor_trait",
-    "miyusql_schema_read_tables_impl",
-    "miyusql_schema_read_table_impl"
-  ],
-  "crates/miyustore/src/payment.rs": [
-    "miyustore_tool_commerce_payment_capture",
-    "miyustore_tool_commerce_payment_refund",
-    "miyustore_tool_commerce_payment_status"
-  ],
-  "crates/tamr/src/metadata.rs": [
-    "tamr_metadata",
-    "tamr_metadata_entity_id",
-    "tamr_metadata_values",
-    "tamr_metadata_manager_trait",
-    "tamr_metadata_manager_get",
-    "tamr_metadata_test_creation"
-  ],
-  "crates/miyufeeds/src/feed.rs": [
-    "miyufeeds_tool_atom_board",
-    "miyufeeds_tool_atom_forum",
-    "miyufeeds_tool_atom_topic"
-  ],
-  "crates/miyucomptareports/src/lib.rs": [
-    "miyucomptareports_toolkit_lib"
-  ],
-  "crates/miyuposanalytics/src/cash.rs": [
-    "miyuposanalytics_tool_cash_discrepancy"
-  ],
-  "crates/miyupossales/src/cash_movement.rs": [
-    "miyupossales_tool_cash_movement_record"
-  ],
-  "crates/miyukini-admin/src/services/permission.rs": [
-    "miyukiniadmin_permission_service",
-    "miyukiniadmin_capabilities_admin",
-    "miyukiniadmin_capabilities_recovery_extra",
-    "miyukiniadmin_capabilities_audit",
-    "miyukiniadmin_permission_service_new",
-    "miyukiniadmin_permission_has_capability",
-    "miyukiniadmin_permission_capabilities_for_role"
-  ],
-  "crates/miyutreasury/src/dashboard.rs": [
-    "miyutreasury_tool_treasury_dashboard_aggregate"
-  ],
-  "crates/miyuwidgets/src/template.rs": [
-    "miyuwidgets_tool_web_template_resolve"
-  ],
-  "crates/miyubilling/src/invoice.rs": [
-    "miyubilling_tool_billing_invoice_generate",
-    "miyubilling_tool_billing_invoice_list"
-  ],
-  "crates/miyukini-admin/src/models/mod.rs": [
-    "miyukiniadmin_models_mod"
-  ],
-  "crates/miyupossales/src/order.rs": [
-    "miyupossales_tool_order_service_type_set"
-  ],
-  "crates/miyupossales/src/item.rs": [
-    "miyupossales_tool_variant_resolve",
-    "miyupossales_tool_modifier_apply"
-  ],
-  "crates/miyuposanalytics/src/lib.rs": [
-    "miyuposanalytics_toolkit_lib"
-  ],
-  "crates/miyujobs/src/queue.rs": [
-    "miyujobs_tool_queue_enqueue",
-    "miyujobs_tool_queue_process"
-  ],
-  "crates/miyusocialfeed/src/feed.rs": [
-    "miyusocialfeed_tool_feed_list"
-  ],
-  "crates/miyuvalidate/src/lib.rs": [
-    "miyuvalidate_toolkit_lib"
-  ],
-  "crates/miyuwidgets/src/widget.rs": [
-    "miyuwidgets_tool_web_widget_text_render",
-    "miyuwidgets_tool_web_widget_image_render",
-    "miyuwidgets_tool_web_widget_button_render",
-    "miyuwidgets_tool_web_widget_grid_render",
-    "miyuwidgets_tool_web_widget_container_render"
-  ],
-  "crates/miyuwebway_participant/src/address.rs": [
-    "miyuwebway_participant_mws_address_tracker_default"
-  ],
-  "crates/miyucalc/src/context.rs": [
-    "miyucalc_governed_context",
-    "miyucalc_governed_context_struct"
-  ],
-  "crates/caringnanny/src/health.rs": [
-    "caringnanny_health_status",
-    "caringnanny_health_status_healthy",
-    "caringnanny_health_status_degraded",
-    "caringnanny_health_status_unhealthy",
-    "caringnanny_health_checker_trait",
-    "caringnanny_health_checker_check",
-    "caringnanny_health_test_status_equality"
-  ],
-  "crates/miyuinvoice/src/electronic.rs": [
-    "miyuinvoice_tool_invoice_electronic_submit"
-  ],
-  "crates/miyucalc/src/errors.rs": [
-    "miyucalc_errors",
-    "miyucalc_error_enum"
-  ],
-  "crates/miyukini-admin/src/bonding_brother_bridge.rs": [
-    "miyukiniadmin_bonding_brother_bridge_trait",
-    "miyukiniadmin_bonding_brother_bridge_connect",
-    "miyukiniadmin_bonding_brother_bridge_error",
-    "miyukiniadmin_bonding_brother_bridge_error_connection_failed",
-    "miyukiniadmin_bonding_brother_bridge_test_error"
-  ],
-  "crates/miyukini-kernel/src/lib.rs": [
-    "kernel_module_config",
-    "kernel_module_id",
-    "kernel_module_time",
-    "kernel_module_log",
-    "kernel_module_lifecycle",
-    "kernel_reexport_config",
-    "kernel_reexport_id",
-    "kernel_reexport_time",
-    "kernel_reexport_log",
-    "kernel_reexport_lifecycle"
-  ],
-  "crates/miyubookmarks/src/bookmark.rs": [
-    "miyubookmarks_tool_bookmark_add",
-    "miyubookmarks_tool_bookmark_remove",
-    "miyubookmarks_tool_bookmark_list"
   ],
   "crates/miyucontacts/src/contacts.rs": [
     "miyucontacts_tool_contacts_list"
   ],
-  "crates/miyuhr/src/schedule.rs": [
-    "miyuhr_tool_schedule_get"
+  "crates/miyuinvoice/src/electronic.rs": [
+    "miyuinvoice_tool_invoice_electronic_submit"
   ],
-  "crates/miyusocialfeed/src/lib.rs": [
-    "miyusocialfeed_toolkit_lib"
+  "crates/miyucontacts/src/lib.rs": [
+    "miyucontacts_toolkit_lib"
   ],
-  "crates/miyuprofile/src/lib.rs": [
-    "miyuprofile_toolkit_lib"
-  ],
-  "crates/miyukini-kernel/src/time.rs": [
-    "kernel_clock_trait",
-    "kernel_clock_now",
-    "kernel_clock_default",
-    "kernel_clock_default_struct",
-    "test_time_now_returns_systemtime",
-    "test_time_now_monotonic",
-    "test_time_fake_clock_injection",
-    "test_time_no_timezone_logic",
-    "test_time_no_business_logic",
-    "test_time_no_external_dependency",
-    "test_time_deterministic_fake",
-    "kernel_clock_fake"
-  ],
-  "crates/miyuweb/src/asset.rs": [
-    "miyuweb_tool_web_asset_serve"
-  ],
-  "crates/miyuantispam/src/flood.rs": [
-    "miyuantispam_tool_flood_check"
-  ],
-  "crates/miyuwebway_participant/src/port.rs": [
-    "miyuwebway_participant_mws_port_check"
-  ],
-  "crates/miyuwebway_tracker/src/transport.rs": [
-    "miyuwebway_tracker_mws_transport_receive",
-    "miyuwebway_tracker_mws_transport_send"
-  ],
-  "crates/miyucomptareports/src/report.rs": [
-    "miyucomptareports_tool_livre_recettes_generate",
-    "miyucomptareports_tool_balance_generate",
-    "miyucomptareports_tool_liasse_generate",
-    "miyucomptareports_tool_cashflow_generate"
-  ],
-  "crates/miyukini-admin/src/services/pre_destruction_backup.rs": [
-    "miyukiniadmin_pre_destruction_backup_service",
-    "miyukiniadmin_pre_destruction_backup_new",
-    "miyukiniadmin_pre_destruction_has_prior",
-    "miyukiniadmin_pre_destruction_run_if_needed",
-    "miyukiniadmin_pre_destruction_result"
-  ],
-  "crates/miyusql/src/cache.rs": [
-    "miyusql_tool_cache_get",
-    "miyusql_tool_cache_set",
-    "miyusql_tool_cache_invalidate",
-    "miyusql_cache_executor_trait",
-    "miyusql_cache_get_impl",
-    "miyusql_cache_set_impl",
-    "miyusql_cache_invalidate_impl"
-  ],
-  "crates/miyuforum/src/category.rs": [
-    "miyuforum_tool_forum_category_list",
-    "miyuforum_tool_forum_category_get",
-    "miyuforum_tool_forum_category_create",
-    "miyuforum_tool_forum_category_update"
+  "crates/miyuexpense/src/receipt.rs": [
+    "miyuexpense_tool_expense_receipt_capture",
+    "miyuexpense_tool_expense_receipt_extract"
   ],
   "crates/miyukini-admin/src/main.rs": [
     "miyukiniadmin_backend_app_state",
@@ -704,42 +129,995 @@
     "miyukiniadmin_backend_serve_database",
     "miyukiniadmin_backend_serve_tests"
   ],
-  "crates/miyuprofile/src/preferences.rs": [
-    "miyuprofile_tool_preferences_get",
-    "miyuprofile_tool_preferences_set"
-  ],
-  "crates/miyucontacts/src/lib.rs": [
-    "miyucontacts_toolkit_lib"
-  ],
-  "crates/miyupossales/src/barcode.rs": [
-    "miyupossales_tool_barcode_parse"
-  ],
-  "crates/miyukini-admin/src/config.rs": [
-    "miyukiniadmin_config_backend_config",
-    "miyukiniadmin_config_backend_config_port",
-    "miyukiniadmin_config_backend_config_host",
-    "miyukiniadmin_config_backend_config_https",
-    "miyukiniadmin_config_backend_config_tls_cert",
-    "miyukiniadmin_config_backend_config_tls_key",
-    "miyukiniadmin_config_backend_config_from_env",
-    "miyukiniadmin_config_test_from_env"
+  "crates/miyusocialprofile/src/follow.rs": [
+    "miyusocialprofile_tool_follow_add",
+    "miyusocialprofile_tool_follow_remove",
+    "miyusocialprofile_tool_followers_list",
+    "miyusocialprofile_tool_following_list"
   ],
   "crates/miyuweb/src/html.rs": [
     "miyuweb_tool_web_html_render"
   ],
-  "crates/worrysentinel/src/threat_detector.rs": [
-    "worrysentinel_threat_level",
-    "worrysentinel_threat_level_none",
-    "worrysentinel_threat_level_low",
-    "worrysentinel_threat_level_medium",
-    "worrysentinel_threat_level_high",
-    "worrysentinel_threat_level_critical",
-    "worrysentinel_threat_detector_trait",
-    "worrysentinel_threat_detector_detect",
-    "worrysentinel_threat_test_level_ordering"
+  "crates/miyubooking/src/resource.rs": [
+    "miyubooking_tool_booking_resource_resolve",
+    "miyubooking_tool_booking_resource_availability"
   ],
-  "crates/miyubilling/src/tenant.rs": [
-    "miyubilling_tool_billing_tenant_resolve"
+  "crates/strongfather/src/decision.rs": [
+    "strongfather_decision_type",
+    "strongfather_decision_type_accepted",
+    "strongfather_decision_accepted_priority",
+    "strongfather_decision_type_refused",
+    "strongfather_decision_refused_reason",
+    "strongfather_decision_refused_violated_policies",
+    "strongfather_decision_type_ambiguous",
+    "strongfather_decision_ambiguous_missing_information",
+    "strongfather_decision_ambiguous_clarifications",
+    "strongfather_decision_type_deferred",
+    "strongfather_decision_deferred_reason",
+    "strongfather_decision_deferred_context_required",
+    "strongfather_decision_justification",
+    "strongfather_decision_justification_explanation",
+    "strongfather_decision_justification_policy_references",
+    "strongfather_decision_justification_reasoning_steps",
+    "strongfather_decision_justification_new",
+    "strongfather_decision_justification_with_reasoning",
+    "strongfather_decision_metadata",
+    "strongfather_decision_metadata_fields",
+    "strongfather_decision_metadata_new",
+    "strongfather_decision_metadata_with_field",
+    "strongfather_decision_metadata_default",
+    "strongfather_decision_evaluation_context",
+    "strongfather_decision_eval_context_fields",
+    "strongfather_decision_eval_context_new",
+    "strongfather_decision_eval_context_with_field",
+    "strongfather_decision_eval_context_default",
+    "strongfather_decision",
+    "strongfather_decision_intent_id",
+    "strongfather_decision_type",
+    "strongfather_decision_justification",
+    "strongfather_decision_policies_applied",
+    "strongfather_decision_evaluation_context",
+    "strongfather_decision_metadata",
+    "strongfather_decision_new",
+    "strongfather_decision_with_evaluation_context",
+    "strongfather_decision_with_metadata",
+    "strongfather_decision_is_accepted",
+    "strongfather_decision_is_refused",
+    "strongfather_decision_is_ambiguous",
+    "strongfather_decision_is_deferred",
+    "strongfather_decision_test_create_accepted",
+    "strongfather_decision_test_create_refused",
+    "strongfather_decision_test_create_ambiguous",
+    "strongfather_decision_test_create_deferred",
+    "strongfather_decision_test_justification"
+  ],
+  "crates/miyucalc/src/round.rs": [
+    "miyucalc_tool_round"
+  ],
+  "crates/strongfather/src/priority.rs": [
+    "strongfather_priority_value",
+    "strongfather_priority_value_level",
+    "strongfather_priority_new",
+    "strongfather_priority_minimum",
+    "strongfather_priority_maximum",
+    "strongfather_priority_default",
+    "strongfather_priority_calculator",
+    "strongfather_priority_calculator_new",
+    "strongfather_priority_calculator_calculate",
+    "strongfather_priority_calculator_compare",
+    "strongfather_priority_calculator_default",
+    "strongfather_priority_test_create",
+    "strongfather_priority_test_default",
+    "strongfather_priority_test_calculate_with_requested",
+    "strongfather_priority_test_calculate_with_policies",
+    "strongfather_priority_test_compare"
+  ],
+  "crates/miyustore/src/checkout.rs": [
+    "miyustore_tool_commerce_checkout_validate",
+    "miyustore_tool_commerce_checkout_submit"
+  ],
+  "crates/borderguard/src/crossing.rs": [
+    "borderguard_crossing_rule",
+    "borderguard_crossing_rule_boundary_id",
+    "borderguard_crossing_rule_min_trust_level",
+    "borderguard_crossing_rule_allowed",
+    "borderguard_crossing_rule_new",
+    "borderguard_crossing_rules",
+    "borderguard_crossing_rules_rules",
+    "borderguard_crossing_rules_add",
+    "borderguard_crossing_test_rule_creation"
+  ],
+  "crates/miyucalc/src/lib.rs": [
+    "miyucalc_toolkit_lib"
+  ],
+  "crates/miyupossales/src/cash_register.rs": [
+    "miyupossales_tool_cash_register_open",
+    "miyupossales_tool_cash_register_close"
+  ],
+  "crates/miyuforum/src/topic.rs": [
+    "miyuforum_tool_forum_topic_create",
+    "miyuforum_tool_forum_topic_list",
+    "miyuforum_tool_forum_topic_get",
+    "miyuforum_tool_forum_topic_update",
+    "miyuforum_tool_forum_topic_sticky",
+    "miyuforum_tool_forum_topic_announce",
+    "miyuforum_tool_forum_topic_export_pdf",
+    "miyuforum_tool_forum_topic_export_text"
+  ],
+  "crates/miyuposloyalty/src/customer.rs": [
+    "miyuposloyalty_tool_customer_get",
+    "miyuposloyalty_tool_customer_list",
+    "miyuposloyalty_tool_customer_create",
+    "miyuposloyalty_tool_customer_update",
+    "miyuposloyalty_tool_customer_address_get",
+    "miyuposloyalty_tool_customer_note_add",
+    "miyuposloyalty_tool_customer_note_list"
+  ],
+  "crates/miyulocale/src/translate.rs": [
+    "miyulocale_tool_translate"
+  ],
+  "crates/miyukini-admin/src/api_routes.rs": [
+    "miyukiniadmin_api_routes_router",
+    "miyukiniadmin_api_routes_router_handlers",
+    "miyukiniadmin_api_routes_router_new",
+    "miyukiniadmin_api_routes_router_register",
+    "miyukiniadmin_api_routes_router_route",
+    "miyukiniadmin_api_routes_test_router_creation"
+  ],
+  "crates/miyubooking/src/participants.rs": [
+    "miyubooking_tool_booking_participants_compute"
+  ],
+  "crates/borderguard/src/boundary.rs": [
+    "borderguard_boundary_type",
+    "borderguard_boundary_type_external",
+    "borderguard_boundary_type_internal",
+    "borderguard_boundary_type_integration",
+    "borderguard_boundary",
+    "borderguard_boundary_id",
+    "borderguard_boundary_type",
+    "borderguard_boundary_name",
+    "borderguard_boundary_new",
+    "borderguard_boundary_test_creation"
+  ],
+  "crates/miyushipping/src/shipment.rs": [
+    "miyushipping_tool_commerce_shipping_shipment_create",
+    "miyushipping_tool_commerce_shipping_shipment_list"
+  ],
+  "crates/miyuposinventory/src/import.rs": [
+    "miyuposinventory_tool_import_items"
+  ],
+  "crates/miyuwebway_tracker/src/declaration.rs": [
+    "miyuwebway_tracker_mws_declaration_validate",
+    "miyuwebway_tracker_mws_declaration_verify"
+  ],
+  "crates/miyuweb/src/script.rs": [
+    "miyuweb_tool_web_script_execute",
+    "miyuweb_tool_web_script_compile"
+  ],
+  "crates/bondingbrother/src/sync.rs": [
+    "bondingbrother_sync_strategy",
+    "bondingbrother_sync_strategy_immediate",
+    "bondingbrother_sync_strategy_deferred",
+    "bondingbrother_sync_manager_trait",
+    "bondingbrother_sync_manager_sync",
+    "bondingbrother_sync_error",
+    "bondingbrother_sync_error_failed",
+    "bondingbrother_sync_test_strategy"
+  ],
+  "crates/miyuprofile/src/profile.rs": [
+    "miyuprofile_tool_profile_get",
+    "miyuprofile_tool_profile_update"
+  ],
+  "crates/miyuwebway_tracker/src/port.rs": [
+    "miyuwebway_tracker_mws_port_check"
+  ],
+  "crates/miyauth/src/resolve.rs": [
+    "miyauth_tool_identity_resolve"
+  ],
+  "crates/everbuddy/src/version.rs": [
+    "everbuddy_version",
+    "everbuddy_version_major",
+    "everbuddy_version_minor",
+    "everbuddy_version_patch",
+    "everbuddy_version_new",
+    "everbuddy_version_manager_trait",
+    "everbuddy_version_manager_get_current",
+    "everbuddy_version_test_creation"
+  ],
+  "crates/miyuprofile/src/rank.rs": [
+    "miyuprofile_tool_rank_list",
+    "miyuprofile_tool_rank_resolve"
+  ],
+  "crates/borderguard/src/trust_level.rs": [
+    "borderguard_trust_level",
+    "borderguard_trust_level_trusted",
+    "borderguard_trust_level_verified",
+    "borderguard_trust_level_unknown",
+    "borderguard_trust_level_hostile",
+    "borderguard_trust_level_classifier",
+    "borderguard_trust_level_classifier_classify",
+    "borderguard_trust_level_test_ordering"
+  ],
+  "crates/miyauth/src/attest.rs": [
+    "miyauth_tool_identity_attest"
+  ],
+  "crates/miyuforum/src/category.rs": [
+    "miyuforum_tool_forum_category_list",
+    "miyuforum_tool_forum_category_get",
+    "miyuforum_tool_forum_category_create",
+    "miyuforum_tool_forum_category_update"
+  ],
+  "crates/miyunotify/src/email.rs": [
+    "miyunotify_tool_email_send"
+  ],
+  "crates/miyucptaledger/src/company.rs": [
+    "miyucptaledger_tool_company_structure_resolve",
+    "miyucptaledger_tool_company_structure_register",
+    "miyucptaledger_tool_company_siret_resolve"
+  ],
+  "crates/miyujobs/src/queue.rs": [
+    "miyujobs_tool_queue_enqueue",
+    "miyujobs_tool_queue_process"
+  ],
+  "crates/miyuposinventory/src/purchase_order.rs": [
+    "miyuposinventory_tool_purchase_order_create",
+    "miyuposinventory_tool_purchase_order_update",
+    "miyuposinventory_tool_purchase_order_track"
+  ],
+  "crates/miyupossales/src/receipt.rs": [
+    "miyupossales_tool_receipt_render",
+    "miyupossales_tool_receipt_print",
+    "miyupossales_tool_receipt_send",
+    "miyupossales_tool_receipt_list"
+  ],
+  "crates/miyushipping/src/zones.rs": [
+    "miyushipping_tool_commerce_shipping_zones_resolve"
+  ],
+  "crates/miyuprofile/src/field.rs": [
+    "miyuprofile_tool_field_list",
+    "miyuprofile_tool_field_get",
+    "miyuprofile_tool_field_set"
+  ],
+  "crates/miyucalc/src/number.rs": [
+    "miyucalc_tool_number_format"
+  ],
+  "crates/miyupm/src/conversation.rs": [
+    "miyupm_tool_pm_conversation_list",
+    "miyupm_tool_pm_conversation_get"
+  ],
+  "crates/miyutreasury/src/alert.rs": [
+    "miyutreasury_tool_treasury_alert_check"
+  ],
+  "crates/miyutreasury/src/dashboard.rs": [
+    "miyutreasury_tool_treasury_dashboard_aggregate"
+  ],
+  "crates/miyutreasury/src/forecast.rs": [
+    "miyutreasury_tool_treasury_forecast_compute"
+  ],
+  "crates/miyuwebway_tracker/src/discovery.rs": [
+    "miyuwebway_tracker_mws_discovery_response_build",
+    "miyuwebway_tracker_mws_discovery_response_send"
+  ],
+  "crates/miyukini-admin/src/lib.rs": [
+    "miyukiniadmin_module_config",
+    "miyukiniadmin_module_monitoring_service",
+    "miyukiniadmin_module_database_service",
+    "miyukiniadmin_module_security_service",
+    "miyukiniadmin_module_admin_cell",
+    "miyukiniadmin_module_module_testing_service",
+    "miyukiniadmin_module_module_lifecycle_service",
+    "miyukiniadmin_module_testing_service",
+    "miyukiniadmin_module_db_unit_tests",
+    "miyukiniadmin_module_cycle_tests_runner",
+    "miyukiniadmin_module_testing_suites",
+    "miyukiniadmin_module_bonding_brother_bridge",
+    "miyukiniadmin_module_audit_logger",
+    "miyukiniadmin_module_api_handlers",
+    "miyukiniadmin_module_api_routes",
+    "miyukiniadmin_module_crud_state",
+    "miyukiniadmin_module_migration_service",
+    "miyukiniadmin_module_backup_service",
+    "miyukiniadmin_module_models",
+    "miyukiniadmin_module_services"
+  ],
+  "crates/miyuposinventory/src/transfer.rs": [
+    "miyuposinventory_tool_transfer_create",
+    "miyuposinventory_tool_transfer_execute",
+    "miyuposinventory_tool_transfer_list"
+  ],
+  "crates/miyumoderationforum/src/usernote.rs": [
+    "miyumoderationforum_tool_usernote_create",
+    "miyumoderationforum_tool_usernote_list"
+  ],
+  "crates/miyupossales/src/cash_movement.rs": [
+    "miyupossales_tool_cash_movement_record"
+  ],
+  "crates/miyuposanalytics/src/shift.rs": [
+    "miyuposanalytics_tool_shift_close"
+  ],
+  "crates/miyudeclarations/src/lib.rs": [
+    "miyudeclarations_toolkit_lib"
+  ],
+  "crates/miyuposanalytics/src/lib.rs": [
+    "miyuposanalytics_toolkit_lib"
+  ],
+  "crates/miyusocialmoderation/src/lib.rs": [
+    "miyusocialmoderation_toolkit_lib"
+  ],
+  "crates/caringnanny/src/health.rs": [
+    "caringnanny_health_status",
+    "caringnanny_health_status_healthy",
+    "caringnanny_health_status_degraded",
+    "caringnanny_health_status_unhealthy",
+    "caringnanny_health_checker_trait",
+    "caringnanny_health_checker_check",
+    "caringnanny_health_test_status_equality"
+  ],
+  "crates/miyustore/src/cart.rs": [
+    "miyustore_tool_commerce_cart_add",
+    "miyustore_tool_commerce_cart_update",
+    "miyustore_tool_commerce_cart_remove",
+    "miyustore_tool_commerce_cart_compute"
+  ],
+  "crates/miyuwebway_participant/src/discovery.rs": [
+    "miyuwebway_participant_mws_discovery_request_build",
+    "miyuwebway_participant_mws_discovery_request_send"
+  ],
+  "crates/miyubooking/src/slots.rs": [
+    "miyubooking_tool_booking_slots_list",
+    "miyubooking_tool_booking_slots_resolve"
+  ],
+  "crates/miyuprofile/src/signature.rs": [
+    "miyuprofile_tool_signature_get",
+    "miyuprofile_tool_signature_set"
+  ],
+  "crates/strongfather/src/intent.rs": [
+    "strongfather_intent_type",
+    "strongfather_intent_action_creation",
+    "strongfather_intent_action_modification",
+    "strongfather_intent_action_deletion",
+    "strongfather_intent_action_read",
+    "strongfather_intent_action_evaluation",
+    "strongfather_intent_call_context",
+    "strongfather_intent_context_caller_identity",
+    "strongfather_intent_context_origin",
+    "strongfather_intent_context_instance",
+    "strongfather_intent_constraint",
+    "strongfather_intent_constraint_id",
+    "strongfather_intent_constraint_description",
+    "strongfather_intent_data",
+    "strongfather_intent_data_content",
+    "strongfather_intent_state",
+    "strongfather_intent_state_submitted",
+    "strongfather_intent_state_in_evaluation",
+    "strongfather_intent_state_decided",
+    "strongfather_intent",
+    "strongfather_intent_id",
+    "strongfather_intent_action_type",
+    "strongfather_intent_subject",
+    "strongfather_intent_call_context",
+    "strongfather_intent_data",
+    "strongfather_intent_requested_priority",
+    "strongfather_intent_constraints",
+    "strongfather_intent_metadata",
+    "strongfather_intent_new",
+    "strongfather_intent_with_priority",
+    "strongfather_intent_with_constraints",
+    "strongfather_intent_with_metadata",
+    "strongfather_intent_test_create_basic",
+    "strongfather_intent_test_create_with_priority",
+    "strongfather_intent_test_create_with_constraints",
+    "strongfather_intent_test_all_action_types"
+  ],
+  "crates/miyudeclarations/src/estimate.rs": [
+    "miyudeclarations_tool_estimate_cotisations"
+  ],
+  "crates/miyuwebway_participant/src/transport.rs": [
+    "miyuwebway_participant_mws_transport_send"
+  ],
+  "crates/masterbutler/src/workflow.rs": [
+    "masterbutler_workflow_id",
+    "masterbutler_workflow",
+    "masterbutler_workflow_id_field",
+    "masterbutler_workflow_name",
+    "masterbutler_workflow_new",
+    "masterbutler_workflow_test_creation"
+  ],
+  "crates/miyukini-admin/src/services/environment_state.rs": [
+    "miyukiniadmin_environment_state_service",
+    "miyukiniadmin_env_state_service_data_dir",
+    "miyukiniadmin_env_state_service_new",
+    "miyukiniadmin_env_state_verify_eip",
+    "miyukiniadmin_env_state_verify_registry",
+    "miyukiniadmin_env_state_verify_schema",
+    "miyukiniadmin_env_state_verify_consistency",
+    "miyukiniadmin_env_state_detect",
+    "miyukiniadmin_env_state_write_eip_stub",
+    "miyukiniadmin_env_state_write_bootstrap_schema_initial"
+  ],
+  "crates/miyulocale/src/date.rs": [
+    "miyulocale_tool_date_format"
+  ],
+  "crates/miyupm/src/folder.rs": [
+    "miyupm_tool_pm_folder_list",
+    "miyupm_tool_pm_folder_create",
+    "miyupm_tool_pm_folder_update"
+  ],
+  "crates/miyuexport/src/lib.rs": [
+    "miyuexport_toolkit_lib"
+  ],
+  "crates/miyuposinventory/src/history.rs": [
+    "miyuposinventory_tool_history_list"
+  ],
+  "crates/miyukini-admin/src/services/auto_recovery.rs": [
+    "miyukiniadmin_auto_recovery_service",
+    "miyukiniadmin_auto_recovery_new",
+    "miyukiniadmin_auto_recovery_run",
+    "miyukiniadmin_auto_recovery_result"
+  ],
+  "crates/miyuvalidate/src/schema.rs": [
+    "miyuvalidate_tool_schema_check"
+  ],
+  "crates/logisticssteward/src/optimization.rs": [
+    "logisticssteward_optimization",
+    "logisticssteward_optimization_recommendations",
+    "logisticssteward_optimizer_trait",
+    "logisticssteward_optimizer_optimize",
+    "logisticssteward_optimization_test_creation"
+  ],
+  "crates/miyusocialfeed/src/feed.rs": [
+    "miyusocialfeed_tool_feed_list"
+  ],
+  "crates/miyudeclarations/src/urssaf.rs": [
+    "miyudeclarations_tool_urssaf_prepare",
+    "miyudeclarations_tool_urssaf_submit"
+  ],
+  "crates/miyupospayment/src/check.rs": [
+    "miyupospayment_tool_check_record"
+  ],
+  "crates/miyuexpense/src/mileage.rs": [
+    "miyuexpense_tool_expense_mileage_calculate",
+    "miyuexpense_tool_expense_mileage_export"
+  ],
+  "crates/miyukini-admin/src/backup_service.rs": [
+    "miyukiniadmin_backup_service_backup_record",
+    "miyukiniadmin_backup_record_id",
+    "miyukiniadmin_backup_record_timestamp",
+    "miyukiniadmin_backup_record_type",
+    "miyukiniadmin_backup_record_size_bytes",
+    "miyukiniadmin_backup_record_status",
+    "miyukiniadmin_backup_service_trait",
+    "miyukiniadmin_backup_service_list",
+    "miyukiniadmin_backup_service_create",
+    "miyukiniadmin_backup_service_restore",
+    "miyukiniadmin_backup_service_create_result",
+    "miyukiniadmin_create_result_success",
+    "miyukiniadmin_create_result_backup_id",
+    "miyukiniadmin_create_result_message",
+    "miyukiniadmin_backup_service_restore_result",
+    "miyukiniadmin_restore_result_success",
+    "miyukiniadmin_restore_result_message",
+    "miyukiniadmin_backup_service_impl",
+    "miyukiniadmin_backup_impl_backups",
+    "miyukiniadmin_backup_impl_new",
+    "miyukiniadmin_backup_impl_with_seed",
+    "miyukiniadmin_backup_test_list",
+    "miyukiniadmin_backup_test_restore"
+  ],
+  "crates/miyusql/src/memory.rs": [
+    "miyusql_memory_executor"
+  ],
+  "crates/miyukini-admin/src/cycle_tests_runner.rs": [
+    "miyukiniadmin_cycle_runner",
+    "miyukiniadmin_miyukinisqltest_runner"
+  ],
+  "crates/miyuweb/src/theme.rs": [
+    "miyuweb_tool_web_theme_resolve"
+  ],
+  "crates/miyucms/src/revision.rs": [
+    "miyucms_tool_content_revision_list",
+    "miyucms_tool_content_revision_restore",
+    "miyucms_tool_content_revision_compare"
+  ],
+  "crates/masterbutler/src/orchestrator.rs": [
+    "masterbutler_orchestrator_trait",
+    "masterbutler_orchestrator_execute",
+    "masterbutler_orchestrator_test_workflow_execution"
+  ],
+  "crates/miyukini-admin/src/db_unit_tests.rs": [
+    "miyukiniadmin_db_unit_tests_module",
+    "COH_001",
+    "COH_002",
+    "COH_003",
+    "COH_004",
+    "COH_005",
+    "COH_006",
+    "CONF_001",
+    "miyukiniadmin_db_unit_tests_run_single",
+    "miyukiniadmin_db_unit_tests_run_suite"
+  ],
+  "crates/miyupossales/src/lib.rs": [
+    "miyupossales_toolkit_lib"
+  ],
+  "crates/miyuforum/src/post.rs": [
+    "miyuforum_tool_forum_post_create",
+    "miyuforum_tool_forum_post_list",
+    "miyuforum_tool_forum_post_get",
+    "miyuforum_tool_forum_post_update"
+  ],
+  "crates/miyukini-kernel/src/lib.rs": [
+    "kernel_module_config",
+    "kernel_module_id",
+    "kernel_module_time",
+    "kernel_module_log",
+    "kernel_module_lifecycle",
+    "kernel_reexport_config",
+    "kernel_reexport_id",
+    "kernel_reexport_time",
+    "kernel_reexport_log",
+    "kernel_reexport_lifecycle"
+  ],
+  "crates/miyucptaledger/src/bank.rs": [
+    "miyucptaledger_tool_compta_bank_sync"
+  ],
+  "crates/miyusql/src/transaction.rs": [
+    "miyusql_tool_tx_begin",
+    "miyusql_tool_tx_commit",
+    "miyusql_tool_tx_rollback",
+    "miyusql_transaction_executor_trait",
+    "miyusql_tx_begin_impl",
+    "miyusql_tx_commit_impl",
+    "miyusql_tx_rollback_impl"
+  ],
+  "crates/miyuposkitchen/src/service_type.rs": [
+    "miyuposkitchen_tool_service_type_set"
+  ],
+  "crates/miyusocialmessaging/src/conversation.rs": [
+    "miyusocialmessaging_tool_conversation_list",
+    "miyusocialmessaging_tool_conversation_get"
+  ],
+  "crates/miyuweb/src/asset.rs": [
+    "miyuweb_tool_web_asset_serve"
+  ],
+  "crates/miyupossales/src/display.rs": [
+    "miyupossales_tool_display_push"
+  ],
+  "crates/miyuwebway_participant/src/cog_list.rs": [
+    "miyuwebway_participant_mws_cog_list_get",
+    "miyuwebway_participant_mws_cog_list_update",
+    "miyuwebway_participant_mws_cog_list_merge"
+  ],
+  "crates/miyuforum/src/readtrack.rs": [
+    "miyuforum_tool_forum_readtrack_mark",
+    "miyuforum_tool_forum_readtrack_list"
+  ],
+  "crates/miyumoderationforum/src/ban.rs": [
+    "miyumoderationforum_tool_ban_create",
+    "miyumoderationforum_tool_ban_list"
+  ],
+  "crates/miyusql/src/schema.rs": [
+    "miyusql_schema_table_meta",
+    "miyusql_schema_table_name",
+    "miyusql_schema_columns",
+    "miyusql_schema_column_meta",
+    "miyusql_schema_column_name",
+    "miyusql_schema_column_type",
+    "miyusql_schema_result",
+    "miyusql_schema_tables",
+    "miyusql_tool_schema_read",
+    "miyusql_tool_schema_read_table",
+    "miyusql_schema_executor_trait",
+    "miyusql_schema_read_tables_impl",
+    "miyusql_schema_read_table_impl"
+  ],
+  "crates/miyuhr/src/lib.rs": [
+    "miyuhr_toolkit_lib"
+  ],
+  "crates/miyuinvoice/src/quote.rs": [
+    "miyuinvoice_tool_invoice_quote_create",
+    "miyuinvoice_tool_invoice_quote_update",
+    "miyuinvoice_tool_invoice_quote_to_invoice"
+  ],
+  "crates/miyukini-admin/src/migration_service.rs": [
+    "miyukiniadmin_migration_service_migration_record",
+    "miyukiniadmin_migration_record_id",
+    "miyukiniadmin_migration_record_applied_at",
+    "miyukiniadmin_migration_record_checksum",
+    "miyukiniadmin_migration_record_duration_ms",
+    "miyukiniadmin_migration_record_result",
+    "miyukiniadmin_migration_record_operator_id",
+    "miyukiniadmin_migration_service_pending_migration",
+    "miyukiniadmin_pending_migration_id",
+    "miyukiniadmin_pending_migration_description",
+    "miyukiniadmin_migration_service_trait",
+    "miyukiniadmin_migration_service_list_applied",
+    "miyukiniadmin_migration_service_list_pending",
+    "miyukiniadmin_migration_service_history",
+    "miyukiniadmin_migration_service_apply",
+    "miyukiniadmin_migration_service_apply_result",
+    "miyukiniadmin_apply_result_status",
+    "miyukiniadmin_apply_result_applied_count",
+    "miyukiniadmin_apply_result_message",
+    "miyukiniadmin_migration_service_impl",
+    "miyukiniadmin_migration_impl_applied",
+    "miyukiniadmin_migration_impl_pending",
+    "miyukiniadmin_migration_impl_new",
+    "miyukiniadmin_migration_impl_with_seed",
+    "miyukiniadmin_migration_test_list",
+    "miyukiniadmin_migration_test_apply_result"
+  ],
+  "crates/kindmother/src/api.rs": [
+    "kindmother_api_write_intent",
+    "kindmother_api_write_intent_id",
+    "kindmother_api_write_intent_entity_id",
+    "kindmother_api_write_intent_operation",
+    "kindmother_api_write_intent_data",
+    "kindmother_api_write_operation",
+    "kindmother_api_write_operation_create",
+    "kindmother_api_write_operation_update",
+    "kindmother_api_write_operation_delete",
+    "kindmother_api_coredata",
+    "kindmother_api_read",
+    "kindmother_api_submit_write_intent",
+    "kindmother_api_error",
+    "kindmother_api_error_not_found",
+    "kindmother_api_error_permission_denied",
+    "kindmother_api_error_invalid_intent",
+    "kindmother_api_test_write_intent_creation"
+  ],
+  "crates/miyusearch/src/index.rs": [
+    "miyusearch_tool_search_index_update"
+  ],
+  "crates/miyustore/src/payment.rs": [
+    "miyustore_tool_commerce_payment_capture",
+    "miyustore_tool_commerce_payment_refund",
+    "miyustore_tool_commerce_payment_status"
+  ],
+  "crates/miyucomptareports/src/export.rs": [
+    "miyucomptareports_tool_ledger_export"
+  ],
+  "crates/logisticssteward/src/resource.rs": [
+    "logisticssteward_resource_type",
+    "logisticssteward_resource_type_memory",
+    "logisticssteward_resource_type_cpu",
+    "logisticssteward_resource_type_disk",
+    "logisticssteward_resource",
+    "logisticssteward_resource_type_field",
+    "logisticssteward_resource_capacity",
+    "logisticssteward_resource_manager_trait",
+    "logisticssteward_resource_manager_get",
+    "logisticssteward_resource_test_creation"
+  ],
+  "crates/miyumoderationforum/src/warning.rs": [
+    "miyumoderationforum_tool_warning_create",
+    "miyumoderationforum_tool_warning_list"
+  ],
+  "crates/miyuvalidate/src/sanitize.rs": [
+    "miyuvalidate_tool_sanitize"
+  ],
+  "crates/strongfather/src/validator.rs": [
+    "strongfather_validator_error",
+    "strongfather_validator_error_missing_components",
+    "strongfather_validator_error_violated_rules",
+    "strongfather_validator_error_message",
+    "strongfather_validator_error_new",
+    "strongfather_validator_error_display",
+    "strongfather_intent_validator",
+    "strongfather_intent_validator_new",
+    "strongfather_intent_validator_validate",
+    "strongfather_intent_validator_validate_structure_only",
+    "strongfather_intent_validator_default",
+    "strongfather_validator_test_valid_intent",
+    "strongfather_validator_test_missing_intent_id",
+    "strongfather_validator_test_missing_subject",
+    "strongfather_validator_test_incomplete_context"
+  ],
+  "crates/miyauth/src/role.rs": [
+    "miyauth_tool_identity_role"
+  ],
+  "crates/miyuantispam/src/captcha.rs": [
+    "miyuantispam_tool_captcha_generate",
+    "miyuantispam_tool_captcha_verify"
+  ],
+  "crates/miyujobs/src/schedule.rs": [
+    "miyujobs_tool_schedule_at",
+    "miyujobs_tool_schedule_cron"
+  ],
+  "crates/miyuclock/src/time.rs": [
+    "miyuclock_tool_time_now",
+    "miyuclock_tool_time_now_injected",
+    "miyuclock_tool_time_delta"
+  ],
+  "crates/miyukini-admin/src/services/auth.rs": [
+    "miyukiniadmin_auth_service",
+    "miyukiniadmin_auth_service_new",
+    "miyukiniadmin_auth_hash_password",
+    "miyukiniadmin_auth_verify_password",
+    "miyukiniadmin_auth_load_registry",
+    "miyukiniadmin_auth_save_registry",
+    "miyukiniadmin_auth_login",
+    "miyukiniadmin_auth_validate_session",
+    "miyukiniadmin_auth_logout",
+    "miyukiniadmin_auth_create_account",
+    "miyukiniadmin_auth_login_error",
+    "miyukiniadmin_auth_create_account_error"
+  ],
+  "crates/miyuinvoice/src/payment_link.rs": [
+    "miyuinvoice_tool_invoice_payment_link_generate"
+  ],
+  "crates/miyuposinventory/src/label.rs": [
+    "miyuposinventory_tool_label_print"
+  ],
+  "crates/miyubooking/src/booking.rs": [
+    "miyubooking_tool_booking_create",
+    "miyubooking_tool_booking_update",
+    "miyubooking_tool_booking_cancel"
+  ],
+  "crates/miyukini-admin/src/testing_suites.rs": [
+    "miyukiniadmin_testing_suites",
+    "miyukiniadmin_testing_suites_run_and_report"
+  ],
+  "crates/miyuvalidate/src/lib.rs": [
+    "miyuvalidate_toolkit_lib"
+  ],
+  "crates/miyuexport/src/csv.rs": [
+    "miyuexport_tool_csv_generate"
+  ],
+  "crates/miyuinvoice/src/invoice.rs": [
+    "miyuinvoice_tool_invoice_create",
+    "miyuinvoice_tool_invoice_send"
+  ],
+  "crates/miyupolls/src/lib.rs": [
+    "miyupolls_toolkit_lib"
+  ],
+  "crates/miyupossales/src/ticket.rs": [
+    "miyupossales_tool_ticket_open",
+    "miyupossales_tool_ticket_save",
+    "miyupossales_tool_ticket_close",
+    "miyupossales_tool_ticket_list"
+  ],
+  "crates/miyusocialprofile/src/profile.rs": [
+    "miyusocialprofile_tool_profile_get",
+    "miyusocialprofile_tool_profile_update"
+  ],
+  "crates/miyucomptareports/src/report.rs": [
+    "miyucomptareports_tool_livre_recettes_generate",
+    "miyucomptareports_tool_balance_generate",
+    "miyucomptareports_tool_liasse_generate",
+    "miyucomptareports_tool_cashflow_generate"
+  ],
+  "crates/miyukini-admin/src/services/permission.rs": [
+    "miyukiniadmin_permission_service",
+    "miyukiniadmin_capabilities_admin",
+    "miyukiniadmin_capabilities_recovery_extra",
+    "miyukiniadmin_capabilities_audit",
+    "miyukiniadmin_permission_service_new",
+    "miyukiniadmin_permission_has_capability",
+    "miyukiniadmin_permission_capabilities_for_role"
+  ],
+  "crates/logisticssteward/src/allocation.rs": [
+    "logisticssteward_allocation",
+    "logisticssteward_allocation_resource_type",
+    "logisticssteward_allocation_component_id",
+    "logisticssteward_allocation_amount",
+    "logisticssteward_allocation_manager_trait",
+    "logisticssteward_allocation_manager_allocate",
+    "logisticssteward_allocation_error",
+    "logisticssteward_allocation_error_insufficient",
+    "logisticssteward_allocation_test_creation"
+  ],
+  "crates/strongfather/src/lib.rs": [
+    "strongfather_module_intent",
+    "strongfather_module_policy",
+    "strongfather_module_decision",
+    "strongfather_module_policy_engine",
+    "strongfather_module_priority",
+    "strongfather_module_validator",
+    "strongfather_reexport_intent",
+    "strongfather_reexport_policy",
+    "strongfather_reexport_decision",
+    "strongfather_reexport_policy_engine",
+    "strongfather_reexport_priority",
+    "strongfather_reexport_validator"
+  ],
+  "crates/miyucalc/src/context.rs": [
+    "miyucalc_governed_context",
+    "miyucalc_governed_context_struct"
+  ],
+  "crates/miyuposinventory/src/valuation.rs": [
+    "miyuposinventory_tool_valuation_report"
+  ],
+  "crates/miyuantispam/src/lib.rs": [
+    "miyuantispam_toolkit_lib"
+  ],
+  "crates/miyupossales/src/barcode.rs": [
+    "miyupossales_tool_barcode_parse"
+  ],
+  "crates/miyuprofile/src/avatar.rs": [
+    "miyuprofile_tool_avatar_get",
+    "miyuprofile_tool_avatar_set",
+    "miyuprofile_tool_avatar_resolve"
+  ],
+  "crates/miyusocialmessaging/src/dm.rs": [
+    "miyusocialmessaging_tool_dm_send",
+    "miyusocialmessaging_tool_dm_list",
+    "miyusocialmessaging_tool_dm_get",
+    "miyusocialmessaging_tool_dm_reaction_add",
+    "miyusocialmessaging_tool_dm_reaction_remove",
+    "miyusocialmessaging_tool_dm_readmark_set"
+  ],
+  "crates/miyusql/src/lib.rs": [
+    "miyusql_toolkit_lib"
+  ],
+  "crates/miyuweb/src/event.rs": [
+    "miyuweb_tool_web_event_dispatch"
+  ],
+  "crates/miyuposanalytics/src/tax.rs": [
+    "miyuposanalytics_tool_tax_report"
+  ],
+  "crates/miyupospayment/src/cash.rs": [
+    "miyupospayment_tool_cash_record"
+  ],
+  "crates/kindmother/src/threat.rs": [
+    "kindmother_threat_level",
+    "kindmother_threat_level_none",
+    "kindmother_threat_level_low",
+    "kindmother_threat_level_medium",
+    "kindmother_threat_level_high",
+    "kindmother_threat_level_critical",
+    "kindmother_threat_detector_trait",
+    "kindmother_threat_detector_check_corruption",
+    "kindmother_threat_detector_check_anomalies",
+    "kindmother_threat_detector_default",
+    "kindmother_threat_test_detector_default"
+  ],
+  "crates/miyukini-admin/src/security_service.rs": [
+    "miyukiniadmin_security_service_trait",
+    "miyukiniadmin_security_service_get_security_level",
+    "miyukiniadmin_security_test_service_structure"
+  ],
+  "crates/miyuwidgets/src/widget.rs": [
+    "miyuwidgets_tool_web_widget_text_render",
+    "miyuwidgets_tool_web_widget_image_render",
+    "miyuwidgets_tool_web_widget_button_render",
+    "miyuwidgets_tool_web_widget_grid_render",
+    "miyuwidgets_tool_web_widget_container_render"
+  ],
+  "crates/miyupossales/src/order.rs": [
+    "miyupossales_tool_order_service_type_set"
+  ],
+  "crates/miyulocale/src/number.rs": [
+    "miyulocale_tool_number_format"
+  ],
+  "crates/miyukini-admin/src/audit_logger.rs": [
+    "miyukiniadmin_audit_logger_trait",
+    "miyukiniadmin_audit_logger_log_action",
+    "miyukiniadmin_audit_logger_default",
+    "miyukiniadmin_audit_logger_default_logger",
+    "miyukiniadmin_audit_logger_default_new",
+    "miyukiniadmin_audit_logger_test_default"
+  ],
+  "crates/miyuantispam/src/flood.rs": [
+    "miyuantispam_tool_flood_check"
+  ],
+  "crates/miyukini-kernel/src/lifecycle.rs": [
+    "kernel_lifecycle_trait",
+    "kernel_lifecycle_register_shutdown_hook",
+    "kernel_lifecycle_shutdown",
+    "kernel_lifecycle_default",
+    "kernel_lifecycle_default_struct",
+    "kernel_lifecycle_hooks",
+    "kernel_lifecycle_new",
+    "test_lifecycle_register_hook",
+    "test_lifecycle_shutdown_executes_hooks",
+    "test_lifecycle_shutdown_lifo_order",
+    "test_lifecycle_multiple_hooks",
+    "test_lifecycle_shutdown_idempotent",
+    "test_lifecycle_no_init_hooks",
+    "test_lifecycle_no_business_logic",
+    "test_lifecycle_deterministic"
+  ],
+  "crates/miyuposloyalty/src/loyalty.rs": [
+    "miyuposloyalty_tool_points_grant",
+    "miyuposloyalty_tool_points_redeem",
+    "miyuposloyalty_tool_balance_get",
+    "miyuposloyalty_tool_card_resolve"
+  ],
+  "crates/miyusocialprofile/src/lib.rs": [
+    "miyusocialprofile_toolkit_lib"
+  ],
+  "crates/miyutext/src/sanitize.rs": [
+    "miyutext_tool_sanitize"
+  ],
+  "crates/strongfather/src/policy_engine.rs": [
+    "strongfather_policy_engine_error",
+    "strongfather_policy_engine_error_consistency",
+    "strongfather_policy_engine_error_invariant",
+    "strongfather_policy_engine_error_reason",
+    "strongfather_policy_engine_error_display",
+    "strongfather_policy_engine",
+    "strongfather_policy_engine_policies",
+    "strongfather_policy_engine_new",
+    "strongfather_policy_engine_apply",
+    "strongfather_policy_engine_select_applicable",
+    "strongfather_policy_engine_evaluate_policy",
+    "strongfather_policy_engine_test_create",
+    "strongfather_policy_engine_test_apply_permission",
+    "strongfather_policy_engine_test_priority_order"
+  ],
+  "crates/miyuposinventory/src/alert.rs": [
+    "miyuposinventory_tool_alert_low_evaluate"
+  ],
+  "crates/miyusocialfeed/src/post.rs": [
+    "miyusocialfeed_tool_post_create",
+    "miyusocialfeed_tool_post_update",
+    "miyusocialfeed_tool_post_delete",
+    "miyusocialfeed_tool_post_get"
+  ],
+  "crates/miyuposanalytics/src/export.rs": [
+    "miyuposanalytics_tool_export_spreadsheet"
+  ],
+  "crates/miyusql/src/admin_cell.rs": [
+    "miyusql_admin_cell",
+    "miyusql_admin_identification",
+    "miyusql_admin_test_criteria",
+    "miyusql_admin_embedded_test_def",
+    "miyusql_admin_test_manifest",
+    "miyusql_admin_integrity",
+    "miyusql_admin_cell_struct",
+    "miyusql_admin_cell_build"
+  ],
+  "crates/miyuposinventory/src/production.rs": [
+    "miyuposinventory_tool_production_record"
+  ],
+  "crates/miyupossales/src/item.rs": [
+    "miyupossales_tool_variant_resolve",
+    "miyupossales_tool_modifier_apply"
+  ],
+  "crates/miyukini-admin/src/database_service.rs": [
+    "miyukiniadmin_database_service_trait",
+    "miyukiniadmin_database_service_get_instance_info",
+    "miyukiniadmin_database_instance_info",
+    "miyukiniadmin_database_instance_info_identity",
+    "miyukiniadmin_database_test_instance_info"
+  ],
+  "crates/miyudiscovery/src/lib.rs": [
+    "miyudiscovery_toolkit_lib"
+  ],
+  "crates/miyuposanalytics/src/cash.rs": [
+    "miyuposanalytics_tool_cash_discrepancy"
+  ],
+  "crates/miyutext/src/template.rs": [
+    "miyutext_tool_template_apply"
+  ],
+  "crates/miyuweb/src/form.rs": [
+    "miyuweb_tool_web_form_validate"
+  ],
+  "crates/kindmother/src/miyusql_bridge.rs": [
+    "kindmother_miyusql_bridge",
+    "kindmother_miyusql_bridge_trait",
+    "kindmother_miyusql_bridge_impl"
+  ],
+  "crates/miyuweb/src/input.rs": [
+    "miyuweb_tool_web_input_capture"
+  ],
+  "crates/miyukini-kernel/src/log.rs": [
+    "kernel_log_level",
+    "kernel_logger_trait",
+    "kernel_logger_log",
+    "kernel_logger_default",
+    "kernel_logger_default_struct",
+    "test_log_all_levels",
+    "test_log_message_preserved",
+    "test_log_level_enum",
+    "test_log_default_logger",
+    "test_log_no_format_imposed",
+    "test_log_no_business_logic",
+    "test_log_no_external_dependency",
+    "test_log_deterministic"
+  ],
+  "crates/miyutext/src/markdown.rs": [
+    "miyutext_tool_markdown_render"
   ],
   "crates/everbuddy/src/compatibility.rs": [
     "everbuddy_compatibility_level",
@@ -751,30 +1129,381 @@
     "everbuddy_compatibility_checker_check",
     "everbuddy_compatibility_test_levels"
   ],
+  "crates/miyustore/src/order.rs": [
+    "miyustore_tool_commerce_order_create",
+    "miyustore_tool_commerce_order_update",
+    "miyustore_tool_commerce_order_status",
+    "miyustore_tool_commerce_order_list"
+  ],
+  "crates/miyupolls/src/poll.rs": [
+    "miyupolls_tool_poll_create",
+    "miyupolls_tool_poll_vote",
+    "miyupolls_tool_poll_list",
+    "miyupolls_tool_poll_result"
+  ],
+  "crates/miyuwebway_tracker/src/cog_list.rs": [
+    "miyuwebway_tracker_mws_cog_list_get",
+    "miyuwebway_tracker_mws_cog_list_update",
+    "miyuwebway_tracker_mws_cog_list_merge",
+    "miyuwebway_tracker_mws_cog_list_filter"
+  ],
+  "crates/miyucms/src/content.rs": [
+    "miyucms_tool_content_create",
+    "miyucms_tool_content_update",
+    "miyucms_tool_content_publish",
+    "miyucms_tool_content_schedule"
+  ],
+  "crates/miyukini-admin/src/services/destruction_reinit.rs": [
+    "miyukiniadmin_destruction_reinit_service",
+    "miyukiniadmin_destruction_reinit_new",
+    "miyukiniadmin_destruction_write_corruption_memory",
+    "miyukiniadmin_destruction_reinit_run"
+  ],
+  "crates/miyuexpense/src/claim.rs": [
+    "miyuexpense_tool_expense_claim_create",
+    "miyuexpense_tool_expense_claim_update",
+    "miyuexpense_tool_expense_claim_list",
+    "miyuexpense_tool_expense_claim_validate",
+    "miyuexpense_tool_expense_claim_export"
+  ],
+  "crates/miyubilling/src/payment.rs": [
+    "miyubilling_tool_billing_payment_record"
+  ],
+  "crates/miyumoderationforum/src/report.rs": [
+    "miyumoderationforum_tool_report_create",
+    "miyumoderationforum_tool_report_list"
+  ],
+  "crates/miyupm/src/export.rs": [
+    "miyupm_tool_pm_export"
+  ],
+  "crates/miyucms/src/comment.rs": [
+    "miyucms_tool_content_comment_create",
+    "miyucms_tool_content_comment_moderate",
+    "miyucms_tool_content_comment_list"
+  ],
+  "crates/miyuinvoice/src/reminder.rs": [
+    "miyuinvoice_tool_invoice_reminder_send"
+  ],
+  "crates/miyukini-admin/src/services/mod.rs": [
+    "miyukiniadmin_services_mod"
+  ],
+  "crates/miyudeclarations/src/declaration.rs": [
+    "miyudeclarations_tool_declaration_list"
+  ],
+  "crates/miyusql/src/errors.rs": [
+    "miyusql_errors",
+    "miyusql_error_enum",
+    "miyusql_error_no_mandate",
+    "miyusql_error_timeout",
+    "miyusql_error_connection",
+    "miyusql_error_syntax",
+    "miyusql_error_execution"
+  ],
+  "crates/masterbutler/src/step.rs": [
+    "masterbutler_step",
+    "masterbutler_step_id",
+    "masterbutler_step_name",
+    "masterbutler_step_result",
+    "masterbutler_step_result_success",
+    "masterbutler_step_result_failure",
+    "masterbutler_step_test_creation"
+  ],
+  "crates/miyucalc/src/admin_cell.rs": [
+    "miyucalc_admin_cell",
+    "miyucalc_admin_identification",
+    "miyucalc_admin_test_criteria",
+    "miyucalc_admin_embedded_test_def",
+    "miyucalc_admin_test_manifest",
+    "miyucalc_admin_integrity",
+    "miyucalc_admin_cell_struct",
+    "miyucalc_admin_cell_build"
+  ],
+  "crates/miyusql/src/query.rs": [
+    "miyusql_query_result",
+    "miyusql_query_result_rows",
+    "miyusql_query_result_count",
+    "miyusql_tool_query_execute",
+    "miyusql_tool_query_prepare",
+    "miyusql_query_executor_trait",
+    "miyusql_executor_execute",
+    "miyusql_executor_prepare"
+  ],
+  "crates/miyujobs/src/lib.rs": [
+    "miyujobs_toolkit_lib"
+  ],
+  "crates/miyustory/src/story.rs": [
+    "miyustory_tool_story_create",
+    "miyustory_tool_story_list",
+    "miyustory_tool_story_get",
+    "miyustory_tool_story_reaction_add"
+  ],
+  "crates/worrysentinel/src/degradation.rs": [
+    "worrysentinel_degradation_state",
+    "worrysentinel_degradation_state_normal",
+    "worrysentinel_degradation_state_unstable",
+    "worrysentinel_degradation_state_degraded",
+    "worrysentinel_degradation_state_restricted",
+    "worrysentinel_degradation_state_blocked",
+    "worrysentinel_degradation",
+    "worrysentinel_degradation_state_field",
+    "worrysentinel_degradation_manager_trait",
+    "worrysentinel_degradation_manager_get_current",
+    "worrysentinel_degradation_test_state_ordering"
+  ],
+  "crates/miyubilling/src/invoice.rs": [
+    "miyubilling_tool_billing_invoice_generate",
+    "miyubilling_tool_billing_invoice_list"
+  ],
+  "crates/miyumoderationforum/src/topic.rs": [
+    "miyumoderationforum_tool_topic_lock",
+    "miyumoderationforum_tool_topic_move",
+    "miyumoderationforum_tool_topic_merge",
+    "miyumoderationforum_tool_topic_split",
+    "miyumoderationforum_tool_topic_delete",
+    "miyumoderationforum_tool_topic_copy"
+  ],
+  "crates/miyupossales/src/refund.rs": [
+    "miyupossales_tool_refund_record"
+  ],
+  "crates/miyukini-admin/src/api_handlers.rs": [
+    "miyukiniadmin_api_handler_trait",
+    "miyukiniadmin_api_handler_handle_request",
+    "miyukiniadmin_api_response",
+    "miyukiniadmin_api_response_status",
+    "miyukiniadmin_api_response_body",
+    "miyukiniadmin_api_handler_test_response_creation"
+  ],
+  "crates/miyushipping/src/tracking.rs": [
+    "miyushipping_tool_commerce_shipping_tracking_get"
+  ],
+  "crates/kindmother/src/observability.rs": [
+    "kindmother_observability_health_status",
+    "kindmother_observability_health_healthy",
+    "kindmother_observability_health_degraded",
+    "kindmother_observability_health_unhealthy",
+    "kindmother_observability_metrics",
+    "kindmother_observability_metrics_read_count",
+    "kindmother_observability_metrics_write_count",
+    "kindmother_observability_metrics_sync_count",
+    "kindmother_observability_trait",
+    "kindmother_observability_get_health",
+    "kindmother_observability_get_metrics",
+    "kindmother_observability_default",
+    "kindmother_observability_test_default_health",
+    "kindmother_observability_test_default_metrics"
+  ],
+  "crates/miyutext/src/replace.rs": [
+    "miyutext_tool_replace"
+  ],
+  "crates/miyusocialfeed/src/lib.rs": [
+    "miyusocialfeed_toolkit_lib"
+  ],
+  "crates/miyukini-admin/src/models/environment_state.rs": [
+    "miyukiniadmin_environment_state_enum",
+    "miyukiniadmin_env_state_vierge",
+    "miyukiniadmin_env_state_initialise",
+    "miyukiniadmin_env_state_compromis"
+  ],
+  "crates/miyuposinventory/src/stock.rs": [
+    "miyuposinventory_tool_stock_get",
+    "miyuposinventory_tool_stock_adjust"
+  ],
+  "crates/miyumoderationforum/src/lib.rs": [
+    "miyumoderationforum_toolkit_lib"
+  ],
   "crates/miyuposkitchen/src/lib.rs": [
     "miyuposkitchen_toolkit_lib"
   ],
-  "crates/kindmother/src/state.rs": [
-    "kindmother_instance_type",
-    "kindmother_instance_type_mother",
-    "kindmother_instance_type_daughter",
-    "kindmother_instance_identity",
-    "kindmother_instance_identity_id",
-    "kindmother_instance_identity_type",
-    "kindmother_instance_identity_new",
-    "kindmother_instance_identity_is_mother",
-    "kindmother_instance_identity_is_daughter",
-    "kindmother_instance_state",
-    "kindmother_instance_state_identity",
-    "kindmother_instance_state_created_at",
-    "kindmother_instance_state_new",
-    "kindmother_instance_state_test_mother_creation",
-    "kindmother_instance_state_test_daughter_creation",
-    "kindmother_instance_state_test_unique_ids"
+  "crates/miyuposinventory/src/lib.rs": [
+    "miyuposinventory_toolkit_lib"
   ],
-  "crates/miyuinvoice/src/invoice.rs": [
-    "miyuinvoice_tool_invoice_create",
-    "miyuinvoice_tool_invoice_send"
+  "crates/miyusql/src/context.rs": [
+    "miyusql_governed_context",
+    "miyusql_governed_context_struct",
+    "miyusql_context_mandate_id",
+    "miyusql_context_security_level",
+    "miyusql_context_new",
+    "miyusql_context_has_mandate"
+  ],
+  "crates/miyunotify/src/push.rs": [
+    "miyunotify_tool_push_send"
+  ],
+  "crates/miyucalc/src/expression.rs": [
+    "miyucalc_tool_expression_evaluate"
+  ],
+  "crates/miyukini-admin/src/services/pre_destruction_backup.rs": [
+    "miyukiniadmin_pre_destruction_backup_service",
+    "miyukiniadmin_pre_destruction_backup_new",
+    "miyukiniadmin_pre_destruction_has_prior",
+    "miyukiniadmin_pre_destruction_run_if_needed",
+    "miyukiniadmin_pre_destruction_result"
+  ],
+  "crates/miyukini-admin/src/testing_service.rs": [
+    "miyukiniadmin_testing_service_trait",
+    "miyukiniadmin_testing_service_run_tests",
+    "miyukiniadmin_testing_test_results",
+    "miyukiniadmin_testing_test_results_passed",
+    "miyukiniadmin_testing_test_results_failed",
+    "miyukiniadmin_testing_test_results_creation"
+  ],
+  "crates/miyumedia/src/media.rs": [
+    "miyumedia_tool_media_upload",
+    "miyumedia_tool_media_serve",
+    "miyumedia_tool_media_transform"
+  ],
+  "crates/miyukini-kernel/src/time.rs": [
+    "kernel_clock_trait",
+    "kernel_clock_now",
+    "kernel_clock_default",
+    "kernel_clock_default_struct",
+    "test_time_now_returns_systemtime",
+    "test_time_now_monotonic",
+    "test_time_fake_clock_injection",
+    "test_time_no_timezone_logic",
+    "test_time_no_business_logic",
+    "test_time_no_external_dependency",
+    "test_time_deterministic_fake",
+    "kernel_clock_fake"
+  ],
+  "crates/miyucontacts/src/foe.rs": [
+    "miyucontacts_tool_foe_add",
+    "miyucontacts_tool_foe_remove",
+    "miyucontacts_tool_foe_list"
+  ],
+  "crates/bondingbrother/src/connection.rs": [
+    "bondingbrother_connection",
+    "bondingbrother_connection_id",
+    "bondingbrother_connection_operator_id",
+    "bondingbrother_connection_manager_trait",
+    "bondingbrother_connection_manager_connect",
+    "bondingbrother_connection_error",
+    "bondingbrother_connection_error_already_connected",
+    "bondingbrother_connection_test_creation"
+  ],
+  "crates/tamr/src/classification.rs": [
+    "tamr_classification",
+    "tamr_classification_entity_id",
+    "tamr_classification_taxonomy_id",
+    "tamr_classification_terms",
+    "tamr_classifier_trait",
+    "tamr_classifier_classify",
+    "tamr_classification_test_creation"
+  ],
+  "crates/miyubookmarks/src/lib.rs": [
+    "miyubookmarks_toolkit_lib"
+  ],
+  "crates/miyudeclarations/src/tva.rs": [
+    "miyudeclarations_tool_tva_prepare",
+    "miyudeclarations_tool_tva_submit"
+  ],
+  "crates/miyupospayment/src/split.rs": [
+    "miyupospayment_tool_split"
+  ],
+  "crates/miyusocialmoderation/src/post.rs": [
+    "miyusocialmoderation_tool_post_delete"
+  ],
+  "crates/miyuwidgets/src/template.rs": [
+    "miyuwidgets_tool_web_template_resolve"
+  ],
+  "crates/miyuprofile/src/lib.rs": [
+    "miyuprofile_toolkit_lib"
+  ],
+  "crates/miyudiscovery/src/discover.rs": [
+    "miyudiscovery_tool_discover_list"
+  ],
+  "crates/miyuwidgets/src/layout.rs": [
+    "miyuwidgets_tool_web_layout_apply"
+  ],
+  "crates/miyuweb/src/layout.rs": [
+    "miyuweb_tool_web_layout_render"
+  ],
+  "crates/miyupm/src/message.rs": [
+    "miyupm_tool_pm_send",
+    "miyupm_tool_pm_list",
+    "miyupm_tool_pm_get"
+  ],
+  "crates/tamr/src/metadata.rs": [
+    "tamr_metadata",
+    "tamr_metadata_entity_id",
+    "tamr_metadata_values",
+    "tamr_metadata_manager_trait",
+    "tamr_metadata_manager_get",
+    "tamr_metadata_test_creation"
+  ],
+  "crates/miyucptaledger/src/reconciliation.rs": [
+    "miyucptaledger_tool_compta_reconciliation_suggest",
+    "miyucptaledger_tool_compta_reconciliation_record"
+  ],
+  "crates/miyuhr/src/schedule.rs": [
+    "miyuhr_tool_schedule_get"
+  ],
+  "crates/kindmother/src/storage.rs": [
+    "kindmother_storage_trait",
+    "kindmother_storage_read",
+    "kindmother_storage_write",
+    "kindmother_storage_delete",
+    "kindmother_storage_error",
+    "kindmother_storage_error_not_found",
+    "kindmother_storage_error_corruption",
+    "kindmother_storage_error_io",
+    "kindmother_storage_memory",
+    "kindmother_storage_memory_data",
+    "kindmother_storage_memory_new",
+    "kindmother_storage_test_read_write",
+    "kindmother_storage_test_delete"
+  ],
+  "crates/miyudiscovery/src/search.rs": [
+    "miyudiscovery_tool_search"
+  ],
+  "crates/miyukini-admin/src/models/admin_account.rs": [
+    "miyukiniadmin_admin_account",
+    "miyukiniadmin_admin_account_id",
+    "miyukiniadmin_admin_account_username",
+    "miyukiniadmin_admin_account_password_hash",
+    "miyukiniadmin_admin_account_role",
+    "miyukiniadmin_admin_account_mfa_enabled",
+    "miyukiniadmin_admin_account_mfa_secret_encrypted",
+    "miyukiniadmin_admin_account_created_at",
+    "miyukiniadmin_admin_account_updated_at",
+    "miyukiniadmin_admin_account_last_login_at",
+    "miyukiniadmin_admin_account_locked_until",
+    "miyukiniadmin_admin_account_failed_attempts",
+    "miyukiniadmin_admin_role_enum",
+    "miyukiniadmin_role_admin",
+    "miyukiniadmin_role_recovery",
+    "miyukiniadmin_role_audit"
+  ],
+  "crates/miyuposinventory/src/count.rs": [
+    "miyuposinventory_tool_count_start",
+    "miyuposinventory_tool_count_record",
+    "miyuposinventory_tool_count_reconcile"
+  ],
+  "crates/miyukini-kernel/src/id.rs": [
+    "kernel_id_type",
+    "kernel_id_parse",
+    "kernel_id_display",
+    "kernel_id_parse_error",
+    "kernel_id_generator_trait",
+    "kernel_id_generator_generate",
+    "kernel_id_generator_uuid",
+    "kernel_id_generator_uuid_struct",
+    "test_id_generate_unique",
+    "test_id_display_roundtrip",
+    "test_id_parse_valid_uuid",
+    "test_id_parse_invalid_format",
+    "test_id_equality",
+    "test_id_hash",
+    "test_id_no_business_logic",
+    "test_id_no_external_dependency",
+    "test_id_deterministic_parse"
+  ],
+  "crates/miyunotify/src/inbox.rs": [
+    "miyunotify_tool_inbox_write"
+  ],
+  "crates/miyusocialfeed/src/reaction.rs": [
+    "miyusocialfeed_tool_reaction_add",
+    "miyusocialfeed_tool_reaction_remove",
+    "miyusocialfeed_tool_reaction_list"
   ],
   "crates/strongfather/src/policy.rs": [
     "strongfather_policy_type",
@@ -837,24 +1566,261 @@
     "strongfather_policy_test_policy_set",
     "strongfather_policy_test_all_types"
   ],
-  "crates/miyudeclarations/src/declaration.rs": [
-    "miyudeclarations_tool_declaration_list"
+  "crates/miyucptaledger/src/transaction.rs": [
+    "miyucptaledger_tool_compta_transaction_categorize",
+    "miyucptaledger_tool_compta_transaction_vat_resolve"
   ],
-  "crates/miyumoderationforum/src/lib.rs": [
-    "miyumoderationforum_toolkit_lib"
+  "crates/miyuexport/src/pdf.rs": [
+    "miyuexport_tool_pdf_render"
   ],
-  "crates/miyusocialfeed/src/share.rs": [
-    "miyusocialfeed_tool_share_create",
-    "miyusocialfeed_tool_share_list"
+  "crates/miyusearch/src/query.rs": [
+    "miyusearch_tool_search_query_execute"
   ],
-  "crates/masterbutler/src/step.rs": [
-    "masterbutler_step",
-    "masterbutler_step_id",
-    "masterbutler_step_name",
-    "masterbutler_step_result",
-    "masterbutler_step_result_success",
-    "masterbutler_step_result_failure",
-    "masterbutler_step_test_creation"
+  "crates/miyudiscovery/src/trending.rs": [
+    "miyudiscovery_tool_trending_list"
+  ],
+  "crates/miyusocialfeed/src/comment.rs": [
+    "miyusocialfeed_tool_comment_create",
+    "miyusocialfeed_tool_comment_list",
+    "miyusocialfeed_tool_comment_delete"
+  ],
+  "crates/miyuwebway_tracker/src/address.rs": [
+    "miyuwebway_tracker_mws_address_tracker_default"
+  ],
+  "crates/miyufeeds/src/lib.rs": [
+    "miyufeeds_toolkit_lib"
+  ],
+  "crates/miyukini-admin/src/config.rs": [
+    "miyukiniadmin_config_backend_config",
+    "miyukiniadmin_config_backend_config_port",
+    "miyukiniadmin_config_backend_config_host",
+    "miyukiniadmin_config_backend_config_https",
+    "miyukiniadmin_config_backend_config_tls_cert",
+    "miyukiniadmin_config_backend_config_tls_key",
+    "miyukiniadmin_config_backend_config_from_env",
+    "miyukiniadmin_config_test_from_env"
+  ],
+  "crates/miyukini-admin/src/models/corruption_memory.rs": [
+    "miyukiniadmin_corruption_memory",
+    "miyukiniadmin_corruption_memory_reinitialised_at",
+    "miyukiniadmin_corruption_memory_reason",
+    "miyukiniadmin_corruption_memory_previous_state"
+  ],
+  "crates/miyusocialmessaging/src/lib.rs": [
+    "miyusocialmessaging_toolkit_lib"
+  ],
+  "crates/miyuhr/src/time_clock.rs": [
+    "miyuhr_tool_time_clock_in",
+    "miyuhr_tool_time_clock_out"
+  ],
+  "crates/miyucms/src/media.rs": [
+    "miyucms_tool_media_upload",
+    "miyucms_tool_media_serve",
+    "miyucms_tool_media_transform"
+  ],
+  "crates/bondingbrother/src/translation.rs": [
+    "bondingbrother_translation",
+    "bondingbrother_translation_source_format",
+    "bondingbrother_translation_target_format",
+    "bondingbrother_translator_trait",
+    "bondingbrother_translator_translate",
+    "bondingbrother_translation_error",
+    "bondingbrother_translation_error_unsupported",
+    "bondingbrother_translation_test_creation"
+  ],
+  "crates/miyukini-admin/src/bonding_brother_bridge.rs": [
+    "miyukiniadmin_bonding_brother_bridge_trait",
+    "miyukiniadmin_bonding_brother_bridge_connect",
+    "miyukiniadmin_bonding_brother_bridge_error",
+    "miyukiniadmin_bonding_brother_bridge_error_connection_failed",
+    "miyukiniadmin_bonding_brother_bridge_test_error"
+  ],
+  "crates/miyubilling/src/tenant.rs": [
+    "miyubilling_tool_billing_tenant_resolve"
+  ],
+  "crates/miyucontacts/src/friend.rs": [
+    "miyucontacts_tool_friend_add",
+    "miyucontacts_tool_friend_remove",
+    "miyucontacts_tool_friend_list"
+  ],
+  "crates/miyuforum/src/board.rs": [
+    "miyuforum_tool_forum_board_list",
+    "miyuforum_tool_forum_board_get",
+    "miyuforum_tool_forum_board_create",
+    "miyuforum_tool_forum_board_update"
+  ],
+  "crates/miyucalc/src/errors.rs": [
+    "miyucalc_errors",
+    "miyucalc_error_enum"
+  ],
+  "crates/miyukini-admin/src/monitoring_service.rs": [
+    "miyukiniadmin_monitoring_service_trait",
+    "miyukiniadmin_monitoring_service_collect_metrics",
+    "miyukiniadmin_monitoring_system_metrics",
+    "miyukiniadmin_monitoring_system_metrics_cores_health",
+    "miyukiniadmin_monitoring_test_system_metrics"
+  ],
+  "crates/miyuwebway_participant/src/address.rs": [
+    "miyuwebway_participant_mws_address_tracker_default"
+  ],
+  "crates/miyuwebway_participant/src/port.rs": [
+    "miyuwebway_participant_mws_port_check"
+  ],
+  "crates/worrysentinel/src/security_level.rs": [
+    "worrysentinel_security_level",
+    "worrysentinel_security_level_public",
+    "worrysentinel_security_level_standard",
+    "worrysentinel_security_level_sensitive",
+    "worrysentinel_security_level_critical",
+    "worrysentinel_security_level_hardened",
+    "worrysentinel_security_level_manager_trait",
+    "worrysentinel_security_level_manager_get_current",
+    "worrysentinel_security_test_level_ordering"
+  ],
+  "crates/miyushipping/src/rate.rs": [
+    "miyushipping_tool_commerce_shipping_rate",
+    "miyushipping_tool_commerce_shipping_rates_compare"
+  ],
+  "crates/miyuinvoice/src/customer.rs": [
+    "miyuinvoice_tool_invoice_customer_resolve",
+    "miyuinvoice_tool_invoice_customer_list"
+  ],
+  "crates/miyustory/src/lib.rs": [
+    "miyustory_toolkit_lib"
+  ],
+  "crates/miyuposkitchen/src/kitchen.rs": [
+    "miyuposkitchen_tool_kitchen_print",
+    "miyuposkitchen_tool_order_push",
+    "miyuposkitchen_tool_order_update_status"
+  ],
+  "crates/miyuwebway_tracker/src/transport.rs": [
+    "miyuwebway_tracker_mws_transport_receive",
+    "miyuwebway_tracker_mws_transport_send"
+  ],
+  "crates/miyupm/src/draft.rs": [
+    "miyupm_tool_pm_draft_create",
+    "miyupm_tool_pm_draft_update",
+    "miyupm_tool_pm_draft_list"
+  ],
+  "crates/miyucomptareports/src/lib.rs": [
+    "miyucomptareports_toolkit_lib"
+  ],
+  "crates/miyulocale/src/lib.rs": [
+    "miyulocale_toolkit_lib"
+  ],
+  "crates/miyustore/src/product.rs": [
+    "miyustore_tool_commerce_product_list",
+    "miyustore_tool_commerce_product_resolve",
+    "miyustore_tool_commerce_product_variations",
+    "miyustore_tool_commerce_product_create",
+    "miyustore_tool_commerce_product_update"
+  ],
+  "crates/miyuposkitchen/src/ticket.rs": [
+    "miyuposkitchen_tool_ticket_preset_assign"
+  ],
+  "crates/everbuddy/src/migration.rs": [
+    "everbuddy_migration",
+    "everbuddy_migration_from_version",
+    "everbuddy_migration_to_version",
+    "everbuddy_migration_executor_trait",
+    "everbuddy_migration_executor_execute",
+    "everbuddy_migration_error",
+    "everbuddy_migration_error_failed",
+    "everbuddy_migration_test_creation"
+  ],
+  "crates/borderguard/src/lib.rs": [
+    "borderguard_module_boundary",
+    "borderguard_module_trust_level",
+    "borderguard_module_crossing"
+  ],
+  "crates/miyupossales/src/sale.rs": [
+    "miyupossales_tool_sale_create",
+    "miyupossales_tool_sale_add_item",
+    "miyupossales_tool_sale_remove_item"
+  ],
+  "crates/miyutext/src/lib.rs": [
+    "miyutext_toolkit_lib"
+  ],
+  "crates/caringnanny/src/metrics.rs": [
+    "caringnanny_metrics",
+    "caringnanny_metrics_event_count",
+    "caringnanny_metrics_error_count",
+    "caringnanny_metrics_collector_trait",
+    "caringnanny_metrics_collector_get",
+    "caringnanny_metrics_test_default"
+  ],
+  "crates/miyufeeds/src/feed.rs": [
+    "miyufeeds_tool_atom_board",
+    "miyufeeds_tool_atom_forum",
+    "miyufeeds_tool_atom_topic"
+  ],
+  "crates/kindmother/src/sync.rs": [
+    "kindmother_sync_delta",
+    "kindmother_sync_delta_entity_id",
+    "kindmother_sync_delta_operation",
+    "kindmother_sync_delta_data",
+    "kindmother_sync_delta_operation",
+    "kindmother_sync_delta_operation_create",
+    "kindmother_sync_delta_operation_update",
+    "kindmother_sync_delta_operation_delete",
+    "kindmother_sync_trait",
+    "kindmother_sync_compute_delta",
+    "kindmother_sync_apply_delta",
+    "kindmother_sync_error",
+    "kindmother_sync_error_conflict",
+    "kindmother_sync_error_invalid_delta",
+    "kindmother_sync_error_io",
+    "kindmother_sync_test_delta_creation"
+  ],
+  "crates/miyusql/src/cache.rs": [
+    "miyusql_tool_cache_get",
+    "miyusql_tool_cache_set",
+    "miyusql_tool_cache_invalidate",
+    "miyusql_cache_executor_trait",
+    "miyusql_cache_get_impl",
+    "miyusql_cache_set_impl",
+    "miyusql_cache_invalidate_impl"
+  ],
+  "crates/miyupospayment/src/terminal.rs": [
+    "miyupospayment_tool_terminal_authorize",
+    "miyupospayment_tool_terminal_capture"
+  ],
+  "crates/miyuprofile/src/preferences.rs": [
+    "miyuprofile_tool_preferences_get",
+    "miyuprofile_tool_preferences_set"
+  ],
+  "crates/miyusearch/src/suggest.rs": [
+    "miyusearch_tool_search_suggest"
+  ],
+  "crates/miyupossales/src/store.rs": [
+    "miyupossales_tool_store_resolve"
+  ],
+  "crates/miyauth/src/verify.rs": [
+    "miyauth_tool_identity_verify"
+  ],
+  "crates/kindmother/src/state.rs": [
+    "kindmother_instance_type",
+    "kindmother_instance_type_mother",
+    "kindmother_instance_type_daughter",
+    "kindmother_instance_identity",
+    "kindmother_instance_identity_id",
+    "kindmother_instance_identity_type",
+    "kindmother_instance_identity_new",
+    "kindmother_instance_identity_is_mother",
+    "kindmother_instance_identity_is_daughter",
+    "kindmother_instance_state",
+    "kindmother_instance_state_identity",
+    "kindmother_instance_state_created_at",
+    "kindmother_instance_state_new",
+    "kindmother_instance_state_test_mother_creation",
+    "kindmother_instance_state_test_daughter_creation",
+    "kindmother_instance_state_test_unique_ids"
+  ],
+  "crates/miyuwebway_participant/src/declaration.rs": [
+    "miyuwebway_participant_mws_declaration_build",
+    "miyuwebway_participant_mws_declaration_sign",
+    "miyuwebway_participant_mws_declaration_validate",
+    "miyuwebway_participant_mws_declaration_verify"
   ],
   "crates/miyukini-admin/src/models/session.rs": [
     "miyukiniadmin_admin_session",
@@ -867,542 +1833,12 @@
     "miyukiniadmin_session_user_agent",
     "miyukiniadmin_session_is_valid"
   ],
-  "crates/miyubookmarks/src/lib.rs": [
-    "miyubookmarks_toolkit_lib"
-  ],
-  "crates/miyuantispam/src/rate_limit.rs": [
-    "miyuantispam_tool_rate_limit_check"
-  ],
-  "crates/miyuinvoice/src/quote.rs": [
-    "miyuinvoice_tool_invoice_quote_create",
-    "miyuinvoice_tool_invoice_quote_update",
-    "miyuinvoice_tool_invoice_quote_to_invoice"
-  ],
-  "crates/miyukini-kernel/src/config.rs": [
-    "config_get",
-    "envconfig_struct",
-    "envconfig_values",
-    "envconfig_from_env",
-    "envconfig_get_impl",
-    "test_config_get_existing_key",
-    "test_config_get_missing_key",
-    "test_config_get_empty_key",
-    "test_config_get_case_sensitive",
-    "test_config_envconfig_from_env",
-    "test_config_no_business_logic",
-    "test_config_no_external_dependency",
-    "test_config_deterministic",
-    "test_config_multiple_keys",
-    "test_config_empty_value"
-  ],
-  "crates/miyukini-admin/src/database_service.rs": [
-    "miyukiniadmin_database_service_trait",
-    "miyukiniadmin_database_service_get_instance_info",
-    "miyukiniadmin_database_instance_info",
-    "miyukiniadmin_database_instance_info_identity",
-    "miyukiniadmin_database_test_instance_info"
-  ],
-  "crates/miyushipping/src/tracking.rs": [
-    "miyushipping_tool_commerce_shipping_tracking_get"
-  ],
-  "crates/miyuwebway_participant/src/transport.rs": [
-    "miyuwebway_participant_mws_transport_send"
-  ],
-  "crates/miyuposkitchen/src/kitchen.rs": [
-    "miyuposkitchen_tool_kitchen_print",
-    "miyuposkitchen_tool_order_push",
-    "miyuposkitchen_tool_order_update_status"
-  ],
-  "crates/miyuantispam/src/captcha.rs": [
-    "miyuantispam_tool_captcha_generate",
-    "miyuantispam_tool_captcha_verify"
-  ],
-  "crates/miyukini-admin/src/models/admin_account.rs": [
-    "miyukiniadmin_admin_account",
-    "miyukiniadmin_admin_account_id",
-    "miyukiniadmin_admin_account_username",
-    "miyukiniadmin_admin_account_password_hash",
-    "miyukiniadmin_admin_account_role",
-    "miyukiniadmin_admin_account_mfa_enabled",
-    "miyukiniadmin_admin_account_mfa_secret_encrypted",
-    "miyukiniadmin_admin_account_created_at",
-    "miyukiniadmin_admin_account_updated_at",
-    "miyukiniadmin_admin_account_last_login_at",
-    "miyukiniadmin_admin_account_locked_until",
-    "miyukiniadmin_admin_account_failed_attempts",
-    "miyukiniadmin_admin_role_enum",
-    "miyukiniadmin_role_admin",
-    "miyukiniadmin_role_recovery",
-    "miyukiniadmin_role_audit"
-  ],
-  "crates/miyuexport/src/pdf.rs": [
-    "miyuexport_tool_pdf_render"
-  ],
-  "crates/miyukini-admin/src/testing_suites.rs": [
-    "miyukiniadmin_testing_suites",
-    "miyukiniadmin_testing_suites_run_and_report"
-  ],
-  "crates/miyupm/src/folder.rs": [
-    "miyupm_tool_pm_folder_list",
-    "miyupm_tool_pm_folder_create",
-    "miyupm_tool_pm_folder_update"
-  ],
-  "crates/miyupospayment/src/terminal.rs": [
-    "miyupospayment_tool_terminal_authorize",
-    "miyupospayment_tool_terminal_capture"
-  ],
-  "crates/miyusocialmessaging/src/dm.rs": [
-    "miyusocialmessaging_tool_dm_send",
-    "miyusocialmessaging_tool_dm_list",
-    "miyusocialmessaging_tool_dm_get",
-    "miyusocialmessaging_tool_dm_reaction_add",
-    "miyusocialmessaging_tool_dm_reaction_remove",
-    "miyusocialmessaging_tool_dm_readmark_set"
-  ],
-  "crates/miyuexport/src/xlsx.rs": [
-    "miyuexport_tool_xlsx_generate"
-  ],
-  "crates/miyusocialmessaging/src/lib.rs": [
-    "miyusocialmessaging_toolkit_lib"
-  ],
-  "crates/miyusocialmoderation/src/block.rs": [
-    "miyusocialmoderation_tool_block_add",
-    "miyusocialmoderation_tool_block_remove",
-    "miyusocialmoderation_tool_block_list"
-  ],
-  "crates/kindmother/src/api.rs": [
-    "kindmother_api_write_intent",
-    "kindmother_api_write_intent_id",
-    "kindmother_api_write_intent_entity_id",
-    "kindmother_api_write_intent_operation",
-    "kindmother_api_write_intent_data",
-    "kindmother_api_write_operation",
-    "kindmother_api_write_operation_create",
-    "kindmother_api_write_operation_update",
-    "kindmother_api_write_operation_delete",
-    "kindmother_api_coredata",
-    "kindmother_api_read",
-    "kindmother_api_submit_write_intent",
-    "kindmother_api_error",
-    "kindmother_api_error_not_found",
-    "kindmother_api_error_permission_denied",
-    "kindmother_api_error_invalid_intent",
-    "kindmother_api_test_write_intent_creation"
-  ],
-  "crates/miyuprofile/src/avatar.rs": [
-    "miyuprofile_tool_avatar_get",
-    "miyuprofile_tool_avatar_set",
-    "miyuprofile_tool_avatar_resolve"
-  ],
-  "crates/miyustore/src/order.rs": [
-    "miyustore_tool_commerce_order_create",
-    "miyustore_tool_commerce_order_update",
-    "miyustore_tool_commerce_order_status",
-    "miyustore_tool_commerce_order_list"
-  ],
-  "crates/miyuposanalytics/src/export.rs": [
-    "miyuposanalytics_tool_export_spreadsheet"
-  ],
-  "crates/miyubilling/src/payment.rs": [
-    "miyubilling_tool_billing_payment_record"
-  ],
-  "crates/masterbutler/src/workflow.rs": [
-    "masterbutler_workflow_id",
-    "masterbutler_workflow",
-    "masterbutler_workflow_id_field",
-    "masterbutler_workflow_name",
-    "masterbutler_workflow_new",
-    "masterbutler_workflow_test_creation"
-  ],
-  "crates/miyudiscovery/src/lib.rs": [
-    "miyudiscovery_toolkit_lib"
-  ],
-  "crates/miyukini-admin/src/models/environment_state.rs": [
-    "miyukiniadmin_environment_state_enum",
-    "miyukiniadmin_env_state_vierge",
-    "miyukiniadmin_env_state_initialise",
-    "miyukiniadmin_env_state_compromis"
-  ],
-  "crates/miyujobs/src/schedule.rs": [
-    "miyujobs_tool_schedule_at",
-    "miyujobs_tool_schedule_cron"
-  ],
-  "crates/miyuexpense/src/claim.rs": [
-    "miyuexpense_tool_expense_claim_create",
-    "miyuexpense_tool_expense_claim_update",
-    "miyuexpense_tool_expense_claim_list",
-    "miyuexpense_tool_expense_claim_validate",
-    "miyuexpense_tool_expense_claim_export"
-  ],
-  "crates/miyustore/src/shipping.rs": [
-    "miyustore_tool_commerce_shipping_rate",
-    "miyustore_tool_commerce_shipping_zones_resolve"
-  ],
-  "crates/miyucptaledger/src/reconciliation.rs": [
-    "miyucptaledger_tool_compta_reconciliation_suggest",
-    "miyucptaledger_tool_compta_reconciliation_record"
-  ],
-  "crates/miyudeclarations/src/estimate.rs": [
-    "miyudeclarations_tool_estimate_cotisations"
-  ],
-  "crates/miyuforum/src/topic.rs": [
-    "miyuforum_tool_forum_topic_create",
-    "miyuforum_tool_forum_topic_list",
-    "miyuforum_tool_forum_topic_get",
-    "miyuforum_tool_forum_topic_update",
-    "miyuforum_tool_forum_topic_sticky",
-    "miyuforum_tool_forum_topic_announce",
-    "miyuforum_tool_forum_topic_export_pdf",
-    "miyuforum_tool_forum_topic_export_text"
-  ],
-  "crates/miyumoderationforum/src/post.rs": [
-    "miyumoderationforum_tool_post_edit",
-    "miyumoderationforum_tool_post_lock",
-    "miyumoderationforum_tool_post_delete"
-  ],
-  "crates/miyustore/src/checkout.rs": [
-    "miyustore_tool_commerce_checkout_validate",
-    "miyustore_tool_commerce_checkout_submit"
-  ],
-  "crates/miyuwebway_tracker/src/discovery.rs": [
-    "miyuwebway_tracker_mws_discovery_response_build",
-    "miyuwebway_tracker_mws_discovery_response_send"
-  ],
-  "crates/miyutext/src/sanitize.rs": [
-    "miyutext_tool_sanitize"
-  ],
-  "crates/miyusocialfeed/src/comment.rs": [
-    "miyusocialfeed_tool_comment_create",
-    "miyusocialfeed_tool_comment_list",
-    "miyusocialfeed_tool_comment_delete"
-  ],
-  "crates/miyudiscovery/src/hashtag.rs": [
-    "miyudiscovery_tool_hashtag_list",
-    "miyudiscovery_tool_hashtag_get",
-    "miyudiscovery_tool_hashtag_trending"
-  ],
-  "crates/miyuposinventory/src/count.rs": [
-    "miyuposinventory_tool_count_start",
-    "miyuposinventory_tool_count_record",
-    "miyuposinventory_tool_count_reconcile"
-  ],
-  "crates/strongfather/src/intent.rs": [
-    "strongfather_intent_type",
-    "strongfather_intent_action_creation",
-    "strongfather_intent_action_modification",
-    "strongfather_intent_action_deletion",
-    "strongfather_intent_action_read",
-    "strongfather_intent_action_evaluation",
-    "strongfather_intent_call_context",
-    "strongfather_intent_context_caller_identity",
-    "strongfather_intent_context_origin",
-    "strongfather_intent_context_instance",
-    "strongfather_intent_constraint",
-    "strongfather_intent_constraint_id",
-    "strongfather_intent_constraint_description",
-    "strongfather_intent_data",
-    "strongfather_intent_data_content",
-    "strongfather_intent_state",
-    "strongfather_intent_state_submitted",
-    "strongfather_intent_state_in_evaluation",
-    "strongfather_intent_state_decided",
-    "strongfather_intent",
-    "strongfather_intent_id",
-    "strongfather_intent_action_type",
-    "strongfather_intent_subject",
-    "strongfather_intent_call_context",
-    "strongfather_intent_data",
-    "strongfather_intent_requested_priority",
-    "strongfather_intent_constraints",
-    "strongfather_intent_metadata",
-    "strongfather_intent_new",
-    "strongfather_intent_with_priority",
-    "strongfather_intent_with_constraints",
-    "strongfather_intent_with_metadata",
-    "strongfather_intent_test_create_basic",
-    "strongfather_intent_test_create_with_priority",
-    "strongfather_intent_test_create_with_constraints",
-    "strongfather_intent_test_all_action_types"
-  ],
-  "crates/borderguard/src/lib.rs": [
-    "borderguard_module_boundary",
-    "borderguard_module_trust_level",
-    "borderguard_module_crossing"
-  ],
-  "crates/miyubooking/src/resource.rs": [
-    "miyubooking_tool_booking_resource_resolve",
-    "miyubooking_tool_booking_resource_availability"
-  ],
-  "crates/miyuweb/src/event.rs": [
-    "miyuweb_tool_web_event_dispatch"
-  ],
-  "crates/miyumoderationforum/src/warning.rs": [
-    "miyumoderationforum_tool_warning_create",
-    "miyumoderationforum_tool_warning_list"
-  ],
-  "crates/kindmother/src/threat.rs": [
-    "kindmother_threat_level",
-    "kindmother_threat_level_none",
-    "kindmother_threat_level_low",
-    "kindmother_threat_level_medium",
-    "kindmother_threat_level_high",
-    "kindmother_threat_level_critical",
-    "kindmother_threat_detector_trait",
-    "kindmother_threat_detector_check_corruption",
-    "kindmother_threat_detector_check_anomalies",
-    "kindmother_threat_detector_default",
-    "kindmother_threat_test_detector_default"
-  ],
-  "crates/miyupossales/src/ticket.rs": [
-    "miyupossales_tool_ticket_open",
-    "miyupossales_tool_ticket_save",
-    "miyupossales_tool_ticket_close",
-    "miyupossales_tool_ticket_list"
-  ],
-  "crates/borderguard/src/boundary.rs": [
-    "borderguard_boundary_type",
-    "borderguard_boundary_type_external",
-    "borderguard_boundary_type_internal",
-    "borderguard_boundary_type_integration",
-    "borderguard_boundary",
-    "borderguard_boundary_id",
-    "borderguard_boundary_type",
-    "borderguard_boundary_name",
-    "borderguard_boundary_new",
-    "borderguard_boundary_test_creation"
-  ],
-  "crates/miyuexpense/src/receipt.rs": [
-    "miyuexpense_tool_expense_receipt_capture",
-    "miyuexpense_tool_expense_receipt_extract"
-  ],
-  "crates/miyupolls/src/poll.rs": [
-    "miyupolls_tool_poll_create",
-    "miyupolls_tool_poll_vote",
-    "miyupolls_tool_poll_list",
-    "miyupolls_tool_poll_result"
-  ],
-  "crates/miyuclock/src/time.rs": [
-    "miyuclock_tool_time_now",
-    "miyuclock_tool_time_now_injected",
-    "miyuclock_tool_time_delta"
-  ],
-  "crates/miyukini-admin/src/audit_logger.rs": [
-    "miyukiniadmin_audit_logger_trait",
-    "miyukiniadmin_audit_logger_log_action",
-    "miyukiniadmin_audit_logger_default",
-    "miyukiniadmin_audit_logger_default_logger",
-    "miyukiniadmin_audit_logger_default_new",
-    "miyukiniadmin_audit_logger_test_default"
-  ],
-  "crates/miyudeclarations/src/urssaf.rs": [
-    "miyudeclarations_tool_urssaf_prepare",
-    "miyudeclarations_tool_urssaf_submit"
-  ],
-  "crates/kindmother/src/storage.rs": [
-    "kindmother_storage_trait",
-    "kindmother_storage_read",
-    "kindmother_storage_write",
-    "kindmother_storage_delete",
-    "kindmother_storage_error",
-    "kindmother_storage_error_not_found",
-    "kindmother_storage_error_corruption",
-    "kindmother_storage_error_io",
-    "kindmother_storage_memory",
-    "kindmother_storage_memory_data",
-    "kindmother_storage_memory_new",
-    "kindmother_storage_test_read_write",
-    "kindmother_storage_test_delete"
-  ],
-  "crates/miyucalc/src/expression.rs": [
-    "miyucalc_tool_expression_evaluate"
-  ],
-  "crates/miyuposanalytics/src/shift.rs": [
-    "miyuposanalytics_tool_shift_close"
-  ],
-  "crates/miyusocialmessaging/src/conversation.rs": [
-    "miyusocialmessaging_tool_conversation_list",
-    "miyusocialmessaging_tool_conversation_get"
-  ],
-  "crates/miyukini-admin/src/cycle_tests_runner.rs": [
-    "miyukiniadmin_cycle_runner",
-    "miyukiniadmin_miyukinisqltest_runner"
-  ],
-  "crates/miyukini-admin/src/backup_service.rs": [
-    "miyukiniadmin_backup_service_backup_record",
-    "miyukiniadmin_backup_record_id",
-    "miyukiniadmin_backup_record_timestamp",
-    "miyukiniadmin_backup_record_type",
-    "miyukiniadmin_backup_record_size_bytes",
-    "miyukiniadmin_backup_record_status",
-    "miyukiniadmin_backup_service_trait",
-    "miyukiniadmin_backup_service_list",
-    "miyukiniadmin_backup_service_create",
-    "miyukiniadmin_backup_service_restore",
-    "miyukiniadmin_backup_service_create_result",
-    "miyukiniadmin_create_result_success",
-    "miyukiniadmin_create_result_backup_id",
-    "miyukiniadmin_create_result_message",
-    "miyukiniadmin_backup_service_restore_result",
-    "miyukiniadmin_restore_result_success",
-    "miyukiniadmin_restore_result_message",
-    "miyukiniadmin_backup_service_impl",
-    "miyukiniadmin_backup_impl_backups",
-    "miyukiniadmin_backup_impl_new",
-    "miyukiniadmin_backup_impl_with_seed",
-    "miyukiniadmin_backup_test_list",
-    "miyukiniadmin_backup_test_restore"
-  ],
-  "crates/miyuforum/src/board.rs": [
-    "miyuforum_tool_forum_board_list",
-    "miyuforum_tool_forum_board_get",
-    "miyuforum_tool_forum_board_create",
-    "miyuforum_tool_forum_board_update"
-  ],
-  "crates/miyuposinventory/src/valuation.rs": [
-    "miyuposinventory_tool_valuation_report"
-  ],
-  "crates/miyupossales/src/receipt.rs": [
-    "miyupossales_tool_receipt_render",
-    "miyupossales_tool_receipt_print",
-    "miyupossales_tool_receipt_send",
-    "miyupossales_tool_receipt_list"
-  ],
-  "crates/miyusocialmoderation/src/report.rs": [
-    "miyusocialmoderation_tool_report_create",
-    "miyusocialmoderation_tool_report_list"
-  ],
-  "crates/miyupospayment/src/split.rs": [
-    "miyupospayment_tool_split"
-  ],
-  "crates/miyulocale/src/lib.rs": [
-    "miyulocale_toolkit_lib"
-  ],
-  "crates/miyuinvoice/src/customer.rs": [
-    "miyuinvoice_tool_invoice_customer_resolve",
-    "miyuinvoice_tool_invoice_customer_list"
-  ],
-  "crates/miyuprofile/src/rank.rs": [
-    "miyuprofile_tool_rank_list",
-    "miyuprofile_tool_rank_resolve"
-  ],
-  "crates/miyusql/src/lib.rs": [
-    "miyusql_toolkit_lib"
-  ],
-  "crates/miyukini-admin/src/models/corruption_memory.rs": [
-    "miyukiniadmin_corruption_memory",
-    "miyukiniadmin_corruption_memory_reinitialised_at",
-    "miyukiniadmin_corruption_memory_reason",
-    "miyukiniadmin_corruption_memory_previous_state"
-  ],
-  "crates/miyukini-admin/src/testing_service.rs": [
-    "miyukiniadmin_testing_service_trait",
-    "miyukiniadmin_testing_service_run_tests",
-    "miyukiniadmin_testing_test_results",
-    "miyukiniadmin_testing_test_results_passed",
-    "miyukiniadmin_testing_test_results_failed",
-    "miyukiniadmin_testing_test_results_creation"
-  ],
-  "crates/miyunotify/src/inbox.rs": [
-    "miyunotify_tool_inbox_write"
-  ],
-  "crates/miyujobs/src/lib.rs": [
-    "miyujobs_toolkit_lib"
-  ],
-  "crates/miyumoderationforum/src/ban.rs": [
-    "miyumoderationforum_tool_ban_create",
-    "miyumoderationforum_tool_ban_list"
-  ],
-  "crates/miyufeeds/src/lib.rs": [
-    "miyufeeds_toolkit_lib"
-  ],
-  "crates/miyucalc/src/admin_cell.rs": [
-    "miyucalc_admin_cell",
-    "miyucalc_admin_identification",
-    "miyucalc_admin_test_criteria",
-    "miyucalc_admin_embedded_test_def",
-    "miyucalc_admin_test_manifest",
-    "miyucalc_admin_integrity",
-    "miyucalc_admin_cell_struct",
-    "miyucalc_admin_cell_build"
-  ],
-  "crates/miyusocialprofile/src/lib.rs": [
-    "miyusocialprofile_toolkit_lib"
-  ],
-  "crates/caringnanny/src/metrics.rs": [
-    "caringnanny_metrics",
-    "caringnanny_metrics_event_count",
-    "caringnanny_metrics_error_count",
-    "caringnanny_metrics_collector_trait",
-    "caringnanny_metrics_collector_get",
-    "caringnanny_metrics_test_default"
-  ],
-  "crates/miyuvalidate/src/sanitize.rs": [
-    "miyuvalidate_tool_sanitize"
-  ],
-  "crates/miyutext/src/replace.rs": [
-    "miyutext_tool_replace"
-  ],
-  "crates/miyucomptareports/src/export.rs": [
-    "miyucomptareports_tool_ledger_export"
-  ],
-  "crates/logisticssteward/src/allocation.rs": [
-    "logisticssteward_allocation",
-    "logisticssteward_allocation_resource_type",
-    "logisticssteward_allocation_component_id",
-    "logisticssteward_allocation_amount",
-    "logisticssteward_allocation_manager_trait",
-    "logisticssteward_allocation_manager_allocate",
-    "logisticssteward_allocation_error",
-    "logisticssteward_allocation_error_insufficient",
-    "logisticssteward_allocation_test_creation"
-  ],
-  "crates/miyusql/src/memory.rs": [
-    "miyusql_memory_executor"
-  ],
-  "crates/masterbutler/src/orchestrator.rs": [
-    "masterbutler_orchestrator_trait",
-    "masterbutler_orchestrator_execute",
-    "masterbutler_orchestrator_test_workflow_execution"
-  ],
-  "crates/miyudiscovery/src/discover.rs": [
-    "miyudiscovery_tool_discover_list"
-  ],
-  "crates/miyuprofile/src/signature.rs": [
-    "miyuprofile_tool_signature_get",
-    "miyuprofile_tool_signature_set"
-  ],
-  "crates/logisticssteward/src/resource.rs": [
-    "logisticssteward_resource_type",
-    "logisticssteward_resource_type_memory",
-    "logisticssteward_resource_type_cpu",
-    "logisticssteward_resource_type_disk",
-    "logisticssteward_resource",
-    "logisticssteward_resource_type_field",
-    "logisticssteward_resource_capacity",
-    "logisticssteward_resource_manager_trait",
-    "logisticssteward_resource_manager_get",
-    "logisticssteward_resource_test_creation"
-  ],
-  "crates/miyucms/src/content.rs": [
-    "miyucms_tool_content_create",
-    "miyucms_tool_content_update",
-    "miyucms_tool_content_publish",
-    "miyucms_tool_content_schedule"
-  ],
-  "crates/miyuwidgets/src/layout.rs": [
-    "miyuwidgets_tool_web_layout_apply"
-  ],
-  "crates/miyukini-admin/src/api_handlers.rs": [
-    "miyukiniadmin_api_handler_trait",
-    "miyukiniadmin_api_handler_handle_request",
-    "miyukiniadmin_api_response",
-    "miyukiniadmin_api_response_status",
-    "miyukiniadmin_api_response_body",
-    "miyukiniadmin_api_handler_test_response_creation"
-  ],
-  "crates/miyubooking/src/slots.rs": [
-    "miyubooking_tool_booking_slots_list",
-    "miyubooking_tool_booking_slots_resolve"
+  "crates/miyushipping/src/label.rs": [
+    "miyushipping_tool_commerce_shipping_label_create",
+    "miyushipping_tool_commerce_shipping_label_print"
+  ],
+  "crates/miyuposloyalty/src/lib.rs": [
+    "miyuposloyalty_toolkit_lib"
   ],
   "crates/caringnanny/src/observer.rs": [
     "caringnanny_observer_event_type",
@@ -1417,490 +1853,54 @@
     "caringnanny_observer_observe",
     "caringnanny_observer_test_event_creation"
   ],
-  "crates/worrysentinel/src/security_level.rs": [
-    "worrysentinel_security_level",
-    "worrysentinel_security_level_public",
-    "worrysentinel_security_level_standard",
-    "worrysentinel_security_level_sensitive",
-    "worrysentinel_security_level_critical",
-    "worrysentinel_security_level_hardened",
-    "worrysentinel_security_level_manager_trait",
-    "worrysentinel_security_level_manager_get_current",
-    "worrysentinel_security_test_level_ordering"
-  ],
-  "crates/miyupm/src/draft.rs": [
-    "miyupm_tool_pm_draft_create",
-    "miyupm_tool_pm_draft_update",
-    "miyupm_tool_pm_draft_list"
-  ],
-  "crates/miyubooking/src/participants.rs": [
-    "miyubooking_tool_booking_participants_compute"
-  ],
-  "crates/miyulocale/src/translate.rs": [
-    "miyulocale_tool_translate"
-  ],
-  "crates/miyusql/src/query.rs": [
-    "miyusql_query_result",
-    "miyusql_query_result_rows",
-    "miyusql_query_result_count",
-    "miyusql_tool_query_execute",
-    "miyusql_tool_query_prepare",
-    "miyusql_query_executor_trait",
-    "miyusql_executor_execute",
-    "miyusql_executor_prepare"
-  ],
-  "crates/miyuposinventory/src/label.rs": [
-    "miyuposinventory_tool_label_print"
-  ],
-  "crates/worrysentinel/src/degradation.rs": [
-    "worrysentinel_degradation_state",
-    "worrysentinel_degradation_state_normal",
-    "worrysentinel_degradation_state_unstable",
-    "worrysentinel_degradation_state_degraded",
-    "worrysentinel_degradation_state_restricted",
-    "worrysentinel_degradation_state_blocked",
-    "worrysentinel_degradation",
-    "worrysentinel_degradation_state_field",
-    "worrysentinel_degradation_manager_trait",
-    "worrysentinel_degradation_manager_get_current",
-    "worrysentinel_degradation_test_state_ordering"
-  ],
-  "crates/miyauth/src/resolve.rs": [
-    "miyauth_tool_identity_resolve"
-  ],
-  "crates/miyukini-admin/src/services/destruction_reinit.rs": [
-    "miyukiniadmin_destruction_reinit_service",
-    "miyukiniadmin_destruction_reinit_new",
-    "miyukiniadmin_destruction_write_corruption_memory",
-    "miyukiniadmin_destruction_reinit_run"
-  ],
-  "crates/miyukini-kernel/src/lifecycle.rs": [
-    "kernel_lifecycle_trait",
-    "kernel_lifecycle_register_shutdown_hook",
-    "kernel_lifecycle_shutdown",
-    "kernel_lifecycle_default",
-    "kernel_lifecycle_default_struct",
-    "kernel_lifecycle_hooks",
-    "kernel_lifecycle_new",
-    "test_lifecycle_register_hook",
-    "test_lifecycle_shutdown_executes_hooks",
-    "test_lifecycle_shutdown_lifo_order",
-    "test_lifecycle_multiple_hooks",
-    "test_lifecycle_shutdown_idempotent",
-    "test_lifecycle_no_init_hooks",
-    "test_lifecycle_no_business_logic",
-    "test_lifecycle_deterministic"
-  ],
-  "crates/miyuwebway_tracker/src/address.rs": [
-    "miyuwebway_tracker_mws_address_tracker_default"
-  ],
-  "crates/miyucms/src/revision.rs": [
-    "miyucms_tool_content_revision_list",
-    "miyucms_tool_content_revision_restore",
-    "miyucms_tool_content_revision_compare"
-  ],
-  "crates/miyukini-admin/src/db_unit_tests.rs": [
-    "miyukiniadmin_db_unit_tests_module",
-    "COH_001",
-    "COH_002",
-    "COH_003",
-    "COH_004",
-    "COH_005",
-    "COH_006",
-    "CONF_001",
-    "miyukiniadmin_db_unit_tests_run_single",
-    "miyukiniadmin_db_unit_tests_run_suite"
-  ],
-  "crates/miyupospayment/src/cash.rs": [
-    "miyupospayment_tool_cash_record"
-  ],
-  "crates/everbuddy/src/version.rs": [
-    "everbuddy_version",
-    "everbuddy_version_major",
-    "everbuddy_version_minor",
-    "everbuddy_version_patch",
-    "everbuddy_version_new",
-    "everbuddy_version_manager_trait",
-    "everbuddy_version_manager_get_current",
-    "everbuddy_version_test_creation"
-  ],
-  "crates/miyuposanalytics/src/tax.rs": [
-    "miyuposanalytics_tool_tax_report"
-  ],
-  "crates/miyudeclarations/src/lib.rs": [
-    "miyudeclarations_toolkit_lib"
-  ],
-  "crates/kindmother/src/observability.rs": [
-    "kindmother_observability_health_status",
-    "kindmother_observability_health_healthy",
-    "kindmother_observability_health_degraded",
-    "kindmother_observability_health_unhealthy",
-    "kindmother_observability_metrics",
-    "kindmother_observability_metrics_read_count",
-    "kindmother_observability_metrics_write_count",
-    "kindmother_observability_metrics_sync_count",
-    "kindmother_observability_trait",
-    "kindmother_observability_get_health",
-    "kindmother_observability_get_metrics",
-    "kindmother_observability_default",
-    "kindmother_observability_test_default_health",
-    "kindmother_observability_test_default_metrics"
-  ],
-  "crates/miyukini-admin/src/services/auth.rs": [
-    "miyukiniadmin_auth_service",
-    "miyukiniadmin_auth_service_new",
-    "miyukiniadmin_auth_hash_password",
-    "miyukiniadmin_auth_verify_password",
-    "miyukiniadmin_auth_load_registry",
-    "miyukiniadmin_auth_save_registry",
-    "miyukiniadmin_auth_login",
-    "miyukiniadmin_auth_validate_session",
-    "miyukiniadmin_auth_logout",
-    "miyukiniadmin_auth_create_account",
-    "miyukiniadmin_auth_login_error",
-    "miyukiniadmin_auth_create_account_error"
-  ],
-  "crates/miyuposloyalty/src/customer.rs": [
-    "miyuposloyalty_tool_customer_get",
-    "miyuposloyalty_tool_customer_list",
-    "miyuposloyalty_tool_customer_create",
-    "miyuposloyalty_tool_customer_update",
-    "miyuposloyalty_tool_customer_address_get",
-    "miyuposloyalty_tool_customer_note_add",
-    "miyuposloyalty_tool_customer_note_list"
-  ],
-  "crates/miyupossales/src/refund.rs": [
-    "miyupossales_tool_refund_record"
-  ],
-  "crates/miyusql/src/transaction.rs": [
-    "miyusql_tool_tx_begin",
-    "miyusql_tool_tx_commit",
-    "miyusql_tool_tx_rollback",
-    "miyusql_transaction_executor_trait",
-    "miyusql_tx_begin_impl",
-    "miyusql_tx_commit_impl",
-    "miyusql_tx_rollback_impl"
-  ],
-  "crates/strongfather/src/lib.rs": [
-    "strongfather_module_intent",
-    "strongfather_module_policy",
-    "strongfather_module_decision",
-    "strongfather_module_policy_engine",
-    "strongfather_module_priority",
-    "strongfather_module_validator",
-    "strongfather_reexport_intent",
-    "strongfather_reexport_policy",
-    "strongfather_reexport_decision",
-    "strongfather_reexport_policy_engine",
-    "strongfather_reexport_priority",
-    "strongfather_reexport_validator"
-  ],
-  "crates/bondingbrother/src/connection.rs": [
-    "bondingbrother_connection",
-    "bondingbrother_connection_id",
-    "bondingbrother_connection_operator_id",
-    "bondingbrother_connection_manager_trait",
-    "bondingbrother_connection_manager_connect",
-    "bondingbrother_connection_error",
-    "bondingbrother_connection_error_already_connected",
-    "bondingbrother_connection_test_creation"
-  ],
-  "crates/miyustore/src/product.rs": [
-    "miyustore_tool_commerce_product_list",
-    "miyustore_tool_commerce_product_resolve",
-    "miyustore_tool_commerce_product_variations",
-    "miyustore_tool_commerce_product_create",
-    "miyustore_tool_commerce_product_update"
-  ],
-  "crates/miyutext/src/template.rs": [
-    "miyutext_tool_template_apply"
-  ],
-  "crates/kindmother/src/lib.rs": [
-    "kindmother_module_state",
-    "kindmother_module_storage",
-    "kindmother_module_sync",
-    "kindmother_module_api",
-    "kindmother_module_threat",
-    "kindmother_module_observability",
-    "kindmother_module_miyusql_bridge",
-    "kindmother_reexport_state",
-    "kindmother_reexport_storage",
-    "kindmother_reexport_sync",
-    "kindmother_reexport_api",
-    "kindmother_reexport_threat",
-    "kindmother_reexport_observability"
-  ],
-  "crates/miyuwebway_tracker/src/port.rs": [
-    "miyuwebway_tracker_mws_port_check"
-  ],
-  "crates/miyukini-kernel/src/log.rs": [
-    "kernel_log_level",
-    "kernel_logger_trait",
-    "kernel_logger_log",
-    "kernel_logger_default",
-    "kernel_logger_default_struct",
-    "test_log_all_levels",
-    "test_log_message_preserved",
-    "test_log_level_enum",
-    "test_log_default_logger",
-    "test_log_no_format_imposed",
-    "test_log_no_business_logic",
-    "test_log_no_external_dependency",
-    "test_log_deterministic"
-  ],
-  "crates/miyubooking/src/booking.rs": [
-    "miyubooking_tool_booking_create",
-    "miyubooking_tool_booking_update",
-    "miyubooking_tool_booking_cancel"
-  ],
-  "crates/strongfather/src/priority.rs": [
-    "strongfather_priority_value",
-    "strongfather_priority_value_level",
-    "strongfather_priority_new",
-    "strongfather_priority_minimum",
-    "strongfather_priority_maximum",
-    "strongfather_priority_default",
-    "strongfather_priority_calculator",
-    "strongfather_priority_calculator_new",
-    "strongfather_priority_calculator_calculate",
-    "strongfather_priority_calculator_compare",
-    "strongfather_priority_calculator_default",
-    "strongfather_priority_test_create",
-    "strongfather_priority_test_default",
-    "strongfather_priority_test_calculate_with_requested",
-    "strongfather_priority_test_calculate_with_policies",
-    "strongfather_priority_test_compare"
-  ],
-  "crates/miyutext/src/lib.rs": [
-    "miyutext_toolkit_lib"
-  ],
-  "crates/miyukini-admin/src/services/auto_recovery.rs": [
-    "miyukiniadmin_auto_recovery_service",
-    "miyukiniadmin_auto_recovery_new",
-    "miyukiniadmin_auto_recovery_run",
-    "miyukiniadmin_auto_recovery_result"
-  ],
-  "crates/miyuwebway_participant/src/discovery.rs": [
-    "miyuwebway_participant_mws_discovery_request_build",
-    "miyuwebway_participant_mws_discovery_request_send"
-  ],
-  "crates/miyunotify/src/email.rs": [
-    "miyunotify_tool_email_send"
-  ],
-  "crates/miyucms/src/media.rs": [
-    "miyucms_tool_media_upload",
-    "miyucms_tool_media_serve",
-    "miyucms_tool_media_transform"
-  ],
-  "crates/miyucalc/src/number.rs": [
-    "miyucalc_tool_number_format"
-  ],
-  "crates/miyuvalidate/src/schema.rs": [
-    "miyuvalidate_tool_schema_check"
-  ],
-  "crates/miyusocialprofile/src/follow.rs": [
-    "miyusocialprofile_tool_follow_add",
-    "miyusocialprofile_tool_follow_remove",
-    "miyusocialprofile_tool_followers_list",
-    "miyusocialprofile_tool_following_list"
-  ],
-  "crates/miyusearch/src/query.rs": [
-    "miyusearch_tool_search_query_execute"
-  ],
-  "crates/bondingbrother/src/translation.rs": [
-    "bondingbrother_translation",
-    "bondingbrother_translation_source_format",
-    "bondingbrother_translation_target_format",
-    "bondingbrother_translator_trait",
-    "bondingbrother_translator_translate",
-    "bondingbrother_translation_error",
-    "bondingbrother_translation_error_unsupported",
-    "bondingbrother_translation_test_creation"
-  ],
-  "crates/miyuprofile/src/profile.rs": [
-    "miyuprofile_tool_profile_get",
-    "miyuprofile_tool_profile_update"
-  ],
-  "crates/miyuwebway_tracker/src/cog_list.rs": [
-    "miyuwebway_tracker_mws_cog_list_get",
-    "miyuwebway_tracker_mws_cog_list_update",
-    "miyuwebway_tracker_mws_cog_list_merge",
-    "miyuwebway_tracker_mws_cog_list_filter"
-  ],
-  "crates/miyupossales/src/cash_register.rs": [
-    "miyupossales_tool_cash_register_open",
-    "miyupossales_tool_cash_register_close"
-  ],
-  "crates/miyudiscovery/src/search.rs": [
-    "miyudiscovery_tool_search"
-  ],
-  "crates/miyushipping/src/zones.rs": [
-    "miyushipping_tool_commerce_shipping_zones_resolve"
-  ],
-  "crates/miyustory/src/story.rs": [
-    "miyustory_tool_story_create",
-    "miyustory_tool_story_list",
-    "miyustory_tool_story_get",
-    "miyustory_tool_story_reaction_add"
-  ],
-  "crates/miyuwebway_participant/src/declaration.rs": [
-    "miyuwebway_participant_mws_declaration_build",
-    "miyuwebway_participant_mws_declaration_sign",
-    "miyuwebway_participant_mws_declaration_validate",
-    "miyuwebway_participant_mws_declaration_verify"
-  ],
-  "crates/miyupospayment/src/check.rs": [
-    "miyupospayment_tool_check_record"
-  ],
-  "crates/miyuposinventory/src/import.rs": [
-    "miyuposinventory_tool_import_items"
-  ],
-  "crates/miyuposloyalty/src/loyalty.rs": [
-    "miyuposloyalty_tool_points_grant",
-    "miyuposloyalty_tool_points_redeem",
-    "miyuposloyalty_tool_balance_get",
-    "miyuposloyalty_tool_card_resolve"
-  ],
-  "crates/miyuposinventory/src/purchase_order.rs": [
-    "miyuposinventory_tool_purchase_order_create",
-    "miyuposinventory_tool_purchase_order_update",
-    "miyuposinventory_tool_purchase_order_track"
-  ],
-  "crates/miyusql/src/admin_cell.rs": [
-    "miyusql_admin_cell",
-    "miyusql_admin_identification",
-    "miyusql_admin_test_criteria",
-    "miyusql_admin_embedded_test_def",
-    "miyusql_admin_test_manifest",
-    "miyusql_admin_integrity",
-    "miyusql_admin_cell_struct",
-    "miyusql_admin_cell_build"
-  ],
-  "crates/miyupossales/src/lib.rs": [
-    "miyupossales_toolkit_lib"
-  ],
-  "crates/miyuexport/src/csv.rs": [
-    "miyuexport_tool_csv_generate"
-  ],
-  "crates/miyucalc/src/round.rs": [
-    "miyucalc_tool_round"
-  ],
-  "crates/miyupm/src/message.rs": [
-    "miyupm_tool_pm_send",
-    "miyupm_tool_pm_list",
-    "miyupm_tool_pm_get"
-  ],
-  "crates/miyuweb/src/theme.rs": [
-    "miyuweb_tool_web_theme_resolve"
-  ],
-  "crates/miyupospayment/src/lib.rs": [
-    "miyupospayment_toolkit_lib"
-  ],
-  "crates/miyauth/src/attest.rs": [
-    "miyauth_tool_identity_attest"
-  ],
-  "crates/miyusql/src/context.rs": [
-    "miyusql_governed_context",
-    "miyusql_governed_context_struct",
-    "miyusql_context_mandate_id",
-    "miyusql_context_security_level",
-    "miyusql_context_new",
-    "miyusql_context_has_mandate"
-  ],
-  "crates/miyukini-admin/src/services/mod.rs": [
-    "miyukiniadmin_services_mod"
-  ],
-  "crates/strongfather/src/decision.rs": [
-    "strongfather_decision_type",
-    "strongfather_decision_type_accepted",
-    "strongfather_decision_accepted_priority",
-    "strongfather_decision_type_refused",
-    "strongfather_decision_refused_reason",
-    "strongfather_decision_refused_violated_policies",
-    "strongfather_decision_type_ambiguous",
-    "strongfather_decision_ambiguous_missing_information",
-    "strongfather_decision_ambiguous_clarifications",
-    "strongfather_decision_type_deferred",
-    "strongfather_decision_deferred_reason",
-    "strongfather_decision_deferred_context_required",
-    "strongfather_decision_justification",
-    "strongfather_decision_justification_explanation",
-    "strongfather_decision_justification_policy_references",
-    "strongfather_decision_justification_reasoning_steps",
-    "strongfather_decision_justification_new",
-    "strongfather_decision_justification_with_reasoning",
-    "strongfather_decision_metadata",
-    "strongfather_decision_metadata_fields",
-    "strongfather_decision_metadata_new",
-    "strongfather_decision_metadata_with_field",
-    "strongfather_decision_metadata_default",
-    "strongfather_decision_evaluation_context",
-    "strongfather_decision_eval_context_fields",
-    "strongfather_decision_eval_context_new",
-    "strongfather_decision_eval_context_with_field",
-    "strongfather_decision_eval_context_default",
-    "strongfather_decision",
-    "strongfather_decision_intent_id",
-    "strongfather_decision_type",
-    "strongfather_decision_justification",
-    "strongfather_decision_policies_applied",
-    "strongfather_decision_evaluation_context",
-    "strongfather_decision_metadata",
-    "strongfather_decision_new",
-    "strongfather_decision_with_evaluation_context",
-    "strongfather_decision_with_metadata",
-    "strongfather_decision_is_accepted",
-    "strongfather_decision_is_refused",
-    "strongfather_decision_is_ambiguous",
-    "strongfather_decision_is_deferred",
-    "strongfather_decision_test_create_accepted",
-    "strongfather_decision_test_create_refused",
-    "strongfather_decision_test_create_ambiguous",
-    "strongfather_decision_test_create_deferred",
-    "strongfather_decision_test_justification"
-  ],
-  "crates/miyukini-admin/src/services/environment_state.rs": [
-    "miyukiniadmin_environment_state_service",
-    "miyukiniadmin_env_state_service_data_dir",
-    "miyukiniadmin_env_state_service_new",
-    "miyukiniadmin_env_state_verify_eip",
-    "miyukiniadmin_env_state_verify_registry",
-    "miyukiniadmin_env_state_verify_schema",
-    "miyukiniadmin_env_state_verify_consistency",
-    "miyukiniadmin_env_state_detect",
-    "miyukiniadmin_env_state_write_eip_stub",
-    "miyukiniadmin_env_state_write_bootstrap_schema_initial"
-  ],
-  "crates/miyutreasury/src/forecast.rs": [
-    "miyutreasury_tool_treasury_forecast_compute"
+  "crates/miyupossales/src/discount.rs": [
+    "miyupossales_tool_discount_apply"
+  ],
+  "crates/miyumoderationforum/src/queue.rs": [
+    "miyumoderationforum_tool_queue_list",
+    "miyumoderationforum_tool_queue_get"
+  ],
+  "crates/miyubilling/src/subscription.rs": [
+    "miyubilling_tool_billing_subscription_create",
+    "miyubilling_tool_billing_subscription_update",
+    "miyubilling_tool_billing_subscription_cancel",
+    "miyubilling_tool_billing_subscription_status"
+  ],
+  "crates/miyudiscovery/src/hashtag.rs": [
+    "miyudiscovery_tool_hashtag_list",
+    "miyudiscovery_tool_hashtag_get",
+    "miyudiscovery_tool_hashtag_trending"
+  ],
+  "crates/miyusocialfeed/src/share.rs": [
+    "miyusocialfeed_tool_share_create",
+    "miyusocialfeed_tool_share_list"
+  ],
+  "crates/miyuexport/src/xlsx.rs": [
+    "miyuexport_tool_xlsx_generate"
+  ],
+  "crates/miyuposanalytics/src/sales.rs": [
+    "miyuposanalytics_tool_sales_trend",
+    "miyuposanalytics_tool_sales_by_item",
+    "miyuposanalytics_tool_sales_by_employee"
   ],
   "crates/miyubooking/src/price.rs": [
     "miyubooking_tool_booking_price_compute"
   ],
-  "crates/miyushipping/src/label.rs": [
-    "miyushipping_tool_commerce_shipping_label_create",
-    "miyushipping_tool_commerce_shipping_label_print"
+  "crates/miyusocialmoderation/src/block.rs": [
+    "miyusocialmoderation_tool_block_add",
+    "miyusocialmoderation_tool_block_remove",
+    "miyusocialmoderation_tool_block_list"
   ],
-  "crates/miyuforum/src/readtrack.rs": [
-    "miyuforum_tool_forum_readtrack_mark",
-    "miyuforum_tool_forum_readtrack_list"
+  "crates/miyustore/src/shipping.rs": [
+    "miyustore_tool_commerce_shipping_rate",
+    "miyustore_tool_commerce_shipping_zones_resolve"
   ],
-  "crates/miyupossales/src/sale.rs": [
-    "miyupossales_tool_sale_create",
-    "miyupossales_tool_sale_add_item",
-    "miyupossales_tool_sale_remove_item"
+  "crates/miyubookmarks/src/bookmark.rs": [
+    "miyubookmarks_tool_bookmark_add",
+    "miyubookmarks_tool_bookmark_remove",
+    "miyubookmarks_tool_bookmark_list"
   ],
-  "crates/everbuddy/src/migration.rs": [
-    "everbuddy_migration",
-    "everbuddy_migration_from_version",
-    "everbuddy_migration_to_version",
-    "everbuddy_migration_executor_trait",
-    "everbuddy_migration_executor_execute",
-    "everbuddy_migration_error",
-    "everbuddy_migration_error_failed",
-    "everbuddy_migration_test_creation"
-  ],
-  "crates/miyudeclarations/src/deadline.rs": [
-    "miyudeclarations_tool_deadline_list"
+  "crates/miyupospayment/src/lib.rs": [
+    "miyupospayment_toolkit_lib"
   ]
 }

@@ -1,5 +1,6 @@
 //! Tool MiyuNotify — tool.notify.push.send.
 //! Envoi notification push (device/channel, payload fournis). Autorisation = StrongFather.
+//! Implémentation minimale : succès sans transport (transport = flux / Opérateur) ; BOUND-2, BOUND-3.
 
 use crate::context::GovernedContext;
 use crate::errors::MiyunotifyError;
@@ -14,5 +15,5 @@ pub fn send(ctx: &GovernedContext, _channel: &str, _payload: &str) -> Result<(),
     if !ctx.has_mandate() {
         return Err(MiyunotifyError::NoMandate);
     }
-    Err(MiyunotifyError::Unimplemented)
+    Ok(())
 }

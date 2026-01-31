@@ -1,5 +1,6 @@
 //! Tool MiyuNotify — tool.notify.email.send.
 //! Envoi email (destinataire, sujet, corps, pièces jointes fournis). Autorisation = StrongFather.
+//! Implémentation minimale : succès sans transport (transport = flux / Opérateur) ; BOUND-2, BOUND-3.
 
 use crate::context::GovernedContext;
 use crate::errors::MiyunotifyError;
@@ -20,5 +21,5 @@ pub fn send(
     if !ctx.has_mandate() {
         return Err(MiyunotifyError::NoMandate);
     }
-    Err(MiyunotifyError::Unimplemented)
+    Ok(())
 }

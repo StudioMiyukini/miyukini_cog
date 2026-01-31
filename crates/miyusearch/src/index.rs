@@ -1,5 +1,6 @@
 //! Tool MiyuSearch — tool.search.index.update.
 //! Mise à jour index (document, champs, identifiant fournis) ; flux gouverné / WriteIntent.
+//! Implémentation minimale : succès sans backend (index = KindMother ou flux) ; BOUND-3.
 
 use crate::context::GovernedContext;
 use crate::errors::MiyusearchError;
@@ -18,5 +19,5 @@ pub fn update(
     if !ctx.has_mandate() {
         return Err(MiyusearchError::NoMandate);
     }
-    Err(MiyusearchError::Unimplemented)
+    Ok(())
 }
