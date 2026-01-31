@@ -1,0 +1,28 @@
+[package]
+name = "miyukini-central"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Miyukini Central - Hub de gestion des Services de l'ecosysteme Miyukini COG"
+
+[dependencies]
+egui = "0.33"
+eframe = { version = "0.33", default-features = false, features = ["default_fonts", "persistence", "glow"] }
+
+[[bin]]
+name = "miyukini-central"
+path = "src/main.rs"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"

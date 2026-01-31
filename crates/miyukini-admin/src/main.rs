@@ -14,7 +14,7 @@ use axum::{
     response::{Html, IntoResponse, Json, Redirect, Response},
     Json as JsonExtract,
 };
-use miyukini_admin::admin_cell::{AdminCell, ModuleType};
+use miyukini_admin::admin_cell::{AdminCell, ModuleInfo, ModuleType};
 use miyukini_admin::backup_service::{BackupServiceImpl, BackupService};
 use miyukini_admin::config::BackendConfig;
 use miyukini_admin::crud_state::CrudState;
@@ -32,6 +32,7 @@ use miyukini_kernel::EnvConfig;
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::{env, fs};
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::ServeDir;
 
@@ -160,6 +161,31 @@ async fn main() {
 
     let module_discovery = Arc::new(StubModuleDiscovery::new());
     let admin_cell_reader = Arc::new(StubAdminCellReader::new());
+    // Charge le registre des 49 Toolkits (mscm_index/toolkit_registry.json) si présent (généré par toolkit-registry-export).
+    if let Ok(cwd) = env::current_dir() {
+        let registry_path = cwd.join("mscm_index").join("toolkit_registry.json");
+        if registry_path.is_file() {
+            if let Ok(content) = fs::read_to_string(&registry_path) {
+                #[derive(serde::Deserialize)]
+                struct ToolkitRegistryEntry {
+                    module_info: ModuleInfo,
+                    admin_cell: AdminCell,
+                }
+                #[derive(serde::Deserialize)]
+                struct ToolkitRegistry {
+                    entries: Vec<ToolkitRegistryEntry>,
+                }
+                if let Ok(registry) = serde_json::from_str::<ToolkitRegistry>(&content) {
+                    let count = registry.entries.len();
+                    for entry in registry.entries {
+                        module_discovery.register_module(entry.module_info.clone());
+                        admin_cell_reader.register_cell(entry.module_info.id.clone(), entry.admin_cell);
+                    }
+                    eprintln!("MiyukiniAdmin: {} toolkits chargés depuis mscm_index/toolkit_registry.json", count);
+                }
+            }
+        }
+    }
     let integrity_verifier = Arc::new(StubIntegrityVerifier::default());
     let module_testing_svc = Arc::new(ModuleTestingService::new(
         Arc::clone(&module_discovery),

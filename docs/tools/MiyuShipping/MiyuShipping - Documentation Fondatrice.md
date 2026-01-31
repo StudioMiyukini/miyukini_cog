@@ -89,6 +89,8 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 ## 8. Relation avec KindMother et MiyuStore
 
+Les obligations de conformité détaillées sont dans [MiyuShipping - Tool Governance Compliance Contract](./contracts/governance/MiyuShipping%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 - **KindMother** est l'autorité sur les règles de livraison (zones, tarifs), l'état des commandes et des expéditions. MiyuShipping exécute des capacités (rate, zones, label, tracking, shipment) **sans décider** de la politique de livraison ; les règles sont fournies par KindMother ou dans le flux.
 - **MiyuStore** inclut les Tools de base `tool.commerce.shipping.rate` et `tool.commerce.shipping.zones.resolve` pour le checkout ; MiyuShipping agrège l'ensemble des Tools livraison (rate, zones, étiquettes, comparaison, suivi, expéditions) pour le Service complet de livraison et d'expédition.
 
@@ -98,7 +100,7 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuShipping sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol) :
+La documentation et la future implémentation de MiyuShipping sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). Référence : [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
 
 - **Domaine** : `commerce` — cohérent avec la projection domains.json (blocs du domaine « commerce »).
 - **Layer** : outil / toolkit (Strate 6) — à refléter dans layers.json lorsque le code existera.

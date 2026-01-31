@@ -82,9 +82,17 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 **KindMother** est l'autorité sur toutes les données : clients, adresses, notes, points fidélité. Toute écriture (création/mise à jour client, octroi/rédemption points) passe par **WriteIntent** sous autorité KindMother. MiyuPosLoyalty exécute des capacités atomiques ; l'autorisation d'octroi/rédemption reste à StrongFather.
 
+Les obligations de conformité détaillées sont dans [MiyuPosLoyalty - Tool Governance Compliance Contract](./contracts/governance/MiyuPosLoyalty%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 ---
 
-## 9. Références croisées
+## 9. Alignement MIP
+
+La documentation et la future implémentation de MiyuPosLoyalty sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). À l'implémentation, le code fournissant les Tools MiyuPosLoyalty devra être balisé MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit généré selon le [Protocole MIP v1](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+
+---
+
+## 10. Références croisées
 
 | Document | Lien |
 |----------|------|

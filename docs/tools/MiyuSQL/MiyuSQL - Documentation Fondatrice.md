@@ -95,6 +95,8 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 **Référence :** [Miyukini Conceptual References - Acces DB et Droits Agents IA](../../reference/Miyukini%20Conceptual%20References%20-%20Acces%20DB%20et%20Droits%20Agents%20IA.md) (distinction outillage vs WriteIntent, si pertinent).
 
+Les obligations de conformité détaillées sont dans [MiyuSQL - Tool Governance Compliance Contract](./contracts/governance/MiyuSQL%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 ---
 
 ## 9. Alignement MIP

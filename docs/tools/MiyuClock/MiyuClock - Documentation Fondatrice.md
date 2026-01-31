@@ -94,6 +94,8 @@ Le Toolkit MiyuClock est **déclaré** dans Master Butler et **compatibilisé** 
 
 **Référence :** [Miyukini Conceptual References - Lois Autonomie Systeme](../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) (LOI-4).
 
+Les obligations de conformité détaillées sont dans [MiyuClock - Tool Governance Compliance Contract](./contracts/governance/MiyuClock%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 ---
 
 ## 9. Alignement MIP

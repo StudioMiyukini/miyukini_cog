@@ -54,7 +54,7 @@ L'autorité sur les données (règles de créneaux, ressources, réservations, t
 
 ## 5. Liste des outils composants
 
-MiyuBooking est composé des Tools suivants (format canonique `tool.booking.<sous-domaine>.<action>` ou `tool.booking.<action>`). Le détail de chaque outil (action, niveau de sécurité, capability_id) sera décrit dans MiyuBooking - Reference Outils (phase ultérieure).
+Le détail de chaque outil est décrit dans [MiyuBooking - Reference Outils](./MiyuBooking%20-%20Reference%20Outils.md). MiyuBooking est composé des Tools suivants (format canonique `tool.booking.<sous-domaine>.<action>` ou `tool.booking.<action>`).
 
 | ToolId | Description courte |
 |--------|---------------------|
@@ -90,6 +90,8 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 ## 8. Relation avec KindMother
 
+Les obligations de conformité détaillées sont dans [MiyuBooking - Tool Governance Compliance Contract](./contracts/governance/MiyuBooking%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 - **KindMother** est l'autorité sur les règles de créneaux, les ressources (salles, équipements), les réservations et les tarifs. MiyuBooking exécute des capacités (slots.list/resolve, create, update, cancel, resource.resolve/availability, price.compute, participants.compute) **sans décider** de l'autorisation (StrongFather) ni de la politique de réservation ; les règles sont fournies par KindMother ou dans le flux.
 - Les créneaux peuvent être affichés dans le fuseau horaire de l'utilisateur ; les règles de disponibilité et les ressources sont des données KindMother.
 
@@ -99,7 +101,7 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuBooking sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol) :
+La documentation et la future implémentation de MiyuBooking sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). Référence : [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
 
 - **Domaine** : `booking` — cohérent avec la projection domains.json (blocs du domaine « booking »).
 - **Layer** : outil / toolkit (Strate 6) — à refléter dans layers.json lorsque le code existera.

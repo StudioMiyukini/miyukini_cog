@@ -54,7 +54,7 @@ L'autorité sur les données (contenus, médias, révisions, commentaires) appar
 
 ## 5. Liste des outils composants
 
-MiyuCMS est composé des Tools suivants (format canonique `tool.<domain>.<action>` ou `tool.<domain>.<sous-domaine>.<action>`). Le détail de chaque outil (action, niveau de sécurité, capability_id) sera décrit dans MiyuCMS - Reference Outils (phase ultérieure).
+Le détail de chaque outil est décrit dans [MiyuCMS - Reference Outils](./MiyuCMS%20-%20Reference%20Outils.md). MiyuCMS est composé des Tools suivants (format canonique `tool.<domain>.<action>` ou `tool.<domain>.<sous-domaine>.<action>`).
 
 | ToolId | Description courte |
 |--------|---------------------|
@@ -103,7 +103,7 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuCMS sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol) :
+La documentation et la future implémentation de MiyuCMS sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). Référence : [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
 
 - **Domaine** : `content` — cohérent avec la projection domains.json (blocs du domaine « content »).
 - **Layer** : outil / toolkit (Strate 6) — à refléter dans layers.json lorsque le code existera.

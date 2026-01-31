@@ -129,6 +129,8 @@ MiyuAuth **ne dépend pas** de MiyuSQL (pas d'appel direct) ; la relation est **
 
 **Référence :** [MiyuSQL - Documentation Fondatrice](../MiyuSQL/MiyuSQL%20-%20Documentation%20Fondatrice.md), [MiyuSQL - KindMother Integration Contract](../MiyuSQL/contracts/integration/MiyuSQL%20-%20KindMother%20Integration%20Contract.md).
 
+Les obligations de conformité détaillées sont dans [MiyuAuth - Tool Governance Compliance Contract](./contracts/governance/MiyuAuth%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 ---
 
 ## 9. Alignement MIP

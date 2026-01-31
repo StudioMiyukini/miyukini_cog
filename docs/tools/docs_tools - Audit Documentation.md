@@ -147,6 +147,7 @@ Audit de la documentation des Kits d'Outils (Toolkits) dans **docs/tools/** : re
 ## 6. Références
 
 - [docs/tools/_index.md](./_index.md)
+- [docs_tools - Audit Qualité Conformité Sécurité Implémentation](./docs_tools%20-%20Audit%20Qualite%20Conformite%20Securite%20Implementation.md) — audit qualité, conformité protocoles, niveau de sécurité, guides d’implémentation
 - [Miyukini Conceptual References - Tools et Toolkits](../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)
 - [Master Butler - Tool Governance Contract](../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md)
 

@@ -74,6 +74,8 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 **KindMother** est l'autorité sur les données : destinataires, préférences, historique inbox. L'outil `tool.notify.inbox.write` produit une **WriteIntent** vers KindMother. Les outils email.send et push.send exécutent un envoi externe (pas d'écriture directe en base métier par MiyuNotify ; les logs d'envoi relèvent de l'implémentation).
 
+Les obligations de conformité détaillées sont dans [MiyuNotify - Tool Governance Compliance Contract](./contracts/governance/MiyuNotify%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 ---
 
 ## 9. Alignement MIP

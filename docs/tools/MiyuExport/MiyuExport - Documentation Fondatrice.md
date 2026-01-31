@@ -74,6 +74,8 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 **KindMother** est l'autorité sur les données. MiyuExport **ne lit pas** la base directement : les données à exporter sont **fournies dans le flux** (après lecture via MiyuSQL sous autorité KindMother). MiyuExport produit un flux binaire (CSV, XLSX, PDF) ; pas d'écriture en base métier par MiyuExport.
 
+Les obligations de conformité détaillées sont dans [MiyuExport - Tool Governance Compliance Contract](./contracts/governance/MiyuExport%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 ---
 
 ## 9. Alignement MIP

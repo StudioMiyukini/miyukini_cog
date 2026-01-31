@@ -1,0 +1,2016 @@
+{
+  "entries": [
+    {
+      "module_info": {
+        "id": "toolkit.calc.miyucalc",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyucalc",
+        "admin_cell_ref": {
+          "module_id": "toolkit.calc.miyucalc",
+          "ref_path": "crate:toolkit.calc.miyucalc"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.calc.miyucalc",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "miyukini-miyucalc"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "MiyukiniCalctest",
+              "name": "Test chemin complet MiyuCalc (expression, format, unit, round)",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "MiyuCalc-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.data.miyusql",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyusql",
+        "admin_cell_ref": {
+          "module_id": "toolkit.data.miyusql",
+          "ref_path": "crate:toolkit.data.miyusql"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.data.miyusql",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "miyukini-miyusql"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "MiyukiniSQLtest",
+              "name": "Test chemin complet MiyuSQL (WriteIntent → table → colonne → insert → read → delete)",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "MiyuSQL-KindMother-Integration",
+            "MiyuSQL-Runtime-Boundary",
+            "MiyuSQL-Dependencies",
+            "MiyuSQL-Cycle-Tests"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.text.miyutext",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyutext",
+        "admin_cell_ref": {
+          "module_id": "toolkit.text.miyutext",
+          "ref_path": "crate:toolkit.text.miyutext"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.text.miyutext",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "miyukini-miyutext"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "MiyukiniTexttest",
+              "name": "Test chemin complet MiyuText",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "MiyuText-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.validate.miyuvalidate",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuvalidate",
+        "admin_cell_ref": {
+          "module_id": "toolkit.validate.miyuvalidate",
+          "ref_path": "crate:toolkit.validate.miyuvalidate"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.validate.miyuvalidate",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "miyukini-miyuvalidate"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "MiyukiniValidatetest",
+              "name": "Test chemin complet MiyuValidate",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "MiyuValidate-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.locale.miyulocale",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyulocale",
+        "admin_cell_ref": {
+          "module_id": "toolkit.locale.miyulocale",
+          "ref_path": "crate:toolkit.locale.miyulocale"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.locale.miyulocale",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "miyukini-miyulocale"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "MiyukiniLocaletest",
+              "name": "Test chemin complet MiyuLocale",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "MiyuLocale-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.export.miyuexport",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuexport",
+        "admin_cell_ref": {
+          "module_id": "toolkit.export.miyuexport",
+          "ref_path": "crate:toolkit.export.miyuexport"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.export.miyuexport",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "miyukini-miyuexport"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "MiyukiniExporttest",
+              "name": "Test chemin complet MiyuExport",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "MiyuExport-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.jobs.miyujobs",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyujobs",
+        "admin_cell_ref": {
+          "module_id": "toolkit.jobs.miyujobs",
+          "ref_path": "crate:toolkit.jobs.miyujobs"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.jobs.miyujobs",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "miyukini-miyujobs"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "MiyukiniJobstest",
+              "name": "Test chemin complet MiyuJobs",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "MiyuJobs-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.identity.miyauth",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyauth",
+        "admin_cell_ref": {
+          "module_id": "toolkit.identity.miyauth",
+          "ref_path": "crate:toolkit.identity.miyauth"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.identity.miyauth",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyauth"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyauth",
+              "name": "Test chemin complet Miyauth",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyauth-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.web.miyuweb",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuweb",
+        "admin_cell_ref": {
+          "module_id": "toolkit.web.miyuweb",
+          "ref_path": "crate:toolkit.web.miyuweb"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.web.miyuweb",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyuweb"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyuweb",
+              "name": "Test chemin complet Miyuweb",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyuweb-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.kernel.miyuclock",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuclock",
+        "admin_cell_ref": {
+          "module_id": "toolkit.kernel.miyuclock",
+          "ref_path": "crate:toolkit.kernel.miyuclock"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.kernel.miyuclock",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyuclock"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyuclock",
+              "name": "Test chemin complet Miyuclock",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyuclock-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.community.forum",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuforum",
+        "admin_cell_ref": {
+          "module_id": "toolkit.community.forum",
+          "ref_path": "crate:toolkit.community.forum"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.community.forum",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyuforum"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyuforum",
+              "name": "Test chemin complet Miyuforum",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyuforum-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.communication.pm",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyupm",
+        "admin_cell_ref": {
+          "module_id": "toolkit.communication.pm",
+          "ref_path": "crate:toolkit.communication.pm"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.communication.pm",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyupm"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyupm",
+              "name": "Test chemin complet Miyupm",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyupm-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.notify.miyunotify",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyunotify",
+        "admin_cell_ref": {
+          "module_id": "toolkit.notify.miyunotify",
+          "ref_path": "crate:toolkit.notify.miyunotify"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.notify.miyunotify",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyunotify"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyunotify",
+              "name": "Test chemin complet Miyunotify",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyunotify-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.search.miyusearch",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyusearch",
+        "admin_cell_ref": {
+          "module_id": "toolkit.search.miyusearch",
+          "ref_path": "crate:toolkit.search.miyusearch"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.search.miyusearch",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyusearch"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyusearch",
+              "name": "Test chemin complet Miyusearch",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyusearch-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.webway.participant",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuwebway-participant",
+        "admin_cell_ref": {
+          "module_id": "toolkit.webway.participant",
+          "ref_path": "crate:toolkit.webway.participant"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.webway.participant",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "MiyuwebwayParticipant"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "MiyuwebwayParticipant",
+              "name": "Test chemin complet MiyuwebwayParticipant",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "MiyuwebwayParticipant-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.webway.tracker",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuwebway-tracker",
+        "admin_cell_ref": {
+          "module_id": "toolkit.webway.tracker",
+          "ref_path": "crate:toolkit.webway.tracker"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.webway.tracker",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "MiyuwebwayTracker"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "MiyuwebwayTracker",
+              "name": "Test chemin complet MiyuwebwayTracker",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "MiyuwebwayTracker-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.billing.saas",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyubilling",
+        "admin_cell_ref": {
+          "module_id": "toolkit.billing.saas",
+          "ref_path": "crate:toolkit.billing.saas"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.billing.saas",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyubilling"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyubilling",
+              "name": "Test chemin complet Miyubilling",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyubilling-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.booking.reservations",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyubooking",
+        "admin_cell_ref": {
+          "module_id": "toolkit.booking.reservations",
+          "ref_path": "crate:toolkit.booking.reservations"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.booking.reservations",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyubooking"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyubooking",
+              "name": "Test chemin complet Miyubooking",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyubooking-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.content.cms",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyucms",
+        "admin_cell_ref": {
+          "module_id": "toolkit.content.cms",
+          "ref_path": "crate:toolkit.content.cms"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.content.cms",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyucms"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyucms",
+              "name": "Test chemin complet Miyucms",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyucms-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.content.media",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyumedia",
+        "admin_cell_ref": {
+          "module_id": "toolkit.content.media",
+          "ref_path": "crate:toolkit.content.media"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.content.media",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyumedia"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyumedia",
+              "name": "Test chemin complet Miyumedia",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyumedia-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.commerce.shipping",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyushipping",
+        "admin_cell_ref": {
+          "module_id": "toolkit.commerce.shipping",
+          "ref_path": "crate:toolkit.commerce.shipping"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.commerce.shipping",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyushipping"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyushipping",
+              "name": "Test chemin complet Miyushipping",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyushipping-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.commerce.store",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyustore",
+        "admin_cell_ref": {
+          "module_id": "toolkit.commerce.store",
+          "ref_path": "crate:toolkit.commerce.store"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.commerce.store",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyustore"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyustore",
+              "name": "Test chemin complet Miyustore",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyustore-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.web.widgets",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuwidgets",
+        "admin_cell_ref": {
+          "module_id": "toolkit.web.widgets",
+          "ref_path": "crate:toolkit.web.widgets"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.web.widgets",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyuwidgets"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyuwidgets",
+              "name": "Test chemin complet Miyuwidgets",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyuwidgets-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.invoice.standalone",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuinvoice",
+        "admin_cell_ref": {
+          "module_id": "toolkit.invoice.standalone",
+          "ref_path": "crate:toolkit.invoice.standalone"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.invoice.standalone",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyuinvoice"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyuinvoice",
+              "name": "Test chemin complet Miyuinvoice",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyuinvoice-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.compta.ledger",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyucptaledger",
+        "admin_cell_ref": {
+          "module_id": "toolkit.compta.ledger",
+          "ref_path": "crate:toolkit.compta.ledger"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.compta.ledger",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyucptaledger"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyucptaledger",
+              "name": "Test chemin complet Miyucptaledger",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyucptaledger-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.expense.claims",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuexpense",
+        "admin_cell_ref": {
+          "module_id": "toolkit.expense.claims",
+          "ref_path": "crate:toolkit.expense.claims"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.expense.claims",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyuexpense"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyuexpense",
+              "name": "Test chemin complet Miyuexpense",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyuexpense-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.treasury.forecast",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyutreasury",
+        "admin_cell_ref": {
+          "module_id": "toolkit.treasury.forecast",
+          "ref_path": "crate:toolkit.treasury.forecast"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.treasury.forecast",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyutreasury"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyutreasury",
+              "name": "Test chemin complet Miyutreasury",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyutreasury-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.security.antispam",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuantispam",
+        "admin_cell_ref": {
+          "module_id": "toolkit.security.antispam",
+          "ref_path": "crate:toolkit.security.antispam"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.security.antispam",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyuantispam"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyuantispam",
+              "name": "Test chemin complet Miyuantispam",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyuantispam-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.content.bookmarks",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyubookmarks",
+        "admin_cell_ref": {
+          "module_id": "toolkit.content.bookmarks",
+          "ref_path": "crate:toolkit.content.bookmarks"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.content.bookmarks",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyubookmarks"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyubookmarks",
+              "name": "Test chemin complet Miyubookmarks",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyubookmarks-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.compta.reports",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyucomptareports",
+        "admin_cell_ref": {
+          "module_id": "toolkit.compta.reports",
+          "ref_path": "crate:toolkit.compta.reports"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.compta.reports",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyucomptareports"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyucomptareports",
+              "name": "Test chemin complet Miyucomptareports",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyucomptareports-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.communication.contacts",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyucontacts",
+        "admin_cell_ref": {
+          "module_id": "toolkit.communication.contacts",
+          "ref_path": "crate:toolkit.communication.contacts"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.communication.contacts",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyucontacts"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyucontacts",
+              "name": "Test chemin complet Miyucontacts",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyucontacts-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.compta.declarations",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyudeclarations",
+        "admin_cell_ref": {
+          "module_id": "toolkit.compta.declarations",
+          "ref_path": "crate:toolkit.compta.declarations"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.compta.declarations",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyudeclarations"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyudeclarations",
+              "name": "Test chemin complet Miyudeclarations",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyudeclarations-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.social.discovery",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyudiscovery",
+        "admin_cell_ref": {
+          "module_id": "toolkit.social.discovery",
+          "ref_path": "crate:toolkit.social.discovery"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.social.discovery",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyudiscovery"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyudiscovery",
+              "name": "Test chemin complet Miyudiscovery",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyudiscovery-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.content.feeds",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyufeeds",
+        "admin_cell_ref": {
+          "module_id": "toolkit.content.feeds",
+          "ref_path": "crate:toolkit.content.feeds"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.content.feeds",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyufeeds"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyufeeds",
+              "name": "Test chemin complet Miyufeeds",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyufeeds-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.hr.miyuhr",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuhr",
+        "admin_cell_ref": {
+          "module_id": "toolkit.hr.miyuhr",
+          "ref_path": "crate:toolkit.hr.miyuhr"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.hr.miyuhr",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyuhr"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyuhr",
+              "name": "Test chemin complet Miyuhr",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyuhr-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.moderation.forum",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyumoderationforum",
+        "admin_cell_ref": {
+          "module_id": "toolkit.moderation.forum",
+          "ref_path": "crate:toolkit.moderation.forum"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.moderation.forum",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyumoderationforum"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyumoderationforum",
+              "name": "Test chemin complet Miyumoderationforum",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyumoderationforum-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.content.polls",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyupolls",
+        "admin_cell_ref": {
+          "module_id": "toolkit.content.polls",
+          "ref_path": "crate:toolkit.content.polls"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.content.polls",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyupolls"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyupolls",
+              "name": "Test chemin complet Miyupolls",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyupolls-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.pos.miyuposanalytics",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuposanalytics",
+        "admin_cell_ref": {
+          "module_id": "toolkit.pos.miyuposanalytics",
+          "ref_path": "crate:toolkit.pos.miyuposanalytics"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.pos.miyuposanalytics",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyuposanalytics"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyuposanalytics",
+              "name": "Test chemin complet Miyuposanalytics",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyuposanalytics-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.pos.miyuposinventory",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuposinventory",
+        "admin_cell_ref": {
+          "module_id": "toolkit.pos.miyuposinventory",
+          "ref_path": "crate:toolkit.pos.miyuposinventory"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.pos.miyuposinventory",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyuposinventory"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyuposinventory",
+              "name": "Test chemin complet Miyuposinventory",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyuposinventory-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.pos.miyuposkitchen",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuposkitchen",
+        "admin_cell_ref": {
+          "module_id": "toolkit.pos.miyuposkitchen",
+          "ref_path": "crate:toolkit.pos.miyuposkitchen"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.pos.miyuposkitchen",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyuposkitchen"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyuposkitchen",
+              "name": "Test chemin complet Miyuposkitchen",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyuposkitchen-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.pos.miyuposloyalty",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuposloyalty",
+        "admin_cell_ref": {
+          "module_id": "toolkit.pos.miyuposloyalty",
+          "ref_path": "crate:toolkit.pos.miyuposloyalty"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.pos.miyuposloyalty",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyuposloyalty"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyuposloyalty",
+              "name": "Test chemin complet Miyuposloyalty",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyuposloyalty-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.pos.miyupospayment",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyupospayment",
+        "admin_cell_ref": {
+          "module_id": "toolkit.pos.miyupospayment",
+          "ref_path": "crate:toolkit.pos.miyupospayment"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.pos.miyupospayment",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyupospayment"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyupospayment",
+              "name": "Test chemin complet Miyupospayment",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyupospayment-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.pos.miyupossales",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyupossales",
+        "admin_cell_ref": {
+          "module_id": "toolkit.pos.miyupossales",
+          "ref_path": "crate:toolkit.pos.miyupossales"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.pos.miyupossales",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyupossales"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyupossales",
+              "name": "Test chemin complet Miyupossales",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyupossales-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.identity.profile",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyuprofile",
+        "admin_cell_ref": {
+          "module_id": "toolkit.identity.profile",
+          "ref_path": "crate:toolkit.identity.profile"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.identity.profile",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyuprofile"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyuprofile",
+              "name": "Test chemin complet Miyuprofile",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyuprofile-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.social.feed",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyusocialfeed",
+        "admin_cell_ref": {
+          "module_id": "toolkit.social.feed",
+          "ref_path": "crate:toolkit.social.feed"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.social.feed",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyusocialfeed"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyusocialfeed",
+              "name": "Test chemin complet Miyusocialfeed",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyusocialfeed-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.social.messaging",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyusocialmessaging",
+        "admin_cell_ref": {
+          "module_id": "toolkit.social.messaging",
+          "ref_path": "crate:toolkit.social.messaging"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.social.messaging",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyusocialmessaging"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyusocialmessaging",
+              "name": "Test chemin complet Miyusocialmessaging",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyusocialmessaging-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.social.moderation",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyusocialmoderation",
+        "admin_cell_ref": {
+          "module_id": "toolkit.social.moderation",
+          "ref_path": "crate:toolkit.social.moderation"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.social.moderation",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyusocialmoderation"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyusocialmoderation",
+              "name": "Test chemin complet Miyusocialmoderation",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyusocialmoderation-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.social.profile",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyusocialprofile",
+        "admin_cell_ref": {
+          "module_id": "toolkit.social.profile",
+          "ref_path": "crate:toolkit.social.profile"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.social.profile",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyusocialprofile"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyusocialprofile",
+              "name": "Test chemin complet Miyusocialprofile",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyusocialprofile-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    },
+    {
+      "module_info": {
+        "id": "toolkit.social.story",
+        "version": "0.1.0",
+        "module_type": "toolkit",
+        "module_origin": "miyukini-miyustory",
+        "admin_cell_ref": {
+          "module_id": "toolkit.social.story",
+          "ref_path": "crate:toolkit.social.story"
+        },
+        "locked": false
+      },
+      "admin_cell": {
+        "identification": {
+          "id": "toolkit.social.story",
+          "version": "0.1.0",
+          "module_type": "toolkit",
+          "module_origin": "Miyustory"
+        },
+        "test_manifest": {
+          "tests": [
+            {
+              "id": "Miyustory",
+              "name": "Test chemin complet Miyustory",
+              "protocol": "invoke",
+              "criteria": {
+                "pass": "all_steps_ok"
+              }
+            }
+          ],
+          "result_format": "json"
+        },
+        "integrity": {
+          "fingerprint": "toolkit-registry-export",
+          "contracts": [
+            "Miyustory-Tool-Governance-Compliance"
+          ],
+          "core_versions": {}
+        }
+      }
+    }
+  ]
+}

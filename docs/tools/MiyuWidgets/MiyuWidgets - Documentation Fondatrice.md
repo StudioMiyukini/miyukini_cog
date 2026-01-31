@@ -54,7 +54,7 @@ L'autorité sur les données (templates, structures de layout) appartient à **K
 
 ## 5. Liste des outils composants
 
-MiyuWidgets est composé des Tools suivants (format canonique `tool.web.<sous-domaine>.<action>`). Le détail de chaque outil (action, niveau de sécurité, capability_id) sera décrit dans MiyuWidgets - Reference Outils (phase ultérieure).
+Le détail de chaque outil est décrit dans [MiyuWidgets - Reference Outils](./MiyuWidgets%20-%20Reference%20Outils.md). MiyuWidgets est composé des Tools suivants (format canonique `tool.web.<sous-domaine>.<action>`).
 
 | ToolId | Description courte |
 |--------|---------------------|
@@ -88,6 +88,8 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 ## 8. Relation avec MiyuWeb et KindMother
 
+Les obligations de conformité détaillées sont dans [MiyuWidgets - Tool Governance Compliance Contract](./contracts/governance/MiyuWidgets%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 - **MiyuWeb** fournit les capacités de base (html.render, layout.render, theme.resolve, form.validate, event.dispatch, input.capture, etc.). MiyuWidgets **complète** MiyuWeb pour l'édition visuelle de pages et de thèmes (widgets, layout.apply, template.resolve). L'Opérateur d'Interface « Éditeur de pages / thème » utilise MiyuWeb + MiyuWidgets.
 - **KindMother** est l'autorité sur les données (templates, structures de layout) ; ces données sont fournies dans le flux à MiyuWidgets, qui ne lit pas la base directement.
 - Les Tools MiyuWidgets opèrent sur des **données fournies dans le flux** ; la persistance des templates et layouts relève de KindMother (et éventuellement MiyuSQL sous mandat KindMother).
@@ -98,7 +100,7 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuWidgets sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol) :
+La documentation et la future implémentation de MiyuWidgets sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). Référence : [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
 
 - **Domaine** : `web` — cohérent avec la projection domains.json (blocs du domaine « web »).
 - **Layer** : outil / toolkit (Strate 6) — à refléter dans layers.json lorsque le code existera.

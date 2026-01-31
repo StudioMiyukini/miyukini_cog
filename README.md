@@ -17,8 +17,9 @@
 7. [Gouvernance et sécurité](#7-gouvernance-et-sécurité)
 8. [À qui s'adresse Miyukini](#8-à-qui-sadresse-miyukini)
 9. [Documentation de référence](#9-documentation-de-référence)
-10. [Conclusion](#10-conclusion)
-11. [Log de rédaction](#11-log-de-rédaction)
+10. [Licence](#10-licence)
+11. [Conclusion](#11-conclusion)
+12. [Log de rédaction](#12-log-de-rédaction)
 
 ---
 
@@ -270,11 +271,24 @@ La pyramide, les Cores, les Lois d'autonomie, les contrats de sécurité et de g
 
 **Kits d'Outils** : [docs/tools/_index.md](docs/tools/_index.md) — index des Toolkits documentés.  
 **Protocoles** : [docs/protocols/](docs/protocols/) — MIP, écriture documentation conceptuelle, implémentation générale.  
-**Cores** : [docs/core/](docs/core/) — par Core (StrongFather, KindMother, Master Butler, MiyukiniAdmin, etc.).
+**Cores** : [docs/core/](docs/core/) — par Core (StrongFather, KindMother, Master Butler, MiyukiniAdmin, etc.).  
+**Stack UI (egui / eframe)** : [Miyukini - Stack UI egui eframe](docs/ux_ui/Miyukini%20-%20Stack%20UI%20egui%20eframe.md) — applications desktop et web en pur Rust (Hub, clients natifs).  
+**Miyukini Central (Hub Services)** : [Miyukini Conceptual References - Miyukini Central Hub Services](docs/reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Central%20Hub%20Services.md) — hub de gestion des Services (catalogue, Mes Services, lancement, UI/UX, sécurité).
 
 ---
 
-## 10. Conclusion
+## 10. Licence
+
+Miyukini est distribué sous une **politique de licence duale** :
+
+- **Usage domestique / personnel** (personne physique, à des fins non commerciales) : **gratuit** — voir le fichier [LICENSE](LICENSE) à la racine du dépôt.
+- **Usage par une société ou une collectivité** (entreprise, association, administration, établissement public, etc.) : **payant** — une **licence commerciale** est requise.
+
+Détails et conditions : [Miyukini — Politique de licence](docs/legal/Miyukini%20-%20Politique%20de%20Licence.md).
+
+---
+
+## 11. Conclusion
 
 Miyukini ne vise pas à être le plus rapide ni le plus flexible, mais **prévisible, traçable, autonome et structurellement sécurisé**. Il demande un investissement initial (architecture en strates, contraintes de gouvernance, invariants) en échange de garanties : fonctionnement déterministe en isolation, sécurité par conception, évolution sans rupture, traçabilité complète.
 
@@ -282,10 +296,11 @@ Miyukini ne vise pas à être le plus rapide ni le plus flexible, mais **prévis
 
 ---
 
-## 11. Log de rédaction
+## 12. Log de rédaction
 
 **2026-01-30 — Refonte README racine**
 
+- Ajout section **Licence** : politique duale (usage domestique gratuit, sociétés et collectivités payant) ; lien vers LICENSE et docs/legal/Miyukini - Politique de Licence.md.
 - Suppression de l'arborescence du projet et de la cartographie des crates (aspects purement techniques).
 - Ajout section **Environnements, fédération et sécurité** : identification des environnements (COG, LSI/VID/WID), échanges entre environnements fédérés (visite gouvernée, Passeport, Visa, Bridge), logique de sécurité sous-jacente (identité ≠ autorité, un seul souverain, zero-trust).
 - Recentrage sur la **vision**, la **philosophie**, les **mécaniques générales** (Service → Opérateur(s) → Tools/Toolkits → Gouvernance).

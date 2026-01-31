@@ -1,0 +1,65 @@
+[package]
+name = "toolkit-registry-export"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Exporte le registre des admin_cells des 49 Toolkits vers mscm_index/toolkit_registry.json pour MiyukiniAdmin"
+
+[[bin]]
+name = "toolkit-registry-export"
+path = "src/main.rs"
+
+[dependencies]
+miyukini-admin = { path = "../../crates/miyukini-admin" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+miyucalc = { path = "../../crates/miyucalc" }
+miyusql = { path = "../../crates/miyusql" }
+miyutext = { path = "../../crates/miyutext" }
+miyuvalidate = { path = "../../crates/miyuvalidate" }
+miyulocale = { path = "../../crates/miyulocale" }
+miyuexport = { path = "../../crates/miyuexport" }
+miyujobs = { path = "../../crates/miyujobs" }
+miyauth = { path = "../../crates/miyauth" }
+miyuweb = { path = "../../crates/miyuweb" }
+miyuclock = { path = "../../crates/miyuclock" }
+miyuforum = { path = "../../crates/miyuforum" }
+miyupm = { path = "../../crates/miyupm" }
+miyunotify = { path = "../../crates/miyunotify" }
+miyusearch = { path = "../../crates/miyusearch" }
+miyuwebway_participant = { path = "../../crates/miyuwebway_participant" }
+miyuwebway_tracker = { path = "../../crates/miyuwebway_tracker" }
+miyubilling = { path = "../../crates/miyubilling" }
+miyubooking = { path = "../../crates/miyubooking" }
+miyucms = { path = "../../crates/miyucms" }
+miyumedia = { path = "../../crates/miyumedia" }
+miyushipping = { path = "../../crates/miyushipping" }
+miyustore = { path = "../../crates/miyustore" }
+miyuwidgets = { path = "../../crates/miyuwidgets" }
+miyuinvoice = { path = "../../crates/miyuinvoice" }
+miyucptaledger = { path = "../../crates/miyucptaledger" }
+miyuexpense = { path = "../../crates/miyuexpense" }
+miyutreasury = { path = "../../crates/miyutreasury" }
+miyuantispam = { path = "../../crates/miyuantispam" }
+miyubookmarks = { path = "../../crates/miyubookmarks" }
+miyucomptareports = { path = "../../crates/miyucomptareports" }
+miyucontacts = { path = "../../crates/miyucontacts" }
+miyudeclarations = { path = "../../crates/miyudeclarations" }
+miyudiscovery = { path = "../../crates/miyudiscovery" }
+miyufeeds = { path = "../../crates/miyufeeds" }
+miyuhr = { path = "../../crates/miyuhr" }
+miyumoderationforum = { path = "../../crates/miyumoderationforum" }
+miyupolls = { path = "../../crates/miyupolls" }
+miyuposanalytics = { path = "../../crates/miyuposanalytics" }
+miyuposinventory = { path = "../../crates/miyuposinventory" }
+miyuposkitchen = { path = "../../crates/miyuposkitchen" }
+miyuposloyalty = { path = "../../crates/miyuposloyalty" }
+miyupospayment = { path = "../../crates/miyupospayment" }
+miyupossales = { path = "../../crates/miyupossales" }
+miyuprofile = { path = "../../crates/miyuprofile" }
+miyusocialfeed = { path = "../../crates/miyusocialfeed" }
+miyusocialmessaging = { path = "../../crates/miyusocialmessaging" }
+miyusocialmoderation = { path = "../../crates/miyusocialmoderation" }
+miyusocialprofile = { path = "../../crates/miyusocialprofile" }
+miyustory = { path = "../../crates/miyustory" }

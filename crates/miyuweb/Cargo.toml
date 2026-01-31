@@ -1,0 +1,26 @@
+[package]
+name = "miyuweb"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Kit d'outils Miyuweb — squelette Phase 1 sous gouvernance"
+
+[dependencies]
+miyukini-kernel = { path = "../miyukini-kernel" }
+serde = { version = "1.0", features = ["derive"] }
+
+[dev-dependencies]
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"

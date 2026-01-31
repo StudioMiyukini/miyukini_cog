@@ -74,6 +74,8 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 **KindMother** est l'autorité sur les catalogues de traduction et les préférences de locale. MiyuLocale **ne lit pas** la base directement : locale et catalogue sont **fournis dans le flux** (après lecture via MiyuSQL sous autorité KindMother si besoin). MiyuLocale n'écrit pas la base.
 
+Les obligations de conformité détaillées sont dans [MiyuLocale - Tool Governance Compliance Contract](./contracts/governance/MiyuLocale%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 ---
 
 ## 9. Alignement MIP

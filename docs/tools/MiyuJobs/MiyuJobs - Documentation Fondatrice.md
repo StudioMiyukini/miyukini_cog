@@ -75,6 +75,8 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 **KindMother** est l'autorité sur les données métier. Les payloads des jobs peuvent être persistés (queue, historique) ; écriture = **WriteIntent** vers KindMother ou stockage gouverné. MiyuJobs n'exécute pas la logique métier des tâches : il planifie, enfile et déclenche le traitement ; le contenu et le handler sont fournis dans le flux gouverné.
 
+Les obligations de conformité détaillées sont dans [MiyuJobs - Tool Governance Compliance Contract](./contracts/governance/MiyuJobs%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 ---
 
 ## 9. Alignement MIP

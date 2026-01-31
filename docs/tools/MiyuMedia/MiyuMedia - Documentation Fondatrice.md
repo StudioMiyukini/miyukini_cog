@@ -84,6 +84,8 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 ## 8. Relation avec KindMother et MiyuCMS
 
+Les obligations de conformité détaillées sont dans [MiyuMedia - Tool Governance Compliance Contract](./contracts/governance/MiyuMedia%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 - **KindMother** est l'autorité sur toutes les données médias. Toute création (upload) passe par **WriteIntent** vers KindMother ; MiyuMedia exécute des capacités (upload, serve, transform) **sans décider** de la politique de stockage.
 - **MiyuCMS** agrège MiyuMedia (tool.media.*) dans son périmètre pour le Service CMS complet ; MiyuMedia peut être utilisé seul pour des contextes où seule la gestion des médias est requise.
 
@@ -93,7 +95,7 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuMedia sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol) :
+La documentation et la future implémentation de MiyuMedia sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). Référence : [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
 
 - **Domaine** : `content` — cohérent avec la projection domains.json (blocs du domaine « content »).
 - **Layer** : outil / toolkit (Strate 6) — à refléter dans layers.json lorsque le code existera.

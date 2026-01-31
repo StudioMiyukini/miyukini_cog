@@ -54,7 +54,7 @@ L'autorité sur les données (produits, paniers, commandes, règles livraison et
 
 ## 5. Liste des outils composants
 
-MiyuStore est composé des Tools suivants (format canonique `tool.commerce.<sous-domaine>.<action>`). Le détail de chaque outil (action, niveau de sécurité, capability_id) sera décrit dans MiyuStore - Reference Outils (phase ultérieure).
+Le détail de chaque outil est décrit dans [MiyuStore - Reference Outils](./MiyuStore%20-%20Reference%20Outils.md). MiyuStore est composé des Tools suivants (format canonique `tool.commerce.<sous-domaine>.<action>`).
 
 | ToolId | Description courte |
 |--------|---------------------|
@@ -110,7 +110,7 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuStore sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol) :
+La documentation et la future implémentation de MiyuStore sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). Référence : [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
 
 - **Domaine** : `commerce` — cohérent avec la projection domains.json (blocs du domaine « commerce »).
 - **Layer** : outil / toolkit (Strate 6) — à refléter dans layers.json lorsque le code existera.

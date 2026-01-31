@@ -107,6 +107,8 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 **Référence :** [Miyukini Conceptual References - Equivalents PoS Logiciel Caisse](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20PoS%20Logiciel%20Caisse.md).
 
+Les obligations de conformité détaillées sont dans [MiyuPosSales - Tool Governance Compliance Contract](./contracts/governance/MiyuPosSales%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 ---
 
 ## 9. Alignement MIP

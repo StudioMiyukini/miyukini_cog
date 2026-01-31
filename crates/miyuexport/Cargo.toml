@@ -1,0 +1,28 @@
+[package]
+name = "miyuexport"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Kit d'outils MiyuExport - export et génération de documents (CSV, XLSX, PDF) sous gouvernance"
+
+[dependencies]
+miyukini-kernel = { path = "../miyukini-kernel" }
+serde = { version = "1.0", features = ["derive"] }
+rust_xlsxwriter = "0.64"
+genpdf = "0.2"
+
+[dev-dependencies]
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"

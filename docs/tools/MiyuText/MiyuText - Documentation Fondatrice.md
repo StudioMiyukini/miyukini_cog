@@ -75,6 +75,8 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 **KindMother** est l'autorité sur le contenu métier. MiyuText **n'écrit pas** et **ne lit pas** la base : il opère sur des **chaînes fournies dans le flux**. Les Opérateurs (ex. MiyuCMS, MiyuWeb) récupèrent le contenu via MiyuSQL sous autorité KindMother, puis appellent MiyuText pour rendre, remplacer ou sanitiser.
 
+Les obligations de conformité détaillées sont dans [MiyuText - Tool Governance Compliance Contract](./contracts/governance/MiyuText%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 ---
 
 ## 9. Alignement MIP

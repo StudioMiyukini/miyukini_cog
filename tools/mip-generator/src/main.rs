@@ -27,38 +27,43 @@ struct Registry {
     integrity: String,
 }
 
+/// Découvre tous les répertoires `src` des crates sous `crates/` et `tools/`.
+fn discover_crate_src_dirs() -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
+    let mut dirs = Vec::new();
+    for parent in &["crates", "tools"] {
+        let parent_path = PathBuf::from(parent);
+        if !parent_path.exists() {
+            continue;
+        }
+        for entry in fs::read_dir(&parent_path)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_dir() {
+                let cargo_toml = path.join("Cargo.toml");
+                let src = path.join("src");
+                if cargo_toml.is_file() && src.is_dir() {
+                    dirs.push(src);
+                }
+            }
+        }
+    }
+    Ok(dirs)
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let output_dir = PathBuf::from("mscm_index");
 
     // Créer le dossier de sortie
     fs::create_dir_all(&output_dir)?;
 
-    // Scanner tous les fichiers Rust dans tous les crates
+    // Découverte dynamique de tous les crates (workspace)
+    let crate_src_dirs = discover_crate_src_dirs()?;
+
     let mut blocks = Vec::new();
     let mut files_processed = HashSet::new();
 
-    // Scanner tous les crates
-    let crates = vec![
-        "crates/miyukini-kernel/src",
-        "crates/strongfather/src",
-        "crates/kindmother/src",
-        "crates/borderguard/src",
-        "crates/caringnanny/src",
-        "crates/masterbutler/src",
-        "crates/bondingbrother/src",
-        "crates/everbuddy/src",
-        "crates/worrysentinel/src",
-        "crates/tamr/src",
-        "crates/logisticssteward/src",
-        "crates/miyusql/src",
-        "crates/miyukini-admin/src",
-    ];
-
-    for crate_dir in crates {
-        let crate_path = PathBuf::from(crate_dir);
-        if crate_path.exists() {
-            scan_directory(&crate_path, &mut blocks, &mut files_processed)?;
-        }
+    for crate_dir in &crate_src_dirs {
+        scan_directory(crate_dir, &mut blocks, &mut files_processed)?;
     }
 
     // Générer les fichiers d'index

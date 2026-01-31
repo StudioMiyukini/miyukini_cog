@@ -54,7 +54,7 @@ L'autorité sur les données (offres d'abonnement, souscriptions, factures, paie
 
 ## 5. Liste des outils composants
 
-MiyuBilling est composé des Tools suivants (format canonique `tool.billing.<sous-domaine>.<action>` ou `tool.billing.<action>`). Le détail de chaque outil (action, niveau de sécurité, capability_id) sera décrit dans MiyuBilling - Reference Outils (phase ultérieure).
+Le détail de chaque outil est décrit dans [MiyuBilling - Reference Outils](./MiyuBilling%20-%20Reference%20Outils.md). MiyuBilling est composé des Tools suivants (format canonique `tool.billing.<sous-domaine>.<action>` ou `tool.billing.<action>`).
 
 | ToolId | Description courte |
 |--------|---------------------|
@@ -89,6 +89,8 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 ## 8. Relation avec KindMother et multi-tenant
 
+Les obligations de conformité détaillées sont dans [MiyuBilling - Tool Governance Compliance Contract](./contracts/governance/MiyuBilling%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 - **KindMother** est l'autorité sur les offres d'abonnement, les souscriptions, les factures et les paiements. MiyuBilling exécute des capacités (subscription.*, invoice.*, payment.record, tenant.resolve) **sans décider** de l'autorisation (StrongFather) ni de la politique de facturation ; les règles sont fournies par KindMother ou dans le flux.
 - **Multi-tenant** : `tool.billing.tenant.resolve` permet de résoudre le contexte tenant (identifiant, périmètre) pour une requête ; les requêtes sont ensuite filtrées par ce périmètre (KindMother / Master Butler). L'isolation des données par tenant relève de KindMother et Border Guard ; MiyuBilling fournit la capacité de résolution du contexte tenant.
 
@@ -98,7 +100,7 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuBilling sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol) :
+La documentation et la future implémentation de MiyuBilling sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). Référence : [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
 
 - **Domaine** : `billing` — cohérent avec la projection domains.json (blocs du domaine « billing »).
 - **Layer** : outil / toolkit (Strate 6) — à refléter dans layers.json lorsque le code existera.

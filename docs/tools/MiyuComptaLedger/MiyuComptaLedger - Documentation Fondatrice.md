@@ -83,7 +83,13 @@ Les obligations de conformité détaillées sont dans [MiyuComptaLedger - Tool G
 
 ---
 
-## 9. Références croisées
+## 9. Alignement MIP
+
+La documentation et la future implémentation de MiyuComptaLedger sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). À l'implémentation, le code fournissant les Tools MiyuComptaLedger devra être balisé MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit généré selon le [Protocole MIP v1](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+
+---
+
+## 10. Références croisées
 
 | Document | Lien |
 |----------|------|

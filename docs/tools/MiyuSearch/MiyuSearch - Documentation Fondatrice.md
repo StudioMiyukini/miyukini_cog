@@ -74,6 +74,8 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 **KindMother** est l'autorité sur les données sources. L'index MiyuSearch est une **dérivation** des données KindMother ; mise à jour d'index = flux gouverné (WriteIntent ou mécanisme documenté). Les Tools lisent l'index pour requêter et suggérer ; pas d'écriture métier directe sur les données sources.
 
+Les obligations de conformité détaillées sont dans [MiyuSearch - Tool Governance Compliance Contract](./contracts/governance/MiyuSearch%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 ---
 
 ## 9. Alignement MIP

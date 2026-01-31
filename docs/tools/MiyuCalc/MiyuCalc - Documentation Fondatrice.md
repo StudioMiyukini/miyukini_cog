@@ -75,6 +75,8 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 **KindMother** est l'autorité sur les données métier. MiyuCalc **n'écrit pas** et **ne lit pas** la base : il opère sur des valeurs et expressions **fournies dans le flux**. Les Opérateurs (ex. MiyuTreasury, MiyuStore) récupèrent les données via MiyuSQL sous autorité KindMother, puis appellent MiyuCalc pour calculer ou formater.
 
+Les obligations de conformité détaillées sont dans [MiyuCalc - Tool Governance Compliance Contract](./contracts/governance/MiyuCalc%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 ---
 
 ## 9. Alignement MIP

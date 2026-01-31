@@ -73,6 +73,8 @@ Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%
 
 **KindMother** est l'autorité sur les schémas et règles métier. MiyuValidate **ne lit pas** la base directement : schéma et politique sont **fournis dans le flux** (après lecture via MiyuSQL sous autorité KindMother si besoin). MiyuValidate n'écrit pas la base ; il retourne un résultat de validation ou une valeur sanitisée.
 
+Les obligations de conformité détaillées sont dans [MiyuValidate - Tool Governance Compliance Contract](./contracts/governance/MiyuValidate%20-%20Tool%20Governance%20Compliance%20Contract.md).
+
 ---
 
 ## 9. Alignement MIP
