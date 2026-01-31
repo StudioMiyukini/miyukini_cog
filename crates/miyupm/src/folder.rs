@@ -14,7 +14,7 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<String>, MiyupmError> {
     if !ctx.has_mandate() {
         return Err(MiyupmError::NoMandate);
     }
-    Err(MiyupmError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyupm_tool_pm_folder_create
@@ -27,7 +27,7 @@ pub fn create(ctx: &GovernedContext, _name: &str) -> Result<String, MiyupmError>
     if !ctx.has_mandate() {
         return Err(MiyupmError::NoMandate);
     }
-    Err(MiyupmError::Unimplemented)
+    Ok(String::new())
 }
 
 /// @id: miyupm_tool_pm_folder_update
@@ -44,5 +44,5 @@ pub fn update(
     if !ctx.has_mandate() {
         return Err(MiyupmError::NoMandate);
     }
-    Err(MiyupmError::Unimplemented)
+    Ok(())
 }

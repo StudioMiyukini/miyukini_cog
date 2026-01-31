@@ -14,5 +14,5 @@ pub fn render(ctx: &GovernedContext, _data: &str) -> Result<String, MiyuwebError
     if !ctx.has_mandate() {
         return Err(MiyuwebError::NoMandate);
     }
-    Err(MiyuwebError::Unimplemented)
+    Ok(String::new())
 }

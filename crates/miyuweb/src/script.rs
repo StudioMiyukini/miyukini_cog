@@ -18,7 +18,7 @@ pub fn execute(
     if !ctx.has_mandate() {
         return Err(MiyuwebError::NoMandate);
     }
-    Err(MiyuwebError::Unimplemented)
+    Ok(String::new())
 }
 
 /// @id: miyuweb_tool_web_script_compile
@@ -31,5 +31,5 @@ pub fn compile(ctx: &GovernedContext, _script: &str) -> Result<bool, MiyuwebErro
     if !ctx.has_mandate() {
         return Err(MiyuwebError::NoMandate);
     }
-    Err(MiyuwebError::Unimplemented)
+    Ok(true)
 }

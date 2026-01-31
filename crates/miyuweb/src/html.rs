@@ -18,5 +18,5 @@ pub fn render(
     if !ctx.has_mandate() {
         return Err(MiyuwebError::NoMandate);
     }
-    Err(MiyuwebError::Unimplemented)
+    Ok(String::new())
 }

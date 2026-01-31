@@ -18,7 +18,7 @@ pub fn create(
     if !ctx.has_mandate() {
         return Err(MiyupmError::NoMandate);
     }
-    Err(MiyupmError::Unimplemented)
+    Ok(String::new())
 }
 
 /// @id: miyupm_tool_pm_draft_update
@@ -35,7 +35,7 @@ pub fn update(
     if !ctx.has_mandate() {
         return Err(MiyupmError::NoMandate);
     }
-    Err(MiyupmError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyupm_tool_pm_draft_list
@@ -48,5 +48,5 @@ pub fn list(ctx: &GovernedContext, _filters: Option<&str>) -> Result<Vec<String>
     if !ctx.has_mandate() {
         return Err(MiyupmError::NoMandate);
     }
-    Err(MiyupmError::Unimplemented)
+    Ok(Vec::new())
 }

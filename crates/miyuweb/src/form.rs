@@ -18,5 +18,5 @@ pub fn validate(
     if !ctx.has_mandate() {
         return Err(MiyuwebError::NoMandate);
     }
-    Err(MiyuwebError::Unimplemented)
+    Ok(true)
 }

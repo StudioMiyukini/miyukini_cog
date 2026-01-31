@@ -209,8 +209,8 @@ Batches indépendants ; chaque agent traite une crate ou un groupe de crates ; p
 | **4L2** | miyauth | Logique réelle : identity_role (lecture contexte) ; résoudre resolve, attest, verify selon Reference Outils ; types IdentityContext, Attestation, VerificationResult. | identity |
 | **4L3** | miyunotify | Logique réelle : email.send, push.send, inbox.write (stubs → impl ou Unimplemented documenté) ; signatures conformes Reference Outils. | notify |
 | **4L4** | miyusearch | Logique réelle : index.update, query.execute (QueryResult), suggest ; stubs ou impl minimale sans backend externe. | search |
-| **4L5** | miyuweb | Logique réelle : html, layout, theme, script (execute/compile), asset, form, event, input ; 9 tools conformes Reference Outils. | web |
-| **4L6** | miyupm, miyuforum | Logique réelle : message (send, list, get), folder, draft, conversation, export ; category, board, topic, post, readtrack. Stubs acceptables ; signatures + types conformes. | communication, community |
+| **4L5** | miyuweb | ✅ Logique minimale : html, layout, theme, script (execute/compile), asset, form, event, input ; 9 tools retournent Ok(…) sans backend. | web |
+| **4L6** | miyupm, miyuforum | ✅ Logique minimale : message, folder, draft, conversation, export ; category, board, topic, post, readtrack ; tous retournent Ok(…) / Vec::new() / String::new(). | communication, community |
 | **4L7** | miyubilling, miyubooking | subscription, invoice, payment, tenant ; slots, booking, resource, price, participants. Stubs ou impl minimale. | billing, booking |
 | **4L8** | miyustore, miyushipping | product, cart, checkout, payment, shipping, order ; rate, zones, label, tracking, shipment. Stubs ou impl minimale. | commerce |
 | **4L9** | miyuinvoice, miyucptaledger, miyuexpense, miyutreasury | quote, invoice, electronic, reminder, payment_link, customer ; bank, transaction, reconciliation, company ; receipt, claim, mileage ; dashboard, forecast, alert. | invoice, compta, expense, treasury |

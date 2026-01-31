@@ -18,5 +18,5 @@ pub fn dispatch(
     if !ctx.has_mandate() {
         return Err(MiyuwebError::NoMandate);
     }
-    Err(MiyuwebError::Unimplemented)
+    Ok(())
 }

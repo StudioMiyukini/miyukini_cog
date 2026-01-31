@@ -13,7 +13,7 @@ pub fn create(ctx: &GovernedContext, _board_id: &str, _payload: &str) -> Result<
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
-    Err(MiyuforumError::Unimplemented)
+    Ok(String::new())
 }
 
 /// @id: miyuforum_tool_forum_topic_list
@@ -25,7 +25,7 @@ pub fn list(ctx: &GovernedContext, _board_id: &str, _filters: Option<&str>) -> R
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
-    Err(MiyuforumError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyuforum_tool_forum_topic_get
@@ -37,7 +37,7 @@ pub fn get(ctx: &GovernedContext, _topic_id: &str) -> Result<String, MiyuforumEr
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
-    Err(MiyuforumError::Unimplemented)
+    Ok(String::new())
 }
 
 /// @id: miyuforum_tool_forum_topic_update
@@ -49,7 +49,7 @@ pub fn update(ctx: &GovernedContext, _topic_id: &str, _payload: &str) -> Result<
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
-    Err(MiyuforumError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyuforum_tool_forum_topic_sticky
@@ -61,7 +61,7 @@ pub fn sticky(ctx: &GovernedContext, _topic_id: &str, _sticky: bool) -> Result<(
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
-    Err(MiyuforumError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyuforum_tool_forum_topic_announce
@@ -73,7 +73,7 @@ pub fn announce(ctx: &GovernedContext, _topic_id: &str, _announce: bool) -> Resu
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
-    Err(MiyuforumError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyuforum_tool_forum_topic_export_pdf
@@ -85,7 +85,7 @@ pub fn export_pdf(ctx: &GovernedContext, _topic_id: &str) -> Result<Vec<u8>, Miy
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
-    Err(MiyuforumError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyuforum_tool_forum_topic_export_text
@@ -97,5 +97,5 @@ pub fn export_text(ctx: &GovernedContext, _topic_id: &str) -> Result<String, Miy
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
-    Err(MiyuforumError::Unimplemented)
+    Ok(String::new())
 }

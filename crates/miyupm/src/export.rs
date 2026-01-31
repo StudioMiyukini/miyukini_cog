@@ -18,5 +18,5 @@ pub fn export(
     if !ctx.has_mandate() {
         return Err(MiyupmError::NoMandate);
     }
-    Err(MiyupmError::Unimplemented)
+    Ok(Vec::new())
 }

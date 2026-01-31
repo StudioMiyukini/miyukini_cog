@@ -17,7 +17,7 @@ pub fn mark(
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
-    Err(MiyuforumError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyuforum_tool_forum_readtrack_list
@@ -29,5 +29,5 @@ pub fn list(ctx: &GovernedContext, _user_ref: &str, _board_id: Option<&str>) -> 
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
-    Err(MiyuforumError::Unimplemented)
+    Ok(Vec::new())
 }

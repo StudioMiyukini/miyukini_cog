@@ -1,65 +1,15 @@
 {
-  "miyusql_error_enum": [
-    "miyusql_error_no_mandate",
-    "miyusql_error_timeout",
-    "miyusql_error_connection",
-    "miyusql_error_syntax",
-    "miyusql_error_execution"
+  "kernel_module_lifecycle": [
+    "kernel_reexport_lifecycle"
   ],
-  "strongfather_intent": [
-    "strongfather_intent_new"
+  "strongfather_policy": [
+    "strongfather_policy_new",
+    "strongfather_policy_is_critical"
   ],
-  "worrysentinel_degradation_manager_trait": [
-    "worrysentinel_degradation_manager_get_current"
-  ],
-  "worrysentinel_threat_level": [
-    "worrysentinel_threat_level_none",
-    "worrysentinel_threat_level_low",
-    "worrysentinel_threat_level_medium",
-    "worrysentinel_threat_level_high",
-    "worrysentinel_threat_level_critical",
-    "worrysentinel_threat_test_level_ordering"
-  ],
-  "miyukiniadmin_models_admin_account": [
-    "miyukiniadmin_auth_service"
-  ],
-  "miyukiniadmin_models_session": [
-    "miyukiniadmin_auth_service"
-  ],
-  "strongfather_policy_set_new": [
-    "strongfather_policy_set_add",
-    "strongfather_policy_set_get",
-    "strongfather_policy_set_iter",
-    "strongfather_policy_set_len",
-    "strongfather_policy_set_is_empty"
-  ],
-  "everbuddy_migration": [
-    "everbuddy_migration_from_version",
-    "everbuddy_migration_to_version",
-    "everbuddy_migration_test_creation"
-  ],
-  "kernel_id_parse": [
-    "test_id_display_roundtrip",
-    "test_id_parse_valid_uuid",
-    "test_id_parse_invalid_format",
-    "test_id_deterministic_parse"
-  ],
-  "worrysentinel_degradation": [
-    "worrysentinel_degradation_state_field"
-  ],
-  "borderguard_boundary_new": [
-    "borderguard_boundary_test_creation"
-  ],
-  "caringnanny_health_status": [
-    "caringnanny_health_status_healthy",
-    "caringnanny_health_status_degraded",
-    "caringnanny_health_status_unhealthy",
-    "caringnanny_health_test_status_equality"
-  ],
-  "caringnanny_metrics": [
-    "caringnanny_metrics_event_count",
-    "caringnanny_metrics_error_count",
-    "caringnanny_metrics_test_default"
+  "kindmother_api_write_operation": [
+    "kindmother_api_write_operation_create",
+    "kindmother_api_write_operation_update",
+    "kindmother_api_write_operation_delete"
   ],
   "miyukiniadmin_migration_service_impl": [
     "miyukiniadmin_migration_impl_applied",
@@ -67,8 +17,15 @@
     "miyukiniadmin_migration_impl_new",
     "miyukiniadmin_migration_impl_with_seed"
   ],
-  "kernel_logger_default": [
-    "test_log_default_logger"
+  "bondingbrother_connection_manager_connect": [
+    "miyukiniadmin_bonding_brother_bridge_connect"
+  ],
+  "strongfather_decision": [
+    "strongfather_decision_new",
+    "strongfather_decision_is_accepted",
+    "strongfather_decision_is_refused",
+    "strongfather_decision_is_ambiguous",
+    "strongfather_decision_is_deferred"
   ],
   "borderguard_crossing_rule": [
     "borderguard_crossing_rule_boundary_id",
@@ -76,259 +33,45 @@
     "borderguard_crossing_rule_allowed",
     "borderguard_crossing_rule_new"
   ],
-  "kindmother_api_coredata": [
-    "kindmother_api_read",
-    "kindmother_api_submit_write_intent"
+  "strongfather_policy_engine_new": [
+    "strongfather_policy_engine_apply",
+    "strongfather_policy_engine_select_applicable",
+    "strongfather_policy_engine_evaluate_policy"
+  ],
+  "miyukiniadmin_backup_impl_with_seed": [
+    "miyukiniadmin_backup_test_list"
+  ],
+  "kindmother_storage_trait": [
+    "kindmother_storage_read",
+    "kindmother_storage_write",
+    "kindmother_storage_delete"
+  ],
+  "miyukiniadmin_models_corruption_memory": [
+    "miyukiniadmin_destruction_reinit_service"
+  ],
+  "kernel_module_id": [
+    "kernel_reexport_id"
   ],
   "strongfather_priority_calculator": [
     "strongfather_priority_calculator_new"
   ],
-  "kindmother_threat_level": [
-    "kindmother_threat_level_none",
-    "kindmother_threat_level_low",
-    "kindmother_threat_level_medium",
-    "kindmother_threat_level_high",
-    "kindmother_threat_level_critical"
+  "masterbutler_workflow_new": [
+    "masterbutler_workflow_test_creation"
   ],
-  "kernel_module_log": [
-    "kernel_reexport_log"
+  "miyukiniadmin_security_service_trait": [
+    "miyukiniadmin_security_service_get_security_level",
+    "miyukiniadmin_security_test_service_structure"
   ],
-  "kindmother_storage_memory": [
-    "kindmother_storage_memory_data",
-    "kindmother_storage_memory_new"
-  ],
-  "miyukiniadmin_testing_test_results": [
-    "miyukiniadmin_testing_test_results_passed",
-    "miyukiniadmin_testing_test_results_failed",
-    "miyukiniadmin_testing_test_results_creation"
-  ],
-  "kernel_module_lifecycle": [
-    "kernel_reexport_lifecycle"
-  ],
-  "config_get": [
-    "envconfig_get_impl",
-    "test_config_get_existing_key",
-    "test_config_get_missing_key",
-    "test_config_get_empty_key",
-    "test_config_get_case_sensitive",
-    "test_config_deterministic",
-    "test_config_multiple_keys",
-    "test_config_empty_value"
-  ],
-  "kernel_lifecycle_trait": [
-    "kernel_lifecycle_register_shutdown_hook",
-    "kernel_lifecycle_shutdown",
-    "test_lifecycle_no_init_hooks",
-    "test_lifecycle_no_business_logic"
-  ],
-  "miyusql_errors": [
-    "miyusql_error_enum"
-  ],
-  "miyukiniadmin_monitoring_service_trait": [
-    "miyukiniadmin_monitoring_service_collect_metrics"
-  ],
-  "tamr_classifier_trait": [
-    "tamr_classifier_classify"
-  ],
-  "logisticssteward_allocation_error": [
-    "logisticssteward_allocation_error_insufficient"
-  ],
-  "miyukiniadmin_migration_service_pending_migration": [
-    "miyukiniadmin_pending_migration_id",
-    "miyukiniadmin_pending_migration_description"
-  ],
-  "worrysentinel_security_level_manager_get_current": [
-    "miyukiniadmin_security_service_get_security_level"
-  ],
-  "strongfather_module_decision": [
-    "strongfather_reexport_decision"
-  ],
-  "kindmother_module_observability": [
-    "kindmother_reexport_observability"
-  ],
-  "kernel_lifecycle_default_struct": [
-    "kernel_lifecycle_hooks",
-    "kernel_lifecycle_new"
-  ],
-  "kernel_lifecycle_shutdown": [
-    "test_lifecycle_shutdown_executes_hooks",
-    "test_lifecycle_shutdown_lifo_order",
-    "test_lifecycle_multiple_hooks",
-    "test_lifecycle_shutdown_idempotent",
-    "test_lifecycle_deterministic"
-  ],
-  "kernel_log_level": [
-    "test_log_level_enum"
-  ],
-  "kindmother_sync_trait": [
-    "kindmother_sync_compute_delta",
-    "kindmother_sync_apply_delta"
-  ],
-  "miyukiniadmin_backup_service_trait": [
-    "miyukiniadmin_backup_service_list",
-    "miyukiniadmin_backup_service_create",
-    "miyukiniadmin_backup_service_restore",
-    "miyukiniadmin_backup_service_impl",
-    "miyukiniadmin_pre_destruction_backup_service"
-  ],
-  "miyukiniadmin_migration_service_trait": [
-    "miyukiniadmin_migration_service_list_applied",
-    "miyukiniadmin_migration_service_list_pending",
-    "miyukiniadmin_migration_service_history",
-    "miyukiniadmin_migration_service_apply",
-    "miyukiniadmin_migration_service_impl"
-  ],
-  "strongfather_decision_new": [
-    "strongfather_decision_with_evaluation_context",
-    "strongfather_decision_with_metadata"
-  ],
-  "kindmother_api_write_operation": [
-    "kindmother_api_write_operation_create",
-    "kindmother_api_write_operation_update",
-    "kindmother_api_write_operation_delete"
-  ],
-  "strongfather_priority_calculator_new": [
-    "strongfather_priority_calculator_calculate",
-    "strongfather_priority_calculator_compare"
-  ],
-  "tamr_classification": [
-    "tamr_classification_entity_id",
-    "tamr_classification_taxonomy_id",
-    "tamr_classification_terms",
-    "tamr_classification_test_creation"
-  ],
-  "miyukiniadmin_config_backend_config_from_env": [
-    "miyukiniadmin_config_test_from_env",
-    "miyukiniadmin_backend_main"
-  ],
-  "kindmother_storage_error": [
-    "kindmother_storage_error_not_found",
-    "kindmother_storage_error_corruption",
-    "kindmother_storage_error_io"
-  ],
-  "masterbutler_workflow": [
-    "masterbutler_workflow_id_field",
-    "masterbutler_workflow_name",
-    "masterbutler_workflow_new"
-  ],
-  "logisticssteward_resource_manager_trait": [
-    "logisticssteward_resource_manager_get"
-  ],
-  "logisticssteward_allocation_manager_trait": [
-    "logisticssteward_allocation_manager_allocate"
-  ],
-  "miyukiniadmin_backup_service_create_result": [
-    "miyukiniadmin_create_result_success",
-    "miyukiniadmin_create_result_backup_id",
-    "miyukiniadmin_create_result_message"
-  ],
-  "kindmother_storage_delete": [
-    "kindmother_storage_test_delete"
-  ],
-  "masterbutler_step_result": [
-    "masterbutler_step_result_success",
-    "masterbutler_step_result_failure"
-  ],
-  "borderguard_boundary_type": [
-    "borderguard_boundary_type_external",
-    "borderguard_boundary_type_internal",
-    "borderguard_boundary_type_integration"
-  ],
-  "kernel_lifecycle_register_shutdown_hook": [
-    "test_lifecycle_register_hook"
-  ],
-  "strongfather_policy_engine": [
-    "strongfather_policy_engine_new"
-  ],
-  "everbuddy_migration_error": [
-    "everbuddy_migration_error_failed"
-  ],
-  "kindmother_observability_trait": [
-    "kindmother_observability_get_health",
-    "kindmother_observability_get_metrics"
-  ],
-  "miyukiniadmin_services_environment_state_detect": [
-    "miyukiniadmin_backend_main"
-  ],
-  "borderguard_trust_level_classifier": [
-    "borderguard_trust_level_classifier_classify"
-  ],
-  "logisticssteward_optimization": [
-    "logisticssteward_optimization_recommendations",
-    "logisticssteward_optimization_test_creation"
-  ],
-  "miyukiniadmin_api_handler_trait": [
-    "miyukiniadmin_api_handler_handle_request"
-  ],
-  "kernel_logger_log": [
-    "miyukiniadmin_audit_logger_log_action",
-    "test_log_all_levels",
-    "test_log_message_preserved",
-    "test_log_no_format_imposed",
-    "test_log_no_external_dependency",
-    "test_log_deterministic"
-  ],
-  "miyukiniadmin_audit_logger_default": [
-    "miyukiniadmin_audit_logger_default_logger",
-    "miyukiniadmin_audit_logger_default_new"
-  ],
-  "miyukiniadmin_audit_logger_default_new": [
-    "miyukiniadmin_audit_logger_test_default"
-  ],
-  "bondingbrother_sync_strategy": [
-    "bondingbrother_sync_strategy_immediate",
-    "bondingbrother_sync_strategy_deferred",
-    "bondingbrother_sync_test_strategy"
-  ],
-  "miyukiniadmin_config_backend_config": [
-    "miyukiniadmin_config_backend_config_port",
-    "miyukiniadmin_config_backend_config_host",
-    "miyukiniadmin_config_backend_config_https",
-    "miyukiniadmin_config_backend_config_tls_cert",
-    "miyukiniadmin_config_backend_config_tls_key",
-    "miyukiniadmin_config_backend_config_from_env"
+  "worrysentinel_security_level": [
+    "worrysentinel_security_level_public",
+    "worrysentinel_security_level_standard",
+    "worrysentinel_security_level_sensitive",
+    "worrysentinel_security_level_critical",
+    "worrysentinel_security_level_hardened",
+    "worrysentinel_security_test_level_ordering"
   ],
   "strongfather_intent_validator": [
     "strongfather_intent_validator_new"
-  ],
-  "miyukiniadmin_migration_service_apply": [
-    "miyukiniadmin_migration_test_apply_result"
-  ],
-  "kindmother_module_storage": [
-    "kindmother_reexport_storage"
-  ],
-  "miyukiniadmin_database_instance_info": [
-    "miyukiniadmin_database_instance_info_identity",
-    "miyukiniadmin_database_test_instance_info"
-  ],
-  "kindmother_api_write_intent": [
-    "kindmother_api_write_intent_id",
-    "kindmother_api_write_intent_entity_id",
-    "kindmother_api_write_intent_operation",
-    "kindmother_api_write_intent_data",
-    "kindmother_api_test_write_intent_creation"
-  ],
-  "kindmother_instance_type": [
-    "kindmother_instance_type_mother",
-    "kindmother_instance_type_daughter"
-  ],
-  "bondingbrother_sync_error": [
-    "bondingbrother_sync_error_failed"
-  ],
-  "everbuddy_version_manager_trait": [
-    "everbuddy_version_manager_get_current"
-  ],
-  "kindmother_observability_health_status": [
-    "kindmother_observability_health_healthy",
-    "kindmother_observability_health_degraded",
-    "kindmother_observability_health_unhealthy"
-  ],
-  "miyukiniadmin_services_environment_state": [
-    "miyukiniadmin_auto_recovery_service",
-    "miyukiniadmin_destruction_reinit_service"
-  ],
-  "miyukiniadmin_testing_service_trait": [
-    "miyukiniadmin_testing_service_run_tests"
   ],
   "kernel_id_type": [
     "kernel_id_parse",
@@ -337,113 +80,179 @@
     "test_id_hash",
     "test_id_no_business_logic"
   ],
-  "borderguard_crossing_rules": [
-    "borderguard_crossing_rules_rules",
-    "borderguard_crossing_rules_add"
+  "bondingbrother_sync_manager_trait": [
+    "bondingbrother_sync_manager_sync"
   ],
-  "kindmother_threat_detector_default": [
-    "kindmother_threat_test_detector_default"
+  "kernel_config_get": [
+    "miyukiniadmin_config_backend_config_from_env"
   ],
-  "miyukiniadmin_security_service_trait": [
-    "miyukiniadmin_security_service_get_security_level",
-    "miyukiniadmin_security_test_service_structure"
+  "miyukiniadmin_migration_service_trait": [
+    "miyukiniadmin_migration_service_list_applied",
+    "miyukiniadmin_migration_service_list_pending",
+    "miyukiniadmin_migration_service_history",
+    "miyukiniadmin_migration_service_apply",
+    "miyukiniadmin_migration_service_impl"
   ],
-  "kindmother_module_threat": [
-    "kindmother_reexport_threat"
+  "miyusql_admin_cell_struct": [
+    "miyusql_admin_cell_build"
   ],
-  "kernel_id_generator_generate": [
-    "kindmother_instance_identity_new",
-    "test_id_generate_unique",
-    "test_id_no_external_dependency"
+  "kindmother_sync_trait": [
+    "kindmother_sync_compute_delta",
+    "kindmother_sync_apply_delta"
   ],
-  "miyukiniadmin_backup_impl_with_seed": [
-    "miyukiniadmin_backup_test_list"
+  "borderguard_boundary_new": [
+    "borderguard_boundary_test_creation"
   ],
-  "strongfather_decision_justification_new": [
-    "strongfather_decision_justification_with_reasoning"
+  "caringnanny_health_checker_trait": [
+    "caringnanny_health_checker_check"
   ],
-  "strongfather_module_policy": [
-    "strongfather_reexport_policy"
+  "kindmother_storage_memory": [
+    "kindmother_storage_memory_data",
+    "kindmother_storage_memory_new"
   ],
-  "kindmother_storage_memory_new": [
-    "kindmother_storage_test_read_write",
-    "kindmother_storage_test_delete"
+  "kindmother_storage_read": [
+    "kindmother_storage_test_read_write"
   ],
-  "bondingbrother_translation": [
-    "bondingbrother_translation_source_format",
-    "bondingbrother_translation_target_format",
-    "bondingbrother_translation_test_creation"
+  "miyusql_admin_cell": [
+    "miyusql_admin_cell_struct"
   ],
   "logisticssteward_resource_type": [
     "logisticssteward_resource_type_memory",
     "logisticssteward_resource_type_cpu",
     "logisticssteward_resource_type_disk"
   ],
-  "bondingbrother_connection_manager_trait": [
-    "bondingbrother_connection_manager_connect"
+  "kindmother_storage_delete": [
+    "kindmother_storage_test_delete"
   ],
-  "kindmother_threat_detector_check_corruption": [
-    "kindmother_threat_test_detector_default"
+  "strongfather_decision_justification_new": [
+    "strongfather_decision_justification_with_reasoning"
   ],
-  "kernel_module_time": [
-    "kernel_reexport_time"
+  "strongfather_policy_engine_error": [
+    "strongfather_policy_engine_error_display"
   ],
-  "miyusql_governed_context": [
-    "miyusql_governed_context_struct"
+  "miyukiniadmin_backup_service_impl": [
+    "miyukiniadmin_backup_impl_backups",
+    "miyukiniadmin_backup_impl_new",
+    "miyukiniadmin_backup_impl_with_seed"
   ],
-  "kindmother_instance_state_new": [
-    "kindmother_instance_state_test_mother_creation",
-    "kindmother_instance_state_test_daughter_creation",
-    "kindmother_instance_state_test_unique_ids"
+  "miyukiniadmin_database_service_trait": [
+    "miyukiniadmin_database_service_get_instance_info"
+  ],
+  "strongfather_policy_set_new": [
+    "strongfather_policy_set_add",
+    "strongfather_policy_set_get",
+    "strongfather_policy_set_iter",
+    "strongfather_policy_set_len",
+    "strongfather_policy_set_is_empty"
+  ],
+  "strongfather_intent_validator_new": [
+    "strongfather_intent_validator_validate",
+    "strongfather_intent_validator_validate_structure_only"
+  ],
+  "everbuddy_migration_executor_trait": [
+    "everbuddy_migration_executor_execute"
+  ],
+  "kindmother_module_storage": [
+    "kindmother_reexport_storage"
+  ],
+  "kindmother_observability_get_metrics": [
+    "kindmother_observability_test_default_metrics"
+  ],
+  "masterbutler_orchestrator_trait": [
+    "masterbutler_orchestrator_execute",
+    "masterbutler_orchestrator_test_workflow_execution"
+  ],
+  "logisticssteward_resource_manager_trait": [
+    "logisticssteward_resource_manager_get"
+  ],
+  "logisticssteward_resource": [
+    "logisticssteward_resource_type_field",
+    "logisticssteward_resource_capacity",
+    "logisticssteward_resource_test_creation"
+  ],
+  "worrysentinel_degradation_manager_trait": [
+    "worrysentinel_degradation_manager_get_current"
+  ],
+  "worrysentinel_security_level_manager_trait": [
+    "worrysentinel_security_level_manager_get_current"
+  ],
+  "borderguard_trust_level_classifier": [
+    "borderguard_trust_level_classifier_classify"
+  ],
+  "strongfather_decision_new": [
+    "strongfather_decision_with_evaluation_context",
+    "strongfather_decision_with_metadata"
+  ],
+  "kindmother_threat_detector_trait": [
+    "kindmother_threat_detector_check_corruption",
+    "kindmother_threat_detector_check_anomalies"
+  ],
+  "bondingbrother_connection": [
+    "bondingbrother_connection_id",
+    "bondingbrother_connection_operator_id",
+    "bondingbrother_connection_test_creation"
+  ],
+  "miyukiniadmin_database_instance_info": [
+    "miyukiniadmin_database_instance_info_identity",
+    "miyukiniadmin_database_test_instance_info"
+  ],
+  "borderguard_trust_level": [
+    "borderguard_trust_level_trusted",
+    "borderguard_trust_level_verified",
+    "borderguard_trust_level_unknown",
+    "borderguard_trust_level_hostile",
+    "borderguard_trust_level_test_ordering"
+  ],
+  "bondingbrother_translation_error": [
+    "bondingbrother_translation_error_unsupported"
+  ],
+  "miyukiniadmin_testing_service_trait": [
+    "miyukiniadmin_testing_service_run_tests"
+  ],
+  "envconfig_struct": [
+    "envconfig_values",
+    "envconfig_from_env",
+    "envconfig_get_impl",
+    "test_config_no_business_logic"
+  ],
+  "miyukiniadmin_services_environment_state": [
+    "miyukiniadmin_auto_recovery_service",
+    "miyukiniadmin_destruction_reinit_service"
+  ],
+  "kernel_logger_trait": [
+    "kernel_logger_log",
+    "test_log_no_business_logic"
+  ],
+  "strongfather_module_intent": [
+    "strongfather_reexport_intent"
+  ],
+  "strongfather_module_decision": [
+    "strongfather_reexport_decision"
+  ],
+  "strongfather_validator_error": [
+    "strongfather_validator_error_new",
+    "strongfather_validator_error_display"
+  ],
+  "kindmother_sync_delta_operation": [
+    "kindmother_sync_delta_operation_create",
+    "kindmother_sync_delta_operation_update",
+    "kindmother_sync_delta_operation_delete"
+  ],
+  "miyukiniadmin_backup_service_trait": [
+    "miyukiniadmin_backup_service_list",
+    "miyukiniadmin_backup_service_create",
+    "miyukiniadmin_backup_service_restore",
+    "miyukiniadmin_backup_service_impl",
+    "miyukiniadmin_pre_destruction_backup_service"
   ],
   "borderguard_crossing_rule_new": [
     "borderguard_crossing_test_rule_creation"
   ],
-  "bondingbrother_sync_manager_trait": [
-    "bondingbrother_sync_manager_sync"
+  "config_trait": [
+    "config_get"
   ],
-  "kindmother_observability_metrics": [
-    "kindmother_observability_metrics_read_count",
-    "kindmother_observability_metrics_write_count",
-    "kindmother_observability_metrics_sync_count"
-  ],
-  "miyukiniadmin_api_routes_router": [
-    "miyukiniadmin_api_routes_router_handlers",
-    "miyukiniadmin_api_routes_router_new",
-    "miyukiniadmin_api_routes_router_register",
-    "miyukiniadmin_api_routes_router_route"
-  ],
-  "miyukiniadmin_monitoring_system_metrics": [
-    "miyukiniadmin_monitoring_system_metrics_cores_health",
-    "miyukiniadmin_monitoring_test_system_metrics"
-  ],
-  "caringnanny_metrics_collector_get": [
-    "miyukiniadmin_monitoring_service_collect_metrics"
-  ],
-  "envconfig_from_env": [
-    "test_config_envconfig_from_env",
-    "test_config_no_external_dependency",
-    "test_config_deterministic"
-  ],
-  "kernel_id_display": [
-    "test_id_display_roundtrip"
-  ],
-  "strongfather_decision_evaluation_context": [
-    "strongfather_decision_eval_context_new"
-  ],
-  "strongfather_module_validator": [
-    "strongfather_reexport_validator"
-  ],
-  "worrysentinel_threat_detector_trait": [
-    "worrysentinel_threat_detector_detect"
-  ],
-  "caringnanny_health_checker_trait": [
-    "caringnanny_health_checker_check"
-  ],
-  "tamr_metadata": [
-    "tamr_metadata_entity_id",
-    "tamr_metadata_values",
-    "tamr_metadata_test_creation"
+  "miyukiniadmin_permission_service": [
+    "miyukiniadmin_permission_has_capability"
   ],
   "worrysentinel_degradation_state": [
     "worrysentinel_degradation_state_normal",
@@ -453,76 +262,47 @@
     "worrysentinel_degradation_state_blocked",
     "worrysentinel_degradation_test_state_ordering"
   ],
-  "strongfather_validator_error": [
-    "strongfather_validator_error_new",
-    "strongfather_validator_error_display"
+  "everbuddy_migration_error": [
+    "everbuddy_migration_error_failed"
   ],
-  "masterbutler_orchestrator_trait": [
-    "masterbutler_orchestrator_execute",
-    "masterbutler_orchestrator_test_workflow_execution"
+  "miyukiniadmin_api_response": [
+    "miyukiniadmin_api_response_status",
+    "miyukiniadmin_api_response_body",
+    "miyukiniadmin_api_handler_test_response_creation"
   ],
-  "kindmother_instance_state": [
-    "kindmother_instance_state_identity",
-    "kindmother_instance_state_created_at",
-    "kindmother_instance_state_new"
+  "everbuddy_version": [
+    "everbuddy_version_major",
+    "everbuddy_version_minor",
+    "everbuddy_version_patch",
+    "everbuddy_version_new"
   ],
-  "tamr_taxonomy_manager_trait": [
-    "tamr_taxonomy_manager_get"
+  "miyukiniadmin_api_handler_trait": [
+    "miyukiniadmin_api_handler_handle_request"
   ],
-  "bondingbrother_translator_trait": [
-    "bondingbrother_translator_translate"
+  "miyukiniadmin_config_backend_config_from_env": [
+    "miyukiniadmin_config_test_from_env",
+    "miyukiniadmin_backend_main"
   ],
-  "kindmother_observability_get_metrics": [
-    "kindmother_observability_test_default_metrics"
+  "caringnanny_observer_event_type": [
+    "caringnanny_observer_event_state_change",
+    "caringnanny_observer_event_anomaly",
+    "caringnanny_observer_event_health_change"
   ],
-  "kindmother_storage_write": [
-    "kindmother_storage_test_read_write",
-    "kindmother_storage_test_delete"
+  "kernel_lifecycle_shutdown": [
+    "test_lifecycle_shutdown_executes_hooks",
+    "test_lifecycle_shutdown_lifo_order",
+    "test_lifecycle_multiple_hooks",
+    "test_lifecycle_shutdown_idempotent",
+    "test_lifecycle_deterministic"
   ],
-  "miyukiniadmin_migration_service_apply_result": [
-    "miyukiniadmin_apply_result_status",
-    "miyukiniadmin_apply_result_applied_count",
-    "miyukiniadmin_apply_result_message"
+  "worrysentinel_degradation": [
+    "worrysentinel_degradation_state_field"
   ],
-  "miyukiniadmin_backup_service_backup_record": [
-    "miyukiniadmin_backup_record_id",
-    "miyukiniadmin_backup_record_timestamp",
-    "miyukiniadmin_backup_record_type",
-    "miyukiniadmin_backup_record_size_bytes",
-    "miyukiniadmin_backup_record_status"
+  "worrysentinel_security_level_manager_get_current": [
+    "miyukiniadmin_security_service_get_security_level"
   ],
-  "miyukiniadmin_models_corruption_memory": [
-    "miyukiniadmin_destruction_reinit_service"
-  ],
-  "kernel_clock_trait": [
-    "kernel_clock_now",
-    "test_time_fake_clock_injection",
-    "test_time_no_business_logic",
-    "test_time_deterministic_fake"
-  ],
-  "kernel_module_config": [
-    "kernel_reexport_config"
-  ],
-  "miyukiniadmin_audit_logger_log_action": [
-    "miyukiniadmin_audit_logger_test_default"
-  ],
-  "tamr_taxonomy": [
-    "tamr_taxonomy_id",
-    "tamr_taxonomy_name",
-    "tamr_taxonomy_terms",
-    "tamr_taxonomy_test_creation"
-  ],
-  "everbuddy_migration_executor_trait": [
-    "everbuddy_migration_executor_execute"
-  ],
-  "kindmother_module_state": [
-    "kindmother_reexport_state"
-  ],
-  "strongfather_decision_justification": [
-    "strongfather_decision_justification_new"
-  ],
-  "miyukiniadmin_backup_service_restore": [
-    "miyukiniadmin_backup_test_restore"
+  "kindmother_threat_detector_check_corruption": [
+    "kindmother_threat_test_detector_default"
   ],
   "strongfather_decision_eval_context_new": [
     "strongfather_decision_eval_context_with_field"
@@ -531,27 +311,188 @@
     "miyukiniadmin_restore_result_success",
     "miyukiniadmin_restore_result_message"
   ],
-  "strongfather_policy_engine_error": [
-    "strongfather_policy_engine_error_display"
+  "strongfather_decision_justification": [
+    "strongfather_decision_justification_new"
   ],
-  "kernel_clock_now": [
-    "kindmother_instance_state_new",
-    "test_time_now_returns_systemtime",
-    "test_time_now_monotonic",
-    "test_time_no_timezone_logic",
-    "test_time_no_external_dependency"
+  "miyukiniadmin_backup_service_restore": [
+    "miyukiniadmin_backup_test_restore"
   ],
-  "strongfather_module_intent": [
-    "strongfather_reexport_intent"
+  "miyukiniadmin_testing_test_results": [
+    "miyukiniadmin_testing_test_results_passed",
+    "miyukiniadmin_testing_test_results_failed",
+    "miyukiniadmin_testing_test_results_creation"
   ],
-  "miyusql_governed_context_struct": [
-    "miyusql_context_mandate_id",
-    "miyusql_context_security_level",
-    "miyusql_context_new",
-    "miyusql_context_has_mandate"
+  "strongfather_module_policy_engine": [
+    "strongfather_reexport_policy_engine"
   ],
-  "strongfather_decision_metadata_new": [
-    "strongfather_decision_metadata_with_field"
+  "bondingbrother_sync_strategy": [
+    "bondingbrother_sync_strategy_immediate",
+    "bondingbrother_sync_strategy_deferred",
+    "bondingbrother_sync_test_strategy"
+  ],
+  "masterbutler_workflow": [
+    "masterbutler_workflow_id_field",
+    "masterbutler_workflow_name",
+    "masterbutler_workflow_new"
+  ],
+  "kernel_lifecycle_register_shutdown_hook": [
+    "test_lifecycle_register_hook"
+  ],
+  "kindmother_module_api": [
+    "kindmother_reexport_api"
+  ],
+  "kernel_lifecycle_trait": [
+    "kernel_lifecycle_register_shutdown_hook",
+    "kernel_lifecycle_shutdown",
+    "test_lifecycle_no_init_hooks",
+    "test_lifecycle_no_business_logic"
+  ],
+  "strongfather_module_policy": [
+    "strongfather_reexport_policy"
+  ],
+  "miyukiniadmin_models_session": [
+    "miyukiniadmin_auth_service"
+  ],
+  "caringnanny_observer_system_event": [
+    "caringnanny_observer_system_event_type",
+    "caringnanny_observer_system_event_component",
+    "caringnanny_observer_system_event_message",
+    "caringnanny_observer_test_event_creation"
+  ],
+  "kindmother_storage_error": [
+    "kindmother_storage_error_not_found",
+    "kindmother_storage_error_corruption",
+    "kindmother_storage_error_io"
+  ],
+  "masterbutler_step": [
+    "masterbutler_step_id",
+    "masterbutler_step_name",
+    "masterbutler_step_test_creation"
+  ],
+  "kernel_log_level": [
+    "test_log_level_enum"
+  ],
+  "kindmother_api_coredata": [
+    "kindmother_api_read",
+    "kindmother_api_submit_write_intent"
+  ],
+  "miyukiniadmin_bonding_brother_bridge_error": [
+    "miyukiniadmin_bonding_brother_bridge_error_connection_failed",
+    "miyukiniadmin_bonding_brother_bridge_test_error"
+  ],
+  "strongfather_decision_metadata": [
+    "strongfather_decision_metadata_new"
+  ],
+  "strongfather_decision_evaluation_context": [
+    "strongfather_decision_eval_context_new"
+  ],
+  "miyukiniadmin_api_routes_router_new": [
+    "miyukiniadmin_api_routes_test_router_creation"
+  ],
+  "miyukiniadmin_services_destruction_reinit": [
+    "miyukiniadmin_auto_recovery_service"
+  ],
+  "kindmother_module_observability": [
+    "kindmother_reexport_observability"
+  ],
+  "strongfather_module_validator": [
+    "strongfather_reexport_validator"
+  ],
+  "strongfather_policy_engine": [
+    "strongfather_policy_engine_new"
+  ],
+  "tamr_metadata_manager_trait": [
+    "tamr_metadata_manager_get"
+  ],
+  "everbuddy_version_manager_trait": [
+    "everbuddy_version_manager_get_current"
+  ],
+  "worrysentinel_threat_level": [
+    "worrysentinel_threat_level_none",
+    "worrysentinel_threat_level_low",
+    "worrysentinel_threat_level_medium",
+    "worrysentinel_threat_level_high",
+    "worrysentinel_threat_level_critical",
+    "worrysentinel_threat_test_level_ordering"
+  ],
+  "worrysentinel_threat_detector_trait": [
+    "worrysentinel_threat_detector_detect"
+  ],
+  "kernel_logger_default": [
+    "test_log_default_logger"
+  ],
+  "miyukiniadmin_migration_service_apply_result": [
+    "miyukiniadmin_apply_result_status",
+    "miyukiniadmin_apply_result_applied_count",
+    "miyukiniadmin_apply_result_message"
+  ],
+  "kindmother_storage_memory_new": [
+    "kindmother_storage_test_read_write",
+    "kindmother_storage_test_delete"
+  ],
+  "miyukiniadmin_environment_state_service": [
+    "miyukiniadmin_env_state_detect"
+  ],
+  "kindmother_instance_identity": [
+    "kindmother_instance_identity_id",
+    "kindmother_instance_identity_type",
+    "kindmother_instance_identity_new",
+    "kindmother_instance_identity_is_mother",
+    "kindmother_instance_identity_is_daughter",
+    "kindmother_instance_state_identity"
+  ],
+  "kindmother_sync_delta": [
+    "kindmother_sync_delta_entity_id",
+    "kindmother_sync_delta_operation",
+    "kindmother_sync_delta_data",
+    "kindmother_sync_test_delta_creation"
+  ],
+  "kindmother_api_write_intent": [
+    "kindmother_api_write_intent_id",
+    "kindmother_api_write_intent_entity_id",
+    "kindmother_api_write_intent_operation",
+    "kindmother_api_write_intent_data",
+    "kindmother_api_test_write_intent_creation"
+  ],
+  "logisticssteward_optimization": [
+    "logisticssteward_optimization_recommendations",
+    "logisticssteward_optimization_test_creation"
+  ],
+  "kernel_logger_log": [
+    "miyukiniadmin_audit_logger_log_action",
+    "test_log_all_levels",
+    "test_log_message_preserved",
+    "test_log_no_format_imposed",
+    "test_log_no_external_dependency",
+    "test_log_deterministic"
+  ],
+  "bondingbrother_translation": [
+    "bondingbrother_translation_source_format",
+    "bondingbrother_translation_target_format",
+    "bondingbrother_translation_test_creation"
+  ],
+  "miyukiniadmin_services_environment_state_detect": [
+    "miyukiniadmin_backend_main"
+  ],
+  "miyusql_errors": [
+    "miyusql_error_enum"
+  ],
+  "borderguard_boundary_type": [
+    "borderguard_boundary_type_external",
+    "borderguard_boundary_type_internal",
+    "borderguard_boundary_type_integration"
+  ],
+  "logisticssteward_allocation_error": [
+    "logisticssteward_allocation_error_insufficient"
+  ],
+  "kindmother_observability_metrics": [
+    "kindmother_observability_metrics_read_count",
+    "kindmother_observability_metrics_write_count",
+    "kindmother_observability_metrics_sync_count"
+  ],
+  "kindmother_storage_write": [
+    "kindmother_storage_test_read_write",
+    "kindmother_storage_test_delete"
   ],
   "miyukiniadmin_backend_app_state": [
     "miyukiniadmin_backend_api_tables_list",
@@ -567,8 +508,127 @@
     "miyukiniadmin_backend_api_backups_create",
     "miyukiniadmin_backend_api_backups_restore"
   ],
+  "kindmother_observability_health_status": [
+    "kindmother_observability_health_healthy",
+    "kindmother_observability_health_degraded",
+    "kindmother_observability_health_unhealthy"
+  ],
+  "caringnanny_observer_trait": [
+    "caringnanny_observer_observe"
+  ],
+  "bondingbrother_connection_manager_trait": [
+    "bondingbrother_connection_manager_connect"
+  ],
+  "logisticssteward_allocation": [
+    "logisticssteward_allocation_resource_type",
+    "logisticssteward_allocation_component_id",
+    "logisticssteward_allocation_amount",
+    "logisticssteward_allocation_test_creation"
+  ],
+  "kernel_module_log": [
+    "kernel_reexport_log"
+  ],
+  "masterbutler_step_result": [
+    "masterbutler_step_result_success",
+    "masterbutler_step_result_failure"
+  ],
+  "strongfather_intent_new": [
+    "strongfather_intent_with_priority",
+    "strongfather_intent_with_constraints",
+    "strongfather_intent_with_metadata"
+  ],
+  "strongfather_policy_new": [
+    "strongfather_policy_with_priority",
+    "strongfather_policy_with_metadata",
+    "strongfather_policy_with_composite"
+  ],
+  "kindmother_module_sync": [
+    "kindmother_reexport_sync"
+  ],
+  "logisticssteward_allocation_manager_trait": [
+    "logisticssteward_allocation_manager_allocate"
+  ],
+  "caringnanny_metrics_collector_get": [
+    "miyukiniadmin_monitoring_service_collect_metrics"
+  ],
+  "kernel_module_time": [
+    "kernel_reexport_time"
+  ],
+  "tamr_classifier_trait": [
+    "tamr_classifier_classify"
+  ],
+  "bondingbrother_connection_error": [
+    "bondingbrother_connection_error_already_connected"
+  ],
+  "miyukiniadmin_backup_service_backup_record": [
+    "miyukiniadmin_backup_record_id",
+    "miyukiniadmin_backup_record_timestamp",
+    "miyukiniadmin_backup_record_type",
+    "miyukiniadmin_backup_record_size_bytes",
+    "miyukiniadmin_backup_record_status"
+  ],
+  "everbuddy_compatibility_level": [
+    "everbuddy_compatibility_level_compatible",
+    "everbuddy_compatibility_level_incompatible",
+    "everbuddy_compatibility_test_levels"
+  ],
+  "kernel_id_display": [
+    "test_id_display_roundtrip"
+  ],
+  "caringnanny_metrics": [
+    "caringnanny_metrics_event_count",
+    "caringnanny_metrics_error_count",
+    "caringnanny_metrics_test_default"
+  ],
+  "everbuddy_migration": [
+    "everbuddy_migration_from_version",
+    "everbuddy_migration_to_version",
+    "everbuddy_migration_test_creation"
+  ],
+  "kindmother_observability_default": [
+    "kindmother_observability_test_default_health",
+    "kindmother_observability_test_default_metrics"
+  ],
+  "kernel_module_config": [
+    "kernel_reexport_config"
+  ],
+  "miyusql_governed_context": [
+    "miyusql_governed_context_struct"
+  ],
+  "kernel_id_parse": [
+    "test_id_display_roundtrip",
+    "test_id_parse_valid_uuid",
+    "test_id_parse_invalid_format",
+    "test_id_deterministic_parse"
+  ],
+  "miyusql_governed_context_struct": [
+    "miyusql_context_mandate_id",
+    "miyusql_context_security_level",
+    "miyusql_context_new",
+    "miyusql_context_has_mandate"
+  ],
+  "tamr_classification": [
+    "tamr_classification_entity_id",
+    "tamr_classification_taxonomy_id",
+    "tamr_classification_terms",
+    "tamr_classification_test_creation"
+  ],
+  "config_get": [
+    "envconfig_get_impl",
+    "test_config_get_existing_key",
+    "test_config_get_missing_key",
+    "test_config_get_empty_key",
+    "test_config_get_case_sensitive",
+    "test_config_deterministic",
+    "test_config_multiple_keys",
+    "test_config_empty_value"
+  ],
   "strongfather_module_priority": [
     "strongfather_reexport_priority"
+  ],
+  "borderguard_crossing_rules": [
+    "borderguard_crossing_rules_rules",
+    "borderguard_crossing_rules_add"
   ],
   "borderguard_boundary": [
     "borderguard_boundary_id",
@@ -576,183 +636,68 @@
     "borderguard_boundary_name",
     "borderguard_boundary_new"
   ],
-  "kindmother_observability_default": [
-    "kindmother_observability_test_default_health",
-    "kindmother_observability_test_default_metrics"
-  ],
-  "envconfig_struct": [
-    "envconfig_values",
-    "envconfig_from_env",
-    "envconfig_get_impl",
-    "test_config_no_business_logic"
-  ],
-  "strongfather_priority_value": [
-    "strongfather_priority_new",
-    "strongfather_priority_minimum",
-    "strongfather_priority_maximum"
-  ],
-  "masterbutler_workflow_new": [
-    "masterbutler_workflow_test_creation"
-  ],
-  "kindmother_api_error": [
-    "kindmother_api_error_not_found",
-    "kindmother_api_error_permission_denied",
-    "kindmother_api_error_invalid_intent"
-  ],
-  "bondingbrother_connection_error": [
-    "bondingbrother_connection_error_already_connected"
-  ],
-  "kindmother_storage_read": [
-    "kindmother_storage_test_read_write"
-  ],
-  "miyukiniadmin_api_routes_router_new": [
-    "miyukiniadmin_api_routes_test_router_creation"
-  ],
-  "miyukiniadmin_models_admin_role": [
-    "miyukiniadmin_permission_service"
-  ],
-  "logisticssteward_optimizer_trait": [
-    "logisticssteward_optimizer_optimize"
-  ],
-  "caringnanny_observer_event_type": [
-    "caringnanny_observer_event_state_change",
-    "caringnanny_observer_event_anomaly",
-    "caringnanny_observer_event_health_change"
-  ],
-  "kindmother_sync_delta_operation": [
-    "kindmother_sync_delta_operation_create",
-    "kindmother_sync_delta_operation_update",
-    "kindmother_sync_delta_operation_delete"
+  "miyukiniadmin_migration_service_pending_migration": [
+    "miyukiniadmin_pending_migration_id",
+    "miyukiniadmin_pending_migration_description"
   ],
   "kindmother_sync_error": [
     "kindmother_sync_error_conflict",
     "kindmother_sync_error_invalid_delta",
     "kindmother_sync_error_io"
   ],
-  "miyukiniadmin_database_service_trait": [
-    "miyukiniadmin_database_service_get_instance_info"
+  "miyukiniadmin_monitoring_system_metrics": [
+    "miyukiniadmin_monitoring_system_metrics_cores_health",
+    "miyukiniadmin_monitoring_test_system_metrics"
   ],
-  "strongfather_decision": [
-    "strongfather_decision_new",
-    "strongfather_decision_is_accepted",
-    "strongfather_decision_is_refused",
-    "strongfather_decision_is_ambiguous",
-    "strongfather_decision_is_deferred"
-  ],
-  "kernel_config_get": [
-    "miyukiniadmin_config_backend_config_from_env"
-  ],
-  "strongfather_policy": [
-    "strongfather_policy_new",
-    "strongfather_policy_is_critical"
-  ],
-  "strongfather_policy_set": [
-    "strongfather_policy_set_new"
-  ],
-  "kindmother_storage_trait": [
-    "kindmother_storage_read",
-    "kindmother_storage_write",
-    "kindmother_storage_delete"
-  ],
-  "kindmother_module_sync": [
-    "kindmother_reexport_sync"
-  ],
-  "kernel_id_generator_trait": [
-    "kernel_id_generator_generate"
-  ],
-  "everbuddy_compatibility_level": [
-    "everbuddy_compatibility_level_compatible",
-    "everbuddy_compatibility_level_incompatible",
-    "everbuddy_compatibility_test_levels"
-  ],
-  "kindmother_instance_identity_new": [
-    "kindmother_instance_state_new"
-  ],
-  "caringnanny_observer_trait": [
-    "caringnanny_observer_observe"
-  ],
-  "everbuddy_compatibility_checker_trait": [
-    "everbuddy_compatibility_checker_check"
-  ],
-  "masterbutler_step": [
-    "masterbutler_step_id",
-    "masterbutler_step_name",
-    "masterbutler_step_test_creation"
-  ],
-  "miyukiniadmin_environment_state_service": [
-    "miyukiniadmin_env_state_detect"
-  ],
-  "strongfather_policy_new": [
-    "strongfather_policy_with_priority",
-    "strongfather_policy_with_metadata",
-    "strongfather_policy_with_composite"
-  ],
-  "worrysentinel_security_level": [
-    "worrysentinel_security_level_public",
-    "worrysentinel_security_level_standard",
-    "worrysentinel_security_level_sensitive",
-    "worrysentinel_security_level_critical",
-    "worrysentinel_security_level_hardened",
-    "worrysentinel_security_test_level_ordering"
-  ],
-  "config_trait": [
-    "config_get"
-  ],
-  "kindmother_observability_get_health": [
-    "kindmother_observability_test_default_health"
-  ],
-  "worrysentinel_security_level_manager_trait": [
-    "worrysentinel_security_level_manager_get_current"
-  ],
-  "miyukiniadmin_services_destruction_reinit": [
-    "miyukiniadmin_auto_recovery_service"
-  ],
-  "borderguard_trust_level": [
-    "borderguard_trust_level_trusted",
-    "borderguard_trust_level_verified",
-    "borderguard_trust_level_unknown",
-    "borderguard_trust_level_hostile",
-    "borderguard_trust_level_test_ordering"
-  ],
-  "everbuddy_compatibility": [
-    "everbuddy_compatibility_level_field"
-  ],
-  "bondingbrother_connection": [
-    "bondingbrother_connection_id",
-    "bondingbrother_connection_operator_id",
-    "bondingbrother_connection_test_creation"
-  ],
-  "miyukiniadmin_bonding_brother_bridge_error": [
-    "miyukiniadmin_bonding_brother_bridge_error_connection_failed",
-    "miyukiniadmin_bonding_brother_bridge_test_error"
-  ],
-  "kindmother_module_api": [
-    "kindmother_reexport_api"
-  ],
-  "kindmother_instance_identity": [
-    "kindmother_instance_identity_id",
-    "kindmother_instance_identity_type",
-    "kindmother_instance_identity_new",
-    "kindmother_instance_identity_is_mother",
-    "kindmother_instance_identity_is_daughter",
-    "kindmother_instance_state_identity"
-  ],
-  "miyukiniadmin_api_response": [
-    "miyukiniadmin_api_response_status",
-    "miyukiniadmin_api_response_body",
-    "miyukiniadmin_api_handler_test_response_creation"
-  ],
-  "bondingbrother_connection_manager_connect": [
-    "miyukiniadmin_bonding_brother_bridge_connect"
-  ],
-  "miyukiniadmin_migration_service_impl_with_seed": [
-    "miyukiniadmin_migration_test_list"
-  ],
-  "everbuddy_version_new": [
-    "everbuddy_version_test_creation"
+  "miyukiniadmin_monitoring_service_trait": [
+    "miyukiniadmin_monitoring_service_collect_metrics"
   ],
   "miyukiniadmin_models_environment_state": [
     "miyukiniadmin_environment_state_service"
+  ],
+  "kindmother_api_error": [
+    "kindmother_api_error_not_found",
+    "kindmother_api_error_permission_denied",
+    "kindmother_api_error_invalid_intent"
+  ],
+  "kernel_id_generator_generate": [
+    "kindmother_instance_identity_new",
+    "test_id_generate_unique",
+    "test_id_no_external_dependency"
+  ],
+  "kindmother_observability_trait": [
+    "kindmother_observability_get_health",
+    "kindmother_observability_get_metrics"
+  ],
+  "miyukiniadmin_api_routes_router": [
+    "miyukiniadmin_api_routes_router_handlers",
+    "miyukiniadmin_api_routes_router_new",
+    "miyukiniadmin_api_routes_router_register",
+    "miyukiniadmin_api_routes_router_route"
+  ],
+  "caringnanny_health_status": [
+    "caringnanny_health_status_healthy",
+    "caringnanny_health_status_degraded",
+    "caringnanny_health_status_unhealthy",
+    "caringnanny_health_test_status_equality"
+  ],
+  "kindmother_instance_state": [
+    "kindmother_instance_state_identity",
+    "kindmother_instance_state_created_at",
+    "kindmother_instance_state_new"
+  ],
+  "miyukiniadmin_bonding_brother_bridge_trait": [
+    "miyukiniadmin_bonding_brother_bridge_connect"
+  ],
+  "kindmother_module_state": [
+    "kindmother_reexport_state"
+  ],
+  "miyukiniadmin_audit_logger_default": [
+    "miyukiniadmin_audit_logger_default_logger",
+    "miyukiniadmin_audit_logger_default_new"
+  ],
+  "miyukiniadmin_migration_service_apply": [
+    "miyukiniadmin_migration_test_apply_result"
   ],
   "miyukiniadmin_migration_service_migration_record": [
     "miyukiniadmin_migration_record_id",
@@ -762,93 +707,148 @@
     "miyukiniadmin_migration_record_result",
     "miyukiniadmin_migration_record_operator_id"
   ],
-  "caringnanny_observer_system_event": [
-    "caringnanny_observer_system_event_type",
-    "caringnanny_observer_system_event_component",
-    "caringnanny_observer_system_event_message",
-    "caringnanny_observer_test_event_creation"
+  "logisticssteward_optimizer_trait": [
+    "logisticssteward_optimizer_optimize"
   ],
-  "bondingbrother_translation_error": [
-    "bondingbrother_translation_error_unsupported"
+  "miyukiniadmin_models_admin_role": [
+    "miyukiniadmin_permission_service"
   ],
-  "miyukiniadmin_audit_logger_trait": [
-    "miyukiniadmin_audit_logger_log_action"
+  "bondingbrother_sync_error": [
+    "bondingbrother_sync_error_failed"
   ],
-  "miyukiniadmin_bonding_brother_bridge_trait": [
-    "miyukiniadmin_bonding_brother_bridge_connect"
+  "everbuddy_version_new": [
+    "everbuddy_version_test_creation"
+  ],
+  "kindmother_observability_get_health": [
+    "kindmother_observability_test_default_health"
+  ],
+  "kernel_lifecycle_default_struct": [
+    "kernel_lifecycle_hooks",
+    "kernel_lifecycle_new"
+  ],
+  "kernel_id_generator_trait": [
+    "kernel_id_generator_generate"
+  ],
+  "strongfather_decision_metadata_new": [
+    "strongfather_decision_metadata_with_field"
+  ],
+  "miyukiniadmin_migration_service_impl_with_seed": [
+    "miyukiniadmin_migration_test_list"
+  ],
+  "everbuddy_compatibility": [
+    "everbuddy_compatibility_level_field"
+  ],
+  "miyusql_error_enum": [
+    "miyusql_error_no_mandate",
+    "miyusql_error_timeout",
+    "miyusql_error_connection",
+    "miyusql_error_syntax",
+    "miyusql_error_execution"
+  ],
+  "strongfather_intent": [
+    "strongfather_intent_new"
+  ],
+  "strongfather_policy_set": [
+    "strongfather_policy_set_new"
+  ],
+  "kernel_clock_now": [
+    "kindmother_instance_state_new",
+    "test_time_now_returns_systemtime",
+    "test_time_now_monotonic",
+    "test_time_no_timezone_logic",
+    "test_time_no_external_dependency"
+  ],
+  "strongfather_priority_value": [
+    "strongfather_priority_new",
+    "strongfather_priority_minimum",
+    "strongfather_priority_maximum"
+  ],
+  "kindmother_threat_level": [
+    "kindmother_threat_level_none",
+    "kindmother_threat_level_low",
+    "kindmother_threat_level_medium",
+    "kindmother_threat_level_high",
+    "kindmother_threat_level_critical"
+  ],
+  "bondingbrother_translator_trait": [
+    "bondingbrother_translator_translate"
+  ],
+  "miyukiniadmin_backup_service_create_result": [
+    "miyukiniadmin_create_result_success",
+    "miyukiniadmin_create_result_backup_id",
+    "miyukiniadmin_create_result_message"
+  ],
+  "miyukiniadmin_models_admin_account": [
+    "miyukiniadmin_auth_service"
+  ],
+  "strongfather_priority_calculator_new": [
+    "strongfather_priority_calculator_calculate",
+    "strongfather_priority_calculator_compare"
+  ],
+  "tamr_metadata": [
+    "tamr_metadata_entity_id",
+    "tamr_metadata_values",
+    "tamr_metadata_test_creation"
+  ],
+  "tamr_taxonomy": [
+    "tamr_taxonomy_id",
+    "tamr_taxonomy_name",
+    "tamr_taxonomy_terms",
+    "tamr_taxonomy_test_creation"
+  ],
+  "tamr_taxonomy_manager_trait": [
+    "tamr_taxonomy_manager_get"
+  ],
+  "kernel_clock_trait": [
+    "kernel_clock_now",
+    "test_time_fake_clock_injection",
+    "test_time_no_business_logic",
+    "test_time_deterministic_fake"
+  ],
+  "envconfig_from_env": [
+    "test_config_envconfig_from_env",
+    "test_config_no_external_dependency",
+    "test_config_deterministic"
+  ],
+  "kindmother_threat_detector_default": [
+    "kindmother_threat_test_detector_default"
+  ],
+  "kindmother_instance_type": [
+    "kindmother_instance_type_mother",
+    "kindmother_instance_type_daughter"
+  ],
+  "kindmother_instance_identity_new": [
+    "kindmother_instance_state_new"
+  ],
+  "miyukiniadmin_config_backend_config": [
+    "miyukiniadmin_config_backend_config_port",
+    "miyukiniadmin_config_backend_config_host",
+    "miyukiniadmin_config_backend_config_https",
+    "miyukiniadmin_config_backend_config_tls_cert",
+    "miyukiniadmin_config_backend_config_tls_key",
+    "miyukiniadmin_config_backend_config_from_env"
+  ],
+  "kindmother_instance_state_new": [
+    "kindmother_instance_state_test_mother_creation",
+    "kindmother_instance_state_test_daughter_creation",
+    "kindmother_instance_state_test_unique_ids"
+  ],
+  "kindmother_module_threat": [
+    "kindmother_reexport_threat"
+  ],
+  "everbuddy_compatibility_checker_trait": [
+    "everbuddy_compatibility_checker_check"
   ],
   "caringnanny_metrics_collector_trait": [
     "caringnanny_metrics_collector_get"
   ],
-  "logisticssteward_resource": [
-    "logisticssteward_resource_type_field",
-    "logisticssteward_resource_capacity",
-    "logisticssteward_resource_test_creation"
+  "miyukiniadmin_audit_logger_trait": [
+    "miyukiniadmin_audit_logger_log_action"
   ],
-  "kindmother_threat_detector_trait": [
-    "kindmother_threat_detector_check_corruption",
-    "kindmother_threat_detector_check_anomalies"
+  "miyukiniadmin_audit_logger_default_new": [
+    "miyukiniadmin_audit_logger_test_default"
   ],
-  "miyukiniadmin_permission_service": [
-    "miyukiniadmin_permission_has_capability"
-  ],
-  "strongfather_decision_metadata": [
-    "strongfather_decision_metadata_new"
-  ],
-  "strongfather_module_policy_engine": [
-    "strongfather_reexport_policy_engine"
-  ],
-  "miyusql_admin_cell": [
-    "miyusql_admin_cell_struct"
-  ],
-  "miyusql_admin_cell_struct": [
-    "miyusql_admin_cell_build"
-  ],
-  "strongfather_policy_engine_new": [
-    "strongfather_policy_engine_apply",
-    "strongfather_policy_engine_select_applicable",
-    "strongfather_policy_engine_evaluate_policy"
-  ],
-  "tamr_metadata_manager_trait": [
-    "tamr_metadata_manager_get"
-  ],
-  "kindmother_sync_delta": [
-    "kindmother_sync_delta_entity_id",
-    "kindmother_sync_delta_operation",
-    "kindmother_sync_delta_data",
-    "kindmother_sync_test_delta_creation"
-  ],
-  "kernel_module_id": [
-    "kernel_reexport_id"
-  ],
-  "kernel_logger_trait": [
-    "kernel_logger_log",
-    "test_log_no_business_logic"
-  ],
-  "strongfather_intent_validator_new": [
-    "strongfather_intent_validator_validate",
-    "strongfather_intent_validator_validate_structure_only"
-  ],
-  "strongfather_intent_new": [
-    "strongfather_intent_with_priority",
-    "strongfather_intent_with_constraints",
-    "strongfather_intent_with_metadata"
-  ],
-  "everbuddy_version": [
-    "everbuddy_version_major",
-    "everbuddy_version_minor",
-    "everbuddy_version_patch",
-    "everbuddy_version_new"
-  ],
-  "miyukiniadmin_backup_service_impl": [
-    "miyukiniadmin_backup_impl_backups",
-    "miyukiniadmin_backup_impl_new",
-    "miyukiniadmin_backup_impl_with_seed"
-  ],
-  "logisticssteward_allocation": [
-    "logisticssteward_allocation_resource_type",
-    "logisticssteward_allocation_component_id",
-    "logisticssteward_allocation_amount",
-    "logisticssteward_allocation_test_creation"
+  "miyukiniadmin_audit_logger_log_action": [
+    "miyukiniadmin_audit_logger_test_default"
   ]
 }

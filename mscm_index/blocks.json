@@ -7431,33 +7431,33 @@
   },
   {
     "do": "email_send_under_governance",
-    "end_line": 24,
+    "end_line": 25,
     "file": "crates/miyunotify/src/email.rs",
     "human": "Envoie un email ; autorisation fournie par le flux (StrongFather).",
     "id": "miyunotify_tool_email_send",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 7
+    "start_line": 8
   },
   {
     "do": "inbox_write_under_governance",
-    "end_line": 31,
+    "end_line": 37,
     "file": "crates/miyunotify/src/inbox.rs",
     "human": "Écrit une entrée en boîte de réception in-app ; WriteIntent KindMother.",
     "id": "miyunotify_tool_inbox_write",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 15
+    "start_line": 17
   },
   {
     "do": "push_send_under_governance",
-    "end_line": 18,
+    "end_line": 19,
     "file": "crates/miyunotify/src/push.rs",
     "human": "Envoie une notification push ; autorisation fournie par le flux.",
     "id": "miyunotify_tool_push_send",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 7
+    "start_line": 8
   },
   {
     "do": "pm_conversation_list_under_governance",
@@ -8511,33 +8511,33 @@
   },
   {
     "do": "search_index_update_under_governance",
-    "end_line": 22,
+    "end_line": 23,
     "file": "crates/miyusearch/src/index.rs",
     "human": "Met à jour l'index ; document, champs, identifiant fournis dans le flux.",
     "id": "miyusearch_tool_search_index_update",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 7
+    "start_line": 8
   },
   {
     "do": "search_query_execute_under_governance",
-    "end_line": 32,
+    "end_line": 36,
     "file": "crates/miyusearch/src/query.rs",
     "human": "Exécute une requête full-text ; terme(s), filtres, options fournis.",
     "id": "miyusearch_tool_search_query_execute",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 16
+    "start_line": 17
   },
   {
     "do": "search_suggest_under_governance",
-    "end_line": 22,
+    "end_line": 23,
     "file": "crates/miyusearch/src/suggest.rs",
     "human": "Produit des suggestions autocomplete à partir d'un préfixe et options fournis.",
     "id": "miyusearch_tool_search_suggest",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 7
+    "start_line": 8
   },
   {
     "do": "commerce_shipping_label_create_under_governance",

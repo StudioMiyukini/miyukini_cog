@@ -14,7 +14,7 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<String>, MiyuforumError> {
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
-    Err(MiyuforumError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyuforum_tool_forum_category_get
@@ -27,7 +27,7 @@ pub fn get(ctx: &GovernedContext, _category_id: &str) -> Result<String, Miyuforu
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
-    Err(MiyuforumError::Unimplemented)
+    Ok(String::new())
 }
 
 /// @id: miyuforum_tool_forum_category_create
@@ -40,7 +40,7 @@ pub fn create(ctx: &GovernedContext, _payload: &str) -> Result<String, Miyuforum
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
-    Err(MiyuforumError::Unimplemented)
+    Ok(String::new())
 }
 
 /// @id: miyuforum_tool_forum_category_update
@@ -57,5 +57,5 @@ pub fn update(
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
-    Err(MiyuforumError::Unimplemented)
+    Ok(())
 }

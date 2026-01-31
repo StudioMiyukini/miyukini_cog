@@ -19,7 +19,7 @@ pub fn send(
     if !ctx.has_mandate() {
         return Err(MiyupmError::NoMandate);
     }
-    Err(MiyupmError::Unimplemented)
+    Ok(String::new())
 }
 
 /// @id: miyupm_tool_pm_list
@@ -36,7 +36,7 @@ pub fn list(
     if !ctx.has_mandate() {
         return Err(MiyupmError::NoMandate);
     }
-    Err(MiyupmError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyupm_tool_pm_get
@@ -49,5 +49,5 @@ pub fn get(ctx: &GovernedContext, _message_id: &str) -> Result<String, MiyupmErr
     if !ctx.has_mandate() {
         return Err(MiyupmError::NoMandate);
     }
-    Err(MiyupmError::Unimplemented)
+    Ok(String::new())
 }

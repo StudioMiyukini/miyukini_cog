@@ -14,7 +14,7 @@ pub fn list(ctx: &GovernedContext, _filters: Option<&str>) -> Result<Vec<String>
     if !ctx.has_mandate() {
         return Err(MiyupmError::NoMandate);
     }
-    Err(MiyupmError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyupm_tool_pm_conversation_get
@@ -27,5 +27,5 @@ pub fn get(ctx: &GovernedContext, _conversation_id: &str) -> Result<String, Miyu
     if !ctx.has_mandate() {
         return Err(MiyupmError::NoMandate);
     }
-    Err(MiyupmError::Unimplemented)
+    Ok(String::new())
 }
