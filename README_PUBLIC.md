@@ -4,7 +4,7 @@
 
 Le README de ce projet est également disponible dans un **dépôt public séparé** pour permettre la découverte du projet sans exposer le code source.
 
-**URL du dépôt public** : `https://github.com/StudioMiyukini/miyukini-core-system-readme`
+**URL du dépôt public** : `https://github.com/StudioMiyukini/miyukini-core-system-public`
 
 **Emplacement local** : `c:\Users\miyuk\Documents\Cursor\miyukini-core-system-readme`
 
