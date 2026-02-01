@@ -148,7 +148,7 @@ Les **Cores** (Strate 4) gouvernent ; ils ne décident pas à la place de l'exé
 
 > **Dans Miyukini, les utilisateurs n'installent pas d'applications. Ils interagissent avec des Opérateurs gouvernés qui exécutent des rôles pour leur compte.**
 
-Les Opérateurs, grâce à leur savoir-faire et leurs compétences, **orchestrent les Outils** — seuls ou en équipe — en fonction des besoins des services consommés par les utilisateurs.
+Les concepts de services identifient les besoins en Opérateurs ; les Opérateurs orchestrent les Toolkits implémentés selon les Mandats de Permission et Contrats d'équipe.
 
 ---
 
@@ -216,17 +216,19 @@ Le projet suit un **cycle strict**, de l'idée jusqu'à l'audit, sans court-circ
 
 ## 6. État actuel et roadmap
 
-### Travail en cours : Kits d'Outils (Toolkits)
+### Kits d'Outils (Toolkits) — Implémentés
 
-L'effort actuel se concentre sur les **Toolkits** pour couvrir le spectre des besoins le plus large possible. Chaque Toolkit est documenté (documentation fondatrice, contrats de gouvernance, référence outils, intégration KindMother, sécurité) et positionné dans la pyramide (Strate 6).
+**49 Toolkits** sont **implémentés** comme crates Rust dans le workspace (`crates/`), couvrant un large spectre de besoins. Chaque Toolkit est documenté (documentation fondatrice, contrats de gouvernance, référence outils) et positionné dans la pyramide (Strate 6).
 
-**Domaines couverts (extrait)** : données (MiyuSQL), identité (MiyuAuth), web (MiyuWeb), horloge (MiyuClock), contenu (MiyuCMS, MiyuMedia), widgets, boutique (MiyuStore), livraison (MiyuShipping), réservation (MiyuBooking), facturation SaaS (MiyuBilling), caisse et PoS (MiyuPosSales, MiyuPosInventory, MiyuPosAnalytics, MiyuPosLoyalty, MiyuPosKitchen, MiyuPosPayment), RH (MiyuHR), facturation métier (MiyuInvoice), comptabilité (MiyuComptaLedger, MiyuComptaReports, MiyuDeclarations), notes de frais (MiyuExpense), trésorerie (MiyuTreasury), etc.
+**Domaines couverts** : données (MiyuSQL), identité (MiyuAuth), web (MiyuWeb), horloge (MiyuClock), contenu (MiyuCMS, MiyuMedia), widgets, boutique (MiyuStore), livraison (MiyuShipping), réservation (MiyuBooking), facturation SaaS (MiyuBilling), caisse et PoS (MiyuPosSales, MiyuPosInventory, MiyuPosAnalytics, MiyuPosLoyalty, MiyuPosKitchen, MiyuPosPayment), RH (MiyuHR), facturation métier (MiyuInvoice), comptabilité (MiyuComptaLedger, MiyuComptaReports, MiyuDeclarations), notes de frais (MiyuExpense), trésorerie (MiyuTreasury), et bien d'autres.
 
-L'objectif est d'avoir un **catalogue de capacités gouvernées** (Tools & Toolkits) stable et documenté, sur lequel s'appuyer pour la phase suivante.
+**État d'implémentation** : Phase 1 (squelettes) complète — toutes les crates compilent. Phase 2 (implémentation progressive) en cours — plusieurs Toolkits déjà fonctionnels (MiyuSQL, MiyuClock, MiyuNotify, MiyuAuth, etc.).
 
-### Premiers services en cours d'élaboration
+**Documentation** : [docs/tools/_index.md](docs/tools/_index.md) — index des Toolkits documentés.
 
-Les **concepts de services** permettent d'identifier les **besoins en Opérateurs** qui orchestreront les Outils. Chaque service est défini par un **document fondateur**, des **analyses par public** (besoins, parcours, capacités livrables) et des documents **Opérateurs et Toolkits** qui précisent quels Opérateurs et Kits délivreront le service sous gouvernance.
+### Services en cours d'élaboration
+
+Les **concepts de services** identifient les **besoins en Opérateurs** qui orchestreront les Toolkits implémentés. Chaque service est défini par un **document fondateur**, des **analyses par public** (besoins, parcours, capacités livrables) et des documents **Opérateurs et Toolkits** qui précisent quels Opérateurs et Kits délivreront le service sous gouvernance.
 
 | Service | Description | Publics documentés |
 |---------|-------------|--------------------|
@@ -235,26 +237,15 @@ Les **concepts de services** permettent d'identifier les **besoins en Opérateur
 | **Miyukini Agenda** | Service unifié du domaine agenda : entrées (RDV, éditions, ateliers), détection de conflits, vue calendrier agrégée, fuseaux, export (iCal, PDF). Consommé par JayRDV et Miyukini Festival Service. | Tous les services avec espace utilisateur |
 | **Miyukini Account** | Service unifié budget et comptabilité (multi-échelle). Deux points d'entrée : **Miyukini Purse** (budgets perso et occasionnels), **Miyukini Account** (devis, facturation, comptabilité entreprise). Consommé par MFS et JayRDV. | Purse (Account), Account (entreprise) |
 
-**Documentation des services** : [docs/services/](docs/services/) — chaque service dispose d'un document fondateur, d'analyses des besoins par public, de parcours capacités/livrables et de documents **Opérateurs et Toolkits** qui font le lien entre les besoins métier et les Opérateurs (Strate 7) appelant les Outils (Strate 6).
+**Documentation** : [docs/services/](docs/services/) — chaque service dispose d'un document fondateur, d'analyses des besoins par public, de parcours capacités/livrables et de documents **Opérateurs et Toolkits**.
 
-### Lien Service → Opérateurs → Outils
+### Prochaine phase : implémentation des Opérateurs
 
-> **Les concepts de services identifient les besoins en Opérateurs ; les Opérateurs orchestrent les Outils.**
-
-1. **Service** — Ce que l'utilisateur perçoit et consomme (ex. réservation, agenda, facturation).
-2. **Besoins identifiés** — Par public (professionnel, client, organisateur, exposant, visiteur) : analyse des besoins, parcours, capacités livrables.
-3. **Opérateurs et Kits** — Les documents « Opérateurs et Toolkits » par service/public précisent quels Opérateurs (et Équipes d'Opérateurs) délivrent le service et quels Kits d'outils ils orchestrent.
-4. **Implémentation** — Les Opérateurs (Strate 7) exécutent des rôles sous gouvernance et appellent les Outils et Kits (Strate 6) selon les Mandats de Permission et Contrats d'équipe.
-
-Cette chaîne garantit que chaque service est tracé jusqu'aux capacités exécutables (Outils) tout en restant gouverné (Cores, Mandats).
-
-### Phase suivante : implémentation des Opérateurs
-
-Une fois les services suffisamment spécifiés (fondateurs, analyses, Opérateurs et Toolkits), le travail se déplacera vers l'**implémentation des Opérateurs** (Strate 7). Les Opérateurs, grâce à leur savoir-faire et leurs compétences, **orchestreront les Outils** — seuls ou en équipe — en fonction des besoins des **services** consommés par les utilisateurs. Les Opérateurs ne décident pas ; ils exécutent des rôles sous gouvernance (StrongFather, Mandats de Permission, Contrats d'équipe).
+Une fois les services suffisamment spécifiés (fondateurs, analyses, Opérateurs et Toolkits), le travail se déplacera vers l'**implémentation des Opérateurs** (Strate 7). Les Opérateurs orchestrent les Toolkits implémentés — seuls ou en équipe — en fonction des besoins des services consommés par les utilisateurs, sous gouvernance (StrongFather, Mandats de Permission, Contrats d'équipe).
 
 ### Maturité conceptuelle
 
-La pyramide, les Cores, les Lois d'autonomie, les contrats de sécurité et de gouvernance d'écosystème sont **stabilisés et documentés**. Le Kernel et les Cores du workspace sont en place ; l'outillage MIP (index structurel MSCM) est disponible. Les **premiers services** (JayRDV, Miyukini Festival Service, Miyukini Agenda, Miyukini Account) sont en phase de conception produit et de spécification des besoins en Opérateurs et Toolkits.
+La pyramide, les Cores, les Lois d'autonomie, les contrats de sécurité et de gouvernance d'écosystème sont **stabilisés et documentés**. Le Kernel et les Cores du workspace sont en place ; l'outillage MIP (index structurel MSCM) est disponible. Les **premiers services** (JayRDV, Miyukini Festival Service, Miyukini Agenda, Miyukini Account) sont en phase de conception produit et de spécification des besoins en Opérateurs.
 
 ---
 
@@ -323,13 +314,12 @@ Miyukini ne vise pas à être le plus rapide ni le plus flexible, mais **prévis
 
 ## 12. Log de rédaction
 
-**2026-01-31 — Avancées et premiers services**
+**2026-01-31 — Correction état réel et suppression répétitions**
 
-- Ajout section **Premiers services en cours d'élaboration** : JayRDV (réservation en ligne), Miyukini Festival Service (événements et festivals), Miyukini Agenda (agenda unifié), Miyukini Account (budget et comptabilité, Purse / Account). Tableau récapitulatif avec publics documentés.
-- Ajout du **lien Service → Opérateurs → Outils** : les concepts de services permettent d'identifier les besoins en Opérateurs qui orchestreront les Outils ; chaîne Service → Besoins (par public) → Opérateurs et Kits → Implémentation.
-- Lien vers **docs/services/** dans la section Documentation de référence et dans l'état actuel (documentation fondateurs, analyses par public, Opérateurs et Toolkits).
-- Reformulation **Phase suivante** : implémentation des Opérateurs une fois les services suffisamment spécifiés.
-- Maturité conceptuelle : mention des premiers services en phase de conception produit et de spécification des besoins en Opérateurs et Toolkits.
+- Mise à jour section **État actuel** : les Toolkits sont **implémentés** (49 crates dans le workspace), pas seulement documentés. Phase 1 (squelettes) complète, Phase 2 (implémentation progressive) en cours.
+- Réorganisation section **Services** : simplification et clarification du lien Service → Opérateurs → Toolkits implémentés.
+- Suppression des répétitions entre "Mécaniques générales" et "État actuel" : consolidation du message sur le rôle des services et l'orchestration des Toolkits.
+- Reformulation **Prochaine phase** : implémentation des Opérateurs une fois les services suffisamment spécifiés, avec référence aux Toolkits déjà implémentés.
 
 **2026-01-30 — Refonte README racine**
 
@@ -349,4 +339,4 @@ Miyukini ne vise pas à être le plus rapide ni le plus flexible, mais **prévis
 
 **Document** : README racine officiel  
 **Dernière mise à jour** : 2026-01-31  
-**Références** : Glossaire officiel, Pyramide Architecture Complete, Lois d'autonomie, Objectif Final, Tools et Toolkits, docs/services (Services en cours d'élaboration)
+**Références** : Glossaire officiel, Pyramide Architecture Complete, Lois d'autonomie, Objectif Final, Tools et Toolkits (implémentés), docs/services (Services en cours d'élaboration)
