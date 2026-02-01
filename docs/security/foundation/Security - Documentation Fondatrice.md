@@ -251,6 +251,20 @@ Voir : [Caring Nanny - Documentation Fondatrice](../core/CaringNanny/foundation/
 
 Voir : [KindMother - Documentation Fondatrice](../core/KindMother/foundation/KindMother%20-%20Documentation%20Fondatrice.md)
 
+### 4.9 Données sensibles et résidence centralisée (COG de référence)
+
+**Rôle sécurité** : Garantir que les données sensibles (personnelles, métier critique) ne résident pas comme seule copie sur des terminaux ou des COG tiers.
+
+| Responsabilité | Description |
+|----------------|-------------|
+| COG de référence | Désignation du COG détenteur canonique des données à résidence centralisée (Instance Mère KindMother) |
+| Politique de résidence | Les données de niveau WorrySentinel 2+ (Sensitive) et au-delà sont soumises à la politique de résidence centralisée selon contrat Service |
+| Disponibilité | En cas de coupure du terminal (ex. exposant), les données restent accessibles sur le COG de référence (ex. pour les organisateurs) |
+
+**Invariant** : Pour les données à résidence centralisée, la copie canonique réside sur un COG de référence désigné ; un terminal ou un COG tiers ne peut pas en être la seule copie.
+
+Voir : [Miyukini Conceptual References - Politique Residence Donnees Sensibles](../../reference/Miyukini%20Conceptual%20References%20-%20Politique%20Residence%20Donnees%20Sensibles.md), [Glossaire — COG de référence](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+
 ---
 
 ## 5. Les 8 Security Engines

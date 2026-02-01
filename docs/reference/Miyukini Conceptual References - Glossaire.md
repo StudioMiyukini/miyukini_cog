@@ -205,6 +205,23 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
+### COG de référence (Reference COG / Official COG)
+
+**COG désigné comme détenteur canonique** des données sensibles d'un domaine donné. Il héberge l'Instance Mère KindMother (ou l'équivalent « serveur ») pour ce domaine.
+
+**Rôle :**
+- Détenteur canonique des données à résidence centralisée
+- Source de vérité pour les données sensibles du domaine
+- Accessible par les acteurs autorisés (Visite gouvernée, sync) — les terminaux ou autres COG n'en sont pas propriétaires, ils accèdent sans en être la seule copie
+
+**Règle fondamentale :**
+
+> **Les données sensibles à résidence centralisée ne doivent pas avoir pour seule copie un terminal ou un COG tiers. Leur copie canonique réside sur le COG de référence.**
+
+**Voir aussi :** Politique de résidence des données sensibles, KindMother (Instance Mère), COG Hébergeur, WorrySentinel, Niveaux de sécurité
+
+---
+
 ### COG Tracker (Webway Tracker)
 
 **COG dont l'administrateur a choisi d'endosser le rôle de Tracker** : exposer volontairement une adresse (IP ou nom de domaine) pour participer au maillage Miyukini Webway System (MWS) et servir de point de rendez-vous pour la découverte.
@@ -931,6 +948,22 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
+### Politique de résidence des données sensibles (Sensitive Data Residence Policy)
+
+**Règle gouvernant où réside la copie canonique** des données sensibles : certaines données (personnelles, métier critique) ne doivent pas être dupliquées comme seule copie sur des terminaux ou des COG tiers.
+
+**Contenu de la politique :**
+- **Données à résidence centralisée** : liste ou critères (domaine, niveau WorrySentinel 2+) des données dont la copie canonique doit résider sur un COG de référence
+- **COG de référence** : désignation du COG détenteur canonique (ex. COG organisateur, COG du Service)
+- **Terminaux / COG tiers** : accès en lecture via Visite gouvernée ou sync ; écritures soumises en WriteIntent, validées et persistées sur la Mère (COG de référence)
+- **Interdiction** : la seule copie de ces données ne doit jamais résider uniquement sur un terminal ou un COG non désigné comme COG de référence
+
+**Effet :** En cas de coupure du terminal (ex. exposant), les données restent disponibles sur le COG de référence (ex. pour les organisateurs).
+
+**Voir aussi :** COG de référence, KindMother (Instance Mère), WorrySentinel, Niveaux de sécurité, Migration
+
+---
+
 ### Pyramide Miyukini
 
 **Architecture en strates** de l'écosystème Miyukini.
@@ -1442,6 +1475,7 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 | Visitor User                    | **Utilisateur Visiteur**                   |
 | Host COG                        | **COG Hébergeur**                          |
 | Home COG                        | **COG Origine**                            |
+| Reference COG / Official COG    | **COG de référence**                       |
 | Inter-COG Bridge                | **Bridge inter-COG**                       |
 | Public User                     | **Utilisateur Externe**                    |
 | Anonymous User                  | **Utilisateur Externe**                    |
@@ -1454,12 +1488,13 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 ---
 
 **Date de création :** 2026-01-27  
-**Version :** 1.9 (ajout Déclaration d'hébergement de session, Norme de déclaration sécurisée MWS)  
+**Version :** 1.10 (ajout COG de référence, Politique de résidence des données sensibles)  
 **Statut :** Document de référence normatif — GLOSSAIRE OFFICIEL
 
 **Références croisées :**
 
 - [Miyukini Conceptual References - Definition COG](./Miyukini%20Conceptual%20References%20-%20Definition%20COG.md)
+- [Miyukini Conceptual References - Politique Residence Donnees Sensibles](./Miyukini%20Conceptual%20References%20-%20Politique%20Residence%20Donnees%20Sensibles.md) : **Centralisation et résidence des données sensibles**
 - [Miyukini Conceptual References - Miyukini Webway System](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) : **Couche de présence et découverte (MWS)**
 - [Miyukini Conceptual References - Miyukini Webway System Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) : **Annexe MWS — normes, formats, protocole, matrice des statuts**
 - [Miyukini Conceptual References - Miyukini Webway System Outils et Operateurs](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Outils%20et%20Operateurs.md) : **Annexe MWS — Outils, Kits d'Outils, Opérateurs MWS**

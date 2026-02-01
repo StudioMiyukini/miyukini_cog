@@ -2,6 +2,9 @@
 target/
 Cargo.lock
 
+# Catakana
+.Catakana
+
 # Dependencies
 node_modules
 .pnp

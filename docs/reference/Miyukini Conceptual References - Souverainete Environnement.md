@@ -321,6 +321,7 @@ Les environnements COG peuvent échanger des données **si et seulement si** cel
 | 5 | L'identité est à 3 niveaux (LSI, WID, VID) | **RECOMMANDÉ** |
 | 6 | Migration = diplomatie explicite | **NON NÉGOCIABLE** |
 | 7 | Évolution ralentie volontairement | **RECOMMANDÉ** |
+| 8 | Données sensibles à résidence centralisée : copie canonique sur COG de référence | **NORMATIF** (voir Politique de résidence) |
 
 ### Formulation officielle
 
@@ -330,12 +331,21 @@ Les environnements COG peuvent échanger des données **si et seulement si** cel
 
 ---
 
+## 10. Résidence des données sensibles
+
+Certaines données sensibles (données personnelles, métier critique) ne doivent pas avoir pour seule copie un terminal ou un COG tiers. Leur **copie canonique** réside sur un **COG de référence** désigné (voir [Politique de résidence des données sensibles](./Miyukini%20Conceptual%20References%20-%20Politique%20Residence%20Donnees%20Sensibles.md)).
+
+**Effet :** En cas de coupure du terminal (ex. exposant), les données restent disponibles sur le COG de référence (ex. pour les organisateurs). La souveraineté du COG de référence inclut la détention canonique de ces données ; les terminaux accèdent via Visite gouvernée ou synchronisation, sans en être la seule copie.
+
+---
+
 **Date de création :** 2026-01-27  
-**Version :** 1.2 (terminologie Opérateurs)  
+**Version :** 1.3 (ajout résidence des données sensibles, COG de référence)  
 **Statut :** Document de référence normatif
 
 **Références croisées :**
 - [Miyukini Conceptual References - Definition COG](./Miyukini%20Conceptual%20References%20-%20Definition%20COG.md) : Définition officielle COG
+- [Miyukini Conceptual References - Politique Residence Donnees Sensibles](./Miyukini%20Conceptual%20References%20-%20Politique%20Residence%20Donnees%20Sensibles.md) : Centralisation et résidence des données sensibles
 - [Miyukini Conceptual References - Operators et Terminologie](./Miyukini%20Conceptual%20References%20-%20Operators%20et%20Terminologie.md) : Terminologie officielle
 - [Miyukini Conceptual References - Lois Autonomie Systeme](./Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) : Contraintes d'autonomie
 - [Miyukini Conceptual References - Vision Strategique](./Miyukini%20Conceptual%20References%20-%20Vision%20Strategique.md) : Stratégie globale
@@ -343,3 +353,4 @@ Les environnements COG peuvent échanger des données **si et seulement si** cel
 - [Miyukini Conceptual References - Kernel Maintenance Observability Contract](./Miyukini%20Conceptual%20References%20-%20Kernel%20Maintenance%20Observability%20Contract.md) : Capacités bas niveau de maintenance (compatible isolation)
 - [BondingBrother - Migration & Compatibility Contract](../core/BondingBrother/BondingBrother%20-%20Migration%20%26%20Compatibility%20Contract.md) : Contrat de migration
 - [Border Guard - Documentation Fondatrice](../core/BorderGuard/Border%20Guard%20-%20Documentation%20Fondatrice.md) : Frontières et confiance
+- [Miyukini Conceptual References - Glossaire](./Miyukini%20Conceptual%20References%20-%20Glossaire.md) : COG de référence, Politique de résidence des données sensibles

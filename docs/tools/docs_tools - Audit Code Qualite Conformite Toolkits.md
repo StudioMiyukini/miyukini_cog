@@ -22,11 +22,11 @@ Ce document audite le **code source des crates Toolkits** (crates `miyu*` du wor
 | **Compilation** | OK | `cargo check --workspace` réussit. |
 | **Unsafe** | Conforme | Aucun bloc `unsafe` dans les crates. |
 | **unsafe_code = "forbid"** | Conforme | Appliqué dans l’ensemble des crates toolkits et Cores (51+ Cargo.toml). |
-| **Gouvernance (mandat)** | Bon | 1205+ usages `has_mandate` / `GovernedContext` dans 293 fichiers. |
+| **Gouvernance (mandat)** | Bon | ~448 lignes `has_mandate` dans 242 fichiers ; tous les points d’entrée Tools vérifiés. |
 | **Balisage MSCM / MIP** | Bon | 2588+ marqueurs @id / @do (ou équivalent) dans 304 fichiers ; index MIP à jour. |
 | **BOUND-1 (pas de décision ALLOW/DENY)** | Conforme | Aucun toolkit ne décide ALLOW/DENY ; mentions uniquement en commentaires ou dans Cores (StrongFather, BorderGuard). |
 | **unwrap / expect** | À surveiller | 1 occurrence en code toolkit production (miyufeeds : `expect` sur `duration_since(UNIX_EPOCH)` — justifié et documenté). Autres occurrences limitées aux tests, kernel, admin, Cores. |
-| **Stubs Unimplemented** | En cours | 432 occurrences dans 206 fichiers ; nombreux toolkits avec logique partielle ou stub. |
+| **Stubs Unimplemented** | En cours | ~286 `Err(…Unimplemented)` dans 133 fichiers ; nombreux toolkits avec logique partielle ou stub. |
 
 ---
 
@@ -50,9 +50,9 @@ Ce document audite le **code source des crates Toolkits** (crates `miyu*` du wor
 |----------|--------|
 | Occurrences `unsafe` | 0 |
 | Crates avec `unsafe_code = "forbid"` | 51+ (dont tous les toolkits) |
-| Références `has_mandate` / `GovernedContext` | 1205 (293 fichiers) |
-| Références MSCM (@id / @do ou équivalent) | 2588 (304 fichiers) |
-| Occurrences `Unimplemented` / `unimplemented!` | 432 (206 fichiers) |
+| Références `has_mandate` (appels + définition) | ~448 lignes (242 fichiers) |
+| Références MSCM (@id / @do ou équivalent) | 2588+ (304 fichiers) |
+| Occurrences `Err(…Unimplemented)` | ~286 (133 fichiers) |
 | `unwrap` / `expect` en production toolkits | 1 (miyufeeds — `expect` sur temps système, documenté) |
 
 ### 3.3 Conformité BOUND-*
@@ -84,11 +84,28 @@ Les **tests** (miyusql, miyukini-kernel, etc.) et la **doc** (exemples dans id.r
 
 ---
 
-## 5. Bon fonctionnement
+## 5. Vérification détaillée (audit 2026-01-31)
+
+### 5.1 BOUND-1 — Mandat à l’entrée des Tools
+
+- **Vérification :** Tous les points d’entrée publics des Tools (fonctions exposées par les crates `miyu*`) doivent refuser l’exécution si `!ctx.has_mandate()` et retourner une erreur contractuelle (ex. `NoMandate`).
+- **Résultat :** **Conforme.** 242 fichiers contiennent `has_mandate` ; les modules de Tools audités (miyucalc, miyuclock, miyutext, miyusearch, miyujobs, miyudiscovery, miyupospayment, miyuweb, miyupm, miyuforum, etc.) appellent systématiquement `if !ctx.has_mandate() { return Err(…); }` en tête de chaque fonction outil. Les contextes (`GovernedContext`) exposent `has_mandate()` ; aucun outil ne s’exécute sans mandat.
+
+### 5.2 BOUND-3 — Absence d’accès direct à la base
+
+- **Vérification :** Aucun toolkit (hors MiyuSQL / KindMother) ne doit accéder directement à une base (SQL, pool, rusqlite, diesel, etc.).
+- **Résultat :** **Conforme.** Les seules occurrences de `sql` / `database` / `query` / `execute` / `Pool` dans les crates concernent : **kindmother** (abstraction persistance, pont MiyuSQL), **miyusql** (couche données par conception), **miyukini-admin** (service UI + tests cycle). Aucune crate toolkit métier (miyucalc, miyutext, miyauth, miyustore, etc.) n’effectue d’accès DB direct.
+
+### 5.3 Pas de décision ALLOW/DENY dans les Tools
+
+- **Vérification :** Aucun toolkit ne doit décider d’autoriser ou refuser une action (décision = StrongFather).
+- **Résultat :** **Conforme.** Les mentions de « allow », « deny », « permission », « authorize » en code sont : `policy.allowed_tags` (MiyuText sanitize — paramètre de politique fourni en entrée), `authorize` (MiyuPosPayment — nom du Tool `tool.payment.terminal.authorize`), commentaires explicites (miyauth verify, miyujobs schedule) indiquant que le kit ne décide pas. Aucune logique ALLOW/DENY implémentée dans les Tools.
+
+### 5.4 Bon fonctionnement
 
 - **Compilation** : `cargo check --workspace` exécuté avec succès (sortie 0).
 - **Index MIP** : `mscm_index/registry.json` et `stats.json` cohérents ; `toolkit_registry.json` alimenté par `toolkit-registry-export`.
-- **Structure des toolkits** : pattern répété `admin_cell`, `context` (GovernedContext), `errors`, modules par domaine (ex. calc : expression, number, round, unit) — cohérent avec le protocole et le plan d’implémentation.
+- **Structure des toolkits** : pattern répété `admin_cell`, `context` (GovernedContext avec `has_mandate()`), `errors`, modules par domaine (ex. calc : expression, number, round, unit) — cohérent avec le protocole et le plan d’implémentation.
 
 ---
 
@@ -97,7 +114,7 @@ Les **tests** (miyusql, miyukini-kernel, etc.) et la **doc** (exemples dans id.r
 ### 6.1 Priorité haute
 
 1. **Réduire les stubs Unimplemented**  
-   Poursuivre l’implémentation de la logique réelle pour les toolkits encore en stub (432 occurrences), en priorisant les lots 7–9 du plan d’implémentation et les kits à fort impact (commerce, compta, contenu, identité).
+   Poursuivre l’implémentation de la logique réelle pour les toolkits encore en stub (~286 occurrences `Err(…Unimplemented)` dans 133 fichiers), en priorisant les lots 7–9 du plan d’implémentation et les kits à fort impact (commerce, compta, contenu, identité).
 
 2. **Réduire unwrap/expect en production**  
    Pour tout nouveau code toolkit : privilégier `map_err`, `?` et types `Result` ; réserver `expect` aux cas documentés (ex. invariant temps système dans miyufeeds).
@@ -136,4 +153,5 @@ Les **tests** (miyusql, miyukini-kernel, etc.) et la **doc** (exemples dans id.r
 ---
 
 **Date de création :** 2026-01-31  
+**Dernière mise à jour :** 2026-01-31 (vérification détaillée BOUND-1, BOUND-3, ALLOW/DENY ; métriques has_mandate et Unimplemented recalculées)  
 **Statut :** Rapport d’audit — à mettre à jour après corrections ou évolution des métriques.
