@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuComptaReports — toolkit.compta.reports
 //!
 //! Kit d'outils rapports comptables (livre recettes, balance, liasse, cashflow, export ledger).

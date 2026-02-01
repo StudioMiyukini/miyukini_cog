@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuLocale — toolkit.locale.miyulocale
 //!
 //! Kit d'outils de locale et i18n (date, number, translate). Locale et catalogue fournis dans le flux.

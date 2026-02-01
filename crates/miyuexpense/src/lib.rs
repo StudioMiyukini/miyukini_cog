@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuExpense — toolkit.expense.claims
 //!
 //! Kit d'outils notes de frais et indemnités (justificatifs, notes, validation, export).

@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuStory — toolkit.social.story
 //!
 //! Kit d'outils stories (create, list, get, reaction.add). Décision = StrongFather ; WriteIntent KindMother.

@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuSocialModeration — toolkit.social.moderation
 //!
 //! Kit d'outils modération social (report, block, post). Décision = StrongFather ; WriteIntent KindMother.

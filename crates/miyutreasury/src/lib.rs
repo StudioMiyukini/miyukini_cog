@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuTreasury — toolkit.treasury.forecast
 //!
 //! Kit d'outils trésorerie et prévisionnel (tableau de bord, prévisionnel, alertes).

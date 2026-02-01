@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuJobs — toolkit.jobs.miyujobs
 //!
 //! Kit d'outils de planification et file d'attente (schedule.at, schedule.cron, queue.enqueue, queue.process). Décision de planifier = StrongFather.

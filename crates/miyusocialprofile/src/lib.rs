@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuSocialProfile — toolkit.social.profile
 //!
 //! Kit d'outils profil social (profile, follow). Décision = StrongFather ; WriteIntent KindMother.

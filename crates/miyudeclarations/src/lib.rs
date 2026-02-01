@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuDeclarations — toolkit.compta.declarations
 //!
 //! Kit d'outils déclarations fiscales et sociales (URSSAF, TVA, deadline, list, estimate).

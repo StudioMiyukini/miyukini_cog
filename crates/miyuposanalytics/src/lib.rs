@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuPosAnalytics — toolkit.pos.analytics
 //!
 //! Kit d'outils analytics ventes PoS (sales, cash, tax, shift, export). Données = KindMother.

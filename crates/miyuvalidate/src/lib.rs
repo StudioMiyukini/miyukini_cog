@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuValidate — toolkit.validate.miyuvalidate
 //!
 //! Kit d'outils de validation et sanitization (schéma, sanitize). Schéma et politique fournis dans le flux.

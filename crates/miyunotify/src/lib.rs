@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuNotify — toolkit.notify.miyunotify
 //!
 //! Kit d'outils de notification (email, push, inbox). Décision d'envoi = StrongFather.

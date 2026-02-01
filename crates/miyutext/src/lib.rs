@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuText — toolkit.text.miyutext
 //!
 //! Kit d'outils de traitement de texte (markdown, replace, template, sanitize). Contenu fourni dans le flux ; pas de décision métier.

@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuStore — toolkit.commerce.store
 //!
 //! Kit d'outils commerce (produits, panier, checkout, paiement, livraison, commandes).

@@ -14,6 +14,7 @@ description = "Miyukini Central - Hub de gestion des Services de l'ecosysteme Mi
 [dependencies]
 egui = "0.33"
 eframe = { version = "0.33", default-features = false, features = ["default_fonts", "persistence", "glow"] }
+egui-phosphor = "0.9"
 
 [[bin]]
 name = "miyukini-central"
@@ -24,5 +25,6 @@ unsafe_code = "forbid"
 missing_docs = "warn"
 
 [lints.clippy]
-all = "warn"
-pedantic = "warn"
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+doc_markdown = "allow"

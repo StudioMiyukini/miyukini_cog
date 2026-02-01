@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuWeb — toolkit.web.miyuweb
 //!
 //! Kit d'outils d'affichage web (rendu HTML, layout, thème, scripts, assets, formulaires, événements).

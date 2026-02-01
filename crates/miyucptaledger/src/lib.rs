@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuComptaLedger — toolkit.compta.ledger
 //!
 //! Kit d'outils tenue des livres (synchro bancaire, écritures, rapprochement, structure entreprise).

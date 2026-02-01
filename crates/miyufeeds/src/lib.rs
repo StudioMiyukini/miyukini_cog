@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuFeeds — toolkit.content.feeds
 //!
 //! Kit d'outils flux ATOM (board, forum, topic). Lecture = KindMother ; décision accès = StrongFather.

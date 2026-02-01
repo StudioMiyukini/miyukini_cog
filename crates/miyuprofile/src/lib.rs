@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuProfile — toolkit.identity.profile
 //!
 //! Kit d'outils profil (profile, field, avatar, signature, rank, preferences). Décision = StrongFather ; WriteIntent KindMother.

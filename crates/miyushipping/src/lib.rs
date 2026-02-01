@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuShipping — toolkit.commerce.shipping
 //!
 //! Kit d'outils livraison (tarifs, zones, étiquettes, suivi, expéditions).

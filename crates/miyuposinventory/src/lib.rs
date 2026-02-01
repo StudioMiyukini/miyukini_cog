@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuPosInventory — toolkit.pos.inventory
 //!
 //! Kit d'outils inventaire PoS (stock, import, alert, purchase_order, transfer, count, production, label, history, valuation). WriteIntent KindMother.

@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuInvoice — toolkit.invoice.standalone
 //!
 //! Kit d'outils facturation métier (devis, factures, électronique, relances, lien paiement, clients).

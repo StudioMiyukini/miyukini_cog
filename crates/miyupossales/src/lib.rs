@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuPosSales — toolkit.pos.sales
 //!
 //! Kit d'outils caisse et ventes PoS (sale, ticket, discount, refund, receipt, item, cash_register, cash_movement, barcode, store, display, order). WriteIntent KindMother.

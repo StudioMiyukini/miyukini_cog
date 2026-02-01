@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuWebwayParticipant — toolkit.webway.participant
 //!
 //! Kit d'outils MWS Participant (déclaration, transport, découverte, cog_list, port, adresse).

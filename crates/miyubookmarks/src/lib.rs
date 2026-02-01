@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuBookmarks — toolkit.content.bookmarks
 //!
 //! Kit d'outils signets (add, remove, list). Décision = StrongFather ; WriteIntent KindMother.

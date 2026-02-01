@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuSearch — toolkit.search.miyusearch
 //!
 //! Kit d'outils de recherche (index, requête, suggestions). Index sous autorité KindMother ; critères fournis dans le flux.

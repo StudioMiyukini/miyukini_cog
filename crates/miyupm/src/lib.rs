@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuPM — toolkit.communication.pm
 //!
 //! Kit d'outils de messages privés (envoi, liste, dossiers, brouillons, conversations, export).

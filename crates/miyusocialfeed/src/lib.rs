@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuSocialFeed — toolkit.social.feed
 //!
 //! Kit d'outils flux social (post, feed, reaction, share, comment). Décision = StrongFather ; WriteIntent KindMother.

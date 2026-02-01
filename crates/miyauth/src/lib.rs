@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuAuth — toolkit.identity.miyauth
 //!
 //! Kit d'outils d'identité (résolution, attestation, vérification Passeport/Visa, rôle).

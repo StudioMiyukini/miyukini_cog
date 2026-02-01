@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuDiscovery — toolkit.social.discovery
 //!
 //! Kit d'outils discovery social (hashtag, trending, discover, search). Politique = StrongFather.

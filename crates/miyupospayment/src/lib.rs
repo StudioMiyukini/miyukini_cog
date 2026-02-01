@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuPosPayment — toolkit.pos.payment
 //!
 //! Kit d'outils paiements PoS (cash, check, split, terminal). WriteIntent KindMother.

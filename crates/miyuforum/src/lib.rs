@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuForum — toolkit.community.forum
 //!
 //! Kit d'outils forum (catégories, boards, topics, posts, suivi lu, export).

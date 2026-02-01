@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuWidgets — toolkit.web.widgets
 //!
 //! Kit d'outils widgets web (layout, blocs texte/image/bouton/grille/conteneur, template).

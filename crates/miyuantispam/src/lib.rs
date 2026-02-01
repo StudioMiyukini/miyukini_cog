@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuAntiSpam — toolkit.security.antispam
 //!
 //! Kit d'outils antispam (captcha, flood, rate_limit). Décision bloquer = StrongFather.

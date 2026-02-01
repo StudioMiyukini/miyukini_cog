@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuSocialMessaging — toolkit.social.messaging
 //!
 //! Kit d'outils messagerie (dm, conversation). Décision envoi = StrongFather ; WriteIntent KindMother.

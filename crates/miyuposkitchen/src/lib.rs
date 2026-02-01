@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuPosKitchen — toolkit.pos.kitchen
 //!
 //! Kit d'outils cuisine PoS (kitchen, service_type, ticket). Données fournies dans le flux.

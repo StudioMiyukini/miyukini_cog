@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuClock — toolkit.kernel.miyuclock
 //!
 //! Kit d'outils de mesure du temps (instant présent, delta entre instants).

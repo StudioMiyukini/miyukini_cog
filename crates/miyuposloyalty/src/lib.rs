@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuPosLoyalty — toolkit.pos.loyalty
 //!
 //! Kit d'outils CRM et fidélité PoS (customer, loyalty). WriteIntent KindMother.

@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuBooking — toolkit.booking.reservations
 //!
 //! Kit d'outils réservations (créneaux, réservations, ressources, prix, participants).

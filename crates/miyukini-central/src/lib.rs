@@ -1,9 +1,7 @@
-//! Miyukini Central — Hub de gestion des Services (MVP).
-//!
-//! Opérateur d'Interface (Strate 7) : vitrine du Registre d'Opérateurs,
-//! catalogue, Mes Services, lancement de Services factices (démo).
+//! Bibliothèque Miyukini Central - Hub de gestion des Services.
 
 pub mod app;
 pub mod catalog;
+pub mod pixel_theme;
 pub mod services;
 pub mod theme;

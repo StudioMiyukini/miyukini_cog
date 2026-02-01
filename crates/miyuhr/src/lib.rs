@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuHR — toolkit.hr.miyuhr
 //!
 //! Kit d'outils RH (time_clock, schedule). Persistance = KindMother (WriteIntent).

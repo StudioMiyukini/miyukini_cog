@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuMedia — toolkit.content.media
 //!
 //! Kit d'outils médias (upload, serve, transform).

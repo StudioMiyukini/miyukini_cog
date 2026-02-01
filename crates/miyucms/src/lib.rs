@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuCMS — toolkit.content.cms
 //!
 //! Kit d'outils CMS (contenus, révisions, commentaires, médias).

@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuContacts — toolkit.communication.contacts
 //!
 //! Kit d'outils contacts (friend, foe, list). Décision = StrongFather ; WriteIntent KindMother.

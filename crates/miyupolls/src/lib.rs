@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuPolls — toolkit.content.polls
 //!
 //! Kit d'outils sondages (create, vote, list, result). Décision = StrongFather ; WriteIntent KindMother.

@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuBilling — toolkit.billing.saas
 //!
 //! Kit d'outils facturation SaaS (souscriptions, factures, paiements, tenant).

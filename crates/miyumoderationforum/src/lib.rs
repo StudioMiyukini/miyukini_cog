@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuModerationForum — toolkit.moderation.forum
 //!
 //! Kit d'outils modération forum (queue, report, topic, post, warning, ban, usernote). Décision = StrongFather ; WriteIntent KindMother.

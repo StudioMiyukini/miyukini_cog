@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuExport — toolkit.export.miyuexport
 //!
 //! Kit d'outils d'export (CSV, XLSX, PDF). Données et options fournies dans le flux.

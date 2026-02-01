@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! # MiyuWebwayTracker — toolkit.webway.tracker
 //!
 //! Kit d'outils MWS Tracker (déclaration, transport, découverte, cog_list, port, adresse).
