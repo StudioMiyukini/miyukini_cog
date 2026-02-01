@@ -5,9 +5,6 @@ Cargo.lock
 # Catakana
 .Catakana
 
-# Market Analysis
-market
-
 # Dependencies
 node_modules
 .pnp
