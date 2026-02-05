@@ -82,16 +82,16 @@ todos:
     status: completed
   - id: odoo_social_marketing
     content: Analyser Odoo Social Marketing - Créer 7 documents complets selon méthodologie standardisée
-    status: pending
+    status: in_progress
   - id: odoo_email_marketing
     content: Analyser Odoo Email Marketing - Créer 7 documents complets selon méthodologie standardisée
-    status: pending
+    status: in_progress
   - id: odoo_sms_marketing
     content: Analyser Odoo SMS Marketing - Créer 7 documents complets selon méthodologie standardisée
-    status: pending
+    status: in_progress
   - id: odoo_events
     content: Analyser Odoo Events - Créer 7 documents complets selon méthodologie standardisée
-    status: pending
+    status: in_progress
   - id: odoo_marketing_automation
     content: Analyser Odoo Marketing Automation - Créer 7 documents complets selon méthodologie standardisée
     status: pending

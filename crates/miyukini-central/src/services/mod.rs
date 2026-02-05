@@ -4,14 +4,28 @@
 //! avec des vues intégrées au Hub.
 
 mod calculator;
+mod dev_center;
+mod egui_editor;
 mod game;
-mod text_editor;
+mod jayfestival_service;
+mod lord_of_the_castle;
+mod miyuclicker;
+mod mock_jay;
 mod notes;
+mod text_editor;
+mod ui_library;
 
 pub use calculator::CalculatorService;
+pub use dev_center::DevCenterService;
+pub use egui_editor::{EditorThemeState, EguiEditorService, UI_EDITOR_THEME_STORAGE_KEY};
 pub use game::GameService;
-pub use text_editor::TextEditorService;
+pub use jayfestival_service::JayFestivalService;
+pub use lord_of_the_castle::LordOfTheCastleService;
+pub use miyuclicker::MiyuClickerService;
+pub use mock_jay::MockJayService;
 pub use notes::NotesService;
+pub use text_editor::TextEditorService;
+pub use ui_library::UiLibraryService;
 
 use crate::catalog::ServiceId;
 use eframe::egui;
@@ -24,4 +38,11 @@ pub trait ServiceUi {
     fn title(&self) -> &'static str;
     /// Dessine l'UI du Service dans le panneau central.
     fn show(&mut self, ui: &mut egui::Ui);
+    /// Persiste l'état si nécessaire (ex. thème UI Editor). Appelé par le Hub après show().
+    fn persist_if_needed(&mut self, _storage: Option<&mut dyn eframe::Storage>) {}
+
+    /// Thème éditable (UI Editor uniquement). Permet au Hub de synchroniser le thème global.
+    fn ui_editor_theme_mut(&mut self) -> Option<&mut EditorThemeState> {
+        None
+    }
 }

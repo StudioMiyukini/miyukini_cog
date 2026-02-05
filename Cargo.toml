@@ -62,6 +62,9 @@ members = [
     "crates/miyustory",
     "crates/miyukini-admin",
     "crates/miyukini-central",
+    "crates/miyuclicker",
+    "crates/lord_of_the_castle",
+    "crates/jayfestival",
     "tools/mip-generator",
     "tools/toolkit-skeleton",
     "tools/toolkit-registry-export",
@@ -71,6 +74,7 @@ resolver = "2"
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.75"
 authors = ["Miyukini Contributors"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/miyukini/miyukini-kernel"

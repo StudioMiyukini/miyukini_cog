@@ -14,6 +14,23 @@ Ce document constitue le **dictionnaire officiel** de l'écosystème Miyukini. I
 
 ---
 
+## Nomenclature des composants (préfixes)
+
+Les préfixes suivants identifient le **type de composant** conçu par Miyukini ou appartenant à la famille officielle Jay :
+
+| Préfixe / pattern | Signification |
+|-------------------|---------------|
+| **MiyuXxx** | Nom générique **Toolkit** conçu par Miyukini |
+| **MiyukiniOpsXxx** | Nom générique **Opérateurs** conçu par Miyukini |
+| **MiyukiniXxx** | Nom générique **Service** conçu par Miyukini |
+| **JayXxx** | **Service Jay** — Services officiels de la famille « Jay » |
+
+**Exemples :** MiyuClock (Toolkit), MiyukiniOpsAdmin (Opérateur), MiyukiniSales (Service), JayRDV, JayFestival, JayXpose (Services Jay).
+
+**Voir aussi :** Outil, Kit d'Outils, Opérateur, Service, [Interpolarité des services Jay](./Miyukini%20Conceptual%20References%20-%20Interpolarite%20Services%20Jay.md).
+
+---
+
 ## A
 
 ### ACTIF (ACTIVE) — état de vie

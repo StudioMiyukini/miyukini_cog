@@ -2,6 +2,11 @@
 //!
 //! Inspiré des stores (Steam, Microsoft Store) : coins arrondis, couleurs d'accent,
 //! cartes visuelles, espacement généreux.
+//!
+//! **Legacy :** Ce module n'est pas utilisé par Miyukini Central. L'app utilise
+//! [pixel_theme](crate::pixel_theme) et [EditorThemeState](crate::services::EditorThemeState).
+//! Pour harmoniser avec les thèmes, préférer `ctx.style().visuals` ou les couleurs
+//! résolues via le Hub (global_ui_theme / resolve_chrome).
 
 use eframe::egui;
 

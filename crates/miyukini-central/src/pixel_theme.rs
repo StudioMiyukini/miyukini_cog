@@ -3,16 +3,30 @@
 //! Ce module adapte les techniques CSS de chrome-tabs dans egui pour créer
 //! une interface pixel art fidèle au style Chrome.
 
-use eframe::egui;
+use eframe::egui::{self, Color32};
 
 /// Couleurs Chrome exactes (style pixel art).
+/// Palette mode clair : beige light (fridaahlsen) — #d9b99b barre exe, #fff0db header, #e4d5b7 sidebars.
 #[allow(missing_docs)]
 pub mod chrome_colors {
     use eframe::egui::Color32;
 
-    /// Fond de la barre d'onglets (gris très clair Chrome).
-    pub const TAB_BAR_BG_LIGHT: Color32 = Color32::from_rgb(242, 242, 244);
-    pub const TAB_BAR_BG_DARK: Color32 = Color32::from_rgb(45, 45, 50);
+    /// Barre de l'exécutable (ligne 1 du header : titre + connexion) en mode clair.
+    pub const BARRE_EXE_LIGHT: Color32 = Color32::from_rgb(217, 185, 155); // #d9b99b
+    /// Fond de la barre d'onglets / header (ligne 2) en mode clair.
+    pub const TAB_BAR_BG_LIGHT: Color32 = Color32::from_rgb(255, 240, 219); // #fff0db
+    /// Fond des sidebars du Hub en mode clair.
+    pub const SIDEBAR_BG_LIGHT: Color32 = Color32::from_rgb(228, 213, 183); // #e4d5b7
+
+    /// Fond du header en mode nuit (gris moyen).
+    pub const TAB_BAR_BG_DARK: Color32 = Color32::from_rgb(85, 85, 85);
+    /// Barre exe en mode nuit (même zone que clair).
+    pub const BARRE_EXE_DARK: Color32 = Color32::from_rgb(65, 65, 70);
+    /// Sidebars Hub en mode nuit.
+    pub const SIDEBAR_BG_DARK: Color32 = Color32::from_rgb(55, 55, 60);
+
+    /// Fond du body (zone centrale) en mode nuit.
+    pub const BODY_BG_DARK: Color32 = Color32::from_rgb(45, 45, 45);
 
     /// Onglet actif - fond blanc pur.
     pub const TAB_ACTIVE_BG_LIGHT: Color32 = Color32::WHITE;
@@ -22,9 +36,13 @@ pub mod chrome_colors {
     pub const TAB_ACTIVE_TEXT_LIGHT: Color32 = Color32::from_rgb(32, 33, 36);
     pub const TAB_ACTIVE_TEXT_DARK: Color32 = Color32::from_rgb(240, 240, 240);
 
-    /// Onglet inactif - fond gris clair.
+    /// Onglet inactif - fond gris clair (niveau normal).
     pub const TAB_INACTIVE_BG_LIGHT: Color32 = Color32::from_rgb(236, 236, 236);
     pub const TAB_INACTIVE_BG_DARK: Color32 = Color32::from_rgb(60, 60, 65);
+
+    /// Onglet inactif au survol - fond gris (niveau hover, entre normal et actif).
+    pub const TAB_INACTIVE_HOVER_BG_LIGHT: Color32 = Color32::from_rgb(220, 220, 220);
+    pub const TAB_INACTIVE_HOVER_BG_DARK: Color32 = Color32::from_rgb(70, 70, 75);
 
     /// Onglet inactif - texte gris moyen.
     pub const TAB_INACTIVE_TEXT_LIGHT: Color32 = Color32::from_rgb(95, 99, 104);
@@ -54,21 +72,24 @@ pub mod chrome_colors {
 /// Dimensions et constantes pour le style Chrome pixel art.
 #[allow(missing_docs)]
 pub mod chrome_dimensions {
-    /// Hauteur des onglets.
+    /// Hauteur des onglets (actif = collé au body, même hauteur que barre).
     pub const TAB_HEIGHT_ACTIVE: f32 = 32.0;
-    pub const TAB_HEIGHT_INACTIVE: f32 = 28.0;
+    pub const TAB_HEIGHT_INACTIVE: f32 = 32.0;
 
     /// Largeur des onglets.
-    pub const TAB_WIDTH: f32 = 200.0;
+    pub const TAB_WIDTH: f32 = 160.0;
 
-    /// Rayon des coins arrondis en haut.
-    pub const TAB_CORNER_RADIUS: u8 = 8;
+    /// Rayon des coins arrondis en haut uniquement (5 px spec).
+    pub const TAB_CORNER_RADIUS: u8 = 5;
 
-    /// Profondeur de la courbe concave en bas (onglet actif).
-    pub const TAB_CURVE_DEPTH: f32 = 2.5;
+    /// Espacement entre onglets (12 px spec).
+    pub const TAB_GAP: f32 = 12.0;
 
-    /// Offset vertical des onglets inactifs.
-    pub const TAB_INACTIVE_OFFSET_Y: f32 = 2.0;
+    /// Offset vertical des onglets inactifs (alignés en bas avec l’actif).
+    pub const TAB_INACTIVE_OFFSET_Y: f32 = 0.0;
+
+    /// Espace (px) sous l'onglet inactif : l'onglet flotte au-dessus de la barre, laissant voir le fond.
+    pub const INACTIVE_TAB_BOTTOM_GAP: f32 = 2.0;
 
     /// Padding horizontal dans les onglets.
     pub const TAB_PADDING_X: f32 = 12.0;
@@ -123,19 +144,26 @@ impl PixelChromeTheme {
         style.visuals.widgets.hovered.corner_radius = radius;
         style.visuals.widgets.active.corner_radius = radius;
 
-        // Couleurs des widgets selon le thème
-        use egui::Color32;
+        // Couleurs des widgets selon le thème (constantes Chrome pour cohérence).
         if self.dark_mode {
             style.visuals.widgets.inactive.bg_fill = TAB_INACTIVE_BG_DARK;
-            style.visuals.widgets.hovered.bg_fill = Color32::from_rgb(70, 70, 75);
+            style.visuals.widgets.hovered.bg_fill = TAB_INACTIVE_HOVER_BG_DARK;
             style.visuals.widgets.active.bg_fill = TAB_ACTIVE_BG_DARK;
             style.visuals.override_text_color = Some(TAB_ACTIVE_TEXT_DARK);
         } else {
             style.visuals.widgets.inactive.bg_fill = TAB_INACTIVE_BG_LIGHT;
-            style.visuals.widgets.hovered.bg_fill = Color32::from_rgb(220, 220, 220);
+            style.visuals.widgets.hovered.bg_fill = TAB_INACTIVE_HOVER_BG_LIGHT;
             style.visuals.widgets.active.bg_fill = TAB_ACTIVE_BG_LIGHT;
             style.visuals.override_text_color = Some(TAB_ACTIVE_TEXT_LIGHT);
         }
+
+        // Pas de contours noirs : strokes à zéro (header, panels, fenêtres, widgets type Recherche/HUB).
+        let no_stroke = egui::Stroke::new(0.0, Color32::TRANSPARENT);
+        style.visuals.window_stroke = no_stroke;
+        style.visuals.widgets.noninteractive.bg_stroke = no_stroke;
+        style.visuals.widgets.inactive.bg_stroke = no_stroke;
+        style.visuals.widgets.hovered.bg_stroke = no_stroke;
+        style.visuals.widgets.active.bg_stroke = no_stroke;
 
         // Espacement style Chrome
         style.spacing.button_padding = egui::vec2(12.0, 6.0);
@@ -145,12 +173,39 @@ impl PixelChromeTheme {
         ctx.set_style(style);
     }
 
-    /// Retourne la couleur de fond de la barre d'onglets.
+    /// Retourne la couleur de la barre exécutable (ligne 1 du header : titre + connexion).
+    pub fn barre_exe_bg(&self) -> egui::Color32 {
+        if self.dark_mode {
+            chrome_colors::BARRE_EXE_DARK
+        } else {
+            chrome_colors::BARRE_EXE_LIGHT
+        }
+    }
+
+    /// Retourne la couleur de fond de la barre d'onglets (ligne 2 du header).
     pub fn tab_bar_bg(&self) -> egui::Color32 {
         if self.dark_mode {
             chrome_colors::TAB_BAR_BG_DARK
         } else {
             chrome_colors::TAB_BAR_BG_LIGHT
+        }
+    }
+
+    /// Retourne la couleur de fond des sidebars du Hub.
+    pub fn sidebar_bg(&self) -> egui::Color32 {
+        if self.dark_mode {
+            chrome_colors::SIDEBAR_BG_DARK
+        } else {
+            chrome_colors::SIDEBAR_BG_LIGHT
+        }
+    }
+
+    /// Retourne la couleur de fond du body (zone centrale).
+    pub fn body_bg(&self) -> egui::Color32 {
+        if self.dark_mode {
+            chrome_colors::BODY_BG_DARK
+        } else {
+            egui::Color32::WHITE
         }
     }
 
@@ -190,6 +245,15 @@ impl PixelChromeTheme {
         }
     }
 
+    /// Retourne la couleur de fond d'un onglet inactif au survol (2e niveau de gris).
+    pub fn tab_inactive_hover_bg(&self) -> egui::Color32 {
+        if self.dark_mode {
+            chrome_colors::TAB_INACTIVE_HOVER_BG_DARK
+        } else {
+            chrome_colors::TAB_INACTIVE_HOVER_BG_LIGHT
+        }
+    }
+
     /// Retourne la couleur du séparateur entre onglets.
     pub fn tab_separator(&self) -> egui::Color32 {
         if self.dark_mode {
@@ -210,27 +274,20 @@ impl PixelChromeTheme {
 }
 
 /// Fonctions utilitaires pour créer des formes Chrome dans egui.
+/// Spec : onglets carrés en bas, arrondis 5 px en haut.
 pub mod chrome_shapes {
     use super::chrome_dimensions;
     use eframe::egui;
 
-    /// Crée la forme d'un onglet Chrome actif avec courbe concave en bas.
+    /// Crée la forme d'un onglet actif : carré en bas, arrondi 5 px en haut (même fond que body).
     pub fn create_active_tab_shape(
         rect: egui::Rect,
         bg_color: egui::Color32,
     ) -> Vec<egui::Shape> {
-        use chrome_dimensions::*;
+        use chrome_dimensions::TAB_CORNER_RADIUS;
 
-        let mut shapes = Vec::new();
-
-        // Partie supérieure avec coins arrondis
-        let base_rect = egui::Rect::from_min_max(
-            rect.min,
-            egui::pos2(rect.max.x, rect.max.y - 1.0),
-        );
-
-        let top_shape = egui::Shape::rect_filled(
-            base_rect,
+        let shape = egui::Shape::rect_filled(
+            rect,
             egui::CornerRadius {
                 nw: TAB_CORNER_RADIUS,
                 ne: TAB_CORNER_RADIUS,
@@ -239,37 +296,15 @@ pub mod chrome_shapes {
             },
             bg_color,
         );
-        shapes.push(top_shape);
-
-        // Courbe concave en bas (style Chrome)
-        let curve_depth = TAB_CURVE_DEPTH;
-        let mut bottom_points = Vec::new();
-        bottom_points.push(egui::pos2(rect.min.x, base_rect.max.y));
-
-        // Créer la courbe concave avec plusieurs points
-        let num_points = 16;
-        for i in 0..=num_points {
-            let t = i as f32 / num_points as f32;
-            let x = rect.min.x + (rect.max.x - rect.min.x) * t;
-            // Courbe quadratique concave (remonte au centre)
-            let y = rect.max.y - curve_depth * (1.0 - 4.0 * t * (1.0 - t));
-            bottom_points.push(egui::pos2(x, y));
-        }
-
-        bottom_points.push(egui::pos2(rect.max.x, base_rect.max.y));
-
-        let bottom_shape = egui::Shape::convex_polygon(bottom_points, bg_color, egui::Stroke::NONE);
-        shapes.push(bottom_shape);
-
-        shapes
+        vec![shape]
     }
 
-    /// Crée la forme d'un onglet Chrome inactif (coins arrondis en haut, bord plat en bas).
+    /// Crée la forme d'un onglet inactif : carré en bas, arrondi 5 px en haut.
     pub fn create_inactive_tab_shape(
         rect: egui::Rect,
         bg_color: egui::Color32,
     ) -> egui::Shape {
-        use chrome_dimensions::*;
+        use chrome_dimensions::TAB_CORNER_RADIUS;
 
         egui::Shape::rect_filled(
             rect,

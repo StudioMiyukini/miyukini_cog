@@ -6,6 +6,8 @@
 
 **Rôle fondateur :** *Exposer les Services de l'écosystème de façon utilisable — catalogue, « Mes Services », lancement gouverné.*
 
+**Règle canonique (gravée dans le marbre) :** *Tous les Services ont comme point d'accès utilisateur Miyukini Central.* Aucun Service ne doit exposer à l'utilisateur final un point d'entrée UI concurrent du Hub. Voir [Miyukini Conceptual References - Barrieres Techniques COG et Point Acces Central](./Miyukini%20Conceptual%20References%20-%20Barrieres%20Techniques%20COG%20et%20Point%20Acces%20Central.md) (CANON-CENTRAL-1 à CANON-CENTRAL-4).
+
 ## Portee / Scope
 
 - **Applicable a :** Conception, développement et exploitation du Hub Miyukini Central (desktop, web, Android).
@@ -323,6 +325,7 @@ Les Outils exacts seront définis dans la documentation fondatrice et les contra
 | **Stack UI egui/eframe** | [Miyukini - Stack UI egui eframe](../ux_ui/Miyukini%20-%20Stack%20UI%20egui%20eframe.md) |
 | **Master Butler** | [docs/core/MasterButler](../../core/MasterButler/) |
 | **Mandats et Équipes** | [Mandats et Equipes Operators](./Miyukini%20Conceptual%20References%20-%20Mandats%20et%20Equipes%20Operators.md) |
+| **Barrières techniques COG et point d'accès Central** | [Barrieres Techniques COG et Point Acces Central](./Miyukini%20Conceptual%20References%20-%20Barrieres%20Techniques%20COG%20et%20Point%20Acces%20Central.md) |
 
 ---
 

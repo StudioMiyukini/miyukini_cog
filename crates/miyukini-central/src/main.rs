@@ -13,9 +13,6 @@ fn main() -> eframe::Result<()> {
     eframe::run_native(
         "Miyukini Central",
         options,
-        Box::new(|cc| {
-            cc.egui_ctx.set_visuals(egui::Visuals::dark());
-            Ok(Box::new(MiyukiniCentralApp::new(cc)))
-        }),
+        Box::new(|cc| Ok(Box::new(MiyukiniCentralApp::new(cc)))),
     )
 }

@@ -71,13 +71,13 @@ Les Services et Opérateurs qui manipulent des données de niveau 2 et au-delà 
 
 Le COG de référence pour un domaine donné est désigné par :
 
-- **Contrat du Service** (ex. Miyukini Festival Service : COG organisateur ou COG du Service)
+- **Contrat du Service** (ex. JayFestival : COG organisateur ou COG du Service)
 - **Politique d'environnement** (déclaration Master Butler, validation StrongFather)
 - **Règles métier** : qui doit avoir accès en permanence aux données ? → le COG de cet acteur est candidat COG de référence (ex. organisateur pour les données exposant)
 
 ---
 
-## 4. Cas d'usage : Exposants (Miyukini Festival Service)
+## 4. Cas d'usage : Exposants (JayFestival)
 
 ### 4.1 Contexte
 
@@ -94,7 +94,7 @@ Les données personnelles et métier des **exposants** (fiche, candidatures, doc
 
 ### 4.3 Référence documentaire
 
-Voir [Miyukini Festival Service - Document Fondateur](../services/MiyukiniFestivalService/Miyukini%20Festival%20Service%20-%20Document%20Fondateur.md) et [Exposants - Analyse des besoins](../services/MiyukiniFestivalService/publics/Exposants/Exposants%20-%20Analyse%20des%20besoins.md) pour l'application explicite au public Exposants.
+Voir [JayFestival - Document Fondateur](../services/JayFestival/JayFestival%20-%20Document%20Fondateur.md) et [Exposants - Analyse des besoins](../services/JayFestival/publics/Exposants/Exposants%20-%20Analyse%20des%20besoins.md) pour l'application explicite au public Exposants.
 
 ---
 
@@ -132,4 +132,4 @@ Voir [Miyukini Festival Service - Document Fondateur](../services/MiyukiniFestiv
 - [Miyukini Conceptual References - Connexion Inter-COG](./Miyukini%20Conceptual%20References%20-%20Connexion%20Inter-COG.md)
 - [Miyukini Conceptual References - Security Levels](./Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) (ou Niveaux de sécurité dans le Glossaire)
 - [KindMother — Documentation Fondatrice](../core/KindMother/foundation/KindMother%20-%20Documentation%20Fondatrice.md)
-- [Miyukini Festival Service - Document Fondateur](../services/MiyukiniFestivalService/Miyukini%20Festival%20Service%20-%20Document%20Fondateur.md)
+- [JayFestival - Document Fondateur](../services/JayFestival/JayFestival%20-%20Document%20Fondateur.md)

@@ -226,6 +226,22 @@ Le projet suit un **cycle strict**, de l'idée jusqu'à l'audit, sans court-circ
 
 **Documentation** : [docs/tools/_index.md](docs/tools/_index.md) — index des Toolkits documentés.
 
+### Miyukini Central (Hub Services)
+
+**Miyukini Central** est l'application desktop (egui/eframe) qui sert de point d'entrée au COG : le Hub des Services. Elle permet de parcourir et d'ouvrir les Opérateurs disponibles dans l'environnement.
+
+| Composant | Description |
+|-----------|-------------|
+| **Écran de chargement** | Au démarrage : titre « MIYUKINI COG System », barre de progression à remplissage irrégulier (10–12 s), phrases de chargement aléatoires (alternance 1,5–3 s). |
+| **HUB** | Onglet principal : message de bienvenue, catalogue des services en grille ou en liste. |
+| **Sidebar gauche** | Recherche (nom ou description), filtres par catégorie (Toutes, Utilitaires, Loisirs, Productivité, Design), type d'affichage (Grille / Liste). |
+| **Cartes de services** | Chaque service affiche nom, catégorie, description courte (ServiceMeta) et bouton « Ouvrir ». Grille 3 colonnes à largeur fixe ou liste compacte. |
+| **Services disponibles (MVP)** | Calculatrice, Jeu, Lord of the Click (MiyuClicker), Traitement de texte, Notes, Miyukini UI Library. |
+| **Overlays** | Profil utilisateur, Paramètres (thème clair/obscur, persistance en storage). |
+| **Header** | Onglets (HUB + services ouverts), icônes Lucide (utilisateur, paramètres), thème appliqué selon préférence. |
+
+**Lancement** : exécutable produit par la crate `miyukini-central` (workspace Rust). Référence : [Miyukini Conceptual References - Miyukini Central Hub Services](docs/reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Central%20Hub%20Services.md).
+
 ### Services en cours d'élaboration
 
 Les **concepts de services** identifient les **besoins en Opérateurs** qui orchestreront les Toolkits implémentés. Chaque service est défini par un **document fondateur**, des **analyses par public** (besoins, parcours, capacités livrables) et des documents **Opérateurs et Toolkits** qui précisent quels Opérateurs et Kits délivreront le service sous gouvernance.
@@ -284,12 +300,13 @@ La pyramide, les Cores, les Lois d'autonomie, les contrats de sécurité et de g
 | **Tools et Toolkits** | [Tools et Toolkits](docs/reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
 | **Objectif final** | [Objectif Final](docs/reference/Miyukini%20Conceptual%20References%20-%20Objectif%20Final.md) |
 
-**Services** : [docs/services/](docs/services/) — premiers services en cours d'élaboration (JayRDV, Miyukini Festival Service, Miyukini Agenda, Miyukini Account) : documents fondateurs, analyses par public, Opérateurs et Toolkits. Les concepts de services identifient les besoins en Opérateurs qui orchestreront les Outils.  
+**Services** : [docs/services/](docs/services/) — premiers services en cours d'élaboration (JayRDV, JayFestival, JayKoa, JayKonta, JayXpose, JayFaim) : documents fondateurs, analyses par public, Opérateurs et Toolkits. Les concepts de services identifient les besoins en Opérateurs qui orchestreront les Outils.
+**Interpolarité des services Jay** : [Miyukini Conceptual References - Interpolarite Services Jay](docs/reference/Miyukini%20Conceptual%20References%20-%20Interpolarite%20Services%20Jay.md) — principe de couplage entre services Jay (JayXpose ↔ JayFestival, JayFaim ↔ JayFestival, JayKoa intégrateur des dates).  
 **Kits d'Outils** : [docs/tools/_index.md](docs/tools/_index.md) — index des Toolkits documentés.  
 **Protocoles** : [docs/protocols/](docs/protocols/) — MIP, écriture documentation conceptuelle, implémentation générale.  
 **Cores** : [docs/core/](docs/core/) — par Core (StrongFather, KindMother, Master Butler, MiyukiniAdmin, etc.).  
 **Stack UI (egui / eframe)** : [Miyukini - Stack UI egui eframe](docs/ux_ui/Miyukini%20-%20Stack%20UI%20egui%20eframe.md) — applications desktop et web en pur Rust (Hub, clients natifs).  
-**Miyukini Central (Hub Services)** : [Miyukini Conceptual References - Miyukini Central Hub Services](docs/reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Central%20Hub%20Services.md) — hub de gestion des Services (catalogue, Mes Services, lancement, UI/UX, sécurité).
+**Miyukini Central (Hub Services)** : [Miyukini Conceptual References - Miyukini Central Hub Services](docs/reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Central%20Hub%20Services.md) — point d'entrée COG : écran de chargement, HUB avec sidebar (recherche, filtres, grille/liste), catalogue de services (ServiceMeta), overlays Profil/Paramètres, thème clair/obscur persistant.
 
 ---
 
@@ -313,6 +330,12 @@ Miyukini ne vise pas à être le plus rapide ni le plus flexible, mais **prévis
 ---
 
 ## 12. Log de rédaction
+
+**2026-02-02 — Miyukini Central (Hub)**
+
+- Ajout section **Miyukini Central (Hub Services)** dans l'état actuel : écran de chargement (barre à-coups, phrases aléatoires), HUB avec sidebar (recherche, filtres par catégorie, affichage Grille/Liste), cartes de services (ServiceMeta), services MVP (Calculatrice, Jeu, Lord of the Click, Traitement de texte, Notes, Miyukini UI Library), overlays Profil/Paramètres, thème persistant.
+- Mise à jour référence documentation Miyukini Central (point d'entrée COG, fonctionnalités actuelles).
+- Date de dernière mise à jour : 2026-02-02.
 
 **2026-01-31 — Correction état réel et suppression répétitions**
 
@@ -338,5 +361,5 @@ Miyukini ne vise pas à être le plus rapide ni le plus flexible, mais **prévis
 ---
 
 **Document** : README racine officiel  
-**Dernière mise à jour** : 2026-01-31  
+**Dernière mise à jour** : 2026-02-02  
 **Références** : Glossaire officiel, Pyramide Architecture Complete, Lois d'autonomie, Objectif Final, Tools et Toolkits (implémentés), docs/services (Services en cours d'élaboration)

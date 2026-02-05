@@ -1020,6 +1020,1118 @@
     "start_line": 68
   },
   {
+    "do": "update_frame_apply_theme_show_ui",
+    "end_line": 103,
+    "file": "crates/jayfestival/src/app.rs",
+    "id": "jayfestival_app_loop",
+    "layer": "app",
+    "start_line": 46
+  },
+  {
+    "do": "retourne l'écran actuellement affiché (router global)",
+    "end_line": 52,
+    "file": "crates/jayfestival/src/app_state.rs",
+    "id": "app_state_current_screen",
+    "layer": "app",
+    "start_line": 50
+  },
+  {
+    "do": "enregistre une demande de navigation vers un écran (appliquée en fin de frame)",
+    "end_line": 61,
+    "file": "crates/jayfestival/src/app_state.rs",
+    "id": "app_state_navigate",
+    "layer": "app",
+    "start_line": 59
+  },
+  {
+    "do": "retourne la session utilisateur courante si connecté (auth)",
+    "end_line": 83,
+    "file": "crates/jayfestival/src/app_state.rs",
+    "id": "app_state_user",
+    "layer": "app",
+    "start_line": 76
+  },
+  {
+    "do": "authentifie un utilisateur par email et mot de passe (Supabase Auth).",
+    "end_line": 97,
+    "file": "crates/jayfestival/src/auth/mod.rs",
+    "id": "auth_sign_in",
+    "layer": "domain",
+    "start_line": 95
+  },
+  {
+    "do": "crée un compte utilisateur par email et mot de passe (Supabase Auth).",
+    "end_line": 152,
+    "file": "crates/jayfestival/src/auth/mod.rs",
+    "id": "auth_sign_up",
+    "layer": "domain",
+    "start_line": 150
+  },
+  {
+    "do": "récupère la session courante (utilisateur + token) si connecté.",
+    "end_line": 198,
+    "file": "crates/jayfestival/src/auth/mod.rs",
+    "id": "auth_session_current",
+    "layer": "domain",
+    "start_line": 196
+  },
+  {
+    "do": "déconnecte l'utilisateur et invalide la session côté client.",
+    "end_line": 237,
+    "file": "crates/jayfestival/src/auth/mod.rs",
+    "id": "auth_sign_out",
+    "layer": "domain",
+    "start_line": 228
+  },
+  {
+    "do": "dérive le type utilisateur (admin, manager, exhibitor, volunteer, visitor) depuis le profil.",
+    "end_line": 17,
+    "file": "crates/jayfestival/src/auth/permissions.rs",
+    "id": "auth_user_type_from_profile",
+    "layer": "domain",
+    "start_line": 15
+  },
+  {
+    "do": "indique si l'utilisateur peut accéder à une édition (admin, manager de l'édition, ou RLS exposant).",
+    "end_line": 52,
+    "file": "crates/jayfestival/src/auth/permissions.rs",
+    "id": "auth_can_access_edition",
+    "layer": "domain",
+    "start_line": 36
+  },
+  {
+    "do": "define_exp_dashboard_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/exp/e04_dashboard.rs",
+    "id": "screen_exp_e04",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_exp_dashboard_with_gestion_layout_and_cards",
+    "end_line": 114,
+    "file": "crates/jayfestival/src/screens/exp/e04_dashboard.rs",
+    "id": "exp_e04_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_exp_candidatures_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/exp/e05_candidatures.rs",
+    "id": "screen_exp_e05",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_exp_candidatures_with_gestion_layout_and_cards",
+    "end_line": 91,
+    "file": "crates/jayfestival/src/screens/exp/e05_candidatures.rs",
+    "id": "exp_e05_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_exp_participations_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/exp/e06_participations.rs",
+    "id": "screen_exp_e06",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_exp_participations_with_gestion_layout_and_cards",
+    "end_line": 88,
+    "file": "crates/jayfestival/src/screens/exp/e06_participations.rs",
+    "id": "exp_e06_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_exp_rest_screens_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/exp/e07_e19_rest.rs",
+    "id": "screen_exp_e07_e19",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_exp_rest_screen_by_reserved_id",
+    "end_line": 108,
+    "file": "crates/jayfestival/src/screens/exp/e07_e19_rest.rs",
+    "id": "exp_e07_e19_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_screen_identifiers_for_routing",
+    "end_line": 85,
+    "file": "crates/jayfestival/src/screens/mod.rs",
+    "id": "jayfestival_screen_ids",
+    "layer": "app",
+    "start_line": 6
+  },
+  {
+    "do": "define_org_dashboard_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/org/e04_dashboard.rs",
+    "id": "screen_org_e04",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_org_dashboard_with_gestion_layout_and_cards",
+    "end_line": 79,
+    "file": "crates/jayfestival/src/screens/org/e04_dashboard.rs",
+    "id": "org_e04_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_org_liste_editions_screen_component",
+    "end_line": 23,
+    "file": "crates/jayfestival/src/screens/org/e05_liste_editions.rs",
+    "id": "screen_org_e05",
+    "layer": "app",
+    "start_line": 15
+  },
+  {
+    "do": "render_org_liste_editions_with_gestion_layout_and_cards",
+    "end_line": 95,
+    "file": "crates/jayfestival/src/screens/org/e05_liste_editions.rs",
+    "id": "org_e05_show",
+    "layer": "app",
+    "start_line": 20
+  },
+  {
+    "do": "define_org_creation_edition_screen_component",
+    "end_line": 21,
+    "file": "crates/jayfestival/src/screens/org/e06_creation_edition.rs",
+    "id": "screen_org_e06",
+    "layer": "app",
+    "start_line": 13
+  },
+  {
+    "do": "render_org_creation_edition_form_with_gestion_layout",
+    "end_line": 102,
+    "file": "crates/jayfestival/src/screens/org/e06_creation_edition.rs",
+    "id": "org_e06_show",
+    "layer": "app",
+    "start_line": 18
+  },
+  {
+    "do": "define_org_dashboard_edition_screen_component",
+    "end_line": 23,
+    "file": "crates/jayfestival/src/screens/org/e07_dashboard_edition.rs",
+    "id": "screen_org_e07",
+    "layer": "app",
+    "start_line": 15
+  },
+  {
+    "do": "render_org_dashboard_edition_with_gestion_layout_and_cards",
+    "end_line": 143,
+    "file": "crates/jayfestival/src/screens/org/e07_dashboard_edition.rs",
+    "id": "org_e07_show",
+    "layer": "app",
+    "start_line": 20
+  },
+  {
+    "do": "define_org_liste_exposants_screen_component",
+    "end_line": 23,
+    "file": "crates/jayfestival/src/screens/org/e08_liste_exposants.rs",
+    "id": "screen_org_e08",
+    "layer": "app",
+    "start_line": 15
+  },
+  {
+    "do": "render_org_liste_exposants_with_gestion_layout_and_cards",
+    "end_line": 115,
+    "file": "crates/jayfestival/src/screens/org/e08_liste_exposants.rs",
+    "id": "org_e08_show",
+    "layer": "app",
+    "start_line": 20
+  },
+  {
+    "do": "define_org_candidatures_screen_component",
+    "end_line": 23,
+    "file": "crates/jayfestival/src/screens/org/e09_candidatures.rs",
+    "id": "screen_org_e09",
+    "layer": "app",
+    "start_line": 15
+  },
+  {
+    "do": "render_org_candidatures_with_gestion_layout_and_cards",
+    "end_line": 122,
+    "file": "crates/jayfestival/src/screens/org/e09_candidatures.rs",
+    "id": "org_e09_show",
+    "layer": "app",
+    "start_line": 20
+  },
+  {
+    "do": "define_org_fiche_exposant_screen_component",
+    "end_line": 23,
+    "file": "crates/jayfestival/src/screens/org/e10_fiche_exposant.rs",
+    "id": "screen_org_e10",
+    "layer": "app",
+    "start_line": 15
+  },
+  {
+    "do": "render_org_fiche_exposant_with_gestion_layout_and_cards",
+    "end_line": 136,
+    "file": "crates/jayfestival/src/screens/org/e10_fiche_exposant.rs",
+    "id": "org_e10_show",
+    "layer": "app",
+    "start_line": 20
+  },
+  {
+    "do": "define_org_plan_salle_screen_component",
+    "end_line": 21,
+    "file": "crates/jayfestival/src/screens/org/e11_plan_salle.rs",
+    "id": "screen_org_e11",
+    "layer": "app",
+    "start_line": 13
+  },
+  {
+    "do": "render_org_plan_salle_with_gestion_layout_and_zones",
+    "end_line": 88,
+    "file": "crates/jayfestival/src/screens/org/e11_plan_salle.rs",
+    "id": "org_e11_show",
+    "layer": "app",
+    "start_line": 18
+  },
+  {
+    "do": "define_org_programme_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/org/e12_programme.rs",
+    "id": "screen_org_e12",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_org_programme_with_gestion_layout_and_cards",
+    "end_line": 79,
+    "file": "crates/jayfestival/src/screens/org/e12_programme.rs",
+    "id": "org_e12_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_org_budget_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/org/e13_budget.rs",
+    "id": "screen_org_e13",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_org_budget_with_gestion_layout_and_inputs",
+    "end_line": 84,
+    "file": "crates/jayfestival/src/screens/org/e13_budget.rs",
+    "id": "org_e13_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_org_devis_factures_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/org/e14_devis_factures.rs",
+    "id": "screen_org_e14",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_org_devis_factures_with_gestion_layout_and_cards",
+    "end_line": 86,
+    "file": "crates/jayfestival/src/screens/org/e14_devis_factures.rs",
+    "id": "org_e14_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_org_documents_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/org/e15_documents.rs",
+    "id": "screen_org_e15",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_org_documents_with_gestion_layout_and_cards",
+    "end_line": 83,
+    "file": "crates/jayfestival/src/screens/org/e15_documents.rs",
+    "id": "org_e15_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_org_rest_screens_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/org/e16_e25_rest.rs",
+    "id": "screen_org_e16_e25",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_org_rest_screen_by_reserved_id",
+    "end_line": 93,
+    "file": "crates/jayfestival/src/screens/org/e16_e25_rest.rs",
+    "id": "org_e16_e25_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_landing_screen_component",
+    "end_line": 26,
+    "file": "crates/jayfestival/src/screens/unc/e01_landing.rs",
+    "id": "screen_unc_e01",
+    "layer": "app",
+    "start_line": 18
+  },
+  {
+    "do": "render_landing_screen_with_hero_features_directory_roles_cta",
+    "end_line": 169,
+    "file": "crates/jayfestival/src/screens/unc/e01_landing.rs",
+    "id": "unc_e01_show",
+    "layer": "app",
+    "start_line": 23
+  },
+  {
+    "do": "define_liste_evenements_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/unc/e02_liste_evenements.rs",
+    "id": "screen_unc_e02",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_liste_evenements_with_filters_and_cards",
+    "end_line": 119,
+    "file": "crates/jayfestival/src/screens/unc/e02_liste_evenements.rs",
+    "id": "unc_e02_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_fiche_evenement_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/unc/e03_fiche_evenement.rs",
+    "id": "screen_unc_e03",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_fiche_evenement_with_blocks_and_ctas",
+    "end_line": 107,
+    "file": "crates/jayfestival/src/screens/unc/e03_fiche_evenement.rs",
+    "id": "unc_e03_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_liste_organisateurs_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/unc/e06_liste_organisateurs.rs",
+    "id": "screen_unc_e06",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_liste_organisateurs_with_filters_and_cards",
+    "end_line": 105,
+    "file": "crates/jayfestival/src/screens/unc/e06_liste_organisateurs.rs",
+    "id": "unc_e06_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_fiche_organisateur_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/unc/e07_fiche_organisateur.rs",
+    "id": "screen_unc_e07",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_fiche_organisateur_with_blocks",
+    "end_line": 89,
+    "file": "crates/jayfestival/src/screens/unc/e07_fiche_organisateur.rs",
+    "id": "unc_e07_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_liste_exposants_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/unc/e08_liste_exposants.rs",
+    "id": "screen_unc_e08",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_liste_exposants_with_filters_and_cards",
+    "end_line": 105,
+    "file": "crates/jayfestival/src/screens/unc/e08_liste_exposants.rs",
+    "id": "unc_e08_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_fiche_exposant_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/unc/e09_fiche_exposant.rs",
+    "id": "screen_unc_e09",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_fiche_exposant_with_blocks",
+    "end_line": 89,
+    "file": "crates/jayfestival/src/screens/unc/e09_fiche_exposant.rs",
+    "id": "unc_e09_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_recherche_screen_component",
+    "end_line": 21,
+    "file": "crates/jayfestival/src/screens/unc/e10_recherche.rs",
+    "id": "screen_unc_e10",
+    "layer": "app",
+    "start_line": 13
+  },
+  {
+    "do": "render_recherche_with_input_and_results_sections",
+    "end_line": 106,
+    "file": "crates/jayfestival/src/screens/unc/e10_recherche.rs",
+    "id": "unc_e10_show",
+    "layer": "app",
+    "start_line": 18
+  },
+  {
+    "do": "define_cta_contextuels_screen_component",
+    "end_line": 21,
+    "file": "crates/jayfestival/src/screens/unc/e11_cta_contextuels.rs",
+    "id": "screen_unc_e11",
+    "layer": "app",
+    "start_line": 13
+  },
+  {
+    "do": "render_cta_contextuels_modal_with_message_and_buttons",
+    "end_line": 64,
+    "file": "crates/jayfestival/src/screens/unc/e11_cta_contextuels.rs",
+    "id": "unc_e11_show",
+    "layer": "app",
+    "start_line": 18
+  },
+  {
+    "do": "define_connexion_screen_component",
+    "end_line": 21,
+    "file": "crates/jayfestival/src/screens/unc/e12_connexion.rs",
+    "id": "screen_unc_e12",
+    "layer": "app",
+    "start_line": 13
+  },
+  {
+    "do": "render_connexion_form_and_call_auth_sign_in",
+    "end_line": 88,
+    "file": "crates/jayfestival/src/screens/unc/e12_connexion.rs",
+    "id": "unc_e12_show",
+    "layer": "app",
+    "start_line": 18
+  },
+  {
+    "do": "define_inscription_screen_component",
+    "end_line": 20,
+    "file": "crates/jayfestival/src/screens/unc/e13_inscription.rs",
+    "id": "screen_unc_e13",
+    "layer": "app",
+    "start_line": 12
+  },
+  {
+    "do": "render_inscription_choice_with_role_cards",
+    "end_line": 86,
+    "file": "crates/jayfestival/src/screens/unc/e13_inscription.rs",
+    "id": "unc_e13_show",
+    "layer": "app",
+    "start_line": 17
+  },
+  {
+    "do": "define_mentions_screen_component",
+    "end_line": 20,
+    "file": "crates/jayfestival/src/screens/unc/e14_mentions.rs",
+    "id": "screen_unc_e14",
+    "layer": "app",
+    "start_line": 12
+  },
+  {
+    "do": "render_mentions_legal_content_with_back_button",
+    "end_line": 65,
+    "file": "crates/jayfestival/src/screens/unc/e14_mentions.rs",
+    "id": "unc_e14_show",
+    "layer": "app",
+    "start_line": 17
+  },
+  {
+    "do": "define_vis_dashboard_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/vis/e04_dashboard.rs",
+    "id": "screen_vis_e04",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_vis_dashboard_with_gestion_layout_and_cards",
+    "end_line": 119,
+    "file": "crates/jayfestival/src/screens/vis/e04_dashboard.rs",
+    "id": "vis_e04_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_vis_agenda_screen_component",
+    "end_line": 22,
+    "file": "crates/jayfestival/src/screens/vis/e05_agenda.rs",
+    "id": "screen_vis_e05",
+    "layer": "app",
+    "start_line": 14
+  },
+  {
+    "do": "render_vis_agenda_with_gestion_layout",
+    "end_line": 86,
+    "file": "crates/jayfestival/src/screens/vis/e05_agenda.rs",
+    "id": "vis_e05_show",
+    "layer": "app",
+    "start_line": 19
+  },
+  {
+    "do": "define_vis_rest_screens_component",
+    "end_line": 21,
+    "file": "crates/jayfestival/src/screens/vis/e06_e15_billets_reservations_pass.rs",
+    "id": "screen_vis_e06_e15",
+    "layer": "app",
+    "start_line": 13
+  },
+  {
+    "do": "render_vis_rest_screen_by_reserved_id",
+    "end_line": 99,
+    "file": "crates/jayfestival/src/screens/vis/e06_e15_billets_reservations_pass.rs",
+    "id": "vis_e06_e15_show",
+    "layer": "app",
+    "start_line": 18
+  },
+  {
+    "do": "publie une édition vers JayKoa pour agrégation calendrier et détection conflits",
+    "end_line": 44,
+    "file": "crates/jayfestival/src/services/jaykoa/adapter.rs",
+    "id": "jaykoa_publish_edition",
+    "layer": "domain",
+    "start_line": 42
+  },
+  {
+    "do": "récupère les conflits de dates pour un exposant ou visiteur (vue agrégée JayKoa)",
+    "end_line": 66,
+    "file": "crates/jayfestival/src/services/jaykoa/adapter.rs",
+    "id": "jaykoa_get_conflicts",
+    "layer": "domain",
+    "start_line": 57
+  },
+  {
+    "do": "crée un devis pour un exposant (façade Miyuinvoice → JayKonta)",
+    "end_line": 54,
+    "file": "crates/jayfestival/src/services/jaykonta/adapter.rs",
+    "id": "jaykonta_create_quote",
+    "layer": "domain",
+    "start_line": 52
+  },
+  {
+    "do": "émet une facture (conversion devis ou création directe ; façade Miyuinvoice)",
+    "end_line": 66,
+    "file": "crates/jayfestival/src/services/jaykonta/adapter.rs",
+    "id": "jaykonta_emit_invoice",
+    "layer": "domain",
+    "start_line": 64
+  },
+  {
+    "do": "façade d'accès aux outils Miyuinvoice (quote, invoice) pour JayFestival",
+    "end_line": 86,
+    "file": "crates/jayfestival/src/services/jaykonta/adapter.rs",
+    "id": "miyuinvoice_facade",
+    "layer": "domain",
+    "start_line": 81
+  },
+  {
+    "do": "récupère le profil exposant pour l'utilisateur courant (mon compte).",
+    "end_line": 45,
+    "file": "crates/jayfestival/src/services/jayxpose/client.rs",
+    "id": "jayxpose_get_profile",
+    "layer": "domain",
+    "start_line": 43
+  },
+  {
+    "do": "liste les exposants visibles dans le répertoire avec filtres et pagination.",
+    "end_line": 71,
+    "file": "crates/jayfestival/src/services/jayxpose/client.rs",
+    "id": "jayxpose_list_repertoire",
+    "layer": "domain",
+    "start_line": 69
+  },
+  {
+    "do": "récupère la fiche exposant publique par id.",
+    "end_line": 125,
+    "file": "crates/jayfestival/src/services/jayxpose/client.rs",
+    "id": "jayxpose_fiche_by_id",
+    "layer": "domain",
+    "start_line": 104
+  },
+  {
+    "do": "type de sortie pour le profil exposant (fiche complète, répertoire).",
+    "end_line": 19,
+    "file": "crates/jayfestival/src/services/jayxpose/contract.rs",
+    "id": "jayxpose_profile_type",
+    "layer": "domain",
+    "start_line": 16
+  },
+  {
+    "do": "filtres d'entrée pour la liste répertoire (secteur, pagination).",
+    "end_line": 93,
+    "file": "crates/jayfestival/src/services/jayxpose/contract.rs",
+    "id": "jayxpose_repertoire_filters",
+    "layer": "domain",
+    "start_line": 88
+  },
+  {
+    "do": "liste les créneaux disponibles pour une ressource / édition (Miyubooking slots.list)",
+    "end_line": 50,
+    "file": "crates/jayfestival/src/services/miyubooking/adapter.rs",
+    "id": "miyubooking_list_slots",
+    "layer": "domain",
+    "start_line": 48
+  },
+  {
+    "do": "crée une réservation (atelier, billet, pass) via Miyubooking (booking.create)",
+    "end_line": 68,
+    "file": "crates/jayfestival/src/services/miyubooking/adapter.rs",
+    "id": "miyubooking_create_booking",
+    "layer": "domain",
+    "start_line": 62
+  },
+  {
+    "do": "retourne l'instant présent selon l'horloge locale (MiyuClock tool.time.now)",
+    "end_line": 50,
+    "file": "crates/jayfestival/src/services/miyuclock/adapter.rs",
+    "id": "miyuclock_now",
+    "layer": "domain",
+    "start_line": 48
+  },
+  {
+    "do": "atteste la date/heure IRL pour un usage (trace, affichage) — MiyuClock comme référentiel",
+    "end_line": 63,
+    "file": "crates/jayfestival/src/services/miyuclock/adapter.rs",
+    "id": "miyuclock_attest_date",
+    "layer": "domain",
+    "start_line": 58
+  },
+  {
+    "do": "envoie une annonce (broadcast) aux destinataires d'une édition ou d'un canal",
+    "end_line": 51,
+    "file": "crates/jayfestival/src/services/miyunotify/adapter.rs",
+    "id": "miyunotify_send_announcement",
+    "layer": "domain",
+    "start_line": 49
+  },
+  {
+    "do": "envoie une notification ciblée (email, push ou inbox) à un ou plusieurs destinataires",
+    "end_line": 91,
+    "file": "crates/jayfestival/src/services/miyunotify/adapter.rs",
+    "id": "miyunotify_send_targeted",
+    "layer": "domain",
+    "start_line": 66
+  },
+  {
+    "do": "initialise le client Supabase à partir de l'URL du projet et de la clé anon.",
+    "end_line": 33,
+    "file": "crates/jayfestival/src/supabase/client.rs",
+    "id": "supabase_client_init",
+    "layer": "infra",
+    "start_line": 31
+  },
+  {
+    "do": "exécute une requête HTTP vers l'API REST Supabase.",
+    "end_line": 116,
+    "file": "crates/jayfestival/src/supabase/client.rs",
+    "id": "supabase_client_request",
+    "layer": "infra",
+    "start_line": 90
+  },
+  {
+    "do": "hold_theme_tokens_and_apply_to_egui",
+    "end_line": 12,
+    "file": "crates/jayfestival/src/theme.rs",
+    "id": "jayfestival_theme_struct",
+    "layer": "ui",
+    "start_line": 8
+  },
+  {
+    "do": "define_colors_radius_spacing_fonts",
+    "end_line": 24,
+    "file": "crates/jayfestival/src/theme.rs",
+    "id": "jayfestival_theme_tokens",
+    "layer": "ui",
+    "start_line": 18
+  },
+  {
+    "do": "define_badge_component_with_theme_variants",
+    "end_line": 35,
+    "file": "crates/jayfestival/src/ui/atoms/badge.rs",
+    "human": "Composant pastille de statut ; couleurs et padding via thème.",
+    "id": "atom_badge",
+    "layer": "ui",
+    "start_line": 18
+  },
+  {
+    "do": "render_badge_in_ui_with_theme",
+    "end_line": 50,
+    "file": "crates/jayfestival/src/ui/atoms/badge.rs",
+    "id": "badge_render",
+    "layer": "ui",
+    "start_line": 32
+  },
+  {
+    "do": "define_button_component_with_theme_variants",
+    "end_line": 71,
+    "file": "crates/jayfestival/src/ui/atoms/button.rs",
+    "human": "Composant bouton avec variantes Primary/Secondary/Outline/Ghost et taille, style via thème.",
+    "id": "atom_button",
+    "layer": "ui",
+    "start_line": 37
+  },
+  {
+    "do": "render_button_in_ui_with_theme_and_return_response",
+    "end_line": 91,
+    "file": "crates/jayfestival/src/ui/atoms/button.rs",
+    "id": "button_render",
+    "layer": "ui",
+    "start_line": 67
+  },
+  {
+    "do": "define_checkbox_component_with_theme",
+    "end_line": 16,
+    "file": "crates/jayfestival/src/ui/atoms/checkbox.rs",
+    "human": "Composant case à cocher ; style cohérent thème (bordure, accent).",
+    "id": "atom_checkbox",
+    "layer": "ui",
+    "start_line": 8
+  },
+  {
+    "do": "render_checkbox_with_label_and_theme",
+    "end_line": 25,
+    "file": "crates/jayfestival/src/ui/atoms/checkbox.rs",
+    "id": "checkbox_render",
+    "layer": "ui",
+    "start_line": 13
+  },
+  {
+    "do": "wrap_icon_display_with_theme_size_and_color",
+    "end_line": 32,
+    "file": "crates/jayfestival/src/ui/atoms/icon_wrapper.rs",
+    "human": "Encapsule l'affichage d'une icône (caractère unicode) avec taille et couleur du thème.",
+    "id": "atom_icon_wrapper",
+    "layer": "ui",
+    "start_line": 27
+  },
+  {
+    "do": "render_icon_in_ui_with_theme",
+    "end_line": 59,
+    "file": "crates/jayfestival/src/ui/atoms/icon_wrapper.rs",
+    "id": "icon_wrapper_render",
+    "layer": "ui",
+    "start_line": 46
+  },
+  {
+    "do": "define_input_component_with_theme_tokens",
+    "end_line": 16,
+    "file": "crates/jayfestival/src/ui/atoms/input.rs",
+    "human": "Composant champ texte une ligne ; style via thème (bordure, rayon, padding, police).",
+    "id": "atom_input",
+    "layer": "ui",
+    "start_line": 8
+  },
+  {
+    "do": "render_singleline_text_edit_with_theme",
+    "end_line": 46,
+    "file": "crates/jayfestival/src/ui/atoms/input.rs",
+    "id": "input_render",
+    "layer": "ui",
+    "start_line": 13
+  },
+  {
+    "do": "define_label_component_with_theme_levels",
+    "end_line": 26,
+    "file": "crates/jayfestival/src/ui/atoms/label.rs",
+    "human": "Composant label avec niveaux Heading/Body/Small/Muted ; couleurs et tailles via thème.",
+    "id": "atom_label",
+    "layer": "ui",
+    "start_line": 18
+  },
+  {
+    "do": "render_label_text_with_theme_level",
+    "end_line": 36,
+    "file": "crates/jayfestival/src/ui/atoms/label.rs",
+    "id": "label_render",
+    "layer": "ui",
+    "start_line": 23
+  },
+  {
+    "do": "define_select_component_with_theme",
+    "end_line": 16,
+    "file": "crates/jayfestival/src/ui/atoms/select.rs",
+    "human": "Composant liste déroulante ; style via thème (bordure, padding, libellé).",
+    "id": "atom_select",
+    "layer": "ui",
+    "start_line": 8
+  },
+  {
+    "do": "render_combo_box_with_options_and_theme",
+    "end_line": 53,
+    "file": "crates/jayfestival/src/ui/atoms/select.rs",
+    "id": "select_render",
+    "layer": "ui",
+    "start_line": 13
+  },
+  {
+    "do": "define_card_container_props",
+    "end_line": 15,
+    "file": "crates/jayfestival/src/ui/molecules/card.rs",
+    "id": "molecule_card",
+    "layer": "ui",
+    "start_line": 6
+  },
+  {
+    "do": "render_card_with_header_body_footer",
+    "end_line": 43,
+    "file": "crates/jayfestival/src/ui/molecules/card.rs",
+    "id": "card_render",
+    "layer": "ui",
+    "start_line": 11
+  },
+  {
+    "do": "define_cta_card_props",
+    "end_line": 15,
+    "file": "crates/jayfestival/src/ui/molecules/cta_card.rs",
+    "id": "molecule_cta_card",
+    "layer": "ui",
+    "start_line": 6
+  },
+  {
+    "do": "render_cta_card_with_button",
+    "end_line": 56,
+    "file": "crates/jayfestival/src/ui/molecules/cta_card.rs",
+    "id": "cta_card_render",
+    "layer": "ui",
+    "start_line": 11
+  },
+  {
+    "do": "define_directory_card_props",
+    "end_line": 15,
+    "file": "crates/jayfestival/src/ui/molecules/directory_card.rs",
+    "id": "molecule_directory_card",
+    "layer": "ui",
+    "start_line": 6
+  },
+  {
+    "do": "render_directory_card_with_cta",
+    "end_line": 55,
+    "file": "crates/jayfestival/src/ui/molecules/directory_card.rs",
+    "id": "directory_card_render",
+    "layer": "ui",
+    "start_line": 11
+  },
+  {
+    "do": "define_feature_card_props_and_variant",
+    "end_line": 10,
+    "file": "crates/jayfestival/src/ui/molecules/feature_card.rs",
+    "id": "molecule_feature_card",
+    "layer": "ui",
+    "start_line": 6
+  },
+  {
+    "do": "render_feature_card_with_title_description_icon",
+    "end_line": 67,
+    "file": "crates/jayfestival/src/ui/molecules/feature_card.rs",
+    "id": "feature_card_render",
+    "layer": "ui",
+    "start_line": 19
+  },
+  {
+    "do": "define_role_card_props",
+    "end_line": 15,
+    "file": "crates/jayfestival/src/ui/molecules/role_card.rs",
+    "id": "molecule_role_card",
+    "layer": "ui",
+    "start_line": 6
+  },
+  {
+    "do": "render_role_card_with_accent_pill",
+    "end_line": 62,
+    "file": "crates/jayfestival/src/ui/molecules/role_card.rs",
+    "id": "role_card_render",
+    "layer": "ui",
+    "start_line": 11
+  },
+  {
+    "do": "define_cta_section_component",
+    "end_line": 25,
+    "file": "crates/jayfestival/src/ui/organisms/cta_section.rs",
+    "human": "Section regroupant un ou plusieurs appels à l'action (CTACard).",
+    "id": "organism_cta_section",
+    "layer": "ui",
+    "start_line": 17
+  },
+  {
+    "do": "render_cta_section_with_cards",
+    "end_line": 45,
+    "file": "crates/jayfestival/src/ui/organisms/cta_section.rs",
+    "id": "cta_section_render",
+    "layer": "ui",
+    "start_line": 22
+  },
+  {
+    "do": "define_directory_banner_component",
+    "end_line": 19,
+    "file": "crates/jayfestival/src/ui/organisms/directory_banner.rs",
+    "human": "Bannière mettant en avant un répertoire (événements, organisateurs, exposants) via DirectoryCard.",
+    "id": "organism_directory_banner",
+    "layer": "ui",
+    "start_line": 10
+  },
+  {
+    "do": "render_directory_banner_with_card",
+    "end_line": 28,
+    "file": "crates/jayfestival/src/ui/organisms/directory_banner.rs",
+    "id": "directory_banner_render",
+    "layer": "ui",
+    "start_line": 15
+  },
+  {
+    "do": "define_features_grid_component",
+    "end_line": 27,
+    "file": "crates/jayfestival/src/ui/organisms/features_grid.rs",
+    "human": "Grille de cartes fonctionnalités (FeatureCard).",
+    "id": "organism_features_grid",
+    "layer": "ui",
+    "start_line": 19
+  },
+  {
+    "do": "render_grid_of_feature_cards",
+    "end_line": 52,
+    "file": "crates/jayfestival/src/ui/organisms/features_grid.rs",
+    "id": "features_grid_render",
+    "layer": "ui",
+    "start_line": 24
+  },
+  {
+    "do": "define_gestion_layout_with_edition_header",
+    "end_line": 19,
+    "file": "crates/jayfestival/src/ui/organisms/gestion_layout.rs",
+    "human": "Layout de gestion : header avec sélecteur d'édition + sidebar + contenu central.",
+    "id": "organism_gestion_layout",
+    "layer": "ui",
+    "start_line": 10
+  },
+  {
+    "do": "render_gestion_layout_with_header_edition_sidebar_content",
+    "end_line": 43,
+    "file": "crates/jayfestival/src/ui/organisms/gestion_layout.rs",
+    "id": "gestion_layout_render",
+    "layer": "ui",
+    "start_line": 15
+  },
+  {
+    "do": "define_header_component_with_title_and_nav",
+    "end_line": 18,
+    "file": "crates/jayfestival/src/ui/organisms/header.rs",
+    "human": "Barre d'en-tête avec titre applicatif et boutons de navigation (atoms).",
+    "id": "organism_header",
+    "layer": "ui",
+    "start_line": 9
+  },
+  {
+    "do": "render_header_bar_with_title_and_nav_buttons",
+    "end_line": 40,
+    "file": "crates/jayfestival/src/ui/organisms/header.rs",
+    "id": "header_render",
+    "layer": "ui",
+    "start_line": 14
+  },
+  {
+    "do": "define_header_with_edition_selector",
+    "end_line": 18,
+    "file": "crates/jayfestival/src/ui/organisms/header_with_edition.rs",
+    "human": "En-tête avec titre, sélecteur d'édition et boutons de navigation.",
+    "id": "organism_header_with_edition",
+    "layer": "ui",
+    "start_line": 9
+  },
+  {
+    "do": "render_header_with_edition_select_and_nav",
+    "end_line": 58,
+    "file": "crates/jayfestival/src/ui/organisms/header_with_edition.rs",
+    "id": "header_with_edition_render",
+    "layer": "ui",
+    "start_line": 14
+  },
+  {
+    "do": "define_hero_section_with_title_subtitle_cta",
+    "end_line": 18,
+    "file": "crates/jayfestival/src/ui/organisms/hero_section.rs",
+    "human": "Section d'accroche avec titre, sous-titre et bouton CTA optionnel.",
+    "id": "organism_hero_section",
+    "layer": "ui",
+    "start_line": 9
+  },
+  {
+    "do": "render_hero_section_with_optional_cta",
+    "end_line": 40,
+    "file": "crates/jayfestival/src/ui/organisms/hero_section.rs",
+    "id": "hero_section_render",
+    "layer": "ui",
+    "start_line": 14
+  },
+  {
+    "do": "define_layout_structure_with_header_sidebar_central",
+    "end_line": 17,
+    "file": "crates/jayfestival/src/ui/organisms/layout.rs",
+    "human": "Layout applicatif : bandeau header, panneau latéral (nav), zone centrale.",
+    "id": "organism_layout",
+    "layer": "ui",
+    "start_line": 8
+  },
+  {
+    "do": "render_layout_with_header_side_panel_and_central_panel",
+    "end_line": 42,
+    "file": "crates/jayfestival/src/ui/organisms/layout.rs",
+    "id": "layout_render",
+    "layer": "ui",
+    "start_line": 13
+  },
+  {
+    "do": "define_roles_grid_component",
+    "end_line": 25,
+    "file": "crates/jayfestival/src/ui/organisms/roles_grid.rs",
+    "human": "Grille de cartes rôles (organisateur, exposant, visiteur, bénévole).",
+    "id": "organism_roles_grid",
+    "layer": "ui",
+    "start_line": 17
+  },
+  {
+    "do": "render_grid_of_role_cards",
+    "end_line": 40,
+    "file": "crates/jayfestival/src/ui/organisms/roles_grid.rs",
+    "id": "roles_grid_render",
+    "layer": "ui",
+    "start_line": 22
+  },
+  {
     "do": "represent_write_intent",
     "end_line": 17,
     "file": "crates/kindmother/src/api.rs",
@@ -2521,13 +3633,13 @@
   },
   {
     "do": "expose_miyuantispam_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyuantispam/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuAntiSpam ; expose les modules tools.",
     "id": "miyuantispam_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "rate_limit_check_under_governance",
@@ -2741,13 +3853,13 @@
   },
   {
     "do": "expose_miyubookmarks_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyubookmarks/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuBookmarks ; expose les modules tools.",
     "id": "miyubookmarks_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "expose_admin_cell",
@@ -2918,6 +4030,609 @@
     "layer": "tool",
     "role": "mutator",
     "start_line": 9
+  },
+  {
+    "do": "represent_current_screen",
+    "end_line": 26,
+    "file": "crates/miyuclicker/src/app.rs",
+    "id": "miyuclicker_app_screen",
+    "role": "data",
+    "start_line": 23
+  },
+  {
+    "do": "default_app_state",
+    "end_line": 67,
+    "file": "crates/miyuclicker/src/app.rs",
+    "id": "miyuclicker_app_default",
+    "role": "data",
+    "start_line": 65
+  },
+  {
+    "do": "resolve_game_speed_multiplier_from_index",
+    "end_line": 123,
+    "file": "crates/miyuclicker/src/app.rs",
+    "human": "0=pause, 1=1h/s, 2=3h/s, 3=6h/s, 4=1j/s, 5=2j/s.",
+    "id": "miyuclicker_app_game_speed_multiplier",
+    "role": "reader",
+    "start_line": 94
+  },
+  {
+    "do": "append_dev_log_line",
+    "end_line": 141,
+    "file": "crates/miyuclicker/src/app.rs",
+    "id": "miyuclicker_app_dev_log_message",
+    "role": "mutator",
+    "start_line": 126
+  },
+  {
+    "do": "render_config_window",
+    "end_line": 868,
+    "file": "crates/miyuclicker/src/app.rs",
+    "id": "miyuclicker_app_ui_config_menu",
+    "role": "interface",
+    "start_line": 171
+  },
+  {
+    "do": "render_loading_screen_and_advance",
+    "end_line": 868,
+    "file": "crates/miyuclicker/src/app.rs",
+    "id": "miyuclicker_app_ui_loading",
+    "role": "interface",
+    "start_line": 222
+  },
+  {
+    "do": "render_landing_screen",
+    "end_line": 868,
+    "file": "crates/miyuclicker/src/app.rs",
+    "id": "miyuclicker_app_ui_landing",
+    "role": "interface",
+    "start_line": 258
+  },
+  {
+    "do": "render_slot_selection_screen",
+    "end_line": 868,
+    "file": "crates/miyuclicker/src/app.rs",
+    "id": "miyuclicker_app_ui_slots",
+    "role": "interface",
+    "start_line": 347
+  },
+  {
+    "do": "render_header_bar_resources_clock_speed_nav",
+    "end_line": 868,
+    "file": "crates/miyuclicker/src/app.rs",
+    "id": "miyuclicker_app_ui_bar",
+    "role": "interface",
+    "start_line": 358
+  },
+  {
+    "do": "render_dev_console_stats_and_log",
+    "end_line": 868,
+    "file": "crates/miyuclicker/src/app.rs",
+    "human": "Métriques et log [TEST] pour diagnostic défilement temps.",
+    "id": "miyuclicker_app_ui_dev_console",
+    "role": "interface",
+    "start_line": 430
+  },
+  {
+    "do": "render_seven_cards_responsive_rounded",
+    "end_line": 868,
+    "file": "crates/miyuclicker/src/app.rs",
+    "id": "miyuclicker_app_ui_building_zone_cards",
+    "role": "interface",
+    "start_line": 473
+  },
+  {
+    "do": "render_house_card",
+    "end_line": 868,
+    "file": "crates/miyuclicker/src/app.rs",
+    "id": "miyuclicker_app_ui_card_maison",
+    "role": "interface",
+    "start_line": 541
+  },
+  {
+    "do": "render_zone_card",
+    "end_line": 868,
+    "file": "crates/miyuclicker/src/app.rs",
+    "id": "miyuclicker_app_ui_card_zone",
+    "role": "interface",
+    "start_line": 582
+  },
+  {
+    "do": "render_game_over_message_and_return_to_slots",
+    "end_line": 868,
+    "file": "crates/miyuclicker/src/app.rs",
+    "id": "miyuclicker_app_ui_game_over_overlay",
+    "role": "interface",
+    "start_line": 613
+  },
+  {
+    "do": "render_ma_citee_screen",
+    "end_line": 868,
+    "file": "crates/miyuclicker/src/app.rs",
+    "id": "miyuclicker_app_ui_ma_citee",
+    "role": "interface",
+    "start_line": 673
+  },
+  {
+    "do": "render_carte_monde_screen",
+    "end_line": 868,
+    "file": "crates/miyuclicker/src/app.rs",
+    "id": "miyuclicker_app_ui_carte_monde",
+    "role": "interface",
+    "start_line": 831
+  },
+  {
+    "do": "main_loop_delta_repaint_log",
+    "end_line": 995,
+    "file": "crates/miyuclicker/src/app.rs",
+    "human": "Un seul delta par frame ; request_repaint si jeu actif pour défilement fluide.",
+    "id": "miyuclicker_app_update",
+    "role": "interface",
+    "start_line": 956
+  },
+  {
+    "do": "register_troop_movement_and_deduct_from_source",
+    "end_line": 15,
+    "file": "crates/miyuclicker/src/carte.rs",
+    "id": "miyuclicker_carte_move_troops",
+    "role": "mutator",
+    "start_line": 13
+  },
+  {
+    "do": "advance_movements_and_resolve_arrivals",
+    "end_line": 66,
+    "file": "crates/miyuclicker/src/carte.rs",
+    "id": "miyuclicker_carte_model_update",
+    "role": "mutator",
+    "start_line": 64
+  },
+  {
+    "do": "resolve_movement_arrival_combat_or_reinforce",
+    "end_line": 142,
+    "file": "crates/miyuclicker/src/carte.rs",
+    "id": "miyuclicker_carte_resolve_arrival",
+    "role": "mutator",
+    "start_line": 101
+  },
+  {
+    "do": "generate_minimal_map_cities_routes",
+    "end_line": 186,
+    "file": "crates/miyuclicker/src/carte.rs",
+    "id": "miyuclicker_carte_generate_mvp",
+    "role": "mutator",
+    "start_line": 140
+  },
+  {
+    "do": "represent_combat_outcome",
+    "end_line": 15,
+    "file": "crates/miyuclicker/src/combat.rs",
+    "id": "miyuclicker_combat_combat_result",
+    "role": "data",
+    "start_line": 12
+  },
+  {
+    "do": "resolve_combat_result",
+    "end_line": 76,
+    "file": "crates/miyuclicker/src/combat.rs",
+    "human": "stats_att/stats_def 1.0 en MVP ; seed = graine pour dé (tests ou SystemTime).",
+    "id": "miyuclicker_combat_resolve",
+    "role": "mutator",
+    "start_line": 23
+  },
+  {
+    "do": "define_game_speed_multipliers",
+    "end_line": 19,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "human": "Pause=0 ; 1=1h/s ; 2=3h/s ; 3=6h/s ; 4=1j/s ; 5=2j/s.",
+    "id": "miyuclicker_idlesim_game_speeds",
+    "role": "data",
+    "start_line": 16
+  },
+  {
+    "end_line": 97,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_click_costs",
+    "start_line": 33
+  },
+  {
+    "end_line": 97,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_construction_pts_per_macon_per_day",
+    "start_line": 54
+  },
+  {
+    "do": "define_game_over_threshold_days",
+    "end_line": 97,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "human": "0 nourriture pendant plus de 7 jours → Game Over.",
+    "id": "miyuclicker_idlesim_jours_game_over",
+    "role": "data",
+    "start_line": 94
+  },
+  {
+    "end_line": 132,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_moral_baisse_1pct",
+    "start_line": 101
+  },
+  {
+    "end_line": 132,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_moral_baisse_5pct",
+    "start_line": 105
+  },
+  {
+    "do": "clamp_all_resources_non_negative",
+    "end_line": 132,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_clamp_resources",
+    "role": "mutator",
+    "start_line": 112
+  },
+  {
+    "do": "apply_click_gain_to_state",
+    "end_line": 132,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_apply_click",
+    "role": "mutator",
+    "start_line": 130
+  },
+  {
+    "do": "convert_one_pop_to_one_macon",
+    "end_line": 166,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_convert_pop_to_macon",
+    "role": "mutator",
+    "start_line": 164
+  },
+  {
+    "do": "convert_one_macon_to_one_pop",
+    "end_line": 181,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_convert_macon_to_pop",
+    "role": "mutator",
+    "start_line": 179
+  },
+  {
+    "do": "apply_worker_allocation_to_state",
+    "end_line": 196,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_apply_allocation",
+    "role": "mutator",
+    "start_line": 194
+  },
+  {
+    "do": "apply_mason_allocation_to_state",
+    "end_line": 213,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_apply_allocation_macons",
+    "role": "mutator",
+    "start_line": 211
+  },
+  {
+    "do": "compute_construction_pts_required_for_next_barracks",
+    "end_line": 231,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_pts_required_caserne_pub",
+    "role": "reader",
+    "start_line": 229
+  },
+  {
+    "do": "compute_construction_pts_required_for_next_granary",
+    "end_line": 239,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_pts_required_grenier_pub",
+    "role": "reader",
+    "start_line": 237
+  },
+  {
+    "do": "compute_construction_pts_required_for_next_warehouse",
+    "end_line": 252,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_pts_required_entrepot_pub",
+    "role": "reader",
+    "start_line": 250
+  },
+  {
+    "do": "advance_game_time_and_apply_production_consumption",
+    "end_line": 261,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "human": "delta_s = secondes IRL ; game_speed = s in-game/s IRL (0 = pause).",
+    "id": "miyuclicker_idlesim_tick",
+    "role": "mutator",
+    "start_line": 258
+  },
+  {
+    "do": "compute_construction_pts_required_by_type",
+    "end_line": 455,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_pts_required_for_building",
+    "role": "reader",
+    "start_line": 368
+  },
+  {
+    "do": "try_complete_building_by_type",
+    "end_line": 455,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_try_complete_building",
+    "role": "mutator",
+    "start_line": 382
+  },
+  {
+    "do": "pay_and_start_house_construction",
+    "end_line": 473,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "id": "miyuclicker_idlesim_start_construction_maison",
+    "role": "mutator",
+    "start_line": 453
+  },
+  {
+    "do": "run_native_eframe_app",
+    "end_line": 35,
+    "file": "crates/miyuclicker/src/main.rs",
+    "id": "miyuclicker_main_fn_main",
+    "role": "bootstrap",
+    "start_line": 17
+  },
+  {
+    "do": "represent_serialized_resources",
+    "end_line": 33,
+    "file": "crates/miyuclicker/src/save.rs",
+    "id": "miyuclicker_save_save_resources",
+    "role": "data",
+    "start_line": 30
+  },
+  {
+    "end_line": 49,
+    "file": "crates/miyuclicker/src/save.rs",
+    "id": "miyuclicker_save_cap_moral",
+    "start_line": 48
+  },
+  {
+    "end_line": 64,
+    "file": "crates/miyuclicker/src/save.rs",
+    "id": "miyuclicker_save_buildings",
+    "start_line": 63
+  },
+  {
+    "do": "represent_serialized_meta",
+    "end_line": 103,
+    "file": "crates/miyuclicker/src/save.rs",
+    "id": "miyuclicker_save_save_meta",
+    "role": "data",
+    "start_line": 100
+  },
+  {
+    "do": "represent_slot_display_metadata",
+    "end_line": 114,
+    "file": "crates/miyuclicker/src/save.rs",
+    "id": "miyuclicker_save_slot_metadata",
+    "role": "data",
+    "start_line": 111
+  },
+  {
+    "do": "convert_game_state_to_serializable",
+    "end_line": 243,
+    "file": "crates/miyuclicker/src/save.rs",
+    "id": "miyuclicker_save_game_state_to_save",
+    "role": "mutator",
+    "start_line": 123
+  },
+  {
+    "do": "deserialize_save_to_game_state",
+    "end_line": 243,
+    "file": "crates/miyuclicker/src/save.rs",
+    "id": "miyuclicker_save_save_to_game_state",
+    "role": "mutator",
+    "start_line": 179
+  },
+  {
+    "do": "resolve_slot_file_path",
+    "end_line": 243,
+    "file": "crates/miyuclicker/src/save.rs",
+    "id": "miyuclicker_save_slot_path",
+    "role": "reader",
+    "start_line": 233
+  },
+  {
+    "do": "serialize_and_write_game_state_to_slot_file",
+    "end_line": 243,
+    "file": "crates/miyuclicker/src/save.rs",
+    "id": "miyuclicker_save_slot_write",
+    "role": "mutator",
+    "start_line": 241
+  },
+  {
+    "do": "read_and_deserialize_slot_file_to_game_state",
+    "end_line": 258,
+    "file": "crates/miyuclicker/src/save.rs",
+    "id": "miyuclicker_save_slot_read",
+    "role": "reader",
+    "start_line": 256
+  },
+  {
+    "do": "list_slot_metadata_for_ui",
+    "end_line": 297,
+    "file": "crates/miyuclicker/src/save.rs",
+    "id": "miyuclicker_save_slot_list",
+    "role": "reader",
+    "start_line": 270
+  },
+  {
+    "do": "represent_click_target",
+    "end_line": 15,
+    "file": "crates/miyuclicker/src/state.rs",
+    "human": "Clic Champ = 1 nourriture ; Village = +1 pop -30 nourriture ; Château = +1 soldat -50 nourriture -5 armes ; ressource = +1.",
+    "id": "miyuclicker_state_click_target",
+    "role": "data",
+    "start_line": 11
+  },
+  {
+    "do": "represent_building_type_for_construction",
+    "end_line": 37,
+    "file": "crates/miyuclicker/src/state.rs",
+    "id": "miyuclicker_state_building_type",
+    "role": "data",
+    "start_line": 34
+  },
+  {
+    "do": "represent_cite_owner",
+    "end_line": 51,
+    "file": "crates/miyuclicker/src/state.rs",
+    "id": "miyuclicker_state_proprietaire",
+    "role": "data",
+    "start_line": 47
+  },
+  {
+    "do": "represent_city_on_map",
+    "end_line": 63,
+    "file": "crates/miyuclicker/src/state.rs",
+    "id": "miyuclicker_state_cite",
+    "role": "data",
+    "start_line": 60
+  },
+  {
+    "do": "represent_troop_movement_in_progress",
+    "end_line": 85,
+    "file": "crates/miyuclicker/src/state.rs",
+    "id": "miyuclicker_state_deplacement",
+    "role": "data",
+    "start_line": 82
+  },
+  {
+    "do": "represent_worker_allocation_per_zone",
+    "end_line": 100,
+    "file": "crates/miyuclicker/src/state.rs",
+    "human": "Ferme=champs, Scierie, Carrière, Mine, Atelier=outils, Forge=armes, Recherche.",
+    "id": "miyuclicker_state_allocation",
+    "start_line": 97
+  },
+  {
+    "do": "represent_mason_allocation_per_building",
+    "end_line": 124,
+    "file": "crates/miyuclicker/src/state.rs",
+    "human": "Chaque maçon alloué = 1 pt construction/jour sur le bâtiment.",
+    "id": "miyuclicker_state_allocation_macons",
+    "role": "data",
+    "start_line": 120
+  },
+  {
+    "do": "represent_full_game_state",
+    "end_line": 144,
+    "file": "crates/miyuclicker/src/state.rs",
+    "human": "Ressources, cap, moral, allocation, carte, temps simulé.",
+    "id": "miyuclicker_state_game_state",
+    "role": "data",
+    "start_line": 140
+  },
+  {
+    "end_line": 162,
+    "file": "crates/miyuclicker/src/state.rs",
+    "id": "miyuclicker_state_maisons",
+    "start_line": 160
+  },
+  {
+    "end_line": 173,
+    "file": "crates/miyuclicker/src/state.rs",
+    "id": "miyuclicker_state_macons",
+    "start_line": 171
+  },
+  {
+    "do": "represent_happiness_moral_metric",
+    "end_line": 187,
+    "file": "crates/miyuclicker/src/state.rs",
+    "human": "Bonheur = moral × 100 % ; baisse si nourriture < population (1 %/j ou 5 %/j).",
+    "id": "miyuclicker_state_moral_bonheur",
+    "role": "data",
+    "start_line": 184
+  },
+  {
+    "do": "track_days_at_zero_food_for_game_over",
+    "end_line": 193,
+    "file": "crates/miyuclicker/src/state.rs",
+    "id": "miyuclicker_state_jours_nourriture_zero",
+    "role": "data",
+    "start_line": 191
+  },
+  {
+    "do": "represent_game_over_state",
+    "end_line": 198,
+    "file": "crates/miyuclicker/src/state.rs",
+    "id": "miyuclicker_state_game_over",
+    "role": "data",
+    "start_line": 196
+  },
+  {
+    "do": "default_game_state",
+    "end_line": 217,
+    "file": "crates/miyuclicker/src/state.rs",
+    "id": "miyuclicker_state_default",
+    "role": "data",
+    "start_line": 215
+  },
+  {
+    "end_line": 264,
+    "file": "crates/miyuclicker/src/state.rs",
+    "id": "miyuclicker_state_cap_gens_from_maisons",
+    "start_line": 263
+  },
+  {
+    "do": "compute_soldier_cap_from_barracks",
+    "end_line": 273,
+    "file": "crates/miyuclicker/src/state.rs",
+    "id": "miyuclicker_state_cap_soldats",
+    "role": "reader",
+    "start_line": 270
+  },
+  {
+    "do": "compute_food_cap_from_granary",
+    "end_line": 282,
+    "file": "crates/miyuclicker/src/state.rs",
+    "id": "miyuclicker_state_cap_nourriture",
+    "role": "reader",
+    "start_line": 279
+  },
+  {
+    "do": "compute_raw_materials_cap_from_depot",
+    "end_line": 291,
+    "file": "crates/miyuclicker/src/state.rs",
+    "id": "miyuclicker_state_cap_matières",
+    "role": "reader",
+    "start_line": 288
+  },
+  {
+    "do": "compute_manufactured_cap_from_warehouse",
+    "end_line": 300,
+    "file": "crates/miyuclicker/src/state.rs",
+    "id": "miyuclicker_state_cap_manufacturés",
+    "role": "reader",
+    "start_line": 297
+  },
+  {
+    "do": "compute_happiness_percentage_for_display",
+    "end_line": 310,
+    "file": "crates/miyuclicker/src/state.rs",
+    "human": "Bonheur = moral × 100, entier pour affichage.",
+    "id": "miyuclicker_state_bonheur_pourcent",
+    "role": "reader",
+    "start_line": 306
+  },
+  {
+    "do": "format_game_time_as_hh_mm_ddmmyyyy",
+    "end_line": 319,
+    "file": "crates/miyuclicker/src/state.rs",
+    "human": "Calendrier simplifié 360 jours/an (12×30).",
+    "id": "miyuclicker_state_format_clock",
+    "role": "formatter",
+    "start_line": 316
+  },
+  {
+    "do": "create_initial_game_state_with_one_city",
+    "end_line": 356,
+    "file": "crates/miyuclicker/src/state.rs",
+    "id": "miyuclicker_state_new_game",
+    "role": "mutator",
+    "start_line": 340
   },
   {
     "do": "time_now_under_governance",
@@ -3091,13 +4806,13 @@
   },
   {
     "do": "expose_miyucomptareports_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyucomptareports/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuComptaReports ; expose les modules tools.",
     "id": "miyucomptareports_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "livre_recettes_generate_under_governance",
@@ -3211,13 +4926,13 @@
   },
   {
     "do": "expose_miyucontacts_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyucontacts/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuContacts ; expose les modules tools.",
     "id": "miyucontacts_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "compta_bank_sync_under_governance",
@@ -3331,13 +5046,13 @@
   },
   {
     "do": "expose_miyudeclarations_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyudeclarations/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuDeclarations ; expose les modules tools.",
     "id": "miyudeclarations_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "tva_prepare_under_governance",
@@ -3421,13 +5136,13 @@
   },
   {
     "do": "expose_miyudiscovery_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyudiscovery/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuDiscovery ; expose les modules tools.",
     "id": "miyudiscovery_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "social_search_under_governance",
@@ -3551,13 +5266,13 @@
   },
   {
     "do": "expose_miyuexport_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyuexport/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuExport ; expose les modules tools.",
     "id": "miyuexport_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "pdf_render_under_governance",
@@ -3611,13 +5326,13 @@
   },
   {
     "do": "expose_miyufeeds_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyufeeds/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuFeeds ; expose les modules tools.",
     "id": "miyufeeds_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "forum_board_list_under_governance",
@@ -3841,13 +5556,13 @@
   },
   {
     "do": "expose_miyuhr_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyuhr/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuHR ; expose les modules tools.",
     "id": "miyuhr_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "schedule_get_under_governance",
@@ -3981,13 +5696,13 @@
   },
   {
     "do": "expose_miyujobs_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyujobs/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuJobs ; expose les modules tools.",
     "id": "miyujobs_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "queue_enqueue_under_governance",
@@ -6340,6 +8055,51 @@
     "start_line": 76
   },
   {
+    "do": "main_loop_theme_header_overlay_content",
+    "end_line": 305,
+    "file": "crates/miyukini-central/src/app.rs",
+    "human": "Boucle principale : thème, header, overlays, contenu selon onglet.",
+    "id": "miyukini_central_app_update",
+    "role": "interface",
+    "start_line": 215
+  },
+  {
+    "do": "dispatch_content_by_active_tab",
+    "end_line": 1259,
+    "file": "crates/miyukini-central/src/app.rs",
+    "human": "Route vers ui_hub_content, ui_service_content ou autre selon onglet.",
+    "id": "miyukini_central_app_ui_content",
+    "role": "interface",
+    "start_line": 891
+  },
+  {
+    "do": "represent_service_display_metadata",
+    "end_line": 158,
+    "file": "crates/miyukini-central/src/catalog.rs",
+    "human": "Nom, description, catégorie, version pour affichage catalogue.",
+    "id": "miyukini_central_catalog_service_meta",
+    "role": "data",
+    "start_line": 154
+  },
+  {
+    "do": "return_mock_service_metadata_list",
+    "end_line": 176,
+    "file": "crates/miyukini-central/src/catalog.rs",
+    "human": "Liste des ServiceMeta pour HUB et menu.",
+    "id": "miyukini_central_catalog_mock_catalog",
+    "role": "reader",
+    "start_line": 173
+  },
+  {
+    "do": "lookup_service_metadata_by_id",
+    "end_line": 274,
+    "file": "crates/miyukini-central/src/catalog.rs",
+    "human": "Recherche dans le catalogue pour affichage carte HUB.",
+    "id": "miyukini_central_catalog_meta_for_service",
+    "role": "reader",
+    "start_line": 268
+  },
+  {
     "do": "get_config_by_key",
     "end_line": 86,
     "file": "crates/miyukini-kernel/src/config.rs",
@@ -7171,13 +8931,13 @@
   },
   {
     "do": "expose_miyulocale_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyulocale/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuLocale ; expose les modules tools.",
     "id": "miyulocale_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "number_format_under_governance",
@@ -7251,13 +9011,13 @@
   },
   {
     "do": "expose_miyumoderationforum_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyumoderationforum/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuModerationForum ; expose les modules tools.",
     "id": "miyumoderationforum_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "post_edit_under_governance",
@@ -7581,13 +9341,13 @@
   },
   {
     "do": "expose_miyupolls_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyupolls/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuPolls ; expose les modules tools.",
     "id": "miyupolls_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "poll_create_under_governance",
@@ -7651,13 +9411,13 @@
   },
   {
     "do": "expose_miyuposanalytics_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyuposanalytics/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuPosAnalytics ; expose les modules tools.",
     "id": "miyuposanalytics_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "sales_trend_under_governance",
@@ -7781,13 +9541,13 @@
   },
   {
     "do": "expose_miyuposinventory_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyuposinventory/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuPosInventory ; expose les modules tools.",
     "id": "miyuposinventory_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "production_record_under_governance",
@@ -7921,13 +9681,13 @@
   },
   {
     "do": "expose_miyuposkitchen_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyuposkitchen/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuPosKitchen ; expose les modules tools.",
     "id": "miyuposkitchen_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "service_type_set_under_governance",
@@ -8021,13 +9781,13 @@
   },
   {
     "do": "expose_miyuposloyalty_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyuposloyalty/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuPosLoyalty ; expose les modules tools.",
     "id": "miyuposloyalty_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "points_grant_under_governance",
@@ -8091,13 +9851,13 @@
   },
   {
     "do": "expose_miyupospayment_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyupospayment/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuPosPayment ; expose les modules tools.",
     "id": "miyupospayment_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "payment_split_under_governance",
@@ -8211,13 +9971,13 @@
   },
   {
     "do": "expose_miyupossales_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyupossales/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuPosSales ; expose les modules tools.",
     "id": "miyupossales_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "order_service_type_set_under_governance",
@@ -8421,13 +10181,13 @@
   },
   {
     "do": "expose_miyuprofile_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyuprofile/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuProfile ; expose les modules tools.",
     "id": "miyuprofile_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "preferences_get_under_governance",
@@ -8661,13 +10421,13 @@
   },
   {
     "do": "expose_miyusocialfeed_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyusocialfeed/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuSocialFeed ; expose les modules tools.",
     "id": "miyusocialfeed_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "post_create_under_governance",
@@ -8841,13 +10601,13 @@
   },
   {
     "do": "expose_miyusocialmessaging_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyusocialmessaging/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuSocialMessaging ; expose les modules tools.",
     "id": "miyusocialmessaging_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "block_add_under_governance",
@@ -8881,13 +10641,13 @@
   },
   {
     "do": "expose_miyusocialmoderation_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyusocialmoderation/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuSocialModeration ; expose les modules tools.",
     "id": "miyusocialmoderation_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "post_delete_under_governance",
@@ -8961,13 +10721,13 @@
   },
   {
     "do": "expose_miyusocialprofile_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyusocialprofile/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuSocialProfile ; expose les modules tools.",
     "id": "miyusocialprofile_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "social_profile_get_under_governance",
@@ -9765,13 +11525,13 @@
   },
   {
     "do": "expose_miyustory_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyustory/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuStory ; expose les modules tools.",
     "id": "miyustory_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "story_create_under_governance",
@@ -9815,13 +11575,13 @@
   },
   {
     "do": "expose_miyutext_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyutext/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuText ; expose les modules tools.",
     "id": "miyutext_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "markdown_render_under_governance",
@@ -9895,13 +11655,13 @@
   },
   {
     "do": "expose_miyuvalidate_toolkit",
-    "end_line": 13,
+    "end_line": 14,
     "file": "crates/miyuvalidate/src/lib.rs",
     "human": "Point d'entrée du toolkit MiyuValidate ; expose les modules tools.",
     "id": "miyuvalidate_toolkit_lib",
     "layer": "toolkit",
     "role": "infrastructure",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "sanitize_under_governance",

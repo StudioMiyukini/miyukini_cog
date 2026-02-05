@@ -1,0 +1,29 @@
+# Lord of the Castle — Miyukini Survivor (Survivor + Tower Defense).
+# Titre du service Miyukini Survivor. Document fondateur : docs/services/MiyukiniSurvivor/.
+
+[package]
+name = "lord_of_the_castle"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Lord of the Castle — Miyukini Survivor (Survivor + Tower Defense)"
+
+[dependencies]
+eframe = { version = "0.33", default-features = false, features = ["default_fonts", "persistence", "glow"] }
+egui = "0.33"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[[bin]]
+name = "lord_of_the_castle"
+path = "src/main.rs"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "allow"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+doc_markdown = "allow"
