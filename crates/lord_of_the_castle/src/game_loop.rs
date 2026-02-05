@@ -243,6 +243,7 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
                     let dead = enemy.take_damage(damage);
                     if !dead {
                         enemy.set_damage_flash();
+                        enemy.push_back_from(px, py, 2.0);
                     }
                     state.record_player_damage(damage, enemy_id);
                     if dead {
@@ -287,6 +288,7 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
             let dead = state.enemies[idx].take_damage(damage);
             if !dead {
                 state.enemies[idx].set_damage_flash();
+                state.enemies[idx].push_back_from(tower.x, tower.y, 2.0);
             }
             if dead {
                 to_remove_enemies.push(state.enemies[idx].id);

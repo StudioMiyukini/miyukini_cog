@@ -114,4 +114,18 @@ impl Enemy {
         let dy = self.y - y;
         (dx * dx + dy * dy).sqrt()
     }
+
+    /// Repousse l'ennemi de `distance` px depuis le point (from_x, from_y).
+    /// Direction : de (from_x, from_y) vers l'ennemi ; aucun effet si source = centre ennemi.
+    pub fn push_back_from(&mut self, from_x: f32, from_y: f32, distance: f32) {
+        let dx = self.x - from_x;
+        let dy = self.y - from_y;
+        let dist_sq = dx * dx + dy * dy;
+        if dist_sq > 0.0 {
+            let dist = dist_sq.sqrt();
+            let d = distance / dist;
+            self.x += dx * d;
+            self.y += dy * d;
+        }
+    }
 }

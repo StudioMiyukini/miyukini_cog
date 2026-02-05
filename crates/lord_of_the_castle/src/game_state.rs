@@ -18,7 +18,7 @@ use std::time::Instant;
 pub const INVENTORY_MAX_SLOTS: usize = 20;
 
 /// Coût d’identification par un expert (or).
-pub const EXPERT_IDENTIFY_COST_GOLD: u32 = 100;
+pub const EXPERT_IDENTIFY_COST_GOLD: u32 = 20;
 
 /// Phase de jeu : Préparation (construction, skills) ou Bataille (vagues).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -113,7 +113,7 @@ impl GameState {
         Self {
             phase: GamePhase::Preparation,
             wave_number: 1,
-            gold: 0,
+            gold: 100,
             xp: 0,
             level: 1,
             castle: Castle::new(castle_center_x, castle_center_y),
@@ -322,7 +322,7 @@ impl GameState {
         true
     }
 
-    /// Identifie un objet non identifié par un expert (100 or). Retourne true si fait.
+    /// Identifie un objet non identifié par un expert (20 or par objet). Retourne true si fait.
     pub fn identify_expert(&mut self, slot_index: usize) -> bool {
         if self.gold < EXPERT_IDENTIFY_COST_GOLD {
             return false;
