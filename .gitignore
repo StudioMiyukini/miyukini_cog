@@ -10,6 +10,9 @@ node_modules
 .pnp
 .pnp.js
 
+# Copie locale du dépôt egui (référence / path deps)
+deps/egui
+
 # Build
 .next
 out
