@@ -29,7 +29,7 @@ mod e16_e25_rest;
 use std::cell::RefCell;
 
 use crate::screens::ScreenId;
-use crate::supabase::{Edition, EditionExposant, Exposant};
+use crate::data::{Edition, EditionExposant, Exposant};
 use crate::theme::JayFestivalTheme;
 use eframe::egui;
 

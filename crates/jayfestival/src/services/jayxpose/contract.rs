@@ -8,7 +8,7 @@
 //! @do: filtres d'entrée pour la liste répertoire (secteur, pagination).
 //! @layer: domain
 
-use crate::supabase::Exposant;
+use crate::data::Exposant;
 
 /// Profil exposant (type de sortie JayXpose).
 /// Fiche complète : identité, contact, vitrine, visibilité répertoire.

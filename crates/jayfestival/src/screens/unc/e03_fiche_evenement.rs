@@ -3,7 +3,7 @@
 //! Conforme [Specification UI § 4.1]. Layout, Card, Label, Button.
 
 use crate::screens::ScreenId;
-use crate::supabase::Edition;
+use crate::data::Edition;
 use crate::theme::JayFestivalTheme;
 use crate::ui::molecules::card_show;
 use crate::ui::organisms::{header_render, layout_show};

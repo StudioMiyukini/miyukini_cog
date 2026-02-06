@@ -4,7 +4,7 @@
 //! GestionLayout, Card, Badge, Button. Sortie vers Liste exposants, Fiche exposant.
 
 use crate::screens::ScreenId;
-use crate::supabase::{EditionExposant, Exposant};
+use crate::data::{EditionExposant, Exposant};
 use crate::theme::JayFestivalTheme;
 use crate::ui::molecules::card_show;
 use crate::ui::organisms::gestion_layout_show;

@@ -1,176 +1,178 @@
-//! UNC-E01 — Landing / Accueil catalogue.
+//! UNC-E01 — Landing / Page d'accueil JayFestival.
 //!
-//! Conforme [Specification UI § 4.1] et [UtilisateurNonConnecte - Ecrans et cycle].
-//! Layout, HeroSection, FeaturesGrid, DirectoryBanner, RolesGrid, CTASection.
+//! Conforme wireframe Page accueil : Header (Accueil, titre, connexion, conf),
+//! Sidebar (News, Mes évènements favoris, J'organise, Informations), zone principale
+//! (Mes évènements, Les évènements des 12 prochains mois, News).
 
 use crate::screens::ScreenId;
 use crate::theme::JayFestivalTheme;
-use crate::ui::molecules::FeatureCardVariant;
-use crate::ui::organisms::{
-    cta_section_render, directory_banner_render, features_grid_render, header_render,
-    hero_section_render, layout_show, roles_grid_render, CtaCardItem, FeatureCardItem,
-    RoleCardItem,
-};
-use crate::ui::{button, label, ButtonVariant, LabelLevel};
+use crate::ui::molecules::{event_card_landing_render, news_card_landing_render};
+use crate::ui::organisms::{header_landing_render, layout_show};
+use crate::ui::{button, label, ButtonVariant, EventCardLandingItem, LabelLevel, NewsCardLandingItem};
 use eframe::egui;
 use std::cell::RefCell;
 
 /// @id: screen_unc_e01
 /// @do: define_landing_screen_component
 /// @layer: app
-/// Écran d'accueil catalogue : en-tête, recherche, héro, grilles, CTA.
+/// Écran d'accueil : header, sidebar, blocs Mes évènements, 12 prochains mois, News.
+
+/// Données de démo pour les cartes événement (à remplacer par données Opérateur de Service).
+fn placeholder_events() -> Vec<EventCardLandingItem> {
+    (1..=6)
+        .map(|i| EventCardLandingItem {
+            nom: format!("[nom event {}]", i),
+            type_event: "[type event]".into(),
+            date: "Date".into(),
+            lieu: "Lieu".into(),
+        })
+        .collect()
+}
+
+/// Données de démo pour les news (à remplacer par données Opérateur de Service).
+fn placeholder_news() -> Vec<NewsCardLandingItem> {
+    vec![
+        NewsCardLandingItem {
+            titre: "Article 1".into(),
+            type_article: "Type".into(),
+            description: "short description".into(),
+        },
+        NewsCardLandingItem {
+            titre: "Article 2".into(),
+            type_article: "Type".into(),
+            description: "short description".into(),
+        },
+        NewsCardLandingItem {
+            titre: "Article 3".into(),
+            type_article: "Type".into(),
+            description: "short description".into(),
+        },
+    ]
+}
 
 /// @id: unc_e01_show
-/// @do: render_landing_screen_with_hero_features_directory_roles_cta
+/// @do: render_landing_screen_with_header_sidebar_blocks
 /// @layer: app
-/// Affiche la landing : header, sidebar nav, zone centrale (héro, recherche, features, directory, roles, CTA).
+/// Affiche la page d'accueil : header (Accueil, titre, connexion, conf), sidebar, blocs contenu.
 pub fn unc_e01_show(
     ctx: &egui::Context,
     theme: &JayFestivalTheme,
     nav_request: &RefCell<Option<ScreenId>>,
 ) {
+    let events = placeholder_events();
+    let events_12 = placeholder_events();
+    let news = placeholder_news();
+
     layout_show(
         ctx,
         theme,
         |ui| {
-            let nav = ["Événements", "Organisateurs", "Exposants", "Se connecter", "S'inscrire"];
-            let responses = header_render(ui, theme, "JayFestival", &nav);
-            if responses.get(0).and_then(|r| r.clicked().then_some(())).is_some() {
-                let _ = nav_request.replace(Some(ScreenId::UncListeEvenements));
-            } else if responses.get(1).and_then(|r| r.clicked().then_some(())).is_some() {
-                let _ = nav_request.replace(Some(ScreenId::UncListeOrganisateurs));
-            } else if responses.get(2).and_then(|r| r.clicked().then_some(())).is_some() {
-                let _ = nav_request.replace(Some(ScreenId::UncListeExposants));
-            } else if responses.get(3).and_then(|r| r.clicked().then_some(())).is_some() {
+            let resp = header_landing_render(ui, theme, "JayFestival");
+            if resp.connexion_clicked {
                 let _ = nav_request.replace(Some(ScreenId::UncConnexion));
-            } else if responses.get(4).and_then(|r| r.clicked().then_some(())).is_some() {
-                let _ = nav_request.replace(Some(ScreenId::UncInscription));
+            }
+            if resp.conf_clicked {
+                // TODO: écran paramètres / conf
             }
         },
         |ui| {
             ui.vertical(|ui| {
                 ui.add_space(theme.item_spacing());
-                label(ui, theme, "JayFestival", LabelLevel::Heading);
+                label(ui, theme, "Sidebar", LabelLevel::Small);
                 ui.add_space(theme.item_spacing() * 2.0);
-                if button(ui, theme, "Accueil", ButtonVariant::NavSelected, Default::default()).clicked() {
-                    // déjà sur landing
+
+                label(ui, theme, "News", LabelLevel::Body);
+                ui.add_space(theme.item_spacing());
+                if button(ui, theme, "News", ButtonVariant::Ghost, Default::default()).clicked() {
+                    // lien News
                 }
-                if button(ui, theme, "Événements", ButtonVariant::Ghost, Default::default()).clicked() {
-                    let _ = nav_request.replace(Some(ScreenId::UncListeEvenements));
-                }
-                if button(ui, theme, "Organisateurs", ButtonVariant::Ghost, Default::default()).clicked() {
+                if button(ui, theme, "Les Organisateurs", ButtonVariant::Ghost, Default::default()).clicked() {
                     let _ = nav_request.replace(Some(ScreenId::UncListeOrganisateurs));
                 }
-                if button(ui, theme, "Exposants", ButtonVariant::Ghost, Default::default()).clicked() {
+                if button(ui, theme, "Les exposants", ButtonVariant::Ghost, Default::default()).clicked() {
                     let _ = nav_request.replace(Some(ScreenId::UncListeExposants));
                 }
-                if button(ui, theme, "Recherche", ButtonVariant::Ghost, Default::default()).clicked() {
-                    let _ = nav_request.replace(Some(ScreenId::UncRecherche));
+                if button(ui, theme, "Les évènements", ButtonVariant::Ghost, Default::default()).clicked() {
+                    let _ = nav_request.replace(Some(ScreenId::UncListeEvenements));
                 }
                 ui.add_space(theme.item_spacing() * 2.0);
-                if button(ui, theme, "Mentions", ButtonVariant::Ghost, Default::default()).clicked() {
-                    let _ = nav_request.replace(Some(ScreenId::UncMentions));
-                }
+
+                label(ui, theme, "Mes évènements favoris", LabelLevel::Body);
+                ui.add_space(theme.item_spacing());
+                ui.label("- [nom de l'event]");
+                ui.label("- [nom de l'event]");
+                ui.add_space(theme.item_spacing() * 2.0);
+
+                label(ui, theme, "J'organise", LabelLevel::Body);
+                ui.add_space(theme.item_spacing());
+                ui.label("- [nom de l'event]");
+                ui.label("- [nom de l'event]");
+                ui.add_space(theme.item_spacing() * 2.0);
+
+                ui.add_space(theme.item_spacing() * 4.0);
+                label(ui, theme, "Informations", LabelLevel::Small);
+                label(ui, theme, "2026 Miyukini", LabelLevel::Small);
             });
         },
         |ui| {
-            let hero_response = hero_section_render(
-                ui,
-                theme,
-                "Découvrez les événements et festivals",
-                "Recherchez un événement, un organisateur ou un exposant.",
-                Some("Rechercher"),
-            );
-            if hero_response.clicked() {
-                let _ = nav_request.replace(Some(ScreenId::UncRecherche));
-            }
+            ui.vertical(|ui| {
+                ui.add_space(theme.item_spacing());
 
-            ui.add_space(theme.item_spacing() * 2.0);
+                // Container My_event_block — Mes évènements (défilement horizontal)
+                label(ui, theme, "Mes évènements", LabelLevel::Heading);
+                ui.add_space(theme.item_spacing());
+                egui::ScrollArea::horizontal()
+                    .id_salt("jayfestival_landing_my_events_scroll")
+                    .show(ui, |ui| {
+                        ui.horizontal(|ui| {
+                            for item in &events {
+                                let r = event_card_landing_render(theme, ui, item);
+                                if r.clicked() {
+                                    let _ = nav_request.replace(Some(ScreenId::UncListeEvenements));
+                                }
+                                ui.add_space(theme.item_spacing());
+                            }
+                        });
+                    });
+                ui.add_space(theme.item_spacing() * 2.0);
 
-            let features = [
-                FeatureCardItem {
-                    title: "Événements".into(),
-                    description: "Liste des événements à venir.".into(),
-                    icon: "📅".into(),
-                    variant: FeatureCardVariant::Default,
-                },
-                FeatureCardItem {
-                    title: "Organisateurs".into(),
-                    description: "Structures organisatrices.".into(),
-                    icon: "🏛️".into(),
-                    variant: FeatureCardVariant::Default,
-                },
-                FeatureCardItem {
-                    title: "Exposants".into(),
-                    description: "Répertoire des exposants.".into(),
-                    icon: "🏪".into(),
-                    variant: FeatureCardVariant::Default,
-                },
-            ];
-            features_grid_render(theme, ui, &features);
+                // Container Next_12_month_events_block — Les évènements des 12 prochains mois
+                ui.horizontal(|ui| {
+                    label(ui, theme, "Les évènements des 12 prochains mois", LabelLevel::Heading);
+                    ui.add_space(theme.item_spacing());
+                    if button(ui, theme, "Mois suivant", ButtonVariant::Ghost, Default::default()).clicked() {
+                        // TODO: pagination mois
+                    }
+                });
+                ui.add_space(theme.item_spacing());
+                egui::ScrollArea::horizontal()
+                    .id_salt("jayfestival_landing_12months_scroll")
+                    .show(ui, |ui| {
+                        ui.horizontal(|ui| {
+                            for item in &events_12 {
+                                let r = event_card_landing_render(theme, ui, item);
+                                if r.clicked() {
+                                    let _ = nav_request.replace(Some(ScreenId::UncListeEvenements));
+                                }
+                                ui.add_space(theme.item_spacing());
+                            }
+                        });
+                    });
+                ui.add_space(theme.item_spacing() * 2.0);
 
-            ui.add_space(theme.item_spacing() * 2.0);
-
-            let dir_ev = directory_banner_render(theme, ui, "Événements", Some("Prochains événements"), "Voir les événements");
-            if dir_ev.clicked() {
-                let _ = nav_request.replace(Some(ScreenId::UncListeEvenements));
-            }
-            let dir_org = directory_banner_render(theme, ui, "Organisateurs", Some("Répertoire des organisateurs"), "Voir les organisateurs");
-            if dir_org.clicked() {
-                let _ = nav_request.replace(Some(ScreenId::UncListeOrganisateurs));
-            }
-            let dir_exp = directory_banner_render(theme, ui, "Exposants", Some("Répertoire des exposants"), "Voir les exposants");
-            if dir_exp.clicked() {
-                let _ = nav_request.replace(Some(ScreenId::UncListeExposants));
-            }
-
-            ui.add_space(theme.item_spacing() * 2.0);
-
-            let roles = [
-                RoleCardItem {
-                    title: "Organisateur".into(),
-                    description: Some("Gérer mes éditions.".into()),
-                    accent_color: theme.accent_organisateur(),
-                },
-                RoleCardItem {
-                    title: "Exposant".into(),
-                    description: Some("Candidater, gérer mes participations.".into()),
-                    accent_color: theme.accent_exposant(),
-                },
-                RoleCardItem {
-                    title: "Visiteur".into(),
-                    description: Some("Réserver, acheter des pass.".into()),
-                    accent_color: theme.accent_visiteur(),
-                },
-            ];
-            roles_grid_render(theme, ui, &roles);
-
-            ui.add_space(theme.item_spacing() * 2.0);
-
-            let cta_items = [
-                CtaCardItem {
-                    title: "Se connecter".into(),
-                    description: Some("Accéder à mon espace.".into()),
-                    button_label: "Se connecter".into(),
-                },
-                CtaCardItem {
-                    title: "S'inscrire".into(),
-                    description: Some("Créer un compte.".into()),
-                    button_label: "S'inscrire".into(),
-                },
-            ];
-            let cta_responses = cta_section_render(theme, ui, &cta_items);
-            if cta_responses.get(0).and_then(|r| r.clicked().then_some(())).is_some() {
-                let _ = nav_request.replace(Some(ScreenId::UncConnexion));
-            } else if cta_responses.get(1).and_then(|r| r.clicked().then_some(())).is_some() {
-                let _ = nav_request.replace(Some(ScreenId::UncInscription));
-            }
-
-            ui.add_space(theme.item_spacing() * 2.0);
-            label(ui, theme, "Mentions légales · CGU · Confidentialité · Accessibilité", LabelLevel::Small);
-            if button(ui, theme, "Mentions légales", ButtonVariant::Ghost, Default::default()).clicked() {
-                let _ = nav_request.replace(Some(ScreenId::UncMentions));
-            }
+                // Container News_block — News
+                label(ui, theme, "News", LabelLevel::Heading);
+                ui.add_space(theme.item_spacing());
+                ui.horizontal(|ui| {
+                    for item in &news {
+                        let r = news_card_landing_render(theme, ui, item);
+                        if r.clicked() {
+                            // TODO: fiche article
+                        }
+                        ui.add_space(theme.item_spacing());
+                    }
+                });
+            });
         },
     );
 }

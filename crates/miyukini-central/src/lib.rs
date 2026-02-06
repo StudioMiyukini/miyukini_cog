@@ -1,6 +1,7 @@
 //! Bibliothèque Miyukini Central - Hub de gestion des Services.
 
 pub mod app;
+pub mod auth;
 pub mod catalog;
 pub mod config;
 pub mod loading;

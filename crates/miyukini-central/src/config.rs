@@ -18,6 +18,8 @@ pub struct SupabaseConfig {
     pub anon_key: Option<String>,
     /// Clé service_role (secret — serveur uniquement, jamais côté client).
     pub service_role_key: Option<String>,
+    /// URL de base de la DB mère (validation des ID de profils). Optionnel.
+    pub mother_db_url: Option<String>,
 }
 
 impl SupabaseConfig {
@@ -56,6 +58,7 @@ pub fn load_supabase_config() -> SupabaseConfig {
         project_id: std::env::var("SUPABASE_PROJECT_ID").ok().filter(|s| !s.is_empty()),
         anon_key: std::env::var("SUPABASE_ANON_KEY").ok().filter(|s| !s.is_empty()),
         service_role_key: std::env::var("SUPABASE_SERVICE_ROLE_KEY").ok().filter(|s| !s.is_empty()),
+        mother_db_url: std::env::var("MOTHER_DB_URL").ok().filter(|s| !s.is_empty()),
     }
 }
 

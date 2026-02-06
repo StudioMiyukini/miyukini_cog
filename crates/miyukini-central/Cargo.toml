@@ -12,19 +12,24 @@ categories.workspace = true
 description = "Miyukini Central - Hub de gestion des Services de l'ecosysteme Miyukini COG"
 
 [dependencies]
+chrono = "0.4"
 dotenvy = "0.15"
 egui = "0.33"
 eframe = { version = "0.33", default-features = false, features = ["default_fonts", "persistence", "glow"] }
 egui-phosphor = "0.11"
 jayfestival = { path = "../jayfestival" }
-miyuclicker = { path = "../miyuclicker" }
 lord_of_the_castle = { path = "../lord_of_the_castle" }
+miyuclicker = { path = "../miyuclicker" }
 resvg = { version = "0.46", default-features = false }
-usvg = { version = "0.46", default-features = false }
-tiny-skia = "0.11"
+rusqlite = { version = "0.32", features = ["bundled"] }
 rand = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+sha2 = "0.10"
+tiny-skia = "0.11"
+ureq = { version = "2", default-features = false, features = ["json"] }
+usvg = { version = "0.46", default-features = false }
+uuid = { version = "1", features = ["v4"] }
 
 [[bin]]
 name = "miyukini-central"

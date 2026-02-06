@@ -4,7 +4,7 @@
 //! GestionLayout, Card, Select, Button. Sortie vers Dashboard édition, Création édition.
 
 use crate::screens::ScreenId;
-use crate::supabase::Edition;
+use crate::data::Edition;
 use crate::theme::JayFestivalTheme;
 use crate::ui::molecules::card_show;
 use crate::ui::organisms::gestion_layout_show;

@@ -4,7 +4,7 @@
 //! GestionLayout, Card, Badge. Données JayXpose/Supabase. Sortie vers Fiche exposant, Candidatures.
 
 use crate::screens::ScreenId;
-use crate::supabase::{EditionExposant, Exposant};
+use crate::data::{EditionExposant, Exposant};
 use crate::theme::JayFestivalTheme;
 use crate::ui::molecules::card_show;
 use crate::ui::organisms::gestion_layout_show;
