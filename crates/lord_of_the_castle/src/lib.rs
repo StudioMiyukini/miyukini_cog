@@ -21,6 +21,7 @@ pub mod game_loop;
 pub mod game_state;
 pub mod loot;
 pub mod player;
+pub mod secondary_player;
 pub mod spritesheet;
 pub mod towers;
 pub mod troops;

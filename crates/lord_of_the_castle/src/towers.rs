@@ -1,5 +1,5 @@
 //! Tours — bâtiments construits en phase Préparation (Miyukini Survivor).
-//! Attaquent l'ennemi le plus proche dans leur champ de vision (80 px).
+//! Attaquent l'ennemi le plus proche dans leur champ de vision (tour de base : 300 px) ; flèches 600 px.
 //!
 //! @id: lord_of_the_castle_towers
 //! @do: define_tower_entity_range_attack
@@ -7,11 +7,62 @@
 //! @layer: domain
 //! @human: Entité Tour : PV, portée, dégâts, cadence, construction en phase Préparation.
 
-use crate::constants::{hp, size, TOWER_BASE_RANGE};
+use crate::constants::{hp, size, TOWER_BASE_VISION, TOWER_PROJECTILE_SPEED};
 use serde::{Deserialize, Serialize};
 use std::time::Instant;
 
-/// Tour de base : portée 80 px, 1 projectile/s, 1 dégât, PV 100, armure 0.
+/// Projectile tiré par une tour : sprite 2×2 px noir, vitesse 600 px/s vers la cible.
+/// Règle générale : tout projectile allié blesse le premier ennemi qu'il touche puis disparaît (sauf effets spécifiques, ex. transpercer).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TowerProjectile {
+    /// Position X (monde).
+    pub x: f32,
+    /// Position Y (monde).
+    pub y: f32,
+    /// Origine X (pour supprimer si au-delà de la portée).
+    pub origin_x: f32,
+    /// Origine Y.
+    pub origin_y: f32,
+    /// Vitesse X (px/s), direction vers la cible au moment du tir.
+    pub vx: f32,
+    /// Vitesse Y (px/s).
+    pub vy: f32,
+    /// Dégâts appliqués à l'impact.
+    pub damage: i32,
+}
+
+impl TowerProjectile {
+    /// Crée un projectile à (x, y) allant vers (target_x, target_y) à 600 px/s.
+    pub fn toward(x: f32, y: f32, target_x: f32, target_y: f32, damage: i32) -> Self {
+        let dx = target_x - x;
+        let dy = target_y - y;
+        let dist = (dx * dx + dy * dy).sqrt();
+        let (vx, vy) = if dist < 0.01 {
+            (TOWER_PROJECTILE_SPEED, 0.0)
+        } else {
+            let u = TOWER_PROJECTILE_SPEED / dist;
+            (dx * u, dy * u)
+        };
+        Self {
+            x,
+            y,
+            origin_x: x,
+            origin_y: y,
+            vx,
+            vy,
+            damage,
+        }
+    }
+
+    /// Distance parcourue depuis l'origine.
+    pub fn distance_from_origin(&self) -> f32 {
+        let dx = self.x - self.origin_x;
+        let dy = self.y - self.origin_y;
+        (dx * dx + dy * dy).sqrt()
+    }
+}
+
+/// Tour de base : champ de vision 300 px, flèches 600 px, 1 projectile / 2 s, 4 dégâts, PV 100, armure 0.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Tower {
     /// Identifiant unique.
@@ -26,7 +77,7 @@ pub struct Tower {
     pub hp_max: i32,
     /// Armure (base 0).
     pub armor: i32,
-    /// Dernière attaque (pour cadence 1/s). Non sérialisé.
+    /// Dernière attaque (pour cadence 1 / 2 s). Non sérialisé.
     #[serde(skip)]
     pub last_attack: Option<Instant>,
 }
@@ -45,24 +96,24 @@ impl Tower {
         }
     }
 
-    /// Demi-taille (20×20 → 10).
+    /// Demi-taille (40×40 → 20).
     pub fn half_size() -> f32 {
         size::TOWER / 2.0
     }
 
-    /// Portée / champ de vision (px).
+    /// Champ de vision (px) : ciblage des ennemis.
     pub fn range() -> f32 {
-        TOWER_BASE_RANGE
+        TOWER_BASE_VISION
     }
 
-    /// Dégâts par projectile (tour de base : 1).
+    /// Dégâts par projectile (tour de base : 4).
     pub fn damage(&self) -> i32 {
-        1
+        4
     }
 
-    /// Cadence : 1 projectile par seconde.
+    /// Cadence : 1 projectile toutes les 2 secondes.
     pub fn attack_interval_s() -> f32 {
-        1.0
+        2.0
     }
 
     /// Distance au point (x, y).

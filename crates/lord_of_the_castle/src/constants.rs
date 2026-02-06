@@ -17,8 +17,10 @@ pub const BOTTOM_PANEL_HEIGHT: f32 = 70.0;
 pub mod size {
     /// Château : cube 40×40 px.
     pub const CASTLE: f32 = 40.0;
-    /// Tours : 20×20 px.
-    pub const TOWER: f32 = 20.0;
+    /// Tours (bâtiments) : 40×40 px (2 cases × 2 cases de 20 px).
+    pub const TOWER: f32 = 40.0;
+    /// Taille d'une case de la grille de construction (px).
+    pub const CONSTRUCTION_CELL_SIZE: f32 = 20.0;
     /// Entités mobiles (joueur, ennemis normaux, troupes) : 10×10 px.
     pub const MOBILE: f32 = 10.0;
     /// Mini-boss : 20×20 px.
@@ -84,8 +86,16 @@ pub mod wave {
 /// Champ de vision ennemis (px).
 pub const ENEMY_VISION_RADIUS: f32 = 60.0;
 
-/// Portée tour de base (px).
-pub const TOWER_BASE_RANGE: f32 = 80.0;
+/// Champ de vision des tours de base (px) : ciblage des ennemis.
+pub const TOWER_BASE_VISION: f32 = 300.0;
+/// Portée maximale des flèches des tours de base (px) : course du projectile.
+pub const TOWER_PROJECTILE_MAX_RANGE: f32 = 600.0;
+/// Coût en or pour construire une tour de base.
+pub const TOWER_BASE_COST_GOLD: u32 = 50;
+/// Projectile des tours : taille d'affichage 2×2 px (carré noir).
+pub const TOWER_PROJECTILE_SIZE: f32 = 2.0;
+/// Projectile des tours : vitesse 600 px/s vers la cible.
+pub const TOWER_PROJECTILE_SPEED: f32 = 600.0;
 
 /// Loot : rayon de ramassage par le joueur (px).
 pub const PICKUP_RADIUS: f32 = 30.0;

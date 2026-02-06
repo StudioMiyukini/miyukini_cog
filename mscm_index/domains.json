@@ -1733,6 +1733,8 @@
     "lord_of_the_castle_character_creation",
     "lord_of_the_castle_app",
     "lord_of_the_castle_app_ui",
-    "lord_of_the_castle_spritesheet"
+    "lord_of_the_castle_spritesheet",
+    "lord_of_the_castle_troops",
+    "lord_of_the_castle_warrior_skills"
   ]
 }

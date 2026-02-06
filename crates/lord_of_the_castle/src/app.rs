@@ -12,11 +12,12 @@ use crate::app_ui::{
     allocate_game_zone_and_bottom, game_zone_tick_and_paint, paint_bottom_panel,
     paint_equipment_window, paint_inventory_window, paint_player_window,
     paint_skills_window,
-    screen_to_world,
+    screen_to_cell, screen_to_world,
 };
 use crate::character_creation::{
     apply_phrase_effects, pick_three_phrases, CharacterStats, PhraseDef, Stat,
 };
+use crate::constants::TOWER_BASE_COST_GOLD;
 use crate::game_state::{
     GamePhase, GameState, INVENTORY_MAX_SLOTS, EXPERT_IDENTIFY_COST_GOLD,
 };
@@ -74,8 +75,10 @@ pub struct LordOfTheCastleApp {
     pub screen: Screen,
     pub game: Option<GameState>,
     pub last_tick: Instant,
-    /// Touches enfoncées (8 directions).
+    /// Touches enfoncées (8 directions) — joueur principal (ZQSD ou OKLM si joueur 2 présent).
     pub keys: [bool; 8],
+    /// Touches joueur secondaire (ZQSD) — utilisé uniquement si secondary_player présent.
+    pub keys_secondary: [bool; 8],
     /// Fenêtre « Player » (métriques joueur) ouverte.
     pub player_window_open: bool,
     /// Fenêtre « Inventaire » ouverte.
@@ -112,6 +115,8 @@ pub struct LordOfTheCastleApp {
     pub marchand_open: bool,
     pub expert_open: bool,
     pub construction_open: bool,
+    /// Case sélectionnée en mode construction (grille 20×20, origine = coin château). None = pas de sélection.
+    pub construction_selected_cell: Option<(i32, i32)>,
     pub recrutement_open: bool,
     /// Achat marchand différé (pool, index) pour éviter emprunt pendant la fenêtre.
     pub pending_merchant_buy: RefCell<Option<(MerchantPoolKind, usize)>>,
@@ -119,6 +124,10 @@ pub struct LordOfTheCastleApp {
     pub pending_merchant_reroll: RefCell<bool>,
     /// En dev : ajouter 100 or au joueur (bouton marchand).
     pub pending_dev_add_gold: RefCell<bool>,
+    /// Fenêtre « Mode Dev » ouverte (bouton Mode Dev ouvre cette fenêtre).
+    pub dev_mode_window_open: bool,
+    /// Fenêtre « Joueur 2 » ouverte (bouton Joueur 2, phase Préparation).
+    pub joueur2_window_open: bool,
     /// Identification par soi-même différée (index dans l'inventaire).
     pub pending_identify_self: RefCell<Option<usize>>,
     /// Overlay « trop encombré » quand le joueur clique Lancer la vague avec inventaire plein.
@@ -160,6 +169,7 @@ impl Default for LordOfTheCastleApp {
             game: None,
             last_tick: Instant::now(),
             keys: [false; 8],
+            keys_secondary: [false; 8],
             player_window_open: false,
             inventory_window_open: false,
             selected_inventory_slot: None,
@@ -179,10 +189,13 @@ impl Default for LordOfTheCastleApp {
             marchand_open: false,
             expert_open: false,
             construction_open: false,
+            construction_selected_cell: None,
             recrutement_open: false,
             pending_merchant_buy: RefCell::new(None),
             pending_merchant_reroll: RefCell::new(false),
             pending_dev_add_gold: RefCell::new(false),
+            dev_mode_window_open: false,
+            joueur2_window_open: false,
             pending_identify_self: RefCell::new(None),
             show_encumbered_overlay: false,
             player_sprite_texture: None,
@@ -309,21 +322,35 @@ impl LordOfTheCastleApp {
         // Clic « Lancer la vague » depuis la barre haute (toujours visible)
         let start_battle_request = RefCell::new(false);
 
-        // Input clavier (8 directions) : ZQSD + flèches (Z=haut, Q=gauche, S=bas, D=droite)
+        // Input clavier : si joueur 2 présent, J1 = OKLM (O=haut, K=gauche, L=bas, M=droite), J2 = ZQSD ; sinon J1 = ZQSD + flèches
         let input = ui.ctx().input(Clone::clone);
         use egui::Key;
-        let up = input.key_down(Key::Z) || input.key_down(Key::W) || input.key_down(Key::ArrowUp);
-        let down = input.key_down(Key::S) || input.key_down(Key::ArrowDown);
-        let left = input.key_down(Key::Q) || input.key_down(Key::A) || input.key_down(Key::ArrowLeft);
-        let right = input.key_down(Key::D) || input.key_down(Key::ArrowRight);
-        self.keys[0] = up && !left && !right;
-        self.keys[1] = up && right;
-        self.keys[2] = right && !up && !down;
-        self.keys[3] = down && right;
-        self.keys[4] = down && !left && !right;
-        self.keys[5] = down && left;
-        self.keys[6] = left && !up && !down;
-        self.keys[7] = up && left;
+        let two_players = self.game.as_ref().map(|s| s.secondary_player.is_some()).unwrap_or(false);
+        let (up1, down1, left1, right1) = if two_players {
+            (input.key_down(Key::O), input.key_down(Key::L), input.key_down(Key::K), input.key_down(Key::M))
+        } else {
+            (input.key_down(Key::Z) || input.key_down(Key::W) || input.key_down(Key::ArrowUp),
+             input.key_down(Key::S) || input.key_down(Key::ArrowDown),
+             input.key_down(Key::Q) || input.key_down(Key::A) || input.key_down(Key::ArrowLeft),
+             input.key_down(Key::D) || input.key_down(Key::ArrowRight))
+        };
+        self.keys[0] = up1 && !left1 && !right1;
+        self.keys[1] = up1 && right1;
+        self.keys[2] = right1 && !up1 && !down1;
+        self.keys[3] = down1 && right1;
+        self.keys[4] = down1 && !left1 && !right1;
+        self.keys[5] = down1 && left1;
+        self.keys[6] = left1 && !up1 && !down1;
+        self.keys[7] = up1 && left1;
+        let (up2, down2, left2, right2) = (input.key_down(Key::Z), input.key_down(Key::S), input.key_down(Key::Q), input.key_down(Key::D));
+        self.keys_secondary[0] = up2 && !left2 && !right2;
+        self.keys_secondary[1] = up2 && right2;
+        self.keys_secondary[2] = right2 && !up2 && !down2;
+        self.keys_secondary[3] = down2 && right2;
+        self.keys_secondary[4] = down2 && !left2 && !right2;
+        self.keys_secondary[5] = down2 && left2;
+        self.keys_secondary[6] = left2 && !up2 && !down2;
+        self.keys_secondary[7] = up2 && left2;
 
         if self.screen == Screen::Battle {
             ui.ctx().request_repaint();
@@ -359,6 +386,9 @@ impl LordOfTheCastleApp {
                 if ui.add_enabled(prep_enabled, egui::Button::new("Recrutement")).clicked() && prep_enabled {
                     self.recrutement_open ^= true;
                 }
+                if ui.add_enabled(prep_enabled, egui::Button::new("Joueur 2")).clicked() && prep_enabled {
+                    self.joueur2_window_open = true;
+                }
                 ui.label(format!("Vague {}", state.wave_number));
                 ui.label(format!("Ennemis: {}", state.enemies.len()));
                 let troops_count = state.troops.iter().filter(|t| t.is_active_in_squad()).count();
@@ -368,11 +398,8 @@ impl LordOfTheCastleApp {
                 {
                     start_battle_request.replace(true);
                 }
-                if ui
-                    .button(if state.dev_mode { "Mode Dev: ON" } else { "Mode Dev" })
-                    .clicked()
-                {
-                    state.dev_mode = !state.dev_mode;
+                if ui.button("Mode Dev").clicked() {
+                    self.dev_mode_window_open = true;
                 }
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     ui.label(format!("Or: {}", state.gold));
@@ -380,6 +407,69 @@ impl LordOfTheCastleApp {
             }
         });
         ui.add_space(8.0);
+
+        // Fenêtre Joueur 2 (phase Préparation) : spawn Tombilol, Tal Ratchou, Sergent Garcia
+        if self.joueur2_window_open {
+            let mut open = true;
+            let mut should_close = false;
+            egui::Window::new("Joueur 2")
+                .open(&mut open)
+                .default_width(320.0)
+                .show(ui.ctx(), |ui| {
+                    ui.label("Spawn un personnage secondaire (2 joueurs) :");
+                    ui.add_space(6.0);
+                    if let Some(ref mut state) = self.game {
+                        if state.secondary_player.is_some() {
+                            ui.label("Un joueur secondaire est déjà présent.");
+                            if ui.button("lvlup (joueur 2)").clicked() {
+                                state.secondary_give_level_up();
+                            }
+                        } else {
+                            if ui.button("Tombilol — 30 PV, attaque 360° 30 px, 1 att/s").clicked() {
+                                state.spawn_secondary_tombilol();
+                                should_close = true;
+                            }
+                            if ui.button("Tal Ratchou — 20 PV, projectile homing 0,6/s, 200 px").clicked() {
+                                state.spawn_secondary_tal_ratchou();
+                                should_close = true;
+                            }
+                            if ui.button("Sergent Garcia — 10 PV, 6 miliciens").clicked() {
+                                state.spawn_secondary_sergent_garcia();
+                                should_close = true;
+                            }
+                        }
+                    }
+                });
+            if !open || should_close {
+                self.joueur2_window_open = false;
+            }
+        }
+
+        // Fenêtre Mode Dev (Visions des portées, +100 or, Spawn 50 ennemis, lvlup)
+        if self.dev_mode_window_open {
+            let mut open = true;
+            egui::Window::new("Mode Dev")
+                .open(&mut open)
+                .default_width(280.0)
+                .show(ui.ctx(), |ui| {
+                    if let Some(ref mut state) = self.game {
+                        ui.checkbox(&mut state.dev_mode, "Visions des portées");
+                        ui.add_space(6.0);
+                        if ui.button("+ 100 or").clicked() {
+                            state.gold += 100;
+                        }
+                        if ui.button("Spawn 50 ennemis normal").clicked() {
+                            state.dev_spawn_50_normal_enemies_random();
+                        }
+                        if ui.button("lvlup").clicked() {
+                            state.dev_give_level_up();
+                        }
+                    }
+                });
+            if !open {
+                self.dev_mode_window_open = false;
+            }
+        }
 
         // Fenêtre Player (métriques joueur)
         if self.player_window_open {
@@ -581,11 +671,27 @@ impl LordOfTheCastleApp {
                     .show(ui.ctx(), |ui| {
                         ui.label(format!("Or : {} or", gold));
                         ui.add_space(8.0);
-                        ui.heading("Construction");
-                        ui.label("• Tours : archer, baliste, catapulte");
-                        ui.label("• Fortifications : murs, barricades, portes, pièges");
-                        ui.label("• Bâtiments civils : auberge, taverne, forge, caserne, arsenal, atelier, habitations");
-                        ui.weak("(À implémenter : catégories et placement)");
+                        ui.heading("Bâtiments constructibles");
+                        ui.label("Sélectionnez une case sur la zone de jeu (grille 20×20). Clic droit pour annuler.");
+                        ui.add_space(8.0);
+                        if let Some((ci, cj)) = self.construction_selected_cell {
+                            ui.label(format!("Case sélectionnée : ({}, {})", ci, cj));
+                            let has_place = state.can_build_at_cell(ci, cj);
+                            let has_gold = state.gold >= TOWER_BASE_COST_GOLD;
+                            if has_place {
+                                if has_gold {
+                                    if ui.button(format!("Tour ({} po) — Construire dedans", TOWER_BASE_COST_GOLD)).clicked() {
+                                        state.build_tower_at_cell(ci, cj);
+                                    }
+                                } else {
+                                    ui.weak(format!("Or insuffisant ({} po requis).", TOWER_BASE_COST_GOLD));
+                                }
+                            } else {
+                                ui.weak("Pas la place ici (château ou autre bâtiment).");
+                            }
+                        } else {
+                            ui.weak("Aucune case sélectionnée.");
+                        }
                     });
                 if !open {
                     close_construction = true;
@@ -626,6 +732,7 @@ impl LordOfTheCastleApp {
         }
         if close_construction {
             self.construction_open = false;
+            self.construction_selected_cell = None;
         }
         if close_recrutement {
             self.recrutement_open = false;
@@ -810,12 +917,34 @@ impl LordOfTheCastleApp {
                         .map(|(t, d)| (t, d, troop_frame));
                     let troop_attack_sprite = self.troop_attack_sprite_texture.as_ref()
                         .zip(self.troop_attack_sprite_desc.as_ref());
+                    if self.construction_open {
+                        if resp.clicked() {
+                            let pos = resp.interact_pointer_pos()
+                                .or_else(|| ui.ctx().input(|i| i.pointer.press_origin()));
+                            if let Some(pos) = pos {
+                                let (ci, cj) = screen_to_cell(
+                                    game_rect,
+                                    pos.x,
+                                    pos.y,
+                                    state.player.x,
+                                    state.player.y,
+                                    state.castle.x,
+                                    state.castle.y,
+                                );
+                                self.construction_selected_cell = Some((ci, cj));
+                            }
+                        }
+                        if resp.secondary_clicked() {
+                            self.construction_selected_cell = None;
+                        }
+                    }
                     let (tick, go) = game_zone_tick_and_paint(
                         game_rect,
                         &painter,
                         state,
                         last_tick,
                         keys,
+                        self.keys_secondary,
                         ui.visuals().window_fill(),
                         cursor_screen,
                         player_sprite,
@@ -823,13 +952,15 @@ impl LordOfTheCastleApp {
                         enemy_miniboss_sprite,
                         troop_walk_sprite,
                         troop_attack_sprite,
+                        self.construction_open,
+                        self.construction_selected_cell,
                     );
                     *result.borrow_mut() = (tick, go);
                     paint_bottom_panel(ui, bottom_rect, state);
                     let (new_tick, game_over) = *result.borrow();
                     self.last_tick = new_tick;
                     if game_over {
-                        self.screen = Screen::GameOver;
+                    self.screen = Screen::GameOver;
                     }
                 }
                 self.game = state_opt;
@@ -884,6 +1015,7 @@ impl LordOfTheCastleApp {
                         state,
                         self.last_tick,
                         self.keys,
+                        self.keys_secondary,
                         ui.visuals().window_fill(),
                         cursor_screen,
                         player_sprite,
@@ -891,6 +1023,8 @@ impl LordOfTheCastleApp {
                         enemy_miniboss_sprite,
                         troop_walk_sprite,
                         troop_attack_sprite,
+                        self.construction_open,
+                        self.construction_selected_cell,
                     );
                     self.last_tick = new_tick;
                     paint_bottom_panel(ui, bottom_rect, state);
@@ -1127,21 +1261,35 @@ fn paint_equipment_item_detail(
 
 impl App for LordOfTheCastleApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        // Input clavier (8 directions) : ZQSD + flèches (Z=haut, Q=gauche, S=bas, D=droite).
+        // Input clavier : si joueur 2 présent, J1 = OKLM (O=haut, K=gauche, L=bas, M=droite), J2 = ZQSD ; sinon J1 = ZQSD + flèches
         let input = ctx.input(Clone::clone);
         use egui::Key;
-        let up = input.key_down(Key::Z) || input.key_down(Key::W) || input.key_down(Key::ArrowUp);
-        let down = input.key_down(Key::S) || input.key_down(Key::ArrowDown);
-        let left = input.key_down(Key::Q) || input.key_down(Key::A) || input.key_down(Key::ArrowLeft);
-        let right = input.key_down(Key::D) || input.key_down(Key::ArrowRight);
-        self.keys[0] = up && !left && !right;
-        self.keys[1] = up && right;
-        self.keys[2] = right && !up && !down;
-        self.keys[3] = down && right;
-        self.keys[4] = down && !left && !right;
-        self.keys[5] = down && left;
-        self.keys[6] = left && !up && !down;
-        self.keys[7] = up && left;
+        let two_players = self.game.as_ref().map(|s| s.secondary_player.is_some()).unwrap_or(false);
+        let (up1, down1, left1, right1) = if two_players {
+            (input.key_down(Key::O), input.key_down(Key::L), input.key_down(Key::K), input.key_down(Key::M))
+        } else {
+            (input.key_down(Key::Z) || input.key_down(Key::W) || input.key_down(Key::ArrowUp),
+             input.key_down(Key::S) || input.key_down(Key::ArrowDown),
+             input.key_down(Key::Q) || input.key_down(Key::A) || input.key_down(Key::ArrowLeft),
+             input.key_down(Key::D) || input.key_down(Key::ArrowRight))
+        };
+        self.keys[0] = up1 && !left1 && !right1;
+        self.keys[1] = up1 && right1;
+        self.keys[2] = right1 && !up1 && !down1;
+        self.keys[3] = down1 && right1;
+        self.keys[4] = down1 && !left1 && !right1;
+        self.keys[5] = down1 && left1;
+        self.keys[6] = left1 && !up1 && !down1;
+        self.keys[7] = up1 && left1;
+        let (up2, down2, left2, right2) = (input.key_down(Key::Z), input.key_down(Key::S), input.key_down(Key::Q), input.key_down(Key::D));
+        self.keys_secondary[0] = up2 && !left2 && !right2;
+        self.keys_secondary[1] = up2 && right2;
+        self.keys_secondary[2] = right2 && !up2 && !down2;
+        self.keys_secondary[3] = down2 && right2;
+        self.keys_secondary[4] = down2 && !left2 && !right2;
+        self.keys_secondary[5] = down2 && left2;
+        self.keys_secondary[6] = left2 && !up2 && !down2;
+        self.keys_secondary[7] = up2 && left2;
 
         egui::TopBottomPanel::top("lotc_top")
             .min_height(40.0)
@@ -1175,6 +1323,9 @@ impl App for LordOfTheCastleApp {
                         if ui.add_enabled(prep_enabled, egui::Button::new("Recrutement")).clicked() && prep_enabled {
                             self.recrutement_open ^= true;
                         }
+                        if ui.add_enabled(prep_enabled, egui::Button::new("Joueur 2")).clicked() && prep_enabled {
+                            self.joueur2_window_open = true;
+                        }
                         if state.phase == GamePhase::Preparation {
                             if ui.button("Lancer la vague").clicked() {
                                 if state.inventory.len() >= INVENTORY_MAX_SLOTS {
@@ -1189,11 +1340,8 @@ impl App for LordOfTheCastleApp {
                         ui.label(format!("Ennemis: {}", state.enemies.len()));
                         let troops_count_standalone = state.troops.iter().filter(|t| t.is_active_in_squad()).count();
                         ui.label(format!("Troupes: {} / {}", troops_count_standalone, state.max_troops()));
-                        if ui
-                            .button(if state.dev_mode { "Mode Dev: ON" } else { "Mode Dev" })
-                            .clicked()
-                        {
-                            state.dev_mode = !state.dev_mode;
+                        if ui.button("Mode Dev").clicked() {
+                            self.dev_mode_window_open = true;
                         }
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                             ui.label(format!("Or: {}", state.gold));
@@ -1201,6 +1349,69 @@ impl App for LordOfTheCastleApp {
                     }
                 });
             });
+
+        // Fenêtre Joueur 2 (standalone)
+        if self.joueur2_window_open {
+            let mut open = true;
+            let mut should_close = false;
+            egui::Window::new("Joueur 2")
+                .open(&mut open)
+                .default_width(320.0)
+                .show(ctx, |ui| {
+                    ui.label("Spawn un personnage secondaire (2 joueurs) :");
+                    ui.add_space(6.0);
+                    if let Some(ref mut state) = self.game {
+                        if state.secondary_player.is_some() {
+                            ui.label("Un joueur secondaire est déjà présent.");
+                            if ui.button("lvlup (joueur 2)").clicked() {
+                                state.secondary_give_level_up();
+                            }
+                        } else {
+                            if ui.button("Tombilol — 30 PV, attaque 360° 30 px, 1 att/s").clicked() {
+                                state.spawn_secondary_tombilol();
+                                should_close = true;
+                            }
+                            if ui.button("Tal Ratchou — 20 PV, projectile homing 0,6/s, 200 px").clicked() {
+                                state.spawn_secondary_tal_ratchou();
+                                should_close = true;
+                            }
+                            if ui.button("Sergent Garcia — 10 PV, 6 miliciens").clicked() {
+                                state.spawn_secondary_sergent_garcia();
+                                should_close = true;
+                            }
+                        }
+                    }
+                });
+            if !open || should_close {
+                self.joueur2_window_open = false;
+            }
+        }
+
+        // Fenêtre Mode Dev (standalone)
+        if self.dev_mode_window_open {
+            let mut open = true;
+            egui::Window::new("Mode Dev")
+                .open(&mut open)
+                .default_width(280.0)
+                .show(ctx, |ui| {
+                    if let Some(ref mut state) = self.game {
+                        ui.checkbox(&mut state.dev_mode, "Visions des portées");
+                        ui.add_space(6.0);
+                        if ui.button("+ 100 or").clicked() {
+                            state.gold += 100;
+                        }
+                        if ui.button("Spawn 50 ennemis normal").clicked() {
+                            state.dev_spawn_50_normal_enemies_random();
+                        }
+                        if ui.button("lvlup").clicked() {
+                            state.dev_give_level_up();
+                        }
+                    }
+                });
+            if !open {
+                self.dev_mode_window_open = false;
+            }
+        }
 
         // Overlay « trop encombré » : inventaire plein au clic sur Lancer la vague.
         if self.show_encumbered_overlay {
@@ -1420,11 +1631,27 @@ impl App for LordOfTheCastleApp {
                     .show(ctx, |ui| {
                         ui.label(format!("Or : {} or", gold));
                         ui.add_space(8.0);
-                        ui.heading("Construction");
-                        ui.label("• Tours : archer, baliste, catapulte");
-                        ui.label("• Fortifications : murs, barricades, portes, pièges");
-                        ui.label("• Bâtiments civils : auberge, taverne, forge, caserne, arsenal, atelier, habitations");
-                        ui.weak("(À implémenter : catégories et placement)");
+                        ui.heading("Bâtiments constructibles");
+                        ui.label("Sélectionnez une case sur la zone de jeu (grille 20×20). Clic droit pour annuler.");
+                        ui.add_space(8.0);
+                        if let Some((ci, cj)) = self.construction_selected_cell {
+                            ui.label(format!("Case sélectionnée : ({}, {})", ci, cj));
+                            let has_place = state.can_build_at_cell(ci, cj);
+                            let has_gold = state.gold >= TOWER_BASE_COST_GOLD;
+                            if has_place {
+                                if has_gold {
+                                    if ui.button(format!("Tour ({} po) — Construire dedans", TOWER_BASE_COST_GOLD)).clicked() {
+                                        state.build_tower_at_cell(ci, cj);
+                                    }
+                                } else {
+                                    ui.weak(format!("Or insuffisant ({} po requis).", TOWER_BASE_COST_GOLD));
+                                }
+                            } else {
+                                ui.weak("Pas la place ici (château ou autre bâtiment).");
+                            }
+                        } else {
+                            ui.weak("Aucune case sélectionnée.");
+                        }
                     });
                 if !open {
                     close_construction = true;
@@ -1465,6 +1692,7 @@ impl App for LordOfTheCastleApp {
         }
         if close_construction {
             self.construction_open = false;
+            self.construction_selected_cell = None;
         }
         if close_recrutement {
             self.recrutement_open = false;
@@ -1623,6 +1851,27 @@ impl App for LordOfTheCastleApp {
                         if resp.clicked() {
                             ctx.memory_mut(|m| m.request_focus(resp.id));
                         }
+                        if self.construction_open {
+                            if resp.clicked() {
+                                let pos = resp.interact_pointer_pos()
+                                    .or_else(|| ui.ctx().input(|i| i.pointer.press_origin()));
+                                if let Some(pos) = pos {
+                                    let (ci, cj) = screen_to_cell(
+                                        game_rect,
+                                        pos.x,
+                                        pos.y,
+                                        state.player.x,
+                                        state.player.y,
+                                        state.castle.x,
+                                        state.castle.y,
+                                    );
+                                    self.construction_selected_cell = Some((ci, cj));
+                                }
+                            }
+                            if resp.secondary_clicked() {
+                                self.construction_selected_cell = None;
+                            }
+                        }
                         let painter = ui.painter();
                         let cursor_screen = ui.ctx().input(|i| i.pointer.hover_pos());
                         let (cx, cy) = (state.player.x, state.player.y);
@@ -1659,6 +1908,7 @@ impl App for LordOfTheCastleApp {
                             state,
                             last_tick,
                             keys,
+                            self.keys_secondary,
                             ui.visuals().window_fill(),
                             cursor_screen,
                             player_sprite,
@@ -1666,6 +1916,8 @@ impl App for LordOfTheCastleApp {
                             enemy_miniboss_sprite,
                             troop_walk_sprite,
                             troop_attack_sprite,
+                            self.construction_open,
+                            self.construction_selected_cell,
                         );
                         *result.borrow_mut() = (tick, go);
                         paint_bottom_panel(ui, bottom_rect, state);
@@ -1742,6 +1994,7 @@ impl App for LordOfTheCastleApp {
                             state,
                             self.last_tick,
                             self.keys,
+                            self.keys_secondary,
                             ui.visuals().window_fill(),
                             cursor_screen,
                             player_sprite,
@@ -1749,6 +2002,8 @@ impl App for LordOfTheCastleApp {
                             enemy_miniboss_sprite,
                             troop_walk_sprite,
                             troop_attack_sprite,
+                            self.construction_open,
+                            self.construction_selected_cell,
                         );
                         self.last_tick = new_tick;
                         paint_bottom_panel(ui, bottom_rect, state);

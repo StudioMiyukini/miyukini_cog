@@ -863,6 +863,8 @@
     "lord_of_the_castle_loot",
     "lord_of_the_castle_player",
     "lord_of_the_castle_spritesheet",
-    "lord_of_the_castle_towers"
+    "lord_of_the_castle_towers",
+    "lord_of_the_castle_troops",
+    "lord_of_the_castle_warrior_skills"
   ]
 }

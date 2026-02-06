@@ -9,7 +9,7 @@
 
 use crate::castle::Castle;
 use crate::character_creation::{CharacterStats, Stat};
-use crate::constants::wave;
+use crate::constants::{size, wave, TOWER_BASE_COST_GOLD};
 use crate::enemies::{Enemy, EnemyKind};
 use crate::troops::{Troop, TroopKind, TroopState};
 use crate::warrior_skills::{prerequisites_met, warrior_skill_def, WarriorSkillId};
@@ -20,7 +20,8 @@ use crate::loot::{
 };
 use std::collections::HashMap;
 use crate::player::Player;
-use crate::towers::Tower;
+use crate::secondary_player::{SecondaryPlayer, SecondaryPlayerKind, SecondaryProjectile};
+use crate::towers::{Tower, TowerProjectile};
 use serde::{Deserialize, Serialize};
 use std::time::Instant;
 
@@ -58,6 +59,9 @@ pub struct GameState {
     pub enemies: Vec<Enemy>,
     /// Tours construites (non détruites).
     pub towers: Vec<Tower>,
+    /// Projectiles des tours en vol (2×2 px noir, 600 px/s).
+    #[serde(default)]
+    pub tower_projectiles: Vec<TowerProjectile>,
     /// Troupes alliées (zone de commandement, recrutement).
     #[serde(default)]
     pub troops: Vec<Troop>,
@@ -129,6 +133,15 @@ pub struct GameState {
     /// Accumulateur pour régénération GigaChad (1 PV/s). Non sérialisé.
     #[serde(skip)]
     pub gigachad_regen_accumulator: f32,
+    /// Joueur secondaire (2 joueurs) : Tombilol, Tal Ratchou ou Sergent Garcia. 10×10 px bleu-vert fluo.
+    #[serde(default)]
+    pub secondary_player: Option<SecondaryPlayer>,
+    /// Projectiles homing de Tal Ratchou.
+    #[serde(default)]
+    pub secondary_projectiles: Vec<SecondaryProjectile>,
+    /// Prochain ID joueur secondaire (pour Garcia miliciens).
+    #[serde(default)]
+    pub next_secondary_id: u64,
 }
 
 impl GameState {
@@ -159,6 +172,7 @@ impl GameState {
             player,
             enemies: Vec::new(),
             towers: Vec::new(),
+            tower_projectiles: Vec::new(),
             troops: Vec::new(),
             next_enemy_id: 0,
             next_tower_id: 0,
@@ -189,6 +203,9 @@ impl GameState {
             merchant_armor,
             merchant_accessories,
             gigachad_regen_accumulator: 0.0,
+            secondary_player: None,
+            secondary_projectiles: Vec::new(),
+            next_secondary_id: 0,
         }
     }
 
@@ -285,6 +302,55 @@ impl GameState {
         self.effective_stats().cha.max(0) as usize
     }
 
+    /// Grille de construction : origine (0,0) = coin inférieur gauche du château (castle.x - 20, castle.y - 20).
+    /// Bâtiment 2×2 dont le coin inférieur gauche est (cell_i, cell_j) → centre monde = (castle.x + ci*20, castle.y + cj*20).
+    fn cell_to_tower_center(castle_x: f32, castle_y: f32, cell_i: i32, cell_j: i32) -> (f32, f32) {
+        let cell_size = size::CONSTRUCTION_CELL_SIZE;
+        (
+            castle_x + (cell_i as f32) * cell_size,
+            castle_y + (cell_j as f32) * cell_size,
+        )
+    }
+
+    /// Château occupe les cases (0,0), (1,0), (0,1), (1,1). Retourne true si on peut construire un bâtiment 2×2 dont le coin inférieur gauche est (cell_i, cell_j).
+    pub fn can_build_at_cell(&self, cell_i: i32, cell_j: i32) -> bool {
+        // Pas de chevauchement avec le château (cases 0,0 à 1,1).
+        let overlaps_castle = cell_i < 2 && cell_i + 2 > 0 && cell_j < 2 && cell_j + 2 > 0;
+        if overlaps_castle {
+            return false;
+        }
+        // Pas de chevauchement avec une tour existante (chaque tour 40×40 = 2×2 cases, centre = coin + 20).
+        let cell_size = size::CONSTRUCTION_CELL_SIZE;
+        for t in &self.towers {
+            if t.hp <= 0 {
+                continue;
+            }
+            let t_ci = ((t.x - self.castle.x) / cell_size).floor() as i32;
+            let t_cj = ((t.y - self.castle.y) / cell_size).floor() as i32;
+            let overlaps = cell_i < t_ci + 2 && cell_i + 2 > t_ci && cell_j < t_cj + 2 && cell_j + 2 > t_cj;
+            if overlaps {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// Construit une tour avec coin inférieur gauche en (cell_i, cell_j). Retourne true si la construction a eu lieu (place + or suffisant).
+    pub fn build_tower_at_cell(&mut self, cell_i: i32, cell_j: i32) -> bool {
+        if !self.can_build_at_cell(cell_i, cell_j) {
+            return false;
+        }
+        if self.gold < TOWER_BASE_COST_GOLD {
+            return false;
+        }
+        self.gold -= TOWER_BASE_COST_GOLD;
+        let (cx, cy) = Self::cell_to_tower_center(self.castle.x, self.castle.y, cell_i, cell_j);
+        let id = self.next_tower_id;
+        self.next_tower_id = self.next_tower_id.wrapping_add(1);
+        self.towers.push(Tower::new(id, cx, cy));
+        true
+    }
+
     /// Recrute une troupe du type donné si la limite n'est pas atteinte. La troupe apparaît à côté du joueur, état InZone.
     pub fn recruit_troop(&mut self, kind: TroopKind) -> bool {
         let count_active = self.troops.iter().filter(|t| t.is_active_in_squad()).count();
@@ -302,6 +368,7 @@ impl GameState {
             hp_max,
             kind,
             state: TroopState::InZone,
+            follow_secondary_id: None,
             target_enemy_id: None,
             last_attack: None,
         };
@@ -511,6 +578,170 @@ impl GameState {
             // Bord gauche : x = cx - half, y de cy + half à cy - half
             (cx - half, cy + half - (t - 2400.0))
         }
+    }
+
+    /// Spawn un seul ennemi Normal à la position donnée (dev).
+    pub fn spawn_enemy_normal_at(&mut self, x: f32, y: f32) {
+        let constitution = self.player_constitution();
+        let id = self.next_enemy_id;
+        self.next_enemy_id += 1;
+        let kind = EnemyKind::Normal;
+        let hp_max = kind.hp_max_from_constitution(constitution);
+        self.enemies.push(Enemy {
+            id,
+            x,
+            y,
+            hp: hp_max,
+            hp_max,
+            kind,
+            damage_flash_start: None,
+        });
+    }
+
+    /// Spawn 50 ennemis normaux répartis aléatoirement sur la zone de spawn (bord 800×800). Dev uniquement.
+    pub fn dev_spawn_50_normal_enemies_random(&mut self) {
+        for _ in 0..50 {
+            let (x, y) = self.random_spawn_position_on_border();
+            self.spawn_enemy_normal_at(x, y);
+        }
+    }
+
+    /// Accorde un level up immédiat (niveau +1, xp remise à 0, +1 point de compétence ; +1 point de stat si niveau multiple de 5). Dev uniquement.
+    pub fn dev_give_level_up(&mut self) {
+        self.level += 1;
+        self.xp = 0;
+        self.skill_points_available += 1;
+        if self.level % 5 == 0 {
+            self.stat_points_available += 1;
+        }
+    }
+
+    /// Spawn le joueur secondaire « Tombilol » (30 PV, attaque 360°, 30 px, 1 att/s). Un seul joueur secondaire à la fois.
+    pub fn spawn_secondary_tombilol(&mut self) -> bool {
+        if self.secondary_player.is_some() {
+            return false;
+        }
+        let id = self.next_secondary_id;
+        self.next_secondary_id = self.next_secondary_id.wrapping_add(1);
+        let x = self.castle.x + 60.0;
+        let y = self.castle.y;
+        let kind = SecondaryPlayerKind::Tombilol;
+        let level = 1u32;
+        let hp_max = kind.hp_max_at_level(level);
+        self.secondary_player = Some(SecondaryPlayer {
+            id,
+            x,
+            y,
+            kind,
+            level,
+            hp: hp_max,
+            hp_max,
+            last_attack: None,
+            last_projectile_time: None,
+        });
+        true
+    }
+
+    /// Spawn le joueur secondaire « Tal Ratchou » (20 PV, projectile homing, 0,6 proj/s, 200 px).
+    pub fn spawn_secondary_tal_ratchou(&mut self) -> bool {
+        if self.secondary_player.is_some() {
+            return false;
+        }
+        let id = self.next_secondary_id;
+        self.next_secondary_id = self.next_secondary_id.wrapping_add(1);
+        let x = self.castle.x + 60.0;
+        let y = self.castle.y;
+        let kind = SecondaryPlayerKind::TalRatchou;
+        let level = 1u32;
+        let hp_max = kind.hp_max_at_level(level);
+        self.secondary_player = Some(SecondaryPlayer {
+            id,
+            x,
+            y,
+            kind,
+            level,
+            hp: hp_max,
+            hp_max,
+            last_attack: None,
+            last_projectile_time: None,
+        });
+        true
+    }
+
+    /// Spawn le joueur secondaire « Sergent Garcia » (10 PV, 6 miliciens). Crée 6 troupes qui suivent Garcia.
+    pub fn spawn_secondary_sergent_garcia(&mut self) -> bool {
+        if self.secondary_player.is_some() {
+            return false;
+        }
+        let id = self.next_secondary_id;
+        self.next_secondary_id = self.next_secondary_id.wrapping_add(1);
+        let x = self.castle.x + 60.0;
+        let y = self.castle.y;
+        let kind = SecondaryPlayerKind::SergentGarcia;
+        let level = 1u32;
+        let hp_max = kind.hp_max_at_level(level);
+        self.secondary_player = Some(SecondaryPlayer {
+            id,
+            x,
+            y,
+            kind,
+            level,
+            hp: hp_max,
+            hp_max,
+            last_attack: None,
+            last_projectile_time: None,
+        });
+        let count = kind.militiamen_count_at_level(level);
+        for i in 0..count {
+            let troop_id = self.next_troop_id;
+            self.next_troop_id = self.next_troop_id.wrapping_add(1);
+            let hp_max_t = TroopKind::Milicien.hp_max_base();
+            let troop = Troop {
+                id: troop_id,
+                x: x + (i as f32) * 8.0 - (count as f32) * 4.0,
+                y: y + 12.0,
+                hp: hp_max_t,
+                hp_max: hp_max_t,
+                kind: TroopKind::Milicien,
+                state: TroopState::InZone,
+                follow_secondary_id: Some(id),
+                target_enemy_id: None,
+                last_attack: None,
+            };
+            self.troops.push(troop);
+        }
+        true
+    }
+
+    /// Accorde un level up au joueur secondaire (si présent).
+    pub fn secondary_give_level_up(&mut self) -> bool {
+        let Some(ref mut sec) = self.secondary_player else {
+            return false;
+        };
+        sec.give_level_up();
+        if sec.kind == SecondaryPlayerKind::SergentGarcia {
+            let extra = sec.kind.militiamen_count_at_level(sec.level)
+                .saturating_sub(sec.kind.militiamen_count_at_level(sec.level - 1));
+            for _ in 0..extra {
+                let troop_id = self.next_troop_id;
+                self.next_troop_id = self.next_troop_id.wrapping_add(1);
+                let hp_max_t = TroopKind::Milicien.hp_max_base();
+                let troop = Troop {
+                    id: troop_id,
+                    x: sec.x,
+                    y: sec.y + 12.0,
+                    hp: hp_max_t,
+                    hp_max: hp_max_t,
+                    kind: TroopKind::Milicien,
+                    state: TroopState::InZone,
+                    follow_secondary_id: Some(sec.id),
+                    target_enemy_id: None,
+                    last_attack: None,
+                };
+                self.troops.push(troop);
+            }
+        }
+        true
     }
 
     /// Identifie un objet non identifié par soi-même (une tentative par phase). Retourne true si fait.

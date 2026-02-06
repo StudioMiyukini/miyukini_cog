@@ -11,10 +11,10 @@ use crate::character_creation::Stat;
 use crate::SkillsTab;
 use crate::constants::{
     size, BOTTOM_PANEL_HEIGHT, COMBAT_SURFACE_SIZE, COMMAND_ZONE_RADIUS, ENEMY_VISION_RADIUS,
-    PICKUP_RADIUS,
+    PICKUP_RADIUS, TOWER_PROJECTILE_SIZE,
 };
 use crate::enemies::EnemyKind;
-use crate::game_loop::{move_player, tick_battle};
+use crate::game_loop::{move_player, move_secondary_player, tick_battle};
 use crate::game_state::{GamePhase, GameState, INVENTORY_MAX_SLOTS};
 use crate::loot::{InventoryEntry, ItemSlot, LootKind};
 use crate::player::{Dir8, Player};
@@ -107,6 +107,41 @@ pub(crate) fn screen_to_world(
     let cx = rect.center().x;
     let cy = rect.center().y;
     (sx - cx + camera_x, sy - cy + camera_y)
+}
+
+/// Centre de la caméra : joueur 1 seul, ou milieu entre joueur 1 et joueur 2 en mode 2 joueurs (pour garder les deux à l'écran).
+pub(crate) fn camera_center(state: &GameState) -> (f32, f32) {
+    match state.secondary_player.as_ref() {
+        Some(sec) if !sec.is_dead() => (
+            (state.player.x + sec.x) / 2.0,
+            (state.player.y + sec.y) / 2.0,
+        ),
+        _ => (state.player.x, state.player.y),
+    }
+}
+
+/// Monde → cellule de la grille de construction (origine = coin inférieur gauche du château).
+pub(crate) fn world_to_cell(castle_x: f32, castle_y: f32, wx: f32, wy: f32) -> (i32, i32) {
+    let cell_size = size::CONSTRUCTION_CELL_SIZE;
+    let origin_x = castle_x - size::CASTLE / 2.0;
+    let origin_y = castle_y - size::CASTLE / 2.0;
+    let ci = ((wx - origin_x) / cell_size).floor() as i32;
+    let cj = ((wy - origin_y) / cell_size).floor() as i32;
+    (ci, cj)
+}
+
+/// Écran → cellule (pour clic en mode construction).
+pub(crate) fn screen_to_cell(
+    rect: egui::Rect,
+    sx: f32,
+    sy: f32,
+    camera_x: f32,
+    camera_y: f32,
+    castle_x: f32,
+    castle_y: f32,
+) -> (i32, i32) {
+    let (wx, wy) = screen_to_world(rect, sx, sy, camera_x, camera_y);
+    world_to_cell(castle_x, castle_y, wx, wy)
 }
 
 // ---------------------------------------------------------------------------
@@ -571,8 +606,59 @@ pub(crate) fn paint_equipment_window(
 // Zone de jeu : château, joueur, ennemis, tours, barres de vie, loot, dev
 // ---------------------------------------------------------------------------
 
+/// Dessine la grille de construction (20×20 px) et la case sélectionnée (bordure bleue).
+pub(crate) fn paint_construction_grid(
+    painter: &egui::Painter,
+    rect: egui::Rect,
+    castle_x: f32,
+    castle_y: f32,
+    camera_x: f32,
+    camera_y: f32,
+    selected_cell: Option<(i32, i32)>,
+) {
+    let cell_size = size::CONSTRUCTION_CELL_SIZE;
+    let origin_x = castle_x - size::CASTLE / 2.0;
+    let origin_y = castle_y - size::CASTLE / 2.0;
+    // Grille de -50 à +50 en cellules = ±1000 px en monde depuis l'origine
+    const GRID_EXTENT: i32 = 50;
+    // Gris 70 % d'opacité pour une grille bien visible
+    let line_color = egui::Color32::from_rgba_unmultiplied(100, 100, 100, 178);
+    let stroke = 2.0;
+    for i in -GRID_EXTENT..=GRID_EXTENT {
+        let wx0 = origin_x + (i as f32) * cell_size;
+        let wy0 = origin_y - (GRID_EXTENT as f32) * cell_size;
+        let wy1 = origin_y + (GRID_EXTENT as f32) * cell_size;
+        let p0 = world_to_screen(rect, wx0, wy0, camera_x, camera_y);
+        let p1 = world_to_screen(rect, wx0, wy1, camera_x, camera_y);
+        painter.line_segment([p0, p1], (stroke, line_color));
+    }
+    for j in -GRID_EXTENT..=GRID_EXTENT {
+        let wy0 = origin_y + (j as f32) * cell_size;
+        let wx0 = origin_x - (GRID_EXTENT as f32) * cell_size;
+        let wx1 = origin_x + (GRID_EXTENT as f32) * cell_size;
+        let p0 = world_to_screen(rect, wx0, wy0, camera_x, camera_y);
+        let p1 = world_to_screen(rect, wx1, wy0, camera_x, camera_y);
+        painter.line_segment([p0, p1], (stroke, line_color));
+    }
+    if let Some((ci, cj)) = selected_cell {
+        let wx_min = origin_x + (ci as f32) * cell_size;
+        let wy_min = origin_y + (cj as f32) * cell_size;
+        let wx_max = wx_min + cell_size;
+        let wy_max = wy_min + cell_size;
+        let min = world_to_screen(rect, wx_min, wy_min, camera_x, camera_y);
+        let max = world_to_screen(rect, wx_max, wy_max, camera_x, camera_y);
+        let r = egui::Rect::from_min_max(min, max);
+        painter.rect_stroke(
+            r,
+            0.0,
+            (3.0, egui::Color32::from_rgb(60, 120, 255)),
+            egui::StrokeKind::Outside,
+        );
+    }
+}
+
 pub(crate) fn paint_castle(painter: &egui::Painter, rect: egui::Rect, state: &GameState) {
-    let (cx, cy) = (state.player.x, state.player.y);
+    let (cx, cy) = camera_center(state);
     let half = size::CASTLE / 2.0;
     let min = world_to_screen(rect, state.castle.x - half, state.castle.y - half, cx, cy);
     let max = world_to_screen(rect, state.castle.x + half, state.castle.y + half, cx, cy);
@@ -586,6 +672,59 @@ pub(crate) fn paint_castle(painter: &egui::Painter, rect: egui::Rect, state: &Ga
     );
 }
 
+/// Taille moitié du joueur secondaire (10×10 px → 5 px).
+const SECONDARY_HALF: f32 = 5.0;
+
+/// Dessine le joueur secondaire : carré 10×10 px bleu-vert fluo.
+pub(crate) fn paint_secondary_player(
+    painter: &egui::Painter,
+    rect: egui::Rect,
+    state: &GameState,
+) {
+    let Some(ref sec) = state.secondary_player else {
+        return;
+    };
+    if sec.is_dead() {
+        return;
+    }
+    let (cam_x, cam_y) = camera_center(state);
+    let min = world_to_screen(
+        rect,
+        sec.x - SECONDARY_HALF,
+        sec.y - SECONDARY_HALF,
+        cam_x,
+        cam_y,
+    );
+    let max = world_to_screen(
+        rect,
+        sec.x + SECONDARY_HALF,
+        sec.y + SECONDARY_HALF,
+        cam_x,
+        cam_y,
+    );
+    let color = egui::Color32::from_rgb(0, 255, 200); // bleu-vert fluo
+    painter.rect_filled(egui::Rect::from_min_max(min, max), 0.0, color);
+}
+
+/// Dessine les projectiles homing du joueur secondaire (Tal Ratchou).
+pub(crate) fn paint_secondary_projectiles(
+    painter: &egui::Painter,
+    rect: egui::Rect,
+    state: &GameState,
+) {
+    let (cam_x, cam_y) = camera_center(state);
+    let size = 4.0; // petit carré
+    for p in &state.secondary_projectiles {
+        let min = world_to_screen(rect, p.x - size / 2.0, p.y - size / 2.0, cam_x, cam_y);
+        let max = world_to_screen(rect, p.x + size / 2.0, p.y + size / 2.0, cam_x, cam_y);
+        painter.rect_filled(
+            egui::Rect::from_min_max(min, max),
+            0.0,
+            egui::Color32::from_rgb(180, 255, 255),
+        );
+    }
+}
+
 /// Dessine le joueur : sprite (spritesheet) par-dessus la hitbox si fourni, sinon carré de couleur.
 pub(crate) fn paint_player(
     painter: &egui::Painter,
@@ -593,7 +732,7 @@ pub(crate) fn paint_player(
     state: &GameState,
     player_sprite: Option<(&egui::TextureHandle, &SpritesheetDesc, usize, bool)>,
 ) {
-    let (cam_x, cam_y) = (state.player.x, state.player.y);
+    let (cam_x, cam_y) = camera_center(state);
     let half = size::MOBILE / 2.0;
     let center = world_to_screen(rect, state.player.x, state.player.y, cam_x, cam_y);
 
@@ -638,7 +777,7 @@ pub(crate) fn paint_enemies(
     enemy_sprite: Option<(&egui::TextureHandle, &SpritesheetDesc, usize)>,
     enemy_miniboss_sprite: Option<(&egui::TextureHandle, &SpritesheetDesc, usize)>,
 ) {
-    let (cam_x, cam_y) = (state.player.x, state.player.y);
+    let (cam_x, cam_y) = camera_center(state);
     for e in &state.enemies {
         let half = e.half_size();
         let center = world_to_screen(rect, e.x, e.y, cam_x, cam_y);
@@ -698,7 +837,7 @@ pub(crate) fn paint_troops(
     troop_walk_sprite: Option<(&egui::TextureHandle, &SpritesheetDesc, usize)>,
     troop_attack_sprite: Option<(&egui::TextureHandle, &SpritesheetDesc)>,
 ) {
-    let (cam_x, cam_y) = (state.player.x, state.player.y);
+    let (cam_x, cam_y) = camera_center(state);
     for t in &state.troops {
         let half = t.half_size();
         let center = world_to_screen(rect, t.x, t.y, cam_x, cam_y);
@@ -736,7 +875,7 @@ pub(crate) fn paint_troops(
 }
 
 pub(crate) fn paint_towers(painter: &egui::Painter, rect: egui::Rect, state: &GameState) {
-    let (cam_x, cam_y) = (state.player.x, state.player.y);
+    let (cam_x, cam_y) = camera_center(state);
     let half = size::TOWER / 2.0;
     for t in &state.towers {
         if t.hp <= 0 {
@@ -752,6 +891,22 @@ pub(crate) fn paint_towers(painter: &egui::Painter, rect: egui::Rect, state: &Ga
             (1.0, egui::Color32::from_rgb(60, 60, 60)),
             egui::StrokeKind::Outside,
         );
+    }
+}
+
+/// Dessine les projectiles des tours : sprite 2×2 px noir à 600 px/s.
+pub(crate) fn paint_tower_projectiles(
+    painter: &egui::Painter,
+    rect: egui::Rect,
+    state: &GameState,
+) {
+    let (cam_x, cam_y) = camera_center(state);
+    let half = TOWER_PROJECTILE_SIZE / 2.0;
+    for p in &state.tower_projectiles {
+        let min = world_to_screen(rect, p.x - half, p.y - half, cam_x, cam_y);
+        let max = world_to_screen(rect, p.x + half, p.y + half, cam_x, cam_y);
+        let r = egui::Rect::from_min_max(min, max);
+        painter.rect_filled(r, 0.0, egui::Color32::BLACK);
     }
 }
 
@@ -802,7 +957,7 @@ pub(crate) fn paint_health_bar(
 }
 
 pub(crate) fn paint_health_bars(painter: &egui::Painter, rect: egui::Rect, state: &GameState) {
-    let (cam_x, cam_y) = (state.player.x, state.player.y);
+    let (cam_x, cam_y) = camera_center(state);
     if state.castle.hp < state.castle.hp_max && state.castle.hp > 0 {
         paint_health_bar(
             painter,
@@ -854,7 +1009,7 @@ pub(crate) fn paint_health_bars(painter: &egui::Painter, rect: egui::Rect, state
 }
 
 pub(crate) fn paint_loot(painter: &egui::Painter, rect: egui::Rect, state: &GameState) {
-    let (cam_x, cam_y) = (state.player.x, state.player.y);
+    let (cam_x, cam_y) = camera_center(state);
     let pixel = 6.0f32;
     for drop_ in &state.loot_drops {
         let min = world_to_screen(
@@ -891,10 +1046,11 @@ pub(crate) fn paint_dev_ranges(
     let stroke = 1.5f32;
     let color_circle = egui::Color32::from_rgb(0, 100, 255);
     let color_cone = egui::Color32::from_rgb(0, 150, 255);
+    let (cam_x, cam_y) = camera_center(state);
     let px = state.player.x;
     let py = state.player.y;
     let r_player = Player::auto_attack_range();
-    let center = world_to_screen(rect, px, py, px, py);
+    let center = world_to_screen(rect, px, py, cam_x, cam_y);
     painter.circle_stroke(center, r_player, (stroke, color_circle));
     let aim_angle_rad = cursor_world
         .map(|(cx, cy)| (cy - py).atan2(cx - px))
@@ -906,15 +1062,15 @@ pub(crate) fn paint_dev_ranges(
         rect,
         px + r_player * left_angle.cos(),
         py + r_player * left_angle.sin(),
-        px,
-        py,
+        cam_x,
+        cam_y,
     );
     let tip_right = world_to_screen(
         rect,
         px + r_player * right_angle.cos(),
         py + r_player * right_angle.sin(),
-        px,
-        py,
+        cam_x,
+        cam_y,
     );
     painter.line_segment([center, tip_left], (stroke, color_cone));
     painter.line_segment([center, tip_right], (stroke, color_cone));
@@ -922,13 +1078,13 @@ pub(crate) fn paint_dev_ranges(
         return;
     }
     // Zone de commandement (orange, semi-transparent pour visibilité)
-    let center_cmd = world_to_screen(rect, px, py, px, py);
+    let center_cmd = world_to_screen(rect, px, py, cam_x, cam_y);
     let orange = egui::Color32::from_rgb(255, 165, 0);
     let orange_alpha = egui::Color32::from_rgba_unmultiplied(255, 165, 0, 60);
     painter.circle_filled(center_cmd, COMMAND_ZONE_RADIUS, orange_alpha);
     painter.circle_stroke(center_cmd, COMMAND_ZONE_RADIUS, (stroke + 0.5, orange));
     for e in &state.enemies {
-        let center = world_to_screen(rect, e.x, e.y, px, py);
+        let center = world_to_screen(rect, e.x, e.y, cam_x, cam_y);
         painter.circle_stroke(
             center,
             ENEMY_VISION_RADIUS,
@@ -939,7 +1095,7 @@ pub(crate) fn paint_dev_ranges(
         if t.hp <= 0 {
             continue;
         }
-        let center = world_to_screen(rect, t.x, t.y, px, py);
+        let center = world_to_screen(rect, t.x, t.y, cam_x, cam_y);
         painter.circle_stroke(
             center,
             Tower::range(),
@@ -955,6 +1111,7 @@ pub(crate) fn game_zone_tick_and_paint(
     state: &mut GameState,
     last_tick: Instant,
     keys: [bool; 8],
+    keys_secondary: [bool; 8],
     _window_fill: egui::Color32,
     cursor_screen: Option<egui::Pos2>,
     player_sprite: Option<(&egui::TextureHandle, &SpritesheetDesc, usize, bool)>,
@@ -962,11 +1119,13 @@ pub(crate) fn game_zone_tick_and_paint(
     enemy_miniboss_sprite: Option<(&egui::TextureHandle, &SpritesheetDesc, usize)>,
     troop_walk_sprite: Option<(&egui::TextureHandle, &SpritesheetDesc, usize)>,
     troop_attack_sprite: Option<(&egui::TextureHandle, &SpritesheetDesc)>,
+    construction_mode: bool,
+    construction_selected_cell: Option<(i32, i32)>,
 ) -> (Instant, bool) {
-    let grass_fill = egui::Color32::from_rgb(56, 118, 56);
+    let grass_fill = egui::Color32::from_rgb(78, 98, 78);
     painter.rect_filled(rect, 0.0, grass_fill);
 
-    let (cam_x, cam_y) = (state.player.x, state.player.y);
+    let (cam_x, cam_y) = camera_center(state);
     let cursor_world = cursor_screen
         .filter(|p| rect.contains(*p))
         .map(|p| screen_to_world(rect, p.x, p.y, cam_x, cam_y));
@@ -998,17 +1157,56 @@ pub(crate) fn game_zone_tick_and_paint(
         if keys[7] {
             move_player(state, Dir8::NW, delta);
         }
+        if keys_secondary[0] {
+            move_secondary_player(state, Dir8::N, delta);
+        }
+        if keys_secondary[1] {
+            move_secondary_player(state, Dir8::NE, delta);
+        }
+        if keys_secondary[2] {
+            move_secondary_player(state, Dir8::E, delta);
+        }
+        if keys_secondary[3] {
+            move_secondary_player(state, Dir8::SE, delta);
+        }
+        if keys_secondary[4] {
+            move_secondary_player(state, Dir8::S, delta);
+        }
+        if keys_secondary[5] {
+            move_secondary_player(state, Dir8::SW, delta);
+        }
+        if keys_secondary[6] {
+            move_secondary_player(state, Dir8::W, delta);
+        }
+        if keys_secondary[7] {
+            move_secondary_player(state, Dir8::NW, delta);
+        }
         tick_battle(state, delta, cursor_world);
     }
 
     paint_towers(painter, rect, state);
+    paint_tower_projectiles(painter, rect, state);
     paint_troops(painter, rect, state, troop_walk_sprite, troop_attack_sprite);
     paint_enemies(painter, rect, state, enemy_sprite, enemy_miniboss_sprite);
     paint_castle(painter, rect, state);
+    paint_secondary_player(painter, rect, state);
+    paint_secondary_projectiles(painter, rect, state);
     paint_dev_ranges(painter, rect, state, cursor_world);
     paint_player(painter, rect, state, player_sprite);
     paint_health_bars(painter, rect, state);
     paint_loot(painter, rect, state);
+
+    if construction_mode {
+        paint_construction_grid(
+            painter,
+            rect,
+            state.castle.x,
+            state.castle.y,
+            cam_x,
+            cam_y,
+            construction_selected_cell,
+        );
+    }
 
     (now, state.is_game_over())
 }

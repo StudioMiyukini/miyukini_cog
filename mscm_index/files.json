@@ -2314,5 +2314,11 @@
   ],
   "crates/lord_of_the_castle/src/spritesheet.rs": [
     "lord_of_the_castle_spritesheet"
+  ],
+  "crates/lord_of_the_castle/src/troops.rs": [
+    "lord_of_the_castle_troops"
+  ],
+  "crates/lord_of_the_castle/src/warrior_skills.rs": [
+    "lord_of_the_castle_warrior_skills"
   ]
 }

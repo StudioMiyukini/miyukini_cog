@@ -1317,12 +1317,16 @@
     "lord_of_the_castle_enemies",
     "lord_of_the_castle_player",
     "lord_of_the_castle_towers",
+    "lord_of_the_castle_troops",
+    "lord_of_the_castle_warrior_skills",
     "lord_of_the_castle_constants"
   ],
   "lord_of_the_castle_game_state": [
     "lord_of_the_castle_castle",
     "lord_of_the_castle_player",
     "lord_of_the_castle_towers",
+    "lord_of_the_castle_troops",
+    "lord_of_the_castle_warrior_skills",
     "lord_of_the_castle_enemies",
     "lord_of_the_castle_loot",
     "lord_of_the_castle_constants"
@@ -1339,5 +1343,9 @@
   ],
   "lord_of_the_castle_towers": [
     "lord_of_the_castle_constants"
-  ]
+  ],
+  "lord_of_the_castle_troops": [
+    "lord_of_the_castle_constants"
+  ],
+  "lord_of_the_castle_warrior_skills": []
 }

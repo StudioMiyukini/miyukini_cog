@@ -14702,5 +14702,25 @@
     "role": "ui",
     "layer": "infra",
     "human": "Chargement PNG, découpage strip horizontal, affichage frame centrée (flip horizontal)."
+  },
+  {
+    "id": "lord_of_the_castle_troops",
+    "file": "crates/lord_of_the_castle/src/troops.rs",
+    "start_line": 1,
+    "end_line": 136,
+    "do": "define_troop_types_states_and_behavior",
+    "role": "data",
+    "layer": "domain",
+    "human": "Troupes : types (Milicien…), états (InZone, OutOfZone, Dead, AtCastle), PV, déplacement, attaque."
+  },
+  {
+    "id": "lord_of_the_castle_warrior_skills",
+    "file": "crates/lord_of_the_castle/src/warrior_skills.rs",
+    "start_line": 1,
+    "end_line": 382,
+    "do": "define_warrior_skill_tree",
+    "role": "data",
+    "layer": "domain",
+    "human": "Nœuds Guerrier : Baston, Plus fort, Tireur, etc. ; descriptions, effets, max rang, prérequis."
   }
 ]

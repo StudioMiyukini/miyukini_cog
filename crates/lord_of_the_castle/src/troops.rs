@@ -81,7 +81,7 @@ pub enum TroopState {
     AtCastle,
 }
 
-/// Une troupe alliée du joueur.
+/// Une troupe alliée du joueur (ou du joueur secondaire Sergent Garcia).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Troop {
     pub id: u64,
@@ -91,6 +91,9 @@ pub struct Troop {
     pub hp_max: i32,
     pub kind: TroopKind,
     pub state: TroopState,
+    /// Si Some, la troupe suit ce joueur secondaire (Sergent Garcia) au lieu du joueur principal.
+    #[serde(default)]
+    pub follow_secondary_id: Option<u64>,
     /// Cible ennemi (quand InZone et ennemi en vision). Non sérialisé pour simplicité ; recalculé au tick.
     #[serde(skip)]
     pub target_enemy_id: Option<u64>,
