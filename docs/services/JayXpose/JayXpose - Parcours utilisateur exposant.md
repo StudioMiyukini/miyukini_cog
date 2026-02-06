@@ -2,96 +2,166 @@
 
 ## Contexte
 
-Ce document décrit le **parcours utilisateur exposant** côté **JayXpose** : création du profil, mise à jour de la fiche entreprise, gestion de la **fiche publique** (répertoire) et mécaniques alignées sur **Catakana** / JayFestival. Il s’appuie sur les écrans et cycles exposant de JayFestival (EXP-E03, EXP-E17, EXP-E18) et sur les données stockées en alpha Supabase.
+Ce document décrit les **parcours utilisateur exposant** côté **JayXpose** : création du profil, gestion de la fiche entreprise, catalogue de produits, site vitrine, coffre-fort documentaire, fiche publique (annuaire) et interactions avec JayFestival. Il s'appuie sur les écrans et cycles exposant de JayFestival et sur les données alpha Supabase.
 
-**Références** : [JayXpose - Analyse des besoins](./JayXpose%20-%20Analyse%20des%20besoins.md), [Exposants - Ecrans et cycle](../JayFestival/publics/Exposants/Exposants%20-%20Ecrans%20et%20cycle.md), [JayXpose - Base de donnees Supabase et Migration SQLite](./reference/JayXpose%20-%20Base%20de%20donnees%20Supabase%20et%20Migration%20SQLite.md).
+**Références** : [JayXpose - Analyse des besoins](./JayXpose%20-%20Analyse%20des%20besoins.md), [JayXpose - Catalogue Produits](./JayXpose%20-%20Catalogue%20Produits.md), [JayXpose - Documents Professionnels et Coffre-Fort](./JayXpose%20-%20Documents%20Professionnels%20et%20Coffre-Fort.md), [Exposants - Ecrans et cycle](../JayFestival/publics/Exposants/Exposants%20-%20Ecrans%20et%20cycle.md).
 
 ## Portée / Scope
 
-- **Périmètre** : Parcours côté profil/vitrine/répertoire (création compte exposant, fiche entreprise, fiche publique) ; mécaniques Catakana reprises pour l’alpha.
-- **Hors périmètre** : Parcours candidatures, participations, facturation (documents JayFestival Exposants).
+- **Périmètre** : Parcours complets côté profil, catalogue, vitrine, documents, annuaire ; mécaniques de synchronisation JayFestival.
+- **Hors périmètre** : Parcours candidatures et participations détaillés (documents JayFestival Exposants) ; facturation (JayKonta).
 
 ---
 
-## 1. Vue d’ensemble du parcours (JayXpose)
+## 1. Vue d'ensemble des parcours
 
 | Phase | Description | Écrans / actions |
 |-------|-------------|-------------------|
-| **Onboarding** | Création du compte exposant et du **profil JayXpose** (fiche entreprise). | Inscription exposant (EXP-E03) → création `profiles` + `exposants`. |
-| **Mon compte / Fiche entreprise** | Mise à jour du profil (nom, contact, activité, logo, site web). | Mon compte (EXP-E17) → formulaire fiche entreprise ; sauvegarde `exposants`. |
-| **Fiche publique (répertoire)** | Gestion de la visibilité et des champs affichés dans le répertoire des exposants. | Fiche publique (EXP-E18) → aperçu + édition champs autorisés + option visibilité. |
-| **Consommation par JayFestival** | Lecture du profil pour fiche exposant (organisateur), répertoire (catalogue), candidatures. | Écrans JayFestival (liste exposants, fiche exposant, formulaire candidature) lisent `exposants`. |
+| **Onboarding** | Création du compte exposant et du profil JayXpose (fiche entreprise). | Inscription exposant → création profiles + exposants. |
+| **Fiche entreprise** | Mise à jour complète du profil (identité, contacts, juridique, visuels, réseaux). | Mon compte → Fiche entreprise. |
+| **Catalogue** | Gestion des produits : création, modification, catégories, visuels, mise en avant. | Mon catalogue → liste produits, fiche produit, catégories. |
+| **Vitrine** | Configuration et publication du site vitrine (pages, personnalisation, SEO, activation). | Ma vitrine → pages, paramètres, prévisualisation, publication. |
+| **Documents** | Upload, gestion et partage des documents professionnels. | Mes documents → coffre-fort, upload, partage, alertes. |
+| **Fiche publique** | Gestion de la visibilité dans l'annuaire et contrôle des champs affichés. | Ma fiche publique → aperçu, visibilité, champs autorisés. |
+| **JayFestival** | Synchronisation : pré-remplissage candidatures, partage documents, historique. | Depuis JayFestival → lecture profil, documents, catalogue. |
 
 ---
 
-## 2. Parcours détaillés (mécaniques Catakana)
+## 2. Parcours détaillés
 
 ### 2.1 Inscription exposant (création du profil JayXpose)
 
-**Contexte** : Premier usage ; l’utilisateur s’inscrit en tant qu’exposant depuis le catalogue (JayFestival) ou depuis une page dédiée.
+**Contexte** : Premier usage ; l'utilisateur s'inscrit en tant qu'exposant depuis le catalogue JayFestival, depuis l'annuaire, ou depuis une page dédiée.
 
 | Étape | Action | Données / mécanique |
 |-------|--------|----------------------|
-| 1 | Accès à l’écran « Créer un compte exposant » (EXP-E03). | Lien depuis landing ou fiche événement « Candidater ». |
-| 2 | Saisie email, mot de passe, confirmation. | Supabase Auth : `signUp` ; création entrée `auth.users`. |
-| 3 | Saisie fiche entreprise : nom entreprise, activité/secteur, contact (téléphone, adresse), site web (optionnel). | Création ou mise à jour **profiles** (trigger ou service) : `user_type = 'exhibitor'`. Création **exposants** : `id = auth.uid()`, `company_name`, `contact_*`, `secteur`, etc. (voir requêtes SQL en référence). |
-| 4 | Acceptation CGU + clic « S’inscrire ». | Insert `exposants` si pas encore créé ; sinon update. |
-| 5 | Redirection vers dashboard exposant ou page de confirmation. | Session établie ; exposant peut candidater (JayFestival) et modifier sa fiche (JayXpose). |
+| 1 | Accès à l'écran « Créer un compte exposant ». | Lien depuis landing, fiche événement « Candidater », ou annuaire. |
+| 2 | Saisie email, mot de passe, confirmation. | Supabase Auth : `signUp` ; création `auth.users`. |
+| 3 | Saisie fiche entreprise minimale : nom entreprise, activité/secteur, contact principal (email, téléphone), adresse. | Création `profiles` (user_type = 'exhibitor'). Création `exposants` (id = auth.uid()). |
+| 4 | Acceptation CGU + clic « S'inscrire ». | Insert `exposants`. |
+| 5 | Redirection vers le dashboard exposant. | Session établie ; l'exposant peut compléter son profil, créer son catalogue, configurer sa vitrine. |
 
-**Mécanique Catakana** : À l’inscription, un enregistrement **exposants** est créé avec `id = profile.id` (1:1). Les champs du formulaire d’inscription exposant correspondent aux colonnes de la table `exposants`.
+**Mécanique** : À l'inscription, un enregistrement `exposants` est créé avec `id = profile.id` (1:1). Seuls les champs minimaux sont requis à l'inscription ; le reste est complété progressivement.
 
-### 2.2 Mon compte — Fiche entreprise (mise à jour du profil)
+### 2.2 Fiche entreprise (profil complet)
 
-**Contexte** : Exposant connecté ; il consulte ou modifie sa fiche entreprise (écran EXP-E17, onglet « Fiche entreprise »).
-
-| Étape | Action | Données / mécanique |
-|-------|--------|----------------------|
-| 1 | Accès à « Mon compte » depuis le dashboard exposant. | Navigation menu. |
-| 2 | Onglet « Fiche entreprise » : affichage des champs actuels (nom, contact, activité, logo, site web, adresse, SIRET…). | SELECT sur `exposants` WHERE `id = auth.uid()`. |
-| 3 | Modification des champs et clic « Enregistrer ». | UPDATE `exposants` SET … WHERE `id = auth.uid()` ; RLS : seul le propriétaire peut modifier. |
-| 4 | (Optionnel) Upload logo. | Upload vers Supabase Storage (bucket `logos` ou `exposants`) ; mise à jour `exposants.logo_url`. |
-| 5 | Confirmation visuelle (toast ou message). | Données à jour ; répertoire et fiche exposant (JayFestival) reflètent les changements à la prochaine lecture. |
-
-**Mécanique Catakana** : Les services Catakana (`exposantService`) exposent `getExposantByUserId`, `updateExposant` ; en alpha JayFestival/JayXpose on utilise les mêmes tables et RLS.
-
-### 2.3 Fiche publique — Répertoire (visibilité et champs publiés)
-
-**Contexte** : Exposant connecté ; il consulte l’aperçu de sa fiche telle qu’elle apparaît dans le **répertoire des exposants** et peut activer/désactiver la visibilité ou éditer les champs autorisés (écran EXP-E18).
+**Contexte** : Exposant connecté ; il complète ou modifie sa fiche entreprise.
 
 | Étape | Action | Données / mécanique |
 |-------|--------|----------------------|
-| 1 | Accès à « Ma fiche publique » depuis Mon compte ou le dashboard. | Navigation. |
-| 2 | Affichage de l’aperçu (mode lecture) : comme vu par un visiteur du répertoire. | Données lues depuis `exposants` (champs avec `visible_repertoire` ou politique) ; masquage des champs non publiés. |
-| 3 | Option « Visible dans le répertoire » : case à cocher. | UPDATE `exposants` SET `visible_repertoire = true/false` WHERE `id = auth.uid()`. |
-| 4 | Édition des champs autorisés pour le répertoire (nom, description, logo, site web, réseaux). | Même table `exposants` ; champs « publics » définis par politique (ex. company_name, description, logo_url, site_web). |
-| 5 | Enregistrement. | UPDATE `exposants` ; liste répertoire (catalogue) filtre sur `visible_repertoire = true`. |
+| 1 | Accès à « Mon compte » → onglet « Fiche entreprise ». | Navigation menu. |
+| 2 | **Section Identité** : Raison sociale, forme juridique, slogan, description courte et longue. | Champs `company_name`, `legal_form`, `slogan`, `description_short`, `description_long`. |
+| 3 | **Section Juridique** : SIRET, SIREN, code APE, numéro d'immatriculation. | Champs `siret`, `siren`, `code_ape`, `num_immatriculation`. Validation format SIRET (14 chiffres). |
+| 4 | **Section Contacts** : Contact principal (nom, email, téléphone) + contacts facturation et logistique (optionnels). | Champs `contact_*` multiples. |
+| 5 | **Section Adresses** : Adresse siège + adresses de correspondance. | Champs `adresse_siege`, `adresse_correspondance`. |
+| 6 | **Section Visuels** : Upload logo, bannière. | Stockage (Supabase Storage alpha) ; mise à jour `logo_url`, `banner_url`. |
+| 7 | **Section Réseaux sociaux** : Liens Facebook, Instagram, LinkedIn, TikTok, YouTube, Pinterest, X. | Champs `social_*`. |
+| 8 | **Section Activité** : Secteur, tags / mots-clés. | Champs `secteur`, `tags`. |
+| 9 | Clic « Enregistrer ». | UPDATE `exposants` WHERE id = auth.uid(). |
+| 10 | Confirmation visuelle. | Toast de confirmation ; données à jour dans l'annuaire et la vitrine. |
 
-**Mécanique Catakana** : Le répertoire public (catalogue) interroge les exposants avec un filtre type `visible_repertoire = true` (ou équivalent selon schéma Catakana). La fiche détail exposant (UNC-E09, ORG-E11) lit les mêmes champs.
+### 2.3 Catalogue de produits
 
-### 2.4 Consommation par JayFestival (lecture seule)
+**Contexte** : Exposant connecté ; il gère son catalogue de produits.
 
-| Cas d’usage | Acteur | Données lues | Requête type |
-|-------------|--------|--------------|--------------|
-| Liste répertoire (catalogue) | Utilisateur non connecté / visiteur | Exposants visibles | SELECT exposants WHERE visible_repertoire = true (+ jointures si besoin). |
-| Fiche exposant (détail public) | UNC, visiteur | Fiche complète (champs publics) | SELECT exposants WHERE id = ?. |
-| Fiche exposant (organisateur) | Organisateur édition | Fiche + statut participation | SELECT exposants + editions_exposants WHERE edition_id = ? AND exposant_id = ?. |
-| Formulaire candidature (pré-remplissage) | Exposant | Son propre profil | SELECT exposants WHERE id = auth.uid(). |
-| Liste exposants par édition | Organisateur / catalogue | Exposants ayant une participation validée pour l’édition | SELECT exposants JOIN editions_exposants ON … WHERE edition_id = ? AND is_validated = true. |
+| Étape | Action | Données / mécanique |
+|-------|--------|----------------------|
+| 1 | Accès à « Mon catalogue » depuis le dashboard. | Navigation menu. |
+| 2 | **Vue liste** : Liste des produits avec nom, catégorie, prix, statut, image principale. | SELECT produits_catalogue WHERE exposant_id = auth.uid(). |
+| 3 | **Créer un produit** : Clic « Ajouter un produit ». | Formulaire création. |
+| 4 | Saisie : nom, description, prix (optionnel), catégorie, disponibilité. | Champs obligatoires : nom. |
+| 5 | Upload visuels (1 à 5 images) ; désigner l'image principale. | INSERT produits_visuels ; Supabase Storage. |
+| 6 | Marquer comme « vedette » (optionnel). | Flag `is_featured`. |
+| 7 | Clic « Enregistrer ». | INSERT produits_catalogue + produits_visuels. |
+| 8 | **Modifier un produit** : Clic sur un produit dans la liste → édition. | UPDATE produits_catalogue. |
+| 9 | **Supprimer un produit** : Confirmation → suppression (soft delete). | DELETE ou archive. |
+| 10 | **Gérer les catégories** : Créer, renommer, réordonner, supprimer des catégories. | CRUD categories_produits. |
 
-Détail des requêtes SQL dans [JayXpose - Base de donnees Supabase et Migration SQLite](./reference/JayXpose%20-%20Base%20de%20donnees%20Supabase%20et%20Migration%20SQLite.md).
+### 2.4 Site vitrine
+
+**Contexte** : Exposant connecté ; il configure et publie son site vitrine.
+
+| Étape | Action | Données / mécanique |
+|-------|--------|----------------------|
+| 1 | Accès à « Ma vitrine » depuis le dashboard. | Navigation menu. |
+| 2 | **Paramètres** : Choisir le slug URL, les couleurs, le titre SEO, la meta description. | Champs `vitrine_slug`, `vitrine_colors`, `seo_title`, `seo_description`, `seo_keywords`. |
+| 3 | **Page Accueil** : Activation + aperçu (bannière, accroche, produits vedettes). | Composée automatiquement depuis profil + produits vedettes. |
+| 4 | **Page Catalogue** : Activation + aperçu (liste filtrée des produits). | Composée depuis `produits_catalogue`. |
+| 5 | **Page Présentation** : Rédaction contenu (histoire, savoir-faire, valeurs) via éditeur. | Table `vitrine_pages` (page_type = 'presentation'). |
+| 6 | **Page Contact** : Activation + choix des coordonnées affichées. | Coordonnées filtrées par la politique de confidentialité. |
+| 7 | **Prévisualisation** : L'exposant visualise sa vitrine telle qu'elle sera vue par un visiteur. | Rendu lecture seule avec données actuelles. |
+| 8 | **Publication** : Clic « Publier ma vitrine ». | UPDATE `exposants` SET vitrine_status = 'publiee'. |
+| 9 | **Désactivation** : L'exposant peut repasser en brouillon ou suspendre. | UPDATE vitrine_status. |
+
+### 2.5 Documents professionnels (coffre-fort)
+
+**Contexte** : Exposant connecté ; il gère ses documents professionnels.
+
+| Étape | Action | Données / mécanique |
+|-------|--------|----------------------|
+| 1 | Accès à « Mes documents » depuis le dashboard. | Navigation menu. |
+| 2 | **Vue coffre-fort** : Liste des documents avec type, nom, statut, date d'expiration, version. | SELECT documents_professionnels WHERE exposant_id = auth.uid(). |
+| 3 | **Upload document** : Clic « Ajouter un document » → choix type (RIB, assurance, KBIS…) → upload fichier. | INSERT documents_professionnels ; Supabase Storage (bucket sécurisé). |
+| 4 | **Renseigner date d'expiration** (optionnel). | Champ `expires_at`. |
+| 5 | **Remplacer un document** (nouvelle version) : Upload nouvelle version → version précédente archivée. | Incrémentation `version` ; archivage de l'ancienne URL. |
+| 6 | **Consulter statut** : En attente, validé, expiré, rejeté. | Affichage couleur par statut. |
+| 7 | **Alerte expiration** : Notification si un document expire dans 30j / 15j / 7j. | Calcul `expires_at - now()` ; notifications in-app / email. |
+| 8 | **Partage pour candidature** : Une demande de partage arrive depuis JayFestival. | Notification « L'organisateur X demande votre attestation d'assurance pour l'édition Y ». |
+| 9 | **Accepter / refuser le partage** : Document par document. | INSERT/UPDATE documents_partages (status = accepte / refuse). |
+| 10 | **Révoquer un partage** : L'exposant retire l'accès à un document partagé. | UPDATE documents_partages SET status = 'revoque'. |
+
+### 2.6 Fiche publique (annuaire)
+
+**Contexte** : Exposant connecté ; il gère sa visibilité dans l'annuaire.
+
+| Étape | Action | Données / mécanique |
+|-------|--------|----------------------|
+| 1 | Accès à « Ma fiche publique » depuis le dashboard. | Navigation. |
+| 2 | **Aperçu** : Affichage lecture seule tel que vu dans l'annuaire. | Rendu avec champs publics uniquement. |
+| 3 | **Visibilité annuaire** : Case à cocher « Visible dans l'annuaire ». | UPDATE `exposants` SET visible_annuaire. |
+| 4 | **Confidentialité par champ** : Pour chaque champ (email, téléphone, adresse), choisir le niveau de visibilité (public / authentifié / organisateur / privé). | Politique de confidentialité stockée (JSON ou table dédiée). |
+| 5 | **Lien vitrine** : Si la vitrine est publiée, le lien est affiché automatiquement. | Lecture vitrine_slug + vitrine_status. |
+| 6 | **Enregistrement**. | Sauvegarde politique de confidentialité. |
+
+### 2.7 Synchronisation JayFestival (consommation)
+
+| Cas d'usage | Acteur | Données lues | Source |
+|-------------|--------|--------------|--------|
+| Liste annuaire global | Visiteur | Exposants visibles (profil + accroche + logo) | `exposants` WHERE visible_annuaire = true. |
+| Fiche exposant détaillée | Visiteur | Profil + catalogue (aperçu) + éditions participées | `exposants` + `produits_catalogue` + `editions_exposants`. |
+| Fiche exposant (organisateur) | Organisateur | Profil + statut participation + documents partagés | `exposants` + `editions_exposants` + `documents_partages`. |
+| Formulaire candidature | Exposant | Pré-remplissage depuis son profil | `exposants` WHERE id = auth.uid(). |
+| Demande de documents | Organisateur → Exposant | Liste des documents demandés | Notification → `documents_partages`. |
+| Liste exposants par édition | Catalogue | Exposants validés pour l'édition | `exposants` JOIN `editions_exposants`. |
+| Catalogue dans JayFestival | Visiteur | Produits de l'exposant (lien ou encart) | `produits_catalogue` WHERE exposant_id = ?. |
+| Historique participations | Exposant | Ses éditions passées, en cours, à venir | `editions_exposants` JOIN `editions`. |
 
 ---
 
 ## 3. Flux résumé (schéma)
 
 ```
-[Inscription exposant] → Auth + profiles (user_type=exhibitor) + exposants (création)
+[Inscription exposant]
+    → Auth + profiles (user_type=exhibitor) + exposants (création minimale)
         ↓
-[Mon compte - Fiche entreprise] → UPDATE exposants (propriétaire)
+[Fiche entreprise]
+    → Compléter identité, juridique, contacts, visuels, réseaux
         ↓
-[Fiche publique] → UPDATE visible_repertoire + champs publiés
+[Mon catalogue]
+    → Créer produits, catégories, visuels, vedettes
         ↓
-[JayFestival] → Lecture exposants (répertoire, fiche exposant, candidatures, liste par édition)
+[Ma vitrine]
+    → Configurer pages, personnaliser, SEO, publier
+        ↓
+[Mes documents]
+    → Uploader RIB, KBIS, assurances... → Coffre-fort sécurisé
+        ↓
+[Ma fiche publique]
+    → Visibilité annuaire + confidentialité par champ
+        ↓
+[JayFestival]
+    → Candidater (pré-rempli) → Partager documents → Participer
+    → Annuaire global + par édition → Catalogue visible
 ```
 
 ---
@@ -99,12 +169,15 @@ Détail des requêtes SQL dans [JayXpose - Base de donnees Supabase et Migration
 ## 4. Références
 
 - [JayXpose - Analyse des besoins](./JayXpose%20-%20Analyse%20des%20besoins.md)
+- [JayXpose - Catalogue Produits](./JayXpose%20-%20Catalogue%20Produits.md)
+- [JayXpose - Documents Professionnels et Coffre-Fort](./JayXpose%20-%20Documents%20Professionnels%20et%20Coffre-Fort.md)
+- [JayXpose - Site Vitrine Specification](./JayXpose%20-%20Site%20Vitrine%20Specification.md)
 - [JayXpose - Base de donnees Supabase et Migration SQLite](./reference/JayXpose%20-%20Base%20de%20donnees%20Supabase%20et%20Migration%20SQLite.md)
 - [Exposants - Ecrans et cycle](../JayFestival/publics/Exposants/Exposants%20-%20Ecrans%20et%20cycle.md)
 
 ---
 
-**Document** : JayXpose — Parcours utilisateur exposant  
-**Version** : 1.0  
-**Date** : 2026-02-03  
+**Document** : JayXpose — Parcours utilisateur exposant
+**Version** : 2.0
+**Date** : 2026-02-06
 **Statut** : Référence produit
