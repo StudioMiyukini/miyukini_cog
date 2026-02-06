@@ -1,5 +1,11 @@
 //! Château — objectif central des ennemis (Miyukini Survivor).
 //! PV, armure (absorption flat). À 0 PV = game over.
+//!
+//! @id: lord_of_the_castle_castle
+//! @do: define_castle_entity_hp_armor
+//! @role: data
+//! @layer: domain
+//! @human: Entité Château : PV, armure, dégâts, game over si détruit.
 
 use crate::constants::{hp, size};
 use serde::{Deserialize, Serialize};

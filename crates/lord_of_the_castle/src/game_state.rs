@@ -1,12 +1,22 @@
 //! État du jeu Lord of the Castle (Miyukini Survivor).
 //! Phases Préparation / Bataille, vague, or, XP, entités.
+//!
+//! @id: lord_of_the_castle_game_state
+//! @do: hold_full_game_state_and_mutations
+//! @role: data
+//! @layer: domain
+//! @human: État complet d'une run : phases, vagues, or, XP, inventaire, équipement, marchand.
 
 use crate::castle::Castle;
+use crate::character_creation::{CharacterStats, Stat};
 use crate::constants::wave;
 use crate::enemies::{Enemy, EnemyKind};
+use crate::troops::{Troop, TroopKind, TroopState};
+use crate::warrior_skills::{prerequisites_met, warrior_skill_def, WarriorSkillId};
+use crate::constants::{hp, speed};
 use crate::loot::{
-    generate_loot, roll_identification_expert, roll_identification_self, InventoryEntry, ItemInstance,
-    ItemSlot, LootDrop, LootKind,
+    generate_loot, generate_merchant_pools, roll_identification_expert, roll_identification_self,
+    InventoryEntry, ItemInstance, ItemSlot, LootDrop, LootKind, MerchantEntry,
 };
 use std::collections::HashMap;
 use crate::player::Player;
@@ -48,10 +58,16 @@ pub struct GameState {
     pub enemies: Vec<Enemy>,
     /// Tours construites (non détruites).
     pub towers: Vec<Tower>,
+    /// Troupes alliées (zone de commandement, recrutement).
+    #[serde(default)]
+    pub troops: Vec<Troop>,
     /// Prochain ID ennemi.
     pub next_enemy_id: u64,
     /// Prochain ID tour.
     pub next_tower_id: u64,
+    /// Prochain ID troupe.
+    #[serde(default)]
+    pub next_troop_id: u64,
     /// Timer spawn : prochain spawn dans X s.
     pub spawn_timer_s: f32,
     /// Spawn quantity pour cette vague (évolue : ⌈prev×1.1⌉+1).
@@ -94,6 +110,25 @@ pub struct GameState {
     pub xp_gained_this_wave: u32,
     /// Objets trouvés (ramassés) pendant la vague en cours.
     pub items_found_this_wave: u32,
+    /// Points de compétence disponibles (level up).
+    #[serde(default)]
+    pub skill_points_available: u32,
+    /// Points de statistique disponibles (tous les 5 niveaux), à placer dans For/Con/Agi/etc.
+    #[serde(default)]
+    pub stat_points_available: u32,
+    /// Rangs des compétences Guerrier (skill_id → rang actuel, 0 = non apprise).
+    #[serde(default)]
+    pub warrior_skill_ranks: HashMap<WarriorSkillId, u32>,
+    /// Pools du marchand (renouvelées à chaque fin de vague). Non sérialisé.
+    #[serde(skip)]
+    pub merchant_weapons: Vec<Option<MerchantEntry>>,
+    #[serde(skip)]
+    pub merchant_armor: Vec<Option<MerchantEntry>>,
+    #[serde(skip)]
+    pub merchant_accessories: Vec<Option<MerchantEntry>>,
+    /// Accumulateur pour régénération GigaChad (1 PV/s). Non sérialisé.
+    #[serde(skip)]
+    pub gigachad_regen_accumulator: f32,
 }
 
 impl GameState {
@@ -110,6 +145,10 @@ impl GameState {
         player.y = castle_center_y;
         let mut equipped = HashMap::new();
         equipped.insert(ItemSlot::MainHand, ItemInstance::default_short_sword());
+        let (w, a, acc) = generate_merchant_pools(&mut || rand_simple());
+        let merchant_weapons = w.into_iter().map(Some).collect();
+        let merchant_armor = a.into_iter().map(Some).collect();
+        let merchant_accessories = acc.into_iter().map(Some).collect();
         Self {
             phase: GamePhase::Preparation,
             wave_number: 1,
@@ -120,8 +159,10 @@ impl GameState {
             player,
             enemies: Vec::new(),
             towers: Vec::new(),
+            troops: Vec::new(),
             next_enemy_id: 0,
             next_tower_id: 0,
+            next_troop_id: 0,
             spawn_timer_s: 0.0,
             spawn_quantity: wave::SPAWN_QUANTITY_INIT,
             spawn_rate_s: wave::SPAWN_RATE_INIT_S,
@@ -141,12 +182,155 @@ impl GameState {
             gold_collected_this_wave: 0,
             xp_gained_this_wave: 0,
             items_found_this_wave: 0,
+            skill_points_available: 0,
+            stat_points_available: 0,
+            warrior_skill_ranks: HashMap::new(),
+            merchant_weapons,
+            merchant_armor,
+            merchant_accessories,
+            gigachad_regen_accumulator: 0.0,
         }
     }
 
-    /// XP requise pour le niveau suivant (formule simple : level × 100).
+    /// Régénère les 3 pools du marchand (armes, armures, accessoires). Utilisé en fin de vague et en dev (bouton reroll). Les slots vides sont remplis.
+    pub fn refresh_merchant_pools(&mut self) {
+        let (w, a, acc) = generate_merchant_pools(&mut || rand_simple());
+        self.merchant_weapons = w.into_iter().map(Some).collect();
+        self.merchant_armor = a.into_iter().map(Some).collect();
+        self.merchant_accessories = acc.into_iter().map(Some).collect();
+    }
+
+    /// XP requise pour le niveau suivant : 100 + (niveau actuel).
     pub fn xp_required_for_next_level(&self) -> u32 {
-        self.level * 100
+        100 + self.level
+    }
+
+    /// Applique les level up tant que l'XP le permet : niveau +1, xp remis à zéro, 1 point de compétence ; tous les 5 niveaux +1 point de statistique.
+    pub fn try_level_ups(&mut self) {
+        while self.xp >= self.xp_required_for_next_level() {
+            self.level += 1;
+            self.xp = 0;
+            self.skill_points_available += 1;
+            if self.level % 5 == 0 {
+                self.stat_points_available += 1;
+            }
+        }
+    }
+
+    /// Dépense un point de statistique (panneau joueur). Met à jour hp_max (formule sur stats effectives + Pot de Wey). Retourne false si aucun point.
+    pub fn spend_stat_point(&mut self, stat: Stat) -> bool {
+        if self.stat_points_available == 0 {
+            return false;
+        }
+        self.stat_points_available -= 1;
+        self.player.stats.add(stat, 1);
+        self.player.agility = (5 + self.player.stats.agi).max(0);
+        self.player.luck = self.player.stats.luk.max(0).min(100);
+        let new_hp_max = self.effective_hp_max();
+        self.player.hp_max = new_hp_max;
+        if self.player.hp > new_hp_max {
+            self.player.hp = new_hp_max;
+        }
+        true
+    }
+
+    /// Bonus aux stats issus des compétences Guerrier (EncorePlusFort→For, Musculation→Con, Tireur→Dex).
+    pub fn stat_bonus_from_warrior_skills(&self) -> CharacterStats {
+        use crate::warrior_skills::WarriorSkillId;
+        let r = |id: WarriorSkillId| *self.warrior_skill_ranks.get(&id).unwrap_or(&0) as i32;
+        CharacterStats {
+            for_: r(WarriorSkillId::EncorePlusFort),
+            con: r(WarriorSkillId::Musculation),
+            agi: 0,
+            dex: r(WarriorSkillId::Tireur),
+            int: 0,
+            sag: 0,
+            cha: 0,
+            luk: 0,
+        }
+    }
+
+    /// Stats effectives = base (création + points de stat) + bonus (compétences). Utilisées dans toutes les formules.
+    pub fn effective_stats(&self) -> CharacterStats {
+        let b = self.stat_bonus_from_warrior_skills();
+        CharacterStats {
+            for_: self.player.stats.for_ + b.for_,
+            con: self.player.stats.con + b.con,
+            agi: self.player.stats.agi + b.agi,
+            dex: self.player.stats.dex + b.dex,
+            int: self.player.stats.int + b.int,
+            sag: self.player.stats.sag + b.sag,
+            cha: self.player.stats.cha + b.cha,
+            luk: self.player.stats.luk + b.luk,
+        }
+    }
+
+    /// PV max : formule sur stats effectives, puis bonus Pot de Wey (+15 % par niveau).
+    pub fn effective_hp_max(&self) -> i32 {
+        let eff = self.effective_stats();
+        let base_hp = (eff.con * 2 + eff.for_).max(hp::PLAYER_MIN_MAX);
+        let pot_rank = *self.warrior_skill_ranks.get(&WarriorSkillId::PotDeWey).unwrap_or(&0) as f32;
+        let mult = 1.0 + 0.15 * pot_rank;
+        (base_hp as f32 * mult).floor() as i32
+    }
+
+    /// Vitesse de déplacement (px/s) : formule sur agilité effective (5 + Agi).
+    pub fn effective_move_speed(&self) -> f32 {
+        let agi = 5 + self.effective_stats().agi.max(0);
+        speed::PLAYER_BASE * speed::PLAYER_SPEED_MULTIPLIER * (1.0 + (agi as f32 / 100.0))
+    }
+
+    /// Nombre max de troupes (Charisme effectif).
+    pub fn max_troops(&self) -> usize {
+        self.effective_stats().cha.max(0) as usize
+    }
+
+    /// Recrute une troupe du type donné si la limite n'est pas atteinte. La troupe apparaît à côté du joueur, état InZone.
+    pub fn recruit_troop(&mut self, kind: TroopKind) -> bool {
+        let count_active = self.troops.iter().filter(|t| t.is_active_in_squad()).count();
+        if count_active >= self.max_troops() {
+            return false;
+        }
+        let id = self.next_troop_id;
+        self.next_troop_id = self.next_troop_id.wrapping_add(1);
+        let hp_max = kind.hp_max_base();
+        let troop = Troop {
+            id,
+            x: self.player.x + 20.0,
+            y: self.player.y,
+            hp: hp_max,
+            hp_max,
+            kind,
+            state: TroopState::InZone,
+            target_enemy_id: None,
+            last_attack: None,
+        };
+        self.troops.push(troop);
+        true
+    }
+
+    /// Apprend ou améliore une compétence Guerrier (dépense 1 point de compétence). Retourne false si impossible.
+    pub fn learn_warrior_skill(&mut self, id: WarriorSkillId) -> bool {
+        if self.skill_points_available == 0 {
+            return false;
+        }
+        let def = warrior_skill_def(id);
+        let current = *self.warrior_skill_ranks.get(&id).unwrap_or(&0);
+        if current >= def.max_rank {
+            return false;
+        }
+        if !prerequisites_met(&self.warrior_skill_ranks, &def) {
+            return false;
+        }
+        self.skill_points_available -= 1;
+        *self.warrior_skill_ranks.entry(id).or_insert(0) += 1;
+        // Recalcul PV max (Pot de Wey, etc.) et plafonner les PV actuels.
+        let new_hp_max = self.effective_hp_max();
+        self.player.hp_max = new_hp_max;
+        if self.player.hp > new_hp_max {
+            self.player.hp = new_hp_max;
+        }
+        true
     }
 
     /// Spawn du loot à la mort d'un monstre (position, hp_max du monstre). Utilise player.luck comme chance.
@@ -186,6 +370,7 @@ impl GameState {
                 }
             }
         }
+        self.try_level_ups();
         // Retirer en ordre décroissant pour ne pas décaler les indices.
         for i in to_remove.into_iter().rev() {
             self.loot_drops.remove(i);
@@ -201,9 +386,31 @@ impl GameState {
         }
     }
 
-    /// Constitution du joueur (pour PV ennemis) : base 10 + stats.con.
+    /// Dégâts de l’attaque auto du joueur selon équipement :
+    /// - Mains nues : For + Con/2 (min 1)
+    /// - Arme CàC : dégâts de l’arme + For/2 (min 1)
+    /// - Arme à distance : dégâts de l’arme + Dex/2 (min 1)
+    pub fn player_auto_attack_damage(&self) -> i32 {
+        let eff = self.effective_stats();
+        let main_hand = self.get_equipped(ItemSlot::MainHand);
+        let (weapon_dmg, is_ranged) = match main_hand.and_then(|w| w.effective_weapon_damage().map(|d| (d, w.is_ranged))) {
+            Some((d, r)) => (d, r),
+            None => {
+                let baston = *self.warrior_skill_ranks.get(&WarriorSkillId::Baston).unwrap_or(&0) as i32;
+                let for_unarmed = eff.for_ + baston;
+                return (for_unarmed + eff.con / 2).max(1);
+            }
+        };
+        if is_ranged {
+            (weapon_dmg + eff.dex / 2).max(1)
+        } else {
+            (weapon_dmg + eff.for_ / 2).max(1)
+        }
+    }
+
+    /// Constitution du joueur (pour PV ennemis) : 10 + Con effectif.
     pub fn player_constitution(&self) -> i32 {
-        (10 + self.player.stats.con).max(1)
+        (10 + self.effective_stats().con).max(1)
     }
 
     /// Démarre la phase Bataille : timer de spawn à 0 pour premier spawn immédiat.
@@ -212,6 +419,8 @@ impl GameState {
     pub fn start_battle_phase(&mut self) {
         self.max_wave_reached = self.max_wave_reached.max(self.wave_number);
         self.phase = GamePhase::Battle;
+        self.player.x = self.castle.x;
+        self.player.y = self.castle.y + 30.0;
         self.spawn_timer_s = 0.0; // premier spawn immédiat
         self.spawn_quantity = (10 + (self.wave_number as i32 - 1) + self.wave_number as i32).max(1) as u32;
         self.enemies_spawned_this_wave = 0;
@@ -226,6 +435,8 @@ impl GameState {
     pub fn start_preparation_phase(&mut self) {
         self.max_wave_reached = self.max_wave_reached.max(self.wave_number);
         self.phase = GamePhase::Preparation;
+        self.player.x = self.castle.x;
+        self.player.y = self.castle.y + 30.0;
         self.wave_number += 1;
         self.enemies.clear();
         self.identified_this_phase = false; // une tentative d’ID par soi-même par phase
@@ -234,6 +445,7 @@ impl GameState {
         if self.player.dead {
             self.player.revive_after_wave();
         }
+        self.refresh_merchant_pools();
         // Garder le loot au sol entre les vagues (le joueur peut encore ramasser).
         self.last_update = Some(Instant::now());
     }
@@ -351,6 +563,45 @@ impl GameState {
     }
 
     /// Retourne l’objet équipé dans le slot, s’il y en a un.
+    pub fn buy_merchant_weapon(&mut self, index: usize) -> bool {
+        let Some(entry) = self.merchant_weapons.get_mut(index).and_then(Option::take) else {
+            return false;
+        };
+        if self.inventory.len() >= INVENTORY_MAX_SLOTS || self.gold < entry.price {
+            self.merchant_weapons[index] = Some(entry);
+            return false;
+        }
+        self.gold -= entry.price;
+        self.inventory.push(entry.entry);
+        true
+    }
+
+    pub fn buy_merchant_armor(&mut self, index: usize) -> bool {
+        let Some(entry) = self.merchant_armor.get_mut(index).and_then(Option::take) else {
+            return false;
+        };
+        if self.inventory.len() >= INVENTORY_MAX_SLOTS || self.gold < entry.price {
+            self.merchant_armor[index] = Some(entry);
+            return false;
+        }
+        self.gold -= entry.price;
+        self.inventory.push(entry.entry);
+        true
+    }
+
+    pub fn buy_merchant_accessory(&mut self, index: usize) -> bool {
+        let Some(entry) = self.merchant_accessories.get_mut(index).and_then(Option::take) else {
+            return false;
+        };
+        if self.inventory.len() >= INVENTORY_MAX_SLOTS || self.gold < entry.price {
+            self.merchant_accessories[index] = Some(entry);
+            return false;
+        }
+        self.gold -= entry.price;
+        self.inventory.push(entry.entry);
+        true
+    }
+
     pub fn get_equipped(&self, slot: ItemSlot) -> Option<&ItemInstance> {
         self.equipped.get(&slot)
     }
@@ -374,19 +625,12 @@ impl GameState {
             return false;
         };
         let slot = item.slot;
-        if !slot.is_weapon_or_shield() && !slot.is_ammo() {
-            // Slots équipement (armure, etc.)
-            if self.equipped.contains_key(&slot) {
-                self.inventory.len() < INVENTORY_MAX_SLOTS
-            } else {
-                true
-            }
+        // Les deux branches (arme/bouclier/ammo ou armure) appliquent la même logique :
+        // si le slot est déjà occupé, il faut de la place pour le swap ; sinon OK.
+        if self.equipped.contains_key(&slot) {
+            self.inventory.len() < INVENTORY_MAX_SLOTS
         } else {
-            if self.equipped.contains_key(&slot) {
-                self.inventory.len() < INVENTORY_MAX_SLOTS
-            } else {
-                true
-            }
+            true
         }
     }
 
@@ -394,7 +638,7 @@ impl GameState {
     pub fn equip_item(&mut self, slot_index: usize) -> bool {
         let item = match self.inventory.get(slot_index) {
             Some(InventoryEntry::Identified(it)) => it.clone(),
-            _ => return false,
+            Some(InventoryEntry::Unidentified(_)) | None => return false,
         };
         let slot = item.slot;
         if self.equipped.contains_key(&slot) {

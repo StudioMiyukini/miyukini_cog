@@ -2,6 +2,12 @@
 //!
 //! Permet de charger une texture (strip horizontal), de calculer le rect UV d'une frame
 //! et d'afficher la frame centrée sur une position (hitbox) avec transparence.
+//!
+//! @id: lord_of_the_castle_spritesheet
+//! @do: load_and_draw_spritesheet_frames
+//! @role: ui
+//! @layer: infra
+//! @human: Chargement PNG, découpage strip horizontal, affichage frame centrée (flip horizontal).
 
 use eframe::egui;
 use std::path::Path;

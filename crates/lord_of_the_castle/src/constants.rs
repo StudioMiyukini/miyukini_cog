@@ -1,8 +1,17 @@
 //! Constantes de référence Lord of the Castle (Miyukini Survivor).
 //! Aligné sur docs/services/MiyukiniSurvivor/Miyukini Survivor - Gameplay et Mecaniques.md
+//!
+//! @id: lord_of_the_castle_constants
+//! @do: declare_game_balance_constants
+//! @role: config
+//! @layer: domain
+//! @human: Toutes les constantes gameplay (tailles, PV, vitesses, combat, vagues, portées).
 
-/// Surface de combat : 800×800 px, centrée au milieu du body. Le château est au centre.
+/// Surface de combat : 800×800 px (legacy, zone de jeu est maintenant pleine largeur).
 pub const COMBAT_SURFACE_SIZE: f32 = 800.0;
+
+/// Hauteur du panneau bottom (barre XP + PV/Mana).
+pub const BOTTOM_PANEL_HEIGHT: f32 = 70.0;
 
 /// Dimensions (px).
 pub mod size {
@@ -20,7 +29,7 @@ pub mod size {
 
 /// PV max de référence.
 pub mod hp {
-    /// Joueur : formule PV max = Con + For/2 (voir Player::hp_max_from_stats). Constante conservée pour compat.
+    /// Joueur : formule PV max = Con*2 + For (voir Player::hp_max_from_stats). Constante conservée pour compat.
     pub const PLAYER_MAX: i32 = 10;
     /// Joueur : minimum 4 PV max (formule Con+For/2 plancher, et après pénalités revive).
     pub const PLAYER_MIN_MAX: i32 = 4;
@@ -32,16 +41,19 @@ pub mod hp {
 
 /// Vitesses (px/s).
 pub mod speed {
-    /// Joueur : 10 px/s × 10 + bonus Agilité %.
-    pub const PLAYER_BASE: f32 = 10.0;
-    /// Multiplicateur vitesse déplacement joueur (×10).
-    pub const PLAYER_SPEED_MULTIPLIER: f32 = 10.0;
-    /// Ennemi normal : 8 px/s.
-    pub const ENEMY_NORMAL: f32 = 8.0;
-    /// Mini-boss : 6 px/s.
-    pub const ENEMY_MINI_BOSS: f32 = 6.0;
-    /// Boss : 4 px/s.
-    pub const ENEMY_BOSS: f32 = 4.0;
+    /// Joueur : 90 × (1 + Agilité/100) px/s.
+    pub const PLAYER_BASE: f32 = 90.0;
+    /// Multiplicateur vitesse déplacement joueur : (1 + AGI/100).
+    pub const PLAYER_SPEED_MULTIPLIER: f32 = 1.0;
+    /// Ennemi normal : base 16 × (1 + vague/100) px/s, plafond 50.
+    pub const ENEMY_NORMAL_BASE: f32 = 16.0;
+    pub const ENEMY_NORMAL_MAX: f32 = 50.0;
+    /// Mini-boss : base 8 × (1 + vague/100) px/s, plafond 40.
+    pub const ENEMY_MINI_BOSS_BASE: f32 = 8.0;
+    pub const ENEMY_MINI_BOSS_MAX: f32 = 40.0;
+    /// Boss : base 6 × (1 + vague/100) px/s, plafond 30.
+    pub const ENEMY_BOSS_BASE: f32 = 6.0;
+    pub const ENEMY_BOSS_MAX: f32 = 30.0;
 }
 
 /// Combat.
@@ -57,6 +69,8 @@ pub mod combat {
     pub const ENEMY_CONTACT_NORMAL: i32 = 1;
     pub const ENEMY_CONTACT_MINI_BOSS: i32 = 3;
     pub const ENEMY_CONTACT_BOSS: i32 = 10;
+    /// Pushback appliqué par un ennemi sur le joueur ou une troupe au contact (px).
+    pub const ENEMY_PUSHBACK_ON_CONTACT_PX: f32 = 4.0;
 }
 
 /// Vagues (vague 1).
@@ -68,10 +82,28 @@ pub mod wave {
 }
 
 /// Champ de vision ennemis (px).
-pub const ENEMY_VISION_RADIUS: f32 = 30.0;
+pub const ENEMY_VISION_RADIUS: f32 = 60.0;
 
 /// Portée tour de base (px).
 pub const TOWER_BASE_RANGE: f32 = 80.0;
 
 /// Loot : rayon de ramassage par le joueur (px).
 pub const PICKUP_RADIUS: f32 = 30.0;
+
+/// Zone de commandement : rayon autour du joueur (px). Les troupes restent et combattent dans cette zone.
+pub const COMMAND_ZONE_RADIUS: f32 = 200.0;
+
+/// Champ de vision des troupes : rayon pour repérer un ennemi à attaquer (px).
+pub const TROOP_VISION_RADIUS: f32 = 100.0;
+
+/// Distance minimale au joueur (px) : les troupes s'arrêtent à cette distance pour ne pas pousser le joueur.
+pub const TROOP_MIN_DISTANCE_FROM_PLAYER: f32 = 10.0;
+
+/// Écart minimal entre troupes (px) : les troupes se tiennent à au moins cette distance pour éviter les regroupements.
+pub const TROOP_MIN_GAP_BETWEEN_TROOPS: f32 = 5.0;
+
+/// Nombre maximum de troupes pouvant cibler un même ennemi (répartition des cibles).
+pub const TROOP_MAX_PER_ENEMY: usize = 3;
+
+/// Délai avant réapparition d'une troupe morte à côté du château (secondes).
+pub const TROOP_RESPAWN_DELAY_S: f32 = 10.0;

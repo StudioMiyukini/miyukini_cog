@@ -1,4 +1,10 @@
 //! Joueur — déplacement 8 directions, PV, attaque auto (Miyukini Survivor).
+//!
+//! @id: lord_of_the_castle_player
+//! @do: define_player_entity_stats_movement
+//! @role: data
+//! @layer: domain
+//! @human: Entité joueur : stats, PV, mana, direction, attaque auto, mort/réanimation.
 
 use crate::character_creation::CharacterStats;
 use crate::constants::{combat, hp, size, speed};
@@ -89,9 +95,9 @@ pub struct Player {
 }
 
 impl Player {
-    /// PV max du joueur : Con + For/2, minimum PLAYER_MIN_MAX.
+    /// PV max du joueur : Con*2 + For, minimum PLAYER_MIN_MAX.
     pub fn hp_max_from_stats(stats: &CharacterStats) -> i32 {
-        (stats.con + stats.for_ / 2).max(hp::PLAYER_MIN_MAX)
+        (stats.con * 2 + stats.for_).max(hp::PLAYER_MIN_MAX)
     }
 
     /// Nouveau joueur à la position donnée (sans création de personnage).
@@ -149,7 +155,7 @@ impl Player {
         }
     }
 
-    /// Vitesse de déplacement (px/s) : (10 + Agilité %) × 3.
+    /// Vitesse de déplacement (px/s) : 90 × (1 + Agilité/100).
     pub fn move_speed(&self) -> f32 {
         speed::PLAYER_BASE * speed::PLAYER_SPEED_MULTIPLIER * (1.0 + (self.agility as f32 / 100.0))
     }
@@ -169,11 +175,10 @@ impl Player {
         combat::AUTO_ATTACK_INTERVAL_S
     }
 
-    /// Dégâts à main nue (sans arme équipée) : Force + dizaine de la Constitution, minimum 1.
+    /// Dégâts à main nue (sans arme équipée) : For + Con/2, minimum 1.
+    /// Avec arme, utiliser GameState::player_auto_attack_damage (arme CàC = dégâts arme + For/2, distance = dégâts arme + Dex/2).
     pub fn auto_attack_damage(&self) -> i32 {
-        let force = self.stats.for_;
-        let dizaine_con = self.stats.con / 10; // dizaine de la Constitution
-        (force + dizaine_con).max(1)
+        (self.stats.for_ + self.stats.con / 2).max(1)
     }
 
     /// Applique des dégâts. Si PV à 0, marque dead.

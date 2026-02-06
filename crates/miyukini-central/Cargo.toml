@@ -15,7 +15,7 @@ description = "Miyukini Central - Hub de gestion des Services de l'ecosysteme Mi
 dotenvy = "0.15"
 egui = "0.33"
 eframe = { version = "0.33", default-features = false, features = ["default_fonts", "persistence", "glow"] }
-egui-phosphor = "0.9"
+egui-phosphor = "0.11"
 jayfestival = { path = "../jayfestival" }
 miyuclicker = { path = "../miyuclicker" }
 lord_of_the_castle = { path = "../lord_of_the_castle" }

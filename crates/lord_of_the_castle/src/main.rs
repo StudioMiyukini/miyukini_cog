@@ -6,6 +6,8 @@
 //! @id: lord_of_the_castle_main_entry
 //! @do: run_native_lord_of_the_castle_app
 //! @role: bootstrap
+//! @layer: infra
+//! @human: Binaire standalone (dev/test). Point d'accès canonique : Miyukini Central.
 
 use eframe::egui;
 use lord_of_the_castle::LordOfTheCastleApp;

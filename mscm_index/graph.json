@@ -1294,5 +1294,24 @@
   ],
   "borderguard_trust_level_verified": [
     "borderguard_trust_level"
+  ],
+  "lord_of_the_castle_app": [
+    "lord_of_the_castle_app_ui",
+    "lord_of_the_castle_game_state",
+    "lord_of_the_castle_loot"
+  ],
+  "lord_of_the_castle_game_loop": [
+    "lord_of_the_castle_game_state",
+    "lord_of_the_castle_enemies",
+    "lord_of_the_castle_player"
+  ],
+  "lord_of_the_castle_game_state": [
+    "lord_of_the_castle_castle",
+    "lord_of_the_castle_loot",
+    "lord_of_the_castle_player"
+  ],
+  "lord_of_the_castle_app_ui": [
+    "lord_of_the_castle_game_state",
+    "lord_of_the_castle_spritesheet"
   ]
 }

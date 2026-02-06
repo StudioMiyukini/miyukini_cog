@@ -2272,5 +2272,47 @@
   ],
   "crates/miyuweb/src/asset.rs": [
     "miyuweb_tool_web_asset_serve"
+  ],
+  "crates/lord_of_the_castle/src/lib.rs": [
+    "lord_of_the_castle_lib"
+  ],
+  "crates/lord_of_the_castle/src/main.rs": [
+    "lord_of_the_castle_main_entry"
+  ],
+  "crates/lord_of_the_castle/src/constants.rs": [
+    "lord_of_the_castle_constants"
+  ],
+  "crates/lord_of_the_castle/src/castle.rs": [
+    "lord_of_the_castle_castle"
+  ],
+  "crates/lord_of_the_castle/src/towers.rs": [
+    "lord_of_the_castle_towers"
+  ],
+  "crates/lord_of_the_castle/src/enemies.rs": [
+    "lord_of_the_castle_enemies"
+  ],
+  "crates/lord_of_the_castle/src/player.rs": [
+    "lord_of_the_castle_player"
+  ],
+  "crates/lord_of_the_castle/src/game_state.rs": [
+    "lord_of_the_castle_game_state"
+  ],
+  "crates/lord_of_the_castle/src/game_loop.rs": [
+    "lord_of_the_castle_game_loop"
+  ],
+  "crates/lord_of_the_castle/src/loot.rs": [
+    "lord_of_the_castle_loot"
+  ],
+  "crates/lord_of_the_castle/src/character_creation.rs": [
+    "lord_of_the_castle_character_creation"
+  ],
+  "crates/lord_of_the_castle/src/app.rs": [
+    "lord_of_the_castle_app"
+  ],
+  "crates/lord_of_the_castle/src/app_ui.rs": [
+    "lord_of_the_castle_app_ui"
+  ],
+  "crates/lord_of_the_castle/src/spritesheet.rs": [
+    "lord_of_the_castle_spritesheet"
   ]
 }

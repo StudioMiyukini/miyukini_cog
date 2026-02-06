@@ -1,4 +1,10 @@
 //! Ennemis — types, PV, déplacement vers le Château (Miyukini Survivor).
+//!
+//! @id: lord_of_the_castle_enemies
+//! @do: define_enemy_types_hp_movement
+//! @role: data
+//! @layer: domain
+//! @human: Entités ennemis (Normal, MiniBoss, Boss) : PV, vitesse, dégâts contact, flash.
 
 use crate::constants::{combat, size, speed};
 use serde::{Deserialize, Serialize};
@@ -22,12 +28,13 @@ impl EnemyKind {
         }
     }
 
-    /// Vitesse (px/s) : 8, 6, 4.
-    pub fn move_speed(&self) -> f32 {
+    /// Vitesse (px/s) : base × (1 + vague/100), plafonnée. Plus la vague est haute, plus l'ennemi est rapide.
+    pub fn move_speed(&self, wave_number: u32) -> f32 {
+        let factor = 1.0 + (wave_number as f32 / 100.0);
         match self {
-            EnemyKind::Normal => speed::ENEMY_NORMAL,
-            EnemyKind::MiniBoss => speed::ENEMY_MINI_BOSS,
-            EnemyKind::Boss => speed::ENEMY_BOSS,
+            EnemyKind::Normal => (speed::ENEMY_NORMAL_BASE * factor).min(speed::ENEMY_NORMAL_MAX),
+            EnemyKind::MiniBoss => (speed::ENEMY_MINI_BOSS_BASE * factor).min(speed::ENEMY_MINI_BOSS_MAX),
+            EnemyKind::Boss => (speed::ENEMY_BOSS_BASE * factor).min(speed::ENEMY_BOSS_MAX),
         }
     }
 
@@ -80,9 +87,9 @@ impl Enemy {
         self.kind.size() / 2.0
     }
 
-    /// Vitesse (px/s).
-    pub fn move_speed(&self) -> f32 {
-        self.kind.move_speed()
+    /// Vitesse (px/s), dépend du numéro de vague.
+    pub fn move_speed(&self, wave_number: u32) -> f32 {
+        self.kind.move_speed(wave_number)
     }
 
     /// Dégâts au contact.

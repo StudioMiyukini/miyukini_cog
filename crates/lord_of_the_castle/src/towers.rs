@@ -1,5 +1,11 @@
 //! Tours — bâtiments construits en phase Préparation (Miyukini Survivor).
 //! Attaquent l'ennemi le plus proche dans leur champ de vision (80 px).
+//!
+//! @id: lord_of_the_castle_towers
+//! @do: define_tower_entity_range_attack
+//! @role: data
+//! @layer: domain
+//! @human: Entité Tour : PV, portée, dégâts, cadence, construction en phase Préparation.
 
 use crate::constants::{hp, size, TOWER_BASE_RANGE};
 use serde::{Deserialize, Serialize};

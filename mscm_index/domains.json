@@ -1718,5 +1718,21 @@
   ],
   "roles": [
     "roles_grid_render"
+  ],
+  "lord_of_the_castle": [
+    "lord_of_the_castle_lib",
+    "lord_of_the_castle_main_entry",
+    "lord_of_the_castle_constants",
+    "lord_of_the_castle_castle",
+    "lord_of_the_castle_towers",
+    "lord_of_the_castle_enemies",
+    "lord_of_the_castle_player",
+    "lord_of_the_castle_game_state",
+    "lord_of_the_castle_game_loop",
+    "lord_of_the_castle_loot",
+    "lord_of_the_castle_character_creation",
+    "lord_of_the_castle_app",
+    "lord_of_the_castle_app_ui",
+    "lord_of_the_castle_spritesheet"
   ]
 }

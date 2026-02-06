@@ -1,4 +1,10 @@
 //! Création de personnage — stats (For, Con, Agi, Dex, Int, Sag, Cha, Luk), phrases et effets.
+//!
+//! @id: lord_of_the_castle_character_creation
+//! @do: define_stats_phrases_and_effects
+//! @role: logic
+//! @layer: domain
+//! @human: 8 stats, 25 phrases humoristiques avec effets, tirage aléatoire, parcours 4 étapes.
 
 use serde::{Deserialize, Serialize};
 

@@ -781,11 +781,25 @@
     "test_time_no_business_logic",
     "test_time_no_external_dependency",
     "test_time_deterministic_fake",
-    "kernel_clock_fake"
+    "kernel_clock_fake",
+    "lord_of_the_castle_lib",
+    "lord_of_the_castle_main_entry",
+    "lord_of_the_castle_constants",
+    "lord_of_the_castle_castle",
+    "lord_of_the_castle_towers",
+    "lord_of_the_castle_enemies",
+    "lord_of_the_castle_player",
+    "lord_of_the_castle_game_state",
+    "lord_of_the_castle_game_loop",
+    "lord_of_the_castle_loot",
+    "lord_of_the_castle_character_creation",
+    "lord_of_the_castle_app",
+    "lord_of_the_castle_app_ui"
   ],
   "infra": [
     "supabase_client_init",
-    "supabase_client_request"
+    "supabase_client_request",
+    "lord_of_the_castle_spritesheet"
   ],
   "unknown": [
     "miyuclicker_app_screen",
@@ -1537,6 +1551,9 @@
     "miyuwidgets_tool_web_widget_image_render",
     "miyuwidgets_tool_web_widget_button_render",
     "miyuwidgets_tool_web_widget_grid_render",
-    "miyuwidgets_tool_web_widget_container_render"
+    "miyuwidgets_tool_web_widget_container_render",
+    "lord_of_the_castle_app",
+    "lord_of_the_castle_app_ui",
+    "lord_of_the_castle_spritesheet"
   ]
 }

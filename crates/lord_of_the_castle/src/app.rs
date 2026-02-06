@@ -1,28 +1,38 @@
 //! Application Lord of the Castle — écrans, zone de jeu, barre haute, input.
 //! Aligné sur docs/services/MiyukiniSurvivor (Ecrans et UI, Gameplay).
 //! Surface de combat 800×800 centrée au milieu du body ; déplacement ZQSD.
+//!
+//! @id: lord_of_the_castle_app
+//! @do: manage_screens_windows_and_game_flow
+//! @role: ui
+//! @layer: domain
+//! @human: Orchestration des écrans (titre, lore, création, préparation, bataille, game over), fenêtres, header.
 
+use crate::app_ui::{
+    allocate_game_zone_and_bottom, game_zone_tick_and_paint, paint_bottom_panel,
+    paint_equipment_window, paint_inventory_window, paint_player_window,
+    paint_skills_window,
+    screen_to_world,
+};
 use crate::character_creation::{
     apply_phrase_effects, pick_three_phrases, CharacterStats, PhraseDef, Stat,
 };
-use crate::constants::PICKUP_RADIUS;
-use crate::constants::{size, COMBAT_SURFACE_SIZE, ENEMY_VISION_RADIUS};
-use crate::enemies::EnemyKind;
-use crate::game_loop::{move_player, tick_battle};
 use crate::game_state::{
     GamePhase, GameState, INVENTORY_MAX_SLOTS, EXPERT_IDENTIFY_COST_GOLD,
 };
-use crate::loot::{InventoryEntry, ItemSlot, LootKind};
+use crate::loot::{InventoryEntry, ItemSlot};
 use crate::player::{Dir8, Player};
-use crate::spritesheet::{load_image_from_path, draw_sprite_frame, SpritesheetDesc};
-use crate::towers::Tower;
+use crate::troops::TroopKind;
+use crate::warrior_skills::WarriorSkillId;
+use crate::spritesheet::{load_image_from_path, SpritesheetDesc};
 use std::path::Path;
 use eframe::egui;
 use eframe::App;
 use std::cell::RefCell;
 use std::time::Instant;
 
-/// Section active dans la sidebar « Mode préparation ».
+/// Section active dans la sidebar « Mode préparation » (legacy ; remplacée par fenêtres).
+#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum PreparationSection {
     #[default]
@@ -30,6 +40,14 @@ pub enum PreparationSection {
     ExpertIdentification,
     Construction,
     Recrutement,
+}
+
+/// Pool du marchand (pour achat différé).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MerchantPoolKind {
+    Weapon,
+    Armor,
+    Accessory,
 }
 
 /// Écran courant.
@@ -81,8 +99,30 @@ pub struct LordOfTheCastleApp {
     pub creation_reroll_pending: bool,
     /// Les 3 phrases proposées à l’étape courante.
     pub creation_current_choices: Vec<PhraseDef>,
+    #[allow(dead_code)]
     pub preparation_sidebar_open: bool,
+    #[allow(dead_code)]
     pub preparation_section: PreparationSection,
+    /// Fenêtres Mode préparation (ouvertes par boutons header).
+    pub competences_open: bool,
+    /// Onglet actif dans la fenêtre Compétences.
+    pub skills_tab: crate::SkillsTab,
+    /// Compétence Guerrier sélectionnée (pour la fenêtre de détail).
+    pub selected_warrior_skill: Option<WarriorSkillId>,
+    pub marchand_open: bool,
+    pub expert_open: bool,
+    pub construction_open: bool,
+    pub recrutement_open: bool,
+    /// Achat marchand différé (pool, index) pour éviter emprunt pendant la fenêtre.
+    pub pending_merchant_buy: RefCell<Option<(MerchantPoolKind, usize)>>,
+    /// En dev : demande de reroll des pools du marchand (bouton).
+    pub pending_merchant_reroll: RefCell<bool>,
+    /// En dev : ajouter 100 or au joueur (bouton marchand).
+    pub pending_dev_add_gold: RefCell<bool>,
+    /// Identification par soi-même différée (index dans l'inventaire).
+    pub pending_identify_self: RefCell<Option<usize>>,
+    /// Overlay « trop encombré » quand le joueur clique Lancer la vague avec inventaire plein.
+    pub show_encumbered_overlay: bool,
     /// Texture du spritesheet joueur (Knight-Idle), chargée à la première partie.
     pub player_sprite_texture: Option<egui::TextureHandle>,
     /// Description du spritesheet (6 frames horizontal).
@@ -91,6 +131,26 @@ pub struct LordOfTheCastleApp {
     pub player_walk_desc: Option<SpritesheetDesc>,
     /// Accumulateur temps pour l’animation idle (frame index dérivé).
     pub player_anim_accumulator: f32,
+    /// Texture du spritesheet ennemis de base (Skeleton-Walk), chargée à la première partie.
+    pub enemy_sprite_texture: Option<egui::TextureHandle>,
+    /// Description du spritesheet (8 frames horizontal).
+    pub enemy_sprite_desc: Option<SpritesheetDesc>,
+    /// Texture du spritesheet mini-boss (Werebear-Walk), chargée à la première partie.
+    pub enemy_miniboss_sprite_texture: Option<egui::TextureHandle>,
+    /// Description du spritesheet mini-boss (8 frames horizontal).
+    pub enemy_miniboss_sprite_desc: Option<SpritesheetDesc>,
+    /// Accumulateur temps pour l'animation marche ennemis.
+    pub enemy_anim_accumulator: f32,
+    /// Texture du spritesheet troupes (Soldier-Walk / Miliciens), chargée à la première partie.
+    pub troop_sprite_texture: Option<egui::TextureHandle>,
+    /// Description du spritesheet troupes (8 frames horizontal).
+    pub troop_sprite_desc: Option<SpritesheetDesc>,
+    /// Texture du spritesheet attaque troupes (Soldier-Attack01 / Miliciens), 6 frames.
+    pub troop_attack_sprite_texture: Option<egui::TextureHandle>,
+    /// Description du spritesheet attaque troupes (6 frames horizontal).
+    pub troop_attack_sprite_desc: Option<SpritesheetDesc>,
+    /// Accumulateur temps pour l'animation marche troupes.
+    pub troop_anim_accumulator: f32,
 }
 
 impl Default for LordOfTheCastleApp {
@@ -113,11 +173,33 @@ impl Default for LordOfTheCastleApp {
             creation_current_choices: Vec::new(),
             preparation_sidebar_open: true,
             preparation_section: PreparationSection::Marchand,
+            competences_open: false,
+            skills_tab: crate::SkillsTab::Guerrier,
+            selected_warrior_skill: None,
+            marchand_open: false,
+            expert_open: false,
+            construction_open: false,
+            recrutement_open: false,
+            pending_merchant_buy: RefCell::new(None),
+            pending_merchant_reroll: RefCell::new(false),
+            pending_dev_add_gold: RefCell::new(false),
+            pending_identify_self: RefCell::new(None),
+            show_encumbered_overlay: false,
             player_sprite_texture: None,
             player_sprite_desc: None,
             player_walk_texture: None,
             player_walk_desc: None,
             player_anim_accumulator: 0.0,
+            enemy_sprite_texture: None,
+            enemy_sprite_desc: None,
+            enemy_miniboss_sprite_texture: None,
+            enemy_miniboss_sprite_desc: None,
+            enemy_anim_accumulator: 0.0,
+            troop_sprite_texture: None,
+            troop_sprite_desc: None,
+            troop_attack_sprite_texture: None,
+            troop_attack_sprite_desc: None,
+            troop_anim_accumulator: 0.0,
         }
     }
 }
@@ -167,7 +249,7 @@ impl LordOfTheCastleApp {
         // Chargement unique des spritesheets joueur (Knight-Idle, Knight-Walk) quand une partie est en cours
         if self.game.is_some() {
             if self.player_sprite_texture.is_none() {
-                let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../images/sprites/Knight-Idle.png");
+                let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Knight/Knight/Knight-Idle.png");
                 if let Some(color_image) = load_image_from_path(&path) {
                     let [w, h] = color_image.size;
                     let tex = ui.ctx().load_texture("knight_idle", color_image, egui::TextureOptions::default());
@@ -176,12 +258,48 @@ impl LordOfTheCastleApp {
                 }
             }
             if self.player_walk_texture.is_none() {
-                let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../images/sprites/Knight-Walk.png");
+                let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Knight/Knight/Knight-Walk.png");
                 if let Some(color_image) = load_image_from_path(&path) {
                     let [w, h] = color_image.size;
                     let tex = ui.ctx().load_texture("knight_walk", color_image, egui::TextureOptions::default());
                     self.player_walk_texture = Some(tex);
                     self.player_walk_desc = Some(SpritesheetDesc::horizontal(w as u32, h as u32, 8));
+                }
+            }
+            if self.enemy_sprite_texture.is_none() {
+                let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Skeleton/Skeleton/Skeleton-Walk.png");
+                if let Some(color_image) = load_image_from_path(&path) {
+                    let [w, h] = color_image.size;
+                    let tex = ui.ctx().load_texture("skeleton_walk", color_image, egui::TextureOptions::default());
+                    self.enemy_sprite_texture = Some(tex);
+                    self.enemy_sprite_desc = Some(SpritesheetDesc::horizontal(w as u32, h as u32, 8));
+                }
+            }
+            if self.enemy_miniboss_sprite_texture.is_none() {
+                let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Werebear/Werebear/Werebear-Walk.png");
+                if let Some(color_image) = load_image_from_path(&path) {
+                    let [w, h] = color_image.size;
+                    let tex = ui.ctx().load_texture("werebear_walk", color_image, egui::TextureOptions::default());
+                    self.enemy_miniboss_sprite_texture = Some(tex);
+                    self.enemy_miniboss_sprite_desc = Some(SpritesheetDesc::horizontal(w as u32, h as u32, 8));
+                }
+            }
+            if self.troop_sprite_texture.is_none() {
+                let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Soldier/Soldier/Soldier-Walk.png");
+                if let Some(color_image) = load_image_from_path(&path) {
+                    let [w, h] = color_image.size;
+                    let tex = ui.ctx().load_texture("soldier_walk", color_image, egui::TextureOptions::default());
+                    self.troop_sprite_texture = Some(tex);
+                    self.troop_sprite_desc = Some(SpritesheetDesc::horizontal(w as u32, h as u32, 8));
+                }
+            }
+            if self.troop_attack_sprite_texture.is_none() {
+                let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Soldier/Soldier/Soldier-Attack01.png");
+                if let Some(color_image) = load_image_from_path(&path) {
+                    let [w, h] = color_image.size;
+                    let tex = ui.ctx().load_texture("soldier_attack01", color_image, egui::TextureOptions::default());
+                    self.troop_attack_sprite_texture = Some(tex);
+                    self.troop_attack_sprite_desc = Some(SpritesheetDesc::horizontal(w as u32, h as u32, 6));
                 }
             }
         }
@@ -192,7 +310,7 @@ impl LordOfTheCastleApp {
         let start_battle_request = RefCell::new(false);
 
         // Input clavier (8 directions) : ZQSD + flèches (Z=haut, Q=gauche, S=bas, D=droite)
-        let input = ui.ctx().input(|i| i.clone());
+        let input = ui.ctx().input(Clone::clone);
         use egui::Key;
         let up = input.key_down(Key::Z) || input.key_down(Key::W) || input.key_down(Key::ArrowUp);
         let down = input.key_down(Key::S) || input.key_down(Key::ArrowDown);
@@ -211,7 +329,7 @@ impl LordOfTheCastleApp {
             ui.ctx().request_repaint();
         }
 
-        // Barre haute : Player, Inventaire, vague, ennemis, Lancer la vague, Mode Dev, Or
+        // Barre haute : Player, Inventaire, Équipement, Marchand, Deckard Rain, Construction, Recrutement, vague, Lancer la vague, Mode Dev, Or
         ui.horizontal(|ui| {
             if ui.button("Player").clicked() {
                 self.player_window_open = true;
@@ -225,8 +343,26 @@ impl LordOfTheCastleApp {
                 self.selected_equipment_slot = None;
             }
             if let Some(ref mut state) = self.game {
+                let prep_enabled = state.phase == GamePhase::Preparation;
+                if ui.add_enabled(prep_enabled, egui::Button::new("Compétences")).clicked() && prep_enabled {
+                    self.competences_open ^= true;
+                }
+                if ui.add_enabled(prep_enabled, egui::Button::new("Marchand")).clicked() && prep_enabled {
+                    self.marchand_open ^= true;
+                }
+                if ui.add_enabled(prep_enabled, egui::Button::new("Deckard Rain (expert)")).clicked() && prep_enabled {
+                    self.expert_open ^= true;
+                }
+                if ui.add_enabled(prep_enabled, egui::Button::new("Construction")).clicked() && prep_enabled {
+                    self.construction_open ^= true;
+                }
+                if ui.add_enabled(prep_enabled, egui::Button::new("Recrutement")).clicked() && prep_enabled {
+                    self.recrutement_open ^= true;
+                }
                 ui.label(format!("Vague {}", state.wave_number));
                 ui.label(format!("Ennemis: {}", state.enemies.len()));
+                let troops_count = state.troops.iter().filter(|t| t.is_active_in_squad()).count();
+                ui.label(format!("Troupes: {} / {}", troops_count, state.max_troops()));
                 if self.screen == Screen::Preparation
                     && ui.button("Lancer la vague").clicked()
                 {
@@ -251,7 +387,7 @@ impl LordOfTheCastleApp {
             egui::Window::new("Player")
                 .open(&mut open)
                 .default_width(280.0)
-                .show(ui.ctx(), |ui| paint_player_window(ui, self.game.as_ref()));
+                .show(ui.ctx(), |ui| paint_player_window(ui, self.game.as_mut()));
             if !open {
                 self.player_window_open = false;
             }
@@ -265,7 +401,7 @@ impl LordOfTheCastleApp {
                 .default_width(320.0)
                 .default_height(400.0)
                 .show(ui.ctx(), |ui| {
-                    paint_inventory_window(ui, self.game.as_mut(), &mut self.selected_inventory_slot);
+                    paint_inventory_window(ui, self.game.as_mut(), &mut self.selected_inventory_slot, &self.pending_identify_self);
                 });
             if !open {
                 self.inventory_window_open = false;
@@ -274,8 +410,7 @@ impl LordOfTheCastleApp {
         }
 
         // Fenêtre Détail / Identification (vue intégrée)
-        if self.selected_inventory_slot.is_some() {
-            let slot_idx = self.selected_inventory_slot.unwrap();
+        if let Some(slot_idx) = self.selected_inventory_slot {
             egui::Window::new("Détail objet")
                 .collapsible(false)
                 .resizable(false)
@@ -299,14 +434,226 @@ impl LordOfTheCastleApp {
                 self.selected_equipment_slot = None;
             }
         }
-        if self.selected_equipment_slot.is_some() {
-            let slot = self.selected_equipment_slot.unwrap();
+        if let Some(slot) = self.selected_equipment_slot {
             egui::Window::new("Détail équipement")
                 .collapsible(false)
                 .resizable(false)
                 .show(ui.ctx(), |ui| {
                     paint_equipment_item_detail(ui, self, slot);
                 });
+        }
+
+        // Fenêtre Compétences (5 onglets : Guerrier, Sorcier, Saint, Régent, Commandant)
+        if self.competences_open {
+            let mut open = true;
+            egui::Window::new("Compétences")
+                .open(&mut open)
+                .default_width(420.0)
+                .default_height(380.0)
+                .show(ui.ctx(), |ui| paint_skills_window(ui, self.game.as_mut(), &mut self.skills_tab, &mut self.selected_warrior_skill));
+            if !open {
+                self.competences_open = false;
+            }
+        }
+
+        // Fenêtres Mode préparation (Marchand, Expert, Construction, Recrutement) — vue intégrée Central
+        let mut close_marchand = false;
+        let mut close_expert = false;
+        let mut close_construction = false;
+        let mut close_recrutement = false;
+        if let Some(ref mut state) = self.game {
+            let gold = state.gold;
+            if self.marchand_open {
+                let mut open = true;
+                egui::Window::new("Marchand")
+                    .open(&mut open)
+                    .default_width(380.0)
+                    .default_height(480.0)
+                    .show(ui.ctx(), |ui| {
+                        ui.label(format!("Or : {} or", gold));
+                        if state.dev_mode {
+                            if ui.button("+100 or (dev)").clicked() {
+                                self.pending_dev_add_gold.replace(true);
+                            }
+                        }
+                        if cfg!(debug_assertions) {
+                            if ui.button("🔄 Reroll pools (dev)").clicked() {
+                                self.pending_merchant_reroll.replace(true);
+                            }
+                        }
+                        ui.add_space(6.0);
+                        egui::ScrollArea::vertical().show(ui, |ui| {
+                            ui.heading("Armes");
+                            for (i, opt) in state.merchant_weapons.iter().enumerate() {
+                                match opt {
+                                    Some(me) => {
+                                        match &me.entry {
+                                            InventoryEntry::Identified(item) => {
+                                                let (r, g, b) = item.rarity.color_rgb();
+                                                ui.colored_label(egui::Color32::from_rgb(r, g, b), &item.display_name);
+                                            }
+                                            InventoryEntry::Unidentified(slot) => {
+                                                ui.label(format!("Objet non identifié — {} — {} or", slot.label(), me.price));
+                                            }
+                                        }
+                                        if ui.button(format!("Acheter ({} or)", me.price)).clicked() && gold >= me.price {
+                                            self.pending_merchant_buy.borrow_mut().replace((MerchantPoolKind::Weapon, i));
+                                        }
+                                    }
+                                    None => {
+                                        ui.weak("Slot vide");
+                                    }
+                                }
+                            }
+                            ui.add_space(8.0);
+                            ui.heading("Armures");
+                            for (i, opt) in state.merchant_armor.iter().enumerate() {
+                                match opt {
+                                    Some(me) => {
+                                        match &me.entry {
+                                            InventoryEntry::Identified(item) => {
+                                                let (r, g, b) = item.rarity.color_rgb();
+                                                ui.colored_label(egui::Color32::from_rgb(r, g, b), &item.display_name);
+                                            }
+                                            InventoryEntry::Unidentified(slot) => {
+                                                ui.label(format!("Objet non identifié — {} — {} or", slot.label(), me.price));
+                                            }
+                                        }
+                                        if ui.button(format!("Acheter ({} or)", me.price)).clicked() && gold >= me.price {
+                                            self.pending_merchant_buy.borrow_mut().replace((MerchantPoolKind::Armor, i));
+                                        }
+                                    }
+                                    None => {
+                                        ui.weak("Slot vide");
+                                    }
+                                }
+                            }
+                            ui.add_space(8.0);
+                            ui.heading("Accessoires");
+                            for (i, opt) in state.merchant_accessories.iter().enumerate() {
+                                match opt {
+                                    Some(me) => {
+                                        match &me.entry {
+                                            InventoryEntry::Identified(item) => {
+                                                let (r, g, b) = item.rarity.color_rgb();
+                                                ui.colored_label(egui::Color32::from_rgb(r, g, b), &item.display_name);
+                                            }
+                                            InventoryEntry::Unidentified(slot) => {
+                                                ui.label(format!("Objet non identifié — {} — {} or", slot.label(), me.price));
+                                            }
+                                        }
+                                        if ui.button(format!("Acheter ({} or)", me.price)).clicked() && gold >= me.price {
+                                            self.pending_merchant_buy.borrow_mut().replace((MerchantPoolKind::Accessory, i));
+                                        }
+                                    }
+                                    None => {
+                                        ui.weak("Slot vide");
+                                    }
+                                }
+                            }
+                        });
+                    });
+                if !open {
+                    close_marchand = true;
+                }
+            }
+            if self.expert_open {
+                let mut open = true;
+                egui::Window::new("Expert en identification")
+                    .open(&mut open)
+                    .default_width(320.0)
+                    .show(ui.ctx(), |ui| {
+                        ui.label(format!("Or : {} or", gold));
+                        ui.add_space(8.0);
+                        ui.heading("Expert en identification");
+                        ui.label("Identification groupée : identifier tous les objets de l'inventaire en une fois (prix cumulé).");
+                        ui.weak("(À implémenter : bouton et coût total)");
+                    });
+                if !open {
+                    close_expert = true;
+                }
+            }
+            if self.construction_open {
+                let mut open = true;
+                egui::Window::new("Construction")
+                    .open(&mut open)
+                    .default_width(320.0)
+                    .show(ui.ctx(), |ui| {
+                        ui.label(format!("Or : {} or", gold));
+                        ui.add_space(8.0);
+                        ui.heading("Construction");
+                        ui.label("• Tours : archer, baliste, catapulte");
+                        ui.label("• Fortifications : murs, barricades, portes, pièges");
+                        ui.label("• Bâtiments civils : auberge, taverne, forge, caserne, arsenal, atelier, habitations");
+                        ui.weak("(À implémenter : catégories et placement)");
+                    });
+                if !open {
+                    close_construction = true;
+                }
+            }
+            if self.recrutement_open {
+                let mut open = true;
+                let troops_count = state.troops.iter().filter(|t| t.is_active_in_squad()).count();
+                let max_troops = state.max_troops();
+                egui::Window::new("Recrutement")
+                    .open(&mut open)
+                    .default_width(320.0)
+                    .show(ui.ctx(), |ui| {
+                        ui.label(format!("Or : {} or", gold));
+                        ui.label(format!("Troupes : {} / {}", troops_count, max_troops));
+                        ui.add_space(8.0);
+                        ui.heading("Troupes disponibles");
+                        ui.horizontal(|ui| {
+                            ui.label(TroopKind::Milicien.label());
+                            ui.label("— 100 PV, 20 % blocage, 6 dégâts, 1 att/s, portée 25 px.");
+                            if ui.add_enabled(troops_count < max_troops, egui::Button::new("Recruter")).clicked()
+                                && troops_count < max_troops
+                            {
+                                state.recruit_troop(TroopKind::Milicien);
+                            }
+                        });
+                    });
+                if !open {
+                    close_recrutement = true;
+                }
+            }
+        }
+        if close_marchand {
+            self.marchand_open = false;
+        }
+        if close_expert {
+            self.expert_open = false;
+        }
+        if close_construction {
+            self.construction_open = false;
+        }
+        if close_recrutement {
+            self.recrutement_open = false;
+        }
+        if let Some((pool, index)) = self.pending_merchant_buy.borrow_mut().take() {
+            if let Some(ref mut state) = self.game {
+                match pool {
+                    MerchantPoolKind::Weapon => {
+                        state.buy_merchant_weapon(index);
+                    }
+                    MerchantPoolKind::Armor => {
+                        state.buy_merchant_armor(index);
+                    }
+                    MerchantPoolKind::Accessory => {
+                        state.buy_merchant_accessory(index);
+                    }
+                }
+            }
+        }
+        if self.pending_merchant_reroll.replace(false) {
+            if let Some(ref mut state) = self.game {
+                state.refresh_merchant_pools();
+            }
+        }
+        if self.pending_dev_add_gold.replace(false) {
+            if let Some(ref mut state) = self.game {
+                state.gold += 100;
+            }
         }
 
         // Contenu central selon l'écran
@@ -422,70 +769,67 @@ impl LordOfTheCastleApp {
                     let keys = self.keys;
                     let delta = last_tick.elapsed().as_secs_f32();
                     self.player_anim_accumulator += delta;
+                    self.enemy_anim_accumulator += delta;
+                    self.troop_anim_accumulator += delta;
                     let is_moving = keys.iter().any(|&k| k);
                     let frame_idle = ((self.player_anim_accumulator * 6.0) as usize) % 6;
                     let frame_walk = ((self.player_anim_accumulator * 8.0) as usize) % 8;
+                    let enemy_frame = ((self.enemy_anim_accumulator * 8.0) as usize) % 8;
                     let result = RefCell::new((last_tick, false));
-                    let transition = RefCell::new(None::<Screen>);
-                    ui.horizontal(|ui| {
-                        ui.spacing_mut().item_spacing.x = 0.0;
-                        // Colonne gauche : zone de combat 800×800 (hauteur plafonnée pour éviter vide en bas)
-                        ui.vertical(|ui| {
-                            ui.set_min_width(COMBAT_SURFACE_SIZE);
-                            ui.set_max_width(COMBAT_SURFACE_SIZE);
-                            let available = ui.available_rect_before_wrap();
-                            let h_cap = available.height().min(COMBAT_SURFACE_SIZE);
-                            let available_capped = egui::Rect::from_min_max(
-                                available.min,
-                                egui::pos2(available.right(), available.top() + h_cap),
-                            );
-                            let (game_rect, resp) = allocate_combat_surface_centered(ui, available_capped);
-                            if resp.clicked() {
-                                focus_request.replace(Some(resp.id));
-                            }
-                            let painter = ui.painter();
-                            let cursor_screen = ui.ctx().input(|i| i.pointer.hover_pos());
-                            let cursor_world = cursor_screen
-                                .filter(|p| game_rect.contains(*p))
-                                .map(|p| screen_to_world(game_rect, p.x, p.y));
-                            let facing_left = cursor_world
-                                .map(|(cx, _)| cx < state.player.x)
-                                .unwrap_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW));
-                            let player_sprite = if is_moving {
-                                self.player_walk_texture.as_ref()
-                                    .zip(self.player_walk_desc.as_ref())
-                                    .map(|(t, d)| (t, d, frame_walk, facing_left))
-                            } else {
-                                self.player_sprite_texture.as_ref()
-                                    .zip(self.player_sprite_desc.as_ref())
-                                    .map(|(t, d)| (t, d, frame_idle, facing_left))
-                            };
-                            let (tick, go) = game_zone_tick_and_paint(
-                                game_rect,
-                                &painter,
-                                state,
-                                last_tick,
-                                keys,
-                                ui.visuals().window_fill(),
-                                cursor_screen,
-                                player_sprite,
-                            );
-                            *result.borrow_mut() = (tick, go);
-                        });
-                        let mut sidebar_open = self.preparation_sidebar_open;
-                        let mut sidebar_section = self.preparation_section;
-                        paint_preparation_sidebar(ui, Some(state), &transition, &mut sidebar_open, &mut sidebar_section);
-                        self.preparation_sidebar_open = sidebar_open;
-                        self.preparation_section = sidebar_section;
-                    });
+                    let (game_rect, resp, bottom_rect) = allocate_game_zone_and_bottom(ui);
+                    if resp.clicked() {
+                        focus_request.replace(Some(resp.id));
+                    }
+                    let painter = ui.painter();
+                    let cursor_screen = ui.ctx().input(|i| i.pointer.hover_pos());
+                    let (cx, cy) = (state.player.x, state.player.y);
+                    let cursor_world = cursor_screen
+                        .filter(|p| game_rect.contains(*p))
+                        .map(|p| screen_to_world(game_rect, p.x, p.y, cx, cy));
+                    let facing_left = cursor_world
+                        .map(|(cw, _)| cw < state.player.x)
+                        .unwrap_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW));
+                    let player_sprite = if is_moving {
+                        self.player_walk_texture.as_ref()
+                            .zip(self.player_walk_desc.as_ref())
+                            .map(|(t, d)| (t, d, frame_walk, facing_left))
+                    } else {
+                        self.player_sprite_texture.as_ref()
+                            .zip(self.player_sprite_desc.as_ref())
+                            .map(|(t, d)| (t, d, frame_idle, facing_left))
+                    };
+                    let enemy_sprite = self.enemy_sprite_texture.as_ref()
+                        .zip(self.enemy_sprite_desc.as_ref())
+                        .map(|(t, d)| (t, d, enemy_frame));
+                    let enemy_miniboss_sprite = self.enemy_miniboss_sprite_texture.as_ref()
+                        .zip(self.enemy_miniboss_sprite_desc.as_ref())
+                        .map(|(t, d)| (t, d, enemy_frame));
+                    let troop_frame = ((self.troop_anim_accumulator * 8.0) as usize) % 8;
+                    let troop_walk_sprite = self.troop_sprite_texture.as_ref()
+                        .zip(self.troop_sprite_desc.as_ref())
+                        .map(|(t, d)| (t, d, troop_frame));
+                    let troop_attack_sprite = self.troop_attack_sprite_texture.as_ref()
+                        .zip(self.troop_attack_sprite_desc.as_ref());
+                    let (tick, go) = game_zone_tick_and_paint(
+                        game_rect,
+                        &painter,
+                        state,
+                        last_tick,
+                        keys,
+                        ui.visuals().window_fill(),
+                        cursor_screen,
+                        player_sprite,
+                        enemy_sprite,
+                        enemy_miniboss_sprite,
+                        troop_walk_sprite,
+                        troop_attack_sprite,
+                    );
+                    *result.borrow_mut() = (tick, go);
+                    paint_bottom_panel(ui, bottom_rect, state);
                     let (new_tick, game_over) = *result.borrow();
                     self.last_tick = new_tick;
                     if game_over {
                         self.screen = Screen::GameOver;
-                    }
-                    let screen_transition = transition.borrow_mut().take();
-                    if let Some(s) = screen_transition {
-                        self.screen = s;
                     }
                 }
                 self.game = state_opt;
@@ -494,63 +838,69 @@ impl LordOfTheCastleApp {
                 if let Some(ref mut state) = self.game {
                     let delta = self.last_tick.elapsed().as_secs_f32();
                     self.player_anim_accumulator += delta;
+                    self.enemy_anim_accumulator += delta;
+                    self.troop_anim_accumulator += delta;
                     let is_moving = self.keys.iter().any(|&k| k);
                     let frame_idle = ((self.player_anim_accumulator * 6.0) as usize) % 6;
                     let frame_walk = ((self.player_anim_accumulator * 8.0) as usize) % 8;
-                    let game_rect_for_overlay = RefCell::new(None::<egui::Rect>);
-                    // Même layout qu'en préparation : colonne 800px à gauche pour la zone de bataille
-                    ui.horizontal(|ui| {
-                        ui.spacing_mut().item_spacing.x = 0.0;
-                        ui.vertical(|ui| {
-                            ui.set_min_width(COMBAT_SURFACE_SIZE);
-                            ui.set_max_width(COMBAT_SURFACE_SIZE);
-                            let available = ui.available_rect_before_wrap();
-                            let h_cap = available.height().min(COMBAT_SURFACE_SIZE);
-                            let available_capped = egui::Rect::from_min_max(
-                                available.min,
-                                egui::pos2(available.right(), available.top() + h_cap),
-                            );
-                            let (game_rect, resp) = allocate_combat_surface_centered(ui, available_capped);
-                            *game_rect_for_overlay.borrow_mut() = Some(game_rect);
-                            if resp.clicked() {
-                                focus_request.replace(Some(resp.id));
-                            }
-                            let painter = ui.painter();
-                            let cursor_screen = ui.ctx().input(|i| i.pointer.hover_pos());
-                            let cursor_world = cursor_screen
-                                .filter(|p| game_rect.contains(*p))
-                                .map(|p| screen_to_world(game_rect, p.x, p.y));
-                            let facing_left = cursor_world
-                                .map(|(cx, _)| cx < state.player.x)
-                                .unwrap_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW));
-                            let player_sprite = if is_moving {
-                                self.player_walk_texture.as_ref()
-                                    .zip(self.player_walk_desc.as_ref())
-                                    .map(|(t, d)| (t, d, frame_walk, facing_left))
-                            } else {
-                                self.player_sprite_texture.as_ref()
-                                    .zip(self.player_sprite_desc.as_ref())
-                                    .map(|(t, d)| (t, d, frame_idle, facing_left))
-                            };
-                            let (new_tick, game_over) = game_zone_tick_and_paint(
-                                game_rect,
-                                &painter,
-                                state,
-                                self.last_tick,
-                                self.keys,
-                                ui.visuals().window_fill(),
-                                cursor_screen,
-                                player_sprite,
-                            );
-                            self.last_tick = new_tick;
-                            if game_over {
-                                self.screen = Screen::GameOver;
-                            }
-                        });
-                    });
-                    // Overlay victoire de vague (même logique que l'autre branche Battle)
+                    let enemy_frame = ((self.enemy_anim_accumulator * 8.0) as usize) % 8;
+                    let (game_rect, resp, bottom_rect) = allocate_game_zone_and_bottom(ui);
+                    if resp.clicked() {
+                        focus_request.replace(Some(resp.id));
+                    }
+                    let painter = ui.painter();
+                    let cursor_screen = ui.ctx().input(|i| i.pointer.hover_pos());
+                    let (cx, cy) = (state.player.x, state.player.y);
+                    let cursor_world = cursor_screen
+                        .filter(|p| game_rect.contains(*p))
+                        .map(|p| screen_to_world(game_rect, p.x, p.y, cx, cy));
+                    let facing_left = cursor_world
+                        .map(|(cw, _)| cw < state.player.x)
+                        .unwrap_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW));
+                    let player_sprite = if is_moving {
+                        self.player_walk_texture.as_ref()
+                            .zip(self.player_walk_desc.as_ref())
+                            .map(|(t, d)| (t, d, frame_walk, facing_left))
+                    } else {
+                        self.player_sprite_texture.as_ref()
+                            .zip(self.player_sprite_desc.as_ref())
+                            .map(|(t, d)| (t, d, frame_idle, facing_left))
+                    };
+                    let enemy_sprite = self.enemy_sprite_texture.as_ref()
+                        .zip(self.enemy_sprite_desc.as_ref())
+                        .map(|(t, d)| (t, d, enemy_frame));
+                    let enemy_miniboss_sprite = self.enemy_miniboss_sprite_texture.as_ref()
+                        .zip(self.enemy_miniboss_sprite_desc.as_ref())
+                        .map(|(t, d)| (t, d, enemy_frame));
+                    let troop_frame = ((self.troop_anim_accumulator * 8.0) as usize) % 8;
+                    let troop_walk_sprite = self.troop_sprite_texture.as_ref()
+                        .zip(self.troop_sprite_desc.as_ref())
+                        .map(|(t, d)| (t, d, troop_frame));
+                    let troop_attack_sprite = self.troop_attack_sprite_texture.as_ref()
+                        .zip(self.troop_attack_sprite_desc.as_ref());
+                    let (new_tick, game_over) = game_zone_tick_and_paint(
+                        game_rect,
+                        &painter,
+                        state,
+                        self.last_tick,
+                        self.keys,
+                        ui.visuals().window_fill(),
+                        cursor_screen,
+                        player_sprite,
+                        enemy_sprite,
+                        enemy_miniboss_sprite,
+                        troop_walk_sprite,
+                        troop_attack_sprite,
+                    );
+                    self.last_tick = new_tick;
+                    paint_bottom_panel(ui, bottom_rect, state);
+                    if game_over {
+                        self.screen = Screen::GameOver;
+                    }
+                    // Overlay victoire de vague
                     if state.is_wave_won() {
-                        if let Some(rect) = game_rect_for_overlay.borrow().copied() {
+                        let rect = game_rect;
+                        if rect.width() > 0.0 && rect.height() > 0.0 {
                             egui::Area::new(egui::Id::new("wave_won_overlay_2"))
                                 .order(egui::Order::Foreground)
                                 .fixed_pos(rect.min)
@@ -625,255 +975,13 @@ impl LordOfTheCastleApp {
         // Appliquer « Lancer la vague » cliqué depuis la barre haute.
         if start_battle_request.replace(false) {
             if let Some(ref mut state) = self.game {
-                state.start_battle_phase();
-            }
-            self.screen = Screen::Battle;
-        }
-    }
-}
-
-/// Sidebar « Mode préparation » : affichée ou masquée. Quand affichée : 4 sections (Marchand, Expert, Construction, Recrutement).
-fn paint_preparation_sidebar(
-    ui: &mut egui::Ui,
-    mut state: Option<&mut GameState>,
-    transition: &std::cell::RefCell<Option<Screen>>,
-    sidebar_open: &mut bool,
-    section: &mut PreparationSection,
-) {
-    if !*sidebar_open {
-        ui.vertical(|ui| {
-            ui.set_min_width(40.0);
-            if ui.button("Mode préparation ▶").clicked() {
-                *sidebar_open = true;
-            }
-        });
-        return;
-    }
-    ui.vertical(|ui| {
-        ui.set_min_width(280.0);
-        ui.horizontal(|ui| {
-            ui.heading("Mode préparation");
-            if ui.button("◀ Masquer").clicked() {
-                *sidebar_open = false;
-            }
-        });
-        if let Some(ref mut st) = state {
-            ui.label(format!("Or : {} or", st.gold));
-            if ui.button("Lancer la vague").clicked() {
-                st.start_battle_phase();
-                transition.replace(Some(Screen::Battle));
-            }
-        }
-        ui.add_space(8.0);
-        ui.separator();
-        ui.horizontal(|ui| {
-            if ui.selectable_label(*section == PreparationSection::Marchand, "Marchand").clicked() {
-                *section = PreparationSection::Marchand;
-            }
-            if ui.selectable_label(*section == PreparationSection::ExpertIdentification, "Expert").clicked() {
-                *section = PreparationSection::ExpertIdentification;
-            }
-            if ui.selectable_label(*section == PreparationSection::Construction, "Construction").clicked() {
-                *section = PreparationSection::Construction;
-            }
-            if ui.selectable_label(*section == PreparationSection::Recrutement, "Recrutement").clicked() {
-                *section = PreparationSection::Recrutement;
-            }
-        });
-        ui.add_space(8.0);
-        egui::ScrollArea::vertical().show(ui, |ui| {
-            match *section {
-                PreparationSection::Marchand => {
-                    ui.heading("Marchand");
-                    ui.label("Potions et consommables (illimités). Objets communs. Un objet non identifié (pari).");
-                    ui.weak("(À implémenter : catalogue et achat)");
-                }
-                PreparationSection::ExpertIdentification => {
-                    ui.heading("Expert en identification");
-                    ui.label("Identification groupée : identifier tous les objets de l'inventaire en une fois (prix cumulé).");
-                    ui.weak("(À implémenter : bouton et coût total)");
-                }
-                PreparationSection::Construction => {
-                    ui.heading("Construction");
-                    ui.label("• Tours : archer, baliste, catapulte");
-                    ui.label("• Fortifications : murs, barricades, portes, pièges");
-                    ui.label("• Bâtiments civils : auberge, taverne, forge, caserne, arsenal, atelier, habitations");
-                    ui.weak("(À implémenter : catégories et placement)");
-                }
-                PreparationSection::Recrutement => {
-                    ui.heading("Recrutement");
-                    ui.label("Paysans (cap : dizaine de Charisme).");
-                    ui.weak("(À implémenter : troupes et cap)");
+                if state.inventory.len() >= INVENTORY_MAX_SLOTS {
+                    self.show_encumbered_overlay = true;
+                } else {
+                    state.start_battle_phase();
+                    self.screen = Screen::Battle;
                 }
             }
-        });
-    });
-}
-
-/// Taille de la surface de combat (800×800 max, ou moins si zone insuffisante). Carré.
-fn combat_surface_size(available: egui::Rect) -> egui::Vec2 {
-    let w = COMBAT_SURFACE_SIZE.min(available.width());
-    let h = COMBAT_SURFACE_SIZE.min(available.height());
-    let side = w.min(h);
-    egui::Vec2::new(side, side)
-}
-
-/// Alloue la surface de combat centrée dans la zone disponible (espacements explicites pour centrage vertical et horizontal).
-/// Retourne (game_rect, response) pour demander le focus au clic.
-fn allocate_combat_surface_centered(
-    ui: &mut egui::Ui,
-    available: egui::Rect,
-) -> (egui::Rect, egui::Response) {
-    let size = combat_surface_size(available);
-    let top_space = (available.height() - size.y) / 2.0;
-    let bottom_space = available.height() - size.y - top_space;
-    let left_space = (available.width() - size.x) / 2.0;
-    let right_space = available.width() - size.x - left_space;
-    ui.add_space(top_space.max(0.0));
-    let response = ui.horizontal(|ui| {
-        ui.add_space(left_space.max(0.0));
-        let rect = egui::Rect::from_min_size(ui.cursor().min, size);
-        let response = ui.allocate_rect(rect, egui::Sense::click());
-        ui.add_space(right_space.max(0.0));
-        (rect, response)
-    });
-    let (game_rect, resp) = response.inner;
-    ui.add_space(bottom_space.max(0.0));
-    (game_rect, resp)
-}
-
-/// Monde → écran : château au centre du rect (centre monde = centre de la surface 800×800).
-fn world_to_screen(rect: egui::Rect, wx: f32, wy: f32) -> egui::Pos2 {
-    let cx = rect.center().x;
-    let cy = rect.center().y;
-    egui::Pos2::new(cx + wx, cy + wy)
-}
-
-/// Écran → monde : inverse de world_to_screen (pour position curseur → coords monde).
-fn screen_to_world(rect: egui::Rect, sx: f32, sy: f32) -> (f32, f32) {
-    let cx = rect.center().x;
-    let cy = rect.center().y;
-    (sx - cx, sy - cy)
-}
-
-/// Fenêtre fiche joueur : nom, niveau, PV/Mana, XP, caractéristiques, statistiques.
-fn paint_player_window(ui: &mut egui::Ui, state: Option<&GameState>) {
-    let Some(state) = state else {
-        ui.label("Aucune partie en cours.");
-        return;
-    };
-    let p = &state.player;
-    let name = if p.name.is_empty() { "Joueur" } else { p.name.as_str() };
-
-    // [Nom du personnage] [Niveau]
-    ui.horizontal(|ui| {
-        ui.heading(name);
-        ui.label(format!("Niveau {}", state.level));
-    });
-    ui.add_space(4.0);
-
-    // [xx/yy PV] - [xx/yy Mana]
-    ui.label(format!("{} / {} PV  —  {} / {} Mana", p.hp, p.hp_max, p.mana, p.mana_max));
-    ui.add_space(2.0);
-
-    // xxx / yyyy XP pour le prochain niveau
-    let xp_next = state.xp_required_for_next_level();
-    ui.label(format!("{} / {} XP pour le prochain niveau", state.xp, xp_next));
-    ui.add_space(8.0);
-
-    // Caractéristiques (collapse) : 2 colonnes
-    ui.collapsing("Caractéristiques", |ui| {
-        let s = &p.stats;
-        ui.horizontal(|ui| {
-            ui.vertical(|ui| {
-                ui.label(format!("Force (For) : {}", s.display(Stat::For)));
-                ui.label(format!("Constitution (Con) : {}", s.display(Stat::Con)));
-                ui.label(format!("Agilité (Agi) : {}", s.display(Stat::Agi)));
-                ui.label(format!("Dextérité (Dex) : {}", s.display(Stat::Dex)));
-            });
-            ui.vertical(|ui| {
-                ui.label(format!("Intelligence (Int) : {}", s.display(Stat::Int)));
-                ui.label(format!("Sagesse (Sag) : {}", s.display(Stat::Sag)));
-                ui.label(format!("Charisme (Cha) : {}", s.display(Stat::Cha)));
-                ui.label(format!("Chance (Luk) : {}", s.display(Stat::Luk)));
-            });
-        });
-    });
-
-    // Statistiques (collapse)
-    let dmg = p.auto_attack_damage(); // à main nue : Force + dizaine(Constitution)
-    let interval_s = Player::auto_attack_interval_s();
-    let attack_speed = 1.0 / interval_s;
-    ui.collapsing("Statistiques", |ui| {
-        ui.label(format!("Dégât (à main nue) : {}", dmg));
-        ui.label(format!("Vitesse de déplacement : {:.0} px/s", p.move_speed()));
-        ui.label(format!("Vitesse d'attaque : {:.1}/s", attack_speed));
-        ui.label(format!("Rayon d'attaque : {} px", Player::auto_attack_range()));
-        ui.label(format!("Rayon de collecte : {} px", PICKUP_RADIUS));
-        ui.label(format!("Armure : {}", p.armor));
-        ui.label(format!("Résistance magique : {}", p.magic_resist));
-        ui.add_space(4.0);
-        ui.separator();
-        ui.label(format!("Nombre d'ennemis tués : {}", state.enemies_killed));
-        ui.label(format!("Vague max : {}", state.max_wave_reached));
-        ui.label(format!("Nombre de Boss tués : {}", state.bosses_killed));
-        ui.label(format!("Or cumulés : {}", state.gold_total));
-    });
-}
-
-/// Fenêtre inventaire : [xx/xx slots], liste des objets. Clic = sélection pour détail / identification.
-fn paint_inventory_window(
-    ui: &mut egui::Ui,
-    state: Option<&mut GameState>,
-    selected_slot: &mut Option<usize>,
-) {
-    let Some(state) = state else {
-        ui.label("Aucune partie en cours.");
-        return;
-    };
-    let n = state.inventory.len();
-    ui.label(format!("[{}/{} slots]", n, INVENTORY_MAX_SLOTS));
-    ui.add_space(6.0);
-    ui.separator();
-    for (i, entry) in state.inventory.iter().enumerate() {
-        let (label, color) = match entry {
-            InventoryEntry::Unidentified(slot) => {
-                (format!("Objet non-identifié : {}", slot.label()), egui::Color32::GRAY)
-            }
-            InventoryEntry::Identified(item) => {
-                let (r, g, b) = item.rarity.color_rgb();
-                (
-                    format!("{} — {} — {}", item.display_name, item.slot.label(), item.rarity.label()),
-                    egui::Color32::from_rgb(r, g, b),
-                )
-            }
-        };
-        let btn = egui::Button::new(egui::RichText::new(label).color(color));
-        if ui.add(btn).clicked() {
-            *selected_slot = Some(i);
-        }
-    }
-}
-
-/// Fenêtre équipement : liste des slots, objet équipé ou "Vide". Clic sur un objet = détail (selected_equipment_slot).
-fn paint_equipment_window(
-    ui: &mut egui::Ui,
-    state: Option<&mut GameState>,
-    selected_slot: &mut Option<ItemSlot>,
-) {
-    let Some(state) = state else {
-        ui.label("Aucune partie en cours.");
-        return;
-    };
-    for &slot in ItemSlot::equipment_slots() {
-        let label = match state.get_equipped(slot) {
-            Some(item) => format!("{} : {}", slot.label(), item.display_name),
-            None => format!("{} : Vide", slot.label()),
-        };
-        let has_item = state.get_equipped(slot).is_some();
-        let btn = egui::Button::new(label);
-        if ui.add(btn).clicked() && has_item {
-            *selected_slot = Some(slot);
         }
     }
 }
@@ -902,6 +1010,7 @@ fn paint_item_detail_or_identify(
         InventoryEntry::Unidentified(slot) => {
             ui.label("Objet non-identifié");
             ui.label(format!("Type : {}", slot.label()));
+            ui.weak("Un objet non identifié ne peut pas être équipé.");
             if state.phase == GamePhase::Preparation {
                 ui.add_space(8.0);
                 ui.label("Voulez-vous identifier cet objet ?");
@@ -1016,294 +1125,10 @@ fn paint_equipment_item_detail(
     }
 }
 
-fn paint_castle(painter: &egui::Painter, rect: egui::Rect, state: &GameState) {
-    let half = size::CASTLE / 2.0;
-    let min = world_to_screen(rect, state.castle.x - half, state.castle.y - half);
-    let max = world_to_screen(rect, state.castle.x + half, state.castle.y + half);
-    let r = egui::Rect::from_min_max(min, max);
-    // Bâtiment type forteresse : pierre grise + contour sombre (plus lisible qu'un bloc vert)
-    painter.rect_filled(r, 0.0, egui::Color32::from_rgb(100, 100, 110));
-    painter.rect_stroke(
-        r,
-        0.0,
-        (2.0, egui::Color32::from_rgb(50, 50, 55)),
-        egui::StrokeKind::Outside,
-    );
-}
-
-/// Dessine le joueur : sprite (spritesheet) par-dessus la hitbox si fourni, sinon carré de couleur.
-/// La hitbox (carré) reste la référence pour les collisions ; le sprite est centré dessus.
-/// Le 4e élément du tuple = flip horizontal (gauche en 2D plateforme).
-fn paint_player(
-    painter: &egui::Painter,
-    rect: egui::Rect,
-    state: &GameState,
-    player_sprite: Option<(&egui::TextureHandle, &SpritesheetDesc, usize, bool)>,
-) {
-    let half = size::MOBILE / 2.0;
-    let center = world_to_screen(rect, state.player.x, state.player.y);
-
-    if let Some((texture, desc, frame_index, flip_h)) = player_sprite {
-        let uv = desc.frame_uv_rect(frame_index);
-        let (fw, fh) = desc.frame_size();
-        let tint = if state.player.dead {
-            egui::Color32::from_rgb(140, 100, 80)
-        } else {
-            egui::Color32::WHITE
-        };
-        draw_sprite_frame(painter, texture, uv, center, (fw, fh), tint, flip_h);
-    } else {
-        let min = world_to_screen(rect, state.player.x - half, state.player.y - half);
-        let max = world_to_screen(rect, state.player.x + half, state.player.y + half);
-        let color = if state.player.dead {
-            egui::Color32::from_rgb(100, 50, 0)
-        } else {
-            egui::Color32::from_rgb(255, 165, 0)
-        };
-        painter.rect_filled(egui::Rect::from_min_max(min, max), 0.0, color);
-    }
-}
-
-fn paint_enemies(painter: &egui::Painter, rect: egui::Rect, state: &GameState) {
-    for e in &state.enemies {
-        let half = e.half_size();
-        let min = world_to_screen(rect, e.x - half, e.y - half);
-        let max = world_to_screen(rect, e.x + half, e.y + half);
-        let color = if e.is_flashing() {
-            egui::Color32::from_rgb(255, 255, 220)
-        } else {
-            match e.kind {
-                EnemyKind::Normal => egui::Color32::from_rgb(139, 90, 43),
-                EnemyKind::MiniBoss => egui::Color32::from_rgb(255, 165, 0),
-                EnemyKind::Boss => egui::Color32::from_rgb(200, 0, 0),
-            }
-        };
-        painter.rect_filled(egui::Rect::from_min_max(min, max), 0.0, color);
-    }
-}
-
-fn paint_towers(painter: &egui::Painter, rect: egui::Rect, state: &GameState) {
-    let half = size::TOWER / 2.0;
-    for t in &state.towers {
-        if t.hp <= 0 {
-            continue;
-        }
-        let min = world_to_screen(rect, t.x - half, t.y - half);
-        let max = world_to_screen(rect, t.x + half, t.y + half);
-        let r = egui::Rect::from_min_max(min, max);
-        painter.rect_filled(r, 0.0, egui::Color32::from_rgb(100, 100, 100));
-        painter.rect_stroke(
-            r,
-            0.0,
-            (1.0, egui::Color32::from_rgb(60, 60, 60)),
-            egui::StrokeKind::Outside,
-        );
-    }
-}
-
-/// Barre de vie verte sous une entité (monde → écran). hp/hp_max = % affiché.
-fn paint_health_bar(
-    painter: &egui::Painter,
-    rect: egui::Rect,
-    world_x: f32,
-    world_y: f32,
-    entity_half_size: f32,
-    hp: i32,
-    hp_max: i32,
-) {
-    if hp_max <= 0 {
-        return;
-    }
-    let bar_w = entity_half_size * 2.4f32;
-    let bar_h = 4.0;
-    let offset_y = entity_half_size + 4.0;
-    let min = world_to_screen(rect, world_x - bar_w / 2.0, world_y + offset_y);
-    let max_bg = world_to_screen(rect, world_x + bar_w / 2.0, world_y + offset_y + bar_h);
-    let bg_rect = egui::Rect::from_min_max(min, max_bg);
-    painter.rect_filled(bg_rect, 0.0, egui::Color32::from_rgb(40, 40, 40));
-    let t = (hp as f32 / hp_max as f32).clamp(0.0, 1.0);
-    let max_fill = world_to_screen(rect, world_x - bar_w / 2.0 + bar_w * t, world_y + offset_y + bar_h);
-    let fill_rect = egui::Rect::from_min_max(min, max_fill);
-    painter.rect_filled(fill_rect, 0.0, egui::Color32::from_rgb(0, 200, 0));
-}
-
-/// Barres de vie sous les entités blessées (PV < PV max).
-fn paint_health_bars(painter: &egui::Painter, rect: egui::Rect, state: &GameState) {
-    if state.castle.hp < state.castle.hp_max && state.castle.hp > 0 {
-        paint_health_bar(
-            painter,
-            rect,
-            state.castle.x,
-            state.castle.y,
-            size::CASTLE / 2.0,
-            state.castle.hp,
-            state.castle.hp_max,
-        );
-    }
-    if state.player.hp < state.player.hp_max && state.player.hp > 0 {
-        paint_health_bar(
-            painter,
-            rect,
-            state.player.x,
-            state.player.y,
-            Player::half_size(),
-            state.player.hp,
-            state.player.hp_max,
-        );
-    }
-    for e in &state.enemies {
-        if e.hp < e.hp_max {
-            paint_health_bar(painter, rect, e.x, e.y, e.half_size(), e.hp, e.hp_max);
-        }
-    }
-    for t in &state.towers {
-        if t.hp > 0 && t.hp < t.hp_max {
-            paint_health_bar(
-                painter,
-                rect,
-                t.x,
-                t.y,
-                Tower::half_size(),
-                t.hp,
-                t.hp_max,
-            );
-        }
-    }
-}
-
-/// Pixels de loot au sol : jaune = or, bleu = xp, marron = objet.
-fn paint_loot(painter: &egui::Painter, rect: egui::Rect, state: &GameState) {
-    let pixel = 6.0f32; // demi-côté du pixel
-    for drop_ in &state.loot_drops {
-        let min = world_to_screen(rect, drop_.x - pixel, drop_.y - pixel);
-        let max = world_to_screen(rect, drop_.x + pixel, drop_.y + pixel);
-        let r = egui::Rect::from_min_max(min, max);
-        let color = match &drop_.kind {
-            LootKind::Gold(_) => egui::Color32::from_rgb(255, 215, 0),   // jaune or
-            LootKind::Xp(_) => egui::Color32::from_rgb(70, 130, 255),    // bleu xp
-            LootKind::Item(_) => egui::Color32::from_rgb(139, 90, 43),  // marron objet
-        };
-        painter.rect_filled(r, 0.0, color);
-    }
-}
-
-/// Cône d'attaque joueur (toujours affiché) + cercles de portée ennemis/tours (mode dev uniquement).
-/// cursor_world : position curseur en coords monde (pour tracer le cône d'attaque vers le curseur).
-fn paint_dev_ranges(
-    painter: &egui::Painter,
-    rect: egui::Rect,
-    state: &GameState,
-    cursor_world: Option<(f32, f32)>,
-) {
-    // Même rendu en préparation et en bataille (zone identique).
-    let stroke = 1.5f32;
-    let color_circle = egui::Color32::from_rgb(0, 100, 255);
-    let color_cone = egui::Color32::from_rgb(0, 150, 255);
-    let px = state.player.x;
-    let py = state.player.y;
-    let r_player = Player::auto_attack_range();
-    let center = world_to_screen(rect, px, py);
-    // Joueur : cercle de portée + cône 40°
-    painter.circle_stroke(center, r_player, (stroke, color_circle));
-    let aim_angle_rad = cursor_world
-        .map(|(cx, cy)| (cy - py).atan2(cx - px))
-        .unwrap_or_else(|| state.player.dir.to_angle_rad());
-    let half_cone_rad = 20.0_f32.to_radians();
-    let left_angle = aim_angle_rad - half_cone_rad;
-    let right_angle = aim_angle_rad + half_cone_rad;
-    let tip_left = world_to_screen(
-        rect,
-        px + r_player * left_angle.cos(),
-        py + r_player * left_angle.sin(),
-    );
-    let tip_right = world_to_screen(
-        rect,
-        px + r_player * right_angle.cos(),
-        py + r_player * right_angle.sin(),
-    );
-    painter.line_segment([center, tip_left], (stroke, color_cone));
-    painter.line_segment([center, tip_right], (stroke, color_cone));
-    // Mode dev uniquement : cercles ennemis (rouge) et tours (orange)
-    if !state.dev_mode {
-        return;
-    }
-    for e in &state.enemies {
-        let center = world_to_screen(rect, e.x, e.y);
-        painter.circle_stroke(center, ENEMY_VISION_RADIUS, (stroke, egui::Color32::from_rgb(255, 0, 0)));
-    }
-    for t in &state.towers {
-        if t.hp <= 0 {
-            continue;
-        }
-        let center = world_to_screen(rect, t.x, t.y);
-        painter.circle_stroke(center, Tower::range(), (stroke, egui::Color32::from_rgb(255, 165, 0)));
-    }
-}
-
-/// Tick + peinture de la zone de jeu. Retourne (nouvel instant, game_over).
-/// cursor_screen : position du curseur en coords écran (pour cône d’attaque joueur).
-fn game_zone_tick_and_paint(
-    rect: egui::Rect,
-    painter: &egui::Painter,
-    state: &mut GameState,
-    last_tick: Instant,
-    keys: [bool; 8],
-    window_fill: egui::Color32,
-    cursor_screen: Option<egui::Pos2>,
-    player_sprite: Option<(&egui::TextureHandle, &SpritesheetDesc, usize, bool)>,
-) -> (Instant, bool) {
-    painter.rect_filled(rect, 0.0, window_fill.linear_multiply(0.5));
-
-    let cursor_world = cursor_screen
-        .filter(|p| rect.contains(*p))
-        .map(|p| screen_to_world(rect, p.x, p.y));
-
-    let now = Instant::now();
-    if state.phase == GamePhase::Battle {
-        let delta = last_tick.elapsed().as_secs_f32();
-        if keys[0] {
-            move_player(state, Dir8::N, delta);
-        }
-        if keys[1] {
-            move_player(state, Dir8::NE, delta);
-        }
-        if keys[2] {
-            move_player(state, Dir8::E, delta);
-        }
-        if keys[3] {
-            move_player(state, Dir8::SE, delta);
-        }
-        if keys[4] {
-            move_player(state, Dir8::S, delta);
-        }
-        if keys[5] {
-            move_player(state, Dir8::SW, delta);
-        }
-        if keys[6] {
-            move_player(state, Dir8::W, delta);
-        }
-        if keys[7] {
-            move_player(state, Dir8::NW, delta);
-        }
-        tick_battle(state, delta, cursor_world);
-    }
-
-    paint_towers(painter, rect, state);
-    paint_enemies(painter, rect, state);
-    paint_castle(painter, rect, state);
-    paint_dev_ranges(painter, rect, state, cursor_world);
-    paint_player(painter, rect, state, player_sprite);
-    paint_health_bars(painter, rect, state);
-    paint_loot(painter, rect, state);
-
-    // Ne pas passer en Préparation ici : l'app affiche l'overlay victoire et le joueur clique "Phase suivante".
-    (now, state.is_game_over())
-}
-
 impl App for LordOfTheCastleApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         // Input clavier (8 directions) : ZQSD + flèches (Z=haut, Q=gauche, S=bas, D=droite).
-        let input = ctx.input(|i| i.clone());
+        let input = ctx.input(Clone::clone);
         use egui::Key;
         let up = input.key_down(Key::Z) || input.key_down(Key::W) || input.key_down(Key::ArrowUp);
         let down = input.key_down(Key::S) || input.key_down(Key::ArrowDown);
@@ -1334,8 +1159,36 @@ impl App for LordOfTheCastleApp {
                         self.selected_equipment_slot = None;
                     }
                     if let Some(ref mut state) = self.game {
+                        let prep_enabled = state.phase == GamePhase::Preparation;
+                        if ui.add_enabled(prep_enabled, egui::Button::new("Compétences")).clicked() && prep_enabled {
+                            self.competences_open ^= true;
+                        }
+                        if ui.add_enabled(prep_enabled, egui::Button::new("Marchand")).clicked() && prep_enabled {
+                            self.marchand_open ^= true;
+                        }
+                        if ui.add_enabled(prep_enabled, egui::Button::new("Deckard Rain")).clicked() && prep_enabled {
+                            self.expert_open ^= true;
+                        }
+                        if ui.add_enabled(prep_enabled, egui::Button::new("Construction")).clicked() && prep_enabled {
+                            self.construction_open ^= true;
+                        }
+                        if ui.add_enabled(prep_enabled, egui::Button::new("Recrutement")).clicked() && prep_enabled {
+                            self.recrutement_open ^= true;
+                        }
+                        if state.phase == GamePhase::Preparation {
+                            if ui.button("Lancer la vague").clicked() {
+                                if state.inventory.len() >= INVENTORY_MAX_SLOTS {
+                                    self.show_encumbered_overlay = true;
+                                } else {
+                                    state.start_battle_phase();
+                                    self.screen = Screen::Battle;
+                                }
+                            }
+                        }
                         ui.label(format!("Vague {}", state.wave_number));
                         ui.label(format!("Ennemis: {}", state.enemies.len()));
+                        let troops_count_standalone = state.troops.iter().filter(|t| t.is_active_in_squad()).count();
+                        ui.label(format!("Troupes: {} / {}", troops_count_standalone, state.max_troops()));
                         if ui
                             .button(if state.dev_mode { "Mode Dev: ON" } else { "Mode Dev" })
                             .clicked()
@@ -1349,13 +1202,31 @@ impl App for LordOfTheCastleApp {
                 });
             });
 
+        // Overlay « trop encombré » : inventaire plein au clic sur Lancer la vague.
+        if self.show_encumbered_overlay {
+            let mut open = true;
+            egui::Window::new("Attention")
+                .collapsible(false)
+                .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::ZERO)
+                .show(ctx, |ui| {
+                    ui.label("Vous êtes trop encombré pour vous battre. Vendez quelques objets avant de partir au combat.");
+                    ui.add_space(8.0);
+                    if ui.button("OK").clicked() {
+                        open = false;
+                    }
+                });
+            if !open {
+                self.show_encumbered_overlay = false;
+            }
+        }
+
         // Fenêtre Player (métriques joueur) — standalone
         if self.player_window_open {
             let mut open = true;
             egui::Window::new("Player")
                 .open(&mut open)
                 .default_width(280.0)
-                .show(ctx, |ui| paint_player_window(ui, self.game.as_ref()));
+                .show(ctx, |ui| paint_player_window(ui, self.game.as_mut()));
             if !open {
                 self.player_window_open = false;
             }
@@ -1369,7 +1240,7 @@ impl App for LordOfTheCastleApp {
                 .default_width(320.0)
                 .default_height(400.0)
                 .show(ctx, |ui| {
-                    paint_inventory_window(ui, self.game.as_mut(), &mut self.selected_inventory_slot);
+                    paint_inventory_window(ui, self.game.as_mut(), &mut self.selected_inventory_slot, &self.pending_identify_self);
                 });
             if !open {
                 self.inventory_window_open = false;
@@ -1378,8 +1249,7 @@ impl App for LordOfTheCastleApp {
         }
 
         // Fenêtre Détail / Identification (objet sélectionné)
-        if self.selected_inventory_slot.is_some() {
-            let slot_idx = self.selected_inventory_slot.unwrap();
+        if let Some(slot_idx) = self.selected_inventory_slot {
             egui::Window::new("Détail objet")
                 .collapsible(false)
                 .resizable(false)
@@ -1403,14 +1273,231 @@ impl App for LordOfTheCastleApp {
                 self.selected_equipment_slot = None;
             }
         }
-        if self.selected_equipment_slot.is_some() {
-            let slot = self.selected_equipment_slot.unwrap();
+        if let Some(slot) = self.selected_equipment_slot {
             egui::Window::new("Détail équipement")
                 .collapsible(false)
                 .resizable(false)
                 .show(ctx, |ui| {
                     paint_equipment_item_detail(ui, self, slot);
                 });
+        }
+
+        // Fenêtre Compétences (5 onglets)
+        if self.competences_open {
+            let mut open = true;
+            egui::Window::new("Compétences")
+                .open(&mut open)
+                .default_width(420.0)
+                .default_height(380.0)
+                .show(ctx, |ui| paint_skills_window(ui, self.game.as_mut(), &mut self.skills_tab, &mut self.selected_warrior_skill));
+            if !open {
+                self.competences_open = false;
+            }
+        }
+
+        // Fenêtres Mode préparation (Marchand, Expert, Construction, Recrutement)
+        let mut close_marchand = false;
+        let mut close_expert = false;
+        let mut close_construction = false;
+        let mut close_recrutement = false;
+        if let Some(ref mut state) = self.game {
+            let gold = state.gold;
+            if self.marchand_open {
+                let mut open = true;
+                egui::Window::new("Marchand")
+                    .open(&mut open)
+                    .default_width(380.0)
+                    .default_height(480.0)
+                    .show(ctx, |ui| {
+                        ui.label(format!("Or : {} or", gold));
+                        if state.dev_mode {
+                            if ui.button("+100 or (dev)").clicked() {
+                                self.pending_dev_add_gold.replace(true);
+                            }
+                        }
+                        if cfg!(debug_assertions) {
+                            if ui.button("🔄 Reroll pools (dev)").clicked() {
+                                self.pending_merchant_reroll.replace(true);
+                            }
+                        }
+                        ui.add_space(6.0);
+                        egui::ScrollArea::vertical().show(ui, |ui| {
+                            ui.heading("Armes");
+                            for (i, opt) in state.merchant_weapons.iter().enumerate() {
+                                match opt {
+                                    Some(me) => {
+                                        match &me.entry {
+                                            InventoryEntry::Identified(item) => {
+                                                let (r, g, b) = item.rarity.color_rgb();
+                                                ui.colored_label(egui::Color32::from_rgb(r, g, b), &item.display_name);
+                                            }
+                                            InventoryEntry::Unidentified(slot) => {
+                                                ui.label(format!("Objet non identifié — {} — {} or", slot.label(), me.price));
+                                            }
+                                        }
+                                        if ui.button(format!("Acheter ({} or)", me.price)).clicked() && gold >= me.price {
+                                            self.pending_merchant_buy.borrow_mut().replace((MerchantPoolKind::Weapon, i));
+                                        }
+                                    }
+                                    None => {
+                                        ui.weak("Slot vide");
+                                    }
+                                }
+                            }
+                            ui.add_space(8.0);
+                            ui.heading("Armures");
+                            for (i, opt) in state.merchant_armor.iter().enumerate() {
+                                match opt {
+                                    Some(me) => {
+                                        match &me.entry {
+                                            InventoryEntry::Identified(item) => {
+                                                let (r, g, b) = item.rarity.color_rgb();
+                                                ui.colored_label(egui::Color32::from_rgb(r, g, b), &item.display_name);
+                                            }
+                                            InventoryEntry::Unidentified(slot) => {
+                                                ui.label(format!("Objet non identifié — {} — {} or", slot.label(), me.price));
+                                            }
+                                        }
+                                        if ui.button(format!("Acheter ({} or)", me.price)).clicked() && gold >= me.price {
+                                            self.pending_merchant_buy.borrow_mut().replace((MerchantPoolKind::Armor, i));
+                                        }
+                                    }
+                                    None => {
+                                        ui.weak("Slot vide");
+                                    }
+                                }
+                            }
+                            ui.add_space(8.0);
+                            ui.heading("Accessoires");
+                            for (i, opt) in state.merchant_accessories.iter().enumerate() {
+                                match opt {
+                                    Some(me) => {
+                                        match &me.entry {
+                                            InventoryEntry::Identified(item) => {
+                                                let (r, g, b) = item.rarity.color_rgb();
+                                                ui.colored_label(egui::Color32::from_rgb(r, g, b), &item.display_name);
+                                            }
+                                            InventoryEntry::Unidentified(slot) => {
+                                                ui.label(format!("Objet non identifié — {} — {} or", slot.label(), me.price));
+                                            }
+                                        }
+                                        if ui.button(format!("Acheter ({} or)", me.price)).clicked() && gold >= me.price {
+                                            self.pending_merchant_buy.borrow_mut().replace((MerchantPoolKind::Accessory, i));
+                                        }
+                                    }
+                                    None => {
+                                        ui.weak("Slot vide");
+                                    }
+                                }
+                            }
+                        });
+                    });
+                if !open {
+                    close_marchand = true;
+                }
+            }
+            if self.expert_open {
+                let mut open = true;
+                egui::Window::new("Expert en identification")
+                    .open(&mut open)
+                    .default_width(320.0)
+                    .show(ctx, |ui| {
+                        ui.label(format!("Or : {} or", gold));
+                        ui.add_space(8.0);
+                        ui.heading("Expert en identification");
+                        ui.label("Identification groupée : identifier tous les objets de l'inventaire en une fois (prix cumulé).");
+                        ui.weak("(À implémenter : bouton et coût total)");
+                    });
+                if !open {
+                    close_expert = true;
+                }
+            }
+            if self.construction_open {
+                let mut open = true;
+                egui::Window::new("Construction")
+                    .open(&mut open)
+                    .default_width(320.0)
+                    .show(ctx, |ui| {
+                        ui.label(format!("Or : {} or", gold));
+                        ui.add_space(8.0);
+                        ui.heading("Construction");
+                        ui.label("• Tours : archer, baliste, catapulte");
+                        ui.label("• Fortifications : murs, barricades, portes, pièges");
+                        ui.label("• Bâtiments civils : auberge, taverne, forge, caserne, arsenal, atelier, habitations");
+                        ui.weak("(À implémenter : catégories et placement)");
+                    });
+                if !open {
+                    close_construction = true;
+                }
+            }
+            if self.recrutement_open {
+                let mut open = true;
+                let troops_count = state.troops.iter().filter(|t| t.is_active_in_squad()).count();
+                let max_troops = state.max_troops();
+                egui::Window::new("Recrutement")
+                    .open(&mut open)
+                    .default_width(320.0)
+                    .show(ctx, |ui| {
+                        ui.label(format!("Or : {} or", gold));
+                        ui.label(format!("Troupes : {} / {}", troops_count, max_troops));
+                        ui.add_space(8.0);
+                        ui.heading("Troupes disponibles");
+                        ui.horizontal(|ui| {
+                            ui.label(TroopKind::Milicien.label());
+                            ui.label("— 100 PV, 20 % blocage, 6 dégâts, 1 att/s, portée 25 px.");
+                            if ui.add_enabled(troops_count < max_troops, egui::Button::new("Recruter")).clicked()
+                                && troops_count < max_troops
+                            {
+                                state.recruit_troop(TroopKind::Milicien);
+                            }
+                        });
+                    });
+                if !open {
+                    close_recrutement = true;
+                }
+            }
+        }
+        if close_marchand {
+            self.marchand_open = false;
+        }
+        if close_expert {
+            self.expert_open = false;
+        }
+        if close_construction {
+            self.construction_open = false;
+        }
+        if close_recrutement {
+            self.recrutement_open = false;
+        }
+        if let Some((pool, index)) = self.pending_merchant_buy.borrow_mut().take() {
+            if let Some(ref mut state) = self.game {
+                match pool {
+                    MerchantPoolKind::Weapon => {
+                        state.buy_merchant_weapon(index);
+                    }
+                    MerchantPoolKind::Armor => {
+                        state.buy_merchant_armor(index);
+                    }
+                    MerchantPoolKind::Accessory => {
+                        state.buy_merchant_accessory(index);
+                    }
+                }
+            }
+        }
+        if self.pending_merchant_reroll.replace(false) {
+            if let Some(ref mut state) = self.game {
+                state.refresh_merchant_pools();
+            }
+        }
+        if self.pending_dev_add_gold.replace(false) {
+            if let Some(ref mut state) = self.game {
+                state.gold += 100;
+            }
+        }
+        if let Some(idx) = self.pending_identify_self.borrow_mut().take() {
+            if let Some(ref mut state) = self.game {
+                state.identify_self(idx);
+            }
         }
 
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -1525,70 +1612,67 @@ impl App for LordOfTheCastleApp {
                         let keys = self.keys;
                         let delta = last_tick.elapsed().as_secs_f32();
                         self.player_anim_accumulator += delta;
+                        self.enemy_anim_accumulator += delta;
+                        self.troop_anim_accumulator += delta;
                         let is_moving = keys.iter().any(|&k| k);
                         let frame_idle = ((self.player_anim_accumulator * 6.0) as usize) % 6;
                         let frame_walk = ((self.player_anim_accumulator * 8.0) as usize) % 8;
+                        let enemy_frame = ((self.enemy_anim_accumulator * 8.0) as usize) % 8;
                         let result = RefCell::new((last_tick, false));
-                        let transition = RefCell::new(None::<Screen>);
-                        ui.horizontal(|ui| {
-                            ui.spacing_mut().item_spacing.x = 0.0;
-                            // Colonne gauche : zone de combat (hauteur plafonnée)
-                            ui.vertical(|ui| {
-                                ui.set_min_width(COMBAT_SURFACE_SIZE);
-                                ui.set_max_width(COMBAT_SURFACE_SIZE);
-                                let available = ui.available_rect_before_wrap();
-                                let h_cap = available.height().min(COMBAT_SURFACE_SIZE);
-                                let available_capped = egui::Rect::from_min_max(
-                                    available.min,
-                                    egui::pos2(available.right(), available.top() + h_cap),
-                                );
-                                let (game_rect, resp) = allocate_combat_surface_centered(ui, available_capped);
-                                if resp.clicked() {
-                                    ctx.memory_mut(|m| m.request_focus(resp.id));
-                                }
-                                let painter = ui.painter();
-                                let cursor_screen = ui.ctx().input(|i| i.pointer.hover_pos());
-                                let cursor_world = cursor_screen
-                                    .filter(|p| game_rect.contains(*p))
-                                    .map(|p| screen_to_world(game_rect, p.x, p.y));
-                                let facing_left = cursor_world
-                                    .map(|(cx, _)| cx < state.player.x)
-                                    .unwrap_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW));
-                                let player_sprite = if is_moving {
-                                    self.player_walk_texture.as_ref()
-                                        .zip(self.player_walk_desc.as_ref())
-                                        .map(|(t, d)| (t, d, frame_walk, facing_left))
-                                } else {
-                                    self.player_sprite_texture.as_ref()
-                                        .zip(self.player_sprite_desc.as_ref())
-                                        .map(|(t, d)| (t, d, frame_idle, facing_left))
-                                };
-                                let (tick, go) = game_zone_tick_and_paint(
-                                    game_rect,
-                                    &painter,
-                                    state,
-                                    last_tick,
-                                    keys,
-                                    ui.visuals().window_fill(),
-                                    cursor_screen,
-                                    player_sprite,
-                                );
-                                *result.borrow_mut() = (tick, go);
-                            });
-                            let mut sidebar_open = self.preparation_sidebar_open;
-                            let mut sidebar_section = self.preparation_section;
-                            paint_preparation_sidebar(ui, Some(state), &transition, &mut sidebar_open, &mut sidebar_section);
-                            self.preparation_sidebar_open = sidebar_open;
-                            self.preparation_section = sidebar_section;
-                        });
+                        let (game_rect, resp, bottom_rect) = allocate_game_zone_and_bottom(ui);
+                        if resp.clicked() {
+                            ctx.memory_mut(|m| m.request_focus(resp.id));
+                        }
+                        let painter = ui.painter();
+                        let cursor_screen = ui.ctx().input(|i| i.pointer.hover_pos());
+                        let (cx, cy) = (state.player.x, state.player.y);
+                        let cursor_world = cursor_screen
+                            .filter(|p| game_rect.contains(*p))
+                            .map(|p| screen_to_world(game_rect, p.x, p.y, cx, cy));
+                        let facing_left = cursor_world
+                            .map(|(cw, _)| cw < state.player.x)
+                            .unwrap_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW));
+                        let player_sprite = if is_moving {
+                            self.player_walk_texture.as_ref()
+                                .zip(self.player_walk_desc.as_ref())
+                                .map(|(t, d)| (t, d, frame_walk, facing_left))
+                        } else {
+                            self.player_sprite_texture.as_ref()
+                                .zip(self.player_sprite_desc.as_ref())
+                                .map(|(t, d)| (t, d, frame_idle, facing_left))
+                        };
+                        let enemy_sprite = self.enemy_sprite_texture.as_ref()
+                            .zip(self.enemy_sprite_desc.as_ref())
+                            .map(|(t, d)| (t, d, enemy_frame));
+                        let enemy_miniboss_sprite = self.enemy_miniboss_sprite_texture.as_ref()
+                            .zip(self.enemy_miniboss_sprite_desc.as_ref())
+                            .map(|(t, d)| (t, d, enemy_frame));
+                        let troop_frame = ((self.troop_anim_accumulator * 8.0) as usize) % 8;
+                        let troop_walk_sprite = self.troop_sprite_texture.as_ref()
+                            .zip(self.troop_sprite_desc.as_ref())
+                            .map(|(t, d)| (t, d, troop_frame));
+                        let troop_attack_sprite = self.troop_attack_sprite_texture.as_ref()
+                            .zip(self.troop_attack_sprite_desc.as_ref());
+                        let (tick, go) = game_zone_tick_and_paint(
+                            game_rect,
+                            &painter,
+                            state,
+                            last_tick,
+                            keys,
+                            ui.visuals().window_fill(),
+                            cursor_screen,
+                            player_sprite,
+                            enemy_sprite,
+                            enemy_miniboss_sprite,
+                            troop_walk_sprite,
+                            troop_attack_sprite,
+                        );
+                        *result.borrow_mut() = (tick, go);
+                        paint_bottom_panel(ui, bottom_rect, state);
                         let (new_tick, game_over) = *result.borrow();
                         self.last_tick = new_tick;
                         if game_over {
                             self.screen = Screen::GameOver;
-                        }
-                        let screen_transition = transition.borrow_mut().take();
-                        if let Some(s) = screen_transition {
-                            self.screen = s;
                         }
                         // Log dégâts joueur (standalone Préparation)
                         ui.add_space(8.0);
@@ -1605,70 +1689,76 @@ impl App for LordOfTheCastleApp {
                                     }
                                 });
                             });
-                        }
+                    }
                     self.game = state_opt;
                 }
                 Screen::Battle => {
                     if let Some(ref mut state) = self.game {
                         let delta = self.last_tick.elapsed().as_secs_f32();
                         self.player_anim_accumulator += delta;
+                        self.enemy_anim_accumulator += delta;
+                        self.troop_anim_accumulator += delta;
                         let is_moving = self.keys.iter().any(|&k| k);
                         let frame_idle = ((self.player_anim_accumulator * 6.0) as usize) % 6;
                         let frame_walk = ((self.player_anim_accumulator * 8.0) as usize) % 8;
-                        let game_rect_for_overlay = RefCell::new(None::<egui::Rect>);
-                        // Même layout qu'en préparation : colonne 800px à gauche
-                        ui.horizontal(|ui| {
-                            ui.spacing_mut().item_spacing.x = 0.0;
-                            ui.vertical(|ui| {
-                                ui.set_min_width(COMBAT_SURFACE_SIZE);
-                                ui.set_max_width(COMBAT_SURFACE_SIZE);
-                                let available = ui.available_rect_before_wrap();
-                                let h_cap = available.height().min(COMBAT_SURFACE_SIZE);
-                                let available_capped = egui::Rect::from_min_max(
-                                    available.min,
-                                    egui::pos2(available.right(), available.top() + h_cap),
-                                );
-                                let (game_rect, resp) = allocate_combat_surface_centered(ui, available_capped);
-                                *game_rect_for_overlay.borrow_mut() = Some(game_rect);
-                                if resp.clicked() {
-                                    ctx.memory_mut(|m| m.request_focus(resp.id));
-                                }
-                                let painter = ui.painter();
-                                let cursor_screen = ui.ctx().input(|i| i.pointer.hover_pos());
-                                let cursor_world = cursor_screen
-                                    .filter(|p| game_rect.contains(*p))
-                                    .map(|p| screen_to_world(game_rect, p.x, p.y));
-                                let facing_left = cursor_world
-                                    .map(|(cx, _)| cx < state.player.x)
-                                    .unwrap_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW));
-                                let player_sprite = if is_moving {
-                                    self.player_walk_texture.as_ref()
-                                        .zip(self.player_walk_desc.as_ref())
-                                        .map(|(t, d)| (t, d, frame_walk, facing_left))
-                                } else {
-                                    self.player_sprite_texture.as_ref()
-                                        .zip(self.player_sprite_desc.as_ref())
-                                        .map(|(t, d)| (t, d, frame_idle, facing_left))
-                                };
-                                let (new_tick, game_over) = game_zone_tick_and_paint(
-                                    game_rect,
-                                    &painter,
-                                    state,
-                                    self.last_tick,
-                                    self.keys,
-                                    ui.visuals().window_fill(),
-                                    cursor_screen,
-                                    player_sprite,
-                                );
-                                self.last_tick = new_tick;
-                                if game_over {
-                                    self.screen = Screen::GameOver;
-                                }
-                            });
-                        });
+                        let enemy_frame = ((self.enemy_anim_accumulator * 8.0) as usize) % 8;
+                        let (game_rect, resp, bottom_rect) = allocate_game_zone_and_bottom(ui);
+                        if resp.clicked() {
+                            ctx.memory_mut(|m| m.request_focus(resp.id));
+                        }
+                        let painter = ui.painter();
+                        let cursor_screen = ui.ctx().input(|i| i.pointer.hover_pos());
+                        let (cx, cy) = (state.player.x, state.player.y);
+                        let cursor_world = cursor_screen
+                            .filter(|p| game_rect.contains(*p))
+                            .map(|p| screen_to_world(game_rect, p.x, p.y, cx, cy));
+                        let facing_left = cursor_world
+                            .map(|(cw, _)| cw < state.player.x)
+                            .unwrap_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW));
+                        let player_sprite = if is_moving {
+                            self.player_walk_texture.as_ref()
+                                .zip(self.player_walk_desc.as_ref())
+                                .map(|(t, d)| (t, d, frame_walk, facing_left))
+                        } else {
+                            self.player_sprite_texture.as_ref()
+                                .zip(self.player_sprite_desc.as_ref())
+                                .map(|(t, d)| (t, d, frame_idle, facing_left))
+                        };
+                        let enemy_sprite = self.enemy_sprite_texture.as_ref()
+                            .zip(self.enemy_sprite_desc.as_ref())
+                            .map(|(t, d)| (t, d, enemy_frame));
+                        let enemy_miniboss_sprite = self.enemy_miniboss_sprite_texture.as_ref()
+                            .zip(self.enemy_miniboss_sprite_desc.as_ref())
+                            .map(|(t, d)| (t, d, enemy_frame));
+                        let troop_frame = ((self.troop_anim_accumulator * 8.0) as usize) % 8;
+                        let troop_walk_sprite = self.troop_sprite_texture.as_ref()
+                            .zip(self.troop_sprite_desc.as_ref())
+                            .map(|(t, d)| (t, d, troop_frame));
+                        let troop_attack_sprite = self.troop_attack_sprite_texture.as_ref()
+                            .zip(self.troop_attack_sprite_desc.as_ref());
+                        let (new_tick, game_over) = game_zone_tick_and_paint(
+                            game_rect,
+                            &painter,
+                            state,
+                            self.last_tick,
+                            self.keys,
+                            ui.visuals().window_fill(),
+                            cursor_screen,
+                            player_sprite,
+                            enemy_sprite,
+                            enemy_miniboss_sprite,
+                            troop_walk_sprite,
+                            troop_attack_sprite,
+                        );
+                        self.last_tick = new_tick;
+                        paint_bottom_panel(ui, bottom_rect, state);
+                        if game_over {
+                            self.screen = Screen::GameOver;
+                        }
                         // Overlay victoire de vague : félicitations + résumé + "Phase suivante"
                         if state.is_wave_won() {
-                            if let Some(rect) = game_rect_for_overlay.borrow().copied() {
+                            let rect = game_rect;
+                            if rect.width() > 0.0 && rect.height() > 0.0 {
                             egui::Area::new(egui::Id::new("wave_won_overlay"))
                                 .order(egui::Order::Foreground)
                                 .fixed_pos(rect.min)

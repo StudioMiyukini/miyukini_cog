@@ -14562,5 +14562,145 @@
     "layer": "core",
     "role": "test",
     "start_line": 66
+  },
+  {
+    "id": "lord_of_the_castle_lib",
+    "file": "crates/lord_of_the_castle/src/lib.rs",
+    "start_line": 1,
+    "end_line": 28,
+    "do": "declare_modules_and_reexports",
+    "role": "bootstrap",
+    "layer": "domain",
+    "human": "Point d'entrée bibliothèque du jeu Lord of the Castle (modules, réexports publics)."
+  },
+  {
+    "id": "lord_of_the_castle_main_entry",
+    "file": "crates/lord_of_the_castle/src/main.rs",
+    "start_line": 1,
+    "end_line": 31,
+    "do": "run_native_lord_of_the_castle_app",
+    "role": "bootstrap",
+    "layer": "infra",
+    "human": "Binaire standalone (dev/test). Point d'accès canonique : Miyukini Central."
+  },
+  {
+    "id": "lord_of_the_castle_constants",
+    "file": "crates/lord_of_the_castle/src/constants.rs",
+    "start_line": 1,
+    "end_line": 87,
+    "do": "declare_game_balance_constants",
+    "role": "config",
+    "layer": "domain",
+    "human": "Toutes les constantes gameplay (tailles, PV, vitesses, combat, vagues, portées)."
+  },
+  {
+    "id": "lord_of_the_castle_castle",
+    "file": "crates/lord_of_the_castle/src/castle.rs",
+    "start_line": 1,
+    "end_line": 52,
+    "do": "define_castle_entity_hp_armor",
+    "role": "data",
+    "layer": "domain",
+    "human": "Entité Château : PV, armure, dégâts, game over si détruit."
+  },
+  {
+    "id": "lord_of_the_castle_towers",
+    "file": "crates/lord_of_the_castle/src/towers.rs",
+    "start_line": 1,
+    "end_line": 81,
+    "do": "define_tower_entity_range_attack",
+    "role": "data",
+    "layer": "domain",
+    "human": "Entité Tour : PV, portée, dégâts, cadence, construction en phase Préparation."
+  },
+  {
+    "id": "lord_of_the_castle_enemies",
+    "file": "crates/lord_of_the_castle/src/enemies.rs",
+    "start_line": 1,
+    "end_line": 132,
+    "do": "define_enemy_types_hp_movement",
+    "role": "data",
+    "layer": "domain",
+    "human": "Entités ennemis (Normal, MiniBoss, Boss) : PV, vitesse, dégâts contact, flash."
+  },
+  {
+    "id": "lord_of_the_castle_player",
+    "file": "crates/lord_of_the_castle/src/player.rs",
+    "start_line": 1,
+    "end_line": 195,
+    "do": "define_player_entity_stats_movement",
+    "role": "data",
+    "layer": "domain",
+    "human": "Entité joueur : stats, PV, mana, direction, attaque auto, mort/réanimation."
+  },
+  {
+    "id": "lord_of_the_castle_game_state",
+    "file": "crates/lord_of_the_castle/src/game_state.rs",
+    "start_line": 1,
+    "end_line": 510,
+    "do": "hold_full_game_state_and_mutations",
+    "role": "logic",
+    "layer": "domain",
+    "human": "État complet d'une run : phases, vagues, or, XP, inventaire, équipement, marchand."
+  },
+  {
+    "id": "lord_of_the_castle_game_loop",
+    "file": "crates/lord_of_the_castle/src/game_loop.rs",
+    "start_line": 1,
+    "end_line": 348,
+    "do": "tick_battle_spawn_move_attack_loot",
+    "role": "logic",
+    "layer": "domain",
+    "human": "Boucle de jeu : spawn ennemis, déplacement, collisions, attaque joueur/tours, loot."
+  },
+  {
+    "id": "lord_of_the_castle_loot",
+    "file": "crates/lord_of_the_castle/src/loot.rs",
+    "start_line": 1,
+    "end_line": 2074,
+    "do": "generate_loot_items_and_merchant_pools",
+    "role": "logic",
+    "layer": "domain",
+    "human": "Système de loot (or, XP, objets), identification, marchand, tables armes/armures/accessoires."
+  },
+  {
+    "id": "lord_of_the_castle_character_creation",
+    "file": "crates/lord_of_the_castle/src/character_creation.rs",
+    "start_line": 1,
+    "end_line": 358,
+    "do": "define_stats_phrases_and_effects",
+    "role": "logic",
+    "layer": "domain",
+    "human": "8 stats, 25 phrases humoristiques avec effets, tirage aléatoire, parcours 4 étapes."
+  },
+  {
+    "id": "lord_of_the_castle_app",
+    "file": "crates/lord_of_the_castle/src/app.rs",
+    "start_line": 1,
+    "end_line": 1382,
+    "do": "manage_screens_windows_and_game_flow",
+    "role": "ui",
+    "layer": "domain",
+    "human": "Orchestration des écrans (titre, lore, création, préparation, bataille, game over), fenêtres, header."
+  },
+  {
+    "id": "lord_of_the_castle_app_ui",
+    "file": "crates/lord_of_the_castle/src/app_ui.rs",
+    "start_line": 1,
+    "end_line": 695,
+    "do": "render_game_zone_windows_and_hud",
+    "role": "ui",
+    "layer": "domain",
+    "human": "Rendu : bottom panel, fenêtres (player, inventaire, équipement), zone de jeu (peinture entités)."
+  },
+  {
+    "id": "lord_of_the_castle_spritesheet",
+    "file": "crates/lord_of_the_castle/src/spritesheet.rs",
+    "start_line": 1,
+    "end_line": 101,
+    "do": "load_and_draw_spritesheet_frames",
+    "role": "ui",
+    "layer": "infra",
+    "human": "Chargement PNG, découpage strip horizontal, affichage frame centrée (flip horizontal)."
   }
 ]
