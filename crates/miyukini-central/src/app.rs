@@ -9,6 +9,10 @@
 //! @layer: application
 //! @human: Hub Central : header, onglets, grille services, overlays.
 
+use crate::auth::{
+    validate_password, validate_profiles_with_mother, CentralAuthDb, CentralProfile,
+    password_rules_hint,
+};
 use crate::catalog::{meta_for_service, mock_catalog, CategoryId, ServiceId, ServiceMeta};
 use crate::config::load_supabase_config;
 use crate::loading::{LoadingState, LOADING_PHRASES};
@@ -22,6 +26,17 @@ use crate::services::{
 use crate::usage_tracking::{UsageContext, UsageStore};
 use eframe::egui;
 use eframe::App;
+use std::sync::mpsc;
+use std::sync::Arc;
+use std::time::{SystemTime, UNIX_EPOCH};
+
+/// Mode de la fenêtre auth : Connexion ou Créer un compte.
+#[derive(Clone, Copy, PartialEq, Eq, Default)]
+pub enum AuthMode {
+    #[default]
+    Connexion,
+    CreerCompte,
+}
 
 /// Application principale du Hub.
 pub struct MiyukiniCentralApp {
@@ -57,6 +72,22 @@ pub struct MiyukiniCentralApp {
     pub hub_sidebar: HubSidebarState,
     /// Utilisateur connecté (true) ou non (false) — pour affichage Connexion/Déconnexion.
     pub connected: bool,
+    /// Profil Miyukini COG connecté (email, id).
+    pub current_profile: Option<CentralProfile>,
+    /// Fenêtre Connexion / Créer un compte ouverte (ouverte par le bouton Connexion).
+    pub auth_window_open: bool,
+    /// Mode de la fenêtre auth : Connexion ou Créer un compte.
+    pub auth_mode: AuthMode,
+    /// Email saisi dans la fenêtre auth.
+    pub auth_email: String,
+    /// Mot de passe saisi dans la fenêtre auth.
+    pub auth_password: String,
+    /// Répétition du mot de passe (création de compte).
+    pub auth_password_repeat: String,
+    /// Message d'erreur affiché dans la fenêtre auth.
+    pub auth_error: Option<String>,
+    /// Base des profils Miyukini COG (SQLite).
+    pub auth_db: Arc<CentralAuthDb>,
     /// IDs des Services favoris (ordre d’ajout).
     pub favorites: Vec<ServiceId>,
     /// Store de suivi d'utilisation (sessions Central / Services).
@@ -71,6 +102,29 @@ pub struct MiyukiniCentralApp {
     pub usage_stats_overlay_open: bool,
     /// Thème global édité par Miyukini UI Editor. Appliqué à toute l'app en temps réel ; None = défaut (pixel_theme).
     pub global_ui_theme: Option<EditorThemeState>,
+    /// Dernière validation des ID de profils auprès de la DB mère (timestamp sec). None = jamais fait (première connexion internet).
+    pub last_mother_validation_at: Option<f64>,
+    /// Intervalle (sec) entre deux validations auprès de la DB mère.
+    pub mother_validation_interval_sec: f64,
+    /// True tant qu'un thread de validation mère est en cours.
+    pub mother_validation_in_progress: bool,
+    /// Réception du résultat de validation (liste (old_id, new_id) à appliquer en local).
+    pub mother_validation_rx: Option<mpsc::Receiver<Result<Vec<(String, String)>, String>>>,
+    /// À true quand la fenêtre Profil vient de s'ouvrir : on recopie current_profile dans les champs d'édition.
+    pub profile_edit_pending_sync: bool,
+    /// Champs d'édition du profil (fenêtre Profil).
+    pub profile_edit_pseudonyme: String,
+    pub profile_edit_nom: String,
+    pub profile_edit_prenom: String,
+    pub profile_edit_date_naissance: String,
+    pub profile_edit_telephone: String,
+    pub profile_edit_email: String,
+    pub profile_edit_numero_voie: String,
+    pub profile_edit_rue: String,
+    pub profile_edit_code_postal: String,
+    pub profile_edit_ville: String,
+    /// Erreur affichée après un clic sur Sauvegarder le profil.
+    pub profile_save_error: Option<String>,
 }
 
 /// Couleurs header/Hub/onglets résolues : UI Editor (si override) ou palette Chrome.
@@ -230,6 +284,16 @@ impl MiyukiniCentralApp {
             loading_state,
             hub_sidebar: HubSidebarState::default(),
             connected: false,
+            current_profile: None,
+            auth_window_open: false,
+            auth_mode: AuthMode::default(),
+            auth_email: String::new(),
+            auth_password: String::new(),
+            auth_password_repeat: String::new(),
+            auth_error: None,
+            auth_db: Arc::new(
+                CentralAuthDb::open("miyukini_cog.db").unwrap_or_else(|e| panic!("auth db: {}", e)),
+            ),
             favorites: Vec::new(),
             usage_store: load_usage_store(cc.storage),
             supabase_config: load_supabase_config(),
@@ -241,6 +305,22 @@ impl MiyukiniCentralApp {
                 .and_then(|s| s.get_string(UI_EDITOR_THEME_STORAGE_KEY))
                 .as_ref()
                 .and_then(|s| EditorThemeState::from_storage_string(s)),
+            last_mother_validation_at: None,
+            mother_validation_interval_sec: 3600.0,
+            mother_validation_in_progress: false,
+            mother_validation_rx: None,
+            profile_edit_pending_sync: false,
+            profile_edit_pseudonyme: String::new(),
+            profile_edit_nom: String::new(),
+            profile_edit_prenom: String::new(),
+            profile_edit_date_naissance: String::new(),
+            profile_edit_telephone: String::new(),
+            profile_edit_email: String::new(),
+            profile_edit_numero_voie: String::new(),
+            profile_edit_rue: String::new(),
+            profile_edit_code_postal: String::new(),
+            profile_edit_ville: String::new(),
+            profile_save_error: None,
         }
     }
 }
@@ -308,12 +388,70 @@ impl App for MiyukiniCentralApp {
             }
         }
 
+        // Validation des ID de profils auprès de la DB mère (première connexion internet puis à intervalle régulier).
+        if let Some(ref rx) = self.mother_validation_rx {
+            if let Ok(result) = rx.try_recv() {
+                self.mother_validation_rx = None;
+                self.mother_validation_in_progress = false;
+                self.last_mother_validation_at = Some(
+                    SystemTime::now()
+                        .duration_since(UNIX_EPOCH)
+                        .unwrap_or_default()
+                        .as_secs_f64(),
+                );
+                if let Ok(updates) = result {
+                    for (old_id, new_id) in &updates {
+                        let _ = self.auth_db.update_profile_id(old_id, new_id);
+                    }
+                    if let Some(ref mut profile) = self.current_profile {
+                        for (old_id, new_id) in &updates {
+                            if profile.id == *old_id {
+                                profile.id = new_id.clone();
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if let Some(ref url) = self.supabase_config.mother_db_url {
+            if !self.mother_validation_in_progress && self.mother_validation_rx.is_none() {
+                let now_sec = SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap_or_default()
+                    .as_secs_f64();
+                let should_run = self.last_mother_validation_at.map_or(true, |last| {
+                    now_sec - last >= self.mother_validation_interval_sec
+                });
+                if should_run {
+                    let profiles = match self.auth_db.list_profiles() {
+                        Ok(p) => p,
+                        Err(_) => Vec::new(),
+                    };
+                    if !profiles.is_empty() {
+                        let url_clone = url.clone();
+                        let (tx, rx) = mpsc::channel();
+                        std::thread::spawn(move || {
+                            let result = validate_profiles_with_mother(&url_clone, &profiles)
+                                .map_err(|e| e.to_string());
+                            let _ = tx.send(result);
+                        });
+                        self.mother_validation_rx = Some(rx);
+                        self.mother_validation_in_progress = true;
+                    } else {
+                        self.last_mother_validation_at = Some(now_sec);
+                    }
+                }
+            }
+        }
+
         // Header en 2 lignes.
         self.ui_header(ctx, frame);
 
         // Fenêtres overlay Profil et Paramètres.
         self.ui_profile_overlay(ctx);
         self.ui_settings_overlay(ctx);
+        self.ui_auth_overlay(ctx);
         self.ui_usage_stats_overlay(ctx);
 
         // Contenu principal selon l'onglet actif (fond body : blanc en clair, R45 G45 B45 en nuit).
@@ -589,13 +727,15 @@ impl MiyukiniCentralApp {
                     .clicked()
                 {
                     self.connected = false;
+                    self.current_profile = None;
                 }
             } else {
                 if ui
                     .button(egui::RichText::new("Connexion").size(ACTION_SIZE))
                     .clicked()
                 {
-                    self.connected = true;
+                    self.auth_window_open = true;
+                    self.auth_error = None;
                 }
             }
             ui.add_space(8.0);
@@ -609,6 +749,8 @@ impl MiyukiniCentralApp {
             };
             if profile_clicked {
                 self.profile_overlay_open = true;
+                self.profile_edit_pending_sync = true;
+                self.profile_save_error = None;
             }
             ui.add_space(12.0);
             // Configuration : icône Lucide ou fallback texte
@@ -979,13 +1121,16 @@ impl MiyukiniCentralApp {
         let mut open = self.profile_overlay_open;
         egui::Window::new("Profil utilisateur")
             .open(&mut open)
-            .default_size(egui::vec2(360.0, 280.0))
+            .default_size(egui::vec2(420.0, 560.0))
             .resizable(true)
             .collapsible(false)
             .show(ctx, |ui| {
                 self.ui_profile_content(ui);
             });
         self.profile_overlay_open = open;
+        if !open {
+            self.profile_edit_pending_sync = true;
+        }
     }
 
     /// Fenêtre overlay Paramètres (ouverte depuis le header).
@@ -1000,6 +1145,182 @@ impl MiyukiniCentralApp {
                 self.ui_settings_content(ui);
             });
         self.settings_overlay_open = open;
+    }
+
+    /// Fenêtre login (Connexion / Créer un compte) ouverte par le bouton Connexion du header.
+    fn ui_auth_overlay(&mut self, ctx: &egui::Context) {
+        if !self.auth_window_open {
+            return;
+        }
+        let mut open = self.auth_window_open;
+        let title = match self.auth_mode {
+            AuthMode::Connexion => "Connexion — Miyukini COG",
+            AuthMode::CreerCompte => "Créer un compte — Miyukini COG",
+        };
+        let (width, height) = match self.auth_mode {
+            AuthMode::Connexion => (380.0, 320.0),
+            AuthMode::CreerCompte => (400.0, 420.0),
+        };
+        egui::Window::new(title)
+            .open(&mut open)
+            .default_size(egui::vec2(width, height))
+            .resizable(false)
+            .collapsible(false)
+            .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
+            .show(ctx, |ui| {
+                match self.auth_mode {
+                    AuthMode::Connexion => self.ui_auth_screen_connexion(ui),
+                    AuthMode::CreerCompte => self.ui_auth_screen_enregistrement(ui),
+                }
+            });
+        // Ne pas rouvrir si on a fermé depuis l'intérieur (connexion ou création de compte réussie).
+        if self.auth_window_open {
+            self.auth_window_open = open;
+        }
+    }
+
+    /// Écran Connexion : email, mot de passe, bouton Se connecter, lien vers Créer un compte.
+    fn ui_auth_screen_connexion(&mut self, ui: &mut egui::Ui) {
+        ui.add_space(8.0);
+        ui.heading("Connexion");
+        ui.add_space(4.0);
+        ui.label(egui::RichText::new("Connectez-vous avec votre compte Miyukini COG.").small().weak());
+        ui.add_space(16.0);
+
+        ui.label("Email (login)");
+        ui.add(
+            egui::TextEdit::singleline(&mut self.auth_email)
+                .hint_text("vous@exemple.fr")
+                .desired_width(f32::INFINITY),
+        );
+        ui.add_space(10.0);
+
+        ui.label("Mot de passe");
+        ui.add(
+            egui::TextEdit::singleline(&mut self.auth_password)
+                .password(true)
+                .hint_text("••••••••")
+                .desired_width(f32::INFINITY),
+        );
+
+        if let Some(ref err) = self.auth_error {
+            ui.add_space(8.0);
+            ui.colored_label(egui::Color32::RED, err);
+        }
+
+        ui.add_space(16.0);
+        if ui.add_sized(egui::vec2(120.0, 28.0), egui::Button::new("Se connecter")).clicked() {
+            self.auth_error = None;
+            match self.auth_db.sign_in(&self.auth_email, &self.auth_password) {
+                Ok(Some(profile)) => {
+                    self.connected = true;
+                    self.current_profile = Some(profile);
+                    self.auth_window_open = false;
+                    self.auth_email.clear();
+                    self.auth_password.clear();
+                    self.auth_error = None;
+                }
+                Ok(None) => {
+                    self.auth_error = Some("Email ou mot de passe incorrect.".to_string());
+                }
+                Err(e) => {
+                    self.auth_error = Some(e.to_string());
+                }
+            }
+        }
+
+        ui.add_space(20.0);
+        ui.separator();
+        ui.add_space(12.0);
+        ui.horizontal(|ui| {
+            ui.label(egui::RichText::new("Pas encore de compte ?").small().weak());
+            if ui.link("Créer un compte").clicked() {
+                self.auth_mode = AuthMode::CreerCompte;
+                self.auth_error = None;
+            }
+        });
+    }
+
+    /// Écran Enregistrement : email, mot de passe, répétition, règles, bouton Créer le compte, lien vers Connexion.
+    fn ui_auth_screen_enregistrement(&mut self, ui: &mut egui::Ui) {
+        ui.add_space(8.0);
+        ui.heading("Créer un compte");
+        ui.add_space(4.0);
+        ui.label(egui::RichText::new("Enregistrez-vous pour utiliser Miyukini COG.").small().weak());
+        ui.add_space(16.0);
+
+        ui.label("Email (login)");
+        ui.add(
+            egui::TextEdit::singleline(&mut self.auth_email)
+                .hint_text("vous@exemple.fr")
+                .desired_width(f32::INFINITY),
+        );
+        ui.add_space(10.0);
+
+        ui.label("Mot de passe");
+        ui.add(
+            egui::TextEdit::singleline(&mut self.auth_password)
+                .password(true)
+                .hint_text("••••••••")
+                .desired_width(f32::INFINITY),
+        );
+        ui.add_space(4.0);
+        ui.label(egui::RichText::new(password_rules_hint()).small().weak());
+        ui.add_space(6.0);
+
+        ui.label("Répéter le mot de passe");
+        ui.add(
+            egui::TextEdit::singleline(&mut self.auth_password_repeat)
+                .password(true)
+                .hint_text("••••••••")
+                .desired_width(f32::INFINITY),
+        );
+
+        if let Some(ref err) = self.auth_error {
+            ui.add_space(8.0);
+            ui.colored_label(egui::Color32::RED, err);
+        }
+
+        ui.add_space(16.0);
+        if ui.add_sized(egui::vec2(140.0, 28.0), egui::Button::new("Créer le compte")).clicked() {
+            self.auth_error = None;
+            if self.auth_password != self.auth_password_repeat {
+                self.auth_error = Some("Les deux mots de passe ne correspondent pas.".to_string());
+            } else {
+                match validate_password(&self.auth_password) {
+                    Ok(()) => {
+                        match self.auth_db.sign_up(&self.auth_email, &self.auth_password) {
+                            Ok(profile) => {
+                                self.connected = true;
+                                self.current_profile = Some(profile);
+                                self.auth_window_open = false;
+                                self.auth_email.clear();
+                                self.auth_password.clear();
+                                self.auth_password_repeat.clear();
+                                self.auth_error = None;
+                            }
+                            Err(e) => {
+                                self.auth_error = Some(e.to_string());
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        self.auth_error = Some(e.to_string());
+                    }
+                }
+            }
+        }
+
+        ui.add_space(20.0);
+        ui.separator();
+        ui.add_space(12.0);
+        ui.horizontal(|ui| {
+            ui.label(egui::RichText::new("Déjà un compte ?").small().weak());
+            if ui.link("Se connecter").clicked() {
+                self.auth_mode = AuthMode::Connexion;
+                self.auth_error = None;
+            }
+        });
     }
 
     /// Affiche le contenu principal selon l'onglet actif.
@@ -1345,10 +1666,112 @@ impl MiyukiniCentralApp {
 
     /// Affiche le contenu de l'onglet profil (utilisé dans l'overlay et éventuellement en onglet).
     fn ui_profile_content(&mut self, ui: &mut egui::Ui) {
-        ui.vertical(|ui| {
+        if self.profile_edit_pending_sync
+            || (self.current_profile.is_some()
+                && self.profile_edit_email.is_empty()
+                && !self.current_profile.as_ref().unwrap().email.is_empty())
+        {
+            if let Some(ref p) = self.current_profile {
+                self.profile_edit_pseudonyme = p.pseudonyme.clone().unwrap_or_default();
+                self.profile_edit_nom = p.nom.clone().unwrap_or_default();
+                self.profile_edit_prenom = p.prenom.clone().unwrap_or_default();
+                self.profile_edit_date_naissance = p.date_naissance.clone().unwrap_or_default();
+                self.profile_edit_telephone = p.telephone.clone().unwrap_or_default();
+                self.profile_edit_email = p.email.clone();
+                self.profile_edit_numero_voie = p.numero_voie.clone().unwrap_or_default();
+                self.profile_edit_rue = p.rue.clone().unwrap_or_default();
+                self.profile_edit_code_postal = p.code_postal.clone().unwrap_or_default();
+                self.profile_edit_ville = p.ville.clone().unwrap_or_default();
+            }
+            self.profile_edit_pending_sync = false;
+        }
+
+        egui::ScrollArea::vertical().show(ui, |ui| {
             ui.heading("Profil utilisateur");
-            ui.label("Informations du profil");
+            ui.add_space(8.0);
+
+            if self.current_profile.is_none() {
+                ui.label(egui::RichText::new("Connectez-vous pour modifier votre profil.").weak());
+                ui.add_space(12.0);
+                ui.separator();
+                ui.add_space(8.0);
+                ui.label("Statistiques d'utilisation");
+                ui.label("Temps passé sur Central et chaque service, première utilisation, pics dans la journée.");
+                if ui.button("Voir le détail — Statistiques d'utilisation").clicked() {
+                    self.usage_stats_overlay_open = true;
+                }
+                return;
+            }
+
+            ui.label(egui::RichText::new("Informations modifiables (sauvegardées en base).").small().weak());
+            ui.add_space(10.0);
+
+            ui.label("Pseudonyme");
+            ui.add(egui::TextEdit::singleline(&mut self.profile_edit_pseudonyme).hint_text("Pseudo").desired_width(f32::INFINITY));
+            ui.add_space(6.0);
+
+            ui.label("Nom");
+            ui.add(egui::TextEdit::singleline(&mut self.profile_edit_nom).hint_text("Nom de famille").desired_width(f32::INFINITY));
+            ui.add_space(6.0);
+
+            ui.label("Prénom");
+            ui.add(egui::TextEdit::singleline(&mut self.profile_edit_prenom).hint_text("Prénom").desired_width(f32::INFINITY));
+            ui.add_space(6.0);
+
+            ui.label("Date de naissance");
+            ui.add(egui::TextEdit::singleline(&mut self.profile_edit_date_naissance).hint_text("JJ/MM/AAAA").desired_width(f32::INFINITY));
+            ui.add_space(6.0);
+
+            ui.label("Téléphone");
+            ui.add(egui::TextEdit::singleline(&mut self.profile_edit_telephone).hint_text("Numéro").desired_width(f32::INFINITY));
+            ui.add_space(6.0);
+
+            ui.label("Adresse mail");
+            ui.add(egui::TextEdit::singleline(&mut self.profile_edit_email).hint_text("email@exemple.fr").desired_width(f32::INFINITY));
+            ui.add_space(6.0);
+
+            ui.label("Adresse");
+            ui.horizontal(|ui| {
+                ui.add(egui::TextEdit::singleline(&mut self.profile_edit_numero_voie).hint_text("N°").desired_width(50.0));
+                ui.add(egui::TextEdit::singleline(&mut self.profile_edit_rue).hint_text("Rue").desired_width(f32::INFINITY));
+            });
+            ui.add_space(4.0);
+            ui.horizontal(|ui| {
+                ui.add(egui::TextEdit::singleline(&mut self.profile_edit_code_postal).hint_text("Code postal").desired_width(100.0));
+                ui.add(egui::TextEdit::singleline(&mut self.profile_edit_ville).hint_text("Ville").desired_width(f32::INFINITY));
+            });
+
+            if let Some(ref err) = self.profile_save_error {
+                ui.add_space(8.0);
+                ui.colored_label(egui::Color32::RED, err);
+            }
+
             ui.add_space(12.0);
+            if ui.button("Sauvegarder le profil").clicked() {
+                self.profile_save_error = None;
+                if let Some(ref mut p) = self.current_profile {
+                    if self.profile_edit_email.trim().is_empty() {
+                        self.profile_save_error = Some("L'adresse mail est obligatoire.".to_string());
+                    } else {
+                        p.email = self.profile_edit_email.trim().to_string();
+                        p.pseudonyme = Some(self.profile_edit_pseudonyme.trim().to_string()).filter(|s| !s.is_empty());
+                        p.nom = Some(self.profile_edit_nom.trim().to_string()).filter(|s| !s.is_empty());
+                        p.prenom = Some(self.profile_edit_prenom.trim().to_string()).filter(|s| !s.is_empty());
+                        p.date_naissance = Some(self.profile_edit_date_naissance.trim().to_string()).filter(|s| !s.is_empty());
+                        p.telephone = Some(self.profile_edit_telephone.trim().to_string()).filter(|s| !s.is_empty());
+                        p.numero_voie = Some(self.profile_edit_numero_voie.trim().to_string()).filter(|s| !s.is_empty());
+                        p.rue = Some(self.profile_edit_rue.trim().to_string()).filter(|s| !s.is_empty());
+                        p.code_postal = Some(self.profile_edit_code_postal.trim().to_string()).filter(|s| !s.is_empty());
+                        p.ville = Some(self.profile_edit_ville.trim().to_string()).filter(|s| !s.is_empty());
+                        match self.auth_db.update_profile(p) {
+                            Ok(()) => {}
+                            Err(e) => self.profile_save_error = Some(e.to_string()),
+                        }
+                    }
+                }
+            }
+
+            ui.add_space(16.0);
             ui.separator();
             ui.add_space(8.0);
             ui.label("Statistiques d'utilisation");

@@ -8,7 +8,7 @@
 //! @do: indique si l'utilisateur peut accéder à une édition (admin, manager de l'édition, ou RLS exposant).
 //! @layer: domain
 
-use crate::supabase::{Profile, UserType};
+use crate::data::{Profile, UserType};
 
 /// Déduit le type utilisateur depuis le champ `user_type` du profil (table `profiles`).
 ///
@@ -54,8 +54,8 @@ pub fn auth_can_access_edition(
 #[cfg(test)]
 mod tests {
     use super::{auth_can_access_edition, auth_user_type_from_profile};
-    use crate::supabase::Profile;
-    use crate::supabase::UserType;
+    use crate::data::Profile;
+    use crate::data::UserType;
 
     fn profile_with_user_type(ut: &str) -> Profile {
         Profile {

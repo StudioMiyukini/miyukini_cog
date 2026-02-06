@@ -28,7 +28,7 @@ mod e13_inscription;
 mod e14_mentions;
 
 use crate::screens::ScreenId;
-use crate::supabase::{Edition, Exposant, Organisateur};
+use crate::data::{Edition, Exposant, Organisateur};
 use crate::theme::JayFestivalTheme;
 use eframe::egui;
 

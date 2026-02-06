@@ -54,3 +54,11 @@ next-env.d.ts
 # Secrets
 .github-token
 supabase-catakana.env
+
+# JayFestival — base fille SQLite (KindMother)
+jayfestival.db
+jayfestival.db-journal
+
+# Miyukini Central — auth profils COG (SQLite)
+miyukini_cog.db
+miyukini_cog.db-journal

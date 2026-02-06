@@ -4,7 +4,7 @@
 //! GestionLayout, Card. Données JayXpose/Supabase. Blocs : Identité, Statut, Emplacement, Documents. Actions : Devis, Facture.
 
 use crate::screens::ScreenId;
-use crate::supabase::{EditionExposant, Exposant};
+use crate::data::{EditionExposant, Exposant};
 use crate::theme::JayFestivalTheme;
 use crate::ui::molecules::card_show;
 use crate::ui::organisms::gestion_layout_show;

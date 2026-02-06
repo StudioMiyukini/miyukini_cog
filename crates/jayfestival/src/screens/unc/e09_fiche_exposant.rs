@@ -3,7 +3,7 @@
 //! Conforme [Specification UI § 4.1]. Layout, Card (données JayXpose/Supabase).
 
 use crate::screens::ScreenId;
-use crate::supabase::Exposant;
+use crate::data::Exposant;
 use crate::theme::JayFestivalTheme;
 use crate::ui::molecules::card_show;
 use crate::ui::organisms::{header_render, layout_show};

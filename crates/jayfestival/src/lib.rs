@@ -9,7 +9,7 @@ pub mod screens;
 pub mod services;
 pub mod theme;
 pub mod ui;
-pub mod supabase;
+pub mod data;
 pub mod auth;
 /// État global et router (écran courant, navigation, utilisateur).
 pub mod app_state;
