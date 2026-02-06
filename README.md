@@ -14,12 +14,14 @@
 4. [Environnements, fédération et sécurité](#4-environnements-fédération-et-sécurité)
 5. [Méthodologie de développement](#5-méthodologie-de-développement)
 6. [État actuel et roadmap](#6-état-actuel-et-roadmap)
-7. [Gouvernance et sécurité](#7-gouvernance-et-sécurité)
-8. [À qui s'adresse Miyukini](#8-à-qui-sadresse-miyukini)
-9. [Documentation de référence](#9-documentation-de-référence)
-10. [Licence](#10-licence)
-11. [Conclusion](#11-conclusion)
-12. [Log de rédaction](#12-log-de-rédaction)
+7. [Écosystème Jay — Services interopérables](#7-écosystème-jay--services-interopérables)
+8. [Jeux Miyukini — Gameplay et influences croisées](#8-jeux-miyukini--gameplay-et-influences-croisées)
+9. [Gouvernance et sécurité](#9-gouvernance-et-sécurité)
+10. [À qui s'adresse Miyukini](#10-à-qui-sadresse-miyukini)
+11. [Documentation de référence](#11-documentation-de-référence)
+12. [Licence](#12-licence)
+13. [Conclusion](#13-conclusion)
+14. [Log de rédaction](#14-log-de-rédaction)
 
 ---
 
@@ -244,14 +246,23 @@ Le projet suit un **cycle strict**, de l'idée jusqu'à l'audit, sans court-circ
 
 ### Services en cours d'élaboration
 
-Les **concepts de services** identifient les **besoins en Opérateurs** qui orchestreront les Toolkits implémentés. Chaque service est défini par un **document fondateur**, des **analyses par public** (besoins, parcours, capacités livrables) et des documents **Opérateurs et Toolkits** qui précisent quels Opérateurs et Kits délivreront le service sous gouvernance.
+Les **concepts de services** identifient les **besoins en Opérateurs** qui orchestreront les Toolkits implémentés. L'écosystème Miyukini comprend deux familles de services :
 
-| Service | Description | Publics documentés |
-|---------|-------------|--------------------|
-| **JayRDV** | Prise de rendez-vous et réservation en ligne (B2B2C). Créneaux, calendriers, ressources, confirmations, rappels, intégration site/CRM. | Professionnels, Clients, Utilisateur non connecté |
-| **Miyukini Festival Service** | Gestion d'événements et festivals. Catalogue (annuaire événements, répertoires organisateurs/exposants), comptes cross-événements, dashboard exposant, agenda et conflits de dates, espace visiteur (billets, réservations, jeux, ateliers). | Organisateurs, Exposants, Visiteurs, Utilisateur non connecté |
-| **Miyukini Agenda** | Service unifié du domaine agenda : entrées (RDV, éditions, ateliers), détection de conflits, vue calendrier agrégée, fuseaux, export (iCal, PDF). Consommé par JayRDV et Miyukini Festival Service. | Tous les services avec espace utilisateur |
-| **Miyukini Account** | Service unifié budget et comptabilité (multi-échelle). Deux points d'entrée : **Miyukini Purse** (budgets perso et occasionnels), **Miyukini Account** (devis, facturation, comptabilité entreprise). Consommé par MFS et JayRDV. | Purse (Account), Account (entreprise) |
+- **Services Jay** — Services métier officiels de la famille « Jay », conçus pour être **interopérables** au sein de l'environnement COG unifié (voir [section 7](#7-écosystème-jay--services-interopérables)).
+- **Services Miyukini** — Services transversaux qui fournissent des capacités partagées à tout l'écosystème.
+
+Chaque service est défini par un **document fondateur**, des **analyses par public** (besoins, parcours, capacités livrables) et des documents **Opérateurs et Toolkits** qui précisent quels Opérateurs et Kits délivreront le service sous gouvernance.
+
+| Service | Famille | Description |
+|---------|---------|-------------|
+| **JayFestival** | Jay | Gestion d'événements et festivals (B2B2C). Catalogue, exposants, visiteurs, comptes cross-événements, dashboard organisateur, billetterie. |
+| **JayXpose** | Jay | Identité professionnelle de l'exposant : profil complet, catalogue de produits, site vitrine, coffre-fort documentaire (RIB, KBIS, assurances), annuaire des exposants. |
+| **JayRDV** | Jay | Prise de rendez-vous et réservation en ligne. Créneaux, calendriers, ressources, confirmations, rappels. |
+| **JayKoa** | Jay | Service unifié du domaine agenda : entrées, détection de conflits, vue calendrier agrégée, fuseaux, export (iCal, PDF). |
+| **JayKonta** | Jay | Comptabilité et budget multi-échelle. Deux points d'entrée : **JayBudget** (perso) et **JayKonta** (entreprise : devis, facturation, comptabilité). |
+| **JayFaim** | Jay | Réservation de tables et commande en ligne de nourriture (restaurants, traiteurs, food trucks). |
+| **MiyukiniSurvivor** | Jeux | Jeu hybride Survivor + Tower Defense (voir [section 8](#8-jeux-miyukini--gameplay-et-influences-croisées)). |
+| **MiyuClicker** | Jeux | Idle/Clicker + Grande stratégie (carte, conquête). |
 
 **Documentation** : [docs/services/](docs/services/) — chaque service dispose d'un document fondateur, d'analyses des besoins par public, de parcours capacités/livrables et de documents **Opérateurs et Toolkits**.
 
@@ -261,11 +272,146 @@ Une fois les services suffisamment spécifiés (fondateurs, analyses, Opérateur
 
 ### Maturité conceptuelle
 
-La pyramide, les Cores, les Lois d'autonomie, les contrats de sécurité et de gouvernance d'écosystème sont **stabilisés et documentés**. Le Kernel et les Cores du workspace sont en place ; l'outillage MIP (index structurel MSCM) est disponible. Les **premiers services** (JayRDV, Miyukini Festival Service, Miyukini Agenda, Miyukini Account) sont en phase de conception produit et de spécification des besoins en Opérateurs.
+La pyramide, les Cores, les Lois d'autonomie, les contrats de sécurité et de gouvernance d'écosystème sont **stabilisés et documentés**. Le Kernel et les Cores du workspace sont en place ; l'outillage MIP (index structurel MSCM) est disponible. Les **services Jay** (JayFestival, JayXpose, JayRDV, JayKoa, JayKonta, JayFaim) et les **jeux** (MiyukiniSurvivor, MiyuClicker) sont en phase de conception produit et de spécification des besoins en Opérateurs.
 
 ---
 
-## 7. Gouvernance et sécurité
+## 7. Écosystème Jay — Services interopérables
+
+### Vue d'ensemble
+
+Les **services Jay** forment une famille de services métier conçus pour fonctionner ensemble dans l'environnement COG unifié. Chaque service Jay est un Opérateur (ou une Équipe d'Opérateurs) gouverné, autonome dans son domaine, mais capable de **collaborer avec les autres** sous gouvernance stricte (Mandats de Permission, Contrats d'équipe, BondingBrother).
+
+> **L'interpolarité Jay : chaque service enrichit les autres sans jamais les envahir.**
+
+### Les 6 services Jay
+
+| Service | Domaine | Description |
+|---------|---------|-------------|
+| **JayFestival** | Événementiel | Gestion complète d'événements et festivals : création d'éditions, gestion des organisateurs, exposants et visiteurs, catalogue d'événements, candidatures, stands, billetterie, espace visiteur (jeux, ateliers, réservations). Hub central de l'écosystème événementiel. |
+| **JayXpose** | Identité exposant | Identité professionnelle de l'exposant : profil enrichi (raison sociale, juridique, contacts multiples), catalogue de produits, site vitrine complet (4 pages, URL unique, SEO), coffre-fort documentaire sécurisé (RIB, KBIS, assurances, licences), référencement dans l'annuaire. |
+| **JayRDV** | Réservation | Prise de rendez-vous et réservation en ligne (B2B2C). Créneaux, calendriers, ressources, confirmations, rappels, réduction des no-shows. Intégration site/CRM. |
+| **JayKoa** | Agenda | Service unifié du domaine agenda. Agrège toutes les entrées temporelles (RDV, éditions, ateliers), détecte les conflits, fournit une vue calendrier unifiée, gère les fuseaux horaires, exporte en iCal/PDF. |
+| **JayKonta** | Comptabilité | Comptabilité et budget multi-échelle. Deux points d'entrée : **JayBudget** (budgets perso et occasionnels) et **JayKonta** (devis, facturation, comptabilité entreprise, déclarations). |
+| **JayFaim** | Restauration | Réservation de tables et commande en ligne de nourriture (restaurants, traiteurs, food trucks). Gestion des menus, commandes, créneaux, encaissements. |
+
+### Carte d'interopérabilité
+
+```
+                          ┌─────────────┐
+                          │   JayKoa    │ ← Agenda unifié
+                          │  (Agenda)   │
+                          └──────┬──────┘
+                                 │ agrège dates
+                    ┌────────────┼────────────┐
+                    │            │             │
+             ┌──────┴──────┐  ┌─┴───────────┐ │
+             │   JayRDV    │  │ JayFestival  │ │
+             │(Réservation)│  │(Événements)  │ │
+             └──────┬──────┘  └──┬──┬──┬─────┘ │
+                    │            │  │  │        │
+                    │     ┌──────┘  │  └──────┐ │
+                    │     │        │         │ │
+               ┌────┴─────┴──┐  ┌─┴────┐ ┌──┴─┴──────┐
+               │  JayKonta   │  │JayX- │ │  JayFaim   │
+               │(Comptabilité)│  │pose  │ │(Restaura-  │
+               └─────────────┘  │(Expo-│ │   tion)    │
+                                │sant) │ └────────────┘
+                                └──────┘
+```
+
+### Interopérabilité détaillée
+
+| Flux | Direction | Données échangées | Gouvernance |
+|------|-----------|-------------------|-------------|
+| **JayXpose → JayFestival** | Lecture | Profil exposant, catalogue produits, documents partagés (coffre-fort). | Mandat de Permission ; partage documents = acte explicite de l'exposant. |
+| **JayFestival → JayXpose** | Demandes | Demandes de documents pour candidatures, notifications (acceptation, rejet). | BondingBrother (médiation). |
+| **JayFaim → JayFestival** | Lecture | Stands restauration, menus, disponibilités sur événement. | Mandat inter-services. |
+| **JayKoa ← JayRDV** | Agrégation | Entrées agenda (RDV, créneaux, exceptions). | Contrat de lecture. |
+| **JayKoa ← JayFestival** | Agrégation | Éditions, participations, ateliers réservés. | Contrat de lecture. |
+| **JayKonta ← JayFestival** | Facturation | Budget par édition, devis et factures exposants. | Mandat de Permission. |
+| **JayKonta ← JayRDV** | Facturation | Facturation professionnels, abonnements, encaissements. | Mandat de Permission. |
+| **JayXpose → JayKonta** | Partage | RIB partagé depuis le coffre-fort documentaire. | Mandat explicite + acceptation exposant. |
+| **JayXpose → JayRDV** | Lien | Lien depuis la vitrine exposant vers la prise de rendez-vous. | Lecture publique (lien). |
+
+### Avantages de l'environnement unifié COG
+
+L'exécution de tous les services Jay dans un même environnement COG apporte des avantages structurels impossibles avec une architecture en silos :
+
+| Avantage | Description |
+|----------|-------------|
+| **Identité unique** | Un utilisateur = un profil. L'exposant crée son profil JayXpose une fois et le réutilise dans JayFestival, JayKonta, JayRDV. Pas de re-saisie, pas de comptes multiples. |
+| **Données sans duplication** | Le profil, le catalogue et les documents vivent dans JayXpose (source unique). JayFestival, JayKonta et les autres lisent, ne dupliquent jamais. |
+| **Coffre-fort centralisé** | Un document (assurance, KBIS, RIB) est uploadé une fois et sert pour N candidatures, N événements, N services — avec partage gouverné, document par document. |
+| **Agenda unifié** | JayKoa agrège tous les événements (RDV JayRDV, éditions JayFestival, échéances JayKonta) dans une seule vue calendrier. Détection automatique des conflits. |
+| **Facturation transversale** | JayKonta facture les exposants (via JayFestival), les professionnels (via JayRDV), les restaurateurs (via JayFaim) avec les mêmes outils comptables et la même gouvernance. |
+| **Confidentialité souveraine** | L'exposant contrôle champ par champ ce qui est visible (public, authentifié, organisateur, privé). Chaque partage est un acte explicite, traçable et révocable. |
+| **Sécurité par niveaux** | WorrySentinel applique des niveaux de sécurité différenciés : Public (0) pour la vitrine, Sensitive (2) pour le profil, Critical (3) pour les documents. Pas de sécurité uniforme — risque segmenté. |
+| **Fonctionnement offline** | Chaque service fonctionne localement (LOI-1, LOI-2). Un organisateur de festival peut gérer ses exposants, consulter les fiches et le catalogue même sans connexion internet. |
+| **Évolution sans rupture** | Ajouter un nouveau service Jay (ex. JayFaim) n'impacte pas les services existants. L'interpolarité est additive : chaque service enrichit l'écosystème sans modifier les autres. |
+
+### Principe d'interpolarité
+
+> **Les services Jay ne sont pas des applications isolées. Ce sont des Opérateurs gouvernés qui collaborent sous Mandat de Permission dans un environnement COG unifié.**
+
+L'interpolarité repose sur trois piliers :
+
+1. **Source unique** — Chaque donnée a un propriétaire (un service) et les autres lisent, ne dupliquent jamais.
+2. **Partage gouverné** — Tout échange inter-services passe par BondingBrother et est encadré par un Mandat de Permission émis par StrongFather.
+3. **Enrichissement additif** — Chaque nouveau service enrichit les autres sans les modifier. JayXpose enrichit JayFestival (catalogue dans le répertoire) ; JayFaim enrichit JayFestival (restauration sur événement) ; JayKoa unifie les agendas.
+
+Référence : [Miyukini Conceptual References - Interpolarite Services Jay](docs/reference/Miyukini%20Conceptual%20References%20-%20Interpolarite%20Services%20Jay.md).
+
+---
+
+## 8. Jeux Miyukini — Gameplay et influences croisées
+
+### Vue d'ensemble
+
+Les jeux Miyukini ne sont pas des applications isolées : ce sont des **Opérateurs gouvernés** qui s'exécutent dans l'environnement COG, bénéficient des mêmes Toolkits que les services métier, et peuvent **interagir avec les autres services et entre eux**.
+
+### Jeux en développement
+
+| Jeu | Genre | Description |
+|-----|-------|-------------|
+| **Miyukini Survivor** | Survivor + Tower Defense | Le joueur se déplace en 8 directions, attaque (mêlée, armes de jet, sortilèges), protège le Château au centre de la carte. Phase Préparation (construction de tours, upgrades) et phase Bataille (vagues d'ennemis). Mode 2 joueurs local. Bestiaire riche, système de loot (préfixes/suffixes), équipement. |
+| **MiyuClicker** | Idle/Clicker + Grande stratégie | Gestion de ressources, production automatique, et conquête de carte (type Risk). Démo montrant la coexistence de plusieurs Opérateurs (UI, simulation, combat, sauvegarde, carte) dans un environnement COG. |
+
+### Influences croisées entre jeux
+
+Les jeux Miyukini sont conçus pour que la **progression dans un jeu puisse influencer un autre** :
+
+| Influence | Source | Cible | Mécanisme |
+|-----------|--------|-------|-----------|
+| Récompenses croisées | MiyuClicker | Miyukini Survivor | Ressources ou bonus débloqués dans MiyuClicker utilisables dans Miyukini Survivor (cosmétiques, bonus de départ). |
+| Succès partagés | Miyukini Survivor | MiyuClicker | Battre un boss dans Survivor débloque un territoire ou un bonus dans MiyuClicker. |
+| Profil joueur unifié | Tous les jeux | Tous les jeux | Un seul profil joueur dans le COG : statistiques, succès, temps de jeu — partagés entre tous les jeux. |
+
+### Influences jeux / services
+
+L'environnement COG unifié permet des **interactions entre jeux et services métier** — une possibilité unique liée à l'architecture Miyukini :
+
+| Influence | Jeu | Service | Mécanisme |
+|-----------|-----|---------|-----------|
+| Gamification événements | Miyukini Survivor | JayFestival | Un festival peut proposer un mode spécial « Survivor » (challenge thématique, classement visiteurs, lots). Les visiteurs jouent sur le stand et les scores alimentent un classement JayFestival. |
+| Récompenses fidélité | MiyuClicker | JayFestival / JayXpose | La participation à des événements JayFestival débloque des bonus dans MiyuClicker (territoire événement, skin exclusif). |
+| Catalogue gamifié | Miyukini Survivor | JayXpose | Un exposant artisan peut présenter ses créations sous forme de « butin » dans Miyukini Survivor (arme inspirée du catalogue, skin thématique). |
+| Vitrine interactive | MiyuClicker | JayXpose | La vitrine d'un exposant peut intégrer un mini-jeu MiyuClicker thématique (clicker aux couleurs de la marque). |
+
+### Architecture technique
+
+Les jeux sont implémentés comme des crates Rust dans le workspace :
+
+| Crate | Jeu | Toolkits consommés |
+|-------|-----|-------------------|
+| `lord_of_the_castle` | Miyukini Survivor | egui/eframe (UI), MiyuClock (temps), KindMother (sauvegarde), sprites/animations. |
+| `miyukini-central` (module clicker) | MiyuClicker | egui/eframe (UI), simulation, sauvegarde, carte. |
+
+Les jeux sont exposés dans **Miyukini Central** (Hub Services) au même titre que les services métier — l'utilisateur les ouvre depuis le catalogue de services.
+
+---
+
+## 9. Gouvernance et sécurité
 
 - **Zero-trust** : aucun appelant présumé valide ; toute intention évaluée selon les politiques.
 - **Niveaux de sécurité** (0–4) et **états de confiance** (T0–T4) : gouvernés par WorrySentinel ; dégradation progressive, pas de blocage brutal.
@@ -274,7 +420,7 @@ La pyramide, les Cores, les Lois d'autonomie, les contrats de sécurité et de g
 
 ---
 
-## 8. À qui s'adresse Miyukini
+## 10. À qui s'adresse Miyukini
 
 | Acteur | Besoin |
 |--------|--------|
@@ -286,7 +432,7 @@ La pyramide, les Cores, les Lois d'autonomie, les contrats de sécurité et de g
 
 ---
 
-## 9. Documentation de référence
+## 11. Documentation de référence
 
 | Thème | Document principal |
 |-------|--------------------|
@@ -300,8 +446,9 @@ La pyramide, les Cores, les Lois d'autonomie, les contrats de sécurité et de g
 | **Tools et Toolkits** | [Tools et Toolkits](docs/reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
 | **Objectif final** | [Objectif Final](docs/reference/Miyukini%20Conceptual%20References%20-%20Objectif%20Final.md) |
 
-**Services** : [docs/services/](docs/services/) — premiers services en cours d'élaboration (JayRDV, JayFestival, JayKoa, JayKonta, JayXpose, JayFaim) : documents fondateurs, analyses par public, Opérateurs et Toolkits. Les concepts de services identifient les besoins en Opérateurs qui orchestreront les Outils.
-**Interpolarité des services Jay** : [Miyukini Conceptual References - Interpolarite Services Jay](docs/reference/Miyukini%20Conceptual%20References%20-%20Interpolarite%20Services%20Jay.md) — principe de couplage entre services Jay (JayXpose ↔ JayFestival, JayFaim ↔ JayFestival, JayKoa intégrateur des dates).  
+**Services Jay** : [docs/services/](docs/services/) — 6 services Jay interopérables (JayFestival, JayXpose, JayRDV, JayKoa, JayKonta, JayFaim) + 2 jeux (MiyukiniSurvivor, MiyuClicker) : documents fondateurs, analyses par public, Opérateurs et Toolkits.
+**Interpolarité des services Jay** : [Miyukini Conceptual References - Interpolarite Services Jay](docs/reference/Miyukini%20Conceptual%20References%20-%20Interpolarite%20Services%20Jay.md) — principe de couplage entre services Jay (JayXpose ↔ JayFestival, JayFaim ↔ JayFestival, JayKoa intégrateur des dates).
+**JayXpose (documentation complète)** : [docs/services/JayXpose/](docs/services/JayXpose/) — 14 documents : profil, catalogue, vitrine, coffre-fort, annuaire, confidentialité, synchronisation JayFestival, base de données, niveaux de sécurité.  
 **Kits d'Outils** : [docs/tools/_index.md](docs/tools/_index.md) — index des Toolkits documentés.  
 **Protocoles** : [docs/protocols/](docs/protocols/) — MIP, écriture documentation conceptuelle, implémentation générale.  
 **Cores** : [docs/core/](docs/core/) — par Core (StrongFather, KindMother, Master Butler, MiyukiniAdmin, etc.).  
@@ -310,7 +457,7 @@ La pyramide, les Cores, les Lois d'autonomie, les contrats de sécurité et de g
 
 ---
 
-## 10. Licence
+## 12. Licence
 
 Miyukini est distribué sous une **politique de licence duale** :
 
@@ -321,7 +468,7 @@ Détails et conditions : [Miyukini — Politique de licence](docs/legal/Miyukini
 
 ---
 
-## 11. Conclusion
+## 13. Conclusion
 
 Miyukini ne vise pas à être le plus rapide ni le plus flexible, mais **prévisible, traçable, autonome et structurellement sécurisé**. Il demande un investissement initial (architecture en strates, contraintes de gouvernance, invariants) en échange de garanties : fonctionnement déterministe en isolation, sécurité par conception, évolution sans rupture, traçabilité complète.
 
@@ -329,7 +476,16 @@ Miyukini ne vise pas à être le plus rapide ni le plus flexible, mais **prévis
 
 ---
 
-## 12. Log de rédaction
+## 14. Log de rédaction
+
+**2026-02-06 — Écosystème Jay, jeux et interopérabilité**
+
+- Ajout section **7. Écosystème Jay — Services interopérables** : présentation des 6 services Jay (JayFestival, JayXpose, JayRDV, JayKoa, JayKonta, JayFaim), carte d'interopérabilité (schéma ASCII), tableau des flux inter-services, avantages de l'environnement COG unifié (identité unique, données sans duplication, coffre-fort centralisé, agenda unifié, facturation transversale, confidentialité souveraine, sécurité par niveaux, offline-first, évolution sans rupture), principe d'interpolarité.
+- Ajout section **8. Jeux Miyukini — Gameplay et influences croisées** : Miyukini Survivor et MiyuClicker, influences croisées entre jeux (récompenses, succès, profil joueur unifié), influences jeux/services (gamification événements JayFestival, récompenses fidélité, catalogue gamifié JayXpose, vitrine interactive).
+- Mise à jour section **6. État actuel et roadmap** : tableau enrichi des services (Jay + Jeux), nomenclature clarifiée (famille Jay vs Miyukini).
+- Mise à jour section **Documentation de référence** : ajout lien JayXpose (14 documents).
+- Renumérotation des sections (7→9, 8→10, 9→11, 10→12, 11→13, 12→14).
+- Date de dernière mise à jour : 2026-02-06.
 
 **2026-02-02 — Miyukini Central (Hub)**
 
@@ -361,5 +517,5 @@ Miyukini ne vise pas à être le plus rapide ni le plus flexible, mais **prévis
 ---
 
 **Document** : README racine officiel  
-**Dernière mise à jour** : 2026-02-02  
+**Dernière mise à jour** : 2026-02-06  
 **Références** : Glossaire officiel, Pyramide Architecture Complete, Lois d'autonomie, Objectif Final, Tools et Toolkits (implémentés), docs/services (Services en cours d'élaboration)
