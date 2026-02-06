@@ -313,7 +313,7 @@ pub(crate) fn paint_player_window(ui: &mut egui::Ui, state: Option<&mut GameStat
         ui.label(format!("Vitesse d'attaque : {:.1}/s", attack_speed));
         ui.label(format!("Rayon d'attaque : {} px", Player::auto_attack_range()));
         ui.label(format!("Rayon de collecte : {} px", PICKUP_RADIUS));
-        ui.label(format!("Armure : {}", state.player.armor));
+        ui.label(format!("Armure : {}", state.player_total_armor()));
         ui.label(format!("Résistance magique : {}", state.player.magic_resist));
         ui.add_space(4.0);
         ui.separator();
@@ -589,6 +589,9 @@ pub(crate) fn paint_equipment_window(
         ui.label("Aucune partie en cours.");
         return;
     };
+    let total_armor = state.player_total_armor();
+    ui.heading(format!("Armure totale : {}", total_armor));
+    ui.add_space(6.0);
     for &slot in ItemSlot::equipment_slots() {
         let label = match state.get_equipped(slot) {
             Some(item) => format!("{} : {}", slot.label(), item.display_name),

@@ -1647,6 +1647,10 @@ impl MiyukiniCentralApp {
     /// Affiche le contenu d'un service.
     fn ui_service_content(&mut self, ui: &mut egui::Ui, service_id: ServiceId) {
         if let Some(service) = self.open_services.iter_mut().find(|s| s.id() == service_id) {
+            service.set_lotc_save_load(
+                Some(self.auth_db.clone()),
+                self.current_profile.as_ref().map(|p| p.id.as_str()),
+            );
             service.show(ui);
         }
     }

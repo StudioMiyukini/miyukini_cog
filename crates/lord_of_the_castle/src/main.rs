@@ -11,6 +11,9 @@
 
 use eframe::egui;
 use lord_of_the_castle::LordOfTheCastleApp;
+use std::io;
+
+const SAVE_PATH: &str = "lord_of_the_castle_save.bin";
 
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
@@ -24,7 +27,16 @@ fn main() -> eframe::Result<()> {
         options,
         Box::new(|cc| {
             cc.egui_ctx.set_visuals(egui::Visuals::dark());
-            Ok(Box::new(LordOfTheCastleApp::new(cc)))
+            let mut app = LordOfTheCastleApp::new(cc);
+            app.set_save_load_callbacks(
+                |bytes| {
+                    std::fs::write(SAVE_PATH, bytes).map_err(|e: io::Error| e.to_string())
+                },
+                || {
+                    std::fs::read(SAVE_PATH).map_err(|e: io::Error| e.to_string())
+                },
+            );
+            Ok(Box::new(app))
         }),
     )
 }

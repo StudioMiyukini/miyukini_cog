@@ -16,6 +16,8 @@ mod db;
 mod mother_client;
 mod password;
 
-pub use db::{AuthDbError, CentralAuthDb, CentralProfile};
+pub use db::{
+    AuthDbError, CentralAuthDb, CentralProfile, CentralProfileSave, CentralProfileSaveRow,
+};
 pub use mother_client::{validate_profiles_with_mother, MotherClientError};
 pub use password::{validate_password, password_rules_hint, PasswordError, PASSWORD_MIN_LEN};

@@ -20,6 +20,12 @@
   - Positionnement (Survivor + Tower Defense)
   - Décisions structurantes
 
+### Concepts, mécaniques et référentiels
+
+- **[Miyukini Survivor - Concepts Mecaniques et Referentiels](Miyukini%20Survivor%20-%20Concepts%20Mecaniques%20et%20Referentiels.md)**
+  - Synthèse : concepts, gameplay, inventaire, bestiaire, mécaniques RPG
+  - Tableaux de référence alignés sur le code (Lord of the Castle)
+
 ### Gameplay et mécaniques
 
 - **[Miyukini Survivor - Gameplay et Mecaniques](Miyukini%20Survivor%20-%20Gameplay%20et%20Mecaniques.md)**

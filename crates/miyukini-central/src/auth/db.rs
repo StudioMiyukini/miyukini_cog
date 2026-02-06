@@ -5,6 +5,11 @@
 //! par service : clé de service → id de la ligne dans la table du service).
 //! Exemple : sauvegarde de jeu → `service_key = "lord_of_the_castle"`, `ref_id` = id
 //! de la ligne dans la table des sauvegardes du service.
+//!
+//! **Structure de sauvegarde liée au profil Central :**
+//! - `central_profile_saves` : sauvegardes par (profile_id, service_key, slot).
+//!   `ref_id` dans `profile_service_refs` pointe vers `central_profile_saves.id` (sauvegarde courante).
+//! - Un profil peut avoir plusieurs slots par service (slot 0, 1, 2…).
 
 use crate::auth::password::validate_password;
 use rusqlite::{params, Connection};
@@ -34,6 +39,27 @@ impl From<rusqlite::Error> for AuthDbError {
     fn from(e: rusqlite::Error) -> Self {
         AuthDbError(e.to_string())
     }
+}
+
+/// Ligne de sauvegarde liée au profil Central (données complètes).
+#[derive(Debug, Clone)]
+pub struct CentralProfileSave {
+    pub id: String,
+    pub profile_id: String,
+    pub service_key: String,
+    pub slot: i64,
+    pub data: Vec<u8>,
+    pub created_at: String,
+    pub updated_at: String,
+}
+
+/// Ligne allégée pour lister les sauvegardes (sans le BLOB).
+#[derive(Debug, Clone)]
+pub struct CentralProfileSaveRow {
+    pub id: String,
+    pub slot: i64,
+    pub created_at: String,
+    pub updated_at: String,
 }
 
 /// Profil Miyukini COG (email = login, champs enrichis modifiables).
@@ -100,6 +126,19 @@ impl CentralAuthDb {
                 PRIMARY KEY (profile_id, service_key),
                 FOREIGN KEY (profile_id) REFERENCES central_profiles(id)
             );
+            CREATE TABLE IF NOT EXISTS central_profile_saves (
+                id TEXT PRIMARY KEY,
+                profile_id TEXT NOT NULL,
+                service_key TEXT NOT NULL,
+                slot INTEGER NOT NULL DEFAULT 0,
+                data BLOB NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                UNIQUE(profile_id, service_key, slot),
+                FOREIGN KEY (profile_id) REFERENCES central_profiles(id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_central_profile_saves_profile_service
+                ON central_profile_saves(profile_id, service_key);
             "#,
         )?;
         Ok(())
@@ -344,6 +383,128 @@ impl CentralAuthDb {
                     params![profile_id, service_key],
                 )?;
             }
+        }
+        Ok(())
+    }
+
+    // ---------- Sauvegardes liées au profil (central_profile_saves) ----------
+
+    /// Crée une sauvegarde pour un profil et un service (slot 0 par défaut). Retourne l’id de la ligne.
+    pub fn insert_profile_save(
+        &self,
+        profile_id: &str,
+        service_key: &str,
+        slot: i64,
+        data: &[u8],
+    ) -> Result<String, AuthDbError> {
+        let id = uuid::Uuid::new_v4().to_string();
+        let now = chrono::Utc::now().to_rfc3339();
+        let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
+        conn.execute(
+            "INSERT INTO central_profile_saves (id, profile_id, service_key, slot, data, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            params![id, profile_id, service_key, slot, data, now, now],
+        )?;
+        Ok(id)
+    }
+
+    /// Charge une sauvegarde par id.
+    pub fn get_profile_save(&self, id: &str) -> Result<Option<CentralProfileSave>, AuthDbError> {
+        let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
+        let mut stmt = conn.prepare(
+            "SELECT id, profile_id, service_key, slot, data, created_at, updated_at FROM central_profile_saves WHERE id = ?1",
+        )?;
+        let row = stmt.query_row(params![id], |row| {
+            Ok(CentralProfileSave {
+                id: row.get::<_, String>(0)?,
+                profile_id: row.get::<_, String>(1)?,
+                service_key: row.get::<_, String>(2)?,
+                slot: row.get::<_, i64>(3)?,
+                data: row.get::<_, Vec<u8>>(4)?,
+                created_at: row.get::<_, String>(5)?,
+                updated_at: row.get::<_, String>(6)?,
+            })
+        });
+        match row {
+            Ok(s) => Ok(Some(s)),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e.into()),
+        }
+    }
+
+    /// Charge une sauvegarde par (profile_id, service_key, slot).
+    pub fn get_profile_save_by_slot(
+        &self,
+        profile_id: &str,
+        service_key: &str,
+        slot: i64,
+    ) -> Result<Option<CentralProfileSave>, AuthDbError> {
+        let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
+        let mut stmt = conn.prepare(
+            "SELECT id, profile_id, service_key, slot, data, created_at, updated_at FROM central_profile_saves WHERE profile_id = ?1 AND service_key = ?2 AND slot = ?3",
+        )?;
+        let row = stmt.query_row(params![profile_id, service_key, slot], |row| {
+            Ok(CentralProfileSave {
+                id: row.get::<_, String>(0)?,
+                profile_id: row.get::<_, String>(1)?,
+                service_key: row.get::<_, String>(2)?,
+                slot: row.get::<_, i64>(3)?,
+                data: row.get::<_, Vec<u8>>(4)?,
+                created_at: row.get::<_, String>(5)?,
+                updated_at: row.get::<_, String>(6)?,
+            })
+        });
+        match row {
+            Ok(s) => Ok(Some(s)),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e.into()),
+        }
+    }
+
+    /// Met à jour le blob et updated_at d’une sauvegarde existante.
+    pub fn update_profile_save(&self, id: &str, data: &[u8]) -> Result<(), AuthDbError> {
+        let now = chrono::Utc::now().to_rfc3339();
+        let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
+        let n = conn.execute(
+            "UPDATE central_profile_saves SET data = ?1, updated_at = ?2 WHERE id = ?3",
+            params![data, now, id],
+        )?;
+        if n == 0 {
+            return Err(AuthDbError(format!("Sauvegarde non trouvée: {}", id)));
+        }
+        Ok(())
+    }
+
+    /// Liste les sauvegardes (sans BLOB) pour un profil et un service.
+    pub fn list_profile_saves(
+        &self,
+        profile_id: &str,
+        service_key: &str,
+    ) -> Result<Vec<CentralProfileSaveRow>, AuthDbError> {
+        let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
+        let mut stmt = conn.prepare(
+            "SELECT id, slot, created_at, updated_at FROM central_profile_saves WHERE profile_id = ?1 AND service_key = ?2 ORDER BY slot",
+        )?;
+        let rows = stmt.query_map(params![profile_id, service_key], |row| {
+            Ok(CentralProfileSaveRow {
+                id: row.get::<_, String>(0)?,
+                slot: row.get::<_, i64>(1)?,
+                created_at: row.get::<_, String>(2)?,
+                updated_at: row.get::<_, String>(3)?,
+            })
+        })?;
+        let mut out = Vec::new();
+        for row in rows {
+            out.push(row?);
+        }
+        Ok(out)
+    }
+
+    /// Supprime une sauvegarde par id. Ne modifie pas `profile_service_refs` (à faire côté appelant si ref_id pointait ici).
+    pub fn delete_profile_save(&self, id: &str) -> Result<(), AuthDbError> {
+        let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
+        let n = conn.execute("DELETE FROM central_profile_saves WHERE id = ?1", params![id])?;
+        if n == 0 {
+            return Err(AuthDbError(format!("Sauvegarde non trouvée: {}", id)));
         }
         Ok(())
     }

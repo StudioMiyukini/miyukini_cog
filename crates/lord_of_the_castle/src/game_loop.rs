@@ -367,6 +367,9 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
 
     // ——— Dégâts au contact : ennemi vs château, joueur, tours, troupes ———
     let mut to_remove_enemies = Vec::new();
+    let mut player_contact_damage = 0i32;
+    let mut player_push_dx = 0.0f32;
+    let mut player_push_dy = 0.0f32;
     for enemy in &state.enemies {
         let d_castle = enemy.dist_to(state.castle.x, state.castle.y);
         if overlap(d_castle, enemy.half_size(), castle_half) {
@@ -375,10 +378,10 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
         if !state.player.dead {
             let d_player = enemy.dist_to(state.player.x, state.player.y);
             if overlap(d_player, enemy.half_size(), player_half) {
-                state.player.take_damage(enemy.contact_damage());
+                player_contact_damage += enemy.contact_damage();
                 let (dx, dy) = push_back_delta(enemy.x, enemy.y, state.player.x, state.player.y, combat::ENEMY_PUSHBACK_ON_CONTACT_PX);
-                state.player.x += dx;
-                state.player.y += dy;
+                player_push_dx += dx;
+                player_push_dy += dy;
             }
         }
         if let Some(ref mut sec) = state.secondary_player {
@@ -420,6 +423,11 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
                 troop.y += dy;
             }
         }
+    }
+    if player_contact_damage > 0 {
+        state.apply_damage_to_player(player_contact_damage);
+        state.player.x += player_push_dx;
+        state.player.y += player_push_dy;
     }
 
     // ——— Régénération GigaChad : 1 PV/s si compétence apprise ———

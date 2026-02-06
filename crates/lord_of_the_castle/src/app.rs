@@ -160,6 +160,22 @@ pub struct LordOfTheCastleApp {
     pub troop_attack_sprite_desc: Option<SpritesheetDesc>,
     /// Accumulateur temps pour l'animation marche troupes.
     pub troop_anim_accumulator: f32,
+    /// Callback pour sauvegarder les octets (Central = DB, standalone = fichier). None = non disponible.
+    pub save_callback: Option<Box<dyn Fn(&[u8]) -> Result<(), String>>>,
+    /// Callback pour charger les octets. None = non disponible.
+    pub load_callback: Option<Box<dyn Fn() -> Result<Vec<u8>, String>>>,
+    /// Message temporaire après sauvegarde/chargement (texte, instant d'affichage). Effacé après 2 s.
+    pub save_load_message: Option<(String, Instant)>,
+    /// Demande de sauvegarde (bouton cliqué) ; traitée après le bloc UI pour éviter double emprunt.
+    pub save_requested: bool,
+    /// Demande de chargement (bouton cliqué).
+    pub load_requested: bool,
+    /// Notifications « niveau atteint » affichées en bas à droite (message, instant). Expirent après 3 s.
+    pub level_up_toasts: Vec<(String, Instant)>,
+    /// Fenêtre « Tutoriel » ouverte (bouton Tuto dans le header).
+    pub tutorial_window_open: bool,
+    /// Onglet actif dans la fenêtre Tutoriel (0 = Comment jouer, 1 = Contrôles, 2 = Phases, 3 = Mécaniques).
+    pub tutorial_tab: usize,
 }
 
 impl Default for LordOfTheCastleApp {
@@ -213,6 +229,14 @@ impl Default for LordOfTheCastleApp {
             troop_attack_sprite_texture: None,
             troop_attack_sprite_desc: None,
             troop_anim_accumulator: 0.0,
+            save_callback: None,
+            load_callback: None,
+            save_load_message: None,
+            save_requested: false,
+            load_requested: false,
+            level_up_toasts: Vec::new(),
+            tutorial_window_open: false,
+            tutorial_tab: 0,
         }
     }
 }
@@ -245,6 +269,7 @@ impl LordOfTheCastleApp {
         let player = Player::from_creation(name, save_name, stats, 0.0, 0.0);
         self.game = Some(GameState::new_with_player(0.0, 0.0, player));
         self.screen = Screen::Preparation;
+        self.tutorial_window_open = true;
         self.creation_available_ids.clear();
         self.creation_reroll_pending = false;
         self.creation_current_choices.clear();
@@ -254,6 +279,77 @@ impl LordOfTheCastleApp {
     /// Le jeu s'exécute dans le body de Central ; pas de fenêtre standalone.
     pub fn new_embedded() -> Self {
         Self::default()
+    }
+
+    /// Enregistre les callbacks de sauvegarde/chargement (Central = DB, standalone = fichier).
+    pub fn set_save_load_callbacks(
+        &mut self,
+        save: impl Fn(&[u8]) -> Result<(), String> + 'static,
+        load: impl Fn() -> Result<Vec<u8>, String> + 'static,
+    ) {
+        self.save_callback = Some(Box::new(save));
+        self.load_callback = Some(Box::new(load));
+    }
+
+    /// Sauvegarde la partie courante (sérialisation bincode + callback). Retourne le message d’erreur éventuel.
+    /// Draine les notifications « niveau atteint » du state vers les toasts (à appeler après le tick).
+    fn drain_level_up_toasts(&mut self) {
+        if let Some(ref mut state) = self.game {
+            for msg in state.pending_level_up_notifications.drain(..) {
+                self.level_up_toasts.push((msg, Instant::now()));
+            }
+        }
+    }
+
+    /// Affiche les toasts « niveau atteint » en bas à droite. Expire après 3 s.
+    fn paint_level_up_toasts(&mut self, ctx: &egui::Context) {
+        const TOAST_TTL_SECS: f32 = 3.0;
+        self.level_up_toasts.retain(|(_, t)| Instant::now().duration_since(*t).as_secs_f32() <= TOAST_TTL_SECS);
+        if self.level_up_toasts.is_empty() {
+            return;
+        }
+        let messages: Vec<String> = self.level_up_toasts.iter().map(|(m, _)| m.clone()).collect();
+        let rect = ctx.available_rect();
+        egui::Area::new(egui::Id::new("lotc_level_toasts"))
+            .anchor(egui::Align2::RIGHT_BOTTOM, egui::Vec2::ZERO)
+            .order(egui::Order::Foreground)
+            .constrain(true)
+            .show(ctx, |ui| {
+                ui.set_max_width(rect.width() * 0.35);
+                for msg in &messages {
+                    let frame = egui::Frame::new()
+                        .fill(ui.visuals().window_fill())
+                        .corner_radius(6.0)
+                        .inner_margin(8);
+                    frame.show(ui, |ui| {
+                        ui.colored_label(egui::Color32::from_rgb(100, 200, 100), msg);
+                    });
+                }
+            });
+    }
+
+    /// Sauvegarde la partie courante (sérialisation bincode + callback). Retourne le message d'erreur éventuel.
+    fn do_save(&self) -> Result<(), String> {
+        let state = self.game.as_ref().ok_or("Aucune partie en cours.")?;
+        let bytes = bincode::serialize(state).map_err(|e| e.to_string())?;
+        let cb = self
+            .save_callback
+            .as_ref()
+            .ok_or("Sauvegarde non disponible (connexion requise dans Central).")?;
+        cb(&bytes)
+    }
+
+    /// Charge une partie (callback + désérialisation bincode). Remplace l’état courant.
+    fn do_load(&mut self) -> Result<(), String> {
+        let bytes = self
+            .load_callback
+            .as_ref()
+            .ok_or("Chargement non disponible (connexion requise dans Central).")?()?;
+        let state: GameState = bincode::deserialize(&bytes).map_err(|e| e.to_string())?;
+        self.game = Some(state);
+        self.screen = Screen::Preparation;
+        self.last_tick = Instant::now();
+        Ok(())
     }
 
     /// Rendu dans un `ui` fourni (intégration Miyukini Central).
@@ -315,6 +411,7 @@ impl LordOfTheCastleApp {
                     self.troop_attack_sprite_desc = Some(SpritesheetDesc::horizontal(w as u32, h as u32, 6));
                 }
             }
+            self.drain_level_up_toasts();
         }
 
         // Id à focus si l'utilisateur clique sur la zone de jeu (pour recevoir ZQSD)
@@ -401,11 +498,56 @@ impl LordOfTheCastleApp {
                 if ui.button("Mode Dev").clicked() {
                     self.dev_mode_window_open = true;
                 }
+                if ui.button("Sauvegarder").clicked() {
+                    self.save_requested = true;
+                }
+                if ui.button("Charger").clicked() {
+                    self.load_requested = true;
+                }
+                if ui.button("Tuto").clicked() {
+                    self.tutorial_window_open = true;
+                }
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     ui.label(format!("Or: {}", state.gold));
                 });
             }
         });
+        // Bandeau « PHASE DE REPOS » sous le header (visible uniquement en phase Préparation)
+        if let Some(ref state) = self.game {
+            if state.phase == GamePhase::Preparation {
+                ui.add_space(4.0);
+                egui::Frame::new()
+                    .fill(egui::Color32::from_rgb(255, 220, 0))
+                    .inner_margin(egui::Margin::symmetric(8, 6))
+                    .show(ui, |ui| {
+                        ui.vertical_centered(|ui| {
+                            ui.label(egui::RichText::new("PHASE DE REPOS").color(egui::Color32::BLACK).strong());
+                        });
+                    });
+                ui.add_space(4.0);
+            }
+        }
+        if self.save_requested {
+            self.save_requested = false;
+            match self.do_save() {
+                Ok(()) => self.save_load_message = Some(("Sauvegarde OK.".into(), Instant::now())),
+                Err(e) => self.save_load_message = Some((format!("Erreur: {}", e), Instant::now())),
+            }
+        }
+        if self.load_requested {
+            self.load_requested = false;
+            match self.do_load() {
+                Ok(()) => self.save_load_message = Some(("Partie chargée.".into(), Instant::now())),
+                Err(e) => self.save_load_message = Some((format!("Erreur: {}", e), Instant::now())),
+            }
+        }
+        if let Some((msg, t)) = &self.save_load_message {
+            if t.elapsed().as_secs_f32() > 2.0 {
+                self.save_load_message = None;
+            } else {
+                ui.colored_label(egui::Color32::from_rgb(120, 255, 120), msg.as_str());
+            }
+        }
         ui.add_space(8.0);
 
         // Fenêtre Joueur 2 (phase Préparation) : spawn Tombilol, Tal Ratchou, Sergent Garcia
@@ -443,6 +585,72 @@ impl LordOfTheCastleApp {
             if !open || should_close {
                 self.joueur2_window_open = false;
             }
+        }
+
+        // Fenêtre Tutoriel (déplaçable, fermable, onglets)
+        if self.tutorial_window_open {
+            let mut tab = self.tutorial_tab;
+            egui::Window::new("Tutoriel")
+                .open(&mut self.tutorial_window_open)
+                .default_size([420.0, 380.0])
+                .resizable(true)
+                .show(ui.ctx(), |ui| {
+                    ui.horizontal(|ui| {
+                        if ui.selectable_label(tab == 0, "Comment jouer").clicked() { tab = 0; }
+                        if ui.selectable_label(tab == 1, "Contrôles").clicked() { tab = 1; }
+                        if ui.selectable_label(tab == 2, "Phases").clicked() { tab = 2; }
+                        if ui.selectable_label(tab == 3, "Mécaniques").clicked() { tab = 3; }
+                    });
+                    ui.separator();
+                    egui::ScrollArea::vertical().show(ui, |ui| {
+                        match tab {
+                            0 => {
+                                ui.heading("Comment jouer");
+                                ui.add_space(6.0);
+                                ui.label("Lord of the Castle est un jeu de défense de tour et d’action. Votre objectif : protéger le Château des vagues d’ennemis.");
+                                ui.add_space(4.0);
+                                ui.label("• En phase Préparation : achetez équipement, construisez des tours, recrutez des troupes, montez en compétences.");
+                                ui.label("• Cliquez sur « Lancer la vague » pour passer en Bataille.");
+                                ui.label("• En Bataille : déplacez-vous (ZQSD), combattez les ennemis avec votre personnage et vos troupes ; les tours tirent automatiquement.");
+                                ui.label("• Ramassez l’or et l’XP au sol, identifiez les objets trouvés, puis repassez en Préparation pour la vague suivante.");
+                                ui.add_space(4.0);
+                                ui.label("Si le Château tombe à 0 PV, c’est le Game Over.");
+                            }
+                            1 => {
+                                ui.heading("Contrôles");
+                                ui.add_space(6.0);
+                                ui.label("• Déplacement : ZQSD ou flèches directionnelles (8 directions).");
+                                ui.label("• Avec un joueur 2 : le joueur 1 utilise OKLM, le joueur 2 utilise ZQSD.");
+                                ui.label("• Cliquez sur la zone de jeu pour lui donner le focus (clavier actif).");
+                                ui.label("• Header : Player, Inventaire, Équipement, Compétences, Marchand, Expert (Deckard Rain), Construction, Recrutement, Lancer la vague, Sauvegarder, Charger.");
+                                ui.label("• Ramassage : approchez-vous des orbes (or, XP) et des objets au sol (rayon ~30 px).");
+                            }
+                            2 => {
+                                ui.heading("Phases");
+                                ui.add_space(6.0);
+                                ui.label("Préparation :");
+                                ui.label("  • Compétences (arbre Guerrier), équipement au Marchand, construction de tours (grille 20×20), recrutement de troupes.");
+                                ui.label("  • Inventaire max 20 slots ; ne lancez pas la vague si l’inventaire est plein.");
+                                ui.add_space(4.0);
+                                ui.label("Bataille :");
+                                ui.label("  • Ennemis spawnent et marchent vers le Château. Vous, les tours et les troupes les attaquez.");
+                                ui.label("  • Quand tous les ennemis sont morts, la vague est gagnée : or, XP et objets récupérables au sol.");
+                                ui.label("  • Passez à la vague suivante en revenant en Préparation.");
+                            }
+                            3 => {
+                                ui.heading("Mécaniques");
+                                ui.add_space(6.0);
+                                ui.label("Joueur : attaque auto à portée (~40 px), 1 att/s ; dégâts et PV selon équipement et stats. Mort à 0 PV : revive après la vague avec −1 PV max.");
+                                ui.label("Tours : coût 50 or, champ de vision 300 px, flèches 600 px, 1 tir / 2 s.");
+                                ui.label("Troupes : suivent le joueur dans un rayon ~200 px, combattent les ennemis à portée (ex. Milicien 3 dégâts, 25 px).");
+                                ui.label("Ennemis : priorité Joueur > Tour > Château ; donnent or, XP et parfois objets à la mort.");
+                                ui.label("Loot : or et XP en orbes ; objets à identifier (Marchand ou Expert 20 or).");
+                            }
+                            _ => {}
+                        }
+                    });
+                });
+            self.tutorial_tab = tab;
         }
 
         // Fenêtre Mode Dev (Visions des portées, +100 or, Spawn 50 ennemis, lvlup)
@@ -1117,6 +1325,8 @@ impl LordOfTheCastleApp {
                 }
             }
         }
+
+        self.paint_level_up_toasts(ui.ctx());
     }
 }
 
@@ -1261,6 +1471,9 @@ fn paint_equipment_item_detail(
 
 impl App for LordOfTheCastleApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        if self.game.is_some() {
+            self.drain_level_up_toasts();
+        }
         // Input clavier : si joueur 2 présent, J1 = OKLM (O=haut, K=gauche, L=bas, M=droite), J2 = ZQSD ; sinon J1 = ZQSD + flèches
         let input = ctx.input(Clone::clone);
         use egui::Key;
@@ -1343,12 +1556,60 @@ impl App for LordOfTheCastleApp {
                         if ui.button("Mode Dev").clicked() {
                             self.dev_mode_window_open = true;
                         }
+                        if ui.button("Sauvegarder").clicked() {
+                            self.save_requested = true;
+                        }
+                        if ui.button("Charger").clicked() {
+                            self.load_requested = true;
+                        }
+                        if ui.button("Tuto").clicked() {
+                            self.tutorial_window_open = true;
+                        }
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                             ui.label(format!("Or: {}", state.gold));
                         });
                     }
                 });
+                if self.save_requested {
+                    self.save_requested = false;
+                    match self.do_save() {
+                        Ok(()) => self.save_load_message = Some(("Sauvegarde OK.".into(), Instant::now())),
+                        Err(e) => self.save_load_message = Some((format!("Erreur: {}", e), Instant::now())),
+                    }
+                }
+                if self.load_requested {
+                    self.load_requested = false;
+                    match self.do_load() {
+                        Ok(()) => self.save_load_message = Some(("Partie chargée.".into(), Instant::now())),
+                        Err(e) => self.save_load_message = Some((format!("Erreur: {}", e), Instant::now())),
+                    }
+                }
+                if let Some((msg, t)) = &self.save_load_message {
+                    if t.elapsed().as_secs_f32() > 2.0 {
+                        self.save_load_message = None;
+                    } else {
+                        ui.colored_label(egui::Color32::from_rgb(120, 255, 120), msg.as_str());
+                    }
+                }
             });
+
+        // Bandeau « PHASE DE REPOS » sous le header (visible uniquement en phase Préparation)
+        if let Some(ref state) = self.game {
+            if state.phase == GamePhase::Preparation {
+                egui::TopBottomPanel::top("lotc_phase_bandeau")
+                    .min_height(28.0)
+                    .show(ctx, |ui| {
+                        egui::Frame::new()
+                            .fill(egui::Color32::from_rgb(255, 220, 0))
+                            .inner_margin(egui::Margin::symmetric(8, 4))
+                            .show(ui, |ui| {
+                                ui.vertical_centered(|ui| {
+                                    ui.label(egui::RichText::new("PHASE DE REPOS").color(egui::Color32::BLACK).strong());
+                                });
+                            });
+                    });
+            }
+        }
 
         // Fenêtre Joueur 2 (standalone)
         if self.joueur2_window_open {
@@ -1385,6 +1646,72 @@ impl App for LordOfTheCastleApp {
             if !open || should_close {
                 self.joueur2_window_open = false;
             }
+        }
+
+        // Fenêtre Tutoriel (standalone)
+        if self.tutorial_window_open {
+            let mut tab = self.tutorial_tab;
+            egui::Window::new("Tutoriel")
+                .open(&mut self.tutorial_window_open)
+                .default_size([420.0, 380.0])
+                .resizable(true)
+                .show(ctx, |ui| {
+                    ui.horizontal(|ui| {
+                        if ui.selectable_label(tab == 0, "Comment jouer").clicked() { tab = 0; }
+                        if ui.selectable_label(tab == 1, "Contrôles").clicked() { tab = 1; }
+                        if ui.selectable_label(tab == 2, "Phases").clicked() { tab = 2; }
+                        if ui.selectable_label(tab == 3, "Mécaniques").clicked() { tab = 3; }
+                    });
+                    ui.separator();
+                    egui::ScrollArea::vertical().show(ui, |ui| {
+                        match tab {
+                            0 => {
+                                ui.heading("Comment jouer");
+                                ui.add_space(6.0);
+                                ui.label("Lord of the Castle est un jeu de défense de tour et d'action. Votre objectif : protéger le Château des vagues d'ennemis.");
+                                ui.add_space(4.0);
+                                ui.label("• En phase Préparation : achetez équipement, construisez des tours, recrutez des troupes, montez en compétences.");
+                                ui.label("• Cliquez sur « Lancer la vague » pour passer en Bataille.");
+                                ui.label("• En Bataille : déplacez-vous (ZQSD), combattez les ennemis avec votre personnage et vos troupes ; les tours tirent automatiquement.");
+                                ui.label("• Ramassez l'or et l'XP au sol, identifiez les objets trouvés, puis repassez en Préparation pour la vague suivante.");
+                                ui.add_space(4.0);
+                                ui.label("Si le Château tombe à 0 PV, c'est le Game Over.");
+                            }
+                            1 => {
+                                ui.heading("Contrôles");
+                                ui.add_space(6.0);
+                                ui.label("• Déplacement : ZQSD ou flèches directionnelles (8 directions).");
+                                ui.label("• Avec un joueur 2 : le joueur 1 utilise OKLM, le joueur 2 utilise ZQSD.");
+                                ui.label("• Cliquez sur la zone de jeu pour lui donner le focus (clavier actif).");
+                                ui.label("• Header : Player, Inventaire, Équipement, Compétences, Marchand, Expert (Deckard Rain), Construction, Recrutement, Lancer la vague, Sauvegarder, Charger.");
+                                ui.label("• Ramassage : approchez-vous des orbes (or, XP) et des objets au sol (rayon ~30 px).");
+                            }
+                            2 => {
+                                ui.heading("Phases");
+                                ui.add_space(6.0);
+                                ui.label("Préparation :");
+                                ui.label("  • Compétences (arbre Guerrier), équipement au Marchand, construction de tours (grille 20×20), recrutement de troupes.");
+                                ui.label("  • Inventaire max 20 slots ; ne lancez pas la vague si l'inventaire est plein.");
+                                ui.add_space(4.0);
+                                ui.label("Bataille :");
+                                ui.label("  • Ennemis spawnent et marchent vers le Château. Vous, les tours et les troupes les attaquez.");
+                                ui.label("  • Quand tous les ennemis sont morts, la vague est gagnée : or, XP et objets récupérables au sol.");
+                                ui.label("  • Passez à la vague suivante en revenant en Préparation.");
+                            }
+                            3 => {
+                                ui.heading("Mécaniques");
+                                ui.add_space(6.0);
+                                ui.label("Joueur : attaque auto à portée (~40 px), 1 att/s ; dégâts et PV selon équipement et stats. Mort à 0 PV : revive après la vague avec −1 PV max.");
+                                ui.label("Tours : coût 50 or, champ de vision 300 px, flèches 600 px, 1 tir / 2 s.");
+                                ui.label("Troupes : suivent le joueur dans un rayon ~200 px, combattent les ennemis à portée (ex. Milicien 3 dégâts, 25 px).");
+                                ui.label("Ennemis : priorité Joueur > Tour > Château ; donnent or, XP et parfois objets à la mort.");
+                                ui.label("Loot : or et XP en orbes ; objets à identifier (Marchand ou Expert 20 or).");
+                            }
+                            _ => {}
+                        }
+                    });
+                });
+            self.tutorial_tab = tab;
         }
 
         // Fenêtre Mode Dev (standalone)
@@ -2075,6 +2402,7 @@ impl App for LordOfTheCastleApp {
             }
         });
 
+        self.paint_level_up_toasts(ctx);
         ctx.request_repaint();
     }
 }

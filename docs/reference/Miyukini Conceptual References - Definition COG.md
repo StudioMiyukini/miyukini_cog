@@ -189,8 +189,14 @@ L'analogie du "pays" est techniquement pertinente :
 
 ---
 
+## Note — Version full Web envisagée
+
+Une **version full Web** du COG est envisagée pour une utilisation **Client–Navigateur / serveur web**, avec **Supabase en base de données**. Cette évolution permettrait un accès au COG depuis le navigateur (Façade Publique Gouvernée ou Visite selon le cas) tout en conservant la gouvernance et la persistance côté serveur (Supabase Auth, PostgreSQL, etc.).
+
+---
+
 **Date de création :** 2026-01-27  
-**Version :** 1.3 (terminologie Opérateurs)  
+**Version :** 1.4 (note version full Web)  
 **Statut :** Document de référence identitaire
 
 **Références croisées :**

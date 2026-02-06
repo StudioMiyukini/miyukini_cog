@@ -45,4 +45,12 @@ pub trait ServiceUi {
     fn ui_editor_theme_mut(&mut self) -> Option<&mut EditorThemeState> {
         None
     }
+
+    /// Lie la sauvegarde Lord of the Castle au profil Central (auth_db + profile_id). No-op pour les autres services.
+    fn set_lotc_save_load(
+        &mut self,
+        _auth_db: Option<std::sync::Arc<crate::auth::CentralAuthDb>>,
+        _profile_id: Option<&str>,
+    ) {
+    }
 }

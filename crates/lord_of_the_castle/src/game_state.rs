@@ -142,6 +142,9 @@ pub struct GameState {
     /// Prochain ID joueur secondaire (pour Garcia miliciens).
     #[serde(default)]
     pub next_secondary_id: u64,
+    /// Notifications « niveau atteint » à afficher en bas à droite (drainées par l'app chaque frame).
+    #[serde(skip, default)]
+    pub pending_level_up_notifications: Vec<String>,
 }
 
 impl GameState {
@@ -206,6 +209,7 @@ impl GameState {
             secondary_player: None,
             secondary_projectiles: Vec::new(),
             next_secondary_id: 0,
+            pending_level_up_notifications: Vec::new(),
         }
     }
 
@@ -231,6 +235,8 @@ impl GameState {
             if self.level % 5 == 0 {
                 self.stat_points_available += 1;
             }
+            self.pending_level_up_notifications
+                .push(format!("Niveau {} atteint !", self.level));
         }
     }
 
@@ -457,6 +463,25 @@ impl GameState {
     /// - Mains nues : For + Con/2 (min 1)
     /// - Arme CàC : dégâts de l’arme + For/2 (min 1)
     /// - Arme à distance : dégâts de l’arme + Dex/2 (min 1)
+    /// Armure totale du joueur (somme des armures effectives des pièces équipées). Réduction plate ; dégâts min subis = 1.
+    pub fn player_total_armor(&self) -> i32 {
+        self.equipped.values().map(|item| item.effective_armor()).sum()
+    }
+
+    /// Applique des dégâts bruts au joueur (après armure : réduction plate, dégâts min = 1).
+    pub fn apply_damage_to_player(&mut self, raw_damage: i32) {
+        let armor = self.player_total_armor();
+        let actual = (raw_damage - armor).max(1);
+        self.player.hp = (self.player.hp - actual).max(0);
+        if self.player.hp <= 0 {
+            self.player.dead = true;
+        }
+    }
+
+    /// Dégâts de l'attaque auto du joueur selon équipement :
+    /// - Mains nues : For + Con/2 (min 1)
+    /// - Arme CàC : dégâts de l'arme + For/2 (min 1)
+    /// - Arme à distance : dégâts de l'arme + Dex/2 (min 1)
     pub fn player_auto_attack_damage(&self) -> i32 {
         let eff = self.effective_stats();
         let main_hand = self.get_equipped(ItemSlot::MainHand);
@@ -614,6 +639,8 @@ impl GameState {
         if self.level % 5 == 0 {
             self.stat_points_available += 1;
         }
+        self.pending_level_up_notifications
+            .push(format!("Niveau {} atteint !", self.level));
     }
 
     /// Spawn le joueur secondaire « Tombilol » (30 PV, attaque 360°, 30 px, 1 att/s). Un seul joueur secondaire à la fois.
@@ -719,6 +746,8 @@ impl GameState {
             return false;
         };
         sec.give_level_up();
+        self.pending_level_up_notifications
+            .push(format!("Joueur 2 : Niveau {} atteint !", sec.level));
         if sec.kind == SecondaryPlayerKind::SergentGarcia {
             let extra = sec.kind.militiamen_count_at_level(sec.level)
                 .saturating_sub(sec.kind.militiamen_count_at_level(sec.level - 1));
