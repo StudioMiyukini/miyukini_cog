@@ -19,6 +19,7 @@ pub enum IconSize {
 
 impl IconSize {
     /// Taille en points depuis le thème.
+    #[must_use] 
     pub fn size_pt(self, theme: &JayFestivalTheme) -> f32 {
         match self {
             IconSize::Sm => theme.font_size_sm(),

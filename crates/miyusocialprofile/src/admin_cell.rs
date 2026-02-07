@@ -49,6 +49,7 @@ pub struct MiyusocialprofileAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.social.profile";
 
+#[must_use] 
 pub fn miyusocialprofile_admin_cell(version: &str, fingerprint: &str) -> MiyusocialprofileAdminCell {
     MiyusocialprofileAdminCell {
         identification: MiyusocialprofileIdentification {

@@ -49,6 +49,7 @@ pub struct MiyubillingAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.billing.saas";
 
+#[must_use] 
 pub fn miyubilling_admin_cell(version: &str, fingerprint: &str) -> MiyubillingAdminCell {
     MiyubillingAdminCell {
         identification: MiyubillingIdentification {

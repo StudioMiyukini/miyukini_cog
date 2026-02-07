@@ -112,7 +112,7 @@ impl std::fmt::Display for StorageError {
         match self {
             StorageError::NotFound => write!(f, "Entity not found"),
             StorageError::Corruption => write!(f, "Storage corruption detected"),
-            StorageError::Io(msg) => write!(f, "IO error: {}", msg),
+            StorageError::Io(msg) => write!(f, "IO error: {msg}"),
         }
     }
 }
@@ -144,6 +144,7 @@ impl MemoryStorage {
     /// @do: create_memory_storage
     /// @depends: kindmother_storage_memory
     /// Crée un nouveau stockage mémoire.
+    #[must_use] 
     pub fn new() -> Self {
         Self::default()
     }
@@ -167,7 +168,7 @@ impl Storage for MemoryStorage {
         let instance_key = format!("{}", instance.id);
         self.data
             .entry(instance_key)
-            .or_insert_with(std::collections::HashMap::new)
+            .or_default()
             .insert(entity_id.to_string(), data.to_vec());
         Ok(())
     }

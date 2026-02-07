@@ -51,6 +51,7 @@ pub struct MiyuLocaleAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.locale.miyulocale";
 
+#[must_use] 
 pub fn miyulocale_admin_cell(version: &str, fingerprint: &str) -> MiyuLocaleAdminCell {
     MiyuLocaleAdminCell {
         identification: MiyuLocaleIdentification {

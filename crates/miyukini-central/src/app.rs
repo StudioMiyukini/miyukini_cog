@@ -225,6 +225,7 @@ fn load_usage_store(storage: Option<&dyn eframe::Storage>) -> UsageStore {
 impl MiyukiniCentralApp {
     /// Crée une nouvelle instance de l'application.
     /// Charge le mode clair/obscur depuis le storage (persistant).
+    #[must_use] 
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         let mut header_state = HeaderState::default();
         header_state.tabs.push(TabInfo {
@@ -237,8 +238,7 @@ impl MiyukiniCentralApp {
         let dark_mode = cc
             .storage
             .and_then(|s| s.get_string(STORAGE_KEY_DARK_MODE))
-            .map(|s| s == "true")
-            .unwrap_or(false);
+            .is_some_and(|s| s == "true");
 
         if dark_mode {
             cc.egui_ctx.set_visuals(egui::Visuals::dark());
@@ -292,7 +292,7 @@ impl MiyukiniCentralApp {
             auth_password_repeat: String::new(),
             auth_error: None,
             auth_db: Arc::new(
-                CentralAuthDb::open("miyukini_cog.db").unwrap_or_else(|e| panic!("auth db: {}", e)),
+                CentralAuthDb::open("miyukini_cog.db").unwrap_or_else(|e| panic!("auth db: {e}")),
             ),
             favorites: Vec::new(),
             usage_store: load_usage_store(cc.storage),
@@ -365,9 +365,9 @@ impl App for MiyukiniCentralApp {
         let mut usage_modified = false;
         if let Some(ctx_now) = current_ctx {
             let need_switch = self.current_session_context.as_ref() != Some(&ctx_now);
-            let need_flush = self.current_session_start.map_or(false, |start| time_sec - start >= FLUSH_INTERVAL_SEC);
+            let need_flush = self.current_session_start.is_some_and(|start| time_sec - start >= FLUSH_INTERVAL_SEC);
             if need_switch || need_flush {
-                if let (Some(start), Some(ref prev_ctx)) = (self.current_session_start, self.current_session_context.as_ref()) {
+                if let (Some(start), Some(prev_ctx)) = (self.current_session_start, self.current_session_context.as_ref()) {
                     self.usage_store.record(start, time_sec, prev_ctx);
                     usage_modified = true;
                 }
@@ -420,15 +420,14 @@ impl App for MiyukiniCentralApp {
                     .duration_since(UNIX_EPOCH)
                     .unwrap_or_default()
                     .as_secs_f64();
-                let should_run = self.last_mother_validation_at.map_or(true, |last| {
+                let should_run = self.last_mother_validation_at.is_none_or(|last| {
                     now_sec - last >= self.mother_validation_interval_sec
                 });
                 if should_run {
-                    let profiles = match self.auth_db.list_profiles() {
-                        Ok(p) => p,
-                        Err(_) => Vec::new(),
-                    };
-                    if !profiles.is_empty() {
+                    let profiles = self.auth_db.list_profiles().unwrap_or_default();
+                    if profiles.is_empty() {
+                        self.last_mother_validation_at = Some(now_sec);
+                    } else {
                         let url_clone = url.clone();
                         let (tx, rx) = mpsc::channel();
                         std::thread::spawn(move || {
@@ -438,8 +437,6 @@ impl App for MiyukiniCentralApp {
                         });
                         self.mother_validation_rx = Some(rx);
                         self.mother_validation_in_progress = true;
-                    } else {
-                        self.last_mother_validation_at = Some(now_sec);
                     }
                 }
             }
@@ -518,21 +515,21 @@ impl MiyukiniCentralApp {
             tab_active_text: t.and_then(|x| x.tab_active_text).unwrap_or_else(|| pixel_theme.tab_active_text()),
             tab_inactive_text: t.and_then(|x| x.tab_inactive_text).unwrap_or_else(|| pixel_theme.tab_inactive_text()),
             tab_separator: t.and_then(|x| x.tab_separator).unwrap_or_else(|| pixel_theme.tab_separator()),
-            close_btn_fg: t.and_then(|x| x.close_btn_fg).unwrap_or_else(|| {
+            close_btn_fg: t.and_then(|x| x.close_btn_fg).unwrap_or({
                 if pixel_theme.dark_mode {
                     crate::pixel_theme::chrome_colors::CLOSE_BUTTON_DARK
                 } else {
                     crate::pixel_theme::chrome_colors::CLOSE_BUTTON_LIGHT
                 }
             }),
-            close_btn_hover_fg: t.and_then(|x| x.close_btn_hover_fg).unwrap_or_else(|| {
+            close_btn_hover_fg: t.and_then(|x| x.close_btn_hover_fg).unwrap_or({
                 if pixel_theme.dark_mode {
                     crate::pixel_theme::chrome_colors::CLOSE_BUTTON_HOVER_DARK
                 } else {
                     crate::pixel_theme::chrome_colors::CLOSE_BUTTON_HOVER_LIGHT
                 }
             }),
-            close_btn_hover_bg: t.and_then(|x| x.close_btn_hover_bg).unwrap_or_else(|| {
+            close_btn_hover_bg: t.and_then(|x| x.close_btn_hover_bg).unwrap_or({
                 if pixel_theme.dark_mode {
                     crate::pixel_theme::chrome_colors::CLOSE_BUTTON_BG_HOVER_DARK
                 } else {
@@ -729,14 +726,12 @@ impl MiyukiniCentralApp {
                     self.connected = false;
                     self.current_profile = None;
                 }
-            } else {
-                if ui
-                    .button(egui::RichText::new("Connexion").size(ACTION_SIZE))
-                    .clicked()
-                {
-                    self.auth_window_open = true;
-                    self.auth_error = None;
-                }
+            } else if ui
+                .button(egui::RichText::new("Connexion").size(ACTION_SIZE))
+                .clicked()
+            {
+                self.auth_window_open = true;
+                self.auth_error = None;
             }
             ui.add_space(8.0);
             // Profil : icône Lucide (handle garde la texture) ou fallback texte
@@ -778,7 +773,7 @@ impl MiyukiniCentralApp {
     /// Affiche les onglets dans la ligne 2 du header.
     /// Largeur adaptée à l'espace (style Chrome) : HUB fixe (1/3 de l'ancienne largeur), autres onglets partagent l'espace restant.
     fn ui_header_tabs(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
-        use chrome_dimensions::*;
+        use chrome_dimensions::TAB_GAP;
 
         let pixel_theme = PixelChromeTheme::new(ctx.style().visuals.dark_mode);
         let r = self.resolve_chrome(&pixel_theme);
@@ -804,7 +799,7 @@ impl MiyukiniCentralApp {
         let n_tabs = tabs_data.len();
         let n_service_tabs = tabs_data.iter().filter(|(_, t)| t.tab_type != TabType::Hub).count();
         let gaps_width = if n_tabs > 1 { (n_tabs - 1) as f32 * TAB_GAP } else { 0.0 };
-        let has_hub = tabs_data.first().map(|(_, t)| t.tab_type == TabType::Hub).unwrap_or(false);
+        let has_hub = tabs_data.first().is_some_and(|(_, t)| t.tab_type == TabType::Hub);
         let hub_width = if has_hub { HUB_TAB_WIDTH } else { 0.0 };
         let remaining = total_width - hub_width - gaps_width;
         let service_tab_width = if n_service_tabs > 0 {
@@ -856,8 +851,8 @@ impl MiyukiniCentralApp {
         tab_rect: egui::Rect,
         r: &ResolvedChromeColors,
     ) -> TabClickResult {
-        use chrome_dimensions::*;
-        use chrome_shapes::*;
+        use chrome_dimensions::{CLOSE_BUTTON_SIZE, TAB_PADDING_X, TAB_PADDING_Y, CLOSE_BUTTON_PADDING, CLOSE_CROSS_SIZE, CLOSE_CROSS_STROKE, TAB_TEXT_SIZE};
+        use chrome_shapes::{create_active_tab_shape, create_inactive_tab_shape};
 
         let painter = ui.painter();
         let closable = matches!(tab_info.tab_type, TabType::Service | TabType::Profile);
@@ -898,12 +893,10 @@ impl MiyukiniCentralApp {
             }
         } else if hovered {
             r.tab_inactive_hover_bg
+        } else if tab_info.tab_type == TabType::Hub {
+            r.sidebar_bg
         } else {
-            if tab_info.tab_type == TabType::Hub {
-                r.sidebar_bg
-            } else {
-                r.tab_inactive_bg
-            }
+            r.tab_inactive_bg
         };
         let text_color = if is_active {
             r.tab_active_text
@@ -1284,9 +1277,7 @@ impl MiyukiniCentralApp {
         ui.add_space(16.0);
         if ui.add_sized(egui::vec2(140.0, 28.0), egui::Button::new("Créer le compte")).clicked() {
             self.auth_error = None;
-            if self.auth_password != self.auth_password_repeat {
-                self.auth_error = Some("Les deux mots de passe ne correspondent pas.".to_string());
-            } else {
+            if self.auth_password == self.auth_password_repeat {
                 match validate_password(&self.auth_password) {
                     Ok(()) => {
                         match self.auth_db.sign_up(&self.auth_email, &self.auth_password) {
@@ -1308,6 +1299,8 @@ impl MiyukiniCentralApp {
                         self.auth_error = Some(e.to_string());
                     }
                 }
+            } else {
+                self.auth_error = Some("Les deux mots de passe ne correspondent pas.".to_string());
             }
         }
 
@@ -1465,7 +1458,7 @@ impl MiyukiniCentralApp {
             let mut fav_to_remove = None;
             for (i, &sid) in self.favorites.iter().enumerate() {
                 let meta = meta_for_service(catalog, sid);
-                let name = meta.map(|m| m.name.as_str()).unwrap_or_else(|| sid.as_str());
+                let name = meta.map_or_else(|| sid.as_str(), |m| m.name.as_str());
                 ui.horizontal(|ui| {
                     if ui.selectable_label(
                         self.hub_sidebar.selected_service_id == Some(sid),
@@ -1490,7 +1483,7 @@ impl MiyukiniCentralApp {
             let services_sorted = self.hub_filtered_services_sorted_by_name(catalog);
             for &sid in &services_sorted {
                 let meta = meta_for_service(catalog, sid);
-                let name = meta.map(|m| m.name.as_str()).unwrap_or_else(|| sid.as_str());
+                let name = meta.map_or_else(|| sid.as_str(), |m| m.name.as_str());
                 let is_fav = self.favorites.contains(&sid);
                 ui.horizontal(|ui| {
                     if ui
@@ -1512,11 +1505,10 @@ impl MiyukiniCentralApp {
                             self.favorites.retain(|&id| id != sid);
                         }
                     }
-                    if self.hub_sidebar.selected_service_id == Some(sid) {
-                        if ui.small_button("Lancer").on_hover_text("Lancer le service").clicked() {
+                    if self.hub_sidebar.selected_service_id == Some(sid)
+                        && ui.small_button("Lancer").on_hover_text("Lancer le service").clicked() {
                             self.open_service(sid, frame.storage());
                         }
-                    }
                 });
             }
                 });
@@ -1637,8 +1629,8 @@ impl MiyukiniCentralApp {
             })
             .collect();
         ids.sort_by(|a, b| {
-            let na = meta_for_service(catalog, *a).map(|m| m.name.as_str()).unwrap_or("");
-            let nb = meta_for_service(catalog, *b).map(|m| m.name.as_str()).unwrap_or("");
+            let na = meta_for_service(catalog, *a).map_or("", |m| m.name.as_str());
+            let nb = meta_for_service(catalog, *b).map_or("", |m| m.name.as_str());
             na.cmp(nb)
         });
         ids
@@ -1662,8 +1654,7 @@ impl MiyukiniCentralApp {
             TabType::Menu | TabType::Hub | TabType::Profile => UsageContext::Central,
             TabType::Service => {
                 tab.service_id
-                    .map(|id| UsageContext::Service(id.storage_key().to_string()))
-                    .unwrap_or(UsageContext::Central)
+                    .map_or(UsageContext::Central, |id| UsageContext::Service(id.storage_key().to_string()))
             }
         })
     }
@@ -1811,7 +1802,7 @@ impl MiyukiniCentralApp {
             ui.heading("Résumé");
             ui.add_space(4.0);
             if let Some(ref s) = stats.first_use_relative_human(now_sec) {
-                ui.label(format!("Première utilisation : {}", s));
+                ui.label(format!("Première utilisation : {s}"));
             } else {
                 ui.label("Aucune session enregistrée.");
             }
@@ -1834,9 +1825,7 @@ impl MiyukiniCentralApp {
                     ui.label("Top 3 services :");
                     for (i, (key, sec)) in stats.top3_services.iter().enumerate() {
                         let pct = 100.0 * sec / stats.total_sec_all;
-                        let name = crate::catalog::ServiceId::from_storage_key(key)
-                            .map(|id| format!("{} {}", id.icon(), id.as_str()))
-                            .unwrap_or_else(|| key.clone());
+                        let name = crate::catalog::ServiceId::from_storage_key(key).map_or_else(|| key.clone(), |id| format!("{} {}", id.icon(), id.as_str()));
                         ui.label(format!("  {}. {} — {:.0} % ({})", i + 1, name, pct, format_duration_sec(*sec)));
                     }
                 }
@@ -1855,9 +1844,7 @@ impl MiyukiniCentralApp {
                         if k == "central" {
                             "HUB Central".to_string()
                         } else {
-                            crate::catalog::ServiceId::from_storage_key(k)
-                                .map(|id| format!("{} {}", id.icon(), id.as_str()))
-                                .unwrap_or_else(|| k.clone())
+                            crate::catalog::ServiceId::from_storage_key(k).map_or_else(|| k.clone(), |id| format!("{} {}", id.icon(), id.as_str()))
                         }
                     })
                     .unwrap_or_else(|| "—".to_string());
@@ -1887,9 +1874,7 @@ impl MiyukiniCentralApp {
             ui.add_space(8.0);
             ui.heading("Temps par service");
             for (key, sec) in &stats.total_sec_by_service {
-                let name = crate::catalog::ServiceId::from_storage_key(key)
-                    .map(|id| format!("{} {}", id.icon(), id.as_str()))
-                    .unwrap_or_else(|| key.clone());
+                let name = crate::catalog::ServiceId::from_storage_key(key).map_or_else(|| key.clone(), |id| format!("{} {}", id.icon(), id.as_str()));
                 ui.label(format!("{} : {}", name, format_duration_sec(*sec)));
             }
             ui.add_space(12.0);

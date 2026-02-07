@@ -175,8 +175,7 @@ impl MiyuClickerApp {
         let temps = self
             .game_state
             .as_ref()
-            .map(|s| s.temps_simule_s)
-            .unwrap_or(0.0);
+            .map_or(0.0, |s| s.temps_simule_s);
         let line = format!("[TEST] {}", msg.into());
         self.dev_log.push_back((temps, line));
         while self.dev_log.len() > DEV_LOG_MAX {
@@ -202,6 +201,7 @@ impl MiyuClickerApp {
 
     /// Crée une instance pour intégration dans Miyukini Central (point d'accès utilisateur unique).
     /// Le jeu s'exécute dans le body de Central ; pas de fenêtre standalone.
+    #[must_use] 
     pub fn new_embedded() -> Self {
         let data_dir = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
         let mut app = Self {
@@ -224,15 +224,14 @@ impl MiyuClickerApp {
             .anchor(egui::Align2::RIGHT_TOP, [-10.0, 40.0])
             .resizable(false)
             .show(ctx, |ui| {
-                if in_game {
-                    if ui.button("Sauvegarder").clicked() {
+                if in_game
+                    && ui.button("Sauvegarder").clicked() {
                         if let Some(ref state) = self.game_state {
                             let _ = slot_write(&self.data_dir, state.slot_id, state);
                             self.slot_metadata = slot_list(&self.data_dir);
                         }
                         self.config_menu_open = false;
                     }
-                }
                 if ui.button("Changer la résolution").clicked() {
                     self.config_menu_open = false;
                 }
@@ -344,7 +343,7 @@ impl MiyuClickerApp {
                                 self.game_state = Some(state);
                                 self.game_speed_index = 0; // Pause au chargement d'une partie.
                                 self.screen = Screen::MaCitee;
-                                if self.game_state.as_ref().map(|s| s.cites.is_empty()).unwrap_or(true) {
+                                if self.game_state.as_ref().is_none_or(|s| s.cites.is_empty()) {
                                     if let Some(ref mut g) = self.game_state {
                                         generate_carte_mvp(g);
                                     }
@@ -488,7 +487,7 @@ impl MiyuClickerApp {
     /// Un groupe ressource : libellé + métrique (lisibilité).
     fn header_resource(ui: &mut egui::Ui, label: &str, value: &str) {
         ui.horizontal(|ui| {
-            ui.label(egui::RichText::new(format!("{} ", label)).weak());
+            ui.label(egui::RichText::new(format!("{label} ")).weak());
             ui.label(egui::RichText::new(value).strong());
         });
     }
@@ -503,7 +502,7 @@ impl MiyuClickerApp {
             return;
         }
         let state = self.game_state.as_ref();
-        let temps_s = state.map(|s| s.temps_simule_s).unwrap_or(0.0);
+        let temps_s = state.map_or(0.0, |s| s.temps_simule_s);
         let mult = game_speed_multiplier(self.game_speed_index);
         egui::Window::new("Console Dev")
             .open(&mut self.dev_console_open)
@@ -517,17 +516,17 @@ impl MiyuClickerApp {
                 });
                 ui.horizontal(|ui| {
                     ui.label(format!("Vitesse index: {}", self.game_speed_index));
-                    ui.label(format!("mult: {:.0} s jeu/s IRL", mult));
+                    ui.label(format!("mult: {mult:.0} s jeu/s IRL"));
                 });
                 ui.horizontal(|ui| {
-                    ui.label(format!("temps_simule_s: {:.1}", temps_s));
+                    ui.label(format!("temps_simule_s: {temps_s:.1}"));
                     ui.label(format!("frame: {}", self.frame_count));
                 });
                 ui.separator();
                 ui.label("Log [TEST] (défilement = repaint continu)");
                 egui::ScrollArea::vertical().max_height(180.0).show(ui, |ui| {
                     for (t, line) in self.dev_log.iter().rev() {
-                        ui.label(format!("[{:.0}s] {}", t, line));
+                        ui.label(format!("[{t:.0}s] {line}"));
                     }
                 });
                 if ui.button("Vider le log").clicked() {
@@ -716,7 +715,7 @@ impl MiyuClickerApp {
 
     /// Contenu central de l'écran Ma cité : blocs organiques (zone cité, notification) + molécules (panneau ressources, panneau bâtiments).
     fn ui_ma_citee_central_content(&mut self, ui: &mut egui::Ui) {
-        let game_over = self.game_state.as_ref().map(|s| s.game_over).unwrap_or(false);
+        let game_over = self.game_state.as_ref().is_some_and(|s| s.game_over);
         if game_over {
             Self::ui_game_over_overlay(ui, &mut self.screen);
             return;
@@ -774,7 +773,7 @@ impl MiyuClickerApp {
                 .stroke(egui::Stroke::new(2.0, color_organic_stroke()));
             notif_frame.show(ui, |ui| {
                 ui.set_min_height(LAYOUT_NOTIFICATION_HEIGHT);
-                let last = self.dev_log.back().map(|(t, s)| format!("[{:.0}s] {}", t, s)).unwrap_or_else(|| "—".to_string());
+                let last = self.dev_log.back().map_or_else(|| "—".to_string(), |(t, s)| format!("[{t:.0}s] {s}"));
                 ui.label(egui::RichText::new(last).small());
             });
             ui.add_space(LAYOUT_SPACING_BLOCKS);
@@ -813,7 +812,7 @@ impl MiyuClickerApp {
             (CityWalkerKind::Soldat, n_soldats),
             (CityWalkerKind::Macon, n_macons),
         ] {
-            let existing: Vec<CityWalker> = walkers.iter().filter(|w| w.kind == kind).cloned().take(target).collect();
+            let existing: Vec<CityWalker> = walkers.iter().filter(|w| w.kind == kind).take(target).cloned().collect();
             for w in existing {
                 out.push(w);
             }
@@ -942,7 +941,7 @@ impl MiyuClickerApp {
 
     /// Contenu central de l'écran Carte du monde (carte, cités, routes, clic). Utilisé par ui_carte_monde et show_into.
     fn ui_carte_monde_central_content(&mut self, ui: &mut egui::Ui) {
-        let game_over = self.game_state.as_ref().map(|s| s.game_over).unwrap_or(false);
+        let game_over = self.game_state.as_ref().is_some_and(|s| s.game_over);
         if game_over {
             Self::ui_game_over_overlay(ui, &mut self.screen);
             return;
@@ -1051,8 +1050,8 @@ impl MiyuClickerApp {
             .map(|c| (c.id.clone(), c.nom.clone(), matches!(c.proprietaire, crate::state::Proprietaire::Adverse(_))))
             .collect();
         ui.heading(&cite_nom);
-        ui.label(format!("Troupes: {}", cite_troupes));
-        ui.label(format!("Propriétaire: {}", cite_proprio));
+        ui.label(format!("Troupes: {cite_troupes}"));
+        ui.label(format!("Propriétaire: {cite_proprio}"));
         if is_joueur {
             ui.add(
                 egui::DragValue::new(&mut self.send_troops_count)
@@ -1062,9 +1061,9 @@ impl MiyuClickerApp {
             );
             for (other_id, other_nom, is_adverse) in &others {
                 let label = if *is_adverse {
-                    format!("Envoyer vers {} (adverse)", other_nom)
+                    format!("Envoyer vers {other_nom} (adverse)")
                 } else {
-                    format!("Envoyer vers {} (renfort)", other_nom)
+                    format!("Envoyer vers {other_nom} (renfort)")
                 };
                 if ui.button(label).clicked() {
                     self.pending_move_troops = Some((cite_id.clone(), other_id.clone(), self.send_troops_count));
@@ -1125,8 +1124,8 @@ impl MiyuClickerApp {
             ui.ctx().request_repaint();
         }
 
-        if in_game && self.frame_count % 120 == 0 {
-            let temps = self.game_state.as_ref().map(|s| s.temps_simule_s).unwrap_or(0.0);
+        if in_game && self.frame_count.is_multiple_of(120) {
+            let temps = self.game_state.as_ref().map_or(0.0, |s| s.temps_simule_s);
             self.dev_log(format!(
                 "frame {} delta={:.3}s temps_simule={:.0}s speed={}",
                 self.frame_count,
@@ -1231,8 +1230,8 @@ impl App for MiyuClickerApp {
             ctx.request_repaint();
         }
 
-        if in_game && self.frame_count % 120 == 0 {
-            let temps = self.game_state.as_ref().map(|s| s.temps_simule_s).unwrap_or(0.0);
+        if in_game && self.frame_count.is_multiple_of(120) {
+            let temps = self.game_state.as_ref().map_or(0.0, |s| s.temps_simule_s);
             self.dev_log(format!(
                 "frame {} delta={:.3}s temps_simule={:.0}s speed={}",
                 self.frame_count,

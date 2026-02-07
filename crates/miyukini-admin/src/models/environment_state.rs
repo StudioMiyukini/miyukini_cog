@@ -11,10 +11,12 @@ use serde::{Deserialize, Serialize};
 /// @do: represent_environment_state
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[derive(Default)]
 pub enum EnvironmentState {
     /// Aucun artefact présent (EIP, registre admin, schéma bootstrap absents).
     /// Parcours Futur Admin (setup) uniquement.
     /// @id: miyukiniadmin_env_state_vierge
+    #[default]
     Vierge,
 
     /// Tous les artefacts présents et valides. Environnement opérationnel.
@@ -27,11 +29,6 @@ pub enum EnvironmentState {
     Compromis,
 }
 
-impl Default for EnvironmentState {
-    fn default() -> Self {
-        Self::Vierge
-    }
-}
 
 impl std::fmt::Display for EnvironmentState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

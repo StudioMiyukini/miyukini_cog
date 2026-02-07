@@ -49,6 +49,7 @@ pub struct MiyuwidgetsAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.web.widgets";
 
+#[must_use] 
 pub fn miyuwidgets_admin_cell(version: &str, fingerprint: &str) -> MiyuwidgetsAdminCell {
     MiyuwidgetsAdminCell {
         identification: MiyuwidgetsIdentification {

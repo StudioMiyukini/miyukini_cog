@@ -119,14 +119,15 @@ pub struct PixelChromeTheme {
 
 impl PixelChromeTheme {
     /// Crée un nouveau thème Chrome pixel art.
+    #[must_use] 
     pub fn new(dark_mode: bool) -> Self {
         Self { dark_mode }
     }
 
     /// Applique le thème Chrome pixel art au contexte egui.
     pub fn apply(&self, ctx: &egui::Context) {
-        use chrome_colors::*;
-        use chrome_dimensions::*;
+        use chrome_colors::{TAB_INACTIVE_BG_DARK, TAB_INACTIVE_HOVER_BG_DARK, TAB_ACTIVE_BG_DARK, TAB_ACTIVE_TEXT_DARK, TAB_INACTIVE_BG_LIGHT, TAB_INACTIVE_HOVER_BG_LIGHT, TAB_ACTIVE_BG_LIGHT, TAB_ACTIVE_TEXT_LIGHT};
+        use chrome_dimensions::TAB_CORNER_RADIUS;
 
         let mut style = (*ctx.style()).clone();
         let visuals = if self.dark_mode {
@@ -174,6 +175,7 @@ impl PixelChromeTheme {
     }
 
     /// Retourne la couleur de la barre exécutable (ligne 1 du header : titre + connexion).
+    #[must_use] 
     pub fn barre_exe_bg(&self) -> egui::Color32 {
         if self.dark_mode {
             chrome_colors::BARRE_EXE_DARK
@@ -183,6 +185,7 @@ impl PixelChromeTheme {
     }
 
     /// Retourne la couleur de fond de la barre d'onglets (ligne 2 du header).
+    #[must_use] 
     pub fn tab_bar_bg(&self) -> egui::Color32 {
         if self.dark_mode {
             chrome_colors::TAB_BAR_BG_DARK
@@ -192,6 +195,7 @@ impl PixelChromeTheme {
     }
 
     /// Retourne la couleur de fond des sidebars du Hub.
+    #[must_use] 
     pub fn sidebar_bg(&self) -> egui::Color32 {
         if self.dark_mode {
             chrome_colors::SIDEBAR_BG_DARK
@@ -201,6 +205,7 @@ impl PixelChromeTheme {
     }
 
     /// Retourne la couleur de fond du body (zone centrale).
+    #[must_use] 
     pub fn body_bg(&self) -> egui::Color32 {
         if self.dark_mode {
             chrome_colors::BODY_BG_DARK
@@ -210,6 +215,7 @@ impl PixelChromeTheme {
     }
 
     /// Retourne la couleur de fond d'un onglet actif.
+    #[must_use] 
     pub fn tab_active_bg(&self) -> egui::Color32 {
         if self.dark_mode {
             chrome_colors::TAB_ACTIVE_BG_DARK
@@ -219,6 +225,7 @@ impl PixelChromeTheme {
     }
 
     /// Retourne la couleur de texte d'un onglet actif.
+    #[must_use] 
     pub fn tab_active_text(&self) -> egui::Color32 {
         if self.dark_mode {
             chrome_colors::TAB_ACTIVE_TEXT_DARK
@@ -228,6 +235,7 @@ impl PixelChromeTheme {
     }
 
     /// Retourne la couleur de fond d'un onglet inactif.
+    #[must_use] 
     pub fn tab_inactive_bg(&self) -> egui::Color32 {
         if self.dark_mode {
             chrome_colors::TAB_INACTIVE_BG_DARK
@@ -237,6 +245,7 @@ impl PixelChromeTheme {
     }
 
     /// Retourne la couleur de texte d'un onglet inactif.
+    #[must_use] 
     pub fn tab_inactive_text(&self) -> egui::Color32 {
         if self.dark_mode {
             chrome_colors::TAB_INACTIVE_TEXT_DARK
@@ -246,6 +255,7 @@ impl PixelChromeTheme {
     }
 
     /// Retourne la couleur de fond d'un onglet inactif au survol (2e niveau de gris).
+    #[must_use] 
     pub fn tab_inactive_hover_bg(&self) -> egui::Color32 {
         if self.dark_mode {
             chrome_colors::TAB_INACTIVE_HOVER_BG_DARK
@@ -255,6 +265,7 @@ impl PixelChromeTheme {
     }
 
     /// Retourne la couleur du séparateur entre onglets.
+    #[must_use] 
     pub fn tab_separator(&self) -> egui::Color32 {
         if self.dark_mode {
             chrome_colors::TAB_SEPARATOR_DARK
@@ -264,6 +275,7 @@ impl PixelChromeTheme {
     }
 
     /// Retourne la couleur de la bordure supérieure de l'onglet actif.
+    #[must_use] 
     pub fn tab_active_border(&self) -> egui::Color32 {
         if self.dark_mode {
             chrome_colors::TAB_ACTIVE_BORDER_DARK
@@ -280,6 +292,7 @@ pub mod chrome_shapes {
     use eframe::egui;
 
     /// Crée la forme d'un onglet actif : carré en bas, arrondi 5 px en haut (même fond que body).
+    #[must_use] 
     pub fn create_active_tab_shape(
         rect: egui::Rect,
         bg_color: egui::Color32,

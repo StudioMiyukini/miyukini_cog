@@ -49,6 +49,7 @@ pub struct MiyushippingAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.commerce.shipping";
 
+#[must_use] 
 pub fn miyushipping_admin_cell(version: &str, fingerprint: &str) -> MiyushippingAdminCell {
     MiyushippingAdminCell {
         identification: MiyushippingIdentification {

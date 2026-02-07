@@ -37,7 +37,7 @@ pub fn unc_e02_show(
         |ui| {
             let nav = ["Accueil", "Organisateurs", "Exposants", "Se connecter", "S'inscrire"];
             let responses = header_render(ui, theme, "JayFestival", &nav);
-            if responses.get(0).and_then(|r| r.clicked().then_some(())).is_some() {
+            if responses.first().and_then(|r| r.clicked().then_some(())).is_some() {
                 let _ = nav_request.replace(Some(ScreenId::UncLanding));
             } else if responses.get(1).and_then(|r| r.clicked().then_some(())).is_some() {
                 let _ = nav_request.replace(Some(ScreenId::UncListeOrganisateurs));

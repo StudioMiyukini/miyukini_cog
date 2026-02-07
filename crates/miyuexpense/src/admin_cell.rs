@@ -49,6 +49,7 @@ pub struct MiyuexpenseAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.expense.claims";
 
+#[must_use] 
 pub fn miyuexpense_admin_cell(version: &str, fingerprint: &str) -> MiyuexpenseAdminCell {
     MiyuexpenseAdminCell {
         identification: MiyuexpenseIdentification {

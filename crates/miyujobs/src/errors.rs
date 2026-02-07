@@ -10,7 +10,7 @@ impl std::fmt::Display for MiyuJobsError {
         match self {
             MiyuJobsError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyuJobsError::Unimplemented => write!(f, "Tool not yet implemented"),
-            MiyuJobsError::InvalidInput(ref msg) => write!(f, "{}", msg),
+            MiyuJobsError::InvalidInput(ref msg) => write!(f, "{msg}"),
         }
     }
 }

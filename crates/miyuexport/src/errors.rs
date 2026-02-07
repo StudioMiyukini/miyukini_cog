@@ -11,7 +11,7 @@ impl std::fmt::Display for MiyuExportError {
         match self {
             MiyuExportError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyuExportError::Unimplemented => write!(f, "Tool not yet implemented"),
-            MiyuExportError::Io(ref msg) => write!(f, "{}", msg),
+            MiyuExportError::Io(ref msg) => write!(f, "{msg}"),
         }
     }
 }

@@ -1884,6 +1884,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "jayxpose"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "eframe",
+ "egui",
+ "kindmother",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "sha2",
+ "uuid",
+]
+
+[[package]]
 name = "jni"
 version = "0.21.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

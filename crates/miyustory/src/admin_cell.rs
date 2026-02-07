@@ -49,6 +49,7 @@ pub struct MiyustoryAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.social.story";
 
+#[must_use] 
 pub fn miyustory_admin_cell(version: &str, fingerprint: &str) -> MiyustoryAdminCell {
     MiyustoryAdminCell {
         identification: MiyustoryIdentification {

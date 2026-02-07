@@ -71,9 +71,9 @@ pub fn exp_e05_show(
             card_show(theme, ui, Some("Filtres"), |ui| {
                 ui.horizontal(|ui| {
                     label(ui, theme, "Statut :", LabelLevel::Small);
-                    if button(ui, theme, "Toutes", ButtonVariant::Ghost, Default::default()).clicked() {}
-                    if button(ui, theme, "En attente", ButtonVariant::Ghost, Default::default()).clicked() {}
-                    if button(ui, theme, "Validées", ButtonVariant::Ghost, Default::default()).clicked() {}
+                    button(ui, theme, "Toutes", ButtonVariant::Ghost, Default::default()).clicked();
+                    button(ui, theme, "En attente", ButtonVariant::Ghost, Default::default()).clicked();
+                    button(ui, theme, "Validées", ButtonVariant::Ghost, Default::default()).clicked();
                     if button(ui, theme, "Refusées", ButtonVariant::Ghost, Default::default()).clicked() {}
                 });
             }, None::<fn(&mut egui::Ui)>);

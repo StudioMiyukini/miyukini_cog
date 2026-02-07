@@ -51,6 +51,7 @@ pub struct MiyuJobsAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.jobs.miyujobs";
 
+#[must_use] 
 pub fn miyujobs_admin_cell(version: &str, fingerprint: &str) -> MiyuJobsAdminCell {
     MiyuJobsAdminCell {
         identification: MiyuJobsIdentification {

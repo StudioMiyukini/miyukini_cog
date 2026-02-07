@@ -37,6 +37,7 @@ impl Default for MemoryExecutor {
 
 impl MemoryExecutor {
     /// Crée un exécuteur en mémoire pour tests (sandbox / MiyukiniSQLtest).
+    #[must_use] 
     pub fn new() -> Self {
         Self {
             tables: Mutex::new(HashMap::new()),
@@ -75,7 +76,7 @@ impl MemoryExecutor {
             if table.is_empty() {
                 return Err(MiyuSQLError::Syntax("invalid INSERT".into()));
             }
-            let row: HashMap<String, String> = cols.into_iter().zip(vals.into_iter()).map(|(k, v)| (k, v)).collect();
+            let row: HashMap<String, String> = cols.into_iter().zip(vals).collect();
             let ent = tables.entry(table).or_default();
             ent.push(row);
             return Ok(QueryResult { rows: vec![], count: ent.len() as u64 });
@@ -91,7 +92,7 @@ impl MemoryExecutor {
         }
         if sql_upper.starts_with("DELETE FROM") {
             let table = extract_table_name_delete(sql).unwrap_or_default();
-            let removed = tables.get_mut(&table).map(|r| r.len()).unwrap_or(0);
+            let removed = tables.get_mut(&table).map_or(0, |r| r.len());
             tables.entry(table).or_default().clear();
             return Ok(QueryResult { rows: vec![], count: removed as u64 });
         }

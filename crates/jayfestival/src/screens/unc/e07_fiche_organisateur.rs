@@ -32,7 +32,7 @@ pub fn unc_e07_show(
         |ui| {
             let nav = ["Accueil", "Événements", "Organisateurs", "Exposants", "Se connecter"];
             let responses = header_render(ui, theme, "JayFestival", &nav);
-            if responses.get(0).and_then(|r| r.clicked().then_some(())).is_some() {
+            if responses.first().and_then(|r| r.clicked().then_some(())).is_some() {
                 let _ = nav_request.replace(Some(ScreenId::UncLanding));
             } else if responses.get(1).and_then(|r| r.clicked().then_some(())).is_some() {
                 let _ = nav_request.replace(Some(ScreenId::UncListeEvenements));
@@ -76,8 +76,8 @@ pub fn unc_e07_show(
 
             ui.add_space(theme.item_spacing());
             card_show(theme, ui, Some("Contact"), |ui| {
-                label(ui, theme, &format!("Email : {}", contact), LabelLevel::Body);
-                label(ui, theme, &format!("Site : {}", website), LabelLevel::Body);
+                label(ui, theme, &format!("Email : {contact}"), LabelLevel::Body);
+                label(ui, theme, &format!("Site : {website}"), LabelLevel::Body);
             }, None::<fn(&mut egui::Ui)>);
 
             ui.add_space(theme.item_spacing());

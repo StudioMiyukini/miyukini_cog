@@ -53,6 +53,7 @@ pub struct MiyuTextAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.text.miyutext";
 
+#[must_use] 
 pub fn miyutext_admin_cell(version: &str, fingerprint: &str) -> MiyuTextAdminCell {
     MiyuTextAdminCell {
         identification: MiyuTextIdentification {

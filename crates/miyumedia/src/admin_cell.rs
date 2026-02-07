@@ -49,6 +49,7 @@ pub struct MiyumediaAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.content.media";
 
+#[must_use] 
 pub fn miyumedia_admin_cell(version: &str, fingerprint: &str) -> MiyumediaAdminCell {
     MiyumediaAdminCell {
         identification: MiyumediaIdentification {

@@ -15,6 +15,7 @@ pub struct MiyuClickerService {
 
 impl MiyuClickerService {
     /// Crée une instance (utilise MiyuClickerApp::new_embedded pour intégration Central).
+    #[must_use] 
     pub fn new() -> Self {
         Self {
             app: MiyuClickerApp::new_embedded(),

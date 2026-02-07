@@ -49,6 +49,7 @@ pub struct MiyuclockAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.kernel.miyuclock";
 
+#[must_use] 
 pub fn miyuclock_admin_cell(version: &str, fingerprint: &str) -> MiyuclockAdminCell {
     MiyuclockAdminCell {
         identification: MiyuclockIdentification {

@@ -49,6 +49,7 @@ pub struct MiyuposinventoryAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.pos.miyuposinventory";
 
+#[must_use] 
 pub fn miyuposinventory_admin_cell(version: &str, fingerprint: &str) -> MiyuposinventoryAdminCell {
     MiyuposinventoryAdminCell {
         identification: MiyuposinventoryIdentification {

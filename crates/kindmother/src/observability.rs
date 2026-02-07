@@ -43,6 +43,7 @@ pub enum HealthStatus {
 /// @do: represent_instance_metrics
 /// Métriques d'une instance.
 #[derive(Debug, Clone)]
+#[derive(Default)]
 pub struct Metrics {
     /// @id: kindmother_observability_metrics_read_count
     /// @role: data
@@ -67,15 +68,6 @@ pub struct Metrics {
     pub sync_count: u64,
 }
 
-impl Default for Metrics {
-    fn default() -> Self {
-        Self {
-            read_count: 0,
-            write_count: 0,
-            sync_count: 0,
-        }
-    }
-}
 
 /// @id: kindmother_observability_trait
 /// @role: infrastructure

@@ -14,6 +14,7 @@ pub struct MockJayService {
 
 impl MockJayService {
     /// Crée un service Jay mock avec l’ID et le titre affiché dans l’onglet.
+    #[must_use] 
     pub fn new(service_id: ServiceId, title: &'static str) -> Self {
         Self { service_id, title }
     }

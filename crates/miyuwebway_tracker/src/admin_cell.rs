@@ -49,6 +49,7 @@ pub struct MiyuwebwayTrackerAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.webway.tracker";
 
+#[must_use] 
 pub fn miyuwebway_tracker_admin_cell(version: &str, fingerprint: &str) -> MiyuwebwayTrackerAdminCell {
     MiyuwebwayTrackerAdminCell {
         identification: MiyuwebwayTrackerIdentification {

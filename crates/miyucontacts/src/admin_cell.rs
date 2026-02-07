@@ -49,6 +49,7 @@ pub struct MiyucontactsAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.communication.contacts";
 
+#[must_use] 
 pub fn miyucontacts_admin_cell(version: &str, fingerprint: &str) -> MiyucontactsAdminCell {
     MiyucontactsAdminCell {
         identification: MiyucontactsIdentification {

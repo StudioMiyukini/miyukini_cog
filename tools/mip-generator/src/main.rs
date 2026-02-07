@@ -177,13 +177,12 @@ fn parse_file(file_path: &Path, blocks: &mut Vec<Block>) -> Result<(), Box<dyn s
 
             // Détecter la fin du bloc de commentaires MSCM
             // Le bloc se termine quand on trouve une ligne de code Rust (pas un commentaire)
-            if in_comment_block && !trimmed.starts_with("///") && !trimmed.starts_with("//!") {
-                if !trimmed.is_empty() {
+            if in_comment_block && !trimmed.starts_with("///") && !trimmed.starts_with("//!")
+                && !trimmed.is_empty() {
                     // On a trouvé le début du code, le bloc se termine ici
                     block.end_line = find_block_end(&lines, line_num - 1);
                     in_comment_block = false;
                 }
-            }
         }
     }
 
@@ -307,7 +306,7 @@ fn generate_hierarchy(blocks: &[Block], output_dir: &Path) -> Result<(), Box<dyn
             for dep in &block.depends {
                 hierarchy
                     .entry(dep.clone())
-                    .or_insert_with(Vec::new)
+                    .or_default()
                     .push(block.id.clone());
             }
         }
@@ -358,7 +357,7 @@ fn generate_domains(blocks: &[Block], output_dir: &Path) -> Result<(), Box<dyn s
         
         domains
             .entry(domain)
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(block.id.clone());
     }
 
@@ -375,7 +374,7 @@ fn generate_layers(blocks: &[Block], output_dir: &Path) -> Result<(), Box<dyn st
         let layer = block.layer.as_deref().unwrap_or("unknown").to_string();
         layers
             .entry(layer)
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(block.id.clone());
     }
 
@@ -409,7 +408,7 @@ fn generate_files(blocks: &[Block], output_dir: &Path) -> Result<(), Box<dyn std
     for block in blocks {
         files
             .entry(block.file.clone())
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(block.id.clone());
     }
 

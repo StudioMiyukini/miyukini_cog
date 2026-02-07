@@ -87,7 +87,7 @@ fn session_id_from_headers(headers: &axum::http::HeaderMap) -> Option<String> {
         .split(';')
         .filter_map(|s| {
             let s = s.trim();
-            let prefix = format!("{}=", SESSION_COOKIE_NAME);
+            let prefix = format!("{SESSION_COOKIE_NAME}=");
             s.starts_with(prefix.as_str()).then(|| s[prefix.len()..].trim().to_string())
         })
         .next()
@@ -181,12 +181,12 @@ async fn main() {
                         module_discovery.register_module(entry.module_info.clone());
                         admin_cell_reader.register_cell(entry.module_info.id.clone(), entry.admin_cell);
                     }
-                    eprintln!("MiyukiniAdmin: {} toolkits chargés depuis mscm_index/toolkit_registry.json", count);
+                    eprintln!("MiyukiniAdmin: {count} toolkits chargés depuis mscm_index/toolkit_registry.json");
                 }
             }
         }
     }
-    let integrity_verifier = Arc::new(StubIntegrityVerifier::default());
+    let integrity_verifier = Arc::new(StubIntegrityVerifier);
     let module_testing_svc = Arc::new(ModuleTestingService::new(
         Arc::clone(&module_discovery),
         Arc::clone(&admin_cell_reader),
@@ -458,7 +458,7 @@ async fn api_auth_logout(
         state.auth_svc.logout(&sid).await;
     }
     let mut res = Json(serde_json::json!({ "success": true, "message": "Déconnecté." })).into_response();
-    let clear_cookie = format!("{}=; Max-Age=0; Path=/; SameSite=Lax", SESSION_COOKIE_NAME);
+    let clear_cookie = format!("{SESSION_COOKIE_NAME}=; Max-Age=0; Path=/; SameSite=Lax");
     if let Ok(hv) = HeaderValue::try_from(clear_cookie) {
         res.headers_mut().append(header::SET_COOKIE, hv);
     }
@@ -580,7 +580,7 @@ async fn api_table_rows(
     let start = ((page - 1) * per_page) as usize;
     let end = (start + per_page as usize).min(total);
     let slice: Vec<serde_json::Value> = rows[start..end].to_vec();
-    let total_pages = if per_page as usize == 0 { 1 } else { (total + per_page as usize - 1) / per_page as usize };
+    let total_pages = if per_page as usize == 0 { 1 } else { total.div_ceil(per_page as usize) };
     Json(serde_json::json!({
         "table": name,
         "rows": slice,
@@ -848,7 +848,7 @@ async fn api_modules_add(
             }
             Json(serde_json::json!({
                 "success": result.success,
-                "action": serde_json::to_value(&result.action).unwrap_or(serde_json::Value::Null),
+                "action": serde_json::to_value(result.action).unwrap_or(serde_json::Value::Null),
                 "module_id": result.module_id,
                 "message": result.message
             }))
@@ -911,7 +911,7 @@ async fn api_modules_lock(
             }
             Json(serde_json::json!({
                 "success": result.success,
-                "action": serde_json::to_value(&result.action).unwrap_or(serde_json::Value::Null),
+                "action": serde_json::to_value(result.action).unwrap_or(serde_json::Value::Null),
                 "module_id": result.module_id,
                 "message": result.message
             }))
@@ -935,7 +935,7 @@ async fn api_modules_unlock(
             }
             Json(serde_json::json!({
                 "success": result.success,
-                "action": serde_json::to_value(&result.action).unwrap_or(serde_json::Value::Null),
+                "action": serde_json::to_value(result.action).unwrap_or(serde_json::Value::Null),
                 "module_id": result.module_id,
                 "message": result.message
             }))
@@ -955,7 +955,7 @@ async fn api_modules_delete(
     match state.module_lifecycle_svc.delete_module(&id) {
         Ok(result) => Json(serde_json::json!({
             "success": result.success,
-            "action": serde_json::to_value(&result.action).unwrap_or(serde_json::Value::Null),
+            "action": serde_json::to_value(result.action).unwrap_or(serde_json::Value::Null),
             "module_id": result.module_id,
             "message": result.message
         })),

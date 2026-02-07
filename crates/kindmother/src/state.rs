@@ -69,6 +69,7 @@ impl InstanceIdentity {
     /// # Returns
     ///
     /// Une nouvelle identité avec un identifiant unique généré.
+    #[must_use] 
     pub fn new(instance_type: InstanceType) -> Self {
         let generator = UuidIdGenerator;
         Self {
@@ -84,6 +85,7 @@ impl InstanceIdentity {
     /// @do: check_if_mother_instance
     /// @depends: kindmother_instance_identity
     /// Vérifie si l'instance est une DB Mère.
+    #[must_use] 
     pub fn is_mother(&self) -> bool {
         matches!(self.instance_type, InstanceType::Mother)
     }
@@ -95,6 +97,7 @@ impl InstanceIdentity {
     /// @do: check_if_daughter_instance
     /// @depends: kindmother_instance_identity
     /// Vérifie si l'instance est une DB Fille.
+    #[must_use] 
     pub fn is_daughter(&self) -> bool {
         matches!(self.instance_type, InstanceType::Daughter)
     }
@@ -140,6 +143,7 @@ impl InstanceState {
     /// # Returns
     ///
     /// Un nouvel état avec une identité générée et l'horodatage de création.
+    #[must_use] 
     pub fn new(instance_type: InstanceType) -> Self {
         Self {
             identity: InstanceIdentity::new(instance_type),

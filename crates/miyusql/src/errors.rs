@@ -63,9 +63,9 @@ impl std::fmt::Display for MiyuSQLError {
         match self {
             MiyuSQLError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyuSQLError::Timeout => write!(f, "Execution timeout"),
-            MiyuSQLError::Connection(msg) => write!(f, "Connection error: {}", msg),
-            MiyuSQLError::Syntax(msg) => write!(f, "Syntax error: {}", msg),
-            MiyuSQLError::Execution(msg) => write!(f, "Execution error: {}", msg),
+            MiyuSQLError::Connection(msg) => write!(f, "Connection error: {msg}"),
+            MiyuSQLError::Syntax(msg) => write!(f, "Syntax error: {msg}"),
+            MiyuSQLError::Execution(msg) => write!(f, "Execution error: {msg}"),
         }
     }
 }

@@ -26,10 +26,10 @@ pub fn convert(
     if from.is_empty() || to.is_empty() {
         return Err(MiyuCalcError::InvalidUnit("empty unit".to_string()));
     }
-    let factor_from = unit_to_base(&from).ok_or_else(|| MiyuCalcError::InvalidUnit(format!("unknown unit: {}", from)))?;
-    let factor_to = unit_to_base(&to).ok_or_else(|| MiyuCalcError::InvalidUnit(format!("unknown unit: {}", to)))?;
+    let factor_from = unit_to_base(&from).ok_or_else(|| MiyuCalcError::InvalidUnit(format!("unknown unit: {from}")))?;
+    let factor_to = unit_to_base(&to).ok_or_else(|| MiyuCalcError::InvalidUnit(format!("unknown unit: {to}")))?;
     if factor_from.1 != factor_to.1 {
-        return Err(MiyuCalcError::InvalidUnit(format!("incompatible units: {} vs {}", from, to)));
+        return Err(MiyuCalcError::InvalidUnit(format!("incompatible units: {from} vs {to}")));
     }
     let base = value * factor_from.0;
     Ok(base / factor_to.0)

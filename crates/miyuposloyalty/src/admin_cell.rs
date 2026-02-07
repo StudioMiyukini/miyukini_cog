@@ -49,6 +49,7 @@ pub struct MiyuposloyaltyAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.pos.miyuposloyalty";
 
+#[must_use] 
 pub fn miyuposloyalty_admin_cell(version: &str, fingerprint: &str) -> MiyuposloyaltyAdminCell {
     MiyuposloyaltyAdminCell {
         identification: MiyuposloyaltyIdentification {

@@ -40,6 +40,7 @@ pub struct LoadingState {
 
 impl LoadingState {
     /// Construit un nouvel état avec durée 10–12 s et segments aléatoires (pattern non prévisible).
+    #[must_use] 
     pub fn new() -> Self {
         let mut rng = rand::thread_rng();
         let total_duration_sec = rng.gen_range(10.0_f32..=12.0);
@@ -81,6 +82,7 @@ impl LoadingState {
     }
 
     /// Progression à afficher (0.0 ..= 1.0) pour un temps écoulé donné.
+    #[must_use] 
     pub fn progress_at(&self, elapsed_sec: f32) -> f32 {
         let mut t = elapsed_sec;
         let mut p = 0.0_f32;
@@ -110,13 +112,14 @@ impl LoadingState {
     }
 
     /// Temps écoulé depuis le début (secondes), depuis egui uniquement.
+    #[must_use] 
     pub fn elapsed_sec(&self, time_sec: f64) -> f32 {
         self.start_time_sec
-            .map(|s| (time_sec - s) as f32)
-            .unwrap_or(0.0)
+            .map_or(0.0, |s| (time_sec - s) as f32)
     }
 
     /// Temps écoulé effectif (egui ou Instant, le plus avancé) pour affichage et is_done.
+    #[must_use] 
     pub fn effective_elapsed_sec(&self, time_sec: f64) -> f32 {
         let egui = self.elapsed_sec(time_sec);
         let instant = self.created_at.elapsed().as_secs_f32();
@@ -124,6 +127,7 @@ impl LoadingState {
     }
 
     /// True si le chargement est terminé (durée atteinte).
+    #[must_use] 
     pub fn is_done(&self, time_sec: f64) -> bool {
         self.effective_elapsed_sec(time_sec) >= self.total_duration_sec
     }

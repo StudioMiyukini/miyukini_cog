@@ -23,21 +23,16 @@ use crate::theme::JayFestivalTheme;
 use eframe::egui;
 
 /// État mutable partagé pour les écrans VIS (visiteur : agenda, billets, réservations, pass).
+#[derive(Default)]
 pub struct VisState {
     /// Index d'édition affiché dans le header (pour cohérence avec GestionLayout ; visiteur peut avoir une édition courante).
     pub selected_edition_idx: usize,
 }
 
-impl Default for VisState {
-    fn default() -> Self {
-        Self {
-            selected_edition_idx: 0,
-        }
-    }
-}
 
 impl VisState {
     /// Options pour le sélecteur d'édition (visiteur : à remplir selon événements accessibles).
+    #[must_use] 
     pub fn edition_options(&self) -> Vec<String> {
         Vec::new()
     }

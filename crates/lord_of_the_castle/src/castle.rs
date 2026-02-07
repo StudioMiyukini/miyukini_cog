@@ -28,6 +28,7 @@ pub struct Castle {
 
 impl Castle {
     /// Nouveau château au centre donné, PV max et armure par défaut.
+    #[must_use] 
     pub fn new(center_x: f32, center_y: f32) -> Self {
         Self {
             x: center_x,
@@ -39,6 +40,7 @@ impl Castle {
     }
 
     /// Demi-largeur / demi-hauteur pour hitbox (40×40 → 20).
+    #[must_use] 
     pub fn half_size() -> f32 {
         size::CASTLE / 2.0
     }
@@ -51,6 +53,7 @@ impl Castle {
     }
 
     /// Game over si PV à 0.
+    #[must_use] 
     pub fn is_destroyed(&self) -> bool {
         self.hp <= 0
     }

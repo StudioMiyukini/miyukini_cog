@@ -34,6 +34,7 @@ pub enum UserType {
 }
 
 impl UserType {
+    #[must_use] 
     pub fn as_str(self) -> &'static str {
         match self {
             UserType::Admin => "admin",
@@ -45,6 +46,7 @@ impl UserType {
         }
     }
 
+    #[must_use] 
     pub fn from_str(s: &str) -> Self {
         match s.to_lowercase().as_str() {
             "admin" => UserType::Admin,

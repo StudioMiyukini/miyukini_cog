@@ -33,6 +33,7 @@ impl Priority {
     /// @human: Crée une nouvelle priorité avec une valeur donnée.
     /// @do: create_priority
     /// @depends: strongfather_priority_value
+    #[must_use] 
     pub fn new(value: u32) -> Self {
         Self { value }
     }
@@ -82,6 +83,7 @@ impl PriorityCalculator {
     /// @human: Crée un nouveau calculateur de priorité.
     /// @do: create_priority_calculator
     /// @depends: strongfather_priority_calculator
+    #[must_use] 
     pub fn new() -> Self {
         Self
     }
@@ -92,6 +94,7 @@ impl PriorityCalculator {
     /// @human: Calcule la priorité d'une intention selon les politiques de priorité applicables et la priorité demandée.
     /// @do: calculate_priority_from_policies
     /// @depends: strongfather_priority_calculator_new
+    #[must_use] 
     pub fn calculate(
         &self,
         intent: &Intent,
@@ -121,6 +124,7 @@ impl PriorityCalculator {
     /// @human: Compare deux priorités pour déterminer l'ordre relatif.
     /// @do: compare_priorities
     /// @depends: strongfather_priority_calculator_new
+    #[must_use] 
     pub fn compare(&self, a: &Priority, b: &Priority) -> std::cmp::Ordering {
         a.value.cmp(&b.value)
     }

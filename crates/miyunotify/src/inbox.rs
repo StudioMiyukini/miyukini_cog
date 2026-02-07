@@ -32,6 +32,6 @@ pub fn write(
     let gen = UuidIdGenerator;
     let id = gen.generate();
     Ok(InboxWriteResult {
-        intent_id: format!("inbox:{}", id),
+        intent_id: format!("inbox:{id}"),
     })
 }

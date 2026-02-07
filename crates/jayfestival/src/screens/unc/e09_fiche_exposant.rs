@@ -32,7 +32,7 @@ pub fn unc_e09_show(
         |ui| {
             let nav = ["Accueil", "Événements", "Organisateurs", "Exposants", "Se connecter"];
             let responses = header_render(ui, theme, "JayFestival", &nav);
-            if responses.get(0).and_then(|r| r.clicked().then_some(())).is_some() {
+            if responses.first().and_then(|r| r.clicked().then_some(())).is_some() {
                 let _ = nav_request.replace(Some(ScreenId::UncLanding));
             } else if responses.get(1).and_then(|r| r.clicked().then_some(())).is_some() {
                 let _ = nav_request.replace(Some(ScreenId::UncListeEvenements));
@@ -67,8 +67,8 @@ pub fn unc_e09_show(
                 .unwrap_or("—");
 
             card_show(theme, ui, Some(name), |ui| {
-                label(ui, theme, &format!("Contact : {}", contact), LabelLevel::Body);
-                label(ui, theme, &format!("Tél : {}", phone), LabelLevel::Body);
+                label(ui, theme, &format!("Contact : {contact}"), LabelLevel::Body);
+                label(ui, theme, &format!("Tél : {phone}"), LabelLevel::Body);
                 label(ui, theme, adresse, LabelLevel::Small);
             }, None::<fn(&mut egui::Ui)>);
 

@@ -243,6 +243,7 @@ impl Default for LordOfTheCastleApp {
 
 impl LordOfTheCastleApp {
     /// Nouvelle instance (avec contexte eframe pour polices, etc.).
+    #[must_use] 
     pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         Self::default()
     }
@@ -277,6 +278,7 @@ impl LordOfTheCastleApp {
 
     /// Crée une instance pour intégration dans Miyukini Central (point d'accès utilisateur unique).
     /// Le jeu s'exécute dans le body de Central ; pas de fenêtre standalone.
+    #[must_use] 
     pub fn new_embedded() -> Self {
         Self::default()
     }
@@ -422,7 +424,7 @@ impl LordOfTheCastleApp {
         // Input clavier : si joueur 2 présent, J1 = OKLM (O=haut, K=gauche, L=bas, M=droite), J2 = ZQSD ; sinon J1 = ZQSD + flèches
         let input = ui.ctx().input(Clone::clone);
         use egui::Key;
-        let two_players = self.game.as_ref().map(|s| s.secondary_player.is_some()).unwrap_or(false);
+        let two_players = self.game.as_ref().is_some_and(|s| s.secondary_player.is_some());
         let (up1, down1, left1, right1) = if two_players {
             (input.key_down(Key::O), input.key_down(Key::L), input.key_down(Key::K), input.key_down(Key::M))
         } else {
@@ -531,14 +533,14 @@ impl LordOfTheCastleApp {
             self.save_requested = false;
             match self.do_save() {
                 Ok(()) => self.save_load_message = Some(("Sauvegarde OK.".into(), Instant::now())),
-                Err(e) => self.save_load_message = Some((format!("Erreur: {}", e), Instant::now())),
+                Err(e) => self.save_load_message = Some((format!("Erreur: {e}"), Instant::now())),
             }
         }
         if self.load_requested {
             self.load_requested = false;
             match self.do_load() {
                 Ok(()) => self.save_load_message = Some(("Partie chargée.".into(), Instant::now())),
-                Err(e) => self.save_load_message = Some((format!("Erreur: {}", e), Instant::now())),
+                Err(e) => self.save_load_message = Some((format!("Erreur: {e}"), Instant::now())),
             }
         }
         if let Some((msg, t)) = &self.save_load_message {
@@ -768,17 +770,15 @@ impl LordOfTheCastleApp {
                     .default_width(380.0)
                     .default_height(480.0)
                     .show(ui.ctx(), |ui| {
-                        ui.label(format!("Or : {} or", gold));
-                        if state.dev_mode {
-                            if ui.button("+100 or (dev)").clicked() {
+                        ui.label(format!("Or : {gold} or"));
+                        if state.dev_mode
+                            && ui.button("+100 or (dev)").clicked() {
                                 self.pending_dev_add_gold.replace(true);
                             }
-                        }
-                        if cfg!(debug_assertions) {
-                            if ui.button("🔄 Reroll pools (dev)").clicked() {
+                        if cfg!(debug_assertions)
+                            && ui.button("🔄 Reroll pools (dev)").clicked() {
                                 self.pending_merchant_reroll.replace(true);
                             }
-                        }
                         ui.add_space(6.0);
                         egui::ScrollArea::vertical().show(ui, |ui| {
                             ui.heading("Armes");
@@ -861,7 +861,7 @@ impl LordOfTheCastleApp {
                     .open(&mut open)
                     .default_width(320.0)
                     .show(ui.ctx(), |ui| {
-                        ui.label(format!("Or : {} or", gold));
+                        ui.label(format!("Or : {gold} or"));
                         ui.add_space(8.0);
                         ui.heading("Expert en identification");
                         ui.label("Identification groupée : identifier tous les objets de l'inventaire en une fois (prix cumulé).");
@@ -877,22 +877,22 @@ impl LordOfTheCastleApp {
                     .open(&mut open)
                     .default_width(320.0)
                     .show(ui.ctx(), |ui| {
-                        ui.label(format!("Or : {} or", gold));
+                        ui.label(format!("Or : {gold} or"));
                         ui.add_space(8.0);
                         ui.heading("Bâtiments constructibles");
                         ui.label("Sélectionnez une case sur la zone de jeu (grille 20×20). Clic droit pour annuler.");
                         ui.add_space(8.0);
                         if let Some((ci, cj)) = self.construction_selected_cell {
-                            ui.label(format!("Case sélectionnée : ({}, {})", ci, cj));
+                            ui.label(format!("Case sélectionnée : ({ci}, {cj})"));
                             let has_place = state.can_build_at_cell(ci, cj);
                             let has_gold = state.gold >= TOWER_BASE_COST_GOLD;
                             if has_place {
                                 if has_gold {
-                                    if ui.button(format!("Tour ({} po) — Construire dedans", TOWER_BASE_COST_GOLD)).clicked() {
+                                    if ui.button(format!("Tour ({TOWER_BASE_COST_GOLD} po) — Construire dedans")).clicked() {
                                         state.build_tower_at_cell(ci, cj);
                                     }
                                 } else {
-                                    ui.weak(format!("Or insuffisant ({} po requis).", TOWER_BASE_COST_GOLD));
+                                    ui.weak(format!("Or insuffisant ({TOWER_BASE_COST_GOLD} po requis)."));
                                 }
                             } else {
                                 ui.weak("Pas la place ici (château ou autre bâtiment).");
@@ -913,8 +913,8 @@ impl LordOfTheCastleApp {
                     .open(&mut open)
                     .default_width(320.0)
                     .show(ui.ctx(), |ui| {
-                        ui.label(format!("Or : {} or", gold));
-                        ui.label(format!("Troupes : {} / {}", troops_count, max_troops));
+                        ui.label(format!("Or : {gold} or"));
+                        ui.label(format!("Troupes : {troops_count} / {max_troops}"));
                         ui.add_space(8.0);
                         ui.heading("Troupes disponibles");
                         ui.horizontal(|ui| {
@@ -1101,9 +1101,7 @@ impl LordOfTheCastleApp {
                     let cursor_world = cursor_screen
                         .filter(|p| game_rect.contains(*p))
                         .map(|p| screen_to_world(game_rect, p.x, p.y, cx, cy));
-                    let facing_left = cursor_world
-                        .map(|(cw, _)| cw < state.player.x)
-                        .unwrap_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW));
+                    let facing_left = cursor_world.map_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW), |(cw, _)| cw < state.player.x);
                     let player_sprite = if is_moving {
                         self.player_walk_texture.as_ref()
                             .zip(self.player_walk_desc.as_ref())
@@ -1148,7 +1146,7 @@ impl LordOfTheCastleApp {
                     }
                     let (tick, go) = game_zone_tick_and_paint(
                         game_rect,
-                        &painter,
+                        painter,
                         state,
                         last_tick,
                         keys,
@@ -1193,9 +1191,7 @@ impl LordOfTheCastleApp {
                     let cursor_world = cursor_screen
                         .filter(|p| game_rect.contains(*p))
                         .map(|p| screen_to_world(game_rect, p.x, p.y, cx, cy));
-                    let facing_left = cursor_world
-                        .map(|(cw, _)| cw < state.player.x)
-                        .unwrap_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW));
+                    let facing_left = cursor_world.map_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW), |(cw, _)| cw < state.player.x);
                     let player_sprite = if is_moving {
                         self.player_walk_texture.as_ref()
                             .zip(self.player_walk_desc.as_ref())
@@ -1219,7 +1215,7 @@ impl LordOfTheCastleApp {
                         .zip(self.troop_attack_sprite_desc.as_ref());
                     let (new_tick, game_over) = game_zone_tick_and_paint(
                         game_rect,
-                        &painter,
+                        painter,
                         state,
                         self.last_tick,
                         self.keys,
@@ -1390,13 +1386,13 @@ fn paint_item_detail_or_identify(
             let slot_label = item.slot.label();
             let rarity_label = item.rarity.label();
             ui.heading(egui::RichText::new(name).color(egui::Color32::from_rgb(r, g, b)));
-            ui.label(format!("{} — {}", slot_label, rarity_label));
+            ui.label(format!("{slot_label} — {rarity_label}"));
             ui.add_space(4.0);
             ui.label("Effets :");
             ui.label(effects);
             ui.add_space(4.0);
             ui.horizontal(|ui| {
-                ui.label(format!("Prix de vente : {} or", price));
+                ui.label(format!("Prix de vente : {price} or"));
                 if ui.button("Vendre").clicked() {
                     do_sell = true;
                 }
@@ -1459,11 +1455,10 @@ fn paint_equipment_item_detail(
     ui.label(item.effects_text());
     ui.add_space(8.0);
     let can_unequip = state.inventory.len() < INVENTORY_MAX_SLOTS;
-    if ui.add_enabled(can_unequip, egui::Button::new("Déséquiper")).clicked() {
-        if state.unequip_to_inventory(slot) {
+    if ui.add_enabled(can_unequip, egui::Button::new("Déséquiper")).clicked()
+        && state.unequip_to_inventory(slot) {
             app.selected_equipment_slot = None;
         }
-    }
     if ui.button("Fermer").clicked() {
         app.selected_equipment_slot = None;
     }
@@ -1477,7 +1472,7 @@ impl App for LordOfTheCastleApp {
         // Input clavier : si joueur 2 présent, J1 = OKLM (O=haut, K=gauche, L=bas, M=droite), J2 = ZQSD ; sinon J1 = ZQSD + flèches
         let input = ctx.input(Clone::clone);
         use egui::Key;
-        let two_players = self.game.as_ref().map(|s| s.secondary_player.is_some()).unwrap_or(false);
+        let two_players = self.game.as_ref().is_some_and(|s| s.secondary_player.is_some());
         let (up1, down1, left1, right1) = if two_players {
             (input.key_down(Key::O), input.key_down(Key::L), input.key_down(Key::K), input.key_down(Key::M))
         } else {
@@ -1539,8 +1534,8 @@ impl App for LordOfTheCastleApp {
                         if ui.add_enabled(prep_enabled, egui::Button::new("Joueur 2")).clicked() && prep_enabled {
                             self.joueur2_window_open = true;
                         }
-                        if state.phase == GamePhase::Preparation {
-                            if ui.button("Lancer la vague").clicked() {
+                        if state.phase == GamePhase::Preparation
+                            && ui.button("Lancer la vague").clicked() {
                                 if state.inventory.len() >= INVENTORY_MAX_SLOTS {
                                     self.show_encumbered_overlay = true;
                                 } else {
@@ -1548,7 +1543,6 @@ impl App for LordOfTheCastleApp {
                                     self.screen = Screen::Battle;
                                 }
                             }
-                        }
                         ui.label(format!("Vague {}", state.wave_number));
                         ui.label(format!("Ennemis: {}", state.enemies.len()));
                         let troops_count_standalone = state.troops.iter().filter(|t| t.is_active_in_squad()).count();
@@ -1574,14 +1568,14 @@ impl App for LordOfTheCastleApp {
                     self.save_requested = false;
                     match self.do_save() {
                         Ok(()) => self.save_load_message = Some(("Sauvegarde OK.".into(), Instant::now())),
-                        Err(e) => self.save_load_message = Some((format!("Erreur: {}", e), Instant::now())),
+                        Err(e) => self.save_load_message = Some((format!("Erreur: {e}"), Instant::now())),
                     }
                 }
                 if self.load_requested {
                     self.load_requested = false;
                     match self.do_load() {
                         Ok(()) => self.save_load_message = Some(("Partie chargée.".into(), Instant::now())),
-                        Err(e) => self.save_load_message = Some((format!("Erreur: {}", e), Instant::now())),
+                        Err(e) => self.save_load_message = Some((format!("Erreur: {e}"), Instant::now())),
                     }
                 }
                 if let Some((msg, t)) = &self.save_load_message {
@@ -1847,17 +1841,15 @@ impl App for LordOfTheCastleApp {
                     .default_width(380.0)
                     .default_height(480.0)
                     .show(ctx, |ui| {
-                        ui.label(format!("Or : {} or", gold));
-                        if state.dev_mode {
-                            if ui.button("+100 or (dev)").clicked() {
+                        ui.label(format!("Or : {gold} or"));
+                        if state.dev_mode
+                            && ui.button("+100 or (dev)").clicked() {
                                 self.pending_dev_add_gold.replace(true);
                             }
-                        }
-                        if cfg!(debug_assertions) {
-                            if ui.button("🔄 Reroll pools (dev)").clicked() {
+                        if cfg!(debug_assertions)
+                            && ui.button("🔄 Reroll pools (dev)").clicked() {
                                 self.pending_merchant_reroll.replace(true);
                             }
-                        }
                         ui.add_space(6.0);
                         egui::ScrollArea::vertical().show(ui, |ui| {
                             ui.heading("Armes");
@@ -1940,7 +1932,7 @@ impl App for LordOfTheCastleApp {
                     .open(&mut open)
                     .default_width(320.0)
                     .show(ctx, |ui| {
-                        ui.label(format!("Or : {} or", gold));
+                        ui.label(format!("Or : {gold} or"));
                         ui.add_space(8.0);
                         ui.heading("Expert en identification");
                         ui.label("Identification groupée : identifier tous les objets de l'inventaire en une fois (prix cumulé).");
@@ -1956,22 +1948,22 @@ impl App for LordOfTheCastleApp {
                     .open(&mut open)
                     .default_width(320.0)
                     .show(ctx, |ui| {
-                        ui.label(format!("Or : {} or", gold));
+                        ui.label(format!("Or : {gold} or"));
                         ui.add_space(8.0);
                         ui.heading("Bâtiments constructibles");
                         ui.label("Sélectionnez une case sur la zone de jeu (grille 20×20). Clic droit pour annuler.");
                         ui.add_space(8.0);
                         if let Some((ci, cj)) = self.construction_selected_cell {
-                            ui.label(format!("Case sélectionnée : ({}, {})", ci, cj));
+                            ui.label(format!("Case sélectionnée : ({ci}, {cj})"));
                             let has_place = state.can_build_at_cell(ci, cj);
                             let has_gold = state.gold >= TOWER_BASE_COST_GOLD;
                             if has_place {
                                 if has_gold {
-                                    if ui.button(format!("Tour ({} po) — Construire dedans", TOWER_BASE_COST_GOLD)).clicked() {
+                                    if ui.button(format!("Tour ({TOWER_BASE_COST_GOLD} po) — Construire dedans")).clicked() {
                                         state.build_tower_at_cell(ci, cj);
                                     }
                                 } else {
-                                    ui.weak(format!("Or insuffisant ({} po requis).", TOWER_BASE_COST_GOLD));
+                                    ui.weak(format!("Or insuffisant ({TOWER_BASE_COST_GOLD} po requis)."));
                                 }
                             } else {
                                 ui.weak("Pas la place ici (château ou autre bâtiment).");
@@ -1992,8 +1984,8 @@ impl App for LordOfTheCastleApp {
                     .open(&mut open)
                     .default_width(320.0)
                     .show(ctx, |ui| {
-                        ui.label(format!("Or : {} or", gold));
-                        ui.label(format!("Troupes : {} / {}", troops_count, max_troops));
+                        ui.label(format!("Or : {gold} or"));
+                        ui.label(format!("Troupes : {troops_count} / {max_troops}"));
                         ui.add_space(8.0);
                         ui.heading("Troupes disponibles");
                         ui.horizontal(|ui| {
@@ -2205,9 +2197,7 @@ impl App for LordOfTheCastleApp {
                         let cursor_world = cursor_screen
                             .filter(|p| game_rect.contains(*p))
                             .map(|p| screen_to_world(game_rect, p.x, p.y, cx, cy));
-                        let facing_left = cursor_world
-                            .map(|(cw, _)| cw < state.player.x)
-                            .unwrap_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW));
+                        let facing_left = cursor_world.map_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW), |(cw, _)| cw < state.player.x);
                         let player_sprite = if is_moving {
                             self.player_walk_texture.as_ref()
                                 .zip(self.player_walk_desc.as_ref())
@@ -2231,7 +2221,7 @@ impl App for LordOfTheCastleApp {
                             .zip(self.troop_attack_sprite_desc.as_ref());
                         let (tick, go) = game_zone_tick_and_paint(
                             game_rect,
-                            &painter,
+                            painter,
                             state,
                             last_tick,
                             keys,
@@ -2291,9 +2281,7 @@ impl App for LordOfTheCastleApp {
                         let cursor_world = cursor_screen
                             .filter(|p| game_rect.contains(*p))
                             .map(|p| screen_to_world(game_rect, p.x, p.y, cx, cy));
-                        let facing_left = cursor_world
-                            .map(|(cw, _)| cw < state.player.x)
-                            .unwrap_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW));
+                        let facing_left = cursor_world.map_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW), |(cw, _)| cw < state.player.x);
                         let player_sprite = if is_moving {
                             self.player_walk_texture.as_ref()
                                 .zip(self.player_walk_desc.as_ref())
@@ -2317,7 +2305,7 @@ impl App for LordOfTheCastleApp {
                             .zip(self.troop_attack_sprite_desc.as_ref());
                         let (new_tick, game_over) = game_zone_tick_and_paint(
                             game_rect,
-                            &painter,
+                            painter,
                             state,
                             self.last_tick,
                             self.keys,

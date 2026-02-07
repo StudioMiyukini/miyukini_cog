@@ -49,6 +49,7 @@ pub struct MiyucptaledgerAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.compta.ledger";
 
+#[must_use] 
 pub fn miyucptaledger_admin_cell(version: &str, fingerprint: &str) -> MiyucptaledgerAdminCell {
     MiyucptaledgerAdminCell {
         identification: MiyucptaledgerIdentification {

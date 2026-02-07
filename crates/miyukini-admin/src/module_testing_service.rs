@@ -27,15 +27,15 @@ pub enum ModuleTestingError {
 impl std::fmt::Display for ModuleTestingError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ModuleTestingError::ModuleNotFound(id) => write!(f, "Module not found: {}", id),
+            ModuleTestingError::ModuleNotFound(id) => write!(f, "Module not found: {id}"),
             ModuleTestingError::AdminCellUnavailable(msg) => {
-                write!(f, "Admin cell unavailable: {}", msg)
+                write!(f, "Admin cell unavailable: {msg}")
             }
             ModuleTestingError::TestExecutionFailed(msg) => {
-                write!(f, "Test execution failed: {}", msg)
+                write!(f, "Test execution failed: {msg}")
             }
             ModuleTestingError::IntegrityCheckFailed(msg) => {
-                write!(f, "Integrity check failed: {}", msg)
+                write!(f, "Integrity check failed: {msg}")
             }
         }
     }
@@ -90,6 +90,7 @@ where
     }
 
     /// Liste les modules présents (via Master Butler via BondingBrother).
+    #[must_use] 
     pub fn discover_modules(&self) -> Vec<ModuleInfo> {
         self.discovery.discover_modules()
     }
@@ -183,6 +184,7 @@ pub struct StubModuleDiscovery {
 
 impl StubModuleDiscovery {
     /// Crée un discovery stub avec une liste vide.
+    #[must_use] 
     pub fn new() -> Self {
         Self {
             modules: RwLock::new(Vec::new()),
@@ -219,6 +221,7 @@ pub struct StubAdminCellReader {
 
 impl StubAdminCellReader {
     /// Crée un reader stub vide.
+    #[must_use] 
     pub fn new() -> Self {
         Self {
             cells: RwLock::new(HashMap::new()),

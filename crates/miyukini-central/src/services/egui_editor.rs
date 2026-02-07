@@ -201,6 +201,7 @@ impl EditorThemeState {
     }
 
     /// Sérialise pour persistance (JSON : mode + couleurs r,g,b + rayons + angle + header/hub).
+    #[must_use] 
     pub fn to_storage_string(&self) -> String {
         let r = |c: Color32| (c.r(), c.g(), c.b());
         let opt_rgb = |o: Option<Color32>| o.map(r);
@@ -239,18 +240,19 @@ impl EditorThemeState {
     }
 
     /// Désérialise depuis la persistance ; retourne None si invalide. v1 = sans noninteractive/fg, v2 = idem, v3 = + header/hub.
+    #[must_use] 
     pub fn from_storage_string(s: &str) -> Option<Self> {
         let j: serde_json::Value = serde_json::from_str(s).ok()?;
         let rgb = |v: &serde_json::Value| {
             let arr = v.as_array()?;
-            let r = arr.get(0)?.as_u64()? as u8;
+            let r = arr.first()?.as_u64()? as u8;
             let g = arr.get(1)?.as_u64()? as u8;
             let b = arr.get(2)?.as_u64()? as u8;
             Some(Color32::from_rgb(r, g, b))
         };
-        let opt_rgb = |v: Option<&serde_json::Value>| v.and_then(|x| rgb(x));
+        let opt_rgb = |v: Option<&serde_json::Value>| v.and_then(&rgb);
         let def = Self::default();
-        let dark = j.get("dark_mode").and_then(|x| x.as_bool()).unwrap_or(true);
+        let dark = j.get("dark_mode").and_then(serde_json::Value::as_bool).unwrap_or(true);
         let base = if dark { Visuals::dark() } else { Visuals::light() };
         Some(Self {
             dark_mode: dark,
@@ -266,9 +268,9 @@ impl EditorThemeState {
             widget_active_fg: opt_rgb(j.get("widget_active_fg")).unwrap_or(base.widgets.active.fg_stroke.color),
             override_text_color: j.get("override_text_color").and_then(rgb),
             weak_text_color: j.get("weak_text_color").and_then(rgb),
-            corner_radius: j.get("corner_radius").and_then(|x| x.as_f64()).map(|x| x as f32).unwrap_or(def.corner_radius),
-            window_rounding: j.get("window_rounding").and_then(|x| x.as_f64()).map(|x| x as f32).unwrap_or(def.window_rounding),
-            angle_deg: j.get("angle_deg").and_then(|x| x.as_f64()).map(|x| x as f32).unwrap_or(def.angle_deg),
+            corner_radius: j.get("corner_radius").and_then(serde_json::Value::as_f64).map_or(def.corner_radius, |x| x as f32),
+            window_rounding: j.get("window_rounding").and_then(serde_json::Value::as_f64).map_or(def.window_rounding, |x| x as f32),
+            angle_deg: j.get("angle_deg").and_then(serde_json::Value::as_f64).map_or(def.angle_deg, |x| x as f32),
             barre_exe_bg: j.get("barre_exe_bg").and_then(rgb),
             tab_bar_bg: j.get("tab_bar_bg").and_then(rgb),
             sidebar_bg: j.get("sidebar_bg").and_then(rgb),
@@ -660,6 +662,7 @@ fn load_custom_themes(storage: Option<&dyn eframe::Storage>) -> Option<Vec<Named
 
 impl EguiEditorService {
     /// Charge depuis le storage (thème persisté + thèmes personnalisés) ; sinon défaut.
+    #[must_use] 
     pub fn from_storage(storage: Option<&dyn eframe::Storage>) -> Self {
         let theme = storage
             .and_then(|s| s.get_string(UI_EDITOR_THEME_STORAGE_KEY))
@@ -692,7 +695,7 @@ impl EguiEditorService {
     pub fn persist_theme_if_dirty(&mut self, storage: Option<&mut dyn eframe::Storage>) {
         if let Some(storage) = storage {
             if self.theme_dirty {
-                let _ = storage.set_string(UI_EDITOR_THEME_STORAGE_KEY, self.theme.to_storage_string());
+                let () = storage.set_string(UI_EDITOR_THEME_STORAGE_KEY, self.theme.to_storage_string());
                 self.theme_dirty = false;
             }
             if self.custom_themes_dirty {
@@ -702,7 +705,7 @@ impl EguiEditorService {
                     .map(|nt| (nt.name.clone(), nt.state.to_storage_string()))
                     .collect();
                 if let Ok(json) = serde_json::to_string(&arr) {
-                    let _ = storage.set_string(UI_EDITOR_CUSTOM_THEMES_STORAGE_KEY, json);
+                    let () = storage.set_string(UI_EDITOR_CUSTOM_THEMES_STORAGE_KEY, json);
                 }
                 self.custom_themes_dirty = false;
             }

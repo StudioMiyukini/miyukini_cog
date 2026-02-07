@@ -49,6 +49,7 @@ pub struct MiyucomptareportsAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.compta.reports";
 
+#[must_use] 
 pub fn miyucomptareports_admin_cell(version: &str, fingerprint: &str) -> MiyucomptareportsAdminCell {
     MiyucomptareportsAdminCell {
         identification: MiyucomptareportsIdentification {

@@ -86,16 +86,16 @@ pub fn org_e10_show(
             card_show(theme, ui, Some("Identité"), |ui| {
                 if let Some(e) = exposant {
                     if let Some(s) = e.company_name.as_deref() {
-                        label(ui, theme, &format!("Raison sociale : {}", s), LabelLevel::Body);
+                        label(ui, theme, &format!("Raison sociale : {s}"), LabelLevel::Body);
                     }
                     if let Some(s) = e.stand_name.as_deref() {
-                        label(ui, theme, &format!("Stand : {}", s), LabelLevel::Body);
+                        label(ui, theme, &format!("Stand : {s}"), LabelLevel::Body);
                     }
                     if let Some(s) = e.contact_email.as_deref() {
-                        label(ui, theme, &format!("Contact : {}", s), LabelLevel::Body);
+                        label(ui, theme, &format!("Contact : {s}"), LabelLevel::Body);
                     }
                     if let Some(s) = e.category.as_deref() {
-                        label(ui, theme, &format!("Catégorie : {}", s), LabelLevel::Small);
+                        label(ui, theme, &format!("Catégorie : {s}"), LabelLevel::Small);
                     }
                 } else {
                     label(ui, theme, "Aucune donnée exposant.", LabelLevel::Body);
@@ -106,10 +106,10 @@ pub fn org_e10_show(
             card_show(theme, ui, Some("Emplacement"), |ui| {
                 if let Some(ee) = edition_exposant {
                     if let Some(s) = ee.assigned_stand.as_deref() {
-                        label(ui, theme, &format!("Stand attribué : {}", s), LabelLevel::Body);
+                        label(ui, theme, &format!("Stand attribué : {s}"), LabelLevel::Body);
                     }
                     if let Some(m) = ee.size_meters {
-                        label(ui, theme, &format!("Surface : {} m²", m), LabelLevel::Body);
+                        label(ui, theme, &format!("Surface : {m} m²"), LabelLevel::Body);
                     }
                     if ee.assigned_stand.is_none() {
                         label(ui, theme, "Aucun stand attribué.", LabelLevel::Small);

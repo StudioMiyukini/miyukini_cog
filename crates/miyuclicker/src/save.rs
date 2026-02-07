@@ -234,7 +234,7 @@ fn save_to_game_state(save: SaveState) -> GameState {
 /// @do: resolve_slot_file_path
 /// @role: reader
 fn slot_path(data_dir: &Path, slot_id: u8) -> std::path::PathBuf {
-    data_dir.join(format!("miyuclicker_slot_{}.json", slot_id))
+    data_dir.join(format!("miyuclicker_slot_{slot_id}.json"))
 }
 
 /// Écrit l'état dans le slot (1, 2 ou 3).
@@ -270,6 +270,7 @@ pub fn slot_read(data_dir: &Path, slot_id: u8) -> Result<GameState, String> {
 /// @id: miyuclicker_save_slot_list
 /// @do: list_slot_metadata_for_ui
 /// @role: reader
+#[must_use] 
 pub fn slot_list(data_dir: &Path) -> Vec<SlotMetadata> {
     let mut out = Vec::with_capacity(3);
     for slot_id in 1..=3 {
@@ -277,7 +278,7 @@ pub fn slot_list(data_dir: &Path) -> Vec<SlotMetadata> {
         let (occupied, saved_at, summary) = if path.exists() {
             let meta = fs::metadata(&path).ok();
             let modified = meta.and_then(|m| m.modified().ok());
-            let saved_at = modified.map(|t| format!("{:?}", t));
+            let saved_at = modified.map(|t| format!("{t:?}"));
             let summary = fs::read_to_string(&path)
                 .ok()
                 .and_then(|s| serde_json::from_str::<SaveState>(&s).ok())

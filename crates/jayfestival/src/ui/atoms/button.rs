@@ -35,6 +35,7 @@ pub enum ButtonSize {
 
 impl ButtonSize {
     /// Hauteur minimale du bouton en pixels (accessibilité PROTO-7).
+    #[must_use] 
     pub fn min_height(self) -> f32 {
         match self {
             ButtonSize::Sm => 32.0,

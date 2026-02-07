@@ -24,7 +24,7 @@ pub enum JayXposeError {
 impl fmt::Display for JayXposeError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            JayXposeError::Db(s) => write!(f, "JayXpose DB: {}", s),
+            JayXposeError::Db(s) => write!(f, "JayXpose DB: {s}"),
             JayXposeError::NotFound => write!(f, "JayXpose: exposant not found"),
         }
     }

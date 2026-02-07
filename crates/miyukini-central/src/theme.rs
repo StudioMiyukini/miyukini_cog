@@ -67,11 +67,13 @@ pub fn apply_store_theme(ctx: &egui::Context, dark: bool) {
 }
 
 /// Rayon des cartes (store), pour Frame::corner_radius (egui 0.33).
+#[must_use] 
 pub fn card_corner_radius() -> u8 {
     CARD_CORNER_RADIUS
 }
 
 /// Fond de carte (store) selon thème.
+#[must_use] 
 pub fn card_bg_color(dark: bool) -> egui::Color32 {
     if dark {
         egui::Color32::from_rgba_unmultiplied(50, 50, 55, CARD_BG_ALPHA_DARK)
@@ -81,11 +83,13 @@ pub fn card_bg_color(dark: bool) -> egui::Color32 {
 }
 
 /// Couleur d'accent pour bouton principal.
+#[must_use] 
 pub fn primary_button_color() -> egui::Color32 {
     accent_color()
 }
 
 /// Couleur au survol du bouton principal.
+#[must_use] 
 pub fn primary_button_hover_color() -> egui::Color32 {
     accent_hover_color()
 }

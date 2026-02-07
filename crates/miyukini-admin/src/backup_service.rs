@@ -156,6 +156,7 @@ impl BackupServiceImpl {
     /// @human: Crée le service avec état stub.
     /// @do: create_backup_service
     /// @depends: miyukiniadmin_backup_service_impl
+    #[must_use] 
     pub fn new() -> Self {
         Self::default()
     }
@@ -166,6 +167,7 @@ impl BackupServiceImpl {
     /// @human: Initialise avec des backups de démo.
     /// @do: seed_demo_backups
     /// @depends: miyukiniadmin_backup_service_impl
+    #[must_use] 
     pub fn with_seed(mut self) -> Self {
         self.backups = vec![
             BackupRecord {
@@ -209,7 +211,7 @@ impl BackupService for BackupServiceImpl {
             message: if found {
                 Some("Stub: restore non exécuté (voir StrongFather + KindMother en production).".to_string())
             } else {
-                Some(format!("Backup non trouvé: {}", backup_id))
+                Some(format!("Backup non trouvé: {backup_id}"))
             },
         }
     }

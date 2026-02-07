@@ -93,7 +93,7 @@ pub fn exp_e07_e19_show(
                     }
                 } else if reserved_id == 10 {
                     ui.horizontal(|ui| {
-                        if button(ui, theme, "Prévisualiser", ButtonVariant::Ghost, Default::default()).clicked() {}
+                        button(ui, theme, "Prévisualiser", ButtonVariant::Ghost, Default::default()).clicked();
                         if button(ui, theme, "Envoyer", ButtonVariant::Primary, Default::default()).clicked() {
                             let _ = nav_request.replace(Some(ScreenId::ExpCandidatures));
                         }

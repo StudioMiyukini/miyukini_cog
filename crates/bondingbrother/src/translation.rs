@@ -58,7 +58,7 @@ impl std::fmt::Display for TranslationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             TranslationError::UnsupportedFormat(format) => {
-                write!(f, "Unsupported format: {}", format)
+                write!(f, "Unsupported format: {format}")
             }
         }
     }

@@ -110,7 +110,7 @@ pub trait Logger {
 /// est le message.
 impl Logger for DefaultLogger {
     fn log(&self, level: Level, message: &str) {
-        eprintln!("[{:?}] {}", level, message);
+        eprintln!("[{level:?}] {message}");
     }
 }
 

@@ -221,6 +221,7 @@ pub fn apply_allocation_macons(state: &mut GameState, allocation: &AllocationMac
 }
 
 /// Pts requis pour la prochaine maison (pour affichage UI).
+#[must_use] 
 pub fn pts_required_maison_pub(state: &GameState) -> f64 {
     pts_required_for_building(state, BuildingType::Maison)
 }
@@ -229,6 +230,7 @@ pub fn pts_required_maison_pub(state: &GameState) -> f64 {
 /// @id: miyuclicker_idlesim_pts_required_caserne_pub
 /// @do: compute_construction_pts_required_for_next_barracks
 /// @role: reader
+#[must_use] 
 pub fn pts_required_caserne_pub(state: &GameState) -> f64 {
     pts_required_for_building(state, BuildingType::Caserne)
 }
@@ -237,11 +239,13 @@ pub fn pts_required_caserne_pub(state: &GameState) -> f64 {
 /// @id: miyuclicker_idlesim_pts_required_grenier_pub
 /// @do: compute_construction_pts_required_for_next_granary
 /// @role: reader
+#[must_use] 
 pub fn pts_required_grenier_pub(state: &GameState) -> f64 {
     pts_required_for_building(state, BuildingType::Grenier)
 }
 
 /// Pts requis pour le prochain niveau dépôt (pour affichage UI).
+#[must_use] 
 pub fn pts_required_depot_pub(state: &GameState) -> f64 {
     DEPOT_PTS_BASE * (1.0 + DEPOT_PTS_PCT_PAR_NIVEAU * (state.depot_lvl as f64))
 }
@@ -250,6 +254,7 @@ pub fn pts_required_depot_pub(state: &GameState) -> f64 {
 /// @id: miyuclicker_idlesim_pts_required_entrepot_pub
 /// @do: compute_construction_pts_required_for_next_warehouse
 /// @role: reader
+#[must_use] 
 pub fn pts_required_entrepot_pub(state: &GameState) -> f64 {
     pts_required_for_building(state, BuildingType::Entrepot)
 }

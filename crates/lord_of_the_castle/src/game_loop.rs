@@ -37,6 +37,7 @@ pub enum EnemyTarget {
 }
 
 /// Calcule la cible d'un ennemi (champ de vision 30 px) : Joueur > Tour > Château.
+#[must_use] 
 pub fn enemy_target(
     enemy: &Enemy,
     _castle: &Castle,
@@ -80,6 +81,7 @@ pub fn move_enemy_toward(enemy: &mut Enemy, target_x: f32, target_y: f32, dt_s: 
 }
 
 /// Retourne (x, y) de la cible pour un ennemi.
+#[must_use] 
 pub fn target_position(
     target: EnemyTarget,
     castle: &Castle,
@@ -100,6 +102,7 @@ pub fn target_position(
 }
 
 /// Hitbox overlap : distance entre centres <= half_a + half_b.
+#[must_use] 
 pub fn overlap(dist: f32, half_a: f32, half_b: f32) -> bool {
     dist <= half_a + half_b
 }
@@ -451,9 +454,7 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
             let range = Player::auto_attack_range();
             let px = state.player.x;
             let py = state.player.y;
-            let aim_angle = cursor_world
-                .map(|(cx, cy)| (cy - py).atan2(cx - px))
-                .unwrap_or_else(|| state.player.dir.to_angle_rad());
+            let aim_angle = cursor_world.map_or_else(|| state.player.dir.to_angle_rad(), |(cx, cy)| (cy - py).atan2(cx - px));
             let damage = state.player_auto_attack_damage();
             let in_cone: Vec<u64> = state
                 .enemies
@@ -494,11 +495,11 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
                             let d = sec.dist_to(enemy.x, enemy.y);
                             if d <= range {
                                 let dead = enemy.take_damage(damage);
-                                if !dead {
+                                if dead {
+                                    to_remove_enemies.push(enemy.id);
+                                } else {
                                     enemy.set_damage_flash();
                                     enemy.push_back_from(sec.x, sec.y, 2.0);
-                                } else {
-                                    to_remove_enemies.push(enemy.id);
                                 }
                             }
                         }
@@ -549,8 +550,7 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
         }
         let elapsed = tower
             .last_attack
-            .map(|t| t.elapsed().as_secs_f32())
-            .unwrap_or(2.0);
+            .map_or(2.0, |t| t.elapsed().as_secs_f32());
         if elapsed < Tower::attack_interval_s() {
             continue;
         }
@@ -647,12 +647,9 @@ fn tick_secondary_projectiles(
 
     for (pi, p) in state.secondary_projectiles.iter_mut().enumerate() {
         let target_id = p.target_enemy_id;
-        let (tx, ty) = match enemy_pos.iter().find(|(id, _, _)| *id == target_id) {
-            Some((_, x, y)) => (*x, *y),
-            None => {
-                to_remove_proj.push(pi);
-                continue;
-            }
+        let (tx, ty) = if let Some((_, x, y)) = enemy_pos.iter().find(|(id, _, _)| *id == target_id) { (*x, *y) } else {
+            to_remove_proj.push(pi);
+            continue;
         };
         let dx = tx - p.x;
         let dy = ty - p.y;
@@ -675,11 +672,11 @@ fn tick_secondary_projectiles(
     for (_, enemy_id, damage, from_x, from_y) in hits {
         if let Some(e) = state.enemies.iter_mut().find(|e| e.id == enemy_id) {
             let dead = e.take_damage(damage);
-            if !dead {
+            if dead {
+                to_remove_enemies.push(enemy_id);
+            } else {
                 e.set_damage_flash();
                 e.push_back_from(from_x, from_y, 2.0);
-            } else {
-                to_remove_enemies.push(enemy_id);
             }
         }
     }
@@ -747,11 +744,11 @@ fn tick_tower_projectiles(
         let enemy = &mut state.enemies[ei];
         let eid = enemy.id;
         let dead = enemy.take_damage(damage);
-        if !dead {
+        if dead {
+            to_remove_enemies.push(eid);
+        } else {
             enemy.set_damage_flash();
             enemy.push_back_from(from_x, from_y, 2.0);
-        } else {
-            to_remove_enemies.push(eid);
         }
     }
     // Supprimer les projectiles (impact ou hors portée) par indices décroissants
@@ -912,10 +909,8 @@ fn tick_troops(state: &mut GameState, delta_s: f32, to_remove_enemies: &mut Vec<
             } else {
                 move_troop_toward(troop, ex, ey, delta_s);
             }
-        } else {
-            if dist_to_commander > TROOP_MIN_DISTANCE_FROM_PLAYER {
-                move_troop_toward(troop, cx, cy, delta_s);
-            }
+        } else if dist_to_commander > TROOP_MIN_DISTANCE_FROM_PLAYER {
+            move_troop_toward(troop, cx, cy, delta_s);
         }
     }
 
@@ -924,11 +919,11 @@ fn tick_troops(state: &mut GameState, delta_s: f32, to_remove_enemies: &mut Vec<
         if let Some(e) = state.enemies.iter_mut().find(|e| e.id == enemy_id) {
             let damage = kind.attack_damage();
             let dead = e.take_damage(damage);
-            if !dead {
+            if dead {
+                to_remove_enemies.push(enemy_id);
+            } else {
                 e.set_damage_flash();
                 e.push_back_from(troop_x, troop_y, 2.0);
-            } else {
-                to_remove_enemies.push(enemy_id);
             }
         }
     }

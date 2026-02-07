@@ -49,6 +49,7 @@ pub struct MiyubookingAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.booking.reservations";
 
+#[must_use] 
 pub fn miyubooking_admin_cell(version: &str, fingerprint: &str) -> MiyubookingAdminCell {
     MiyubookingAdminCell {
         identification: MiyubookingIdentification {

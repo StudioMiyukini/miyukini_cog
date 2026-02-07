@@ -33,7 +33,7 @@ pub fn enqueue(
     }
     let gen = UuidIdGenerator;
     let id = gen.generate();
-    Ok(format!("task:{}:{}", q, id))
+    Ok(format!("task:{q}:{id}"))
 }
 
 /// Résultat du traitement d'une tâche (handler fourni dans le flux).

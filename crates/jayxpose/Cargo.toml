@@ -1,0 +1,58 @@
+# @id: jayxpose_crate_config
+# @do: declare_jayxpose_crate_and_dependencies
+# @layer: infra
+# Crate JayXpose — Service officiel famille Jay (profil exposant, catalogue, vitrine, documents).
+
+[package]
+name = "jayxpose"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords = ["jayxpose", "exposant", "catalogue", "egui", "eframe"]
+categories.workspace = true
+description = "JayXpose — Service profil exposant, catalogue produits, vitrine, coffre-fort documentaire (egui/eframe)"
+
+[dependencies]
+egui = "0.33"
+eframe = { version = "0.33", default-features = false, features = ["default_fonts", "persistence", "glow"] }
+kindmother = { path = "../kindmother" }
+rusqlite = { version = "0.32", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+uuid = { version = "1", features = ["v4"] }
+chrono = "0.4"
+
+[[bin]]
+name = "jayxpose"
+path = "src/main.rs"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = "allow"
+doc_markdown = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+return_self_not_must_use = "allow"
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+cast_precision_loss = "allow"
+cast_lossless = "allow"
+module_name_repetitions = "allow"
+struct_excessive_bools = "allow"
+too_many_lines = "allow"
+wildcard_imports = "allow"
+unused_self = "allow"
+needless_pass_by_value = "allow"
+similar_names = "allow"
+unreadable_literal = "allow"
+items_after_statements = "allow"

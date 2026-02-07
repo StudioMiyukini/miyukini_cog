@@ -46,6 +46,7 @@ impl DefaultAuditLogger {
     /// @human: Crée un nouveau logger d'audit par défaut.
     /// @do: create_default_audit_logger
     /// @depends: miyukiniadmin_audit_logger_default
+    #[must_use] 
     pub fn new(logger: Box<dyn Logger>) -> Self {
         Self { logger }
     }
@@ -53,7 +54,7 @@ impl DefaultAuditLogger {
 
 impl AuditLogger for DefaultAuditLogger {
     fn log_action(&self, action: &str, context: &str) {
-        let message = format!("AUDIT: {} | Context: {}", action, context);
+        let message = format!("AUDIT: {action} | Context: {context}");
         self.logger.log(Level::Info, &message);
     }
 }

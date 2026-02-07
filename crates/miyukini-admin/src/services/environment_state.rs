@@ -27,6 +27,7 @@ impl EnvironmentStateService {
     /// @layer: operator
     /// @human: Construit le service avec le répertoire de données.
     /// @do: create_environment_state_service
+    #[must_use] 
     pub fn new(data_dir: PathBuf) -> Self {
         Self { data_dir }
     }
@@ -140,6 +141,7 @@ impl EnvironmentStateService {
     }
 
     /// Retourne le répertoire de données (pour autres services).
+    #[must_use] 
     pub fn data_dir(&self) -> &PathBuf {
         &self.data_dir
     }

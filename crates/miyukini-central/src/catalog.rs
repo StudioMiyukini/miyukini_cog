@@ -46,6 +46,7 @@ pub enum ServiceId {
 
 impl ServiceId {
     /// Retourne l'identifiant string pour affichage ou persistance.
+    #[must_use] 
     pub fn as_str(&self) -> &'static str {
         match self {
             ServiceId::Calculator => "calculator",
@@ -66,6 +67,7 @@ impl ServiceId {
         }
     }
     /// Clé stable pour persistance (suivi d'utilisation, DB).
+    #[must_use] 
     pub fn storage_key(&self) -> &'static str {
         match self {
             ServiceId::Calculator => "calculator",
@@ -87,6 +89,7 @@ impl ServiceId {
     }
 
     /// Parse un ServiceId depuis une clé de stockage.
+    #[must_use] 
     pub fn from_storage_key(s: &str) -> Option<ServiceId> {
         match s {
             "calculator" => Some(ServiceId::Calculator),
@@ -109,6 +112,7 @@ impl ServiceId {
     }
 
     /// Icône / emoji pour l'affichage type store.
+    #[must_use] 
     pub fn icon(&self) -> &'static str {
         match self {
             ServiceId::Calculator => "🔢",
@@ -147,6 +151,7 @@ pub enum CategoryId {
 
 impl CategoryId {
     /// Libellé affiché.
+    #[must_use] 
     pub fn label(&self) -> &'static str {
         match self {
             CategoryId::Utilitaires => "Utilitaires",
@@ -157,6 +162,7 @@ impl CategoryId {
         }
     }
     /// Icône pour les filtres / pills.
+    #[must_use] 
     pub fn icon(&self) -> &'static str {
         match self {
             CategoryId::Utilitaires => "🛠️",
@@ -192,6 +198,7 @@ pub struct ServiceMeta {
 /// @do: return_mock_service_metadata_list
 /// @role: reader
 /// @human: Liste des ServiceMeta pour HUB et menu.
+#[must_use] 
 pub fn mock_catalog() -> Vec<ServiceMeta> {
     vec![
         ServiceMeta {
@@ -308,6 +315,7 @@ pub fn mock_catalog() -> Vec<ServiceMeta> {
 /// @do: lookup_service_metadata_by_id
 /// @role: reader
 /// @human: Recherche dans le catalogue pour affichage carte HUB.
+#[must_use] 
 pub fn meta_for_service(catalog: &[ServiceMeta], id: ServiceId) -> Option<&ServiceMeta> {
     catalog.iter().find(|m| m.id == id)
 }

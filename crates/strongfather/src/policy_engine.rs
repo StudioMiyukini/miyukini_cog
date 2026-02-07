@@ -54,8 +54,7 @@ impl std::fmt::Display for PolicyEngineError {
             } => {
                 write!(
                     f,
-                    "Consistency error: {} - {}",
-                    violated_invariant, reason
+                    "Consistency error: {violated_invariant} - {reason}"
                 )
             }
         }
@@ -86,6 +85,7 @@ impl PolicyEngine {
     /// @human: Crée un nouveau moteur de politiques avec un ensemble de politiques.
     /// @do: create_policy_engine
     /// @depends: strongfather_policy_engine
+    #[must_use] 
     pub fn new(policies: PolicySet) -> Self {
         Self { policies }
     }

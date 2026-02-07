@@ -51,6 +51,7 @@ pub struct MiyuExportAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.export.miyuexport";
 
+#[must_use] 
 pub fn miyuexport_admin_cell(version: &str, fingerprint: &str) -> MiyuExportAdminCell {
     MiyuExportAdminCell {
         identification: MiyuExportIdentification {

@@ -21,7 +21,7 @@ use std::cell::RefCell;
 fn placeholder_events() -> Vec<EventCardLandingItem> {
     (1..=6)
         .map(|i| EventCardLandingItem {
-            nom: format!("[nom event {}]", i),
+            nom: format!("[nom event {i}]"),
             type_event: "[type event]".into(),
             date: "Date".into(),
             lieu: "Lieu".into(),

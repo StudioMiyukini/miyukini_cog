@@ -34,7 +34,7 @@ pub enum JayKontaError {
 impl fmt::Display for JayKontaError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            JayKontaError::Invoice(e) => write!(f, "invoice: {}", e),
+            JayKontaError::Invoice(e) => write!(f, "invoice: {e}"),
         }
     }
 }

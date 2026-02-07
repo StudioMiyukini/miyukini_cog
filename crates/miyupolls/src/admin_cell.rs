@@ -49,6 +49,7 @@ pub struct MiyupollsAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.content.polls";
 
+#[must_use] 
 pub fn miyupolls_admin_cell(version: &str, fingerprint: &str) -> MiyupollsAdminCell {
     MiyupollsAdminCell {
         identification: MiyupollsIdentification {

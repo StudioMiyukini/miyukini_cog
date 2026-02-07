@@ -52,7 +52,7 @@ pub fn auth_sign_in(db: &JayFestivalDb, email: &str, password: &str) -> AuthResu
     let profile = db
         .profile_by_email_password(email, password)
         .map_err(|e| AuthError {
-            message: format!("base de données: {}", e),
+            message: format!("base de données: {e}"),
         })?;
     let profile = profile.ok_or_else(|| AuthError {
         message: "Email ou mot de passe incorrect.".to_string(),
@@ -77,10 +77,10 @@ pub fn auth_sign_up(
     user_type: &str,
 ) -> AuthResult<AuthSession> {
     let user_id = db.profile_create(email, password, user_type).map_err(|e| AuthError {
-        message: format!("création compte: {}", e),
+        message: format!("création compte: {e}"),
     })?;
     let profile = db.profile_by_id(&user_id).map_err(|e| AuthError {
-        message: format!("lecture profil: {}", e),
+        message: format!("lecture profil: {e}"),
     })?;
     Ok(AuthSession {
         user_id: user_id.clone(),

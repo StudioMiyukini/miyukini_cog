@@ -66,6 +66,7 @@ pub enum ItemSlot {
 }
 
 impl ItemSlot {
+    #[must_use] 
     pub fn label(&self) -> &'static str {
         match self {
             ItemSlot::Head => "Tête",
@@ -86,17 +87,20 @@ impl ItemSlot {
         }
     }
 
+    #[must_use] 
     pub fn is_weapon_or_shield(&self) -> bool {
         matches!(self, ItemSlot::MainHand | ItemSlot::OffHand)
     }
 
+    #[must_use] 
     pub fn is_ammo(&self) -> bool {
         self == &ItemSlot::Ammo
     }
 
     /// Slots affichés dans la fenêtre Équipement (tous sauf Consumable).
+    #[must_use] 
     pub fn equipment_slots() -> &'static [ItemSlot] {
-        use ItemSlot::*;
+        use ItemSlot::{Head, Neck, Shoulders, Bracer, Gloves, Ring1, Ring2, Chest, Belt, Legs, Feet, MainHand, OffHand, Ammo};
         const SLOTS: [ItemSlot; 14] = [
             Head, Neck, Shoulders, Bracer, Gloves, Ring1, Ring2,
             Chest, Belt, Legs, Feet, MainHand, OffHand, Ammo,
@@ -117,6 +121,7 @@ pub enum ItemRarity {
 }
 
 impl ItemRarity {
+    #[must_use] 
     pub fn label(&self) -> &'static str {
         match self {
             ItemRarity::Common => "Commun",
@@ -129,6 +134,7 @@ impl ItemRarity {
     }
 
     /// Couleur de carte (egui) selon la rareté.
+    #[must_use] 
     pub fn color_rgb(&self) -> (u8, u8, u8) {
         match self {
             ItemRarity::Common => (160, 160, 160),
@@ -156,6 +162,7 @@ pub enum WeaponPrefix {
 }
 
 impl WeaponPrefix {
+    #[must_use] 
     pub fn label(&self) -> &'static str {
         match self {
             WeaponPrefix::Mauvais => "Mauvais",
@@ -167,6 +174,7 @@ impl WeaponPrefix {
             WeaponPrefix::Legendaire => "Légendaire",
         }
     }
+    #[must_use] 
     pub fn damage_pct(&self) -> i32 {
         match self {
             WeaponPrefix::Mauvais => -20,
@@ -178,6 +186,7 @@ impl WeaponPrefix {
             WeaponPrefix::Legendaire => 25,
         }
     }
+    #[must_use] 
     pub fn price_pct(&self) -> i32 {
         match self {
             WeaponPrefix::Mauvais => -30,
@@ -190,6 +199,7 @@ impl WeaponPrefix {
         }
     }
     /// Multiplicateur prix achat (marchand). Table : Mauvais 0.7, Banal 0.9, Aucun 1.0, Bon 1.2, Solide 2.0, Héroïque 3.0, Légendaire 5.0.
+    #[must_use] 
     pub fn achat_mult(&self) -> f32 {
         match self {
             WeaponPrefix::Mauvais => 0.7,
@@ -202,6 +212,7 @@ impl WeaponPrefix {
         }
     }
     /// Multiplicateur prix vente. Même valeurs que achat.
+    #[must_use] 
     pub fn vente_mult(&self) -> f32 {
         self.achat_mult()
     }
@@ -225,6 +236,7 @@ pub enum WeaponSuffix {
 }
 
 impl WeaponSuffix {
+    #[must_use] 
     pub fn label(&self) -> &'static str {
         match self {
             WeaponSuffix::Casse => "cassé",
@@ -241,6 +253,7 @@ impl WeaponSuffix {
             WeaponSuffix::Unique => "unique",
         }
     }
+    #[must_use] 
     pub fn damage_pct(&self) -> i32 {
         match self {
             WeaponSuffix::Casse => -60,
@@ -257,6 +270,7 @@ impl WeaponSuffix {
             WeaponSuffix::Unique => 30,
         }
     }
+    #[must_use] 
     pub fn price_pct(&self) -> i32 {
         match self {
             WeaponSuffix::Casse => -30,
@@ -274,6 +288,7 @@ impl WeaponSuffix {
         }
     }
     /// Multiplicateur achat/vente (table : cassé 0.2 … de maître 1.6, unique 1.8).
+    #[must_use] 
     pub fn achat_mult(&self) -> f32 {
         match self {
             WeaponSuffix::Casse => 0.2,
@@ -290,6 +305,7 @@ impl WeaponSuffix {
             WeaponSuffix::Unique => 1.8,
         }
     }
+    #[must_use] 
     pub fn vente_mult(&self) -> f32 {
         self.achat_mult()
     }
@@ -309,6 +325,7 @@ pub enum WeaponMaterial {
 }
 
 impl WeaponMaterial {
+    #[must_use] 
     pub fn label(&self) -> &'static str {
         match self {
             WeaponMaterial::Bois => "bois",
@@ -321,6 +338,7 @@ impl WeaponMaterial {
             WeaponMaterial::Adamante => "adamante",
         }
     }
+    #[must_use] 
     pub fn damage_pct(&self) -> i32 {
         match self {
             WeaponMaterial::Bois => -20,
@@ -334,6 +352,7 @@ impl WeaponMaterial {
         }
     }
     /// Multiplicateur achat/vente (table : bois 0.5 … adamante 2.0).
+    #[must_use] 
     pub fn achat_mult(&self) -> f32 {
         match self {
             WeaponMaterial::Bois => 0.5,
@@ -346,6 +365,7 @@ impl WeaponMaterial {
             WeaponMaterial::Adamante => 2.0,
         }
     }
+    #[must_use] 
     pub fn vente_mult(&self) -> f32 {
         self.achat_mult()
     }
@@ -366,6 +386,7 @@ pub enum ArmorPrefix {
 }
 
 impl ArmorPrefix {
+    #[must_use] 
     pub fn label(&self) -> &'static str {
         match self {
             ArmorPrefix::Mauvais => "Mauvais",
@@ -377,6 +398,7 @@ impl ArmorPrefix {
             ArmorPrefix::Legendaire => "Légendaire",
         }
     }
+    #[must_use] 
     pub fn mult(&self) -> f32 {
         match self {
             ArmorPrefix::Mauvais => 0.5,
@@ -389,6 +411,7 @@ impl ArmorPrefix {
         }
     }
     /// Multiplicateur prix achat/vente (tableau-armure.csv).
+    #[must_use] 
     pub fn achat_mult(&self) -> f32 {
         match self {
             ArmorPrefix::Aucun => 1.0,
@@ -400,6 +423,7 @@ impl ArmorPrefix {
             ArmorPrefix::Legendaire => 5.0,
         }
     }
+    #[must_use] 
     pub fn vente_mult(&self) -> f32 {
         self.achat_mult()
     }
@@ -423,6 +447,7 @@ pub enum ArmorSuffix {
 }
 
 impl ArmorSuffix {
+    #[must_use] 
     pub fn label(&self) -> &'static str {
         match self {
             ArmorSuffix::Casse => "cassé",
@@ -439,6 +464,7 @@ impl ArmorSuffix {
             ArmorSuffix::Unique => "unique",
         }
     }
+    #[must_use] 
     pub fn mult(&self) -> f32 {
         match self {
             ArmorSuffix::Casse => 0.5,
@@ -456,6 +482,7 @@ impl ArmorSuffix {
         }
     }
     /// Multiplicateur prix achat/vente (tableau-armure.csv).
+    #[must_use] 
     pub fn achat_mult(&self) -> f32 {
         match self {
             ArmorSuffix::Aucun => 1.0,
@@ -472,6 +499,7 @@ impl ArmorSuffix {
             ArmorSuffix::Unique => 1.8,
         }
     }
+    #[must_use] 
     pub fn vente_mult(&self) -> f32 {
         self.achat_mult()
     }
@@ -491,6 +519,7 @@ pub enum ArmorMaterial {
 }
 
 impl ArmorMaterial {
+    #[must_use] 
     pub fn label(&self) -> &'static str {
         match self {
             ArmorMaterial::Bois => "bois",
@@ -503,6 +532,7 @@ impl ArmorMaterial {
             ArmorMaterial::Adamante => "adamante",
         }
     }
+    #[must_use] 
     pub fn mult(&self) -> f32 {
         match self {
             ArmorMaterial::Bois => 0.4,
@@ -516,6 +546,7 @@ impl ArmorMaterial {
         }
     }
     /// Multiplicateur prix achat/vente (tableau-armure.csv).
+    #[must_use] 
     pub fn achat_mult(&self) -> f32 {
         match self {
             ArmorMaterial::Bois => 0.5,
@@ -528,6 +559,7 @@ impl ArmorMaterial {
             ArmorMaterial::Adamante => 2.0,
         }
     }
+    #[must_use] 
     pub fn vente_mult(&self) -> f32 {
         self.achat_mult()
     }
@@ -616,6 +648,7 @@ pub struct ItemInstance {
 
 impl ItemInstance {
     /// Épée courte de départ (équipée par défaut en main droite). Table : 98 achat, 49 vente.
+    #[must_use] 
     pub fn default_short_sword() -> Self {
         Self {
             display_name: "Épée courte".to_string(),
@@ -639,6 +672,7 @@ impl ItemInstance {
     }
 
     /// Potion de vie (marchand / consommable).
+    #[must_use] 
     pub fn potion_vie() -> Self {
         Self {
             display_name: "Potion de vie".to_string(),
@@ -662,6 +696,7 @@ impl ItemInstance {
     }
 
     /// Potion de mana (marchand / consommable).
+    #[must_use] 
     pub fn potion_mana() -> Self {
         Self {
             display_name: "Potion de mana".to_string(),
@@ -685,6 +720,7 @@ impl ItemInstance {
     }
 
     /// Dégâts effectifs de l’arme (base × (100 + bonus %)/100, min 1). None si pas une arme.
+    #[must_use] 
     pub fn effective_weapon_damage(&self) -> Option<i32> {
         let base = self.base_damage?;
         let pct = self.weapon_damage_pct_bonus();
@@ -705,6 +741,7 @@ impl ItemInstance {
     }
 
     /// Bonus dégâts total % (préfixe + suffixe + matériau) pour armes.
+    #[must_use] 
     pub fn weapon_damage_pct_bonus(&self) -> i32 {
         let mut pct = 0i32;
         if let Some(wp) = self.weapon_prefix {
@@ -720,19 +757,20 @@ impl ItemInstance {
     }
 
     /// Prix de vente (or). Si base_sell présent (arme/munition/armure) : base_sell × préfixe × suffixe × matériau ; sinon ancienne formule slot/rareté.
+    #[must_use] 
     pub fn sell_price(&self) -> u32 {
         if let Some(base) = self.base_sell {
             if self.weapon_prefix.is_some() || self.weapon_suffix.is_some() || self.weapon_material.is_some() {
-                let wp = self.weapon_prefix.map(|p| p.vente_mult()).unwrap_or(1.0);
-                let ws = self.weapon_suffix.map(|s| s.vente_mult()).unwrap_or(1.0);
-                let wm = self.weapon_material.map(|m| m.vente_mult()).unwrap_or(1.0);
+                let wp = self.weapon_prefix.map_or(1.0, |p| p.vente_mult());
+                let ws = self.weapon_suffix.map_or(1.0, |s| s.vente_mult());
+                let wm = self.weapon_material.map_or(1.0, |m| m.vente_mult());
                 let p = (base as f32 * wp * ws * wm).round().max(0.0) as u32;
                 return p.max(1);
             }
             if self.armor_prefix.is_some() || self.armor_suffix.is_some() || self.armor_material.is_some() {
-                let ap = self.armor_prefix.map(|p| p.vente_mult()).unwrap_or(1.0);
-                let as_ = self.armor_suffix.map(|s| s.vente_mult()).unwrap_or(1.0);
-                let am = self.armor_material.map(|m| m.vente_mult()).unwrap_or(1.0);
+                let ap = self.armor_prefix.map_or(1.0, |p| p.vente_mult());
+                let as_ = self.armor_suffix.map_or(1.0, |s| s.vente_mult());
+                let am = self.armor_material.map_or(1.0, |m| m.vente_mult());
                 let p = (base as f32 * ap * as_ * am).round().max(0.0) as u32;
                 return p.max(1);
             }
@@ -756,25 +794,26 @@ impl ItemInstance {
             ItemRarity::Unique => 30,
         };
         let pct_bonus = self.price_multiplier_pct();
-        let price = (base * mult) as i32;
+        let price = (base * mult);
         let with_bonus = price + (price * pct_bonus / 100);
         with_bonus.max(1) as u32
     }
 
     /// Prix d'achat (marchand). Si base_buy présent : base_buy × préfixe × suffixe × matériau (arme ou armure) ; sinon 2× sell_price (fallback).
+    #[must_use] 
     pub fn buy_price(&self) -> u32 {
         if let Some(base) = self.base_buy {
             if self.weapon_prefix.is_some() || self.weapon_suffix.is_some() || self.weapon_material.is_some() {
-                let wp = self.weapon_prefix.map(|p| p.achat_mult()).unwrap_or(1.0);
-                let ws = self.weapon_suffix.map(|s| s.achat_mult()).unwrap_or(1.0);
-                let wm = self.weapon_material.map(|m| m.achat_mult()).unwrap_or(1.0);
+                let wp = self.weapon_prefix.map_or(1.0, |p| p.achat_mult());
+                let ws = self.weapon_suffix.map_or(1.0, |s| s.achat_mult());
+                let wm = self.weapon_material.map_or(1.0, |m| m.achat_mult());
                 let p = (base as f32 * wp * ws * wm).round().max(0.0) as u32;
                 return p.max(1);
             }
             if self.armor_prefix.is_some() || self.armor_suffix.is_some() || self.armor_material.is_some() {
-                let ap = self.armor_prefix.map(|p| p.achat_mult()).unwrap_or(1.0);
-                let as_ = self.armor_suffix.map(|s| s.achat_mult()).unwrap_or(1.0);
-                let am = self.armor_material.map(|m| m.achat_mult()).unwrap_or(1.0);
+                let ap = self.armor_prefix.map_or(1.0, |p| p.achat_mult());
+                let as_ = self.armor_suffix.map_or(1.0, |s| s.achat_mult());
+                let am = self.armor_material.map_or(1.0, |m| m.achat_mult());
                 let p = (base as f32 * ap * as_ * am).round().max(0.0) as u32;
                 return p.max(1);
             }
@@ -784,29 +823,31 @@ impl ItemInstance {
     }
 
     /// Armure effective : base × préfixe × suffixe × matériau (réduction plate ; dégâts min subis = 1).
+    #[must_use] 
     pub fn effective_armor(&self) -> i32 {
         let Some(base) = self.base_armor else {
             return 0;
         };
-        let p = self.armor_prefix.map(|a| a.mult()).unwrap_or(1.0);
-        let s = self.armor_suffix.map(|a| a.mult()).unwrap_or(1.0);
-        let m = self.armor_material.map(|a| a.mult()).unwrap_or(1.0);
+        let p = self.armor_prefix.map_or(1.0, |a| a.mult());
+        let s = self.armor_suffix.map_or(1.0, |a| a.mult());
+        let m = self.armor_material.map_or(1.0, |a| a.mult());
         (base as f32 * p * s * m).round().max(0.0) as i32
     }
 
     /// Texte des effets (préfixe/suffixe arme ou générique ou armure).
+    #[must_use] 
     pub fn effects_text(&self) -> String {
         if self.slot.is_weapon_or_shield() {
             let mut parts = Vec::new();
             let dmg_pct = self.weapon_damage_pct_bonus();
             if dmg_pct != 0 {
-                parts.push(format!("Dégâts : {:+}%", dmg_pct));
+                parts.push(format!("Dégâts : {dmg_pct:+}%"));
             }
             if let Some(block) = self.block_chance_base {
-                parts.push(format!("Blocage : {}% (base)", block));
+                parts.push(format!("Blocage : {block}% (base)"));
             }
             if let Some(dmg) = self.base_damage {
-                parts.push(format!("Dégâts de base : {}", dmg));
+                parts.push(format!("Dégâts de base : {dmg}"));
             }
             if parts.is_empty() {
                 "Aucun effet particulier.".to_string()
@@ -815,14 +856,14 @@ impl ItemInstance {
             }
         } else if self.base_armor.is_some() {
             let arm = self.effective_armor();
-            format!("Armure : {} (réduction plate, dégâts min subis = 1)", arm)
+            format!("Armure : {arm} (réduction plate, dégâts min subis = 1)")
         } else {
             let mut parts = Vec::new();
             if let Some(ref p) = self.prefix {
-                parts.push(format!("Préfixe: {}", p));
+                parts.push(format!("Préfixe: {p}"));
             }
             if let Some(ref s) = self.suffix {
-                parts.push(format!("Suffixe: {}", s));
+                parts.push(format!("Suffixe: {s}"));
             }
             if parts.is_empty() {
                 "Aucun effet particulier.".to_string()
@@ -977,12 +1018,12 @@ pub fn roll_identification_self(
         }
     } else {
         let (base_name, _) = roll_base_item_identification(slot, rarity, roll, wisdom).unwrap_or_else(|| (String::from("Objet"), slot));
-        let prefix = if roll() < 0.3 + wisdom as f32 * 0.2 {
+        let prefix = if roll() < 0.3 + wisdom * 0.2 {
             Some(roll_prefix(roll))
         } else {
             None
         };
-        let suffix = if roll() < 0.3 + wisdom as f32 * 0.2 {
+        let suffix = if roll() < 0.3 + wisdom * 0.2 {
             Some(roll_suffix(&base_name, roll))
         } else {
             None
@@ -1286,7 +1327,7 @@ fn pick_weapon_entry_with_dispo_retry<'a>(roll: &mut impl FnMut() -> f32, entrie
     let mut idx = 0;
     loop {
         let roll_val = roll() * 100.0;
-        if roll_val < entries[idx].4 as f32 {
+        if roll_val < f32::from(entries[idx].4) {
             return &entries[idx];
         }
         idx = (idx + 1) % entries.len();
@@ -1298,7 +1339,7 @@ fn pick_armor_entry_with_dispo_retry<'a>(roll: &mut impl FnMut() -> f32, entries
     let mut idx = 0;
     loop {
         let roll_val = roll() * 100.0;
-        if roll_val < entries[idx].4 as f32 {
+        if roll_val < f32::from(entries[idx].4) {
             return &entries[idx];
         }
         idx = (idx + 1) % entries.len();
@@ -1311,7 +1352,7 @@ fn pick_ammo_entry_with_dispo_retry(roll: &mut impl FnMut() -> f32) -> (&'static
     let mut idx = 0;
     loop {
         let roll_val = roll() * 100.0;
-        if roll_val < list[idx].3 as f32 {
+        if roll_val < f32::from(list[idx].3) {
             return (list[idx].0, list[idx].1, list[idx].2);
         }
         idx = (idx + 1) % list.len();
@@ -1324,7 +1365,7 @@ fn pick_shield_entry_with_dispo_retry(roll: &mut impl FnMut() -> f32) -> (&'stat
     let mut idx = 0;
     loop {
         let roll_val = roll() * 100.0;
-        if roll_val < list[idx].4 as f32 {
+        if roll_val < f32::from(list[idx].4) {
             return (list[idx].0, list[idx].1, list[idx].2, list[idx].3);
         }
         idx = (idx + 1) % list.len();
@@ -1590,11 +1631,11 @@ fn build_armor_display_name(
 
 /// Tirage pondéré par dispo% dans une slice de WeaponEntry. Retourne l'entrée choisie.
 fn pick_weighted_weapon<'a>(entries: &'a [WeaponEntry], roll: &mut impl FnMut() -> f32) -> &'a WeaponEntry {
-    let total: u32 = entries.iter().map(|e| e.4 as u32).sum();
+    let total: u32 = entries.iter().map(|e| u32::from(e.4)).sum();
     let r = (roll() * total as f32).min(total as f32 - 0.01).max(0.0) as u32;
     let mut cum = 0u32;
     for e in entries {
-        cum += e.4 as u32;
+        cum += u32::from(e.4);
         if r < cum {
             return e;
         }
@@ -1604,11 +1645,11 @@ fn pick_weighted_weapon<'a>(entries: &'a [WeaponEntry], roll: &mut impl FnMut() 
 
 /// Tirage pondéré bouclier par dispo% (nom, block, buy, sell).
 fn pick_weighted_weapon_shield(roll: &mut impl FnMut() -> f32) -> (&'static str, f32, u32, u32) {
-    let total: u32 = SHIELD_ENTRIES.iter().map(|e| e.4 as u32).sum();
+    let total: u32 = SHIELD_ENTRIES.iter().map(|e| u32::from(e.4)).sum();
     let r = (roll() * total as f32).min(total as f32 - 0.01).max(0.0) as u32;
     let mut cum = 0u32;
     for e in SHIELD_ENTRIES {
-        cum += e.4 as u32;
+        cum += u32::from(e.4);
         if r < cum {
             return (e.0, e.1, e.2, e.3);
         }
@@ -1620,11 +1661,11 @@ fn pick_weighted_weapon_shield(roll: &mut impl FnMut() -> f32) -> (&'static str,
 /// Tirage pondéré pour munitions (nom, achat, vente, dispo).
 fn pick_weighted_ammo(roll: &mut impl FnMut() -> f32) -> (&'static str, u32, u32, u8) {
     let entries = AMMO_ENTRIES;
-    let total: u32 = entries.iter().map(|e| e.3 as u32).sum();
+    let total: u32 = entries.iter().map(|e| u32::from(e.3)).sum();
     let r = (roll() * total as f32).min(total as f32 - 0.01).max(0.0) as u32;
     let mut cum = 0u32;
     for e in entries {
-        cum += e.3 as u32;
+        cum += u32::from(e.3);
         if r < cum {
             return *e;
         }
@@ -1639,12 +1680,12 @@ fn roll_weapon_base(
 ) -> (String, Option<i32>, Option<f32>, bool, Option<u32>, Option<u32>) {
     match slot {
         ItemSlot::MainHand | ItemSlot::OffHand => {
-            let total_1h: u32 = ONE_HAND_WEAPONS.iter().map(|e| e.4 as u32).sum();
-            let total_2h: u32 = TWO_HAND_WEAPONS.iter().map(|e| e.4 as u32).sum();
-            let total_hast: u32 = HAST_WEAPONS.iter().map(|e| e.4 as u32).sum();
-            let total_ranged: u32 = RANGED_WEAPONS.iter().map(|e| e.4 as u32).sum();
+            let total_1h: u32 = ONE_HAND_WEAPONS.iter().map(|e| u32::from(e.4)).sum();
+            let total_2h: u32 = TWO_HAND_WEAPONS.iter().map(|e| u32::from(e.4)).sum();
+            let total_hast: u32 = HAST_WEAPONS.iter().map(|e| u32::from(e.4)).sum();
+            let total_ranged: u32 = RANGED_WEAPONS.iter().map(|e| u32::from(e.4)).sum();
             let total_weapons = total_1h + total_2h + total_hast + total_ranged;
-            let total_shields: u32 = SHIELD_ENTRIES.iter().map(|e| e.4 as u32).sum();
+            let total_shields: u32 = SHIELD_ENTRIES.iter().map(|e| u32::from(e.4)).sum();
             let kind_total = total_weapons + total_shields;
             let kind_r = (roll() * kind_total as f32).min(kind_total as f32 - 0.01).max(0.0) as u32;
             if kind_r < total_1h {
@@ -1690,7 +1731,7 @@ fn roll_base_item_identification(
         (ItemSlot::Shoulders, _) => (vec!["Spalières", "Épaulières", "Mantelet"], ItemSlot::Shoulders),
         (ItemSlot::Bracer, _) => (vec!["Brassard", "Protège-bras", "Manchette"], ItemSlot::Bracer),
         (ItemSlot::Gloves, _) => (vec!["Gants", "Gantelets", "Mitaines"], ItemSlot::Gloves),
-        (ItemSlot::Ring1, _) | (ItemSlot::Ring2, _) => (vec!["Bague", "Anneau", "Chevalière"], slot),
+        (ItemSlot::Ring1 | ItemSlot::Ring2, _) => (vec!["Bague", "Anneau", "Chevalière"], slot),
         (ItemSlot::Chest, ItemRarity::Common) => (vec!["Tunique", "Veste en cuir", "Haubert usé"], ItemSlot::Chest),
         (ItemSlot::Chest, ItemRarity::Uncommon) => (vec!["Armure de plaques légère", "Robe de voyage"], ItemSlot::Chest),
         (ItemSlot::Chest, ItemRarity::Rare) => (vec!["Cuirasse du château"], ItemSlot::Chest),

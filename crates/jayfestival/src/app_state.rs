@@ -41,6 +41,7 @@ impl Default for AppState {
 
 impl AppState {
     /// Crée un état initial (Landing, pas d'utilisateur).
+    #[must_use] 
     pub fn new() -> Self {
         Self::default()
     }

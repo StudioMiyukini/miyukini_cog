@@ -49,6 +49,7 @@ pub struct MiyusocialmoderationAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.social.moderation";
 
+#[must_use] 
 pub fn miyusocialmoderation_admin_cell(version: &str, fingerprint: &str) -> MiyusocialmoderationAdminCell {
     MiyusocialmoderationAdminCell {
         identification: MiyusocialmoderationIdentification {

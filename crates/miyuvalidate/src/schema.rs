@@ -40,7 +40,7 @@ pub fn check(
         for key in required {
             if let Some(k) = key.as_str() {
                 if !obj.contains_key(k) {
-                    error_codes.push(format!("missing_required:{}", k));
+                    error_codes.push(format!("missing_required:{k}"));
                 }
             }
         }
@@ -53,7 +53,7 @@ pub fn check(
             if let Some(v) = obj.get(key) {
                 if let Some(t) = type_spec.as_str() {
                     if !type_matches(v, t) {
-                        error_codes.push(format!("type_mismatch:{}", key));
+                        error_codes.push(format!("type_mismatch:{key}"));
                     }
                 }
             }

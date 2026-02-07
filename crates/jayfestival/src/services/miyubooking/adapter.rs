@@ -39,7 +39,7 @@ impl std::error::Error for MiyubookingAdapterError {}
 impl From<MiyubookingError> for MiyubookingAdapterError {
     fn from(e: MiyubookingError) -> Self {
         MiyubookingAdapterError {
-            message: format!("{:?}", e),
+            message: format!("{e:?}"),
         }
     }
 }

@@ -45,7 +45,7 @@ pub fn format(
         let chars: Vec<char> = int_str.chars().collect();
         let n = chars.len();
         for (i, c) in chars.into_iter().enumerate() {
-            if i > 0 && (n - i) % 3 == 0 {
+            if i > 0 && (n - i).is_multiple_of(3) {
                 out.push(sep);
             }
             out.push(c);

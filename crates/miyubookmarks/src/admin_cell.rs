@@ -49,6 +49,7 @@ pub struct MiyubookmarksAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.content.bookmarks";
 
+#[must_use] 
 pub fn miyubookmarks_admin_cell(version: &str, fingerprint: &str) -> MiyubookmarksAdminCell {
     MiyubookmarksAdminCell {
         identification: MiyubookmarksIdentification {

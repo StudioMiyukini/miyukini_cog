@@ -902,9 +902,9 @@ impl UiLibraryService {
 
         let fill_color = if is_disabled {
             let (r, g, b) = (
-                spec.color_neutral_r as f32,
-                spec.color_neutral_g as f32,
-                spec.color_neutral_b as f32,
+                f32::from(spec.color_neutral_r),
+                f32::from(spec.color_neutral_g),
+                f32::from(spec.color_neutral_b),
             );
             let grey = 120.0;
             let i = spec.desaturation_intensity.clamp(0.0, 1.0);
@@ -1006,7 +1006,7 @@ impl UiLibraryService {
         let text_color = if is_disabled {
             let i = spec.desaturation_intensity.clamp(0.0, 1.0);
             let grey = 140u8;
-            let w = (255.0 * (1.0 - i) + grey as f32 * i) as u8;
+            let w = (255.0 * (1.0 - i) + f32::from(grey) * i) as u8;
             egui::Color32::from_rgb(w, w, w)
         } else {
             egui::Color32::WHITE
@@ -1037,8 +1037,7 @@ impl UiLibraryService {
             .iter()
             .filter(|el| {
                 self.filter_category
-                    .map(|cat| el.category == cat)
-                    .unwrap_or(true)
+                    .is_none_or(|cat| el.category == cat)
             })
             .collect()
     }

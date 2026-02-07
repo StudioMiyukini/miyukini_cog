@@ -19,8 +19,7 @@ pub fn auth_user_type_from_profile(profile: &Profile) -> UserType {
     profile
         .user_type
         .as_deref()
-        .map(UserType::from_str)
-        .unwrap_or(UserType::Unknown)
+        .map_or(UserType::Unknown, UserType::from_str)
 }
 
 /// Indique si l'utilisateur peut accéder à une édition donnée.
@@ -36,6 +35,7 @@ pub fn auth_user_type_from_profile(profile: &Profile) -> UserType {
 /// @id: auth_can_access_edition
 /// @do: indique si l'utilisateur peut accéder à une édition (admin, manager de l'édition, ou RLS exposant).
 /// @layer: domain
+#[must_use] 
 pub fn auth_can_access_edition(
     profile: &Profile,
     _edition_id: &str,

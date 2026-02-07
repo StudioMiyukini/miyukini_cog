@@ -49,6 +49,7 @@ pub struct MiyuantispamAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.security.antispam";
 
+#[must_use] 
 pub fn miyuantispam_admin_cell(version: &str, fingerprint: &str) -> MiyuantispamAdminCell {
     MiyuantispamAdminCell {
         identification: MiyuantispamIdentification {

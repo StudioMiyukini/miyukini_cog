@@ -11,8 +11,8 @@ impl std::fmt::Display for MiyuValidateError {
         match self {
             MiyuValidateError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyuValidateError::Unimplemented => write!(f, "Tool not yet implemented"),
-            MiyuValidateError::InvalidSchema(m) => write!(f, "Invalid schema: {}", m),
-            MiyuValidateError::InvalidData(m) => write!(f, "Invalid data: {}", m),
+            MiyuValidateError::InvalidSchema(m) => write!(f, "Invalid schema: {m}"),
+            MiyuValidateError::InvalidData(m) => write!(f, "Invalid data: {m}"),
         }
     }
 }

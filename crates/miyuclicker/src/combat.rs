@@ -24,6 +24,7 @@ pub struct CombatResult {
 /// @do: resolve_combat_result
 /// @role: mutator
 /// @human: stats_att/stats_def 1.0 en MVP ; seed = graine pour dé (tests ou SystemTime).
+#[must_use] 
 pub fn resolve(
     attaquant: i64,
     defenseur: i64,

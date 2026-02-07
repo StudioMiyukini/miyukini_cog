@@ -24,19 +24,16 @@ use crate::theme::JayFestivalTheme;
 use eframe::egui;
 
 /// État mutable partagé pour les écrans EXP (exposant : pas de sélecteur d'édition dans l'en-tête ; données candidatures/participations à venir).
+#[derive(Default)]
 pub struct ExpState {
     /// Index d'édition affiché dans le header (pour cohérence avec GestionLayout ; exposant n'a pas d'édition courante, gardé à 0).
     pub selected_edition_idx: usize,
 }
 
-impl Default for ExpState {
-    fn default() -> Self {
-        Self { selected_edition_idx: 0 }
-    }
-}
 
 impl ExpState {
     /// Options pour le sélecteur d'édition (vide pour exposant ; GestionLayout accepte un slice vide).
+    #[must_use] 
     pub fn edition_options(&self) -> Vec<String> {
         Vec::new()
     }

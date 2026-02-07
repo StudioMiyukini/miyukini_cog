@@ -111,6 +111,7 @@ pub struct Allocation {
 
 impl Allocation {
     /// Somme totale des gens affectés.
+    #[must_use] 
     pub fn total(&self) -> i64 {
         self.champs + self.ateliers + self.scierie + self.carriere + self.mine + self.forge + self.recherche
     }
@@ -131,6 +132,7 @@ pub struct AllocationMacons {
 }
 
 impl AllocationMacons {
+    #[must_use] 
     pub fn total(&self) -> i64 {
         self.maison + self.caserne + self.grenier + self.depot + self.entrepot
     }
@@ -262,6 +264,7 @@ impl GameState {
     /// Cap population = maisons × 4.
     /// @id: miyuclicker_state_cap_gens_from_maisons
     #[inline]
+    #[must_use] 
     pub fn cap_gens_from_maisons(&self) -> i64 {
         self.maisons * 4
     }
@@ -271,6 +274,7 @@ impl GameState {
     /// @do: compute_soldier_cap_from_barracks
     /// @role: reader
     #[inline]
+    #[must_use] 
     pub fn cap_soldats(&self) -> i64 {
         self.caserne_lvl * 10
     }
@@ -280,6 +284,7 @@ impl GameState {
     /// @do: compute_food_cap_from_granary
     /// @role: reader
     #[inline]
+    #[must_use] 
     pub fn cap_nourriture(&self) -> f64 {
         (self.grenier_lvl * 100) as f64
     }
@@ -289,6 +294,7 @@ impl GameState {
     /// @do: compute_raw_materials_cap_from_depot
     /// @role: reader
     #[inline]
+    #[must_use] 
     pub fn cap_matières(&self) -> i64 {
         self.depot_lvl * 100
     }
@@ -298,6 +304,7 @@ impl GameState {
     /// @do: compute_manufactured_cap_from_warehouse
     /// @role: reader
     #[inline]
+    #[must_use] 
     pub fn cap_manufacturés(&self) -> i64 {
         self.entrepot_lvl * 50
     }
@@ -308,6 +315,7 @@ impl GameState {
     /// @role: reader
     /// @human: Bonheur = moral × 100, entier pour affichage.
     #[inline]
+    #[must_use] 
     pub fn bonheur_pourcent(&self) -> i64 {
         (self.moral.clamp(0.0, 1.0) * 100.0).round() as i64
     }
@@ -317,6 +325,7 @@ impl GameState {
     /// @do: format_game_time_as_hh_mm_ddmmyyyy
     /// @role: formatter
     /// @human: Calendrier simplifié 360 jours/an (12×30).
+    #[must_use] 
     pub fn format_clock(temps_simule_s: f64) -> String {
         let total_s = temps_simule_s.max(0.0) as u64;
         let hour = (total_s / 3600) % 24;
@@ -327,12 +336,7 @@ impl GameState {
         let month = (day_of_year / 30) + 1;
         let day = (day_of_year % 30) + 1;
         format!(
-            "{:02}:{:02} {:02}/{:02}/{:04}",
-            hour,
-            minute,
-            day,
-            month,
-            year
+            "{hour:02}:{minute:02} {day:02}/{month:02}/{year:04}"
         )
     }
 
@@ -340,6 +344,7 @@ impl GameState {
     /// @id: miyuclicker_state_new_game
     /// @do: create_initial_game_state_with_one_city
     /// @role: mutator
+    #[must_use] 
     pub fn new_game(slot_id: u8) -> Self {
         let mut state = Self::default();
         state.slot_id = slot_id;

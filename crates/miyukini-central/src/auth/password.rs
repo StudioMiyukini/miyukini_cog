@@ -68,7 +68,7 @@ pub enum PasswordError {
 impl std::fmt::Display for PasswordError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            PasswordError::TooShort => write!(f, "Au moins {} caractères requis.", PASSWORD_MIN_LEN),
+            PasswordError::TooShort => write!(f, "Au moins {PASSWORD_MIN_LEN} caractères requis."),
             PasswordError::NoLetter => write!(f, "Au moins une lettre requise."),
             PasswordError::NoDigit => write!(f, "Au moins un chiffre requis."),
             PasswordError::NoSpecial => write!(f, "Au moins un caractère spécial requis."),
@@ -81,6 +81,7 @@ impl std::fmt::Display for PasswordError {
 impl std::error::Error for PasswordError {}
 
 /// Message d'aide pour l'utilisateur (règles affichées dans la fenêtre).
+#[must_use] 
 pub fn password_rules_hint() -> &'static str {
     "8 caractères min., 1 lettre, 1 chiffre, 1 caractère spécial, 1 majuscule, 1 minuscule."
 }

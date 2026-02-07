@@ -49,6 +49,7 @@ pub struct MiyufeedsAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.content.feeds";
 
+#[must_use] 
 pub fn miyufeeds_admin_cell(version: &str, fingerprint: &str) -> MiyufeedsAdminCell {
     MiyufeedsAdminCell {
         identification: MiyufeedsIdentification {

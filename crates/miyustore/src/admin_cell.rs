@@ -49,6 +49,7 @@ pub struct MiyustoreAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.commerce.store";
 
+#[must_use] 
 pub fn miyustore_admin_cell(version: &str, fingerprint: &str) -> MiyustoreAdminCell {
     MiyustoreAdminCell {
         identification: MiyustoreIdentification {

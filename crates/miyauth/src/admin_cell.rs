@@ -49,6 +49,7 @@ pub struct MiyauthAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.identity.miyauth";
 
+#[must_use] 
 pub fn miyauth_admin_cell(version: &str, fingerprint: &str) -> MiyauthAdminCell {
     MiyauthAdminCell {
         identification: MiyauthIdentification {

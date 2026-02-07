@@ -67,6 +67,7 @@ impl Boundary {
     /// @human: Crée une nouvelle frontière.
     /// @do: create_boundary
     /// @depends: borderguard_boundary
+    #[must_use] 
     pub fn new(id: String, boundary_type: BoundaryType, name: String) -> Self {
         Self {
             id,

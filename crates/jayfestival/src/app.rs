@@ -36,11 +36,13 @@ pub struct JayFestivalApp {
 
 impl JayFestivalApp {
     /// Crée l'application avec thème par défaut (mode sombre) et écran Landing.
+    #[must_use] 
     pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         Self::default()
     }
 
     /// Crée l'application pour mode embarqué (sans CreationContext).
+    #[must_use] 
     pub fn new_embedded() -> Self {
         Self::default()
     }
@@ -50,7 +52,7 @@ impl Default for JayFestivalApp {
     fn default() -> Self {
         let db = Arc::new(
             JayFestivalDb::open("jayfestival.db").unwrap_or_else(|e| {
-                panic!("JayFestival: impossible d'ouvrir la base SQLite (KindMother fille): {}", e)
+                panic!("JayFestival: impossible d'ouvrir la base SQLite (KindMother fille): {e}")
             }),
         );
         let theme = JayFestivalTheme::new(true);
@@ -157,7 +159,7 @@ impl JayFestivalApp {
         } else {
             eframe::egui::CentralPanel::default().show(ctx, |ui| {
                 ui.heading("JayFestival");
-                ui.label(format!("Écran : {:?}", current_screen));
+                ui.label(format!("Écran : {current_screen:?}"));
             });
         }
 

@@ -40,6 +40,7 @@ impl AuthService {
     /// @layer: operator
     /// @human: Construit le service d'authentification.
     /// @do: create_auth_service
+    #[must_use] 
     pub fn new(data_dir: PathBuf) -> Self {
         Self {
             data_dir,

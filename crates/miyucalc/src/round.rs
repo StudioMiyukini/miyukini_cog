@@ -51,11 +51,9 @@ fn round_half_even(x: f64) -> f64 {
         t
     } else if f > 0.5 + 1e-12 {
         t + x.signum()
+    } else if (t as i64).abs() % 2 == 0 {
+        t
     } else {
-        if (t as i64).abs() % 2 == 0 {
-            t
-        } else {
-            t + x.signum()
-        }
+        t + x.signum()
     }
 }

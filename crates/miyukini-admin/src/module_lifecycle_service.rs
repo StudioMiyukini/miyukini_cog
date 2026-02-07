@@ -23,10 +23,10 @@ pub enum ModuleLifecycleError {
 impl std::fmt::Display for ModuleLifecycleError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ModuleLifecycleError::ModuleNotFound(id) => write!(f, "Module not found: {}", id),
-            ModuleLifecycleError::InvalidState(msg) => write!(f, "Invalid state: {}", msg),
+            ModuleLifecycleError::ModuleNotFound(id) => write!(f, "Module not found: {id}"),
+            ModuleLifecycleError::InvalidState(msg) => write!(f, "Invalid state: {msg}"),
             ModuleLifecycleError::StrongFatherRejected(msg) => {
-                write!(f, "StrongFather rejected: {}", msg)
+                write!(f, "StrongFather rejected: {msg}")
             }
         }
     }
@@ -58,6 +58,7 @@ pub struct ModuleLifecycleService {
 
 impl ModuleLifecycleService {
     /// Crée un nouveau service de cycle de vie (stub : registre en mémoire).
+    #[must_use] 
     pub fn new() -> Self {
         Self {
             modules: RwLock::new(HashMap::new()),

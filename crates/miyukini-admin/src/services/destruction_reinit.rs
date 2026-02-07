@@ -30,6 +30,7 @@ impl DestructionAndReinitService {
     /// @layer: operator
     /// @human: Construit le service destruction/réinit.
     /// @do: create_destruction_reinit_service
+    #[must_use] 
     pub fn new(data_dir: PathBuf, pre_destruction_backup: PreDestructionBackupService) -> Self {
         Self {
             data_dir,

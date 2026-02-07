@@ -10,7 +10,7 @@ impl std::fmt::Display for MiyuhrError {
         match self {
             MiyuhrError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyuhrError::Unimplemented => write!(f, "Tool not yet implemented"),
-            MiyuhrError::InvalidInput(ref msg) => write!(f, "{}", msg),
+            MiyuhrError::InvalidInput(ref msg) => write!(f, "{msg}"),
         }
     }
 }

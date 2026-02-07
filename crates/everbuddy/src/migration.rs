@@ -57,7 +57,7 @@ pub enum MigrationError {
 impl std::fmt::Display for MigrationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            MigrationError::Failed(msg) => write!(f, "Migration failed: {}", msg),
+            MigrationError::Failed(msg) => write!(f, "Migration failed: {msg}"),
         }
     }
 }

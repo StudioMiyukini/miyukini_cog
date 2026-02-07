@@ -208,6 +208,7 @@ impl Intent {
     /// @human: Crée une nouvelle intention avec les composants obligatoires.
     /// @do: create_intent
     /// @depends: strongfather_intent
+    #[must_use] 
     pub fn new(
         intent_id: String,
         action_type: ActionType,
@@ -233,6 +234,7 @@ impl Intent {
     /// @human: Ajoute une priorité demandée à l'intention.
     /// @do: add_requested_priority
     /// @depends: strongfather_intent_new
+    #[must_use] 
     pub fn with_priority(mut self, priority: u32) -> Self {
         self.requested_priority = Some(priority);
         self
@@ -244,6 +246,7 @@ impl Intent {
     /// @human: Ajoute des contraintes explicites à l'intention.
     /// @do: add_constraints
     /// @depends: strongfather_intent_new
+    #[must_use] 
     pub fn with_constraints(mut self, constraints: Vec<Constraint>) -> Self {
         self.constraints = constraints;
         self
@@ -255,6 +258,7 @@ impl Intent {
     /// @human: Ajoute des métadonnées de traçabilité à l'intention.
     /// @do: add_metadata
     /// @depends: strongfather_intent_new
+    #[must_use] 
     pub fn with_metadata(mut self, metadata: HashMap<String, String>) -> Self {
         self.metadata = metadata;
         self

@@ -97,7 +97,7 @@ impl CentralAuthDb {
     fn init_schema(&self) -> Result<(), AuthDbError> {
         let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
         conn.execute_batch(
-            r#"
+            r"
             CREATE TABLE IF NOT EXISTS central_profiles (
                 id TEXT PRIMARY KEY,
                 email TEXT UNIQUE NOT NULL,
@@ -114,11 +114,11 @@ impl CentralAuthDb {
                 code_postal TEXT,
                 ville TEXT
             );
-            "#,
+            ",
         )?;
         self.migrate_add_profile_columns(&conn)?;
         conn.execute_batch(
-            r#"
+            r"
             CREATE TABLE IF NOT EXISTS profile_service_refs (
                 profile_id TEXT NOT NULL,
                 service_key TEXT NOT NULL,
@@ -139,7 +139,7 @@ impl CentralAuthDb {
             );
             CREATE INDEX IF NOT EXISTS idx_central_profile_saves_profile_service
                 ON central_profile_saves(profile_id, service_key);
-            "#,
+            ",
         )?;
         Ok(())
     }
@@ -158,7 +158,7 @@ impl CentralAuthDb {
             ("ville", "TEXT"),
         ];
         for (name, typ) in columns {
-            let sql = format!("ALTER TABLE central_profiles ADD COLUMN {} {}", name, typ);
+            let sql = format!("ALTER TABLE central_profiles ADD COLUMN {name} {typ}");
             if let Err(e) = conn.execute(&sql, []) {
                 if !e.to_string().contains("duplicate column name") {
                     return Err(e.into());
@@ -303,7 +303,7 @@ impl CentralAuthDb {
             params![new_id, chrono::Utc::now().to_rfc3339(), old_id],
         )?;
         if n == 0 {
-            return Err(AuthDbError(format!("Profil non trouvé: {}", old_id)));
+            return Err(AuthDbError(format!("Profil non trouvé: {old_id}")));
         }
         Ok(())
     }
@@ -469,7 +469,7 @@ impl CentralAuthDb {
             params![data, now, id],
         )?;
         if n == 0 {
-            return Err(AuthDbError(format!("Sauvegarde non trouvée: {}", id)));
+            return Err(AuthDbError(format!("Sauvegarde non trouvée: {id}")));
         }
         Ok(())
     }
@@ -504,7 +504,7 @@ impl CentralAuthDb {
         let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
         let n = conn.execute("DELETE FROM central_profile_saves WHERE id = ?1", params![id])?;
         if n == 0 {
-            return Err(AuthDbError(format!("Sauvegarde non trouvée: {}", id)));
+            return Err(AuthDbError(format!("Sauvegarde non trouvée: {id}")));
         }
         Ok(())
     }

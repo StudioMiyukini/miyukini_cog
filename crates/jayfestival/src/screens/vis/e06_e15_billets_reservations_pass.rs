@@ -79,19 +79,16 @@ pub fn vis_e06_e15_show(
 
             card_show(theme, ui, Some(description), |ui| {
                 label(ui, theme, "Contenu alpha : à compléter selon les spécifications (Visiteurs - Ecrans et cycle).", LabelLevel::Small);
-                if reserved_id == 14 {
-                    if button(ui, theme, "Préférences de notification", ButtonVariant::Secondary, Default::default()).clicked() {
+                if reserved_id == 14
+                    && button(ui, theme, "Préférences de notification", ButtonVariant::Secondary, Default::default()).clicked() {
                         let _ = nav_request.replace(Some(ScreenId::VisReserved(15)));
                     }
-                }
                 if reserved_id == 15 || reserved_id == 14 {
                     if button(ui, theme, "Retour tableau de bord", ButtonVariant::Secondary, Default::default()).clicked() {
                         let _ = nav_request.replace(Some(ScreenId::VisDashboard));
                     }
-                } else {
-                    if button(ui, theme, "Retour tableau de bord", ButtonVariant::Ghost, Default::default()).clicked() {
-                        let _ = nav_request.replace(Some(ScreenId::VisDashboard));
-                    }
+                } else if button(ui, theme, "Retour tableau de bord", ButtonVariant::Ghost, Default::default()).clicked() {
+                    let _ = nav_request.replace(Some(ScreenId::VisDashboard));
                 }
             }, None::<fn(&mut egui::Ui)>);
         },

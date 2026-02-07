@@ -146,8 +146,8 @@ impl std::fmt::Display for APIError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             APIError::NotFound => write!(f, "Entity not found"),
-            APIError::PermissionDenied(msg) => write!(f, "Permission denied: {}", msg),
-            APIError::InvalidIntent(msg) => write!(f, "Invalid intent: {}", msg),
+            APIError::PermissionDenied(msg) => write!(f, "Permission denied: {msg}"),
+            APIError::InvalidIntent(msg) => write!(f, "Invalid intent: {msg}"),
         }
     }
 }

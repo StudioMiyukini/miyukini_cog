@@ -154,6 +154,7 @@ pub struct Recommendation {
 }
 
 /// Définitions des tests COH (cohérence).
+#[must_use] 
 pub fn coh_test_definitions() -> Vec<DbUnitTestDefinition> {
     vec![
         DbUnitTestDefinition {
@@ -223,6 +224,7 @@ pub fn coh_test_definitions() -> Vec<DbUnitTestDefinition> {
 }
 
 /// Définitions des tests CONF (conformité).
+#[must_use] 
 pub fn conf_test_definitions() -> Vec<DbUnitTestDefinition> {
     vec![
         DbUnitTestDefinition {
@@ -280,6 +282,7 @@ pub fn conf_test_definitions() -> Vec<DbUnitTestDefinition> {
 }
 
 /// Définitions des tests STRUCT (structure).
+#[must_use] 
 pub fn struct_test_definitions() -> Vec<DbUnitTestDefinition> {
     vec![
         DbUnitTestDefinition {
@@ -331,6 +334,7 @@ pub fn struct_test_definitions() -> Vec<DbUnitTestDefinition> {
 }
 
 /// Définitions des tests SEC (sécurité).
+#[must_use] 
 pub fn sec_test_definitions() -> Vec<DbUnitTestDefinition> {
     vec![
         DbUnitTestDefinition {
@@ -397,6 +401,7 @@ pub fn sec_test_definitions() -> Vec<DbUnitTestDefinition> {
 }
 
 /// Toutes les définitions de tests unitaires DB (COH, CONF, STRUCT, SEC).
+#[must_use] 
 pub fn all_db_unit_test_definitions() -> Vec<DbUnitTestDefinition> {
     let mut all = coh_test_definitions();
     all.extend(conf_test_definitions());
@@ -416,6 +421,7 @@ pub trait DbUnitTestBackend: Send + Sync {
 /// @role: mutator
 /// @layer: operator
 /// Exécute un seul test unitaire DB et retourne le résultat.
+#[must_use] 
 pub fn run_single_test(
     def: &DbUnitTestDefinition,
     backend: Option<&dyn DbUnitTestBackend>,
@@ -475,6 +481,7 @@ pub fn run_single_test(
 /// @role: mutator
 /// @layer: operator
 /// Exécute une suite de tests (Quick, Standard, Full) et produit un rapport.
+#[must_use] 
 pub fn run_suite(
     suite_name: &str,
     definitions: &[DbUnitTestDefinition],

@@ -70,6 +70,7 @@ pub trait MiyukiniSQLtestBackend: Send + Sync {
 
 /// Exécute le test MiyukiniSQLtest via le backend fourni.
 /// Si aucun backend n'est fourni, retourne un résultat SKIP/Abort avec message.
+#[must_use] 
 pub fn run_miyukinisqltest(backend: Option<&dyn MiyukiniSQLtestBackend>) -> MiyukiniSQLtestResult {
     let timestamp = chrono::Utc::now().to_rfc3339();
     match backend {
@@ -94,7 +95,7 @@ pub fn run_miyukinisqltest(backend: Option<&dyn MiyukiniSQLtestBackend>) -> Miyu
                 steps: vec![MiyukiniSQLtestStepResult {
                     step: 0,
                     name: "Erreur technique".to_string(),
-                    status: format!("ERROR: {}", e),
+                    status: format!("ERROR: {e}"),
                 }],
                 criteria_met: false,
                 duration_ms: 0,

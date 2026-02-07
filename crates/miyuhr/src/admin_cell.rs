@@ -49,6 +49,7 @@ pub struct MiyuhrAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.hr.miyuhr";
 
+#[must_use] 
 pub fn miyuhr_admin_cell(version: &str, fingerprint: &str) -> MiyuhrAdminCell {
     MiyuhrAdminCell {
         identification: MiyuhrIdentification {

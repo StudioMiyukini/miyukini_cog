@@ -57,7 +57,7 @@ pub enum SyncError {
 impl std::fmt::Display for SyncError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            SyncError::Failed(msg) => write!(f, "Sync failed: {}", msg),
+            SyncError::Failed(msg) => write!(f, "Sync failed: {msg}"),
         }
     }
 }

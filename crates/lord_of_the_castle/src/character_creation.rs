@@ -22,6 +22,7 @@ pub enum Stat {
 }
 
 impl Stat {
+    #[must_use] 
     pub fn label(self) -> &'static str {
         match self {
             Stat::For => "For",
@@ -50,6 +51,7 @@ pub struct CharacterStats {
 }
 
 impl CharacterStats {
+    #[must_use] 
     pub fn get(&self, s: Stat) -> i32 {
         match s {
             Stat::For => self.for_,
@@ -77,10 +79,11 @@ impl CharacterStats {
     }
 
     /// Affichage : si négatif "1(-x)", sinon la valeur.
+    #[must_use] 
     pub fn display(&self, s: Stat) -> String {
         let v = self.get(s);
         if v < 0 {
-            format!("1({})", v)
+            format!("1({v})")
         } else {
             v.to_string()
         }
@@ -169,6 +172,7 @@ pub fn apply_phrase_effects(stats: &mut CharacterStats, effects: &[PhraseEffect]
 }
 
 /// Pool de toutes les phrases (id = index).
+#[must_use] 
 pub fn all_phrases() -> Vec<PhraseDef> {
     vec![
         PhraseDef {

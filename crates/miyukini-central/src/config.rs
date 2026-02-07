@@ -24,6 +24,7 @@ pub struct SupabaseConfig {
 
 impl SupabaseConfig {
     /// Indique si une configuration Supabase utilisable est présente.
+    #[must_use] 
     pub fn is_available(&self) -> bool {
         !self.project_id.as_deref().unwrap_or("").is_empty()
             && !self.anon_key.as_deref().unwrap_or("").is_empty()
@@ -39,6 +40,7 @@ impl SupabaseConfig {
 ///
 /// Ne modifie pas les variables d'environnement déjà définies.
 /// Retourne une config vide si le fichier est absent ou invalide.
+#[must_use] 
 pub fn load_supabase_config() -> SupabaseConfig {
     let path = find_env_file();
     let path = match path {

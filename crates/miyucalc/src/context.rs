@@ -23,6 +23,7 @@ pub struct GovernedContext {
 
 impl GovernedContext {
     /// Construit un contexte gouverné.
+    #[must_use] 
     pub fn new(mandate_id: String, security_level: u8) -> Self {
         Self {
             mandate_id,
@@ -31,6 +32,7 @@ impl GovernedContext {
     }
 
     /// Indique si le contexte a un mandat valide.
+    #[must_use] 
     pub fn has_mandate(&self) -> bool {
         !self.mandate_id.is_empty()
     }

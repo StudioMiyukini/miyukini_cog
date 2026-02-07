@@ -33,6 +33,7 @@ pub struct TowerProjectile {
 
 impl TowerProjectile {
     /// Crée un projectile à (x, y) allant vers (target_x, target_y) à 600 px/s.
+    #[must_use] 
     pub fn toward(x: f32, y: f32, target_x: f32, target_y: f32, damage: i32) -> Self {
         let dx = target_x - x;
         let dy = target_y - y;
@@ -55,6 +56,7 @@ impl TowerProjectile {
     }
 
     /// Distance parcourue depuis l'origine.
+    #[must_use] 
     pub fn distance_from_origin(&self) -> f32 {
         let dx = self.x - self.origin_x;
         let dy = self.y - self.origin_y;
@@ -84,6 +86,7 @@ pub struct Tower {
 
 impl Tower {
     /// Nouvelle tour à la position donnée.
+    #[must_use] 
     pub fn new(id: u64, x: f32, y: f32) -> Self {
         Self {
             id,
@@ -97,26 +100,31 @@ impl Tower {
     }
 
     /// Demi-taille (40×40 → 20).
+    #[must_use] 
     pub fn half_size() -> f32 {
         size::TOWER / 2.0
     }
 
     /// Champ de vision (px) : ciblage des ennemis.
+    #[must_use] 
     pub fn range() -> f32 {
         TOWER_BASE_VISION
     }
 
     /// Dégâts par projectile (tour de base : 4).
+    #[must_use] 
     pub fn damage(&self) -> i32 {
         4
     }
 
     /// Cadence : 1 projectile toutes les 2 secondes.
+    #[must_use] 
     pub fn attack_interval_s() -> f32 {
         2.0
     }
 
     /// Distance au point (x, y).
+    #[must_use] 
     pub fn dist_to(&self, x: f32, y: f32) -> f32 {
         let dx = self.x - x;
         let dy = self.y - y;
@@ -131,6 +139,7 @@ impl Tower {
     }
 
     /// Détruite si PV à 0.
+    #[must_use] 
     pub fn is_destroyed(&self) -> bool {
         self.hp <= 0
     }

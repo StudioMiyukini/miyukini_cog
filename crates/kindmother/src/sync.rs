@@ -153,9 +153,9 @@ pub enum SyncError {
 impl std::fmt::Display for SyncError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            SyncError::Conflict(msg) => write!(f, "Sync conflict: {}", msg),
-            SyncError::InvalidDelta(msg) => write!(f, "Invalid delta: {}", msg),
-            SyncError::Io(msg) => write!(f, "IO error: {}", msg),
+            SyncError::Conflict(msg) => write!(f, "Sync conflict: {msg}"),
+            SyncError::InvalidDelta(msg) => write!(f, "Invalid delta: {msg}"),
+            SyncError::Io(msg) => write!(f, "IO error: {msg}"),
         }
     }
 }

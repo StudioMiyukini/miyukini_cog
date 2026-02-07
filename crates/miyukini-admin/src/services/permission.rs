@@ -78,6 +78,7 @@ impl PermissionService {
     /// @layer: operator
     /// @human: Crée le service RBAC.
     /// @do: create_permission_service
+    #[must_use] 
     pub fn new() -> Self {
         Self
     }
@@ -89,6 +90,7 @@ impl PermissionService {
     /// @human: Vérifie si le rôle a la capacité demandée.
     /// @do: has_capability
     /// @depends: miyukiniadmin_permission_service
+    #[must_use] 
     pub fn has_capability(&self, role: AdminRole, capability: &str) -> bool {
         let set = self.capabilities_for_role(role);
         set.contains(capability)

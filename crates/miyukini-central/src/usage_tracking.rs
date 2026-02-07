@@ -26,6 +26,7 @@ pub enum UsageContext {
 
 impl UsageContext {
     /// Clé string pour persistance.
+    #[must_use] 
     pub fn key(&self) -> String {
         match self {
             UsageContext::Central => "central".to_string(),
@@ -34,6 +35,7 @@ impl UsageContext {
     }
 
     /// Crée un contexte à partir de la clé (central ou storage_key du service).
+    #[must_use] 
     pub fn from_key(key: &str) -> Self {
         if key == "central" {
             UsageContext::Central
@@ -57,6 +59,7 @@ pub struct UsageSession {
 
 impl UsageSession {
     /// Durée en secondes.
+    #[must_use] 
     pub fn duration_sec(&self) -> f64 {
         (self.end_sec - self.start_sec).max(0.0)
     }
@@ -101,6 +104,7 @@ impl UsageStore {
 
     /// Calcule les statistiques agrégées à partir des sessions.
     /// `now_sec` sert aux tendances (cette semaine / ce mois, comparaisons).
+    #[must_use] 
     pub fn compute_stats(&self, now_sec: f64) -> UsageStats {
         let mut first_use_sec: Option<f64> = None;
         let mut total_sec_central: f64 = 0.0;
@@ -110,7 +114,7 @@ impl UsageStore {
         let mut longest_session_context_key: Option<String> = None;
 
         for s in &self.sessions {
-            if first_use_sec.map_or(true, |t| s.start_sec < t) {
+            if first_use_sec.is_none_or(|t| s.start_sec < t) {
                 first_use_sec = Some(s.start_sec);
             }
             let dur = s.duration_sec();
@@ -264,16 +268,19 @@ pub struct UsageStats {
 
 impl UsageStats {
     /// Temps total sur Central formaté (minutes / heures / jours).
+    #[must_use] 
     pub fn central_duration_human(&self) -> String {
         format_duration_sec(self.total_sec_central)
     }
 
     /// Temps total tout contexte formaté.
+    #[must_use] 
     pub fn total_duration_human(&self) -> String {
         format_duration_sec(self.total_sec_all)
     }
 
     /// Texte "depuis quand" à partir de la première utilisation et du temps actuel.
+    #[must_use] 
     pub fn first_use_relative_human(&self, now_sec: f64) -> Option<String> {
         self.first_use_sec.map(|sec| {
             let elapsed_sec = (now_sec - sec).max(0.0);
@@ -294,6 +301,7 @@ impl UsageStats {
     }
 
     /// Indices des heures avec le plus d'utilisation (pics, triés par ordre décroissant).
+    #[must_use] 
     pub fn peak_hours(&self) -> Vec<(usize, f64)> {
         let mut v: Vec<(usize, f64)> = (0..24).map(|h| (h, self.hourly_distribution[h])).collect();
         v.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
@@ -301,11 +309,13 @@ impl UsageStats {
     }
 
     /// Part des services (100 - central_pct), pour affichage.
+    #[must_use] 
     pub fn services_pct(&self) -> f64 {
         (100.0 - self.central_pct).max(0.0)
     }
 
     /// Comparaison cette semaine vs semaine précédente (ex. "+25 %" ou "-10 %" ou "=").
+    #[must_use] 
     pub fn week_comparison_human(&self) -> Option<String> {
         if self.last_week_sec <= 0.0 {
             return None;
@@ -314,13 +324,14 @@ impl UsageStats {
         Some(if diff_pct.abs() < 1.0 {
             "≈ identique".to_string()
         } else if diff_pct > 0.0 {
-            format!("+{:.0} % vs sem. précédente", diff_pct)
+            format!("+{diff_pct:.0} % vs sem. précédente")
         } else {
-            format!("{:.0} % vs sem. précédente", diff_pct)
+            format!("{diff_pct:.0} % vs sem. précédente")
         })
     }
 
     /// Comparaison ce mois vs mois précédent (ex. "+15 %" ou "-20 %").
+    #[must_use] 
     pub fn month_comparison_human(&self) -> Option<String> {
         if self.last_month_sec <= 0.0 {
             return None;
@@ -329,36 +340,37 @@ impl UsageStats {
         Some(if diff_pct.abs() < 1.0 {
             "≈ identique".to_string()
         } else if diff_pct > 0.0 {
-            format!("+{:.0} % vs mois précédent", diff_pct)
+            format!("+{diff_pct:.0} % vs mois précédent")
         } else {
-            format!("{:.0} % vs mois précédent", diff_pct)
+            format!("{diff_pct:.0} % vs mois précédent")
         })
     }
 }
 
 /// Formate une durée en secondes en chaîne lisible (min, h, j, etc.).
+#[must_use] 
 pub fn format_duration_sec(sec: f64) -> String {
     if sec < 60.0 {
-        return format!("{:.0} s", sec);
+        return format!("{sec:.0} s");
     }
     let min = sec / 60.0;
     if min < 60.0 {
-        return format!("{:.1} min", min);
+        return format!("{min:.1} min");
     }
     let h = min / 60.0;
     if h < 24.0 {
-        return format!("{:.1} h", h);
+        return format!("{h:.1} h");
     }
     let d = h / 24.0;
     if d < 30.0 {
-        return format!("{:.1} j", d);
+        return format!("{d:.1} j");
     }
     let m = d / 30.0;
     if m < 12.0 {
-        return format!("{:.1} mois", m);
+        return format!("{m:.1} mois");
     }
     let y = d / 365.0;
-    format!("{:.1} an(s)", y)
+    format!("{y:.1} an(s)")
 }
 
 #[cfg(test)]

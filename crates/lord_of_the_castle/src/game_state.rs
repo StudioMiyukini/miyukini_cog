@@ -149,6 +149,7 @@ pub struct GameState {
 
 impl GameState {
     /// Nouvel état : phase Préparation, vague 1, or 0, château au centre donné (joueur par défaut).
+    #[must_use] 
     pub fn new(castle_center_x: f32, castle_center_y: f32) -> Self {
         let player_x = castle_center_x - 60.0;
         let player_y = castle_center_y;
@@ -222,6 +223,7 @@ impl GameState {
     }
 
     /// XP requise pour le niveau suivant : 100 + (niveau actuel).
+    #[must_use] 
     pub fn xp_required_for_next_level(&self) -> u32 {
         100 + self.level
     }
@@ -232,7 +234,7 @@ impl GameState {
             self.level += 1;
             self.xp = 0;
             self.skill_points_available += 1;
-            if self.level % 5 == 0 {
+            if self.level.is_multiple_of(5) {
                 self.stat_points_available += 1;
             }
             self.pending_level_up_notifications
@@ -258,6 +260,7 @@ impl GameState {
     }
 
     /// Bonus aux stats issus des compétences Guerrier (EncorePlusFort→For, Musculation→Con, Tireur→Dex).
+    #[must_use] 
     pub fn stat_bonus_from_warrior_skills(&self) -> CharacterStats {
         use crate::warrior_skills::WarriorSkillId;
         let r = |id: WarriorSkillId| *self.warrior_skill_ranks.get(&id).unwrap_or(&0) as i32;
@@ -274,6 +277,7 @@ impl GameState {
     }
 
     /// Stats effectives = base (création + points de stat) + bonus (compétences). Utilisées dans toutes les formules.
+    #[must_use] 
     pub fn effective_stats(&self) -> CharacterStats {
         let b = self.stat_bonus_from_warrior_skills();
         CharacterStats {
@@ -289,6 +293,7 @@ impl GameState {
     }
 
     /// PV max : formule sur stats effectives, puis bonus Pot de Wey (+15 % par niveau).
+    #[must_use] 
     pub fn effective_hp_max(&self) -> i32 {
         let eff = self.effective_stats();
         let base_hp = (eff.con * 2 + eff.for_).max(hp::PLAYER_MIN_MAX);
@@ -298,12 +303,14 @@ impl GameState {
     }
 
     /// Vitesse de déplacement (px/s) : formule sur agilité effective (5 + Agi).
+    #[must_use] 
     pub fn effective_move_speed(&self) -> f32 {
         let agi = 5 + self.effective_stats().agi.max(0);
         speed::PLAYER_BASE * speed::PLAYER_SPEED_MULTIPLIER * (1.0 + (agi as f32 / 100.0))
     }
 
     /// Nombre max de troupes (Charisme effectif).
+    #[must_use] 
     pub fn max_troops(&self) -> usize {
         self.effective_stats().cha.max(0) as usize
     }
@@ -319,6 +326,7 @@ impl GameState {
     }
 
     /// Château occupe les cases (0,0), (1,0), (0,1), (1,1). Retourne true si on peut construire un bâtiment 2×2 dont le coin inférieur gauche est (cell_i, cell_j).
+    #[must_use] 
     pub fn can_build_at_cell(&self, cell_i: i32, cell_j: i32) -> bool {
         // Pas de chevauchement avec le château (cases 0,0 à 1,1).
         let overlaps_castle = cell_i < 2 && cell_i + 2 > 0 && cell_j < 2 && cell_j + 2 > 0;
@@ -464,8 +472,9 @@ impl GameState {
     /// - Arme CàC : dégâts de l’arme + For/2 (min 1)
     /// - Arme à distance : dégâts de l’arme + Dex/2 (min 1)
     /// Armure totale du joueur (somme des armures effectives des pièces équipées). Réduction plate ; dégâts min subis = 1.
+    #[must_use] 
     pub fn player_total_armor(&self) -> i32 {
-        self.equipped.values().map(|item| item.effective_armor()).sum()
+        self.equipped.values().map(super::loot::ItemInstance::effective_armor).sum()
     }
 
     /// Applique des dégâts bruts au joueur (après armure : réduction plate, dégâts min = 1).
@@ -482,16 +491,14 @@ impl GameState {
     /// - Mains nues : For + Con/2 (min 1)
     /// - Arme CàC : dégâts de l'arme + For/2 (min 1)
     /// - Arme à distance : dégâts de l'arme + Dex/2 (min 1)
+    #[must_use] 
     pub fn player_auto_attack_damage(&self) -> i32 {
         let eff = self.effective_stats();
         let main_hand = self.get_equipped(ItemSlot::MainHand);
-        let (weapon_dmg, is_ranged) = match main_hand.and_then(|w| w.effective_weapon_damage().map(|d| (d, w.is_ranged))) {
-            Some((d, r)) => (d, r),
-            None => {
-                let baston = *self.warrior_skill_ranks.get(&WarriorSkillId::Baston).unwrap_or(&0) as i32;
-                let for_unarmed = eff.for_ + baston;
-                return (for_unarmed + eff.con / 2).max(1);
-            }
+        let (weapon_dmg, is_ranged) = if let Some((d, r)) = main_hand.and_then(|w| w.effective_weapon_damage().map(|d| (d, w.is_ranged))) { (d, r) } else {
+            let baston = *self.warrior_skill_ranks.get(&WarriorSkillId::Baston).unwrap_or(&0) as i32;
+            let for_unarmed = eff.for_ + baston;
+            return (for_unarmed + eff.con / 2).max(1);
         };
         if is_ranged {
             (weapon_dmg + eff.dex / 2).max(1)
@@ -501,6 +508,7 @@ impl GameState {
     }
 
     /// Constitution du joueur (pour PV ennemis) : 10 + Con effectif.
+    #[must_use] 
     pub fn player_constitution(&self) -> i32 {
         (10 + self.effective_stats().con).max(1)
     }
@@ -549,7 +557,7 @@ impl GameState {
         for _ in 0..count {
             let id = self.next_enemy_id;
             self.next_enemy_id += 1;
-            let kind = if self.wave_number > 0 && self.wave_number % 10 == 0 && created == 0 {
+            let kind = if self.wave_number > 0 && self.wave_number.is_multiple_of(10) && created == 0 {
                 EnemyKind::Boss
             } else if rand_simple() < 0.15 {
                 EnemyKind::MiniBoss
@@ -572,17 +580,20 @@ impl GameState {
     }
 
     /// Vague gagnée si plus d'ennemis et château vivant.
+    #[must_use] 
     pub fn is_wave_won(&self) -> bool {
         self.phase == GamePhase::Battle && self.enemies.is_empty() && !self.castle.is_destroyed()
     }
 
     /// Game over si château détruit.
+    #[must_use] 
     pub fn is_game_over(&self) -> bool {
         self.castle.is_destroyed()
     }
 
     /// Position aléatoire sur la bordure de la zone 800×800 (centre = château).
     /// Utilisé pour le spawn des ennemis n'importe où sur le périmètre.
+    #[must_use] 
     pub fn random_spawn_position_on_border(&self) -> (f32, f32) {
         use crate::constants::COMBAT_SURFACE_SIZE;
         let half = COMBAT_SURFACE_SIZE / 2.0;
@@ -636,7 +647,7 @@ impl GameState {
         self.level += 1;
         self.xp = 0;
         self.skill_points_available += 1;
-        if self.level % 5 == 0 {
+        if self.level.is_multiple_of(5) {
             self.stat_points_available += 1;
         }
         self.pending_level_up_notifications
@@ -862,6 +873,7 @@ impl GameState {
         true
     }
 
+    #[must_use] 
     pub fn get_equipped(&self, slot: ItemSlot) -> Option<&ItemInstance> {
         self.equipped.get(&slot)
     }
@@ -880,6 +892,7 @@ impl GameState {
     }
 
     /// Peut-on équiper l’objet à l’index d’inventaire ? (slot libre ou place en inventaire pour l’objet actuellement équipé)
+    #[must_use] 
     pub fn can_equip_from_inventory(&self, slot_index: usize) -> bool {
         let Some(InventoryEntry::Identified(ref item)) = self.inventory.get(slot_index) else {
             return false;

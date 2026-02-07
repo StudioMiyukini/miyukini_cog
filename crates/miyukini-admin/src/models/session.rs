@@ -71,6 +71,7 @@ impl AdminSession {
     /// @layer: operator
     /// @human: Indique si la session est valide.
     /// @do: check_session_valid
+    #[must_use] 
     pub fn is_valid(&self, now: DateTime<Utc>) -> bool {
         now < self.expires_at
     }

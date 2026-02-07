@@ -99,9 +99,11 @@ pub struct AdminAccount {
 /// @do: represent_admin_role
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
+#[derive(Default)]
 pub enum AdminRole {
     /// Administrateur standard.
     /// @id: miyukiniadmin_role_admin
+    #[default]
     Admin,
 
     /// Administrateur recovery (accès DB recovery, conditions cumulatives).
@@ -113,11 +115,6 @@ pub enum AdminRole {
     Audit,
 }
 
-impl Default for AdminRole {
-    fn default() -> Self {
-        Self::Admin
-    }
-}
 
 impl std::fmt::Display for AdminRole {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

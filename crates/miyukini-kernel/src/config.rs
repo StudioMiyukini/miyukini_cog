@@ -123,6 +123,7 @@ impl EnvConfig {
     ///
     /// let config = EnvConfig::from_env();
     /// ```
+    #[must_use] 
     pub fn from_env() -> Self {
         Self {
             values: std::env::vars().collect(),
@@ -157,7 +158,7 @@ impl Config for EnvConfig {
     /// * `Some(&str)` - La valeur si la clé existe
     /// * `None` - Si la clé n'existe pas
     fn get(&self, key: &str) -> Option<&str> {
-        self.values.get(key).map(|s| s.as_str())
+        self.values.get(key).map(std::string::String::as_str)
     }
 }
 

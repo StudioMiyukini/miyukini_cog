@@ -48,7 +48,7 @@ pub fn format(
         if l.starts_with("fr") { Some(' ') } else if l.starts_with("en") { Some(',') } else { None }
     });
     let s = format_decimal(val, decimals, sep_decimal, sep_thousands);
-    Ok(format!("{}{}{}", prefix, s, suffix))
+    Ok(format!("{prefix}{s}{suffix}"))
 }
 
 fn currency_symbol(code: &str) -> &'static str {
@@ -74,7 +74,7 @@ fn format_decimal(value: f64, decimals: u32, sep_decimal: char, sep_thousands: O
         let chars: Vec<char> = int_str.chars().collect();
         let n = chars.len();
         for (i, c) in chars.into_iter().enumerate() {
-            if i > 0 && (n - i) % 3 == 0 {
+            if i > 0 && (n - i).is_multiple_of(3) {
                 out.push(sep);
             }
             out.push(c);

@@ -32,6 +32,7 @@ const CATAKANA_WHITE_ON_ORANGE: (u8, u8, u8) = (255, 255, 255);
 
 impl JayFestivalTheme {
     /// Crée un thème JayFestival (mode clair ou sombre).
+    #[must_use] 
     pub fn new(dark_mode: bool) -> Self {
         Self { dark_mode }
     }
@@ -39,6 +40,7 @@ impl JayFestivalTheme {
     // --- Couleurs (Reference UI § 2.2, Catakana_Orga : orange, bruns) ---
 
     /// Fond général / background primary (brun très foncé en mode Catakana_Orga).
+    #[must_use] 
     pub fn background_primary(&self) -> Color32 {
         if self.dark_mode {
             Color32::from_rgb(CATAKANA_BROWN_HEADER.0, CATAKANA_BROWN_HEADER.1, CATAKANA_BROWN_HEADER.2)
@@ -48,6 +50,7 @@ impl JayFestivalTheme {
     }
 
     /// Fond section (opacité 0,4 — PROTO-5, brun anthracite semi-transparent).
+    #[must_use] 
     pub fn section_background(&self) -> Color32 {
         if self.dark_mode {
             Color32::from_rgba_unmultiplied(
@@ -62,6 +65,7 @@ impl JayFestivalTheme {
     }
 
     /// Fond carte (section.card.background, brun foncé).
+    #[must_use] 
     pub fn section_card_background(&self) -> Color32 {
         if self.dark_mode {
             Color32::from_rgba_unmultiplied(
@@ -76,6 +80,7 @@ impl JayFestivalTheme {
     }
 
     /// Bordure section / carte (légèrement plus claire en brun).
+    #[must_use] 
     pub fn section_border(&self) -> Color32 {
         if self.dark_mode {
             Color32::from_rgb(80, 70, 62)
@@ -85,6 +90,7 @@ impl JayFestivalTheme {
     }
 
     /// Couleur titre de section.
+    #[must_use] 
     pub fn section_title(&self) -> Color32 {
         if self.dark_mode {
             Color32::from_rgb(250, 250, 248)
@@ -94,6 +100,7 @@ impl JayFestivalTheme {
     }
 
     /// Couleur description / texte secondaire.
+    #[must_use] 
     pub fn section_description(&self) -> Color32 {
         if self.dark_mode {
             Color32::from_rgb(200, 190, 180)
@@ -103,6 +110,7 @@ impl JayFestivalTheme {
     }
 
     /// Texte principal (body).
+    #[must_use] 
     pub fn text_primary(&self) -> Color32 {
         if self.dark_mode {
             Color32::from_rgb(250, 250, 248)
@@ -112,46 +120,55 @@ impl JayFestivalTheme {
     }
 
     /// Accent primaire (Catakana_Orga orange vif #F97316).
+    #[must_use] 
     pub fn accent_primary(&self) -> Color32 {
         Color32::from_rgb(CATAKANA_ORANGE.0, CATAKANA_ORANGE.1, CATAKANA_ORANGE.2)
     }
 
     /// Accent secondaire (orange plus foncé pour hover/bordures).
+    #[must_use] 
     pub fn accent_secondary(&self) -> Color32 {
         Color32::from_rgb(CATAKANA_ORANGE_DARK.0, CATAKANA_ORANGE_DARK.1, CATAKANA_ORANGE_DARK.2)
     }
 
     /// Accent organisateur (référence).
+    #[must_use] 
     pub fn accent_organisateur(&self) -> Color32 {
         Color32::from_rgb(59, 130, 246)
     }
 
     /// Accent exposant (Green #10B981).
+    #[must_use] 
     pub fn accent_exposant(&self) -> Color32 {
         Color32::from_rgb(16, 185, 129)
     }
 
     /// Accent visiteur / bénévole (Amber #F59E0B).
+    #[must_use] 
     pub fn accent_visiteur(&self) -> Color32 {
         Color32::from_rgb(245, 158, 11)
     }
 
     /// Couleur succès (badge, validation — vert).
+    #[must_use] 
     pub fn badge_success(&self) -> Color32 {
         Color32::from_rgb(16, 185, 129)
     }
 
     /// Couleur avertissement (badge — jaune/ambre).
+    #[must_use] 
     pub fn badge_warning(&self) -> Color32 {
         Color32::from_rgb(245, 158, 11)
     }
 
     /// Couleur erreur (badge, refusé — rouge).
+    #[must_use] 
     pub fn badge_error(&self) -> Color32 {
         Color32::from_rgb(239, 68, 68)
     }
 
     /// Fond navigation (sidebar, brun foncé Catakana_Orga).
+    #[must_use] 
     pub fn navigation_container_background(&self) -> Color32 {
         if self.dark_mode {
             Color32::from_rgb(
@@ -166,6 +183,7 @@ impl JayFestivalTheme {
 
     /// Bouton nav : normal, hover, active (couleurs pour widgets).
     /// Couleur bouton navigation à l'état normal.
+    #[must_use] 
     pub fn navigation_button_normal(&self) -> Color32 {
         if self.dark_mode {
             Color32::from_rgb(55, 48, 42)
@@ -175,6 +193,7 @@ impl JayFestivalTheme {
     }
 
     /// Couleur bouton navigation au survol.
+    #[must_use] 
     pub fn navigation_button_hover(&self) -> Color32 {
         if self.dark_mode {
             Color32::from_rgb(70, 60, 52)
@@ -184,6 +203,7 @@ impl JayFestivalTheme {
     }
 
     /// Couleur bouton navigation à l'état actif (sélectionné, orange Catakana_Orga).
+    #[must_use] 
     pub fn navigation_button_active(&self) -> Color32 {
         if self.dark_mode {
             Color32::from_rgb(CATAKANA_ORANGE.0, CATAKANA_ORANGE.1, CATAKANA_ORANGE.2)
@@ -193,11 +213,13 @@ impl JayFestivalTheme {
     }
 
     /// Couleur logo carré (fond orange, texte blanc).
+    #[must_use] 
     pub fn logo_fill(&self) -> Color32 {
         Color32::from_rgb(CATAKANA_ORANGE.0, CATAKANA_ORANGE.1, CATAKANA_ORANGE.2)
     }
 
     /// Couleur texte sur le logo (blanc sur orange).
+    #[must_use] 
     pub fn logo_text(&self) -> Color32 {
         Color32::from_rgb(
             CATAKANA_WHITE_ON_ORANGE.0,
@@ -209,16 +231,19 @@ impl JayFestivalTheme {
     // --- Borders radius (borders.radius small/medium/large) ---
 
     /// Rayon petit (4 px).
+    #[must_use] 
     pub fn radius_small(&self) -> f32 {
         4.0
     }
 
     /// Rayon moyen (8 px).
+    #[must_use] 
     pub fn radius_medium(&self) -> f32 {
         8.0
     }
 
     /// Rayon grand (12 px).
+    #[must_use] 
     pub fn radius_large(&self) -> f32 {
         12.0
     }
@@ -226,26 +251,31 @@ impl JayFestivalTheme {
     // --- Spacing (spacing.*) ---
 
     /// Padding bouton.
+    #[must_use] 
     pub fn button_padding(&self) -> f32 {
         12.0
     }
 
     /// Padding input.
+    #[must_use] 
     pub fn input_padding(&self) -> f32 {
         10.0
     }
 
     /// Padding carte.
+    #[must_use] 
     pub fn card_padding(&self) -> f32 {
         16.0
     }
 
     /// Padding badge.
+    #[must_use] 
     pub fn badge_padding(&self) -> f32 {
         6.0
     }
 
     /// Espacement entre éléments (item_spacing).
+    #[must_use] 
     pub fn item_spacing(&self) -> f32 {
         8.0
     }
@@ -253,21 +283,25 @@ impl JayFestivalTheme {
     // --- Fonts sizes (fonts.sizes.*) — 14 px sous 800 px, 16 px au-dessus (PROTO-6) ---
 
     /// Taille sm (14 pt).
+    #[must_use] 
     pub fn font_size_sm(&self) -> f32 {
         14.0
     }
 
     /// Taille md (16 pt).
+    #[must_use] 
     pub fn font_size_md(&self) -> f32 {
         16.0
     }
 
     /// Taille lg (20 pt).
+    #[must_use] 
     pub fn font_size_lg(&self) -> f32 {
         20.0
     }
 
     /// Taille heading (titre section).
+    #[must_use] 
     pub fn font_size_heading(&self) -> f32 {
         18.0
     }

@@ -40,7 +40,7 @@ impl std::error::Error for MiyunotifyAdapterError {}
 impl From<MiyunotifyError> for MiyunotifyAdapterError {
     fn from(e: MiyunotifyError) -> Self {
         MiyunotifyAdapterError {
-            message: format!("{:?}", e),
+            message: format!("{e:?}"),
         }
     }
 }

@@ -14,6 +14,7 @@ use std::path::Path;
 
 /// Charge une image PNG depuis le chemin et la convertit en `egui::ColorImage` (RGBA).
 /// Retourne `None` si le fichier est absent ou invalide.
+#[must_use] 
 pub fn load_image_from_path(path: &Path) -> Option<egui::ColorImage> {
     let data = std::fs::read(path).ok()?;
     let img = image::load_from_memory(&data).ok()?;
@@ -43,6 +44,7 @@ pub struct SpritesheetDesc {
 
 impl SpritesheetDesc {
     /// Crée une description pour un strip horizontal (toutes les frames ont la même taille).
+    #[must_use] 
     pub fn horizontal(total_width: u32, total_height: u32, frame_count: usize) -> Self {
         let frame_width = total_width / frame_count.max(1) as u32;
         Self {
@@ -53,6 +55,7 @@ impl SpritesheetDesc {
     }
 
     /// Retourne le rect UV (0–1) pour la frame d'index donné (strip horizontal).
+    #[must_use] 
     pub fn frame_uv_rect(&self, frame_index: usize) -> egui::Rect {
         let n = self.frame_count.max(1);
         let i = frame_index % n;
@@ -65,6 +68,7 @@ impl SpritesheetDesc {
     }
 
     /// Taille d'une frame en pixels (pour dimensionner l'affichage à l'écran).
+    #[must_use] 
     pub fn frame_size(&self) -> (f32, f32) {
         (self.frame_width as f32, self.frame_height as f32)
     }

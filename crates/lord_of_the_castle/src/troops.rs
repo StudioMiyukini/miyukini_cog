@@ -19,6 +19,7 @@ pub enum TroopKind {
 }
 
 impl TroopKind {
+    #[must_use] 
     pub fn label(&self) -> &'static str {
         match self {
             TroopKind::Milicien => "Milicien",
@@ -26,6 +27,7 @@ impl TroopKind {
     }
 
     /// PV max de base.
+    #[must_use] 
     pub fn hp_max_base(&self) -> i32 {
         match self {
             TroopKind::Milicien => 100,
@@ -33,6 +35,7 @@ impl TroopKind {
     }
 
     /// Chance de bloquer une attaque ennemie (0.0 à 1.0).
+    #[must_use] 
     pub fn block_chance(&self) -> f32 {
         match self {
             TroopKind::Milicien => 0.20,
@@ -40,6 +43,7 @@ impl TroopKind {
     }
 
     /// Vitesse de déplacement (px/s).
+    #[must_use] 
     pub fn move_speed(&self) -> f32 {
         match self {
             TroopKind::Milicien => 50.0,
@@ -47,6 +51,7 @@ impl TroopKind {
     }
 
     /// Dégâts par attaque.
+    #[must_use] 
     pub fn attack_damage(&self) -> i32 {
         match self {
             TroopKind::Milicien => 3,
@@ -54,6 +59,7 @@ impl TroopKind {
     }
 
     /// Portée d'attaque (px).
+    #[must_use] 
     pub fn attack_range(&self) -> f32 {
         match self {
             TroopKind::Milicien => 25.0,
@@ -61,6 +67,7 @@ impl TroopKind {
     }
 
     /// Intervalle entre deux attaques (secondes).
+    #[must_use] 
     pub fn attack_interval_s(&self) -> f32 {
         match self {
             TroopKind::Milicien => 1.0,
@@ -103,10 +110,12 @@ pub struct Troop {
 }
 
 impl Troop {
+    #[must_use] 
     pub fn half_size(&self) -> f32 {
         size::MOBILE / 2.0
     }
 
+    #[must_use] 
     pub fn dist_to(&self, x: f32, y: f32) -> f32 {
         let dx = self.x - x;
         let dy = self.y - y;
@@ -114,11 +123,13 @@ impl Troop {
     }
 
     /// true si la troupe est « active » (compte dans la limite, suit ou combat).
+    #[must_use] 
     pub fn is_active_in_squad(&self) -> bool {
         matches!(self.state, TroopState::InZone | TroopState::OutOfZone)
     }
 
     /// true si la troupe est vivante (pas Dead).
+    #[must_use] 
     pub fn is_alive(&self) -> bool {
         !matches!(self.state, TroopState::Dead { .. })
     }

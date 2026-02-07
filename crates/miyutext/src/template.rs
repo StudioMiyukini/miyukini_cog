@@ -29,7 +29,7 @@ pub fn apply(
                 let key = template[i + 2..close]
                     .trim()
                     .to_string();
-                let val = data.get(&key).map(String::as_str).unwrap_or("");
+                let val = data.get(&key).map_or("", String::as_str);
                 out.push_str(val);
                 i = close + 2;
             } else {

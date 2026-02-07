@@ -21,6 +21,7 @@ pub struct LordOfTheCastleService {
 
 impl LordOfTheCastleService {
     /// Crée une instance (utilise LordOfTheCastleApp::new_embedded pour intégration Central).
+    #[must_use] 
     pub fn new() -> Self {
         Self {
             app: LordOfTheCastleApp::new_embedded(),

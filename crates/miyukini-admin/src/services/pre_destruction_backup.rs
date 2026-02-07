@@ -29,6 +29,7 @@ impl PreDestructionBackupService {
     /// @layer: operator
     /// @human: Construit le service pre-destruction backup.
     /// @do: create_pre_destruction_backup_service
+    #[must_use] 
     pub fn new(backup_service: Arc<BackupServiceImpl>, backups_dir: PathBuf) -> Self {
         Self {
             backup_service,
@@ -48,6 +49,7 @@ impl PreDestructionBackupService {
     /// @layer: operator
     /// @human: Crée un backup avant destruction si aucun backup existant.
     /// @do: run_pre_destruction_backup_if_needed
+    #[must_use] 
     pub fn run_if_needed(&self) -> PreDestructionBackupResult {
         if self.has_prior_local_backup() {
             return PreDestructionBackupResult {

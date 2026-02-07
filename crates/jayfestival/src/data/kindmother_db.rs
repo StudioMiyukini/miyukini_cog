@@ -58,7 +58,7 @@ impl JayFestivalDb {
     fn init_schema(&self) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         conn.execute_batch(
-            r#"
+            r"
             CREATE TABLE IF NOT EXISTS profiles (
                 id TEXT PRIMARY KEY,
                 username TEXT,
@@ -124,7 +124,7 @@ impl JayFestivalDb {
                 FOREIGN KEY (exposant_id) REFERENCES exposants(id),
                 FOREIGN KEY (edition_id) REFERENCES editions(id)
             );
-            "#,
+            ",
         )?;
         Ok(())
     }

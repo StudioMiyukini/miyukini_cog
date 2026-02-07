@@ -68,7 +68,7 @@ pub fn validate_profiles_with_mother(
         return Ok(Vec::new());
     }
     let base = base_url.trim_end_matches('/');
-    let url = format!("{}/{}", base, VALIDATE_PATH);
+    let url = format!("{base}/{VALIDATE_PATH}");
     let body = ValidateRequest {
         profiles: profiles
             .iter()
@@ -98,7 +98,7 @@ pub fn validate_profiles_with_mother(
     }
     let response_body: ValidateResponse = resp
         .into_json()
-        .map_err(|e| MotherClientError(format!("Réponse invalide: {}", e)))?;
+        .map_err(|e| MotherClientError(format!("Réponse invalide: {e}")))?;
     let updates: Vec<(String, String)> = response_body
         .results
         .into_iter()

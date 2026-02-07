@@ -60,15 +60,12 @@ impl BackendConfig {
             .and_then(|s| s.parse().ok())
             .unwrap_or(8181);
         let host = config
-            .get("MIYUKINIADMIN_HOST")
-            .map(|s| s.to_string())
-            .unwrap_or_else(|| "127.0.0.1".to_string());
+            .get("MIYUKINIADMIN_HOST").map_or_else(|| "127.0.0.1".to_string(), std::string::ToString::to_string);
         let use_https = config
             .get("MIYUKINIADMIN_HTTPS")
-            .map(|s| s.eq_ignore_ascii_case("1") || s.eq_ignore_ascii_case("true"))
-            .unwrap_or(false);
-        let tls_cert_path = config.get("MIYUKINIADMIN_TLS_CERT").map(|s| s.to_string());
-        let tls_key_path = config.get("MIYUKINIADMIN_TLS_KEY").map(|s| s.to_string());
+            .is_some_and(|s| s.eq_ignore_ascii_case("1") || s.eq_ignore_ascii_case("true"));
+        let tls_cert_path = config.get("MIYUKINIADMIN_TLS_CERT").map(std::string::ToString::to_string);
+        let tls_key_path = config.get("MIYUKINIADMIN_TLS_KEY").map(std::string::ToString::to_string);
 
         Self {
             port,

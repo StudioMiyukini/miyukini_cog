@@ -49,6 +49,7 @@ pub struct MiyunotifyAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.notify.miyunotify";
 
+#[must_use] 
 pub fn miyunotify_admin_cell(version: &str, fingerprint: &str) -> MiyunotifyAdminCell {
     MiyunotifyAdminCell {
         identification: MiyunotifyIdentification {

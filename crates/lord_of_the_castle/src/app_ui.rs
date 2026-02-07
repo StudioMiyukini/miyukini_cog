@@ -113,8 +113,8 @@ pub(crate) fn screen_to_world(
 pub(crate) fn camera_center(state: &GameState) -> (f32, f32) {
     match state.secondary_player.as_ref() {
         Some(sec) if !sec.is_dead() => (
-            (state.player.x + sec.x) / 2.0,
-            (state.player.y + sec.y) / 2.0,
+            f32::midpoint(state.player.x, sec.x),
+            f32::midpoint(state.player.y, sec.y),
         ),
         _ => (state.player.x, state.player.y),
     }
@@ -284,20 +284,19 @@ pub(crate) fn paint_player_window(ui: &mut egui::Ui, state: Option<&mut GameStat
     ui.collapsing("Caractéristiques", |ui| {
         for (stat, label) in stats_list {
             ui.horizontal(|ui| {
-                if state.stat_points_available > 0 {
-                    if ui.small_button("+").clicked() {
+                if state.stat_points_available > 0
+                    && ui.small_button("+").clicked() {
                         state.spend_stat_point(stat);
                     }
-                }
                 let base = state.player.stats.get(stat);
                 let bonus = state.stat_bonus_from_warrior_skills().get(stat);
                 let total = base + bonus;
                 let stat_str = if bonus != 0 {
-                    format!("{} ({} + {})", total, base, bonus)
+                    format!("{total} ({base} + {bonus})")
                 } else {
-                    format!("{}", total)
+                    format!("{total}")
                 };
-                ui.label(format!("{} : {}", label, stat_str));
+                ui.label(format!("{label} : {stat_str}"));
             });
         }
     });
@@ -306,13 +305,12 @@ pub(crate) fn paint_player_window(ui: &mut egui::Ui, state: Option<&mut GameStat
     let attack_speed = 1.0 / interval_s;
     ui.collapsing("Statistiques", |ui| {
         ui.label(format!(
-            "Dégâts attaque auto : {} (mains nues / CàC / distance selon équipement)",
-            dmg
+            "Dégâts attaque auto : {dmg} (mains nues / CàC / distance selon équipement)"
         ));
         ui.label(format!("Vitesse de déplacement : {:.0} px/s", state.effective_move_speed()));
-        ui.label(format!("Vitesse d'attaque : {:.1}/s", attack_speed));
+        ui.label(format!("Vitesse d'attaque : {attack_speed:.1}/s"));
         ui.label(format!("Rayon d'attaque : {} px", Player::auto_attack_range()));
-        ui.label(format!("Rayon de collecte : {} px", PICKUP_RADIUS));
+        ui.label(format!("Rayon de collecte : {PICKUP_RADIUS} px"));
         ui.label(format!("Armure : {}", state.player_total_armor()));
         ui.label(format!("Résistance magique : {}", state.player.magic_resist));
         ui.add_space(4.0);
@@ -538,7 +536,7 @@ pub(crate) fn paint_inventory_window(
         return;
     };
     let n = state.inventory.len();
-    ui.label(format!("[{}/{} slots]", n, INVENTORY_MAX_SLOTS));
+    ui.label(format!("[{n}/{INVENTORY_MAX_SLOTS} slots]"));
     ui.add_space(6.0);
     ui.separator();
     for (i, entry) in state.inventory.iter().enumerate() {
@@ -590,7 +588,7 @@ pub(crate) fn paint_equipment_window(
         return;
     };
     let total_armor = state.player_total_armor();
-    ui.heading(format!("Armure totale : {}", total_armor));
+    ui.heading(format!("Armure totale : {total_armor}"));
     ui.add_space(6.0);
     for &slot in ItemSlot::equipment_slots() {
         let label = match state.get_equipped(slot) {
@@ -848,7 +846,7 @@ pub(crate) fn paint_troops(
             && (troop_walk_sprite.is_some() || troop_attack_sprite.is_some());
         if draw_as_sprite {
             let elapsed_attack = t.last_attack.as_ref().map(|i| i.elapsed().as_secs_f32());
-            let in_attack_anim = elapsed_attack.map_or(false, |e| e < TROOP_ATTACK_ANIM_DURATION_S);
+            let in_attack_anim = elapsed_attack.is_some_and(|e| e < TROOP_ATTACK_ANIM_DURATION_S);
             let (texture, desc, frame_index) = if in_attack_anim && troop_attack_sprite.is_some() {
                 let (tex, attack_desc) = troop_attack_sprite.unwrap();
                 let elapsed = elapsed_attack.unwrap_or(0.0);
@@ -1055,9 +1053,7 @@ pub(crate) fn paint_dev_ranges(
     let r_player = Player::auto_attack_range();
     let center = world_to_screen(rect, px, py, cam_x, cam_y);
     painter.circle_stroke(center, r_player, (stroke, color_circle));
-    let aim_angle_rad = cursor_world
-        .map(|(cx, cy)| (cy - py).atan2(cx - px))
-        .unwrap_or_else(|| state.player.dir.to_angle_rad());
+    let aim_angle_rad = cursor_world.map_or_else(|| state.player.dir.to_angle_rad(), |(cx, cy)| (cy - py).atan2(cx - px));
     let half_cone_rad = 20.0_f32.to_radians();
     let left_angle = aim_angle_rad - half_cone_rad;
     let right_angle = aim_angle_rad + half_cone_rad;

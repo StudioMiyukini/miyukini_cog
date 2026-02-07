@@ -85,6 +85,7 @@ pub enum ScreenId {
 
 impl ScreenId {
     /// Retourne true si l'écran est du parcours UNC (utilisateur non connecté).
+    #[must_use] 
     pub fn is_unc(&self) -> bool {
         matches!(
             self,
@@ -104,6 +105,7 @@ impl ScreenId {
     }
 
     /// Retourne true si l'écran est du parcours ORG (organisateur).
+    #[must_use] 
     pub fn is_org(&self) -> bool {
         matches!(
             self,
@@ -124,6 +126,7 @@ impl ScreenId {
     }
 
     /// Retourne true si l'écran est du parcours EXP (exposant).
+    #[must_use] 
     pub fn is_exp(&self) -> bool {
         matches!(
             self,
@@ -132,6 +135,7 @@ impl ScreenId {
     }
 
     /// Retourne true si l'écran est du parcours VIS (visiteur).
+    #[must_use] 
     pub fn is_vis(&self) -> bool {
         matches!(
             self,
@@ -140,6 +144,7 @@ impl ScreenId {
     }
 
     /// Liste de tous les écrans UNC (pour tests parcours).
+    #[must_use] 
     pub fn all_unc() -> &'static [ScreenId] {
         &[
             ScreenId::UncLanding,
@@ -158,6 +163,7 @@ impl ScreenId {
     }
 
     /// Liste de tous les écrans ORG (pour tests parcours).
+    #[must_use] 
     pub fn all_org() -> &'static [ScreenId] {
         &[
             ScreenId::OrgDashboard,
@@ -176,6 +182,7 @@ impl ScreenId {
     }
 
     /// Liste de tous les écrans EXP (pour tests parcours).
+    #[must_use] 
     pub fn all_exp() -> &'static [ScreenId] {
         &[
             ScreenId::ExpDashboard,
@@ -185,6 +192,7 @@ impl ScreenId {
     }
 
     /// Liste de tous les écrans VIS (pour tests parcours).
+    #[must_use] 
     pub fn all_vis() -> &'static [ScreenId] {
         &[ScreenId::VisDashboard, ScreenId::VisAgenda]
     }

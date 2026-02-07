@@ -51,10 +51,10 @@ impl CalculatorService {
                 CalcOp::Sub => self.current - value,
                 CalcOp::Mul => self.current * value,
                 CalcOp::Div => {
-                    if value != 0.0 {
-                        self.current / value
-                    } else {
+                    if value == 0.0 {
                         self.current
+                    } else {
+                        self.current / value
                     }
                 }
             };
@@ -154,11 +154,10 @@ impl ServiceUi for CalculatorService {
                 if ui.button("0").clicked() {
                     self.append_digit("0");
                 }
-                if ui.button(".").clicked() {
-                    if !self.display.contains('.') {
+                if ui.button(".").clicked()
+                    && !self.display.contains('.') {
                         self.append_digit(".");
                     }
-                }
                 if ui.button("+").clicked() {
                     let v: f64 = self.display.replace(',', ".").parse().unwrap_or(0.0);
                     self.apply_pending();
@@ -179,6 +178,6 @@ fn format_number(n: f64) -> String {
     if n.fract() == 0.0 && n.abs() < 1e15 {
         format!("{}", n as i64)
     } else {
-        format!("{:.6}", n).trim_end_matches('0').trim_end_matches('.').to_string()
+        format!("{n:.6}").trim_end_matches('0').trim_end_matches('.').to_string()
     }
 }

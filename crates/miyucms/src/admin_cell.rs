@@ -49,6 +49,7 @@ pub struct MiyucmsAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.content.cms";
 
+#[must_use] 
 pub fn miyucms_admin_cell(version: &str, fingerprint: &str) -> MiyucmsAdminCell {
     MiyucmsAdminCell {
         identification: MiyucmsIdentification {

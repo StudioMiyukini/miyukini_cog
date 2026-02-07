@@ -49,6 +49,7 @@ pub struct MiyuwebwayParticipantAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.webway.participant";
 
+#[must_use] 
 pub fn miyuwebway_participant_admin_cell(version: &str, fingerprint: &str) -> MiyuwebwayParticipantAdminCell {
     MiyuwebwayParticipantAdminCell {
         identification: MiyuwebwayParticipantIdentification {

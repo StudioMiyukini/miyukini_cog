@@ -59,8 +59,9 @@ pub struct WarriorSkillDef {
 }
 
 impl WarriorSkillId {
+    #[must_use] 
     pub fn all() -> &'static [WarriorSkillId] {
-        use WarriorSkillId::*;
+        use WarriorSkillId::{Baston, Bagarre, Kungfu, PlusFort, Souple, EncorePlusFort, Rapide, Precis, Musculation, Balayage, Fulgurant, DetectionFaiblesses, PotDeWey, AttaqueLarge, DoubleArmes, Assassin, GigaChad, TrombiLol, Tireur, TirRapide, VuPercante, TirARepetition, MunitionsLourdes, RechargementRapide, Sniper, TirDouble};
         &[
             Baston, Bagarre, Kungfu,
             PlusFort, Souple, EncorePlusFort, Rapide, Precis, Musculation, Balayage,
@@ -73,8 +74,9 @@ impl WarriorSkillId {
 }
 
 /// Retourne la définition d'une compétence.
+#[must_use] 
 pub fn warrior_skill_def(id: WarriorSkillId) -> WarriorSkillDef {
-    use WarriorSkillId::*;
+    use WarriorSkillId::{Baston, Bagarre, Rapide, Kungfu, PlusFort, Souple, EncorePlusFort, Precis, Musculation, Balayage, Fulgurant, DetectionFaiblesses, PotDeWey, AttaqueLarge, DoubleArmes, Assassin, GigaChad, TrombiLol, Tireur, TirRapide, VuPercante, TirARepetition, MunitionsLourdes, RechargementRapide, Sniper, TirDouble};
     match id {
         Baston => WarriorSkillDef {
             id: Baston,
@@ -340,8 +342,9 @@ pub fn warrior_skill_def(id: WarriorSkillId) -> WarriorSkillDef {
 }
 
 /// Arêtes de l'arbre (prérequis → compétence) pour tracer les lignes.
+#[must_use] 
 pub fn warrior_skill_edges() -> Vec<(WarriorSkillId, WarriorSkillId)> {
-    use WarriorSkillId::*;
+    use WarriorSkillId::{Baston, Bagarre, Rapide, Kungfu, PlusFort, Souple, EncorePlusFort, Precis, Musculation, Balayage, Fulgurant, DetectionFaiblesses, PotDeWey, AttaqueLarge, DoubleArmes, Assassin, GigaChad, TrombiLol, Tireur, TirRapide, VuPercante, TirARepetition, MunitionsLourdes, RechargementRapide, Sniper, TirDouble};
     vec![
         (Baston, Bagarre),
         (Rapide, Bagarre),
@@ -371,6 +374,7 @@ pub fn warrior_skill_edges() -> Vec<(WarriorSkillId, WarriorSkillId)> {
 }
 
 /// Vérifie si les prérequis sont satisfaits (chaque prérequis au moins au rang 1).
+#[must_use] 
 pub fn prerequisites_met(ranks: &HashMap<WarriorSkillId, u32>, def: &WarriorSkillDef) -> bool {
     if def.prerequisites.is_empty() {
         return true;

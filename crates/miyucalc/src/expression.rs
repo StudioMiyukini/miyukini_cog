@@ -99,7 +99,7 @@ fn parse_factor(it: &mut Peekable<Chars>) -> Result<f64, MiyuCalcError> {
 }
 
 fn skip_ws(it: &mut Peekable<Chars>) {
-    while it.peek().copied().map_or(false, |c| c == ' ' || c == '\t') {
+    while it.peek().copied().is_some_and(|c| c == ' ' || c == '\t') {
         it.next();
     }
 }
@@ -114,5 +114,5 @@ fn parse_number(it: &mut Peekable<Chars>) -> Result<f64, MiyuCalcError> {
             break;
         }
     }
-    s.parse::<f64>().map_err(|_| MiyuCalcError::InvalidExpression(format!("invalid number: {}", s)))
+    s.parse::<f64>().map_err(|_| MiyuCalcError::InvalidExpression(format!("invalid number: {s}")))
 }

@@ -17,7 +17,7 @@ pub fn generate(ctx: &GovernedContext) -> Result<String, MiyuantispamError> {
     }
     let gen = UuidIdGenerator;
     let id = gen.generate();
-    Ok(format!("cap:{}", id))
+    Ok(format!("cap:{id}"))
 }
 
 /// @id: miyuantispam_tool_captcha_verify

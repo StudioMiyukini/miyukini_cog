@@ -49,6 +49,7 @@ pub struct MiyupospaymentAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.pos.miyupospayment";
 
+#[must_use] 
 pub fn miyupospayment_admin_cell(version: &str, fingerprint: &str) -> MiyupospaymentAdminCell {
     MiyupospaymentAdminCell {
         identification: MiyupospaymentIdentification {

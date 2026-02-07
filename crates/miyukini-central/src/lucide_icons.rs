@@ -64,6 +64,7 @@ fn svg_to_texture(
 
 /// Enregistre les icônes Lucide du header (cog, user, settings).
 /// Retourne des TextureHandle pour garder les textures vivantes.
+#[must_use] 
 pub fn register_header_icons(cc: &eframe::CreationContext<'_>) -> (
     Option<egui::TextureHandle>,
     Option<egui::TextureHandle>,

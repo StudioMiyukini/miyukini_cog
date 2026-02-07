@@ -21,7 +21,7 @@ pub fn clock_in(ctx: &GovernedContext, employee_id: &str) -> Result<String, Miyu
     }
     let gen = UuidIdGenerator;
     let id = gen.generate();
-    Ok(format!("clock:in:{}:{}", eid, id))
+    Ok(format!("clock:in:{eid}:{id}"))
 }
 
 /// @id: miyuhr_tool_time_clock_out
@@ -40,5 +40,5 @@ pub fn clock_out(ctx: &GovernedContext, employee_id: &str) -> Result<String, Miy
     }
     let gen = UuidIdGenerator;
     let id = gen.generate();
-    Ok(format!("clock:out:{}:{}", eid, id))
+    Ok(format!("clock:out:{eid}:{id}"))
 }

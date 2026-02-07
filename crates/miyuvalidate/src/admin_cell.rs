@@ -51,6 +51,7 @@ pub struct MiyuValidateAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.validate.miyuvalidate";
 
+#[must_use] 
 pub fn miyuvalidate_admin_cell(version: &str, fingerprint: &str) -> MiyuValidateAdminCell {
     MiyuValidateAdminCell {
         identification: MiyuValidateIdentification {

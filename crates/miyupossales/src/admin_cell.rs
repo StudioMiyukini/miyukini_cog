@@ -49,6 +49,7 @@ pub struct MiyupossalesAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.pos.miyupossales";
 
+#[must_use] 
 pub fn miyupossales_admin_cell(version: &str, fingerprint: &str) -> MiyupossalesAdminCell {
     MiyupossalesAdminCell {
         identification: MiyupossalesIdentification {

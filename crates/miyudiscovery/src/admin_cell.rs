@@ -49,6 +49,7 @@ pub struct MiyudiscoveryAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.social.discovery";
 
+#[must_use] 
 pub fn miyudiscovery_admin_cell(version: &str, fingerprint: &str) -> MiyudiscoveryAdminCell {
     MiyudiscoveryAdminCell {
         identification: MiyudiscoveryIdentification {

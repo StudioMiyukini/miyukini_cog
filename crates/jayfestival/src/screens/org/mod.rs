@@ -34,6 +34,7 @@ use crate::theme::JayFestivalTheme;
 use eframe::egui;
 
 /// État mutable partagé pour les écrans ORG (éditions, exposants, formulaires).
+#[derive(Default)]
 pub struct OrgState {
     /// Liste des éditions chargées.
     pub editions: Vec<Edition>,
@@ -61,27 +62,10 @@ pub struct OrgState {
     pub budget_depenses_label: String,
 }
 
-impl Default for OrgState {
-    fn default() -> Self {
-        Self {
-            editions: Vec::new(),
-            edition_exposants: Vec::new(),
-            exposants: Vec::new(),
-            selected_edition_idx: 0,
-            pending_edition_idx: None,
-            selected_exposant_id: None,
-            form_creation_name: String::new(),
-            form_creation_start_date: String::new(),
-            form_creation_end_date: String::new(),
-            form_creation_location: String::new(),
-            budget_revenus_label: String::new(),
-            budget_depenses_label: String::new(),
-        }
-    }
-}
 
 impl OrgState {
     /// Options pour le sélecteur d'édition (noms).
+    #[must_use] 
     pub fn edition_options(&self) -> Vec<String> {
         self.editions
             .iter()
@@ -90,6 +74,7 @@ impl OrgState {
     }
 
     /// Nom de l'édition courante.
+    #[must_use] 
     pub fn current_edition_name(&self) -> String {
         self.editions
             .get(self.selected_edition_idx)
@@ -98,6 +83,7 @@ impl OrgState {
     }
 
     /// Exposant sélectionné pour la fiche.
+    #[must_use] 
     pub fn selected_exposant(&self) -> Option<&Exposant> {
         self.selected_exposant_id
             .as_ref()
@@ -105,6 +91,7 @@ impl OrgState {
     }
 
     /// EditionExposant pour l'exposant sélectionné et l'édition courante.
+    #[must_use] 
     pub fn selected_edition_exposant(&self) -> Option<&EditionExposant> {
         let edition_id = self.editions.get(self.selected_edition_idx).and_then(|e| e.id.as_ref())?;
         let exposant_id = self.selected_exposant_id.as_ref()?;

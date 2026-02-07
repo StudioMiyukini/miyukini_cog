@@ -167,6 +167,7 @@ impl DefaultLifecycle {
     ///
     /// let mut lifecycle = DefaultLifecycle::new();
     /// ```
+    #[must_use] 
     pub fn new() -> Self {
         Self {
             hooks: Vec::new(),

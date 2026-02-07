@@ -35,7 +35,7 @@ pub enum BridgeError {
 impl std::fmt::Display for BridgeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            BridgeError::ConnectionFailed(msg) => write!(f, "Connection failed: {}", msg),
+            BridgeError::ConnectionFailed(msg) => write!(f, "Connection failed: {msg}"),
         }
     }
 }

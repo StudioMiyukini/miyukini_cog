@@ -126,6 +126,7 @@ impl Justification {
     /// @human: Crée une nouvelle justification avec explication et références aux politiques.
     /// @do: create_justification
     /// @depends: strongfather_decision_justification
+    #[must_use] 
     pub fn new(explanation: String, policy_references: Vec<PolicyId>) -> Self {
         Self {
             explanation,
@@ -140,6 +141,7 @@ impl Justification {
     /// @human: Ajoute des étapes de raisonnement à la justification.
     /// @do: add_reasoning_steps
     /// @depends: strongfather_decision_justification_new
+    #[must_use] 
     pub fn with_reasoning_steps(mut self, steps: Vec<String>) -> Self {
         self.reasoning_steps = steps;
         self
@@ -169,6 +171,7 @@ impl DecisionMetadata {
     /// @human: Crée de nouvelles métadonnées vides.
     /// @do: create_metadata
     /// @depends: strongfather_decision_metadata
+    #[must_use] 
     pub fn new() -> Self {
         Self {
             fields: HashMap::new(),
@@ -181,6 +184,7 @@ impl DecisionMetadata {
     /// @human: Ajoute un champ de métadonnée.
     /// @do: add_metadata_field
     /// @depends: strongfather_decision_metadata_new
+    #[must_use] 
     pub fn with_field(mut self, key: String, value: String) -> Self {
         self.fields.insert(key, value);
         self
@@ -221,6 +225,7 @@ impl EvaluationContext {
     /// @human: Crée un nouveau contexte d'évaluation vide.
     /// @do: create_evaluation_context
     /// @depends: strongfather_decision_evaluation_context
+    #[must_use] 
     pub fn new() -> Self {
         Self {
             fields: HashMap::new(),
@@ -233,6 +238,7 @@ impl EvaluationContext {
     /// @human: Ajoute un champ au contexte d'évaluation.
     /// @do: add_context_field
     /// @depends: strongfather_decision_eval_context_new
+    #[must_use] 
     pub fn with_field(mut self, key: String, value: String) -> Self {
         self.fields.insert(key, value);
         self
@@ -303,6 +309,7 @@ impl Decision {
     /// @human: Crée une nouvelle décision avec les composants obligatoires.
     /// @do: create_decision
     /// @depends: strongfather_decision
+    #[must_use] 
     pub fn new(
         intent_id: String,
         decision_type: DecisionType,
@@ -325,6 +332,7 @@ impl Decision {
     /// @human: Définit le contexte d'évaluation de la décision.
     /// @do: set_evaluation_context
     /// @depends: strongfather_decision_new
+    #[must_use] 
     pub fn with_evaluation_context(mut self, context: EvaluationContext) -> Self {
         self.evaluation_context = context;
         self
@@ -336,6 +344,7 @@ impl Decision {
     /// @human: Définit les métadonnées de la décision.
     /// @do: set_decision_metadata
     /// @depends: strongfather_decision_new
+    #[must_use] 
     pub fn with_metadata(mut self, metadata: DecisionMetadata) -> Self {
         self.metadata = metadata;
         self
@@ -347,6 +356,7 @@ impl Decision {
     /// @human: Vérifie si la décision est acceptée.
     /// @do: check_if_accepted
     /// @depends: strongfather_decision
+    #[must_use] 
     pub fn is_accepted(&self) -> bool {
         matches!(self.decision_type, DecisionType::Accepted { .. })
     }
@@ -357,6 +367,7 @@ impl Decision {
     /// @human: Vérifie si la décision est refusée.
     /// @do: check_if_refused
     /// @depends: strongfather_decision
+    #[must_use] 
     pub fn is_refused(&self) -> bool {
         matches!(self.decision_type, DecisionType::Refused { .. })
     }
@@ -367,6 +378,7 @@ impl Decision {
     /// @human: Vérifie si la décision est ambiguë.
     /// @do: check_if_ambiguous
     /// @depends: strongfather_decision
+    #[must_use] 
     pub fn is_ambiguous(&self) -> bool {
         matches!(self.decision_type, DecisionType::Ambiguous { .. })
     }
@@ -377,6 +389,7 @@ impl Decision {
     /// @human: Vérifie si la décision est différée.
     /// @do: check_if_deferred
     /// @depends: strongfather_decision
+    #[must_use] 
     pub fn is_deferred(&self) -> bool {
         matches!(self.decision_type, DecisionType::Deferred { .. })
     }

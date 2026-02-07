@@ -23,7 +23,7 @@ pub fn add(
     let _ = (target_id.trim(), target_type.trim(), label);
     let gen = UuidIdGenerator;
     let id = gen.generate();
-    Ok(format!("bm:{}", id))
+    Ok(format!("bm:{id}"))
 }
 
 /// @id: miyubookmarks_tool_bookmark_remove

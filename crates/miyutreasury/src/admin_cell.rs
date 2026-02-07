@@ -49,6 +49,7 @@ pub struct MiyutreasuryAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.treasury.forecast";
 
+#[must_use] 
 pub fn miyutreasury_admin_cell(version: &str, fingerprint: &str) -> MiyutreasuryAdminCell {
     MiyutreasuryAdminCell {
         identification: MiyutreasuryIdentification {

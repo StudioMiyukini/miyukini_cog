@@ -39,6 +39,7 @@ impl CrossingRule {
     /// @human: Crée une nouvelle règle de franchissement.
     /// @do: create_crossing_rule
     /// @depends: borderguard_crossing_rule
+    #[must_use] 
     pub fn new(boundary_id: String, min_trust_level: TrustLevel, allowed: bool) -> Self {
         Self {
             boundary_id,

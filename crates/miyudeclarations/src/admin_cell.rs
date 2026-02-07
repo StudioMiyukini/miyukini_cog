@@ -49,6 +49,7 @@ pub struct MiyudeclarationsAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.compta.declarations";
 
+#[must_use] 
 pub fn miyudeclarations_admin_cell(version: &str, fingerprint: &str) -> MiyudeclarationsAdminCell {
     MiyudeclarationsAdminCell {
         identification: MiyudeclarationsIdentification {

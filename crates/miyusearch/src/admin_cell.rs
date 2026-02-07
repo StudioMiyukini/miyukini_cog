@@ -49,6 +49,7 @@ pub struct MiyusearchAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.search.miyusearch";
 
+#[must_use] 
 pub fn miyusearch_admin_cell(version: &str, fingerprint: &str) -> MiyusearchAdminCell {
     MiyusearchAdminCell {
         identification: MiyusearchIdentification {

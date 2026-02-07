@@ -39,7 +39,7 @@ impl std::error::Error for MiyuclockAdapterError {}
 impl From<MiyuclockError> for MiyuclockAdapterError {
     fn from(e: MiyuclockError) -> Self {
         MiyuclockAdapterError {
-            message: format!("{:?}", e),
+            message: format!("{e:?}"),
         }
     }
 }

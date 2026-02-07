@@ -49,6 +49,7 @@ pub struct MiyupmAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.communication.pm";
 
+#[must_use] 
 pub fn miyupm_admin_cell(version: &str, fingerprint: &str) -> MiyupmAdminCell {
     MiyupmAdminCell {
         identification: MiyupmIdentification {

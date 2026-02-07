@@ -37,6 +37,7 @@ impl Version {
     /// @human: Crée une nouvelle version.
     /// @do: create_version
     /// @depends: everbuddy_version
+    #[must_use] 
     pub fn new(major: u32, minor: u32, patch: u32) -> Self {
         Self {
             major,

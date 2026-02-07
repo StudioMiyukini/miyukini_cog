@@ -49,6 +49,7 @@ pub struct MiyuinvoiceAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.invoice.standalone";
 
+#[must_use] 
 pub fn miyuinvoice_admin_cell(version: &str, fingerprint: &str) -> MiyuinvoiceAdminCell {
     MiyuinvoiceAdminCell {
         identification: MiyuinvoiceIdentification {

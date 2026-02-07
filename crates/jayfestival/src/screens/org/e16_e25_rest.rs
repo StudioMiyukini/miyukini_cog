@@ -75,7 +75,7 @@ pub fn org_e16_e25_show(
                 label(ui, theme, "Contenu alpha : à compléter selon les spécifications.", LabelLevel::Small);
                 if reserved_id == 25 {
                     ui.horizontal(|ui| {
-                        if button(ui, theme, "Publier l'édition", ButtonVariant::Primary, Default::default()).clicked() {}
+                        button(ui, theme, "Publier l'édition", ButtonVariant::Primary, Default::default()).clicked();
                         if button(ui, theme, "Clôturer", ButtonVariant::Outline, Default::default()).clicked() {
                             let _ = nav_request.replace(Some(ScreenId::OrgListeEditions));
                         }

@@ -856,11 +856,11 @@ impl DevCenterService {
         ui.separator();
         ui.add_space(8.0);
 
-        for (_idx, suite) in suites.iter().enumerate() {
+        for suite in suites {
             let n = suite.total_tests();
             ui.horizontal(|ui| {
                 ui.label(egui::RichText::new(suite.display_name).size(13.0).strong());
-                ui.label(format!("{} tests", n));
+                ui.label(format!("{n} tests"));
             });
             ui.label(egui::RichText::new(suite.description).size(12.0).weak());
             ui.add_space(6.0);
@@ -950,7 +950,7 @@ impl DevCenterService {
         let m = (ts / 60) % 60;
         let s = ts % 60;
         self.console_log
-            .push(format!("[MDC {:02}:{:02}:{:02}] Lancement des tests pour {}…", h, m, s, crate_name));
+            .push(format!("[MDC {h:02}:{m:02}:{s:02}] Lancement des tests pour {crate_name}…"));
 
         let (tx, rx) = mpsc::channel();
         let crate_name = crate_name.to_string();

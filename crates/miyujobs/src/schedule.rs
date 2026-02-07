@@ -23,7 +23,7 @@ pub fn schedule_at(
     if id.is_empty() {
         return Err(MiyuJobsError::InvalidInput("job_id empty".into()));
     }
-    Ok(format!("at:{}:{}", id, run_at_utc_ms))
+    Ok(format!("at:{id}:{run_at_utc_ms}"))
 }
 
 /// @id: miyujobs_tool_schedule_cron
@@ -49,11 +49,11 @@ pub fn schedule_cron(
         return Err(MiyuJobsError::InvalidInput("invalid cron expression".into()));
     }
     let safe = cron_expression.trim().replace(' ', "_");
-    Ok(format!("cron:{}:{}", id, safe))
+    Ok(format!("cron:{id}:{safe}"))
 }
 
 fn validate_cron_five_fields(s: &str) -> bool {
-    let parts: Vec<&str> = s.trim().split_whitespace().collect();
+    let parts: Vec<&str> = s.split_whitespace().collect();
     if parts.len() != 5 {
         return false;
     }
