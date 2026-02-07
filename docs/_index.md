@@ -57,8 +57,7 @@ Contenu de `public/` :
 - **Miyukini - Definition COG.md** - Definition du Core-Orchestrated Governance Environment
 - **Miyukini - Pyramide Architecture Complete.md** - Architecture en strates
 - **Miyukini - Lois Autonomie Systeme.md** - 8 lois d'autonomie non negociables
-- **Miyukini - Vision Strategique.md** - Vision et strategie
-- **Miyukini - Objectif Final.md** - Objectif final du projet
+- **Miyukini - Objectif du projet.md** - Objectifs, strategie, produit, business, utilite, usage final
 - **Miyukini - Souverainete Environnement.md** - Souverainete des environnements
 - **Miyukini - Operators et Terminologie.md** - Operateurs et terminologie officielle
 - **Miyukini - Tools et Toolkits.md** - Outils et Kits d'Outils

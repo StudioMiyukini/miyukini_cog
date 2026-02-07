@@ -1,5 +1,10 @@
 # Objectif Final Miyukini — Formulation claire et exploitable
 
+> **Ce document est fusionné dans [Miyukini Conceptual References - Objectif du projet](Miyukini%20Conceptual%20References%20-%20Objectif%20du%20projet.md).**  
+> Consulter « Objectif du projet » pour les objectifs à long terme, la stratégie, le produit, le business, l'utilité et l'utilisation finale.
+
+---
+
 ## Contexte
 
 Ce document formalise la **vision stratégique** et les **objectifs finaux** de l'écosystème Miyukini. Il sert de boussole pour toutes les décisions architecturales et de développement.
