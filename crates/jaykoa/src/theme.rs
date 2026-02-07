@@ -5,7 +5,7 @@
 //! @role: theme
 //! @layer: app
 
-use egui::Color32;
+use egui::{Color32, Stroke};
 
 /// Thème JayKoa : tokens couleurs, espacements, tailles.
 pub struct JayKoaTheme {
@@ -63,7 +63,7 @@ impl JayKoaTheme {
         Self {
             dark_mode: true,
             bg_primary: Color32::from_rgb(32, 33, 36), bg_secondary: Color32::from_rgb(41, 42, 45),
-            bg_grid: Color32::from_rgb(32, 33, 36), grid_line: Color32::from_rgb(60, 64, 67),
+            bg_grid: Color32::from_rgb(32, 33, 36), grid_line: Color32::from_rgb(255, 255, 255),
             text_primary: Color32::from_rgb(232, 234, 237), text_secondary: Color32::from_rgb(154, 160, 166),
             text_muted: Color32::from_rgb(95, 99, 104),
             accent: Color32::from_rgb(138, 180, 248), accent_hover: Color32::from_rgb(174, 203, 250),
@@ -79,7 +79,7 @@ impl JayKoaTheme {
         Self {
             dark_mode: false,
             bg_primary: Color32::WHITE, bg_secondary: Color32::from_rgb(241, 243, 244),
-            bg_grid: Color32::WHITE, grid_line: Color32::from_rgb(218, 220, 224),
+            bg_grid: Color32::WHITE, grid_line: Color32::from_rgb(0, 0, 0),
             text_primary: Color32::from_rgb(32, 33, 36), text_secondary: Color32::from_rgb(95, 99, 104),
             text_muted: Color32::from_rgb(154, 160, 166),
             accent: Color32::from_rgb(26, 115, 232), accent_hover: Color32::from_rgb(24, 90, 188),
@@ -89,6 +89,12 @@ impl JayKoaTheme {
             cell_padding: 2.0, hour_height: 48.0, hour_column_width: 56.0,
             sidebar_width: 240.0, header_height: 48.0,
         }
+    }
+
+    /// Trait pour les lignes de grille (plus épais en mode sombre pour une meilleure lisibilité).
+    pub fn grid_line_stroke(&self) -> Stroke {
+        let width = if self.dark_mode { 1.0 } else { 0.5 };
+        Stroke::new(width, self.grid_line)
     }
 
     /// Couleur d'un bloc événement selon sa source.

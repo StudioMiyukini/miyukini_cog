@@ -74,10 +74,11 @@ fn show_week_view(ui: &mut Ui, state: &mut AppState, cal_data: &CalendarData,
         let painter = ui.painter_at(grid_rect);
 
         // Lignes horizontales (heures)
+        let grid_stroke = theme.grid_line_stroke();
         for h in 0..24u8 {
             let y = grid_rect.top() + h as f32 * theme.hour_height;
             painter.line_segment([egui::pos2(grid_rect.left() + theme.hour_column_width, y), egui::pos2(grid_rect.right(), y)],
-                egui::Stroke::new(0.5, theme.grid_line));
+                grid_stroke);
             painter.text(egui::pos2(grid_rect.left() + 4.0, y + 2.0), egui::Align2::LEFT_TOP,
                 format!("{:02}:00", h), egui::FontId::proportional(10.0), theme.text_secondary);
         }
@@ -85,7 +86,7 @@ fn show_week_view(ui: &mut Ui, state: &mut AppState, cal_data: &CalendarData,
         for d in 0..=7u32 {
             let x = grid_rect.left() + theme.hour_column_width + d as f32 * col_width;
             painter.line_segment([egui::pos2(x, grid_rect.top()), egui::pos2(x, grid_rect.bottom())],
-                egui::Stroke::new(0.5, theme.grid_line));
+                grid_stroke);
         }
         // Marqueur "Maintenant"
         if today >= week_start && today <= week_start + chrono::Duration::days(6) {
@@ -140,9 +141,10 @@ fn show_day_view(ui: &mut Ui, state: &mut AppState, cal_data: &CalendarData,
         let th = theme.hour_height * 24.0;
         let (gr, _) = ui.allocate_exact_size(Vec2::new(aw, th), egui::Sense::click());
         let p = ui.painter_at(gr);
+        let grid_stroke = theme.grid_line_stroke();
         for h in 0..24u8 {
             let y = gr.top() + h as f32 * theme.hour_height;
-            p.line_segment([egui::pos2(gr.left() + theme.hour_column_width, y), egui::pos2(gr.right(), y)], egui::Stroke::new(0.5, theme.grid_line));
+            p.line_segment([egui::pos2(gr.left() + theme.hour_column_width, y), egui::pos2(gr.right(), y)], grid_stroke);
             p.text(egui::pos2(gr.left() + 4.0, y + 2.0), egui::Align2::LEFT_TOP, format!("{:02}:00", h), egui::FontId::proportional(10.0), theme.text_secondary);
         }
         for entry in &cal_data.entries {

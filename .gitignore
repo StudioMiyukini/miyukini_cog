@@ -2,6 +2,10 @@
 target/
 Cargo.lock
 
+# Git Token
+.git-token 
+# Contient le token GitHub pour le dépôt miyukini-core-system-public
+
 # Catakana
 .Catakana
 

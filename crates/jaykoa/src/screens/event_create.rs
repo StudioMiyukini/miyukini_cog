@@ -11,7 +11,7 @@ use crate::data::types::{EntryType, TemporalEntry};
 use crate::data::JayKoaDb;
 use crate::theme::JayKoaTheme;
 use chrono::{Local, Timelike};
-use egui::Ui;
+use egui::Context;
 use std::sync::Arc;
 
 /// État du formulaire de création/édition.
@@ -82,9 +82,9 @@ impl EventFormState {
     }
 }
 
-/// Affiche le popover de création rapide.
-pub fn show_quick_add(ui: &mut Ui, state: &mut AppState, form: &mut EventFormState, db: &Arc<JayKoaDb>, _theme: &JayKoaTheme) {
-    egui::Window::new("Nouvel événement").collapsible(false).resizable(false).default_width(340.0).show(ui.ctx(), |ui| {
+/// Affiche le popover de création rapide (fenêtre flottante au-dessus de l'agenda).
+pub fn show_quick_add(ctx: &Context, state: &mut AppState, form: &mut EventFormState, db: &Arc<JayKoaDb>, _theme: &JayKoaTheme) {
+    egui::Window::new("Nouvel événement").collapsible(false).resizable(false).default_width(340.0).show(ctx, |ui| {
         ui.add_space(4.0);
         ui.horizontal(|ui| { ui.label("Titre :"); ui.text_edit_singleline(&mut form.title); });
         ui.horizontal(|ui| {
@@ -113,10 +113,10 @@ pub fn show_quick_add(ui: &mut Ui, state: &mut AppState, form: &mut EventFormSta
     });
 }
 
-/// Affiche le formulaire complet de création/édition.
-pub fn show_full_editor(ui: &mut Ui, state: &mut AppState, form: &mut EventFormState, agendas: &[(String, String)], db: &Arc<JayKoaDb>, _theme: &JayKoaTheme) {
+/// Affiche le formulaire complet de création/édition (fenêtre flottante au-dessus de l'agenda).
+pub fn show_full_editor(ctx: &Context, state: &mut AppState, form: &mut EventFormState, agendas: &[(String, String)], db: &Arc<JayKoaDb>, _theme: &JayKoaTheme) {
     let title = if state.editing_entry_id.is_some() { "Modifier l'événement" } else { "Nouvel événement" };
-    egui::Window::new(title).collapsible(false).resizable(true).default_width(450.0).show(ui.ctx(), |ui| {
+    egui::Window::new(title).collapsible(false).resizable(true).default_width(450.0).show(ctx, |ui| {
         egui::ScrollArea::vertical().show(ui, |ui| {
             ui.label(egui::RichText::new("Titre").size(12.0).strong()); ui.text_edit_singleline(&mut form.title); ui.add_space(8.0);
             ui.label(egui::RichText::new("Début").size(12.0).strong());

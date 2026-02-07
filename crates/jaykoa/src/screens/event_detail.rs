@@ -11,14 +11,14 @@ use crate::data::types::{EntryType, EventSource, TemporalEntry};
 use crate::data::JayKoaDb;
 use crate::theme::JayKoaTheme;
 use crate::ui::molecules;
-use egui::Ui;
+use egui::Context;
 use std::sync::Arc;
 
-/// Affiche la popover de détail d'un événement.
-pub fn show_event_detail(ui: &mut Ui, state: &mut AppState, entry: &TemporalEntry, theme: &JayKoaTheme, db: &Arc<JayKoaDb>) {
+/// Affiche la popover de détail d'un événement (fenêtre flottante au-dessus de l'agenda).
+pub fn show_event_detail(ctx: &Context, state: &mut AppState, entry: &TemporalEntry, theme: &JayKoaTheme, db: &Arc<JayKoaDb>) {
     let et = EntryType::from_str(entry.entry_type.as_deref().unwrap_or("internal"));
     let ro = et.is_readonly();
-    egui::Window::new("Détail de l'événement").collapsible(false).resizable(false).default_width(380.0).show(ui.ctx(), |ui| {
+    egui::Window::new("Détail de l'événement").collapsible(false).resizable(false).default_width(380.0).show(ctx, |ui| {
         ui.heading(egui::RichText::new(entry.title.as_deref().unwrap_or("(sans titre)")).size(18.0).strong());
         ui.add_space(8.0);
         if ro {

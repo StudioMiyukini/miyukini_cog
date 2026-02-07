@@ -92,7 +92,31 @@ impl JayKoaApp {
         // Rechargement données
         if self.needs_reload { self.reload_data(); self.needs_reload = false; }
 
-        // --- Popovers ---
+        // --- Layout principal : toujours affiché (header, sidebar, agenda) ---
+        let prev_filters_active = self.state.filters_active;
+        let prev_filter_sources = self.state.filter_sources.clone();
+        let prev_filter_entry_types = self.state.filter_entry_types.clone();
+
+        egui::TopBottomPanel::top("jaykoa_header").show(ctx, |ui| { organisms::header_bar(ui, &mut self.state, &self.theme); });
+        egui::SidePanel::left("jaykoa_sidebar").default_width(self.theme.sidebar_width).show(ctx, |ui| {
+            organisms::sidebar(ui, &mut self.state, &mut self.agendas, &self.theme, &self.db);
+        });
+        egui::CentralPanel::default().show(ctx, |ui| {
+            if self.state.current_view == ViewId::Settings {
+                settings::show_settings(ui, &mut self.user_settings, &self.db, &self.theme);
+            } else {
+                calendar::show_calendar(ui, &mut self.state, &self.cal_data, &self.agendas_colors, &self.theme);
+            }
+        });
+
+        if self.state.filters_active != prev_filters_active
+            || self.state.filter_sources != prev_filter_sources
+            || self.state.filter_entry_types != prev_filter_entry_types
+        {
+            self.needs_reload = true;
+        }
+
+        // --- Modales / fenêtres flottantes (au-dessus de l'agenda) ---
         if self.state.show_quick_add {
             if self.form_state.is_none() {
                 let aid = self.agendas.iter().find(|a| a.is_default).or(self.agendas.first())
@@ -100,7 +124,7 @@ impl JayKoaApp {
                 self.form_state = Some(EventFormState::new_empty(aid));
             }
             if let Some(form) = &mut self.form_state {
-                egui::CentralPanel::default().show(ctx, |ui| { event_create::show_quick_add(ui, &mut self.state, form, &self.db, &self.theme); });
+                event_create::show_quick_add(ctx, &mut self.state, form, &self.db, &self.theme);
                 if form.saved || !self.state.show_quick_add {
                     if form.saved { self.needs_reload = true; }
                     if !self.state.show_full_editor { self.form_state = None; }
@@ -121,7 +145,7 @@ impl JayKoaApp {
             let al: Vec<(String, String)> = self.agendas.iter()
                 .filter_map(|a| Some((a.id.clone()?, a.name.clone().unwrap_or_else(|| "Sans nom".to_string())))).collect();
             if let Some(form) = &mut self.form_state {
-                egui::CentralPanel::default().show(ctx, |ui| { event_create::show_full_editor(ui, &mut self.state, form, &al, &self.db, &self.theme); });
+                event_create::show_full_editor(ctx, &mut self.state, form, &al, &self.db, &self.theme);
                 if form.saved || !self.state.show_full_editor { if form.saved { self.needs_reload = true; } self.form_state = None; }
             }
         }
@@ -132,45 +156,14 @@ impl JayKoaApp {
                     self.detail_entry = self.db.entry_by_id(eid).ok().flatten();
                 }
                 if let Some(entry) = &self.detail_entry.clone() {
-                    egui::CentralPanel::default().show(ctx, |ui| { event_detail::show_event_detail(ui, &mut self.state, entry, &self.theme, &self.db); });
+                    event_detail::show_event_detail(ctx, &mut self.state, entry, &self.theme, &self.db);
                 }
             }
             if !self.state.show_event_detail { self.detail_entry = None; self.needs_reload = true; }
         }
 
-        // --- Popover Export iCal ---
         if self.state.show_export {
-            egui::CentralPanel::default().show(ctx, |ui| {
-                export_screen::show_export(ui, &mut self.state, &self.db, &self.theme);
-            });
-        }
-
-        // --- Layout principal ---
-        if !self.state.show_quick_add && !self.state.show_full_editor && !self.state.show_event_detail && !self.state.show_export {
-            // Snapshot des filtres avant rendu pour détecter les changements
-            let prev_filters_active = self.state.filters_active;
-            let prev_filter_sources = self.state.filter_sources.clone();
-            let prev_filter_entry_types = self.state.filter_entry_types.clone();
-
-            egui::TopBottomPanel::top("jaykoa_header").show(ctx, |ui| { organisms::header_bar(ui, &mut self.state, &self.theme); });
-            egui::SidePanel::left("jaykoa_sidebar").default_width(self.theme.sidebar_width).show(ctx, |ui| {
-                organisms::sidebar(ui, &mut self.state, &mut self.agendas, &self.theme, &self.db);
-            });
-            egui::CentralPanel::default().show(ctx, |ui| {
-                if self.state.current_view == ViewId::Settings {
-                    settings::show_settings(ui, &mut self.user_settings, &self.db, &self.theme);
-                } else {
-                    calendar::show_calendar(ui, &mut self.state, &self.cal_data, &self.agendas_colors, &self.theme);
-                }
-            });
-
-            // Détecter si les filtres ont changé et déclencher un rechargement
-            if self.state.filters_active != prev_filters_active
-                || self.state.filter_sources != prev_filter_sources
-                || self.state.filter_entry_types != prev_filter_entry_types
-            {
-                self.needs_reload = true;
-            }
+            export_screen::show_export(ctx, &mut self.state, &self.db, &self.theme);
         }
     }
 

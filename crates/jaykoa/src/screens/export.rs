@@ -13,7 +13,7 @@ use crate::data::JayKoaDb;
 use crate::export::ical;
 use crate::theme::JayKoaTheme;
 use chrono::Datelike;
-use egui::{ScrollArea, Ui};
+use egui::{Context, ScrollArea};
 use std::sync::Arc;
 
 /// Format d'export sélectionné.
@@ -41,12 +41,12 @@ impl Default for ExportPanelState {
     }
 }
 
-/// Affiche le panneau d'export (popover/panneau central).
+/// Affiche le panneau d'export (fenêtre flottante au-dessus de l'agenda).
 ///
 /// Charge les entrées visibles via `db.entries_in_range()` avec les mêmes
 /// paramètres que le calendrier, puis génère le contenu iCal.
 pub fn show_export(
-    ui: &mut Ui,
+    ctx: &Context,
     state: &mut AppState,
     db: &Arc<JayKoaDb>,
     theme: &JayKoaTheme,
@@ -56,7 +56,7 @@ pub fn show_export(
         .resizable(true)
         .default_width(520.0)
         .default_height(480.0)
-        .show(ui.ctx(), |ui| {
+        .show(ctx, |ui| {
             // --- Récupérer l'état persisté dans la mémoire egui ---
             let panel_id = ui.id().with("export_panel_state");
             let mut panel = ui
