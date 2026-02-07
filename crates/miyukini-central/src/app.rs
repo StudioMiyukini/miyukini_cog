@@ -20,9 +20,9 @@ use crate::lucide_icons;
 use crate::pixel_theme::{chrome_dimensions, chrome_shapes, PixelChromeTheme};
 use crate::services::{
     CalculatorService, DevCenterService, EguiEditorService, EditorThemeState, GameService,
-    JayFestivalService, JayKoaService, JayXposeService, LordOfTheCastleService, MiyuClickerService,
-    MockJayService,
-    NotesService, ServiceUi, TextEditorService, UiLibraryService, UI_EDITOR_THEME_STORAGE_KEY,
+    JayFestivalService, JayKoaService, JayKontaService, JayXposeService, LordOfTheCastleService,
+    MiyuClickerService, MockJayService, NotesService, ServiceUi, TextEditorService, UiLibraryService,
+    UI_EDITOR_THEME_STORAGE_KEY,
 };
 use crate::usage_tracking::{UsageContext, UsageStore};
 use eframe::egui;
@@ -1116,7 +1116,7 @@ impl MiyukiniCentralApp {
             ServiceId::JayRDV => Box::new(MockJayService::new(service_id, "JayRDV")),
             ServiceId::JayFestival => Box::new(JayFestivalService::default()),
             ServiceId::JayKoa => Box::new(JayKoaService::with_profile(profile_id)),
-            ServiceId::JayKonta => Box::new(MockJayService::new(service_id, "JayKonta")),
+            ServiceId::JayKonta => Box::new(JayKontaService::default()),
             ServiceId::JayXpose => Box::new(JayXposeService::default()),
             ServiceId::JayFaim => Box::new(MockJayService::new(service_id, "JayFaim")),
             ServiceId::DevCenter => Box::new(DevCenterService::default()),

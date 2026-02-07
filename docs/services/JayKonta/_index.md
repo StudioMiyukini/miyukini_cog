@@ -1,26 +1,28 @@
-# JayKonta — Service comptabilité multi-échelle
+# JayKonta - Service comptabilite multi-echelle
 
 ## Contexte
 
-**JayKonta** est le **service Miyukini unifié du domaine comptabilité et budget** au sein de l’écosystème COG. Il couvre une **comptabilité multi-échelle** : de la tenue de budget personnelle et des budgets occasionnels (vacances, cadeaux de Noël) à la comptabilité d’entreprise au sens large (devis, facturation, rapports).
-
-**Un seul service COG**, avec **deux points d’entrée** distincts pour des raisons de positionnement marché :
-
-| Point d’entrée | Nom commercial | Périmètre |
-|----------------|----------------|-----------|
-| **Perso / Individuel** | **JayBudget** | Budgets personnels, budgets occasionnels (vacances, cadeaux, projets courts). |
-| **Entreprise** | **JayKonta** | Comptabilité d’entreprise, devis, facturation, suivi des revenus et dépenses, rapports. |
+JayKonta est le service COG unifie du domaine comptabilite et budget.
+Il couvre deux points d'entree :
+- JayBudget (Purse) pour le personnel
+- JayKonta (Account) pour l'entreprise
 
 ## Documentation principale
 
-| Document | Rôle |
+| Document | Role |
 |----------|------|
-| [JayKonta - Document Fondateur](./JayKonta%20-%20Document%20Fondateur.md) | Besoins, positionnement stratégique, points d’entrée Purse/Account, intégration multi-services, niveaux de sécurité. |
-| [Reference](./reference/_index.md) | Niveaux de sécurité, points d’entrée, intégration avec les autres services. |
-| [Publics](./publics/_index.md) | Points d’entrée JayBudget (perso) et JayKonta (entreprise) — analyse des besoins, parcours. |
+| [JayKonta - Document Fondateur](./JayKonta%20-%20Document%20Fondateur.md) | Vision, positionnement, securite, integration. |
+| [JayKonta - Documentation Enrichie](./JayKonta%20-%20Documentation%20Enrichie.md) | Architecture de service enrichie, capacites, gouvernance, UX cible. |
+| [JayKonta - Contrats Service Operateurs et Toolkits](./JayKonta%20-%20Contrats%20Service%20Operateurs%20et%20Toolkits.md) | Contrats normatifs CK-SVC, CK-OP, CK-TK, CK-INT, CK-SEC, CK-AUD. |
+| [JayKonta - Bornage Implementation](./JayKonta%20-%20Bornage%20Implementation.md) | Perimetre phase 1/2/3, in scope, hors scope, criteres fin de phase. |
+| [JayKonta - Plan Implementation](./JayKonta%20-%20Plan%20Implementation.md) | Plan de delivery par phases et taches. |
+| [JayKonta - Analyse PR Concurrence Web](./JayKonta%20-%20Analyse%20PR%20Concurrence%20Web.md) | Benchmark concurrentiel web et adaptations COG. |
+| [JayKonta - Interfaces Inter-Services Futures](./reference/JayKonta%20-%20Interfaces%20Inter-Services%20Futures.md) | Guide d'implementation des interfaces futures: enveloppe, payloads, erreurs, idempotence, audit et versioning. |
+| [Reference](./reference/_index.md) | Niveaux securite, points d'entree, integration. |
+| [Publics](./publics/_index.md) | Purse et Account : analyses, parcours, operateurs/toolkits. |
 
 ## Voir aussi
 
-- [Miyukini Festival Service](../JayFestival/JayFestival%20-%20Document%20Fondateur.md) — consommateur (budget édition, facturation exposants)
-- [JayRDV](../JayRDV/JayRDV%20-%20Document%20Fondateur.md) — consommateur (facturation professionnels)
-- [Politique de résidence des données sensibles](../../reference/Miyukini%20Conceptual%20References%20-%20Politique%20Residence%20Donnees%20Sensibles.md)
+- [Miyukini Festival Service](../JayFestival/JayFestival%20-%20Document%20Fondateur.md)
+- [JayRDV](../JayRDV/JayRDV%20-%20Document%20Fondateur.md)
+- [Politique de residence des donnees sensibles](../../reference/Miyukini%20Conceptual%20References%20-%20Politique%20Residence%20Donnees%20Sensibles.md)

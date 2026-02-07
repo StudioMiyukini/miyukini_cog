@@ -1897,6 +1897,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "jaykonta"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "eframe",
+ "egui",
+ "kindmother",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "uuid",
+]
+
+[[package]]
 name = "jayxpose"
 version = "0.1.0"
 dependencies = [
@@ -2442,6 +2456,7 @@ dependencies = [
  "egui-phosphor",
  "jayfestival",
  "jaykoa",
+ "jaykonta",
  "jayxpose",
  "lord_of_the_castle",
  "miyuclicker",

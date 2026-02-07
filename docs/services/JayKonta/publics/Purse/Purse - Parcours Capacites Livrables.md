@@ -1,108 +1,162 @@
-# JayBudget — Parcours, capacités et livrables
+# JayBudget - Parcours, capacites et livrables (point d'entree Purse)
 
 ## Contexte
 
-Ce document détaille le **parcours**, les **capacités** et les **livrables** du point d’entrée **JayBudget** (perso/individuel) du service COG JayKonta. Il complète le [Document fondateur JayKonta](../../JayKonta%20-%20Document%20Fondateur.md) et s’appuie sur l’[analyse des besoins](./Purse%20-%20Analyse%20des%20besoins.md) et le document [Operateurs et Toolkits](./Purse%20-%20Operateurs%20et%20Toolkits.md).
+Ce document decrit les parcours utilisateur Purse et les livrables cibles.
+Il aligne les flux UX avec les contrats et besoins enrichis.
 
-## Portée / Scope
+## Portee
 
-- **Public** : Particuliers, foyers (point d’entrée JayBudget).
-- **Périmètre** : Parcours (onboarding, tableau de bord, mouvements, budgets occasionnels, objectifs, rapports, export, alertes), capacités et livrables associés.
-- **Hors périmètre** : Devis et facturation légale (réservés au point d’entrée JayKonta) ; spécifications techniques (API, schémas).
+- In scope : onboarding, mouvements, budgets occasionnels, objectifs, alertes, rapports/export
+- Out of scope : devis/facturation entreprise
 
----
+## Parcours P1 - Onboarding Purse
 
-## 1. Profil du public
+### Etapes
 
-| Critère | Description |
-|---------|-------------|
-| **Qui** | Particuliers ou foyers qui souhaitent tenir un budget personnel et/ou gérer des budgets occasionnels (vacances, Noël, mariage, travaux). |
-| **Compte** | Compte JayBudget (email, mot de passe ou lien magique, identité minimale) ; pas d’exigence SIRET ni de facturation. |
-| **Accès** | Authentification (Miyauth) ; session gouvernée par Mandat ; point d’entrée JayBudget. |
-| **Espace** | Tableau de bord Purse (solde, synthèse, mouvements, budgets occasionnels, objectifs, rapports, export, alertes). |
+1. Inscription/connexion
+2. Choix contexte Purse
+3. Arrivee dashboard
 
----
+### Livrables
 
-## 2. Parcours utilisateur
+- ecran auth Purse
+- ecran dashboard initial
 
-### 2.1 Parcours onboarding (inscription Purse)
+### Contrats
 
-1. **Accès** : L’utilisateur accède à la page d’inscription JayBudget.
-2. **Formulaire** : Saisie email, mot de passe ou lien magique, identité minimale (nom, prénom optionnel).
-3. **Validation** : Validation email si configurée ; pas d’exigence SIRET ni de facturation.
-4. **Résultat** : Compte Purse créé ; redirection vers le tableau de bord.
+- CK-SVC-01
+- CK-SVC-02
+- CK-TK-01
 
-**Livrables sollicités** : Formulaire d’inscription dédié Purse ; validation email ; tableau de bord (PUR-01, PUR-02).
+## Parcours P2 - Saisie budget quotidien
 
-### 2.2 Parcours tableau de bord et mouvements
+### Etapes
 
-1. **Connexion** : L’utilisateur se connecte (Miyauth) ; session gouvernée par Mandat.
-2. **Tableau de bord** : Affichage du solde courant, synthèse (revenus vs dépenses), répartition par catégorie, évolution (filtres : mois, trimestre, année).
-3. **Saisie d’un mouvement** : Saisie manuelle (date, montant, libellé, catégorie) ou import CSV ; correction et suppression selon règles.
-4. **Historique** : Liste paginée et filtrable des mouvements ; recherche par libellé ; export liste (CSV) pour usage personnel.
+1. Ajouter mouvement
+2. Choisir categorie
+3. Valider
+4. Voir impact solde
 
-**Livrables sollicités** : Tableau de bord (solde, synthèse, répartition) ; formulaire de saisie mouvement ; liste historique ; export CSV (PUR-04 à PUR-07).
+### Livrables
 
-### 2.3 Parcours budgets occasionnels (vacances, Noël, etc.)
+- formulaire mouvement rapide
+- liste mouvements filtrable
+- widget solde
 
-1. **Création** : L’utilisateur crée un budget occasionnel (nom, montant cible ou plafond, date de début/fin optionnelle).
-2. **Affectation** : Lors de la saisie d’un mouvement, possibilité d’affecter à un budget occasionnel ; solde du budget (dépensé / restant) mis à jour.
-3. **Liste et détail** : Liste des budgets avec indicateur (solde, % utilisé) ; fiche par budget (mouvements, solde, objectif) ; archivage ou clôture quand projet terminé.
-4. **Alerte** : Alerte si dépassement ou seuil configuré (Miyunotify).
+### Contrats
 
-**Livrables sollicités** : Formulaire création budget occasionnel ; affectation mouvement à un budget ; liste et fiche budgets ; archivage/clôture ; alerte dépassement (PUR-08 à PUR-10, PUR-15).
+- CK-OP-02
+- CK-TK-11
+- CK-AUD-01
 
-### 2.4 Parcours objectifs (épargne, dépense)
+## Parcours P3 - Budget occasionnel
 
-1. **Définition** : L’utilisateur définit un objectif (libellé, montant cible, période ou récurrent) ; lien optionnel à un budget occasionnel ou une catégorie.
-2. **Suivi** : Tableau de bord objectifs : progression (atteint, en cours, en retard) ; alerte si objectif atteint ou en retard (Miyunotify optionnel).
-3. **Rappels (optionnel)** : Intégration JayKoa pour rappels (échéance objectif) ; références temporelles uniquement ; source de vérité reste JayKonta.
+### Etapes
 
-**Livrables sollicités** : Formulaire objectif ; tableau de bord objectifs ; alertes ; rappels agenda optionnels (PUR-11, PUR-12, PUR-16).
+1. Creer budget occasionnel
+2. Affecter mouvements
+3. Suivre depense/restant
+4. Clore budget
 
-### 2.5 Parcours rapports et export
+### Livrables
 
-1. **Rapports** : Consultation de rapports prédéfinis (mensuel, trimestriel, annuel) : synthèse, évolution, répartition par catégorie, comparaison de périodes ; graphiques et tableaux ; niveau 2 (pas de données au-delà du niveau autorisé).
-2. **Export** : Export PDF (synthèse, rapport) ou CSV (mouvements) ; périmètre limité aux données de l’utilisateur ; pas d’export de données de paiement brutes.
+- ecran liste budgets occasionnels
+- ecran detail budget occasionnel
 
-**Livrables sollicités** : Rapports prédéfinis ; graphiques et tableaux ; export PDF/CSV (PUR-13, PUR-14).
+### Contrats
 
-### 2.6 Parcours alertes
+- CK-OP-03
+- CK-TK-61
 
-1. **Configuration** : L’utilisateur configure les alertes (seuil solde, dépassement budget occasionnel, objectif atteint/en retard).
-2. **Réception** : Notification (Miyunotify) par email et/ou in-app ; préférences utilisateur.
+## Parcours P4 - Objectifs
 
-**Livrables sollicités** : Page configuration alertes ; notifications email/in-app ; préférences (PUR-15).
+### Etapes
 
----
+1. Creer objectif
+2. Suivre progression
+3. Recevoir alertes seuil
 
-## 3. Capacités et livrables (synthèse)
+### Livrables
 
-| Capacité | Description | Livrable | Besoin(s) couvert(s) |
-|----------|-------------|----------|----------------------|
-| **Compte Purse** | Inscription, connexion, déconnexion, récupération mot de passe. | Formulaire inscription/connexion ; session gouvernée. | PUR-01, PUR-02 |
-| **Données niveau 2** | Données Purse au minimum niveau 2 ; résidence selon politique. | Gouvernance WorrySentinel, KindMother ; pas d’exposition hors Mandat. | PUR-03 |
-| **Mouvements** | Enregistrement revenus/dépenses, catégories, solde, synthèse, historique. | Tableau de bord ; formulaire saisie ; liste historique ; export CSV. | PUR-04 à PUR-07 |
-| **Budgets occasionnels** | Création, suivi dépenses, solde, liste/détail, archivage/clôture. | Formulaire budget ; affectation mouvement ; liste et fiche budgets ; alerte dépassement. | PUR-08 à PUR-10, PUR-15 |
-| **Objectifs** | Définition, suivi, alerte atteint/en retard. | Formulaire objectif ; tableau de bord objectifs ; notifications. | PUR-11, PUR-12 |
-| **Rapports et export** | Rapports prédéfinis, graphiques, export PDF/CSV. | Rapports mensuel/trimestriel/annuel ; export PDF/CSV. | PUR-13, PUR-14 |
-| **Alertes** | Configuration et réception alertes (seuil, budget, objectif). | Page configuration ; notifications email/in-app. | PUR-15 |
-| **Rappels (optionnel)** | Rappels via JayKoa (échéance, clôture). | Références temporelles dans l’agenda ; pas de donnée financière. | PUR-16 |
+- ecran objectifs
+- indicateurs progression
+- alertes objectifs
 
----
+### Contrats
 
-## 4. Références
+- CK-TK-61
 
-| Document | Rôle |
-|----------|------|
-| [Purse - Analyse des besoins](./Purse%20-%20Analyse%20des%20besoins.md) | Liste exhaustive des besoins PUR-01 à PUR-16, NFR-PUR-01 à NFR-PUR-07. |
-| [Purse - Operateurs et Toolkits](./Purse%20-%20Operateurs%20et%20Toolkits.md) | Matrice Besoin → Service / Opérateur / Toolkit. |
-| [JayKonta - Document Fondateur](../../JayKonta%20-%20Document%20Fondateur.md) | Contexte service COG, points d’entrée Purse/Account. |
-| [Points d’entrée Purse et Account](../../reference/JayKonta%20-%20Points%20Entree%20JayBudget%20et%20JayKonta.md) | Périmètre Purse, capacités exposées. |
+## Parcours P5 - Rapports et export
 
----
+### Etapes
 
-**Document** : JayBudget — Parcours, capacités et livrables  
-**Version** : 1.0  
-**Date** : 2026-01-31  
-**Statut** : Document de référence (parcours, capacités, livrables)
+1. Ouvrir rapport mensuel
+2. Filtrer periode
+3. Exporter PDF/CSV
+
+### Livrables
+
+- ecran rapports Purse
+- module export personnel
+
+### Contrats
+
+- CK-TK-51
+- CK-AUD-02
+
+## Parcours P6 - Rappels optionnels
+
+### Etapes
+
+1. Activer rappels
+2. Publier echeances vers JayKoa
+3. Recevoir rappel
+
+### Livrables
+
+- option reminders
+- liaison JayKoa de base
+
+### Contrats
+
+- CK-INT-03
+
+## Matrice capacite vers livrable
+
+| Capacite | Livrable principal | Priorite |
+|----------|--------------------|----------|
+| Auth Purse | Onboarding | P0 |
+| Mouvements | Formulaire + historique | P0 |
+| Categories | Gestion categories | P0 |
+| Budgets occasionnels | Liste + detail | P1 |
+| Objectifs | Module objectifs | P2 |
+| Alertes | Preferences + notifications | P3 |
+| Rapports/Export | Module reporting Purse | P2 |
+| Rappels JayKoa | Option reminder | P3 |
+
+## Criteres de validation parcours
+
+- CV-1 : parcours P2 complet en moins de 30 secondes
+- CV-2 : parcours P3 sans ambiguite de solde
+- CV-3 : parcours P5 export audite
+
+## Risques UX et reponses
+
+- surcharge ecran principal
+- reponse : widgets prioritaires, details deferes
+
+- alert fatigue
+- reponse : profilage alertes, seuils configurables
+
+## References
+
+- `docs/services/JayKonta/publics/Purse/Purse - Analyse des besoins.md`
+- `docs/services/JayKonta/publics/Purse/Purse - Operateurs et Toolkits.md`
+- `docs/services/JayKonta/JayKonta - Contrats Service Operateurs et Toolkits.md`
+
+## Statut
+
+- Version : 2.0
+- Date : 2026-02-07
+- Statut : Parcours enrichis

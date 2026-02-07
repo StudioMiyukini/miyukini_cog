@@ -1,201 +1,148 @@
-# JayKonta — Analyse des besoins (point d’entrée entreprise)
+# JayKonta - Analyse des besoins (point d'entree Account)
 
 ## Contexte
 
-Ce document constitue l’**analyse des besoins** du point d’entrée **JayKonta** (entreprise) du service COG JayKonta. Il identifie l’ensemble des besoins fonctionnels et non fonctionnels, les parcours détaillés, les personas, l’intégration avec les services métier (JayFestival, JayRDV), ainsi que la priorisation et les dépendances. Il s’adresse aux équipes produit, conception et développement.
+Ce document formalise l'analyse des besoins du point d'entree Account du service COG JayKonta.
+Le perimetre couvre la comptabilite entreprise, le cycle devis vers facture vers paiement, les rapports et les integrations metier.
 
-**Références** : [Document fondateur JayKonta](../../JayKonta%20-%20Document%20Fondateur.md), [Points d’entrée JayBudget et JayKonta](../../reference/JayKonta%20-%20Points%20Entree%20Purse%20et%20Account.md), [Intégration avec les autres services](../../reference/JayKonta%20-%20Integration%20Services.md), [Niveaux de sécurité et protection](../../reference/JayKonta%20-%20Niveaux%20Securite%20et%20Protection%20Donnees.md).
+References principales :
+- `docs/services/JayKonta/JayKonta - Document Fondateur.md`
+- `docs/services/JayKonta/JayKonta - Contrats Service Operateurs et Toolkits.md`
+- `docs/services/JayKonta/reference/JayKonta - Integration Services.md`
+- `docs/services/JayKonta/reference/JayKonta - Niveaux Securite et Protection Donnees.md`
 
-## Portée / Scope
+## Portee
 
-- **Public** : Professionnels, associations, TPE/PME, organisateurs (point d’entrée JayKonta).
-- **Périmètre** : Tous les besoins identifiés pour ce point d’entrée (comptabilité, devis, facturation, rapports, intégration JayFestival/JayRDV).
-- **Hors périmètre** : Budgets personnels type Purse (réservés au point d’entrée JayBudget), spécifications techniques détaillées (API, schémas).
+- Public : professionnels, associations, TPE/PME, organisateurs
+- In scope : compte Account, roles, grand livre, devis, factures, paiements, rapports, export, integrations JayFestival/JayRDV
+- Out of scope : budget personnel Purse, implementation technique detaillee API/DB
 
-### Cadre de travail (protocole documentation conceptuelle)
+## Objectifs metier
 
-Conformément au [Protocole d’écriture de la documentation conceptuelle](../../../../protocols/Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md) :
+- O1 : tenir une comptabilite exploitable sans double saisie
+- O2 : executer le cycle commercial devis vers facture vers encaissement
+- O3 : produire des rapports legaux et de pilotage
+- O4 : supporter les integrations JayFestival et JayRDV sous contrat
+- O5 : garantir securite, residence et audit de niveau 2 a 3
 
-| Élément | Description |
-|--------|-------------|
-| **Documentation autorisée (liste fermée)** | Document fondateur JayKonta ; Points d’entrée JayBudget et JayKonta ; Integration Services ; Niveaux sécurité et protection ; Document fondateur JayFestival ; Document fondateur JayRDV ; Glossaire Miyukini ; Politique de résidence des données sensibles. |
-| **Ce document ne fusionne pas** | Avec le Document fondateur, les documents référence ou l’analyse des besoins Purse. |
-| **Ce document n’anticipe pas** | Les parcours capacités / livrables détaillés, les contrats d’API JayFestival/JayRDV ni les spécifications d’Opérateurs/Kits Account. |
+## Personas et attentes
 
-### Contraintes absolues
+| Persona | Attente principale | Risque de non couverture |
+|---------|--------------------|--------------------------|
+| TPE / Independant | Facturer vite et suivre les impayes | abandon outil, tableur externe |
+| Association | Budget par projet/edition + facturation simple | compta dispersee |
+| Organisateur evenement | Budget edition, devis/factures exposants | duplication entre outils |
+| Professionnel RDV | Facturation prestation et suivi paiements | erreur de reconciliation |
+| Comptable interne | Journal fiable, export, audit | non conformite, perte de trace |
 
-| Contrainte | Description |
-|------------|-------------|
-| ❌ **Ne pas anticiper** | Les écrans, flux détaillés ou contrats d’API ne sont pas rédigés dans ce document. |
-| ❌ **Ne pas fusionner** | Ce document reste limité au point d’entrée Account ; pas de mélange avec Purse ni avec les documents JayFestival/JayRDV. |
-| ❌ **Ne pas corriger hors périmètre** | Les besoins Purse, JayFestival ou JayRDV ne sont pas modifiés depuis ce document ; les contrats d’intégration restent dans Integration Services. |
-| ✅ **Source de vérité** | Ce document est la **référence** pour l’analyse des besoins du point d’entrée JayKonta (entreprise). |
+## Besoins fonctionnels
 
-### Décisions structurantes (mini log)
+### B1. Acces et gouvernance
 
-| Id | Décision | Justification |
-|----|----------|---------------|
-| **DS-MAC-01** | Account : devis, facturation, grand livre, rapports légaux ; pas de budgets occasionnels type Purse (sauf réutilisation en contexte projet/édition). | Périmètre entreprise ; différenciation avec Purse ; réutilisation des capacités « budget par projet » pour JayFestival (budget par édition). |
-| **DS-MAC-02** | Données Account niveau 2–3 (Sensitive à Critical) ; résidence centralisée recommandée ou obligatoire. | Conformité Politique de résidence ; données facturation et moyens de paiement critiques. |
-| **DS-MAC-03** | JayFestival et JayRDV appellent les Opérateurs JayKonta (quote.create, invoice.emit, budget.movements.record) ; ils détiennent les données métier (exposant, professionnel), JayKonta détient les données comptables. | Réduction de la duplication ; responsabilités explicites (INT-1 à INT-4, voir Integration Services). |
-| **Dépendance critique** | Ce document dépend du Document fondateur JayKonta, des documents Points d’entrée et Integration Services ; toute évolution des besoins Account (ex. nouveaux besoins JayFestival/JayRDV) doit être cohérente avec Integration Services. | — |
+| ID | Besoin | Contrat associe |
+|----|--------|-----------------|
+| MAC-01 | Creation/connexion compte Account | CK-SVC-01, CK-TK-01 |
+| MAC-02 | Roles et permissions (admin/comptable/lecture) | CK-SVC-02, CK-SEC-02 |
+| MAC-03 | Contexte Account explicite et isole | CK-SVC-02 |
 
----
+### B2. Comptabilite coeur
 
+| ID | Besoin | Contrat associe |
+|----|--------|-----------------|
+| MAC-04 | Enregistrer mouvements (revenu/depense) | CK-OP-11, CK-TK-11 |
+| MAC-05 | Ventiler par categorie/projet/edition | CK-TK-11 |
+| MAC-06 | Consulter journal et grand livre | CK-TK-11 |
 
-## 1. Profil du public et personas
+### B3. Cycle devis
 
-### 1.1 Définition du public
+| ID | Besoin | Contrat associe |
+|----|--------|-----------------|
+| MAC-07 | Creer devis conforme | CK-OP-11, CK-TK-21 |
+| MAC-08 | Envoyer et suivre statut devis | CK-TK-21 |
+| MAC-09 | Convertir devis vers facture | CK-OP-12, CK-TK-21 |
+| MAC-10 | Exposer quote.create aux integrations | CK-INT-01, CK-INT-02 |
 
-Les **utilisateurs JayKonta** (marque) sont des **professionnels**, **associations** ou **entreprises** qui souhaitent **tenir une comptabilité** au sens large : grand livre, devis, facturation, suivi des encaissements, rapports légaux. Ils accèdent au service COG JayKonta via le point d’entrée **JayKonta**. Ce point d’entrée est également **consommé** par les services métier (JayFestival pour facturation exposants, JayRDV pour facturation professionnels).
+### B4. Cycle facturation et paiement
 
-### 1.2 Personas
+| ID | Besoin | Contrat associe |
+|----|--------|-----------------|
+| MAC-11 | Emettre facture | CK-OP-13, CK-TK-31 |
+| MAC-12 | Relancer impayes | CK-TK-31 |
+| MAC-13 | Enregistrer encaissements | CK-OP-14, CK-TK-41 |
+| MAC-14 | Exposer invoice.emit aux integrations | CK-INT-01, CK-INT-02 |
 
-| Persona | Profil | Objectifs principaux | Frustrations typiques |
-|---------|--------|----------------------|------------------------|
-| **TPE / auto-entrepreneur** | Peu de factures, besoin de simplicité et de conformité (TVA, numérotation). | Émettre des devis et factures, suivre les encaissements, rapports simples. | Outils trop lourds ou trop limités, conformité floue. |
-| **Association** | Budget par projet ou par édition (événement), facturation occasionnelle (stands, prestations). | Budget par édition, devis/factures exposants ou prestataires, rapports pour l’AG. | Mélange budget perso et asso, pas de vue par projet. |
-| **Organisateur (JayFestival)** | Plusieurs éditions (festivals), nombreux exposants, budget par édition. | Budget par édition, devis et factures exposants, ventilation revenus/dépenses, rapports. | Duplication des outils, pas d’intégration avec le service événementiel. |
-| **Professionnel (JayRDV)** | Praticien ou cabinet ; facturation des RDV, abonnements. | Facturation des prestations (RDV, abonnements), relances, suivi des encaissements. | Double saisie entre agenda et facturation. |
-| **Comptable / gestionnaire** | Gestion de la comptabilité, conformité, rapports légaux. | Grand livre, rapports (bilan, compte de résultat), export pour expert-comptable, conformité TVA. | Données éparpillées, pas d’audit traçable. |
+### B5. Reporting et export
 
-### 1.3 Contexte d’usage
+| ID | Besoin | Contrat associe |
+|----|--------|-----------------|
+| MAC-15 | Dashboard financier | CK-TK-51 |
+| MAC-16 | Rapports legaux | CK-OP-15, CK-TK-51 |
+| MAC-17 | Exports controle�s (PDF/CSV) | CK-TK-51, CK-AUD-02 |
 
-- **Fréquence** : connexion régulière (saisie des mouvements, émission de factures, relances) ou ponctuelle (rapports, clôture).
-- **Appareils** : desktop prioritaire (comptabilité, rapports) ; mobile pour consultation et validation.
-- **Intégration** : consommation par JayFestival (budget édition, facturation exposants), JayRDV (facturation professionnels) ; données métier (exposant, professionnel) détenues par le service consommateur, données comptables par JayKonta.
+### B6. Integration evenementielle
 
----
+| ID | Besoin | Contrat associe |
+|----|--------|-----------------|
+| MAC-18 | Budget par edition (JayFestival) | CK-INT-01 |
+| MAC-19 | Restitution budget organisateur | CK-INT-01 |
 
-## 2. Besoins fonctionnels
+## Besoins non fonctionnels
 
-### 2.1 Compte et accès
+| ID | Exigence | Cible |
+|----|----------|-------|
+| NFR-MAC-01 | Classification securite | Niveau 2 minimum, 3 sur paiements et pieces critiques |
+| NFR-MAC-02 | Residence donnees | Centralisee pour classes 3 |
+| NFR-MAC-03 | Secrets paiement | Pas de stockage en clair |
+| NFR-MAC-04 | Audit | Journal complet des ecritures et exports |
+| NFR-MAC-05 | Performance ecran dashboard | < 3 s mediane |
+| NFR-MAC-06 | Emission facture | < 3 s mediane |
+| NFR-MAC-07 | Disponibilite degradee | lecture possible si integration externe indisponible |
+| NFR-MAC-08 | Conformite export | scope minimal et tra�abilite |
 
-| Id | Besoin | Description | Critères d’acceptation |
-|----|--------|-------------|-------------------------|
-| MAC-01 | Compte entreprise (Account) | Créer ou utiliser un compte JayKonta (entreprise, association) avec identité légale (SIRET, etc.) si exigé. | Formulaire dédié Account ; validation selon politique ; Mandat et permissions (Master Butler) pour devis, facturation, rapports. |
-| MAC-02 | Rôles et permissions | Gérer les rôles (admin, comptable, lecture seule) et les permissions (qui peut émettre une facture, qui peut consulter les rapports). | Rôles définis par Contrat d’équipe ; permissions (Master Butler) ; audit des actions sensibles. |
-| MAC-03 | Données niveau 2–3 | Les données Account (devis, factures, mouvements, moyens de paiement) sont niveau 2–3 (Sensitive à Critical) ; résidence centralisée recommandée ou obligatoire. | Niveau WorrySentinel 2–3 ; résidence sur COG de référence ; chiffrement et audit. |
+## Priorisation
 
-### 2.2 Grand livre et mouvements
+| Priorite | Besoins |
+|----------|---------|
+| P0 | MAC-01 a MAC-06, MAC-11 a MAC-13 |
+| P1 | MAC-07 a MAC-10 |
+| P2 | MAC-14 a MAC-17 |
+| P3 | MAC-18 a MAC-19 |
 
-| Id | Besoin | Description | Critères d’acceptation |
-|----|--------|-------------|-------------------------|
-| MAC-04 | Enregistrement des mouvements | Enregistrer des revenus et dépenses (date, montant, libellé, catégorie, client/fournisseur, pièce justificative). | Saisie manuelle ou import (CSV) ; catégories et comptes ; liaison client/fournisseur ; correction et annulation selon règles. |
-| MAC-05 | Ventilation par catégorie / projet | Ventiler les mouvements par catégorie comptable, projet ou édition (ex. budget par édition JayFestival). | Catégories et projets configurables ; filtres par projet/édition ; rapports par projet. |
-| MAC-06 | Grand livre et journal | Consulter le grand livre et le journal (liste des mouvements, tri, filtres). | Vue grand livre et journal ; filtres (date, catégorie, projet, client/fournisseur) ; export pour expert-comptable. |
+## Criteres d'acceptation globaux
 
-### 2.3 Devis
+- CA-1 : un compte Account peut emettre un devis et le convertir en facture
+- CA-2 : une facture peut passer en payee/partielle avec trace audit
+- CA-3 : journal et grand livre sont coherents sur une periode
+- CA-4 : export PDF/CSV respecte le scope autorise
+- CA-5 : appels JayFestival/JayRDV passent par les contrats CK-INT
 
-| Id | Besoin | Description | Critères d’acceptation |
-|----|--------|-------------|-------------------------|
-| MAC-07 | Création de devis | Créer un devis (client, lignes, montants, TVA, conditions, validité). | Formulaire devis ; lignes (description, quantité, prix, TVA) ; numérotation conforme ; enregistrement (KindMother). |
-| MAC-08 | Envoi et suivi des devis | Envoyer un devis au client (email, lien) et suivre le statut (envoyé, accepté, refusé). | Envoi par email ou lien ; statut mis à jour ; notification (Miyunotify) optionnelle. |
-| MAC-09 | Conversion devis → facture | Convertir un devis accepté en facture (sans ressaisie). | Action « Convertir en facture » ; reprise des lignes et montants ; numérotation facture distincte. |
-| MAC-10 | Intégration JayFestival / JayRDV | Les services JayFestival et JayRDV appellent les Opérateurs JayKonta pour créer des devis (ex. devis exposant, devis professionnel). | Appel `quote.create` avec référence métier (exposant, édition, professionnel) ; identifiant retourné ; audit et niveau de sécurité déclaré. |
+## Definition of done (document)
 
-### 2.4 Facturation
+- besoins listes et traces vers contrats
+- priorisation explicite
+- criteres mesurables presents
+- dependances et risques identifies
 
-| Id | Besoin | Description | Critères d’acceptation |
-|----|--------|-------------|-------------------------|
-| MAC-11 | Émission de factures | Émettre une facture (client, lignes, montants, TVA, numérotation, conditions de paiement). | Formulaire facture ; conformité (TVA, numérotation selon juridiction) ; enregistrement et PDF. |
-| MAC-12 | Relances | Gérer les relances (factures impayées, rappels, escalade). | Liste des factures impayées ; envoi de relance (email, modèle) ; suivi des relances ; configuration des seuils. |
-| MAC-13 | Suivi des encaissements | Enregistrer les encaissements et associer à une facture (statut payé / partiel / impayé). | Saisie encaissement (montant, date, moyen) ; liaison facture ; pas de stockage RIB/carte en clair (token ou référence opaque). |
-| MAC-14 | Intégration JayFestival / JayRDV | JayFestival et JayRDV appellent les Opérateurs JayKonta pour émettre des factures (ex. facture exposant, facture professionnel). | Appel `invoice.emit` avec référence métier ; facture enregistrée ; suivi relances/encaissements ; audit. |
+## Risques et mitigations
 
-### 2.5 Rapports et export
+- R1 : confusion Purse/Account
+- mitigation : separation de contexte et permissions strictes
 
-| Id | Besoin | Description | Critères d’acceptation |
-|----|--------|-------------|-------------------------|
-| MAC-15 | Tableaux de bord | Consulter des tableaux de bord (CA, encaissements, factures en attente, répartition par catégorie/projet). | Tableau de bord configurable ; indicateurs clés ; filtres par période, projet. |
-| MAC-16 | Rapports légaux | Produire des rapports (bilan, compte de résultat, journal, grand livre) pour conformité et expert-comptable. | Rapports prédéfinis selon juridiction ; export PDF/CSV ; pas d’export de données de paiement brutes. |
-| MAC-17 | Export pour tiers | Exporter des données pour expert-comptable ou logiciel tiers (format standard, périmètre contrôlé). | Export CSV/Excel ou format standard ; périmètre et niveau de sécurité contrôlés ; audit de l’export. |
+- R2 : surcharge phase 1
+- mitigation : limiter P0/P1, reporter enrichissements phase 2
 
-### 2.6 Budget par projet / édition (intégration JayFestival)
+- R3 : regressions integration
+- mitigation : tests de contrats CK-INT automatiques
 
-| Id | Besoin | Description | Critères d’acceptation |
-|----|--------|-------------|-------------------------|
-| MAC-18 | Budget par édition (JayFestival) | JayFestival enregistre les revenus et dépenses par édition via JayKonta. | Appel `budget.movements.record` avec référence édition ; ventilation par édition ; rapports budget par édition dans JayFestival. |
-| MAC-19 | Vue budget organisateur | L’organisateur JayFestival consulte le budget de ses éditions (revenus/dépenses, ventilation) depuis son espace JayFestival. | Données comptables fournies par JayKonta (rapports) ; affichage dans JayFestival selon Mandat et permissions. |
+## References complementaires
 
----
+- `docs/services/JayKonta/JayKonta - Bornage Implementation.md`
+- `docs/services/JayKonta/JayKonta - Plan Implementation.md`
+- `docs/services/JayKonta/publics/Account/Account - Operateurs et Toolkits.md`
+- `docs/services/JayKonta/publics/Account/Account - Parcours Capacites Livrables.md`
 
-## 3. Besoins non fonctionnels
+## Statut
 
-### 3.1 Sécurité et confidentialité
-
-| Id | Besoin | Critères d’acceptation |
-|----|--------|-------------------------|
-| NFR-MAC-01 | Données niveau 2–3 (Sensitive à Critical) | Devis, factures, mouvements : niveau 2 ; données de paiement, pièces comptables : niveau 3 ; flux chiffrés, résidence centralisée. |
-| NFR-MAC-02 | Résidence centralisée | COG de référence désigné par contrat ; pas de copie non gouvernée sur terminaux ou COG tiers. |
-| NFR-MAC-03 | Pas de stockage des données de paiement en clair | RIB, cartes, tokens sensibles : référencement par token ou identifiant opaque ; conformité PCI-DSS / réglementation. |
-| NFR-MAC-04 | Audit complet | Traçabilité de toutes les lectures et écritures (devis, factures, mouvements, export) ; révocation possible (StrongFather, WorrySentinel). |
-
-### 3.2 Conformité légale
-
-| Id | Besoin | Critères d’acceptation |
-|----|--------|-------------------------|
-| NFR-MAC-05 | Conformité facturation | Numérotation, TVA, mentions légales selon juridiction (France, UE, etc.). |
-| NFR-MAC-06 | Conformité rapports | Rapports (bilan, compte de résultat) conformes aux normes en vigueur selon juridiction. |
-
-### 3.3 Performance et disponibilité
-
-| Id | Besoin | Critères d’acceptation |
-|----|--------|-------------------------|
-| NFR-MAC-07 | Temps de chargement des rapports | Les rapports (tableau de bord, grand livre) se chargent en moins de 5 secondes (réseau standard). |
-| NFR-MAC-08 | Émission de facture | L’émission d’une facture (création + PDF) s’effectue en moins de 3 secondes. |
-
----
-
-## 4. Priorisation et dépendances
-
-### 4.1 Priorisation (exemple)
-
-| Priorité | Besoins | Justification |
-|----------|---------|---------------|
-| **P0** | MAC-01 à MAC-06, MAC-11 à MAC-13 (compte, mouvements, facturation, encaissements) | Fondamentaux comptabilité entreprise. |
-| **P1** | MAC-07 à MAC-10 (devis, intégration JayFestival/JayRDV devis) | Parcours devis → facture ; intégration services. |
-| **P2** | MAC-14 à MAC-17 (intégration facturation JayFestival/JayRDV, rapports, export) | Intégration complète, rapports légaux. |
-| **P3** | MAC-18 à MAC-19 (budget par édition JayFestival) | Besoin JayFestival déjà cité dans Document fondateur JayFestival. |
-
-### 4.2 Dépendances
-
-| Besoin | Dépendance |
-|--------|-------------|
-| Compte Account | Miyauth, Master Butler (permissions, rôles), WorrySentinel (niveau 2–3). |
-| Devis, factures, mouvements, rapports | Opérateurs et Kits JayKonta (COG) : `quote.create`, `invoice.emit`, `budget.movements.record`, `report.balance`, `report.export`. |
-| Intégration JayFestival | JayFestival (données métier exposants, éditions) ; JayKonta (données comptables). |
-| Intégration JayRDV | JayRDV (données métier professionnels, RDV) ; JayKonta (facturation, encaissements). |
-| Notifications | Miyunotify (relances, rappels). |
-
-### 4.3 Dépendances explicites (ordre de lecture recommandé)
-
-Pour cohérence inter-documents, l’ordre suivant est recommandé :
-
-| Ordre | Document | Rôle |
-|-------|----------|------|
-| 1 | [JayKonta - Document Fondateur](../../JayKonta%20-%20Document%20Fondateur.md) | Contexte service COG, points d’entrée, sécurité. |
-| 2 | [Points d’entrée JayBudget et JayKonta](../../reference/JayKonta%20-%20Points%20Entree%20Purse%20et%20Account.md) | Périmètre Account, capacités exposées. |
-| 3 | [Integration Services](../../reference/JayKonta%20-%20Integration%20Services.md) | Flux JayFestival, JayRDV, responsabilités. |
-| 4 | Ce document (Account - Analyse des besoins) | Besoins fonctionnels et non fonctionnels Account. |
-
----
-
-## 5. Références
-
-| Document | Rôle |
-|----------|------|
-| [JayKonta - Document Fondateur](../../JayKonta%20-%20Document%20Fondateur.md) | Contexte, besoins stratégiques, positionnement Account. |
-| [Points d’entrée JayBudget et JayKonta](../../reference/JayKonta%20-%20Points%20Entree%20Purse%20et%20Account.md) | Périmètre Account, données, résidence. |
-| [Intégration avec les autres services](../../reference/JayKonta%20-%20Integration%20Services.md) | JayFestival, JayRDV, flux de données, responsabilités. |
-| [Niveaux de sécurité et protection](../../reference/JayKonta%20-%20Niveaux%20Securite%20et%20Protection%20Donnees.md) | Niveaux WorrySentinel, mesures de protection. |
-| [JayFestival - Document Fondateur](../../../MiyukiniFestivalService/Miyukini%20Festival%20Service%20-%20Document%20Fondateur.md) | Service consommateur (budget édition, facturation exposants). |
-| [JayRDV - Document Fondateur](../../../JayRDV/JayRDV%20-%20Document%20Fondateur.md) | Service consommateur (facturation professionnels). |
-| [Miyukini Prompt Protocol — Écriture documentation conceptuelle](../../../../protocols/Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md) | Protocole d’écriture de la documentation conceptuelle (cadre de travail, contraintes, décisions structurantes). |
-
----
-
-**Document** : JayKonta — Analyse des besoins (point d’entrée entreprise)  
-**Version** : 1.1  
-**Date** : 2026-01-31  
-**Statut** : Document d’analyse (point d’entrée Account). Enrichi selon [Protocole d’écriture documentation conceptuelle](../../../../protocols/Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
+- Version : 2.0
+- Date : 2026-02-07
+- Statut : Analyse enrichie

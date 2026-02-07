@@ -67,6 +67,7 @@ members = [
     "crates/jayfestival",
     "crates/jaykoa",
     "crates/jayxpose",
+    "crates/jaykonta",
     "tools/mip-generator",
     "tools/toolkit-skeleton",
     "tools/toolkit-registry-export",

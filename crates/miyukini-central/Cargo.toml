@@ -20,6 +20,7 @@ egui-phosphor = "0.11"
 jayfestival = { path = "../jayfestival" }
 jaykoa = { path = "../jaykoa" }
 jayxpose = { path = "../jayxpose" }
+jaykonta = { path = "../jaykonta" }
 lord_of_the_castle = { path = "../lord_of_the_castle" }
 miyuclicker = { path = "../miyuclicker" }
 resvg = { version = "0.46", default-features = false }
