@@ -1,0 +1,41 @@
+# @id: jaykoa_crate_config
+# @do: declare_jaykoa_crate_and_dependencies
+# @layer: infra
+# Crate JayKoa — Service officiel famille Jay (calendrier universel, agenda unifié).
+# Récepteur temporel transversal : reflète, agrège et orchestre le temps.
+# Dépendances : egui, eframe (UI), kindmother (persistance), chrono (temps).
+
+[package]
+name = "jaykoa"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords = ["jaykoa", "agenda", "calendar", "egui", "eframe"]
+categories.workspace = true
+description = "JayKoa — Calendrier universel du COG, récepteur temporel transversal (egui/eframe)"
+
+[dependencies]
+egui = "0.33"
+eframe = { version = "0.33", default-features = false, features = ["default_fonts", "persistence", "glow"] }
+kindmother = { path = "../kindmother" }
+rusqlite = { version = "0.32", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+[[bin]]
+name = "jaykoa"
+path = "src/main.rs"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+doc_markdown = "allow"

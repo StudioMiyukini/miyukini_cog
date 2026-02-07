@@ -64,6 +64,7 @@ pub struct CentralProfileSaveRow {
 
 /// Profil Miyukini COG (email = login, champs enrichis modifiables).
 #[derive(Debug, Clone)]
+#[allow(missing_docs)]
 pub struct CentralProfile {
     pub id: String,
     pub email: String,

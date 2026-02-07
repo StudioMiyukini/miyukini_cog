@@ -56,6 +56,7 @@ pub fn validate_password(password: &str) -> Result<(), PasswordError> {
 
 /// Erreur de validation du mot de passe.
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[allow(missing_docs)]
 pub enum PasswordError {
     TooShort,
     NoLetter,

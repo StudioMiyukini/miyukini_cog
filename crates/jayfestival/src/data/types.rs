@@ -1,6 +1,8 @@
 //! Types domaine JayFestival (profiles, editions, organisateurs, exposants).
 //! Alignés sur la référence base de données ; persistance via KindMother (SQLite fille).
 
+#![allow(missing_docs)]
+
 use serde::{Deserialize, Serialize};
 
 /// Profil utilisateur (table `profiles`).
