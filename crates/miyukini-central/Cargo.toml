@@ -18,6 +18,7 @@ egui = "0.33"
 eframe = { version = "0.33", default-features = false, features = ["default_fonts", "persistence", "glow"] }
 egui-phosphor = "0.11"
 jayfestival = { path = "../jayfestival" }
+jaykoa = { path = "../jaykoa" }
 lord_of_the_castle = { path = "../lord_of_the_castle" }
 miyuclicker = { path = "../miyuclicker" }
 resvg = { version = "0.46", default-features = false }

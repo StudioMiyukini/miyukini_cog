@@ -263,7 +263,7 @@ pub fn mock_catalog() -> Vec<ServiceMeta> {
             name: "JayKoa".to_string(),
             description: "Agenda unifié : intègre tout ce qui manipule des dates (JayRDV, JayFestival, conflits, calendrier).".to_string(),
             category: CategoryId::Jay,
-            version: "0.1.0 (mock)".to_string(),
+            version: "0.2.0".to_string(),
         },
         ServiceMeta {
             id: ServiceId::JayKonta,

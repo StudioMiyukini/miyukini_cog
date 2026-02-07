@@ -65,6 +65,7 @@ members = [
     "crates/miyuclicker",
     "crates/lord_of_the_castle",
     "crates/jayfestival",
+    "crates/jaykoa",
     "tools/mip-generator",
     "tools/toolkit-skeleton",
     "tools/toolkit-registry-export",

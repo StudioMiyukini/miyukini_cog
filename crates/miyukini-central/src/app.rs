@@ -20,8 +20,8 @@ use crate::lucide_icons;
 use crate::pixel_theme::{chrome_dimensions, chrome_shapes, PixelChromeTheme};
 use crate::services::{
     CalculatorService, DevCenterService, EguiEditorService, EditorThemeState, GameService,
-    JayFestivalService, LordOfTheCastleService, MiyuClickerService, MockJayService, NotesService,
-    ServiceUi, TextEditorService, UiLibraryService, UI_EDITOR_THEME_STORAGE_KEY,
+    JayFestivalService, JayKoaService, LordOfTheCastleService, MiyuClickerService, MockJayService,
+    NotesService, ServiceUi, TextEditorService, UiLibraryService, UI_EDITOR_THEME_STORAGE_KEY,
 };
 use crate::usage_tracking::{UsageContext, UsageStore};
 use eframe::egui;
@@ -32,6 +32,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Mode de la fenêtre auth : Connexion ou Créer un compte.
 #[derive(Clone, Copy, PartialEq, Eq, Default)]
+#[allow(missing_docs)]
 pub enum AuthMode {
     #[default]
     Connexion,
@@ -114,14 +115,23 @@ pub struct MiyukiniCentralApp {
     pub profile_edit_pending_sync: bool,
     /// Champs d'édition du profil (fenêtre Profil).
     pub profile_edit_pseudonyme: String,
+    /// Nom (édition profil).
     pub profile_edit_nom: String,
+    /// Prénom (édition profil).
     pub profile_edit_prenom: String,
+    /// Date de naissance (édition profil).
     pub profile_edit_date_naissance: String,
+    /// Téléphone (édition profil).
     pub profile_edit_telephone: String,
+    /// Email (édition profil).
     pub profile_edit_email: String,
+    /// Numéro de voie (édition profil).
     pub profile_edit_numero_voie: String,
+    /// Rue (édition profil).
     pub profile_edit_rue: String,
+    /// Code postal (édition profil).
     pub profile_edit_code_postal: String,
+    /// Ville (édition profil).
     pub profile_edit_ville: String,
     /// Erreur affichée après un clic sur Sauvegarder le profil.
     pub profile_save_error: Option<String>,
@@ -1069,7 +1079,8 @@ impl MiyukiniCentralApp {
             return;
         }
 
-        // Créer le service (services Jay en mock = placeholder). UI Editor : thème chargé depuis storage.
+        // Créer le service. JayKoa et JayFestival = prod ; JayRDV, JayKonta, JayXpose, JayFaim = mock. UI Editor : thème depuis storage.
+        let profile_id = self.current_profile.as_ref().map(|p| p.id.clone());
         let service: Box<dyn ServiceUi> = match service_id {
             ServiceId::Calculator => Box::new(CalculatorService::default()),
             ServiceId::Game => Box::new(GameService::default()),
@@ -1081,7 +1092,7 @@ impl MiyukiniCentralApp {
             ServiceId::EguiEditor => Box::new(EguiEditorService::from_storage(storage)),
             ServiceId::JayRDV => Box::new(MockJayService::new(service_id, "JayRDV")),
             ServiceId::JayFestival => Box::new(JayFestivalService::default()),
-            ServiceId::JayKoa => Box::new(MockJayService::new(service_id, "JayKoa")),
+            ServiceId::JayKoa => Box::new(JayKoaService::with_profile(profile_id)),
             ServiceId::JayKonta => Box::new(MockJayService::new(service_id, "JayKonta")),
             ServiceId::JayXpose => Box::new(MockJayService::new(service_id, "JayXpose")),
             ServiceId::JayFaim => Box::new(MockJayService::new(service_id, "JayFaim")),

@@ -1884,6 +1884,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "jaykoa"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "eframe",
+ "egui",
+ "kindmother",
+ "rusqlite",
+ "serde",
+ "uuid",
+]
+
+[[package]]
 name = "jni"
 version = "0.21.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2413,6 +2426,7 @@ dependencies = [
  "egui",
  "egui-phosphor",
  "jayfestival",
+ "jaykoa",
  "lord_of_the_castle",
  "miyuclicker",
  "rand 0.8.5",

@@ -59,6 +59,10 @@ supabase-catakana.env
 jayfestival.db
 jayfestival.db-journal
 
+# JayKoa — base fille SQLite (KindMother)
+jaykoa.db
+jaykoa.db-journal
+
 # Miyukini Central — auth profils COG (SQLite)
 miyukini_cog.db
 miyukini_cog.db-journal
