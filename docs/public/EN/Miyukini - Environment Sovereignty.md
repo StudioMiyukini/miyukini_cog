@@ -1,0 +1,356 @@
+# Miyukini Conceptual References — Environment Sovereignty
+
+## Context
+
+This document defines the **fundamental rules of sovereignty** of Miyukini environments (COGs). It establishes the architectural principle that a COG is a sovereign, versioned, isolated, and uniquely identified entity.
+
+This document formalizes the distinction between Miyukini and traditional SaaS models: **Miyukini adopts the kernel/distribution model, not the SaaS model.**
+
+## Scope
+
+- **Applies to:** Global architecture, versioning strategy, deployment
+- **Audience:** Architects, developers, environment operators
+- **Status:** Normative reference document
+
+---
+
+## 1. Foundational Rule: No Patch, Only Complete Environments
+
+### Canonical statement
+
+> **In Miyukini, the Cores stratum is immutable.**  
+> **Any evolution is done by creating a new complete environment.**  
+> **Operators are bound to a single environment and cannot exist outside it.**
+
+### What this rule means
+
+| Aspect | Rule |
+|--------|------|
+| **No micro-patch** | The Cores stratum (Stratum 4) is never patched individually |
+| **Complete versions only** | Any evolution produces a complete environment version |
+| **No wild hotfix** | No "fix in prod at 3am" |
+| **Temporal stability** | Mandatory delay between versions |
+
+### Why this rule is fundamental
+
+| Benefit | Explanation |
+|---------|-------------|
+| ✅ Avoids micro-patch hell | No cascade of incompatible fixes |
+| ✅ Avoids compatibility fragmentation | One environment = one coherent version |
+| ✅ Avoids permanent churn for third-party devs | Stable target, predictable development time |
+| ✅ Enables audit and certification | Frozen version, auditable, certifiable |
+| ✅ Enables LTS environments | Long-Term Support possible |
+
+---
+
+## 2. Definition: A COG Environment is a Sovereign Entity
+
+### Canonical definition
+
+> A Miyukini environment (COG) is a **sovereign, versioned, isolated, and uniquely identified entity**.
+
+### Characteristics of a COG environment
+
+| Property | Description |
+|----------|-------------|
+| **Complete cores version** | Coherent, frozen set of all cores (Stratum 4) |
+| **Unique iteration** | Distinct version number in history |
+| **Unique environment ID** | Identifier generated at creation by the kernel |
+| **Set of bound Operators** | Operators (Stratum 7) tied to this environment |
+| **Strict boundaries** | Clear limits between the environment and the outside |
+
+### What a COG environment represents
+
+**👉 It is an instance of governance, not a mere runtime.**
+
+The "country" analogy is technically relevant:
+
+| Analogy | COG environment |
+|---------|------------------|
+| Territory | Boundaries defined by Border Guard |
+| Constitution | Invariants and contracts (Stratum 3) |
+| Government | System Cores (Stratum 4) |
+| Citizens | Bound Operators (Stratum 7) |
+| National identity | Unique environment ID |
+| Diplomatic relations | Migration via BondingBrother |
+
+---
+
+## 3. Golden Rule: Strict Vertical Dependency
+
+### Statement
+
+| Rule | Implication |
+|------|-------------|
+| ❌ **An Operator cannot communicate with multiple versions of Cores strata** | No "multi-version runtime" |
+| ❌ **An Operator is never dynamically portable between environments** | No hot migration |
+
+### Consequence: Strict Operator/Environment Binding
+
+An Operator in Miyukini is:
+
+| Property | Description |
+|----------|-------------|
+| **Bound to one environment version** | Compiled/configured for a specific version |
+| **Bound to a precise iteration** | No implicit compatibility between iterations |
+| **Subject to its environment’s rules** | Governed by that environment’s StrongFather policies |
+
+### What is forbidden
+
+| ❌ Forbidden | Why |
+|--------------|-----|
+| Cross-core hacks | An Operator cannot bypass cores to communicate |
+| Wild compat layer | No unofficial compatibility layer |
+| Dynamic core import | An Operator does not load cores on the fly |
+| Multi-environment runtime | An Operator does not run "between" two environments |
+
+---
+
+## 4. Coexistence on the Same Hardware: Validated
+
+### Rule
+
+**Multiple COG environments may coexist on the same physical hardware.**
+
+### Architecture diagram
+
+```
+Physical Hardware
+ │
+ ├─ Miyukini Env A (COG v1.2 LTS)
+ │   ├─ Operators A1, A2
+ │   └─ [ID: env-a-uuid]
+ │
+ ├─ Miyukini Env B (COG v2.0)
+ │   ├─ Operators B1
+ │   └─ [ID: env-b-uuid]
+ │
+ └─ Miyukini Env C (isolated / offline)
+     ├─ Operators C1
+     └─ [ID: env-c-uuid]
+```
+
+### Why there is no conflict
+
+| Reason | Explanation |
+|--------|-------------|
+| **No shared patch** | Each environment has its own complete cores |
+| **No shared core** | No system resource shared between environments |
+| **No cross dependency** | Each environment is self-contained |
+| **Complete isolation** | Boundaries are strictly defined |
+
+---
+
+## 5. Environment Identity: 3-Level Model
+
+### Generation principle
+
+| Property | Rule |
+|----------|------|
+| **Generated by the kernel** | Only the kernel can create an environment ID |
+| **Unique** | Uniqueness guaranteed (local or global depending on mode) |
+| **Immutable** | The ID never changes after creation |
+
+### The 3 identity levels
+
+#### Level 1: Local Sovereign ID (LSI)
+
+| Aspect | Description |
+|--------|-------------|
+| **Generation** | By local kernel at creation |
+| **Validity** | Always valid locally |
+| **Uniqueness** | Guaranteed locally (UUID v4 or equivalent) |
+| **Use case** | Isolated environment, permanently offline |
+| **Trust** | Sovereign — the environment self-declares |
+
+#### Level 2: Verified ID (VID)
+
+| Aspect | Description |
+|--------|-------------|
+| **Generation** | LSI verified by a global registry |
+| **Validity** | Valid globally if network available |
+| **Uniqueness** | Verified against a central registry |
+| **Use case** | Connected, federated environment |
+| **Trust** | Attested — a third party has verified the identity |
+
+#### Level 3: Witnessed ID (WID)
+
+| Aspect | Description |
+|--------|-------------|
+| **Generation** | LSI verified by indirect exchange |
+| **Validity** | Valid in a distributed trust network |
+| **Uniqueness** | Verified by witnesses (other environments) |
+| **Use case** | Semi-connected environment, USB key, QR, signature |
+| **Trust** | Witnessed — other environments attest |
+
+### Trust gradation
+
+```
+Minimal trust                                    Maximum trust
+      │                                                      │
+      ▼                                                      ▼
+┌─────────────┐      ┌─────────────┐      ┌─────────────┐
+│  Local      │  →   │  Witnessed   │  →   │  Verified   │
+│  Sovereign  │      │  ID          │      │  ID         │
+│  ID (LSI)   │      │  (WID)       │      │  (VID)      │
+└─────────────┘      └─────────────┘      └─────────────┘
+  Self-declared       Witnessed            Attested
+```
+
+### Compatibility with autonomy
+
+This gradation is **fully compatible** with the Miyukini model:
+
+| Principle | Respect |
+|-----------|---------|
+| **Offline-first** | ✅ LSI works without network |
+| **Sovereign** | ✅ Each level is valid in its context |
+| **Controlled interoperability** | ✅ Higher levels enable federation |
+
+---
+
+## 6. Migration = Diplomacy between Environments
+
+### Fundamental principle
+
+> **Migration ≠ Direct communication**
+
+COG environments may exchange data **if and only if** it is **explicitly permitted**.
+
+### Migration rules
+
+| Rule | Description |
+|------|-------------|
+| **Migration = process** | Not instant exchange, but a formal procedure |
+| **Migration = contract** | Both environments explicitly accept the exchange |
+| **Migration = controlled boundary** | Border Guard validates each transfer |
+| **Migration = translation** | BondingBrother translates between versions, no raw copy |
+
+### Migration actors
+
+| Core | Role in migration |
+|------|-------------------|
+| **Border Guard** | Defines crossing rules |
+| **BondingBrother** | Translates and mediates the exchange |
+| **StrongFather** | Decides whether migration is authorized |
+| **KindMother** | Executes persistence of migrated data |
+| **Ever Buddy** | Validates version compatibility |
+
+### What is migrable vs what never is
+
+| Migrable | Not migrable |
+|----------|--------------|
+| Business data (with translation) | Active policies |
+| Exportable journals | Sessions and tokens |
+| Sync metadata | Real-time system state |
+| Schemas (if compatible) | Cache and transient data |
+
+---
+
+## 7. Security & Temporality: Deliberately Slowing Evolution
+
+### Principle
+
+> **We want to guarantee security and impose a delay between versions to avoid the patch race.**
+
+### Implications
+
+| Aspect | Rule |
+|--------|------|
+| **No wild hotfix** | Any fix goes through a new complete version |
+| **No "fix in prod at 3am"** | Emergencies are handled by degradation, not patch |
+| **Minimum delay between versions** | Mandatory stabilization time (e.g. LTS) |
+| **Predictable cycle** | Third-party developers can plan |
+
+### Benefits for third-party developers
+
+| Benefit | Explanation |
+|---------|-------------|
+| **Stable target** | One version = one fixed development target |
+| **Available time** | No permanent compatibility race |
+| **Quality** | Room for thorough testing |
+| **Predictability** | Reliable development planning |
+
+### What Miyukini prioritizes
+
+| Priority | Description |
+|----------|-------------|
+| ✅ **Reliability** | An environment works or it does not — no dubious intermediate state |
+| ✅ **Predictability** | Deterministic, documented behaviour |
+| ✅ **System quality** | Solid architecture over fast features |
+| ❌ **Not hype** | No race for new features |
+
+---
+
+## 8. Versioned Software Sovereignty Model
+
+### What Miyukini creates
+
+> **A versioned software sovereignty model.**
+
+### What Miyukini is NOT
+
+| ❌ Is not | Why |
+|-----------|-----|
+| An OS | It is a governance environment, not an operating system |
+| A framework | It is a complete ecosystem with its own rules |
+| A SaaS | No cloud dependency, no continuous patch |
+
+### What Miyukini IS
+
+| ✅ Is | Description |
+|-------|-------------|
+| **Governed environment** | Explicit and enforced rules |
+| **Versioned** | Each environment has a complete version |
+| **Isolable** | Can run alone, offline, with no dependency |
+| **Migrable** | Data can be transferred between environments |
+| **Auditable** | Every action is traceable and verifiable |
+
+---
+
+## 9. Summary of Fundamental Rules
+
+### Summary table
+
+| # | Rule | Status |
+|---|------|--------|
+| 1 | The Cores stratum is never patched | **NON-NEGOTIABLE** |
+| 2 | A COG is a sovereign entity | **NON-NEGOTIABLE** |
+| 3 | An Operator is bound to a single environment | **NON-NEGOTIABLE** |
+| 4 | Multiple COGs may coexist on one hardware | **ALLOWED** |
+| 5 | Identity has 3 levels (LSI, WID, VID) | **RECOMMENDED** |
+| 6 | Migration = explicit diplomacy | **NON-NEGOTIABLE** |
+| 7 | Evolution deliberately slowed | **RECOMMENDED** |
+| 8 | Sensitive data residence centralized: canonical copy on reference COG | **NORMATIVE** (see Residence policy) |
+
+### Official formulation
+
+> **In Miyukini, the Cores stratum is immutable.**  
+> **Any evolution is done by creating a new complete environment.**  
+> **Operators are bound to a single environment and cannot exist outside it.**
+
+---
+
+## 10. Sensitive data residence
+
+Certain sensitive data (personal data, critical business data) must not have their only copy on a terminal or third-party COG. Their **canonical copy** resides on a designated **reference COG** (see [Sensitive Data Residence Policy](./Miyukini%20Conceptual%20References%20-%20Politique%20Residence%20Donnees%20Sensibles.md)).
+
+**Effect:** If the terminal is cut off (e.g. exhibitor), data remains available on the reference COG (e.g. for organizers). The reference COG’s sovereignty includes holding the canonical copy of this data; terminals access via governed Visit or synchronization, without being the only copy.
+
+---
+
+**Date of creation:** 2026-01-27  
+**Version:** 1.3 (addition of sensitive data residence, reference COG)  
+**Status:** Normative reference document
+
+**Cross-references:**
+- [COG Definition](Miyukini%20-%20Definition%20COG.md): Official COG definition
+- [Miyukini Conceptual References - Politique Residence Donnees Sensibles](./Miyukini%20Conceptual%20References%20-%20Politique%20Residence%20Donnees%20Sensibles.md): Centralization and sensitive data residence
+- [Operators and Terminology](Miyukini%20-%20Operators%20and%20Terminology.md): Official terminology
+- [Laws of Autonomy](Miyukini%20-%20Laws%20of%20Autonomy.md): Autonomy constraints
+- [Miyukini Conceptual References - Vision Strategique](./Miyukini%20Conceptual%20References%20-%20Vision%20Strategique.md): Overall strategy
+- [Complete Architecture Pyramid](Miyukini%20-%20Complete%20Architecture%20Pyramid.md): Stratified architecture
+- [Kernel Maintenance Observability Contract](Miyukini%20-%20Kernel%20Maintenance%20Observability%20Contract.md): Low-level maintenance capabilities (compatible with isolation)
+- [BondingBrother - Migration & Compatibility Contract](../core/BondingBrother/BondingBrother%20-%20Migration%20%26%20Compatibility%20Contract.md): Migration contract
+- [Border Guard - Documentation Fondatrice](../core/BorderGuard/Border%20Guard%20-%20Documentation%20Fondatrice.md): Boundaries and trust
+- [Glossary](Miyukini%20-%20Glossary.md): Reference COG, Sensitive data residence policy

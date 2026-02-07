@@ -9,7 +9,7 @@
 //! @human: Registre mock des Opérateurs et métadonnées pour le HUB.
 
 /// Identifiant unique d'un Service (factice pour le MVP).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum ServiceId {
     /// Calculatrice.
     Calculator,
@@ -42,6 +42,8 @@ pub enum ServiceId {
     DevCenter,
     /// Miyukini UI Editor — personnalisation persistante de l'interface (thèmes, couleurs, formes).
     EguiEditor,
+    /// Miyukini Récompenses — système de fidélisation, achievements, objets virtuels, boutique MIYU, gacha.
+    MiyukiniLoyalty,
 }
 
 impl ServiceId {
@@ -64,6 +66,7 @@ impl ServiceId {
             ServiceId::JayFaim => "JayFaim",
             ServiceId::DevCenter => "Miyukini Dev Center",
             ServiceId::EguiEditor => "Miyukini UI Editor",
+            ServiceId::MiyukiniLoyalty => "Miyukini Récompenses",
         }
     }
     /// Clé stable pour persistance (suivi d'utilisation, DB).
@@ -85,6 +88,7 @@ impl ServiceId {
             ServiceId::JayFaim => "jay_faim",
             ServiceId::DevCenter => "dev_center",
             ServiceId::EguiEditor => "egui_editor",
+            ServiceId::MiyukiniLoyalty => "miyukini_loyalty",
         }
     }
 
@@ -107,6 +111,7 @@ impl ServiceId {
             "jay_faim" => Some(ServiceId::JayFaim),
             "dev_center" => Some(ServiceId::DevCenter),
             "egui_editor" => Some(ServiceId::EguiEditor),
+            "miyukini_loyalty" => Some(ServiceId::MiyukiniLoyalty),
             _ => None,
         }
     }
@@ -130,6 +135,7 @@ impl ServiceId {
             ServiceId::JayFaim => "🍽️",
             ServiceId::DevCenter => "🧪",
             ServiceId::EguiEditor => "🖌️",
+            ServiceId::MiyukiniLoyalty => "🎁",
         }
     }
 }
@@ -147,6 +153,8 @@ pub enum CategoryId {
     Design,
     /// Services Jay (interpolarité : RDV, festival, agenda, budget, vitrine, restauration).
     Jay,
+    /// Système (fidélisation, paramètres).
+    Systeme,
 }
 
 impl CategoryId {
@@ -159,6 +167,7 @@ impl CategoryId {
             CategoryId::Productivite => "Productivité",
             CategoryId::Design => "Design",
             CategoryId::Jay => "Services Jay",
+            CategoryId::Systeme => "Système",
         }
     }
     /// Icône pour les filtres / pills.
@@ -170,6 +179,7 @@ impl CategoryId {
             CategoryId::Productivite => "⚡",
             CategoryId::Design => "🎨",
             CategoryId::Jay => "🌐",
+            CategoryId::Systeme => "⚙️",
         }
     }
 }
@@ -305,6 +315,13 @@ pub fn mock_catalog() -> Vec<ServiceMeta> {
             name: "Miyukini UI Editor".to_string(),
             description: "Démo egui en local : changez couleurs, formes et angles, visibles en direct.".to_string(),
             category: CategoryId::Design,
+            version: "1.0.0".to_string(),
+        },
+        ServiceMeta {
+            id: ServiceId::MiyukiniLoyalty,
+            name: "Miyukini Récompenses".to_string(),
+            description: "Système de fidélisation : gagnez des points MIYU, débloquez des achievements, collectionnez des objets, et tentez votre chance au gacha. Tous les services participent !".to_string(),
+            category: CategoryId::Systeme,
             version: "1.0.0".to_string(),
         },
     ]

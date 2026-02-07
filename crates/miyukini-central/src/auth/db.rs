@@ -44,21 +44,32 @@ impl From<rusqlite::Error> for AuthDbError {
 /// Ligne de sauvegarde liée au profil Central (données complètes).
 #[derive(Debug, Clone)]
 pub struct CentralProfileSave {
+    /// Identifiant unique de la sauvegarde.
     pub id: String,
+    /// Identifiant du profil Central.
     pub profile_id: String,
+    /// Clé du service (ex. `lord_of_the_castle`).
     pub service_key: String,
+    /// Numéro de slot (0, 1, 2…).
     pub slot: i64,
+    /// Données sérialisées (BLOB).
     pub data: Vec<u8>,
+    /// Date de création (ISO).
     pub created_at: String,
+    /// Date de dernière mise à jour (ISO).
     pub updated_at: String,
 }
 
 /// Ligne allégée pour lister les sauvegardes (sans le BLOB).
 #[derive(Debug, Clone)]
 pub struct CentralProfileSaveRow {
+    /// Identifiant unique de la sauvegarde.
     pub id: String,
+    /// Numéro de slot.
     pub slot: i64,
+    /// Date de création (ISO).
     pub created_at: String,
+    /// Date de dernière mise à jour (ISO).
     pub updated_at: String,
 }
 

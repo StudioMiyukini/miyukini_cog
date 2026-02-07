@@ -20,7 +20,8 @@ use crate::lucide_icons;
 use crate::pixel_theme::{chrome_dimensions, chrome_shapes, PixelChromeTheme};
 use crate::services::{
     CalculatorService, DevCenterService, EguiEditorService, EditorThemeState, GameService,
-    JayFestivalService, JayKoaService, LordOfTheCastleService, MiyuClickerService, MockJayService,
+    JayFestivalService, JayKoaService, JayXposeService, LordOfTheCastleService, MiyuClickerService,
+    MockJayService,
     NotesService, ServiceUi, TextEditorService, UiLibraryService, UI_EDITOR_THEME_STORAGE_KEY,
 };
 use crate::usage_tracking::{UsageContext, UsageStore};
@@ -135,6 +136,10 @@ pub struct MiyukiniCentralApp {
     pub profile_edit_ville: String,
     /// Erreur affichée après un clic sur Sauvegarder le profil.
     pub profile_save_error: Option<String>,
+    /// État du système de fidélisation (points MIYU, achievements, items, missions).
+    pub loyalty_state: crate::loyalty::LoyaltyState,
+    /// Notifications de fidélisation à afficher.
+    pub loyalty_notifications: Vec<crate::loyalty::LoyaltyNotification>,
 }
 
 /// Couleurs header/Hub/onglets résolues : UI Editor (si override) ou palette Chrome.
@@ -261,7 +266,7 @@ impl MiyukiniCentralApp {
 
         let loading_state = LoadingState::new();
 
-        Self {
+        let mut app = Self {
             header_state,
             open_services: Vec::new(),
             catalog: vec![
@@ -331,7 +336,21 @@ impl MiyukiniCentralApp {
             profile_edit_code_postal: String::new(),
             profile_edit_ville: String::new(),
             profile_save_error: None,
-        }
+            loyalty_state: {
+                let mut state = crate::loyalty::LoyaltyState::new();
+                crate::loyalty::initialize_loyalty_system(&mut state);
+                state
+            },
+            loyalty_notifications: Vec::new(),
+        };
+
+        // Débloquer les achievements de premier lancement
+        crate::loyalty::check_and_unlock_achievements(
+            &mut app.loyalty_state,
+            &mut app.loyalty_notifications,
+        );
+
+        app
     }
 }
 
@@ -460,6 +479,7 @@ impl App for MiyukiniCentralApp {
         self.ui_settings_overlay(ctx);
         self.ui_auth_overlay(ctx);
         self.ui_usage_stats_overlay(ctx);
+        self.ui_loyalty_notifications(ctx);
 
         // Contenu principal selon l'onglet actif (fond body : blanc en clair, R45 G45 B45 en nuit).
         // Pas de marge intérieure pour que le body + sidebar occupent toute la hauteur restante.
@@ -727,6 +747,16 @@ impl MiyukiniCentralApp {
     fn ui_header_profile(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
         const ACTION_SIZE: f32 = 12.0;
         ui.horizontal(|ui| {
+            // Points MIYU en haut à droite (layout right_to_left donc en premier = plus à droite)
+            let miyu_points = self.loyalty_state.miyu_points.get();
+            ui.label(
+                egui::RichText::new(format!("💎 {} MIYU", miyu_points))
+                    .size(13.0)
+                    .strong()
+                    .color(egui::Color32::from_rgb(255, 215, 0)), // Couleur or
+            );
+            ui.add_space(16.0);
+
             // Bloc connexion : Connexion / Déconnexion
             if self.connected {
                 if ui
@@ -1072,7 +1102,7 @@ impl MiyukiniCentralApp {
             return;
         }
 
-        // Créer le service. JayKoa et JayFestival = prod ; JayRDV, JayKonta, JayXpose, JayFaim = mock. UI Editor : thème depuis storage.
+        // Créer le service. JayKoa, JayFestival, JayXpose = prod ; JayRDV, JayKonta, JayFaim = mock. UI Editor : thème depuis storage.
         let profile_id = self.current_profile.as_ref().map(|p| p.id.clone());
         let service: Box<dyn ServiceUi> = match service_id {
             ServiceId::Calculator => Box::new(CalculatorService::default()),
@@ -1087,9 +1117,10 @@ impl MiyukiniCentralApp {
             ServiceId::JayFestival => Box::new(JayFestivalService::default()),
             ServiceId::JayKoa => Box::new(JayKoaService::with_profile(profile_id)),
             ServiceId::JayKonta => Box::new(MockJayService::new(service_id, "JayKonta")),
-            ServiceId::JayXpose => Box::new(MockJayService::new(service_id, "JayXpose")),
+            ServiceId::JayXpose => Box::new(JayXposeService::default()),
             ServiceId::JayFaim => Box::new(MockJayService::new(service_id, "JayFaim")),
             ServiceId::DevCenter => Box::new(DevCenterService::default()),
+            ServiceId::MiyukiniLoyalty => Box::new(crate::services::LoyaltyService::default()),
         };
 
         // Ajouter l'onglet.
@@ -1903,6 +1934,59 @@ impl MiyukiniCentralApp {
                 ui.label(label);
             }
         });
+    }
+
+    /// Affiche les notifications de fidélisation (achievements, MIYU, items).
+    fn ui_loyalty_notifications(&mut self, ctx: &egui::Context) {
+        let time_sec = ctx.input(|i| i.time);
+
+        // Filtrer les notifications expirées
+        self.loyalty_notifications.retain(|notif| {
+            time_sec - notif.created_at < notif.duration as f64
+        });
+
+        // Afficher les notifications en haut à droite, sous le header
+        let screen_rect = ctx.content_rect();
+        let notification_width = 300.0;
+        let notification_spacing = 10.0;
+        let mut y_offset = 90.0; // Décalage depuis le haut (sous le header)
+
+        for notif in &self.loyalty_notifications {
+            let remaining = notif.duration - (time_sec - notif.created_at) as f32;
+            let alpha = (remaining / notif.duration).clamp(0.0, 1.0);
+
+            let window_pos = egui::pos2(
+                screen_rect.max.x - notification_width - 20.0,
+                screen_rect.min.y + y_offset,
+            );
+
+            egui::Area::new(egui::Id::new(format!("notification_{}", notif.created_at)))
+                .fixed_pos(window_pos)
+                .show(ctx, |ui| {
+                    egui::Frame::NONE
+                        .fill(egui::Color32::from_rgba_unmultiplied(40, 40, 50, (255.0 * alpha) as u8))
+                        .stroke(egui::Stroke::new(2.0, egui::Color32::from_rgba_unmultiplied(255, 215, 0, (255.0 * alpha) as u8)))
+                        .corner_radius(egui::CornerRadius::same(8))
+                        .inner_margin(egui::Margin::same(12))
+                        .show(ui, |ui| {
+                            ui.set_max_width(notification_width - 24.0);
+                            ui.horizontal(|ui| {
+                                ui.label(egui::RichText::new(&notif.icon).size(24.0));
+                                ui.vertical(|ui| {
+                                    ui.label(egui::RichText::new(&notif.title).strong().color(egui::Color32::WHITE));
+                                    ui.label(egui::RichText::new(&notif.message).color(egui::Color32::LIGHT_GRAY));
+                                });
+                            });
+                        });
+                });
+
+            y_offset += 80.0 + notification_spacing;
+        }
+
+        // Redemander un repaint si des notifications sont actives
+        if !self.loyalty_notifications.is_empty() {
+            ctx.request_repaint();
+        }
     }
 
     /// Affiche le contenu Paramètres (utilisé dans l'overlay).

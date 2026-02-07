@@ -5,6 +5,7 @@ pub mod auth;
 pub mod catalog;
 pub mod config;
 pub mod loading;
+pub mod loyalty;
 pub mod lucide_icons;
 pub mod pixel_theme;
 pub mod services;

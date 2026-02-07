@@ -794,7 +794,7 @@ impl ItemInstance {
             ItemRarity::Unique => 30,
         };
         let pct_bonus = self.price_multiplier_pct();
-        let price = (base * mult);
+        let price = base * mult;
         let with_bonus = price + (price * pct_bonus / 100);
         with_bonus.max(1) as u32
     }

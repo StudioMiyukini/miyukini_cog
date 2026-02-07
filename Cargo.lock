@@ -2442,6 +2442,7 @@ dependencies = [
  "egui-phosphor",
  "jayfestival",
  "jaykoa",
+ "jayxpose",
  "lord_of_the_castle",
  "miyuclicker",
  "rand 0.8.5",
