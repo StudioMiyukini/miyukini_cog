@@ -452,8 +452,7 @@ Toute la documentation conceptuelle de reference est disponible dans le dossier 
 | **Qu'est-ce qu'un COG** | [Definition COG](docs/public/Miyukini%20-%20Definition%20COG.md) |
 | **Architecture en strates** | [Pyramide Architecture](docs/public/Miyukini%20-%20Pyramide%20Architecture%20Complete.md) |
 | **Lois fondamentales** | [Lois d'Autonomie](docs/public/Miyukini%20-%20Lois%20Autonomie%20Systeme.md) |
-| **Vision et strategie** | [Vision Strategique](docs/public/Miyukini%20-%20Vision%20Strategique.md) |
-| **Objectif du projet** | [Objectif Final](docs/public/Miyukini%20-%20Objectif%20Final.md) |
+| **Objectif du projet** | [Objectif du projet](docs/public/Miyukini%20-%20Objectif%20du%20projet.md) |
 | **Souverainete des environnements** | [Souverainete](docs/public/Miyukini%20-%20Souverainete%20Environnement.md) |
 | **Les Operateurs** | [Operateurs et Terminologie](docs/public/Miyukini%20-%20Operators%20et%20Terminologie.md) |
 | **Les outils** | [Tools et Toolkits](docs/public/Miyukini%20-%20Tools%20et%20Toolkits.md) |

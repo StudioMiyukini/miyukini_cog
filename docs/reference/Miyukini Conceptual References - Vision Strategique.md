@@ -1,5 +1,10 @@
 # Miyukini Conceptual References — Vision Stratégique
 
+> **Ce document est fusionné dans [Miyukini Conceptual References - Objectif du projet](Miyukini%20Conceptual%20References%20-%20Objectif%20du%20projet.md).**  
+> Consulter « Objectif du projet » pour les objectifs à long terme, la stratégie, le produit, le business, l'utilité et l'utilisation finale.
+
+---
+
 ## 1. Contexte
 
 Ce document définit la **vision stratégique** de l'écosystème Miyukini : les objectifs fondamentaux, la posture architecturale, et la stratégie de construction qui guide toutes les décisions de développement.
