@@ -1,0 +1,57 @@
+.wrapper {
+  padding-bottom: 3rem;
+}
+
+.intro {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.section h2 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: var(--accent);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.serviceCard h3 {
+  font-size: 1.05rem;
+  margin: 0 0 0.35rem;
+}
+
+.serviceCard p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.id {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.cta {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.cta a {
+  font-weight: 500;
+}
+
+.cta a:hover {
+  text-decoration: underline;
+}

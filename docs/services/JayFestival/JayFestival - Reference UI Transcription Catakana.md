@@ -2,18 +2,18 @@
 
 ## Contexte
 
-Ce document **retranscrit l’UI complète de Catakana** (Atomic Design, thème, ui-kit, écrans) dans la **stack actuelle** Miyukini : **egui / eframe** (Rust), avec référence au thème existant (miyukini-central `theme.rs`, `pixel_theme.rs`) et à la Miyukini UI Library. Il sert de **référence pour l’implémentation** de JayFestival et complète l’[Audit documentation Catakana](./JayFestival%20-%20Audit%20Documentation%20Catakana.md) et le [Bornage Implementation](./JayFestival%20-%20Bornage%20Implementation.md).
+Ce document **retranscrit l’UI complète de Catakana** (Atomic Design, thème, ui-kit, écrans) dans la **stack actuelle** Miyukini : **Dioxus** (Rust), avec référence au thème existant (miyukini-central `theme.rs`, `pixel_theme.rs`) et à la Miyukini UI Library. Il sert de **référence pour l’implémentation** de JayFestival et complète l’[Audit documentation Catakana](./JayFestival%20-%20Audit%20Documentation%20Catakana.md) et le [Bornage Implementation](./JayFestival%20-%20Bornage%20Implementation.md).
 
 **Sources Catakana** : `.Catakana/docs/ATOMIC_THEME_GUIDE.md`, `.Catakana/docs/reference/UI_ARCHITECTURE.md`, `.Catakana/src/components/` (atoms, molecules, organisms, theme, ui shadcn), `sectionsConfig.ts`, `adminCategoriesConfig.tsx`.
 
 **Conformité** : L'implémentation doit respecter la [Spécification UI conforme Catakana](./JayFestival%20-%20Specification%20UI%20Conforme%20Catakana.md) : protocoles obligatoires, spécifications détaillées de chaque atome/molécule/organisme, parcours par écran avec composants ordonnés. Ce document (Reference UI) fournit le mapping global ; la spec fournit les bornes et les règles de conformité.
 
-**Stack cible** : [Miyukini - Stack UI egui eframe](../../ux_ui/Miyukini%20-%20Stack%20UI%20egui%20eframe.md) ; `crates/miyukini-central/src/theme.rs`, `pixel_theme.rs`, `services/ui_library.rs`.
+**Stack cible** : [Miyukini - Stack UI Dioxus](../../ux_ui/Miyukini%20-%20Stack%20UI%20Dioxus%20Dioxus.md) ; `crates/miyukini-central/src/theme.rs`, `pixel_theme.rs`, `services/ui_library.rs`.
 
 ## Portée / Scope
 
-- **Périmètre** : Transcription Atomic UI, tokens de thème, ui-kit (composants), mapping écrans Catakana → écrans JayFestival (egui), checklist d’implémentation.
-- **Hors périmètre** : Code source React/TypeScript Catakana ; implémentation détaillée des widgets egui (référence docs egui et miyukini-central).
+- **Périmètre** : Transcription Atomic UI, tokens de thème, ui-kit (composants), mapping écrans Catakana → écrans JayFestival (Dioxus), checklist d’implémentation.
+- **Hors périmètre** : Code source React/TypeScript Catakana ; implémentation détaillée des widgets Dioxus (référence docs Dioxus et miyukini-central).
 
 ---
 
@@ -21,28 +21,28 @@ Ce document **retranscrit l’UI complète de Catakana** (Atomic Design, thème,
 
 ### 1.1 Principes Catakana à conserver
 
-| Principe | Catakana | JayFestival / egui |
+| Principe | Catakana | JayFestival / Dioxus |
 |----------|----------|---------------------|
 | **Source unique des styles** | `useActiveTheme()` → tokens (couleurs, rayons, ombres, spacing, opacités) | Struct `JayFestivalTheme` (ou extension `theme.rs`) ; appliquer via `ctx.set_style()` et helpers. |
-| **Opacité des fonds** | Fonds principaux ~40 % opacité | `egui::Color32::from_rgba_unmultiplied(r, g, b, 102)` (255*0.4≈102) pour fonds section/carte. |
-| **Atomic design** | Atoms → Molecules → Organisms → Templates → Pages | Équivalent egui : **widgets de base** (bouton, label, champ) → **composants composés** (Frame + label + bouton) → **panels/sections** (SidePanel + liste + cartes) → **layout page** (TopBottomPanel + SidePanel + CentralPanel) → **écran** (état + layout + sections). |
-| **Tokens UI** | Jamais de couleurs/tailles en dur | Toutes les couleurs, rayons, espacements, polices viennent du thème (struct ou `egui::Style`). |
+| **Opacité des fonds** | Fonds principaux ~40 % opacité | `Dioxus::Color32::from_rgba_unmultiplied(r, g, b, 102)` (255*0.4≈102) pour fonds section/carte. |
+| **Atomic design** | Atoms → Molecules → Organisms → Templates → Pages | Équivalent Dioxus : **widgets de base** (bouton, label, champ) → **composants composés** (Frame + label + bouton) → **panels/sections** (SidePanel + liste + cartes) → **layout page** (TopBottomPanel + SidePanel + CentralPanel) → **écran** (état + layout + sections). |
+| **Tokens UI** | Jamais de couleurs/tailles en dur | Toutes les couleurs, rayons, espacements, polices viennent du thème (struct ou `Dioxus::Style`). |
 
 ### 1.2 Stack actuelle (rappel)
 
-- **UI** : egui 0.33, eframe 0.33 (Rust).
+- **UI** : Dioxus 0.33, Dioxus 0.33 (Rust).
 - **Layout** : `CentralPanel`, `SidePanel`, `TopBottomPanel`, `Window`, `Area`.
 - **Widgets** : `ui.button()`, `ui.label()`, `ui.heading()`, `TextEdit`, `checkbox`, `selectable_value`, `collapsing`, `horizontal` / `vertical`, etc.
-- **Style** : `ctx.set_style()`, `ctx.set_visuals()` ; `egui::Style`, `egui::Visuals`, `egui::WidgetVisuals` (corner_radius, bg_fill, …).
+- **Style** : `ctx.set_style()`, `ctx.set_visuals()` ; `Dioxus::Style`, `Dioxus::Visuals`, `Dioxus::WidgetVisuals` (corner_radius, bg_fill, …).
 - **Thème existant** : `theme.rs` (store : accent, card radius, spacing), `pixel_theme.rs` (Chrome tabs).
 
 ---
 
-## 2. Thème — tokens Catakana → egui / JayFestival
+## 2. Thème — tokens Catakana → Dioxus / JayFestival
 
-### 2.1 Noms de tokens (Catakana) → champs egui / struct
+### 2.1 Noms de tokens (Catakana) → champs Dioxus / struct
 
-| Catakana (theme) | Type / usage | egui / JayFestival |
+| Catakana (theme) | Type / usage | Dioxus / JayFestival |
 |------------------|--------------|---------------------|
 | `colors.background.primary` | Fond général | `Visuals::window_fill()` ou couleur fond CentralPanel ; avec opacité 0.4 si overlay. |
 | `colors.section.background` | Fond section | `Frame::fill(card_bg_color(dark))` ; opacité 0.4 recommandée. |
@@ -54,16 +54,16 @@ Ce document **retranscrit l’UI complète de Catakana** (Atomic Design, thème,
 | `colors.navigation.button.*` | Bouton nav (normal, hover, active) | `WidgetVisuals::inactive/hovered/active.bg_fill`. |
 | `colors.header.*` | Logo, titre header | `TopBottomPanel` fill + texte avec `header_title_color()`. |
 | `colors.sidebar.*` | Sidebar, menuItem | `SidePanel` fill, stroke ; `selectable_value` avec bg_fill actif. |
-| `fonts.sizes.*` | Tailles texte | `egui::FontId::new(size, FontFamily::Proportional)`. |
-| `fonts.weights.*` | Graisse | Non utilisé tel quel en egui (pas de font-weight) ; différencier par `FontId::new(size_large, …)` si besoin. |
+| `fonts.sizes.*` | Tailles texte | `Dioxus::FontId::new(size, FontFamily::Proportional)`. |
+| `fonts.weights.*` | Graisse | Non utilisé tel quel en Dioxus (pas de font-weight) ; différencier par `FontId::new(size_large, …)` si besoin. |
 | `borders.radius.small/medium/large` | Rayon coins | `CornerRadius::same(4)` small, `8` medium, `12` large (u8). |
 | `spacing.*` | Marges, padding | `style.spacing.item_spacing`, `button_padding`, `window_margin` ; `Margin::same(n)`. |
-| `shadows.small/medium/large` | Ombres | egui n’a pas de box-shadow ; simuler par `Frame::stroke` légère ou accepter l’absence. |
+| `shadows.small/medium/large` | Ombres | Dioxus n’a pas de box-shadow ; simuler par `Frame::stroke` légère ou accepter l’absence. |
 | `opacity.overlay/cardBackground` | Opacités | Alpha dans `Color32::from_rgba_unmultiplied(r,g,b,alpha)`. |
 
-### 2.2 Palette Catakana → couleurs JayFestival (egui)
+### 2.2 Palette Catakana → couleurs JayFestival (Dioxus)
 
-| Usage Catakana | Couleur / valeur | egui Color32 (exemple) |
+| Usage Catakana | Couleur / valeur | Dioxus Color32 (exemple) |
 |----------------|------------------|-------------------------|
 | **Catakana Purple** (primaire) | `#8B5CF6` | `Color32::from_rgb(139, 92, 246)` |
 | **Catakana Blue** (secondaire) | `#3B82F6` | `Color32::from_rgb(59, 130, 246)` |
@@ -76,37 +76,37 @@ Recommandation : définir un module `jay_festival_theme.rs` (ou étendre `theme.
 
 ### 2.3 Responsive / breakpoints
 
-Catakana : breakpoint 800px, 14px mobile / 16px+ desktop. En egui : utiliser `ctx.screen_rect().width()` pour choisir layout (sidebar large vs icônes seules), et `FontId::new(14., …)` vs `16.` selon largeur.
+Catakana : breakpoint 800px, 14px mobile / 16px+ desktop. En Dioxus : utiliser `ctx.screen_rect().width()` pour choisir layout (sidebar large vs icônes seules), et `FontId::new(14., …)` vs `16.` selon largeur.
 
 ---
 
-## 3. Atomic UI — Catakana → egui
+## 3. Atomic UI — Catakana → Dioxus
 
 ### 3.1 Atoms (éléments de base)
 
-| Catakana | Fichier / usage | Équivalent egui |
+| Catakana | Fichier / usage | Équivalent Dioxus |
 |----------|------------------|------------------|
-| **IconWrapper** | `atoms/IconWrapper.tsx` (Lucide, variantes couleur, taille sm/md/lg) | Pas d’icônes Lucide en egui ; utiliser `ui.label("📅")` (emoji) ou intégrer une font d’icônes (egui_extras) ; taille = `FontId::new(14.|16.|20., …)`. |
+| **IconWrapper** | `atoms/IconWrapper.tsx` (Lucide, variantes couleur, taille sm/md/lg) | Pas d’icônes Lucide en Dioxus ; utiliser `ui.label("📅")` (emoji) ou intégrer une font d’icônes (Dioxus_extras) ; taille = `FontId::new(14.|16.|20., …)`. |
 | **Button** | shadcn `button.tsx` | `ui.button(RichText::new("Label").color(text_color()))` ; style via `ctx.style().visuals.widgets`. |
-| **Input** | shadcn `input.tsx` | `ui.add(egui::TextEdit::singleline(&mut string))`. |
+| **Input** | shadcn `input.tsx` | `ui.add(Dioxus::TextEdit::singleline(&mut string))`. |
 | **Label** | shadcn `label.tsx` | `ui.label()` ou `ui.heading()`. |
 | **Badge** | shadcn `badge.tsx`, `ExhibitorStatusBadge` | `Frame::group(ui).fill(badge_bg).show(ui, \|ui\| ui.label("Validé"))`. |
 | **Checkbox** | shadcn `checkbox.tsx` | `ui.checkbox(&mut bool, "Label")`. |
-| **Select** | shadcn `select.tsx` | `egui::ComboBox::from_id_salt("id").selected_text(...).show_ui(ui, \|ui\| { ui.selectable_value(...) })`. |
+| **Select** | shadcn `select.tsx` | `Dioxus::ComboBox::from_id_salt("id").selected_text(...).show_ui(ui, \|ui\| { ui.selectable_value(...) })`. |
 
 ### 3.2 Molecules (combinaisons)
 
-| Catakana | Fichier / usage | Équivalent egui |
+| Catakana | Fichier / usage | Équivalent Dioxus |
 |----------|------------------|------------------|
 | **FeatureCard** | `molecules/FeatureCard.tsx` (titre, description, icône, variante) | `Frame::card(ui).show(ui, \|ui\| { ui.heading("Titre"); ui.label("Description"); })` avec fill/stroke du thème. |
-| **DirectoryCard** | `molecules/DirectoryCard.tsx` (gradient, CTA) | Idem + bouton en bas ; gradient en egui = dégradé manuel ou fill uniforme. |
+| **DirectoryCard** | `molecules/DirectoryCard.tsx` (gradient, CTA) | Idem + bouton en bas ; gradient en Dioxus = dégradé manuel ou fill uniforme. |
 | **RoleCard** | `molecules/RoleCard.tsx` (pastille colorée) | Frame + petit cercle/rect coloré + label. |
 | **CTACard** | `molecules/CTACard.tsx` | Frame + titre + description + `ui.button()`. |
 | **Card** (shadcn) | `ui/card.tsx` | `Frame::default().fill(card_bg).stroke(...).rounding(...).show(ui, ...)`. |
 
 ### 3.3 Organisms (sections complètes)
 
-| Catakana | Fichier / usage | Équivalent egui |
+| Catakana | Fichier / usage | Équivalent Dioxus |
 |----------|------------------|------------------|
 | **Header** | `organisms/Header.tsx` (nav responsive, auth) | `TopBottomPanel::top("header").show(ctx, \|ui\| { ui.horizontal(\|ui\| { ui.label("JayFestival"); ui.button("Catalogue"); ... }) })`. |
 | **HeaderWithEdition** | Avec sélecteur d’édition | Idem + `ComboBox` édition. |
@@ -121,15 +121,15 @@ Catakana : breakpoint 800px, 14px mobile / 16px+ desktop. En egui : utiliser `ct
 ### 3.4 Templates / Pages
 
 - **Catakana** : templates = layout (header, sidebar, body, footer) ; pages = assemblage + données.
-- **egui** : même idée — une fonction `fn ui_organisateur_dashboard(ctx, app_state)` qui appelle `ui_sidebar()`, puis dans `CentralPanel` `ui_edition_list()` ou `ui_edition_dashboard(edition_id)` ; chaque « page » = une branche de `match current_view { ... }`.
+- **Dioxus** : même idée — une fonction `fn ui_organisateur_dashboard(ctx, app_state)` qui appelle `ui_sidebar()`, puis dans `CentralPanel` `ui_edition_list()` ou `ui_edition_dashboard(edition_id)` ; chaque « page » = une branche de `match current_view { ... }`.
 
 ---
 
 ## 4. UI-kit — composants Catakana (shadcn + custom) → spec implémentation
 
-Liste non exhaustive ; chaque entrée donne le **nom**, l’**usage** et la **cible egui**.
+Liste non exhaustive ; chaque entrée donne le **nom**, l’**usage** et la **cible Dioxus**.
 
-| Composant Catakana | Usage | Implémentation egui / référence |
+| Composant Catakana | Usage | Implémentation Dioxus / référence |
 |--------------------|--------|----------------------------------|
 | **button** | Primaire, secondaire, outline, ghost | `ui.button()` + `ctx.style().visuals.widgets` (inactive/hovered/active). |
 | **input** | Texte une ligne | `TextEdit::singleline()`. |
@@ -137,25 +137,25 @@ Liste non exhaustive ; chaque entrée donne le **nom**, l’**usage** et la **ci
 | **label** | Libellé champ | `ui.label()`. |
 | **card** | Conteneur avec titre/corps/footer | `Frame::card().inner_margin(...).show(ui, ...)`. |
 | **badge** | Statut (ex. exposant validé/refusé) | Frame petit + texte ; couleur selon statut. |
-| **table** | Listes tabulaires (exposants, budget) | `egui::Grid` ou `ui.horizontal` répété ; en-têtes en `ui.heading()` ou première ligne en gras. |
-| **tabs** | Onglets (dashboard édition) | `ui.horizontal` + `selectable_value` ou `egui::TopBottomPanel` avec boutons. |
+| **table** | Listes tabulaires (exposants, budget) | `Dioxus::Grid` ou `ui.horizontal` répété ; en-têtes en `ui.heading()` ou première ligne en gras. |
+| **tabs** | Onglets (dashboard édition) | `ui.horizontal` + `selectable_value` ou `Dioxus::TopBottomPanel` avec boutons. |
 | **dialog** | Modale | `Window::new("Titre").anchor(Align2::CENTER_CENTER, [0.,0.]).show(ctx, \|ui\| ...)`. |
 | **dropdown-menu** | Actions | `ui.menu_button("Actions", \|ui\| { if ui.button("Exporter").clicked() { ... } })`. |
 | **select** | Liste déroulante | `ComboBox::from_id_salt(...).selected_text(...).show_ui(...)`. |
 | **checkbox** | Booléen | `ui.checkbox()`. |
-| **calendar** | Date (programme, filtres) | egui_extras `DatePicker` ou champ texte + parsing. |
+| **calendar** | Date (programme, filtres) | Dioxus_extras `DatePicker` ou champ texte + parsing. |
 | **breadcrumb** | Fil d’Ariane (Mes éditions > Nom édition) | `ui.horizontal` avec `ui.link("Mes éditions")` + `ui.label(" > ")` + `ui.label(nom_edition)`. |
 | **pagination** | Liste paginée | `ui.horizontal` avec boutons « Précédent » / « Suivant » + label « Page n / N ». |
 | **ExhibitorStatusBadge** | Badge statut exposant | Frame coloré (vert/jaune/rouge) + texte (Validé / En attente / Refusé). |
-| **DocumentViewer** | Affichage document (PDF/texte) | Lien téléchargement ou iframe non disponible en egui ; afficher métadonnées + bouton « Télécharger ». |
-| **FloorPlanCanvas** | Plan de salle interactif (Fabric.js) | egui : dessin personnalisé avec `Painter` (rectangles, texte) ou intégration widget 2D ; drag & drop = `Response::dragged()` + mise à jour positions. |
+| **DocumentViewer** | Affichage document (PDF/texte) | Lien téléchargement ou iframe non disponible en Dioxus ; afficher métadonnées + bouton « Télécharger ». |
+| **FloorPlanCanvas** | Plan de salle interactif (Fabric.js) | Dioxus : dessin personnalisé avec `Painter` (rectangles, texte) ou intégration widget 2D ; drag & drop = `Response::dragged()` + mise à jour positions. |
 | **ScheduleGrid** | Grille programme (créneaux × salles) | `ui.grid()` ou tableau avec `ui.label()` par cellule ; clic = ouvrir fenêtre édition animation. |
 
 Référence complémentaire : **Miyukini UI Library** (`crates/miyukini-central/src/services/ui_library.rs`) pour boutons, cartes, champs, barres — réutiliser ou aligner les styles (padding, corner_radius, couleurs) sur le thème JayFestival.
 
 ---
 
-## 5. Mapping écrans Catakana → écrans JayFestival (egui)
+## 5. Mapping écrans Catakana → écrans JayFestival (Dioxus)
 
 ### 5.1 Par public
 
@@ -194,7 +194,7 @@ Les écrans JayFestival sont décrits dans les documents « Écrans et cycle » 
 | Écran JayFestival | Id | Composants / sections Catakana |
 |-------------------|-----|-------------------------------|
 | Dashboard exposant | EXP-E01–E04 | Layout type « espace exposant » : onglets Candidatures, Participations, Agenda, Documents, Factures. |
-| Candidatures / Dépôt | EXP-E05–E06 | Formulaire candidature (champs dynamiques) + upload (egui : chemin fichier ou base64 si limité). |
+| Candidatures / Dépôt | EXP-E05–E06 | Formulaire candidature (champs dynamiques) + upload (Dioxus : chemin fichier ou base64 si limité). |
 | Participations / Fiche édition | EXP-E07–E08 | Liste éditions validées + fiche détail (plan, programme, documents). |
 | Agenda / Conflits | EXP-E09 | Vue calendrier (données JayKoa) + alerte conflit. |
 | Documents / Factures | EXP-E10–E12 | Liste + téléchargement (lien ou métadonnées). |
@@ -258,7 +258,7 @@ Les écrans JayFestival sont décrits dans les documents « Écrans et cycle » 
 
 ### 6.6 Accessibilité et responsive
 
-- [ ] Focus visible (egui par défaut).
+- [ ] Focus visible (Dioxus par défaut).
 - [ ] Tailles touch minimales (boutons hauteur ≥ 40 px si possible).
 - [ ] Détection largeur écran pour sidebar réduite (icônes seules) vs complète.
 
@@ -272,7 +272,7 @@ Les écrans JayFestival sont décrits dans les documents « Écrans et cycle » 
 | [JayFestival - Document Fondateur](./JayFestival%20-%20Document%20Fondateur.md) | Vision, macro, distribution. |
 | [JayFestival - Audit Documentation Catakana](./JayFestival%20-%20Audit%20Documentation%20Catakana.md) | Métriques, manques fonctionnels. |
 | [JayFestival - Bornage Implementation](./JayFestival%20-%20Bornage%20Implementation.md) | Périmètre MVP/phase 2, critères de livraison. |
-| [Miyukini - Stack UI egui eframe](../../ux_ui/Miyukini%20-%20Stack%20UI%20egui%20eframe.md) | Stack UI officielle. |
+| [Miyukini - Stack UI Dioxus](../../ux_ui/Miyukini%20-%20Stack%20UI%20Dioxus%20Dioxus.md) | Stack UI officielle. |
 | Catakana `.Catakana/docs/ATOMIC_THEME_GUIDE.md` | Guide thème et Atomic (source). |
 | Catakana `.Catakana/docs/reference/UI_ARCHITECTURE.md` | Architecture UI Catakana (source). |
 | Organisateurs / Exposants / Visiteurs / UNC — Écrans et cycle | Liste officielle des écrans JayFestival. |

@@ -1,0 +1,130 @@
+.wrapper {
+  padding-bottom: 3rem;
+}
+
+.intro {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.section {
+  margin-bottom: 3rem;
+}
+
+.section h2 {
+  font-size: 1.35rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+
+.lead {
+  color: var(--text-secondary);
+  margin-bottom: 1.25rem;
+  font-size: 0.95rem;
+}
+
+.pyramid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.stratum {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 1rem;
+  align-items: start;
+}
+
+.stratumLevel {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
+.stratum h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.stratum p {
+  margin: 0.25rem 0 0;
+  grid-column: 2;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.examples {
+  font-size: 0.85rem !important;
+  color: var(--text-muted) !important;
+}
+
+.flow {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+}
+
+.flow code {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
+.muted {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.glossary {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.glossaryItem {
+  margin: 0;
+  padding: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.glossaryItem dt {
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 0.35rem;
+}
+
+.glossaryItem dd {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.laws {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.laws li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.laws li:last-child {
+  border-bottom: none;
+}
+
+.laws strong {
+  color: var(--text-primary);
+  margin-right: 0.35rem;
+}

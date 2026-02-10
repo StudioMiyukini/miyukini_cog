@@ -12,8 +12,10 @@
 //! @human: Point d'entrée bibliothèque du jeu Lord of the Castle (modules, réexports publics).
 
 pub mod app;
-mod app_ui;
 pub mod castle;
+pub mod embedded_sprites;
+pub mod errors;
+pub mod save;
 pub mod character_creation;
 pub mod constants;
 pub mod enemies;
@@ -38,5 +40,7 @@ pub enum SkillsTab {
     Commandant,
 }
 
-pub use app::{LordOfTheCastleApp, Screen};
+pub use app::{Screen, SurvivorApp, SurvivorAppStandalone};
+pub use errors::SaveError;
 pub use game_state::{GamePhase, GameState};
+pub use save::{LordOfTheCastleDb, SlotMetadata, SAVE_SLOT_COUNT};

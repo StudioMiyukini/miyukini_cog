@@ -11,7 +11,7 @@ Ce document est le **plan d’implémentation** du service **JayFestival** et de
 
 ## Portée / Scope
 
-- **Périmètre** : Implémentation alpha JayFestival (egui/eframe, Supabase backend) + services dépendants dans le scope alpha (JayXpose, intégrations Miyu*, JayKoa, JayKonta).
+- **Périmètre** : Implémentation alpha JayFestival (Dioxus, Supabase backend) + services dépendants dans le scope alpha (JayXpose, intégrations Miyu*, JayKoa, JayKonta).
 - **Nomenclature des tâches** : `[xx] - [nom du fichier à produire]` ; `xx` = préfixe de regroupement (01, 02, …) ; **maximum 4 tâches par préfixe** pour exécution parallèle (max 4 agents simultanés).
 - **Règles** : 1 étape = 1 fichier ; 1 agent = 1 tâche ; contexte vierge pour chaque délégation ; balisage MSCM obligatoire ; index MIP régénéré en Phase 4.
 
@@ -25,7 +25,7 @@ Planification globale JayFestival et services dépendants.
 
 ### 0.2 Explication rapide
 
-- **Objectif** : Livrer une version **alpha fonctionnelle** de JayFestival (reprise Catakana en egui/eframe, backend Supabase), avec catalogue (événements, organisateurs, exposants), espaces organisateur / exposant / visiteur, et intégrations documentées (JayXpose, JayKoa, JayKonta, Miyuinvoice, Miyunotify, Miyubooking, MiyuClock).
+- **Objectif** : Livrer une version **alpha fonctionnelle** de JayFestival (reprise Catakana en Dioxus, backend Supabase), avec catalogue (événements, organisateurs, exposants), espaces organisateur / exposant / visiteur, et intégrations documentées (JayXpose, JayKoa, JayKonta, Miyuinvoice, Miyunotify, Miyubooking, MiyuClock).
 - **Périmètre** : Création crate(s) JayFestival, UI conforme [Specification UI Conforme Catakana](./JayFestival%20-%20Specification%20UI%20Conforme%20Catakana.md), parcours UNC / ORG / EXP / VIS selon docs Écrans et cycle, client Supabase (Auth + REST), services dépendants dans le scope alpha.
 - **Limites** : JayFaim hors alpha ; KindMother/SQLite post-alpha ; pas de migration de données dans ce plan (documentée à part).
 
@@ -58,7 +58,7 @@ MODE IA ACTIF : AI Mode 1 | AI Mode 2
 ### 0.6 Tests
 
 - Tests unitaires console (`cargo test`) pour modules logique métier et services lorsque possible.
-- Justification explicite si absence de tests (ex. UI pure egui).
+- Justification explicite si absence de tests (ex. UI pure Dioxus).
 
 ### 0.7 Mini log de planification
 
@@ -80,7 +80,7 @@ MODE IA ACTIF : AI Mode 1 | AI Mode 2
 |----------|--------------------|-------------|----------------------------------------|
 | **[01] - Crate et config** | `crates/jayfestival/Cargo.toml` + `crates/jayfestival/src/lib.rs` (stub) | — | `jayfestival_crate_config`, `jayfestival_lib_stub` ; layer: infra |
 | **[02] - Thème** | `crates/jayfestival/src/theme.rs` (ou `ui/theme.rs`) | [01] | `jayfestival_theme_struct`, `jayfestival_theme_tokens` (couleurs, borders.radius, spacing, fonts.sizes) ; layer: ui |
-| **[03] - Main et boucle app** | `crates/jayfestival/src/main.rs` (eframe) | [01], [02] | `jayfestival_main_entry`, `jayfestival_app_loop` ; layer: app |
+| **[03] - Main et boucle app** | `crates/jayfestival/src/main.rs` (Dioxus) | [01], [02] | `jayfestival_main_entry`, `jayfestival_app_loop` ; layer: app |
 | **[04] - Constantes écrans** | `crates/jayfestival/src/screens.rs` (ScreenId enum / consts) | [01] | `jayfestival_screen_ids` ; layer: app |
 
 **Balisage MSCM** : Chaque bloc avec `@id` unique, `@do` (description fonctionnelle), `@layer` (infra | ui | app). Optionnel : `@role`, `@human`.

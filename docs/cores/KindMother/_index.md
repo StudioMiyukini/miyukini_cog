@@ -101,6 +101,8 @@ Documentation architecturale.
 | Document | Description |
 |----------|-------------|
 | [Internal State Machine (Informative)](./architecture/KindMother%20-%20Internal%20State%20Machine%20(Informative).md) | Machine à états interne (informatif) |
+| [Core Server](./architecture/KindMother%20-%20Core%20Server.md) | **NOUVEAU** — Architecture du serveur isolé, mécaniques d'arbitrage, gestion multi-bases |
+| [Client (Délégation)](./architecture/KindMother%20-%20Client.md) | **NOUVEAU** — Pattern de délégation, API client, intégration dans les services COG |
 
 ---
 
@@ -111,6 +113,7 @@ Guides d'implémentation.
 | Document | Description |
 |----------|-------------|
 | [Reference Implementation Guidelines](./implementation/KindMother%20-%20Reference%20Implementation%20Guidelines.md) | Guidelines d'implémentation de référence |
+| [Systeme Persistance libSQL Migration](./implementation/KindMother%20-%20Systeme%20Persistance%20libSQL%20Migration.md) | **NOUVEAU** — Migration vers libSQL chiffré, architecture processus isolé, guide technique complet |
 
 ---
 

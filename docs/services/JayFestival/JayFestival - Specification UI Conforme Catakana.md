@@ -10,7 +10,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 
 - **Périmètre** : Protocoles d’implémentation, spécifications détaillées de chaque composant UI (atoms, molecules, organisms), parcours par écran avec liste ordonnée des composants, critères de conformité.
 - **Statut** : **Normatif** — l’implémentation JayFestival doit s’y conformer pour être considérée conforme à Catakana.
-- **Hors périmètre** : Code source Catakana ; implémentation détaillée des primitives egui (voir docs egui et miyukini-central).
+- **Hors périmètre** : Code source Catakana ; implémentation détaillée des primitives Dioxus (voir docs Dioxus et miyukini-central).
 
 ---
 
@@ -26,7 +26,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **PROTO-4** | Chaque écran listé en section 4 doit afficher les **zones** dans l’ordre défini et utiliser les **composants** listés dans l’ordre indiqué ; aucun composant Catakana référencé ne doit être omis. | Revue écran par écran. |
 | **PROTO-5** | Opacité des fonds principaux (section, carte, corps) : **0,4** (alpha 102 sur 255) sauf exception documentée. | Vérification thème et usage `fill()`. |
 | **PROTO-6** | Responsive : breakpoint unique **800 px** (largeur) ; en dessous : sidebar réduite (icônes seules si applicable), taille police de base 14 px ; au-dessus : sidebar complète, 16 px. | `ctx.screen_rect().width()` utilisé pour choisir layout. |
-| **PROTO-7** | Accessibilité : zone cliquable minimale **40 px** (hauteur boutons, liens) ; focus visible (egui par défaut). | Mesure des widgets. |
+| **PROTO-7** | Accessibilité : zone cliquable minimale **40 px** (hauteur boutons, liens) ; focus visible (Dioxus par défaut). | Mesure des widgets. |
 | **PROTO-8** | Parcours : les **entrées/sorties** documentées dans les docs « Écrans et cycle » (UNC, Organisateurs, Exposants, Visiteurs) sont les seules navigations autorisées entre écrans. | Pas de lien ou bouton vers un écran non prévu. |
 
 ### 1.2 Ordre de construction (obligatoire)
@@ -59,7 +59,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `icon_id: IconId` (ou emoji unicode), `size: Size` (sm=14, md=16, lg=20), `color: Option<Color32>` (défaut = `section_title_color()` ou texte normal). |
 | **Tokens** | `fonts.sizes.sm/md/lg`, `colors.section.title` ou `colors.text.primary`. |
 | **Comportement** | Affiche une icône (emoji ou glyphe) à la taille et couleur demandées ; pas d’interaction. |
-| **Contrat egui** | `fn icon_wrapper(ui: &mut Ui, icon_id: IconId, size: Size, color: Option<Color32>) -> Response` ; utilise `ui.label(RichText::new(icon_char).size(size_pt).color(c))` ou équivalent. |
+| **Contrat Dioxus** | `fn icon_wrapper(ui: &mut Ui, icon_id: IconId, size: Size, color: Option<Color32>) -> Response` ; utilise `ui.label(RichText::new(icon_char).size(size_pt).color(c))` ou équivalent. |
 | **Variantes** | sm (14 pt), md (16 pt), lg (20 pt). Couleur : default, primary (accent), muted (description). |
 
 #### A2 — Button
@@ -71,7 +71,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `label: &str`, `variant: ButtonVariant` (Primary, Secondary, Outline, Ghost), `size: Size` (sm, md, lg). |
 | **Tokens** | `colors.navigation.button.normal/hover/active`, `borders.radius.medium`, `spacing.button_padding`, `fonts.sizes.md`. |
 | **Comportement** | Clic déclenche callback ; états hover/active visibles. |
-| **Contrat egui** | `fn button(ui: &mut Ui, label: &str, variant: ButtonVariant, size: Size) -> Response` ; style via `ctx.style().visuals.widgets` (inactive/hovered/active) et couleurs thème. |
+| **Contrat Dioxus** | `fn button(ui: &mut Ui, label: &str, variant: ButtonVariant, size: Size) -> Response` ; style via `ctx.style().visuals.widgets` (inactive/hovered/active) et couleurs thème. |
 | **Variantes** | Primary (fond accent), Secondary (fond secondaire), Outline (bordure, fond transparent), Ghost (transparent, hover léger). |
 
 #### A3 — Input
@@ -83,7 +83,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `value: &mut String`, `placeholder: Option<&str>`, `password: bool`, `enabled: bool`. |
 | **Tokens** | `colors.section.border`, `borders.radius.small`, `spacing.input_padding`, `fonts.sizes.md`. |
 | **Comportement** | Champ texte une ligne ; placeholder si vide. |
-| **Contrat egui** | `fn input(ui: &mut Ui, value: &mut String, placeholder: Option<&str>, password: bool) -> Response` ; `TextEdit::singleline(value)` avec frame et couleurs thème. |
+| **Contrat Dioxus** | `fn input(ui: &mut Ui, value: &mut String, placeholder: Option<&str>, password: bool) -> Response` ; `TextEdit::singleline(value)` avec frame et couleurs thème. |
 
 #### A4 — Label
 
@@ -94,7 +94,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `text: &str`, `level: LabelLevel` (Heading, Body, Small, Muted). |
 | **Tokens** | `colors.section.title` (heading), `colors.text.primary` (body), `colors.section.description` (muted), `fonts.sizes.*`. |
 | **Comportement** | Texte seul, non interactif. |
-| **Contrat egui** | `fn label(ui: &mut Ui, text: &str, level: LabelLevel)` ; `ui.heading()` ou `ui.label(RichText::new(text).color(...).size(...))`. |
+| **Contrat Dioxus** | `fn label(ui: &mut Ui, text: &str, level: LabelLevel)` ; `ui.heading()` ou `ui.label(RichText::new(text).color(...).size(...))`. |
 
 #### A5 — Badge
 
@@ -105,7 +105,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `text: &str`, `variant: BadgeVariant` (Default, Success, Warning, Error — pour Validé, En attente, Refusé, etc.). |
 | **Tokens** | Couleurs par variant (vert/jaune/rouge), `borders.radius.small`, `spacing.badge_padding`, `fonts.sizes.sm`. |
 | **Comportement** | Pastille de statut ; pas d’interaction. |
-| **Contrat egui** | `fn badge(ui: &mut Ui, text: &str, variant: BadgeVariant) -> Rect` ; `Frame::none().fill(badge_bg(variant)).inner_margin(...).show(ui, \|ui\| ui.label(text))`. |
+| **Contrat Dioxus** | `fn badge(ui: &mut Ui, text: &str, variant: BadgeVariant) -> Rect` ; `Frame::none().fill(badge_bg(variant)).inner_margin(...).show(ui, \|ui\| ui.label(text))`. |
 
 #### A6 — Checkbox
 
@@ -116,7 +116,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `checked: &mut bool`, `label: &str`, `enabled: bool`. |
 | **Tokens** | `colors.section.border`, accent pour coché, `fonts.sizes.md`. |
 | **Comportement** | Case à cocher ; clic inverse la valeur. |
-| **Contrat egui** | `ui.checkbox(checked, label)` ; style cohérent thème. |
+| **Contrat Dioxus** | `ui.checkbox(checked, label)` ; style cohérent thème. |
 
 #### A7 — Select
 
@@ -127,7 +127,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `selected: &mut usize`, `options: &[String]`, `label: Option<&str>`, `id: impl Hash`. |
 | **Tokens** | Même que Input + `colors.section.title` pour libellé. |
 | **Comportement** | Liste déroulante ; sélection met à jour `selected`. |
-| **Contrat egui** | `ComboBox::from_id_salt(id).selected_text(options[*selected].clone()).show_ui(ui, \|ui\| { for (i, o) in options.iter().enumerate() { ui.selectable_value(selected, i, o); } })`. |
+| **Contrat Dioxus** | `ComboBox::from_id_salt(id).selected_text(options[*selected].clone()).show_ui(ui, \|ui\| { for (i, o) in options.iter().enumerate() { ui.selectable_value(selected, i, o); } })`. |
 
 ---
 
@@ -142,7 +142,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `title: &str`, `description: &str`, `icon: IconId`, `variant: CardVariant` (default, accent). |
 | **Tokens** | `colors.section.card.background`, `colors.section.border`, `borders.radius.medium`, `spacing.card_padding`, `colors.section.title`, `colors.section.description`. |
 | **Comportement** | Carte avec titre, description, icône ; optionnellement cliquable (lien). |
-| **Contrat egui** | `Frame::default().fill(card_bg).stroke(...).rounding(radius_medium).inner_margin(...).show(ui, \|ui\| { IconWrapper; Label(title, Heading); Label(description, Muted) })`. |
+| **Contrat Dioxus** | `Frame::default().fill(card_bg).stroke(...).rounding(radius_medium).inner_margin(...).show(ui, \|ui\| { IconWrapper; Label(title, Heading); Label(description, Muted) })`. |
 
 #### M2 — DirectoryCard
 
@@ -151,9 +151,9 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Id** | `DirectoryCard` |
 | **Source Catakana** | `molecules/DirectoryCard.tsx` (gradient, CTA) |
 | **Props / paramètres** | `title: &str`, `description: Option<&str>`, `cta_label: &str`, `on_click: impl FnOnce()`. |
-| **Tokens** | Idem FeatureCard + `colors.navigation.button.*` pour CTA. Gradient en egui : fill uniforme ou dégradé manuel si disponible. |
+| **Tokens** | Idem FeatureCard + `colors.navigation.button.*` pour CTA. Gradient en Dioxus : fill uniforme ou dégradé manuel si disponible. |
 | **Comportement** | Carte avec CTA en bas ; clic sur le bouton déclenche `on_click`. |
-| **Contrat egui** | FeatureCard + `ui.add_space()` + `Button(cta_label, Primary, md)` dans le même Frame. |
+| **Contrat Dioxus** | FeatureCard + `ui.add_space()` + `Button(cta_label, Primary, md)` dans le même Frame. |
 
 #### M3 — RoleCard
 
@@ -164,7 +164,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `title: &str`, `description: Option<&str>`, `accent_color: Color32`, `on_click: Option<impl FnOnce()>`. |
 | **Tokens** | `colors.section.card.background`, `borders.radius.medium`, `spacing.card_padding`. `accent_color` = organisateur / exposant / visiteur / bénévole (Amber, Green, Blue, Purple). |
 | **Comportement** | Petite carte avec pastille colorée (cercle ou rectangle) + titre (+ description) ; optionnellement cliquable. |
-| **Contrat egui** | `Frame::default().fill(card_bg).rounding(...).show(ui, \|ui\| { ui.horizontal(\|ui\| { ui.add(PaintCircle(accent_color)); ui.label(title); }); optional description })`. |
+| **Contrat Dioxus** | `Frame::default().fill(card_bg).rounding(...).show(ui, \|ui\| { ui.horizontal(\|ui\| { ui.add(PaintCircle(accent_color)); ui.label(title); }); optional description })`. |
 
 #### M4 — CTACard
 
@@ -175,7 +175,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `title: &str`, `description: Option<&str>`, `button_label: &str`, `on_click: impl FnOnce()`. |
 | **Tokens** | Idem FeatureCard + bouton Primary. |
 | **Comportement** | Carte avec titre, description optionnelle, bouton d’action. |
-| **Contrat egui** | FeatureCard + `Button(button_label, Primary, md)` ; clic = `on_click`. |
+| **Contrat Dioxus** | FeatureCard + `Button(button_label, Primary, md)` ; clic = `on_click`. |
 
 #### M5 — Card (conteneur shadcn-like)
 
@@ -186,7 +186,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `header: Option<&str>`, `body: impl FnOnce(&mut Ui)`, `footer: Option<impl FnOnce(&mut Ui)>`. |
 | **Tokens** | `colors.section.card.background`, `colors.section.border`, `borders.radius.medium`, `spacing.card_padding`. |
 | **Comportement** | Conteneur avec zones header/body/footer ; body obligatoire. |
-| **Contrat egui** | `Frame::default().fill(card_bg).stroke(...).rounding(...).show(ui, \|ui\| { optional heading(header); body(ui); optional footer(ui) })`. |
+| **Contrat Dioxus** | `Frame::default().fill(card_bg).stroke(...).rounding(...).show(ui, \|ui\| { optional heading(header); body(ui); optional footer(ui) })`. |
 
 ---
 
@@ -201,7 +201,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `logo_label: &str` ("JayFestival"), `nav_links: &[(&str, ScreenId)]`, `show_auth: bool`, `on_login: impl FnOnce()`, `on_signup: impl FnOnce()`, `user_menu: Option<UserMenu>` (si connecté). |
 | **Tokens** | `colors.header.*`, `colors.navigation.container.background`, `colors.navigation.button.*`, `fonts.sizes.md`. |
 | **Comportement** | Barre haute : logo + liens nav + boutons Se connecter / S’inscrire ou menu utilisateur. Responsive : sous 800 px, liens regroupés ou icônes. |
-| **Contrat egui** | `TopBottomPanel::top("header").show(ctx, \|ui\| { ui.horizontal(\|ui\| { Label(logo_label, Heading); for (label, _) in nav_links { Button(label, Ghost, sm); } if show_auth { Button("Se connecter", Outline, sm); Button("S'inscrire", Primary, sm); } else { user_menu } }) })`. |
+| **Contrat Dioxus** | `TopBottomPanel::top("header").show(ctx, \|ui\| { ui.horizontal(\|ui\| { Label(logo_label, Heading); for (label, _) in nav_links { Button(label, Ghost, sm); } if show_auth { Button("Se connecter", Outline, sm); Button("S'inscrire", Primary, sm); } else { user_menu } }) })`. |
 
 #### O2 — HeaderWithEdition
 
@@ -211,7 +211,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Source Catakana** | Header avec sélecteur d’édition (organisateur) |
 | **Props / paramètres** | Comme Header + `edition_id: &mut Option<Id>`, `editions: &[(Id, String)]`, `on_edition_change: impl FnOnce(Id)`. |
 | **Comportement** | Header + ComboBox édition à droite (ou dans la barre). |
-| **Contrat egui** | Header + `Select` ou `ComboBox` pour édition. |
+| **Contrat Dioxus** | Header + `Select` ou `ComboBox` pour édition. |
 
 #### O3 — HeroSection
 
@@ -222,7 +222,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `title: &str`, `subtitle: Option<&str>`, `optional_search_placeholder: Option<&str>`, `optional_cta: Option<(&str, impl FnOnce())>`. |
 | **Tokens** | `colors.section.title`, `colors.section.description`, `fonts.sizes.*` (title grand, subtitle plus petit). |
 | **Comportement** | Zone d’accroche : titre principal, sous-texte, optionnellement champ recherche et/ou CTA. |
-| **Contrat egui** | `CentralPanel` ou zone : `Label(title, Heading)` grande, `Label(subtitle, Muted)`, optionnel `Input` (recherche), optionnel `Button` (CTA). |
+| **Contrat Dioxus** | `CentralPanel` ou zone : `Label(title, Heading)` grande, `Label(subtitle, Muted)`, optionnel `Input` (recherche), optionnel `Button` (CTA). |
 
 #### O4 — FeaturesGrid
 
@@ -233,7 +233,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `tabs: &[(&str, &[FeatureCardData])]` (onglet label + liste de cartes). |
 | **Tokens** | Idem FeatureCard + couleurs onglets (actif / inactif). |
 | **Comportement** | Onglets horizontaux ; au clic, affichage de la grille de FeatureCard correspondante. |
-| **Contrat egui** | `ui.horizontal` avec `selectable_value` pour onglets ; puis `ui.grid()` ou boucle vertical/horizontal pour `FeatureCard`. |
+| **Contrat Dioxus** | `ui.horizontal` avec `selectable_value` pour onglets ; puis `ui.grid()` ou boucle vertical/horizontal pour `FeatureCard`. |
 
 #### O5 — DirectoryBanner
 
@@ -244,7 +244,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `left_card: DirectoryCardData`, `right_card: DirectoryCardData`. |
 | **Tokens** | Idem DirectoryCard. |
 | **Comportement** | Deux DirectoryCard côte à côte (ou empilés si largeur < 800 px). |
-| **Contrat egui** | `ui.horizontal(\|ui\| { DirectoryCard(left_card); DirectoryCard(right_card); })` ou vertical si responsive. |
+| **Contrat Dioxus** | `ui.horizontal(\|ui\| { DirectoryCard(left_card); DirectoryCard(right_card); })` ou vertical si responsive. |
 
 #### O6 — RolesGrid
 
@@ -255,7 +255,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `roles: &[RoleCardData]` (4 rôles : Organisateur, Exposant, Visiteur, Bénévole). |
 | **Tokens** | Idem RoleCard. |
 | **Comportement** | Grille 2×2 (ou 4 en ligne sur grand écran) de RoleCard. |
-| **Contrat egui** | `ui.grid()` ou 2×2 `RoleCard`. |
+| **Contrat Dioxus** | `ui.grid()` ou 2×2 `RoleCard`. |
 
 #### O7 — CTASection
 
@@ -266,7 +266,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `cards: &[CTACardData]`, `main_button: Option<(&str, impl FnOnce())>`. |
 | **Tokens** | Idem CTACard. |
 | **Comportement** | Grille de CTACard + optionnel bouton principal en bas ou à part. |
-| **Contrat egui** | Grille de `CTACard` + optionnel `Button(..., Primary, lg)`. |
+| **Contrat Dioxus** | Grille de `CTACard` + optionnel `Button(..., Primary, lg)`. |
 
 #### O8 — Layout (structure page catalogue)
 
@@ -277,7 +277,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Props / paramètres** | `header: Header`, `sidebar: Option<SidebarContent>`, `body: impl FnOnce(&mut Ui)`, `footer: Option<impl FnOnce(&mut Ui)>`. |
 | **Tokens** | `colors.navigation.container.background`, `colors.section.background`. |
 | **Comportement** | TopBottomPanel (header) + SidePanel (sidebar si présent) + CentralPanel (body) ; footer optionnel en bas du central. |
-| **Contrat egui** | `Header.show(ctx)` ; `SidePanel::left(...).show(ctx, sidebar)` si présent ; `CentralPanel::default().show(ctx, body)` ; footer dans body ou Area en bas. |
+| **Contrat Dioxus** | `Header.show(ctx)` ; `SidePanel::left(...).show(ctx, sidebar)` si présent ; `CentralPanel::default().show(ctx, body)` ; footer dans body ou Area en bas. |
 
 #### O9 — GestionLayout (organisateur / exposant / visiteur connecté)
 
@@ -287,7 +287,7 @@ Ce document est la **spécification normative** de l’UI JayFestival. Il impose
 | **Source Catakana** | `layouts/GestionLayout.tsx` (menu admin / catégories) |
 | **Props / paramètres** | Comme Layout + `menu_items: &[(ScreenId, &str, Option<IconId>)]`, `breadcrumb: Option<&[(&str, Option<ScreenId)>]>`, `edition_selector: Option<...>` (organisateur). |
 | **Comportement** | Sidebar = menu (Éditions, Exposants, Plan, Programme, Budget, Documents, etc.) ; breadcrumb au-dessus du body ; body = contenu de l’écran courant. |
-| **Contrat egui** | SidePanel avec `selectable_value` pour menu ; CentralPanel avec optional breadcrumb (horizontal links + labels) puis body. |
+| **Contrat Dioxus** | SidePanel avec `selectable_value` pour menu ; CentralPanel avec optional breadcrumb (horizontal links + labels) puis body. |
 
 ---
 
@@ -485,7 +485,7 @@ Pour chaque écran, la **structure** (zones) et la **liste ordonnée des composa
 | Layout | 1 | **GestionLayout** ; body = **Label** "Fiche exposant — [Nom]" ; **Card** (Identité : nom, contact, catégorie) ; **Card** (Statut : **Badge**, motif) ; **Card** (Emplacement, lien plan) ; **Card** (Documents, liste + **Button** Télécharger) ; **Card** (Historique) ; **Button** "Modifier", "Générer devis", "Convertir en facture". |
 | Pied | 2 | **Button** Retour liste. |
 
-Les autres écrans organisateur (ORG-E08, ORG-E12 à ORG-E25) suivent le même schéma : **GestionLayout** + sidebar + body avec **Card**, **Input**, **Select**, **Button**, **Badge**, **Label**, tableaux (grille egui), modales (**Window**) pour formulaires secondaires. Détail complet à déduire des sections 2 et 3 et des docs « Écrans et cycle ».
+Les autres écrans organisateur (ORG-E08, ORG-E12 à ORG-E25) suivent le même schéma : **GestionLayout** + sidebar + body avec **Card**, **Input**, **Select**, **Button**, **Badge**, **Label**, tableaux (grille Dioxus), modales (**Window**) pour formulaires secondaires. Détail complet à déduire des sections 2 et 3 et des docs « Écrans et cycle ».
 
 ---
 
@@ -575,7 +575,7 @@ Les écrans VIS-E05 à VIS-E15 suivent le même principe : **GestionLayout** + b
 
 | Document | Rôle |
 |----------|------|
-| [JayFestival - Reference UI Transcription Catakana](./JayFestival%20-%20Reference%20UI%20Transcription%20Catakana.md) | Mapping global, thème, stack egui. |
+| [JayFestival - Reference UI Transcription Catakana](./JayFestival%20-%20Reference%20UI%20Transcription%20Catakana.md) | Mapping global, thème, stack Dioxus. |
 | [JayFestival - Bornage Implementation](./JayFestival%20-%20Bornage%20Implementation.md) | Périmètre alpha, critères de livraison. |
 | [UtilisateurNonConnecte - Ecrans et cycle](./publics/UtilisateurNonConnecte/UtilisateurNonConnecte%20-%20Ecrans%20et%20cycle.md) | Écrans UNC. |
 | [Organisateurs - Ecrans et cycle](./publics/Organisateurs/Organisateurs%20-%20Ecrans%20et%20cycle.md) | Écrans ORG. |

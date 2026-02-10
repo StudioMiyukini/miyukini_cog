@@ -34,6 +34,7 @@ Documents fondateurs definissant la vision operationnelle de la securite.
 | Document | Description |
 |----------|-------------|
 | [Documentation Fondatrice](./foundation/Security%20-%20Documentation%20Fondatrice.md) | Vision operationnelle, synthese des principes, roles des Cores |
+| [Gouvernance Cores Protection Donnees](./foundation/Security%20-%20Gouvernance%20Cores%20Protection%20Donnees.md) | **NOUVEAU** — Architecture de protection maximale, isolation processus, chiffrement souverain, conformite LOI |
 
 ---
 

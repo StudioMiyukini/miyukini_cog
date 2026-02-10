@@ -320,6 +320,8 @@ Les Outils exacts seront définis dans la documentation fondatrice et les contra
 | Document | Lien |
 |----------|------|
 | **Glossaire** | [Miyukini Conceptual References - Glossaire](./Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
+| **Types de Services et Espaces** | [Types de Services et Espaces](./Miyukini%20Conceptual%20References%20-%20Types%20de%20Services%20et%20Espaces.md) |
+| **Miyukini Web Portal** | [Miyukini Web Portal](../services/MiyukiniWebPortal/_index.md) |
 | **Opérateurs et terminologie** | [Operators et Terminologie](./Miyukini%20Conceptual%20References%20-%20Operators%20et%20Terminologie.md) |
 | **Pyramide** | [Pyramide Architecture Complete](./Miyukini%20Conceptual%20References%20-%20Pyramide%20Architecture%20Complete.md) |
 | **Stack UI egui/eframe** | [Miyukini - Stack UI egui eframe](../ux_ui/Miyukini%20-%20Stack%20UI%20egui%20eframe.md) |
@@ -330,5 +332,5 @@ Les Outils exacts seront définis dans la documentation fondatrice et les contra
 ---
 
 **Date de creation :** 2026-01-30  
-**Version :** 1.0  
-**Statut :** Document de reference conceptuel — Miyukini Central (Hub de gestion des Services)
+**Version :** 1.1 (ajout références Types de Services et Miyukini Web Portal)  
+**Statut :** Document de reference conceptuel — Miyukini Central (Hub de gestion des Services, Service Fondamental)

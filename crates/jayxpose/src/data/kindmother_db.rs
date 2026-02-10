@@ -7,8 +7,9 @@
 //! @layer: infra
 
 use crate::data::types::{
-    CategorieProduit, ConfidentialiteProfil, DocumentPartage, DocumentProfessionnel,
-    DocumentVersion, ExposantProfile, ProduitCatalogue, ProduitVisuel, VitrinePage,
+    CategorieProduit, CmsArticle, CmsCategory, ConfidentialiteProfil, DocumentPartage,
+    DocumentProfessionnel, DocumentVersion, ExposantProfile, PosStockLink, ProduitCatalogue,
+    ProduitVisuel, SyncLog, VitrineBlock, VitrinePage, VitrineTemplate,
 };
 use kindmother::{InstanceIdentity, InstanceType};
 use rusqlite::{params, Connection};
@@ -211,6 +212,109 @@ impl JayXposeDb {
                 updated_at TEXT,
                 FOREIGN KEY (exposant_id) REFERENCES exposants(id)
             );
+            CREATE TABLE IF NOT EXISTS vitrine_blocs (
+                id TEXT PRIMARY KEY,
+                page_id TEXT NOT NULL,
+                block_key TEXT NOT NULL,
+                block_type TEXT NOT NULL,
+                props_json TEXT NOT NULL,
+                position INTEGER NOT NULL,
+                created_at TEXT,
+                updated_at TEXT,
+                FOREIGN KEY (page_id) REFERENCES vitrine_pages(id)
+            );
+            CREATE TABLE IF NOT EXISTS vitrine_templates (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL UNIQUE,
+                site_type TEXT NOT NULL,
+                schema_version TEXT NOT NULL,
+                content_json TEXT NOT NULL,
+                is_default INTEGER NOT NULL DEFAULT 0,
+                created_at TEXT,
+                updated_at TEXT
+            );
+            CREATE TABLE IF NOT EXISTS sync_logs (
+                id TEXT PRIMARY KEY,
+                exposant_id TEXT,
+                sync_source TEXT NOT NULL,
+                sync_type TEXT NOT NULL,
+                status TEXT NOT NULL,
+                payload_json TEXT,
+                error_message TEXT,
+                created_at TEXT
+            );
+            CREATE TABLE IF NOT EXISTS pos_stock_links (
+                id TEXT PRIMARY KEY,
+                produit_id TEXT NOT NULL UNIQUE,
+                pos_sku TEXT NOT NULL,
+                stock_qty INTEGER NOT NULL DEFAULT 0,
+                last_sync_at TEXT,
+                updated_at TEXT,
+                FOREIGN KEY (produit_id) REFERENCES produits_catalogue(id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_vitrine_blocs_page ON vitrine_blocs(page_id, position);
+            CREATE INDEX IF NOT EXISTS idx_sync_logs_exposant ON sync_logs(exposant_id, created_at);
+            CREATE INDEX IF NOT EXISTS idx_pos_stock_sku ON pos_stock_links(pos_sku);
+
+            -- CMS Articles (M8)
+            CREATE TABLE IF NOT EXISTS cms_articles (
+                id TEXT PRIMARY KEY,
+                exposant_id TEXT NOT NULL,
+                title TEXT,
+                slug TEXT,
+                excerpt TEXT,
+                content TEXT,
+                article_type TEXT DEFAULT 'article',
+                status TEXT DEFAULT 'brouillon',
+                category_id TEXT,
+                tags_json TEXT,
+                cover_image_url TEXT,
+                cover_image_alt TEXT,
+                seo_title TEXT,
+                seo_description TEXT,
+                seo_keywords TEXT,
+                is_featured INTEGER DEFAULT 0,
+                allow_comments INTEGER DEFAULT 1,
+                published_at TEXT,
+                author_name TEXT,
+                view_count INTEGER DEFAULT 0,
+                created_at TEXT,
+                updated_at TEXT,
+                FOREIGN KEY (exposant_id) REFERENCES exposants(id),
+                FOREIGN KEY (category_id) REFERENCES cms_categories(id)
+            );
+            CREATE TABLE IF NOT EXISTS cms_categories (
+                id TEXT PRIMARY KEY,
+                exposant_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                slug TEXT,
+                description TEXT,
+                color TEXT,
+                sort_order INTEGER DEFAULT 0,
+                created_at TEXT,
+                FOREIGN KEY (exposant_id) REFERENCES exposants(id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_cms_articles_exposant ON cms_articles(exposant_id, status);
+            CREATE INDEX IF NOT EXISTS idx_cms_articles_slug ON cms_articles(exposant_id, slug);
+            CREATE INDEX IF NOT EXISTS idx_cms_categories_exposant ON cms_categories(exposant_id);
+
+            INSERT INTO vitrine_templates (id, name, site_type, schema_version, content_json, is_default, created_at, updated_at)
+            SELECT 'tpl-mini-site', 'Mini-Site Vitrine', 'mini_site', '1.0.0',
+                   '{"blocks":[{"type":"hero"},{"type":"story"},{"type":"product_grid"},{"type":"contact_cta"}]}',
+                   1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+            WHERE NOT EXISTS (SELECT 1 FROM vitrine_templates WHERE name='Mini-Site Vitrine');
+
+            INSERT INTO vitrine_templates (id, name, site_type, schema_version, content_json, is_default, created_at, updated_at)
+            SELECT 'tpl-e-shop', 'E-Shop', 'e_shop', '1.0.0',
+                   '{"blocks":[{"type":"hero"},{"type":"category_grid"},{"type":"product_grid"},{"type":"promo"}]}',
+                   0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+            WHERE NOT EXISTS (SELECT 1 FROM vitrine_templates WHERE name='E-Shop');
+
+            INSERT INTO vitrine_templates (id, name, site_type, schema_version, content_json, is_default, created_at, updated_at)
+            SELECT 'tpl-service-shop', 'Service-Shop', 'service_shop', '1.0.0',
+                   '{"blocks":[{"type":"hero"},{"type":"service_cards"},{"type":"faq"},{"type":"contact_form"}]}',
+                   0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+            WHERE NOT EXISTS (SELECT 1 FROM vitrine_templates WHERE name='Service-Shop');
             "#,
         )?;
         Ok(())
@@ -943,6 +1047,11 @@ impl JayXposeDb {
 
     /// Insère ou remplace une page vitrine (INSERT OR REPLACE).
     pub fn vitrine_page_upsert(&self, v: &VitrinePage) -> Result<(), DbError> {
+        self.vitrine_page_upsert_return_id(v).map(|_| ())
+    }
+
+    /// Insère ou remplace une page vitrine et retourne l'identifiant utilisé.
+    pub fn vitrine_page_upsert_return_id(&self, v: &VitrinePage) -> Result<String, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let id = v
             .id
@@ -962,7 +1071,7 @@ impl JayXposeDb {
                 now,
             ],
         )?;
-        Ok(())
+        Ok(id)
     }
 
     /// Liste les pages vitrine d'un exposant.
@@ -981,6 +1090,194 @@ impl JayXposeDb {
                 is_visible: row.get::<_, Option<i32>>(4)?.map(|x| x != 0),
                 sort_order: row.get(5)?,
                 updated_at: row.get(6)?,
+            })
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    /// Remplace tous les blocs d'une page par la liste fournie.
+    pub fn vitrine_blocks_replace(
+        &self,
+        page_id: &str,
+        blocks: &[VitrineBlock],
+    ) -> Result<(), DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        conn.execute("DELETE FROM vitrine_blocs WHERE page_id=?1", params![page_id])?;
+        let now = chrono::Utc::now().to_rfc3339();
+        for (idx, block) in blocks.iter().enumerate() {
+            let id = block
+                .id
+                .clone()
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+            conn.execute(
+                "INSERT INTO vitrine_blocs
+                 (id, page_id, block_key, block_type, props_json, position, created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+                params![
+                    id,
+                    page_id,
+                    block.block_key.clone().unwrap_or_else(|| format!("blk-{}", idx + 1)),
+                    block.block_type.clone().unwrap_or_else(|| "text".to_string()),
+                    block.props_json.clone().unwrap_or_else(|| "{}".to_string()),
+                    block.position.unwrap_or(idx as i32),
+                    now,
+                    now
+                ],
+            )?;
+        }
+        Ok(())
+    }
+
+    /// Liste les blocs d'une page vitrine.
+    pub fn vitrine_blocks_by_page(&self, page_id: &str) -> Result<Vec<VitrineBlock>, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let mut stmt = conn.prepare(
+            "SELECT id, page_id, block_key, block_type, props_json, position, created_at, updated_at
+             FROM vitrine_blocs WHERE page_id=?1 ORDER BY position",
+        )?;
+        let rows = stmt.query_map(params![page_id], |row| {
+            Ok(VitrineBlock {
+                id: row.get(0)?,
+                page_id: row.get(1)?,
+                block_key: row.get(2)?,
+                block_type: row.get(3)?,
+                props_json: row.get(4)?,
+                position: row.get(5)?,
+                created_at: row.get(6)?,
+                updated_at: row.get(7)?,
+            })
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    /// Liste les templates de vitrine disponibles.
+    pub fn vitrine_templates_list(&self) -> Result<Vec<VitrineTemplate>, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let mut stmt = conn.prepare(
+            "SELECT id, name, site_type, schema_version, content_json, is_default, created_at, updated_at
+             FROM vitrine_templates ORDER BY is_default DESC, name ASC",
+        )?;
+        let rows = stmt.query_map([], |row| {
+            Ok(VitrineTemplate {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                site_type: row.get(2)?,
+                schema_version: row.get(3)?,
+                content_json: row.get(4)?,
+                is_default: row.get::<_, Option<i32>>(5)?.map(|v| v != 0),
+                created_at: row.get(6)?,
+                updated_at: row.get(7)?,
+            })
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    // -----------------------------------------------------------------------
+    // Sync logs + PoS links
+    // -----------------------------------------------------------------------
+
+    /// Insère un log de synchronisation.
+    pub fn sync_log_insert(&self, l: &SyncLog) -> Result<(), DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let id = l
+            .id
+            .clone()
+            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let now = chrono::Utc::now().to_rfc3339();
+        conn.execute(
+            "INSERT INTO sync_logs
+             (id, exposant_id, sync_source, sync_type, status, payload_json, error_message, created_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+            params![
+                id,
+                l.exposant_id,
+                l.sync_source,
+                l.sync_type,
+                l.status,
+                l.payload_json,
+                l.error_message,
+                l.created_at.clone().unwrap_or(now)
+            ],
+        )?;
+        Ok(())
+    }
+
+    /// Récupère les logs de sync d'un exposant (ordre récent d'abord).
+    pub fn sync_logs_by_exposant(&self, exposant_id: &str, limit: i64) -> Result<Vec<SyncLog>, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let mut stmt = conn.prepare(
+            "SELECT id, exposant_id, sync_source, sync_type, status, payload_json, error_message, created_at
+             FROM sync_logs WHERE exposant_id=?1 ORDER BY created_at DESC LIMIT ?2",
+        )?;
+        let rows = stmt.query_map(params![exposant_id, limit], |row| {
+            Ok(SyncLog {
+                id: row.get(0)?,
+                exposant_id: row.get(1)?,
+                sync_source: row.get(2)?,
+                sync_type: row.get(3)?,
+                status: row.get(4)?,
+                payload_json: row.get(5)?,
+                error_message: row.get(6)?,
+                created_at: row.get(7)?,
+            })
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    /// Upsert d'un lien stock PoS pour un produit, avec mise à jour de disponibilité.
+    pub fn pos_stock_upsert(
+        &self,
+        produit_id: &str,
+        pos_sku: &str,
+        stock_qty: i32,
+    ) -> Result<(), DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let now = chrono::Utc::now().to_rfc3339();
+        let existing: Option<String> = conn
+            .query_row(
+                "SELECT id FROM pos_stock_links WHERE produit_id=?1",
+                params![produit_id],
+                |row| row.get(0),
+            )
+            .ok();
+        if let Some(id) = existing {
+            conn.execute(
+                "UPDATE pos_stock_links SET pos_sku=?1, stock_qty=?2, last_sync_at=?3, updated_at=?4 WHERE id=?5",
+                params![pos_sku, stock_qty, now, now, id],
+            )?;
+        } else {
+            conn.execute(
+                "INSERT INTO pos_stock_links (id, produit_id, pos_sku, stock_qty, last_sync_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                params![uuid::Uuid::new_v4().to_string(), produit_id, pos_sku, stock_qty, now, now],
+            )?;
+        }
+        let availability = if stock_qty <= 0 { "rupture" } else { "disponible" };
+        conn.execute(
+            "UPDATE produits_catalogue SET availability=?1, updated_at=?2 WHERE id=?3",
+            params![availability, now, produit_id],
+        )?;
+        Ok(())
+    }
+
+    /// Retourne les liens stock PoS d'un exposant.
+    pub fn pos_stock_links_by_exposant(&self, exposant_id: &str) -> Result<Vec<PosStockLink>, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let mut stmt = conn.prepare(
+            "SELECT psl.id, psl.produit_id, psl.pos_sku, psl.stock_qty, psl.last_sync_at, psl.updated_at
+             FROM pos_stock_links psl
+             JOIN produits_catalogue pc ON pc.id = psl.produit_id
+             WHERE pc.exposant_id = ?1
+             ORDER BY psl.updated_at DESC",
+        )?;
+        let rows = stmt.query_map(params![exposant_id], |row| {
+            Ok(PosStockLink {
+                id: row.get(0)?,
+                produit_id: row.get(1)?,
+                pos_sku: row.get(2)?,
+                stock_qty: row.get(3)?,
+                last_sync_at: row.get(4)?,
+                updated_at: row.get(5)?,
             })
         })?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
@@ -1020,6 +1317,263 @@ impl JayXposeDb {
                 field_name: row.get(2)?,
                 visibility: row.get(3)?,
                 updated_at: row.get(4)?,
+            })
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    // -----------------------------------------------------------------------
+    // CMS Articles (M8)
+    // -----------------------------------------------------------------------
+
+    /// Insère un article CMS.
+    ///
+    /// @id: cms_article_insert
+    /// @do: insert_cms_article_to_db
+    /// @layer: infra
+    pub fn cms_article_insert(&self, a: &CmsArticle) -> Result<String, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let id = a
+            .id
+            .clone()
+            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let now = chrono::Utc::now().to_rfc3339();
+        conn.execute(
+            "INSERT INTO cms_articles (
+                id, exposant_id, title, slug, excerpt, content, article_type, status,
+                category_id, tags_json, cover_image_url, cover_image_alt, seo_title,
+                seo_description, seo_keywords, is_featured, allow_comments, published_at,
+                author_name, view_count, created_at, updated_at
+             ) VALUES (
+                ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22
+             )",
+            params![
+                id,
+                a.exposant_id,
+                a.title,
+                a.slug,
+                a.excerpt,
+                a.content,
+                a.article_type.clone().unwrap_or_else(|| "article".to_string()),
+                a.status.clone().unwrap_or_else(|| "brouillon".to_string()),
+                a.category_id,
+                a.tags_json,
+                a.cover_image_url,
+                a.cover_image_alt,
+                a.seo_title,
+                a.seo_description,
+                a.seo_keywords,
+                a.is_featured.map(|b| if b { 1_i32 } else { 0 }),
+                a.allow_comments.map(|b| if b { 1_i32 } else { 0 }),
+                a.published_at,
+                a.author_name,
+                a.view_count.unwrap_or(0),
+                now,
+                now,
+            ],
+        )?;
+        Ok(id)
+    }
+
+    /// Met à jour un article CMS existant.
+    ///
+    /// @id: cms_article_update
+    /// @do: update_cms_article_in_db
+    /// @layer: infra
+    pub fn cms_article_update(&self, a: &CmsArticle) -> Result<(), DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let now = chrono::Utc::now().to_rfc3339();
+        let id = a.id.as_deref().ok_or_else(|| DbError("cms_article_update: id requis".to_string()))?;
+        conn.execute(
+            "UPDATE cms_articles SET
+                exposant_id=?1, title=?2, slug=?3, excerpt=?4, content=?5, article_type=?6,
+                status=?7, category_id=?8, tags_json=?9, cover_image_url=?10, cover_image_alt=?11,
+                seo_title=?12, seo_description=?13, seo_keywords=?14, is_featured=?15,
+                allow_comments=?16, published_at=?17, author_name=?18, view_count=?19, updated_at=?20
+             WHERE id=?21",
+            params![
+                a.exposant_id,
+                a.title,
+                a.slug,
+                a.excerpt,
+                a.content,
+                a.article_type,
+                a.status,
+                a.category_id,
+                a.tags_json,
+                a.cover_image_url,
+                a.cover_image_alt,
+                a.seo_title,
+                a.seo_description,
+                a.seo_keywords,
+                a.is_featured.map(|b| if b { 1_i32 } else { 0 }),
+                a.allow_comments.map(|b| if b { 1_i32 } else { 0 }),
+                a.published_at,
+                a.author_name,
+                a.view_count,
+                now,
+                id,
+            ],
+        )?;
+        Ok(())
+    }
+
+    /// Supprime un article CMS par identifiant.
+    pub fn cms_article_delete(&self, id: &str) -> Result<(), DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        conn.execute("DELETE FROM cms_articles WHERE id = ?1", params![id])?;
+        Ok(())
+    }
+
+    /// Récupère un article CMS par identifiant.
+    pub fn cms_article_by_id(&self, id: &str) -> Result<Option<CmsArticle>, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let mut stmt = conn.prepare(
+            "SELECT id, exposant_id, title, slug, excerpt, content, article_type, status,
+                    category_id, tags_json, cover_image_url, cover_image_alt, seo_title,
+                    seo_description, seo_keywords, is_featured, allow_comments, published_at,
+                    author_name, view_count, created_at, updated_at
+             FROM cms_articles WHERE id = ?1",
+        )?;
+        let row = stmt.query_row(params![id], Self::row_to_cms_article);
+        match row {
+            Ok(a) => Ok(Some(a)),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e.into()),
+        }
+    }
+
+    /// Liste les articles CMS d'un exposant.
+    pub fn cms_articles_by_exposant(&self, exposant_id: &str) -> Result<Vec<CmsArticle>, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let mut stmt = conn.prepare(
+            "SELECT id, exposant_id, title, slug, excerpt, content, article_type, status,
+                    category_id, tags_json, cover_image_url, cover_image_alt, seo_title,
+                    seo_description, seo_keywords, is_featured, allow_comments, published_at,
+                    author_name, view_count, created_at, updated_at
+             FROM cms_articles WHERE exposant_id = ?1 ORDER BY created_at DESC",
+        )?;
+        let rows = stmt.query_map(params![exposant_id], Self::row_to_cms_article)?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    /// Liste les articles CMS publiés d'un exposant (pour vitrine publique).
+    pub fn cms_articles_published(&self, exposant_id: &str) -> Result<Vec<CmsArticle>, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let mut stmt = conn.prepare(
+            "SELECT id, exposant_id, title, slug, excerpt, content, article_type, status,
+                    category_id, tags_json, cover_image_url, cover_image_alt, seo_title,
+                    seo_description, seo_keywords, is_featured, allow_comments, published_at,
+                    author_name, view_count, created_at, updated_at
+             FROM cms_articles WHERE exposant_id = ?1 AND status = 'publie'
+             ORDER BY is_featured DESC, published_at DESC",
+        )?;
+        let rows = stmt.query_map(params![exposant_id], Self::row_to_cms_article)?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    /// Incrémente le compteur de vues d'un article.
+    pub fn cms_article_increment_views(&self, id: &str) -> Result<(), DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        conn.execute(
+            "UPDATE cms_articles SET view_count = view_count + 1 WHERE id = ?1",
+            params![id],
+        )?;
+        Ok(())
+    }
+
+    /// Convertit une ligne SQLite en `CmsArticle`.
+    fn row_to_cms_article(row: &rusqlite::Row<'_>) -> rusqlite::Result<CmsArticle> {
+        Ok(CmsArticle {
+            id: row.get(0)?,
+            exposant_id: row.get(1)?,
+            title: row.get(2)?,
+            slug: row.get(3)?,
+            excerpt: row.get(4)?,
+            content: row.get(5)?,
+            article_type: row.get(6)?,
+            status: row.get(7)?,
+            category_id: row.get(8)?,
+            tags_json: row.get(9)?,
+            cover_image_url: row.get(10)?,
+            cover_image_alt: row.get(11)?,
+            seo_title: row.get(12)?,
+            seo_description: row.get(13)?,
+            seo_keywords: row.get(14)?,
+            is_featured: row.get::<_, Option<i32>>(15)?.map(|x| x != 0),
+            allow_comments: row.get::<_, Option<i32>>(16)?.map(|x| x != 0),
+            published_at: row.get(17)?,
+            author_name: row.get(18)?,
+            view_count: row.get(19)?,
+            created_at: row.get(20)?,
+            updated_at: row.get(21)?,
+        })
+    }
+
+    // -----------------------------------------------------------------------
+    // CMS Categories
+    // -----------------------------------------------------------------------
+
+    /// Insère une catégorie CMS.
+    pub fn cms_category_insert(&self, c: &CmsCategory) -> Result<String, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let id = c
+            .id
+            .clone()
+            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let now = chrono::Utc::now().to_rfc3339();
+        conn.execute(
+            "INSERT INTO cms_categories (id, exposant_id, name, slug, description, color, sort_order, created_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+            params![
+                id,
+                c.exposant_id,
+                c.name,
+                c.slug,
+                c.description,
+                c.color,
+                c.sort_order.unwrap_or(0),
+                now,
+            ],
+        )?;
+        Ok(id)
+    }
+
+    /// Met à jour une catégorie CMS existante.
+    pub fn cms_category_update(&self, c: &CmsCategory) -> Result<(), DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let id = c.id.as_deref().ok_or_else(|| DbError("cms_category_update: id requis".to_string()))?;
+        conn.execute(
+            "UPDATE cms_categories SET exposant_id=?1, name=?2, slug=?3, description=?4, color=?5, sort_order=?6 WHERE id=?7",
+            params![c.exposant_id, c.name, c.slug, c.description, c.color, c.sort_order, id],
+        )?;
+        Ok(())
+    }
+
+    /// Supprime une catégorie CMS par identifiant.
+    pub fn cms_category_delete(&self, id: &str) -> Result<(), DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        conn.execute("DELETE FROM cms_categories WHERE id = ?1", params![id])?;
+        Ok(())
+    }
+
+    /// Liste les catégories CMS d'un exposant.
+    pub fn cms_categories_by_exposant(&self, exposant_id: &str) -> Result<Vec<CmsCategory>, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let mut stmt = conn.prepare(
+            "SELECT id, exposant_id, name, slug, description, color, sort_order, created_at
+             FROM cms_categories WHERE exposant_id = ?1 ORDER BY sort_order, name",
+        )?;
+        let rows = stmt.query_map(params![exposant_id], |row| {
+            Ok(CmsCategory {
+                id: row.get(0)?,
+                exposant_id: row.get(1)?,
+                name: row.get(2)?,
+                slug: row.get(3)?,
+                description: row.get(4)?,
+                color: row.get(5)?,
+                sort_order: row.get(6)?,
+                created_at: row.get(7)?,
             })
         })?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)

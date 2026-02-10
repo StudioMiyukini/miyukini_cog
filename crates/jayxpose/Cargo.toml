@@ -12,24 +12,32 @@ license.workspace = true
 repository.workspace = true
 homepage.workspace = true
 documentation.workspace = true
-keywords = ["jayxpose", "exposant", "catalogue", "egui", "eframe"]
+keywords = ["jayxpose", "exposant", "catalogue", "tauri"]
 categories.workspace = true
-description = "JayXpose — Service profil exposant, catalogue produits, vitrine, coffre-fort documentaire (egui/eframe)"
+description = "JayXpose — Service profil exposant, catalogue produits, vitrine, coffre-fort documentaire"
 
 [dependencies]
-egui = "0.33"
-eframe = { version = "0.33", default-features = false, features = ["default_fonts", "persistence", "glow"] }
 kindmother = { path = "../kindmother" }
-rusqlite = { version = "0.32", features = ["bundled"] }
+kindmother-client = { path = "../kindmother-client" }
+# rusqlite conservé temporairement pour migration progressive
+rusqlite = { version = "0.32", features = ["bundled"], optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
 uuid = { version = "1", features = ["v4"] }
 chrono = "0.4"
+tokio = { version = "1", features = ["rt-multi-thread"] }
+thiserror = "2"
 
-[[bin]]
-name = "jayxpose"
-path = "src/main.rs"
+[features]
+default = ["legacy-sqlite"]
+# Mode legacy: accès SQLite direct (migration progressive)
+legacy-sqlite = ["rusqlite"]
+# Mode production: accès via KindMother uniquement
+kindmother-only = []
+
+# Note: eGUI supprimé — migration vers Tauri + React/TypeScript
+# Voir docs/implementation/Miyukini - Plan Migration Tauri React TypeScript.md
 
 [lints.rust]
 unsafe_code = "forbid"

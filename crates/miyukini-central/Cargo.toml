@@ -11,32 +11,43 @@ keywords.workspace = true
 categories.workspace = true
 description = "Miyukini Central - Hub de gestion des Services de l'ecosysteme Miyukini COG"
 
+# Binaire minimal (stub) — ne pas écraser miyukini-central.exe produit par apps/central
+[[bin]]
+name = "miyukini-central-stub"
+path = "src/main.rs"
+
 [dependencies]
+kindmother = { path = "../kindmother" }
+kindmother-client = { path = "../kindmother-client" }
 chrono = "0.4"
 dotenvy = "0.15"
-egui = "0.33"
-eframe = { version = "0.33", default-features = false, features = ["default_fonts", "persistence", "glow"] }
-egui-phosphor = "0.11"
 jayfestival = { path = "../jayfestival" }
 jaykoa = { path = "../jaykoa" }
 jayxpose = { path = "../jayxpose" }
 jaykonta = { path = "../jaykonta" }
 lord_of_the_castle = { path = "../lord_of_the_castle" }
 miyuclicker = { path = "../miyuclicker" }
-resvg = { version = "0.46", default-features = false }
-rusqlite = { version = "0.32", features = ["bundled"] }
+# rusqlite conservé temporairement pour migration progressive
+rusqlite = { version = "0.32", features = ["bundled"], optional = true }
 rand = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sha2 = "0.10"
-tiny-skia = "0.11"
-ureq = { version = "2", default-features = false, features = ["json"] }
-usvg = { version = "0.46", default-features = false }
 uuid = { version = "1", features = ["v4"] }
+ureq = { version = "2", default-features = false, features = ["json", "tls"] }
+tokio = { version = "1", features = ["rt-multi-thread"] }
+thiserror = "2"
+base64 = "0.22"
 
-[[bin]]
-name = "miyukini-central"
-path = "src/main.rs"
+[features]
+default = ["legacy-sqlite"]
+# Mode legacy: accès SQLite direct (migration progressive)
+legacy-sqlite = ["rusqlite"]
+# Mode production: accès via KindMother uniquement
+kindmother-only = []
+
+# Note: eGUI supprimé — migration vers Tauri + React/TypeScript
+# Voir docs/implementation/Miyukini - Plan Migration Tauri React TypeScript.md
 
 [lints.rust]
 unsafe_code = "forbid"

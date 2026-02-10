@@ -1,42 +1,28 @@
-//! Point d'entrée Lord of the Castle (mode autonome — développement / tests).
+//! Point d'entrée binaire Lord of the Castle (Miyukini Survivor).
+//! Lance l'app Dioxus Desktop (rendu Blitz/WGPU). Peut aussi être intégré au Hub Central.
 //!
-//! Point d'accès utilisateur canonique : Miyukini Central (CANON-CENTRAL).
-//! Ce binaire permet de lancer Lord of the Castle en fenêtre standalone.
-//!
-//! @id: lord_of_the_castle_main_entry
-//! @do: run_native_lord_of_the_castle_app
-//! @role: bootstrap
-//! @layer: infra
-//! @human: Binaire standalone (dev/test). Point d'accès canonique : Miyukini Central.
+//! Persistance KM : base path = `MIYUKINI_DATA_DIR` (env) ou répertoire courant.
+//! Fichier DB : `lord_of_the_castle.db` (table survivor_slots).
 
-use eframe::egui;
-use lord_of_the_castle::LordOfTheCastleApp;
-use std::io;
+fn main() {
+    tracing_subscriber::fmt()
+        .with_env_filter("lord_of_the_castle=debug,dioxus=info")
+        .init();
 
-const SAVE_PATH: &str = "lord_of_the_castle_save.bin";
+    tracing::info!("Démarrage de Lord of the Castle (Miyukini Survivor)...");
 
-fn main() -> eframe::Result<()> {
-    let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
-            .with_inner_size([1024.0, 768.0])
-            .with_title("Lord of the Castle — Miyukini Survivor"),
-        ..Default::default()
-    };
-    eframe::run_native(
-        "Lord of the Castle",
-        options,
-        Box::new(|cc| {
-            cc.egui_ctx.set_visuals(egui::Visuals::dark());
-            let mut app = LordOfTheCastleApp::new(cc);
-            app.set_save_load_callbacks(
-                |bytes| {
-                    std::fs::write(SAVE_PATH, bytes).map_err(|e: io::Error| e.to_string())
-                },
-                || {
-                    std::fs::read(SAVE_PATH).map_err(|e: io::Error| e.to_string())
-                },
-            );
-            Ok(Box::new(app))
-        }),
-    )
+    let config = dioxus::desktop::Config::new()
+        .with_window(
+            dioxus::desktop::WindowBuilder::new()
+                .with_title("Lord of the Castle — Miyukini Survivor")
+                .with_inner_size(dioxus::desktop::LogicalSize::new(1024.0, 768.0))
+                .with_min_inner_size(dioxus::desktop::LogicalSize::new(800.0, 600.0))
+                .with_decorations(true)
+                .with_resizable(true),
+        )
+        .with_disable_context_menu(false);
+
+    dioxus::LaunchBuilder::desktop()
+        .with_cfg(config)
+        .launch(lord_of_the_castle::SurvivorAppStandalone);
 }

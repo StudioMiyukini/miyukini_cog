@@ -1,0 +1,52 @@
+# @id: kindmother_client_crate_config
+# @do: declare_kindmother_client_crate
+# @layer: toolkit
+# Crate KindMother Client — Client IPC pour délégation vers KindMother Service.
+
+[package]
+name = "kindmother-client"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords = ["kindmother", "client", "ipc", "database"]
+categories.workspace = true
+description = "KindMother Client — Client de délégation vers le service KindMother"
+
+[dependencies]
+# Core Miyukini
+miyukini-kernel = { path = "../miyukini-kernel" }
+kindmother = { path = "../kindmother" }
+
+# Sérialisation
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# IPC - JSON over TCP (simple, pas de dépendance protoc)
+# tonic et prost retirés car nécessitent protoc
+
+# Utilitaires
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "2"
+tracing = "0.1"
+
+# Pas de build dependencies nécessaires sans gRPC
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = "allow"
+doc_markdown = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"

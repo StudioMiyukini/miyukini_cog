@@ -17,6 +17,7 @@ Il couvre deux points d'entree :
 | [JayKonta - Bornage Implementation](./JayKonta%20-%20Bornage%20Implementation.md) | Perimetre phase 1/2/3, in scope, hors scope, criteres fin de phase. |
 | [JayKonta - Plan Implementation](./JayKonta%20-%20Plan%20Implementation.md) | Plan de delivery par phases et taches. |
 | [JayKonta - Analyse PR Concurrence Web](./JayKonta%20-%20Analyse%20PR%20Concurrence%20Web.md) | Benchmark concurrentiel web et adaptations COG. |
+| [**JayKonta - Mocks UI et Guide Implementation**](./JayKonta%20-%20Mocks%20UI%20et%20Guide%20Implementation.md) | **[NOUVEAU]** Mocks ASCII tous ecrans (Purse P1-P6, Account A1-A7), schema SQL KindMother complet, types Rust, composants Dioxus, guide implementation 6 phases (42.5j). Debloque Phase 2.2 du Parcours Developpement. |
 | [JayKonta - Interfaces Inter-Services Futures](./reference/JayKonta%20-%20Interfaces%20Inter-Services%20Futures.md) | Guide d'implementation des interfaces futures: enveloppe, payloads, erreurs, idempotence, audit et versioning. |
 | [Reference](./reference/_index.md) | Niveaux securite, points d'entree, integration. |
 | [Publics](./publics/_index.md) | Purse et Account : analyses, parcours, operateurs/toolkits. |

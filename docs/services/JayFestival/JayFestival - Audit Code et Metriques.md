@@ -118,7 +118,7 @@ test result: ok. 9 passed; 0 failed
 - **Taux de réussite des tests :** **100 %** (9/9).
 
 **Score tests :** 85 %  
-- 100 % de réussite ; présence de tests sur domain + app ; couverture partielle des modules testables (justification : UI egui et services I/O en alpha).
+- 100 % de réussite ; présence de tests sur domain + app ; couverture partielle des modules testables (justification : UI Dioxus et services I/O en alpha).
 
 ---
 

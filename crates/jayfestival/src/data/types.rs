@@ -6,7 +6,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Profil utilisateur (table `profiles`).
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct Profile {
     pub id: Option<String>,
@@ -62,7 +62,7 @@ impl UserType {
 }
 
 /// Édition / événement (table `editions`).
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct Edition {
     pub id: Option<String>,
@@ -80,7 +80,7 @@ pub struct Edition {
 }
 
 /// Organisateur (table `organisateurs`).
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct Organisateur {
     pub id: Option<String>,
@@ -97,7 +97,7 @@ pub struct Organisateur {
 }
 
 /// Exposant (table `exposants`).
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct Exposant {
     pub id: Option<String>,
@@ -120,7 +120,7 @@ pub struct Exposant {
 }
 
 /// Participation exposant × édition (table `editions_exposants`).
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct EditionExposant {
     pub id: Option<String>,
@@ -131,8 +131,63 @@ pub struct EditionExposant {
     pub is_paid: Option<bool>,
     pub assigned_stand: Option<String>,
     pub size_meters: Option<f64>,
+    /// Date de dépôt de candidature.
+    pub candidature_date: Option<String>,
+    /// Motif de refus (si candidature refusée).
+    pub motif_refus: Option<String>,
+    /// Statut de candidature : en_attente, acceptee, refusee, annulee.
+    pub status_candidature: Option<String>,
     #[serde(default)]
     pub created_at: Option<String>,
     #[serde(default)]
     pub updated_at: Option<String>,
+}
+
+/// Animation / activité programmée dans une édition (table `animations`).
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct Animation {
+    pub id: Option<String>,
+    pub edition_id: Option<String>,
+    pub name: Option<String>,
+    /// Type d'animation : conference, atelier, spectacle, demo, autre.
+    pub animation_type: Option<String>,
+    pub start_time: Option<String>,
+    pub end_time: Option<String>,
+    pub room: Option<String>,
+    pub description: Option<String>,
+    /// Statut : brouillon, confirme, annule.
+    pub status: Option<String>,
+    #[serde(default)]
+    pub created_at: Option<String>,
+    #[serde(default)]
+    pub updated_at: Option<String>,
+}
+
+/// Entrée budgétaire d'une édition (table `budget_entries`).
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct BudgetEntry {
+    pub id: Option<String>,
+    pub edition_id: Option<String>,
+    pub label: Option<String>,
+    /// Catégorie : logistique, communication, location, personnel, sponsor, billetterie, autre.
+    pub category: Option<String>,
+    pub amount: Option<f64>,
+    /// Type d'entrée : revenu ou depense.
+    pub entry_type: Option<String>,
+    pub date: Option<String>,
+    pub notes: Option<String>,
+    #[serde(default)]
+    pub created_at: Option<String>,
+    #[serde(default)]
+    pub updated_at: Option<String>,
+}
+
+/// Résumé budgétaire calculé (non persisté).
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct BudgetSummary {
+    pub total_revenus: f64,
+    pub total_depenses: f64,
+    pub balance: f64,
 }

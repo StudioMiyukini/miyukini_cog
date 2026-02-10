@@ -88,7 +88,7 @@ impl DestructionAndReinitService {
     /// @human: Sauvegarde si besoin, wipe artefacts, écrit mémoire corruption, réinit.
     /// @do: run_destruction_and_reinit
     pub async fn run(&self, reason: &str) -> Result<(), std::io::Error> {
-        self.pre_destruction_backup.run_if_needed();
+        let _ = self.pre_destruction_backup.run_if_needed();
 
         self.remove_eip_blob().await?;
         self.remove_admin_registry().await?;

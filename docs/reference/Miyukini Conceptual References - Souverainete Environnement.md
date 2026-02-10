@@ -322,6 +322,7 @@ Les environnements COG peuvent échanger des données **si et seulement si** cel
 | 6 | Migration = diplomatie explicite | **NON NÉGOCIABLE** |
 | 7 | Évolution ralentie volontairement | **RECOMMANDÉ** |
 | 8 | Données sensibles à résidence centralisée : copie canonique sur COG de référence | **NORMATIF** (voir Politique de résidence) |
+| 9 | Les Services Fondamentaux (Central, Portail) font partie de l'environnement versionné | **NON NÉGOCIABLE** |
 
 ### Formulation officielle
 
@@ -339,12 +340,70 @@ Certaines données sensibles (données personnelles, métier critique) ne doiven
 
 ---
 
+## 11. Services Fondamentaux
+
+### Définition
+
+Les **Services Fondamentaux** sont les points d'entrée structurels de l'écosystème COG dont la présence fait partie de l'environnement versionné. Ils ne sont pas optionnels.
+
+### Les deux Services Fondamentaux
+
+| Service | Rôle | Cible |
+|---------|------|-------|
+| **Miyukini Central** | Hub de gestion des Services — point d'entrée utilisateur COG | Utilisateur du COG (gestion, admin, création) |
+| **Miyukini Web Portal** | Hub des surfaces web — point d'entrée utilisateurs externes | Utilisateurs externes (web, sans COG) |
+
+### Règle canonique
+
+> **Central = COG, Portail = Web.**
+>
+> Un COG sans Central ne peut pas être administré.  
+> Un COG sans Portail ne peut pas exposer de surfaces web.
+
+### Position dans l'environnement versionné
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Environnement COG (versionné)                     │
+│                                                                      │
+│  ┌────────────────────────────┐  ┌────────────────────────────┐    │
+│  │   Miyukini Central         │  │   Miyukini Web Portal      │    │
+│  │   (Service Fondamental)    │  │   (Service Fondamental)    │    │
+│  │   · Point d'entrée COG     │  │   · Point d'entrée Web     │    │
+│  └────────────────────────────┘  └────────────────────────────┘    │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐  │
+│  │                    Services (Type 1, 2, 3)                    │  │
+│  └──────────────────────────────────────────────────────────────┘  │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐  │
+│  │                    Strate Cores (immuable)                    │  │
+│  └──────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Implication pour le versioning
+
+Lorsque l'environnement COG est versionné, les Services Fondamentaux font partie de cette version :
+
+- Version des Cores (Strate 4) → immuable
+- Version des Services Fondamentaux (Central, Portail) → versionnée avec l'environnement
+- Version des Services métier → peut évoluer indépendamment (sous gouvernance)
+
+**Voir aussi :** [Types de Services et Espaces](./Miyukini%20Conceptual%20References%20-%20Types%20de%20Services%20et%20Espaces.md), [Miyukini Central Hub Services](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Central%20Hub%20Services.md), [Miyukini Web Portal](../services/MiyukiniWebPortal/_index.md)
+
+---
+
 **Date de création :** 2026-01-27  
-**Version :** 1.3 (ajout résidence des données sensibles, COG de référence)  
+**Version :** 1.4 (ajout Services Fondamentaux : Miyukini Central et Miyukini Web Portal)  
 **Statut :** Document de référence normatif
 
 **Références croisées :**
+- [Miyukini Conceptual References - Comportement COG Environnements](./Miyukini%20Conceptual%20References%20-%20Comportement%20COG%20Environnements.md) : Schéma et comportement des environnements COG
 - [Miyukini Conceptual References - Definition COG](./Miyukini%20Conceptual%20References%20-%20Definition%20COG.md) : Définition officielle COG
+- [Miyukini Conceptual References - Types de Services et Espaces](./Miyukini%20Conceptual%20References%20-%20Types%20de%20Services%20et%20Espaces.md) : Classification des Services (Type 1, 2, 3)
+- [Miyukini Conceptual References - Miyukini Central Hub Services](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Central%20Hub%20Services.md) : Service Fondamental — Hub COG
+- [Miyukini Web Portal - Document Fondateur](../services/MiyukiniWebPortal/Miyukini%20Web%20Portal%20-%20Document%20Fondateur.md) : Service Fondamental — Hub Web
 - [Miyukini Conceptual References - Politique Residence Donnees Sensibles](./Miyukini%20Conceptual%20References%20-%20Politique%20Residence%20Donnees%20Sensibles.md) : Centralisation et résidence des données sensibles
 - [Miyukini Conceptual References - Operators et Terminologie](./Miyukini%20Conceptual%20References%20-%20Operators%20et%20Terminologie.md) : Terminologie officielle
 - [Miyukini Conceptual References - Lois Autonomie Systeme](./Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) : Contraintes d'autonomie
@@ -353,4 +412,4 @@ Certaines données sensibles (données personnelles, métier critique) ne doiven
 - [Miyukini Conceptual References - Kernel Maintenance Observability Contract](./Miyukini%20Conceptual%20References%20-%20Kernel%20Maintenance%20Observability%20Contract.md) : Capacités bas niveau de maintenance (compatible isolation)
 - [BondingBrother - Migration & Compatibility Contract](../core/BondingBrother/BondingBrother%20-%20Migration%20%26%20Compatibility%20Contract.md) : Contrat de migration
 - [Border Guard - Documentation Fondatrice](../core/BorderGuard/Border%20Guard%20-%20Documentation%20Fondatrice.md) : Frontières et confiance
-- [Miyukini Conceptual References - Glossaire](./Miyukini%20Conceptual%20References%20-%20Glossaire.md) : COG de référence, Politique de résidence des données sensibles
+- [Miyukini Conceptual References - Glossaire](./Miyukini%20Conceptual%20References%20-%20Glossaire.md) : Services Fondamentaux, Types de Services

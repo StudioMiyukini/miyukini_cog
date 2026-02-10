@@ -1,2396 +1,1981 @@
-//! Application Lord of the Castle — écrans, zone de jeu, barre haute, input.
-//! Aligné sur docs/services/MiyukiniSurvivor (Ecrans et UI, Gameplay).
-//! Surface de combat 800×800 centrée au milieu du body ; déplacement ZQSD.
+//! Application Dioxus Lord of the Castle (Miyukini Survivor).
+//! Point d'entrée UI : menu principal (slots KM), écran de jeu complet avec
+//! rendu des entités, barres d'info, sidebar préparation, panneaux overlay.
 //!
-//! @id: lord_of_the_castle_app
-//! @do: manage_screens_windows_and_game_flow
-//! @role: ui
-//! @layer: domain
-//! @human: Orchestration des écrans (titre, lore, création, préparation, bataille, game over), fenêtres, header.
+//! Layout sans défilement : tout rentre dans 100vh.
+//! ┌─────────────────────────────────────────────────────────────┐
+//! │  Header (vague, ennemis, or, niveau)                        │
+//! ├─────────────────────────────────────────────────────────────┤
+//! │  Boutons (Stats, Skills, Inventaire)  │  XP bar             │
+//! ├───────────────────────────────┬─────────────────────────────┤
+//! │                               │  Sidebar (préparation)      │
+//! │   Zone de jeu (entités)       │  - Construire tour          │
+//! │                               │  - Recruter troupe          │
+//! │                               │  - Marchand                 │
+//! ├───────────────────────────────┴─────────────────────────────┤
+//! │  Footer (PV joueur, sauvegarde, actions)                    │
+//! └─────────────────────────────────────────────────────────────┘
 
-use crate::app_ui::{
-    allocate_game_zone_and_bottom, game_zone_tick_and_paint, paint_bottom_panel,
-    paint_equipment_window, paint_inventory_window, paint_player_window,
-    paint_skills_window,
-    screen_to_cell, screen_to_world,
-};
 use crate::character_creation::{
-    apply_phrase_effects, pick_three_phrases, CharacterStats, PhraseDef, Stat,
+    all_phrases, apply_phrase_effects, pick_three_phrases, CharacterStats, PhraseDef,
 };
-use crate::constants::TOWER_BASE_COST_GOLD;
-use crate::game_state::{
-    GamePhase, GameState, INVENTORY_MAX_SLOTS, EXPERT_IDENTIFY_COST_GOLD,
-};
-use crate::loot::{InventoryEntry, ItemSlot};
+use crate::constants::{COMBAT_SURFACE_SIZE, TOWER_BASE_COST_GOLD};
+use crate::enemies::EnemyKind;
+use crate::game_loop::{move_player, move_secondary_player, tick_battle};
+use crate::game_state::{rand_simple, GamePhase, GameState};
+use crate::loot::{InventoryEntry, ItemSlot, LootKind};
 use crate::player::{Dir8, Player};
+use crate::save::{LordOfTheCastleDb, SlotMetadata};
+use crate::embedded_sprites::{
+    animation_frame_index, player, enemy_normal, enemy_miniboss, enemy_boss,
+};
 use crate::troops::TroopKind;
-use crate::warrior_skills::WarriorSkillId;
-use crate::spritesheet::{load_image_from_path, SpritesheetDesc};
-use std::path::Path;
-use eframe::egui;
-use eframe::App;
-use std::cell::RefCell;
-use std::time::Instant;
+use crate::warrior_skills::{warrior_skill_def, WarriorSkillId};
+use dioxus::prelude::*;
+use std::path::PathBuf;
+use std::time::{Duration, Instant};
 
-/// Section active dans la sidebar « Mode préparation » (legacy ; remplacée par fenêtres).
-#[allow(dead_code)]
+// ─── Types ────────────────────────────────────────────────────────────
+
+/// Écran actif de l'app (menu, création, jeu).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub enum PreparationSection {
-    #[default]
-    Marchand,
-    ExpertIdentification,
-    Construction,
-    Recrutement,
-}
-
-/// Pool du marchand (pour achat différé).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum MerchantPoolKind {
-    Weapon,
-    Armor,
-    Accessory,
-}
-
-/// Écran courant.
-#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Screen {
-    /// Titre : Nouvelle partie.
-    Title,
-    /// Lore (texte + Skip).
-    Lore,
-    /// Saisie nom personnage et nom de sauvegarde.
-    NameInput,
-    /// Création de personnage, étape 0..=3 (4 écrans × 3 phrases).
-    CharacterCreation(u8),
-    /// Phase Préparation : sidebar, Lancer la vague.
-    Preparation,
-    /// Phase Bataille : zone de jeu, ennemis.
-    Battle,
-    /// Game over (Château à 0 PV).
-    GameOver,
+    #[default]
+    MainMenu,
+    CharacterCreation,
+    Game,
 }
 
-/// Application Lord of the Castle.
-pub struct LordOfTheCastleApp {
-    pub screen: Screen,
-    pub game: Option<GameState>,
-    pub last_tick: Instant,
-    /// Touches enfoncées (8 directions) — joueur principal (ZQSD ou OKLM si joueur 2 présent).
-    pub keys: [bool; 8],
-    /// Touches joueur secondaire (ZQSD) — utilisé uniquement si secondary_player présent.
-    pub keys_secondary: [bool; 8],
-    /// Fenêtre « Player » (métriques joueur) ouverte.
-    pub player_window_open: bool,
-    /// Fenêtre « Inventaire » ouverte.
-    pub inventory_window_open: bool,
-    /// Slot d’inventaire sélectionné pour détail / identification (fenêtre secondaire).
-    pub selected_inventory_slot: Option<usize>,
-    /// Fenêtre « Équipement » ouverte.
-    pub equipment_window_open: bool,
-    /// Slot d'équipement sélectionné pour détail (fenêtre secondaire).
-    pub selected_equipment_slot: Option<ItemSlot>,
-    // ——— Parcours « Nouvelle partie » ———
-    /// Texte nom du personnage (écran NameInput).
-    pub creation_name: String,
-    /// Texte nom de la sauvegarde (écran NameInput).
-    pub creation_save_name: String,
-    /// IDs de phrases non encore affichées (création).
-    pub creation_available_ids: Vec<usize>,
-    /// Stats courantes pendant la création.
-    pub creation_stats: CharacterStats,
-    /// Si « Que Nawak décide... » a été choisi (reroll en fin).
-    pub creation_reroll_pending: bool,
-    /// Les 3 phrases proposées à l’étape courante.
-    pub creation_current_choices: Vec<PhraseDef>,
-    #[allow(dead_code)]
-    pub preparation_sidebar_open: bool,
-    #[allow(dead_code)]
-    pub preparation_section: PreparationSection,
-    /// Fenêtres Mode préparation (ouvertes par boutons header).
-    pub competences_open: bool,
-    /// Onglet actif dans la fenêtre Compétences.
-    pub skills_tab: crate::SkillsTab,
-    /// Compétence Guerrier sélectionnée (pour la fenêtre de détail).
-    pub selected_warrior_skill: Option<WarriorSkillId>,
-    pub marchand_open: bool,
-    pub expert_open: bool,
-    pub construction_open: bool,
-    /// Case sélectionnée en mode construction (grille 20×20, origine = coin château). None = pas de sélection.
-    pub construction_selected_cell: Option<(i32, i32)>,
-    pub recrutement_open: bool,
-    /// Achat marchand différé (pool, index) pour éviter emprunt pendant la fenêtre.
-    pub pending_merchant_buy: RefCell<Option<(MerchantPoolKind, usize)>>,
-    /// En dev : demande de reroll des pools du marchand (bouton).
-    pub pending_merchant_reroll: RefCell<bool>,
-    /// En dev : ajouter 100 or au joueur (bouton marchand).
-    pub pending_dev_add_gold: RefCell<bool>,
-    /// Fenêtre « Mode Dev » ouverte (bouton Mode Dev ouvre cette fenêtre).
-    pub dev_mode_window_open: bool,
-    /// Fenêtre « Joueur 2 » ouverte (bouton Joueur 2, phase Préparation).
-    pub joueur2_window_open: bool,
-    /// Identification par soi-même différée (index dans l'inventaire).
-    pub pending_identify_self: RefCell<Option<usize>>,
-    /// Overlay « trop encombré » quand le joueur clique Lancer la vague avec inventaire plein.
-    pub show_encumbered_overlay: bool,
-    /// Texture du spritesheet joueur (Knight-Idle), chargée à la première partie.
-    pub player_sprite_texture: Option<egui::TextureHandle>,
-    /// Description du spritesheet (6 frames horizontal).
-    pub player_sprite_desc: Option<SpritesheetDesc>,
-    pub player_walk_texture: Option<egui::TextureHandle>,
-    pub player_walk_desc: Option<SpritesheetDesc>,
-    /// Accumulateur temps pour l’animation idle (frame index dérivé).
-    pub player_anim_accumulator: f32,
-    /// Texture du spritesheet ennemis de base (Skeleton-Walk), chargée à la première partie.
-    pub enemy_sprite_texture: Option<egui::TextureHandle>,
-    /// Description du spritesheet (8 frames horizontal).
-    pub enemy_sprite_desc: Option<SpritesheetDesc>,
-    /// Texture du spritesheet mini-boss (Werebear-Walk), chargée à la première partie.
-    pub enemy_miniboss_sprite_texture: Option<egui::TextureHandle>,
-    /// Description du spritesheet mini-boss (8 frames horizontal).
-    pub enemy_miniboss_sprite_desc: Option<SpritesheetDesc>,
-    /// Accumulateur temps pour l'animation marche ennemis.
-    pub enemy_anim_accumulator: f32,
-    /// Texture du spritesheet troupes (Soldier-Walk / Miliciens), chargée à la première partie.
-    pub troop_sprite_texture: Option<egui::TextureHandle>,
-    /// Description du spritesheet troupes (8 frames horizontal).
-    pub troop_sprite_desc: Option<SpritesheetDesc>,
-    /// Texture du spritesheet attaque troupes (Soldier-Attack01 / Miliciens), 6 frames.
-    pub troop_attack_sprite_texture: Option<egui::TextureHandle>,
-    /// Description du spritesheet attaque troupes (6 frames horizontal).
-    pub troop_attack_sprite_desc: Option<SpritesheetDesc>,
-    /// Accumulateur temps pour l'animation marche troupes.
-    pub troop_anim_accumulator: f32,
-    /// Callback pour sauvegarder les octets (Central = DB, standalone = fichier). None = non disponible.
-    pub save_callback: Option<Box<dyn Fn(&[u8]) -> Result<(), String>>>,
-    /// Callback pour charger les octets. None = non disponible.
-    pub load_callback: Option<Box<dyn Fn() -> Result<Vec<u8>, String>>>,
-    /// Message temporaire après sauvegarde/chargement (texte, instant d'affichage). Effacé après 2 s.
-    pub save_load_message: Option<(String, Instant)>,
-    /// Demande de sauvegarde (bouton cliqué) ; traitée après le bloc UI pour éviter double emprunt.
-    pub save_requested: bool,
-    /// Demande de chargement (bouton cliqué).
-    pub load_requested: bool,
-    /// Notifications « niveau atteint » affichées en bas à droite (message, instant). Expirent après 3 s.
-    pub level_up_toasts: Vec<(String, Instant)>,
-    /// Fenêtre « Tutoriel » ouverte (bouton Tuto dans le header).
-    pub tutorial_window_open: bool,
-    /// Onglet actif dans la fenêtre Tutoriel (0 = Comment jouer, 1 = Contrôles, 2 = Phases, 3 = Mécaniques).
-    pub tutorial_tab: usize,
+/// Panneaux overlay (fenêtres type UO / Mortal Online).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Panel {
+    Stats,
+    Skills,
+    Inventory,
 }
 
-impl Default for LordOfTheCastleApp {
-    fn default() -> Self {
+/// Surface de rendu (800×800 unités de jeu).
+const SURFACE: f32 = COMBAT_SURFACE_SIZE;
+
+// ─── Helpers ──────────────────────────────────────────────────────────
+
+fn get_base_path() -> PathBuf {
+    std::env::var("MIYUKINI_DATA_DIR")
+        .ok()
+        .map(PathBuf::from)
+        .unwrap_or_else(|| std::env::current_dir().unwrap_or_default())
+}
+
+/// Position en % de la surface de jeu.
+fn pct(v: f32) -> f32 {
+    v / SURFACE * 100.0
+}
+
+/// Style CSS pour une entité (div positionnée absolument, centrée sur son point).
+fn entity_style(x: f32, y: f32, size: f32, color: &str) -> String {
+    format!(
+        "position:absolute;left:{lp:.2}%;top:{tp:.2}%;width:{sp:.2}%;height:{sp:.2}%;background:{c};transform:translate(-50%,-50%);pointer-events:none;border-radius:1px;",
+        lp = pct(x),
+        tp = pct(y),
+        sp = pct(size),
+        c = color,
+    )
+}
+
+// NOTE: Fonctions de sprite désactivées temporairement car le chargement via file://
+// ne fonctionne pas dans Dioxus Desktop. La configuration des sprites est disponible
+// dans crate::spritesheet pour une future intégration via assets bundlés ou data URLs.
+
+/// Style CSS pour une barre de PV au-dessus d'une entité.
+fn hp_bar_outer(x: f32, y: f32, entity_size: f32) -> String {
+    format!(
+        "position:absolute;left:{lp:.2}%;top:{tp:.2}%;width:{sp:.2}%;height:0.35%;transform:translateX(-50%);background:#333;pointer-events:none;",
+        lp = pct(x),
+        tp = pct(y - entity_size / 2.0 - 3.0),
+        sp = pct(entity_size.max(12.0)),
+    )
+}
+
+fn hp_bar_fill_style(hp: i32, hp_max: i32) -> String {
+    let ratio = if hp_max > 0 {
+        (hp as f32 / hp_max as f32).clamp(0.0, 1.0)
+    } else {
+        0.0
+    };
+    let color = if ratio > 0.6 {
+        "#44cc44"
+    } else if ratio > 0.3 {
+        "#ccaa44"
+    } else {
+        "#cc4444"
+    };
+    format!(
+        "width:{w:.1}%;height:100%;background:{c};",
+        w = ratio * 100.0,
+        c = color,
+    )
+}
+
+/// Cherche la première cellule libre pour construire une tour (spirale autour du château).
+fn find_build_cell(gs: &GameState) -> Option<(i32, i32)> {
+    for ring in 2i32..15 {
+        for i in -ring..=ring {
+            for j in -ring..=ring {
+                if (i.abs() == ring || j.abs() == ring) && gs.can_build_at_cell(i, j) {
+                    return Some((i, j));
+                }
+            }
+        }
+    }
+    None
+}
+
+// ─── Entrées standalone / embarquée ───────────────────────────────────
+
+/// Point d'entrée standalone : fournit le chemin de données puis affiche SurvivorApp.
+#[component]
+pub fn SurvivorAppStandalone() -> Element {
+    use_context_provider(|| Signal::new(get_base_path()));
+    rsx! { SurvivorApp {} }
+}
+
+/// Position du curseur en coordonnées monde (partagée entre composants).
+static CURSOR_WORLD: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+fn set_cursor_world(x: f32, y: f32) {
+    let packed = ((x.to_bits() as u64) << 32) | (y.to_bits() as u64);
+    CURSOR_WORLD.store(packed, std::sync::atomic::Ordering::Relaxed);
+}
+
+fn get_cursor_world() -> Option<(f32, f32)> {
+    let packed = CURSOR_WORLD.load(std::sync::atomic::Ordering::Relaxed);
+    if packed == 0 {
+        return None;
+    }
+    let x = f32::from_bits((packed >> 32) as u32);
+    let y = f32::from_bits(packed as u32);
+    Some((x, y))
+}
+
+/// Application Dioxus pour Lord of the Castle (Miyukini Survivor).
+/// Le contexte `Signal<PathBuf>` doit être fourni par le parent (Central ou SurvivorAppStandalone).
+#[component]
+pub fn SurvivorApp() -> Element {
+    let screen = use_signal(|| Screen::MainMenu);
+    let game_state = use_signal(|| Option::<GameState>::None);
+    let active_slot = use_signal(|| Option::<u8>::None);
+
+    let _ = use_context::<Signal<PathBuf>>();
+
+    // Boucle de jeu : tick Battle ~60 FPS quand une partie est en cours
+    use_effect(move || {
+        let mut state_signal = game_state;
+        spawn(async move {
+            let mut interval = tokio::time::interval(Duration::from_millis(16));
+            let mut last = Instant::now();
+            loop {
+                interval.tick().await;
+                let delta = last.elapsed().as_secs_f32();
+                last = Instant::now();
+                if let Some(gs) = state_signal.write().as_mut() {
+                    if gs.phase == GamePhase::Battle {
+                        tick_battle(gs, delta.min(0.1), get_cursor_world());
+                    }
+                }
+            }
+        });
+    });
+
+    let content = match screen() {
+        Screen::MainMenu => rsx! { MainMenu { screen, game_state, active_slot } },
+        Screen::CharacterCreation => rsx! { CharacterCreationScreen { screen, game_state, active_slot } },
+        Screen::Game => rsx! { GameScreen { screen, game_state, active_slot } },
+    };
+
+    rsx! {
+        style { {GLOBAL_CSS} }
+        div {
+            style: "width:100%;height:100%;background:#171a21;color:#c6d4df;font-family:'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column;overflow:hidden;",
+            {content}
+        }
+    }
+}
+
+const GLOBAL_CSS: &str = r#"
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { overflow: hidden; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #1b2838; }
+::-webkit-scrollbar-thumb { background: #2a3f5f; border-radius: 3px; }
+button { font-family: inherit; }
+button:hover { filter: brightness(1.15); }
+"#;
+
+// ─── Menu principal ───────────────────────────────────────────────────
+
+#[component]
+fn MainMenu(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, active_slot: Signal<Option<u8>>) -> Element {
+    let base_path = use_context::<Signal<PathBuf>>();
+    let slots_resource = use_resource(move || {
+        let path = base_path.read().clone();
+        async move {
+            tokio::task::spawn_blocking(move || {
+                LordOfTheCastleDb::open(path.join("lord_of_the_castle.db")).map(|db| db.slot_list())
+            })
+            .await
+            .map_err(|_| "spawn_blocking failed".to_string())?
+            .map_err(|e| e.to_string())
+        }
+    });
+
+    let slots: Vec<SlotMetadata> = slots_resource
+        .read()
+        .as_ref()
+        .and_then(|r| r.as_ref().ok())
+        .cloned()
+        .unwrap_or_default();
+
+    let slot_entries: Vec<(u8, bool, Option<String>)> = slots
+        .iter()
+        .map(|s| (s.slot_id, s.occupied, s.summary.clone()))
+        .collect();
+
+    rsx! {
+        div {
+            style: "flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;",
+            h1 {
+                style: "font-size:32px;font-weight:700;color:#1a9fff;",
+                "Lord of the Castle"
+            }
+            p {
+                style: "font-size:14px;color:#8f98a0;margin-bottom:24px;",
+                "Miyukini Survivor — Survivor + Tower Defense"
+            }
+            button {
+                style: "padding:14px 44px;background:linear-gradient(135deg,#5ba32b 0%,#3d8c40 100%);color:white;border:none;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;",
+                onclick: move |_| {
+                    screen.set(Screen::CharacterCreation);
+                },
+                "▶ Nouvelle partie"
+            }
+            div {
+                style: "display:flex;flex-direction:column;gap:6px;width:100%;max-width:300px;",
+                for (slot_id, occupied, summary) in slot_entries.into_iter() {
+                    button {
+                        style: "padding:10px 20px;background:#2a3f5f;color:#c6d4df;border:1px solid #3d4f5f;border-radius:6px;font-size:13px;cursor:pointer;text-align:left;",
+                        disabled: !occupied,
+                        onclick: move |_| {
+                            if !occupied { return; }
+                            let path = base_path.read().clone();
+                            spawn(async move {
+                                let r = tokio::task::spawn_blocking(move || {
+                                    let db = LordOfTheCastleDb::open(path.join("lord_of_the_castle.db"))?;
+                                    db.slot_read(slot_id)
+                                }).await.ok().and_then(|r| r.ok());
+                                if let Some(gs) = r {
+                                    game_state.set(Some(gs));
+                                    active_slot.set(Some(slot_id));
+                                    screen.set(Screen::Game);
+                                }
+                            });
+                        },
+                        { if occupied {
+                            format!("Slot {} : {}", slot_id, summary.as_deref().unwrap_or("Sauvegardé"))
+                        } else {
+                            format!("Slot {} : Vide", slot_id)
+                        } }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ─── Écran de création de personnage ──────────────────────────────────
+
+/// État interne de la création de personnage.
+#[derive(Debug, Clone)]
+struct CreationState {
+    /// Étape courante (0..3, puis 4 = récap final).
+    step: usize,
+    /// Stats en cours de construction.
+    stats: CharacterStats,
+    /// Pool d'indices de phrases encore disponibles.
+    available: Vec<usize>,
+    /// Les 3 phrases proposées à l'étape courante.
+    choices: Vec<PhraseDef>,
+    /// Historique : phrases choisies (texte + effets).
+    history: Vec<String>,
+    /// Nom du personnage (saisi à l'étape finale).
+    name: String,
+    /// Flag « Que Nawak décide » a été choisi → reroll total en fin.
+    reroll_at_end: bool,
+    /// Slot de sauvegarde choisi (1, 2 ou 3).
+    save_slot: u8,
+}
+
+impl CreationState {
+    fn new() -> Self {
+        let mut available: Vec<usize> = (0..all_phrases().len()).collect();
+        let mut roll = || rand_simple();
+        let choices = pick_three_phrases(&mut available, &mut roll);
         Self {
-            screen: Screen::Title,
-            game: None,
-            last_tick: Instant::now(),
-            keys: [false; 8],
-            keys_secondary: [false; 8],
-            player_window_open: false,
-            inventory_window_open: false,
-            selected_inventory_slot: None,
-            equipment_window_open: false,
-            selected_equipment_slot: None,
-            creation_name: String::new(),
-            creation_save_name: String::new(),
-            creation_available_ids: Vec::new(),
-            creation_stats: CharacterStats::default(),
-            creation_reroll_pending: false,
-            creation_current_choices: Vec::new(),
-            preparation_sidebar_open: true,
-            preparation_section: PreparationSection::Marchand,
-            competences_open: false,
-            skills_tab: crate::SkillsTab::Guerrier,
-            selected_warrior_skill: None,
-            marchand_open: false,
-            expert_open: false,
-            construction_open: false,
-            construction_selected_cell: None,
-            recrutement_open: false,
-            pending_merchant_buy: RefCell::new(None),
-            pending_merchant_reroll: RefCell::new(false),
-            pending_dev_add_gold: RefCell::new(false),
-            dev_mode_window_open: false,
-            joueur2_window_open: false,
-            pending_identify_self: RefCell::new(None),
-            show_encumbered_overlay: false,
-            player_sprite_texture: None,
-            player_sprite_desc: None,
-            player_walk_texture: None,
-            player_walk_desc: None,
-            player_anim_accumulator: 0.0,
-            enemy_sprite_texture: None,
-            enemy_sprite_desc: None,
-            enemy_miniboss_sprite_texture: None,
-            enemy_miniboss_sprite_desc: None,
-            enemy_anim_accumulator: 0.0,
-            troop_sprite_texture: None,
-            troop_sprite_desc: None,
-            troop_attack_sprite_texture: None,
-            troop_attack_sprite_desc: None,
-            troop_anim_accumulator: 0.0,
-            save_callback: None,
-            load_callback: None,
-            save_load_message: None,
-            save_requested: false,
-            load_requested: false,
-            level_up_toasts: Vec::new(),
-            tutorial_window_open: false,
-            tutorial_tab: 0,
+            step: 0,
+            stats: CharacterStats::default(),
+            available,
+            choices,
+            history: Vec::new(),
+            name: String::new(),
+            reroll_at_end: false,
+            save_slot: 1,
         }
     }
 }
 
-impl LordOfTheCastleApp {
-    /// Nouvelle instance (avec contexte eframe pour polices, etc.).
-    #[must_use] 
-    pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
-        Self::default()
-    }
+#[component]
+fn CharacterCreationScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, active_slot: Signal<Option<u8>>) -> Element {
+    let mut state = use_signal(CreationState::new);
+    let base_path = use_context::<Signal<PathBuf>>();
 
-    /// Démarre le parcours « Nouvelle partie » : écran Lore.
-    pub fn start_new_game(&mut self) {
-        self.game = None;
-        self.screen = Screen::Lore;
-        self.last_tick = Instant::now();
-    }
+    let st = state.read().clone();
+    let step = st.step;
+    let stats = st.stats.clone();
+    let history = st.history.clone();
+    let choices = st.choices.clone();
+    let name = st.name.clone();
+    let save_slot = st.save_slot;
 
-    /// Termine la création et lance la partie (écran Préparation).
-    fn finish_creation_and_start(&mut self) {
-        let name = std::mem::take(&mut self.creation_name);
-        let save_name = if self.creation_save_name.is_empty() {
-            name.clone()
-        } else {
-            std::mem::take(&mut self.creation_save_name)
-        };
-        let mut stats = std::mem::take(&mut self.creation_stats);
-        if self.creation_reroll_pending {
-            stats.reroll_all(&mut crate::game_state::rand_simple);
-        }
-        let player = Player::from_creation(name, save_name, stats, 0.0, 0.0);
-        self.game = Some(GameState::new_with_player(0.0, 0.0, player));
-        self.screen = Screen::Preparation;
-        self.tutorial_window_open = true;
-        self.creation_available_ids.clear();
-        self.creation_reroll_pending = false;
-        self.creation_current_choices.clear();
-    }
+    // Titres des étapes
+    let step_title = match step {
+        0 => "Etape 1/4 — Qui es-tu ?",
+        1 => "Etape 2/4 — D'où viens-tu ?",
+        2 => "Etape 3/4 — Que sais-tu faire ?",
+        3 => "Etape 4/4 — Un dernier mot ?",
+        _ => "Récapitulatif",
+    };
 
-    /// Crée une instance pour intégration dans Miyukini Central (point d'accès utilisateur unique).
-    /// Le jeu s'exécute dans le body de Central ; pas de fenêtre standalone.
-    #[must_use] 
-    pub fn new_embedded() -> Self {
-        Self::default()
-    }
+    rsx! {
+        div {
+            style: "flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;",
 
-    /// Enregistre les callbacks de sauvegarde/chargement (Central = DB, standalone = fichier).
-    pub fn set_save_load_callbacks(
-        &mut self,
-        save: impl Fn(&[u8]) -> Result<(), String> + 'static,
-        load: impl Fn() -> Result<Vec<u8>, String> + 'static,
-    ) {
-        self.save_callback = Some(Box::new(save));
-        self.load_callback = Some(Box::new(load));
-    }
+            h1 {
+                style: "font-size:28px;font-weight:700;color:#1a9fff;margin-bottom:4px;",
+                "Création de personnage"
+            }
+            h2 {
+                style: "font-size:16px;color:#c6d4df;margin-bottom:12px;",
+                "{step_title}"
+            }
 
-    /// Sauvegarde la partie courante (sérialisation bincode + callback). Retourne le message d’erreur éventuel.
-    /// Draine les notifications « niveau atteint » du state vers les toasts (à appeler après le tick).
-    fn drain_level_up_toasts(&mut self) {
-        if let Some(ref mut state) = self.game {
-            for msg in state.pending_level_up_notifications.drain(..) {
-                self.level_up_toasts.push((msg, Instant::now()));
+            if step < 4 {
+                // ── Choix de phrase ──
+                div {
+                    style: "display:flex;flex-direction:column;gap:8px;width:100%;max-width:520px;",
+                    for phrase in choices.iter() {
+                        {
+                            let phrase_text = phrase.text.to_string();
+                            let effects = phrase.effects.clone();
+                            rsx! {
+                                button {
+                                    style: "padding:14px 20px;background:#232f3e;color:#c6d4df;border:1px solid #2a3f5f;border-radius:6px;font-size:14px;cursor:pointer;text-align:left;transition:background 0.15s;",
+                                    onclick: move |_| {
+                                        let mut s = state.write();
+                                        let mut roll = || rand_simple();
+                                        let reroll = apply_phrase_effects(&mut s.stats, &effects, &mut roll);
+                                        if reroll { s.reroll_at_end = true; }
+                                        s.history.push(phrase_text.clone());
+                                        s.step += 1;
+                                        if s.step < 4 {
+                                            // Proposer 3 nouvelles phrases
+                                            s.choices = pick_three_phrases(&mut s.available, &mut roll);
+                                        } else {
+                                            // Fin : appliquer reroll si nécessaire
+                                            if s.reroll_at_end {
+                                                s.stats.reroll_all(&mut roll);
+                                            }
+                                            s.choices.clear();
+                                        }
+                                    },
+                                    "« {phrase.text} »"
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                // ── Récapitulatif final ──
+                div {
+                    style: "display:flex;gap:24px;width:100%;max-width:600px;",
+
+                    // Colonne gauche : phrases choisies
+                    div {
+                        style: "flex:1;display:flex;flex-direction:column;gap:8px;",
+                        h3 { style: "font-size:14px;color:#1a9fff;margin-bottom:4px;", "Tes choix" }
+                        for (i, text) in history.iter().enumerate() {
+                            div {
+                                style: "padding:8px 12px;background:#232f3e;border-radius:4px;font-size:12px;color:#c6d4df;",
+                                span { style: "color:#8f98a0;margin-right:6px;", "{i+1}." }
+                                "« {text} »"
+                            }
+                        }
+                    }
+
+                    // Colonne droite : stats finales
+                    div {
+                        style: "width:200px;display:flex;flex-direction:column;gap:4px;",
+                        h3 { style: "font-size:14px;color:#1a9fff;margin-bottom:4px;", "Stats" }
+                        { stat_row("For", "Force", stats.for_) }
+                        { stat_row("Con", "Constitution", stats.con) }
+                        { stat_row("Agi", "Agilité", stats.agi) }
+                        { stat_row("Dex", "Dextérité", stats.dex) }
+                        { stat_row("Int", "Intelligence", stats.int) }
+                        { stat_row("Sag", "Sagesse", stats.sag) }
+                        { stat_row("Cha", "Charisme", stats.cha) }
+                        { stat_row("Luk", "Chance", stats.luk) }
+                    }
+                }
+
+                // Nom du personnage + Slot de sauvegarde
+                div {
+                    style: "display:flex;gap:16px;width:100%;max-width:600px;margin-top:16px;",
+
+                    // Nom
+                    div {
+                        style: "flex:1;display:flex;flex-direction:column;gap:6px;",
+                        label { style: "font-size:13px;color:#8f98a0;", "Nom du personnage :" }
+                        input {
+                            style: "padding:10px 14px;background:#232f3e;color:#c6d4df;border:1px solid #2a3f5f;border-radius:6px;font-size:15px;outline:none;",
+                            r#type: "text",
+                            placeholder: "Héros sans nom",
+                            value: "{name}",
+                            oninput: move |evt: Event<FormData>| {
+                                state.write().name = evt.value();
+                            },
+                        }
+                    }
+
+                    // Slot de sauvegarde
+                    div {
+                        style: "display:flex;flex-direction:column;gap:6px;",
+                        label { style: "font-size:13px;color:#8f98a0;", "Emplacement de sauvegarde :" }
+                        div {
+                            style: "display:flex;gap:6px;",
+                            for sid in [1u8, 2, 3] {
+                                {
+                                    let is_selected = save_slot == sid;
+                                    let bg = if is_selected { "#2a5a3a" } else { "#232f3e" };
+                                    let border = if is_selected { "#4a8a5a" } else { "#2a3f5f" };
+                                    let color = if is_selected { "#88cc88" } else { "#8f98a0" };
+                                    rsx! {
+                                        button {
+                                            style: "padding:8px 16px;background:{bg};color:{color};border:2px solid {border};border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;min-width:48px;",
+                                            onclick: move |_| {
+                                                state.write().save_slot = sid;
+                                            },
+                                            "{sid}"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Boutons
+                div {
+                    style: "display:flex;gap:12px;margin-top:16px;",
+                    button {
+                        style: "padding:10px 28px;background:#232f3e;color:#8f98a0;border:1px solid #2a3f5f;border-radius:6px;font-size:14px;cursor:pointer;",
+                        onclick: move |_| {
+                            // Recommencer la création
+                            state.set(CreationState::new());
+                        },
+                        "↺ Recommencer"
+                    }
+                    button {
+                        style: "padding:10px 36px;background:linear-gradient(135deg,#5ba32b 0%,#3d8c40 100%);color:white;border:none;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;",
+                        onclick: move |_| {
+                            let s = state.read();
+                            let char_name = if s.name.trim().is_empty() {
+                                "Héros sans nom".to_string()
+                            } else {
+                                s.name.trim().to_string()
+                            };
+                            let slot = s.save_slot;
+                            let player = Player::from_creation(
+                                char_name.clone(),
+                                char_name,
+                                s.stats.clone(),
+                                400.0,
+                                400.0,
+                            );
+                            let gs = GameState::new_with_player(400.0, 400.0, player);
+                            let gs_for_save = gs.clone();
+                            game_state.set(Some(gs));
+                            active_slot.set(Some(slot));
+                            // Sauvegarde immédiate dans le slot choisi
+                            let path = base_path.read().clone();
+                            spawn(async move {
+                                let _ = tokio::task::spawn_blocking(move || {
+                                    let db = LordOfTheCastleDb::open(path.join("lord_of_the_castle.db"))?;
+                                    db.slot_write(slot, &gs_for_save)
+                                }).await;
+                            });
+                            screen.set(Screen::Game);
+                        },
+                        "⚔ Commencer l'aventure (slot {save_slot})"
+                    }
+                }
+            }
+
+            // Bouton retour
+            button {
+                style: "margin-top:12px;padding:6px 20px;background:transparent;color:#556677;border:1px solid #2a3f5f;border-radius:4px;font-size:12px;cursor:pointer;",
+                onclick: move |_| {
+                    screen.set(Screen::MainMenu);
+                },
+                "← Retour au menu"
             }
         }
     }
+}
 
-    /// Affiche les toasts « niveau atteint » en bas à droite. Expire après 3 s.
-    fn paint_level_up_toasts(&mut self, ctx: &egui::Context) {
-        const TOAST_TTL_SECS: f32 = 3.0;
-        self.level_up_toasts.retain(|(_, t)| Instant::now().duration_since(*t).as_secs_f32() <= TOAST_TTL_SECS);
-        if self.level_up_toasts.is_empty() {
-            return;
+/// Ligne de stat pour le récapitulatif création.
+fn stat_row(short: &str, long: &str, value: i32) -> Element {
+    let val_color = if value > 0 { "#88cc88" } else if value < 0 { "#cc6666" } else { "#c6d4df" };
+    let display = if value < 0 {
+        format!("1({})", value)
+    } else {
+        value.to_string()
+    };
+    rsx! {
+        div {
+            style: "display:flex;justify-content:space-between;padding:3px 8px;background:#232f3e;border-radius:3px;font-size:12px;",
+            span { style: "color:#8f98a0;",
+                span { style: "color:#c6d4df;font-weight:600;margin-right:4px;", "{short}" }
+                "{long}"
+            }
+            span { style: "color:{val_color};font-weight:600;", "{display}" }
         }
-        let messages: Vec<String> = self.level_up_toasts.iter().map(|(m, _)| m.clone()).collect();
-        let rect = ctx.available_rect();
-        egui::Area::new(egui::Id::new("lotc_level_toasts"))
-            .anchor(egui::Align2::RIGHT_BOTTOM, egui::Vec2::ZERO)
-            .order(egui::Order::Foreground)
-            .constrain(true)
-            .show(ctx, |ui| {
-                ui.set_max_width(rect.width() * 0.35);
-                for msg in &messages {
-                    let frame = egui::Frame::new()
-                        .fill(ui.visuals().window_fill())
-                        .corner_radius(6.0)
-                        .inner_margin(8);
-                    frame.show(ui, |ui| {
-                        ui.colored_label(egui::Color32::from_rgb(100, 200, 100), msg);
-                    });
-                }
-            });
     }
+}
 
-    /// Sauvegarde la partie courante (sérialisation bincode + callback). Retourne le message d'erreur éventuel.
-    fn do_save(&self) -> Result<(), String> {
-        let state = self.game.as_ref().ok_or("Aucune partie en cours.")?;
-        let bytes = bincode::serialize(state).map_err(|e| e.to_string())?;
-        let cb = self
-            .save_callback
-            .as_ref()
-            .ok_or("Sauvegarde non disponible (connexion requise dans Central).")?;
-        cb(&bytes)
-    }
+// ─── Écran de jeu ─────────────────────────────────────────────────────
 
-    /// Charge une partie (callback + désérialisation bincode). Remplace l’état courant.
-    fn do_load(&mut self) -> Result<(), String> {
-        let bytes = self
-            .load_callback
-            .as_ref()
-            .ok_or("Chargement non disponible (connexion requise dans Central).")?()?;
-        let state: GameState = bincode::deserialize(&bytes).map_err(|e| e.to_string())?;
-        self.game = Some(state);
-        self.screen = Screen::Preparation;
-        self.last_tick = Instant::now();
-        Ok(())
-    }
+/// Touches de direction maintenues
+#[derive(Default, Clone, Copy)]
+struct HeldKeys {
+    up: bool,
+    down: bool,
+    left: bool,
+    right: bool,
+    up2: bool,
+    down2: bool,
+    left2: bool,
+    right2: bool,
+}
 
-    /// Rendu dans un `ui` fourni (intégration Miyukini Central).
-    /// Point d'accès utilisateur unique : Central ; le service s'exécute dans le body de Central.
-    pub fn show_into(&mut self, ui: &mut egui::Ui) {
-        // Chargement unique des spritesheets joueur (Knight-Idle, Knight-Walk) quand une partie est en cours
-        if self.game.is_some() {
-            if self.player_sprite_texture.is_none() {
-                let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Knight/Knight/Knight-Idle.png");
-                if let Some(color_image) = load_image_from_path(&path) {
-                    let [w, h] = color_image.size;
-                    let tex = ui.ctx().load_texture("knight_idle", color_image, egui::TextureOptions::default());
-                    self.player_sprite_texture = Some(tex);
-                    self.player_sprite_desc = Some(SpritesheetDesc::horizontal(w as u32, h as u32, 6));
-                }
-            }
-            if self.player_walk_texture.is_none() {
-                let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Knight/Knight/Knight-Walk.png");
-                if let Some(color_image) = load_image_from_path(&path) {
-                    let [w, h] = color_image.size;
-                    let tex = ui.ctx().load_texture("knight_walk", color_image, egui::TextureOptions::default());
-                    self.player_walk_texture = Some(tex);
-                    self.player_walk_desc = Some(SpritesheetDesc::horizontal(w as u32, h as u32, 8));
-                }
-            }
-            if self.enemy_sprite_texture.is_none() {
-                let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Skeleton/Skeleton/Skeleton-Walk.png");
-                if let Some(color_image) = load_image_from_path(&path) {
-                    let [w, h] = color_image.size;
-                    let tex = ui.ctx().load_texture("skeleton_walk", color_image, egui::TextureOptions::default());
-                    self.enemy_sprite_texture = Some(tex);
-                    self.enemy_sprite_desc = Some(SpritesheetDesc::horizontal(w as u32, h as u32, 8));
-                }
-            }
-            if self.enemy_miniboss_sprite_texture.is_none() {
-                let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Werebear/Werebear/Werebear-Walk.png");
-                if let Some(color_image) = load_image_from_path(&path) {
-                    let [w, h] = color_image.size;
-                    let tex = ui.ctx().load_texture("werebear_walk", color_image, egui::TextureOptions::default());
-                    self.enemy_miniboss_sprite_texture = Some(tex);
-                    self.enemy_miniboss_sprite_desc = Some(SpritesheetDesc::horizontal(w as u32, h as u32, 8));
-                }
-            }
-            if self.troop_sprite_texture.is_none() {
-                let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Soldier/Soldier/Soldier-Walk.png");
-                if let Some(color_image) = load_image_from_path(&path) {
-                    let [w, h] = color_image.size;
-                    let tex = ui.ctx().load_texture("soldier_walk", color_image, egui::TextureOptions::default());
-                    self.troop_sprite_texture = Some(tex);
-                    self.troop_sprite_desc = Some(SpritesheetDesc::horizontal(w as u32, h as u32, 8));
-                }
-            }
-            if self.troop_attack_sprite_texture.is_none() {
-                let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Soldier/Soldier/Soldier-Attack01.png");
-                if let Some(color_image) = load_image_from_path(&path) {
-                    let [w, h] = color_image.size;
-                    let tex = ui.ctx().load_texture("soldier_attack01", color_image, egui::TextureOptions::default());
-                    self.troop_attack_sprite_texture = Some(tex);
-                    self.troop_attack_sprite_desc = Some(SpritesheetDesc::horizontal(w as u32, h as u32, 6));
-                }
-            }
-            self.drain_level_up_toasts();
-        }
+#[component]
+fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, active_slot: Signal<Option<u8>>) -> Element {
+    let mut active_panel = use_signal(|| Option::<Panel>::None);
+    let mut dev_mode = use_signal(|| false);
+    let mut build_mode = use_signal(|| false); // Mode construction RTS
+    let mut cursor_angle = use_signal(|| 0.0f32); // Angle du curseur par rapport au joueur (en degrés)
+    let mut held_keys = use_signal(HeldKeys::default);
+    let mut show_click_hint = use_signal(|| false);
+    let mut last_wave_hint = use_signal(|| 0u32);
 
-        // Id à focus si l'utilisateur clique sur la zone de jeu (pour recevoir ZQSD)
-        let focus_request = RefCell::new(None::<egui::Id>);
-        // Clic « Lancer la vague » depuis la barre haute (toujours visible)
-        let start_battle_request = RefCell::new(false);
-
-        // Input clavier : si joueur 2 présent, J1 = OKLM (O=haut, K=gauche, L=bas, M=droite), J2 = ZQSD ; sinon J1 = ZQSD + flèches
-        let input = ui.ctx().input(Clone::clone);
-        use egui::Key;
-        let two_players = self.game.as_ref().is_some_and(|s| s.secondary_player.is_some());
-        let (up1, down1, left1, right1) = if two_players {
-            (input.key_down(Key::O), input.key_down(Key::L), input.key_down(Key::K), input.key_down(Key::M))
-        } else {
-            (input.key_down(Key::Z) || input.key_down(Key::W) || input.key_down(Key::ArrowUp),
-             input.key_down(Key::S) || input.key_down(Key::ArrowDown),
-             input.key_down(Key::Q) || input.key_down(Key::A) || input.key_down(Key::ArrowLeft),
-             input.key_down(Key::D) || input.key_down(Key::ArrowRight))
-        };
-        self.keys[0] = up1 && !left1 && !right1;
-        self.keys[1] = up1 && right1;
-        self.keys[2] = right1 && !up1 && !down1;
-        self.keys[3] = down1 && right1;
-        self.keys[4] = down1 && !left1 && !right1;
-        self.keys[5] = down1 && left1;
-        self.keys[6] = left1 && !up1 && !down1;
-        self.keys[7] = up1 && left1;
-        let (up2, down2, left2, right2) = (input.key_down(Key::Z), input.key_down(Key::S), input.key_down(Key::Q), input.key_down(Key::D));
-        self.keys_secondary[0] = up2 && !left2 && !right2;
-        self.keys_secondary[1] = up2 && right2;
-        self.keys_secondary[2] = right2 && !up2 && !down2;
-        self.keys_secondary[3] = down2 && right2;
-        self.keys_secondary[4] = down2 && !left2 && !right2;
-        self.keys_secondary[5] = down2 && left2;
-        self.keys_secondary[6] = left2 && !up2 && !down2;
-        self.keys_secondary[7] = up2 && left2;
-
-        if self.screen == Screen::Battle {
-            ui.ctx().request_repaint();
-        }
-
-        // Barre haute : Player, Inventaire, Équipement, Marchand, Deckard Rain, Construction, Recrutement, vague, Lancer la vague, Mode Dev, Or
-        ui.horizontal(|ui| {
-            if ui.button("Player").clicked() {
-                self.player_window_open = true;
-            }
-            if ui.button("Inventaire").clicked() {
-                self.inventory_window_open = true;
-                self.selected_inventory_slot = None;
-            }
-            if ui.button("Équipement").clicked() {
-                self.equipment_window_open = true;
-                self.selected_equipment_slot = None;
-            }
-            if let Some(ref mut state) = self.game {
-                let prep_enabled = state.phase == GamePhase::Preparation;
-                if ui.add_enabled(prep_enabled, egui::Button::new("Compétences")).clicked() && prep_enabled {
-                    self.competences_open ^= true;
+    // Boucle de mouvement fluide basée sur les touches maintenues
+    use_effect(move || {
+        let keys_signal = held_keys;
+        spawn(async move {
+            let mut interval = tokio::time::interval(Duration::from_millis(16));
+            loop {
+                interval.tick().await;
+                let keys = *keys_signal.read();
+                if let Some(gs) = game_state.write().as_mut() {
+                    // Joueur 1
+                    if keys.up && !keys.down {
+                        move_player(gs, Dir8::N, 0.016);
+                    } else if keys.down && !keys.up {
+                        move_player(gs, Dir8::S, 0.016);
+                    }
+                    if keys.left && !keys.right {
+                        move_player(gs, Dir8::W, 0.016);
+                    } else if keys.right && !keys.left {
+                        move_player(gs, Dir8::E, 0.016);
+                    }
+                    // Joueur 2
+                    if keys.up2 && !keys.down2 {
+                        move_secondary_player(gs, Dir8::N, 0.016);
+                    } else if keys.down2 && !keys.up2 {
+                        move_secondary_player(gs, Dir8::S, 0.016);
+                    }
+                    if keys.left2 && !keys.right2 {
+                        move_secondary_player(gs, Dir8::W, 0.016);
+                    } else if keys.right2 && !keys.left2 {
+                        move_secondary_player(gs, Dir8::E, 0.016);
+                    }
                 }
-                if ui.add_enabled(prep_enabled, egui::Button::new("Marchand")).clicked() && prep_enabled {
-                    self.marchand_open ^= true;
-                }
-                if ui.add_enabled(prep_enabled, egui::Button::new("Deckard Rain (expert)")).clicked() && prep_enabled {
-                    self.expert_open ^= true;
-                }
-                if ui.add_enabled(prep_enabled, egui::Button::new("Construction")).clicked() && prep_enabled {
-                    self.construction_open ^= true;
-                }
-                if ui.add_enabled(prep_enabled, egui::Button::new("Recrutement")).clicked() && prep_enabled {
-                    self.recrutement_open ^= true;
-                }
-                if ui.add_enabled(prep_enabled, egui::Button::new("Joueur 2")).clicked() && prep_enabled {
-                    self.joueur2_window_open = true;
-                }
-                ui.label(format!("Vague {}", state.wave_number));
-                ui.label(format!("Ennemis: {}", state.enemies.len()));
-                let troops_count = state.troops.iter().filter(|t| t.is_active_in_squad()).count();
-                ui.label(format!("Troupes: {} / {}", troops_count, state.max_troops()));
-                if self.screen == Screen::Preparation
-                    && ui.button("Lancer la vague").clicked()
-                {
-                    start_battle_request.replace(true);
-                }
-                if ui.button("Mode Dev").clicked() {
-                    self.dev_mode_window_open = true;
-                }
-                if ui.button("Sauvegarder").clicked() {
-                    self.save_requested = true;
-                }
-                if ui.button("Charger").clicked() {
-                    self.load_requested = true;
-                }
-                if ui.button("Tuto").clicked() {
-                    self.tutorial_window_open = true;
-                }
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    ui.label(format!("Or: {}", state.gold));
-                });
             }
         });
-        // Bandeau « PHASE DE REPOS » sous le header (visible uniquement en phase Préparation)
-        if let Some(ref state) = self.game {
-            if state.phase == GamePhase::Preparation {
-                ui.add_space(4.0);
-                egui::Frame::new()
-                    .fill(egui::Color32::from_rgb(255, 220, 0))
-                    .inner_margin(egui::Margin::symmetric(8, 6))
-                    .show(ui, |ui| {
-                        ui.vertical_centered(|ui| {
-                            ui.label(egui::RichText::new("PHASE DE REPOS").color(egui::Color32::BLACK).strong());
-                        });
-                    });
-                ui.add_space(4.0);
-            }
-        }
-        if self.save_requested {
-            self.save_requested = false;
-            match self.do_save() {
-                Ok(()) => self.save_load_message = Some(("Sauvegarde OK.".into(), Instant::now())),
-                Err(e) => self.save_load_message = Some((format!("Erreur: {e}"), Instant::now())),
-            }
-        }
-        if self.load_requested {
-            self.load_requested = false;
-            match self.do_load() {
-                Ok(()) => self.save_load_message = Some(("Partie chargée.".into(), Instant::now())),
-                Err(e) => self.save_load_message = Some((format!("Erreur: {e}"), Instant::now())),
-            }
-        }
-        if let Some((msg, t)) = &self.save_load_message {
-            if t.elapsed().as_secs_f32() > 2.0 {
-                self.save_load_message = None;
-            } else {
-                ui.colored_label(egui::Color32::from_rgb(120, 255, 120), msg.as_str());
-            }
-        }
-        ui.add_space(8.0);
+    });
 
-        // Fenêtre Joueur 2 (phase Préparation) : spawn Tombilol, Tal Ratchou, Sergent Garcia
-        if self.joueur2_window_open {
-            let mut open = true;
-            let mut should_close = false;
-            egui::Window::new("Joueur 2")
-                .open(&mut open)
-                .default_width(320.0)
-                .show(ui.ctx(), |ui| {
-                    ui.label("Spawn un personnage secondaire (2 joueurs) :");
-                    ui.add_space(6.0);
-                    if let Some(ref mut state) = self.game {
-                        if state.secondary_player.is_some() {
-                            ui.label("Un joueur secondaire est déjà présent.");
-                            if ui.button("lvlup (joueur 2)").clicked() {
-                                state.secondary_give_level_up();
-                            }
-                        } else {
-                            if ui.button("Tombilol — 30 PV, attaque 360° 30 px, 1 att/s").clicked() {
-                                state.spawn_secondary_tombilol();
-                                should_close = true;
-                            }
-                            if ui.button("Tal Ratchou — 20 PV, projectile homing 0,6/s, 200 px").clicked() {
-                                state.spawn_secondary_tal_ratchou();
-                                should_close = true;
-                            }
-                            if ui.button("Sergent Garcia — 10 PV, 6 miliciens").clicked() {
-                                state.spawn_secondary_sergent_garcia();
-                                should_close = true;
-                            }
-                        }
-                    }
-                });
-            if !open || should_close {
-                self.joueur2_window_open = false;
-            }
-        }
+    let gs = game_state.read().clone();
+    let Some(ref gs) = gs else {
+        return rsx! { div { "Aucune partie." } };
+    };
 
-        // Fenêtre Tutoriel (déplaçable, fermable, onglets)
-        if self.tutorial_window_open {
-            let mut tab = self.tutorial_tab;
-            egui::Window::new("Tutoriel")
-                .open(&mut self.tutorial_window_open)
-                .default_size([420.0, 380.0])
-                .resizable(true)
-                .show(ui.ctx(), |ui| {
-                    ui.horizontal(|ui| {
-                        if ui.selectable_label(tab == 0, "Comment jouer").clicked() { tab = 0; }
-                        if ui.selectable_label(tab == 1, "Contrôles").clicked() { tab = 1; }
-                        if ui.selectable_label(tab == 2, "Phases").clicked() { tab = 2; }
-                        if ui.selectable_label(tab == 3, "Mécaniques").clicked() { tab = 3; }
-                    });
-                    ui.separator();
-                    egui::ScrollArea::vertical().show(ui, |ui| {
-                        match tab {
-                            0 => {
-                                ui.heading("Comment jouer");
-                                ui.add_space(6.0);
-                                ui.label("Lord of the Castle est un jeu de défense de tour et d’action. Votre objectif : protéger le Château des vagues d’ennemis.");
-                                ui.add_space(4.0);
-                                ui.label("• En phase Préparation : achetez équipement, construisez des tours, recrutez des troupes, montez en compétences.");
-                                ui.label("• Cliquez sur « Lancer la vague » pour passer en Bataille.");
-                                ui.label("• En Bataille : déplacez-vous (ZQSD), combattez les ennemis avec votre personnage et vos troupes ; les tours tirent automatiquement.");
-                                ui.label("• Ramassez l’or et l’XP au sol, identifiez les objets trouvés, puis repassez en Préparation pour la vague suivante.");
-                                ui.add_space(4.0);
-                                ui.label("Si le Château tombe à 0 PV, c’est le Game Over.");
-                            }
-                            1 => {
-                                ui.heading("Contrôles");
-                                ui.add_space(6.0);
-                                ui.label("• Déplacement : ZQSD ou flèches directionnelles (8 directions).");
-                                ui.label("• Avec un joueur 2 : le joueur 1 utilise OKLM, le joueur 2 utilise ZQSD.");
-                                ui.label("• Cliquez sur la zone de jeu pour lui donner le focus (clavier actif).");
-                                ui.label("• Header : Player, Inventaire, Équipement, Compétences, Marchand, Expert (Deckard Rain), Construction, Recrutement, Lancer la vague, Sauvegarder, Charger.");
-                                ui.label("• Ramassage : approchez-vous des orbes (or, XP) et des objets au sol (rayon ~30 px).");
-                            }
-                            2 => {
-                                ui.heading("Phases");
-                                ui.add_space(6.0);
-                                ui.label("Préparation :");
-                                ui.label("  • Compétences (arbre Guerrier), équipement au Marchand, construction de tours (grille 20×20), recrutement de troupes.");
-                                ui.label("  • Inventaire max 20 slots ; ne lancez pas la vague si l’inventaire est plein.");
-                                ui.add_space(4.0);
-                                ui.label("Bataille :");
-                                ui.label("  • Ennemis spawnent et marchent vers le Château. Vous, les tours et les troupes les attaquez.");
-                                ui.label("  • Quand tous les ennemis sont morts, la vague est gagnée : or, XP et objets récupérables au sol.");
-                                ui.label("  • Passez à la vague suivante en revenant en Préparation.");
-                            }
-                            3 => {
-                                ui.heading("Mécaniques");
-                                ui.add_space(6.0);
-                                ui.label("Joueur : attaque auto à portée (~40 px), 1 att/s ; dégâts et PV selon équipement et stats. Mort à 0 PV : revive après la vague avec −1 PV max.");
-                                ui.label("Tours : coût 50 or, champ de vision 300 px, flèches 600 px, 1 tir / 2 s.");
-                                ui.label("Troupes : suivent le joueur dans un rayon ~200 px, combattent les ennemis à portée (ex. Milicien 3 dégâts, 25 px).");
-                                ui.label("Ennemis : priorité Joueur > Tour > Château ; donnent or, XP et parfois objets à la mort.");
-                                ui.label("Loot : or et XP en orbes ; objets à identifier (Marchand ou Expert 20 or).");
-                            }
-                            _ => {}
-                        }
-                    });
-                });
-            self.tutorial_tab = tab;
-        }
+    let base_path = use_context::<Signal<PathBuf>>();
+    let phase = gs.phase;
+    let wave = gs.wave_number;
 
-        // Fenêtre Mode Dev (Visions des portées, +100 or, Spawn 50 ennemis, lvlup)
-        if self.dev_mode_window_open {
-            let mut open = true;
-            egui::Window::new("Mode Dev")
-                .open(&mut open)
-                .default_width(280.0)
-                .show(ui.ctx(), |ui| {
-                    if let Some(ref mut state) = self.game {
-                        ui.checkbox(&mut state.dev_mode, "Visions des portées");
-                        ui.add_space(6.0);
-                        if ui.button("+ 100 or").clicked() {
-                            state.gold += 100;
-                        }
-                        if ui.button("Spawn 50 ennemis normal").clicked() {
-                            state.dev_spawn_50_normal_enemies_random();
-                        }
-                        if ui.button("lvlup").clicked() {
-                            state.dev_give_level_up();
-                        }
-                    }
-                });
-            if !open {
-                self.dev_mode_window_open = false;
-            }
-        }
-
-        // Fenêtre Player (métriques joueur)
-        if self.player_window_open {
-            let mut open = true;
-            egui::Window::new("Player")
-                .open(&mut open)
-                .default_width(280.0)
-                .show(ui.ctx(), |ui| paint_player_window(ui, self.game.as_mut()));
-            if !open {
-                self.player_window_open = false;
-            }
-        }
-
-        // Fenêtre Inventaire (vue intégrée)
-        if self.inventory_window_open {
-            let mut open = true;
-            egui::Window::new("Inventaire")
-                .open(&mut open)
-                .default_width(320.0)
-                .default_height(400.0)
-                .show(ui.ctx(), |ui| {
-                    paint_inventory_window(ui, self.game.as_mut(), &mut self.selected_inventory_slot, &self.pending_identify_self);
-                });
-            if !open {
-                self.inventory_window_open = false;
-                self.selected_inventory_slot = None;
-            }
-        }
-
-        // Fenêtre Détail / Identification (vue intégrée)
-        if let Some(slot_idx) = self.selected_inventory_slot {
-            egui::Window::new("Détail objet")
-                .collapsible(false)
-                .resizable(false)
-                .show(ui.ctx(), |ui| {
-                    paint_item_detail_or_identify(ui, self, slot_idx);
-                });
-        }
-
-        // Fenêtre Équipement (liste des slots + détail)
-        if self.equipment_window_open {
-            let mut open = true;
-            egui::Window::new("Équipement")
-                .open(&mut open)
-                .default_width(280.0)
-                .default_height(360.0)
-                .show(ui.ctx(), |ui| {
-                    paint_equipment_window(ui, self.game.as_mut(), &mut self.selected_equipment_slot);
-                });
-            if !open {
-                self.equipment_window_open = false;
-                self.selected_equipment_slot = None;
-            }
-        }
-        if let Some(slot) = self.selected_equipment_slot {
-            egui::Window::new("Détail équipement")
-                .collapsible(false)
-                .resizable(false)
-                .show(ui.ctx(), |ui| {
-                    paint_equipment_item_detail(ui, self, slot);
-                });
-        }
-
-        // Fenêtre Compétences (5 onglets : Guerrier, Sorcier, Saint, Régent, Commandant)
-        if self.competences_open {
-            let mut open = true;
-            egui::Window::new("Compétences")
-                .open(&mut open)
-                .default_width(420.0)
-                .default_height(380.0)
-                .show(ui.ctx(), |ui| paint_skills_window(ui, self.game.as_mut(), &mut self.skills_tab, &mut self.selected_warrior_skill));
-            if !open {
-                self.competences_open = false;
-            }
-        }
-
-        // Fenêtres Mode préparation (Marchand, Expert, Construction, Recrutement) — vue intégrée Central
-        let mut close_marchand = false;
-        let mut close_expert = false;
-        let mut close_construction = false;
-        let mut close_recrutement = false;
-        if let Some(ref mut state) = self.game {
-            let gold = state.gold;
-            if self.marchand_open {
-                let mut open = true;
-                egui::Window::new("Marchand")
-                    .open(&mut open)
-                    .default_width(380.0)
-                    .default_height(480.0)
-                    .show(ui.ctx(), |ui| {
-                        ui.label(format!("Or : {gold} or"));
-                        if state.dev_mode
-                            && ui.button("+100 or (dev)").clicked() {
-                                self.pending_dev_add_gold.replace(true);
-                            }
-                        if cfg!(debug_assertions)
-                            && ui.button("🔄 Reroll pools (dev)").clicked() {
-                                self.pending_merchant_reroll.replace(true);
-                            }
-                        ui.add_space(6.0);
-                        egui::ScrollArea::vertical().show(ui, |ui| {
-                            ui.heading("Armes");
-                            for (i, opt) in state.merchant_weapons.iter().enumerate() {
-                                match opt {
-                                    Some(me) => {
-                                        match &me.entry {
-                                            InventoryEntry::Identified(item) => {
-                                                let (r, g, b) = item.rarity.color_rgb();
-                                                ui.colored_label(egui::Color32::from_rgb(r, g, b), &item.display_name);
-                                            }
-                                            InventoryEntry::Unidentified(slot) => {
-                                                ui.label(format!("Objet non identifié — {} — {} or", slot.label(), me.price));
-                                            }
-                                        }
-                                        if ui.button(format!("Acheter ({} or)", me.price)).clicked() && gold >= me.price {
-                                            self.pending_merchant_buy.borrow_mut().replace((MerchantPoolKind::Weapon, i));
-                                        }
-                                    }
-                                    None => {
-                                        ui.weak("Slot vide");
-                                    }
-                                }
-                            }
-                            ui.add_space(8.0);
-                            ui.heading("Armures");
-                            for (i, opt) in state.merchant_armor.iter().enumerate() {
-                                match opt {
-                                    Some(me) => {
-                                        match &me.entry {
-                                            InventoryEntry::Identified(item) => {
-                                                let (r, g, b) = item.rarity.color_rgb();
-                                                ui.colored_label(egui::Color32::from_rgb(r, g, b), &item.display_name);
-                                            }
-                                            InventoryEntry::Unidentified(slot) => {
-                                                ui.label(format!("Objet non identifié — {} — {} or", slot.label(), me.price));
-                                            }
-                                        }
-                                        if ui.button(format!("Acheter ({} or)", me.price)).clicked() && gold >= me.price {
-                                            self.pending_merchant_buy.borrow_mut().replace((MerchantPoolKind::Armor, i));
-                                        }
-                                    }
-                                    None => {
-                                        ui.weak("Slot vide");
-                                    }
-                                }
-                            }
-                            ui.add_space(8.0);
-                            ui.heading("Accessoires");
-                            for (i, opt) in state.merchant_accessories.iter().enumerate() {
-                                match opt {
-                                    Some(me) => {
-                                        match &me.entry {
-                                            InventoryEntry::Identified(item) => {
-                                                let (r, g, b) = item.rarity.color_rgb();
-                                                ui.colored_label(egui::Color32::from_rgb(r, g, b), &item.display_name);
-                                            }
-                                            InventoryEntry::Unidentified(slot) => {
-                                                ui.label(format!("Objet non identifié — {} — {} or", slot.label(), me.price));
-                                            }
-                                        }
-                                        if ui.button(format!("Acheter ({} or)", me.price)).clicked() && gold >= me.price {
-                                            self.pending_merchant_buy.borrow_mut().replace((MerchantPoolKind::Accessory, i));
-                                        }
-                                    }
-                                    None => {
-                                        ui.weak("Slot vide");
-                                    }
-                                }
-                            }
-                        });
-                    });
-                if !open {
-                    close_marchand = true;
-                }
-            }
-            if self.expert_open {
-                let mut open = true;
-                egui::Window::new("Expert en identification")
-                    .open(&mut open)
-                    .default_width(320.0)
-                    .show(ui.ctx(), |ui| {
-                        ui.label(format!("Or : {gold} or"));
-                        ui.add_space(8.0);
-                        ui.heading("Expert en identification");
-                        ui.label("Identification groupée : identifier tous les objets de l'inventaire en une fois (prix cumulé).");
-                        ui.weak("(À implémenter : bouton et coût total)");
-                    });
-                if !open {
-                    close_expert = true;
-                }
-            }
-            if self.construction_open {
-                let mut open = true;
-                egui::Window::new("Construction")
-                    .open(&mut open)
-                    .default_width(320.0)
-                    .show(ui.ctx(), |ui| {
-                        ui.label(format!("Or : {gold} or"));
-                        ui.add_space(8.0);
-                        ui.heading("Bâtiments constructibles");
-                        ui.label("Sélectionnez une case sur la zone de jeu (grille 20×20). Clic droit pour annuler.");
-                        ui.add_space(8.0);
-                        if let Some((ci, cj)) = self.construction_selected_cell {
-                            ui.label(format!("Case sélectionnée : ({ci}, {cj})"));
-                            let has_place = state.can_build_at_cell(ci, cj);
-                            let has_gold = state.gold >= TOWER_BASE_COST_GOLD;
-                            if has_place {
-                                if has_gold {
-                                    if ui.button(format!("Tour ({TOWER_BASE_COST_GOLD} po) — Construire dedans")).clicked() {
-                                        state.build_tower_at_cell(ci, cj);
-                                    }
-                                } else {
-                                    ui.weak(format!("Or insuffisant ({TOWER_BASE_COST_GOLD} po requis)."));
-                                }
-                            } else {
-                                ui.weak("Pas la place ici (château ou autre bâtiment).");
-                            }
-                        } else {
-                            ui.weak("Aucune case sélectionnée.");
-                        }
-                    });
-                if !open {
-                    close_construction = true;
-                }
-            }
-            if self.recrutement_open {
-                let mut open = true;
-                let troops_count = state.troops.iter().filter(|t| t.is_active_in_squad()).count();
-                let max_troops = state.max_troops();
-                egui::Window::new("Recrutement")
-                    .open(&mut open)
-                    .default_width(320.0)
-                    .show(ui.ctx(), |ui| {
-                        ui.label(format!("Or : {gold} or"));
-                        ui.label(format!("Troupes : {troops_count} / {max_troops}"));
-                        ui.add_space(8.0);
-                        ui.heading("Troupes disponibles");
-                        ui.horizontal(|ui| {
-                            ui.label(TroopKind::Milicien.label());
-                            ui.label("— 100 PV, 20 % blocage, 6 dégâts, 1 att/s, portée 25 px.");
-                            if ui.add_enabled(troops_count < max_troops, egui::Button::new("Recruter")).clicked()
-                                && troops_count < max_troops
-                            {
-                                state.recruit_troop(TroopKind::Milicien);
-                            }
-                        });
-                    });
-                if !open {
-                    close_recrutement = true;
-                }
-            }
-        }
-        if close_marchand {
-            self.marchand_open = false;
-        }
-        if close_expert {
-            self.expert_open = false;
-        }
-        if close_construction {
-            self.construction_open = false;
-            self.construction_selected_cell = None;
-        }
-        if close_recrutement {
-            self.recrutement_open = false;
-        }
-        if let Some((pool, index)) = self.pending_merchant_buy.borrow_mut().take() {
-            if let Some(ref mut state) = self.game {
-                match pool {
-                    MerchantPoolKind::Weapon => {
-                        state.buy_merchant_weapon(index);
-                    }
-                    MerchantPoolKind::Armor => {
-                        state.buy_merchant_armor(index);
-                    }
-                    MerchantPoolKind::Accessory => {
-                        state.buy_merchant_accessory(index);
-                    }
-                }
-            }
-        }
-        if self.pending_merchant_reroll.replace(false) {
-            if let Some(ref mut state) = self.game {
-                state.refresh_merchant_pools();
-            }
-        }
-        if self.pending_dev_add_gold.replace(false) {
-            if let Some(ref mut state) = self.game {
-                state.gold += 100;
-            }
-        }
-
-        // Contenu central selon l'écran
-        match &self.screen {
-            Screen::Title => {
-                ui.vertical_centered(|ui| {
-                    ui.heading("Lord of the Castle");
-                    ui.label("Miyukini Survivor — Survivor + Tower Defense");
-                    ui.add_space(20.0);
-                    if ui.button("Nouvelle partie").clicked() {
-                        self.start_new_game();
-                    }
-                    ui.add_space(4.0);
-                    ui.colored_label(
-                        ui.visuals().weak_text_color(),
-                        "Attention : cela écrase la sauvegarde actuelle.",
-                    );
-                });
-            }
-            Screen::Lore => {
-                ui.vertical_centered(|ui| {
-                    ui.heading("Lore");
-                    ui.add_space(12.0);
-                    ui.label("Tu es le seigneur de ton domaine qui est attaqué par des mort-vivants.");
-                    ui.label("Protège tes terres et ton château.");
-                    ui.add_space(24.0);
-                });
-                ui.with_layout(egui::Layout::bottom_up(egui::Align::Min), |ui| {
-                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        if ui.button("Skip").clicked() {
-                            self.screen = Screen::NameInput;
-                            self.creation_name.clear();
-                            self.creation_save_name.clear();
-                        }
-                    });
-                });
-            }
-            Screen::NameInput => {
-                ui.vertical_centered(|ui| {
-                    ui.heading("Création du personnage");
-                    ui.label("Entre le nom de ton personnage et le nom de la sauvegarde.");
-                    ui.add_space(16.0);
-                    ui.horizontal(|ui| {
-                        ui.label("Nom du personnage :");
-                        ui.add(egui::TextEdit::singleline(&mut self.creation_name).desired_width(200.0));
-                    });
-                    ui.horizontal(|ui| {
-                        ui.label("Nom de la sauvegarde :");
-                        ui.add(egui::TextEdit::singleline(&mut self.creation_save_name).desired_width(200.0));
-                    });
-                    ui.label("(Si vide, le nom du personnage sera utilisé)");
-                    ui.add_space(16.0);
-                    if ui.button("Valider").clicked() {
-                        let name = self.creation_name.trim();
-                        if !name.is_empty() {
-                            self.screen = Screen::CharacterCreation(0);
-                            self.creation_available_ids = (0..=24).collect();
-                            self.creation_stats = CharacterStats::default();
-                            self.creation_reroll_pending = false;
-                            self.creation_current_choices = pick_three_phrases(
-                                &mut self.creation_available_ids,
-                                &mut crate::game_state::rand_simple,
-                            );
-                        }
-                    }
-                });
-            }
-            Screen::CharacterCreation(step) => {
-                let step = *step;
-                let mut chosen: Option<usize> = None;
-                ui.vertical_centered(|ui| {
-                    ui.heading(format!("Création du personnage — Étape {}/4", step + 1));
-                    ui.add_space(8.0);
-                    ui.label("Choisis une phrase qui te décrit :");
-                    ui.add_space(12.0);
-                    for (i, phrase) in self.creation_current_choices.iter().enumerate() {
-                        if ui.button(phrase.text).clicked() {
-                            chosen = Some(i);
-                        }
-                    }
-                    ui.add_space(16.0);
-                    ui.collapsing("Caractéristiques actuelles", |ui| {
-                        let s = &self.creation_stats;
-                        ui.label(format!("For: {}  Con: {}  Agi: {}  Dex: {}", s.display(Stat::For), s.display(Stat::Con), s.display(Stat::Agi), s.display(Stat::Dex)));
-                        ui.label(format!("Int: {}  Sag: {}  Cha: {}  Luk: {}", s.display(Stat::Int), s.display(Stat::Sag), s.display(Stat::Cha), s.display(Stat::Luk)));
-                    });
-                });
-                if let Some(i) = chosen {
-                    let phrase = self.creation_current_choices[i].clone();
-                    let reroll = apply_phrase_effects(
-                        &mut self.creation_stats,
-                        &phrase.effects,
-                        &mut crate::game_state::rand_simple,
-                    );
-                    if reroll {
-                        self.creation_reroll_pending = true;
-                    }
-                    if step < 3 {
-                        self.screen = Screen::CharacterCreation(step + 1);
-                        self.creation_current_choices = pick_three_phrases(
-                            &mut self.creation_available_ids,
-                            &mut crate::game_state::rand_simple,
-                        );
-                    } else {
-                        self.finish_creation_and_start();
-                    }
-                }
-            }
-            Screen::Preparation => {
-                let mut state_opt = self.game.take();
-                if let Some(ref mut state) = state_opt {
-                    let last_tick = self.last_tick;
-                    let keys = self.keys;
-                    let delta = last_tick.elapsed().as_secs_f32();
-                    self.player_anim_accumulator += delta;
-                    self.enemy_anim_accumulator += delta;
-                    self.troop_anim_accumulator += delta;
-                    let is_moving = keys.iter().any(|&k| k);
-                    let frame_idle = ((self.player_anim_accumulator * 6.0) as usize) % 6;
-                    let frame_walk = ((self.player_anim_accumulator * 8.0) as usize) % 8;
-                    let enemy_frame = ((self.enemy_anim_accumulator * 8.0) as usize) % 8;
-                    let result = RefCell::new((last_tick, false));
-                    let (game_rect, resp, bottom_rect) = allocate_game_zone_and_bottom(ui);
-                    if resp.clicked() {
-                        focus_request.replace(Some(resp.id));
-                    }
-                    let painter = ui.painter();
-                    let cursor_screen = ui.ctx().input(|i| i.pointer.hover_pos());
-                    let (cx, cy) = (state.player.x, state.player.y);
-                    let cursor_world = cursor_screen
-                        .filter(|p| game_rect.contains(*p))
-                        .map(|p| screen_to_world(game_rect, p.x, p.y, cx, cy));
-                    let facing_left = cursor_world.map_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW), |(cw, _)| cw < state.player.x);
-                    let player_sprite = if is_moving {
-                        self.player_walk_texture.as_ref()
-                            .zip(self.player_walk_desc.as_ref())
-                            .map(|(t, d)| (t, d, frame_walk, facing_left))
-                    } else {
-                        self.player_sprite_texture.as_ref()
-                            .zip(self.player_sprite_desc.as_ref())
-                            .map(|(t, d)| (t, d, frame_idle, facing_left))
-                    };
-                    let enemy_sprite = self.enemy_sprite_texture.as_ref()
-                        .zip(self.enemy_sprite_desc.as_ref())
-                        .map(|(t, d)| (t, d, enemy_frame));
-                    let enemy_miniboss_sprite = self.enemy_miniboss_sprite_texture.as_ref()
-                        .zip(self.enemy_miniboss_sprite_desc.as_ref())
-                        .map(|(t, d)| (t, d, enemy_frame));
-                    let troop_frame = ((self.troop_anim_accumulator * 8.0) as usize) % 8;
-                    let troop_walk_sprite = self.troop_sprite_texture.as_ref()
-                        .zip(self.troop_sprite_desc.as_ref())
-                        .map(|(t, d)| (t, d, troop_frame));
-                    let troop_attack_sprite = self.troop_attack_sprite_texture.as_ref()
-                        .zip(self.troop_attack_sprite_desc.as_ref());
-                    if self.construction_open {
-                        if resp.clicked() {
-                            let pos = resp.interact_pointer_pos()
-                                .or_else(|| ui.ctx().input(|i| i.pointer.press_origin()));
-                            if let Some(pos) = pos {
-                                let (ci, cj) = screen_to_cell(
-                                    game_rect,
-                                    pos.x,
-                                    pos.y,
-                                    state.player.x,
-                                    state.player.y,
-                                    state.castle.x,
-                                    state.castle.y,
-                                );
-                                self.construction_selected_cell = Some((ci, cj));
-                            }
-                        }
-                        if resp.secondary_clicked() {
-                            self.construction_selected_cell = None;
-                        }
-                    }
-                    let (tick, go) = game_zone_tick_and_paint(
-                        game_rect,
-                        painter,
-                        state,
-                        last_tick,
-                        keys,
-                        self.keys_secondary,
-                        ui.visuals().window_fill(),
-                        cursor_screen,
-                        player_sprite,
-                        enemy_sprite,
-                        enemy_miniboss_sprite,
-                        troop_walk_sprite,
-                        troop_attack_sprite,
-                        self.construction_open,
-                        self.construction_selected_cell,
-                    );
-                    *result.borrow_mut() = (tick, go);
-                    paint_bottom_panel(ui, bottom_rect, state);
-                    let (new_tick, game_over) = *result.borrow();
-                    self.last_tick = new_tick;
-                    if game_over {
-                    self.screen = Screen::GameOver;
-                    }
-                }
-                self.game = state_opt;
-            }
-            Screen::Battle => {
-                if let Some(ref mut state) = self.game {
-                    let delta = self.last_tick.elapsed().as_secs_f32();
-                    self.player_anim_accumulator += delta;
-                    self.enemy_anim_accumulator += delta;
-                    self.troop_anim_accumulator += delta;
-                    let is_moving = self.keys.iter().any(|&k| k);
-                    let frame_idle = ((self.player_anim_accumulator * 6.0) as usize) % 6;
-                    let frame_walk = ((self.player_anim_accumulator * 8.0) as usize) % 8;
-                    let enemy_frame = ((self.enemy_anim_accumulator * 8.0) as usize) % 8;
-                    let (game_rect, resp, bottom_rect) = allocate_game_zone_and_bottom(ui);
-                    if resp.clicked() {
-                        focus_request.replace(Some(resp.id));
-                    }
-                    let painter = ui.painter();
-                    let cursor_screen = ui.ctx().input(|i| i.pointer.hover_pos());
-                    let (cx, cy) = (state.player.x, state.player.y);
-                    let cursor_world = cursor_screen
-                        .filter(|p| game_rect.contains(*p))
-                        .map(|p| screen_to_world(game_rect, p.x, p.y, cx, cy));
-                    let facing_left = cursor_world.map_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW), |(cw, _)| cw < state.player.x);
-                    let player_sprite = if is_moving {
-                        self.player_walk_texture.as_ref()
-                            .zip(self.player_walk_desc.as_ref())
-                            .map(|(t, d)| (t, d, frame_walk, facing_left))
-                    } else {
-                        self.player_sprite_texture.as_ref()
-                            .zip(self.player_sprite_desc.as_ref())
-                            .map(|(t, d)| (t, d, frame_idle, facing_left))
-                    };
-                    let enemy_sprite = self.enemy_sprite_texture.as_ref()
-                        .zip(self.enemy_sprite_desc.as_ref())
-                        .map(|(t, d)| (t, d, enemy_frame));
-                    let enemy_miniboss_sprite = self.enemy_miniboss_sprite_texture.as_ref()
-                        .zip(self.enemy_miniboss_sprite_desc.as_ref())
-                        .map(|(t, d)| (t, d, enemy_frame));
-                    let troop_frame = ((self.troop_anim_accumulator * 8.0) as usize) % 8;
-                    let troop_walk_sprite = self.troop_sprite_texture.as_ref()
-                        .zip(self.troop_sprite_desc.as_ref())
-                        .map(|(t, d)| (t, d, troop_frame));
-                    let troop_attack_sprite = self.troop_attack_sprite_texture.as_ref()
-                        .zip(self.troop_attack_sprite_desc.as_ref());
-                    let (new_tick, game_over) = game_zone_tick_and_paint(
-                        game_rect,
-                        painter,
-                        state,
-                        self.last_tick,
-                        self.keys,
-                        self.keys_secondary,
-                        ui.visuals().window_fill(),
-                        cursor_screen,
-                        player_sprite,
-                        enemy_sprite,
-                        enemy_miniboss_sprite,
-                        troop_walk_sprite,
-                        troop_attack_sprite,
-                        self.construction_open,
-                        self.construction_selected_cell,
-                    );
-                    self.last_tick = new_tick;
-                    paint_bottom_panel(ui, bottom_rect, state);
-                    if game_over {
-                        self.screen = Screen::GameOver;
-                    }
-                    // Overlay victoire de vague
-                    if state.is_wave_won() {
-                        let rect = game_rect;
-                        if rect.width() > 0.0 && rect.height() > 0.0 {
-                            egui::Area::new(egui::Id::new("wave_won_overlay_2"))
-                                .order(egui::Order::Foreground)
-                                .fixed_pos(rect.min)
-                                .constrain(true)
-                                .show(ui.ctx(), |ui| {
-                                    ui.set_min_size(rect.size());
-                                    let frame = egui::Frame::new()
-                                        .fill(egui::Color32::from_white_alpha(240))
-                                        .corner_radius(8.0);
-                                    frame.show(ui, |ui| {
-                                        ui.vertical_centered(|ui| {
-                                            ui.add_space(60.0);
-                                            ui.heading("Vague terminée !");
-                                            ui.label("Félicitations.");
-                                            ui.add_space(16.0);
-                                            ui.label("Résumé de la vague :");
-                                            ui.label(format!("Ennemis tués : {}", state.enemies_killed_this_wave));
-                                            ui.label(format!("Or collecté : {} or", state.gold_collected_this_wave));
-                                            ui.label(format!("XP gagnée : {}", state.xp_gained_this_wave));
-                                            ui.label(format!("Objets trouvés : {}", state.items_found_this_wave));
-                                            ui.add_space(24.0);
-                                            if ui.button("Phase suivante").clicked() {
-                                                state.start_preparation_phase();
-                                                self.screen = Screen::Preparation;
-                                            }
-                                        });
-                                    });
-                                });
-                        }
-                    }
-                }
-            }
-            Screen::GameOver => {
-                ui.vertical_centered(|ui| {
-                    ui.heading("Game Over");
-                    ui.label("Le Château a été détruit.");
-                    ui.add_space(20.0);
-                    if ui.button("Retour au titre").clicked() {
-                        self.screen = Screen::Title;
-                        self.game = None;
-                    }
-                });
-            }
-        }
-
-        // Log des dégâts joueur (en bas) — Bataille ou Préparation
-        if let Some(ref state) = self.game {
-            if self.screen == Screen::Battle || self.screen == Screen::Preparation {
-                ui.add_space(8.0);
-                egui::CollapsingHeader::new("Dégâts infligés par le joueur")
-                    .default_open(true)
-                    .show(ui, |ui| {
-                        ui.set_max_height(100.0);
-                        egui::ScrollArea::vertical().stick_to_bottom(true).show(ui, |ui| {
-                            for line in state.player_damage_log.iter().rev() {
-                                ui.label(line);
-                            }
-                            if state.player_damage_log.is_empty() {
-                                ui.weak("Aucun dégât infligé pour l'instant.");
-                            }
-                        });
-                    });
-            }
-        }
-
-        // Donner le focus clavier à la zone de jeu si l'utilisateur a cliqué dessus (ZQSD).
-        let focus_id = focus_request.borrow_mut().take();
-        if let Some(id) = focus_id {
-            ui.ctx().memory_mut(|m| m.request_focus(id));
-        }
-
-        // Appliquer « Lancer la vague » cliqué depuis la barre haute.
-        if start_battle_request.replace(false) {
-            if let Some(ref mut state) = self.game {
-                if state.inventory.len() >= INVENTORY_MAX_SLOTS {
-                    self.show_encumbered_overlay = true;
-                } else {
-                    state.start_battle_phase();
-                    self.screen = Screen::Battle;
-                }
-            }
-        }
-
-        self.paint_level_up_toasts(ui.ctx());
+    // Afficher notification "cliquer sur la zone" pour vagues 1, 2, 3 en phase Battle
+    if phase == GamePhase::Battle && wave <= 3 && last_wave_hint() != wave {
+        last_wave_hint.set(wave);
+        show_click_hint.set(true);
+        spawn(async move {
+            tokio::time::sleep(Duration::from_secs(3)).await;
+            show_click_hint.set(false);
+        });
     }
-}
-
-/// Fenêtre détail (objet identifié) ou identification (objet non identifié). Ferme en mettant app.selected_inventory_slot = None.
-fn paint_item_detail_or_identify(
-    ui: &mut egui::Ui,
-    app: &mut LordOfTheCastleApp,
-    slot_idx: usize,
-) {
-    let Some(ref mut state) = app.game else {
-        app.selected_inventory_slot = None;
-        return;
+    let gold = gs.gold;
+    let level = gs.level;
+    let xp = gs.xp;
+    let xp_needed = gs.xp_required_for_next_level();
+    let xp_pct = if xp_needed > 0 { (xp as f32 / xp_needed as f32 * 100.0).min(100.0) } else { 0.0 };
+    let player_hp = gs.player.hp;
+    let player_hp_max = gs.player.hp_max;
+    let player_dead = gs.player.dead;
+    let is_game_over = gs.is_game_over();
+    let is_wave_won = gs.is_wave_won();
+    let enemies_alive = gs.enemies.len();
+    let _enemies_spawned = gs.enemies_spawned_this_wave;
+    let spawn_qty = gs.spawn_quantity;
+    let castle_hp = gs.castle.hp;
+    let castle_hp_max = gs.castle.hp_max;
+    let skill_pts = gs.skill_points_available;
+    let stat_pts = gs.stat_points_available;
+    let towers_count = gs.towers.len();
+    let troops_count = gs.troops.iter().filter(|t| t.is_active_in_squad()).count();
+    let max_troops = gs.max_troops();
+    let armor = gs.player_total_armor();
+    let atk_dmg = gs.player_auto_attack_damage();
+    let inv_count = gs.inventory.len();
+    let phase_label = match phase {
+        GamePhase::Preparation => "Préparation",
+        GamePhase::Battle => "Bataille",
     };
-    let Some(entry) = state.inventory.get(slot_idx) else {
-        app.selected_inventory_slot = None;
-        return;
-    };
-    let mut close_window = false;
-    let mut do_sell = false;
-    let mut do_equip = false;
-    let mut do_identify_self = false;
-    let mut do_identify_expert = false;
 
-    match entry {
-        InventoryEntry::Unidentified(slot) => {
-            ui.label("Objet non-identifié");
-            ui.label(format!("Type : {}", slot.label()));
-            ui.weak("Un objet non identifié ne peut pas être équipé.");
-            if state.phase == GamePhase::Preparation {
-                ui.add_space(8.0);
-                ui.label("Voulez-vous identifier cet objet ?");
-                ui.horizontal(|ui| {
-                    let can_self = !state.identified_this_phase;
-                    if ui.add_enabled(can_self, egui::Button::new("Moi-même")).clicked() {
-                        do_identify_self = true;
+    // ─── Données de rendu des entités ───
+    let castle_x = gs.castle.x;
+    let castle_y = gs.castle.y;
+
+    // Ennemis (x, y, size, color, hp, hp_max, kind, is_flashing)
+    let enemy_renders: Vec<(f32, f32, f32, String, i32, i32, EnemyKind, bool)> = gs
+        .enemies
+        .iter()
+        .map(|e| {
+            let color = match e.kind {
+                EnemyKind::Normal => {
+                    if e.is_flashing() { "#ffffff".to_string() } else { "#ff4444".to_string() }
+                }
+                EnemyKind::MiniBoss => {
+                    if e.is_flashing() { "#ffffff".to_string() } else { "#ff8800".to_string() }
+                }
+                EnemyKind::Boss => {
+                    if e.is_flashing() { "#ffffff".to_string() } else { "#cc44ff".to_string() }
+                }
+            };
+            (e.x, e.y, e.kind.size(), color, e.hp, e.hp_max, e.kind, e.is_flashing())
+        })
+        .collect();
+
+    // Tours
+    let tower_renders: Vec<(f32, f32, i32, i32)> = gs
+        .towers
+        .iter()
+        .filter(|t| t.hp > 0)
+        .map(|t| (t.x, t.y, t.hp, t.hp_max))
+        .collect();
+
+    // Projectiles tours
+    let proj_renders: Vec<(f32, f32)> = gs
+        .tower_projectiles
+        .iter()
+        .map(|p| (p.x, p.y))
+        .collect();
+
+    // Loot au sol
+    let loot_renders: Vec<(f32, f32, String)> = gs
+        .loot_drops
+        .iter()
+        .map(|d| {
+            let c = match d.kind {
+                LootKind::Gold(_) => "#ffcc00",
+                LootKind::Xp(_) => "#4488ff",
+                LootKind::Item(_) => "#aa6633",
+            };
+            (d.x, d.y, c.to_string())
+        })
+        .collect();
+
+    // Troupes
+    let troop_renders: Vec<(f32, f32, bool)> = gs
+        .troops
+        .iter()
+        .filter(|t| t.is_alive())
+        .map(|t| (t.x, t.y, t.follow_secondary_id.is_some()))
+        .collect();
+
+    // Joueur secondaire
+    let sec_render = gs.secondary_player.as_ref().filter(|s| !s.is_dead()).map(|s| (s.x, s.y));
+
+    // Projectiles secondaires
+    let sec_proj_renders: Vec<(f32, f32)> = gs
+        .secondary_projectiles
+        .iter()
+        .map(|p| (p.x, p.y))
+        .collect();
+
+    // Joueur
+    let player_x = gs.player.x;
+    let player_y = gs.player.y;
+    let _player_dir = gs.player.dir;
+    let player_attack_range = crate::player::Player::auto_attack_range();
+
+    // Notifications level up
+    let notifications: Vec<String> = gs.pending_level_up_notifications.clone();
+
+    // ─── Pré-calcul des styles de rendu des entités ───
+    let _tower_cost = TOWER_BASE_COST_GOLD;
+
+    let loot_styles: Vec<String> = loot_renders.iter()
+        .map(|(x, y, c)| entity_style(*x, *y, 5.0, c))
+        .collect();
+
+    let castle_ent_style = format!(
+        "{}border:2px solid #8899aa;border-radius:3px;",
+        entity_style(castle_x, castle_y, 40.0, "#667788")
+    );
+    let castle_hp_outer_s = hp_bar_outer(castle_x, castle_y, 40.0);
+    let castle_hp_fill_s = hp_bar_fill_style(castle_hp, castle_hp_max);
+
+    let tower_styles: Vec<(String, String, String)> = tower_renders.iter()
+        .map(|(x, y, hp, hm)| (
+            format!("{}border:1px solid #aa8833;border-radius:2px;", entity_style(*x, *y, 40.0, "#8b6914")),
+            hp_bar_outer(*x, *y, 40.0),
+            hp_bar_fill_style(*hp, *hm),
+        ))
+        .collect();
+
+    let troop_styles: Vec<String> = troop_renders.iter()
+        .map(|(x, y, is_sec)| {
+            let c = if *is_sec { "#22aa88" } else { "#44cc44" };
+            format!("{}border-radius:50%;", entity_style(*x, *y, 10.0, c))
+        })
+        .collect();
+
+    // ─ Temps pour les animations de sprites (basé sur l'instant système) ─
+    static START: std::sync::OnceLock<Instant> = std::sync::OnceLock::new();
+    let anim_elapsed = START.get_or_init(Instant::now).elapsed().as_secs_f32();
+
+    // ─ Rendu des ennemis (sprites animés) ─
+    let enemy_styles: Vec<(String, Option<(String, String)>)> = enemy_renders.iter()
+        .map(|(x, y, sz, _c, hp, hm, kind, is_flashing)| {
+            // Choisir le sprite selon le type d'ennemi
+            let sprite = match kind {
+                EnemyKind::Normal => &enemy_normal::IDLE,
+                EnemyKind::MiniBoss => &enemy_miniboss::IDLE,
+                EnemyKind::Boss => &enemy_boss::IDLE,
+            };
+            let frame_idx = animation_frame_index(anim_elapsed, sprite.frame_count, sprite.frame_duration_s);
+            let sprite_css = sprite.css_style(frame_idx, false);
+            
+            // Taille du sprite (ajustée selon le type)
+            let sprite_size = match kind {
+                EnemyKind::Normal => 5.0,
+                EnemyKind::MiniBoss => 7.0,
+                EnemyKind::Boss => 9.0,
+            };
+            let left_pct = pct(*x);
+            let top_pct = pct(*y);
+            
+            let ent = if *is_flashing {
+                format!(
+                    "position:absolute;left:{left_pct:.2}%;top:{top_pct:.2}%;width:{sprite_size:.2}%;height:{sprite_size:.2}%;transform:translate(-50%,-50%);{sprite_css}filter:brightness(3);"
+                )
+            } else {
+                format!(
+                    "position:absolute;left:{left_pct:.2}%;top:{top_pct:.2}%;width:{sprite_size:.2}%;height:{sprite_size:.2}%;transform:translate(-50%,-50%);{sprite_css}"
+                )
+            };
+            let hp_bar = if *hp < *hm {
+                Some((hp_bar_outer(*x, *y, *sz), hp_bar_fill_style(*hp, *hm)))
+            } else {
+                None
+            };
+            (ent, hp_bar)
+        })
+        .collect();
+
+    let sec_style = sec_render.map(|(x, y)|
+        format!("{}border:1px solid #66ffff;border-radius:50%;", entity_style(x, y, 10.0, "#00cccc"))
+    );
+
+    // ─ Rendu du joueur (sprite animé) ─
+    let player_sprite = if player_dead { &player::DEATH } else { &player::IDLE };
+    let player_frame = animation_frame_index(anim_elapsed, player_sprite.frame_count, player_sprite.frame_duration_s);
+    // Flip horizontal si le joueur regarde vers la gauche
+    let player_facing_left = matches!(_player_dir, Dir8::W | Dir8::NW | Dir8::SW);
+    let player_sprite_css = player_sprite.css_style(player_frame, player_facing_left);
+    let player_left_pct = pct(player_x);
+    let player_top_pct = pct(player_y);
+    let player_size_pct = 7.0; // Taille du sprite joueur
+    let player_style = if !player_dead {
+        format!(
+            "position:absolute;left:{player_left_pct:.2}%;top:{player_top_pct:.2}%;width:{player_size_pct}%;height:{player_size_pct}%;transform:translate(-50%,-50%);z-index:5;{player_sprite_css}"
+        )
+    } else {
+        format!(
+            "position:absolute;left:{player_left_pct:.2}%;top:{player_top_pct:.2}%;width:{player_size_pct}%;height:{player_size_pct}%;transform:translate(-50%,-50%);z-index:5;opacity:0.5;{player_sprite_css}"
+        )
+    };
+    
+    // ─ Cône d'attaque du joueur (suit le curseur) ─
+    let current_cursor_angle = cursor_angle();
+    let attack_cone_style = if !player_dead && phase == GamePhase::Battle {
+        // Cône de 40° (demi-angle 20°), portée = player_attack_range
+        let cone_size = pct(player_attack_range * 2.0);
+        Some(format!(
+            "position:absolute;left:{lp:.2}%;top:{tp:.2}%;width:{sz:.2}%;height:{sz:.2}%;transform:translate(-50%,-50%) rotate({angle}deg);background:conic-gradient(from -20deg, rgba(68,136,255,0.3) 0deg, rgba(68,136,255,0.3) 40deg, transparent 40deg);border-radius:50%;pointer-events:none;z-index:4;",
+            lp = pct(player_x),
+            tp = pct(player_y),
+            sz = cone_size,
+            angle = current_cursor_angle,
+        ))
+    } else {
+        None
+    };
+
+    let proj_styles: Vec<String> = proj_renders.iter()
+        .map(|(x, y)| format!("{}border-radius:50%;z-index:6;", entity_style(*x, *y, 3.0, "#cccccc")))
+        .collect();
+
+    let sec_proj_styles: Vec<String> = sec_proj_renders.iter()
+        .map(|(x, y)| format!("{}border-radius:50%;z-index:6;", entity_style(*x, *y, 4.0, "#00ffff")))
+        .collect();
+
+    // ─── Grille de construction RTS ───
+    // Génère les cellules de la grille autour du château (rayon de 10 cellules)
+    use crate::constants::size::CONSTRUCTION_CELL_SIZE;
+    let grid_radius = 10i32; // Nombre de cellules autour du château
+    let cell_size_world = CONSTRUCTION_CELL_SIZE; // 20.0 px
+    
+    let grid_cells: Vec<(i32, i32, bool, f32, f32)> = if phase == GamePhase::Preparation && build_mode() {
+        let mut cells = Vec::new();
+        for ci in -grid_radius..=grid_radius {
+            for cj in -grid_radius..=grid_radius {
+                // Convertir coordonnées de cellule en coordonnées monde
+                let world_x = castle_x + (ci as f32) * cell_size_world;
+                let world_y = castle_y + (cj as f32) * cell_size_world;
+                let can_build = gs.can_build_at_cell(ci, cj);
+                cells.push((ci, cj, can_build, world_x, world_y));
+            }
+        }
+        cells
+    } else {
+        Vec::new()
+    };
+
+    // ─── Données pour les panneaux ───
+    let stats = gs.effective_stats();
+    let base_stats = gs.player.stats.clone();
+    let enemies_killed = gs.enemies_killed;
+    let bosses_killed = gs.bosses_killed;
+    let gold_total = gs.gold_total;
+    let max_wave = gs.max_wave_reached;
+
+    // Skills
+    let skill_ranks = gs.warrior_skill_ranks.clone();
+
+    // Inventaire
+    let inventory: Vec<(usize, String)> = gs
+        .inventory
+        .iter()
+        .enumerate()
+        .map(|(i, e)| {
+            let label = match e {
+                InventoryEntry::Unidentified(slot) => format!("? {} (non identifié)", slot.label()),
+                InventoryEntry::Identified(item) => {
+                    let (_r, _g, _b) = item.rarity.color_rgb();
+                    format!("{} [{}]", item.display_name, item.rarity.label())
+                }
+            };
+            (i, label)
+        })
+        .collect();
+
+    let equipped: Vec<(ItemSlot, String)> = ItemSlot::equipment_slots()
+        .iter()
+        .map(|&slot| {
+            let label = gs
+                .get_equipped(slot)
+                .map(|i| format!("{} ({})", i.display_name, i.rarity.label()))
+                .unwrap_or_else(|| "—".to_string());
+            (slot, label)
+        })
+        .collect();
+
+    rsx! {
+        div {
+            style: "display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden;outline:none;",
+            tabindex: "0",
+            autofocus: true,
+            onmounted: move |evt| {
+                // Focus automatique pour capturer les touches clavier
+                spawn(async move {
+                    tokio::time::sleep(Duration::from_millis(50)).await;
+                    let _ = evt.set_focus(true);
+                });
+            },
+            onkeydown: move |evt| {
+                let key = evt.key().to_string();
+                let mut keys = held_keys.write();
+                // Joueur 1 : ZQSD + WASD + flèches
+                match key.as_str() {
+                    "w" | "W" | "ArrowUp" | "z" | "Z" => keys.up = true,
+                    "a" | "A" | "ArrowLeft" | "q" | "Q" => keys.left = true,
+                    "s" | "S" | "ArrowDown" => keys.down = true,
+                    "d" | "D" | "ArrowRight" => keys.right = true,
+                    // Joueur 2 : IJKL
+                    "i" | "I" => keys.up2 = true,
+                    "j" | "J" => keys.left2 = true,
+                    "k" | "K" => keys.down2 = true,
+                    "l" | "L" => keys.right2 = true,
+                    _ => {}
+                }
+            },
+            onkeyup: move |evt| {
+                let key = evt.key().to_string();
+                let mut keys = held_keys.write();
+                match key.as_str() {
+                    "w" | "W" | "ArrowUp" | "z" | "Z" => keys.up = false,
+                    "a" | "A" | "ArrowLeft" | "q" | "Q" => keys.left = false,
+                    "s" | "S" | "ArrowDown" => keys.down = false,
+                    "d" | "D" | "ArrowRight" => keys.right = false,
+                    "i" | "I" => keys.up2 = false,
+                    "j" | "J" => keys.left2 = false,
+                    "k" | "K" => keys.down2 = false,
+                    "l" | "L" => keys.right2 = false,
+                    _ => {}
+                }
+            },
+
+            // ═══ HEADER : infos de run ═══
+            header {
+                style: "display:flex;align-items:center;justify-content:space-between;padding:6px 16px;background:#1b2838;border-bottom:1px solid #2a3f5f;min-height:36px;flex-shrink:0;",
+                div {
+                    style: "display:flex;align-items:center;gap:12px;",
+                    button {
+                        style: "padding:4px 12px;background:#232f3e;color:#8f98a0;border:1px solid #2a3f5f;border-radius:3px;cursor:pointer;font-size:12px;",
+                        onclick: move |_| {
+                            game_state.set(None);
+                            screen.set(Screen::MainMenu);
+                        },
+                        "← Menu"
                     }
-                    let can_expert = state.gold >= EXPERT_IDENTIFY_COST_GOLD;
-                    if ui
-                        .add_enabled(can_expert, egui::Button::new("Par un expert (20 or)"))
-                        .clicked()
+                    span { style: "font-size:15px;color:#1a9fff;font-weight:600;", "Lord of the Castle" }
+                }
+                div {
+                    style: "display:flex;gap:16px;font-size:12px;align-items:center;",
+                    span { style: "color:#8f98a0;",
+                        "Phase : "
+                        span { style: "color:#c6d4df;font-weight:600;", "{phase_label}" }
+                    }
+                    span { style: "color:#8f98a0;",
+                        "Vague "
+                        span { style: "color:#c6d4df;", "{wave}" }
+                    }
+                    if phase == GamePhase::Battle {
+                        span { style: "color:#8f98a0;",
+                            "Ennemis "
+                            span { style: "color:#ff6644;", "{enemies_alive}" }
+                            span { style: "color:#555;", "/{spawn_qty}" }
+                        }
+                    }
+                    span { style: "color:#8f98a0;",
+                        "Or "
+                        span { style: "color:#ffcc00;font-weight:600;", "{gold}" }
+                    }
+                    span { style: "color:#8f98a0;",
+                        "Niv "
+                        span { style: "color:#c6d4df;", "{level}" }
+                    }
+                    span { style: "color:#8f98a0;",
+                        "Tours "
+                        span { style: "color:#c6d4df;", "{towers_count}" }
+                    }
+                    span { style: "color:#8f98a0;",
+                        "Troupes "
+                        span { style: "color:#c6d4df;", "{troops_count}/{max_troops}" }
+                    }
+                }
+            }
+
+            // ═══ BARRE DE BOUTONS + XP ═══
+            div {
+                style: "display:flex;align-items:center;justify-content:space-between;padding:4px 16px;background:#1e2a3a;border-bottom:1px solid #2a3f5f;min-height:30px;flex-shrink:0;gap:8px;",
+                // Boutons panneaux
+                div {
+                    style: "display:flex;gap:4px;",
+                    { panel_button("Stats", Panel::Stats, active_panel, skill_pts == 0 && stat_pts == 0) }
+                    { panel_button("Skills", Panel::Skills, active_panel, skill_pts == 0) }
+                    { panel_button("Inventaire", Panel::Inventory, active_panel, inv_count == 0) }
+                    // Bouton dev mode
                     {
-                        do_identify_expert = true;
+                        let dev_bg = if dev_mode() { "#3a2f1e" } else { "#232f3e" };
+                        rsx! {
+                            button {
+                                style: "padding:3px 8px;background:{dev_bg};color:#8f98a0;border:1px solid #2a3f5f;border-radius:3px;cursor:pointer;font-size:11px;",
+                                onclick: move |_| dev_mode.set(!dev_mode()),
+                                "DEV"
+                            }
+                        }
                     }
-                    if ui.button("Annulé").clicked() {
-                        close_window = true;
+                }
+                // Barre XP
+                div {
+                    style: "flex:1;display:flex;align-items:center;gap:8px;max-width:400px;",
+                    div {
+                        style: "flex:1;height:10px;background:#232f3e;border-radius:5px;overflow:hidden;",
+                        div {
+                            style: "width:{xp_pct:.1}%;height:100%;background:linear-gradient(90deg,#1a6fff,#1a9fff);transition:width 0.2s;",
+                        }
                     }
-                });
-            } else {
-                ui.add_space(4.0);
-                ui.label("Identifiable en phase Préparation.");
-                if ui.button("Fermer").clicked() {
-                    close_window = true;
+                    span { style: "font-size:11px;color:#8f98a0;white-space:nowrap;", "XP {xp}/{xp_needed}" }
+                    if skill_pts > 0 {
+                        span { style: "font-size:11px;color:#ffcc00;", "🔸{skill_pts} pts comp." }
+                    }
+                    if stat_pts > 0 {
+                        span { style: "font-size:11px;color:#44ccff;", "🔹{stat_pts} pts stat" }
+                    }
                 }
             }
-        }
-        InventoryEntry::Identified(item) => {
-            let (r, g, b) = item.rarity.color_rgb();
-            let name = item.display_name.clone();
-            let effects = item.effects_text();
-            let price = item.sell_price();
-            let slot_label = item.slot.label();
-            let rarity_label = item.rarity.label();
-            ui.heading(egui::RichText::new(name).color(egui::Color32::from_rgb(r, g, b)));
-            ui.label(format!("{slot_label} — {rarity_label}"));
-            ui.add_space(4.0);
-            ui.label("Effets :");
-            ui.label(effects);
-            ui.add_space(4.0);
-            ui.horizontal(|ui| {
-                ui.label(format!("Prix de vente : {price} or"));
-                if ui.button("Vendre").clicked() {
-                    do_sell = true;
-                }
-            });
-            let can_equip = state.can_equip_from_inventory(slot_idx);
-            if ui.add_enabled(can_equip, egui::Button::new("Équiper")).clicked() {
-                do_equip = true;
-            }
-            if ui.button("Fermer").clicked() {
-                close_window = true;
-            }
-        }
-    }
 
-    if do_identify_self {
-        if let Some(ref mut state) = app.game {
-            state.identify_self(slot_idx);
-        }
-        app.selected_inventory_slot = None;
-    } else if do_identify_expert {
-        if let Some(ref mut state) = app.game {
-            state.identify_expert(slot_idx);
-        }
-        app.selected_inventory_slot = None;
-    } else if do_sell {
-        if let Some(ref mut state) = app.game {
-            state.sell_item(slot_idx);
-        }
-        app.selected_inventory_slot = None;
-    } else if do_equip {
-        if let Some(ref mut state) = app.game {
-            if state.equip_item(slot_idx) {
-                app.selected_inventory_slot = None;
+            // ═══ CORPS : zone de jeu + sidebar ═══
+            div {
+                style: "flex:1;display:flex;overflow:hidden;min-height:0;align-items:stretch;",
+
+                // Zone de jeu (centre)
+                div {
+                    style: "flex:1;display:flex;align-items:center;justify-content:center;background:#0a0e14;position:relative;overflow:hidden;",
+
+                    // Surface de jeu (aspect-ratio 1:1, centrée)
+                    div {
+                        style: "position:relative;aspect-ratio:1;height:100%;max-width:100%;background:#0d1117;border:1px solid #1a2233;overflow:hidden;",
+                        onmousemove: move |evt| {
+                            // Obtenir les coordonnées du curseur relatives à l'élément
+                            let coords = evt.element_coordinates();
+                            let cursor_px_x = coords.x as f32;
+                            let cursor_px_y = coords.y as f32;
+                            
+                            // L'élément est carré (aspect-ratio:1)
+                            
+                            // Estimer la taille de l'élément (on suppose qu'il fait environ la hauteur de la fenêtre moins les barres)
+                            // Pour simplifier, on utilise la position maximale du curseur observée
+                            // La surface de jeu fait 800x800 unités
+                            
+                            // On suppose que l'élément fait environ 600px de côté (ajuster si nécessaire)
+                            let elem_size = 600.0f32; // Taille approximative en pixels
+                            
+                            // Convertir en coordonnées monde (0-800)
+                            let cursor_world_x = (cursor_px_x / elem_size) * SURFACE;
+                            let cursor_world_y = (cursor_px_y / elem_size) * SURFACE;
+                            
+                            // Stocker pour la boucle de jeu (auto-attaque)
+                            set_cursor_world(cursor_world_x, cursor_world_y);
+                            
+                            // Calculer l'angle pour le cône visuel
+                            if let Some(gs) = game_state.read().as_ref() {
+                                let px = gs.player.x;
+                                let py = gs.player.y;
+                                
+                                let dx = cursor_world_x - px;
+                                let dy = cursor_world_y - py;
+                                // atan2: 0°=droite, 90°=bas (Y vers le bas sur écran)
+                                // CSS rotate: 0°=haut, 90°=droite
+                                // Pour pointer vers droite (atan2=0), on veut rotate(90)
+                                // Donc: css_angle = atan2_angle + 90
+                                let angle_rad = dy.atan2(dx);
+                                let angle_deg = angle_rad.to_degrees() + 90.0;
+                                
+                                cursor_angle.set(angle_deg);
+                            }
+                        },
+
+                        // ─ Grille de construction RTS ─
+                        if build_mode() && phase == GamePhase::Preparation {
+                            for (ci, cj, can_build, wx, wy) in grid_cells.iter() {
+                                {
+                                    let ci_copy = *ci;
+                                    let cj_copy = *cj;
+                                    let can_build_copy = *can_build;
+                                    let bg_color = if can_build_copy { 
+                                        "rgba(68, 204, 68, 0.3)" 
+                                    } else { 
+                                        "rgba(204, 68, 68, 0.2)" 
+                                    };
+                                    let border_color = if can_build_copy { 
+                                        "rgba(68, 204, 68, 0.6)" 
+                                    } else { 
+                                        "rgba(204, 68, 68, 0.4)" 
+                                    };
+                                    let hover_style = if can_build_copy {
+                                        "cursor:pointer;"
+                                    } else {
+                                        "cursor:not-allowed;"
+                                    };
+                                    rsx! {
+                                        div {
+                                            style: "position:absolute;left:{pct(*wx):.2}%;top:{pct(*wy):.2}%;width:{pct(cell_size_world):.2}%;height:{pct(cell_size_world):.2}%;background:{bg_color};border:1px solid {border_color};transform:translate(-50%,-50%);{hover_style}z-index:1;",
+                                            onclick: move |_| {
+                                                if can_build_copy {
+                                                    if let Some(gs) = game_state.write().as_mut() {
+                                                        if gs.gold >= TOWER_BASE_COST_GOLD {
+                                                            gs.build_tower_at_cell(ci_copy, cj_copy);
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // ─ Loot au sol ─
+                        for s in loot_styles.iter() {
+                            div { style: "{s}" }
+                        }
+
+                        // ─ Château ─
+                        div { style: "{castle_ent_style}" }
+                        div {
+                            style: "{castle_hp_outer_s}",
+                            div { style: "{castle_hp_fill_s}" }
+                        }
+
+                        // ─ Tours ─
+                        for (te, to, tf) in tower_styles.iter() {
+                            div { style: "{te}" }
+                            div {
+                                style: "{to}",
+                                div { style: "{tf}" }
+                            }
+                        }
+
+                        // ─ Troupes ─
+                        for s in troop_styles.iter() {
+                            div { style: "{s}" }
+                        }
+
+                        // ─ Ennemis ─
+                        for (ent_s, hp_opt) in enemy_styles.iter() {
+                            div { style: "{ent_s}" }
+                            if let Some((ho, hf)) = hp_opt {
+                                div {
+                                    style: "{ho}",
+                                    div { style: "{hf}" }
+                                }
+                            }
+                        }
+
+                        // ─ Joueur secondaire ─
+                        if let Some(ref ss) = sec_style {
+                            div { style: "{ss}" }
+                        }
+
+                        // ─ Cône d'attaque joueur ─
+                        if let Some(ref cone_style) = attack_cone_style {
+                            div { style: "{cone_style}" }
+                        }
+
+                        // ─ Joueur ─
+                        div { style: "{player_style}" }
+
+                        // ─ Projectiles tours ─
+                        for s in proj_styles.iter() {
+                            div { style: "{s}" }
+                        }
+
+                        // ─ Projectiles secondaires ─
+                        for s in sec_proj_styles.iter() {
+                            div { style: "{s}" }
+                        }
+
+                        // Légende (coin bas gauche)
+                        div {
+                            style: "position:absolute;bottom:4px;left:4px;font-size:9px;color:#3a4555;pointer-events:none;",
+                            "WASD : déplacement • IJKL : joueur 2"
+                        }
+
+                        // Notification "cliquer sur la zone" (vagues 1,2,3)
+                        if show_click_hint() {
+                            div {
+                                style: "position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+                                        background:rgba(0,0,0,0.8);color:#ffd700;padding:16px 32px;
+                                        border-radius:12px;font-size:18px;font-weight:bold;
+                                        text-align:center;pointer-events:none;z-index:1000;
+                                        animation:fadeInOut 3s ease-in-out;",
+                                "Cliquez sur la zone de combat pour activer les contrôles !"
+                            }
+                        }
+                    }
+                }
+
+                // ═══ SIDEBAR (Préparation seulement) ═══
+                if phase == GamePhase::Preparation {
+                    div {
+                        style: "width:200px;min-height:600px;background:#1b2838;border-left:1px solid #2a3f5f;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;padding:8px;gap:6px;",
+
+                        h3 { style: "font-size:13px;color:#1a9fff;margin-bottom:4px;text-align:center;", "Préparation" }
+
+                        // Construction tour - Mode RTS
+                        div {
+                            style: "background:#232f3e;border-radius:4px;padding:8px;",
+                            p { style: "font-size:12px;color:#c6d4df;font-weight:600;margin-bottom:4px;", "🏗 Tour de base" }
+                            p { style: "font-size:10px;color:#8f98a0;margin-bottom:6px;", "PV 100 • Portée 300px • Dmg 4" }
+                            p { style: "font-size:10px;color:#ffcc00;margin-bottom:6px;", "Coût : {TOWER_BASE_COST_GOLD} or" }
+                            
+                            // Bouton pour activer/désactiver le mode construction
+                            {
+                                let is_build_mode = build_mode();
+                                let btn_bg = if is_build_mode { "#3a5a2a" } else { "#2a4a2a" };
+                                let btn_border = if is_build_mode { "#5a8a3a" } else { "#3a5a3a" };
+                                let btn_text = if is_build_mode { "🔨 Mode construction ACTIF" } else { "🏗 Placer une tour" };
+                                rsx! {
+                                    button {
+                                        style: "width:100%;padding:5px;background:{btn_bg};color:#88cc88;border:1px solid {btn_border};border-radius:3px;cursor:pointer;font-size:11px;margin-bottom:4px;",
+                                        disabled: gold < TOWER_BASE_COST_GOLD,
+                                        onclick: move |_| {
+                                            build_mode.set(!build_mode());
+                                        },
+                                        "{btn_text}"
+                                    }
+                                }
+                            }
+                            
+                            // Bouton construction rapide (trouve automatiquement une place)
+                            button {
+                                style: "width:100%;padding:4px;background:#1a3a1a;color:#668866;border:1px solid #2a4a2a;border-radius:3px;cursor:pointer;font-size:10px;",
+                                disabled: gold < TOWER_BASE_COST_GOLD,
+                                onclick: move |_| {
+                                    if let Some(gs) = game_state.write().as_mut() {
+                                        if let Some((ci, cj)) = find_build_cell(gs) {
+                                            gs.build_tower_at_cell(ci, cj);
+                                        }
+                                    }
+                                },
+                                "Auto-placer"
+                            }
+                            
+                            if build_mode() {
+                                p { 
+                                    style: "font-size:9px;color:#88cc88;margin-top:6px;text-align:center;",
+                                    "Cliquez sur une case verte pour construire"
+                                }
+                            }
+                        }
+
+                        // Recrutement troupe
+                        div {
+                            style: "background:#232f3e;border-radius:4px;padding:8px;",
+                            p { style: "font-size:12px;color:#c6d4df;font-weight:600;margin-bottom:4px;", "⚔ Milicien" }
+                            p { style: "font-size:10px;color:#8f98a0;margin-bottom:6px;",
+                                "PV 10 • Att 2 • Portée 15px"
+                            }
+                            p { style: "font-size:10px;color:#8f98a0;margin-bottom:6px;",
+                                "Limite : Charisme ({max_troops} max)"
+                            }
+                            button {
+                                style: "width:100%;padding:5px;background:#2a3a4a;color:#88aacc;border:1px solid #3a4a5a;border-radius:3px;cursor:pointer;font-size:11px;",
+                                disabled: troops_count >= max_troops,
+                                onclick: move |_| {
+                                    if let Some(gs) = game_state.write().as_mut() {
+                                        gs.recruit_troop(TroopKind::Milicien);
+                                    }
+                                },
+                                "Recruter"
+                            }
+                        }
+
+                        // Joueur 2
+                        div {
+                            style: "background:#232f3e;border-radius:4px;padding:8px;",
+                            p { style: "font-size:12px;color:#c6d4df;font-weight:600;margin-bottom:4px;", "👥 Joueur 2" }
+                            button {
+                                style: "width:100%;padding:4px;background:#2a3a4a;color:#88cccc;border:1px solid #3a4a5a;border-radius:3px;cursor:pointer;font-size:10px;margin-bottom:3px;",
+                                onclick: move |_| {
+                                    if let Some(gs) = game_state.write().as_mut() {
+                                        gs.spawn_secondary_tombilol();
+                                    }
+                                },
+                                "Tombilol (CàC 360°)"
+                            }
+                            button {
+                                style: "width:100%;padding:4px;background:#2a3a4a;color:#88cccc;border:1px solid #3a4a5a;border-radius:3px;cursor:pointer;font-size:10px;margin-bottom:3px;",
+                                onclick: move |_| {
+                                    if let Some(gs) = game_state.write().as_mut() {
+                                        gs.spawn_secondary_tal_ratchou();
+                                    }
+                                },
+                                "Tal Ratchou (proj. homing)"
+                            }
+                            button {
+                                style: "width:100%;padding:4px;background:#2a3a4a;color:#88cccc;border:1px solid #3a4a5a;border-radius:3px;cursor:pointer;font-size:10px;",
+                                onclick: move |_| {
+                                    if let Some(gs) = game_state.write().as_mut() {
+                                        gs.spawn_secondary_sergent_garcia();
+                                    }
+                                },
+                                "Sgt Garcia (miliciens)"
+                            }
+                        }
+
+                        // Dev mode actions
+                        if dev_mode() {
+                            div {
+                                style: "background:#3a2f1e;border-radius:4px;padding:8px;",
+                                p { style: "font-size:12px;color:#ffaa44;font-weight:600;margin-bottom:4px;", "🔧 Dev" }
+                                button {
+                                    style: "width:100%;padding:4px;background:#4a3a2a;color:#ccaa88;border:1px solid #5a4a3a;border-radius:3px;cursor:pointer;font-size:10px;margin-bottom:3px;",
+                                    onclick: move |_| {
+                                        if let Some(gs) = game_state.write().as_mut() {
+                                            gs.dev_spawn_50_normal_enemies_random();
+                                        }
+                                    },
+                                    "+50 ennemis"
+                                }
+                                button {
+                                    style: "width:100%;padding:4px;background:#4a3a2a;color:#ccaa88;border:1px solid #5a4a3a;border-radius:3px;cursor:pointer;font-size:10px;margin-bottom:3px;",
+                                    onclick: move |_| {
+                                        if let Some(gs) = game_state.write().as_mut() {
+                                            gs.dev_give_level_up();
+                                        }
+                                    },
+                                    "+1 Niveau"
+                                }
+                                button {
+                                    style: "width:100%;padding:4px;background:#4a3a2a;color:#ccaa88;border:1px solid #5a4a3a;border-radius:3px;cursor:pointer;font-size:10px;margin-bottom:3px;",
+                                    onclick: move |_| {
+                                        if let Some(gs) = game_state.write().as_mut() {
+                                            gs.gold += 500;
+                                        }
+                                    },
+                                    "+500 or"
+                                }
+                                button {
+                                    style: "width:100%;padding:4px;background:#4a3a2a;color:#ccaa88;border:1px solid #5a4a3a;border-radius:3px;cursor:pointer;font-size:10px;margin-bottom:3px;",
+                                    onclick: move |_| {
+                                        if let Some(gs) = game_state.write().as_mut() {
+                                            gs.secondary_give_level_up();
+                                        }
+                                    },
+                                    "J2 +1 Niveau"
+                                }
+                                button {
+                                    style: "width:100%;padding:4px;background:#4a3a2a;color:#ccaa88;border:1px solid #5a4a3a;border-radius:3px;cursor:pointer;font-size:10px;",
+                                    onclick: move |_| {
+                                        if let Some(gs) = game_state.write().as_mut() {
+                                            gs.refresh_merchant_pools();
+                                        }
+                                    },
+                                    "Reroll marchand"
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ═══ SIDEBAR (Battle - infos de combat) ═══
+                if phase == GamePhase::Battle {
+                    div {
+                        style: "width:200px;min-height:600px;background:#1b2838;border-left:1px solid #2a3f5f;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;padding:8px;gap:6px;",
+
+                        h3 { style: "font-size:13px;color:#ff6644;margin-bottom:4px;text-align:center;", "⚔ Combat" }
+
+                        // Infos vague
+                        div {
+                            style: "background:#232f3e;border-radius:4px;padding:8px;",
+                            p { style: "font-size:12px;color:#c6d4df;font-weight:600;margin-bottom:4px;", "Vague {wave}" }
+                            p { style: "font-size:11px;color:#8f98a0;margin-bottom:4px;", "Ennemis restants : {enemies_alive}" }
+                            p { style: "font-size:11px;color:#8f98a0;", "Total à spawner : {spawn_qty}" }
+                        }
+
+                        // Château
+                        div {
+                            style: "background:#232f3e;border-radius:4px;padding:8px;",
+                            p { style: "font-size:12px;color:#c6d4df;font-weight:600;margin-bottom:4px;", "🏰 Château" }
+                            {
+                                let castle_pct_sidebar = if castle_hp_max > 0 { castle_hp as f32 / castle_hp_max as f32 * 100.0 } else { 0.0 };
+                                rsx! {
+                                    div {
+                                        style: "width:100%;height:8px;background:#332222;border-radius:4px;overflow:hidden;margin-bottom:4px;",
+                                        div {
+                                            style: "width:{castle_pct_sidebar:.1}%;height:100%;background:#667788;",
+                                        }
+                                    }
+                                    p { style: "font-size:10px;color:#8f98a0;text-align:center;", "{castle_hp}/{castle_hp_max} PV" }
+                                }
+                            }
+                        }
+
+                        // Victoire / Défaite
+                        if is_wave_won {
+                            div {
+                                style: "background:#2a4a2a;border:1px solid #4a8a4a;border-radius:4px;padding:12px;text-align:center;",
+                                p { style: "font-size:14px;color:#88ff88;font-weight:700;", "✓ VICTOIRE !" }
+                                p { style: "font-size:11px;color:#aaffaa;margin-top:4px;", "Vague {wave} terminée" }
+                            }
+                        }
+                        if is_game_over {
+                            div {
+                                style: "background:#4a2a2a;border:1px solid #8a4a4a;border-radius:4px;padding:12px;text-align:center;",
+                                p { style: "font-size:14px;color:#ff8888;font-weight:700;", "✗ DÉFAITE" }
+                                p { style: "font-size:11px;color:#ffaaaa;margin-top:4px;", "Le château est détruit" }
+                            }
+                        }
+
+                        // Tours actives
+                        div {
+                            style: "background:#232f3e;border-radius:4px;padding:8px;",
+                            p { style: "font-size:12px;color:#c6d4df;font-weight:600;margin-bottom:4px;", "🗼 Tours : {towers_count}" }
+                            p { style: "font-size:10px;color:#8f98a0;", "Défense automatique active" }
+                        }
+
+                        // Troupes
+                        if troops_count > 0 {
+                            div {
+                                style: "background:#232f3e;border-radius:4px;padding:8px;",
+                                p { style: "font-size:12px;color:#c6d4df;font-weight:600;margin-bottom:4px;", "⚔ Troupes : {troops_count}" }
+                                p { style: "font-size:10px;color:#8f98a0;", "Combat en cours..." }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ═══ FOOTER ═══
+            footer {
+                style: "display:flex;align-items:center;justify-content:space-between;padding:5px 16px;background:#1b2838;border-top:1px solid #2a3f5f;min-height:40px;flex-shrink:0;gap:8px;",
+
+                // Gauche : PV / Mana / Armure / Att
+                div {
+                    style: "display:flex;align-items:center;gap:10px;flex-wrap:nowrap;",
+                    // Barre PV
+                    {
+                        let footer_hp_pct = if player_hp_max > 0 { player_hp as f32 / player_hp_max as f32 * 100.0 } else { 0.0 };
+                        let footer_hp_color = if player_dead { "#666" } else if player_hp as f32 / player_hp_max.max(1) as f32 > 0.5 { "#cc4444" } else { "#ff2222" };
+                        rsx! {
+                            div {
+                                style: "display:flex;align-items:center;gap:4px;",
+                                span { style: "font-size:11px;color:#cc4444;", "♥" }
+                                div {
+                                    style: "width:100px;height:8px;background:#332222;border-radius:4px;overflow:hidden;",
+                                    div {
+                                        style: "width:{footer_hp_pct:.1}%;height:100%;background:{footer_hp_color};transition:width 0.1s;",
+                                    }
+                                }
+                                span { style: "font-size:11px;color:#c6d4df;", "{player_hp}/{player_hp_max}" }
+                            }
+                        }
+                    }
+                    span { style: "font-size:11px;color:#8f98a0;", "🛡{armor}" }
+                    span { style: "font-size:11px;color:#8f98a0;", "⚔{atk_dmg}" }
+                    if player_dead {
+                        span { style: "font-size:11px;color:#ff4444;font-weight:600;", "💀 MORT" }
+                    }
+                }
+
+                // Centre : actions (lancer vague, fin de vague)
+                div {
+                    style: "display:flex;align-items:center;gap:6px;",
+                    if phase == GamePhase::Preparation {
+                        button {
+                            style: "padding:6px 20px;background:linear-gradient(135deg,#1a9fff 0%,#1477cc 100%);color:white;border:none;border-radius:4px;cursor:pointer;font-weight:700;font-size:13px;box-shadow:0 2px 8px rgba(26,159,255,0.3);",
+                            onclick: move |_| {
+                                if let Some(g) = game_state.write().as_mut() {
+                                    g.start_battle_phase();
+                                }
+                            },
+                            "⚔ Lancer la vague {wave}"
+                        }
+                    }
+                    if is_wave_won {
+                        button {
+                            style: "padding:6px 20px;background:linear-gradient(135deg,#5ba32b 0%,#3d8c40 100%);color:white;border:none;border-radius:4px;cursor:pointer;font-weight:700;font-size:13px;box-shadow:0 2px 8px rgba(91,163,43,0.3);",
+                            onclick: move |_| {
+                                if let Some(g) = game_state.write().as_mut() {
+                                    g.start_preparation_phase();
+                                }
+                                // Auto-save après fin de combat
+                                if let Some(slot) = active_slot() {
+                                    let path = base_path.read().clone();
+                                    let state = game_state.read().clone();
+                                    if let Some(st) = state {
+                                        spawn(async move {
+                                            let _ = tokio::task::spawn_blocking(move || {
+                                                let db = LordOfTheCastleDb::open(path.join("lord_of_the_castle.db"))?;
+                                                db.slot_write(slot, &st)
+                                            }).await;
+                                        });
+                                    }
+                                }
+                            },
+                            "✓ Fin de vague → Préparation"
+                        }
+                    }
+                }
+
+                // Droite-centre : sauvegarde (3 slots, slot actif en surbrillance)
+                div {
+                    style: "display:flex;align-items:center;gap:3px;",
+                    span { style: "font-size:10px;color:#556677;margin-right:2px;", "💾" }
+                    for slot_id in [1u8, 2, 3] {
+                        {
+                            let path_clone = base_path.read().clone();
+                            let is_active = active_slot() == Some(slot_id);
+                            let bg = if is_active { "#2a4a3a" } else { "#232f3e" };
+                            let border = if is_active { "#4a8a5a" } else { "#2a3f5f" };
+                            let color = if is_active { "#88cc88" } else { "#8f98a0" };
+                            rsx! {
+                                button {
+                                    style: "padding:3px 8px;background:{bg};color:{color};border:1px solid {border};border-radius:3px;cursor:pointer;font-size:10px;",
+                                    onclick: move |_| {
+                                        let path = path_clone.clone();
+                                        let state = game_state.read().clone();
+                                        if let Some(st) = state {
+                                            active_slot.set(Some(slot_id));
+                                            spawn(async move {
+                                                let _ = tokio::task::spawn_blocking(move || {
+                                                    let db = LordOfTheCastleDb::open(path.join("lord_of_the_castle.db"))?;
+                                                    db.slot_write(slot_id, &st)
+                                                }).await;
+                                            });
+                                        }
+                                    },
+                                    "{slot_id}"
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Droite : infos château
+                {
+                    let castle_pct = if castle_hp_max > 0 { castle_hp as f32 / castle_hp_max as f32 * 100.0 } else { 0.0 };
+                    rsx! {
+                        div {
+                            style: "display:flex;align-items:center;gap:6px;",
+                            span { style: "font-size:11px;color:#8f98a0;", "🏰" }
+                            div {
+                                style: "width:60px;height:8px;background:#333;border-radius:4px;overflow:hidden;",
+                                div {
+                                    style: "width:{castle_pct:.1}%;height:100%;background:#667788;",
+                                }
+                            }
+                            span { style: "font-size:11px;color:#c6d4df;", "{castle_hp}/{castle_hp_max}" }
+                        }
+                    }
+                }
+            }
+
+            // ═══ PANNEAU OVERLAY ═══
+            if let Some(panel) = active_panel() {
+                div {
+                    style: "position:absolute;top:68px;left:50%;transform:translateX(-50%);width:520px;max-height:calc(100vh - 150px);background:#1b2838;border:1px solid #2a3f5f;border-radius:6px;box-shadow:0 8px 32px rgba(0,0,0,0.6);z-index:50;display:flex;flex-direction:column;overflow:hidden;",
+
+                    // Barre titre
+                    div {
+                        style: "display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#232f3e;border-bottom:1px solid #2a3f5f;flex-shrink:0;",
+                        span {
+                            style: "font-size:14px;font-weight:600;color:#1a9fff;",
+                            { match panel {
+                                Panel::Stats => "Statistiques",
+                                Panel::Skills => "Compétences Guerrier",
+                                Panel::Inventory => "Inventaire",
+                            } }
+                        }
+                        button {
+                            style: "padding:2px 8px;background:#3a2222;color:#cc6666;border:1px solid #4a3333;border-radius:3px;cursor:pointer;font-size:12px;",
+                            onclick: move |_| active_panel.set(None),
+                            "✕"
+                        }
+                    }
+
+                    // Contenu du panneau
+                    div {
+                        style: "flex:1;overflow-y:auto;padding:10px;",
+                        { match panel {
+                            Panel::Stats => rsx! {
+                                StatsContent {
+                                    game_state,
+                                    base_stats: base_stats.clone(),
+                                    eff_stats: stats.clone(),
+                                    stat_pts,
+                                    player_hp, player_hp_max, armor, atk_dmg,
+                                    castle_hp, castle_hp_max,
+                                    enemies_killed, bosses_killed, gold_total, max_wave,
+                                }
+                            },
+                            Panel::Skills => rsx! {
+                                SkillsContent {
+                                    game_state,
+                                    skill_ranks: skill_ranks.clone(),
+                                    skill_pts,
+                                }
+                            },
+                            Panel::Inventory => rsx! {
+                                InventoryContent {
+                                    game_state,
+                                    inventory: inventory.clone(),
+                                    equipped: equipped.clone(),
+                                    gold,
+                                }
+                            },
+                        } }
+                    }
+                }
+            }
+
+            // ═══ OVERLAY GAME OVER ═══
+            if is_game_over {
+                div {
+                    style: "position:absolute;inset:0;background:rgba(0,0,0,0.8);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;",
+                    h1 { style: "font-size:36px;color:#cc2222;margin-bottom:12px;", "GAME OVER" }
+                    p { style: "font-size:16px;color:#c6d4df;margin-bottom:8px;",
+                        "Le château a été détruit à la vague {wave}."
+                    }
+                    p { style: "font-size:14px;color:#8f98a0;margin-bottom:24px;",
+                        "Ennemis tués : {enemies_killed} • Boss : {bosses_killed} • Or total : {gold_total}"
+                    }
+                    button {
+                        style: "padding:12px 36px;background:#1a9fff;color:white;border:none;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;",
+                        onclick: move |_| {
+                            game_state.set(None);
+                            screen.set(Screen::MainMenu);
+                        },
+                        "Retour au menu"
+                    }
+                }
+            }
+
+            // ═══ OVERLAY VAGUE GAGNÉE ═══
+            if is_wave_won && !is_game_over {
+                div {
+                    style: "position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#1b3828;border:2px solid #2a5a3f;border-radius:8px;padding:20px 32px;z-index:80;text-align:center;",
+                    h2 { style: "font-size:22px;color:#5ba32b;margin-bottom:8px;", "Vague {wave} terminée !" }
+                    p { style: "font-size:13px;color:#c6d4df;margin-bottom:4px;",
+                        "Ennemis tués : {enemies_killed}"
+                    }
+                    p { style: "font-size:12px;color:#8f98a0;",
+                        "Passez en préparation pour construire et recruter."
+                    }
+                }
+            }
+
+            // ═══ NOTIFICATIONS ═══
+            if !notifications.is_empty() {
+                div {
+                    style: "position:absolute;bottom:50px;right:16px;display:flex;flex-direction:column;gap:4px;z-index:60;pointer-events:none;",
+                    for notif in notifications.iter() {
+                        div {
+                            style: "padding:6px 12px;background:#2a3f1e;border:1px solid #4a5f3e;border-radius:4px;font-size:12px;color:#88cc44;",
+                            "{notif}"
+                        }
+                    }
+                }
             }
         }
-    } else if close_window {
-        app.selected_inventory_slot = None;
     }
 }
 
-/// Fenêtre détail d'un objet équipé : infos + bouton Déséquiper (grisé si inventaire plein).
-fn paint_equipment_item_detail(
-    ui: &mut egui::Ui,
-    app: &mut LordOfTheCastleApp,
-    slot: ItemSlot,
-) {
-    let Some(ref mut state) = app.game else {
-        app.selected_equipment_slot = None;
-        return;
-    };
-    let Some(item) = state.get_equipped(slot).cloned() else {
-        app.selected_equipment_slot = None;
-        return;
-    };
-    let (r, g, b) = item.rarity.color_rgb();
-    ui.heading(egui::RichText::new(item.display_name.clone()).color(egui::Color32::from_rgb(r, g, b)));
-    ui.label(format!("{} — {}", item.slot.label(), item.rarity.label()));
-    ui.add_space(4.0);
-    ui.label("Effets :");
-    ui.label(item.effects_text());
-    ui.add_space(8.0);
-    let can_unequip = state.inventory.len() < INVENTORY_MAX_SLOTS;
-    if ui.add_enabled(can_unequip, egui::Button::new("Déséquiper")).clicked()
-        && state.unequip_to_inventory(slot) {
-            app.selected_equipment_slot = None;
+/// Bouton pour ouvrir/fermer un panneau.
+fn panel_button(label: &str, panel: Panel, mut active: Signal<Option<Panel>>, dim: bool) -> Element {
+    let is_active = active() == Some(panel);
+    let bg = if is_active { "#2a4a6a" } else { "#232f3e" };
+    let color = if dim && !is_active { "#556677" } else if is_active { "#1a9fff" } else { "#c6d4df" };
+    let fw = if is_active { "600" } else { "400" };
+    rsx! {
+        button {
+            style: "padding:3px 10px;background:{bg};color:{color};border:1px solid #2a3f5f;border-radius:3px;cursor:pointer;font-size:11px;font-weight:{fw};",
+            onclick: move |_| {
+                if active() == Some(panel) {
+                    active.set(None);
+                } else {
+                    active.set(Some(panel));
+                }
+            },
+            "{label}"
         }
-    if ui.button("Fermer").clicked() {
-        app.selected_equipment_slot = None;
     }
 }
 
-impl App for LordOfTheCastleApp {
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        if self.game.is_some() {
-            self.drain_level_up_toasts();
-        }
-        // Input clavier : si joueur 2 présent, J1 = OKLM (O=haut, K=gauche, L=bas, M=droite), J2 = ZQSD ; sinon J1 = ZQSD + flèches
-        let input = ctx.input(Clone::clone);
-        use egui::Key;
-        let two_players = self.game.as_ref().is_some_and(|s| s.secondary_player.is_some());
-        let (up1, down1, left1, right1) = if two_players {
-            (input.key_down(Key::O), input.key_down(Key::L), input.key_down(Key::K), input.key_down(Key::M))
-        } else {
-            (input.key_down(Key::Z) || input.key_down(Key::W) || input.key_down(Key::ArrowUp),
-             input.key_down(Key::S) || input.key_down(Key::ArrowDown),
-             input.key_down(Key::Q) || input.key_down(Key::A) || input.key_down(Key::ArrowLeft),
-             input.key_down(Key::D) || input.key_down(Key::ArrowRight))
-        };
-        self.keys[0] = up1 && !left1 && !right1;
-        self.keys[1] = up1 && right1;
-        self.keys[2] = right1 && !up1 && !down1;
-        self.keys[3] = down1 && right1;
-        self.keys[4] = down1 && !left1 && !right1;
-        self.keys[5] = down1 && left1;
-        self.keys[6] = left1 && !up1 && !down1;
-        self.keys[7] = up1 && left1;
-        let (up2, down2, left2, right2) = (input.key_down(Key::Z), input.key_down(Key::S), input.key_down(Key::Q), input.key_down(Key::D));
-        self.keys_secondary[0] = up2 && !left2 && !right2;
-        self.keys_secondary[1] = up2 && right2;
-        self.keys_secondary[2] = right2 && !up2 && !down2;
-        self.keys_secondary[3] = down2 && right2;
-        self.keys_secondary[4] = down2 && !left2 && !right2;
-        self.keys_secondary[5] = down2 && left2;
-        self.keys_secondary[6] = left2 && !up2 && !down2;
-        self.keys_secondary[7] = up2 && left2;
+// ─── Contenu panneau Stats ────────────────────────────────────────────
 
-        egui::TopBottomPanel::top("lotc_top")
-            .min_height(40.0)
-            .show(ctx, |ui| {
-                ui.horizontal(|ui| {
-                    if ui.button("Player").clicked() {
-                        self.player_window_open = true;
-                    }
-                    if ui.button("Inventaire").clicked() {
-                        self.inventory_window_open = true;
-                        self.selected_inventory_slot = None;
-                    }
-                    if ui.button("Équipement").clicked() {
-                        self.equipment_window_open = true;
-                        self.selected_equipment_slot = None;
-                    }
-                    if let Some(ref mut state) = self.game {
-                        let prep_enabled = state.phase == GamePhase::Preparation;
-                        if ui.add_enabled(prep_enabled, egui::Button::new("Compétences")).clicked() && prep_enabled {
-                            self.competences_open ^= true;
-                        }
-                        if ui.add_enabled(prep_enabled, egui::Button::new("Marchand")).clicked() && prep_enabled {
-                            self.marchand_open ^= true;
-                        }
-                        if ui.add_enabled(prep_enabled, egui::Button::new("Deckard Rain")).clicked() && prep_enabled {
-                            self.expert_open ^= true;
-                        }
-                        if ui.add_enabled(prep_enabled, egui::Button::new("Construction")).clicked() && prep_enabled {
-                            self.construction_open ^= true;
-                        }
-                        if ui.add_enabled(prep_enabled, egui::Button::new("Recrutement")).clicked() && prep_enabled {
-                            self.recrutement_open ^= true;
-                        }
-                        if ui.add_enabled(prep_enabled, egui::Button::new("Joueur 2")).clicked() && prep_enabled {
-                            self.joueur2_window_open = true;
-                        }
-                        if state.phase == GamePhase::Preparation
-                            && ui.button("Lancer la vague").clicked() {
-                                if state.inventory.len() >= INVENTORY_MAX_SLOTS {
-                                    self.show_encumbered_overlay = true;
-                                } else {
-                                    state.start_battle_phase();
-                                    self.screen = Screen::Battle;
-                                }
+#[component]
+fn StatsContent(
+    game_state: Signal<Option<GameState>>,
+    base_stats: crate::character_creation::CharacterStats,
+    eff_stats: crate::character_creation::CharacterStats,
+    stat_pts: u32,
+    player_hp: i32,
+    player_hp_max: i32,
+    armor: i32,
+    atk_dmg: i32,
+    castle_hp: i32,
+    castle_hp_max: i32,
+    enemies_killed: u32,
+    bosses_killed: u32,
+    gold_total: u32,
+    max_wave: u32,
+) -> Element {
+    use crate::character_creation::Stat;
+    let stat_list: Vec<(&str, &str, i32, i32, Stat)> = vec![
+        ("For", "Force", base_stats.for_, eff_stats.for_, Stat::For),
+        ("Con", "Constitution", base_stats.con, eff_stats.con, Stat::Con),
+        ("Agi", "Agilité", base_stats.agi, eff_stats.agi, Stat::Agi),
+        ("Dex", "Dextérité", base_stats.dex, eff_stats.dex, Stat::Dex),
+        ("Int", "Intelligence", base_stats.int, eff_stats.int, Stat::Int),
+        ("Sag", "Sagesse", base_stats.sag, eff_stats.sag, Stat::Sag),
+        ("Cha", "Charisme", base_stats.cha, eff_stats.cha, Stat::Cha),
+        ("Luk", "Chance", base_stats.luk, eff_stats.luk, Stat::Luk),
+    ];
+
+    rsx! {
+        // Statistiques joueur
+        h3 { style: "font-size:13px;color:#1a9fff;margin-bottom:6px;", "Joueur" }
+        div {
+            style: "display:grid;grid-template-columns:60px 1fr 40px 40px 32px;gap:2px 8px;font-size:11px;margin-bottom:12px;",
+            span { style: "color:#8f98a0;font-weight:600;", "Stat" }
+            span { style: "color:#8f98a0;", "" }
+            span { style: "color:#8f98a0;text-align:right;", "Base" }
+            span { style: "color:#8f98a0;text-align:right;", "Eff." }
+            span { }
+            for (short, long, base, eff, stat) in stat_list.into_iter() {
+                span { style: "color:#c6d4df;font-weight:600;", "{short}" }
+                span { style: "color:#8f98a0;", "{long}" }
+                span { style: "color:#c6d4df;text-align:right;", "{base}" }
+                span { style: "color:#88ccff;text-align:right;font-weight:600;", "{eff}" }
+                if stat_pts > 0 {
+                    button {
+                        style: "padding:1px 4px;background:#2a4a3a;color:#88cc88;border:1px solid #3a5a4a;border-radius:2px;cursor:pointer;font-size:10px;",
+                        onclick: move |_| {
+                            if let Some(gs) = game_state.write().as_mut() {
+                                gs.spend_stat_point(stat);
                             }
-                        ui.label(format!("Vague {}", state.wave_number));
-                        ui.label(format!("Ennemis: {}", state.enemies.len()));
-                        let troops_count_standalone = state.troops.iter().filter(|t| t.is_active_in_squad()).count();
-                        ui.label(format!("Troupes: {} / {}", troops_count_standalone, state.max_troops()));
-                        if ui.button("Mode Dev").clicked() {
-                            self.dev_mode_window_open = true;
-                        }
-                        if ui.button("Sauvegarder").clicked() {
-                            self.save_requested = true;
-                        }
-                        if ui.button("Charger").clicked() {
-                            self.load_requested = true;
-                        }
-                        if ui.button("Tuto").clicked() {
-                            self.tutorial_window_open = true;
-                        }
-                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                            ui.label(format!("Or: {}", state.gold));
-                        });
+                        },
+                        "+"
                     }
-                });
-                if self.save_requested {
-                    self.save_requested = false;
-                    match self.do_save() {
-                        Ok(()) => self.save_load_message = Some(("Sauvegarde OK.".into(), Instant::now())),
-                        Err(e) => self.save_load_message = Some((format!("Erreur: {e}"), Instant::now())),
-                    }
+                } else {
+                    span { }
                 }
-                if self.load_requested {
-                    self.load_requested = false;
-                    match self.do_load() {
-                        Ok(()) => self.save_load_message = Some(("Partie chargée.".into(), Instant::now())),
-                        Err(e) => self.save_load_message = Some((format!("Erreur: {e}"), Instant::now())),
-                    }
-                }
-                if let Some((msg, t)) = &self.save_load_message {
-                    if t.elapsed().as_secs_f32() > 2.0 {
-                        self.save_load_message = None;
-                    } else {
-                        ui.colored_label(egui::Color32::from_rgb(120, 255, 120), msg.as_str());
-                    }
-                }
-            });
-
-        // Bandeau « PHASE DE REPOS » sous le header (visible uniquement en phase Préparation)
-        if let Some(ref state) = self.game {
-            if state.phase == GamePhase::Preparation {
-                egui::TopBottomPanel::top("lotc_phase_bandeau")
-                    .min_height(28.0)
-                    .show(ctx, |ui| {
-                        egui::Frame::new()
-                            .fill(egui::Color32::from_rgb(255, 220, 0))
-                            .inner_margin(egui::Margin::symmetric(8, 4))
-                            .show(ui, |ui| {
-                                ui.vertical_centered(|ui| {
-                                    ui.label(egui::RichText::new("PHASE DE REPOS").color(egui::Color32::BLACK).strong());
-                                });
-                            });
-                    });
             }
         }
 
-        // Fenêtre Joueur 2 (standalone)
-        if self.joueur2_window_open {
-            let mut open = true;
-            let mut should_close = false;
-            egui::Window::new("Joueur 2")
-                .open(&mut open)
-                .default_width(320.0)
-                .show(ctx, |ui| {
-                    ui.label("Spawn un personnage secondaire (2 joueurs) :");
-                    ui.add_space(6.0);
-                    if let Some(ref mut state) = self.game {
-                        if state.secondary_player.is_some() {
-                            ui.label("Un joueur secondaire est déjà présent.");
-                            if ui.button("lvlup (joueur 2)").clicked() {
-                                state.secondary_give_level_up();
-                            }
-                        } else {
-                            if ui.button("Tombilol — 30 PV, attaque 360° 30 px, 1 att/s").clicked() {
-                                state.spawn_secondary_tombilol();
-                                should_close = true;
-                            }
-                            if ui.button("Tal Ratchou — 20 PV, projectile homing 0,6/s, 200 px").clicked() {
-                                state.spawn_secondary_tal_ratchou();
-                                should_close = true;
-                            }
-                            if ui.button("Sergent Garcia — 10 PV, 6 miliciens").clicked() {
-                                state.spawn_secondary_sergent_garcia();
-                                should_close = true;
-                            }
-                        }
-                    }
-                });
-            if !open || should_close {
-                self.joueur2_window_open = false;
-            }
+        // Combat
+        h3 { style: "font-size:13px;color:#1a9fff;margin-bottom:6px;", "Combat" }
+        div {
+            style: "font-size:11px;display:grid;grid-template-columns:1fr 1fr;gap:2px 16px;margin-bottom:12px;",
+            span { style: "color:#8f98a0;", "PV" }
+            span { style: "color:#c6d4df;", "{player_hp} / {player_hp_max}" }
+            span { style: "color:#8f98a0;", "Armure" }
+            span { style: "color:#c6d4df;", "{armor}" }
+            span { style: "color:#8f98a0;", "Dégâts auto" }
+            span { style: "color:#c6d4df;", "{atk_dmg}" }
         }
 
-        // Fenêtre Tutoriel (standalone)
-        if self.tutorial_window_open {
-            let mut tab = self.tutorial_tab;
-            egui::Window::new("Tutoriel")
-                .open(&mut self.tutorial_window_open)
-                .default_size([420.0, 380.0])
-                .resizable(true)
-                .show(ctx, |ui| {
-                    ui.horizontal(|ui| {
-                        if ui.selectable_label(tab == 0, "Comment jouer").clicked() { tab = 0; }
-                        if ui.selectable_label(tab == 1, "Contrôles").clicked() { tab = 1; }
-                        if ui.selectable_label(tab == 2, "Phases").clicked() { tab = 2; }
-                        if ui.selectable_label(tab == 3, "Mécaniques").clicked() { tab = 3; }
-                    });
-                    ui.separator();
-                    egui::ScrollArea::vertical().show(ui, |ui| {
-                        match tab {
-                            0 => {
-                                ui.heading("Comment jouer");
-                                ui.add_space(6.0);
-                                ui.label("Lord of the Castle est un jeu de défense de tour et d'action. Votre objectif : protéger le Château des vagues d'ennemis.");
-                                ui.add_space(4.0);
-                                ui.label("• En phase Préparation : achetez équipement, construisez des tours, recrutez des troupes, montez en compétences.");
-                                ui.label("• Cliquez sur « Lancer la vague » pour passer en Bataille.");
-                                ui.label("• En Bataille : déplacez-vous (ZQSD), combattez les ennemis avec votre personnage et vos troupes ; les tours tirent automatiquement.");
-                                ui.label("• Ramassez l'or et l'XP au sol, identifiez les objets trouvés, puis repassez en Préparation pour la vague suivante.");
-                                ui.add_space(4.0);
-                                ui.label("Si le Château tombe à 0 PV, c'est le Game Over.");
-                            }
-                            1 => {
-                                ui.heading("Contrôles");
-                                ui.add_space(6.0);
-                                ui.label("• Déplacement : ZQSD ou flèches directionnelles (8 directions).");
-                                ui.label("• Avec un joueur 2 : le joueur 1 utilise OKLM, le joueur 2 utilise ZQSD.");
-                                ui.label("• Cliquez sur la zone de jeu pour lui donner le focus (clavier actif).");
-                                ui.label("• Header : Player, Inventaire, Équipement, Compétences, Marchand, Expert (Deckard Rain), Construction, Recrutement, Lancer la vague, Sauvegarder, Charger.");
-                                ui.label("• Ramassage : approchez-vous des orbes (or, XP) et des objets au sol (rayon ~30 px).");
-                            }
-                            2 => {
-                                ui.heading("Phases");
-                                ui.add_space(6.0);
-                                ui.label("Préparation :");
-                                ui.label("  • Compétences (arbre Guerrier), équipement au Marchand, construction de tours (grille 20×20), recrutement de troupes.");
-                                ui.label("  • Inventaire max 20 slots ; ne lancez pas la vague si l'inventaire est plein.");
-                                ui.add_space(4.0);
-                                ui.label("Bataille :");
-                                ui.label("  • Ennemis spawnent et marchent vers le Château. Vous, les tours et les troupes les attaquez.");
-                                ui.label("  • Quand tous les ennemis sont morts, la vague est gagnée : or, XP et objets récupérables au sol.");
-                                ui.label("  • Passez à la vague suivante en revenant en Préparation.");
-                            }
-                            3 => {
-                                ui.heading("Mécaniques");
-                                ui.add_space(6.0);
-                                ui.label("Joueur : attaque auto à portée (~40 px), 1 att/s ; dégâts et PV selon équipement et stats. Mort à 0 PV : revive après la vague avec −1 PV max.");
-                                ui.label("Tours : coût 50 or, champ de vision 300 px, flèches 600 px, 1 tir / 2 s.");
-                                ui.label("Troupes : suivent le joueur dans un rayon ~200 px, combattent les ennemis à portée (ex. Milicien 3 dégâts, 25 px).");
-                                ui.label("Ennemis : priorité Joueur > Tour > Château ; donnent or, XP et parfois objets à la mort.");
-                                ui.label("Loot : or et XP en orbes ; objets à identifier (Marchand ou Expert 20 or).");
-                            }
-                            _ => {}
-                        }
-                    });
-                });
-            self.tutorial_tab = tab;
+        // Château
+        h3 { style: "font-size:13px;color:#1a9fff;margin-bottom:6px;", "Château" }
+        div {
+            style: "font-size:11px;display:grid;grid-template-columns:1fr 1fr;gap:2px 16px;margin-bottom:12px;",
+            span { style: "color:#8f98a0;", "PV" }
+            span { style: "color:#c6d4df;", "{castle_hp} / {castle_hp_max}" }
         }
 
-        // Fenêtre Mode Dev (standalone)
-        if self.dev_mode_window_open {
-            let mut open = true;
-            egui::Window::new("Mode Dev")
-                .open(&mut open)
-                .default_width(280.0)
-                .show(ctx, |ui| {
-                    if let Some(ref mut state) = self.game {
-                        ui.checkbox(&mut state.dev_mode, "Visions des portées");
-                        ui.add_space(6.0);
-                        if ui.button("+ 100 or").clicked() {
-                            state.gold += 100;
-                        }
-                        if ui.button("Spawn 50 ennemis normal").clicked() {
-                            state.dev_spawn_50_normal_enemies_random();
-                        }
-                        if ui.button("lvlup").clicked() {
-                            state.dev_give_level_up();
-                        }
-                    }
-                });
-            if !open {
-                self.dev_mode_window_open = false;
-            }
+        // Run
+        h3 { style: "font-size:13px;color:#1a9fff;margin-bottom:6px;", "Run" }
+        div {
+            style: "font-size:11px;display:grid;grid-template-columns:1fr 1fr;gap:2px 16px;",
+            span { style: "color:#8f98a0;", "Ennemis tués" }
+            span { style: "color:#c6d4df;", "{enemies_killed}" }
+            span { style: "color:#8f98a0;", "Boss tués" }
+            span { style: "color:#c6d4df;", "{bosses_killed}" }
+            span { style: "color:#8f98a0;", "Or total" }
+            span { style: "color:#ffcc00;", "{gold_total}" }
+            span { style: "color:#8f98a0;", "Vague max" }
+            span { style: "color:#c6d4df;", "{max_wave}" }
         }
+    }
+}
 
-        // Overlay « trop encombré » : inventaire plein au clic sur Lancer la vague.
-        if self.show_encumbered_overlay {
-            let mut open = true;
-            egui::Window::new("Attention")
-                .collapsible(false)
-                .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::ZERO)
-                .show(ctx, |ui| {
-                    ui.label("Vous êtes trop encombré pour vous battre. Vendez quelques objets avant de partir au combat.");
-                    ui.add_space(8.0);
-                    if ui.button("OK").clicked() {
-                        open = false;
-                    }
-                });
-            if !open {
-                self.show_encumbered_overlay = false;
-            }
-        }
+// ─── Contenu panneau Skills ───────────────────────────────────────────
 
-        // Fenêtre Player (métriques joueur) — standalone
-        if self.player_window_open {
-            let mut open = true;
-            egui::Window::new("Player")
-                .open(&mut open)
-                .default_width(280.0)
-                .show(ctx, |ui| paint_player_window(ui, self.game.as_mut()));
-            if !open {
-                self.player_window_open = false;
-            }
-        }
+#[component]
+fn SkillsContent(
+    game_state: Signal<Option<GameState>>,
+    skill_ranks: std::collections::HashMap<WarriorSkillId, u32>,
+    skill_pts: u32,
+) -> Element {
+    let all_skills: Vec<(WarriorSkillId, &str, &str, u32, u32, bool)> = WarriorSkillId::all()
+        .iter()
+        .map(|&id| {
+            let def = warrior_skill_def(id);
+            let current = skill_ranks.get(&id).copied().unwrap_or(0);
+            let can_learn = skill_pts > 0
+                && current < def.max_rank
+                && crate::warrior_skills::prerequisites_met(&skill_ranks, &def);
+            (id, def.name, def.effect_description, current, def.max_rank, can_learn)
+        })
+        .collect();
 
-        // Fenêtre Inventaire
-        if self.inventory_window_open {
-            let mut open = true;
-            egui::Window::new("Inventaire")
-                .open(&mut open)
-                .default_width(320.0)
-                .default_height(400.0)
-                .show(ctx, |ui| {
-                    paint_inventory_window(ui, self.game.as_mut(), &mut self.selected_inventory_slot, &self.pending_identify_self);
-                });
-            if !open {
-                self.inventory_window_open = false;
-                self.selected_inventory_slot = None;
-            }
+    rsx! {
+        if skill_pts > 0 {
+            p { style: "font-size:12px;color:#ffcc00;margin-bottom:8px;", "Points disponibles : {skill_pts}" }
         }
-
-        // Fenêtre Détail / Identification (objet sélectionné)
-        if let Some(slot_idx) = self.selected_inventory_slot {
-            egui::Window::new("Détail objet")
-                .collapsible(false)
-                .resizable(false)
-                .show(ctx, |ui| {
-                    paint_item_detail_or_identify(ui, self, slot_idx);
-                });
-        }
-
-        // Fenêtre Équipement
-        if self.equipment_window_open {
-            let mut open = true;
-            egui::Window::new("Équipement")
-                .open(&mut open)
-                .default_width(280.0)
-                .default_height(360.0)
-                .show(ctx, |ui| {
-                    paint_equipment_window(ui, self.game.as_mut(), &mut self.selected_equipment_slot);
-                });
-            if !open {
-                self.equipment_window_open = false;
-                self.selected_equipment_slot = None;
-            }
-        }
-        if let Some(slot) = self.selected_equipment_slot {
-            egui::Window::new("Détail équipement")
-                .collapsible(false)
-                .resizable(false)
-                .show(ctx, |ui| {
-                    paint_equipment_item_detail(ui, self, slot);
-                });
-        }
-
-        // Fenêtre Compétences (5 onglets)
-        if self.competences_open {
-            let mut open = true;
-            egui::Window::new("Compétences")
-                .open(&mut open)
-                .default_width(420.0)
-                .default_height(380.0)
-                .show(ctx, |ui| paint_skills_window(ui, self.game.as_mut(), &mut self.skills_tab, &mut self.selected_warrior_skill));
-            if !open {
-                self.competences_open = false;
-            }
-        }
-
-        // Fenêtres Mode préparation (Marchand, Expert, Construction, Recrutement)
-        let mut close_marchand = false;
-        let mut close_expert = false;
-        let mut close_construction = false;
-        let mut close_recrutement = false;
-        if let Some(ref mut state) = self.game {
-            let gold = state.gold;
-            if self.marchand_open {
-                let mut open = true;
-                egui::Window::new("Marchand")
-                    .open(&mut open)
-                    .default_width(380.0)
-                    .default_height(480.0)
-                    .show(ctx, |ui| {
-                        ui.label(format!("Or : {gold} or"));
-                        if state.dev_mode
-                            && ui.button("+100 or (dev)").clicked() {
-                                self.pending_dev_add_gold.replace(true);
-                            }
-                        if cfg!(debug_assertions)
-                            && ui.button("🔄 Reroll pools (dev)").clicked() {
-                                self.pending_merchant_reroll.replace(true);
-                            }
-                        ui.add_space(6.0);
-                        egui::ScrollArea::vertical().show(ui, |ui| {
-                            ui.heading("Armes");
-                            for (i, opt) in state.merchant_weapons.iter().enumerate() {
-                                match opt {
-                                    Some(me) => {
-                                        match &me.entry {
-                                            InventoryEntry::Identified(item) => {
-                                                let (r, g, b) = item.rarity.color_rgb();
-                                                ui.colored_label(egui::Color32::from_rgb(r, g, b), &item.display_name);
-                                            }
-                                            InventoryEntry::Unidentified(slot) => {
-                                                ui.label(format!("Objet non identifié — {} — {} or", slot.label(), me.price));
-                                            }
-                                        }
-                                        if ui.button(format!("Acheter ({} or)", me.price)).clicked() && gold >= me.price {
-                                            self.pending_merchant_buy.borrow_mut().replace((MerchantPoolKind::Weapon, i));
-                                        }
+        div {
+            style: "display:flex;flex-direction:column;gap:4px;",
+            for (id, name, effect, current, max_rank, can_learn) in all_skills.into_iter() {
+                {
+                    let name_color = if current > 0 { "#c6d4df" } else { "#667788" };
+                    let rank_color = if current >= max_rank { "#5ba32b" } else if current > 0 { "#88aacc" } else { "#556677" };
+                    rsx! {
+                        div {
+                            style: "display:flex;align-items:center;gap:8px;padding:4px 6px;background:#232f3e;border-radius:3px;",
+                            div {
+                                style: "flex:1;",
+                                div {
+                                    style: "display:flex;align-items:center;gap:6px;",
+                                    span {
+                                        style: "font-size:12px;color:{name_color};font-weight:600;",
+                                        "{name}"
                                     }
-                                    None => {
-                                        ui.weak("Slot vide");
+                                    span {
+                                        style: "font-size:10px;color:{rank_color};",
+                                        "{current}/{max_rank}"
                                     }
                                 }
-                            }
-                            ui.add_space(8.0);
-                            ui.heading("Armures");
-                            for (i, opt) in state.merchant_armor.iter().enumerate() {
-                                match opt {
-                                    Some(me) => {
-                                        match &me.entry {
-                                            InventoryEntry::Identified(item) => {
-                                                let (r, g, b) = item.rarity.color_rgb();
-                                                ui.colored_label(egui::Color32::from_rgb(r, g, b), &item.display_name);
-                                            }
-                                            InventoryEntry::Unidentified(slot) => {
-                                                ui.label(format!("Objet non identifié — {} — {} or", slot.label(), me.price));
-                                            }
-                                        }
-                                        if ui.button(format!("Acheter ({} or)", me.price)).clicked() && gold >= me.price {
-                                            self.pending_merchant_buy.borrow_mut().replace((MerchantPoolKind::Armor, i));
-                                        }
-                                    }
-                                    None => {
-                                        ui.weak("Slot vide");
-                                    }
+                                p {
+                                    style: "font-size:10px;color:#8f98a0;margin-top:1px;",
+                                    "{effect}"
                                 }
                             }
-                            ui.add_space(8.0);
-                            ui.heading("Accessoires");
-                            for (i, opt) in state.merchant_accessories.iter().enumerate() {
-                                match opt {
-                                    Some(me) => {
-                                        match &me.entry {
-                                            InventoryEntry::Identified(item) => {
-                                                let (r, g, b) = item.rarity.color_rgb();
-                                                ui.colored_label(egui::Color32::from_rgb(r, g, b), &item.display_name);
-                                            }
-                                            InventoryEntry::Unidentified(slot) => {
-                                                ui.label(format!("Objet non identifié — {} — {} or", slot.label(), me.price));
-                                            }
+                            if can_learn {
+                                button {
+                                    style: "padding:3px 8px;background:#2a4a3a;color:#88cc88;border:1px solid #3a5a4a;border-radius:3px;cursor:pointer;font-size:10px;flex-shrink:0;",
+                                    onclick: move |_| {
+                                        if let Some(gs) = game_state.write().as_mut() {
+                                            gs.learn_warrior_skill(id);
                                         }
-                                        if ui.button(format!("Acheter ({} or)", me.price)).clicked() && gold >= me.price {
-                                            self.pending_merchant_buy.borrow_mut().replace((MerchantPoolKind::Accessory, i));
-                                        }
-                                    }
-                                    None => {
-                                        ui.weak("Slot vide");
-                                    }
+                                    },
+                                    "+1"
                                 }
                             }
-                        });
-                    });
-                if !open {
-                    close_marchand = true;
+                        }
+                    }
                 }
             }
-            if self.expert_open {
-                let mut open = true;
-                egui::Window::new("Expert en identification")
-                    .open(&mut open)
-                    .default_width(320.0)
-                    .show(ctx, |ui| {
-                        ui.label(format!("Or : {gold} or"));
-                        ui.add_space(8.0);
-                        ui.heading("Expert en identification");
-                        ui.label("Identification groupée : identifier tous les objets de l'inventaire en une fois (prix cumulé).");
-                        ui.weak("(À implémenter : bouton et coût total)");
-                    });
-                if !open {
-                    close_expert = true;
+        }
+    }
+}
+
+// ─── Contenu panneau Inventaire ───────────────────────────────────────
+
+#[component]
+fn InventoryContent(
+    game_state: Signal<Option<GameState>>,
+    inventory: Vec<(usize, String)>,
+    equipped: Vec<(ItemSlot, String)>,
+    gold: u32,
+) -> Element {
+    rsx! {
+        // Équipement
+        h3 { style: "font-size:13px;color:#1a9fff;margin-bottom:6px;", "Équipement" }
+        div {
+            style: "display:grid;grid-template-columns:90px 1fr;gap:2px 8px;font-size:11px;margin-bottom:12px;",
+            for (slot, label) in equipped.iter() {
+                span { style: "color:#8f98a0;", "{slot.label()}" }
+                span { style: "color:#c6d4df;", "{label}" }
+            }
+        }
+
+        // Inventaire (sac)
+        {
+            let inv_count = inventory.len();
+            rsx! {
+                h3 { style: "font-size:13px;color:#1a9fff;margin-bottom:6px;",
+                    "Sac ({inv_count}/20)"
                 }
             }
-            if self.construction_open {
-                let mut open = true;
-                egui::Window::new("Construction")
-                    .open(&mut open)
-                    .default_width(320.0)
-                    .show(ctx, |ui| {
-                        ui.label(format!("Or : {gold} or"));
-                        ui.add_space(8.0);
-                        ui.heading("Bâtiments constructibles");
-                        ui.label("Sélectionnez une case sur la zone de jeu (grille 20×20). Clic droit pour annuler.");
-                        ui.add_space(8.0);
-                        if let Some((ci, cj)) = self.construction_selected_cell {
-                            ui.label(format!("Case sélectionnée : ({ci}, {cj})"));
-                            let has_place = state.can_build_at_cell(ci, cj);
-                            let has_gold = state.gold >= TOWER_BASE_COST_GOLD;
-                            if has_place {
-                                if has_gold {
-                                    if ui.button(format!("Tour ({TOWER_BASE_COST_GOLD} po) — Construire dedans")).clicked() {
-                                        state.build_tower_at_cell(ci, cj);
-                                    }
-                                } else {
-                                    ui.weak(format!("Or insuffisant ({TOWER_BASE_COST_GOLD} po requis)."));
+        }
+        if inventory.is_empty() {
+            p { style: "font-size:11px;color:#556677;", "Inventaire vide." }
+        }
+        div {
+            style: "display:flex;flex-direction:column;gap:3px;",
+            for (idx, label) in inventory.iter() {
+                div {
+                    style: "display:flex;align-items:center;gap:6px;padding:3px 6px;background:#232f3e;border-radius:3px;",
+                    span { style: "flex:1;font-size:11px;color:#c6d4df;", "{label}" }
+                    // Boutons d'action
+                    {
+                        let idx_copy = *idx;
+                        let is_unidentified = label.starts_with("?");
+                        rsx! {
+                            if is_unidentified {
+                                button {
+                                    style: "padding:2px 6px;background:#2a3a4a;color:#88aacc;border:1px solid #3a4a5a;border-radius:2px;cursor:pointer;font-size:9px;",
+                                    onclick: move |_| {
+                                        if let Some(gs) = game_state.write().as_mut() {
+                                            gs.identify_self(idx_copy);
+                                        }
+                                    },
+                                    "ID soi"
+                                }
+                                button {
+                                    style: "padding:2px 6px;background:#2a3a4a;color:#ffcc00;border:1px solid #3a4a5a;border-radius:2px;cursor:pointer;font-size:9px;",
+                                    onclick: move |_| {
+                                        if let Some(gs) = game_state.write().as_mut() {
+                                            gs.identify_expert(idx_copy);
+                                        }
+                                    },
+                                    "ID 20g"
                                 }
                             } else {
-                                ui.weak("Pas la place ici (château ou autre bâtiment).");
-                            }
-                        } else {
-                            ui.weak("Aucune case sélectionnée.");
-                        }
-                    });
-                if !open {
-                    close_construction = true;
-                }
-            }
-            if self.recrutement_open {
-                let mut open = true;
-                let troops_count = state.troops.iter().filter(|t| t.is_active_in_squad()).count();
-                let max_troops = state.max_troops();
-                egui::Window::new("Recrutement")
-                    .open(&mut open)
-                    .default_width(320.0)
-                    .show(ctx, |ui| {
-                        ui.label(format!("Or : {gold} or"));
-                        ui.label(format!("Troupes : {troops_count} / {max_troops}"));
-                        ui.add_space(8.0);
-                        ui.heading("Troupes disponibles");
-                        ui.horizontal(|ui| {
-                            ui.label(TroopKind::Milicien.label());
-                            ui.label("— 100 PV, 20 % blocage, 6 dégâts, 1 att/s, portée 25 px.");
-                            if ui.add_enabled(troops_count < max_troops, egui::Button::new("Recruter")).clicked()
-                                && troops_count < max_troops
-                            {
-                                state.recruit_troop(TroopKind::Milicien);
-                            }
-                        });
-                    });
-                if !open {
-                    close_recrutement = true;
-                }
-            }
-        }
-        if close_marchand {
-            self.marchand_open = false;
-        }
-        if close_expert {
-            self.expert_open = false;
-        }
-        if close_construction {
-            self.construction_open = false;
-            self.construction_selected_cell = None;
-        }
-        if close_recrutement {
-            self.recrutement_open = false;
-        }
-        if let Some((pool, index)) = self.pending_merchant_buy.borrow_mut().take() {
-            if let Some(ref mut state) = self.game {
-                match pool {
-                    MerchantPoolKind::Weapon => {
-                        state.buy_merchant_weapon(index);
-                    }
-                    MerchantPoolKind::Armor => {
-                        state.buy_merchant_armor(index);
-                    }
-                    MerchantPoolKind::Accessory => {
-                        state.buy_merchant_accessory(index);
-                    }
-                }
-            }
-        }
-        if self.pending_merchant_reroll.replace(false) {
-            if let Some(ref mut state) = self.game {
-                state.refresh_merchant_pools();
-            }
-        }
-        if self.pending_dev_add_gold.replace(false) {
-            if let Some(ref mut state) = self.game {
-                state.gold += 100;
-            }
-        }
-        if let Some(idx) = self.pending_identify_self.borrow_mut().take() {
-            if let Some(ref mut state) = self.game {
-                state.identify_self(idx);
-            }
-        }
-
-        egui::CentralPanel::default().show(ctx, |ui| {
-            match self.screen {
-                Screen::Title => {
-                    ui.vertical_centered(|ui| {
-                        ui.heading("Lord of the Castle");
-                        ui.label("Miyukini Survivor — Survivor + Tower Defense");
-                        ui.add_space(20.0);
-                        if ui.button("Nouvelle partie").clicked() {
-                            self.start_new_game();
-                        }
-                        ui.add_space(4.0);
-                        ui.colored_label(
-                            ui.visuals().weak_text_color(),
-                            "Attention : cela écrase la sauvegarde actuelle.",
-                        );
-                    });
-                }
-                Screen::Lore => {
-                    ui.vertical_centered(|ui| {
-                        ui.heading("Lore");
-                        ui.add_space(12.0);
-                        ui.label("Tu es le seigneur de ton domaine qui est attaqué par des mort-vivants.");
-                        ui.label("Protège tes terres et ton château.");
-                        ui.add_space(24.0);
-                    });
-                    ui.with_layout(egui::Layout::bottom_up(egui::Align::Min), |ui| {
-                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                            if ui.button("Skip").clicked() {
-                                self.screen = Screen::NameInput;
-                                self.creation_name.clear();
-                                self.creation_save_name.clear();
-                            }
-                        });
-                    });
-                }
-                Screen::NameInput => {
-                    ui.vertical_centered(|ui| {
-                        ui.heading("Création du personnage");
-                        ui.label("Entre le nom de ton personnage et le nom de la sauvegarde.");
-                        ui.add_space(16.0);
-                        ui.horizontal(|ui| {
-                            ui.label("Nom du personnage :");
-                            ui.add(egui::TextEdit::singleline(&mut self.creation_name).desired_width(200.0));
-                        });
-                        ui.horizontal(|ui| {
-                            ui.label("Nom de la sauvegarde :");
-                            ui.add(egui::TextEdit::singleline(&mut self.creation_save_name).desired_width(200.0));
-                        });
-                        ui.label("(Si vide, le nom du personnage sera utilisé)");
-                        ui.add_space(16.0);
-                        if ui.button("Valider").clicked() {
-                            let name = self.creation_name.trim();
-                            if !name.is_empty() {
-                                self.screen = Screen::CharacterCreation(0);
-                                self.creation_available_ids = (0..=24).collect();
-                                self.creation_stats = CharacterStats::default();
-                                self.creation_reroll_pending = false;
-                                self.creation_current_choices = pick_three_phrases(
-                                    &mut self.creation_available_ids,
-                                    &mut crate::game_state::rand_simple,
-                                );
-                            }
-                        }
-                    });
-                }
-                Screen::CharacterCreation(step) => {
-                    let mut chosen: Option<usize> = None;
-                    ui.vertical_centered(|ui| {
-                        ui.heading(format!("Création du personnage — Étape {}/4", step + 1));
-                        ui.add_space(8.0);
-                        ui.label("Choisis une phrase qui te décrit :");
-                        ui.add_space(12.0);
-                        for (i, phrase) in self.creation_current_choices.iter().enumerate() {
-                            if ui.button(phrase.text).clicked() {
-                                chosen = Some(i);
-                            }
-                        }
-                        ui.add_space(16.0);
-                        ui.collapsing("Caractéristiques actuelles", |ui| {
-                            let s = &self.creation_stats;
-                            ui.label(format!("For: {}  Con: {}  Agi: {}  Dex: {}", s.display(Stat::For), s.display(Stat::Con), s.display(Stat::Agi), s.display(Stat::Dex)));
-                            ui.label(format!("Int: {}  Sag: {}  Cha: {}  Luk: {}", s.display(Stat::Int), s.display(Stat::Sag), s.display(Stat::Cha), s.display(Stat::Luk)));
-                        });
-                    });
-                    if let Some(i) = chosen {
-                        let phrase = self.creation_current_choices[i].clone();
-                        let reroll = apply_phrase_effects(
-                            &mut self.creation_stats,
-                            &phrase.effects,
-                            &mut crate::game_state::rand_simple,
-                        );
-                        if reroll {
-                            self.creation_reroll_pending = true;
-                        }
-                        if step < 3 {
-                            self.screen = Screen::CharacterCreation(step + 1);
-                            self.creation_current_choices = pick_three_phrases(
-                                &mut self.creation_available_ids,
-                                &mut crate::game_state::rand_simple,
-                            );
-                        } else {
-                            self.finish_creation_and_start();
-                        }
-                    }
-                }
-                Screen::Preparation => {
-                    let mut state_opt = self.game.take();
-                    if let Some(ref mut state) = state_opt {
-                        let last_tick = self.last_tick;
-                        let keys = self.keys;
-                        let delta = last_tick.elapsed().as_secs_f32();
-                        self.player_anim_accumulator += delta;
-                        self.enemy_anim_accumulator += delta;
-                        self.troop_anim_accumulator += delta;
-                        let is_moving = keys.iter().any(|&k| k);
-                        let frame_idle = ((self.player_anim_accumulator * 6.0) as usize) % 6;
-                        let frame_walk = ((self.player_anim_accumulator * 8.0) as usize) % 8;
-                        let enemy_frame = ((self.enemy_anim_accumulator * 8.0) as usize) % 8;
-                        let result = RefCell::new((last_tick, false));
-                        let (game_rect, resp, bottom_rect) = allocate_game_zone_and_bottom(ui);
-                        if resp.clicked() {
-                            ctx.memory_mut(|m| m.request_focus(resp.id));
-                        }
-                        if self.construction_open {
-                            if resp.clicked() {
-                                let pos = resp.interact_pointer_pos()
-                                    .or_else(|| ui.ctx().input(|i| i.pointer.press_origin()));
-                                if let Some(pos) = pos {
-                                    let (ci, cj) = screen_to_cell(
-                                        game_rect,
-                                        pos.x,
-                                        pos.y,
-                                        state.player.x,
-                                        state.player.y,
-                                        state.castle.x,
-                                        state.castle.y,
-                                    );
-                                    self.construction_selected_cell = Some((ci, cj));
+                                button {
+                                    style: "padding:2px 6px;background:#2a4a3a;color:#88cc88;border:1px solid #3a5a4a;border-radius:2px;cursor:pointer;font-size:9px;",
+                                    onclick: move |_| {
+                                        if let Some(gs) = game_state.write().as_mut() {
+                                            gs.equip_item(idx_copy);
+                                        }
+                                    },
+                                    "Équiper"
+                                }
+                                button {
+                                    style: "padding:2px 6px;background:#4a3a2a;color:#ccaa88;border:1px solid #5a4a3a;border-radius:2px;cursor:pointer;font-size:9px;",
+                                    onclick: move |_| {
+                                        if let Some(gs) = game_state.write().as_mut() {
+                                            gs.sell_item(idx_copy);
+                                        }
+                                    },
+                                    "Vendre"
                                 }
                             }
-                            if resp.secondary_clicked() {
-                                self.construction_selected_cell = None;
-                            }
                         }
-                        let painter = ui.painter();
-                        let cursor_screen = ui.ctx().input(|i| i.pointer.hover_pos());
-                        let (cx, cy) = (state.player.x, state.player.y);
-                        let cursor_world = cursor_screen
-                            .filter(|p| game_rect.contains(*p))
-                            .map(|p| screen_to_world(game_rect, p.x, p.y, cx, cy));
-                        let facing_left = cursor_world.map_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW), |(cw, _)| cw < state.player.x);
-                        let player_sprite = if is_moving {
-                            self.player_walk_texture.as_ref()
-                                .zip(self.player_walk_desc.as_ref())
-                                .map(|(t, d)| (t, d, frame_walk, facing_left))
-                        } else {
-                            self.player_sprite_texture.as_ref()
-                                .zip(self.player_sprite_desc.as_ref())
-                                .map(|(t, d)| (t, d, frame_idle, facing_left))
-                        };
-                        let enemy_sprite = self.enemy_sprite_texture.as_ref()
-                            .zip(self.enemy_sprite_desc.as_ref())
-                            .map(|(t, d)| (t, d, enemy_frame));
-                        let enemy_miniboss_sprite = self.enemy_miniboss_sprite_texture.as_ref()
-                            .zip(self.enemy_miniboss_sprite_desc.as_ref())
-                            .map(|(t, d)| (t, d, enemy_frame));
-                        let troop_frame = ((self.troop_anim_accumulator * 8.0) as usize) % 8;
-                        let troop_walk_sprite = self.troop_sprite_texture.as_ref()
-                            .zip(self.troop_sprite_desc.as_ref())
-                            .map(|(t, d)| (t, d, troop_frame));
-                        let troop_attack_sprite = self.troop_attack_sprite_texture.as_ref()
-                            .zip(self.troop_attack_sprite_desc.as_ref());
-                        let (tick, go) = game_zone_tick_and_paint(
-                            game_rect,
-                            painter,
-                            state,
-                            last_tick,
-                            keys,
-                            self.keys_secondary,
-                            ui.visuals().window_fill(),
-                            cursor_screen,
-                            player_sprite,
-                            enemy_sprite,
-                            enemy_miniboss_sprite,
-                            troop_walk_sprite,
-                            troop_attack_sprite,
-                            self.construction_open,
-                            self.construction_selected_cell,
-                        );
-                        *result.borrow_mut() = (tick, go);
-                        paint_bottom_panel(ui, bottom_rect, state);
-                        let (new_tick, game_over) = *result.borrow();
-                        self.last_tick = new_tick;
-                        if game_over {
-                            self.screen = Screen::GameOver;
-                        }
-                        // Log dégâts joueur (standalone Préparation)
-                        ui.add_space(8.0);
-                        egui::CollapsingHeader::new("Dégâts infligés par le joueur")
-                            .default_open(true)
-                            .show(ui, |ui| {
-                                ui.set_max_height(100.0);
-                                egui::ScrollArea::vertical().stick_to_bottom(true).show(ui, |ui| {
-                                    for line in state.player_damage_log.iter().rev() {
-                                        ui.label(line);
-                                    }
-                                    if state.player_damage_log.is_empty() {
-                                        ui.weak("Aucun dégât infligé pour l'instant.");
-                                    }
-                                });
-                            });
                     }
-                    self.game = state_opt;
-                }
-                Screen::Battle => {
-                    if let Some(ref mut state) = self.game {
-                        let delta = self.last_tick.elapsed().as_secs_f32();
-                        self.player_anim_accumulator += delta;
-                        self.enemy_anim_accumulator += delta;
-                        self.troop_anim_accumulator += delta;
-                        let is_moving = self.keys.iter().any(|&k| k);
-                        let frame_idle = ((self.player_anim_accumulator * 6.0) as usize) % 6;
-                        let frame_walk = ((self.player_anim_accumulator * 8.0) as usize) % 8;
-                        let enemy_frame = ((self.enemy_anim_accumulator * 8.0) as usize) % 8;
-                        let (game_rect, resp, bottom_rect) = allocate_game_zone_and_bottom(ui);
-                        if resp.clicked() {
-                            ctx.memory_mut(|m| m.request_focus(resp.id));
-                        }
-                        let painter = ui.painter();
-                        let cursor_screen = ui.ctx().input(|i| i.pointer.hover_pos());
-                        let (cx, cy) = (state.player.x, state.player.y);
-                        let cursor_world = cursor_screen
-                            .filter(|p| game_rect.contains(*p))
-                            .map(|p| screen_to_world(game_rect, p.x, p.y, cx, cy));
-                        let facing_left = cursor_world.map_or_else(|| matches!(state.player.dir, Dir8::W | Dir8::NW | Dir8::SW), |(cw, _)| cw < state.player.x);
-                        let player_sprite = if is_moving {
-                            self.player_walk_texture.as_ref()
-                                .zip(self.player_walk_desc.as_ref())
-                                .map(|(t, d)| (t, d, frame_walk, facing_left))
-                        } else {
-                            self.player_sprite_texture.as_ref()
-                                .zip(self.player_sprite_desc.as_ref())
-                                .map(|(t, d)| (t, d, frame_idle, facing_left))
-                        };
-                        let enemy_sprite = self.enemy_sprite_texture.as_ref()
-                            .zip(self.enemy_sprite_desc.as_ref())
-                            .map(|(t, d)| (t, d, enemy_frame));
-                        let enemy_miniboss_sprite = self.enemy_miniboss_sprite_texture.as_ref()
-                            .zip(self.enemy_miniboss_sprite_desc.as_ref())
-                            .map(|(t, d)| (t, d, enemy_frame));
-                        let troop_frame = ((self.troop_anim_accumulator * 8.0) as usize) % 8;
-                        let troop_walk_sprite = self.troop_sprite_texture.as_ref()
-                            .zip(self.troop_sprite_desc.as_ref())
-                            .map(|(t, d)| (t, d, troop_frame));
-                        let troop_attack_sprite = self.troop_attack_sprite_texture.as_ref()
-                            .zip(self.troop_attack_sprite_desc.as_ref());
-                        let (new_tick, game_over) = game_zone_tick_and_paint(
-                            game_rect,
-                            painter,
-                            state,
-                            self.last_tick,
-                            self.keys,
-                            self.keys_secondary,
-                            ui.visuals().window_fill(),
-                            cursor_screen,
-                            player_sprite,
-                            enemy_sprite,
-                            enemy_miniboss_sprite,
-                            troop_walk_sprite,
-                            troop_attack_sprite,
-                            self.construction_open,
-                            self.construction_selected_cell,
-                        );
-                        self.last_tick = new_tick;
-                        paint_bottom_panel(ui, bottom_rect, state);
-                        if game_over {
-                            self.screen = Screen::GameOver;
-                        }
-                        // Overlay victoire de vague : félicitations + résumé + "Phase suivante"
-                        if state.is_wave_won() {
-                            let rect = game_rect;
-                            if rect.width() > 0.0 && rect.height() > 0.0 {
-                            egui::Area::new(egui::Id::new("wave_won_overlay"))
-                                .order(egui::Order::Foreground)
-                                .fixed_pos(rect.min)
-                                .constrain(true)
-                                .show(ctx, |ui| {
-                                    ui.set_min_size(rect.size());
-                                    let frame = egui::Frame::new()
-                                        .fill(egui::Color32::from_white_alpha(240))
-                                        .corner_radius(8.0);
-                                    frame.show(ui, |ui| {
-                                        ui.vertical_centered(|ui| {
-                                            ui.add_space(60.0);
-                                            ui.heading("Vague terminée !");
-                                            ui.label("Félicitations.");
-                                            ui.add_space(16.0);
-                                            ui.label("Résumé de la vague :");
-                                            ui.label(format!("Ennemis tués : {}", state.enemies_killed_this_wave));
-                                            ui.label(format!("Or collecté : {} or", state.gold_collected_this_wave));
-                                            ui.label(format!("XP gagnée : {}", state.xp_gained_this_wave));
-                                            ui.label(format!("Objets trouvés : {}", state.items_found_this_wave));
-                                            ui.add_space(24.0);
-                                            if ui.button("Phase suivante").clicked() {
-                                                state.start_preparation_phase();
-                                                self.screen = Screen::Preparation;
-                                            }
-                                        });
-                                    });
-                                });
-                            }
-                        }
-                        // Log dégâts joueur (standalone)
-                        ui.add_space(8.0);
-                        egui::CollapsingHeader::new("Dégâts infligés par le joueur")
-                            .default_open(true)
-                            .show(ui, |ui| {
-                                ui.set_max_height(100.0);
-                                egui::ScrollArea::vertical().stick_to_bottom(true).show(ui, |ui| {
-                                    for line in state.player_damage_log.iter().rev() {
-                                        ui.label(line);
-                                    }
-                                    if state.player_damage_log.is_empty() {
-                                        ui.weak("Aucun dégât infligé pour l'instant.");
-                                    }
-                                });
-                            });
-                    }
-                }
-                Screen::GameOver => {
-                    ui.vertical_centered(|ui| {
-                        ui.heading("Game Over");
-                        ui.label("Le Château a été détruit.");
-                        ui.add_space(20.0);
-                        if ui.button("Retour au titre").clicked() {
-                            self.screen = Screen::Title;
-                            self.game = None;
-                        }
-                    });
                 }
             }
-        });
-
-        self.paint_level_up_toasts(ctx);
-        ctx.request_repaint();
+        }
     }
 }

@@ -1,80 +1,73 @@
 //! Sauvegarde / chargement des 3 slots (JSON).
-//! Toolkit MiyuClickerSave.
+//! Toolkit MiyuClickerSave — format v2.0 aligné sur le nouveau GameState.
 //!
 //! @id: miyuclicker_save_module
 //! @role: infrastructure
 //! @layer: domain
 //! @do: persist_and_load_game_state_slots
+//! @human: 3 slots, JSON pretty-printed. Version 2.0 : ouvriers/bâtisseurs/soldats, 6 ressources, 3 bâtiments.
 
-use crate::state::{Allocation, AllocationMacons, Cite, Deplacement, GameState, Route};
+use crate::state::{
+    Allocation, AllocationBatisseurs, Cite, Deplacement, GameState, Route,
+};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
 
-/// Structure sérialisable pour le fichier JSON (alignée Guide MVP).
+// ═══════════════════════════════════════════════════════════════════════════════
+// Structures de sauvegarde (sérialisables)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Structure racine sérialisable pour le fichier JSON.
+/// @id: miyuclicker_save_save_state
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SaveState {
     pub version: String,
+    pub pseudo: String,
     pub resources: SaveResources,
-    pub cap_moral: SaveCapMoral,
-    #[serde(default)]
+    pub population: SavePopulation,
     pub buildings: SaveBuildings,
     pub allocation: Allocation,
-    #[serde(default)]
-    pub allocation_macons: AllocationMacons,
+    pub allocation_batisseurs: AllocationBatisseurs,
+    pub moral: SaveMoral,
     pub carte: SaveCarte,
     pub meta: SaveMeta,
 }
 
-/// Ressources brutes sérialisées (or, gens, soldats, nourriture, matières, outils, armes).
+/// Ressources sérialisées (6 types, toutes f64).
 /// @id: miyuclicker_save_save_resources
 /// @do: represent_serialized_resources
 /// @role: data
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SaveResources {
-    pub or: i64,
-    pub gens: i64,
-    pub soldats: i64,
-    pub recherche: i64,
     pub nourriture: f64,
     pub bois: f64,
     pub pierre: f64,
-    pub fer: f64,
+    pub metal: f64,
     pub outils: f64,
-    pub armes: i64,
+    pub armes: f64,
 }
 
-/// Cap, bonheur (moral), fécondité, Game Over.
-/// @id: miyuclicker_save_cap_moral
+/// Population sérialisée (3 rôles).
+/// @id: miyuclicker_save_save_population
+/// @do: represent_serialized_population
+/// @role: data
 #[derive(Debug, Serialize, Deserialize)]
-pub struct SaveCapMoral {
-    pub cap_gens: i64,
-    #[serde(default, alias = "habitations")]
-    pub maisons: i64,
-    pub moral: f64,
-    pub fecondite: f64,
-    #[serde(default)]
-    pub jours_nourriture_zero: f64,
-    #[serde(default)]
-    pub game_over: bool,
+pub struct SavePopulation {
+    pub ouvriers: i64,
+    pub batisseurs: i64,
+    pub soldats: i64,
 }
 
-/// Bâtiments, maçons, progression construction.
-/// @id: miyuclicker_save_buildings
-#[derive(Debug, Default, Serialize, Deserialize)]
+/// Bâtiments sérialisés (niveaux + construction en cours).
+/// @id: miyuclicker_save_save_buildings
+/// @do: represent_serialized_buildings
+/// @role: data
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SaveBuildings {
-    #[serde(default)]
-    pub maisons: i64,
-    #[serde(default)]
+    pub maisons_lvl: i64,
     pub caserne_lvl: i64,
-    #[serde(default)]
-    pub grenier_lvl: i64,
-    #[serde(default)]
-    pub depot_lvl: i64,
-    #[serde(default)]
-    pub entrepot_lvl: i64,
-    #[serde(default)]
-    pub macons: i64,
+    pub guilde_lvl: i64,
     #[serde(default)]
     pub construction_maison: f64,
     #[serde(default)]
@@ -82,13 +75,29 @@ pub struct SaveBuildings {
     #[serde(default)]
     pub construction_caserne: f64,
     #[serde(default)]
-    pub construction_grenier: f64,
+    pub construction_caserne_paid: bool,
     #[serde(default)]
-    pub construction_depot: f64,
+    pub construction_guilde: f64,
     #[serde(default)]
-    pub construction_entrepot: f64,
+    pub construction_guilde_paid: bool,
 }
 
+/// Moral / bonheur / croissance sérialisés.
+/// @id: miyuclicker_save_save_moral
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SaveMoral {
+    pub moral: f64,
+    pub fecondite: f64,
+    #[serde(default)]
+    pub growth_accumulator: f64,
+    #[serde(default)]
+    pub jours_nourriture_zero: f64,
+    #[serde(default)]
+    pub game_over: bool,
+}
+
+/// Carte sérialisée (cités, routes, déplacements).
+/// @id: miyuclicker_save_save_carte
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SaveCarte {
     pub cites: Vec<Cite>,
@@ -96,10 +105,8 @@ pub struct SaveCarte {
     pub deplacements: Vec<Deplacement>,
 }
 
-/// Métadonnées de sauvegarde (temps simulé, slot_id, version).
+/// Métadonnées de sauvegarde.
 /// @id: miyuclicker_save_save_meta
-/// @do: represent_serialized_meta
-/// @role: data
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SaveMeta {
     pub temps_simule_s: f64,
@@ -119,49 +126,51 @@ pub struct SlotMetadata {
     pub summary: Option<String>,
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// Conversions GameState ↔ SaveState
+// ═══════════════════════════════════════════════════════════════════════════════
+
 /// Convertit GameState en SaveState pour sérialisation.
 /// @id: miyuclicker_save_game_state_to_save
 /// @do: convert_game_state_to_serializable
 /// @role: mutator
 fn game_state_to_save(state: &GameState) -> SaveState {
     SaveState {
-        version: "1.0".to_string(),
+        version: "2.0".to_string(),
+        pseudo: state.pseudo.clone(),
         resources: SaveResources {
-            or: state.or,
-            gens: state.gens,
-            soldats: state.soldats,
-            recherche: state.recherche,
             nourriture: state.nourriture,
             bois: state.bois,
             pierre: state.pierre,
-            fer: state.fer,
+            metal: state.metal,
             outils: state.outils,
             armes: state.armes,
         },
-        cap_moral: SaveCapMoral {
-            cap_gens: state.cap_gens,
-            maisons: state.maisons,
-            moral: state.moral,
-            fecondite: state.fecondite,
-            jours_nourriture_zero: state.jours_nourriture_zero,
-            game_over: state.game_over,
+        population: SavePopulation {
+            ouvriers: state.ouvriers,
+            batisseurs: state.batisseurs,
+            soldats: state.soldats,
         },
         buildings: SaveBuildings {
-            maisons: state.maisons,
+            maisons_lvl: state.maisons_lvl,
             caserne_lvl: state.caserne_lvl,
-            grenier_lvl: state.grenier_lvl,
-            depot_lvl: state.depot_lvl,
-            entrepot_lvl: state.entrepot_lvl,
-            macons: state.macons,
+            guilde_lvl: state.guilde_lvl,
             construction_maison: state.construction_maison,
             construction_maison_paid: state.construction_maison_paid,
             construction_caserne: state.construction_caserne,
-            construction_grenier: state.construction_grenier,
-            construction_depot: state.construction_depot,
-            construction_entrepot: state.construction_entrepot,
+            construction_caserne_paid: state.construction_caserne_paid,
+            construction_guilde: state.construction_guilde,
+            construction_guilde_paid: state.construction_guilde_paid,
         },
         allocation: state.allocation.clone(),
-        allocation_macons: state.allocation_macons.clone(),
+        allocation_batisseurs: state.allocation_batisseurs.clone(),
+        moral: SaveMoral {
+            moral: state.moral,
+            fecondite: state.fecondite,
+            growth_accumulator: state.growth_accumulator,
+            jours_nourriture_zero: state.jours_nourriture_zero,
+            game_over: state.game_over,
+        },
         carte: SaveCarte {
             cites: state.cites.clone(),
             routes: state.routes.clone(),
@@ -175,64 +184,61 @@ fn game_state_to_save(state: &GameState) -> SaveState {
     }
 }
 
-/// Reconstruit GameState depuis SaveState (rétrocompatibilité maisons/habitations).
+/// Reconstruit GameState depuis SaveState.
 /// @id: miyuclicker_save_save_to_game_state
 /// @do: deserialize_save_to_game_state
 /// @role: mutator
 fn save_to_game_state(save: SaveState) -> GameState {
-    let maisons = if save.buildings.maisons > 0 {
-        save.buildings.maisons
-    } else {
-        save.cap_moral.maisons.max(1)
-    };
-    let caserne_lvl = save.buildings.caserne_lvl.max(1);
-    let grenier_lvl = save.buildings.grenier_lvl.max(1);
-    let depot_lvl = save.buildings.depot_lvl.max(1);
-    let entrepot_lvl = save.buildings.entrepot_lvl.max(1);
     GameState {
-        or: save.resources.or,
-        gens: save.resources.gens,
-        soldats: save.resources.soldats,
-        recherche: save.resources.recherche,
         nourriture: save.resources.nourriture,
         bois: save.resources.bois,
         pierre: save.resources.pierre,
-        fer: save.resources.fer,
+        metal: save.resources.metal,
         outils: save.resources.outils,
         armes: save.resources.armes,
-        cap_gens: maisons * 4,
-        maisons,
-        caserne_lvl,
-        grenier_lvl,
-        depot_lvl,
-        entrepot_lvl,
-        macons: save.buildings.macons,
+
+        ouvriers: save.population.ouvriers,
+        batisseurs: save.population.batisseurs,
+        soldats: save.population.soldats,
+
+        maisons_lvl: save.buildings.maisons_lvl.max(1),
+        caserne_lvl: save.buildings.caserne_lvl.max(1),
+        guilde_lvl: save.buildings.guilde_lvl.max(1),
+
         construction_maison: save.buildings.construction_maison,
         construction_maison_paid: save.buildings.construction_maison_paid,
         construction_caserne: save.buildings.construction_caserne,
-        construction_grenier: save.buildings.construction_grenier,
-        construction_depot: save.buildings.construction_depot,
-        construction_entrepot: save.buildings.construction_entrepot,
-        allocation_macons: save.allocation_macons.clone(),
-        moral: save.cap_moral.moral,
-        fecondite: save.cap_moral.fecondite,
-        jours_nourriture_zero: save.cap_moral.jours_nourriture_zero,
-        game_over: save.cap_moral.game_over,
+        construction_caserne_paid: save.buildings.construction_caserne_paid,
+        construction_guilde: save.buildings.construction_guilde,
+        construction_guilde_paid: save.buildings.construction_guilde_paid,
+
         allocation: save.allocation,
+        allocation_batisseurs: save.allocation_batisseurs,
+
+        moral: save.moral.moral,
+        fecondite: save.moral.fecondite,
+        growth_accumulator: save.moral.growth_accumulator,
+        jours_nourriture_zero: save.moral.jours_nourriture_zero,
+        game_over: save.moral.game_over,
+
         cites: save.carte.cites,
         routes: save.carte.routes,
         route_duree_by_pair: None,
         deplacements: save.carte.deplacements,
+
+        pseudo: save.pseudo,
         temps_simule_s: save.meta.temps_simule_s,
         slot_id: save.meta.slot_id,
         version_sauvegarde: save.meta.version_sauvegarde,
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// API publique
+// ═══════════════════════════════════════════════════════════════════════════════
+
 /// Retourne le chemin du fichier pour un slot (dans le répertoire data fourni).
 /// @id: miyuclicker_save_slot_path
-/// @do: resolve_slot_file_path
-/// @role: reader
 fn slot_path(data_dir: &Path, slot_id: u8) -> std::path::PathBuf {
     data_dir.join(format!("miyuclicker_slot_{slot_id}.json"))
 }
@@ -270,7 +276,7 @@ pub fn slot_read(data_dir: &Path, slot_id: u8) -> Result<GameState, String> {
 /// @id: miyuclicker_save_slot_list
 /// @do: list_slot_metadata_for_ui
 /// @role: reader
-#[must_use] 
+#[must_use]
 pub fn slot_list(data_dir: &Path) -> Vec<SlotMetadata> {
     let mut out = Vec::with_capacity(3);
     for slot_id in 1..=3 {
@@ -282,7 +288,16 @@ pub fn slot_list(data_dir: &Path) -> Vec<SlotMetadata> {
             let summary = fs::read_to_string(&path)
                 .ok()
                 .and_then(|s| serde_json::from_str::<SaveState>(&s).ok())
-                .map(|save| format!("Gens: {}, Or: {}", save.resources.gens, save.resources.or));
+                .map(|save| {
+                    format!(
+                        "Pop: {}/{}, Ouvriers: {}, Bâtisseurs: {}, Soldats: {}",
+                        save.population.ouvriers + save.population.batisseurs + save.population.soldats,
+                        save.buildings.maisons_lvl * 4,
+                        save.population.ouvriers,
+                        save.population.batisseurs,
+                        save.population.soldats,
+                    )
+                });
             (true, saved_at, summary)
         } else {
             (false, None, None)

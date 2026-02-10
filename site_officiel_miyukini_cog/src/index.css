@@ -1,0 +1,54 @@
+/* Miyukini COG — Site officiel — Variables et base */
+:root {
+  --bg-deep: #0b0f14;
+  --bg-card: #111820;
+  --bg-elevated: #161d28;
+  --text-primary: #e6edf4;
+  --text-secondary: #8b9cad;
+  --text-muted: #5c6f82;
+  --accent: #2dd4bf;
+  --accent-dim: #0d9488;
+  --accent-glow: rgba(45, 212, 191, 0.25);
+  --border: #1e2936;
+  --success: #34d399;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --transition: 0.2s ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+a:hover {
+  color: var(--text-primary);
+}
+
+h1, h2, h3 {
+  font-weight: 600;
+  line-height: 1.3;
+}

@@ -458,6 +458,7 @@ Toute la documentation conceptuelle de reference est disponible dans le dossier 
 | **Les outils** | [Tools et Toolkits](docs/public/Miyukini%20-%20Tools%20et%20Toolkits.md) |
 | **Collaboration gouvernee** | [Mandats et Equipes](docs/public/Miyukini%20-%20Mandats%20et%20Equipes%20Operators.md) |
 | **Echanges entre COG** | [Connexion Inter-COG](docs/public/Miyukini%20-%20Connexion%20Inter-COG.md) |
+| **Comportement des COG (schéma)** | [Comportement COG Environnements](docs/public/FR/Miyukini%20-%20Comportement%20COG%20Environnements.md) |
 | **Maintenance Kernel** | [Kernel Maintenance](docs/public/Miyukini%20-%20Kernel%20Maintenance%20Observability%20Contract.md) |
 
 ### Pour aller plus loin (repo prive)

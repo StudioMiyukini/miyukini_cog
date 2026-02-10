@@ -25,7 +25,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Un utilisateur peut posséder plusieurs agendas (personnel, professionnel,
 /// par service synchronisé). Chaque agenda contient des engagements temporels.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct Agenda {
     /// Identifiant unique (UUID v4).
@@ -93,7 +93,7 @@ impl CalendarType {
 ///
 /// C'est l'unité fondamentale de JayKoa. Chaque engagement occupe une plage
 /// temporelle et possède un statut, une source, et un contexte visuel.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct TemporalEntry {
     /// Identifiant unique (UUID v4).
@@ -281,7 +281,7 @@ impl EventSource {
 ///
 /// INVARIANT : Le conflit est un indicateur VISUEL uniquement.
 /// JayKoa ne résout jamais les conflits. Il les signale à l'utilisateur.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct TemporalConflict {
     /// ID du premier engagement en conflit.

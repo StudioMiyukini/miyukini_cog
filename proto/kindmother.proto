@@ -1,0 +1,171 @@
+// @id: kindmother_proto_definition
+// @do: define_kindmother_grpc_api
+// @layer: core
+// Définition Protocol Buffers pour l'API KindMother (IPC gRPC).
+
+syntax = "proto3";
+
+package kindmother;
+
+// Service principal KindMother - seul point d'accès à la persistance.
+service KindMotherService {
+    // Exécute une requête en lecture seule.
+    rpc Query(QueryRequest) returns (QueryResponse);
+    
+    // Exécute une opération d'écriture (INSERT, UPDATE, DELETE).
+    rpc Execute(ExecuteRequest) returns (ExecuteResponse);
+    
+    // Exécute une transaction avec plusieurs opérations.
+    rpc Transaction(TransactionRequest) returns (TransactionResponse);
+    
+    // Vérifie la santé du service.
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+    
+    // Obtient les métadonnées d'une base de données.
+    rpc GetDatabaseInfo(DatabaseInfoRequest) returns (DatabaseInfoResponse);
+}
+
+// === Messages de requête ===
+
+message QueryRequest {
+    // Identifiant de l'opérateur appelant (ex: "jayxpose", "jaykonta")
+    string operator_id = 1;
+    
+    // Nom de la base de données cible
+    string database = 2;
+    
+    // Requête SQL SELECT
+    string sql = 3;
+    
+    // Paramètres de la requête (JSON sérialisé)
+    repeated string params = 4;
+}
+
+message ExecuteRequest {
+    // Identifiant de l'opérateur appelant
+    string operator_id = 1;
+    
+    // Nom de la base de données cible
+    string database = 2;
+    
+    // Requête SQL (INSERT, UPDATE, DELETE)
+    string sql = 3;
+    
+    // Paramètres de la requête (JSON sérialisé)
+    repeated string params = 4;
+    
+    // Intent de l'opération pour l'audit
+    string intent = 5;
+}
+
+message TransactionRequest {
+    // Identifiant de l'opérateur appelant
+    string operator_id = 1;
+    
+    // Nom de la base de données cible
+    string database = 2;
+    
+    // Liste des opérations à exécuter
+    repeated Operation operations = 3;
+    
+    // Intent global de la transaction
+    string intent = 4;
+}
+
+message Operation {
+    // Requête SQL
+    string sql = 1;
+    
+    // Paramètres
+    repeated string params = 2;
+}
+
+message HealthCheckRequest {
+    // Optionnel: vérifie une base spécifique
+    optional string database = 1;
+}
+
+message DatabaseInfoRequest {
+    // Identifiant de l'opérateur appelant
+    string operator_id = 1;
+    
+    // Nom de la base de données
+    string database = 2;
+}
+
+// === Messages de réponse ===
+
+message QueryResponse {
+    // Succès de l'opération
+    bool success = 1;
+    
+    // Lignes retournées (JSON sérialisé)
+    repeated Row rows = 2;
+    
+    // Message d'erreur si échec
+    optional string error = 3;
+    
+    // Nombre de lignes retournées
+    uint64 row_count = 4;
+}
+
+message Row {
+    // Colonnes de la ligne (JSON key-value)
+    string data = 1;
+}
+
+message ExecuteResponse {
+    // Succès de l'opération
+    bool success = 1;
+    
+    // Nombre de lignes affectées
+    uint64 rows_affected = 2;
+    
+    // Dernier ID inséré (si applicable)
+    optional int64 last_insert_id = 3;
+    
+    // Message d'erreur si échec
+    optional string error = 4;
+}
+
+message TransactionResponse {
+    // Succès de toute la transaction
+    bool success = 1;
+    
+    // Résultats de chaque opération
+    repeated ExecuteResponse results = 2;
+    
+    // Message d'erreur si échec (rollback effectué)
+    optional string error = 3;
+}
+
+message HealthCheckResponse {
+    // Service en bonne santé
+    bool healthy = 1;
+    
+    // Message de statut
+    string status = 2;
+    
+    // Temps de réponse en ms
+    uint64 latency_ms = 3;
+}
+
+message DatabaseInfoResponse {
+    // Succès de la requête
+    bool success = 1;
+    
+    // Nom de la base
+    string database = 2;
+    
+    // Taille en bytes
+    uint64 size_bytes = 3;
+    
+    // Nombre de tables
+    uint32 table_count = 4;
+    
+    // Base chiffrée
+    bool encrypted = 5;
+    
+    // Message d'erreur si échec
+    optional string error = 6;
+}

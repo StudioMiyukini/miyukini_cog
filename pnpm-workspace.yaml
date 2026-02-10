@@ -1,0 +1,8 @@
+# Miyukini COG — Configuration pnpm workspace
+# Monorepo pour les applications Tauri et packages partagés
+
+packages:
+  # Applications Tauri
+  - 'apps/*'
+  # Packages partagés
+  - 'packages/*'

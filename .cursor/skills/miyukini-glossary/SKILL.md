@@ -24,6 +24,11 @@ Toujours utiliser la terminologie officielle. Pour le glossaire complet, voir [r
 | Operator | **Operateur** |
 | Decision Window | **Mandat de Permission** |
 | Fast Path | **Chemin Mandate** |
+| Hub / Dashboard | **Miyukini Central** (pour utilisateur COG) |
+| Web Portal / Public Portal | **Miyukini Web Portal** ou **Portail** (pour utilisateurs externes) |
+| Service Type 1 | **Service interne COG** |
+| Service Type 2 | **Service a surface web externe** |
+| Service Type 3 | **Service Inter-COG** |
 
 ## Nomenclature des noms
 
@@ -56,6 +61,27 @@ Toujours utiliser la terminologie officielle. Pour le glossaire complet, voir [r
 - **Outil** = Capacite executable gouvernee, sans autorite
 - **Kit d'Outils** = Composition officielle d'Outils
 
+## Services Fondamentaux
+
+Les Services Fondamentaux font partie de l'environnement versionne du COG.
+
+| Service | Role | Cible |
+|---------|------|-------|
+| **Miyukini Central** | Hub de gestion des Services | Utilisateur du COG |
+| **Miyukini Web Portal** (Portail) | Hub des surfaces web | Utilisateurs externes (web) |
+
+**Regle canonique :** Central = COG, Portail = Web.
+
+## Types de Services
+
+| Type | Nom | Description | Espaces |
+|------|-----|-------------|---------|
+| **1** | Service interne COG | Aucune surface externe | Central uniquement |
+| **2** | Service a surface web externe | Gestion + surface web | Central + Portail |
+| **3** | Service Inter-COG | Interactions entre COGs | Central + Protocoles Inter-COG |
+
+**Regle :** Tout Service doit declarer son type et prevoir les espaces correspondants.
+
 ## Phrases fondatrices cles
 
 > "Dans Miyukini, les utilisateurs n'installent pas d'applications. Ils interagissent avec des Operateurs gouvernes."
@@ -66,7 +92,16 @@ Toujours utiliser la terminologie officielle. Pour le glossaire complet, voir [r
 
 > "Un Mandat de Permission n'est pas une optimisation. C'est un acte de gouvernance delegue."
 
+> "Central = COG, Portail = Web."
+
+> "Les Services Fondamentaux font partie de l'environnement versionne du COG."
+
+> "Tout Service doit declarer son type et prevoir les espaces correspondants."
+
 ## References
 
 - Glossaire complet : [references/glossaire-complet.md](references/glossaire-complet.md)
 - Documentation officielle : `docs/reference/Miyukini Conceptual References - Glossaire.md`
+- Types de Services : `docs/reference/Miyukini Conceptual References - Types de Services et Espaces.md`
+- Miyukini Central : `docs/reference/Miyukini Conceptual References - Miyukini Central Hub Services.md`
+- Miyukini Web Portal : `docs/services/MiyukiniWebPortal/`

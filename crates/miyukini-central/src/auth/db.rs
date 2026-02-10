@@ -88,6 +88,8 @@ pub struct CentralProfile {
     pub rue: Option<String>,
     pub code_postal: Option<String>,
     pub ville: Option<String>,
+    /// Premier compte créé = admin de l'environnement (MiyukiniAdmin).
+    pub is_admin: bool,
 }
 
 /// Base des profils Central (SQLite).
@@ -128,6 +130,7 @@ impl CentralAuthDb {
             );
             ",
         )?;
+        conn.execute("CREATE TABLE IF NOT EXISTS cog_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)", [])?;
         self.migrate_add_profile_columns(&conn)?;
         conn.execute_batch(
             r"
@@ -168,6 +171,7 @@ impl CentralAuthDb {
             ("rue", "TEXT"),
             ("code_postal", "TEXT"),
             ("ville", "TEXT"),
+            ("is_admin", "INTEGER NOT NULL DEFAULT 0"),
         ];
         for (name, typ) in columns {
             let sql = format!("ALTER TABLE central_profiles ADD COLUMN {name} {typ}");
@@ -187,7 +191,7 @@ impl CentralAuthDb {
             return Ok(None);
         }
         let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
-        let sql = "SELECT id, email, password_hash, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville FROM central_profiles WHERE email = ?1";
+        let sql = "SELECT id, email, password_hash, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin FROM central_profiles WHERE email = ?1";
         let mut stmt = conn.prepare(sql)?;
         let row = stmt.query_row(params![email], |row| {
             Ok((
@@ -203,10 +207,11 @@ impl CentralAuthDb {
                 row.get::<_, Option<String>>(9)?,
                 row.get::<_, Option<String>>(10)?,
                 row.get::<_, Option<String>>(11)?,
+                row.get::<_, i64>(12)?,
             ))
         });
         match row {
-            Ok((id, email_val, hash, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville)) => {
+            Ok((id, email_val, hash, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin)) => {
                 if hash == hash_password(password) {
                     Ok(Some(CentralProfile {
                         id,
@@ -220,6 +225,7 @@ impl CentralAuthDb {
                         rue,
                         code_postal,
                         ville,
+                        is_admin: is_admin != 0,
                     }))
                 } else {
                     Ok(None)
@@ -233,7 +239,7 @@ impl CentralAuthDb {
     /// Charge un profil par ID (pour édition dans la fenêtre Profil).
     pub fn get_profile(&self, id: &str) -> Result<Option<CentralProfile>, AuthDbError> {
         let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
-        let sql = "SELECT id, email, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville FROM central_profiles WHERE id = ?1";
+        let sql = "SELECT id, email, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin FROM central_profiles WHERE id = ?1";
         let mut stmt = conn.prepare(sql)?;
         let row = stmt.query_row(params![id], |row| {
             Ok(CentralProfile {
@@ -248,6 +254,7 @@ impl CentralAuthDb {
                 rue: row.get::<_, Option<String>>(8)?,
                 code_postal: row.get::<_, Option<String>>(9)?,
                 ville: row.get::<_, Option<String>>(10)?,
+                is_admin: row.get::<_, i64>(11)? != 0,
             })
         });
         match row {
@@ -281,10 +288,10 @@ impl CentralAuthDb {
         Ok(())
     }
 
-    /// Liste tous les profils (id, email uniquement pour la DB mère).
+    /// Liste tous les profils (id, email, is_admin pour la DB mère).
     pub fn list_profiles(&self) -> Result<Vec<CentralProfile>, AuthDbError> {
         let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
-        let mut stmt = conn.prepare("SELECT id, email FROM central_profiles")?;
+        let mut stmt = conn.prepare("SELECT id, email, is_admin FROM central_profiles")?;
         let rows = stmt.query_map([], |row| {
             Ok(CentralProfile {
                 id: row.get::<_, String>(0)?,
@@ -298,6 +305,7 @@ impl CentralAuthDb {
                 rue: None,
                 code_postal: None,
                 ville: None,
+                is_admin: row.get::<_, i64>(2)? != 0,
             })
         })?;
         let mut out = Vec::new();
@@ -320,29 +328,111 @@ impl CentralAuthDb {
         Ok(())
     }
 
+    /// Indique si le COG est vierge (aucun compte créé). Passe à false à la création du premier compte.
+    pub fn is_cog_virgin(&self) -> Result<bool, AuthDbError> {
+        let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
+        let v = match conn.query_row(
+            "SELECT value FROM cog_meta WHERE key = 'cog_virgin'",
+            [],
+            |row| row.get::<_, String>(0),
+        ) {
+            Ok(s) => s,
+            Err(rusqlite::Error::QueryReturnedNoRows) => return Ok(true),
+            Err(e) => return Err(e.into()),
+        };
+        Ok(v == "1")
+    }
+
+    /// Marque le COG comme non vierge (appelé à la création du premier compte).
+    pub fn set_cog_virgin(&self, virgin: bool) -> Result<(), AuthDbError> {
+        let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
+        let value = if virgin { "1" } else { "0" };
+        conn.execute(
+            "INSERT OR REPLACE INTO cog_meta (key, value) VALUES ('cog_virgin', ?1)",
+            [value],
+        )?;
+        Ok(())
+    }
+
+    /// ID du profil actuellement connecté (session persistée).
+    pub fn get_current_profile_id(&self) -> Result<Option<String>, AuthDbError> {
+        let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
+        match conn.query_row(
+            "SELECT value FROM cog_meta WHERE key = 'current_profile_id'",
+            [],
+            |row| row.get::<_, String>(0),
+        ) {
+            Ok(id) => Ok(Some(id)),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e.into()),
+        }
+    }
+
+    /// Enregistre le profil connecté (ou None pour déconnexion).
+    pub fn set_current_profile_id(&self, profile_id: Option<&str>) -> Result<(), AuthDbError> {
+        let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
+        match profile_id {
+            Some(id) => {
+                conn.execute(
+                    "INSERT OR REPLACE INTO cog_meta (key, value) VALUES ('current_profile_id', ?1)",
+                    [id],
+                )?;
+            }
+            None => {
+                conn.execute("DELETE FROM cog_meta WHERE key = 'current_profile_id'", [])?;
+            }
+        }
+        Ok(())
+    }
+
+    /// Réinitialise le COG à l'état vierge (suppression de tous les comptes). Pour tests uniquement.
+    pub fn reset_cog_to_virgin(&self) -> Result<(), AuthDbError> {
+        let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
+        conn.execute("DELETE FROM central_profile_saves", [])?;
+        conn.execute("DELETE FROM profile_service_refs", [])?;
+        conn.execute("DELETE FROM central_profiles", [])?;
+        conn.execute(
+            "INSERT OR REPLACE INTO cog_meta (key, value) VALUES ('cog_virgin', '1')",
+            [],
+        )?;
+        conn.execute("DELETE FROM cog_meta WHERE key = 'current_profile_id'", [])?;
+        Ok(())
+    }
+
     /// Création de compte : email + mot de passe complexe. Retourne le profil créé.
+    /// Le premier compte créé est admin de l'environnement (MiyukiniAdmin).
+    /// `pseudonyme` : optionnel, utilisé pour le Rite d'Entrée (nom / pseudo).
     pub fn sign_up(
         &self,
         email: &str,
         password: &str,
+        pseudonyme: Option<&str>,
     ) -> Result<CentralProfile, AuthDbError> {
         let email = email.trim();
         if email.is_empty() {
             return Err(AuthDbError("L'email est requis.".into()));
         }
         validate_password(password).map_err(|e| AuthDbError(e.to_string()))?;
+        let is_first = self.list_profiles()?.is_empty();
         let id = uuid::Uuid::new_v4().to_string();
         let hash = hash_password(password);
         let now = chrono::Utc::now().to_rfc3339();
-        let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
-        conn.execute(
-            "INSERT INTO central_profiles (id, email, password_hash, created_at, updated_at, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville) VALUES (?1, ?2, ?3, ?4, ?5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)",
-            params![id, email, hash, now, now],
-        )?;
+        let is_admin = is_first;
+        let pseudo_val = pseudonyme.map(|s| s.trim()).filter(|s| !s.is_empty());
+        {
+            let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
+            conn.execute(
+                "INSERT INTO central_profiles (id, email, password_hash, created_at, updated_at, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin) VALUES (?1, ?2, ?3, ?4, ?5, ?6, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, ?7)",
+                params![id, email, hash, now, now, pseudo_val, if is_admin { 1i64 } else { 0i64 }],
+            )?;
+        } // conn libéré ici — évite le deadlock avec set_cog_virgin ci-dessous
+        if is_first {
+            self.set_cog_virgin(false)?;
+        }
         Ok(CentralProfile {
             id: id.clone(),
             email: email.to_string(),
-            pseudonyme: None,
+            pseudonyme: pseudo_val.map(String::from),
             nom: None,
             prenom: None,
             date_naissance: None,
@@ -351,6 +441,7 @@ impl CentralAuthDb {
             rue: None,
             code_postal: None,
             ville: None,
+            is_admin,
         })
     }
 

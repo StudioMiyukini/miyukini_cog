@@ -131,7 +131,7 @@ Ce document constitue l’**audit de la documentation JayFestival** par rapport 
 3. **Préciser le sigle « MFS »** (ex. Miyukini Festival Service ou équivalent) dans le glossaire ou dans le document fondateur JayFestival.
 4. **Documenter ou décider** : module Actualités (News) public (Miyufeeds / Miyucms vs Annonces) ; gestion matériel, reporting avancé, interventions techniques/urgences (hors scope v1 ou backlog).
 5. **Ajouter une référence « Niveaux Sécurité et Protection Données »** pour JayFestival (sur le modèle JayKonta / JayKoa) si nécessaire pour les audits et la conformité.
-6. **Référence UI et implémentation** : [JayFestival - Reference UI Transcription Catakana](./JayFestival%20-%20Reference%20UI%20Transcription%20Catakana.md) retranscrit l’UI complète Catakana (Atomic, thème, ui-kit, écrans) dans la stack actuelle (egui/eframe) pour préparer l’implémentation.
+6. **Référence UI et implémentation** : [JayFestival - Reference UI Transcription Catakana](./JayFestival%20-%20Reference%20UI%20Transcription%20Catakana.md) retranscrit l’UI complète Catakana (Atomic, thème, ui-kit, écrans) dans la stack actuelle (Dioxus) pour préparer l’implémentation.
 
 ---
 

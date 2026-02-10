@@ -200,6 +200,7 @@ Une **version full Web** du COG est envisagée pour une utilisation **Client–N
 **Statut :** Document de référence identitaire
 
 **Références croisées :**
+- [Miyukini Conceptual References - Comportement COG Environnements](./Miyukini%20Conceptual%20References%20-%20Comportement%20COG%20Environnements.md) — schéma et comportement des environnements (A, B, Officiel, Tracker)
 - [Miyukini Conceptual References - Objectif Final](./Miyukini%20Conceptual%20References%20-%20Objectif%20Final.md)
 - [Miyukini Conceptual References - Vision Stratégique](./Miyukini%20Conceptual%20References%20-%20Vision%20Strategique.md)
 - [Miyukini Conceptual References - Pyramide Architecture Complete](./Miyukini%20Conceptual%20References%20-%20Pyramide%20Architecture%20Complete.md)

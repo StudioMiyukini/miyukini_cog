@@ -1,8 +1,13 @@
 [workspace]
+# Binaire principal : apps/central produit target/debug/miyukini-central.exe
+default-members = ["apps/central"]
 members = [
+    # === Cores (strate 1-4) ===
     "crates/miyukini-kernel",
     "crates/strongfather",
     "crates/kindmother",
+    "crates/kindmother-service",  # Serveur libSQL isolé
+    "crates/kindmother-client",   # Client délégation IPC
     "crates/borderguard",
     "crates/caringnanny",
     "crates/masterbutler",
@@ -11,6 +16,8 @@ members = [
     "crates/worrysentinel",
     "crates/tamr",
     "crates/logisticssteward",
+    
+    # === Toolkits (strate 5-6) ===
     "crates/miyusql",
     "crates/miyucalc",
     "crates/miyutext",
@@ -60,14 +67,23 @@ members = [
     "crates/miyusocialmoderation",
     "crates/miyusocialprofile",
     "crates/miyustory",
-    "crates/miyukini-admin",
+    
+    # === Services (strate 7-8) - Backend only ===
     "crates/miyukini-central",
     "crates/miyuclicker",
-    "crates/lord_of_the_castle",
     "crates/jayfestival",
     "crates/jaykoa",
     "crates/jayxpose",
     "crates/jaykonta",
+    
+    # === Services avec UI native ===
+    "crates/lord_of_the_castle",  # MiyukiniSurvivor — Dioxus + Blitz
+    
+    # === Applications Natives (Dioxus) ===
+    "apps/central",
+    
+    # === Outils internes ===
+    "crates/miyukini-admin",
     "tools/mip-generator",
     "tools/toolkit-skeleton",
     "tools/toolkit-registry-export",

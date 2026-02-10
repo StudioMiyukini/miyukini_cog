@@ -21,7 +21,7 @@ Ce document décrit : (1) l’**état actuel** des interactions avec la base Sup
 
 - **Catakana** = application fonctionnelle **pré-COG** : stack React + Supabase (PostgreSQL, Auth, Storage).
 - **JayFestival** reprend les spécificités de Catakana et les porte à l’échelle COG. Pour livrer une **version alpha fonctionnelle** sans attendre la complète implémentation COG (KindMother, SQLite, Mandats côté persistance), le **backend Supabase** est **autorisé en exception** pour l’alpha.
-- **Alpha** = version **fonctionnelle** (pas un MVP « minimal ») : Catakana fonctionne déjà ; l’alpha JayFestival vise une reprise fonctionnelle (egui/eframe + même périmètre métier) avec Supabase en backend, puis migration documentée vers SQLite + outils maison.
+- **Alpha** = version **fonctionnelle** (pas un MVP « minimal ») : Catakana fonctionne déjà ; l’alpha JayFestival vise une reprise fonctionnelle (Dioxus + même périmètre métier) avec Supabase en backend, puis migration documentée vers SQLite + outils maison.
 
 ### 1.2 Règles
 
@@ -166,7 +166,7 @@ Référence détaillée : `.Catakana/docs/reference/README_RLS_PERMISSIONS.md`.
 - **Auth** : `supabase.auth` (signIn, signUp, signOut, onAuthStateChange) ; création auto de profil dans `profiles` à la première connexion.
 - **Accès données** : `supabase.from('table').select().eq().insert().update().delete()` ; types TypeScript via `@/types/supabase` (générés ou manuels).
 
-Pour l’**alpha JayFestival** (egui/eframe) : soit appel HTTP direct à l’API Supabase (REST) depuis Rust, soit client existant si une couche web reste en place. La documentation des **endpoints et filtres** utilisés par chaque service Catakana sert de **spécification** pour l’adapter côté Rust ou pour reproduire la logique en SQLite.
+Pour l’**alpha JayFestival** (Dioxus) : soit appel HTTP direct à l’API Supabase (REST) depuis Rust, soit client existant si une couche web reste en place. La documentation des **endpoints et filtres** utilisés par chaque service Catakana sert de **spécification** pour l’adapter côté Rust ou pour reproduire la logique en SQLite.
 
 ---
 
@@ -214,7 +214,7 @@ Après la bascule vers **SQLite + KindMother**, le **Supabase Catakana** peut ê
 ### 5.1 Alpha = fonctionnelle (pas MVP minimal)
 
 - **Catakana** fonctionne déjà en production (React + Supabase). L’**alpha JayFestival** vise une **reprise fonctionnelle** du même périmètre métier (catalogue, organisateurs, exposants, visiteurs, éditions, plan, programme, budget, documents, notifications, facturation) avec :
-  - **UI** : stack egui/eframe (voir [Reference UI Transcription Catakana](../JayFestival%20-%20Reference%20UI%20Transcription%20Catakana.md)).
+  - **UI** : stack Dioxus (voir [Reference UI Transcription Catakana](../JayFestival%20-%20Reference%20UI%20Transcription%20Catakana.md)).
   - **Backend** : **Supabase** en exception pré-COG (Auth + PostgreSQL + Storage si besoin).
 - **Pas un MVP « minimal »** : l’alpha est **fonctionnelle** (parcours principaux utilisables, données cohérentes avec Catakana).
 
@@ -245,7 +245,7 @@ Après la bascule vers **SQLite + KindMother**, le **Supabase Catakana** peut ê
 | [JayFestival - Document Fondateur](../JayFestival%20-%20Document%20Fondateur.md) | Vision, macro, distribution. |
 | [JayFestival - Bornage Implementation](../JayFestival%20-%20Bornage%20Implementation.md) | Périmètre alpha, phase 2, migration, critères. |
 | [JayFestival - Audit Documentation Catakana](../JayFestival%20-%20Audit%20Documentation%20Catakana.md) | Métriques, manques. |
-| [JayFestival - Reference UI Transcription Catakana](../JayFestival%20-%20Reference%20UI%20Transcription%20Catakana.md) | UI egui/eframe. |
+| [JayFestival - Reference UI Transcription Catakana](../JayFestival%20-%20Reference%20UI%20Transcription%20Catakana.md) | UI Dioxus. |
 | Catakana `docs/reference/database_schema.md` | Schéma résumé Catakana. |
 | Catakana `docs/reference/README_RLS_PERMISSIONS.md` | RLS Supabase. |
 | Catakana `supabase/migrations/` | Migrations SQL Supabase. |

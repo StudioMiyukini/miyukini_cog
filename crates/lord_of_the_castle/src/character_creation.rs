@@ -38,7 +38,7 @@ impl Stat {
 }
 
 /// Valeurs des 8 stats. Négatif affiché comme 1(-x).
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct CharacterStats {
     pub for_: i32,
     pub con: i32,

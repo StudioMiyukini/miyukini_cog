@@ -10,7 +10,7 @@
 | [Index de la documentation](./_index.md) | Vue d’ensemble, structure par public, interpolarité, audit, bornage, référence UI. |
 | [Audit documentation Catakana](./JayFestival%20-%20Audit%20Documentation%20Catakana.md) | Audit qualité doc vs Catakana ; métriques, manques, recommandations. |
 | [Bornage implémentation](./JayFestival%20-%20Bornage%20Implementation.md) | Périmètre MVP / phase 2, hors scope, dépendances, critères de livraison. |
-| [Référence UI — Transcription Catakana](./JayFestival%20-%20Reference%20UI%20Transcription%20Catakana.md) | UI complète Catakana retranscrite dans la stack actuelle (Atomic, thème, ui-kit, écrans egui/eframe). |
+| [Référence UI — Transcription Catakana](./JayFestival%20-%20Reference%20UI%20Transcription%20Catakana.md) | UI complète Catakana retranscrite dans la stack actuelle (Atomic, thème, ui-kit, écrans Dioxus). |
 | [Spécification UI conforme Catakana](./JayFestival%20-%20Specification%20UI%20Conforme%20Catakana.md) | Spec normative : protocoles, atoms/molecules/organisms détaillés, parcours par écran, checklist conformité. |
 | [Référence — Base de données et migration Supabase → SQLite](./reference/JayFestival%20-%20Reference%20Base%20de%20Donnees%20et%20Migration%20Supabase%20vers%20SQLite.md) | DB Supabase (Catakana), mapping tables/services, migration SQLite + outils maison, alpha (Supabase exception pré-COG). |
 | [Interpolarité avec les services Jay](./reference/JayFestival%20-%20Interpolarite%20Services%20Jay.md) | Couplages avec JayXpose, JayFaim, JayKoa, JayKonta. |

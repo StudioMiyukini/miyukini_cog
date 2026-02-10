@@ -510,6 +510,7 @@ Pour les utilisateurs externes, la dégradation est **beaucoup plus agressive** 
 
 ## Références croisées
 
+- [Comportement COG Environnements](./Miyukini%20Conceptual%20References%20-%20Comportement%20COG%20Environnements.md) — schéma et comportement des environnements COG (A, B, Officiel, Tracker)
 - [Miyukini Webway System (MWS)](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) — couche de présence et découverte
 - [Ecosystem Dependency Contract](./Miyukini%20Conceptual%20References%20-%20Ecosystem%20Dependency%20Contract.md)
 - [Security Levels](./Miyukini%20Conceptual%20References%20-%20Security%20Levels.md)

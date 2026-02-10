@@ -27,6 +27,7 @@ Le depot public contient :
    - Tools et Toolkits
    - Mandats et Equipes
    - Connexion Inter-COG
+   - Comportement COG Environnements (schéma des environnements A, B, Officiel, Tracker)
    - Kernel Maintenance Observability
 
 ---

@@ -1,9 +1,9 @@
-//! Router EXP — écrans Espace Exposant (XP-E01 à XP-E12).
+//! Router EXP — écrans Espace Exposant (XP-E01 à XP-E14).
 //!
 //! @id: router_exp
 //! @do: dispatch_exp_screen_rendering_by_screen_id
 //! @layer: app
-//! Affiche l'écran EXP correspondant à l'identifiant ; délègue à chaque module e01..e12.
+//! Affiche l'écran EXP correspondant à l'identifiant ; délègue à chaque module e01..e14.
 //!
 //! @id: exp_navigate
 //! @do: change_current_screen_from_exp
@@ -22,17 +22,21 @@ mod e09_documents;
 mod e10_upload_document;
 mod e11_fiche_publique;
 mod e12_partage_documents;
+mod e13_cms_articles;
+mod e14_cms_edit_article;
 
 use std::cell::RefCell;
 use std::sync::Arc;
 
 use crate::data::{
-    CategorieProduit, ConfidentialiteProfil, DocumentPartage, DocumentProfessionnel,
-    ExposantProfile, JayXposeDb, ProduitCatalogue, VitrinePage,
+    CategorieProduit, CmsArticle, CmsCategory, ConfidentialiteProfil, DocumentPartage,
+    DocumentProfessionnel, ExposantProfile, JayXposeDb, PageBuilderBlock, PosStockLink,
+    ProduitCatalogue, StockConflict, SyncLog, VitrinePage, VitrineTemplate,
 };
 use crate::screens::ScreenId;
 use crate::theme::JayXposeTheme;
 use eframe::egui;
+use std::collections::HashSet;
 
 /// État mutable partagé pour les écrans EXP (espace exposant).
 #[derive(Default)]
@@ -57,6 +61,8 @@ pub struct ExpState {
     pub catalogue_search: String,
     /// Filtre catégorie dans le catalogue (None = toutes).
     pub catalogue_category_filter: Option<String>,
+    /// Produits sélectionnés dans la liste catalogue (actions de masse).
+    pub catalogue_selected_ids: HashSet<String>,
     /// Identifiant du produit en cours d'édition (None = création).
     pub editing_produit_id: Option<String>,
     /// Formulaire produit (création/modification).
@@ -67,8 +73,54 @@ pub struct ExpState {
     // --- Vitrine ---
     /// Pages de la vitrine.
     pub vitrine_pages: Vec<VitrinePage>,
+    /// Blocs structures de la page courante (page builder).
+    pub vitrine_pagebuilder_blocks: Vec<PageBuilderBlock>,
+    /// Templates disponibles pour accelerer la creation de pages.
+    pub vitrine_templates: Vec<VitrineTemplate>,
     /// Contenu éditeur de la page présentation.
     pub presentation_content: String,
+    /// Index du bloc sélectionné dans la librairie page builder.
+    pub pagebuilder_selected_block_idx: usize,
+    /// Index du bloc sélectionné dans le canvas.
+    pub pagebuilder_selected_canvas_idx: Option<usize>,
+    /// Recherche widgets dans la librairie.
+    pub pagebuilder_search: String,
+    /// Onglet panneau propriétés (0 content, 1 style, 2 advanced).
+    pub pagebuilder_active_tab: usize,
+    /// Historique snapshots JSON du builder pour undo.
+    pub pagebuilder_history: Vec<String>,
+    /// Historique inverse pour redo.
+    pub pagebuilder_future: Vec<String>,
+    /// Clipboard de style (props partielles).
+    pub pagebuilder_style_clipboard: Option<String>,
+    /// Clipboard widget (copie de bloc complet pour paste).
+    pub pagebuilder_block_clipboard: Option<PageBuilderBlock>,
+    /// Widget en cours de déplacement (drag-and-drop natif dans le canvas).
+    pub pagebuilder_dnd_widget_id: Option<String>,
+    /// Libellé affiché pendant le drag (ghost).
+    pub pagebuilder_dnd_widget_label: Option<String>,
+    /// Colonne cible courante (pendant le drag).
+    pub pagebuilder_dnd_target_col_id: Option<String>,
+    /// Position d'insertion (0..=len) dans la colonne cible (pendant le drag).
+    pub pagebuilder_dnd_target_pos: Option<usize>,
+    /// Barre latérale paramètres page builder ouverte.
+    pub pagebuilder_settings_open: bool,
+    /// Fenetre navigator ouverte.
+    pub pagebuilder_navigator_open: bool,
+    /// Fenetre templates ouverte.
+    pub pagebuilder_templates_open: bool,
+    /// Device preview (0 desktop, 1 tablet, 2 mobile).
+    pub pagebuilder_device_preview: usize,
+    /// Couleur primaire globale page builder.
+    pub pagebuilder_global_primary: String,
+    /// Couleur texte globale page builder.
+    pub pagebuilder_global_text: String,
+    /// Couleur fond globale page builder.
+    pub pagebuilder_global_bg: String,
+    /// Taille de police globale pour headings.
+    pub pagebuilder_global_heading_size: i32,
+    /// Taille de police globale pour texte.
+    pub pagebuilder_global_body_size: i32,
     /// Onglet sélectionné dans la prévisualisation vitrine.
     pub vitrine_preview_tab: usize,
 
@@ -85,6 +137,36 @@ pub struct ExpState {
     // --- Confidentialité ---
     /// Règles de confidentialité du profil.
     pub confidentialite: Vec<ConfidentialiteProfil>,
+    /// Liens de stock PoS associes aux produits.
+    pub pos_stock_links: Vec<PosStockLink>,
+    /// Historique recent des synchronisations inter-services.
+    pub sync_logs: Vec<SyncLog>,
+    /// Conflits de stock detectes lors des sync PoS.
+    pub stock_conflicts: Vec<StockConflict>,
+    /// Mandat de gouvernance actif pour operations non-SQL.
+    pub governance_mandate_id: String,
+    /// Niveau de sécurité du mandat actif.
+    pub governance_security_level: u8,
+    /// Mode de synchronisation PoS (manual, batch, realtime).
+    pub sync_mode: String,
+    /// Politique de resolution des conflits (manual_review, prefer_pos, prefer_local).
+    pub sync_conflict_policy: String,
+
+    // --- CMS Articles (M8) ---
+    /// Liste des articles CMS.
+    pub cms_articles: Vec<CmsArticle>,
+    /// Catégories CMS.
+    pub cms_categories: Vec<CmsCategory>,
+    /// Identifiant de l'article en cours d'édition (None = création).
+    pub editing_article_id: Option<String>,
+    /// Formulaire article (création/modification).
+    pub article_form: CmsArticle,
+    /// Recherche dans la liste des articles.
+    pub cms_search: String,
+    /// Filtre statut CMS (None = tous).
+    pub cms_status_filter: Option<String>,
+    /// Filtre type article CMS (None = tous).
+    pub cms_type_filter: Option<String>,
 
     // --- UI ---
     /// Message de statut (succès ou erreur).
@@ -138,6 +220,12 @@ pub fn exp_show(
         }
         ScreenId::ExpPartageDocuments => {
             e12_partage_documents::exp_e12_show(ctx, theme, nav_request, state, db);
+        }
+        ScreenId::ExpCmsArticles => {
+            e13_cms_articles::exp_e13_show(ctx, theme, nav_request, state, db);
+        }
+        ScreenId::ExpCmsEditArticle => {
+            e14_cms_edit_article::exp_e14_show(ctx, theme, nav_request, state, db);
         }
         _ => {}
     }

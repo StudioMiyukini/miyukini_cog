@@ -3,7 +3,7 @@
 # @layer: infra
 # Crate JayKoa — Service officiel famille Jay (calendrier universel, agenda unifié).
 # Récepteur temporel transversal : reflète, agrège et orchestre le temps.
-# Dépendances : egui, eframe (UI), kindmother (persistance), chrono (temps).
+# Dépendances : kindmother (persistance), chrono (temps).
 
 [package]
 name = "jaykoa"
@@ -14,22 +14,31 @@ license.workspace = true
 repository.workspace = true
 homepage.workspace = true
 documentation.workspace = true
-keywords = ["jaykoa", "agenda", "calendar", "egui", "eframe"]
+keywords = ["jaykoa", "agenda", "calendar", "tauri"]
 categories.workspace = true
-description = "JayKoa — Calendrier universel du COG, récepteur temporel transversal (egui/eframe)"
+description = "JayKoa — Calendrier universel du COG, récepteur temporel transversal"
 
 [dependencies]
-egui = "0.33"
-eframe = { version = "0.33", default-features = false, features = ["default_fonts", "persistence", "glow"] }
 kindmother = { path = "../kindmother" }
-rusqlite = { version = "0.32", features = ["bundled"] }
+kindmother-client = { path = "../kindmother-client" }
+# rusqlite conservé temporairement pour migration progressive
+rusqlite = { version = "0.32", features = ["bundled"], optional = true }
 serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 uuid = { version = "1", features = ["v4"] }
 chrono = { version = "0.4", features = ["serde"] }
+tokio = { version = "1", features = ["rt-multi-thread"] }
+thiserror = "2"
 
-[[bin]]
-name = "jaykoa"
-path = "src/main.rs"
+[features]
+default = ["legacy-sqlite"]
+# Mode legacy: accès SQLite direct (migration progressive)
+legacy-sqlite = ["rusqlite"]
+# Mode production: accès via KindMother uniquement
+kindmother-only = []
+
+# Note: eGUI supprimé — migration vers Tauri + React/TypeScript
+# Voir docs/implementation/Miyukini - Plan Migration Tauri React TypeScript.md
 
 [lints.rust]
 unsafe_code = "forbid"

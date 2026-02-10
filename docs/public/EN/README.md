@@ -457,6 +457,7 @@ All conceptual reference documentation is in the `docs/public/` folder:
 | **Tools** | [Tools and Toolkits](Miyukini%20-%20Tools%20and%20Toolkits.md) |
 | **Governed collaboration** | [Mandates and Operator Teams](Miyukini%20-%20Mandates%20and%20Operator%20Teams.md) |
 | **Exchanges between COGs** | [Inter-COG Connection](Miyukini%20-%20Inter-COG%20Connection.md) |
+| **COG behavior (schema)** | [COG Environments Behavior](Miyukini%20-%20COG%20Environments%20Behavior.md) |
 | **Kernel maintenance** | [Kernel Maintenance Observability Contract](Miyukini%20-%20Kernel%20Maintenance%20Observability%20Contract.md) |
 
 ### Further (private repo)

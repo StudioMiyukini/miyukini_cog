@@ -11,7 +11,7 @@
 La Phase 11 du plan JayFestival impose quatre livrables de vérification avant passage au gel (Phase 12) :
 
 - **[201]** Vérification globale : incohérences, non-conformité docs, violations PROTO-1 à PROTO-8.
-- **[202]** Tests : exécution `cargo test` pour domain/auth/supabase/services ; justification si pas de tests (ex. UI pure egui).
+- **[202]** Tests : exécution `cargo test` pour domain/auth/supabase/services ; justification si pas de tests (ex. UI pure Dioxus).
 - **[203]** Conformité MSCM : tous les blocs avec `@id`, `@do`, `@layer` ; pas de bloc orphelin.
 - **[204]** Régénération MIP : pipeline MIP exécuté ; `mscm_index/` à jour, `registry.json` cohérent.
 
@@ -67,7 +67,7 @@ Le thème documente les tailles 14 px (sous 800 px) et 16 px (au-dessus) en comm
 
 ### PROTO-7 — Accessibilité (zone cliquable ≥ 40 px)
 
-Les widgets boutons/labels utilisent le thème et les tailles (sm/md/lg) ; `Size::min_height()` dans button.rs assure une hauteur minimale. Focus géré par egui par défaut.
+Les widgets boutons/labels utilisent le thème et les tailles (sm/md/lg) ; `Size::min_height()` dans button.rs assure une hauteur minimale. Focus géré par Dioxus par défaut.
 
 **Verdict PROTO-7 :** Conforme.
 
@@ -88,8 +88,8 @@ Les entrées/sorties entre écrans passent par `AppState` et les docs « Écrans
 
 - **Commande exécutée :** `cargo test -p jayfestival` (compilation lancée ; timeout possible en environnement CI).
 - **Résultat :** Aucun module `#[cfg(test)]` ni fonction `#[test]` dans le crate `jayfestival`.
-- **Justification (conformité protocole) :** Le crate JayFestival est principalement **UI pure egui** (écrans, atoms, molecules, organisms, layout). Les protocoles prévoient une justification explicite en l’absence de tests unitaires pour ce type de code. Les services (auth, supabase, jayxpose, adapters) sont des façades ou appels externes ; les tests d’intégration Supabase/Auth seraient à prévoir en phase ultérieure (hors périmètre Phase 11).
-- **Verdict [202] :** Conforme — pas de tests, justification acceptée (UI pure egui + façades).
+- **Justification (conformité protocole) :** Le crate JayFestival est principalement **UI pure Dioxus** (écrans, atoms, molecules, organisms, layout). Les protocoles prévoient une justification explicite en l’absence de tests unitaires pour ce type de code. Les services (auth, supabase, jayxpose, adapters) sont des façades ou appels externes ; les tests d’intégration Supabase/Auth seraient à prévoir en phase ultérieure (hors périmètre Phase 11).
+- **Verdict [202] :** Conforme — pas de tests, justification acceptée (UI pure Dioxus + façades).
 
 ---
 
@@ -129,7 +129,7 @@ Les entrées/sorties entre écrans passent par `AppState` et les docs « Écrans
 | Tâche | Statut | Note |
 |-------|--------|------|
 | [201] Vérification globale | OK | PROTO-1 à PROTO-8 vérifiés ; réserves mineures (badge, PROTO-6 dynamique). |
-| [202] Tests | OK | Aucun test ; justification UI pure egui acceptée. |
+| [202] Tests | OK | Aucun test ; justification UI pure Dioxus acceptée. |
 | [203] Conformité MSCM | OK | @id, @do, @layer présents ; pas de bloc orphelin. |
 | [204] Régénération MIP | OK | Pipeline exécuté ; 1520 blocs, 590 fichiers ; registry.json integrity OK ; jayfestival inclus. |
 

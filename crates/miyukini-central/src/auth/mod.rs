@@ -1,4 +1,4 @@
-//! Authentification Miyukini Central (Miyukini COG).
+//! Authentification Miyukini Central (Miyukini COG) via KindMother Service.
 //!
 //! Connexion et création de compte dans une fenêtre frame ; mot de passe complexe.
 //! Validation des ID de profils auprès de la DB mère à la première connexion internet puis à intervalle régulier.
@@ -8,16 +8,34 @@
 //! Le profil central est la base pour les autres services. Chaque service peut lier le profil
 //! à sa table dédiée via [`CentralAuthDb::get_profile_service_ref`] et [`CentralAuthDb::set_profile_service_ref`].
 //! La table `profile_service_refs(profile_id, service_key, ref_id)` stocke une référence par service :
-//! `ref_id` pointe vers l’ID de la ligne dans la table du service (ex. sauvegarde de jeu).
+//! `ref_id` pointe vers l'ID de la ligne dans la table du service (ex. sauvegarde de jeu).
 //! Exemple : le service Lord of the Castle utilise `service_key = "lord_of_the_castle"` et stocke
-//! l’ID de la sauvegarde du joueur dans `ref_id`.
+//! l'ID de la sauvegarde du joueur dans `ref_id`.
+//!
+//! En mode `legacy-sqlite`, accès direct SQLite (migration progressive).
+//! En mode `kindmother-only`, délégation exclusive au service KindMother.
 
-mod db;
 mod mother_client;
 mod password;
 
+// Mode legacy SQLite (migration progressive)
+#[cfg(feature = "legacy-sqlite")]
+mod db;
+
+// Mode KindMother client (production)
+#[cfg(feature = "kindmother-only")]
+mod db_client;
+
+// Export de l'implémentation selon le feature flag
+#[cfg(feature = "legacy-sqlite")]
 pub use db::{
     AuthDbError, CentralAuthDb, CentralProfile, CentralProfileSave, CentralProfileSaveRow,
 };
+
+#[cfg(feature = "kindmother-only")]
+pub use db_client::{
+    AuthDbError, CentralAuthDb, CentralProfile, CentralProfileSave, CentralProfileSaveRow,
+};
+
 pub use mother_client::{validate_profiles_with_mother, MotherClientError};
 pub use password::{validate_password, password_rules_hint, PasswordError, PASSWORD_MIN_LEN};

@@ -841,6 +841,59 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
+### Miyukini Central
+
+**Service Fondamental** — Hub de gestion des Services, point d'entrée pour l'utilisateur du COG (Strate 7).
+
+**Rôle :** Exposer le catalogue des Services (Registre d'Opérateurs), permettre de découvrir, activer et lancer des Services. Point d'entrée unique pour l'utilisateur du COG.
+
+**Question fondamentale :** *"Quels Services sont disponibles, et comment y accéder ?"*
+
+**Caractéristiques :**
+
+- Service Fondamental (fait partie de l'environnement versionné)
+- Opérateur d'Interface (Strate 7)
+- Point d'entrée COG (gestion, administration, création)
+- Aucune autorité propre — relaie vers les Cores
+
+**Règle canonique :**
+
+> **Central = COG. Tous les Services ont comme point d'accès utilisateur Miyukini Central.**
+
+**Voir aussi :** Miyukini Web Portal, Service Fondamental, Opérateur d'Interface
+
+---
+
+### Miyukini Web Portal (Portail)
+
+**Service Fondamental** — Point d'entrée web pour les utilisateurs externes (Strate 7).
+
+**Rôle :** Exposer les Façades Publiques Gouvernées des Services de Type 2 aux utilisateurs externes via le web. Équivalent de Central pour le monde extérieur.
+
+**Question fondamentale :** *"Comment les utilisateurs externes accèdent-ils aux surfaces web du COG ?"*
+
+**Caractéristiques :**
+
+- Service Fondamental (fait partie de l'environnement versionné)
+- Opérateur d'Interface (Strate 7)
+- Point d'entrée Web (utilisateurs externes sans COG)
+- Identification et fichage des connexions entrantes
+- Gouvernance via BorderGuard + Mandat Public d'Accès
+
+**Règle canonique :**
+
+> **Portail = Web. Central = COG, Portail = Web.**
+
+**Ce que le Portail N'EST PAS :**
+
+- ❌ Un serveur central unique (chaque COG a son Portail)
+- ❌ Un remplacement de Central
+- ❌ Une porte ouverte (tout passe par BorderGuard)
+
+**Voir aussi :** Miyukini Central, Service Fondamental, Façade Publique Gouvernée, Mandat Public d'Accès
+
+---
+
 ## N
 
 ### Norme de déclaration sécurisée (MWS)
@@ -1073,7 +1126,34 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 - Le système exécute via des Opérateurs
 - La complexité est gérée par collaboration, pas accumulation
 
-**Voir aussi :** Opérateur, Équipe d'Opérateurs
+**Voir aussi :** Opérateur, Équipe d'Opérateurs, Service Fondamental, Types de Services
+
+---
+
+### Service Fondamental (Fundamental Service)
+
+**Service dont la présence fait partie de l'environnement versionné du COG.** Un Service Fondamental n'est pas optionnel ; il constitue un point d'entrée structurel de l'écosystème.
+
+**Services Fondamentaux :**
+
+| Service | Rôle | Cible |
+|---------|------|-------|
+| **Miyukini Central** | Hub de gestion des Services — point d'entrée utilisateur COG | Utilisateur du COG |
+| **Miyukini Web Portal** | Hub des surfaces web — point d'entrée utilisateurs externes | Utilisateurs externes (web) |
+
+**Règle canonique :**
+
+> **Central = COG, Portail = Web.**
+>
+> Ces deux Services Fondamentaux font partie intégrante de l'environnement versionné du COG.
+
+**Caractéristiques :**
+
+- Fait partie de l'environnement versionné (comme les Cores)
+- Non optionnel (un COG sans Central ne peut pas être administré)
+- Opérateur d'Interface (Strate 7)
+
+**Voir aussi :** Miyukini Central, Miyukini Web Portal, Types de Services, Environnement
 
 ---
 
@@ -1156,6 +1236,30 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 **Question fondamentale :** *"Quand l'humain a-t-il le droit d'intervenir dans le système ?"*
 
 **Voir aussi :** Cores, WorrySentinel
+
+---
+
+### Types de Services (Service Types)
+
+**Classification empirique des Services** dans l'écosystème Miyukini COG. Tout Service doit se ranger dans l'un des trois types et prévoir les espaces correspondants.
+
+| Type | Nom | Description | Espaces |
+|------|-----|-------------|---------|
+| **Type 1** | Service interne COG | Destiné uniquement à l'utilisateur du COG. Aucune surface externe. | Central uniquement |
+| **Type 2** | Service à surface web externe | Gestion dans le COG + surface web pour utilisateurs externes. | Central + Portail |
+| **Type 3** | Service Inter-COG | Interactions entre COGs (jeux multijoueur, fédération). | Central + Protocoles Inter-COG |
+
+**Règle fondamentale :**
+
+> **Tout Service doit déclarer son type (1, 2 ou 3) et prévoir les espaces correspondants.**
+
+**Exemples :**
+
+- **Type 1 :** JayKoa (agenda personnel)
+- **Type 2 :** JayXpose (vitrine/e-shop), JayFestival (billets/visiteurs), JayRDV (réservation)
+- **Type 3 :** Jeux multijoueur, collaboration inter-COG
+
+**Voir aussi :** Service, Service Fondamental, Miyukini Central, Miyukini Web Portal, Façade Publique Gouvernée
 
 ---
 
@@ -1464,6 +1568,16 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 > **Un utilisateur externe n'entre jamais dans un COG. C'est le COG qui sort vers lui, jamais l'inverse.**
 
+### Services Fondamentaux
+
+> **Central = COG, Portail = Web.**
+
+> **Les Services Fondamentaux (Central, Portail) font partie de l'environnement versionné du COG.**
+
+### Types de Services
+
+> **Tout Service doit déclarer son type et prévoir les espaces correspondants.**
+
 ---
 
 ## Tableau de correspondance terminologique
@@ -1499,18 +1613,26 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 | Web Visitor                     | **Utilisateur Externe**                    |
 | Public Exposure Surface         | **Façade Publique Gouvernée**              |
 | Public Access Mandate           | **Mandat Public d'Accès**                  |
-| Tracker (rôle Webway)           | **COG Tracker**                           |
+| Tracker (rôle Webway)           | **COG Tracker**                            |
+| Hub / Dashboard                 | **Miyukini Central** (pour utilisateur COG) |
+| Web Portal / Public Portal      | **Miyukini Web Portal** (pour utilisateurs externes) |
+| Service Type 1                  | **Service interne COG**                    |
+| Service Type 2                  | **Service à surface web externe**          |
+| Service Type 3                  | **Service Inter-COG**                      |
 
 
 ---
 
 **Date de création :** 2026-01-27  
-**Version :** 1.10 (ajout COG de référence, Politique de résidence des données sensibles)  
+**Version :** 1.11 (ajout Miyukini Central, Miyukini Web Portal, Service Fondamental, Types de Services)  
 **Statut :** Document de référence normatif — GLOSSAIRE OFFICIEL
 
 **Références croisées :**
 
 - [Miyukini Conceptual References - Definition COG](./Miyukini%20Conceptual%20References%20-%20Definition%20COG.md)
+- [Miyukini Conceptual References - Types de Services et Espaces](./Miyukini%20Conceptual%20References%20-%20Types%20de%20Services%20et%20Espaces.md) : **Classification des Services (Type 1, 2, 3)**
+- [Miyukini Conceptual References - Miyukini Central Hub Services](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Central%20Hub%20Services.md) : **Service Fondamental — Hub COG**
+- [Miyukini Web Portal - Document Fondateur](../services/MiyukiniWebPortal/Miyukini%20Web%20Portal%20-%20Document%20Fondateur.md) : **Service Fondamental — Hub Web**
 - [Miyukini Conceptual References - Politique Residence Donnees Sensibles](./Miyukini%20Conceptual%20References%20-%20Politique%20Residence%20Donnees%20Sensibles.md) : **Centralisation et résidence des données sensibles**
 - [Miyukini Conceptual References - Miyukini Webway System](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) : **Couche de présence et découverte (MWS)**
 - [Miyukini Conceptual References - Miyukini Webway System Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) : **Annexe MWS — normes, formats, protocole, matrice des statuts**
