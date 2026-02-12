@@ -8,6 +8,9 @@
 
 ## Sommaire
 
+0. [L'Experience Vibe Coding — Un projet entierement pilote par IA](#0-lexperience-vibe-coding--un-projet-entierement-pilote-par-ia)  
+   - [Workflow de l'auteur — Outillage et process](#workflow-de-lauteur--outillage-et-process)  
+   - [Mon histoire — Du non-codeur a l'ecosysteme](#mon-histoire--du-non-codeur-a-lecosysteme)
 1. [La Philosophie — Pourquoi Miyukini existe](#1-la-philosophie--pourquoi-miyukini-existe)
 2. [L'Ampleur du Projet — Ce qui est construit](#2-lampleur-du-projet--ce-qui-est-construit)
 3. [Les Strates — Comment tout s'organise](#3-les-strates--comment-tout-sorganise)
@@ -16,10 +19,144 @@
 6. [Les Operateurs — Les executants gouvernes](#6-les-operateurs--les-executants-gouvernes)
 7. [Les Services — Ce que l'utilisateur voit](#7-les-services--ce-que-lutilisateur-voit)
 8. [Miyukini Central — Le point d'entree](#8-miyukini-central--le-point-dentree)
-9. [Services implementes](#9-services-implementes)
+9. [Services implementes — Detail fonctionnel](#9-services-implementes--detail-fonctionnel)
 10. [Etat des lieux du projet](#10-etat-des-lieux-du-projet)
 11. [Documentation de reference](#11-documentation-de-reference)
 12. [Licence](#12-licence)
+
+---
+
+## 0. L'Experience Vibe Coding — Un projet entierement pilote par IA
+
+### Le pari : construire un ecosysteme logiciel complet en Vibe Coding
+
+Miyukini COG est, a notre connaissance, l'un des **plus gros projets entierement concu et implemente en Vibe Coding** — c'est-a-dire en pilotage integral par agents IA, sous supervision humaine.
+
+L'intégralite du code Rust (70+ crates, 49 Toolkits, 9 Cores, des milliers de fichiers), de la documentation (1000+ pages), de l'architecture, et des protocoles a ete produite par des **modeles de langage** (Claude, GPT-4, Gemini) utilises comme **agents de developpement** dans Cursor IDE — et non comme simples assistants de completion.
+
+> **Vibe Coding** : le developpeur humain ne tape plus de code. Il definit l'intention, la vision, les contraintes. L'IA genere, structure, implemente. L'humain supervise, valide, oriente.
+
+### Pourquoi c'est remarquable
+
+Ce projet n'est pas une demo, un prototype, ou un side-project. C'est un **ecosysteme logiciel complet** avec :
+- Une **architecture en strates** (8 niveaux, du Kernel aux Services)
+- **9 Cores de gouvernance** fonctionnels
+- **49 Toolkits** implementes comme crates Rust
+- **6 Services utilisateur** avec backend et interface graphique
+- **2 jeux complets** jouables (MiyukiniClicker, MiyukiniSurvivor)
+- Un **Hub desktop natif** (Miyukini Central)
+- Un **serveur de donnees chiffre** (KindMother) avec protocole TCP/JSON
+- **1000+ pages** de documentation conceptuelle, technique et de marche
+
+Tout cela produit en **Vibe Coding**, avec un seul developpeur humain qui orchestre les agents IA.
+
+### Le probleme : comment faire du Vibe Coding a grande echelle ?
+
+Le Vibe Coding fonctionne bien pour un script, un composant, un petit projet. Mais a l'echelle d'un ecosysteme de 70+ crates avec des milliers de fichiers, **les agents IA perdent le contexte**, inventent des conventions, et divergent les uns des autres.
+
+Miyukini a resolu ce probleme en creant **des protocoles et des outils specifiquement concus pour les agents IA** :
+
+### Les protocoles inventes pour piloter les IA
+
+#### MSCM — Miyukini Semantic Code Markup
+
+Un **systeme de balisage semantique** integre directement dans les commentaires du code source :
+
+```rust
+//! @id toolkit.auth.miyauth
+//! @role security
+//! @layer domain
+//! @human Kit d'outils d'authentification
+//! @do manage_authentication_and_identity
+```
+
+Chaque bloc de code porte ses propres metadonnees semantiques : identifiant unique, role, couche architecturale, description humaine, et description fonctionnelle. Les agents IA peuvent ainsi **comprendre le code sans lire des milliers de fichiers** — ils interrogent les balises.
+
+#### MIP — MSCM Index Protocol
+
+Un **systeme d'indexation structurelle globale** genere automatiquement a partir du code balise MSCM :
+
+```
+mscm_index/
+├── registry.json      # Gouvernance (version, integrite)
+├── blocks.json        # Identite semantique de chaque bloc
+├── hierarchy.json     # Structure parent-enfant
+├── graph.json         # Relations transverses
+├── domains.json       # Vision metier par domaine
+├── layers.json        # Architecture technique par couche
+├── dependencies.json  # Dependances logiques
+├── files.json         # Cartographie code → blocs
+└── stats.json         # Metriques globales
+```
+
+Le MIP transforme le codebase en un **graphe semantique exploitable par IA** : memoire structurelle du projet, modele de navigation, couche de gouvernance. Un agent IA peut comprendre l'architecture globale du projet **en lisant un seul fichier JSON** au lieu de parcourir des centaines de fichiers source.
+
+> *"La semantique est dans le code (MSCM). La structure est dans l'index (MIP). La gouvernance est dans le graphe."*
+
+#### Prompt Protocols — Protocoles de pilotage des agents IA
+
+Trois protocoles normatifs definissent **comment les agents IA doivent travailler** sur le projet :
+
+| Protocole | Role |
+|-----------|------|
+| **Protocole d'Implementation Generale** | Cycle obligatoire en 4 phases : Planification → Distribution → Verification → Gel. Selection du modele IA, gestion du contexte, interdiction de toute interpretation libre. |
+| **Protocole MIP** | Regles de generation et de maintenance de l'index structurel. Tout code produit DOIT etre conforme MSCM. |
+| **Protocole d'Ecriture Documentaire** | Regles pour la generation de documentation conceptuelle par IA, avec nomenclature, qualite et versionnement. |
+
+#### Skills IA — Documentation-as-Instructions
+
+Le projet utilise des **Skills Cursor** — des fichiers de documentation structure destines specifiquement aux agents IA. Ces fichiers ne sont pas de la documentation humaine classique. Ce sont des **instructions normatives** que l'agent IA lit avant de travailler :
+
+- **Skill Architecture** — regles de la pyramide, strates, Cores, Lois d'Autonomie
+- **Skill Glossaire** — terminologie officielle, termes interdits/corrects
+- **Skill MSCM/MIP** — protocole de balisage et d'indexation
+- **Skill Rust Patterns** — structure standard des crates, patterns recurrents
+- **Skill Documentation** — nomenclature et regles de documentation
+
+> L'agent IA ne "devine" pas les conventions du projet. Il les **lit** dans des fichiers structures, comme un nouveau developpeur lirait un guide d'onboarding.
+
+### Ce que cette experience demontre
+
+1. **Le Vibe Coding est viable pour des projets complexes** — a condition d'investir massivement dans les protocoles, la documentation-as-instructions, et l'indexation semantique
+2. **L'IA a besoin de contraintes formelles** — sans protocoles stricts, les agents divergent, inventent, et produisent du code incoherent
+3. **La documentation devient du code** — les Skills, les Prompt Protocols, et le MSCM/MIP ne sont pas des docs passives mais des **instructions executables** qui guident les agents
+4. **Un seul humain peut piloter un ecosysteme de 70+ crates** — a condition d'avoir les bons outils de gouvernance IA
+
+### Workflow de l'auteur — Outillage et process
+
+L'auteur du projet travaille en **Vibe Coding** avec un setup maximal : **Cursor IDE**, **Claude Code**, **Codex** et l'abonnement Cursor. Les credits (deux LLM + Cursor) sont souvent utilises a pleine capacite. Voici le process applique pour chaque nouveau service ou fonctionnalite :
+
+1. **Documentation fondatrice** — Rediger d'abord une documentation fondamentale de l'idee : quoi, pourquoi, pour qui. L'intention est fixee avant toute ligne de code.
+
+2. **Analyse de correspondances** — Demander aux agents s'il existe des correspondances, de la concurrence ou des solutions qui s'en approchent. Cela evite de reinventer l'existant et affine le positionnement.
+
+3. **Analyse PR (Product / Positionnement)** — Realiser une analyse produit/positionnement. Une fois celle-ci faite et l'idee solidement documentee, on passe a l'etape suivante.
+
+4. **Guide d'implementation et bornages** — Rediger le guide d'implementation avec des bornages clairs (perimetre, contraintes, livrables). Ce document pilote les agents pendant l'implementation.
+
+5. **Indexation MIP** — Utiliser le protocole **MIP** (MSCM Index Protocol) pour indexer chaque bloc de code. L'IA retrouve plus rapidement l'information dans la codebase en s'appuyant sur l'index semantique plutot qu'en parcourant des milliers de fichiers.
+
+6. **Implementation multi-agents** — Faire l'implementation avec plusieurs agents en parallele, sur plusieurs postes si necessaire. Les guides et le MIP permettent de garder la coherence malgre le travail distribue.
+
+7. **Audit et verification des failles** — Realiser un audit et une verification des failles (vulnerabilites, incoherences). L'auteur s'appuie notamment sur **Opus 4.6** pour cette phase lorsqu'il en trouve.
+
+8. **Variation des LLM** — En fonction des taches (doc, code, refacto, revue), varier les modeles (Claude, Codex, Cursor, etc.) pour optimiser les tokens et le rapport qualite/cout.
+
+9. **Phase de test et passage au service suivant** — Conclure par une phase de test, puis enchaîner sur un autre service ou une autre fonctionnalite en reprenant le cycle depuis l'etape 1.
+
+> *"Documenter d'abord. Indexer pour que l'IA navigue. Implementer en parallele. Auditer. Varier les modeles. Puis passer au suivant."*
+
+### Mon histoire — Du non-codeur a l'ecosysteme
+
+Je ne suis pas codeur, mais j'ai une **surface de contact avec le code** qui a ete assez importante. Dans les annees 2000, j'ai beaucoup utilise des outils comme **MyPHP**, **PHPBB**, **MySQL**. J'ai aussi fait du **modding** pour des jeux — donc je comprends la logique autour du code, sans etre celui qui ecrit les bases.
+
+Il y a deux ans, j'ai pu tester **Loveable**. Ce fut assez revelateur, mais frustrant : tres vite, ca faisait n'importe quoi. Ensuite, j'ai ete en contact avec **Cursor**. A ce moment-la, j'ai commence a developper des sites web, des petites apps, des petits jeux — mais j'etais toujours frustre par les **dependances externes**, le fait de ne pas controler la chaîne. Du coup, je suis parti dans une **experimentation** : **Miyukini COG**. L'idee etait de controler **toute la chaîne**, du plus bas niveau possible pour moi jusqu'a l'utilisateur final.
+
+**L'analogie du restaurant** : avant, c'etait comme si j'allais souvent manger au restaurant en ne controlant que *ou* j'allais. La, je controle le restaurant, la chaîne de distribution du restaurant, la production des ingredients, la transformation — et c'est franchisable (les differents environnements). Je controle tout au maximum, pour voir si c'est possible en vibe codant.
+
+Au **debut du developpement** de Miyukini COG, j'etais dans un lieu **sans internet solide**, avec un debit tres bas. Je me suis dit qu'il etait interessant de partir du **postulat que l'environnement pouvait vivre en autonomie** en dehors du reseau. Il a fallu reflechir a tous les scenarios : connexion, reconnexion, fonctionnement asynchrone, etc. N'etant pas codeur, j'en ai profite pour que, au fur et a mesure du developpement, l'IA m'explique **comment fonctionne chaque chose** — quel langage utiliser, quelle dependance avoir au *compile* mais pas au *runtime*, etc. L'autonomie n'est donc pas qu'un choix de conception : c'est ne d'un contexte reel et d'une volonte d'apprendre en construisant.
+
+> *"Controler toute la chaîne. Partir de l'autonomie comme norme. Apprendre en faisant expliquer chaque brique."*
 
 ---
 
@@ -71,14 +208,19 @@ Miyukini est un **projet experimental a grande echelle**, ecrit en **Rust**, ave
 Pour donner une idee de l'echelle :
 
 ```
- 9 Cores de gouvernance       (les institutions du systeme)
-49 Toolkits implementes        (les outils professionnels)
-10 Services documentes         (les services publics)
-70+ crates Rust                (les modules de code)
+  9 Cores de gouvernance        (les institutions du systeme)
+ 49 Toolkits implementes        (les outils professionnels)
+ 10 Services documentes          (les services publics)
+  6 Services fonctionnels       (avec backend + UI)
+  2 Jeux jouables               (MiyukiniClicker + MiyukiniSurvivor)
+ 70+ crates Rust                (les modules de code)
+  3 Protocoles IA               (Implementation, MIP, Documentation)
+  5 Skills Cursor               (instructions normatives pour agents IA)
 
 1000+ pages de documentation conceptuelle
  244 analyses de marche (Odoo, etc.)
  Architecture complete en strates (de la couche 0 au sommet)
+ Entierement produit en Vibe Coding (pilotage par agents IA)
 ```
 
 Ce n'est pas un prototype. C'est un **ecosysteme structurel** dont l'ambition est de remplacer les CMS, SaaS, et applications silotees par un environnement souverain, gouverne, et autonome.
@@ -378,22 +520,235 @@ flowchart TD
 
 ---
 
-## 9. Services implementes
+## 9. Services implementes — Detail fonctionnel
 
-### Etat d'implementation
+### 9.1 Miyukini Central — Le Hub
 
-| Couche | Composant | Statut |
-|--------|-----------|--------|
-| **Kernel** | miyukini-kernel | Implemente |
-| **Cores** (x9) | strongfather, kindmother, caringnanny, masterbutler, borderguard, everbuddy, worrysentinel, tamr, logisticssteward | Implementes |
-| **Toolkits** (x49) | Tous les MiyuXxx | Phase 1 (squelettes) complete, Phase 2 (logique) en cours |
-| **Miyukini Central** | Hub desktop (egui) | Fonctionnel |
-| **JayKoa** | Calendrier universel | Implemente (crate + UI) |
-| **JayFestival** | Gestion evenements | Implemente (crate) |
-| **MiyukiniClicker** | Jeu idle/clicker | Implemente (crate) |
-| **MiyukiniSurvivor** | Jeu survivor/TD | Implemente (crate lord_of_the_castle) |
-| **MiyukiniAdmin** | Console admin | Implemente (crate + UI web) |
-| **JayRDV, JayKonta, JayXpose, JayFaim, MiyukiniSales** | Services documentes | Phase conceptuelle (documentation complete, pas encore de crate) |
+**Crate** : `miyukini-central` | **App** : `apps/central`
+**Statut** : Fonctionnel
+
+Miyukini Central est l'**application desktop native** (Dioxus/Tauri, pur Rust) qui sert de point d'entree unique a l'ecosysteme. C'est un **Operateur d'Interface** (Strate 7) qui ne contient aucune logique metier — il orchestre et presente les Services.
+
+**Fonctionnalites implementees** :
+- **Catalogue de services** avec grille de cartes interactives (nom, description, icone, categorie)
+- **Systeme d'onglets** avec keep-alive — chaque service ouvert conserve son etat meme en arriere-plan
+- **Routeur de services** — navigation fluide entre Hub et services ouverts
+- **Ecran de connexion** et **rite d'entree** (onboarding)
+- **Profil utilisateur** et **parametres** (theme clair/sombre persistant)
+- **Sidebar laterale** avec recherche et filtres par categorie/type
+- **Header** avec barre d'onglets dynamique
+
+---
+
+### 9.2 JayFestival — Gestion d'evenements et festivals
+
+**Crate** : `jayfestival` | **UI** : `apps/central/src/services/jayfestival/`
+**Statut** : Fonctionnel (backend + UI complete)
+
+JayFestival est un service complet de **gestion d'evenements B2B2C** — des petits marches artisanaux aux grands festivals. Il gere l'ensemble du cycle de vie d'un evenement : creation, organisation, gestion des exposants, programme, billetterie, et experience visiteur.
+
+**Architecture multi-roles** — chaque role dispose de son propre espace :
+
+| Role | Espace | Fonctionnalites |
+|------|--------|----------------|
+| **Organisateur** | Dashboard, Editions, Programme, Exposants, Plan, Budget, Equipe, Documents, Parametres, Publication | Gestion complete de l'evenement, supervision des exposants, budget et facturation |
+| **Exposant** | Dashboard, Candidatures, Participations, Agenda, Factures, Documents, Compte, Fiche publique, Notifications | Candidature aux evenements, gestion de la presence, documents et paiements |
+| **Visiteur** | Dashboard, Catalogue, Agenda, Activites, Billets, Reservations, Compte | Decouverte, billetterie, planification de visite |
+| **Non-connecte** | Landing, Recherche, Annuaire, Evenements | Facade publique pour decouvrir les evenements |
+
+**Integrations** :
+- **JayKoa** — synchronisation des dates dans le calendrier universel
+- **JayKonta** — gestion financiere (budget, factures, paiements)
+- **JayXpose** — profils exposants et vitrines produits
+- **MiyuBooking** — reservation de creneaux et d'emplacements
+- **MiyuClock** — gestion du temps et des plannings
+- **MiyuNotify** — notifications en temps reel
+
+---
+
+### 9.3 JayKoa — Calendrier universel
+
+**Crate** : `jaykoa` | **UI** : `apps/central/src/services/jaykoa/`
+**Statut** : Fonctionnel (backend + UI complete)
+
+JayKoa est le **calendrier universel du COG**. Il ne cree pas d'evenements propres — il **reflete et agrege** le temps provenant de tous les autres services. C'est un miroir temporel gouverne.
+
+**Principe fondamental** : JayKoa ne modifie jamais les donnees sources. Il projette en lecture seule les evenements de JayFestival, JayRDV, et tout autre service temporel.
+
+**Fonctionnalites implementees** :
+- **Vue Jour** — agenda detaille heure par heure
+- **Vue Semaine** — grille 7 jours avec evenements positionnes
+- **Vue Mois** — vue calendrier classique avec indicateurs
+- **Vue Planning** — vue emploi du temps multi-agenda
+- **Mini-calendrier** de navigation rapide
+- **Sidebar** avec gestion des agendas (creation, activation/desactivation, couleurs)
+- **Formulaire de creation d'evenement** avec champs complets
+- **Service de synchronisation** — sync bidirectionnelle avec JayFestival
+- **Export iCal** — compatibilite avec les calendriers externes (Google, Apple, Outlook)
+- **Detection de conflits** — alerte quand des evenements se chevauchent
+
+**Integrations** :
+- **JayFestival** — reflete les dates d'editions, les creneaux exposants, le programme
+- **JayRDV** — reflete les rendez-vous et reservations (en cours)
+
+---
+
+### 9.4 JayKonta — Comptabilite et budget
+
+**Crate** : `jaykonta` | **UI** : `apps/central/src/services/jaykonta/`
+**Statut** : Partiellement fonctionnel (Bourse complete, Comptabilite en cours)
+
+JayKonta est le service financier unifie du COG. Il couvre deux echelles : la **gestion budgetaire personnelle** (Bourse) et la **comptabilite d'entreprise** (Compte).
+
+**Module Bourse (fonctionnel)** :
+- **Dashboard** — vue d'ensemble des finances personnelles, solde, tendances
+- **Mouvements** — historique complet des transactions avec filtres et recherche
+- **Recurrences** — gestion des depenses et revenus recurrents (loyer, salaire, abonnements)
+- **Previsions** — projection budgetaire avec graphiques de tendance
+
+**Module Compte (en developpement)** :
+- **Journal comptable** — ecritures en partie double
+- **Devis et factures** — cycle devis → facture → paiement
+- **Paiements** — suivi des encaissements et decaissements
+
+**Architecture domaine** :
+- `domain/purse.rs` — modele de bourse personnelle
+- `domain/account.rs` — modele de compte professionnel
+- `integrations/` — contrats d'integration inter-services (CK-INT-01, CK-INT-02, CK-INT-03)
+- `services/` — PurseService (logique budgetaire), AuditService (tracabilite)
+
+---
+
+### 9.5 JayXpose — Profil exposant et vitrine
+
+**Crate** : `jayxpose` | **UI** : `apps/central/src/services/jayxpose/`
+**Statut** : Fonctionnel (backend + UI complete)
+
+JayXpose est le service de **profil exposant et site vitrine** pour artisans, artistes, petites marques. Il permet de creer un catalogue produit, une identite visuelle, et une fiche publique — le tout integre nativement dans JayFestival.
+
+**Fonctionnalites implementees** :
+- **Dashboard** — vue d'ensemble de l'activite exposant
+- **Entreprise** — informations legales, identite, coordonnees
+- **Catalogue produits** — liste, ajout, modification, suppression de produits
+- **Formulaire produit** — creation detaillee avec photos, prix, categories
+- **Vitrine** — presentation publique du catalogue et de la marque
+- **Documents** — coffre-fort documentaire (contrats, factures, certifications)
+- **Fiche publique** — profil visible par les visiteurs et organisateurs
+
+**Integrations** :
+- **JayFestival** — les exposants de JayXpose apparaissent dans les annuaires des evenements
+- **KindMother** — persistance chiffree des donnees exposant
+
+---
+
+### 9.6 MiyukiniClicker — Jeu idle/clicker + strategie
+
+**Crate** : `miyuclicker` | **App** : `apps/miyuclicker` | **UI** : `apps/central/src/services/miyuclicker/`
+**Statut** : Fonctionnel et jouable
+
+MiyukiniClicker est le **premier jeu officiel de l'ecosysteme Miyukini**. C'est un idle/clicker avec des elements de strategie et de gestion de cite. Il sert egalement de **demonstration technique** : un jeu complet coexistant avec des services professionnels dans un meme COG.
+
+**Mecaniques implementees** :
+- **Simulation idle** — production automatique de ressources meme en arriere-plan
+- **Batiments de production** — Ferme, Scierie, Carriere, Mine, Atelier, Forge
+- **Systeme de construction** — Maisons, Casernes, Guilde
+- **Gestion de population** — Ouvriers, Batisseurs, Soldats
+- **Systeme de combat** — affrontements tactiques
+- **Carte strategique** — vue de la cite et du territoire
+- **Systeme de sauvegarde** — persistence locale de la partie
+- **Controle de vitesse** — acceleration du jeu (x1, x2, x5, x10)
+
+**Architecture technique** :
+- `idlesim.rs` — moteur de simulation idle (production, transformation, construction)
+- `combat.rs` — systeme de combat au tour par tour
+- `carte.rs` — carte strategique et exploration
+- `save.rs` — serialisation/deserialisation de l'etat de jeu
+- `state.rs` — machine a etats du jeu
+
+---
+
+### 9.7 MiyukiniSurvivor (Lord of the Castle) — Jeu Survivor/Tower Defense
+
+**Crate** : `lord_of_the_castle` | **UI** : integration dans Central via `survivor_embed.rs`
+**Statut** : Fonctionnel et jouable
+
+MiyukiniSurvivor est un **jeu hybride Survivor + Tower Defense** ou le joueur protege un chateau contre des vagues d'ennemis. Il combine une phase de preparation strategique et une phase de bataille en temps reel.
+
+**Mecaniques implementees** :
+- **Creation de personnage** — choix de classe, personnalisation
+- **Phase de preparation** — placement de tours, recrutement de troupes, ameliorations
+- **Phase de bataille** — combat en temps reel avec gestion des vagues d'ennemis
+- **Systeme de tours** — differents types de tours defensives avec portee et degats
+- **Systeme de troupes** — unites avec competences et comportement IA
+- **Ennemis varies** — types multiples avec comportements distincts
+- **Boucle de jeu** — alternance preparation/bataille avec progression
+- **Systeme de loot** — recompenses et butin apres les batailles
+- **Competences guerrier** — arbre de competences pour le personnage principal
+- **Sauvegarde** — persistence de la progression
+
+**Architecture technique** :
+- `game_loop.rs` — boucle de jeu principale (tick de bataille)
+- `game_state.rs` — etats du jeu (menu, preparation, bataille, victoire, defaite)
+- `towers.rs`, `troops.rs`, `enemies.rs` — entites de jeu
+- `castle.rs` — chateau et ses proprietes
+- `ui/` — composants UI complets (menu, creation, aire de jeu, sidebar, overlays)
+- Executable standalone pour developpement/test + integration dans Central
+
+---
+
+### 9.8 KindMother Service — Infrastructure de persistance chiffree
+
+**Crates** : `kindmother-service`, `kindmother-client`, `kindmother-db-adapter`
+**Statut** : Fonctionnel (infrastructure critique)
+
+KindMother n'est pas un service utilisateur — c'est le **Core de persistance** (Strate 4) rendu operationnel comme serveur TCP. C'est le **seul point d'acces autorise aux donnees** dans tout l'ecosysteme.
+
+**Fonctionnalites implementees** :
+- **Serveur TCP/JSON** — ecoute sur localhost, protocole requete/reponse structure
+- **Base de donnees chiffree** — libSQL avec chiffrement AES-256-CBC
+- **Derivation de cles** — Argon2id pour la generation de cles a partir de mots de passe
+- **Systeme WriteIntent** — toute ecriture passe par une intention formelle auditee
+- **Controle d'acces par Operateur** — chaque Operateur n'accede qu'a ses propres donnees
+- **Arbitrage** — regles de permission et de resolution de conflits
+
+**Client** (`kindmother-client`) :
+- Bibliotheque Rust pour tous les Operateurs
+- Connexion TCP, envoi de requetes, reception de reponses
+- Support complet du protocole WriteIntent
+- Gestion d'erreurs typee
+
+> Chaque service (JayFestival, JayKoa, JayKonta, JayXpose...) possede son propre module `data/kindmother_db.rs` qui utilise le client KindMother pour persister ses donnees de maniere chiffree et gouvernee.
+
+---
+
+### 9.9 MiyukiniAdmin — Console d'administration souveraine
+
+**Crate** : `miyukini-admin`
+**Statut** : Implemente (interface web)
+
+MiyukiniAdmin est l'**Operateur Souverain** (Strate 9) — la plus haute autorite du systeme. C'est la seule entite qui peut outrepasser les regles normales de gouvernance en cas d'urgence.
+
+**Fonctionnalites** :
+- Interface d'administration web
+- Gestion des Operateurs et de leurs permissions
+- Supervision de l'etat du systeme
+- Actions d'exception (intervention souveraine)
+
+---
+
+### 9.10 Tableau recapitulatif
+
+| Service | Backend | UI | Persistance | Integrations | Statut |
+|---------|---------|-----|-------------|--------------|--------|
+| **Miyukini Central** | `miyukini-central` | Dioxus | — | Tous les services | Fonctionnel |
+| **JayFestival** | `jayfestival` | 40+ ecrans | KindMother | JayKoa, JayKonta, JayXpose, MiyuBooking | Fonctionnel |
+| **JayKoa** | `jaykoa` | 4 vues calendrier | KindMother | JayFestival, JayRDV | Fonctionnel |
+| **JayKonta** | `jaykonta` | Bourse complete | KindMother | Contrats CK-INT | Partiellement fonctionnel |
+| **JayXpose** | `jayxpose` | 7 sections | KindMother | JayFestival | Fonctionnel |
+| **MiyukiniClicker** | `miyuclicker` | Jeu complet | Locale | — | Fonctionnel et jouable |
+| **MiyukiniSurvivor** | `lord_of_the_castle` | Jeu complet | Locale | — | Fonctionnel et jouable |
+| **KindMother** | `kindmother-service` | — | libSQL chiffre | Tous les services | Infrastructure critique |
+| **MiyukiniAdmin** | `miyukini-admin` | Web | — | Tous les Cores | Implemente |
 
 ### Prochaine phase
 
@@ -408,15 +763,22 @@ Le travail se deplace vers l'**implementation des Operateurs** (Strate 7). Les O
 - La **Pyramide**, les **Cores**, les **Lois d'autonomie** et les **contrats de gouvernance** sont documentes et stabilises
 - Le **Kernel** et les **9 Cores** sont implementes comme crates Rust
 - Les **49 Toolkits** sont implementes (squelettes complets, logique progressive)
-- **Miyukini Central** (Hub desktop) est fonctionnel
+- **Miyukini Central** (Hub desktop) est fonctionnel avec systeme d'onglets et keep-alive
+- **6 services utilisateur** fonctionnels avec backend et interface graphique
+- **2 jeux complets** jouables integres dans le Hub
+- **KindMother** (serveur de persistance chiffre) operationnel avec protocole TCP/JSON
 - **1000+ pages** de documentation conceptuelle couvrant l'ensemble de l'architecture
 - **244 analyses de marche** (dont une etude exhaustive d'Odoo module par module)
 - Systeme de **balisage semantique** (MSCM) et d'**indexation structurelle** (MIP) operationnel
+- **3 protocoles de pilotage IA** (Implementation, MIP, Documentation) normatifs et utilises quotidiennement
+- **5 Skills Cursor** pour guider les agents IA (Architecture, Glossaire, MSCM/MIP, Rust Patterns, Documentation)
 
 ### Ce qui est en cours
 
 - Implementation progressive de la logique metier dans les Toolkits (Phase 2)
-- Conception produit des services Jay (JayRDV, JayFestival, JayKonta, JayXpose, JayFaim)
+- Module Compte (comptabilite entreprise) dans JayKonta
+- Integration JayRDV dans JayKoa
+- Conception produit des services restants (JayRDV, JayFaim, MiyukiniSales)
 - Specification des besoins en Operateurs pour chaque service
 
 ### Ce qui reste a faire
@@ -424,18 +786,23 @@ Le travail se deplace vers l'**implementation des Operateurs** (Strate 7). Les O
 - Implementation des **Operateurs** (Strate 7) — la couche qui orchestre les Toolkits pour delivrer les services
 - **Federation inter-COG** — les protocoles sont documentes, l'implementation est a venir
 - **Webway** — le reseau de decouverte et federation entre COG
+- **Services supplementaires** — JayRDV, JayFaim, MiyukiniSales (documentation complete, implementation a venir)
+- **Portail Web** (MiyukiniWebPortal) — facades publiques des services
 
 ### Maturite du projet
 
 ```
-Documentation conceptuelle    ████████████████████  95%
-Architecture (Pyramide/Cores) ████████████████████  95%
-Kernel                        ██████████████████░░  90%
-Toolkits (49 crates)          ████████████░░░░░░░░  60%
-Services (conception)         ████████████░░░░░░░░  55%
-Miyukini Central (Hub)        ██████████████░░░░░░  70%
-Operateurs (implementation)   ████░░░░░░░░░░░░░░░░  15%
-Federation inter-COG          ██░░░░░░░░░░░░░░░░░░  10%
+Documentation conceptuelle       ████████████████████  95%
+Architecture (Pyramide/Cores)    ████████████████████  95%
+Protocoles IA (MSCM/MIP/Skills) ██████████████████░░  90%
+Kernel                           ██████████████████░░  90%
+Toolkits (49 crates)             ████████████░░░░░░░░  60%
+Services (implementation)        ██████████████░░░░░░  70%
+Miyukini Central (Hub)           ████████████████░░░░  80%
+KindMother (persistance)         ████████████████░░░░  80%
+Jeux (Clicker + Survivor)        ██████████████░░░░░░  70%
+Operateurs (implementation)      ████░░░░░░░░░░░░░░░░  15%
+Federation inter-COG             ██░░░░░░░░░░░░░░░░░░  10%
 ```
 
 ---
@@ -461,6 +828,16 @@ Toute la documentation conceptuelle de reference est disponible dans le dossier 
 | **Comportement des COG (schéma)** | [Comportement COG Environnements](docs/public/FR/Miyukini%20-%20Comportement%20COG%20Environnements.md) |
 | **Maintenance Kernel** | [Kernel Maintenance](docs/public/Miyukini%20-%20Kernel%20Maintenance%20Observability%20Contract.md) |
 
+### Protocoles IA et Vibe Coding
+
+| Theme | Document |
+|-------|----------|
+| **Protocole d'implementation IA** | [Implementation generale](docs/contrats/Miyukini%20Prompt%20Protocol%20-%20Implémentation%20générale.md) |
+| **Protocole MIP (indexation)** | [MIP v1 MSCM Index Protocol](docs/contrats/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md) |
+| **Protocole de documentation IA** | [Ecriture Documentation Conceptuelle](docs/contrats/Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md) |
+| **Protocole d'ecriture enrichie** | [Ecriture Enrichie Toolkits](docs/contrats/Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md) |
+| **Index MIP genere** | `mscm_index/` (registry, blocks, hierarchy, graph, domains, layers...) |
+
 ### Pour aller plus loin (repo prive)
 
 | Theme | Emplacement |
@@ -470,6 +847,7 @@ Toute la documentation conceptuelle de reference est disponible dans le dossier 
 | Documentation des Cores | `docs/cores/` |
 | Analyses de marche | `docs/market/` |
 | Securite | `docs/security/` |
+| Skills Cursor (instructions IA) | `.cursor/skills/` |
 
 ---
 
@@ -486,4 +864,4 @@ Details : [Miyukini — Politique de licence](docs/legal/Miyukini%20-%20Politiqu
 
 > *"Miyukini n'est pas une bibliotheque. C'est un environnement gouverne dans lequel des Operateurs operent."*
 
-**Derniere mise a jour** : 2026-02-07
+**Derniere mise a jour** : 2026-02-11

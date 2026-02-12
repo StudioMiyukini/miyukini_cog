@@ -64,7 +64,7 @@ Le répertoire **`ui/game_ui_pack`** contient des packs d’assets UI et graphiq
 
 | Fichier / thème | Rôle | Pertinence MiyuClicker |
 |-----------------|------|-------------------------|
-| **Fonts** | Cute_Fantasy_Font_5x9.png, CuteFantasy-5x9.ttf | Typo in-game (egui peut charger TTF). |
+| **Fonts** | Cute_Fantasy_Font_5x9.png, CuteFantasy-5x9.ttf | Typo in-game (Dioxus peut charger TTF). |
 | **UI_ALL.png** | Assemblage UI | Référence layout. |
 | **UI_Bars.png** | Barres (vie, ressource, chargement) | **Barres ressources**, moral, troupes. |
 | **UI_Buttons.png** | Boutons | Menus, actions (allouer gens, envoyer troupes). |
@@ -99,11 +99,11 @@ Le répertoire **`ui/game_ui_pack`** contient des packs d’assets UI et graphiq
 | **16x16 / 32x32 / 48x48** | Variantes de résolution | UI adaptable (différentes densités). |
 | **Modern_UI_Style_1 / 2** | Styles UI modernes | Alternative look « moderne » (non fantasy). |
 | **Modern_UI_Gamepad** | Indicateurs manette | Optionnel (support manette). |
-| **Animated (GIF)** | Boutons poubelle (trash) animés | Exemples d’**animations UI** (équivalent possible en spritesheet pour egui). |
+| **Animated (GIF)** | Boutons poubelle (trash) animés | Exemples d’**animations UI** (équivalent possible en spritesheet pour Dioxus). |
 | **Portrait_Generator** | Accessories, Eyes, Hairstyles, Skins (PNG + Aseprite) | **Portraits** unités / héros (beta v1.0). |
 | **Portrait_Generator_ase** | Fichiers .aseprite | Édition / variantes de portraits. |
 
-**Usage recommandé :** UI alternative « moderne » ; **Portrait Generator** pour héros / généraux en beta v1.0 ; référence pour **animations UI** (GIF → spritesheet pour egui).
+**Usage recommandé :** UI alternative « moderne » ; **Portrait Generator** pour héros / généraux en beta v1.0 ; référence pour **animations UI** (GIF → spritesheet pour Dioxus).
 
 #### Référence 32x32 (implémentation MiyuClicker)
 
@@ -117,7 +117,7 @@ Pour l’UI MiyuClicker, le pack **32x32** est la cible recommandée (barres, bo
 | **Gamepad (optionnel)** | `ui/game_ui_pack/modernuserinterface-win/32x32/Modern_UI_Gamepad_32x32.png` |
 | **Animated (GIF, référence)** | `ui/game_ui_pack/modernuserinterface-win/32x32/Animated_32x32/` |
 
-Les spritesheets Style 1 et Style 2 contiennent boutons, barres, cadres et indicateurs (type « Qté actuel / Qté max »). Lors de l’intégration des textures dans egui, utiliser les constantes définies dans le crate (module `ui_assets`) pour résoudre ces chemins.
+Les spritesheets Style 1 et Style 2 contiennent boutons, barres, cadres et indicateurs (type « Qté actuel / Qté max »). Lors de l’intégration des textures dans Dioxus, utiliser les constantes définies dans le crate (module `ui_assets`) pour résoudre ces chemins.
 
 ---
 
@@ -189,7 +189,7 @@ Les spritesheets Style 1 et Style 2 contiennent boutons, barres, cadres et indic
 | **Armes / équipement (icônes)** | **ui-icn_fantasy-weapons_01** (après vérif. licence) | Type d’unité, équipement. |
 | **Portraits héros (beta v1.0)** | **modernuserinterface-win** → Portrait_Generator | Généraux, héros. |
 | **Animations UI (feedback)** | Cute_Fantasy_UI → Pointer_Click_Anim ; modernuserinterface-win → GIF (référence spritesheet) | Toolkit animation par frame. |
-| **Polices** | Cute_Fantasy_UI → Fonts (ttf) | egui : chargement de polices. |
+| **Polices** | Cute_Fantasy_UI → Fonts (ttf) | Dioxus : chargement de polices. |
 
 ---
 

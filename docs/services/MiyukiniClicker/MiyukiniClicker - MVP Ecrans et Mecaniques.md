@@ -67,12 +67,12 @@ Ce document définit le **MVP (Minimum Viable Product)** de MiyuClicker : **écr
 
 | Toolkit | Rôle | Utiliser / Créer | Référence |
 |---------|------|-------------------|-----------|
-| **Stack UI (egui/eframe)** | Fenêtres, panels, boutons, barres, liste déroulante, rendu 2D. | **Utiliser** | Stack UI officielle Miyukini ([Miyukini - Stack UI egui eframe](../../ux_ui/Miyukini%20-%20Stack%20UI%20egui%20eframe.md)). |
+| **Stack UI (Dioxus)** | Fenêtres, panels, boutons, barres, liste déroulante, rendu natif WGPU. | **Utiliser** | Stack UI officielle Miyukini ([Miyukini - Stack UI Dioxus](../../ux_ui/Miyukini%20-%20Stack%20UI%20Dioxus.md)). |
 | **MiyuClickerSprites** | Chargement d’images, spritesheets, cache textures, frame → Rect (animation par frame). | **Créer** | Toolkit interne jeu ; alimentation depuis `ui/game_ui_pack`. |
 | **MiyuClickerIdleSim** | Tick simulation : ressources, consommation, production, moral, cap gens, affectations. | **Créer** | Outils : `tick.apply`, `state.resources_update`, `state.allocation_apply` (logique métier sans UI). |
-| **MiyuClickerSave** | Sérialisation / désérialisation état partie ; lecture/écriture slots (fichier ou eframe persistence). | **Créer** | Outils : `save.slot_write`, `save.slot_read`, `save.slot_list` (métadonnées pour affichage slots). |
+| **MiyuClickerSave** | Sérialisation / désérialisation état partie ; lecture/écriture slots (sauvegarde fichier JSON). | **Créer** | Outils : `save.slot_write`, `save.slot_read`, `save.slot_list` (métadonnées pour affichage slots). |
 | **MiyuClickerCombat** | Résolution combat : attaquant, défenseur, hasard → vainqueur, troupes restantes. | **Créer** | Outil : `combat.resolve` (stats + RNG). |
-| **MiyuClickerCarte** | Modèle carte (nœuds, arêtes) ; déplacements en cours ; rendu (egui painter) et hit-test. | **Créer** | Toolkit interne : modèle + rendu + interaction. |
+| **MiyuClickerCarte** | Modèle carte (nœuds, arêtes) ; déplacements en cours ; rendu (éléments SVG/canvas Dioxus) et hit-test. | **Créer** | Toolkit interne : modèle + rendu + interaction. |
 
 **Règle :** Les Toolkits **n’exécutent que des capacités déclarées** (Tools) ; pas de logique métier décisionnelle (StrongFather, etc.). Les **données** (état du jeu) sont fournies dans le flux ou lues/écrites via MiyuClickerSave.
 
@@ -82,7 +82,7 @@ Ce document définit le **MVP (Minimum Viable Product)** de MiyuClicker : **écr
 
 | Opérateur | Rôle MVP | Type | Toolkits consommés |
 |-----------|----------|------|---------------------|
-| **MiyuClickerUI** | Rendu de tous les écrans (Loading, Landing, Slots, Ma citée, Carte du monde) ; barre ressources ; menu config ; 4 boutons ; liste déroulante. | Opérateur d’Interface | egui/eframe, MiyuClickerSprites, MiyuClickerCarte (rendu). |
+| **MiyuClickerUI** | Rendu de tous les écrans (Loading, Landing, Slots, Ma citée, Carte du monde) ; barre ressources ; menu config ; 4 boutons ; liste déroulante. | Opérateur d’Interface | Dioxus, MiyuClickerSprites, MiyuClickerCarte (rendu). |
 | **MiyuClickerSim** | Exécution du **tick** : mise à jour des ressources, consommation, production, moral, cap. Appelé à chaque frame ou à intervalle fixe depuis l’UI. | Opérateur de Service | MiyuClickerIdleSim. |
 | **MiyuClickerSave** | Sauvegarde / chargement des 3 slots ; fourniture des métadonnées (date, résumé) pour l’écran Slots. | Opérateur de Service | MiyuClickerSave (Tools). |
 | **MiyuClickerCombat** | Résolution des combats (carte) : appel après arrivée des troupes sur une cité adverse. | Opérateur de Service / Tool | MiyuClickerCombat. |
@@ -103,7 +103,7 @@ Ce document définit le **MVP (Minimum Viable Product)** de MiyuClicker : **écr
 | **Contrat d’équipe** | À formaliser : flux autorisés entre Opérateurs (UI → Sim, UI → Save, UI → Carte, Carte → Combat). |
 | **Mandat de permission** | StrongFather émet un mandat pour la session de jeu ; les Opérateurs collaborent sous ce mandat. |
 
-**Point d’entrée :** Une application **eframe** (desktop ou WASM) qui crée l’environnement COG (ou un mode démo simplifié sans COG complet pour le MVP), instancie les Opérateurs et affiche **MiyuClickerUI**. Les Toolkits sont enregistrés (Master Butler) ou utilisés en direct selon le niveau d’intégration COG retenu pour le MVP.
+**Point d’entrée :** Une application **Dioxus** (desktop natif via Blitz/WGPU) qui crée l’environnement COG (ou un mode démo simplifié sans COG complet pour le MVP), instancie les Opérateurs et affiche **MiyuClickerUI**. Les Toolkits sont enregistrés (Master Butler) ou utilisés en direct selon le niveau d’intégration COG retenu pour le MVP.
 
 ---
 
@@ -113,7 +113,7 @@ Ce document définit le **MVP (Minimum Viable Product)** de MiyuClicker : **écr
 |----------|---------|
 | **Écrans** | Loading, Landing, Slots, Ma citée (barre + 4 boutons + liste affectation), Carte du monde (cités, routes, envoi troupes, combat simplifié). |
 | **Mécaniques** | Clic (Champs, Ateliers, Château, Village), affectation des gens (liste déroulante), tick (ressources, moral, cap), habitations (bois+pierre), outils (matières), armes (fer+bois), sauvegarde 3 slots, combat (résolution simple). |
-| **Toolkits** | Utiliser : egui/eframe. Créer : MiyuClickerSprites, MiyuClickerIdleSim, MiyuClickerSave, MiyuClickerCombat, MiyuClickerCarte. |
+| **Toolkits** | Utiliser : Dioxus. Créer : MiyuClickerSprites, MiyuClickerIdleSim, MiyuClickerSave, MiyuClickerCombat, MiyuClickerCarte. |
 | **Opérateurs** | MiyuClickerUI, MiyuClickerSim, MiyuClickerSave, MiyuClickerCombat, MiyuClickerCarte. |
 | **Service** | MiyuClicker = agrégat des Opérateurs ci-dessus. |
 
@@ -126,7 +126,7 @@ Ce document définit le **MVP (Minimum Viable Product)** de MiyuClicker : **écr
 - [MiyuClicker - Ergonomie Ecran Gestion](MiyuClicker%20-%20Ergonomie%20Ecran%20Gestion.md)
 - [MiyuClicker - Operateurs et Toolkits](MiyuClicker%20-%20Operateurs%20et%20Toolkits.md)
 - [MiyuClicker - Guide Implementation MVP](MiyuClicker%20-%20Guide%20Implementation%20MVP.md)
-- [Miyukini - Stack UI egui eframe](../../ux_ui/Miyukini%20-%20Stack%20UI%20egui%20eframe.md)
+- [Miyukini - Stack UI Dioxus](../../ux_ui/Miyukini%20-%20Stack%20UI%20Dioxus.md)
 
 ---
 

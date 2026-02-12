@@ -44,20 +44,20 @@ Ce document détaille l’**analyse PR du marché** des jeux Idle / Clicker avec
 
 | Besoin | Détail | Solution |
 |--------|--------|----------|
-| Fenêtre principale | Une fenêtre (desktop / web) avec zones : gestion (ressources, gens, soldats) et carte. | eframe + egui (panels, layout). |
-| Menus et navigation | Menu principal, options, sauvegarde/chargement. | egui SidePanel / TopBottomPanel / Window. |
-| Indicateurs en temps réel | Ressources (nourriture, matières, etc.), nombre de gens, moral, troupes. | egui labels, progress bars, tableaux mis à jour chaque frame. |
-| Formulaires | Allocation de gens (sliders ou champs), envoi de troupes (nombre + cité cible). | egui widgets (Slider, DragValue, Button, SelectableValue). |
-| Thème / pack UI | Couleurs, polices, coins arrondis, boutons cohérents. | Style egui (Visuals, Style) ; **packs dans `ui/game_ui_pack`** : Cute_Fantasy_UI (principal), Cute_Fantasy, modernuserinterface-win — voir [Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md). |
+| Fenêtre principale | Une fenêtre (desktop / web) avec zones : gestion (ressources, gens, soldats) et carte. | Dioxus (layout CSS flexbox/grid). |
+| Menus et navigation | Menu principal, options, sauvegarde/chargement. | Dioxus layout CSS flexbox/grid. |
+| Indicateurs en temps réel | Ressources (nourriture, matières, etc.), nombre de gens, moral, troupes. | composants RSX avec CSS, mis à jour via signaux réactifs Dioxus. |
+| Formulaires | Allocation de gens (sliders ou champs), envoi de troupes (nombre + cité cible). | composants RSX avec CSS (input range, boutons, sélecteurs). |
+| Thème / pack UI | Couleurs, polices, coins arrondis, boutons cohérents. | Thème CSS Dioxus ; **packs dans `ui/game_ui_pack`** : Cute_Fantasy_UI (principal), Cute_Fantasy, modernuserinterface-win — voir [Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md). |
 
-**Toolkit :** Stack UI egui/eframe (interne Miyukini).
+**Toolkit :** Stack UI Dioxus (interne Miyukini).
 
 ### 2.2 Animations par frame
 
 | Besoin | Détail | Solution |
 |--------|--------|----------|
-| Boucle de rendu | Mise à jour visuelle à chaque frame (60 FPS ou moins). | eframe appelle `App::update` ; `ctx.request_repaint()` si besoin. |
-| Delta temps | Avancement des animations et de la simulation en fonction du temps. | `ctx.input().time` ou stockage `previous_time` ; `delta = now - previous_time`. |
+| Boucle de rendu | Mise à jour visuelle à chaque frame (60 FPS ou moins). | Dioxus réactivité (signaux) ; re-rendu automatique sur changement d'état. |
+| Delta temps | Avancement des animations et de la simulation en fonction du temps. | `use_future` / tokio interval ou stockage `previous_time` ; `delta = now - previous_time`. |
 | Animation sprite | Pour chaque entité animée : (spritesheet, animation_id, temps écoulé) → frame index. | Toolkit interne : structure Animation { frames: Vec<Rect>, fps } ; avancement `t += delta`, frame = frames[(t * fps) % len]. |
 | Pause / vitesse | Pause, x1, x2 pour la simulation. | Horloge simulée : `sim_time += delta * speed_factor`. |
 
@@ -67,49 +67,49 @@ Ce document détaille l’**analyse PR du marché** des jeux Idle / Clicker avec
 
 | Besoin | Détail | Solution |
 |--------|--------|----------|
-| Chargement d’images | PNG/JPEG pour spritesheets. | Crate `image` ou chargement via eframe/egui (inclure bytes, puis créer TextureHandle). |
+| Chargement d’images | PNG/JPEG pour spritesheets. | Crate `image` ou chargement via Dioxus (inclure bytes, puis élément img avec data URL). |
 | Découpage spritesheet | Grille (rows × cols) ou atlas avec coordonnées. | Toolkit interne : Spritesheet { texture, tile_width, tile_height, rows, cols } ; `frame_rect(index) -> Rect`. |
-| Cache textures | Éviter de recharger les mêmes images. | Registre global ou dans l’état App : `HashMap<SpritesheetId, TextureHandle>`. |
-| Affichage d’un sprite | À une position (UI ou carte), éventuellement avec scale/rotation. | egui `ui.image(uri_or_texture_id, rect)` avec source rect = frame_rect(frame_index). |
+| Cache textures | Éviter de recharger les mêmes images. | Registre global ou dans l’état App : `HashMap<SpritesheetId, ImageData>` (élément img avec data URL). |
+| Affichage d’un sprite | À une position (UI ou carte), éventuellement avec scale/rotation. | élément `img` RSX avec style CSS pour positionner la frame (background-position). |
 | Sprites multiples | Unités, bâtiments, icônes de ressources. | Registre de sprites : (sheet_id, frame_index) ou (atlas_id, name). **Assets :** `ui/game_ui_pack` — Cute_Fantasy, Tiny RPG, ui-icn_fantasy-weapons_01 — voir [Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md). |
 
-**Toolkit :** Sprites / Spritesheets (interne) — chargement, cache, API `sprite_rect(sheet, frame)` et affichage via egui ; alimentation depuis `ui/game_ui_pack`.
+**Toolkit :** Sprites / Spritesheets (interne) — chargement, cache, API `sprite_rect(sheet, frame)` et affichage via Dioxus RSX ; alimentation depuis `ui/game_ui_pack`.
 
 ### 2.4 Carte stratégique
 
 | Besoin | Détail | Solution |
 |--------|--------|----------|
 | Modèle de données | Nœuds (cités), arêtes (routes), positions 2D, propriété (joueur / adverses). | Structs : Node { id, position, troops, owner, ... }, Edge { from, to, travel_time? }. |
-| Rendu carte | Dessin des nœuds (cercles/polygones), des arêtes (lignes), des labels. | egui `ui.painter().circle()`, `line()`, `text()` ; ou textures pour fond. |
+| Rendu carte | Dessin des nœuds (cercles/polygones), des arêtes (lignes), des labels. | éléments SVG/canvas Dioxus (circle, line, text) ; ou textures pour fond. |
 | Interaction | Clic sur une cité, sélection, affichage d’infos (tooltip). | Hit-test : coordonnées clic → nœud le plus proche ; état `selected_city_id`. |
 | Déplacements des troupes | Représentation visuelle (flèches, lignes animées). | Liste des mouvements en cours (from, to, progress 0..1) ; dessin de segments ou sprites le long de la route. |
 
-**Toolkit :** Carte stratégique (interne) — modèle (graphe), rendu (egui painter), interaction (clic, survol).
+**Toolkit :** Carte stratégique (interne) — modèle (graphe), rendu (SVG/canvas Dioxus), interaction (clic, survol).
 
 ### 2.5 Simulation (tick) et sauvegarde
 
 | Besoin | Détail | Solution |
 |--------|--------|----------|
 | Tick simulation | Ressources, population, moral, troupes, déplacements, conquêtes. | Moteur de règles métier : `game_state.tick(delta)` ; pas de logique dans l’UI. |
-| Sauvegarde | État complet de la partie (ressources, cités, troupes, carte). | serde + serde_json ; eframe `App::save` / `load` (persistence). |
+| Sauvegarde | État complet de la partie (ressources, cités, troupes, carte). | serde + serde_json ; sauvegarde fichier JSON (serde + I/O). |
 | Temps simulé | Vitesse du jeu (pause, x1, x2). | Variable `sim_time` ; `tick(delta * speed)` selon le mode. |
 
-**Toolkits :** Simulation (interne — cœur métier) ; Sauvegarde (interne — sérialisation + eframe).
+**Toolkits :** Simulation (interne — cœur métier) ; Sauvegarde (interne — sérialisation + I/O fichier).
 
 ### 2.6 Synthèse : tout ce que le jeu aura besoin pour fonctionner
 
 | Domaine | Éléments | Priorité interne |
 |---------|----------|------------------|
-| **UI** | Fenêtre, panels, boutons, sliders, labels, tableaux, thème | egui/eframe (interne) |
-| **Rendu 2D** | Carte (formes, lignes, texte), sprites (images) | egui painter + Image (interne) |
+| **UI** | Fenêtre, panels, boutons, sliders, labels, tableaux, thème | Dioxus (interne) |
+| **Rendu 2D** | Carte (formes, lignes, texte), sprites (images) | SVG/canvas Dioxus + img RSX (interne) |
 | **Sprites** | Chargement, spritesheets, cache, frame → Rect | Toolkit Sprites (interne) |
 | **Animation** | Delta temps, FPS, frame index par animation | Toolkit Animation (interne) |
-| **Entrées** | Clic, survol, clavier | egui (interne) |
+| **Entrées** | Clic, survol, clavier | Dioxus événements RSX (interne) |
 | **Simulation** | Tick ressources, gens, moral, troupes, déplacements, combat | Moteur métier (interne) |
-| **Sauvegarde** | Sérialisation état, persistence | eframe + serde (interne) |
+| **Sauvegarde** | Sérialisation état, persistence | serde + I/O fichier (interne) |
 | **Son** (optionnel v0.1) | SFX, musique | Crate permissive (rodio/kira) si besoin |
 
-**Privilégier au maximum les solutions internes** : Toolkits Miyukini, stack egui/eframe, moteur de simulation maison ; **assets depuis `ui/game_ui_pack`** (inventaire et mapping dans [MiyuClicker - Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md)). N’introduire des crates externes (macroquad, bevy, etc.) que si le rendu egui s’avère insuffisant pour la cible visée.
+**Privilégier au maximum les solutions internes** : Toolkits Miyukini, stack Dioxus, moteur de simulation maison ; **assets depuis `ui/game_ui_pack`** (inventaire et mapping dans [MiyuClicker - Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md)). N’introduire des crates externes (macroquad, bevy, etc.) que si le rendu Dioxus s’avère insuffisant pour la cible visée.
 
 ---
 
@@ -132,9 +132,10 @@ Inventaire détaillé, licences et règles d’usage : [MiyuClicker - Reference 
 
 - [MiyuClicker - Document Fondateur](MiyuClicker%20-%20Document%20Fondateur.md)
 - [MiyuClicker - Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md)
-- [Miyukini - Stack UI egui eframe](../../ux_ui/Miyukini%20-%20Stack%20UI%20egui%20eframe.md)
+- [Miyukini - Stack UI Dioxus](../../ux_ui/Miyukini%20-%20Stack%20UI%20Dioxus.md)
 
 ---
 
 **Document créé le :** 2026-02-01  
+**Dernière mise à jour :** 2026-02-11  
 **Statut :** Complément au Document Fondateur

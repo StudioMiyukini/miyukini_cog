@@ -4,7 +4,7 @@
 
 **MiyuClicker** est le **premier jeu officiel Miyukini**. Il sert de **démo vivante** pour montrer qu’il est possible de faire coexister plusieurs services (Opérateurs, Toolkits) au sein d’un même environnement COG, tout en offrant une expérience de jeu complète : Idle / Clicker côté gestion, et grande stratégie (type Risk) côté conquête territoriale.
 
-Le jeu est développé en **Rust**, s’appuie sur la **stack UI officielle Miyukini (egui / eframe)** et sur un **pack UI open-source à licence permissive**. Il consomme les Toolkits et Opérateurs nécessaires (gestion UI, animations, sprites, sauvegarde, etc.) en privilégiant au maximum les **solutions internes** à l’écosystème Miyukini.
+Le jeu est développé en **Rust**, s’appuie sur la **stack UI officielle Miyukini (Dioxus)** et sur un **pack UI open-source à licence permissive**. Il consomme les Toolkits et Opérateurs nécessaires (gestion UI, animations, sprites, sauvegarde, etc.) en privilégiant au maximum les **solutions internes** à l’écosystème Miyukini.
 
 Ce document est le **document fondateur** du jeu : il en fixe la raison d’être, l’analyse marché, les besoins métier et techniques (Toolkits), le gameplay, les versions prévues (0.1, beta v1.0) et les inspirations.
 
@@ -38,21 +38,21 @@ Ce document est le **document fondateur** du jeu : il en fixe la raison d’êtr
 
 ### 2.1 Vue d’ensemble
 
-Le jeu nécessite des **capacités** couvrant : UI, rendu 2D (carte, sprites), animations par frame, gestion des spritesheets, entrées utilisateur, sauvegarde/chargement, simulation (tick), et éventuellement son. **Priorité : privilégier les solutions internes** (Toolkits Miyukini, egui/eframe) avant d’intégrer des crates externes.
+Le jeu nécessite des **capacités** couvrant : UI, rendu 2D (carte, sprites), animations par frame, gestion des spritesheets, entrées utilisateur, sauvegarde/chargement, simulation (tick), et éventuellement son. **Priorité : privilégier les solutions internes** (Toolkits Miyukini, Dioxus) avant d’intégrer des crates externes.
 
 ### 2.2 Besoins détaillés et Toolkits associés
 
 | Besoin | Description | Solution privilégiée (interne) | Solution externe si nécessaire |
 |--------|-------------|---------------------------------|----------------------------------|
-| **UI principale** | Menus, panels, boutons, indicateurs de ressources, listes (gens, soldats, cités). | **egui / eframe** (stack UI officielle Miyukini). | — |
-| **Pack UI / thème** | Look cohérent, couleurs, typo, composants réutilisables. | Thème egui dérivé du style Miyukini (voir [Stack UI egui eframe](../../ux_ui/Miyukini%20-%20Stack%20UI%20egui%20eframe.md)) ; **packs UI jeux** présents dans `ui/game_ui_pack` (voir [MiyuClicker - Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md)) : Cute_Fantasy_UI (principal), Cute_Fantasy (sprites, tuiles, icônes), modernuserinterface-win (alternative, portraits). | Packs déjà présents en interne ; vérifier licences par pack (pas de redistribution des assets bruts). |
-| **Rendu 2D (carte)** | Carte stratégique : nœuds (cités), arêtes (routes), déplacements, sélection. | **egui** : custom painting (`ui.painter()`) ou zone dédiée avec primitives (cercles, lignes, polygones). Textures pour fond/tiles si besoin. | Si besoin moteur 2D dédié : crates Rust à licence permissive (ex. macroquad pour canvas jeu uniquement). |
-| **Sprites et spritesheets** | Personnages, unités, bâtiments, icônes ; animations par frame. | **egui** : `egui::Image` / textures à partir d’images ; découpage spritesheet en sous-rectangles ; frame courante = index dans la sheet. **Assets** : `ui/game_ui_pack` — Cute_Fantasy (bâtiments, tuiles, NPCs, icônes ressources), Tiny RPG (unités, héros), ui-icn_fantasy-weapons_01 (icônes armes) — voir [Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md). Toolkit interne : chargement + cache de textures, définition d’animations (plage de frames, FPS). | Crate type `image`, `png` ; éventuellement macroquad/bevy si on décide d’un rendu jeu séparé de l’UI egui. |
-| **Animations par frame** | Mise à jour du numéro de frame en fonction du temps (delta). | **Toolkit interne** : boucle de jeu avec `ctx.request_repaint()` ; état `(sprite_id, animation_id, t_accumulator)` ; avancement `t += delta`, sélection de la frame. | — |
+| **UI principale** | Menus, panels, boutons, indicateurs de ressources, listes (gens, soldats, cités). | **Dioxus** (stack UI officielle Miyukini). | — |
+| **Pack UI / thème** | Look cohérent, couleurs, typo, composants réutilisables. | Thème CSS Dioxus dérivé du style Miyukini (voir [Stack UI Dioxus](../../ux_ui/Miyukini%20-%20Stack%20UI%20Dioxus.md)) ; **packs UI jeux** présents dans `ui/game_ui_pack` (voir [MiyuClicker - Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md)) : Cute_Fantasy_UI (principal), Cute_Fantasy (sprites, tuiles, icônes), modernuserinterface-win (alternative, portraits). | Packs déjà présents en interne ; vérifier licences par pack (pas de redistribution des assets bruts). |
+| **Rendu 2D (carte)** | Carte stratégique : nœuds (cités), arêtes (routes), déplacements, sélection. | **Dioxus** : éléments SVG/canvas pour la carte avec primitives (cercles, lignes, polygones). Textures pour fond/tiles si besoin. | Si besoin moteur 2D dédié : crates Rust à licence permissive (ex. macroquad pour canvas jeu uniquement). |
+| **Sprites et spritesheets** | Personnages, unités, bâtiments, icônes ; animations par frame. | **Dioxus** : éléments `img` RSX / textures à partir d’images ; découpage spritesheet en sous-rectangles ; frame courante = index dans la sheet. **Assets** : `ui/game_ui_pack` — Cute_Fantasy (bâtiments, tuiles, NPCs, icônes ressources), Tiny RPG (unités, héros), ui-icn_fantasy-weapons_01 (icônes armes) — voir [Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md). Toolkit interne : chargement + cache de textures, définition d’animations (plage de frames, FPS). | Crate type `image`, `png` ; éventuellement macroquad/bevy si on décide d’un rendu jeu séparé de l’UI Dioxus. |
+| **Animations par frame** | Mise à jour du numéro de frame en fonction du temps (delta). | **Toolkit interne** : boucle de jeu avec signaux réactifs Dioxus ; état `(sprite_id, animation_id, t_accumulator)` ; avancement `t += delta`, sélection de la frame. | — |
 | **Gestion des sprites** | Chargement, cache, libération ; résolution des rectangles par (spritesheet, row, col) ou par ID. | **Toolkit interne** : registre de sprites (path ou bytes, dimensions, layout en grille) ; API du type `sprite_rect(sheet_id, frame_index) -> Rect`. | Crate `image` pour décodage. |
-| **Entrées** | Clics, survol, clavier (raccourcis, navigation). | **egui** : `ui.input()`, réponses des widgets (`.clicked()`, `.hovered()`), zones interactives sur la carte. | — |
-| **Boucle de gameplay (tick)** | Simulation discrète ou continue (ressources, moral, population, déplacements des troupes). | **Logique métier interne** : état du monde (ECS ou structs selon complexité) ; `tick(delta)` appelé depuis `App::update` ; pas de logique dans l’UI. | — |
-| **Sauvegarde / chargement** | Persistance de la partie (ressources, cités, troupes, carte). | **eframe** : feature `persistence` + `App::save` / `App::load` ; sérialisation (serde) de l’état du jeu. Optionnel : KindMother si on veut centraliser les sauvegardes côté COG (hors scope v0.1). | `serde`, `serde_json` (déjà courants en Rust). |
+| **Entrées** | Clics, survol, clavier (raccourcis, navigation). | **Dioxus** : événements RSX (`onclick`, `onmouseover`, `onkeydown`), zones interactives sur la carte. | — |
+| **Boucle de gameplay (tick)** | Simulation discrète ou continue (ressources, moral, population, déplacements des troupes). | **Logique métier interne** : état du monde (ECS ou structs selon complexité) ; `tick(delta)` appelé via `use_future` / tokio interval ; pas de logique dans l’UI. | — |
+| **Sauvegarde / chargement** | Persistance de la partie (ressources, cités, troupes, carte). | **Sauvegarde fichier JSON** (serde + I/O direct) ; sérialisation (serde) de l’état du jeu. Optionnel : KindMother si on veut centraliser les sauvegardes côté COG (hors scope v0.1). | `serde`, `serde_json` (déjà courants en Rust). |
 | **Temps réel / temps simulé** | Vitesse du jeu (pause, x1, x2), temps de déplacement des troupes. | **Horloge interne** : temps simulé séparé du temps réel ; `Clock` Kernel si alignement avec la trace (optionnel). | — |
 | **Son (optionnel v0.1)** | Sons d’interface, ambiances. | Toolkit interne ou crate audio permissive (MIT/Apache-2.0). | `rodio`, `kira` (licences permissives). |
 
@@ -60,11 +60,11 @@ Le jeu nécessite des **capacités** couvrant : UI, rendu 2D (carte, sprites), a
 
 | Toolkit | Rôle |
 |---------|------|
-| **UI (egui/eframe)** | Déjà stack officielle ; fenêtre principale, panels gestion + carte, widgets. |
-| **Sprites / Spritesheets** | Chargement images, cache textures egui, découpage en frames, registre (sheet_id, frame) → Rect. |
+| **UI (Dioxus)** | Déjà stack officielle ; fenêtre principale, layout CSS flexbox/grid, composants RSX. |
+| **Sprites / Spritesheets** | Chargement images, cache textures, découpage en frames, registre (sheet_id, frame) → Rect. |
 | **Animation par frame** | Avancement temporel des animations (delta), sélection de la frame, boucle ou one-shot. |
-| **Carte stratégique** | Modèle (nœuds, arêtes, positions) ; rendu egui (painter) ; interaction (clic, survol). |
-| **Sauvegarde** | Sérialisation état jeu ; intégration eframe persistence. |
+| **Carte stratégique** | Modèle (nœuds, arêtes, positions) ; rendu SVG/canvas Dioxus ; interaction (clic, survol). |
+| **Sauvegarde** | Sérialisation état jeu ; sauvegarde fichier JSON (serde + I/O). |
 | **Simulation (tick)** | Moteur de règles métier : ressources, gens, moral, soldats, conquêtes, déplacements. |
 
 ---
@@ -110,17 +110,17 @@ Le jeu nécessite des **capacités** couvrant : UI, rendu 2D (carte, sprites), a
 | Élément | Choix | Référence |
 |--------|--------|------------|
 | **Langage** | Rust | Écosystème Miyukini, performance, sécurité. |
-| **UI** | egui + eframe | Stack UI officielle Miyukini ; licence MIT/Apache-2.0 ; desktop + Web (WASM) + Android. |
+| **UI** | Dioxus 0.6 (desktop natif via Blitz/WGPU) | Stack UI officielle Miyukini ; licence MIT/Apache-2.0 ; desktop natif. |
 | **Pack UI / assets** | Pack open-source à licence permissive | Pour cohérence visuelle (thème, icônes, sprites génériques) ; pas de dépendance propriétaire. |
 
 ### 4.2 Rendu jeu (carte, sprites)
 
-- **Option A (recommandée v0.1)** : tout dans **egui** — carte en custom painting, sprites via `egui::Image` et textures (spritesheets découpées). Un seul cadre (eframe), une seule boucle.
-- **Option B** : si besoin de rendu 2D plus riche (effets, nombreux sprites animés), intégration d’un moteur 2D Rust (ex. macroquad) dans une fenêtre ou un viewport ; **egui** reste pour les menus et HUD. À trancher en phase d’implémentation.
+- **Option A (recommandée v0.1)** : tout dans **Dioxus** — carte via éléments SVG/canvas, sprites via éléments `img` RSX et textures (spritesheets découpées). Un seul point d'entrée (`dioxus::launch`), une seule boucle réactive.
+- **Option B** : si besoin de rendu 2D plus riche (effets, nombreux sprites animés), intégration d’un moteur 2D Rust (ex. macroquad) dans une fenêtre ou un viewport ; **Dioxus** reste pour les menus et HUD. À trancher en phase d’implémentation.
 
 ### 4.3 Licences
 
-- **egui / eframe** : MIT ou Apache-2.0.
+- **Dioxus** : MIT ou Apache-2.0.
 - **Pack UI / sprites** : choix d’un pack ou d’assets **MIT, Apache-2.0, CC0** (ou équivalent permissif) pour éviter toute contrainte commerciale ou d’attribution forte.
 
 ---
@@ -139,7 +139,7 @@ Le jeu nécessite des **capacités** couvrant : UI, rendu 2D (carte, sprites), a
 | **MiyuClickerUI** | Interface principale (gestion + carte), menus, HUD. | Opérateur d’Interface |
 | **MiyuClickerSim** | Simulation tick (ressources, gens, moral, troupes, déplacements). | Opérateur de Service |
 | **MiyuClickerCombat** | Résolution des combats (stats, hasard, troupes restantes). | Opérateur de Service / Tool |
-| **MiyuClickerSave** | Sauvegarde / chargement de partie (état monde). | Opérateur de Service ou usage eframe + KindMother optionnel |
+| **MiyuClickerSave** | Sauvegarde / chargement de partie (état monde). | Opérateur de Service ou sauvegarde fichier JSON + KindMother optionnel |
 | **MiyuClickerCarte** | Modèle carte (cités, routes), déplacements, combats. | Opérateur de Service |
 
 Les **Toolkits** (Sprites, Animation, Carte, IdleSim, Save, Combat) sont des **Kits d’Outils** ou **Outils** (Strate 6) utilisés par ces Opérateurs, gouvernés par Master Butler et les Cores. **Détail MVP et mapping :** [MiyuClicker - MVP Ecrans et Mecaniques](MiyuClicker%20-%20MVP%20Ecrans%20et%20Mecaniques.md), [MiyuClicker - Operateurs et Toolkits](MiyuClicker%20-%20Operateurs%20et%20Toolkits.md).
@@ -162,7 +162,7 @@ Les **Toolkits** (Sprites, Animation, Carte, IdleSim, Save, Combat) sont des **K
 | Id | Décision | Justification |
 |----|----------|---------------|
 | **DS-01** | Premier jeu officiel Miyukini = démo multi-services COG | Prouver la coexistence d’Opérateurs et Toolkits dans un même environnement. |
-| **DS-02** | Rust + egui/eframe + pack UI permissif | Alignement stack Miyukini, licence sans contrainte commerciale. |
+| **DS-02** | Rust + Dioxus + pack UI permissif | Alignement stack Miyukini, licence sans contrainte commerciale. |
 | **DS-03** | Privilégier solutions internes (Toolkits UI, sprites, animation, sauvegarde) | Réutilisabilité, gouvernance, cohérence avec la pyramide Miyukini. |
 | **DS-04** | Deux volées : Gestion (Idle) + Carte (grande stratégie) | Boucle idle claire + objectif long terme (conquête). |
 | **DS-05** | Version 0.1 : cités sans IA, courbe de troupes adverses, bonus tribu | Scope maîtrisable ; beta v1.0 pour diplomatie, marché, routes, héros, RTS. |
@@ -191,7 +191,7 @@ Le répertoire **`ui/game_ui_pack`** contient des packs d’assets UI et graphiq
 
 | Document | Lien |
 |----------|------|
-| **Stack UI egui / eframe** | [Miyukini - Stack UI egui eframe](../../ux_ui/Miyukini%20-%20Stack%20UI%20egui%20eframe.md) |
+| **Stack UI Dioxus** | [Miyukini - Stack UI Dioxus](../../ux_ui/Miyukini%20-%20Stack%20UI%20Dioxus.md) |
 | **Packs UI jeux** | [MiyuClicker - Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md) |
 | **Glossaire Miyukini** | Miyukini Conceptual References - Glossaire (Opérateur, Toolkit, COG) |
 | **Document Fondateur type** | [Miyukini Sales - Document Fondateur](../../services/MiyukiniSales/Miyukini%20Sales%20-%20Document%20Fondateur.md) |
@@ -199,5 +199,5 @@ Le répertoire **`ui/game_ui_pack`** contient des packs d’assets UI et graphiq
 ---
 
 **Document créé le :** 2026-02-01  
-**Dernière mise à jour :** 2026-02-01  
+**Dernière mise à jour :** 2026-02-11  
 **Statut :** Document fondateur — premier jeu officiel Miyukini

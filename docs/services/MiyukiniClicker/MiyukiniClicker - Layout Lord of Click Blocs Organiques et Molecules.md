@@ -88,7 +88,7 @@ De **haut en bas** :
 #### 3.2.3 Barre de défilement
 
 - **Atome** : scrollbar verticale à droite de la liste.
-- **Correspondance code :** Déjà présent dans `egui::ScrollArea::vertical()` autour des cartes bâtiments.
+- **Correspondance code :** Déjà présent dans `CSS overflow-y: auto` sur le conteneur des cartes bâtiments.
 
 ---
 
@@ -129,7 +129,7 @@ De **haut en bas** :
 | Panneau bâtiments | `ui_building_cards` | Présent (cartes verticales) ; à faire évoluer en liste + recherche |
 | Recherche / filtrage | — | À ajouter |
 | Ligne bâtiment (icône, Lvl, nom, desc, maçons, coût, barre, bouton) | `ui_card_maison`, `ui_card_zone` | Partiel ; formaliser en ligne unique |
-| Scrollbar liste bâtiments | `ScrollArea::vertical()` | Présent |
+| Scrollbar liste bâtiments | `CSS overflow-y: auto` | Présent |
 
 ---
 

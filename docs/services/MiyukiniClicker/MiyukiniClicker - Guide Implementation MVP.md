@@ -159,7 +159,7 @@ struct GameState {
 | **Partie droite** | **Liste déroulante** (ou panneau extensible) : pour chaque lieu (Champs, Ateliers, Scierie, Carrière, Mine, Recherche), afficher lieu + ressource générée + **nombre de gens affectés** (slider ou spinbox). Contrainte : total affecté ≤ gens. |
 | **Menu config** | Identique au Landing ; **Sauvegarder** actif → appelle `save.slot_write(slot_id, state)`. |
 
-**Transitions :** Clic « Carte du monde » → écran **Carte du monde**. Clic roue → menu config. Tick (timer) → appel Sim `tick(state, delta)` ; mise à jour état ; repaint.
+**Transitions :** Clic « Carte du monde » → écran **Carte du monde**. Clic roue → menu config. Tick (timer via `use_future` ou `use_coroutine`) → appel Sim `tick(state, delta)` ; mise à jour état via signaux réactifs Dioxus (`use_signal`).
 
 **Données affichées :** Lecture de `GameState` (ressources, allocation) ; mise à jour après chaque tick et après chaque clic (intention traitée par Sim).
 
@@ -167,7 +167,7 @@ struct GameState {
 
 | Élément | Spécification |
 |--------|----------------|
-| **Layout** | Même barre haut (ligne 1 + 2) que Ma citée ; **Carte du monde** surligné, **Ma citée** lien. Zone carte : custom painting (egui) ou zone cliquable. |
+| **Layout** | Même barre haut (ligne 1 + 2) que Ma citée ; **Carte du monde** surligné, **Ma citée** lien. Zone carte : éléments SVG inline ou canvas Dioxus, ou zone cliquable. |
 | **Rendu carte** | Nœuds = cités (cercles ou sprites) ; arêtes = routes (lignes) ; déplacements en cours (ligne en pointillés ou segment progressif). Couleur / icône selon propriétaire (joueur / adverse). |
 | **Interaction** | Clic sur une cité → afficher panneau latéral ou popup : nom, propriétaire, troupes. Si cité adverse et cité joueur sélectionnée : bouton « Envoyer X soldats » (X saisi ou slider) → intention `carte.move_troops(from, to, count)`. |
 | **Tick** | Avancement des déplacements (`progress += delta / duree`) ; à arrivée (`progress >= 1`) → `carte.resolve_arrival` → Combat si cité adverse → mise à jour cités et troupes. |
@@ -202,7 +202,7 @@ Les signatures ci-dessous sont **contractuelles** pour l’implémentation : ent
 
 | Tool | Entrées | Sortie | Description |
 |------|---------|--------|-------------|
-| `tool.miyuclicker.save.slot_write` | `slot_id: u8`, `state: &GameState` | `Result<(), Error>` | Sérialise `state` et écrit dans le slot (fichier ou eframe persistence). |
+| `tool.miyuclicker.save.slot_write` | `slot_id: u8`, `state: &GameState` | `Result<(), Error>` | Sérialise `state` et écrit dans le slot (fichier JSON via serde + I/O). |
 | `tool.miyuclicker.save.slot_read` | `slot_id: u8` | `Result<GameState, Error>` | Lit et désérialise l’état du slot. |
 | `tool.miyuclicker.save.slot_list` | `()` | `Vec<SlotMetadata>` | Retourne pour chaque slot (1, 2, 3) : occupé, date, résumé (optionnel). |
 
@@ -226,7 +226,7 @@ Les signatures ci-dessous sont **contractuelles** pour l’implémentation : ent
 
 | Opérateur | Appelé par | Appelle |
 |------------|------------|---------|
-| **MiyuClickerUI** | Boucle eframe | MiyuClickerSim (tick, apply_click, apply_allocation), MiyuClickerSave (slot_list, slot_read, slot_write), MiyuClickerCarte (move_troops, model_update pour tick carte). |
+| **MiyuClickerUI** | Boucle Dioxus | MiyuClickerSim (tick, apply_click, apply_allocation), MiyuClickerSave (slot_list, slot_read, slot_write), MiyuClickerCarte (move_troops, model_update pour tick carte). |
 | **MiyuClickerSim** | MiyuClickerUI | MiyuClickerIdleSim (tick, apply_allocation, apply_click). |
 | **MiyuClickerSave** | MiyuClickerUI | MiyuClickerSave Tools (slot_*). |
 | **MiyuClickerCarte** | MiyuClickerUI (tick carte) | MiyuClickerCarte (model_update), MiyuClickerCombat (resolve). |
@@ -249,7 +249,7 @@ Format recommandé : **JSON** (serde_json) pour lisibilité et debug ; binaire (
 
 ### 4.2 Fichiers slots
 
-- **Emplacement** : répertoire de données eframe (ex. `app_data_dir`) ou répertoire projet : `miyuclicker_slot_1.json`, `miyuclicker_slot_2.json`, `miyuclicker_slot_3.json`.
+- **Emplacement** : répertoire de données applicatif (ex. `data_dir`) ou répertoire projet : `miyuclicker_slot_1.json`, `miyuclicker_slot_2.json`, `miyuclicker_slot_3.json`.
 - **Métadonnées pour slot_list** : dérivées du fichier (date modification) et d’un champ `saved_at` + `summary` dans le JSON (ou en en-tête court).
 
 ### 4.3 Exemple minimal (JSON)
@@ -277,7 +277,7 @@ Format recommandé : **JSON** (serde_json) pour lisibilité et debug ; binaire (
 
 | Livrable | Contenu |
 |----------|---------|
-| **Projet eframe** | Création du projet Rust (crate binaire), dépendances egui, eframe, serde, serde_json. |
+| **Projet Dioxus** | Création du projet Rust (crate binaire), dépendances dioxus (feature `desktop`), serde, serde_json. |
 | **Écrans** | Loading (barre ou spinner) → Landing (titre, [Jouer], roue config) → Slots (3 slots, appel mock slot_list, [Retour]). Pas de chargement/sauvegarde réel. |
 | **État global** | `AppState` : écran courant (Loading, Landing, Slots, MaCitee, CarteMonde), `GameState` minimal (ressources à 0 ou valeurs de test). Pas de tick. |
 | **Navigation** | Transition Slots → Ma citée (avec état de test ou état initial fixe). Barre haut sur Ma citée (ressources en dur ou état minimal) ; lien « Carte du monde » → écran Carte (vide ou placeholder). |
@@ -303,7 +303,7 @@ Format recommandé : **JSON** (serde_json) pour lisibilité et debug ; binaire (
 | **Modèle carte** | Génération ou chargement d’un graphe (cités + routes) ; au moins 1 cité joueur, N cités adverses. |
 | **MiyuClickerCarte** | move_troops, model_update (avancement déplacements), resolve_arrival. |
 | **MiyuClickerCombat** | resolve(attaquant, defenseur, …) → vainqueur, troupes restantes. |
-| **Écran Carte du monde** | Rendu cités et routes (egui painter) ; clic cité → infos ; envoi troupes (input + bouton) ; tick carte (model_update) en parallèle du tick Sim. |
+| **Écran Carte du monde** | Rendu cités et routes (éléments SVG inline ou canvas Dioxus) ; clic cité → infos ; envoi troupes (input + bouton) ; tick carte (model_update) en parallèle du tick Sim. |
 | **Intégration** | État partagé : même GameState pour Sim et Carte ; troupes déduites de la cité joueur à l’envoi, mises à jour après combat. |
 
 **Critère de fin :** Envoi de troupes, déplacement, résolution combat, conquête de cité (bonus ressources optionnel pour MVP).
@@ -325,9 +325,10 @@ Format recommandé : **JSON** (serde_json) pour lisibilité et debug ; binaire (
 - [MiyuClicker - Ergonomie Ecran Gestion](MiyuClicker%20-%20Ergonomie%20Ecran%20Gestion.md)
 - [MiyuClicker - Parcours Utilisateur](MiyuClicker%20-%20Parcours%20Utilisateur.md)
 - [MiyuClicker - Document Fondateur](MiyuClicker%20-%20Document%20Fondateur.md)
-- [Miyukini - Stack UI egui eframe](../../ux_ui/Miyukini%20-%20Stack%20UI%20egui%20eframe.md)
+- [Miyukini - Stack UI Dioxus](../../ux_ui/Miyukini%20-%20Stack%20UI%20egui%20eframe.md)
 
 ---
 
 **Document créé le :** 2026-02-01  
+**Dernière mise à jour :** 2026-02-11  
 **Statut :** Guide d’implémentation MVP — modèle d’état, specs écrans, APIs, format sauvegarde, phases

@@ -15,7 +15,7 @@ Ce document décrit le **mapping Opérateurs / Toolkits** pour le MVP MiyuClicke
 
 | Opérateur | Type | Toolkits consommés | Rôle MVP |
 |-----------|------|--------------------|----------|
-| **MiyuClickerUI** | Opérateur d’Interface | egui/eframe, MiyuClickerSprites, MiyuClickerCarte (rendu) | Rendu de tous les écrans, barre, boutons, liste déroulante. |
+| **MiyuClickerUI** | Opérateur d’Interface | Dioxus, MiyuClickerSprites, MiyuClickerCarte (rendu) | Rendu de tous les écrans, barre, boutons, liste déroulante. |
 | **MiyuClickerSim** | Opérateur de Service | MiyuClickerIdleSim | Tick simulation (ressources, affectations, moral, cap). |
 | **MiyuClickerSave** | Opérateur de Service | MiyuClickerSave (Tools) | Sauvegarde / chargement 3 slots. |
 | **MiyuClickerCombat** | Opérateur de Service / Tool | MiyuClickerCombat (Tool) | Résolution combat (stats + hasard). |
@@ -25,12 +25,12 @@ Ce document décrit le **mapping Opérateurs / Toolkits** pour le MVP MiyuClicke
 
 ## 2. Toolkits — Utiliser
 
-### 2.1 Stack UI (egui / eframe)
+### 2.1 Stack UI (Dioxus)
 
 | Attribut | Détail |
 |----------|--------|
 | **Source** | Stack UI officielle Miyukini. |
-| **Référence** | [Miyukini - Stack UI egui eframe](../../ux_ui/Miyukini%20-%20Stack%20UI%20egui%20eframe.md). |
+| **Référence** | [Miyukini - Stack UI Dioxus](../../ux_ui/Miyukini%20-%20Stack%20UI%20Dioxus.md). |
 | **Rôle** | Fenêtres, panels, boutons, labels, sliders, listes, custom painting (carte). |
 | **Consommé par** | **MiyuClickerUI**. |
 | **Usage MVP** | Tous les écrans (Loading, Landing, Slots, Ma citée, Carte du monde) ; barre 2 lignes ; 4 gros boutons ; liste déroulante ; menu config. |
@@ -44,7 +44,7 @@ Ce document décrit le **mapping Opérateurs / Toolkits** pour le MVP MiyuClicke
 | Attribut | Détail |
 |----------|--------|
 | **ToolkitId (proposé)** | `toolkit.miyuclicker.sprites` |
-| **Rôle** | Chargement d’images, spritesheets, cache textures egui, découpage en frames, animation par frame. |
+| **Rôle** | Chargement d’images, spritesheets, cache textures, découpage en frames, animation par frame. |
 | **Outils (Tools) proposés** | `tool.miyuclicker.sprites.load`, `tool.miyuclicker.sprites.frame_rect`, `tool.miyuclicker.sprites.animate` (avancement delta → frame index). |
 | **Consommé par** | **MiyuClickerUI**. |
 | **Sources assets** | `ui/game_ui_pack` (Cute_Fantasy_UI, Cute_Fantasy, etc.) — voir [Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md). |
@@ -64,7 +64,7 @@ Ce document décrit le **mapping Opérateurs / Toolkits** pour le MVP MiyuClicke
 | Attribut | Détail |
 |----------|--------|
 | **ToolkitId (proposé)** | `toolkit.miyuclicker.save` |
-| **Rôle** | Sérialisation / désérialisation de l’état partie ; lecture / écriture des 3 slots (fichier ou eframe persistence). |
+| **Rôle** | Sérialisation / désérialisation de l’état partie ; lecture / écriture des 3 slots (sauvegarde fichier JSON via serde + I/O). |
 | **Outils (Tools) proposés** | `tool.miyuclicker.save.slot_write` (slot_id, état), `tool.miyuclicker.save.slot_read` (slot_id → état), `tool.miyuclicker.save.slot_list` (→ métadonnées 3 slots : date, résumé). |
 | **Consommé par** | **MiyuClickerSave** (Opérateur), **MiyuClickerUI** (affichage slots, déclenchement sauvegarde/chargement). |
 
@@ -82,7 +82,7 @@ Ce document décrit le **mapping Opérateurs / Toolkits** pour le MVP MiyuClicke
 | Attribut | Détail |
 |----------|--------|
 | **ToolkitId (proposé)** | `toolkit.miyuclicker.carte` |
-| **Rôle** | Modèle de la carte (nœuds = cités, arêtes = routes) ; déplacements en cours (from, to, progress) ; rendu (primitives egui) ; hit-test (clic → cité). |
+| **Rôle** | Modèle de la carte (nœuds = cités, arêtes = routes) ; déplacements en cours (from, to, progress) ; rendu (éléments SVG/canvas Dioxus) ; hit-test (clic → cité). |
 | **Outils (Tools) proposés** | `tool.miyuclicker.carte.model_update` (déplacements, conquêtes), `tool.miyuclicker.carte.move_troops` (cité_from, cité_to, nombre), `tool.miyuclicker.carte.resolve_arrival` (déplacement arrivé → déclenche combat si cité adverse). |
 | **Consommé par** | **MiyuClickerUI** (rendu, clic), **MiyuClickerCarte** (Opérateur) pour la logique déplacements et combats. |
 
@@ -96,7 +96,7 @@ Ce document décrit le **mapping Opérateurs / Toolkits** pour le MVP MiyuClicke
 |----------|--------|
 | **Type** | Opérateur d’Interface |
 | **Rôle** | Rendu de tous les écrans ; réception des entrées utilisateur ; envoi des **intentions** vers les autres Opérateurs (Sim, Save, Carte). |
-| **Toolkits** | egui/eframe (stack), MiyuClickerSprites (assets), MiyuClickerCarte (rendu carte). |
+| **Toolkits** | Dioxus (stack), MiyuClickerSprites (assets), MiyuClickerCarte (rendu carte). |
 | **Écrans** | Loading, Landing, Slots, Ma citée (barre + 4 boutons + liste affectation), Carte du monde, menu config (roue). |
 | **Flux sortants** | Clic Champs/Ateliers/Château/Village → intention « gain clic » → Sim ; affectation gens → intention « allocation » → Sim ; sauvegarder / charger → Save ; envoyer troupes → Carte ; tick (timer) → Sim. |
 
@@ -157,7 +157,7 @@ Ce document décrit le **mapping Opérateurs / Toolkits** pour le MVP MiyuClicke
 
 | Élément | Action | Référence |
 |--------|--------|-----------|
-| **egui/eframe** | Utiliser | Stack UI Miyukini |
+| **Dioxus** | Utiliser | Stack UI Miyukini |
 | **MiyuClickerSprites** | Créer | Toolkit + Tools load, frame_rect, animate |
 | **MiyuClickerIdleSim** | Créer | Toolkit + Tools tick, apply_allocation |
 | **MiyuClickerSave** | Créer | Toolkit + Tools slot_write, slot_read, slot_list |
@@ -182,4 +182,5 @@ Ce document décrit le **mapping Opérateurs / Toolkits** pour le MVP MiyuClicke
 ---
 
 **Document créé le :** 2026-02-01  
+**Dernière mise à jour :** 2026-02-11  
 **Statut :** Mapping Opérateurs et Toolkits pour le MVP MiyuClicker
