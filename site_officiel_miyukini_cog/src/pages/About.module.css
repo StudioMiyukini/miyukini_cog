@@ -1,0 +1,243 @@
+.wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-bottom: 3rem;
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.title {
+  font-size: 2.5rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+  font-size: 1.25rem;
+  color: var(--accent);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Sections */
+.section {
+  margin-bottom: 3rem;
+}
+
+.section h2 {
+  font-size: 1.5rem;
+  margin: 0 0 1.25rem 0;
+}
+
+/* Vision */
+.visionCard {
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+  border-color: var(--accent-dim);
+  padding: 2rem;
+}
+
+.vision {
+  font-size: 1.2rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin: 0;
+  text-align: center;
+}
+
+.vision strong {
+  color: var(--text-primary);
+}
+
+/* COG */
+.cogGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.cogCard {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.cogLetter {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.cogCard h3 {
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.cogCard p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.cogTagline {
+  text-align: center;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+}
+
+/* Objectives */
+.objectives {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.objectiveCard {
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.objectiveIcon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.objectiveCard h3 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.objectiveCard p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Principles */
+.principles {
+  display: grid;
+  gap: 1rem;
+}
+
+.principleCard {
+  padding: 1.5rem;
+}
+
+.principleCard blockquote {
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  margin: 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--accent);
+  line-height: 1.6;
+}
+
+/* Governance */
+.governance {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.govCard {
+  padding: 1.5rem;
+}
+
+.govCard h3 {
+  font-size: 1.1rem;
+  color: var(--accent);
+  margin: 0 0 0.75rem 0;
+}
+
+.govCard p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* CTA */
+.cta {
+  text-align: center;
+  padding: 2rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.cta h2 {
+  margin: 0 0 1.5rem 0;
+}
+
+.ctaLinks {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.primaryBtn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--accent);
+  color: var(--bg-deep);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transition: box-shadow var(--transition);
+}
+
+.primaryBtn:hover {
+  box-shadow: 0 0 20px var(--accent-glow);
+  color: var(--bg-deep);
+}
+
+.secondaryBtn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.secondaryBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .vision {
+    font-size: 1.05rem;
+  }
+
+  .cogCard {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .cogLetter {
+    margin: 0 auto;
+  }
+}

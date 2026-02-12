@@ -1,0 +1,211 @@
+.wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-bottom: 3rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.header h1 {
+  font-size: 2.25rem;
+  margin: 0 0 1rem 0;
+}
+
+.intro {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Sections */
+.section {
+  margin-bottom: 3rem;
+}
+
+.section h2 {
+  font-size: 1.5rem;
+  margin: 0 0 1rem 0;
+}
+
+.sectionIntro {
+  color: var(--text-secondary);
+  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
+}
+
+/* Flow */
+.flowCard {
+  padding: 2rem;
+}
+
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.flowStep {
+  padding: 0.5rem 1rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.flowArrow {
+  color: var(--accent);
+  font-size: 1.25rem;
+}
+
+.flowDesc {
+  text-align: center;
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Rule */
+.ruleCard {
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+  border-color: var(--accent-dim);
+  padding: 2rem;
+}
+
+.quote {
+  font-size: 1.5rem;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--accent);
+  margin: 0 0 1rem 0;
+  text-align: center;
+}
+
+.ruleExplain {
+  text-align: center;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Laws */
+.laws {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.lawCard {
+  padding: 1.25rem;
+}
+
+.lawHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.lawId {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  background: var(--accent);
+  color: var(--bg-deep);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.lawTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.lawDesc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Validation */
+.validationCard {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, var(--bg-card)) 0%, var(--bg-card) 100%);
+  text-align: center;
+  padding: 2rem;
+}
+
+.validationTitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin: 0 0 1rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.validationQuestion {
+  font-size: 1.35rem;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+}
+
+.validationDesc {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Links */
+.links {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.link {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--accent);
+  transition: color var(--transition);
+}
+
+.link:hover {
+  color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .header h1 {
+    font-size: 1.75rem;
+  }
+
+  .quote {
+    font-size: 1.25rem;
+  }
+
+  .laws {
+    grid-template-columns: 1fr;
+  }
+
+  .flow {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .flowArrow {
+    transform: rotate(90deg);
+  }
+}

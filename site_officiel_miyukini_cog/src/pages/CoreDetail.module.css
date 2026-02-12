@@ -1,0 +1,285 @@
+.wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: 3rem;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.breadcrumb a {
+  color: var(--text-secondary);
+}
+
+.breadcrumb a:hover {
+  color: var(--accent);
+}
+
+.separator {
+  color: var(--text-muted);
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.icon {
+  font-size: 3rem;
+  width: 5rem;
+  height: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.name {
+  font-size: 2rem;
+  margin: 0 0 0.25rem 0;
+}
+
+.domain {
+  font-size: 1.1rem;
+  color: var(--accent);
+  margin: 0;
+}
+
+/* Question card */
+.questionCard {
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+  border-color: var(--accent-dim);
+  margin-bottom: 1.5rem;
+}
+
+.questionLabel {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin: 0 0 0.5rem 0;
+}
+
+.question {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+  font-style: italic;
+}
+
+/* Badges */
+.badges {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: var(--accent-dim);
+  color: var(--bg-deep);
+  border-radius: 100px;
+}
+
+/* Sections */
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.section h2 {
+  font-size: 1.25rem;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.longDesc {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Lists */
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.listItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.bullet {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 0.1em;
+}
+
+/* Invariants */
+.invariants {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.invariantCard {
+  padding: 1rem;
+}
+
+.invariantCard p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.invariantNum {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent);
+  background: var(--bg-elevated);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+/* Interactions */
+.interactions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.interactionItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.arrow {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* Navigation */
+.coreNav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.navLink {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.navLink:hover {
+  border-color: var(--accent-dim);
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.navLinkNext {
+  text-align: right;
+}
+
+.navLabel {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.navName {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.navLinkNext .navName {
+  justify-content: flex-end;
+}
+
+.navIcon {
+  font-size: 1.25rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .icon {
+    font-size: 2rem;
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .name {
+    font-size: 1.5rem;
+  }
+
+  .question {
+    font-size: 1.25rem;
+  }
+
+  .coreNav {
+    flex-direction: column;
+  }
+
+  .navLinkNext {
+    text-align: left;
+  }
+
+  .navLinkNext .navName {
+    justify-content: flex-start;
+    flex-direction: row-reverse;
+  }
+}

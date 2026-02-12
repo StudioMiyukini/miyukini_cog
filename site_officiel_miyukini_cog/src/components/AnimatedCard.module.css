@@ -1,0 +1,48 @@
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease,
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card.hoverable:hover {
+  border-color: var(--accent-dim);
+  box-shadow: 0 0 20px var(--glow-color, var(--accent-glow));
+}
+
+.card.clickable {
+  cursor: pointer;
+}
+
+.card.clickable:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.card.clickable:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Animation keyframes pour utilisation alternative */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

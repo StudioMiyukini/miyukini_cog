@@ -1,0 +1,82 @@
+.list {
+  display: grid;
+  grid-template-columns: repeat(var(--columns, 2), 1fr);
+  gap: 1.25rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.item {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition:
+    border-color var(--transition),
+    background var(--transition);
+}
+
+.item:hover {
+  border-color: var(--border);
+  background: var(--bg-card);
+}
+
+.icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.description {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Version compacte */
+.compact .item {
+  padding: 0.75rem;
+}
+
+.compact .icon {
+  font-size: 1.25rem;
+  width: 2rem;
+  height: 2rem;
+}
+
+.compact .title {
+  font-size: 0.9rem;
+}
+
+.compact .description {
+  font-size: 0.8rem;
+}
