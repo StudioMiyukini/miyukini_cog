@@ -66,11 +66,11 @@ En tant que relay, Origin effectue les opérations suivantes :
 
 | Étape | Description |
 |-------|-------------|
-| **Réception du Passeport COG** | Origin reçoit le Passeport complet du COG (`cog_id`, `core_version`, `service_list`, `environment_health`, `previous_visas`, `passport_type`). |
+| **Réception du Passeport COG** | Origin reçoit le Passeport complet du COG (`cog_id`, `core_version`, `service_list`, `environment_health`, `previous_permis`, `passport_type`). |
 | **Phase A : Clé de conformité des Cores** | Origin compare la clé cachée dans le code des Cores avec la clé attendue pour la version déclarée. |
 | **Phase B : Blocs de code des Services** | Origin demande des blocs de code MIP aléatoires pour chaque Service et vérifie le déchiffrement. |
 | **Phase C : Santé de l'environnement** | Origin vérifie le rapport de santé produit par WorrySentinel et KeeperOfStorage. |
-| **Décision** | Conforme → Visa de circulation. Non-conforme → Quarantaine. |
+| **Décision** | Conforme → Permis de circulation (accord relay). Non-conforme → Quarantaine. |
 
 ### 2.2 Distribution des versions
 
@@ -103,7 +103,7 @@ sequenceDiagram
     else Origin disponible
         O->>COG: Acceptation directe
         O->>O: Vérification (Phase A, B, C)
-        O->>COG: Visa de circulation
+        O->>COG: Permis de circulation
     end
 ```
 
@@ -116,9 +116,9 @@ En tant que tracker, Origin gère :
 | Capacité | Description |
 |----------|-------------|
 | **Pools par version des Cores** | Dirige les COGs vers des pools isolés par `core_version.MAJOR`. |
-| **Contrôle d'identité et de Visa** | Vérifie le Visa de circulation avant connexion au maillage. |
+| **Contrôle d'identité et contrôle tracker** | Vérifie le Permis de circulation avant connexion au maillage. |
 | **Whitelists / Blacklists / Quarantaines** | Maintient les listes maîtres (partagées avec les trackers). |
-| **Catalogue et Lobbys** | Gère le catalogue des COGs connectés et leurs Lobbys (port 80). |
+| **Catalogue web (port 80)** | Catalogue des services WEB publics (URLs, recherche) ; catalogue de Lobbys tenu mais visible depuis les services COG, pas depuis le portail web. |
 | **Monitoring réseau** | Surveille l'état du réseau, détecte les congestions. |
 
 ---
@@ -233,13 +233,13 @@ Origin expose un **serveur web** (port 80/443) avec :
 |------------------------|
 | Fonction RELAY :       |
 | - Vérification (A,B,C) |
-| - Visa de circulation  |
+| - Permis de circulation  |
 | - Distribution versions|
 | - Passeports spéciaux  |
 |------------------------|
 | Fonction TRACKER :     |
 | - Pools par version    |
-| - Catalogue et Lobbys  |
+| - Catalogue web (services WEB publics) ; catalogue de Lobbys (visible depuis les services) |
 | - Whitelists/Blacklists|
 | - Monitoring réseau    |
 |------------------------|

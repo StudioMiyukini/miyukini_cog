@@ -1,8 +1,8 @@
-# MWS — Passeport COG et Visa de Circulation
+# MWS — Passeport COG et Permis de Circulation
 
 ## Contexte
 
-Le **Passeport COG** et le **Visa de circulation** sont les deux documents fondamentaux qui permettent à un COG de participer au réseau Miyukini Webway. Le Passeport est l'identité complète du COG ; le Visa est l'autorisation de circuler sur le réseau, délivrée après vérification de conformité.
+Le **Passeport COG** et le **Permis de circulation** sont les deux documents fondamentaux qui permettent à un COG de participer au réseau Miyukini Webway. Le Passeport est l'identité complète du COG ; le Permis de circulation (accord relay) est l'autorisation de circuler sur le réseau, délivrée par un relay après vérification de conformité, et contrôlée par les trackers (contrôle tracker).
 
 **Référence fondatrice :** [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 
@@ -10,8 +10,8 @@ Le **Passeport COG** et le **Visa de circulation** sont les deux documents fonda
 
 - Structure et contenu du Passeport COG
 - Types de Passeport (Standard, Spécial)
-- Visa de circulation : émission, contenu, durée
-- Visa d'accès hôte (distinct du Visa de circulation)
+- Permis de circulation : émission (accord relay), contenu, durée
+- Accord d'hôte (distinct du Permis de circulation)
 - Cycle de vie des documents
 
 ---
@@ -30,7 +30,7 @@ Le **Passeport COG** est le document d'identité complet d'un COG. Il contient t
 | `core_version` | string | Version des Cores (`MAJOR.MINOR`, ex. `1.0`) |
 | `service_list` | array | Liste des Services installés |
 | `environment_health` | object | Rapport de santé de l'environnement |
-| `previous_visas` | array | Historique des Visas précédents |
+| `previous_permis` | array | Historique des Permis de circulation précédents |
 | `passport_type` | enum | `STANDARD` ou `SPECIAL` |
 | `special_key` | string | (Passeports spéciaux uniquement) Clé délivrée par Origin |
 
@@ -83,17 +83,17 @@ Rapport de santé généré par les Cores (WorrySentinel, KeeperOfStorage) :
 | `attestation_signature` | Signature du rapport par WorrySentinel |
 | `generated_at` | Date de génération |
 
-#### previous_visas
+#### previous_permis
 
-Historique des Visas de circulation précédents :
+Historique des Permis de circulation précédents :
 
 | Champ | Description |
 |-------|-------------|
-| `visa_id` | Identifiant du Visa |
+| `permis_id` | Identifiant du Permis de circulation |
 | `issued_by` | Relay ou Origin émetteur |
 | `issued_at` | Date d'émission |
 | `expired_at` | Date d'expiration |
-| `scope` | Portée du Visa |
+| `scope` | Portée du Permis |
 
 #### passport_type
 
@@ -147,26 +147,32 @@ sequenceDiagram
 
 ---
 
-## 3. Visa de Circulation
+## 3. Permis de Circulation (accord relay)
 
 ### 3.1 Définition
 
-Le **Visa de circulation** est l'autorisation officielle de circuler sur le réseau MWS. Il est délivré par un **relay** (ou Origin) après vérification de conformité du COG.
+Le **Permis de circulation** est l'autorisation officielle de circuler sur le réseau MWS. Il est délivré par un **relay** (ou Origin) après vérification de conformité du COG (accord relay) et vérifié par les trackers (contrôle tracker).
 
-### 3.2 Structure du Visa
+**Validité et trackers officiels :**
+
+- Le Permis de circulation délivré par un relay est **valable sur tout le réseau** accessible au COG qui le présente (maillage MWS couvert par Origin et les relays).
+- Lors de la délivrance du Permis, le relay remet au COG les **adresses des trackers sûrs/officiels** (trackers connus et reconnus par Origin). Le COG ne peut et **ne doit pas** se connecter à un tracker inconnu d'Origin : seuls les trackers figurant sur cette liste sont autorisés pour la connexion au maillage.
+
+### 3.2 Structure du Permis de circulation
 
 | Champ | Type | Description |
 |-------|------|-------------|
-| `visa_id` | string | Identifiant unique du Visa |
+| `permis_id` | string | Identifiant unique du Permis de circulation |
 | `cog_id` | string | COG concerné |
 | `issued_by` | string | Relay ou Origin émetteur |
 | `issued_at` | datetime | Date et heure d'émission |
 | `expires_at` | datetime | Date et heure d'expiration |
-| `scope` | object | Portée du Visa |
+| `scope` | object | Portée du Permis |
 | `core_version` | string | Version des Cores validée |
 | `passport_type` | enum | `STANDARD` ou `SPECIAL` |
+| `tracker_addresses` | array | Adresses des trackers officiels/sûrs (remises par le relay avec le Permis ; le COG ne doit se connecter qu'à ces trackers). |
 
-### 3.3 Portée (scope) du Visa
+### 3.3 Portée (scope) du Permis de circulation
 
 Le champ `scope` définit les **intentions** déclarées par le COG :
 
@@ -184,7 +190,7 @@ Le champ `scope` définit les **intentions** déclarées par le COG :
 | Standard | 1 à 24 heures | Automatique à expiration si toujours conforme |
 | Spécial | Jusqu'à 7 jours | Renouvellement simplifié |
 
-### 3.5 Émission du Visa
+### 3.5 Émission du Permis de circulation (accord relay)
 
 ```mermaid
 sequenceDiagram
@@ -196,7 +202,7 @@ sequenceDiagram
     R->>R: Phase B : Vérification blocs de code Services
     R->>R: Phase C : Vérification santé environnement
     alt Conforme
-        R->>COG: Visa de circulation (visa_id, expires_at, scope)
+        R->>COG: Permis de circulation (permis_id, expires_at, scope)
     else Non-conforme
         R->>COG: Quarantaine (durée, raison)
     end
@@ -204,17 +210,17 @@ sequenceDiagram
 
 ---
 
-## 4. Visa d'Accès Hôte
+## 4. Accord d'hôte
 
 ### 4.1 Définition
 
-Distinct du Visa de circulation, le **Visa d'accès hôte** est délivré par un **COG hôte** à un COG client pour autoriser la consommation de services spécifiques.
+Distinct du Permis de circulation, l'**accord d'hôte** est délivré par un **COG hôte** à un COG client pour autoriser la consommation de services spécifiques.
 
 ### 4.2 Structure
 
 | Champ | Type | Description |
 |-------|------|-------------|
-| `access_visa_id` | string | Identifiant unique |
+| `accord_id` | string | Identifiant unique (accord d'hôte) |
 | `client_cog_id` | string | COG client autorisé |
 | `host_cog_id` | string | COG hôte |
 | `services_authorized` | array | Services accessibles |
@@ -222,13 +228,13 @@ Distinct du Visa de circulation, le **Visa d'accès hôte** est délivré par un
 | `expires_at` | datetime | Date d'expiration |
 | `lobby_id` | string | Lobby concerné (optionnel) |
 
-### 4.3 Distinction avec le Visa de circulation
+### 4.3 Distinction avec le Permis de circulation
 
-| Aspect | Visa de circulation | Visa d'accès hôte |
-|--------|---------------------|-------------------|
+| Aspect | Permis de circulation (accord relay) | Accord d'hôte |
+|--------|--------------------------------------|---------------|
 | **Émetteur** | Relay / Origin | COG hôte |
 | **Autorisation** | Circuler sur le réseau MWS | Consommer les services du hôte |
-| **Vérification** | Conformité du COG | Autorisation du hôte |
+| **Vérification** | Conformité du COG (relay) ; contrôle tracker | Autorisation du hôte |
 | **Durée** | Heures à jours | Session ou définie par le hôte |
 
 ### 4.4 Flow de délivrance
@@ -238,12 +244,12 @@ sequenceDiagram
     participant Client as COG Client
     participant Host as COG Hôte
 
-    Note over Client: Possède un Visa de circulation valide
-    Client->>Host: Demande d'accès (Visa circulation, services souhaités)
-    Host->>Host: Vérifier Visa de circulation
+    Note over Client: Possède un Permis de circulation valide
+    Client->>Host: Demande d'accès (Permis circulation, services souhaités)
+    Host->>Host: Vérifier Permis de circulation
     Host->>Host: Vérifier autorisation (Lobby, politique)
     alt Autorisé
-        Host->>Client: Visa d'accès hôte (services_authorized)
+        Host->>Client: Accord d'hôte (services_authorized)
         Client->>Host: Consommation des services
     else Non autorisé
         Host->>Client: Refus (raison)
@@ -269,7 +275,7 @@ stateDiagram-v2
     Spécial --> Actif: Statut révoqué
 ```
 
-### 5.2 Cycle du Visa de circulation
+### 5.2 Cycle du Permis de circulation
 
 ```mermaid
 stateDiagram-v2
@@ -286,16 +292,16 @@ stateDiagram-v2
 
 ---
 
-## 6. Vérification des Visas par les Trackers
+## 6. Contrôle tracker : vérification des Permis de circulation
 
-### 6.1 Points de vérification
+### 6.1 Points de vérification (contrôle tracker)
 
 Quand un COG se présente à un Tracker :
 
 | Vérification | Description |
 |--------------|-------------|
-| **Existence** | Le Visa existe-t-il ? |
-| **Expiration** | Le Visa n'est-il pas expiré ? |
+| **Existence** | Le Permis de circulation existe-t-il ? |
+| **Expiration** | Le Permis n'est-il pas expiré ? |
 | **Émetteur** | Le relay émetteur est-il reconnu ? |
 | **Cohérence** | Le scope est-il cohérent avec la requête ? |
 | **Blacklist** | Le `cog_id` n'est-il pas blacklisté ? |
@@ -304,14 +310,14 @@ Quand un COG se présente à un Tracker :
 
 | Résultat | Action |
 |----------|--------|
-| Visa valide | Accepter la connexion, assigner au pool |
-| Visa expiré | Rediriger vers relay pour renouvellement |
-| Visa invalide | Refuser, journaliser, potentiel signalement |
-| COG blacklisté | Refuser, ignorer le Visa |
+| Permis valide | Accepter la connexion, assigner au pool |
+| Permis expiré | Rediriger vers relay pour renouvellement |
+| Permis invalide | Refuser, journaliser, potentiel signalement |
+| COG blacklisté | Refuser, ignorer le Permis |
 
 ---
 
-## 7. Exemples de Passeport et Visa
+## 7. Exemples de Passeport et Permis de circulation
 
 ### 7.1 Exemple de Passeport Standard
 
@@ -330,19 +336,19 @@ Quand un COG se présente à un Tracker :
     "attestation_signature": "sig:...",
     "generated_at": "2026-02-13T10:00:00Z"
   },
-  "previous_visas": [
-    {"visa_id": "visa-001", "issued_by": "relay-eu", "issued_at": "2026-02-12T08:00:00Z"}
+  "previous_permis": [
+    {"permis_id": "permis-001", "issued_by": "relay-eu", "issued_at": "2026-02-12T08:00:00Z"}
   ],
   "passport_type": "STANDARD",
   "special_key": null
 }
 ```
 
-### 7.2 Exemple de Visa de circulation
+### 7.2 Exemple de Permis de circulation
 
 ```json
 {
-  "visa_id": "visa-002",
+  "permis_id": "permis-002",
   "cog_id": "550e8400-e29b-41d4-a716-446655440000",
   "issued_by": "relay-eu",
   "issued_at": "2026-02-13T10:05:00Z",

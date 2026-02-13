@@ -24,13 +24,13 @@ Ce document est l'**index des références** détaillées du Miyukini Webway Sys
 |----------|---------|
 | [MWS - Origin](../acteurs/MWS%20-%20Origin.md) | Point d'origine, source de vérité, Registre de Services, Passeports spéciaux |
 | [MWS - Relays](../acteurs/MWS%20-%20Relays.md) | Duplications d'Origin, vérification 3 phases, distribution des versions |
-| [MWS - Trackers](../acteurs/MWS%20-%20Trackers.md) | Douaniers du réseau, pools par version, catalogue, Lobbys, monitoring |
+| [MWS - Trackers](../acteurs/MWS%20-%20Trackers.md) | Douaniers, pools ; catalogue web = services WEB publics ; Lobbys visibles depuis les services |
 
 ### Vérification et identité
 
 | Document | Contenu |
 |----------|---------|
-| [MWS - Passeport et Visa](../verification/MWS%20-%20Passeport%20et%20Visa.md) | Structure Passeport COG, types, Visa de circulation, Visa d'accès hôte |
+| [MWS - Passeport et Permis](../verification/MWS%20-%20Passeport%20et%20Visa.md) | Structure Passeport COG, types, Permis de circulation (accord relay), accord d'hôte |
 | [MWS - Flux de Vérification](../verification/MWS%20-%20Flux%20de%20Verification.md) | Phase A (clé Cores), Phase B (blocs MIP), Phase C (santé), résultats |
 
 ### Sécurité
@@ -83,8 +83,8 @@ Ce document est l'**index des références** détaillées du Miyukini Webway Sys
 
 | Document | Contenu |
 |----------|---------|
-| [Connexion Inter-COG](../../reference/Miyukini%20Conceptual%20References%20-%20Connexion%20Inter-COG.md) | Visite gouvernée, Passeport, Visa, Bridge |
-| [Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) | Termes officiels MWS (Origin, Lobby, Visa, Pool, etc.) |
+| [Connexion Inter-COG](../../reference/Miyukini%20Conceptual%20References%20-%20Connexion%20Inter-COG.md) | Visite gouvernée, Passeport, Permis de circulation, Bridge |
+| [Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) | Termes officiels MWS (Origin, Lobby, Permis de circulation, Pool, etc.) |
 
 ---
 
@@ -129,7 +129,7 @@ Ce document est l'**index des références** détaillées du Miyukini Webway Sys
 | **Origin** | MWS - Origin | Relay (sections 1, 3, 6) |
 | **Relays** | MWS - Relays | Relay, Relay Protocol |
 | **Trackers** | MWS - Trackers | MiyuWebwayTracker (contrats) |
-| **Passeport / Visa** | MWS - Passeport et Visa | Relay (section 2) |
+| **Passeport / Permis de circulation** | MWS - Passeport et Permis | Relay (accord relay), Tracker (contrôle tracker) |
 | **Vérification** | MWS - Flux de Vérification | Relay (section 2) |
 | **Quarantaine / Blacklist** | MWS - Quarantaine et Blacklist | Relay (sections 2.8, 2.9, 3.4) |
 | **Chiffrement** | MWS - Chiffrement et TLS | Relay (sections 3.3, 10) |

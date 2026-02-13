@@ -35,13 +35,13 @@ Le MWS est considéré comme un **système complet** dans l'environnement Miyuki
 |----------|-------------|
 | [MWS - Origin](./acteurs/MWS%20-%20Origin.md) | Origin : point d'origine, source de vérité, Registre de Services, Passeports spéciaux |
 | [MWS - Relays](./acteurs/MWS%20-%20Relays.md) | Relays : duplications d'Origin, vérification, distribution des versions |
-| [MWS - Trackers](./acteurs/MWS%20-%20Trackers.md) | Trackers : douaniers du réseau, pools, catalogue, Lobbys, monitoring |
+| [MWS - Trackers](./acteurs/MWS%20-%20Trackers.md) | Trackers : douaniers, pools ; catalogue web = services WEB publics ; Lobbys visibles depuis les services |
 
 ### Vérification (`verification/`)
 
 | Document | Description |
 |----------|-------------|
-| [MWS - Passeport et Visa](./verification/MWS%20-%20Passeport%20et%20Visa.md) | Structure du Passeport COG, types (Standard/Spécial), Visa de circulation, Visa d'accès hôte |
+| [MWS - Passeport et Permis](./verification/MWS%20-%20Passeport%20et%20Visa.md) | Structure du Passeport COG, types (Standard/Spécial), Permis de circulation (accord relay), accord d'hôte |
 | [MWS - Flux de Vérification](./verification/MWS%20-%20Flux%20de%20Verification.md) | Les 3 phases : clé Cores, blocs de code Services, santé environnement |
 
 ### Sécurité (`securite/`)
@@ -101,7 +101,7 @@ docs/miyukini-webway-system/
 │   └── MWS - Trackers.md
 │
 ├── verification/
-│   ├── MWS - Passeport et Visa.md
+│   ├── MWS - Passeport et Permis.md (Passeport et Visa)
 │   └── MWS - Flux de Verification.md
 │
 ├── securite/

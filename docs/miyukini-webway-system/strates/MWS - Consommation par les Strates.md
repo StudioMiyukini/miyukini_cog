@@ -9,7 +9,7 @@ Le Miyukini Webway System (MWS) est **consommé à différentes parties par tout
 ## Portée / Scope
 
 - Identification des **points de consommation** du MWS par strate (ou niveau logique).
-- Rôle de chaque strate dans la présence, la découverte, les Lobbys, les visas et le transport.
+- Rôle de chaque strate dans la présence, la découverte, les Lobbys, les permis de circulation et le transport.
 - Pas de description détaillée des protocoles (voir références MWS Normes et Standards, Relay, Protocol).
 
 ---
@@ -23,7 +23,7 @@ Les **Cores** gouvernent la participation au Webway et la conformité.
 | **Attestation d'environnement** | WorrySentinel (et autres Cores) produisent l'attestation signée (revue interne) utilisée par les relays pour la vérification de conformité. |
 | **Clé de conformité des Cores** | Les Cores fournissent la clé cachée dans le code, transmise au relay (Phase A de vérification). |
 | **Politique de présence** | Les Cores décident si le COG s'annonce, quelles surfaces exposer, quels Lobbys créer. |
-| **Visa de circulation** | Obtenu auprès d'Origin/relay après vérification ; les Cores gèrent la présentation du Passeport et la réception du Visa. |
+| **Permis de circulation (accord relay)** | Obtenu auprès d'Origin/relay après vérification ; les Cores gèrent la présentation du Passeport et la réception du Permis. Contrôle tracker par les trackers. |
 | **Sécurité réseau** | Border Guard, WorrySentinel : listes de statuts, décisions de confiance, réaction aux alertes (quarantaine, blacklist). |
 
 **Documentation détaillée :** [Miyukini Webway Relay](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) (sections 2, 3, 4).
@@ -36,8 +36,8 @@ Les **Outils** MWS implémentent les rôles Tracker et Participant.
 
 | Outil | Consommation du MWS |
 |-------|---------------------|
-| **MiyuWebwayTracker** | Expose le rôle Tracker : port 21000 (découverte), port 80 (catalogue et Lobbys) ; gère pools par version, visas, whitelists/blacklists/quarantaines ; contrats passifs et actifs ; indique les chemins aux clients pour joindre les hôtes. |
-| **MiyuWebwayParticipant** | Annonces de présence, déclaration des surfaces (services, ports), création de Lobbys, découverte des autres COGs, consommation des Lobbys (avec Visa d'accès hôte), favoris. |
+| **MiyuWebwayTracker** | Expose le rôle Tracker : port 21000 (découverte), port 80 (catalogue et Lobbys) ; gère pools par version, permis de circulation, whitelists/blacklists/quarantaines ; contrats passifs et actifs ; indique les chemins aux clients pour joindre les hôtes. |
+| **MiyuWebwayParticipant** | Annonces de présence, déclaration des surfaces (services, ports), création de Lobbys, découverte des autres COGs, consommation des Lobbys (avec accord d'hôte), favoris. |
 
 **Documentation détaillée :**  
 - [MiyuWebwayTracker - Documentation Fondatrice](../../tools/MiyuWebwayTracker/MiyuWebwayTracker%20-%20Documentation%20Fondatrice.md)  
@@ -55,7 +55,7 @@ Les **Opérateurs** et **Services** utilisent le MWS pour s'exposer et pour cons
 | **Annonces** | Déclaration des services exposés, adresses (IP/ports), sessions hébergées (Host), conformément à la norme de déclaration sécurisée. |
 | **Surfaces et Lobbys** | Déclaration des surfaces de connexion (quels services, quels ports, acceptation de connexions) ; création de Lobbys dans le catalogue des trackers. |
 | **Découverte** | Requêtes de découverte vers les trackers ; réception des listes de COGs et Lobbys (filtrées par version des Cores, statuts). |
-| **Connexion client–hôte** | Le COG client suit les chemins indiqués par le tracker, se connecte au COG hôte, obtient le Visa d'accès hôte et consomme les services exposés. |
+| **Connexion client–hôte** | Le COG client suit les chemins indiqués par le tracker, se connecte au COG hôte, obtient l'accord d'hôte et consomme les services exposés. |
 | **Favoris et amis** | Gestion des favoris (retrouver un COG hôte) et de la relation « amis » (contrôles allégés, demande/confirmation humaine). |
 
 **Documentation détaillée :** [Miyukini Webway Relay](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) (sections 8, 9), [Miyukini Webway System](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md).

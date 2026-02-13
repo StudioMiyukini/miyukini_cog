@@ -2,18 +2,20 @@
 
 ## Contexte
 
-Les **trackers** sont les **douaniers du réseau** Miyukini Webway. Ils assurent les **connexions entre COGs** et en garantissent la sécurité par des **contrôles d'identité et de Visa**. Ils gèrent les **pools par version des Cores**, les **whitelists/blacklists/quarantaines**, le **catalogue** des COGs connectés et les **Lobbys** d'exposition de services.
+Les **trackers** sont les **douaniers du réseau** Miyukini Webway. Ils assurent les **connexions entre COGs** et en garantissent la sécurité par des **contrôles d'identité et contrôle tracker**. Ils gèrent les **pools par version des Cores**, les **whitelists/blacklists/quarantaines**, le **catalogue web des services WEB publics** (port 80) et le **catalogue de Lobbys** (visible depuis les services COG, pas depuis le portail web).
 
-> **Principe fondamental :** Le Tracker **ne fait pas** de vérification lourde de conformité (Passeport, clé Cores, blocs de code Services). Cette responsabilité incombe aux **relays** qui délivrent les Visas. Le Tracker vérifie uniquement l'identité et le Visa de circulation.
+> **Principe fondamental :** Le Tracker **ne fait pas** de vérification lourde de conformité (Passeport, clé Cores, blocs de code Services). Cette responsabilité incombe aux **relays** qui délivrent les Permis de circulation (accord relay). Le Tracker effectue le **contrôle tracker** (vérification de l'identité et du Permis de circulation).
+
+> **Règle de connexion :** Un COG **ne peut pas et ne doit pas** se connecter à un tracker inconnu d'Origin. Lors de la délivrance du Permis de circulation, le relay remet au COG la liste des **trackers officiels/sûrs** (adresses des trackers reconnus par Origin). Le COG ne doit utiliser que ces trackers pour rejoindre le maillage. Le Permis est valable sur tout le réseau accessible au COG qui le présente.
 
 **Référence fondatrice :** [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 
 ## Portée / Scope
 
-- Rôle de douanier : contrôle d'identité et de Visa
+- Rôle de douanier : contrôle d'identité et contrôle tracker
 - Pools par version des Cores
 - Gestion des whitelists, blacklists, quarantaines
-- Catalogue et Lobbys (port 80)
+- Catalogue web (port 80) : services WEB publics ; catalogue de Lobbys (visible depuis les services)
 - Monitoring réseau et congestion
 - Fermeture de connexions (confinement)
 - Systèmes passifs et actifs
@@ -22,7 +24,7 @@ Les **trackers** sont les **douaniers du réseau** Miyukini Webway. Ils assurent
 
 ## 1. Position dans l'architecture
 
-Les trackers sont le **point d'entrée** des COGs sur le maillage MWS après obtention de leur Visa de circulation auprès d'un relay.
+Les trackers sont le **point d'entrée** des COGs sur le maillage MWS après obtention de leur Permis de circulation (accord relay) auprès d'un relay. Le COG reçoit avec son Permis les **adresses des trackers officiels** ; il ne doit se connecter qu'à ceux-ci (trackers connus d'Origin), jamais à un tracker inconnu.
 
 ```mermaid
 flowchart LR
@@ -42,8 +44,8 @@ flowchart LR
     end
 
     C1 -->|1. Vérification| R
-    R -->|2. Visa| C1
-    C1 -->|3. Connexion avec Visa| T
+    R -->|2. Permis de circulation| C1
+    C1 -->|3. Connexion (contrôle tracker)| T
     T -->|4. Pool version| C2
     T -->|4. Pool version| C3
     T --- CAT
@@ -51,23 +53,23 @@ flowchart LR
 
 | Caractéristique | Description |
 |-----------------|-------------|
-| **Douanier** | Le Tracker contrôle l'identité et le Visa, comme un douanier à une frontière. |
+| **Douanier** | Le Tracker contrôle l'identité et le Permis de circulation (contrôle tracker), comme un douanier à une frontière. |
 | **Passerelle** | Il permet aux COGs vérifiés de se découvrir et de se connecter. |
 | **Pools isolés** | Il maintient des pools séparés par `core_version.MAJOR`. |
-| **Catalogue** | Il expose un catalogue web des COGs et leurs Lobbys (port 80). |
+| **Catalogue web (port 80)** | Il expose un catalogue des **services WEB publics** des COGs connectés (URLs, type moteur de recherche, gestion d’adresses) ; les Lobbys des autres services ne sont pas visibles depuis ce portail. |
 
 ---
 
-## 2. Contrôle d'identité et de Visa
+## 2. Contrôle d'identité et contrôle tracker
 
 ### 2.1 Présentation au Tracker
 
 Quand un COG se présente au Tracker :
 
 1. **Présentation du Passeport** : Le COG montre son Passeport pour un contrôle initial.
-2. **Vérification du Visa** : Le Tracker vérifie que le COG possède un **Visa de circulation valide** :
+2. **Contrôle tracker** : Le Tracker vérifie que le COG possède un **Permis de circulation valide** :
    - Non expiré
-   - Émis par un relay ou Origin reconnu
+   - Émis par un relay ou Origin reconnu (accord relay)
    - Scope cohérent avec la requête
 3. **Assignation au pool** : Le COG est dirigé vers le pool correspondant à sa `core_version.MAJOR`.
 
@@ -76,12 +78,12 @@ sequenceDiagram
     participant COG as COG
     participant T as Tracker
 
-    COG->>T: Connexion (Passeport, Visa)
-    T->>T: Vérifier Visa valide ?
-    alt Visa valide
+    COG->>T: Connexion (Passeport, Permis de circulation)
+    T->>T: Contrôle tracker : Permis valide ?
+    alt Permis valide
         T->>T: Assigner au pool (core_version.MAJOR)
         T->>COG: Connexion acceptée
-    else Visa invalide/expiré
+    else Permis invalide/expiré
         T->>COG: Refus, redirection vers relay
     end
 ```
@@ -93,10 +95,10 @@ sequenceDiagram
 | Vérification de la clé de conformité des Cores | Relay / Origin |
 | Vérification des blocs de code des Services | Relay / Origin |
 | Vérification de la santé de l'environnement | Relay / Origin |
-| Délivrance du Visa de circulation | Relay / Origin |
+| Délivrance du Permis de circulation (accord relay) | Relay / Origin |
 | Délivrance des Passeports spéciaux | Origin uniquement |
 
-Le Tracker **fait confiance au Visa** délivré par le relay. S'il y a un doute, il redirige vers un relay pour re-vérification.
+Le Tracker **fait confiance au Permis de circulation** délivré par le relay (accord relay). S'il y a un doute, il redirige vers un relay pour re-vérification.
 
 ---
 
@@ -187,31 +189,32 @@ Les COGs en quarantaine sont temporairement isolés et ne peuvent pas se connect
 
 ---
 
-## 5. Catalogue et Lobbys (port 80)
+## 5. Catalogue web (port 80) et catalogue de Lobbys
 
-### 5.1 Service web de portail
+### 5.1 Service web de portail — services WEB publics uniquement
 
-Les trackers exposent un **service web de portail** (port 80) qui catalogue les COGs connectés et leurs **surfaces de connexion** exposées.
+Les trackers exposent un **service web de portail** (port 80) qui présente le **catalogue des services WEB publics** des COGs connectés au réseau. Ce catalogue fonctionne à la manière d’un **moteur de recherche** et gère aussi les **adresses URL** : il permet de découvrir et d’accéder aux COGs ayant une surface web active et publique (sites, SaaS, portails). Les **Lobbys des autres services COG** (jeu, APIs, etc.) **ne sont pas visibles** depuis ce portail.
 
 | Caractéristique | Description |
 |-----------------|-------------|
 | **Catalogue global** | Mis à jour et diffusé automatiquement |
-| **Facilitateur** | Les COGs n'ont pas besoin de nom de domaine ni d'IP fixe |
-| **Chemins** | Le Tracker indique les chemins pour joindre les COGs hôtes |
+| **Facilitateur / URLs** | Les COGs n’ont pas besoin de nom de domaine ni d’IP fixe ; le tracker gère les URLs et redirige |
+| **Pas de Lobbys** | Seuls les services WEB publics sont listés ; les Lobbys sont visibles depuis les services COG (voir 5.3) |
 
 ### 5.2 Présentation des surfaces au Tracker
 
-Quand un COG se présente au Tracker (après validation du Visa), il déclare :
+Quand un COG se présente au Tracker (après validation du Permis de circulation), il déclare :
 
 | Déclaration | Description |
 |-------------|-------------|
 | **Surfaces de connexion** | Quels services sont exposés, sur quels ports |
+| **Surfaces web publiques** | Services web exposés au catalogue du portail (port 80) |
 | **Attentes et désirs** | Ce que le COG propose et/ou cherche à joindre |
 | **Acceptation de connexions** | Si le COG accepte des connexions entrantes |
 
-### 5.3 Création de Lobbys
+### 5.3 Catalogue de Lobbys (visible depuis les services)
 
-Si le COG **accepte des connexions** pour certains services et ports, cela crée un **Lobby** dans le catalogue :
+Si le COG **accepte des connexions** pour certains services et ports, cela crée un **Lobby** dans le **catalogue de Lobbys** tenu par le tracker. Ce catalogue **n’est pas affiché sur le portail web** du tracker : il est **visible et joignable depuis les mêmes services** (ex. depuis le client jeu, le client SaaS) qui consomment ces Lobbys. Chaque type de service affiche ainsi les Lobbys qui le concernent.
 
 | Champ | Description |
 |-------|-------------|
@@ -250,19 +253,19 @@ sequenceDiagram
     T->>Client: Liste des Lobbys (filtrée par pool)
     Client->>T: Demande chemin vers Host
     T->>Client: Chemin (relay, tunnel, direct)
-    Client->>Host: Connexion (Visa de circulation)
-    Host->>Host: Vérification du Visa client
-    Host->>Client: Visa d'accès hôte délivré
+    Client->>Host: Connexion (Permis de circulation)
+    Host->>Host: Vérification du Permis client
+    Host->>Client: Accord d'hôte délivré
     Client->>Host: Consommation des services
 ```
 
-### 6.2 Visa d'accès hôte
+### 6.2 Accord d'hôte
 
-Distinct du **Visa de circulation** (relay), le **Visa d'accès hôte** est délivré par le COG hôte :
+Distinct du **Permis de circulation** (accord relay), l'**accord d'hôte** est délivré par le COG hôte :
 
 | Champ | Description |
 |-------|-------------|
-| `access_visa_id` | Identifiant unique |
+| `accord_id` | Identifiant unique |
 | `client_cog_id` | COG client autorisé |
 | `host_cog_id` | COG hôte |
 | `services_authorized` | Services accessibles |
@@ -352,7 +355,7 @@ Voir [MiyuWebwayTracker - Active Systems Contract](../../tools/MiyuWebwayTracker
 | Port | Usage |
 |------|-------|
 | **21000** | Protocole MWS (découverte, connexions) |
-| **80** | Catalogue web et Lobbys |
+| **80** | Catalogue web (services WEB publics ; URLs, recherche) |
 
 ---
 
@@ -363,7 +366,7 @@ Voir [MiyuWebwayTracker - Active Systems Contract](../../tools/MiyuWebwayTracker
 |           TRACKER              |
 |--------------------------------|
 | CONTRÔLE :                     |
-| - Identité et Visa             |
+| - Identité et Permis de circulation (contrôle tracker) |
 | - Whitelists / Blacklists      |
 | - Quarantaines                 |
 |--------------------------------|
@@ -371,10 +374,8 @@ Voir [MiyuWebwayTracker - Active Systems Contract](../../tools/MiyuWebwayTracker
 | - Isolation par core_version   |
 | - Pas de connexion inter-pool  |
 |--------------------------------|
-| CATALOGUE (port 80) :          |
-| - COGs connectés               |
-| - Lobbys (services exposés)    |
-| - Chemins vers les hôtes       |
+| CATALOGUE WEB (port 80) : services WEB publics (URLs, recherche). Lobbys visibles depuis les services COG. |
+| - Chemins / redirections vers les hôtes                       |
 |--------------------------------|
 | MONITORING :                   |
 | - Journalisation               |

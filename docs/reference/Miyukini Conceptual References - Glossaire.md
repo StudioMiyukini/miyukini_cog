@@ -37,7 +37,7 @@ Les préfixes suivants identifient le **type de composant** conçu par Miyukini 
 
 **Relation explicite entre deux COGs** permettant une connexion **plus rapide** avec des **protocoles de controle allegees** et une **periodicite de re-verification plus longue**. Les demandes d'amis et leur confirmation sont **humaines** (initiees et acceptees par les utilisateurs). Les COGs peuvent exposer les **noms ou pseudos** de leurs utilisateurs pour la reconnaissance. La relation amis est une facilitation contractuelle, pas un contournement des Cores.
 
-**Voir aussi :** Lobby (Webway), Visa de circulation, [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 9.4
+**Voir aussi :** Lobby (Webway), Permis de circulation, [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 9.4
 
 ---
 
@@ -122,7 +122,7 @@ Les préfixes suivants identifient le **type de composant** conçu par Miyukini 
 
 ### Catalogue web (Tracker) (Web Catalog)
 
-**Service web des trackers** (port 80) qui catalogue les **COGs connectes** ayant une **surface web active et publique**. Les COGs n'ont pas besoin de nom de domaine ni d'IP fixe : le tracker agit comme facilitateur et tunnel (type No-IP). Le catalogue **redirige** vers les COGs ; il n'a aucune fonction de controle sur les connexions web. Mise a jour et diffusion automatiques ; catalogue **global** accessible depuis n'importe quel tracker.
+**Service web des trackers** (port 80) qui presente le **catalogue des services WEB publics** des COGs connectes au reseau, a la maniere d'un **moteur de recherche** ; il gere aussi les **adresses URL**. Seuls les COGs ayant une **surface web active et publique** (sites, SaaS, portails) y figurent. Les **Lobbys des autres services COG** (jeu, APIs, etc.) **ne sont pas visibles** depuis ce portail — le catalogue de Lobbys est visible **depuis les services COG** concernes. Les COGs n'ont pas besoin de nom de domaine ni d'IP fixe : le tracker agit comme facilitateur et tunnel (type No-IP). Le catalogue **redirige** vers les COGs ; il n'a aucune fonction de controle sur les connexions web. Mise a jour et diffusion automatiques ; catalogue **global** accessible depuis n'importe quel tracker.
 
 **Voir aussi :** COG Tracker, Surface de connexion, Serveur web embarque (COG), [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 9.1
 
@@ -336,12 +336,12 @@ La conformite est verifiee par le **relay** (verification lourde : attestation, 
 
 ### COG Tracker (Webway Tracker)
 
-**Douanier du reseau Miyukini Webway.** Le Tracker assure les connexions entre COGs et en assure la securite par des controles d'identite et de **Visa de circulation**, comme un douanier a une frontiere.
+**Douanier du reseau Miyukini Webway.** Le Tracker assure les connexions entre COGs et en assure la securite par des controles d'identite et **contrôle tracker** (verification du **Permis de circulation**), comme un douanier a une frontiere. Seuls les **trackers connus d'Origin** (trackers officiels/sûrs) sont autorises : un COG ne peut et ne doit se connecter qu'aux trackers dont les adresses lui sont remises avec son Permis de circulation par le relay.
 
 **Port officiel :** les COGs Tracker MWS exposent leur endpoint sur le **port 21000**.
 
 **Role :**
-- **Controle d'identite et de Visa** : verifier que le COG possede un Visa de circulation valide delivre par un relay ou Origin avant de le laisser se connecter au maillage.
+- **Contrôle d'identite et contrôle tracker** : verifier que le COG possede un Permis de circulation valide delivre par un relay ou Origin (accord relay) avant de le laisser se connecter au maillage.
 - **Pools par version des Cores** : diriger des pools separes par `core_version.MAJOR` pour ne jamais connecter des COGs avec des versions differentes.
 - **Whitelists / Blacklists / Quarantaines** : gerer les listes d'autorisation, d'exclusion et de quarantaine.
 - **Monitoring et congestion** : journaliser et monitorer l'etat du reseau, detecter les points de congestion. Renforcer la surveillance si un COG accumule beaucoup de connexions (COGs speciaux).
@@ -353,7 +353,7 @@ La conformite est verifiee par le **relay** (verification lourde : attestation, 
 - Un transporteur de donnees metier
 - Un distributeur de mises a jour (redirige vers les relays)
 
-**Voir aussi :** Origin, Relay Webway, Visa de circulation, Pool de version, Quarantaine, Confinement reseau, [MiyuWebwayTracker - Passive Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md), [MiyuWebwayTracker - Active Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md)
+**Voir aussi :** Origin, Relay Webway, Permis de circulation, accord relay, contrôle tracker, Pool de version, Quarantaine, Confinement reseau, [MiyuWebwayTracker - Passive Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md), [MiyuWebwayTracker - Active Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md)
 
 ---
 
@@ -386,7 +386,7 @@ La conformite est verifiee par le **relay** (verification lourde : attestation, 
 
 **Annonce par un COG Hébergeur au réseau MWS** indiquant qu'il héberge une session d'un service donné et qu'il attend des connexions vers lui (adresse et port).
 
-**Contenu minimal (orientation) :** identifiant du service ou type de session, identifiant du COG Hébergeur, adresse de connexion (IP ou nom de domaine, port). La déclaration **ne donne aucun droit d'accès** ; elle indique où se présenter pour demander un Visa.
+**Contenu minimal (orientation) :** identifiant du service ou type de session, identifiant du COG Hébergeur, adresse de connexion (IP ou nom de domaine, port). La déclaration **ne donne aucun droit d'accès** ; elle indique où se présenter pour demander un Permis de circulation ou un accord d'hôte.
 
 **Voir aussi :** Miyukini Webway System, COG Hébergeur, Norme de déclaration sécurisée (MWS)
 
@@ -636,7 +636,7 @@ La conformite est verifiee par le **relay** (verification lourde : attestation, 
 
 **Liste de COGs hôtes** que l'utilisateur du COG client souhaite **retrouver rapidement** dans les listes et Lobbys distribues par le tracker. Les favoris peuvent etre stockes localement (cote client) ou signales au tracker pour un affichage prioritaire. Permet d'accelerer la decouverte du COG hôte desire lors de la consommation de services.
 
-**Voir aussi :** Lobby (Webway), Visa d'acces (hôte), [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 9.3
+**Voir aussi :** Lobby (Webway), accord d'hôte, [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 9.3
 
 ---
 
@@ -819,9 +819,9 @@ La conformite est verifiee par le **relay** (verification lourde : attestation, 
 
 ### Lobby (Webway) (Lobby)
 
-**Entree du catalogue des trackers** correspondant a l'exposition d'un ou plusieurs **services** d'un **COG hôte** sur des **ports donnes**. Cree lorsque le COG presente au tracker ses surfaces de connexion et indique qu'il accepte des connexions pour tels services et ports. Les Lobbys sont **visibles et joignables** depuis le service du COG client. Un Lobby peut etre **public** ou **prive** (mot de passe) ; en prive, 5 echecs d'acces entrainent le ban du COG client, avec de-ban manuel uniquement par l'utilisateur du COG hôte.
+**Entree du catalogue de Lobbys** tenu par les trackers, correspondant a l'exposition d'un ou plusieurs **services** d'un **COG hôte** sur des **ports donnes**. Cree lorsque le COG presente au tracker ses surfaces de connexion et indique qu'il accepte des connexions pour tels services et ports. Ce catalogue **n'est pas affiche sur le portail web des trackers** (reserve aux services WEB publics) : les Lobbys sont **visibles et joignables depuis les services COG** concernes (ex. client jeu, client SaaS). Un Lobby peut etre **public** ou **prive** (mot de passe) ; en prive, 5 echecs d'acces entrainent le ban du COG client, avec de-ban manuel uniquement par l'utilisateur du COG hôte.
 
-**Voir aussi :** Catalogue web (Tracker), Surface de connexion, Visa d'acces (hôte), Favoris (COG), [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 9.1–9.2
+**Voir aussi :** Catalogue web (Tracker), Surface de connexion, accord d'hôte, Favoris (COG), [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 9.1–9.2
 
 ---
 
@@ -1008,7 +1008,7 @@ La conformite est verifiee par le **relay** (verification lourde : attestation, 
 **Couche de présence et de découverte** des environnements COG disposant d'un accès réseau. Permet aux COGs de se déclarer, de savoir qui est présent sur le maillage, et de faciliter l'initiation des visites gouvernées (Passeport, Visa) sans transférer de données métier.
 
 **Rôle :**
-- Normaliser *qui est là* et *où se présenter* pour demander un Visa
+- Normaliser *qui est là* et *où se présenter* pour demander un Permis de circulation
 - Système de sécurité fondé sur l'échange de listes de COGs avec statuts (Webway COG List)
 - Les COGs Tracker ont le devoir de protéger le réseau par des mécanismes passifs ([Passive Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md)) et actifs ([Active Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md))
 
@@ -1225,10 +1225,10 @@ Les **relays** sont des duplications d'Origin sous son autorite. Les **trackers*
 - `core_version` : version des Cores.
 - `service_list` : liste des Services installes avec versions et checksums.
 - `environment_health` : rapport de sante de l'environnement.
-- `previous_visas` : historique des Visas precedents.
+- `previous_permis` : historique des Permis de circulation precedents.
 - `passport_type` : STANDARD ou SPECIAL.
 
-**Voir aussi :** Passeport special, Visa de circulation, Presentation d'identite, Origin
+**Voir aussi :** Passeport special, Permis de circulation, Presentation d'identite, Origin
 
 ---
 
@@ -1259,7 +1259,7 @@ Les **relays** sont des duplications d'Origin sous son autorite. Les **trackers*
 
 **Regroupement de COGs** gere par les trackers, isole par `core_version.MAJOR`. Les trackers dirigent chaque COG vers le pool correspondant a sa version des Cores. **Aucune connexion inter-pool n'est autorisee** : des COGs avec des versions majeures differentes ne sont jamais connectes entre eux.
 
-**Voir aussi :** COG Tracker (Webway), Version des Cores, Visa de circulation
+**Voir aussi :** COG Tracker (Webway), Version des Cores, Permis de circulation
 
 ---
 
@@ -1388,9 +1388,9 @@ Le COG en quarantaine peut retenter la verification apres expiration du delai. L
 
 ### Relay Webway (Miyukini Webway Relay)
 
-**Duplication d'Origin** sous son autorite. Composant de **transport et de confiance** du Miyukini Webway System. Le relay garantit la conformite des COGs (verification en trois phases : cle Cores, blocs de code Services, sante environnement), assure la maintenance des environnements et la distribution des versions (mises a jour). Il possede la liste officielle des services disponibles aux COGs, heritee d'Origin. Le relay delivre les **Visas de circulation** aux COGs conformes.
+**Duplication d'Origin** sous son autorite. Composant de **transport et de confiance** du Miyukini Webway System. Le relay garantit la conformite des COGs (verification en trois phases : cle Cores, blocs de code Services, sante environnement), assure la maintenance des environnements et la distribution des versions (mises a jour). Il possede la liste officielle des services disponibles aux COGs, heritee d'Origin. Le relay delivre les **Permis de circulation** (accord relay) aux COGs conformes.
 
-**Voir aussi :** Origin, Passeport COG, Visa de circulation, Verification de conformite, Cle de conformite des Cores, Bloc de code (verification), Quarantaine, [Miyukini Conceptual References - Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md), [Miyukini - Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md)
+**Voir aussi :** Origin, Passeport COG, Permis de circulation, accord relay, Verification de conformite, Cle de conformite des Cores, Bloc de code (verification), Quarantaine, [Miyukini Conceptual References - Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md), [Miyukini - Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md)
 
 ---
 
@@ -1775,33 +1775,36 @@ Synonyme historique d'**Origin**. Designe Origin dans sa fonction de relay (sour
 
 ---
 
-### Visa de circulation (Circulation Visa)
+### Permis de circulation (accord relay)
 
-**Autorisation temporaire** delivree par Origin ou un relay a un COG ayant passe la verification de conformite. Le Visa permet au COG de se connecter au Webway via les trackers.
+**Autorisation temporaire** delivree par Origin ou un relay (accord relay) a un COG ayant passe la verification de conformite. Le Permis de circulation permet au COG de se connecter au Webway via les **trackers officiels** ; les trackers effectuent le **contrôle tracker** (verification du permis).
 
-**Contenu du Visa :**
+**Validite :** Le Permis est **valable sur tout le reseau** accessible au COG qui le presente. Avec le Permis, le relay remet les **adresses des trackers officiels/sûrs** (trackers connus d'Origin). Un COG **ne peut pas et ne doit pas** se connecter a un tracker inconnu d'Origin ; il ne doit utiliser que les trackers de cette liste.
+
+**Contenu du Permis de circulation :**
 
 | Champ | Description |
 |-------|-------------|
-| `visa_id` | Identifiant unique du visa |
+| `permis_id` | Identifiant unique du permis |
 | `cog_id` | COG concerne |
 | `issued_by` | Relay ou Origin emetteur |
 | `issued_at` / `expires_at` | Validite temporelle |
 | `scope` | Portee (intentions du COG : services, COGs a contacter) |
 | `core_version` | Version des Cores validee |
 | `passport_type` | STANDARD ou SPECIAL |
+| `tracker_addresses` | Adresses des trackers officiels (le COG ne doit se connecter qu'a ces trackers). |
 
-Les trackers verifient le Visa avant d'autoriser les connexions. Un Visa expire oblige le COG a se re-verifier aupres d'un relay.
+Les trackers verifient le Permis de circulation avant d'autoriser les connexions (contrôle tracker). Un Permis expire oblige le COG a se re-verifier aupres d'un relay.
 
-**Voir aussi :** Passeport COG, Quarantaine, Pool de version, Origin
+**Voir aussi :** Passeport COG, accord relay, contrôle tracker, Quarantaine, Pool de version, Origin
 
 ---
 
-### Visa d'acces (hôte) (Host Access Visa)
+### Accord d'hôte (Host Access)
 
-**Autorisation delivree par le COG hôte** au COG client pour **consommer les services exposes** par ce hôte (Lobby). Distinct du **Visa de circulation** (delivre par le relay/Origin) : le Visa de circulation autorise a circuler sur le Webway ; le Visa d'acces (hôte) autorise l'acces aux ressources et services d'un COG hôte determine. Le COG client se connecte au COG hôte en suivant les protocoles de securite et consomme les services grace a ce visa.
+**Autorisation delivree par le COG hôte** au COG client pour **consommer les services exposes** par ce hôte (Lobby). Distinct du **Permis de circulation** (delivre par le relay/Origin) : le Permis de circulation autorise a circuler sur le Webway ; l'accord d'hôte autorise l'acces aux ressources et services d'un COG hôte determine. Le COG client se connecte au COG hôte en suivant les protocoles de securite et consomme les services grace a cet accord.
 
-**Voir aussi :** Visa de circulation, Lobby (Webway), COG Hébergeur, [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 9.3
+**Voir aussi :** Permis de circulation, Lobby (Webway), COG Hébergeur, [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 9.3
 
 ---
 
@@ -2101,7 +2104,7 @@ Les trackers verifient le Visa avant d'autoriser les connexions. Un Visa expire 
 | Origin Distributed Truth        | **Verite distribuee d'Origin**             |
 | COG Passport                    | **Passeport COG**                          |
 | Special Passport                | **Passeport special**                      |
-| Circulation Visa                | **Visa de circulation**                    |
+| Circulation Visa / Permis       | **Permis de circulation** (accord relay)    |
 | Version Pool                    | **Pool de version**                        |
 | Webway Quarantine               | **Quarantaine (Webway)**                   |
 | Core Conformity Key             | **Cle de conformite des Cores**            |
@@ -2122,13 +2125,13 @@ Les trackers verifient le Visa avant d'autoriser les connexions. Un Visa expire 
 | Lobby (Webway)                  | **Lobby (Webway)**                          |
 | COG Favorites                   | **Favoris (COG)**                           |
 | COG Friends                     | **Amis (COGs)**                             |
-| Host Access Visa                | **Visa d'acces (hôte)**                     |
+| Host Access Visa                | **Accord d'hôte**                           |
 
 
 ---
 
 **Date de création :** 2026-01-27  
-**Version :** 1.18 (Lobby, Favoris, Amis COGs, Visa d'acces hôte ; surfaces au tracker, Lobbys prives, flow client-hôte)  
+**Version :** 1.18 (Lobby, Favoris, Amis COGs, accord d'hôte ; surfaces au tracker, Lobbys prives, flow client-hôte)  
 **Statut :** Document de référence normatif — GLOSSAIRE OFFICIEL
 
 **Références croisées :**

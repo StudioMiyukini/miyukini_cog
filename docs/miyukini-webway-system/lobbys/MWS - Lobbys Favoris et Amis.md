@@ -11,7 +11,7 @@ Les **Lobbys**, **favoris** et **amis** sont les mécanismes de découverte et d
 - Lobbys : définition, création, visibilité, accès
 - Lobbys privés : mot de passe, bans, dé-ban
 - Surfaces de connexion : déclaration, limites
-- Flow client → hôte : découverte, connexion, Visa d'accès
+- Flow client → hôte : découverte, connexion, accord d'hôte
 - Favoris : marquage, retrouver rapidement un hôte
 - Amis : relation de confiance, contrôles allégés
 
@@ -21,11 +21,11 @@ Les **Lobbys**, **favoris** et **amis** sont les mécanismes de découverte et d
 
 ### 1.1 Définition
 
-Un **Lobby** est une entrée dans le **catalogue des trackers** représentant les services qu'un COG hôte expose pour des connexions entrantes. C'est le point de rendez-vous entre les COGs qui offrent des services et ceux qui souhaitent les consommer.
+Un **Lobby** est une entrée dans le **catalogue de Lobbys** tenu par les trackers, représentant les services qu'un COG hôte expose pour des connexions entrantes. Ce catalogue **n'est pas affiché sur le portail web des trackers** (qui ne montre que les services WEB publics) : les Lobbys sont **visibles et joignables depuis les services COG** concernés (ex. client jeu, client SaaS). C'est le point de rendez-vous entre les COGs qui offrent des services et ceux qui souhaitent les consommer.
 
 ### 1.2 Création d'un Lobby
 
-Quand un COG se présente à un Tracker (après validation du Visa de circulation), il peut déclarer ses **surfaces de connexion** :
+Quand un COG se présente à un Tracker (après validation du Permis de circulation), il peut déclarer ses **surfaces de connexion** :
 
 ```mermaid
 sequenceDiagram
@@ -34,9 +34,9 @@ sequenceDiagram
 
     COG->>T: Déclaration de surfaces
     Note over COG,T: services, ports, visibilité
-    T->>T: Créer Lobby dans le catalogue
+    T->>T: Créer Lobby dans le catalogue de Lobbys
     T->>COG: Lobby créé (lobby_id)
-    T->>T: Diffuser dans le catalogue global
+    T->>T: Diffuser (visible depuis les services COG, pas depuis le portail web)
 ```
 
 ### 1.3 Structure d'un Lobby
@@ -57,9 +57,11 @@ sequenceDiagram
 
 ### 1.4 Visibilité des Lobbys
 
+Les Lobbys sont visibles **depuis les services COG** qui les consomment (ex. liste de serveurs dans un jeu, liste de Lobbys dans un client SaaS), **pas** depuis le portail web des trackers (réservé aux services WEB publics).
+
 | Visibilité | Description |
 |------------|-------------|
-| **Public** | Visible dans le catalogue, accessible à tous les COGs du même pool |
+| **Public** | Visible dans le catalogue de Lobbys (affiché par les services), accessible à tous les COGs du même pool |
 | **Privé** | Visible dans le catalogue mais nécessite un mot de passe pour rejoindre |
 | **Caché** | Non listé dans le catalogue, accessible uniquement par ID direct (fonctionnalité avancée) |
 
@@ -182,18 +184,18 @@ sequenceDiagram
 
     Client->>T: Demande chemin vers Host
     T->>Client: Chemin (relay, tunnel, direct)
-    Client->>Host: Connexion (Visa de circulation)
-    Host->>Host: Vérifier Visa client
-    alt Visa valide
+    Client->>Host: Connexion (Permis de circulation)
+    Host->>Host: Vérifier Permis client
+    alt Permis valide
         Host->>Host: Vérifier autorisation (Lobby, politique)
         alt Autorisé
-            Host->>Client: Visa d'accès hôte
+            Host->>Client: Accord d'hôte
             Client->>Host: Consommation des services
         else Lobby privé
             Host->>Client: Demande de mot de passe
             Client->>Host: Mot de passe
             alt Correct
-                Host->>Client: Visa d'accès hôte
+                Host->>Client: Accord d'hôte
             else Incorrect (< 5 fois)
                 Host->>Client: Refus, réessayer
             else Incorrect (5 fois)
@@ -201,18 +203,18 @@ sequenceDiagram
                 T->>Client: Banni de ce Lobby
             end
         end
-    else Visa invalide
+    else Permis invalide
         Host->>Client: Refus
     end
 ```
 
-### 4.3 Visa d'accès hôte
+### 4.3 Accord d'hôte
 
-Le **Visa d'accès hôte** est délivré par le COG hôte au COG client :
+L'**accord d'hôte** est délivré par le COG hôte au COG client :
 
 | Champ | Description |
 |-------|-------------|
-| `access_visa_id` | Identifiant unique |
+| `accord_id` | Identifiant unique |
 | `client_cog_id` | COG client autorisé |
 | `host_cog_id` | COG hôte |
 | `services_authorized` | Services accessibles |
@@ -220,7 +222,7 @@ Le **Visa d'accès hôte** est délivré par le COG hôte au COG client :
 | `issued_at` | Date d'émission |
 | `expires_at` | Date d'expiration |
 
-Ce Visa est **distinct** du Visa de circulation (délivré par les relays).
+L'accord d'hôte est **distinct** du Permis de circulation (délivré par les relays, accord relay).
 
 ---
 
@@ -330,22 +332,22 @@ sequenceDiagram
 | **Pas de contournement** | Les amis restent soumis aux règles de surface et de sécurité |
 | **Révocable** | Chaque utilisateur peut mettre fin à la relation |
 | **Surveillance** | Les Trackers peuvent surveiller les abus |
-| **Passeport requis** | Les deux COGs doivent avoir un Visa de circulation valide |
+| **Passeport requis** | Les deux COGs doivent avoir un Permis de circulation valide |
 
 ---
 
-## 7. Catalogue web des Trackers
+## 7. Catalogue web des Trackers (services WEB publics uniquement)
 
 ### 7.1 Service web de portail (port 80)
 
-Les Trackers exposent un **catalogue web** accessible via navigateur :
+Le service web des trackers (port 80) présente le **catalogue des services WEB publics** des COGs connectés au réseau, à la manière d’un **moteur de recherche** ; il gère aussi les **adresses URL**. Les **Lobbys des autres services COG** (jeu, APIs, etc.) **ne sont pas visibles** depuis ce portail. Le **catalogue de Lobbys** de chaque type de service est visible **depuis ces mêmes services** (ex. depuis le client jeu, le client SaaS).
 
 | Fonction | Description |
 |----------|-------------|
-| **Liste des Lobbys** | Affichage des Lobbys publics |
-| **Recherche** | Recherche par service, nom, tags |
-| **Filtrage** | Filtrage par version des Cores |
-| **Redirection** | Les utilisateurs web sont redirigés vers les COGs hôtes |
+| **Services WEB publics** | Liste des COGs ayant une surface web active et publique (sites, SaaS, portails) |
+| **Recherche / URLs** | Moteur de recherche et gestion des adresses URL |
+| **Redirection** | Les utilisateurs web sont redirigés vers les COGs hôtes (type No-IP) |
+| **Pas de Lobbys** | Les Lobbys ne sont pas affichés ici ; ils sont visibles depuis les services COG concernés |
 
 ### 7.2 Fonctionnement "No-IP"
 
@@ -362,7 +364,7 @@ Les Trackers exposent un **catalogue web** accessible via navigateur :
 
 | Aspect | Description |
 |--------|-------------|
-| **Temps réel** | Le catalogue est mis à jour en temps réel |
+| **Temps réel** | Le catalogue des services WEB publics est mis à jour en temps réel |
 | **Global** | Le catalogue est global et accessible par n'importe quel Tracker |
 | **Diffusion** | Les mises à jour sont diffusées automatiquement |
 

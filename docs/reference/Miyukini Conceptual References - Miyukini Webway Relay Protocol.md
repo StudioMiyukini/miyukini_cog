@@ -157,7 +157,7 @@ La verification suit le flux complet decrit dans [Miyukini Webway Relay](./Miyuk
    - **core_version** : version des Cores (`MAJOR.MINOR`).
    - **svc_manifest** : JSON compact des versions de Services actifs avec checksums.
    - **environment_health** : rapport de sante de l'environnement genere par les Cores.
-   - **previous_visas** : historique des visas precedents (IDs, relays emetteurs).
+   - **previous_permis** : historique des Permis de circulation precedents (IDs, relays emetteurs).
    - **passport_type** : `STANDARD` (0x01) ou `SPECIAL` (0x02).
    - **special_key** (si passport_type = SPECIAL) : cle speciale delivree par Origin.
 
@@ -170,7 +170,7 @@ La verification suit le flux complet decrit dans [Miyukini Webway Relay](./Miyuk
 **Phase 3 : Resultat**
 
 7. Le relay repond :
-   - **REGISTER_OK** avec un **Visa de circulation** (visa_id, duree, portee, core_version validee).
+   - **REGISTER_OK** avec un **Permis de circulation** (permis_id, duree, portee, core_version validee).
    - **REGISTER_ERR** avec code d'erreur (quarantaine, notification de mise a jour, ou blacklistage).
 
 Apres **REGISTER_OK**, le tunnel est actif et le COG possede un Visa valide pour se connecter aux trackers.

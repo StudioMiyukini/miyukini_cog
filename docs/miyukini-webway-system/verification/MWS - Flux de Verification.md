@@ -2,7 +2,7 @@
 
 ## Contexte
 
-La **vérification de conformité** est le processus par lequel un relay (ou Origin) s'assure qu'un COG est **authentique**, **intègre** et **sain** avant de lui délivrer un Visa de circulation. Cette vérification se déroule en **trois phases** distinctes et complémentaires.
+La **vérification de conformité** est le processus par lequel un relay (ou Origin) s'assure qu'un COG est **authentique**, **intègre** et **sain** avant de lui délivrer un Permis de circulation. Cette vérification se déroule en **trois phases** distinctes et complémentaires.
 
 **Référence fondatrice :** [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 
@@ -42,7 +42,7 @@ flowchart TB
     end
 
     subgraph Résultat["Résultat"]
-        R1[Visa de circulation]
+        R1[Permis de circulation]
         R2[Quarantaine]
     end
 
@@ -194,7 +194,7 @@ sequenceDiagram
     R->>R: Vérifier signature du rapport
     R->>R: Analyser les indicateurs
     alt Santé OK
-        R->>R: Phase C OK → Visa délivré
+        R->>R: Phase C OK → Permis délivré
     else Santé dégradée/corrompue
         R->>COG: Non-conformité → Quarantaine
     end
@@ -230,7 +230,7 @@ Si les **trois phases** réussissent :
 
 | Action | Description |
 |--------|-------------|
-| **Visa de circulation** | Délivré avec `visa_id`, `expires_at`, `scope` |
+| **Permis de circulation** | Délivré avec `permis_id`, `expires_at`, `scope` |
 | **Enregistrement** | COG enregistré dans la table de routage du relay |
 | **Notification** | Si version en retard : notification de mise à jour |
 
@@ -307,7 +307,7 @@ sequenceDiagram
     end
 
     %% Succès
-    R->>COG: VISA DE CIRCULATION (visa_id, expires_at)
+    R->>COG: PERMIS DE CIRCULATION (permis_id, expires_at)
 ```
 
 ---

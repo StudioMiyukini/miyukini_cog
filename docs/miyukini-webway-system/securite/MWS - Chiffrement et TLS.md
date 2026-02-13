@@ -145,7 +145,7 @@ L'exemption n'est possible que si **toutes** les conditions suivantes sont rempl
 | Condition | Description |
 |-----------|-------------|
 | **Négociation préalable** | Les deux COGs ont négocié l'exemption via le canal de contrôle chiffré |
-| **Visa valide** | Les deux COGs possèdent un Visa de circulation valide |
+| **Permis valide** | Les deux COGs possèdent un Permis de circulation valide |
 | **Vérification préalable** | Les deux COGs ont été vérifiés par un relay |
 | **Flux éphémère** | La session non chiffrée est limitée dans le temps |
 | **Notification utilisateur** | L'utilisateur est explicitement informé du mode non chiffré |

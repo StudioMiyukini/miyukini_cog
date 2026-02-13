@@ -126,7 +126,7 @@ sequenceDiagram
     O->>O: Vérifier environment_health
 
     alt Tout conforme
-        O->>COG: REGISTER_OK (visa_id, session_id)
+        O->>COG: REGISTER_OK (permis_id, session_id)
     else Non-conforme
         O->>COG: REGISTER_ERR (code, raison)
     end
@@ -146,8 +146,8 @@ sequenceDiagram
 | `svc_manifest` | Variable | Liste des Services (JSON) |
 | `env_health_len` | 2 octets | Longueur du rapport de santé |
 | `environment_health` | Variable | Rapport de santé |
-| `visa_history_len` | 2 octets | Longueur de l'historique |
-| `previous_visas` | Variable | Visas précédents (JSON) |
+| `permis_history_len` | 2 octets | Longueur de l'historique |
+| `previous_permis` | Variable | Permis de circulation précédents (JSON) |
 | `passport_type` | 1 octet | 0 = STANDARD, 1 = SPECIAL |
 | `special_key_len` | 2 octets | Longueur de la clé spéciale |
 | `special_key` | Variable | Clé spéciale (si SPECIAL) |
@@ -159,11 +159,13 @@ sequenceDiagram
 | Champ | Taille | Description |
 |-------|--------|-------------|
 | `session_id` | 16 octets | Identifiant de session |
-| `visa_id_len` | 2 octets | Longueur du visa_id |
-| `visa_id` | Variable | Identifiant du Visa délivré |
-| `visa_expires_at` | 8 octets | Date d'expiration du Visa |
-| `visa_scope_len` | 2 octets | Longueur du scope |
-| `visa_scope` | Variable | Portée du Visa (JSON) |
+| `permis_id_len` | 2 octets | Longueur du permis_id |
+| `permis_id` | Variable | Identifiant du Permis de circulation délivré (accord relay) |
+| `permis_expires_at` | 8 octets | Date d'expiration du Permis |
+| `permis_scope_len` | 2 octets | Longueur du scope |
+| `permis_scope` | Variable | Portée du Permis (JSON) |
+| `tracker_addresses_len` | 2 octets | Longueur de la liste des adresses de trackers officiels |
+| `tracker_addresses` | Variable | Liste des adresses des trackers officiels/sûrs (connus d'Origin) ; le COG ne doit se connecter qu'à ces trackers. |
 | `status` | 1 octet | 0 = OK, 1 = UPDATE_RECOMMENDED |
 | `min_core_version_len` | 1 octet | Longueur (optionnel) |
 | `min_core_version` | Variable | Version minimale recommandée |

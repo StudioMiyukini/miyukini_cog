@@ -22,7 +22,7 @@ La **quarantaine** et la **blacklist** sont les mécanismes de sécurité du MWS
 
 La **quarantaine** est un état d'**isolement temporaire** d'un COG qui n'a pas passé la vérification de conformité. Un COG en quarantaine :
 
-- Ne peut pas obtenir de Visa de circulation
+- Ne peut pas obtenir de Permis de circulation
 - Ne peut pas se connecter aux trackers
 - Ne peut pas participer au maillage MWS
 - Peut retenter la vérification après le délai de quarantaine
@@ -34,7 +34,7 @@ La **quarantaine** est un état d'**isolement temporaire** d'un COG qui n'a pas 
 | **Échec Phase A** | Clé Cores | Clé de conformité incorrecte |
 | **Échec Phase B** | Blocs Services | Un ou plusieurs Services suspects |
 | **Échec Phase C** | Santé | Environnement dégradé ou corrompu |
-| **Visa expiré/invalide** | Tracker | Tentative de connexion avec Visa invalide |
+| **Permis expiré/invalide** | Tracker | Tentative de connexion avec Permis invalide (contrôle tracker) |
 | **Service non répertorié** | Registre | Service absent du Registre Origin |
 
 ### 1.3 Escalade des durées
@@ -176,7 +176,7 @@ sequenceDiagram
     R->>R: Vérification Phase A, B, C
     alt Conforme
         R->>R: Réinitialiser compteur de tentatives
-        R->>COG: Visa de circulation délivré
+        R->>COG: Permis de circulation délivré
         Note over COG: Sortie de quarantaine
     else Non-conforme
         R->>R: Incrémenter compteur de tentatives
@@ -250,8 +250,8 @@ Le **confinement réseau** est l'état d'urgence du MWS où les connexions inter
 
 1. Les COGs se re-présentent aux relays
 2. Re-vérification complète (Phase A, B, C)
-3. Si conforme → nouveau Visa de circulation
-4. Connexion aux trackers avec le nouveau Visa
+3. Si conforme → nouveau Permis de circulation
+4. Connexion aux trackers avec le nouveau Permis
 5. Reconstruction progressive du maillage
 
 ---

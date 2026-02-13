@@ -21,7 +21,7 @@ La pyramide Miyukini définit des **strates** (Kernel, Cores, Outils, Opérateur
 
 | Constat | Description |
 |---------|-------------|
-| **MWS trop vaste** | Le MWS couvre présence, découverte, transport, conformité, catalogue, Lobbys, visas, relay, trackers — soit des capacités qui touchent le Kernel (réseau), les Cores (gouvernance), les Outils (MiyuWebway*), les Opérateurs (annonces, Lobbys). |
+| **MWS trop vaste** | Le MWS couvre présence, découverte, transport, conformité, catalogue, Lobbys, permis de circulation, relay, trackers — soit des capacités qui touchent le Kernel (réseau), les Cores (gouvernance), les Outils (MiyuWebway*), les Opérateurs (annonces, Lobbys). |
 | **Pas d'étiquette de strate** | On ne dit pas « le MWS est la strate X » ; on dit « le MWS est un **système complet** dont la racine documentaire est `docs/miyukini-webway-system` et qui est **uniquement subordonné aux Cores** ». |
 | **Transversal** | Le MWS est **consommé** par plusieurs strates ; il ne *s'assoit* pas sur une seule. |
 
@@ -34,8 +34,8 @@ La pyramide Miyukini définit des **strates** (Kernel, Cores, Outils, Opérateur
 | Aspect | Rôle des Cores | Rôle du MWS |
 |--------|----------------|-------------|
 | **Politique** | Les Cores (WorrySentinel, Border Guard, StrongFather, etc.) définissent ou valident les politiques de présence, conformité, attestation, sécurité réseau. | Le MWS met en œuvre les mécanismes (protocoles, relay, trackers, catalogue) conformément à ces politiques. |
-| **Décision** | Les Cores décident qui est conforme, qui reçoit un Visa de circulation (via Origin/relays), qui est en quarantaine ou blacklisté. | Origin et les relays **exécutent** les vérifications et délivrent les visas selon les critères hérités des Cores. |
-| **Gouvernance locale** | Chaque COG est gouverné par **ses** Cores. Le MWS ne remplace pas cette gouvernance. | Le MWS fournit le maillage et les chemins ; il ne gouverne pas les accès métier (Visa d'accès hôte = COG Hébergeur). |
+| **Décision** | Les Cores décident qui est conforme, qui reçoit un Permis de circulation (via Origin/relays, accord relay), qui est en quarantaine ou blacklisté. | Origin et les relays **exécutent** les vérifications et délivrent les Permis de circulation selon les critères hérités des Cores. |
+| **Gouvernance locale** | Chaque COG est gouverné par **ses** Cores. Le MWS ne remplace pas cette gouvernance. | Le MWS fournit le maillage et les chemins ; il ne gouverne pas les accès métier (accord d'hôte = COG Hébergeur). |
 
 **Aucune autre strate ne commande le MWS.** Les Outils (ex. MiyuWebwayTracker) sont des **consommateurs** du MWS et sont gouvernés par les Cores ; ils n'ordonnent pas au MWS en tant que système.
 

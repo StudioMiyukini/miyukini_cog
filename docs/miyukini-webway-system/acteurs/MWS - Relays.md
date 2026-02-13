@@ -75,7 +75,7 @@ Le COG transmet son **Passeport complet** :
 | `core_version` | Version des Cores (`MAJOR.MINOR`) |
 | `service_list` | Services installés avec versions et checksums |
 | `environment_health` | Rapport de santé (WorrySentinel, KeeperOfStorage) |
-| `previous_visas` | Historique des Visas précédents |
+| `previous_permis` | Historique des Permis de circulation précédents |
 | `passport_type` | `STANDARD` ou `SPECIAL` |
 | `special_key` | (Passeports spéciaux) Clé délivrée par Origin |
 
@@ -114,19 +114,19 @@ Le relay vérifie le rapport `environment_health` :
 
 | Résultat | Action |
 |----------|--------|
-| **Conforme** | Visa de circulation délivré |
+| **Conforme** | Permis de circulation délivré (accord relay) |
 | **Version en retard** | Notification de mise à jour (pas d'alerte) |
 | **Non-conforme** | Quarantaine (voir [MWS - Quarantaine et Blacklist](../securite/MWS%20-%20Quarantaine%20et%20Blacklist.md)) |
 
 ---
 
-## 3. Délivrance du Visa de circulation
+## 3. Délivrance du Permis de circulation (accord relay)
 
-En cas de conformité, le relay délivre un **Visa de circulation** :
+En cas de conformité, le relay délivre un **Permis de circulation** (accord relay) :
 
 | Champ | Description |
 |-------|-------------|
-| `visa_id` | Identifiant unique du visa |
+| `permis_id` | Identifiant unique du permis |
 | `cog_id` | COG concerné |
 | `issued_by` | Relay (ou Origin) émetteur |
 | `issued_at` | Date et heure d'émission |
@@ -135,7 +135,7 @@ En cas de conformité, le relay délivre un **Visa de circulation** :
 | `core_version` | Version des Cores validée |
 | `passport_type` | `STANDARD` ou `SPECIAL` |
 
-Le COG peut alors se connecter au Webway par les trackers. Les trackers vérifient le Visa avant d'autoriser les connexions.
+Le COG peut alors se connecter au Webway par les **trackers officiels** dont les adresses sont remises avec le Permis (liste fournie par le relay, trackers connus d'Origin). Le Permis est valable sur tout le réseau accessible au COG. Un COG ne peut et ne doit pas se connecter à un tracker inconnu d'Origin. Les trackers effectuent le contrôle tracker (vérification du Permis de circulation) avant d'autoriser les connexions.
 
 ---
 
@@ -204,7 +204,7 @@ sequenceDiagram
     R->>COG: (TLS handshake)
     COG->>R: REGISTER (token, cog_id, Passeport)
     R->>R: Vérification (Phase A, B, C)
-    R->>COG: REGISTER_OK (visa_id, session_id)
+    R->>COG: REGISTER_OK (permis_id, session_id)
     loop Persistance
         COG->>R: HEARTBEAT
         R->>COG: HEARTBEAT_ACK
@@ -320,7 +320,7 @@ Voir [Miyukini - Webway Relay Deployment Guide](../../setup/Miyukini%20-%20Webwa
 | - Phase A : Clé Cores  |
 | - Phase B : Blocs MIP  |
 | - Phase C : Santé env. |
-| - Visa de circulation  |
+| - Permis de circulation  |
 |------------------------|
 | DISTRIBUTION :         |
 | - Versions Cores       |
