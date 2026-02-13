@@ -4,7 +4,7 @@
 
 Les **systemes actifs** du COG Tracker MWS (MiyuWebwayTracker) sont des mecanismes qui **agissent sur les flux** du Webway (annonces, requetes, connexions) pour **filtrer, degrader ou bloquer** en fonction des listes de statuts et des politiques. Ils protegent le maillage en appliquant des decisions de rejet ou de degradation conformes au devoir de protection des Trackers. Ce contrat formalise les **declencheurs, actions et limites** des systemes actifs.
 
-> **Role du Tracker :** Le Tracker est le **douanier du reseau**. Il controle l'identite et le **Visa de circulation** des COGs, gere les **whitelists, blacklists et quarantaines**, dirige les **pools par version des Cores**, et peut **fermer des connexions** pour circonscrire les attaques sur annonce des relays. La verification lourde de conformite (Passeport, cle Cores, blocs de code Services) reste du ressort des **relays** qui delivrent les Visas (voir [Miyukini Webway Relay](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 2).
+> **Role du Tracker :** Le Tracker est le **douanier du reseau**. Il controle l'identite et le **Permis de circulation** des COGs (contrôle tracker), gere les **whitelists, blacklists et quarantaines**, dirige les **pools par version des Cores**, et peut **fermer des connexions** pour circonscrire les attaques sur annonce des relays. La verification lourde de conformite (Passeport, cle Cores, blocs de code Services) reste du ressort des **relays** qui delivrent les Permis de circulation (accord relay) (voir [Miyukini Webway Relay](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 2).
 
 **Reference conceptuelle :** [Miyukini Conceptual References - Miyukini Webway System](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) (section 5.2).
 
@@ -38,7 +38,7 @@ Les actions actives sont declenchees lorsque une ou plusieurs conditions suivant
 | T10 | **Version de protocole non supportee** : le COG utilise un `protocol_version` que le Tracker ne supporte pas. | Refus d'annonce, signalement |
 | T11 | **Service non repertorie detecte** : le `service_manifest` du COG contient un ou plusieurs `service_id` absents du Registre de Services du Relay Origin (statut NOT_FOUND ou SUSPENDED). Le service a ete installe hors ligne sans verification prealable ou a ete retire du Registre. | Isolation reseau, notification, surveillance |
 | T12 | **Mise a jour critique non appliquee** : le COG utilise un service dont la version est inferieure a la version minimale du Registre (`min_version`) ou pour lequel une mise a jour `critical` (securite) est disponible depuis un delai depasse (configurable, ex. 72 h). | Degradation, signalement, isolation progressive |
-| T13 | **Visa expire ou invalide** : le COG se presente au Tracker avec un Visa de circulation expire, revoque, ou emis par un relay non reconnu. | Refus de connexion, redirection vers relay pour re-verification |
+| T13 | **Permis expire ou invalide** : le COG se presente au Tracker avec un Permis de circulation expire, revoque, ou emis par un relay non reconnu (ou se connecte a un tracker non officiel). | Refus de connexion, redirection vers relay pour re-verification |
 | T14 | **Connexion inter-pool** : un COG tente de se connecter a un COG d'un pool de version differente (`core_version.MAJOR` differente). | Refus de connexion |
 | T15 | **Congestion sur un COG** : un COG accumule un nombre anormalement eleve de connexions (seuil configurable). Particulierement surveille pour les COGs avec Passeport special. | Surveillance renforcee, throttling, alerte |
 | T16 | **Alerte reseau des relays** : les relays annoncent une alerte (multiples rejets, attaque detectee). | Confinement, fermeture de connexions, controle renforce |
@@ -64,7 +64,7 @@ Pour chaque declencheur, les actions possibles sont limitees aux suivantes. Tout
 | A11 | **Isolation reseau (service non repertorie)** | Exclure le COG du maillage MWS actif : pas d'annonces de presence relayees, pas d'inclusion dans les reponses de decouverte, pas de routing de donnees vers d'autres COGs. Le tunnel relay est maintenu en mode surveillance (heartbeats, notifications, consultation du Registre). Le COG est notifie de la raison et des actions correctives. | T11 |
 | A12 | **Notification utilisateur** | Emettre une notification explicite vers le COG (via les Cores, WorrySentinel) informant l'utilisateur du service non repertorie ou de la mise a jour critique non appliquee, avec le `service_id`, la raison, et les actions recommandees (soumettre au Registre, mettre a jour, desinstaller). | T11, T12 |
 | A13 | **Journalisation reseau du service inconnu** | Journaliser l'evenement au niveau du maillage (Relay Origin + Trackers connectes) : cog_id, service_id non repertorie, horodatage, adresse source. Cela enrichit la surveillance globale et permet aux autres Trackers de connaitre l'incident. | T11 |
-| A14 | **Refus de connexion (visa invalide)** | Refuser la connexion au maillage et rediriger le COG vers un relay pour re-verification et obtention d'un nouveau Visa de circulation. | T13 |
+| A14 | **Refus de connexion (permis invalide)** | Refuser la connexion au maillage et rediriger le COG vers un relay pour re-verification et obtention d'un nouveau Permis de circulation. | T13 |
 | A15 | **Blocage inter-pool** | Refuser systematiquement toute tentative de connexion entre COGs de pools de version differentes. Les pools sont strictement isoles. | T14 |
 | A16 | **Surveillance renforcee (congestion)** | Renforcer le monitoring d'un COG a forte concentration de connexions. Peut inclure : throttling des nouvelles connexions, journalisation detaillee, alerte WorrySentinel. | T15 |
 | A17 | **Confinement reseau** | Sur alerte des relays, fermer **tout ou partie** des connexions inter-COG pour circonscrire l'attaque. Les COGs doivent se re-verifier aupres des relays (lecture seule) avant de pouvoir reconnecter. | T16 |
@@ -78,7 +78,7 @@ Les contraintes suivantes **doivent** etre respectees par les systemes actifs.
 | ID | Limite | Description |
 |----|--------|-------------|
 | L1 | **Politique par les Cores** : les decisions de **qui** bloquer, degrader ou signaler (statuts, blacklist) sont definies par les **Cores** (Border Guard, WorrySentinel, StrongFather). Le Tracker **applique** ces decisions ; il ne definit pas la politique metier. | Separation des responsabilites |
-| L2 | **Pas de gouvernance Visa/Passeport** : les systemes actifs du Tracker **ne delivrent ni ne refusent** de Visa ni de Passeport. Ils protegent le **maillage MWS** (presence, decouverte) ; la gouvernance des visites reste du ressort du COG Hebergeur. | Portee MWS |
+| L2 | **Pas de gouvernance Permis/Passeport** : les systemes actifs du Tracker **ne delivrent ni ne refusent** de Permis de circulation ni de Passeport. Ils protegent le **maillage MWS** (presence, decouverte) ; la gouvernance des visites reste du ressort du COG Hebergeur. | Portee MWS |
 | L3 | **Pas de donnees metier** : les actions (blocage, signalement, alerte) ne doivent **pas exposer** de donnees metier ni de secrets de gouvernance. Les signaux echanges portent sur identifiants COG, statuts, adresses de connexion Webway. | Confidentialite |
 | L4 | **Proportionnalite** : les actions actives doivent etre **proportionnees** aux declencheurs. Regles de proportionnalite : Under review -> degradation/throttling (pas de blocage total sauf politique explicite). Distrusted -> degradation ou blocage selon politique. Rejected -> blocage complet autorise. Rate limit -> throttling d'abord, blocage temporaire si persistant. | Proportionnalite |
 | L5 | **Tracabilite** : toute action active (refus, blocage, signalement) doit etre **journalisee** (qui, quand, declencheur, action, duree) pour audit et conformite, sans inclure de donnees metier. | Audit |
@@ -158,8 +158,8 @@ Lorsqu'un COG utilise un service avec une mise a jour critique (securite) dispon
 
 ### 4.6 Isolation des canaux
 
-- **Separation MWS / relay** : les actions actives du Tracker s'appliquent **uniquement** au canal MWS (port 21000, protocole de decouverte). Elles ne s'etendent pas au canal du relay (port 7000) ni aux connexions inter-COG gouvernees par Visa/Passeport. Le Tracker peut signaler un COG suspect au relay (via les Cores), mais il ne bloque pas directement le tunnel relay.
-- **Pas d'interference avec la gouvernance** : les systemes actifs ne modifient jamais les Passeports, Visas, ni les decisions de Bridge. Ils protegent uniquement la couche de presence et decouverte.
+- **Separation MWS / relay** : les actions actives du Tracker s'appliquent **uniquement** au canal MWS (port 21000, protocole de decouverte). Elles ne s'etendent pas au canal du relay (port 7000) ni aux connexions inter-COG gouvernees par Permis de circulation / Passeport / Visa de Connexion. Le Tracker peut signaler un COG suspect au relay (via les Cores), mais il ne bloque pas directement le tunnel relay.
+- **Pas d'interference avec la gouvernance** : les systemes actifs ne modifient jamais les Passeports, Permis de circulation, Visa de Connexion, ni les decisions de Bridge. Ils protegent uniquement la couche de presence et decouverte.
 
 ---
 
@@ -179,7 +179,7 @@ Lorsqu'un COG utilise un service avec une mise a jour critique (securite) dispon
 | T10 (protocol_version non supportee) | A1, A6, A9 |
 | T11 (Service non repertorie) | A5, A6, A11, A12, A13 |
 | T12 (Mise a jour critique non appliquee) | A4, A5, A6, A11, A12 |
-| T13 (Visa expire ou invalide) | A6, A14 |
+| T13 (Permis expire ou invalide) | A6, A14 |
 | T14 (Connexion inter-pool) | A15 |
 | T15 (Congestion sur un COG) | A4, A6, A16 |
 | T16 (Alerte reseau des relays) | A3, A5, A6, A7, A17 |

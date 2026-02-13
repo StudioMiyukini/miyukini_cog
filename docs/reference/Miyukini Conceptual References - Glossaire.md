@@ -57,7 +57,7 @@ Les préfixes suivants identifient le **type de composant** conçu par Miyukini 
 
 1. WorrySentinel verifie les checksums des binaires installes.
 2. Border Guard verifie la coherence de l'identite et des certificats.
-3. KeeperOfStorage verifie l'integrite des donnees persistantes.
+3. KindMother verifie l'integrite des donnees persistantes.
 4. StrongFather valide la coherence des politiques avec la version des Cores.
 5. L'attestation signee est transmise au relay lors du REGISTER.
 
@@ -1267,7 +1267,7 @@ Les **relays** sont des duplications d'Origin sous son autorite. Les **trackers*
 
 **Processus par lequel un COG se presente au reseau Webway** en declarant son identite complete (cog_id, empreinte de version, attestation d'environnement). La presentation d'identite se deroule en deux temps :
 
-1. **Auto-revue interne** : les Cores du COG (WorrySentinel, Border Guard, KeeperOfStorage, StrongFather) auditent l'environnement installe pour verifier sa coherence et son integrite. Le resultat est une **attestation d'environnement** signee.
+1. **Auto-revue interne** : les Cores du COG (WorrySentinel, Border Guard, KindMother, StrongFather) auditent l'environnement installe pour verifier sa coherence et son integrite. Le resultat est une **attestation d'environnement** signee.
 2. **Verification externe** : le relay verifie l'attestation, les checksums et la concordance entre l'identite declaree et l'environnement atteste (anti-deguisement). Le Tracker ne fait qu'une verification legere de l'identite.
 
 **Voir aussi :** Attestation d'environnement, Conformite environnement, Verification de conformite, Relay Webway
@@ -1825,7 +1825,7 @@ Les trackers verifient le Permis de circulation avant d'autoriser les connexions
 
 ### Version des Cores (Core Version)
 
-**Identifiant de version** du socle de gouvernance d'un COG, au format `MAJOR.MINOR`. Les Cores (Border Guard, WorrySentinel, StrongFather, BondingBrother, KindMother, KeeperOfStorage, Master Butler, Ever Buddy) sont **immuables** a version donnee.
+**Identifiant de version** du socle de gouvernance d'un COG, au format `MAJOR.MINOR`. Les Cores (StrongFather, KindMother, Caring Nanny, Master Butler, Border Guard, Ever Buddy, WorrySentinel, TAMR) sont **immuables** a version donnee.
 
 **Regles :**
 
@@ -2144,7 +2144,7 @@ Les trackers verifient le Permis de circulation avant d'autoriser les connexions
 - [Miyukini Conceptual References - Miyukini Webway System](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) : **Couche de présence et découverte (MWS)**
 - [Miyukini Conceptual References - Miyukini Webway System Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) : **Annexe MWS — normes, formats, protocole, matrice des statuts**
 - [Miyukini Conceptual References - Miyukini Webway System Outils et Operateurs](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Outils%20et%20Operateurs.md) : **Annexe MWS — Outils, Kits d'Outils, Opérateurs MWS**
-- [Miyukini Conceptual References - Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) : **Architecture relay de transport (bore étendu multi-tenant)**
+- [Miyukini Conceptual References - Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) : **Architecture relay de transport (tunnel étendu multi-tenant)**
 - [Miyukini Conceptual References - Miyukini Webway Relay Protocol](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md) : **Protocole relay (messages, handshake, TLS)**
 - [Miyukini Conceptual References - Operators et Terminologie](./Miyukini%20Conceptual%20References%20-%20Operators%20et%20Terminologie.md)
 - [Miyukini Conceptual References - Mandats et Équipes Operators](./Miyukini%20Conceptual%20References%20-%20Mandats%20et%20Equipes%20Operators.md) : **Mandats de Permission et Équipes**

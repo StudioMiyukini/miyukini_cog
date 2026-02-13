@@ -82,6 +82,9 @@ members = [
     # === Applications Natives (Dioxus) ===
     "apps/central",
     
+    # === MWS Origin ===
+    "apps/origin",
+    
     # === Outils internes ===
     "crates/miyukini-admin",
     "tools/mip-generator",

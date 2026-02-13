@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Services - Miyukini Documentation</title>
+  <meta name="description" content="Les services Miyukini : JayFestival, JayKoa, JayKonta, JayXpose, MiyukiniClicker, MiyukiniSurvivor et plus.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-content">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">M</div>
+        <span>Miyukini</span>
+      </a>
+      <button class="nav-toggle" onclick="toggleNav()">☰</button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Accueil</a></li>
+        <li><a href="cog.html">Qu'est-ce qu'un COG</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+        <li><a href="services.html" class="active">Services</a></li>
+        <li><a href="webway.html">Webway</a></li>
+        <li><a href="about.html">À propos</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <h1>Les Services Miyukini</h1>
+    <p>Des services complets, interconnectés, et gouvernés — Ce que l'utilisateur voit et utilise</p>
+  </header>
+
+  <main class="content">
+    <h2>Vue d'ensemble</h2>
+    <p>Un <strong>Service</strong>, c'est ce que le citoyen perçoit. Il ne voit pas les ministères (Cores), pas les coffres à outils (Toolkits), pas les procédures internes (Mandats). Il voit : <em>"Je veux prendre un rendez-vous"</em>, <em>"Je veux gérer mon festival"</em>, <em>"Je veux tenir ma comptabilité"</em>.</p>
+
+    <h2>Miyukini Central — Le Hub</h2>
+    <p><strong>Crate</strong> : <code>miyukini-central</code> | <strong>Statut</strong> : Fonctionnel</p>
+    
+    <p><strong>Miyukini Central</strong>, c'est la <strong>Mairie</strong> de notre pays numérique. C'est là où le citoyen se rend pour accéder aux services publics. La Mairie ne fournit pas les services elle-même — elle les <strong>répertorie</strong>, les <strong>présente</strong>, et <strong>oriente</strong> le citoyen vers le bon guichet.</p>
+
+    <h3>Fonctionnalités</h3>
+    <ul>
+      <li><strong>Catalogue de services</strong> avec grille de cartes interactives</li>
+      <li><strong>Système d'onglets</strong> avec keep-alive — chaque service ouvert conserve son état</li>
+      <li><strong>Routeur de services</strong> — navigation fluide entre Hub et services ouverts</li>
+      <li><strong>Écran de connexion</strong> et <strong>rite d'entrée</strong> (onboarding)</li>
+      <li><strong>Profil utilisateur</strong> et <strong>paramètres</strong> (thème clair/sombre persistant)</li>
+      <li><strong>Sidebar latérale</strong> avec recherche et filtres</li>
+    </ul>
+
+    <blockquote>
+      Miyukini Central <strong>ne décide jamais</strong>. Il traduit les intentions de l'utilisateur vers les Cores via BondingBrother.
+    </blockquote>
+
+    <h2>La Famille Jay — Services interconnectés</h2>
+    <p>Les services <strong>Jay</strong> sont conçus pour <strong>s'inter-polariser</strong> : ils se couplent naturellement les uns aux autres, tout en restant indépendants.</p>
+
+    <h3>JayFestival — Gestion d'événements et festivals</h3>
+    <p><strong>Crate</strong> : <code>jayfestival</code> | <strong>Statut</strong> : Fonctionnel (backend + UI complète)</p>
+    
+    <p>JayFestival est un service complet de <strong>gestion d'événements B2B2C</strong> — des petits marchés artisanaux aux grands festivals. Il gère l'ensemble du cycle de vie d'un événement.</p>
+
+    <h4>Architecture multi-rôles</h4>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Rôle</th>
+            <th>Espace</th>
+            <th>Fonctionnalités</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Organisateur</strong></td><td>Dashboard, Éditions, Programme, Exposants, Plan, Budget</td><td>Gestion complète de l'événement</td></tr>
+          <tr><td><strong>Exposant</strong></td><td>Dashboard, Candidatures, Participations, Agenda, Factures</td><td>Candidature et gestion de présence</td></tr>
+          <tr><td><strong>Visiteur</strong></td><td>Dashboard, Catalogue, Agenda, Activités, Billets</td><td>Découverte et billetterie</td></tr>
+          <tr><td><strong>Non-connecté</strong></td><td>Landing, Recherche, Annuaire</td><td>Façade publique</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>JayKoa — Calendrier universel</h3>
+    <p><strong>Crate</strong> : <code>jaykoa</code> | <strong>Statut</strong> : Fonctionnel</p>
+    
+    <p>JayKoa est le <strong>calendrier universel du COG</strong>. Il ne crée pas d'événements propres — il <strong>reflète et agrège</strong> le temps provenant de tous les autres services. C'est un miroir temporel gouverné.</p>
+
+    <h4>Fonctionnalités</h4>
+    <ul>
+      <li><strong>Vue Jour</strong> — agenda détaillé heure par heure</li>
+      <li><strong>Vue Semaine</strong> — grille 7 jours avec événements positionnés</li>
+      <li><strong>Vue Mois</strong> — vue calendrier classique avec indicateurs</li>
+      <li><strong>Vue Planning</strong> — vue emploi du temps multi-agenda</li>
+      <li><strong>Mini-calendrier</strong> de navigation rapide</li>
+      <li><strong>Export iCal</strong> — compatibilité Google, Apple, Outlook</li>
+      <li><strong>Détection de conflits</strong> — alerte quand des événements se chevauchent</li>
+    </ul>
+
+    <h3>JayKonta — Comptabilité et budget</h3>
+    <p><strong>Crate</strong> : <code>jaykonta</code> | <strong>Statut</strong> : Partiellement fonctionnel</p>
+    
+    <p>JayKonta est le service financier unifié du COG. Il couvre deux échelles : la <strong>gestion budgétaire personnelle</strong> (Bourse) et la <strong>comptabilité d'entreprise</strong> (Compte).</p>
+
+    <h4>Module Bourse (fonctionnel)</h4>
+    <ul>
+      <li><strong>Dashboard</strong> — vue d'ensemble des finances personnelles, solde, tendances</li>
+      <li><strong>Mouvements</strong> — historique complet des transactions</li>
+      <li><strong>Récurrences</strong> — gestion des dépenses et revenus récurrents</li>
+      <li><strong>Prévisions</strong> — projection budgétaire avec graphiques</li>
+    </ul>
+
+    <h3>JayXpose — Profil exposant et vitrine</h3>
+    <p><strong>Crate</strong> : <code>jayxpose</code> | <strong>Statut</strong> : Fonctionnel</p>
+    
+    <p>JayXpose est le service de <strong>profil exposant et site vitrine</strong> pour artisans, artistes, petites marques. Il permet de créer un catalogue produit, une identité visuelle, et une fiche publique — le tout intégré nativement dans JayFestival.</p>
+
+    <h4>Fonctionnalités</h4>
+    <ul>
+      <li><strong>Dashboard</strong> — vue d'ensemble de l'activité exposant</li>
+      <li><strong>Entreprise</strong> — informations légales, identité, coordonnées</li>
+      <li><strong>Catalogue produits</strong> — liste, ajout, modification, suppression</li>
+      <li><strong>Vitrine</strong> — présentation publique du catalogue et de la marque</li>
+      <li><strong>Documents</strong> — coffre-fort documentaire (contrats, factures, certifications)</li>
+    </ul>
+
+    <h2>Les Jeux Miyukini</h2>
+
+    <h3>MiyukiniClicker — Jeu idle/clicker + stratégie</h3>
+    <p><strong>Crate</strong> : <code>miyuclicker</code> | <strong>Statut</strong> : Fonctionnel et jouable</p>
+    
+    <p>MiyukiniClicker est le <strong>premier jeu officiel de l'écosystème Miyukini</strong>. C'est un idle/clicker avec des éléments de stratégie et de gestion de cité. Il sert également de <strong>démonstration technique</strong> : un jeu complet coexistant avec des services professionnels dans un même COG.</p>
+
+    <h4>Mécaniques implémentées</h4>
+    <ul>
+      <li><strong>Simulation idle</strong> — production automatique de ressources même en arrière-plan</li>
+      <li><strong>Bâtiments de production</strong> — Ferme, Scierie, Carrière, Mine, Atelier, Forge</li>
+      <li><strong>Système de construction</strong> — Maisons, Casernes, Guilde</li>
+      <li><strong>Gestion de population</strong> — Ouvriers, Bâtisseurs, Soldats</li>
+      <li><strong>Système de combat</strong> — affrontements tactiques</li>
+      <li><strong>Carte stratégique</strong> — vue de la cité et du territoire</li>
+      <li><strong>Contrôle de vitesse</strong> — accélération du jeu (x1, x2, x5, x10)</li>
+    </ul>
+
+    <h3>MiyukiniSurvivor (Lord of the Castle)</h3>
+    <p><strong>Crate</strong> : <code>lord_of_the_castle</code> | <strong>Statut</strong> : Fonctionnel et jouable</p>
+    
+    <p>MiyukiniSurvivor est un <strong>jeu hybride Survivor + Tower Defense</strong> où le joueur protège un château contre des vagues d'ennemis. Il combine une phase de préparation stratégique et une phase de bataille en temps réel.</p>
+
+    <h4>Mécaniques implémentées</h4>
+    <ul>
+      <li><strong>Création de personnage</strong> — choix de classe, personnalisation</li>
+      <li><strong>Phase de préparation</strong> — placement de tours, recrutement de troupes</li>
+      <li><strong>Phase de bataille</strong> — combat en temps réel avec vagues d'ennemis</li>
+      <li><strong>Système de tours</strong> — différents types avec portée et dégâts</li>
+      <li><strong>Système de troupes</strong> — unités avec compétences et comportement IA</li>
+      <li><strong>Boucle de jeu</strong> — alternance préparation/bataille avec progression</li>
+    </ul>
+
+    <h2>Infrastructure : KindMother Service</h2>
+    <p><strong>Crates</strong> : <code>kindmother-service</code>, <code>kindmother-client</code>, <code>kindmother-db-adapter</code> | <strong>Statut</strong> : Fonctionnel (infrastructure critique)</p>
+    
+    <p>KindMother n'est pas un service utilisateur — c'est le <strong>Core de persistance</strong> (Strate 4) rendu opérationnel comme serveur TCP. C'est le <strong>seul point d'accès autorisé aux données</strong> dans tout l'écosystème.</p>
+
+    <h4>Fonctionnalités</h4>
+    <ul>
+      <li><strong>Serveur TCP/JSON</strong> — écoute sur localhost, protocole requête/réponse structuré</li>
+      <li><strong>Base de données chiffrée</strong> — libSQL avec chiffrement AES-256-CBC</li>
+      <li><strong>Dérivation de clés</strong> — Argon2id pour la génération de clés</li>
+      <li><strong>Système WriteIntent</strong> — toute écriture passe par une intention formelle auditée</li>
+      <li><strong>Contrôle d'accès par Opérateur</strong> — chaque Opérateur n'accède qu'à ses propres données</li>
+    </ul>
+
+    <h2>Tableau récapitulatif</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Backend</th>
+            <th>Persistance</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Miyukini Central</strong></td><td>miyukini-central</td><td>—</td><td>Fonctionnel</td></tr>
+          <tr><td><strong>JayFestival</strong></td><td>jayfestival</td><td>KindMother</td><td>Fonctionnel</td></tr>
+          <tr><td><strong>JayKoa</strong></td><td>jaykoa</td><td>KindMother</td><td>Fonctionnel</td></tr>
+          <tr><td><strong>JayKonta</strong></td><td>jaykonta</td><td>KindMother</td><td>Partiel</td></tr>
+          <tr><td><strong>JayXpose</strong></td><td>jayxpose</td><td>KindMother</td><td>Fonctionnel</td></tr>
+          <tr><td><strong>MiyukiniClicker</strong></td><td>miyuclicker</td><td>Locale</td><td>Jouable</td></tr>
+          <tr><td><strong>MiyukiniSurvivor</strong></td><td>lord_of_the_castle</td><td>Locale</td><td>Jouable</td></tr>
+          <tr><td><strong>KindMother</strong></td><td>kindmother-service</td><td>libSQL chiffré</td><td>Infrastructure</td></tr>
+          <tr><td><strong>MiyukiniAdmin</strong></td><td>miyukini-admin</td><td>—</td><td>Implémenté</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-logo">
+        <div class="logo-icon">M</div>
+        <span>Miyukini COG</span>
+      </div>
+      <div class="footer-links">
+        <a href="cog.html">Documentation</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="services.html">Services</a>
+        <a href="webway.html">Webway</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 Miyukini. Licence duale.</p>
+    </div>
+  </footer>
+
+  <script>
+    function toggleNav() {
+      document.getElementById('navLinks').classList.toggle('active');
+    }
+  </script>
+</body>
+</html>

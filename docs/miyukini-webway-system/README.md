@@ -22,6 +22,7 @@ Le MWS est considéré comme un **système complet** dans l'environnement Miyuki
 |----------|-------------|
 | [README.md](./README.md) | Ce fichier — point d'entrée |
 | [MWS - Document Fondateur](./MWS%20-%20Document%20Fondateur.md) | Définition, positionnement, principes cardinaux |
+| [MWS - Audit Documentation](./MWS%20-%20Audit%20Documentation.md) | Audit de la doc MWS, terminologie (Permis de circulation, trackers officiels), corrections appliquées |
 
 ### Architecture (`architecture/`)
 
@@ -148,7 +149,7 @@ Les documents détaillés (spécifications, protocoles, contrats, outils) resten
 ### Setup et déploiement (`docs/setup/`)
 
 - [Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md)
-- [Oracle Cloud Instance Webway Relay](../setup/Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md)
+- [Hostinger VPS Origin Webway](../setup/Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md)
 
 ---
 

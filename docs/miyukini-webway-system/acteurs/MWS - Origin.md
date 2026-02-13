@@ -56,6 +56,10 @@ flowchart TB
 | **Source de vérité** | Toutes les informations officielles (versions, checksums, politiques) émanent d'Origin. |
 | **Subordination** | Les relays et trackers héritent leur vérité d'Origin et lui sont subordonnés. |
 
+### 1.2 Comment les clients obtiennent l'adresse d'Origin
+
+L'adresse d'Origin **ne doit pas être falsifiable**. Les distributions (packages, installateurs) fournissent cette adresse via un **Manifeste Origin signé** : un fichier contenant l'URL canonique et le pin TLS, signé par l'autorité MWS. La clé publique de vérification est intégrée dans le client. Toute modification du manifeste invalide la signature et est rejetée. Voir [MWS - Manifeste Origin et Adresse Canonique](../securite/MWS%20-%20Manifeste%20Origin%20et%20Adresse%20Canonique.md).
+
 ---
 
 ## 2. Fonctions relay d'Origin
@@ -69,7 +73,7 @@ En tant que relay, Origin effectue les opérations suivantes :
 | **Réception du Passeport COG** | Origin reçoit le Passeport complet du COG (`cog_id`, `core_version`, `service_list`, `environment_health`, `previous_permis`, `passport_type`). |
 | **Phase A : Clé de conformité des Cores** | Origin compare la clé cachée dans le code des Cores avec la clé attendue pour la version déclarée. |
 | **Phase B : Blocs de code des Services** | Origin demande des blocs de code MIP aléatoires pour chaque Service et vérifie le déchiffrement. |
-| **Phase C : Santé de l'environnement** | Origin vérifie le rapport de santé produit par WorrySentinel et KeeperOfStorage. |
+| **Phase C : Santé de l'environnement** | Origin vérifie le rapport de santé produit par WorrySentinel et KindMother. |
 | **Décision** | Conforme → Permis de circulation (accord relay). Non-conforme → Quarantaine. |
 
 ### 2.2 Distribution des versions
@@ -200,9 +204,23 @@ Origin publie et maintient :
 
 ---
 
-## 6. Services web d'Origin
+## 6. Services sur Origin (exclusivement MWS)
 
-Origin expose un **serveur web** (port 80/443) avec :
+Origin est **exclusivement dédié au MWS**. Aucun service hors périmètre MWS n'est installé ni exécuté sur la VM Origin.
+
+### 6.1 Services MWS présents
+
+| Service | Port | Description |
+|---------|------|-------------|
+| **Origin Relay** | 7000 | Vérification de conformité, délivrance de Permis |
+| **Origin Tracker** | 21000 | Pools, découverte, Lobbys, catalogue |
+| **Portail web Origin** | 80/443 (`/`) | Site public MWS (voir § 6.2) + bouton d'accès MiyukiniAdmin Origin |
+| **MiyukiniAdmin Origin** | 443 (`/admin`) | Panneau d'administration spécifique à Origin : tests, monitoring, gestion (accès restreint) |
+| **Registre de Services** | interne | Liste officielle des services autorisés |
+
+### 6.2 Portail web Origin (racine `/`)
+
+La racine du serveur web d'Origin (`https://origin.miyukini.com/` ou l'URL du VPS Hostinger) affiche le **portail public MWS** avec le contenu suivant :
 
 | Contenu | Description |
 |---------|-------------|
@@ -211,6 +229,55 @@ Origin expose un **serveur web** (port 80/443) avec :
 | **Téléchargement** | Versions des COGs, Cores, packages officiels |
 | **Dev blog** | Blog de développement et actualités |
 | **Annonces globales** | Nouvelles versions, alertes, communications officielles |
+
+En bas ou en en-tête du portail, un **bouton d'accès** renvoie vers la page d'authentification de **MiyukiniAdmin Origin** (`/admin`). Ce bouton est visible publiquement mais la page `/admin` elle-même est protégée par le protocole d'identification (e-mail + mot de passe Argon2id).
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  origin.miyukini.com                                         │
+│══════════════════════════════════════════════════════════════│
+│                                                              │
+│   ╔══════════════════════════════════════════════════════╗   │
+│   ║            Miyukini COG — Webway System              ║   │
+│   ╚══════════════════════════════════════════════════════╝   │
+│                                                              │
+│   ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│   │ Présentation │  │ Documentation│  │  Téléchargement  │  │
+│   └──────────────┘  └──────────────┘  └──────────────────┘  │
+│                                                              │
+│   ┌──────────────┐  ┌──────────────────────────────────────┐ │
+│   │   Dev Blog   │  │       Annonces globales              │ │
+│   └──────────────┘  └──────────────────────────────────────┘ │
+│                                                              │
+│                              ┌──────────────────────────┐    │
+│                              │  MiyukiniAdmin Origin ➜  │    │
+│                              │     (Authentification)    │    │
+│                              └──────────────────────────┘    │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### 6.3 Services exclus
+
+| Exclusion | Raison |
+|-----------|--------|
+| Services applicatifs tiers | S'exécutent sur les COGs, pas sur Origin |
+| Jeux, streaming, messagerie | Services utilisateurs — hors périmètre |
+| CDN de contenu | Origin ne sert pas de CDN (sauf catalogue MWS) |
+| CI/CD, monitoring externe | Le monitoring est intégré dans MiyukiniAdmin |
+| Base de données externe | Origin utilise son propre stockage embarqué |
+
+### 6.4 MiyukiniAdmin Origin
+
+**MiyukiniAdmin Origin** est le panneau d'administration **spécifique à Origin**, accessible uniquement à l'administrateur authentifié (détenteur de la distribution stable). Il fournit :
+
+- **Batterie complète de tests** (connectivité, fonctionnel MWS, sécurité, réseau)
+- **Monitoring en temps réel** (métriques système et MWS, alertes 3 niveaux)
+- **Gestion des services** (restart, Registre, versions Cores, quarantaines, blacklists, alertes réseau)
+
+> **Note :** MiyukiniAdmin est un concept générique ; chaque acteur MWS peut disposer de son propre MiyukiniAdmin adapté à son rôle. Celui d'Origin est le plus complet car Origin est la source de vérité.
+
+Voir [MWS - MiyukiniAdmin](../administration/MWS%20-%20MiyukiniAdmin.md) pour la documentation complète.
 
 ---
 
@@ -222,6 +289,20 @@ Origin expose un **serveur web** (port 80/443) avec :
 | **Redirection** | En cas de saturation, redirection vers les relays. |
 | **Mode lecture seule** | En cas d'alerte réseau, Origin reste accessible en lecture seule. |
 | **Reconstruction** | En cas de défaillance, les relays maintiennent la vérité héritée jusqu'à restauration. |
+
+### 7.1 Implémentation actuelle
+
+Origin est hébergé sur un **VPS Hostinger** (Debian 13) :
+
+| Paramètre | Valeur |
+|-----------|--------|
+| **IP publique** | `46.202.129.65` |
+| **Domaine** | `origin.miyukini.com` (à configurer) |
+| **Port relay** | 7000 |
+| **Port tracker** | 21000 |
+| **Port web** | 80 / 443 |
+
+Pour le guide complet d'installation et de configuration, voir [MWS - Implémentation Origin Hostinger](../deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md).
 
 ---
 
@@ -264,9 +345,14 @@ Origin expose un **serveur web** (port 80/443) avec :
 - [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 - [MWS - Relays](./MWS%20-%20Relays.md)
 - [MWS - Trackers](./MWS%20-%20Trackers.md)
+- [MWS - Manifeste Origin et Adresse Canonique](../securite/MWS%20-%20Manifeste%20Origin%20et%20Adresse%20Canonique.md)
+- [MWS - MiyukiniAdmin](../administration/MWS%20-%20MiyukiniAdmin.md) — panneau d'administration Origin
+- [MWS - Implémentation Origin Hostinger](../deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md) — guide complet de déploiement
+- [MWS - Haute Disponibilité Origin](../securite/MWS%20-%20Haute%20Disponibilite%20Origin.md) — architecture actif-passif, failover
 - [Miyukini Webway Relay](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) — sections 1, 3, 6
 
 ---
 
-**Version :** 1.0  
+**Version :** 3.0  
+**Mise à jour :** Services MWS uniquement, MiyukiniAdmin, scope restreint  
 **Classification :** Documentation MWS — Acteurs

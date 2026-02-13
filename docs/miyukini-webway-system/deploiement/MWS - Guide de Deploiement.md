@@ -18,7 +18,8 @@ Ce document est un **guide condensé** pour le déploiement des composants MWS :
 
 Pour les guides complets, voir :
 - [Miyukini - Webway Relay Deployment Guide](../../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md)
-- [Miyukini - Oracle Cloud Instance Webway Relay](../../setup/Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md)
+- [Miyukini - Hostinger VPS Origin Webway](../../setup/Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md)
+- [MWS - Implémentation Origin Hostinger](./MWS%20-%20Implementation%20Origin%20Hostinger.md)
 
 ---
 
@@ -48,7 +49,7 @@ Pour les guides complets, voir :
 
 | Composant | Exigence |
 |-----------|----------|
-| **OS** | Linux (Ubuntu 22.04+, Debian 12+) |
+| **OS** | Linux (Debian 13, Ubuntu 22.04+, Oracle Linux 9+) |
 | **Rust** | 1.70+ (pour compiler les binaires) |
 | **RAM** | Minimum 1 Go (4 Go recommandé) |
 | **Stockage** | 10 Go minimum |
@@ -105,6 +106,13 @@ max_connections = 10000
 rate_limit_per_source = 100
 heartbeat_interval_seconds = 30
 tunnel_timeout_seconds = 300
+
+# Contremesure R-002 — seuils détaillés (voir MWS - Protection DDoS)
+[rate_limits]
+register_per_minute_per_ip = 10
+connections_per_token = 100
+requests_per_hour_per_cog = 1000
+tcp_connections_per_ip = 5000
 ```
 
 ### 2.3 Certificat TLS
@@ -238,23 +246,19 @@ sudo ufw allow 443/tcp comment "HTTPS"
 sudo ufw enable
 ```
 
-### 4.3 Oracle Cloud
+### 4.3 Hostinger VPS (Debian 13)
 
 ```bash
-# Dans la console Oracle Cloud :
-# Networking → Virtual Cloud Networks → Security Lists
-
-# Ajouter les règles Ingress :
-# Source: 0.0.0.0/0, Protocol: TCP, Port: 7000
-# Source: 0.0.0.0/0, Protocol: TCP, Port: 21000
-# Source: 0.0.0.0/0, Protocol: TCP, Port: 80
-# Source: 0.0.0.0/0, Protocol: TCP, Port: 443
-
-# iptables sur l'instance
-sudo iptables -I INPUT -p tcp --dport 7000 -j ACCEPT
-sudo iptables -I INPUT -p tcp --dport 21000 -j ACCEPT
-sudo netfilter-persistent save
+# Sur le VPS (ufw)
+sudo ufw allow 22/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw allow 7000/tcp
+sudo ufw allow 21000/tcp
+sudo ufw --force enable
 ```
+
+Dans le panneau Hostinger, s'assurer que les ports 22, 80, 443, 7000, 21000 sont autorisés pour le VPS.
 
 ---
 
@@ -322,6 +326,9 @@ Créer `/etc/logrotate.d/miyukini` :
 | Logs en append-only | ☐ |
 | Utilisateur dédié (non-root) | ☐ |
 | Mises à jour automatiques | ☐ |
+| NTP actif (drift < 5 s) | ☐ |
+| Rate limiting configuré | ☐ |
+| Protection DDoS (Origin) | ☐ |
 
 ### 6.2 Utilisateur dédié
 
@@ -345,6 +352,32 @@ sudo sysctl -w net.core.somaxconn=2048
 # Protection contre SYN flood
 sudo sysctl -w net.ipv4.tcp_syncookies=1
 ```
+
+### 6.4 Synchronisation NTP (contremesure R-006)
+
+Tous les serveurs (Origin, relays, trackers) doivent être synchronisés avec un serveur NTP pour que la **fenêtre d'acceptation des timestamps** (±10 secondes) soit respectée :
+
+```bash
+# systemd-timesyncd (Ubuntu/Debian)
+sudo systemctl enable systemd-timesyncd
+sudo systemctl start systemd-timesyncd
+timedatectl set-ntp true
+
+# Vérification
+timedatectl status
+# Doit afficher "NTP service: active"
+```
+
+### 6.5 Protection DDoS (contremesure R-002)
+
+Pour **Origin** et les relays exposés publiquement :
+
+| Mesure | Description |
+|--------|-------------|
+| **Service anti-DDoS** | Déployer Origin derrière Cloudflare, AWS Shield ou équivalent |
+| **Challenge-response (PoW)** | Implémenter le PoW avant REGISTER (voir [MWS - Protection DDoS](../securite/MWS%20-%20Protection%20DDoS.md)) |
+| **Rate limiting** | Activer les seuils définis dans `[rate_limits]` (voir § 2.2) |
+| **Whitelist relays** | Configurer la liste des IP des relays connus pour assouplir le PoW |
 
 ---
 
@@ -459,11 +492,15 @@ sudo grep -i error /var/log/miyukini/relay.log | tail -20
 
 - [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 - [Miyukini - Webway Relay Deployment Guide](../../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md) — Guide complet
-- [Miyukini - Oracle Cloud Instance Webway Relay](../../setup/Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) — Déploiement Oracle Cloud
+- [Miyukini - Hostinger VPS Origin Webway](../../setup/Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) — Instance Origin (Hostinger, Debian 13)
+- [MWS - Implémentation Origin Hostinger](./MWS%20-%20Implementation%20Origin%20Hostinger.md) — Guide complet Origin sur Hostinger
 - [MWS - Relays](../acteurs/MWS%20-%20Relays.md)
 - [MWS - Trackers](../acteurs/MWS%20-%20Trackers.md)
+- [MWS - Protection DDoS](../securite/MWS%20-%20Protection%20DDoS.md)
+- [MWS - Contre-Mesures de Sécurité](../securite/MWS%20-%20Contre-Mesures%20de%20Securite.md)
 
 ---
 
-**Version :** 1.0  
+**Version :** 2.0  
+**Mise à jour :** Rate limiting, NTP, Protection DDoS (R-002, R-006)  
 **Classification :** Documentation MWS — Déploiement

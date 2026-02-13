@@ -1,6 +1,6 @@
 ---
 name: miyukini-mscm-mip
-description: Protocole MSCM (Miyukini Semantic Code Markup) et MIP (MSCM Index Protocol) pour le balisage semantique du code et l'indexation globale. Utiliser quand on ajoute des balises MSCM au code, quand on genere ou met a jour l'index MIP, quand on travaille sur mscm_index/, ou quand on veut comprendre la structure semantique du projet.
+description: Protocole MSCM (Miyukini Semantic Code Markup) et MIP (MSCM Index Protocol) pour le balisage semantique du code et l'indexation globale. Utiliser quand on ajoute des balises MSCM au code, quand on genere ou met a jour l'index MIP, quand on travaille sur mscm_index/, ou quand on veut comprendre la structure semantique du projet. Les blocs MIP sont utilises dans la verification de conformite MWS (Phase B, relay).
 ---
 
 # MSCM & MIP — Balisage semantique et indexation
@@ -95,7 +95,17 @@ Le generateur MIP se trouve dans `tools/mip-generator/`.
 4. MIP est la source structurelle
 5. Tout projet MSCM sans MIP = non gouverne
 
+## Lien avec le MWS (Webway)
+
+Lors de la **verification de conformite** (relay / Origin), la **Phase B** utilise des **blocs de code MIP** : le relay demande un bloc aleatoire par Service, le COG envoie un paquet chiffre contenant ce bloc ; le relay verifie avec les references Origin. Les blocs MSCM/MIP servent donc a l'attestation d'integrite des Services. Voir `docs/miyukini-webway-system/verification/` et `docs/reference/Miyukini Conceptual References - Miyukini Webway Relay.md` (Phase B).
+
 ## References
 
-- Protocole MIP complet : [references/mip-protocol.md](references/mip-protocol.md)
-- Documentation : `docs/protocols/MIP v1 MSCM Index Protocol.md`
+*Chemins `docs/` relatifs a la racine du workspace. Liens relatifs au skill pour references/.*
+
+- **Protocole MIP (skill)** : [references/mip-protocol.md](references/mip-protocol.md)
+- **Protocole MIP (workspace)** : `docs/contrats/Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol.md`
+- **Implementation / MSCM** : `docs/implementation/Miyukini COG 0.1 - MSCM MIP Compliance Checklist.md`
+- **Verification MWS (blocs MIP)** : `docs/miyukini-webway-system/verification/MWS - Flux de Verification.md`
+- **Relay (Phase B)** : `docs/reference/Miyukini Conceptual References - Miyukini Webway Relay.md` (section Phase B)
+- **Index MIP** : repertoire `mscm_index/` a la racine du projet

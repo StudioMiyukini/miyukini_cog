@@ -11,7 +11,7 @@ Ce document est le **document maître consolidé** du **Miyukini Webway System (
 ## Portée / Scope
 
 - **Entrée unique** pour comprendre l'ensemble du MWS (présence, découverte, relay, sécurité, déploiement).
-- **Synthèse** des trois références conceptuelles MWS (document principal, Normes et Standards, Outils et Opérateurs) et du guide d'instance Oracle Cloud.
+- **Synthèse** des trois références conceptuelles MWS (document principal, Normes et Standards, Outils et Opérateurs) et du guide d'instance Hostinger VPS.
 - **Diagrammes** : flux de connexion, topologie réseau, séquence d'enregistrement.
 - **Références croisées** vers tous les documents MWS et connexes.
 
@@ -29,19 +29,19 @@ Le **Miyukini Webway System (MWS)** est la couche de **présence et de découver
 |----------|-------------|
 | **Se déclarer** | Annoncer sa présence (identité COG, adresse du Bridge / point de contact) |
 | **Découvrir** | Savoir quels COGs sont présents et où les joindre |
-| **Faciliter l'échange** | Donner le point d'entrée pour initier une visite gouvernée (Passeport → Bridge → Visa) |
+| **Faciliter l'échange** | Donner le point d'entrée pour initier une visite gouvernée (Passeport → Permis de circulation → Bridge → Visa de Connexion) |
 
-**Le MWS ne sert pas à transférer des données métier.** Il est la transcription concrète des concepts de présence : il normalise *qui est là* et *où se présenter* pour demander un Visa.
+**Le MWS ne sert pas à transférer des données métier.** Il est la transcription concrète des concepts de présence : il normalise *qui est là* et *où se présenter* pour demander un Permis de circulation (relay) ou un Visa de Connexion / accord d'hôte (COG hôte).
 
-**Analogie :** à la manière d'un réseau de type BitTorrent, les COGs peuvent s'annoncer et interroger des **Trackers** (points de rendez-vous pour la découverte) ; le transfert réel et la gouvernance restent dans le cadre de la visite gouvernée (Bridge, Visa).
+**Analogie :** à la manière d'un réseau de type BitTorrent, les COGs peuvent s'annoncer et interroger des **Trackers** (points de rendez-vous pour la découverte) ; le transfert réel et la gouvernance restent dans le cadre de la visite gouvernée (Bridge, Visa de Connexion).
 
 ### 1.2 Principes cardinaux
 
 - **Le maillage ne fait pas confiance** — il transporte et expose des informations de présence.
-- **La gouvernance (Passeport, Visa) reste souveraine** ; le Webway ne gouverne pas.
+- **La gouvernance (Passeport, Permis de circulation, Visa de Connexion) reste souveraine** ; le Webway ne gouverne pas.
 - **Optionnel** : les environnements sans réseau ou qui refusent la découverte restent souverains (LOI-2, LOI-6).
 - **Aucun core partagé** : la présence ne donne aucun accès aux Cores ; elle indique où aller pour initier une visite.
-- **Une seule gouvernance active** : c'est toujours le COG Hébergeur qui décide (Visa, refus, révocation).
+- **Une seule gouvernance active** : c'est toujours le COG Hébergeur qui décide (Visa de Connexion / accord d'hôte, refus, révocation) ; Origin/relays pour le Permis de circulation.
 
 ---
 
@@ -92,7 +92,7 @@ Détails des formats, champs obligatoires/optionnels et ports : [MWS Normes et S
 
 ## 4. Relay Webway
 
-Le **relay Miyukini Webway** est un composant de **transport** (bore étendu multi-tenant) qui permet aux COGs derrière NAT ou sans IP publique d'être joignables : ils s'enregistrent auprès du relay avec un **token d'authentification** et une adresse logique (`cog_id`), et le relay route le trafic entrant vers le bon tunnel.
+Le **relay Miyukini Webway** est un composant de **transport** (tunnel étendu multi-tenant) qui permet aux COGs derrière NAT ou sans IP publique d'être joignables : ils s'enregistrent auprès du relay avec un **token d'authentification** et une adresse logique (`cog_id`), et le relay route le trafic entrant vers le bon tunnel.
 
 ### 4.1 Rôle du relay
 
@@ -103,9 +103,9 @@ Le **relay Miyukini Webway** est un composant de **transport** (bore étendu mul
 ### 4.2 Port et déploiement
 
 - **Port relay (orientation)** : **7000** (TCP) — modifiable selon l'implémentation.
-- **Port Tracker MWS** : **21000** (découverte) — peut être hébergé sur la même machine que le relay (ex. instance Oracle Cloud).
+- **Port Tracker MWS** : **21000** (découverte) — peut être hébergé sur la même machine que le relay (ex. VPS Hostinger).
 
-Documentation détaillée du relay : [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) (architecture, sécurité) et [Miyukini Webway Relay Protocol](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md) (protocole binaire, handshake). Guide d'instance : [Oracle Cloud Instance Webway Relay](../setup/Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md). Guide de déploiement complet : [Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md).
+Documentation détaillée du relay : [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) (architecture, sécurité) et [Miyukini Webway Relay Protocol](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md) (protocole binaire, handshake). Guide d'instance : [Hostinger VPS Origin Webway](../setup/Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md). Guide de déploiement complet : [Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md).
 
 ---
 
@@ -157,7 +157,7 @@ Pour les annonces (présence, services, adresses, sessions hébergées) : **auth
 
 ## 8. Déploiement
 
-- **Instance Oracle Cloud (Always Free)** : création d'une VM (ex. Ubuntu 22.04, VM.Standard.E2.1.Micro) pour héberger le **relay** (port 7000) et optionnellement le **Tracker MWS** (port 21000). Règles de sécurité : ouvrir TCP 22 (SSH), 7000 (relay), 21000 (Tracker). Voir [Miyukini - Oracle Cloud Instance Webway Relay](../setup/Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md).
+- **VPS Hostinger (Debian 13)** : instance pour héberger **Origin** (relay port 7000, Tracker port 21000, catalogue web). Règles de sécurité : ouvrir TCP 22 (SSH), 80, 443, 7000 (relay), 21000 (Tracker). Voir [Miyukini - Hostinger VPS Origin Webway](../setup/Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md).
 - **Relay** : déploiement du binaire relay (crate Rust), configuration TLS et authentification par token/secret, enregistrement des tunnels par `cog_id`. Guide de déploiement complet : [Miyukini - Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md).
 - **DNS (optionnel)** : nom de domaine pointant vers l'IP publique (ex. `webway.studiomiyukini.com`) pour une adresse stable du relay et du Tracker.
 
@@ -179,8 +179,8 @@ sequenceDiagram
     V->>T: discovery_request
     T->>V: discovery_response (adresse Bridge H)
     V->>H: Passeport + Demande de Visite (Connexion Inter-COG)
-    H->>H: Douane, émission Visa
-    H->>V: Visa, session gouvernée
+    H->>H: Douane, émission Visa de Connexion / accord d'hôte
+    H->>V: Visa de Connexion, session gouvernée
 ```
 
 ### 9.2 Topologie réseau (Participants, Trackers, Relay)
@@ -237,7 +237,7 @@ Le MWS **ne remplace pas** la visite gouvernée ; il la **précède** et la **re
 | 1 | **MWS** | Découverte : quels COGs sont présents, où contacter le Bridge du COG Hébergeur |
 | 2 | **Connexion Inter-COG** | Pré-validation locale (COG Origine), émission du Passeport Utilisateur |
 | 3 | **Connexion Inter-COG** | Présentation au Bridge (Passeport + Demande de Visite) |
-| 4 | **Connexion Inter-COG** | Douane du Host COG, émission du Visa, session gouvernée |
+| 4 | **Connexion Inter-COG** | Douane du Host COG, émission du Visa de Connexion / accord d'hôte, session gouvernée |
 
 Référence : [Connexion Inter-COG](./Miyukini%20Conceptual%20References%20-%20Connexion%20Inter-COG.md).
 
@@ -264,9 +264,9 @@ Le MWS est une **couche de découverte et de présence** sous le contrôle des C
 
 ### Relay et déploiement
 
-- [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) — architecture du relay custom (bore étendu multi-tenant)
+- [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) — architecture du relay custom (tunnel étendu multi-tenant)
 - [Miyukini Webway Relay Protocol](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md) — protocole relay (messages, handshake, TLS)
-- [Miyukini - Oracle Cloud Instance Webway Relay](../setup/Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) — instance Always Free, Rust, systemd, firewall, monitoring
+- [Miyukini - Hostinger VPS Origin Webway](../setup/Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) — instance Origin (Debian 13), Rust, systemd, ufw, monitoring
 - [Miyukini - Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md) — guide de déploiement complet (VM, TLS, systemd, tests)
 
 ### Toolkits MWS

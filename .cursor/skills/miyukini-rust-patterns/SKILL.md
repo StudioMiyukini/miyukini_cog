@@ -1,6 +1,6 @@
 ---
 name: miyukini-rust-patterns
-description: Patterns Rust recurrents du codebase Miyukini COG. Structure standard des crates, pattern admin_cell.rs, context.rs, errors.rs, lib.rs, Cargo.toml. Utiliser quand on cree un nouveau crate/toolkit/module, quand on modifie un module existant, ou quand on veut comprendre la structure standard du code.
+description: Patterns Rust recurrents du codebase Miyukini COG. Structure standard des crates (admin_cell, context, errors, lib, Cargo.toml), contracts docs (governance, security), toolkits MWS (MiyuWebwayTracker, MiyuWebwayParticipant). Utiliser quand on cree un nouveau crate/toolkit/module, quand on modifie un module existant, ou quand on veut comprendre la structure standard du code.
 ---
 
 # Patterns Rust — Miyukini COG
@@ -209,7 +209,23 @@ Certains modules incluent des annotations semantiques :
 //! @do manage_authentication_and_identity
 ```
 
+## 8. Toolkits MWS (Webway)
+
+Les toolkits **MiyuWebwayTracker** et **MiyuWebwayParticipant** suivent la meme structure (admin_cell, context, errors, lib). En plus des contracts governance, le Tracker possede des **contracts security** (Passive Systems, Active Systems). Documentation : `docs/tools/MiyuWebwayTracker/`, `docs/tools/MiyuWebwayParticipant/` ; racine MWS : `docs/miyukini-webway-system/`.
+
+## 9. Contracts dans docs/tools/
+
+Pour un toolkit complet, prevoir sous `docs/tools/Miyu{Nom}/contracts/` :
+- `governance/` — conformite gouvernance (Tool Governance Compliance)
+- `security/` — si applicable (Passive Systems, Active Systems, etc.)
+
 ## References
 
-- Exemples concrets : [references/examples.md](references/examples.md)
-- Voir n'importe quel crate `crates/miyu*/` pour reference
+*Chemins `docs/` relatifs a la racine du workspace. Liens relatifs au skill pour references/.*
+
+- **Exemples (skill)** : [references/examples.md](references/examples.md)
+- **Crates toolkits** : `crates/miyu*/` (ex. miyauth, miyuclock, miyuwebway_tracker)
+- **Documentation toolkits** : `docs/tools/Miyu{Nom}/` — Documentation Fondatrice, Reference Outils, contracts/, implementation/
+- **MWS (Webway)** : `docs/miyukini-webway-system/` ; toolkits MWS : `docs/tools/MiyuWebwayTracker/`, `docs/tools/MiyuWebwayParticipant/`
+- **Template implementation** : `docs/tools/docs_tools - Reference Implementation Guidelines Template.md`
+- **Contrats security (Tracker)** : `docs/tools/MiyuWebwayTracker/contracts/security/` (Passive Systems, Active Systems)

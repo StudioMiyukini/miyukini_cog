@@ -111,7 +111,7 @@ Si tu préfères tout faire à la main :
 
 ## Voir aussi
 
-- [Miyukini - Oracle Cloud Instance Webway Relay](Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) — Créer une instance Always Free pour héberger le relay et le Tracker MWS (connectivité COG / Android).
+- [Miyukini - Hostinger VPS Origin Webway](Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) — VPS Hostinger (Debian 13) pour héberger Origin (relay, Tracker MWS, catalogue).
 
 ---
 

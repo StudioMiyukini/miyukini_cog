@@ -10,6 +10,7 @@ mod jaykoa;
 mod jaykonta;
 mod game_view;
 mod survivor_embed;
+mod mws_view;
 
 pub use home::HomeView;
 pub use service_view::ServiceView;
@@ -19,6 +20,7 @@ pub use jaykoa::JayKoaView;
 pub use jaykonta::JayKontaView;
 pub use game_view::GameView;
 pub use survivor_embed::SurvivorEmbed;
+pub use mws_view::MwsNetworkView;
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

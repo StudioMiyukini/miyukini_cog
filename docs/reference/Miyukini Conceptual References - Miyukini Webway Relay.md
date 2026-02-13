@@ -153,7 +153,7 @@ Quand la requete est acceptee, le COG transmet son **Passeport COG** complet :
 | `cog_id` | Identifiant unique du COG |
 | `core_version` | Version des Cores (`MAJOR.MINOR`) |
 | `service_list` | Liste des Services installes avec versions et checksums |
-| `environment_health` | Rapport de sante de l'environnement (genere par les Cores : WorrySentinel, KeeperOfStorage) |
+| `environment_health` | Rapport de sante de l'environnement (genere par les Cores : WorrySentinel, KindMother) |
 | `previous_permis` | Historique des Permis de circulation precedents (duree, portee, relay emetteur) |
 | `passport_type` | Type de passeport : `STANDARD` ou `SPECIAL` (voir section 2.6) |
 | `special_key` | (Passeports speciaux uniquement) Cle speciale delivree par Origin |
@@ -404,7 +404,7 @@ sequenceDiagram
 
 Le modele de versioning des COGs repose sur une separation fondamentale :
 
-- **Version des Cores** : les Cores (Border Guard, WorrySentinel, StrongFather, BondingBrother, KindMother, KeeperOfStorage, Master Butler, Ever Buddy) sont **immuables** a version donnee. La version des Cores definit le socle de gouvernance et de securite du COG. Deux COGs ne peuvent interagir que s'ils partagent la **meme version majeure des Cores**.
+- **Version des Cores** : les Cores (StrongFather, KindMother, Caring Nanny, Master Butler, Border Guard, Ever Buddy, WorrySentinel, TAMR) sont **immuables** a version donnee. La version des Cores definit le socle de gouvernance et de securite du COG. Deux COGs ne peuvent interagir que s'ils partagent la **meme version majeure des Cores**.
 - **Version des Services** : les Services (Operateurs, Outils, Kits d'Outils) peuvent etre **patches** independamment des Cores. Un Service peut recevoir des correctifs (patch) ou des mises a jour mineures sans modifier les Cores. Differentes versions de Services restent compatibles tant que la version des Cores est identique.
 
 > **Regle fondamentale :** La compatibilite entre COGs est determinee par la version des Cores. Les Services sont interchangeables/patchables a Cores identiques.
@@ -873,7 +873,7 @@ Les relays sont **source de verite** pour ces contenus mais restent **toujours s
 
 - **Evenements journalises** : enregistrement de tunnel (succes, echec), deconnexion (normale, timeout, erreur), echec d'authentification (type d'erreur, adresse source sans token), erreurs de routing, rate limiting declenche, blacklist temporaire activee.
 - **Donnees sensibles** : ne **jamais** logger les tokens, secrets, ou le contenu des donnees relayees. Logger uniquement les `cog_id` (ou identifiants opaques), adresses sources (IP), horodatages, types d'evenements et codes d'erreur.
-- **Retention** : conserver les logs selon la politique de retention du deploiement (voir [Oracle Cloud Instance Webway Relay](../setup/Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) section 9.2 et [Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md) section 8.5).
+- **Retention** : conserver les logs selon la politique de retention du deploiement (voir [Hostinger VPS Origin Webway](../setup/Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) et [MWS - Implementation Origin Hostinger](../miyukini-webway-system/deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md) section 12 et [Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md) section 8.5).
 - **Correlation** : chaque connexion et tunnel recoit un identifiant de session unique (ex. UUID) pour permettre la correlation des evenements lies a un meme tunnel ou appelant.
 
 ### 10.6 Securite de la configuration et des secrets
@@ -950,7 +950,7 @@ Les relays sont **source de verite** pour ces contenus mais restent **toujours s
 
 ## 13. Deploiement (orientation)
 
-- **Instance** : une VM (ex. Oracle Cloud Always Free) peut heberger le relay sur le port 7000 et optionnellement le Tracker sur 21000. Voir [Miyukini - Oracle Cloud Instance Webway Relay](../setup/Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md).
+- **Instance** : un VPS (ex. Hostinger, Debian 13) peut héberger le relay sur le port 7000 et optionnellement le Tracker sur 21000. Voir [Miyukini - Hostinger VPS Origin Webway](../setup/Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md).
 - **Binaire** : deploiement du binaire relay (crate Rust), configuration TLS, tokens/secrets, timeouts, rate limiting et logs. Guide pas a pas : [Miyukini - Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md).
 - **DNS** : nom de domaine pointant vers l'IP publique (ex. `webway.studiomiyukini.com`) pour une adresse stable du relay.
 
@@ -967,7 +967,7 @@ Les relays sont **source de verite** pour ces contenus mais restent **toujours s
 
 ### Setup et deploiement
 
-- [Miyukini - Oracle Cloud Instance Webway Relay](../setup/Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) -- creation instance Always Free, regles de securite, ports
+- [Miyukini - Hostinger VPS Origin Webway](../setup/Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) — instance Origin (Debian 13), règles de sécurité, ports
 - [Miyukini - Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md) -- guide de deploiement complet (VM, TLS, systemd, tests)
 
 ### Connexes

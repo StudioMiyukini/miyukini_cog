@@ -2,7 +2,7 @@
 
 ## Contexte
 
-Ce guide décrit le déploiement pas à pas du **relay Miyukini Webway** : de la création de la VM à un relay fonctionnel, avec TLS, systemd, monitoring et tests de connectivité. Il s'appuie sur le guide [Miyukini - Oracle Cloud Instance Webway Relay](Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) pour la partie instance Oracle Cloud et complète par la compilation, la configuration TLS, le service systemd, les logs et le dépannage.
+Ce guide décrit le déploiement pas à pas du **relay Miyukini Webway** : de la création de la VM à un relay fonctionnel, avec TLS, systemd, monitoring et tests de connectivité. Pour l'instance Origin actuelle (Hostinger VPS, Debian 13), voir [Miyukini - Hostinger VPS Origin Webway](Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) et [MWS - Implémentation Origin Hostinger](../miyukini-webway-system/deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md). Ce guide complète par la compilation, la configuration TLS, le service systemd, les logs et le dépannage.
 
 ## Portée / Scope
 
@@ -16,12 +16,12 @@ Ce guide décrit le déploiement pas à pas du **relay Miyukini Webway** : de la
 
 | Étape | Description | Référence |
 |-------|-------------|-----------|
-| 1 | Créer et configurer la VM (ports, SSH) | [Oracle Cloud Instance Webway Relay](Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) sections 1–4 |
-| 2 | Installer Rust sur la VM | [Oracle Cloud Instance Webway Relay](Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) section 5 |
-| 3 | Compiler et déployer le binaire relay | [Oracle Cloud Instance Webway Relay](Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) section 6 |
+| 1 | Créer et configurer le VPS (ports, SSH) | [Hostinger VPS Origin Webway](Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) |
+| 2 | Installer Rust sur le VPS | [MWS - Implémentation Origin Hostinger](../miyukini-webway-system/deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md) section 4 |
+| 3 | Compiler et déployer le binaire relay | [MWS - Implémentation Origin Hostinger](../miyukini-webway-system/deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md) section 5 |
 | 4 | Configurer TLS (certificats, config) | Ce guide, section 4 |
-| 5 | Configurer systemd et firewall | [Oracle Cloud Instance Webway Relay](Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) sections 7–8 |
-| 6 | Démarrer le service, vérifier logs | [Oracle Cloud Instance Webway Relay](Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) section 9 |
+| 5 | Configurer systemd et firewall | [MWS - Implémentation Origin Hostinger](../miyukini-webway-system/deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md) sections 9–10 |
+| 6 | Démarrer le service, vérifier logs | [MWS - Implémentation Origin Hostinger](../miyukini-webway-system/deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md) section 15 |
 | 7 | Tester la connectivité (Windows, Android) | Ce guide, section 7 |
 | 8 | Dépannage | Ce guide, section 8 |
 
@@ -29,7 +29,7 @@ Ce guide décrit le déploiement pas à pas du **relay Miyukini Webway** : de la
 
 ## 2. Prérequis
 
-- **VM** : instance Linux (Ubuntu 22.04 / 24.04 ou Oracle Linux) avec accès SSH, IP publique si le relay doit être joignable depuis Internet.
+- **VM / VPS** : instance Linux (Debian 13, Ubuntu 22.04+) avec accès SSH, IP publique si le relay doit être joignable depuis Internet. Origin actuel : Hostinger VPS (Debian 13).
 - **Ports** : 22 (SSH), 7000 (relay) — et optionnellement 21000 (Tracker MWS) — ouverts dans la Security List OCI et dans le firewall de l'OS.
 - **Code source** : workspace Miyukini COG (ou dépôt contenant le crate du relay, ex. `miyuwebway_relay`) accessible depuis la VM (clone git ou transfert).
 
@@ -37,9 +37,9 @@ Ce guide décrit le déploiement pas à pas du **relay Miyukini Webway** : de la
 
 ## 3. Création de la VM et accès SSH
 
-Suivre le guide [Miyukini - Oracle Cloud Instance Webway Relay](Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) :
+Suivre le guide [Miyukini - Hostinger VPS Origin Webway](Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) ou [MWS - Implémentation Origin Hostinger](../miyukini-webway-system/deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md) :
 
-- Sections 1–2 : créer une instance Always Free (Compute → Instances, forme VM.Standard.E2.1.Micro, image Ubuntu ou Oracle Linux).
+- Créer un VPS Hostinger avec Debian 13, ouvrir les ports 22, 80, 443, 7000, 21000, ajouter la clé SSH.
 - Section 3 : ajouter les règles d'ingress pour les ports 22, 7000 (et 21000 si Tracker).
 - Section 4 : se connecter en SSH (`ssh -i cle_privee ubuntu@<IP_PUBLIQUE>` ou `opc@<IP_PUBLIQUE>`).
 
@@ -49,14 +49,14 @@ Suivre le guide [Miyukini - Oracle Cloud Instance Webway Relay](Miyukini%20-%20O
 
 ### 4.1 Rust et dépendances
 
-Sur la VM, exécuter (voir [Oracle Cloud Instance Webway Relay](Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) section 5) :
+Sur le VPS, exécuter (voir [MWS - Implémentation Origin Hostinger](../miyukini-webway-system/deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md) section 4) :
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source "$HOME/.cargo/env"
 # Dépendances (Ubuntu)
 sudo apt update && sudo apt install -y pkg-config libssl-dev build-essential
-# ou Oracle Linux
+# ou Debian : sudo apt install -y build-essential pkg-config libssl-dev
 sudo dnf install -y pkg-config openssl-devel gcc
 ```
 
@@ -123,11 +123,11 @@ Ajuster les chemins et options selon la documentation du binaire relay. S'assure
 
 ### 6.1 Unité systemd
 
-Créer `/etc/systemd/system/miyukini-webway-relay.service` comme décrit dans [Oracle Cloud Instance Webway Relay](Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) section 7 (WorkingDirectory `/opt/miyukini-webway-relay`, ExecStart `/opt/miyukini-webway-relay/relay`, Restart=on-failure, logs vers journald).
+Créer le service systemd comme décrit dans [MWS - Implémentation Origin Hostinger](../miyukini-webway-system/deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md) section 9 (WorkingDirectory `/var/lib/miyukini`, ExecStart `/usr/local/bin/miyukini-origin`, Restart=always, logs vers journald).
 
 ### 6.2 Firewall OS
 
-- **Oracle Linux** : `sudo firewall-cmd --permanent --add-port=7000/tcp` puis `--reload`.
+- **Debian / Ubuntu (ufw)** : `sudo ufw allow 7000/tcp` puis `sudo ufw reload`.
 - **Ubuntu** : `sudo ufw allow 7000/tcp` puis `sudo ufw enable`.
 
 ### 6.3 Démarrage et vérification
@@ -193,7 +193,7 @@ Test-NetConnection -ComputerName <IP_PUBLIQUE_RELAY> -Port 7000
 ### 8.2 Le relay démarre mais n'est pas joignable de l'extérieur
 
 - **Security List OCI** : confirmer qu'une règle d'ingress autorise TCP 7000 depuis `0.0.0.0/0` (ou la plage source attendue).
-- **Firewall OS** : `sudo firewall-cmd --list-ports` (Oracle Linux) ou `sudo ufw status` (Ubuntu) ; 7000/tcp doit être autorisé.
+- **Firewall OS** : `sudo ufw status` (Debian/Ubuntu) ; 7000/tcp doit être autorisé.
 - **Écoute** : le relay doit écouter sur `0.0.0.0:7000` et non uniquement sur `127.0.0.1`.
 
 ### 8.3 Connexions refusées ou timeouts
@@ -209,13 +209,13 @@ Test-NetConnection -ComputerName <IP_PUBLIQUE_RELAY> -Port 7000
 ### 8.5 Logs et rotation
 
 - **Voir les logs en continu** : `sudo journalctl -u miyukini-webway-relay -f`
-- **Persistance / taille** : configurer journald si besoin (voir [Oracle Cloud Instance Webway Relay](Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) section 9.2).
+- **Persistance / taille** : configurer journald si besoin (voir [MWS - Implémentation Origin Hostinger](../miyukini-webway-system/deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md) section 12).
 
 ---
 
 ## 9. Résumé et références
 
-- **VM et base** : [Miyukini - Oracle Cloud Instance Webway Relay](Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md)
+- **VPS et base** : [Miyukini - Hostinger VPS Origin Webway](Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md), [MWS - Implémentation Origin Hostinger](../miyukini-webway-system/deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md)
 - **Architecture relay** : [Miyukini Conceptual References - Miyukini Webway Relay](../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md)
 - **Protocole relay** : [Miyukini Conceptual References - Miyukini Webway Relay Protocol](../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md)
 - **MWS** : [Miyukini Conceptual References - Miyukini Webway System](../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md)

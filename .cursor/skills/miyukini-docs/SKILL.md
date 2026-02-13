@@ -1,6 +1,6 @@
 ---
 name: miyukini-docs
-description: Nomenclature et regles de documentation du projet Miyukini COG. Format de nommage des fichiers, arborescence standard, prefixes, qualite requise. Utiliser quand on cree ou modifie un fichier de documentation, quand on genere de la doc automatiquement, ou quand on organise les fichiers docs/.
+description: Nomenclature et regles de documentation du projet Miyukini COG. Format de nommage des fichiers, arborescence standard (docs/core, tools, services, reference, miyukini-webway-system), prefixes, qualite requise, structure MWS. Utiliser quand on cree ou modifie un fichier de documentation, quand on genere de la doc automatiquement, ou quand on organise les fichiers docs/.
 ---
 
 # Documentation Miyukini — Nomenclature et regles
@@ -49,23 +49,25 @@ Facultatif mais recommande pour eviter les fichiers fourre-tout :
 
 ```
 docs/
-├── core/              # Un sous-dossier par Core
-│   ├── BondingBrother/
+├── core/              # Un sous-dossier par Core (8 Cores Strate 4 + BondingBrother Strate 5)
+│   ├── BondingBrother/   # Strate 5 — mediation
 │   ├── BorderGuard/
 │   ├── CaringNanny/
 │   ├── EverBuddy/
 │   ├── KindMother/
-│   ├── LogisticsSteward/
 │   ├── MasterButler/
-│   ├── MiyukiniAdmin/
 │   ├── StrongFather/
 │   ├── TAMR/
 │   └── WorrySentinel/
+├── miyukini-webway-system/  # Racine MWS (systeme presence/decouverte/transport)
+│   ├── MWS - Document Fondateur.md
+│   ├── reference/_index.md   # Index des references MWS
+│   ├── architecture/, acteurs/, verification/, securite/, lobbys/, protocole/, deploiement/
 ├── tools/             # Un sous-dossier par Toolkit
 │   └── Miyu{Nom}/
 ├── services/          # Un sous-dossier par Service
 │   └── Jay{Nom}/
-├── reference/         # References conceptuelles
+├── reference/         # References conceptuelles (Glossaire, Relay, MWS, etc.)
 ├── protocols/         # Protocoles de dev (MIP, MSCM)
 ├── kernel/            # Architecture Kernel
 ├── security/          # Politiques de securite
@@ -104,8 +106,25 @@ docs/tools/Miyu{Nom}/
 └── implementation/
 ```
 
+## Documentation MWS (Miyukini Webway System)
+
+- **Racine obligatoire :** `docs/miyukini-webway-system/` — tout document fondateur ou de positionnement MWS part de la. Les specs detaillees (relay, protocole, contrats) restent dans `docs/reference/`, `docs/tools/MiyuWebwayTracker/`, `docs/setup/` et sont **liees** depuis l'index MWS.
+- **Prefixe des fichiers MWS :** `MWS - <Sujet>.md` (ex. `MWS - Document Fondateur.md`, `MWS - Origin.md`).
+- **Index des references :** `docs/miyukini-webway-system/reference/_index.md` pointe vers tous les documents MWS et references conceptuelles.
+
 ## Rappel
 
 - Une **page** sert a livrer
 - Un **ecran** sert a concevoir
 - Les documents `brain_` ne sont PAS contractuels
+
+## References
+
+*Chemins relatifs a la racine du workspace.*
+
+- **Racine documentation** : `docs/`
+- **References conceptuelles** : `docs/reference/` (Glossaire, MWS, Relay, etc.)
+- **MWS** : `docs/miyukini-webway-system/` — fondateur, architecture, acteurs, index : `reference/_index.md`
+- **Toolkits** : `docs/tools/Miyu{Nom}/` (ex. MiyuWebwayTracker, MiyuAuth) — Documentation Fondatrice, Reference Outils, contracts/, implementation/
+- **Services** : `docs/services/` (Jay*, Miyukini*)
+- **Template contrats** : `docs/contrats/` (Miyukini Protocol - Ecriture Enrichie Toolkits, etc.)

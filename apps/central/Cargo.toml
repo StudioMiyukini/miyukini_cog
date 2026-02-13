@@ -38,6 +38,9 @@ rodio = { version = "0.21", default-features = false, features = ["playback", "m
 # Auth et profils Central (COG vierge, premier compte admin)
 miyukini-central = { path = "../../crates/miyukini-central", features = ["legacy-sqlite"] }
 
+# MWS - Miyukini Webway System
+miyuwebway_participant = { path = "../../crates/miyuwebway_participant" }
+
 # Service backends (donnees reelles via KindMother SQLite)
 jayxpose = { path = "../../crates/jayxpose" }
 jayfestival = { path = "../../crates/jayfestival" }

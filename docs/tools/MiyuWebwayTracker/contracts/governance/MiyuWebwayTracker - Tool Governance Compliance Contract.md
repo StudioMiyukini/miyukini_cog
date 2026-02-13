@@ -16,7 +16,7 @@ Conformité aux obligations communes : [Master Butler - Tool Governance Complian
 ## Obligations spécifiques MiyuWebwayTracker
 
 - **Décisions** (accepter ou rejeter une déclaration, politique de filtrage, statuts) = **Border Guard, WorrySentinel, StrongFather** ; traduction en intentions = **BondingBrother**.
-- Le Kit **ne gouverne pas** les accès (Passeport, Visa) ; il **protège le maillage** en appliquant les politiques des Cores.
+- Le Kit **ne gouverne pas** les accès (Passeport, Permis de circulation, Visa de Connexion) ; il **protège le maillage** en appliquant les politiques des Cores.
 - Aucune donnée métier ni gouvernance transmise ; uniquement présence et découverte (format MWS).
 - Filtrage (cog_list.filter) : critère fourni par Cores (ex. exclure Rejected, Distrusted) ; le Tool applique sans décider de la politique.
 

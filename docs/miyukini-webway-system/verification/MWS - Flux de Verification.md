@@ -181,7 +181,7 @@ Le relay vérifie le rapport de **santé de l'environnement** (`environment_heal
 
 ```mermaid
 sequenceDiagram
-    participant Cores as Cores (WorrySentinel, KeeperOfStorage)
+    participant Cores as Cores (WorrySentinel, KindMother)
     participant COG as COG
     participant R as Relay
 
@@ -204,7 +204,7 @@ sequenceDiagram
 
 | Indicateur | Valeurs | Description |
 |------------|---------|-------------|
-| `storage_integrity` | `OK`, `DEGRADED`, `CORRUPTED` | Intégrité du stockage vérifiée par KeeperOfStorage |
+| `storage_integrity` | `OK`, `DEGRADED`, `CORRUPTED` | Intégrité du stockage vérifiée par KindMother |
 | `config_valid` | `true`, `false` | Configuration valide et cohérente |
 | `strata_intact` | `true`, `false` | Strates 0-9 intactes |
 | `attestation_signature` | signature | Signature cryptographique par WorrySentinel |

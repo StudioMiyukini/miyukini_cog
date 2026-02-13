@@ -173,7 +173,7 @@ La verification suit le flux complet decrit dans [Miyukini Webway Relay](./Miyuk
    - **REGISTER_OK** avec un **Permis de circulation** (permis_id, duree, portee, core_version validee).
    - **REGISTER_ERR** avec code d'erreur (quarantaine, notification de mise a jour, ou blacklistage).
 
-Apres **REGISTER_OK**, le tunnel est actif et le COG possede un Visa valide pour se connecter aux trackers.
+Apres **REGISTER_OK**, le tunnel est actif et le COG possede un Permis de circulation valide et la liste des trackers officiels pour se connecter aux trackers (uniquement a ceux figurant dans cette liste).
 
 ### 4.2 Format REGISTER (orientation)
 
@@ -189,9 +189,9 @@ Apres **REGISTER_OK**, le tunnel est actif et le COG possede un Visa valide pour
 | svc_manifest_len | 2 octets (BE) | Longueur du service manifest (0 si absent) |
 | svc_manifest | svc_manifest_len octets | JSON compact des versions de Services avec checksums (UTF-8) ; vide si len=0 |
 | env_health_len | 2 octets (BE) | Longueur du rapport de sante de l'environnement |
-| environment_health | env_health_len octets | Rapport de sante genere par les Cores (WorrySentinel, KeeperOfStorage) : integrite stockage, configuration, strates. |
-| visa_history_len | 2 octets (BE) | Longueur de l'historique des visas precedents (0 si premier enregistrement) |
-| previous_visas | visa_history_len octets | JSON compact des visas precedents (visa_id, issued_by, expires_at). |
+| environment_health | env_health_len octets | Rapport de sante genere par les Cores (WorrySentinel, KindMother) : integrite stockage, configuration, strates. |
+| permis_history_len | 2 octets (BE) | Longueur de l'historique des permis precedents (0 si premier enregistrement) |
+| previous_permis | permis_history_len octets | JSON compact des permis de circulation precedents (permis_id, issued_by, expires_at). |
 | passport_type | 1 octet | Type de passeport : `0x01` = STANDARD, `0x02` = SPECIAL |
 | special_key_len | 2 octets (BE) | Longueur de la cle speciale (0 si STANDARD) |
 | special_key | special_key_len octets | Cle speciale delivree par Origin (uniquement si passport_type = SPECIAL) |
@@ -205,15 +205,16 @@ Les limites (taille max de `cog_id`, de token, de `svc_manifest`, etc.) sont def
 - **REGISTER_OK** : payload contenant :
   - **session_id** (16 octets) : identifiant de session unique pour correlation.
   - **registration_status** (1 octet) : `0x01` = ACTIVE, `0x02` = ISOLATED, `0x03` = UPDATE_RECOMMENDED.
-  - **visa_id** (16 octets) : identifiant unique du Visa de circulation delivre.
-  - **visa_expires_at** (8 octets BE) : expiration du Visa (secondes epoch).
-  - **visa_scope_len** (2 octets BE) + **visa_scope** (UTF-8) : portee du Visa (intentions autorisees).
+  - **permis_id** (16 octets) : identifiant unique du Permis de circulation delivre (accord relay).
+  - **permis_expires_at** (8 octets BE) : expiration du Permis (secondes epoch).
+  - **permis_scope_len** (2 octets BE) + **permis_scope** (UTF-8) : portee du Permis (intentions autorisees).
+  - **tracker_addresses_len** (2 octets BE) + **tracker_addresses** (UTF-8 ou JSON) : liste des adresses des trackers officiels (le COG ne doit se connecter qu'a ces trackers).
   - **heartbeat_interval** (2 octets BE) : delai de heartbeat recommande (en secondes).
   - **min_core_version_len** (1 octet) + **min_core_version** (UTF-8) : version minimale des Cores recommandee.
   - **relay_protocol_version** (1 octet) : version du protocole cote relay.
   - **isolation_reason_len** (2 octets BE) + **isolation_reason** (UTF-8) : raison d'isolation (0 si ACTIVE).
   
-  Le COG utilise le `visa_id` et `visa_expires_at` pour se presenter aux trackers. Si le statut est `UPDATE_RECOMMENDED`, le Visa est delivre mais une mise a jour est disponible (pas un blocage). Si le statut est `ISOLATED`, le tunnel est maintenu en surveillance.
+  Le COG utilise le `permis_id`, `permis_expires_at` et la liste **tracker_addresses** pour se presenter aux trackers officiels uniquement. Si le statut est `UPDATE_RECOMMENDED`, le Permis est delivre mais une mise a jour est disponible (pas un blocage). Si le statut est `ISOLATED`, le tunnel est maintenu en surveillance.
 
 - **REGISTER_ERR** : payload recommande -- **code** (2 octets, big-endian) + **message** (longueur + UTF-8). Codes d'erreur :
 
@@ -271,7 +272,7 @@ Direction : **COG -> Relay**. Un message SERVICE_BLOCK est envoye **par Service*
 | detail_len | 2 octets (BE) | Longueur du detail (0 si OK) |
 | detail | detail_len octets | Detail de l'echec ou demande de verification etendue (UTF-8) |
 
-Direction : **Relay -> COG**. Envoye apres chaque phase pour informer le COG de la progression. Si toutes les phases sont OK, le relay envoie **REGISTER_OK** avec le Visa de circulation.
+Direction : **Relay -> COG**. Envoye apres chaque phase pour informer le COG de la progression. Si toutes les phases sont OK, le relay envoie **REGISTER_OK** avec le Permis de circulation et la liste des trackers officiels.
 
 ---
 
@@ -455,11 +456,11 @@ sequenceDiagram
 
 | Message      | Role |
 |-------------|------|
-| **REGISTER** | COG transmet son Passeport complet (token, cog_id, core_version, svc_manifest, environment_health, previous_visas, passport_type, special_key) |
+| **REGISTER** | COG transmet son Passeport complet (token, cog_id, core_version, svc_manifest, environment_health, previous_permis, passport_type, special_key) |
 | **CORE_KEY** | Cores du COG transmettent la cle de conformite cachee (Phase A de verification) |
 | **SERVICE_BLOCK** | Chaque Service envoie un bloc de code MIP chiffre choisi aleatoirement (Phase B) |
 | **VERIFY_RESULT** | Relay informe le COG du resultat de chaque phase de verification (A, B, C) |
-| **REGISTER_OK** | Verification reussie : Visa de circulation delivre (visa_id, expiration, portee) + status (ACTIVE / ISOLATED / UPDATE_RECOMMENDED) |
+| **REGISTER_OK** | Verification reussie : Permis de circulation delivre (permis_id, expiration, portee, tracker_addresses) + status (ACTIVE / ISOLATED / UPDATE_RECOMMENDED) |
 | **REGISTER_ERR** | Verification echouee : code erreur (core_key_mismatch, service_block_mismatch, quarantine, blacklisted, redirect, etc.) |
 | **REDIRECT** | Origin sature : redirection vers un relay disponible |
 | **CONNECT** | Client demande a joindre un cog_id (+ core_version appelant optionnel) |
@@ -480,7 +481,7 @@ sequenceDiagram
 - [Miyukini Webway System Complet](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Complet.md) -- vue d'ensemble MWS et relay
 - [Miyukini Webway System](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) -- acteurs, annonces, securite MWS
 - [Miyukini Webway System Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) -- formats MWS, ports, bindings
-- [Miyukini - Oracle Cloud Instance Webway Relay](../setup/Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) -- instance et configuration
+- [Miyukini - Hostinger VPS Origin Webway](../setup/Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) — instance et configuration
 - [Miyukini - Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md) -- guide de deploiement pas a pas (VM, TLS, systemd, tests)
 - [MiyuWebwayTracker - Passive Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md) -- contrats systemes passifs Tracker
 - [MiyuWebwayTracker - Active Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md) -- contrats systemes actifs Tracker

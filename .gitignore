@@ -1,6 +1,5 @@
 # secret files
-ssh-key-2026-02-12.key
-ssh-key-2026-02-12.key.pub
+cle_ssh_hostinger
 # Rust build artifacts
 target/
 Cargo.lock

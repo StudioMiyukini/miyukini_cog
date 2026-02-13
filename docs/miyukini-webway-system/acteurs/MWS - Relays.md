@@ -74,7 +74,7 @@ Le COG transmet son **Passeport complet** :
 | `cog_id` | Identifiant unique du COG |
 | `core_version` | Version des Cores (`MAJOR.MINOR`) |
 | `service_list` | Services installés avec versions et checksums |
-| `environment_health` | Rapport de santé (WorrySentinel, KeeperOfStorage) |
+| `environment_health` | Rapport de santé (WorrySentinel, KindMother) |
 | `previous_permis` | Historique des Permis de circulation précédents |
 | `passport_type` | `STANDARD` ou `SPECIAL` |
 | `special_key` | (Passeports spéciaux) Clé délivrée par Origin |
@@ -106,7 +106,7 @@ Le relay vérifie le rapport `environment_health` :
 
 | Vérification | Description |
 |--------------|-------------|
-| Intégrité du stockage | Pas de corruption détectée par KeeperOfStorage |
+| Intégrité du stockage | Pas de corruption détectée par KindMother |
 | Configuration cohérente | Strates intactes, configuration valide |
 | Attestation signée | Rapport signé par WorrySentinel |
 

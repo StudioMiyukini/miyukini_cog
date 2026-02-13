@@ -256,6 +256,40 @@ Le **confinement réseau** est l'état d'urgence du MWS où les connexions inter
 
 ---
 
+## 5.5 Révocation de Permis en temps réel (contremesure R-009)
+
+Pour réagir rapidement à un COG malveillant sans attendre l'expiration de son Permis, le MWS prévoit une **révocation de Permis en temps réel**.
+
+### Déclenchement
+
+| Déclencheur | Description |
+|-------------|-------------|
+| **Alerte sécurité** | Comportement suspect détecté par un tracker ou un relay |
+| **Décision administrative** | Origin ou relay décide de révoquer un Permis |
+| **Blacklistage** | Le COG est blacklisté → tous ses Permis sont révoqués |
+
+### Propagation
+
+| Étape | Description |
+|-------|-------------|
+| 1 | Le relay (ou Origin) émet un message **PERMIT_REVOKE** (permis_id, raison, signature) |
+| 2 | Origin diffuse la révocation à tous les trackers en **moins de 1 minute** |
+| 3 | Chaque tracker met à jour son **cache de révocation** et ferme les connexions concernées |
+| 4 | Le COG révoqué reçoit **CLOSE** avec la raison `permit_revoked` |
+
+### Cache de révocation
+
+Les trackers maintiennent un cache des Permis révoqués (TTL au moins égal à la durée max d'un Permis, ex. 8 jours). Toute connexion présentant un Permis révoqué est refusée.
+
+### Journalisation
+
+| Événement | Données |
+|-----------|---------|
+| Révocation émise | `permis_id`, `cog_id`, `reason`, `revoked_by`, `revoked_at` |
+| Révocation appliquée | `tracker_id`, `permis_id`, `connections_closed` |
+
+---
+
 ## 6. Synchronisation des listes
 
 ### 6.1 Architecture de synchronisation
@@ -350,6 +384,7 @@ Si un COG légitime est mis en quarantaine par erreur :
 | Retrait de blacklist | `cog_id`, `reason`, `verified_by` |
 | Alerte réseau | `trigger_count`, `time_window`, `initiator` |
 | Confinement | `phase`, `connections_closed`, `timestamp` |
+| Révocation Permis | `permis_id`, `cog_id`, `reason`, `revoked_by` |
 
 ### 8.2 Rétention
 
@@ -368,9 +403,11 @@ Si un COG légitime est mis en quarantaine par erreur :
 - [MWS - Flux de Vérification](../verification/MWS%20-%20Flux%20de%20Verification.md)
 - [MWS - Relays](../acteurs/MWS%20-%20Relays.md)
 - [MWS - Trackers](../acteurs/MWS%20-%20Trackers.md)
+- [MWS - Contre-Mesures de Sécurité](./MWS%20-%20Contre-Mesures%20de%20Securite.md) — R-009
 - [Miyukini Webway Relay](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) — sections 2.8, 2.9, 3.4
 
 ---
 
-**Version :** 1.0  
+**Version :** 2.0  
+**Mise à jour :** Révocation Permis temps réel (R-009)  
 **Classification :** Documentation MWS — Sécurité

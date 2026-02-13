@@ -101,7 +101,7 @@ Les documents suivants (hors racine MWS) constituent la **documentation précise
 
 - Références conceptuelles (MWS, Normes et Standards, Outils et Opérateurs, Relay, Protocol)
 - Outils : MiyuWebwayTracker, MiyuWebwayParticipant (Documentation Fondatrice, contrats, implémentation)
-- Setup : Relay Deployment, Oracle Cloud Instance
+- Setup : Relay Deployment, Hostinger VPS Origin
 
 ---
 

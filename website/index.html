@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Miyukini COG - Core-Orchestrated Governance Environment</title>
+  <meta name="description" content="Miyukini est un COG - un environnement de gouvernance orchestré par des cores. Ecosystème logiciel souverain, autonome et gouverné.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-content">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">M</div>
+        <span>Miyukini</span>
+      </a>
+      <button class="nav-toggle" onclick="toggleNav()">☰</button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html" class="active">Accueil</a></li>
+        <li><a href="cog.html">Qu'est-ce qu'un COG</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="webway.html">Webway</a></li>
+        <li><a href="about.html">À propos</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="hero-content animate-in">
+      <span class="hero-badge">Core-Orchestrated Governance Environment</span>
+      <h1>Miyukini COG</h1>
+      <p class="hero-subtitle">
+        Un écosystème logiciel gouverné : un environnement complet dans lequel des entités logicielles opèrent selon des règles strictes, des contrats vérifiables, et une gouvernance centralisée.
+      </p>
+      <blockquote class="hero-quote">
+        "Miyukini is not an OS. It's the cog that makes digital systems work together."
+      </blockquote>
+      <div class="hero-buttons">
+        <a href="cog.html" class="btn btn-primary">Découvrir le COG</a>
+        <a href="architecture.html" class="btn btn-secondary">Explorer l'architecture</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats Section -->
+  <section class="section">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-value">9</div>
+        <div class="stat-label">Cores de gouvernance</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">49</div>
+        <div class="stat-label">Toolkits implémentés</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">6</div>
+        <div class="stat-label">Services fonctionnels</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">70+</div>
+        <div class="stat-label">Crates Rust</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">1000+</div>
+        <div class="stat-label">Pages de documentation</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Concepts Section -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Concepts clés</h2>
+      <p>Comprendre les fondements de l'écosystème Miyukini</p>
+    </div>
+    <div class="cards-grid">
+      <a href="cog.html" class="card">
+        <div class="card-icon">⚙️</div>
+        <h3>Qu'est-ce qu'un COG ?</h3>
+        <p>Core-Orchestrated Governance Environment — un environnement souverain, versionné et isolé où des entités logicielles opèrent sous gouvernance stricte.</p>
+        <span class="card-tag">Fondamental</span>
+      </a>
+      <a href="architecture.html" class="card">
+        <div class="card-icon">🏛️</div>
+        <h3>La Pyramide Architecture</h3>
+        <p>7 strates architecturales + Kernel : du hardware jusqu'aux services utilisateur, avec une dépendance strictement unidirectionnelle.</p>
+        <span class="card-tag">Architecture</span>
+      </a>
+      <a href="architecture.html#cores" class="card">
+        <div class="card-icon">💎</div>
+        <h3>Les 9 Cores</h3>
+        <p>StrongFather, KindMother, CaringNanny, MasterButler, BorderGuard, EverBuddy, WorrySentinel, TAMR, LogisticsSteward — les institutions qui gouvernent.</p>
+        <span class="card-tag">Gouvernance</span>
+      </a>
+      <a href="architecture.html#lois" class="card">
+        <div class="card-icon">📜</div>
+        <h3>Les 8 Lois d'Autonomie</h3>
+        <p>Les invariants non négociables de l'écosystème : zéro dépendance externe, isolement comme état normal, état local souverain...</p>
+        <span class="card-tag">Principes</span>
+      </a>
+      <a href="services.html" class="card">
+        <div class="card-icon">🎯</div>
+        <h3>Les Services</h3>
+        <p>JayFestival, JayKoa, JayKonta, JayXpose, MiyukiniClicker, MiyukiniSurvivor — des services complets et interconnectés.</p>
+        <span class="card-tag">Fonctionnel</span>
+      </a>
+      <a href="webway.html" class="card">
+        <div class="card-icon">🌐</div>
+        <h3>Miyukini Webway System</h3>
+        <p>La couche de présence, découverte et transport entre environnements COG. Relays, trackers, et fédération gouvernée.</p>
+        <span class="card-tag">Réseau</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Philosophy Section -->
+  <section class="section" style="background: var(--bg-card); border-radius: 16px; margin: 0 2rem;">
+    <div class="section-header">
+      <h2>La philosophie Miyukini</h2>
+      <p>Pourquoi ce projet existe</p>
+    </div>
+    <div class="content" style="padding-top: 0;">
+      <h3>L'allégorie de la nation numérique</h3>
+      <p>Imaginez que vous construisiez un <strong>pays</strong> — pas une maison, pas un quartier, mais un pays entier. Ce pays a besoin d'une constitution, d'institutions, de fonctionnaires, de lois, de frontières, d'une diplomatie. Il doit pouvoir fonctionner <strong>même si toutes les routes sont coupées</strong> : pas de panique, pas d'effondrement, juste un fonctionnement dégradé mais ordonné.</p>
+      <p>C'est exactement ce que fait Miyukini. Sauf que le pays est numérique, la constitution est du code, et les citoyens sont des composants logiciels.</p>
+      
+      <h3>Le problème que Miyukini résout</h3>
+      <p>Les logiciels modernes reposent sur des hypothèses fragiles : connexion permanente, cloud toujours disponible, services tiers accessibles. Quand une de ces hypothèses tombe, tout s'effondre.</p>
+      <p>Miyukini prend le problème à l'envers :</p>
+      <blockquote>
+        <strong>La déconnexion n'est pas une erreur à corriger. C'est un état normal du système.</strong>
+      </blockquote>
+      <p>Un système Miyukini démarre sans réseau, fonctionne sans cloud, dégrade proprement en isolation, reste administrable localement, et se réconcilie quand le réseau revient — sans reconstruction.</p>
+    </div>
+  </section>
+
+  <!-- Vibe Coding Section -->
+  <section class="section">
+    <div class="section-header">
+      <h2>L'expérience Vibe Coding</h2>
+      <p>Un projet entièrement piloté par IA</p>
+    </div>
+    <div class="content" style="padding-top: 0;">
+      <p>Miyukini COG est, à notre connaissance, l'un des <strong>plus gros projets entièrement conçu et implémenté en Vibe Coding</strong> — c'est-à-dire en pilotage intégral par agents IA, sous supervision humaine.</p>
+      <p>L'intégralité du code Rust (70+ crates, 49 Toolkits, 9 Cores, des milliers de fichiers), de la documentation (1000+ pages), de l'architecture, et des protocoles a été produite par des <strong>modèles de langage</strong> (Claude, GPT-4, Gemini) utilisés comme <strong>agents de développement</strong> dans Cursor IDE — et non comme simples assistants de complétion.</p>
+      
+      <div class="callout callout-info">
+        <div class="callout-title">Qu'est-ce que le Vibe Coding ?</div>
+        <p>Le développeur humain ne tape plus de code. Il définit l'intention, la vision, les contraintes. L'IA génère, structure, implémente. L'humain supervise, valide, oriente.</p>
+      </div>
+
+      <h3>Protocoles inventés pour piloter les IA</h3>
+      <ul>
+        <li><strong>MSCM</strong> (Miyukini Semantic Code Markup) — Balisage sémantique intégré dans le code source</li>
+        <li><strong>MIP</strong> (MSCM Index Protocol) — Indexation structurelle globale du codebase</li>
+        <li><strong>Skills IA</strong> — Documentation-as-Instructions pour les agents</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-logo">
+        <div class="logo-icon">M</div>
+        <span>Miyukini COG</span>
+      </div>
+      <div class="footer-links">
+        <a href="cog.html">Documentation</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="services.html">Services</a>
+        <a href="webway.html">Webway</a>
+        <a href="about.html">À propos</a>
+      </div>
+      <p class="footer-copy">
+        &copy; 2026 Miyukini. Licence duale — Usage personnel gratuit / Licence commerciale requise pour entreprises.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    function toggleNav() {
+      document.getElementById('navLinks').classList.toggle('active');
+    }
+  </script>
+</body>
+</html>

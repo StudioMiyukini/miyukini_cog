@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Architecture - La Pyramide Miyukini</title>
+  <meta name="description" content="La Pyramide Miyukini : 7 strates architecturales + Kernel, les 9 Cores, les 8 Lois d'Autonomie.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-content">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">M</div>
+        <span>Miyukini</span>
+      </a>
+      <button class="nav-toggle" onclick="toggleNav()">☰</button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Accueil</a></li>
+        <li><a href="cog.html">Qu'est-ce qu'un COG</a></li>
+        <li><a href="architecture.html" class="active">Architecture</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="webway.html">Webway</a></li>
+        <li><a href="about.html">À propos</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <h1>La Pyramide Architecture</h1>
+    <p>7 strates architecturales + Kernel — Du hardware jusqu'aux services utilisateur</p>
+  </header>
+
+  <main class="content">
+    <h2>Vue d'ensemble</h2>
+    <p>La <strong>Pyramide Miyukini</strong> définit l'architecture complète de l'écosystème. Chaque strate a des responsabilités distinctes, des invariants spécifiques, et des relations clairement définies avec les strates adjacentes.</p>
+    
+    <div class="callout callout-info">
+      <div class="callout-title">Principe fondamental</div>
+      <p>La dépendance est <strong>strictement unidirectionnelle</strong>, de haut en bas. Chaque strate dépend uniquement des strates inférieures, jamais l'inverse.</p>
+    </div>
+
+    <h2>Schéma de la Pyramide</h2>
+    <div class="diagram">
+┌──────────────────────────────────────────────┐
+│ 🔧 STRATE 9 — MiyukiniAdmin (EXCEPTION)       │
+│ Console souveraine d'administration          │
+│ → Out-of-band, comme BIOS/hyperviseur        │
+└──────────────────────────────────────────────┘
+                    ▲
+┌──────────────────────────────────────────────┐
+│ 🟩 STRATE 7 — OPERATORS                       │
+│ Service · Interface · Automation · Domain    │
+│ → Entités fonctionnelles gouvernées          │
+└──────────────────────────────────────────────┘
+                    ▲
+┌──────────────────────────────────────────────┐
+│ 🟦 STRATE 6 — TOOLS & TOOLKITS                │
+│ Auth · Billing · Content · Realtime · Admin  │
+│ → Capacités & compositions gouvernées        │
+└──────────────────────────────────────────────┘
+                    ▲
+┌──────────────────────────────────────────────┐
+│ 🟨 STRATE 5 — INTERFACES & ADAPTATION         │
+│ UI · API · CLI · WebSocket · BondingBrother  │
+└──────────────────────────────────────────────┘
+                    ▲
+┌──────────────────────────────────────────────┐
+│ 🟥 STRATE 4 — CORES SYSTÈME                   │
+│ StrongFather · KindMother · CaringNanny      │
+│ MasterButler · BorderGuard · EverBuddy       │
+└──────────────────────────────────────────────┘
+                    ▲
+┌──────────────────────────────────────────────┐
+│ 🟪 STRATE 3 — INVARIANTS & CONTRATS           │
+│ Décision ≠ Exécution · Zero-trust            │
+│ Déterminisme · Auditabilité · Autonomie      │
+└──────────────────────────────────────────────┘
+                    ▲
+┌──────────────────────────────────────────────┐
+│ ⚙️ KERNEL — SUBSTRAT TECHNIQUE                │
+│ Id · Logger · Clock · Config · Lifecycle     │
+└──────────────────────────────────────────────┘
+                    ▲
+┌──────────────────────────────────────────────┐
+│ 🟫 STRATE 0 — HARDWARE & OS                   │
+│ CPU · RAM · Disque · Réseau · Pannes         │
+└──────────────────────────────────────────────┘
+    </div>
+
+    <h2>Description des Strates</h2>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Strate</th>
+            <th>Allégorie</th>
+            <th>Rôle</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>0</strong></td><td>Le terrain</td><td>Hardware et OS — la réalité physique</td></tr>
+          <tr><td><strong>K</strong></td><td>Les fondations</td><td>Kernel — identifiants, horloge, logs (zéro logique métier)</td></tr>
+          <tr><td><strong>3</strong></td><td>Le règlement intérieur</td><td>Contrats et invariants architecturaux</td></tr>
+          <tr><td><strong>4</strong></td><td>Les ministères</td><td>9 Cores qui gouvernent sans jamais exécuter</td></tr>
+          <tr><td><strong>5</strong></td><td>L'interprète officiel</td><td>BondingBrother traduit les intentions vers les Cores</td></tr>
+          <tr><td><strong>6</strong></td><td>La caisse à outils</td><td>49 Toolkits — capacités exécutables et gouvernées</td></tr>
+          <tr><td><strong>7</strong></td><td>Les fonctionnaires</td><td>Opérateurs — exécutent les services pour l'utilisateur</td></tr>
+          <tr><td><strong>9</strong></td><td>Le président</td><td>MiyukiniAdmin — autorité souveraine d'exception</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="cores">Les 9 Cores de gouvernance</h2>
+    <p>Les <strong>Cores</strong> sont les "ministères" du système. Chacun a un domaine exclusif, une autorité absolue dans ce domaine, mais <strong>aucun pouvoir d'exécution</strong>. Ils décident, gouvernent, définissent — mais n'exécutent jamais.</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Core</th>
+            <th>Allégorie</th>
+            <th>Question fondamentale</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>StrongFather</strong></td>
+            <td>Le Président</td>
+            <td>"Devrait-on faire cette action ?"</td>
+          </tr>
+          <tr>
+            <td><strong>KindMother</strong></td>
+            <td>La Gardienne des archives</td>
+            <td>"Comment les données sont-elles persistées ?"</td>
+          </tr>
+          <tr>
+            <td><strong>CaringNanny</strong></td>
+            <td>L'Infirmière scolaire</td>
+            <td>"Dans quel état se trouve le système ?"</td>
+          </tr>
+          <tr>
+            <td><strong>MasterButler</strong></td>
+            <td>Le Registre du cadastre</td>
+            <td>"Qu'est-ce qui est possible dans cet environnement ?"</td>
+          </tr>
+          <tr>
+            <td><strong>BorderGuard</strong></td>
+            <td>Le Douanier</td>
+            <td>"Où sont les frontières et les règles de franchissement ?"</td>
+          </tr>
+          <tr>
+            <td><strong>EverBuddy</strong></td>
+            <td>L'Archiviste des versions</td>
+            <td>"Comment le système évolue-t-il sans se rompre ?"</td>
+          </tr>
+          <tr>
+            <td><strong>WorrySentinel</strong></td>
+            <td>L'Agence de sécurité</td>
+            <td>"Quel niveau de sécurité est applicable ?"</td>
+          </tr>
+          <tr>
+            <td><strong>TAMR</strong></td>
+            <td>Le Médiateur citoyen</td>
+            <td>"Quand l'humain a-t-il le droit d'intervenir ?"</td>
+          </tr>
+          <tr>
+            <td><strong>LogisticsSteward</strong></td>
+            <td>L'Intendant</td>
+            <td>Gestion des ressources et logistique</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <blockquote>
+      <strong>Règle d'or :</strong> les Cores décident ou gouvernent, mais n'exécutent jamais.
+    </blockquote>
+
+    <h2 id="lois">Les 8 Lois d'Autonomie</h2>
+    <p>Ces lois sont les <strong>invariants non négociables</strong> de l'écosystème. Rien ne peut les contredire :</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Loi</th>
+            <th>Énoncé</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>LOI-1</strong></td><td>Aucune dépendance externe critique à l'exécution</td></tr>
+          <tr><td><strong>LOI-2</strong></td><td>Le système accepte l'isolement comme état normal</td></tr>
+          <tr><td><strong>LOI-3</strong></td><td>L'état local est souverain</td></tr>
+          <tr><td><strong>LOI-4</strong></td><td>Pas de temps global requis</td></tr>
+          <tr><td><strong>LOI-5</strong></td><td>Le coût doit être proportionnel au hardware</td></tr>
+          <tr><td><strong>LOI-6</strong></td><td>L'autonomie n'empêche pas la fédération</td></tr>
+          <tr><td><strong>LOI-7</strong></td><td>La strate Cores est immuable — évolution par environnement</td></tr>
+          <tr><td><strong>LOI-8</strong></td><td>Migration = diplomatie entre environnements</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-warning">
+      <div class="callout-title">Question de conception permanente</div>
+      <p>"Est-ce que ça fonctionne encore si le système est seul, lent, et isolé ?"</p>
+    </div>
+
+    <h2>Les Toolkits (Strate 6)</h2>
+    <p>Un <strong>Toolkit</strong> (Kit d'Outils), c'est comme un <strong>coffre à outils professionnel</strong>. Le coffre contient des outils (tournevis, clé, perceuse). Chaque outil fait une chose précise. Le coffre les organise pour qu'ils soient plus efficaces ensemble. Mais <strong>le coffre ne décide jamais</strong> quoi construire — c'est le travail de l'Opérateur.</p>
+
+    <h3>49 Toolkits implémentés</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Domaine</th>
+            <th>Toolkits</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Données & Infra</strong></td><td>MiyuSQL, MiyuWeb, MiyuClock, MiyuLocale, MiyuValidate, MiyuExport, MiyuSearch, MiyuJobs</td></tr>
+          <tr><td><strong>Identité & Social</strong></td><td>MiyuAuth, MiyuProfile, MiyuContacts, MiyuSocialFeed, MiyuSocialMessaging, MiyuSocialProfile, MiyuSocialModeration, MiyuStory, MiyuDiscovery</td></tr>
+          <tr><td><strong>Contenu & Media</strong></td><td>MiyuCMS, MiyuMedia, MiyuText, MiyuWidgets, MiyuForum, MiyuPolls, MiyuFeeds, MiyuBookmarks, MiyuModerationForum, MiyuAntiSpam, MiyuPM</td></tr>
+          <tr><td><strong>Commerce & Finance</strong></td><td>MiyuStore, MiyuShipping, MiyuBooking, MiyuBilling, MiyuInvoice, MiyuExpense, MiyuTreasury</td></tr>
+          <tr><td><strong>Point de Vente</strong></td><td>MiyuPosSales, MiyuPosInventory, MiyuPosAnalytics, MiyuPosLoyalty, MiyuPosKitchen, MiyuPosPayment</td></tr>
+          <tr><td><strong>Comptabilité</strong></td><td>MiyuComptaLedger, MiyuComptaReports, MiyuDeclarations</td></tr>
+          <tr><td><strong>Organisation</strong></td><td>MiyuHR, MiyuCalc, MiyuNotify, MiyuBooking</td></tr>
+          <tr><td><strong>Fédération</strong></td><td>MiyuWebwayParticipant, MiyuWebwayTracker</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Les Opérateurs (Strate 7)</h2>
+    <p>Un <strong>Opérateur</strong>, c'est comme un <strong>fonctionnaire</strong> dans notre pays numérique. Il exécute un rôle précis pour le compte du citoyen (l'utilisateur). Mais contrairement à un freelance, il ne travaille jamais seul et sans cadre : il est <strong>gouverné</strong>, <strong>mandaté</strong>, et <strong>tracé</strong>.</p>
+
+    <blockquote>
+      "Dans Miyukini, les utilisateurs n'installent pas d'applications. Ils interagissent avec des Opérateurs gouvernés qui exécutent des rôles pour leur compte."
+    </blockquote>
+
+    <h3>Types d'Opérateurs</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Rôle</th>
+            <th>Exemple</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Opérateur de Service</strong></td><td>Gère un domaine fonctionnel</td><td>CMS, Auth, Facturation</td></tr>
+          <tr><td><strong>Opérateur d'Interface</strong></td><td>Expose les services à l'utilisateur</td><td>UI Web, App mobile</td></tr>
+          <tr><td><strong>Opérateur de Domaine</strong></td><td>Exerce un métier précis</td><td>Blog, Catalogue, Forum</td></tr>
+          <tr><td><strong>Opérateur d'Automatisation</strong></td><td>Agit automatiquement</td><td>Notifications, Planification</td></tr>
+          <tr><td><strong>Opérateur Souverain</strong></td><td>Autorité système (exception)</td><td>MiyukiniAdmin uniquement</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-logo">
+        <div class="logo-icon">M</div>
+        <span>Miyukini COG</span>
+      </div>
+      <div class="footer-links">
+        <a href="cog.html">Documentation</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="services.html">Services</a>
+        <a href="webway.html">Webway</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 Miyukini. Licence duale.</p>
+    </div>
+  </footer>
+
+  <script>
+    function toggleNav() {
+      document.getElementById('navLinks').classList.toggle('active');
+    }
+  </script>
+</body>
+</html>

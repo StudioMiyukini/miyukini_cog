@@ -54,6 +54,7 @@ sequenceDiagram
 | `created_at` | datetime | Date de création |
 | `max_connections` | int | Nombre max de connexions (si limité) |
 | `current_connections` | int | Nombre de connexions actives |
+| `verified` | bool | **Lobby vérifié** (contremesure R-012) : badge visuel pour les Lobbys dont l'hôte a été vérifié par Origin ou le tracker. Afficher clairement le `host_cog_id` avant connexion pour limiter le phishing. |
 
 ### 1.4 Visibilité des Lobbys
 
@@ -86,8 +87,8 @@ stateDiagram-v2
     [*] --> Tentative: COG client essaie de rejoindre
     Tentative --> Échec: Mot de passe incorrect
     Échec --> Compteur: Incrémenter compteur
-    Compteur --> Tentative: < 5 échecs
-    Compteur --> Ban: 5 échecs atteints
+    Compteur --> Tentative: < 3 échecs
+    Compteur --> Ban: 3 échecs atteints
     Ban --> NotificationHôte: Notifier l'utilisateur hôte
     Tentative --> Succès: Mot de passe correct
     Succès --> [*]
@@ -95,10 +96,12 @@ stateDiagram-v2
 
 | Règle | Valeur | Description |
 |-------|--------|-------------|
-| **Limite d'échecs** | 5 | Après 5 mots de passe incorrects |
+| **Limite d'échecs** | **3** | Après 3 mots de passe incorrects (contremesure R-011) |
+| **Délai exponentiel** | 1 s, 2 s, 4 s… | Délai croissant entre chaque essai pour limiter le brute force |
 | **Action** | Ban | Le COG client est banni de ce Lobby |
 | **Notification** | Utilisateur hôte | L'hôte est notifié du ban |
 | **Dé-ban** | Manuel uniquement | Seul l'utilisateur hôte peut dé-bannir |
+| **Mot de passe** | Recommandé ≥ 12 caractères | Pour réduire le risque de devinette |
 
 ### 2.3 Dé-ban manuel
 

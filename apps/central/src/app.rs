@@ -4,9 +4,9 @@ use std::sync::Arc;
 
 use dioxus::prelude::*;
 use crate::data::ServiceConnections;
-use crate::state::{AppContext, AppState};
+use crate::state::{AppContext, AppState, MainTab};
 use crate::components::{Header, TabBar};
-use crate::services::ActiveServiceView;
+use crate::services::{ActiveServiceView, MwsNetworkView};
 use crate::theme::styles;
 use crate::screens::{RiteEntree, Connexion, ProfileWindow};
 
@@ -64,10 +64,28 @@ pub fn App() -> Element {
                     style: "{styles::content_area(theme)}",
                     role: "main",
 
-                    TabBar {}
+                    // Afficher TabBar uniquement pour Magasin et Bibliothèque
+                    if matches!(state.read().main_tab, MainTab::Magasin | MainTab::Bibliotheque) {
+                        TabBar {}
+                    }
+
                     div {
                         style: "{styles::content_panel(theme)}",
-                        ActiveServiceView {}
+
+                        // Contenu selon l'onglet principal
+                        match state.read().main_tab {
+                            MainTab::Communaute => rsx! { MwsNetworkView {} },
+                            MainTab::Miyukini => rsx! { 
+                                div {
+                                    style: "padding: 24px; color: #fff;",
+                                    h1 { "⚙️ Paramètres Miyukini" }
+                                    p { style: "color: #9ca3af; margin-top: 8px;",
+                                        "Configuration du COG et des services."
+                                    }
+                                }
+                            },
+                            _ => rsx! { ActiveServiceView {} }
+                        }
                     }
                 }
                 footer {

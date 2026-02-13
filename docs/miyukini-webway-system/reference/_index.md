@@ -40,6 +40,13 @@ Ce document est l'**index des références** détaillées du Miyukini Webway Sys
 | [MWS - Quarantaine et Blacklist](../securite/MWS%20-%20Quarantaine%20et%20Blacklist.md) | Escalade progressive, auto-destruction, alerte réseau, confinement |
 | [MWS - Chiffrement et TLS](../securite/MWS%20-%20Chiffrement%20et%20TLS.md) | TLS obligatoire, exemption temps réel, authentification, secrets |
 | [MWS - Registre de Services et Isolation](../securite/MWS%20-%20Registre%20de%20Services%20et%20Isolation.md) | Registre de Services, services tiers, isolation, suivi des mises à jour |
+| [MWS - Audit de Sécurité Complet](../securite/MWS%20-%20Audit%20de%20Securite%20Complet.md) | **AUDIT** — Vecteurs d'attaque, simulations, vulnérabilités, plan de remédiation |
+| [MWS - Contre-Mesures Prioritaires](../securite/MWS%20-%20Contre-Mesures%20Prioritaires.md) | **REMEDIATION** — Implémentation détaillée des contre-mesures critiques |
+| [MWS - Contre-Mesures de Sécurité](../securite/MWS%20-%20Contre-Mesures%20de%20Securite.md) | **REFERENTIEL** — Index normatif R-001 à R-015 et renvois vers les docs MWS |
+| [MWS - Haute Disponibilité Origin](../securite/MWS%20-%20Haute%20Disponibilite%20Origin.md) | R-001 — Architecture actif-passif, RTO/RPO, réplication |
+| [MWS - Procédure de Failover](../securite/MWS%20-%20Procedure%20de%20Failover.md) | R-001 — Bascule Origin, relay promu |
+| [MWS - Protection DDoS](../securite/MWS%20-%20Protection%20DDoS.md) | R-002 — Rate limiting, PoW, anti-DDoS |
+| [MWS - Manifeste Origin et Adresse Canonique](../securite/MWS%20-%20Manifeste%20Origin%20et%20Adresse%20Canonique.md) | Adresse Origin non falsifiable : manifeste signé, pin TLS, rôle des distributions |
 
 ### Lobbys et connexions
 
@@ -53,11 +60,18 @@ Ce document est l'**index des références** détaillées du Miyukini Webway Sys
 |----------|---------|
 | [MWS - Protocole Relay](../protocole/MWS%20-%20Protocole%20Relay.md) | Format binaire, types de messages, séquences d'échange |
 
+### Administration
+
+| Document | Contenu |
+|----------|---------|
+| [MWS - MiyukiniAdmin](../administration/MWS%20-%20MiyukiniAdmin.md) | **ADMIN** — Panneau d'administration Origin : authentification, batterie de tests, monitoring, gestion services MWS |
+
 ### Déploiement
 
 | Document | Contenu |
 |----------|---------|
 | [MWS - Guide de Déploiement](../deploiement/MWS%20-%20Guide%20de%20Deploiement.md) | Installation, TLS, systemd, monitoring, sécurité |
+| [MWS - Implémentation Origin Hostinger](../deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md) | **IMPLEMENTATION** — Origin sur VPS Hostinger (Debian 13), config complète, MiyukiniAdmin, manifeste, nginx |
 
 ---
 
@@ -117,7 +131,7 @@ Ce document est l'**index des références** détaillées du Miyukini Webway Sys
 | Document | Contenu |
 |----------|---------|
 | [Webway Relay Deployment Guide](../../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md) | Guide de déploiement complet (VM, TLS, systemd, tests) |
-| [Oracle Cloud Instance Webway Relay](../../setup/Miyukini%20-%20Oracle%20Cloud%20Instance%20Webway%20Relay.md) | Instance Oracle Cloud (Rust, systemd, firewall, monitoring) |
+| [Hostinger VPS Origin Webway](../../setup/Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) | Instance Origin sur Hostinger VPS Debian 13 (Rust, systemd, ufw, monitoring) |
 
 ---
 
@@ -126,18 +140,20 @@ Ce document est l'**index des références** détaillées du Miyukini Webway Sys
 | Sujet | Document principal | Références détaillées |
 |-------|-------------------|----------------------|
 | **Positionnement MWS** | Document Fondateur | Architecture, Consommation Strates |
-| **Origin** | MWS - Origin | Relay (sections 1, 3, 6) |
+| **Origin** | MWS - Origin | Relay (sections 1, 3, 6), MiyukiniAdmin |
 | **Relays** | MWS - Relays | Relay, Relay Protocol |
 | **Trackers** | MWS - Trackers | MiyuWebwayTracker (contrats) |
 | **Passeport / Permis de circulation** | MWS - Passeport et Permis | Relay (accord relay), Tracker (contrôle tracker) |
 | **Vérification** | MWS - Flux de Vérification | Relay (section 2) |
 | **Quarantaine / Blacklist** | MWS - Quarantaine et Blacklist | Relay (sections 2.8, 2.9, 3.4) |
 | **Chiffrement** | MWS - Chiffrement et TLS | Relay (sections 3.3, 10) |
+| **Audit Sécurité** | MWS - Audit de Sécurité Complet | Contre-Mesures Prioritaires |
 | **Lobbys** | MWS - Lobbys, Favoris et Amis | Relay (sections 8, 9) |
 | **Protocole** | MWS - Protocole Relay | Relay Protocol |
-| **Déploiement** | MWS - Guide de Déploiement | Setup guides |
+| **Administration** | MWS - MiyukiniAdmin | Implémentation Origin Hostinger |
+| **Déploiement** | MWS - Guide de Déploiement | Setup guides, Implémentation Origin Hostinger |
 
 ---
 
-**Version :** 2.0  
+**Version :** 3.0  
 **Dernière mise à jour :** 2026-02-13

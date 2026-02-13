@@ -88,6 +88,7 @@ Les nombres multi-octets sont en **big-endian** (network byte order).
 | 0x11 | **SERVICE_BLOCK** | COG → Relay | Bloc de code MIP d'un Service (Phase B) |
 | 0x12 | **VERIFY_RESULT** | Relay → COG | Résultat d'une phase de vérification |
 | 0x13 | **REDIRECT** | Relay/Origin → COG | Redirection vers un autre relay |
+| 0x30 | **PERMIT_REVOKE** | Relay/Origin → Tracker | Révocation d'un Permis de circulation (contremesure R-009). Propagation en < 1 min ; le COG révoqué reçoit CLOSE avec raison `permit_revoked`. |
 
 ---
 
@@ -140,6 +141,8 @@ sequenceDiagram
 | `token` | Variable | Token d'authentification |
 | `cog_id_len` | 2 octets | Longueur du cog_id |
 | `cog_id` | Variable | Identifiant du COG |
+| `cog_type` | 1 octet | Type de COG (voir ci-dessous) |
+| `os_type` | 1 octet | Type d'OS (voir ci-dessous) |
 | `core_version_len` | 1 octet | Longueur de core_version |
 | `core_version` | Variable | Version des Cores |
 | `svc_manifest_len` | 2 octets | Longueur du manifest |
@@ -151,8 +154,32 @@ sequenceDiagram
 | `passport_type` | 1 octet | 0 = STANDARD, 1 = SPECIAL |
 | `special_key_len` | 2 octets | Longueur de la clé spéciale |
 | `special_key` | Variable | Clé spéciale (si SPECIAL) |
+| `parent_cog_id_len` | 2 octets | Longueur du parent_cog_id (0 si non applicable) |
+| `parent_cog_id` | Variable | cog_id du parent (TERMINAL uniquement) |
 | `nonce` | 16 octets | Protection anti-rejeu |
 | `timestamp` | 8 octets | Horodatage (secondes depuis epoch) |
+
+#### Valeurs de `cog_type`
+
+| Code | Valeur | Description |
+|------|--------|-------------|
+| 0x00 | `ORIGIN` | Point central de vérité (un seul par réseau) |
+| 0x01 | `RELAY` | COG de contrôle d'intégrité |
+| 0x02 | `TRACKER` | Mapping et contrôle |
+| 0x03 | `STABLE` | COG d'utilisateur commun |
+| 0x04 | `SPECIAL` | COG professionnel à forte utilisation |
+| 0x05 | `TERMINAL` | COG mobile enfant d'un STABLE |
+| 0x06 | `LONE` | COG isolé volontairement (ne devrait pas envoyer REGISTER) |
+
+#### Valeurs de `os_type`
+
+| Code | Valeur | Description |
+|------|--------|-------------|
+| 0x00 | `WINDOWS` | Microsoft Windows |
+| 0x01 | `LINUX` | Distributions Linux |
+| 0x02 | `MACOS` | Apple macOS |
+| 0x03 | `ANDROID` | Google Android |
+| 0x04 | `IOS` | Apple iOS |
 
 ### 4.3 Format REGISTER_OK
 
@@ -166,6 +193,7 @@ sequenceDiagram
 | `permis_scope` | Variable | Portée du Permis (JSON) |
 | `tracker_addresses_len` | 2 octets | Longueur de la liste des adresses de trackers officiels |
 | `tracker_addresses` | Variable | Liste des adresses des trackers officiels/sûrs (connus d'Origin) ; le COG ne doit se connecter qu'à ces trackers. |
+| `tracker_signature` | 64 octets | **Signature Ed25519** par Origin de la liste des trackers (contremesure R-004 — protection Eclipse). Le COG doit vérifier cette signature avant d'utiliser les trackers. |
 | `status` | 1 octet | 0 = OK, 1 = UPDATE_RECOMMENDED |
 | `min_core_version_len` | 1 octet | Longueur (optionnel) |
 | `min_core_version` | Variable | Version minimale recommandée |
@@ -202,6 +230,7 @@ sequenceDiagram
 | `sequence` | 4 octets | Numéro de séquence |
 | `payload_len` | 4 octets | Longueur des données |
 | `payload` | Variable | Données opaques |
+| `mac` | 32 octets | **HMAC-SHA256** du message (session_key, header \|\| payload) — obligatoire même en mode temps réel non chiffré (contremesure R-003). Voir [MWS - Chiffrement et TLS](../securite/MWS%20-%20Chiffrement%20et%20TLS.md). |
 
 ### 5.2 Format HEARTBEAT
 
@@ -326,6 +355,19 @@ sequenceDiagram
 | Version supportée | Rejet si version non supportée |
 | Trames malformées | Fermeture + ERROR (`invalid_format`) |
 
+### 8.3 Validation des payloads JSON (contremesure R-010)
+
+Les payloads JSON (`svc_manifest`, `previous_permis`, `permis_scope`, etc.) doivent être validés avant traitement :
+
+| Exigence | Description |
+|----------|-------------|
+| **Schéma** | Chaque type de payload possède un **JSON Schema** publié ; validation obligatoire côté relay/origin |
+| **Profondeur max** | Imbrication limitée à **5 niveaux** ; rejet si dépassement |
+| **Taille** | Respect des limites (ex. `svc_manifest` ≤ 4096 octets) |
+| **Champs inconnus** | Politique définie (rejet ou `additionalProperties: false`) |
+
+Les schémas sont disponibles dans la documentation MWS et dans le dépôt des spécifications.
+
 ---
 
 ## 9. Résumé des flux
@@ -344,10 +386,12 @@ sequenceDiagram
 ## Références
 
 - [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
+- [MWS - Contre-Mesures de Sécurité](../securite/MWS%20-%20Contre-Mesures%20de%20Securite.md) — R-003, R-004, R-009, R-010
 - [Miyukini Webway Relay Protocol](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md) — Spécification complète
 - [MWS - Relays](../acteurs/MWS%20-%20Relays.md)
 
 ---
 
-**Version :** 1.0  
+**Version :** 2.0  
+**Mise à jour :** MAC DATA (R-003), tracker_signature (R-004), PERMIT_REVOKE (R-009), validation JSON (R-010)  
 **Classification :** Documentation MWS — Protocole

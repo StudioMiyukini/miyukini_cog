@@ -65,6 +65,7 @@ Les cipher suites acceptées doivent garantir :
 | **Validation côté client** | Obligatoire (chaîne de confiance, nom de domaine) |
 | **Auto-signé** | Uniquement en test, avec certificate pinning |
 | **Durée de validité** | Maximum 1 an (90 jours recommandé avec Let's Encrypt) |
+| **Certificate pinning Origin** | Les clients se connectant à **Origin** doivent implémenter le **certificate pinning** (contremesure R-014) pour limiter les risques de DNS poisoning et MITM. |
 
 ### 2.4 Ports et endpoints
 
@@ -124,6 +125,17 @@ Le **canal de données** transporte les données opaques échangées entre COGs 
 | **TLS par défaut** | Les données sont chiffrées TLS |
 | **Exemption possible** | Uniquement sous conditions strictes |
 
+### 4.3 MAC sur paquets DATA (contremesure R-003)
+
+Même en **mode temps réel non chiffré**, l'intégrité des paquets DATA doit être garantie :
+
+| Exigence | Description |
+|----------|-------------|
+| **MAC obligatoire** | Chaque trame DATA inclut un champ **MAC** de 32 octets (HMAC-SHA256) |
+| **Clé de session** | La clé est dérivée lors de la négociation TLS initiale : `session_key = HKDF(tls_master_secret, "MWS-DATA-MAC", session_id)` |
+| **Vérification** | Le récepteur vérifie le MAC avant de traiter ; rejet si invalide |
+| **Format** | Voir [MWS - Protocole Relay](../protocole/MWS%20-%20Protocole%20Relay.md) — format DATA avec champ `mac` |
+
 ---
 
 ## 5. Exemption temps réel
@@ -148,8 +160,9 @@ L'exemption n'est possible que si **toutes** les conditions suivantes sont rempl
 | **Permis valide** | Les deux COGs possèdent un Permis de circulation valide |
 | **Vérification préalable** | Les deux COGs ont été vérifiés par un relay |
 | **Flux éphémère** | La session non chiffrée est limitée dans le temps |
+| **Durée maximale** | **4 heures** — au-delà, renouvellement obligatoire (contremesure R-008) |
 | **Notification utilisateur** | L'utilisateur est explicitement informé du mode non chiffré |
-| **Journalisation** | La session est journalisée (cog_ids, durée, volume) |
+| **Journalisation** | La session est journalisée (cog_ids, durée, volume) ; sessions > 1 h font l'objet d'une alerte si ratio non-chiffré/chiffré > 20 % |
 
 ### 5.3 Négociation
 
@@ -247,7 +260,8 @@ sequenceDiagram
 |-----------|-------------|
 | **Nonce** | Chaque message critique inclut un nonce unique (min 16 octets) |
 | **Timestamp** | Horodatage avec précision seconde |
-| **Fenêtre d'acceptation** | Recommandé : ±30 secondes |
+| **Fenêtre d'acceptation** | **±10 secondes** (obligatoire) — contremesure R-006 |
+| **Synchronisation NTP** | Recommandée pour tous les acteurs (drift max 5 s) |
 | **Registre de nonces** | Cache borné des nonces vus récemment |
 
 ### 7.2 Vérification
@@ -299,13 +313,15 @@ Pour les messages de session active (HEARTBEAT, CLOSE) :
 | **Git ignore** | Fichiers de secrets dans `.gitignore` |
 | **Audit** | Vérification périodique de l'absence de secrets |
 
-### 8.4 Rotation des tokens
+### 8.4 Rotation des tokens (contremesure R-007)
 
 | Exigence | Description |
 |----------|-------------|
-| **Révocable** | Les tokens doivent pouvoir être révoqués |
+| **Révocable** | Les tokens doivent pouvoir être révoqués immédiatement |
 | **Renouvelable** | Renouvellement sans interruption de service |
 | **Transition** | Plusieurs tokens valides simultanés pendant la transition |
+| **Rotation automatique** | Tous les **7 jours** ; notification au COG 24 h avant expiration |
+| **Alerte nouvelle IP** | Notifier le COG si son token est utilisé depuis une nouvelle IP (optionnel) |
 
 ---
 
@@ -331,10 +347,12 @@ Pour les messages de session active (HEARTBEAT, CLOSE) :
 
 - [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 - [MWS - Relays](../acteurs/MWS%20-%20Relays.md)
+- [MWS - Contre-Mesures de Sécurité](./MWS%20-%20Contre-Mesures%20de%20Securite.md) — R-003, R-006, R-007, R-008, R-014
 - [Miyukini Webway Relay](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) — sections 3.3, 10
 - [Miyukini Webway Relay Protocol](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md) — section 2
 
 ---
 
-**Version :** 1.0  
+**Version :** 2.0  
+**Mise à jour :** Intégration contremesures R-003, R-006, R-007, R-008, R-014  
 **Classification :** Documentation MWS — Sécurité

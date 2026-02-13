@@ -43,6 +43,9 @@ Le Registre est maintenu par **Origin** et contient deux catégories :
 | `current_version` | Version courante officielle (`MAJOR.MINOR.PATCH`) |
 | `min_version` | Version minimale acceptée sur le réseau |
 | `checksum` | Hash SHA-256 du binaire/package |
+| `signature` | **Signature Ed25519 ou GPG** du binaire (contremesure R-005 — supply chain). Obligatoire pour toute installation. |
+| `signing_key_id` | Référence à la clé publique de signature (Registre des clés). |
+| `build_reproducible` | Optionnel : booléen + hash de build pour reproducible builds. |
 | `download_url` | URL de téléchargement officielle Miyukini |
 | `changelog_url` | URL du journal des modifications |
 | `core_compatibility` | Liste des `core_version.MAJOR` compatibles |
@@ -57,9 +60,13 @@ Le Registre est maintenu par **Origin** et contient deux catégories :
 | `official_source_url` | URL de la source officielle de l'éditeur |
 | `current_version` | Dernière version connue dans le Registre |
 | `checksum` | Hash SHA-256 de la version répertoriée |
+| `signature` | **Signature** du binaire par l'éditeur (contremesure R-005). Vérification obligatoire avant installation. |
+| `signing_key` | Clé publique de l'éditeur (enregistrée et vérifiée par Origin). |
 | `core_compatibility` | Liste des `core_version.MAJOR` compatibles |
 | `review_status` | `APPROVED`, `PENDING_REVIEW`, `SUSPENDED` |
 | `registration_date` | Date d'enregistrement dans le Registre |
+
+**Règle R-005 :** Avant d'installer un Service, le COG doit vérifier la signature du binaire avec la clé publique enregistrée. En cas d'échec de vérification, l'installation est refusée.
 
 ### 1.3 Synchronisation
 
@@ -356,9 +363,11 @@ Pour qu'un service tiers soit ajouté au Registre :
 - [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 - [MWS - Origin](../acteurs/MWS%20-%20Origin.md)
 - [MWS - Flux de Vérification](../verification/MWS%20-%20Flux%20de%20Verification.md)
+- [MWS - Contre-Mesures de Sécurité](./MWS%20-%20Contre-Mesures%20de%20Securite.md) — R-005
 - [Miyukini Webway Relay](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) — section 6
 
 ---
 
-**Version :** 1.0  
+**Version :** 2.0  
+**Mise à jour :** Signature des binaires (R-005)  
 **Classification :** Documentation MWS — Sécurité
