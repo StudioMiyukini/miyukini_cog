@@ -10,6 +10,11 @@ Ce document est **informatif, non normatif, et non contractuel**. Il guide un d�
 
 **Avertissement :** Ce document ne crée aucune nouvelle règle contractuelle et ne modifie aucun contrat existant. Les contrats fondateurs priment toujours sur ce guide.
 
+## Portée / Scope
+
+- Lignes directrices d'implémentation pour le Kit MiyuWebwayParticipant (déclaration, transport, découverte, listes de statuts).
+- Document informatif et non contractuel ; les contrats fondateurs priment.
+
 ---
 
 ## 1. Introduction
@@ -56,7 +61,7 @@ Niveau **2 à 3** (réseau, déclarations, découverte). États autorisés : `HE
 
 ### 2.8 Alignement MIP/MSCM
 
-Domaine `webway`, layer Strate 6. À l'implémentation, baliser le code MSCM pour alimenter blocks.json, domains.json, layers.json selon le [Protocole MIP v1](../../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+Domaine `webway`, layer Strate 6. À l'implémentation, baliser le code MSCM pour alimenter blocks.json, domains.json, layers.json selon le [Protocole MIP v1](../../../contrats/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
 
 ---
 
@@ -102,7 +107,7 @@ Erreurs techniques (format invalide, transport échoué) remontées sans exposer
 
 - **Domaine** : `webway` (toolkit.webway.participant).
 - **Layer** : Strate 6 dans layers.json.
-- **Blocs** : Chaque Outil MWS MiyuWebwayParticipant = unité logique avec `id`, `do`, `role`, `layer`. Balisage MSCM selon le [Protocole MIP v1](../../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+- **Blocs** : Chaque Outil MWS MiyuWebwayParticipant = unité logique avec `id`, `do`, `role`, `layer`. Balisage MSCM selon le [Protocole MIP v1](../../../contrats/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
 
 ---
 
@@ -121,7 +126,7 @@ Les tests relèvent des bonnes pratiques projet et du Tool Governance Compliance
 | MiyuWebwayParticipant - Tool Governance Compliance Contract | [MiyuWebwayParticipant - Tool Governance Compliance Contract](../contracts/governance/MiyuWebwayParticipant%20-%20Tool%20Governance%20Compliance%20Contract.md) |
 | Miyukini Webway System - Outils et Opérateurs | [Miyukini Webway System - Outils et Opérateurs](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Outils%20et%20Operateurs.md) |
 | Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](../../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
-| MIP v1 | [MIP v1 MSCM Index Protocol](../../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md) |
+| MIP v1 | [MIP v1 MSCM Index Protocol](../../../contrats/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md) |
 
 ---
 

@@ -89,7 +89,7 @@ Les obligations de conformité détaillées sont dans [MiyuWebwayParticipant - T
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuWebwayParticipant sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). À l'implémentation, le code fournissant les Outils MWS MiyuWebwayParticipant devra être balisé MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit généré selon le [Protocole MIP v1](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+La documentation et la future implémentation de MiyuWebwayParticipant sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). À l'implémentation, le code fournissant les Outils MWS MiyuWebwayParticipant devra être balisé MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit généré selon le [Protocole MIP v1](../../contrats/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
 
 ---
 
@@ -99,7 +99,7 @@ La documentation et la future implémentation de MiyuWebwayParticipant sont con�
 |----------|------|
 | Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
 | Webway System - Outils et Opérateurs | [Miyukini Webway System - Outils et Operateurs](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Outils%20et%20Operateurs.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../cores/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 
 ---
 

@@ -6,6 +6,11 @@ Ce document liste les **Outils MWS** composant le Kit **MiyuWebwayParticipant** 
 
 **Référence :** [MiyuWebwayParticipant - Documentation Fondatrice](./MiyuWebwayParticipant%20-%20Documentation%20Fondatrice.md)
 
+## Portée / Scope
+
+- Liste exhaustive des Outils MWS du Kit MiyuWebwayParticipant : ToolId, action, niveau de sécurité.
+- Invariants : le Kit exécute les intentions fournies par les Cores ; il ne décide pas.
+
 ---
 
 ## Liste des outils MWS

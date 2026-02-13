@@ -174,7 +174,27 @@ Les **formats de messages** définissent la structure des échanges sur le Webwa
 - `value` : string (ex. encodage base64 de la signature ou du MAC)
 - Optionnel : `key_id` ou `algorithm` pour vérification
 
-Les schémas détaillés (JSON Schema, CDDL, ou équivalent) seront définis dans un document de spécification technique rattaché à la norme.
+### 2.6.1 JSON canonique et champs obligatoires / optionnels
+
+Pour l'interopérabilité et la vérification d'intégrité, les messages MWS utilisent un **encodage JSON canonique** (RFC 8785 ou équivalent : clés triées, pas d'espaces superflus, UTF-8) lors du calcul de la signature ou du MAC. Les implémentations doivent accepter tout JSON valide conforme au schéma ; la forme canonique est exigée **uniquement** pour la production et la vérification du champ `integrity`.
+
+**Convention :** les champs listés comme **obligatoires** dans les tableaux des sections 2.1 à 2.5 sont **requis** ; leur absence rend le message **non conforme**. Les champs **optionnels** peuvent être omis ; s'ils sont présents, leur type et contraintes doivent être respectés.
+
+**Résumé normatif des champs par type de message :**
+
+| Type de message | Champs obligatoires | Champs optionnels |
+|-----------------|---------------------|-------------------|
+| `presence_announcement` | `version`, `type`, `cog_id`, `bridge_address`, `issued_at`, `integrity` | `core_version_hint`, `valid_until` |
+| `service_announcement` | `version`, `type`, `cog_id`, `services`, `issued_at`, `integrity` | `valid_until` ; par service : `protocol`, niveau de sécurité |
+| `host_session_declaration` | `version`, `type`, `cog_id`, `service_id`, `connection_address`, `issued_at`, `integrity` | `session_id`, `capacity_hint`, `security_level_hint`, `valid_until`, `protocol` |
+| `discovery_request` | `version`, `type`, `requester_cog_id`, `query`, `issued_at` | `scope`, `integrity` |
+| `cog_list` / `status_update` | `version`, `type`, `sender_cog_id`, `entries`, `issued_at`, `integrity` | `partial`, `scope` |
+
+**Structure `address` (obligatoire dans tout champ d'adresse) :** `host` (string), `port` (integer) obligatoires ; `protocol` (string) optionnel. La structure **relay_address** (annonce via relay) est décrite en section 2.8.
+
+**Structure `integrity` (obligatoire sauf pour discovery_request) :** `method` (string), `value` (string) obligatoires ; `key_id`, `algorithm` (strings) optionnels.
+
+Les schémas détaillés (JSON Schema, CDDL) pour validation machine peuvent être publiés dans un document de spécification technique rattaché à la norme ; ce document en fixe le cadre normatif.
 
 ### 2.7 Ports utilisables et ports exclus (MWS)
 
@@ -263,6 +283,24 @@ Le port **21000** appartient à la plage User Ports (1024–49151) et n'est pas 
 - Les COGs Tracker peuvent **rejeter** ou **ignorer** ces annonces (système actif) et **signaler** la non-conformité (système passif).
 - La liste des ports exclus est **versionnée** avec la norme (ex. `mws_declaration_v1`) et peut être étendue sans changement de version majeure (ajout de ports à exclure).
 
+#### 2.8 Annonce d'adresse relay (intégration relay)
+
+Lorsqu'un COG est joignable via un **relay Webway** (bore étendu multi-tenant), les annonces de présence, de services ou d'hébergement de session peuvent indiquer une **adresse de type relay** au lieu d'une adresse IP/port directe. Voir [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md).
+
+**Structure `relay_address` (optionnelle dans les annonces) :**
+
+| Champ | Type | Obligatoire | Description |
+|-------|------|-------------|-------------|
+| `host` | string | oui | Adresse du relay (nom de domaine ou IP), ex. `webway.studiomiyukini.com` |
+| `port` | integer | oui | Port du relay (ex. **7000** — port relay MWS) ; doit être hors liste des ports exclus |
+| `relay_type` | string | oui | Valeur fixe `relay` pour distinguer d'une adresse directe |
+| `cog_id` | string | optionnel | Identifiant du COG cible côté relay (pour le routing) ; peut être omis si dérivé du token ou de la politique |
+| `token_hint` | string | optionnel | Indication opaque (ex. préfixe, alias) pour l'appelant ; **jamais** le secret complet |
+
+**Règle :** une annonce peut contenir à la fois une adresse directe (`address`) et une `relay_address` (ex. COG joignable en direct et via relay). Les champs `bridge_address`, `connection_address` ou une entrée dans `services` peuvent être soit un objet `address`, soit un objet `relay_address` (discriminant : présence de `relay_type: "relay"`).
+
+**Conformité :** l'annonce d'une adresse relay doit respecter les mêmes contraintes de ports (port relay hors liste exclusive) et d'intégrité que les annonces d'adresses directes. Le relay ne gouverne pas les accès ; il assure uniquement le transport et le routing par `cog_id`.
+
 ---
 
 ## 3. Protocole MWS (orientation)
@@ -295,10 +333,12 @@ Le **protocole MWS** définit les **types de messages**, les **séquences** et l
 1. Les COGs (et Trackers) s'échangent des `cog_list` ou `status_update` selon le protocole et la politique (périodicité, déclencheur).
 2. Chaque COG met à jour sa liste locale et peut appliquer des règles (filtrer, dégrader, rejeter) selon la matrice des statuts (section 4).
 
-### 3.3 Règles de transport
+### 3.3 Règles de transport et bindings
 
-- **Transport** : le protocole MWS ne impose pas un transport unique (ex. HTTP(S), WebSocket, UDP, autre). La norme peut spécifier un ou plusieurs **bindings** (transport + encodage).
-- **Sécurité du transport** : recommandation de confidentialité et d'intégrité en transit (ex. TLS) pour limiter l'écoute et la modification.
+- **Binding principal (normatif)** : le transport **TCP avec TLS** est le **binding principal** du protocole MWS pour les échanges entre COGs participants et COGs Tracker (annonces, requêtes de découverte, listes de statuts). Les implémentations conformes doivent **au minimum** supporter ce binding.
+  - **Encodage** : messages en JSON (UTF-8), forme canonique pour le calcul d'intégrité (voir 2.6.1).
+  - **TLS** : confidentialité et intégrité en transit ; certificat serveur recommandé pour les Trackers. En production, TLS est **recommandé** ; les déploiements peuvent autoriser TCP nu uniquement en environnement contrôlé (ex. boucle locale).
+- **Autres bindings (optionnels)** : d'autres bindings (ex. WebSocket sur TLS, HTTP/2, UDP pour annonces légères) peuvent être définis par extension de la norme ou par politique locale. Ils ne remplacent pas l'exigence de support du binding TCP + TLS pour l'interopérabilité de base.
 - **Port officiel des Trackers** : les COGs Tracker MWS exposent leur endpoint sur le **port 21000** (voir section 2.7.4). Les COGs participants se connectent aux Trackers sur `host:21000` par défaut (ou sur l'adresse complète indiquée en config si override).
 - **Découverte des Trackers** : les COGs doivent pouvoir connaître l'adresse (host) des Trackers (config locale, bootstrap, ou annuaire connu). Le port par défaut pour joindre un Tracker est **21000**. Le détail du bootstrap est hors scope de ce document conceptuel.
 
@@ -347,6 +387,38 @@ Les **statuts** de la Webway COG List sont **normatifs** pour l'interopérabilit
 
 Les comportements précis (ex. seuils, durées) relèvent des contrats des systèmes passifs et actifs des Trackers et des politiques locales.
 
+### 4.5 Règles de transition entre statuts (matrice normative)
+
+Les **transitions** d'un statut à un autre sont soumises aux règles suivantes. Seuls certains acteurs peuvent proposer ou appliquer une transition ; chaque COG reste souverain pour accepter ou ignorer une mise à jour de statut (voir 4.3).
+
+**Valeurs de statut normatives :** `trusted` | `neutral` | `under_review` | `distrusted` | `rejected`.
+
+**Matrice des transitions autorisées (orientation normative) :**
+
+| Statut source | Transition autorisée vers | Acteur typique à l'origine | Condition / remarque |
+|----------------|----------------------------|----------------------------|----------------------|
+| * (initial) | `neutral` | Premier contact, Tracker | Entrée par défaut pour un COG jamais vu |
+| `neutral` | `trusted` | Tracker, COG participant | Signal positif (historique, attestation, politique locale) |
+| `neutral` | `under_review` | Tracker, COG participant | Comportement suspect, signalement, à analyser |
+| `neutral` | `distrusted` | Tracker, COG participant | Signal négatif sans blocage total |
+| `neutral` | `rejected` | Tracker, politique locale | Refus explicite (malveillance, politique) |
+| `trusted` | `neutral` | Tracker, COG | Révocation du statut privilégié (délai, changement de politique) |
+| `trusted` | `under_review` | Tracker | Signal négatif sur un COG jusque-là fiable |
+| `under_review` | `neutral` | Tracker, COG | Fin de revue sans sanction |
+| `under_review` | `trusted` | Tracker, COG | Revue favorable |
+| `under_review` | `distrusted` | Tracker, COG | Revue défavorable |
+| `under_review` | `rejected` | Tracker, politique | Sanction maximale |
+| `distrusted` | `neutral` | Tracker, COG | Réhabilitation (après délai ou preuve) |
+| `distrusted` | `under_review` | Tracker | Nouvelle analyse |
+| `distrusted` | `rejected` | Tracker, politique | Escalade |
+| `rejected` | `under_review` | Tracker, politique | Réexamen exceptionnel (déblocage manuel) |
+| `rejected` | `neutral` | — | Non recommandé sans processus explicite de réhabilitation |
+
+**Règles générales :**
+- **Unidirectionnalité recommandée pour `rejected`** : le passage à `rejected` est une décision forte ; la sortie de `rejected` doit être contrôlée (processus de réhabilitation, délai, audit).
+- **Source de la transition** : chaque entrée de liste (section 4.2) porte un `source` (COG ou Tracker) et `updated_at` ; la propagation et l'agrégation des statuts restent définies par le protocole et les contrats des systèmes passifs/actifs.
+- **Conflits** : si deux sources proposent des statuts différents pour le même `cog_id`, chaque COG applique sa politique locale (priorité à la source, au timestamp, ou au statut le plus restrictif selon configuration).
+
 ---
 
 ## 5. Standards de conformité pour les COGs Tracker
@@ -360,7 +432,7 @@ Les **COGs Tracker** doivent respecter des **exigences minimales** pour particip
 | **Norme de déclaration** | Accepter et vérifier uniquement les déclarations conformes à la norme de déclaration sécurisée (MWS) en vigueur. |
 | **Formats** | Comprendre et traiter les formats de messages normatifs (annonces, requêtes, listes de statuts) selon la version supportée. |
 | **Statuts** | Maintenir et échanger des listes de COGs avec les statuts normatifs ; appliquer les règles d'échange (section 4). |
-| **Protection du réseau** | Mettre en œuvre des mécanismes **passifs** et **actifs** conformes aux contrats MWS (à créer) pour protéger le maillage. |
+| **Protection du réseau** | Mettre en œuvre des mécanismes **passifs** et **actifs** conformes aux contrats MWS ([Passive Systems](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md), [Active Systems](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md)) pour protéger le maillage. |
 | **Pas de gouvernance** | Ne jamais décider d'accès (Visa, Passeport) ; ne pas exposer de données métier ni de gouvernance. |
 
 ### 5.2 Vérification de conformité
@@ -402,12 +474,13 @@ Les **COGs Tracker** doivent respecter des **exigences minimales** pour particip
 
 | Domaine | Norme / Standard | Statut |
 |---------|------------------|--------|
-| **Déclaration sécurisée** | Authentification, intégrité, format unifié, limitation des abus | À créer et appliquer (cadre défini) |
-| **Formats de messages** | Annonce présence, services, session hébergée, requête découverte, liste statuts | Schémas à finaliser (orientation donnée) |
-| **Ports utilisables / exclus** | Liste normative ports exclus (0–1023 + ports courants web/dev/DB) ; ports utilisables pour MWS | Défini conceptuellement (section 2.7) |
-| **Protocole MWS** | Types de messages, séquences, règles de transport | Orientation ; bindings à spécifier |
-| **Matrice des statuts** | Valeurs normatives, structure d'entrée, règles d'échange, comportement attendu | Défini conceptuellement |
-| **Conformité Trackers** | Exigences minimales, vérification, versionnement supporté | Cadre défini ; critères détaillés à créer |
+| **Déclaration sécurisée** | Authentification, intégrité, format unifié, limitation des abus | Cadre défini (sections 1–2) ; implémentation à appliquer |
+| **Formats de messages** | Annonce présence, services, session hébergée, requête découverte, liste statuts ; JSON canonique, champs obligatoires/optionnels (section 2.6.1) | Schémas finalisés (cadre normatif) |
+| **Ports utilisables / exclus** | Liste normative ports exclus (0–1023 + ports courants web/dev/DB) ; ports utilisables pour MWS | Défini (section 2.7) |
+| **Protocole MWS** | Types de messages, séquences, règles de transport ; **binding principal TCP + TLS** (section 3.3) | Bindings précisés |
+| **Intégration relay** | Annonce d'adresse relay (relay_address), structure et conformité (section 2.8) | Défini ; voir [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) |
+| **Matrice des statuts** | Valeurs normatives, structure d'entrée, règles d'échange, comportement attendu, **règles de transition** (section 4.5) | Formalisation complète |
+| **Conformité Trackers** | Exigences minimales, vérification, versionnement supporté | Cadre défini (section 5) ; contrats Tracker : [Passive](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md) / [Active](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md) |
 | **Versionnement** | Version des normes, rétrocompatibilité, gouvernance de l'évolution | Principes définis |
 
 ---
@@ -416,6 +489,10 @@ Les **COGs Tracker** doivent respecter des **exigences minimales** pour particip
 
 - [Miyukini Webway System (MWS)](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) — document principal
 - [Miyukini Webway System - Outils et Operateurs](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Outils%20et%20Operateurs.md) — annexe conceptuelle (Outils, Kits d'Outils, Opérateurs MWS)
+- [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) — architecture relay, annonce d'adresse relay (section 2.8)
+- [Miyukini - Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md) — déploiement relay (VM, TLS, systemd, tests)
+- [MiyuWebwayTracker - Passive Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md) — contrats systèmes passifs Tracker
+- [MiyuWebwayTracker - Active Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md) — contrats systèmes actifs Tracker
 - [Connexion Inter-COG](./Miyukini%20Conceptual%20References%20-%20Connexion%20Inter-COG.md)
 - [Doctrine Securite Fondamentale](./Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md)
 - [Glossaire](./Miyukini%20Conceptual%20References%20-%20Glossaire.md) (Norme de déclaration sécurisée MWS, Déclaration d'hébergement de session, COG Tracker, Liste de COGs avec statuts)

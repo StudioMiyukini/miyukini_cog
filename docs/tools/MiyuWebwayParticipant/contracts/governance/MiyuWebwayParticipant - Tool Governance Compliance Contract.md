@@ -2,9 +2,14 @@
 
 ## Contexte
 
-Conformité aux obligations communes : [Master Butler - Tool Governance Compliance Template](../../../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
+Conformité aux obligations communes : [Master Butler - Tool Governance Compliance Template](../../../../cores/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
 
 **ToolkitId :** `toolkit.webway.participant`
+
+## Portée / Scope
+
+- Obligations de conformité du Kit MiyuWebwayParticipant envers le contrat de gouvernance Master Butler.
+- Séparation des responsabilités : décisions (Cores) vs exécution (Kit).
 
 ---
 

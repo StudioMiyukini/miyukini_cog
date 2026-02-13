@@ -33,11 +33,37 @@ Les préfixes suivants identifient le **type de composant** conçu par Miyukini 
 
 ## A
 
+### Amis (COGs) (COG Friends)
+
+**Relation explicite entre deux COGs** permettant une connexion **plus rapide** avec des **protocoles de controle allegees** et une **periodicite de re-verification plus longue**. Les demandes d'amis et leur confirmation sont **humaines** (initiees et acceptees par les utilisateurs). Les COGs peuvent exposer les **noms ou pseudos** de leurs utilisateurs pour la reconnaissance. La relation amis est une facilitation contractuelle, pas un contournement des Cores.
+
+**Voir aussi :** Lobby (Webway), Visa de circulation, [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 9.4
+
+---
+
 ### ACTIF (ACTIVE) — état de vie
 
 État d'un élément en usage normal. L'élément est stable, documenté, supporté, et utilisable par tous les consommateurs autorisés. Les changements sont soumis aux règles de compatibilité.
 
 **Voir aussi :** BROUILLON, DÉPRÉCIÉ, RETIRÉ, Ever Buddy
+
+---
+
+### Attestation d'environnement (Environment Attestation)
+
+**Hash cryptographique signe** genere par les Cores d'un COG (principalement WorrySentinel) apres une **revue interne de l'environnement**. L'attestation certifie que l'environnement installe du COG (binaires des Cores, Services, configuration) correspond exactement a ce qui est declare dans l'empreinte de version.
+
+**Processus :**
+
+1. WorrySentinel verifie les checksums des binaires installes.
+2. Border Guard verifie la coherence de l'identite et des certificats.
+3. KeeperOfStorage verifie l'integrite des donnees persistantes.
+4. StrongFather valide la coherence des politiques avec la version des Cores.
+5. L'attestation signee est transmise au relay lors du REGISTER.
+
+**But :** empecher les COGs malveillants deguises (qui declarent une identite legitime tout en executant un environnement modifie) de rejoindre le maillage.
+
+**Voir aussi :** Presentation d'identite, Verification de conformite, Relay Webway
 
 ---
 
@@ -67,6 +93,14 @@ Les préfixes suivants identifient le **type de composant** conçu par Miyukini 
 
 ---
 
+### Bloc de code (verification) (Code Block Verification)
+
+**Mecanisme de verification d'authenticite des Services** lors du controle de conformite. Chaque Service envoie un paquet chiffre contenant un **bloc de code** (au sens du MSCM/MIP) choisi **aleatoirement** parmi les blocs de code du Service. Le relay tente de dechiffrer le bloc en utilisant les references de la version connue (heritees d'Origin). Si le dechiffrement est correct, le Service est **authentique** et execute un code **non corrompu** (au moins sur le bloc verifie). En cas de doute, la verification peut etre etendue a **tout le code** (securite renforcee).
+
+**Voir aussi :** Verification de conformite (Phase B), MSCM, MIP, Origin
+
+---
+
 ### Bridge inter-COG
 
 **Canal diplomatique** entre COG, extension de BondingBrother pour les communications inter-environnements.
@@ -85,6 +119,14 @@ Les préfixes suivants identifient le **type de composant** conçu par Miyukini 
 ---
 
 ## C
+
+### Catalogue web (Tracker) (Web Catalog)
+
+**Service web des trackers** (port 80) qui catalogue les **COGs connectes** ayant une **surface web active et publique**. Les COGs n'ont pas besoin de nom de domaine ni d'IP fixe : le tracker agit comme facilitateur et tunnel (type No-IP). Le catalogue **redirige** vers les COGs ; il n'a aucune fonction de controle sur les connexions web. Mise a jour et diffusion automatiques ; catalogue **global** accessible depuis n'importe quel tracker.
+
+**Voir aussi :** COG Tracker, Surface de connexion, Serveur web embarque (COG), [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 9.1
+
+---
 
 ### Capacité (Capability)
 
@@ -112,6 +154,51 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 **Responsabilité Outils :** Cohérence d'état — bloque les Outils si l'environnement est dégradé.
 
 **Voir aussi :** Cores, États de confiance
+
+---
+
+### Compatibilite de version COG (COG Version Compatibility)
+
+**Capacite de deux COGs a interagir** sur le maillage MWS, determinee par leur empreinte de version respective. La compatibilite repose sur deux niveaux :
+
+1. **Cores (immuables)** : deux COGs sont compatibles si et seulement si leur `core_version.MAJOR` est identique. Les Cores definissent le socle de gouvernance et de securite ; une difference de MAJOR implique une rupture de compatibilite.
+2. **Services (patchables)** : a `core_version.MAJOR` identique, les Services peuvent avoir des versions differentes (MINOR, PATCH) et rester compatibles. Un patch de Service est transparent pour les interactions inter-COG.
+
+**Verification** : la compatibilite est verifiee par le relay (lors du REGISTER et du CONNECT) et par le Tracker (lors des annonces et des reponses de decouverte).
+
+**Voir aussi :** Empreinte de version COG, Version des Cores, Relay Webway, COG Tracker (Webway)
+
+---
+
+### Cle de conformite des Cores (Core Conformity Key)
+
+**Cle secrete cachee dans le code des Cores**, connue d'Origin et de tous les relays. Lors de la verification d'un COG, les Cores transmettent cette cle au relay. La **concordance** entre la cle transmise et la cle attendue pour la `core_version` declaree prouve que les Cores sont **authentiques** et non modifies. La cle est specifique a chaque version des Cores.
+
+**Voir aussi :** Verification de conformite (Phase A), Origin, Passeport COG
+
+---
+
+### Confinement reseau (Network Containment)
+
+**Protocole d'urgence** declenche par les relays lorsque plusieurs COGs sont rejetes dans un tres court laps de temps (attaque ou corruption detectee). Le confinement comprend :
+
+1. Alerte envoyee aux trackers et relays.
+2. Controle renforce obligatoire de tous les COGs connectes.
+3. Fermeture possible de toutes les connexions inter-COG par les trackers.
+4. Origin et relays restent accessibles en **lecture seule** avec verification.
+5. Reconstruction progressive par les COGs valides re-verifies.
+
+**Voir aussi :** Quarantaine, Origin, Mode d'urgence reseau
+
+---
+
+### Conformite environnement (Environment Conformity)
+
+**Etat d'un COG dont l'environnement installe** (Cores, Services, configuration) **est conforme aux criteres d'Origin** : tous les services sont presents dans le Registre, les checksums correspondent aux versions declarees, l'attestation d'environnement est valide et recente.
+
+La conformite est verifiee par le **relay** (verification lourde : attestation, checksums, Registre) et non par le Tracker (qui ne verifie que l'identite).
+
+**Voir aussi :** Attestation d'environnement, Verification de conformite, Relay Origin, Presentation d'identite
 
 ---
 
@@ -222,6 +309,14 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
+### COG participant (Webway Participant)
+
+**COG qui choisit de participer au maillage MWS** : il se déclare auprès d'un ou plusieurs COGs Tracker, expose ses informations de présence (identité COG, adresse du Bridge ou point de contact) et peut consulter la présence d'autres COGs. Il peut annoncer une **adresse relay** (relay_host:port + token d'authentification relay) s'il est derrière NAT pour être joignable via un Relay Webway.
+
+**Voir aussi :** Miyukini Webway System, COG Tracker, Relay Webway, Token d'authentification relay
+
+---
+
 ### COG de référence (Reference COG / Official COG)
 
 **COG désigné comme détenteur canonique** des données sensibles d'un domaine donné. Il héberge l'Instance Mère KindMother (ou l'équivalent « serveur ») pour ce domaine.
@@ -241,20 +336,24 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ### COG Tracker (Webway Tracker)
 
-**COG dont l'administrateur a choisi d'endosser le rôle de Tracker** : exposer volontairement une adresse (IP ou nom de domaine) pour participer au maillage Miyukini Webway System (MWS) et servir de point de rendez-vous pour la découverte.
+**Douanier du reseau Miyukini Webway.** Le Tracker assure les connexions entre COGs et en assure la securite par des controles d'identite et de **Visa de circulation**, comme un douanier a une frontiere.
 
-**Port officiel :** les COGs Tracker MWS exposent leur endpoint sur le **port 21000**. Les COGs participants se connectent aux Trackers sur ce port par défaut.
+**Port officiel :** les COGs Tracker MWS exposent leur endpoint sur le **port 21000**.
 
-**Rôle :**
-- Point de rendez-vous pour la découverte (annonces de présence, requêtes de découverte)
-- **Devoir de protection du réseau** par des mécanismes passifs et actifs (à créer)
+**Role :**
+- **Controle d'identite et de Visa** : verifier que le COG possede un Visa de circulation valide delivre par un relay ou Origin avant de le laisser se connecter au maillage.
+- **Pools par version des Cores** : diriger des pools separes par `core_version.MAJOR` pour ne jamais connecter des COGs avec des versions differentes.
+- **Whitelists / Blacklists / Quarantaines** : gerer les listes d'autorisation, d'exclusion et de quarantaine.
+- **Monitoring et congestion** : journaliser et monitorer l'etat du reseau, detecter les points de congestion. Renforcer la surveillance si un COG accumule beaucoup de connexions (COGs speciaux).
+- **Fermeture de connexions** : pouvoir fermer tout ou partie des connexions pour circonscrire une attaque, sur annonce des relays.
+- **Decouverte** : point de rendez-vous pour la decouverte (annonces de presence, requetes de decouverte) ; les adresses annoncees peuvent etre une adresse relay.
 
 **Ce qu'un COG Tracker N'EST PAS :**
-- ❌ Un super-COG qui gouverne les autres
-- ❌ Un transporteur de données métier
-- ❌ Une autorité de Visa ou de Passeport
+- Un verificateur de conformite (pas de verification Passeport/Cores/Services, c'est le role des relays)
+- Un transporteur de donnees metier
+- Un distributeur de mises a jour (redirige vers les relays)
 
-**Voir aussi :** Miyukini Webway System, COG Hébergeur, Bridge inter-COG
+**Voir aussi :** Origin, Relay Webway, Visa de circulation, Pool de version, Quarantaine, Confinement reseau, [MiyuWebwayTracker - Passive Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md), [MiyuWebwayTracker - Active Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md)
 
 ---
 
@@ -352,18 +451,6 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
-### Opérateur de Domaine (Domain Operator)
-
-**Type d'Opérateur** qui exerce un métier précis.
-
-**Exemples :** Blog, Catalogue, Support, Base de connaissances, Forum
-
-**Phrase type :** *"Exerce ce métier précis."*
-
-**Voir aussi :** Opérateur, Opérateur de Service
-
----
-
 ### BROUILLON (DRAFT) — état de vie
 
 État d'un élément en cours de définition. Non utilisable en production, peut changer librement, aucun engagement de stabilité.
@@ -403,6 +490,35 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 > **L'empreinte observe et atteste, mais ne corrige jamais.**
 
 **Voir aussi :** Divergence silencieuse, Maintenance explicable, Kernel Maintenance Observability Contract
+
+---
+
+### Empreinte de version COG (COG Version Fingerprint)
+
+**Ensemble de donnees de version** transmis par un COG lorsqu'il se presente au relay ou au Tracker MWS. L'empreinte identifie le socle technique du COG et permet de verifier la compatibilite avant interaction.
+
+**Composants :**
+
+| Champ | Description |
+|-------|-------------|
+| `core_version` | Version des Cores (format `MAJOR.MINOR`). Les Cores sont **immuables** a version donnee ; le MAJOR determine la compatibilite stricte. |
+| `service_manifest` | Liste des Services actifs avec leurs versions (`service_id` + `MAJOR.MINOR.PATCH`). Les Services sont patchables independamment des Cores. |
+| `protocol_version` | Version du protocole relay ou MWS utilise. |
+| `build_id` | Identifiant de build (optionnel, tracabilite). |
+
+**Regle fondamentale :**
+
+> **Deux COGs ne peuvent interagir que s'ils partagent la meme `core_version.MAJOR`. Les patchs de Service sont transparents a Cores identiques.**
+
+**Voir aussi :** Version des Cores, Compatibilite de version COG, Enregistrement relay
+
+---
+
+### Enregistrement relay (Webway)
+
+**Action par laquelle un COG enregistre son tunnel** auprès d'un Relay Webway : le COG ouvre une connexion persistante (souvent TLS) vers le relay, s'authentifie avec un token d'authentification relay, déclare son `cog_id` ; le relay associe alors la connexion (tunnel) à ce `cog_id` dans sa table de routage. Les connexions entrantes destinées à ce COG sont routées vers ce tunnel.
+
+**Voir aussi :** Relay Webway, Tunnel (Webway), Token d'authentification relay, Miyukini Webway System
 
 ---
 
@@ -487,6 +603,16 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
+### Heartbeat (relay Webway)
+
+**Message périodique** envoyé par un COG vers le Relay Webway sur le tunnel établi pour maintenir le tunnel actif et permettre au relay de détecter les déconnexions. En l'absence de heartbeat (selon politique du relay), le tunnel peut être considéré comme inactif et retiré de la table de routage.
+
+**Voir aussi :** Relay Webway, Tunnel (Webway), Enregistrement relay
+
+---
+
+## F
+
 ### Façade Publique Gouvernée (Public Exposure Surface)
 
 **Zone tampon d'exposition** permettant aux utilisateurs externes d'interagir avec un COG sans y entrer.
@@ -503,6 +629,14 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 > **C'est le COG qui sort vers l'utilisateur externe, jamais l'inverse.**
 
 **Voir aussi :** Utilisateur Externe, Mandat Public d'Accès, BorderGuard
+
+---
+
+### Favoris (COG) (Favorites)
+
+**Liste de COGs hôtes** que l'utilisateur du COG client souhaite **retrouver rapidement** dans les listes et Lobbys distribues par le tracker. Les favoris peuvent etre stockes localement (cote client) ou signales au tracker pour un affichage prioritaire. Permet d'accelerer la decouverte du COG hôte desire lors de la consommation de services.
+
+**Voir aussi :** Lobby (Webway), Visa d'acces (hôte), [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 9.3
 
 ---
 
@@ -549,6 +683,23 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 **Phrase type :** *"Expose les services de façon utilisable."*
 
 **Voir aussi :** Opérateur, Opérateur de Service
+
+---
+
+### Isolation reseau (Webway Network Isolation)
+
+**Mesure de protection appliquee par le Webway** lorsqu'un COG presente un service non repertorie dans son `service_manifest`. Le COG est exclu du maillage MWS actif tout en restant connecte en mode surveillance :
+
+| Etat | Description |
+|------|-------------|
+| **Exclu** | Pas d'annonces de presence relayees, pas d'inclusion dans les reponses de decouverte, pas de routing de donnees. |
+| **Maintenu** | Tunnel relay actif (heartbeats acceptes), notifications et consultations du Registre possibles. |
+| **Notifie** | L'utilisateur du COG est informe de la raison de l'isolation et des actions correctives. |
+| **Surveille** | L'evenement est journalise au niveau du maillage (Relay Origin + Trackers) ; le COG est reevalue periodiquement. |
+
+**Levee :** automatique lorsque le COG se re-enregistre avec un manifest conforme au Registre de Services.
+
+**Voir aussi :** Service non repertorie, Registre de Services, Relay Origin
 
 ---
 
@@ -619,6 +770,29 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
+### Kit d'Outils (Toolkit)
+
+**Composition officielle d'Outils** (Strate 6), validée et déclarée par l'environnement.
+
+**Définition canonique :**
+
+> **Un Kit d'Outils est une composition officielle d'Outils, validée et déclarée par l'environnement, optimisée pour efficience, cohérence et performance.**
+
+**Caractéristiques :**
+
+- Agrège des Outils existants
+- N'ajoute aucune capacité nouvelle
+- Sans logique métier
+- Gouverné
+
+**Règle fondamentale :**
+
+> **👉 Un Kit d'Outils orchestre, mais n'ajoute pas de capacité.**
+
+**Voir aussi :** Outil, Master Butler
+
+---
+
 ## L
 
 ### Local Sovereign ID (LSI)
@@ -640,6 +814,22 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 **Échange :** les COGs se transfèrent des listes ou des mises à jour de statuts selon le protocole MWS ; chaque COG reste souverain dans l'usage qu'il en fait.
 
 **Voir aussi :** Miyukini Webway System, COG Tracker
+
+---
+
+### Lobby (Webway) (Lobby)
+
+**Entree du catalogue des trackers** correspondant a l'exposition d'un ou plusieurs **services** d'un **COG hôte** sur des **ports donnes**. Cree lorsque le COG presente au tracker ses surfaces de connexion et indique qu'il accepte des connexions pour tels services et ports. Les Lobbys sont **visibles et joignables** depuis le service du COG client. Un Lobby peut etre **public** ou **prive** (mot de passe) ; en prive, 5 echecs d'acces entrainent le ban du COG client, avec de-ban manuel uniquement par l'utilisateur du COG hôte.
+
+**Voir aussi :** Catalogue web (Tracker), Surface de connexion, Visa d'acces (hôte), Favoris (COG), [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 9.1–9.2
+
+---
+
+### Limite de connexions (COG classique)
+
+**Plafond de 100 connexions simultanees** (hors ports web 80 et 8080) pour un **COG classique**. Garantit une qualite de suivi des organes de securite ; les COGs ne sont pas des services type torrent. Les connexions sur les ports 80 et 8080 ne sont pas comptees. Les COGs avec **Passeport special** peuvent etre autorises a des plafonds superieurs.
+
+**Voir aussi :** Surface de connexion, Passeport special, [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 8.2
 
 ---
 
@@ -805,6 +995,14 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
+### Migration COG (père/fils)
+
+**Mecanisme de passage a des Cores plus recents** : un COG (**COG pere**) prepare sa migration vers un **COG fils** (Cores plus recents). Le COG fils enregistre sa **parentalite** aupres du pere ; le pere archive sa DB par strates ; le fils installe les Services compatibles et effectue la migration DB. Les deux COGs gardent leur **propre Passeport** et sont uniques. Le lien de parentalite **renforce la securite** et la force du Passeport lors des controles ; un COG enfant d'un pere sûr de longue date peut passer plus rapidement les controles douaniers des trackers.
+
+**Voir aussi :** Parentalite COG, Passeport COG, Versioning COG, [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 5.8
+
+---
+
 ### Miyukini Webway System (MWS)
 
 **Couche de présence et de découverte** des environnements COG disposant d'un accès réseau. Permet aux COGs de se déclarer, de savoir qui est présent sur le maillage, et de faciliter l'initiation des visites gouvernées (Passeport, Visa) sans transférer de données métier.
@@ -812,7 +1010,7 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 **Rôle :**
 - Normaliser *qui est là* et *où se présenter* pour demander un Visa
 - Système de sécurité fondé sur l'échange de listes de COGs avec statuts (Webway COG List)
-- Les COGs Tracker ont le devoir de protéger le réseau par des mécanismes passifs et actifs (à créer)
+- Les COGs Tracker ont le devoir de protéger le réseau par des mécanismes passifs ([Passive Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md)) et actifs ([Active Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md))
 
 **Règle fondamentale :**
 
@@ -898,7 +1096,7 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ### Norme de déclaration sécurisée (MWS)
 
-**Norme à créer et à appliquer** pour les annonces MWS : services exposés, adresses (IP/ports) et sessions hébergées. Elle vise l'authentification de l'origine des déclarations, l'intégrité, un format unifié et la limitation des abus. Les COGs Tracker peuvent exiger la conformité pour accepter ou relayer les annonces.
+**Norme définie** pour les annonces MWS : services exposés, adresses (IP/ports) et sessions hébergées. Elle assure l'**authentification** de l'origine des déclarations (signature COG), l'**intégrité** (sérialisation canonique + MAC/signature), un **format unifié** (schéma commun, champs obligatoires) et la **limitation des abus**. Les COGs Tracker peuvent exiger la conformité pour accepter ou relayer les annonces. Le cadre conceptuel est défini dans [MWS](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) section 3.3 ; les formats détaillés dans [MWS Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) sections 1–2.
 
 **Développement :** voir [Miyukini Webway System - Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) (document conceptuel annexe).
 
@@ -925,6 +1123,37 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 ---
 
 ## O
+
+### Origin (Relay Origin)
+
+**Point d'origine du Miyukini Webway System (MWS).** Origin possede les fonctions de **relay** et de **tracker** ; il est la **source de verite unique** de l'ecosysteme.
+
+**Fonctions :**
+
+- Verification de conformite des COGs (Passeport, cle Cores, blocs de code Services).
+- Hebergement du Registre de Services officiel (maitre).
+- Distribution des versions des Cores et des mises a jour des Services.
+- Delivrance des Passeports speciaux (exclusif a Origin).
+- Gestion des whitelists, blacklists et quarantaines (reference).
+- Point d'entree initial de tout COG (si sature, redirige vers un relay).
+
+Les **relays** sont des duplications d'Origin sous son autorite. Les **trackers** heritent les criteres legers d'Origin via les relays.
+
+**Voir aussi :** Relay Webway, Registre de Services, Verite distribuee d'Origin, Passeport COG
+
+---
+
+### Opérateur de Domaine (Domain Operator)
+
+**Type d'Opérateur** qui exerce un métier précis.
+
+**Exemples :** Blog, Catalogue, Support, Base de connaissances, Forum
+
+**Phrase type :** *"Exerce ce métier précis."*
+
+**Voir aussi :** Opérateur, Opérateur de Service
+
+---
 
 ### Opérateur (Operator)
 
@@ -961,7 +1190,89 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
+### Outil (Tool)
+
+**Capacité exécutable gouvernée** (Strate 6), sans autorité, sans décision métier, sans connaissance du contexte.
+
+**Définition canonique :**
+
+> **Un Outil est une capacité exécutable, sans autorité, sans décision métier, sans connaissance de l'Opérateur appelant, gouvernée par les Cores.**
+
+**Caractéristiques :**
+
+- Capacité atomique
+- Sans autorité
+- Sans logique métier
+- Gouverné par les Cores
+
+**Règle fondamentale :**
+
+> **👉 Un Outil fait, mais ne décide jamais.**
+
+**Exemples :** `layout.render`, `form.validate`, `query.execute`
+
+**Voir aussi :** Kit d'Outils, Opérateur
+
+---
+
 ## P
+
+### Passeport COG (COG Passport)
+
+**Document d'identite complet** transmis par un COG lors de sa verification aupres d'Origin ou d'un relay. Le Passeport contient :
+
+- `cog_id` : identifiant unique.
+- `core_version` : version des Cores.
+- `service_list` : liste des Services installes avec versions et checksums.
+- `environment_health` : rapport de sante de l'environnement.
+- `previous_visas` : historique des Visas precedents.
+- `passport_type` : STANDARD ou SPECIAL.
+
+**Voir aussi :** Passeport special, Visa de circulation, Presentation d'identite, Origin
+
+---
+
+### Parentalite COG (COG Parent-Child Link)
+
+**Lien declare et verifie** entre un **COG pere** (Cores plus anciens) et un **COG fils** (Cores plus recents) dans le cadre d'une migration. Le COG fils enregistre sa parentalite aupres du pere. Ce lien **renforce la securite** et la force du Passeport lors des controles ; un enfant d'un pere sûr de longue date peut passer plus rapidement les controles douaniers des trackers. Chaque COG conserve son Passeport unique.
+
+**Voir aussi :** Migration COG (pere/fils), Passeport COG
+
+---
+
+### Passeport special (Special Passport)
+
+**Passeport delivre exclusivement par Origin** a des COGs a usage **professionnel ou a fort trafic** (sites de grandes entreprises, serveurs de services, jeux MMO). Le Passeport special comporte une **ID speciale** et une **cle speciale**.
+
+**Caracteristiques :**
+
+- Controle **allege au quotidien** pour gagner en performance.
+- Controle **renforce lors des audits** planifies ou declenches.
+- Facilites de connexion avec risques assumes.
+- Delivrance via un protocole specifique d'audit prealable par Origin.
+
+**Voir aussi :** Passeport COG, Origin, Pool de version
+
+---
+
+### Pool de version (Version Pool)
+
+**Regroupement de COGs** gere par les trackers, isole par `core_version.MAJOR`. Les trackers dirigent chaque COG vers le pool correspondant a sa version des Cores. **Aucune connexion inter-pool n'est autorisee** : des COGs avec des versions majeures differentes ne sont jamais connectes entre eux.
+
+**Voir aussi :** COG Tracker (Webway), Version des Cores, Visa de circulation
+
+---
+
+### Presentation d'identite (Identity Presentation)
+
+**Processus par lequel un COG se presente au reseau Webway** en declarant son identite complete (cog_id, empreinte de version, attestation d'environnement). La presentation d'identite se deroule en deux temps :
+
+1. **Auto-revue interne** : les Cores du COG (WorrySentinel, Border Guard, KeeperOfStorage, StrongFather) auditent l'environnement installe pour verifier sa coherence et son integrite. Le resultat est une **attestation d'environnement** signee.
+2. **Verification externe** : le relay verifie l'attestation, les checksums et la concordance entre l'identite declaree et l'environnement atteste (anti-deguisement). Le Tracker ne fait qu'une verification legere de l'identite.
+
+**Voir aussi :** Attestation d'environnement, Conformite environnement, Verification de conformite, Relay Webway
+
+---
 
 ### Permission
 
@@ -1055,7 +1366,60 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
+## Q
+
+### Quarantaine (Webway Quarantine)
+
+**Etat d'isolation temporaire** applique a un COG non conforme sur le Webway. La quarantaine suit une **escalade progressive** :
+
+| Etape | Delai | Action |
+|-------|-------|--------|
+| 1ere non-conformite | **1 heure** | Isolation, reseau informe, journalise |
+| 2eme non-conformite | **2 heures** (x2) | Idem, delai double |
+| 3eme non-conformite | **Blacklistage** | COG et IP blacklistes pour tout le reseau |
+
+Le COG en quarantaine peut retenter la verification apres expiration du delai. Le COG blackliste suit le protocole d'auto-destruction et reconstruction (voir Relay Webway section 2.9).
+
+**Voir aussi :** Origin, Relay Webway, Confinement reseau
+
+---
+
 ## R
+
+### Relay Webway (Miyukini Webway Relay)
+
+**Duplication d'Origin** sous son autorite. Composant de **transport et de confiance** du Miyukini Webway System. Le relay garantit la conformite des COGs (verification en trois phases : cle Cores, blocs de code Services, sante environnement), assure la maintenance des environnements et la distribution des versions (mises a jour). Il possede la liste officielle des services disponibles aux COGs, heritee d'Origin. Le relay delivre les **Visas de circulation** aux COGs conformes.
+
+**Voir aussi :** Origin, Passeport COG, Visa de circulation, Verification de conformite, Cle de conformite des Cores, Bloc de code (verification), Quarantaine, [Miyukini Conceptual References - Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md), [Miyukini - Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md)
+
+---
+
+### Relay Origin
+
+Synonyme historique d'**Origin**. Designe Origin dans sa fonction de relay (source de verite pour le versioning, le Registre de Services, la delivrance des Passeports speciaux). Voir **Origin (Relay Origin)** pour la definition complete.
+
+**Voir aussi :** Origin, Relay Webway, Registre de Services, [Miyukini Conceptual References - Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 1
+
+---
+
+### Registre de Services (Service Registry)
+
+**Base de donnees maintenue par le Relay Origin** qui repertorie tous les services autorises sur le Webway :
+
+| Categorie | Description |
+|-----------|-------------|
+| **Services officiels Miyukini** | Services developpes et maintenus par Miyukini (service_id, version courante, checksum, URL telechargement, core_compatibility, statut). |
+| **Services tiers repertories** | Services tiers audites et autorises (service_id avec prefixe namespace editeur, editeur, source officielle, version, review_status : APPROVED, PENDING_REVIEW, SUSPENDED). |
+
+**Fonctions :**
+
+- **Verification** : les relays, Trackers et COGs consultent le Registre pour verifier la presence et le statut de chaque service.
+- **Mises a jour** : le Registre fournit les versions courantes et les URLs de telechargement pour le suivi des mises a jour.
+- **Redirection** : pour les services tiers, le Registre fournit l'URL de la source officielle de l'editeur.
+
+**Voir aussi :** Relay Origin, Service repertorie, Service non repertorie, Suivi des mises a jour
+
+---
 
 ### RETIRÉ (RETIRED) — état de vie
 
@@ -1071,6 +1435,22 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 ---
 
 ## S
+
+### Serveur web embarque (COG) (Embedded Web Server)
+
+**Serveur web integre a un COG** permettant a certains Services de fonctionner en **headless** et en **permanence**, et de proposer leur service sur des **navigateurs web**. Exemples : site web, SaaS, portail visiteur (ex. disponibilite web JayFestival). Expose sur les ports 80 et/ou 8080 ; les trackers peuvent faciliter l'acces via le **catalogue web**.
+
+**Voir aussi :** Surface de connexion, Catalogue web (Tracker), Limite de connexions (COG classique)
+
+---
+
+### Surface de connexion (Connection Surface)
+
+**Perimetre explicite** des services et ports d'un COG ouverts aux connexions externes. Toute connexion **en dehors de la surface** est **systematiquement rejetee**. L'integrite des Cores et de la DB est prioritaire. La surface definit ce qui est autorise ; le reste est refuse. Un COG classique est en outre soumis a la **limite de 100 connexions simultanees** (hors ports 80 et 8080).
+
+**Voir aussi :** Limite de connexions (COG classique), Serveur web embarque (COG), [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 8.1
+
+---
 
 ### Sécurité Hétérogène (Heterogeneous Security)
 
@@ -1157,7 +1537,45 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
-### Opérateur de Service (Service Operator)
+### Service non repertorie (Unregistered Service)
+
+**Service installe dans un COG mais absent du Registre de Services du Relay Origin.** Un service non repertorie peut avoir ete installe hors ligne ou retire du Registre. Sa presence dans le `service_manifest` d'un COG declenche l'**isolation reseau** du COG par le Webway.
+
+**Consequences :**
+
+- Le COG est **isole du maillage MWS** : pas d'annonces de presence, pas de reponses de decouverte, pas de routing de donnees.
+- Le tunnel relay est maintenu en **mode surveillance** (heartbeats, notifications, consultation du Registre).
+- L'utilisateur est **notifie** de la raison et des actions correctives.
+- L'evenement est **journalise** au niveau du maillage (Relay Origin + Trackers).
+
+**Levee d'isolation :** le COG se re-enregistre avec un manifest conforme ou le service est ajoute au Registre.
+
+**Voir aussi :** Registre de Services, Relay Origin, Isolation reseau (Webway), Service repertorie
+
+---
+
+### Service repertorie (Registered Service)
+
+**Service present dans le Registre de Services du Relay Origin**, qu'il soit officiel Miyukini ou tiers autorise. Un service repertorie a un statut dans le Registre : APPROVED (audite, autorise), PENDING_REVIEW (en attente), ou SUSPENDED (temporairement retire).
+
+**Voir aussi :** Registre de Services, Relay Origin, Service non repertorie
+
+---
+
+### Suivi des mises a jour (Update Tracking)
+
+**Capacite de chaque COG connecte au Webway** de suivre et gerer les mises a jour de ses Services :
+
+- **Verification periodique** : le COG interroge le Registre du Relay Origin pour comparer son `service_manifest` aux versions courantes.
+- **Notification push** : le relay peut envoyer un message UPDATE_AVAILABLE lorsqu'une mise a jour est disponible.
+- **Registre local de versions** : le COG maintient un historique de ses mises a jour (version, date, statut : appliquee, reportee, ignoree).
+- **Decision souveraine** : le COG decide d'appliquer ou non les mises a jour. Pour les mises a jour critiques (securite), une degradation ou isolation progressive peut etre appliquee si le delai est depasse.
+
+**Voir aussi :** Relay Origin, Registre de Services, Empreinte de version COG
+
+---
+
+### Operateur de Service (Service Operator)
 
 **Type d'Opérateur** qui gère un domaine fonctionnel.
 
@@ -1263,51 +1681,19 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 
 ---
 
-### Outil (Tool)
+### Token d'authentification relay (Webway)
 
-**Capacité exécutable gouvernée** (Strate 6), sans autorité, sans décision métier, sans connaissance du contexte.
+**Secret ou jeton** utilisé par un COG pour s'authentifier auprès d'un Relay Webway lors de l'**enregistrement relay**. Le relay associe le tunnel à un `cog_id` après vérification du token ; les appels entrants vers ce COG sont alors routés vers ce tunnel. L'adresse annoncée sur le MWS peut être de la forme `relay_host:port` + token (ou identifiant dérivé) pour joindre le COG via le relay.
 
-**Définition canonique :**
-
-> **Un Outil est une capacité exécutable, sans autorité, sans décision métier, sans connaissance de l'Opérateur appelant, gouvernée par les Cores.**
-
-**Caractéristiques :**
-
-- Capacité atomique
-- Sans autorité
-- Sans logique métier
-- Gouverné par les Cores
-
-**Règle fondamentale :**
-
-> **👉 Un Outil fait, mais ne décide jamais.**
-
-**Exemples :** `layout.render`, `form.validate`, `query.execute`
-
-**Voir aussi :** Kit d'Outils, Opérateur
+**Voir aussi :** Relay Webway, Enregistrement relay, COG participant (Webway)
 
 ---
 
-### Kit d'Outils (Toolkit)
+### Tunnel (Webway)
 
-**Composition officielle d'Outils** (Strate 6), validée et déclarée par l'environnement.
+**Connexion persistante** établie par un COG vers un Relay Webway après authentification (token) et enregistrement du `cog_id`. Le relay utilise ce tunnel pour router vers le COG le trafic entrant destiné à ce `cog_id`. Le COG peut envoyer des **heartbeats** pour maintenir le tunnel actif.
 
-**Définition canonique :**
-
-> **Un Kit d'Outils est une composition officielle d'Outils, validée et déclarée par l'environnement, optimisée pour efficience, cohérence et performance.**
-
-**Caractéristiques :**
-
-- Agrège des Outils existants
-- N'ajoute aucune capacité nouvelle
-- Sans logique métier
-- Gouverné
-
-**Règle fondamentale :**
-
-> **👉 Un Kit d'Outils orchestre, mais n'ajoute pas de capacité.**
-
-**Voir aussi :** Outil, Master Butler
+**Voir aussi :** Relay Webway, Enregistrement relay, Heartbeat (relay Webway)
 
 ---
 
@@ -1374,6 +1760,80 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 ---
 
 ## V
+
+### Verification de conformite (Conformity Verification)
+
+**Processus execute par Origin ou un relay** lors de la verification d'un COG pour s'assurer que l'identite declaree correspond a l'environnement reellement installe. La verification se decompose en **trois phases** :
+
+1. **Phase A -- Cle de conformite des Cores** : les Cores transmettent une cle cachee dans le code, connue d'Origin/relay. La concordance prouve que les Cores sont authentiques.
+2. **Phase B -- Blocs de code des Services** : chaque Service envoie un paquet chiffre contenant un bloc de code MIP choisi aleatoirement. Le relay dechiffre avec les references Origin ; un bon dechiffrement prouve que le Service est authentique et non corrompu. Verification renforcee possible sur tout le code en cas de doute.
+3. **Phase C -- Sante de l'environnement** : verification du rapport de sante genere par les Cores (integrite du stockage, configuration, strates).
+
+**Important :** cette verification lourde est la responsabilite du **relay**, pas du Tracker. Le Tracker ne fait qu'une verification legere de l'identite (cog_id, signature, core_version).
+
+**Voir aussi :** Attestation d'environnement, Presentation d'identite, Conformite environnement, Relay Webway
+
+---
+
+### Visa de circulation (Circulation Visa)
+
+**Autorisation temporaire** delivree par Origin ou un relay a un COG ayant passe la verification de conformite. Le Visa permet au COG de se connecter au Webway via les trackers.
+
+**Contenu du Visa :**
+
+| Champ | Description |
+|-------|-------------|
+| `visa_id` | Identifiant unique du visa |
+| `cog_id` | COG concerne |
+| `issued_by` | Relay ou Origin emetteur |
+| `issued_at` / `expires_at` | Validite temporelle |
+| `scope` | Portee (intentions du COG : services, COGs a contacter) |
+| `core_version` | Version des Cores validee |
+| `passport_type` | STANDARD ou SPECIAL |
+
+Les trackers verifient le Visa avant d'autoriser les connexions. Un Visa expire oblige le COG a se re-verifier aupres d'un relay.
+
+**Voir aussi :** Passeport COG, Quarantaine, Pool de version, Origin
+
+---
+
+### Visa d'acces (hôte) (Host Access Visa)
+
+**Autorisation delivree par le COG hôte** au COG client pour **consommer les services exposes** par ce hôte (Lobby). Distinct du **Visa de circulation** (delivre par le relay/Origin) : le Visa de circulation autorise a circuler sur le Webway ; le Visa d'acces (hôte) autorise l'acces aux ressources et services d'un COG hôte determine. Le COG client se connecte au COG hôte en suivant les protocoles de securite et consomme les services grace a ce visa.
+
+**Voir aussi :** Visa de circulation, Lobby (Webway), COG Hébergeur, [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 9.3
+
+---
+
+### Verite distribuee d'Origin (Origin Distributed Truth)
+
+**Mecanisme par lequel les criteres du Relay Origin** (Registre de Services, versions Cores, checksums, politiques de conformite) **sont distribues a travers le reseau** Webway via les relays et, de maniere allegee, via les Trackers.
+
+**Principes :**
+
+- Chaque relay heberge une **copie (partielle ou complete)** des criteres d'Origin, synchronisee periodiquement.
+- Les Trackers heritent les **criteres legers** (min_core_version, min_protocol_version, alertes) des relays auxquels ils sont rattaches.
+- Les criteres sont diffuses aux COGs via les reponses REGISTER_OK, REGISTRY_RESPONSE, UPDATE_AVAILABLE et les reponses de decouverte MWS.
+- Un relay temporairement deconnecte d'Origin continue de fonctionner avec son cache local.
+
+**Voir aussi :** Relay Origin, Registre de Services, Relay Webway
+
+---
+
+### Version des Cores (Core Version)
+
+**Identifiant de version** du socle de gouvernance d'un COG, au format `MAJOR.MINOR`. Les Cores (Border Guard, WorrySentinel, StrongFather, BondingBrother, KindMother, KeeperOfStorage, Master Butler, Ever Buddy) sont **immuables** a version donnee.
+
+**Regles :**
+
+- Le `MAJOR` determine la **compatibilite stricte** entre COGs : deux COGs doivent avoir le meme `MAJOR` pour interagir.
+- Le `MINOR` indique des ajustements internes compatibles (ex. correctifs de documentation, optimisations sans rupture d'interface).
+- Un changement de `MAJOR` signifie une **rupture d'interface** ou de contrat au niveau des Cores ; les COGs avec des `MAJOR` differents ne peuvent pas interagir de maniere fiable.
+- Les Services (Operateurs, Outils, Kits d'Outils) peuvent etre patches independamment sans changer la Version des Cores.
+
+**Voir aussi :** Empreinte de version COG, Compatibilite de version COG, Cores
+
+---
 
 ### Verified ID (VID)
 
@@ -1614,17 +2074,61 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 | Public Exposure Surface         | **Façade Publique Gouvernée**              |
 | Public Access Mandate           | **Mandat Public d'Accès**                  |
 | Tracker (rôle Webway)           | **COG Tracker**                            |
+| Webway Participant              | **COG participant (Webway)**               |
+| Webway COG List                 | **Liste de COGs avec statuts**             |
+| Host Session Declaration        | **Déclaration d'hébergement de session**   |
+| MWS Secure Declaration          | **Norme de déclaration sécurisée (MWS)**   |
+| Miyukini Webway Relay           | **Relay Webway**                           |
+| Webway Tunnel                   | **Tunnel (Webway)**                        |
+| Relay Registration              | **Enregistrement relay**                   |
+| Relay Heartbeat                 | **Heartbeat (relay Webway)**               |
+| Relay Auth Token                | **Token d'authentification relay**         |
+| MWS                             | **Miyukini Webway System**                 |
+| COG Version Fingerprint         | **Empreinte de version COG**               |
+| Core Version                    | **Version des Cores**                      |
+| COG Version Compatibility       | **Compatibilite de version COG**           |
+| Service Patch                   | **Patch de Service**                       |
+| Relay Origin                    | **Relay Origin**                           |
+| Service Registry                | **Registre de Services**                   |
+| Registered Service              | **Service repertorie**                     |
+| Unregistered Service            | **Service non repertorie**                 |
+| Webway Network Isolation        | **Isolation reseau (Webway)**              |
+| Update Tracking                 | **Suivi des mises a jour**                 |
+| Environment Attestation         | **Attestation d'environnement**            |
+| Environment Conformity          | **Conformite environnement**               |
+| Identity Presentation           | **Presentation d'identite**                |
+| Conformity Verification         | **Verification de conformite**             |
+| Origin Distributed Truth        | **Verite distribuee d'Origin**             |
+| COG Passport                    | **Passeport COG**                          |
+| Special Passport                | **Passeport special**                      |
+| Circulation Visa                | **Visa de circulation**                    |
+| Version Pool                    | **Pool de version**                        |
+| Webway Quarantine               | **Quarantaine (Webway)**                   |
+| Core Conformity Key             | **Cle de conformite des Cores**            |
+| Code Block Verification         | **Bloc de code (verification)**            |
+| Network Containment             | **Confinement reseau**                     |
+| Origin (MWS)                    | **Origin (Relay Origin)**                  |
 | Hub / Dashboard                 | **Miyukini Central** (pour utilisateur COG) |
 | Web Portal / Public Portal      | **Miyukini Web Portal** (pour utilisateurs externes) |
 | Service Type 1                  | **Service interne COG**                    |
 | Service Type 2                  | **Service à surface web externe**          |
 | Service Type 3                  | **Service Inter-COG**                      |
+| COG Migration (parent/child)    | **Migration COG (pere/fils)**              |
+| COG Parent-Child Link           | **Parentalite COG**                         |
+| Connection Surface              | **Surface de connexion**                    |
+| Web Catalog (Tracker)            | **Catalogue web (Tracker)**                 |
+| Connection Limit (classic COG)  | **Limite de connexions (COG classique)**    |
+| Embedded Web Server (COG)       | **Serveur web embarque (COG)**              |
+| Lobby (Webway)                  | **Lobby (Webway)**                          |
+| COG Favorites                   | **Favoris (COG)**                           |
+| COG Friends                     | **Amis (COGs)**                             |
+| Host Access Visa                | **Visa d'acces (hôte)**                     |
 
 
 ---
 
 **Date de création :** 2026-01-27  
-**Version :** 1.11 (ajout Miyukini Central, Miyukini Web Portal, Service Fondamental, Types de Services)  
+**Version :** 1.18 (Lobby, Favoris, Amis COGs, Visa d'acces hôte ; surfaces au tracker, Lobbys prives, flow client-hôte)  
 **Statut :** Document de référence normatif — GLOSSAIRE OFFICIEL
 
 **Références croisées :**
@@ -1637,6 +2141,8 @@ Pouvoir technique qu'un composant possède. C'est ce qu'un module, un adaptateur
 - [Miyukini Conceptual References - Miyukini Webway System](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) : **Couche de présence et découverte (MWS)**
 - [Miyukini Conceptual References - Miyukini Webway System Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) : **Annexe MWS — normes, formats, protocole, matrice des statuts**
 - [Miyukini Conceptual References - Miyukini Webway System Outils et Operateurs](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Outils%20et%20Operateurs.md) : **Annexe MWS — Outils, Kits d'Outils, Opérateurs MWS**
+- [Miyukini Conceptual References - Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) : **Architecture relay de transport (bore étendu multi-tenant)**
+- [Miyukini Conceptual References - Miyukini Webway Relay Protocol](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md) : **Protocole relay (messages, handshake, TLS)**
 - [Miyukini Conceptual References - Operators et Terminologie](./Miyukini%20Conceptual%20References%20-%20Operators%20et%20Terminologie.md)
 - [Miyukini Conceptual References - Mandats et Équipes Operators](./Miyukini%20Conceptual%20References%20-%20Mandats%20et%20Equipes%20Operators.md) : **Mandats de Permission et Équipes**
 - [Miyukini Conceptual References - Tools et Toolkits](./Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)

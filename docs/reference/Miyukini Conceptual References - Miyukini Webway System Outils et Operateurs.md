@@ -107,7 +107,19 @@ Les **Outils MWS** sont des capacités exécutables gouvernées (Strate 6) utili
 
 **Règle :** ces Outils sont **déterministes** et **sans état métier** ; la liste des ports exclus est **versionnée** avec la norme (voir Normes et Standards, section 2.7).
 
-### 2.6 Synthèse des Outils MWS
+### 2.6 Outils relay (Webway Relay)
+
+Les **Outils relay** permettent à un COG d'utiliser le **relay Miyukini Webway** (bore étendu multi-tenant) pour être joignable derrière NAT ou pour joindre un autre COG via le relay. Ils s'appuient sur le [protocole relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md) (REGISTER, CONNECT, HEARTBEAT, etc.).
+
+| Outil | Action | Entrées (orientation) | Sorties (orientation) | Utilisé par |
+|-------|--------|------------------------|------------------------|-------------|
+| **relay.register** | Enregistrer un tunnel vers le relay (connexion persistante associée au cog_id) | relay_adresse (host, port), token, cog_id, options (TLS, timeouts) | ok (tunnel enregistré) / REGISTER_ERR (code, message) | Participant (COG derrière NAT) |
+| **relay.connect** | Établir une connexion vers un cog_id cible via le relay (côté appelant) | relay_adresse, cog_id_cible, options (TLS) | ok (connexion logique établie, prêt pour DATA) / CONNECT_ERR | Participant (COG joignant un autre COG via relay) |
+| **relay.heartbeat** | Envoyer un HEARTBEAT sur le tunnel pour maintenir l'enregistrement et détecter les déconnexions | tunnel (référence au tunnel enregistré) | ok (HEARTBEAT_ACK reçu) / timeout / erreur | Participant (COG ayant enregistré un tunnel) |
+
+**Règle :** les Outils relay **ne décident pas** si le COG doit s'enregistrer ni vers quel relay ; ils **exécutent** l'enregistrement, la connexion ou le heartbeat. La décision d'utiliser le relay et le choix de l'adresse relay relèvent des Cores (Border Guard, StrongFather). Le transport vers le relay utilise TLS (voir [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md)).
+
+### 2.7 Synthèse des Outils MWS
 
 | Domaine | Outils |
 |---------|--------|
@@ -116,8 +128,66 @@ Les **Outils MWS** sont des capacités exécutables gouvernées (Strate 6) utili
 | **Découverte** | mws.discovery.request.build, mws.discovery.request.send, mws.discovery.response.build, mws.discovery.response.send |
 | **Liste COG** | mws.cog_list.get, mws.cog_list.update, mws.cog_list.merge, mws.cog_list.filter |
 | **Adresse / port** | mws.port.check, mws.address.tracker_default |
+| **Relay** | relay.register, relay.connect, relay.heartbeat |
 
-Les noms et signatures détaillés seront fixés dans les contrats d'implémentation (Master Butler, contrats Outils MWS).
+### 2.8 Contrats formels des Outils MWS
+
+Les contrats ci-dessous fixent les **signatures**, **préconditions** et **postconditions** pour chaque Outil MWS et relay. Ils sont déclarés par Master Butler et respectés par les implémentations (Kits, Opérateurs).
+
+**Convention :** *préconditions* = conditions requises avant l'appel ; *postconditions* = garanties en cas de succès ; *invariants* = propriétés préservées. Les décisions métier (accepter, rejeter, filtrer) restent hors du contrat — elles sont fournies par les Cores.
+
+#### 2.8.1 Outils de déclaration
+
+| Outil | Signature (orientation) | Préconditions | Postconditions (succès) |
+|-------|-------------------------|---------------|-------------------------|
+| **mws.declaration.build** | `(type, cog_id, payload, version_norme) → message` | type, cog_id, version_norme fournis ; payload conforme au type | message contient tous les champs obligatoires du format MWS pour ce type ; message prêt pour signature |
+| **mws.declaration.validate** | `(message) → ok \| erreurs` | message non vide, structure parsable | si ok : message conforme (champs, types, ports non exclus) ; sinon : liste d'erreurs de validation non vide |
+| **mws.declaration.sign** | `(message, clé/secret) → message_signé` | message valide (build ou validate) ; clé/secret gouverné disponible | message_signé inclut bloc d'intégrité vérifiable ; origine authentifiable |
+| **mws.declaration.verify** | `(message) → ok \| échec` | message contient bloc d'intégrité | si ok : signature valide, intégrité préservée ; sinon : échec (signature invalide ou absente) |
+
+#### 2.8.2 Outils de transport
+
+| Outil | Signature (orientation) | Préconditions | Postconditions (succès) |
+|-------|-------------------------|---------------|-------------------------|
+| **mws.transport.send** | `(message, adresse) → succès \| erreur` | message sérialisable ; adresse (host, port) valide | message transmis sur le canal vers adresse ; pas de modification du contenu |
+| **mws.transport.receive** | `(endpoint) → message \| timeout \| erreur` | endpoint (host, port) en écoute, liaison réussie | si message : message reçu complet ; timeout si aucune donnée dans la fenêtre configurée |
+
+#### 2.8.3 Outils de découverte
+
+| Outil | Signature (orientation) | Préconditions | Postconditions (succès) |
+|-------|-------------------------|---------------|-------------------------|
+| **mws.discovery.request.build** | `(requester_cog_id, query, version) → requête` | requester_cog_id, version fournis | requête conforme au format MWS discovery request ; prête pour envoi |
+| **mws.discovery.request.send** | `(requête, adresse(s)) → succès \| erreur` | requête construite ; au moins une adresse Tracker | requête envoyée vers chaque adresse (transport.send) |
+| **mws.discovery.response.build** | `(entrées_filtrées, version) → réponse` | entrées déjà filtrées selon politique (fournie par Cores) ; version fournie | réponse conforme au format MWS discovery response ; contient uniquement les entrées fournies |
+| **mws.discovery.response.send** | `(réponse, adresse_demandeur) → succès \| erreur` | réponse construite ; adresse demandeur valide | réponse envoyée vers adresse_demandeur |
+
+#### 2.8.4 Outils de liste COG
+
+| Outil | Signature (orientation) | Préconditions | Postconditions (succès) |
+|-------|-------------------------|---------------|-------------------------|
+| **mws.cog_list.get** | `(cog_id?) → entrée(s)` | liste locale accessible | si cog_id : entrée correspondante (cog_id, status, source, updated_at) ou vide ; si omis : liste complète |
+| **mws.cog_list.update** | `(cog_id, status, source) → ok \| erreur` | cog_id fourni ; status dans l'ensemble normatif (Trusted, Neutral, etc.) | entrée mise à jour ; updated_at rafraîchi |
+| **mws.cog_list.merge** | `(liste_reçue, règle_fusion) → liste_fusionnée \| delta` | liste_reçue et règle_fusion fournis (règle gouvernée) | liste fusionnée conforme à la règle ; pas de suppression de statut sans politique |
+| **mws.cog_list.filter** | `(liste, critère) → liste_filtrée` | liste et critère fournis (critère gouverné) | liste_filtrée ⊆ liste ; tous les éléments satisfont le critère |
+
+#### 2.8.5 Outils d'adresse et de port
+
+| Outil | Signature (orientation) | Préconditions | Postconditions (succès) |
+|-------|-------------------------|---------------|-------------------------|
+| **mws.port.check** | `(port) → true \| false` | port entier dans la plage valide | true si port dans la liste normative des ports exclus MWS ; false sinon |
+| **mws.address.tracker_default** | `(host) → (host, 21000)` | host non vide | adresse (host, 21000) ; 21000 est le port officiel Tracker MWS |
+
+#### 2.8.6 Outils relay
+
+| Outil | Signature (orientation) | Préconditions | Postconditions (succès) |
+|-------|-------------------------|---------------|-------------------------|
+| **relay.register** | `(relay_adresse, token, cog_id, options?) → ok \| REGISTER_ERR` | Connexion TCP+TLS vers relay possible ; token et cog_id fournis | Tunnel enregistré côté relay ; connexion persistante associée à cog_id ; REGISTER_OK reçu |
+| **relay.connect** | `(relay_adresse, cog_id_cible, options?) → ok \| CONNECT_ERR` | Connexion TCP+TLS vers relay possible ; cog_id_cible fourni | Connexion logique vers cog_id_cible établie ; CONNECT_OK reçu ; prêt pour échange DATA |
+| **relay.heartbeat** | `(tunnel) → ok \| timeout \| erreur` | tunnel référence une connexion déjà enregistrée (relay.register) | HEARTBEAT envoyé ; HEARTBEAT_ACK reçu dans le délai configuré ; tunnel maintenu actif |
+
+**Invariant commun aux Outils :** aucun Outil ne prend de décision d'autorisation, de rejet ou de politique ; il exécute une capacité et retourne un résultat. Les choix (quand annoncer, accepter, filtrer) sont fournis par les Cores via BondingBrother aux Opérateurs.
+
+Les noms et signatures détaillés (types exacts, codes d'erreur) sont fixés dans les contrats d'implémentation (Master Butler, contrats Outils MWS) et dans le [Miyukini Webway Relay Protocol](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md) pour les outils relay.
 
 ---
 
@@ -127,7 +197,7 @@ Les **Kits d'Outils MWS** sont des **compositions officielles** d'Outils MWS, va
 
 ### 3.1 Kit Participant Webway (MWS Participant Toolkit)
 
-**Usage :** fournir à l'Opérateur Participant Webway l'ensemble des Outils nécessaires pour **participer** au maillage (annoncer, découvrir, maintenir la liste de statuts).
+**Usage :** fournir à l'Opérateur Participant Webway l'ensemble des Outils nécessaires pour **participer** au maillage (annoncer, découvrir, maintenir la liste de statuts) et, le cas échéant, utiliser le **relay Webway** pour être joignable derrière NAT ou pour joindre un autre COG via le relay.
 
 **Composition (orientation) :**
 - mws.declaration.build, mws.declaration.sign, mws.declaration.validate, mws.declaration.verify
@@ -135,8 +205,10 @@ Les **Kits d'Outils MWS** sont des **compositions officielles** d'Outils MWS, va
 - mws.discovery.request.build, mws.discovery.request.send
 - mws.cog_list.get, mws.cog_list.update, mws.cog_list.merge
 - mws.port.check, mws.address.tracker_default
+- **relay.register**, **relay.heartbeat** (quand le COG s’annonce via relay ; tunnel persistant)
+- **relay.connect** (quand le Participant initie une connexion vers un COG joignable uniquement via relay)
 
-**Règle :** le Kit Participant **ne décide pas** quand annoncer ni à quels Trackers envoyer ; il fournit les capacités. Les **décisions** sont fournies par les Cores via BondingBrother à l'Opérateur Participant Webway.
+**Règle :** le Kit Participant **ne décide pas** quand annoncer ni à quels Trackers ou relay envoyer ; il fournit les capacités. Les **décisions** sont fournies par les Cores via BondingBrother à l'Opérateur Participant Webway.
 
 ### 3.2 Kit Tracker Webway (MWS Tracker Toolkit)
 
@@ -151,7 +223,18 @@ Les **Kits d'Outils MWS** sont des **compositions officielles** d'Outils MWS, va
 
 **Règle :** le Kit Tracker **ne décide pas** d'accepter ou rejeter une déclaration ; il fournit les capacités de validation, vérification, filtrage. Les **décisions** (politique de rejet, statuts) viennent des Cores (Border Guard, WorrySentinel) et sont appliquées par l'Opérateur Tracker Webway.
 
-**Mécanismes passifs et actifs :** les Outils de liste (merge, filter) et de transport (receive, send) sont utilisés par l'Opérateur Tracker pour appliquer les **systèmes passifs** (observer, signaler, alimenter les listes) et **actifs** (filtrer, rejeter) ; les contrats détaillés des systèmes passifs/actifs seront définis dans des documents dédiés.
+**Mécanismes passifs et actifs :** les Outils de liste (merge, filter) et de transport (receive, send) sont utilisés par l'Opérateur Tracker pour appliquer les **systèmes passifs** (observer, signaler, alimenter les listes) et **actifs** (filtrer, rejeter) ; les contrats détaillés des systèmes passifs/actifs sont définis dans [MiyuWebwayTracker - Passive Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md) et [MiyuWebwayTracker - Active Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md).
+
+### 3.3 Kit Relay Webway (MWS Relay Toolkit)
+
+**Usage :** fournir l'ensemble des Outils nécessaires pour **utiliser le relay Miyukini Webway** : enregistrement d'un tunnel (COG derrière NAT), maintien du tunnel par heartbeat, et connexion vers un COG cible via le relay (côté appelant). Ce Kit est typiquement **composé** dans le Kit Participant Webway lorsque le COG participe via relay ; il peut aussi être référencé séparément pour les implémentations qui isolent la couche relay.
+
+**Composition (orientation) :**
+- relay.register
+- relay.connect
+- relay.heartbeat
+
+**Règle :** le Kit Relay Webway **ne décide pas** si le COG doit s'enregistrer ni vers quel relay ; il fournit les capacités. Les **décisions** (utilisation du relay, adresse relay, token) viennent des Cores (Border Guard, StrongFather). Voir [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) et [Miyukini Webway Relay Protocol](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md).
 
 ---
 
@@ -209,7 +292,7 @@ Les **Opérateurs MWS** sont des **Opérateurs de Service** (Strate 7) qui exéc
 
 | Opérateur | Rôle principal | Kit d'Outils | Port / exposition |
 |-----------|----------------|--------------|-------------------|
-| **Participant Webway** | Annoncer, découvrir, maintenir liste de statuts | Kit Participant Webway | Pas d'écoute obligatoire (client vers Trackers) |
+| **Participant Webway** | Annoncer, découvrir, maintenir liste de statuts ; optionnellement relay (tunnel, heartbeat, connect) | Kit Participant Webway (inclut Kit Relay Webway si relay utilisé) | Pas d'écoute obligatoire (client vers Trackers / relay) |
 | **Tracker Webway** | Point de rendez-vous, découverte, protection (passif/actif) | Kit Tracker Webway | **21000** (officiel) |
 
 ---
@@ -221,10 +304,10 @@ Les **Opérateurs MWS** sont des **Opérateurs de Service** (Strate 7) qui exéc
         Participant Webway / Tracker Webway
                ↓
         Kits d'Outils MWS (Strate 6)
-        Kit Participant Webway / Kit Tracker Webway
+        Kit Participant Webway / Kit Tracker Webway / Kit Relay Webway
                ↓
         Outils MWS (Strate 6)
-        mws.declaration.*, mws.transport.*, mws.discovery.*, mws.cog_list.*, mws.port.*, mws.address.*
+        mws.declaration.*, mws.transport.*, mws.discovery.*, mws.cog_list.*, mws.port.*, mws.address.*, relay.*
                ↓
         BondingBrother (Strate 5) — intentions → appels Opérateurs
                ↓
@@ -239,9 +322,9 @@ Les **Outils MWS** et les **Opérateurs MWS** sont **déclarés** par Master But
 
 ## 6. Évolutions futures
 
-- [ ] Formaliser les **contrats d'Outils MWS** (signatures, préconditions, postconditions) et les faire déclarer par Master Butler.
+- [x] Formaliser les **contrats d'Outils MWS** (signatures, préconditions, postconditions) et les faire déclarer par Master Butler — voir section 2.8 ; ajout des **Outils relay** (relay.register, relay.connect, relay.heartbeat) et **Kit Relay Webway**.
 - [ ] Formaliser les **contrats des Opérateurs** Participant Webway et Tracker Webway (frontières, intégration BondingBrother, Border Guard, WorrySentinel).
-- [ ] Définir les **contrats des systèmes passifs et actifs** des Trackers (utilisation des Outils cog_list.filter, transport.receive/send, politiques de rejet).
+- [x] Définir les **contrats des systèmes passifs et actifs** des Trackers — [Passive Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md) et [Active Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md).
 - [ ] Spécifier le **nommage produit** des Opérateurs et Kits (ex. MiyuWebwayParticipant, MiyuWebwayTracker) et les enregistrer dans le registre d'Opérateurs.
 
 ---
@@ -250,9 +333,14 @@ Les **Outils MWS** et les **Opérateurs MWS** sont **déclarés** par Master But
 
 - [Miyukini Webway System (MWS)](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) — document principal
 - [Miyukini Webway System - Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) — normes, formats, protocole, ports
+- [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) — architecture du relay, intégration MWS
+- [Miyukini Webway Relay Protocol](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md) — protocole relay (REGISTER, CONNECT, HEARTBEAT, etc.)
+- [Miyukini - Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md) — déploiement relay (VM, TLS, systemd, tests)
+- [MiyuWebwayTracker - Passive Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md) — contrats systèmes passifs
+- [MiyuWebwayTracker - Active Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md) — contrats systèmes actifs
 - [Tools et Toolkits](./Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)
 - [Operators et Terminologie](./Miyukini%20Conceptual%20References%20-%20Operators%20et%20Terminologie.md)
-- [Glossaire](./Miyukini%20Conceptual%20References%20-%20Glossaire.md) (Outil, Kit d'Outils, Opérateur, Master Butler, Border Guard, WorrySentinel, COG Tracker, MWS)
+- [Glossaire](./Miyukini%20Conceptual%20References%20-%20Glossaire.md) (Outil, Kit d'Outils, Opérateur, Master Butler, Border Guard, WorrySentinel, COG Tracker, MWS, Relay Webway)
 
 ---
 

@@ -6,6 +6,11 @@ Ce document liste les **Outils MWS** composant le Kit **MiyuWebwayTracker** (`to
 
 **Référence :** [MiyuWebwayTracker - Documentation Fondatrice](./MiyuWebwayTracker%20-%20Documentation%20Fondatrice.md)
 
+## Portée / Scope
+
+- Liste exhaustive des Outils MWS du Kit MiyuWebwayTracker : ToolId, action, niveau de sécurité.
+- Invariants : le Kit exécute validations, vérifications et filtrages ; les politiques (accepter, rejeter) relèvent des Cores.
+
 ---
 
 ## Liste des outils MWS

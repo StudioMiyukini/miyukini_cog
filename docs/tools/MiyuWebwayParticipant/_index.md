@@ -7,6 +7,11 @@
 **Strate :** 6 (Tools & Toolkits)  
 **ToolkitId :** `toolkit.webway.participant`
 
+## Portée / Scope
+
+- Index de navigation pour toute la documentation du Kit MiyuWebwayParticipant.
+- Liens vers les documents fondateurs, référence outils et contrat de gouvernance.
+
 ---
 
 ## Structure de la documentation
