@@ -268,143 +268,20 @@ impl ContentManager {
     async fn load_downloads(&self) {
         let mut downloads = self.downloads.write().await;
         
-        // COGs
+        // COG Stable v0.1.0 - Windows uniquement pour l'instant
         downloads.push(Download {
             id: "miyukini-cog-windows".to_string(),
             name: "Miyukini COG".to_string(),
-            description: "Environnement COG complet pour Windows — Inclut Central, les 8 Cores et les Services de base".to_string(),
+            description: "Environnement COG complet pour Windows — Inclut Central, KindMother, client MWS et tous les Services (JayXpose, JayFestival, JayKonta, JayKoa, MiyuClicker, Lord of the Castle)".to_string(),
             version: "0.1.0".to_string(),
             category: DownloadCategory::Cog,
             platforms: vec![Platform::Windows],
-            download_url: "/downloads/miyukini-cog-0.1.0-windows.zip".to_string(),
-            size_bytes: 85_000_000,
-            sha256: "pending".to_string(),
+            download_url: "/files/Miyukini-COG-v0.1.0-windows.zip".to_string(),
+            size_bytes: 8_243_322, // 7.86 MB
+            sha256: "F98A2A8A98C64BF1FCA6E7214756A99B63CECA1CFBEA8D04F4E4038EB07B8E28".to_string(),
             published_at: Utc::now(),
-            release_notes: "Version initiale avec tous les composants essentiels".to_string(),
+            release_notes: "Première release stable — Central, KindMother, client MWS, Services Jay*, jeux intégrés".to_string(),
             min_core_version: None,
-        });
-
-        downloads.push(Download {
-            id: "miyukini-cog-linux".to_string(),
-            name: "Miyukini COG".to_string(),
-            description: "Environnement COG complet pour Linux — Compatible Ubuntu 22.04+, Debian 12+, Fedora 38+".to_string(),
-            version: "0.1.0".to_string(),
-            category: DownloadCategory::Cog,
-            platforms: vec![Platform::Linux],
-            download_url: "/downloads/miyukini-cog-0.1.0-linux.tar.gz".to_string(),
-            size_bytes: 78_000_000,
-            sha256: "pending".to_string(),
-            published_at: Utc::now(),
-            release_notes: "Version initiale pour Linux".to_string(),
-            min_core_version: None,
-        });
-
-        // Cores
-        downloads.push(Download {
-            id: "cores-bundle".to_string(),
-            name: "Cores Bundle".to_string(),
-            description: "Les 8 Cores système complets : StrongFather, KindMother, BondingBrother, BorderGuard, CaringNanny, MasterButler, EverBuddy, WorrySentinel".to_string(),
-            version: "0.1.0".to_string(),
-            category: DownloadCategory::Cores,
-            platforms: vec![Platform::Universal],
-            download_url: "/downloads/cores-0.1.0.tar.gz".to_string(),
-            size_bytes: 45_000_000,
-            sha256: "pending".to_string(),
-            published_at: Utc::now(),
-            release_notes: "Bundle initial des 8 Cores avec gouvernance complète".to_string(),
-            min_core_version: None,
-        });
-
-        // Services
-        downloads.push(Download {
-            id: "jayfestival".to_string(),
-            name: "JayFestival".to_string(),
-            description: "Service de gestion d'événements et festivals — Planning, billetterie, exposants".to_string(),
-            version: "0.1.0".to_string(),
-            category: DownloadCategory::Service,
-            platforms: vec![Platform::Universal],
-            download_url: "/downloads/jayfestival-0.1.0.tar.gz".to_string(),
-            size_bytes: 12_000_000,
-            sha256: "pending".to_string(),
-            published_at: Utc::now(),
-            release_notes: "Version initiale avec gestion des éditions et exposants".to_string(),
-            min_core_version: Some("0.1.0".to_string()),
-        });
-
-        downloads.push(Download {
-            id: "jayxpose".to_string(),
-            name: "JayXpose".to_string(),
-            description: "Service de gestion d'entreprise — Catalogue produits, vitrine, documents".to_string(),
-            version: "0.1.0".to_string(),
-            category: DownloadCategory::Service,
-            platforms: vec![Platform::Universal],
-            download_url: "/downloads/jayxpose-0.1.0.tar.gz".to_string(),
-            size_bytes: 8_000_000,
-            sha256: "pending".to_string(),
-            published_at: Utc::now(),
-            release_notes: "Version initiale".to_string(),
-            min_core_version: Some("0.1.0".to_string()),
-        });
-
-        downloads.push(Download {
-            id: "jaykonta".to_string(),
-            name: "JayKonta".to_string(),
-            description: "Service de comptabilité — Gestion des portefeuilles, mouvements, prévisions".to_string(),
-            version: "0.1.0".to_string(),
-            category: DownloadCategory::Service,
-            platforms: vec![Platform::Universal],
-            download_url: "/downloads/jaykonta-0.1.0.tar.gz".to_string(),
-            size_bytes: 6_000_000,
-            sha256: "pending".to_string(),
-            published_at: Utc::now(),
-            release_notes: "Version initiale".to_string(),
-            min_core_version: Some("0.1.0".to_string()),
-        });
-
-        downloads.push(Download {
-            id: "jaykoa".to_string(),
-            name: "JayKoa".to_string(),
-            description: "Service de calendrier universel — Agendas, événements, synchronisation".to_string(),
-            version: "0.1.0".to_string(),
-            category: DownloadCategory::Service,
-            platforms: vec![Platform::Universal],
-            download_url: "/downloads/jaykoa-0.1.0.tar.gz".to_string(),
-            size_bytes: 5_000_000,
-            sha256: "pending".to_string(),
-            published_at: Utc::now(),
-            release_notes: "Version initiale".to_string(),
-            min_core_version: Some("0.1.0".to_string()),
-        });
-
-        // Jeux
-        downloads.push(Download {
-            id: "miyuclicker".to_string(),
-            name: "MiyuClicker".to_string(),
-            description: "Jeu idle/clicker — Construisez votre empire de clics avec progression infinie".to_string(),
-            version: "0.1.0".to_string(),
-            category: DownloadCategory::Service,
-            platforms: vec![Platform::Universal],
-            download_url: "/downloads/miyuclicker-0.1.0.tar.gz".to_string(),
-            size_bytes: 15_000_000,
-            sha256: "pending".to_string(),
-            published_at: Utc::now(),
-            release_notes: "Version initiale avec système de prestige".to_string(),
-            min_core_version: Some("0.1.0".to_string()),
-        });
-
-        downloads.push(Download {
-            id: "lord-of-the-castle".to_string(),
-            name: "Lord of the Castle".to_string(),
-            description: "Jeu de stratégie coopératif — Défendez votre château contre les vagues d'ennemis".to_string(),
-            version: "0.1.0".to_string(),
-            category: DownloadCategory::Service,
-            platforms: vec![Platform::Universal],
-            download_url: "/downloads/lord-of-the-castle-0.1.0.tar.gz".to_string(),
-            size_bytes: 25_000_000,
-            sha256: "pending".to_string(),
-            published_at: Utc::now(),
-            release_notes: "Version initiale avec mode multijoueur".to_string(),
-            min_core_version: Some("0.1.0".to_string()),
         });
     }
 

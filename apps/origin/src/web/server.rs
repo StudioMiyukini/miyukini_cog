@@ -11,12 +11,19 @@ use tracing::{debug, error, info};
 /// Base de données JayXpose (optionnelle) pour les pages vitrine publiques.
 pub type JayXposeDbRef = Arc<jayxpose::JayXposeDb>;
 
-/// Réponse HTTP : normale ou redirection.
+/// Réponse HTTP : normale, binaire ou redirection.
 pub enum RouteResponse {
     Normal {
         status: String,
         content_type: String,
         body: String,
+    },
+    /// Réponse binaire pour les fichiers (ZIP, images, etc.)
+    Binary {
+        status: String,
+        content_type: String,
+        body: Vec<u8>,
+        filename: Option<String>,
     },
     Redirect { location: String },
 }
@@ -145,6 +152,31 @@ async fn handle_connection(
             writer.write_all(response.as_bytes()).await?;
             writer.write_all(body.as_bytes()).await?;
         }
+        RouteResponse::Binary {
+            status,
+            content_type,
+            body,
+            filename,
+        } => {
+            let disposition = filename
+                .map(|f| format!("Content-Disposition: attachment; filename=\"{f}\"\r\n"))
+                .unwrap_or_default();
+            let response = format!(
+                "HTTP/1.1 {}\r\n\
+                 Content-Type: {}\r\n\
+                 Content-Length: {}\r\n\
+                 {}\
+                 Access-Control-Allow-Origin: *\r\n\
+                 Connection: close\r\n\
+                 \r\n",
+                status,
+                content_type,
+                body.len(),
+                disposition
+            );
+            writer.write_all(response.as_bytes()).await?;
+            writer.write_all(&body).await?;
+        }
         RouteResponse::Redirect { location } => {
             let response = format!(
                 "HTTP/1.1 302 Found\r\nLocation: {}\r\nConnection: close\r\n\r\n",
@@ -201,6 +233,40 @@ async fn route_request(
                 status: "200 OK".to_string(),
                 content_type: "text/html".to_string(),
                 body,
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // Fichiers statiques (téléchargements)
+        // ═══════════════════════════════════════════════════════════════════
+        _ if path_clean.starts_with("/files/") => {
+            let filename = &path_clean[7..]; // Après "/files/"
+            // Sécurité: interdire les chemins relatifs
+            if filename.contains("..") || filename.contains('\\') {
+                return RouteResponse::Normal {
+                    status: "400 Bad Request".to_string(),
+                    content_type: "text/plain".to_string(),
+                    body: "Invalid path".to_string(),
+                };
+            }
+            let file_path = format!("/opt/miyukini-origin/files/{}", filename);
+            match tokio::fs::read(&file_path).await {
+                Ok(data) => {
+                    let content_type = if filename.ends_with(".zip") {
+                        "application/zip"
+                    } else if filename.ends_with(".tar.gz") || filename.ends_with(".tgz") {
+                        "application/gzip"
+                    } else {
+                        "application/octet-stream"
+                    };
+                    RouteResponse::Binary {
+                        status: "200 OK".to_string(),
+                        content_type: content_type.to_string(),
+                        body: data,
+                        filename: Some(filename.to_string()),
+                    }
+                }
+                Err(_) => not_found_page(),
             }
         }
 
