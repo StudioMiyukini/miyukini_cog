@@ -4,7 +4,7 @@
 
 [package]
 name = "miyukini-central-native"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Miyukini Central — Hub natif des Services COG (Dioxus + Blitz)"
 authors = ["Miyukini Contributors"]
@@ -63,3 +63,14 @@ missing_errors_doc = "allow"
 missing_panics_doc = "allow"
 must_use_candidate = "allow"
 module_name_repetitions = "allow"
+# Casts intentionnels en UI (grilles calendrier, dimensions, couleurs)
+cast_possible_truncation = "allow"
+cast_precision_loss = "allow"
+cast_sign_loss = "allow"
+cast_possible_wrap = "allow"
+# Autres lints trop verbeux en contexte UI
+ref_option = "allow"
+assigning_clones = "allow"
+items_after_statements = "allow"
+redundant_closure = "allow"
+trivially_copy_pass_by_ref = "allow"
