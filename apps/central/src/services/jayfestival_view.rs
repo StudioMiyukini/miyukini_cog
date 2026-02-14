@@ -70,7 +70,7 @@ pub fn JayFestivalView() -> Element {
                     for edition in editions.iter() {
                         EventCard {
                             name: edition.name.clone().unwrap_or_else(|| "Sans nom".to_string()),
-                            date: format_date_range(&edition.start_date, &edition.end_date),
+                            date: format_date_range(edition.start_date.as_ref(), edition.end_date.as_ref()),
                             location: edition.location.clone().unwrap_or_else(|| "Lieu non defini".to_string()),
                             status: edition.status.clone().unwrap_or_else(|| "brouillon".to_string()),
                         }
@@ -82,7 +82,7 @@ pub fn JayFestivalView() -> Element {
 }
 
 /// Formate une plage de dates pour affichage.
-fn format_date_range(start: &Option<String>, end: &Option<String>) -> String {
+fn format_date_range(start: Option<&String>, end: Option<&String>) -> String {
     match (start, end) {
         (Some(s), Some(e)) => format!("{s} — {e}"),
         (Some(s), None) => s.clone(),

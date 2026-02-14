@@ -25,10 +25,10 @@ pub fn RiteEntree() -> Element {
     let mut state = use_app_state();
     let theme = state.read().current_theme;
     let mut step = use_signal(|| STEP_NOM);
-    let mut pseudonyme = use_signal(|| String::new());
-    let mut email = use_signal(|| String::new());
-    let mut password = use_signal(|| String::new());
-    let mut error = use_signal(|| String::new());
+    let mut pseudonyme = use_signal(String::new);
+    let mut email = use_signal(String::new);
+    let mut password = use_signal(String::new);
+    let mut error = use_signal(String::new);
     let mut last_played_step = use_signal(|| None::<u8>);
 
     // Jouer la voix Miou de l'étape courante (une fois par étape).

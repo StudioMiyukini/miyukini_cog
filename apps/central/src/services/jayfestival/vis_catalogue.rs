@@ -44,7 +44,7 @@ pub fn VisCatalogue() -> Element {
                         {
                             let name = edition.name.clone().unwrap_or_else(|| "Sans nom".to_string());
                             let location = edition.location.clone().unwrap_or_default();
-                            let date_range = format_date_range(&edition.start_date, &edition.end_date);
+                            let date_range = format_date_range(edition.start_date.as_ref(), edition.end_date.as_ref());
                             let status = edition.status.clone().unwrap_or_else(|| "brouillon".to_string());
                             let theme_text = edition.theme.clone().unwrap_or_default();
                             let status_color = match status.as_str() {

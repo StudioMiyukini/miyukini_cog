@@ -154,7 +154,7 @@ pub fn UncSearch(state: Signal<JayFestivalState>) -> Element {
                                         let id_str = opt_str(&edition.id);
                                         let name = opt_str(&edition.name);
                                         let location = opt_str(&edition.location);
-                                        let subtitle = format!("{} — {}", format_date_range(&edition.start_date, &edition.end_date), location);
+                                        let subtitle = format!("{} — {}", format_date_range(edition.start_date.as_ref(), edition.end_date.as_ref()), location);
                                         let badge = edition.status.clone();
                                         let id_clone = edition.id.clone();
                                         rsx! {

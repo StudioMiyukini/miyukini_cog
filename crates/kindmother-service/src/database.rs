@@ -20,6 +20,16 @@ use tokio::sync::{Mutex, RwLock};
 
 use crate::errors::ServiceError;
 
+/// Paramètres d'une entrée d'audit (réduit le nombre d'arguments de `audit_operation`).
+struct AuditEntry<'a> {
+    operator_id: &'a str,
+    operation: &'a str,
+    intent: &'a str,
+    sql: &'a str,
+    rows_affected: u64,
+    success: bool,
+}
+
 /// Gestionnaire de bases de données isolées.
 pub struct EncryptedDatabase {
     /// Répertoire racine des données
@@ -233,7 +243,14 @@ impl EncryptedDatabase {
         let last_insert_id = conn.last_insert_rowid();
 
         // Audit
-        self.audit_operation(&conn, operator_id, "execute", intent, sql, rows_affected as u64, true)?;
+        self.audit_operation(&conn, AuditEntry {
+            operator_id,
+            operation: "execute",
+            intent,
+            sql,
+            rows_affected: rows_affected as u64,
+            success: true,
+        })?;
 
         Ok((rows_affected as u64, Some(last_insert_id)))
     }
@@ -272,24 +289,22 @@ impl EncryptedDatabase {
 
         // Audit
         let total_affected: u64 = results.iter().sum();
-        self.audit_operation(&conn, operator_id, "transaction", intent, "COMMIT", total_affected, true)?;
+        self.audit_operation(&conn, AuditEntry {
+            operator_id,
+            operation: "transaction",
+            intent,
+            sql: "COMMIT",
+            rows_affected: total_affected,
+            success: true,
+        })?;
 
         Ok(results)
     }
 
     /// Enregistre une opération dans l'audit.
-    fn audit_operation(
-        &self,
-        conn: &Connection,
-        operator_id: &str,
-        operation: &str,
-        intent: &str,
-        sql: &str,
-        rows_affected: u64,
-        success: bool,
-    ) -> Result<(), ServiceError> {
-        use sha2::{Sha256, Digest};
-        let sql_hash = format!("{:x}", Sha256::digest(sql.as_bytes()));
+    fn audit_operation(&self, conn: &Connection, entry: AuditEntry<'_>) -> Result<(), ServiceError> {
+        use sha2::{Digest, Sha256};
+        let sql_hash = format!("{:x}", Sha256::digest(entry.sql.as_bytes()));
 
         conn.execute(
             r#"
@@ -298,15 +313,15 @@ impl EncryptedDatabase {
             VALUES (?1, ?2, ?3, ?4, ?5, ?6)
             "#,
             params![
-                operator_id,
-                operation,
-                intent,
+                entry.operator_id,
+                entry.operation,
+                entry.intent,
                 sql_hash,
-                rows_affected as i64,
-                if success { 1 } else { 0 },
+                entry.rows_affected as i64,
+                if entry.success { 1 } else { 0 },
             ],
         )
-        .map_err(|e| ServiceError::Database(format!("Audit failed: {}", e)))?;
+        .map_err(|e| ServiceError::Database(format!("Audit failed: {e}")))?;
 
         Ok(())
     }

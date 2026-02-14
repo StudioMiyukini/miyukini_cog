@@ -47,7 +47,7 @@ pub fn Entreprise(state: Signal<JayXposeState>) -> Element {
     let mut social_youtube = use_signal(|| existing.social_youtube.clone().unwrap_or_default());
     let mut social_x = use_signal(|| existing.social_x.clone().unwrap_or_default());
 
-    let mut save_message = use_signal(|| String::new());
+    let mut save_message = use_signal(String::new);
 
     let on_save = move |_| {
         let profile = jayxpose::data::ExposantProfile {

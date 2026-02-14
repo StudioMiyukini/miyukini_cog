@@ -27,7 +27,7 @@ pub fn GameView(props: GameViewProps) -> Element {
         "Cliquez pour accumuler des ressources, developpez votre royaume et conquerez de nouvelles terres.",
     );
 
-    let icon = service.as_ref().map(|s| s.icon.clone()).unwrap_or_else(|| "🎮".to_string());
+    let icon = service.as_ref().map_or_else(|| "🎮".to_string(), |s| s.icon.clone());
 
     let base_path = conns.read().miyuclicker_data_dir.clone();
     let game_stats = load_miyuclicker_stats(&base_path);

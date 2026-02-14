@@ -36,14 +36,14 @@ pub fn PurseMovements(state: Signal<JayKontaState>) -> Element {
         .collect();
 
     let total_count = filtered.len() as u32;
-    let total_pages = (total_count + per_page - 1) / per_page;
+    let total_pages = total_count.div_ceil(per_page);
     let current_page = *page.read();
     let start = (current_page * per_page) as usize;
     let page_items: Vec<_> = filtered
         .iter()
         .skip(start)
         .take(per_page as usize)
-        .cloned()
+        .copied()
         .collect();
 
     // Totaux
@@ -65,7 +65,7 @@ pub fn PurseMovements(state: Signal<JayKontaState>) -> Element {
                 }
                 ActionButton {
                     label: "+ Nouveau mouvement".to_string(),
-                    icon: "".to_string(),
+                    icon: String::new(),
                     accent: true,
                     onclick: move |_| {
                         state.write().purse_section = PurseSection::NouveauMouvement;

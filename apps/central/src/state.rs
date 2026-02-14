@@ -22,7 +22,7 @@ pub enum MainTab {
     Magasin,
     /// Bibliothèque des Services installés
     Bibliotheque,
-    /// Communauté COG
+    /// Webway (réseau MWS)
     Communaute,
     /// Paramètres Miyukini
     Miyukini,
@@ -34,7 +34,7 @@ impl MainTab {
         match self {
             Self::Magasin => "MAGASIN",
             Self::Bibliotheque => "BIBLIOTHÈQUE",
-            Self::Communaute => "COMMUNAUTÉ",
+            Self::Communaute => "WEBWAY",
             Self::Miyukini => "MIYUKINI",
         }
     }
@@ -241,7 +241,7 @@ impl AppState {
     pub fn open_service(&mut self, service: &ServiceInfo) {
         // Vérifier si déjà ouvert
         if let Some(idx) = self.open_tabs.iter().position(|t| {
-            t.service_id.as_ref().map_or(false, |id| id == &service.id)
+            t.service_id.as_ref() == Some(&service.id)
         }) {
             self.active_tab_index = idx;
             return;

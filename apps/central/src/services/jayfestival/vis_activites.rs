@@ -154,7 +154,7 @@ fn GameCard(
 ) -> Element {
     let c = use_app_state().read().current_theme.palette();
 
-    let progress_pct = progress.map(|(current, total)| (current * 100) / total).unwrap_or(0);
+    let progress_pct = progress.map_or(0, |(current, total)| (current * 100) / total);
 
     rsx! {
         div {

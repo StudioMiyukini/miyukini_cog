@@ -172,14 +172,14 @@ pub fn OrgEditions(
                     for edition in editions.iter() {
                         EventCard {
                             name: edition.name.clone().unwrap_or_else(|| "Sans nom".to_string()),
-                            date: format_date_range(&edition.start_date, &edition.end_date),
+                            date: format_date_range(edition.start_date.as_ref(), edition.end_date.as_ref()),
                             location: edition.location.clone().unwrap_or_else(|| "Lieu non defini".to_string()),
                             status: edition.status.clone().unwrap_or_else(|| "brouillon".to_string()),
                             onclick: {
                                 let eid = edition.id.clone();
                                 move |_| {
                                     let mut s = state.write();
-                                    s.selected_edition_id = eid.clone();
+                                    s.selected_edition_id.clone_from(&eid);
                                     s.org_section = OrgSection::EditionHub;
                                     s.edition_tab = OrgEditionTab::Overview;
                                 }

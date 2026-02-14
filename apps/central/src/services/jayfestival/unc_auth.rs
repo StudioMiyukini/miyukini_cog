@@ -122,7 +122,6 @@ pub fn UncConnexion(state: Signal<JayFestivalState>) -> Element {
                 let role = match profile.user_type.as_deref() {
                     Some("organisateur") => JayFestivalRole::Organisateur,
                     Some("exposant") => JayFestivalRole::Exposant,
-                    Some("visiteur") => JayFestivalRole::Visiteur,
                     _ => JayFestivalRole::Visiteur,
                 };
                 state.write().role = role;
@@ -133,7 +132,7 @@ pub fn UncConnexion(state: Signal<JayFestivalState>) -> Element {
                 error.set(Some("Email ou mot de passe incorrect".to_string()));
             }
             Err(e) => {
-                error.set(Some(format!("Erreur: {}", e)));
+                error.set(Some(format!("Erreur: {e}")));
             }
         }
         loading.set(false);
@@ -288,7 +287,6 @@ pub fn UncInscription(state: Signal<JayFestivalState>) -> Element {
                     let role = match user_type.as_str() {
                         "organisateur" => JayFestivalRole::Organisateur,
                         "exposant" => JayFestivalRole::Exposant,
-                        "visiteur" => JayFestivalRole::Visiteur,
                         _ => JayFestivalRole::Visiteur,
                     };
                     state.write().role = role;
@@ -296,7 +294,7 @@ pub fn UncInscription(state: Signal<JayFestivalState>) -> Element {
                     state.write().current_user_id = Some(id);
                 }
                 Err(e) => {
-                    error.set(Some(format!("Erreur: {}", e)));
+                    error.set(Some(format!("Erreur: {e}")));
                 }
             }
             loading.set(false);
@@ -313,7 +311,6 @@ pub fn UncInscription(state: Signal<JayFestivalState>) -> Element {
     let type_icon = match user_type.as_str() {
         "organisateur" => "🏢",
         "exposant" => "🧑‍💼",
-        "visiteur" => "👤",
         _ => "👤",
     };
 

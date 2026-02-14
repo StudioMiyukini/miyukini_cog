@@ -31,8 +31,16 @@ fn main() {
     // Initialiser le holder du processus KindMother
     KINDMOTHER_PROCESS.get_or_init(|| Mutex::new(None));
 
-    // === Phase 1: Assurer que KindMother est disponible ===
-    tracing::info!("Vérification de KindMother...");
+    // === Phase 0: Vérifier les dépendances (kindmother-server) ===
+    tracing::info!("Vérification des dépendances...");
+    if let Err(e) = kindmother_launcher::ensure_dependencies() {
+        tracing::error!("Dépendances manquantes: {}", e);
+        show_error_dialog(&e);
+        std::process::exit(1);
+    }
+
+    // === Phase 1: Vérifier la présence de KindMother (lancer si besoin) ===
+    tracing::info!("Vérification de la présence de KindMother...");
     
     match kindmother_launcher::ensure_kindmother_running() {
         kindmother_launcher::LaunchResult::AlreadyRunning => {
@@ -87,20 +95,21 @@ fn show_error_dialog(err: &str) {
         eprintln!("\n╔══════════════════════════════════════════════════════════════╗");
         eprintln!("║              MIYUKINI CENTRAL - ERREUR CRITIQUE              ║");
         eprintln!("╠══════════════════════════════════════════════════════════════╣");
-        eprintln!("║ Impossible de démarrer KindMother.                           ║");
+        eprintln!("║ Dépendances ou KindMother manquants.                         ║");
         eprintln!("║                                                              ║");
         eprintln!("║ {:<60} ║", err.chars().take(60).collect::<String>());
         eprintln!("║                                                              ║");
-        eprintln!("║ Vérifiez que kindmother-server.exe est présent dans le même  ║");
-        eprintln!("║ dossier que miyukini-central.exe ou dans target/debug/.      ║");
+        eprintln!("║ Central construit kindmother-server si absent (cargo build). ║");
+        eprintln!("║ Lancez depuis la racine du dépôt ou placez kindmother-server ║");
+        eprintln!("║ dans le même dossier que miyukini-central.exe.                ║");
         eprintln!("╚══════════════════════════════════════════════════════════════╝\n");
     }
     
     #[cfg(not(windows))]
     {
-        eprintln!("ERREUR CRITIQUE: Impossible de démarrer KindMother.");
+        eprintln!("ERREUR CRITIQUE: Dépendances ou KindMother manquants.");
         eprintln!("{}", err);
-        eprintln!("Vérifiez que kindmother-server est présent dans le même dossier ou dans target/debug/.");
+        eprintln!("Lancez Central depuis la racine du dépôt pour auto-construction de kindmother-server.");
     }
 }
 

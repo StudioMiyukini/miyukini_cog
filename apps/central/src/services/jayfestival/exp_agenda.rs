@@ -205,7 +205,7 @@ fn TimeRow(hour: &'static str, has_event_at: Option<usize>) -> Element {
             // Cellules jours
             for i in 0..7 {
                 {
-                    let has_event = has_event_at.map(|idx| idx == i).unwrap_or(false);
+                    let has_event = has_event_at.is_some_and(|idx| idx == i);
                     rsx! {
                         div {
                             style: "border-left: 1px solid {c.border}; padding: 2px;",

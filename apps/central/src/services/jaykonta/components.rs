@@ -43,7 +43,7 @@ pub fn KpiCard(label: String, value: String, detail: String, icon: String, posit
 pub fn AmountDisplay(amount: f64, currency: String) -> Element {
     let c = use_app_state().read().current_theme.palette();
     let color = if amount >= 0.0 { c.accent_green } else { c.accent_red };
-    let formatted = format!("{:+.2} {currency}", amount);
+    let formatted = format!("{amount:+.2} {currency}");
 
     rsx! {
         span {
@@ -94,7 +94,7 @@ pub fn MovementRow(
 ) -> Element {
     let c = use_app_state().read().current_theme.palette();
     let amount_color = if amount >= 0.0 { c.accent_green } else { c.accent_red };
-    let amount_str = format!("{:+.2} {currency}", amount);
+    let amount_str = format!("{amount:+.2} {currency}");
 
     rsx! {
         div {

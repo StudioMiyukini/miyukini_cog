@@ -12,9 +12,9 @@ pub fn Catalogue(state: Signal<JayXposeState>) -> Element {
     let conns = use_service_connections();
     let exposant_id = state.read().exposant_id.clone().unwrap_or_default();
     let mut show_categories = use_signal(|| false);
-    let mut search_query = use_signal(|| String::new());
-    let mut filter_category = use_signal(|| String::new());
-    let new_category_name = use_signal(|| String::new());
+    let mut search_query = use_signal(String::new);
+    let mut filter_category = use_signal(String::new);
+    let new_category_name = use_signal(String::new);
 
     // Charger donnees reelles
     let db = &conns.read().jayxpose;
@@ -138,7 +138,7 @@ fn ProductRow(
 
     let pid = product.id.clone().unwrap_or_default();
     let name = product.name.as_deref().unwrap_or("Sans nom");
-    let price = product.price.map(|p| format!("{:.2} EUR", p)).unwrap_or_else(|| "Sur demande".to_string());
+    let price = product.price.map_or_else(|| "Sur demande".to_string(), |p| format!("{p:.2} EUR"));
     let availability = product.availability.as_deref().unwrap_or("disponible");
     let is_featured = product.is_featured.unwrap_or(false);
 

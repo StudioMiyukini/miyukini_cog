@@ -33,8 +33,7 @@ pub fn UncEventsList(state: Signal<JayFestivalState>) -> Element {
             filter_loc.is_empty()
                 || e.location
                     .as_ref()
-                    .map(|l| l.to_lowercase().contains(&filter_loc.to_lowercase()))
-                    .unwrap_or(false)
+                    .is_some_and(|l| l.to_lowercase().contains(&filter_loc.to_lowercase()))
         })
         .collect();
 
@@ -193,7 +192,7 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
 
     let name = opt_str(&edition.name);
     let location = opt_str(&edition.location);
-    let date_range = format_date_range(&edition.start_date, &edition.end_date);
+    let date_range = format_date_range(edition.start_date.as_ref(), edition.end_date.as_ref());
     let exposants_count = exposants.len();
 
     rsx! {
@@ -400,7 +399,7 @@ fn EventListItem(
 
     let name = opt_str(&edition.name);
     let location = opt_str(&edition.location);
-    let date_range = format_date_range(&edition.start_date, &edition.end_date);
+    let date_range = format_date_range(edition.start_date.as_ref(), edition.end_date.as_ref());
     let theme = edition.theme.clone();
 
     rsx! {

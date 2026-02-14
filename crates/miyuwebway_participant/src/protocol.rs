@@ -676,13 +676,19 @@ pub struct LobbyInfo {
 }
 
 /// Payload de heartbeat Tracker.
+/// Champs alignés sur le format attendu côté Origin : `cog_id` + `timestamp`.
+/// `health` et `load` sont conservés pour enrichissement futur.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TrackerHeartbeatPayload {
     /// ID du COG.
     pub cog_id: String,
+    /// Timestamp Unix (secondes) — requis par le Tracker Origin.
+    pub timestamp: u64,
     /// État de santé (0-100).
+    #[serde(default)]
     pub health: u8,
     /// Charge (0-100).
+    #[serde(default)]
     pub load: u8,
 }
 

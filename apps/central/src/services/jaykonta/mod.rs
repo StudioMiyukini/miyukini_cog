@@ -27,8 +27,10 @@ use purse_forecast::PurseForecast;
 
 /// Espace actif dans JayKonta.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Default)]
 pub enum JayKontaSpace {
     /// Choix initial.
+    #[default]
     Selector,
     /// Budget personnel (JayBudget).
     Purse,
@@ -36,11 +38,6 @@ pub enum JayKontaSpace {
     Account,
 }
 
-impl Default for JayKontaSpace {
-    fn default() -> Self {
-        Self::Selector
-    }
-}
 
 /// Section active cote Purse.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]

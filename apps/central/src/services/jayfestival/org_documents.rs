@@ -29,7 +29,7 @@ pub fn OrgDocuments(edition_id: String) -> Element {
             }
 
             // Catégories
-            DocumentCategories { selected: selected_cat.clone() }
+            DocumentCategories { selected: selected_cat }
 
             // Liste des documents
             DocumentsList {}

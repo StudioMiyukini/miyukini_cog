@@ -14,7 +14,7 @@ pub fn ProfileWindow() -> Element {
 
     let profile = state.read().current_user.clone();
     let Some(ref p) = profile else {
-        return rsx! { div { style: "display: none;" } }.into();
+        return rsx! { div { style: "display: none;" } };
     };
 
     let display_name = profile_display_name(p);

@@ -46,14 +46,11 @@ pub fn CalendarHeader(props: CalendarHeaderProps) -> Element {
             let week_num = props.current_date.iso_week().week();
             format!("{} {} — Semaine {}", month_name(props.current_date.month()), props.current_date.year(), week_num)
         }
-        CalendarViewMode::Month => {
+        CalendarViewMode::Month | CalendarViewMode::Schedule => {
             format!("{} {}", month_name(props.current_date.month()), props.current_date.year())
         }
         CalendarViewMode::Year => {
             format!("{}", props.current_date.year())
-        }
-        CalendarViewMode::Schedule => {
-            format!("{} {}", month_name(props.current_date.month()), props.current_date.year())
         }
     };
     
@@ -173,14 +170,14 @@ pub fn EventBlock(props: EventBlockProps) -> Element {
     
     let title = props.entry.title.as_deref().unwrap_or("Sans titre");
     let color = props.entry.color.as_deref().unwrap_or("#4285F4");
-    let entry_type = props.entry.entry_type.as_deref().map(EntryType::from_str).unwrap_or(EntryType::Internal);
+    let entry_type = props.entry.entry_type.as_deref().map_or(EntryType::Internal, EntryType::from_str);
     let is_readonly = entry_type.is_readonly();
     
     // Formater l'heure
     let time_label = if let (Some(start), Some(end)) = (&props.entry.start_datetime, &props.entry.end_datetime) {
         let start_time = &start[11..16];
         let end_time = &end[11..16];
-        format!("{} — {}", start_time, end_time)
+        format!("{start_time} — {end_time}")
     } else {
         String::new()
     };

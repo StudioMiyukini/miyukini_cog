@@ -24,7 +24,7 @@ pub fn TabBar() -> Element {
 
                     if tab.service_id.is_some() {
                         span { style: "font-size: 14px;",
-                            { state.read().services.iter().find(|s| Some(&s.id) == tab.service_id.as_ref()).map(|s| s.icon.clone()).unwrap_or("📦".to_string()) }
+                            { state.read().services.iter().find(|s| Some(&s.id) == tab.service_id.as_ref()).map_or_else(|| "📦".to_string(), |s| s.icon.clone()) }
                         }
                     } else {
                         span { style: "font-size: 14px;", "🏠" }

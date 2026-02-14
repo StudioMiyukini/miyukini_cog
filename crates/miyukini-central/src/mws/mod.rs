@@ -24,6 +24,7 @@ use std::sync::Arc;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpListener;
 use tokio::sync::{oneshot, RwLock};
+use tokio::time::{sleep, Duration};
 use tracing::{error, info, warn};
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -436,6 +437,33 @@ impl CentralMwsManager {
                     *svc = Some(service);
                 }
 
+                // Démarrer le heartbeat Central → Tracker pour maintenir la connexion.
+                // Intervalle de 25s (le seuil Absent côté Origin est 90s, TTL cleanup 300s).
+                let service_ref = Arc::clone(&self.service);
+                let cog_id_log = self.cog_id.clone();
+                let heartbeat_interval_secs = 25u64;
+                info!("Démarrage heartbeat Central → Tracker (interval={}s, cog={})", heartbeat_interval_secs, &cog_id_log);
+                tokio::spawn(async move {
+                    let mut count: u64 = 0;
+                    loop {
+                        sleep(Duration::from_secs(heartbeat_interval_secs)).await;
+                        count += 1;
+                        let guard = service_ref.read().await;
+                        let Some(ref svc) = *guard else {
+                            warn!("[Heartbeat #{}] Service MWS disparu, arrêt du heartbeat (COG {})", count, cog_id_log);
+                            break;
+                        };
+                        match svc.send_heartbeat().await {
+                            Ok(()) => {
+                                info!("[Heartbeat #{} OK] Central → Tracker (COG {})", count, cog_id_log);
+                            }
+                            Err(e) => {
+                                warn!("[Heartbeat #{} ERREUR] Central → Tracker (COG {}): {}", count, cog_id_log, e);
+                            }
+                        }
+                    }
+                });
+
                 // Conformité complète
                 self.update_conformity(MwsConformityState::FullyConformant).await;
                 self.update_state(CentralMwsState::Connected).await;
@@ -456,8 +484,9 @@ impl CentralMwsManager {
                     let bind_for_server = bind_addr.clone();
                     let bind_for_log = bind_addr.clone();
                     tokio::spawn(async move {
-                        if let Err(e) = run_home_server(bind_for_server, cog_id, core_version, services, home_jayxpose, rx).await {
-                            warn!("Serveur Home arrêté: {}", e);
+                        match run_home_server(bind_for_server.clone(), cog_id, core_version, services, home_jayxpose, rx).await {
+                            Ok(()) => info!("Serveur Home arrêté proprement"),
+                            Err(e) => error!("❌ Serveur Home ERREUR (bind={}): {}", bind_for_server, e),
                         }
                     });
                     let mut shutdown_guard = self.home_server_shutdown.write().await;
@@ -868,13 +897,14 @@ async fn run_home_server(
                 break;
             }
             accept_result = listener.accept() => {
-                let (stream, _addr) = match accept_result {
+                let (stream, addr) = match accept_result {
                     Ok(x) => x,
                     Err(e) => {
                         warn!("Accept Home: {}", e);
                         continue;
                     }
                 };
+                info!("[Home Server] Connexion entrante depuis {}", addr);
                 let cog_id = cog_id.clone();
                 let core_version = core_version.clone();
                 let services = services.clone();

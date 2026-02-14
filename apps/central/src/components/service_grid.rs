@@ -43,11 +43,11 @@ pub fn ServiceGrid(props: ServiceGridProps) -> Element {
         .filter(|s| {
             // Filtre de recherche
             let query = state.read().search_query.to_lowercase();
-            if !query.is_empty() {
-                if !s.name.to_lowercase().contains(&query) 
-                    && !s.description.to_lowercase().contains(&query) {
-                    return false;
-                }
+            if !query.is_empty()
+                && !s.name.to_lowercase().contains(&query)
+                && !s.description.to_lowercase().contains(&query)
+            {
+                return false;
             }
 
             // Filtre de catégorie

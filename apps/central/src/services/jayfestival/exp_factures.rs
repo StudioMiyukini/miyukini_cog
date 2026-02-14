@@ -15,7 +15,7 @@ pub fn ExpFactures() -> Element {
         return rsx! {
             FactureDetail {
                 facture_id: facture_id,
-                on_back: move |_| { selected_facture.set(None); },
+                on_back: move |()| { selected_facture.set(None); },
             }
         };
     }

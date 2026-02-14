@@ -33,8 +33,8 @@ pub fn Connexion() -> Element {
     let mut step = use_signal(|| if has_saved { STEP_ACCUEIL } else { STEP_CLE });
     let initial_email = saved_email.clone();
     let mut email = use_signal(move || initial_email.clone());
-    let mut password = use_signal(|| String::new());
-    let mut error = use_signal(|| String::new());
+    let mut password = use_signal(String::new);
+    let mut error = use_signal(String::new);
     // Index de la phrase (et du son) Miou choisi au montage (0=a, 1=b, 2=c).
     let mut miou_phrase_index = use_signal(|| None::<usize>);
 

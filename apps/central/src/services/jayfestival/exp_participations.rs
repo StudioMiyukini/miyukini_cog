@@ -51,7 +51,7 @@ pub fn ExpParticipations() -> Element {
         return rsx! {
             ParticipationDetail {
                 participation_id: part_id,
-                on_back: move |_| { selected_participation.set(None); },
+                on_back: move |()| { selected_participation.set(None); },
             }
         };
     }

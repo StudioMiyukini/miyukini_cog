@@ -12,8 +12,8 @@ pub fn Header() -> Element {
     let theme = state.read().current_theme;
     let c = theme.palette();
 
-    let display_name = state.read().current_user.as_ref().map(profile_display_name).unwrap_or_else(|| "Profil".to_string());
-    let initial = display_name.chars().next().map(|c| c.to_uppercase().next().unwrap_or(c)).unwrap_or('?');
+    let display_name = state.read().current_user.as_ref().map_or_else(|| "Profil".to_string(), profile_display_name);
+    let initial = display_name.chars().next().map_or('?', |c| c.to_uppercase().next().unwrap_or(c));
 
     rsx! {
         header {

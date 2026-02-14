@@ -7,7 +7,8 @@
 //! - Créer et rejoindre des lobbys
 //! - Activer/désactiver le mode Lone (COG isolé)
 
-use crate::data::use_service_connections;
+use crate::data::{profile_display_name, use_service_connections};
+use crate::state::AppContext;
 use dioxus::prelude::*;
 use miyukini_central::{
     CentralMwsConfig, CentralMwsManager, CentralMwsState, MwsConformityState, MwsStatusSummary,
@@ -81,7 +82,45 @@ pub struct DiscoveredLobby {
 #[component]
 pub fn MwsNetworkView() -> Element {
     let mws_state = use_signal(MwsViewState::default);
+    // Compteur de rafraîchissement : chaque incrément force un re-render du composant.
+    let tick = use_signal(|| 0u64);
     let conns = use_service_connections();
+
+    // Lire tick pour s'y abonner — toute écriture déclenche un re-render.
+    let _tick_val = *tick.read();
+
+    // Polling de l'état MWS via le manager (toutes les 2s).
+    // On passe par `tick` pour forcer le re-render quand l'état change.
+    use_future(move || {
+        let mut state = mws_state;
+        let mut tick = tick;
+        async move {
+            loop {
+                tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+
+                let arc = state.read().manager.clone();
+                let guard = arc.read().await;
+                if let Some(ref manager) = *guard {
+                    let st = manager.get_state().await;
+                    let conf = manager.get_conformity_state().await;
+                    drop(guard);
+
+                    let current_state = state.read().state.clone();
+                    let current_conf = state.read().conformity.clone();
+                    if st != current_state || conf != current_conf {
+                        tracing::info!("[MWS UI poll] état changé: {:?} → {:?}, conformité: {:?} → {:?}", current_state, st, current_conf, conf);
+                        let mut s = state.write();
+                        s.state = st;
+                        s.conformity = conf;
+                        s.connecting = false;
+                        drop(s);
+                        let n = *tick.read();
+                        tick.set(n + 1);
+                    }
+                }
+            }
+        }
+    });
 
     rsx! {
         div {
@@ -109,20 +148,18 @@ pub fn MwsNetworkView() -> Element {
                     style: "display: flex; gap: 12px; align-items: center;",
                     
                     // Toggle Mode Lone
-                    MwsLoneModeToggle { state: mws_state }
+                    MwsLoneModeToggle { state: mws_state, tick }
                     
                     // Bouton connexion/déconnexion
-                    MwsConnectionButton { state: mws_state, conns }
+                    MwsConnectionButton { state: mws_state, conns, tick }
                 }
             }
 
             // État de connexion avec étapes de conformité
             MwsStatusCard { state: mws_state }
 
-            // Barre de progression de conformité (pendant connexion)
-            if mws_state.read().connecting {
-                MwsConformityProgress { state: mws_state }
-            }
+            // Protocole de conformité MWS — toujours visible pour refléter l'état (étape 0/10 → 10/10)
+            MwsConformityProgress { state: mws_state }
 
             // Mode Lone actif
             if mws_state.read().is_lone {
@@ -186,29 +223,34 @@ pub fn MwsNetworkView() -> Element {
 
 /// Toggle pour le mode Lone.
 #[component]
-fn MwsLoneModeToggle(mut state: Signal<MwsViewState>) -> Element {
+fn MwsLoneModeToggle(mut state: Signal<MwsViewState>, mut tick: Signal<u64>) -> Element {
     let is_lone = state.read().is_lone;
 
     let onclick = move |_| {
-        let mut state = state.clone();
+        let mut state = state;
+        let mut tick = tick;
         let will_be_lone = !state.read().is_lone;
         if will_be_lone {
-            // Passer en Lone : déconnecter le manager MWS puis mettre à jour l'état
             spawn(async move {
-                real_mws_disconnect(state.clone()).await;
+                real_mws_disconnect(state, tick).await;
                 let mut s = state.write();
                 s.is_lone = true;
                 s.state = CentralMwsState::Lone;
                 s.conformity = MwsConformityState::LoneMode;
                 s.discovered_cogs.clear();
                 s.discovered_lobbys.clear();
+                drop(s);
+                let n = *tick.read();
+                tick.set(n + 1);
             });
         } else {
-            // Quitter le mode Lone : état déconnecté
             let mut s = state.write();
             s.is_lone = false;
             s.state = CentralMwsState::Disconnected;
             s.conformity = MwsConformityState::Uninitialized;
+            drop(s);
+            let n = *tick.read();
+            tick.set(n + 1);
         }
     };
 
@@ -243,7 +285,7 @@ fn MwsConformityProgress(state: Signal<MwsViewState>) -> Element {
     let conformity = state.read().conformity.clone();
     let step = conformity.step_number();
     let total_steps = 10u8;
-    let progress_pct = (step as f32 / total_steps as f32 * 100.0) as u32;
+    let progress_pct = (f32::from(step) / f32::from(total_steps) * 100.0) as u32;
 
     // Étapes de conformité
     let steps = [
@@ -353,32 +395,41 @@ fn MwsConformityProgress(state: Signal<MwsViewState>) -> Element {
 
 /// Bouton de connexion/déconnexion.
 #[component]
-fn MwsConnectionButton(mut state: Signal<MwsViewState>, conns: Signal<Arc<crate::data::ServiceConnections>>) -> Element {
+fn MwsConnectionButton(
+    mut state: Signal<MwsViewState>,
+    conns: Signal<Arc<crate::data::ServiceConnections>>,
+    tick: Signal<u64>,
+) -> Element {
     let current_state = state.read().state.clone();
     let conformity = state.read().conformity.clone();
     let connecting = state.read().connecting;
     let is_lone = state.read().is_lone;
 
-    // Déterminer les propriétés du bouton via le résumé d'état
     let summary = MwsStatusSummary::from_state(&current_state, &conformity);
 
+    // Récupérer le display_name de l'utilisateur pour l'identifiant COG sur le Webway
+    let app_ctx = use_context::<AppContext>();
+    let user_display_name = app_ctx.state.read().current_user.as_ref()
+        .map(|p| profile_display_name(p))
+        .unwrap_or_else(|| "central-native".to_string());
+
     let onclick = move |_| {
-        let state = state.clone();
+        let state = state;
         let conns_arc = conns.read().clone();
+        let tick = tick;
+        let dn = user_display_name.clone();
         spawn(async move {
             let current = state.read().state.clone();
             let is_lone = state.read().is_lone;
 
             if is_lone {
-                return; // Pas d'action en mode Lone
+                return;
             }
 
             if current == CentralMwsState::Connected || current == CentralMwsState::RelayConnected {
-                // Déconnexion réelle via le manager MWS
-                real_mws_disconnect(state.clone()).await;
+                real_mws_disconnect(state, tick).await;
             } else {
-                // Connexion réelle au réseau MWS
-                real_mws_connect(state.clone(), conns_arc).await;
+                real_mws_connect(state, conns_arc, tick, dn).await;
             }
         });
     };
@@ -420,7 +471,15 @@ fn MwsConnectionButton(mut state: Signal<MwsViewState>, conns: Signal<Arc<crate:
 /// Connexion réelle au réseau MWS via CentralMwsManager et miyuwebway_participant.
 /// Active le serveur Home (page de présentation du COG) lorsque annoncé sur le Tracker.
 /// Si une vitrine JayXpose est publiée, la carte « Découvrir » est affichée sur la Home.
-async fn real_mws_connect(mut state: Signal<MwsViewState>, conns: Arc<crate::data::ServiceConnections>) {
+/// `tick` est incrémenté après mise à jour pour forcer le re-render de l'UI (spawn → Dioxus).
+/// `display_name` est le pseudonyme ou l'email de l'utilisateur connecté — utilisé comme identifiant COG sur le Webway.
+async fn real_mws_connect(
+    mut state: Signal<MwsViewState>,
+    conns: Arc<crate::data::ServiceConnections>,
+    mut tick: Signal<u64>,
+    display_name: String,
+) {
+    tracing::info!("[MWS UI] real_mws_connect démarré (cog_id={})", &display_name);
     {
         let mut s = state.write();
         s.connecting = true;
@@ -428,28 +487,35 @@ async fn real_mws_connect(mut state: Signal<MwsViewState>, conns: Arc<crate::dat
         s.state = CentralMwsState::Connecting;
     }
 
-    let mut config = CentralMwsConfig::default();
-    // Exposer la page Home du COG quand annoncé : écoute HTTP et adresse annoncée au Tracker
-    config.home_http_bind = Some("0.0.0.0:8080".to_string());
-    config.public_address = "127.0.0.1:8080".to_string(); // Lien "Visiter" sur le catalogue Origin
-
     // Slug vitrine JayXpose publiée (pour la carte « Découvrir » sur la Home)
     let jayxpose_slug = conns.jayxpose.first_published_vitrine_slug().ok().flatten();
-    if let Some(ref _slug) = jayxpose_slug {
-        config.expose_jayxpose_vitrine = true;
-        // URL de base des vitrines (serveur web Origin) : dérivée du relay par défaut
-        let (host, _) = config.relay_address.split_once(':').unwrap_or((config.relay_address.as_str(), "7000"));
-        config.jayxpose_vitrine_base_url = Some(format!("http://{}:8080", host));
-    }
+    let default_cfg = CentralMwsConfig::default();
+    let (expose_jayxpose_vitrine, jayxpose_vitrine_base_url) = if jayxpose_slug.is_some() {
+        let (host, _) = default_cfg.relay_address.split_once(':').unwrap_or((default_cfg.relay_address.as_str(), "7000"));
+        (true, Some(format!("http://{host}:8080")))
+    } else {
+        (false, None)
+    };
+    // Exposer la page Home du COG quand annoncé : écoute HTTP et adresse annoncée au Tracker
+    // Port 8090 pour éviter conflit avec Origin (8080 par défaut)
+    let config = CentralMwsConfig {
+        home_http_bind: Some("0.0.0.0:8090".to_string()),
+        public_address: "127.0.0.1:8090".to_string(), // Lien "Visiter" sur le catalogue Origin
+        expose_jayxpose_vitrine,
+        jayxpose_vitrine_base_url,
+        ..default_cfg
+    };
 
     let services = if jayxpose_slug.is_some() {
         vec!["jayxpose".to_string()]
     } else {
         vec![]
     };
+    // Utiliser le display_name de l'utilisateur comme cog_id au lieu de "central-native"
+    let cog_id = if display_name.is_empty() { "central-native".to_string() } else { display_name };
     let manager = CentralMwsManager::new(
         config,
-        "central-native".to_string(),
+        cog_id,
         "0.1.0".to_string(),
         services,
         jayxpose_slug,
@@ -497,18 +563,27 @@ async fn real_mws_connect(mut state: Signal<MwsViewState>, conns: Arc<crate::dat
                     password_required: r.lobby.password_required,
                 })
                 .collect();
+            drop(s);
+            tracing::info!("[MWS UI] real_mws_connect OK → tick++");
+            let n = *tick.read();
+            tick.set(n + 1);
         }
         Err(e) => {
+            tracing::error!("[MWS UI] real_mws_connect ERREUR: {}", &e);
             let mut s = state.write();
             s.connecting = false;
             s.error = Some(e.clone());
             s.state = CentralMwsState::Error(e);
+            drop(s);
+            let n = *tick.read();
+            tick.set(n + 1);
         }
     }
 }
 
 /// Déconnexion réelle du réseau MWS.
-async fn real_mws_disconnect(mut state: Signal<MwsViewState>) {
+async fn real_mws_disconnect(mut state: Signal<MwsViewState>, mut tick: Signal<u64>) {
+    tracing::info!("[MWS UI] real_mws_disconnect…");
     let arc = state.read().manager.clone();
     let mut guard = arc.write().await;
     if let Some(mgr) = guard.take() {
@@ -525,6 +600,9 @@ async fn real_mws_disconnect(mut state: Signal<MwsViewState>) {
         s.connecting = false;
         s.error = None;
     }
+    tracing::info!("[MWS UI] real_mws_disconnect terminé → tick++");
+    let n = *tick.read();
+    tick.set(n + 1);
 }
 
 /// Carte d'état de connexion.
@@ -640,8 +718,8 @@ fn MwsStatusCard(state: Signal<MwsViewState>) -> Element {
                         font-size: 12px;
                         color: #6b7280;
                     ",
-                    span { "📡 Relay: origin.miyukini.net:7000" }
-                    span { "📊 Tracker: origin.miyukini.net:21000" }
+                    span { "📡 Relay: miyukini.com:7000" }
+                    span { "📊 Tracker: miyukini.com:21000" }
                     if conformity.is_online() {
                         span { style: "color: #10b981;", "✓ Permis actif" }
                     }
@@ -655,7 +733,7 @@ fn MwsStatusCard(state: Signal<MwsViewState>) -> Element {
 #[component]
 fn MwsSearchSection(mut state: Signal<MwsViewState>) -> Element {
     let search_cogs = move |_| {
-        let mut state = state.clone();
+        let mut state = state;
         spawn(async move {
             let arc = state.read().manager.clone();
             let guard = arc.read().await;

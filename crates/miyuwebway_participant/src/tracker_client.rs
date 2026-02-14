@@ -188,6 +188,10 @@ impl TrackerClient {
 
         let payload = TrackerHeartbeatPayload {
             cog_id: cog_id.to_string(),
+            timestamp: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_secs())
+                .unwrap_or(0),
             health,
             load,
         };

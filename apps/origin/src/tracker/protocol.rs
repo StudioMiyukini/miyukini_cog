@@ -484,11 +484,14 @@ impl JoinLobbyResultPayload {
 }
 
 /// Payload HEARTBEAT.
+/// Accepte les champs supplémentaires (`health`, `load`) envoyés par les participants
+/// sans échouer à la désérialisation.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HeartbeatPayload {
     /// ID du COG.
     pub cog_id: String,
-    /// Timestamp.
+    /// Timestamp Unix (secondes).
+    #[serde(default)]
     pub timestamp: u64,
 }
 

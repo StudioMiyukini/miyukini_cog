@@ -63,7 +63,7 @@ pub fn WeekView(props: WeekViewProps) -> Element {
     // IDs des entrées en conflit
     let conflict_ids: Vec<String> = props.conflicts.iter()
         .flat_map(|c| [c.entry_a_id.clone(), c.entry_b_id.clone()])
-        .filter_map(|id| id)
+        .flatten()
         .collect();
 
     rsx! {
@@ -208,8 +208,7 @@ pub fn WeekView(props: WeekViewProps) -> Element {
                                         {
                                             let (top_px, height_px) = calculate_event_position(entry, hour_height);
                                             let has_conflict = entry.id.as_ref()
-                                                .map(|id| conflict_ids.contains(id))
-                                                .unwrap_or(false);
+                                                .is_some_and(|id| conflict_ids.contains(id));
                                             
                                             rsx! {
                                                 EventBlock {

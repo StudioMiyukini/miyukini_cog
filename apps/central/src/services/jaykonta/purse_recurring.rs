@@ -39,12 +39,12 @@ pub fn PurseRecurring(state: Signal<JayKontaState>) -> Element {
     let monthly_expense: f64 = expenses
         .iter()
         .filter(|r| r.is_active)
-        .map(|r| monthly_amount(r))
+        .map(monthly_amount)
         .sum();
     let monthly_income: f64 = incomes
         .iter()
         .filter(|r| r.is_active)
-        .map(|r| monthly_amount(r))
+        .map(monthly_amount)
         .sum();
 
     rsx! {
@@ -123,7 +123,7 @@ pub fn PurseRecurring(state: Signal<JayKontaState>) -> Element {
                 }
 
                 for item in incomes.into_iter() {
-                    { render_recurring_row(&item, c.clone(), conns.clone(), refresh_tick) }
+                    { render_recurring_row(&item, &c, conns, refresh_tick) }
                 }
             }
 
@@ -145,7 +145,7 @@ pub fn PurseRecurring(state: Signal<JayKontaState>) -> Element {
                 }
 
                 for item in expenses.into_iter() {
-                    { render_recurring_row(&item, c.clone(), conns.clone(), refresh_tick) }
+                    { render_recurring_row(&item, &c, conns, refresh_tick) }
                 }
             }
         }
@@ -155,7 +155,7 @@ pub fn PurseRecurring(state: Signal<JayKontaState>) -> Element {
 /// Rend une ligne de transaction recurrente (inline, pas un composant Dioxus pour eviter PartialEq).
 fn render_recurring_row(
     item: &jaykonta::domain::purse::RecurringTransaction,
-    c: crate::theme::ThemePalette,
+    c: &crate::theme::ThemePalette,
     conns: Signal<std::sync::Arc<crate::data::ServiceConnections>>,
     mut refresh_tick: Signal<u32>,
 ) -> Element {
@@ -285,14 +285,14 @@ fn RecurringForm(
     let conns = use_service_connections();
 
     let mut direction = use_signal(|| "expense".to_string());
-    let mut amount = use_signal(|| String::new());
-    let mut description = use_signal(|| String::new());
+    let mut amount = use_signal(String::new);
+    let mut description = use_signal(String::new);
     let mut frequency = use_signal(|| "monthly".to_string());
     let mut day_of_month = use_signal(|| "1".to_string());
     let mut start_date = use_signal(|| chrono::Local::now().format("%Y-%m-%d").to_string());
-    let mut end_date = use_signal(|| String::new());
-    let mut notes = use_signal(|| String::new());
-    let mut error_msg = use_signal(|| String::new());
+    let mut end_date = use_signal(String::new);
+    let mut notes = use_signal(String::new);
+    let mut error_msg = use_signal(String::new);
 
     // Charger les categories
     let categories = {
@@ -301,7 +301,7 @@ fn RecurringForm(
         let aid = get_account_id(db);
         db.list_categories(&aid).unwrap_or_default()
     };
-    let mut category_id = use_signal(|| String::new());
+    let mut category_id = use_signal(String::new);
 
     let input_style = format!(
         "padding: 8px 12px; background: {}; border: 1px solid {}; border-radius: 4px; color: {}; font-size: 13px;",
@@ -509,7 +509,7 @@ fn RecurringForm(
                             note.as_deref(),
                         );
                         match result {
-                            Ok(_) => {
+                            Ok(()) => {
                                 error_msg.set(String::new());
                                 on_save.call(evt);
                             }

@@ -35,9 +35,9 @@ pub fn resolve_voice_path(base: &Path, subpath: &str) -> PathBuf {
 pub fn play_mp3_background(path: PathBuf) {
     std::thread::spawn(move || {
         if let Err(e) = play_mp3_sync(&path) {
-            let msg = format!("Lecture voix Miou: {} — {}", path.display(), e);
+            let msg = format!("Lecture voix Miou: {} — {e}", path.display());
             tracing::warn!("{}", msg);
-            eprintln!("[Central] {}", msg);
+            eprintln!("[Central] {msg}");
         }
     });
 }
@@ -48,7 +48,7 @@ pub fn play_voice_background(base: &Path, filename: &str) {
     if !path.exists() {
         let msg = format!("Fichier voix introuvable: {}", path.display());
         tracing::warn!("{}", msg);
-        eprintln!("[Central] {}", msg);
+        eprintln!("[Central] {msg}");
         return;
     }
     play_mp3_background(path);
@@ -64,7 +64,7 @@ fn play_mp3_sync(path: &PathBuf) -> Result<(), String> {
                 if let Err(fb) = play_via_shell_windows(path) {
                     return Err(format!("{e}; fallback Windows: {fb}"));
                 }
-                return Ok(());
+                Ok(())
             }
             #[cfg(not(windows))]
             Err(e)

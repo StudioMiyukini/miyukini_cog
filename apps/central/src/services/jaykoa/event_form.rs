@@ -306,7 +306,7 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
                                 {
                                     let is_selected = *selected_color.read() == color;
                                     let border_style = if is_selected { "3px solid white".to_string() } else { "none".to_string() };
-                                    let shadow_style = if is_selected { format!("0 0 0 2px {}", color) } else { "none".to_string() };
+                                    let shadow_style = if is_selected { format!("0 0 0 2px {color}") } else { "none".to_string() };
                                     rsx! {
                                         button {
                                             key: "{color}",

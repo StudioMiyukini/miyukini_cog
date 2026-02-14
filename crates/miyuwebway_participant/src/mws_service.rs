@@ -156,9 +156,11 @@ impl MwsService {
             *state = MwsServiceState::ConnectingTracker;
         }
 
+        // Le permis_id reçu du Relay est une string UTF-8 (ex: "permis-xxx")
+        // On doit le passer tel quel au Tracker, pas l'encoder en hex
         let permis_id = session
             .permis_id
-            .map(|p| hex::encode(&p))
+            .map(|p| String::from_utf8_lossy(&p).to_string())
             .unwrap_or_default();
 
         let lobbys = self.lobbys.read().await.clone();
@@ -187,6 +189,22 @@ impl MwsService {
             self.start_heartbeat_task(identity.cog_id.clone()).await;
         }
 
+        Ok(())
+    }
+
+    /// Envoie un heartbeat au Tracker pour maintenir la connexion (appelable par le Central).
+    pub async fn send_heartbeat(&self) -> Result<(), MiyuwebwayParticipantError> {
+        self.ensure_online().await?;
+        let identity = self.identity.read().await;
+        let cog_id = identity
+            .as_ref()
+            .ok_or(MiyuwebwayParticipantError::NotConnected)?
+            .cog_id
+            .clone();
+        drop(identity);
+        tracing::debug!("[MWS Participant] send_heartbeat cog_id={}", &cog_id);
+        self.tracker_client.heartbeat(&cog_id, 100, 0).await?;
+        tracing::debug!("[MWS Participant] heartbeat ACK reçu pour {}", &cog_id);
         Ok(())
     }
 

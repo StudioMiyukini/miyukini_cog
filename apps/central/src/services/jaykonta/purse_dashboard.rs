@@ -26,8 +26,6 @@ pub fn PurseDashboard(state: Signal<JayKontaState>) -> Element {
     let solde_str = format!("{solde:.2} EUR");
     let expenses_str = format!("{:.2} EUR", stats.monthly_expenses);
     let budget_pct = format!("{:.0}%", stats.budget_usage_pct);
-    let _solde_positive = solde >= 0.0;
-
     rsx! {
         div {
             style: "display: flex; flex-direction: column; gap: 24px;",
@@ -146,7 +144,7 @@ pub fn PurseDashboard(state: Signal<JayKontaState>) -> Element {
 
                 ActionButton {
                     label: "+ Nouveau mouvement".to_string(),
-                    icon: "".to_string(),
+                    icon: String::new(),
                     accent: true,
                     onclick: move |_| {
                         state.write().purse_section = PurseSection::NouveauMouvement;

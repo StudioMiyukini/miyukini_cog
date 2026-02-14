@@ -211,7 +211,7 @@ pub fn OrgProgramme(edition_id: String) -> Element {
                                 _ => c.text_secondary,
                             };
                             let delete_id = anim_id.clone();
-                            let conns_del = conns.clone();
+                            let conns_del = conns;
                             rsx! {
                                 div {
                                     style: "display: flex; align-items: center; gap: 12px; background: {c.bg_secondary}; border-radius: 8px; padding: 12px 16px;",

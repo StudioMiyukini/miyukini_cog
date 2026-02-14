@@ -1,10 +1,14 @@
 //! Gestion du lancement automatique de KindMother.
 //!
-//! Ce module vérifie si le service KindMother est accessible.
-//! Si non, il tente de le lancer automatiquement avant que Central ne démarre.
+//! Ordre au démarrage de Central :
+//! 1. **Dépendances** : vérifier que les dépendances sont présentes ;
+//!    - `kindmother-server` (exécutable) : si absent, construire `kindmother-service` ;
+//!    - `miyuwebway_participant` (bibliothèque MWS) : si workspace dispo, construire le crate.
+//! 2. **Présence KM** : vérifier que le service KindMother est accessible (déjà en cours) ;
+//!    si non, le lancer puis attendre qu'il soit prêt.
 
 use std::net::TcpStream;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::time::Duration;
 use std::thread;
@@ -21,6 +25,12 @@ const MAX_RETRY_ATTEMPTS: u32 = 10;
 /// Délai entre les tentatives (ms).
 const RETRY_DELAY_MS: u64 = 500;
 
+/// Nom du package Cargo pour le serveur KindMother.
+const KINDMOTHER_SERVICE_PACKAGE: &str = "kindmother-service";
+
+/// Nom du package Cargo pour le client MWS (bibliothèque, utilisée par Central).
+const MIYUWEBWAY_PARTICIPANT_PACKAGE: &str = "miyuwebway_participant";
+
 /// Résultat du lancement de KindMother.
 #[derive(Debug)]
 pub enum LaunchResult {
@@ -34,18 +44,162 @@ pub enum LaunchResult {
 
 /// Vérifie si KindMother est accessible sur l'adresse donnée.
 pub fn is_kindmother_running(addr: &str) -> bool {
-    match TcpStream::connect_timeout(
+    if TcpStream::connect_timeout(
         &addr.parse().expect("Invalid address"),
         Duration::from_millis(CONNECTION_TIMEOUT_MS),
-    ) {
-        Ok(_) => {
-            tracing::debug!("KindMother is reachable at {}", addr);
-            true
+    )
+    .is_ok()
+    {
+        tracing::debug!("KindMother is reachable at {addr}");
+        true
+    } else {
+        tracing::debug!("KindMother is not reachable at {addr}");
+        false
+    }
+}
+
+/// Indique si un répertoire est la racine du workspace (contient Cargo.toml avec [workspace]).
+fn is_workspace_root(dir: &Path) -> bool {
+    let cargo_toml = dir.join("Cargo.toml");
+    if let Ok(content) = std::fs::read_to_string(&cargo_toml) {
+        return content.contains("[workspace]");
+    }
+    false
+}
+
+/// Trouve la racine du workspace (répertoire contenant Cargo.toml avec [workspace]).
+fn find_workspace_root() -> Option<PathBuf> {
+    // 1. Depuis le répertoire courant (cas "cargo run" depuis la racine)
+    if let Ok(cwd) = std::env::current_dir() {
+        let mut cur = cwd.as_path();
+        for _ in 0..10 {
+            if is_workspace_root(cur) {
+                tracing::debug!("Workspace root (from cwd): {:?}", cur);
+                return Some(cur.to_path_buf());
+            }
+            cur = match cur.parent() {
+                Some(p) => p,
+                None => break,
+            };
         }
-        Err(_) => {
-            tracing::debug!("KindMother is not reachable at {}", addr);
-            false
+    }
+
+    // 2. Depuis l'exécutable (ex: .../Miyukini_COG/target/debug/miyukini-central.exe)
+    if let Ok(exe) = std::env::current_exe() {
+        let mut cur = exe.parent();
+        // Remonter target/debug ou target/release
+        while let Some(p) = cur {
+            if let Some(name) = p.file_name() {
+                let name = name.to_string_lossy();
+                if name == "debug" || name == "release" {
+                    if let Some(target) = p.parent() {
+                        if target.file_name().is_some_and(|n| n == "target") {
+                            if let Some(ws) = target.parent() {
+                                if is_workspace_root(ws) {
+                                    tracing::debug!("Workspace root (from exe): {:?}", ws);
+                                    return Some(ws.to_path_buf());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            cur = p.parent();
         }
+    }
+
+    None
+}
+
+/// Construit un ou plusieurs packages Cargo (depuis la racine du workspace).
+fn build_packages(workspace_root: &Path, release: bool, packages: &[&str]) -> Result<(), String> {
+    let mut cmd = Command::new("cargo");
+    cmd.current_dir(workspace_root).arg("build");
+    for p in packages {
+        cmd.arg("-p").arg(p);
+    }
+    if release {
+        cmd.arg("--release");
+    }
+    cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
+
+    let profile = if release { "release" } else { "debug" };
+    tracing::info!(
+        "Construction de {} (profile: {})...",
+        packages.join(", "),
+        profile
+    );
+
+    let output = cmd
+        .output()
+        .map_err(|e| format!("Impossible de lancer cargo: {e}"))?;
+
+    if output.status.success() {
+        tracing::info!("Packages construits avec succès.");
+        Ok(())
+    } else {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        Err(format!(
+            "cargo build -p {} a échoué:\n{}",
+            packages.join(" -p "),
+            stderr.trim()
+        ))
+    }
+}
+
+/// Assure que les dépendances sont présentes (kindmother-server, miyuwebway_participant).
+///
+/// - **kindmother-server** (exécutable) : si absent, construction de `kindmother-service` et de
+///   `miyuwebway_participant` (bibliothèque MWS utilisée par Central).
+/// - **miyuwebway_participant** (bibliothèque) : construite en même temps que kindmother-service
+///   lorsque l'exécutable est manquant, pour garder le workspace cohérent.
+///
+/// # Returns
+/// - `Ok(())` si l'exécutable est présent ou a été construit
+/// - `Err(msg)` si absent et construction impossible ou échouée
+pub fn ensure_dependencies() -> Result<(), String> {
+    if find_kindmother_executable().is_some() {
+        tracing::info!("Dépendances (kindmother-server, miyuwebway_participant) déjà présentes.");
+        return Ok(());
+    }
+
+    tracing::info!(
+        "kindmother-server introuvable, construction de {} et {}...",
+        MIYUWEBWAY_PARTICIPANT_PACKAGE,
+        KINDMOTHER_SERVICE_PACKAGE
+    );
+
+    let workspace_root = find_workspace_root().ok_or_else(|| {
+        "Racine du workspace introuvable (pas de Cargo.toml [workspace] depuis le répertoire courant ou le chemin de l'exécutable). \
+         Lancez Central depuis la racine du dépôt ou placez kindmother-server dans le même dossier que l'exécutable."
+            .to_string()
+    })?;
+
+    // Utiliser le même profile que Central (release si exe dans target/release)
+    let release = std::env::current_exe()
+        .ok()
+        .is_some_and(|exe_path| {
+            exe_path
+                .parent()
+                .and_then(std::path::Path::file_name)
+                .is_some_and(|n| n == "release")
+        });
+
+    build_packages(
+        &workspace_root,
+        release,
+        &[MIYUWEBWAY_PARTICIPANT_PACKAGE, KINDMOTHER_SERVICE_PACKAGE],
+    )?;
+
+    if find_kindmother_executable().is_some() {
+        Ok(())
+    } else {
+        Err(format!(
+            "{} a été construit mais l'exécutable kindmother-server est toujours introuvable. \
+             Vérifiez target/{}.",
+            KINDMOTHER_SERVICE_PACKAGE,
+            if release { "release" } else { "debug" }
+        ))
     }
 }
 
@@ -110,8 +264,7 @@ fn launch_kindmother_process(exe_path: &PathBuf) -> Result<Child, String> {
     
     // Configurer les variables d'environnement pour KindMother
     let data_dir = std::env::current_dir()
-        .map(|p| p.join("data").join("kindmother"))
-        .unwrap_or_else(|_| PathBuf::from("./data/kindmother"));
+        .map_or_else(|_| PathBuf::from("./data/kindmother"), |p| p.join("data").join("kindmother"));
     
     // Créer le répertoire de données si nécessaire
     if let Err(e) = std::fs::create_dir_all(&data_dir) {
@@ -125,7 +278,7 @@ fn launch_kindmother_process(exe_path: &PathBuf) -> Result<Child, String> {
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
-        .map_err(|e| format!("Failed to spawn kindmother-server: {}", e))
+        .map_err(|e| format!("Failed to spawn kindmother-server: {e}"))
 }
 
 /// Attend que KindMother soit prêt à accepter des connexions.
@@ -169,22 +322,19 @@ pub fn ensure_kindmother_running() -> LaunchResult {
     }
     
     // Trouver l'exécutable
-    let exe_path = match find_kindmother_executable() {
-        Some(path) => path,
-        None => {
-            let msg = "Could not find kindmother-server executable. \
-                       Please ensure it is built (cargo build -p kindmother-service) \
-                       or available in PATH.";
-            tracing::error!("{}", msg);
-            return LaunchResult::Failed(msg.to_string());
-        }
+    let Some(exe_path) = find_kindmother_executable() else {
+        let msg = "Could not find kindmother-server executable. \
+                   Please ensure it is built (cargo build -p kindmother-service) \
+                   or available in PATH.";
+        tracing::error!("{msg}");
+        return LaunchResult::Failed(msg.to_string());
     };
-    
+
     // Lancer le processus
     let child = match launch_kindmother_process(&exe_path) {
-        Ok(child) => child,
+        Ok(c) => c,
         Err(e) => {
-            tracing::error!("Failed to launch KindMother: {}", e);
+            tracing::error!("Failed to launch KindMother: {e}");
             return LaunchResult::Failed(e);
         }
     };
@@ -195,8 +345,7 @@ pub fn ensure_kindmother_running() -> LaunchResult {
         LaunchResult::Launched(child)
     } else {
         let msg = format!(
-            "KindMother was launched but failed to become ready after {} attempts",
-            MAX_RETRY_ATTEMPTS
+            "KindMother was launched but failed to become ready after {MAX_RETRY_ATTEMPTS} attempts"
         );
         tracing::error!("{}", msg);
         LaunchResult::Failed(msg)

@@ -121,7 +121,7 @@ fn VitrineParametres(exposant_id: String) -> Element {
     let mut seo_title = use_signal(|| exposant.seo_title.clone().unwrap_or_default());
     let mut seo_description = use_signal(|| exposant.seo_description.clone().unwrap_or_default());
     let mut seo_keywords = use_signal(|| exposant.seo_keywords.clone().unwrap_or_default());
-    let mut save_msg = use_signal(|| String::new());
+    let mut save_msg = use_signal(String::new);
 
     let on_save = move |_| {
         let mut exp = exposant.clone();
@@ -326,7 +326,7 @@ fn VitrinePreview(exposant_id: String) -> Element {
                                     h3 { style: "font-size: 14px; color: {c.text_white};", "{p.name.as_deref().unwrap_or(\"Produit\")}" }
                                     p {
                                         style: "font-size: 13px; color: {c.accent_blue}; margin-top: 4px;",
-                                        {p.price.map(|pr| format!("{:.2} EUR", pr)).unwrap_or_else(|| "Sur demande".to_string())}
+                                        {p.price.map_or_else(|| "Sur demande".to_string(), |pr| format!("{pr:.2} EUR"))}
                                     }
                                 }
                             }

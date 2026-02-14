@@ -89,7 +89,7 @@ pub fn Documents(state: Signal<JayXposeState>) -> Element {
                     DocView::Upload => rsx! {
                         UploadDocument {
                             exposant_id: exposant_id.clone(),
-                            on_done: move |_| view.set(DocView::Liste),
+                            on_done: move |()| view.set(DocView::Liste),
                         }
                     },
                     DocView::Partages => rsx! {
@@ -161,10 +161,10 @@ fn UploadDocument(
     let conns = use_service_connections();
 
     let mut doc_type = use_signal(|| "rib".to_string());
-    let mut custom_label = use_signal(|| String::new());
-    let mut file_name = use_signal(|| String::new());
-    let mut expires_at = use_signal(|| String::new());
-    let mut save_msg = use_signal(|| String::new());
+    let mut custom_label = use_signal(String::new);
+    let mut file_name = use_signal(String::new);
+    let mut expires_at = use_signal(String::new);
+    let mut save_msg = use_signal(String::new);
 
     let is_autre = doc_type.read().as_str() == "autre";
 
@@ -184,7 +184,7 @@ fn UploadDocument(
             doc_type: Some(dt),
             label: Some(label),
             file_name: Some(fname.clone()),
-            file_url: Some(format!("local://{}", fname)),
+            file_url: Some(format!("local://{fname}")),
             status: Some("en_attente".to_string()),
             expires_at: Some(expires_at.read().clone()).filter(|s| !s.is_empty()),
             version: Some(1),

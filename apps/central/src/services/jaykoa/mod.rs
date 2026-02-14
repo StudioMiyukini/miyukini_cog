@@ -126,7 +126,7 @@ pub fn JayKoaView() -> Element {
             CalendarViewMode::Day => (date, date),
             CalendarViewMode::Week => {
                 let weekday = date.weekday().num_days_from_monday();
-                let start = date - chrono::Duration::days(weekday as i64);
+                let start = date - chrono::Duration::days(i64::from(weekday));
                 let end = start + chrono::Duration::days(6);
                 (start, end)
             }
@@ -201,10 +201,10 @@ pub fn JayKoaView() -> Element {
                         }
                     }
                 },
-                on_create_event: move |_| {
+                on_create_event: move |()| {
                     koa_state.write().show_event_form = true;
                 },
-                on_sync_jayfestival: move |_| {
+                on_sync_jayfestival: move |()| {
                     koa_state.write().syncing_jayfestival = true;
                     // Lancer la synchronisation JayFestival
                     let conns = conns.read();
@@ -247,9 +247,9 @@ pub fn JayKoaView() -> Element {
                             id: Some(uuid::Uuid::new_v4().to_string()),
                             agenda_id: Some(target_id.clone()),
                             title: Some(title.to_string()),
-                            description: Some(format!("Édition JayFestival : {}", title)),
-                            start_datetime: Some(format!("{}T00:00:00", start)),
-                            end_datetime: Some(format!("{}T23:59:59", end)),
+                            description: Some(format!("Édition JayFestival : {title}")),
+                            start_datetime: Some(format!("{start}T00:00:00")),
+                            end_datetime: Some(format!("{end}T23:59:59")),
                             all_day: true,
                             location: Some(loc.to_string()),
                             status: Some("confirmed".to_string()),
@@ -280,10 +280,10 @@ pub fn JayKoaView() -> Element {
                     on_view_change: move |mode: CalendarViewMode| {
                         koa_state.write().view_mode = mode;
                     },
-                    on_today: move |_| {
+                    on_today: move |()| {
                         koa_state.write().current_date = chrono::Local::now().date_naive();
                     },
-                    on_prev: move |_| {
+                    on_prev: move |()| {
                         let mode = koa_state.read().view_mode;
                         let date = koa_state.read().current_date;
                         let new_date = match mode {
@@ -295,8 +295,7 @@ pub fn JayKoaView() -> Element {
                                 } else {
                                     let prev_month = date.month() - 1;
                                     let max_day = chrono::NaiveDate::from_ymd_opt(date.year(), prev_month + 1, 1)
-                                        .map(|d| d.pred_opt().unwrap_or(d).day())
-                                        .unwrap_or(28);
+                                        .map_or(28, |d| d.pred_opt().unwrap_or(d).day());
                                     chrono::NaiveDate::from_ymd_opt(date.year(), prev_month, date.day().min(max_day)).unwrap_or(date)
                                 }
                             }
@@ -305,7 +304,7 @@ pub fn JayKoaView() -> Element {
                         };
                         koa_state.write().current_date = new_date;
                     },
-                    on_next: move |_| {
+                    on_next: move |()| {
                         let mode = koa_state.read().view_mode;
                         let date = koa_state.read().current_date;
                         let new_date = match mode {
@@ -320,8 +319,7 @@ pub fn JayKoaView() -> Element {
                                         31
                                     } else {
                                         chrono::NaiveDate::from_ymd_opt(date.year(), next_month + 1, 1)
-                                            .map(|d| d.pred_opt().unwrap_or(d).day())
-                                            .unwrap_or(28)
+                                            .map_or(28, |d| d.pred_opt().unwrap_or(d).day())
                                     };
                                     chrono::NaiveDate::from_ymd_opt(date.year(), next_month, date.day().min(max_day)).unwrap_or(date)
                                 }
@@ -392,7 +390,7 @@ pub fn JayKoaView() -> Element {
                 EventFormModal {
                     initial_datetime: koa_state.read().new_event_start.clone(),
                     agendas: agendas_for_form.clone(),
-                    on_close: move |_| {
+                    on_close: move |()| {
                         koa_state.write().show_event_form = false;
                         koa_state.write().new_event_start = None;
                     },

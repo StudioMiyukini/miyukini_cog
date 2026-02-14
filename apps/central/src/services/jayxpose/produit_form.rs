@@ -36,7 +36,7 @@ pub fn ProduitForm(state: Signal<JayXposeState>) -> Element {
     let mut category_id = use_signal(|| existing.category_id.clone().unwrap_or_default());
     let mut availability = use_signal(|| existing.availability.clone().unwrap_or_else(|| "disponible".to_string()));
     let mut is_featured = use_signal(|| existing.is_featured.unwrap_or(false));
-    let mut save_message = use_signal(|| String::new());
+    let mut save_message = use_signal(String::new);
 
     let on_save = move |_| {
         let p_name = name.read().trim().to_string();

@@ -48,7 +48,7 @@ pub fn ExpCandidatures() -> Element {
                             let start = edition.start_date.clone().unwrap_or_default();
                             let status = edition.status.clone().unwrap_or_else(|| "brouillon".to_string());
                             let eid = edition.id.clone().unwrap_or_default();
-                            let conns_apply = conns.clone();
+                            let conns_apply = conns;
                             rsx! {
                                 div {
                                     style: "display: flex; align-items: center; gap: 12px; background: {c.bg_secondary}; border-radius: 8px; padding: 14px 16px;",

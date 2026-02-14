@@ -193,7 +193,7 @@ pub fn EventCard(
 }
 
 /// Formate une plage de dates pour affichage.
-pub fn format_date_range(start: &Option<String>, end: &Option<String>) -> String {
+pub fn format_date_range(start: Option<&String>, end: Option<&String>) -> String {
     match (start, end) {
         (Some(s), Some(e)) => format!("{s} — {e}"),
         (Some(s), None) => s.clone(),

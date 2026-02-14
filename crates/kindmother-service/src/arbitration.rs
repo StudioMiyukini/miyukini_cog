@@ -230,12 +230,10 @@ impl ArbitrationEngine {
             .unwrap_or("");
 
         // Vérifier les mots-clés DDL
-        if self.ddl_keywords.contains(first_keyword) {
-            if *permission != Permission::Admin {
-                return Err(ServiceError::PermissionDenied(
-                    "DDL operations require Admin permission".to_string(),
-                ));
-            }
+        if self.ddl_keywords.contains(first_keyword) && *permission != Permission::Admin {
+            return Err(ServiceError::PermissionDenied(
+                "DDL operations require Admin permission".to_string(),
+            ));
         }
 
         // Vérifier les mots-clés d'écriture

@@ -33,12 +33,10 @@ pub fn UncOrganisateursList(state: Signal<JayFestivalState>) -> Element {
             search_str.is_empty()
                 || o.name
                     .as_ref()
-                    .map(|n| n.to_lowercase().contains(&search_str.to_lowercase()))
-                    .unwrap_or(false)
+                    .is_some_and(|n| n.to_lowercase().contains(&search_str.to_lowercase()))
                 || o.region
                     .as_ref()
-                    .map(|r| r.to_lowercase().contains(&search_str.to_lowercase()))
-                    .unwrap_or(false)
+                    .is_some_and(|r| r.to_lowercase().contains(&search_str.to_lowercase()))
         })
         .collect();
 
@@ -284,17 +282,14 @@ pub fn UncExposantsList(state: Signal<JayFestivalState>) -> Element {
             let search_match = search_str.is_empty()
                 || e.company_name
                     .as_ref()
-                    .map(|n| n.to_lowercase().contains(&search_str.to_lowercase()))
-                    .unwrap_or(false)
+                    .is_some_and(|n| n.to_lowercase().contains(&search_str.to_lowercase()))
                 || e.secteur
                     .as_ref()
-                    .map(|s| s.to_lowercase().contains(&search_str.to_lowercase()))
-                    .unwrap_or(false);
+                    .is_some_and(|s| s.to_lowercase().contains(&search_str.to_lowercase()));
             let cat_match = cat_str.is_empty()
                 || e.category
                     .as_ref()
-                    .map(|c| c == &cat_str)
-                    .unwrap_or(false);
+                    .is_some_and(|c| c == &cat_str);
             search_match && cat_match
         })
         .collect();

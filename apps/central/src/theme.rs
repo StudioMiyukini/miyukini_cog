@@ -124,8 +124,7 @@ pub mod styles {
             "2px solid transparent".to_string()
         };
         format!(
-            "padding: 8px 16px; background: {}; color: {}; border: none; border-bottom: {}; cursor: pointer; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s;",
-            bg, color, border_bottom
+            "padding: 8px 16px; background: {bg}; color: {color}; border: none; border-bottom: {border_bottom}; cursor: pointer; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s;"
         )
     }
 
@@ -165,8 +164,7 @@ pub mod styles {
         let bg = if is_active { c.bg_card } else { "transparent" };
         let color = if is_active { c.text_white } else { c.text_secondary };
         format!(
-            "display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: {}; color: {}; border: none; border-radius: 4px 4px 0 0; cursor: pointer; font-size: 13px; max-width: 200px; transition: all 0.2s;",
-            bg, color
+            "display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: {bg}; color: {color}; border: none; border-radius: 4px 4px 0 0; cursor: pointer; font-size: 13px; max-width: 200px; transition: all 0.2s;"
         )
     }
 
@@ -247,7 +245,7 @@ pub mod styles {
     }
 
     pub fn services_grid() -> String {
-        "display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;".to_string()
+        "display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;".to_string()
     }
 
     pub fn section_title(theme: Theme) -> String {

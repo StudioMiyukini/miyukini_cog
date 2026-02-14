@@ -27,12 +27,16 @@ pub fn App() -> Element {
             .ok()
             .flatten()
             .and_then(|id| auth_db.get_profile(&id).ok().flatten());
-        let mut state = AppState::default();
-        state.is_cog_virgin = is_cog_virgin;
-        if let Some(ref p) = last_profile {
-            state.last_login_email = p.email.clone();
-            state.last_login_pseudo = p.pseudonyme.clone().unwrap_or_default();
-        }
+        let (last_login_email, last_login_pseudo) = last_profile
+            .as_ref()
+            .map(|p| (p.email.clone(), p.pseudonyme.clone().unwrap_or_default()))
+            .unwrap_or_default();
+        let state = AppState {
+            is_cog_virgin,
+            last_login_email,
+            last_login_pseudo,
+            ..AppState::default()
+        };
         // current_user reste None au démarrage : l'écran de connexion s'affiche toujours.
         AppContext {
             connections: Signal::new(connections),
@@ -102,6 +106,7 @@ pub fn App() -> Element {
 }
 
 /// CSS global injecté dans la page.
+#[allow(clippy::needless_raw_string_hashes)]
 const GLOBAL_CSS: &str = r#"
 * {
     margin: 0;

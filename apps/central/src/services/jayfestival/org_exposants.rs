@@ -24,7 +24,7 @@ pub fn OrgExposants(edition_id: String) -> Element {
             ExposantFiche {
                 edition_id: edition_id.clone(),
                 exposant_id: exp_id,
-                on_back: move |_| { selected_exposant.set(None); },
+                on_back: move |()| { selected_exposant.set(None); },
             }
         };
     }
@@ -158,8 +158,8 @@ fn CandidaturesTab(edition_id: String, on_select: EventHandler<String>) -> Eleme
                     let exp_id_click = exp_id.clone();
                     let pid_accept = pid.clone();
                     let pid_refuse = pid.clone();
-                    let conns_a = conns.clone();
-                    let conns_r = conns.clone();
+                    let conns_a = conns;
+                    let conns_r = conns;
                     rsx! {
                         div {
                             style: "display: flex; align-items: center; gap: 12px; background: {c.bg_secondary}; border-radius: 8px; padding: 12px 16px;",

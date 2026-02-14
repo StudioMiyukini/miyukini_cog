@@ -28,9 +28,9 @@ pub fn PurseMovementForm(state: Signal<JayKontaState>) -> Element {
 
     // State du formulaire
     let mut is_expense = use_signal(|| true);
-    let mut amount_str = use_signal(|| String::new());
-    let mut selected_category = use_signal(|| String::new());
-    let mut description = use_signal(|| String::new());
+    let mut amount_str = use_signal(String::new);
+    let mut selected_category = use_signal(String::new);
+    let mut description = use_signal(String::new);
     let mut date_str = use_signal(|| chrono::Local::now().format("%Y-%m-%d").to_string());
     let mut submitted = use_signal(|| false);
     let mut error_msg = use_signal(|| Option::<String>::None);

@@ -132,7 +132,7 @@ fn PlanVisualisationTab(edition_id: String) -> Element {
 #[component]
 fn LegendItem(color: String, label: String) -> Element {
     let c = use_app_state().read().current_theme.palette();
-    let bg_color = format!("{}40", color);
+    let bg_color = format!("{color}40");
 
     rsx! {
         div {
@@ -157,36 +157,36 @@ fn PlanGrid() -> Element {
             style: "display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; max-width: 600px;",
 
             // Rangée A
-            StandCell { id: "A1", status: "libre", selected: selected_stand.clone() }
-            StandCell { id: "A2", status: "libre", selected: selected_stand.clone() }
-            StandCell { id: "A3", status: "libre", selected: selected_stand.clone() }
-            StandCell { id: "A4", status: "libre", selected: selected_stand.clone() }
-            StandCell { id: "A5", status: "libre", selected: selected_stand.clone() }
-            StandCell { id: "A6", status: "libre", selected: selected_stand.clone() }
+            StandCell { id: "A1", status: "libre", selected: selected_stand }
+            StandCell { id: "A2", status: "libre", selected: selected_stand }
+            StandCell { id: "A3", status: "libre", selected: selected_stand }
+            StandCell { id: "A4", status: "libre", selected: selected_stand }
+            StandCell { id: "A5", status: "libre", selected: selected_stand }
+            StandCell { id: "A6", status: "libre", selected: selected_stand }
 
             // Rangée B
-            StandCell { id: "B1", status: "libre", selected: selected_stand.clone() }
-            StandCell { id: "B2", status: "reserve", selected: selected_stand.clone() }
-            StandCell { id: "B3", status: "reserve", selected: selected_stand.clone() }
-            StandCell { id: "B4", status: "libre", selected: selected_stand.clone() }
-            StandCell { id: "B5", status: "libre", selected: selected_stand.clone() }
-            StandCell { id: "B6", status: "libre", selected: selected_stand.clone() }
+            StandCell { id: "B1", status: "libre", selected: selected_stand }
+            StandCell { id: "B2", status: "reserve", selected: selected_stand }
+            StandCell { id: "B3", status: "reserve", selected: selected_stand }
+            StandCell { id: "B4", status: "libre", selected: selected_stand }
+            StandCell { id: "B5", status: "libre", selected: selected_stand }
+            StandCell { id: "B6", status: "libre", selected: selected_stand }
 
             // Rangée C
-            StandCell { id: "C1", status: "attribue", selected: selected_stand.clone() }
-            StandCell { id: "C2", status: "attribue", selected: selected_stand.clone() }
-            StandCell { id: "C3", status: "libre", selected: selected_stand.clone() }
-            StandCell { id: "C4", status: "libre", selected: selected_stand.clone() }
-            StandCell { id: "C5", status: "reserve", selected: selected_stand.clone() }
-            StandCell { id: "C6", status: "libre", selected: selected_stand.clone() }
+            StandCell { id: "C1", status: "attribue", selected: selected_stand }
+            StandCell { id: "C2", status: "attribue", selected: selected_stand }
+            StandCell { id: "C3", status: "libre", selected: selected_stand }
+            StandCell { id: "C4", status: "libre", selected: selected_stand }
+            StandCell { id: "C5", status: "reserve", selected: selected_stand }
+            StandCell { id: "C6", status: "libre", selected: selected_stand }
 
             // Rangée D
-            StandCell { id: "D1", status: "libre", selected: selected_stand.clone() }
-            StandCell { id: "D2", status: "libre", selected: selected_stand.clone() }
-            StandCell { id: "D3", status: "attribue", selected: selected_stand.clone() }
-            StandCell { id: "D4", status: "libre", selected: selected_stand.clone() }
-            StandCell { id: "D5", status: "libre", selected: selected_stand.clone() }
-            StandCell { id: "D6", status: "libre", selected: selected_stand.clone() }
+            StandCell { id: "D1", status: "libre", selected: selected_stand }
+            StandCell { id: "D2", status: "libre", selected: selected_stand }
+            StandCell { id: "D3", status: "attribue", selected: selected_stand }
+            StandCell { id: "D4", status: "libre", selected: selected_stand }
+            StandCell { id: "D5", status: "libre", selected: selected_stand }
+            StandCell { id: "D6", status: "libre", selected: selected_stand }
         }
     }
 }
@@ -205,7 +205,7 @@ fn StandCell(id: &'static str, status: &'static str, selected: Signal<Option<Str
     let border = if is_selected {
         format!("2px solid {}", c.accent_blue)
     } else {
-        format!("1px solid {}", border_color)
+        format!("1px solid {border_color}")
     };
 
     rsx! {

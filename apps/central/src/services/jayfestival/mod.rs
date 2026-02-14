@@ -74,17 +74,14 @@ use unc_auth::{UncCtaModal, UncConnexion, UncInscription, UncMentionsLegales};
 
 /// Rôle actif dans JayFestival.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Default)]
 pub enum JayFestivalRole {
+    #[default]
     Organisateur,
     Exposant,
     Visiteur,
 }
 
-impl Default for JayFestivalRole {
-    fn default() -> Self {
-        Self::Organisateur
-    }
-}
 
 /// Section active pour utilisateur non connecté (UNC).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]

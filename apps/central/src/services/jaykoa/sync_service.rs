@@ -40,7 +40,7 @@ impl JayFestivalSync {
         let agenda_id = match ensure_jayfestival_agenda(koa_db, profile_id) {
             Ok(id) => id,
             Err(e) => {
-                result.errors.push(format!("Impossible de créer l'agenda JayFestival: {}", e));
+                result.errors.push(format!("Impossible de créer l'agenda JayFestival: {e}"));
                 return result;
             }
         };
@@ -49,7 +49,7 @@ impl JayFestivalSync {
         let editions = match festival_db.editions_list() {
             Ok(eds) => eds,
             Err(e) => {
-                result.errors.push(format!("Erreur de lecture JayFestival: {}", e));
+                result.errors.push(format!("Erreur de lecture JayFestival: {e}"));
                 return result;
             }
         };
@@ -67,13 +67,13 @@ impl JayFestivalSync {
                 id: Some(uuid::Uuid::new_v4().to_string()),
                 agenda_id: Some(agenda_id.clone()),
                 title: Some(name.clone()),
-                description: Some(format!("Édition JayFestival : {}", name)),
-                start_datetime: Some(format!("{}T00:00:00", start_date)),
-                end_datetime: Some(format!("{}T23:59:59", end_date)),
+                description: Some(format!("Édition JayFestival : {name}")),
+                start_datetime: Some(format!("{start_date}T00:00:00")),
+                end_datetime: Some(format!("{end_date}T23:59:59")),
                 all_day: true,
                 location: edition.location.clone(),
                 status: Some(match edition.status.as_deref() {
-                    Some("termine") | Some("annule") => TemporalStatus::Cancelled.as_str(),
+                    Some("termine" | "annule") => TemporalStatus::Cancelled.as_str(),
                     _ => TemporalStatus::Confirmed.as_str(),
                 }.to_string()),
                 entry_type: Some(EntryType::ReflectJayFestival.as_str().to_string()),
@@ -88,7 +88,7 @@ impl JayFestivalSync {
             };
             
             if let Err(e) = koa_db.reflect_upsert(&entry) {
-                result.errors.push(format!("Erreur sync édition {}: {}", name, e));
+                result.errors.push(format!("Erreur sync édition {name}: {e}"));
             } else {
                 result.synced_count += 1;
             }
@@ -113,7 +113,7 @@ impl JayFestivalSync {
         let agenda_id = match ensure_jayfestival_agenda(koa_db, profile_id) {
             Ok(id) => id,
             Err(e) => {
-                result.errors.push(format!("Impossible de créer l'agenda JayFestival: {}", e));
+                result.errors.push(format!("Impossible de créer l'agenda JayFestival: {e}"));
                 return result;
             }
         };
@@ -126,7 +126,7 @@ impl JayFestivalSync {
         let editions = match festival_db.editions_list() {
             Ok(eds) => eds,
             Err(e) => {
-                result.errors.push(format!("Erreur de lecture JayFestival: {}", e));
+                result.errors.push(format!("Erreur de lecture JayFestival: {e}"));
                 return result;
             }
         };
@@ -142,16 +142,16 @@ impl JayFestivalSync {
             let entry = TemporalEntry {
                 id: Some(uuid::Uuid::new_v4().to_string()),
                 agenda_id: Some(agenda_id.clone()),
-                title: Some(format!("🎪 {}", name)),
-                description: Some(format!("Participation à l'édition : {}", name)),
-                start_datetime: Some(format!("{}T00:00:00", start_date)),
-                end_datetime: Some(format!("{}T23:59:59", end_date)),
+                title: Some(format!("🎪 {name}")),
+                description: Some(format!("Participation à l'édition : {name}")),
+                start_datetime: Some(format!("{start_date}T00:00:00")),
+                end_datetime: Some(format!("{end_date}T23:59:59")),
                 all_day: true,
                 location: edition.location.clone(),
                 status: Some(TemporalStatus::Confirmed.as_str().to_string()),
                 entry_type: Some(EntryType::ReflectJayFestival.as_str().to_string()),
                 source_service: Some(EventSource::JayFestival.as_str().to_string()),
-                source_event_id: Some(format!("participation_{}", edition_id)),
+                source_event_id: Some(format!("participation_{edition_id}")),
                 color: Some(EventSource::JayFestival.default_color().to_string()),
                 recurrence_rule: None,
                 reminders_json: None,
@@ -161,7 +161,7 @@ impl JayFestivalSync {
             };
             
             if let Err(e) = koa_db.reflect_upsert(&entry) {
-                result.errors.push(format!("Erreur sync participation {}: {}", name, e));
+                result.errors.push(format!("Erreur sync participation {name}: {e}"));
             } else {
                 result.synced_count += 1;
             }

@@ -69,7 +69,7 @@ fn CommunitySection() -> Element {
     rsx! {
         div {
             style: "display: flex; flex-direction: column; gap: 24px;",
-            h2 { style: "font-size: 20px; color: {c.text_white};", "Communauté COG" }
+            h2 { style: "font-size: 20px; color: {c.text_white};", "Webway" }
             div {
                 style: "display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;",
                 CommunityCard { icon: "💬", title: "Forum", description: "Discussions et entraide" }

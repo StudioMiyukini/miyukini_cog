@@ -46,14 +46,14 @@ pub fn Dashboard(state: Signal<JayXposeState>) -> Element {
     // Completude profil
     let profile_completion = if let Some(ref e) = exposant {
         let fields: Vec<bool> = vec![
-            e.company_name.as_ref().map_or(false, |s| !s.is_empty()),
-            e.contact_email.as_ref().map_or(false, |s| !s.is_empty()),
-            e.contact_phone.as_ref().map_or(false, |s| !s.is_empty()),
-            e.siret.as_ref().map_or(false, |s| !s.is_empty()),
-            e.description_short.as_ref().map_or(false, |s| !s.is_empty()),
-            e.secteur.as_ref().map_or(false, |s| !s.is_empty()),
-            e.logo_url.as_ref().map_or(false, |s| !s.is_empty()),
-            e.site_web.as_ref().map_or(false, |s| !s.is_empty()),
+            e.company_name.as_ref().is_some_and(|s| !s.is_empty()),
+            e.contact_email.as_ref().is_some_and(|s| !s.is_empty()),
+            e.contact_phone.as_ref().is_some_and(|s| !s.is_empty()),
+            e.siret.as_ref().is_some_and(|s| !s.is_empty()),
+            e.description_short.as_ref().is_some_and(|s| !s.is_empty()),
+            e.secteur.as_ref().is_some_and(|s| !s.is_empty()),
+            e.logo_url.as_ref().is_some_and(|s| !s.is_empty()),
+            e.site_web.as_ref().is_some_and(|s| !s.is_empty()),
         ];
         let filled = fields.iter().filter(|&&b| b).count();
         (filled * 100) / fields.len()

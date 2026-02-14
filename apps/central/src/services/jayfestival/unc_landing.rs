@@ -146,7 +146,7 @@ pub fn UncLanding(state: Signal<JayFestivalState>) -> Element {
                             {
                                 let id_str = opt_str(&edition.id);
                                 let name = opt_str(&edition.name);
-                                let date = format_date_range(&edition.start_date, &edition.end_date);
+                                let date = format_date_range(edition.start_date.as_ref(), edition.end_date.as_ref());
                                 let location = opt_str(&edition.location);
                                 let status = opt_str(&edition.status);
                                 let id_clone = edition.id.clone();

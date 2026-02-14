@@ -364,15 +364,25 @@ impl TrackerServer {
     ) -> Option<TrackerMessage> {
         let heartbeat = match HeartbeatPayload::parse(payload) {
             Ok(h) => h,
-            Err(_) => return None,
+            Err(e) => {
+                warn!("[Tracker] Heartbeat payload invalide ({} octets): {}", payload.len(), e);
+                return None;
+            }
         };
 
+        info!("[Tracker] Heartbeat reçu: cog_id={}", &heartbeat.cog_id);
+
         // Mettre à jour last_seen dans le pool
+        let mut touched = false;
         let versions = pool_manager.list_versions().await;
         for version in versions {
             if let Some(pool) = pool_manager.get_pool(&version).await {
                 pool.touch_cog(&heartbeat.cog_id).await;
+                touched = true;
             }
+        }
+        if !touched {
+            warn!("[Tracker] Heartbeat pour cog_id={} mais aucun pool trouvé", &heartbeat.cog_id);
         }
 
         metrics.record_heartbeat();

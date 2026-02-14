@@ -25,7 +25,7 @@ pub fn ScheduleView(props: ScheduleViewProps) -> Element {
     // Grouper les entrées par jour
     let mut entries_by_day: std::collections::BTreeMap<String, Vec<&TemporalEntry>> = std::collections::BTreeMap::new();
     
-    for entry in props.entries.iter() {
+    for entry in &props.entries {
         if let Some(start) = &entry.start_datetime {
             let day = &start[..10]; // YYYY-MM-DD
             entries_by_day.entry(day.to_string()).or_default().push(entry);
@@ -35,7 +35,7 @@ pub fn ScheduleView(props: ScheduleViewProps) -> Element {
     // IDs des entrées en conflit
     let conflict_ids: Vec<String> = props.conflicts.iter()
         .flat_map(|c| [c.entry_a_id.clone(), c.entry_b_id.clone()])
-        .filter_map(|id| id)
+        .flatten()
         .collect();
     
     // Si aucun événement
@@ -170,8 +170,7 @@ pub fn ScheduleView(props: ScheduleViewProps) -> Element {
                                     for entry in day_entries.iter() {
                                         {
                                             let has_conflict = entry.id.as_ref()
-                                                .map(|id| conflict_ids.contains(id))
-                                                .unwrap_or(false);
+                                                .is_some_and(|id| conflict_ids.contains(id));
                                             
                                             rsx! {
                                                 ScheduleEventCard {
@@ -206,7 +205,7 @@ fn ScheduleEventCard(props: ScheduleEventCardProps) -> Element {
     
     let color = props.entry.color.as_deref().unwrap_or("#4285F4");
     let title = props.entry.title.as_deref().unwrap_or("Sans titre");
-    let entry_type = props.entry.entry_type.as_deref().map(EntryType::from_str).unwrap_or(EntryType::Internal);
+    let entry_type = props.entry.entry_type.as_deref().map_or(EntryType::Internal, EntryType::from_str);
     let is_readonly = entry_type.is_readonly();
     
     // Heure
@@ -215,14 +214,14 @@ fn ScheduleEventCard(props: ScheduleEventCardProps) -> Element {
     } else if let (Some(start), Some(end)) = (&props.entry.start_datetime, &props.entry.end_datetime) {
         let start_time = &start[11..16];
         let end_time = &end[11..16];
-        format!("{} — {}", start_time, end_time)
+        format!("{start_time} — {end_time}")
     } else {
         String::new()
     };
     
     // Source
     let source = props.entry.source_service.as_deref().map(EventSource::from_str);
-    let source_label = source.map(|s| s.display_label());
+    let source_label = source.map(jaykoa::data::EventSource::display_label);
     let source_icon = match source {
         Some(EventSource::JayFestival) => Some("🎪"),
         Some(EventSource::JayRDV) => Some("📅"),
@@ -233,7 +232,7 @@ fn ScheduleEventCard(props: ScheduleEventCardProps) -> Element {
     let border = if props.has_conflict {
         format!("3px solid {}", c.accent_orange)
     } else {
-        format!("3px solid {}", color)
+        format!("3px solid {color}")
     };
 
     rsx! {

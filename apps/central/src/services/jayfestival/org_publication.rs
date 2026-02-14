@@ -86,8 +86,8 @@ pub fn OrgPublication(edition_id: String) -> Element {
 fn PublicationChecklist(exposants_count: usize, animations_count: usize) -> Element {
     let c = use_app_state().read().current_theme.palette();
 
-    let exp_desc = format!("{} exposant(s) inscrit(s)", exposants_count);
-    let anim_desc = format!("{} animation(s) programmee(s)", animations_count);
+    let exp_desc = format!("{exposants_count} exposant(s) inscrit(s)");
+    let anim_desc = format!("{animations_count} animation(s) programmee(s)");
 
     rsx! {
         section {

@@ -189,7 +189,7 @@ fn render_forecast_row(
     let net_color = if entry.recurring_net >= 0.0 { c.accent_green } else { c.accent_red };
     let balance_color = if entry.projected_balance >= 0.0 { c.accent_green } else { c.accent_red };
     let bar_pct = if balance_range > 0.0 {
-        ((entry.projected_balance - min_balance) / balance_range * 100.0).max(2.0).min(100.0)
+        ((entry.projected_balance - min_balance) / balance_range * 100.0).clamp(2.0, 100.0)
     } else {
         50.0
     };
@@ -304,7 +304,7 @@ fn build_forecast_direct(
 fn add_months(date: chrono::NaiveDate, months: u32) -> chrono::NaiveDate {
     use chrono::NaiveDate;
     let total = date.year() as u32 * 12 + date.month() - 1 + months;
-    let y = (total / 12) as i32;
+    let y = (total / 12) as i32; // intentionnel : calcul mois/année
     let m = total % 12 + 1;
     let max_day = days_in_month(y, m);
     let d = date.day().min(max_day);
@@ -318,8 +318,7 @@ fn days_in_month(year: i32, month: u32) -> u32 {
     } else {
         NaiveDate::from_ymd_opt(year, month + 1, 1)
     }
-    .map(|d| d.pred_opt().map(|p| p.day()).unwrap_or(28))
-    .unwrap_or(28)
+    .map_or(28, |d| d.pred_opt().map_or(28, |p| p.day()))
 }
 
 fn french_month_label(month: &str) -> String {
@@ -367,14 +366,14 @@ fn compute_month_for_recurring(
             jaykonta::domain::purse::RecurringFrequency::Monthly => 1,
             jaykonta::domain::purse::RecurringFrequency::Quarterly => {
                 let start_m = start.month();
-                if (m_start.month() + 12 - start_m) % 3 == 0 { 1 } else { 0 }
+                i32::from((m_start.month() + 12 - start_m).is_multiple_of(3))
             }
             jaykonta::domain::purse::RecurringFrequency::Yearly => {
-                if m_start.month() == start.month() { 1 } else { 0 }
+                i32::from(m_start.month() == start.month())
             }
         };
 
-        let total = r.amount * occ as f64;
+        let total = r.amount * f64::from(occ);
         match r.direction {
             jaykonta::domain::purse::RecurringDirection::Income => income += total,
             jaykonta::domain::purse::RecurringDirection::Expense => expense += total,

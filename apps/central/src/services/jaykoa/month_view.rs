@@ -29,7 +29,7 @@ pub fn MonthView(props: MonthViewProps) -> Element {
     // Premier jour du mois
     let first_day = NaiveDate::from_ymd_opt(props.year, props.month, 1).unwrap_or(today);
     // Décalage pour commencer le lundi
-    let start_offset = first_day.weekday().num_days_from_monday() as i64;
+    let start_offset = i64::from(first_day.weekday().num_days_from_monday());
     // Premier jour affiché
     let start_date = first_day - chrono::Duration::days(start_offset);
     
@@ -38,11 +38,11 @@ pub fn MonthView(props: MonthViewProps) -> Element {
         NaiveDate::from_ymd_opt(props.year + 1, 1, 1)
     } else {
         NaiveDate::from_ymd_opt(props.year, props.month + 1, 1)
-    }.map(|d| d.pred_opt().unwrap_or(d).day()).unwrap_or(30);
+    }.map_or(30, |d| d.pred_opt().unwrap_or(d).day());
     
     // Nombre de semaines à afficher (5 ou 6)
     let total_days = start_offset as u32 + days_in_month;
-    let weeks = ((total_days + 6) / 7).max(5);
+    let weeks = total_days.div_ceil(7).max(5);
     
     // Noms des jours
     let weekday_names = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
@@ -74,7 +74,7 @@ pub fn MonthView(props: MonthViewProps) -> Element {
                         
                         for day_of_week in 0..7u32 {
                             {
-                                let day_index = (week * 7 + day_of_week) as i64;
+                                let day_index = i64::from(week * 7 + day_of_week);
                                 let date = start_date + chrono::Duration::days(day_index);
                                 let is_current_month = date.month() == props.month;
                                 let is_today = date == today;
