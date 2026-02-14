@@ -268,19 +268,19 @@ impl ContentManager {
     async fn load_downloads(&self) {
         let mut downloads = self.downloads.write().await;
         
-        // COG Stable v0.1.1 - Windows uniquement pour l'instant
+        // COG Stable v0.1.2 - Windows uniquement pour l'instant
         downloads.push(Download {
             id: "miyukini-cog-windows".to_string(),
             name: "Miyukini COG".to_string(),
             description: "Environnement COG complet pour Windows — Inclut Central, KindMother, client MWS et tous les Services (JayXpose, JayFestival, JayKonta, JayKoa, MiyuClicker, Lord of the Castle)".to_string(),
-            version: "0.1.1".to_string(),
+            version: "0.1.2".to_string(),
             category: DownloadCategory::Cog,
             platforms: vec![Platform::Windows],
-            download_url: "https://miyukini.com/files/Miyukini-COG-v0.1.1-windows.zip".to_string(),
-            size_bytes: 8_243_741, // 7.86 MB
-            sha256: "1D5FE8B2107BCBEAD539ECA598EF908ED7E8FDA86DB9883F6AE55B5C96B46C3F".to_string(),
+            download_url: "https://miyukini.com/files/Miyukini-COG-v0.1.2-windows.zip".to_string(),
+            size_bytes: 8_347_191,
+            sha256: "78618B4EFB0795C628EECE3A672BB068AB19DEB92E179B128F0B1FA8F3B98A55".to_string(),
             published_at: Utc::now(),
-            release_notes: "v0.1.1 — Fix connexion MWS (domaine miyukini.com), instructions installation améliorées".to_string(),
+            release_notes: "v0.1.2 — Fix panic rustls CryptoProvider pour connexion TLS au Relay".to_string(),
             min_core_version: None,
         });
     }

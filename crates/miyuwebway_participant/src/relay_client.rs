@@ -13,7 +13,18 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 use tokio::sync::RwLock;
 use tokio_rustls::rustls::{ClientConfig, RootCertStore};
+use tokio_rustls::rustls::crypto::ring::default_provider;
 use tokio_rustls::TlsConnector;
+use std::sync::Once;
+
+/// Initialise le CryptoProvider une seule fois.
+static CRYPTO_INIT: Once = Once::new();
+
+fn ensure_crypto_provider() {
+    CRYPTO_INIT.call_once(|| {
+        let _ = default_provider().install_default();
+    });
+}
 use tracing::{debug, error, info, warn};
 
 /// Configuration du client Relay.
@@ -134,6 +145,9 @@ impl RelayClient {
             let mut session = self.session.write().await;
             session.state = RelaySessionState::Connecting;
         }
+
+        // Initialiser le provider crypto (ring) une seule fois
+        ensure_crypto_provider();
 
         // Connexion TCP
         let stream = TcpStream::connect(&self.config.relay_address)
