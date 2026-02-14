@@ -242,6 +242,43 @@ impl JayXposeDb {
             .collect()
     }
 
+    /// Retourne le premier slug de vitrine publiée (pour la carte Home COG / lien Découvrir).
+    pub async fn first_published_vitrine_slug(&self) -> Result<Option<String>, DbError> {
+        let rows = self.client
+            .query(
+                "SELECT vitrine_slug FROM exposants WHERE vitrine_status = 'publiee'
+                 AND vitrine_slug IS NOT NULL AND trim(vitrine_slug) != '' ORDER BY company_name LIMIT 1",
+                vec![],
+            )
+            .await?;
+        let first = rows.into_iter().next();
+        Ok(first.and_then(|r| Self::get_opt_string(&r, "vitrine_slug")))
+    }
+
+    /// Récupère un exposant par slug vitrine, uniquement si la vitrine est publiée.
+    /// Utilisé par le service WEB (Origin) pour servir les pages vitrine publiques.
+    pub async fn exposant_by_vitrine_slug(&self, slug: &str) -> Result<Option<ExposantProfile>, DbError> {
+        let rows = self.client
+            .query(
+                "SELECT id, company_name, legal_form, slogan, description_short, description_long,
+                        stand_name, contact_email, contact_phone, adresse_siege, adresse_correspondance,
+                        contact_facturation_nom, contact_facturation_email, contact_facturation_phone,
+                        contact_logistique_nom, contact_logistique_email, contact_logistique_phone,
+                        logo_url, banner_url, site_web, siret, siren, code_ape, num_immatriculation,
+                        secteur, tags, social_facebook, social_instagram, social_linkedin, social_tiktok,
+                        social_youtube, social_pinterest, social_x, visible_annuaire, vitrine_slug,
+                        vitrine_status, vitrine_colors, seo_title, seo_description, seo_keywords,
+                        created_at, updated_at
+                 FROM exposants WHERE vitrine_slug = ?1 AND vitrine_status = 'publiee'",
+                vec![slug],
+            )
+            .await?;
+        rows.into_iter()
+            .next()
+            .map(|row| Self::row_to_exposant(&row))
+            .transpose()
+    }
+
     /// Cherche un exposant par email et password hash.
     pub async fn exposant_by_email_password(
         &self,

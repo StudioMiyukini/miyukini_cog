@@ -349,6 +349,7 @@ pub mod styles {
     }
 
     /// Sous-texte / hint formulaire.
+    #[allow(dead_code)]
     pub fn form_hint(theme: Theme) -> String {
         let c = c(theme);
         format!("font-size: 12px; color: {}; margin-top: 12px; font-style: italic;", c.text_secondary)

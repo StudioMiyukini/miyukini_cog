@@ -140,6 +140,11 @@ pub struct RelayConfig {
     /// Port d'écoute.
     #[serde(default = "default_relay_port")]
     pub port: u16,
+    /// Vérification stricte en 3 phases (Phase A CORE_KEY, Phase C environment_health).
+    /// Si true : après REGISTER on envoie VERIFY_RESULT(phase A, EXTENDED_REQUIRED),
+    /// on attend CORE_KEY puis on fait Phase C et REGISTER_OK.
+    #[serde(default)]
+    pub strict_verification: bool,
 }
 
 fn default_host() -> String {
@@ -168,6 +173,9 @@ pub struct TrackerConfig {
     /// Configuration des lobbys.
     #[serde(default)]
     pub lobbys: LobbysConfig,
+    /// Chemin optionnel vers la base JayXpose (vitrines publiques). Si présent, les routes /vitrine/* sont servies.
+    #[serde(default)]
+    pub jayxpose_db_path: Option<String>,
 }
 
 fn default_tracker_port() -> u16 {
@@ -482,6 +490,7 @@ impl Default for OriginConfig {
             relay: RelayConfig {
                 host: default_host(),
                 port: default_relay_port(),
+                strict_verification: false,
             },
             tracker: TrackerConfig {
                 host: default_host(),
@@ -489,6 +498,7 @@ impl Default for OriginConfig {
                 web_port: default_web_port(),
                 pools: PoolsConfig::default(),
                 lobbys: LobbysConfig::default(),
+                jayxpose_db_path: None,
             },
             tls: TlsConfig {
                 cert_path: "tls/origin.crt".to_string(),

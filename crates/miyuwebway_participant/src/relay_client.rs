@@ -4,8 +4,8 @@
 
 use crate::errors::MiyuwebwayParticipantError;
 use crate::protocol::{
-    PermisGrantedPayload, RegisterAckPayload, RegisterPayload, RelayFrame, RelayMessageType,
-    NONCE_SIZE, SESSION_ID_SIZE,
+    core_key_payload_bytes, RegisterAckPayload, RegisterPayload, RelayFrame, RelayMessageType,
+    VerifyResultPayload, NONCE_SIZE, SESSION_ID_SIZE,
 };
 use bytes::BytesMut;
 use std::sync::Arc;
@@ -27,6 +27,9 @@ pub struct RelayClientConfig {
     pub connect_timeout: u64,
     /// Intervalle de heartbeat en secondes.
     pub heartbeat_interval: u64,
+    /// Clé de conformité Cores (Phase A) pour mode strict. Si le Relay répond
+    /// VERIFY_RESULT(phase A, EXTENDED_REQUIRED), cette clé est envoyée en CORE_KEY.
+    pub core_conformity_key: Option<Vec<u8>>,
 }
 
 impl Default for RelayClientConfig {
@@ -36,6 +39,7 @@ impl Default for RelayClientConfig {
             tls_domain: "origin.miyukini.net".to_string(),
             connect_timeout: 30,
             heartbeat_interval: 30,
+            core_conformity_key: None,
         }
     }
 }
@@ -179,11 +183,7 @@ impl RelayClient {
             timestamp: chrono::Utc::now().timestamp() as u64,
         };
 
-        let frame = RelayFrame::new(
-            RelayMessageType::Register,
-            [0u8; SESSION_ID_SIZE],
-            register.to_bytes(),
-        );
+        let frame = RelayFrame::new(RelayMessageType::Register, register.to_origin_bytes());
 
         tls_stream.write_all(&frame.to_bytes()).await.map_err(|e| {
             MiyuwebwayParticipantError::SendError(e.to_string())
@@ -191,43 +191,81 @@ impl RelayClient {
 
         debug!("REGISTER sent, waiting for response");
 
-        // Lire REGISTER_ACK
-        let response = self.read_frame(&mut tls_stream).await?;
+        // Boucle jusqu'à REGISTER_OK / REGISTER_ERR (mode strict : VERIFY_RESULT → CORE_KEY → REGISTER_OK)
+        let mut response = self.read_frame(&mut tls_stream).await?;
 
-        match response.header.message_type {
-            RelayMessageType::RegisterAck => {
-                let ack = RegisterAckPayload::from_bytes(&response.payload)
-                    .ok_or(MiyuwebwayParticipantError::InvalidPayload)?;
+        loop {
+            match response.header.message_type {
+                RelayMessageType::RegisterAck => {
+                    let ack = RegisterAckPayload::from_origin_bytes(&response.payload)
+                        .or_else(|| RegisterAckPayload::from_bytes(&response.payload))
+                        .ok_or(MiyuwebwayParticipantError::InvalidPayload)?;
 
-                info!("Registration accepted, session_id assigned");
+                    info!("Registration accepted, session_id assigned");
 
-                let mut session = self.session.write().await;
-                session.session_id = ack.session_id;
-                session.ttl = ack.ttl;
-                session.heartbeat_interval = ack.heartbeat_interval;
-                session.state = RelaySessionState::Registered;
+                    let mut session = self.session.write().await;
+                    session.session_id = ack.session_id;
+                    session.ttl = ack.ttl;
+                    session.heartbeat_interval = ack.heartbeat_interval;
+                    session.state = RelaySessionState::Active;
+                    session.permis_id = if ack.permis_id.is_empty() {
+                        Some(ack.session_id.to_vec())
+                    } else {
+                        Some(ack.permis_id.clone())
+                    };
+                    session.scopes = vec!["tracker".to_string(), "relay".to_string()];
 
-                // Pour COG Stable, on simplifie : on considère le permis comme obtenu
-                // après l'enregistrement (vérification simplifiée)
-                // TODO: Implémenter les phases A, B, C complètes
+                    info!("Session active with permis");
+                    return Ok(session.clone());
+                }
+                RelayMessageType::RegisterReject => {
+                    let message = String::from_utf8_lossy(&response.payload).to_string();
+                    warn!("Registration rejected: {}", message);
+                    return Err(MiyuwebwayParticipantError::RegistrationRejected(message));
+                }
+                RelayMessageType::VerifyResult => {
+                    let verify = VerifyResultPayload::from_origin_bytes(&response.payload)
+                        .ok_or(MiyuwebwayParticipantError::InvalidPayload)?;
 
-                // Simuler l'obtention du permis pour COG Stable
-                session.state = RelaySessionState::Active;
-                session.permis_id = Some(ack.session_id.to_vec());
-                session.scopes = vec!["tracker".to_string(), "relay".to_string()];
-
-                info!("Session active with permis");
-
-                Ok(session.clone())
-            }
-            RelayMessageType::RegisterReject => {
-                let message = String::from_utf8_lossy(&response.payload).to_string();
-                warn!("Registration rejected: {}", message);
-                Err(MiyuwebwayParticipantError::RegistrationRejected(message))
-            }
-            _ => {
-                error!("Unexpected response: {:?}", response.header.message_type);
-                Err(MiyuwebwayParticipantError::UnexpectedMessage)
+                    use crate::protocol::{VerifyPhase, VerifyResult};
+                    if verify.phase == VerifyPhase::PhaseA
+                        && verify.result == VerifyResult::ExtendedRequired
+                    {
+                        let key = self
+                            .config
+                            .core_conformity_key
+                            .as_deref()
+                            .ok_or_else(|| {
+                                MiyuwebwayParticipantError::RegistrationRejected(
+                                    "Relay requested CORE_KEY (strict verification) but \
+                                     core_conformity_key is not set in config"
+                                        .to_string(),
+                                )
+                            })?;
+                        let core_key_payload = core_key_payload_bytes(&verify.session_id, key);
+                        let frame =
+                            RelayFrame::new(RelayMessageType::CoreKey, core_key_payload);
+                        tls_stream.write_all(&frame.to_bytes()).await.map_err(|e| {
+                            MiyuwebwayParticipantError::SendError(e.to_string())
+                        })?;
+                        debug!("CORE_KEY sent, waiting for REGISTER_OK");
+                        response = self.read_frame(&mut tls_stream).await?;
+                        continue;
+                    }
+                    if verify.result == VerifyResult::Fail {
+                        let msg = String::from_utf8_lossy(&verify.message).to_string();
+                        return Err(MiyuwebwayParticipantError::RegistrationRejected(
+                            format!("Verification failed: {}", msg),
+                        ));
+                    }
+                    // Phase A Ok ou autre : lire la suite (REGISTER_OK attendu)
+                    response = self.read_frame(&mut tls_stream).await?;
+                    continue;
+                }
+                _ => {
+                    error!("Unexpected response: {:?}", response.header.message_type);
+                    return Err(MiyuwebwayParticipantError::UnexpectedMessage);
+                }
             }
         }
     }

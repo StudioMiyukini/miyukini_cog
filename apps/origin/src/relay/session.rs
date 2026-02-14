@@ -72,6 +72,8 @@ pub struct Session {
     pub parent_cog_id: Option<String>,
 
     // Informations de vérification
+    /// Rapport de santé (REGISTER) pour Phase C en mode strict.
+    pub environment_health: Option<Bytes>,
     /// Résultat Phase A.
     pub phase_a_passed: bool,
     /// Résultat Phase B (services vérifiés).
@@ -115,6 +117,7 @@ impl Session {
             core_version: None,
             passport_type: None,
             parent_cog_id: None,
+            environment_health: None,
             phase_a_passed: false,
             verified_services: Vec::new(),
             phase_c_passed: false,
@@ -160,6 +163,15 @@ impl Session {
         self.core_version = Some(core_version);
         self.passport_type = Some(passport_type);
         self.parent_cog_id = parent_cog_id;
+    }
+
+    /// Stocke le rapport de santé (Phase C en mode strict).
+    pub fn set_environment_health(&mut self, health: Bytes) {
+        self.environment_health = if health.is_empty() {
+            None
+        } else {
+            Some(health)
+        };
     }
 
     /// Passe à la phase de vérification A.

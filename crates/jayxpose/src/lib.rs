@@ -11,3 +11,6 @@
 pub mod data;
 pub mod auth;
 pub mod governance;
+
+/// Réexport pour les consommateurs (Origin, Central).
+pub use data::JayXposeDb;

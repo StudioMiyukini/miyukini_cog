@@ -10,12 +10,14 @@
 //! - Création et gestion des lobbys
 //! - Heartbeat pour maintenir les connexions
 
-use bytes::BytesMut;
+use bytes::{Bytes, BytesMut};
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tracing::{debug, error, info, warn};
+
+use crate::relay::PermisRegistry;
 
 use super::catalog::Catalog;
 use super::metrics::TrackerMetrics;
@@ -39,12 +41,17 @@ pub struct TrackerServer {
     catalog: Arc<Catalog>,
     /// Métriques.
     metrics: Arc<TrackerMetrics>,
+    /// Registre des permis (partagé avec le Relay pour vérifier ANNOUNCE, R-011).
+    permis_registry: Option<Arc<PermisRegistry>>,
 }
 
 impl TrackerServer {
     /// Crée un nouveau serveur tracker.
     #[must_use]
-    pub fn new(config: Arc<OriginConfig>) -> Self {
+    pub fn new(
+        config: Arc<OriginConfig>,
+        permis_registry: Option<Arc<PermisRegistry>>,
+    ) -> Self {
         let pool_manager = Arc::new(PoolManager::new(
             config.tracker.pools.enable_version_isolation,
         ));
@@ -56,6 +63,7 @@ impl TrackerServer {
             pool_manager,
             catalog,
             metrics,
+            permis_registry,
         }
     }
 
@@ -134,9 +142,10 @@ impl TrackerServer {
         let pool_manager = Arc::clone(&self.pool_manager);
         let config = Arc::clone(&self.config);
         let metrics = Arc::clone(&self.metrics);
+        let permis_registry = self.permis_registry.clone();
 
         tokio::spawn(async move {
-            if let Err(e) = Self::handle_connection(stream, peer_addr, pool_manager, config, Arc::clone(&metrics)).await {
+            if let Err(e) = Self::handle_connection(stream, peer_addr, pool_manager, config, permis_registry, Arc::clone(&metrics)).await {
                 debug!("Tracker connection error from {}: {}", peer_addr, e);
             }
             metrics.record_connection_closed();
@@ -149,6 +158,7 @@ impl TrackerServer {
         peer_addr: SocketAddr,
         pool_manager: Arc<PoolManager>,
         config: Arc<OriginConfig>,
+        permis_registry: Option<Arc<PermisRegistry>>,
         metrics: Arc<TrackerMetrics>,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let mut buf = BytesMut::with_capacity(4096);
@@ -170,6 +180,7 @@ impl TrackerServer {
                     msg,
                     &pool_manager,
                     &config,
+                    permis_registry.as_ref(),
                     &metrics,
                 )
                 .await;
@@ -206,11 +217,12 @@ impl TrackerServer {
         msg: TrackerMessage,
         pool_manager: &Arc<PoolManager>,
         config: &Arc<OriginConfig>,
+        permis_registry: Option<&Arc<PermisRegistry>>,
         metrics: &Arc<TrackerMetrics>,
     ) -> Option<TrackerMessage> {
         match msg.header.message_type {
             TrackerMessageType::Announce => {
-                Self::handle_announce(&msg.payload, pool_manager, config, metrics).await
+                Self::handle_announce(&msg.payload, pool_manager, config, permis_registry, metrics).await
             }
             TrackerMessageType::Withdraw => {
                 Self::handle_withdraw(&msg.payload, pool_manager, metrics).await
@@ -251,6 +263,7 @@ impl TrackerServer {
         payload: &[u8],
         pool_manager: &Arc<PoolManager>,
         config: &Arc<OriginConfig>,
+        permis_registry: Option<&Arc<PermisRegistry>>,
         metrics: &Arc<TrackerMetrics>,
     ) -> Option<TrackerMessage> {
         let announce = match AnnouncePayload::parse(payload) {
@@ -269,7 +282,22 @@ impl TrackerServer {
             announce.cog_id, announce.core_version, announce.services
         );
 
-        // TODO: vérifier le permis_id avec le Relay
+        // Vérifier le permis_id avec le registre partagé Relay (R-011)
+        if let Some(registry) = permis_registry {
+            if !registry.is_valid(&announce.permis_id).await {
+                metrics.record_announce(false);
+                let ack = AnnounceAckPayload {
+                    success: false,
+                    message: "Invalid or expired permis".to_string(),
+                    heartbeat_interval: config.limits.heartbeat_interval_seconds,
+                    ttl: config.limits.tunnel_timeout_seconds,
+                };
+                return Some(TrackerMessage::new(
+                    TrackerMessageType::AnnounceAck,
+                    ack.to_bytes(),
+                ));
+            }
+        }
 
         // Récupérer ou créer le pool
         let pool = pool_manager.get_or_create_pool(&announce.core_version).await;
@@ -548,12 +576,23 @@ impl TrackerServer {
         // Générer l'ID du lobby
         let lobby_id = format!("lobby-{}-{}", create.cog_id, chrono::Utc::now().timestamp());
 
+        let password_hash = create.password.as_ref().and_then(|pwd| {
+            use argon2::password_hash::{PasswordHasher, SaltString};
+            use argon2::Argon2;
+            let salt = SaltString::generate(&mut rand::rngs::OsRng);
+            Argon2::default()
+                .hash_password(pwd.as_bytes(), &salt)
+                .ok()
+                .map(|h| h.to_string())
+        });
+
         // Créer le lobby
         let lobby = LobbyEntry {
             lobby_id: lobby_id.clone(),
             name: create.name,
             is_public: create.is_public,
             password_required: create.password.is_some(),
+            password_hash,
             max_players: create.max_players,
             current_players: 1, // L'hôte
             metadata: serde_json::to_string(&create.metadata).unwrap_or_default(),
@@ -648,7 +687,10 @@ impl TrackerServer {
 
         metrics.record_lobby_deleted();
         info!("Lobby {} deleted", delete.lobby_id);
-        None
+        Some(TrackerMessage::new(
+            TrackerMessageType::DeleteLobbyOk,
+            Bytes::new(),
+        ))
     }
 
     /// Traite une demande de join.
@@ -693,10 +735,34 @@ impl TrackerServer {
                 ));
             }
 
-            // Vérifier le mot de passe
+            // Vérifier le mot de passe (MWS Lobbys — doc : limite 5 échecs → ban)
             if lobby.password_required {
-                // TODO: vérifier le mot de passe
-                // Pour l'instant on accepte sans vérification
+                let password_ok = match (&lobby.password_hash, &join.password) {
+                    (Some(hash), Some(pwd)) => {
+                        use argon2::password_hash::{PasswordHash, PasswordVerifier};
+                        PasswordHash::new(hash)
+                            .ok()
+                            .map(|parsed| {
+                                argon2::Argon2::default()
+                                    .verify_password(pwd.as_bytes(), &parsed)
+                                    .is_ok()
+                            })
+                            .unwrap_or(false)
+                    }
+                    _ => false,
+                };
+                if !password_ok {
+                    metrics.record_join_request(false);
+                    return Some(TrackerMessage::new(
+                        TrackerMessageType::JoinLobbyResult,
+                        JoinLobbyResultPayload {
+                            success: false,
+                            message: "Wrong password".to_string(),
+                            host_address: None,
+                        }
+                        .to_bytes(),
+                    ));
+                }
             }
 
             // Trouver l'adresse du COG hôte

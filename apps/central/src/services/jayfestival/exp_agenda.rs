@@ -1,20 +1,13 @@
 //! EXP-E07/E08 — Agenda exposant (animations, RDV, creneaux).
 
 use dioxus::prelude::*;
-use crate::data::use_service_connections;
 use crate::state::use_app_state;
-
-fn opt_str(s: &Option<String>) -> String {
-    s.clone().unwrap_or_default()
-}
 
 /// Agenda de l'exposant.
 #[component]
 pub fn ExpAgenda() -> Element {
     let c = use_app_state().read().current_theme.palette();
-    let conns = use_service_connections();
     let mut active_tab = use_signal(|| "semaine".to_string());
-    let mut selected_date = use_signal(|| "2026-02-15".to_string());
 
     // Note: Les animations seraient chargées depuis la DB
     // Pour la démo, on utilise des données statiques

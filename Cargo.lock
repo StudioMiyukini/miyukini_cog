@@ -3986,6 +3986,7 @@ dependencies = [
  "ed25519-dalek",
  "hex",
  "hmac",
+ "jayxpose",
  "miyukini-kernel",
  "miyuwebway_participant",
  "miyuwebway_tracker",

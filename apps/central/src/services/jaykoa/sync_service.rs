@@ -2,6 +2,8 @@
 //!
 //! Lit les éditions JayFestival et crée des reflets en lecture seule dans JayKoa.
 
+#![allow(dead_code)]
+
 use jaykoa::data::{Agenda, TemporalEntry, EntryType, EventSource, TemporalStatus, JayKoaDb};
 use jayfestival::data::JayFestivalDb;
 use chrono::Local;

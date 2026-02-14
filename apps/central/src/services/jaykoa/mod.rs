@@ -17,13 +17,11 @@ mod sync_service;
 
 pub use sidebar::JayKoaSidebar;
 pub use components::*;
-pub use calendar_view::CalendarMainView as _CalendarMainView;
 pub use week_view::WeekView;
 pub use day_view::DayView;
 pub use month_view::MonthView;
 pub use schedule_view::ScheduleView;
 pub use event_form::EventFormModal;
-pub use sync_service::JayFestivalSync as _JayFestivalSync;
 
 use dioxus::prelude::*;
 use chrono::Datelike;
@@ -37,6 +35,7 @@ pub enum CalendarViewMode {
     #[default]
     Week,
     Month,
+    #[allow(dead_code)]
     Year,
     Schedule,
 }

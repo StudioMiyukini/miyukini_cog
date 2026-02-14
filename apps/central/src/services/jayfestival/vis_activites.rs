@@ -2,7 +2,7 @@
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;
-use super::components::{Badge, ActionButton, StatCard};
+use super::components::{Badge, StatCard};
 
 /// Hub des activités visiteur.
 #[component]

@@ -58,6 +58,8 @@ pub enum TrackerMessageType {
     UpdateLobby = 0x23,
     /// Suppression de lobby.
     DeleteLobby = 0x24,
+    /// Accusé de suppression de lobby.
+    DeleteLobbyOk = 0x28,
     /// Demande pour rejoindre.
     JoinLobby = 0x25,
     /// Résultat de la demande.
@@ -104,6 +106,7 @@ impl TrackerMessageType {
             0x22 => Some(Self::CreateLobbyErr),
             0x23 => Some(Self::UpdateLobby),
             0x24 => Some(Self::DeleteLobby),
+            0x28 => Some(Self::DeleteLobbyOk),
             0x25 => Some(Self::JoinLobby),
             0x26 => Some(Self::JoinLobbyResult),
             0x27 => Some(Self::LeaveLobby),

@@ -23,10 +23,10 @@ pub fn ExpCompte() -> Element {
     let siret = exposant.as_ref().and_then(|e| e.siret.clone()).unwrap_or_default();
     let address = exposant.as_ref().and_then(|e| e.adresse.clone()).unwrap_or_default();
 
-    let mut company_input = use_signal(|| company_name.clone());
-    let mut email_input = use_signal(|| email.clone());
-    let mut phone_input = use_signal(|| phone.clone());
-    let mut siret_input = use_signal(|| siret.clone());
+    let company_input = use_signal(|| company_name.clone());
+    let email_input = use_signal(|| email.clone());
+    let phone_input = use_signal(|| phone.clone());
+    let siret_input = use_signal(|| siret.clone());
     let mut address_input = use_signal(|| address.clone());
 
     rsx! {

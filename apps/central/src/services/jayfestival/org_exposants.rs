@@ -11,10 +11,6 @@ use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{Badge, ActionButton};
 
-fn opt_str(s: &Option<String>) -> String {
-    s.clone().unwrap_or_default()
-}
-
 /// Vue principale des exposants avec onglets.
 #[component]
 pub fn OrgExposants(edition_id: String) -> Element {

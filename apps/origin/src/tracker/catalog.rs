@@ -1,12 +1,17 @@
 //! Catalogue web MWS.
 //!
-//! Expose les services et lobbys via HTTP.
+//! Expose les services, lobbys et COGs via HTTP.
 
 use std::sync::Arc;
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use tokio::sync::RwLock;
 
 use super::pool::PoolManager;
+use super::visit_tracker::CatalogVisitTracker;
+
+/// Seuil en secondes au-delà duquel un COG est considéré absent (non connecté).
+pub const COG_ABSENT_THRESHOLD_SECONDS: i64 = 90;
 
 /// Entrée du catalogue de services.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -129,19 +134,43 @@ impl Catalog {
             .collect()
     }
 
-    /// Génère le JSON du catalogue complet.
-    pub async fn to_json(&self) -> serde_json::Value {
+    /// Génère le JSON du catalogue complet (services, lobbys, cogs avec présent/absent).
+    /// Un COG est considéré présent si heartbeat récent (90 s) OU visite catalogue→Home récente (~1 min).
+    pub async fn to_json(&self, visit_tracker: Option<&CatalogVisitTracker>) -> serde_json::Value {
         let services = self.list_services().await;
         let lobbys = self.list_lobbys().await;
+        let all_cogs = self.pool_manager.list_all_cogs().await;
+        let now = Utc::now();
+
+        let mut cogs = Vec::with_capacity(all_cogs.len());
+        for e in all_cogs {
+            let age_secs = (now - e.last_seen).num_seconds();
+            let present_heartbeat = age_secs <= COG_ABSENT_THRESHOLD_SECONDS;
+            let present_visit = match visit_tracker {
+                Some(vt) => vt.has_recent_visit(&e.cog_id).await,
+                None => false,
+            };
+            let present = present_heartbeat || present_visit;
+            cogs.push(serde_json::json!({
+                "cog_id": e.cog_id,
+                "core_version": e.core_version,
+                "address": e.address,
+                "last_seen": e.last_seen.to_rfc3339(),
+                "services": e.services,
+                "lobby_count": e.lobbys.len(),
+                "present": present,
+            }));
+        }
 
         serde_json::json!({
             "services": services,
             "lobbys": lobbys,
+            "cogs": cogs,
             "pool_stats": {
                 "total_cogs": self.pool_manager.total_cog_count().await,
                 "versions": self.pool_manager.list_versions().await,
             },
-            "generated_at": chrono::Utc::now().to_rfc3339(),
+            "generated_at": now.to_rfc3339(),
         })
     }
 
@@ -226,6 +255,51 @@ impl Catalog {
         .api-links a:hover { text-decoration: underline; }
         .back-link { margin-bottom: 2rem; }
         .back-link a { color: var(--text-muted); }
+        .cogs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .cog-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            position: relative;
+        }
+        .cog-card.absent {
+            opacity: 0.6;
+            filter: grayscale(0.5);
+            padding-top: 2rem;
+        }
+        .cog-card .cog-absent-banner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(100, 100, 100, 0.9);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 4px 0;
+            border-radius: 0.75rem 0.75rem 0 0;
+        }
+        .cog-card h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+        .cog-card .cog-meta { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.75rem; }
+        .cog-card .btn-visit {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 6px 12px;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+        .cog-card .btn-visit:hover { opacity: 0.9; }
+        .cog-card .btn-visit.disabled { pointer-events: none; background: #555; color: #999; }
     </style>
 </head>
 <body>
@@ -235,6 +309,14 @@ impl Catalog {
         </div>
         <h1>📡 Catalogue MWS</h1>
         <p class="subtitle">Services et lobbys disponibles sur le réseau</p>
+
+        <div class="card">
+            <h2>🌐 COGs du réseau</h2>
+            <p class="subtitle" style="margin-bottom: 1rem;">Visitez la page d'accueil de chaque COG connecté. Les COGs déconnectés sont marqués « Absent » — droit reconnu à la déconnexion.</p>
+            <div id="cogs-cards" class="cogs-grid">
+                <p class="empty">Chargement...</p>
+            </div>
+        </div>
 
         <div class="stats">
             <div class="stat">
@@ -305,9 +387,33 @@ impl Catalog {
                 } else {
                     lobbysEl.innerHTML = '<p class="empty">Aucun lobby actif</p>';
                 }
+
+                const cogsEl = document.getElementById('cogs-cards');
+                if (data.cogs && data.cogs.length > 0) {
+                    cogsEl.innerHTML = data.cogs.map(c => {
+                        const visitUrl = '/visit?cog_id=' + encodeURIComponent(c.cog_id);
+                        const present = c.present === true;
+                        const cardClass = 'cog-card' + (present ? '' : ' absent');
+                        const banner = present ? '' : '<div class="cog-absent-banner">Absent</div>';
+                        const btnClass = 'btn-visit' + (present ? '' : ' disabled');
+                        const btnContent = present ? '<a href="' + visitUrl + '" class="' + btnClass + '" target="_blank" rel="noopener">Visiter</a>' : '<span class="' + btnClass + '">Visiter</span>';
+                        return '<div class="' + cardClass + '">' + banner +
+                            '<h3>' + escapeHtml(c.cog_id) + '</h3>' +
+                            '<p class="cog-meta">Cores ' + escapeHtml(c.core_version) + ' · ' + (c.services?.length || 0) + ' service(s)</p>' +
+                            btnContent + '</div>';
+                    }).join('');
+                } else {
+                    cogsEl.innerHTML = '<p class="empty">Aucun COG enregistré sur le réseau</p>';
+                }
             } catch (e) {
                 console.error('Failed to load catalog:', e);
             }
+        }
+        function escapeHtml(s) {
+            if (!s) return '';
+            const div = document.createElement('div');
+            div.textContent = s;
+            return div.innerHTML;
         }
         loadCatalog();
         setInterval(loadCatalog, 30000);

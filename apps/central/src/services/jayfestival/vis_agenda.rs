@@ -2,7 +2,6 @@
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;
-use super::components::Badge;
 
 /// Agenda personnel du visiteur.
 #[component]

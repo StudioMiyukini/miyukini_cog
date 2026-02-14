@@ -228,7 +228,7 @@ struct AllDayEventLargeProps {
 #[component]
 fn AllDayEventLarge(props: AllDayEventLargeProps) -> Element {
     let state = use_app_state();
-    let c = state.read().current_theme.palette();
+    let _c = state.read().current_theme.palette();
     
     let color = props.entry.color.as_deref().unwrap_or("#4285F4");
     let title = props.entry.title.as_deref().unwrap_or("Sans titre");

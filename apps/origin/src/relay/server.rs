@@ -22,6 +22,7 @@ use tokio_rustls::TlsAcceptor;
 use tracing::{debug, error, info, warn};
 
 use super::metrics::RelayMetrics;
+use super::permis_registry::PermisRegistry;
 use super::rate_limiter::{RateLimiter, RateLimiterConfig, RateLimitResult};
 use super::session::{PermisInfo, Session, SessionManager, SessionState};
 use super::tunnel::{TunnelManager, TunnelMessage};
@@ -39,6 +40,8 @@ pub struct RelayServer {
     config: Arc<OriginConfig>,
     /// Gestionnaire de sessions.
     sessions: Arc<SessionManager>,
+    /// Registre des permis (partagé avec le Tracker pour vérification ANNOUNCE).
+    permis_registry: Option<Arc<PermisRegistry>>,
     /// Vérificateur de conformité.
     verifier: Arc<Verifier>,
     /// Accepteur TLS.
@@ -57,7 +60,13 @@ pub struct RelayServer {
 
 impl RelayServer {
     /// Crée un nouveau serveur relay.
-    pub async fn new(config: Arc<OriginConfig>) -> Result<Self, Box<dyn std::error::Error + Send + Sync>> {
+    ///
+    /// Si `permis_registry` est fourni, les permis délivrés y sont enregistrés
+    /// pour que le Tracker puisse vérifier les ANNOUNCE.
+    pub async fn new(
+        config: Arc<OriginConfig>,
+        permis_registry: Option<Arc<PermisRegistry>>,
+    ) -> Result<Self, Box<dyn std::error::Error + Send + Sync>> {
         // Créer le gestionnaire de sessions
         let sessions = Arc::new(SessionManager::new(
             i64::from(config.limits.tunnel_timeout_seconds),
@@ -99,6 +108,7 @@ impl RelayServer {
         Ok(Self {
             config,
             sessions,
+            permis_registry,
             verifier,
             tls_acceptor: Some(tls_acceptor),
             tracker_addresses: Bytes::from(tracker_addresses),
@@ -248,6 +258,7 @@ impl RelayServer {
         // Cloner les références nécessaires
         let tls_acceptor = self.tls_acceptor.clone();
         let sessions = Arc::clone(&self.sessions);
+        let permis_registry = self.permis_registry.clone();
         let verifier = Arc::clone(&self.verifier);
         let config = Arc::clone(&self.config);
         let tracker_addresses = self.tracker_addresses.clone();
@@ -262,6 +273,7 @@ impl RelayServer {
                 peer_addr,
                 tls_acceptor,
                 sessions,
+                permis_registry,
                 verifier,
                 config,
                 tracker_addresses,
@@ -286,6 +298,7 @@ impl RelayServer {
         peer_addr: SocketAddr,
         tls_acceptor: Option<TlsAcceptor>,
         sessions: Arc<SessionManager>,
+        permis_registry: Option<Arc<PermisRegistry>>,
         verifier: Arc<Verifier>,
         config: Arc<OriginConfig>,
         tracker_addresses: Bytes,
@@ -354,6 +367,7 @@ impl RelayServer {
                                 let response = Self::handle_frame(
                                     &frame,
                                     &session,
+                                    permis_registry.as_ref(),
                                     &verifier,
                                     &config,
                                     &tracker_addresses,
@@ -437,6 +451,7 @@ impl RelayServer {
     async fn handle_frame(
         frame: &Frame,
         session: &Arc<RwLock<Session>>,
+        permis_registry: Option<&Arc<PermisRegistry>>,
         verifier: &Arc<Verifier>,
         config: &Arc<OriginConfig>,
         tracker_addresses: &Bytes,
@@ -454,6 +469,7 @@ impl RelayServer {
                 Self::handle_register(
                     &frame.payload,
                     session,
+                    permis_registry,
                     verifier,
                     config,
                     tracker_addresses,
@@ -466,7 +482,20 @@ impl RelayServer {
                 .await
             }
             MessageType::CoreKey => {
-                Self::handle_core_key(&frame.payload, session, verifier, metrics).await
+                Self::handle_core_key(
+                    &frame.payload,
+                    session,
+                    verifier,
+                    config,
+                    permis_registry,
+                    tracker_addresses,
+                    tracker_signature,
+                    sessions,
+                    client_ip,
+                    rate_limiter,
+                    metrics,
+                )
+                .await
             }
             MessageType::ServiceBlock => {
                 Self::handle_service_block(&frame.payload, session, verifier, metrics).await
@@ -494,6 +523,7 @@ impl RelayServer {
     async fn handle_register(
         payload: &Bytes,
         session: &Arc<RwLock<Session>>,
+        permis_registry: Option<&Arc<PermisRegistry>>,
         verifier: &Arc<Verifier>,
         config: &Arc<OriginConfig>,
         tracker_addresses: &Bytes,
@@ -559,7 +589,7 @@ impl RelayServer {
         }
 
         // Mettre à jour la session
-        {
+        let session_id = {
             let mut s = session.write().await;
             s.set_cog_info(
                 cog_id.clone(),
@@ -575,27 +605,25 @@ impl RelayServer {
                         .map(String::from)
                 },
             );
+            s.set_environment_health(register.environment_health.clone());
             s.start_phase_a();
-        }
-
-        // Enregistrer le mapping
-        let session_id = {
-            let s = session.read().await;
             s.id
         };
         sessions.register_cog(cog_id.clone(), session_id).await;
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Vérification Phase A
-        // ─────────────────────────────────────────────────────────────────────
-        let core_version = register.core_version_str().unwrap_or_default();
+        // Mode strict : demander CORE_KEY (Phase A) puis Phase C, pas de REGISTER_OK ici
+        if config.relay.strict_verification {
+            let response = VerifyResultPayload::new(
+                session_id,
+                VerifyPhase::PhaseA,
+                VerifyResult::ExtendedRequired,
+                Bytes::from_static(b"Send CORE_KEY"),
+            );
+            return Some(Frame::new(MessageType::VerifyResult, response.to_bytes()));
+        }
 
-        // Pour simplifier le développement initial, on accepte avec des
-        // vérifications minimales. En production, il faudrait implémenter
-        // les 3 phases complètement.
-
-        // Simuler la vérification Phase A (clé Cores)
-        // En production: attendre CORE_KEY du client
+        // Mode non strict : simulation Phase A/C et REGISTER_OK immédiat
+        let _core_version = register.core_version_str().unwrap_or_default();
         {
             let mut s = session.write().await;
             s.phase_a_passed = true;
@@ -604,18 +632,15 @@ impl RelayServer {
         metrics.record_phase_a(true);
         metrics.record_phase_c(true);
 
-        // Générer le Permis
         let permis_id = {
             let s = session.read().await;
             s.generate_permis_id()
         };
         let permis_expires = chrono::Utc::now() + chrono::Duration::hours(24);
 
-        // Générer la clé de session
         let mut session_key = [0u8; 32];
         rand::RngCore::fill_bytes(&mut rand::thread_rng(), &mut session_key);
 
-        // Activer la session
         {
             let mut s = session.write().await;
             let permis = PermisInfo {
@@ -636,7 +661,12 @@ impl RelayServer {
             cog_id, permis_id
         );
 
-        // Construire REGISTER_OK
+        if let Some(registry) = permis_registry {
+            registry
+                .register(permis_id.clone(), permis_expires)
+                .await;
+        }
+
         let response = RegisterOkPayload::build(
             session_id,
             Bytes::from(permis_id),
@@ -654,6 +684,13 @@ impl RelayServer {
         payload: &Bytes,
         session: &Arc<RwLock<Session>>,
         verifier: &Arc<Verifier>,
+        config: &Arc<OriginConfig>,
+        permis_registry: Option<&Arc<PermisRegistry>>,
+        tracker_addresses: &Bytes,
+        tracker_signature: &[u8; ED25519_SIGNATURE_SIZE],
+        sessions: &Arc<SessionManager>,
+        client_ip: std::net::IpAddr,
+        rate_limiter: &Arc<RateLimiter>,
         metrics: &Arc<RelayMetrics>,
     ) -> Option<Frame> {
         let core_key = match CoreKeyPayload::parse(payload.clone()) {
@@ -671,8 +708,93 @@ impl RelayServer {
         };
 
         let result = verifier.verify_phase_a(&core_version, &core_key.key).await;
-        let passed = result == VerifyResult::Ok;
-        metrics.record_phase_a(passed);
+        let passed_a = result == VerifyResult::Ok;
+        metrics.record_phase_a(passed_a);
+
+        if passed_a {
+            let mut s = session.write().await;
+            s.complete_phase_a();
+        }
+
+        // Mode strict : après Phase A OK, faire Phase C puis REGISTER_OK
+        if passed_a && config.relay.strict_verification {
+            let (environment_health, cog_id) = {
+                let s = session.read().await;
+                let health = s
+                    .environment_health
+                    .clone()
+                    .unwrap_or_else(Bytes::new);
+                let cog_id = s.cog_id.clone();
+                (health, cog_id)
+            };
+            let phase_c_result = verifier.verify_phase_c(&environment_health).await;
+            let phase_c_ok = phase_c_result == VerifyResult::Ok;
+            metrics.record_phase_c(phase_c_ok);
+
+            if !phase_c_ok {
+                let mut s = session.write().await;
+                s.state = SessionState::VerifyingPhaseC;
+                let response = VerifyResultPayload::new(
+                    core_key.session_id,
+                    VerifyPhase::PhaseC,
+                    VerifyResult::Fail,
+                    Bytes::from_static(b"Environment health check failed"),
+                );
+                return Some(Frame::new(MessageType::VerifyResult, response.to_bytes()));
+            }
+
+            let session_id = {
+                let s = session.read().await;
+                s.id
+            };
+            let cog_id = cog_id.unwrap_or_default();
+            let permis_id = {
+                let s = session.read().await;
+                s.generate_permis_id()
+            };
+            let permis_expires = chrono::Utc::now() + chrono::Duration::hours(24);
+
+            let mut session_key = [0u8; 32];
+            rand::RngCore::fill_bytes(&mut rand::thread_rng(), &mut session_key);
+
+            {
+                let mut s = session.write().await;
+                let permis = PermisInfo {
+                    permis_id: permis_id.clone(),
+                    issued_at: chrono::Utc::now(),
+                    expires_at: permis_expires,
+                    scope: Bytes::from_static(b"{}"),
+                };
+                s.phase_c_passed = true;
+                s.activate(permis, session_key);
+            }
+
+            metrics.record_registration(true);
+            metrics.record_permit_issued();
+            metrics.record_phase_c(true);
+            rate_limiter.reset_failed_registrations(client_ip).await;
+
+            info!(
+                "COG {} registered (strict 3-phase), Permis: {}",
+                cog_id, permis_id
+            );
+
+            if let Some(registry) = permis_registry {
+                registry
+                    .register(permis_id.clone(), permis_expires)
+                    .await;
+            }
+
+            let response = RegisterOkPayload::build(
+                session_id,
+                Bytes::from(permis_id),
+                permis_expires.timestamp() as u64,
+                Bytes::from_static(b"{}"),
+                tracker_addresses.clone(),
+                *tracker_signature,
+            );
+            return Some(Frame::new(MessageType::RegisterOk, response.to_bytes()));
+        }
 
         let response = VerifyResultPayload::new(
             core_key.session_id,
@@ -680,12 +802,6 @@ impl RelayServer {
             result,
             Bytes::new(),
         );
-
-        if passed {
-            let mut s = session.write().await;
-            s.complete_phase_a();
-        }
-
         Some(Frame::new(MessageType::VerifyResult, response.to_bytes()))
     }
 

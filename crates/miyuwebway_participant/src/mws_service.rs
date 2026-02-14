@@ -4,12 +4,12 @@
 
 use crate::errors::MiyuwebwayParticipantError;
 use crate::protocol::{CogInfo, LobbyInfo, LobbySearchResult};
-use crate::relay_client::{RelayClient, RelayClientConfig, RelaySession, RelaySessionState};
-use crate::tracker_client::{TrackerAnnouncement, TrackerClient, TrackerClientConfig, TrackerState};
+use crate::relay_client::{RelayClient, RelayClientConfig, RelaySession};
+use crate::tracker_client::{TrackerAnnouncement, TrackerClient, TrackerClientConfig};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tokio::time::{interval, Duration};
-use tracing::{debug, error, info, warn};
+use tracing::{debug, info, warn};
 
 /// Configuration du service MWS.
 #[derive(Debug, Clone)]
@@ -316,13 +316,22 @@ impl MwsService {
     pub async fn delete_lobby(&self, lobby_id: &str) -> Result<(), MiyuwebwayParticipantError> {
         self.ensure_online().await?;
 
-        // Retirer de la liste locale
+        let cog_id = self
+            .identity
+            .read()
+            .await
+            .as_ref()
+            .map(|i| i.cog_id.clone())
+            .ok_or(MiyuwebwayParticipantError::NotConnected)?;
+
+        // Envoyer DELETE_LOBBY au Tracker et attendre DeleteLobbyOk
+        self.tracker_client.delete_lobby(&cog_id, lobby_id).await?;
+
+        // Retirer de la liste locale après succès Tracker
         {
             let mut lobbys = self.lobbys.write().await;
             lobbys.retain(|l| l.lobby_id != lobby_id);
         }
-
-        // TODO: envoyer DELETE_LOBBY au Tracker
 
         Ok(())
     }

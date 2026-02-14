@@ -9,7 +9,6 @@ use crate::protocol::{
     TrackerFrame, TrackerHeartbeatPayload, TrackerMessageType,
 };
 use bytes::BytesMut;
-use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
@@ -67,14 +66,12 @@ pub struct TrackerAnnouncement {
     pub lobbys: Vec<LobbyInfo>,
 }
 
-/// Client Tracker MWS.
+/// Client Tracker MWS (protocole aligné Origin).
 pub struct TrackerClient {
     /// Configuration.
     config: TrackerClientConfig,
     /// État actuel.
     state: Arc<RwLock<TrackerState>>,
-    /// Compteur de requêtes.
-    request_counter: AtomicU32,
     /// Buffer de lecture.
     read_buffer: Arc<RwLock<BytesMut>>,
     /// Intervalle de heartbeat actuel.
@@ -87,7 +84,6 @@ impl TrackerClient {
         Self {
             config,
             state: Arc::new(RwLock::new(TrackerState::Disconnected)),
-            request_counter: AtomicU32::new(0),
             read_buffer: Arc::new(RwLock::new(BytesMut::with_capacity(8192))),
             heartbeat_interval: Arc::new(RwLock::new(60)),
         }
@@ -96,11 +92,6 @@ impl TrackerClient {
     /// Crée un client avec la configuration par défaut.
     pub fn with_defaults() -> Self {
         Self::new(TrackerClientConfig::default())
-    }
-
-    /// Génère un ID de requête unique.
-    fn next_request_id(&self) -> u32 {
-        self.request_counter.fetch_add(1, Ordering::SeqCst)
     }
 
     /// Annonce le COG sur le réseau.
@@ -136,9 +127,8 @@ impl TrackerClient {
             lobbys: announcement.lobbys.clone(),
         };
 
-        // Envoyer l'annonce
-        let request_id = self.next_request_id();
-        let frame = TrackerFrame::new(TrackerMessageType::Announce, request_id, payload.to_bytes());
+        // Envoyer l'annonce (format Origin : pas de request_id)
+        let frame = TrackerFrame::new(TrackerMessageType::Announce, payload.to_bytes());
 
         stream.write_all(&frame.to_bytes()).await.map_err(|e| {
             MiyuwebwayParticipantError::SendError(e.to_string())
@@ -155,7 +145,7 @@ impl TrackerClient {
                     .ok_or(MiyuwebwayParticipantError::InvalidPayload)?;
 
                 if ack.success {
-                    info!("Announce successful: {}", ack.message);
+                    info!("Announce successful: {} (ttl: {}s)", ack.message, ack.ttl);
 
                     let mut interval = self.heartbeat_interval.write().await;
                     *interval = ack.heartbeat_interval;
@@ -202,8 +192,7 @@ impl TrackerClient {
             load,
         };
 
-        let request_id = self.next_request_id();
-        let frame = TrackerFrame::new(TrackerMessageType::Heartbeat, request_id, payload.to_bytes());
+        let frame = TrackerFrame::new(TrackerMessageType::Heartbeat, payload.to_bytes());
 
         stream.write_all(&frame.to_bytes()).await.map_err(|e| {
             MiyuwebwayParticipantError::SendError(e.to_string())
@@ -237,8 +226,7 @@ impl TrackerClient {
         let payload = serde_json::json!({ "cog_id": cog_id });
         let payload_bytes = bytes::Bytes::from(serde_json::to_vec(&payload).unwrap_or_default());
 
-        let request_id = self.next_request_id();
-        let frame = TrackerFrame::new(TrackerMessageType::Withdraw, request_id, payload_bytes);
+        let frame = TrackerFrame::new(TrackerMessageType::Withdraw, payload_bytes);
 
         stream.write_all(&frame.to_bytes()).await.map_err(|e| {
             MiyuwebwayParticipantError::SendError(e.to_string())
@@ -267,13 +255,14 @@ impl TrackerClient {
             })?;
 
         let payload = SearchCogsPayload {
-            version_filter,
-            service_filter,
-            limit,
+            query: None,
+            version: version_filter,
+            service: service_filter,
+            limit: Some(limit),
+            offset: None,
         };
 
-        let request_id = self.next_request_id();
-        let frame = TrackerFrame::new(TrackerMessageType::SearchCogs, request_id, payload.to_bytes());
+        let frame = TrackerFrame::new(TrackerMessageType::SearchCogs, payload.to_bytes());
 
         stream.write_all(&frame.to_bytes()).await.map_err(|e| {
             MiyuwebwayParticipantError::SendError(e.to_string())
@@ -313,13 +302,14 @@ impl TrackerClient {
             })?;
 
         let payload = SearchLobbysPayload {
-            name_filter,
-            public_only,
-            limit,
+            query: name_filter,
+            version: None,
+            available_only: Some(public_only),
+            limit: Some(limit),
+            offset: None,
         };
 
-        let request_id = self.next_request_id();
-        let frame = TrackerFrame::new(TrackerMessageType::SearchLobbys, request_id, payload.to_bytes());
+        let frame = TrackerFrame::new(TrackerMessageType::SearchLobbys, payload.to_bytes());
 
         stream.write_all(&frame.to_bytes()).await.map_err(|e| {
             MiyuwebwayParticipantError::SendError(e.to_string())
@@ -364,8 +354,7 @@ impl TrackerClient {
             password,
         };
 
-        let request_id = self.next_request_id();
-        let frame = TrackerFrame::new(TrackerMessageType::CreateLobby, request_id, payload.to_bytes());
+        let frame = TrackerFrame::new(TrackerMessageType::CreateLobby, payload.to_bytes());
 
         stream.write_all(&frame.to_bytes()).await.map_err(|e| {
             MiyuwebwayParticipantError::SendError(e.to_string())
@@ -385,6 +374,47 @@ impl TrackerClient {
 
                 info!("Lobby created with ID: {}", lobby_id);
                 Ok(lobby_id)
+            }
+            TrackerMessageType::Error => {
+                let message = String::from_utf8_lossy(&response.payload).to_string();
+                Err(MiyuwebwayParticipantError::TrackerError(message))
+            }
+            _ => Err(MiyuwebwayParticipantError::UnexpectedMessage),
+        }
+    }
+
+    /// Supprime un lobby sur le Tracker.
+    pub async fn delete_lobby(
+        &self,
+        cog_id: &str,
+        lobby_id: &str,
+    ) -> Result<(), MiyuwebwayParticipantError> {
+        info!("Deleting lobby {} on Tracker", lobby_id);
+
+        let mut stream = TcpStream::connect(&self.config.tracker_address)
+            .await
+            .map_err(|e| {
+                MiyuwebwayParticipantError::ConnectionFailed(e.to_string())
+            })?;
+
+        let payload = serde_json::json!({
+            "cog_id": cog_id,
+            "lobby_id": lobby_id,
+        });
+        let payload_bytes = bytes::Bytes::from(serde_json::to_vec(&payload).unwrap_or_default());
+
+        let frame = TrackerFrame::new(TrackerMessageType::DeleteLobby, payload_bytes);
+
+        stream.write_all(&frame.to_bytes()).await.map_err(|e| {
+            MiyuwebwayParticipantError::SendError(e.to_string())
+        })?;
+
+        let response = self.read_frame(&mut stream).await?;
+
+        match response.header.message_type {
+            TrackerMessageType::DeleteLobbyOk => {
+                info!("Lobby {} deleted on Tracker", lobby_id);
+                Ok(())
             }
             TrackerMessageType::Error => {
                 let message = String::from_utf8_lossy(&response.payload).to_string();
@@ -444,13 +474,5 @@ mod tests {
     fn test_default_config() {
         let config = TrackerClientConfig::default();
         assert_eq!(config.tracker_address, "origin.miyukini.net:21000");
-    }
-
-    #[test]
-    fn test_request_id_increment() {
-        let client = TrackerClient::with_defaults();
-        let id1 = client.next_request_id();
-        let id2 = client.next_request_id();
-        assert_eq!(id2, id1 + 1);
     }
 }

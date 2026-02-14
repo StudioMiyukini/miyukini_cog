@@ -1,7 +1,7 @@
 //! API REST pour le site web Origin.
 
 use super::content::{ContentManager, DownloadCategory};
-use crate::tracker::{catalog::Catalog, pool::PoolManager};
+use crate::tracker::{catalog::Catalog, pool::PoolManager, CatalogVisitTracker};
 use serde_json::json;
 
 /// Génère la réponse JSON pour /api/blog.
@@ -61,9 +61,12 @@ pub async fn api_doc_article(content_mgr: &ContentManager, section_id: &str, art
 }
 
 /// Génère la réponse JSON pour /api/catalog.
-pub async fn api_catalog(pool_mgr: &PoolManager) -> String {
+pub async fn api_catalog(
+    pool_mgr: &PoolManager,
+    visit_tracker: Option<&CatalogVisitTracker>,
+) -> String {
     let catalog = Catalog::from_pools(pool_mgr).await;
-    let json_value = catalog.to_json().await;
+    let json_value = catalog.to_json(visit_tracker).await;
     serde_json::to_string_pretty(&json_value).unwrap_or_else(|_| "{}".to_string())
 }
 

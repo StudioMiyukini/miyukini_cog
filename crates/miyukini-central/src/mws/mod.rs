@@ -18,11 +18,12 @@
 
 use miyuwebway_participant::{
     CogIdentity, CogInfo, LobbyInfo, LobbySearchResult, MwsService, MwsServiceConfig,
-    MwsServiceState,
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use tokio::sync::RwLock;
+use tokio::io::AsyncWriteExt;
+use tokio::net::TcpListener;
+use tokio::sync::{oneshot, RwLock};
 use tracing::{error, info, warn};
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -42,6 +43,9 @@ pub struct CentralMwsConfig {
     pub relay_address: String,
     /// Adresse du Tracker Origin.
     pub tracker_address: String,
+    /// Clé de conformité CORE (Phase C) pour le Relay en mode strict.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub core_conformity_key: Option<Vec<u8>>,
     /// Adresse publique de ce COG.
     pub public_address: String,
     /// Activer le heartbeat automatique.
@@ -50,6 +54,15 @@ pub struct CentralMwsConfig {
     pub auto_reconnect: bool,
     /// Présenter le COG même sans services exposés.
     pub present_without_services: bool,
+    /// Adresse d'écoute du mini serveur Home (ex. "0.0.0.0:8080"). Si présent, une page Home est exposée lorsque le COG est annoncé sur le Tracker.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub home_http_bind: Option<String>,
+    /// Afficher une carte JayXpose « Découvrir » sur la Home si une vitrine est publiée.
+    #[serde(default)]
+    pub expose_jayxpose_vitrine: bool,
+    /// URL de base du serveur web Origin (vitrines). Ex. "http://origin.example.com:8080". Requis pour le lien « Découvrir ».
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub jayxpose_vitrine_base_url: Option<String>,
 }
 
 impl Default for CentralMwsConfig {
@@ -60,10 +73,14 @@ impl Default for CentralMwsConfig {
             auto_connect: true,
             relay_address: "origin.miyukini.net:7000".to_string(),
             tracker_address: "origin.miyukini.net:21000".to_string(),
+            core_conformity_key: None,
             public_address: "0.0.0.0:0".to_string(), // Sera détecté
             auto_heartbeat: true,
             auto_reconnect: true,
             present_without_services: true, // Se présente toujours
+            home_http_bind: None, // Optionnel : "0.0.0.0:8080" pour exposer la Home
+            expose_jayxpose_vitrine: false,
+            jayxpose_vitrine_base_url: None,
         }
     }
 }
@@ -220,15 +237,21 @@ pub struct CentralMwsManager {
     lobbys: Arc<RwLock<Vec<LobbyInfo>>>,
     /// Callback de mise à jour d'état.
     state_callback: Arc<RwLock<Option<Box<dyn Fn(MwsConformityState) + Send + Sync>>>>,
+    /// Envoi du signal d'arrêt du serveur Home (si actif).
+    home_server_shutdown: Arc<RwLock<Option<oneshot::Sender<()>>>>,
+    /// Slug de la première vitrine publiée (pour la carte JayXpose sur la Home).
+    jayxpose_vitrine_slug: Option<String>,
 }
 
 impl CentralMwsManager {
     /// Crée un nouveau gestionnaire MWS.
+    /// `jayxpose_vitrine_slug` : slug de la vitrine publiée à afficher sur la Home (optionnel).
     pub fn new(
         config: CentralMwsConfig,
         cog_id: String,
         core_version: String,
         services: Vec<String>,
+        jayxpose_vitrine_slug: Option<String>,
     ) -> Self {
         let (state, conformity) = if config.lone_mode {
             (CentralMwsState::Lone, MwsConformityState::LoneMode)
@@ -248,6 +271,8 @@ impl CentralMwsManager {
             services: Arc::new(RwLock::new(services)),
             lobbys: Arc::new(RwLock::new(Vec::new())),
             state_callback: Arc::new(RwLock::new(None)),
+            home_server_shutdown: Arc::new(RwLock::new(None)),
+            jayxpose_vitrine_slug,
         }
     }
 
@@ -258,6 +283,7 @@ impl CentralMwsManager {
             cog_id,
             core_version,
             Vec::new(),
+            None,
         )
     }
 
@@ -268,6 +294,7 @@ impl CentralMwsManager {
             cog_id,
             core_version,
             Vec::new(),
+            None,
         )
     }
 
@@ -355,6 +382,7 @@ impl CentralMwsManager {
         let mut mws_config = MwsServiceConfig::default();
         mws_config.relay.relay_address = self.config.relay_address.clone();
         mws_config.relay.tls_domain = relay_host.to_string();
+        mws_config.relay.core_conformity_key = self.config.core_conformity_key.clone();
         mws_config.tracker.tracker_address = self.config.tracker_address.clone();
         mws_config.auto_heartbeat = self.config.auto_heartbeat;
         mws_config.auto_reconnect = self.config.auto_reconnect;
@@ -412,6 +440,31 @@ impl CentralMwsManager {
                 self.update_conformity(MwsConformityState::FullyConformant).await;
                 self.update_state(CentralMwsState::Connected).await;
 
+                // Démarrer le mini serveur Home si configuré (exposition automatique)
+                if let Some(ref bind_addr) = self.config.home_http_bind {
+                    let cog_id = self.cog_id.clone();
+                    let core_version = self.core_version.clone();
+                    let services = self.services.read().await.clone();
+                    let home_jayxpose = (self.config.expose_jayxpose_vitrine
+                        && self.config.jayxpose_vitrine_base_url.is_some()
+                        && self.jayxpose_vitrine_slug.is_some())
+                        .then(|| HomeJayXposeInfo {
+                            base_url: self.config.jayxpose_vitrine_base_url.clone().unwrap(),
+                            slug: self.jayxpose_vitrine_slug.clone().unwrap(),
+                        });
+                    let (tx, rx) = oneshot::channel();
+                    let bind_for_server = bind_addr.clone();
+                    let bind_for_log = bind_addr.clone();
+                    tokio::spawn(async move {
+                        if let Err(e) = run_home_server(bind_for_server, cog_id, core_version, services, home_jayxpose, rx).await {
+                            warn!("Serveur Home arrêté: {}", e);
+                        }
+                    });
+                    let mut shutdown_guard = self.home_server_shutdown.write().await;
+                    *shutdown_guard = Some(tx);
+                    info!("Page Home exposée sur http://{}", bind_for_log);
+                }
+
                 info!(
                     "✅ COG {} est maintenant PRÉSENT sur le réseau MWS",
                     self.cog_id
@@ -434,6 +487,12 @@ impl CentralMwsManager {
     /// Déconnecte du réseau MWS.
     pub async fn disconnect(&self) -> Result<(), String> {
         info!("Déconnexion du réseau MWS...");
+
+        // Arrêter le serveur Home
+        let mut shutdown_guard = self.home_server_shutdown.write().await;
+        if let Some(tx) = shutdown_guard.take() {
+            let _ = tx.send(());
+        }
 
         let service = self.service.read().await;
         if let Some(ref svc) = *service {
@@ -776,6 +835,191 @@ impl MwsStatusSummary {
             },
         }
     }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SERVEUR HOME COG (layout commun, exposition automatique quand annoncé)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Informations pour afficher la carte JayXpose sur la Home (lien « Découvrir »).
+#[derive(Clone)]
+struct HomeJayXposeInfo {
+    base_url: String,
+    slug: String,
+}
+
+/// Lance le mini serveur HTTP qui sert la page Home du COG (GET /).
+/// S'arrête quand `shutdown` reçoit un signal.
+async fn run_home_server(
+    bind_addr: String,
+    cog_id: String,
+    core_version: String,
+    services: Vec<String>,
+    home_jayxpose: Option<HomeJayXposeInfo>,
+    mut shutdown: oneshot::Receiver<()>,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let listener = TcpListener::bind(&bind_addr).await?;
+    info!("Serveur Home COG en écoute sur http://{}", bind_addr);
+
+    loop {
+        tokio::select! {
+            _ = &mut shutdown => {
+                info!("Serveur Home arrêté (déconnexion MWS)");
+                break;
+            }
+            accept_result = listener.accept() => {
+                let (stream, _addr) = match accept_result {
+                    Ok(x) => x,
+                    Err(e) => {
+                        warn!("Accept Home: {}", e);
+                        continue;
+                    }
+                };
+                let cog_id = cog_id.clone();
+                let core_version = core_version.clone();
+                let services = services.clone();
+                let home_jayxpose = home_jayxpose.clone();
+                tokio::spawn(async move {
+                    if let Err(e) = handle_home_connection(stream, cog_id, core_version, services, home_jayxpose).await {
+                        warn!("Home connection: {}", e);
+                    }
+                });
+            }
+        }
+    }
+    Ok(())
+}
+
+async fn handle_home_connection(
+    mut stream: tokio::net::TcpStream,
+    cog_id: String,
+    core_version: String,
+    services: Vec<String>,
+    home_jayxpose: Option<HomeJayXposeInfo>,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    use tokio::io::{AsyncBufReadExt, BufReader};
+
+    let (reader, mut writer) = stream.split();
+    let mut reader = BufReader::new(reader);
+    let mut first_line = String::new();
+    reader.read_line(&mut first_line).await?;
+
+    let is_get_root = first_line.trim().starts_with("GET / ") || first_line.trim() == "GET /";
+
+    // Consommer le reste des en-têtes
+    loop {
+        let mut line = String::new();
+        reader.read_line(&mut line).await?;
+        if line.trim().is_empty() {
+            break;
+        }
+    }
+
+    let (status, body) = if is_get_root {
+        (
+            "200 OK",
+            home_page_html(&cog_id, &core_version, &services, home_jayxpose.as_ref()),
+        )
+    } else {
+        (
+            "404 Not Found",
+            r#"<!DOCTYPE html><html><head><meta charset="utf-8"><title>404</title></head><body><h1>404</h1><p>Page non trouvée.</p></body></html>"#.to_string(),
+        )
+    };
+
+    let response = format!(
+        "HTTP/1.1 {}\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+        status,
+        body.len(),
+        body
+    );
+    writer.write_all(response.as_bytes()).await?;
+    writer.flush().await?;
+    Ok(())
+}
+
+/// Génère la page Home COG (layout commun à tous les COGs).
+fn home_page_html(cog_id: &str, core_version: &str, services: &[String], home_jayxpose: Option<&HomeJayXposeInfo>) -> String {
+    let services_list: String = if services.is_empty() {
+        "<li>Aucun service exposé</li>".to_string()
+    } else {
+        services
+            .iter()
+            .map(|s| format!("<li>{}</li>", html_escape(s)))
+            .collect()
+    };
+
+    let jayxpose_card: String = if let Some(j) = home_jayxpose {
+        let url = format!("{}/vitrine/{}", j.base_url.trim_end_matches('/'), j.slug);
+        format!(
+            r##"
+        <div class="card card-service">
+            <h2>JayXpose</h2>
+            <p class="card-desc">Vitrine et catalogue — Découvrez notre présentation et nos produits.</p>
+            <a href="{url}" class="btn-discover" target="_blank" rel="noopener">Découvrir</a>
+        </div>"##,
+            url = html_escape(&url),
+        )
+    } else {
+        String::new()
+    };
+
+    format!(
+        r##"<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home — {cog_id}</title>
+    <style>
+        :root {{ --primary: #8b5cf6; --bg: #0a0a0f; --bg-surface: #12121a; --text: #f0f0f5; --text-muted: #9ca3af; --border: rgba(139, 92, 246, 0.2); }}
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 2rem; }}
+        .container {{ max-width: 720px; margin: 0 auto; }}
+        h1 {{ font-size: 1.75rem; margin-bottom: 0.5rem; color: var(--primary); }}
+        .subtitle {{ color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem; }}
+        .card {{ background: var(--bg-surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1rem; }}
+        .card h2 {{ font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--text-muted); }}
+        .card-desc {{ font-size: 0.9rem; color: var(--text); margin-bottom: 1rem; }}
+        .btn-discover {{ display: inline-block; background: var(--primary); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; }}
+        .btn-discover:hover {{ opacity: 0.9; }}
+        ul {{ list-style: none; }}
+        ul li {{ padding: 0.25rem 0; }}
+        .badge {{ display: inline-block; background: var(--primary); color: #fff; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; margin-top: 1rem; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 {cog_id}</h1>
+        <p class="subtitle">COG Miyukini — Cores {core_version} · Point d'entrée web</p>
+        <div class="card">
+            <h2>Services disponibles</h2>
+            <ul>{services_list}</ul>
+        </div>{jayxpose_card}
+        <span class="badge">Miyukini Webway System</span>
+    </div>
+</body>
+</html>"##,
+        cog_id = html_escape(cog_id),
+        core_version = html_escape(core_version),
+        services_list = services_list,
+        jayxpose_card = jayxpose_card,
+    )
+}
+
+fn html_escape(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    for c in s.chars() {
+        match c {
+            '&' => out.push_str("&amp;"),
+            '<' => out.push_str("&lt;"),
+            '>' => out.push_str("&gt;"),
+            '"' => out.push_str("&quot;"),
+            '\'' => out.push_str("&#39;"),
+            _ => out.push(c),
+        }
+    }
+    out
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

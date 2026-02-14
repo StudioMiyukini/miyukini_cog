@@ -36,6 +36,8 @@ pub struct LobbyEntry {
     pub is_public: bool,
     /// Mot de passe requis.
     pub password_required: bool,
+    /// Hash Argon2 du mot de passe (si password_required).
+    pub password_hash: Option<String>,
     /// Nombre de places.
     pub max_players: u32,
     /// Nombre de joueurs actuels.
@@ -262,6 +264,16 @@ impl PoolManager {
         let pools = self.pools.read().await;
         pools.keys().cloned().collect()
     }
+
+    /// Liste tous les COGs de tous les pools.
+    pub async fn list_all_cogs(&self) -> Vec<CogEntry> {
+        let pools = self.pools.read().await;
+        let mut cogs = Vec::new();
+        for pool in pools.values() {
+            cogs.extend(pool.list_cogs().await);
+        }
+        cogs
+    }
 }
 
 #[cfg(test)]
@@ -284,6 +296,7 @@ mod tests {
                 name: "Test Lobby".to_string(),
                 is_public: true,
                 password_required: false,
+                password_hash: None,
                 max_players: 8,
                 current_players: 1,
                 metadata: "{}".to_string(),

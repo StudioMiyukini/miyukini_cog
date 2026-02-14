@@ -24,7 +24,7 @@ use tracing_subscriber::FmtSubscriber;
 
 use admin::AdminServer;
 use config::OriginConfig;
-use relay::RelayServer;
+use relay::{PermisRegistry, RelayServer};
 use tracker::TrackerServer;
 use web::WebServer;
 
@@ -126,19 +126,39 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Créer les serveurs
     info!("Starting servers...");
 
+    // Registre des permis (Relay enregistre à la délivrance, Tracker vérifie sur ANNOUNCE, R-011)
+    let permis_registry = Arc::new(PermisRegistry::new());
+
     // Créer le tracker (pour partager le pool_manager)
-    let tracker = TrackerServer::new(Arc::clone(&config));
+    let tracker = TrackerServer::new(Arc::clone(&config), Some(Arc::clone(&permis_registry)));
     let pool_manager = tracker.pool_manager();
 
+    // Base JayXpose optionnelle (pages vitrine publiques /vitrine/*)
+    let jayxpose_db: Option<std::sync::Arc<jayxpose::JayXposeDb>> = config
+        .tracker
+        .jayxpose_db_path
+        .as_ref()
+        .and_then(|path| {
+            let p = std::path::Path::new(path);
+            if p.exists() {
+                jayxpose::JayXposeDb::open(p).ok().map(Arc::new)
+            } else {
+                None
+            }
+        });
+    if jayxpose_db.is_some() {
+        info!("JayXpose vitrines publiques activées (/vitrine/*)");
+    }
+
     // Créer le serveur web
-    let web_server = WebServer::new(Arc::clone(&config), Arc::clone(&pool_manager));
+    let web_server = WebServer::new(Arc::clone(&config), Arc::clone(&pool_manager), jayxpose_db);
 
     // Créer le serveur admin
     let admin = AdminServer::new(Arc::clone(&config))
         .with_pools(Arc::clone(&pool_manager));
 
     // Créer le serveur relay
-    let relay_result = RelayServer::new(Arc::clone(&config)).await;
+    let relay_result = RelayServer::new(Arc::clone(&config), Some(Arc::clone(&permis_registry))).await;
 
     // Démarrer les serveurs en parallèle
     let tracker_handle = {

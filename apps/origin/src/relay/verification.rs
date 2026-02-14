@@ -192,6 +192,12 @@ impl Verifier {
     pub async fn verify_phase_c(&self, environment_health: &[u8]) -> VerifyResult {
         debug!("Phase C: Verifying environment health");
 
+        // Absence de rapport (participant minimal) : accepter pour permettre le flux strict
+        if environment_health.is_empty() {
+            info!("Phase C: No health report (empty), accepting");
+            return VerifyResult::Ok;
+        }
+
         // Parser le rapport de santé (JSON)
         let health: serde_json::Result<EnvironmentHealth> =
             serde_json::from_slice(environment_health);

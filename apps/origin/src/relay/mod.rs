@@ -13,10 +13,12 @@
 //! - `metrics` — Métriques et statistiques
 
 pub mod metrics;
+pub mod permis_registry;
 pub mod rate_limiter;
 pub mod server;
 pub mod session;
 pub mod tunnel;
 pub mod verification;
 
+pub use permis_registry::PermisRegistry;
 pub use server::RelayServer;

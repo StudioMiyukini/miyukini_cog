@@ -2,27 +2,51 @@
 
 use super::{api, content::ContentManager, pages};
 use crate::config::OriginConfig;
-use crate::tracker::{catalog::Catalog, pool::PoolManager};
+use crate::tracker::{catalog::Catalog, pool::PoolManager, CatalogVisitTracker};
 use std::sync::Arc;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpListener;
 use tracing::{debug, error, info};
+
+/// Base de données JayXpose (optionnelle) pour les pages vitrine publiques.
+pub type JayXposeDbRef = Arc<jayxpose::JayXposeDb>;
+
+/// Réponse HTTP : normale ou redirection.
+pub enum RouteResponse {
+    Normal {
+        status: String,
+        content_type: String,
+        body: String,
+    },
+    Redirect { location: String },
+}
 
 /// Serveur web public.
 pub struct WebServer {
     config: Arc<OriginConfig>,
     pool_manager: Arc<PoolManager>,
     content_manager: Arc<ContentManager>,
+    /// Suivi des visites catalogue → Home (pour considérer un COG présent ~1 min après une visite).
+    visit_tracker: Arc<CatalogVisitTracker>,
+    /// Base JayXpose (lecture seule) pour /vitrine/*. Absent si non configuré.
+    jayxpose_db: Option<JayXposeDbRef>,
 }
 
 impl WebServer {
     /// Crée un nouveau serveur web.
+    /// Si `jayxpose_db` est fourni, les routes `/vitrine/*` sont activées.
     #[must_use]
-    pub fn new(config: Arc<OriginConfig>, pool_manager: Arc<PoolManager>) -> Self {
+    pub fn new(
+        config: Arc<OriginConfig>,
+        pool_manager: Arc<PoolManager>,
+        jayxpose_db: Option<JayXposeDbRef>,
+    ) -> Self {
         Self {
             config,
             pool_manager,
             content_manager: Arc::new(ContentManager::new()),
+            visit_tracker: Arc::new(CatalogVisitTracker::new()),
+            jayxpose_db,
         }
     }
 
@@ -38,9 +62,11 @@ impl WebServer {
                     let config = Arc::clone(&self.config);
                     let pool_mgr = Arc::clone(&self.pool_manager);
                     let content_mgr = Arc::clone(&self.content_manager);
+                    let visit_tracker = Arc::clone(&self.visit_tracker);
+                    let jayxpose_db = self.jayxpose_db.clone();
 
                     tokio::spawn(async move {
-                        if let Err(e) = handle_connection(stream, config, pool_mgr, content_mgr).await {
+                        if let Err(e) = handle_connection(stream, config, pool_mgr, content_mgr, visit_tracker, jayxpose_db).await {
                             debug!("Connection error from {}: {}", addr, e);
                         }
                     });
@@ -59,6 +85,8 @@ async fn handle_connection(
     _config: Arc<OriginConfig>,
     pool_mgr: Arc<PoolManager>,
     content_mgr: Arc<ContentManager>,
+    visit_tracker: Arc<CatalogVisitTracker>,
+    jayxpose_db: Option<JayXposeDbRef>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let (reader, mut writer) = stream.split();
     let mut buf_reader = BufReader::new(reader);
@@ -87,23 +115,44 @@ async fn handle_connection(
     debug!("{} {}", method, path);
 
     // Router
-    let (status, content_type, body) = route_request(path, &pool_mgr, &content_mgr).await;
+    let route_response = route_request(
+        path,
+        &pool_mgr,
+        &content_mgr,
+        &visit_tracker,
+        jayxpose_db.as_deref(),
+    )
+    .await;
 
     // Réponse HTTP
-    let response = format!(
-        "HTTP/1.1 {}\r\n\
-         Content-Type: {}; charset=utf-8\r\n\
-         Content-Length: {}\r\n\
-         Access-Control-Allow-Origin: *\r\n\
-         Connection: close\r\n\
-         \r\n",
-        status,
-        content_type,
-        body.len()
-    );
-
-    writer.write_all(response.as_bytes()).await?;
-    writer.write_all(body.as_bytes()).await?;
+    match route_response {
+        RouteResponse::Normal {
+            status,
+            content_type,
+            body,
+        } => {
+            let response = format!(
+                "HTTP/1.1 {}\r\n\
+                 Content-Type: {}; charset=utf-8\r\n\
+                 Content-Length: {}\r\n\
+                 Access-Control-Allow-Origin: *\r\n\
+                 Connection: close\r\n\
+                 \r\n",
+                status,
+                content_type,
+                body.len()
+            );
+            writer.write_all(response.as_bytes()).await?;
+            writer.write_all(body.as_bytes()).await?;
+        }
+        RouteResponse::Redirect { location } => {
+            let response = format!(
+                "HTTP/1.1 302 Found\r\nLocation: {}\r\nConnection: close\r\n\r\n",
+                location
+            );
+            writer.write_all(response.as_bytes()).await?;
+        }
+    }
     writer.flush().await?;
 
     Ok(())
@@ -114,9 +163,11 @@ async fn route_request(
     path: &str,
     pool_mgr: &PoolManager,
     content_mgr: &ContentManager,
-) -> (String, String, String) {
+    visit_tracker: &CatalogVisitTracker,
+    jayxpose_db: Option<&jayxpose::JayXposeDb>,
+) -> RouteResponse {
     // Séparer path et query string
-    let (path_only, _query) = path.split_once('?').unwrap_or((path, ""));
+    let (path_only, query) = path.split_once('?').unwrap_or((path, ""));
 
     // Nettoyer le path
     let path_clean = path_only.trim_end_matches('/');
@@ -128,43 +179,102 @@ async fn route_request(
         // ═══════════════════════════════════════════════════════════════════
         "/" => {
             let body = pages::home_page(content_mgr, pool_mgr).await;
-            ("200 OK".to_string(), "text/html".to_string(), body)
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
         }
 
         "/docs" => {
             let body = pages::docs_page(content_mgr).await;
-            ("200 OK".to_string(), "text/html".to_string(), body)
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
         }
 
         "/downloads" => {
             let body = pages::downloads_page(content_mgr).await;
-            ("200 OK".to_string(), "text/html".to_string(), body)
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
         }
 
         "/blog" => {
             let body = pages::blog_page(content_mgr).await;
-            ("200 OK".to_string(), "text/html".to_string(), body)
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
         }
 
         "/announcements" => {
             let body = pages::announcements_page(content_mgr).await;
-            ("200 OK".to_string(), "text/html".to_string(), body)
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
         }
 
         "/catalog" => {
             let catalog = Catalog::from_pools(pool_mgr).await;
             let body = catalog.to_html();
-            ("200 OK".to_string(), "text/html".to_string(), body)
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
+        }
+
+        "/visit" => {
+            // Redirection catalogue → Home COG : enregistre la visite puis redirige (présent ~1 min)
+            let cog_id = query
+                .split('&')
+                .find_map(|p| {
+                    let v = p.strip_prefix("cog_id=")?;
+                    let v = v.split('&').next().unwrap_or(v);
+                    urlencoding::decode(v).ok().map(|c| c.into_owned())
+                });
+            match cog_id {
+                Some(id) if !id.is_empty() => {
+                    if let Some(entry) = pool_mgr.find_cog(&id).await {
+                        visit_tracker.record_visit(&id).await;
+                        let location = if entry.address.starts_with("http") {
+                            entry.address
+                        } else {
+                            format!("http://{}/", entry.address)
+                        };
+                        RouteResponse::Redirect { location }
+                    } else {
+                        not_found_page()
+                    }
+                }
+                _ => not_found_page(),
+            }
         }
 
         "/services" => {
             let body = pages::services_page(content_mgr).await;
-            ("200 OK".to_string(), "text/html".to_string(), body)
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
         }
 
         "/about" => {
             let body = pages::about_page();
-            ("200 OK".to_string(), "text/html".to_string(), body)
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
         }
 
         // ═══════════════════════════════════════════════════════════════════
@@ -172,37 +282,65 @@ async fn route_request(
         // ═══════════════════════════════════════════════════════════════════
         "/api/health" => {
             let body = api::api_health();
-            ("200 OK".to_string(), "application/json".to_string(), body)
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "application/json".to_string(),
+                body,
+            }
         }
 
         "/api/status" => {
             let body = api::api_status(pool_mgr).await;
-            ("200 OK".to_string(), "application/json".to_string(), body)
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "application/json".to_string(),
+                body,
+            }
         }
 
         "/api/blog" => {
             let body = api::api_blog(content_mgr).await;
-            ("200 OK".to_string(), "application/json".to_string(), body)
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "application/json".to_string(),
+                body,
+            }
         }
 
         "/api/announcements" => {
             let body = api::api_announcements(content_mgr).await;
-            ("200 OK".to_string(), "application/json".to_string(), body)
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "application/json".to_string(),
+                body,
+            }
         }
 
         "/api/downloads" => {
             let body = api::api_downloads(content_mgr).await;
-            ("200 OK".to_string(), "application/json".to_string(), body)
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "application/json".to_string(),
+                body,
+            }
         }
 
         "/api/docs" => {
             let body = api::api_docs(content_mgr).await;
-            ("200 OK".to_string(), "application/json".to_string(), body)
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "application/json".to_string(),
+                body,
+            }
         }
 
         "/api/catalog" => {
-            let body = api::api_catalog(pool_mgr).await;
-            ("200 OK".to_string(), "application/json".to_string(), body)
+            let body = api::api_catalog(pool_mgr, Some(visit_tracker)).await;
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "application/json".to_string(),
+                body,
+            }
         }
 
         // ═══════════════════════════════════════════════════════════════════
@@ -211,7 +349,11 @@ async fn route_request(
         _ if path_clean.starts_with("/blog/") => {
             let post_id = &path_clean[6..]; // Après "/blog/"
             if let Some(body) = pages::blog_post_page(content_mgr, post_id).await {
-                ("200 OK".to_string(), "text/html".to_string(), body)
+                RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
             } else {
                 not_found_page()
             }
@@ -220,18 +362,34 @@ async fn route_request(
         _ if path_clean.starts_with("/api/blog/") => {
             let post_id = &path_clean[10..]; // Après "/api/blog/"
             if let Some(body) = api::api_blog_post(content_mgr, post_id).await {
-                ("200 OK".to_string(), "application/json".to_string(), body)
+                RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "application/json".to_string(),
+                body,
+            }
             } else {
-                ("404 Not Found".to_string(), "application/json".to_string(), r#"{"error": "Post not found"}"#.to_string())
+                RouteResponse::Normal {
+                status: "404 Not Found".to_string(),
+                content_type: "application/json".to_string(),
+                body: r#"{"error": "Post not found"}"#.to_string(),
+            }
             }
         }
 
         _ if path_clean.starts_with("/api/downloads/") => {
             let category = &path_clean[15..]; // Après "/api/downloads/"
             if let Some(body) = api::api_downloads_by_category(content_mgr, category).await {
-                ("200 OK".to_string(), "application/json".to_string(), body)
+                RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "application/json".to_string(),
+                body,
+            }
             } else {
-                ("404 Not Found".to_string(), "application/json".to_string(), r#"{"error": "Category not found"}"#.to_string())
+                RouteResponse::Normal {
+                status: "404 Not Found".to_string(),
+                content_type: "application/json".to_string(),
+                body: r#"{"error": "Category not found"}"#.to_string(),
+            }
             }
         }
 
@@ -244,7 +402,11 @@ async fn route_request(
                 [section_id] => {
                     if let Some(section) = content_mgr.get_doc_section(section_id).await {
                         let body = doc_section_page(&section);
-                        ("200 OK".to_string(), "text/html".to_string(), body)
+                        RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
                     } else {
                         not_found_page()
                     }
@@ -252,12 +414,102 @@ async fn route_request(
                 [section_id, article_id] => {
                     if let Some(article) = content_mgr.get_doc_article(section_id, article_id).await {
                         let body = doc_article_page(section_id, &article);
-                        ("200 OK".to_string(), "text/html".to_string(), body)
+                        RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
                     } else {
                         not_found_page()
                     }
                 }
                 _ => not_found_page(),
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // Pages vitrine JayXpose (publiques, données par KM)
+        // ═══════════════════════════════════════════════════════════════════
+        _ if path_clean.starts_with("/vitrine/") => {
+            if let Some(db) = jayxpose_db {
+                let remainder = path_clean.strip_prefix("/vitrine/").unwrap_or("");
+                let segments: Vec<&str> = remainder.split('/').filter(|s| !s.is_empty()).collect();
+                match segments.as_slice() {
+                    [slug] => {
+                        if let Some(body) = pages::vitrine_home_page(db, slug) {
+                            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
+                        } else {
+                            not_found_page()
+                        }
+                    }
+                    [slug, "catalogue"] => {
+                        if let Some(body) = pages::vitrine_catalogue_page(db, slug, None) {
+                            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
+                        } else {
+                            not_found_page()
+                        }
+                    }
+                    [slug, "catalogue", produit_id] => {
+                        if let Some(body) = pages::vitrine_produit_page(db, slug, produit_id) {
+                            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
+                        } else {
+                            not_found_page()
+                        }
+                    }
+                    [slug, "presentation"] => {
+                        if let Some(body) = pages::vitrine_presentation_page(db, slug) {
+                            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
+                        } else {
+                            not_found_page()
+                        }
+                    }
+                    [slug, "contact"] => {
+                        if let Some(body) = pages::vitrine_contact_page(db, slug) {
+                            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
+                        } else {
+                            not_found_page()
+                        }
+                    }
+                    _ => not_found_page(),
+                }
+            } else {
+                not_found_page()
+            }
+        }
+
+        _ if path_clean == "/vitrine" => {
+            if let Some(db) = jayxpose_db {
+                if let Some(body) = pages::vitrine_index_page(db) {
+                    RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
+                } else {
+                    not_found_page()
+                }
+            } else {
+                not_found_page()
             }
         }
 
@@ -268,19 +520,39 @@ async fn route_request(
             match parts.as_slice() {
                 [section_id] => {
                     if let Some(body) = api::api_doc_section(content_mgr, section_id).await {
-                        ("200 OK".to_string(), "application/json".to_string(), body)
+                        RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "application/json".to_string(),
+                body,
+            }
                     } else {
-                        ("404 Not Found".to_string(), "application/json".to_string(), r#"{"error": "Section not found"}"#.to_string())
+                        RouteResponse::Normal {
+                status: "404 Not Found".to_string(),
+                content_type: "application/json".to_string(),
+                body: r#"{"error": "Section not found"}"#.to_string(),
+            }
                     }
                 }
                 [section_id, article_id] => {
                     if let Some(body) = api::api_doc_article(content_mgr, section_id, article_id).await {
-                        ("200 OK".to_string(), "application/json".to_string(), body)
+                        RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "application/json".to_string(),
+                body,
+            }
                     } else {
-                        ("404 Not Found".to_string(), "application/json".to_string(), r#"{"error": "Article not found"}"#.to_string())
+                        RouteResponse::Normal {
+                status: "404 Not Found".to_string(),
+                content_type: "application/json".to_string(),
+                body: r#"{"error": "Article not found"}"#.to_string(),
+            }
                     }
                 }
-                _ => ("404 Not Found".to_string(), "application/json".to_string(), r#"{"error": "Invalid path"}"#.to_string()),
+                _ => RouteResponse::Normal {
+                status: "404 Not Found".to_string(),
+                content_type: "application/json".to_string(),
+                body: r#"{"error": "Invalid path"}"#.to_string(),
+            },
             }
         }
 
@@ -292,7 +564,7 @@ async fn route_request(
 }
 
 /// Page 404.
-fn not_found_page() -> (String, String, String) {
+fn not_found_page() -> RouteResponse {
     let body = r#"<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -343,7 +615,11 @@ fn not_found_page() -> (String, String, String) {
 </body>
 </html>"#.to_string();
 
-    ("404 Not Found".to_string(), "text/html".to_string(), body)
+    RouteResponse::Normal {
+        status: "404 Not Found".to_string(),
+        content_type: "text/html".to_string(),
+        body,
+    }
 }
 
 /// Page d'une section de documentation.
@@ -553,7 +829,7 @@ fn md_links_to_html(s: &str) -> String {
 }
 
 /// Conversion Markdown basique en HTML.
-fn simple_md_to_html(markdown: &str) -> String {
+pub(crate) fn simple_md_to_html(markdown: &str) -> String {
     let mut html = String::new();
     let mut in_code_block = false;
     let mut in_table = false;

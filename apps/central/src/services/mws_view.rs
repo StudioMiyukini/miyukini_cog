@@ -7,9 +7,10 @@
 //! - Créer et rejoindre des lobbys
 //! - Activer/désactiver le mode Lone (COG isolé)
 
+use crate::data::use_service_connections;
 use dioxus::prelude::*;
 use miyukini_central::{
-    CentralMwsManager, CentralMwsState, MwsConformityState, MwsStatusSummary,
+    CentralMwsConfig, CentralMwsManager, CentralMwsState, MwsConformityState, MwsStatusSummary,
 };
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -17,7 +18,7 @@ use tokio::sync::RwLock;
 /// État du composant MWS.
 #[derive(Clone)]
 pub struct MwsViewState {
-    /// Gestionnaire MWS.
+    /// Gestionnaire MWS (connexion réelle au réseau).
     pub manager: Arc<RwLock<Option<CentralMwsManager>>>,
     /// État simplifié.
     pub state: CentralMwsState,
@@ -79,7 +80,8 @@ pub struct DiscoveredLobby {
 /// Vue principale du réseau MWS.
 #[component]
 pub fn MwsNetworkView() -> Element {
-    let mut mws_state = use_signal(MwsViewState::default);
+    let mws_state = use_signal(MwsViewState::default);
+    let conns = use_service_connections();
 
     rsx! {
         div {
@@ -110,7 +112,7 @@ pub fn MwsNetworkView() -> Element {
                     MwsLoneModeToggle { state: mws_state }
                     
                     // Bouton connexion/déconnexion
-                    MwsConnectionButton { state: mws_state }
+                    MwsConnectionButton { state: mws_state, conns }
                 }
             }
 
@@ -188,14 +190,23 @@ fn MwsLoneModeToggle(mut state: Signal<MwsViewState>) -> Element {
     let is_lone = state.read().is_lone;
 
     let onclick = move |_| {
-        let mut s = state.write();
-        s.is_lone = !s.is_lone;
-        if s.is_lone {
-            s.state = CentralMwsState::Lone;
-            s.conformity = MwsConformityState::LoneMode;
-            s.discovered_cogs.clear();
-            s.discovered_lobbys.clear();
+        let mut state = state.clone();
+        let will_be_lone = !state.read().is_lone;
+        if will_be_lone {
+            // Passer en Lone : déconnecter le manager MWS puis mettre à jour l'état
+            spawn(async move {
+                real_mws_disconnect(state.clone()).await;
+                let mut s = state.write();
+                s.is_lone = true;
+                s.state = CentralMwsState::Lone;
+                s.conformity = MwsConformityState::LoneMode;
+                s.discovered_cogs.clear();
+                s.discovered_lobbys.clear();
+            });
         } else {
+            // Quitter le mode Lone : état déconnecté
+            let mut s = state.write();
+            s.is_lone = false;
             s.state = CentralMwsState::Disconnected;
             s.conformity = MwsConformityState::Uninitialized;
         }
@@ -342,7 +353,7 @@ fn MwsConformityProgress(state: Signal<MwsViewState>) -> Element {
 
 /// Bouton de connexion/déconnexion.
 #[component]
-fn MwsConnectionButton(mut state: Signal<MwsViewState>) -> Element {
+fn MwsConnectionButton(mut state: Signal<MwsViewState>, conns: Signal<Arc<crate::data::ServiceConnections>>) -> Element {
     let current_state = state.read().state.clone();
     let conformity = state.read().conformity.clone();
     let connecting = state.read().connecting;
@@ -352,7 +363,8 @@ fn MwsConnectionButton(mut state: Signal<MwsViewState>) -> Element {
     let summary = MwsStatusSummary::from_state(&current_state, &conformity);
 
     let onclick = move |_| {
-        let mut state = state.clone();
+        let state = state.clone();
+        let conns_arc = conns.read().clone();
         spawn(async move {
             let current = state.read().state.clone();
             let is_lone = state.read().is_lone;
@@ -362,17 +374,11 @@ fn MwsConnectionButton(mut state: Signal<MwsViewState>) -> Element {
             }
 
             if current == CentralMwsState::Connected || current == CentralMwsState::RelayConnected {
-                // Déconnexion
-                {
-                    let mut s = state.write();
-                    s.state = CentralMwsState::Disconnected;
-                    s.conformity = MwsConformityState::Uninitialized;
-                    s.discovered_cogs.clear();
-                    s.discovered_lobbys.clear();
-                }
+                // Déconnexion réelle via le manager MWS
+                real_mws_disconnect(state.clone()).await;
             } else {
-                // Connexion avec simulation du protocole complet
-                simulate_mws_connection(&mut state).await;
+                // Connexion réelle au réseau MWS
+                real_mws_connect(state.clone(), conns_arc).await;
             }
         });
     };
@@ -411,9 +417,10 @@ fn MwsConnectionButton(mut state: Signal<MwsViewState>) -> Element {
     }
 }
 
-/// Simule le protocole de connexion MWS complet.
-async fn simulate_mws_connection(state: &mut Signal<MwsViewState>) {
-    // Phase 1: Initialisation
+/// Connexion réelle au réseau MWS via CentralMwsManager et miyuwebway_participant.
+/// Active le serveur Home (page de présentation du COG) lorsque annoncé sur le Tracker.
+/// Si une vitrine JayXpose est publiée, la carte « Découvrir » est affichée sur la Home.
+async fn real_mws_connect(mut state: Signal<MwsViewState>, conns: Arc<crate::data::ServiceConnections>) {
     {
         let mut s = state.write();
         s.connecting = true;
@@ -421,100 +428,102 @@ async fn simulate_mws_connection(state: &mut Signal<MwsViewState>) {
         s.state = CentralMwsState::Connecting;
     }
 
-    // Étape 1: Résolution Origin
-    {
-        let mut s = state.write();
-        s.conformity = MwsConformityState::ResolvingOrigin;
-    }
-    tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
+    let mut config = CentralMwsConfig::default();
+    // Exposer la page Home du COG quand annoncé : écoute HTTP et adresse annoncée au Tracker
+    config.home_http_bind = Some("0.0.0.0:8080".to_string());
+    config.public_address = "127.0.0.1:8080".to_string(); // Lien "Visiter" sur le catalogue Origin
 
-    // Étape 2: Connexion TLS au Relay
-    {
-        let mut s = state.write();
-        s.conformity = MwsConformityState::ConnectingRelay;
+    // Slug vitrine JayXpose publiée (pour la carte « Découvrir » sur la Home)
+    let jayxpose_slug = conns.jayxpose.first_published_vitrine_slug().ok().flatten();
+    if let Some(ref _slug) = jayxpose_slug {
+        config.expose_jayxpose_vitrine = true;
+        // URL de base des vitrines (serveur web Origin) : dérivée du relay par défaut
+        let (host, _) = config.relay_address.split_once(':').unwrap_or((config.relay_address.as_str(), "7000"));
+        config.jayxpose_vitrine_base_url = Some(format!("http://{}:8080", host));
     }
-    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
 
-    // Étape 3: Enregistrement Relay
-    {
-        let mut s = state.write();
-        s.conformity = MwsConformityState::RegisteringRelay;
+    let services = if jayxpose_slug.is_some() {
+        vec!["jayxpose".to_string()]
+    } else {
+        vec![]
+    };
+    let manager = CentralMwsManager::new(
+        config,
+        "central-native".to_string(),
+        "0.1.0".to_string(),
+        services,
+        jayxpose_slug,
+    );
+
+    match manager.connect().await {
+        Ok(()) => {
+            let st = manager.get_state().await;
+            let conf = manager.get_conformity_state().await;
+            let cogs = manager
+                .search_cogs(None, None, 50)
+                .await
+                .unwrap_or_default();
+            let lobbys = manager
+                .search_lobbys(None, true, 50)
+                .await
+                .unwrap_or_default();
+
+            let mut s = state.write();
+            s.manager = Arc::new(RwLock::new(Some(manager)));
+            s.state = st;
+            s.conformity = conf;
+            s.connecting = false;
+            s.error = None;
+            s.discovered_cogs = cogs
+                .into_iter()
+                .map(|c| DiscoveredCog {
+                    cog_id: c.cog_id,
+                    core_version: c.core_version,
+                    address: c.address,
+                    services: c.services,
+                    last_seen: c.last_seen,
+                })
+                .collect();
+            s.discovered_lobbys = lobbys
+                .into_iter()
+                .map(|r| DiscoveredLobby {
+                    lobby_id: r.lobby.lobby_id,
+                    name: r.lobby.name,
+                    host_cog_id: r.host_cog_id,
+                    pool_version: r.pool_version,
+                    current_players: r.lobby.current_players,
+                    max_players: r.lobby.max_players,
+                    is_public: r.lobby.is_public,
+                    password_required: r.lobby.password_required,
+                })
+                .collect();
+        }
+        Err(e) => {
+            let mut s = state.write();
+            s.connecting = false;
+            s.error = Some(e.clone());
+            s.state = CentralMwsState::Error(e);
+        }
     }
-    tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
+}
 
-    // Étape 4: Attente accusé Relay
-    {
-        let mut s = state.write();
-        s.conformity = MwsConformityState::AwaitingRelayAck;
+/// Déconnexion réelle du réseau MWS.
+async fn real_mws_disconnect(mut state: Signal<MwsViewState>) {
+    let arc = state.read().manager.clone();
+    let mut guard = arc.write().await;
+    if let Some(mgr) = guard.take() {
+        let _ = mgr.disconnect().await;
     }
-    tokio::time::sleep(tokio::time::Duration::from_millis(400)).await;
+    drop(guard);
 
-    // Étape 5: Session Relay établie
     {
         let mut s = state.write();
-        s.conformity = MwsConformityState::RelaySessionEstablished;
-        s.state = CentralMwsState::RelayConnected;
-    }
-    tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
-
-    // Étape 6: Obtention du Permis
-    {
-        let mut s = state.write();
-        s.conformity = MwsConformityState::ObtainingPermis;
-    }
-    tokio::time::sleep(tokio::time::Duration::from_millis(400)).await;
-
-    // Étape 7: Connexion au Tracker
-    {
-        let mut s = state.write();
-        s.conformity = MwsConformityState::ConnectingTracker;
-    }
-    tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
-
-    // Étape 8: Annonce au Tracker
-    {
-        let mut s = state.write();
-        s.conformity = MwsConformityState::AnnouncingTracker;
-    }
-    tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
-
-    // Étape 9: Attente accusé Tracker
-    {
-        let mut s = state.write();
-        s.conformity = MwsConformityState::AwaitingTrackerAck;
-    }
-    tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
-
-    // Étape 10: Conformité complète
-    {
-        let mut s = state.write();
-        s.conformity = MwsConformityState::FullyConformant;
+        s.state = CentralMwsState::Disconnected;
+        s.conformity = MwsConformityState::Uninitialized;
+        s.discovered_cogs.clear();
+        s.discovered_lobbys.clear();
         s.connecting = false;
-        s.state = CentralMwsState::Connected;
-
-        // Ajouter des lobbys de démonstration
-        s.discovered_lobbys = vec![
-            DiscoveredLobby {
-                lobby_id: "lobby-1".to_string(),
-                name: "Lord of the Click - Partie rapide".to_string(),
-                host_cog_id: "cog-abc123".to_string(),
-                pool_version: "1.0.0".to_string(),
-                current_players: 3,
-                max_players: 8,
-                is_public: true,
-                password_required: false,
-            },
-            DiscoveredLobby {
-                lobby_id: "lobby-2".to_string(),
-                name: "Survivor Coop".to_string(),
-                host_cog_id: "cog-def456".to_string(),
-                pool_version: "1.0.0".to_string(),
-                current_players: 1,
-                max_players: 4,
-                is_public: true,
-                password_required: false,
-            },
-        ];
+        s.error = None;
     }
 }
 
@@ -523,7 +532,7 @@ async fn simulate_mws_connection(state: &mut Signal<MwsViewState>) {
 fn MwsStatusCard(state: Signal<MwsViewState>) -> Element {
     let current_state = state.read().state.clone();
     let conformity = state.read().conformity.clone();
-    let is_lone = state.read().is_lone;
+    let _is_lone = state.read().is_lone;
 
     // Utiliser le résumé d'état
     let summary = MwsStatusSummary::from_state(&current_state, &conformity);
@@ -648,29 +657,49 @@ fn MwsSearchSection(mut state: Signal<MwsViewState>) -> Element {
     let search_cogs = move |_| {
         let mut state = state.clone();
         spawn(async move {
-            // TODO: appeler tracker_client.search_cogs()
-            // Simuler des résultats
-            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-            
-            {
-                let mut s = state.write();
-                s.discovered_cogs = vec![
-                    DiscoveredCog {
-                        cog_id: "cog-abc123".to_string(),
-                        core_version: "1.0.0".to_string(),
-                        address: "192.168.1.100:8080".to_string(),
-                        services: vec!["jayfestival".to_string(), "jayxpose".to_string()],
-                        last_seen: "il y a 2 min".to_string(),
-                    },
-                    DiscoveredCog {
-                        cog_id: "cog-def456".to_string(),
-                        core_version: "1.0.0".to_string(),
-                        address: "192.168.1.101:8080".to_string(),
-                        services: vec!["miyuclicker".to_string()],
-                        last_seen: "il y a 5 min".to_string(),
-                    },
-                ];
-            }
+            let arc = state.read().manager.clone();
+            let guard = arc.read().await;
+            let Some(ref manager) = *guard else { return };
+            let query = state.read().search_query.clone();
+            let version_filter = if query.is_empty() {
+                None
+            } else {
+                Some(query.clone())
+            };
+            let cogs = manager
+                .search_cogs(version_filter, None, 50)
+                .await
+                .unwrap_or_default();
+            let lobbys = manager
+                .search_lobbys(Some(query).filter(|q| !q.is_empty()), true, 50)
+                .await
+                .unwrap_or_default();
+            drop(guard);
+
+            let mut s = state.write();
+            s.discovered_cogs = cogs
+                .into_iter()
+                .map(|c| DiscoveredCog {
+                    cog_id: c.cog_id,
+                    core_version: c.core_version,
+                    address: c.address,
+                    services: c.services,
+                    last_seen: c.last_seen,
+                })
+                .collect();
+            s.discovered_lobbys = lobbys
+                .into_iter()
+                .map(|r| DiscoveredLobby {
+                    lobby_id: r.lobby.lobby_id,
+                    name: r.lobby.name,
+                    host_cog_id: r.host_cog_id,
+                    pool_version: r.pool_version,
+                    current_players: r.lobby.current_players,
+                    max_players: r.lobby.max_players,
+                    is_public: r.lobby.is_public,
+                    password_required: r.lobby.password_required,
+                })
+                .collect();
         });
     };
 
