@@ -334,6 +334,20 @@ async fn route_request(
             }
         }
 
+        // Route dynamique /services/{id}
+        _ if path_clean.starts_with("/services/") => {
+            let service_id = &path_clean[10..]; // Après "/services/"
+            if let Some(body) = pages::service_detail_page(content_mgr, service_id).await {
+                RouteResponse::Normal {
+                    status: "200 OK".to_string(),
+                    content_type: "text/html".to_string(),
+                    body,
+                }
+            } else {
+                not_found_page()
+            }
+        }
+
         "/about" => {
             let body = pages::about_page();
             RouteResponse::Normal {

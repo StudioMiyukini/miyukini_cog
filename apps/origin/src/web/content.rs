@@ -70,6 +70,128 @@ pub struct Announcement {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Services (catalogue public)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Catégorie de service.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum ServiceCategory {
+    /// Outils utilitaires.
+    Outils,
+    /// Développement et programmation.
+    Developpement,
+    /// Commerce et vente.
+    Commerce,
+    /// Jeux et divertissement.
+    Jeux,
+    /// Style de vie et productivité.
+    StyleDeVie,
+    /// Social et communication.
+    Social,
+    /// Autre.
+    Autre,
+}
+
+impl ServiceCategory {
+    /// Retourne le libellé français de la catégorie.
+    pub fn label(&self) -> &'static str {
+        match self {
+            Self::Outils => "Outils",
+            Self::Developpement => "Développement",
+            Self::Commerce => "Commerce",
+            Self::Jeux => "Jeux",
+            Self::StyleDeVie => "Style de vie",
+            Self::Social => "Social",
+            Self::Autre => "Autre",
+        }
+    }
+
+    /// Retourne toutes les catégories.
+    pub fn all() -> &'static [ServiceCategory] {
+        &[
+            Self::Outils,
+            Self::Developpement,
+            Self::Commerce,
+            Self::Jeux,
+            Self::StyleDeVie,
+            Self::Social,
+            Self::Autre,
+        ]
+    }
+}
+
+/// Type de service.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum ServiceType {
+    /// Service Miyukini officiel.
+    Officiel,
+    /// Service tiers.
+    Tiers,
+}
+
+impl ServiceType {
+    pub fn label(&self) -> &'static str {
+        match self {
+            Self::Officiel => "Officiel",
+            Self::Tiers => "Tiers",
+        }
+    }
+}
+
+/// Fiche complète d'un service pour le catalogue.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ServiceInfo {
+    /// Identifiant unique (slug).
+    pub id: String,
+    /// Nom du service.
+    pub name: String,
+    /// Description courte (1 ligne).
+    pub short_description: String,
+    /// Description complète (Markdown).
+    pub full_description: String,
+    /// Catégorie.
+    pub category: ServiceCategory,
+    /// Éditeur / développeur.
+    pub editor: String,
+    /// Version COG minimale.
+    pub cog_version: String,
+    /// Type de service (officiel/tiers).
+    pub service_type: ServiceType,
+    /// Licence d'utilisation.
+    pub license: String,
+    /// Prix (0.0 = gratuit).
+    pub price: f64,
+    /// Date de parution.
+    pub release_date: DateTime<Utc>,
+    /// URL du site officiel.
+    pub website_url: Option<String>,
+    /// URL de téléchargement/achat.
+    pub download_url: Option<String>,
+    /// URLs des captures d'écran.
+    pub screenshots: Vec<String>,
+    /// URL de la petite bannière.
+    pub banner_url: Option<String>,
+}
+
+impl ServiceInfo {
+    /// Retourne si le service est gratuit.
+    pub fn is_free(&self) -> bool {
+        self.price <= 0.0
+    }
+
+    /// Retourne le prix formaté.
+    pub fn price_label(&self) -> String {
+        if self.is_free() {
+            "Gratuit".to_string()
+        } else {
+            format!("{:.2} €", self.price)
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Téléchargements
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -176,6 +298,8 @@ pub struct ContentManager {
     downloads: Arc<RwLock<Vec<Download>>>,
     /// Documentation.
     doc_sections: Arc<RwLock<Vec<DocSection>>>,
+    /// Services (catalogue).
+    services: Arc<RwLock<Vec<ServiceInfo>>>,
 }
 
 impl ContentManager {
@@ -187,6 +311,7 @@ impl ContentManager {
             announcements: Arc::new(RwLock::new(Vec::new())),
             downloads: Arc::new(RwLock::new(Vec::new())),
             doc_sections: Arc::new(RwLock::new(Vec::new())),
+            services: Arc::new(RwLock::new(Vec::new())),
         };
 
         // Charger le contenu initial dans un spawn
@@ -195,6 +320,7 @@ impl ContentManager {
             announcements: Arc::clone(&manager.announcements),
             downloads: Arc::clone(&manager.downloads),
             doc_sections: Arc::clone(&manager.doc_sections),
+            services: Arc::clone(&manager.services),
         };
 
         tokio::spawn(async move {
@@ -210,6 +336,7 @@ impl ContentManager {
         self.load_announcements().await;
         self.load_downloads().await;
         self.load_documentation().await;
+        self.load_services().await;
     }
 
     /// Charge les articles de blog.
@@ -268,19 +395,19 @@ impl ContentManager {
     async fn load_downloads(&self) {
         let mut downloads = self.downloads.write().await;
         
-        // COG Stable v0.1.2 - Windows uniquement pour l'instant
+        // COG Stable v0.1.4 - Windows uniquement pour l'instant
         downloads.push(Download {
             id: "miyukini-cog-windows".to_string(),
             name: "Miyukini COG".to_string(),
             description: "Environnement COG complet pour Windows — Inclut Central, KindMother, client MWS et tous les Services (JayXpose, JayFestival, JayKonta, JayKoa, MiyuClicker, Lord of the Castle)".to_string(),
-            version: "0.1.2".to_string(),
+            version: "0.1.4".to_string(),
             category: DownloadCategory::Cog,
             platforms: vec![Platform::Windows],
-            download_url: "https://miyukini.com/files/Miyukini-COG-v0.1.2-windows.zip".to_string(),
-            size_bytes: 8_347_191,
-            sha256: "78618B4EFB0795C628EECE3A672BB068AB19DEB92E179B128F0B1FA8F3B98A55".to_string(),
+            download_url: "https://miyukini.com/files/Miyukini-COG-v0.1.4-windows.zip".to_string(),
+            size_bytes: 8_331_400,
+            sha256: "50C697D330795DB63C723C0BAB3ADB8C73B0E0F56E040C07D345D85D85F7B6A1".to_string(),
             published_at: Utc::now(),
-            release_notes: "v0.1.2 — Fix panic rustls CryptoProvider pour connexion TLS au Relay".to_string(),
+            release_notes: "v0.1.4 — Fix UI MWS: polling état connexion, adresses miyukini.com".to_string(),
             min_core_version: None,
         });
     }
@@ -1724,6 +1851,327 @@ Dans `apps/central/src/services/` :
         });
     }
 
+    /// Charge les services du catalogue.
+    async fn load_services(&self) {
+        let mut services = self.services.write().await;
+
+        // Services Jay (productivité)
+        services.push(ServiceInfo {
+            id: "jayfestival".to_string(),
+            name: "JayFestival".to_string(),
+            short_description: "Gestion complète d'événements et festivals".to_string(),
+            full_description: r#"# JayFestival
+
+**JayFestival** est un service complet de gestion d'événements, festivals et salons professionnels.
+
+## Fonctionnalités principales
+
+### Pour les organisateurs
+- Création et gestion d'éditions
+- Planning et programme interactif
+- Gestion des exposants et participants
+- Billetterie intégrée
+- Budget et suivi financier
+- Communications et annonces
+
+### Pour les exposants
+- Inscription aux événements
+- Fiche publique de présentation
+- Gestion de l'agenda personnel
+- Notifications et messages
+
+### Pour les visiteurs
+- Consultation du catalogue
+- Achat de billets
+- Navigation dans le programme
+- Favoris et planning personnel
+
+## Intégration MWS
+
+JayFestival utilise le Miyukini Webway System pour :
+- Synchroniser les données entre organisateurs
+- Permettre aux exposants de se connecter depuis leur COG
+- Gérer la billetterie distribuée
+
+## Architecture
+
+Le service fonctionne via KindMother pour la persistance des données, garantissant la souveraineté des informations."#.to_string(),
+            category: ServiceCategory::Commerce,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.1.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(30),
+            website_url: Some("https://miyukini.com/services/jayfestival".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
+
+        services.push(ServiceInfo {
+            id: "jayxpose".to_string(),
+            name: "JayXpose".to_string(),
+            short_description: "Vitrine et catalogue d'entreprise en ligne".to_string(),
+            full_description: r#"# JayXpose
+
+**JayXpose** permet de créer une vitrine professionnelle pour présenter vos produits et services.
+
+## Fonctionnalités
+
+### Gestion de l'entreprise
+- Fiche entreprise complète
+- Logo et bannière personnalisables
+- Informations de contact
+
+### Catalogue produits
+- Ajout et gestion des produits
+- Photos et descriptions
+- Prix et disponibilité
+- Catégorisation
+
+### Vitrine publique
+- Page d'accueil personnalisée
+- Catalogue consultable
+- Page de présentation
+- Formulaire de contact
+
+## Intégration
+
+JayXpose s'intègre avec JayKonta pour la facturation et avec le MWS pour la publication sur le réseau."#.to_string(),
+            category: ServiceCategory::Commerce,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.1.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(25),
+            website_url: Some("https://miyukini.com/services/jayxpose".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
+
+        services.push(ServiceInfo {
+            id: "jaykonta".to_string(),
+            name: "JayKonta".to_string(),
+            short_description: "Comptabilité et gestion financière personnelle".to_string(),
+            full_description: r#"# JayKonta
+
+**JayKonta** est un service de comptabilité personnelle et professionnelle.
+
+## Fonctionnalités
+
+### Gestion des comptes
+- Création de porte-monnaies (comptes)
+- Suivi des soldes en temps réel
+- Historique des mouvements
+
+### Mouvements financiers
+- Revenus et dépenses
+- Transferts entre comptes
+- Catégorisation automatique
+
+### Récurrences
+- Dépenses récurrentes (loyer, abonnements)
+- Revenus réguliers (salaire)
+- Alertes de paiement
+
+### Prévisions
+- Projection du solde futur
+- Graphiques de tendance
+- Alertes de découvert
+
+## Données souveraines
+
+Toutes vos données financières restent sur votre COG, jamais partagées sans votre accord."#.to_string(),
+            category: ServiceCategory::Outils,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.1.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(20),
+            website_url: Some("https://miyukini.com/services/jaykonta".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
+
+        services.push(ServiceInfo {
+            id: "jaykoa".to_string(),
+            name: "JayKoa".to_string(),
+            short_description: "Calendrier universel et gestion d'agenda".to_string(),
+            full_description: r#"# JayKoa
+
+**JayKoa** est un calendrier universel pour gérer vos événements et rendez-vous.
+
+## Fonctionnalités
+
+### Vues multiples
+- Vue mois complète
+- Vue semaine détaillée
+- Vue jour heure par heure
+- Vue agenda (liste)
+
+### Gestion des événements
+- Création rapide d'événements
+- Rappels et notifications
+- Récurrence (quotidien, hebdomadaire, mensuel)
+- Couleurs et catégories
+
+### Synchronisation
+- Synchronisation via MWS entre COGs
+- Import/Export CalDAV
+- Partage de calendriers
+
+## Intégration
+
+JayKoa s'intègre avec JayFestival pour les événements publics et avec JayKonta pour les échéances financières."#.to_string(),
+            category: ServiceCategory::StyleDeVie,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.1.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(15),
+            website_url: Some("https://miyukini.com/services/jaykoa".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
+
+        // Jeux
+        services.push(ServiceInfo {
+            id: "miyuclicker".to_string(),
+            name: "MiyuClicker".to_string(),
+            short_description: "Jeu idle/clicker avec progression infinie".to_string(),
+            full_description: r#"# MiyuClicker
+
+**MiyuClicker** est un jeu idle/clicker addictif avec une progression infinie.
+
+## Gameplay
+
+### Clics et automatisation
+- Gagnez des ressources en cliquant
+- Débloquez des améliorations automatiques
+- Progression exponentielle
+
+### Améliorations
+- Upgrades de clic
+- Générateurs automatiques
+- Multiplicateurs de bonus
+
+### Achievements
+- Objectifs à débloquer
+- Récompenses spéciales
+- Classements
+
+## Mode hors ligne
+
+Le jeu continue à progresser même quand vous ne jouez pas, grâce à la simulation de temps écoulé."#.to_string(),
+            category: ServiceCategory::Jeux,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.1.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(45),
+            website_url: Some("https://miyukini.com/games/miyuclicker".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
+
+        services.push(ServiceInfo {
+            id: "lord-of-the-castle".to_string(),
+            name: "Lord of the Castle".to_string(),
+            short_description: "Tower defense coopératif en réseau".to_string(),
+            full_description: r#"# Lord of the Castle
+
+**Lord of the Castle** est un jeu de tower defense coopératif jouable en réseau via le MWS.
+
+## Gameplay
+
+### Défense
+- Construisez des tours de défense
+- Améliorez vos bâtiments
+- Gérez vos ressources
+
+### Vagues d'ennemis
+- Vagues progressives de difficulté
+- Types d'ennemis variés
+- Boss redoutables
+
+### Mode coopératif
+- Jouez avec d'autres COGs via le MWS
+- Partagez les ressources
+- Stratégie collaborative
+
+## Lobbys publics
+
+Créez ou rejoignez des lobbys pour jouer avec d'autres membres du réseau Miyukini."#.to_string(),
+            category: ServiceCategory::Jeux,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.1.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(60),
+            website_url: Some("https://miyukini.com/games/lord-of-the-castle".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
+
+        // Outils système
+        services.push(ServiceInfo {
+            id: "miyukini-central".to_string(),
+            name: "Miyukini Central".to_string(),
+            short_description: "Hub principal de votre environnement COG".to_string(),
+            full_description: r#"# Miyukini Central
+
+**Miyukini Central** est le hub principal de votre environnement COG, comparable à Steam pour les jeux.
+
+## Fonctionnalités
+
+### Bibliothèque
+- Accès à tous vos Services installés
+- Lancement rapide des applications
+- Gestion des installations
+
+### Communauté
+- Connexion au réseau MWS
+- Découverte des COGs connectés
+- Lobbys et sessions multijoueur
+
+### Magasin
+- Catalogue des Services disponibles
+- Installation en un clic
+- Mises à jour automatiques
+
+### Profil
+- Gestion de votre identité COG
+- Paramètres de confidentialité
+- Configuration du mode Lone/Connecté
+
+## Interface
+
+Central utilise une interface native performante construite avec Dioxus, sans webview."#.to_string(),
+            category: ServiceCategory::Outils,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.1.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(90),
+            website_url: Some("https://miyukini.com".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Accesseurs
     // ─────────────────────────────────────────────────────────────────────────
@@ -1789,6 +2237,30 @@ Dans `apps/central/src/services/` :
             .iter()
             .find(|s| s.id == section_id)
             .and_then(|s| s.articles.iter().find(|a| a.id == article_id).cloned())
+    }
+
+    /// Récupère tous les services.
+    pub async fn get_services(&self) -> Vec<ServiceInfo> {
+        let services = self.services.read().await;
+        services.clone()
+    }
+
+    /// Récupère un service par ID.
+    pub async fn get_service(&self, id: &str) -> Option<ServiceInfo> {
+        let services = self.services.read().await;
+        services.iter().find(|s| s.id == id).cloned()
+    }
+
+    /// Récupère les services par catégorie.
+    pub async fn get_services_by_category(&self, category: ServiceCategory) -> Vec<ServiceInfo> {
+        let services = self.services.read().await;
+        services.iter().filter(|s| s.category == category).cloned().collect()
+    }
+
+    /// Récupère les services gratuits.
+    pub async fn get_free_services(&self) -> Vec<ServiceInfo> {
+        let services = self.services.read().await;
+        services.iter().filter(|s| s.is_free()).cloned().collect()
     }
 }
 

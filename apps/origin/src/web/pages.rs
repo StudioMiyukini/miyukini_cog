@@ -950,101 +950,697 @@ pub async fn downloads_page(content_mgr: &ContentManager) -> String {
     layout("Téléchargements", &content, "downloads")
 }
 
-/// Page des services disponibles — présentations des services répertoriés.
+/// Page des services disponibles — catalogue avec carousel horizontal (conforme maquette).
 pub async fn services_page(content_mgr: &ContentManager) -> String {
-    let downloads = content_mgr.get_downloads().await;
+    use super::content::ServiceCategory;
 
-    let miyukini_services: Vec<_> = downloads
+    let services = content_mgr.get_services().await;
+
+    // Générer la liste des catégories pour la sidebar
+    let categories_list: String = ServiceCategory::all()
         .iter()
-        .filter(|d| matches!(d.id.as_str(), "miyuclicker" | "lord-of-the-castle"))
+        .map(|cat| {
+            format!(
+                r#"<li><a href="/services?category={}">{}</a></li>"#,
+                html_escape(&format!("{:?}", cat).to_lowercase()),
+                html_escape(cat.label())
+            )
+        })
         .collect();
-    let jay_services: Vec<_> = downloads
+
+    // Générer les cartes de services pour le carousel
+    let services_cards: String = services
         .iter()
-        .filter(|d| d.id.starts_with("jay"))
+        .map(|s| {
+            format!(
+                r#"<div class="service-card">
+                    <div class="service-banner">{}</div>
+                    <div class="service-content">
+                        <h3 class="service-title">{}</h3>
+                        <div class="service-category">{}</div>
+                        <p class="service-description">{}</p>
+                        <div class="service-footer">
+                            <div class="service-meta">
+                                <span class="service-editor">{}</span>
+                                <span class="service-version">COG v{}</span>
+                            </div>
+                            <div class="service-actions">
+                                <a href="/services/{}" class="btn btn-secondary btn-sm">En savoir plus</a>
+                                <a href="/downloads" class="btn btn-primary btn-sm">Pré-installé</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>"#,
+                if s.banner_url.is_some() {
+                    format!(r#"<img src="{}" alt="Bannière">"#, html_escape(s.banner_url.as_deref().unwrap_or("")))
+                } else {
+                    "Petite bannière".to_string()
+                },
+                html_escape(&s.name),
+                html_escape(s.category.label()),
+                html_escape(&s.short_description),
+                html_escape(&s.editor),
+                html_escape(&s.cog_version),
+                html_escape(&s.id),
+            )
+        })
         .collect();
-    let games: Vec<_> = downloads
-        .iter()
-        .filter(|d| matches!(d.id.as_str(), "miyuclicker" | "lord-of-the-castle"))
-        .collect();
-
-    let service_card = |d: &super::content::Download| {
-        format!(
-            r#"<a href="{}" class="card" style="display: block;">
-                <h3>{}</h3>
-                <p>{}</p>
-                <span class="tag">v{}</span>
-            </a>"#,
-            html_escape(&d.download_url),
-            html_escape(&d.name),
-            html_escape(&d.description),
-            html_escape(&d.version)
-        )
-    };
-
-    let miyukini_html: String = miyukini_services.iter().map(|d| service_card(d)).collect();
-    let jay_html: String = jay_services.iter().map(|d| service_card(d)).collect();
-    let games_html: String = games.iter().map(|d| service_card(d)).collect();
-
-    let miyukini_section = if miyukini_html.is_empty() {
-        r#"<div class="card"><p style="color: var(--text-muted);">Aucun service Miyukini pour le moment.</p></div>"#.to_string()
-    } else {
-        miyukini_html
-    };
-    let jay_section = if jay_html.is_empty() {
-        r#"<div class="card"><p style="color: var(--text-muted);">Aucun service Jay pour le moment.</p></div>"#.to_string()
-    } else {
-        jay_html
-    };
-    let games_section = if games_html.is_empty() {
-        r#"<div class="card"><p style="color: var(--text-muted);">Aucun jeu pour le moment.</p></div>"#.to_string()
-    } else {
-        games_html
-    };
 
     let content = format!(
-        r#"
-        <section class="hero" style="padding: 2rem 0;">
-            <h1>Les services disponibles</h1>
-            <p>Présentation des services répertoriés et disponibles sur le réseau Miyukini — surface web public des COGs connectés au MWS</p>
-        </section>
+        r##"
+        <div class="services-layout">
+            <!-- Sidebar filtres -->
+            <aside class="services-sidebar">
+                <h2>LES SERVICES</h2>
+                
+                <div class="filter-group">
+                    <label class="toggle-label">
+                        <span>Gratuit</span>
+                        <input type="checkbox" id="filter-free" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
 
-        <section class="section">
-            <h2 class="section-title">📦 Services Miyukini</h2>
-            <p class="section-subtitle">Services officiels développés par l'équipe Miyukini</p>
-            <div class="grid grid-3">
-                {miyukini_section}
-            </div>
-        </section>
+                <div class="filter-group">
+                    <label>Filtrer par catégorie :</label>
+                    <select class="filter-select" id="filter-category">
+                        <option value="">Toutes les catégories</option>
+                        <option value="outils">Outils</option>
+                        <option value="developpement">Développement</option>
+                        <option value="commerce">Commerce</option>
+                        <option value="jeux">Jeux</option>
+                        <option value="styledevie">Style de vie</option>
+                        <option value="social">Social</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                </div>
 
-        <section class="section">
-            <h2 class="section-title">🔧 Services Jay</h2>
-            <p class="section-subtitle">Suite de services de productivité pour entreprises et créateurs</p>
-            <div class="grid grid-3">
-                {jay_section}
-            </div>
-        </section>
+                <div class="filter-group">
+                    <label>Filtrer par Éditeur :</label>
+                    <select class="filter-select" id="filter-editor">
+                        <option value="">Tous les éditeurs</option>
+                        <option value="miyukini">Miyukini</option>
+                    </select>
+                </div>
 
-        <section class="section">
-            <h2 class="section-title">🎮 Les jeux</h2>
-            <p class="section-subtitle">Jeux disponibles dans le COG — divertissement et expérimentation</p>
-            <div class="grid grid-3">
-                {games_section}
-            </div>
-        </section>
+                <div class="filter-group">
+                    <label>Filtrer par prix :</label>
+                    <div class="price-inputs">
+                        <span>De</span>
+                        <input type="number" class="price-input" placeholder="min" min="0">
+                        <span>à</span>
+                        <input type="number" class="price-input" placeholder="max" min="0">
+                    </div>
+                </div>
 
-        <section class="section">
-            <div class="card" style="text-align: center;">
-                <p>Tous ces services sont exposés par les COGs connectés au <strong>Miyukini Webway System</strong>.</p>
-                <a href="/catalog" class="btn btn-primary" style="margin-top: 1rem;">Explorer le catalogue complet</a>
-            </div>
-        </section>
-        "#,
-        miyukini_section = miyukini_section,
-        jay_section = jay_section,
-        games_section = games_section,
+                <div class="filter-group categories-list">
+                    <h4>Liste des Catégories</h4>
+                    <ul>
+                        {categories_list}
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Carousel horizontal des services -->
+            <main class="services-main">
+                <div class="carousel-container">
+                    <div class="carousel-track" id="servicesCarousel">
+                        {services_cards}
+                    </div>
+                </div>
+
+                <div class="services-loadmore">
+                    <div class="loadmore-progress">
+                        <div class="loadmore-bar" id="carouselProgress"></div>
+                    </div>
+                    <button class="btn btn-secondary btn-loadmore" onclick="scrollCarousel()">Charger Plus de services &gt;&gt;&gt;</button>
+                </div>
+            </main>
+        </div>
+
+        <script>
+            // Carousel horizontal avec défilement infini
+            const carousel = document.getElementById('servicesCarousel');
+            const progressBar = document.getElementById('carouselProgress');
+            let scrollAmount = 0;
+            const cardWidth = 300;
+            
+            function scrollCarousel() {{
+                const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+                scrollAmount += cardWidth;
+                
+                if (scrollAmount >= maxScroll) {{
+                    // Retour au début (boucle)
+                    scrollAmount = 0;
+                }}
+                
+                carousel.scrollTo({{
+                    left: scrollAmount,
+                    behavior: 'smooth'
+                }});
+                
+                updateProgress();
+            }}
+            
+            function updateProgress() {{
+                const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+                const progress = maxScroll > 0 ? (scrollAmount / maxScroll) * 100 : 100;
+                progressBar.style.width = progress + '%';
+            }}
+            
+            // Défilement automatique toutes les 5 secondes
+            let autoScroll = setInterval(scrollCarousel, 5000);
+            
+            // Pause au survol
+            carousel.addEventListener('mouseenter', () => clearInterval(autoScroll));
+            carousel.addEventListener('mouseleave', () => {{
+                autoScroll = setInterval(scrollCarousel, 5000);
+            }});
+            
+            // Mise à jour de la barre au scroll manuel
+            carousel.addEventListener('scroll', () => {{
+                scrollAmount = carousel.scrollLeft;
+                updateProgress();
+            }});
+            
+            // Init
+            updateProgress();
+        </script>
+
+        <style>
+            .services-layout {{
+                display: grid;
+                grid-template-columns: 250px 1fr;
+                gap: 2rem;
+                min-height: 80vh;
+            }}
+
+            /* Sidebar */
+            .services-sidebar {{
+                background: var(--bg-surface);
+                border: 1px solid var(--border);
+                border-radius: 1rem;
+                padding: 1.5rem;
+                height: fit-content;
+                position: sticky;
+                top: 90px;
+            }}
+            .services-sidebar h2 {{
+                font-size: 1.25rem;
+                margin-bottom: 1.5rem;
+                padding-bottom: 0.75rem;
+                border-bottom: 1px solid var(--border);
+            }}
+            .filter-group {{
+                margin-bottom: 1.25rem;
+            }}
+            .filter-group label {{
+                display: block;
+                font-size: 0.875rem;
+                color: var(--text-muted);
+                margin-bottom: 0.5rem;
+            }}
+            .filter-select {{
+                width: 100%;
+                padding: 0.5rem;
+                background: var(--bg-elevated);
+                border: 1px solid var(--border);
+                border-radius: 0.5rem;
+                color: var(--text);
+                font-size: 0.875rem;
+            }}
+            .price-inputs {{
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }}
+            .price-input {{
+                width: 60px;
+                padding: 0.375rem;
+                background: var(--bg-elevated);
+                border: 1px solid var(--border);
+                border-radius: 0.25rem;
+                color: var(--text);
+                font-size: 0.8rem;
+            }}
+            .toggle-label {{
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                cursor: pointer;
+            }}
+            .toggle-label span:first-child {{
+                font-weight: 500;
+                color: var(--text);
+            }}
+            .toggle-slider {{
+                width: 40px;
+                height: 22px;
+                background: var(--bg-elevated);
+                border-radius: 11px;
+                position: relative;
+                transition: background 0.2s;
+            }}
+            .toggle-slider::before {{
+                content: '';
+                position: absolute;
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                background: var(--text-muted);
+                top: 2px;
+                left: 2px;
+                transition: transform 0.2s, background 0.2s;
+            }}
+            .toggle-label input {{
+                display: none;
+            }}
+            .toggle-label input:checked + .toggle-slider {{
+                background: var(--primary);
+            }}
+            .toggle-label input:checked + .toggle-slider::before {{
+                transform: translateX(18px);
+                background: white;
+            }}
+            .categories-list h4 {{
+                font-size: 0.875rem;
+                margin-bottom: 0.75rem;
+            }}
+            .categories-list ul {{
+                list-style: none;
+                padding: 0;
+            }}
+            .categories-list li {{
+                margin-bottom: 0.375rem;
+            }}
+            .categories-list a {{
+                color: var(--text-muted);
+                font-size: 0.875rem;
+                transition: color 0.2s;
+            }}
+            .categories-list a:hover {{
+                color: var(--primary);
+            }}
+
+            /* Carousel horizontal */
+            .services-main {{
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }}
+            .carousel-container {{
+                overflow: hidden;
+                position: relative;
+            }}
+            .carousel-track {{
+                display: flex;
+                gap: 1.5rem;
+                overflow-x: auto;
+                scroll-behavior: smooth;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                padding: 0.5rem 0;
+            }}
+            .carousel-track::-webkit-scrollbar {{
+                display: none;
+            }}
+
+            /* Carte de service */
+            .service-card {{
+                flex: 0 0 280px;
+                min-width: 280px;
+                background: var(--bg-surface);
+                border: 1px solid var(--border);
+                border-radius: 1rem;
+                overflow: hidden;
+                transition: all 0.2s;
+            }}
+            .service-card:hover {{
+                border-color: var(--primary);
+                transform: translateY(-4px);
+                box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15);
+            }}
+            .service-banner {{
+                height: 100px;
+                background: linear-gradient(135deg, var(--bg-elevated), var(--bg));
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--text-muted);
+                font-size: 0.875rem;
+                border-bottom: 1px solid var(--border);
+            }}
+            .service-banner img {{
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }}
+            .service-content {{
+                padding: 1rem;
+            }}
+            .service-title {{
+                font-size: 1.1rem;
+                margin-bottom: 0.25rem;
+            }}
+            .service-category {{
+                font-size: 0.8rem;
+                color: var(--primary);
+                font-weight: 500;
+                margin-bottom: 0.5rem;
+            }}
+            .service-description {{
+                font-size: 0.85rem;
+                color: var(--text-muted);
+                margin-bottom: 1rem;
+                line-height: 1.4;
+            }}
+            .service-footer {{
+                border-top: 1px solid var(--border);
+                padding-top: 1rem;
+            }}
+            .service-meta {{
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.75rem;
+                color: var(--text-muted);
+                margin-bottom: 0.75rem;
+            }}
+            .service-actions {{
+                display: flex;
+                gap: 0.5rem;
+            }}
+            .btn-sm {{
+                padding: 0.375rem 0.75rem;
+                font-size: 0.8rem;
+            }}
+
+            /* Charger plus / Progress */
+            .services-loadmore {{
+                margin-top: 2rem;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }}
+            .loadmore-progress {{
+                flex: 1;
+                height: 8px;
+                background: var(--bg-elevated);
+                border-radius: 4px;
+                overflow: hidden;
+            }}
+            .loadmore-bar {{
+                height: 100%;
+                background: var(--primary);
+                border-radius: 4px;
+                transition: width 0.3s ease;
+            }}
+            .btn-loadmore {{
+                white-space: nowrap;
+            }}
+
+            /* Responsive */
+            @media (max-width: 900px) {{
+                .services-layout {{
+                    grid-template-columns: 1fr;
+                }}
+                .services-sidebar {{
+                    position: static;
+                }}
+                .service-card {{
+                    flex: 0 0 260px;
+                    min-width: 260px;
+                }}
+            }}
+        </style>
+        "##,
+        categories_list = categories_list,
+        services_cards = services_cards,
     );
 
     layout("Les services", &content, "services")
+}
+
+/// Page de fiche détaillée d'un service.
+pub async fn service_detail_page(content_mgr: &ContentManager, service_id: &str) -> Option<String> {
+    let service = content_mgr.get_service(service_id).await?;
+
+    // Générer les dots du carousel (simulé avec 4 points)
+    let screenshots_dots = r#"<span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>"#;
+
+    // Tags
+    let tags_html = format!(
+        r#"<span class="service-tag">COG v{}</span>
+           <span class="service-tag">{}</span>
+           <span class="service-tag">{}</span>
+           <span class="service-tag">{}</span>"#,
+        html_escape(&service.cog_version),
+        html_escape(service.category.label()),
+        service.release_date.format("%d/%m/%Y"),
+        html_escape(service.service_type.label())
+    );
+
+    // Convertir la description complète en HTML
+    let description_html = super::server::simple_md_to_html(&service.full_description);
+
+    let content = format!(
+        r##"
+        <div class="service-detail">
+            <header class="service-header">
+                <h1>{}</h1>
+                <a href="/services" class="btn btn-secondary">Retour aux Services</a>
+            </header>
+
+            <div class="service-detail-layout">
+                <!-- Section principale : screenshot + infos -->
+                <div class="service-detail-left">
+                    <div class="service-screenshot">
+                        <div class="screenshot-placeholder">Screenshot</div>
+                        <div class="screenshot-dots">
+                            {}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="service-detail-right">
+                    <div class="service-detail-banner">
+                        {}
+                    </div>
+
+                    <div class="service-detail-info">
+                        <p class="info-description">{}</p>
+                        <p class="info-editor"><strong>Éditeur :</strong> {}</p>
+                        <p class="info-license"><strong>Licence :</strong> {}</p>
+                    </div>
+
+                    <div class="service-detail-tags">
+                        {}
+                    </div>
+
+                    <div class="service-detail-actions">
+                        {}
+                        <a href="/downloads" class="btn btn-primary btn-lg">Pré-installé</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description complète -->
+            <section class="service-full-description">
+                <h2>Description complète</h2>
+                <div class="description-content">
+                    {}
+                </div>
+            </section>
+        </div>
+
+        <style>
+            .service-detail {{
+                max-width: 1200px;
+                margin: 0 auto;
+            }}
+            .service-header {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 2rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid var(--border);
+            }}
+            .service-header h1 {{
+                font-size: 2rem;
+                margin: 0;
+            }}
+
+            .service-detail-layout {{
+                display: grid;
+                grid-template-columns: 1.5fr 1fr;
+                gap: 2rem;
+                margin-bottom: 2rem;
+            }}
+
+            /* Screenshot */
+            .service-screenshot {{
+                background: var(--bg-surface);
+                border: 1px solid var(--border);
+                border-radius: 1rem;
+                overflow: hidden;
+            }}
+            .screenshot-placeholder {{
+                height: 350px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(135deg, var(--bg-elevated), var(--bg));
+                color: var(--text-muted);
+                font-size: 1.5rem;
+            }}
+            .screenshot-dots {{
+                display: flex;
+                justify-content: center;
+                gap: 0.5rem;
+                padding: 1rem;
+            }}
+            .dot {{
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: var(--bg-elevated);
+                border: 1px solid var(--border);
+                cursor: pointer;
+            }}
+            .dot.active {{
+                background: var(--primary);
+                border-color: var(--primary);
+            }}
+
+            /* Right side */
+            .service-detail-right {{
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }}
+            .service-detail-banner {{
+                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.1));
+                border: 1px solid var(--border);
+                border-radius: 1rem;
+                padding: 2rem;
+                text-align: center;
+                color: var(--text-muted);
+                min-height: 120px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }}
+            .service-detail-info {{
+                background: var(--bg-surface);
+                border: 1px solid var(--border);
+                border-radius: 1rem;
+                padding: 1.25rem;
+            }}
+            .service-detail-info p {{
+                margin: 0 0 0.5rem;
+                font-size: 0.9rem;
+            }}
+            .service-detail-info .info-description {{
+                color: var(--text-muted);
+                margin-bottom: 1rem;
+            }}
+            .service-detail-tags {{
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }}
+            .service-tag {{
+                background: var(--bg-surface);
+                border: 1px solid var(--border);
+                border-radius: 2rem;
+                padding: 0.375rem 0.875rem;
+                font-size: 0.8rem;
+                color: var(--text-muted);
+            }}
+            .service-detail-actions {{
+                display: flex;
+                gap: 1rem;
+                margin-top: auto;
+            }}
+            .service-detail-actions .btn {{
+                flex: 1;
+                justify-content: center;
+                text-align: center;
+            }}
+            .btn-lg {{
+                padding: 1rem 1.5rem;
+                font-size: 1rem;
+            }}
+
+            /* Description complète */
+            .service-full-description {{
+                background: var(--bg-surface);
+                border: 1px solid var(--border);
+                border-radius: 1rem;
+                padding: 2rem;
+            }}
+            .service-full-description h2 {{
+                font-size: 1.25rem;
+                margin-bottom: 1.5rem;
+                padding-bottom: 0.75rem;
+                border-bottom: 1px solid var(--border);
+            }}
+            .description-content {{
+                line-height: 1.8;
+            }}
+            .description-content h1 {{
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+                color: var(--primary);
+            }}
+            .description-content h2 {{
+                font-size: 1.25rem;
+                margin: 1.5rem 0 0.75rem;
+            }}
+            .description-content h3 {{
+                font-size: 1.1rem;
+                margin: 1.25rem 0 0.5rem;
+            }}
+            .description-content p {{
+                margin-bottom: 1rem;
+                color: var(--text-muted);
+            }}
+            .description-content ul, .description-content ol {{
+                margin: 0.5rem 0 1rem 1.5rem;
+                color: var(--text-muted);
+            }}
+            .description-content li {{
+                margin-bottom: 0.375rem;
+            }}
+
+            /* Responsive */
+            @media (max-width: 900px) {{
+                .service-detail-layout {{
+                    grid-template-columns: 1fr;
+                }}
+            }}
+        </style>
+        "##,
+        html_escape(&service.name),
+        screenshots_dots,
+        if service.banner_url.is_some() {
+            format!(r#"<img src="{}" alt="Bannière" style="max-width: 100%; border-radius: 0.5rem;">"#, html_escape(service.banner_url.as_deref().unwrap_or("")))
+        } else {
+            "[petite bannière]".to_string()
+        },
+        html_escape(&service.short_description),
+        html_escape(&service.editor),
+        html_escape(&service.license),
+        tags_html,
+        if service.website_url.is_some() {
+            format!(r#"<a href="{}" class="btn btn-secondary btn-lg" target="_blank">Site Officiel</a>"#, html_escape(service.website_url.as_deref().unwrap_or("#")))
+        } else {
+            String::new()
+        },
+        description_html,
+    );
+
+    Some(layout(&service.name, &content, "services"))
 }
 
 /// Page À propos du projet.
