@@ -1,5 +1,11 @@
 # secret files
-cle_ssh_hostinger
+hostinger_VPS.md
+hostinger_private_key
+hostinger_private_key.txt
+cle_ssh_hostinger.txt
+
+# Release builds (local distribution)
+release/
 # Rust build artifacts
 target/
 Cargo.lock
