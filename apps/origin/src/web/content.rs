@@ -276,7 +276,7 @@ impl ContentManager {
             version: "0.1.0".to_string(),
             category: DownloadCategory::Cog,
             platforms: vec![Platform::Windows],
-            download_url: "/files/Miyukini-COG-v0.1.0-windows.zip".to_string(),
+            download_url: "https://miyukini.com/files/Miyukini-COG-v0.1.0-windows.zip".to_string(),
             size_bytes: 8_243_322, // 7.86 MB
             sha256: "F98A2A8A98C64BF1FCA6E7214756A99B63CECA1CFBEA8D04F4E4038EB07B8E28".to_string(),
             published_at: Utc::now(),
