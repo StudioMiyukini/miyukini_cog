@@ -950,7 +950,7 @@ pub async fn downloads_page(content_mgr: &ContentManager) -> String {
     layout("Téléchargements", &content, "downloads")
 }
 
-/// Page des services disponibles — catalogue avec carousel horizontal (conforme maquette).
+/// Page des services disponibles — catalogue en grille 3 colonnes (défilement vertical).
 pub async fn services_page(content_mgr: &ContentManager) -> String {
     use super::content::ServiceCategory;
 
@@ -968,7 +968,7 @@ pub async fn services_page(content_mgr: &ContentManager) -> String {
         })
         .collect();
 
-    // Générer les cartes de services pour le carousel
+    // Générer les cartes de services pour la grille
     let services_cards: String = services
         .iter()
         .map(|s| {
@@ -1061,71 +1061,13 @@ pub async fn services_page(content_mgr: &ContentManager) -> String {
                 </div>
             </aside>
 
-            <!-- Carousel horizontal des services -->
+            <!-- Grille 3 colonnes des services (défilement vertical) -->
             <main class="services-main">
-                <div class="carousel-container">
-                    <div class="carousel-track" id="servicesCarousel">
-                        {services_cards}
-                    </div>
-                </div>
-
-                <div class="services-loadmore">
-                    <div class="loadmore-progress">
-                        <div class="loadmore-bar" id="carouselProgress"></div>
-                    </div>
-                    <button class="btn btn-secondary btn-loadmore" onclick="scrollCarousel()">Charger Plus de services &gt;&gt;&gt;</button>
+                <div class="services-grid">
+                    {services_cards}
                 </div>
             </main>
         </div>
-
-        <script>
-            // Carousel horizontal avec défilement infini
-            const carousel = document.getElementById('servicesCarousel');
-            const progressBar = document.getElementById('carouselProgress');
-            let scrollAmount = 0;
-            const cardWidth = 300;
-            
-            function scrollCarousel() {{
-                const maxScroll = carousel.scrollWidth - carousel.clientWidth;
-                scrollAmount += cardWidth;
-                
-                if (scrollAmount >= maxScroll) {{
-                    // Retour au début (boucle)
-                    scrollAmount = 0;
-                }}
-                
-                carousel.scrollTo({{
-                    left: scrollAmount,
-                    behavior: 'smooth'
-                }});
-                
-                updateProgress();
-            }}
-            
-            function updateProgress() {{
-                const maxScroll = carousel.scrollWidth - carousel.clientWidth;
-                const progress = maxScroll > 0 ? (scrollAmount / maxScroll) * 100 : 100;
-                progressBar.style.width = progress + '%';
-            }}
-            
-            // Défilement automatique toutes les 5 secondes
-            let autoScroll = setInterval(scrollCarousel, 5000);
-            
-            // Pause au survol
-            carousel.addEventListener('mouseenter', () => clearInterval(autoScroll));
-            carousel.addEventListener('mouseleave', () => {{
-                autoScroll = setInterval(scrollCarousel, 5000);
-            }});
-            
-            // Mise à jour de la barre au scroll manuel
-            carousel.addEventListener('scroll', () => {{
-                scrollAmount = carousel.scrollLeft;
-                updateProgress();
-            }});
-            
-            // Init
-            updateProgress();
-        </script>
 
         <style>
             .services-layout {{
@@ -1242,33 +1184,21 @@ pub async fn services_page(content_mgr: &ContentManager) -> String {
                 color: var(--primary);
             }}
 
-            /* Carousel horizontal */
+            /* Grille 3 colonnes — défilement vertical */
             .services-main {{
                 display: flex;
                 flex-direction: column;
-                overflow: hidden;
+                overflow-y: auto;
             }}
-            .carousel-container {{
-                overflow: hidden;
-                position: relative;
-            }}
-            .carousel-track {{
-                display: flex;
+            .services-grid {{
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
                 gap: 1.5rem;
-                overflow-x: auto;
-                scroll-behavior: smooth;
-                scrollbar-width: none;
-                -ms-overflow-style: none;
                 padding: 0.5rem 0;
-            }}
-            .carousel-track::-webkit-scrollbar {{
-                display: none;
             }}
 
             /* Carte de service */
             .service-card {{
-                flex: 0 0 280px;
-                min-width: 280px;
                 background: var(--bg-surface);
                 border: 1px solid var(--border);
                 border-radius: 1rem;
@@ -1334,30 +1264,6 @@ pub async fn services_page(content_mgr: &ContentManager) -> String {
                 font-size: 0.8rem;
             }}
 
-            /* Charger plus / Progress */
-            .services-loadmore {{
-                margin-top: 2rem;
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-            }}
-            .loadmore-progress {{
-                flex: 1;
-                height: 8px;
-                background: var(--bg-elevated);
-                border-radius: 4px;
-                overflow: hidden;
-            }}
-            .loadmore-bar {{
-                height: 100%;
-                background: var(--primary);
-                border-radius: 4px;
-                transition: width 0.3s ease;
-            }}
-            .btn-loadmore {{
-                white-space: nowrap;
-            }}
-
             /* Responsive */
             @media (max-width: 900px) {{
                 .services-layout {{
@@ -1366,9 +1272,13 @@ pub async fn services_page(content_mgr: &ContentManager) -> String {
                 .services-sidebar {{
                     position: static;
                 }}
-                .service-card {{
-                    flex: 0 0 260px;
-                    min-width: 260px;
+                .services-grid {{
+                    grid-template-columns: repeat(2, 1fr);
+                }}
+            }}
+            @media (max-width: 560px) {{
+                .services-grid {{
+                    grid-template-columns: 1fr;
                 }}
             }}
         </style>
