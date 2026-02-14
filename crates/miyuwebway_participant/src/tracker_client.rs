@@ -29,7 +29,7 @@ pub struct TrackerClientConfig {
 impl Default for TrackerClientConfig {
     fn default() -> Self {
         Self {
-            tracker_address: "origin.miyukini.net:21000".to_string(),
+            tracker_address: "miyukini.com:21000".to_string(),
             connect_timeout: 30,
             heartbeat_interval: 60,
         }
@@ -473,6 +473,6 @@ mod tests {
     #[test]
     fn test_default_config() {
         let config = TrackerClientConfig::default();
-        assert_eq!(config.tracker_address, "origin.miyukini.net:21000");
+        assert_eq!(config.tracker_address, "miyukini.com:21000");
     }
 }

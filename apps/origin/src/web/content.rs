@@ -277,8 +277,8 @@ impl ContentManager {
             category: DownloadCategory::Cog,
             platforms: vec![Platform::Windows],
             download_url: "https://miyukini.com/files/Miyukini-COG-v0.1.0-windows.zip".to_string(),
-            size_bytes: 8_243_322, // 7.86 MB
-            sha256: "F98A2A8A98C64BF1FCA6E7214756A99B63CECA1CFBEA8D04F4E4038EB07B8E28".to_string(),
+            size_bytes: 8_243_169, // 7.86 MB
+            sha256: "B447463C3B1BF9B11AC92882AFF8E9615E2B9B207306BECA426CBB5CD735FA86".to_string(),
             published_at: Utc::now(),
             release_notes: "Première release stable — Central, KindMother, client MWS, Services Jay*, jeux intégrés".to_string(),
             min_core_version: None,

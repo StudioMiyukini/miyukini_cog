@@ -35,8 +35,8 @@ pub struct RelayClientConfig {
 impl Default for RelayClientConfig {
     fn default() -> Self {
         Self {
-            relay_address: "origin.miyukini.net:7000".to_string(),
-            tls_domain: "origin.miyukini.net".to_string(),
+            relay_address: "miyukini.com:7000".to_string(),
+            tls_domain: "miyukini.com".to_string(),
             connect_timeout: 30,
             heartbeat_interval: 30,
             core_conformity_key: None,
@@ -340,7 +340,7 @@ mod tests {
     #[test]
     fn test_default_config() {
         let config = RelayClientConfig::default();
-        assert_eq!(config.relay_address, "origin.miyukini.net:7000");
+        assert_eq!(config.relay_address, "miyukini.com:7000");
     }
 
     #[test]

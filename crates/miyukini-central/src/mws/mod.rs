@@ -71,8 +71,8 @@ impl Default for CentralMwsConfig {
             enabled: true,
             lone_mode: false,
             auto_connect: true,
-            relay_address: "origin.miyukini.net:7000".to_string(),
-            tracker_address: "origin.miyukini.net:21000".to_string(),
+            relay_address: "miyukini.com:7000".to_string(),
+            tracker_address: "miyukini.com:21000".to_string(),
             core_conformity_key: None,
             public_address: "0.0.0.0:0".to_string(), // Sera détecté
             auto_heartbeat: true,
