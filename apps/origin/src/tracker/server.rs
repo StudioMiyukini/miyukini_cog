@@ -336,24 +336,57 @@ impl TrackerServer {
         pool_manager: &Arc<PoolManager>,
         metrics: &Arc<TrackerMetrics>,
     ) -> Option<TrackerMessage> {
-        // Le payload est juste le cog_id en JSON
-        let cog_id: String = match serde_json::from_slice(payload) {
-            Ok(id) => id,
-            Err(_) => return None,
+        // Le client envoie {"cog_id": "..."} — extraire le cog_id depuis l'objet JSON.
+        // Accepte aussi une chaîne brute ("cog_id") pour rétro-compatibilité.
+        let cog_id: String = match serde_json::from_slice::<serde_json::Value>(payload) {
+            Ok(serde_json::Value::Object(map)) => {
+                match map.get("cog_id").and_then(|v| v.as_str()) {
+                    Some(id) => id.to_string(),
+                    None => {
+                        warn!("[Tracker] WITHDRAW payload objet sans champ cog_id: {:?}", map);
+                        return None;
+                    }
+                }
+            }
+            Ok(serde_json::Value::String(id)) => id,
+            Ok(other) => {
+                warn!("[Tracker] WITHDRAW payload inattendu: {:?}", other);
+                return None;
+            }
+            Err(e) => {
+                warn!("[Tracker] WITHDRAW payload invalide ({} octets): {}", payload.len(), e);
+                return None;
+            }
         };
 
-        info!("WITHDRAW from {}", cog_id);
+        info!("[Tracker] WITHDRAW reçu pour cog_id={}", &cog_id);
 
         // Chercher et supprimer dans tous les pools
+        let mut removed = false;
         let versions = pool_manager.list_versions().await;
         for version in versions {
             if let Some(pool) = pool_manager.get_pool(&version).await {
+                let before = pool.count().await;
                 pool.remove_cog(&cog_id).await;
+                let after = pool.count().await;
+                if before != after {
+                    info!("[Tracker] COG {} retiré du pool {} ({} → {} COGs)", &cog_id, version, before, after);
+                    removed = true;
+                }
             }
+        }
+        if !removed {
+            warn!("[Tracker] WITHDRAW pour cog_id={} mais COG introuvable dans les pools", &cog_id);
         }
 
         metrics.record_cog_withdrawn();
-        None
+
+        // Renvoyer un accusé de réception pour confirmer le retrait
+        let ack = serde_json::json!({ "cog_id": cog_id, "status": "withdrawn" });
+        Some(TrackerMessage::new(
+            TrackerMessageType::WithdrawAck,
+            bytes::Bytes::from(serde_json::to_vec(&ack).unwrap_or_default()),
+        ))
     }
 
     /// Traite un heartbeat.

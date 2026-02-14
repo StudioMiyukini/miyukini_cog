@@ -86,6 +86,8 @@ pub enum TrackerMessageType {
     AnnounceAck = 0x02,
     /// Retrait du réseau.
     Withdraw = 0x03,
+    /// Accusé de retrait.
+    WithdrawAck = 0x06,
     /// Heartbeat.
     Heartbeat = 0x04,
     /// Accusé Heartbeat.
@@ -129,6 +131,7 @@ impl TrackerMessageType {
             0x01 => Some(Self::Announce),
             0x02 => Some(Self::AnnounceAck),
             0x03 => Some(Self::Withdraw),
+            0x06 => Some(Self::WithdrawAck),
             0x04 => Some(Self::Heartbeat),
             0x05 => Some(Self::HeartbeatAck),
             0x10 => Some(Self::SearchCogs),

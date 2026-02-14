@@ -248,20 +248,25 @@ impl MwsService {
 
     /// Arrête le service et se déconnecte du réseau.
     pub async fn stop(&self) -> Result<(), MiyuwebwayParticipantError> {
-        info!("Stopping MWS service");
+        info!("[MWS Service] Arrêt en cours…");
 
-        // Signaler l'arrêt
+        // Signaler l'arrêt aux tâches de fond (heartbeat, etc.)
         {
             let mut shutdown = self.shutdown.write().await;
             *shutdown = true;
         }
+        info!("[MWS Service] Signal shutdown envoyé aux tâches de fond");
 
-        // Retirer du Tracker
+        // Retirer du Tracker (WITHDRAW)
         let identity = self.identity.read().await;
         if let Some(ref id) = *identity {
-            if let Err(e) = self.tracker_client.withdraw(&id.cog_id).await {
-                warn!("Failed to withdraw from Tracker: {}", e);
+            info!("[MWS Service] Envoi WITHDRAW pour COG {}…", &id.cog_id);
+            match self.tracker_client.withdraw(&id.cog_id).await {
+                Ok(()) => info!("[MWS Service] WITHDRAW réussi pour COG {}", &id.cog_id),
+                Err(e) => warn!("[MWS Service] WITHDRAW échoué pour COG {}: {}", &id.cog_id, e),
             }
+        } else {
+            warn!("[MWS Service] Pas d'identité — WITHDRAW ignoré");
         }
 
         // Mettre à jour l'état
@@ -270,7 +275,7 @@ impl MwsService {
             *state = MwsServiceState::Stopped;
         }
 
-        info!("MWS service stopped");
+        info!("[MWS Service] Service arrêté");
         Ok(())
     }
 

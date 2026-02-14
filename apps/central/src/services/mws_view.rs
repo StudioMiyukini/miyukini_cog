@@ -581,16 +581,33 @@ async fn real_mws_connect(
     }
 }
 
-/// Déconnexion réelle du réseau MWS.
+/// Déconnexion réelle du réseau MWS : WITHDRAW au Tracker, arrêt du service, reset UI.
 async fn real_mws_disconnect(mut state: Signal<MwsViewState>, mut tick: Signal<u64>) {
-    tracing::info!("[MWS UI] real_mws_disconnect…");
+    tracing::info!("[MWS UI] real_mws_disconnect — début");
+
+    // Indiquer visuellement que la déconnexion est en cours
+    {
+        let mut s = state.write();
+        s.connecting = true; // Réutilisé comme indicateur "opération en cours"
+    }
+    let n = *tick.read();
+    tick.set(n + 1);
+
+    // Récupérer et consommer le manager (disconnect + withdraw)
     let arc = state.read().manager.clone();
     let mut guard = arc.write().await;
     if let Some(mgr) = guard.take() {
-        let _ = mgr.disconnect().await;
+        tracing::info!("[MWS UI] Appel manager.disconnect() (WITHDRAW + arrêt)…");
+        match mgr.disconnect().await {
+            Ok(()) => tracing::info!("[MWS UI] manager.disconnect() OK"),
+            Err(e) => tracing::warn!("[MWS UI] manager.disconnect() erreur: {}", e),
+        }
+    } else {
+        tracing::warn!("[MWS UI] Pas de manager actif — déconnexion locale uniquement");
     }
     drop(guard);
 
+    // Réinitialiser complètement l'état UI
     {
         let mut s = state.write();
         s.state = CentralMwsState::Disconnected;
@@ -599,8 +616,10 @@ async fn real_mws_disconnect(mut state: Signal<MwsViewState>, mut tick: Signal<u
         s.discovered_lobbys.clear();
         s.connecting = false;
         s.error = None;
+        // Réinitialiser le manager pour le prochain connect
+        s.manager = std::sync::Arc::new(tokio::sync::RwLock::new(None));
     }
-    tracing::info!("[MWS UI] real_mws_disconnect terminé → tick++");
+    tracing::info!("[MWS UI] real_mws_disconnect terminé — état réinitialisé → tick++");
     let n = *tick.read();
     tick.set(n + 1);
 }

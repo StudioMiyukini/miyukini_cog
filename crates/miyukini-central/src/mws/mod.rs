@@ -515,20 +515,32 @@ impl CentralMwsManager {
 
     /// Déconnecte du réseau MWS.
     pub async fn disconnect(&self) -> Result<(), String> {
-        info!("Déconnexion du réseau MWS...");
+        info!("[CentralMws] Déconnexion du réseau MWS…");
 
-        // Arrêter le serveur Home
+        // 1. Arrêter le serveur Home
         let mut shutdown_guard = self.home_server_shutdown.write().await;
         if let Some(tx) = shutdown_guard.take() {
             let _ = tx.send(());
+            info!("[CentralMws] Serveur Home arrêté");
+        }
+        drop(shutdown_guard);
+
+        // 2. Envoyer WITHDRAW au Tracker puis arrêter le service MWS
+        {
+            let service = self.service.read().await;
+            if let Some(ref svc) = *service {
+                info!("[CentralMws] Envoi WITHDRAW + arrêt du service MWS…");
+                if let Err(e) = svc.stop().await {
+                    warn!("[CentralMws] Erreur lors de l'arrêt: {}", e);
+                } else {
+                    info!("[CentralMws] Service MWS arrêté (WITHDRAW envoyé)");
+                }
+            } else {
+                warn!("[CentralMws] Pas de service MWS actif à arrêter");
+            }
         }
 
-        let service = self.service.read().await;
-        if let Some(ref svc) = *service {
-            svc.stop().await.map_err(|e| e.to_string())?;
-        }
-
-        // Mettre à jour l'état
+        // 3. Mettre à jour l'état interne
         let (new_state, new_conformity) = if self.config.lone_mode {
             (CentralMwsState::Lone, MwsConformityState::LoneMode)
         } else if self.config.enabled {
@@ -537,16 +549,17 @@ impl CentralMwsManager {
             (CentralMwsState::Disabled, MwsConformityState::Uninitialized)
         };
 
-        self.update_state(new_state).await;
-        self.update_conformity(new_conformity).await;
+        self.update_state(new_state.clone()).await;
+        self.update_conformity(new_conformity.clone()).await;
+        info!("[CentralMws] État → {:?}, Conformité → {:?}", new_state, new_conformity);
 
-        // Effacer le service
+        // 4. Effacer le service
         {
             let mut svc = self.service.write().await;
             *svc = None;
         }
 
-        info!("Déconnecté du réseau MWS");
+        info!("[CentralMws] ✅ Déconnexion complète du réseau MWS");
         Ok(())
     }
 

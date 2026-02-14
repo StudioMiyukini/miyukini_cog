@@ -219,7 +219,7 @@ impl TrackerClient {
 
     /// Retire le COG du réseau.
     pub async fn withdraw(&self, cog_id: &str) -> Result<(), MiyuwebwayParticipantError> {
-        info!("Withdrawing COG {} from Tracker", cog_id);
+        info!("[Withdraw] Envoi WITHDRAW pour COG {} au Tracker ({})", cog_id, &self.config.tracker_address);
 
         let mut stream = TcpStream::connect(&self.config.tracker_address)
             .await
@@ -236,10 +236,30 @@ impl TrackerClient {
             MiyuwebwayParticipantError::SendError(e.to_string())
         })?;
 
+        // Attendre l'accusé de retrait (WithdrawAck) du Tracker
+        match tokio::time::timeout(
+            std::time::Duration::from_secs(5),
+            self.read_frame(&mut stream),
+        ).await {
+            Ok(Ok(response)) => {
+                if response.header.message_type == TrackerMessageType::WithdrawAck {
+                    info!("[Withdraw] Accusé de retrait reçu pour COG {}", cog_id);
+                } else {
+                    warn!("[Withdraw] Réponse inattendue du Tracker: {:?}", response.header.message_type);
+                }
+            }
+            Ok(Err(e)) => {
+                warn!("[Withdraw] Erreur lecture accusé: {} — le COG a quand même été retiré", e);
+            }
+            Err(_) => {
+                warn!("[Withdraw] Timeout en attente de l'accusé — le COG a quand même été retiré");
+            }
+        }
+
         let mut state = self.state.write().await;
         *state = TrackerState::Disconnected;
 
-        info!("COG withdrawn from network");
+        info!("[Withdraw] COG {} déconnecté du réseau", cog_id);
         Ok(())
     }
 
