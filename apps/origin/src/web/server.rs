@@ -124,6 +124,7 @@ async fn handle_connection(
     // Router
     let route_response = route_request(
         path,
+        _config.as_ref(),
         &pool_mgr,
         &content_mgr,
         &visit_tracker,
@@ -190,9 +191,30 @@ async fn handle_connection(
     Ok(())
 }
 
+/// Retourne true si l'adresse est locale (non routable par les visiteurs externes).
+fn is_local_address(addr: &str) -> bool {
+    let a = addr.to_lowercase();
+    a.starts_with("127.0.0.1")
+        || a.starts_with("localhost")
+        || a.starts_with("0.0.0.0")
+        || a.starts_with("[::1]")
+        || a.contains("localhost")
+}
+
+/// URL publique d'Origin pour les visites COG (schéma + host).
+fn origin_public_base(config: &OriginConfig) -> String {
+    let host = config
+        .identity
+        .domain
+        .as_deref()
+        .unwrap_or("miyukini.com");
+    format!("https://{}", host)
+}
+
 /// Route les requêtes HTTP.
 async fn route_request(
     path: &str,
+    config: &OriginConfig,
     pool_mgr: &PoolManager,
     content_mgr: &ContentManager,
     visit_tracker: &CatalogVisitTracker,
@@ -313,8 +335,18 @@ async fn route_request(
                 Some(id) if !id.is_empty() => {
                     if let Some(entry) = pool_mgr.find_cog(&id).await {
                         visit_tracker.record_visit(&id).await;
-                        let location = if entry.address.starts_with("http") {
-                            entry.address
+                        // Si l'adresse est locale (127.0.0.1, etc.), les visiteurs externes
+                        // seraient redirigés vers leur propre machine. Utiliser l'URL Origin
+                        // qui proxy vers le COG via le tunnel.
+                        let location = if is_local_address(&entry.address) {
+                            let base = origin_public_base(config);
+                            format!("{}/cog/{}", base, urlencoding::encode(&id))
+                        } else if entry.address.starts_with("http") {
+                            let mut loc = entry.address.clone();
+                            if !loc.ends_with('/') {
+                                loc.push('/');
+                            }
+                            loc
                         } else {
                             format!("http://{}/", entry.address)
                         };
@@ -357,6 +389,23 @@ async fn route_request(
                 content_type: "text/html".to_string(),
                 body,
             }
+        }
+
+        // Route /cog/{cog_id} — Proxy vers la Home COG (visiteurs externes)
+        // Quand public_address est une URL Origin (https://.../cog/xxx), les visiteurs
+        // arrivent ici. Tunnel HTTP via Relay en cours d'implémentation.
+        _ if path_clean.starts_with("/cog/") => {
+            let suffix = path_clean.strip_prefix("/cog/").unwrap_or("");
+            let cog_id = suffix.split('/').next().unwrap_or(suffix);
+            let cog_id_decoded = urlencoding::decode(cog_id).unwrap_or_default();
+            let cog_id_str = cog_id_decoded.as_ref();
+
+            if cog_id_str.is_empty() {
+                return not_found_page();
+            }
+
+            let present = pool_mgr.find_cog(cog_id_str).await.is_some();
+            cog_tunnel_placeholder_page(config, cog_id_str, present)
         }
 
         // ═══════════════════════════════════════════════════════════════════
@@ -643,6 +692,72 @@ async fn route_request(
         // ═══════════════════════════════════════════════════════════════════
         _ => not_found_page(),
     }
+}
+
+/// Page de substitution pour /cog/{cog_id} — Tunnel HTTP via Relay en cours d'implémentation.
+/// Les visiteurs ne sont plus redirigés vers 127.0.0.1 ; ils voient cette page en attendant le proxy.
+fn cog_tunnel_placeholder_page(config: &OriginConfig, cog_id: &str, present: bool) -> RouteResponse {
+    let base = origin_public_base(config);
+    let catalog_url = format!("{}/catalog", base);
+    let status_msg = if present {
+        "Ce COG est en ligne. Le tunnel de visite HTTP est en cours de déploiement."
+    } else {
+        "Ce COG est actuellement absent du réseau."
+    };
+    let cog_escaped = html_escape_for_cog(cog_id);
+    let body = format!(
+        r#"<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COG {cog_escaped} — Miyukini</title>
+    <style>
+        :root {{ --primary: #8b5cf6; --bg: #0a0a0f; --text: #f0f0f5; --text-muted: #9ca3af; }}
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ font-family: system-ui, sans-serif; background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; }}
+        .container {{ padding: 2rem; max-width: 480px; }}
+        h1 {{ font-size: 1.5rem; color: var(--primary); margin-bottom: 1rem; }}
+        p {{ color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6; }}
+        a {{ display: inline-block; background: var(--primary); color: white; padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem; text-decoration: none; font-weight: 600; margin: 0.25rem; }}
+        a:hover {{ opacity: 0.9; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 {cog_escaped}</h1>
+        <p>{status_msg}</p>
+        <p>Les visiteurs externes sont désormais correctement dirigés vers Origin. Le proxy HTTP via le tunnel Relay sera activé prochainement.</p>
+        <a href="{catalog_url}">Retour au catalogue</a>
+    </div>
+</body>
+</html>"#,
+        cog_escaped = cog_escaped,
+        status_msg = status_msg,
+        catalog_url = catalog_url,
+    );
+    RouteResponse::Normal {
+        status: "200 OK".to_string(),
+        content_type: "text/html; charset=utf-8".to_string(),
+        body,
+    }
+}
+
+fn html_escape_for_cog(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    for c in s.chars() {
+        match c {
+            '&' => out.push_str("&amp;"),
+            '<' => out.push_str("&lt;"),
+            '>' => out.push_str("&gt;"),
+            '"' => out.push_str("&quot;"),
+            '\'' => out.push_str("&#39;"),
+            _ => out.push(c),
+        }
+    }
+    out
 }
 
 /// Page 404.
