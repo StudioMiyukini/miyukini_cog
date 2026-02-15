@@ -246,7 +246,7 @@ async fn write_response(
             writer.write_all(response.as_bytes()).await?;
         }
         RouteResponse::Raw { bytes } => {
-            writer.write_all(bytes).await?;
+            writer.write_all(&bytes).await?;
         }
     }
     writer.flush().await?;
