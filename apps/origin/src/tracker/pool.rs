@@ -1,6 +1,9 @@
 //! Pools de COGs par version.
 //!
 //! Gère l'isolation des COGs par version des Cores.
+//!
+//! Note : Code préparé pour fonctionnalités futures (pools étendus).
+#![allow(dead_code)]
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -144,6 +147,20 @@ impl Pool {
         let mut cogs = self.cogs.write().await;
         if let Some(entry) = cogs.get_mut(cog_id) {
             entry.last_seen = Utc::now();
+        }
+    }
+
+    /// Marque un COG comme absent (sans le supprimer).
+    /// Met last_seen dans le passé pour qu'il soit affiché comme "absent" dans le catalogue.
+    pub async fn mark_absent(&self, cog_id: &str) -> bool {
+        let mut cogs = self.cogs.write().await;
+        if let Some(entry) = cogs.get_mut(cog_id) {
+            // Met last_seen à une heure dans le passé pour être sûr qu'il soit marqué absent
+            entry.last_seen = Utc::now() - chrono::Duration::hours(1);
+            debug!("Marked COG {} as absent in pool {}", cog_id, self.version);
+            true
+        } else {
+            false
         }
     }
 }

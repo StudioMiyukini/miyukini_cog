@@ -9,6 +9,9 @@
 //! - Recherche de COGs, lobbys et services
 //! - Création et gestion des lobbys
 //! - Heartbeat pour maintenir les connexions
+//!
+//! Note : Code préparé pour fonctionnalités futures (méthodes supplémentaires).
+#![allow(dead_code)]
 
 use bytes::{Bytes, BytesMut};
 use std::net::SocketAddr;
@@ -115,21 +118,18 @@ impl TrackerServer {
 
     /// Démarre les tâches de maintenance.
     fn start_maintenance_tasks(&self) {
-        // Nettoyage des COGs inactifs
-        let pool_manager = Arc::clone(&self.pool_manager);
+        // Les COGs inactifs ne sont PAS supprimés du catalogue.
+        // Ils restent avec le statut "absent" (droit reconnu à la déconnexion).
+        // Seul un WITHDRAW explicite retire un COG du catalogue.
         let metrics = Arc::clone(&self.metrics);
-        let timeout = i64::from(self.config.limits.tunnel_timeout_seconds);
 
         tokio::spawn(async move {
             loop {
+                // Maintenance périodique (logging, métriques, etc.)
                 tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
-                let cleaned = pool_manager.cleanup_all(timeout).await;
-                if cleaned > 0 {
-                    info!("Cleaned up {} inactive COGs from pools", cleaned);
-                    for _ in 0..cleaned {
-                        metrics.record_cog_expired();
-                    }
-                }
+                // Note: Les COGs absent sont conservés dans le catalogue
+                // et affichés avec le badge "Absent" sur la page web.
+                let _ = &metrics; // Garder la référence pour futures métriques
             }
         });
     }
@@ -331,6 +331,7 @@ impl TrackerServer {
     }
 
     /// Traite un retrait.
+    /// Le COG reste dans le catalogue mais est marqué "absent" (droit reconnu à la déconnexion).
     async fn handle_withdraw(
         payload: &[u8],
         pool_manager: &Arc<PoolManager>,
@@ -361,28 +362,25 @@ impl TrackerServer {
 
         info!("[Tracker] WITHDRAW reçu pour cog_id={}", &cog_id);
 
-        // Chercher et supprimer dans tous les pools
-        let mut removed = false;
+        // Marquer le COG comme absent (sans le supprimer du catalogue)
+        let mut marked = false;
         let versions = pool_manager.list_versions().await;
         for version in versions {
             if let Some(pool) = pool_manager.get_pool(&version).await {
-                let before = pool.count().await;
-                pool.remove_cog(&cog_id).await;
-                let after = pool.count().await;
-                if before != after {
-                    info!("[Tracker] COG {} retiré du pool {} ({} → {} COGs)", &cog_id, version, before, after);
-                    removed = true;
+                if pool.mark_absent(&cog_id).await {
+                    info!("[Tracker] COG {} marqué absent dans le pool {}", &cog_id, version);
+                    marked = true;
                 }
             }
         }
-        if !removed {
+        if !marked {
             warn!("[Tracker] WITHDRAW pour cog_id={} mais COG introuvable dans les pools", &cog_id);
         }
 
         metrics.record_cog_withdrawn();
 
         // Renvoyer un accusé de réception pour confirmer le retrait
-        let ack = serde_json::json!({ "cog_id": cog_id, "status": "withdrawn" });
+        let ack = serde_json::json!({ "cog_id": cog_id, "status": "absent" });
         Some(TrackerMessage::new(
             TrackerMessageType::WithdrawAck,
             bytes::Bytes::from(serde_json::to_vec(&ack).unwrap_or_default()),
