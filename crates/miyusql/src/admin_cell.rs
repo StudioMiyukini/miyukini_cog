@@ -5,12 +5,12 @@
 
 use serde::{Deserialize, Serialize};
 
-/// @id: miyusql_admin_cell
-/// @role: data
-/// @layer: toolkit
-/// @human: Cellule Admin MiyuSQL : identification, manifeste (MiyukiniSQLtest), intégrité.
-/// @do: expose_admin_cell
-/// Format déclaratif lisible par MiyukiniAdmin.
+// @id: miyusql_admin_cell
+// @role: data
+// @layer: toolkit
+// @human: Cellule Admin MiyuSQL : identification, manifeste (MiyukiniSQLtest), intégrité.
+// @do: expose_admin_cell
+// Format déclaratif lisible par MiyukiniAdmin.
 
 /// @id: miyusql_admin_identification
 /// @role: data

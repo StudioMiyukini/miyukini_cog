@@ -9,6 +9,9 @@
 //! - Rate limiting et protection anti-abus
 //! - Tunnels de données entre COGs
 //! - Métriques et statistiques
+//!
+//! Note : Code préparé pour fonctionnalités futures (accesseurs).
+#![allow(dead_code)]
 
 use bytes::{Bytes, BytesMut};
 use std::net::SocketAddr;
@@ -524,7 +527,7 @@ impl RelayServer {
         payload: &Bytes,
         session: &Arc<RwLock<Session>>,
         permis_registry: Option<&Arc<PermisRegistry>>,
-        verifier: &Arc<Verifier>,
+        _verifier: &Arc<Verifier>,
         config: &Arc<OriginConfig>,
         tracker_addresses: &Bytes,
         tracker_signature: &[u8; ED25519_SIGNATURE_SIZE],
@@ -688,7 +691,7 @@ impl RelayServer {
         permis_registry: Option<&Arc<PermisRegistry>>,
         tracker_addresses: &Bytes,
         tracker_signature: &[u8; ED25519_SIGNATURE_SIZE],
-        sessions: &Arc<SessionManager>,
+        _sessions: &Arc<SessionManager>,
         client_ip: std::net::IpAddr,
         rate_limiter: &Arc<RateLimiter>,
         metrics: &Arc<RelayMetrics>,

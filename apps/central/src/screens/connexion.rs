@@ -6,6 +6,8 @@ use crate::audio;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use crate::theme::styles;
+use miyukiniwatch::MiyukiniWatchCollector;
+use uuid::Uuid;
 
 /// Étapes du rite de retour : Accueil → Clé.
 const STEP_ACCUEIL: u8 = 0;
@@ -66,7 +68,25 @@ pub fn Connexion() -> Element {
         match auth_db.sign_in(&em, &pass) {
             Ok(Some(profile)) => {
                 let _ = auth_db.set_current_profile_id(Some(profile.id.as_str()));
-                state.write().current_user = Some(profile);
+
+                // MiyukiniWatch : session démarrée
+                let session_id = Uuid::new_v4().to_string();
+                let db = connections.read().miyukiniwatch.clone();
+                let collector = MiyukiniWatchCollector::new(db);
+                if let Err(e) = collector.record_session_start(&profile.id, &session_id) {
+                    tracing::debug!("MiyukiniWatch record_session_start: {}", e);
+                } else {
+                    if let Ok(Some(total)) = connections.read().miyukiniwatch.get_global(&profile.id, "total_sessions") {
+                        let _ = connections.read().miyukiniwatch.set_global(&profile.id, "total_sessions", total + 1);
+                    } else {
+                        let _ = connections.read().miyukiniwatch.set_global(&profile.id, "total_sessions", 1);
+                    }
+                }
+
+                let mut s = state.write();
+                s.current_user = Some(profile);
+                s.miyukiniwatch_session_id = Some(session_id);
+                s.miyukiniwatch_session_started_at = Some(std::time::Instant::now());
             }
             Ok(None) => {
                 error.write().push_str("Clé incorrecte ou compte inconnu.");

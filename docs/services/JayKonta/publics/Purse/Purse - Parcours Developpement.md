@@ -581,4 +581,4 @@ Donner une vision claire du solde et des dépenses, piloter des budgets occasion
 
 ---
 
-**✨ Projet créé avec le Template Parcours Développement Miyukini COG v1.0**
+**✨ Projet créé avec le Template Parcours Développement Miyukini COG vers. 0.1.0**

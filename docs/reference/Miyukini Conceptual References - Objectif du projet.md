@@ -372,7 +372,7 @@ Détails : [Glossaire](Miyukini%20Conceptual%20References%20-%20Glossaire.md), [
 | **Marchés multiples** | Vente de briques (B2B), de produits finaux (B2C) ou de licences (B2B2C) | Une agence achète 10 licences MiyuAuth (€500/an) ; un restaurateur paie JayFaim (€20/mois) ; une collectivité déploie JayFestival sous licence (€2000/an) |
 | **Adoption progressive** | Commencer par des briques (B2B), puis proposer des Services complets (B2C/B2B2C) | Phase 1 : vente MiyuAuth + MiyuCMS aux agences. Phase 2 : lancement JayRDV B2C pour professionnels. Phase 3 : JayFestival B2B2C pour collectivités |
 | **Coûts maîtrisés** | Déploiement possible sur matériel modeste (€150-800), pas de dépendance cloud obligatoire | Festival 2000 visiteurs : laptop €600 + licence événement €300 = €900 total (vs Eventbrite + Stripe + site : €2000/an + commissions 5%) |
-| **Pérennité** | Évolution par nouveaux environnements et composition, pas par réécriture | Un COG v1.0 reste opérationnel 10 ans. Migration v2.0 = diplomatie Inter-COG (protocoles documentés), pas refonte complète |
+| **Pérennité** | Évolution par nouveaux environnements et composition, pas par réécriture | Un COG vers. 1.0 reste opérationnel 10 ans. Migration vers. 2.0 = diplomatie Inter-COG (protocoles documentés), pas refonte complète |
 
 ---
 
@@ -520,8 +520,8 @@ Ces lois sont gravées dans le marbre. Aucune implémentation, aucun Service, au
 | **LOI-4** | Pas de temps global requis | Pas de dépendance NTP obligatoire. Horloge locale (MiyuClock). Timestamps relatifs. Fusion par vecteurs d'horloge (CRDT). |
 | **LOI-5** | Le coût doit être proportionnel au hardware | Raspberry Pi 4 (€50) doit pouvoir faire tourner Miyukini. Pas de processus dormants coûteux. Mémoire maîtrisée. CPU prévisible. |
 | **LOI-6** | L'autonomie n'empêche pas la fédération | Un COG peut se fédérer avec d'autres COG (protocoles Inter-COG : Passeport/Visa/Webway). Mais fédération = option, pas obligation. |
-| **LOI-7** | La strate Cores est immuable — évolution par environnement | Pas de patch StrongFather. Toute évolution = nouveau COG complet (v1.0 → v2.0). Migration = diplomatie entre environnements (LOI-8). |
-| **LOI-8** | Migration = diplomatie entre environnements | Un Opérateur d'un COG v1.0 ne migre pas « magiquement » vers v2.0. Il demande un Visa, franchit la frontière, s'adapte ou reste dans v1.0. |
+| **LOI-7** | La strate Cores est immuable — évolution par environnement | Pas de patch StrongFather. Toute évolution = nouveau COG complet (vers. 1.0 → vers. 2.0). Migration = diplomatie entre environnements (LOI-8). |
+| **LOI-8** | Migration = diplomatie entre environnements | Un Opérateur d'un COG vers. 1.0 ne migre pas « magiquement » vers vers. 2.0. Il demande un Visa, franchit la frontière, s'adapte ou reste dans vers. 1.0. |
 
 > Question de conception permanente : *"Est-ce que ça fonctionne encore si le système est seul, lent, et isolé ?"*
 
@@ -595,7 +595,7 @@ Avant toute décision stratégique, produit ou architecture, vérifier :
 | Dépend-il d'un service externe pour fonctionner ? | **Non** | Pas d'API cloud obligatoire. Pas de serveur distant requis. SQLite local. Pas de token cloud. |
 | Un non-développeur peut-il utiliser des Services ? | **Oui** | Marie la kiné ouvre JayRDV et voit ses RDV. Jean l'admin configure JayFestival via MiyukiniAdmin. Aucun ne voit les Cores. |
 | La dégradation en cas de problème est-elle contrôlée ? | **Oui** | Réseau coupé : mode offline, synchronisation différée. CPU surchargé : CaringNanny alerte, pas de crash. DB corrompue : KindMother détecte, propose restauration. |
-| Peut-on faire évoluer sans tout casser ? | **Oui** | COG v1.0 reste opérationnel 10 ans. Migration v2.0 = nouveau COG complet + protocoles Inter-COG (diplomatie). Pas de refonte. |
+| Peut-on faire évoluer sans tout casser ? | **Oui** | COG vers. 1.0 reste opérationnel 10 ans. Migration vers. 2.0 = nouveau COG complet + protocoles Inter-COG (diplomatie). Pas de refonte. |
 | La sécurité est-elle structurelle ? | **Oui** | StrongFather évalue toute intention. KindMother persiste toute donnée. Pas de bypass possible. Niveaux S1-S5 appliqués par WorrySentinel. |
 
 ### 10.2 Phrase de doctrine

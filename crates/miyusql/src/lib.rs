@@ -15,11 +15,11 @@
 //! - [MiyuSQL - Documentation Fondatrice](../../docs/tools/MiyuSQL/MiyuSQL%20-%20Documentation%20Fondatrice.md)
 //! - [MiyuSQL - Runtime Boundary Contract](../../docs/tools/MiyuSQL/contracts/boundaries/MiyuSQL%20-%20Runtime%20Boundary%20Contract.md)
 
-/// @id: miyusql_toolkit_lib
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Point d'entrée du toolkit MiyuSQL ; expose les modules tools, pas de capacité nouvelle.
-/// @do: expose_miyusql_toolkit
+// @id: toolkit.data.miyusql
+// @role: infrastructure
+// @layer: toolkit
+// @human: Point d'entrée du toolkit MiyuSQL ; expose les modules tools, pas de capacité nouvelle.
+// @do: expose_miyusql_toolkit
 
 pub mod admin_cell;
 pub mod cache;

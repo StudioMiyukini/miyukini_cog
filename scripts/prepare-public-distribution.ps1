@@ -78,6 +78,18 @@ if (Test-Path $Lic) {
     Write-Host "    -> LICENSE"
 }
 
+# Voix Miou (optionnel — si le dossier existe)
+$VoicesSrc = Join-Path $RepoRoot "voices"
+$VoicesDest = Join-Path $DistRoot "voices"
+if (Test-Path $VoicesSrc) {
+    New-Item -ItemType Directory -Path $VoicesDest -Force | Out-Null
+    Copy-Item -Path (Join-Path $VoicesSrc "*") -Destination $VoicesDest -Recurse -Force
+    Write-Host "    -> voices/ (Miou)"
+}
+else {
+    Write-Host "    voices/ absent (optionnel)" -ForegroundColor DarkGray
+}
+
 Write-Host "[5/5] Termine." -ForegroundColor Green
 Write-Host ""
 Write-Host "Distribution prete : $DistRoot"

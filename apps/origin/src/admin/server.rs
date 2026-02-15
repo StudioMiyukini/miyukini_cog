@@ -96,6 +96,7 @@ impl AdminServer {
     }
 
     /// Définit le gestionnaire de sessions.
+    #[allow(dead_code)]
     pub fn with_sessions(mut self, sessions: Arc<SessionManager>) -> Self {
         self.sessions = Some(sessions);
         self
@@ -157,10 +158,9 @@ impl AdminServer {
             }
         }
 
-        let mut in_headers = true;
+        let in_headers = true;
         for line in request.lines().skip(1) {
             if line.is_empty() {
-                in_headers = false;
                 if let Some(pos) = request.find("\r\n\r\n") {
                     body = request[pos + 4..].to_string();
                 }

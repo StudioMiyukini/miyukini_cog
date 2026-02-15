@@ -4,6 +4,9 @@
 //! - Phase A : Clé de conformité des Cores
 //! - Phase B : Blocs de code MIP des Services
 //! - Phase C : Santé de l'environnement
+//!
+//! Note : Code préparé pour fonctionnalités futures (Phase B étendue).
+#![allow(dead_code)]
 
 use bytes::Bytes;
 use sha2::{Digest, Sha256};
@@ -16,6 +19,7 @@ use tracing::{debug, info, warn};
 use crate::protocol::VerifyResult;
 
 /// Erreur de vérification.
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct VerificationError {
     /// Phase où l'erreur s'est produite.

@@ -13,7 +13,8 @@ pub mod frame;
 pub mod messages;
 pub mod types;
 
-// Réexports pour faciliter l'usage
+// Réexports pour faciliter l'usage (FrameError exposé pour l'API publique)
+#[allow(unused_imports)]
 pub use frame::{Frame, FrameError};
 pub use messages::*;
 pub use types::*;

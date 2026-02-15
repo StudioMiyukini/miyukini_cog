@@ -78,61 +78,68 @@ pub fn JayXposeView() -> Element {
 
     let has_exposant = state.read().exposant_id.is_some();
 
+    // Hauteur fixe calculée pour éviter le scroll externe (le wrapper parent a overflow-y: auto)
+    // On utilise height: 0 + flex-grow: 1 pour que le conteneur prenne exactement la place disponible
     rsx! {
         div {
-            style: "display: flex; height: 100%;",
+            style: "display: flex; flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-height: 0; overflow: hidden;",
 
-            // Sidebar
+            // Sidebar (hauteur fixe, pas de scroll)
             JayXposeSidebar { state: state }
 
-            // Contenu principal
-            main {
-                style: "flex: 1; padding: 24px; overflow-y: auto;",
+            // Contenu principal : wrapper pour le scroll
+            div {
+                style: "flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden;",
 
-                if !has_exposant {
-                    components::EmptyState {
-                        title: "Aucun profil exposant".to_string(),
-                        message: "Creez votre profil exposant pour commencer a utiliser JayXpose.".to_string(),
-                        icon: "🏪".to_string(),
-                        action_label: "Creer mon profil".to_string(),
-                        on_action: move |_| {
-                            // Creer un exposant vide
-                            let db = &conns.read().jayxpose;
-                            let new_id = uuid::Uuid::new_v4().to_string();
-                            let profile = jayxpose::data::ExposantProfile {
-                                id: Some(new_id.clone()),
-                                ..Default::default()
-                            };
-                            if db.exposant_upsert(&profile).is_ok() {
-                                let mut s = state.write();
-                                s.exposant_id = Some(new_id);
-                                s.section = JayXposeSection::Entreprise;
-                            }
-                        },
-                    }
-                } else {
-                    match state.read().section {
-                        JayXposeSection::Dashboard => rsx! {
-                            Dashboard { state: state }
-                        },
-                        JayXposeSection::Entreprise => rsx! {
-                            Entreprise { state: state }
-                        },
-                        JayXposeSection::Catalogue => rsx! {
-                            Catalogue { state: state }
-                        },
-                        JayXposeSection::NouveauProduit | JayXposeSection::ModifierProduit => rsx! {
-                            ProduitForm { state: state }
-                        },
-                        JayXposeSection::Vitrine => rsx! {
-                            Vitrine { state: state }
-                        },
-                        JayXposeSection::Documents => rsx! {
-                            Documents { state: state }
-                        },
-                        JayXposeSection::FichePublique => rsx! {
-                            FichePublique { state: state }
-                        },
+                // Zone scrollable avec padding
+                div {
+                    style: "flex: 1; min-height: 0; padding: 24px; overflow-y: auto; overflow-x: hidden;",
+
+                    if !has_exposant {
+                        components::EmptyState {
+                            title: "Aucun profil exposant".to_string(),
+                            message: "Creez votre profil exposant pour commencer a utiliser JayXpose.".to_string(),
+                            icon: "🏪".to_string(),
+                            action_label: "Creer mon profil".to_string(),
+                            on_action: move |_| {
+                                // Creer un exposant vide
+                                let db = &conns.read().jayxpose;
+                                let new_id = uuid::Uuid::new_v4().to_string();
+                                let profile = jayxpose::data::ExposantProfile {
+                                    id: Some(new_id.clone()),
+                                    ..Default::default()
+                                };
+                                if db.exposant_upsert(&profile).is_ok() {
+                                    let mut s = state.write();
+                                    s.exposant_id = Some(new_id);
+                                    s.section = JayXposeSection::Entreprise;
+                                }
+                            },
+                        }
+                    } else {
+                        match state.read().section {
+                            JayXposeSection::Dashboard => rsx! {
+                                Dashboard { state: state }
+                            },
+                            JayXposeSection::Entreprise => rsx! {
+                                Entreprise { state: state }
+                            },
+                            JayXposeSection::Catalogue => rsx! {
+                                Catalogue { state: state }
+                            },
+                            JayXposeSection::NouveauProduit | JayXposeSection::ModifierProduit => rsx! {
+                                ProduitForm { state: state }
+                            },
+                            JayXposeSection::Vitrine => rsx! {
+                                Vitrine { state: state }
+                            },
+                            JayXposeSection::Documents => rsx! {
+                                Documents { state: state }
+                            },
+                            JayXposeSection::FichePublique => rsx! {
+                                FichePublique { state: state }
+                            },
+                        }
                     }
                 }
             }

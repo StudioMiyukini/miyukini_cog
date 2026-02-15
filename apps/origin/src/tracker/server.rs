@@ -661,7 +661,7 @@ impl TrackerServer {
     async fn handle_update_lobby(
         payload: &[u8],
         pool_manager: &Arc<PoolManager>,
-        metrics: &Arc<TrackerMetrics>,
+        _metrics: &Arc<TrackerMetrics>,
     ) -> Option<TrackerMessage> {
         let update = match UpdateLobbyPayload::parse(payload) {
             Ok(u) => u,
@@ -738,7 +738,7 @@ impl TrackerServer {
     async fn handle_join_lobby(
         payload: &[u8],
         pool_manager: &Arc<PoolManager>,
-        config: &Arc<OriginConfig>,
+        _config: &Arc<OriginConfig>,
         metrics: &Arc<TrackerMetrics>,
     ) -> Option<TrackerMessage> {
         let join = match JoinLobbyPayload::parse(payload) {

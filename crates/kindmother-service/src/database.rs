@@ -34,6 +34,8 @@ struct AuditEntry<'a> {
 pub struct EncryptedDatabase {
     /// Répertoire racine des données
     data_dir: PathBuf,
+    #[cfg(feature = "db-encryption")]
+    key_derivation: kindmother_db_key::KeyDerivation,
     /// Cache des connexions ouvertes (protégé par mutex async)
     connections: Arc<RwLock<HashMap<String, Arc<Mutex<Connection>>>>>,
 }
@@ -44,7 +46,11 @@ impl EncryptedDatabase {
         let data_dir = data_dir.as_ref().to_path_buf();
         std::fs::create_dir_all(&data_dir)
             .map_err(|e| ServiceError::Internal(format!("Cannot create data dir: {}", e)))?;
-        
+
+        #[cfg(feature = "db-encryption")]
+        let key_derivation = kindmother_db_key::KeyDerivation::new(&data_dir)
+            .map_err(|e| ServiceError::Encryption(e.0))?;
+
         // Définir des permissions restrictives sur le répertoire
         #[cfg(unix)]
         {
@@ -53,9 +59,11 @@ impl EncryptedDatabase {
             std::fs::set_permissions(&data_dir, perms)
                 .map_err(|e| ServiceError::Internal(format!("Cannot set permissions: {}", e)))?;
         }
-        
+
         Ok(Self {
             data_dir,
+            #[cfg(feature = "db-encryption")]
+            key_derivation,
             connections: Arc::new(RwLock::new(HashMap::new())),
         })
     }
@@ -94,7 +102,7 @@ impl EncryptedDatabase {
         }
 
         let db_path = self.data_dir.join(format!("{}.db", database));
-        
+
         // Ouvrir avec des flags restrictifs
         let conn = Connection::open_with_flags(
             &db_path,
@@ -103,6 +111,16 @@ impl EncryptedDatabase {
                 | OpenFlags::SQLITE_OPEN_NO_MUTEX,
         )
         .map_err(|e| ServiceError::Database(format!("Cannot open database: {}", e)))?;
+
+        #[cfg(feature = "db-encryption")]
+        {
+            let pragma_key = self
+                .key_derivation
+                .pragma_key_hex(database)
+                .map_err(|e| ServiceError::Encryption(e.0))?;
+            conn.pragma_update(None, "key", &pragma_key)
+                .map_err(|e| ServiceError::Database(format!("Cannot set encryption key: {}", e)))?;
+        }
 
         // Configuration de sécurité
         conn.execute_batch(
@@ -352,7 +370,7 @@ impl EncryptedDatabase {
             database: database.to_string(),
             size_bytes,
             table_count: table_count as u32,
-            encrypted: false, // SQLite standard n'est pas chiffré
+            encrypted: cfg!(feature = "db-encryption"),
         })
     }
 }

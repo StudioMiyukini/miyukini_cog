@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="doc-title">Document — Miyukini COG</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo">
+        <span class="logo-icon">宮</span>
+        <span>Miyukini</span>
+      </a>
+      <nav class="main-nav">
+        <a href="/">Accueil</a>
+        <a href="/catalog">Catalogue</a>
+        <a href="/services">Services</a>
+        <a href="/downloads">Télécharger</a>
+        <a href="/docs/" class="active">Documentation</a>
+        <a href="/about">À propos</a>
+      </nav>
+    </div>
+  </header>
+  
+  <div class="breadcrumb container">
+    <a href="/docs/">← Retour à la documentation</a>
+  </div>
+
+  <main class="container doc-main">
+    <article id="doc-article" class="doc-article">
+      <div id="doc-loading" class="doc-loading">Chargement…</div>
+      <div id="doc-error" class="doc-error hidden"></div>
+      <div id="doc-body" class="doc-body markdown-body hidden"></div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p><a href="index.html">Retour à la liste de la documentation</a></p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="js/doc.js"></script>
+</body>
+</html>

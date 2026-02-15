@@ -6,6 +6,7 @@ use dioxus::prelude::*;
 use miyukini_central::auth::CentralProfile;
 use crate::data::ServiceConnections;
 use crate::theme::Theme;
+use crate::miou::state::{MiouState, MiouPreferences};
 
 /// Contexte partagé (connexions + état) fourni une seule fois à la racine pour éviter hook-in-hook.
 #[derive(Clone)]
@@ -17,35 +18,35 @@ pub struct AppContext {
 /// Onglet principal de navigation (header).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum MainTab {
-    /// Magasin des Services
+    /// Salon des Services
     #[default]
-    Magasin,
+    Salon,
     /// Bibliothèque des Services installés
     Bibliotheque,
     /// Webway (réseau MWS)
     Communaute,
-    /// Paramètres Miyukini
-    Miyukini,
+    /// Liste des amis (Jay1Tribu)
+    MesAmis,
 }
 
 impl MainTab {
     /// Libellé affiché dans l'interface.
     pub fn label(&self) -> &'static str {
         match self {
-            Self::Magasin => "MAGASIN",
+            Self::Salon => "SALON",
             Self::Bibliotheque => "BIBLIOTHÈQUE",
             Self::Communaute => "WEBWAY",
-            Self::Miyukini => "MIYUKINI",
+            Self::MesAmis => "MES AMIS",
         }
     }
 
     /// Toutes les valeurs pour itération.
     pub fn all() -> &'static [MainTab] {
         &[
-            MainTab::Magasin,
+            MainTab::Salon,
             MainTab::Bibliotheque,
             MainTab::Communaute,
-            MainTab::Miyukini,
+            MainTab::MesAmis,
         ]
     }
 }
@@ -127,6 +128,18 @@ pub struct AppState {
     pub last_login_email: String,
     /// Pseudo du dernier profil connecté (pour le message d'accueil).
     pub last_login_pseudo: String,
+    /// Session MiyukiniWatch en cours (pour la collecte).
+    pub miyukiniwatch_session_id: Option<String>,
+    /// Début de session (pour calcul durée à la déconnexion).
+    pub miyukiniwatch_session_started_at: Option<std::time::Instant>,
+    /// Rite d'Entrée : profil créé, en attente des infos complémentaires.
+    pub rite_infos_pending: bool,
+    /// État Miou de la session (bulles, file d'attente, historique).
+    pub miou_state: MiouState,
+    /// Préférences Miou (persistées avec le profil).
+    pub miou_prefs: MiouPreferences,
+    /// Première bulle Miou déjà déclenchée cette session.
+    pub miou_first_trigger_done: bool,
 }
 
 impl Default for AppState {
@@ -149,7 +162,7 @@ impl Default for AppState {
             }
         }
         Self {
-            main_tab: MainTab::Magasin,
+            main_tab: MainTab::Salon,
             open_tabs,
             active_tab_index: 0,
             services,
@@ -160,6 +173,12 @@ impl Default for AppState {
             current_theme: Theme::Gaming,
             last_login_email: String::new(),
             last_login_pseudo: String::new(),
+            miyukiniwatch_session_id: None,
+            miyukiniwatch_session_started_at: None,
+            rite_infos_pending: false,
+            miou_state: MiouState::default(),
+            miou_prefs: MiouPreferences::default(),
+            miou_first_trigger_done: false,
         }
     }
 }
@@ -207,6 +226,28 @@ impl AppState {
                 description: "Comptabilité COG unifiée Purse + Account".to_string(),
                 icon: "🧮".to_string(),
                 service_type: ServiceType::InterneCog,
+                is_installed: true,
+                is_favorite: true,
+                version: "0.1.0".to_string(),
+                developer: "Miyukini".to_string(),
+            },
+            ServiceInfo {
+                id: "miyukiniwatch".to_string(),
+                name: "MiyukiniWatch".to_string(),
+                description: "Tes habitudes et tes mesures — consulte, comprends, efface.".to_string(),
+                icon: "👁".to_string(),
+                service_type: ServiceType::InterneCog,
+                is_installed: true,
+                is_favorite: false,
+                version: "0.1.0".to_string(),
+                developer: "Miyukini".to_string(),
+            },
+            ServiceInfo {
+                id: "jay1tribu".to_string(),
+                name: "Jay1Tribu".to_string(),
+                description: "Tribus, amis et discussions — chat et tribu pleins uniquement si connecté au Webway.".to_string(),
+                icon: "💬".to_string(),
+                service_type: ServiceType::InterCog,
                 is_installed: true,
                 is_favorite: true,
                 version: "0.1.0".to_string(),

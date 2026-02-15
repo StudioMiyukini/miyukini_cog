@@ -392,10 +392,73 @@ impl MwsService {
     pub async fn get_lobbys(&self) -> Vec<LobbyInfo> {
         self.lobbys.read().await.clone()
     }
+
+    /// Met à jour les services exposés et envoie un RE-ANNOUNCE au Tracker.
+    ///
+    /// Cette méthode permet de modifier dynamiquement la liste des services
+    /// annoncés au réseau MWS (ex: activer/désactiver JayXpose).
+    pub async fn update_services(
+        &self,
+        services: Vec<String>,
+    ) -> Result<(), MiyuwebwayParticipantError> {
+        self.ensure_online().await?;
+
+        // Mettre à jour l'identité avec les nouveaux services
+        let mut identity_guard = self.identity.write().await;
+        let identity = identity_guard
+            .as_mut()
+            .ok_or(MiyuwebwayParticipantError::NotConnected)?;
+        identity.services = services.clone();
+        let identity_snapshot = identity.clone();
+        drop(identity_guard);
+
+        // Récupérer le permis_id de la session Relay
+        let session = self.relay_session.read().await;
+        let permis_id = session
+            .as_ref()
+            .and_then(|s| s.permis_id.clone())
+            .map(|p| String::from_utf8_lossy(&p).to_string())
+            .unwrap_or_default();
+        drop(session);
+
+        // Récupérer les lobbys actuels
+        let lobbys = self.lobbys.read().await.clone();
+
+        // Envoyer une nouvelle annonce au Tracker (RE-ANNOUNCE)
+        let announcement = TrackerAnnouncement {
+            cog_id: identity_snapshot.cog_id.clone(),
+            core_version: identity_snapshot.core_version.clone(),
+            permis_id,
+            address: identity_snapshot.public_address.clone(),
+            services,
+            lobbys,
+        };
+
+        info!(
+            "RE-ANNOUNCE: updating services for COG {} → {:?}",
+            announcement.cog_id, announcement.services
+        );
+
+        self.tracker_client.announce(&announcement).await?;
+
+        info!("Services updated successfully");
+        Ok(())
+    }
+
+    /// Retourne les services actuellement annoncés.
+    pub async fn get_services(&self) -> Vec<String> {
+        self.identity
+            .read()
+            .await
+            .as_ref()
+            .map(|i| i.services.clone())
+            .unwrap_or_default()
+    }
 }
 
 /// Dépendance manquante : hex encoding
 mod hex {
+    #[allow(dead_code)]
     pub fn encode(data: &[u8]) -> String {
         data.iter().map(|b| format!("{:02x}", b)).collect()
     }

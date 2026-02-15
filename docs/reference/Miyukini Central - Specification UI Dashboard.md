@@ -30,7 +30,7 @@ Le header est composé de **2 lignes**, sans trait de séparation entre elles.
 
 | Zone | Contenu | Alignement |
 |------|---------|-------------|
-| **Gauche** | Bloc **titre + version** : « MIYUKINI COG » + « V0.0.1 » (ou version courante). | Gauche de l’affichage. |
+| **Gauche** | Bloc **titre + version** : « MIYUKINI COG » + « vers. 0.1.0 » (ou version courante). | Gauche de l’affichage. |
 | **Droite** | Deux blocs côte à côte : | Droite de l’affichage. |
 
 **Bloc de connexion :**

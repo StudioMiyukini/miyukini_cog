@@ -139,4 +139,4 @@ Les entrées/sorties entre écrans passent par `AppState` et les docs « Écrans
 
 - [Miyukini Prompt Protocol - Implémentation générale](../../protocols/Miyukini%20Prompt%20Protocol%20-%20Implémentation%20générale.md)
 - [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md)
-- [Miyukini COG 0.1 - MSCM MIP Compliance Checklist](../../implementation/Miyukini%20COG%200.1%20-%20MSCM%20MIP%20Compliance%20Checklist.md)
+- [Miyukini COG vers. 0.1.0 - MSCM MIP Compliance Checklist](../../implementation/Miyukini%20COG%200.1%20-%20MSCM%20MIP%20Compliance%20Checklist.md)

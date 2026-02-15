@@ -1,6 +1,6 @@
 ---
-name: Implémentation Miyukini COG 0.1
-overview: "Plan d'implémentation complet de Miyukini COG 0.1 suivant les trois documents de référence : Documentation Implementation Reference, MSCM MIP Compliance Checklist, et Quick Reference Guide. Le plan couvre les 3 phases (Kernel, Cores système, MiyukiniAdmin) avec respect strict des protocoles MSCM/MIP et des règles d'implémentation."
+name: Implémentation Miyukini COG vers. 0.1.0
+overview: "Plan d'implémentation complet de Miyukini COG vers. 0.1.0 suivant les trois documents de référence : Documentation Implementation Reference, MSCM MIP Compliance Checklist, et Quick Reference Guide. Le plan couvre les 3 phases (Kernel, Cores système, MiyukiniAdmin) avec respect strict des protocoles MSCM/MIP et des règles d'implémentation."
 todos:
   - id: init-workspace
     content: Initialiser le workspace Rust avec Cargo.toml et structure de base
@@ -81,12 +81,12 @@ todos:
     content: Effectuer audit final de conformité
     status: completed
   - id: document-gel
-    content: Rédiger document de gel COG 0.1
+    content: Rédiger document de gel COG vers. 0.1.0
     status: completed
 isProject: false
 ---
 
-# Plan d'Implémentation Miyukini COG 0.1
+# Plan d'Implémentation Miyukini COG vers. 0.1.0
 
 ## Contexte et État Actuel
 
@@ -719,7 +719,7 @@ Phase 3 : MiyukiniAdmin (opérateur souverain)
 
 ### 4.2 Document de Gel
 
-**Tâche :** `[301] - Document de gel COG 0.1`
+**Tâche :** `[301] - Document de gel COG vers. 0.1.0`
 
 **Contenu obligatoire :**
 

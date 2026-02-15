@@ -8,6 +8,7 @@ mod audio;
 mod components;
 mod data;
 mod kindmother_launcher;
+mod miou;
 mod screens;
 mod services;
 mod state;
@@ -66,7 +67,26 @@ fn main() {
     tracing::info!("KindMother OK, démarrage de l'interface...");
 
     // Configuration de la fenêtre
-    let config = dioxus::desktop::Config::new()
+    let mut config = dioxus::desktop::Config::new();
+
+    // Sur Windows : rediriger WebView2 vers LOCALAPPDATA pour éviter "Accès refusé"
+    // quand l'app est installée dans Program Files (dossier non accessible en écriture).
+    #[cfg(windows)]
+    {
+        if let Ok(local) = std::env::var("LOCALAPPDATA") {
+            let webview2_dir = std::path::PathBuf::from(local)
+                .join("Miyukini-COG")
+                .join("webview2");
+            if let Err(e) = std::fs::create_dir_all(&webview2_dir) {
+                tracing::warn!("Impossible de créer le dossier WebView2: {}", e);
+            } else {
+                tracing::debug!("WebView2 user data: {:?}", webview2_dir);
+                config = config.with_data_directory(webview2_dir);
+            }
+        }
+    }
+
+    config = config
         .with_window(
             dioxus::desktop::WindowBuilder::new()
                 .with_title("Miyukini Central")

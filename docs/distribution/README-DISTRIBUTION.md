@@ -12,6 +12,7 @@ Cette distribution contient une **version fonctionnelle** de Miyukini COG : bina
 |--------|-------------|
 | **bin/** | Exécutables : Miyukini Central (Hub) et KindMother (serveur de données, optionnel). |
 | **docs/** | Documentation complète du projet (conceptuelle, technique, services, références). |
+| **docs/legal/** | Documents juridiques : politique de licence, licence pro service-tier (validation Relay, tarifs 2026). |
 | **MODE_EMPLOI.md** | Installation, premier lancement et prise en main. |
 | **LICENSE** | Licence d’utilisation (personnelle et domestique). |
 
@@ -33,9 +34,10 @@ Aucun code source (crates, apps) n’est inclus.
 - **Documentation conceptuelle** : `docs/public/` (FR et EN)
 - **Documentation des services** : `docs/services/`
 - **Références et contrats** : `docs/reference/`, `docs/contrats/`
+- **Documents juridiques** : `docs/legal/` (politique de licence, licence pro service-tier)
 
 ---
 
 ## Licence
 
-Voir [LICENSE](LICENSE). Usage personnel et domestique gratuit ; usage par une société ou une collectivité soumis à une licence commerciale.
+Voir [LICENSE](LICENSE). Usage personnel et domestique gratuit ; usage par une société ou une collectivité soumis à une licence commerciale. Pour proposer un service-tier aux COGs (validation Relay, mise en ligne) : voir [docs/legal/](docs/legal/) (Licence Pro Service-Tier — tarifs 2026, gratuité sur demande pour non-lucratif et intérêt général).

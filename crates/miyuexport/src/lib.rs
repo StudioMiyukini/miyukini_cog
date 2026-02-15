@@ -4,7 +4,7 @@
 //! Kit d'outils d'export (CSV, XLSX, PDF). Données et options fournies dans le flux.
 //! Alignement MIP : domaine `export`, layer tool/toolkit.
 
-/// @id: miyuexport_toolkit_lib
+// @id: toolkit.export.miyuexport
 /// @role: infrastructure
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuExport ; expose les modules tools.

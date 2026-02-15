@@ -15,6 +15,8 @@ use crate::domain::purse::{
 // use crate::domain::account::{Counterparty, InvoiceStatus, PaymentMethod, QuoteStatus};
 use chrono::Local;
 use kindmother::{InstanceIdentity, InstanceType};
+#[cfg(feature = "db-encryption")]
+use kindmother_db_key::KeyDerivation;
 use rusqlite::{params, Connection};
 use std::path::Path;
 use std::sync::Mutex;
@@ -71,9 +73,24 @@ pub struct JayKontaDb {
 }
 
 impl JayKontaDb {
-    /// Ouvre ou cree la DB locale et initialise le schema.
+    /// Ouvre ou cree la DB locale chiffree et initialise le schema.
     pub fn open(path: impl AsRef<Path>) -> Result<Self, DbError> {
+        let path = path.as_ref();
         let conn = Connection::open(path)?;
+
+        #[cfg(feature = "db-encryption")]
+        {
+            let data_dir = path.parent().unwrap_or(path);
+            let db_name = path
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("jaykonta");
+            let kd = KeyDerivation::new(data_dir).map_err(|e| DbError(e.0))?;
+            let pragma_key = kd.pragma_key_hex(db_name).map_err(|e| DbError(e.0))?;
+            conn.pragma_update(None, "key", &pragma_key)
+                .map_err(|e| DbError(e.to_string()))?;
+        }
+
         conn.execute_batch("PRAGMA foreign_keys = ON;")?;
         let db = Self {
             conn: Mutex::new(conn),

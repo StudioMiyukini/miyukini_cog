@@ -1,4 +1,4 @@
-# Miyukini COG 0.1 — Documentation Implementation Reference
+# Miyukini COG vers. 0.1.0 — Documentation Implementation Reference
 
 **Version :** 0.1  
 **Statut :** Référence principale — Normatif  
@@ -22,13 +22,13 @@
 
 ## 1. Introduction et Contexte
 
-### 1.1 Qu'est-ce que Miyukini COG 0.1 ?
+### 1.1 Qu'est-ce que Miyukini COG vers. 0.1.0 ?
 
-**Miyukini COG 0.1** (Core-Orchestrated Governance Environment version 0.1) est la première version complète et gelée de l'environnement de gouvernance orchestré par des cores du système Miyukini.
+**Miyukini COG vers. 0.1.0** (Core-Orchestrated Governance Environment version 0.1) est la première version complète et gelée de l'environnement de gouvernance orchestré par des cores du système Miyukini.
 
 **Définition :**
 
-> Miyukini COG 0.1 est un environnement complet de gouvernance logicielle qui coordonne, sécurise et fait fonctionner des systèmes logiciels complets, du noyau technique (Kernel) jusqu'aux opérateurs applicatifs (Strate 7), en passant par les cores système (Strate 4) et les outils mutualisés (Strate 6).
+> Miyukini COG vers. 0.1.0 est un environnement complet de gouvernance logicielle qui coordonne, sécurise et fait fonctionner des systèmes logiciels complets, du noyau technique (Kernel) jusqu'aux opérateurs applicatifs (Strate 7), en passant par les cores système (Strate 4) et les outils mutualisés (Strate 6).
 
 **Caractéristiques principales :**
 
@@ -43,7 +43,7 @@
 
 **Vision stratégique :**
 
-Miyukini COG 0.1 établit la fondation technique et conceptuelle permettant de :
+Miyukini COG vers. 0.1.0 établit la fondation technique et conceptuelle permettant de :
 - Livrer des produits SaaS, web, mobile, et jeux sur une base commune
 - Garantir la souveraineté et l'autonomie des environnements
 - Maintenir la cohérence décisionnelle et exécutionnelle à travers tous les composants
@@ -61,7 +61,7 @@ Miyukini COG 0.1 établit la fondation technique et conceptuelle permettant de :
 
 ### 1.3 Périmètre Fonctionnel
 
-**Ce qui EST inclus dans COG 0.1 :**
+**Ce qui EST inclus dans COG vers. 0.1.0 :**
 
 | Composant | Description | Statut |
 |-----------|-------------|--------|
@@ -78,7 +78,7 @@ Miyukini COG 0.1 établit la fondation technique et conceptuelle permettant de :
 | **LogisticsSteward** | Gestionnaire de ressources et optimisation | ✅ Phase 2 |
 | **MiyukiniAdmin** | Console souveraine d'administration | ✅ Phase 3 |
 
-**Ce qui N'EST PAS inclus dans COG 0.1 :**
+**Ce qui N'EST PAS inclus dans COG vers. 0.1.0 :**
 
 | Élément | Raison | Statut |
 |---------|--------|--------|
@@ -1566,7 +1566,7 @@ pub fn collect_metrics() -> Result<Metrics, Error> {
 
 ## Conclusion
 
-Ce document constitue la **référence principale** pour l'implémentation de Miyukini COG 0.1. Il fournit :
+Ce document constitue la **référence principale** pour l'implémentation de Miyukini COG vers. 0.1.0. Il fournit :
 
 - Un cadre strict d'implémentation
 - Des références précises aux documents fondateurs

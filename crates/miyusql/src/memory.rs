@@ -12,21 +12,30 @@ use crate::transaction::TransactionExecutor;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-/// @id: miyusql_memory_executor
-/// @role: infrastructure
-/// @layer: tool
-/// @human: Exécuteur en mémoire pour tests (tables, cache, transactions).
-/// @do: implement_memory_executor
-/// État partagé : tables (nom -> lignes), cache (clé -> valeur), transactions.
+// @id: miyusql_memory_executor
+// @role: infrastructure
+// @layer: tool
+// @human: Exécuteur en mémoire pour tests (tables, cache, transactions).
+// @do: implement_memory_executor
+// État partagé : tables (nom -> lignes), cache (clé -> valeur), transactions.
 
+/// Alias pour une ligne de table (colonne -> valeur).
+type TableRow = HashMap<String, String>;
+/// Alias pour une entrée de cache (données, TTL optionnel).
+type CacheEntry = (Vec<u8>, Option<u64>);
+/// Alias pour les données de transaction (snapshot des tables).
+type TransactionSnapshot = HashMap<String, Vec<TableRow>>;
+
+/// Exécuteur en mémoire pour tests (sandbox / MiyukiniSQLtest).
 pub struct MemoryExecutor {
     /// Tables : nom -> vec de rows (HashMap colonne -> valeur)
-    tables: Mutex<HashMap<String, Vec<HashMap<String, String>>>>,
+    tables: Mutex<HashMap<String, Vec<TableRow>>>,
     /// Schéma : nom table -> colonnes (nom, type)
     schema: Mutex<HashMap<String, Vec<(String, String)>>>,
-    cache: Mutex<HashMap<String, (Vec<u8>, Option<u64>)>>,
-    /// tx_id -> (snapshot des tables au begin, ou flag "active")
-    transactions: Mutex<HashMap<String, HashMap<String, Vec<HashMap<String, String>>>>>,
+    /// Cache : clé -> (données, TTL optionnel)
+    cache: Mutex<HashMap<String, CacheEntry>>,
+    /// tx_id -> snapshot des tables au begin
+    transactions: Mutex<HashMap<String, TransactionSnapshot>>,
 }
 
 impl Default for MemoryExecutor {
@@ -209,7 +218,7 @@ impl TransactionExecutor for MemoryExecutor {
         }
         let tx_id = format!("tx-{}", ctx.mandate_id);
         let tables = self.tables.lock().map_err(|_| MiyuSQLError::Execution("lock".into()))?;
-        let snapshot: HashMap<String, Vec<HashMap<String, String>>> = tables.clone();
+        let snapshot: TransactionSnapshot = tables.clone();
         drop(tables);
         let mut tx = self.transactions.lock().map_err(|_| MiyuSQLError::Execution("lock".into()))?;
         tx.insert(tx_id.clone(), snapshot);

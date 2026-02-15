@@ -4,7 +4,7 @@
 //! Kit d'outils rapports comptables (livre recettes, balance, liasse, cashflow, export ledger).
 //! Alignement MIP : domaine `compta`, layer tool/toolkit.
 
-/// @id: miyucomptareports_toolkit_lib
+// @id: toolkit.accounting.miyucomptareports
 /// @role: infrastructure
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuComptaReports ; expose les modules tools.

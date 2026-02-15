@@ -3,6 +3,7 @@
 use dioxus::prelude::*;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
+use crate::services::MwsViewState;
 use super::components::{Badge, FormField, FormSection};
 use super::JayXposeState;
 
@@ -62,6 +63,24 @@ pub fn Vitrine(state: Signal<JayXposeState>) -> Element {
                                 exp.vitrine_status = Some("publiee".to_string());
                                 let db = &conns.read().jayxpose;
                                 let _ = db.exposant_upsert(&exp);
+                                // Annoncer le service JayXpose au MWS
+                                spawn(async move {
+                                    let mws_state: Signal<MwsViewState> = use_context();
+                                    let manager_arc = mws_state.read().manager.clone();
+                                    let guard = manager_arc.read().await;
+                                    if let Some(ref mgr) = *guard {
+                                        let current_services = mgr.get_services().await;
+                                        if !current_services.contains(&"jayxpose".to_string()) {
+                                            let mut new_services = current_services;
+                                            new_services.push("jayxpose".to_string());
+                                            if let Err(e) = mgr.update_services(new_services).await {
+                                                tracing::warn!("Erreur publication MWS: {}", e);
+                                            } else {
+                                                tracing::info!("JayXpose publié sur le réseau MWS");
+                                            }
+                                        }
+                                    }
+                                });
                             },
                             "🚀 Publier"
                         }
@@ -74,6 +93,24 @@ pub fn Vitrine(state: Signal<JayXposeState>) -> Element {
                                 exp.vitrine_status = Some("suspendue".to_string());
                                 let db = &conns.read().jayxpose;
                                 let _ = db.exposant_upsert(&exp);
+                                // Retirer le service JayXpose du MWS
+                                spawn(async move {
+                                    let mws_state: Signal<MwsViewState> = use_context();
+                                    let manager_arc = mws_state.read().manager.clone();
+                                    let guard = manager_arc.read().await;
+                                    if let Some(ref mgr) = *guard {
+                                        let current_services = mgr.get_services().await;
+                                        let new_services: Vec<String> = current_services
+                                            .into_iter()
+                                            .filter(|s| s != "jayxpose")
+                                            .collect();
+                                        if let Err(e) = mgr.update_services(new_services).await {
+                                            tracing::warn!("Erreur suspension MWS: {}", e);
+                                        } else {
+                                            tracing::info!("JayXpose suspendu sur le réseau MWS");
+                                        }
+                                    }
+                                });
                             },
                             "⏸ Suspendre"
                         }

@@ -1,6 +1,9 @@
 //! Session de connexion relay.
 //!
 //! Représente une connexion active entre un COG et le relay.
+//!
+//! Note : Code préparé pour fonctionnalités futures (phases de vérification).
+#![allow(dead_code)]
 
 use bytes::Bytes;
 use chrono::{DateTime, Utc};

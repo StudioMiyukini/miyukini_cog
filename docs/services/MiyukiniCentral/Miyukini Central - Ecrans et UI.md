@@ -167,7 +167,7 @@ L'onglet **HUB** est l'onglet système toujours présent. Il contient plusieurs 
 │  │ Opérateur(s) : Opérateur Calculatrice                               │  │
 │  │                                                                      │  │
 │  │ Prérequis :                                                          │  │
-│  │ - Environnement COG v1.2.0+                                         │  │
+│  │ - Environnement COG vers. 1.2.0+                                         │  │
 │  │ - Niveau de sécurité : Standard (1)                                 │  │
 │  │                                                                      │  │
 │  │ [Ouvrir ce Service]  [← Catalogue]  [← Mes Services]                │  │

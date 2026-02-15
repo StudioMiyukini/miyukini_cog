@@ -31,7 +31,8 @@ Cela :
   - **docs/** — toute la documentation du projet ;
   - **README.md** — présentation de la distribution ;
   - **MODE_EMPLOI.md** — mode d’emploi utilisateur ;
-  - **LICENSE**.
+  - **LICENSE** ;
+  - **docs/legal/** — politique de licence et licence pro service-tier.
 
 Aucun code source n’est inclus.
 

@@ -982,7 +982,7 @@ pub async fn services_page(content_mgr: &ContentManager) -> String {
                         <div class="service-footer">
                             <div class="service-meta">
                                 <span class="service-editor">{}</span>
-                                <span class="service-version">COG v{}</span>
+                                <span class="service-version">COG vers. {}</span>
                             </div>
                             <div class="service-actions">
                                 <a href="/services/{}" class="btn btn-secondary btn-sm">En savoir plus</a>

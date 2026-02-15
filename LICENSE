@@ -1,7 +1,7 @@
-Miyukini — Licence d'utilisation personnelle et domestique
-==========================================================
+Miyukini COG vers. 0.1.0 — Licence d'utilisation personnelle et domestique
+============================================================================
 
-Copyright (c) Miyukini. Tous droits réservés.
+Copyright (c) 2026 Studio Miyukini. Tous droits réservés.
 
 1. Objet
 --------
@@ -18,38 +18,41 @@ Votre droit d'utilisation dépend du type d'utilisation que vous en faites.
 - "Collectivité" : toute entité publique ou parapublique (État, collectivités
   territoriales, établissements publics, organismes à caractère administratif,
   etc.).
-- "Licence commerciale" : contrat distinct, payant, conclu avec le titulaire
-  des droits sur Miyukini pour un usage par une Société ou une Collectivité.
+- "Licence commerciale" : contrat distinct, payant, conclu avec Studio Miyukini
+  pour un usage par une Société ou une Collectivité.
 
 3. Utilisation autorisée sans contrepartie financière
 -----------------------------------------------------
 Vous êtes autorisé à utiliser, modifier et redistribuer le Logiciel gratuitement
-uniquement dans le cadre d'une **utilisation domestique** au sens défini ci-dessus :
+uniquement dans le cadre d'une utilisation domestique au sens défini ci-dessus :
 - vous êtes une personne physique ;
 - votre utilisation est à des fins personnelles, non commerciales ;
-- vous n'agissez pas au nom ou pour le compte d'une Société ou d'une Collectivité.
+- vous n'agissez pas au nom ou pour le compte d'une Société ou d'une
+  Collectivité.
 
 Sous ces conditions, vous pouvez :
 - utiliser le Logiciel ;
-- le modifier et créer des œuvres dérivées pour votre usage personnel ou domestique ;
-- redistribuer le Logiciel (ou des œuvres dérivées) à des tiers qui s'engagent
-  à respecter les présentes conditions (utilisation domestique uniquement).
+- le modifier et créer des oeuvres dérivées pour votre usage personnel ou
+  domestique ;
+- redistribuer le Logiciel (ou des oeuvres dérivées) à des tiers qui
+  s'engagent à respecter les présentes conditions (utilisation domestique
+  uniquement).
 
 4. Utilisation par les sociétés et les collectivités
 ----------------------------------------------------
-L'utilisation du Logiciel par une **Société** ou une **Collectivité** (y compris
-pour un usage interne, un service, un produit ou une prestation) n'est **pas**
-couverte par la présente licence et nécessite une **licence commerciale** payante.
+L'utilisation du Logiciel par une Société ou une Collectivité (y compris pour
+un usage interne, un service, un produit ou une prestation) n'est PAS couverte
+par la présente licence et nécessite une licence commerciale payante.
 
 Sans licence commerciale en cours de validité, toute utilisation par une Société
 ou une Collectivité constitue une utilisation non autorisée.
 
-Pour obtenir une licence commerciale : contactez le titulaire des droits
-(voir la documentation du projet ou le fichier docs/legal/Miyukini - Politique de Licence.md).
+Pour obtenir une licence commerciale : contactez Studio Miyukini
+(voir docs/legal/Miyukini - Politique de Licence.md).
 
 5. Attribution et conservation de la licence
 --------------------------------------------
-Toute distribution du Logiciel (ou d'œuvres dérivées) doit inclure une copie
+Toute distribution du Logiciel (ou d'oeuvres dérivées) doit inclure une copie
 de la présente licence et conserver les mentions de copyright et d'attribution
 présentes dans le Logiciel.
 
@@ -57,9 +60,9 @@ présentes dans le Logiciel.
 ----------------------
 LE LOGICIEL EST FOURNI "EN L'ÉTAT", SANS GARANTIE D'AUCUNE SORTE, EXPRESSE OU
 IMPLICITE, NOTAMMENT SANS GARANTIE DE QUALITÉ MARCHANDE, D'ADÉQUATION À UN
-USAGE PARTICULIER OU D'ABSENCE DE CONTREFAÇON. EN AUCUN CAS LE TITULAIRE DES
-DROITS OU LES CONTRIBUTEURS NE POURRONT ÊTRE TENUS RESPONSABLES DE DOMMAGES
-DIRECTS, INDIRECTS, ACCESSOIRES OU CONSÉCUTIFS LIÉS À L'UTILISATION DU LOGICIEL.
+USAGE PARTICULIER OU D'ABSENCE DE CONTREFAÇON. EN AUCUN CAS STUDIO MIYUKINI
+OU LES CONTRIBUTEURS NE POURRONT ÊTRE TENUS RESPONSABLES DE DOMMAGES DIRECTS,
+INDIRECTS, ACCESSOIRES OU CONSÉCUTIFS LIÉS À L'UTILISATION DU LOGICIEL.
 
 7. Divers
 ---------
@@ -70,6 +73,12 @@ DIRECTS, INDIRECTS, ACCESSOIRES OU CONSÉCUTIFS LIÉS À L'UTILISATION DU LOGICI
 - Une traduction de cette licence dans une autre langue est fournie à titre
   indicatif ; en cas de divergence, la version française fait foi.
 
----
-Miyukini — Personal and domestic use only. Commercial and institutional use
-requires a paid license. See docs/legal/ for the full license policy.
+================================================================================
+
+Miyukini COG vers. 0.1.0
+Copyright (c) 2026 Studio Miyukini. All rights reserved.
+
+Personal and domestic use only. Commercial and institutional use requires
+a paid license from Studio Miyukini.
+
+See docs/legal/Miyukini - Politique de Licence.md for the full license policy.

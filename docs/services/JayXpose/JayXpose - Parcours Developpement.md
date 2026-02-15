@@ -1090,7 +1090,7 @@ Itération 5 (P3) : M8 (CMS Articles) + Polish
 
 ---
 
-**✨ Projet créé avec le Template Parcours Développement Miyukini COG v1.0**
+**✨ Projet créé avec le Template Parcours Développement Miyukini COG vers. 0.1.0**
 
 ---
 

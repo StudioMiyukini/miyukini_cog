@@ -4,7 +4,7 @@
 //! Kit d'outils modération forum (queue, report, topic, post, warning, ban, usernote). Décision = StrongFather ; WriteIntent KindMother.
 //! Alignement MIP : domaine `moderation`, layer tool/toolkit.
 
-/// @id: miyumoderationforum_toolkit_lib
+// @id: toolkit.moderation.miyumoderationforum
 /// @role: infrastructure
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuModerationForum ; expose les modules tools.

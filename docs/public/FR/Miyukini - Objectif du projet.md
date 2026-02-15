@@ -372,7 +372,7 @@ Détails : [Glossaire](Miyukini%20-%20Glossaire.md), [Operators et Terminologie]
 | **Marchés multiples** | Vente de briques (B2B), de produits finaux (B2C) ou de licences (B2B2C) | Une agence achète 10 licences MiyuAuth (€500/an) ; un restaurateur paie JayFaim (€20/mois) ; une collectivité déploie JayFestival sous licence (€2000/an) |
 | **Adoption progressive** | Commencer par des briques (B2B), puis proposer des Services complets (B2C/B2B2C) | Phase 1 : vente MiyuAuth + MiyuCMS aux agences. Phase 2 : lancement JayRDV B2C pour professionnels. Phase 3 : JayFestival B2B2C pour collectivités |
 | **Coûts maîtrisés** | Déploiement possible sur matériel modeste (€150-800), pas de dépendance cloud obligatoire | Festival 2000 visiteurs : laptop €600 + licence événement €300 = €900 total (vs Eventbrite + Stripe + site : €2000/an + commissions 5%) |
-| **Pérennité** | Évolution par nouveaux environnements et composition, pas par réécriture | Un COG v1.0 reste opérationnel 10 ans. Migration v2.0 = diplomatie Inter-COG (protocoles documentés), pas refonte complète |
+| **Pérennité** | Évolution par nouveaux environnements et composition, pas par réécriture | Un COG vers. 1.0 reste opérationnel 10 ans. Migration vers. 2.0 = diplomatie Inter-COG (protocoles documentés), pas refonte complète |
 
 ---
 

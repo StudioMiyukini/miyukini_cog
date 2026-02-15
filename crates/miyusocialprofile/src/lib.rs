@@ -4,7 +4,7 @@
 //! Kit d'outils profil social (profile, follow). Décision = StrongFather ; WriteIntent KindMother.
 //! Alignement MIP : domaine `social`, layer tool/toolkit.
 
-/// @id: miyusocialprofile_toolkit_lib
+// @id: toolkit.social.miyusocialprofile
 /// @role: infrastructure
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuSocialProfile ; expose les modules tools.

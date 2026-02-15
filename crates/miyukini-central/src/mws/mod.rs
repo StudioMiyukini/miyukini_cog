@@ -16,12 +16,14 @@
 //! - Utilisation hors ligne
 //! - Souveraineté complète des données
 
+use jayxpose::data::JayXposeDb;
 use miyuwebway_participant::{
     CogIdentity, CogInfo, LobbyInfo, LobbySearchResult, MwsService, MwsServiceConfig,
 };
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use tokio::io::AsyncWriteExt;
+use tokio::task::JoinHandle;
 use tokio::net::TcpListener;
 use tokio::sync::{oneshot, RwLock};
 use tokio::time::{sleep, Duration};
@@ -242,17 +244,23 @@ pub struct CentralMwsManager {
     home_server_shutdown: Arc<RwLock<Option<oneshot::Sender<()>>>>,
     /// Slug de la première vitrine publiée (pour la carte JayXpose sur la Home).
     jayxpose_vitrine_slug: Option<String>,
+    /// Handle de la tâche heartbeat (annulée à la déconnexion ou au drop).
+    heartbeat_handle: Mutex<Option<JoinHandle<()>>>,
+    /// Base de données JayXpose pour servir les pages vitrine localement.
+    jayxpose_db: Option<Arc<JayXposeDb>>,
 }
 
 impl CentralMwsManager {
     /// Crée un nouveau gestionnaire MWS.
     /// `jayxpose_vitrine_slug` : slug de la vitrine publiée à afficher sur la Home (optionnel).
+    /// `jayxpose_db` : référence à la base JayXpose pour servir les pages vitrine localement.
     pub fn new(
         config: CentralMwsConfig,
         cog_id: String,
         core_version: String,
         services: Vec<String>,
         jayxpose_vitrine_slug: Option<String>,
+        jayxpose_db: Option<Arc<JayXposeDb>>,
     ) -> Self {
         let (state, conformity) = if config.lone_mode {
             (CentralMwsState::Lone, MwsConformityState::LoneMode)
@@ -274,6 +282,8 @@ impl CentralMwsManager {
             state_callback: Arc::new(RwLock::new(None)),
             home_server_shutdown: Arc::new(RwLock::new(None)),
             jayxpose_vitrine_slug,
+            heartbeat_handle: Mutex::new(None),
+            jayxpose_db,
         }
     }
 
@@ -285,6 +295,7 @@ impl CentralMwsManager {
             core_version,
             Vec::new(),
             None,
+            None,
         )
     }
 
@@ -295,6 +306,7 @@ impl CentralMwsManager {
             cog_id,
             core_version,
             Vec::new(),
+            None,
             None,
         )
     }
@@ -438,15 +450,15 @@ impl CentralMwsManager {
                 }
 
                 // Démarrer le heartbeat Central → Tracker pour maintenir la connexion.
-                // Intervalle de 25s (le seuil Absent côté Origin est 90s, TTL cleanup 300s).
+                // Une seule tâche par manager ; intervalle 30s (seuil Absent Origin 90s, TTL 300s).
                 let service_ref = Arc::clone(&self.service);
                 let cog_id_log = self.cog_id.clone();
-                let heartbeat_interval_secs = 25u64;
-                info!("Démarrage heartbeat Central → Tracker (interval={}s, cog={})", heartbeat_interval_secs, &cog_id_log);
-                tokio::spawn(async move {
+                const HEARTBEAT_INTERVAL_SECS: u64 = 30;
+                info!("Démarrage heartbeat Central → Tracker (interval={}s, cog={})", HEARTBEAT_INTERVAL_SECS, &cog_id_log);
+                let handle = tokio::spawn(async move {
                     let mut count: u64 = 0;
                     loop {
-                        sleep(Duration::from_secs(heartbeat_interval_secs)).await;
+                        sleep(Duration::from_secs(HEARTBEAT_INTERVAL_SECS)).await;
                         count += 1;
                         let guard = service_ref.read().await;
                         let Some(ref svc) = *guard else {
@@ -463,6 +475,9 @@ impl CentralMwsManager {
                         }
                     }
                 });
+                if let Ok(mut guard) = self.heartbeat_handle.lock() {
+                    *guard = Some(handle);
+                }
 
                 // Conformité complète
                 self.update_conformity(MwsConformityState::FullyConformant).await;
@@ -480,11 +495,12 @@ impl CentralMwsManager {
                             base_url: self.config.jayxpose_vitrine_base_url.clone().unwrap(),
                             slug: self.jayxpose_vitrine_slug.clone().unwrap(),
                         });
+                    let jayxpose_db = self.jayxpose_db.clone();
                     let (tx, rx) = oneshot::channel();
                     let bind_for_server = bind_addr.clone();
                     let bind_for_log = bind_addr.clone();
                     tokio::spawn(async move {
-                        match run_home_server(bind_for_server.clone(), cog_id, core_version, services, home_jayxpose, rx).await {
+                        match run_home_server(bind_for_server.clone(), cog_id, core_version, services, home_jayxpose, jayxpose_db, rx).await {
                             Ok(()) => info!("Serveur Home arrêté proprement"),
                             Err(e) => error!("❌ Serveur Home ERREUR (bind={}): {}", bind_for_server, e),
                         }
@@ -516,6 +532,14 @@ impl CentralMwsManager {
     /// Déconnecte du réseau MWS.
     pub async fn disconnect(&self) -> Result<(), String> {
         info!("[CentralMws] Déconnexion du réseau MWS…");
+
+        // 0. Arrêter la tâche heartbeat (évite tâches orphelines et doublons)
+        if let Ok(mut guard) = self.heartbeat_handle.lock() {
+            if let Some(handle) = guard.take() {
+                handle.abort();
+                info!("[CentralMws] Tâche heartbeat arrêtée");
+            }
+        }
 
         // 1. Arrêter le serveur Home
         let mut shutdown_guard = self.home_server_shutdown.write().await;
@@ -718,6 +742,39 @@ impl CentralMwsManager {
         info!("Service '{}' retiré des services exposés", service_id);
     }
 
+    /// Met à jour les services exposés et envoie un RE-ANNOUNCE au Tracker.
+    ///
+    /// Cette méthode permet de modifier dynamiquement la liste des services
+    /// annoncés au réseau MWS. Si connecté, envoie immédiatement la mise à jour
+    /// au Tracker. Sinon, met seulement à jour la liste locale.
+    ///
+    /// # Arguments
+    /// * `services` - Nouvelle liste complète des services à annoncer
+    ///
+    /// # Returns
+    /// * `Ok(())` si la mise à jour a réussi
+    /// * `Err(String)` si une erreur s'est produite
+    pub async fn update_services(&self, services: Vec<String>) -> Result<(), String> {
+        // Mettre à jour la liste locale
+        {
+            let mut local_services = self.services.write().await;
+            *local_services = services.clone();
+        }
+        info!("Services locaux mis à jour: {:?}", services);
+
+        // Si connecté, envoyer le RE-ANNOUNCE au Tracker
+        let service = self.service.read().await;
+        if let Some(ref svc) = *service {
+            svc.update_services(services)
+                .await
+                .map_err(|e| format!("Erreur RE-ANNOUNCE: {}", e))?;
+        } else {
+            info!("Non connecté au MWS — mise à jour locale uniquement");
+        }
+
+        Ok(())
+    }
+
     /// Active le mode Lone (déconnecte du réseau).
     pub async fn enable_lone_mode(&mut self) -> Result<(), String> {
         if self.is_connected().await {
@@ -738,6 +795,17 @@ impl CentralMwsManager {
         self.update_conformity(MwsConformityState::Uninitialized).await;
         self.update_state(CentralMwsState::Disconnected).await;
         info!("Mode Lone désactivé — COG prêt à rejoindre le réseau MWS");
+    }
+}
+
+impl Drop for CentralMwsManager {
+    /// Annule la tâche heartbeat si le manager est drop sans disconnect (ex. remplacement par un nouveau manager).
+    fn drop(&mut self) {
+        if let Ok(mut guard) = self.heartbeat_handle.lock() {
+            if let Some(handle) = guard.take() {
+                handle.abort();
+            }
+        }
     }
 }
 
@@ -898,6 +966,7 @@ async fn run_home_server(
     core_version: String,
     services: Vec<String>,
     home_jayxpose: Option<HomeJayXposeInfo>,
+    jayxpose_db: Option<Arc<JayXposeDb>>,
     mut shutdown: oneshot::Receiver<()>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let listener = TcpListener::bind(&bind_addr).await?;
@@ -922,8 +991,9 @@ async fn run_home_server(
                 let core_version = core_version.clone();
                 let services = services.clone();
                 let home_jayxpose = home_jayxpose.clone();
+                let jayxpose_db = jayxpose_db.clone();
                 tokio::spawn(async move {
-                    if let Err(e) = handle_home_connection(stream, cog_id, core_version, services, home_jayxpose).await {
+                    if let Err(e) = handle_home_connection(stream, cog_id, core_version, services, home_jayxpose, jayxpose_db).await {
                         warn!("Home connection: {}", e);
                     }
                 });
@@ -939,6 +1009,7 @@ async fn handle_home_connection(
     core_version: String,
     services: Vec<String>,
     home_jayxpose: Option<HomeJayXposeInfo>,
+    jayxpose_db: Option<Arc<JayXposeDb>>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     use tokio::io::{AsyncBufReadExt, BufReader};
 
@@ -947,7 +1018,13 @@ async fn handle_home_connection(
     let mut first_line = String::new();
     reader.read_line(&mut first_line).await?;
 
-    let is_get_root = first_line.trim().starts_with("GET / ") || first_line.trim() == "GET /";
+    // Parser la requête: "GET /path HTTP/1.x"
+    let parts: Vec<&str> = first_line.trim().split_whitespace().collect();
+    let path = if parts.len() >= 2 && parts[0] == "GET" {
+        parts[1]
+    } else {
+        "/"
+    };
 
     // Consommer le reste des en-têtes
     loop {
@@ -958,17 +1035,15 @@ async fn handle_home_connection(
         }
     }
 
-    let (status, body) = if is_get_root {
-        (
-            "200 OK",
-            home_page_html(&cog_id, &core_version, &services, home_jayxpose.as_ref()),
-        )
-    } else {
-        (
-            "404 Not Found",
-            r#"<!DOCTYPE html><html><head><meta charset="utf-8"><title>404</title></head><body><h1>404</h1><p>Page non trouvée.</p></body></html>"#.to_string(),
-        )
-    };
+    // Routage
+    let (status, body) = route_request(
+        path,
+        &cog_id,
+        &core_version,
+        &services,
+        home_jayxpose.as_ref(),
+        jayxpose_db.as_ref(),
+    );
 
     let response = format!(
         "HTTP/1.1 {}\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
@@ -981,30 +1056,132 @@ async fn handle_home_connection(
     Ok(())
 }
 
-/// Génère la page Home COG (layout commun à tous les COGs).
-fn home_page_html(cog_id: &str, core_version: &str, services: &[String], home_jayxpose: Option<&HomeJayXposeInfo>) -> String {
-    let services_list: String = if services.is_empty() {
-        "<li>Aucun service exposé</li>".to_string()
+/// Route les requêtes vers les handlers appropriés.
+fn route_request(
+    path: &str,
+    cog_id: &str,
+    core_version: &str,
+    services: &[String],
+    home_jayxpose: Option<&HomeJayXposeInfo>,
+    jayxpose_db: Option<&Arc<JayXposeDb>>,
+) -> (&'static str, String) {
+    // Normaliser le path (enlever query string éventuelle)
+    let path = path.split('?').next().unwrap_or("/");
+    let path = path.trim_end_matches('/');
+    let path = if path.is_empty() { "/" } else { path };
+
+    match path {
+        "/" => (
+            "200 OK",
+            home_portal_html(cog_id, core_version, services, home_jayxpose),
+        ),
+        "/jayxpose" => {
+            if let Some(db) = jayxpose_db {
+                if let Some(html) = jayxpose_home_html(db) {
+                    ("200 OK", html)
+                } else {
+                    ("404 Not Found", not_found_html("Aucune vitrine publiée"))
+                }
+            } else {
+                ("503 Service Unavailable", not_found_html("Service JayXpose non disponible"))
+            }
+        }
+        "/jayxpose/catalogue" => {
+            if let Some(db) = jayxpose_db {
+                if let Some(html) = jayxpose_catalogue_html(db) {
+                    ("200 OK", html)
+                } else {
+                    ("404 Not Found", not_found_html("Catalogue non disponible"))
+                }
+            } else {
+                ("503 Service Unavailable", not_found_html("Service JayXpose non disponible"))
+            }
+        }
+        "/jayxpose/contact" => {
+            if let Some(db) = jayxpose_db {
+                if let Some(html) = jayxpose_contact_html(db) {
+                    ("200 OK", html)
+                } else {
+                    ("404 Not Found", not_found_html("Page contact non disponible"))
+                }
+            } else {
+                ("503 Service Unavailable", not_found_html("Service JayXpose non disponible"))
+            }
+        }
+        _ if path.starts_with("/jayxpose/catalogue/") => {
+            let product_id = path.strip_prefix("/jayxpose/catalogue/").unwrap_or("");
+            if let Some(db) = jayxpose_db {
+                if let Some(html) = jayxpose_product_html(db, product_id) {
+                    ("200 OK", html)
+                } else {
+                    ("404 Not Found", not_found_html("Produit non trouvé"))
+                }
+            } else {
+                ("503 Service Unavailable", not_found_html("Service JayXpose non disponible"))
+            }
+        }
+        _ => ("404 Not Found", not_found_html("Page non trouvée")),
+    }
+}
+
+/// Page 404.
+fn not_found_html(message: &str) -> String {
+    format!(
+        r#"<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>404</title>
+<style>body {{ font-family: system-ui, sans-serif; background: #0a0a0f; color: #f0f0f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }}
+.error {{ text-align: center; }} h1 {{ color: #8b5cf6; }}</style>
+</head><body><div class="error"><h1>404</h1><p>{}</p><a href="/" style="color: #8b5cf6;">Retour à l'accueil</a></div></body></html>"#,
+        html_escape(message)
+    )
+}
+
+/// Génère la page portail du COG avec liens vers les services locaux.
+fn home_portal_html(cog_id: &str, core_version: &str, services: &[String], _home_jayxpose: Option<&HomeJayXposeInfo>) -> String {
+    // Génère des cartes pour chaque service exposé avec lien local
+    let services_cards: String = if services.is_empty() {
+        r#"<p class="text-muted">Aucun service exposé pour le moment.</p>"#.to_string()
     } else {
         services
             .iter()
-            .map(|s| format!("<li>{}</li>", html_escape(s)))
-            .collect()
-    };
-
-    let jayxpose_card: String = if let Some(j) = home_jayxpose {
-        let url = format!("{}/vitrine/{}", j.base_url.trim_end_matches('/'), j.slug);
-        format!(
-            r##"
-        <div class="card card-service">
-            <h2>JayXpose</h2>
-            <p class="card-desc">Vitrine et catalogue — Découvrez notre présentation et nos produits.</p>
-            <a href="{url}" class="btn-discover" target="_blank" rel="noopener">Découvrir</a>
-        </div>"##,
-            url = html_escape(&url),
-        )
-    } else {
-        String::new()
+            .map(|s| {
+                let (title, desc, icon, path) = match s.as_str() {
+                    "jayxpose" => (
+                        "JayXpose",
+                        "Vitrine et catalogue — Découvrez notre présentation et nos produits.",
+                        "🛍️",
+                        "/jayxpose",
+                    ),
+                    "jaybooking" => (
+                        "JayBooking",
+                        "Réservations et planification — Prenez rendez-vous facilement.",
+                        "📅",
+                        "/jaybooking",
+                    ),
+                    "jayfestival" => (
+                        "JayFestival",
+                        "Événements et festivals — Découvrez nos événements.",
+                        "🎉",
+                        "/jayfestival",
+                    ),
+                    _ => (s.as_str(), "Service disponible", "📦", "#"),
+                };
+                format!(
+                    r#"<a href="{path}" class="card card-service">
+                        <div class="card-icon">{icon}</div>
+                        <div class="card-content">
+                            <h3>{title}</h3>
+                            <p class="card-desc">{desc}</p>
+                        </div>
+                        <span class="card-arrow">→</span>
+                    </a>"#,
+                    path = html_escape(path),
+                    icon = icon,
+                    title = html_escape(title),
+                    desc = html_escape(desc),
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
     };
 
     format!(
@@ -1013,41 +1190,360 @@ fn home_page_html(cog_id: &str, core_version: &str, services: &[String], home_ja
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home — {cog_id}</title>
+    <title>{cog_id} — Portail</title>
     <style>
-        :root {{ --primary: #8b5cf6; --bg: #0a0a0f; --bg-surface: #12121a; --text: #f0f0f5; --text-muted: #9ca3af; --border: rgba(139, 92, 246, 0.2); }}
+        :root {{ --primary: #8b5cf6; --primary-hover: #7c3aed; --bg: #0a0a0f; --bg-surface: #12121a; --bg-hover: #1a1a24; --text: #f0f0f5; --text-muted: #9ca3af; --border: rgba(139, 92, 246, 0.2); }}
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 2rem; }}
-        .container {{ max-width: 720px; margin: 0 auto; }}
-        h1 {{ font-size: 1.75rem; margin-bottom: 0.5rem; color: var(--primary); }}
-        .subtitle {{ color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem; }}
-        .card {{ background: var(--bg-surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1rem; }}
-        .card h2 {{ font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--text-muted); }}
-        .card-desc {{ font-size: 0.9rem; color: var(--text); margin-bottom: 1rem; }}
-        .btn-discover {{ display: inline-block; background: var(--primary); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; }}
-        .btn-discover:hover {{ opacity: 0.9; }}
-        ul {{ list-style: none; }}
-        ul li {{ padding: 0.25rem 0; }}
-        .badge {{ display: inline-block; background: var(--primary); color: #fff; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; margin-top: 1rem; }}
+        body {{ font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }}
+        .hero {{ background: linear-gradient(135deg, var(--bg-surface), var(--bg)); padding: 3rem 2rem; text-align: center; border-bottom: 1px solid var(--border); }}
+        .hero h1 {{ font-size: 2rem; margin-bottom: 0.5rem; color: var(--primary); }}
+        .hero .subtitle {{ color: var(--text-muted); font-size: 1rem; }}
+        .container {{ max-width: 800px; margin: 0 auto; padding: 2rem; }}
+        .section-title {{ font-size: 1.25rem; color: var(--text-muted); margin-bottom: 1rem; font-weight: 500; }}
+        .services-grid {{ display: flex; flex-direction: column; gap: 1rem; }}
+        .card {{ background: var(--bg-surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.25rem 1.5rem; text-decoration: none; color: inherit; display: flex; align-items: center; gap: 1rem; transition: all 0.2s ease; }}
+        .card:hover {{ background: var(--bg-hover); border-color: var(--primary); transform: translateX(4px); }}
+        .card-icon {{ font-size: 2rem; }}
+        .card-content {{ flex: 1; }}
+        .card h3 {{ font-size: 1.1rem; margin-bottom: 0.25rem; color: var(--text); }}
+        .card-desc {{ font-size: 0.875rem; color: var(--text-muted); margin: 0; }}
+        .card-arrow {{ font-size: 1.25rem; color: var(--primary); opacity: 0; transition: opacity 0.2s; }}
+        .card:hover .card-arrow {{ opacity: 1; }}
+        .text-muted {{ color: var(--text-muted); }}
+        .badge {{ display: inline-block; background: var(--primary); color: #fff; font-size: 0.7rem; padding: 4px 10px; border-radius: 4px; margin-top: 2rem; }}
+        .footer {{ text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.8rem; }}
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="hero">
         <h1>🌐 {cog_id}</h1>
-        <p class="subtitle">COG Miyukini — Cores {core_version} · Point d'entrée web</p>
-        <div class="card">
-            <h2>Services disponibles</h2>
-            <ul>{services_list}</ul>
-        </div>{jayxpose_card}
+        <p class="subtitle">COG Miyukini — Cores {core_version}</p>
+    </div>
+    <div class="container">
+        <h2 class="section-title">Services disponibles</h2>
+        <div class="services-grid">
+            {services_cards}
+        </div>
         <span class="badge">Miyukini Webway System</span>
+    </div>
+    <div class="footer">
+        <p>Propulsé par Miyukini COG · Réseau décentralisé souverain</p>
     </div>
 </body>
 </html>"##,
         cog_id = html_escape(cog_id),
         core_version = html_escape(core_version),
-        services_list = services_list,
-        jayxpose_card = jayxpose_card,
+        services_cards = services_cards,
     )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAGES JAYXPOSE (vitrine locale)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Layout commun pour les pages JayXpose locales.
+fn jayxpose_layout(title: &str, content: &str, active_page: &str) -> String {
+    let nav_home_class = if active_page == "home" { "nav-link active" } else { "nav-link" };
+    let nav_catalogue_class = if active_page == "catalogue" { "nav-link active" } else { "nav-link" };
+    let nav_contact_class = if active_page == "contact" { "nav-link active" } else { "nav-link" };
+
+    format!(
+        r##"<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <style>
+        :root {{ --primary: #8b5cf6; --primary-hover: #7c3aed; --bg: #0a0a0f; --bg-surface: #12121a; --bg-hover: #1a1a24; --text: #f0f0f5; --text-muted: #9ca3af; --border: rgba(139, 92, 246, 0.2); --success: #10b981; }}
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }}
+        header {{ background: var(--bg-surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }}
+        .logo {{ font-size: 1.25rem; font-weight: 700; color: var(--primary); text-decoration: none; }}
+        nav {{ display: flex; gap: 0.5rem; }}
+        .nav-link {{ padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; color: var(--text-muted); transition: all 0.2s; }}
+        .nav-link:hover {{ color: var(--text); background: var(--bg-hover); }}
+        .nav-link.active {{ color: var(--primary); background: rgba(139, 92, 246, 0.1); }}
+        .container {{ max-width: 1000px; margin: 0 auto; padding: 2rem; }}
+        .hero {{ background: linear-gradient(135deg, var(--bg-surface), var(--bg)); padding: 3rem 2rem; text-align: center; border-bottom: 1px solid var(--border); }}
+        .hero h1 {{ font-size: 2rem; margin-bottom: 0.5rem; }}
+        .hero p {{ color: var(--text-muted); font-size: 1.1rem; }}
+        h2 {{ font-size: 1.5rem; margin: 2rem 0 1rem; color: var(--text); }}
+        .products-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }}
+        .product-card {{ background: var(--bg-surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; text-decoration: none; color: inherit; transition: all 0.2s; display: block; }}
+        .product-card:hover {{ border-color: var(--primary); transform: translateY(-2px); }}
+        .product-card h3 {{ font-size: 1.1rem; margin-bottom: 0.5rem; }}
+        .product-price {{ font-size: 1.25rem; font-weight: 600; color: var(--primary); margin: 0.5rem 0; }}
+        .product-avail {{ font-size: 0.8rem; color: var(--success); }}
+        .product-avail.rupture {{ color: #ef4444; }}
+        .back-link {{ display: inline-block; margin-bottom: 1rem; color: var(--primary); text-decoration: none; }}
+        .back-link:hover {{ text-decoration: underline; }}
+        .contact-info {{ background: var(--bg-surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 2rem; }}
+        .contact-info h3 {{ margin-bottom: 1rem; }}
+        .contact-item {{ display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center; }}
+        .contact-item span {{ color: var(--text-muted); }}
+        .footer {{ text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 3rem; }}
+        .text-muted {{ color: var(--text-muted); }}
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" class="logo">← Portail COG</a>
+        <nav>
+            <a href="/jayxpose" class="{nav_home_class}">Accueil</a>
+            <a href="/jayxpose/catalogue" class="{nav_catalogue_class}">Catalogue</a>
+            <a href="/jayxpose/contact" class="{nav_contact_class}">Contact</a>
+        </nav>
+    </header>
+    {content}
+    <div class="footer">
+        <p>Vitrine propulsée par JayXpose · Miyukini COG</p>
+    </div>
+</body>
+</html>"##,
+        title = html_escape(title),
+        content = content,
+        nav_home_class = nav_home_class,
+        nav_catalogue_class = nav_catalogue_class,
+        nav_contact_class = nav_contact_class,
+    )
+}
+
+/// Page d'accueil JayXpose (vitrine publiée).
+fn jayxpose_home_html(db: &JayXposeDb) -> Option<String> {
+    // Récupérer l'exposant avec vitrine publiée
+    let exposants = db.exposants_list_annuaire().ok()?;
+    let exposant = exposants
+        .into_iter()
+        .find(|e| e.vitrine_status.as_deref() == Some("publiee"))?;
+
+    let company_name = exposant.company_name.as_deref().unwrap_or("Vitrine");
+    let slogan = exposant.slogan.as_deref().unwrap_or("");
+    let desc = exposant.description_short.as_deref().unwrap_or("");
+    let desc_long = exposant.description_long.as_deref().unwrap_or(desc);
+
+    // Produits vedettes
+    let produits = db
+        .produits_by_exposant(exposant.id.as_deref().unwrap_or(""))
+        .ok()
+        .unwrap_or_default();
+    let vedettes: Vec<_> = produits
+        .into_iter()
+        .filter(|p| p.is_featured == Some(true))
+        .take(6)
+        .collect();
+
+    let vedettes_html: String = if vedettes.is_empty() {
+        String::new()
+    } else {
+        let cards: String = vedettes
+            .iter()
+            .map(|p| {
+                let id = p.id.as_deref().unwrap_or("");
+                let name = p.name.as_deref().unwrap_or("Produit");
+                let price = p
+                    .price
+                    .map(|x| format!("{:.2} €", x))
+                    .unwrap_or_else(|| "Sur demande".to_string());
+                format!(
+                    r#"<a href="/jayxpose/catalogue/{id}" class="product-card">
+                        <h3>{name}</h3>
+                        <p class="product-price">{price}</p>
+                    </a>"#,
+                    id = html_escape(id),
+                    name = html_escape(name),
+                    price = html_escape(&price),
+                )
+            })
+            .collect();
+        format!(
+            r#"<h2>Produits vedettes</h2><div class="products-grid">{}</div>"#,
+            cards
+        )
+    };
+
+    let content = format!(
+        r#"<div class="hero">
+            <h1>{company_name}</h1>
+            <p>{slogan}</p>
+        </div>
+        <div class="container">
+            <p style="font-size: 1.1rem; margin-bottom: 2rem;">{desc_long}</p>
+            {vedettes_html}
+        </div>"#,
+        company_name = html_escape(company_name),
+        slogan = html_escape(slogan),
+        desc_long = html_escape(desc_long),
+        vedettes_html = vedettes_html,
+    );
+
+    Some(jayxpose_layout(company_name, &content, "home"))
+}
+
+/// Page catalogue JayXpose.
+fn jayxpose_catalogue_html(db: &JayXposeDb) -> Option<String> {
+    let exposants = db.exposants_list_annuaire().ok()?;
+    let exposant = exposants
+        .into_iter()
+        .find(|e| e.vitrine_status.as_deref() == Some("publiee"))?;
+
+    let company_name = exposant.company_name.as_deref().unwrap_or("Vitrine");
+    let exposant_id = exposant.id.as_deref().unwrap_or("");
+    let produits = db.produits_by_exposant(exposant_id).ok().unwrap_or_default();
+
+    let availability_label = |a: Option<&String>| -> (&str, &str) {
+        let s: &str = a.map(|x| x.as_str()).unwrap_or("disponible");
+        match s {
+            "rupture" => ("Rupture", "rupture"),
+            "sur_commande" => ("Sur commande", ""),
+            _ => ("Disponible", ""),
+        }
+    };
+
+    let cards: String = if produits.is_empty() {
+        r#"<p class="text-muted">Aucun produit disponible pour le moment.</p>"#.to_string()
+    } else {
+        produits
+            .iter()
+            .map(|p| {
+                let id = p.id.as_deref().unwrap_or("");
+                let name = p.name.as_deref().unwrap_or("Produit");
+                let price = p
+                    .price
+                    .map(|x| format!("{:.2} €", x))
+                    .unwrap_or_else(|| "Sur demande".to_string());
+                let (avail_text, avail_class) = availability_label(p.availability.as_ref());
+                format!(
+                    r#"<a href="/jayxpose/catalogue/{id}" class="product-card">
+                        <h3>{name}</h3>
+                        <p class="product-price">{price}</p>
+                        <span class="product-avail {avail_class}">{avail_text}</span>
+                    </a>"#,
+                    id = html_escape(id),
+                    name = html_escape(name),
+                    price = html_escape(&price),
+                    avail_text = html_escape(avail_text),
+                    avail_class = avail_class,
+                )
+            })
+            .collect()
+    };
+
+    let content = format!(
+        r#"<div class="container">
+            <h2>Catalogue — {company_name}</h2>
+            <div class="products-grid">{cards}</div>
+        </div>"#,
+        company_name = html_escape(company_name),
+        cards = cards,
+    );
+
+    Some(jayxpose_layout(&format!("Catalogue — {}", company_name), &content, "catalogue"))
+}
+
+/// Page fiche produit JayXpose.
+fn jayxpose_product_html(db: &JayXposeDb, product_id: &str) -> Option<String> {
+    let produit = db.produit_by_id(product_id).ok()??;
+    let name = produit.name.as_deref().unwrap_or("Produit");
+    let desc = produit.description.as_deref().unwrap_or("");
+    let price = produit
+        .price
+        .map(|x| format!("{:.2} €", x))
+        .unwrap_or_else(|| "Sur demande".to_string());
+    let availability = match produit.availability.as_deref().unwrap_or("disponible") {
+        "rupture" => ("Rupture de stock", "rupture"),
+        "sur_commande" => ("Sur commande", ""),
+        _ => ("Disponible", ""),
+    };
+
+    let content = format!(
+        r#"<div class="container">
+            <a href="/jayxpose/catalogue" class="back-link">← Retour au catalogue</a>
+            <h1 style="font-size: 2rem; margin-bottom: 1rem;">{name}</h1>
+            <p class="product-price" style="font-size: 1.5rem;">{price}</p>
+            <p class="product-avail {avail_class}" style="margin-bottom: 2rem;">Disponibilité : {avail_text}</p>
+            <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem;">
+                <h3 style="margin-bottom: 1rem;">Description</h3>
+                <p>{desc}</p>
+            </div>
+        </div>"#,
+        name = html_escape(name),
+        price = html_escape(&price),
+        avail_text = html_escape(availability.0),
+        avail_class = availability.1,
+        desc = html_escape(desc),
+    );
+
+    Some(jayxpose_layout(name, &content, "catalogue"))
+}
+
+/// Page contact JayXpose.
+fn jayxpose_contact_html(db: &JayXposeDb) -> Option<String> {
+    let exposants = db.exposants_list_annuaire().ok()?;
+    let exposant = exposants
+        .into_iter()
+        .find(|e| e.vitrine_status.as_deref() == Some("publiee"))?;
+
+    let company_name = exposant.company_name.as_deref().unwrap_or("Vitrine");
+    let email = exposant.contact_email.as_deref().unwrap_or("");
+    let phone = exposant.contact_phone.as_deref().unwrap_or("");
+    let site_web = exposant.site_web.as_deref().unwrap_or("");
+
+    // Réseaux sociaux
+    let mut socials = Vec::new();
+    if let Some(fb) = exposant.social_facebook.as_ref().filter(|s| !s.is_empty()) {
+        socials.push(format!(r#"<a href="{}" target="_blank" rel="noopener">Facebook</a>"#, html_escape(fb)));
+    }
+    if let Some(ig) = exposant.social_instagram.as_ref().filter(|s| !s.is_empty()) {
+        socials.push(format!(r#"<a href="{}" target="_blank" rel="noopener">Instagram</a>"#, html_escape(ig)));
+    }
+    if let Some(li) = exposant.social_linkedin.as_ref().filter(|s| !s.is_empty()) {
+        socials.push(format!(r#"<a href="{}" target="_blank" rel="noopener">LinkedIn</a>"#, html_escape(li)));
+    }
+    if let Some(x) = exposant.social_x.as_ref().filter(|s| !s.is_empty()) {
+        socials.push(format!(r#"<a href="{}" target="_blank" rel="noopener">X (Twitter)</a>"#, html_escape(x)));
+    }
+
+    let socials_html = if socials.is_empty() {
+        String::new()
+    } else {
+        format!(
+            r#"<div class="contact-item"><span>Réseaux sociaux</span><div style="display: flex; gap: 1rem;">{}</div></div>"#,
+            socials.join(" ")
+        )
+    };
+
+    let content = format!(
+        r#"<div class="container">
+            <h2>Contact — {company_name}</h2>
+            <div class="contact-info">
+                <h3>Coordonnées</h3>
+                {email_html}
+                {phone_html}
+                {site_html}
+                {socials_html}
+            </div>
+        </div>"#,
+        company_name = html_escape(company_name),
+        email_html = if email.is_empty() {
+            String::new()
+        } else {
+            format!(r#"<div class="contact-item"><span>📧 Email</span><a href="mailto:{}" style="color: var(--primary);">{}</a></div>"#, html_escape(email), html_escape(email))
+        },
+        phone_html = if phone.is_empty() {
+            String::new()
+        } else {
+            format!(r#"<div class="contact-item"><span>📞 Téléphone</span><span>{}</span></div>"#, html_escape(phone))
+        },
+        site_html = if site_web.is_empty() {
+            String::new()
+        } else {
+            format!(r#"<div class="contact-item"><span>🌐 Site web</span><a href="{}" target="_blank" rel="noopener" style="color: var(--primary);">{}</a></div>"#, html_escape(site_web), html_escape(site_web))
+        },
+        socials_html = socials_html,
+    );
+
+    Some(jayxpose_layout(&format!("Contact — {}", company_name), &content, "contact"))
 }
 
 fn html_escape(s: &str) -> String {

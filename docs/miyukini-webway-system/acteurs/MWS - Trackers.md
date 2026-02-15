@@ -124,10 +124,10 @@ flowchart TB
         P2[Pool Core v2.x]
     end
 
-    C1[COG v1.3] -->|Assignation| P1
-    C2[COG v1.5] -->|Assignation| P1
-    C3[COG v2.0] -->|Assignation| P2
-    C4[COG v2.1] -->|Assignation| P2
+    C1[COG vers. 1.3] -->|Assignation| P1
+    C2[COG vers. 1.5] -->|Assignation| P1
+    C3[COG vers. 2.0] -->|Assignation| P2
+    C4[COG vers. 2.1] -->|Assignation| P2
 
     P1 -.-|Pas de connexion| P2
 ```

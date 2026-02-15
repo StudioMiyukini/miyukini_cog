@@ -6,9 +6,14 @@ use dioxus::prelude::*;
 use crate::data::ServiceConnections;
 use crate::state::{AppContext, AppState, MainTab};
 use crate::components::{Header, TabBar};
-use crate::services::{ActiveServiceView, MwsNetworkView};
+use crate::services::{ActiveServiceView, MwsNetworkView, Jay1TribuView, MwsViewState};
 use crate::theme::styles;
 use crate::screens::{RiteEntree, Connexion, ProfileWindow};
+use crate::miou::{
+    MiouBubbleOverlay, BulleOutput, BulleAction, ActionType,
+    BotContext, decide, select_variante, templates::generate_bulle,
+};
+use crate::miou::bubble::MIOU_CSS;
 
 /// Point d'entrée de l'application.
 #[component]
@@ -44,6 +49,9 @@ pub fn App() -> Element {
         }
     });
 
+    // État MWS partagé : persiste au changement d'onglet (connexion maintenue sauf déconnexion manuelle ou fermeture).
+    use_context_provider(|| Signal::new(MwsViewState::default()));
+
     let ctx = use_context::<AppContext>();
     let state = ctx.state;
     let is_cog_virgin = state.read().is_cog_virgin;
@@ -51,14 +59,118 @@ pub fn App() -> Element {
     let theme = state.read().current_theme;
     let c = theme.palette();
 
+    // Signal pour la bulle Miou actuelle
+    let mut current_bubble: Signal<Option<BulleOutput>> = use_signal(|| None);
+
+    // Trigger de la première bulle Miou après connexion (délai 2-3s)
+    let ctx_for_effect = ctx.clone();
+    use_effect(move || {
+        let mut ctx = ctx_for_effect.clone();
+        let state_read = ctx.state.read();
+        
+        // Déclencher seulement si : utilisateur connecté, pas virgin, trigger pas déjà fait
+        if state_read.current_user.is_some() 
+            && !state_read.is_cog_virgin 
+            && !state_read.rite_infos_pending
+            && !state_read.miou_first_trigger_done 
+        {
+            let pseudo = state_read.current_user.as_ref()
+                .and_then(|u| u.pseudonyme.clone())
+                .unwrap_or_else(|| "habitant".to_string());
+            let prefs = state_read.miou_prefs.clone();
+            let miou_state = state_read.miou_state.clone();
+            
+            drop(state_read);
+            
+            spawn(async move {
+                // Délai 2-3 secondes
+                tokio::time::sleep(std::time::Duration::from_millis(2500)).await;
+                
+                // Construire le contexte
+                let context = BotContext {
+                    pseudo,
+                    is_first_connection_of_session: true,
+                    session_duration_minutes: 0,
+                    bulles_actives: prefs.bulles_actives,
+                    dnd_actif: prefs.dnd_actif,
+                    max_bulles_par_session: prefs.frequence.max_bulles(),
+                    bulles_deja_affichees: miou_state.bulles_count_this_session,
+                    seuil_pause_minutes: prefs.seuil_pause_minutes,
+                    rappels_pause_actives: prefs.rappels_pause_actives,
+                    ..BotContext::default()
+                };
+                
+                // Décision
+                let decision = decide(&context, &miou_state);
+                
+                if let Some(categorie) = decision.categorie {
+                    // Sélectionner une variante
+                    if let Some(template) = select_variante(categorie, &miou_state.variantes_used) {
+                        let bulle = generate_bulle(&template, &context);
+                        current_bubble.set(Some(bulle.clone()));
+                        
+                        // Marquer le trigger comme fait et enregistrer
+                        ctx.state.write().miou_first_trigger_done = true;
+                        ctx.state.write().miou_state.record_bulle_shown(categorie, &template.id);
+                    }
+                }
+            });
+        }
+    });
+
+    // Handler pour dismiss de la bulle
+    let mut ctx_for_dismiss = ctx.clone();
+    let on_dismiss = move |_| {
+        // Vérifier si la bulle est une pause et enregistrer le dismiss
+        {
+            let bubble = current_bubble.read();
+            if let Some(b) = bubble.as_ref() {
+                if b.categorie.contains("pause") {
+                    ctx_for_dismiss.state.write().miou_state.record_pause_dismissed();
+                }
+            }
+        }
+        current_bubble.set(None);
+    };
+
+    // Handler pour actions de la bulle
+    let mut ctx_for_action = ctx.clone();
+    let on_action = move |action: BulleAction| {
+        match action.action_type {
+            ActionType::Dismiss => {
+                current_bubble.set(None);
+            }
+            ActionType::Pause => {
+                ctx_for_action.state.write().miou_state.record_pause_dismissed();
+                current_bubble.set(None);
+                // TODO: Déclencher une action de pause (ex: notification système)
+            }
+            ActionType::OuvrirService => {
+                if let Some(service_id) = action.payload {
+                    // Ouvrir le service
+                    let services = ctx_for_action.state.read().services.clone();
+                    if let Some(service) = services.iter().find(|s| s.id == service_id) {
+                        ctx_for_action.state.write().open_service(service);
+                    }
+                }
+                current_bubble.set(None);
+            }
+            ActionType::Custom => {
+                current_bubble.set(None);
+            }
+        }
+    };
+
     rsx! {
         div {
             style: "{styles::main_container(theme)}",
 
             // CSS global pour les scrollbars et fonts
             style { {GLOBAL_CSS} }
+            // CSS pour les animations Miou
+            style { {MIOU_CSS} }
 
-            if is_cog_virgin {
+            if is_cog_virgin || state.read().rite_infos_pending {
                 RiteEntree {}
             } else if !has_user {
                 Connexion {}
@@ -68,27 +180,25 @@ pub fn App() -> Element {
                     style: "{styles::content_area(theme)}",
                     role: "main",
 
-                    // Afficher TabBar uniquement pour Magasin et Bibliothèque
-                    if matches!(state.read().main_tab, MainTab::Magasin | MainTab::Bibliotheque) {
+                    // Afficher TabBar uniquement pour Salon et Bibliothèque
+                    if matches!(state.read().main_tab, MainTab::Salon | MainTab::Bibliotheque) {
                         TabBar {}
                     }
 
                     div {
                         style: "{styles::content_panel(theme)}",
 
-                        // Contenu selon l'onglet principal
-                        match state.read().main_tab {
-                            MainTab::Communaute => rsx! { MwsNetworkView {} },
-                            MainTab::Miyukini => rsx! { 
-                                div {
-                                    style: "padding: 24px; color: #fff;",
-                                    h1 { "⚙️ Paramètres Miyukini" }
-                                    p { style: "color: #9ca3af; margin-top: 8px;",
-                                        "Configuration du COG et des services."
-                                    }
-                                }
-                            },
-                            _ => rsx! { ActiveServiceView {} }
+                        // Wrapper flex : overflow-y auto pour vues simples (Home), min-height: 0 pour JayXpose
+                        div {
+                            style: "flex: 1; min-height: 0; display: flex; flex-direction: column; overflow-y: auto;",
+
+                            // Contenu selon l'onglet principal
+                            match state.read().main_tab {
+                                MainTab::Salon => rsx! { ActiveServiceView {} },
+                                MainTab::Bibliotheque => rsx! { ActiveServiceView {} },
+                                MainTab::Communaute => rsx! { MwsNetworkView {} },
+                                MainTab::MesAmis => rsx! { Jay1TribuView {} },
+                            }
                         }
                     }
                 }
@@ -99,6 +209,13 @@ pub fn App() -> Element {
                 }
                 if state.read().show_profile_window {
                     ProfileWindow {}
+                }
+                
+                // Overlay Miou (bulle)
+                MiouBubbleOverlay {
+                    bubble: current_bubble,
+                    on_dismiss: on_dismiss,
+                    on_action: on_action,
                 }
             }
         }

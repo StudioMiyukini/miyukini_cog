@@ -4,7 +4,7 @@
 //! Kit d'outils paiements PoS (cash, check, split, terminal). WriteIntent KindMother.
 //! Alignement MIP : domaine `pos`, layer tool/toolkit.
 
-/// @id: miyupospayment_toolkit_lib
+// @id: toolkit.pos.miyupospayment
 /// @role: infrastructure
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuPosPayment ; expose les modules tools.

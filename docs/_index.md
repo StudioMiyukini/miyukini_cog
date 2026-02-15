@@ -35,7 +35,7 @@ La documentation est organisee selon les **strates de la Pyramide Miyukini** et 
 | [reference/equivalents/](reference/equivalents/) | Analyses d'equivalence marche (PoS, Forum, Suite Bureautique, etc.) |
 | [security/](security/) | Gouvernance securite transverse |
 | [market/](market/) | Analyse de marche et concurrents (Odoo, etc.) |
-| [implementation/](implementation/) | Documentation d'implementation versionnee (COG 0.1) |
+| [implementation/](implementation/) | Documentation d'implementation versionnee (COG vers. 0.1.0) |
 | [ux_ui/](ux_ui/) | UI/UX, Design System, composants HyperUI |
 | [spm-cms/](spm-cms/) | Framework SPM-CMS (adaptateurs, modules, contrats) |
 | [qa/](qa/) | Qualite, audits, checklists |

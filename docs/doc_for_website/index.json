@@ -1,0 +1,463 @@
+{
+  "title": "Documentation Miyukini COG",
+  "description": "Documentation officielle du système Miyukini COG - Core-Orchestrated Governance Environment",
+  "version": "1.0.0",
+  "filters": [
+    {
+      "id": "category",
+      "label": "Catégorie",
+      "options": [
+        { "value": "presentation", "label": "Présentation" },
+        { "value": "architecture", "label": "Architecture" },
+        { "value": "cores", "label": "Cores Système" },
+        { "value": "interface", "label": "Interface" },
+        { "value": "tools", "label": "Outils & Toolkits" },
+        { "value": "services", "label": "Services" },
+        { "value": "mws", "label": "Webway System" },
+        { "value": "security", "label": "Sécurité" },
+        { "value": "admin", "label": "Administration" }
+      ]
+    },
+    {
+      "id": "strate",
+      "label": "Strate",
+      "options": [
+        { "value": "0", "label": "Strate 0 - Hardware & OS" },
+        { "value": "K", "label": "Strate K - Kernel" },
+        { "value": "3", "label": "Strate 3 - Invariants" },
+        { "value": "4", "label": "Strate 4 - Cores" },
+        { "value": "5", "label": "Strate 5 - Interface" },
+        { "value": "6", "label": "Strate 6 - Outils" },
+        { "value": "7", "label": "Strate 7 - Opérateurs" },
+        { "value": "9", "label": "Strate 9 - Admin" },
+        { "value": "transverse", "label": "Transverse" }
+      ]
+    },
+    {
+      "id": "type",
+      "label": "Type",
+      "options": [
+        { "value": "concept", "label": "Concept" },
+        { "value": "reference", "label": "Référence" },
+        { "value": "guide", "label": "Guide" },
+        { "value": "specification", "label": "Spécification" }
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "id": "presentation-generale",
+      "title": "Présentation Générale",
+      "description": "Introduction au projet Miyukini COG, ses objectifs et sa philosophie",
+      "icon": "home",
+      "path": "presentation/presentation-generale.md",
+      "tags": ["presentation", "transverse", "concept"],
+      "order": 1
+    },
+    {
+      "id": "definition-cog",
+      "title": "Définition COG",
+      "description": "Qu'est-ce qu'un COG (Core-Orchestrated Governance Environment)",
+      "icon": "cube",
+      "path": "presentation/definition-cog.md",
+      "tags": ["presentation", "transverse", "concept"],
+      "order": 2
+    },
+    {
+      "id": "lois-autonomie",
+      "title": "Lois d'Autonomie",
+      "description": "Les 8 lois fondamentales non négociables du système",
+      "icon": "scale",
+      "path": "architecture/lois-autonomie.md",
+      "tags": ["architecture", "transverse", "concept"],
+      "order": 3
+    },
+    {
+      "id": "pyramide-strates",
+      "title": "Pyramide des Strates",
+      "description": "Architecture hiérarchique complète du système Miyukini",
+      "icon": "layers",
+      "path": "architecture/pyramide-strates.md",
+      "tags": ["architecture", "transverse", "concept"],
+      "order": 4
+    },
+    {
+      "id": "souverainete-environnement",
+      "title": "Souveraineté Environnement",
+      "description": "Principes d'isolation et de souveraineté des COGs",
+      "icon": "shield",
+      "path": "architecture/souverainete-environnement.md",
+      "tags": ["architecture", "transverse", "concept"],
+      "order": 5
+    },
+    {
+      "id": "kernel",
+      "title": "Kernel",
+      "description": "Le substrat technique neutre du système",
+      "icon": "cpu",
+      "path": "architecture/kernel.md",
+      "tags": ["architecture", "K", "specification"],
+      "order": 6
+    },
+    {
+      "id": "strongfather",
+      "title": "StrongFather",
+      "description": "Core d'orchestration et de pilotage du système",
+      "icon": "crown",
+      "path": "cores/strongfather.md",
+      "tags": ["cores", "4", "specification"],
+      "order": 10
+    },
+    {
+      "id": "kindmother",
+      "title": "KindMother",
+      "description": "Core de persistance et gestion des données",
+      "icon": "database",
+      "path": "cores/kindmother.md",
+      "tags": ["cores", "4", "specification"],
+      "order": 11
+    },
+    {
+      "id": "tamr",
+      "title": "TAMR",
+      "description": "Core de gestion des accès et permissions",
+      "icon": "key",
+      "path": "cores/tamr.md",
+      "tags": ["cores", "4", "specification"],
+      "order": 12
+    },
+    {
+      "id": "borderguard",
+      "title": "BorderGuard",
+      "description": "Core de protection des frontières système",
+      "icon": "shield-check",
+      "path": "cores/borderguard.md",
+      "tags": ["cores", "4", "specification"],
+      "order": 13
+    },
+    {
+      "id": "worrysentinel",
+      "title": "WorrySentinel",
+      "description": "Core de surveillance et alertes système",
+      "icon": "bell",
+      "path": "cores/worrysentinel.md",
+      "tags": ["cores", "4", "specification"],
+      "order": 14
+    },
+    {
+      "id": "logisticssteward",
+      "title": "LogisticsSteward",
+      "description": "Core de gestion des ressources et logistique",
+      "icon": "truck",
+      "path": "cores/logisticssteward.md",
+      "tags": ["cores", "4", "specification"],
+      "order": 15
+    },
+    {
+      "id": "bondingbrother",
+      "title": "BondingBrother",
+      "description": "Interface d'adaptation entre Cores et Outils",
+      "icon": "link",
+      "path": "interface/bondingbrother.md",
+      "tags": ["interface", "5", "specification"],
+      "order": 20
+    },
+    {
+      "id": "toolkits-overview",
+      "title": "Vue d'ensemble des Toolkits",
+      "description": "Catalogue des 49 toolkits disponibles",
+      "icon": "toolbox",
+      "path": "tools/toolkits-overview.md",
+      "tags": ["tools", "6", "reference"],
+      "order": 30
+    },
+    {
+      "id": "miyuauth",
+      "title": "MiyuAuth",
+      "description": "Toolkit d'authentification et gestion des sessions",
+      "icon": "fingerprint",
+      "path": "tools/miyuauth.md",
+      "tags": ["tools", "6", "specification"],
+      "order": 31
+    },
+    {
+      "id": "miyusql",
+      "title": "MiyuSQL",
+      "description": "Toolkit d'accès aux bases de données",
+      "icon": "database",
+      "path": "tools/miyusql.md",
+      "tags": ["tools", "6", "specification"],
+      "order": 32
+    },
+    {
+      "id": "miyuweb",
+      "title": "MiyuWeb",
+      "description": "Toolkit de communication web et APIs",
+      "icon": "globe",
+      "path": "tools/miyuweb.md",
+      "tags": ["tools", "6", "specification"],
+      "order": 33
+    },
+    {
+      "id": "miyuwebwayparticipant",
+      "title": "MiyuWebwayParticipant",
+      "description": "Toolkit de participation au réseau Webway",
+      "icon": "network",
+      "path": "tools/miyuwebwayparticipant.md",
+      "tags": ["tools", "6", "specification"],
+      "order": 34
+    },
+    {
+      "id": "miyuwebwaytracker",
+      "title": "MiyuWebwayTracker",
+      "description": "Toolkit de tracking et découverte Webway",
+      "icon": "radar",
+      "path": "tools/miyuwebwaytracker.md",
+      "tags": ["tools", "6", "specification"],
+      "order": 35
+    },
+    {
+      "id": "autres-toolkits",
+      "title": "Autres Toolkits",
+      "description": "MiyuStore, MiyuText, MiyuValidate, MiyuWidgets et plus",
+      "icon": "grid",
+      "path": "tools/autres-toolkits.md",
+      "tags": ["tools", "6", "reference"],
+      "order": 39
+    },
+    {
+      "id": "services-overview",
+      "title": "Vue d'ensemble des Services",
+      "description": "Catalogue des services Miyukini",
+      "icon": "apps",
+      "path": "services/services-overview.md",
+      "tags": ["services", "7", "reference"],
+      "order": 40
+    },
+    {
+      "id": "miyukini-central",
+      "title": "Miyukini Central",
+      "description": "Hub central et point d'accès principal",
+      "icon": "home",
+      "path": "services/miyukini-central.md",
+      "tags": ["services", "7", "specification"],
+      "order": 41
+    },
+    {
+      "id": "miou",
+      "title": "Miou - Assistant IA",
+      "description": "Assistant intelligent intégré à Central",
+      "icon": "bot",
+      "path": "services/miou.md",
+      "tags": ["services", "7", "specification"],
+      "order": 42
+    },
+    {
+      "id": "jayxpose",
+      "title": "JayXpose",
+      "description": "Gestion de portfolio et présence professionnelle",
+      "icon": "briefcase",
+      "path": "services/jayxpose.md",
+      "tags": ["services", "7", "specification"],
+      "order": 43
+    },
+    {
+      "id": "jaykonta",
+      "title": "JayKonta",
+      "description": "Gestion comptable et financière",
+      "icon": "calculator",
+      "path": "services/jaykonta.md",
+      "tags": ["services", "7", "specification"],
+      "order": 44
+    },
+    {
+      "id": "jaykoa",
+      "title": "JayKoa",
+      "description": "Système de design et composants UI",
+      "icon": "palette",
+      "path": "services/jaykoa.md",
+      "tags": ["services", "7", "specification"],
+      "order": 45
+    },
+    {
+      "id": "jayfestival",
+      "title": "JayFestival",
+      "description": "Organisation d'événements et festivals",
+      "icon": "calendar",
+      "path": "services/jayfestival.md",
+      "tags": ["services", "7", "specification"],
+      "order": 46
+    },
+    {
+      "id": "jayrdv",
+      "title": "JayRDV",
+      "description": "Gestion de rendez-vous et planification",
+      "icon": "clock",
+      "path": "services/jayrdv.md",
+      "tags": ["services", "7", "specification"],
+      "order": 47
+    },
+    {
+      "id": "jayshop",
+      "title": "JayShop",
+      "description": "Boutique et commerce en ligne",
+      "icon": "shopping-cart",
+      "path": "services/jayshop.md",
+      "tags": ["services", "7", "specification"],
+      "order": 48
+    },
+    {
+      "id": "jay1tribu",
+      "title": "Jay1Tribu",
+      "description": "Gestion communautaire et sociale",
+      "icon": "users",
+      "path": "services/jay1tribu.md",
+      "tags": ["services", "7", "specification"],
+      "order": 49
+    },
+    {
+      "id": "miyukini-clicker",
+      "title": "Miyukini Clicker",
+      "description": "Jeu clicker intégré",
+      "icon": "gamepad",
+      "path": "services/miyukini-clicker.md",
+      "tags": ["services", "7", "specification"],
+      "order": 50
+    },
+    {
+      "id": "miyukini-watch",
+      "title": "Miyukini Watch",
+      "description": "Monitoring et métriques utilisateur",
+      "icon": "activity",
+      "path": "services/miyukini-watch.md",
+      "tags": ["services", "7", "specification"],
+      "order": 51
+    },
+    {
+      "id": "mws-fondateur",
+      "title": "MWS - Document Fondateur",
+      "description": "Introduction au Miyukini Webway System",
+      "icon": "network",
+      "path": "mws/mws-fondateur.md",
+      "tags": ["mws", "transverse", "concept"],
+      "order": 60
+    },
+    {
+      "id": "mws-architecture",
+      "title": "MWS - Architecture",
+      "description": "Architecture et subordination aux Cores",
+      "icon": "sitemap",
+      "path": "mws/mws-architecture.md",
+      "tags": ["mws", "transverse", "specification"],
+      "order": 61
+    },
+    {
+      "id": "mws-origin",
+      "title": "MWS - Origin",
+      "description": "Source de vérité du réseau Webway",
+      "icon": "server",
+      "path": "mws/mws-origin.md",
+      "tags": ["mws", "transverse", "specification"],
+      "order": 62
+    },
+    {
+      "id": "mws-relays",
+      "title": "MWS - Relays",
+      "description": "Noeuds de relais et distribution",
+      "icon": "repeat",
+      "path": "mws/mws-relays.md",
+      "tags": ["mws", "transverse", "specification"],
+      "order": 63
+    },
+    {
+      "id": "mws-trackers",
+      "title": "MWS - Trackers",
+      "description": "Découverte et contrôle des COGs",
+      "icon": "search",
+      "path": "mws/mws-trackers.md",
+      "tags": ["mws", "transverse", "specification"],
+      "order": 64
+    },
+    {
+      "id": "mws-protocole",
+      "title": "MWS - Protocole Relay",
+      "description": "Protocole de communication inter-COG",
+      "icon": "zap",
+      "path": "mws/mws-protocole.md",
+      "tags": ["mws", "transverse", "specification"],
+      "order": 65
+    },
+    {
+      "id": "mws-securite",
+      "title": "MWS - Sécurité",
+      "description": "Chiffrement, TLS et contre-mesures",
+      "icon": "lock",
+      "path": "mws/mws-securite.md",
+      "tags": ["mws", "transverse", "specification"],
+      "order": 66
+    },
+    {
+      "id": "security-overview",
+      "title": "Sécurité - Vue d'ensemble",
+      "description": "Architecture de sécurité globale",
+      "icon": "shield",
+      "path": "security/security-overview.md",
+      "tags": ["security", "transverse", "concept"],
+      "order": 70
+    },
+    {
+      "id": "security-niveaux",
+      "title": "Niveaux de Sécurité",
+      "description": "Les 5 niveaux de sécurité (0-4)",
+      "icon": "layers",
+      "path": "security/niveaux-securite.md",
+      "tags": ["security", "transverse", "reference"],
+      "order": 71
+    },
+    {
+      "id": "security-etats-confiance",
+      "title": "États de Confiance",
+      "description": "Les états T0 à T4 du système",
+      "icon": "heart",
+      "path": "security/etats-confiance.md",
+      "tags": ["security", "transverse", "reference"],
+      "order": 72
+    },
+    {
+      "id": "security-cores-protection",
+      "title": "Protection par les Cores",
+      "description": "Gouvernance sécurité par les Cores",
+      "icon": "castle",
+      "path": "security/cores-protection.md",
+      "tags": ["security", "4", "specification"],
+      "order": 73
+    },
+    {
+      "id": "miyukini-admin",
+      "title": "MiyukiniAdmin",
+      "description": "Panneau d'administration souverain",
+      "icon": "settings",
+      "path": "admin/miyukini-admin.md",
+      "tags": ["admin", "9", "specification"],
+      "order": 80
+    },
+    {
+      "id": "glossaire",
+      "title": "Glossaire",
+      "description": "Terminologie officielle Miyukini",
+      "icon": "book",
+      "path": "reference/glossaire.md",
+      "tags": ["presentation", "transverse", "reference"],
+      "order": 90
+    },
+    {
+      "id": "operateurs-terminologie",
+      "title": "Opérateurs & Terminologie",
+      "description": "Vocabulaire et concepts des opérateurs",
+      "icon": "tag",
+      "path": "reference/operateurs-terminologie.md",
+      "tags": ["presentation", "transverse", "reference"],
+      "order": 91
+    }
+  ]
+}

@@ -117,11 +117,11 @@ Un Opérateur dans Miyukini est :
 ```
 Hardware Physique
  │
- ├─ Miyukini Env A (COG v1.2 LTS)
+ ├─ Miyukini Env A (COG vers. 1.2 LTS)
  │   ├─ Opérateurs A1, A2
  │   └─ [ID: env-a-uuid]
  │
- ├─ Miyukini Env B (COG v2.0)
+ ├─ Miyukini Env B (COG vers. 2.0)
  │   ├─ Opérateurs B1
  │   └─ [ID: env-b-uuid]
  │

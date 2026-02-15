@@ -4,7 +4,7 @@
 //! Kit d'outils stories (create, list, get, reaction.add). Décision = StrongFather ; WriteIntent KindMother.
 //! Alignement MIP : domaine `social`, layer tool/toolkit.
 
-/// @id: miyustory_toolkit_lib
+// @id: toolkit.narrative.miyustory
 /// @role: infrastructure
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuStory ; expose les modules tools.

@@ -2,12 +2,12 @@
 //!
 //! Mandat d'exécution, niveau de sécurité, pas d'identité Opérateur (BOUND-5).
 
-/// @id: miyusql_governed_context
-/// @role: data
-/// @layer: toolkit
-/// @human: Contexte gouverné pour l'exécution MiyuSQL (mandat, niveau sécurité, pas d'identité Opérateur).
-/// @do: represent_governed_context
-/// Contexte fourni par la gouvernance ; MiyuSQL ne connaît pas l'Opérateur appelant.
+// @id: miyusql_governed_context
+// @role: data
+// @layer: toolkit
+// @human: Contexte gouverné pour l'exécution MiyuSQL (mandat, niveau sécurité, pas d'identité Opérateur).
+// @do: represent_governed_context
+// Contexte fourni par la gouvernance ; MiyuSQL ne connaît pas l'Opérateur appelant.
 
 /// @id: miyusql_governed_context_struct
 /// @role: data

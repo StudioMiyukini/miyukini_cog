@@ -7,7 +7,7 @@ version = "0.1.0"
 edition = "2021"
 description = "Standalone UI Builder — itération rapide sur les assets UI Miyukini"
 authors = ["Miyukini Contributors"]
-license = "MIT OR Apache-2.0"
+license = "LicenseRef-Miyukini-Dual"
 
 [[bin]]
 name = "ui-builder"

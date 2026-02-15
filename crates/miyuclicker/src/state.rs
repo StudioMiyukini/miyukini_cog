@@ -590,8 +590,7 @@ impl GameState {
     /// @role: mutator
     #[must_use]
     pub fn new_game(slot_id: u8) -> Self {
-        let mut state = Self::default();
-        state.slot_id = slot_id;
+        let mut state = Self { slot_id, ..Default::default() };
         state.cites.push(Cite {
             id: "ma_cite".to_string(),
             nom: "Ma cité".to_string(),

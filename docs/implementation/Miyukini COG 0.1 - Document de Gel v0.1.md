@@ -1,14 +1,14 @@
-# Miyukini COG 0.1 — Document de Gel v0.1
+# Miyukini COG vers. 0.1.0 — Document de Gel v0.1
 
 ## Contexte
 
-Ce document formalise le gel de la version **Miyukini COG 0.1 (Core-Orchestrated Governance Environment)** conformément au plan d'implémentation et aux contrats de versionnement.
+Ce document formalise le gel de la version **Miyukini COG vers. 0.1.0 (Core-Orchestrated Governance Environment)** conformément au plan d'implémentation et aux contrats de versionnement.
 
 ## Version et date
 
 - **Version gelée :** v0.1.0  
 - **Date de gel :** 2025-01-28  
-- **Environnement :** COG 0.1  
+- **Environnement :** COG vers. 0.1.0  
 
 ## Éléments gelés
 
@@ -52,9 +52,9 @@ Ce document formalise le gel de la version **Miyukini COG 0.1 (Core-Orchestrated
 
 ## Conditions de dégel
 
-Le gel COG 0.1 peut être levé pour :
+Le gel COG vers. 0.1.0 peut être levé pour :
 
-- Passage à une version majeure (COG 0.2) après validation des contrats et mise à jour de la documentation fondatrice.
+- Passage à une version majeure (COG vers. 0.2) après validation des contrats et mise à jour de la documentation fondatrice.
 - Correction d’anomalies bloquantes validées par l’équipe, avec mise à jour du présent document et du numéro de version (patch ou mineur selon le cas).
 
 ## Références

@@ -12,6 +12,8 @@ use crate::data::types::{
     ProduitVisuel, SyncLog, VitrineBlock, VitrinePage, VitrineTemplate,
 };
 use kindmother::{InstanceIdentity, InstanceType};
+#[cfg(feature = "db-encryption")]
+use kindmother_db_key::KeyDerivation;
 use rusqlite::{params, Connection};
 use std::path::Path;
 use std::sync::Mutex;
@@ -46,14 +48,29 @@ pub struct JayXposeDb {
 }
 
 impl JayXposeDb {
-    /// Ouvre ou crée la base SQLite à `path` et initialise le schéma.
+    /// Ouvre ou crée la base SQLite chiffrée à `path` et initialise le schéma.
     /// Identité KindMother : Daughter (base fille).
     ///
     /// @id: jayxpose_db_open
     /// @do: open_or_create_sqlite_database
     /// @layer: infra
     pub fn open(path: impl AsRef<Path>) -> Result<Self, DbError> {
+        let path = path.as_ref();
         let conn = Connection::open(path)?;
+
+        #[cfg(feature = "db-encryption")]
+        {
+            let data_dir = path.parent().unwrap_or(path);
+            let db_name = path
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("jayxpose");
+            let kd = KeyDerivation::new(data_dir).map_err(|e| DbError(e.0))?;
+            let pragma_key = kd.pragma_key_hex(db_name).map_err(|e| DbError(e.0))?;
+            conn.pragma_update(None, "key", &pragma_key)
+                .map_err(|e| DbError(e.to_string()))?;
+        }
+
         let instance = InstanceIdentity::new(InstanceType::Daughter);
         let db = Self {
             conn: Mutex::new(conn),

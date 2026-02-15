@@ -7,8 +7,11 @@
 //! ```bash
 //! miyukini-origin --config /etc/miyukini/origin.toml
 //! ```
+//!
+//! Note : Code préparé pour fonctionnalités futures (MWS complet).
 
 #![allow(missing_docs)]
+#![allow(dead_code)]
 
 mod admin;
 mod config;

@@ -1,8 +1,10 @@
 //! Carte d'un service (affichage dans la grille).
 
 use dioxus::prelude::*;
+use crate::data::use_service_connections;
 use crate::state::{use_app_state, ServiceInfo};
 use crate::theme::styles;
+use miyukiniwatch::MiyukiniWatchCollector;
 
 #[derive(Props, Clone, PartialEq)]
 pub struct ServiceCardProps {
@@ -14,6 +16,7 @@ pub struct ServiceCardProps {
 #[component]
 pub fn ServiceCard(props: ServiceCardProps) -> Element {
     let mut state = use_app_state();
+    let conns = use_service_connections();
     let theme = state.read().current_theme;
     let c = theme.palette();
     let service = props.service.clone();
@@ -22,7 +25,20 @@ pub fn ServiceCard(props: ServiceCardProps) -> Element {
     rsx! {
         div {
             style: "{styles::service_card(theme)}",
-            onclick: move |_| { state.write().open_service(&service_for_click); },
+            onclick: move |_| {
+                state.write().open_service(&service_for_click);
+                // MiyukiniWatch : service ouvert (sauf pour miyukiniwatch lui-même)
+                if service_for_click.id != "miyukiniwatch" {
+                    if let (Some(profile_id), Some(session_id)) = (
+                        state.read().current_user.as_ref().map(|u| u.id.clone()),
+                        state.read().miyukiniwatch_session_id.clone(),
+                    ) {
+                        let db = conns.read().miyukiniwatch.clone();
+                        let collector = MiyukiniWatchCollector::new(db);
+                        let _ = collector.record_service_opened(&profile_id, &session_id, &service_for_click.id);
+                    }
+                }
+            },
             onmouseenter: move |_| {},
 
             div {

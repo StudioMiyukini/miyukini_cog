@@ -4,7 +4,7 @@
 //! Kit d'outils de locale et i18n (date, number, translate). Locale et catalogue fournis dans le flux.
 //! Alignement MIP : domaine `locale`, layer tool/toolkit.
 
-/// @id: miyulocale_toolkit_lib
+// @id: toolkit.locale.miyulocale
 /// @role: infrastructure
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuLocale ; expose les modules tools.

@@ -1,6 +1,9 @@
 //! Catalogue web MWS.
 //!
 //! Expose les services, lobbys et COGs via HTTP.
+//!
+//! Note : Code préparé pour fonctionnalités futures (recherche avancée).
+#![allow(dead_code)]
 
 use std::sync::Arc;
 use chrono::Utc;

@@ -3,7 +3,7 @@ name = "miyukini-origin"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
-license.workspace = true
+license = "LicenseRef-Miyukini-Dual"
 repository.workspace = true
 description = "Miyukini Webway System Origin - Point central de vérité MWS (relay + tracker + registre)"
 

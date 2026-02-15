@@ -4,7 +4,7 @@
 //! Kit d'outils profil (profile, field, avatar, signature, rank, preferences). Décision = StrongFather ; WriteIntent KindMother.
 //! Alignement MIP : domaine `identity`, layer tool/toolkit.
 
-/// @id: miyuprofile_toolkit_lib
+// @id: toolkit.identity.miyuprofile
 /// @role: infrastructure
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuProfile ; expose les modules tools.

@@ -20,9 +20,10 @@ description = "KindMother Service — Serveur de persistance libSQL isolé et ch
 # Core Miyukini
 miyukini-kernel = { path = "../miyukini-kernel" }
 kindmother = { path = "../kindmother" }
+kindmother-db-key = { path = "../kindmother-db-key", optional = true }
 
-# SQLite via rusqlite (compatible bundled, pas besoin de compilateur C externe)
-rusqlite = { version = "0.32", features = ["bundled"] }
+# SQLite : bundled par défaut. db-encryption pour SQLCipher (requiert OpenSSL sur Windows)
+rusqlite = { version = "0.32", features = ["bundled"], default-features = false }
 
 # Sérialisation
 serde = { version = "1", features = ["derive"] }
@@ -34,10 +35,6 @@ tokio = { version = "1", features = ["full", "sync"] }
 # IPC - JSON over TCP (simple, pas de dépendance protoc)
 # tonic et prost retirés car nécessitent protoc
 
-# Sécurité
-argon2 = "0.5"
-zeroize = { version = "1", features = ["derive"] }
-
 # Utilitaires
 uuid = { version = "1", features = ["v4"] }
 chrono = { version = "0.4", features = ["serde"] }
@@ -46,8 +43,9 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 sha2 = "0.10"
 
-[target.'cfg(windows)'.dependencies]
-winreg = "0.55"
+[features]
+default = []
+db-encryption = ["dep:kindmother-db-key", "rusqlite/bundled-sqlcipher"]
 
 [[bin]]
 name = "kindmother-server"

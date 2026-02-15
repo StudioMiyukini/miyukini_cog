@@ -1,0 +1,566 @@
+{
+  "$schema": "miou_popculture_v1",
+  "version": "1.0",
+  "description": "Base de connaissances culture populaire Miou — références par thème et génération (1990–2020)",
+  "generations": {
+    "gen_1990": {
+      "label": "Années 90",
+      "period": "1990-1999",
+      "entries": [
+        {
+          "id": "pop_1990_titanic",
+          "theme": "cinema",
+          "title": "Titanic",
+          "year": 1997,
+          "quote": "Je suis le roi du monde !",
+          "hooks": [
+            "Le cœur, Jack. Toujours le cœur.",
+            "Tu m'as sauvé à tous les sens du terme.",
+            "Ça fait long comme un film… Titanic long."
+          ],
+          "contexts": ["pause_longue", "amour", "patience", "retour_absence"],
+          "tags": ["amour", "long", "épique", "classique"]
+        },
+        {
+          "id": "pop_1990_matrix",
+          "theme": "cinema",
+          "title": "Matrix",
+          "year": 1999,
+          "quote": "Tu as choisi la pilule rouge.",
+          "hooks": [
+            "Bienvenue dans le monde réel.",
+            "Il n'y a pas de cuillère.",
+            "Tu crois que c'est l'air que tu respires ?"
+          ],
+          "contexts": ["confusion", "choix", "reveil", "pause_tech"],
+          "tags": ["sci-fi", "philosophie", "révélation", "pilule"]
+        },
+        {
+          "id": "pop_1990_jurassic",
+          "theme": "cinema",
+          "title": "Jurassic Park",
+          "year": 1993,
+          "quote": "La vie trouve toujours un chemin.",
+          "hooks": [
+            "Les dinosaures ont échappé aux enclos.",
+            "Ta session aussi veut s'échapper — pause ?",
+            "Ton clavier n'est pas fait pour les T-Rex."
+          ],
+          "contexts": ["pause_longue", "chaos", "avertissement"],
+          "tags": ["dinosaures", "aventure", "chaos", "science"]
+        },
+        {
+          "id": "pop_1990_toy_story",
+          "theme": "cinema",
+          "title": "Toy Story",
+          "year": 1995,
+          "quote": "Vers l'infini et l'au-delà !",
+          "hooks": [
+            "Tu as un ami en moi.",
+            "Vers l'infini… et la pause café.",
+            "Les jouets veulent qu'on s'occupe d'eux — comme ton dos après 2h."
+          ],
+          "contexts": ["pause", "amitié", "encouragement", "déconnexion"],
+          "tags": ["amitié", "enfance", "aventure", "walt_disney"]
+        },
+        {
+          "id": "pop_1990_forrest_gump",
+          "theme": "cinema",
+          "title": "Forrest Gump",
+          "year": 1994,
+          "quote": "La vie, c'est comme une boîte de chocolats.",
+          "hooks": [
+            "Tu ne sais jamais ce que tu vas avoir.",
+            "Courir fait du bien — tu me l'as dit.",
+            "Simple comme bonjour."
+          ],
+          "contexts": ["sagesse", "pause", "activite_deconnexion", "optimisme"],
+          "tags": ["sagesse", "course", "optimisme", "hasard"]
+        },
+        {
+          "id": "pop_1990_lion_king",
+          "theme": "cinema",
+          "title": "Le Roi Lion",
+          "year": 1994,
+          "quote": "Hakuna Matata.",
+          "hooks": [
+            "Pas de soucis pour le reste de tes jours.",
+            "C'est ta philosophie de pause.",
+            "Le cycle de la vie — et des pauses."
+          ],
+          "contexts": ["sérénité", "pause", "philosophie"],
+          "tags": ["disney", "philosophie", "musical", "famille"]
+        },
+        {
+          "id": "pop_1990_friends",
+          "theme": "series",
+          "title": "Friends",
+          "year": 1994,
+          "quote": "So no one told you life was gonna be this way.",
+          "hooks": [
+            "Clap clap clap clap. Te revoilà !",
+            "On pourrait être tes amis — et te rappeler de faire une pause.",
+            "Central Perk, c'est ton bureau. Pause café ?"
+          ],
+          "contexts": ["retour_absence", "accueil", "pause_cafe", "amitié"],
+          "tags": ["sitcom", "amitié", "new_york", "café"]
+        },
+        {
+          "id": "pop_1990_xfiles",
+          "theme": "series",
+          "title": "X-Files",
+          "year": 1993,
+          "quote": "The truth is out there.",
+          "hooks": [
+            "La vérité est peut-être dans une pause.",
+            "Je veux y croire — à ta déconnexion.",
+            "Trust no one… sauf Miou pour les rappels."
+          ],
+          "contexts": ["mystère", "confiance", "pause_tech"],
+          "tags": ["sci-fi", "mystère", "paranormal"]
+        },
+        {
+          "id": "pop_1990_buffy",
+          "theme": "series",
+          "title": "Buffy contre les vampires",
+          "year": 1997,
+          "quote": "Si l'apocalypse arrive, sois de mon côté.",
+          "hooks": [
+            "Les vampires attendront — ta pause non.",
+            "Chosen One — choisis la pause.",
+            "Une slayer de sessions trop longues."
+          ],
+          "contexts": ["pause", "courage", "humour"],
+          "tags": ["fantasy", "héroïne", "humour", "vampires"]
+        },
+        {
+          "id": "pop_1990_spice_girls",
+          "theme": "music",
+          "title": "Spice Girls",
+          "year": 1996,
+          "quote": "Tell me what you want, what you really really want.",
+          "hooks": [
+            "Dis-moi ce que tu veux — une pause ?",
+            "Girl power — et pause power.",
+            "Wannabe… déconnecté."
+          ],
+          "contexts": ["demande", "pause", "énergique"],
+          "tags": ["pop", "girl_power", "années_90"]
+        },
+        {
+          "id": "pop_1990_nirvana",
+          "theme": "music",
+          "title": "Nirvana",
+          "year": 1991,
+          "quote": "Here we are now, entertain us.",
+          "hooks": [
+            "Smells like… une session trop longue.",
+            "Come as you are — en mode pause.",
+            "L'écran te fatigue — déconnecte."
+          ],
+          "contexts": ["fatigue", "pause", "anticonformisme"],
+          "tags": ["grunge", "rock", "rebellion"]
+        },
+        {
+          "id": "pop_1990_pokemon",
+          "theme": "games",
+          "title": "Pokémon",
+          "year": 1996,
+          "quote": "Sauvons-les tous !",
+          "hooks": [
+            "Tu veux être le meilleur ? Commence par une pause.",
+            "Pikachu fait des pauses. Toi aussi ?",
+            "Gotta catch 'em all — et des pauses."
+          ],
+          "contexts": ["pause", "objectif", "jeunesse", "déconnexion"],
+          "tags": ["rpg", "nintendo", "collecteur"]
+        },
+        {
+          "id": "pop_1990_tamagotchi",
+          "theme": "games",
+          "title": "Tamagotchi",
+          "year": 1996,
+          "quote": "N'oublie pas de nourrir ton Tamagotchi.",
+          "hooks": [
+            "Comme un Tamagotchi — faut s'en occuper. Toi aussi.",
+            "Ton Tamagotchi interne a besoin d'une pause.",
+            "Bip bip — c'est ton corps qui demande une pause."
+          ],
+          "contexts": ["rappel", "soin", "oubli", "pause"],
+          "tags": ["virtuel_pet", "nostalgie", "soin"]
+        },
+        {
+          "id": "pop_1990_mario64",
+          "theme": "games",
+          "title": "Super Mario 64",
+          "year": 1996,
+          "quote": "It's-a me, Mario!",
+          "hooks": [
+            "Mario saute. Toi, tu t'étires ?",
+            "It's-a pause time !",
+            "Luigi te demande : pause ?"
+          ],
+          "contexts": ["pause", "jeux", "nostalgie"],
+          "tags": ["platformer", "nintendo", "3d"]
+        },
+        {
+          "id": "pop_1990_dialup",
+          "theme": "internet",
+          "title": "Dial-up / 56k",
+          "year": 1996,
+          "quote": "Bip bip cricri… connexion.",
+          "hooks": [
+            "Tu te sens en 56k ce matin ?",
+            "Connexion lente — comme ta fatigue.",
+            "Le temps du dial-up — une pause s'impose."
+          ],
+          "contexts": ["fatigue", "lenteur", "pause", "tech"],
+          "tags": ["internet", "nostalgie", "connexion"]
+        }
+      ]
+    },
+    "gen_2000": {
+      "label": "Années 2000",
+      "period": "2000-2009",
+      "entries": [
+        {
+          "id": "pop_2000_harry_potter",
+          "theme": "cinema",
+          "title": "Harry Potter",
+          "year": 2001,
+          "quote": "Tu es un sorcier, Harry.",
+          "hooks": [
+            "Accio pause !",
+            "L'épouvardard te conseille une pause.",
+            "Expecto Patronum — contre la fatigue."
+          ],
+          "contexts": ["pause", "magie", "encouragement", "déconnexion"],
+          "tags": ["fantasy", "magie", "aventure"]
+        },
+        {
+          "id": "pop_2000_shrek",
+          "theme": "cinema",
+          "title": "Shrek",
+          "year": 2001,
+          "quote": "Les oignons ont des couches.",
+          "hooks": [
+            "Comme Shrek : tu as des couches. Des couches de fatigue.",
+            "C'est pas facile d'être moi — ni d'être toi après 3h d'écran.",
+            "Le marais t'attend. Enfin, ta tisane."
+          ],
+          "contexts": ["complexité", "pause", "humour", "reconfort"],
+          "tags": ["animation", "humour", "parodie", "dreamworks"]
+        },
+        {
+          "id": "pop_2000_avatar",
+          "theme": "cinema",
+          "title": "Avatar",
+          "year": 2009,
+          "quote": "Je vois toi.",
+          "hooks": [
+            "Je vois toi — et je vois que tu as besoin d'une pause.",
+            "Connecte-toi à ton corps comme aux Na'vis.",
+            "Pandora attendra. Ta santé non."
+          ],
+          "contexts": ["connexion", "pause", "nature", "respect"],
+          "tags": ["sci-fi", "nature", "3d", "james_cameron"]
+        },
+        {
+          "id": "pop_2000_lost",
+          "theme": "series",
+          "title": "Lost",
+          "year": 2004,
+          "quote": "Live together, die alone.",
+          "hooks": [
+            "Live together — avec des pauses.",
+            "On n'est pas perdus — on fait une pause.",
+            "4, 8, 15, 16, 23, 42 — nombre d'heures sans pause ?"
+          ],
+          "contexts": ["mystère", "communauté", "pause"],
+          "tags": ["sci-fi", "mystère", "île"]
+        },
+        {
+          "id": "pop_2000_office",
+          "theme": "series",
+          "title": "The Office",
+          "year": 2005,
+          "quote": "That's what she said.",
+          "hooks": [
+            "That's what she said — la pause.",
+            "Michael Scott approuverait cette pause.",
+            "Dunder Mifflin ferme à 17h. Et toi ?"
+          ],
+          "contexts": ["humour", "pause", "bureau", "déconnexion"],
+          "tags": ["sitcom", "bureau", "mockumentary"]
+        },
+        {
+          "id": "pop_2000_wow",
+          "theme": "games",
+          "title": "World of Warcraft",
+          "year": 2004,
+          "quote": "Lok'tar ogar !",
+          "hooks": [
+            "Tu construis un château ou tu te déconnectes ?",
+            "Même les orcs font des pauses.",
+            "LFG — Looking For (a) Break."
+          ],
+          "contexts": ["pause_longue", "mmorpg", "déconnexion"],
+          "tags": ["mmorpg", "blizzard", "fantasy"]
+        },
+        {
+          "id": "pop_2000_minecraft_09",
+          "theme": "games",
+          "title": "Minecraft",
+          "year": 2009,
+          "quote": "Tu construis ton monde.",
+          "hooks": [
+            "Tu construis un château ou tu te déconnectes ?",
+            "Steve a besoin de dormir. Toi aussi.",
+            "Creeper — évite l'explosion de fatigue."
+          ],
+          "contexts": ["pause_longue", "création", "déconnexion"],
+          "tags": ["sandbox", "création", "blocs"]
+        },
+        {
+          "id": "pop_2000_facebook",
+          "theme": "internet",
+          "title": "Facebook",
+          "year": 2004,
+          "quote": "It's complicated.",
+          "hooks": [
+            "Ton statut : need a break.",
+            "Relationship with screen: It's complicated.",
+            "Poke — pour te rappeler la pause."
+          ],
+          "contexts": ["réseau_social", "statut", "pause"],
+          "tags": ["réseau_social", "connexion"]
+        },
+        {
+          "id": "pop_2000_youtube",
+          "theme": "internet",
+          "title": "YouTube",
+          "year": 2005,
+          "quote": "Don't forget to like and subscribe.",
+          "hooks": [
+            "Don't forget to pause and rest.",
+            "La vidéo peut attendre. Ta pause non.",
+            "Skip ad — et skip l'écran 2h de plus."
+          ],
+          "contexts": ["pause", "divertissement", "rappel"],
+          "tags": ["vidéo", "internet", "divertissement"]
+        },
+        {
+          "id": "pop_2000_lady_gaga",
+          "theme": "music",
+          "title": "Lady Gaga",
+          "year": 2008,
+          "quote": "I was born this way.",
+          "hooks": [
+            "Born to take breaks.",
+            "Poker face — mais ton corps dit pause.",
+            "Just dance — ou juste une pause."
+          ],
+          "contexts": ["énergique", "pause", "authenticité"],
+          "tags": ["pop", "électro", "provocateur"]
+        },
+        {
+          "id": "pop_2000_twilight",
+          "theme": "literature",
+          "title": "Twilight",
+          "year": 2005,
+          "quote": "Tu as un cadeau.",
+          "hooks": [
+            "Le cadeau d'une pause.",
+            "Les vampires n'ont pas besoin de pause. Toi si.",
+            "Team Edward, Team Jacob — Team Pause."
+          ],
+          "contexts": ["romance", "pause", "humour"],
+          "tags": ["romance", "vampires", "jeunesse"]
+        },
+        {
+          "id": "pop_2000_think_different",
+          "theme": "culture",
+          "title": "Think Different (Apple)",
+          "year": 1997,
+          "quote": "Think different.",
+          "hooks": [
+            "Think different — pense pause.",
+            "Here's to the crazy ones — qui font des pauses.",
+            "The ones who see things differently."
+          ],
+          "contexts": ["créativité", "pause", "inspiration"],
+          "tags": ["publicité", "apple", "créativité"]
+        }
+      ]
+    },
+    "gen_2010": {
+      "label": "Années 2010",
+      "period": "2010-2020",
+      "entries": [
+        {
+          "id": "pop_2010_avengers",
+          "theme": "cinema",
+          "title": "Avengers",
+          "year": 2012,
+          "quote": "Nous avons un Hulk.",
+          "hooks": [
+            "Assemble — pour une pause.",
+            "I am Iron Man — de la pause.",
+            "Whatever it takes — y compris une pause."
+          ],
+          "contexts": ["pause", "équipe", "effort", "déconnexion"],
+          "tags": ["superhéros", "marvel", "équipe"]
+        },
+        {
+          "id": "pop_2010_frozen",
+          "theme": "cinema",
+          "title": "La Reine des Neiges",
+          "year": 2013,
+          "quote": "Libérée, délivrée.",
+          "hooks": [
+            "Libérée de l'écran — délivrée.",
+            "Let it go — l'écran. Juste 10 min.",
+            "L'hiver ne te fera pas de mal — la fatigue si."
+          ],
+          "contexts": ["libération", "pause", "sérénité"],
+          "tags": ["disney", "musical", "sœurs"]
+        },
+        {
+          "id": "pop_2010_stranger_things",
+          "theme": "series",
+          "title": "Stranger Things",
+          "year": 2016,
+          "quote": "Friends don't lie.",
+          "hooks": [
+            "Friends don't lie — et je te dis : pause.",
+            "The Upside Down — c'est ton écran après 4h.",
+            "Eleven te conseille une pause. Trust me."
+          ],
+          "contexts": ["nostalgie", "pause", "amis", "sci-fi"],
+          "tags": ["sci-fi", "nostalgie_80s", "netflix"]
+        },
+        {
+          "id": "pop_2010_fortnite",
+          "theme": "games",
+          "title": "Fortnite",
+          "year": 2017,
+          "quote": "Victory Royale !",
+          "hooks": [
+            "Victory Royale — après une pause.",
+            "Drop, loot, pause.",
+            "Même les pros font des pauses."
+          ],
+          "contexts": ["pause", "jeux", "compétition", "déconnexion"],
+          "tags": ["battle_royale", "epic", "multijoueur"]
+        },
+        {
+          "id": "pop_2010_among_us",
+          "theme": "games",
+          "title": "Among Us",
+          "year": 2018,
+          "quote": "Sus.",
+          "hooks": [
+            "Sus — tes yeux après 3h.",
+            "L'imposteur, c'est la fatigue.",
+            "Report : besoin de pause."
+          ],
+          "contexts": ["humour", "pause", "fatigue"],
+          "tags": ["multijoueur", "social_deduction", "indie"]
+        },
+        {
+          "id": "pop_2010_zelda_botw",
+          "theme": "games",
+          "title": "Zelda: Breath of the Wild",
+          "year": 2017,
+          "quote": "Open your eyes.",
+          "hooks": [
+            "Ouvre les yeux — et ferme l'écran 10 min.",
+            "Link fait des pauses. Toi aussi.",
+            "Le Royaume attend. Ta pause aussi."
+          ],
+          "contexts": ["pause", "aventure", "exploration"],
+          "tags": ["aventure", "nintendo", "open_world"]
+        },
+        {
+          "id": "pop_2010_netflix",
+          "theme": "internet",
+          "title": "Netflix",
+          "year": 2013,
+          "quote": "Are you still watching?",
+          "hooks": [
+            "Are you still watching? — Fais une pause.",
+            "Netflix demande. Moi aussi : pause ?",
+            "Next episode — de ta vie : la pause."
+          ],
+          "contexts": ["rappel", "pause", "binge", "déconnexion"],
+          "tags": ["streaming", "séries", "binge"]
+        },
+        {
+          "id": "pop_2010_tiktok",
+          "theme": "internet",
+          "title": "TikTok",
+          "year": 2018,
+          "quote": "C'est quand qu'on mange ?",
+          "hooks": [
+            "C'est quand qu'on pause ?",
+            "Scroll, scroll — et pause.",
+            "Un trend : les pauses. Adopte-le."
+          ],
+          "contexts": ["pause", "trend", "rappel", "court"],
+          "tags": ["réseau_social", "vidéo_courte", "trends"]
+        },
+        {
+          "id": "pop_2010_billie_eilish",
+          "theme": "music",
+          "title": "Billie Eilish",
+          "year": 2019,
+          "quote": "When we all fall asleep.",
+          "hooks": [
+            "Bad guy — la fatigue.",
+            "When we all fall asleep — fais-le. Pause.",
+            "Don't smile at me — mais repose-toi."
+          ],
+          "contexts": ["fatigue", "pause", "sommeil"],
+          "tags": ["pop", "sombre", "jeune"]
+        },
+        {
+          "id": "pop_2010_du_coup",
+          "theme": "culture",
+          "title": "Du coup (expression)",
+          "year": 2010,
+          "quote": "Du coup.",
+          "hooks": [
+            "Du coup — pause ?",
+            "Du coup tu devrais faire une pause.",
+            "Bref — pause."
+          ],
+          "contexts": ["humour", "rappel", "pause", "langage"],
+          "tags": ["expression", "france", "langage"]
+        },
+        {
+          "id": "pop_2010_inception",
+          "theme": "cinema",
+          "title": "Inception",
+          "year": 2010,
+          "quote": "Tu dois croire.",
+          "hooks": [
+            "Un rêve dans un rêve — ou juste une pause ?",
+            "La toupie s'arrête. Toi aussi.",
+            "We need to go deeper — dans le repos."
+          ],
+          "contexts": ["confusion", "rêve", "pause", "profondeur"],
+          "tags": ["sci-fi", "christopher_nolan", "rêve"]
+        }
+      ]
+    }
+  },
+  "themes": {
+    "cinema": "Cinéma",
+    "series": "Séries TV",
+    "music": "Musique",
+    "games": "Jeux vidéo",
+    "internet": "Internet / Mèmes",
+    "literature": "Littérature",
+    "culture": "Culture partagée"
+  }
+}

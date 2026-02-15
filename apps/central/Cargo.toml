@@ -8,7 +8,7 @@ version = "0.1.4"
 edition = "2021"
 description = "Miyukini Central — Hub natif des Services COG (Dioxus + Blitz)"
 authors = ["Miyukini Contributors"]
-license = "Dual"
+license = "LicenseRef-Miyukini-Dual"
 
 [[bin]]
 name = "miyukini-central"
@@ -46,6 +46,8 @@ jayxpose = { path = "../../crates/jayxpose" }
 jayfestival = { path = "../../crates/jayfestival" }
 jaykonta = { path = "../../crates/jaykonta" }
 jaykoa = { path = "../../crates/jaykoa" }
+miyukiniwatch = { path = "../../crates/miyukiniwatch" }
+jay1tribu = { path = "../../crates/jay1tribu" }
 miyuclicker = { path = "../../crates/miyuclicker" }
 lord_of_the_castle = { path = "../../crates/lord_of_the_castle" }
 

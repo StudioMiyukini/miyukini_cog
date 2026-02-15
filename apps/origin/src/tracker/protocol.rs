@@ -1,6 +1,9 @@
 //! Protocole Tracker.
 //!
 //! Messages binaires pour la communication avec le Tracker.
+//!
+//! Note : Code préparé pour fonctionnalités futures (messages étendus).
+#![allow(dead_code)]
 
 use bytes::{Buf, BufMut, Bytes, BytesMut};
 use serde::{Deserialize, Serialize};

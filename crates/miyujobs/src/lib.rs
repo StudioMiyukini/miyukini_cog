@@ -4,7 +4,7 @@
 //! Kit d'outils de planification et file d'attente (schedule.at, schedule.cron, queue.enqueue, queue.process). Décision de planifier = StrongFather.
 //! Alignement MIP : domaine `jobs`, layer tool/toolkit.
 
-/// @id: miyujobs_toolkit_lib
+// @id: toolkit.jobs.miyujobs
 /// @role: infrastructure
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuJobs ; expose les modules tools.

@@ -11,6 +11,8 @@ mod jaykonta;
 mod game_view;
 mod survivor_embed;
 mod mws_view;
+mod miyukiniwatch;
+mod jay1tribu;
 
 pub use home::HomeView;
 pub use service_view::ServiceView;
@@ -20,7 +22,9 @@ pub use jaykoa::JayKoaView;
 pub use jaykonta::JayKontaView;
 pub use game_view::GameView;
 pub use survivor_embed::SurvivorEmbed;
-pub use mws_view::MwsNetworkView;
+pub use mws_view::{MwsNetworkView, MwsViewState};
+pub use miyukiniwatch::MiyukiniWatchView;
+pub use jay1tribu::Jay1TribuView;
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;
@@ -43,6 +47,8 @@ pub fn ActiveServiceView() -> Element {
             Some("miyuclicker") => rsx! { 
                 GameView { service_id: tab.service_id.clone().unwrap_or_default() } 
             },
+            Some("miyukiniwatch") => rsx! { MiyukiniWatchView {} },
+            Some("jay1tribu") => rsx! { Jay1TribuView {} },
             Some(id) => rsx! { 
                 ServiceView { service_id: id.to_string() } 
             },

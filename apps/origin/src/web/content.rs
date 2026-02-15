@@ -1,6 +1,9 @@
 //! Contenu dynamique du site web Origin.
 //!
 //! Gère les articles de blog, annonces et téléchargements.
+//!
+//! Note : Code préparé pour fonctionnalités futures (filtres et méthodes).
+#![allow(dead_code)]
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

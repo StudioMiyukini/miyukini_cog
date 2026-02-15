@@ -3,7 +3,7 @@ name = "miyuclicker"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
-license.workspace = true
+license = "LicenseRef-Miyukini-Dual"
 description = "Lord of the Click — Premier jeu officiel Miyukini (Idle/Clicker + Carte stratégique)"
 
 [dependencies]

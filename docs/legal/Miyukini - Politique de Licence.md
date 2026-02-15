@@ -69,6 +69,17 @@ Pour les sociétés et les collectivités souhaitant utiliser Miyukini :
 
 *Point de contact : à définir par le titulaire du projet (site web, adresse e-mail dédiée licence, etc.).*
 
+### 4.1 Licence Pro Service-Tier (services proposés aux COGs)
+
+Les sociétés qui souhaitent proposer un **service-tier** (service tiers aux COGs) sur le réseau MWS doivent acquérir une **Licence Pro Service-Tier**. Cette licence octroie la validation Relay et la mise en ligne pour un service.
+
+- **Tarification 2026 :** 100 € (année d'acquisition) + 50 € par année suivante.
+- **Conditions :** livraison du code source du service pour examen ; validation obtenue dans un délai d'**un an**, sinon contrat caduc.
+- **Avertissement :** les services-tier non conformes non détectés sont considérés comme des intrusions au réseau et traités comme des menaces.
+- **Gratuité :** les services non lucratifs et d'intérêt général peuvent demander une licence à titre gratuit (voir document dédié).
+
+**Document détaillé :** [Miyukini - Licence Pro Service-Tier](Miyukini%20-%20Licence%20Pro%20Service-Tier.md).
+
 ---
 
 ## 5. Contribution au projet
@@ -80,6 +91,7 @@ Les contributions (code, documentation) soumises au dépôt Miyukini peuvent êt
 ## 6. Références
 
 - **LICENSE** (à la racine du dépôt) : texte intégral de la licence d’utilisation personnelle et domestique.
+- **Licence Pro Service-Tier :** [Miyukini - Licence Pro Service-Tier](Miyukini%20-%20Licence%20Pro%20Service-Tier.md) — tarifs, validation Relay, mise en ligne, délai d'un an, gratuité sur demande.
 - **README.md** : présentation du projet et lien vers la présente politique.
 
 ---

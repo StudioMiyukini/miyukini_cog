@@ -140,7 +140,7 @@ Aucun groupe de préfixe ne dépasse 4 tâches en parallèle (conformité protoc
 ## 5. Références techniques
 
 - **Génération MIP** : [tools/mip-generator](tools/mip-generator/) — scan des `crates/*/src` et `tools/*/src`, parsing des blocs MSCM (regex), génération de `mscm_index/*.json`. La future crate `crates/jayfestival/` sera prise en compte dès qu’elle existera.
-- **Checklist conformité** : [Miyukini COG 0.1 - MSCM MIP Compliance Checklist](docs/implementation/Miyukini%20COG%200.1%20-%20MSCM%20MIP%20Compliance%20Checklist.md) (critères MSCM/MIP réutilisables pour JayFestival).
+- **Checklist conformité** : [Miyukini COG vers. 0.1.0 - MSCM MIP Compliance Checklist](docs/implementation/Miyukini%20COG%200.1%20-%20MSCM%20MIP%20Compliance%20Checklist.md) (critères MSCM/MIP réutilisables pour JayFestival).
 - **Todo list détaillée** : Voir section 5.1 ci-dessous.
 
 ---

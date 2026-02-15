@@ -1,0 +1,39 @@
+# MiyukiniWatch — Service silencieux de mesure des habitudes.
+# Alimente Miou (avatar/mascotte) pour bulles, rappels et suggestions.
+# Aucune dépendance réseau. Données strictement locales.
+
+[package]
+name = "miyukiniwatch"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords = ["miyukiniwatch", "metrics", "habits", "miou", "usage"]
+categories.workspace = true
+description = "MiyukiniWatch — Service silencieux de mesure des habitudes au service de Miou"
+
+[dependencies]
+kindmother = { path = "../kindmother" }
+kindmother-db-key = { path = "../kindmother-db-key", optional = true }
+rusqlite = { version = "0.32", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "2"
+
+[features]
+default = []
+db-encryption = ["dep:kindmother-db-key", "rusqlite/bundled-sqlcipher"]
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+doc_markdown = "allow"

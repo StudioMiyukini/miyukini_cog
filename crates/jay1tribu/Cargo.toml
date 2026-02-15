@@ -1,0 +1,36 @@
+# Jay1Tribu — Service de messagerie P2P (tribus, salons, amis).
+# Chat et tribu ne fonctionnent pleinement que si le COG est connecté au Webway (MWS).
+
+[package]
+name = "jay1tribu"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Jay1Tribu — Messagerie P2P, tribus, salons et amis (Service Inter-COG Type 3)"
+
+[dependencies]
+kindmother = { path = "../kindmother" }
+rusqlite = { version = "0.32", features = ["bundled"], optional = true }
+kindmother-db-key = { path = "../kindmother-db-key", optional = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "2"
+
+[features]
+default = ["legacy-sqlite"]
+legacy-sqlite = ["rusqlite"]
+db-encryption = ["dep:kindmother-db-key", "rusqlite/bundled-sqlcipher"]
+kindmother-only = []
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+doc_markdown = "allow"

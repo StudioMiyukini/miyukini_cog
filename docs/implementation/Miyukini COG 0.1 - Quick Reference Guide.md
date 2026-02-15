@@ -1,28 +1,28 @@
-# Miyukini COG 0.1 - Quick Reference Guide
+# Miyukini COG vers. 0.1.0 - Quick Reference Guide
 
 **Guide rapide pour agents IA**  
 **Version :** 0.1  
 **Statut :** Référence d'implémentation  
-**Audience :** Agents IA implémentant Miyukini COG 0.1
+**Audience :** Agents IA implémentant Miyukini COG vers. 0.1.0
 
 ---
 
 ## Contexte
 
-Ce document est un **guide condensé** pour les agents IA qui implémentent Miyukini COG 0.1. Il fournit les références essentielles, les check-lists critiques et les règles non négociables.
+Ce document est un **guide condensé** pour les agents IA qui implémentent Miyukini COG vers. 0.1.0. Il fournit les références essentielles, les check-lists critiques et les règles non négociables.
 
 **Document complet :** Voir `Miyukini COG 0.1 - Documentation Implementation Reference.md`  
 **Check-list conformité :** Voir `Miyukini COG 0.1 - MSCM MIP Compliance Checklist.md`
 
 ---
 
-## 1. Qu'est-ce que Miyukini COG 0.1 ?
+## 1. Qu'est-ce que Miyukini COG vers. 0.1.0 ?
 
 **COG = Core-Orchestrated Governance Environment**
 
-Miyukini COG 0.1 est un environnement de gouvernance orchestré par des cores qui coordonne, sécurise et fait fonctionner des systèmes logiciels complets, du noyau jusqu'à l'utilisateur final.
+Miyukini COG vers. 0.1.0 est un environnement de gouvernance orchestré par des cores qui coordonne, sécurise et fait fonctionner des systèmes logiciels complets, du noyau jusqu'à l'utilisateur final.
 
-### Périmètre COG 0.1
+### Périmètre COG vers. 0.1.0
 
 - ✅ **Phase 1 :** Kernel (fondation technique)
 - ✅ **Phase 2 :** Cores système (10 cores)

@@ -179,7 +179,7 @@ pub mod styles {
     pub fn content_panel(theme: Theme) -> String {
         let c = c(theme);
         format!(
-            "flex: 1; background: {}; padding: {}; overflow-y: auto;",
+            "flex: 1; display: flex; flex-direction: column; min-height: 0; background: {}; padding: {}; overflow: hidden;",
             c.bg_card, spacing::PADDING_LG
         )
     }

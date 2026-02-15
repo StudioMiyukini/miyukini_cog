@@ -10,6 +10,7 @@
 use crate::data::{profile_display_name, use_service_connections};
 use crate::state::AppContext;
 use dioxus::prelude::*;
+use jay1tribu::set_webway_connected;
 use miyukini_central::{
     CentralMwsConfig, CentralMwsManager, CentralMwsState, MwsConformityState, MwsStatusSummary,
 };
@@ -79,9 +80,10 @@ pub struct DiscoveredLobby {
 }
 
 /// Vue principale du réseau MWS.
+/// L'état MWS est fourni par le contexte App pour persister au changement d'onglet.
 #[component]
 pub fn MwsNetworkView() -> Element {
-    let mws_state = use_signal(MwsViewState::default);
+    let mws_state = use_context::<Signal<MwsViewState>>();
     // Compteur de rafraîchissement : chaque incrément force un re-render du composant.
     let tick = use_signal(|| 0u64);
     let conns = use_service_connections();
@@ -101,7 +103,7 @@ pub fn MwsNetworkView() -> Element {
                 let arc = state.read().manager.clone();
                 let guard = arc.read().await;
                 if let Some(ref manager) = *guard {
-                    let st = manager.get_state().await;
+                    let st: CentralMwsState = manager.get_state().await;
                     let conf = manager.get_conformity_state().await;
                     drop(guard);
 
@@ -109,6 +111,7 @@ pub fn MwsNetworkView() -> Element {
                     let current_conf = state.read().conformity.clone();
                     if st != current_state || conf != current_conf {
                         tracing::info!("[MWS UI poll] état changé: {:?} → {:?}, conformité: {:?} → {:?}", current_state, st, current_conf, conf);
+                        set_webway_connected(st == CentralMwsState::Connected);
                         let mut s = state.write();
                         s.state = st;
                         s.conformity = conf;
@@ -244,6 +247,7 @@ fn MwsLoneModeToggle(mut state: Signal<MwsViewState>, mut tick: Signal<u64>) -> 
                 tick.set(n + 1);
             });
         } else {
+            set_webway_connected(false);
             let mut s = state.write();
             s.is_lone = false;
             s.state = CentralMwsState::Disconnected;
@@ -513,12 +517,15 @@ async fn real_mws_connect(
     };
     // Utiliser le display_name de l'utilisateur comme cog_id au lieu de "central-native"
     let cog_id = if display_name.is_empty() { "central-native".to_string() } else { display_name };
+    // Passer la DB JayXpose au manager pour servir les pages vitrine localement
+    let jayxpose_db = Some(Arc::clone(&conns.jayxpose));
     let manager = CentralMwsManager::new(
         config,
         cog_id,
         "0.1.0".to_string(),
         services,
         jayxpose_slug,
+        jayxpose_db,
     );
 
     match manager.connect().await {
@@ -610,6 +617,7 @@ async fn real_mws_disconnect(mut state: Signal<MwsViewState>, mut tick: Signal<u
     // Réinitialiser complètement l'état UI
     {
         let mut s = state.write();
+        set_webway_connected(false);
         s.state = CentralMwsState::Disconnected;
         s.conformity = MwsConformityState::Uninitialized;
         s.discovered_cogs.clear();
@@ -991,7 +999,7 @@ fn CogCard(cog: DiscoveredCog) -> Element {
                         font-size: 12px;
                         color: #8b5cf6;
                     ",
-                    "v{cog.core_version}"
+                    "vers. {cog.core_version}"
                 }
             }
 

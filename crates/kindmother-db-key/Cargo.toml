@@ -1,0 +1,29 @@
+# @id: kindmother_db_key_crate_config
+# @do: declare_kindmother_db_key_crate
+# @layer: core
+# Crate KindMother DB Key — Dérivation de clé pour chiffrement SQLCipher.
+
+[package]
+name = "kindmother-db-key"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords = ["kindmother", "encryption", "sqlcipher", "key-derivation"]
+categories.workspace = true
+description = "Dérivation de clé AES-256 pour bases SQLite chiffrées (SQLCipher)"
+
+[dependencies]
+argon2 = "0.5"
+zeroize = { version = "1", features = ["derive"] }
+getrandom = "0.2"
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.55"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"

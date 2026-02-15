@@ -258,14 +258,37 @@ fn find_kindmother_executable() -> Option<PathBuf> {
     None
 }
 
+/// Détecte si l'exécutable est dans un répertoire système (ex: Program Files) où l'utilisateur
+/// ne peut pas écrire. Dans ce cas, on utilise %LOCALAPPDATA% pour les données.
+fn is_installed_in_system_dir() -> bool {
+    std::env::current_exe()
+        .ok()
+        .and_then(|p| p.parent().map(|parent| parent.to_string_lossy().into_owned()))
+        .map_or(false, |path| {
+            path.contains("Program Files") || path.contains("Program Files (x86)")
+        })
+}
+
+/// Retourne le répertoire de données KindMother (toujours inscriptible par l'utilisateur).
+fn kindmother_data_dir() -> PathBuf {
+    if cfg!(windows) && is_installed_in_system_dir() {
+        if let Ok(local) = std::env::var("LOCALAPPDATA") {
+            let data_dir = PathBuf::from(local).join("Miyukini-COG").join("data").join("kindmother");
+            tracing::info!("Installed app: using LOCALAPPDATA for KindMother data: {:?}", data_dir);
+            return data_dir;
+        }
+    }
+
+    std::env::current_dir()
+        .map_or_else(|_| PathBuf::from("./data/kindmother"), |p| p.join("data").join("kindmother"))
+}
+
 /// Lance le service KindMother.
 fn launch_kindmother_process(exe_path: &PathBuf) -> Result<Child, String> {
     tracing::info!("Launching KindMother from {:?}", exe_path);
-    
-    // Configurer les variables d'environnement pour KindMother
-    let data_dir = std::env::current_dir()
-        .map_or_else(|_| PathBuf::from("./data/kindmother"), |p| p.join("data").join("kindmother"));
-    
+
+    let data_dir = kindmother_data_dir();
+
     // Créer le répertoire de données si nécessaire
     if let Err(e) = std::fs::create_dir_all(&data_dir) {
         tracing::warn!("Could not create data directory: {}", e);

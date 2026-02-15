@@ -1,6 +1,9 @@
 //! Métriques du Tracker.
 //!
 //! Statistiques et compteurs pour le monitoring.
+//!
+//! Note : Code préparé pour fonctionnalités futures (métriques avancées).
+#![allow(dead_code)]
 
 use std::sync::atomic::{AtomicU64, Ordering};
 

@@ -28,8 +28,9 @@ jayxpose = { path = "../jayxpose" }
 jaykonta = { path = "../jaykonta" }
 lord_of_the_castle = { path = "../lord_of_the_castle" }
 miyuclicker = { path = "../miyuclicker" }
-# rusqlite conservé temporairement pour migration progressive
+# rusqlite : bundled par défaut. db-encryption pour SQLCipher
 rusqlite = { version = "0.32", features = ["bundled"], optional = true }
+kindmother-db-key = { path = "../kindmother-db-key", optional = true }
 rand = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -45,6 +46,7 @@ tracing = "0.1"
 default = ["legacy-sqlite"]
 # Mode legacy: accès SQLite direct (migration progressive)
 legacy-sqlite = ["rusqlite"]
+db-encryption = ["dep:kindmother-db-key", "rusqlite/bundled-sqlcipher"]
 # Mode production: accès via KindMother uniquement
 kindmother-only = []
 

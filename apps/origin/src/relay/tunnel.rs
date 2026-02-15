@@ -1,6 +1,9 @@
 //! Tunnels de données entre COGs.
 //!
 //! Gère le relaying de données entre COGs connectés via le Relay.
+//!
+//! Note : Code préparé pour fonctionnalités futures (tunnels étendus).
+#![allow(dead_code)]
 
 use bytes::Bytes;
 use std::collections::HashMap;
@@ -416,6 +419,7 @@ impl TunnelManager {
 }
 
 /// Statistiques d'un tunnel.
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct TunnelStats {
     /// ID du tunnel.

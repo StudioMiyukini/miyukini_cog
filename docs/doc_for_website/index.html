@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation — Miyukini COG</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo">
+        <span class="logo-icon">宮</span>
+        <span>Miyukini</span>
+      </a>
+      <nav class="main-nav">
+        <a href="/">Accueil</a>
+        <a href="/catalog">Catalogue</a>
+        <a href="/services">Services</a>
+        <a href="/downloads">Télécharger</a>
+        <a href="/docs/" class="active">Documentation</a>
+        <a href="/about">À propos</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <section class="list-intro">
+      <h1>Documentation Miyukini COG</h1>
+      <p class="list-description">Documentation officielle du système Miyukini COG — Core-Orchestrated Governance Environment. Un document = une page.</p>
+    </section>
+
+    <section class="toolbar">
+      <div class="search-wrap">
+        <label for="search-input" class="sr-only">Rechercher par titre</label>
+        <input type="search" id="search-input" class="search-input" placeholder="Rechercher par titre…" autocomplete="off">
+        <span class="search-icon" aria-hidden="true">⌕</span>
+      </div>
+      <div class="filters" id="filters-wrap">
+        <!-- rempli par JS depuis index.json -->
+      </div>
+      <div class="toolbar-meta">
+        <span id="card-count" class="card-count"></span>
+      </div>
+    </section>
+
+    <section class="cards-section">
+      <div id="cards-container" class="cards-grid">
+        <!-- cartes injectées par JS -->
+      </div>
+      <p id="no-results" class="no-results hidden">Aucun document ne correspond aux filtres ou à la recherche.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Miyukini COG — Documentation site web. Un document = une page.</p>
+    </div>
+  </footer>
+
+  <script src="js/list.js"></script>
+</body>
+</html>

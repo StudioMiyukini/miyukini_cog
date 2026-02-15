@@ -4,7 +4,7 @@
 //! Kit d'outils analytics ventes PoS (sales, cash, tax, shift, export). Données = KindMother.
 //! Alignement MIP : domaine `pos`, layer tool/toolkit.
 
-/// @id: miyuposanalytics_toolkit_lib
+// @id: toolkit.pos.miyuposanalytics
 /// @role: infrastructure
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuPosAnalytics ; expose les modules tools.

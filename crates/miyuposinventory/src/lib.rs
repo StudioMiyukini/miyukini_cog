@@ -4,7 +4,7 @@
 //! Kit d'outils inventaire PoS (stock, import, alert, purchase_order, transfer, count, production, label, history, valuation). WriteIntent KindMother.
 //! Alignement MIP : domaine `pos`, layer tool/toolkit.
 
-/// @id: miyuposinventory_toolkit_lib
+// @id: toolkit.pos.miyuposinventory
 /// @role: infrastructure
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuPosInventory ; expose les modules tools.

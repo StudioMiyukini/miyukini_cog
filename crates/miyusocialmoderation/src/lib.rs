@@ -4,7 +4,7 @@
 //! Kit d'outils modération social (report, block, post). Décision = StrongFather ; WriteIntent KindMother.
 //! Alignement MIP : domaine `social`, layer tool/toolkit.
 
-/// @id: miyusocialmoderation_toolkit_lib
+// @id: toolkit.social.miyusocialmoderation
 /// @role: infrastructure
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuSocialModeration ; expose les modules tools.

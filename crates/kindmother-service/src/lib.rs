@@ -29,14 +29,14 @@
 //! - Audit complet des opérations
 //! - Écoute uniquement sur localhost
 
-mod encryption;
 mod database;
 mod arbitration;
 mod server;
 mod protocol;
 mod errors;
 
-pub use encryption::KeyDerivation;
+#[cfg(feature = "db-encryption")]
+pub use kindmother_db_key::KeyDerivation;
 pub use database::EncryptedDatabase;
 pub use arbitration::{ArbitrationEngine, Permission};
 pub use server::KindMotherServer;

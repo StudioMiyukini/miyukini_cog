@@ -3161,12 +3161,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "jay1tribu"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "kindmother",
+ "kindmother-db-key",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "uuid",
+]
+
+[[package]]
 name = "jayfestival"
 version = "0.1.0"
 dependencies = [
  "chrono",
  "kindmother",
  "kindmother-client",
+ "kindmother-db-key",
  "miyubooking",
  "miyuclock",
  "miyuinvoice",
@@ -3188,6 +3203,7 @@ dependencies = [
  "chrono",
  "kindmother",
  "kindmother-client",
+ "kindmother-db-key",
  "rusqlite",
  "serde",
  "serde_json",
@@ -3203,6 +3219,7 @@ dependencies = [
  "chrono",
  "kindmother",
  "kindmother-client",
+ "kindmother-db-key",
  "rusqlite",
  "serde",
  "serde_json",
@@ -3219,6 +3236,7 @@ dependencies = [
  "chrono",
  "kindmother",
  "kindmother-client",
+ "kindmother-db-key",
  "rusqlite",
  "serde",
  "serde_json",
@@ -3305,12 +3323,22 @@ dependencies = [
 ]
 
 [[package]]
-name = "kindmother-service"
+name = "kindmother-db-key"
 version = "0.1.0"
 dependencies = [
  "argon2",
+ "getrandom 0.2.17",
+ "winreg",
+ "zeroize",
+]
+
+[[package]]
+name = "kindmother-service"
+version = "0.1.0"
+dependencies = [
  "chrono",
  "kindmother",
+ "kindmother-db-key",
  "miyukini-kernel",
  "rusqlite",
  "serde",
@@ -3321,8 +3349,6 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "uuid",
- "winreg",
- "zeroize",
 ]
 
 [[package]]
@@ -3530,6 +3556,7 @@ dependencies = [
  "dioxus",
  "image",
  "kindmother",
+ "kindmother-db-key",
  "rusqlite",
  "serde",
  "serde_json",
@@ -3930,6 +3957,7 @@ dependencies = [
  "jayxpose",
  "kindmother",
  "kindmother-client",
+ "kindmother-db-key",
  "lord_of_the_castle",
  "miyuclicker",
  "miyuwebway_participant",
@@ -3951,6 +3979,7 @@ version = "0.1.4"
 dependencies = [
  "chrono",
  "dioxus",
+ "jay1tribu",
  "jayfestival",
  "jaykoa",
  "jaykonta",
@@ -3958,6 +3987,7 @@ dependencies = [
  "lord_of_the_castle",
  "miyuclicker",
  "miyukini-central",
+ "miyukiniwatch",
  "miyuwebway_participant",
  "rodio",
  "serde",
@@ -4006,6 +4036,20 @@ dependencies = [
  "urlencoding",
  "uuid",
  "webpki-roots 0.26.11",
+]
+
+[[package]]
+name = "miyukiniwatch"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "kindmother",
+ "kindmother-db-key",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "uuid",
 ]
 
 [[package]]

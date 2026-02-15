@@ -21,8 +21,13 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tokio = { version = "1", features = ["rt-multi-thread", "time"] }
 kindmother = { path = "../kindmother" }
+kindmother-db-key = { path = "../kindmother-db-key", optional = true }
 rusqlite = { version = "0.32", features = ["bundled"] }
 chrono = "0.4"
+
+[features]
+default = []
+db-encryption = ["dep:kindmother-db-key", "rusqlite/bundled-sqlcipher"]
 
 [[bin]]
 name = "lord_of_the_castle"

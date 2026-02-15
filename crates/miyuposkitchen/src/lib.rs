@@ -4,7 +4,7 @@
 //! Kit d'outils cuisine PoS (kitchen, service_type, ticket). Données fournies dans le flux.
 //! Alignement MIP : domaine `pos`, layer tool/toolkit.
 
-/// @id: miyuposkitchen_toolkit_lib
+// @id: toolkit.pos.miyuposkitchen
 /// @role: infrastructure
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuPosKitchen ; expose les modules tools.

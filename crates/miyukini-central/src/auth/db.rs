@@ -12,6 +12,8 @@
 //! - Un profil peut avoir plusieurs slots par service (slot 0, 1, 2…).
 
 use crate::auth::password::validate_password;
+#[cfg(feature = "db-encryption")]
+use kindmother_db_key::KeyDerivation;
 use rusqlite::{params, Connection};
 use sha2::{Digest, Sha256};
 use std::path::Path;
@@ -90,6 +92,22 @@ pub struct CentralProfile {
     pub ville: Option<String>,
     /// Premier compte créé = admin de l'environnement (MiyukiniAdmin).
     pub is_admin: bool,
+    /// Genre (Masculin, Féminin, Neutre) — Rite d'Entrée.
+    pub genre: Option<String>,
+    /// Statut relationnel (Célibataire, En couple, Marié) — Rite d'Entrée.
+    pub statut_marital: Option<String>,
+    /// Genre du/de la partenaire si non célibataire.
+    pub partenaire_genre: Option<String>,
+    /// Nom ou prénom du/de la partenaire si non célibataire.
+    pub partenaire_nom: Option<String>,
+    /// Nombre d'enfants (0 si aucun ou non renseigné).
+    pub enfants_nombre: Option<i32>,
+    /// Prénoms des enfants (JSON array ou séparés par virgule).
+    pub enfants_noms: Option<String>,
+    /// Profession ou activité — Rite d'Entrée.
+    pub profession: Option<String>,
+    /// Langue maternelle.
+    pub langue_maternelle: Option<String>,
 }
 
 /// Base des profils Central (SQLite).
@@ -100,7 +118,22 @@ pub struct CentralAuthDb {
 impl CentralAuthDb {
     /// Ouvre ou crée la base SQLite à `path`.
     pub fn open(path: impl AsRef<Path>) -> Result<Self, AuthDbError> {
+        let path = path.as_ref();
         let conn = Connection::open(path)?;
+
+        #[cfg(feature = "db-encryption")]
+        {
+            let data_dir = path.parent().unwrap_or(path);
+            let db_name = path
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("central");
+            let kd = KeyDerivation::new(data_dir).map_err(|e| AuthDbError(e.0))?;
+            let pragma_key = kd.pragma_key_hex(db_name).map_err(|e| AuthDbError(e.0))?;
+            conn.pragma_update(None, "key", &pragma_key)
+                .map_err(|e| AuthDbError(e.to_string()))?;
+        }
+
         let db = Self {
             conn: Mutex::new(conn),
         };
@@ -172,6 +205,14 @@ impl CentralAuthDb {
             ("code_postal", "TEXT"),
             ("ville", "TEXT"),
             ("is_admin", "INTEGER NOT NULL DEFAULT 0"),
+            ("genre", "TEXT"),
+            ("statut_marital", "TEXT"),
+            ("partenaire_genre", "TEXT"),
+            ("partenaire_nom", "TEXT"),
+            ("enfants_nombre", "INTEGER"),
+            ("enfants_noms", "TEXT"),
+            ("profession", "TEXT"),
+            ("langue_maternelle", "TEXT"),
         ];
         for (name, typ) in columns {
             let sql = format!("ALTER TABLE central_profiles ADD COLUMN {name} {typ}");
@@ -191,7 +232,7 @@ impl CentralAuthDb {
             return Ok(None);
         }
         let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
-        let sql = "SELECT id, email, password_hash, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin FROM central_profiles WHERE email = ?1";
+        let sql = "SELECT id, email, password_hash, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin, genre, statut_marital, partenaire_genre, partenaire_nom, enfants_nombre, enfants_noms, profession, langue_maternelle FROM central_profiles WHERE email = ?1";
         let mut stmt = conn.prepare(sql)?;
         let row = stmt.query_row(params![email], |row| {
             Ok((
@@ -208,10 +249,18 @@ impl CentralAuthDb {
                 row.get::<_, Option<String>>(10)?,
                 row.get::<_, Option<String>>(11)?,
                 row.get::<_, i64>(12)?,
+                row.get::<_, Option<String>>(13)?,
+                row.get::<_, Option<String>>(14)?,
+                row.get::<_, Option<String>>(15)?,
+                row.get::<_, Option<String>>(16)?,
+                row.get::<_, Option<i32>>(17)?,
+                row.get::<_, Option<String>>(18)?,
+                row.get::<_, Option<String>>(19)?,
+                row.get::<_, Option<String>>(20)?,
             ))
         });
         match row {
-            Ok((id, email_val, hash, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin)) => {
+            Ok((id, email_val, hash, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin, genre, statut_marital, partenaire_genre, partenaire_nom, enfants_nombre, enfants_noms, profession, langue_maternelle)) => {
                 if hash == hash_password(password) {
                     Ok(Some(CentralProfile {
                         id,
@@ -226,6 +275,14 @@ impl CentralAuthDb {
                         code_postal,
                         ville,
                         is_admin: is_admin != 0,
+                        genre,
+                        statut_marital,
+                        partenaire_genre,
+                        partenaire_nom,
+                        enfants_nombre,
+                        enfants_noms,
+                        profession,
+                        langue_maternelle,
                     }))
                 } else {
                     Ok(None)
@@ -239,7 +296,7 @@ impl CentralAuthDb {
     /// Charge un profil par ID (pour édition dans la fenêtre Profil).
     pub fn get_profile(&self, id: &str) -> Result<Option<CentralProfile>, AuthDbError> {
         let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
-        let sql = "SELECT id, email, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin FROM central_profiles WHERE id = ?1";
+        let sql = "SELECT id, email, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin, genre, statut_marital, partenaire_genre, partenaire_nom, enfants_nombre, enfants_noms, profession, langue_maternelle FROM central_profiles WHERE id = ?1";
         let mut stmt = conn.prepare(sql)?;
         let row = stmt.query_row(params![id], |row| {
             Ok(CentralProfile {
@@ -255,6 +312,14 @@ impl CentralAuthDb {
                 code_postal: row.get::<_, Option<String>>(9)?,
                 ville: row.get::<_, Option<String>>(10)?,
                 is_admin: row.get::<_, i64>(11)? != 0,
+                genre: row.get::<_, Option<String>>(12).unwrap_or(None),
+                statut_marital: row.get::<_, Option<String>>(13).unwrap_or(None),
+                partenaire_genre: row.get::<_, Option<String>>(14).unwrap_or(None),
+                partenaire_nom: row.get::<_, Option<String>>(15).unwrap_or(None),
+                enfants_nombre: row.get::<_, Option<i32>>(16).unwrap_or(None),
+                enfants_noms: row.get::<_, Option<String>>(17).unwrap_or(None),
+                profession: row.get::<_, Option<String>>(18).unwrap_or(None),
+                langue_maternelle: row.get::<_, Option<String>>(19).unwrap_or(None),
             })
         });
         match row {
@@ -269,7 +334,7 @@ impl CentralAuthDb {
         let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
         let now = chrono::Utc::now().to_rfc3339();
         conn.execute(
-            "UPDATE central_profiles SET email = ?1, pseudonyme = ?2, nom = ?3, prenom = ?4, date_naissance = ?5, telephone = ?6, numero_voie = ?7, rue = ?8, code_postal = ?9, ville = ?10, updated_at = ?11 WHERE id = ?12",
+            "UPDATE central_profiles SET email = ?1, pseudonyme = ?2, nom = ?3, prenom = ?4, date_naissance = ?5, telephone = ?6, numero_voie = ?7, rue = ?8, code_postal = ?9, ville = ?10, genre = ?11, statut_marital = ?12, partenaire_genre = ?13, partenaire_nom = ?14, enfants_nombre = ?15, enfants_noms = ?16, profession = ?17, langue_maternelle = ?18, updated_at = ?19 WHERE id = ?20",
             params![
                 profile.email,
                 profile.pseudonyme,
@@ -281,6 +346,14 @@ impl CentralAuthDb {
                 profile.rue,
                 profile.code_postal,
                 profile.ville,
+                profile.genre,
+                profile.statut_marital,
+                profile.partenaire_genre,
+                profile.partenaire_nom,
+                profile.enfants_nombre,
+                profile.enfants_noms,
+                profile.profession,
+                profile.langue_maternelle,
                 now,
                 profile.id,
             ],
@@ -306,6 +379,14 @@ impl CentralAuthDb {
                 code_postal: None,
                 ville: None,
                 is_admin: row.get::<_, i64>(2)? != 0,
+                genre: None,
+                statut_marital: None,
+                partenaire_genre: None,
+                partenaire_nom: None,
+                enfants_nombre: None,
+                enfants_noms: None,
+                profession: None,
+                langue_maternelle: None,
             })
         })?;
         let mut out = Vec::new();
@@ -442,6 +523,14 @@ impl CentralAuthDb {
             code_postal: None,
             ville: None,
             is_admin,
+            genre: None,
+            statut_marital: None,
+            partenaire_genre: None,
+            partenaire_nom: None,
+            enfants_nombre: None,
+            enfants_noms: None,
+            profession: None,
+            langue_maternelle: None,
         })
     }
 

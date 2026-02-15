@@ -4,7 +4,7 @@
 //! Kit d'outils sondages (create, vote, list, result). Décision = StrongFather ; WriteIntent KindMother.
 //! Alignement MIP : domaine `content`, layer tool/toolkit.
 
-/// @id: miyupolls_toolkit_lib
+// @id: toolkit.social.miyupolls
 /// @role: infrastructure
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuPolls ; expose les modules tools.

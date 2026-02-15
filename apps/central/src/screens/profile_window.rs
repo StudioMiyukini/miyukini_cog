@@ -4,6 +4,7 @@ use dioxus::prelude::*;
 use crate::data::{use_service_connections, profile_display_name};
 use crate::state::use_app_state;
 use crate::theme::{Theme, styles};
+use miyukiniwatch::MiyukiniWatchCollector;
 
 #[component]
 pub fn ProfileWindow() -> Element {
@@ -23,6 +24,19 @@ pub fn ProfileWindow() -> Element {
     };
 
     let on_reset_cog = move |_| {
+        // MiyukiniWatch : session terminée avant reset
+        if let (Some(profile_id), Some(session_id)) = (
+            state.read().current_user.as_ref().map(|u| u.id.clone()),
+            state.read().miyukiniwatch_session_id.clone(),
+        ) {
+            if let Some(started) = state.read().miyukiniwatch_session_started_at {
+                let duration = started.elapsed().as_secs() as i64;
+                let db = connections.read().miyukiniwatch.clone();
+                let collector = MiyukiniWatchCollector::new(db);
+                let _ = collector.record_session_end(&profile_id, &session_id, duration);
+            }
+        }
+
         let auth_db = connections.read().auth_db.clone();
         if let Err(e) = auth_db.reset_cog_to_virgin() {
             tracing::error!("reset_cog_to_virgin: {}", e);
@@ -32,6 +46,8 @@ pub fn ProfileWindow() -> Element {
         s.current_user = None;
         s.is_cog_virgin = true;
         s.show_profile_window = false;
+        s.miyukiniwatch_session_id = None;
+        s.miyukiniwatch_session_started_at = None;
     };
 
     rsx! {

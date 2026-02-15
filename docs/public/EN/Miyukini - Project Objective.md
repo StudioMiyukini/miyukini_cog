@@ -184,7 +184,7 @@ Local government, festivals and events, independent professionals (appointments,
 | **Multiple markets** | Sell building blocks (B2B), end products (B2C) or licences (B2B2C) | Agency buys 10 MiyuAuth licences; restaurateur pays JayFaim; authority deploys JayFestival under licence |
 | **Progressive adoption** | Start with building blocks (B2B), then offer full Services (B2C/B2B2C) | Phase 1: sell MiyuAuth + MiyuCMS to agencies. Phase 2: launch JayRDV B2C. Phase 3: JayFestival B2B2C |
 | **Controlled costs** | Deploy on modest hardware (€150–800), no mandatory cloud | Festival 2000 visitors: laptop €600 + event licence €300 = €900 total |
-| **Longevity** | Evolution by new environments and composition, not rewrite | A COG v1.0 remains operational 10 years. Migration v2.0 = Inter-COG diplomacy |
+| **Longevity** | Evolution by new environments and composition, not rewrite | A COG vers. 1.0 remains operational 10 years. Migration vers. 2.0 = Inter-COG diplomacy |
 
 ---
 

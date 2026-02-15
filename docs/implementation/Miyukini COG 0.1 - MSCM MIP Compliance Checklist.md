@@ -1,4 +1,4 @@
-# Miyukini COG 0.1 — MSCM MIP Compliance Checklist
+# Miyukini COG vers. 0.1.0 — MSCM MIP Compliance Checklist
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
@@ -9,7 +9,7 @@
 
 ## Contexte
 
-Cette check-list définit les **critères de conformité obligatoires** pour le balisage MSCM (Miyukini Semantic Code Markup) et l'indexation MIP (MSCM Index Protocol) dans le cadre de l'implémentation de Miyukini COG 0.1.
+Cette check-list définit les **critères de conformité obligatoires** pour le balisage MSCM (Miyukini Semantic Code Markup) et l'indexation MIP (MSCM Index Protocol) dans le cadre de l'implémentation de Miyukini COG vers. 0.1.0.
 
 **Principe fondamental :**
 > La sémantique est dans le code.  
@@ -641,7 +641,7 @@ Pour chaque Core :
 
 ## Conclusion
 
-Cette check-list constitue la **référence contractuelle** pour la conformité MSCM/MIP dans le cadre de l'implémentation de Miyukini COG 0.1.
+Cette check-list constitue la **référence contractuelle** pour la conformité MSCM/MIP dans le cadre de l'implémentation de Miyukini COG vers. 0.1.0.
 
 **Rappel :**
 - Tout code produit DOIT être conforme MSCM
@@ -659,4 +659,4 @@ Cette check-list constitue la **référence contractuelle** pour la conformité 
 **Version :** 1.0  
 **Date de création :** 2026-01-28  
 **Statut :** Contractuel — Obligatoire  
-**Mainteneur :** Équipe d'implémentation Miyukini COG 0.1
+**Mainteneur :** Équipe d'implémentation Miyukini COG vers. 0.1.0

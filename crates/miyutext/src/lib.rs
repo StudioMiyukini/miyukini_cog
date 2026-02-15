@@ -4,7 +4,7 @@
 //! Kit d'outils de traitement de texte (markdown, replace, template, sanitize). Contenu fourni dans le flux ; pas de décision métier.
 //! Alignement MIP : domaine `text`, layer tool/toolkit.
 
-/// @id: miyutext_toolkit_lib
+// @id: toolkit.text.miyutext
 /// @role: infrastructure
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuText ; expose les modules tools.

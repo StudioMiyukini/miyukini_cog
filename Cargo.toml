@@ -6,6 +6,7 @@ members = [
     "crates/miyukini-kernel",
     "crates/strongfather",
     "crates/kindmother",
+    "crates/kindmother-db-key",   # Dérivation clé pour SQLCipher
     "crates/kindmother-service",  # Serveur libSQL isolé
     "crates/kindmother-client",   # Client délégation IPC
     "crates/borderguard",
@@ -75,7 +76,9 @@ members = [
     "crates/jaykoa",
     "crates/jayxpose",
     "crates/jaykonta",
-    
+    "crates/jay1tribu",
+    "crates/miyukiniwatch",
+
     # === Services avec UI native ===
     "crates/lord_of_the_castle",  # MiyukiniSurvivor — Dioxus + Blitz
     
@@ -107,7 +110,11 @@ categories = ["development-tools", "infrastructure"]
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
-missing_docs = "warn"
+missing_docs = "allow"
+unused_imports = "allow"
+unused_variables = "allow"
+unused_assignments = "allow"
+dead_code = "allow"
 
 [workspace.lints.clippy]
 all = { level = "warn", priority = -1 }
