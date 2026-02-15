@@ -247,6 +247,11 @@ pub struct AnnouncePayload {
     pub services: Vec<String>,
     /// Permis ID (pour vérification).
     pub permis_id: String,
+    /// Slug de sous-domaine personnalisé (optionnel).
+    /// Si fourni, le COG sera accessible via `<slug>.miyukini.com`.
+    /// Si absent, un slug est dérivé automatiquement du `cog_id`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub slug: Option<String>,
 }
 
 impl AnnouncePayload {
@@ -272,6 +277,10 @@ pub struct AnnounceAckPayload {
     pub heartbeat_interval: u32,
     /// TTL de l'annonce (secondes).
     pub ttl: u32,
+    /// Sous-domaine attribué au COG (ex: "boutique-alice.miyukini.com").
+    /// `None` si l'attribution a échoué ou si la fonctionnalité est désactivée.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assigned_subdomain: Option<String>,
 }
 
 impl AnnounceAckPayload {
@@ -613,6 +622,7 @@ mod tests {
             address: "127.0.0.1:12345".to_string(),
             services: vec!["jayfestival".to_string()],
             permis_id: "permis-123".to_string(),
+            slug: None,
         };
 
         let msg = TrackerMessage::new(TrackerMessageType::Announce, payload.to_bytes());

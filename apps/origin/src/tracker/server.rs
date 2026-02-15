@@ -32,6 +32,7 @@ use super::protocol::{
     SearchLobbysResultPayload, StatsResultPayload, TrackerError, TrackerMessage,
     TrackerMessageType, UpdateLobbyPayload,
 };
+use super::slug_registry::SlugRegistry;
 use crate::config::OriginConfig;
 
 /// Serveur Tracker.
@@ -46,6 +47,8 @@ pub struct TrackerServer {
     metrics: Arc<TrackerMetrics>,
     /// Registre des permis (partagé avec le Relay pour vérifier ANNOUNCE, R-011).
     permis_registry: Option<Arc<PermisRegistry>>,
+    /// Registre des slugs de sous-domaines COG (slug → cog_id).
+    slug_registry: Arc<SlugRegistry>,
 }
 
 impl TrackerServer {
@@ -60,6 +63,7 @@ impl TrackerServer {
         ));
         let catalog = Arc::new(Catalog::new(Arc::clone(&pool_manager)));
         let metrics = Arc::new(TrackerMetrics::new());
+        let slug_registry = Arc::new(SlugRegistry::new());
 
         Self {
             config,
@@ -67,7 +71,14 @@ impl TrackerServer {
             catalog,
             metrics,
             permis_registry,
+            slug_registry,
         }
+    }
+
+    /// Récupère le registre de slugs.
+    #[must_use]
+    pub fn slug_registry(&self) -> Arc<SlugRegistry> {
+        Arc::clone(&self.slug_registry)
     }
 
     /// Récupère le gestionnaire de pools.
@@ -143,9 +154,10 @@ impl TrackerServer {
         let config = Arc::clone(&self.config);
         let metrics = Arc::clone(&self.metrics);
         let permis_registry = self.permis_registry.clone();
+        let slug_registry = Arc::clone(&self.slug_registry);
 
         tokio::spawn(async move {
-            if let Err(e) = Self::handle_connection(stream, peer_addr, pool_manager, config, permis_registry, Arc::clone(&metrics)).await {
+            if let Err(e) = Self::handle_connection(stream, peer_addr, pool_manager, config, permis_registry, slug_registry, Arc::clone(&metrics)).await {
                 debug!("Tracker connection error from {}: {}", peer_addr, e);
             }
             metrics.record_connection_closed();
@@ -159,6 +171,7 @@ impl TrackerServer {
         pool_manager: Arc<PoolManager>,
         config: Arc<OriginConfig>,
         permis_registry: Option<Arc<PermisRegistry>>,
+        slug_registry: Arc<SlugRegistry>,
         metrics: Arc<TrackerMetrics>,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let mut buf = BytesMut::with_capacity(4096);
@@ -182,6 +195,7 @@ impl TrackerServer {
                     &pool_manager,
                     &config,
                     permis_registry.as_ref(),
+                    &slug_registry,
                     &metrics,
                 )
                 .await;
@@ -220,14 +234,15 @@ impl TrackerServer {
         pool_manager: &Arc<PoolManager>,
         config: &Arc<OriginConfig>,
         permis_registry: Option<&Arc<PermisRegistry>>,
+        slug_registry: &Arc<SlugRegistry>,
         metrics: &Arc<TrackerMetrics>,
     ) -> Option<TrackerMessage> {
         match msg.header.message_type {
             TrackerMessageType::Announce => {
-                Self::handle_announce(&msg.payload, peer_addr, pool_manager, config, permis_registry, metrics).await
+                Self::handle_announce(&msg.payload, peer_addr, pool_manager, config, permis_registry, slug_registry, metrics).await
             }
             TrackerMessageType::Withdraw => {
-                Self::handle_withdraw(&msg.payload, pool_manager, metrics).await
+                Self::handle_withdraw(&msg.payload, pool_manager, slug_registry, metrics).await
             }
             TrackerMessageType::Heartbeat => {
                 Self::handle_heartbeat(&msg.payload, pool_manager, metrics).await
@@ -270,6 +285,7 @@ impl TrackerServer {
         pool_manager: &Arc<PoolManager>,
         config: &Arc<OriginConfig>,
         permis_registry: Option<&Arc<PermisRegistry>>,
+        slug_registry: &Arc<SlugRegistry>,
         metrics: &Arc<TrackerMetrics>,
     ) -> Option<TrackerMessage> {
         let announce = match AnnouncePayload::parse(payload) {
@@ -284,8 +300,8 @@ impl TrackerServer {
         };
 
         info!(
-            "ANNOUNCE from {} (version: {}, services: {:?})",
-            announce.cog_id, announce.core_version, announce.services
+            "ANNOUNCE from {} (version: {}, services: {:?}, slug: {:?})",
+            announce.cog_id, announce.core_version, announce.services, announce.slug
         );
 
         // Vérifier le permis_id avec le registre partagé Relay (R-011)
@@ -297,6 +313,7 @@ impl TrackerServer {
                     message: "Invalid or expired permis".to_string(),
                     heartbeat_interval: config.limits.heartbeat_interval_seconds,
                     ttl: config.limits.tunnel_timeout_seconds,
+                    assigned_subdomain: None,
                 };
                 return Some(TrackerMessage::new(
                     TrackerMessageType::AnnounceAck,
@@ -340,6 +357,33 @@ impl TrackerServer {
             }
         };
 
+        // Enregistrer le slug de sous-domaine
+        let assigned_subdomain = match slug_registry
+            .register(&announce.cog_id, announce.slug.as_deref())
+            .await
+        {
+            Ok(slug) => {
+                let domain = config
+                    .identity
+                    .domain
+                    .as_deref()
+                    .unwrap_or("miyukini.com");
+                let subdomain = format!("{}.{}", slug, domain);
+                info!(
+                    "COG {} assigned subdomain: {}",
+                    announce.cog_id, subdomain
+                );
+                Some(subdomain)
+            }
+            Err(e) => {
+                warn!(
+                    "COG {} slug registration failed: {}",
+                    announce.cog_id, e
+                );
+                None
+            }
+        };
+
         // Créer l'entrée COG
         let entry = CogEntry {
             cog_id: announce.cog_id.clone(),
@@ -360,6 +404,7 @@ impl TrackerServer {
             message: "Registered successfully".to_string(),
             heartbeat_interval: config.limits.heartbeat_interval_seconds,
             ttl: config.limits.tunnel_timeout_seconds,
+            assigned_subdomain,
         };
 
         Some(TrackerMessage::new(
@@ -370,9 +415,11 @@ impl TrackerServer {
 
     /// Traite un retrait.
     /// Le COG reste dans le catalogue mais est marqué "absent" (droit reconnu à la déconnexion).
+    /// Le slug de sous-domaine est désenregistré.
     async fn handle_withdraw(
         payload: &[u8],
         pool_manager: &Arc<PoolManager>,
+        slug_registry: &Arc<SlugRegistry>,
         metrics: &Arc<TrackerMetrics>,
     ) -> Option<TrackerMessage> {
         // Le client envoie {"cog_id": "..."} — extraire le cog_id depuis l'objet JSON.
@@ -399,6 +446,9 @@ impl TrackerServer {
         };
 
         info!("[Tracker] WITHDRAW reçu pour cog_id={}", &cog_id);
+
+        // Désenregistrer le slug de sous-domaine
+        slug_registry.unregister(&cog_id).await;
 
         // Marquer le COG comme absent (sans le supprimer du catalogue)
         let mut marked = false;

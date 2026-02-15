@@ -629,6 +629,10 @@ pub struct AnnouncePayload {
     pub services: Vec<String>,
     /// Lobbys hébergés.
     pub lobbys: Vec<LobbyInfo>,
+    /// Slug de sous-domaine personnalisé (optionnel).
+    /// Si fourni, le COG sera accessible via `<slug>.miyukini.com`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub slug: Option<String>,
 }
 
 impl AnnouncePayload {
@@ -650,6 +654,9 @@ pub struct AnnounceAckPayload {
     /// TTL de l'annonce en secondes (Origin).
     #[serde(default)]
     pub ttl: u32,
+    /// Sous-domaine attribué au COG (ex: "boutique-alice.miyukini.com").
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assigned_subdomain: Option<String>,
 }
 
 impl AnnounceAckPayload {

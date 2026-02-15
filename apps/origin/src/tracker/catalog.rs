@@ -490,7 +490,7 @@ mod tests {
         let pool_manager = Arc::new(PoolManager::new(true));
         let catalog = Catalog::new(pool_manager);
 
-        let json = catalog.to_json().await;
+        let json = catalog.to_json(None).await;
         assert!(json.get("services").is_some());
         assert!(json.get("lobbys").is_some());
         assert!(json.get("pool_stats").is_some());

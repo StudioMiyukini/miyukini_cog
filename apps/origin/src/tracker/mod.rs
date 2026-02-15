@@ -15,6 +15,7 @@ pub mod metrics;
 pub mod pool;
 pub mod protocol;
 pub mod server;
+pub mod slug_registry;
 pub mod visit_tracker;
 
 pub use server::TrackerServer;

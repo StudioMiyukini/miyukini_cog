@@ -132,9 +132,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Registre des permis (Relay enregistre à la délivrance, Tracker vérifie sur ANNOUNCE, R-011)
     let permis_registry = Arc::new(PermisRegistry::new());
 
-    // Créer le tracker (pour partager le pool_manager)
+    // Créer le tracker (pour partager le pool_manager et le slug_registry)
     let tracker = TrackerServer::new(Arc::clone(&config), Some(Arc::clone(&permis_registry)));
     let pool_manager = tracker.pool_manager();
+    let slug_registry = tracker.slug_registry();
 
     // Base JayXpose optionnelle (pages vitrine publiques /vitrine/*)
     let jayxpose_db: Option<std::sync::Arc<jayxpose::JayXposeDb>> = config
@@ -153,17 +154,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         info!("JayXpose vitrines publiques activées (/vitrine/*)");
     }
 
-    // Créer le serveur web
-    let web_server = WebServer::new(Arc::clone(&config), Arc::clone(&pool_manager), jayxpose_db);
+    // Créer le serveur relay (avant web pour Phase 2 : inject HTTP via tunnel)
+    let relay_arc: Option<Arc<RelayServer>> = match RelayServer::new(
+        Arc::clone(&config),
+        Some(Arc::clone(&permis_registry)),
+    )
+    .await
+    {
+        Ok(relay) => Some(Arc::new(relay)),
+        Err(e) => {
+            error!("Failed to create relay server: {}", e);
+            error!("Relay server disabled (TLS configuration issue?)");
+            None
+        }
+    };
+
+    // Créer le serveur web (avec le slug_registry et relay pour Phase 2)
+    let web_server = WebServer::new(
+        Arc::clone(&config),
+        Arc::clone(&pool_manager),
+        jayxpose_db,
+        slug_registry,
+        relay_arc.clone(),
+    );
 
     // Créer le serveur admin
     let admin = AdminServer::new(Arc::clone(&config))
         .with_pools(Arc::clone(&pool_manager));
-
-    // Créer le serveur relay
-    let relay_result = RelayServer::new(Arc::clone(&config), Some(Arc::clone(&permis_registry))).await;
-
-    // Démarrer les serveurs en parallèle
     let tracker_handle = {
         let tracker = tracker;
         tokio::spawn(async move {
@@ -192,16 +209,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let relay_handle = tokio::spawn(async move {
-        match relay_result {
-            Ok(relay) => {
-                if let Err(e) = relay.run().await {
-                    error!("Relay server error: {}", e);
-                }
-            }
-            Err(e) => {
-                error!("Failed to create relay server: {}", e);
-                error!("Relay server disabled (TLS configuration issue?)");
-                // Continuer sans le relay - le tracker et admin fonctionnent
+        if let Some(relay) = relay_arc {
+            if let Err(e) = relay.run().await {
+                error!("Relay server error: {}", e);
             }
         }
         // Keep the task alive if relay failed to start

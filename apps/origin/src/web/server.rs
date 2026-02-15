@@ -2,16 +2,18 @@
 
 use super::{api, content::ContentManager, pages};
 use crate::config::OriginConfig;
-use crate::tracker::{catalog::Catalog, pool::PoolManager, CatalogVisitTracker};
+use crate::relay::RelayServer;
+use crate::tracker::{catalog::Catalog, pool::PoolManager, slug_registry::SlugRegistry, CatalogVisitTracker};
+use bytes::Bytes;
 use std::sync::Arc;
-use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpListener;
-use tracing::{debug, error, info};
+use tracing::{debug, error, info, warn};
 
 /// Base de données JayXpose (optionnelle) pour les pages vitrine publiques.
 pub type JayXposeDbRef = Arc<jayxpose::JayXposeDb>;
 
-/// Réponse HTTP : normale, binaire ou redirection.
+/// Réponse HTTP : normale, binaire, redirection ou brute.
 pub enum RouteResponse {
     Normal {
         status: String,
@@ -26,6 +28,8 @@ pub enum RouteResponse {
         filename: Option<String>,
     },
     Redirect { location: String },
+    /// Réponse HTTP brute (Phase 2 tunnel) à transmettre telle quelle.
+    Raw { bytes: Vec<u8> },
 }
 
 /// Serveur web public.
@@ -37,16 +41,23 @@ pub struct WebServer {
     visit_tracker: Arc<CatalogVisitTracker>,
     /// Base JayXpose (lecture seule) pour /vitrine/*. Absent si non configuré.
     jayxpose_db: Option<JayXposeDbRef>,
+    /// Registre des slugs de sous-domaines COG (pour le routage xxx.miyukini.com).
+    slug_registry: Arc<SlugRegistry>,
+    /// Relay pour Phase 2 : inject HTTP via tunnel (si session active).
+    relay_ref: Option<Arc<RelayServer>>,
 }
 
 impl WebServer {
     /// Crée un nouveau serveur web.
     /// Si `jayxpose_db` est fourni, les routes `/vitrine/*` sont activées.
+    /// Si `relay_ref` est fourni, Phase 2 (inject HTTP via tunnel) est activée.
     #[must_use]
     pub fn new(
         config: Arc<OriginConfig>,
         pool_manager: Arc<PoolManager>,
         jayxpose_db: Option<JayXposeDbRef>,
+        slug_registry: Arc<SlugRegistry>,
+        relay_ref: Option<Arc<RelayServer>>,
     ) -> Self {
         Self {
             config,
@@ -54,6 +65,8 @@ impl WebServer {
             content_manager: Arc::new(ContentManager::new()),
             visit_tracker: Arc::new(CatalogVisitTracker::new()),
             jayxpose_db,
+            slug_registry,
+            relay_ref,
         }
     }
 
@@ -71,9 +84,11 @@ impl WebServer {
                     let content_mgr = Arc::clone(&self.content_manager);
                     let visit_tracker = Arc::clone(&self.visit_tracker);
                     let jayxpose_db = self.jayxpose_db.clone();
+                    let slug_registry = Arc::clone(&self.slug_registry);
+                    let relay_ref = self.relay_ref.clone();
 
                     tokio::spawn(async move {
-                        if let Err(e) = handle_connection(stream, config, pool_mgr, content_mgr, visit_tracker, jayxpose_db).await {
+                        if let Err(e) = handle_connection(stream, config, pool_mgr, content_mgr, visit_tracker, jayxpose_db, slug_registry, relay_ref).await {
                             debug!("Connection error from {}: {}", addr, e);
                         }
                     });
@@ -89,11 +104,13 @@ impl WebServer {
 /// Gère une connexion HTTP.
 async fn handle_connection(
     mut stream: tokio::net::TcpStream,
-    _config: Arc<OriginConfig>,
+    config: Arc<OriginConfig>,
     pool_mgr: Arc<PoolManager>,
     content_mgr: Arc<ContentManager>,
     visit_tracker: Arc<CatalogVisitTracker>,
     jayxpose_db: Option<JayXposeDbRef>,
+    slug_registry: Arc<SlugRegistry>,
+    relay_ref: Option<Arc<RelayServer>>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let (reader, mut writer) = stream.split();
     let mut buf_reader = BufReader::new(reader);
@@ -108,20 +125,55 @@ async fn handle_connection(
     let method = parts[0];
     let path = parts[1];
 
-    // Lire les headers (pour ignorer le corps)
-    let mut _headers = Vec::new();
+    // Lire les headers
+    let mut headers = Vec::new();
+    let mut host_header: Option<String> = None;
     loop {
         let mut line = String::new();
         buf_reader.read_line(&mut line).await?;
         if line.trim().is_empty() {
             break;
         }
-        _headers.push(line);
+        // Extraire le Host header
+        if let Some(value) = line.strip_prefix("Host:").or_else(|| line.strip_prefix("host:")) {
+            host_header = Some(value.trim().to_lowercase());
+        }
+        headers.push(line);
     }
 
-    debug!("{} {}", method, path);
+    debug!("{} {} (Host: {:?})", method, path, host_header);
 
-    // Router
+    // Vérifier si la requête est pour un sous-domaine COG
+    let domain = config
+        .identity
+        .domain
+        .as_deref()
+        .unwrap_or("miyukini.com");
+
+    if let Some(slug) = extract_cog_slug(host_header.as_deref(), domain) {
+        // Construire la requête HTTP brute pour Phase 2 (inject via tunnel)
+        let raw_request = format!(
+            "{}\r\n{}\r\n\r\n",
+            request_line.trim_end(),
+            headers.iter().map(|h| h.trim_end()).collect::<Vec<_>>().join("\r\n")
+        );
+        let route_response = handle_cog_subdomain_request(
+            &slug,
+            path,
+            method,
+            &headers,
+            Bytes::from(raw_request),
+            &config,
+            &pool_mgr,
+            &slug_registry,
+            relay_ref.as_deref(),
+        )
+        .await;
+        write_response(&mut writer, route_response).await?;
+        return Ok(());
+    }
+
+    // Routage normal (miyukini.com / origin.miyukini.com / IP directe)
     let route_response = route_request(
         path,
         &pool_mgr,
@@ -131,7 +183,16 @@ async fn handle_connection(
     )
     .await;
 
-    // Réponse HTTP
+    write_response(&mut writer, route_response).await?;
+
+    Ok(())
+}
+
+/// Écrit une réponse HTTP sur le stream.
+async fn write_response(
+    writer: &mut (impl AsyncWriteExt + Unpin),
+    route_response: RouteResponse,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     match route_response {
         RouteResponse::Normal {
             status,
@@ -184,10 +245,319 @@ async fn handle_connection(
             );
             writer.write_all(response.as_bytes()).await?;
         }
+        RouteResponse::Raw { bytes } => {
+            writer.write_all(bytes).await?;
+        }
     }
     writer.flush().await?;
-
     Ok(())
+}
+
+/// Extrait le slug du sous-domaine COG depuis le header Host.
+///
+/// Retourne `Some("boutique-alice")` pour `Host: boutique-alice.miyukini.com`.
+/// Retourne `None` pour le domaine principal, origin, www, ou une IP directe.
+fn extract_cog_slug(host: Option<&str>, domain: &str) -> Option<String> {
+    let host = host?;
+    // Retirer le port si présent (ex: "boutique-alice.miyukini.com:8080")
+    let host_no_port = host.split(':').next().unwrap_or(host);
+
+    // Vérifier que c'est un sous-domaine de notre domaine
+    let suffix = format!(".{}", domain);
+    if !host_no_port.ends_with(&suffix) {
+        return None;
+    }
+
+    // Extraire le slug (partie avant .miyukini.com)
+    let slug = &host_no_port[..host_no_port.len() - suffix.len()];
+    if slug.is_empty() {
+        return None;
+    }
+
+    // Ignorer les sous-domaines système
+    let reserved = ["www", "origin", "api", "admin", "relay", "tracker", "mail", "docs", "blog", "status"];
+    if reserved.contains(&slug) {
+        return None;
+    }
+
+    Some(slug.to_string())
+}
+
+/// Gère une requête HTTP destinée à un sous-domaine COG.
+///
+/// Phase 2 : si le COG a une session Relay active, inject via tunnel (masquage IP).
+/// Phase 1 (fallback) : proxy HTTP direct vers l'IP:port du COG.
+async fn handle_cog_subdomain_request(
+    slug: &str,
+    path: &str,
+    _method: &str,
+    _headers: &[String],
+    raw_request: Bytes,
+    config: &OriginConfig,
+    pool_mgr: &PoolManager,
+    slug_registry: &SlugRegistry,
+    relay_ref: Option<&RelayServer>,
+) -> RouteResponse {
+    // Chercher le cog_id associé au slug
+    let cog_id = match slug_registry.lookup(slug).await {
+        Some(id) => id,
+        None => {
+            return cog_not_found_page(slug, config);
+        }
+    };
+
+    // Phase 2 : inject via tunnel si le COG a une session Relay active
+    if let Some(relay) = relay_ref {
+        match relay.inject_http_request(&cog_id, raw_request.clone()).await {
+            Ok(response_bytes) => {
+                info!(
+                    "COG subdomain Phase 2 (tunnel): {}.{} (cog_id: {})",
+                    slug,
+                    config.identity.domain.as_deref().unwrap_or("miyukini.com"),
+                    cog_id
+                );
+                return raw_http_response_to_route(&response_bytes);
+            }
+            Err(e) => {
+                debug!(
+                    "Phase 2 tunnel not available for '{}' ({}), falling back to Phase 1: {}",
+                    slug, cog_id, e
+                );
+            }
+        }
+    }
+
+    // Phase 1 (ou fallback) : proxy HTTP direct vers le COG
+    let entry = pool_mgr.find_cog(&cog_id).await;
+
+    match entry {
+        Some(entry) => {
+            let target_url = if entry.address.starts_with("http") {
+                format!("{}{}", entry.address.trim_end_matches('/'), path)
+            } else {
+                format!("http://{}{}", entry.address, path)
+            };
+
+            info!(
+                "COG subdomain proxy: {}.{} -> {} (cog_id: {})",
+                slug,
+                config.identity.domain.as_deref().unwrap_or("miyukini.com"),
+                target_url,
+                cog_id
+            );
+
+            match proxy_http_request(&target_url).await {
+                Ok(response) => response,
+                Err(e) => {
+                    warn!(
+                        "COG proxy failed for slug '{}' (cog_id: {}): {}",
+                        slug, cog_id, e
+                    );
+                    cog_offline_page(slug, &cog_id, config)
+                }
+            }
+        }
+        None => {
+            cog_offline_page(slug, &cog_id, config)
+        }
+    }
+}
+
+/// Convertit une réponse HTTP brute (Phase 2 tunnel) en RouteResponse.
+fn raw_http_response_to_route(response: &[u8]) -> RouteResponse {
+    RouteResponse::Raw {
+        bytes: response.to_vec(),
+    }
+}
+
+/// Proxy HTTP direct vers le COG (Phase 1).
+async fn proxy_http_request(
+    target_url: &str,
+) -> Result<RouteResponse, Box<dyn std::error::Error + Send + Sync>> {
+    // Extraire host:port et path depuis l'URL
+    let url = target_url
+        .strip_prefix("http://")
+        .unwrap_or(target_url.strip_prefix("https://").unwrap_or(target_url));
+
+    let (host_port, path) = match url.find('/') {
+        Some(idx) => (&url[..idx], &url[idx..]),
+        None => (url, "/"),
+    };
+
+    // Connexion TCP vers le COG
+    let mut stream = match tokio::time::timeout(
+        tokio::time::Duration::from_secs(5),
+        tokio::net::TcpStream::connect(host_port),
+    )
+    .await
+    {
+        Ok(Ok(s)) => s,
+        Ok(Err(e)) => return Err(format!("connection failed: {}", e).into()),
+        Err(_) => return Err("connection timeout (5s)".into()),
+    };
+
+    // Envoyer la requête HTTP
+    let request = format!(
+        "GET {} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\nUser-Agent: MiyukiniOriginProxy/1.0\r\n\r\n",
+        path, host_port
+    );
+    stream.write_all(request.as_bytes()).await?;
+
+    // Lire la réponse complète
+    let mut response_buf = Vec::new();
+    tokio::time::timeout(
+        tokio::time::Duration::from_secs(10),
+        stream.read_to_end(&mut response_buf),
+    )
+    .await
+    .map_err(|_| "response timeout (10s)")??;
+
+    // Parser la réponse HTTP minimale
+    let response_str = String::from_utf8_lossy(&response_buf);
+
+    // Séparer headers et body
+    if let Some(header_end) = response_str.find("\r\n\r\n") {
+        let body = &response_str[header_end + 4..];
+        let headers_part = &response_str[..header_end];
+
+        // Extraire le status
+        let status = headers_part
+            .lines()
+            .next()
+            .and_then(|line| line.strip_prefix("HTTP/1.1 ").or_else(|| line.strip_prefix("HTTP/1.0 ")))
+            .unwrap_or("200 OK")
+            .to_string();
+
+        // Extraire Content-Type
+        let content_type = headers_part
+            .lines()
+            .find_map(|line| {
+                let lower = line.to_lowercase();
+                if lower.starts_with("content-type:") {
+                    Some(line.split_once(':')?.1.trim().to_string())
+                } else {
+                    None
+                }
+            })
+            .unwrap_or_else(|| "text/html".to_string());
+
+        Ok(RouteResponse::Normal {
+            status,
+            content_type,
+            body: body.to_string(),
+        })
+    } else {
+        Ok(RouteResponse::Normal {
+            status: "502 Bad Gateway".to_string(),
+            content_type: "text/plain".to_string(),
+            body: "Invalid response from COG".to_string(),
+        })
+    }
+}
+
+/// Page affichée quand le slug ne correspond à aucun COG enregistré.
+fn cog_not_found_page(slug: &str, config: &OriginConfig) -> RouteResponse {
+    let domain = config
+        .identity
+        .domain
+        .as_deref()
+        .unwrap_or("miyukini.com");
+    let catalog_url = format!("https://{}/catalog", domain);
+    let slug_escaped = pages::html_escape(slug);
+    let body = format!(
+        r#"<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{slug_escaped}.{domain} — COG introuvable</title>
+    <style>
+        :root {{ --primary: #8b5cf6; --bg: #0a0a0f; --text: #f0f0f5; --text-muted: #9ca3af; }}
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ font-family: system-ui, sans-serif; background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; }}
+        .container {{ padding: 2rem; max-width: 480px; }}
+        h1 {{ font-size: 1.5rem; color: var(--primary); margin-bottom: 1rem; }}
+        p {{ color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6; }}
+        .slug {{ color: var(--primary); font-weight: 600; }}
+        a {{ display: inline-block; background: var(--primary); color: white; padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem; text-decoration: none; font-weight: 600; }}
+        a:hover {{ opacity: 0.9; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>COG introuvable</h1>
+        <p>Le sous-domaine <span class="slug">{slug_escaped}.{domain}</span> ne correspond a aucun COG enregistre sur le Webway.</p>
+        <p>Le COG n'est peut-etre pas encore connecte, ou le slug est incorrect.</p>
+        <a href="{catalog_url}">Voir le catalogue</a>
+    </div>
+</body>
+</html>"#,
+        slug_escaped = slug_escaped,
+        domain = domain,
+        catalog_url = catalog_url,
+    );
+    RouteResponse::Normal {
+        status: "404 Not Found".to_string(),
+        content_type: "text/html; charset=utf-8".to_string(),
+        body,
+    }
+}
+
+/// Page affichée quand le COG est enregistré mais offline / injoignable.
+fn cog_offline_page(slug: &str, cog_id: &str, config: &OriginConfig) -> RouteResponse {
+    let domain = config
+        .identity
+        .domain
+        .as_deref()
+        .unwrap_or("miyukini.com");
+    let catalog_url = format!("https://{}/catalog", domain);
+    let slug_escaped = pages::html_escape(slug);
+    let cog_escaped = pages::html_escape(cog_id);
+    let body = format!(
+        r#"<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{slug_escaped}.{domain} — COG hors ligne</title>
+    <style>
+        :root {{ --primary: #8b5cf6; --bg: #0a0a0f; --text: #f0f0f5; --text-muted: #9ca3af; --warning: #f59e0b; }}
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ font-family: system-ui, sans-serif; background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; }}
+        .container {{ padding: 2rem; max-width: 480px; }}
+        h1 {{ font-size: 1.5rem; color: var(--warning); margin-bottom: 1rem; }}
+        p {{ color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6; }}
+        .slug {{ color: var(--primary); font-weight: 600; }}
+        .cog-id {{ font-family: monospace; font-size: 0.875rem; color: var(--text-muted); }}
+        a {{ display: inline-block; background: var(--primary); color: white; padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem; text-decoration: none; font-weight: 600; }}
+        a:hover {{ opacity: 0.9; }}
+        .retry {{ margin-top: 1rem; font-size: 0.875rem; color: var(--text-muted); }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>COG hors ligne</h1>
+        <p>Le COG <span class="slug">{slug_escaped}</span> est enregistre sur le Webway mais n'est pas joignable actuellement.</p>
+        <p class="cog-id">{cog_escaped}</p>
+        <a href="{catalog_url}">Voir le catalogue</a>
+        <p class="retry">Rechargez la page dans quelques instants.</p>
+    </div>
+</body>
+</html>"#,
+        slug_escaped = slug_escaped,
+        domain = domain,
+        cog_escaped = cog_escaped,
+        catalog_url = catalog_url,
+    );
+    RouteResponse::Normal {
+        status: "503 Service Unavailable".to_string(),
+        content_type: "text/html; charset=utf-8".to_string(),
+        body,
+    }
 }
 
 /// Route les requêtes HTTP.

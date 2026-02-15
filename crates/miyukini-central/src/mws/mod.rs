@@ -66,6 +66,10 @@ pub struct CentralMwsConfig {
     /// URL de base du serveur web Origin (vitrines). Ex. "http://origin.example.com:8080". Requis pour le lien « Découvrir ».
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub jayxpose_vitrine_base_url: Option<String>,
+    /// Slug de sous-domaine personnalisé (optionnel).
+    /// Si fourni, le COG sera accessible via `<slug>.miyukini.com`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subdomain_slug: Option<String>,
 }
 
 impl Default for CentralMwsConfig {
@@ -84,6 +88,7 @@ impl Default for CentralMwsConfig {
             home_http_bind: None, // Optionnel : "0.0.0.0:8080" pour exposer la Home
             expose_jayxpose_vitrine: false,
             jayxpose_vitrine_base_url: None,
+            subdomain_slug: None,
         }
     }
 }
@@ -399,6 +404,15 @@ impl CentralMwsManager {
         mws_config.tracker.tracker_address = self.config.tracker_address.clone();
         mws_config.auto_heartbeat = self.config.auto_heartbeat;
         mws_config.auto_reconnect = self.config.auto_reconnect;
+        mws_config.subdomain_slug = self.config.subdomain_slug.clone();
+        // Phase 2 : adresse pour le forwarding HTTP via tunnel (0.0.0.0 → 127.0.0.1)
+        mws_config.home_http_bind = self.config.home_http_bind.as_ref().map(|addr| {
+            if addr.starts_with("0.0.0.0:") {
+                format!("127.0.0.1:{}", addr.strip_prefix("0.0.0.0:").unwrap_or("8080"))
+            } else {
+                addr.clone()
+            }
+        });
 
         // Créer le service MWS
         let service = MwsService::new(mws_config);

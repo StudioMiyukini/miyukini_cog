@@ -7,7 +7,7 @@ use crate::protocol::{
     core_key_payload_bytes, RegisterAckPayload, RegisterPayload, RelayFrame, RelayMessageType,
     VerifyResultPayload, NONCE_SIZE, SESSION_ID_SIZE,
 };
-use bytes::BytesMut;
+use bytes::{Bytes, BytesMut};
 use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
@@ -41,6 +41,9 @@ pub struct RelayClientConfig {
     /// Clé de conformité Cores (Phase A) pour mode strict. Si le Relay répond
     /// VERIFY_RESULT(phase A, EXTENDED_REQUIRED), cette clé est envoyée en CORE_KEY.
     pub core_conformity_key: Option<Vec<u8>>,
+    /// Phase 2 : adresse du serveur HTTP local pour le forwarding (ex. "127.0.0.1:8080").
+    /// Si fourni, la connexion reste ouverte et les trames DATA sont transmises comme requêtes HTTP.
+    pub home_http_bind: Option<String>,
 }
 
 impl Default for RelayClientConfig {
@@ -51,6 +54,7 @@ impl Default for RelayClientConfig {
             connect_timeout: 30,
             heartbeat_interval: 30,
             core_conformity_key: None,
+            home_http_bind: None,
         }
     }
 }
@@ -229,6 +233,15 @@ impl RelayClient {
                     };
                     session.scopes = vec!["tracker".to_string(), "relay".to_string()];
 
+                    // Phase 2 : démarrer le listener DATA si home_http_bind configuré
+                    if let Some(ref home_http) = self.config.home_http_bind {
+                        let home_http = home_http.clone();
+                        info!("Phase 2: starting relay listener, forwarding DATA to {}", home_http);
+                        tokio::spawn(async move {
+                            run_relay_listener(tls_stream, home_http).await;
+                        });
+                    }
+
                     info!("Session active with permis");
                     return Ok(session.clone());
                 }
@@ -325,6 +338,98 @@ impl RelayClient {
     pub async fn get_permis_id(&self) -> Option<Vec<u8>> {
         self.session.read().await.permis_id.clone()
     }
+}
+
+/// Tâche Phase 2 : écoute les trames DATA, les transmet au serveur HTTP local, renvoie la réponse.
+async fn run_relay_listener(
+    mut stream: tokio_rustls::client::TlsStream<TcpStream>,
+    home_http_bind: String,
+) {
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    let mut buffer = BytesMut::with_capacity(8192);
+    let mut temp = [0u8; 4096];
+
+    loop {
+        match stream.read(&mut temp).await {
+            Ok(0) => {
+                debug!("Relay listener: connection closed");
+                break;
+            }
+            Ok(n) => {
+                buffer.extend_from_slice(&temp[..n]);
+                while let Some(frame) = RelayFrame::parse(&mut buffer) {
+                    match frame.header.message_type {
+                        RelayMessageType::Data => {
+                            debug!(
+                                "Relay DATA received ({} bytes), forwarding to {}",
+                                frame.payload.len(),
+                                home_http_bind
+                            );
+                            match forward_http_to_local(&home_http_bind, &frame.payload).await {
+                                Ok(response) => {
+                                    let response_frame =
+                                        RelayFrame::new(RelayMessageType::Data, response);
+                                    if stream.write_all(&response_frame.to_bytes()).await.is_err() {
+                                        warn!("Relay listener: failed to send HTTP response");
+                                        return;
+                                    }
+                                }
+                                Err(e) => {
+                                    warn!("Relay listener: HTTP forward failed: {}", e);
+                                    // Envoyer une réponse d'erreur 502 pour que Origin puisse répondre au visiteur
+                                    let err_body = format!(
+                                        "HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\n\r\n"
+                                    );
+                                    let err_frame =
+                                        RelayFrame::new(RelayMessageType::Data, Bytes::from(err_body));
+                                    let _ = stream.write_all(&err_frame.to_bytes()).await;
+                                }
+                            }
+                        }
+                        RelayMessageType::Close => {
+                            info!("Relay listener: received Close");
+                            return;
+                        }
+                        _ => debug!("Relay listener: ignoring message {:?}", frame.header.message_type),
+                    }
+                }
+            }
+            Err(e) => {
+                debug!("Relay listener: read error: {}", e);
+                break;
+            }
+        }
+    }
+}
+
+/// Transmet une requête HTTP brute au serveur local et retourne la réponse.
+async fn forward_http_to_local(
+    addr: &str,
+    request: &[u8],
+) -> Result<Bytes, Box<dyn std::error::Error + Send + Sync>> {
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    let mut tcp = tokio::time::timeout(
+        tokio::time::Duration::from_secs(5),
+        tokio::net::TcpStream::connect(addr),
+    )
+    .await
+    .map_err(|_| "Connection timeout")??;
+
+    tcp.write_all(request).await?;
+
+    let mut response = Vec::new();
+    match tokio::time::timeout(
+        tokio::time::Duration::from_secs(30),
+        tcp.read_to_end(&mut response),
+    )
+    .await
+    {
+        Ok(Ok(_)) => {}
+        Ok(Err(e)) => return Err(e.into()),
+        Err(_) => return Err("Read timeout".into()),
+    }
+
+    Ok(Bytes::from(response))
 }
 
 /// Génère un nonce aléatoire.

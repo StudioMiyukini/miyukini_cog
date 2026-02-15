@@ -26,6 +26,11 @@ pub struct MwsServiceConfig {
     pub reconnect_delay: u64,
     /// Nombre max de tentatives de reconnexion.
     pub max_reconnect_attempts: u32,
+    /// Slug de sous-domaine personnalisé (optionnel).
+    /// Si fourni, le COG sera accessible via `<slug>.miyukini.com`.
+    pub subdomain_slug: Option<String>,
+    /// Phase 2 : adresse du serveur HTTP local pour le forwarding via tunnel (ex. "127.0.0.1:8080").
+    pub home_http_bind: Option<String>,
 }
 
 impl Default for MwsServiceConfig {
@@ -37,6 +42,8 @@ impl Default for MwsServiceConfig {
             auto_reconnect: true,
             reconnect_delay: 10,
             max_reconnect_attempts: 5,
+            subdomain_slug: None,
+            home_http_bind: None,
         }
     }
 }
@@ -94,8 +101,12 @@ pub struct MwsService {
 impl MwsService {
     /// Crée un nouveau service MWS.
     pub fn new(config: MwsServiceConfig) -> Self {
+        let mut relay_config = config.relay.clone();
+        if relay_config.home_http_bind.is_none() && config.home_http_bind.is_some() {
+            relay_config.home_http_bind = config.home_http_bind.clone();
+        }
         Self {
-            relay_client: Arc::new(RelayClient::new(config.relay.clone())),
+            relay_client: Arc::new(RelayClient::new(relay_config)),
             tracker_client: Arc::new(TrackerClient::new(config.tracker.clone())),
             config,
             identity: Arc::new(RwLock::new(None)),
@@ -172,6 +183,7 @@ impl MwsService {
             address: identity.public_address.clone(),
             services: identity.services.clone(),
             lobbys,
+            slug: self.config.subdomain_slug.clone(),
         };
 
         self.tracker_client.announce(&announcement).await?;
@@ -432,6 +444,7 @@ impl MwsService {
             address: identity_snapshot.public_address.clone(),
             services,
             lobbys,
+            slug: self.config.subdomain_slug.clone(),
         };
 
         info!(

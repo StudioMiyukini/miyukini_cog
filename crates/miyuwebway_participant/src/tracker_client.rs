@@ -64,6 +64,9 @@ pub struct TrackerAnnouncement {
     pub services: Vec<String>,
     /// Lobbys hébergés.
     pub lobbys: Vec<LobbyInfo>,
+    /// Slug de sous-domaine personnalisé (optionnel).
+    /// Si fourni, le COG sera accessible via `<slug>.miyukini.com`.
+    pub slug: Option<String>,
 }
 
 /// Client Tracker MWS (protocole aligné Origin).
@@ -125,6 +128,7 @@ impl TrackerClient {
             address: announcement.address.clone(),
             services: announcement.services.clone(),
             lobbys: announcement.lobbys.clone(),
+            slug: announcement.slug.clone(),
         };
 
         // Envoyer l'annonce (format Origin : pas de request_id)
@@ -145,7 +149,11 @@ impl TrackerClient {
                     .ok_or(MiyuwebwayParticipantError::InvalidPayload)?;
 
                 if ack.success {
-                    info!("Announce successful: {} (ttl: {}s)", ack.message, ack.ttl);
+                    if let Some(ref subdomain) = ack.assigned_subdomain {
+                        info!("Announce successful: {} (ttl: {}s, subdomain: {})", ack.message, ack.ttl, subdomain);
+                    } else {
+                        info!("Announce successful: {} (ttl: {}s)", ack.message, ack.ttl);
+                    }
 
                     let mut interval = self.heartbeat_interval.write().await;
                     *interval = ack.heartbeat_interval;

@@ -254,6 +254,33 @@ impl TunnelManager {
         }
     }
 
+    /// Envoie des données directement à une session (cas Origin → COG).
+    ///
+    /// Utilisé pour le proxy HTTP Phase 2 : Origin envoie la requête HTTP
+    /// au COG via la connexion Relay existante, sans tunnel COG-COG.
+    pub async fn send_to_session(
+        &self,
+        session_id: [u8; SESSION_ID_SIZE],
+        data: Bytes,
+    ) -> Result<(), TunnelError> {
+        let queues = self.outbound_queues.read().await;
+        if let Some(sender) = queues.get(&session_id) {
+            let msg = TunnelMessage {
+                source_session: [0u8; SESSION_ID_SIZE], // Origine = Origin (pas un COG)
+                dest_session: session_id,
+                data,
+                sequence: 0,
+                timestamp: chrono::Utc::now().timestamp() as u64,
+            };
+            sender.send(msg).await.map_err(|_| {
+                TunnelError::SendFailed(hex::encode(&session_id[..8]))
+            })?;
+            Ok(())
+        } else {
+            Err(TunnelError::SessionNotFound(hex::encode(&session_id[..8])))
+        }
+    }
+
     /// Relaye des données via un tunnel.
     pub async fn relay_data(
         &self,

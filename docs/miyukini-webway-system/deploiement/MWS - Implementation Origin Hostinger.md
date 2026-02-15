@@ -355,6 +355,61 @@ sudo chmod 600 /etc/miyukini/tls/origin.key
 
 > Migrer vers Let's Encrypt dès que le domaine `origin.miyukini.com` est actif (certbot).
 
+### 6.4 Certificat SSL wildcard Let's Encrypt (sous-domaines COG)
+
+Pour activer les sous-domaines COG (`xxx.miyukini.com`), un certificat wildcard est requis. Let's Encrypt exige le **challenge DNS-01** (HTTP-01 ne fonctionne pas pour les wildcards).
+
+**Prérequis :** Le DNS wildcard `*.miyukini.com` doit pointer vers l'IP du VPS (46.202.129.65).
+
+**Étape 1 — Lancer certbot (sur le VPS ou en local) :**
+
+```bash
+sudo certbot certonly --manual --preferred-challenges dns \
+  -d "miyukini.com" -d "*.miyukini.com"
+```
+
+**Étape 2 — Enregistrement TXT temporaire :**
+
+Certbot affiche un enregistrement TXT à ajouter dans le DNS Hostinger :
+
+- Type : `TXT`
+- Nom : `_acme-challenge` ou `_acme-challenge.miyukini.com` (selon l'instruction certbot)
+- Valeur : (chaîne fournie par certbot)
+- TTL : 300 ou 3600
+
+**Étape 3 — Propagation DNS :**
+
+Attendre 2 à 10 minutes, vérifier la propagation :
+
+```bash
+dig TXT _acme-challenge.miyukini.com +short
+```
+
+**Étape 4 — Validation :**
+
+Appuyer sur Entrée dans le terminal certbot pour lancer la vérification.
+
+**Étape 5 — Chemins des certificats :**
+
+Les certificats sont installés dans :
+
+- `/etc/letsencrypt/live/miyukini.com/fullchain.pem`
+- `/etc/letsencrypt/live/miyukini.com/privkey.pem`
+
+**Étape 6 — Nginx :**
+
+Mettre à jour la configuration nginx (voir section 8) pour utiliser ces chemins. La config de référence `origin-miyukini.conf` utilise déjà `/etc/letsencrypt/live/miyukini.com/`.
+
+**Renouvellement (tous les 90 jours) :**
+
+Sans plugin DNS Hostinger, le renouvellement est manuel :
+
+```bash
+sudo certbot renew --manual --preferred-challenges dns
+```
+
+Répéter l'ajout de l'enregistrement TXT dans Hostinger à chaque renouvellement. Pour automatiser, envisager un plugin DNS (ex. `certbot-dns-cloudflare`) ou un hook personnalisé.
+
 ---
 
 ## 7. Configuration MiyukiniAdmin Origin
@@ -412,6 +467,10 @@ sudo chmod 600 /etc/miyukini/admin_jwt.key
 
 **Debian utilise `sites-available` / `sites-enabled`.**
 
+Pour la config complète incluant les sous-domaines COG (`*.miyukini.com`), voir `docs/doc_for_website/origin-miyukini.conf` à la racine du dépôt.
+
+> **Après le certificat wildcard (section 6.4)** : remplacer les chemins `ssl_certificate` par `/etc/letsencrypt/live/miyukini.com/fullchain.pem` et `privkey.pem`, puis `sudo nginx -t && sudo systemctl reload nginx`.
+
 ```bash
 sudo tee /etc/nginx/sites-available/origin-miyukini.conf > /dev/null << NGINX_CONF
 # Nginx — Origin Miyukini MWS (Hostinger VPS — 46.202.129.65)
@@ -420,7 +479,7 @@ limit_req_zone \$binary_remote_addr zone=admin_login:10m rate=5r/m;
 
 server {
     listen 80;
-    server_name 46.202.129.65 origin.miyukini.com;
+    server_name 46.202.129.65 origin.miyukini.com *.miyukini.com;
 
     location /.well-known/acme-challenge/ {
         root /var/www/html;

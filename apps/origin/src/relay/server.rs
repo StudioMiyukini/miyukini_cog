@@ -14,12 +14,13 @@
 #![allow(dead_code)]
 
 use bytes::{Bytes, BytesMut};
+use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::path::Path;
 use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
-use tokio::sync::{mpsc, RwLock};
+use tokio::sync::{mpsc, oneshot, RwLock};
 use tokio_rustls::rustls;
 use tokio_rustls::TlsAcceptor;
 use tracing::{debug, error, info, warn};
@@ -34,8 +35,45 @@ use crate::config::OriginConfig;
 use crate::protocol::{
     CoreKeyPayload, Frame, MessageType, RegisterErrPayload, RegisterErrorCode,
     RegisterOkPayload, RegisterPayload, ServiceBlockPayload, VerifyPhase, VerifyResult,
-    VerifyResultPayload, ED25519_SIGNATURE_SIZE,
+    VerifyResultPayload, ED25519_SIGNATURE_SIZE, SESSION_ID_SIZE,
 };
+
+/// Pending HTTP injections (Phase 2 : Origin → COG via tunnel).
+/// Quand Origin envoie une requête HTTP à un COG, on enregistre un oneshot.
+/// Quand le COG renvoie DATA (réponse HTTP), handle_data complète le oneshot.
+struct HttpInjector {
+    pending: Arc<RwLock<HashMap<[u8; SESSION_ID_SIZE], oneshot::Sender<Bytes>>>>,
+}
+
+impl HttpInjector {
+    fn new() -> Self {
+        Self {
+            pending: Arc::new(RwLock::new(HashMap::new())),
+        }
+    }
+
+    /// Enregistre une attente de réponse et retourne le receiver.
+    async fn register(&self, session_id: [u8; SESSION_ID_SIZE]) -> oneshot::Receiver<Bytes> {
+        let (tx, rx) = oneshot::channel();
+        let mut pending = self.pending.write().await;
+        pending.insert(session_id, tx);
+        rx
+    }
+
+    /// Complète une attente si elle existe (retourne true si complétée).
+    async fn complete(&self, session_id: [u8; SESSION_ID_SIZE], data: Bytes) -> bool {
+        let tx = {
+            let mut pending = self.pending.write().await;
+            pending.remove(&session_id)
+        };
+        if let Some(tx) = tx {
+            let _ = tx.send(data);
+            true
+        } else {
+            false
+        }
+    }
+}
 
 /// Serveur Relay.
 pub struct RelayServer {
@@ -57,6 +95,8 @@ pub struct RelayServer {
     rate_limiter: Arc<RateLimiter>,
     /// Gestionnaire de tunnels.
     tunnel_manager: Arc<TunnelManager>,
+    /// Injecteur HTTP Phase 2 (Origin → COG via tunnel).
+    http_injector: Arc<HttpInjector>,
     /// Métriques.
     metrics: Arc<RelayMetrics>,
 }
@@ -108,6 +148,9 @@ impl RelayServer {
         // Créer les métriques
         let metrics = Arc::new(RelayMetrics::new());
 
+        // Injecteur HTTP Phase 2
+        let http_injector = Arc::new(HttpInjector::new());
+
         Ok(Self {
             config,
             sessions,
@@ -118,6 +161,7 @@ impl RelayServer {
             tracker_signature: [0u8; ED25519_SIGNATURE_SIZE],
             rate_limiter,
             tunnel_manager,
+            http_injector,
             metrics,
         })
     }
@@ -138,6 +182,50 @@ impl RelayServer {
     #[must_use]
     pub fn tunnels(&self) -> Arc<TunnelManager> {
         Arc::clone(&self.tunnel_manager)
+    }
+
+    /// Injecte une requête HTTP vers un COG via le tunnel Relay (Phase 2).
+    ///
+    /// Résout cog_id → session_id, envoie la requête brute, attend la réponse (timeout 30s).
+    /// Retourne Err si le COG n'a pas de session active ou si timeout.
+    pub async fn inject_http_request(
+        &self,
+        cog_id: &str,
+        request_bytes: Bytes,
+    ) -> Result<Bytes, Box<dyn std::error::Error + Send + Sync>> {
+        // Résoudre cog_id → session
+        let session = self
+            .sessions
+            .get_by_cog_id(cog_id)
+            .await
+            .ok_or_else(|| format!("No active Relay session for cog_id: {}", cog_id))?;
+
+        let session_id = {
+            let s = session.read().await;
+            if !s.is_active() {
+                return Err("Session not active".into());
+            }
+            s.id
+        };
+
+        let rx = self.http_injector.register(session_id).await;
+
+        self.tunnel_manager
+            .send_to_session(session_id, request_bytes)
+            .await
+            .map_err(|e| format!("Failed to send to session: {}", e))?;
+
+        // Attendre la réponse (timeout 30s)
+        match tokio::time::timeout(
+            tokio::time::Duration::from_secs(30),
+            rx,
+        )
+        .await
+        {
+            Ok(Ok(response)) => Ok(response),
+            Ok(Err(_)) => Err("COG closed connection before response".into()),
+            Err(_) => Err("HTTP tunnel response timeout (30s)".into()),
+        }
     }
 
     /// Configure TLS.
@@ -268,6 +356,7 @@ impl RelayServer {
         let tracker_signature = self.tracker_signature;
         let rate_limiter = Arc::clone(&self.rate_limiter);
         let tunnel_manager = Arc::clone(&self.tunnel_manager);
+        let http_injector = Arc::clone(&self.http_injector);
         let metrics = Arc::clone(&self.metrics);
 
         tokio::spawn(async move {
@@ -283,6 +372,7 @@ impl RelayServer {
                 tracker_signature,
                 rate_limiter,
                 tunnel_manager,
+                http_injector,
                 Arc::clone(&metrics),
             )
             .await;
@@ -308,6 +398,7 @@ impl RelayServer {
         tracker_signature: [u8; ED25519_SIGNATURE_SIZE],
         rate_limiter: Arc<RateLimiter>,
         tunnel_manager: Arc<TunnelManager>,
+        http_injector: Arc<HttpInjector>,
         metrics: Arc<RelayMetrics>,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         // Appliquer TLS
@@ -377,6 +468,7 @@ impl RelayServer {
                                     &tracker_signature,
                                     &sessions,
                                     &tunnel_manager,
+                                    &http_injector,
                                     peer_addr.ip(),
                                     &rate_limiter,
                                     &metrics,
@@ -461,6 +553,7 @@ impl RelayServer {
         tracker_signature: &[u8; ED25519_SIGNATURE_SIZE],
         sessions: &Arc<SessionManager>,
         tunnel_manager: &Arc<TunnelManager>,
+        http_injector: &Arc<HttpInjector>,
         client_ip: std::net::IpAddr,
         rate_limiter: &Arc<RateLimiter>,
         metrics: &Arc<RelayMetrics>,
@@ -512,7 +605,7 @@ impl RelayServer {
                 None
             }
             MessageType::Data => {
-                Self::handle_data(&frame.payload, session, tunnel_manager, metrics).await
+                Self::handle_data(&frame.payload, session, tunnel_manager, http_injector, metrics).await
             }
             _ => {
                 warn!("Unhandled message type: {:?}", frame.header.message_type);
@@ -875,6 +968,7 @@ impl RelayServer {
         payload: &Bytes,
         session: &Arc<RwLock<Session>>,
         tunnel_manager: &Arc<TunnelManager>,
+        http_injector: &Arc<HttpInjector>,
         metrics: &Arc<RelayMetrics>,
     ) -> Option<Frame> {
         // Vérifier que la session est active
@@ -895,7 +989,13 @@ impl RelayServer {
             return None;
         }
 
-        // Relayer via le tunnel
+        // Phase 2 : si c'est une réponse à une requête HTTP injectée par Origin, compléter le oneshot
+        if http_injector.complete(session_id, payload.clone()).await {
+            debug!("HTTP response received via tunnel for session {}", hex::encode(&session_id[..8]));
+            return None;
+        }
+
+        // Relayer via le tunnel COG-COG
         if let Err(e) = tunnel_manager
             .relay_data(session_id, payload.clone(), sequence)
             .await
