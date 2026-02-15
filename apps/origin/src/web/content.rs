@@ -398,19 +398,19 @@ impl ContentManager {
     async fn load_downloads(&self) {
         let mut downloads = self.downloads.write().await;
         
-        // COG Stable v0.1.4 - Windows uniquement pour l'instant
+        // COG Stable v0.1.4 - Installateur Windows
         downloads.push(Download {
             id: "miyukini-cog-windows".to_string(),
-            name: "Miyukini COG".to_string(),
-            description: "Environnement COG complet pour Windows — Inclut Central, KindMother, client MWS et tous les Services (JayXpose, JayFestival, JayKonta, JayKoa, MiyuClicker, Lord of the Castle)".to_string(),
+            name: "Miyukini COG — Installateur Windows".to_string(),
+            description: "Installateur Miyukini Central pour Windows — Inclut Central, KindMother, client MWS et tous les Services (JayXpose, JayFestival, JayKonta, JayKoa, Jay1Tribu, MiyukiniWatch, MiyuClicker, Lord of the Castle). Installation guidée avec raccourcis Bureau et Menu Démarrer.".to_string(),
             version: "0.1.4".to_string(),
             category: DownloadCategory::Cog,
             platforms: vec![Platform::Windows],
-            download_url: "https://miyukini.com/files/Miyukini-COG-v0.1.4-windows.zip".to_string(),
-            size_bytes: 8_331_400,
-            sha256: "50C697D330795DB63C723C0BAB3ADB8C73B0E0F56E040C07D345D85D85F7B6A1".to_string(),
+            download_url: "https://miyukini.com/files/MiyukiniCentral-0.1.0-Setup.exe".to_string(),
+            size_bytes: 7_429_355,
+            sha256: "".to_string(),
             published_at: Utc::now(),
-            release_notes: "v0.1.4 — Fix UI MWS: polling état connexion, adresses miyukini.com".to_string(),
+            release_notes: "v0.1.4 — Installateur Windows (Inno Setup). Inclut Jay1Tribu, MiyukiniWatch, Miou TTS, guide Linux.".to_string(),
             min_core_version: None,
         });
     }
@@ -492,11 +492,10 @@ Les solutions cloud traditionnelles vous rendent dépendant de services externes
 ### Windows
 ```powershell
 # Télécharger l'installateur
-Invoke-WebRequest -Uri "https://origin.miyukini.net/downloads/miyukini-cog-windows.zip" -OutFile "miyukini-cog.zip"
+Invoke-WebRequest -Uri "https://miyukini.com/files/MiyukiniCentral-0.1.0-Setup.exe" -OutFile "MiyukiniCentral-Setup.exe"
 
-# Extraire et lancer
-Expand-Archive miyukini-cog.zip -DestinationPath C:\MiyukiniCOG
-C:\MiyukiniCOG\miyukini-central.exe
+# Lancer l'installation guidée
+.\MiyukiniCentral-Setup.exe
 ```
 
 ### Linux

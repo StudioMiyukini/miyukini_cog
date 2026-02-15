@@ -256,6 +256,8 @@ async fn route_request(
                         "application/zip"
                     } else if filename.ends_with(".tar.gz") || filename.ends_with(".tgz") {
                         "application/gzip"
+                    } else if filename.ends_with(".exe") {
+                        "application/vnd.microsoft.portable-executable"
                     } else {
                         "application/octet-stream"
                     };
