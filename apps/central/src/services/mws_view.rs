@@ -502,15 +502,13 @@ async fn real_mws_connect(
     };
     // Exposer la page Home du COG quand annoncé : écoute HTTP et adresse annoncée au Tracker
     // Port 8090 pour éviter conflit avec Origin (8080 par défaut)
-    // public_address : URL accessible par les visiteurs externes via Origin (tunnel).
-    // Utiliser l'URL Origin au lieu de 127.0.0.1 pour que les visiteurs externes soient dirigés
-    // vers le COG via le tunnel/proxy Origin, et non vers leur machine locale.
-    let relay_host = default_cfg.relay_address.split_once(':').map(|(h, _)| h).unwrap_or(&default_cfg.relay_address);
-    let cog_id_for_url = if display_name.is_empty() { "central-native" } else { display_name.as_str() };
-    let public_address = format!("https://{}/cog/{}", relay_host, urlencoding::encode(cog_id_for_url));
+    // public_address : on annonce 0.0.0.0:8090 (adresse locale).
+    // Le Tracker détecte l'adresse locale et la remplace automatiquement par l'IP réelle
+    // du COG (vue par le Tracker) + le port 8090. Les visiteurs externes sont ainsi
+    // redirigés vers l'IP publique du host.
     let config = CentralMwsConfig {
         home_http_bind: Some("0.0.0.0:8090".to_string()),
-        public_address,
+        public_address: "0.0.0.0:8090".to_string(),
         expose_jayxpose_vitrine,
         jayxpose_vitrine_base_url,
         ..default_cfg

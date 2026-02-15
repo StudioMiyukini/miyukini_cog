@@ -178,6 +178,7 @@ impl TrackerServer {
                 // Traiter le message
                 let response = Self::handle_message(
                     msg,
+                    peer_addr,
                     &pool_manager,
                     &config,
                     permis_registry.as_ref(),
@@ -215,6 +216,7 @@ impl TrackerServer {
     /// Traite un message.
     async fn handle_message(
         msg: TrackerMessage,
+        peer_addr: SocketAddr,
         pool_manager: &Arc<PoolManager>,
         config: &Arc<OriginConfig>,
         permis_registry: Option<&Arc<PermisRegistry>>,
@@ -222,7 +224,7 @@ impl TrackerServer {
     ) -> Option<TrackerMessage> {
         match msg.header.message_type {
             TrackerMessageType::Announce => {
-                Self::handle_announce(&msg.payload, pool_manager, config, permis_registry, metrics).await
+                Self::handle_announce(&msg.payload, peer_addr, pool_manager, config, permis_registry, metrics).await
             }
             TrackerMessageType::Withdraw => {
                 Self::handle_withdraw(&msg.payload, pool_manager, metrics).await
@@ -259,8 +261,12 @@ impl TrackerServer {
     }
 
     /// Traite une annonce.
+    /// `peer_addr` est l'adresse IP source de la connexion TCP du COG.
+    /// Si l'adresse annoncée est locale (127.0.0.1, etc.), elle est remplacée
+    /// par l'IP réelle du COG + le port annoncé.
     async fn handle_announce(
         payload: &[u8],
+        peer_addr: SocketAddr,
         pool_manager: &Arc<PoolManager>,
         config: &Arc<OriginConfig>,
         permis_registry: Option<&Arc<PermisRegistry>>,
@@ -302,11 +308,43 @@ impl TrackerServer {
         // Récupérer ou créer le pool
         let pool = pool_manager.get_or_create_pool(&announce.core_version).await;
 
+        // Si l'adresse annoncée est locale (127.0.0.1, localhost, 0.0.0.0, etc.),
+        // la remplacer par l'IP réelle du COG (vue par le Tracker) + le port annoncé.
+        let effective_address = {
+            let addr_lower = announce.address.to_lowercase();
+            let is_local = addr_lower.starts_with("127.0.0.1")
+                || addr_lower.starts_with("localhost")
+                || addr_lower.starts_with("0.0.0.0")
+                || addr_lower.starts_with("[::1]")
+                || addr_lower.starts_with("https://127.")
+                || addr_lower.starts_with("http://127.")
+                || addr_lower.starts_with("https://localhost")
+                || addr_lower.starts_with("http://localhost")
+                || addr_lower.starts_with("https://0.0.0.0")
+                || addr_lower.starts_with("http://0.0.0.0");
+
+            if is_local {
+                let port = announce.address
+                    .rsplit(':')
+                    .next()
+                    .and_then(|p| p.trim_end_matches('/').parse::<u16>().ok())
+                    .unwrap_or(8090);
+                let real_addr = format!("{}:{}", peer_addr.ip(), port);
+                info!(
+                    "COG {} announced local address '{}', replaced with real IP: {}",
+                    announce.cog_id, announce.address, real_addr
+                );
+                real_addr
+            } else {
+                announce.address.clone()
+            }
+        };
+
         // Créer l'entrée COG
         let entry = CogEntry {
             cog_id: announce.cog_id.clone(),
             core_version: announce.core_version.clone(),
-            address: announce.address.clone(),
+            address: effective_address,
             last_seen: chrono::Utc::now(),
             services: announce.services.clone(),
             lobbys: Vec::new(),
