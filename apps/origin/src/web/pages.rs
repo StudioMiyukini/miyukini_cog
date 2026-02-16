@@ -315,6 +315,7 @@ fn layout(title: &str, content: &str, active_nav: &str) -> String {
                 <a href="/about" class="{about_active}">À propos</a>
                 <a href="/blog" class="{blog_active}">Blog</a>
                 <a href="/announcements" class="{announcements_active}">Annonces</a>
+                <a href="https://forum.miyukini.com" target="_blank" style="-webkit-text-fill-color: initial;">Forum</a>
             </nav>
         </div>
     </header>
@@ -339,7 +340,7 @@ fn layout(title: &str, content: &str, active_nav: &str) -> String {
                 <ul>
                     <li><a href="/community/discord">Discord</a></li>
                     <li><a href="/community/github">GitHub</a></li>
-                    <li><a href="/community/forum">Forum</a></li>
+                    <li><a href="https://forum.miyukini.com" target="_blank">Forum</a></li>
                 </ul>
             </div>
             <div>

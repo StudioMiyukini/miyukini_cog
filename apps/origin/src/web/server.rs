@@ -1,6 +1,6 @@
 //! Serveur Web Origin — Implémentation HTTP.
 
-use super::{api, content::ContentManager, pages};
+use super::{api, content::ContentManager, forum_auth, pages};
 use crate::config::OriginConfig;
 use crate::relay::RelayServer;
 use crate::tracker::{catalog::Catalog, pool::PoolManager, slug_registry::SlugRegistry, CatalogVisitTracker};
@@ -45,12 +45,15 @@ pub struct WebServer {
     slug_registry: Arc<SlugRegistry>,
     /// Relay pour Phase 2 : inject HTTP via tunnel (si session active).
     relay_ref: Option<Arc<RelayServer>>,
+    /// Auth forum unifiée Central (profils synchronisés). Si présent, /api/auth/forum/* activé.
+    forum_auth_store: Option<Arc<forum_auth::ForumAuthStore>>,
 }
 
 impl WebServer {
     /// Crée un nouveau serveur web.
     /// Si `jayxpose_db` est fourni, les routes `/vitrine/*` sont activées.
     /// Si `relay_ref` est fourni, Phase 2 (inject HTTP via tunnel) est activée.
+    /// Si `forum_auth_store` est fourni, les routes POST /api/auth/forum/validate et /sync sont activées.
     #[must_use]
     pub fn new(
         config: Arc<OriginConfig>,
@@ -58,6 +61,7 @@ impl WebServer {
         jayxpose_db: Option<JayXposeDbRef>,
         slug_registry: Arc<SlugRegistry>,
         relay_ref: Option<Arc<RelayServer>>,
+        forum_auth_store: Option<Arc<forum_auth::ForumAuthStore>>,
     ) -> Self {
         Self {
             config,
@@ -67,6 +71,7 @@ impl WebServer {
             jayxpose_db,
             slug_registry,
             relay_ref,
+            forum_auth_store,
         }
     }
 
@@ -86,9 +91,10 @@ impl WebServer {
                     let jayxpose_db = self.jayxpose_db.clone();
                     let slug_registry = Arc::clone(&self.slug_registry);
                     let relay_ref = self.relay_ref.clone();
+                    let forum_auth_store = self.forum_auth_store.clone();
 
                     tokio::spawn(async move {
-                        if let Err(e) = handle_connection(stream, config, pool_mgr, content_mgr, visit_tracker, jayxpose_db, slug_registry, relay_ref).await {
+                        if let Err(e) = handle_connection(stream, config, pool_mgr, content_mgr, visit_tracker, jayxpose_db, slug_registry, relay_ref, forum_auth_store).await {
                             debug!("Connection error from {}: {}", addr, e);
                         }
                     });
@@ -101,6 +107,19 @@ impl WebServer {
     }
 }
 
+/// Extrait Content-Length des headers (optionnel).
+fn content_length_from_headers(headers: &[String]) -> Option<usize> {
+    const MAX_BODY: usize = 65_536;
+    for line in headers {
+        let lower = line.to_lowercase();
+        if let Some(v) = lower.strip_prefix("content-length:") {
+            let n: usize = v.trim().parse().ok()?;
+            return Some(n.min(MAX_BODY));
+        }
+    }
+    None
+}
+
 /// Gère une connexion HTTP.
 async fn handle_connection(
     mut stream: tokio::net::TcpStream,
@@ -111,6 +130,7 @@ async fn handle_connection(
     jayxpose_db: Option<JayXposeDbRef>,
     slug_registry: Arc<SlugRegistry>,
     relay_ref: Option<Arc<RelayServer>>,
+    forum_auth_store: Option<Arc<forum_auth::ForumAuthStore>>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let (reader, mut writer) = stream.split();
     let mut buf_reader = BufReader::new(reader);
@@ -142,6 +162,20 @@ async fn handle_connection(
     }
 
     debug!("{} {} (Host: {:?})", method, path, host_header);
+
+    // Auth forum : POST /api/auth/forum/* avec body JSON
+    if method == "POST" && path.starts_with("/api/auth/forum/") {
+        if let Some(store) = &forum_auth_store {
+            let len = content_length_from_headers(&headers).unwrap_or(0);
+            let mut body = vec![0u8; len];
+            if !body.is_empty() {
+                buf_reader.read_exact(&mut body).await?;
+            }
+            let route_response = forum_auth::handle_api(path, &body, store.as_ref());
+            write_response(&mut writer, route_response).await?;
+            return Ok(());
+        }
+    }
 
     // Vérifier si la requête est pour un sous-domaine COG
     let domain = config
@@ -275,7 +309,7 @@ fn extract_cog_slug(host: Option<&str>, domain: &str) -> Option<String> {
     }
 
     // Ignorer les sous-domaines système
-    let reserved = ["www", "origin", "api", "admin", "relay", "tracker", "mail", "docs", "blog", "status"];
+    let reserved = ["www", "origin", "api", "admin", "relay", "tracker", "mail", "docs", "blog", "status", "forum"];
     if reserved.contains(&slug) {
         return None;
     }
