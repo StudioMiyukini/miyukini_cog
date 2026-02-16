@@ -154,6 +154,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         info!("JayXpose vitrines publiques activées (/vitrine/*)");
     }
 
+    // Auth forum unifiée Central (profils synchronisés pour forum.miyukini.com)
+    let forum_auth_store: Option<std::sync::Arc<web::forum_auth::ForumAuthStore>> = config
+        .tracker
+        .forum_profiles_db_path
+        .as_ref()
+        .and_then(|path| {
+            match web::forum_auth::ForumAuthStore::open(path) {
+                Ok(store) => {
+                    info!("Forum auth activée (/api/auth/forum/*) — base: {}", path);
+                    Some(Arc::new(store))
+                }
+                Err(e) => {
+                    error!("Forum auth: impossible d'ouvrir la base {}: {}", path, e);
+                    None
+                }
+            }
+        });
+
     // Créer le serveur relay (avant web pour Phase 2 : inject HTTP via tunnel)
     let relay_arc: Option<Arc<RelayServer>> = match RelayServer::new(
         Arc::clone(&config),
@@ -169,13 +187,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-    // Créer le serveur web (avec le slug_registry et relay pour Phase 2)
+    // Créer le serveur web (avec le slug_registry et relay pour Phase 2, forum auth si configuré)
     let web_server = WebServer::new(
         Arc::clone(&config),
         Arc::clone(&pool_manager),
         jayxpose_db,
         slug_registry,
         relay_arc.clone(),
+        forum_auth_store,
     );
 
     // Créer le serveur admin

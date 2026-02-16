@@ -46,6 +46,9 @@ tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 # Time
 chrono = { version = "0.4", features = ["serde"] }
 
+# SQLite (auth forum, profils Central synchronisés)
+rusqlite = { version = "0.32", features = ["bundled"] }
+
 # Utils
 thiserror = "1.0"
 anyhow = "1.0"

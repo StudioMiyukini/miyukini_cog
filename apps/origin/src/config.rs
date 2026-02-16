@@ -176,6 +176,9 @@ pub struct TrackerConfig {
     /// Chemin optionnel vers la base JayXpose (vitrines publiques). Si présent, les routes /vitrine/* sont servies.
     #[serde(default)]
     pub jayxpose_db_path: Option<String>,
+    /// Chemin optionnel vers la base SQLite des profils forum (auth unifiée Central). Si présent, les routes /api/auth/forum/* sont activées.
+    #[serde(default)]
+    pub forum_profiles_db_path: Option<String>,
 }
 
 fn default_tracker_port() -> u16 {
@@ -499,6 +502,7 @@ impl Default for OriginConfig {
                 pools: PoolsConfig::default(),
                 lobbys: LobbysConfig::default(),
                 jayxpose_db_path: None,
+                forum_profiles_db_path: None,
             },
             tls: TlsConfig {
                 cert_path: "tls/origin.crt".to_string(),

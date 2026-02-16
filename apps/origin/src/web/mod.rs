@@ -6,5 +6,6 @@ pub mod server;
 pub mod pages;
 pub mod api;
 pub mod content;
+pub mod forum_auth;
 
 pub use server::WebServer;
