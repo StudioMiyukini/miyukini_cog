@@ -10,18 +10,52 @@
 use crate::data::{profile_display_name, use_service_connections};
 use crate::state::AppContext;
 use dioxus::prelude::*;
-use jay1tribu::set_webway_connected;
+use jay1tribu::{set_mws_transport_sender, set_webway_connected, DispatchError, MwsTransportSender};
 use miyukini_central::{
     CentralMwsConfig, CentralMwsManager, CentralMwsState, MwsConformityState, MwsStatusSummary,
 };
+use miyuwebway_participant::GovernedContext;
 use std::sync::Arc;
-use tokio::sync::RwLock;
+use std::sync::RwLock;
+use tokio::sync::RwLock as TokioRwLock;
+
+/// Sender MWS pour Jay1Tribu : délègue à miyuwebway_participant::transport::send.
+/// Le contexte est mis à jour à la connexion / déconnexion MWS.
+struct CentralJay1TribuSender {
+    ctx: RwLock<Option<GovernedContext>>,
+}
+
+impl CentralJay1TribuSender {
+    fn new() -> Arc<Self> {
+        Arc::new(Self {
+            ctx: RwLock::new(None),
+        })
+    }
+
+    fn set_context(&self, ctx: Option<GovernedContext>) {
+        if let Ok(mut g) = self.ctx.write() {
+            *g = ctx;
+        }
+    }
+}
+
+impl MwsTransportSender for CentralJay1TribuSender {
+    fn send(&self, to: &str, payload: &[u8]) -> Result<(), DispatchError> {
+        let guard = self.ctx.read().map_err(|e| DispatchError::Transport(e.to_string()))?;
+        let ctx = match guard.as_ref() {
+            Some(c) => c.clone(),
+            None => return Err(DispatchError::Transport("MWS non connecté".into())),
+        };
+        miyuwebway_participant::transport::send(&ctx, to, payload)
+            .map_err(|e| DispatchError::Transport(e.to_string()))
+    }
+}
 
 /// État du composant MWS.
 #[derive(Clone)]
 pub struct MwsViewState {
     /// Gestionnaire MWS (connexion réelle au réseau).
-    pub manager: Arc<RwLock<Option<CentralMwsManager>>>,
+    pub manager: Arc<TokioRwLock<Option<CentralMwsManager>>>,
     /// État simplifié.
     pub state: CentralMwsState,
     /// État de conformité détaillé.
@@ -38,12 +72,16 @@ pub struct MwsViewState {
     pub connecting: bool,
     /// Erreur éventuelle.
     pub error: Option<String>,
+    /// Sender MWS pour Jay1Tribu (envoi de messages via le Webway).
+    pub jay1tribu_sender: Arc<CentralJay1TribuSender>,
 }
 
 impl Default for MwsViewState {
     fn default() -> Self {
+        let jay1tribu_sender = CentralJay1TribuSender::new();
+        set_mws_transport_sender(jay1tribu_sender.clone());
         Self {
-            manager: Arc::new(RwLock::new(None)),
+            manager: Arc::new(TokioRwLock::new(None)),
             state: CentralMwsState::Disconnected,
             conformity: MwsConformityState::Uninitialized,
             is_lone: false,
@@ -52,6 +90,7 @@ impl Default for MwsViewState {
             search_query: String::new(),
             connecting: false,
             error: None,
+            jay1tribu_sender,
         }
     }
 }
@@ -111,8 +150,16 @@ pub fn MwsNetworkView() -> Element {
                     let current_conf = state.read().conformity.clone();
                     if st != current_state || conf != current_conf {
                         tracing::info!("[MWS UI poll] état changé: {:?} → {:?}, conformité: {:?} → {:?}", current_state, st, current_conf, conf);
-                        set_webway_connected(st == CentralMwsState::Connected);
+                        let connected = st == CentralMwsState::Connected;
+                        set_webway_connected(connected);
                         let mut s = state.write();
+                        s.jay1tribu_sender.set_context(
+                            if connected {
+                                Some(GovernedContext::new("mws-jay1tribu".to_string(), 0))
+                            } else {
+                                None
+                            },
+                        );
                         s.state = st;
                         s.conformity = conf;
                         s.connecting = false;
@@ -247,6 +294,9 @@ fn MwsLoneModeToggle(mut state: Signal<MwsViewState>, mut tick: Signal<u64>) -> 
                 tick.set(n + 1);
             });
         } else {
+            let mut s = state.write();
+            s.jay1tribu_sender.set_context(None);
+            drop(s);
             set_webway_connected(false);
             let mut s = state.write();
             s.is_lone = false;
@@ -621,6 +671,7 @@ async fn real_mws_disconnect(mut state: Signal<MwsViewState>, mut tick: Signal<u
     // Réinitialiser complètement l'état UI
     {
         let mut s = state.write();
+        s.jay1tribu_sender.set_context(None);
         set_webway_connected(false);
         s.state = CentralMwsState::Disconnected;
         s.conformity = MwsConformityState::Uninitialized;

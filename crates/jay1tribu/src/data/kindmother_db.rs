@@ -1,4 +1,10 @@
 //! Base de données fille SQLite Jay1Tribu (KindMother Daughter).
+//!
+//! @id: jay1tribu_kindmother_db
+//! @do: provide_sqlite_persistence_for_jay1tribu
+//! @role: persistence
+//! @layer: infra
+//!
 //! Archives locales uniquement ; envoi/réception en temps réel requièrent le Webway.
 
 use crate::data::types::{Friend, Message, Salon, SalonType, Tribe};
@@ -124,7 +130,33 @@ impl Jay1TribuDb {
                 created_at TEXT NOT NULL,
                 FOREIGN KEY (salon_id) REFERENCES salons(id)
             );
+            CREATE TABLE IF NOT EXISTS pending_deliveries (
+                id TEXT PRIMARY KEY,
+                message_id TEXT NOT NULL,
+                recipient_cog_id TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (message_id) REFERENCES messages(id)
+            );
+            CREATE TABLE IF NOT EXISTS tribe_invitations (
+                id TEXT PRIMARY KEY,
+                tribe_id TEXT NOT NULL,
+                inviter_cog_id TEXT NOT NULL,
+                invitee_cog_id TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'pending',
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (tribe_id) REFERENCES tribes(id)
+            );
+            CREATE TABLE IF NOT EXISTS message_attachments (
+                id TEXT PRIMARY KEY,
+                message_id TEXT NOT NULL,
+                kind TEXT NOT NULL,
+                local_path TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (message_id) REFERENCES messages(id)
+            );
             CREATE UNIQUE INDEX IF NOT EXISTS idx_friends_profile_cog ON friends(profile_id, friend_cog_id);
+            CREATE INDEX IF NOT EXISTS idx_pending_deliveries_recipient ON pending_deliveries(recipient_cog_id);
+            CREATE INDEX IF NOT EXISTS idx_tribe_invitations_invitee ON tribe_invitations(invitee_cog_id);
             CREATE INDEX IF NOT EXISTS idx_friends_profile ON friends(profile_id);
             CREATE INDEX IF NOT EXISTS idx_tribe_members_tribe ON tribe_members(tribe_id);
             CREATE INDEX IF NOT EXISTS idx_salons_tribe ON salons(tribe_id);
@@ -243,15 +275,20 @@ impl Jay1TribuDb {
             "INSERT INTO tribes (id, name, description, creator_cog_id, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
             params![id, name, description, creator_cog_id, now, now],
         )?;
-        let role_id = uuid::Uuid::new_v4().to_string();
+        let chef_role_id = uuid::Uuid::new_v4().to_string();
         tx.execute(
             "INSERT INTO tribe_roles (id, tribe_id, name, permissions_json, created_at) VALUES (?1, ?2, 'Chef de tribu', NULL, ?3)",
-            params![role_id, id, now],
+            params![chef_role_id, id, now],
+        )?;
+        let membre_role_id = uuid::Uuid::new_v4().to_string();
+        tx.execute(
+            "INSERT INTO tribe_roles (id, tribe_id, name, permissions_json, created_at) VALUES (?1, ?2, 'Membre', NULL, ?3)",
+            params![membre_role_id, id, now],
         )?;
         let member_id = uuid::Uuid::new_v4().to_string();
         tx.execute(
             "INSERT INTO tribe_members (id, tribe_id, cog_id, role_id, joined_at) VALUES (?1, ?2, ?3, ?4, ?5)",
-            params![member_id, id, creator_cog_id, role_id, now],
+            params![member_id, id, creator_cog_id, chef_role_id, now],
         )?;
         tx.commit().map_err(|e| DbError(e.to_string()))?;
         Ok(Tribe {
@@ -368,6 +405,14 @@ impl Jay1TribuDb {
         Ok(())
     }
 
+    /// Liste les cog_ids des membres d'un salon (pour envoi MWS).
+    pub fn salon_member_cog_ids(&self, salon_id: &str) -> Result<Vec<String>, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let mut stmt = conn.prepare("SELECT cog_id FROM salon_members WHERE salon_id = ?1")?;
+        let rows = stmt.query_map(params![salon_id], |row| row.get(0))?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(DbError::from)
+    }
+
     pub fn salon_delete(&self, id: &str) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         conn.execute("DELETE FROM messages WHERE salon_id = ?1", params![id])?;
@@ -460,6 +505,207 @@ impl Jay1TribuDb {
             content: content.to_string(),
             created_at: created_at.clone(),
         })
+    }
+
+    /// Récupère un message par ID (pour livraison différée).
+    pub fn message_by_id(&self, message_id: &str) -> Result<Option<Message>, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let opt: Option<Message> = conn
+            .query_row(
+                "SELECT id, salon_id, sender_cog_id, content, created_at FROM messages WHERE id = ?1",
+                params![message_id],
+                |row| {
+                    Ok(Message {
+                        id: row.get(0)?,
+                        salon_id: row.get(1)?,
+                        sender_cog_id: row.get(2)?,
+                        content: row.get(3)?,
+                        created_at: row.get(4)?,
+                    })
+                },
+            )
+            .ok();
+        Ok(opt)
+    }
+
+    // ---------- Pending deliveries (H2 livraison différée) ----------
+    /// Enregistre une livraison en attente pour un destinataire (tribu).
+    pub fn pending_delivery_enqueue(
+        &self,
+        message_id: &str,
+        recipient_cog_id: &str,
+    ) -> Result<(), DbError> {
+        let id = uuid::Uuid::new_v4().to_string();
+        let created_at = now_rfc3339();
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        conn.execute(
+            "INSERT INTO pending_deliveries (id, message_id, recipient_cog_id, created_at) VALUES (?1, ?2, ?3, ?4)",
+            params![id, message_id, recipient_cog_id, created_at],
+        )?;
+        Ok(())
+    }
+
+    /// Liste les IDs de messages en attente pour un destinataire donné.
+    pub fn pending_delivery_message_ids_for(
+        &self,
+        recipient_cog_id: &str,
+    ) -> Result<Vec<(String, String)>, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let mut stmt = conn.prepare(
+            "SELECT id, message_id FROM pending_deliveries WHERE recipient_cog_id = ?1 ORDER BY created_at",
+        )?;
+        let rows = stmt.query_map(params![recipient_cog_id], |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(DbError::from)
+    }
+
+    /// Supprime une entrée de livraison en attente.
+    pub fn pending_delivery_delete(&self, pending_id: &str) -> Result<(), DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        conn.execute("DELETE FROM pending_deliveries WHERE id = ?1", params![pending_id])?;
+        Ok(())
+    }
+
+    /// Liste les livraisons en attente pour les messages envoyés par un COG donné.
+    /// Retourne (pending_id, message_id, recipient_cog_id) pour reprise à la reconnexion.
+    pub fn pending_deliveries_for_sender(
+        &self,
+        sender_cog_id: &str,
+    ) -> Result<Vec<(String, String, String)>, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let mut stmt = conn.prepare(
+            "SELECT pd.id, pd.message_id, pd.recipient_cog_id FROM pending_deliveries pd
+             INNER JOIN messages m ON m.id = pd.message_id
+             WHERE m.sender_cog_id = ?1 ORDER BY pd.created_at",
+        )?;
+        let rows = stmt.query_map(params![sender_cog_id], |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, String>(2)?))
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(DbError::from)
+    }
+
+    // ---------- Tribe invitations (M4) ----------
+    /// Crée une invitation à une tribu (status = pending).
+    pub fn tribe_invitation_create(
+        &self,
+        tribe_id: &str,
+        inviter_cog_id: &str,
+        invitee_cog_id: &str,
+    ) -> Result<String, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let exists = conn
+            .query_row(
+                "SELECT 1 FROM tribe_invitations WHERE tribe_id = ?1 AND invitee_cog_id = ?2 AND status = 'pending' LIMIT 1",
+                params![tribe_id, invitee_cog_id],
+                |row| row.get::<_, i32>(0),
+            )
+            .is_ok();
+        if exists {
+            return Err(DbError("Invitation déjà en attente pour ce COG.".to_string()));
+        }
+        let id = uuid::Uuid::new_v4().to_string();
+        let created_at = now_rfc3339();
+        conn.execute(
+            "INSERT INTO tribe_invitations (id, tribe_id, inviter_cog_id, invitee_cog_id, status, created_at) VALUES (?1, ?2, ?3, ?4, 'pending', ?5)",
+            params![id, tribe_id, inviter_cog_id, invitee_cog_id, created_at],
+        )?;
+        Ok(id)
+    }
+
+    /// Accepte une invitation (ajoute le membre à la tribu, met status = accepted).
+    pub fn tribe_invitation_accept(&self, invitation_id: &str) -> Result<(), DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let (tribe_id, invitee_cog_id): (String, String) = conn.query_row(
+            "SELECT tribe_id, invitee_cog_id FROM tribe_invitations WHERE id = ?1 AND status = 'pending'",
+            params![invitation_id],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )?;
+        let role_id: String = conn
+            .query_row(
+                "SELECT id FROM tribe_roles WHERE tribe_id = ?1 AND name = 'Membre' LIMIT 1",
+                params![tribe_id],
+                |row| row.get(0),
+            )
+            .or_else(|_| {
+                conn.query_row(
+                    "SELECT id FROM tribe_roles WHERE tribe_id = ?1 LIMIT 1",
+                    params![tribe_id],
+                    |row| row.get(0),
+                )
+            })
+            .map_err(|e| DbError(format!("Aucun rôle pour cette tribu: {}", e)))?;
+        conn.execute("UPDATE tribe_invitations SET status = 'accepted' WHERE id = ?1", params![invitation_id])?;
+        let member_id = uuid::Uuid::new_v4().to_string();
+        let joined_at = now_rfc3339();
+        conn.execute(
+            "INSERT INTO tribe_members (id, tribe_id, cog_id, role_id, joined_at) VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![member_id, tribe_id, invitee_cog_id, role_id, joined_at],
+        )?;
+        Ok(())
+    }
+
+    /// Refuse une invitation (status = refused).
+    pub fn tribe_invitation_refuse(&self, invitation_id: &str) -> Result<(), DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        conn.execute("UPDATE tribe_invitations SET status = 'refused' WHERE id = ?1 AND status = 'pending'", params![invitation_id])?;
+        Ok(())
+    }
+
+    /// Liste les invitations en attente pour un COG (invitee).
+    pub fn tribe_invitations_pending_for(
+        &self,
+        invitee_cog_id: &str,
+    ) -> Result<Vec<(String, String, String)>, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let mut stmt = conn.prepare(
+            "SELECT id, tribe_id, inviter_cog_id FROM tribe_invitations WHERE invitee_cog_id = ?1 AND status = 'pending' ORDER BY created_at",
+        )?;
+        let rows = stmt.query_map(params![invitee_cog_id], |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, String>(2)?))
+        })?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(DbError::from)
+    }
+
+    /// Récupère le role_id par défaut (premier rôle « Membre » ou premier rôle) d'une tribu.
+    pub fn tribe_default_member_role_id(&self, tribe_id: &str) -> Result<Option<String>, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let r: Option<String> = conn
+            .query_row(
+                "SELECT id FROM tribe_roles WHERE tribe_id = ?1 AND name = 'Membre' LIMIT 1",
+                params![tribe_id],
+                |row| row.get(0),
+            )
+            .ok();
+        if r.is_some() {
+            return Ok(r);
+        }
+        let r2: Option<String> = conn
+            .query_row(
+                "SELECT id FROM tribe_roles WHERE tribe_id = ?1 LIMIT 1",
+                params![tribe_id],
+                |row| row.get(0),
+            )
+            .ok();
+        Ok(r2)
+    }
+
+    // ---------- Message attachments (M2) ----------
+    /// Enregistre une pièce jointe (fichier ou image) sur un message.
+    pub fn message_attachment_create(
+        &self,
+        message_id: &str,
+        kind: &str,
+        local_path: &str,
+    ) -> Result<(), DbError> {
+        let id = uuid::Uuid::new_v4().to_string();
+        let created_at = now_rfc3339();
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        conn.execute(
+            "INSERT INTO message_attachments (id, message_id, kind, local_path, created_at) VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![id, message_id, kind, local_path, created_at],
+        )?;
+        Ok(())
     }
 }
 

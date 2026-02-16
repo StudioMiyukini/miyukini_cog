@@ -26,6 +26,20 @@ pub mod trust_level;
 /// @do: expose_crossing_module
 pub mod crossing;
 
+/// @id: borderguard_module_metadata
+/// @role: infrastructure
+/// @layer: core
+/// @human: Métadonnées de traçabilité (INV-BG-8).
+pub mod metadata;
+
+/// @id: borderguard_module_registry
+/// @role: infrastructure
+/// @layer: core
+/// @human: Registre en mémoire des frontières (consultation uniquement).
+pub mod registry;
+
 pub use boundary::{Boundary, BoundaryType};
 pub use crossing::{CrossingRule, CrossingRules};
-pub use trust_level::{TrustLevel, TrustLevelClassifier};
+pub use metadata::BoundaryMetadata;
+pub use registry::BoundaryRegistry;
+pub use trust_level::{DefaultTrustLevelClassifier, TrustLevel, TrustLevelClassifier};

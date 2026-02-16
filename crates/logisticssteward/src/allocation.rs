@@ -78,6 +78,48 @@ impl std::fmt::Display for AllocationError {
 
 impl std::error::Error for AllocationError {}
 
+/// Gestionnaire par défaut : suit les capacités disponibles et les allocations (en mémoire).
+#[derive(Debug, Default)]
+pub struct DefaultAllocationManager {
+    available: std::collections::HashMap<ResourceType, u64>,
+    allocations: Vec<Allocation>,
+}
+
+impl DefaultAllocationManager {
+    /// Crée un gestionnaire vide.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Définit la capacité disponible pour un type de ressource.
+    pub fn set_available(&mut self, resource_type: ResourceType, amount: u64) {
+        self.available.insert(resource_type, amount);
+    }
+}
+
+impl AllocationManager for DefaultAllocationManager {
+    fn allocate(
+        &mut self,
+        resource_type: ResourceType,
+        component_id: &str,
+        amount: u64,
+    ) -> Result<Allocation, AllocationError> {
+        let avail = self.available.entry(resource_type).or_insert(0);
+        if *avail < amount {
+            return Err(AllocationError::InsufficientResources);
+        }
+        *avail -= amount;
+        let allocation = Allocation {
+            resource_type,
+            component_id: component_id.to_string(),
+            amount,
+        };
+        self.allocations.push(allocation.clone());
+        Ok(allocation)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -96,5 +138,15 @@ mod tests {
             amount: 512,
         };
         assert_eq!(allocation.amount, 512);
+    }
+
+    #[test]
+    fn test_default_allocation_manager() {
+        let mut mgr = DefaultAllocationManager::new();
+        mgr.set_available(ResourceType::Memory, 1024);
+        let a = mgr.allocate(ResourceType::Memory, "c1", 512).unwrap();
+        assert_eq!(a.amount, 512);
+        assert_eq!(a.component_id, "c1");
+        assert!(mgr.allocate(ResourceType::Memory, "c2", 1024).is_err());
     }
 }

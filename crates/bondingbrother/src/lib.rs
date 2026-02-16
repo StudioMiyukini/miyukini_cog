@@ -9,6 +9,6 @@ pub mod connection;
 pub mod sync;
 pub mod translation;
 
-pub use connection::{Connection, ConnectionManager};
-pub use sync::{SyncManager, SyncStrategy};
-pub use translation::{Translation, Translator};
+pub use connection::{Connection, ConnectionError, ConnectionManager, DefaultConnectionManager};
+pub use sync::{DefaultSyncManager, SyncError, SyncManager, SyncStrategy};
+pub use translation::{DefaultTranslator, Translation, TranslationError, Translator};

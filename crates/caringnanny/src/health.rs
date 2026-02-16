@@ -45,6 +45,34 @@ pub trait HealthChecker {
     fn check(&self, component: &str) -> HealthStatus;
 }
 
+/// Vérificateur par défaut : registre composant -> statut, défaut Healthy.
+#[derive(Debug, Default)]
+pub struct DefaultHealthChecker {
+    status_by_component: std::collections::HashMap<String, HealthStatus>,
+}
+
+impl DefaultHealthChecker {
+    /// Crée un vérificateur vide (tous les composants considérés Healthy).
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Enregistre le statut d'un composant (pour tests ou mise à jour par observations).
+    pub fn set_status(&mut self, component: impl Into<String>, status: HealthStatus) {
+        self.status_by_component.insert(component.into(), status);
+    }
+}
+
+impl HealthChecker for DefaultHealthChecker {
+    fn check(&self, component: &str) -> HealthStatus {
+        self.status_by_component
+            .get(component)
+            .copied()
+            .unwrap_or(HealthStatus::Healthy)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -59,5 +87,13 @@ mod tests {
     fn test_health_status_equality() {
         assert_eq!(HealthStatus::Healthy, HealthStatus::Healthy);
         assert_ne!(HealthStatus::Healthy, HealthStatus::Unhealthy);
+    }
+
+    #[test]
+    fn test_default_health_checker() {
+        let mut checker = DefaultHealthChecker::new();
+        assert_eq!(checker.check("unknown"), HealthStatus::Healthy);
+        checker.set_status("db", HealthStatus::Degraded);
+        assert_eq!(checker.check("db"), HealthStatus::Degraded);
     }
 }

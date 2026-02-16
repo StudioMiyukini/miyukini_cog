@@ -9,6 +9,6 @@ pub mod workflow;
 pub mod orchestrator;
 pub mod step;
 
-pub use orchestrator::Orchestrator;
+pub use orchestrator::{DefaultOrchestrator, Orchestrator};
 pub use step::{Step, StepResult};
 pub use workflow::{Workflow, WorkflowId};

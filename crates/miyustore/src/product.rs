@@ -1,8 +1,17 @@
 //! Tools MiyuStore — tool.commerce.product.* (list, resolve, variations, create, update).
-//! Produits : lecture ; create/update = WriteIntent KindMother ; décision StrongFather.
+//! Store en mémoire (persistance réelle = KindMother côté produit).
 
 use crate::context::GovernedContext;
 use crate::errors::MiyustoreError;
+use miyukini_kernel::{IdGenerator, UuidIdGenerator};
+use std::collections::HashMap;
+use std::sync::Mutex;
+
+static PRODUCTS: std::sync::OnceLock<Mutex<HashMap<String, String>>> = std::sync::OnceLock::new();
+
+fn products() -> &'static Mutex<HashMap<String, String>> {
+    PRODUCTS.get_or_init(|| Mutex::new(HashMap::new()))
+}
 
 /// @id: miyustore_tool_commerce_product_list
 /// @role: accessor
@@ -13,7 +22,8 @@ pub fn list(ctx: &GovernedContext, _filters: Option<&str>) -> Result<Vec<String>
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    Err(MiyustoreError::Unimplemented)
+    let guard = products().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    Ok(guard.keys().cloned().collect())
 }
 
 /// @id: miyustore_tool_commerce_product_resolve
@@ -21,11 +31,12 @@ pub fn list(ctx: &GovernedContext, _filters: Option<&str>) -> Result<Vec<String>
 /// @layer: tool
 /// @human: Résout un produit par identifiant ; lecture.
 /// @do: commerce_product_resolve_under_governance
-pub fn resolve(ctx: &GovernedContext, _product_id: &str) -> Result<String, MiyustoreError> {
+pub fn resolve(ctx: &GovernedContext, product_id: &str) -> Result<String, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    Err(MiyustoreError::Unimplemented)
+    let guard = products().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    Ok(guard.get(product_id).cloned().unwrap_or_default())
 }
 
 /// @id: miyustore_tool_commerce_product_variations
@@ -37,7 +48,7 @@ pub fn variations(ctx: &GovernedContext, _product_id: &str) -> Result<Vec<String
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    Err(MiyustoreError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyustore_tool_commerce_product_create
@@ -45,11 +56,14 @@ pub fn variations(ctx: &GovernedContext, _product_id: &str) -> Result<Vec<String
 /// @layer: tool
 /// @human: Crée un produit ; WriteIntent KindMother ; décision StrongFather.
 /// @do: commerce_product_create_under_governance
-pub fn create(ctx: &GovernedContext, _payload: &str) -> Result<String, MiyustoreError> {
+pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    Err(MiyustoreError::Unimplemented)
+    let id = format!("prod:{}", UuidIdGenerator.generate());
+    let mut guard = products().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    guard.insert(id.clone(), payload.to_string());
+    Ok(id)
 }
 
 /// @id: miyustore_tool_commerce_product_update
@@ -57,9 +71,11 @@ pub fn create(ctx: &GovernedContext, _payload: &str) -> Result<String, Miyustore
 /// @layer: tool
 /// @human: Met à jour un produit ; WriteIntent KindMother.
 /// @do: commerce_product_update_under_governance
-pub fn update(ctx: &GovernedContext, _product_id: &str, _payload: &str) -> Result<(), MiyustoreError> {
+pub fn update(ctx: &GovernedContext, product_id: &str, payload: &str) -> Result<(), MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    Err(MiyustoreError::Unimplemented)
+    let mut guard = products().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    guard.insert(product_id.to_string(), payload.to_string());
+    Ok(())
 }

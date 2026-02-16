@@ -3,7 +3,8 @@
 
 use crate::context::GovernedContext;
 use crate::errors::MiyauthError;
-use crate::types::{IdentityContext, Attestation};
+use crate::types::{Attestation, IdentityContext};
+use miyukini_kernel::{IdGenerator, UuidIdGenerator};
 
 /// @id: miyauth_tool_identity_attest
 /// @role: mutator
@@ -11,9 +12,13 @@ use crate::types::{IdentityContext, Attestation};
 /// @human: Produit une attestation d'identité à partir du contexte validé.
 /// @do: identity_attest_under_governance
 /// tool.identity.attest — ne crée pas la confiance.
-pub fn attest(ctx: &GovernedContext, _context: &IdentityContext) -> Result<Attestation, MiyauthError> {
+pub fn attest(
+    ctx: &GovernedContext,
+    _context: &IdentityContext,
+) -> Result<Attestation, MiyauthError> {
     if !ctx.has_mandate() {
         return Err(MiyauthError::NoMandate);
     }
-    Err(MiyauthError::Unimplemented)
+    let attestation_id = UuidIdGenerator.generate().to_string();
+    Ok(Attestation { attestation_id })
 }

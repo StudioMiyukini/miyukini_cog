@@ -14,6 +14,8 @@
 | Document | Description |
 |----------|-------------|
 | [JayRDV - Document Fondateur](./JayRDV%20-%20Document%20Fondateur.md) | Contexte, raison d'être et portée du service. |
+| [JayRDV - Specification Complete du Service](./JayRDV%20-%20Specification%20Complete%20du%20Service.md) | **Spécification exhaustive** : vision, modèle de données, flux, écrans, gouvernance, contraintes, roadmap. Exclusion médicale (→ JayBobo). |
+| [JayRDV - Accessibilite Client et Parcours de Reservation](./JayRDV%20-%20Accessibilite%20Client%20et%20Parcours%20de%20Reservation.md) | Stratégies d'accessibilité (web, PWA, mini COG, fédération) et parcours de réservation. |
 | [JayRDV - Fonctionnalites Solutions Reservation en Ligne](./reference/JayRDV%20-%20Fonctionnalites%20Solutions%20Reservation%20en%20Ligne.md) | Analyse produit : fonctionnalités identifiées des solutions de réservation en ligne (benchmark). |
 
 ## Publics
@@ -32,6 +34,8 @@ La documentation produit est structurée par **public** : Professionnels, Client
 docs/services/JayRDV/
 ├── _index.md
 ├── JayRDV - Document Fondateur.md
+├── JayRDV - Specification Complete du Service.md
+├── JayRDV - Accessibilite Client et Parcours de Reservation.md
 ├── reference/
 │   └── JayRDV - Fonctionnalites Solutions Reservation en Ligne.md
 └── publics/

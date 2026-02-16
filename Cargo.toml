@@ -74,10 +74,14 @@ members = [
     "crates/miyuclicker",
     "crates/jayfestival",
     "crates/jaykoa",
+    "crates/jayrdv",
+    "crates/jayfaim",
+    "crates/miyukinisales",
     "crates/jayxpose",
     "crates/jaykonta",
     "crates/jay1tribu",
     "crates/miyukiniwatch",
+    "crates/miyukinibb",
 
     # === Services avec UI native ===
     "crates/lord_of_the_castle",  # MiyukiniSurvivor — Dioxus + Blitz

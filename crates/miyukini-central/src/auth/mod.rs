@@ -12,21 +12,17 @@
 //! Exemple : le service Lord of the Castle utilise `service_key = "lord_of_the_castle"` et stocke
 //! l'ID de la sauvegarde du joueur dans `ref_id`.
 //!
-//! En mode `legacy-sqlite`, accès direct SQLite (migration progressive).
-//! En mode `kindmother-only`, délégation exclusive au service KindMother.
+//! Par défaut : legacy-sqlite. Full KM (kindmother-only) en cours de parité API.
 
 mod mother_client;
 mod password;
 
-// Mode legacy SQLite (migration progressive)
 #[cfg(feature = "legacy-sqlite")]
 mod db;
 
-// Mode KindMother client (production)
 #[cfg(feature = "kindmother-only")]
 mod db_client;
 
-// Export de l'implémentation selon le feature flag
 #[cfg(feature = "legacy-sqlite")]
 pub use db::{
     AuthDbError, CentralAuthDb, CentralProfile, CentralProfileSave, CentralProfileSaveRow,

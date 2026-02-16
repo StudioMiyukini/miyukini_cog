@@ -59,6 +59,48 @@ pub trait ThreatDetector {
     fn detect(&self) -> ThreatLevel;
 }
 
+/// Détecteur par défaut : agrège des signaux fournis au constructeur, retourne le maximum (immuable, INV-WS-4).
+#[derive(Debug)]
+pub struct DefaultThreatDetector {
+    levels: std::collections::VecDeque<ThreatLevel>,
+}
+
+impl DefaultThreatDetector {
+    /// Crée un détecteur vide ; `detect()` retourne `ThreatLevel::None`.
+    #[must_use]
+    pub fn new() -> Self {
+        Self {
+            levels: std::collections::VecDeque::new(),
+        }
+    }
+
+    /// Crée un détecteur avec les signaux donnés (vue déclarative fournie par l'adaptateur au construction).
+    #[must_use]
+    pub fn with_signals(levels: impl IntoIterator<Item = ThreatLevel>) -> Self {
+        Self {
+            levels: levels.into_iter().collect(),
+        }
+    }
+
+    /// Retourne le niveau maximal parmi les signaux, ou `ThreatLevel::None` si aucun.
+    #[must_use]
+    pub fn max_signal(&self) -> ThreatLevel {
+        self.levels.iter().copied().max().unwrap_or(ThreatLevel::None)
+    }
+}
+
+impl Default for DefaultThreatDetector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ThreatDetector for DefaultThreatDetector {
+    fn detect(&self) -> ThreatLevel {
+        self.max_signal()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -73,5 +115,13 @@ mod tests {
     fn test_threat_level_ordering() {
         assert!(ThreatLevel::Critical > ThreatLevel::High);
         assert!(ThreatLevel::High > ThreatLevel::Medium);
+    }
+
+    #[test]
+    fn test_default_threat_detector() {
+        let d = DefaultThreatDetector::new();
+        assert_eq!(d.detect(), ThreatLevel::None);
+        let d = DefaultThreatDetector::with_signals([ThreatLevel::Low, ThreatLevel::Medium]);
+        assert_eq!(d.detect(), ThreatLevel::Medium);
     }
 }

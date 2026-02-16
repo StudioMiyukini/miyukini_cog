@@ -1,5 +1,8 @@
 //! Module de gestion de connexions de BondingBrother
 
+use std::collections::HashSet;
+use miyukini_kernel::{IdGenerator, UuidIdGenerator};
+
 /// @id: bondingbrother_connection
 /// @role: data
 /// @layer: core
@@ -64,6 +67,35 @@ impl std::fmt::Display for ConnectionError {
 
 impl std::error::Error for ConnectionError {}
 
+/// Implémentation par défaut : registre en mémoire des connexions par operator_id.
+#[derive(Debug, Default)]
+pub struct DefaultConnectionManager {
+    connected: HashSet<String>,
+}
+
+impl DefaultConnectionManager {
+    /// Crée un gestionnaire de connexions vide.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl ConnectionManager for DefaultConnectionManager {
+    fn connect(&mut self, operator_id: &str) -> Result<Connection, ConnectionError> {
+        let op = operator_id.to_string();
+        if self.connected.contains(&op) {
+            return Err(ConnectionError::AlreadyConnected);
+        }
+        let id = UuidIdGenerator.generate().to_string();
+        self.connected.insert(op.clone());
+        Ok(Connection {
+            id,
+            operator_id: op,
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -81,5 +113,17 @@ mod tests {
             operator_id: "op-1".to_string(),
         };
         assert_eq!(conn.id, "conn-1");
+    }
+
+    #[test]
+    fn test_default_connection_manager_connect() {
+        use super::*;
+        let mut mgr = DefaultConnectionManager::new();
+        let c1 = mgr.connect("op-1").unwrap();
+        assert!(!c1.id.is_empty());
+        assert_eq!(c1.operator_id, "op-1");
+        assert!(mgr.connect("op-1").is_err());
+        let c2 = mgr.connect("op-2").unwrap();
+        assert_ne!(c1.id, c2.id);
     }
 }

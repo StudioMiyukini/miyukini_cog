@@ -8,6 +8,10 @@ pub mod threat_detector;
 pub mod security_level;
 pub mod degradation;
 
-pub use degradation::{Degradation, DegradationManager};
-pub use security_level::{SecurityLevel, SecurityLevelManager};
-pub use threat_detector::{ThreatDetector, ThreatLevel};
+pub use degradation::{
+    Degradation, DegradationManager, DegradationState, DefaultDegradationManager,
+};
+pub use security_level::{
+    DefaultSecurityLevelManager, SecurityLevel, SecurityLevelManager,
+};
+pub use threat_detector::{DefaultThreatDetector, ThreatDetector, ThreatLevel};

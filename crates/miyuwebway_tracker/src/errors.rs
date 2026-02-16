@@ -2,6 +2,8 @@
 pub enum MiyuwebwayTrackerError {
     NoMandate,
     Unimplemented,
+    /// Tracker (Origin) indisponible ; délégation réseau non implémentée ou échec connexion.
+    TrackerUnavailable(String),
 }
 
 impl std::fmt::Display for MiyuwebwayTrackerError {
@@ -9,6 +11,7 @@ impl std::fmt::Display for MiyuwebwayTrackerError {
         match self {
             MiyuwebwayTrackerError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyuwebwayTrackerError::Unimplemented => write!(f, "Tool not yet implemented"),
+            MiyuwebwayTrackerError::TrackerUnavailable(ref msg) => write!(f, "Tracker unavailable: {msg}"),
         }
     }
 }

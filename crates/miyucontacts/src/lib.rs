@@ -16,6 +16,7 @@ pub mod context;
 pub mod errors;
 pub mod foe;
 pub mod friend;
+pub mod store;
 
 pub use admin_cell::{
     miyucontacts_admin_cell, MiyucontactsAdminCell, MiyucontactsIdentification, MiyucontactsIntegrity,

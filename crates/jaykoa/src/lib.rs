@@ -13,6 +13,8 @@
 //! Les modules UI (app, screens, theme, ui, app_state) ont été supprimés.
 //! Voir docs/implementation/Miyukini - Plan Migration Tauri React TypeScript.md
 
+/// Agrégation temporelle et détection de conflits (conflits = visualisation uniquement).
+pub mod aggregation;
 /// Modèle de domaine : types métier JayKoa.
 pub mod data;
 /// Adaptateurs inter-Services (lecture réfléchie JayFestival, JayRDV).
@@ -21,3 +23,5 @@ pub mod services;
 pub mod export;
 /// Runner des tests unitaires — exécutable depuis MiyukiniAdmin.
 pub mod test_runner;
+
+pub use aggregation::compute_conflicts;

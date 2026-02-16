@@ -1,0 +1,35 @@
+# Crate MiyukiniSales — Service devis et ventes (famille Miyukini).
+# Domaine : devis, commandes, lignes, statuts.
+# Intégration prévue : MiyuStore, MiyuInvoice, JayKonta.
+
+[package]
+name = "miyukinisales"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords = ["miyukinisales", "quote", "order", "sales"]
+categories.workspace = true
+description = "MiyukiniSales — Service devis et ventes du COG"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "2"
+
+[features]
+default = ["memory"]
+memory = []
+kindmother-only = []
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }

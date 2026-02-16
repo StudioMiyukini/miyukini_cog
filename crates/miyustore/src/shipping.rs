@@ -1,5 +1,5 @@
 //! Tools MiyuStore — tool.commerce.shipping.rate, tool.commerce.shipping.zones.resolve.
-//! Livraison : calcul tarif ; résolution zones ; panier/zone fourni.
+//! Stub : tarif fixe ; zones par défaut.
 
 use crate::context::GovernedContext;
 use crate::errors::MiyustoreError;
@@ -13,7 +13,7 @@ pub fn rate(ctx: &GovernedContext, _cart_ref: &str, _zone_ref: &str) -> Result<S
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    Err(MiyustoreError::Unimplemented)
+    Ok("0.00".to_string())
 }
 
 /// @id: miyustore_tool_commerce_shipping_zones_resolve
@@ -25,5 +25,5 @@ pub fn zones_resolve(ctx: &GovernedContext, _context_ref: Option<&str>) -> Resul
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    Err(MiyustoreError::Unimplemented)
+    Ok(vec!["default".to_string()])
 }

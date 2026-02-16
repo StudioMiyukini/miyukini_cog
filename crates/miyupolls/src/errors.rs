@@ -2,6 +2,7 @@
 pub enum MiyupollsError {
     NoMandate,
     Unimplemented,
+    InvalidInput(String),
 }
 
 impl std::fmt::Display for MiyupollsError {
@@ -9,6 +10,7 @@ impl std::fmt::Display for MiyupollsError {
         match self {
             MiyupollsError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyupollsError::Unimplemented => write!(f, "Tool not yet implemented"),
+            MiyupollsError::InvalidInput(ref m) => write!(f, "{m}"),
         }
     }
 }

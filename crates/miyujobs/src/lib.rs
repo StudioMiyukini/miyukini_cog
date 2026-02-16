@@ -22,5 +22,8 @@ pub use admin_cell::{
 };
 pub use context::GovernedContext;
 pub use errors::MiyuJobsError;
-pub use queue::{enqueue as queue_enqueue, process as queue_process, EnqueueOptions, ProcessResult};
+pub use queue::{
+    enqueue as queue_enqueue, get_task as queue_get_task, process as queue_process, EnqueueOptions,
+    ProcessResult, Task, TaskStatus,
+};
 pub use schedule::{schedule_at as jobs_schedule_at, schedule_cron as jobs_schedule_cron};

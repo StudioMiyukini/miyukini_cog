@@ -118,6 +118,8 @@ pub fn declare_target_state(
 
 **Règle d'implémentation :** WorrySentinel ne doit jamais contenir de méthodes `&mut self` qui modifient un état système.
 
+**Implémentation de référence (conformité maximale) :** Aucun setter. Les gestionnaires par défaut sont configurés uniquement au constructeur : `DefaultSecurityLevelManager::new(level)`, `DefaultDegradationManager::new(degradation)`, `DefaultThreatDetector::new()` ou `DefaultThreatDetector::with_signals(levels)`. Pour refléter une vue mise à jour, l'adaptateur crée une nouvelle instance.
+
 #### INV-WS-5 : Aucune logique temporelle technique
 
 **Traduction Rust (conceptuelle) :**

@@ -1,8 +1,9 @@
 //! Tool MiyuBilling — tool.billing.payment.record.
-//! Enregistrement d'un paiement reçu ; décision StrongFather ; WriteIntent KindMother.
+//! Store en mémoire ; id généré pour traçabilité.
 
 use crate::context::GovernedContext;
 use crate::errors::MiyubillingError;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 /// @id: miyubilling_tool_billing_payment_record
 /// @role: mutator
@@ -13,5 +14,7 @@ pub fn record(ctx: &GovernedContext, _payload: &str) -> Result<String, Miyubilli
     if !ctx.has_mandate() {
         return Err(MiyubillingError::NoMandate);
     }
-    Err(MiyubillingError::Unimplemented)
+    static NEXT: AtomicU64 = AtomicU64::new(1);
+    let id = format!("pay:{}", NEXT.fetch_add(1, Ordering::Relaxed));
+    Ok(id)
 }

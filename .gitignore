@@ -87,3 +87,6 @@ jaykoa.db-journal
 # Miyukini Central — auth profils COG (SQLite)
 miyukini_cog.db
 miyukini_cog.db-journal
+
+# Forum phpBB-COG (clone séparé : https://github.com/StudioMiyukini/phpbb-COG)
+forum/

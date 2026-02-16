@@ -1,0 +1,37 @@
+# Crate JayRDV — Service rendez-vous et réservation en ligne (famille Jay).
+# Domaine : créneaux, ressources, rendez-vous, statuts, rappels.
+# Intégration prévue : MiyuBooking (créneaux), MiyuNotify (rappels), JayKoa (agenda).
+
+[package]
+name = "jayrdv"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords = ["jayrdv", "appointment", "booking", "reservation"]
+categories.workspace = true
+description = "JayRDV — Service rendez-vous et réservation en ligne du COG"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "2"
+
+[features]
+default = []
+# Store en mémoire (défaut si aucune feature).
+memory = []
+# Full KM : persistance via KindMother (stub actuel = délégation au store mémoire).
+kindmother-only = []
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }

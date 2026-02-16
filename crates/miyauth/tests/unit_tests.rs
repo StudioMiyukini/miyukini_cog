@@ -39,6 +39,13 @@ fn sample_artefacts() -> IdentityArtefacts {
     }
 }
 
+/// Passeport/Visa mock au format MiyuAuth v1 : [0x01][expiry_nanos 8 bytes LE]. expiry=0 = pas d'expiration.
+fn mock_passport_valid_no_expiry() -> Vec<u8> {
+    let mut b = vec![0x01u8];
+    b.extend_from_slice(&0u64.to_le_bytes());
+    b
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Tests du contexte gouverné (GovernedContext)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -265,7 +272,7 @@ fn mauth_tool_004_role_no_mandate() {
 /// @id: MAUTH_TOOL_010
 /// @role: test
 /// @layer: toolkit
-/// @human: identity_resolve avec mandat - vérifie que le mandat est accepté (Unimplemented attendu).
+/// @human: identity_resolve avec mandat - vérifie résolution (Citizen car Passeport présent).
 #[test]
 fn mauth_tool_010_resolve_with_mandate() {
     let ctx = governed_ctx();
@@ -273,28 +280,32 @@ fn mauth_tool_010_resolve_with_mandate() {
     
     let result = identity_resolve(&ctx, &artefacts);
     
-    // En Phase 1, retourne Unimplemented (pas NoMandate)
-    assert!(matches!(result, Err(MiyauthError::Unimplemented)));
+    assert!(result.is_ok());
+    let context = result.unwrap();
+    assert_eq!(context.role, IdentityRole::Citizen);
+    assert!(!context.opaque_id.is_empty());
+    assert_eq!(context.opaque_id, "session-abc-123");
 }
 
 /// @id: MAUTH_TOOL_011
 /// @role: test
 /// @layer: toolkit
-/// @human: identity_verify avec mandat - vérifie que le mandat est accepté.
+/// @human: identity_verify avec mandat - vérifie Passeport mock valide (format v1, pas d'expiration).
 #[test]
 fn mauth_tool_011_verify_with_mandate() {
     let ctx = governed_ctx();
-    let passport_data = b"passport-raw-data";
+    let passport_data = mock_passport_valid_no_expiry();
     
-    let result = identity_verify(&ctx, passport_data);
+    let result = identity_verify(&ctx, &passport_data);
     
-    assert!(matches!(result, Err(MiyauthError::Unimplemented)));
+    assert!(result.is_ok());
+    assert_eq!(result.unwrap(), VerificationResult::Valid);
 }
 
 /// @id: MAUTH_TOOL_012
 /// @role: test
 /// @layer: toolkit
-/// @human: identity_attest avec mandat - vérifie que le mandat est accepté.
+/// @human: identity_attest avec mandat - vérifie production d'une attestation.
 #[test]
 fn mauth_tool_012_attest_with_mandate() {
     let ctx = governed_ctx();
@@ -302,7 +313,9 @@ fn mauth_tool_012_attest_with_mandate() {
     
     let result = identity_attest(&ctx, &identity_ctx);
     
-    assert!(matches!(result, Err(MiyauthError::Unimplemented)));
+    assert!(result.is_ok());
+    let att = result.unwrap();
+    assert!(!att.attestation_id.is_empty());
 }
 
 /// @id: MAUTH_TOOL_013
@@ -330,7 +343,7 @@ fn mauth_tool_013_role_with_mandate() {
 /// @id: MAUTH_R_001
 /// @role: test
 /// @layer: toolkit
-/// @human: Artefacts avec données vides - vérifie le comportement.
+/// @human: Artefacts avec données vides - résolution en External, opaque_id généré.
 #[test]
 fn mauth_r_001_artefacts_empty_data() {
     let ctx = governed_ctx();
@@ -342,22 +355,25 @@ fn mauth_r_001_artefacts_empty_data() {
     
     let result = identity_resolve(&ctx, &artefacts);
     
-    // Doit échouer avec Unimplemented, pas panic
-    assert!(matches!(result, Err(MiyauthError::Unimplemented)));
+    assert!(result.is_ok());
+    let context = result.unwrap();
+    assert_eq!(context.role, IdentityRole::External);
+    assert!(!context.opaque_id.is_empty());
+    assert!(context.opaque_id.starts_with("opaque:"));
 }
 
 /// @id: MAUTH_R_002
 /// @role: test
 /// @layer: toolkit
-/// @human: Vérification avec données binaires vides - vérifie pas de panic.
+/// @human: Vérification avec données binaires vides - retourne Invalid.
 #[test]
 fn mauth_r_002_verify_empty_data() {
     let ctx = governed_ctx();
     
     let result = identity_verify(&ctx, &[]);
     
-    // Doit échouer avec Unimplemented, pas panic
-    assert!(matches!(result, Err(MiyauthError::Unimplemented)));
+    assert!(result.is_ok());
+    assert_eq!(result.unwrap(), VerificationResult::Invalid);
 }
 
 /// @id: MAUTH_R_003

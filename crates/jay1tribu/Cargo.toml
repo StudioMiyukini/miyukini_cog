@@ -13,18 +13,20 @@ description = "Jay1Tribu — Messagerie P2P, tribus, salons et amis (Service Int
 [dependencies]
 kindmother = { path = "../kindmother" }
 rusqlite = { version = "0.32", features = ["bundled"], optional = true }
+kindmother-client = { path = "../kindmother-client", optional = true }
 kindmother-db-key = { path = "../kindmother-db-key", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 uuid = { version = "1", features = ["v4"] }
 chrono = { version = "0.4", features = ["serde"] }
 thiserror = "2"
+tokio = { version = "1", features = ["rt-multi-thread"], optional = true }
 
 [features]
 default = ["legacy-sqlite"]
 legacy-sqlite = ["rusqlite"]
+kindmother-only = ["dep:kindmother-client", "dep:tokio"]
 db-encryption = ["dep:kindmother-db-key", "rusqlite/bundled-sqlcipher"]
-kindmother-only = []
 
 [lints.rust]
 unsafe_code = "forbid"

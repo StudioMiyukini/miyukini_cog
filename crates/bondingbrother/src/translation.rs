@@ -66,6 +66,31 @@ impl std::fmt::Display for TranslationError {
 
 impl std::error::Error for TranslationError {}
 
+/// Implémentation par défaut : identité si même format, sinon erreur.
+#[derive(Debug, Default)]
+pub struct DefaultTranslator;
+
+impl DefaultTranslator {
+    /// Crée un traducteur.
+    #[must_use]
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Translator for DefaultTranslator {
+    fn translate(&self, data: &[u8], translation: &Translation) -> Result<Vec<u8>, TranslationError> {
+        if translation.source_format == translation.target_format {
+            Ok(data.to_vec())
+        } else {
+            Err(TranslationError::UnsupportedFormat(format!(
+                "{} -> {}",
+                translation.source_format, translation.target_format
+            )))
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -83,5 +108,29 @@ mod tests {
             target_format: "yaml".to_string(),
         };
         assert_eq!(translation.source_format, "json");
+    }
+
+    #[test]
+    fn test_default_translator_identity() {
+        use super::*;
+        let tr = DefaultTranslator::new();
+        let t = Translation {
+            source_format: "json".to_string(),
+            target_format: "json".to_string(),
+        };
+        let data = b"hello";
+        let out = tr.translate(data, &t).unwrap();
+        assert_eq!(out.as_slice(), data);
+    }
+
+    #[test]
+    fn test_default_translator_unsupported() {
+        use super::*;
+        let tr = DefaultTranslator::new();
+        let t = Translation {
+            source_format: "json".to_string(),
+            target_format: "yaml".to_string(),
+        };
+        assert!(tr.translate(b"x", &t).is_err());
     }
 }

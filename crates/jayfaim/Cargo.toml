@@ -1,0 +1,35 @@
+# Crate JayFaim — Service réservation tables / restauration (famille Jay).
+# Domaine : tables, créneaux, réservations, convives.
+# Intégration prévue : MiyuBooking, JayFestival (mode couplé), JayKonta (paiement).
+
+[package]
+name = "jayfaim"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords = ["jayfaim", "reservation", "restaurant", "booking"]
+categories.workspace = true
+description = "JayFaim — Service réservation tables et restauration du COG"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "2"
+
+[features]
+default = ["memory"]
+memory = []
+kindmother-only = []
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }

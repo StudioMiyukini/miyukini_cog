@@ -1,9 +1,11 @@
 //! Tool MiyuContacts — tool.contacts.list.
-//! Liste les contacts (type fourni).
+//! Liste les contacts (type fourni : friend, foe, ou tous).
 
 use crate::context::GovernedContext;
 use crate::errors::MiyucontactsError;
 use crate::friend::ContactItem;
+use crate::foe;
+use crate::friend;
 
 /// @id: miyucontacts_tool_contacts_list
 /// @role: mutator
@@ -13,10 +15,18 @@ use crate::friend::ContactItem;
 /// tool.contacts.list
 pub fn list(
     ctx: &GovernedContext,
-    _contact_type: Option<&str>,
+    contact_type: Option<&str>,
 ) -> Result<Vec<ContactItem>, MiyucontactsError> {
     if !ctx.has_mandate() {
         return Err(MiyucontactsError::NoMandate);
     }
-    Err(MiyucontactsError::Unimplemented)
+    match contact_type {
+        Some("friend") => friend::list(ctx),
+        Some("foe") => foe::list(ctx),
+        _ => {
+            let mut out = friend::list(ctx)?;
+            out.extend(foe::list(ctx)?);
+            Ok(out)
+        }
+    }
 }

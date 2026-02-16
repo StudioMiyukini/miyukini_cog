@@ -11,32 +11,42 @@
 
 use crate::constants::COMBAT_SURFACE_SIZE;
 
-/// Surface de rendu (800×800 unités de jeu).
+/// Surface de rendu (800×800 px, taille absolue de la zone de combat).
 const SURFACE: f32 = COMBAT_SURFACE_SIZE;
 
-/// Position en % de la surface de jeu.
+/// Position en % de la surface de jeu (legacy, préférer px pour cohérence avec les sprites).
 pub fn pct(v: f32) -> f32 {
     v / SURFACE * 100.0
 }
 
+/// Position en pixels (zone 800×800 : 1 unité monde = 1 px).
+pub fn px(v: f32) -> f32 {
+    v
+}
+
 /// Style CSS pour une entité (div positionnée absolument, centrée sur son point).
+/// Utilise des tailles en pixels pour cohérence avec background-size des sprites.
 pub fn entity_style(x: f32, y: f32, size: f32, color: &str) -> String {
     format!(
-        "position:absolute;left:{lp:.2}%;top:{tp:.2}%;width:{sp:.2}%;height:{sp:.2}%;background:{c};transform:translate(-50%,-50%);pointer-events:none;border-radius:1px;",
-        lp = pct(x),
-        tp = pct(y),
-        sp = pct(size),
+        "position:absolute;left:{xp:.0}px;top:{yp:.0}px;width:{sp:.0}px;height:{sp:.0}px;background:{c};transform:translate(-50%,-50%);pointer-events:none;border-radius:1px;",
+        xp = px(x),
+        yp = px(y),
+        sp = px(size),
         c = color,
     )
 }
 
 /// Style CSS pour une barre de PV au-dessus d'une entité.
 pub fn hp_bar_outer(x: f32, y: f32, entity_size: f32) -> String {
+    let bar_height = 3.0f32;
+    let top_y = y - entity_size / 2.0 - bar_height;
+    let bar_width = entity_size.max(12.0);
     format!(
-        "position:absolute;left:{lp:.2}%;top:{tp:.2}%;width:{sp:.2}%;height:0.35%;transform:translateX(-50%);background:#333;pointer-events:none;",
-        lp = pct(x),
-        tp = pct(y - entity_size / 2.0 - 3.0),
-        sp = pct(entity_size.max(12.0)),
+        "position:absolute;left:{xp:.0}px;top:{yp:.0}px;width:{wp:.0}px;height:{hp:.0}px;transform:translateX(-50%);background:#333;pointer-events:none;",
+        xp = px(x),
+        yp = px(top_y),
+        wp = px(bar_width),
+        hp = bar_height,
     )
 }
 

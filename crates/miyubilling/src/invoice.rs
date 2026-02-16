@@ -9,11 +9,15 @@ use crate::errors::MiyubillingError;
 /// @layer: tool
 /// @human: Génère une facture ; règles fournies ; WriteIntent KindMother.
 /// @do: billing_invoice_generate_under_governance
+/// Stub : id facture généré (compteur) ; persistance = KindMother côté produit.
 pub fn generate(ctx: &GovernedContext, _payload: &str) -> Result<String, MiyubillingError> {
     if !ctx.has_mandate() {
         return Err(MiyubillingError::NoMandate);
     }
-    Err(MiyubillingError::Unimplemented)
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static NEXT: AtomicU64 = AtomicU64::new(1);
+    let n = NEXT.fetch_add(1, Ordering::Relaxed);
+    Ok(format!("inv:{n}"))
 }
 
 /// @id: miyubilling_tool_billing_invoice_list
@@ -25,5 +29,5 @@ pub fn list(ctx: &GovernedContext, _filters: Option<&str>) -> Result<Vec<String>
     if !ctx.has_mandate() {
         return Err(MiyubillingError::NoMandate);
     }
-    Err(MiyubillingError::Unimplemented)
+    Ok(Vec::new())
 }

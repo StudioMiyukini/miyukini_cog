@@ -12,7 +12,7 @@
 use crate::constants::size::CONSTRUCTION_CELL_SIZE;
 use crate::constants::{COMBAT_SURFACE_SIZE, TOWER_BASE_COST_GOLD};
 use crate::game_state::{GamePhase, GameState};
-use crate::styles::{entity_style, hp_bar_fill_style, hp_bar_outer, pct};
+use crate::styles::{entity_style, hp_bar_fill_style, hp_bar_outer, px};
 use dioxus::prelude::*;
 use std::sync::atomic::{AtomicU64, Ordering};
 
@@ -115,11 +115,11 @@ pub fn GameArea(mut props: GameAreaProps) -> Element {
     // Cône d'attaque du joueur
     let current_cursor_angle = *props.cursor_angle.read();
     let attack_cone_style = if !props.player_dead && props.phase == GamePhase::Battle {
-        let cone_size = pct(props.player_attack_range * 2.0);
+        let cone_size = props.player_attack_range * 2.0;
         Some(format!(
-            "position:absolute;left:{lp:.2}%;top:{tp:.2}%;width:{sz:.2}%;height:{sz:.2}%;transform:translate(-50%,-50%) rotate({angle}deg);background:conic-gradient(from -20deg, rgba(68,136,255,0.3) 0deg, rgba(68,136,255,0.3) 40deg, transparent 40deg);border-radius:50%;pointer-events:none;z-index:4;",
-            lp = pct(props.player_x),
-            tp = pct(props.player_y),
+            "position:absolute;left:{xp:.0}px;top:{yp:.0}px;width:{sz:.0}px;height:{sz:.0}px;transform:translate(-50%,-50%) rotate({angle}deg);background:conic-gradient(from -20deg, rgba(68,136,255,0.3) 0deg, rgba(68,136,255,0.3) 40deg, transparent 40deg);border-radius:50%;pointer-events:none;z-index:4;",
+            xp = px(props.player_x),
+            yp = px(props.player_y),
             sz = cone_size,
             angle = current_cursor_angle,
         ))
@@ -155,15 +155,15 @@ pub fn GameArea(mut props: GameAreaProps) -> Element {
         div {
             style: "flex:1;display:flex;align-items:center;justify-content:center;background:#0a0e14;position:relative;overflow:hidden;",
 
-            // Surface de jeu (aspect-ratio 1:1, centrée)
+            // Surface de jeu (800×800 px fixe, zone de combat de référence)
             div {
-                style: "position:relative;aspect-ratio:1;height:100%;max-width:100%;background:#0d1117;border:1px solid #1a2233;overflow:hidden;",
+                style: "position:relative;width:800px;height:800px;background:#0d1117;border:1px solid #1a2233;overflow:hidden;",
                 onmousemove: move |evt| {
                     let coords = evt.element_coordinates();
                     let cursor_px_x = coords.x as f32;
                     let cursor_px_y = coords.y as f32;
 
-                    let elem_size = 600.0f32;
+                    let elem_size = SURFACE;
                     let cursor_world_x = (cursor_px_x / elem_size) * SURFACE;
                     let cursor_world_y = (cursor_px_y / elem_size) * SURFACE;
 
@@ -216,7 +216,7 @@ pub fn GameArea(mut props: GameAreaProps) -> Element {
                             };
                             rsx! {
                                 div {
-                                    style: "position:absolute;left:{pct(*wx):.2}%;top:{pct(*wy):.2}%;width:{pct(cell_size_world):.2}%;height:{pct(cell_size_world):.2}%;background:{bg_color};border:1px solid {border_color};transform:translate(-50%,-50%);{hover_style}z-index:1;",
+                                    style: "position:absolute;left:{px(*wx):.0}px;top:{px(*wy):.0}px;width:{px(cell_size_world):.0}px;height:{px(cell_size_world):.0}px;background:{bg_color};border:1px solid {border_color};transform:translate(-50%,-50%);{hover_style}z-index:1;",
                                     onclick: move |_| {
                                         if can_build_copy {
                                             if let Some(gs) = props.game_state.write().as_mut() {

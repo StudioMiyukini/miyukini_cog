@@ -1,5 +1,10 @@
 //! Types domaine Jay1Tribu — Amis, tribus, salons, messages.
 //!
+//! @id: jay1tribu_domain_types
+//! @do: define_jay1tribu_domain_model
+//! @role: data
+//! @layer: domain
+//!
 //! Conformité : archives locales uniquement (C-1), persistance via KindMother (C-4).
 //! Présence et envoi en temps réel requièrent une connexion au Webway (MWS).
 
@@ -8,21 +13,32 @@ use serde::{Deserialize, Serialize};
 /// Lien d'amitié entre le profil local et un COG ami.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Friend {
+    /// Identifiant unique du lien.
     pub id: String,
+    /// Profil local propriétaire de la liste d'amis.
     pub profile_id: String,
+    /// COG de l'ami.
     pub friend_cog_id: String,
+    /// Pseudo affiché (résolu localement).
     pub friend_pseudo: Option<String>,
+    /// Date de création du lien (RFC3339).
     pub created_at: String,
 }
 
 /// Tribu (groupe partageant salons et membres).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Tribe {
+    /// Identifiant unique de la tribu.
     pub id: String,
+    /// Nom affiché.
     pub name: String,
+    /// Description optionnelle.
     pub description: Option<String>,
+    /// COG du créateur (Chef de tribu).
     pub creator_cog_id: String,
+    /// Date de création (RFC3339).
     pub created_at: String,
+    /// Dernière mise à jour (RFC3339).
     pub updated_at: String,
 }
 
@@ -73,11 +89,15 @@ impl SalonType {
 /// Salon de discussion (direct ou au sein d'une tribu).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Salon {
+    /// Identifiant unique du salon.
     pub id: String,
     /// None = conversation directe (DM), Some = salon d'une tribu.
     pub tribe_id: Option<String>,
+    /// Nom affiché du salon.
     pub name: String,
+    /// Type : direct (2 participants) ou collectif.
     pub salon_type: SalonType,
+    /// Date de création (RFC3339).
     pub created_at: String,
 }
 
@@ -92,10 +112,15 @@ pub struct SalonMember {
 /// Message dans un salon (archivé localement ; transit crypté via MWS quand connecté).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Message {
+    /// Identifiant unique du message.
     pub id: String,
+    /// Salon concerné.
     pub salon_id: String,
+    /// COG de l'expéditeur.
     pub sender_cog_id: String,
+    /// Contenu texte (ou référence à une pièce jointe).
     pub content: String,
+    /// Date d'envoi (RFC3339).
     pub created_at: String,
 }
 

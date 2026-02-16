@@ -2,6 +2,7 @@
 pub enum MiyustoreError {
     NoMandate,
     Unimplemented,
+    InvalidInput(String),
 }
 
 impl std::fmt::Display for MiyustoreError {
@@ -9,6 +10,7 @@ impl std::fmt::Display for MiyustoreError {
         match self {
             MiyustoreError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyustoreError::Unimplemented => write!(f, "Tool not yet implemented"),
+            MiyustoreError::InvalidInput(ref msg) => write!(f, "{msg}"),
         }
     }
 }

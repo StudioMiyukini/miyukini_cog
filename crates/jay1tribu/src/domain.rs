@@ -1,5 +1,10 @@
 //! Logique métier Jay1Tribu : envoi de messages et sync tribu requièrent le Webway.
 //!
+//! @id: jay1tribu_domain
+//! @do: orchestrate_messaging_tribes_friends_governed_by_webway
+//! @role: domain
+//! @layer: domain
+//!
 //! Quand le COG n'est pas connecté au MWS :
 //! - Lecture locale (amis, tribus, salons, messages) fonctionne.
 //! - Envoi en temps réel et présence retournent une erreur ou un état dégradé.
@@ -102,6 +107,53 @@ pub fn get_online_friends(
         .collect())
 }
 
+/// Envoi d'un fichier ou d'une image dans un salon (restriction amis, spec §2.4).
+/// Crée un message avec contenu de référence, enregistre la pièce jointe, puis
+/// dispatch ou file d'attente selon présence Webway et destinataires en ligne.
+pub fn send_file(
+    db: &Jay1TribuDb,
+    salon_id: &str,
+    sender_cog_id: &str,
+    sender_profile_id: &str,
+    local_path: &str,
+    kind: &str,
+    online_cog_ids: Option<&[String]>,
+) -> Jay1TribuResult<Message> {
+    let recipients = db.salon_member_cog_ids(salon_id)?;
+    let recipients_only: Vec<String> = recipients.iter().filter(|c| *c != sender_cog_id).cloned().collect();
+    check_can_transfer_file(db, sender_profile_id, &recipients_only)?;
+    let content = if kind.eq_ignore_ascii_case("image") {
+        "[image]".to_string()
+    } else {
+        format!("[fichier: {}]", local_path)
+    };
+    let msg = db.message_create(salon_id, sender_cog_id, &content)?;
+    db.message_attachment_create(&msg.id, kind, local_path)?;
+    if !is_webway_connected() {
+        for cog_id in &recipients {
+            if *cog_id != sender_cog_id {
+                db.pending_delivery_enqueue(&msg.id, cog_id)?;
+            }
+        }
+        return Ok(msg);
+    }
+    let online_set = online_cog_ids.map(|ids| ids.iter().cloned().collect::<std::collections::HashSet<_>>());
+    for cog_id in &recipients {
+        if *cog_id == sender_cog_id {
+            continue;
+        }
+        let is_online = online_set.as_ref().map_or(true, |s| s.contains(cog_id));
+        if is_online {
+            if crate::transport::dispatch_to_recipient(db, &msg, sender_cog_id, cog_id).is_err() {
+                let _ = db.pending_delivery_enqueue(&msg.id, cog_id);
+            }
+        } else {
+            let _ = db.pending_delivery_enqueue(&msg.id, cog_id);
+        }
+    }
+    Ok(msg)
+}
+
 /// Vérifie que l'émetteur peut transférer un fichier vers les destinataires.
 /// Règle : les transferts de fichier ne peuvent se faire qu'entre amis.
 pub fn check_can_transfer_file(
@@ -117,20 +169,70 @@ pub fn check_can_transfer_file(
     Ok(())
 }
 
-/// Enregistre un message localement. L'envoi en temps réel vers les autres COGs
-/// requiert le Webway ; si non connecté, le message est uniquement stocké localement
-/// (livraison différée à la reconnexion pour les tribus, selon la spec).
+/// Enregistre un message localement. Si le Webway est connecté, envoi en temps réel
+/// aux destinataires en ligne ; les destinataires hors ligne sont mis en file
+/// (livraison différée à la reconnexion). `online_cog_ids` : COGs actuellement
+/// en ligne (fourni par Central depuis le MWS) ; si `None`, tente l'envoi à tous.
 pub fn send_message(
     db: &Jay1TribuDb,
     salon_id: &str,
     sender_cog_id: &str,
     content: &str,
+    online_cog_ids: Option<&[String]>,
 ) -> Jay1TribuResult<Message> {
     let msg = db.message_create(salon_id, sender_cog_id, content)?;
-    if is_webway_connected() {
-        // TODO: déclencher l'envoi via MWS vers les autres participants du salon
+    if !is_webway_connected() {
+        let recipients = db.salon_member_cog_ids(salon_id)?;
+        for cog_id in &recipients {
+            if *cog_id != sender_cog_id {
+                db.pending_delivery_enqueue(&msg.id, cog_id)?;
+            }
+        }
+        return Ok(msg);
+    }
+    let recipients = db.salon_member_cog_ids(salon_id)?;
+    let online_set = online_cog_ids.map(|ids| ids.iter().cloned().collect::<std::collections::HashSet<_>>());
+    for cog_id in &recipients {
+        if *cog_id == sender_cog_id {
+            continue;
+        }
+        let is_online = online_set.as_ref().map_or(true, |s| s.contains(cog_id));
+        if is_online {
+            if crate::transport::dispatch_to_recipient(db, &msg, sender_cog_id, cog_id).is_err() {
+                let _ = db.pending_delivery_enqueue(&msg.id, cog_id);
+            }
+        } else {
+            let _ = db.pending_delivery_enqueue(&msg.id, cog_id);
+        }
     }
     Ok(msg)
+}
+
+/// Traite les livraisons en attente pour l'émetteur : envoie les messages
+/// aux destinataires qui sont maintenant en ligne. À appeler par Central
+/// quand le Webway passe à connecté ou quand la liste des COGs en ligne est mise à jour.
+pub fn process_pending_deliveries(
+    db: &Jay1TribuDb,
+    sender_cog_id: &str,
+    online_cog_ids: &[String],
+) -> Jay1TribuResult<()> {
+    if !is_webway_connected() {
+        return Ok(());
+    }
+    let online_set: std::collections::HashSet<_> = online_cog_ids.iter().cloned().collect();
+    let pending = db.pending_deliveries_for_sender(sender_cog_id)?;
+    for (pending_id, message_id, recipient_cog_id) in pending {
+        if !online_set.contains(&recipient_cog_id) {
+            continue;
+        }
+        let Some(msg) = db.message_by_id(&message_id)? else {
+            continue;
+        };
+        if crate::transport::dispatch_to_recipient(db, &msg, sender_cog_id, &recipient_cog_id).is_ok() {
+            db.pending_delivery_delete(&pending_id)?;
+        }
+    }
+    Ok(())
 }
 
 /// Crée un salon (direct ou dans une tribu). Toujours possible en local.
@@ -182,4 +284,39 @@ pub fn create_tribe(
     creator_cog_id: &str,
 ) -> Jay1TribuResult<crate::data::Tribe> {
     db.tribe_create(name, description, creator_cog_id).map_err(Into::into)
+}
+
+// ---------- Invitations tribu (M4) ----------
+
+/// Invitation en attente pour un COG (id, tribe_id, inviter_cog_id).
+pub type PendingInvitation = (String, String, String);
+
+/// Invite un COG dans une tribu (création invitation status = pending).
+pub fn invite_to_tribe(
+    db: &Jay1TribuDb,
+    tribe_id: &str,
+    inviter_cog_id: &str,
+    invitee_cog_id: &str,
+) -> Jay1TribuResult<String> {
+    db.tribe_invitation_create(tribe_id, inviter_cog_id, invitee_cog_id)
+        .map_err(Into::into)
+}
+
+/// Accepte une invitation à une tribu (ajoute le membre avec rôle Membre).
+pub fn accept_tribe_invitation(db: &Jay1TribuDb, invitation_id: &str) -> Jay1TribuResult<()> {
+    db.tribe_invitation_accept(invitation_id).map_err(Into::into)
+}
+
+/// Refuse une invitation à une tribu.
+pub fn refuse_tribe_invitation(db: &Jay1TribuDb, invitation_id: &str) -> Jay1TribuResult<()> {
+    db.tribe_invitation_refuse(invitation_id).map_err(Into::into)
+}
+
+/// Liste les invitations en attente pour un COG (invité).
+pub fn list_pending_invitations(
+    db: &Jay1TribuDb,
+    invitee_cog_id: &str,
+) -> Jay1TribuResult<Vec<PendingInvitation>> {
+    db.tribe_invitations_pending_for(invitee_cog_id)
+        .map_err(Into::into)
 }

@@ -40,6 +40,32 @@ pub trait MetadataManager {
     fn get(&self, entity_id: &str) -> Option<&Metadata>;
 }
 
+/// Gestionnaire par défaut : registre en mémoire.
+#[derive(Debug, Default)]
+pub struct DefaultMetadataManager {
+    by_entity: HashMap<String, Metadata>,
+}
+
+impl DefaultMetadataManager {
+    /// Crée un gestionnaire vide.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Enregistre les métadonnées d'une entité.
+    pub fn register(&mut self, metadata: Metadata) {
+        let id = metadata.entity_id.clone();
+        self.by_entity.insert(id, metadata);
+    }
+}
+
+impl MetadataManager for DefaultMetadataManager {
+    fn get(&self, entity_id: &str) -> Option<&Metadata> {
+        self.by_entity.get(entity_id)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -57,5 +83,16 @@ mod tests {
             values: HashMap::new(),
         };
         assert_eq!(metadata.entity_id, "entity-1");
+    }
+
+    #[test]
+    fn test_default_metadata_manager() {
+        let mut mgr = DefaultMetadataManager::new();
+        mgr.register(Metadata {
+            entity_id: "e1".to_string(),
+            values: HashMap::new(),
+        });
+        assert!(mgr.get("e1").is_some());
+        assert!(mgr.get("e2").is_none());
     }
 }

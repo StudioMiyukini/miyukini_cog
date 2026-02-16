@@ -9,6 +9,6 @@ pub mod observer;
 pub mod metrics;
 pub mod health;
 
-pub use health::{HealthStatus, HealthChecker};
+pub use health::{DefaultHealthChecker, HealthChecker, HealthStatus};
 pub use metrics::{Metrics, MetricsCollector};
-pub use observer::{Observer, SystemEvent};
+pub use observer::{DefaultObserver, Observer, SystemEvent};

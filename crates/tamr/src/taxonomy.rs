@@ -45,6 +45,32 @@ pub trait TaxonomyManager {
     fn get(&self, taxonomy_id: &str) -> Option<&Taxonomy>;
 }
 
+/// Gestionnaire par défaut : registre en mémoire.
+#[derive(Debug, Default)]
+pub struct DefaultTaxonomyManager {
+    taxonomies: std::collections::HashMap<String, Taxonomy>,
+}
+
+impl DefaultTaxonomyManager {
+    /// Crée un gestionnaire vide.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Enregistre une taxonomie.
+    pub fn register(&mut self, taxonomy: Taxonomy) {
+        let id = taxonomy.id.clone();
+        self.taxonomies.insert(id, taxonomy);
+    }
+}
+
+impl TaxonomyManager for DefaultTaxonomyManager {
+    fn get(&self, taxonomy_id: &str) -> Option<&Taxonomy> {
+        self.taxonomies.get(taxonomy_id)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -64,5 +90,18 @@ mod tests {
         };
         assert_eq!(taxonomy.id, "tax-1");
         assert_eq!(taxonomy.terms.len(), 2);
+    }
+
+    #[test]
+    fn test_default_taxonomy_manager() {
+        let mut mgr = DefaultTaxonomyManager::new();
+        mgr.register(Taxonomy {
+            id: "t1".to_string(),
+            name: "N1".to_string(),
+            terms: vec!["a".to_string()],
+        });
+        assert!(mgr.get("t1").is_some());
+        assert_eq!(mgr.get("t1").unwrap().name, "N1");
+        assert!(mgr.get("t2").is_none());
     }
 }

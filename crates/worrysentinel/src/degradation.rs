@@ -75,6 +75,36 @@ pub trait DegradationManager {
     fn get_current(&self) -> Degradation;
 }
 
+/// Gestionnaire par défaut : état en mémoire (sans persistance).
+#[derive(Debug)]
+pub struct DefaultDegradationManager {
+    degradation: Degradation,
+}
+
+impl DefaultDegradationManager {
+    /// Crée un gestionnaire avec l'état donné (immuable, conformité INV-WS-4).
+    #[must_use]
+    pub fn new(degradation: Degradation) -> Self {
+        Self { degradation }
+    }
+}
+
+impl Default for DefaultDegradationManager {
+    fn default() -> Self {
+        Self {
+            degradation: Degradation {
+                state: DegradationState::Normal,
+            },
+        }
+    }
+}
+
+impl DegradationManager for DefaultDegradationManager {
+    fn get_current(&self) -> Degradation {
+        self.degradation.clone()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -89,5 +119,11 @@ mod tests {
     fn test_degradation_state_ordering() {
         assert!(DegradationState::Blocked > DegradationState::Restricted);
         assert!(DegradationState::Restricted > DegradationState::Degraded);
+    }
+
+    #[test]
+    fn test_default_degradation_manager() {
+        let mgr = DefaultDegradationManager::default();
+        assert_eq!(mgr.get_current().state, DegradationState::Normal);
     }
 }

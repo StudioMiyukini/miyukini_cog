@@ -75,6 +75,32 @@ pub trait Observer {
     fn observe(&mut self, event: SystemEvent);
 }
 
+/// Observateur par défaut : enregistre les événements en mémoire (file pour traitement ultérieur).
+#[derive(Debug, Default)]
+pub struct DefaultObserver {
+    events: Vec<SystemEvent>,
+}
+
+impl DefaultObserver {
+    /// Crée un observateur vide.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Retourne les événements observés (lecture).
+    #[must_use]
+    pub fn events(&self) -> &[SystemEvent] {
+        &self.events
+    }
+}
+
+impl Observer for DefaultObserver {
+    fn observe(&mut self, event: SystemEvent) {
+        self.events.push(event);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -93,5 +119,17 @@ mod tests {
             message: "Test event".to_string(),
         };
         assert_eq!(event.event_type, EventType::StateChange);
+    }
+
+    #[test]
+    fn test_default_observer() {
+        let mut obs = DefaultObserver::new();
+        obs.observe(SystemEvent {
+            event_type: EventType::Anomaly,
+            component: "c1".to_string(),
+            message: "msg".to_string(),
+        });
+        assert_eq!(obs.events().len(), 1);
+        assert_eq!(obs.events()[0].component, "c1");
     }
 }

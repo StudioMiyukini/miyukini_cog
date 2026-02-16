@@ -62,6 +62,39 @@ pub trait VersionManager {
     fn get_current(&self) -> Version;
 }
 
+/// Gestionnaire par défaut : version fixe en mémoire.
+#[derive(Debug)]
+pub struct DefaultVersionManager {
+    current: Version,
+}
+
+impl DefaultVersionManager {
+    /// Crée un gestionnaire avec la version donnée.
+    #[must_use]
+    pub fn new(version: Version) -> Self {
+        Self { current: version }
+    }
+
+    /// Définit la version courante.
+    pub fn set_current(&mut self, version: Version) {
+        self.current = version;
+    }
+}
+
+impl Default for DefaultVersionManager {
+    fn default() -> Self {
+        Self {
+            current: Version::new(0, 1, 0),
+        }
+    }
+}
+
+impl VersionManager for DefaultVersionManager {
+    fn get_current(&self) -> Version {
+        self.current.clone()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -78,5 +111,14 @@ mod tests {
         assert_eq!(version.major, 1);
         assert_eq!(version.minor, 0);
         assert_eq!(version.patch, 0);
+    }
+
+    #[test]
+    fn test_default_version_manager() {
+        let mgr = DefaultVersionManager::new(Version::new(1, 2, 3));
+        let v = mgr.get_current();
+        assert_eq!(v.major, 1);
+        assert_eq!(v.minor, 2);
+        assert_eq!(v.patch, 3);
     }
 }

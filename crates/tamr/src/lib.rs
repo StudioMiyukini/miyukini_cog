@@ -9,5 +9,5 @@ pub mod metadata;
 pub mod classification;
 
 pub use classification::{Classification, Classifier};
-pub use metadata::{Metadata, MetadataManager};
-pub use taxonomy::{Taxonomy, TaxonomyManager};
+pub use metadata::{DefaultMetadataManager, Metadata, MetadataManager};
+pub use taxonomy::{DefaultTaxonomyManager, Taxonomy, TaxonomyManager};

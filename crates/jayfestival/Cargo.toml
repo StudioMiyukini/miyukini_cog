@@ -37,10 +37,7 @@ thiserror = "2"
 
 [features]
 default = ["legacy-sqlite"]
-# Mode legacy: accès SQLite direct (migration progressive)
 legacy-sqlite = ["rusqlite"]
-db-encryption = ["dep:kindmother-db-key", "rusqlite/bundled-sqlcipher"]
-# Mode production: accès via KindMother uniquement
 kindmother-only = []
 
 # Note: eGUI supprimé — migration vers Tauri + React/TypeScript

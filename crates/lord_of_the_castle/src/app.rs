@@ -66,33 +66,34 @@ fn get_base_path() -> PathBuf {
         .unwrap_or_else(|| std::env::current_dir().unwrap_or_default())
 }
 
-/// Position en % de la surface de jeu.
-fn pct(v: f32) -> f32 {
-    v / SURFACE * 100.0
+/// Position en pixels (zone 800×800 : 1 unité monde = 1 px).
+fn px(v: f32) -> f32 {
+    v
 }
 
 /// Style CSS pour une entité (div positionnée absolument, centrée sur son point).
+/// Utilise des tailles en pixels pour cohérence avec background-size des sprites.
 fn entity_style(x: f32, y: f32, size: f32, color: &str) -> String {
     format!(
-        "position:absolute;left:{lp:.2}%;top:{tp:.2}%;width:{sp:.2}%;height:{sp:.2}%;background:{c};transform:translate(-50%,-50%);pointer-events:none;border-radius:1px;",
-        lp = pct(x),
-        tp = pct(y),
-        sp = pct(size),
+        "position:absolute;left:{xp:.0}px;top:{yp:.0}px;width:{sp:.0}px;height:{sp:.0}px;background:{c};transform:translate(-50%,-50%);pointer-events:none;border-radius:1px;",
+        xp = px(x),
+        yp = px(y),
+        sp = px(size),
         c = color,
     )
 }
 
-// NOTE: Fonctions de sprite désactivées temporairement car le chargement via file://
-// ne fonctionne pas dans Dioxus Desktop. La configuration des sprites est disponible
-// dans crate::spritesheet pour une future intégration via assets bundlés ou data URLs.
-
 /// Style CSS pour une barre de PV au-dessus d'une entité.
 fn hp_bar_outer(x: f32, y: f32, entity_size: f32) -> String {
+    let bar_height = 3.0f32;
+    let top_y = y - entity_size / 2.0 - bar_height;
+    let bar_width = entity_size.max(12.0);
     format!(
-        "position:absolute;left:{lp:.2}%;top:{tp:.2}%;width:{sp:.2}%;height:0.35%;transform:translateX(-50%);background:#333;pointer-events:none;",
-        lp = pct(x),
-        tp = pct(y - entity_size / 2.0 - 3.0),
-        sp = pct(entity_size.max(12.0)),
+        "position:absolute;left:{xp:.0}px;top:{yp:.0}px;width:{wp:.0}px;height:{hp:.0}px;transform:translateX(-50%);background:#333;pointer-events:none;",
+        xp = px(x),
+        yp = px(top_y),
+        wp = px(bar_width),
+        hp = bar_height,
     )
 }
 
@@ -792,22 +793,22 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
             let frame_idx = animation_frame_index(anim_elapsed, sprite.frame_count, sprite.frame_duration_s);
             let sprite_css = sprite.css_style(frame_idx, false);
             
-            // Taille du sprite (ajustée selon le type)
-            let sprite_size = match kind {
-                EnemyKind::Normal => 5.0,
-                EnemyKind::MiniBoss => 7.0,
-                EnemyKind::Boss => 9.0,
+            // Taille du sprite en px (40, 56, 72 pour cohérence avec background-size)
+            let sprite_size_px = match kind {
+                EnemyKind::Normal => 40.0,
+                EnemyKind::MiniBoss => 56.0,
+                EnemyKind::Boss => 72.0,
             };
-            let left_pct = pct(*x);
-            let top_pct = pct(*y);
+            let left_px = px(*x);
+            let top_px = px(*y);
             
             let ent = if *is_flashing {
                 format!(
-                    "position:absolute;left:{left_pct:.2}%;top:{top_pct:.2}%;width:{sprite_size:.2}%;height:{sprite_size:.2}%;transform:translate(-50%,-50%);{sprite_css}filter:brightness(3);"
+                    "position:absolute;left:{left_px:.0}px;top:{top_px:.0}px;width:{sprite_size_px:.0}px;height:{sprite_size_px:.0}px;transform:translate(-50%,-50%);{sprite_css}filter:brightness(3);"
                 )
             } else {
                 format!(
-                    "position:absolute;left:{left_pct:.2}%;top:{top_pct:.2}%;width:{sprite_size:.2}%;height:{sprite_size:.2}%;transform:translate(-50%,-50%);{sprite_css}"
+                    "position:absolute;left:{left_px:.0}px;top:{top_px:.0}px;width:{sprite_size_px:.0}px;height:{sprite_size_px:.0}px;transform:translate(-50%,-50%);{sprite_css}"
                 )
             };
             let hp_bar = if *hp < *hm {
@@ -829,16 +830,16 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
     // Flip horizontal si le joueur regarde vers la gauche
     let player_facing_left = matches!(_player_dir, Dir8::W | Dir8::NW | Dir8::SW);
     let player_sprite_css = player_sprite.css_style(player_frame, player_facing_left);
-    let player_left_pct = pct(player_x);
-    let player_top_pct = pct(player_y);
-    let player_size_pct = 7.0; // Taille du sprite joueur
+    let player_left_px = px(player_x);
+    let player_top_px = px(player_y);
+    let player_size_px = 56.0; // Taille du sprite joueur (7% de 800)
     let player_style = if !player_dead {
         format!(
-            "position:absolute;left:{player_left_pct:.2}%;top:{player_top_pct:.2}%;width:{player_size_pct}%;height:{player_size_pct}%;transform:translate(-50%,-50%);z-index:5;{player_sprite_css}"
+            "position:absolute;left:{player_left_px:.0}px;top:{player_top_px:.0}px;width:{player_size_px:.0}px;height:{player_size_px:.0}px;transform:translate(-50%,-50%);z-index:5;{player_sprite_css}"
         )
     } else {
         format!(
-            "position:absolute;left:{player_left_pct:.2}%;top:{player_top_pct:.2}%;width:{player_size_pct}%;height:{player_size_pct}%;transform:translate(-50%,-50%);z-index:5;opacity:0.5;{player_sprite_css}"
+            "position:absolute;left:{player_left_px:.0}px;top:{player_top_px:.0}px;width:{player_size_px:.0}px;height:{player_size_px:.0}px;transform:translate(-50%,-50%);z-index:5;opacity:0.5;{player_sprite_css}"
         )
     };
     
@@ -846,11 +847,11 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
     let current_cursor_angle = cursor_angle();
     let attack_cone_style = if !player_dead && phase == GamePhase::Battle {
         // Cône de 40° (demi-angle 20°), portée = player_attack_range
-        let cone_size = pct(player_attack_range * 2.0);
+        let cone_size = player_attack_range * 2.0;
         Some(format!(
-            "position:absolute;left:{lp:.2}%;top:{tp:.2}%;width:{sz:.2}%;height:{sz:.2}%;transform:translate(-50%,-50%) rotate({angle}deg);background:conic-gradient(from -20deg, rgba(68,136,255,0.3) 0deg, rgba(68,136,255,0.3) 40deg, transparent 40deg);border-radius:50%;pointer-events:none;z-index:4;",
-            lp = pct(player_x),
-            tp = pct(player_y),
+            "position:absolute;left:{xp:.0}px;top:{yp:.0}px;width:{sz:.0}px;height:{sz:.0}px;transform:translate(-50%,-50%) rotate({angle}deg);background:conic-gradient(from -20deg, rgba(68,136,255,0.3) 0deg, rgba(68,136,255,0.3) 40deg, transparent 40deg);border-radius:50%;pointer-events:none;z-index:4;",
+            xp = px(player_x),
+            yp = px(player_y),
             sz = cone_size,
             angle = current_cursor_angle,
         ))
@@ -1071,25 +1072,15 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
                 div {
                     style: "flex:1;display:flex;align-items:center;justify-content:center;background:#0a0e14;position:relative;overflow:hidden;",
 
-                    // Surface de jeu (aspect-ratio 1:1, centrée)
+                    // Surface de jeu (800×800 px fixe, zone de combat de référence)
                     div {
-                        style: "position:relative;aspect-ratio:1;height:100%;max-width:100%;background:#0d1117;border:1px solid #1a2233;overflow:hidden;",
+                        style: "position:relative;width:800px;height:800px;background:#0d1117;border:1px solid #1a2233;overflow:hidden;",
                         onmousemove: move |evt| {
-                            // Obtenir les coordonnées du curseur relatives à l'élément
                             let coords = evt.element_coordinates();
                             let cursor_px_x = coords.x as f32;
                             let cursor_px_y = coords.y as f32;
                             
-                            // L'élément est carré (aspect-ratio:1)
-                            
-                            // Estimer la taille de l'élément (on suppose qu'il fait environ la hauteur de la fenêtre moins les barres)
-                            // Pour simplifier, on utilise la position maximale du curseur observée
-                            // La surface de jeu fait 800x800 unités
-                            
-                            // On suppose que l'élément fait environ 600px de côté (ajuster si nécessaire)
-                            let elem_size = 600.0f32; // Taille approximative en pixels
-                            
-                            // Convertir en coordonnées monde (0-800)
+                            let elem_size = SURFACE;
                             let cursor_world_x = (cursor_px_x / elem_size) * SURFACE;
                             let cursor_world_y = (cursor_px_y / elem_size) * SURFACE;
                             
@@ -1138,7 +1129,7 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
                                     };
                                     rsx! {
                                         div {
-                                            style: "position:absolute;left:{pct(*wx):.2}%;top:{pct(*wy):.2}%;width:{pct(cell_size_world):.2}%;height:{pct(cell_size_world):.2}%;background:{bg_color};border:1px solid {border_color};transform:translate(-50%,-50%);{hover_style}z-index:1;",
+                                            style: "position:absolute;left:{px(*wx):.0}px;top:{px(*wy):.0}px;width:{px(cell_size_world):.0}px;height:{px(cell_size_world):.0}px;background:{bg_color};border:1px solid {border_color};transform:translate(-50%,-50%);{hover_style}z-index:1;",
                                             onclick: move |_| {
                                                 if can_build_copy {
                                                     if let Some(gs) = game_state.write().as_mut() {

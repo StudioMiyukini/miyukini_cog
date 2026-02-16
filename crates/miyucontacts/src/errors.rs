@@ -2,6 +2,7 @@
 pub enum MiyucontactsError {
     NoMandate,
     Unimplemented,
+    InvalidInput(String),
 }
 
 impl std::fmt::Display for MiyucontactsError {
@@ -9,6 +10,7 @@ impl std::fmt::Display for MiyucontactsError {
         match self {
             MiyucontactsError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyucontactsError::Unimplemented => write!(f, "Tool not yet implemented"),
+            MiyucontactsError::InvalidInput(ref msg) => write!(f, "{msg}"),
         }
     }
 }

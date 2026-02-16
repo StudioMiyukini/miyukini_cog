@@ -8,6 +8,6 @@ pub mod resource;
 pub mod optimization;
 pub mod allocation;
 
-pub use allocation::{Allocation, AllocationManager};
+pub use allocation::{Allocation, AllocationManager, AllocationError, DefaultAllocationManager};
 pub use optimization::{Optimization, Optimizer};
-pub use resource::{Resource, ResourceManager};
+pub use resource::{DefaultResourceManager, Resource, ResourceManager};

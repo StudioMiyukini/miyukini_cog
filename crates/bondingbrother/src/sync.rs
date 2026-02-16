@@ -64,6 +64,24 @@ impl std::fmt::Display for SyncError {
 
 impl std::error::Error for SyncError {}
 
+/// Implémentation par défaut : exécution de la stratégie sans persistance (no-op ou marquage).
+#[derive(Debug, Default)]
+pub struct DefaultSyncManager;
+
+impl DefaultSyncManager {
+    /// Crée un gestionnaire de sync.
+    #[must_use]
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl SyncManager for DefaultSyncManager {
+    fn sync(&mut self, _strategy: SyncStrategy) -> Result<(), SyncError> {
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -78,5 +96,13 @@ mod tests {
     fn test_sync_strategies() {
         assert_eq!(SyncStrategy::Immediate, SyncStrategy::Immediate);
         assert_ne!(SyncStrategy::Immediate, SyncStrategy::Deferred);
+    }
+
+    #[test]
+    fn test_default_sync_manager() {
+        use super::*;
+        let mut mgr = DefaultSyncManager::new();
+        assert!(mgr.sync(SyncStrategy::Immediate).is_ok());
+        assert!(mgr.sync(SyncStrategy::Deferred).is_ok());
     }
 }

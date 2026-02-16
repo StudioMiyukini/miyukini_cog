@@ -23,4 +23,4 @@ pub use admin_cell::{
 pub use context::GovernedContext;
 pub use errors::MiyuhrError;
 pub use schedule::{get as schedule_get, ScheduleResult, ShiftItem};
-pub use time_clock::{clock_in, clock_out};
+pub use time_clock::{clock_in, clock_out, list_clock_events, ClockEvent, ClockEventKind};

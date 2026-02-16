@@ -9,6 +9,7 @@ mod jayfestival;
 mod jaykoa;
 mod jaykonta;
 mod game_view;
+mod miyuclicker;
 mod survivor_embed;
 mod mws_view;
 mod miyukiniwatch;
@@ -21,6 +22,7 @@ pub use jayfestival::JayFestivalView;
 pub use jaykoa::JayKoaView;
 pub use jaykonta::JayKontaView;
 pub use game_view::GameView;
+pub use miyuclicker::MiyuClickerView;
 pub use survivor_embed::SurvivorEmbed;
 pub use mws_view::{MwsNetworkView, MwsViewState};
 pub use miyukiniwatch::MiyukiniWatchView;
@@ -44,9 +46,7 @@ pub fn ActiveServiceView() -> Element {
             Some("jaykoa") => rsx! { JayKoaView {} },
             Some("jaykonta") => rsx! { JayKontaView {} },
             Some("lord_of_the_castle") => rsx! { SurvivorEmbed {} },
-            Some("miyuclicker") => rsx! { 
-                GameView { service_id: tab.service_id.clone().unwrap_or_default() } 
-            },
+            Some("miyuclicker") => rsx! { MiyuClickerView {} },
             Some("miyukiniwatch") => rsx! { MiyukiniWatchView {} },
             Some("jay1tribu") => rsx! { Jay1TribuView {} },
             Some(id) => rsx! { 

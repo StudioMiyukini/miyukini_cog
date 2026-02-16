@@ -9,11 +9,17 @@ use crate::errors::MiyuwebwayTrackerError;
 /// @layer: tool
 /// @human: Valide le format d'une déclaration reçue ; exécution seule.
 /// @do: mws_declaration_validate_under_governance
-pub fn validate(ctx: &GovernedContext, _declaration: &[u8]) -> Result<bool, MiyuwebwayTrackerError> {
+/// @id: miyuwebway_tracker_mws_declaration_validate
+/// @role: accessor
+/// @layer: tool
+/// @human: Valide le format d'une déclaration reçue ; exécution seule.
+/// @do: mws_declaration_validate_under_governance
+/// Stub : format non vide = valide ; vérification réelle déléguée à MWS/Origin.
+pub fn validate(ctx: &GovernedContext, declaration: &[u8]) -> Result<bool, MiyuwebwayTrackerError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayTrackerError::NoMandate);
     }
-    Err(MiyuwebwayTrackerError::Unimplemented)
+    Ok(!declaration.is_empty())
 }
 
 /// @id: miyuwebway_tracker_mws_declaration_verify
@@ -21,9 +27,10 @@ pub fn validate(ctx: &GovernedContext, _declaration: &[u8]) -> Result<bool, Miyu
 /// @layer: tool
 /// @human: Vérifie la signature d'une déclaration reçue ; exécution seule.
 /// @do: mws_declaration_verify_under_governance
+/// Stub : pas de vérification signature ; retourne false (non vérifié).
 pub fn verify(ctx: &GovernedContext, _declaration: &[u8]) -> Result<bool, MiyuwebwayTrackerError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayTrackerError::NoMandate);
     }
-    Err(MiyuwebwayTrackerError::Unimplemented)
+    Ok(false)
 }

@@ -14,6 +14,7 @@ use crate::miou::{
     BotContext, decide, select_variante, templates::generate_bulle,
 };
 use crate::miou::bubble::MIOU_CSS;
+use jay1tribu::get_online_friends;
 
 /// Point d'entrée de l'application.
 #[component]
@@ -64,6 +65,7 @@ pub fn App() -> Element {
 
     // Trigger de la première bulle Miou après connexion (délai 2-3s)
     let ctx_for_effect = ctx.clone();
+    let mws_state = use_context::<Signal<MwsViewState>>();
     use_effect(move || {
         let mut ctx = ctx_for_effect.clone();
         let state_read = ctx.state.read();
@@ -79,14 +81,32 @@ pub fn App() -> Element {
                 .unwrap_or_else(|| "habitant".to_string());
             let prefs = state_read.miou_prefs.clone();
             let miou_state = state_read.miou_state.clone();
-            
+            let profile_id = state_read.current_user.as_ref().map(|u| u.id.clone()).unwrap_or_default();
+
+            // Données Jay1Tribu pour Miou (contrat Integration Central et Miou)
+            let connections = ctx.connections.read();
+            let jay1tribu_db = connections.jay1tribu.clone();
+            let online_cog_ids: Vec<String> = mws_state
+                .read()
+                .discovered_cogs
+                .iter()
+                .map(|c| c.cog_id.clone())
+                .collect();
+            drop(connections);
             drop(state_read);
-            
+
+            // Dégradation gracieuse : si Jay1Tribu erre, listes vides (INT-05)
+            let ami_connecte_recemment = get_online_friends(&jay1tribu_db, &profile_id, &online_cog_ids)
+                .ok()
+                .and_then(|friends| friends.first().cloned())
+                .map(|f| f.friend_pseudo.unwrap_or(f.friend_cog_id));
+            let ami_plus_delaisse: Option<(String, u32)> = None; // TODO: implémenter via MiyukiniWatch ou last_message_to_friend
+
             spawn(async move {
                 // Délai 2-3 secondes
                 tokio::time::sleep(std::time::Duration::from_millis(2500)).await;
                 
-                // Construire le contexte
+                // Construire le contexte (get_online_friends / get_friends_list pour Miou)
                 let context = BotContext {
                     pseudo,
                     is_first_connection_of_session: true,
@@ -97,6 +117,8 @@ pub fn App() -> Element {
                     bulles_deja_affichees: miou_state.bulles_count_this_session,
                     seuil_pause_minutes: prefs.seuil_pause_minutes,
                     rappels_pause_actives: prefs.rappels_pause_actives,
+                    ami_connecte_recemment,
+                    ami_plus_delaisse,
                     ..BotContext::default()
                 };
                 

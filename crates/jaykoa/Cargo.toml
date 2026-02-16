@@ -19,9 +19,9 @@ categories.workspace = true
 description = "JayKoa — Calendrier universel du COG, récepteur temporel transversal"
 
 [dependencies]
+jayrdv = { path = "../jayrdv" }
 kindmother = { path = "../kindmother" }
 kindmother-client = { path = "../kindmother-client" }
-rusqlite = { version = "0.32", features = ["bundled"], optional = true }
 kindmother-db-key = { path = "../kindmother-db-key", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -31,11 +31,8 @@ tokio = { version = "1", features = ["rt-multi-thread"] }
 thiserror = "2"
 
 [features]
-default = ["legacy-sqlite"]
-# Mode legacy: accès SQLite direct (migration progressive)
-legacy-sqlite = ["rusqlite"]
-db-encryption = ["dep:kindmother-db-key", "rusqlite/bundled-sqlcipher"]
-# Mode production: accès via KindMother uniquement
+default = ["kindmother-only"]
+# Full KM : accès exclusif via KindMother (kindmother-client)
 kindmother-only = []
 
 # Note: eGUI supprimé — migration vers Tauri + React/TypeScript

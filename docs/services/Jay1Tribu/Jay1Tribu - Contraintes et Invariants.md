@@ -23,6 +23,8 @@ Ce document rassemble l'ensemble des **contraintes non négociables** et des **i
 | **C-3** | **Hébergement utilisateur** | Les discussions, fichiers et images restent hébergés chez les utilisateurs (leurs COGs). | Pas de conservation à l'insu des utilisateurs. |
 | **C-4** | **Persistance locale via KindMother** | Toute écriture locale (archives, fichiers, liste d'amis, paramètres tribu) passe par KindMother (WriteIntent). Aucune persistance directe. | Gouvernance ; intégrité et cohérence. |
 
+**Clarification implémentation :** En mode **legacy-sqlite**, l'accès SQLite direct au fichier de base du service respecte le pattern KindMother : `InstanceType::Daughter`, identité déclarée, pas de contournement des règles de gouvernance. La contrainte C-4 est satisfaite par ce mode. En mode **kindmother-only**, toute écriture transite par le client KindMother (WriteIntent) ; les deux modes sont conformes selon le choix de déploiement.
+
 ### 1.2 Type de Service et espaces
 
 | # | Contrainte | Description |

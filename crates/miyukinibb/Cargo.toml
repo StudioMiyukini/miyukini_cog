@@ -1,0 +1,24 @@
+# MiyukiniBB — Service forum (phpBB adapté Miyukini COG).
+# Compte forum = profil Central ; auth unifiée via Origin.
+
+[package]
+name = "miyukinibb"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "MiyukiniBB — Service forum (phpBB adapté), auth unifiée Central, sync profils vers Origin"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+ureq = { version = "2", features = ["json"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }

@@ -1,15 +1,11 @@
 //! Persistance JayFestival via KindMother Service.
-//!
-//! En mode `legacy-sqlite`, accès direct SQLite (migration progressive).
-//! En mode `kindmother-only`, délégation exclusive au service KindMother.
+//! Par défaut : legacy-sqlite. Full KM (kindmother-only) en cours de parité API.
 
 mod types;
 
-// Mode legacy SQLite (migration progressive)
 #[cfg(feature = "legacy-sqlite")]
 mod kindmother_db;
 
-// Mode KindMother client (production)
 #[cfg(feature = "kindmother-only")]
 mod kindmother_client_db;
 
@@ -18,7 +14,6 @@ pub use types::{
     Profile, UserType,
 };
 
-// Export de l'implémentation selon le feature flag
 #[cfg(feature = "legacy-sqlite")]
 pub use kindmother_db::{DbError, JayFestivalDb};
 

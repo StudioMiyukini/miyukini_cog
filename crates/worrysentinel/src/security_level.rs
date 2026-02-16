@@ -59,6 +59,34 @@ pub trait SecurityLevelManager {
     fn get_current(&self) -> SecurityLevel;
 }
 
+/// Gestionnaire par défaut : niveau fixe en mémoire (sans persistance).
+#[derive(Debug)]
+pub struct DefaultSecurityLevelManager {
+    level: SecurityLevel,
+}
+
+impl DefaultSecurityLevelManager {
+    /// Crée un gestionnaire avec le niveau donné (immuable, conformité INV-WS-4).
+    #[must_use]
+    pub fn new(level: SecurityLevel) -> Self {
+        Self { level }
+    }
+}
+
+impl Default for DefaultSecurityLevelManager {
+    fn default() -> Self {
+        Self {
+            level: SecurityLevel::Standard,
+        }
+    }
+}
+
+impl SecurityLevelManager for DefaultSecurityLevelManager {
+    fn get_current(&self) -> SecurityLevel {
+        self.level
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -73,5 +101,11 @@ mod tests {
     fn test_security_level_ordering() {
         assert!(SecurityLevel::Hardened > SecurityLevel::Critical);
         assert!(SecurityLevel::Critical > SecurityLevel::Sensitive);
+    }
+
+    #[test]
+    fn test_default_security_level_manager() {
+        let mgr = DefaultSecurityLevelManager::new(SecurityLevel::Sensitive);
+        assert_eq!(mgr.get_current(), SecurityLevel::Sensitive);
     }
 }

@@ -1,8 +1,15 @@
 //! Tools MWS MiyuWebwayTracker — mws.cog_list.* (get, update, merge, filter).
-//! Liste locale de COGs ; lecture ; mise à jour ; fusion ; filtre (critère fourni par Cores).
+//! Liste locale de COGs (stub en mémoire) ; sync réelle déléguée à Origin / miyuwebway_participant.
 
 use crate::context::GovernedContext;
 use crate::errors::MiyuwebwayTrackerError;
+use std::sync::Mutex;
+
+static COG_LIST: std::sync::OnceLock<Mutex<Vec<String>>> = std::sync::OnceLock::new();
+
+fn cog_list() -> &'static Mutex<Vec<String>> {
+    COG_LIST.get_or_init(|| Mutex::new(Vec::new()))
+}
 
 /// @id: miyuwebway_tracker_mws_cog_list_get
 /// @role: accessor
@@ -13,7 +20,9 @@ pub fn get(ctx: &GovernedContext) -> Result<Vec<String>, MiyuwebwayTrackerError>
     if !ctx.has_mandate() {
         return Err(MiyuwebwayTrackerError::NoMandate);
     }
-    Err(MiyuwebwayTrackerError::Unimplemented)
+    let list = cog_list();
+    let guard = list.lock().map_err(|_| MiyuwebwayTrackerError::TrackerUnavailable("lock".into()))?;
+    Ok(guard.clone())
 }
 
 /// @id: miyuwebway_tracker_mws_cog_list_update
@@ -21,11 +30,16 @@ pub fn get(ctx: &GovernedContext) -> Result<Vec<String>, MiyuwebwayTrackerError>
 /// @layer: tool
 /// @human: Met à jour une entrée dans la liste locale ; écriture liste locale.
 /// @do: mws_cog_list_update_under_governance
-pub fn update(ctx: &GovernedContext, _entry: &str, _payload: &str) -> Result<(), MiyuwebwayTrackerError> {
+pub fn update(ctx: &GovernedContext, entry: &str, _payload: &str) -> Result<(), MiyuwebwayTrackerError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayTrackerError::NoMandate);
     }
-    Err(MiyuwebwayTrackerError::Unimplemented)
+    let list = cog_list();
+    let mut guard = list.lock().map_err(|_| MiyuwebwayTrackerError::TrackerUnavailable("lock".into()))?;
+    if !guard.contains(&entry.to_string()) {
+        guard.push(entry.to_string());
+    }
+    Ok(())
 }
 
 /// @id: miyuwebway_tracker_mws_cog_list_merge
@@ -33,11 +47,19 @@ pub fn update(ctx: &GovernedContext, _entry: &str, _payload: &str) -> Result<(),
 /// @layer: tool
 /// @human: Fusionne une liste reçue avec la liste locale ; règle fournie par Cores.
 /// @do: mws_cog_list_merge_under_governance
-pub fn merge(ctx: &GovernedContext, _incoming: &str, _rule_ref: &str) -> Result<(), MiyuwebwayTrackerError> {
+pub fn merge(ctx: &GovernedContext, incoming: &str, _rule_ref: &str) -> Result<(), MiyuwebwayTrackerError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayTrackerError::NoMandate);
     }
-    Err(MiyuwebwayTrackerError::Unimplemented)
+    let list = cog_list();
+    let mut guard = list.lock().map_err(|_| MiyuwebwayTrackerError::TrackerUnavailable("lock".into()))?;
+    let ids: Vec<String> = incoming.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+    for id in ids {
+        if !guard.contains(&id) {
+            guard.push(id);
+        }
+    }
+    Ok(())
 }
 
 /// @id: miyuwebway_tracker_mws_cog_list_filter
@@ -49,5 +71,5 @@ pub fn filter(ctx: &GovernedContext, _criterion_ref: &str) -> Result<Vec<String>
     if !ctx.has_mandate() {
         return Err(MiyuwebwayTrackerError::NoMandate);
     }
-    Err(MiyuwebwayTrackerError::Unimplemented)
+    get(ctx)
 }

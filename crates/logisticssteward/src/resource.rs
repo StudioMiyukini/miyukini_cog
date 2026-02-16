@@ -5,7 +5,7 @@
 /// @layer: core
 /// @human: Type de ressource système.
 /// @do: represent_resource_type
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ResourceType {
     /// @id: logisticssteward_resource_type_memory
     /// @role: data
@@ -68,6 +68,31 @@ pub trait ResourceManager {
     fn get(&self, resource_type: ResourceType) -> Option<&Resource>;
 }
 
+/// Gestionnaire par défaut : registre en mémoire.
+#[derive(Debug, Default)]
+pub struct DefaultResourceManager {
+    resources: std::collections::HashMap<ResourceType, Resource>,
+}
+
+impl DefaultResourceManager {
+    /// Crée un gestionnaire vide.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Enregistre une ressource.
+    pub fn register(&mut self, resource: Resource) {
+        self.resources.insert(resource.resource_type, resource);
+    }
+}
+
+impl ResourceManager for DefaultResourceManager {
+    fn get(&self, resource_type: ResourceType) -> Option<&Resource> {
+        self.resources.get(&resource_type)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -86,5 +111,16 @@ mod tests {
         };
         assert_eq!(resource.resource_type, ResourceType::Memory);
         assert_eq!(resource.capacity, 1024);
+    }
+
+    #[test]
+    fn test_default_resource_manager() {
+        let mut mgr = DefaultResourceManager::new();
+        mgr.register(Resource {
+            resource_type: ResourceType::Memory,
+            capacity: 1024,
+        });
+        assert!(mgr.get(ResourceType::Memory).is_some());
+        assert_eq!(mgr.get(ResourceType::Memory).unwrap().capacity, 1024);
     }
 }
