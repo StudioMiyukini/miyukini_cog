@@ -28,3 +28,24 @@ pub use context::GovernedContext;
 pub use errors::MiyupospaymentError;
 pub use split::split as payment_split;
 pub use terminal::{authorize as terminal_authorize, capture as terminal_capture, TerminalAuthResult};
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn ctx() -> GovernedContext {
+        GovernedContext::new("m".into(), 0)
+    }
+
+    #[test]
+    fn stub_tools_with_mandate() {
+        let c = ctx();
+        assert!(cash_record(&c, "sess", 10.0).unwrap().starts_with("cash:"));
+    }
+
+    #[test]
+    fn no_mandate_refused() {
+        let c = GovernedContext::new(String::new(), 0);
+        assert!(cash_record(&c, "", 0.0).is_err());
+    }
+}

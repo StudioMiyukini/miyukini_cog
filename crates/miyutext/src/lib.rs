@@ -28,3 +28,22 @@ pub use markdown::{render as markdown_render, MarkdownOptions};
 pub use replace::{replace as text_replace, ReplaceMode};
 pub use sanitize::{sanitize as text_sanitize, SanitizePolicy};
 pub use template::apply as template_apply;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn replace_literal_ok() {
+        let ctx = crate::context::GovernedContext::new("m".into(), 0);
+        let out = text_replace(&ctx, "hello world", "world", "Rust", ReplaceMode::Literal).unwrap();
+        assert_eq!(out, "hello Rust");
+    }
+
+    #[test]
+    fn replace_regex_returns_explicit_error_v01() {
+        let ctx = crate::context::GovernedContext::new("m".into(), 0);
+        let err = text_replace(&ctx, "a", ".", "x", ReplaceMode::Regex).unwrap_err();
+        assert!(matches!(err, MiyuTextError::RegexNotSupportedV01));
+    }
+}

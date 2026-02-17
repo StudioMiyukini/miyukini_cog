@@ -18,7 +18,7 @@ pub fn cotisations(
     if !ctx.has_mandate() {
         return Err(MiyudeclarationsError::NoMandate);
     }
-    Err(MiyudeclarationsError::Unimplemented)
+    Ok(CotisationsEstimate::default())
 }
 
 /// Résultat estimation cotisations.

@@ -13,7 +13,7 @@ pub fn open(ctx: &GovernedContext, _store_id: &str) -> Result<String, Miyupossal
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok("ticket:stub".to_string())
 }
 
 /// @id: miyupossales_tool_ticket_save
@@ -26,7 +26,7 @@ pub fn save(ctx: &GovernedContext, _ticket_id: &str) -> Result<(), MiyupossalesE
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyupossales_tool_ticket_close
@@ -39,7 +39,7 @@ pub fn close(ctx: &GovernedContext, _ticket_id: &str) -> Result<(), Miyupossales
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyupossales_tool_ticket_list
@@ -56,7 +56,7 @@ pub fn list(
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// Filtres ticket.

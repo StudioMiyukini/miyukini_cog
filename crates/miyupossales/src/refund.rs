@@ -18,5 +18,5 @@ pub fn record(
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok("refund:stub".to_string())
 }

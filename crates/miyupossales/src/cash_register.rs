@@ -13,7 +13,7 @@ pub fn open(ctx: &GovernedContext, _store_id: &str, _register_id: &str) -> Resul
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok("session:stub".to_string())
 }
 
 /// @id: miyupossales_tool_cash_register_close
@@ -30,5 +30,5 @@ pub fn close(
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok("session:stub".to_string())
 }

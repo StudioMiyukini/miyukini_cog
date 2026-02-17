@@ -3,6 +3,7 @@
 
 use crate::context::GovernedContext;
 use crate::errors::MiyuwebwayParticipantError;
+use crate::store;
 
 /// @id: miyuwebway_participant_mws_cog_list_get
 /// @role: accessor
@@ -13,7 +14,8 @@ pub fn get(ctx: &GovernedContext) -> Result<Vec<String>, MiyuwebwayParticipantEr
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }
-    Err(MiyuwebwayParticipantError::Unimplemented)
+    let guard = store::cog_list().lock().map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
+    Ok(guard.keys().cloned().collect())
 }
 
 /// @id: miyuwebway_participant_mws_cog_list_update
@@ -21,11 +23,13 @@ pub fn get(ctx: &GovernedContext) -> Result<Vec<String>, MiyuwebwayParticipantEr
 /// @layer: tool
 /// @human: Met à jour une entrée dans la liste locale ; écriture liste locale.
 /// @do: mws_cog_list_update_under_governance
-pub fn update(ctx: &GovernedContext, _entry: &str, _payload: &str) -> Result<(), MiyuwebwayParticipantError> {
+pub fn update(ctx: &GovernedContext, entry: &str, payload: &str) -> Result<(), MiyuwebwayParticipantError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }
-    Err(MiyuwebwayParticipantError::Unimplemented)
+    let mut guard = store::cog_list().lock().map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
+    guard.insert(entry.to_string(), payload.to_string());
+    Ok(())
 }
 
 /// @id: miyuwebway_participant_mws_cog_list_merge
@@ -33,9 +37,16 @@ pub fn update(ctx: &GovernedContext, _entry: &str, _payload: &str) -> Result<(),
 /// @layer: tool
 /// @human: Fusionne une liste reçue avec la liste locale ; règle fournie par Cores.
 /// @do: mws_cog_list_merge_under_governance
-pub fn merge(ctx: &GovernedContext, _incoming: &str, _rule_ref: &str) -> Result<(), MiyuwebwayParticipantError> {
+pub fn merge(ctx: &GovernedContext, incoming: &str, _rule_ref: &str) -> Result<(), MiyuwebwayParticipantError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }
-    Err(MiyuwebwayParticipantError::Unimplemented)
+    let mut guard = store::cog_list().lock().map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
+    for line in incoming.lines() {
+        let line = line.trim();
+        if !line.is_empty() {
+            guard.insert(line.to_string(), String::new());
+        }
+    }
+    Ok(())
 }

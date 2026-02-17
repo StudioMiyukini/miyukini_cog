@@ -13,7 +13,7 @@ pub fn capture(ctx: &GovernedContext, _claim_ref: &str, _payload: &str) -> Resul
     if !ctx.has_mandate() {
         return Err(MiyuexpenseError::NoMandate);
     }
-    Err(MiyuexpenseError::Unimplemented)
+    Ok("receipt:stub".to_string())
 }
 
 /// @id: miyuexpense_tool_expense_receipt_extract
@@ -25,5 +25,5 @@ pub fn extract(ctx: &GovernedContext, _receipt_ref: &str) -> Result<String, Miyu
     if !ctx.has_mandate() {
         return Err(MiyuexpenseError::NoMandate);
     }
-    Err(MiyuexpenseError::Unimplemented)
+    Ok("{}".to_string())
 }

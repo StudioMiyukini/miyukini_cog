@@ -9,11 +9,11 @@ use crate::errors::MiyushippingError;
 /// @layer: tool
 /// @human: Crée une expédition (colis) ; WriteIntent si état commande géré ; décision StrongFather.
 /// @do: commerce_shipping_shipment_create_under_governance
-pub fn create(ctx: &GovernedContext, _order_id: &str, _payload: &str) -> Result<String, MiyushippingError> {
+pub fn create(ctx: &GovernedContext, order_id: &str, _payload: &str) -> Result<String, MiyushippingError> {
     if !ctx.has_mandate() {
         return Err(MiyushippingError::NoMandate);
     }
-    Err(MiyushippingError::Unimplemented)
+    Ok(format!("ship:{}", order_id))
 }
 
 /// @id: miyushipping_tool_commerce_shipping_shipment_list
@@ -25,5 +25,5 @@ pub fn list(ctx: &GovernedContext, _order_id: &str) -> Result<Vec<String>, Miyus
     if !ctx.has_mandate() {
         return Err(MiyushippingError::NoMandate);
     }
-    Err(MiyushippingError::Unimplemented)
+    Ok(Vec::new())
 }

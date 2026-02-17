@@ -16,7 +16,7 @@ pub fn low_evaluate(
     if !ctx.has_mandate() {
         return Err(MiyuposinventoryError::NoMandate);
     }
-    Err(MiyuposinventoryError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// Élément alerte.

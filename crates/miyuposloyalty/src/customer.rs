@@ -14,7 +14,7 @@ pub fn get(ctx: &GovernedContext, _customer_id: &str) -> Result<CustomerItem, Mi
     if !ctx.has_mandate() {
         return Err(MiyuposloyaltyError::NoMandate);
     }
-    Err(MiyuposloyaltyError::Unimplemented)
+    Ok(CustomerItem::default())
 }
 
 /// @id: miyuposloyalty_tool_customer_list
@@ -30,7 +30,7 @@ pub fn list(
     if !ctx.has_mandate() {
         return Err(MiyuposloyaltyError::NoMandate);
     }
-    Err(MiyuposloyaltyError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyuposloyalty_tool_customer_create
@@ -46,7 +46,7 @@ pub fn create(
     if !ctx.has_mandate() {
         return Err(MiyuposloyaltyError::NoMandate);
     }
-    Err(MiyuposloyaltyError::Unimplemented)
+    Ok("customer:stub".to_string())
 }
 
 /// @id: miyuposloyalty_tool_customer_update
@@ -63,7 +63,7 @@ pub fn update(
     if !ctx.has_mandate() {
         return Err(MiyuposloyaltyError::NoMandate);
     }
-    Err(MiyuposloyaltyError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyuposloyalty_tool_customer_address_get
@@ -79,7 +79,7 @@ pub fn address_get(
     if !ctx.has_mandate() {
         return Err(MiyuposloyaltyError::NoMandate);
     }
-    Err(MiyuposloyaltyError::Unimplemented)
+    Ok(AddressItem::default())
 }
 
 /// @id: miyuposloyalty_tool_customer_note_add
@@ -96,7 +96,7 @@ pub fn note_add(
     if !ctx.has_mandate() {
         return Err(MiyuposloyaltyError::NoMandate);
     }
-    Err(MiyuposloyaltyError::Unimplemented)
+    Ok("note:stub".to_string())
 }
 
 /// @id: miyuposloyalty_tool_customer_note_list
@@ -112,7 +112,7 @@ pub fn note_list(
     if !ctx.has_mandate() {
         return Err(MiyuposloyaltyError::NoMandate);
     }
-    Err(MiyuposloyaltyError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// Filtres client.
@@ -123,7 +123,7 @@ pub struct CustomerFilters {
 }
 
 /// Élément client.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct CustomerItem {
     pub id: String,
     pub name: String,
@@ -138,7 +138,7 @@ pub struct AddressItem {
 }
 
 /// Note.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct NoteItem {
     pub id: String,
     pub content: String,

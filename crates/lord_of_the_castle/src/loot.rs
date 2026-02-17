@@ -133,7 +133,7 @@ impl ItemRarity {
         }
     }
 
-    /// Couleur de carte (egui) selon la rareté.
+    /// Couleur de carte (affichage) selon la rareté.
     #[must_use] 
     pub fn color_rgb(&self) -> (u8, u8, u8) {
         match self {

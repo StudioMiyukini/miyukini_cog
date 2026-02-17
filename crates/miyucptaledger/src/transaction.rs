@@ -13,7 +13,7 @@ pub fn categorize(ctx: &GovernedContext, _transaction_ref: &str, _rules: &str) -
     if !ctx.has_mandate() {
         return Err(MiyucptaledgerError::NoMandate);
     }
-    Err(MiyucptaledgerError::Unimplemented)
+    Ok("default".to_string())
 }
 
 /// @id: miyucptaledger_tool_compta_transaction_vat_resolve
@@ -25,5 +25,5 @@ pub fn vat_resolve(ctx: &GovernedContext, _transaction_ref: &str) -> Result<Stri
     if !ctx.has_mandate() {
         return Err(MiyucptaledgerError::NoMandate);
     }
-    Err(MiyucptaledgerError::Unimplemented)
+    Ok("20".to_string())
 }

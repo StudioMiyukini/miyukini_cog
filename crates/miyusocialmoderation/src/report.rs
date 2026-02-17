@@ -2,6 +2,8 @@
 
 use crate::context::GovernedContext;
 use crate::errors::MiyusocialmoderationError;
+use crate::store;
+use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 
 /// @id: miyusocialmoderation_tool_report_create
 /// @role: mutator
@@ -11,14 +13,17 @@ use crate::errors::MiyusocialmoderationError;
 /// tool.moderation.report.create
 pub fn create(
     ctx: &GovernedContext,
-    _target_type: &str,
-    _target_id: &str,
+    target_type: &str,
+    target_id: &str,
     _reason: &str,
 ) -> Result<String, MiyusocialmoderationError> {
     if !ctx.has_mandate() {
         return Err(MiyusocialmoderationError::NoMandate);
     }
-    Err(MiyusocialmoderationError::Unimplemented)
+    let id = format!("rep:{}", UuidIdGenerator.generate());
+    let mut guard = store::reports().lock().map_err(|_| MiyusocialmoderationError::InvalidInput("lock".into()))?;
+    guard.insert(id.clone(), (target_type.to_string(), target_id.to_string()));
+    Ok(id)
 }
 
 /// @id: miyusocialmoderation_tool_report_list
@@ -31,7 +36,9 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<ReportItem>, Miyusocialmoderati
     if !ctx.has_mandate() {
         return Err(MiyusocialmoderationError::NoMandate);
     }
-    Err(MiyusocialmoderationError::Unimplemented)
+    let guard = store::reports().lock().map_err(|_| MiyusocialmoderationError::InvalidInput("lock".into()))?;
+    let items = guard.iter().map(|(id, (target_type, target_id))| ReportItem { id: id.clone(), target_type: target_type.clone(), target_id: target_id.clone() }).collect();
+    Ok(items)
 }
 
 /// Élément signalement.

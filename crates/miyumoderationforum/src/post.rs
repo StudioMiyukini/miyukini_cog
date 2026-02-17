@@ -2,6 +2,7 @@
 
 use crate::context::GovernedContext;
 use crate::errors::MiyumoderationforumError;
+use crate::store;
 
 /// @id: miyumoderationforum_tool_post_edit
 /// @role: mutator
@@ -11,13 +12,16 @@ use crate::errors::MiyumoderationforumError;
 /// tool.forum.post.edit
 pub fn edit(
     ctx: &GovernedContext,
-    _post_id: &str,
-    _new_content: &str,
+    post_id: &str,
+    new_content: &str,
 ) -> Result<(), MiyumoderationforumError> {
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    Err(MiyumoderationforumError::Unimplemented)
+    let mut guard = store::posts().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let (content, _locked) = guard.get_mut(post_id).ok_or_else(|| MiyumoderationforumError::InvalidInput("post not found".into()))?;
+    *content = new_content.to_string();
+    Ok(())
 }
 
 /// @id: miyumoderationforum_tool_post_lock
@@ -26,11 +30,14 @@ pub fn edit(
 /// @human: Verrouille un post ; WriteIntent KindMother.
 /// @do: post_lock_under_governance
 /// tool.forum.post.lock
-pub fn lock(ctx: &GovernedContext, _post_id: &str) -> Result<(), MiyumoderationforumError> {
+pub fn lock(ctx: &GovernedContext, post_id: &str) -> Result<(), MiyumoderationforumError> {
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    Err(MiyumoderationforumError::Unimplemented)
+    let mut guard = store::posts().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let (_, locked) = guard.get_mut(post_id).ok_or_else(|| MiyumoderationforumError::InvalidInput("post not found".into()))?;
+    *locked = true;
+    Ok(())
 }
 
 /// @id: miyumoderationforum_tool_post_delete
@@ -39,9 +46,11 @@ pub fn lock(ctx: &GovernedContext, _post_id: &str) -> Result<(), Miyumoderationf
 /// @human: Supprime un post ; WriteIntent KindMother.
 /// @do: post_delete_under_governance
 /// tool.forum.post.delete
-pub fn delete(ctx: &GovernedContext, _post_id: &str) -> Result<(), MiyumoderationforumError> {
+pub fn delete(ctx: &GovernedContext, post_id: &str) -> Result<(), MiyumoderationforumError> {
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    Err(MiyumoderationforumError::Unimplemented)
+    let mut guard = store::posts().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    guard.remove(post_id).ok_or_else(|| MiyumoderationforumError::InvalidInput("post not found".into()))?;
+    Ok(())
 }

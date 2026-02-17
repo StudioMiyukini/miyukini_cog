@@ -2,6 +2,7 @@
 pub enum MiyuwidgetsError {
     NoMandate,
     Unimplemented,
+    InvalidInput(String),
 }
 
 impl std::fmt::Display for MiyuwidgetsError {
@@ -9,6 +10,7 @@ impl std::fmt::Display for MiyuwidgetsError {
         match self {
             MiyuwidgetsError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyuwidgetsError::Unimplemented => write!(f, "Tool not yet implemented"),
+            MiyuwidgetsError::InvalidInput(ref m) => write!(f, "{m}"),
         }
     }
 }

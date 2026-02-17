@@ -17,5 +17,5 @@ pub fn spreadsheet(
     if !ctx.has_mandate() {
         return Err(MiyuposanalyticsError::NoMandate);
     }
-    Err(MiyuposanalyticsError::Unimplemented)
+    Ok(Vec::new())
 }

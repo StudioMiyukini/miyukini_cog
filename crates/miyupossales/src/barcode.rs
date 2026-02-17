@@ -16,7 +16,7 @@ pub fn parse(
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok(BarcodeParseResult::default())
 }
 
 /// Résultat parse code-barres.

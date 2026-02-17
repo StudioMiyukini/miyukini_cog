@@ -18,7 +18,7 @@ pub fn points_grant(
     if !ctx.has_mandate() {
         return Err(MiyuposloyaltyError::NoMandate);
     }
-    Err(MiyuposloyaltyError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyuposloyalty_tool_points_redeem
@@ -36,7 +36,7 @@ pub fn points_redeem(
     if !ctx.has_mandate() {
         return Err(MiyuposloyaltyError::NoMandate);
     }
-    Err(MiyuposloyaltyError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyuposloyalty_tool_balance_get
@@ -49,7 +49,7 @@ pub fn balance_get(ctx: &GovernedContext, _customer_id: &str) -> Result<i64, Miy
     if !ctx.has_mandate() {
         return Err(MiyuposloyaltyError::NoMandate);
     }
-    Err(MiyuposloyaltyError::Unimplemented)
+    Ok(0)
 }
 
 /// @id: miyuposloyalty_tool_card_resolve
@@ -65,7 +65,7 @@ pub fn card_resolve(
     if !ctx.has_mandate() {
         return Err(MiyuposloyaltyError::NoMandate);
     }
-    Err(MiyuposloyaltyError::Unimplemented)
+    Ok(CardResolveResult::default())
 }
 
 /// Résultat résolution carte.

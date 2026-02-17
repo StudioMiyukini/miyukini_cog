@@ -456,6 +456,9 @@ fn BuildingRow(
 fn SaveLoadPanel(game_state: Signal<GameState>, data_dir: std::path::PathBuf) -> Element {
     let c = use_app_state().read().current_theme.palette();
     let slots = miyuclicker::save::slot_list(Path::new(&data_dir));
+    let occ1 = slots.get(0).map(|s| s.occupied).unwrap_or(false);
+    let occ2 = slots.get(1).map(|s| s.occupied).unwrap_or(false);
+    let occ3 = slots.get(2).map(|s| s.occupied).unwrap_or(false);
 
     rsx! {
         div {
@@ -468,9 +471,9 @@ fn SaveLoadPanel(game_state: Signal<GameState>, data_dir: std::path::PathBuf) ->
                 },
                 "Sauvegarder"
             }
-            SlotRow { game_state, data_dir: data_dir.clone(), slot_id: 1, occupied: slots.get(0).map(|s| s.occupied).unwrap_or(false) }
-            SlotRow { game_state, data_dir: data_dir.clone(), slot_id: 2, occupied: slots.get(1).map(|s| s.occupied).unwrap_or(false) }
-            SlotRow { game_state, data_dir: data_dir.clone(), slot_id: 3, occupied: slots.get(2).map(|s| s.occupied).unwrap_or(false) }
+            SlotRow { game_state, data_dir: data_dir.clone(), slot_id: 1, occupied: occ1 }
+            SlotRow { game_state, data_dir: data_dir.clone(), slot_id: 2, occupied: occ2 }
+            SlotRow { game_state, data_dir: data_dir.clone(), slot_id: 3, occupied: occ3 }
         }
     }
 }
@@ -487,26 +490,20 @@ fn SlotRow(
         div {
             style: "display: flex; justify-content: space-between; align-items: center; padding: 8px; background: {c.bg_hover}; border-radius: 4px;",
             span { "Slot {slot_id}" }
-            { match occupied {
-                true => rsx! {
-                    button {
-                        style: "padding: 4px 8px; font-size: 12px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; cursor: pointer;",
-                        onclick: move |_| {
-                            if let Ok(g) = miyuclicker::save::slot_read(Path::new(&data_dir), slot_id) {
-                                *game_state.write() = g;
-                            }
-                        },
-                        "Charger"
+            button {
+                style: "padding: 4px 8px; font-size: 12px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; cursor: pointer;",
+                onclick: move |_| {
+                    if let Ok(g) = miyuclicker::save::slot_read(Path::new(&data_dir), slot_id) {
+                        *game_state.write() = g;
                     }
                 },
-                false => rsx! {
-                    button {
-                        style: "padding: 4px 8px; font-size: 12px; background: {c.accent_blue}; border: none; border-radius: 4px; color: white; cursor: pointer;",
-                        onclick: move |_| *game_state.write() = GameState::new_game(slot_id),
-                        "Nouvelle partie"
-                    }
-                },
-            } }
+                "Charger"
+            }
+            button {
+                style: "padding: 4px 8px; font-size: 12px; background: {c.accent_blue}; border: none; border-radius: 4px; color: white; cursor: pointer;",
+                onclick: move |_| *game_state.write() = GameState::new_game(slot_id),
+                "Nouvelle partie"
+            }
         }
     }
 }

@@ -31,8 +31,8 @@ node_modules
 .pnp
 .pnp.js
 
-# Copie locale du dépôt egui (référence / path deps)
-deps/egui
+# egui supprimé — UI stack = Dioxus (apps/central)
+# deps/egui
 
 # Build
 .next

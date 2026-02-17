@@ -13,7 +13,7 @@ pub fn store_resolve(ctx: &GovernedContext) -> Result<StoreResult, MiyupossalesE
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok(StoreResult::default())
 }
 
 /// Résultat magasin.

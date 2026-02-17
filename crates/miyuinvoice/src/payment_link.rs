@@ -9,9 +9,9 @@ use crate::errors::MiyuinvoiceError;
 /// @layer: tool
 /// @human: Génère un lien de paiement pour une facture.
 /// @do: invoice_payment_link_generate_under_governance
-pub fn generate(ctx: &GovernedContext, _invoice_id: &str) -> Result<String, MiyuinvoiceError> {
+pub fn generate(ctx: &GovernedContext, invoice_id: &str) -> Result<String, MiyuinvoiceError> {
     if !ctx.has_mandate() {
         return Err(MiyuinvoiceError::NoMandate);
     }
-    Err(MiyuinvoiceError::Unimplemented)
+    Ok(format!("https://pay.example/{}", invoice_id))
 }

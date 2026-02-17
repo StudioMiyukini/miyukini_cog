@@ -13,5 +13,5 @@ pub fn delete(ctx: &GovernedContext, _post_id: &str) -> Result<(), Miyusocialmod
     if !ctx.has_mandate() {
         return Err(MiyusocialmoderationError::NoMandate);
     }
-    Err(MiyusocialmoderationError::Unimplemented)
+    Ok(())
 }

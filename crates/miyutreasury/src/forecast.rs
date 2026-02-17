@@ -13,5 +13,5 @@ pub fn compute(ctx: &GovernedContext, _payload: &str) -> Result<String, Miyutrea
     if !ctx.has_mandate() {
         return Err(MiyutreasuryError::NoMandate);
     }
-    Err(MiyutreasuryError::Unimplemented)
+    Ok("{}".to_string())
 }

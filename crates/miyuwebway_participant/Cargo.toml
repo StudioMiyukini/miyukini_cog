@@ -15,7 +15,7 @@ description = "Kit d'outils MiyuwebwayParticipant — Client MWS pour COG stable
 miyukini-kernel = { path = "../miyukini-kernel" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-tokio = { version = "1", features = ["net", "io-util", "sync", "time", "rt"] }
+tokio = { version = "1", features = ["net", "io-util", "sync", "time", "rt", "macros"] }
 tokio-rustls = "0.26"
 rustls = { version = "0.23", default-features = false, features = ["ring", "std"] }
 rustls-pki-types = "1"

@@ -17,5 +17,5 @@ pub fn close(
     if !ctx.has_mandate() {
         return Err(MiyuposanalyticsError::NoMandate);
     }
-    Err(MiyuposanalyticsError::Unimplemented)
+    Ok("shift:stub".to_string())
 }

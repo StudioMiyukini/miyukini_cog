@@ -17,7 +17,7 @@ pub fn variant_resolve(
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok(VariantResult::default())
 }
 
 /// @id: miyupossales_tool_modifier_apply
@@ -34,7 +34,7 @@ pub fn modifier_apply(
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok(())
 }
 
 /// Résultat variante.

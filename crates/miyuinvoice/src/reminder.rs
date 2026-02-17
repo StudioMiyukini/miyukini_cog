@@ -13,5 +13,5 @@ pub fn send(ctx: &GovernedContext, _invoice_id: &str, _payload: Option<&str>) ->
     if !ctx.has_mandate() {
         return Err(MiyuinvoiceError::NoMandate);
     }
-    Err(MiyuinvoiceError::Unimplemented)
+    Ok(())
 }

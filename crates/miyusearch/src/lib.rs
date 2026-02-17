@@ -9,6 +9,7 @@ pub mod context;
 pub mod errors;
 pub mod index;
 pub mod query;
+pub mod store;
 pub mod suggest;
 
 pub use admin_cell::{

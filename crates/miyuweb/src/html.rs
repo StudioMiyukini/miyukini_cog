@@ -12,11 +12,11 @@ use crate::errors::MiyuwebError;
 /// tool.web.html.render — ne décide pas du contenu.
 pub fn render(
     ctx: &GovernedContext,
-    _template: &str,
+    template: &str,
     _data: &str,
 ) -> Result<String, MiyuwebError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebError::NoMandate);
     }
-    Ok(String::new())
+    Ok(template.to_string())
 }

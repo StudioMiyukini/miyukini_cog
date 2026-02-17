@@ -2,7 +2,7 @@
 # @do: declare_jayfestival_crate_and_dependencies
 # @layer: infra
 # Crate JayFestival — Service officiel famille Jay (festivals, éditions, exposants, visiteurs).
-# Dépendances : egui, eframe (UI), pas de logique métier en Phase 1.
+# UI : hébergée dans apps/central (Dioxus). Pas de dépendance egui/eframe.
 
 [package]
 name = "jayfestival"

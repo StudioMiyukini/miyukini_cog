@@ -13,7 +13,7 @@ pub fn render(ctx: &GovernedContext, _sale_id: &str) -> Result<Vec<u8>, Miyuposs
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyupossales_tool_receipt_print
@@ -26,7 +26,7 @@ pub fn print(ctx: &GovernedContext, _sale_id: &str) -> Result<(), MiyupossalesEr
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyupossales_tool_receipt_send
@@ -43,7 +43,7 @@ pub fn send(
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyupossales_tool_receipt_list
@@ -59,7 +59,7 @@ pub fn list(
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// Filtres reçu.

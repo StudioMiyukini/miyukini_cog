@@ -2,6 +2,8 @@
 
 use crate::context::GovernedContext;
 use crate::errors::MiyusocialmessagingError;
+use crate::store;
+use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 
 /// @id: miyusocialmessaging_tool_dm_send
 /// @role: mutator
@@ -11,13 +13,20 @@ use crate::errors::MiyusocialmessagingError;
 /// tool.social.dm.send
 pub fn send(
     ctx: &GovernedContext,
-    _conversation_id: &str,
-    _content: &str,
+    conversation_id: &str,
+    content: &str,
 ) -> Result<String, MiyusocialmessagingError> {
     if !ctx.has_mandate() {
         return Err(MiyusocialmessagingError::NoMandate);
     }
-    Err(MiyusocialmessagingError::Unimplemented)
+    store::conversations().lock().map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?.entry(conversation_id.to_string()).or_insert_with(|| vec![ctx.mandate_id.clone()]);
+    let id = format!("msg:{}", UuidIdGenerator.generate());
+    {
+        let mut guard = store::messages().lock().map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?;
+        guard.insert(id.clone(), (conversation_id.to_string(), ctx.mandate_id.clone(), content.to_string()));
+    }
+    store::conversation_messages().lock().map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?.entry(conversation_id.to_string()).or_default().push(id.clone());
+    Ok(id)
 }
 
 /// @id: miyusocialmessaging_tool_dm_list
@@ -28,12 +37,17 @@ pub fn send(
 /// tool.social.dm.list
 pub fn list(
     ctx: &GovernedContext,
-    _conversation_id: &str,
+    conversation_id: &str,
 ) -> Result<Vec<DmItem>, MiyusocialmessagingError> {
     if !ctx.has_mandate() {
         return Err(MiyusocialmessagingError::NoMandate);
     }
-    Err(MiyusocialmessagingError::Unimplemented)
+    let guard_ids = store::conversation_messages().lock().map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?;
+    let ids = guard_ids.get(conversation_id).cloned().unwrap_or_default();
+    drop(guard_ids);
+    let guard = store::messages().lock().map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?;
+    let items: Vec<DmItem> = ids.into_iter().filter_map(|id| guard.get(&id).map(|(_, sender_id, content)| DmItem { id, sender_id: sender_id.clone(), content: content.clone() })).collect();
+    Ok(items)
 }
 
 /// @id: miyusocialmessaging_tool_dm_get
@@ -42,11 +56,13 @@ pub fn list(
 /// @human: Récupère un message.
 /// @do: dm_get_under_governance
 /// tool.social.dm.get
-pub fn get(ctx: &GovernedContext, _message_id: &str) -> Result<DmItem, MiyusocialmessagingError> {
+pub fn get(ctx: &GovernedContext, message_id: &str) -> Result<DmItem, MiyusocialmessagingError> {
     if !ctx.has_mandate() {
         return Err(MiyusocialmessagingError::NoMandate);
     }
-    Err(MiyusocialmessagingError::Unimplemented)
+    let guard = store::messages().lock().map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?;
+    let (_, sender_id, content) = guard.get(message_id).ok_or_else(|| MiyusocialmessagingError::InvalidInput("message not found".into()))?.clone();
+    Ok(DmItem { id: message_id.to_string(), sender_id, content })
 }
 
 /// @id: miyusocialmessaging_tool_dm_reaction_add
@@ -57,13 +73,16 @@ pub fn get(ctx: &GovernedContext, _message_id: &str) -> Result<DmItem, Miyusocia
 /// tool.social.dm.reaction.add
 pub fn reaction_add(
     ctx: &GovernedContext,
-    _message_id: &str,
+    message_id: &str,
     _reaction_type: &str,
 ) -> Result<(), MiyusocialmessagingError> {
     if !ctx.has_mandate() {
         return Err(MiyusocialmessagingError::NoMandate);
     }
-    Err(MiyusocialmessagingError::Unimplemented)
+    if !store::messages().lock().map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?.contains_key(message_id) {
+        return Err(MiyusocialmessagingError::InvalidInput("message not found".into()));
+    }
+    Ok(())
 }
 
 /// @id: miyusocialmessaging_tool_dm_reaction_remove
@@ -74,13 +93,16 @@ pub fn reaction_add(
 /// tool.social.dm.reaction.remove
 pub fn reaction_remove(
     ctx: &GovernedContext,
-    _message_id: &str,
+    message_id: &str,
     _reaction_type: &str,
 ) -> Result<(), MiyusocialmessagingError> {
     if !ctx.has_mandate() {
         return Err(MiyusocialmessagingError::NoMandate);
     }
-    Err(MiyusocialmessagingError::Unimplemented)
+    if !store::messages().lock().map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?.contains_key(message_id) {
+        return Err(MiyusocialmessagingError::InvalidInput("message not found".into()));
+    }
+    Ok(())
 }
 
 /// @id: miyusocialmessaging_tool_dm_readmark_set
@@ -97,7 +119,7 @@ pub fn readmark_set(
     if !ctx.has_mandate() {
         return Err(MiyusocialmessagingError::NoMandate);
     }
-    Err(MiyusocialmessagingError::Unimplemented)
+    Ok(())
 }
 
 /// Élément message.

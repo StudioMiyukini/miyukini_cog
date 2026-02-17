@@ -19,5 +19,5 @@ pub fn ledger(
     if !ctx.has_mandate() {
         return Err(MiyucomptareportsError::NoMandate);
     }
-    Err(MiyucomptareportsError::Unimplemented)
+    Ok(Vec::new())
 }

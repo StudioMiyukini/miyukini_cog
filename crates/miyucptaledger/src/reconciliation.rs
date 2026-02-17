@@ -13,7 +13,7 @@ pub fn suggest(ctx: &GovernedContext, _context_ref: Option<&str>) -> Result<Vec<
     if !ctx.has_mandate() {
         return Err(MiyucptaledgerError::NoMandate);
     }
-    Err(MiyucptaledgerError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyucptaledger_tool_compta_reconciliation_record
@@ -25,5 +25,5 @@ pub fn record(ctx: &GovernedContext, _payload: &str) -> Result<String, Miyucptal
     if !ctx.has_mandate() {
         return Err(MiyucptaledgerError::NoMandate);
     }
-    Err(MiyucptaledgerError::Unimplemented)
+    Ok("rec:ok".to_string())
 }

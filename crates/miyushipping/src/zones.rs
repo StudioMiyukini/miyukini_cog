@@ -13,5 +13,5 @@ pub fn resolve(ctx: &GovernedContext, _context_ref: Option<&str>) -> Result<Vec<
     if !ctx.has_mandate() {
         return Err(MiyushippingError::NoMandate);
     }
-    Err(MiyushippingError::Unimplemented)
+    Ok(vec!["default".to_string()])
 }

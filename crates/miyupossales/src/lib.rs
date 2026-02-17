@@ -44,3 +44,25 @@ pub use refund::record as refund_record;
 pub use sale::{add_item as sale_add_item, create as sale_create, remove_item as sale_remove_item};
 pub use store::{store_resolve, StoreResult};
 pub use ticket::{close as ticket_close, list as ticket_list, open as ticket_open, save as ticket_save, TicketFilters, TicketItem};
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn ctx() -> GovernedContext {
+        GovernedContext::new("m".into(), 0)
+    }
+
+    #[test]
+    fn stub_tools_with_mandate() {
+        let c = ctx();
+        assert!(sale_create(&c, "s1").unwrap().starts_with("sale:"));
+        assert!(store_resolve(&c).unwrap().store_id.is_empty());
+    }
+
+    #[test]
+    fn no_mandate_refused() {
+        let c = GovernedContext::new(String::new(), 0);
+        assert!(sale_create(&c, "").is_err());
+    }
+}

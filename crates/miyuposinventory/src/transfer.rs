@@ -18,7 +18,7 @@ pub fn create(
     if !ctx.has_mandate() {
         return Err(MiyuposinventoryError::NoMandate);
     }
-    Err(MiyuposinventoryError::Unimplemented)
+    Ok("transfer:stub".to_string())
 }
 
 /// @id: miyuposinventory_tool_transfer_execute
@@ -31,7 +31,7 @@ pub fn execute(ctx: &GovernedContext, _transfer_id: &str) -> Result<(), Miyuposi
     if !ctx.has_mandate() {
         return Err(MiyuposinventoryError::NoMandate);
     }
-    Err(MiyuposinventoryError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyuposinventory_tool_transfer_list
@@ -47,7 +47,7 @@ pub fn list(
     if !ctx.has_mandate() {
         return Err(MiyuposinventoryError::NoMandate);
     }
-    Err(MiyuposinventoryError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// Filtres transfert.

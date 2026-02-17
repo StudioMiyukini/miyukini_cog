@@ -14,5 +14,5 @@ pub fn resolve(ctx: &GovernedContext, _context_ref: &str) -> Result<String, Miyu
     if !ctx.has_mandate() {
         return Err(MiyuwebError::NoMandate);
     }
-    Ok(String::new())
+    Ok("default".to_string())
 }

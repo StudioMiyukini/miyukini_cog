@@ -2,6 +2,7 @@
 
 use crate::context::GovernedContext;
 use crate::errors::MiyusocialmessagingError;
+use crate::store;
 
 /// @id: miyusocialmessaging_tool_conversation_list
 /// @role: mutator
@@ -13,7 +14,9 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<ConversationItem>, Miyusocialme
     if !ctx.has_mandate() {
         return Err(MiyusocialmessagingError::NoMandate);
     }
-    Err(MiyusocialmessagingError::Unimplemented)
+    let guard = store::conversations().lock().map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?;
+    let items = guard.iter().filter(|(_, participants)| participants.contains(&ctx.mandate_id)).map(|(id, participants)| ConversationItem { id: id.clone(), participant_ids: participants.clone() }).collect();
+    Ok(items)
 }
 
 /// @id: miyusocialmessaging_tool_conversation_get
@@ -24,12 +27,16 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<ConversationItem>, Miyusocialme
 /// tool.social.conversation.get
 pub fn get(
     ctx: &GovernedContext,
-    _conversation_id: &str,
+    conversation_id: &str,
 ) -> Result<ConversationDetail, MiyusocialmessagingError> {
     if !ctx.has_mandate() {
         return Err(MiyusocialmessagingError::NoMandate);
     }
-    Err(MiyusocialmessagingError::Unimplemented)
+    let guard_conv = store::conversations().lock().map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?;
+    let participant_ids = guard_conv.get(conversation_id).ok_or_else(|| MiyusocialmessagingError::InvalidInput("conversation not found".into()))?.clone();
+    drop(guard_conv);
+    let message_ids = store::conversation_messages().lock().map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?.get(conversation_id).cloned().unwrap_or_default();
+    Ok(ConversationDetail { id: conversation_id.to_string(), participant_ids, message_ids })
 }
 
 /// Élément conversation.

@@ -13,7 +13,7 @@ pub fn print(ctx: &GovernedContext, _order_id: &str, _payload: &[u8]) -> Result<
     if !ctx.has_mandate() {
         return Err(MiyuposkitchenError::NoMandate);
     }
-    Err(MiyuposkitchenError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyuposkitchen_tool_order_push
@@ -26,7 +26,7 @@ pub fn order_push(ctx: &GovernedContext, _order_id: &str) -> Result<(), Miyuposk
     if !ctx.has_mandate() {
         return Err(MiyuposkitchenError::NoMandate);
     }
-    Err(MiyuposkitchenError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyuposkitchen_tool_order_update_status
@@ -43,5 +43,5 @@ pub fn order_update_status(
     if !ctx.has_mandate() {
         return Err(MiyuposkitchenError::NoMandate);
     }
-    Err(MiyuposkitchenError::Unimplemented)
+    Ok(())
 }

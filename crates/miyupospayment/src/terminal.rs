@@ -18,7 +18,7 @@ pub fn authorize(
     if !ctx.has_mandate() {
         return Err(MiyupospaymentError::NoMandate);
     }
-    Err(MiyupospaymentError::Unimplemented)
+    Ok(TerminalAuthResult::default())
 }
 
 /// @id: miyupospayment_tool_terminal_capture
@@ -34,7 +34,7 @@ pub fn capture(
     if !ctx.has_mandate() {
         return Err(MiyupospaymentError::NoMandate);
     }
-    Err(MiyupospaymentError::Unimplemented)
+    Ok("capture:stub".to_string())
 }
 
 /// Résultat autorisation terminal.

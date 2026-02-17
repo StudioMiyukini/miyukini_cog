@@ -1,9 +1,10 @@
 //! Tool MiyuSearch — tool.search.query.execute.
 //! Exécute une requête full-text (terme(s), filtres, options fournis) ; retourne identifiants et scores.
-//! Implémentation minimale : résultat vide sans backend (lecture = KindMother ou flux) ; BOUND-3.
+//! Lecture sur index en mémoire (dérivation KindMother) ; BOUND-3.
 
 use crate::context::GovernedContext;
 use crate::errors::MiyusearchError;
+use crate::store;
 
 /// Résultat de requête (identifiants et scores).
 #[derive(Debug, Clone)]
@@ -22,15 +23,27 @@ pub struct QueryResult {
 /// tool.search.query.execute — ne décide pas ; critères fournis.
 pub fn execute(
     ctx: &GovernedContext,
-    _terms: &str,
+    terms: &str,
     _filters: Option<&str>,
     _options: Option<&str>,
 ) -> Result<QueryResult, MiyusearchError> {
     if !ctx.has_mandate() {
         return Err(MiyusearchError::NoMandate);
     }
-    Ok(QueryResult {
-        ids: Vec::new(),
-        scores: Vec::new(),
-    })
+    let guard = store::index().lock().map_err(|_| MiyusearchError::InvalidInput("lock".into()))?;
+    let search_terms: Vec<&str> = terms.split_whitespace().filter(|s| !s.is_empty()).collect();
+    let mut ids = Vec::new();
+    let mut scores = Vec::new();
+    for (id, fields) in guard.iter() {
+        let fields_lower = fields.to_lowercase();
+        let match_count = search_terms
+            .iter()
+            .filter(|t| fields_lower.contains(&t.to_lowercase()))
+            .count();
+        if match_count == search_terms.len() {
+            ids.push(id.clone());
+            scores.push(1.0);
+        }
+    }
+    Ok(QueryResult { ids, scores })
 }

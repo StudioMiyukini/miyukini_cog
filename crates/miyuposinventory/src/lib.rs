@@ -40,3 +40,24 @@ pub use purchase_order::{create as purchase_order_create, track as purchase_orde
 pub use stock::{adjust as stock_adjust, get as stock_get, StockResult};
 pub use transfer::{create as transfer_create, execute as transfer_execute, list as transfer_list, TransferFilters, TransferItem};
 pub use valuation::report as valuation_report;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn ctx() -> GovernedContext {
+        GovernedContext::new("m".into(), 0)
+    }
+
+    #[test]
+    fn stub_tools_with_mandate() {
+        let c = ctx();
+        assert!(stock_get(&c, "a1", "s1").unwrap().quantity == 0);
+    }
+
+    #[test]
+    fn no_mandate_refused() {
+        let c = GovernedContext::new(String::new(), 0);
+        assert!(stock_get(&c, "", "").is_err());
+    }
+}

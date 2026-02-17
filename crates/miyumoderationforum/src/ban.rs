@@ -2,6 +2,8 @@
 
 use crate::context::GovernedContext;
 use crate::errors::MiyumoderationforumError;
+use crate::store;
+use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 
 /// @id: miyumoderationforum_tool_ban_create
 /// @role: mutator
@@ -11,14 +13,18 @@ use crate::errors::MiyumoderationforumError;
 /// tool.moderation.ban.create
 pub fn create(
     ctx: &GovernedContext,
-    _user_id: &str,
-    _reason: &str,
-    _until: Option<&str>,
+    user_id: &str,
+    reason: &str,
+    until: Option<&str>,
 ) -> Result<String, MiyumoderationforumError> {
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    Err(MiyumoderationforumError::Unimplemented)
+    let id = format!("ban:{}", UuidIdGenerator.generate());
+    let until_opt = until.map(String::from);
+    let mut guard = store::bans().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    guard.insert(id.clone(), (user_id.to_string(), reason.to_string(), until_opt));
+    Ok(id)
 }
 
 /// @id: miyumoderationforum_tool_ban_list
@@ -31,7 +37,14 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<BanItem>, MiyumoderationforumEr
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    Err(MiyumoderationforumError::Unimplemented)
+    let guard = store::bans().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let items = guard.iter().map(|(id, (user_id, reason, until))| BanItem {
+        id: id.clone(),
+        user_id: user_id.clone(),
+        reason: reason.clone(),
+        until: until.clone(),
+    }).collect();
+    Ok(items)
 }
 
 /// Élément bannissement.

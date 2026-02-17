@@ -13,7 +13,7 @@ pub fn start(ctx: &GovernedContext, _site_id: &str) -> Result<String, Miyuposinv
     if !ctx.has_mandate() {
         return Err(MiyuposinventoryError::NoMandate);
     }
-    Err(MiyuposinventoryError::Unimplemented)
+    Ok("count:stub".to_string())
 }
 
 /// @id: miyuposinventory_tool_count_record
@@ -31,7 +31,7 @@ pub fn record(
     if !ctx.has_mandate() {
         return Err(MiyuposinventoryError::NoMandate);
     }
-    Err(MiyuposinventoryError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyuposinventory_tool_count_reconcile
@@ -47,7 +47,7 @@ pub fn reconcile(
     if !ctx.has_mandate() {
         return Err(MiyuposinventoryError::NoMandate);
     }
-    Err(MiyuposinventoryError::Unimplemented)
+    Ok(ReconcileResult::default())
 }
 
 /// Résultat réconciliation.

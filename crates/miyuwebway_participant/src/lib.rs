@@ -37,6 +37,7 @@ pub mod declaration;
 pub mod discovery;
 pub mod errors;
 pub mod port;
+mod store;
 pub mod transport;
 
 // Nouveaux modules MWS
@@ -74,3 +75,74 @@ pub use protocol::{
     RelayFrame, RelayMessageType,
     TrackerFrame, TrackerMessageType,
 };
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn ctx() -> GovernedContext {
+        GovernedContext::new("m".into(), 0)
+    }
+
+    #[test]
+    fn test_address_tracker_default() {
+        let c = ctx();
+        assert_eq!(address_tracker_default(&c, None).unwrap(), "127.0.0.1:21000");
+        assert_eq!(address_tracker_default(&c, Some("host.example")).unwrap(), "host.example:21000");
+    }
+
+    #[test]
+    fn test_transport_send_tracker_indisponible() {
+        let c = ctx();
+        let e = transport_send(&c, "addr", b"payload").unwrap_err();
+        assert!(matches!(e, MiyuwebwayParticipantError::ConnectionFailed(ref m) if m.contains("Tracker indisponible")));
+    }
+
+    #[test]
+    fn test_port_check() {
+        let c = ctx();
+        assert!(port_check(&c, 21000).unwrap());
+        assert!(!port_check(&c, 8080).unwrap());
+    }
+
+    #[test]
+    fn test_discovery_build_send() {
+        let c = ctx();
+        assert_eq!(discovery_request_build(&c, Some("p")).unwrap(), b"p");
+        assert!(discovery_request_build(&c, None).unwrap().is_empty());
+        let e = discovery_request_send(&c, &[], b"").unwrap_err();
+        assert!(matches!(e, MiyuwebwayParticipantError::ConnectionFailed(_)));
+    }
+
+    #[test]
+    fn test_declaration_build_sign_validate_verify() {
+        let c = ctx();
+        let raw = declaration_build(&c, "payload").unwrap();
+        assert_eq!(raw, b"payload");
+        let signed = declaration_sign(&c, &raw).unwrap();
+        assert!(declaration_validate(&c, &signed).unwrap());
+        assert!(declaration_verify(&c, &signed).unwrap());
+    }
+
+    #[test]
+    fn test_cog_list_get_update_merge() {
+        let c = ctx();
+        assert!(cog_list_get(&c).unwrap().is_empty());
+        cog_list_update(&c, "cog-1", "data").unwrap();
+        let list = cog_list_get(&c).unwrap();
+        assert_eq!(list.len(), 1);
+        assert!(list.contains(&"cog-1".to_string()));
+        cog_list_merge(&c, "cog-2\ncog-3", "rule").unwrap();
+        let list = cog_list_get(&c).unwrap();
+        assert!(list.len() >= 3);
+        assert!(list.contains(&"cog-2".to_string()));
+        assert!(list.contains(&"cog-3".to_string()));
+    }
+
+    #[test]
+    fn test_no_mandate_refused() {
+        let c = GovernedContext::new(String::new(), 0);
+        assert!(address_tracker_default(&c, None).is_err());
+        assert!(cog_list_get(&c).is_err());
+    }
+}

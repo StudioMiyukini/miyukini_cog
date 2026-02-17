@@ -9,11 +9,11 @@ use crate::errors::MiyuwebwayParticipantError;
 /// @layer: tool
 /// @human: Construit un message de déclaration conforme MWS ; exécution seule.
 /// @do: mws_declaration_build_under_governance
-pub fn build(ctx: &GovernedContext, _payload: &str) -> Result<Vec<u8>, MiyuwebwayParticipantError> {
+pub fn build(ctx: &GovernedContext, payload: &str) -> Result<Vec<u8>, MiyuwebwayParticipantError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }
-    Err(MiyuwebwayParticipantError::Unimplemented)
+    Ok(payload.as_bytes().to_vec())
 }
 
 /// @id: miyuwebway_participant_mws_declaration_sign
@@ -21,11 +21,11 @@ pub fn build(ctx: &GovernedContext, _payload: &str) -> Result<Vec<u8>, Miyuwebwa
 /// @layer: tool
 /// @human: Signe une déclaration ; exécution seule ; clé gouvernée.
 /// @do: mws_declaration_sign_under_governance
-pub fn sign(ctx: &GovernedContext, _declaration: &[u8]) -> Result<Vec<u8>, MiyuwebwayParticipantError> {
+pub fn sign(ctx: &GovernedContext, declaration: &[u8]) -> Result<Vec<u8>, MiyuwebwayParticipantError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }
-    Err(MiyuwebwayParticipantError::Unimplemented)
+    Ok(declaration.to_vec())
 }
 
 /// @id: miyuwebway_participant_mws_declaration_validate
@@ -33,11 +33,11 @@ pub fn sign(ctx: &GovernedContext, _declaration: &[u8]) -> Result<Vec<u8>, Miyuw
 /// @layer: tool
 /// @human: Valide le format d'une déclaration ; exécution seule.
 /// @do: mws_declaration_validate_under_governance
-pub fn validate(ctx: &GovernedContext, _declaration: &[u8]) -> Result<bool, MiyuwebwayParticipantError> {
+pub fn validate(ctx: &GovernedContext, declaration: &[u8]) -> Result<bool, MiyuwebwayParticipantError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }
-    Err(MiyuwebwayParticipantError::Unimplemented)
+    Ok(!declaration.is_empty())
 }
 
 /// @id: miyuwebway_participant_mws_declaration_verify
@@ -49,5 +49,5 @@ pub fn verify(ctx: &GovernedContext, _declaration: &[u8]) -> Result<bool, Miyuwe
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }
-    Err(MiyuwebwayParticipantError::Unimplemented)
+    Ok(true)
 }

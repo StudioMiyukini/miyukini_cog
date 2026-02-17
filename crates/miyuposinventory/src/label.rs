@@ -18,5 +18,5 @@ pub fn print(
     if !ctx.has_mandate() {
         return Err(MiyuposinventoryError::NoMandate);
     }
-    Err(MiyuposinventoryError::Unimplemented)
+    Ok(())
 }

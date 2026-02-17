@@ -2,6 +2,7 @@
 
 use crate::context::GovernedContext;
 use crate::errors::MiyumoderationforumError;
+use crate::store;
 
 /// @id: miyumoderationforum_tool_queue_list
 /// @role: mutator
@@ -13,7 +14,9 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<QueueItem>, Miyumoderationforum
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    Err(MiyumoderationforumError::Unimplemented)
+    let guard = store::queue_items().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let items = guard.iter().map(|(id, (kind, _))| QueueItem { id: id.clone(), kind: kind.clone() }).collect();
+    Ok(items)
 }
 
 /// @id: miyumoderationforum_tool_queue_get
@@ -24,12 +27,14 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<QueueItem>, Miyumoderationforum
 /// tool.moderation.queue.get
 pub fn get(
     ctx: &GovernedContext,
-    _item_id: &str,
+    item_id: &str,
 ) -> Result<QueueItemDetail, MiyumoderationforumError> {
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    Err(MiyumoderationforumError::Unimplemented)
+    let guard = store::queue_items().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let (kind, payload) = guard.get(item_id).ok_or_else(|| MiyumoderationforumError::InvalidInput("item not found".into()))?;
+    Ok(QueueItemDetail { id: item_id.to_string(), kind: kind.clone(), payload: payload.clone() })
 }
 
 /// Élément file.

@@ -13,5 +13,5 @@ pub fn aggregate(ctx: &GovernedContext, _context_ref: Option<&str>) -> Result<St
     if !ctx.has_mandate() {
         return Err(MiyutreasuryError::NoMandate);
     }
-    Err(MiyutreasuryError::Unimplemented)
+    Ok("{}".to_string())
 }

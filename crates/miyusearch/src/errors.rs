@@ -2,6 +2,7 @@
 pub enum MiyusearchError {
     NoMandate,
     Unimplemented,
+    InvalidInput(String),
 }
 
 impl std::fmt::Display for MiyusearchError {
@@ -9,6 +10,7 @@ impl std::fmt::Display for MiyusearchError {
         match self {
             MiyusearchError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyusearchError::Unimplemented => write!(f, "Tool not yet implemented"),
+            MiyusearchError::InvalidInput(s) => write!(f, "Invalid input: {}", s),
         }
     }
 }

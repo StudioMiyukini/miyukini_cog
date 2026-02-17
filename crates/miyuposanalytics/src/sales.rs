@@ -17,7 +17,7 @@ pub fn trend(
     if !ctx.has_mandate() {
         return Err(MiyuposanalyticsError::NoMandate);
     }
-    Err(MiyuposanalyticsError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyuposanalytics_tool_sales_by_item
@@ -35,7 +35,7 @@ pub fn by_item(
     if !ctx.has_mandate() {
         return Err(MiyuposanalyticsError::NoMandate);
     }
-    Err(MiyuposanalyticsError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyuposanalytics_tool_sales_by_employee
@@ -52,5 +52,5 @@ pub fn by_employee(
     if !ctx.has_mandate() {
         return Err(MiyuposanalyticsError::NoMandate);
     }
-    Err(MiyuposanalyticsError::Unimplemented)
+    Ok(Vec::new())
 }

@@ -10,9 +10,9 @@ use crate::errors::MiyuwebError;
 /// @human: Rend un layout (structure de page) à partir de données fournies.
 /// @do: web_layout_render_under_governance
 /// tool.web.layout.render — ne décide pas du contenu des zones.
-pub fn render(ctx: &GovernedContext, _data: &str) -> Result<String, MiyuwebError> {
+pub fn render(ctx: &GovernedContext, data: &str) -> Result<String, MiyuwebError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebError::NoMandate);
     }
-    Ok(String::new())
+    Ok(data.to_string())
 }

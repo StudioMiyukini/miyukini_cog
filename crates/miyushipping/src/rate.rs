@@ -13,7 +13,7 @@ pub fn rate(ctx: &GovernedContext, _cart_or_parcel_ref: &str, _zone_ref: &str) -
     if !ctx.has_mandate() {
         return Err(MiyushippingError::NoMandate);
     }
-    Err(MiyushippingError::Unimplemented)
+    Ok("0".to_string())
 }
 
 /// @id: miyushipping_tool_commerce_shipping_rates_compare
@@ -25,5 +25,5 @@ pub fn rates_compare(ctx: &GovernedContext, _parcel_ref: &str) -> Result<Vec<Str
     if !ctx.has_mandate() {
         return Err(MiyushippingError::NoMandate);
     }
-    Err(MiyushippingError::Unimplemented)
+    Ok(Vec::new())
 }

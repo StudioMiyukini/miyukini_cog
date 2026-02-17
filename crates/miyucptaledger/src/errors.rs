@@ -2,6 +2,7 @@
 pub enum MiyucptaledgerError {
     NoMandate,
     Unimplemented,
+    InvalidInput(String),
 }
 
 impl std::fmt::Display for MiyucptaledgerError {
@@ -9,6 +10,7 @@ impl std::fmt::Display for MiyucptaledgerError {
         match self {
             MiyucptaledgerError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyucptaledgerError::Unimplemented => write!(f, "Tool not yet implemented"),
+            MiyucptaledgerError::InvalidInput(ref m) => write!(f, "{m}"),
         }
     }
 }

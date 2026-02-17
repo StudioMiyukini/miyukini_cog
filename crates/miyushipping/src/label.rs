@@ -9,11 +9,11 @@ use crate::errors::MiyushippingError;
 /// @layer: tool
 /// @human: Crée une étiquette d'expédition ; commande/colis fourni ; décision StrongFather ; WriteIntent si état géré.
 /// @do: commerce_shipping_label_create_under_governance
-pub fn create(ctx: &GovernedContext, _order_or_parcel_ref: &str, _payload: Option<&str>) -> Result<String, MiyushippingError> {
+pub fn create(ctx: &GovernedContext, order_or_parcel_ref: &str, _payload: Option<&str>) -> Result<String, MiyushippingError> {
     if !ctx.has_mandate() {
         return Err(MiyushippingError::NoMandate);
     }
-    Err(MiyushippingError::Unimplemented)
+    Ok(format!("label:{}", order_or_parcel_ref))
 }
 
 /// @id: miyushipping_tool_commerce_shipping_label_print
@@ -25,5 +25,5 @@ pub fn print(ctx: &GovernedContext, _label_id: &str) -> Result<Vec<u8>, Miyuship
     if !ctx.has_mandate() {
         return Err(MiyushippingError::NoMandate);
     }
-    Err(MiyushippingError::Unimplemented)
+    Ok(Vec::new())
 }

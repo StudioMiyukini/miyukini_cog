@@ -19,5 +19,5 @@ pub fn record(
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok("movement:stub".to_string())
 }

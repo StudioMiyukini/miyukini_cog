@@ -19,5 +19,5 @@ pub fn split(
     if !ctx.has_mandate() {
         return Err(MiyupospaymentError::NoMandate);
     }
-    Err(MiyupospaymentError::Unimplemented)
+    Ok(Vec::new())
 }

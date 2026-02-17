@@ -26,3 +26,28 @@ pub use export::ledger as compta_export_ledger;
 pub use report::{
     balance_generate, cashflow_generate, livre_recettes_generate, liasse_generate,
 };
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn ctx() -> GovernedContext {
+        GovernedContext::new("m".into(), 0)
+    }
+
+    #[test]
+    fn reports_and_export() {
+        let c = ctx();
+        assert!(livre_recettes_generate(&c, "2024-01-01", "2024-12-31").unwrap().is_empty());
+        assert!(balance_generate(&c, "2024-12-31").unwrap().is_empty());
+        assert!(liasse_generate(&c, "2024").unwrap().is_empty());
+        assert!(cashflow_generate(&c, "2024-01-01", "2024-12-31").unwrap().is_empty());
+        assert!(compta_export_ledger(&c, "csv", "2024-01-01", "2024-12-31").unwrap().is_empty());
+    }
+
+    #[test]
+    fn no_mandate_refused() {
+        let c = GovernedContext::new(String::new(), 0);
+        assert!(livre_recettes_generate(&c, "", "").is_err());
+    }
+}

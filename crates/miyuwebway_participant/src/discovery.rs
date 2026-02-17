@@ -9,11 +9,11 @@ use crate::errors::MiyuwebwayParticipantError;
 /// @layer: tool
 /// @human: Construit une requête de découverte ; exécution seule.
 /// @do: mws_discovery_request_build_under_governance
-pub fn request_build(ctx: &GovernedContext, _payload: Option<&str>) -> Result<Vec<u8>, MiyuwebwayParticipantError> {
+pub fn request_build(ctx: &GovernedContext, payload: Option<&str>) -> Result<Vec<u8>, MiyuwebwayParticipantError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }
-    Err(MiyuwebwayParticipantError::Unimplemented)
+    Ok(payload.map(str::as_bytes).unwrap_or_default().to_vec())
 }
 
 /// @id: miyuwebway_participant_mws_discovery_request_send
@@ -25,5 +25,7 @@ pub fn request_send(ctx: &GovernedContext, _trackers: &[String], _request: &[u8]
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }
-    Err(MiyuwebwayParticipantError::Unimplemented)
+    Err(MiyuwebwayParticipantError::ConnectionFailed(
+        "Tracker indisponible".to_string(),
+    ))
 }

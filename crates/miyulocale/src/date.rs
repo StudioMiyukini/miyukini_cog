@@ -31,7 +31,7 @@ pub fn format(
     }
     let secs = timestamp_utc_ms / 1000;
     let nsecs = ((timestamp_utc_ms % 1000).unsigned_abs() as u32) * 1_000_000;
-    let dt = DateTime::from_timestamp(secs, nsecs).ok_or(MiyuLocaleError::Unimplemented)?;
+    let dt = DateTime::from_timestamp(secs, nsecs).ok_or(MiyuLocaleError::InvalidTimestamp)?;
     let style = options.style.to_lowercase();
     let (fmt, _locale_used) = match (locale.trim().to_lowercase().as_str(), style.as_str()) {
         ("fr" | "fr-fr", "short") => ("%d/%m/%Y %H:%M", ()),

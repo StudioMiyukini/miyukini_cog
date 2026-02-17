@@ -15,7 +15,7 @@
 //! @role: application
 //! @layer: application
 //! @do: aggregate_miyuclicker_operators_and_toolkits
-//! @human: Service jeu : IdleSim, Save, Combat, Carte. UI migrée vers Tauri + React.
+//! @human: Service jeu : IdleSim, Save, Combat, Carte. UI Dioxus dans apps/central (MiyuClickerView).
 
 pub mod carte;
 pub mod combat;

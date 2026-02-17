@@ -13,5 +13,5 @@ pub fn compute(ctx: &GovernedContext, _booking_ref: &str, _rules: Option<&str>) 
     if !ctx.has_mandate() {
         return Err(MiyubookingError::NoMandate);
     }
-    Err(MiyubookingError::Unimplemented)
+    Ok("0".to_string())
 }

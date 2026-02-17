@@ -13,10 +13,10 @@ use crate::errors::MiyuwebError;
 pub fn capture(
     ctx: &GovernedContext,
     _input_type: &str,
-    _value: &str,
+    value: &str,
 ) -> Result<String, MiyuwebError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebError::NoMandate);
     }
-    Ok(String::new())
+    Ok(value.to_string())
 }

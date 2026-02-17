@@ -18,7 +18,7 @@ pub fn create(
     if !ctx.has_mandate() {
         return Err(MiyuposinventoryError::NoMandate);
     }
-    Err(MiyuposinventoryError::Unimplemented)
+    Ok("po:stub".to_string())
 }
 
 /// @id: miyuposinventory_tool_purchase_order_update
@@ -35,7 +35,7 @@ pub fn update(
     if !ctx.has_mandate() {
         return Err(MiyuposinventoryError::NoMandate);
     }
-    Err(MiyuposinventoryError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyuposinventory_tool_purchase_order_track
@@ -51,7 +51,7 @@ pub fn track(
     if !ctx.has_mandate() {
         return Err(MiyuposinventoryError::NoMandate);
     }
-    Err(MiyuposinventoryError::Unimplemented)
+    Ok(PurchaseOrderStatus::default())
 }
 
 /// Statut bon de commande.

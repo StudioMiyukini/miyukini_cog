@@ -13,5 +13,7 @@ pub fn send(ctx: &GovernedContext, _address: &str, _payload: &[u8]) -> Result<()
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }
-    Err(MiyuwebwayParticipantError::Unimplemented)
+    Err(MiyuwebwayParticipantError::ConnectionFailed(
+        "Tracker indisponible".to_string(),
+    ))
 }

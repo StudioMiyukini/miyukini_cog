@@ -17,5 +17,5 @@ pub fn preset_assign(
     if !ctx.has_mandate() {
         return Err(MiyuposkitchenError::NoMandate);
     }
-    Err(MiyuposkitchenError::Unimplemented)
+    Ok(())
 }

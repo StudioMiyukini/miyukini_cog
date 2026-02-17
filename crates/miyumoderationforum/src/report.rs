@@ -2,6 +2,8 @@
 
 use crate::context::GovernedContext;
 use crate::errors::MiyumoderationforumError;
+use crate::store;
+use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 
 /// @id: miyumoderationforum_tool_report_create
 /// @role: mutator
@@ -11,14 +13,17 @@ use crate::errors::MiyumoderationforumError;
 /// tool.moderation.report.create
 pub fn create(
     ctx: &GovernedContext,
-    _target_type: &str,
-    _target_id: &str,
-    _reason: &str,
+    target_type: &str,
+    target_id: &str,
+    reason: &str,
 ) -> Result<String, MiyumoderationforumError> {
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    Err(MiyumoderationforumError::Unimplemented)
+    let id = format!("rep:{}", UuidIdGenerator.generate());
+    let mut guard = store::reports().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    guard.insert(id.clone(), (target_type.to_string(), target_id.to_string(), reason.to_string()));
+    Ok(id)
 }
 
 /// @id: miyumoderationforum_tool_report_list
@@ -31,7 +36,14 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<ReportItem>, Miyumoderationforu
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    Err(MiyumoderationforumError::Unimplemented)
+    let guard = store::reports().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let items = guard.iter().map(|(id, (target_type, target_id, reason))| ReportItem {
+        id: id.clone(),
+        target_type: target_type.clone(),
+        target_id: target_id.clone(),
+        reason: reason.clone(),
+    }).collect();
+    Ok(items)
 }
 
 /// Élément signalement.

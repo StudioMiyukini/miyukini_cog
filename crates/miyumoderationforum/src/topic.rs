@@ -3,6 +3,8 @@
 
 use crate::context::GovernedContext;
 use crate::errors::MiyumoderationforumError;
+use crate::store;
+use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 
 /// @id: miyumoderationforum_tool_topic_lock
 /// @role: mutator
@@ -10,11 +12,14 @@ use crate::errors::MiyumoderationforumError;
 /// @human: Verrouille un topic ; WriteIntent KindMother.
 /// @do: topic_lock_under_governance
 /// tool.forum.topic.lock
-pub fn lock(ctx: &GovernedContext, _topic_id: &str) -> Result<(), MiyumoderationforumError> {
+pub fn lock(ctx: &GovernedContext, topic_id: &str) -> Result<(), MiyumoderationforumError> {
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    Err(MiyumoderationforumError::Unimplemented)
+    let mut guard = store::topics().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let (_, locked) = guard.get_mut(topic_id).ok_or_else(|| MiyumoderationforumError::InvalidInput("topic not found".into()))?;
+    *locked = true;
+    Ok(())
 }
 
 /// @id: miyumoderationforum_tool_topic_move
@@ -25,13 +30,16 @@ pub fn lock(ctx: &GovernedContext, _topic_id: &str) -> Result<(), Miyumoderation
 /// tool.forum.topic.move
 pub fn r#move(
     ctx: &GovernedContext,
-    _topic_id: &str,
-    _target_board_id: &str,
+    topic_id: &str,
+    target_board_id: &str,
 ) -> Result<(), MiyumoderationforumError> {
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    Err(MiyumoderationforumError::Unimplemented)
+    let mut guard = store::topics().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let (board_id, _) = guard.get_mut(topic_id).ok_or_else(|| MiyumoderationforumError::InvalidInput("topic not found".into()))?;
+    *board_id = target_board_id.to_string();
+    Ok(())
 }
 
 /// @id: miyumoderationforum_tool_topic_merge
@@ -42,13 +50,17 @@ pub fn r#move(
 /// tool.forum.topic.merge
 pub fn merge(
     ctx: &GovernedContext,
-    _source_topic_ids: &[String],
+    source_topic_ids: &[String],
     _target_topic_id: &str,
 ) -> Result<(), MiyumoderationforumError> {
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    Err(MiyumoderationforumError::Unimplemented)
+    let mut guard = store::topics().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    for id in source_topic_ids {
+        guard.remove(id);
+    }
+    Ok(())
 }
 
 /// @id: miyumoderationforum_tool_topic_split
@@ -59,13 +71,18 @@ pub fn merge(
 /// tool.forum.topic.split
 pub fn split(
     ctx: &GovernedContext,
-    _topic_id: &str,
+    topic_id: &str,
     _post_ids_after_split: &[String],
 ) -> Result<String, MiyumoderationforumError> {
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    Err(MiyumoderationforumError::Unimplemented)
+    let guard = store::topics().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let (board_id, locked) = guard.get(topic_id).ok_or_else(|| MiyumoderationforumError::InvalidInput("topic not found".into()))?.clone();
+    drop(guard);
+    let new_id = format!("topic:{}", UuidIdGenerator.generate());
+    store::topics().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?.insert(new_id.clone(), (board_id, locked));
+    Ok(new_id)
 }
 
 /// @id: miyumoderationforum_tool_topic_delete
@@ -74,11 +91,13 @@ pub fn split(
 /// @human: Supprime un topic ; WriteIntent KindMother.
 /// @do: topic_delete_under_governance
 /// tool.forum.topic.delete
-pub fn delete(ctx: &GovernedContext, _topic_id: &str) -> Result<(), MiyumoderationforumError> {
+pub fn delete(ctx: &GovernedContext, topic_id: &str) -> Result<(), MiyumoderationforumError> {
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    Err(MiyumoderationforumError::Unimplemented)
+    let mut guard = store::topics().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    guard.remove(topic_id).ok_or_else(|| MiyumoderationforumError::InvalidInput("topic not found".into()))?;
+    Ok(())
 }
 
 /// @id: miyumoderationforum_tool_topic_copy
@@ -89,11 +108,16 @@ pub fn delete(ctx: &GovernedContext, _topic_id: &str) -> Result<(), Miyumoderati
 /// tool.forum.topic.copy
 pub fn copy(
     ctx: &GovernedContext,
-    _topic_id: &str,
-    _target_board_id: &str,
+    topic_id: &str,
+    target_board_id: &str,
 ) -> Result<String, MiyumoderationforumError> {
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    Err(MiyumoderationforumError::Unimplemented)
+    let guard = store::topics().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let (_, locked) = guard.get(topic_id).ok_or_else(|| MiyumoderationforumError::InvalidInput("topic not found".into()))?.clone();
+    drop(guard);
+    let new_id = format!("topic:{}", UuidIdGenerator.generate());
+    store::topics().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?.insert(new_id.clone(), (target_board_id.to_string(), locked));
+    Ok(new_id)
 }

@@ -17,7 +17,7 @@ pub fn get(
     if !ctx.has_mandate() {
         return Err(MiyuposinventoryError::NoMandate);
     }
-    Err(MiyuposinventoryError::Unimplemented)
+    Ok(StockResult::default())
 }
 
 /// @id: miyuposinventory_tool_stock_adjust
@@ -36,7 +36,7 @@ pub fn adjust(
     if !ctx.has_mandate() {
         return Err(MiyuposinventoryError::NoMandate);
     }
-    Err(MiyuposinventoryError::Unimplemented)
+    Ok(())
 }
 
 /// Résultat stock.

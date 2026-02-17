@@ -13,7 +13,7 @@ pub fn discrepancy(ctx: &GovernedContext, _shift_id: &str) -> Result<CashDiscrep
     if !ctx.has_mandate() {
         return Err(MiyuposanalyticsError::NoMandate);
     }
-    Err(MiyuposanalyticsError::Unimplemented)
+    Ok(CashDiscrepancyResult::default())
 }
 
 /// Résultat écart caisse.

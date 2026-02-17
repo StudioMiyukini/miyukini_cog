@@ -13,7 +13,7 @@ pub fn create(ctx: &GovernedContext, _store_id: &str) -> Result<String, Miyuposs
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok("sale:stub".to_string())
 }
 
 /// @id: miyupossales_tool_sale_add_item
@@ -33,7 +33,7 @@ pub fn add_item(
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok("sale:stub".to_string())
 }
 
 /// @id: miyupossales_tool_sale_remove_item
@@ -50,5 +50,5 @@ pub fn remove_item(
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }
-    Err(MiyupossalesError::Unimplemented)
+    Ok(())
 }

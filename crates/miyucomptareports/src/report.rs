@@ -18,7 +18,7 @@ pub fn livre_recettes_generate(
     if !ctx.has_mandate() {
         return Err(MiyucomptareportsError::NoMandate);
     }
-    Err(MiyucomptareportsError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyucomptareports_tool_balance_generate
@@ -34,7 +34,7 @@ pub fn balance_generate(
     if !ctx.has_mandate() {
         return Err(MiyucomptareportsError::NoMandate);
     }
-    Err(MiyucomptareportsError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyucomptareports_tool_liasse_generate
@@ -50,7 +50,7 @@ pub fn liasse_generate(
     if !ctx.has_mandate() {
         return Err(MiyucomptareportsError::NoMandate);
     }
-    Err(MiyucomptareportsError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyucomptareports_tool_cashflow_generate
@@ -67,5 +67,5 @@ pub fn cashflow_generate(
     if !ctx.has_mandate() {
         return Err(MiyucomptareportsError::NoMandate);
     }
-    Err(MiyucomptareportsError::Unimplemented)
+    Ok(Vec::new())
 }

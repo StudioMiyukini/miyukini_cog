@@ -17,5 +17,5 @@ pub fn record(
     if !ctx.has_mandate() {
         return Err(MiyupospaymentError::NoMandate);
     }
-    Err(MiyupospaymentError::Unimplemented)
+    Ok("cash:stub".to_string())
 }

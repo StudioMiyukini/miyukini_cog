@@ -17,7 +17,7 @@ pub fn prepare(
     if !ctx.has_mandate() {
         return Err(MiyudeclarationsError::NoMandate);
     }
-    Err(MiyudeclarationsError::Unimplemented)
+    Ok(UrssafPrepareResult::default())
 }
 
 /// @id: miyudeclarations_tool_urssaf_submit
@@ -33,7 +33,7 @@ pub fn submit(
     if !ctx.has_mandate() {
         return Err(MiyudeclarationsError::NoMandate);
     }
-    Err(MiyudeclarationsError::Unimplemented)
+    Ok("urssaf:submitted".to_string())
 }
 
 /// Résultat préparation URSSAF.

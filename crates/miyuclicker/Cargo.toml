@@ -10,8 +10,7 @@ description = "Lord of the Click — Premier jeu officiel Miyukini (Idle/Clicker
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
-# Note: eGUI supprimé — migration vers Tauri + React/TypeScript
-# Voir docs/implementation/Miyukini - Plan Migration Tauri React TypeScript.md
+# Note: eGUI supprimé — UI Dioxus dans apps/central (MiyuClickerView).
 
 [lints.rust]
 unsafe_code = "forbid"

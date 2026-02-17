@@ -3,6 +3,8 @@
 
 use crate::context::GovernedContext;
 use crate::errors::MiyustoryError;
+use crate::store;
+use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 
 /// @id: miyustory_tool_story_create
 /// @role: mutator
@@ -12,13 +14,18 @@ use crate::errors::MiyustoryError;
 /// tool.social.story.create
 pub fn create(
     ctx: &GovernedContext,
-    _content_type: &str,
-    _payload: &[u8],
+    content_type: &str,
+    payload: &[u8],
 ) -> Result<String, MiyustoryError> {
     if !ctx.has_mandate() {
         return Err(MiyustoryError::NoMandate);
     }
-    Err(MiyustoryError::Unimplemented)
+    let id = format!("story:{}", UuidIdGenerator.generate());
+    let author_id = ctx.mandate_id.clone();
+    let expires_at = String::new();
+    let mut guard = store::stories().lock().map_err(|_| MiyustoryError::InvalidInput("lock".into()))?;
+    guard.insert(id.clone(), (author_id, content_type.to_string(), payload.to_vec(), expires_at));
+    Ok(id)
 }
 
 /// @id: miyustory_tool_story_list
@@ -29,12 +36,28 @@ pub fn create(
 /// tool.social.story.list
 pub fn list(
     ctx: &GovernedContext,
-    _filters: &StoryFilters,
+    filters: &StoryFilters,
 ) -> Result<Vec<StoryItem>, MiyustoryError> {
     if !ctx.has_mandate() {
         return Err(MiyustoryError::NoMandate);
     }
-    Err(MiyustoryError::Unimplemented)
+    let guard = store::stories().lock().map_err(|_| MiyustoryError::InvalidInput("lock".into()))?;
+    let mut items: Vec<StoryItem> = guard
+        .iter()
+        .filter(|(_, (author_id, _, _, _))| {
+            filters.author_id.as_ref().map_or(true, |a| author_id == a)
+        })
+        .map(|(id, (author_id, content_type, _, expires_at))| StoryItem {
+            id: id.clone(),
+            author_id: author_id.clone(),
+            content_type: content_type.clone(),
+            expires_at: expires_at.clone(),
+        })
+        .collect();
+    if let Some(limit) = filters.limit {
+        items.truncate(limit as usize);
+    }
+    Ok(items)
 }
 
 /// @id: miyustory_tool_story_get
@@ -43,11 +66,22 @@ pub fn list(
 /// @human: Récupère une story.
 /// @do: story_get_under_governance
 /// tool.social.story.get
-pub fn get(ctx: &GovernedContext, _story_id: &str) -> Result<StoryDetail, MiyustoryError> {
+pub fn get(ctx: &GovernedContext, story_id: &str) -> Result<StoryDetail, MiyustoryError> {
     if !ctx.has_mandate() {
         return Err(MiyustoryError::NoMandate);
     }
-    Err(MiyustoryError::Unimplemented)
+    let guard = store::stories().lock().map_err(|_| MiyustoryError::InvalidInput("lock".into()))?;
+    let (author_id, content_type, payload, expires_at) = guard
+        .get(story_id)
+        .ok_or_else(|| MiyustoryError::InvalidInput("story not found".into()))?
+        .clone();
+    Ok(StoryDetail {
+        id: story_id.to_string(),
+        author_id,
+        content_type,
+        payload,
+        expires_at,
+    })
 }
 
 /// @id: miyustory_tool_story_reaction_add
@@ -58,13 +92,17 @@ pub fn get(ctx: &GovernedContext, _story_id: &str) -> Result<StoryDetail, Miyust
 /// tool.social.story.reaction.add
 pub fn reaction_add(
     ctx: &GovernedContext,
-    _story_id: &str,
+    story_id: &str,
     _reaction_type: &str,
 ) -> Result<(), MiyustoryError> {
     if !ctx.has_mandate() {
         return Err(MiyustoryError::NoMandate);
     }
-    Err(MiyustoryError::Unimplemented)
+    let guard = store::stories().lock().map_err(|_| MiyustoryError::InvalidInput("lock".into()))?;
+    if !guard.contains_key(story_id) {
+        return Err(MiyustoryError::InvalidInput("story not found".into()));
+    }
+    Ok(())
 }
 
 /// Filtres liste stories.

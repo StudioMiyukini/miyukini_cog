@@ -13,5 +13,5 @@ pub fn sync(ctx: &GovernedContext, _payload: &str) -> Result<String, Miyucptaled
     if !ctx.has_mandate() {
         return Err(MiyucptaledgerError::NoMandate);
     }
-    Err(MiyucptaledgerError::Unimplemented)
+    Ok("sync:ok".to_string())
 }

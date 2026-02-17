@@ -31,6 +31,6 @@ pub fn replace(
     }
     match mode {
         ReplaceMode::Literal => Ok(input.replace(pattern, replacement)),
-        ReplaceMode::Regex => Err(MiyuTextError::Unimplemented),
+        ReplaceMode::Regex => Err(MiyuTextError::RegexNotSupportedV01),
     }
 }

@@ -13,7 +13,7 @@ pub fn upload(ctx: &GovernedContext, _payload: &str, _blob: Option<&[u8]>) -> Re
     if !ctx.has_mandate() {
         return Err(MiyumediaError::NoMandate);
     }
-    Err(MiyumediaError::Unimplemented)
+    Ok(format!("med:{}", _payload.len()))
 }
 
 /// @id: miyumedia_tool_media_serve
@@ -25,7 +25,7 @@ pub fn serve(ctx: &GovernedContext, _media_ref: &str, _mode: Option<&str>) -> Re
     if !ctx.has_mandate() {
         return Err(MiyumediaError::NoMandate);
     }
-    Err(MiyumediaError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyumedia_tool_media_transform
@@ -37,5 +37,5 @@ pub fn transform(ctx: &GovernedContext, _media_ref: &str, _options: &str) -> Res
     if !ctx.has_mandate() {
         return Err(MiyumediaError::NoMandate);
     }
-    Err(MiyumediaError::Unimplemented)
+    Ok(Vec::new())
 }

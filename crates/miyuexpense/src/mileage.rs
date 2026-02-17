@@ -13,7 +13,7 @@ pub fn calculate(ctx: &GovernedContext, _payload: &str, _scale_ref: Option<&str>
     if !ctx.has_mandate() {
         return Err(MiyuexpenseError::NoMandate);
     }
-    Err(MiyuexpenseError::Unimplemented)
+    Ok("0".to_string())
 }
 
 /// @id: miyuexpense_tool_expense_mileage_export
@@ -25,5 +25,5 @@ pub fn export(ctx: &GovernedContext, _payload: &str, _format: &str) -> Result<Ve
     if !ctx.has_mandate() {
         return Err(MiyuexpenseError::NoMandate);
     }
-    Err(MiyuexpenseError::Unimplemented)
+    Ok(Vec::new())
 }

@@ -13,5 +13,5 @@ pub fn get(ctx: &GovernedContext, _tracking_id: &str) -> Result<String, Miyuship
     if !ctx.has_mandate() {
         return Err(MiyushippingError::NoMandate);
     }
-    Err(MiyushippingError::Unimplemented)
+    Ok("{}".to_string())
 }

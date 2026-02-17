@@ -2,6 +2,7 @@
 pub enum MiyusocialmoderationError {
     NoMandate,
     Unimplemented,
+    InvalidInput(String),
 }
 
 impl std::fmt::Display for MiyusocialmoderationError {
@@ -9,6 +10,7 @@ impl std::fmt::Display for MiyusocialmoderationError {
         match self {
             MiyusocialmoderationError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyusocialmoderationError::Unimplemented => write!(f, "Tool not yet implemented"),
+            MiyusocialmoderationError::InvalidInput(ref m) => write!(f, "{m}"),
         }
     }
 }

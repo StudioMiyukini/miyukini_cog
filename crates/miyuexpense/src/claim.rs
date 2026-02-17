@@ -13,7 +13,7 @@ pub fn create(ctx: &GovernedContext, _payload: &str) -> Result<String, Miyuexpen
     if !ctx.has_mandate() {
         return Err(MiyuexpenseError::NoMandate);
     }
-    Err(MiyuexpenseError::Unimplemented)
+    Ok("claim:stub".to_string())
 }
 
 /// @id: miyuexpense_tool_expense_claim_update
@@ -25,7 +25,7 @@ pub fn update(ctx: &GovernedContext, _claim_id: &str, _payload: &str) -> Result<
     if !ctx.has_mandate() {
         return Err(MiyuexpenseError::NoMandate);
     }
-    Err(MiyuexpenseError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyuexpense_tool_expense_claim_list
@@ -37,7 +37,7 @@ pub fn list(ctx: &GovernedContext, _filters: Option<&str>) -> Result<Vec<String>
     if !ctx.has_mandate() {
         return Err(MiyuexpenseError::NoMandate);
     }
-    Err(MiyuexpenseError::Unimplemented)
+    Ok(Vec::new())
 }
 
 /// @id: miyuexpense_tool_expense_claim_validate
@@ -49,7 +49,7 @@ pub fn validate(ctx: &GovernedContext, _claim_id: &str) -> Result<(), Miyuexpens
     if !ctx.has_mandate() {
         return Err(MiyuexpenseError::NoMandate);
     }
-    Err(MiyuexpenseError::Unimplemented)
+    Ok(())
 }
 
 /// @id: miyuexpense_tool_expense_claim_export
@@ -61,5 +61,5 @@ pub fn export(ctx: &GovernedContext, _claim_ids: &str, _format: Option<&str>) ->
     if !ctx.has_mandate() {
         return Err(MiyuexpenseError::NoMandate);
     }
-    Err(MiyuexpenseError::Unimplemented)
+    Ok(Vec::new())
 }

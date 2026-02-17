@@ -24,7 +24,7 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, Miyubillin
     use std::sync::atomic::{AtomicU64, Ordering};
     static NEXT: AtomicU64 = AtomicU64::new(1);
     let id = format!("sub:{}", NEXT.fetch_add(1, Ordering::Relaxed));
-    let mut guard = subscriptions().lock().map_err(|_| MiyubillingError::Unimplemented)?;
+    let mut guard = subscriptions().lock().map_err(|_| MiyubillingError::LockPoisoned)?;
     guard.insert(id.clone(), payload.to_string());
     Ok(id)
 }
@@ -38,7 +38,7 @@ pub fn update(ctx: &GovernedContext, subscription_id: &str, payload: &str) -> Re
     if !ctx.has_mandate() {
         return Err(MiyubillingError::NoMandate);
     }
-    let mut guard = subscriptions().lock().map_err(|_| MiyubillingError::Unimplemented)?;
+    let mut guard = subscriptions().lock().map_err(|_| MiyubillingError::LockPoisoned)?;
     guard.insert(subscription_id.to_string(), payload.to_string());
     Ok(())
 }
@@ -52,7 +52,7 @@ pub fn cancel(ctx: &GovernedContext, subscription_id: &str) -> Result<(), Miyubi
     if !ctx.has_mandate() {
         return Err(MiyubillingError::NoMandate);
     }
-    let mut guard = subscriptions().lock().map_err(|_| MiyubillingError::Unimplemented)?;
+    let mut guard = subscriptions().lock().map_err(|_| MiyubillingError::LockPoisoned)?;
     guard.insert(subscription_id.to_string(), "cancelled".to_string());
     Ok(())
 }
@@ -66,6 +66,6 @@ pub fn status(ctx: &GovernedContext, subscription_id: &str) -> Result<String, Mi
     if !ctx.has_mandate() {
         return Err(MiyubillingError::NoMandate);
     }
-    let guard = subscriptions().lock().map_err(|_| MiyubillingError::Unimplemented)?;
+    let guard = subscriptions().lock().map_err(|_| MiyubillingError::LockPoisoned)?;
     Ok(guard.get(subscription_id).cloned().unwrap_or_else(|| "active".to_string()))
 }
