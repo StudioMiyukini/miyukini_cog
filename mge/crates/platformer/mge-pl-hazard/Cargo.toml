@@ -1,0 +1,12 @@
+﻿[package]
+name = "mge-pl-hazard"
+version = "0.1.0"
+edition = "2021"
+description = "MGE platformer â€” hazard module"
+
+[dependencies]
+mge-ecs = { path = "../../mge-ecs" }
+mge-event = { path = "../../mge-event" }
+
+[lints.rust]
+unsafe_code = "forbid"

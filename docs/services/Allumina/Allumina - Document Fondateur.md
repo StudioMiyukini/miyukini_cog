@@ -2,7 +2,7 @@
 
 ## Contexte
 
-**Allumina** est le **jeu Action RPG** de l'écosystème Miyukini COG. Inspiré des références du genre (Diablo 2, Path of Exile, Sacred), il est développé en **Rust** avec le moteur **Bevy** et utilise le **MWS (Miyukini Webway System)** pour la partie multijoueur : découverte des parties, connexion entre COGs via les **Lobbys**, sans dépendance critique à l'exécution (LOI-1).
+**Allumina** est le **jeu Action RPG** de l'écosystème Miyukini COG. Inspiré des références du genre (Diablo 2, Path of Exile, Sacred), il est développé en **Rust** avec le **moteur de jeu Miyukini** (maison) et utilise le **MWS (Miyukini Webway System)** pour la partie multijoueur : découverte des parties, connexion entre COGs via les **Lobbys**, sans dépendance critique à l'exécution (LOI-1).
 
 Ce document pose la vision et les principes fondateurs. Pour les concepts détaillés (monde, mécaniques, persistance, Lobbys jeu), voir le [Document Conceptuel](./Concept/Allumina%20-%20Document%20Conceptuel.md).
 
@@ -23,7 +23,7 @@ Ce document pose la vision et les principes fondateurs. Pour les concepts détai
 | **Souveraineté des données** | Progression, personnages et sauvegardes restent sous le contrôle du joueur (COG local) ou de l'hôte de partie (Lobby). |
 | **Multijoueur via MWS** | Découverte des parties via le catalogue de Lobbys ; connexion client → hôte gouvernée par le MWS (Permis de circulation, accord d'hôte). |
 | **Pas de dépendance critique** | Le jeu fonctionne hors-ligne en solo ; le réseau est optionnel (LOI-1, LOI-2). |
-| **Moteur Rust/Bevy** | Binaire autonome, open source, sans runtime externe ni launcher obligatoire. |
+| **Moteur Rust maison** | Binaire autonome, open source, sans runtime externe ; moteur Miyukini (voir [Moteur Jeux et Central Launcher](../../games/Miyukini%20-%20Moteur%20Jeux%20et%20Central%20Launcher.md)). |
 
 ---
 
@@ -32,7 +32,7 @@ Ce document pose la vision et les principes fondateurs. Pour les concepts détai
 **Service Inter-COG (Type 3)** — jeu consommable depuis Miyukini Central ou en standalone :
 
 - **Espace Miyukini Central :** lancement du jeu, liste des Lobbys Allumina (catalogue MWS), favoris, paramètres.
-- **Application jeu (Bevy) :** solo ou client multijoueur ; un COG peut aussi exposer un **Lobby Allumina** (héberger une partie).
+- **Application jeu (moteur Miyukini) :** solo ou client multijoueur ; un COG peut aussi exposer un **Lobby Allumina** (héberger une partie).
 - **Protocoles Inter-COG :** découverte des Lobbys via les trackers MWS ; connexion aux parties via accord d'hôte ; données de jeu (états, actions) transitent entre client et hôte selon le protocole métier Allumina, au-dessus du transport MWS.
 
 ---
@@ -52,8 +52,8 @@ Ce document pose la vision et les principes fondateurs. Pour les concepts détai
 
 | Couche | Choix | Justification |
 |--------|--------|----------------|
-| **Moteur** | Bevy (Rust) | 2D/3D, ECS, binaire statique, pas de dépendance runtime critique. |
-| **Réseau métier** | Protocole Allumina (à définir) sur transport MWS | Réplication jeu (ex. bevy_replicon + backend MWS) ; optionnel. |
+| **Moteur** | Moteur Miyukini (Rust, maison) | 2D (3D optionnel), binaire statique, pas de dépendance runtime critique. |
+| **Réseau métier** | Protocole Allumina (à définir) sur transport MWS | Réplication jeu (état + backend MWS) ; optionnel. |
 | **Persistance** | KindMother (local), ou état hôte (Lobby) | LOI-3 : état local souverain. |
 | **Présence / Lobbys** | MWS (trackers, catalogue de Lobbys, accord d'hôte) | Découverte et connexion sans serveur dédié Allumina. |
 
@@ -71,7 +71,7 @@ Ce document pose la vision et les principes fondateurs. Pour les concepts détai
 
 Allumina respecte en particulier :
 
-- **LOI-1** — Aucune dépendance externe critique à l'exécution : jeu jouable en solo hors-ligne ; Bevy = crate Rust, binaire autonome.
+- **LOI-1** — Aucune dépendance externe critique à l'exécution : jeu jouable en solo hors-ligne ; moteur maison = crate Rust, binaire autonome.
 - **LOI-2** — Le système accepte l'isolement : multijoueur optionnel ; jouable sans réseau.
 - **LOI-3** — L'état local est souverain : sauvegardes et progression locale maîtrisées par le COG.
 - **LOI-6** — L'autonomie n'empêche pas la fédération : parties multijoueur via MWS et Lobbys.
@@ -80,7 +80,7 @@ Allumina respecte en particulier :
 
 ## 7. Résumé
 
-**Allumina** = Action RPG Miyukini : **Bevy (Rust)**, **solo + multijoueur via MWS** (Lobbys = parties), **données souveraines**, gouvernance par les Cores, découverte et transport par le Webway.
+**Allumina** = Action RPG Miyukini : **moteur maison (Rust)**, **solo + multijoueur via MWS** (Lobbys = parties), **données souveraines**, gouvernance par les Cores, découverte et transport par le Webway.
 
 ---
 

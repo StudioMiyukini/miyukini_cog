@@ -1,0 +1,24 @@
+[package]
+name = "rpg_demo"
+version = "0.1.0"
+edition = "2021"
+description = "MGE Example — Core + RPG pack (combat, progression)"
+
+[[bin]]
+name = "rpg_demo"
+path = "src/main.rs"
+
+[dependencies]
+mge-core = { path = "../../crates/mge-core" }
+mge-plugin-spatial = { path = "../../crates/mge-plugin-spatial" }
+mge-plugin-input = { path = "../../crates/mge-plugin-input" }
+mge-plugin-render-2d = { path = "../../crates/mge-plugin-render-2d" }
+mge-plugin-basic-physics = { path = "../../crates/mge-plugin-basic-physics" }
+mge-plugin-save-load = { path = "../../crates/mge-plugin-save-load" }
+mge-rpg-stats = { path = "../../crates/rpg/mge-rpg-stats" }
+mge-rpg-combat = { path = "../../crates/rpg/mge-rpg-combat" }
+mge-rpg-inventory = { path = "../../crates/rpg/mge-rpg-inventory" }
+mge-rpg-quest = { path = "../../crates/rpg/mge-rpg-quest" }
+mge-rpg-progression = { path = "../../crates/rpg/mge-rpg-progression" }
+mge-rpg-dialogue = { path = "../../crates/rpg/mge-rpg-dialogue" }
+mge-rpg-ai = { path = "../../crates/rpg/mge-rpg-ai" }

@@ -1,8 +1,8 @@
 {
-  "blocks": 1437,
+  "blocks": 1578,
   "depth_max": 5,
-  "domains": 96,
-  "files": 657,
-  "layers": 8,
-  "roles": 18
+  "domains": 127,
+  "files": 696,
+  "layers": 11,
+  "roles": 31
 }

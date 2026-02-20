@@ -1,13 +1,14 @@
 //! Auth forum unifiée avec Miyukini Central.
 //!
 //! Copie serveur des profils Central (email, password_hash, pseudonyme) pour
-//! validation des connexions forum. Hash = SHA256 (identique à Central).
+//! validation des connexions forum. Hachage Argon2id (migration progressive depuis SHA256).
 
+use argon2::password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::path::Path;
 use std::sync::Mutex;
-use tracing::{debug, warn};
+use tracing::{debug, info, warn};
 
 /// Profil forum (exposé après validation).
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -53,33 +54,82 @@ impl ForumAuthStore {
         Ok(())
     }
 
-    /// Hash mot de passe (identique à Central : SHA256 hex).
-    fn hash_password(password: &str) -> String {
-        let mut h = Sha256::new();
-        h.update(password.as_bytes());
-        format!("{:x}", h.finalize())
+    /// Hash mot de passe avec Argon2id.
+    fn hash_password_argon2(password: &str) -> Result<String, String> {
+        let salt = SaltString::generate(&mut rand::thread_rng());
+        let argon2 = argon2::Argon2::default();
+        argon2
+            .hash_password(password.as_bytes(), &salt)
+            .map(|h| h.to_string())
+            .map_err(|e| format!("argon2 hash error: {}", e))
+    }
+
+    /// Vérifie un mot de passe contre un hash stocké (Argon2id ou SHA256 legacy).
+    fn verify_password(password: &str, stored_hash: &str) -> bool {
+        if stored_hash.starts_with("$argon2") {
+            if let Ok(parsed) = PasswordHash::new(stored_hash) {
+                return argon2::Argon2::default()
+                    .verify_password(password.as_bytes(), &parsed)
+                    .is_ok();
+            }
+            false
+        } else {
+            let mut h = Sha256::new();
+            h.update(password.as_bytes());
+            let sha_hex = format!("{:x}", h.finalize());
+            sha_hex == stored_hash
+        }
+    }
+
+    /// Migre un hash SHA256 legacy vers Argon2id (écriture en base).
+    fn upgrade_hash_if_legacy(
+        conn: &rusqlite::Connection,
+        central_id: &str,
+        password: &str,
+        stored_hash: &str,
+    ) {
+        if stored_hash.starts_with("$argon2") {
+            return;
+        }
+        if let Ok(new_hash) = Self::hash_password_argon2(password) {
+            let _ = conn.execute(
+                "UPDATE forum_profiles SET password_hash = ?1 WHERE central_id = ?2",
+                rusqlite::params![new_hash, central_id],
+            );
+            info!("Upgraded password hash to Argon2id for central_id={}", central_id);
+        }
     }
 
     /// Valide email + mot de passe ; retourne le profil si OK.
+    /// Supporte Argon2id et SHA256 legacy (migration progressive).
     pub fn validate(&self, email: &str, password: &str) -> Result<Option<ForumProfile>, String> {
         let email = email.trim().to_lowercase();
         if email.is_empty() || password.is_empty() {
             return Ok(None);
         }
-        let hash = Self::hash_password(password);
         let conn = self.conn.lock().map_err(|_| "store lock poisoned".to_string())?;
         let mut stmt = conn.prepare(
-            "SELECT central_id, email, pseudonyme FROM forum_profiles WHERE email = ?1 AND password_hash = ?2",
+            "SELECT central_id, email, pseudonyme, password_hash FROM forum_profiles WHERE email = ?1",
         ).map_err(|e| e.to_string())?;
-        let row = stmt.query_row(rusqlite::params![email, hash], |row| {
-            Ok(ForumProfile {
-                id: row.get::<_, String>(0)?,
-                email: row.get::<_, String>(1)?,
-                pseudonyme: row.get::<_, Option<String>>(2)?,
-            })
+        let row = stmt.query_row(rusqlite::params![email], |row| {
+            Ok((
+                ForumProfile {
+                    id: row.get::<_, String>(0)?,
+                    email: row.get::<_, String>(1)?,
+                    pseudonyme: row.get::<_, Option<String>>(2)?,
+                },
+                row.get::<_, String>(3)?,
+            ))
         });
         match row {
-            Ok(profile) => Ok(Some(profile)),
+            Ok((profile, stored_hash)) => {
+                if Self::verify_password(password, &stored_hash) {
+                    Self::upgrade_hash_if_legacy(&conn, &profile.id, password, &stored_hash);
+                    Ok(Some(profile))
+                } else {
+                    Ok(None)
+                }
+            }
             Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
             Err(e) => Err(e.to_string()),
         }
@@ -129,7 +179,7 @@ pub struct ValidateRequest {
 pub struct SyncRequest {
     pub central_id: String,
     pub email: String,
-    /// Hash SHA256 hex du mot de passe (comme Central).
+    /// Hash du mot de passe (Argon2id ou SHA256 legacy depuis Central).
     pub password_hash: String,
     pub pseudonyme: Option<String>,
 }
@@ -149,10 +199,13 @@ pub fn handle_api(
     };
 
     if path_clean == "/api/auth/forum/validate" || path_clean == "/api/auth/forum/validate/" {
+        if body_str.len() > 4096 {
+            return json_response(400, r#"{"ok":false,"error":"payload too large"}"#);
+        }
         let req: ValidateRequest = match serde_json::from_str(body_str) {
             Ok(r) => r,
-            Err(e) => {
-                return json_response(400, &format!(r#"{{"ok":false,"error":"invalid json: {}"}}"#, e));
+            Err(_) => {
+                return json_response(400, r#"{"ok":false,"error":"invalid json"}"#);
             }
         };
         match store.validate(&req.email, &req.password) {
@@ -178,10 +231,13 @@ pub fn handle_api(
     }
 
     if path_clean == "/api/auth/forum/sync" || path_clean == "/api/auth/forum/sync/" {
+        if body_str.len() > 4096 {
+            return json_response(400, r#"{"ok":false,"error":"payload too large"}"#);
+        }
         let req: SyncRequest = match serde_json::from_str(body_str) {
             Ok(r) => r,
-            Err(e) => {
-                return json_response(400, &format!(r#"{{"ok":false,"error":"invalid json: {}"}}"#, e));
+            Err(_) => {
+                return json_response(400, r#"{"ok":false,"error":"invalid json"}"#);
             }
         };
         match store.sync_profile(

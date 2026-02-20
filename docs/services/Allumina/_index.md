@@ -2,7 +2,7 @@
 
 ## Contexte
 
-**Allumina** est le **jeu Action RPG** de l'écosystème Miyukini COG. Il utilise le moteur **Bevy** (Rust) et le **MWS (Miyukini Webway System)** pour la partie multijoueur (découverte des parties, Lobbys, connexion entre COGs).
+**Allumina** est le **jeu Action RPG** de l'écosystème Miyukini COG. Il utilisera le **moteur de jeu Miyukini** (Rust, maison) et le **MWS (Miyukini Webway System)** pour la partie multijoueur (découverte des parties, Lobbys, connexion entre COGs). Voir [Moteur Jeux et Central Launcher](../../games/Miyukini%20-%20Moteur%20Jeux%20et%20Central%20Launcher.md).
 
 ## Portée / Scope
 
@@ -26,7 +26,16 @@ Les documents **conceptuels** décrivent la vision jeu, le genre (Action RPG), l
 | Document | Rôle |
 |----------|------|
 | [Allumina - Document Conceptuel](./Concept/Allumina%20-%20Document%20Conceptuel.md) | Vision jeu, genre, monde, persistance, Lobbys = parties/serveurs |
+| [Allumina - Vision Gameplay et Ambition](./Concept/Allumina%20-%20Vision%20Gameplay%20et%20Ambition.md) | Mélange UO/Diablo/Dynasty Warriors, progression esclave→héros, métiers, ambitions |
+| [Allumina - Combat et Troupes](./Concept/Allumina%20-%20Combat%20et%20Troupes.md) | Échelles, voies, ordres tactiques, cap Charisme+statut |
+| [Allumina - Compétences et Enseignement](./Concept/Allumina%20-%20Competences%20et%20Enseignement.md) | Usage+enseignement, pas d'XP, PNJ vs joueur |
 | [Allumina - Caractéristiques, Aptitudes et Compétences](./Concept/Allumina%20-%20Caracteristiques%20Aptitudes%20et%20Competences.md) | Caractéristiques (Force à Chance), aptitudes de combat, compétences, plafonds |
+
+## Prototype
+
+| Document | Rôle |
+|----------|------|
+| [Allumina - Prototype Premier Playable](./Allumina%20-%20Prototype%20Premier%20Playable.md) | MVP : 2 joueurs, sync troupes+monstres, co-op PvE |
 
 ---
 

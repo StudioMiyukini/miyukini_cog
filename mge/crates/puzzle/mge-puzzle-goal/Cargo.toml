@@ -1,0 +1,12 @@
+﻿[package]
+name = "mge-puzzle-goal"
+version = "0.1.0"
+edition = "2021"
+description = "MGE puzzle â€” goal module"
+
+[dependencies]
+mge-ecs = { path = "../../mge-ecs" }
+mge-event = { path = "../../mge-event" }
+
+[lints.rust]
+unsafe_code = "forbid"

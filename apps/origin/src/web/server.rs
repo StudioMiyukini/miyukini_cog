@@ -2,6 +2,7 @@
 
 use super::{api, content::ContentManager, forum_auth, pages};
 use crate::config::OriginConfig;
+use crate::relay::rate_limiter::{RateLimiter, RateLimiterConfig, RateLimitResult};
 use crate::relay::RelayServer;
 use crate::tracker::{catalog::Catalog, pool::PoolManager, slug_registry::SlugRegistry, CatalogVisitTracker};
 use bytes::Bytes;
@@ -37,7 +38,7 @@ pub struct WebServer {
     config: Arc<OriginConfig>,
     pool_manager: Arc<PoolManager>,
     content_manager: Arc<ContentManager>,
-    /// Suivi des visites catalogue → Home (pour considérer un COG présent ~1 min après une visite).
+    /// Suivi des visites catalogue -> Home (pour considérer un COG présent ~1 min après une visite).
     visit_tracker: Arc<CatalogVisitTracker>,
     /// Base JayXpose (lecture seule) pour /vitrine/*. Absent si non configuré.
     jayxpose_db: Option<JayXposeDbRef>,
@@ -47,6 +48,8 @@ pub struct WebServer {
     relay_ref: Option<Arc<RelayServer>>,
     /// Auth forum unifiée Central (profils synchronisés). Si présent, /api/auth/forum/* activé.
     forum_auth_store: Option<Arc<forum_auth::ForumAuthStore>>,
+    /// Rate limiter pour les connexions HTTP.
+    rate_limiter: Arc<RateLimiter>,
 }
 
 impl WebServer {
@@ -63,6 +66,16 @@ impl WebServer {
         relay_ref: Option<Arc<RelayServer>>,
         forum_auth_store: Option<Arc<forum_auth::ForumAuthStore>>,
     ) -> Self {
+        let rate_limiter = Arc::new(RateLimiter::new(RateLimiterConfig {
+            max_connections_per_ip: 60,
+            max_messages_per_session: 200,
+            max_failed_registrations: 10,
+            window_seconds: 60,
+            block_duration_seconds: 120,
+            require_pow_for_temp: false,
+            pow_difficulty: 0,
+        }));
+
         Self {
             config,
             pool_manager,
@@ -72,6 +85,7 @@ impl WebServer {
             slug_registry,
             relay_ref,
             forum_auth_store,
+            rate_limiter,
         }
     }
 
@@ -81,9 +95,25 @@ impl WebServer {
         let listener = TcpListener::bind(&bind_addr).await?;
         info!("🌐 Web server listening on http://{}", bind_addr);
 
+        let cleanup_limiter = Arc::clone(&self.rate_limiter);
+        tokio::spawn(async move {
+            loop {
+                tokio::time::sleep(tokio::time::Duration::from_secs(120)).await;
+                cleanup_limiter.cleanup().await;
+            }
+        });
+
         loop {
             match listener.accept().await {
                 Ok((stream, addr)) => {
+                    match self.rate_limiter.check_connection(addr.ip()).await {
+                        RateLimitResult::Allowed => {}
+                        _ => {
+                            warn!("HTTP rate limit exceeded for {}", addr.ip());
+                            continue;
+                        }
+                    }
+
                     let config = Arc::clone(&self.config);
                     let pool_mgr = Arc::clone(&self.pool_manager);
                     let content_mgr = Arc::clone(&self.content_manager);
@@ -227,6 +257,13 @@ async fn write_response(
     writer: &mut (impl AsyncWriteExt + Unpin),
     route_response: RouteResponse,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    const SECURITY_HEADERS: &str = "\
+X-Content-Type-Options: nosniff\r\n\
+X-Frame-Options: DENY\r\n\
+X-XSS-Protection: 1; mode=block\r\n\
+Referrer-Policy: strict-origin-when-cross-origin\r\n\
+Permissions-Policy: camera=(), microphone=(), geolocation=()\r\n";
+
     match route_response {
         RouteResponse::Normal {
             status,
@@ -237,12 +274,13 @@ async fn write_response(
                 "HTTP/1.1 {}\r\n\
                  Content-Type: {}; charset=utf-8\r\n\
                  Content-Length: {}\r\n\
-                 Access-Control-Allow-Origin: *\r\n\
+                 {}\
                  Connection: close\r\n\
                  \r\n",
                 status,
                 content_type,
-                body.len()
+                body.len(),
+                SECURITY_HEADERS,
             );
             writer.write_all(response.as_bytes()).await?;
             writer.write_all(body.as_bytes()).await?;
@@ -261,21 +299,22 @@ async fn write_response(
                  Content-Type: {}\r\n\
                  Content-Length: {}\r\n\
                  {}\
-                 Access-Control-Allow-Origin: *\r\n\
+                 {}\
                  Connection: close\r\n\
                  \r\n",
                 status,
                 content_type,
                 body.len(),
-                disposition
+                disposition,
+                SECURITY_HEADERS,
             );
             writer.write_all(response.as_bytes()).await?;
             writer.write_all(&body).await?;
         }
         RouteResponse::Redirect { location } => {
             let response = format!(
-                "HTTP/1.1 302 Found\r\nLocation: {}\r\nConnection: close\r\n\r\n",
-                location
+                "HTTP/1.1 302 Found\r\nLocation: {}\r\n{}Connection: close\r\n\r\n",
+                location, SECURITY_HEADERS,
             );
             writer.write_all(response.as_bytes()).await?;
         }
@@ -645,15 +684,38 @@ async fn route_request(
         // ═══════════════════════════════════════════════════════════════════
         _ if path_clean.starts_with("/files/") => {
             let filename = &path_clean[7..]; // Après "/files/"
-            // Sécurité: interdire les chemins relatifs
-            if filename.contains("..") || filename.contains('\\') {
+            if filename.is_empty() || filename.len() > 255
+                || filename.contains("..")
+                || filename.contains('\\')
+                || filename.contains('\0')
+                || filename.starts_with('/')
+            {
                 return RouteResponse::Normal {
                     status: "400 Bad Request".to_string(),
                     content_type: "text/plain".to_string(),
                     body: "Invalid path".to_string(),
                 };
             }
-            let file_path = format!("/opt/miyukini-origin/files/{}", filename);
+            let base_dir = std::path::Path::new("/opt/miyukini-origin/files");
+            let requested = base_dir.join(filename);
+            let file_path = match requested.canonicalize() {
+                Ok(p) => p,
+                Err(_) => return not_found_page(),
+            };
+            if !file_path.starts_with(base_dir) {
+                return RouteResponse::Normal {
+                    status: "400 Bad Request".to_string(),
+                    content_type: "text/plain".to_string(),
+                    body: "Invalid path".to_string(),
+                };
+            }
+            if file_path.is_symlink() {
+                return RouteResponse::Normal {
+                    status: "403 Forbidden".to_string(),
+                    content_type: "text/plain".to_string(),
+                    body: "Forbidden".to_string(),
+                };
+            }
             match tokio::fs::read(&file_path).await {
                 Ok(data) => {
                     let content_type = if filename.ends_with(".zip") {
@@ -705,9 +767,6 @@ async fn route_request(
         }
 
         "/visit" => {
-            // Redirection catalogue → Home COG : enregistre la visite puis redirige
-            // Le Tracker remplace automatiquement les adresses locales par l'IP réelle du COG,
-            // donc entry.address contient toujours une adresse routable par les visiteurs externes.
             let cog_id = query
                 .split('&')
                 .find_map(|p| {
@@ -716,7 +775,7 @@ async fn route_request(
                     urlencoding::decode(v).ok().map(|c| c.into_owned())
                 });
             match cog_id {
-                Some(id) if !id.is_empty() => {
+                Some(id) if !id.is_empty() && id.len() <= 128 => {
                     if let Some(entry) = pool_mgr.find_cog(&id).await {
                         visit_tracker.record_visit(&id).await;
                         let location = if entry.address.starts_with("http") {

@@ -1,0 +1,10 @@
+[package]
+name = "mge-event"
+version = "0.1.0"
+edition = "2021"
+description = "MGE Kernel — Event trait, EventQueue (double buffer)"
+
+[dependencies]
+
+[lints.rust]
+unsafe_code = "forbid"

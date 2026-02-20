@@ -1,0 +1,11 @@
+[package]
+name = "mge-rng"
+version = "0.1.0"
+edition = "2021"
+description = "MGE Kernel — Deterministic RNG, seed, entity-specific derivation"
+
+[dependencies]
+rand = { version = "0.8", features = ["small_rng"] }
+
+[lints.rust]
+unsafe_code = "forbid"

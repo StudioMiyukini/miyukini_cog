@@ -1,0 +1,11 @@
+[package]
+name = "mge-query"
+version = "0.1.0"
+edition = "2021"
+description = "MGE Kernel — Query helpers, Query2Mut, iter1/2/3, for_each_mut"
+
+[dependencies]
+mge-ecs = { path = "../mge-ecs" }
+
+[lints.rust]
+unsafe_code = "forbid"

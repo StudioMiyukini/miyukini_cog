@@ -1,0 +1,10 @@
+[package]
+name = "mge-profiler"
+version = "0.1.0"
+edition = "2021"
+description = "MGE Kernel — TickMetrics, PhaseMetrics, SystemMetrics, budget"
+
+[dependencies]
+
+[lints.rust]
+unsafe_code = "forbid"

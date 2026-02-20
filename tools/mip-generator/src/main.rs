@@ -115,12 +115,13 @@ fn parse_file(file_path: &Path, blocks: &mut Vec<Block>) -> Result<(), Box<dyn s
         .replace('\\', "/");
 
     // Regex pour parser les annotations MSCM
-    let id_re = Regex::new(r"///\s*@id:\s*(.+)")?;
-    let role_re = Regex::new(r"///\s*@role:\s*(.+)")?;
-    let layer_re = Regex::new(r"///\s*@layer:\s*(.+)")?;
-    let do_re = Regex::new(r"///\s*@do:\s*(.+)")?;
-    let human_re = Regex::new(r"///\s*@human:\s*(.+)")?;
-    let depends_re = Regex::new(r"///\s*@depends:\s*(.+)")?;
+    // Supporte /// et //!, avec ou sans : après @id/@role/etc.
+    let id_re = Regex::new(r"(?:///|//!)\s*@id:?\s*(.+)")?;
+    let role_re = Regex::new(r"(?:///|//!)\s*@role:?\s*(.+)")?;
+    let layer_re = Regex::new(r"(?:///|//!)\s*@layer:?\s*(.+)")?;
+    let do_re = Regex::new(r"(?:///|//!)\s*@do:?\s*(.+)")?;
+    let human_re = Regex::new(r"(?:///|//!)\s*@human:?\s*(.+)")?;
+    let depends_re = Regex::new(r"(?:///|//!)\s*@depends:?\s*(.+)")?;
 
     let mut current_block: Option<Block> = None;
     let mut in_comment_block = false;

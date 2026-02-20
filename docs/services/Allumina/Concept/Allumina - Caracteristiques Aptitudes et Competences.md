@@ -92,7 +92,7 @@ Les **caractéristiques** sont les stats de base du personnage. Elles détermine
 | **Volonté** | Vol | Résistance mentale ; réserve mana ; puissance magique. | Pool mana, résistance effets mentaux. |
 | **Intelligence** | Int | Réflexion ; énigmes ; magie (base). | Raisonnement, cast speed. |
 | **Sagesse** | Sag | Quantité de sortilèges ; connaissance ; soutien ; cast speed. | Slots sorts, soins, réduction incantation. |
-| **Charisme** | Cha | Roleplay ; commerce ; influence sociale. | Dialogues, marchandage, commandement. |
+| **Charisme** | Cha | Roleplay ; commerce ; influence sociale ; **cap de troupe**. | Dialogues, marchandage, commandement. Le cap de troupe (groupe, compagnie, etc.) est plafonné par Charisme × multiplicateur selon l'échelle ; une seconde limite (statut social) s'applique au début (voir [Combat et Troupes](./Allumina%20-%20Combat%20et%20Troupes.md)). |
 | **Chance** | Luk | Seuil critique (jet ≤ Luk+mod) ; résultat effectif = dé − Luk ; cap non-réussite −1 %/pt Luk. | Critik (blessure assurée, 150 %+mod moins armure) ; critique compétence = test réussi ; max réussite 85 %+Luk (voir section 5.3). |
 
 ---

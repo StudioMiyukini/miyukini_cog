@@ -1,8 +1,6 @@
 [workspace]
 # Binaire principal : apps/central produit target/debug/miyukini-central.exe
 default-members = ["apps/central"]
-# Bevy a son propre [workspace] : on l'exclut pour éviter "multiple workspace roots".
-exclude = ["bevy"]
 members = [
     # === Cores (strate 1-4) ===
     "crates/miyukini-kernel",
@@ -94,8 +92,11 @@ members = [
     # === MWS Origin ===
     "apps/origin",
 
-    # === Jeu Action RPG (Bevy 2D) ===
-    "apps/allumina",
+    # === MGE (Miyukini Game Engine) ===
+    # Workspace MGE indépendant : mge/ (voir mge/Cargo.toml)
+
+    # === Démo MGE ===
+    "demos/mge-pathfinding-labyrinthe",
 
     # === Outils internes ===
     "crates/miyukini-admin",

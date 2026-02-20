@@ -1056,6 +1056,89 @@
     "start_line": 102
   },
   {
+    "do": "persist_jay1tribu_data_via_kindmother_client",
+    "end_line": 11,
+    "file": "crates/jay1tribu/src/data/kindmother_client_db.rs",
+    "id": "jay1tribu_kindmother_client_db",
+    "layer": "infra",
+    "start_line": 6
+  },
+  {
+    "do": "provide_sqlite_persistence_for_jay1tribu",
+    "end_line": 12,
+    "file": "crates/jay1tribu/src/data/kindmother_db.rs",
+    "id": "jay1tribu_kindmother_db",
+    "layer": "infra",
+    "role": "persistence",
+    "start_line": 3
+  },
+  {
+    "do": "expose_domain_types_and_persistence",
+    "end_line": 12,
+    "file": "crates/jay1tribu/src/data/mod.rs",
+    "id": "jay1tribu_data_module",
+    "layer": "domain",
+    "role": "data",
+    "start_line": 3
+  },
+  {
+    "do": "define_jay1tribu_domain_model",
+    "end_line": 14,
+    "file": "crates/jay1tribu/src/data/types.rs",
+    "id": "jay1tribu_domain_types",
+    "layer": "domain",
+    "role": "data",
+    "start_line": 3
+  },
+  {
+    "do": "orchestrate_messaging_tribes_friends_governed_by_webway",
+    "end_line": 19,
+    "file": "crates/jay1tribu/src/domain.rs",
+    "id": "jay1tribu_domain",
+    "layer": "domain",
+    "role": "domain",
+    "start_line": 3
+  },
+  {
+    "do": "expose_public_modules_jay1tribu",
+    "end_line": 14,
+    "file": "crates/jay1tribu/src/lib.rs",
+    "id": "jay1tribu_lib",
+    "layer": "infra",
+    "role": "service",
+    "start_line": 3
+  },
+  {
+    "do": "dispatch_messages_via_mws_to_recipients",
+    "end_line": 15,
+    "file": "crates/jay1tribu/src/transport/mod.rs",
+    "id": "jay1tribu_transport",
+    "layer": "infra",
+    "role": "transport",
+    "start_line": 3
+  },
+  {
+    "do": "authentifie un utilisateur par email et mot de passe (profiles SQLite).",
+    "end_line": 9,
+    "file": "crates/jayfestival/src/auth/mod.rs",
+    "id": "auth_sign_in",
+    "start_line": 3
+  },
+  {
+    "do": "crée un compte utilisateur (profiles SQLite).",
+    "end_line": 9,
+    "file": "crates/jayfestival/src/auth/mod.rs",
+    "id": "auth_sign_up",
+    "start_line": 5
+  },
+  {
+    "do": "déconnecte l'utilisateur (session côté app).",
+    "end_line": 9,
+    "file": "crates/jayfestival/src/auth/mod.rs",
+    "id": "auth_sign_out",
+    "start_line": 7
+  },
+  {
     "do": "authentifie un utilisateur par email et mot de passe (profiles SQLite).",
     "end_line": 50,
     "file": "crates/jayfestival/src/auth/mod.rs",
@@ -1078,6 +1161,22 @@
   },
   {
     "do": "dérive le type utilisateur (admin, manager, exhibitor, volunteer, visitor) depuis le profil.",
+    "end_line": 10,
+    "file": "crates/jayfestival/src/auth/permissions.rs",
+    "id": "auth_user_type_from_profile",
+    "layer": "domain",
+    "start_line": 3
+  },
+  {
+    "do": "indique si l'utilisateur peut accéder à une édition (admin, manager de l'édition, ou RLS exposant).",
+    "end_line": 10,
+    "file": "crates/jayfestival/src/auth/permissions.rs",
+    "id": "auth_can_access_edition",
+    "layer": "domain",
+    "start_line": 7
+  },
+  {
+    "do": "dérive le type utilisateur (admin, manager, exhibitor, volunteer, visitor) depuis le profil.",
     "end_line": 17,
     "file": "crates/jayfestival/src/auth/permissions.rs",
     "id": "auth_user_type_from_profile",
@@ -1091,6 +1190,38 @@
     "id": "auth_can_access_edition",
     "layer": "domain",
     "start_line": 35
+  },
+  {
+    "do": "persist_jayfestival_data_via_kindmother_client",
+    "end_line": 14,
+    "file": "crates/jayfestival/src/data/kindmother_client_db.rs",
+    "id": "jayfestival_kindmother_client_db",
+    "layer": "infra",
+    "start_line": 9
+  },
+  {
+    "do": "expose_public_modules_jayfestival",
+    "end_line": 12,
+    "file": "crates/jayfestival/src/lib.rs",
+    "id": "jayfestival_lib_stub",
+    "layer": "infra",
+    "start_line": 3
+  },
+  {
+    "do": "publie une édition vers JayKoa pour agrégation calendrier et détection conflits",
+    "end_line": 12,
+    "file": "crates/jayfestival/src/services/jaykoa/adapter.rs",
+    "id": "jaykoa_publish_edition",
+    "layer": "domain",
+    "start_line": 3
+  },
+  {
+    "do": "récupère les conflits de dates pour un exposant ou visiteur (vue agrégée JayKoa)",
+    "end_line": 12,
+    "file": "crates/jayfestival/src/services/jaykoa/adapter.rs",
+    "id": "jaykoa_get_conflicts",
+    "layer": "domain",
+    "start_line": 7
   },
   {
     "do": "publie une édition vers JayKoa pour agrégation calendrier et détection conflits",
@@ -1107,6 +1238,30 @@
     "id": "jaykoa_get_conflicts",
     "layer": "domain",
     "start_line": 58
+  },
+  {
+    "do": "crée un devis pour un exposant (façade Miyuinvoice → JayKonta)",
+    "end_line": 16,
+    "file": "crates/jayfestival/src/services/jaykonta/adapter.rs",
+    "id": "jaykonta_create_quote",
+    "layer": "domain",
+    "start_line": 3
+  },
+  {
+    "do": "émet une facture (conversion devis ou création directe ; façade Miyuinvoice)",
+    "end_line": 16,
+    "file": "crates/jayfestival/src/services/jaykonta/adapter.rs",
+    "id": "jaykonta_emit_invoice",
+    "layer": "domain",
+    "start_line": 7
+  },
+  {
+    "do": "façade d'accès aux outils Miyuinvoice (quote, invoice) pour JayFestival",
+    "end_line": 16,
+    "file": "crates/jayfestival/src/services/jaykonta/adapter.rs",
+    "id": "miyuinvoice_facade",
+    "layer": "domain",
+    "start_line": 11
   },
   {
     "do": "crée un devis pour un exposant (façade Miyuinvoice → JayKonta)",
@@ -1134,6 +1289,27 @@
   },
   {
     "do": "récupère le profil exposant pour l'utilisateur courant (mon compte).",
+    "end_line": 9,
+    "file": "crates/jayfestival/src/services/jayxpose/client.rs",
+    "id": "jayxpose_get_profile",
+    "start_line": 3
+  },
+  {
+    "do": "liste les exposants visibles dans le répertoire avec filtres et pagination.",
+    "end_line": 9,
+    "file": "crates/jayfestival/src/services/jayxpose/client.rs",
+    "id": "jayxpose_list_repertoire",
+    "start_line": 5
+  },
+  {
+    "do": "récupère la fiche exposant publique par id.",
+    "end_line": 9,
+    "file": "crates/jayfestival/src/services/jayxpose/client.rs",
+    "id": "jayxpose_fiche_by_id",
+    "start_line": 7
+  },
+  {
+    "do": "récupère le profil exposant pour l'utilisateur courant (mon compte).",
     "end_line": 38,
     "file": "crates/jayfestival/src/services/jayxpose/client.rs",
     "id": "jayxpose_get_profile",
@@ -1155,6 +1331,22 @@
   },
   {
     "do": "type de sortie pour le profil exposant (fiche complète, répertoire).",
+    "end_line": 10,
+    "file": "crates/jayfestival/src/services/jayxpose/contract.rs",
+    "id": "jayxpose_profile_type",
+    "layer": "domain",
+    "start_line": 3
+  },
+  {
+    "do": "filtres d'entrée pour la liste répertoire (secteur, pagination).",
+    "end_line": 10,
+    "file": "crates/jayfestival/src/services/jayxpose/contract.rs",
+    "id": "jayxpose_repertoire_filters",
+    "layer": "domain",
+    "start_line": 7
+  },
+  {
+    "do": "type de sortie pour le profil exposant (fiche complète, répertoire).",
     "end_line": 19,
     "file": "crates/jayfestival/src/services/jayxpose/contract.rs",
     "id": "jayxpose_profile_type",
@@ -1168,6 +1360,22 @@
     "id": "jayxpose_repertoire_filters",
     "layer": "domain",
     "start_line": 110
+  },
+  {
+    "do": "liste les créneaux disponibles pour une ressource / édition (Miyubooking slots.list)",
+    "end_line": 12,
+    "file": "crates/jayfestival/src/services/miyubooking/adapter.rs",
+    "id": "miyubooking_list_slots",
+    "layer": "domain",
+    "start_line": 3
+  },
+  {
+    "do": "crée une réservation (atelier, billet, pass) via Miyubooking (booking.create)",
+    "end_line": 12,
+    "file": "crates/jayfestival/src/services/miyubooking/adapter.rs",
+    "id": "miyubooking_create_booking",
+    "layer": "domain",
+    "start_line": 7
   },
   {
     "do": "liste les créneaux disponibles pour une ressource / édition (Miyubooking slots.list)",
@@ -1187,6 +1395,22 @@
   },
   {
     "do": "retourne l'instant présent selon l'horloge locale (MiyuClock tool.time.now)",
+    "end_line": 12,
+    "file": "crates/jayfestival/src/services/miyuclock/adapter.rs",
+    "id": "miyuclock_now",
+    "layer": "domain",
+    "start_line": 3
+  },
+  {
+    "do": "atteste la date/heure IRL pour un usage (trace, affichage) — MiyuClock comme référentiel",
+    "end_line": 12,
+    "file": "crates/jayfestival/src/services/miyuclock/adapter.rs",
+    "id": "miyuclock_attest_date",
+    "layer": "domain",
+    "start_line": 7
+  },
+  {
+    "do": "retourne l'instant présent selon l'horloge locale (MiyuClock tool.time.now)",
     "end_line": 51,
     "file": "crates/jayfestival/src/services/miyuclock/adapter.rs",
     "id": "miyuclock_now",
@@ -1200,6 +1424,22 @@
     "id": "miyuclock_attest_date",
     "layer": "domain",
     "start_line": 59
+  },
+  {
+    "do": "envoie une annonce (broadcast) aux destinataires d'une édition ou d'un canal",
+    "end_line": 12,
+    "file": "crates/jayfestival/src/services/miyunotify/adapter.rs",
+    "id": "miyunotify_send_announcement",
+    "layer": "domain",
+    "start_line": 3
+  },
+  {
+    "do": "envoie une notification ciblée (email, push ou inbox) à un ou plusieurs destinataires",
+    "end_line": 12,
+    "file": "crates/jayfestival/src/services/miyunotify/adapter.rs",
+    "id": "miyunotify_send_targeted",
+    "layer": "domain",
+    "start_line": 7
   },
   {
     "do": "envoie une annonce (broadcast) aux destinataires d'une édition ou d'un canal",
@@ -1218,12 +1458,199 @@
     "start_line": 67
   },
   {
+    "do": "persist_jaykoa_data_via_kindmother_client",
+    "end_line": 14,
+    "file": "crates/jaykoa/src/data/kindmother_client_db.rs",
+    "id": "jaykoa_kindmother_client_db",
+    "layer": "infra",
+    "start_line": 9
+  },
+  {
+    "do": "provide_sqlite_persistence_for_jaykoa",
+    "end_line": 17,
+    "file": "crates/jaykoa/src/data/kindmother_db.rs",
+    "human": "Instance Daughter : persistance locale via SQLite, identité KindMother.",
+    "id": "jaykoa_kindmother_db",
+    "layer": "infra",
+    "role": "persistence",
+    "start_line": 3
+  },
+  {
+    "do": "expose_domain_types_and_persistence",
+    "end_line": 11,
+    "file": "crates/jaykoa/src/data/mod.rs",
+    "id": "jaykoa_data_module",
+    "layer": "domain",
+    "start_line": 3
+  },
+  {
+    "do": "define_jaykoa_domain_model",
+    "end_line": 29,
+    "file": "crates/jaykoa/src/data/types.rs",
+    "human": "Agenda, événement interne, reflet externe, engagement temporel,",
+    "id": "jaykoa_domain_types",
+    "layer": "domain",
+    "role": "data",
+    "start_line": 3
+  },
+  {
+    "do": "generate_ical_from_temporal_entries",
+    "end_line": 18,
+    "file": "crates/jaykoa/src/export/ical.rs",
+    "human": "Génère un fichier .ics conforme RFC 5545 à partir des TemporalEntry.",
+    "id": "jaykoa_export_ical",
+    "layer": "domain",
+    "start_line": 3
+  },
+  {
+    "do": "provide_export_capabilities",
+    "end_line": 7,
+    "file": "crates/jaykoa/src/export/mod.rs",
+    "id": "jaykoa_export_module",
+    "layer": "domain",
+    "start_line": 3
+  },
+  {
+    "do": "expose_public_modules_jaykoa",
+    "end_line": 18,
+    "file": "crates/jaykoa/src/lib.rs",
+    "id": "jaykoa_lib",
+    "layer": "infra",
+    "start_line": 3
+  },
+  {
+    "do": "read_jayfestival_editions_and_create_reflections",
+    "end_line": 10,
+    "file": "crates/jaykoa/src/services/jayfestival/adapter.rs",
+    "id": "jaykoa_jayfestival_adapter",
+    "layer": "infra",
+    "role": "sync",
+    "start_line": 3
+  },
+  {
+    "do": "read_jayrdv_appointments_and_create_reflections",
+    "end_line": 10,
+    "file": "crates/jaykoa/src/services/jayrdv/adapter.rs",
+    "id": "jaykoa_jayrdv_adapter",
+    "layer": "infra",
+    "role": "sync",
+    "start_line": 3
+  },
+  {
+    "do": "expose_inter_service_sync_adapters",
+    "end_line": 10,
+    "file": "crates/jaykoa/src/services/mod.rs",
+    "id": "jaykoa_services_module",
+    "layer": "infra",
+    "start_line": 3
+  },
+  {
+    "do": "run_all_unit_tests_and_return_report",
+    "end_line": 11,
+    "file": "crates/jaykoa/src/test_runner.rs",
+    "human": "Exécute les mêmes scénarios que les tests #[cfg(test)] et retourne un rapport",
+    "id": "jaykoa_test_runner",
+    "layer": "infra",
+    "start_line": 3
+  },
+  {
+    "do": "persist_jaykonta_data_via_kindmother_client",
+    "end_line": 15,
+    "file": "crates/jaykonta/src/data/kindmother_client_db.rs",
+    "id": "jaykonta_kindmother_client_db",
+    "layer": "infra",
+    "start_line": 9
+  },
+  {
+    "do": "provide_kindmother_backend_for_jayrdv",
+    "end_line": 10,
+    "file": "crates/jayrdv/src/data/kindmother_client_db.rs",
+    "human": "Stub actuel : délègue au store mémoire. À remplacer par appels kindmother-client.",
+    "id": "jayrdv_kindmother_client_db",
+    "layer": "infra",
+    "role": "data",
+    "start_line": 3
+  },
+  {
+    "do": "provide_in_memory_persistence_for_jayrdv",
+    "end_line": 13,
+    "file": "crates/jayrdv/src/data/memory_store.rs",
+    "human": "Implémente le stockage en mémoire (HashMap + RwLock) pour toutes les entités.",
+    "id": "jayrdv_memory_store",
+    "layer": "infra",
+    "role": "data",
+    "start_line": 3
+  },
+  {
+    "do": "reexport_data_types_and_store",
+    "end_line": 13,
+    "file": "crates/jayrdv/src/data/mod.rs",
+    "id": "jayrdv_data",
+    "layer": "domain",
+    "role": "data",
+    "start_line": 3
+  },
+  {
+    "do": "define_jayrdv_domain_model",
+    "end_line": 17,
+    "file": "crates/jayrdv/src/data/types.rs",
+    "human": "Modèle métier du service JayRDV — entités, statuts, énumérations.",
+    "id": "jayrdv_data_types",
+    "layer": "domain",
+    "role": "data",
+    "start_line": 3
+  },
+  {
+    "do": "implement_jayrdv_business_logic",
+    "end_line": 14,
+    "file": "crates/jayrdv/src/domain/mod.rs",
+    "human": "Couche domain pure — validations temporelles, cycles de vie des statuts,",
+    "id": "jayrdv_domain",
+    "layer": "domain",
+    "role": "domain",
+    "start_line": 3
+  },
+  {
+    "do": "expose_jayrdv_public_api_and_modules",
+    "end_line": 15,
+    "file": "crates/jayrdv/src/lib.rs",
+    "human": "Point d'entrée du service JayRDV (rendez-vous, créneaux, ressources, rappels).",
+    "id": "jayrdv_lib",
+    "layer": "infra",
+    "role": "service",
+    "start_line": 3
+  },
+  {
+    "do": "persist_jayshop_data_via_kindmother_client",
+    "end_line": 12,
+    "file": "crates/jayshop/src/data/kindmother_client_db.rs",
+    "id": "jayshop_kindmother_client_db",
+    "layer": "infra",
+    "start_line": 9
+  },
+  {
     "do": "hold_kindmother_client_connection",
     "end_line": 73,
     "file": "crates/jayshop/src/data/kindmother_client_db.rs",
     "id": "jayshop_db_client_struct",
     "layer": "infra",
     "start_line": 66
+  },
+  {
+    "do": "expose_data_types_and_db",
+    "end_line": 12,
+    "file": "crates/jayshop/src/data/mod.rs",
+    "id": "jayshop_data_module",
+    "layer": "infra",
+    "start_line": 6
+  },
+  {
+    "do": "define_domain_types_jayshop",
+    "end_line": 8,
+    "file": "crates/jayshop/src/data/types.rs",
+    "id": "jayshop_data_types",
+    "layer": "domain",
+    "start_line": 5
   },
   {
     "do": "represent_shop_configuration",
@@ -1346,6 +1773,59 @@
     "start_line": 718
   },
   {
+    "do": "expose_domain_logic_jayshop",
+    "end_line": 13,
+    "file": "crates/jayshop/src/domain/mod.rs",
+    "id": "jayshop_domain_module",
+    "layer": "domain",
+    "start_line": 3
+  },
+  {
+    "do": "expose_interservice_integrations_jayshop",
+    "end_line": 10,
+    "file": "crates/jayshop/src/integrations/mod.rs",
+    "id": "jayshop_integrations_module",
+    "layer": "infra",
+    "start_line": 3
+  },
+  {
+    "do": "expose_public_modules_jayshop",
+    "end_line": 13,
+    "file": "crates/jayshop/src/lib.rs",
+    "id": "jayshop_lib",
+    "layer": "infra",
+    "start_line": 3
+  },
+  {
+    "do": "expose_business_services_jayshop",
+    "end_line": 13,
+    "file": "crates/jayshop/src/services/mod.rs",
+    "id": "jayshop_services_module",
+    "layer": "domain",
+    "start_line": 3
+  },
+  {
+    "do": "authentifie un exposant par email et mot de passe (exposants SQLite).",
+    "end_line": 9,
+    "file": "crates/jayxpose/src/auth/mod.rs",
+    "id": "jayxpose_auth_sign_in",
+    "start_line": 3
+  },
+  {
+    "do": "cree un compte exposant (exposants SQLite).",
+    "end_line": 9,
+    "file": "crates/jayxpose/src/auth/mod.rs",
+    "id": "jayxpose_auth_sign_up",
+    "start_line": 5
+  },
+  {
+    "do": "deconnecte l'utilisateur (session cote app).",
+    "end_line": 9,
+    "file": "crates/jayxpose/src/auth/mod.rs",
+    "id": "jayxpose_auth_sign_out",
+    "start_line": 7
+  },
+  {
     "do": "authentifie un exposant par email et mot de passe (exposants SQLite).",
     "end_line": 59,
     "file": "crates/jayxpose/src/auth/mod.rs",
@@ -1370,12 +1850,28 @@
     "start_line": 118
   },
   {
+    "do": "persist_jayxpose_data_via_kindmother_client",
+    "end_line": 9,
+    "file": "crates/jayxpose/src/data/kindmother_client_db.rs",
+    "id": "jayxpose_kindmother_client_db",
+    "layer": "infra",
+    "start_line": 6
+  },
+  {
     "do": "hold_kindmother_client_connection",
     "end_line": 58,
     "file": "crates/jayxpose/src/data/kindmother_client_db.rs",
     "id": "jayxpose_db_client_struct",
     "layer": "infra",
     "start_line": 51
+  },
+  {
+    "do": "persist_jayxpose_data_sqlite_kindmother",
+    "end_line": 8,
+    "file": "crates/jayxpose/src/data/kindmother_db.rs",
+    "id": "jayxpose_kindmother_db",
+    "layer": "infra",
+    "start_line": 5
   },
   {
     "do": "hold_sqlite_connection_and_kindmother_identity",
@@ -1432,6 +1928,22 @@
     "id": "cms_article_update",
     "layer": "infra",
     "start_line": 1435
+  },
+  {
+    "do": "expose_data_types_and_db",
+    "end_line": 10,
+    "file": "crates/jayxpose/src/data/mod.rs",
+    "id": "jayxpose_data_module",
+    "layer": "infra",
+    "start_line": 3
+  },
+  {
+    "do": "define_domain_types_jayxpose",
+    "end_line": 8,
+    "file": "crates/jayxpose/src/data/types.rs",
+    "id": "jayxpose_data_types",
+    "layer": "domain",
+    "start_line": 5
   },
   {
     "do": "represent_exposant_profile_data",
@@ -1576,6 +2088,30 @@
     "id": "article_status_enum",
     "layer": "domain",
     "start_line": 838
+  },
+  {
+    "do": "expose_public_modules_jayxpose",
+    "end_line": 12,
+    "file": "crates/jayxpose/src/lib.rs",
+    "id": "jayxpose_lib_stub",
+    "layer": "infra",
+    "start_line": 3
+  },
+  {
+    "do": "dispatch_exp_screen_rendering_by_screen_id",
+    "end_line": 12,
+    "file": "crates/jayxpose/src/screens/exp/mod.rs",
+    "id": "router_exp",
+    "layer": "app",
+    "start_line": 3
+  },
+  {
+    "do": "change_current_screen_from_exp",
+    "end_line": 14,
+    "file": "crates/jayxpose/src/screens/exp/mod.rs",
+    "id": "exp_navigate",
+    "layer": "app",
+    "start_line": 8
   },
   {
     "do": "represent_write_intent",
@@ -2608,6 +3144,104 @@
     "start_line": 119
   },
   {
+    "do": "implement_delegation_client",
+    "end_line": 8,
+    "file": "crates/kindmother-client/src/client.rs",
+    "id": "kindmother_client_impl",
+    "layer": "toolkit",
+    "start_line": 3
+  },
+  {
+    "do": "define_client_errors",
+    "end_line": 10,
+    "file": "crates/kindmother-client/src/errors.rs",
+    "id": "kindmother_client_errors",
+    "layer": "toolkit",
+    "start_line": 3
+  },
+  {
+    "do": "define_client_protocol",
+    "end_line": 12,
+    "file": "crates/kindmother-client/src/protocol.rs",
+    "id": "kindmother_client_protocol",
+    "layer": "toolkit",
+    "start_line": 3
+  },
+  {
+    "do": "provide_common_utility_functions",
+    "end_line": 24,
+    "file": "crates/kindmother-db-adapter/src/lib.rs",
+    "id": "kindmother_db_adapter",
+    "layer": "infra",
+    "start_line": 13
+  },
+  {
+    "do": "derive_aes256_key_per_database",
+    "end_line": 8,
+    "file": "crates/kindmother-db-key/src/key_derivation.rs",
+    "id": "kindmother_db_key_derivation",
+    "layer": "core",
+    "start_line": 3
+  },
+  {
+    "do": "derive_encryption_keys_for_sqlite",
+    "end_line": 12,
+    "file": "crates/kindmother-db-key/src/lib.rs",
+    "id": "kindmother_db_key",
+    "layer": "core",
+    "start_line": 7
+  },
+  {
+    "do": "enforce_access_control_and_validation",
+    "end_line": 14,
+    "file": "crates/kindmother-service/src/arbitration.rs",
+    "id": "kindmother_service_arbitration",
+    "layer": "core",
+    "start_line": 3
+  },
+  {
+    "do": "manage_sqlite_databases_isolated",
+    "end_line": 16,
+    "file": "crates/kindmother-service/src/database.rs",
+    "id": "kindmother_service_database",
+    "layer": "core",
+    "start_line": 3
+  },
+  {
+    "do": "define_service_errors",
+    "end_line": 10,
+    "file": "crates/kindmother-service/src/errors.rs",
+    "id": "kindmother_service_errors",
+    "layer": "core",
+    "start_line": 3
+  },
+  {
+    "do": "define_ipc_protocol",
+    "end_line": 15,
+    "file": "crates/kindmother-service/src/protocol.rs",
+    "id": "kindmother_service_protocol",
+    "layer": "core",
+    "start_line": 3
+  },
+  {
+    "do": "implement_tcp_json_server",
+    "end_line": 8,
+    "file": "crates/kindmother-service/src/server.rs",
+    "id": "kindmother_service_server",
+    "layer": "core",
+    "start_line": 3
+  },
+  {
+    "do": "define_building_structures_and_types",
+    "end_line": 10,
+    "file": "crates/lifegame-entities/src/building.rs",
+    "human": "Structures et types de bâtiments constructibles",
+    "id": "lifegame.entities.building",
+    "layer": "domain",
+    "role": "simulation",
+    "start_line": 5
+  },
+  {
     "do": "enumerate_building_types",
     "end_line": 18,
     "file": "crates/lifegame-entities/src/building.rs",
@@ -2620,6 +3254,16 @@
     "file": "crates/lifegame-entities/src/building.rs",
     "id": "lifegame.entities.building_struct",
     "start_line": 161
+  },
+  {
+    "do": "define_creature_structures_and_types",
+    "end_line": 10,
+    "file": "crates/lifegame-entities/src/creature.rs",
+    "human": "Structures et types de créatures (animaux, monstres, boss)",
+    "id": "lifegame.entities.creature",
+    "layer": "domain",
+    "role": "simulation",
+    "start_line": 5
   },
   {
     "do": "enumerate_creature_types",
@@ -2636,11 +3280,31 @@
     "start_line": 202
   },
   {
+    "do": "manage_world_entities_units_buildings_creatures",
+    "end_line": 10,
+    "file": "crates/lifegame-entities/src/lib.rs",
+    "human": "Opérateur gérant toutes les entités vivantes et construites du monde",
+    "id": "lifegame.operator.entities",
+    "layer": "domain",
+    "role": "simulation",
+    "start_line": 5
+  },
+  {
     "do": "centralize_entity_storage_and_queries",
     "end_line": 74,
     "file": "crates/lifegame-entities/src/lib.rs",
     "id": "lifegame.entities.manager",
     "start_line": 70
+  },
+  {
+    "do": "define_civilized_unit_structures_and_behaviors",
+    "end_line": 10,
+    "file": "crates/lifegame-entities/src/unit.rs",
+    "human": "Structures et comportements des unités civilisées (Humains, Orcs, Elfes, Nains)",
+    "id": "lifegame.entities.unit",
+    "layer": "domain",
+    "role": "simulation",
+    "start_line": 5
   },
   {
     "do": "enumerate_playable_races",
@@ -2657,11 +3321,51 @@
     "start_line": 136
   },
   {
+    "do": "implement_creation_powers",
+    "end_line": 14,
+    "file": "crates/lifegame-powers/src/creation.rs",
+    "human": "Pouvoirs de création de terrain et d'entités",
+    "id": "lifegame.powers.creation",
+    "layer": "domain",
+    "role": "gameplay",
+    "start_line": 5
+  },
+  {
+    "do": "implement_destruction_powers",
+    "end_line": 14,
+    "file": "crates/lifegame-powers/src/destruction.rs",
+    "human": "Pouvoirs de destruction et catastrophes naturelles",
+    "id": "lifegame.powers.destruction",
+    "layer": "domain",
+    "role": "gameplay",
+    "start_line": 5
+  },
+  {
+    "do": "manage_divine_powers_and_god_actions",
+    "end_line": 10,
+    "file": "crates/lifegame-powers/src/lib.rs",
+    "human": "Opérateur gérant tous les pouvoirs divins (création, destruction, créatures, magie)",
+    "id": "lifegame.operator.powers",
+    "layer": "domain",
+    "role": "gameplay",
+    "start_line": 5
+  },
+  {
     "do": "manage_power_usage_and_cooldowns",
     "end_line": 174,
     "file": "crates/lifegame-powers/src/lib.rs",
     "id": "lifegame.powers.manager",
     "start_line": 170
+  },
+  {
+    "do": "implement_unit_decision_making",
+    "end_line": 10,
+    "file": "crates/lifegame-simulation/src/ai.rs",
+    "human": "Système de décision pour les unités civilisées",
+    "id": "lifegame.simulation.ai",
+    "layer": "domain",
+    "role": "simulation",
+    "start_line": 5
   },
   {
     "do": "determine_best_action_for_unit",
@@ -2671,11 +3375,41 @@
     "start_line": 17
   },
   {
+    "do": "manage_game_loop_ticks_and_entity_ai",
+    "end_line": 12,
+    "file": "crates/lifegame-simulation/src/lib.rs",
+    "human": "Opérateur orchestrant la simulation du monde et l'intelligence des entités",
+    "id": "lifegame.operator.simulation",
+    "layer": "domain",
+    "role": "simulation",
+    "start_line": 5
+  },
+  {
+    "do": "execute_world_simulation_tick",
+    "end_line": 10,
+    "file": "crates/lifegame-simulation/src/world_tick.rs",
+    "human": "Exécute toutes les mises à jour pour un tick de simulation",
+    "id": "lifegame.simulation.world_tick",
+    "layer": "domain",
+    "role": "simulation",
+    "start_line": 5
+  },
+  {
     "do": "process_single_simulation_tick",
     "end_line": 227,
     "file": "crates/lifegame-simulation/src/world_tick.rs",
     "id": "lifegame.simulation.tick_world_fn",
     "start_line": 31
+  },
+  {
+    "do": "manage_climate_zones_and_biomes",
+    "end_line": 10,
+    "file": "crates/lifegame-world/src/biome.rs",
+    "human": "Définition des biomes et leurs caractéristiques",
+    "id": "lifegame.world.biome",
+    "layer": "domain",
+    "role": "simulation",
+    "start_line": 5
   },
   {
     "do": "enumerate_biome_types",
@@ -2692,11 +3426,41 @@
     "start_line": 156
   },
   {
+    "do": "procedurally_generate_terrain_with_noise",
+    "end_line": 10,
+    "file": "crates/lifegame-world/src/generation.rs",
+    "human": "Générateur de monde utilisant le bruit de Perlin",
+    "id": "lifegame.world.generation",
+    "layer": "domain",
+    "role": "simulation",
+    "start_line": 5
+  },
+  {
     "do": "generate_terrain_biomes_resources",
     "end_line": 28,
     "file": "crates/lifegame-world/src/generation.rs",
     "id": "lifegame.world.generator",
     "start_line": 16
+  },
+  {
+    "do": "manage_terrain_biomes_resources_generation",
+    "end_line": 12,
+    "file": "crates/lifegame-world/src/lib.rs",
+    "human": "Opérateur gérant le monde physique : terrain, biomes, ressources naturelles",
+    "id": "lifegame.operator.world",
+    "layer": "domain",
+    "role": "simulation",
+    "start_line": 5
+  },
+  {
+    "do": "manage_terrain_tiles_and_grid",
+    "end_line": 10,
+    "file": "crates/lifegame-world/src/terrain.rs",
+    "human": "Grille de terrain avec types de tuiles et propriétés",
+    "id": "lifegame.world.terrain",
+    "layer": "domain",
+    "role": "simulation",
+    "start_line": 5
   },
   {
     "do": "enumerate_terrain_types",
@@ -2960,6 +3724,274 @@
     "start_line": 100
   },
   {
+    "do": "define_castle_entity_hp_armor",
+    "end_line": 15,
+    "file": "crates/lord_of_the_castle/src/castle.rs",
+    "human": "Entité Château : PV, armure, dégâts, game over si détruit.",
+    "id": "lord_of_the_castle_castle",
+    "layer": "domain",
+    "role": "data",
+    "start_line": 4
+  },
+  {
+    "do": "define_stats_phrases_and_effects",
+    "end_line": 12,
+    "file": "crates/lord_of_the_castle/src/character_creation.rs",
+    "human": "8 stats, 25 phrases humoristiques avec effets, tirage aléatoire, parcours 4 étapes.",
+    "id": "lord_of_the_castle_character_creation",
+    "layer": "domain",
+    "role": "logic",
+    "start_line": 3
+  },
+  {
+    "do": "declare_game_balance_constants",
+    "end_line": 13,
+    "file": "crates/lord_of_the_castle/src/constants.rs",
+    "human": "Toutes les constantes gameplay (tailles, PV, vitesses, combat, vagues, portées).",
+    "id": "lord_of_the_castle_constants",
+    "layer": "domain",
+    "role": "config",
+    "start_line": 4
+  },
+  {
+    "do": "define_enemy_types_hp_movement",
+    "end_line": 10,
+    "file": "crates/lord_of_the_castle/src/enemies.rs",
+    "human": "Entités ennemis (Normal, MiniBoss, Boss) : PV, vitesse, dégâts contact, flash.",
+    "id": "lord_of_the_castle_enemies",
+    "layer": "domain",
+    "role": "data",
+    "start_line": 3
+  },
+  {
+    "do": "declare_save_and_db_errors",
+    "end_line": 18,
+    "file": "crates/lord_of_the_castle/src/errors.rs",
+    "id": "lord_of_the_castle_errors",
+    "layer": "domain",
+    "role": "bootstrap",
+    "start_line": 3
+  },
+  {
+    "do": "tick_battle_spawn_move_attack_loot",
+    "end_line": 15,
+    "file": "crates/lord_of_the_castle/src/game_loop.rs",
+    "human": "Boucle de jeu : spawn ennemis, déplacement, collisions, attaque joueur/tours, loot.",
+    "id": "lord_of_the_castle_game_loop",
+    "layer": "domain",
+    "role": "logic",
+    "start_line": 4
+  },
+  {
+    "do": "hold_full_game_state_and_mutations",
+    "end_line": 11,
+    "file": "crates/lord_of_the_castle/src/game_state.rs",
+    "human": "État complet d'une run : phases, vagues, or, XP, inventaire, équipement, marchand.",
+    "id": "lord_of_the_castle_game_state",
+    "layer": "domain",
+    "role": "data",
+    "start_line": 4
+  },
+  {
+    "do": "declare_modules_and_reexports",
+    "end_line": 15,
+    "file": "crates/lord_of_the_castle/src/lib.rs",
+    "human": "Point d'entrée bibliothèque du jeu Lord of the Castle (modules, réexports publics).",
+    "id": "lord_of_the_castle_lib",
+    "layer": "domain",
+    "role": "bootstrap",
+    "start_line": 8
+  },
+  {
+    "do": "generate_loot_items_and_merchant_pools",
+    "end_line": 18,
+    "file": "crates/lord_of_the_castle/src/loot.rs",
+    "human": "Système de loot (or, XP, objets), identification, marchand, tables armes/armures/accessoires.",
+    "id": "lord_of_the_castle_loot",
+    "layer": "domain",
+    "role": "logic",
+    "start_line": 3
+  },
+  {
+    "do": "define_player_entity_stats_movement",
+    "end_line": 10,
+    "file": "crates/lord_of_the_castle/src/player.rs",
+    "human": "Entité joueur : stats, PV, mana, direction, attaque auto, mort/réanimation.",
+    "id": "lord_of_the_castle_player",
+    "layer": "domain",
+    "role": "data",
+    "start_line": 3
+  },
+  {
+    "do": "persist_and_load_game_state_slots_km",
+    "end_line": 12,
+    "file": "crates/lord_of_the_castle/src/save.rs",
+    "id": "lord_of_the_castle_save",
+    "layer": "domain",
+    "role": "infrastructure",
+    "start_line": 6
+  },
+  {
+    "do": "define_secondary_player_kinds_and_stats",
+    "end_line": 14,
+    "file": "crates/lord_of_the_castle/src/secondary_player.rs",
+    "human": "Joueur 2 : personnages préconstruits (Tombilol, Tal Ratchou, Sergent Garcia), stats et level-up.",
+    "id": "lord_of_the_castle_secondary_player",
+    "layer": "domain",
+    "role": "data",
+    "start_line": 4
+  },
+  {
+    "do": "load_and_draw_spritesheet_frames",
+    "end_line": 16,
+    "file": "crates/lord_of_the_castle/src/spritesheet.rs",
+    "human": "Chargement PNG, découpage strip horizontal ; configuration sprites personnages.",
+    "id": "lord_of_the_castle_spritesheet",
+    "layer": "infra",
+    "role": "ui",
+    "start_line": 6
+  },
+  {
+    "do": "provide_css_style_functions",
+    "end_line": 17,
+    "file": "crates/lord_of_the_castle/src/styles/mod.rs",
+    "human": "Fonctions CSS partagées pour le rendu des entités de jeu.",
+    "id": "lord_of_the_castle.styles",
+    "layer": "ui",
+    "role": "ui_helper",
+    "start_line": 6
+  },
+  {
+    "do": "define_tower_entity_range_attack",
+    "end_line": 11,
+    "file": "crates/lord_of_the_castle/src/towers.rs",
+    "human": "Entité Tour : PV, portée, dégâts, cadence, construction en phase Préparation.",
+    "id": "lord_of_the_castle_towers",
+    "layer": "domain",
+    "role": "data",
+    "start_line": 4
+  },
+  {
+    "do": "define_troop_types_states_and_behavior",
+    "end_line": 11,
+    "file": "crates/lord_of_the_castle/src/troops.rs",
+    "human": "Troupes : types (Milicien…), états (InZone, OutOfZone, Dead, AtCastle), PV, déplacement, attaque.",
+    "id": "lord_of_the_castle_troops",
+    "layer": "domain",
+    "role": "data",
+    "start_line": 4
+  },
+  {
+    "do": "render_character_creation_flow",
+    "end_line": 12,
+    "file": "crates/lord_of_the_castle/src/ui/character_creation.rs",
+    "human": "Écran de création de personnage avec phrases et stats",
+    "id": "lord_of_the_castle.ui.character_creation",
+    "layer": "ui",
+    "role": "ui",
+    "start_line": 5
+  },
+  {
+    "do": "render_game_entities",
+    "end_line": 13,
+    "file": "crates/lord_of_the_castle/src/ui/entity_render.rs",
+    "human": "Composants de rendu des entités de jeu (ennemis, tours, joueur, etc.).",
+    "id": "lord_of_the_castle.ui.entity_render",
+    "layer": "ui",
+    "role": "ui",
+    "start_line": 6
+  },
+  {
+    "do": "render_game_combat_area",
+    "end_line": 13,
+    "file": "crates/lord_of_the_castle/src/ui/game_area.rs",
+    "human": "Zone de jeu centrale avec rendu des entités de combat.",
+    "id": "lord_of_the_castle.ui.game_area",
+    "layer": "ui",
+    "role": "ui",
+    "start_line": 6
+  },
+  {
+    "do": "render_game_footer_bar",
+    "end_line": 12,
+    "file": "crates/lord_of_the_castle/src/ui/game_footer.rs",
+    "human": "Footer avec PV, actions (lancer vague) et sauvegarde",
+    "id": "lord_of_the_castle.ui.game_footer",
+    "layer": "ui",
+    "role": "ui",
+    "start_line": 5
+  },
+  {
+    "do": "render_game_info_header",
+    "end_line": 12,
+    "file": "crates/lord_of_the_castle/src/ui/game_header.rs",
+    "human": "Header avec informations de run (vague, or, niveau, etc.)",
+    "id": "lord_of_the_castle.ui.game_header",
+    "layer": "ui",
+    "role": "ui",
+    "start_line": 5
+  },
+  {
+    "do": "orchestrate_game_screen_components",
+    "end_line": 10,
+    "file": "crates/lord_of_the_castle/src/ui/game_screen.rs",
+    "human": "Écran de jeu complet assemblant header, footer, sidebar, game_area, overlays",
+    "id": "lord_of_the_castle.ui.game_screen",
+    "layer": "ui",
+    "role": "ui",
+    "start_line": 3
+  },
+  {
+    "do": "render_main_menu_screen",
+    "end_line": 12,
+    "file": "crates/lord_of_the_castle/src/ui/main_menu.rs",
+    "human": "Écran de menu principal avec sélection de slots de sauvegarde.",
+    "id": "lord_of_the_castle.ui.main_menu",
+    "layer": "ui",
+    "role": "ui",
+    "start_line": 5
+  },
+  {
+    "do": "organize_ui_components",
+    "end_line": 21,
+    "file": "crates/lord_of_the_castle/src/ui/mod.rs",
+    "human": "Point d'entrée des modules UI pour Lord of the Castle",
+    "id": "lord_of_the_castle.ui",
+    "layer": "ui",
+    "role": "ui",
+    "start_line": 14
+  },
+  {
+    "do": "render_overlay_panels",
+    "end_line": 18,
+    "file": "crates/lord_of_the_castle/src/ui/overlays.rs",
+    "human": "Panneaux overlay (Stats, Skills, Inventaire) et écrans de fin.",
+    "id": "lord_of_the_castle.ui.overlays",
+    "layer": "ui",
+    "role": "ui",
+    "start_line": 11
+  },
+  {
+    "do": "render_preparation_and_battle_sidebars",
+    "end_line": 10,
+    "file": "crates/lord_of_the_castle/src/ui/sidebar.rs",
+    "human": "Panneaux latéraux pour construction, recrutement et infos de combat",
+    "id": "lord_of_the_castle.ui.sidebar",
+    "layer": "ui",
+    "role": "ui",
+    "start_line": 3
+  },
+  {
+    "do": "define_warrior_skill_tree",
+    "end_line": 13,
+    "file": "crates/lord_of_the_castle/src/warrior_skills.rs",
+    "human": "Nœuds Guerrier : Baston, Plus fort, Tireur, etc. ; descriptions, effets, max rang, prérequis.",
+    "id": "lord_of_the_castle_warrior_skills",
+    "layer": "domain",
+    "role": "data",
+    "start_line": 3
+  },
+  {
     "do": "define_orchestrator_contract",
     "end_line": 9,
     "file": "crates/masterbutler/src/orchestrator.rs",
@@ -3118,6 +4150,156 @@
     "layer": "core",
     "role": "test",
     "start_line": 50
+  },
+  {
+    "do": "define_component_marker_trait",
+    "end_line": 10,
+    "file": "crates/mge-core/src/component.rs",
+    "human": "Marqueur des composants ECS",
+    "id": "mge.core.component",
+    "layer": "core",
+    "role": "simulation",
+    "start_line": 3
+  },
+  {
+    "do": "define_engine_configuration",
+    "end_line": 12,
+    "file": "crates/mge-core/src/config.rs",
+    "human": "Configuration Engine",
+    "id": "mge.core.config",
+    "layer": "core",
+    "role": "simulation",
+    "start_line": 3
+  },
+  {
+    "do": "provide_system_execution_context",
+    "end_line": 10,
+    "file": "crates/mge-core/src/context.rs",
+    "human": "Contexte d'exécution des systèmes",
+    "id": "mge.core.context",
+    "layer": "core",
+    "role": "simulation",
+    "start_line": 3
+  },
+  {
+    "do": "orchestrate_lifecycle_and_tick",
+    "end_line": 10,
+    "file": "crates/mge-core/src/engine.rs",
+    "human": "Point d'entrée du moteur",
+    "id": "mge.core.engine",
+    "layer": "core",
+    "role": "simulation",
+    "start_line": 3
+  },
+  {
+    "do": "represent_opaque_entity_identifier",
+    "end_line": 14,
+    "file": "crates/mge-core/src/entity.rs",
+    "human": "Identifiant opaque d'entité",
+    "id": "mge.core.entity",
+    "layer": "core",
+    "role": "simulation",
+    "start_line": 3
+  },
+  {
+    "do": "define_event_marker_trait",
+    "end_line": 10,
+    "file": "crates/mge-core/src/event.rs",
+    "human": "Marqueur des événements typés",
+    "id": "mge.core.event",
+    "layer": "core",
+    "role": "simulation",
+    "start_line": 3
+  },
+  {
+    "do": "store_and_serve_typed_events",
+    "end_line": 13,
+    "file": "crates/mge-core/src/event_queue.rs",
+    "human": "File d'événements typés avec double buffer",
+    "id": "mge.core.event_queue",
+    "layer": "core",
+    "role": "simulation",
+    "start_line": 5
+  },
+  {
+    "do": "provide_minimal_simulation_kernel",
+    "end_line": 39,
+    "file": "crates/mge-core/src/lib.rs",
+    "human": "Microkernel MGE — coeur minimal de simulation",
+    "id": "mge.core",
+    "layer": "core",
+    "role": "simulation",
+    "start_line": 6
+  },
+  {
+    "do": "define_plugin_trait",
+    "end_line": 11,
+    "file": "crates/mge-core/src/plugin.rs",
+    "human": "Contrat d'extension par plugin",
+    "id": "mge.core.plugin",
+    "layer": "core",
+    "role": "simulation",
+    "start_line": 3
+  },
+  {
+    "do": "measure_tick_phase_system_duration",
+    "end_line": 10,
+    "file": "crates/mge-core/src/profiling.rs",
+    "human": "Métriques de profiling par tick/phase/système",
+    "id": "mge.core.profiling",
+    "layer": "core",
+    "role": "simulation",
+    "start_line": 3
+  },
+  {
+    "do": "provide_deterministic_rng",
+    "end_line": 11,
+    "file": "crates/mge-core/src/rng.rs",
+    "human": "RNG déterministe seedable",
+    "id": "mge.core.rng",
+    "layer": "core",
+    "role": "simulation",
+    "start_line": 3
+  },
+  {
+    "do": "execute_systems_in_deterministic_order",
+    "end_line": 10,
+    "file": "crates/mge-core/src/scheduler.rs",
+    "human": "Ordonnancement déterministe des systèmes",
+    "id": "mge.core.scheduler",
+    "layer": "core",
+    "role": "simulation",
+    "start_line": 3
+  },
+  {
+    "do": "store_components_by_type",
+    "end_line": 14,
+    "file": "crates/mge-core/src/storage.rs",
+    "human": "Stockage sparse set par type composant",
+    "id": "mge.core.storage",
+    "layer": "core",
+    "role": "simulation",
+    "start_line": 6
+  },
+  {
+    "do": "provide_tick_based_time",
+    "end_line": 14,
+    "file": "crates/mge-core/src/time.rs",
+    "human": "Gestion du temps de simulation",
+    "id": "mge.core.time",
+    "layer": "core",
+    "role": "simulation",
+    "start_line": 5
+  },
+  {
+    "do": "store_entities_and_components",
+    "end_line": 11,
+    "file": "crates/mge-core/src/world.rs",
+    "human": "Stockage entités et composants SoA",
+    "id": "mge.core.world",
+    "layer": "core",
+    "role": "simulation",
+    "start_line": 3
   },
   {
     "do": "identity_attest_under_governance",
@@ -3331,43 +4513,43 @@
   },
   {
     "do": "booking_resource_resolve_under_governance",
-    "end_line": 11,
+    "end_line": 33,
     "file": "crates/miyubooking/src/resource.rs",
     "human": "Résout une ressource (salle, équipement) ; contraintes fournies par KindMother.",
     "id": "miyubooking_tool_booking_resource_resolve",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 7
+    "start_line": 29
   },
   {
     "do": "booking_resource_availability_under_governance",
-    "end_line": 29,
+    "end_line": 55,
     "file": "crates/miyubooking/src/resource.rs",
     "human": "Retourne la disponibilité d'une ressource sur une plage donnée ; lecture gouvernée.",
     "id": "miyubooking_tool_booking_resource_availability",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 19
+    "start_line": 45
   },
   {
     "do": "booking_slots_list_under_governance",
-    "end_line": 11,
+    "end_line": 49,
     "file": "crates/miyubooking/src/slots.rs",
     "human": "Liste les créneaux disponibles ; contexte ressource, date, durée fourni.",
     "id": "miyubooking_tool_booking_slots_list",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 7
+    "start_line": 45
   },
   {
     "do": "booking_slots_resolve_under_governance",
-    "end_line": 34,
+    "end_line": 83,
     "file": "crates/miyubooking/src/slots.rs",
     "human": "Résout un créneau par identifiant ; lecture.",
     "id": "miyubooking_tool_booking_slots_resolve",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 24
+    "start_line": 68
   },
   {
     "do": "bookmark_add_under_governance",
@@ -3592,6 +4774,15 @@
     "start_line": 138
   },
   {
+    "do": "resolve_combat_attacker_defender",
+    "end_line": 8,
+    "file": "crates/miyuclicker/src/combat.rs",
+    "id": "miyuclicker_combat_module",
+    "layer": "domain",
+    "role": "mutator",
+    "start_line": 4
+  },
+  {
     "do": "represent_combat_outcome",
     "end_line": 15,
     "file": "crates/miyuclicker/src/combat.rs",
@@ -3607,6 +4798,16 @@
     "id": "miyuclicker_combat_resolve",
     "role": "mutator",
     "start_line": 23
+  },
+  {
+    "do": "idle_simulation_tick_production_transformation_construction",
+    "end_line": 10,
+    "file": "crates/miyuclicker/src/idlesim.rs",
+    "human": "Rythme jour (86 400 s jeu), boucles : production, transformation,",
+    "id": "miyuclicker_idlesim_module",
+    "layer": "domain",
+    "role": "mutator",
+    "start_line": 4
   },
   {
     "do": "define_game_speed_multipliers",
@@ -3767,6 +4968,26 @@
     "start_line": 536
   },
   {
+    "do": "aggregate_miyuclicker_operators_and_toolkits",
+    "end_line": 21,
+    "file": "crates/miyuclicker/src/lib.rs",
+    "human": "Service jeu : IdleSim, Save, Combat, Carte. UI Dioxus dans apps/central (MiyuClickerView).",
+    "id": "miyuclicker_lib_module",
+    "layer": "application",
+    "role": "application",
+    "start_line": 14
+  },
+  {
+    "do": "persist_and_load_game_state_slots",
+    "end_line": 9,
+    "file": "crates/miyuclicker/src/save.rs",
+    "human": "3 slots, JSON pretty-printed. Version 2.0 : ouvriers/bâtisseurs/soldats, 6 ressources, 3 bâtiments.",
+    "id": "miyuclicker_save_module",
+    "layer": "domain",
+    "role": "infrastructure",
+    "start_line": 4
+  },
+  {
     "end_line": 23,
     "file": "crates/miyuclicker/src/save.rs",
     "id": "miyuclicker_save_save_state",
@@ -3867,6 +5088,16 @@
     "id": "miyuclicker_save_slot_list",
     "role": "reader",
     "start_line": 276
+  },
+  {
+    "do": "represent_game_state_and_entities",
+    "end_line": 9,
+    "file": "crates/miyuclicker/src/state.rs",
+    "human": "Ouvriers = base. Bâtisseurs (coût outils). Soldats (coût armes). 6 ressources, 3 bâtiments.",
+    "id": "miyuclicker_state_module",
+    "layer": "domain",
+    "role": "data",
+    "start_line": 4
   },
   {
     "do": "represent_manual_click_target",
@@ -4177,33 +5408,33 @@
   },
   {
     "do": "content_comment_create_under_governance",
-    "end_line": 11,
+    "end_line": 13,
     "file": "crates/miyucms/src/comment.rs",
     "human": "Crée un commentaire ; données fournies ; WriteIntent KindMother.",
     "id": "miyucms_tool_content_comment_create",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 7
+    "start_line": 9
   },
   {
     "do": "content_comment_moderate_under_governance",
-    "end_line": 23,
+    "end_line": 34,
     "file": "crates/miyucms/src/comment.rs",
     "human": "Applique modération (approuver, rejeter) ; décision StrongFather ; WriteIntent KindMother.",
     "id": "miyucms_tool_content_comment_moderate",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 19
+    "start_line": 30
   },
   {
     "do": "content_comment_list_under_governance",
-    "end_line": 41,
+    "end_line": 58,
     "file": "crates/miyucms/src/comment.rs",
     "human": "Liste les commentaires d'un contenu ; filtres fournis dans le flux.",
     "id": "miyucms_tool_content_comment_list",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 31
+    "start_line": 46
   },
   {
     "do": "content_create_under_governance",
@@ -4247,63 +5478,73 @@
   },
   {
     "do": "cms_media_upload_under_governance",
-    "end_line": 11,
+    "end_line": 13,
     "file": "crates/miyucms/src/media.rs",
     "human": "Enregistre un média ; persistance KindMother.",
     "id": "miyucms_tool_media_upload",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 7
+    "start_line": 9
   },
   {
     "do": "cms_media_serve_under_governance",
-    "end_line": 23,
+    "end_line": 29,
     "file": "crates/miyucms/src/media.rs",
     "human": "Sert un média (stream ou métadonnées) ; données fournies dans le flux.",
     "id": "miyucms_tool_media_serve",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 19
+    "start_line": 25
   },
   {
     "do": "cms_media_transform_under_governance",
-    "end_line": 41,
+    "end_line": 51,
     "file": "crates/miyucms/src/media.rs",
     "human": "Produit une variante (miniature, recadrage) ; données fournies ; pas de persistance directe.",
     "id": "miyucms_tool_media_transform",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 31
+    "start_line": 39
+  },
+  {
+    "do": "content_revision_create_under_governance",
+    "end_line": 13,
+    "file": "crates/miyucms/src/revision.rs",
+    "human": "Crée une révision pour un contenu ; WriteIntent KindMother.",
+    "id": "miyucms_tool_content_revision_create",
+    "layer": "tool",
+    "role": "mutator",
+    "start_line": 9
   },
   {
     "do": "content_revision_list_under_governance",
-    "end_line": 11,
+    "end_line": 34,
     "file": "crates/miyucms/src/revision.rs",
     "human": "Liste les révisions d'un contenu ; lecture gouvernée.",
     "id": "miyucms_tool_content_revision_list",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 7
+    "start_line": 30
   },
   {
     "do": "content_revision_restore_under_governance",
-    "end_line": 23,
+    "end_line": 48,
     "file": "crates/miyucms/src/revision.rs",
     "human": "Restaure une révision ; décision StrongFather ; WriteIntent KindMother.",
     "id": "miyucms_tool_content_revision_restore",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 19
+    "start_line": 44
   },
   {
     "do": "content_revision_compare_under_governance",
-    "end_line": 41,
+    "end_line": 74,
     "file": "crates/miyucms/src/revision.rs",
     "human": "Compare deux révisions ; lecture seule.",
     "id": "miyucms_tool_content_revision_compare",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 31
+    "start_line": 60
   },
   {
     "do": "ledger_export_under_governance",
@@ -4437,33 +5678,33 @@
   },
   {
     "do": "company_structure_resolve_under_governance",
-    "end_line": 11,
+    "end_line": 13,
     "file": "crates/miyucptaledger/src/company.rs",
     "human": "Résout la structure juridique courante (micro, EURL, etc.) pour le contexte ; lecture.",
     "id": "miyucptaledger_tool_company_structure_resolve",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 7
+    "start_line": 9
   },
   {
     "do": "company_structure_register_under_governance",
-    "end_line": 23,
+    "end_line": 27,
     "file": "crates/miyucptaledger/src/company.rs",
     "human": "Enregistre une structure ; WriteIntent KindMother.",
     "id": "miyucptaledger_tool_company_structure_register",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 19
+    "start_line": 23
   },
   {
     "do": "company_siret_resolve_under_governance",
-    "end_line": 41,
+    "end_line": 49,
     "file": "crates/miyucptaledger/src/company.rs",
     "human": "Récupère les informations depuis SIRET/INSEE ; lecture seule.",
     "id": "miyucptaledger_tool_company_siret_resolve",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 31
+    "start_line": 38
   },
   {
     "do": "compta_reconciliation_suggest_under_governance",
@@ -5037,23 +6278,23 @@
   },
   {
     "do": "invoice_customer_resolve_under_governance",
-    "end_line": 11,
+    "end_line": 22,
     "file": "crates/miyuinvoice/src/customer.rs",
     "human": "Résout un client (facturation) par identifiant ; lecture.",
     "id": "miyuinvoice_tool_invoice_customer_resolve",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 7
+    "start_line": 18
   },
   {
     "do": "invoice_customer_list_under_governance",
-    "end_line": 29,
+    "end_line": 47,
     "file": "crates/miyuinvoice/src/customer.rs",
     "human": "Liste les clients (filtres fournis) pour facturation ; lecture.",
     "id": "miyuinvoice_tool_invoice_customer_list",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 19
+    "start_line": 35
   },
   {
     "do": "invoice_electronic_submit_under_governance",
@@ -5067,23 +6308,23 @@
   },
   {
     "do": "invoice_create_under_governance",
-    "end_line": 11,
+    "end_line": 13,
     "file": "crates/miyuinvoice/src/invoice.rs",
     "human": "Crée une facture (métier indépendant) à partir de données fournies ; WriteIntent KindMother.",
     "id": "miyuinvoice_tool_invoice_create",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 7
+    "start_line": 9
   },
   {
     "do": "invoice_send_under_governance",
-    "end_line": 29,
+    "end_line": 34,
     "file": "crates/miyuinvoice/src/invoice.rs",
     "human": "Envoie une facture par canal fourni (email, etc.).",
     "id": "miyuinvoice_tool_invoice_send",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 19
+    "start_line": 24
   },
   {
     "do": "invoice_payment_link_generate_under_governance",
@@ -5097,33 +6338,33 @@
   },
   {
     "do": "invoice_quote_create_under_governance",
-    "end_line": 11,
+    "end_line": 14,
     "file": "crates/miyuinvoice/src/quote.rs",
     "human": "Crée un devis à partir de données fournies ; persistance = KindMother.",
     "id": "miyuinvoice_tool_invoice_quote_create",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 7
+    "start_line": 10
   },
   {
     "do": "invoice_quote_update_under_governance",
-    "end_line": 23,
+    "end_line": 29,
     "file": "crates/miyuinvoice/src/quote.rs",
     "human": "Met à jour un devis existant ; WriteIntent KindMother.",
     "id": "miyuinvoice_tool_invoice_quote_update",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 19
+    "start_line": 25
   },
   {
     "do": "invoice_quote_to_invoice_under_governance",
-    "end_line": 41,
+    "end_line": 56,
     "file": "crates/miyuinvoice/src/quote.rs",
     "human": "Convertit un devis en facture ; décision = StrongFather.",
     "id": "miyuinvoice_tool_invoice_quote_to_invoice",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 31
+    "start_line": 39
   },
   {
     "do": "invoice_reminder_send_under_governance",
@@ -7486,6 +8727,22 @@
     "start_line": 79
   },
   {
+    "do": "persist_central_auth_data_via_kindmother_client",
+    "end_line": 14,
+    "file": "crates/miyukini-central/src/auth/db_client.rs",
+    "id": "central_auth_kindmother_client_db",
+    "layer": "infra",
+    "start_line": 9
+  },
+  {
+    "do": "provide_common_utility_functions",
+    "end_line": 19,
+    "file": "crates/miyukini-central/src/db/kindmother_adapter.rs",
+    "id": "kindmother_adapter",
+    "layer": "infra",
+    "start_line": 9
+  },
+  {
     "do": "get_config_by_key",
     "end_line": 86,
     "file": "crates/miyukini-kernel/src/config.rs",
@@ -8306,6 +9563,16 @@
     "start_line": 213
   },
   {
+    "do": "orchestrate_life_game_simulation_and_ui",
+    "end_line": 25,
+    "file": "crates/miyulifegame/src/lib.rs",
+    "human": "Jeu de simulation de vie (god simulator) où le joueur crée et observe des civilisations",
+    "id": "service.game.miyulifegame",
+    "layer": "service",
+    "role": "game",
+    "start_line": 5
+  },
+  {
     "do": "aggregate_all_game_state",
     "end_line": 38,
     "file": "crates/miyulifegame/src/lib.rs",
@@ -8388,193 +9655,193 @@
   },
   {
     "do": "ban_create_under_governance",
-    "end_line": 11,
+    "end_line": 13,
     "file": "crates/miyumoderationforum/src/ban.rs",
     "human": "Crée un bannissement ; WriteIntent KindMother.",
     "id": "miyumoderationforum_tool_ban_create",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 6
+    "start_line": 8
   },
   {
     "do": "ban_list_under_governance",
-    "end_line": 38,
+    "end_line": 51,
     "file": "crates/miyumoderationforum/src/ban.rs",
     "human": "Liste les bannissements.",
     "id": "miyumoderationforum_tool_ban_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 24
+    "start_line": 30
   },
   {
     "do": "post_edit_under_governance",
-    "end_line": 11,
+    "end_line": 12,
     "file": "crates/miyumoderationforum/src/post.rs",
     "human": "Édite un post (modération) ; WriteIntent KindMother.",
     "id": "miyumoderationforum_tool_post_edit",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "post_lock_under_governance",
-    "end_line": 28,
+    "end_line": 32,
     "file": "crates/miyumoderationforum/src/post.rs",
     "human": "Verrouille un post ; WriteIntent KindMother.",
     "id": "miyumoderationforum_tool_post_lock",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 23
+    "start_line": 27
   },
   {
     "do": "post_delete_under_governance",
-    "end_line": 47,
+    "end_line": 56,
     "file": "crates/miyumoderationforum/src/post.rs",
     "human": "Supprime un post ; WriteIntent KindMother.",
     "id": "miyumoderationforum_tool_post_delete",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 36
+    "start_line": 43
   },
   {
     "do": "moderation_queue_list_under_governance",
-    "end_line": 11,
+    "end_line": 12,
     "file": "crates/miyumoderationforum/src/queue.rs",
     "human": "Liste la file d'attente de modération.",
     "id": "miyumoderationforum_tool_queue_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "moderation_queue_get_under_governance",
-    "end_line": 36,
+    "end_line": 41,
     "file": "crates/miyumoderationforum/src/queue.rs",
     "human": "Récupère un élément de la file.",
     "id": "miyumoderationforum_tool_queue_get",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 19
+    "start_line": 22
   },
   {
     "do": "report_create_under_governance",
-    "end_line": 11,
+    "end_line": 13,
     "file": "crates/miyumoderationforum/src/report.rs",
     "human": "Crée un signalement ; WriteIntent KindMother.",
     "id": "miyumoderationforum_tool_report_create",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 6
+    "start_line": 8
   },
   {
     "do": "report_list_under_governance",
-    "end_line": 38,
+    "end_line": 50,
     "file": "crates/miyumoderationforum/src/report.rs",
     "human": "Liste les signalements.",
     "id": "miyumoderationforum_tool_report_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 24
+    "start_line": 29
   },
   {
     "do": "topic_lock_under_governance",
-    "end_line": 12,
+    "end_line": 14,
     "file": "crates/miyumoderationforum/src/topic.rs",
     "human": "Verrouille un topic ; WriteIntent KindMother.",
     "id": "miyumoderationforum_tool_topic_lock",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 7
+    "start_line": 9
   },
   {
     "do": "topic_move_under_governance",
-    "end_line": 25,
+    "end_line": 30,
     "file": "crates/miyumoderationforum/src/topic.rs",
     "human": "Déplace un topic ; WriteIntent KindMother.",
     "id": "miyumoderationforum_tool_topic_move",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 20
+    "start_line": 25
   },
   {
     "do": "topic_merge_under_governance",
-    "end_line": 42,
+    "end_line": 50,
     "file": "crates/miyumoderationforum/src/topic.rs",
     "human": "Fusionne des topics ; WriteIntent KindMother.",
     "id": "miyumoderationforum_tool_topic_merge",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 37
+    "start_line": 45
   },
   {
     "do": "topic_split_under_governance",
-    "end_line": 59,
+    "end_line": 71,
     "file": "crates/miyumoderationforum/src/topic.rs",
     "human": "Scinde un topic ; WriteIntent KindMother.",
     "id": "miyumoderationforum_tool_topic_split",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 54
+    "start_line": 66
   },
   {
     "do": "topic_delete_under_governance",
-    "end_line": 76,
+    "end_line": 93,
     "file": "crates/miyumoderationforum/src/topic.rs",
     "human": "Supprime un topic ; WriteIntent KindMother.",
     "id": "miyumoderationforum_tool_topic_delete",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 71
+    "start_line": 88
   },
   {
     "do": "topic_copy_under_governance",
-    "end_line": 99,
+    "end_line": 123,
     "file": "crates/miyumoderationforum/src/topic.rs",
     "human": "Copie un topic ; WriteIntent KindMother.",
     "id": "miyumoderationforum_tool_topic_copy",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 84
+    "start_line": 103
   },
   {
     "do": "usernote_create_under_governance",
-    "end_line": 11,
+    "end_line": 13,
     "file": "crates/miyumoderationforum/src/usernote.rs",
     "human": "Crée une note modérateur ; WriteIntent KindMother.",
     "id": "miyumoderationforum_tool_usernote_create",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 6
+    "start_line": 8
   },
   {
     "do": "usernote_list_under_governance",
-    "end_line": 40,
+    "end_line": 58,
     "file": "crates/miyumoderationforum/src/usernote.rs",
     "human": "Liste les notes modérateur.",
     "id": "miyumoderationforum_tool_usernote_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 23
+    "start_line": 34
   },
   {
     "do": "warning_create_under_governance",
-    "end_line": 11,
+    "end_line": 13,
     "file": "crates/miyumoderationforum/src/warning.rs",
     "human": "Crée un avertissement ; WriteIntent KindMother.",
     "id": "miyumoderationforum_tool_warning_create",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 6
+    "start_line": 8
   },
   {
     "do": "warning_list_under_governance",
-    "end_line": 37,
+    "end_line": 48,
     "file": "crates/miyumoderationforum/src/warning.rs",
     "human": "Liste les avertissements.",
     "id": "miyumoderationforum_tool_warning_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 23
+    "start_line": 28
   },
   {
     "do": "email_send_under_governance",
@@ -9578,33 +10845,33 @@
   },
   {
     "do": "search_index_update_under_governance",
-    "end_line": 23,
+    "end_line": 26,
     "file": "crates/miyusearch/src/index.rs",
     "human": "Met à jour l'index ; document, champs, identifiant fournis dans le flux.",
     "id": "miyusearch_tool_search_index_update",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 8
+    "start_line": 9
   },
   {
     "do": "search_query_execute_under_governance",
-    "end_line": 36,
+    "end_line": 49,
     "file": "crates/miyusearch/src/query.rs",
     "human": "Exécute une requête full-text ; terme(s), filtres, options fournis.",
     "id": "miyusearch_tool_search_query_execute",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 17
+    "start_line": 18
   },
   {
     "do": "search_suggest_under_governance",
-    "end_line": 23,
+    "end_line": 37,
     "file": "crates/miyusearch/src/suggest.rs",
     "human": "Produit des suggestions autocomplete à partir d'un préfixe et options fournis.",
     "id": "miyusearch_tool_search_suggest",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 8
+    "start_line": 10
   },
   {
     "do": "commerce_shipping_label_create_under_governance",
@@ -9688,243 +10955,243 @@
   },
   {
     "do": "comment_create_under_governance",
-    "end_line": 11,
+    "end_line": 13,
     "file": "crates/miyusocialfeed/src/comment.rs",
     "human": "Crée un commentaire ; WriteIntent KindMother.",
     "id": "miyusocialfeed_tool_comment_create",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 6
+    "start_line": 8
   },
   {
     "do": "comment_list_under_governance",
-    "end_line": 28,
+    "end_line": 37,
     "file": "crates/miyusocialfeed/src/comment.rs",
     "human": "Liste les commentaires.",
     "id": "miyusocialfeed_tool_comment_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 23
+    "start_line": 32
   },
   {
     "do": "comment_delete_under_governance",
-    "end_line": 50,
+    "end_line": 73,
     "file": "crates/miyusocialfeed/src/comment.rs",
     "human": "Supprime un commentaire ; WriteIntent KindMother.",
     "id": "miyusocialfeed_tool_comment_delete",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 36
+    "start_line": 50
   },
   {
     "do": "feed_list_under_governance",
-    "end_line": 24,
+    "end_line": 34,
     "file": "crates/miyusocialfeed/src/feed.rs",
     "human": "Liste le flux ; filtres fournis.",
     "id": "miyusocialfeed_tool_feed_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 7
+    "start_line": 8
   },
   {
     "do": "post_create_under_governance",
-    "end_line": 11,
+    "end_line": 13,
     "file": "crates/miyusocialfeed/src/post.rs",
     "human": "Crée une publication ; WriteIntent KindMother.",
     "id": "miyusocialfeed_tool_post_create",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 6
+    "start_line": 8
   },
   {
     "do": "post_update_under_governance",
-    "end_line": 28,
+    "end_line": 34,
     "file": "crates/miyusocialfeed/src/post.rs",
     "human": "Met à jour une publication ; WriteIntent KindMother.",
     "id": "miyusocialfeed_tool_post_update",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 23
+    "start_line": 29
   },
   {
     "do": "post_delete_under_governance",
-    "end_line": 45,
+    "end_line": 54,
     "file": "crates/miyusocialfeed/src/post.rs",
     "human": "Supprime une publication ; WriteIntent KindMother.",
     "id": "miyusocialfeed_tool_post_delete",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 40
+    "start_line": 49
   },
   {
     "do": "post_get_under_governance",
-    "end_line": 67,
+    "end_line": 80,
     "file": "crates/miyusocialfeed/src/post.rs",
     "human": "Récupère une publication.",
     "id": "miyusocialfeed_tool_post_get",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 53
+    "start_line": 64
   },
   {
     "do": "reaction_add_under_governance",
-    "end_line": 11,
+    "end_line": 12,
     "file": "crates/miyusocialfeed/src/reaction.rs",
     "human": "Ajoute une réaction ; WriteIntent KindMother.",
     "id": "miyusocialfeed_tool_reaction_add",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "reaction_remove_under_governance",
-    "end_line": 28,
+    "end_line": 32,
     "file": "crates/miyusocialfeed/src/reaction.rs",
     "human": "Supprime une réaction ; WriteIntent KindMother.",
     "id": "miyusocialfeed_tool_reaction_remove",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 23
+    "start_line": 27
   },
   {
     "do": "reaction_list_under_governance",
-    "end_line": 54,
+    "end_line": 65,
     "file": "crates/miyusocialfeed/src/reaction.rs",
     "human": "Liste les réactions.",
     "id": "miyusocialfeed_tool_reaction_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 40
+    "start_line": 49
   },
   {
     "do": "share_create_under_governance",
-    "end_line": 11,
+    "end_line": 13,
     "file": "crates/miyusocialfeed/src/share.rs",
     "human": "Crée un partage ; WriteIntent KindMother.",
     "id": "miyusocialfeed_tool_share_create",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 6
+    "start_line": 8
   },
   {
     "do": "share_list_under_governance",
-    "end_line": 37,
+    "end_line": 51,
     "file": "crates/miyusocialfeed/src/share.rs",
     "human": "Liste les partages.",
     "id": "miyusocialfeed_tool_share_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 23
+    "start_line": 32
   },
   {
     "do": "conversation_list_under_governance",
-    "end_line": 11,
+    "end_line": 12,
     "file": "crates/miyusocialmessaging/src/conversation.rs",
     "human": "Liste les conversations.",
     "id": "miyusocialmessaging_tool_conversation_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "conversation_get_under_governance",
-    "end_line": 36,
+    "end_line": 43,
     "file": "crates/miyusocialmessaging/src/conversation.rs",
     "human": "Récupère une conversation (fil).",
     "id": "miyusocialmessaging_tool_conversation_get",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 19
+    "start_line": 22
   },
   {
     "do": "dm_send_under_governance",
-    "end_line": 11,
+    "end_line": 13,
     "file": "crates/miyusocialmessaging/src/dm.rs",
     "human": "Envoie un DM ; WriteIntent KindMother.",
     "id": "miyusocialmessaging_tool_dm_send",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 6
+    "start_line": 8
   },
   {
     "do": "dm_list_under_governance",
-    "end_line": 28,
+    "end_line": 37,
     "file": "crates/miyusocialmessaging/src/dm.rs",
     "human": "Liste les messages d'une conversation.",
     "id": "miyusocialmessaging_tool_dm_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 23
+    "start_line": 32
   },
   {
     "do": "dm_get_under_governance",
-    "end_line": 44,
+    "end_line": 58,
     "file": "crates/miyusocialmessaging/src/dm.rs",
     "human": "Récupère un message.",
     "id": "miyusocialmessaging_tool_dm_get",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 39
+    "start_line": 53
   },
   {
     "do": "dm_reaction_add_under_governance",
-    "end_line": 57,
+    "end_line": 73,
     "file": "crates/miyusocialmessaging/src/dm.rs",
     "human": "Ajoute une réaction à un DM ; WriteIntent KindMother.",
     "id": "miyusocialmessaging_tool_dm_reaction_add",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 52
+    "start_line": 68
   },
   {
     "do": "dm_reaction_remove_under_governance",
-    "end_line": 74,
+    "end_line": 93,
     "file": "crates/miyusocialmessaging/src/dm.rs",
     "human": "Supprime une réaction ; WriteIntent KindMother.",
     "id": "miyusocialmessaging_tool_dm_reaction_remove",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 69
+    "start_line": 88
   },
   {
     "do": "dm_readmark_set_under_governance",
-    "end_line": 104,
+    "end_line": 126,
     "file": "crates/miyusocialmessaging/src/dm.rs",
     "human": "Marque comme lu ; WriteIntent KindMother.",
     "id": "miyusocialmessaging_tool_dm_readmark_set",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 86
+    "start_line": 108
   },
   {
     "do": "block_add_under_governance",
-    "end_line": 11,
+    "end_line": 12,
     "file": "crates/miyusocialmoderation/src/block.rs",
     "human": "Bloque un utilisateur ; WriteIntent KindMother.",
     "id": "miyusocialmoderation_tool_block_add",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "block_remove_under_governance",
-    "end_line": 24,
+    "end_line": 30,
     "file": "crates/miyusocialmoderation/src/block.rs",
     "human": "Débloque un utilisateur ; WriteIntent KindMother.",
     "id": "miyusocialmoderation_tool_block_remove",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 19
+    "start_line": 25
   },
   {
     "do": "block_list_under_governance",
-    "end_line": 43,
+    "end_line": 53,
     "file": "crates/miyusocialmoderation/src/block.rs",
     "human": "Liste les utilisateurs bloqués.",
     "id": "miyusocialmoderation_tool_block_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 32
+    "start_line": 41
   },
   {
     "do": "post_delete_under_governance",
@@ -9938,83 +11205,83 @@
   },
   {
     "do": "report_create_under_governance",
-    "end_line": 11,
+    "end_line": 13,
     "file": "crates/miyusocialmoderation/src/report.rs",
     "human": "Crée un signalement ; WriteIntent KindMother.",
     "id": "miyusocialmoderation_tool_report_create",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 6
+    "start_line": 8
   },
   {
     "do": "report_list_under_governance",
-    "end_line": 38,
+    "end_line": 45,
     "file": "crates/miyusocialmoderation/src/report.rs",
     "human": "Liste les signalements.",
     "id": "miyusocialmoderation_tool_report_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 24
+    "start_line": 29
   },
   {
     "do": "follow_add_under_governance",
-    "end_line": 11,
+    "end_line": 12,
     "file": "crates/miyusocialprofile/src/follow.rs",
     "human": "Ajoute un abonnement (follow) ; WriteIntent KindMother.",
     "id": "miyusocialprofile_tool_follow_add",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 6
+    "start_line": 7
   },
   {
     "do": "follow_remove_under_governance",
-    "end_line": 24,
+    "end_line": 27,
     "file": "crates/miyusocialprofile/src/follow.rs",
     "human": "Supprime un abonnement ; WriteIntent KindMother.",
     "id": "miyusocialprofile_tool_follow_remove",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 19
+    "start_line": 22
   },
   {
     "do": "followers_list_under_governance",
-    "end_line": 37,
+    "end_line": 46,
     "file": "crates/miyusocialprofile/src/follow.rs",
     "human": "Liste les abonnés.",
     "id": "miyusocialprofile_tool_followers_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 32
+    "start_line": 41
   },
   {
     "do": "following_list_under_governance",
-    "end_line": 56,
+    "end_line": 67,
     "file": "crates/miyusocialprofile/src/follow.rs",
     "human": "Liste les abonnements.",
     "id": "miyusocialprofile_tool_following_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 45
+    "start_line": 55
   },
   {
     "do": "social_profile_get_under_governance",
-    "end_line": 12,
+    "end_line": 13,
     "file": "crates/miyusocialprofile/src/profile.rs",
     "human": "Récupère le profil social.",
     "id": "miyusocialprofile_tool_profile_get",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 7
+    "start_line": 8
   },
   {
     "do": "social_profile_update_under_governance",
-    "end_line": 35,
+    "end_line": 42,
     "file": "crates/miyusocialprofile/src/profile.rs",
     "human": "Met à jour le profil social ; WriteIntent KindMother.",
     "id": "miyusocialprofile_tool_profile_update",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 20
+    "start_line": 22
   },
   {
     "do": "store_identification",
@@ -10742,43 +12009,43 @@
   },
   {
     "do": "story_create_under_governance",
-    "end_line": 12,
+    "end_line": 14,
     "file": "crates/miyustory/src/story.rs",
     "human": "Crée une story ; WriteIntent KindMother.",
     "id": "miyustory_tool_story_create",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 7
+    "start_line": 9
   },
   {
     "do": "story_list_under_governance",
-    "end_line": 29,
+    "end_line": 36,
     "file": "crates/miyustory/src/story.rs",
     "human": "Liste les stories ; filtres fournis.",
     "id": "miyustory_tool_story_list",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 24
+    "start_line": 31
   },
   {
     "do": "story_get_under_governance",
-    "end_line": 45,
+    "end_line": 68,
     "file": "crates/miyustory/src/story.rs",
     "human": "Récupère une story.",
     "id": "miyustory_tool_story_get",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 40
+    "start_line": 63
   },
   {
     "do": "story_reaction_add_under_governance",
-    "end_line": 71,
+    "end_line": 109,
     "file": "crates/miyustory/src/story.rs",
     "human": "Ajoute une réaction à une story ; WriteIntent KindMother.",
     "id": "miyustory_tool_story_reaction_add",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 53
+    "start_line": 87
   },
   {
     "do": "markdown_render_under_governance",
@@ -10962,7 +12229,7 @@
   },
   {
     "do": "mws_address_tracker_default_under_governance",
-    "end_line": 17,
+    "end_line": 20,
     "file": "crates/miyuwebway_participant/src/address.rs",
     "human": "Résout l'adresse Tracker (port 21000) ; exécution seule ; déterministe.",
     "id": "miyuwebway_participant_mws_address_tracker_default",
@@ -10972,33 +12239,33 @@
   },
   {
     "do": "mws_cog_list_get_under_governance",
-    "end_line": 11,
+    "end_line": 12,
     "file": "crates/miyuwebway_participant/src/cog_list.rs",
     "human": "Lit la liste locale de COGs ; lecture.",
     "id": "miyuwebway_participant_mws_cog_list_get",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 7
+    "start_line": 8
   },
   {
     "do": "mws_cog_list_update_under_governance",
-    "end_line": 23,
+    "end_line": 25,
     "file": "crates/miyuwebway_participant/src/cog_list.rs",
     "human": "Met à jour une entrée dans la liste locale ; écriture liste locale.",
     "id": "miyuwebway_participant_mws_cog_list_update",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 19
+    "start_line": 21
   },
   {
     "do": "mws_cog_list_merge_under_governance",
-    "end_line": 41,
+    "end_line": 52,
     "file": "crates/miyuwebway_participant/src/cog_list.rs",
     "human": "Fusionne une liste reçue avec la liste locale ; règle fournie par Cores.",
     "id": "miyuwebway_participant_mws_cog_list_merge",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 31
+    "start_line": 35
   },
   {
     "do": "mws_declaration_build_under_governance",
@@ -11052,7 +12319,7 @@
   },
   {
     "do": "mws_discovery_request_send_under_governance",
-    "end_line": 29,
+    "end_line": 31,
     "file": "crates/miyuwebway_participant/src/discovery.rs",
     "human": "Envoie une requête de découverte ; Trackers fournis par Cores.",
     "id": "miyuwebway_participant_mws_discovery_request_send",
@@ -11062,7 +12329,7 @@
   },
   {
     "do": "mws_port_check_under_governance",
-    "end_line": 17,
+    "end_line": 14,
     "file": "crates/miyuwebway_participant/src/port.rs",
     "human": "Vérifie si un port est exclus MWS ; exécution seule ; déterministe.",
     "id": "miyuwebway_participant_mws_port_check",
@@ -11072,7 +12339,7 @@
   },
   {
     "do": "mws_transport_send_under_governance",
-    "end_line": 17,
+    "end_line": 19,
     "file": "crates/miyuwebway_participant/src/transport.rs",
     "human": "Envoie un message vers une adresse ; exécution seule ; adresse fournie par Cores.",
     "id": "miyuwebway_participant_mws_transport_send",
@@ -11212,23 +12479,23 @@
   },
   {
     "do": "web_layout_apply_under_governance",
-    "end_line": 17,
+    "end_line": 22,
     "file": "crates/miyuwidgets/src/layout.rs",
     "human": "Applique une modification de layout ; structure à partir de données fournies.",
     "id": "miyuwidgets_tool_web_layout_apply",
     "layer": "tool",
     "role": "mutator",
-    "start_line": 7
+    "start_line": 9
   },
   {
     "do": "web_template_resolve_under_governance",
-    "end_line": 17,
+    "end_line": 21,
     "file": "crates/miyuwidgets/src/template.rs",
     "human": "Résout un template par identifiant ; données fournies dans le flux.",
     "id": "miyuwidgets_tool_web_template_resolve",
     "layer": "tool",
     "role": "accessor",
-    "start_line": 7
+    "start_line": 8
   },
   {
     "do": "web_widget_text_render_under_governance",
@@ -11272,7 +12539,7 @@
   },
   {
     "do": "web_widget_container_render_under_governance",
-    "end_line": 65,
+    "end_line": 69,
     "file": "crates/miyuwidgets/src/widget.rs",
     "human": "Rend un conteneur (section/colonnes) ; données fournies dans le flux.",
     "id": "miyuwidgets_tool_web_widget_container_render",

@@ -16,6 +16,11 @@ use crate::config::OriginConfig;
 use crate::relay::session::SessionManager;
 use crate::tracker::pool::PoolManager;
 
+/// Nombre maximal de tentatives de login avant blocage temporaire.
+const MAX_LOGIN_ATTEMPTS: u32 = 5;
+/// Durée du blocage après trop de tentatives (secondes).
+const LOGIN_BLOCK_DURATION_SECS: u64 = 300;
+
 /// Configuration d'authentification admin (chargée depuis admin.toml).
 #[derive(Debug, Clone)]
 pub struct AdminAuthConfig {
@@ -27,11 +32,13 @@ pub struct AdminAuthConfig {
     pub session_ttl_seconds: u64,
 }
 
-/// État d'authentification admin : config + sessions actives.
+/// État d'authentification admin : config + sessions actives + rate limiting login.
 struct AdminAuthState {
     config: Option<AdminAuthConfig>,
     /// token -> expiration
     sessions: Mutex<HashMap<String, Instant>>,
+    /// IP -> (tentatives, dernière tentative, bloqué_jusqu'à)
+    login_attempts: Mutex<HashMap<std::net::IpAddr, (u32, Instant, Option<Instant>)>>,
 }
 
 /// Serveur d'administration.
@@ -53,6 +60,7 @@ impl AdminServer {
         let auth_state = Arc::new(AdminAuthState {
             config: Self::load_admin_auth_config(&config),
             sessions: Mutex::new(HashMap::new()),
+            login_attempts: Mutex::new(HashMap::new()),
         });
         Self {
             config,
@@ -134,7 +142,7 @@ impl AdminServer {
                     Ok(n) if n > 0 => {
                         let request = String::from_utf8_lossy(&buf[..n]).to_string();
                         let response =
-                            Self::handle_request(&request, &config, sessions.as_ref(), pools.as_ref(), &auth_state).await;
+                            Self::handle_request(&request, &config, sessions.as_ref(), pools.as_ref(), &auth_state, peer_addr).await;
                         let _ = stream.write_all(response.as_bytes()).await;
                     }
                     _ => {}
@@ -143,7 +151,7 @@ impl AdminServer {
         }
     }
 
-    /// Parse requête HTTP : méthode, chemin, cookie admin_session, body.
+    /// Parse requête HTTP : méthode, chemin, cookie admin_session, body, peer IP.
     fn parse_request(request: &str) -> (String, String, Option<String>, String) {
         let mut method = "GET".to_string();
         let mut path = "/".to_string();
@@ -181,6 +189,40 @@ impl AdminServer {
         (method, path, cookie_session, body)
     }
 
+    /// Vérifie si une IP est bloquée pour tentatives de login excessives.
+    async fn check_login_rate_limit(auth_state: &AdminAuthState, ip: std::net::IpAddr) -> bool {
+        let attempts = auth_state.login_attempts.lock().await;
+        if let Some((count, _, blocked_until)) = attempts.get(&ip) {
+            if let Some(until) = blocked_until {
+                if Instant::now() < *until {
+                    return false;
+                }
+            }
+            if *count >= MAX_LOGIN_ATTEMPTS {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// Enregistre une tentative de login échouée.
+    async fn record_failed_login(auth_state: &AdminAuthState, ip: std::net::IpAddr) {
+        let mut attempts = auth_state.login_attempts.lock().await;
+        let entry = attempts.entry(ip).or_insert((0, Instant::now(), None));
+        entry.0 += 1;
+        entry.1 = Instant::now();
+        if entry.0 >= MAX_LOGIN_ATTEMPTS {
+            entry.2 = Some(Instant::now() + Duration::from_secs(LOGIN_BLOCK_DURATION_SECS));
+            warn!("Admin login blocked for IP {} ({} failed attempts)", ip, entry.0);
+        }
+    }
+
+    /// Réinitialise les tentatives après un login réussi.
+    async fn reset_login_attempts(auth_state: &AdminAuthState, ip: std::net::IpAddr) {
+        let mut attempts = auth_state.login_attempts.lock().await;
+        attempts.remove(&ip);
+    }
+
     /// Vérifie que le token de session est valide (présent et non expiré).
     async fn is_session_valid(auth_state: &AdminAuthState, token: Option<&str>) -> bool {
         let token = match token {
@@ -202,17 +244,17 @@ impl AdminServer {
         "HTTP/1.1 302 Found\r\nLocation: /admin/login\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_string()
     }
 
-    /// Réponse redirect vers /admin avec Set-Cookie session.
+    /// Réponse redirect vers /admin avec Set-Cookie session (SameSite=Strict + Secure).
     fn redirect_with_session(token: &str, ttl_secs: u64) -> String {
         format!(
-            "HTTP/1.1 302 Found\r\nLocation: /admin/\r\nSet-Cookie: admin_session={}; HttpOnly; Path=/admin; Max-Age={}\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+            "HTTP/1.1 302 Found\r\nLocation: /admin/\r\nSet-Cookie: admin_session={}; HttpOnly; SameSite=Strict; Path=/admin; Max-Age={}\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
             token, ttl_secs
         )
     }
 
     /// Réponse redirect vers /admin/login avec cookie supprimé (logout).
     fn redirect_logout() -> String {
-        "HTTP/1.1 302 Found\r\nLocation: /admin/login\r\nSet-Cookie: admin_session=; HttpOnly; Path=/admin; Max-Age=0\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_string()
+        "HTTP/1.1 302 Found\r\nLocation: /admin/login\r\nSet-Cookie: admin_session=; HttpOnly; SameSite=Strict; Path=/admin; Max-Age=0\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_string()
     }
 
     /// Gère une requête.
@@ -222,6 +264,7 @@ impl AdminServer {
         sessions: Option<&Arc<SessionManager>>,
         pools: Option<&Arc<PoolManager>>,
         auth_state: &Arc<AdminAuthState>,
+        peer_addr: SocketAddr,
     ) -> String {
         let (method, path, cookie_session, body) = Self::parse_request(request);
 
@@ -238,7 +281,10 @@ impl AdminServer {
                 return Self::login_form_html(auth_state).await;
             }
             if method == "POST" {
-                return Self::login_post(config, body, auth_state).await;
+                if !Self::check_login_rate_limit(auth_state, peer_addr.ip()).await {
+                    return Self::http_response(429, "Too Many Requests", "Too many login attempts. Try again later.");
+                }
+                return Self::login_post(config, body, auth_state, peer_addr.ip()).await;
             }
         }
 
@@ -346,38 +392,46 @@ impl AdminServer {
         Self::http_response_html(200, "OK", &html)
     }
 
-    /// Traitement POST /login : vérification mot de passe, création session.
+    /// Traitement POST /login : vérification mot de passe, création session, rate limiting.
     async fn login_post(
         _config: &OriginConfig,
         body: String,
         auth_state: &Arc<AdminAuthState>,
+        client_ip: std::net::IpAddr,
     ) -> String {
         let auth_config = match &auth_state.config {
             Some(c) => c,
             None => {
-                return Self::http_response_html(403, "Forbidden", "<p>Admin non configuré (admin.toml manquant).</p>");
+                return Self::http_response_html(403, "Forbidden", "<p>Admin auth not configured.</p>");
             }
         };
 
         let email = Self::form_value(&body, "email");
         let password = Self::form_value(&body, "password");
 
-        if email.is_empty() || password.is_empty() {
+        if email.is_empty() || password.is_empty() || email.len() > 256 || password.len() > 256 {
+            Self::record_failed_login(auth_state, client_ip).await;
             return Self::redirect_to_login();
         }
 
         use argon2::password_hash::{PasswordHash, PasswordVerifier};
         let parsed_hash = match PasswordHash::new(&auth_config.password_hash) {
             Ok(h) => h,
-            Err(_) => return Self::redirect_to_login(),
+            Err(_) => {
+                Self::record_failed_login(auth_state, client_ip).await;
+                return Self::redirect_to_login();
+            }
         };
 
         if argon2::Argon2::default()
             .verify_password(password.as_bytes(), &parsed_hash)
             .is_err()
         {
+            Self::record_failed_login(auth_state, client_ip).await;
             return Self::redirect_to_login();
         }
+
+        Self::reset_login_attempts(auth_state, client_ip).await;
 
         let token: String = (0..32).map(|_| rand::random::<u8>()).map(|b| format!("{:02x}", b)).collect();
         let ttl = Duration::from_secs(auth_config.session_ttl_seconds);
@@ -705,27 +759,27 @@ impl AdminServer {
         Self::http_response_json(200, "OK", &json)
     }
 
-    /// Réponse HTTP texte.
+    /// Réponse HTTP texte (avec security headers).
     fn http_response(status: u16, status_text: &str, body: &str) -> String {
         format!(
-            "HTTP/1.1 {} {}\r\nContent-Type: text/plain\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+            "HTTP/1.1 {} {}\r\nContent-Type: text/plain\r\nContent-Length: {}\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: DENY\r\nConnection: close\r\n\r\n{}",
             status, status_text, body.len(), body
         )
     }
 
-    /// Réponse HTTP HTML.
+    /// Réponse HTTP HTML (avec security headers).
     fn http_response_html(status: u16, status_text: &str, body: &str) -> String {
         format!(
-            "HTTP/1.1 {} {}\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+            "HTTP/1.1 {} {}\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: DENY\r\nConnection: close\r\n\r\n{}",
             status, status_text, body.len(), body
         )
     }
 
-    /// Réponse HTTP JSON.
+    /// Réponse HTTP JSON (admin : pas de CORS, headers de sécurité).
     fn http_response_json(status: u16, status_text: &str, json: &serde_json::Value) -> String {
         let body = serde_json::to_string_pretty(json).unwrap_or_default();
         format!(
-            "HTTP/1.1 {} {}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\nAccess-Control-Allow-Origin: *\r\n\r\n{}",
+            "HTTP/1.1 {} {}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: DENY\r\nConnection: close\r\n\r\n{}",
             status, status_text, body.len(), body
         )
     }

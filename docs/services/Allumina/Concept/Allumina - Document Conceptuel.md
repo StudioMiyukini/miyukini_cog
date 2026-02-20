@@ -41,6 +41,10 @@ Le monde et le cadre narratif seront détaillés dans des documents dédiés (lo
 
 La frontière entre monde persistant partagé (type MMO light) et parties instanciées (type donjon/partie) sera précisée au game design ; le MWS permet les deux (un Lobby = une surface de connexion exposée par un COG).
 
+**Préférence cible** : monde unique type Ultima Online ; les contraintes techniques pourront imposer des instances (dungeons, guerres, maisons).  
+**Niveau de persistance des actions joueur** : économie globale, guerre, construction, pillage — selon les capacités du Lobby hôte.  
+**Nations** : entités NPC (les joueurs n'administrent pas les nations ; voir [Vision Gameplay et Ambition](./Allumina%20-%20Vision%20Gameplay%20et%20Ambition.md)).
+
 ---
 
 ## 3. Solo et multijoueur
@@ -114,6 +118,8 @@ Allumina peut être **lancé depuis Miyukini Central** (comme un service de la s
 | Document | Rôle |
 |----------|------|
 | [Allumina - Document Fondateur](../Allumina%20-%20Document%20Fondateur.md) | Vision service, MWS, Lois d'Autonomie. |
+| [Allumina - Vision Gameplay et Ambition](./Allumina%20-%20Vision%20Gameplay%20et%20Ambition.md) | Vision gameplay, métiers, progression, nations. |
+| [Allumina - Combat et Troupes](./Allumina%20-%20Combat%20et%20Troupes.md) | Troupes, échelles, ordres tactiques. |
 | [Allumina - Caractéristiques, Aptitudes et Compétences](./Allumina%20-%20Caracteristiques%20Aptitudes%20et%20Competences.md) | Caractéristiques, aptitudes de combat, compétences, plafonds. |
 | [MWS - Document Fondateur](../../../miyukini-webway-system/MWS%20-%20Document%20Fondateur.md) | Présence, découverte, Lobbys. |
 | [MWS - Lobbys, Favoris et Amis](../../../miyukini-webway-system/lobbys/MWS%20-%20Lobbys%20Favoris%20et%20Amis.md) | Lobbys publics/privés, surfaces, accord d'hôte. |

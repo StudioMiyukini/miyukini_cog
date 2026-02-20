@@ -1,0 +1,12 @@
+[package]
+name = "mge-plugin-audio"
+version = "0.1.0"
+edition = "2021"
+description = "MGE Core Pack — AudioSource, AudioListener"
+
+[dependencies]
+mge-ecs = { path = "../mge-ecs" }
+mge-event = { path = "../mge-event" }
+
+[lints.rust]
+unsafe_code = "forbid"

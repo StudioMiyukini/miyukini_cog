@@ -1,0 +1,11 @@
+[package]
+name = "mge-plugin-spatial"
+version = "0.1.0"
+edition = "2021"
+description = "MGE Core Pack — Position2D, Velocity2D, Rotation, SpatialHash"
+
+[dependencies]
+mge-ecs = { path = "../mge-ecs" }
+
+[lints.rust]
+unsafe_code = "forbid"

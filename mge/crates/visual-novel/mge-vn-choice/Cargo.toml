@@ -1,0 +1,12 @@
+﻿[package]
+name = "mge-vn-choice"
+version = "0.1.0"
+edition = "2021"
+description = "MGE visual_novel â€” choice module"
+
+[dependencies]
+mge-ecs = { path = "../../mge-ecs" }
+mge-event = { path = "../../mge-event" }
+
+[lints.rust]
+unsafe_code = "forbid"

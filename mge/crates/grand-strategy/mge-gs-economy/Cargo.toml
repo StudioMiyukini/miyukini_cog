@@ -1,0 +1,12 @@
+﻿[package]
+name = "mge-gs-economy"
+version = "0.1.0"
+edition = "2021"
+description = "MGE grand_strategy â€” economy module"
+
+[dependencies]
+mge-ecs = { path = "../../mge-ecs" }
+mge-event = { path = "../../mge-event" }
+
+[lints.rust]
+unsafe_code = "forbid"

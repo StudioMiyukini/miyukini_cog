@@ -242,7 +242,13 @@ impl RelayServer {
         let key = rustls_pemfile::private_key(&mut &*key_pem)?
             .ok_or("No private key found")?;
 
-        let tls_config = rustls::ServerConfig::builder()
+        let tls_versions: Vec<&'static rustls::SupportedProtocolVersion> =
+            match config.tls.min_version.as_str() {
+                "1.3" => vec![&rustls::version::TLS13],
+                _ => vec![&rustls::version::TLS12, &rustls::version::TLS13],
+            };
+
+        let tls_config = rustls::ServerConfig::builder_with_protocol_versions(&tls_versions)
             .with_no_client_auth()
             .with_single_cert(certs, key)?;
 
@@ -450,8 +456,13 @@ impl RelayServer {
 
                             // Traiter les trames
                             while let Some(frame) = Self::try_parse_frame(&mut read_buf, &metrics)? {
-                                // Vérifier le rate limit des messages
-                                let session_id_arr: [u8; 16] = session_id[..16].try_into().unwrap();
+                                let session_id_arr: [u8; 16] = match session_id[..16].try_into() {
+                                    Ok(arr) => arr,
+                                    Err(_) => {
+                                        warn!("Invalid session_id length from {}", peer_addr);
+                                        break;
+                                    }
+                                };
                                 if !rate_limiter.check_message(&session_id_arr).await.is_allowed() {
                                     warn!("Session {} rate limited", hex::encode(&session_id[..8]));
                                     break;
@@ -637,7 +648,7 @@ impl RelayServer {
                 metrics.record_registration(false);
                 let err = RegisterErrPayload::new(
                     RegisterErrorCode::InternalError,
-                    Bytes::from(format!("Parse error: {}", e)),
+                    Bytes::from_static(b"Invalid registration payload"),
                 );
                 return Some(Frame::new(MessageType::RegisterErr, err.to_bytes()));
             }

@@ -20,6 +20,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tracing::{debug, error, info, warn};
 
+use crate::relay::rate_limiter::{RateLimiter, RateLimiterConfig, RateLimitResult};
 use crate::relay::PermisRegistry;
 
 use super::catalog::Catalog;
@@ -47,8 +48,10 @@ pub struct TrackerServer {
     metrics: Arc<TrackerMetrics>,
     /// Registre des permis (partagé avec le Relay pour vérifier ANNOUNCE, R-011).
     permis_registry: Option<Arc<PermisRegistry>>,
-    /// Registre des slugs de sous-domaines COG (slug → cog_id).
+    /// Registre des slugs de sous-domaines COG (slug -> cog_id).
     slug_registry: Arc<SlugRegistry>,
+    /// Rate limiter pour les connexions Tracker.
+    rate_limiter: Arc<RateLimiter>,
 }
 
 impl TrackerServer {
@@ -64,6 +67,15 @@ impl TrackerServer {
         let catalog = Arc::new(Catalog::new(Arc::clone(&pool_manager)));
         let metrics = Arc::new(TrackerMetrics::new());
         let slug_registry = Arc::new(SlugRegistry::new());
+        let rate_limiter = Arc::new(RateLimiter::new(RateLimiterConfig {
+            max_connections_per_ip: 20,
+            max_messages_per_session: 100,
+            max_failed_registrations: 5,
+            window_seconds: 60,
+            block_duration_seconds: 300,
+            require_pow_for_temp: false,
+            pow_difficulty: 0,
+        }));
 
         Self {
             config,
@@ -72,6 +84,7 @@ impl TrackerServer {
             metrics,
             permis_registry,
             slug_registry,
+            rate_limiter,
         }
     }
 
@@ -129,24 +142,28 @@ impl TrackerServer {
 
     /// Démarre les tâches de maintenance.
     fn start_maintenance_tasks(&self) {
-        // Les COGs inactifs ne sont PAS supprimés du catalogue.
-        // Ils restent avec le statut "absent" (droit reconnu à la déconnexion).
-        // Seul un WITHDRAW explicite retire un COG du catalogue.
         let metrics = Arc::clone(&self.metrics);
+        let rate_limiter = Arc::clone(&self.rate_limiter);
 
         tokio::spawn(async move {
             loop {
-                // Maintenance périodique (logging, métriques, etc.)
                 tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
-                // Note: Les COGs absent sont conservés dans le catalogue
-                // et affichés avec le badge "Absent" sur la page web.
-                let _ = &metrics; // Garder la référence pour futures métriques
+                rate_limiter.cleanup().await;
+                let _ = &metrics;
             }
         });
     }
 
     /// Gère une nouvelle connexion.
     async fn handle_new_connection(&self, stream: TcpStream, peer_addr: SocketAddr) {
+        match self.rate_limiter.check_connection(peer_addr.ip()).await {
+            RateLimitResult::Allowed => {}
+            _ => {
+                warn!("Tracker rate limit exceeded for {}", peer_addr.ip());
+                self.metrics.record_connection_closed();
+                return;
+            }
+        }
         self.metrics.record_connection();
         debug!("Tracker connection from {}", peer_addr);
 

@@ -1,0 +1,10 @@
+[package]
+name = "mge-ecs"
+version = "0.1.0"
+edition = "2021"
+description = "MGE Kernel — World, EntityId, Component trait, SoA storage"
+
+[dependencies]
+
+[lints.rust]
+unsafe_code = "forbid"

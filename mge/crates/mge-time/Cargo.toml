@@ -1,0 +1,10 @@
+[package]
+name = "mge-time"
+version = "0.1.0"
+edition = "2021"
+description = "MGE Kernel — Time, delta, fixed timestep, time scale, pause"
+
+[dependencies]
+
+[lints.rust]
+unsafe_code = "forbid"

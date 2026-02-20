@@ -238,7 +238,7 @@ pub struct TlsConfig {
 }
 
 fn default_tls_version() -> String {
-    "1.2".to_string()
+    "1.3".to_string()
 }
 
 /// Configuration d'authentification.
@@ -493,7 +493,7 @@ impl Default for OriginConfig {
             relay: RelayConfig {
                 host: default_host(),
                 port: default_relay_port(),
-                strict_verification: false,
+                strict_verification: true,
             },
             tracker: TrackerConfig {
                 host: default_host(),
@@ -574,7 +574,7 @@ keys_dir = "/var/lib/miyukini/keys"
 [policies]
 data_dir = "/var/lib/miyukini/policies"
 "#;
-        let config: OriginConfig = toml::from_str(toml).unwrap();
+        let config: OriginConfig = toml::from_str(toml).expect("test config should parse");
         assert_eq!(config.identity.ip, "84.235.227.152");
         assert_eq!(config.relay.port, 7000);
     }
