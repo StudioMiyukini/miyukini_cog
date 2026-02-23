@@ -5,9 +5,12 @@
 use dioxus::prelude::*;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
+use crate::services::jaykoa::sync_service;
 use super::{UncSection, JayFestivalState};
 use super::components::{Badge, ActionButton, format_date_range};
 use jayfestival::data::Edition;
+
+const DEFAULT_PROFILE: &str = "default";
 
 fn opt_str(s: &Option<String>) -> String {
     s.clone().unwrap_or_default()
@@ -148,6 +151,7 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
     let conns = use_service_connections();
 
     let edition_id = state.read().selected_edition_id.clone();
+    let edition_id_clone = edition_id.clone();
 
     let edition = {
         let db = &conns.read().jayfestival;
@@ -360,7 +364,34 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
                 }
             }
 
-            // CTA
+            // Ajouter au calendrier
+            section {
+                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 24px; margin-bottom: 24px; text-align: center;",
+
+                p {
+                    style: "font-size: 14px; color: {c.text_secondary}; margin-bottom: 12px;",
+                    "Ajoutez cet evenement a votre agenda"
+                }
+
+                ActionButton {
+                    label: "Ajouter a mon agenda".to_string(),
+                    icon: "📅".to_string(),
+                    accent: false,
+                    onclick: move |_| {
+                        if let Some(ref id) = edition_id_clone {
+                            let conns_ref = conns.read();
+                            let _ = sync_service::JayFestivalSync::sync_single_edition(
+                                &conns_ref.jaykoa,
+                                &conns_ref.jayfestival,
+                                DEFAULT_PROFILE,
+                                id,
+                            );
+                        }
+                    },
+                }
+            }
+
+            // CTA Exposant
             section {
                 style: "background: {c.bg_secondary}; border-radius: 8px; padding: 24px; text-align: center;",
 

@@ -489,4 +489,29 @@ mod tests {
             .sum();
         assert_eq!(total_systems, 3);
     }
+
+    #[test]
+    fn test_remove_component() {
+        let mut world = World::new();
+        let e = world.spawn();
+        world.insert(e, Health(100));
+        world.insert(e, Counter(5));
+        assert!(world.has_component::<Health>(e));
+        assert!(world.has_component::<Counter>(e));
+
+        world.remove_component::<Health>(e);
+        assert!(!world.has_component::<Health>(e));
+        assert!(world.has_component::<Counter>(e));
+        assert!(world.is_alive(e));
+        assert!(world.get::<Health>(e).is_none());
+        assert_eq!(world.get::<Counter>(e).unwrap().0, 5);
+
+        world.remove_component::<Counter>(e);
+        assert!(!world.has_component::<Counter>(e));
+        assert!(world.is_alive(e));
+
+        // remove on dead entity is no-op
+        world.despawn(e);
+        world.remove_component::<Health>(e);
+    }
 }

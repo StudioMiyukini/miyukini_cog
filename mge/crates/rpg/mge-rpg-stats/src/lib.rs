@@ -1,4 +1,4 @@
-﻿//! @id mge.rpg.stats.v1
+//! @id mge.rpg.stats.v1
 //! @role plugin
 //! @layer plugin
 //! @domain rpg
@@ -10,3 +10,4 @@ pub mod events;
 
 pub use components::*;
 pub use events::*;
+pub use systems::health_regen_system;

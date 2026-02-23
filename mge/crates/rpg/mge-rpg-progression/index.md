@@ -1,15 +1,18 @@
-﻿Plugin: mge-rpg-progression
+Plugin: mge-rpg-progression
 Version: v1
 Domain: rpg
 
 Components:
-- (Ã  dÃ©finir)
+- SkillSet (skills: Vec<SkillValue>)
+- SkillValue (id, base, gain_factor, lock)
+- SkillLock (Up, Down, Locked)
 
 Systems:
-- (Ã  implÃ©menter)
+- skill_gain_system (Phase 300)
 
 Events:
-- (Ã  dÃ©finir)
+- SkillCheckEvent (entity, skill_id, difficulty, success)
+- SkillGainEvent (entity, skill_id, old_value, new_value)
 
 Hot path: no
 Headless safe: yes

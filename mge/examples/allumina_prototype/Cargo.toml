@@ -2,37 +2,31 @@
 name = "allumina_prototype"
 version = "0.1.0"
 edition = "2021"
-description = "MGE Example — Multi-pack (RPG + Social + Narrative)"
+description = "Allumina MVP — Sandbox RPG solo (MGE)"
 
 [[bin]]
 name = "allumina_prototype"
 path = "src/main.rs"
 
 [dependencies]
+# Fenêtre et rendu
+winit = "0.29"
+wgpu = "24"
+pollster = "0.3"
+bytemuck = { version = "1.14", features = ["derive"] }
+# Erreurs
+anyhow = "1"
+# Logs
+env_logger = "0.10"
+log = "0.4"
+# Utilitaires
+image = "0.25"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+fontdue = "0.9"
+# MGE
 mge-core = { path = "../../crates/mge-core" }
+mge-ecs = { path = "../../crates/mge-ecs" }
+mge-event = { path = "../../crates/mge-event" }
+mge-rng = { path = "../../crates/mge-rng" }
 mge-plugin-spatial = { path = "../../crates/mge-plugin-spatial" }
-mge-plugin-input = { path = "../../crates/mge-plugin-input" }
-mge-plugin-render-2d = { path = "../../crates/mge-plugin-render-2d" }
-mge-plugin-basic-physics = { path = "../../crates/mge-plugin-basic-physics" }
-mge-plugin-audio = { path = "../../crates/mge-plugin-audio" }
-mge-plugin-save-load = { path = "../../crates/mge-plugin-save-load" }
-# RPG pack
-mge-rpg-stats = { path = "../../crates/rpg/mge-rpg-stats" }
-mge-rpg-combat = { path = "../../crates/rpg/mge-rpg-combat" }
-mge-rpg-inventory = { path = "../../crates/rpg/mge-rpg-inventory" }
-mge-rpg-quest = { path = "../../crates/rpg/mge-rpg-quest" }
-mge-rpg-progression = { path = "../../crates/rpg/mge-rpg-progression" }
-mge-rpg-dialogue = { path = "../../crates/rpg/mge-rpg-dialogue" }
-mge-rpg-ai = { path = "../../crates/rpg/mge-rpg-ai" }
-# Social pack
-mge-social-relationship = { path = "../../crates/social/mge-social-relationship" }
-mge-social-faction = { path = "../../crates/social/mge-social-faction" }
-mge-social-reputation = { path = "../../crates/social/mge-social-reputation" }
-mge-social-need = { path = "../../crates/social/mge-social-need" }
-mge-social-schedule = { path = "../../crates/social/mge-social-schedule" }
-mge-social-personality = { path = "../../crates/social/mge-social-personality" }
-# Narrative (Visual Novel partiel)
-mge-vn-script = { path = "../../crates/visual-novel/mge-vn-script" }
-mge-vn-character = { path = "../../crates/visual-novel/mge-vn-character" }
-mge-vn-choice = { path = "../../crates/visual-novel/mge-vn-choice" }
-mge-vn-branch = { path = "../../crates/visual-novel/mge-vn-branch" }

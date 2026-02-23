@@ -118,6 +118,17 @@ impl World {
         }
     }
 
+    /// Retire un composant de type T d'une entité vivante.
+    pub fn remove_component<T: Component>(&mut self, id: EntityId) {
+        if !self.is_alive(id) {
+            return;
+        }
+        let type_id = TypeId::of::<T>();
+        if let Some(&idx) = self.type_index.get(&type_id) {
+            self.storages[idx].remove(id);
+        }
+    }
+
     /// Vérifie si une entité possède un composant de type T.
     pub fn has_component<T: Component>(&self, id: EntityId) -> bool {
         if !self.is_alive(id) {

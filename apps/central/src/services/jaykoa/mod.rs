@@ -206,63 +206,15 @@ pub fn JayKoaView() -> Element {
                 },
                 on_sync_jayfestival: move |()| {
                     koa_state.write().syncing_jayfestival = true;
-                    // Lancer la synchronisation JayFestival
-                    let conns = conns.read();
-                    let db = &conns.jaykoa;
-                    // Trouver ou créer l'agenda JayFestival
-                    let agendas = db.agendas_by_profile(DEFAULT_PROFILE).unwrap_or_default();
-                    let jf_agenda = agendas.iter().find(|a| a.source_service.as_deref() == Some("jayfestival"));
-                    let target_id = if let Some(a) = jf_agenda {
-                        a.id.clone().unwrap_or_default()
-                    } else {
-                        // Créer l'agenda JayFestival
-                        let id = uuid::Uuid::new_v4().to_string();
-                        let now = chrono::Local::now().format("%Y-%m-%dT%H:%M:%S").to_string();
-                        let agenda = jaykoa::data::Agenda {
-                            id: Some(id.clone()),
-                            profile_id: Some(DEFAULT_PROFILE.to_string()),
-                            name: Some("JayFestival".to_string()),
-                            description: Some("Événements synchronisés depuis JayFestival".to_string()),
-                            color: Some("#E67C73".to_string()),
-                            calendar_type: Some("synced_service".to_string()),
-                            visible: true,
-                            is_default: false,
-                            source_service: Some("jayfestival".to_string()),
-                            created_at: Some(now.clone()),
-                            updated_at: Some(now),
-                        };
-                        let _ = db.agenda_insert(&agenda);
-                        id
-                    };
-                    // Synchroniser les éditions
-                    // Note: sync_editions attends un Arc, mais nous avons déjà un Arc via conns
-                    // Pour l'instant, on crée les entrées mock directement
-                    let now = chrono::Local::now().format("%Y-%m-%dT%H:%M:%S").to_string();
-                    let mock_entries = vec![
-                        ("fest_ed_2026_printemps", "Festival Printemps 2026", "2026-03-15", "2026-03-17", "Parc des Expositions"),
-                        ("fest_ed_2026_ete", "Festival Été 2026", "2026-07-01", "2026-07-03", "Esplanade du Lac"),
-                    ];
-                    for (sid, title, start, end, loc) in mock_entries {
-                        let entry = jaykoa::data::TemporalEntry {
-                            id: Some(uuid::Uuid::new_v4().to_string()),
-                            agenda_id: Some(target_id.clone()),
-                            title: Some(title.to_string()),
-                            description: Some(format!("Édition JayFestival : {title}")),
-                            start_datetime: Some(format!("{start}T00:00:00")),
-                            end_datetime: Some(format!("{end}T23:59:59")),
-                            all_day: true,
-                            location: Some(loc.to_string()),
-                            status: Some("confirmed".to_string()),
-                            entry_type: Some("reflect_jayfestival".to_string()),
-                            source_service: Some("jayfestival".to_string()),
-                            source_event_id: Some(sid.to_string()),
-                            color: Some("#E67C73".to_string()),
-                            created_at: Some(now.clone()),
-                            updated_at: Some(now.clone()),
-                            last_synced_at: Some(now.clone()),
-                            ..Default::default()
-                        };
-                        let _ = db.reflect_upsert(&entry);
+                    // Lancer la synchronisation JayFestival (sync réelle via sync_service)
+                    let conns_ref = conns.read();
+                    let result = sync_service::JayFestivalSync::sync_all(
+                        &conns_ref.jaykoa,
+                        &conns_ref.jayfestival,
+                        DEFAULT_PROFILE,
+                    );
+                    if !result.errors.is_empty() {
+                        tracing::warn!("Sync JayFestival: {} erreur(s), {} éditions sync", result.errors.len(), result.synced_count);
                     }
                     koa_state.write().syncing_jayfestival = false;
                 },

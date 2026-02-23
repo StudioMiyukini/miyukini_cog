@@ -10,3 +10,4 @@ pub mod events;
 
 pub use components::*;
 pub use events::*;
+pub use systems::SpatialGrid;

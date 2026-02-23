@@ -1,16 +1,18 @@
-﻿Plugin: mge-rpg-ai
+Plugin: mge-rpg-ai
 Version: v1
 Domain: rpg
 
 Components:
-- (Ã  dÃ©finir)
+- CreatureState (enum: Idle, Chase, Attack, Return)
+- AIState (state, spawn_point, aggro_radius, leash_radius, target, attack_range)
+- AiTargetable (marker)
 
 Systems:
-- (Ã  implÃ©menter)
+- ai_tick_system (phase 500)
 
 Events:
-- (Ã  dÃ©finir)
+- AiAttackRequestEvent (attacker, target)
 
-Hot path: no
+Hot path: yes
 Headless safe: yes
-AI-Native Score: 0/10
+AI-Native Score: 8/10

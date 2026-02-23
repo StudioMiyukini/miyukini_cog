@@ -7,6 +7,7 @@
 //! @do represent_opaque_entity_identifier
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EntityId {
     index: u32,
     generation: u32,

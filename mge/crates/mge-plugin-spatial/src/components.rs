@@ -8,6 +8,7 @@ use mge_ecs::Component;
 /// @id mge.plugin.spatial.v1.component.position2d
 /// @fields x:f32,y:f32
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Position2D {
     pub x: f32,
     pub y: f32,

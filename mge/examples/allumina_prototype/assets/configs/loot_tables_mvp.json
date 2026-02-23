@@ -1,0 +1,33 @@
+{
+  "loot_tables": {
+    "rat_loot": [
+      { "item_type_id": 1000, "probability": 0.8, "count_min": 1, "count_max": 5 },
+      { "item_type_id": 203, "probability": 0.3, "count_min": 1, "count_max": 1 }
+    ],
+    "wolf_loot": [
+      { "item_type_id": 1000, "probability": 0.9, "count_min": 2, "count_max": 12 },
+      { "item_type_id": 203, "probability": 0.5, "count_min": 1, "count_max": 2 },
+      { "item_type_id": 205, "probability": 0.2, "count_min": 1, "count_max": 2 }
+    ],
+    "goblin_loot": [
+      { "item_type_id": 1000, "probability": 1.0, "count_min": 5, "count_max": 20 },
+      { "item_type_id": 201, "probability": 0.4, "count_min": 1, "count_max": 3 },
+      { "item_type_id": 301, "probability": 0.1, "count_min": 1, "count_max": 1 }
+    ],
+    "bandit_loot": [
+      { "item_type_id": 1000, "probability": 1.0, "count_min": 10, "count_max": 35 },
+      { "item_type_id": 301, "probability": 0.15, "count_min": 1, "count_max": 1 },
+      { "item_type_id": 305, "probability": 0.1, "count_min": 1, "count_max": 1 }
+    ],
+    "troll_loot": [
+      { "item_type_id": 1000, "probability": 1.0, "count_min": 25, "count_max": 50 },
+      { "item_type_id": 204, "probability": 0.5, "count_min": 1, "count_max": 2 },
+      { "item_type_id": 306, "probability": 0.12, "count_min": 1, "count_max": 1 }
+    ],
+    "troll_boss_loot": [
+      { "item_type_id": 1000, "probability": 1.0, "count_min": 100, "count_max": 250 },
+      { "item_type_id": 307, "probability": 0.4, "count_min": 1, "count_max": 1 },
+      { "item_type_id": 306, "probability": 0.35, "count_min": 1, "count_max": 1 }
+    ]
+  }
+}

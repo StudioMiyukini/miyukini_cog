@@ -1,12 +1,16 @@
-﻿[package]
+[package]
 name = "mge-rpg-inventory"
 version = "0.1.0"
 edition = "2021"
 description = "MGE rpg â€” inventory module"
 
+[features]
+serde = ["dep:serde", "mge-ecs/serde"]
+
 [dependencies]
 mge-ecs = { path = "../../mge-ecs" }
 mge-event = { path = "../../mge-event" }
+serde = { version = "1", features = ["derive"], optional = true }
 
 [lints.rust]
 unsafe_code = "forbid"

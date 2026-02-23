@@ -12,9 +12,11 @@
 | [**Analyse approfondie Catakana Orga**](./JayFestival%20-%20Analyse%20Approfondie%20Catakana%20Orga.md) | **[NOUVEAU]** Analyse exhaustive du proto-service Catakana Orga (72 pages) : stack technique complète, modèles de données, UI/UX Atomic Design, fonctionnalités par module, parcours utilisateur, recommandations d'adaptation Rust/Dioxus, priorisation implémentation. |
 | [Structure par public cible](./publics/_index.md) | Documentation organisée par type de public : **Organisateurs**, **Exposants**, **Visiteurs**, **Utilisateur non connecté**. |
 | [Référence — Interpolarité](./reference/JayFestival%20-%20Interpolarite%20Services%20Jay.md) | Couplages JayFestival avec JayXpose, JayFaim, JayKoa, JayKonta ; rôle de JayFestival dans chaque couplage. |
+| [**Référence — Connexions et synchronisation**](./reference/JayFestival%20-%20Connexions%20Synchronisation%20Services%20Jay.md) | **Dépendances Cargo, liaisons métier, bornes, implémentation sync JayKoa, sync JayXpose et annuaire exposants** ; chemins de code. |
 | [Référence — État documentation services interfacés](./reference/JayFestival%20-%20Etat%20Documentation%20Services%20Interfaces.md) | Audit doc de chaque service interfacé (Jay, Miyu*, Cores) pour implémentation complète UI ; manques ; ambiguïtés et choix humains à trancher. |
 | [Audit documentation Catakana](./JayFestival%20-%20Audit%20Documentation%20Catakana.md) | Audit qualité doc vs projet Catakana ; métriques, manques, recommandations. |
 | [Bornage implémentation](./JayFestival%20-%20Bornage%20Implementation.md) | Périmètre MVP / phase 2, hors scope, dépendances, critères de livraison. |
+| [**Documentation de l'implémentation**](./JayFestival%20-%20Implementation.md) | **Architecture actuelle, structure du code (crate + UI Central), flux de données, points d'entrée, état des tests.** |
 | [Plan d'implémentation exhaustif](./JayFestival%20-%20Plan%20Implementation.md) | Plan d'implémentation JayFestival et services dépendants : phases, nomenclature [xx]-[fichier], MSCM, todo list (protocoles Implémentation générale et MIP v1). |
 | [Référence UI — Transcription Catakana](./JayFestival%20-%20Reference%20UI%20Transcription%20Catakana.md) | UI complète Catakana retranscrite dans la stack actuelle : Atomic, thème, ui-kit, écrans (Dioxus). |
 | [Spécification UI conforme Catakana](./JayFestival%20-%20Specification%20UI%20Conforme%20Catakana.md) | Spec normative : protocoles d'implémentation, atoms/molecules/organisms détaillés, parcours par écran (composants ordonnés), checklist conformité. |
@@ -42,7 +44,7 @@ JayFestival s’intègre avec les services Jay suivants :
 | **JayKoa** | Agenda agrégé ; éditions, participations, conflits de dates. |
 | **JayKonta** | Budget édition, devis et factures exposants. |
 
-**Référence** : [JayFestival - Interpolarite Services Jay](./reference/JayFestival%20-%20Interpolarite%20Services%20Jay.md) ; [Miyukini Conceptual References - Interpolarite Services Jay](../../reference/Miyukini%20Conceptual%20References%20-%20Interpolarite%20Services%20Jay.md).
+**Référence** : [JayFestival - Interpolarite Services Jay](./reference/JayFestival%20-%20Interpolarite%20Services%20Jay.md) ; [JayFestival - Connexions Synchronisation Services Jay](./reference/JayFestival%20-%20Connexions%20Synchronisation%20Services%20Jay.md) ; [Miyukini Conceptual References - Interpolarite Services Jay](../../reference/Miyukini%20Conceptual%20References%20-%20Interpolarite%20Services%20Jay.md).
 
 ## Voir aussi
 

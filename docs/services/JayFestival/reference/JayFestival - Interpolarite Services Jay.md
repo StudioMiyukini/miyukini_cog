@@ -93,8 +93,10 @@ Pour une **implémentation complète incluant l’UI**, l’état de la document
 
 ## 7. Voir aussi
 
+- [JayFestival - Connexions Synchronisation Services Jay](./JayFestival%20-%20Connexions%20Synchronisation%20Services%20Jay.md) — **dépendances Cargo, liaisons métier, bornes, implémentation sync JayKoa, sync JayXpose et annuaire exposants**.
 - [Miyukini Conceptual References - Interpolarite Services Jay](../../../reference/Miyukini%20Conceptual%20References%20-%20Interpolarite%20Services%20Jay.md) — principe global et tableau des documents fondateurs.
-- [JayFestival - Document Fondateur](../JayFestival%20-%20Document%20Fondateur.md) — raison d’être, vision, macro, distribution.
+- [JayFestival - Document Fondateur](../JayFestival%20-%20Document%20Fondateur.md) — raison d'être, vision, macro, distribution.
+- [JayXpose - Synchronisation JayFestival](../../JayXpose/JayXpose%20-%20Synchronisation%20JayFestival.md) — contrat d'intégration JayXpose ↔ JayFestival (données partagées, flux candidature, annuaire).
 
 ---
 

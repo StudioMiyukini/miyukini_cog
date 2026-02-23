@@ -96,6 +96,79 @@ impl JayFestivalSync {
         
         result
     }
+
+    /// Synchronise une seule édition vers l'agenda JayKoa (pour le flux « Ajouter au calendrier »).
+    pub fn sync_single_edition(
+        koa_db: &Arc<JayKoaDb>,
+        festival_db: &Arc<JayFestivalDb>,
+        profile_id: &str,
+        edition_id: &str,
+    ) -> SyncResult {
+        let mut result = SyncResult {
+            synced_count: 0,
+            errors: Vec::new(),
+        };
+        let agenda_id = match ensure_jayfestival_agenda(koa_db, profile_id) {
+            Ok(id) => id,
+            Err(e) => {
+                result.errors.push(format!("Impossible de créer l'agenda JayFestival: {e}"));
+                return result;
+            }
+        };
+        let edition = match festival_db.edition_by_id(edition_id) {
+            Ok(Some(e)) => e,
+            Ok(None) => {
+                result.errors.push(format!("Édition {edition_id} introuvable"));
+                return result;
+            }
+            Err(e) => {
+                result.errors.push(format!("Erreur lecture édition: {e}"));
+                return result;
+            }
+        };
+        let Some(name) = &edition.name else {
+            result.errors.push("Édition sans nom".to_string());
+            return result;
+        };
+        let Some(start_date) = &edition.start_date else {
+            result.errors.push(format!("Édition {name} sans date de début"));
+            return result;
+        };
+        let Some(end_date) = &edition.end_date else {
+            result.errors.push(format!("Édition {name} sans date de fin"));
+            return result;
+        };
+        let now = Local::now().format("%Y-%m-%dT%H:%M:%S").to_string();
+        let entry = TemporalEntry {
+            id: Some(uuid::Uuid::new_v4().to_string()),
+            agenda_id: Some(agenda_id),
+            title: Some(name.clone()),
+            description: Some(format!("Édition JayFestival : {name}")),
+            start_datetime: Some(format!("{start_date}T00:00:00")),
+            end_datetime: Some(format!("{end_date}T23:59:59")),
+            all_day: true,
+            location: edition.location.clone(),
+            status: Some(match edition.status.as_deref() {
+                Some("termine" | "annule") => TemporalStatus::Cancelled.as_str(),
+                _ => TemporalStatus::Confirmed.as_str(),
+            }.to_string()),
+            entry_type: Some(EntryType::ReflectJayFestival.as_str().to_string()),
+            source_service: Some(EventSource::JayFestival.as_str().to_string()),
+            source_event_id: Some(edition_id.to_string()),
+            color: Some(EventSource::JayFestival.default_color().to_string()),
+            recurrence_rule: None,
+            reminders_json: None,
+            created_at: Some(now.clone()),
+            updated_at: Some(now),
+            last_synced_at: Some(now),
+        };
+        if let Err(e) = koa_db.reflect_upsert(&entry) {
+            result.errors.push(format!("Erreur sync édition {name}: {e}"));
+        } else {
+            result.synced_count = 1;
+        }
+        result
+    }
     
     /// Synchronise les participations d'un exposant vers JayKoa.
     pub fn sync_exposant_participations(

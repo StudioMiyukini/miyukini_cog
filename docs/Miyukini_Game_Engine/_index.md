@@ -36,6 +36,7 @@ Le MGE est le moteur généraliste 2D de l'écosystème Miyukini COG. Il adopte 
 | [MGE - Intégration COG](./MGE%20-%20Integration%20COG.md) | CogService, lancement depuis Central, stop, isolation |
 | [MGE - MSCM & MIP Governance](./MGE%20-%20MSCM%20MIP%20Governance.md) | Balisage MSCM, politique d'ID, intégrité, pipeline MIP |
 | [MGE - Performance Philosophy](./MGE%20-%20Performance%20Philosophy.md) | SoA, batch, spatial hash, cache locality, profiling |
+| [MGE - Rendu 2D Isometrique Robuste](./MGE%20-%20Rendu%202D%20Isometrique%20Robuste.md) | Pipeline isometrique robuste (pivot, Y-sort, texte, pixel-perfect, perf) |
 | [MGE - Roadmap](./MGE%20-%20Roadmap.md) | Phases 1 à 5 progressives |
 
 ---

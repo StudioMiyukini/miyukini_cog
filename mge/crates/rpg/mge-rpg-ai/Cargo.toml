@@ -1,12 +1,15 @@
-﻿[package]
+[package]
 name = "mge-rpg-ai"
 version = "0.1.0"
 edition = "2021"
 description = "MGE rpg â€” ai module"
 
 [dependencies]
+mge-core = { path = "../../mge-core" }
 mge-ecs = { path = "../../mge-ecs" }
 mge-event = { path = "../../mge-event" }
+mge-plugin-spatial = { path = "../../mge-plugin-spatial" }
+mge-rpg-stats = { path = "../mge-rpg-stats" }
 
 [lints.rust]
 unsafe_code = "forbid"

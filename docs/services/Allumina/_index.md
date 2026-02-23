@@ -31,11 +31,26 @@ Les documents **conceptuels** décrivent la vision jeu, le genre (Action RPG), l
 | [Allumina - Compétences et Enseignement](./Concept/Allumina%20-%20Competences%20et%20Enseignement.md) | Usage+enseignement, pas d'XP, PNJ vs joueur |
 | [Allumina - Caractéristiques, Aptitudes et Compétences](./Concept/Allumina%20-%20Caracteristiques%20Aptitudes%20et%20Competences.md) | Caractéristiques (Force à Chance), aptitudes de combat, compétences, plafonds |
 
-## Prototype
+## Prototype et MVP
 
 | Document | Rôle |
 |----------|------|
-| [Allumina - Prototype Premier Playable](./Allumina%20-%20Prototype%20Premier%20Playable.md) | MVP : 2 joueurs, sync troupes+monstres, co-op PvE |
+| [Allumina - Prototype Premier Playable](./Allumina%20-%20Prototype%20Premier%20Playable.md) | Proto initial : 2 joueurs, sync troupes+monstres, co-op PvE |
+| [Allumina - MVP Sandbox](./Allumina%20-%20MVP%20Sandbox.md) | MVP strict 3–6 mois : 13 systèmes, 50–200 joueurs, boucle combat+troupes+craft+trade, plan d'implémentation par phases |
+
+## Analyse technique (références ARPG)
+
+| Document | Rôle |
+|----------|------|
+| [Allumina - Analyse Technique Diablo II pour MGE](./Allumina%20-%20Analyse%20Technique%20Diablo%20II%20pour%20MGE.md) | Reverse-engineering des systèmes D2 (déplacement, IA, spawn, projectiles, followers) et transposition MGE |
+| [Allumina - Extraction Systèmes D2 OpenDiablo2 pour MGE](./Allumina%20-%20Extraction%20Systemes%20D2%20OpenDiablo2%20pour%20MGE.md) | Extraction exhaustive des 10 systèmes D2 (code OpenDiablo2, formules exactes, structures de données, propositions ECS MGE) |
+| [Allumina - Extraction Architecture UO pour MGE](./Allumina%20-%20Extraction%20Architecture%20UO%20pour%20MGE.md) | Reverse-engineering UO (ServUO, ModernUO, ClassicUO, UOX3) : housing, skills, craft, economy, persistence, réseau, adaptation MGE |
+
+## Blueprint moteur
+
+| Document | Rôle |
+|----------|------|
+| [Allumina - Blueprint Moteur Sandbox MGE](./Allumina%20-%20Blueprint%20Moteur%20Sandbox%20MGE.md) | Architecture moteur complète : 8 engines Allumina (Territorial, Progression, Écologique, Production, Régional, Scheduler, Persistence, Network), économie vivante, simulation écologique, Timer Wheel, blueprint modules, configs, cluster MMO |
 
 ---
 
