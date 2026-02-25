@@ -6,6 +6,7 @@ use crate::audio;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use crate::theme::styles;
+#[cfg(feature = "service-miyukiniwatch")]
 use miyukiniwatch::MiyukiniWatchCollector;
 use uuid::Uuid;
 
@@ -71,12 +72,13 @@ pub fn Connexion() -> Element {
 
                 // MiyukiniWatch : session démarrée
                 let session_id = Uuid::new_v4().to_string();
-                let db = connections.read().miyukiniwatch.clone();
-                let collector = MiyukiniWatchCollector::new(db);
-                if let Err(e) = collector.record_session_start(&profile.id, &session_id) {
-                    tracing::debug!("MiyukiniWatch record_session_start: {}", e);
-                } else {
-                    if let Ok(Some(total)) = connections.read().miyukiniwatch.get_global(&profile.id, "total_sessions") {
+                #[cfg(feature = "service-miyukiniwatch")]
+                {
+                    let db = connections.read().miyukiniwatch.clone();
+                    let collector = MiyukiniWatchCollector::new(db);
+                    if let Err(e) = collector.record_session_start(&profile.id, &session_id) {
+                        tracing::debug!("MiyukiniWatch record_session_start: {}", e);
+                    } else if let Ok(Some(total)) = connections.read().miyukiniwatch.get_global(&profile.id, "total_sessions") {
                         let _ = connections.read().miyukiniwatch.set_global(&profile.id, "total_sessions", total + 1);
                     } else {
                         let _ = connections.read().miyukiniwatch.set_global(&profile.id, "total_sessions", 1);

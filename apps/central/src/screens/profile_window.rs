@@ -4,6 +4,7 @@ use dioxus::prelude::*;
 use crate::data::{use_service_connections, profile_display_name};
 use crate::state::use_app_state;
 use crate::theme::{Theme, styles};
+#[cfg(feature = "service-miyukiniwatch")]
 use miyukiniwatch::MiyukiniWatchCollector;
 
 #[component]
@@ -25,6 +26,7 @@ pub fn ProfileWindow() -> Element {
 
     let on_reset_cog = move |_| {
         // MiyukiniWatch : session terminée avant reset
+        #[cfg(feature = "service-miyukiniwatch")]
         if let (Some(profile_id), Some(session_id)) = (
             state.read().current_user.as_ref().map(|u| u.id.clone()),
             state.read().miyukiniwatch_session_id.clone(),

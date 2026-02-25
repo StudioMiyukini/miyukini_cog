@@ -41,6 +41,7 @@ members = [
     "crates/miyumedia",
     "crates/miyushipping",
     "crates/miyustore",
+    "crates/miyumarket",
     "crates/miyuwidgets",
     "crates/miyuinvoice",
     "crates/miyucptaledger",

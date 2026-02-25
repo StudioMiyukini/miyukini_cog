@@ -4,6 +4,7 @@ use dioxus::prelude::*;
 use crate::data::use_service_connections;
 use crate::state::{use_app_state, ServiceInfo};
 use crate::theme::styles;
+#[cfg(feature = "service-miyukiniwatch")]
 use miyukiniwatch::MiyukiniWatchCollector;
 
 #[derive(Props, Clone, PartialEq)]
@@ -28,6 +29,7 @@ pub fn ServiceCard(props: ServiceCardProps) -> Element {
             onclick: move |_| {
                 state.write().open_service(&service_for_click);
                 // MiyukiniWatch : service ouvert (sauf pour miyukiniwatch lui-même)
+                #[cfg(feature = "service-miyukiniwatch")]
                 if service_for_click.id != "miyukiniwatch" {
                     if let (Some(profile_id), Some(session_id)) = (
                         state.read().current_user.as_ref().map(|u| u.id.clone()),

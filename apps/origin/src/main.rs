@@ -187,7 +187,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-    // Créer le serveur web (avec le slug_registry et relay pour Phase 2, forum auth si configuré)
+    // Service Market (catalogue + packages)
+    let data_dir = config.registry.data_dir.clone();
+    let market_store: Option<Arc<web::MarketStore>> = {
+        let db_path = std::path::Path::new(&data_dir).join("market.db");
+        let packages_dir = std::path::Path::new(&data_dir).join("packages");
+        match web::MarketStore::open(&db_path, &packages_dir) {
+            Ok(store) => {
+                info!("Service Market activé (/api/market/*) — base: {}", db_path.display());
+                Some(Arc::new(store))
+            }
+            Err(e) => {
+                error!("Service Market: impossible d'initialiser: {}", e);
+                None
+            }
+        }
+    };
+
+    // Créer le serveur web (avec le slug_registry et relay pour Phase 2, forum auth si configuré, market)
     let web_server = WebServer::new(
         Arc::clone(&config),
         Arc::clone(&pool_manager),
@@ -195,6 +212,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         slug_registry,
         relay_arc.clone(),
         forum_auth_store,
+        market_store,
     );
 
     // Créer le serveur admin

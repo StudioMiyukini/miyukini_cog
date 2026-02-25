@@ -1,4 +1,6 @@
 //! Couche donnees : connexions KindMother DB pour tous les services + auth Central.
+//! Les data layers compilées via miyukini-central sont toujours disponibles.
+//! Seuls miyukiniwatch, jay1tribu, jaymanga sont vraiment optionnels.
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -8,9 +10,12 @@ use jayxpose::data::JayXposeDb;
 use jaykonta::data::JayKontaDb;
 use jayfestival::data::JayFestivalDb;
 use jaykoa::data::JayKoaDb;
+#[cfg(feature = "service-jay1tribu")]
 use jay1tribu::Jay1TribuDb;
+#[cfg(feature = "service-jaymanga")]
 use jaymanga::data::JayMangaDb;
 use miyukini_central::auth::{CentralAuthDb, CentralProfile};
+#[cfg(feature = "service-miyukiniwatch")]
 use miyukiniwatch::MiyukiniWatchDb;
 
 /// Connexions DB partagees pour tous les services du hub.
@@ -25,18 +30,21 @@ pub struct ServiceConnections {
     pub jayfestival: Arc<JayFestivalDb>,
     /// Base JayKoa (calendrier universel, agendas, entries temporelles).
     pub jaykoa: Arc<JayKoaDb>,
+    /// Repertoire des sauvegardes MiyuClicker / base path.
+    pub miyuclicker_data_dir: PathBuf,
     /// Base MiyukiniWatch (métriques d'usage, habitudes, agrégats Miou).
+    #[cfg(feature = "service-miyukiniwatch")]
     pub miyukiniwatch: Arc<MiyukiniWatchDb>,
-    /// Base Jay1Tribu (tribus, salons, amis, messages — chat/tribu pleins uniquement si Webway connecté).
+    /// Base Jay1Tribu (tribus, salons, amis, messages).
+    #[cfg(feature = "service-jay1tribu")]
     pub jay1tribu: Arc<Jay1TribuDb>,
     /// Base JayManga (catalogue manga, lecteur, ventes, agrégation).
+    #[cfg(feature = "service-jaymanga")]
     pub jaymanga: Arc<JayMangaDb>,
-    /// Repertoire des sauvegardes MiyuClicker.
-    pub miyuclicker_data_dir: PathBuf,
 }
 
 impl ServiceConnections {
-    /// Ouvre toutes les bases de donnees. `base_path` = racine workspace.
+    /// Ouvre toutes les bases de donnees activées. `base_path` = racine workspace.
     pub fn open(base_path: &Path) -> Result<Self, String> {
         let auth_db = CentralAuthDb::open(base_path.join("central.db"))
             .map_err(|e| format!("Central auth DB: {e}"))?;
@@ -48,12 +56,6 @@ impl ServiceConnections {
             .map_err(|e| format!("JayFestival DB: {e}"))?;
         let jaykoa = JayKoaDb::open(base_path.join("jaykoa.db"))
             .map_err(|e| format!("JayKoa DB: {e}"))?;
-        let miyukiniwatch = MiyukiniWatchDb::open(base_path.join("miyukiniwatch.db"))
-            .map_err(|e| format!("MiyukiniWatch DB: {e}"))?;
-        let jay1tribu = Jay1TribuDb::open(base_path.join("jay1tribu.db"))
-            .map_err(|e| format!("Jay1Tribu DB: {e}"))?;
-        let jaymanga = JayMangaDb::open(base_path.join("jaymanga.db"))
-            .map_err(|e| format!("JayManga DB: {e}"))?;
 
         Ok(Self {
             auth_db: Arc::new(auth_db),
@@ -61,10 +63,22 @@ impl ServiceConnections {
             jaykonta: Arc::new(jaykonta),
             jayfestival: Arc::new(jayfestival),
             jaykoa: Arc::new(jaykoa),
-            miyukiniwatch: Arc::new(miyukiniwatch),
-            jay1tribu: Arc::new(jay1tribu),
-            jaymanga: Arc::new(jaymanga),
             miyuclicker_data_dir: base_path.to_path_buf(),
+            #[cfg(feature = "service-miyukiniwatch")]
+            miyukiniwatch: Arc::new(
+                MiyukiniWatchDb::open(base_path.join("miyukiniwatch.db"))
+                    .map_err(|e| format!("MiyukiniWatch DB: {e}"))?,
+            ),
+            #[cfg(feature = "service-jay1tribu")]
+            jay1tribu: Arc::new(
+                Jay1TribuDb::open(base_path.join("jay1tribu.db"))
+                    .map_err(|e| format!("Jay1Tribu DB: {e}"))?,
+            ),
+            #[cfg(feature = "service-jaymanga")]
+            jaymanga: Arc::new(
+                JayMangaDb::open(base_path.join("jaymanga.db"))
+                    .map_err(|e| format!("JayManga DB: {e}"))?,
+            ),
         })
     }
 }

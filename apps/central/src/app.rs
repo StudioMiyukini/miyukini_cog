@@ -6,7 +6,9 @@ use dioxus::prelude::*;
 use crate::data::ServiceConnections;
 use crate::state::{AppContext, AppState, MainTab};
 use crate::components::{Header, TabBar};
-use crate::services::{ActiveServiceView, MwsNetworkView, Jay1TribuView, MwsViewState};
+use crate::services::{ActiveServiceView, MwsNetworkView, MwsViewState};
+#[cfg(feature = "service-jay1tribu")]
+use crate::services::Jay1TribuView;
 use crate::theme::styles;
 use crate::screens::{RiteEntree, Connexion, ProfileWindow};
 use crate::miou::{
@@ -14,6 +16,7 @@ use crate::miou::{
     BotContext, decide, select_variante, templates::generate_bulle,
 };
 use crate::miou::bubble::MIOU_CSS;
+#[cfg(feature = "service-jay1tribu")]
 use jay1tribu::get_online_friends;
 
 /// Point d'entrée de l'application.
@@ -84,22 +87,26 @@ pub fn App() -> Element {
             let profile_id = state_read.current_user.as_ref().map(|u| u.id.clone()).unwrap_or_default();
 
             // Données Jay1Tribu pour Miou (contrat Integration Central et Miou)
-            let connections = ctx.connections.read();
-            let jay1tribu_db = connections.jay1tribu.clone();
-            let online_cog_ids: Vec<String> = mws_state
-                .read()
-                .discovered_cogs
-                .iter()
-                .map(|c| c.cog_id.clone())
-                .collect();
-            drop(connections);
+            #[cfg(feature = "service-jay1tribu")]
+            let ami_connecte_recemment = {
+                let connections = ctx.connections.read();
+                let jay1tribu_db = connections.jay1tribu.clone();
+                let online_cog_ids: Vec<String> = mws_state
+                    .read()
+                    .discovered_cogs
+                    .iter()
+                    .map(|c| c.cog_id.clone())
+                    .collect();
+                drop(connections);
+                // Dégradation gracieuse : si Jay1Tribu erre, listes vides (INT-05)
+                get_online_friends(&jay1tribu_db, &profile_id, &online_cog_ids)
+                    .ok()
+                    .and_then(|friends| friends.first().cloned())
+                    .map(|f| f.friend_pseudo.unwrap_or(f.friend_cog_id))
+            };
+            #[cfg(not(feature = "service-jay1tribu"))]
+            let ami_connecte_recemment: Option<String> = None;
             drop(state_read);
-
-            // Dégradation gracieuse : si Jay1Tribu erre, listes vides (INT-05)
-            let ami_connecte_recemment = get_online_friends(&jay1tribu_db, &profile_id, &online_cog_ids)
-                .ok()
-                .and_then(|friends| friends.first().cloned())
-                .map(|f| f.friend_pseudo.unwrap_or(f.friend_cog_id));
             let ami_plus_delaisse: Option<(String, u32)> = None; // TODO: implémenter via MiyukiniWatch ou last_message_to_friend
 
             spawn(async move {
@@ -215,11 +222,20 @@ pub fn App() -> Element {
                             style: "flex: 1; min-height: 0; display: flex; flex-direction: column; overflow-y: auto;",
 
                             // Contenu selon l'onglet principal
-                            match state.read().main_tab {
-                                MainTab::Salon => rsx! { ActiveServiceView {} },
-                                MainTab::Bibliotheque => rsx! { ActiveServiceView {} },
-                                MainTab::Communaute => rsx! { MwsNetworkView {} },
-                                MainTab::MesAmis => rsx! { Jay1TribuView {} },
+                            {
+                                let main_tab = state.read().main_tab;
+                                match main_tab {
+                                    MainTab::Salon | MainTab::Bibliotheque => rsx! { ActiveServiceView {} },
+                                    MainTab::Communaute => rsx! { MwsNetworkView {} },
+                                    #[cfg(feature = "service-jay1tribu")]
+                                    MainTab::MesAmis => rsx! { Jay1TribuView {} },
+                                    #[cfg(not(feature = "service-jay1tribu"))]
+                                    MainTab::MesAmis => rsx! {
+                                        div { style: "padding: 32px; color: #8f98a0;",
+                                            "Service Jay1Tribu non disponible."
+                                        }
+                                    },
+                                }
                             }
                         }
                     }

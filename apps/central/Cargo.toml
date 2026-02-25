@@ -42,19 +42,47 @@ miyukini-central = { path = "../../crates/miyukini-central", features = ["legacy
 # MWS - Miyukini Webway System
 miyuwebway_participant = { path = "../../crates/miyuwebway_participant" }
 
-# Service backends (donnees reelles via KindMother SQLite)
+# Service Market (protocole partagé Central/Origin)
+miyumarket = { path = "../../crates/miyumarket" }
+
+# Service backends — data layers (toujours compilés via miyukini-central)
+# Les features ci-dessous gèrent uniquement l'inclusion des modules UI Dioxus.
 jayxpose = { path = "../../crates/jayxpose" }
 jayfestival = { path = "../../crates/jayfestival" }
 jaykonta = { path = "../../crates/jaykonta" }
 jaykoa = { path = "../../crates/jaykoa" }
-miyukiniwatch = { path = "../../crates/miyukiniwatch" }
-jay1tribu = { path = "../../crates/jay1tribu" }
 miyuclicker = { path = "../../crates/miyuclicker" }
 lord_of_the_castle = { path = "../../crates/lord_of_the_castle" }
-jaymanga = { path = "../../crates/jaymanga" }
+
+# Services indépendants (vrais optionnels — non requis par miyukini-central)
+miyukiniwatch = { path = "../../crates/miyukiniwatch", optional = true }
+jay1tribu = { path = "../../crates/jay1tribu", optional = true }
+jaymanga = { path = "../../crates/jaymanga", optional = true }
 
 [features]
-default = []
+default = ["all-services"]
+all-services = [
+    "service-jayxpose",
+    "service-jayfestival",
+    "service-jaykonta",
+    "service-jaykoa",
+    "service-miyukiniwatch",
+    "service-jay1tribu",
+    "service-miyuclicker",
+    "service-lord-of-the-castle",
+    "service-jaymanga",
+]
+# Features UI — gèrent les modules de vue Dioxus par service.
+# Les crates data sont toujours disponibles ; seule l'UI est conditionnelle.
+service-jayxpose = []
+service-jayfestival = []
+service-jaykonta = []
+service-jaykoa = []
+service-miyukiniwatch = ["dep:miyukiniwatch"]
+service-jay1tribu = ["dep:jay1tribu"]
+service-miyuclicker = []
+service-lord-of-the-castle = []
+service-jaymanga = ["dep:jaymanga"]
 
 [lints.rust]
 unsafe_code = "forbid"

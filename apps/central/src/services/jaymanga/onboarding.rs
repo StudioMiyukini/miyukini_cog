@@ -104,9 +104,12 @@ pub fn Onboarding(on_complete: EventHandler<bool>) -> Element {
                                 } else {
                                     c.bg_hover
                                 };
-                                rsx! {
-                                    div {
-                                        style: "width: {if is_current { 24 } else { 8 }}px; height: 8px; border-radius: 4px; background: {bg}; transition: all 0.3s;",
+                                {
+                                    let w = if is_current { 24 } else { 8 };
+                                    rsx! {
+                                        div {
+                                            style: "width: {w}px; height: 8px; border-radius: 4px; background: {bg}; transition: all 0.3s;",
+                                        }
                                     }
                                 }
                             }
@@ -307,6 +310,14 @@ fn ReaderContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
 
     let can_proceed = *button_enabled.read() && *checkbox_accepted.read();
     let remaining = *remaining_secs.read();
+    let accepted = *checkbox_accepted.read();
+    let enabled = *button_enabled.read();
+    let cb_border_color = if accepted { "#FF6B35" } else { c.border };
+    let cb_bg_color = if accepted { "#FF6B35" } else { "transparent" };
+    let btn_bg = if can_proceed { "#FF6B35" } else { c.bg_hover };
+    let btn_color = if can_proceed { "white" } else { c.text_muted };
+    let btn_border = if can_proceed { "none".to_string() } else { format!("1px solid {}", c.border) };
+    let btn_cursor = if can_proceed { "pointer" } else { "not-allowed" };
 
     rsx! {
         div {
@@ -392,12 +403,12 @@ fn ReaderContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
                 style: "display: flex; align-items: center; gap: 10px; padding: 8px 0;",
 
                 div {
-                    style: "width: 18px; height: 18px; border: 2px solid {if *checkbox_accepted.read() { \"#FF6B35\" } else { c.border }}; border-radius: 4px; background: {if *checkbox_accepted.read() { \"#FF6B35\" } else { \"transparent\" }}; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s;",
+                    style: "width: 18px; height: 18px; border: 2px solid {cb_border_color}; border-radius: 4px; background: {cb_bg_color}; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s;",
                     onclick: move |_| {
                         let val = *checkbox_accepted.read();
                         checkbox_accepted.set(!val);
                     },
-                    if *checkbox_accepted.read() {
+                    if accepted {
                         span { style: "color: white; font-size: 12px; font-weight: 700;", "✓" }
                     }
                 }
@@ -413,16 +424,16 @@ fn ReaderContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
 
             // Bouton avec délai
             button {
-                style: "padding: 12px 32px; background: {if can_proceed { \"#FF6B35\" } else { c.bg_hover }}; color: {if can_proceed { \"white\" } else { c.text_muted }}; border: {if can_proceed { \"none\" } else { format!(\"1px solid {}\", c.border) }}; border-radius: 8px; cursor: {if can_proceed { \"pointer\" } else { \"not-allowed\" }}; font-size: 14px; font-weight: 500; transition: all 0.3s; align-self: center;",
+                style: "padding: 12px 32px; background: {btn_bg}; color: {btn_color}; border: {btn_border}; border-radius: 8px; cursor: {btn_cursor}; font-size: 14px; font-weight: 500; transition: all 0.3s; align-self: center;",
                 disabled: !can_proceed,
                 onclick: move |evt| {
                     if can_proceed {
                         on_accept.call(evt);
                     }
                 },
-                if !*button_enabled.read() {
+                if !enabled {
                     "Lecture en cours… ({remaining}s)"
-                } else if !*checkbox_accepted.read() {
+                } else if !accepted {
                     "Veuillez accepter les conditions"
                 } else {
                     "J'accepte et je continue →"
@@ -453,6 +464,14 @@ fn SellerContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
 
     let can_proceed = *button_enabled.read() && *checkbox_accepted.read();
     let remaining = *remaining_secs.read();
+    let accepted = *checkbox_accepted.read();
+    let enabled = *button_enabled.read();
+    let cb_border_color = if accepted { "#FF6B35" } else { c.border };
+    let cb_bg_color = if accepted { "#FF6B35" } else { "transparent" };
+    let btn_bg = if can_proceed { "#FF6B35" } else { c.bg_hover };
+    let btn_color = if can_proceed { "white" } else { c.text_muted };
+    let btn_border = if can_proceed { "none".to_string() } else { format!("1px solid {}", c.border) };
+    let btn_cursor = if can_proceed { "pointer" } else { "not-allowed" };
 
     rsx! {
         div {
@@ -543,12 +562,12 @@ fn SellerContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
                 style: "display: flex; align-items: center; gap: 10px; padding: 8px 0;",
 
                 div {
-                    style: "width: 18px; height: 18px; border: 2px solid {if *checkbox_accepted.read() { \"#FF6B35\" } else { c.border }}; border-radius: 4px; background: {if *checkbox_accepted.read() { \"#FF6B35\" } else { \"transparent\" }}; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s;",
+                    style: "width: 18px; height: 18px; border: 2px solid {cb_border_color}; border-radius: 4px; background: {cb_bg_color}; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s;",
                     onclick: move |_| {
                         let val = *checkbox_accepted.read();
                         checkbox_accepted.set(!val);
                     },
-                    if *checkbox_accepted.read() {
+                    if accepted {
                         span { style: "color: white; font-size: 12px; font-weight: 700;", "✓" }
                     }
                 }
@@ -564,16 +583,16 @@ fn SellerContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
 
             // Bouton avec délai
             button {
-                style: "padding: 12px 32px; background: {if can_proceed { \"#FF6B35\" } else { c.bg_hover }}; color: {if can_proceed { \"white\" } else { c.text_muted }}; border: {if can_proceed { \"none\" } else { format!(\"1px solid {}\", c.border) }}; border-radius: 8px; cursor: {if can_proceed { \"pointer\" } else { \"not-allowed\" }}; font-size: 14px; font-weight: 500; transition: all 0.3s; align-self: center;",
+                style: "padding: 12px 32px; background: {btn_bg}; color: {btn_color}; border: {btn_border}; border-radius: 8px; cursor: {btn_cursor}; font-size: 14px; font-weight: 500; transition: all 0.3s; align-self: center;",
                 disabled: !can_proceed,
                 onclick: move |evt| {
                     if can_proceed {
                         on_accept.call(evt);
                     }
                 },
-                if !*button_enabled.read() {
+                if !enabled {
                     "Lecture en cours… ({remaining}s)"
-                } else if !*checkbox_accepted.read() {
+                } else if !accepted {
                     "Veuillez accepter les conditions"
                 } else {
                     "J'accepte et je commence →"

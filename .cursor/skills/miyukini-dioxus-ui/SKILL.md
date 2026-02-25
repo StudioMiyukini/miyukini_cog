@@ -216,6 +216,48 @@ audio::play_tts_background("Texte a lire");
 let path = audio::resolve_voice_path(&base, "subdir/file.mp3");
 ```
 
+## Pieges RSX Dioxus 0.6
+
+### INTERDIT : expressions avec accolades dans les format strings RSX
+
+Le parseur RSX de Dioxus 0.6 ne distingue pas les accolades d'un `if/else` ou d'un `format!()` des accolades de fin d'interpolation `{...}`. Cela provoque des erreurs `Expected Ident or Expression` sur tout le bloc `rsx!`.
+
+```rust
+// INTERDIT — nested braces dans string RSX
+style: "width: {if active { 24 } else { 8 }}px;"
+style: "border: {if ok { \"none\" } else { format!(\"1px solid {}\", c.border) }};"
+
+// CORRECT — extraire en variable AVANT le rsx!
+let w = if active { 24 } else { 8 };
+let border = if ok { "none".to_string() } else { format!("1px solid {}", c.border) };
+rsx! {
+    div { style: "width: {w}px;" }
+    div { style: "border: {border};" }
+}
+```
+
+### INTERDIT : named format args dans les text nodes RSX
+
+```rust
+// INTERDIT — Dioxus RSX n'est pas format!()
+p { "Total : {count}", count = items.len() }
+
+// CORRECT — variable locale
+let count = items.len();
+rsx! { p { "Total : {count}" } }
+```
+
+### INTERDIT : read + set sur le meme signal dans une seule expression
+
+```rust
+// INTERDIT — borrow conflict (immutable borrow still alive)
+counter.set(*counter.read() + 1);
+
+// CORRECT — lire d'abord, puis muter
+let prev = *counter.read();
+counter.set(prev + 1);
+```
+
 ## Regles
 
 1. **Provider unique** a la racine : `AppContext` via `use_context_provider`
@@ -225,6 +267,8 @@ let path = audio::resolve_voice_path(&base, "subdir/file.mp3");
 5. **Audio non-bloquant** : thread dedie, erreurs loggees
 6. **Props** : `#[derive(Props, Clone, PartialEq)]`
 7. **Async** : `spawn()` dans handlers, `use_effect` pour effets de bord
+8. **RSX format strings** : jamais d'expressions avec accolades (`if`, `match`, `format!`) dans les `"..."` RSX — toujours extraire en variable avant le `rsx!`
+9. **Signaux** : jamais `signal.set(*signal.read() + x)` en une ligne — lire d'abord dans un `let`
 
 ## References
 

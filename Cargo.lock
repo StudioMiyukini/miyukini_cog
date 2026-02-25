@@ -4113,6 +4113,7 @@ dependencies = [
  "miyuclicker",
  "miyukini-central",
  "miyukiniwatch",
+ "miyumarket",
  "miyuwebway_participant",
  "rodio",
  "serde",
@@ -4144,6 +4145,7 @@ dependencies = [
  "hmac",
  "jayxpose",
  "miyukini-kernel",
+ "miyumarket",
  "miyuwebway_participant",
  "miyuwebway_tracker",
  "rand 0.8.5",
@@ -4206,6 +4208,17 @@ dependencies = [
  "chrono",
  "miyukini-kernel",
  "serde",
+]
+
+[[package]]
+name = "miyumarket"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "serde",
+ "serde_json",
+ "sha2",
+ "thiserror 2.0.18",
 ]
 
 [[package]]

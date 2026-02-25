@@ -10,6 +10,7 @@
 use crate::data::{profile_display_name, use_service_connections};
 use crate::state::AppContext;
 use dioxus::prelude::*;
+#[cfg(feature = "service-jay1tribu")]
 use jay1tribu::{set_mws_transport_sender, set_webway_connected, DispatchError, MwsTransportSender};
 use miyukini_central::{
     CentralMwsConfig, CentralMwsManager, CentralMwsState, MwsConformityState, MwsStatusSummary,
@@ -39,6 +40,7 @@ impl CentralJay1TribuSender {
     }
 }
 
+#[cfg(feature = "service-jay1tribu")]
 impl MwsTransportSender for CentralJay1TribuSender {
     fn send(&self, to: &str, payload: &[u8]) -> Result<(), DispatchError> {
         let guard = self.ctx.read().map_err(|e| DispatchError::Transport(e.to_string()))?;
@@ -79,6 +81,7 @@ pub struct MwsViewState {
 impl Default for MwsViewState {
     fn default() -> Self {
         let jay1tribu_sender = CentralJay1TribuSender::new();
+        #[cfg(feature = "service-jay1tribu")]
         set_mws_transport_sender(jay1tribu_sender.clone());
         Self {
             manager: Arc::new(TokioRwLock::new(None)),
@@ -151,6 +154,7 @@ pub fn MwsNetworkView() -> Element {
                     if st != current_state || conf != current_conf {
                         tracing::info!("[MWS UI poll] état changé: {:?} → {:?}, conformité: {:?} → {:?}", current_state, st, current_conf, conf);
                         let connected = st == CentralMwsState::Connected;
+                        #[cfg(feature = "service-jay1tribu")]
                         set_webway_connected(connected);
                         let mut s = state.write();
                         s.jay1tribu_sender.set_context(
@@ -297,6 +301,7 @@ fn MwsLoneModeToggle(mut state: Signal<MwsViewState>, mut tick: Signal<u64>) -> 
             let s = state.write();
             s.jay1tribu_sender.set_context(None);
             drop(s);
+            #[cfg(feature = "service-jay1tribu")]
             set_webway_connected(false);
             let mut s = state.write();
             s.is_lone = false;
@@ -672,6 +677,7 @@ async fn real_mws_disconnect(mut state: Signal<MwsViewState>, mut tick: Signal<u
     {
         let mut s = state.write();
         s.jay1tribu_sender.set_context(None);
+        #[cfg(feature = "service-jay1tribu")]
         set_webway_connected(false);
         s.state = CentralMwsState::Disconnected;
         s.conformity = MwsConformityState::Uninitialized;

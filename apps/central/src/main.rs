@@ -8,6 +8,7 @@ mod audio;
 mod components;
 mod data;
 mod kindmother_launcher;
+mod market_client;
 mod miou;
 mod screens;
 mod services;

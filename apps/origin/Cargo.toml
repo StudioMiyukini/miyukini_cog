@@ -17,6 +17,7 @@ miyukini-kernel = { path = "../../crates/miyukini-kernel" }
 miyuwebway_tracker = { path = "../../crates/miyuwebway_tracker" }
 miyuwebway_participant = { path = "../../crates/miyuwebway_participant" }
 jayxpose = { path = "../../crates/jayxpose" }
+miyumarket = { path = "../../crates/miyumarket" }
 
 # Async runtime
 tokio = { version = "1.36", features = ["full"] }

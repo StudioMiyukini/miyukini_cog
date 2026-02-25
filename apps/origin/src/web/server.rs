@@ -1,6 +1,6 @@
 //! Serveur Web Origin — Implémentation HTTP.
 
-use super::{api, content::ContentManager, forum_auth, pages};
+use super::{api, content::ContentManager, forum_auth, market, pages};
 use crate::config::OriginConfig;
 use crate::relay::rate_limiter::{RateLimiter, RateLimiterConfig, RateLimitResult};
 use crate::relay::RelayServer;
@@ -48,6 +48,8 @@ pub struct WebServer {
     relay_ref: Option<Arc<RelayServer>>,
     /// Auth forum unifiée Central (profils synchronisés). Si présent, /api/auth/forum/* activé.
     forum_auth_store: Option<Arc<forum_auth::ForumAuthStore>>,
+    /// Service Market (catalogue + packages). Si présent, /api/market/* activé.
+    market_store: Option<Arc<market::MarketStore>>,
     /// Rate limiter pour les connexions HTTP.
     rate_limiter: Arc<RateLimiter>,
 }
@@ -65,6 +67,7 @@ impl WebServer {
         slug_registry: Arc<SlugRegistry>,
         relay_ref: Option<Arc<RelayServer>>,
         forum_auth_store: Option<Arc<forum_auth::ForumAuthStore>>,
+        market_store: Option<Arc<market::MarketStore>>,
     ) -> Self {
         let rate_limiter = Arc::new(RateLimiter::new(RateLimiterConfig {
             max_connections_per_ip: 60,
@@ -85,6 +88,7 @@ impl WebServer {
             slug_registry,
             relay_ref,
             forum_auth_store,
+            market_store,
             rate_limiter,
         }
     }
@@ -122,9 +126,10 @@ impl WebServer {
                     let slug_registry = Arc::clone(&self.slug_registry);
                     let relay_ref = self.relay_ref.clone();
                     let forum_auth_store = self.forum_auth_store.clone();
+                    let market_store = self.market_store.clone();
 
                     tokio::spawn(async move {
-                        if let Err(e) = handle_connection(stream, config, pool_mgr, content_mgr, visit_tracker, jayxpose_db, slug_registry, relay_ref, forum_auth_store).await {
+                        if let Err(e) = handle_connection(stream, config, pool_mgr, content_mgr, visit_tracker, jayxpose_db, slug_registry, relay_ref, forum_auth_store, market_store).await {
                             debug!("Connection error from {}: {}", addr, e);
                         }
                     });
@@ -161,6 +166,7 @@ async fn handle_connection(
     slug_registry: Arc<SlugRegistry>,
     relay_ref: Option<Arc<RelayServer>>,
     forum_auth_store: Option<Arc<forum_auth::ForumAuthStore>>,
+    market_store: Option<Arc<market::MarketStore>>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let (reader, mut writer) = stream.split();
     let mut buf_reader = BufReader::new(reader);
@@ -202,6 +208,130 @@ async fn handle_connection(
                 buf_reader.read_exact(&mut body).await?;
             }
             let route_response = forum_auth::handle_api(path, &body, store.as_ref());
+            write_response(&mut writer, route_response).await?;
+            return Ok(());
+        }
+    }
+
+    // Service Market : /api/market/*
+    if path.starts_with("/api/market/") {
+        if let Some(store) = &market_store {
+            let (path_only, query) = path.split_once('?').unwrap_or((path, ""));
+            let path_clean = path_only.trim_end_matches('/');
+
+            let route_response = match (method, path_clean) {
+                // GET /api/market/catalog
+                ("GET", "/api/market/catalog") => {
+                    let body = market::api_market_catalog(store).await;
+                    RouteResponse::Normal {
+                        status: "200 OK".to_string(),
+                        content_type: "application/json".to_string(),
+                        body,
+                    }
+                }
+                // GET /api/market/catalog/search?q=...
+                ("GET", "/api/market/catalog/search") => {
+                    let q = query.strip_prefix("q=").unwrap_or("");
+                    let body = market::api_market_search(store, q).await;
+                    RouteResponse::Normal {
+                        status: "200 OK".to_string(),
+                        content_type: "application/json".to_string(),
+                        body,
+                    }
+                }
+                // GET /api/market/catalog/{id}
+                ("GET", _) if path_clean.starts_with("/api/market/catalog/") => {
+                    let service_id = &path_clean[20..]; // après "/api/market/catalog/"
+                    if let Some(body) = market::api_market_service(store, service_id).await {
+                        RouteResponse::Normal {
+                            status: "200 OK".to_string(),
+                            content_type: "application/json".to_string(),
+                            body,
+                        }
+                    } else {
+                        RouteResponse::Normal {
+                            status: "404 Not Found".to_string(),
+                            content_type: "application/json".to_string(),
+                            body: r#"{"success":false,"error":"Service introuvable"}"#.to_string(),
+                        }
+                    }
+                }
+                // GET /api/market/package/{id}/{version} — téléchargement binaire
+                ("GET", _) if path_clean.starts_with("/api/market/package/") => {
+                    let remainder = &path_clean[20..]; // après "/api/market/package/"
+                    let parts: Vec<&str> = remainder.splitn(2, '/').collect();
+                    if parts.len() == 2 {
+                        if let Some(data) = market::api_market_download(store, parts[0], parts[1]).await {
+                            let filename = miyumarket::package::package_filename(parts[0], parts[1]);
+                            RouteResponse::Binary {
+                                status: "200 OK".to_string(),
+                                content_type: "application/octet-stream".to_string(),
+                                body: data,
+                                filename: Some(filename),
+                            }
+                        } else {
+                            RouteResponse::Normal {
+                                status: "404 Not Found".to_string(),
+                                content_type: "application/json".to_string(),
+                                body: r#"{"success":false,"error":"Package introuvable"}"#.to_string(),
+                            }
+                        }
+                    } else {
+                        RouteResponse::Normal {
+                            status: "400 Bad Request".to_string(),
+                            content_type: "application/json".to_string(),
+                            body: r#"{"success":false,"error":"Format: /api/market/package/{id}/{version}"}"#.to_string(),
+                        }
+                    }
+                }
+                // POST /api/market/publish
+                ("POST", "/api/market/publish") => {
+                    let len = content_length_from_headers(&headers).unwrap_or(0);
+                    let mut body_bytes = vec![0u8; len];
+                    if !body_bytes.is_empty() {
+                        buf_reader.read_exact(&mut body_bytes).await?;
+                    }
+                    let body_str = String::from_utf8_lossy(&body_bytes);
+                    let body = market::api_market_publish(store, &body_str).await;
+                    RouteResponse::Normal {
+                        status: "200 OK".to_string(),
+                        content_type: "application/json".to_string(),
+                        body,
+                    }
+                }
+                // DELETE /api/market/package/{id}/{version}
+                ("DELETE", _) if path_clean.starts_with("/api/market/package/") => {
+                    let remainder = &path_clean[20..];
+                    let parts: Vec<&str> = remainder.splitn(2, '/').collect();
+                    if parts.len() == 2 {
+                        let len = content_length_from_headers(&headers).unwrap_or(0);
+                        let mut body_bytes = vec![0u8; len];
+                        if !body_bytes.is_empty() {
+                            buf_reader.read_exact(&mut body_bytes).await?;
+                        }
+                        let body_str = String::from_utf8_lossy(&body_bytes);
+                        let body = market::api_market_unpublish(store, parts[0], parts[1], &body_str).await;
+                        RouteResponse::Normal {
+                            status: "200 OK".to_string(),
+                            content_type: "application/json".to_string(),
+                            body,
+                        }
+                    } else {
+                        RouteResponse::Normal {
+                            status: "400 Bad Request".to_string(),
+                            content_type: "application/json".to_string(),
+                            body: r#"{"success":false,"error":"Format: /api/market/package/{id}/{version}"}"#.to_string(),
+                        }
+                    }
+                }
+                _ => {
+                    RouteResponse::Normal {
+                        status: "404 Not Found".to_string(),
+                        content_type: "application/json".to_string(),
+                        body: r#"{"success":false,"error":"Route Market inconnue"}"#.to_string(),
+                    }
+                }
+            };
             write_response(&mut writer, route_response).await?;
             return Ok(());
         }

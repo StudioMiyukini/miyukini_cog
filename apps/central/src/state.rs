@@ -80,6 +80,33 @@ impl ServiceType {
     }
 }
 
+/// Provenance d'un Service dans le Market.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(dead_code)]
+pub enum ServiceSource {
+    /// Service officiel Miyukini (pré-installé ou disponible dans le Market officiel)
+    Officiel,
+    /// Service tiers développé par la communauté
+    Tiers,
+}
+
+#[allow(dead_code)]
+impl ServiceSource {
+    pub fn label(&self) -> &'static str {
+        match self {
+            Self::Officiel => "Officiel",
+            Self::Tiers => "Communauté",
+        }
+    }
+
+    pub fn badge_color(&self) -> &'static str {
+        match self {
+            Self::Officiel => "#10b981",  // Emerald
+            Self::Tiers => "#f59e0b",    // Amber
+        }
+    }
+}
+
 /// Informations sur un Service.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ServiceInfo {
@@ -88,6 +115,7 @@ pub struct ServiceInfo {
     pub description: String,
     pub icon: String,
     pub service_type: ServiceType,
+    pub source: ServiceSource,
     pub is_installed: bool,
     pub is_favorite: bool,
     pub version: String,
@@ -103,6 +131,199 @@ pub struct OpenTab {
     pub closable: bool,
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Service Registry — gestion dynamique des services installés/disponibles
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Registre des services : catalogue officiel + tiers, installation/désinstallation.
+/// Prépare l'API pour le « Services Market ».
+pub struct ServiceRegistry;
+
+/// Métadonnées d'un service officiel (source unique de vérité pour le catalogue).
+struct ServiceMeta {
+    id: &'static str,
+    name: &'static str,
+    description: &'static str,
+    icon: &'static str,
+    service_type: ServiceType,
+    is_favorite: bool,
+}
+
+/// Catalogue officiel complet — chaque service est décrit une seule fois.
+const OFFICIAL_CATALOG: &[ServiceMeta] = &[
+    ServiceMeta { id: "jayxpose",     name: "JayXpose",         description: "Profil exposant, catalogue produits, vitrine, coffre-fort documentaire", icon: "\u{1F3EA}", service_type: ServiceType::SurfaceWeb, is_favorite: true },
+    ServiceMeta { id: "jayfestival",  name: "JayFestival",      description: "Festivals, éditions, exposants, visiteurs",                              icon: "\u{1F4C5}", service_type: ServiceType::SurfaceWeb, is_favorite: false },
+    ServiceMeta { id: "jaykoa",       name: "JayKoa",           description: "Calendrier universel du COG, récepteur temporel transversal",            icon: "\u{1F4C6}", service_type: ServiceType::InterneCog, is_favorite: false },
+    ServiceMeta { id: "jaykonta",     name: "JayKonta",         description: "Comptabilité COG unifiée Purse + Account",                               icon: "\u{1F9EE}", service_type: ServiceType::InterneCog, is_favorite: true },
+    ServiceMeta { id: "miyukiniwatch", name: "MiyukiniWatch",   description: "Tes habitudes et tes mesures — consulte, comprends, efface.",            icon: "\u{1F441}", service_type: ServiceType::InterneCog, is_favorite: false },
+    ServiceMeta { id: "jay1tribu",    name: "Jay1Tribu",        description: "Tribus, amis et discussions — chat et tribu pleins uniquement si connecté au Webway.", icon: "\u{1F4AC}", service_type: ServiceType::InterCog, is_favorite: true },
+    ServiceMeta { id: "jaymanga",     name: "JayManga",         description: "Lecture et vente de manga en ligne — catalogue, lecteur, boutique, portail agrégé", icon: "\u{1F4DA}", service_type: ServiceType::SurfaceWeb, is_favorite: false },
+    ServiceMeta { id: "miyuclicker",  name: "Lord of the Click", description: "Premier jeu officiel Miyukini (Idle/Clicker + Carte stratégique)",      icon: "\u{1F3AE}", service_type: ServiceType::InterCog, is_favorite: true },
+    ServiceMeta { id: "lord_of_the_castle", name: "Miyukini Survivor", description: "Jeu Survivor/Tower Defense officiel Miyukini",                    icon: "\u{1F3F0}", service_type: ServiceType::InterCog, is_favorite: false },
+];
+
+impl ServiceMeta {
+    /// Convertit en `ServiceInfo` avec le flag d'installation.
+    fn to_service_info(&self, installed: bool) -> ServiceInfo {
+        ServiceInfo {
+            id: self.id.into(),
+            name: self.name.into(),
+            description: self.description.into(),
+            icon: self.icon.into(),
+            service_type: self.service_type,
+            source: ServiceSource::Officiel,
+            is_installed: installed,
+            is_favorite: self.is_favorite,
+            version: "0.1.0".into(),
+            developer: "Miyukini".into(),
+        }
+    }
+}
+
+/// IDs des services compilés (features actives).
+fn compiled_service_ids() -> &'static [&'static str] {
+    &[
+        #[cfg(feature = "service-jayxpose")]        "jayxpose",
+        #[cfg(feature = "service-jayfestival")]      "jayfestival",
+        #[cfg(feature = "service-jaykoa")]           "jaykoa",
+        #[cfg(feature = "service-jaykonta")]         "jaykonta",
+        #[cfg(feature = "service-miyukiniwatch")]    "miyukiniwatch",
+        #[cfg(feature = "service-jay1tribu")]        "jay1tribu",
+        #[cfg(feature = "service-jaymanga")]         "jaymanga",
+        #[cfg(feature = "service-miyuclicker")]      "miyuclicker",
+        #[cfg(feature = "service-lord-of-the-castle")] "lord_of_the_castle",
+    ]
+}
+
+impl ServiceRegistry {
+    /// Liste tous les services compilés (features actives) avec `is_installed = true`.
+    /// Le Market est toujours inclus (service intégré au Central).
+    pub fn compiled_services() -> Vec<ServiceInfo> {
+        let ids = compiled_service_ids();
+        let mut services: Vec<ServiceInfo> = OFFICIAL_CATALOG
+            .iter()
+            .filter(|m| ids.contains(&m.id))
+            .map(|m| m.to_service_info(true))
+            .collect();
+
+        // Le Market est un service intégré, toujours disponible
+        services.push(ServiceInfo {
+            id: "market".into(),
+            name: "Service Market".into(),
+            description: "Catalogue des services \u{2014} chercher, installer, d\u{00e9}sinstaller.".into(),
+            icon: "\u{1F6D2}".into(),
+            service_type: ServiceType::InterneCog,
+            source: ServiceSource::Officiel,
+            is_installed: true,
+            is_favorite: true,
+            version: env!("CARGO_PKG_VERSION").into(),
+            developer: "Miyukini".into(),
+        });
+
+        services
+    }
+
+    /// Fallback local : services officiels non compilés (sans appel réseau).
+    #[allow(dead_code)]
+    pub fn local_available() -> Vec<ServiceInfo> {
+        let ids = compiled_service_ids();
+        OFFICIAL_CATALOG
+            .iter()
+            .filter(|m| !ids.contains(&m.id))
+            .map(|m| m.to_service_info(false))
+            .collect()
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // API Services Market — Via MarketClient (requêtes vers Origin)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    /// Récupère le catalogue complet depuis Origin.
+    /// En cas d'échec réseau, retombe sur le catalogue local.
+    #[allow(dead_code)]
+    pub async fn fetch_catalog(client: &crate::market_client::MarketClient) -> (Vec<ServiceInfo>, Vec<ServiceInfo>) {
+        match client.fetch_catalog().await {
+            Ok(catalog) => {
+                let official = catalog.official.into_iter().map(|e| market_entry_to_service_info(e, true)).collect();
+                let community = catalog.community.into_iter().map(|e| market_entry_to_service_info(e, false)).collect();
+                (official, community)
+            }
+            Err(e) => {
+                tracing::debug!("Market catalog fetch failed (fallback local): {e}");
+                (Self::local_available(), Vec::new())
+            }
+        }
+    }
+
+    /// Recherche dans le catalogue Origin.
+    #[allow(dead_code)]
+    pub async fn search(client: &crate::market_client::MarketClient, query: &str) -> Vec<ServiceInfo> {
+        match client.search(query).await {
+            Ok(result) => result.results.into_iter().map(|e| market_entry_to_service_info(e, false)).collect(),
+            Err(e) => {
+                tracing::debug!("Market search failed: {e}");
+                Vec::new()
+            }
+        }
+    }
+
+    /// Installe un service depuis le Market.
+    /// Phase 1 : les services officiels nécessitent une recompilation avec la feature activée.
+    /// Phase 2 : les services tiers seront chargés via plugins WASM/dylib.
+    #[allow(dead_code)]
+    pub async fn install(client: &crate::market_client::MarketClient, service_id: &str, version: &str) -> Result<Vec<u8>, String> {
+        // Télécharger le package depuis Origin
+        client.download_package(service_id, version)
+            .await
+            .map_err(|e| format!("Téléchargement du package échoué : {e}"))
+        // Phase 1 : retourne les bytes du package. L'installation effective
+        // nécessite une recompilation de Central avec la feature activée.
+        // Phase 2 : extraire le .msp, charger le WASM/dylib, enregistrer.
+    }
+
+    /// Désinstalle un service (supprime les données locales).
+    #[allow(dead_code)]
+    pub fn uninstall(_service_id: &str) -> Result<(), String> {
+        // Phase 1 : seule la suppression des données locales est possible.
+        // La feature doit être désactivée manuellement dans Cargo.toml et recompilée.
+        Err("Désinstallation dynamique non encore disponible. Désactivez la feature Cargo correspondante et recompilez.".into())
+    }
+
+    /// Publie un service sur le Market (pour les développeurs).
+    #[allow(dead_code)]
+    pub async fn publish(client: &crate::market_client::MarketClient, manifest: miyumarket::manifest::ServiceManifest, token: &str) -> Result<String, String> {
+        client.publish(manifest, token)
+            .await
+            .map(|resp| format!("Service {} v{} publié (checksum: {})", resp.service_id, resp.version, resp.checksum))
+            .map_err(|e| format!("Publication échouée : {e}"))
+    }
+}
+
+/// Convertit un `MarketEntry` (protocole réseau) en `ServiceInfo` (état local).
+#[allow(dead_code)]
+fn market_entry_to_service_info(entry: miyumarket::protocol::MarketEntry, is_official: bool) -> ServiceInfo {
+    let m = entry.manifest;
+    let compiled_ids = compiled_service_ids();
+    let is_installed = compiled_ids.contains(&m.id.as_str());
+
+    ServiceInfo {
+        id: m.id,
+        name: m.name,
+        description: m.description,
+        icon: m.icon,
+        service_type: match m.service_type {
+            miyumarket::manifest::ServiceType::InterneCog => ServiceType::InterneCog,
+            miyumarket::manifest::ServiceType::SurfaceWeb => ServiceType::SurfaceWeb,
+            miyumarket::manifest::ServiceType::InterCog => ServiceType::InterCog,
+        },
+        source: if is_official { ServiceSource::Officiel } else { ServiceSource::Tiers },
+        is_installed,
+        is_favorite: false,
+        version: m.version,
+        developer: m.developer,
+    }
+}
+
 /// État global de l'application.
 #[derive(Debug, Clone)]
 pub struct AppState {
@@ -112,7 +333,7 @@ pub struct AppState {
     pub open_tabs: Vec<OpenTab>,
     /// Index de l'onglet actif
     pub active_tab_index: usize,
-    /// Services disponibles
+    /// Services disponibles (compilés + installés)
     pub services: Vec<ServiceInfo>,
     /// Recherche en cours
     pub search_query: String,
@@ -144,23 +365,15 @@ pub struct AppState {
 
 impl Default for AppState {
     fn default() -> Self {
-        let services = Self::default_services();
-        let mut open_tabs = vec![OpenTab {
+        let services = ServiceRegistry::compiled_services();
+        // Seul l'onglet Accueil est ouvert au démarrage.
+        // Les services s'ouvrent à la demande via open_service().
+        let open_tabs = vec![OpenTab {
             id: "home".to_string(),
             title: "Accueil".to_string(),
             service_id: None,
             closable: false,
         }];
-        for s in &services {
-            if s.is_installed {
-                open_tabs.push(OpenTab {
-                    id: s.id.clone(),
-                    title: s.name.clone(),
-                    service_id: Some(s.id.clone()),
-                    closable: true,
-                });
-            }
-        }
         Self {
             main_tab: MainTab::Salon,
             open_tabs,
@@ -184,111 +397,6 @@ impl Default for AppState {
 }
 
 impl AppState {
-    /// Services par défaut du COG.
-    fn default_services() -> Vec<ServiceInfo> {
-        vec![
-            ServiceInfo {
-                id: "jayxpose".to_string(),
-                name: "JayXpose".to_string(),
-                description: "Profil exposant, catalogue produits, vitrine, coffre-fort documentaire".to_string(),
-                icon: "🏪".to_string(),
-                service_type: ServiceType::SurfaceWeb,
-                is_installed: true,
-                is_favorite: true,
-                version: "0.1.0".to_string(),
-                developer: "Miyukini".to_string(),
-            },
-            ServiceInfo {
-                id: "jayfestival".to_string(),
-                name: "JayFestival".to_string(),
-                description: "Festivals, éditions, exposants, visiteurs".to_string(),
-                icon: "📅".to_string(),
-                service_type: ServiceType::SurfaceWeb,
-                is_installed: true,
-                is_favorite: false,
-                version: "0.1.0".to_string(),
-                developer: "Miyukini".to_string(),
-            },
-            ServiceInfo {
-                id: "jaykoa".to_string(),
-                name: "JayKoa".to_string(),
-                description: "Calendrier universel du COG, récepteur temporel transversal".to_string(),
-                icon: "📆".to_string(),
-                service_type: ServiceType::InterneCog,
-                is_installed: true,
-                is_favorite: false,
-                version: "0.1.0".to_string(),
-                developer: "Miyukini".to_string(),
-            },
-            ServiceInfo {
-                id: "jaykonta".to_string(),
-                name: "JayKonta".to_string(),
-                description: "Comptabilité COG unifiée Purse + Account".to_string(),
-                icon: "🧮".to_string(),
-                service_type: ServiceType::InterneCog,
-                is_installed: true,
-                is_favorite: true,
-                version: "0.1.0".to_string(),
-                developer: "Miyukini".to_string(),
-            },
-            ServiceInfo {
-                id: "miyukiniwatch".to_string(),
-                name: "MiyukiniWatch".to_string(),
-                description: "Tes habitudes et tes mesures — consulte, comprends, efface.".to_string(),
-                icon: "👁".to_string(),
-                service_type: ServiceType::InterneCog,
-                is_installed: true,
-                is_favorite: false,
-                version: "0.1.0".to_string(),
-                developer: "Miyukini".to_string(),
-            },
-            ServiceInfo {
-                id: "jay1tribu".to_string(),
-                name: "Jay1Tribu".to_string(),
-                description: "Tribus, amis et discussions — chat et tribu pleins uniquement si connecté au Webway.".to_string(),
-                icon: "💬".to_string(),
-                service_type: ServiceType::InterCog,
-                is_installed: true,
-                is_favorite: true,
-                version: "0.1.0".to_string(),
-                developer: "Miyukini".to_string(),
-            },
-            ServiceInfo {
-                id: "jaymanga".to_string(),
-                name: "JayManga".to_string(),
-                description: "Lecture et vente de manga en ligne — catalogue, lecteur, boutique, portail agrégé".to_string(),
-                icon: "📚".to_string(),
-                service_type: ServiceType::SurfaceWeb,
-                is_installed: true,
-                is_favorite: false,
-                version: "0.1.0".to_string(),
-                developer: "Miyukini".to_string(),
-            },
-            ServiceInfo {
-                id: "miyuclicker".to_string(),
-                name: "Lord of the Click".to_string(),
-                description: "Premier jeu officiel Miyukini (Idle/Clicker + Carte stratégique)".to_string(),
-                icon: "🎮".to_string(),
-                service_type: ServiceType::InterCog,
-                is_installed: true,
-                is_favorite: true,
-                version: "0.1.0".to_string(),
-                developer: "Miyukini".to_string(),
-            },
-            ServiceInfo {
-                id: "lord_of_the_castle".to_string(),
-                name: "Miyukini Survivor".to_string(),
-                description: "Jeu Survivor/Tower Defense officiel Miyukini".to_string(),
-                icon: "🏰".to_string(),
-                service_type: ServiceType::InterCog,
-                is_installed: true,
-                is_favorite: false,
-                version: "0.1.0".to_string(),
-                developer: "Miyukini".to_string(),
-            },
-        ]
-    }
-
     /// Ouvre un service dans un nouvel onglet.
     pub fn open_service(&mut self, service: &ServiceInfo) {
         // Vérifier si déjà ouvert

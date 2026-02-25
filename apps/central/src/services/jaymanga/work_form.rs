@@ -740,7 +740,8 @@ fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: 
                                             }
                                         }
 
-                                        imported_count.set(*imported_count.read() + ok_count);
+                                        let prev = *imported_count.read();
+                                        imported_count.set(prev + ok_count);
                                         import_status.set(Some(format!(
                                             "✅ Chapitre {next_ch_num} créé — {ok_count}/{} page(s) importée(s)",
                                             files.len()
@@ -759,10 +760,11 @@ fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: 
                         for (idx, path) in selected_files.read().iter().enumerate() {
                             {
                                 let filename = path.rsplit(['/', '\\']).next().unwrap_or(path).to_string();
+                                let idx_display = idx + 1;
                                 rsx! {
                                     div {
                                         style: "display: flex; align-items: center; gap: 8px; padding: 4px 8px; background: {c.bg_secondary}; border-radius: 2px; font-size: 11px;",
-                                        span { style: "color: {c.text_muted}; min-width: 20px;", "{idx_display}", idx_display = idx + 1 }
+                                        span { style: "color: {c.text_muted}; min-width: 20px;", "{idx_display}" }
                                         span { style: "font-size: 12px;", "🖼️" }
                                         span { style: "color: {c.text_secondary}; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;", "{filename}" }
                                     }
@@ -795,10 +797,14 @@ fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: 
                                 "{chapters_count} chapitre(s), {total_pages} page(s) importées"
                             }
                             if *imported_count.read() > 0 {
-                                p {
-                                    style: "font-size: 11px; color: {c.accent_green}; margin-top: 2px;",
-                                    "+ {imported_display} page(s) ajoutée(s) cette session",
-                                    imported_display = *imported_count.read(),
+                                {
+                                    let imported_display = *imported_count.read();
+                                    rsx! {
+                                        p {
+                                            style: "font-size: 11px; color: {c.accent_green}; margin-top: 2px;",
+                                            "+ {imported_display} page(s) ajoutée(s) cette session"
+                                        }
+                                    }
                                 }
                             }
                         }

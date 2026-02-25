@@ -255,6 +255,8 @@ pub fn Reader(state: Signal<JayMangaState>) -> Element {
     let reader_height = if is_fs { "100vh" } else { "100%" };
     let zoom = *zoom_level.read();
     let zoom_pct = (zoom * 100.0) as i32;
+    let is_bookmarked = *bookmarked.read();
+    let fav_top = if is_bookmarked { 40 } else { 8 };
 
     rsx! {
         div {
@@ -485,7 +487,7 @@ pub fn Reader(state: Signal<JayMangaState>) -> Element {
                 // Indicateur favori (coin supérieur gauche, sous le marque-page)
                 if *is_favorited.read() {
                     div {
-                        style: "position: absolute; top: {if *bookmarked.read() { 40 } else { 8 }}px; left: 8px; padding: 4px 8px; background: #ef444490; border-radius: 4px; font-size: 12px; color: white; font-weight: 600; z-index: 20;",
+                        style: "position: absolute; top: {fav_top}px; left: 8px; padding: 4px 8px; background: #ef444490; border-radius: 4px; font-size: 12px; color: white; font-weight: 600; z-index: 20;",
                         "❤️ Favori"
                     }
                 }
