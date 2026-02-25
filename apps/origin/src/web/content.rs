@@ -2172,6 +2172,173 @@ Central utilise une interface native performante construite avec Dioxus, sans we
             screenshots: vec![],
             banner_url: None,
         });
+
+        // Social & Communication
+        services.push(ServiceInfo {
+            id: "jay1tribu".to_string(),
+            name: "Jay1Tribu".to_string(),
+            short_description: "Messagerie P2P, tribus et salons — communication souveraine".to_string(),
+            full_description: r#"# Jay1Tribu
+
+**Jay1Tribu** est le service de messagerie pair-à-pair et de gestion de communautés de Miyukini.
+
+## Fonctionnalités
+
+### Messagerie directe
+- Conversations privées entre deux COGs
+- Envoi de fichiers et images (restreint aux amis)
+- File d'attente hors-ligne : vos messages partent dès que la connexion revient
+
+### Tribus
+- Créez des groupes (tribus) avec vos proches ou collègues
+- Rôles : Chef, Admin, Membre (personnalisables)
+- Invitations sécurisées entre COGs
+
+### Salons
+- Salons directs (1-à-1) ou collectifs (au sein d'une tribu)
+- Historique complet stocké localement par KindMother
+- Recherche dans les messages
+
+### Présence & hors-ligne
+- Indicateur de présence en temps réel via le MWS
+- Mode hors-ligne natif : lecture, écriture, création de salons — tout fonctionne
+- Les messages en attente sont distribués automatiquement à la reconnexion
+
+## Intégration MWS
+
+Jay1Tribu utilise le transport MWS chiffré pour :
+- Dispatcher les messages en temps réel
+- Synchroniser la présence des amis
+- Distribuer les invitations de tribu
+
+## Architecture
+
+Persistance via KindMother ou SQLite direct (optionnel). Transport via MwsTransportSender avec chiffrement C-2."#.to_string(),
+            category: ServiceCategory::Social,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.1.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(10),
+            website_url: Some("https://miyukini.com/services/jay1tribu".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
+
+        // Rendez-vous & Réservation
+        services.push(ServiceInfo {
+            id: "jayrdv".to_string(),
+            name: "JayRDV".to_string(),
+            short_description: "Prise de rendez-vous et réservation en ligne".to_string(),
+            full_description: r#"# JayRDV
+
+**JayRDV** est le service de prise de rendez-vous et de réservation pour les professionnels et les particuliers.
+
+## Fonctionnalités
+
+### Pour les professionnels
+- Profil professionnel avec secteur d'activité, photo, contact
+- Gestion des praticiens/collaborateurs avec rôles (Admin, Manager, Praticien)
+- Définition des services/prestations (durée, prix, catégorie)
+- Gestion des ressources (salles, équipements, personnel)
+- Plannings récurrents par jour de la semaine
+- Exceptions (congés, fermetures, absences)
+- Paramètres avancés : politique d'annulation, préavis, liste d'attente, acomptes
+
+### Pour les clients
+- Réservation de créneaux en ligne
+- Historique des rendez-vous
+- Rappels multi-canal (SMS, Email, Push) via CaringNanny
+- Annulation et report
+
+### Gestion des créneaux
+- Statuts : Disponible → Réservé temporairement → Confirmé → Bloqué
+- Hold temporaire de 10 min (panier)
+- Round-robin entre praticiens (optionnel)
+
+### Cycle de vie des rendez-vous
+- Pending → Confirmed → Completed / NoShow / Cancelled
+- Suivi des no-shows par client
+- Annulation par client ou professionnel
+
+## Intégrations
+
+- **JayKoa** : synchronisation avec le calendrier
+- **JayXpose** : publication de la page de réservation sur la vitrine
+- **MiyuNotify** : rappels automatiques
+
+## Données souveraines
+
+Toutes les données de rendez-vous restent sur votre COG. Aucun intermédiaire cloud."#.to_string(),
+            category: ServiceCategory::Commerce,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.1.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(5),
+            website_url: Some("https://miyukini.com/services/jayrdv".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
+
+        // Commerce & Point de vente
+        services.push(ServiceInfo {
+            id: "jayshop".to_string(),
+            name: "JayShop".to_string(),
+            short_description: "Point de vente et vente en ligne — caisse et tickets".to_string(),
+            full_description: r#"# JayShop
+
+**JayShop** est le service commerce famille Jay pour la gestion des ventes, du point de vente (PoS) et de la vente en ligne.
+
+## Fonctionnalités
+
+### Gestion des tickets (ventes)
+- Création de tickets : Draft → Open → Paid / Refunded / Cancelled
+- Source : Point de vente (PoS) ou vente en ligne
+- Historique complet des transactions
+
+### Point de vente
+- Interface caisse rapide
+- Scan de produits
+- Calcul automatique des taxes (multi-taux)
+- Réductions et promotions prédéfinies
+- Gestion des sessions de caisse
+
+### Paiements
+- Encaissement multi-moyens
+- Rendu de monnaie
+- Suivi des paiements en attente
+
+### Rapports et KPIs
+- Chiffre d'affaires par période
+- Produits les plus vendus
+- Rapports de caisse journaliers
+
+## Intégrations
+
+- **JayXpose** : synchronisation du catalogue produits et des stocks
+- **JayKonta** : pipeline comptable automatique (factures, TVA, rapports)
+- **JayFestival** : ventes lors d'événements
+
+## Architecture
+
+Persistance via KindMother avec chiffrement libSQL. Pipeline comptable vers JayKonta automatisé."#.to_string(),
+            category: ServiceCategory::Commerce,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.1.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(3),
+            website_url: Some("https://miyukini.com/services/jayshop".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
     }
 
     // ─────────────────────────────────────────────────────────────────────────
