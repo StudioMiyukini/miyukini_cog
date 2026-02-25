@@ -30,7 +30,7 @@ db-encryption = ["dep:kindmother-db-key", "rusqlite/bundled-sqlcipher"]
 
 [lints.rust]
 unsafe_code = "forbid"
-missing_docs = "warn"
+missing_docs = "allow"
 
 [lints.clippy]
 all = { level = "warn", priority = -1 }

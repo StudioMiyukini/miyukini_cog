@@ -13,7 +13,7 @@ mod day_view;
 mod month_view;
 mod schedule_view;
 mod event_form;
-mod sync_service;
+pub mod sync_service;
 
 pub use sidebar::JayKoaSidebar;
 pub use components::*;

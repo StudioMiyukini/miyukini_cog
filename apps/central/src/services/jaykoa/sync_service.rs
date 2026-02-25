@@ -159,7 +159,7 @@ impl JayFestivalSync {
             recurrence_rule: None,
             reminders_json: None,
             created_at: Some(now.clone()),
-            updated_at: Some(now),
+            updated_at: Some(now.clone()),
             last_synced_at: Some(now),
         };
         if let Err(e) = koa_db.reflect_upsert(&entry) {

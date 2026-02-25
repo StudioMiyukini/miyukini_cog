@@ -45,6 +45,7 @@ tracing = "0.1"
 default = ["legacy-sqlite"]
 legacy-sqlite = ["rusqlite"]
 kindmother-only = []
+db-encryption = ["kindmother-db-key"]
 
 # Note: eGUI supprimé — migration vers Tauri + React/TypeScript
 # Voir docs/implementation/Miyukini - Plan Migration Tauri React TypeScript.md

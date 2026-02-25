@@ -51,6 +51,7 @@ miyukiniwatch = { path = "../../crates/miyukiniwatch" }
 jay1tribu = { path = "../../crates/jay1tribu" }
 miyuclicker = { path = "../../crates/miyuclicker" }
 lord_of_the_castle = { path = "../../crates/lord_of_the_castle" }
+jaymanga = { path = "../../crates/jaymanga" }
 
 [features]
 default = []

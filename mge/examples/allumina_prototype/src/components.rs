@@ -24,25 +24,57 @@ pub struct MoveTarget {
 impl Component for MoveTarget {}
 
 /// Identifiant de sprite pour le rendu
-/// - 0 : joueur (Test_joueur.png)
-/// - 1 : mob (Test_mob.png)
-/// - 2 : boss (Test_boss.png)
-/// - 3 : elite (Test_elite.png)
-/// - 4 : archer (Test_archer_follower.png)
-/// - 5 : guerrier (Test_guerrier_follower.png)
+/// - 0–9   : Knight Idle (10 frames)
+/// - 10–17 : Knight Walk (8 frames)
+/// - 18–27 : Knight Dead (10 frames)
+/// - 28–32 : Mobs statiques (5 types)
+/// - 33–36 : NPC village (forgeron, recruteur, serveuse, tavernier)
+/// - 37    : Maison (Medieval_Building_06)
+/// - 38–39 : Arbres (arbre_a, arbre_b)
 pub struct EntitySprite {
     pub sprite_id: u8,
 }
 impl Component for EntitySprite {}
 
+/// Indices sprites NPC dans l'atlas
+pub const NPC_SPRITE_BASE: u8 = 33;
+/// Indice sprite maison dans l'atlas
+pub const HOUSE_SPRITE_ID: u8 = 37;
+/// Indices sprites arbres dans l'atlas
+pub const TREE_SPRITE_BASE: u8 = 38;
+
 impl EntitySprite {
+    /// Joueur — frame 0 (Knight Idle frame 0). AnimSprite pilote ensuite sprite_id.
     pub fn player() -> Self {
         Self { sprite_id: 0 }
     }
+    /// Mob statique — indices 28–32 (voir animation::MOB_SPRITE_BASE).
     pub fn mob(kind: u8) -> Self {
-        Self { sprite_id: (kind % 5) + 1 }
+        Self { sprite_id: crate::animation::MOB_SPRITE_BASE + (kind % 5) }
+    }
+    /// NPC village — indices 33–36 (forgeron=0, recruteur=1, serveuse=2, tavernier=3).
+    pub fn npc(kind: u8) -> Self {
+        Self { sprite_id: NPC_SPRITE_BASE + (kind % 4) }
+    }
+    /// Maison — indice 37.
+    pub fn house() -> Self {
+        Self { sprite_id: HOUSE_SPRITE_ID }
+    }
+    /// Arbre — indices 38–39 (type_a=0, type_b=1).
+    pub fn tree(kind: u8) -> Self {
+        Self { sprite_id: TREE_SPRITE_BASE + (kind % 2) }
     }
 }
+
+/// Tag : entité NPC (non combattante, affichage nom)
+pub struct NpcMarker {
+    pub name: &'static str,
+}
+impl Component for NpcMarker {}
+
+/// Tag : entité décoration statique (maison, arbre) — non interactive
+pub struct DecoMarker;
+impl Component for DecoMarker {}
 
 /// Input en attente depuis la frame winit
 #[derive(Default)]

@@ -16,6 +16,7 @@ Les **trackers** sont les **douaniers du réseau** Miyukini Webway. Ils assurent
 - Pools par version des Cores
 - Gestion des whitelists, blacklists, quarantaines
 - Catalogue web (port 80) : services WEB publics ; catalogue de Lobbys (visible depuis les services)
+- Manifestes de services : métadonnées structurées par service, cache Tracker, API de découverte enrichie
 - Monitoring réseau et congestion
 - Fermeture de connexions (confinement)
 - Systèmes passifs et actifs
@@ -189,7 +190,7 @@ Les COGs en quarantaine sont temporairement isolés et ne peuvent pas se connect
 
 ---
 
-## 5. Catalogue web (port 80) et catalogue de Lobbys
+## 5. Catalogue web (port 80), catalogue de Lobbys et manifestes de services
 
 ### 5.1 Service web de portail — services WEB publics uniquement
 
@@ -211,6 +212,7 @@ Quand un COG se présente au Tracker (après validation du Permis de circulation
 | **Surfaces web publiques** | Services web exposés au catalogue du portail (port 80) |
 | **Attentes et désirs** | Ce que le COG propose et/ou cherche à joindre |
 | **Acceptation de connexions** | Si le COG accepte des connexions entrantes |
+| **Manifestes de services** | Métadonnées structurées par service exposé (voir 5.5) |
 
 ### 5.3 Catalogue de Lobbys (visible depuis les services)
 
@@ -236,6 +238,86 @@ Si le COG **accepte des connexions** pour certains services et ports, cela crée
 | **Dé-ban** | Manuel uniquement par l'utilisateur du COG hôte |
 
 Voir [MWS - Lobbys, Favoris et Amis](../lobbys/MWS%20-%20Lobbys%20Favoris%20et%20Amis.md) pour les détails.
+
+### 5.5 Manifestes de services
+
+#### 5.5.1 Principe
+
+Les **manifestes de services** sont des blocs de métadonnées structurés que chaque COG **déclare au Tracker** lors de sa présentation (en complément des surfaces de connexion, surfaces web et Lobbys). Ils décrivent le contenu et les caractéristiques des services exposés par le COG de manière standardisée, permettant une **découverte enrichie** sans que les COGs demandeurs aient besoin de contacter chaque COG individuellement.
+
+| Caractéristique | Description |
+|-----------------|-------------|
+| **Déclaration volontaire** | Le COG déclare ses manifestes lors de la connexion au Tracker et les met à jour périodiquement. |
+| **Format standardisé** | Chaque type de service définit un schéma de manifeste. Le format est générique (enveloppe commune) avec un contenu spécifique par service. |
+| **Cache Tracker** | Le Tracker met en cache les manifestes reçus et les expose à la découverte. |
+| **Pas de données métier** | Les manifestes ne contiennent que des **métadonnées publiques** (titres, compteurs, formats). Aucune donnée sensible, aucune donnée utilisateur, aucun contenu protégé. |
+| **Opt-in** | Chaque COG contrôle ce qu'il expose dans ses manifestes. Un service peut être déclaré dans le Passeport sans manifeste associé. |
+
+#### 5.5.2 Structure d'un manifeste
+
+Chaque manifeste suit une **enveloppe commune** :
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| `service_id` | TEXT | Identifiant normalisé du service (`jaymanga`, `jayshop`, `jayxpose`, etc.). |
+| `manifest_version` | TEXT | Version du schéma de manifeste (ex. `1.0`). |
+| `cog_id` | TEXT | Identifiant du COG déclarant. |
+| `updated_at` | TEXT (ISO 8601) | Date de dernière mise à jour du manifeste par le COG. |
+| `payload` | JSON | Contenu spécifique au service (schéma défini par chaque service). |
+
+#### 5.5.3 Cycle de vie du manifeste
+
+```
+COG se présente au Tracker (contrôle tracker)
+  → Passeport + Permis de circulation + Surfaces + Manifestes
+  → Le Tracker valide le Permis (contrôle tracker habituel)
+  → Le Tracker enregistre/met à jour les manifestes en cache
+  → Le COG peut mettre à jour ses manifestes à tout moment via une annonce de mise à jour
+
+COG se déconnecte
+  → Les manifestes restent en cache (statut passe à offline)
+  → Le Tracker conserve le cache pendant une durée configurable (défaut : 7 jours)
+  → Après expiration sans reconnexion → manifestes purgés
+```
+
+#### 5.5.4 Requête de manifestes
+
+Les COGs connectés au Tracker peuvent interroger les manifestes en cache :
+
+| Requête | Description |
+|---------|-------------|
+| **Par service** | Liste tous les manifestes d'un service donné (ex. tous les manifestes `jaymanga`). |
+| **Par COG** | Liste tous les manifestes d'un COG spécifique. |
+| **Par service + filtre** | Liste les manifestes d'un service avec des critères de filtrage (définis par chaque schéma de service). |
+| **Incrémentiel** | Liste uniquement les manifestes mis à jour depuis un timestamp donné (`since`). |
+
+Les requêtes sont filtrées par pool (même `core_version.MAJOR`), comme toutes les réponses de découverte du Tracker (voir section 3.3).
+
+#### 5.5.5 Manifeste de présence
+
+En plus des manifestes de services, le Tracker maintient un **manifeste de présence** implicite pour chaque COG connecté :
+
+| Champ | Description |
+|-------|-------------|
+| `cog_id` | Identifiant du COG. |
+| `online_status` | `online` / `offline`. |
+| `last_seen_at` | Dernière activité détectée. |
+| `services_declared` | Liste des `service_id` déclarés dans les manifestes. |
+| `network_address` | Adresse réseau (pour redirection). |
+
+Ce manifeste de présence est consultable en lot (`batch`) pour permettre aux COGs de vérifier la disponibilité de multiples COGs en une seule requête.
+
+#### 5.5.6 Limites et protection
+
+| Mesure | Description |
+|--------|-------------|
+| **Taille maximale** | Chaque manifeste est limité en taille (défaut : 64 Ko par manifeste). Les manifestes excédant la limite sont rejetés. |
+| **Nombre maximal** | Un COG ne peut déclarer qu'un manifeste par `service_id`. |
+| **Validation syntaxique** | Le Tracker valide la structure de l'enveloppe (systèmes passifs). Le contenu du `payload` est opaque pour le Tracker mais sa taille est contrôlée. |
+| **Throttling** | Les mises à jour de manifestes sont limitées (défaut : 1 mise à jour par service par tranche de 5 minutes). |
+| **Pas de relai** | Le Tracker ne relaie pas les manifestes vers d'autres trackers. Chaque tracker maintient son propre cache basé sur les COGs de ses pools. |
+
+Le protocole détaillé des manifestes de services est décrit dans [MWS - Manifestes de Services](../protocole/MWS%20-%20Manifestes%20de%20Services.md).
 
 ---
 
@@ -366,7 +448,9 @@ Voir [MiyuWebwayTracker - Active Systems Contract](../../tools/MiyuWebwayTracker
 |           TRACKER              |
 |--------------------------------|
 | CONTRÔLE :                     |
-| - Identité et Permis de circulation (contrôle tracker) |
+| - Identité et Permis de       |
+|   circulation (contrôle        |
+|   tracker)                     |
 | - Whitelists / Blacklists      |
 | - Quarantaines                 |
 |--------------------------------|
@@ -374,8 +458,14 @@ Voir [MiyuWebwayTracker - Active Systems Contract](../../tools/MiyuWebwayTracker
 | - Isolation par core_version   |
 | - Pas de connexion inter-pool  |
 |--------------------------------|
-| CATALOGUE WEB (port 80) : services WEB publics (URLs, recherche). Lobbys visibles depuis les services COG. |
-| - Chemins / redirections vers les hôtes                       |
+| CATALOGUES :                   |
+| - Web (port 80) : services WEB |
+|   publics (URLs, recherche)    |
+| - Lobbys (depuis les services) |
+| - Manifestes de services       |
+|   (métadonnées par service,    |
+|    cache et découverte)        |
+| - Chemins / redirections       |
 |--------------------------------|
 | MONITORING :                   |
 | - Journalisation               |
@@ -396,10 +486,11 @@ Voir [MiyuWebwayTracker - Active Systems Contract](../../tools/MiyuWebwayTracker
 - [MWS - Origin](./MWS%20-%20Origin.md)
 - [MWS - Relays](./MWS%20-%20Relays.md)
 - [MWS - Lobbys, Favoris et Amis](../lobbys/MWS%20-%20Lobbys%20Favoris%20et%20Amis.md)
+- [MWS - Manifestes de Services](../protocole/MWS%20-%20Manifestes%20de%20Services.md)
 - [MiyuWebwayTracker - Passive Systems Contract](../../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md)
 - [MiyuWebwayTracker - Active Systems Contract](../../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md)
 
 ---
 
-**Version :** 1.0  
+**Version :** 1.1
 **Classification :** Documentation MWS — Acteurs

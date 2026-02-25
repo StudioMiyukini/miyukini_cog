@@ -9,6 +9,7 @@ use jaykonta::data::JayKontaDb;
 use jayfestival::data::JayFestivalDb;
 use jaykoa::data::JayKoaDb;
 use jay1tribu::Jay1TribuDb;
+use jaymanga::data::JayMangaDb;
 use miyukini_central::auth::{CentralAuthDb, CentralProfile};
 use miyukiniwatch::MiyukiniWatchDb;
 
@@ -28,6 +29,8 @@ pub struct ServiceConnections {
     pub miyukiniwatch: Arc<MiyukiniWatchDb>,
     /// Base Jay1Tribu (tribus, salons, amis, messages — chat/tribu pleins uniquement si Webway connecté).
     pub jay1tribu: Arc<Jay1TribuDb>,
+    /// Base JayManga (catalogue manga, lecteur, ventes, agrégation).
+    pub jaymanga: Arc<JayMangaDb>,
     /// Repertoire des sauvegardes MiyuClicker.
     pub miyuclicker_data_dir: PathBuf,
 }
@@ -49,6 +52,8 @@ impl ServiceConnections {
             .map_err(|e| format!("MiyukiniWatch DB: {e}"))?;
         let jay1tribu = Jay1TribuDb::open(base_path.join("jay1tribu.db"))
             .map_err(|e| format!("Jay1Tribu DB: {e}"))?;
+        let jaymanga = JayMangaDb::open(base_path.join("jaymanga.db"))
+            .map_err(|e| format!("JayManga DB: {e}"))?;
 
         Ok(Self {
             auth_db: Arc::new(auth_db),
@@ -58,6 +63,7 @@ impl ServiceConnections {
             jaykoa: Arc::new(jaykoa),
             miyukiniwatch: Arc::new(miyukiniwatch),
             jay1tribu: Arc::new(jay1tribu),
+            jaymanga: Arc::new(jaymanga),
             miyuclicker_data_dir: base_path.to_path_buf(),
         })
     }

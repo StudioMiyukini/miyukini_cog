@@ -3266,6 +3266,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "jaymanga"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "image",
+ "kindmother",
+ "kindmother-client",
+ "kindmother-db-adapter",
+ "kindmother-db-key",
+ "miyukini-kernel",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "uuid",
+]
+
+[[package]]
 name = "jayrdv"
 version = "0.1.0"
 dependencies = [
@@ -3365,6 +3386,19 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "kindmother-db-adapter"
+version = "0.1.0"
+dependencies = [
+ "argon2",
+ "base64",
+ "chrono",
+ "getrandom 0.2.17",
+ "sha2",
+ "subtle",
  "uuid",
 ]
 
@@ -4073,6 +4107,7 @@ dependencies = [
  "jayfestival",
  "jaykoa",
  "jaykonta",
+ "jaymanga",
  "jayxpose",
  "lord_of_the_castle",
  "miyuclicker",

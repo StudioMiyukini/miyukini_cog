@@ -15,11 +15,24 @@ use mge_plugin_spatial::Position2D;
 use crate::ai::MOB_SPEED;
 use crate::components::{AlluminaInput, MoveTarget, PlayerMarker};
 use crate::pathfinding::PathFollow;
+use crate::stats::CharacterStats;
 
-const PLAYER_SPEED: f32 = 5.0; // tiles/sec
+/// Vitesse joueur (tiles/sec) dérivée de l'Agi : 3.0 + (Agi - 5) × 0.2
+/// Agi 1→2.2  Agi 3→2.6  Agi 5→3.0  Agi 8→3.6  Agi 10→4.0
+fn player_speed_from_agi(agi: u8) -> f32 {
+    3.0 + (agi as f32 - 5.0) * 0.2
+}
 
 pub fn movement_system(world: &mut mge_ecs::World, ctx: &mut mge_core::Context) {
     let dt = ctx.delta_secs();
+
+    // Lire Agi du joueur pour calculer la vitesse (spec : base_speed = 3.0 + (Agi-5)×0.2)
+    let player_agi: u8 = world
+        .iter2::<PlayerMarker, CharacterStats>()
+        .next()
+        .map(|(_, _, cs)| cs.agi)
+        .unwrap_or(5);
+    let player_speed = player_speed_from_agi(player_agi);
 
     // ── Mouvement clavier (joueur) ─────────────────────────────────────────────
     // Lire la direction clavier depuis le singleton AlluminaInput
@@ -37,7 +50,7 @@ pub fn movement_system(world: &mut mge_ecs::World, ctx: &mut mge_core::Context) 
             .map(|(id, _, _)| id);
 
         if let Some(pid) = pid {
-            let step = PLAYER_SPEED * dt;
+            let step = player_speed * dt;
             if let Some(pos) = world.get_mut::<Position2D>(pid) {
                 pos.x = (pos.x + move_dir.0 * step).clamp(0.5, 63.5);
                 pos.y = (pos.y + move_dir.1 * step).clamp(0.5, 63.5);
@@ -66,7 +79,7 @@ pub fn movement_system(world: &mut mge_ecs::World, ctx: &mut mge_core::Context) 
             let dx = nx - cx;
             let dy = ny - cy;
             let dist = (dx * dx + dy * dy).sqrt();
-            let step = PLAYER_SPEED * dt;
+            let step = player_speed * dt;
             let reached = dist < 0.08 || step >= dist;
 
             // Mettre à jour la position

@@ -82,6 +82,7 @@ members = [
     "crates/jay1tribu",
     "crates/miyukiniwatch",
     "crates/miyukinibb",
+    "crates/jaymanga",
 
     # === Services avec UI native ===
     "crates/lord_of_the_castle",  # MiyukiniSurvivor — Dioxus + Blitz

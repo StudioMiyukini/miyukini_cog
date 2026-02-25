@@ -170,6 +170,7 @@ pub fn GameView(props: GameViewProps) -> Element {
 }
 
 /// Stats de jeu extraites d'une sauvegarde.
+#[allow(dead_code)]
 struct MiyuClickerStats {
     play_time: String,
     population: String,
@@ -180,6 +181,7 @@ struct MiyuClickerStats {
 }
 
 /// Charge les stats depuis le premier slot occupe.
+#[allow(dead_code)]
 fn load_miyuclicker_stats(data_dir: &std::path::Path) -> Option<MiyuClickerStats> {
     let slots = miyuclicker::save::slot_list(data_dir);
     let first_occupied = slots.iter().find(|s| s.occupied)?;

@@ -15,7 +15,6 @@ use kindmother::{InstanceIdentity, InstanceType};
 use kindmother_client::{ClientError, KindMotherClient};
 use std::collections::HashMap;
 use std::sync::Arc;
-use std::sync::OnceLock;
 use thiserror::Error;
 use tokio::sync::OnceCell;
 
@@ -45,16 +44,12 @@ const DEFAULT_KINDMOTHER_ADDR: &str = "127.0.0.1:50051";
 /// Client global partagé (singleton).
 static CLIENT: OnceCell<Arc<KindMotherClient>> = OnceCell::const_new();
 
-/// Runtime Tokio global pour exécuter les appels async.
-static RUNTIME: OnceLock<tokio::runtime::Runtime> = OnceLock::new();
-
-fn get_runtime() -> &'static tokio::runtime::Runtime {
-    RUNTIME.get_or_init(|| {
-        tokio::runtime::Builder::new_multi_thread()
-            .enable_all()
-            .build()
-            .expect("Failed to create Tokio runtime")
-    })
+/// Exécute un future de manière bloquante, compatible avec un runtime tokio existant (Dioxus).
+fn run_blocking<F: std::future::Future>(f: F) -> F::Output {
+    match tokio::runtime::Handle::try_current() {
+        Ok(handle) => tokio::task::block_in_place(|| handle.block_on(f)),
+        Err(_) => run_blocking(f),
+    }
 }
 
 /// Base de données JayKoa via KindMother Client.
@@ -70,7 +65,7 @@ pub struct JayKoaDb {
 impl JayKoaDb {
     /// Initialise la connexion globale au service KindMother (synchrone).
     pub fn init_global_sync(addr: Option<&str>) -> Result<(), DbError> {
-        get_runtime().block_on(Self::init_global_async(addr))
+        run_blocking(Self::init_global_async(addr))
     }
 
     /// Initialise la connexion globale au service KindMother (async).
@@ -106,7 +101,7 @@ impl JayKoaDb {
 
     /// Initialise le schéma de la base de données (synchrone).
     pub fn init_schema_sync(&self) -> Result<(), DbError> {
-        get_runtime().block_on(self.init_schema_async())
+        run_blocking(self.init_schema_async())
     }
 
     /// Initialise le schéma de la base de données (async).
@@ -185,7 +180,7 @@ impl JayKoaDb {
 
     /// Insère un nouvel agenda (synchrone).
     pub fn agenda_insert(&self, a: &Agenda) -> Result<(), DbError> {
-        get_runtime().block_on(self.agenda_insert_async(a))
+        run_blocking(self.agenda_insert_async(a))
     }
 
     async fn agenda_insert_async(&self, a: &Agenda) -> Result<(), DbError> {
@@ -214,7 +209,7 @@ impl JayKoaDb {
 
     /// Liste tous les agendas d'un profil (synchrone).
     pub fn agendas_by_profile(&self, profile_id: &str) -> Result<Vec<Agenda>, DbError> {
-        get_runtime().block_on(self.agendas_by_profile_async(profile_id))
+        run_blocking(self.agendas_by_profile_async(profile_id))
     }
 
     async fn agendas_by_profile_async(&self, profile_id: &str) -> Result<Vec<Agenda>, DbError> {
@@ -232,7 +227,7 @@ impl JayKoaDb {
 
     /// Met à jour la visibilité d'un agenda (synchrone).
     pub fn agenda_set_visible(&self, agenda_id: &str, visible: bool) -> Result<(), DbError> {
-        get_runtime().block_on(self.agenda_set_visible_async(agenda_id, visible))
+        run_blocking(self.agenda_set_visible_async(agenda_id, visible))
     }
 
     async fn agenda_set_visible_async(&self, agenda_id: &str, visible: bool) -> Result<(), DbError> {
@@ -248,7 +243,7 @@ impl JayKoaDb {
 
     /// Supprime un agenda et tous ses engagements temporels (synchrone).
     pub fn agenda_delete(&self, agenda_id: &str) -> Result<(), DbError> {
-        get_runtime().block_on(self.agenda_delete_async(agenda_id))
+        run_blocking(self.agenda_delete_async(agenda_id))
     }
 
     async fn agenda_delete_async(&self, agenda_id: &str) -> Result<(), DbError> {
@@ -291,7 +286,7 @@ impl JayKoaDb {
 
     /// Insère un nouvel engagement temporel (synchrone).
     pub fn entry_insert(&self, e: &TemporalEntry) -> Result<(), DbError> {
-        get_runtime().block_on(self.entry_insert_async(e))
+        run_blocking(self.entry_insert_async(e))
     }
 
     async fn entry_insert_async(&self, e: &TemporalEntry) -> Result<(), DbError> {
@@ -330,7 +325,7 @@ impl JayKoaDb {
 
     /// Met à jour un engagement temporel interne (synchrone).
     pub fn entry_update(&self, e: &TemporalEntry) -> Result<(), DbError> {
-        get_runtime().block_on(self.entry_update_async(e))
+        run_blocking(self.entry_update_async(e))
     }
 
     async fn entry_update_async(&self, e: &TemporalEntry) -> Result<(), DbError> {
@@ -363,7 +358,7 @@ impl JayKoaDb {
 
     /// Supprime un engagement temporel interne (synchrone).
     pub fn entry_delete(&self, entry_id: &str) -> Result<(), DbError> {
-        get_runtime().block_on(self.entry_delete_async(entry_id))
+        run_blocking(self.entry_delete_async(entry_id))
     }
 
     async fn entry_delete_async(&self, entry_id: &str) -> Result<(), DbError> {
@@ -379,7 +374,7 @@ impl JayKoaDb {
 
     /// Récupère un engagement temporel par son ID (synchrone).
     pub fn entry_by_id(&self, entry_id: &str) -> Result<Option<TemporalEntry>, DbError> {
-        get_runtime().block_on(self.entry_by_id_async(entry_id))
+        run_blocking(self.entry_by_id_async(entry_id))
     }
 
     async fn entry_by_id_async(&self, entry_id: &str) -> Result<Option<TemporalEntry>, DbError> {
@@ -404,7 +399,7 @@ impl JayKoaDb {
         start: &str,
         end: &str,
     ) -> Result<Vec<TemporalEntry>, DbError> {
-        get_runtime().block_on(self.entries_in_range_async(agenda_ids, start, end))
+        run_blocking(self.entries_in_range_async(agenda_ids, start, end))
     }
 
     async fn entries_in_range_async(
@@ -440,7 +435,7 @@ impl JayKoaDb {
 
     /// Liste tous les engagements temporels d'un agenda (synchrone).
     pub fn entries_by_agenda(&self, agenda_id: &str) -> Result<Vec<TemporalEntry>, DbError> {
-        get_runtime().block_on(self.entries_by_agenda_async(agenda_id))
+        run_blocking(self.entries_by_agenda_async(agenda_id))
     }
 
     async fn entries_by_agenda_async(&self, agenda_id: &str) -> Result<Vec<TemporalEntry>, DbError> {
@@ -487,7 +482,7 @@ impl JayKoaDb {
 
     /// Insère ou met à jour un reflet externe (synchrone).
     pub fn reflect_upsert(&self, e: &TemporalEntry) -> Result<(), DbError> {
-        get_runtime().block_on(self.reflect_upsert_async(e))
+        run_blocking(self.reflect_upsert_async(e))
     }
 
     async fn reflect_upsert_async(&self, e: &TemporalEntry) -> Result<(), DbError> {
@@ -537,7 +532,7 @@ impl JayKoaDb {
         agenda_id: &str,
         source_service: &str,
     ) -> Result<(), DbError> {
-        get_runtime().block_on(self.reflect_clear_service_async(agenda_id, source_service))
+        run_blocking(self.reflect_clear_service_async(agenda_id, source_service))
     }
 
     async fn reflect_clear_service_async(
@@ -561,7 +556,7 @@ impl JayKoaDb {
 
     /// Récupère les paramètres utilisateur (synchrone).
     pub fn settings_get(&self, profile_id: &str) -> Result<UserSettings, DbError> {
-        get_runtime().block_on(self.settings_get_async(profile_id))
+        run_blocking(self.settings_get_async(profile_id))
     }
 
     async fn settings_get_async(&self, profile_id: &str) -> Result<UserSettings, DbError> {
@@ -602,7 +597,7 @@ impl JayKoaDb {
 
     /// Enregistre ou met à jour les paramètres utilisateur (synchrone).
     pub fn settings_upsert(&self, s: &UserSettings) -> Result<(), DbError> {
-        get_runtime().block_on(self.settings_upsert_async(s))
+        run_blocking(self.settings_upsert_async(s))
     }
 
     async fn settings_upsert_async(&self, s: &UserSettings) -> Result<(), DbError> {
@@ -641,7 +636,7 @@ impl JayKoaDb {
         start: &str,
         end: &str,
     ) -> Result<Vec<TemporalConflict>, DbError> {
-        get_runtime().block_on(self.detect_conflicts_async(agenda_ids, start, end))
+        run_blocking(self.detect_conflicts_async(agenda_ids, start, end))
     }
 
     async fn detect_conflicts_async(
@@ -695,7 +690,7 @@ impl JayKoaDb {
         start: &str,
         end: &str,
     ) -> Result<(bool, Vec<TemporalConflict>), DbError> {
-        get_runtime().block_on(self.check_conflict_async(profile_id, start, end))
+        run_blocking(self.check_conflict_async(profile_id, start, end))
     }
 
     async fn check_conflict_async(
@@ -721,7 +716,7 @@ impl JayKoaDb {
 
     /// Crée un agenda "Personnel" par défaut si l'utilisateur n'en a aucun (synchrone).
     pub fn ensure_default_agenda(&self, profile_id: &str) -> Result<String, DbError> {
-        get_runtime().block_on(self.ensure_default_agenda_async(profile_id))
+        run_blocking(self.ensure_default_agenda_async(profile_id))
     }
 
     async fn ensure_default_agenda_async(&self, profile_id: &str) -> Result<String, DbError> {
@@ -756,7 +751,7 @@ impl JayKoaDb {
 
     /// Vérification de la santé de la connexion (synchrone).
     pub fn health_check(&self) -> Result<bool, DbError> {
-        get_runtime().block_on(self.client.health_check()).map_err(DbError::from)
+        run_blocking(self.client.health_check()).map_err(DbError::from)
     }
 
     // -----------------------------------------------------------------------

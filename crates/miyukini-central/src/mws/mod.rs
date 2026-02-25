@@ -967,6 +967,7 @@ impl MwsStatusSummary {
 
 /// Informations pour afficher la carte JayXpose sur la Home (lien « Découvrir »).
 #[derive(Clone)]
+#[allow(dead_code)]
 struct HomeJayXposeInfo {
     base_url: String,
     slug: String,

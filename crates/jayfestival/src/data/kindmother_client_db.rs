@@ -57,6 +57,14 @@ fn get_runtime() -> &'static tokio::runtime::Runtime {
     })
 }
 
+/// Exécute un future de manière bloquante, compatible avec un runtime tokio existant (Dioxus).
+fn run_blocking<F: std::future::Future>(f: F) -> F::Output {
+    match tokio::runtime::Handle::try_current() {
+        Ok(handle) => tokio::task::block_in_place(|| handle.block_on(f)),
+        Err(_) => run_blocking(f),
+    }
+}
+
 fn hash_password(password: &str) -> String {
     let mut h = Sha256::new();
     h.update(password.as_bytes());
@@ -74,7 +82,7 @@ pub struct JayFestivalDb {
 impl JayFestivalDb {
     /// Initialise la connexion globale au service KindMother (synchrone).
     pub fn init_global_sync(addr: Option<&str>) -> Result<(), DbError> {
-        get_runtime().block_on(Self::init_global_async(addr))
+        run_blocking(Self::init_global_async(addr))
     }
 
     /// Initialise la connexion globale au service KindMother (async).
@@ -107,7 +115,7 @@ impl JayFestivalDb {
 
     /// Initialise le schéma de la base de données (synchrone).
     pub fn init_schema_sync(&self) -> Result<(), DbError> {
-        get_runtime().block_on(self.init_schema_async())
+        run_blocking(self.init_schema_async())
     }
 
     /// Initialise le schéma de la base de données (async).
@@ -205,7 +213,7 @@ impl JayFestivalDb {
         email: &str,
         password: &str,
     ) -> Result<Option<Profile>, DbError> {
-        get_runtime().block_on(self.profile_by_email_password_async(email, password))
+        run_blocking(self.profile_by_email_password_async(email, password))
     }
 
     async fn profile_by_email_password_async(
@@ -236,7 +244,7 @@ impl JayFestivalDb {
 
     /// Récupère un profil par id (synchrone).
     pub fn profile_by_id(&self, id: &str) -> Result<Option<Profile>, DbError> {
-        get_runtime().block_on(self.profile_by_id_async(id))
+        run_blocking(self.profile_by_id_async(id))
     }
 
     async fn profile_by_id_async(&self, id: &str) -> Result<Option<Profile>, DbError> {
@@ -258,7 +266,7 @@ impl JayFestivalDb {
         password: &str,
         user_type: &str,
     ) -> Result<String, DbError> {
-        get_runtime().block_on(self.profile_create_async(email, password, user_type))
+        run_blocking(self.profile_create_async(email, password, user_type))
     }
 
     async fn profile_create_async(
@@ -302,7 +310,7 @@ impl JayFestivalDb {
 
     /// Liste toutes les éditions (synchrone).
     pub fn editions_list(&self) -> Result<Vec<Edition>, DbError> {
-        get_runtime().block_on(self.editions_list_async())
+        run_blocking(self.editions_list_async())
     }
 
     async fn editions_list_async(&self) -> Result<Vec<Edition>, DbError> {
@@ -319,7 +327,7 @@ impl JayFestivalDb {
 
     /// Récupère une édition par id (synchrone).
     pub fn edition_by_id(&self, id: &str) -> Result<Option<Edition>, DbError> {
-        get_runtime().block_on(self.edition_by_id_async(id))
+        run_blocking(self.edition_by_id_async(id))
     }
 
     async fn edition_by_id_async(&self, id: &str) -> Result<Option<Edition>, DbError> {
@@ -355,7 +363,7 @@ impl JayFestivalDb {
 
     /// Liste tous les organisateurs (synchrone).
     pub fn organisateurs_list(&self) -> Result<Vec<Organisateur>, DbError> {
-        get_runtime().block_on(self.organisateurs_list_async())
+        run_blocking(self.organisateurs_list_async())
     }
 
     async fn organisateurs_list_async(&self) -> Result<Vec<Organisateur>, DbError> {
@@ -372,7 +380,7 @@ impl JayFestivalDb {
 
     /// Récupère un organisateur par id (synchrone).
     pub fn organisateur_by_id(&self, id: &str) -> Result<Option<Organisateur>, DbError> {
-        get_runtime().block_on(self.organisateur_by_id_async(id))
+        run_blocking(self.organisateur_by_id_async(id))
     }
 
     async fn organisateur_by_id_async(&self, id: &str) -> Result<Option<Organisateur>, DbError> {
@@ -409,7 +417,7 @@ impl JayFestivalDb {
 
     /// Liste les exposants (optionnellement filtrés par visible_repertoire) (synchrone).
     pub fn exposants_list(&self, visible_only: bool) -> Result<Vec<Exposant>, DbError> {
-        get_runtime().block_on(self.exposants_list_async(visible_only))
+        run_blocking(self.exposants_list_async(visible_only))
     }
 
     async fn exposants_list_async(&self, visible_only: bool) -> Result<Vec<Exposant>, DbError> {
@@ -425,7 +433,7 @@ impl JayFestivalDb {
 
     /// Récupère un exposant par id (synchrone).
     pub fn exposant_by_id(&self, id: &str) -> Result<Option<Exposant>, DbError> {
-        get_runtime().block_on(self.exposant_by_id_async(id))
+        run_blocking(self.exposant_by_id_async(id))
     }
 
     async fn exposant_by_id_async(&self, id: &str) -> Result<Option<Exposant>, DbError> {
@@ -469,7 +477,7 @@ impl JayFestivalDb {
         &self,
         edition_id: &str,
     ) -> Result<Vec<EditionExposant>, DbError> {
-        get_runtime().block_on(self.editions_exposants_by_edition_async(edition_id))
+        run_blocking(self.editions_exposants_by_edition_async(edition_id))
     }
 
     async fn editions_exposants_by_edition_async(
@@ -508,7 +516,7 @@ impl JayFestivalDb {
 
     /// Vérification de la santé de la connexion (synchrone).
     pub fn health_check(&self) -> Result<bool, DbError> {
-        get_runtime().block_on(self.client.health_check()).map_err(DbError::from)
+        run_blocking(self.client.health_check()).map_err(DbError::from)
     }
 
     // -----------------------------------------------------------------------

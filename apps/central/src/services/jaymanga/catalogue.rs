@@ -1,0 +1,156 @@
+//! Catalogue JayManga — liste des œuvres avec gestion CRUD.
+
+use dioxus::prelude::*;
+use crate::data::use_service_connections;
+use crate::state::use_app_state;
+use super::components::{PageHeader, Badge, EmptyState};
+use super::{JayMangaSection, JayMangaState};
+
+#[component]
+pub fn Catalogue(state: Signal<JayMangaState>) -> Element {
+    let c = use_app_state().read().current_theme.palette();
+    let conns = use_service_connections();
+
+    let db = &conns.read().jaymanga;
+    let works = db.work_list(&jaymanga::data::WorkFilters::default()).unwrap_or_default();
+    let work_count = works.len();
+
+    rsx! {
+        div {
+            style: "display: flex; flex-direction: column; gap: 16px;",
+
+            PageHeader {
+                title: "📖 Catalogue".to_string(),
+                subtitle: "Gérez vos œuvres manga".to_string(),
+                count: Some(work_count),
+                action_label: "Nouvelle œuvre".to_string(),
+                action_icon: "➕".to_string(),
+                on_action: move |_| {
+                    let mut s = state.write();
+                    s.editing_work_id = None;
+                    s.section = JayMangaSection::NouvelleOeuvre;
+                },
+            }
+
+            if works.is_empty() {
+                EmptyState {
+                    title: "Aucune œuvre".to_string(),
+                    message: "Ajoutez votre première œuvre manga pour commencer.".to_string(),
+                    icon: "📖".to_string(),
+                    action_label: "Créer une œuvre".to_string(),
+                    on_action: move |_| {
+                        let mut s = state.write();
+                        s.editing_work_id = None;
+                        s.section = JayMangaSection::NouvelleOeuvre;
+                    },
+                }
+            } else {
+                // Liste des œuvres
+                div {
+                    style: "display: flex; flex-direction: column; gap: 8px;",
+
+                    for work in works.iter() {
+                        {
+                            let work_id = work.id.clone().unwrap_or_default();
+                            let title = work.title.clone().unwrap_or_else(|| "Sans titre".to_string());
+                            let status = work.status.clone().unwrap_or_else(|| "draft".to_string());
+                            let pricing = work.pricing_model.clone().unwrap_or_else(|| "free".to_string());
+                            let price_cents = work.price.unwrap_or(0);
+                            let total_pages = work.total_pages.unwrap_or(0);
+                            let format = work.reading_format.clone().unwrap_or_else(|| "manga".to_string());
+                            let language = work.language.clone().unwrap_or_else(|| "fr".to_string());
+                            let chapter_count = db.chapter_list_by_work(&work_id).map(|v| v.len()).unwrap_or(0);
+
+                            let (status_color, status_label) = match status.as_str() {
+                                "published" => (c.accent_green, "Publié"),
+                                "draft" => (c.text_muted, "Brouillon"),
+                                "archived" => (c.accent_orange, "Archivé"),
+                                _ => (c.text_muted, "Inconnu"),
+                            };
+
+                            let price_display = if pricing == "free" {
+                                "Gratuit".to_string()
+                            } else {
+                                format!("{},{:02} €", price_cents / 100, price_cents % 100)
+                            };
+
+                            let wid_edit = work_id.clone();
+                            let wid_chapters = work_id.clone();
+                            let wid_delete = work_id.clone();
+
+                            rsx! {
+                                div {
+                                    style: "display: flex; align-items: center; gap: 16px; padding: 16px; background: {c.bg_secondary}; border-radius: 8px; border: 1px solid {c.border};",
+
+                                    // Couverture placeholder
+                                    div {
+                                        style: "width: 60px; height: 80px; background: {c.bg_hover}; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;",
+                                        "📖"
+                                    }
+
+                                    // Infos
+                                    div {
+                                        style: "flex: 1; min-width: 0;",
+
+                                        div {
+                                            style: "display: flex; align-items: center; gap: 8px; margin-bottom: 4px;",
+                                            h4 {
+                                                style: "font-size: 15px; color: {c.text_white}; font-weight: 600;",
+                                                "{title}"
+                                            }
+                                            Badge { text: status_label.to_string(), color: status_color.to_string() }
+                                        }
+
+                                        div {
+                                            style: "display: flex; gap: 16px; font-size: 12px; color: {c.text_muted};",
+                                            span { "{chapter_count} chap." }
+                                            span { "{total_pages} pages" }
+                                            span { "{format}" }
+                                            span { "{language}" }
+                                            span {
+                                                style: "color: {c.accent_green};",
+                                                "{price_display}"
+                                            }
+                                        }
+                                    }
+
+                                    // Actions
+                                    div {
+                                        style: "display: flex; gap: 4px; flex-shrink: 0;",
+
+                                        button {
+                                            style: "padding: 6px 12px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 12px;",
+                                            onclick: move |_| {
+                                                let mut s = state.write();
+                                                s.chapters_work_id = Some(wid_chapters.clone());
+                                                s.section = JayMangaSection::Chapters;
+                                            },
+                                            "📑 Chapitres"
+                                        }
+                                        button {
+                                            style: "padding: 6px 12px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 12px;",
+                                            onclick: move |_| {
+                                                let mut s = state.write();
+                                                s.editing_work_id = Some(wid_edit.clone());
+                                                s.section = JayMangaSection::ModifierOeuvre;
+                                            },
+                                            "✏️ Modifier"
+                                        }
+                                        button {
+                                            style: "padding: 6px 12px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.accent_red}; cursor: pointer; font-size: 12px;",
+                                            onclick: move |_| {
+                                                let db = &conns.read().jaymanga;
+                                                let _ = db.work_delete(&wid_delete);
+                                            },
+                                            "🗑️"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -59,6 +59,14 @@ fn get_runtime() -> &'static tokio::runtime::Runtime {
     })
 }
 
+/// Exécute un future de manière bloquante, compatible avec un runtime tokio existant (Dioxus).
+fn run_blocking<F: std::future::Future>(f: F) -> F::Output {
+    match tokio::runtime::Handle::try_current() {
+        Ok(handle) => tokio::task::block_in_place(|| handle.block_on(f)),
+        Err(_) => run_blocking(f),
+    }
+}
+
 /// Base de données JayShop via KindMother Client.
 ///
 /// Fournit une API synchrone pour la compatibilité avec le code existant.
@@ -74,7 +82,7 @@ pub struct JayShopDb {
 impl JayShopDb {
     /// Initialise la connexion globale au service KindMother (synchrone).
     pub fn init_global_sync(addr: Option<&str>) -> Result<(), DbError> {
-        get_runtime().block_on(Self::init_global_async(addr))
+        run_blocking(Self::init_global_async(addr))
     }
 
     /// Initialise la connexion globale au service KindMother (async).
@@ -119,7 +127,7 @@ impl JayShopDb {
 
     /// Initialise le schéma de la base de données (synchrone).
     pub fn init_schema(&self) -> Result<(), DbError> {
-        get_runtime().block_on(self.init_schema_async())
+        run_blocking(self.init_schema_async())
     }
 
     /// Retire les commentaires SQL (-- et /* */) pour envoi à KindMother.
@@ -192,7 +200,7 @@ impl JayShopDb {
 
     /// Insère un nouveau ticket (synchrone).
     pub fn ticket_insert(&self, t: &Ticket) -> Result<(), DbError> {
-        get_runtime().block_on(self.ticket_insert_async(t))
+        run_blocking(self.ticket_insert_async(t))
     }
 
     async fn ticket_insert_async(&self, t: &Ticket) -> Result<(), DbError> {
@@ -233,7 +241,7 @@ impl JayShopDb {
 
     /// Liste les tickets d'un vendeur (synchrone).
     pub fn tickets_by_seller(&self, seller_id: &str) -> Result<Vec<Ticket>, DbError> {
-        get_runtime().block_on(self.tickets_by_seller_async(seller_id))
+        run_blocking(self.tickets_by_seller_async(seller_id))
     }
 
     async fn tickets_by_seller_async(&self, seller_id: &str) -> Result<Vec<Ticket>, DbError> {
@@ -258,7 +266,7 @@ impl JayShopDb {
 
     /// Insère un nouvel événement (synchrone).
     pub fn event_insert(&self, e: &Event) -> Result<(), DbError> {
-        get_runtime().block_on(self.event_insert_async(e))
+        run_blocking(self.event_insert_async(e))
     }
 
     async fn event_insert_async(&self, e: &Event) -> Result<(), DbError> {
@@ -300,7 +308,7 @@ impl JayShopDb {
 
     /// Liste les événements d'un vendeur (synchrone).
     pub fn events_by_seller(&self, seller_id: &str) -> Result<Vec<Event>, DbError> {
-        get_runtime().block_on(self.events_by_seller_async(seller_id))
+        run_blocking(self.events_by_seller_async(seller_id))
     }
 
     async fn events_by_seller_async(&self, seller_id: &str) -> Result<Vec<Event>, DbError> {
@@ -326,7 +334,7 @@ impl JayShopDb {
 
     /// Insère un coût événement (synchrone).
     pub fn event_cost_insert(&self, c: &EventCost) -> Result<(), DbError> {
-        get_runtime().block_on(self.event_cost_insert_async(c))
+        run_blocking(self.event_cost_insert_async(c))
     }
 
     async fn event_cost_insert_async(&self, c: &EventCost) -> Result<(), DbError> {
@@ -359,7 +367,7 @@ impl JayShopDb {
 
     /// Liste les coûts d'un événement (synchrone).
     pub fn event_costs_by_event(&self, event_id: &str) -> Result<Vec<EventCost>, DbError> {
-        get_runtime().block_on(self.event_costs_by_event_async(event_id))
+        run_blocking(self.event_costs_by_event_async(event_id))
     }
 
     async fn event_costs_by_event_async(&self, event_id: &str) -> Result<Vec<EventCost>, DbError> {
@@ -382,7 +390,7 @@ impl JayShopDb {
 
     /// Récupère la configuration boutique d'un vendeur (synchrone).
     pub fn shop_config_get(&self, seller_id: &str) -> Result<Option<ShopConfig>, DbError> {
-        get_runtime().block_on(self.shop_config_get_async(seller_id))
+        run_blocking(self.shop_config_get_async(seller_id))
     }
 
     async fn shop_config_get_async(
@@ -411,7 +419,7 @@ impl JayShopDb {
         &self,
         seller_id: &str,
     ) -> Result<Vec<PaymentMethod>, DbError> {
-        get_runtime().block_on(self.payment_methods_by_seller_async(seller_id))
+        run_blocking(self.payment_methods_by_seller_async(seller_id))
     }
 
     async fn payment_methods_by_seller_async(

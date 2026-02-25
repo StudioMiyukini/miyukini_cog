@@ -85,6 +85,14 @@ fn get_runtime() -> &'static tokio::runtime::Runtime {
     })
 }
 
+/// Exécute un future de manière bloquante, compatible avec un runtime tokio existant (Dioxus).
+fn run_blocking<F: std::future::Future>(f: F) -> F::Output {
+    match tokio::runtime::Handle::try_current() {
+        Ok(handle) => tokio::task::block_in_place(|| handle.block_on(f)),
+        Err(_) => run_blocking(f),
+    }
+}
+
 /// Base de données JayKonta via KindMother Client.
 /// 
 /// Fournit une API synchrone pour la compatibilité avec le code existant.
@@ -96,7 +104,7 @@ pub struct JayKontaDb {
 impl JayKontaDb {
     /// Initialise la connexion globale au service KindMother (synchrone).
     pub fn init_global_sync(addr: Option<&str>) -> Result<(), DbError> {
-        get_runtime().block_on(Self::init_global_async(addr))
+        run_blocking(Self::init_global_async(addr))
     }
 
     /// Initialise la connexion globale au service KindMother (async).
@@ -140,7 +148,7 @@ impl JayKontaDb {
 
     /// Initialise le schéma de la base de données (synchrone).
     pub fn init_schema_sync(&self) -> Result<(), DbError> {
-        get_runtime().block_on(self.init_schema_async())
+        run_blocking(self.init_schema_async())
     }
 
     /// Initialise le schéma de la base de données (async).
@@ -237,7 +245,7 @@ impl JayKontaDb {
 
     /// Indique si la DB est encore vide de flux d'intégration (synchrone).
     pub fn is_bootstrap_needed(&self) -> Result<bool, DbError> {
-        get_runtime().block_on(self.is_bootstrap_needed_async())
+        run_blocking(self.is_bootstrap_needed_async())
     }
 
     /// Indique si la DB est encore vide de flux d'intégration (async).
@@ -257,7 +265,7 @@ impl JayKontaDb {
 
     /// Insère un mouvement (synchrone).
     pub fn insert_movement(&self, m: &MovementRecord) -> Result<(), DbError> {
-        get_runtime().block_on(self.insert_movement_async(m))
+        run_blocking(self.insert_movement_async(m))
     }
 
     /// Insère un mouvement (async).
@@ -285,7 +293,7 @@ impl JayKontaDb {
 
     /// Insère un devis (synchrone).
     pub fn insert_quote(&self, q: &QuoteRecord) -> Result<(), DbError> {
-        get_runtime().block_on(self.insert_quote_async(q))
+        run_blocking(self.insert_quote_async(q))
     }
 
     /// Insère un devis (async).
@@ -313,7 +321,7 @@ impl JayKontaDb {
 
     /// Insère une facture (synchrone).
     pub fn insert_invoice(&self, i: &InvoiceRecord) -> Result<(), DbError> {
-        get_runtime().block_on(self.insert_invoice_async(i))
+        run_blocking(self.insert_invoice_async(i))
     }
 
     /// Insère une facture (async).
@@ -344,7 +352,7 @@ impl JayKontaDb {
 
     /// Insère un paiement et met à jour la facture associée (synchrone).
     pub fn insert_payment_and_update_invoice(&self, p: &PaymentRecord) -> Result<(), DbError> {
-        get_runtime().block_on(self.insert_payment_and_update_invoice_async(p))
+        run_blocking(self.insert_payment_and_update_invoice_async(p))
     }
 
     /// Insère un paiement et met à jour la facture associée (async).
@@ -389,7 +397,7 @@ impl JayKontaDb {
 
     /// Insère un rappel (synchrone).
     pub fn insert_reminder(&self, r: &ReminderRecord) -> Result<(), DbError> {
-        get_runtime().block_on(self.insert_reminder_async(r))
+        run_blocking(self.insert_reminder_async(r))
     }
 
     /// Insère un rappel (async).
@@ -415,7 +423,7 @@ impl JayKontaDb {
 
     /// Insère une entrée d'audit (synchrone).
     pub fn insert_audit(&self, a: &AuditRecord) -> Result<(), DbError> {
-        get_runtime().block_on(self.insert_audit_async(a))
+        run_blocking(self.insert_audit_async(a))
     }
 
     /// Insère une entrée d'audit (async).
@@ -444,7 +452,7 @@ impl JayKontaDb {
 
     /// Retourne les statistiques Account (synchrone).
     pub fn account_stats(&self) -> Result<AccountStats, DbError> {
-        get_runtime().block_on(self.account_stats_async())
+        run_blocking(self.account_stats_async())
     }
 
     /// Retourne les statistiques Account (async).
@@ -526,7 +534,7 @@ impl JayKontaDb {
 
     /// Retourne les statistiques Purse (synchrone).
     pub fn purse_stats(&self) -> Result<PurseStats, DbError> {
-        get_runtime().block_on(self.purse_stats_async())
+        run_blocking(self.purse_stats_async())
     }
 
     /// Retourne les statistiques Purse (async).
@@ -629,7 +637,7 @@ impl JayKontaDb {
 
     /// Solde net du Purse (synchrone).
     pub fn solde_purse(&self) -> Result<f64, DbError> {
-        get_runtime().block_on(self.solde_purse_async())
+        run_blocking(self.solde_purse_async())
     }
 
     /// Solde net du Purse (async).
@@ -650,7 +658,7 @@ impl JayKontaDb {
 
     /// Liste les mouvements récents (synchrone).
     pub fn movements_recent(&self, limit: i64) -> Result<Vec<MovementRecord>, DbError> {
-        get_runtime().block_on(self.movements_recent_async(limit))
+        run_blocking(self.movements_recent_async(limit))
     }
 
     /// Liste les mouvements récents (async).
@@ -669,7 +677,7 @@ impl JayKontaDb {
 
     /// Liste les factures récentes (synchrone).
     pub fn invoices_recent(&self, limit: i64) -> Result<Vec<InvoiceRecord>, DbError> {
-        get_runtime().block_on(self.invoices_recent_async(limit))
+        run_blocking(self.invoices_recent_async(limit))
     }
 
     /// Liste les factures récentes (async).
@@ -688,7 +696,7 @@ impl JayKontaDb {
 
     /// Nombre d'écritures d'audit (synchrone).
     pub fn audit_count(&self) -> Result<i64, DbError> {
-        get_runtime().block_on(self.audit_count_async())
+        run_blocking(self.audit_count_async())
     }
 
     /// Nombre d'écritures d'audit (async).
@@ -709,7 +717,7 @@ impl JayKontaDb {
 
     /// Vérification de la santé de la connexion (synchrone).
     pub fn health_check(&self) -> Result<bool, DbError> {
-        get_runtime().block_on(self.health_check_async())
+        run_blocking(self.health_check_async())
     }
 
     /// Vérification de la santé de la connexion (async).

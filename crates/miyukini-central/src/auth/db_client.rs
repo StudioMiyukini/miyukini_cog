@@ -118,6 +118,14 @@ fn get_runtime() -> &'static tokio::runtime::Runtime {
     })
 }
 
+/// Exécute un future de manière bloquante, compatible avec un runtime tokio existant (Dioxus).
+fn run_blocking<F: std::future::Future>(f: F) -> F::Output {
+    match tokio::runtime::Handle::try_current() {
+        Ok(handle) => tokio::task::block_in_place(|| handle.block_on(f)),
+        Err(_) => run_blocking(f),
+    }
+}
+
 /// Base des profils Central via KindMother Client.
 ///
 /// Fournit une API synchrone pour la compatibilité avec le code existant.
@@ -129,7 +137,7 @@ pub struct CentralAuthDb {
 impl CentralAuthDb {
     /// Initialise la connexion globale au service KindMother (synchrone).
     pub fn init_global_sync(addr: Option<&str>) -> Result<(), AuthDbError> {
-        get_runtime().block_on(Self::init_global_async(addr))
+        run_blocking(Self::init_global_async(addr))
     }
 
     /// Initialise la connexion globale au service KindMother (async).
@@ -162,7 +170,7 @@ impl CentralAuthDb {
 
     /// Initialise le schéma de la base de données (synchrone).
     pub fn init_schema_sync(&self) -> Result<(), AuthDbError> {
-        get_runtime().block_on(self.init_schema_async())
+        run_blocking(self.init_schema_async())
     }
 
     /// Initialise le schéma de la base de données (async).
@@ -232,7 +240,7 @@ impl CentralAuthDb {
         email: &str,
         password: &str,
     ) -> Result<Option<CentralProfile>, AuthDbError> {
-        get_runtime().block_on(self.sign_in_async(email, password))
+        run_blocking(self.sign_in_async(email, password))
     }
 
     async fn sign_in_async(
@@ -267,7 +275,7 @@ impl CentralAuthDb {
 
     /// Charge un profil par ID (synchrone).
     pub fn get_profile(&self, id: &str) -> Result<Option<CentralProfile>, AuthDbError> {
-        get_runtime().block_on(self.get_profile_async(id))
+        run_blocking(self.get_profile_async(id))
     }
 
     async fn get_profile_async(&self, id: &str) -> Result<Option<CentralProfile>, AuthDbError> {
@@ -284,7 +292,7 @@ impl CentralAuthDb {
 
     /// Enregistre les champs modifiables du profil en base (synchrone).
     pub fn update_profile(&self, profile: &CentralProfile) -> Result<(), AuthDbError> {
-        get_runtime().block_on(self.update_profile_async(profile))
+        run_blocking(self.update_profile_async(profile))
     }
 
     async fn update_profile_async(&self, profile: &CentralProfile) -> Result<(), AuthDbError> {
@@ -316,7 +324,7 @@ impl CentralAuthDb {
 
     /// Liste tous les profils (id, email uniquement) (synchrone).
     pub fn list_profiles(&self) -> Result<Vec<CentralProfile>, AuthDbError> {
-        get_runtime().block_on(self.list_profiles_async())
+        run_blocking(self.list_profiles_async())
     }
 
     async fn list_profiles_async(&self) -> Result<Vec<CentralProfile>, AuthDbError> {
@@ -350,7 +358,7 @@ impl CentralAuthDb {
 
     /// Met à jour l'ID d'un profil (synchrone).
     pub fn update_profile_id(&self, old_id: &str, new_id: &str) -> Result<(), AuthDbError> {
-        get_runtime().block_on(self.update_profile_id_async(old_id, new_id))
+        run_blocking(self.update_profile_id_async(old_id, new_id))
     }
 
     async fn update_profile_id_async(&self, old_id: &str, new_id: &str) -> Result<(), AuthDbError> {
@@ -379,7 +387,7 @@ impl CentralAuthDb {
         password: &str,
         pseudonyme: Option<&str>,
     ) -> Result<CentralProfile, AuthDbError> {
-        get_runtime().block_on(self.sign_up_async(email, password, pseudonyme))
+        run_blocking(self.sign_up_async(email, password, pseudonyme))
     }
 
     async fn sign_up_async(
@@ -440,7 +448,7 @@ impl CentralAuthDb {
 
     /// Indique si le COG est vierge (aucun compte créé) (synchrone).
     pub fn is_cog_virgin(&self) -> Result<bool, AuthDbError> {
-        get_runtime().block_on(self.is_cog_virgin_async())
+        run_blocking(self.is_cog_virgin_async())
     }
 
     async fn is_cog_virgin_async(&self) -> Result<bool, AuthDbError> {
@@ -457,7 +465,7 @@ impl CentralAuthDb {
 
     /// Marque le COG comme non vierge (synchrone).
     pub fn set_cog_virgin_sync(&self, virgin: bool) -> Result<(), AuthDbError> {
-        get_runtime().block_on(self.set_cog_virgin_async(virgin))
+        run_blocking(self.set_cog_virgin_async(virgin))
     }
 
     async fn set_cog_virgin_async(&self, virgin: bool) -> Result<(), AuthDbError> {
@@ -474,7 +482,7 @@ impl CentralAuthDb {
 
     /// ID du profil actuellement connecté (synchrone).
     pub fn get_current_profile_id(&self) -> Result<Option<String>, AuthDbError> {
-        get_runtime().block_on(self.get_current_profile_id_async())
+        run_blocking(self.get_current_profile_id_async())
     }
 
     async fn get_current_profile_id_async(&self) -> Result<Option<String>, AuthDbError> {
@@ -494,7 +502,7 @@ impl CentralAuthDb {
 
     /// Enregistre le profil connecté ou None pour déconnexion (synchrone).
     pub fn set_current_profile_id(&self, profile_id: Option<&str>) -> Result<(), AuthDbError> {
-        get_runtime().block_on(self.set_current_profile_id_async(profile_id))
+        run_blocking(self.set_current_profile_id_async(profile_id))
     }
 
     async fn set_current_profile_id_async(&self, profile_id: Option<&str>) -> Result<(), AuthDbError> {
@@ -519,7 +527,7 @@ impl CentralAuthDb {
 
     /// Réinitialise le COG à l'état vierge (suppression de tous les comptes). Pour tests uniquement.
     pub fn reset_cog_to_virgin(&self) -> Result<(), AuthDbError> {
-        get_runtime().block_on(self.reset_cog_to_virgin_async())
+        run_blocking(self.reset_cog_to_virgin_async())
     }
 
     async fn reset_cog_to_virgin_async(&self) -> Result<(), AuthDbError> {
@@ -543,7 +551,7 @@ impl CentralAuthDb {
         profile_id: &str,
         service_key: &str,
     ) -> Result<Option<String>, AuthDbError> {
-        get_runtime().block_on(self.get_profile_service_ref_async(profile_id, service_key))
+        run_blocking(self.get_profile_service_ref_async(profile_id, service_key))
     }
 
     async fn get_profile_service_ref_async(
@@ -571,7 +579,7 @@ impl CentralAuthDb {
         service_key: &str,
         ref_id: Option<&str>,
     ) -> Result<(), AuthDbError> {
-        get_runtime().block_on(self.set_profile_service_ref_async(profile_id, service_key, ref_id))
+        run_blocking(self.set_profile_service_ref_async(profile_id, service_key, ref_id))
     }
 
     async fn set_profile_service_ref_async(
@@ -614,7 +622,7 @@ impl CentralAuthDb {
         slot: i64,
         data: &[u8],
     ) -> Result<String, AuthDbError> {
-        get_runtime().block_on(self.insert_profile_save_async(profile_id, service_key, slot, data))
+        run_blocking(self.insert_profile_save_async(profile_id, service_key, slot, data))
     }
 
     async fn insert_profile_save_async(
@@ -642,7 +650,7 @@ impl CentralAuthDb {
 
     /// Charge une sauvegarde par id (synchrone).
     pub fn get_profile_save(&self, id: &str) -> Result<Option<CentralProfileSave>, AuthDbError> {
-        get_runtime().block_on(self.get_profile_save_async(id))
+        run_blocking(self.get_profile_save_async(id))
     }
 
     async fn get_profile_save_async(&self, id: &str) -> Result<Option<CentralProfileSave>, AuthDbError> {
@@ -666,7 +674,7 @@ impl CentralAuthDb {
         service_key: &str,
         slot: i64,
     ) -> Result<Option<CentralProfileSave>, AuthDbError> {
-        get_runtime().block_on(self.get_profile_save_by_slot_async(profile_id, service_key, slot))
+        run_blocking(self.get_profile_save_by_slot_async(profile_id, service_key, slot))
     }
 
     async fn get_profile_save_by_slot_async(
@@ -690,7 +698,7 @@ impl CentralAuthDb {
 
     /// Met à jour le blob et updated_at d'une sauvegarde existante (synchrone).
     pub fn update_profile_save(&self, id: &str, data: &[u8]) -> Result<(), AuthDbError> {
-        get_runtime().block_on(self.update_profile_save_async(id, data))
+        run_blocking(self.update_profile_save_async(id, data))
     }
 
     async fn update_profile_save_async(&self, id: &str, data: &[u8]) -> Result<(), AuthDbError> {
@@ -721,7 +729,7 @@ impl CentralAuthDb {
         profile_id: &str,
         service_key: &str,
     ) -> Result<Vec<CentralProfileSaveRow>, AuthDbError> {
-        get_runtime().block_on(self.list_profile_saves_async(profile_id, service_key))
+        run_blocking(self.list_profile_saves_async(profile_id, service_key))
     }
 
     async fn list_profile_saves_async(
@@ -751,7 +759,7 @@ impl CentralAuthDb {
 
     /// Supprime une sauvegarde par id (synchrone).
     pub fn delete_profile_save(&self, id: &str) -> Result<(), AuthDbError> {
-        get_runtime().block_on(self.delete_profile_save_async(id))
+        run_blocking(self.delete_profile_save_async(id))
     }
 
     async fn delete_profile_save_async(&self, id: &str) -> Result<(), AuthDbError> {
@@ -774,7 +782,7 @@ impl CentralAuthDb {
 
     /// Vérification de la santé de la connexion (synchrone).
     pub fn health_check(&self) -> Result<bool, AuthDbError> {
-        get_runtime().block_on(self.client.health_check()).map_err(AuthDbError::from)
+        run_blocking(self.client.health_check()).map_err(AuthDbError::from)
     }
 
     // -----------------------------------------------------------------------

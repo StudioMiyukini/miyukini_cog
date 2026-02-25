@@ -10,7 +10,7 @@ use miyuclicker::idlesim::{
     GAME_SPEED_1, GAME_SPEED_2, GAME_SPEED_3, GAME_SPEED_4, GAME_SPEED_5, GAME_SPEED_PAUSE,
 };
 use miyuclicker::state::{
-    Allocation, AllocationBatisseurs, BuildingType, ClickTarget, GameState,
+    AllocationBatisseurs, BuildingType, ClickTarget, GameState,
 };
 use std::path::Path;
 
@@ -35,11 +35,11 @@ pub fn MiyuClickerView() -> Element {
     let data_dir = conns.read().miyuclicker_data_dir.clone();
     let c = app.read().current_theme.palette();
 
-    let game_state = use_signal(|| load_or_new(&data_dir));
+    let mut game_state = use_signal(|| load_or_new(&data_dir));
     let speed_index = use_signal(|| 0usize);
 
     let g = game_state.read().clone();
-    let speed = SPEEDS[speed_index.read().min(&5)].0;
+    let speed = SPEEDS[(*speed_index.read()).min(5)].0;
     let rates = production_rates(&g, speed);
 
     if g.game_over {
@@ -84,7 +84,7 @@ pub fn MiyuClickerView() -> Element {
                         style: "padding: 6px 10px; font-size: 12px; margin-left: 8px; background: {c.accent_blue}; color: white; border: none; border-radius: 4px; cursor: pointer;",
                         onclick: move |_| {
                             let mut g = game_state.read().clone();
-                            let idx = (speed_index.read() as usize).min(5);
+                            let idx = (*speed_index.read()).min(5);
                             let speed = SPEEDS[idx].0;
                             tick(&mut g, 0.1, speed);
                             *game_state.write() = g;
@@ -135,8 +135,8 @@ pub fn MiyuClickerView() -> Element {
 #[component]
 fn SpeedButton(speed_index: Signal<usize>, index: usize, label: &'static str) -> Element {
     let c = use_app_state().read().current_theme.palette();
-    let is_active = speed_index.read() == index;
-    let bg = if is_active { c.accent_blue.clone() } else { c.bg_hover.clone() };
+    let is_active = *speed_index.read() == index;
+    let bg = if is_active { c.accent_blue } else { c.bg_hover };
     rsx! {
         button {
             style: "padding: 6px 10px; font-size: 12px; background: {bg}; color: white; border: none; border-radius: 4px; cursor: pointer;",
@@ -203,7 +203,7 @@ fn RowAlloc(
     rate: String,
 ) -> Element {
     let c = use_app_state().read().current_theme.palette();
-    let apply_one = move |inc: i64| {
+    let mut apply_one = move |inc: i64| {
         let mut g = game_state.read().clone();
         let mut a = g.allocation.clone();
         match field {
@@ -326,7 +326,17 @@ fn AllocationBuilders(game_state: Signal<GameState>) -> Element {
 #[component]
 fn ConversionPanel(game_state: Signal<GameState>) -> Element {
     let c = use_app_state().read().current_theme.palette();
-    let g = game_state.read();
+    let g = game_state.read().clone();
+
+    let bg_batisseur = if g.can_convert_to_batisseur() { c.accent_blue } else { c.bg_hover };
+    let bg_soldat = if g.can_convert_to_soldat() { c.accent_blue } else { c.bg_hover };
+    let bg_bat_retour = if g.batisseurs_libres() > 0 { c.bg_hover } else { c.bg_secondary };
+    let bg_sol_retour = if g.soldats > 0 { c.bg_hover } else { c.bg_secondary };
+    let can_bat = g.can_convert_to_batisseur();
+    let can_sol = g.can_convert_to_soldat();
+    let bat_libres = g.batisseurs_libres();
+    let soldats = g.soldats;
+    let pop_summary = format!("Ouvriers: {} | Bâtisseurs: {} / {} | Soldats: {} / {}", g.ouvriers, g.batisseurs, g.cap_batisseurs(), g.soldats, g.cap_soldats());
 
     rsx! {
         div {
@@ -334,8 +344,8 @@ fn ConversionPanel(game_state: Signal<GameState>) -> Element {
             div {
                 style: "display: flex; gap: 8px; flex-wrap: wrap;",
                 button {
-                    style: "padding: 6px 12px; background: {if g.can_convert_to_batisseur() { c.accent_blue } else { c.bg_hover }}; border: none; border-radius: 4px; color: white; cursor: pointer;",
-                    disabled: !g.can_convert_to_batisseur(),
+                    style: "padding: 6px 12px; background: {bg_batisseur}; border: none; border-radius: 4px; color: white; cursor: pointer;",
+                    disabled: !can_bat,
                     onclick: move |_| {
                         let mut g = game_state.read().clone();
                         if convert_ouvrier_to_batisseur(&mut g) { *game_state.write() = g; }
@@ -343,8 +353,8 @@ fn ConversionPanel(game_state: Signal<GameState>) -> Element {
                     "Ouvrier → Bâtisseur"
                 }
                 button {
-                    style: "padding: 6px 12px; background: {if g.can_convert_to_soldat() { c.accent_blue } else { c.bg_hover }}; border: none; border-radius: 4px; color: white; cursor: pointer;",
-                    disabled: !g.can_convert_to_soldat(),
+                    style: "padding: 6px 12px; background: {bg_soldat}; border: none; border-radius: 4px; color: white; cursor: pointer;",
+                    disabled: !can_sol,
                     onclick: move |_| {
                         let mut g = game_state.read().clone();
                         if convert_ouvrier_to_soldat(&mut g) { *game_state.write() = g; }
@@ -352,8 +362,8 @@ fn ConversionPanel(game_state: Signal<GameState>) -> Element {
                     "Ouvrier → Soldat"
                 }
                 button {
-                    style: "padding: 6px 12px; background: {if g.batisseurs_libres() > 0 { c.bg_hover } else { c.bg_secondary }}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; cursor: pointer;",
-                    disabled: g.batisseurs_libres() <= 0,
+                    style: "padding: 6px 12px; background: {bg_bat_retour}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; cursor: pointer;",
+                    disabled: bat_libres <= 0,
                     onclick: move |_| {
                         let mut g = game_state.read().clone();
                         if convert_batisseur_to_ouvrier(&mut g) { *game_state.write() = g; }
@@ -361,8 +371,8 @@ fn ConversionPanel(game_state: Signal<GameState>) -> Element {
                     "Bâtisseur → Ouvrier"
                 }
                 button {
-                    style: "padding: 6px 12px; background: {if g.soldats > 0 { c.bg_hover } else { c.bg_secondary }}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; cursor: pointer;",
-                    disabled: g.soldats <= 0,
+                    style: "padding: 6px 12px; background: {bg_sol_retour}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; cursor: pointer;",
+                    disabled: soldats <= 0,
                     onclick: move |_| {
                         let mut g = game_state.read().clone();
                         if convert_soldat_to_ouvrier(&mut g) { *game_state.write() = g; }
@@ -370,15 +380,15 @@ fn ConversionPanel(game_state: Signal<GameState>) -> Element {
                     "Soldat → Ouvrier"
                 }
             }
-            p { style: "color: {c.text_muted};", "Ouvriers: {g.ouvriers} | Bâtisseurs: {g.batisseurs} / {g.cap_batisseurs()} | Soldats: {g.soldats} / {g.cap_soldats()}" }
+            p { style: "color: {c.text_muted};", "{pop_summary}" }
         }
     }
 }
 
 #[component]
 fn BuildingPanel(game_state: Signal<GameState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let g = game_state.read();
+    let _c = use_app_state().read().current_theme.palette();
+    let g = game_state.read().clone();
 
     rsx! {
         div {
@@ -388,7 +398,7 @@ fn BuildingPanel(game_state: Signal<GameState>) -> Element {
                 bt: BuildingType::Maison,
                 name: "Maisons",
                 lvl: g.maisons_lvl,
-                progress_pct: construction_progress_pct(g, BuildingType::Maison),
+                progress_pct: construction_progress_pct(&g, BuildingType::Maison),
                 can_start: g.can_start_construction(BuildingType::Maison),
                 cost: g.cout_construction(BuildingType::Maison),
                 paid: g.construction_maison_paid,
@@ -398,7 +408,7 @@ fn BuildingPanel(game_state: Signal<GameState>) -> Element {
                 bt: BuildingType::Caserne,
                 name: "Casernes",
                 lvl: g.caserne_lvl,
-                progress_pct: construction_progress_pct(g, BuildingType::Caserne),
+                progress_pct: construction_progress_pct(&g, BuildingType::Caserne),
                 can_start: g.can_start_construction(BuildingType::Caserne),
                 cost: g.cout_construction(BuildingType::Caserne),
                 paid: g.construction_caserne_paid,
@@ -408,7 +418,7 @@ fn BuildingPanel(game_state: Signal<GameState>) -> Element {
                 bt: BuildingType::GuildeDesMacons,
                 name: "Guilde",
                 lvl: g.guilde_lvl,
-                progress_pct: construction_progress_pct(g, BuildingType::GuildeDesMacons),
+                progress_pct: construction_progress_pct(&g, BuildingType::GuildeDesMacons),
                 can_start: g.can_start_construction(BuildingType::GuildeDesMacons),
                 cost: g.cout_construction(BuildingType::GuildeDesMacons),
                 paid: g.construction_guilde_paid,

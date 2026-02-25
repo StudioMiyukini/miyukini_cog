@@ -32,6 +32,7 @@ pub fn Jay1TribuView() -> Element {
 
     let profile_id_eff = profile_id.clone();
     let cog_id_eff = cog_id.clone();
+    let db2 = db.clone();
     use_effect(move || {
         let online_ids: Vec<String> =
             mws_state.read().discovered_cogs.iter().map(|c| c.cog_id.clone()).collect();
@@ -43,10 +44,10 @@ pub fn Jay1TribuView() -> Element {
         salons.set(db.salon_list_for_cog(&cog_id_eff).unwrap_or_default());
     });
 
-    let sid = *selected_salon_id.read();
+    let sid = selected_salon_id.read().clone();
     use_effect(move || {
         if let Some(ref salon_id) = sid {
-            let list = db.message_list(salon_id, 50).unwrap_or_default();
+            let list = db2.message_list(salon_id, 50).unwrap_or_default();
             messages.set(list);
         } else {
             messages.set(Vec::new());
@@ -120,15 +121,22 @@ pub fn Jay1TribuView() -> Element {
     struct SalonRow {
         id: String,
         name: String,
-        is_selected: bool,
+        style: &'static str,
     }
     let selected_id = selected_salon_id.read().clone();
     let salon_rows: Vec<SalonRow> = salons_list
         .iter()
-        .map(|s| SalonRow {
-            id: s.id.clone(),
-            name: s.name.clone(),
-            is_selected: selected_id.as_ref().map_or(false, |id| id == &s.id),
+        .map(|s| {
+            let is_selected = selected_id.as_ref().map_or(false, |id| id == &s.id);
+            SalonRow {
+                id: s.id.clone(),
+                name: s.name.clone(),
+                style: if is_selected {
+                    "padding: 8px; margin: 2px 0; border-radius: 6px; background: #3d3d5c; cursor: pointer;"
+                } else {
+                    "padding: 8px; margin: 2px 0; border-radius: 6px; cursor: pointer;"
+                },
+            }
         })
         .collect();
 
@@ -190,16 +198,13 @@ pub fn Jay1TribuView() -> Element {
                     h3 { style: "margin: 0 0 8px 0; font-size: 14px;", "{salons_title}" }
                     ul { style: "list-style: none; padding: 0; margin: 0;",
                         for row in salon_rows.iter() {
-                            let salon_id = row.id.clone();
-                            let li_style = if row.is_selected {
-                                "padding: 8px; margin: 2px 0; border-radius: 6px; background: #3d3d5c; cursor: pointer;"
-                            } else {
-                                "padding: 8px; margin: 2px 0; border-radius: 6px; cursor: pointer;"
-                            };
                             li {
-                                style: li_style,
-                                onclick: move |_| {
-                                    selected_salon_id.set(Some(salon_id.clone()));
+                                style: row.style,
+                                onclick: {
+                                    let sid = row.id.clone();
+                                    move |_| {
+                                        selected_salon_id.set(Some(sid.clone()));
+                                    }
                                 },
                                 "{row.name}"
                             }

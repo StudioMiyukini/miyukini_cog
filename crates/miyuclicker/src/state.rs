@@ -163,7 +163,7 @@ impl AllocationBatisseurs {
 /// @id: miyuclicker_state_building_cost
 /// @do: represent_building_resource_cost
 /// @role: data
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BuildingCost {
     pub bois: f64,
     pub pierre: f64,
@@ -175,7 +175,7 @@ pub struct BuildingCost {
 /// @id: miyuclicker_state_production_rates
 /// @do: represent_per_second_production_rates_for_ui
 /// @role: data
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
 pub struct ProductionRates {
     /// Nourriture nette (production − consommation)
     pub nourriture: f64,

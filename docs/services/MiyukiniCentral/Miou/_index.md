@@ -22,6 +22,7 @@ Miou n'est pas un gadget visuel. Elle est le **canal privilégié** par lequel l
 | [Miou - Document Fondateur](./Miou%20-%20Document%20Fondateur.md) | Identité, personnalité, mission, relation avec l'utilisateur, principes fondateurs. |
 | [Miou - Systeme de Bulles et UI](./Miou%20-%20Systeme%20de%20Bulles%20et%20UI.md) | Canal de communication (bulles en bas à droite), placement, forme, comportement, file d'attente, dismiss. |
 | [Miou - Moteur de Generation Templates et LLM](./Miou%20-%20Moteur%20de%20Generation%20Templates%20et%20LLM.md) | Architecture : Proto-IA (Bot + templates, toujours active) + LLM local optionnel. Construction du prompt, modèles compatibles, lazy loading. |
+| [Miou - Architecture LLM Cloud Inter-COG](./Miou%20-%20Architecture%20LLM%20Cloud%20Inter-COG.md) | Évolution vers un Service Inter-COG (Type 3) : COG dédié GPU (Mistral 7B via Ollama), protocole MiouCloudRequest/Response, flux MWS, dégradation gracieuse (LOI-1/LOI-2), souveraineté étendue au réseau COG personnel. |
 | [Miou - Proto-IA Scan et Consentement LLM](./Miou%20-%20Proto-IA%20Scan%20et%20Consentement%20LLM.md) | Scan des specs au premier lancement, proposition de consentement (bulle Miou), refus → relance après long délai, toggle manuel, transparence non intrusive. |
 | [Bot — Documentation exhaustive](./Bot/_index.md) | Première couche d'intelligence : Document Fondateur, Banque de Templates (Vol. 1 et 2), Moteur de Décision, Intégration, Intelligence et Personnalité, Catalogue Triggers, Capacités Avancées. 9 documents. |
 | [Miou - Gamification et Progression](./Miou%20-%20Gamification%20et%20Progression.md) | Badges, étapes, progression visible, ton positif, pas de punition. |
@@ -42,6 +43,7 @@ Miou n'est pas un gadget visuel. Elle est le **canal privilégié** par lequel l
 docs/services/MiyukiniCentral/Miou/
 ├── _index.md
 ├── Miou - Document Fondateur.md
+├── Miou - Architecture LLM Cloud Inter-COG.md
 ├── Miou - Systeme de Bulles et UI.md
 ├── Miou - Moteur de Generation Templates et LLM.md
 ├── Miou - Proto-IA Scan et Consentement LLM.md

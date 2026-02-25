@@ -254,6 +254,17 @@ impl AppState {
                 developer: "Miyukini".to_string(),
             },
             ServiceInfo {
+                id: "jaymanga".to_string(),
+                name: "JayManga".to_string(),
+                description: "Lecture et vente de manga en ligne — catalogue, lecteur, boutique, portail agrégé".to_string(),
+                icon: "📚".to_string(),
+                service_type: ServiceType::SurfaceWeb,
+                is_installed: true,
+                is_favorite: false,
+                version: "0.1.0".to_string(),
+                developer: "Miyukini".to_string(),
+            },
+            ServiceInfo {
                 id: "miyuclicker".to_string(),
                 name: "Lord of the Click".to_string(),
                 description: "Premier jeu officiel Miyukini (Idle/Clicker + Carte stratégique)".to_string(),

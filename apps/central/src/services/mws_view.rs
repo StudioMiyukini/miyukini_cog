@@ -21,7 +21,7 @@ use tokio::sync::RwLock as TokioRwLock;
 
 /// Sender MWS pour Jay1Tribu : délègue à miyuwebway_participant::transport::send.
 /// Le contexte est mis à jour à la connexion / déconnexion MWS.
-struct CentralJay1TribuSender {
+pub(crate) struct CentralJay1TribuSender {
     ctx: RwLock<Option<GovernedContext>>,
 }
 
@@ -294,7 +294,7 @@ fn MwsLoneModeToggle(mut state: Signal<MwsViewState>, mut tick: Signal<u64>) -> 
                 tick.set(n + 1);
             });
         } else {
-            let mut s = state.write();
+            let s = state.write();
             s.jay1tribu_sender.set_context(None);
             drop(s);
             set_webway_connected(false);
@@ -596,7 +596,7 @@ async fn real_mws_connect(
                 .unwrap_or_default();
 
             let mut s = state.write();
-            s.manager = Arc::new(RwLock::new(Some(manager)));
+            s.manager = Arc::new(TokioRwLock::new(Some(manager)));
             s.state = st;
             s.conformity = conf;
             s.connecting = false;

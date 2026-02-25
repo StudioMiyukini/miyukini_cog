@@ -1,0 +1,50 @@
+[package]
+name = "jaymanga"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords = ["jaymanga", "manga", "reader", "webway", "miyukini"]
+categories.workspace = true
+description = "Service JayManga — Lecture et vente de manga en ligne sous gouvernance COG"
+
+[features]
+default = ["legacy-sqlite"]
+legacy-sqlite = ["rusqlite", "kindmother-db-key"]
+kindmother-only = ["kindmother-client"]
+db-encryption = ["kindmother-db-key"]
+
+[dependencies]
+# Core
+miyukini-kernel = { path = "../miyukini-kernel" }
+kindmother = { path = "../kindmother" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+thiserror = "2"
+
+# Persistance (feature-gated)
+rusqlite = { version = "0.32", features = ["bundled"], optional = true }
+kindmother-db-key = { path = "../kindmother-db-key", optional = true }
+kindmother-client = { path = "../kindmother-client", optional = true }
+kindmother-db-adapter = { path = "../kindmother-db-adapter" }
+
+# Image processing
+image = "0.25"
+sha2 = "0.10"
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }

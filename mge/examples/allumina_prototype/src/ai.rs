@@ -12,7 +12,8 @@ use mge_ecs::Component;
 use mge_plugin_spatial::Position2D;
 
 use crate::components::{MoveTarget, PlayerMarker};
-use crate::stats::{CombatStats, PendingDamage};
+use crate::constants::{MAP_MAX_F, MAP_MIN_F, in_safe_zone};
+use crate::stats::{CharacterStats, CombatStats, PendingDamage};
 
 /// Vitesse de déplacement des monstres (tiles/sec)
 pub const MOB_SPEED: f32 = 2.8;
@@ -122,6 +123,9 @@ pub fn ai_system(world: &mut mge_ecs::World, ctx: &mut mge_core::Context) {
 
     let Some((player_id, ppx, ppy)) = player_info else { return };
 
+    // Le joueur est-il dans la safe zone ? (mobs ne peuvent pas y entrer ni aggresser)
+    let player_in_safe_zone = in_safe_zone(ppx, ppy);
+
     // Snapshot tous les monstres avec IA + Stats (shared borrow)
     let snaps: Vec<AiSnap> = world
         .iter3::<Position2D, MonsterAI, CombatStats>()
@@ -171,16 +175,16 @@ pub fn ai_system(world: &mut mge_ecs::World, ctx: &mut mge_core::Context) {
 
         match snap.state {
             AiState::Idle => {
-                if dist_pl <= snap.aggro_range {
-                    // Aggro : passer en Chase
+                if !player_in_safe_zone && dist_pl <= snap.aggro_range {
+                    // Aggro : passer en Chase (seulement si joueur hors safe zone)
                     new_state = AiState::Chase;
                     move_to = Some((ppx, ppy));
                 } else if new_wander_timer <= 0.0 {
                     // Choisir une nouvelle cible d'errance
                     let angle = rng_f32(&mut snap.rng_seed) * std::f32::consts::TAU;
                     let radius = 1.0 + rng_f32(&mut snap.rng_seed) * 2.5;
-                    let wx = (snap.patrol_x + angle.cos() * radius).clamp(1.0, 62.0);
-                    let wy = (snap.patrol_y + angle.sin() * radius).clamp(1.0, 62.0);
+                    let wx = (snap.patrol_x + angle.cos() * radius).clamp(MAP_MIN_F, MAP_MAX_F);
+                    let wy = (snap.patrol_y + angle.sin() * radius).clamp(MAP_MIN_F, MAP_MAX_F);
                     new_wander_target = (wx, wy);
                     reset_wander_timer = Some(2.5 + rng_f32(&mut snap.rng_seed) * 2.0);
                     move_to = Some(new_wander_target);
@@ -195,8 +199,8 @@ pub fn ai_system(world: &mut mge_ecs::World, ctx: &mut mge_core::Context) {
             }
 
             AiState::Chase => {
-                if dist_pl > snap.leash_range {
-                    // Laisse dépassée — retour au patrol
+                if player_in_safe_zone || dist_pl > snap.leash_range {
+                    // Joueur dans safe zone ou laisse dépassée — retour au patrol
                     new_state = AiState::Idle;
                     if dist_pt > 0.3 {
                         move_to = Some((snap.patrol_x, snap.patrol_y));
@@ -212,10 +216,10 @@ pub fn ai_system(world: &mut mge_ecs::World, ctx: &mut mge_core::Context) {
             }
 
             AiState::Attack => {
-                if dist_pl > snap.attack_range * 1.6 {
-                    // Joueur s'est éloigné → repoursuite
-                    new_state = AiState::Chase;
-                    move_to = Some((ppx, ppy));
+                if player_in_safe_zone || dist_pl > snap.attack_range * 1.6 {
+                    // Joueur dans safe zone ou s'est éloigné → retour patrol / poursuite
+                    new_state = if player_in_safe_zone { AiState::Idle } else { AiState::Chase };
+                    if !player_in_safe_zone { move_to = Some((ppx, ppy)); }
                 } else if new_attack_timer <= 0.0 {
                     // Frappe !
                     deal_damage = true;
@@ -242,8 +246,8 @@ pub fn ai_system(world: &mut mge_ecs::World, ctx: &mut mge_core::Context) {
 
         if deal_damage {
             let dmg = world
-                .get::<CombatStats>(snap.id)
-                .map(|s| s.attack)
+                .get::<CharacterStats>(snap.id)
+                .map(|c| c.melee_damage())
                 .unwrap_or(5);
             if let Some(pd) = world.get_mut::<PendingDamage>(player_id) {
                 pd.amount += dmg;

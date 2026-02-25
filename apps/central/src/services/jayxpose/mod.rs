@@ -12,6 +12,7 @@ mod produit_form;
 mod vitrine;
 mod documents;
 mod fiche_publique;
+mod onboarding;
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;
@@ -25,6 +26,7 @@ use produit_form::ProduitForm;
 use vitrine::Vitrine;
 use documents::Documents;
 use fiche_publique::FichePublique;
+use onboarding::JayXposeOnboarding;
 
 // ── State ──────────────────────────────────────────────────────────────
 
@@ -96,26 +98,8 @@ pub fn JayXposeView() -> Element {
                     style: "flex: 1; min-height: 0; padding: 24px; overflow-y: auto; overflow-x: hidden;",
 
                     if !has_exposant {
-                        components::EmptyState {
-                            title: "Aucun profil exposant".to_string(),
-                            message: "Creez votre profil exposant pour commencer a utiliser JayXpose.".to_string(),
-                            icon: "🏪".to_string(),
-                            action_label: "Creer mon profil".to_string(),
-                            on_action: move |_| {
-                                // Creer un exposant vide
-                                let db = &conns.read().jayxpose;
-                                let new_id = uuid::Uuid::new_v4().to_string();
-                                let profile = jayxpose::data::ExposantProfile {
-                                    id: Some(new_id.clone()),
-                                    ..Default::default()
-                                };
-                                if db.exposant_upsert(&profile).is_ok() {
-                                    let mut s = state.write();
-                                    s.exposant_id = Some(new_id);
-                                    s.section = JayXposeSection::Entreprise;
-                                }
-                            },
-                        }
+                        // Onboarding guidé par Miou
+                        JayXposeOnboarding { state: state }
                     } else {
                         match state.read().section {
                             JayXposeSection::Dashboard => rsx! {
