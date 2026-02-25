@@ -535,7 +535,7 @@ fn cog_not_found_page(slug: &str, config: &OriginConfig) -> RouteResponse {
         .domain
         .as_deref()
         .unwrap_or("miyukini.com");
-    let catalog_url = format!("https://{}/catalog", domain);
+    let catalog_url = format!("https://{}/mws", domain);
     let slug_escaped = pages::html_escape(slug);
     let body = format!(
         r#"<!DOCTYPE html>
@@ -563,7 +563,7 @@ fn cog_not_found_page(slug: &str, config: &OriginConfig) -> RouteResponse {
         <h1>COG introuvable</h1>
         <p>Le sous-domaine <span class="slug">{slug_escaped}.{domain}</span> ne correspond a aucun COG enregistre sur le Webway.</p>
         <p>Le COG n'est peut-etre pas encore connecte, ou le slug est incorrect.</p>
-        <a href="{catalog_url}">Voir le catalogue</a>
+        <a href="{catalog_url}">Voir le MWS</a>
     </div>
 </body>
 </html>"#,
@@ -585,7 +585,7 @@ fn cog_offline_page(slug: &str, cog_id: &str, config: &OriginConfig) -> RouteRes
         .domain
         .as_deref()
         .unwrap_or("miyukini.com");
-    let catalog_url = format!("https://{}/catalog", domain);
+    let catalog_url = format!("https://{}/mws", domain);
     let slug_escaped = pages::html_escape(slug);
     let cog_escaped = pages::html_escape(cog_id);
     let body = format!(
@@ -616,7 +616,7 @@ fn cog_offline_page(slug: &str, cog_id: &str, config: &OriginConfig) -> RouteRes
         <h1>COG hors ligne</h1>
         <p>Le COG <span class="slug">{slug_escaped}</span> est enregistre sur le Webway mais n'est pas joignable actuellement.</p>
         <p class="cog-id">{cog_escaped}</p>
-        <a href="{catalog_url}">Voir le catalogue</a>
+        <a href="{catalog_url}">Voir le MWS</a>
         <p class="retry">Rechargez la page dans quelques instants.</p>
     </div>
 </body>
@@ -756,7 +756,7 @@ async fn route_request(
             }
         }
 
-        "/catalog" => {
+        "/mws" => {
             let catalog = Catalog::from_pools(pool_mgr).await;
             let body = catalog.to_html();
             RouteResponse::Normal {
@@ -764,6 +764,10 @@ async fn route_request(
                 content_type: "text/html".to_string(),
                 body,
             }
+        }
+
+        "/catalog" => {
+            RouteResponse::Redirect { location: "/mws".to_string() }
         }
 
         "/visit" => {

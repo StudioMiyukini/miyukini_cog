@@ -194,7 +194,7 @@ impl Catalog {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catalogue — Miyukini Webway</title>
+    <title>MWS — Miyukini Webway</title>
     <style>
         :root {
             --primary: #8b5cf6;
@@ -310,7 +310,7 @@ impl Catalog {
         <div class="back-link">
             <a href="/">← Retour à l'accueil</a>
         </div>
-        <h1>📡 Catalogue MWS</h1>
+        <h1>📡 Miyukini Webway</h1>
         <p class="subtitle">Services et lobbys disponibles sur le réseau</p>
 
         <div class="card">
@@ -352,7 +352,7 @@ impl Catalog {
 
         <div class="api-links">
             <strong>API :</strong>
-            <a href="/api/catalog">Catalogue complet</a>
+            <a href="/api/catalog">API MWS</a>
             <a href="/api/status">Statut serveur</a>
         </div>
     </div>

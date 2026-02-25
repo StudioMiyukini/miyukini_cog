@@ -72,34 +72,35 @@ fn layout(title: &str, content: &str, active_nav: &str) -> String {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 70px;
+            height: 56px;
         }}
         .logo {{
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            font-size: 1.5rem;
+            gap: 0.5rem;
+            font-size: 1.35rem;
             font-weight: 700;
             background: var(--gradient-1);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }}
         .logo-icon {{
-            width: 40px;
-            height: 40px;
+            width: 34px;
+            height: 34px;
             background: var(--gradient-1);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             -webkit-text-fill-color: white;
         }}
-        nav {{ display: flex; gap: 0.5rem; }}
+        nav {{ display: flex; gap: 0.25rem; align-items: center; }}
         nav a {{
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.75rem;
             border-radius: 0.5rem;
             color: var(--text-muted);
+            font-size: 0.9rem;
             font-weight: 500;
             transition: all 0.2s;
         }}
@@ -307,15 +308,13 @@ fn layout(title: &str, content: &str, active_nav: &str) -> String {
                 <span>Miyukini</span>
             </a>
             <nav>
-                <a href="/" class="{home_active}">Miyukini COG</a>
-                <a href="/catalog" class="{catalog_active}">Catalogue</a>
+                <a href="/" class="{home_active}">Accueil</a>
+                <a href="/mws" class="{catalog_active}">MWS</a>
                 <a href="/services" class="{services_active}">Services</a>
                 <a href="/downloads" class="{downloads_active}">Télécharger</a>
-                <a href="/docs" class="{docs_active}">Documentation</a>
+                <a href="/docs" class="{docs_active}">Docs</a>
                 <a href="/about" class="{about_active}">À propos</a>
-                <a href="/blog" class="{blog_active}">Blog</a>
-                <a href="/announcements" class="{announcements_active}">Annonces</a>
-                <a href="https://forum.miyukini.com" target="_blank" style="-webkit-text-fill-color: initial;">Forum</a>
+                <a href="/?onboarding=1" class="nav-miou-replay" title="Redécouvrir avec Miou" style="font-size:1.1rem;-webkit-text-fill-color:initial;">🌸</a>
             </nav>
         </div>
     </header>
@@ -330,7 +329,7 @@ fn layout(title: &str, content: &str, active_nav: &str) -> String {
                     <li><a href="/docs">Documentation</a></li>
                     <li><a href="/services">Les services</a></li>
                     <li><a href="/downloads">Téléchargements</a></li>
-                    <li><a href="/catalog">Catalogue MWS</a></li>
+                    <li><a href="/mws">MWS</a></li>
                     <li><a href="/about">À propos</a></li>
                     <li><a href="/blog">Dev Blog</a></li>
                 </ul>
@@ -372,46 +371,20 @@ fn layout(title: &str, content: &str, active_nav: &str) -> String {
         home_active = if active_nav == "home" { "active" } else { "" },
         docs_active = if active_nav == "docs" { "active" } else { "" },
         downloads_active = if active_nav == "downloads" { "active" } else { "" },
-        blog_active = if active_nav == "blog" { "active" } else { "" },
-        announcements_active = if active_nav == "announcements" { "active" } else { "" },
-        catalog_active = if active_nav == "catalog" { "active" } else { "" },
+        catalog_active = if active_nav == "catalog" || active_nav == "mws" { "active" } else { "" },
         services_active = if active_nav == "services" { "active" } else { "" },
         about_active = if active_nav == "about" { "active" } else { "" },
     )
 }
 
-/// Page d'accueil — Portail MWS.
+
+/// Page d'accueil — Onboarding VN interactif avec Miou.
 pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> String {
-    let announcements = content_mgr.get_announcements().await;
     let blog_posts = content_mgr.get_blog_posts().await;
     let total_cogs = pool_mgr.total_cog_count().await;
     let versions = pool_mgr.list_versions().await;
     let lobbys = pool_mgr.list_all_public_lobbys().await;
-
-    // Dernières annonces
-    let announcements_html: String = announcements
-        .iter()
-        .take(2)
-        .map(|a| {
-            let type_class = match a.announcement_type {
-                AnnouncementType::Release => "release",
-                AnnouncementType::Security => "security",
-                AnnouncementType::Maintenance => "maintenance",
-                AnnouncementType::Info => "info",
-            };
-            format!(
-                r#"<div class="announcement {}"><span>{}</span> <strong>{}</strong></div>"#,
-                type_class,
-                match a.announcement_type {
-                    AnnouncementType::Release => "🚀",
-                    AnnouncementType::Security => "🔒",
-                    AnnouncementType::Maintenance => "🔧",
-                    AnnouncementType::Info => "ℹ️",
-                },
-                html_escape(&a.title)
-            )
-        })
-        .collect();
+    let latest_version = versions.first().map(|v| v.as_str()).unwrap_or("0.1.0");
 
     // Derniers articles
     let recent_posts_html: String = blog_posts
@@ -423,13 +396,11 @@ pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> 
                     <div class="date">{}</div>
                     <h3>{}</h3>
                     <p>{}</p>
-                    <div class="tags">{}</div>
                 </a>"#,
                 html_escape(&p.id),
                 p.published_at.format("%d %B %Y"),
                 html_escape(&p.title),
                 html_escape(&p.summary),
-                p.tags.iter().map(|t| format!(r#"<span class="tag">{}</span>"#, html_escape(t))).collect::<String>()
             )
         })
         .collect();
@@ -467,351 +438,845 @@ pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> 
 
     let content = format!(
         r##"
-        {announcements}
+<!-- ══════════════════════════════════════ -->
+<!--  VN OVERLAY : ONBOARDING FULLSCREEN  -->
+<!-- ══════════════════════════════════════ -->
+<div id="vn-overlay">
 
-        <!-- Hero Section : Miyukini COG -->
-        <section class="hero portal-hero">
-            <div class="portal-badge">🌐 Miyukini Webway System — Origin</div>
-            <h1>Miyukini COG</h1>
-            <p>Page d'accueil : dernières nouvelles, métriques des téléchargements et du réseau, 
-               tout ce qu'offre Miyukini COG. Découvrez les services, connectez-vous aux COGs 
-               et rejoignez l'écosystème de souveraineté numérique.</p>
-            <div class="hero-buttons">
-                <a href="/catalog" class="btn btn-primary">📡 Explorer le Catalogue</a>
-                <a href="/downloads" class="btn btn-secondary">⬇️ Télécharger COG</a>
-            </div>
-        </section>
+  <!-- === SCREEN 1 : TITLE === -->
+  <div class="vn-screen active" id="vn-screen-1">
+    <canvas id="starfield"></canvas>
+    <div class="vn-ornament top-left"></div>
+    <div class="vn-ornament top-right"></div>
+    <div class="vn-ornament bottom-left"></div>
+    <div class="vn-ornament bottom-right"></div>
+    <div class="vn-title-center">
+      <div class="vn-title-logo">Miyukini</div>
+      <div class="vn-title-sub">COG</div>
+      <div class="vn-title-tagline">Cores Orchestrated Governance</div>
+      <div class="vn-click-prompt" id="vn-click-prompt">Cliquez pour d&eacute;couvrir</div>
+    </div>
+    <div class="vn-status-left">
+      <div class="vn-status-item"><span class="vn-dot green"></span> Origin en ligne</div>
+      <div class="vn-status-item">{total_cogs} COG connect&eacute;s</div>
+      <div class="vn-status-item">v{latest_version}</div>
+    </div>
+    <div class="vn-status-right">
+      <button class="vn-skip-btn" onclick="vnSkip()">Acc&egrave;s Portail Origin &rarr;</button>
+    </div>
+  </div>
 
-        <!-- Statistiques du réseau en temps réel -->
-        <section class="section network-stats">
-            <div class="stats-header">
-                <span class="live-indicator"></span>
-                <span>Réseau en temps réel</span>
-            </div>
-            <div class="grid grid-4">
-                <div class="stat stat-highlight">
-                    <div class="stat-value">{total_cogs}</div>
-                    <div class="stat-label">COGs connectés</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">{total_lobbys}</div>
-                    <div class="stat-label">Lobbys actifs</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">{total_versions}</div>
-                    <div class="stat-label">Versions</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value online-status">●</div>
-                    <div class="stat-label">Origin Status</div>
-                </div>
-            </div>
-        </section>
+  <!-- === SCREEN 2 : MIOU + PROFILE SELECT === -->
+  <div class="vn-screen" id="vn-screen-2">
+    <canvas id="starfield2"></canvas>
+    <div class="vn-s2-center">
+      <div class="miou-large" id="miou-large">
+        <span class="miou-char">&#x1f338;</span>
+        <div class="miou-glow-ring"></div>
+      </div>
+      <div class="miou-dialogue-box" id="miou-s2-dialogue">
+        <span id="miou-s2-text"></span><span class="miou-caret">|</span>
+      </div>
+      <div class="vn-profiles" id="vn-profiles">
+        <button class="vn-profile-btn" data-profile="curious" onclick="vnSelectProfile('curious')">
+          <span class="vn-prof-icon">&#x1f50d;</span>
+          <span class="vn-prof-label">Curieux</span>
+          <span class="vn-prof-desc">Je d&eacute;couvre Miyukini</span>
+        </button>
+        <button class="vn-profile-btn" data-profile="user" onclick="vnSelectProfile('user')">
+          <span class="vn-prof-icon">&#x1f3e0;</span>
+          <span class="vn-prof-label">Utilisateur</span>
+          <span class="vn-prof-desc">Je veux mon COG</span>
+        </button>
+        <button class="vn-profile-btn" data-profile="dev" onclick="vnSelectProfile('dev')">
+          <span class="vn-prof-icon">&#x2699;&#xfe0f;</span>
+          <span class="vn-prof-label">D&eacute;veloppeur</span>
+          <span class="vn-prof-desc">Je cr&eacute;e sur COG</span>
+        </button>
+        <button class="vn-profile-btn" data-profile="pro" onclick="vnSelectProfile('pro')">
+          <span class="vn-prof-icon">&#x1f4bc;</span>
+          <span class="vn-prof-label">Professionnel</span>
+          <span class="vn-prof-desc">Solution souveraine</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
-        <!-- Section Portail : Accès rapide -->
-        <section class="section portal-access">
-            <h2 class="section-title">🚀 Accès Rapide</h2>
-            <p class="section-subtitle">Toutes les ressources Miyukini en un seul endroit</p>
-            <div class="grid grid-3">
-                <a href="/docs" class="portal-card">
-                    <div class="portal-icon">📖</div>
-                    <h3>Documentation</h3>
-                    <p>Guide complet de l'architecture, des Cores et du développement sur COG.</p>
-                    <span class="portal-link">Explorer la documentation →</span>
-                </a>
-                <a href="/downloads" class="portal-card">
-                    <div class="portal-icon">⬇️</div>
-                    <h3>Téléchargements</h3>
-                    <p>COGs, Cores, Services officiels et packages pour toutes les plateformes.</p>
-                    <span class="portal-link">Voir les téléchargements →</span>
-                </a>
-                <a href="/catalog" class="portal-card featured">
-                    <div class="portal-icon">📡</div>
-                    <h3>Catalogue MWS</h3>
-                    <p>Services et lobbys publics disponibles sur le réseau Webway.</p>
-                    <span class="portal-link">Accéder au catalogue →</span>
-                </a>
-                <a href="/blog" class="portal-card">
-                    <div class="portal-icon">📝</div>
-                    <h3>Dev Blog</h3>
-                    <p>Actualités, tutoriels et avancées du développement Miyukini.</p>
-                    <span class="portal-link">Lire le blog →</span>
-                </a>
-                <a href="/announcements" class="portal-card">
-                    <div class="portal-icon">📢</div>
-                    <h3>Annonces</h3>
-                    <p>Communications officielles, mises à jour et alertes de sécurité.</p>
-                    <span class="portal-link">Voir les annonces →</span>
-                </a>
-                <a href="/docs/getting_started" class="portal-card">
-                    <div class="portal-icon">🎯</div>
-                    <h3>Démarrage Rapide</h3>
-                    <p>Commencez votre aventure Miyukini en quelques minutes.</p>
-                    <span class="portal-link">Commencer →</span>
-                </a>
-            </div>
-        </section>
+  <!-- === SCREEN 3 : PROFILE DETAIL (3 columns) === -->
+  <div class="vn-screen" id="vn-screen-3">
+    <canvas id="starfield3"></canvas>
+    <div class="vn-s3-layout">
+      <!-- Left: accordion menu -->
+      <div class="vn-s3-menu" id="vn-s3-menu"></div>
+      <!-- Center: Miou -->
+      <div class="vn-s3-miou">
+        <div class="miou-medium" id="miou-medium">
+          <span class="miou-char">&#x1f338;</span>
+          <div class="miou-glow-ring"></div>
+        </div>
+      </div>
+      <!-- Right: dialogue box -->
+      <div class="vn-s3-dialogue">
+        <div class="vn-dialogue-header" id="vn-topic-title"></div>
+        <div class="vn-dialogue-body" id="vn-topic-body"></div>
+        <div class="vn-dialogue-miou">
+          <span class="miou-mini">&#x1f338;</span>
+          <span id="vn-miou-comment"></span>
+        </div>
+        <div class="vn-dialogue-choices" id="vn-choices"></div>
+        <button class="vn-next-topic" id="vn-next-btn" onclick="vnNextTopic()">Suivant &rarr;</button>
+        <button class="vn-finish-btn" id="vn-finish-btn" onclick="vnFinish()" style="display:none">
+          Explorer le portail &#x1f338;
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
-        <!-- Lobbys publics actifs -->
-        <section class="section lobbys-section">
-            <div class="section-header-flex">
-                <div>
-                    <h2 class="section-title">🎮 Lobbys Publics</h2>
-                    <p class="section-subtitle">Rejoignez des sessions en cours sur le réseau</p>
-                </div>
-                <a href="/catalog" class="btn btn-secondary">Voir tout →</a>
-            </div>
-            <div class="lobbys-list">
-                {lobbys_html}
-            </div>
-        </section>
+<!-- ══════════════════════════════════════ -->
+<!--  HOME CONTENT (hidden during VN)      -->
+<!-- ══════════════════════════════════════ -->
+<div id="home-content" style="display:none">
+  <div class="home-nav-grid">
+    <a href="/downloads" class="home-nav-card">
+      <span class="home-nav-icon">&#x1f4e5;</span>
+      <span class="home-nav-title">T&eacute;l&eacute;charger</span>
+      <span class="home-nav-desc">Obtenir Miyukini Central</span>
+    </a>
+    <a href="/services" class="home-nav-card">
+      <span class="home-nav-icon">&#x2728;</span>
+      <span class="home-nav-title">Services</span>
+      <span class="home-nav-desc">D&eacute;couvrir les services</span>
+    </a>
+    <a href="/docs" class="home-nav-card">
+      <span class="home-nav-icon">&#x1f4da;</span>
+      <span class="home-nav-title">Documentation</span>
+      <span class="home-nav-desc">Guides et r&eacute;f&eacute;rences</span>
+    </a>
+    <a href="/about" class="home-nav-card">
+      <span class="home-nav-icon">&#x1f30d;</span>
+      <span class="home-nav-title">&Agrave; propos</span>
+      <span class="home-nav-desc">Vision et philosophie</span>
+    </a>
+  </div>
 
-        <!-- Présentation Miyukini COG -->
-        <section class="section about-section">
-            <h2 class="section-title">Qu'est-ce que Miyukini COG ?</h2>
-            <p class="section-subtitle">Un environnement de gouvernance orchestré par des Cores</p>
-            <div class="grid grid-2">
-                <div class="about-text">
-                    <p>
-                        <strong>Miyukini COG</strong> (Cores Orchestrated Governance) est un environnement 
-                        applicatif révolutionnaire conçu pour garantir votre <em>souveraineté numérique</em>.
-                    </p>
-                    <p>
-                        Contrairement aux solutions cloud traditionnelles, Miyukini fonctionne de manière 
-                        autonome sur votre matériel. Vos données restent les vôtres, sans dépendance 
-                        à des services externes.
-                    </p>
-                    <p>
-                        Le <strong>Miyukini Webway System (MWS)</strong> permet aux COGs de se découvrir 
-                        et de communiquer de manière sécurisée, créant un réseau fédéré de souveraineté.
-                    </p>
-                    <div class="about-actions">
-                        <a href="/docs/architecture" class="btn btn-secondary">En savoir plus →</a>
-                    </div>
-                </div>
-                <div class="about-features">
-                    <div class="mini-feature">
-                        <span class="mini-icon">🔐</span>
-                        <div>
-                            <strong>Souveraineté</strong>
-                            <p>Vos données sur votre matériel</p>
-                        </div>
-                    </div>
-                    <div class="mini-feature">
-                        <span class="mini-icon">🏛️</span>
-                        <div>
-                            <strong>8 Cores immuables</strong>
-                            <p>Gouvernance transparente</p>
-                        </div>
-                    </div>
-                    <div class="mini-feature">
-                        <span class="mini-icon">🌐</span>
-                        <div>
-                            <strong>Réseau fédéré</strong>
-                            <p>Connexion P2P sécurisée</p>
-                        </div>
-                    </div>
-                    <div class="mini-feature">
-                        <span class="mini-icon">⚡</span>
-                        <div>
-                            <strong>Performance Rust</strong>
-                            <p>Rapide et économe</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+  <div class="home-stats-bar">
+    <div class="home-stat"><strong>{total_cogs}</strong> COG connect&eacute;s</div>
+    <div class="home-stat"><strong>{total_lobbys}</strong> lobbys actifs</div>
+    <div class="home-stat"><strong>{total_versions}</strong> versions track&eacute;es</div>
+  </div>
 
-        <!-- Derniers articles -->
-        <section class="section">
-            <div class="section-header-flex">
-                <div>
-                    <h2 class="section-title">📝 Derniers Articles</h2>
-                    <p class="section-subtitle">Actualités et développement</p>
-                </div>
-                <a href="/blog" class="btn btn-secondary">Tous les articles →</a>
-            </div>
-            <div class="grid grid-3">
-                {recent_posts}
-            </div>
-        </section>
+  <div class="home-sections">
+    <section class="home-section" id="home-lobbys">
+      <h2>Lobbys publics</h2>
+      <div class="lobbys-list">{lobbys_html}</div>
+    </section>
+    <section class="home-section" id="home-blog">
+      <h2>Derniers articles</h2>
+      <div class="blog-list">{recent_posts}</div>
+    </section>
+  </div>
 
-        <!-- API Section -->
-        <section class="section api-section">
-            <h2 class="section-title">🔌 API Origin</h2>
-            <p class="section-subtitle">Accédez aux données du réseau programmatiquement</p>
-            <div class="api-grid">
-                <div class="api-endpoint">
-                    <code>GET /api/catalog</code>
-                    <span>Catalogue complet (services, lobbys)</span>
-                </div>
-                <div class="api-endpoint">
-                    <code>GET /api/status</code>
-                    <span>État du serveur Origin</span>
-                </div>
-                <div class="api-endpoint">
-                    <code>GET /api/blog</code>
-                    <span>Articles du blog</span>
-                </div>
-                <div class="api-endpoint">
-                    <code>GET /api/announcements</code>
-                    <span>Annonces officielles</span>
-                </div>
-                <div class="api-endpoint">
-                    <code>GET /api/downloads</code>
-                    <span>Liste des téléchargements</span>
-                </div>
-                <div class="api-endpoint">
-                    <code>GET /api/docs</code>
-                    <span>Documentation structurée</span>
-                </div>
-            </div>
-        </section>
+  <div class="home-miou-float" id="home-miou-float">
+    <span class="miou-char">&#x1f338;</span>
+    <div class="home-miou-tip" id="home-miou-tip"></div>
+  </div>
+</div>
 
-        <style>
-            .portal-hero {{ background: radial-gradient(ellipse at center, rgba(6, 182, 212, 0.15) 0%, transparent 60%); }}
-            .portal-badge {{
-                display: inline-block;
-                background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.2));
-                border: 1px solid rgba(6, 182, 212, 0.3);
-                padding: 0.5rem 1rem;
-                border-radius: 2rem;
-                font-size: 0.875rem;
-                margin-bottom: 1rem;
-            }}
-            .network-stats {{
-                background: var(--bg-surface);
-                border-radius: 1rem;
-                padding: 2rem;
-                border: 1px solid var(--border);
-            }}
-            .stats-header {{
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                margin-bottom: 1.5rem;
-                color: var(--text-muted);
-                font-size: 0.875rem;
-            }}
-            .live-indicator {{
-                width: 8px;
-                height: 8px;
-                background: var(--success);
-                border-radius: 50%;
-                animation: pulse 2s infinite;
-            }}
-            @keyframes pulse {{
-                0%, 100% {{ opacity: 1; }}
-                50% {{ opacity: 0.5; }}
-            }}
-            .stat-highlight .stat-value {{ color: var(--secondary); }}
-            .online-status {{ color: var(--success) !important; font-size: 1.5rem !important; }}
-            
-            .portal-card {{
-                background: var(--bg-surface);
-                border: 1px solid var(--border);
-                border-radius: 1rem;
-                padding: 1.5rem;
-                display: block;
-                transition: all 0.3s;
-            }}
-            .portal-card:hover {{
-                border-color: var(--primary);
-                transform: translateY(-4px);
-                box-shadow: 0 10px 40px rgba(139, 92, 246, 0.15);
-            }}
-            .portal-card.featured {{
-                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.1));
-                border-color: rgba(6, 182, 212, 0.3);
-            }}
-            .portal-icon {{
-                font-size: 2rem;
-                margin-bottom: 1rem;
-            }}
-            .portal-card h3 {{ margin-bottom: 0.5rem; }}
-            .portal-card p {{ color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; }}
-            .portal-link {{ color: var(--primary); font-size: 0.875rem; font-weight: 500; }}
+<!-- ══════════════════════════════════════ -->
+<!--  STYLES VN                            -->
+<!-- ══════════════════════════════════════ -->
+<style>
+/* === VN OVERLAY === */
+#vn-overlay {{
+  position: fixed; inset: 0; z-index: 9999;
+  background: #0a0a14;
+}}
+#vn-overlay.hidden {{ display: none; }}
+.vn-screen {{
+  position: absolute; inset: 0;
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  overflow: hidden;
+}}
+.vn-screen.active {{ display: flex; }}
+.vn-screen canvas {{
+  position: absolute; inset: 0; z-index: 0;
+}}
 
-            .section-header-flex {{
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                margin-bottom: 2rem;
-                flex-wrap: wrap;
-                gap: 1rem;
-            }}
-            
-            .lobbys-list {{
-                display: flex;
-                flex-direction: column;
-                gap: 0.75rem;
-            }}
-            .lobby-card {{
-                background: var(--bg-surface);
-                border: 1px solid var(--border);
-                border-radius: 0.75rem;
-                padding: 1rem 1.5rem;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                transition: border-color 0.2s;
-            }}
-            .lobby-card:hover {{ border-color: var(--primary); }}
-            .lobby-info {{ display: flex; flex-direction: column; gap: 0.25rem; }}
-            .lobby-name {{ font-weight: 600; }}
-            .lobby-host {{ font-size: 0.8rem; color: var(--text-muted); }}
-            .lobby-meta {{ display: flex; gap: 1rem; align-items: center; font-size: 0.875rem; color: var(--text-muted); }}
-            .lobby-version {{ background: var(--bg-elevated); padding: 0.2rem 0.5rem; border-radius: 0.25rem; }}
-            .lobby-lock {{ color: var(--warning); }}
-            .empty-state {{ color: var(--text-muted); text-align: center; padding: 2rem; }}
+/* Ornaments (corner decorations) */
+.vn-ornament {{
+  position: absolute; width: 80px; height: 80px; z-index: 1;
+  border-color: rgba(255,183,197,0.3); border-style: solid; border-width: 0;
+}}
+.vn-ornament.top-left {{ top:20px; left:20px; border-top-width:2px; border-left-width:2px; border-top-left-radius: 12px; }}
+.vn-ornament.top-right {{ top:20px; right:20px; border-top-width:2px; border-right-width:2px; border-top-right-radius: 12px; }}
+.vn-ornament.bottom-left {{ bottom:20px; left:20px; border-bottom-width:2px; border-left-width:2px; border-bottom-left-radius: 12px; }}
+.vn-ornament.bottom-right {{ bottom:20px; right:20px; border-bottom-width:2px; border-right-width:2px; border-bottom-right-radius: 12px; }}
 
-            .about-section .about-text p {{ margin-bottom: 1rem; color: var(--text-muted); }}
-            .about-section .about-text p strong {{ color: var(--text); }}
-            .about-actions {{ margin-top: 1.5rem; }}
-            .about-features {{ display: flex; flex-direction: column; gap: 1rem; }}
-            .mini-feature {{
-                background: var(--bg-surface);
-                border: 1px solid var(--border);
-                border-radius: 0.75rem;
-                padding: 1rem;
-                display: flex;
-                gap: 1rem;
-                align-items: center;
-            }}
-            .mini-icon {{ font-size: 1.5rem; }}
-            .mini-feature strong {{ display: block; margin-bottom: 0.25rem; }}
-            .mini-feature p {{ margin: 0; font-size: 0.8rem; color: var(--text-muted); }}
+/* Title screen */
+.vn-title-center {{
+  z-index: 2; text-align: center;
+}}
+.vn-title-logo {{
+  font-size: 4.5rem; font-weight: 800; letter-spacing: 0.15em;
+  background: linear-gradient(135deg, #ffb7c5, #fff, #ffb7c5);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(255,183,197,0.4);
+  animation: titlePulse 3s ease-in-out infinite;
+}}
+.vn-title-sub {{
+  font-size: 2rem; font-weight: 300; letter-spacing: 0.5em;
+  color: rgba(255,255,255,0.7); margin-top: -8px;
+}}
+.vn-title-tagline {{
+  font-size: 0.9rem; color: rgba(255,183,197,0.6); margin-top: 16px;
+  letter-spacing: 0.2em; text-transform: uppercase;
+}}
+.vn-click-prompt {{
+  margin-top: 48px; font-size: 1rem; color: rgba(255,255,255,0.5);
+  animation: promptFade 2s ease-in-out infinite;
+  cursor: pointer;
+}}
+@keyframes titlePulse {{
+  0%,100% {{ filter: brightness(1); }}
+  50% {{ filter: brightness(1.2); }}
+}}
+@keyframes promptFade {{
+  0%,100% {{ opacity: 0.4; }}
+  50% {{ opacity: 1; }}
+}}
 
-            .api-section {{ background: var(--bg-surface); border-radius: 1rem; padding: 2rem; border: 1px solid var(--border); }}
-            .api-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-top: 1.5rem; }}
-            .api-endpoint {{
-                background: var(--bg-elevated);
-                border-radius: 0.5rem;
-                padding: 1rem;
-                display: flex;
-                flex-direction: column;
-                gap: 0.5rem;
-            }}
-            .api-endpoint code {{
-                background: var(--bg);
-                padding: 0.5rem 0.75rem;
-                border-radius: 0.25rem;
-                font-size: 0.875rem;
-                color: var(--secondary);
-            }}
-            .api-endpoint span {{ font-size: 0.8rem; color: var(--text-muted); }}
-        </style>
+/* Status bars */
+.vn-status-left {{
+  position: absolute; bottom: 24px; left: 28px; z-index: 2;
+  display: flex; flex-direction: column; gap: 6px;
+}}
+.vn-status-item {{
+  font-size: 0.8rem; color: rgba(255,255,255,0.5);
+}}
+.vn-dot {{
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  margin-right: 6px; vertical-align: middle;
+}}
+.vn-dot.green {{ background: #4ade80; box-shadow: 0 0 8px #4ade80; }}
+.vn-status-right {{
+  position: absolute; bottom: 24px; right: 28px; z-index: 2;
+}}
+.vn-skip-btn {{
+  background: rgba(255,183,197,0.15); border: 1px solid rgba(255,183,197,0.3);
+  color: #ffb7c5; padding: 10px 24px; border-radius: 8px; cursor: pointer;
+  font-size: 0.9rem; transition: all 0.3s;
+}}
+.vn-skip-btn:hover {{ background: rgba(255,183,197,0.25); }}
+
+/* Screen 2 */
+.vn-s2-center {{
+  z-index: 2; display: flex; flex-direction: column;
+  align-items: center; gap: 24px;
+}}
+.miou-large {{
+  position: relative; font-size: 5rem;
+  animation: miouFloat 3s ease-in-out infinite;
+}}
+.miou-medium {{
+  position: relative; font-size: 3.5rem;
+  animation: miouFloat 3s ease-in-out infinite;
+}}
+.miou-char {{ position: relative; z-index: 1; }}
+.miou-glow-ring {{
+  position: absolute; inset: -20px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,183,197,0.3), transparent 70%);
+  animation: glowPulse 2s ease-in-out infinite;
+}}
+@keyframes miouFloat {{
+  0%,100% {{ transform: translateY(0); }}
+  50% {{ transform: translateY(-10px); }}
+}}
+@keyframes glowPulse {{
+  0%,100% {{ opacity: 0.5; transform: scale(1); }}
+  50% {{ opacity: 1; transform: scale(1.15); }}
+}}
+.miou-large.talking {{ animation: miouTalk 0.15s ease-in-out infinite; }}
+@keyframes miouTalk {{
+  0%,100% {{ transform: translateY(0) scale(1); }}
+  50% {{ transform: translateY(-3px) scale(1.03); }}
+}}
+
+/* Dialogue box */
+.miou-dialogue-box {{
+  background: rgba(20,20,40,0.85); border: 1px solid rgba(255,183,197,0.3);
+  border-radius: 16px; padding: 20px 28px; max-width: 520px; min-height: 60px;
+  color: #fff; font-size: 1rem; line-height: 1.6;
+  box-shadow: 0 0 30px rgba(255,183,197,0.1);
+}}
+.miou-caret {{
+  color: #ffb7c5; animation: caretBlink 0.8s step-end infinite;
+}}
+@keyframes caretBlink {{
+  0%,100% {{ opacity: 1; }}
+  50% {{ opacity: 0; }}
+}}
+
+/* Profile buttons */
+.vn-profiles {{
+  display: flex; gap: 16px; margin-top: 12px;
+  opacity: 0; transform: translateY(20px);
+  transition: all 0.6s ease;
+}}
+.vn-profiles.visible {{
+  opacity: 1; transform: translateY(0);
+}}
+.vn-profile-btn {{
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,183,197,0.2);
+  border-radius: 12px; padding: 16px 20px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  transition: all 0.3s; color: #fff; min-width: 130px;
+}}
+.vn-profile-btn:hover {{
+  background: rgba(255,183,197,0.15); border-color: #ffb7c5;
+  transform: translateY(-4px); box-shadow: 0 8px 24px rgba(255,183,197,0.2);
+}}
+.vn-prof-icon {{ font-size: 1.8rem; }}
+.vn-prof-label {{ font-size: 0.95rem; font-weight: 600; }}
+.vn-prof-desc {{ font-size: 0.75rem; color: rgba(255,255,255,0.5); }}
+
+/* Screen 3 layout */
+.vn-s3-layout {{
+  position: relative; z-index: 2;
+  display: grid; grid-template-columns: 260px 1fr 400px;
+  width: 100%; height: 100%; padding: 32px;
+  gap: 24px; align-items: start;
+}}
+.vn-s3-menu {{
+  display: flex; flex-direction: column; gap: 4px;
+  margin-top: 40px;
+}}
+.vn-menu-item {{
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,183,197,0.1);
+  border-radius: 8px; padding: 12px 16px; cursor: pointer;
+  color: rgba(255,255,255,0.6); font-size: 0.85rem;
+  transition: all 0.3s; display: flex; align-items: center; gap: 8px;
+}}
+.vn-menu-item:hover {{ background: rgba(255,183,197,0.1); color: #fff; }}
+.vn-menu-item.active {{
+  background: rgba(255,183,197,0.15); border-color: #ffb7c5;
+  color: #ffb7c5; font-weight: 600;
+}}
+.vn-menu-icon {{ font-size: 1.1rem; }}
+
+/* S3 center miou */
+.vn-s3-miou {{
+  display: flex; align-items: center; justify-content: center;
+  height: 100%;
+}}
+
+/* S3 dialogue panel */
+.vn-s3-dialogue {{
+  background: rgba(20,20,40,0.9); border: 1px solid rgba(255,183,197,0.25);
+  border-radius: 16px; padding: 28px; margin-top: 32px;
+  display: flex; flex-direction: column; gap: 16px;
+  max-height: calc(100vh - 120px); overflow-y: auto;
+}}
+.vn-dialogue-header {{
+  font-size: 1.15rem; font-weight: 700; color: #ffb7c5;
+  padding-bottom: 12px; border-bottom: 1px solid rgba(255,183,197,0.15);
+}}
+.vn-dialogue-body {{
+  font-size: 0.9rem; color: rgba(255,255,255,0.85); line-height: 1.7;
+}}
+.vn-dialogue-miou {{
+  display: flex; align-items: flex-start; gap: 10px;
+  background: rgba(255,183,197,0.08); border-radius: 10px; padding: 12px 16px;
+  font-size: 0.85rem; color: rgba(255,255,255,0.7); font-style: italic;
+}}
+.miou-mini {{ font-size: 1.2rem; flex-shrink: 0; }}
+
+/* Choices */
+.vn-dialogue-choices {{
+  display: flex; flex-direction: column; gap: 8px;
+}}
+.vn-choice-btn {{
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,183,197,0.2);
+  border-radius: 8px; padding: 10px 16px; cursor: pointer;
+  color: #fff; font-size: 0.85rem; text-align: left; transition: all 0.3s;
+}}
+.vn-choice-btn:hover {{
+  background: rgba(255,183,197,0.15); border-color: #ffb7c5;
+}}
+
+/* Next/finish buttons */
+.vn-next-topic, .vn-finish-btn {{
+  background: linear-gradient(135deg, rgba(255,183,197,0.2), rgba(255,183,197,0.1));
+  border: 1px solid rgba(255,183,197,0.3); border-radius: 10px;
+  padding: 12px 24px; color: #ffb7c5; cursor: pointer;
+  font-size: 0.9rem; font-weight: 600; transition: all 0.3s;
+  align-self: flex-end;
+}}
+.vn-next-topic:hover, .vn-finish-btn:hover {{
+  background: rgba(255,183,197,0.25); transform: translateY(-2px);
+}}
+
+/* === HOME CONTENT === */
+#home-content {{ padding: 0; }}
+.home-nav-grid {{
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  padding: 24px 32px;
+}}
+.home-nav-card {{
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,183,197,0.12);
+  border-radius: 14px; padding: 28px 20px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  transition: all 0.3s; text-decoration: none; color: inherit;
+}}
+.home-nav-card:hover {{
+  background: rgba(255,183,197,0.08); border-color: #ffb7c5;
+  transform: translateY(-4px); box-shadow: 0 8px 24px rgba(255,183,197,0.1);
+}}
+.home-nav-icon {{ font-size: 2rem; }}
+.home-nav-title {{ font-size: 1rem; font-weight: 600; color: #ffb7c5; }}
+.home-nav-desc {{ font-size: 0.8rem; color: rgba(255,255,255,0.5); }}
+
+.home-stats-bar {{
+  display: flex; justify-content: center; gap: 40px;
+  padding: 16px; background: rgba(255,183,197,0.05);
+  border-top: 1px solid rgba(255,183,197,0.1);
+  border-bottom: 1px solid rgba(255,183,197,0.1);
+}}
+.home-stat {{ font-size: 0.9rem; color: rgba(255,255,255,0.6); }}
+.home-stat strong {{ color: #ffb7c5; }}
+
+.home-sections {{
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  padding: 24px 32px;
+}}
+.home-section h2 {{
+  font-size: 1.1rem; color: #ffb7c5; margin-bottom: 16px;
+  padding-bottom: 8px; border-bottom: 1px solid rgba(255,183,197,0.15);
+}}
+
+/* Floating Miou */
+.home-miou-float {{
+  position: fixed; bottom: 24px; right: 24px; z-index: 100;
+  cursor: pointer; font-size: 2.5rem;
+  animation: miouFloat 3s ease-in-out infinite;
+}}
+.home-miou-tip {{
+  position: absolute; bottom: 100%; right: 0; margin-bottom: 8px;
+  background: rgba(20,20,40,0.95); border: 1px solid rgba(255,183,197,0.3);
+  border-radius: 10px; padding: 10px 14px; font-size: 0.8rem;
+  color: rgba(255,255,255,0.8); white-space: nowrap;
+  opacity: 0; transform: translateY(8px); transition: all 0.3s;
+  pointer-events: none;
+}}
+.home-miou-float:hover .home-miou-tip {{
+  opacity: 1; transform: translateY(0);
+}}
+
+/* Responsive */
+@media (max-width: 1200px) {{
+  .vn-s3-layout {{ grid-template-columns: 200px 1fr 340px; padding: 20px; }}
+}}
+@media (max-width: 900px) {{
+  .vn-profiles {{ flex-wrap: wrap; justify-content: center; }}
+  .vn-s3-layout {{ grid-template-columns: 1fr; padding: 16px; }}
+  .vn-s3-miou {{ display: none; }}
+  .home-nav-grid {{ grid-template-columns: repeat(2, 1fr); }}
+  .home-sections {{ grid-template-columns: 1fr; }}
+}}
+</style>
+
+<!-- ══════════════════════════════════════ -->
+<!--  JAVASCRIPT VN ENGINE                 -->
+<!-- ══════════════════════════════════════ -->
+<script>
+(function() {{
+  'use strict';
+
+  // === DATA : dialogue trees per profile ===
+  const DIALOGUES = {{
+    curious: [
+      {{
+        id: 'vision', icon: '\u{{1f31f}}', title: 'La vision Miyukini',
+        body: 'Miyukini COG est un environnement num\u00e9rique souverain. Pas un logiciel, pas un cloud \u2014 un v\u00e9ritable espace de vie num\u00e9rique qui t\u0027appartient. Tes donn\u00e9es restent chez toi, toujours.',
+        miou: 'Imagine un monde o\u00f9 ton t\u00e9l\u00e9phone, ton PC et tes fichiers ne d\u00e9pendent plus de personne. C\u0027est \u00e7a, un COG\u00a0!',
+        choices: [
+          {{label: 'Et le cloud\u00a0?', reply: 'Le cloud, c\u0027est pratique mais tu d\u00e9pends d\u0027une entreprise. Si elle ferme, change ses prix ou ses conditions\u2026 tu perds tout. Avec un COG, m\u00eame si Origin dispara\u00eet, ton environnement continue de fonctionner\u00a0!'}},
+          {{label: 'Comment \u00e7a marche\u00a0?', reply: 'Tu installes Miyukini Central sur ton appareil, il cr\u00e9e ton COG. Les 8 Cores d\u00e9marrent automatiquement et prot\u00e8gent tout. Ensuite tu actives les services que tu veux\u00a0: m\u00e9dias, messagerie, partage\u2026'}}
+        ]
+      }},
+      {{
+        id: 'cores', icon: '\u{{1f3db}}\u{{fe0f}}', title: 'Les 8 Cores',
+        body: 'Chaque COG est gouvern\u00e9 par 8 Cores immuables : StrongFather (identit\u00e9), KindMother (stockage), Caring Nanny (services), Master Butler (interface), Border Guard (s\u00e9curit\u00e9), Ever Buddy (communaut\u00e9), WorrySentinel (surveillance), TAMR (transactions).',
+        miou: 'Ce sont les gardiens de ton COG. Personne ne peut les modifier, m\u00eame pas toi\u00a0! Ils prot\u00e8gent tout.',
+        choices: null
+      }},
+      {{
+        id: 'offline', icon: '\u{{1f4f5}}', title: 'Hors-ligne natif',
+        body: 'Un COG fonctionne sans Internet. Tous tes services, fichiers et applications restent accessibles m\u00eame sans connexion. Quand tu te reconnectes, la synchronisation est automatique via le MWS.',
+        miou: 'Plus de panique quand le WiFi coupe\u00a0! Ton COG continue de tourner comme si de rien n\u0027\u00e9tait.',
+        choices: null
+      }},
+      {{
+        id: 'mws', icon: '\u{{1f310}}', title: 'Le r\u00e9seau MWS',
+        body: 'Le Miyukini Webway System (MWS) connecte les COGs entre eux de fa\u00e7on f\u00e9d\u00e9r\u00e9e. Pas de serveur central qui contr\u00f4le tout : chaque COG est autonome et choisit ses connexions.',
+        miou: 'C\u0027est comme un r\u00e9seau d\u0027amis o\u00f9 chacun garde sa maison. Origin, c\u0027est juste le point de rendez-vous\u00a0!',
+        choices: null
+      }},
+      {{
+        id: 'compare', icon: '\u{{2696}}\u{{fe0f}}', title: 'vs. Le cloud traditionnel',
+        body: 'Avec le cloud, tes donn\u00e9es sont sur les serveurs d\u0027une entreprise. Avec un COG, elles sont physiquement chez toi. Pas de frais mensuels, pas de conditions d\u0027utilisation qui changent, pas de censure possible.',
+        miou: 'Cloud = louer un appartement. COG = \u00eatre propri\u00e9taire. La diff\u00e9rence est fondamentale\u00a0!',
+        choices: null
+      }}
+    ],
+    user: [
+      {{
+        id: 'start', icon: '\u{{1f680}}', title: 'D\u00e9marrer avec un COG',
+        body: 'T\u00e9l\u00e9charge Miyukini Central, installe-le sur ton PC ou serveur, et c\u0027est parti\u00a0! L\u0027assistant de configuration te guide pas \u00e0 pas pour cr\u00e9er ton identit\u00e9 souveraine.',
+        miou: 'C\u0027est super simple, je te guide \u00e0 chaque \u00e9tape\u00a0! En 5 minutes ton COG est pr\u00eat.',
+        choices: [
+          {{label: 'T\u00e9l\u00e9charger maintenant', reply: 'Super\u00a0! Rendez-vous sur la page T\u00e9l\u00e9chargements apr\u00e8s l\u0027onboarding. Tu y trouveras Central pour Windows, Linux et macOS. L\u0027installation prend moins de 2 minutes\u00a0!'}},
+          {{label: 'En savoir plus d\u0027abord', reply: 'Bonne id\u00e9e\u00a0! Continue l\u0027exploration, je vais te montrer les services et la s\u00e9curit\u00e9. Tu pourras t\u00e9l\u00e9charger quand tu te sentiras pr\u00eat\u00a0!'}}
+        ]
+      }},
+      {{
+        id: 'central', icon: '\u{{1f3ae}}', title: 'Miyukini Central',
+        body: 'Central est ton tableau de bord. Il te donne acc\u00e8s \u00e0 tous tes services, tes fichiers, tes contacts et tes param\u00e8tres. Une interface unique pour tout g\u00e9rer.',
+        miou: 'Central, c\u0027est ta maison num\u00e9rique. Et moi je suis l\u00e0 dedans pour t\u0027aider\u00a0!',
+        choices: null
+      }},
+      {{
+        id: 'services', icon: '\u{{2728}}', title: 'Les services disponibles',
+        body: 'MiyukiniWatch (m\u00e9dias), Jay1Tribu (famille et amis), JayKoa (gestion quotidienne), JayXpose (partage pro)... Chaque service est int\u00e9gr\u00e9 dans ton COG et fonctionne hors-ligne.',
+        miou: 'C\u0027est comme avoir Netflix, WhatsApp et Google Drive... mais tout est \u00e0 toi\u00a0!',
+        choices: null
+      }},
+      {{
+        id: 'security', icon: '\u{{1f512}}', title: 'S\u00e9curit\u00e9 et vie priv\u00e9e',
+        body: 'Chiffrement de bout en bout, identit\u00e9 souveraine, pas de tracking, pas de publicit\u00e9. Border Guard prot\u00e8ge chaque connexion. Tes donn\u00e9es ne quittent jamais ton COG sans ta permission explicite.',
+        miou: 'Ici, c\u0027est toi le patron. Aucune donn\u00e9e ne sort sans que tu le d\u00e9cides.',
+        choices: null
+      }},
+      {{
+        id: 'family', icon: '\u{{1f46a}}', title: 'COG familial',
+        body: 'Un seul COG peut servir toute la famille. Chaque membre a son espace priv\u00e9 et ses permissions. Les enfants ont un acc\u00e8s s\u00e9curis\u00e9 adapt\u00e9 \u00e0 leur \u00e2ge.',
+        miou: 'Toute la famille sous le m\u00eame toit num\u00e9rique, avec chacun sa chambre\u00a0!',
+        choices: null
+      }}
+    ],
+    dev: [
+      {{
+        id: 'archi', icon: '\u{{1f3d7}}\u{{fe0f}}', title: 'Architecture COG',
+        body: 'Le COG utilise une architecture pyramidale \u00e0 10 strates (0\u20139). Les 8 Cores (Strate 4) forment le noyau immuable. BondingBrother (Strate 5) g\u00e8re la m\u00e9diation inter-crates. Tout est en Rust.',
+        miou: 'C\u0027est du Rust pur, avec des contrats de gouvernance. Solide comme un roc\u00a0!',
+        choices: [
+          {{label: 'Voir la doc technique', reply: 'La doc technique couvre l\u0027architecture compl\u00e8te\u00a0: les 10 strates, les contrats de gouvernance, les protocoles MWS. Tout est dans la section Documentation du portail. C\u0027est bien comment\u00e9 et structur\u00e9\u00a0!'}},
+          {{label: 'Parle-moi du MWS', reply: 'Le MWS c\u0027est le r\u00e9seau f\u00e9d\u00e9r\u00e9 qui connecte les COGs. Il y a 3 composants\u00a0: Origin (ici\u00a0!), le Relay pour les tunnels TLS chiffr\u00e9s, et le Tracker pour la d\u00e9couverte de pairs. Tout est v\u00e9rifi\u00e9 en 3 phases\u00a0!'}}
+        ]
+      }},
+      {{
+        id: 'mws-tech', icon: '\u{{1f5a7}}', title: 'MWS en d\u00e9tail',
+        body: 'Le MWS se compose de 3 pi\u00e8ces : Origin (point central de v\u00e9rit\u00e9, c\u0027est ici\u00a0!), le Relay (tunnels TLS, sessions, v\u00e9rification 3 phases) et le Tracker (pools TCP, catalogues, lobbys).',
+        miou: 'Origin = la mairie, Relay = les routes s\u00e9curis\u00e9es, Tracker = l\u0027annuaire du r\u00e9seau.',
+        choices: null
+      }},
+      {{
+        id: 'api', icon: '\u{{1f4e1}}', title: 'API Origin',
+        body: 'Origin expose une API REST pour la gestion des pools, le catalogue de versions, les lobbys et la d\u00e9couverte de COGs. Documentation compl\u00e8te disponible dans /docs.',
+        miou: 'L\u0027API est clean et bien document\u00e9e. Tu peux tout automatiser\u00a0!',
+        choices: null
+      }},
+      {{
+        id: 'contribute', icon: '\u{{1f91d}}', title: 'Contribuer',
+        body: 'Le projet est open-source. Tu peux cr\u00e9er des services, des toolkits MWS, des adaptateurs inter-services. La documentation MSCM/MIP aide \u00e0 naviguer le codebase.',
+        miou: 'On adore les contributions\u00a0! M\u00eame des petits fix, \u00e7a compte \u00e9norm\u00e9ment.',
+        choices: null
+      }},
+      {{
+        id: 'toolkits', icon: '\u{{1f9f0}}', title: 'Cr\u00e9er un service',
+        body: 'Chaque service suit un pattern standard : modules data/, auth/, services/, export/. Les feature flags permettent d\u0027activer/d\u00e9sactiver des fonctionnalit\u00e9s. Les adaptateurs connectent les services entre eux.',
+        miou: 'Le pattern est r\u00e9p\u00e9titif et pr\u00e9visible. Une fois que t\u0027as compris un service, tu les comprends tous\u00a0!',
+        choices: null
+      }}
+    ],
+    pro: [
+      {{
+        id: 'sovereignty', icon: '\u{{1f3e2}}', title: 'Souverainet\u00e9 des donn\u00e9es',
+        body: 'Avec un COG professionnel, vos donn\u00e9es d\u0027entreprise restent dans vos locaux. Z\u00e9ro d\u00e9pendance cloud, conformit\u00e9 RGPD native, audit trail int\u00e9gr\u00e9 via les Cores.',
+        miou: 'Fini les sueurs froides aux audits RGPD. Tout est chez vous, v\u00e9rifiable, souverain.',
+        choices: [
+          {{label: 'D\u00e9tails RGPD', reply: 'Un COG est RGPD-natif\u00a0: les donn\u00e9es ne quittent jamais vos locaux, le chiffrement est de bout en bout, et chaque acc\u00e8s est trac\u00e9 par les Cores. Pas besoin de DPO externe pour g\u00e9rer la conformit\u00e9\u00a0!'}},
+          {{label: 'Cas d\u0027usage', reply: 'Cabinets m\u00e9dicaux pour les dossiers patients, PME pour la gestion interne, \u00e9coles pour les donn\u00e9es \u00e9l\u00e8ves, artisans pour leur vitrine pro avec JayXpose\u2026 Partout o\u00f9 la souverainet\u00e9 des donn\u00e9es compte\u00a0!'}}
+        ]
+      }},
+      {{
+        id: 'jayxpose', icon: '\u{{1f4ca}}', title: 'JayXpose : vitrine pro',
+        body: 'JayXpose transforme votre COG en vitrine professionnelle : catalogue produits, gestion commandes, communication clients. Tout int\u00e9gr\u00e9, tout souverain.',
+        miou: 'Votre boutique en ligne, mais sans plateforme tierce qui prend une commission\u00a0!',
+        choices: null
+      }},
+      {{
+        id: 'team', icon: '\u{{1f465}}', title: 'Travail d\u0027\u00e9quipe',
+        body: 'Jay1Tribu permet la collaboration d\u0027\u00e9quipe : messagerie, partage de fichiers, espaces projet. Chaque membre a son identit\u00e9 souveraine et ses permissions granulaires.',
+        miou: 'Slack + Drive + gestion de projet, mais tout reste dans votre COG.',
+        choices: null
+      }},
+      {{
+        id: 'costs', icon: '\u{{1f4b0}}', title: 'Co\u00fbts et mod\u00e8le',
+        body: 'Pas d\u0027abonnement mensuel. Un COG tourne sur votre mat\u00e9riel existant (PC, serveur, Raspberry Pi). Les services sont inclus. Les mises \u00e0 jour sont gratuites.',
+        miou: 'Z\u00e9ro frais r\u00e9currents. Votre investissement, c\u0027est juste le mat\u00e9riel que vous avez d\u00e9j\u00e0.',
+        choices: null
+      }},
+      {{
+        id: 'migration', icon: '\u{{1f504}}', title: 'Migration',
+        body: 'Des outils de migration sont disponibles pour importer vos donn\u00e9es depuis les services cloud classiques. L\u0027import est progressif et non-destructif.',
+        miou: 'On ne vous demande pas de tout couper d\u0027un coup. Migration en douceur, \u00e0 votre rythme.',
+        choices: null
+      }}
+    ]
+  }};
+
+  const MIOU_REACTIONS = [
+    'D\u0027accord\u00a0!', 'Tr\u00e8s bien\u00a0!', 'Allons-y\u00a0!',
+    'Excellent choix\u00a0!', 'Parfait\u00a0!', 'Super\u00a0!'
+  ];
+
+  const HOME_TIPS = [
+    'Besoin d\u0027aide\u00a0? Je suis l\u00e0\u00a0!',
+    'Explore les services, tu vas adorer\u00a0!',
+    'Pense \u00e0 t\u00e9l\u00e9charger Central\u00a0!',
+    'Le r\u00e9seau MWS grandit chaque jour\u00a0!'
+  ];
+
+  let currentProfile = null;
+  let currentTopicIdx = 0;
+  let typingTimer = null;
+
+  // === STARFIELD ===
+  function initStarfield(canvasId) {{
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const stars = [];
+    for (let i = 0; i < 200; i++) {{
+      stars.push({{
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.3,
+        speed: Math.random() * 0.3 + 0.05,
+        opacity: Math.random() * 0.8 + 0.2
+      }});
+    }}
+    function draw() {{
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {{
+        s.y -= s.speed;
+        if (s.y < 0) {{ s.y = canvas.height; s.x = Math.random() * canvas.width; }}
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,183,197,' + s.opacity + ')';
+        ctx.fill();
+      }});
+      requestAnimationFrame(draw);
+    }}
+    draw();
+  }}
+
+  // === TYPEWRITER ===
+  function typeText(el, text, speed, cb) {{
+    let i = 0;
+    const miou = document.getElementById('miou-large') || document.getElementById('miou-medium');
+    if (miou) miou.classList.add('talking');
+    clearInterval(typingTimer);
+    el.textContent = '';
+    typingTimer = setInterval(function() {{
+      if (i < text.length) {{
+        el.textContent += text[i];
+        i++;
+      }} else {{
+        clearInterval(typingTimer);
+        if (miou) miou.classList.remove('talking');
+        if (cb) cb();
+      }}
+    }}, speed || 35);
+  }}
+
+  // === SCREEN TRANSITIONS ===
+  function showScreen(n) {{
+    document.querySelectorAll('.vn-screen').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById('vn-screen-' + n);
+    if (target) target.classList.add('active');
+    if (n === 2) initStarfield('starfield2');
+    if (n === 3) initStarfield('starfield3');
+  }}
+
+  // === SCREEN 1 : click to continue ===
+  document.getElementById('vn-screen-1').addEventListener('click', function(e) {{
+    if (e.target.closest('.vn-skip-btn')) return;
+    showScreen(2);
+    setTimeout(function() {{
+      typeText(
+        document.getElementById('miou-s2-text'),
+        'Bienvenue dans l\u0027univers Miyukini\u00a0! Je suis Miou, ton guide. Dis-moi qui tu es pour que je te montre ce qui t\u0027int\u00e9resse\u00a0!',
+        30,
+        function() {{ document.getElementById('vn-profiles').classList.add('visible'); }}
+      );
+    }}, 400);
+  }});
+
+  // === SCREEN 2 : profile selection ===
+  window.vnSelectProfile = function(profile) {{
+    currentProfile = profile;
+    currentTopicIdx = 0;
+    localStorage.setItem('miou_profile', profile);
+
+    // Miou reaction
+    const reaction = MIOU_REACTIONS[Math.floor(Math.random() * MIOU_REACTIONS.length)];
+    document.getElementById('vn-profiles').style.pointerEvents = 'none';
+    typeText(document.getElementById('miou-s2-text'), reaction, 25, function() {{
+      setTimeout(function() {{
+        showScreen(3);
+        buildMenu(profile);
+        showTopic(0);
+      }}, 600);
+    }});
+  }};
+
+  // === SCREEN 3 : build menu ===
+  function buildMenu(profile) {{
+    const menu = document.getElementById('vn-s3-menu');
+    const topics = DIALOGUES[profile] || [];
+    menu.innerHTML = '';
+    topics.forEach(function(t, idx) {{
+      const item = document.createElement('div');
+      item.className = 'vn-menu-item' + (idx === 0 ? ' active' : '');
+      item.innerHTML = '<span class="vn-menu-icon">' + t.icon + '</span> ' + t.title;
+      item.onclick = function() {{ showTopic(idx); }};
+      menu.appendChild(item);
+    }});
+  }}
+
+  // === SCREEN 3 : show topic ===
+  function showTopic(idx) {{
+    const topics = DIALOGUES[currentProfile] || [];
+    if (idx >= topics.length) return;
+    currentTopicIdx = idx;
+    const t = topics[idx];
+
+    // Update menu active
+    document.querySelectorAll('.vn-menu-item').forEach(function(el, i) {{
+      el.classList.toggle('active', i === idx);
+    }});
+
+    document.getElementById('vn-topic-title').textContent = t.icon + ' ' + t.title;
+    document.getElementById('vn-topic-body').textContent = t.body;
+    document.getElementById('vn-miou-comment').textContent = '';
+    typeText(document.getElementById('vn-miou-comment'), t.miou, 25);
+
+    // Choices
+    const choicesEl = document.getElementById('vn-choices');
+    choicesEl.innerHTML = '';
+    if (t.choices) {{
+      t.choices.forEach(function(c) {{
+        const btn = document.createElement('button');
+        btn.className = 'vn-choice-btn';
+        btn.textContent = c.label;
+        btn.onclick = function() {{
+          // Highlight selected, disable all
+          choicesEl.querySelectorAll('.vn-choice-btn').forEach(function(b) {{
+            b.disabled = true;
+            b.style.opacity = '0.4';
+            b.style.cursor = 'default';
+          }});
+          btn.style.opacity = '1';
+          btn.style.borderColor = '#ffb7c5';
+          btn.style.background = 'rgba(255,183,197,0.2)';
+          // Miou responds
+          document.getElementById('vn-miou-comment').textContent = '';
+          typeText(document.getElementById('vn-miou-comment'), c.reply, 20);
+        }};
+        choicesEl.appendChild(btn);
+      }});
+    }}
+
+    // Next or finish
+    const isLast = idx >= topics.length - 1;
+    document.getElementById('vn-next-btn').style.display = isLast ? 'none' : 'block';
+    document.getElementById('vn-finish-btn').style.display = isLast ? 'block' : 'none';
+  }}
+
+  window.vnNextTopic = function() {{
+    showTopic(currentTopicIdx + 1);
+  }};
+
+  // === FINISH : exit VN ===
+  window.vnFinish = function() {{
+    localStorage.setItem('miou_onboarding_done', '1');
+    document.getElementById('vn-overlay').classList.add('hidden');
+    document.getElementById('home-content').style.display = '';
+    // Show header/footer
+    const hdr = document.querySelector('.site-header');
+    const ftr = document.querySelector('.site-footer');
+    if (hdr) hdr.style.display = '';
+    if (ftr) ftr.style.display = '';
+    // Miou home tip
+    const tip = HOME_TIPS[Math.floor(Math.random() * HOME_TIPS.length)];
+    const tipEl = document.getElementById('home-miou-tip');
+    if (tipEl) tipEl.textContent = tip;
+  }};
+
+  // === SKIP ===
+  window.vnSkip = function() {{
+    vnFinish();
+  }};
+
+  // === INIT ===
+  function init() {{
+    // Check localStorage
+    const params = new URLSearchParams(window.location.search);
+    const forceOnboarding = params.get('onboarding') === '1';
+    const done = localStorage.getItem('miou_onboarding_done');
+
+    if (done && !forceOnboarding) {{
+      // Skip VN, show home directly
+      document.getElementById('vn-overlay').classList.add('hidden');
+      document.getElementById('home-content').style.display = '';
+      const tip = HOME_TIPS[Math.floor(Math.random() * HOME_TIPS.length)];
+      const tipEl = document.getElementById('home-miou-tip');
+      if (tipEl) tipEl.textContent = tip;
+    }} else {{
+      // Hide header/footer during VN
+      const hdr = document.querySelector('.site-header');
+      const ftr = document.querySelector('.site-footer');
+      if (hdr) hdr.style.display = 'none';
+      if (ftr) ftr.style.display = 'none';
+      // Start starfield on screen 1
+      initStarfield('starfield');
+    }}
+  }}
+
+  if (document.readyState === 'loading') {{
+    document.addEventListener('DOMContentLoaded', init);
+  }} else {{
+    init();
+  }}
+}})();
+</script>
         "##,
-        announcements = announcements_html,
         total_cogs = total_cogs,
         total_lobbys = lobbys.len(),
         total_versions = versions.len(),
+        latest_version = latest_version,
         lobbys_html = lobbys_html,
         recent_posts = recent_posts_html,
     );
 
     layout("Miyukini COG", &content, "home")
 }
+
 
 /// Page de documentation.
 pub async fn docs_page(content_mgr: &ContentManager) -> String {
