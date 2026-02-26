@@ -1990,7 +1990,7 @@ pub async fn services_page(content_mgr: &ContentManager) -> String {
         <!-- Miou (centre) -->
         <div class="inv-mascot">
             <div class="miou-figure">
-                <span class="miou-emoji">&#x1F431;</span>
+                <span class="miou-emoji">&#x1F338;</span>
             </div>
             <span class="miou-name">Miou</span>
         </div>
