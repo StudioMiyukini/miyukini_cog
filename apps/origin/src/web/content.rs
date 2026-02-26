@@ -398,19 +398,19 @@ impl ContentManager {
     async fn load_downloads(&self) {
         let mut downloads = self.downloads.write().await;
         
-        // COG Stable v0.1.4 - Installateur Windows
+        // COG v0.2.0 - Installateur Windows
         downloads.push(Download {
             id: "miyukini-cog-windows".to_string(),
-            name: "Miyukini COG — Installateur Windows".to_string(),
-            description: "Installateur Miyukini Central pour Windows — Inclut Central, KindMother, client MWS et tous les Services (JayXpose, JayFestival, JayKonta, JayKoa, Jay1Tribu, MiyukiniWatch, MiyuClicker, Lord of the Castle). Installation guidée avec raccourcis Bureau et Menu Démarrer.".to_string(),
-            version: "0.1.4".to_string(),
+            name: "Miyukini Central — Installateur Windows".to_string(),
+            description: "Installateur Miyukini Central v0.2.0 pour Windows — Inclut Central, KindMother, voix Miou et tous les Services (JayXpose, JayFestival, JayKonta, JayKoa, Jay1Tribu, JayManga, MiyukiniWatch, MiyuClicker, Lord of the Castle). Installation sans droits admin dans AppData.".to_string(),
+            version: "0.2.0".to_string(),
             category: DownloadCategory::Cog,
             platforms: vec![Platform::Windows],
-            download_url: "https://miyukini.com/files/MiyukiniCentral-0.1.0-Setup.exe".to_string(),
-            size_bytes: 7_429_355,
+            download_url: "https://miyukini.com/downloads/MiyukiniCentral-0.2.0-Setup.exe".to_string(),
+            size_bytes: 6_522_680,
             sha256: "".to_string(),
             published_at: Utc::now(),
-            release_notes: "v0.1.4 — Installateur Windows (Inno Setup). Inclut Jay1Tribu, MiyukiniWatch, Miou TTS, guide Linux.".to_string(),
+            release_notes: "v0.2.0 — Service Market, refonte Central, JayManga, installation AppData sans admin.".to_string(),
             min_core_version: None,
         });
     }
@@ -492,7 +492,7 @@ Les solutions cloud traditionnelles vous rendent dépendant de services externes
 ### Windows
 ```powershell
 # Télécharger l'installateur
-Invoke-WebRequest -Uri "https://miyukini.com/files/MiyukiniCentral-0.1.0-Setup.exe" -OutFile "MiyukiniCentral-Setup.exe"
+Invoke-WebRequest -Uri "https://miyukini.com/downloads/MiyukiniCentral-0.2.0-Setup.exe" -OutFile "MiyukiniCentral-Setup.exe"
 
 # Lancer l'installation guidée
 .\MiyukiniCentral-Setup.exe
