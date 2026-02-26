@@ -188,17 +188,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // Service Market (catalogue + packages)
+    // Ouvert dans spawn_blocking car MarketStore::open utilise blocking_lock pour l'init SQLite.
     let data_dir = config.registry.data_dir.clone();
     let market_store: Option<Arc<web::MarketStore>> = {
         let db_path = std::path::Path::new(&data_dir).join("market.db");
         let packages_dir = std::path::Path::new(&data_dir).join("packages");
-        match web::MarketStore::open(&db_path, &packages_dir) {
-            Ok(store) => {
+        let db_p = db_path.clone();
+        let pkg_p = packages_dir.clone();
+        match tokio::task::spawn_blocking(move || web::MarketStore::open(&db_p, &pkg_p)).await {
+            Ok(Ok(store)) => {
                 info!("Service Market activé (/api/market/*) — base: {}", db_path.display());
                 Some(Arc::new(store))
             }
-            Err(e) => {
+            Ok(Err(e)) => {
                 error!("Service Market: impossible d'initialiser: {}", e);
+                None
+            }
+            Err(e) => {
+                error!("Service Market: spawn_blocking panicked: {}", e);
                 None
             }
         }
