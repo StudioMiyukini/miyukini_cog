@@ -1331,89 +1331,293 @@ pub async fn docs_page(content_mgr: &ContentManager) -> String {
     layout("Documentation", &content, "docs")
 }
 
-/// Page de téléchargements.
+/// Page de téléchargements — style Genshin frost UI.
+/// Seul Central est téléchargeable ici ; les services s'installent depuis l'app.
 pub async fn downloads_page(content_mgr: &ContentManager) -> String {
     let downloads = content_mgr.get_downloads().await;
+    let central = downloads.iter().find(|d| d.category == DownloadCategory::Cog);
 
-    let downloads_by_cat = |cat: DownloadCategory| -> String {
-        downloads
-            .iter()
-            .filter(|d| d.category == cat)
-            .map(|d| {
-                let platforms: String = d.platforms
-                    .iter()
-                    .map(|p| {
-                        let name = match p {
-                            Platform::Windows => "Windows",
-                            Platform::Linux => "Linux",
-                            Platform::MacOs => "macOS",
-                            Platform::Android => "Android",
-                            Platform::Ios => "iOS",
-                            Platform::Universal => "Universel",
-                        };
-                        format!(r#"<span class="platform-badge">{}</span>"#, name)
-                    })
-                    .collect();
-
-                format!(
-                    r#"<div class="card download-card">
-                        <div class="download-info">
-                            <h3>{}</h3>
-                            <p>{}</p>
-                            <div class="download-meta">
-                                <span>v{}</span>
-                                {}
-                            </div>
-                        </div>
-                        <a href="{}" class="btn btn-primary">⬇️ Télécharger</a>
-                    </div>"#,
-                    html_escape(&d.name),
-                    html_escape(&d.description),
-                    html_escape(&d.version),
-                    platforms,
-                    html_escape(&d.download_url)
-                )
-            })
-            .collect()
+    let (dl_url, dl_version, dl_size_mb, dl_notes) = match central {
+        Some(d) => (
+            html_escape(&d.download_url),
+            html_escape(&d.version),
+            format!("{:.1}", d.size_bytes as f64 / 1_048_576.0),
+            html_escape(&d.release_notes),
+        ),
+        None => (
+            String::new(),
+            "—".into(),
+            "—".into(),
+            String::new(),
+        ),
     };
 
     let content = format!(
-        r#"
-        <section class="hero" style="padding: 2rem 0;">
-            <h1>Téléchargements</h1>
-            <p>Téléchargez Miyukini COG et ses composants</p>
-        </section>
+        r##"
+<style>
+/* ── Genshin-style frost page ── */
+.gi-page {{
+    position: relative;
+    min-height: calc(100vh - 56px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    overflow: hidden;
+}}
+.gi-page::before {{
+    content: '';
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(ellipse 60% 50% at 30% 20%, rgba(100,160,255,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 70% 70%, rgba(139,92,246,0.10) 0%, transparent 70%),
+        radial-gradient(ellipse 80% 60% at 50% 50%, rgba(6,182,212,0.06) 0%, transparent 80%);
+    pointer-events: none;
+    z-index: 0;
+}}
+.gi-page > * {{ position: relative; z-index: 1; }}
 
-        <section class="section">
-            <h2 class="section-title">🖥️ COG Complet</h2>
-            <p class="section-subtitle">L'environnement Miyukini COG prêt à l'emploi</p>
-            <div class="grid" style="gap: 1rem;">
-                {}
-            </div>
-        </section>
+/* ── Titre ── */
+.gi-title {{
+    text-align: center;
+    margin-bottom: 2.5rem;
+}}
+.gi-title h1 {{
+    font-size: 2.2rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #e8e4f0;
+    text-shadow: 0 0 30px rgba(139,92,246,0.25);
+    margin-bottom: 0.4rem;
+}}
+.gi-title p {{
+    color: #9ca3af;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+}}
 
-        <section class="section">
-            <h2 class="section-title">⚙️ Cores</h2>
-            <p class="section-subtitle">Les 8 Cores système</p>
-            <div class="grid" style="gap: 1rem;">
-                {}
-            </div>
-        </section>
+/* ── Carte centrale frost ── */
+.gi-card {{
+    width: 100%;
+    max-width: 520px;
+    background: rgba(18,18,30,0.65);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border: 1px solid rgba(139,92,246,0.18);
+    border-radius: 1.25rem;
+    padding: 2.5rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow:
+        0 8px 40px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+}}
 
-        <section class="section">
-            <h2 class="section-title">📦 Services & Opérateurs</h2>
-            <p class="section-subtitle">Services officiels pour votre COG</p>
-            <div class="grid" style="gap: 1rem;">
-                {}
-            </div>
-        </section>
-        "#,
-        downloads_by_cat(DownloadCategory::Cog),
-        downloads_by_cat(DownloadCategory::Cores),
-        downloads_by_cat(DownloadCategory::Service),
+/* icône app */
+.gi-icon {{
+    width: 80px; height: 80px;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem;
+    box-shadow: 0 4px 24px rgba(139,92,246,0.35);
+    margin-bottom: 1.25rem;
+}}
+.gi-app-name {{
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #f0f0f5;
+    letter-spacing: 0.02em;
+}}
+.gi-version {{
+    font-size: 0.8rem;
+    color: #9ca3af;
+    margin-top: 0.2rem;
+    letter-spacing: 0.03em;
+}}
+.gi-desc {{
+    text-align: center;
+    color: #b0aec0;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    margin: 1.25rem 0 1.5rem;
+    max-width: 420px;
+}}
+
+/* badges */
+.gi-badges {{
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}}
+.gi-badge {{
+    font-size: 0.72rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(139,92,246,0.12);
+    border: 1px solid rgba(139,92,246,0.2);
+    color: #c4b5fd;
+    letter-spacing: 0.02em;
+}}
+
+/* bouton télécharger */
+.gi-dl-btn {{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 2.2rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 20px rgba(139,92,246,0.35);
+}}
+.gi-dl-btn:hover {{
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(139,92,246,0.5);
+    color: #fff;
+}}
+.gi-dl-btn svg {{
+    width: 18px; height: 18px;
+    fill: currentColor;
+}}
+.gi-size {{
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-top: 0.75rem;
+}}
+
+/* séparateur */
+.gi-sep {{
+    width: 60%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(139,92,246,0.25), transparent);
+    margin: 2.5rem 0 1.5rem;
+}}
+
+/* note services */
+.gi-note {{
+    text-align: center;
+    max-width: 460px;
+}}
+.gi-note h3 {{
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #c4b5fd;
+    margin-bottom: 0.5rem;
+}}
+.gi-note p {{
+    font-size: 0.82rem;
+    color: #7a7890;
+    line-height: 1.5;
+}}
+.gi-services-row {{
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 0.8rem;
+}}
+.gi-svc {{
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.4rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: #9ca3af;
+}}
+.gi-svc-icon {{ font-size: 0.9rem; }}
+
+/* release notes */
+.gi-release {{
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.78rem;
+    color: #6b6880;
+    font-style: italic;
+}}
+
+@media (max-width: 560px) {{
+    .gi-card {{ padding: 2rem 1.25rem 1.5rem; }}
+    .gi-title h1 {{ font-size: 1.6rem; }}
+    .gi-icon {{ width: 64px; height: 64px; font-size: 1.8rem; }}
+}}
+</style>
+
+<div class="gi-page">
+    <div class="gi-title">
+        <h1>Miyukini Central</h1>
+        <p>Votre environnement COG, pr&ecirc;t &agrave; l&rsquo;emploi</p>
+    </div>
+
+    <div class="gi-card">
+        <div class="gi-icon">&#x1f3ee;</div>
+        <div class="gi-app-name">Miyukini Central</div>
+        <div class="gi-version">v{dl_version} &mdash; Windows x64</div>
+
+        <p class="gi-desc">
+            Hub de gestion de votre COG. Inclut les 8 Cores syst&egrave;me,
+            KindMother, le client MWS Webway et les voix de Miou.<br>
+            Les services s&rsquo;installent directement depuis le Market int&eacute;gr&eacute;.
+        </p>
+
+        <div class="gi-badges">
+            <span class="gi-badge">8 Cores</span>
+            <span class="gi-badge">KindMother</span>
+            <span class="gi-badge">Webway MWS</span>
+            <span class="gi-badge">Voix Miou</span>
+            <span class="gi-badge">Service Market</span>
+        </div>
+
+        <a href="{dl_url}" class="gi-dl-btn">
+            <svg viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/></svg>
+            T&eacute;l&eacute;charger
+        </a>
+        <div class="gi-size">{dl_size_mb} Mo &mdash; Installateur Windows (Inno Setup)</div>
+    </div>
+
+    <div class="gi-sep"></div>
+
+    <div class="gi-note">
+        <h3>9 services officiels disponibles depuis Central</h3>
+        <p>Ouvrez le Market dans Central pour installer, mettre &agrave; jour<br>
+        et g&eacute;rer vos services en un clic.</p>
+        <div class="gi-services-row">
+            <span class="gi-svc"><span class="gi-svc-icon">&#x1F3EA;</span> JayXpose</span>
+            <span class="gi-svc"><span class="gi-svc-icon">&#x1F4C5;</span> JayFestival</span>
+            <span class="gi-svc"><span class="gi-svc-icon">&#x1F4C6;</span> JayKoa</span>
+            <span class="gi-svc"><span class="gi-svc-icon">&#x1F9EE;</span> JayKonta</span>
+            <span class="gi-svc"><span class="gi-svc-icon">&#x1F4AC;</span> Jay1Tribu</span>
+            <span class="gi-svc"><span class="gi-svc-icon">&#x1F4DA;</span> JayManga</span>
+            <span class="gi-svc"><span class="gi-svc-icon">&#x1F441;</span> MiyukiniWatch</span>
+            <span class="gi-svc"><span class="gi-svc-icon">&#x1F3AE;</span> Lord of the Click</span>
+            <span class="gi-svc"><span class="gi-svc-icon">&#x1F3F0;</span> Miyukini Survivor</span>
+        </div>
+    </div>
+
+    <div class="gi-release">{dl_notes}</div>
+</div>
+"##,
+        dl_url = dl_url,
+        dl_version = dl_version,
+        dl_size_mb = dl_size_mb,
+        dl_notes = dl_notes,
     );
 
-    layout("Téléchargements", &content, "downloads")
+    layout("Télécharger", &content, "downloads")
 }
 
 /// Page des services disponibles — catalogue en grille 3 colonnes (défilement vertical).
