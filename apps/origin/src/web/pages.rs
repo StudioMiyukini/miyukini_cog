@@ -1620,341 +1620,435 @@ pub async fn downloads_page(content_mgr: &ContentManager) -> String {
     layout("Télécharger", &content, "downloads")
 }
 
-/// Page des services disponibles — catalogue en grille 3 colonnes (défilement vertical).
+/// Page des services — inventaire Genshin Impact avec Miou mascotte.
 pub async fn services_page(content_mgr: &ContentManager) -> String {
-    use super::content::ServiceCategory;
-
     let services = content_mgr.get_services().await;
 
-    // Générer la liste des catégories pour la sidebar
-    let categories_list: String = ServiceCategory::all()
+    // Mapping service_id → emoji icon (from manifests)
+    let icon_for = |id: &str| -> &str {
+        match id {
+            "jayxpose" => "&#x1F3EA;",
+            "jayfestival" => "&#x1F4C5;",
+            "jaykoa" => "&#x1F4C6;",
+            "jaykonta" => "&#x1F9EE;",
+            "miyukiniwatch" => "&#x1F441;",
+            "jay1tribu" => "&#x1F4AC;",
+            "jaymanga" => "&#x1F4DA;",
+            "miyuclicker" => "&#x1F3AE;",
+            "lord_of_the_castle" => "&#x1F3F0;",
+            _ => "&#x1F4E6;",
+        }
+    };
+
+    // Couleur de rareté par catégorie (style Genshin)
+    let rarity_for = |id: &str| -> &str {
+        match id {
+            "jayxpose" | "jayfestival" => "rarity-5",    // or — commerce
+            "jaykoa" | "jaykonta" => "rarity-4",          // violet — productivité
+            "jay1tribu" => "rarity-4",                    // violet — social
+            "jaymanga" | "miyukiniwatch" => "rarity-3",   // bleu — style de vie
+            "miyuclicker" | "lord_of_the_castle" => "rarity-5", // or — jeux
+            _ => "rarity-3",
+        }
+    };
+
+    // Générer les slots d'inventaire
+    let inventory_slots: String = services
         .iter()
-        .map(|cat| {
+        .map(|s| {
             format!(
-                r#"<li><a href="/services?category={}">{}</a></li>"#,
-                html_escape(&format!("{:?}", cat).to_lowercase()),
-                html_escape(cat.label())
+                r#"<a href="/services/{id}" class="inv-slot {rarity}"
+                    data-name="{name}" data-desc="{desc}" data-cat="{cat}">
+                    <span class="inv-icon">{icon}</span>
+                </a>"#,
+                id = html_escape(&s.id),
+                rarity = rarity_for(&s.id),
+                name = html_escape(&s.name),
+                desc = html_escape(&s.short_description),
+                cat = html_escape(s.category.label()),
+                icon = icon_for(&s.id),
             )
         })
         .collect();
 
-    // Générer les cartes de services pour la grille
-    let services_cards: String = services
-        .iter()
-        .map(|s| {
-            format!(
-                r#"<div class="service-card">
-                    <div class="service-banner">{}</div>
-                    <div class="service-content">
-                        <h3 class="service-title">{}</h3>
-                        <div class="service-category">{}</div>
-                        <p class="service-description">{}</p>
-                        <div class="service-footer">
-                            <div class="service-meta">
-                                <span class="service-editor">{}</span>
-                                <span class="service-version">COG vers. {}</span>
-                            </div>
-                            <div class="service-actions">
-                                <a href="/services/{}" class="btn btn-secondary btn-sm">En savoir plus</a>
-                                <a href="/downloads" class="btn btn-primary btn-sm">Pré-installé</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>"#,
-                if s.banner_url.is_some() {
-                    format!(r#"<img src="{}" alt="Bannière">"#, html_escape(s.banner_url.as_deref().unwrap_or("")))
-                } else {
-                    "Petite bannière".to_string()
-                },
-                html_escape(&s.name),
-                html_escape(s.category.label()),
-                html_escape(&s.short_description),
-                html_escape(&s.editor),
-                html_escape(&s.cog_version),
-                html_escape(&s.id),
-            )
-        })
+    // Slots vides pour remplir la grille (style inventaire)
+    let empty_count = if services.len() < 12 { 12 - services.len() } else { 0 };
+    let empty_slots: String = (0..empty_count)
+        .map(|_| r#"<div class="inv-slot inv-empty"></div>"#.to_string())
         .collect();
 
     let content = format!(
         r##"
-        <div class="services-layout">
-            <!-- Sidebar filtres -->
-            <aside class="services-sidebar">
-                <h2>LES SERVICES</h2>
-                
-                <div class="filter-group">
-                    <label class="toggle-label">
-                        <span>Gratuit</span>
-                        <input type="checkbox" id="filter-free" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
+<style>
+/* ═══ Genshin Inventory Page ═══ */
+.inv-page {{
+    position: relative;
+    min-height: calc(100vh - 56px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1.5rem 3rem;
+    overflow: hidden;
+}}
+.inv-page::before {{
+    content: '';
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(ellipse 60% 50% at 25% 30%, rgba(100,160,255,0.10) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 75% 65%, rgba(139,92,246,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 80% 60% at 50% 50%, rgba(6,182,212,0.05) 0%, transparent 80%);
+    pointer-events: none;
+    z-index: 0;
+}}
+.inv-page > * {{ position: relative; z-index: 1; }}
 
-                <div class="filter-group">
-                    <label>Filtrer par catégorie :</label>
-                    <select class="filter-select" id="filter-category">
-                        <option value="">Toutes les catégories</option>
-                        <option value="outils">Outils</option>
-                        <option value="developpement">Développement</option>
-                        <option value="commerce">Commerce</option>
-                        <option value="jeux">Jeux</option>
-                        <option value="styledevie">Style de vie</option>
-                        <option value="social">Social</option>
-                        <option value="autre">Autre</option>
-                    </select>
-                </div>
+/* ── Titre ── */
+.inv-header {{
+    text-align: center;
+    margin-bottom: 2rem;
+}}
+.inv-header h1 {{
+    font-size: 1.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #e8e4f0;
+    text-shadow: 0 0 30px rgba(139,92,246,0.25);
+    margin-bottom: 0.3rem;
+}}
+.inv-header p {{
+    color: #9ca3af;
+    font-size: 0.88rem;
+    letter-spacing: 0.02em;
+}}
 
-                <div class="filter-group">
-                    <label>Filtrer par Éditeur :</label>
-                    <select class="filter-select" id="filter-editor">
-                        <option value="">Tous les éditeurs</option>
-                        <option value="miyukini">Miyukini</option>
-                    </select>
-                </div>
+/* ── Layout 3 panneaux ── */
+.inv-layout {{
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 2rem;
+    align-items: start;
+    max-width: 1100px;
+    width: 100%;
+}}
 
-                <div class="filter-group">
-                    <label>Filtrer par prix :</label>
-                    <div class="price-inputs">
-                        <span>De</span>
-                        <input type="number" class="price-input" placeholder="min" min="0">
-                        <span>à</span>
-                        <input type="number" class="price-input" placeholder="max" min="0">
-                    </div>
-                </div>
+/* ── Panneau inventaire (gauche) ── */
+.inv-panel {{
+    background: rgba(18,18,30,0.55);
+    backdrop-filter: blur(20px) saturate(1.3);
+    -webkit-backdrop-filter: blur(20px) saturate(1.3);
+    border: 1px solid rgba(139,92,246,0.15);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03);
+}}
+.inv-panel-title {{
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #8b8a9e;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(139,92,246,0.12);
+}}
+.inv-grid {{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+}}
 
-                <div class="filter-group categories-list">
-                    <h4>Liste des Catégories</h4>
-                    <ul>
-                        {categories_list}
-                    </ul>
-                </div>
-            </aside>
+/* ── Slot d'inventaire ── */
+.inv-slot {{
+    width: 72px; height: 72px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    overflow: hidden;
+}}
+.inv-slot::before {{
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 0.5rem;
+    z-index: 0;
+}}
+.inv-slot:hover {{
+    transform: scale(1.1);
+    z-index: 5;
+}}
+.inv-icon {{
+    font-size: 1.8rem;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}}
 
-            <!-- Grille 3 colonnes des services (défilement vertical) -->
-            <main class="services-main">
-                <div class="services-grid">
-                    {services_cards}
-                </div>
-            </main>
+/* Raretés (couleurs Genshin) */
+.rarity-3 {{
+    background: linear-gradient(180deg, #3b5998 0%, #465f8f 50%, #5a7ab5 100%);
+    border: 1px solid rgba(90,122,181,0.5);
+}}
+.rarity-3::before {{
+    background: linear-gradient(180deg, transparent 60%, rgba(90,122,181,0.25) 100%);
+}}
+.rarity-4 {{
+    background: linear-gradient(180deg, #594580 0%, #6b4f96 50%, #8b6cb5 100%);
+    border: 1px solid rgba(139,108,181,0.5);
+}}
+.rarity-4::before {{
+    background: linear-gradient(180deg, transparent 60%, rgba(139,108,181,0.25) 100%);
+}}
+.rarity-5 {{
+    background: linear-gradient(180deg, #8b6914 0%, #a07d24 50%, #c9a535 100%);
+    border: 1px solid rgba(201,165,53,0.5);
+}}
+.rarity-5::before {{
+    background: linear-gradient(180deg, transparent 60%, rgba(201,165,53,0.25) 100%);
+}}
+.inv-slot:hover.rarity-3 {{ box-shadow: 0 0 18px rgba(90,122,181,0.5); }}
+.inv-slot:hover.rarity-4 {{ box-shadow: 0 0 18px rgba(139,108,181,0.5); }}
+.inv-slot:hover.rarity-5 {{ box-shadow: 0 0 18px rgba(201,165,53,0.5); }}
+
+/* Slot vide */
+.inv-empty {{
+    background: rgba(30,30,45,0.4);
+    border: 1px dashed rgba(255,255,255,0.06);
+    cursor: default;
+}}
+
+/* ── Mascotte Miou (centre) ── */
+.inv-mascot {{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 380px;
+    padding: 1rem;
+}}
+.miou-figure {{
+    width: 200px;
+    height: 280px;
+    background: radial-gradient(ellipse at center, rgba(139,92,246,0.08) 0%, transparent 70%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}}
+.miou-figure::after {{
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 120px;
+    height: 20px;
+    background: radial-gradient(ellipse, rgba(139,92,246,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+}}
+.miou-emoji {{
+    font-size: 7rem;
+    filter: drop-shadow(0 8px 24px rgba(139,92,246,0.3));
+    animation: miou-float 3s ease-in-out infinite;
+}}
+@keyframes miou-float {{
+    0%, 100% {{ transform: translateY(0); }}
+    50% {{ transform: translateY(-8px); }}
+}}
+.miou-name {{
+    font-size: 0.85rem;
+    color: #c4b5fd;
+    letter-spacing: 0.05em;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}}
+
+/* ── Dialogue Miou (droite) ── */
+.inv-dialogue {{
+    background: rgba(18,18,30,0.55);
+    backdrop-filter: blur(20px) saturate(1.3);
+    -webkit-backdrop-filter: blur(20px) saturate(1.3);
+    border: 1px solid rgba(139,92,246,0.15);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    max-width: 280px;
+    min-width: 240px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03);
+    position: relative;
+}}
+.inv-dialogue::before {{
+    content: '';
+    position: absolute;
+    left: -8px; top: 40px;
+    width: 0; height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid rgba(18,18,30,0.55);
+}}
+.dlg-speaker {{
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #c4b5fd;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(139,92,246,0.12);
+}}
+.dlg-text {{
+    font-size: 0.88rem;
+    color: #d0cde0;
+    line-height: 1.6;
+}}
+.dlg-text em {{
+    color: #c4b5fd;
+    font-style: normal;
+    font-weight: 500;
+}}
+
+/* ── Tooltip au curseur ── */
+.inv-tooltip {{
+    position: fixed;
+    pointer-events: none;
+    z-index: 999;
+    background: rgba(12,12,22,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(139,92,246,0.25);
+    border-radius: 0.65rem;
+    padding: 0.85rem 1rem;
+    max-width: 260px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.15s, transform 0.15s;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.5);
+}}
+.inv-tooltip.visible {{
+    opacity: 1;
+    transform: translateY(0);
+}}
+.tt-name {{
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #f0f0f5;
+    margin-bottom: 0.15rem;
+}}
+.tt-cat {{
+    font-size: 0.7rem;
+    color: #c4b5fd;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.4rem;
+}}
+.tt-desc {{
+    font-size: 0.78rem;
+    color: #9ca3af;
+    line-height: 1.45;
+    margin-bottom: 0.5rem;
+}}
+.tt-cta {{
+    font-size: 0.72rem;
+    color: #8b5cf6;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {{
+    .inv-layout {{
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        justify-items: center;
+    }}
+    .inv-mascot {{ min-height: 200px; }}
+    .miou-figure {{ width: 140px; height: 180px; }}
+    .miou-emoji {{ font-size: 5rem; }}
+    .inv-dialogue {{ max-width: 100%; }}
+    .inv-dialogue::before {{ display: none; }}
+}}
+@media (max-width: 560px) {{
+    .inv-grid {{ grid-template-columns: repeat(3, 1fr); }}
+    .inv-slot {{ width: 64px; height: 64px; }}
+    .inv-icon {{ font-size: 1.5rem; }}
+}}
+</style>
+
+<div class="inv-page">
+    <div class="inv-header">
+        <h1>Services Miyukini</h1>
+        <p>Survolez un service pour en savoir plus, cliquez pour ouvrir sa fiche</p>
+    </div>
+
+    <div class="inv-layout">
+        <!-- Inventaire (gauche) -->
+        <div class="inv-panel">
+            <div class="inv-panel-title">Inventaire des services</div>
+            <div class="inv-grid">
+                {inventory_slots}
+                {empty_slots}
+            </div>
         </div>
 
-        <style>
-            .services-layout {{
-                display: grid;
-                grid-template-columns: 250px 1fr;
-                gap: 2rem;
-                min-height: 80vh;
-            }}
+        <!-- Miou (centre) -->
+        <div class="inv-mascot">
+            <div class="miou-figure">
+                <span class="miou-emoji">&#x1F431;</span>
+            </div>
+            <span class="miou-name">Miou</span>
+        </div>
 
-            /* Sidebar */
-            .services-sidebar {{
-                background: var(--bg-surface);
-                border: 1px solid var(--border);
-                border-radius: 1rem;
-                padding: 1.5rem;
-                height: fit-content;
-                position: sticky;
-                top: 90px;
-            }}
-            .services-sidebar h2 {{
-                font-size: 1.25rem;
-                margin-bottom: 1.5rem;
-                padding-bottom: 0.75rem;
-                border-bottom: 1px solid var(--border);
-            }}
-            .filter-group {{
-                margin-bottom: 1.25rem;
-            }}
-            .filter-group label {{
-                display: block;
-                font-size: 0.875rem;
-                color: var(--text-muted);
-                margin-bottom: 0.5rem;
-            }}
-            .filter-select {{
-                width: 100%;
-                padding: 0.5rem;
-                background: var(--bg-elevated);
-                border: 1px solid var(--border);
-                border-radius: 0.5rem;
-                color: var(--text);
-                font-size: 0.875rem;
-            }}
-            .price-inputs {{
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }}
-            .price-input {{
-                width: 60px;
-                padding: 0.375rem;
-                background: var(--bg-elevated);
-                border: 1px solid var(--border);
-                border-radius: 0.25rem;
-                color: var(--text);
-                font-size: 0.8rem;
-            }}
-            .toggle-label {{
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                cursor: pointer;
-            }}
-            .toggle-label span:first-child {{
-                font-weight: 500;
-                color: var(--text);
-            }}
-            .toggle-slider {{
-                width: 40px;
-                height: 22px;
-                background: var(--bg-elevated);
-                border-radius: 11px;
-                position: relative;
-                transition: background 0.2s;
-            }}
-            .toggle-slider::before {{
-                content: '';
-                position: absolute;
-                width: 18px;
-                height: 18px;
-                border-radius: 50%;
-                background: var(--text-muted);
-                top: 2px;
-                left: 2px;
-                transition: transform 0.2s, background 0.2s;
-            }}
-            .toggle-label input {{
-                display: none;
-            }}
-            .toggle-label input:checked + .toggle-slider {{
-                background: var(--primary);
-            }}
-            .toggle-label input:checked + .toggle-slider::before {{
-                transform: translateX(18px);
-                background: white;
-            }}
-            .categories-list h4 {{
-                font-size: 0.875rem;
-                margin-bottom: 0.75rem;
-            }}
-            .categories-list ul {{
-                list-style: none;
-                padding: 0;
-            }}
-            .categories-list li {{
-                margin-bottom: 0.375rem;
-            }}
-            .categories-list a {{
-                color: var(--text-muted);
-                font-size: 0.875rem;
-                transition: color 0.2s;
-            }}
-            .categories-list a:hover {{
-                color: var(--primary);
-            }}
+        <!-- Dialogue (droite) -->
+        <div class="inv-dialogue">
+            <div class="dlg-speaker">Miou</div>
+            <div class="dlg-text">
+                Bienvenue dans l&rsquo;inventaire des services&nbsp;!<br><br>
+                Survole les ic&ocirc;nes &agrave; gauche pour d&eacute;couvrir chaque service.
+                Tous sont <em>gratuits</em> et disponibles depuis le Market de Central.<br><br>
+                Clique sur un service pour voir sa pr&eacute;sentation compl&egrave;te&nbsp;!
+            </div>
+        </div>
+    </div>
+</div>
 
-            /* Grille 3 colonnes — défilement vertical */
-            .services-main {{
-                display: flex;
-                flex-direction: column;
-                overflow-y: auto;
-            }}
-            .services-grid {{
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 1.5rem;
-                padding: 0.5rem 0;
-            }}
+<!-- Tooltip flottant -->
+<div class="inv-tooltip" id="inv-tooltip">
+    <div class="tt-name" id="tt-name"></div>
+    <div class="tt-cat" id="tt-cat"></div>
+    <div class="tt-desc" id="tt-desc"></div>
+    <div class="tt-cta">Cliquez pour en savoir plus &rarr;</div>
+</div>
 
-            /* Carte de service */
-            .service-card {{
-                background: var(--bg-surface);
-                border: 1px solid var(--border);
-                border-radius: 1rem;
-                overflow: hidden;
-                transition: all 0.2s;
-            }}
-            .service-card:hover {{
-                border-color: var(--primary);
-                transform: translateY(-4px);
-                box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15);
-            }}
-            .service-banner {{
-                height: 100px;
-                background: linear-gradient(135deg, var(--bg-elevated), var(--bg));
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: var(--text-muted);
-                font-size: 0.875rem;
-                border-bottom: 1px solid var(--border);
-            }}
-            .service-banner img {{
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }}
-            .service-content {{
-                padding: 1rem;
-            }}
-            .service-title {{
-                font-size: 1.1rem;
-                margin-bottom: 0.25rem;
-            }}
-            .service-category {{
-                font-size: 0.8rem;
-                color: var(--primary);
-                font-weight: 500;
-                margin-bottom: 0.5rem;
-            }}
-            .service-description {{
-                font-size: 0.85rem;
-                color: var(--text-muted);
-                margin-bottom: 1rem;
-                line-height: 1.4;
-            }}
-            .service-footer {{
-                border-top: 1px solid var(--border);
-                padding-top: 1rem;
-            }}
-            .service-meta {{
-                display: flex;
-                justify-content: space-between;
-                font-size: 0.75rem;
-                color: var(--text-muted);
-                margin-bottom: 0.75rem;
-            }}
-            .service-actions {{
-                display: flex;
-                gap: 0.5rem;
-            }}
-            .btn-sm {{
-                padding: 0.375rem 0.75rem;
-                font-size: 0.8rem;
-            }}
+<script>
+(function() {{
+    var tip = document.getElementById('inv-tooltip');
+    var slots = document.querySelectorAll('.inv-slot[data-name]');
 
-            /* Responsive */
-            @media (max-width: 900px) {{
-                .services-layout {{
-                    grid-template-columns: 1fr;
-                }}
-                .services-sidebar {{
-                    position: static;
-                }}
-                .services-grid {{
-                    grid-template-columns: repeat(2, 1fr);
-                }}
-            }}
-            @media (max-width: 560px) {{
-                .services-grid {{
-                    grid-template-columns: 1fr;
-                }}
-            }}
-        </style>
-        "##,
-        categories_list = categories_list,
-        services_cards = services_cards,
+    slots.forEach(function(slot) {{
+        slot.addEventListener('mouseenter', function() {{
+            document.getElementById('tt-name').textContent = slot.dataset.name;
+            document.getElementById('tt-cat').textContent = slot.dataset.cat;
+            document.getElementById('tt-desc').textContent = slot.dataset.desc;
+            tip.classList.add('visible');
+        }});
+
+        slot.addEventListener('mousemove', function(e) {{
+            var x = e.clientX + 16;
+            var y = e.clientY + 16;
+            // Prevent tooltip from going off-screen
+            var rect = tip.getBoundingClientRect();
+            if (x + rect.width > window.innerWidth) x = e.clientX - rect.width - 8;
+            if (y + rect.height > window.innerHeight) y = e.clientY - rect.height - 8;
+            tip.style.left = x + 'px';
+            tip.style.top = y + 'px';
+        }});
+
+        slot.addEventListener('mouseleave', function() {{
+            tip.classList.remove('visible');
+        }});
+    }});
+}})();
+</script>
+"##,
+        inventory_slots = inventory_slots,
+        empty_slots = empty_slots,
     );
 
     layout("Les services", &content, "services")
