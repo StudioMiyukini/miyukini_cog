@@ -1,0 +1,19 @@
+{
+  "id": "jay1tribu",
+  "name": "Jay1Tribu",
+  "description": "Tribus, amis et discussions — chat et tribu pleins uniquement si connecté au Webway.",
+  "icon": "💬",
+  "version": "0.1.0",
+  "service_type": "inter_cog",
+  "source": "officiel",
+  "developer": "Miyukini",
+  "min_central_version": "0.2.0",
+  "dependencies": [],
+  "permissions": ["storage", "webway", "identity"],
+  "tags": ["chat", "messagerie", "tribu", "amis"],
+  "execution_mode": "standalone",
+  "binary_name": "jay1tribu.exe",
+  "platforms": {
+    "windows_x64": "jay1tribu.exe"
+  }
+}

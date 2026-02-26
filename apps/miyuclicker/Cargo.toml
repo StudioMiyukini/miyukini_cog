@@ -1,40 +1,29 @@
+# MiyuClicker (Lord of the Click) — App standalone (lancée par Central ou indépendamment).
+
 [package]
-name = "miyuclicker"
+name = "miyuclicker-app"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
-license = "LicenseRef-Miyukini-Dual"
-description = "Lord of the Click — Premier jeu officiel Miyukini (Idle/Clicker + Carte stratégique)"
+license.workspace = true
+description = "Lord of the Click — Idle/Clicker + Carte stratégique (standalone)"
 
 [dependencies]
+miyuclicker = { path = "../../crates/miyuclicker" }
+miyukini-service-ui = { path = "../../crates/miyukini-service-ui" }
+dioxus = { version = "0.6", features = ["desktop"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-# Note: eGUI supprimé — migration vers Tauri + React/TypeScript
-# Voir docs/implementation/Miyukini - Plan Migration Tauri React TypeScript.md
+[lib]
+name = "miyuclicker_app"
+path = "src/lib.rs"
 
-[lints.rust]
-unsafe_code = "forbid"
-missing_docs = "allow"
+[[bin]]
+name = "miyuclicker"
+path = "src/main.rs"
 
-[lints.clippy]
-all = { level = "warn", priority = -1 }
-pedantic = { level = "warn", priority = -1 }
-doc_markdown = "allow"
-missing_errors_doc = "allow"
-missing_panics_doc = "allow"
-must_use_candidate = "allow"
-return_self_not_must_use = "allow"
-cast_possible_truncation = "allow"
-cast_sign_loss = "allow"
-cast_precision_loss = "allow"
-cast_lossless = "allow"
-module_name_repetitions = "allow"
-struct_excessive_bools = "allow"
-too_many_lines = "allow"
-wildcard_imports = "allow"
-unused_self = "allow"
-needless_pass_by_value = "allow"
-similar_names = "allow"
-unreadable_literal = "allow"
-items_after_statements = "allow"
+[lints]
+workspace = true

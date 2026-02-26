@@ -2,13 +2,9 @@
 //! Pré-remplit l'email du dernier profil connecté.
 
 use dioxus::prelude::*;
-use crate::audio;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use crate::theme::styles;
-#[cfg(feature = "service-miyukiniwatch")]
-use miyukiniwatch::MiyukiniWatchCollector;
-use uuid::Uuid;
 
 /// Étapes du rite de retour : Accueil → Clé.
 const STEP_ACCUEIL: u8 = 0;
@@ -41,19 +37,15 @@ pub fn Connexion() -> Element {
     // Index de la phrase (et du son) Miou choisi au montage (0=a, 1=b, 2=c).
     let mut miou_phrase_index = use_signal(|| None::<usize>);
 
-    // À l'affichage de l'écran connexion avec compte connu : jouer un des 3 sons Miou et retenir la phrase.
+    // À l'affichage de l'écran connexion avec compte connu : choisir une phrase Miou aléatoire.
     use_effect(move || {
-        if !has_saved || miou_phrase_index().is_some() {
+        if !has_saved || miou_phrase_index.peek().is_some() {
             return;
         }
-        let base = connections.read().miyuclicker_data_dir.clone();
-        let suffixes = ['a', 'b', 'c'];
         let idx = (std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap_or_default()
             .as_nanos() % 3) as usize;
-        let filename = format!("login_retour_{}.mp3", suffixes[idx]);
-        audio::play_voice_background(&base, &filename);
         miou_phrase_index.set(Some(idx));
     });
 
@@ -70,25 +62,8 @@ pub fn Connexion() -> Element {
             Ok(Some(profile)) => {
                 let _ = auth_db.set_current_profile_id(Some(profile.id.as_str()));
 
-                // MiyukiniWatch : session démarrée
-                let session_id = Uuid::new_v4().to_string();
-                #[cfg(feature = "service-miyukiniwatch")]
-                {
-                    let db = connections.read().miyukiniwatch.clone();
-                    let collector = MiyukiniWatchCollector::new(db);
-                    if let Err(e) = collector.record_session_start(&profile.id, &session_id) {
-                        tracing::debug!("MiyukiniWatch record_session_start: {}", e);
-                    } else if let Ok(Some(total)) = connections.read().miyukiniwatch.get_global(&profile.id, "total_sessions") {
-                        let _ = connections.read().miyukiniwatch.set_global(&profile.id, "total_sessions", total + 1);
-                    } else {
-                        let _ = connections.read().miyukiniwatch.set_global(&profile.id, "total_sessions", 1);
-                    }
-                }
-
                 let mut s = state.write();
                 s.current_user = Some(profile);
-                s.miyukiniwatch_session_id = Some(session_id);
-                s.miyukiniwatch_session_started_at = Some(std::time::Instant::now());
             }
             Ok(None) => {
                 error.write().push_str("Clé incorrecte ou compte inconnu.");

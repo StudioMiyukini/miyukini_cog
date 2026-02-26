@@ -1,0 +1,19 @@
+{
+  "id": "jaykonta",
+  "name": "JayKonta",
+  "description": "Comptabilité COG unifiée Purse + Account",
+  "icon": "🧮",
+  "version": "0.1.0",
+  "service_type": "interne_cog",
+  "source": "officiel",
+  "developer": "Miyukini",
+  "min_central_version": "0.2.0",
+  "dependencies": [],
+  "permissions": ["storage", "accounting"],
+  "tags": ["comptabilité", "budget", "purse", "account"],
+  "execution_mode": "standalone",
+  "binary_name": "jaykonta.exe",
+  "platforms": {
+    "windows_x64": "jaykonta.exe"
+  }
+}

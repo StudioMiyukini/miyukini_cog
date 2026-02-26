@@ -1,29 +1,16 @@
-//! MiyuClicker — Premier jeu officiel Miyukini.
-//!
-//! Idle/Clicker (gestion) + Carte stratégique (conquête).
-//!
-//! ## Architecture gameplay (déduite du schéma GUI)
-//!
-//! ### Boucles de gameplay
-//! 1. **Production** : Ouvriers assignés aux 6 bâtiments (Ferme, Scierie, Carrière, Mine, Atelier, Forge)
-//! 2. **Transformation** : Ouvrier → Bâtisseur (20 outils + 1/existant) | Ouvrier → Soldat (10 armes + 1/existant)
-//! 3. **Construction** : Bâtisseurs assignés aux 3 bâtiments (Maisons, Casernes, Guilde des Maçons)
-//! 4. **Croissance** : Maisons → +pop max → +ouvriers naturels → +production
-//! 5. **Militaire** : Soldats → déploiement carte → conquête cités
-//!
-//! @id: miyuclicker_lib_module
-//! @role: application
-//! @layer: app
-//! @do: aggregate_miyuclicker_operators_and_toolkits
-//! @human: Application jeu : IdleSim, Save, Combat, Carte. UI migrée vers Tauri + React.
+//! MiyuClicker (Lord of the Click) — App standalone Dioxus.
+pub mod views;
 
-pub mod carte;
-pub mod combat;
-pub mod idlesim;
-pub mod save;
-pub mod state;
+use std::path::PathBuf;
+use dioxus::prelude::*;
 
-pub use state::{
-    Allocation, AllocationBatisseurs, BuildingCost, BuildingType, Cite, ClickTarget, Deplacement,
-    GameState, ProductionRates, Proprietaire, Route,
-};
+/// Contexte pour le repertoire de donnees du jeu.
+#[derive(Clone)]
+pub struct DataDirContext {
+    pub data_dir: PathBuf,
+}
+
+/// Hook pour acceder au data_dir.
+pub fn use_data_dir() -> PathBuf {
+    use_context::<Signal<DataDirContext>>().read().data_dir.clone()
+}

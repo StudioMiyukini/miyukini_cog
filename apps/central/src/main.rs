@@ -1,16 +1,18 @@
-//! Miyukini Central — Application Native
+//! Miyukini Central — Standalone Launcher
 //!
 //! Hub de gestion des Services COG avec interface Steam-like.
-//! Rendu natif via Dioxus Desktop (WGPU).
+//! Les services sont des binaires indépendants gérés par le ServiceManager.
 
 mod app;
 mod audio;
 mod components;
 mod data;
 mod kindmother_launcher;
-mod market_client;
+pub mod llm_client;
+pub mod market_client;
 mod miou;
 mod screens;
+pub mod service_manager;
 mod services;
 mod state;
 mod theme;

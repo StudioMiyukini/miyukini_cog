@@ -1,0 +1,28 @@
+# Jay1Tribu — App standalone (lancée par Central ou indépendamment).
+
+[package]
+name = "jay1tribu-app"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Jay1Tribu — Messagerie P2P, tribus, salons et amis (standalone)"
+
+[dependencies]
+jay1tribu = { path = "../../crates/jay1tribu" }
+kindmother = { path = "../../crates/kindmother" }
+miyukini-service-ui = { path = "../../crates/miyukini-service-ui" }
+dioxus = { version = "0.6", features = ["desktop"] }
+tokio = { version = "1", features = ["time"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = "0.4"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[[bin]]
+name = "jay1tribu"
+path = "src/main.rs"
+
+[lints]
+workspace = true

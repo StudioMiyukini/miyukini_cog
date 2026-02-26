@@ -1,0 +1,19 @@
+{
+  "id": "jayfestival",
+  "name": "JayFestival",
+  "description": "Festivals, éditions, exposants, visiteurs",
+  "icon": "📅",
+  "version": "0.1.0",
+  "service_type": "surface_web",
+  "source": "officiel",
+  "developer": "Miyukini",
+  "min_central_version": "0.2.0",
+  "dependencies": [],
+  "permissions": ["storage", "webway", "identity", "notifications"],
+  "tags": ["festival", "événement", "exposant", "visiteur"],
+  "execution_mode": "standalone",
+  "binary_name": "jayfestival.exe",
+  "platforms": {
+    "windows_x64": "jayfestival.exe"
+  }
+}

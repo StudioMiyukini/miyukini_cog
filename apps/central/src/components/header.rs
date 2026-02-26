@@ -2,7 +2,7 @@
 
 use dioxus::prelude::*;
 use crate::data::profile_display_name;
-use crate::state::{use_app_state, MainTab};
+use crate::state::{use_app_state, MainTab, OpenTab};
 use crate::theme::styles;
 
 /// Header principal de l'application.
@@ -32,7 +32,32 @@ pub fn Header() -> Element {
                     for tab in MainTab::all() {
                         button {
                             style: "{styles::nav_tab(theme, state.read().main_tab == *tab)}",
-                            onclick: move |_| { state.write().main_tab = *tab; },
+                            onclick: move |_| {
+                                let mut s = state.write();
+                                s.main_tab = *tab;
+                                match *tab {
+                                    // "SALON" ramène à l'onglet Salon (Home, index 0)
+                                    MainTab::Salon => {
+                                        s.active_tab_index = 0;
+                                    }
+                                    // "SERVICES" ouvre directement le service Services (market)
+                                    MainTab::Bibliotheque => {
+                                        if let Some(idx) = s.open_tabs.iter().position(|t| t.service_id.as_deref() == Some("market")) {
+                                            s.active_tab_index = idx;
+                                        } else {
+                                            let market_tab = OpenTab {
+                                                id: "market".into(),
+                                                title: "Services".into(),
+                                                service_id: Some("market".into()),
+                                                closable: true,
+                                            };
+                                            s.open_tabs.push(market_tab);
+                                            s.active_tab_index = s.open_tabs.len() - 1;
+                                        }
+                                    }
+                                    _ => {}
+                                }
+                            },
                             onmouseenter: move |_| {},
                             "{tab.label()}"
                         }

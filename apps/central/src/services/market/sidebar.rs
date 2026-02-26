@@ -11,6 +11,7 @@ pub fn MarketSidebar(state: Signal<MarketState>) -> Element {
 
     // Compteurs
     let installed_count = app.read().services.iter().filter(|s| s.is_installed).count();
+    let update_count = state.read().available_updates.len();
 
     rsx! {
         aside {
@@ -22,7 +23,7 @@ pub fn MarketSidebar(state: Signal<MarketState>) -> Element {
                 div {
                     style: "display: flex; align-items: center; gap: 8px; margin-bottom: 4px;",
                     span { style: "font-size: 20px;", "\u{1F6D2}" }
-                    h3 { style: "font-size: 16px; color: {c.text_white};", "Service Market" }
+                    h3 { style: "font-size: 16px; color: {c.text_white};", "Services" }
                 }
                 p { style: "font-size: 11px; color: {c.text_muted};", "Catalogue des services" }
             }
@@ -86,7 +87,11 @@ pub fn MarketSidebar(state: Signal<MarketState>) -> Element {
                 SidebarItem {
                     icon: "\u{1F4E6}",
                     label: "Install\u{00e9}s",
-                    badge: Some(installed_count.to_string()),
+                    badge: if update_count > 0 {
+                        Some(format!("{installed_count} \u{2022} {update_count} MAJ"))
+                    } else {
+                        Some(installed_count.to_string())
+                    },
                     is_active: state.read().section == MarketSection::Installes,
                     onclick: move |_| {
                         let mut s = state.write();

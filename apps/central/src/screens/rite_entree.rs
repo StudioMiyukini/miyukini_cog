@@ -4,7 +4,6 @@
 
 use dioxus::prelude::*;
 use miyukini_central::auth::{CentralProfile, PASSWORD_MIN_LEN};
-use crate::audio;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use crate::theme::{Theme, styles};
@@ -322,8 +321,7 @@ pub fn RiteEntree() -> Element {
             return;
         }
         if s == STEP_NOM || s == STEP_EMAIL || s == STEP_CLE {
-            let base = connections.read().miyuclicker_data_dir.clone();
-            audio::play_voice_background(&base, VOIX_RITE[s as usize]);
+            // Audio playback désactivé — les assets voix seront dans le service Miou à terme.
             last_played_step.set(Some(s));
         }
     });

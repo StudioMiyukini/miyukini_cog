@@ -1,12 +1,12 @@
-# Miyukini Central — Application Native Dioxus
-# Hub de gestion des Services avec interface Steam-like
-# Rendu natif WGPU via Blitz (pas de webview)
+# Miyukini Central — Application Native Dioxus (Standalone Launcher)
+# Hub de gestion des Services — installe, lance et gère les services indépendants.
+# Les services sont des binaires séparés, Central orchestre leur cycle de vie.
 
 [package]
 name = "miyukini-central-native"
-version = "0.1.4"
+version = "0.2.0"
 edition = "2021"
-description = "Miyukini Central — Hub natif des Services COG (Dioxus + Blitz)"
+description = "Miyukini Central — Hub standalone des Services COG (Dioxus Desktop)"
 authors = ["Miyukini Contributors"]
 license = "LicenseRef-Miyukini-Dual"
 
@@ -29,12 +29,19 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
+# HTTP client (LLM Studio, API Market, téléchargement packages)
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+
 # Utilities
 chrono = "0.4"
 uuid = { version = "1", features = ["v4"] }
 urlencoding = "2.1"
+
 # Audio (voix Miou sur écran connexion)
 rodio = { version = "0.21", default-features = false, features = ["playback", "mp3"] }
+
+# Archive ZIP pour les packages service (.msp)
+zip = "2"
 
 # Auth et profils Central (COG vierge, premier compte admin)
 miyukini-central = { path = "../../crates/miyukini-central", features = ["legacy-sqlite"] }
@@ -42,47 +49,8 @@ miyukini-central = { path = "../../crates/miyukini-central", features = ["legacy
 # MWS - Miyukini Webway System
 miyuwebway_participant = { path = "../../crates/miyuwebway_participant" }
 
-# Service Market (protocole partagé Central/Origin)
+# Service Market (protocole + manifeste partagé Central/Origin)
 miyumarket = { path = "../../crates/miyumarket" }
-
-# Service backends — data layers (toujours compilés via miyukini-central)
-# Les features ci-dessous gèrent uniquement l'inclusion des modules UI Dioxus.
-jayxpose = { path = "../../crates/jayxpose" }
-jayfestival = { path = "../../crates/jayfestival" }
-jaykonta = { path = "../../crates/jaykonta" }
-jaykoa = { path = "../../crates/jaykoa" }
-miyuclicker = { path = "../../crates/miyuclicker" }
-lord_of_the_castle = { path = "../../crates/lord_of_the_castle" }
-
-# Services indépendants (vrais optionnels — non requis par miyukini-central)
-miyukiniwatch = { path = "../../crates/miyukiniwatch", optional = true }
-jay1tribu = { path = "../../crates/jay1tribu", optional = true }
-jaymanga = { path = "../../crates/jaymanga", optional = true }
-
-[features]
-default = ["all-services"]
-all-services = [
-    "service-jayxpose",
-    "service-jayfestival",
-    "service-jaykonta",
-    "service-jaykoa",
-    "service-miyukiniwatch",
-    "service-jay1tribu",
-    "service-miyuclicker",
-    "service-lord-of-the-castle",
-    "service-jaymanga",
-]
-# Features UI — gèrent les modules de vue Dioxus par service.
-# Les crates data sont toujours disponibles ; seule l'UI est conditionnelle.
-service-jayxpose = []
-service-jayfestival = []
-service-jaykonta = []
-service-jaykoa = []
-service-miyukiniwatch = ["dep:miyukiniwatch"]
-service-jay1tribu = ["dep:jay1tribu"]
-service-miyuclicker = []
-service-lord-of-the-castle = []
-service-jaymanga = ["dep:jaymanga"]
 
 [lints.rust]
 unsafe_code = "forbid"

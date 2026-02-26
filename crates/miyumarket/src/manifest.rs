@@ -27,6 +27,28 @@ pub enum ServiceSource {
     Tiers,
 }
 
+/// Mode d'exécution d'un service.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum ExecutionMode {
+    /// Service avec sa propre fenêtre (processus standalone).
+    #[default]
+    Standalone,
+    /// Service sans UI (processus d'arrière-plan).
+    Background,
+}
+
+/// Binaires spécifiques par plateforme dans le package.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct PlatformBinaries {
+    #[serde(default)]
+    pub windows_x64: Option<String>,
+    #[serde(default)]
+    pub linux_x64: Option<String>,
+    #[serde(default)]
+    pub macos_arm64: Option<String>,
+}
+
 /// Manifeste complet d'un service.
 ///
 /// Fichier : `service.manifest.json` dans le package.
@@ -68,6 +90,15 @@ pub struct ServiceManifest {
     /// Taille du package en octets (rempli par Origin après upload).
     #[serde(default)]
     pub package_size: Option<u64>,
+    /// Mode d'exécution (standalone = fenêtre propre, background = sans UI).
+    #[serde(default)]
+    pub execution_mode: ExecutionMode,
+    /// Nom du binaire dans le package (ex: "jayxpose.exe"). Déduit de l'id si absent.
+    #[serde(default)]
+    pub binary_name: Option<String>,
+    /// Binaires par plateforme (chemins relatifs dans le package).
+    #[serde(default)]
+    pub platforms: PlatformBinaries,
 }
 
 /// Permission demandée par un service.
@@ -143,6 +174,9 @@ mod tests {
             homepage: None,
             checksum: None,
             package_size: None,
+            execution_mode: ExecutionMode::Standalone,
+            binary_name: None,
+            platforms: PlatformBinaries::default(),
         };
         assert!(valid.validate().is_ok());
 
@@ -173,6 +207,9 @@ mod tests {
             homepage: Some("https://miyukini.com/jayxpose".into()),
             checksum: None,
             package_size: None,
+            execution_mode: ExecutionMode::Standalone,
+            binary_name: Some("jayxpose.exe".into()),
+            platforms: PlatformBinaries { windows_x64: Some("jayxpose.exe".into()), ..Default::default() },
         };
         let json = serde_json::to_string_pretty(&manifest).unwrap();
         let parsed: ServiceManifest = serde_json::from_str(&json).unwrap();

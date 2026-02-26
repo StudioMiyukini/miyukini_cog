@@ -1,24 +1,17 @@
 //! Catalogue Market — grille de services avec filtres et recherche.
 
 use dioxus::prelude::*;
-use crate::state::{use_app_state, ServiceInfo, ServiceSource, ServiceType, ServiceRegistry};
+use crate::state::{use_app_state, use_service_manager, ServiceInfo, ServiceSource, ServiceType, ServiceRegistry};
 use super::{MarketSection, MarketState};
 
 #[component]
 pub fn MarketCatalog(state: Signal<MarketState>) -> Element {
     let app = use_app_state();
+    let manager = use_service_manager();
     let c = app.read().current_theme.palette();
 
-    // Construire la liste complète : installés + disponibles (fallback local)
-    let installed = app.read().services.clone();
-    let available = ServiceRegistry::local_available();
-    let mut all_services: Vec<ServiceInfo> = installed;
-    // Ajouter les services disponibles non déjà présents
-    for svc in available {
-        if !all_services.iter().any(|s| s.id == svc.id) {
-            all_services.push(svc);
-        }
-    }
+    // Construire la liste complète : installés + disponibles (catalogue officiel)
+    let all_services = ServiceRegistry::installed_services(&manager);
 
     // Appliquer les filtres
     let section = state.read().section;
@@ -27,6 +20,7 @@ pub fn MarketCatalog(state: Signal<MarketState>) -> Element {
 
     let filtered: Vec<ServiceInfo> = all_services
         .into_iter()
+        .filter(|s| s.id != "market") // Ne pas afficher le Market lui-même
         .filter(|s| match section {
             MarketSection::Decouvrir => true,
             MarketSection::Officiels => s.source == ServiceSource::Officiel,
@@ -61,7 +55,6 @@ pub fn MarketCatalog(state: Signal<MarketState>) -> Element {
         div {
             style: "display: flex; flex-direction: column; gap: 24px;",
 
-            // Header avec titre et compteur
             div {
                 style: "display: flex; align-items: center; justify-content: space-between;",
                 div {
@@ -70,10 +63,8 @@ pub fn MarketCatalog(state: Signal<MarketState>) -> Element {
                 }
             }
 
-            // Filtres par type
             TypeFilterBar { state: state }
 
-            // Grille de services
             if filtered.is_empty() {
                 EmptyState { section: section, has_query: !query.is_empty() }
             } else {
@@ -169,14 +160,48 @@ fn FilterChip(
 #[component]
 fn MarketCard(service: ServiceInfo, state: Signal<MarketState>) -> Element {
     let c = use_app_state().read().current_theme.palette();
+    let manager = use_service_manager();
 
     let svc_id = service.id.clone();
     let svc_for_detail = svc_id.clone();
     let is_installed = service.is_installed;
+    let is_running = manager.is_running(&svc_id);
     let type_color = service.service_type.color();
     let type_label = service.service_type.label();
     let source_color = service.source.badge_color();
     let source_label = service.source.label();
+
+    // Vérifier si une mise à jour est disponible
+    let has_update = state.read().available_updates.iter()
+        .any(|(id, _, _)| id == &svc_id);
+
+    let status_label = if has_update {
+        "Mise \u{00e0} jour"
+    } else if is_running {
+        "En cours"
+    } else if is_installed {
+        "Install\u{00e9}"
+    } else {
+        "Installer"
+    };
+    let status_bg = if has_update {
+        format!("{}20", "#f59e0b")
+    } else if is_running {
+        format!("{}20", "#10b981")
+    } else if is_installed {
+        format!("{}20", c.accent_green)
+    } else {
+        format!("{}20", c.accent_blue)
+    };
+    let status_fg = if has_update {
+        "#f59e0b".to_string()
+    } else if is_running {
+        "#10b981".to_string()
+    } else if is_installed {
+        c.accent_green.to_string()
+    } else {
+        c.accent_blue.to_string()
+    };
 
     rsx! {
         div {
@@ -185,19 +210,16 @@ fn MarketCard(service: ServiceInfo, state: Signal<MarketState>) -> Element {
                 state.write().selected_service_id = Some(svc_for_detail.clone());
             },
 
-            // Icone header avec gradient
             div {
                 style: "height: 80px; background: linear-gradient(135deg, {type_color}30, {type_color}10); display: flex; align-items: center; justify-content: center; position: relative;",
                 span { style: "font-size: 36px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));", "{service.icon}" }
 
-                // Badge source
                 span {
                     style: "position: absolute; top: 8px; right: 8px; padding: 2px 8px; background: {source_color}20; color: {source_color}; border: 1px solid {source_color}40; border-radius: 10px; font-size: 10px; font-weight: 500;",
                     "{source_label}"
                 }
             }
 
-            // Contenu
             div {
                 style: "padding: 14px; flex: 1; display: flex; flex-direction: column;",
 
@@ -207,31 +229,21 @@ fn MarketCard(service: ServiceInfo, state: Signal<MarketState>) -> Element {
                     "{service.description}"
                 }
 
-                // Footer : type + version + statut
                 div {
                     style: "display: flex; align-items: center; justify-content: space-between; margin-top: 12px;",
 
-                    // Type badge
                     span {
                         style: "display: flex; align-items: center; gap: 4px; font-size: 11px; color: {c.text_muted};",
                         span { style: "width: 6px; height: 6px; border-radius: 50%; background: {type_color};" }
                         "{type_label}"
                     }
 
-                    // Version + statut
                     div {
                         style: "display: flex; align-items: center; gap: 6px;",
                         span { style: "font-size: 10px; color: {c.text_muted};", "v{service.version}" }
-                        if is_installed {
-                            span {
-                                style: "padding: 3px 10px; background: {c.accent_green}20; color: {c.accent_green}; border-radius: 10px; font-size: 11px; font-weight: 500;",
-                                "Install\u{00e9}"
-                            }
-                        } else {
-                            span {
-                                style: "padding: 3px 10px; background: {c.accent_blue}20; color: {c.accent_blue}; border-radius: 10px; font-size: 11px; font-weight: 500;",
-                                "Installer"
-                            }
+                        span {
+                            style: "padding: 3px 10px; background: {status_bg}; color: {status_fg}; border-radius: 10px; font-size: 11px; font-weight: 500;",
+                            "{status_label}"
                         }
                     }
                 }
