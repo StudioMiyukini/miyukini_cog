@@ -230,6 +230,25 @@ APPROUVE / REJETE / MODIFIE
 
 > **PRINCIPE FONDAMENTAL** : Apres l'approbation du brief P0, l'execution est **entierement automatique**. L'utilisateur n'intervient plus sauf en cas de **bug bloquant** ou de **delta majeur** par rapport au plan.
 
+### Git Branch Setup (premiere action de l'AUTOPILOT)
+
+Avant toute implementation, creer une branche de feature et la pousser sur le remote :
+
+```bash
+# Creer la branche depuis main
+git checkout -b feat/<slug>    # slug = nom court de la feature (ex: feat/miyuvoice)
+
+# Pousser la branche pour suivi distant
+git push -u origin feat/<slug>
+```
+
+**Convention de nommage des branches** :
+- `feat/<slug>` — Nouvelle fonctionnalite (T3-T5)
+- `fix/<slug>` — Correction de bug (T1-T2)
+- `refactor/<slug>` — Refactoring (T3+)
+
+Le `<slug>` est derive du titre du brief (ex: brief "Ajouter MiyuVoice" → `feat/miyuvoice`).
+
 ### Logging obligatoire
 
 **Chaque tache** du plan exhaustif est tracee via **TodoWrite** pour que l'utilisateur puisse suivre l'avancement en temps reel :
@@ -271,13 +290,15 @@ Dans ces cas, l'agent qui detecte le probleme **arrete l'autopilot** et **presen
 4. **VERIFY** — `cargo test -p {crate}` passe
 5. **LINT** — `cargo clippy -p {crate} -- -D warnings` propre
 6. **COMMIT** — Commit atomique avec message conventionnel
-7. **LOG** — `TodoWrite` : marquer la tache `completed`
+7. **PUSH** — `git push` sur la feature branch (sauvegarde distante)
+8. **LOG** — `TodoWrite` : marquer la tache `completed`
 
 **Checkpoint intermediaire** : Toutes les **5 taches completees**, Denis lance un mini-audit :
 - `cargo build -p {crate}` des crates modifies
 - `cargo clippy -p {crate} -- -D warnings`
 - Verifier que les taches precedentes ne sont pas cassees par les nouvelles
 - Si regression detectee → corriger avant de continuer
+- `git push` — pousser l'etat courant sur la feature branch
 
 **Parallelisme** : Francois et Lise travaillent simultanement quand leurs taches sont independantes. Les taches avec dependances sont sequencees par Denis.
 
@@ -328,12 +349,33 @@ Artefact : `.mip/audits/YYYY-MM-DD-<slug>.md`
 
 **Agent** : Denis
 
-1. Commit final structure (message conventionnel)
-2. Tag si release
-3. **LOG** : `TodoWrite` marquer livraison `completed`
-4. **Presenter le resume a l'utilisateur** : ce qui a ete fait, nombre de fichiers, tests passes, anomalies corrigees
+1. **Commit final** si necessaire (message conventionnel)
+2. **Push final** — `git push` sur la feature branch
+3. **Presenter le resume a l'utilisateur** : ce qui a ete fait, nombre de fichiers, tests passes, anomalies corrigees
+4. **[GATE] Utilisateur confirme** la livraison
 
-**Note** : C'est ici que l'utilisateur reprend la main pour confirmer la livraison.
+Apres confirmation utilisateur :
+
+5. **Merge vers main** — processus standard Git :
+   ```bash
+   git checkout main
+   git pull origin main
+   git merge feat/<slug> --no-ff    # merge explicite avec commit de merge
+   git push origin main
+   ```
+6. **Tag si release** : `git tag -a vX.Y.Z -m "description"` + `git push origin vX.Y.Z`
+7. **Nettoyage** : supprimer la branche de feature
+   ```bash
+   git branch -d feat/<slug>
+   git push origin --delete feat/<slug>
+   ```
+8. **LOG** : `TodoWrite` marquer livraison `completed`
+
+**Alternative PR** : Si le projet utilise des pull requests, remplacer le merge direct par :
+```bash
+gh pr create --title "feat(<slug>): <description>" --body "<resume des changements>"
+```
+L'utilisateur merge la PR manuellement sur GitHub.
 
 **Quality Gate P5** : Utilisateur confirme la livraison.
 
@@ -371,6 +413,8 @@ Artefact : `.mip/audits/YYYY-MM-DD-<slug>.md`
 13. **Archivage systematique** (T3+) — Arianne capitalise apres chaque livraison
 14. **Logging obligatoire** — Chaque tache tracee via TodoWrite
 15. **Autopilot apres P0** — Aucune intervention humaine sauf frein d'urgence
+16. **Feature branch obligatoire** (T2+) — Tout travail sur branche, merge vers main apres validation
+17. **Push regulier** — Chaque commit est pousse sur le remote pour sauvegarde
 
 ---
 
@@ -448,11 +492,13 @@ Utilisateur : "Je veux ajouter MiyuVoice"
   |
   +=== AUTOPILOT START ===================================
   |
+  +-- Git : git checkout -b feat/miyuvoice + git push -u origin feat/miyuvoice
+  |
   +-- P3 PARALLELE (automatique) :
   |   +-- Pre-flight : Context7 spot-check + anti-patterns par tache
-  |   +-- Francois : Taches CODE back-end (TDD) → TodoWrite log
-  |   +-- Lise : Taches CODE front-end (TDD) → TodoWrite log
-  |   +-- [Checkpoint toutes les 5 taches : mini-audit Denis]
+  |   +-- Francois : Taches CODE back-end (TDD) → commit → push → TodoWrite
+  |   +-- Lise : Taches CODE front-end (TDD) → commit → push → TodoWrite
+  |   +-- [Checkpoint toutes les 5 taches : mini-audit Denis + push]
   |   +-- [Auto-correction intelligente : root cause + Context7 + 2 tentatives]
   |
   +-- P4 (automatique) :
@@ -460,8 +506,10 @@ Utilisateur : "Je veux ajouter MiyuVoice"
   |   +-- George : Audit conformite → .mip/audits/
   |   [Auto-correction defauts non-bloquants, frein d'urgence si critique]
   |
-  +-- P5 (automatique) : Denis → Commit final + resume a l'utilisateur
+  +-- P5 (automatique) : Denis → Push final + resume a l'utilisateur
   |   [GATE] Utilisateur confirme la livraison
+  |   +-- git merge feat/miyuvoice → main + push main
+  |   +-- git tag (si release) + nettoyage branche
   |
   +-- P6 (automatique) : Arianne → Archivage + capitalisation
   |   +-- Nouvelles erreurs → mip-antipatterns.md

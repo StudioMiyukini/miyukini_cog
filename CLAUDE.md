@@ -92,11 +92,13 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 
 | Phase | Nom | Agents | Gate |
 |-------|-----|--------|------|
-| P3 | Implementation TDD parallele | Francois + Lise | Tests + clippy par tache |
+| Git | Creation feature branch + push | Denis | Branch prete |
+| P3 | Implementation TDD parallele | Francois + Lise | Tests + clippy + push par tache |
 | P4 | Integration & Audit | Denis + George | 0 defaut bloquant |
-| P5 | Livraison | Denis | Utilisateur confirme |
+| P5 | Livraison + Merge | Denis | Utilisateur confirme → merge main |
 | P6 | Archivage & Capitalisation | Arianne | Memoire a jour |
 
+**Git workflow** : Feature branch (`feat/<slug>`) creee au debut, push apres chaque commit, merge vers main apres validation.
 **Frein d'urgence** : L'autopilot s'arrete si bug bloquant apres 2 auto-corrections, ou delta majeur.
 **Logging** : Chaque tache tracee via TodoWrite pour suivi utilisateur temps reel.
 **Context7** : Verification docs libs (Dioxus, axum, serde) en P0-T4 + spot-checks en P3.
@@ -108,9 +110,11 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 Utilisateur → Maria (P0 : 6 temps) + Lise + Fabrice + Francois (Context7) + Denis
 → [GATE] Brief approuve
 → === AUTOPILOT ===
-→ Francois (P3 back) + Lise (P3 front) en PARALLELE [TDD + Context7 spot-check + TodoWrite]
-→ Denis (P3 checkpoint /5 taches) → Denis (P4 integration) + George (P4 audit)
-→ Denis (P5 livraison) → [GATE] Utilisateur confirme
+→ Git : checkout -b feat/<slug> + push -u origin
+→ Francois (P3 back) + Lise (P3 front) en PARALLELE [TDD + commit + push + TodoWrite]
+→ Denis (P3 checkpoint /5 taches + push) → Denis (P4 integration) + George (P4 audit)
+→ Denis (P5 push final + resume) → [GATE] Utilisateur confirme
+→ Denis (P5 merge main + push + tag + nettoyage branche)
 → Arianne (P6 archivage + capitalisation anti-patterns)
 ```
 

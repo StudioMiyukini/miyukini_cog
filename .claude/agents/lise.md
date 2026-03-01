@@ -198,7 +198,8 @@ Apres approbation du brief P0, Lise execute les taches front-end du plan exhaust
 4. **VERIFY** — `cargo test -p {crate}` passe + verification visuelle
 5. **LINT** — `cargo clippy -p {crate} -- -D warnings` propre
 6. **COMMIT** — Commit atomique : `"type(scope): description"`
-7. **LOG** — `TodoWrite` : marquer la tache `completed`
+7. **PUSH** — `git push` sur la feature branch (sauvegarde distante)
+8. **LOG** — `TodoWrite` : marquer la tache `completed`
 
 **Auto-correction intelligente** : Si un test echoue :
 1. Lire l'erreur — verifier si c'est un **piege RSX connu** (nested braces, named args, read+set)

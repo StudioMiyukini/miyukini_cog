@@ -99,18 +99,27 @@ Denis recoit la spec technique de Francois (Temps 4) et produit le **plan exhaus
 
 Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md`
 
-### Autopilot — P3 (Checkpoints) + P4 (Integration) + P5 (Livraison)
+### Autopilot — Git Setup + P3 (Checkpoints) + P4 (Integration) + P5 (Livraison)
 
 Apres approbation P0, Denis coordonne l'execution automatique :
 
+- **Git Setup** (premiere action) : Creer la feature branch et la pousser :
+  - `git checkout -b feat/<slug>` (ou `fix/<slug>` pour T1-T2)
+  - `git push -u origin feat/<slug>`
 - **P3 (Checkpoints)** : Toutes les **5 taches completees**, lancer un mini-audit :
   - `cargo build -p {crate}` des crates modifies
   - `cargo clippy -p {crate} -- -D warnings`
   - Verifier que les taches precedentes ne sont pas cassees par les nouvelles
   - Si regression → corriger avant de continuer
+  - `git push` pour sauvegarder l'etat courant
 - **P4 (Integration)** : `cargo build/test/clippy --workspace`. Auto-corriger les defauts non-bloquants. Frein d'urgence si echec apres 2 tentatives.
 - **P4 (Audit)** : Coordonner George pour l'audit de conformite.
-- **P5 (Livraison)** : Commit final, tag si release, presentation du resume a l'utilisateur.
+- **P5 (Livraison)** :
+  1. Push final sur la feature branch
+  2. Presenter le resume a l'utilisateur
+  3. **Apres confirmation** : merge vers main (`git merge feat/<slug> --no-ff`)
+  4. Push main + tag si release
+  5. Nettoyage branche (`git branch -d` + `git push origin --delete`)
 
 Chaque etape est **loggee via TodoWrite** pour suivi utilisateur.
 
@@ -137,9 +146,11 @@ Chaque etape est **loggee via TodoWrite** pour suivi utilisateur.
 1. **(P0 Temps 5)** Recevoir la spec de Francois + contributions Maria/Lise/Fabrice
 2. **(P0 Temps 5)** Rediger le **plan exhaustif** (`.mip/plans/`)
 3. **(P0 Temps 5)** Transmettre a Maria (Temps 6) pour synthese dans le brief
-4. **(P3 Autopilot)** Distribuer les taches : Francois (back) + Lise (front)
-5. **(P3 Autopilot)** Superviser l'execution, debloquer les dependances
-6. **(P3 Autopilot)** Checkpoint mini-audit toutes les 5 taches
-7. **(P4 Autopilot)** Executer les tests finaux (`cargo test --workspace`)
-7. **(P4 Autopilot)** Coordonner George pour audit + corriger defauts non-bloquants
-8. **(P5 Autopilot)** Commit final, presenter le resume a l'utilisateur
+4. **(Autopilot)** Creer la feature branch : `git checkout -b feat/<slug>` + push
+5. **(P3 Autopilot)** Distribuer les taches : Francois (back) + Lise (front)
+6. **(P3 Autopilot)** Superviser l'execution, debloquer les dependances
+7. **(P3 Autopilot)** Checkpoint mini-audit toutes les 5 taches + `git push`
+8. **(P4 Autopilot)** Executer les tests finaux (`cargo test --workspace`)
+9. **(P4 Autopilot)** Coordonner George pour audit + corriger defauts non-bloquants
+10. **(P5 Autopilot)** Push final + resume a l'utilisateur
+11. **(P5 Autopilot)** Apres confirmation : merge vers main + push + tag + nettoyage branche

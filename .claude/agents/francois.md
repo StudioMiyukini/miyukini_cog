@@ -184,7 +184,8 @@ Apres approbation du brief P0, Francois execute les taches back-end du plan exha
 4. **VERIFY** — `cargo test -p {crate}` passe
 5. **LINT** — `cargo clippy -p {crate} -- -D warnings` propre
 6. **COMMIT** — Commit atomique : `"type(scope): description"`
-7. **LOG** — `TodoWrite` : marquer la tache `completed`
+7. **PUSH** — `git push` sur la feature branch (sauvegarde distante)
+8. **LOG** — `TodoWrite` : marquer la tache `completed`
 
 **Auto-correction intelligente** : Si un test echoue :
 1. Lire l'erreur, identifier la root cause
