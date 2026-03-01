@@ -129,7 +129,7 @@ crates/{service}/src/ → lib.rs, data/ (mod.rs, types.rs, kindmother_db.rs), au
 |-------|-------|
 | miyukini-architecture | Decisions architecturales, strates, Cores |
 | miyukini-rust-patterns | Structure crates, admin_cell, context, errors |
-| miyukini-mscm-mip | Balisage semantique MSCM, index MIP |
+| miyukini-mscm-mip | Balisage semantique MSCM, index MSCM (ne pas confondre avec MIP v2) |
 | miyukini-services | Pattern services (data/, auth/, adapters) |
 | miyukini-dioxus-ui | UI Dioxus 0.6, theme, composants, pieges RSX |
 | miyukini-testing | Tests unitaires, cycle MiyukiniSQLtest |
