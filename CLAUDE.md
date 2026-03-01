@@ -69,7 +69,7 @@ cargo test -p {crate} -- --nocapture       # Tests verbose d'un crate
 |--------|---------|--------|---------|
 | **T1** | Micro-fix, 1 fichier, <20 lignes | P3 → P5 | Fix typo, ajout comment |
 | **T2** | Fix cible, 1-3 fichiers | P2 → P3 → P5 | Corriger unwrap(), fix RSX |
-| **T3** | Feature moderee, 3-10 fichiers | P1 → P2 → P3 → P5 → P6 | Nouveau composant, endpoint |
+| **T3** | Feature moderee, 3-10 fichiers | P0 → P1 → P2 → P3 → P5 → P6 | Nouveau composant, endpoint |
 | **T4** | Feature majeure, 10+ fichiers | Toutes phases | Nouveau service, refactor |
 | **T5** | Chantier strategique | Toutes phases | Nouveau crate/app, engine |
 
@@ -79,7 +79,7 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 
 | Phase | Nom | Agents | Gate |
 |-------|-----|--------|------|
-| P0 | Cadrage & Analyse | Maria + Fabrice | Brief approuve |
+| P0 | Cadrage & Brainstorming | Maria + Lise + Fabrice | Brief approuve |
 | P1 | Specification technique | Denis | Spec validee |
 | P2 | Plan d'execution atomique | Denis | Plan valide |
 | P3 | Implementation parallele | Francois + Lise | Tests + clippy |
@@ -90,7 +90,7 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 ### Workflow standard
 
 ```
-Utilisateur → Maria (P0 classification + brief) → Fabrice (P0 analyse PR, T4-T5)
+Utilisateur → Maria (P0 brainstorming 4 temps) + Lise (P0 direction visuelle) + Fabrice (P0 analyse PR, T4-T5)
 → Denis (P1 spec + P2 plan) → Francois (P3 back) + Lise (P3 front) en PARALLELE
 → Denis (P4 integration) + George (P4 audit) → Denis (P5 livraison)
 → Arianne (P6 archivage) → Utilisateur

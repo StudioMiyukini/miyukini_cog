@@ -14,7 +14,7 @@ Avant toute action, classer la demande :
 |--------|---------|--------|
 | **T1** | Micro-fix, 1 fichier, <20 lignes | P3 → P5 |
 | **T2** | Fix cible, 1-3 fichiers, bug connu | P2 → P3 → P5 |
-| **T3** | Feature moderee, 3-10 fichiers | P1 → P2 → P3 → P5 → P6 |
+| **T3** | Feature moderee, 3-10 fichiers | P0 → P1 → P2 → P3 → P5 → P6 |
 | **T4** | Feature majeure, 10+ fichiers, multi-crate | P0 → P1 → P2 → P3 → P4 → P5 → P6 |
 | **T5** | Chantier strategique, nouveau crate/app | P0 → P1 → P2 → P3 → P4 → P5 → P6 |
 
@@ -26,23 +26,123 @@ Avant toute action, classer la demande :
 
 ## Etape 2 — Routing des phases
 
-### P0 — Cadrage & Analyse (T4-T5)
+### P0 — Cadrage, Brainstorming & Analyse (T3+)
 
-**Agents** : Maria + Fabrice (T4-T5 seulement)
+**Agents** : Maria (lead) + Lise (direction visuelle, T3+) + Fabrice (analyse concurrentielle, T4-T5)
 
-**Maria** :
-1. Reformuler la demande utilisateur
-2. Identifier la classe T1-T5
-3. Creer le brief : objectifs, contraintes (Lois d'Autonomie), risques
+P0 est la phase la plus importante : elle determine la direction de tout le travail. Aucun code ne sera ecrit avant la fin de P0. Le brainstorming est **structure en 4 temps**.
+
+#### Temps 1 — Exploration (Maria)
+
+Maria reformule la demande et creuse le contexte :
+
+1. **Reformuler** la demande utilisateur en termes precis
+2. **Classifier** la demande (T1-T5)
+3. **Explorer le code existant** : lire les fichiers concernes (Glob, Grep, Read) pour comprendre l'etat actuel
+4. **Poser des questions** de clarification a l'utilisateur (minimum 2-3 questions ciblees)
+5. **Identifier les contraintes** : Lois d'Autonomie applicables, stack technique, compatibilite existante
+
+**Hard gate** : NE PAS passer au temps 2 sans reponses de l'utilisateur.
+
+#### Temps 2 — Ideation (Maria + Lise en parallele)
+
+Deux explorations paralleles :
+
+**Maria** — Cadrage fonctionnel :
+1. Lister les **objectifs** (principal + secondaires)
+2. Definir le **perimetre** : IN / OUT explicite
+3. Identifier les **risques** et leurs mitigations
+4. Proposer **2-3 approches** techniques differentes avec pros/cons
+
+**Lise** (T3+ si la tache a un aspect front/UI) — Vision graphique :
+1. Analyser l'**UI existante** (theme, composants, patterns visuels en place)
+2. Proposer la **direction artistique** : style, ton, inspirations visuelles
+3. Decrire le **parcours utilisateur** (flux ecran par ecran, interactions)
+4. Identifier les **composants** a creer/reutiliser (atomic design : atomes, molecules, organismes)
+5. Si pertinent, referencer des **inspirations visuelles** (apps concurrentes, design systems)
+
+#### Temps 3 — Analyse concurrentielle (Fabrice, T4-T5 seulement)
+
+**Fabrice** (lance en parallele du temps 2 pour T4-T5) :
+1. Identifier les **produits/services concurrents**
+2. Analyser **forces et faiblesses** de chaque concurrent
+3. Identifier la **cible utilisateur** et ses attentes
+4. Lister les **fonctionnalites differenciantes** a envisager
+5. Detecter les **points de friction** des concurrents
+
+#### Temps 4 — Synthese & Brief (Maria)
+
+Maria compile tout dans le brief :
+
+1. **Fusionner** les contributions de tous les agents (Maria + Lise + Fabrice)
+2. **Rediger le brief structure** avec toutes les sections
+3. **Presenter les approches** avec la recommandation de l'equipe
 4. Artefact : `.mip/briefs/YYYY-MM-DD-<slug>.md`
 
-**Fabrice** (T4-T5) :
-1. Analyse concurrentielle
-2. Identification de la cible utilisateur
-3. Recommandations differenciantes
-4. Artefact : integre au brief
+**Template du brief** :
 
-**Quality Gate P0** : Utilisateur approuve le brief.
+```markdown
+# Brief: <titre>
+
+## Metadata
+- Classe: T3/T4/T5
+- Date: YYYY-MM-DD
+- Demandeur: utilisateur
+
+## Contexte
+[Pourquoi cette demande, quel probleme elle resout]
+
+## Objectifs
+- Objectif principal: ...
+- Objectifs secondaires: ...
+- Criteres de succes mesurables: ...
+
+## Perimetre
+### Inclus
+- [Fonctionnalites IN]
+### Exclus
+- [Fonctionnalites OUT — explicitement rejetees]
+
+## Approches proposees
+### Approche A — [nom] (RECOMMANDEE)
+- Description: ...
+- Pros: ...
+- Cons: ...
+- Effort: ...
+
+### Approche B — [nom]
+- Description: ...
+- Pros: ...
+- Cons: ...
+
+## Direction visuelle (par Lise)
+- Style/ton: ...
+- Composants identifies: [atomes, molecules, organismes]
+- Parcours utilisateur: [flux ecran par ecran]
+- Inspirations: ...
+
+## Analyse concurrentielle (par Fabrice, T4-T5)
+- Concurrents: ...
+- Differenciateurs: ...
+- Cible utilisateur: ...
+
+## Contraintes
+- Lois d'Autonomie: LOI-x applicables
+- Stack: ...
+- Compatibilite: ...
+
+## Risques
+| Risque | Probabilite | Impact | Mitigation |
+|--------|-------------|--------|------------|
+| ... | ... | ... | ... |
+
+## Decision
+APPROUVE / REJETE / MODIFIE
+```
+
+**Quality Gate P0** : Utilisateur approuve le brief ET choisit l'approche.
+
+**Hard gate** : AUCUN passage en P1 sans brief approuve.
 
 ---
 
@@ -180,7 +280,7 @@ Ce protocole s'appuie sur les skills SuperClaude quand ils sont disponibles :
 
 | Phase MIP | Skill SuperClaude | Usage |
 |-----------|-------------------|-------|
-| P0 | `brainstorming` | Maria structure le brief |
+| P0 | `brainstorming` | Maria structure le brief (4 temps : exploration → ideation → analyse → synthese) |
 | P2 | `writing-plans` | Denis cree les taches atomiques |
 | P3 | `subagent-driven-development` | Execution par subagent frais |
 | P3 | `test-driven-development` | Cycle RED-GREEN-REFACTOR |
