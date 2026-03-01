@@ -143,26 +143,39 @@ cargo build -p {crate}
 
 ## Protocole MIP v2 — Phases P0 (Temps 4) + P3 (Autopilot)
 
-### P0 — Temps 4 : Specification technique
+### P0 — Temps 4 : Specification technique + Verification Context7
 
 Francois intervient en **P0 Temps 4** pour produire la specification technique :
 
 1. **Explorer le code existant** en profondeur (Glob, Grep, Read)
-2. **Identifier les fichiers** a modifier/creer avec numeros de ligne
-3. **Definir les types, traits, API** (signatures completes)
-4. **Evaluer les dependances** entre modules et crates
-5. **Verifier la conformite architecturale** :
+2. **Verification Context7 obligatoire** — Pour chaque lib impliquee :
+   - `resolve-library-id` → `query-docs` pour verifier les patterns/API actuels
+   - Libs pre-resolues : Dioxus `/dioxuslabs/dioxus/v0.6.3`, axum `/tokio-rs/axum/axum_v0_7_9`, serde `/serde-rs/serde`
+   - Signaler les **breaking changes** et **deprecations**
+3. **Charger les anti-patterns** : Lire `memory/mip-antipatterns.md` et `memory/MEMORY.md` — verifier qu'aucun pattern interdit n'est planifie
+4. **Identifier les fichiers** a modifier/creer avec numeros de ligne
+5. **Definir les types, traits, API** (signatures validees contre les docs Context7)
+6. **Evaluer les dependances** entre modules et crates
+7. **Verifier la conformite architecturale** :
    - [ ] Lois d'Autonomie respectees (LOI-1 a LOI-8)
    - [ ] `unsafe_code = "forbid"` dans tout nouveau Cargo.toml
    - [ ] Strate correcte dans la pyramide COG
    - [ ] Annotations MSCM planifiees (@id, @do, @role, @layer)
-6. **Documenter** les risques techniques identifies
+   - [ ] Versions des dependances a jour
+8. **Documenter** les risques techniques identifies
+
+**Output** : Spec + section "Verification documentaire" (libs verifiees, breaking changes, anti-patterns evites)
 
 Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md`
 
 ### P3 — Implementation automatique (AUTOPILOT)
 
 Apres approbation du brief P0, Francois execute les taches back-end du plan exhaustif de Denis **sans intervention humaine**.
+
+**Pre-flight par tache** :
+1. Lire la tache du plan exhaustif
+2. **Context7 spot-check** si la tache touche un pattern framework (axum, serde, tokio)
+3. Charger les anti-patterns back-end depuis MEMORY.md (ex: `spawn_blocking` pour SQLite async)
 
 **Cycle TDD obligatoire par tache** :
 1. **RED** — Ecrire le test qui echoue
@@ -173,7 +186,12 @@ Apres approbation du brief P0, Francois execute les taches back-end du plan exha
 6. **COMMIT** — Commit atomique : `"type(scope): description"`
 7. **LOG** — `TodoWrite` : marquer la tache `completed`
 
-**Auto-correction** : Si un test echoue, tenter 2 corrections automatiques. Si echec apres 2 tentatives → **frein d'urgence** (arreter et presenter le probleme a l'utilisateur).
+**Auto-correction intelligente** : Si un test echoue :
+1. Lire l'erreur, identifier la root cause
+2. Verifier contre Context7 si c'est un probleme de pattern/API
+3. Corriger et re-tester (tentative 1)
+4. Si echec → corriger differemment (tentative 2)
+5. Si echec → **frein d'urgence** avec diagnostic complet
 
 **Execution** : Chaque tache est isolee (subagent frais si possible) pour eviter la pollution de contexte.
 

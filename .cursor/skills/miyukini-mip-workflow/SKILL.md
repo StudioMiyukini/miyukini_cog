@@ -70,20 +70,34 @@ Deux explorations paralleles :
 4. Lister les **fonctionnalites differenciantes** a envisager
 5. Detecter les **points de friction** des concurrents
 
-#### Temps 4 — Specification technique (Francois)
+#### Temps 4 — Specification technique + Verification Context7 (Francois)
 
-**Francois** analyse le contexte technique et produit la spec :
+**Francois** analyse le contexte technique, **verifie les docs actuelles**, et produit la spec :
 
 1. **Explorer le code existant** en profondeur (Glob, Grep, Read)
-2. **Identifier les fichiers** a modifier/creer avec numeros de ligne
-3. **Definir les types, traits, API** (signatures completes)
-4. **Evaluer les dependances** entre modules et crates
-5. **Verifier la conformite architecturale** :
+2. **Verification Context7 obligatoire** — Pour chaque librairie/framework implique :
+   - Appeler `resolve-library-id` pour identifier la lib
+   - Appeler `query-docs` pour verifier les patterns/API actuels
+   - **Libs a toujours verifier** : Dioxus (`/dioxuslabs/dioxus`), axum (`/tokio-rs/axum`), serde (`/serde-rs/serde`), tokio, et toute lib ajoutee
+   - Documenter les **breaking changes** ou **deprecations** detectees
+   - Comparer avec les patterns existants dans le code — signaler les ecarts
+3. **Charger les anti-patterns connus** : Lire `memory/mip-antipatterns.md` et `memory/MEMORY.md` (section "Erreurs a ne pas repeter") — verifier qu'aucun pattern interdit n'est planifie
+4. **Identifier les fichiers** a modifier/creer avec numeros de ligne
+5. **Definir les types, traits, API** (signatures completes — validees contre les docs Context7)
+6. **Evaluer les dependances** entre modules et crates
+7. **Verifier la conformite architecturale** :
    - [ ] Lois d'Autonomie respectees (LOI-1 a LOI-8)
    - [ ] `unsafe_code = "forbid"` dans tout nouveau Cargo.toml
    - [ ] Strate correcte dans la pyramide COG
    - [ ] Annotations MSCM planifiees (@id, @do, @role, @layer)
-6. **Documenter** les risques techniques identifies
+   - [ ] Versions des dependances a jour (pas de crates deprecated)
+8. **Documenter** les risques techniques identifies
+
+**Output supplementaire** : Section "Verification documentaire" dans la spec avec :
+- Libs verifiees + versions
+- Breaking changes detectes
+- Anti-patterns evites
+- Ecarts code existant vs docs actuelles
 
 Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md`
 
@@ -242,6 +256,14 @@ Dans ces cas, l'agent qui detecte le probleme **arrete l'autopilot** et **presen
 
 **Execution par subagent frais** : Chaque tache est executee par un subagent frais pour eviter la pollution de contexte.
 
+**Pre-flight par tache** (avant d'ecrire du code) :
+1. **Lire la tache** du plan exhaustif (fichier, code attendu, test)
+2. **Context7 spot-check** (si la tache touche une API externe ou un pattern framework) :
+   - Verifier le pattern contre la doc actuelle via `query-docs`
+   - Ex: avant d'ecrire un composant Dioxus → verifier RSX syntax (`/dioxuslabs/dioxus`)
+   - Ex: avant d'ecrire un handler axum → verifier extractors (`/tokio-rs/axum`)
+3. **Charger le contexte anti-patterns** : relire les pieges RSX (Lise) ou patterns DB (Francois) depuis MEMORY.md
+
 **Cycle TDD par tache** :
 1. **RED** — Ecrire le test qui echoue
 2. **GREEN** — Ecrire le code minimal pour que le test passe
@@ -251,9 +273,20 @@ Dans ces cas, l'agent qui detecte le probleme **arrete l'autopilot** et **presen
 6. **COMMIT** — Commit atomique avec message conventionnel
 7. **LOG** — `TodoWrite` : marquer la tache `completed`
 
+**Checkpoint intermediaire** : Toutes les **5 taches completees**, Denis lance un mini-audit :
+- `cargo build -p {crate}` des crates modifies
+- `cargo clippy -p {crate} -- -D warnings`
+- Verifier que les taches precedentes ne sont pas cassees par les nouvelles
+- Si regression detectee → corriger avant de continuer
+
 **Parallelisme** : Francois et Lise travaillent simultanement quand leurs taches sont independantes. Les taches avec dependances sont sequencees par Denis.
 
-**Auto-correction** : Si un test echoue, l'agent tente 2 corrections automatiques. Si echec apres 2 tentatives → **frein d'urgence**.
+**Auto-correction** : Si un test echoue, l'agent :
+1. Lit le message d'erreur et identifie la cause (root cause analysis)
+2. Verifie contre Context7 si c'est un probleme de pattern/API
+3. Corrige et re-teste (tentative 1)
+4. Si echec → corrige differemment (tentative 2)
+5. Si echec → **frein d'urgence** avec diagnostic complet
 
 **Quality Gate P3** : Chaque tache passe test + clippy.
 
@@ -326,15 +359,42 @@ Artefact : `.mip/audits/YYYY-MM-DD-<slug>.md`
 1. **Classification avant action** — Aucun code sans classification T1-T5
 2. **Spec avant code** (T3+) — Pas d'implementation sans spec Francois (Temps 4)
 3. **Plan exhaustif avant execution** (T3+) — Pas d'implementation sans plan Denis (Temps 5)
-4. **TDD obligatoire** — RED-GREEN-REFACTOR, pas d'exception
-5. **Subagent frais par tache** — Eviter la pollution de contexte
-6. **Gates non-bypassables** — Chaque gate doit etre explicitement validee
-7. **Artefacts obligatoires** — Chaque phase produit son artefact dans `.mip/`
-8. **Clippy propre** — `cargo clippy -p {crate} -- -D warnings` apres chaque tache
-9. **Pas de unwrap() en prod** — Uniquement dans `#[cfg(test)]`
-10. **Archivage systematique** (T3+) — Arianne capitalise apres chaque livraison
-11. **Logging obligatoire** — Chaque tache tracee via TodoWrite
-12. **Autopilot apres P0** — Aucune intervention humaine sauf frein d'urgence
+4. **Verification Context7 obligatoire** (T3+) — Verifier les docs des libs impliquees avant de coder
+5. **Anti-patterns charges** — Lire `memory/mip-antipatterns.md` et MEMORY.md avant chaque sprint
+6. **TDD obligatoire** — RED-GREEN-REFACTOR, pas d'exception
+7. **Subagent frais par tache** — Eviter la pollution de contexte
+8. **Checkpoint toutes les 5 taches** — Mini-audit intermediaire en P3
+9. **Gates non-bypassables** — Chaque gate doit etre explicitement validee
+10. **Artefacts obligatoires** — Chaque phase produit son artefact dans `.mip/`
+11. **Clippy propre** — `cargo clippy -p {crate} -- -D warnings` apres chaque tache
+12. **Pas de unwrap() en prod** — Uniquement dans `#[cfg(test)]`
+13. **Archivage systematique** (T3+) — Arianne capitalise apres chaque livraison
+14. **Logging obligatoire** — Chaque tache tracee via TodoWrite
+15. **Autopilot apres P0** — Aucune intervention humaine sauf frein d'urgence
+
+---
+
+## Registre Context7 — Libs a verifier
+
+Identifiants Context7 pre-resolus pour les libs du projet. Utiliser `query-docs` directement avec ces IDs.
+
+| Lib | Context7 ID | Quand verifier |
+|-----|-------------|----------------|
+| **Dioxus 0.6** | `/dioxuslabs/dioxus/v0.6.3` | Tout composant UI, RSX, signals, hooks |
+| **Dioxus docs** | `/llmstxt/dioxuslabs_learn_0_6_llms-full_txt` | Patterns avances, migration, pitfalls |
+| **axum** | `/tokio-rs/axum/axum_v0_7_9` | Tout endpoint REST, middleware, extractors |
+| **serde** | `/serde-rs/serde` | Serialization custom, derive macros, attributes |
+| **Dioxus Components** | `/dioxuslabs/components` | Composants primitifs ARIA |
+
+**Quand verifier** :
+- **Toujours** en P0 Temps 4 (spec) pour chaque lib impliquee
+- **Spot-check** en P3 si la tache touche un pattern specifique
+- **En cas d'erreur** : verifier si le pattern utilise est encore valide
+
+**Queries recommandees** :
+- Dioxus : `RSX syntax`, `use_signal hooks`, `component props`, `event handlers`, `async spawn`
+- axum : `Router handlers`, `extractors State Json`, `error handling`, `middleware layers`
+- serde : `derive attributes`, `custom serialization`, `default values`, `rename`
 
 ---
 
@@ -376,7 +436,10 @@ Utilisateur : "Je veux ajouter MiyuVoice"
   |   +-- Lise : Direction visuelle, parcours UX, composants
   |   +-- Fabrice : Analyse concurrence (Alexa, Siri, etc.)
   |
-  +-- Francois (Temps 4) : Spec technique (fichiers, types, API, conformite)
+  +-- Francois (Temps 4) : Spec technique + VERIFICATION CONTEXT7
+  |   +-- Context7 : Dioxus 0.6 RSX, axum handlers, serde patterns
+  |   +-- Anti-patterns : charge MEMORY.md + mip-antipatterns.md
+  |   +-- Output : spec + section "Verification documentaire"
   |
   +-- Denis (Temps 5) : Plan exhaustif (42 taches : 18 CODE, 12 TEST-U, 4 TEST-I, 3 TEST-G, 3 AUDIT, 2 CORRECT)
   |
@@ -386,9 +449,11 @@ Utilisateur : "Je veux ajouter MiyuVoice"
   +=== AUTOPILOT START ===================================
   |
   +-- P3 PARALLELE (automatique) :
+  |   +-- Pre-flight : Context7 spot-check + anti-patterns par tache
   |   +-- Francois : Taches CODE back-end (TDD) → TodoWrite log
   |   +-- Lise : Taches CODE front-end (TDD) → TodoWrite log
-  |   [Auto-correction si echec test, frein d'urgence apres 2 echecs]
+  |   +-- [Checkpoint toutes les 5 taches : mini-audit Denis]
+  |   +-- [Auto-correction intelligente : root cause + Context7 + 2 tentatives]
   |
   +-- P4 (automatique) :
   |   +-- Denis : Integration workspace (build/test/clippy)
@@ -399,6 +464,8 @@ Utilisateur : "Je veux ajouter MiyuVoice"
   |   [GATE] Utilisateur confirme la livraison
   |
   +-- P6 (automatique) : Arianne → Archivage + capitalisation
+  |   +-- Nouvelles erreurs → mip-antipatterns.md
+  |   +-- Nouveaux patterns → mip-decisions.md
   |
   +=== AUTOPILOT END =====================================
 ```

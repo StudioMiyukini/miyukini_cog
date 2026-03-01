@@ -82,7 +82,7 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 | 1 | Exploration | Maria |
 | 2 | Ideation | Maria + Lise (parallele) |
 | 3 | Analyse concurrentielle | Fabrice (T4-T5, parallele Temps 2) |
-| 4 | Specification technique | Francois |
+| 4 | Specification technique + Context7 | Francois |
 | 5 | Plan exhaustif | Denis |
 | 6 | Synthese & Brief | Maria |
 
@@ -99,17 +99,19 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 
 **Frein d'urgence** : L'autopilot s'arrete si bug bloquant apres 2 auto-corrections, ou delta majeur.
 **Logging** : Chaque tache tracee via TodoWrite pour suivi utilisateur temps reel.
+**Context7** : Verification docs libs (Dioxus, axum, serde) en P0-T4 + spot-checks en P3.
+**Checkpoints** : Mini-audit Denis toutes les 5 taches en P3.
 
 ### Workflow standard
 
 ```
-Utilisateur → Maria (P0 : 6 temps) + Lise + Fabrice + Francois + Denis
+Utilisateur → Maria (P0 : 6 temps) + Lise + Fabrice + Francois (Context7) + Denis
 → [GATE] Brief approuve
 → === AUTOPILOT ===
-→ Francois (P3 back) + Lise (P3 front) en PARALLELE [TDD + TodoWrite]
-→ Denis (P4 integration) + George (P4 audit) [auto-correction]
+→ Francois (P3 back) + Lise (P3 front) en PARALLELE [TDD + Context7 spot-check + TodoWrite]
+→ Denis (P3 checkpoint /5 taches) → Denis (P4 integration) + George (P4 audit)
 → Denis (P5 livraison) → [GATE] Utilisateur confirme
-→ Arianne (P6 archivage)
+→ Arianne (P6 archivage + capitalisation anti-patterns)
 ```
 
 ### Artefacts MIP

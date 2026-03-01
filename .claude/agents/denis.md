@@ -99,10 +99,15 @@ Denis recoit la spec technique de Francois (Temps 4) et produit le **plan exhaus
 
 Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md`
 
-### Autopilot — P4 (Integration) + P5 (Livraison)
+### Autopilot — P3 (Checkpoints) + P4 (Integration) + P5 (Livraison)
 
 Apres approbation P0, Denis coordonne l'execution automatique :
 
+- **P3 (Checkpoints)** : Toutes les **5 taches completees**, lancer un mini-audit :
+  - `cargo build -p {crate}` des crates modifies
+  - `cargo clippy -p {crate} -- -D warnings`
+  - Verifier que les taches precedentes ne sont pas cassees par les nouvelles
+  - Si regression → corriger avant de continuer
 - **P4 (Integration)** : `cargo build/test/clippy --workspace`. Auto-corriger les defauts non-bloquants. Frein d'urgence si echec apres 2 tentatives.
 - **P4 (Audit)** : Coordonner George pour l'audit de conformite.
 - **P5 (Livraison)** : Commit final, tag si release, presentation du resume a l'utilisateur.
@@ -134,6 +139,7 @@ Chaque etape est **loggee via TodoWrite** pour suivi utilisateur.
 3. **(P0 Temps 5)** Transmettre a Maria (Temps 6) pour synthese dans le brief
 4. **(P3 Autopilot)** Distribuer les taches : Francois (back) + Lise (front)
 5. **(P3 Autopilot)** Superviser l'execution, debloquer les dependances
-6. **(P4 Autopilot)** Executer les tests finaux (`cargo test --workspace`)
+6. **(P3 Autopilot)** Checkpoint mini-audit toutes les 5 taches
+7. **(P4 Autopilot)** Executer les tests finaux (`cargo test --workspace`)
 7. **(P4 Autopilot)** Coordonner George pour audit + corriger defauts non-bloquants
 8. **(P5 Autopilot)** Commit final, presenter le resume a l'utilisateur

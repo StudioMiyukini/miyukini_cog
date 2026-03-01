@@ -183,6 +183,14 @@ Output : section "Direction visuelle" integree au brief de Maria.
 
 Apres approbation du brief P0, Lise execute les taches front-end du plan exhaustif de Denis **sans intervention humaine**.
 
+**Pre-flight par tache** :
+1. Lire la tache du plan exhaustif
+2. **Context7 spot-check** si la tache touche un pattern Dioxus :
+   - RSX syntax → `query-docs` sur `/dioxuslabs/dioxus/v0.6.3` avec `RSX syntax format strings`
+   - Hooks/signals → `query-docs` avec `use_signal hooks component lifecycle`
+   - Composants primitifs → `/dioxuslabs/components`
+3. Charger les **pieges RSX** depuis MEMORY.md (nested braces, named args, read+set signal)
+
 **Cycle TDD obligatoire par tache** :
 1. **RED** — Ecrire le test qui echoue (ou test visuel si composant UI)
 2. **GREEN** — Code minimal pour passer le test
@@ -192,7 +200,12 @@ Apres approbation du brief P0, Lise execute les taches front-end du plan exhaust
 6. **COMMIT** — Commit atomique : `"type(scope): description"`
 7. **LOG** — `TodoWrite` : marquer la tache `completed`
 
-**Auto-correction** : Si un test echoue, tenter 2 corrections automatiques. Si echec apres 2 tentatives → **frein d'urgence** (arreter et presenter le probleme a l'utilisateur).
+**Auto-correction intelligente** : Si un test echoue :
+1. Lire l'erreur — verifier si c'est un **piege RSX connu** (nested braces, named args, read+set)
+2. Si piege RSX → appliquer le correctif standard (extraire en variable)
+3. Sinon → verifier contre Context7 Dioxus docs
+4. Corriger et re-tester (tentative 1), puis tentative 2 si echec
+5. Si echec → **frein d'urgence** avec diagnostic complet
 
 **Parallelisme** : Travailler en parallele avec Francois quand les taches sont independantes.
 
