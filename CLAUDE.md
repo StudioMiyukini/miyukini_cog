@@ -69,38 +69,54 @@ cargo test -p {crate} -- --nocapture       # Tests verbose d'un crate
 |--------|---------|--------|---------|
 | **T1** | Micro-fix, 1 fichier, <20 lignes | P3 → P5 | Fix typo, ajout comment |
 | **T2** | Fix cible, 1-3 fichiers | P2 → P3 → P5 | Corriger unwrap(), fix RSX |
-| **T3** | Feature moderee, 3-10 fichiers | P0 → P1 → P2 → P3 → P5 → P6 | Nouveau composant, endpoint |
-| **T4** | Feature majeure, 10+ fichiers | Toutes phases | Nouveau service, refactor |
-| **T5** | Chantier strategique | Toutes phases | Nouveau crate/app, engine |
+| **T3** | Feature moderee, 3-10 fichiers | P0 → P3 → P4 → P5 → P6 | Nouveau composant, endpoint |
+| **T4** | Feature majeure, 10+ fichiers | P0 → P3 → P4 → P5 → P6 | Nouveau service, refactor |
+| **T5** | Chantier strategique | P0 → P3 → P4 → P5 → P6 | Nouveau crate/app, engine |
 
 En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 
-### Phases et agents
+### P0 — Cadrage complet en 6 temps (SEULE phase humaine)
+
+| Temps | Nom | Agent(s) |
+|-------|-----|----------|
+| 1 | Exploration | Maria |
+| 2 | Ideation | Maria + Lise (parallele) |
+| 3 | Analyse concurrentielle | Fabrice (T4-T5, parallele Temps 2) |
+| 4 | Specification technique | Francois |
+| 5 | Plan exhaustif | Denis |
+| 6 | Synthese & Brief | Maria |
+
+**Gate P0** : Brief approuve par l'utilisateur = **derniere intervention humaine**.
+
+### AUTOPILOT (P3 → P6 — execution automatique)
 
 | Phase | Nom | Agents | Gate |
 |-------|-----|--------|------|
-| P0 | Cadrage & Brainstorming | Maria + Lise + Fabrice | Brief approuve |
-| P1 | Specification technique | Denis | Spec validee |
-| P2 | Plan d'execution atomique | Denis | Plan valide |
-| P3 | Implementation parallele | Francois + Lise | Tests + clippy |
+| P3 | Implementation TDD parallele | Francois + Lise | Tests + clippy par tache |
 | P4 | Integration & Audit | Denis + George | 0 defaut bloquant |
 | P5 | Livraison | Denis | Utilisateur confirme |
 | P6 | Archivage & Capitalisation | Arianne | Memoire a jour |
 
+**Frein d'urgence** : L'autopilot s'arrete si bug bloquant apres 2 auto-corrections, ou delta majeur.
+**Logging** : Chaque tache tracee via TodoWrite pour suivi utilisateur temps reel.
+
 ### Workflow standard
 
 ```
-Utilisateur → Maria (P0 brainstorming 4 temps) + Lise (P0 direction visuelle) + Fabrice (P0 analyse PR, T4-T5)
-→ Denis (P1 spec + P2 plan) → Francois (P3 back) + Lise (P3 front) en PARALLELE
-→ Denis (P4 integration) + George (P4 audit) → Denis (P5 livraison)
-→ Arianne (P6 archivage) → Utilisateur
+Utilisateur → Maria (P0 : 6 temps) + Lise + Fabrice + Francois + Denis
+→ [GATE] Brief approuve
+→ === AUTOPILOT ===
+→ Francois (P3 back) + Lise (P3 front) en PARALLELE [TDD + TodoWrite]
+→ Denis (P4 integration) + George (P4 audit) [auto-correction]
+→ Denis (P5 livraison) → [GATE] Utilisateur confirme
+→ Arianne (P6 archivage)
 ```
 
 ### Artefacts MIP
 
-- `.mip/briefs/` — Briefs de cadrage (P0)
-- `.mip/specs/` — Specs techniques (P1)
-- `.mip/plans/` — Plans atomiques (P2)
+- `.mip/briefs/` — Briefs de cadrage (P0 Temps 6)
+- `.mip/specs/` — Specs techniques (P0 Temps 4)
+- `.mip/plans/` — Plans exhaustifs (P0 Temps 5)
 - `.mip/audits/` — Rapports d'audit (P4)
 
 Skill complet : `.cursor/skills/miyukini-mip-workflow/SKILL.md`

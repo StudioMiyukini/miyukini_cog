@@ -14,9 +14,9 @@ Avant toute action, classer la demande :
 |--------|---------|--------|
 | **T1** | Micro-fix, 1 fichier, <20 lignes | P3 → P5 |
 | **T2** | Fix cible, 1-3 fichiers, bug connu | P2 → P3 → P5 |
-| **T3** | Feature moderee, 3-10 fichiers | P0 → P1 → P2 → P3 → P5 → P6 |
-| **T4** | Feature majeure, 10+ fichiers, multi-crate | P0 → P1 → P2 → P3 → P4 → P5 → P6 |
-| **T5** | Chantier strategique, nouveau crate/app | P0 → P1 → P2 → P3 → P4 → P5 → P6 |
+| **T3** | Feature moderee, 3-10 fichiers | P0 → P3 → P4 → P5 → P6 |
+| **T4** | Feature majeure, 10+ fichiers, multi-crate | P0 → P3 → P4 → P5 → P6 |
+| **T5** | Chantier strategique, nouveau crate/app | P0 → P3 → P4 → P5 → P6 |
 
 **Regle** : En cas de doute, classer UN CRAN AU-DESSUS.
 
@@ -26,11 +26,11 @@ Avant toute action, classer la demande :
 
 ## Etape 2 — Routing des phases
 
-### P0 — Cadrage, Brainstorming & Analyse (T3+)
+### P0 — Cadrage complet : Brainstorming, Analyse, Specification & Planification (T3+)
 
-**Agents** : Maria (lead) + Lise (direction visuelle, T3+) + Fabrice (analyse concurrentielle, T4-T5)
+**Agents** : Maria (lead) + Lise (direction visuelle) + Fabrice (analyse PR, T4-T5) + Francois (spec technique) + Denis (plan exhaustif)
 
-P0 est la phase la plus importante : elle determine la direction de tout le travail. Aucun code ne sera ecrit avant la fin de P0. Le brainstorming est **structure en 4 temps**.
+P0 est **LA phase humaine** : elle determine la direction de tout le travail. Aucun code ne sera ecrit avant la fin de P0. Le brainstorming est **structure en 6 temps**. Apres approbation du brief P0, **tout est automatique** (P3 → P6).
 
 #### Temps 1 — Exploration (Maria)
 
@@ -70,14 +70,64 @@ Deux explorations paralleles :
 4. Lister les **fonctionnalites differenciantes** a envisager
 5. Detecter les **points de friction** des concurrents
 
-#### Temps 4 — Synthese & Brief (Maria)
+#### Temps 4 — Specification technique (Francois)
 
-Maria compile tout dans le brief :
+**Francois** analyse le contexte technique et produit la spec :
 
-1. **Fusionner** les contributions de tous les agents (Maria + Lise + Fabrice)
+1. **Explorer le code existant** en profondeur (Glob, Grep, Read)
+2. **Identifier les fichiers** a modifier/creer avec numeros de ligne
+3. **Definir les types, traits, API** (signatures completes)
+4. **Evaluer les dependances** entre modules et crates
+5. **Verifier la conformite architecturale** :
+   - [ ] Lois d'Autonomie respectees (LOI-1 a LOI-8)
+   - [ ] `unsafe_code = "forbid"` dans tout nouveau Cargo.toml
+   - [ ] Strate correcte dans la pyramide COG
+   - [ ] Annotations MSCM planifiees (@id, @do, @role, @layer)
+6. **Documenter** les risques techniques identifies
+
+Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md`
+
+#### Temps 5 — Plan general de developpement exhaustif (Denis)
+
+**Denis** compile la spec de Francois et produit le **plan exhaustif** couvrant TOUTE la chaine de production :
+
+1. **Decomposer en taches atomiques** (2-5 minutes chacune)
+2. **Couvrir exhaustivement** les categories suivantes :
+
+| Categorie | Contenu |
+|-----------|---------|
+| **Code** | Implementation back-end (Francois) + front-end (Lise) |
+| **Tests unitaires** | Un test minimum par fonction/methode ajoutee |
+| **Tests d'integration** | Tests de flux complets (API, UI flows) |
+| **Tests generaux** | `cargo test --workspace`, `cargo clippy --workspace -- -D warnings` |
+| **Audit** | Checklist George (MSCM, securite, UX, conformite) |
+| **Corrections** | Taches de correction pre-planifiees (buffer 20% des taches) |
+
+3. **Chaque tache DOIT contenir** :
+   - Numero sequentiel et categorie (`[CODE-01]`, `[TEST-U-01]`, `[TEST-I-01]`, `[AUDIT-01]`, etc.)
+   - Agent assigne (Francois, Lise, Denis, George)
+   - Fichier(s) exact(s) a modifier (chemin complet)
+   - Code complet a ecrire (pas de "ajouter de la validation")
+   - Commande de test : `cargo test -p {crate} -- {pattern}`
+   - Output attendu : `"test xxx ... ok"`
+   - Message de commit : `"type(scope): description"`
+   - Dependances : liste des taches prerequises (ex: `depends: [CODE-01, CODE-02]`)
+
+4. **Principe** : Presumer que l'executant n'a AUCUN contexte projet.
+
+5. **Ordonnancement** : Les taches sont ordonnees par dependance. Les taches independantes sont marquees comme parallelisables.
+
+Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md`
+
+#### Temps 6 — Synthese & Brief (Maria)
+
+Maria compile tout dans le brief final :
+
+1. **Fusionner** les contributions de tous les agents (Maria + Lise + Fabrice + Francois + Denis)
 2. **Rediger le brief structure** avec toutes les sections
 3. **Presenter les approches** avec la recommandation de l'equipe
-4. Artefact : `.mip/briefs/YYYY-MM-DD-<slug>.md`
+4. **Inclure le plan exhaustif** de Denis en annexe du brief
+5. Artefact : `.mip/briefs/YYYY-MM-DD-<slug>.md`
 
 **Template du brief** :
 
@@ -126,6 +176,22 @@ Maria compile tout dans le brief :
 - Differenciateurs: ...
 - Cible utilisateur: ...
 
+## Specification technique (par Francois)
+- Fichiers modifies/crees: [liste avec numeros de ligne]
+- Types et API definis: [signatures]
+- Conformite: [checklist LOI, MSCM, unsafe]
+- Risques techniques: [liste]
+
+## Plan de developpement exhaustif (par Denis)
+[Voir annexe .mip/plans/YYYY-MM-DD-<slug>.md]
+- Nombre total de taches: X
+  - Code: X taches (Y Francois, Z Lise)
+  - Tests unitaires: X taches
+  - Tests integration: X taches
+  - Tests generaux: X taches
+  - Audit: X taches
+  - Buffer corrections: X taches
+
 ## Contraintes
 - Lois d'Autonomie: LOI-x applicables
 - Stack: ...
@@ -142,51 +208,35 @@ APPROUVE / REJETE / MODIFIE
 
 **Quality Gate P0** : Utilisateur approuve le brief ET choisit l'approche.
 
-**Hard gate** : AUCUN passage en P1 sans brief approuve.
+**Hard gate** : AUCUN passage en execution sans brief approuve. C'est la **DERNIERE intervention humaine** avant la livraison (sauf bug/delta majeur).
 
 ---
 
-### P1 — Specification Technique (T3+)
+## MODE AUTOPILOT — P3 a P6 (apres approbation P0)
 
-**Agent** : Denis
+> **PRINCIPE FONDAMENTAL** : Apres l'approbation du brief P0, l'execution est **entierement automatique**. L'utilisateur n'intervient plus sauf en cas de **bug bloquant** ou de **delta majeur** par rapport au plan.
 
-1. Explorer le code existant (Glob, Grep, Read)
-2. Identifier les fichiers a modifier/creer avec numeros de ligne
-3. Definir les types, traits, API (signatures completes)
-4. Verifier la conformite architecturale :
-   - [ ] Lois d'Autonomie respectees (LOI-1 a LOI-8)
-   - [ ] `unsafe_code = "forbid"` dans tout nouveau Cargo.toml
-   - [ ] Strate correcte dans la pyramide COG
-   - [ ] Annotations MSCM planifiees (@id, @do, @role, @layer)
-5. Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md`
+### Logging obligatoire
 
-**Quality Gate P1** : Denis valide la faisabilite + utilisateur approuve l'approche.
+**Chaque tache** du plan exhaustif est tracee via **TodoWrite** pour que l'utilisateur puisse suivre l'avancement en temps reel :
 
----
+- Chaque tache commence par un `TodoWrite` qui la passe en `in_progress`
+- Chaque tache terminee est immediatement marquee `completed`
+- Les erreurs/blocages sont signales dans le statut de la tache
+- L'utilisateur voit la progression sans avoir a intervenir
 
-### P2 — Plan d'Execution (T2+)
+### Frein d'urgence
 
-**Agent** : Denis
+L'autopilot s'arrete UNIQUEMENT si :
+1. **Bug bloquant** : un test echoue apres 2 tentatives de correction automatique
+2. **Delta majeur** : une tache revele un probleme qui remet en question le plan (ex: API incompatible, dependance cassee)
+3. **Echec audit** : George identifie un defaut CRITIQUE que Denis ne peut pas corriger automatiquement
 
-Decomposer la spec en taches atomiques (2-5 minutes chacune).
-
-**Chaque tache DOIT contenir** :
-- Agent assigne (Francois ou Lise)
-- Fichier(s) exact(s) a modifier (chemin complet)
-- Code complet a ecrire (pas de "ajouter de la validation")
-- Commande de test : `cargo test -p {crate} -- {pattern}`
-- Output attendu : `"test xxx ... ok"`
-- Message de commit : `"type(scope): description"`
-
-**Principe** : Presumer que l'executant n'a AUCUN contexte projet.
-
-Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md`
-
-**Quality Gate P2** : Denis valide le plan complet.
+Dans ces cas, l'agent qui detecte le probleme **arrete l'autopilot** et **presente le probleme a l'utilisateur** avec une proposition de resolution.
 
 ---
 
-### P3 — Implementation (toutes classes)
+### P3 — Implementation automatique (toutes classes)
 
 **Agents** : Francois (back-end) + Lise (front-end) en PARALLELE
 
@@ -199,22 +249,28 @@ Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md`
 4. **VERIFY** — `cargo test -p {crate}` passe
 5. **LINT** — `cargo clippy -p {crate} -- -D warnings` propre
 6. **COMMIT** — Commit atomique avec message conventionnel
+7. **LOG** — `TodoWrite` : marquer la tache `completed`
 
 **Parallelisme** : Francois et Lise travaillent simultanement quand leurs taches sont independantes. Les taches avec dependances sont sequencees par Denis.
+
+**Auto-correction** : Si un test echoue, l'agent tente 2 corrections automatiques. Si echec apres 2 tentatives → **frein d'urgence**.
 
 **Quality Gate P3** : Chaque tache passe test + clippy.
 
 ---
 
-### P4 — Integration & Audit (T4-T5)
+### P4 — Integration & Audit automatique (T3+)
 
 **Agents** : Denis + George
 
-**Denis** :
+**Denis** — Integration :
 1. `cargo build --workspace`
 2. `cargo test --workspace`
 3. `cargo clippy --workspace -- -D warnings`
 4. Verifier l'integration back + front
+5. Si echec : corriger automatiquement, re-tester
+6. Si echec apres 2 tentatives → **frein d'urgence**
+7. **LOG** : `TodoWrite` pour chaque verification
 
 **George** — Audit de conformite :
 - [ ] Build workspace OK
@@ -229,23 +285,28 @@ Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md`
 
 Artefact : `.mip/audits/YYYY-MM-DD-<slug>.md`
 
+**Auto-correction** : Defauts NON-BLOQUANTS sont corriges automatiquement par Denis. Defauts CRITIQUES → **frein d'urgence**.
+
 **Quality Gate P4** : George valide — 0 defaut BLOQUANT.
 
 ---
 
-### P5 — Livraison (toutes classes)
+### P5 — Livraison automatique (toutes classes)
 
 **Agent** : Denis
 
 1. Commit final structure (message conventionnel)
 2. Tag si release
-3. Presentation a l'utilisateur
+3. **LOG** : `TodoWrite` marquer livraison `completed`
+4. **Presenter le resume a l'utilisateur** : ce qui a ete fait, nombre de fichiers, tests passes, anomalies corrigees
+
+**Note** : C'est ici que l'utilisateur reprend la main pour confirmer la livraison.
 
 **Quality Gate P5** : Utilisateur confirme la livraison.
 
 ---
 
-### P6 — Archivage & Capitalisation (T3+)
+### P6 — Archivage & Capitalisation automatique (T3+)
 
 **Agent** : Arianne
 
@@ -256,14 +317,15 @@ Artefact : `.mip/audits/YYYY-MM-DD-<slug>.md`
    - Lecons par chantier → `memory/mip-lessons.md`
    - Competences par agent → `memory/team-skills-audit.md`
 3. Mettre a jour `memory/MEMORY.md` (index, max 200 lignes)
+4. **LOG** : `TodoWrite` marquer archivage `completed`
 
 ---
 
 ## Regles NON NEGOCIABLES
 
 1. **Classification avant action** — Aucun code sans classification T1-T5
-2. **Spec avant code** (T3+) — Pas d'implementation sans spec Denis
-3. **Plan avant execution** (T2+) — Pas d'implementation sans plan atomique
+2. **Spec avant code** (T3+) — Pas d'implementation sans spec Francois (Temps 4)
+3. **Plan exhaustif avant execution** (T3+) — Pas d'implementation sans plan Denis (Temps 5)
 4. **TDD obligatoire** — RED-GREEN-REFACTOR, pas d'exception
 5. **Subagent frais par tache** — Eviter la pollution de contexte
 6. **Gates non-bypassables** — Chaque gate doit etre explicitement validee
@@ -271,6 +333,8 @@ Artefact : `.mip/audits/YYYY-MM-DD-<slug>.md`
 8. **Clippy propre** — `cargo clippy -p {crate} -- -D warnings` apres chaque tache
 9. **Pas de unwrap() en prod** — Uniquement dans `#[cfg(test)]`
 10. **Archivage systematique** (T3+) — Arianne capitalise apres chaque livraison
+11. **Logging obligatoire** — Chaque tache tracee via TodoWrite
+12. **Autopilot apres P0** — Aucune intervention humaine sauf frein d'urgence
 
 ---
 
@@ -280,11 +344,11 @@ Ce protocole s'appuie sur les skills SuperClaude quand ils sont disponibles :
 
 | Phase MIP | Skill SuperClaude | Usage |
 |-----------|-------------------|-------|
-| P0 | `brainstorming` | Maria structure le brief (4 temps : exploration → ideation → analyse → synthese) |
-| P2 | `writing-plans` | Denis cree les taches atomiques |
+| P0 (Temps 1-2) | `brainstorming` | Maria structure le brief (6 temps : exploration → ideation → analyse → spec → plan → synthese) |
+| P0 (Temps 5) | `writing-plans` | Denis cree les taches atomiques exhaustives |
 | P3 | `subagent-driven-development` | Execution par subagent frais |
 | P3 | `test-driven-development` | Cycle RED-GREEN-REFACTOR |
-| P3 | `systematic-debugging` | Root cause avant tout fix |
+| P3 | `systematic-debugging` | Root cause avant tout fix + auto-correction |
 | P4 | `verification-before-completion` | George verifie |
 | P5 | `finishing-a-development-branch` | Denis finalise |
 
@@ -296,3 +360,45 @@ Ce protocole s'appuie sur les skills SuperClaude quand ils sont disponibles :
 **T2 (fix cible)** : Denis ecrit un mini-plan (1-3 taches), execution directe.
 
 Le protocole est **proportionnel** : les petites taches ne sont pas alourdies.
+
+---
+
+## Flux concret — Exemple T4
+
+```
+Utilisateur : "Je veux ajouter MiyuVoice"
+  |
+  +-- Maria (P0 Temps 1) : Classifie T4, explore code, pose questions
+  |   [GATE] Attendre reponses utilisateur
+  |
+  +-- PARALLELE (Temps 2 + 3) :
+  |   +-- Maria : Cadrage fonctionnel, 2-3 approches
+  |   +-- Lise : Direction visuelle, parcours UX, composants
+  |   +-- Fabrice : Analyse concurrence (Alexa, Siri, etc.)
+  |
+  +-- Francois (Temps 4) : Spec technique (fichiers, types, API, conformite)
+  |
+  +-- Denis (Temps 5) : Plan exhaustif (42 taches : 18 CODE, 12 TEST-U, 4 TEST-I, 3 TEST-G, 3 AUDIT, 2 CORRECT)
+  |
+  +-- Maria (Temps 6) : Synthese → Brief complet
+  |   [GATE] Utilisateur approuve le brief
+  |
+  +=== AUTOPILOT START ===================================
+  |
+  +-- P3 PARALLELE (automatique) :
+  |   +-- Francois : Taches CODE back-end (TDD) → TodoWrite log
+  |   +-- Lise : Taches CODE front-end (TDD) → TodoWrite log
+  |   [Auto-correction si echec test, frein d'urgence apres 2 echecs]
+  |
+  +-- P4 (automatique) :
+  |   +-- Denis : Integration workspace (build/test/clippy)
+  |   +-- George : Audit conformite → .mip/audits/
+  |   [Auto-correction defauts non-bloquants, frein d'urgence si critique]
+  |
+  +-- P5 (automatique) : Denis → Commit final + resume a l'utilisateur
+  |   [GATE] Utilisateur confirme la livraison
+  |
+  +-- P6 (automatique) : Arianne → Archivage + capitalisation
+  |
+  +=== AUTOPILOT END =====================================
+```

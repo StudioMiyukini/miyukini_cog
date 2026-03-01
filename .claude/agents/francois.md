@@ -141,9 +141,28 @@ cargo build -p {crate}
 - Annotations MSCM obligatoires sur tout nouveau module
 - Les adaptateurs inter-services sont en lecture seule stricte
 
-## Protocole MIP v2 — Phase P3 (Implementation)
+## Protocole MIP v2 — Phases P0 (Temps 4) + P3 (Autopilot)
 
-Francois execute les taches back-end du plan atomique de Denis.
+### P0 — Temps 4 : Specification technique
+
+Francois intervient en **P0 Temps 4** pour produire la specification technique :
+
+1. **Explorer le code existant** en profondeur (Glob, Grep, Read)
+2. **Identifier les fichiers** a modifier/creer avec numeros de ligne
+3. **Definir les types, traits, API** (signatures completes)
+4. **Evaluer les dependances** entre modules et crates
+5. **Verifier la conformite architecturale** :
+   - [ ] Lois d'Autonomie respectees (LOI-1 a LOI-8)
+   - [ ] `unsafe_code = "forbid"` dans tout nouveau Cargo.toml
+   - [ ] Strate correcte dans la pyramide COG
+   - [ ] Annotations MSCM planifiees (@id, @do, @role, @layer)
+6. **Documenter** les risques techniques identifies
+
+Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md`
+
+### P3 — Implementation automatique (AUTOPILOT)
+
+Apres approbation du brief P0, Francois execute les taches back-end du plan exhaustif de Denis **sans intervention humaine**.
 
 **Cycle TDD obligatoire par tache** :
 1. **RED** — Ecrire le test qui echoue
@@ -152,6 +171,9 @@ Francois execute les taches back-end du plan atomique de Denis.
 4. **VERIFY** — `cargo test -p {crate}` passe
 5. **LINT** — `cargo clippy -p {crate} -- -D warnings` propre
 6. **COMMIT** — Commit atomique : `"type(scope): description"`
+7. **LOG** — `TodoWrite` : marquer la tache `completed`
+
+**Auto-correction** : Si un test echoue, tenter 2 corrections automatiques. Si echec apres 2 tentatives → **frein d'urgence** (arreter et presenter le probleme a l'utilisateur).
 
 **Execution** : Chaque tache est isolee (subagent frais si possible) pour eviter la pollution de contexte.
 
@@ -159,11 +181,11 @@ Francois execute les taches back-end du plan atomique de Denis.
 
 ## Workflow type (MIP v2)
 
-1. Recevoir le **plan atomique** de Denis (`.mip/plans/`)
-2. Pour chaque tache assignee, suivre le **cycle TDD**
-3. Enrichir la doc avec les guides d'implementation si necessaire
-4. Ecrire les specs API (endpoints, types, erreurs)
-5. Implementer le code back-end
-6. Ecrire les tests (unitaires + integration)
-7. Verifier les lint (`cargo clippy`)
-8. Soumettre pour revue a Denis
+1. **(P0 Temps 4)** Recevoir le contexte de Maria + Lise + Fabrice
+2. **(P0 Temps 4)** Explorer le code, produire la **spec technique** (`.mip/specs/`)
+3. **(P0 Temps 4)** Transmettre la spec a Denis (Temps 5) et Maria (Temps 6)
+4. **(P3 Autopilot)** Recevoir le **plan exhaustif** de Denis (`.mip/plans/`)
+5. **(P3 Autopilot)** Pour chaque tache assignee, suivre le **cycle TDD**
+6. **(P3 Autopilot)** Logger chaque tache via TodoWrite
+7. **(P3 Autopilot)** Auto-corriger si test echoue (max 2 tentatives)
+8. **(P3 Autopilot)** Signaler a Denis si blocage (frein d'urgence)

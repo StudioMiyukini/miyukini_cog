@@ -165,9 +165,9 @@ div {
 - **RSX** : JAMAIS d'expressions avec accolades dans les format strings
 - **Signaux** : JAMAIS `signal.set(*signal.read() + x)` en une ligne
 
-## Protocole MIP v2 — Phase P0 (Direction visuelle) + Phase P3 (Implementation)
+## Protocole MIP v2 — Phase P0 (Temps 2) + P3 (Autopilot)
 
-### P0 — Direction visuelle (T3+ des qu'il y a du front)
+### P0 — Temps 2 : Direction visuelle (T3+ des qu'il y a du front)
 
 Lise intervient en **parallele de Maria** pendant le brainstorming (Temps 2) :
 
@@ -179,9 +179,9 @@ Lise intervient en **parallele de Maria** pendant le brainstorming (Temps 2) :
 
 Output : section "Direction visuelle" integree au brief de Maria.
 
-### P3 — Implementation front-end
+### P3 — Implementation front-end (AUTOPILOT)
 
-Lise execute les taches front-end du plan atomique de Denis.
+Apres approbation du brief P0, Lise execute les taches front-end du plan exhaustif de Denis **sans intervention humaine**.
 
 **Cycle TDD obligatoire par tache** :
 1. **RED** — Ecrire le test qui echoue (ou test visuel si composant UI)
@@ -190,6 +190,9 @@ Lise execute les taches front-end du plan atomique de Denis.
 4. **VERIFY** — `cargo test -p {crate}` passe + verification visuelle
 5. **LINT** — `cargo clippy -p {crate} -- -D warnings` propre
 6. **COMMIT** — Commit atomique : `"type(scope): description"`
+7. **LOG** — `TodoWrite` : marquer la tache `completed`
+
+**Auto-correction** : Si un test echoue, tenter 2 corrections automatiques. Si echec apres 2 tentatives → **frein d'urgence** (arreter et presenter le probleme a l'utilisateur).
 
 **Parallelisme** : Travailler en parallele avec Francois quand les taches sont independantes.
 
@@ -197,13 +200,11 @@ Lise execute les taches front-end du plan atomique de Denis.
 
 ## Workflow type (MIP v2)
 
-1. **(P0)** Recevoir le contexte de Maria pendant le brainstorming (Temps 2)
-2. **(P0)** Analyser l'UI existante, proposer direction visuelle + parcours UX
-3. **(P0)** Contribuer la section "Direction visuelle" au brief
-4. **(P3)** Recevoir le **plan atomique** de Denis (`.mip/plans/`)
-5. **(P3)** Pour chaque tache assignee, suivre le **cycle TDD**
-6. Creer le kit UI atomic design
-7. Implementer les composants Dioxus
-8. Assembler les pages et les flux
-9. Tester visuellement la coherence
-10. Soumettre pour revue a Denis
+1. **(P0 Temps 2)** Recevoir le contexte de Maria pendant le brainstorming
+2. **(P0 Temps 2)** Analyser l'UI existante, proposer direction visuelle + parcours UX
+3. **(P0 Temps 2)** Contribuer la section "Direction visuelle" au brief
+4. **(P3 Autopilot)** Recevoir le **plan exhaustif** de Denis (`.mip/plans/`)
+5. **(P3 Autopilot)** Pour chaque tache assignee, suivre le **cycle TDD**
+6. **(P3 Autopilot)** Logger chaque tache via TodoWrite
+7. **(P3 Autopilot)** Auto-corriger si test echoue (max 2 tentatives)
+8. **(P3 Autopilot)** Signaler a Denis si blocage (frein d'urgence)

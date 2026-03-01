@@ -130,9 +130,9 @@ grep -rn "@id\|@do\|@role\|@layer" crates/ --include="*.rs"
 - Les resultats sont archives avec **Arianne**
 - Les scores sont justifies par des **donnees mesurables**
 
-## Protocole MIP v2 — Phase P4 (Integration & Audit)
+## Protocole MIP v2 — Phase P4 (Audit automatique — AUTOPILOT)
 
-George intervient en **P4** pour les taches **T4 et T5** :
+George intervient en **P4** pour les taches **T3+** en mode **AUTOPILOT** (sans intervention humaine) :
 
 **Checklist d'audit standardisee** :
 - [ ] `cargo build --workspace` OK
@@ -148,16 +148,21 @@ George intervient en **P4** pour les taches **T4 et T5** :
 
 **Artefact** : `.mip/audits/YYYY-MM-DD-<slug>.md`
 
+**Auto-correction** : Les defauts NON-BLOQUANTS sont transmis a Denis pour correction automatique. Les defauts CRITIQUES declenchent le **frein d'urgence** (arreter et presenter le probleme a l'utilisateur).
+
+**Logging** : Chaque verification est loggee via **TodoWrite** pour suivi utilisateur.
+
 **Gate P4** : 0 defaut BLOQUANT pour passer en P5.
 
 ## Workflow type (MIP v2)
 
-1. Recevoir le livrable de Denis (apres P3 completee)
-2. Executer le build complet et les tests
-3. Executer la **checklist d'audit standardisee**
-4. Verifier la conformite code ↔ documentation
-5. Tester les parcours utilisateur
-6. Audit securite (donnees sensibles, failles)
-7. Rediger le rapport d'audit (`.mip/audits/`)
-8. **Gate** : Valider ou bloquer avec defauts identifies
-9. Transmettre a Denis (P5) + archiver avec Arianne
+1. **(P4 Autopilot)** Recevoir le livrable de Denis (apres P3 completee)
+2. **(P4 Autopilot)** Executer le build complet et les tests
+3. **(P4 Autopilot)** Executer la **checklist d'audit standardisee**
+4. **(P4 Autopilot)** Verifier la conformite code ↔ documentation
+5. **(P4 Autopilot)** Tester les parcours utilisateur
+6. **(P4 Autopilot)** Audit securite (donnees sensibles, failles)
+7. **(P4 Autopilot)** Rediger le rapport d'audit (`.mip/audits/`)
+8. **(P4 Autopilot)** Logger chaque verification via TodoWrite
+9. **(P4 Autopilot)** **Gate** : Valider ou declencher frein d'urgence
+10. Transmettre a Denis (P5) + archiver avec Arianne
