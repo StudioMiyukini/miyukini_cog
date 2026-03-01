@@ -1,0 +1,59 @@
+# Miyukini AI Studio — Service IA local pour l'écosystème COG.
+# Proxy HTTP + agents IA + skills + contextes + dégradation graduée.
+
+[package]
+name = "miou-llm-bridge"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Miyukini AI Studio — Service IA local avec agents, skills et dégradation graduée"
+
+[[bin]]
+name = "miou-llm-bridge"
+path = "src/main.rs"
+
+[features]
+default = []
+cuda = ["llama-cpp-2/cuda"]
+
+[dependencies]
+# HTTP server
+axum = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal", "fs", "process"] }
+
+# HTTP client (upstream backup : LM Studio / Ollama)
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+
+# Sérialisation
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Hardware detection
+sysinfo = "0.33"
+
+# Async recursion (file_ops)
+async-recursion = "1"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# CORS & middleware
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+tower = { version = "0.5", features = ["util"] }
+
+# Inférence GGUF native (moteur principal)
+llama-cpp-2 = { version = "0.1", features = ["sampler"] }
+
+# Cryptographie (HMAC anti-MITM + AES-256-GCM chiffrement réponses)
+hmac = "0.12"
+sha2 = "0.10"
+aes-gcm = "0.10"
+hex = "0.4"
+base64 = "0.22"
+rand = "0.8"
+
+[lints]
+workspace = true

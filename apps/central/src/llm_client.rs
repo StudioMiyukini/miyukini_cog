@@ -1,14 +1,12 @@
-//! Client LM Studio — API OpenAI-compatible pour le chat Miou.
+//! Client LLM — API OpenAI-compatible pour le chat Miou.
 //!
-//! Version dev : endpoint cloudflare tunnel, pas de fallback.
+//! Pointe vers le bridge MiouLLM (par défaut localhost:11435)
+//! qui relaie les requêtes vers LM Studio ou tout autre serveur compatible.
 
 use serde::{Deserialize, Serialize};
 
-/// URL de base de LM Studio (tunnel Cloudflare dev).
-const LM_STUDIO_BASE: &str = "https://hitting-mighty-decade-feelings.trycloudflare.com";
-
-/// Modèle par défaut à charger.
-const DEFAULT_MODEL: &str = "glm-4-9b-chat-hf-GGUF";
+/// URL par défaut du bridge MiouLLM.
+const DEFAULT_BRIDGE_URL: &str = "http://localhost:11435";
 
 // ── Types API ──────────────────────────────────────────────────────────
 
@@ -48,6 +46,50 @@ pub struct ModelInfo {
     pub id: String,
 }
 
+// ── Types hardware / recommandation ──────────────────────────────────
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct HardwareResponse {
+    pub hardware: HardwareData,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct HardwareData {
+    pub cpu_name: String,
+    pub cpu_cores: u32,
+    pub ram_total_mb: u64,
+    pub ram_available_mb: u64,
+    pub gpu: Option<GpuData>,
+    pub tier: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct GpuData {
+    pub name: String,
+    pub vram_mb: u64,
+    pub vendor: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct RecommendModelResponse {
+    pub recommended: Option<RecommendedModel>,
+    pub candidates: Vec<RecommendedModel>,
+    pub hardware_tier: String,
+    pub models_available: usize,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct RecommendedModel {
+    pub model_id: String,
+    pub display_name: String,
+    pub params: String,
+    pub quantization: String,
+    pub score: u8,
+    pub description: String,
+    pub already_loaded: bool,
+    pub tier_label: String,
+}
+
 // ── Client ─────────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone)]
@@ -74,15 +116,21 @@ impl std::fmt::Display for LlmError {
 }
 
 impl LlmClient {
-    pub fn new() -> Self {
+    /// Crée un client LLM pointant vers l'URL spécifiée.
+    pub fn new(base_url: &str) -> Self {
         let client = reqwest::Client::builder()
-            .timeout(std::time::Duration::from_secs(60))
+            .timeout(std::time::Duration::from_secs(120))
             .build()
             .expect("reqwest client");
         Self {
             client,
-            base_url: LM_STUDIO_BASE.to_string(),
+            base_url: base_url.trim_end_matches('/').to_string(),
         }
+    }
+
+    /// Crée un client pointant vers le bridge par défaut (localhost:11435).
+    pub fn default_bridge() -> Self {
+        Self::new(DEFAULT_BRIDGE_URL)
     }
 
     /// Liste les modèles chargés.
@@ -95,27 +143,42 @@ impl LlmClient {
         Ok(body.data.into_iter().map(|m| m.id).collect())
     }
 
-    /// Vérifie qu'un modèle est chargé, sinon tente de charger le modèle par défaut.
-    /// Retourne le nom du modèle prêt.
+    /// Vérifie qu'un modèle est chargé. Retourne le premier modèle disponible.
     pub async fn ensure_model(&self) -> Result<String, LlmError> {
         let models = self.list_models().await?;
-        if let Some(m) = models.first() {
-            return Ok(m.clone());
-        }
+        models.into_iter().next().ok_or(LlmError::NoModel)
+    }
 
-        // Tenter de charger le modèle par défaut
-        let url = format!("{}/v1/models/load", self.base_url);
-        let body = serde_json::json!({ "model": DEFAULT_MODEL });
-        let resp = self.client.post(&url).json(&body).send().await
+    /// Récupère les specs hardware du host (via le bridge).
+    pub async fn hardware_info(&self) -> Result<HardwareData, LlmError> {
+        let url = format!("{}/v1/hardware", self.base_url);
+        let resp = self
+            .client
+            .get(&url)
+            .send()
+            .await
             .map_err(|e| LlmError::Network(e.to_string()))?;
+        let body: HardwareResponse = resp
+            .json()
+            .await
+            .map_err(|e| LlmError::Api(e.to_string()))?;
+        Ok(body.hardware)
+    }
 
-        if resp.status().is_success() {
-            Ok(DEFAULT_MODEL.to_string())
-        } else {
-            // Peut-être que le load n'est pas supporté — re-check models
-            let models = self.list_models().await?;
-            models.into_iter().next().ok_or(LlmError::NoModel)
-        }
+    /// Demande au bridge de recommander le meilleur modèle pour le hardware.
+    pub async fn recommend_model(&self) -> Result<RecommendModelResponse, LlmError> {
+        let url = format!("{}/v1/recommend", self.base_url);
+        let resp = self
+            .client
+            .get(&url)
+            .send()
+            .await
+            .map_err(|e| LlmError::Network(e.to_string()))?;
+        let body: RecommendModelResponse = resp
+            .json()
+            .await
+            .map_err(|e| LlmError::Api(e.to_string()))?;
+        Ok(body)
     }
 
     /// Envoie un message de chat et retourne la réponse de l'assistant.

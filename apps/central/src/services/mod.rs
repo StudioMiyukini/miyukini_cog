@@ -9,6 +9,7 @@
 mod home;
 mod market;
 mod external_service_view;
+pub mod alicia;
 
 pub use home::HomeView;
 pub use market::MarketView;
@@ -19,6 +20,7 @@ use crate::state::use_app_state;
 
 /// Rendu de la vue correspondant à l'onglet actif.
 /// Les services sont désormais externes — Central affiche un panneau de lancement.
+/// Les services embarqués (alicia, miyukiniwatch…) ont leur propre vue.
 #[component]
 pub fn ActiveServiceView() -> Element {
     let state = use_app_state();
@@ -29,6 +31,7 @@ pub fn ActiveServiceView() -> Element {
         match tab.service_id.as_deref() {
             None => rsx! { HomeView {} },
             Some("market") => rsx! { MarketView {} },
+            Some("alicia") => rsx! { alicia::AliciaView {} },
             Some(id) => rsx! {
                 ExternalServiceView { service_id: id.to_string() }
             },

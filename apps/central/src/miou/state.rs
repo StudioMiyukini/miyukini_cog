@@ -60,8 +60,24 @@ pub struct MiouPreferences {
     pub voix_salon_enabled: bool,
     /// Son des bulles activé (petit « pop »).
     pub son_bulles_enabled: bool,
-    /// Mode LLM activé (non implémenté en 0.1.x, persisté pour compat future).
+    /// Mode LLM activé (bridge MiouLLM disponible).
     pub llm_enabled: bool,
+    /// URL du endpoint LLM (bridge MiouLLM ou direct). Défaut : http://localhost:11435
+    #[serde(default = "default_llm_endpoint")]
+    pub llm_endpoint: String,
+    /// Modèle LLM préféré (vide = auto-detect via /v1/models).
+    #[serde(default)]
+    pub llm_default_model: String,
+    /// Session LM Studio distante activée (pointe vers remote_session_url au lieu du bridge local).
+    #[serde(default)]
+    pub use_remote_session: bool,
+    /// URL de la session LM Studio distante (ex: http://192.168.1.100:1234).
+    #[serde(default)]
+    pub remote_session_url: String,
+}
+
+fn default_llm_endpoint() -> String {
+    "http://localhost:11435".into()
 }
 
 impl Default for MiouPreferences {
@@ -77,6 +93,10 @@ impl Default for MiouPreferences {
             voix_salon_enabled: false,
             son_bulles_enabled: false,
             llm_enabled: false,
+            llm_endpoint: default_llm_endpoint(),
+            llm_default_model: String::new(),
+            use_remote_session: false,
+            remote_session_url: String::new(),
         }
     }
 }

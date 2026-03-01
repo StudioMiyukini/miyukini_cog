@@ -1,0 +1,17 @@
+# @id: MGE-ARPG-Quest @do: arpg @role: back-end @layer: 3 @human: miyuk
+# mge-arpg-quest — MGE ARPG quests: triggers, flags, rewards, NPC dialogue
+
+[package]
+name = "mge-arpg-quest"
+version.workspace = true
+edition.workspace = true
+description = "MGE ARPG quests: triggers, flags, rewards, NPC dialogue"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

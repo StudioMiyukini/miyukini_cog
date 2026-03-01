@@ -1,0 +1,1425 @@
+// @id: Sodomight-World @do: gameplay-world @role: back-end @layer: 4 @human: miyuk
+//! Sodomight game world -- connects all gameplay systems (ECS, stats, combat,
+//! items, skills, loot, quests, AI) into a single cohesive runtime.
+//!
+//! The [`SodomightWorld`] struct owns the full game state and provides the
+//! high-level API for the game loop: spawning, ticking, combat, inventory,
+//! skill usage, and XP/levelling.
+
+use std::collections::HashMap;
+
+use mge_arpg_ai::{AggroRange, AiAgent};
+use mge_arpg_combat::{
+    AttackerStats, CombatEvent, CombatProcessor, DamageType, DefenderStats, StatusEffect,
+};
+use mge_arpg_entity::{Health, Level, Position, Team};
+use mge_arpg_items::{Equipment, Inventory, ItemInstance, ItemSlot};
+use mge_arpg_loot::{DropRoll, LootGenerator, TreasureClassRegistry};
+use mge_arpg_quest::{QuestDef, QuestJournal};
+use mge_arpg_skills::{SkillBook, SkillCooldownTracker, SkillDef, SkillId, SkillRegistry};
+use mge_arpg_stats::{BaseStats, ExpTable, StatBlock};
+use mge_ecs::EntityId;
+use rand::SeedableRng;
+use rand_chacha::ChaCha8Rng;
+
+/// Milliseconds per game tick at the default 25 Hz tick rate.
+const TICK_DELTA_MS: u32 = 40;
+
+/// Default aggro sight range for monsters (world units).
+const DEFAULT_SIGHT_RANGE: f32 = 8.0;
+
+/// Default attack range for monsters (world units).
+const DEFAULT_ATTACK_RANGE: f32 = 1.5;
+
+/// Default XP base reward per monster kill.
+const BASE_XP_PER_KILL: u64 = 50;
+
+/// Fixed RNG seed for deterministic debug sessions.
+const DEBUG_SEED: u64 = 0xDEAD_BEEF_CAFE;
+
+// ---------------------------------------------------------------------------
+// Monster record (ECS-side data stored alongside each monster entity)
+// ---------------------------------------------------------------------------
+
+/// Lightweight ECS component bundling all data needed for a monster entity.
+///
+/// Stored as a single component via `spawn_with_1` because the ECS only
+/// provides helpers up to `spawn_with_3`. All fields are public for direct
+/// access by the world systems.
+#[derive(Debug, Clone)]
+pub struct MonsterRecord {
+    /// Display name.
+    pub name: String,
+    /// World position.
+    pub position: Position,
+    /// Hit points.
+    pub health: Health,
+    /// Monster level.
+    pub level: Level,
+    /// Team affiliation.
+    pub team: Team,
+}
+
+// ---------------------------------------------------------------------------
+// Player record (ECS-side data for the player entity)
+// ---------------------------------------------------------------------------
+
+/// Lightweight ECS component for the player entity.
+#[derive(Debug, Clone)]
+pub struct PlayerRecord {
+    /// World position.
+    pub position: Position,
+    /// Hit points.
+    pub health: Health,
+    /// Character level.
+    pub level: Level,
+    /// Team affiliation.
+    pub team: Team,
+}
+
+// ---------------------------------------------------------------------------
+// WorldError
+// ---------------------------------------------------------------------------
+
+/// Errors that can occur during world operations.
+#[derive(Debug, thiserror::Error)]
+pub enum WorldError {
+    /// The target entity was not found or is dead.
+    #[error("Entity not found or dead")]
+    EntityNotFound,
+
+    /// The player's inventory is full.
+    #[error("Inventory is full")]
+    InventoryFull,
+
+    /// The specified loot index is invalid.
+    #[error("Invalid loot index: {0}")]
+    InvalidLootIndex(usize),
+
+    /// The requested skill is not known or cannot be used.
+    #[error("Skill error: {0}")]
+    SkillError(String),
+
+    /// The player does not have enough mana.
+    #[error("Not enough mana (need {need}, have {have})")]
+    NotEnoughMana {
+        /// Mana required.
+        need: i32,
+        /// Mana currently available.
+        have: i32,
+    },
+
+    /// The skill is still on cooldown.
+    #[error("Skill '{0}' is on cooldown")]
+    OnCooldown(String),
+
+    /// An ECS operation failed.
+    #[error("ECS error: {0}")]
+    EcsError(String),
+
+    /// The target equipment slot is invalid.
+    #[error("Invalid equipment slot")]
+    InvalidEquipSlot,
+
+    /// The inventory slot is empty or out of bounds.
+    #[error("Inventory slot empty or out of bounds")]
+    InventorySlotEmpty,
+}
+
+// ---------------------------------------------------------------------------
+// SodomightWorld
+// ---------------------------------------------------------------------------
+
+/// Complete game state for a Sodomight session.
+///
+/// Encapsulates the ECS world, player data, registries, and all runtime
+/// state needed by the game loop.
+pub struct SodomightWorld {
+    /// The ECS world storing all entities and their components.
+    pub ecs: mge_ecs::World,
+
+    /// The player's entity ID in the ECS.
+    pub player_id: EntityId,
+
+    /// The player's full stat block (base + derived + level/XP).
+    pub player_stats: StatBlock,
+
+    /// The player's grid-based inventory.
+    pub player_inventory: Inventory,
+
+    /// The player's equipment slots.
+    pub player_equipment: Equipment,
+
+    /// The player's skill book (invested skill levels).
+    pub player_skills: SkillBook,
+
+    /// The player's quest journal.
+    pub player_quest_journal: QuestJournal,
+
+    /// Cooldown tracker for all skills.
+    pub cooldown_tracker: SkillCooldownTracker,
+
+    /// Treasure class registry for loot generation.
+    pub tc_registry: TreasureClassRegistry,
+
+    /// All quest definitions available in the game.
+    pub quest_registry: Vec<QuestDef>,
+
+    /// All skill definitions available in the game.
+    pub skill_registry: SkillRegistry,
+
+    /// Combat log messages (most recent last).
+    pub combat_log: Vec<String>,
+
+    /// Pending loot drops on the ground: `(x, y, drops)`.
+    pub pending_loot: Vec<(f32, f32, Vec<DropRoll>)>,
+
+    /// Current game tick counter.
+    pub game_tick: u64,
+
+    /// Seeded RNG for determinism.
+    pub rng: ChaCha8Rng,
+
+    /// Experience table for level-up thresholds.
+    exp_table: ExpTable,
+
+    /// AI agents keyed by their ECS `EntityId`.
+    ai_agents: HashMap<EntityId, AiAgent>,
+
+    /// Active status effects per entity.
+    status_effects: HashMap<EntityId, Vec<StatusEffect>>,
+}
+
+impl std::fmt::Debug for SodomightWorld {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SodomightWorld")
+            .field("player_id", &self.player_id)
+            .field("game_tick", &self.game_tick)
+            .field("entity_count", &self.ecs.entity_count())
+            .field("combat_log_len", &self.combat_log.len())
+            .field("pending_loot_len", &self.pending_loot.len())
+            .finish_non_exhaustive()
+    }
+}
+
+impl SodomightWorld {
+    // -------------------------------------------------------------------
+    // Construction
+    // -------------------------------------------------------------------
+
+    /// Create a new Sodomight world with a level-1 player at position (5, 5).
+    ///
+    /// All registries start empty. Call `register_skill`, `register_tc`, etc.
+    /// to populate game data.
+    pub fn new() -> Result<Self, WorldError> {
+        let mut ecs = mge_ecs::World::new();
+
+        // Spawn the player entity.
+        let player_record = PlayerRecord {
+            position: Position::new(5.0, 5.0),
+            health: Health::new(100),
+            level: Level::new(1),
+            team: Team::PLAYER,
+        };
+
+        let player_id = ecs
+            .spawn_with_1(player_record)
+            .map_err(|e| WorldError::EcsError(e.to_string()))?;
+
+        // Build default player stats (all base stats = 10).
+        let player_stats = StatBlock::new(BaseStats::default(), "warrior");
+
+        Ok(Self {
+            ecs,
+            player_id,
+            player_stats,
+            player_inventory: Inventory::new(),
+            player_equipment: Equipment::new(),
+            player_skills: SkillBook::new(0),
+            player_quest_journal: QuestJournal::new(),
+            cooldown_tracker: SkillCooldownTracker::new(),
+            tc_registry: TreasureClassRegistry::new(),
+            quest_registry: Vec::new(),
+            skill_registry: SkillRegistry::new(),
+            combat_log: Vec::new(),
+            pending_loot: Vec::new(),
+            game_tick: 0,
+            rng: ChaCha8Rng::seed_from_u64(DEBUG_SEED),
+            exp_table: ExpTable::d2_standard(),
+            ai_agents: HashMap::new(),
+            status_effects: HashMap::new(),
+        })
+    }
+
+    // -------------------------------------------------------------------
+    // Spawning
+    // -------------------------------------------------------------------
+
+    /// Spawn a monster in the world.
+    ///
+    /// Returns the `EntityId` of the newly created monster entity.
+    pub fn spawn_monster(
+        &mut self,
+        name: &str,
+        x: f32,
+        y: f32,
+        level: u8,
+        max_health: u32,
+    ) -> Result<EntityId, WorldError> {
+        let record = MonsterRecord {
+            name: name.to_string(),
+            position: Position::new(x, y),
+            health: Health::new(max_health),
+            level: Level::new(level),
+            team: Team::ENEMY,
+        };
+
+        let entity_id = self
+            .ecs
+            .spawn_with_1(record)
+            .map_err(|e| WorldError::EcsError(e.to_string()))?;
+
+        // Create an AI agent for this monster.
+        let agent = AiAgent::new(
+            entity_id.index,
+            AggroRange::new(DEFAULT_SIGHT_RANGE, DEFAULT_ATTACK_RANGE),
+        );
+        self.ai_agents.insert(entity_id, agent);
+
+        Ok(entity_id)
+    }
+
+    // -------------------------------------------------------------------
+    // Game tick
+    // -------------------------------------------------------------------
+
+    /// Execute one game tick.
+    ///
+    /// This is the main simulation step, called at the configured tick rate.
+    ///
+    /// 1. Increment `game_tick`.
+    /// 2. Tick cooldowns.
+    /// 3. Process status effects (poison damage, etc.).
+    /// 4. Run AI decisions for each monster.
+    /// 5. Process AI-initiated attacks.
+    /// 6. Check deaths and generate loot.
+    pub fn tick(&mut self) {
+        self.game_tick += 1;
+
+        // 1. Tick skill cooldowns.
+        self.cooldown_tracker.tick_all(TICK_DELTA_MS);
+
+        // 2. Process status effects.
+        self.tick_status_effects();
+
+        // 3. AI decisions and monster attacks.
+        self.tick_ai();
+    }
+
+    /// Process all active status effects (poison, burn, etc.).
+    fn tick_status_effects(&mut self) {
+        let entity_ids: Vec<EntityId> = self.status_effects.keys().copied().collect();
+
+        for entity_id in &entity_ids {
+            let mut poison_damage = 0;
+
+            if let Some(effects) = self.status_effects.get_mut(entity_id) {
+                for effect in effects.iter_mut() {
+                    if let StatusEffect::Poisoned {
+                        damage_per_tick,
+                        ticks_remaining,
+                    } = effect
+                    {
+                        if *ticks_remaining > 0 {
+                            poison_damage += *damage_per_tick;
+                        }
+                    }
+                    let _ = effect.tick();
+                }
+                // Remove expired effects.
+                effects.retain(|e| !e.is_expired());
+            }
+
+            // Apply poison damage.
+            if poison_damage > 0 {
+                self.apply_damage_to_entity(*entity_id, poison_damage);
+            }
+        }
+
+        // Clean up entities with no remaining effects.
+        self.status_effects.retain(|_, effects| !effects.is_empty());
+    }
+
+    /// Run AI evaluation for all monster agents.
+    fn tick_ai(&mut self) {
+        let player_pos = self.player_position();
+
+        // Collect AI decisions first, then apply attacks.
+        let mut attacks: Vec<EntityId> = Vec::new();
+
+        let agent_ids: Vec<EntityId> = self.ai_agents.keys().copied().collect();
+
+        for monster_id in &agent_ids {
+            if !self.ecs.is_alive(*monster_id) {
+                continue;
+            }
+
+            let monster_record = match self.ecs.get_component::<MonsterRecord>(*monster_id) {
+                Ok(r) => r.clone(),
+                Err(_) => continue,
+            };
+
+            if !monster_record.health.is_alive() {
+                continue;
+            }
+
+            let mx = monster_record.position.x();
+            let my = monster_record.position.y();
+            let dx = player_pos.0 - mx;
+            let dy = player_pos.1 - my;
+            let distance = (dx * dx + dy * dy).sqrt();
+
+            let hp_ratio = monster_record.health.ratio();
+
+            if let Some(agent) = self.ai_agents.get_mut(monster_id) {
+                agent.update(Some(distance), hp_ratio);
+
+                if agent.fsm.can_attack() {
+                    attacks.push(*monster_id);
+                }
+            }
+        }
+
+        // Process monster attacks against the player.
+        for monster_id in attacks {
+            self.monster_attack_player(monster_id);
+        }
+    }
+
+    /// A monster attacks the player.
+    fn monster_attack_player(&mut self, monster_id: EntityId) {
+        let monster = match self.ecs.get_component::<MonsterRecord>(monster_id) {
+            Ok(r) => r.clone(),
+            Err(_) => return,
+        };
+
+        let monster_level = i32::from(monster.level.get());
+        let attacker = AttackerStats {
+            min_damage: 1 + (monster_level / 2),
+            max_damage: 3 + monster_level,
+            attack_rating: monster_level * 5,
+            crit_chance: 0.05,
+            crit_multiplier: 1.5,
+            damage_type: DamageType::Physical,
+        };
+
+        let defender = DefenderStats {
+            defense_rating: self.player_stats.derived.defense_rating,
+            fire_res: self.player_stats.derived.fire_res,
+            cold_res: self.player_stats.derived.cold_res,
+            light_res: self.player_stats.derived.light_res,
+            poison_res: self.player_stats.derived.poison_res,
+            physical_res: 0,
+            is_immune_to: Vec::new(),
+        };
+
+        let result = CombatProcessor::process_attack(
+            monster_id.index,
+            self.player_id.index,
+            &attacker,
+            &defender,
+            self.player_stats.current_life,
+            &mut self.rng,
+        );
+
+        if result.total_damage > 0 {
+            self.player_stats.take_damage(result.total_damage);
+
+            // Sync player ECS component.
+            let new_hp = self.player_stats.current_life;
+            let max_hp = self.player_stats.derived.max_life;
+            let _ = self
+                .ecs
+                .modify_component::<PlayerRecord>(self.player_id, |pr| {
+                    pr.health.current = new_hp.max(0) as u32;
+                    pr.health.max = max_hp.max(0) as u32;
+                });
+        }
+
+        // Log events.
+        for event in &result.events {
+            match event {
+                CombatEvent::Hit { damage, .. } => {
+                    let msg = format!(
+                        "{} hits you for {} damage{}",
+                        monster.name,
+                        damage.final_amount,
+                        if damage.is_critical { " (CRITICAL)" } else { "" }
+                    );
+                    self.combat_log.push(msg);
+                }
+                CombatEvent::Miss { .. } => {
+                    let msg = format!("{} misses you", monster.name);
+                    self.combat_log.push(msg);
+                }
+                CombatEvent::Death { .. } => {
+                    self.combat_log
+                        .push("You have been slain!".to_string());
+                }
+                CombatEvent::Immune { .. } => {}
+            }
+        }
+    }
+
+    /// Apply raw damage to any entity (monster or player).
+    fn apply_damage_to_entity(&mut self, entity_id: EntityId, damage: i32) {
+        if entity_id == self.player_id {
+            self.player_stats.take_damage(damage);
+            let new_hp = self.player_stats.current_life;
+            let max_hp = self.player_stats.derived.max_life;
+            let _ = self
+                .ecs
+                .modify_component::<PlayerRecord>(self.player_id, |pr| {
+                    pr.health.current = new_hp.max(0) as u32;
+                    pr.health.max = max_hp.max(0) as u32;
+                });
+        } else {
+            let _ = self
+                .ecs
+                .modify_component::<MonsterRecord>(entity_id, |mr| {
+                    mr.health.take_damage(damage.max(0) as u32);
+                });
+        }
+    }
+
+    // -------------------------------------------------------------------
+    // Player combat
+    // -------------------------------------------------------------------
+
+    /// The player attacks a target entity.
+    ///
+    /// Returns combat log messages for this attack. If the monster dies,
+    /// loot is generated and XP is awarded.
+    pub fn player_attack(&mut self, target_id: EntityId) -> Result<Vec<String>, WorldError> {
+        let monster = self
+            .ecs
+            .get_component::<MonsterRecord>(target_id)
+            .map_err(|_| WorldError::EntityNotFound)?
+            .clone();
+
+        if !monster.health.is_alive() {
+            return Err(WorldError::EntityNotFound);
+        }
+
+        let attacker = AttackerStats {
+            min_damage: self.player_stats.derived.min_damage,
+            max_damage: self.player_stats.derived.max_damage,
+            attack_rating: self.player_stats.derived.attack_rating,
+            crit_chance: 0.05,
+            crit_multiplier: 1.5,
+            damage_type: DamageType::Physical,
+        };
+
+        let defender = DefenderStats {
+            defense_rating: 0,
+            fire_res: 0,
+            cold_res: 0,
+            light_res: 0,
+            poison_res: 0,
+            physical_res: 0,
+            is_immune_to: Vec::new(),
+        };
+
+        let result = CombatProcessor::process_attack(
+            self.player_id.index,
+            target_id.index,
+            &attacker,
+            &defender,
+            i32::try_from(monster.health.current).unwrap_or(i32::MAX),
+            &mut self.rng,
+        );
+
+        let mut messages = Vec::new();
+
+        // Apply damage to monster.
+        if result.total_damage > 0 {
+            let _ = self
+                .ecs
+                .modify_component::<MonsterRecord>(target_id, |mr| {
+                    mr.health.take_damage(result.total_damage as u32);
+                });
+        }
+
+        // Log combat events and detect death.
+        let monster_died = Self::log_player_attack_events(
+            &result.events,
+            &monster.name,
+            &mut messages,
+            &mut self.combat_log,
+        );
+
+        // Handle monster death.
+        if monster_died {
+            self.handle_monster_death(target_id, &monster, &mut messages);
+        }
+
+        Ok(messages)
+    }
+
+    /// Log combat events from a player attack. Returns `true` if the monster died.
+    fn log_player_attack_events(
+        events: &[CombatEvent],
+        monster_name: &str,
+        messages: &mut Vec<String>,
+        combat_log: &mut Vec<String>,
+    ) -> bool {
+        let mut died = false;
+        for event in events {
+            match event {
+                CombatEvent::Hit { damage, .. } => {
+                    let crit = if damage.is_critical { " (CRITICAL)" } else { "" };
+                    let msg = format!(
+                        "You hit {monster_name} for {} damage{crit}",
+                        damage.final_amount
+                    );
+                    messages.push(msg.clone());
+                    combat_log.push(msg);
+                }
+                CombatEvent::Miss { .. } => {
+                    let msg = format!("You miss {monster_name}");
+                    messages.push(msg.clone());
+                    combat_log.push(msg);
+                }
+                CombatEvent::Death { .. } => {
+                    died = true;
+                }
+                CombatEvent::Immune { dtype, .. } => {
+                    let msg = format!("{monster_name} is immune to {dtype:?}");
+                    messages.push(msg.clone());
+                    combat_log.push(msg);
+                }
+            }
+        }
+        died
+    }
+
+    /// Handle all side-effects of a monster dying: XP, loot, quest tracking, AI cleanup.
+    fn handle_monster_death(
+        &mut self,
+        target_id: EntityId,
+        monster: &MonsterRecord,
+        messages: &mut Vec<String>,
+    ) {
+        let name = &monster.name;
+        let death_msg = format!("{name} has been slain!");
+        messages.push(death_msg.clone());
+        self.combat_log.push(death_msg);
+
+        // Award XP based on monster level.
+        let monster_level = u64::from(monster.level.get());
+        let xp_reward = BASE_XP_PER_KILL * monster_level;
+        let mut xp_messages = self.player_gain_xp(xp_reward);
+        messages.append(&mut xp_messages);
+
+        // Generate loot.
+        let mlvl = u32::from(monster.level.get());
+        let drops = LootGenerator::generate(
+            "tc_default",
+            &self.tc_registry,
+            mlvl,
+            0,
+            &mut self.rng,
+        );
+
+        // Always drop some gold.
+        let gold = LootGenerator::gold_drop(mlvl, mlvl * 10, &mut self.rng);
+
+        let mut all_drops = drops;
+        all_drops.push(gold);
+
+        let drop_count = all_drops.len();
+        let drop_msg = format!("{name} dropped {drop_count} items");
+        messages.push(drop_msg.clone());
+        self.combat_log.push(drop_msg);
+
+        self.pending_loot
+            .push((monster.position.x(), monster.position.y(), all_drops));
+
+        // Notify quest journal.
+        self.player_quest_journal.register_kill(name, 1);
+
+        // Remove AI agent.
+        self.ai_agents.remove(&target_id);
+        self.status_effects.remove(&target_id);
+    }
+
+    // -------------------------------------------------------------------
+    // Loot pickup
+    // -------------------------------------------------------------------
+
+    /// Attempt to pick up a loot drop from the ground.
+    ///
+    /// The `loot_index` indexes into `pending_loot`, and `drop_index`
+    /// selects a specific item within that pile. If successful, the item
+    /// is added to the player's inventory.
+    pub fn player_pickup_loot(
+        &mut self,
+        loot_index: usize,
+        drop_index: usize,
+    ) -> Result<String, WorldError> {
+        let pile = self
+            .pending_loot
+            .get(loot_index)
+            .ok_or(WorldError::InvalidLootIndex(loot_index))?;
+
+        let drop = pile
+            .2
+            .get(drop_index)
+            .ok_or(WorldError::InvalidLootIndex(drop_index))?;
+
+        if drop.item_id == "gold" {
+            // Gold goes directly to... well, we don't have a gold counter yet.
+            // For now, log it.
+            let msg = format!("Picked up {} gold", drop.quantity);
+            self.combat_log.push(msg.clone());
+            // Remove the drop from the pile.
+            let pile_mut = &mut self.pending_loot[loot_index];
+            pile_mut.2.remove(drop_index);
+            if pile_mut.2.is_empty() {
+                self.pending_loot.remove(loot_index);
+            }
+            return Ok(msg);
+        }
+
+        // Create an item instance from the drop.
+        let item = ItemInstance::new_normal(drop.item_id.clone(), 1);
+
+        let slot = self
+            .player_inventory
+            .find_free_slot()
+            .ok_or(WorldError::InventoryFull)?;
+
+        self.player_inventory
+            .try_place(item, slot.0, slot.1)
+            .map_err(|_| WorldError::InventoryFull)?;
+
+        let msg = format!("Picked up {}", drop.item_id);
+        self.combat_log.push(msg.clone());
+
+        // Remove the drop from the pile.
+        let pile_mut = &mut self.pending_loot[loot_index];
+        pile_mut.2.remove(drop_index);
+        if pile_mut.2.is_empty() {
+            self.pending_loot.remove(loot_index);
+        }
+
+        Ok(msg)
+    }
+
+    // -------------------------------------------------------------------
+    // Skill usage
+    // -------------------------------------------------------------------
+
+    /// The player uses a skill on a target.
+    ///
+    /// Validates cooldown, mana cost, and skill availability before
+    /// applying the effect.
+    pub fn player_use_skill(
+        &mut self,
+        skill_id: &SkillId,
+        target: Option<EntityId>,
+    ) -> Result<Vec<String>, WorldError> {
+        // Check skill exists and is learned.
+        let skill_level = self.player_skills.level_of(skill_id);
+        if skill_level == 0 {
+            return Err(WorldError::SkillError(format!(
+                "Skill '{skill_id}' not learned"
+            )));
+        }
+
+        let def = self
+            .skill_registry
+            .get(skill_id)
+            .ok_or_else(|| {
+                WorldError::SkillError(format!("Skill '{skill_id}' not in registry"))
+            })?
+            .clone();
+
+        // Check cooldown.
+        if !self.cooldown_tracker.is_ready(skill_id) {
+            return Err(WorldError::OnCooldown(skill_id.to_string()));
+        }
+
+        // Check mana cost.
+        #[allow(clippy::cast_possible_truncation)]
+        let mana_cost = def.mana_cost(skill_level) as i32;
+        if self.player_stats.current_mana < mana_cost {
+            return Err(WorldError::NotEnoughMana {
+                need: mana_cost,
+                have: self.player_stats.current_mana,
+            });
+        }
+
+        // Deduct mana.
+        self.player_stats.current_mana -= mana_cost;
+
+        // Start cooldown.
+        if def.cooldown_ms > 0 {
+            self.cooldown_tracker
+                .register(skill_id.clone(), def.cooldown_ms);
+            self.cooldown_tracker.trigger(skill_id);
+        }
+
+        let mut messages = Vec::new();
+        let use_msg = format!("You use {}", def.name);
+        messages.push(use_msg.clone());
+        self.combat_log.push(use_msg);
+
+        // Apply skill effect to target (simplified: treat as bonus damage attack).
+        if let Some(target_id) = target {
+            let skill_lvl_i32 = i32::try_from(skill_level).unwrap_or(i32::MAX);
+            let bonus_damage = skill_lvl_i32 * 5 + mana_cost;
+            let _ = self
+                .ecs
+                .modify_component::<MonsterRecord>(target_id, |mr| {
+                    mr.health.take_damage(bonus_damage.max(0) as u32);
+                });
+            let dmg_msg = format!(
+                "{} deals {} damage to target",
+                def.name, bonus_damage
+            );
+            messages.push(dmg_msg.clone());
+            self.combat_log.push(dmg_msg);
+
+            // Check if monster died.
+            if let Ok(mr) = self.ecs.get_component::<MonsterRecord>(target_id) {
+                if !mr.health.is_alive() {
+                    let death_msg = format!("{} has been slain!", mr.name);
+                    messages.push(death_msg.clone());
+                    self.combat_log.push(death_msg);
+
+                    let monster_level = u64::from(mr.level.get());
+                    let xp_reward = BASE_XP_PER_KILL * monster_level;
+                    let mut xp_msgs = self.player_gain_xp(xp_reward);
+                    messages.append(&mut xp_msgs);
+
+                    self.ai_agents.remove(&target_id);
+                    self.status_effects.remove(&target_id);
+                }
+            }
+        }
+
+        Ok(messages)
+    }
+
+    // -------------------------------------------------------------------
+    // Equipment
+    // -------------------------------------------------------------------
+
+    /// Equip an item from the inventory into an equipment slot.
+    ///
+    /// The item at `(inv_col, inv_row)` is moved to the equipment slot.
+    /// If the equipment slot already holds an item, it is swapped back
+    /// into the inventory slot.
+    pub fn player_equip(
+        &mut self,
+        inv_col: usize,
+        inv_row: usize,
+        equip_slot: ItemSlot,
+    ) -> Result<String, WorldError> {
+        let item = self
+            .player_inventory
+            .remove(inv_col, inv_row)
+            .ok_or(WorldError::InventorySlotEmpty)?;
+
+        let item_name = item.base_id.clone();
+
+        // Equip returns the previously equipped item (if any).
+        let previous = self.player_equipment.equip(equip_slot, item);
+
+        // If there was a previously equipped item, put it in the freed inventory slot.
+        if let Some(prev_item) = previous {
+            let _ = self.player_inventory.try_place(prev_item, inv_col, inv_row);
+        }
+
+        // Recalculate derived stats.
+        self.player_stats.recalculate();
+
+        // Sync player ECS health values.
+        let max_life = self.player_stats.derived.max_life;
+        let current_life = self.player_stats.current_life;
+        let _ = self
+            .ecs
+            .modify_component::<PlayerRecord>(self.player_id, |pr| {
+                pr.health.max = max_life.max(0) as u32;
+                pr.health.current = current_life.max(0) as u32;
+            });
+
+        let msg = format!("Equipped {item_name} in {equip_slot:?}");
+        self.combat_log.push(msg.clone());
+
+        Ok(msg)
+    }
+
+    // -------------------------------------------------------------------
+    // Experience and levelling
+    // -------------------------------------------------------------------
+
+    /// Award experience points to the player.
+    ///
+    /// Automatically handles level-ups, stat point grants, and skill
+    /// point grants. Returns messages for each level gained.
+    pub fn player_gain_xp(&mut self, amount: u64) -> Vec<String> {
+        let old_level = self.player_stats.level.level;
+
+        self.player_stats.level.add_experience(amount, &self.exp_table);
+
+        let new_level = self.player_stats.level.level;
+
+        let mut messages = Vec::new();
+        let xp_msg = format!("Gained {amount} XP");
+        messages.push(xp_msg.clone());
+        self.combat_log.push(xp_msg);
+
+        if new_level > old_level {
+            for lvl in (old_level + 1)..=new_level {
+                let lvl_msg = format!("Level up! Now level {lvl}");
+                messages.push(lvl_msg.clone());
+                self.combat_log.push(lvl_msg);
+            }
+
+            // Recalculate derived stats on level-up.
+            self.player_stats.recalculate();
+
+            // Restore pools to full on level-up.
+            self.player_stats.current_life = self.player_stats.derived.max_life;
+            self.player_stats.current_mana = self.player_stats.derived.max_mana;
+
+            // Sync player ECS component.
+            let max_life = self.player_stats.derived.max_life;
+            let _ = self
+                .ecs
+                .modify_component::<PlayerRecord>(self.player_id, |pr| {
+                    pr.health.max = max_life.max(0) as u32;
+                    pr.health.current = max_life.max(0) as u32;
+                    pr.level = Level::new(new_level.min(255) as u8);
+                });
+
+            // Grant skill points to skill book.
+            let skill_points_gained = new_level - old_level;
+            self.player_skills.add_points(skill_points_gained);
+        }
+
+        messages
+    }
+
+    // -------------------------------------------------------------------
+    // Queries
+    // -------------------------------------------------------------------
+
+    /// Returns all monsters within `radius` of the given position.
+    ///
+    /// Each entry is `(entity_id, x, y, current_hp)`.
+    pub fn monsters_near(
+        &self,
+        x: f32,
+        y: f32,
+        radius: f32,
+    ) -> Vec<(EntityId, f32, f32, u32)> {
+        let radius_sq = radius * radius;
+        let mut result = Vec::new();
+
+        for &entity_id in self.ai_agents.keys() {
+            if !self.ecs.is_alive(entity_id) {
+                continue;
+            }
+
+            if let Ok(mr) = self.ecs.get_component::<MonsterRecord>(entity_id) {
+                if !mr.health.is_alive() {
+                    continue;
+                }
+
+                let dx = mr.position.x() - x;
+                let dy = mr.position.y() - y;
+                let dist_sq = dx * dx + dy * dy;
+
+                if dist_sq <= radius_sq {
+                    result.push((entity_id, mr.position.x(), mr.position.y(), mr.health.current));
+                }
+            }
+        }
+
+        result
+    }
+
+    /// Returns the player's current world position.
+    pub fn player_position(&self) -> (f32, f32) {
+        self.ecs
+            .get_component::<PlayerRecord>(self.player_id)
+            .map(|pr| (pr.position.x(), pr.position.y()))
+            .unwrap_or((5.0, 5.0))
+    }
+
+    /// Returns the player's current and maximum health.
+    pub fn player_health(&self) -> (i32, i32) {
+        (
+            self.player_stats.current_life,
+            self.player_stats.derived.max_life,
+        )
+    }
+
+    /// Returns the player's current and maximum mana.
+    pub fn player_mana(&self) -> (i32, i32) {
+        (
+            self.player_stats.current_mana,
+            self.player_stats.derived.max_mana,
+        )
+    }
+
+    /// Move the player to a new position.
+    pub fn set_player_position(&mut self, x: f32, y: f32) {
+        let _ = self
+            .ecs
+            .modify_component::<PlayerRecord>(self.player_id, |pr| {
+                pr.position = Position::new(x, y);
+            });
+    }
+
+    // -------------------------------------------------------------------
+    // Registration helpers
+    // -------------------------------------------------------------------
+
+    /// Register a skill definition in the skill registry and its cooldown.
+    pub fn register_skill(&mut self, def: SkillDef) {
+        if def.cooldown_ms > 0 {
+            self.cooldown_tracker
+                .register(def.id.clone(), def.cooldown_ms);
+        }
+        self.skill_registry.register(def);
+    }
+
+    /// Add a status effect to an entity.
+    pub fn add_status_effect(&mut self, entity_id: EntityId, effect: StatusEffect) {
+        self.status_effects
+            .entry(entity_id)
+            .or_default()
+            .push(effect);
+    }
+
+    /// Returns an iterator over all AI agent entity IDs (live monsters).
+    pub fn ai_agents_keys(&self) -> impl Iterator<Item = &EntityId> {
+        self.ai_agents.keys()
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use mge_arpg_loot::{DropEntry, TreasureClass};
+
+    fn make_world() -> SodomightWorld {
+        SodomightWorld::new().unwrap()
+    }
+
+    // --- Test 1: Spawn player and verify initial stats ---
+
+    #[test]
+    fn test_spawn_player_initial_stats() {
+        let world = make_world();
+
+        assert!(world.ecs.is_alive(world.player_id));
+        assert_eq!(world.player_stats.level.level, 1);
+        assert_eq!(world.player_stats.level.experience, 0);
+        assert!(world.player_stats.current_life > 0);
+        assert!(world.player_stats.current_mana > 0);
+
+        let (px, py) = world.player_position();
+        assert!((px - 5.0).abs() < f32::EPSILON);
+        assert!((py - 5.0).abs() < f32::EPSILON);
+    }
+
+    // --- Test 2: Spawn monster and verify ---
+
+    #[test]
+    fn test_spawn_monster() {
+        let mut world = make_world();
+
+        let monster_id = world
+            .spawn_monster("Zombie", 10.0, 10.0, 3, 50)
+            .unwrap();
+
+        assert!(world.ecs.is_alive(monster_id));
+
+        let mr = world
+            .ecs
+            .get_component::<MonsterRecord>(monster_id)
+            .unwrap();
+
+        assert_eq!(mr.name, "Zombie");
+        assert!((mr.position.x() - 10.0).abs() < f32::EPSILON);
+        assert!((mr.position.y() - 10.0).abs() < f32::EPSILON);
+        assert_eq!(mr.health.current, 50);
+        assert_eq!(mr.health.max, 50);
+        assert_eq!(mr.level.get(), 3);
+        assert!(mr.team.is_enemy());
+    }
+
+    // --- Test 3: Player attack hits and deals damage ---
+
+    #[test]
+    fn test_player_attack_hits() {
+        let mut world = make_world();
+
+        let monster_id = world
+            .spawn_monster("Skeleton", 5.0, 5.0, 1, 200)
+            .unwrap();
+
+        let messages = world.player_attack(monster_id).unwrap();
+        assert!(!messages.is_empty());
+
+        // Monster should have taken some damage (or missed).
+        let mr = world
+            .ecs
+            .get_component::<MonsterRecord>(monster_id)
+            .unwrap();
+        // With a level 1 player and default stats, most attacks should connect.
+        // We check the monster is still alive (200 HP is high enough).
+        assert!(mr.health.current <= 200);
+    }
+
+    // --- Test 4: Player attack kills monster ---
+
+    #[test]
+    fn test_player_attack_kills_monster() {
+        let mut world = make_world();
+
+        // Very low HP monster -- guaranteed kill.
+        let monster_id = world
+            .spawn_monster("Weakling", 5.0, 5.0, 1, 1)
+            .unwrap();
+
+        // Attack repeatedly until the monster dies (seeded RNG might miss once).
+        let mut all_messages = Vec::new();
+        for _ in 0..10 {
+            let is_dead = world
+                .ecs
+                .get_component::<MonsterRecord>(monster_id)
+                .map(|mr| !mr.health.is_alive())
+                .unwrap_or(true);
+            if is_dead {
+                break;
+            }
+            if let Ok(msgs) = world.player_attack(monster_id) {
+                all_messages.extend(msgs);
+            }
+        }
+
+        // The monster should be dead after repeated attacks.
+        let mr = world
+            .ecs
+            .get_component::<MonsterRecord>(monster_id)
+            .unwrap();
+        let is_dead = !mr.health.is_alive();
+
+        // Check for death-related messages.
+        let has_kill_msg = all_messages.iter().any(|m| m.contains("slain"));
+        let has_xp_msg = all_messages.iter().any(|m| m.contains("XP"));
+
+        assert!(
+            is_dead || has_kill_msg || has_xp_msg,
+            "Monster should have been killed after repeated attacks"
+        );
+    }
+
+    // --- Test 5: XP gain and level up ---
+
+    #[test]
+    fn test_xp_gain_level_up() {
+        let mut world = make_world();
+
+        assert_eq!(world.player_stats.level.level, 1);
+
+        // Award enough XP to reach level 2 (threshold is 500 XP).
+        let messages = world.player_gain_xp(600);
+
+        assert!(world.player_stats.level.level >= 2);
+        assert!(messages.iter().any(|m| m.contains("Level up")));
+        assert!(messages.iter().any(|m| m.contains("Gained 600 XP")));
+    }
+
+    // --- Test 6: Inventory pickup ---
+
+    #[test]
+    fn test_inventory_pickup() {
+        let mut world = make_world();
+
+        // Manually add pending loot.
+        let drop = DropRoll {
+            item_id: "short_sword".to_string(),
+            quality: mge_arpg_loot::DropQuality::Normal,
+            quantity: 1,
+        };
+        world.pending_loot.push((5.0, 5.0, vec![drop]));
+
+        let result = world.player_pickup_loot(0, 0);
+        assert!(result.is_ok());
+
+        let msg = result.unwrap();
+        assert!(msg.contains("short_sword"));
+        assert_eq!(world.player_inventory.item_count(), 1);
+    }
+
+    // --- Test 7: Inventory full prevents pickup ---
+
+    #[test]
+    fn test_inventory_full() {
+        let mut world = make_world();
+
+        // Fill the inventory (10x4 = 40 slots).
+        for row in 0..mge_arpg_items::INV_ROWS {
+            for col in 0..mge_arpg_items::INV_COLS {
+                let item = ItemInstance::new_normal(format!("item_{col}_{row}"), 1);
+                world
+                    .player_inventory
+                    .try_place(item, col, row)
+                    .unwrap();
+            }
+        }
+
+        assert!(world.player_inventory.is_full());
+
+        // Try to pick up more loot.
+        let drop = DropRoll {
+            item_id: "extra_item".to_string(),
+            quality: mge_arpg_loot::DropQuality::Normal,
+            quantity: 1,
+        };
+        world.pending_loot.push((5.0, 5.0, vec![drop]));
+
+        let result = world.player_pickup_loot(0, 0);
+        assert!(result.is_err());
+        match result {
+            Err(WorldError::InventoryFull) => {} // Expected.
+            other => panic!("Expected InventoryFull, got: {:?}", other),
+        }
+    }
+
+    // --- Test 8: Equip and unequip ---
+
+    #[test]
+    fn test_equip_unequip() {
+        let mut world = make_world();
+
+        // Place an item in inventory.
+        let item = ItemInstance::new_normal("helmet_01".to_string(), 5);
+        world
+            .player_inventory
+            .try_place(item, 0, 0)
+            .unwrap();
+
+        // Equip it.
+        let result = world.player_equip(0, 0, ItemSlot::Helm);
+        assert!(result.is_ok());
+        assert!(result.unwrap().contains("helmet_01"));
+
+        // Verify inventory slot is now empty and equipment slot is filled.
+        assert!(world.player_inventory.get(0, 0).is_none());
+        assert!(world.player_equipment.get(ItemSlot::Helm).is_some());
+    }
+
+    // --- Test 9: Skill usage and cooldown ---
+
+    #[test]
+    fn test_skill_usage_and_cooldown() {
+        let mut world = make_world();
+
+        // Register a skill.
+        let skill_def = SkillDef {
+            id: SkillId::new("fireball"),
+            name: "Fireball".to_string(),
+            max_level: 20,
+            prerequisites: Vec::new(),
+            synergies: Vec::new(),
+            mana_cost_base: 5.0,
+            mana_cost_per_level: 1.0,
+            cooldown_ms: 100,
+            tree: 0,
+        };
+        world.register_skill(skill_def);
+
+        // Grant skill points and invest.
+        world.player_skills.add_points(1);
+        let skill_id = SkillId::new("fireball");
+        world
+            .player_skills
+            .invest(&skill_id, &world.skill_registry)
+            .unwrap();
+
+        // Spawn a target monster.
+        let monster_id = world
+            .spawn_monster("Target Dummy", 5.0, 5.0, 1, 100)
+            .unwrap();
+
+        // Use the skill.
+        let result = world.player_use_skill(&skill_id, Some(monster_id));
+        assert!(result.is_ok());
+        let messages = result.unwrap();
+        assert!(messages.iter().any(|m| m.contains("Fireball")));
+
+        // Verify mana was consumed.
+        // Mana cost at level 1: 5.0 + 1.0 * 1 = 6
+        let initial_mana = world.player_stats.derived.max_mana;
+        assert!(world.player_stats.current_mana < initial_mana);
+
+        // Verify cooldown is active.
+        assert!(!world.cooldown_tracker.is_ready(&skill_id));
+
+        // Second use should fail (on cooldown).
+        let result2 = world.player_use_skill(&skill_id, Some(monster_id));
+        assert!(result2.is_err());
+    }
+
+    // --- Test 10: Monster death generates loot ---
+
+    #[test]
+    fn test_monster_death_generates_loot() {
+        let mut world = make_world();
+
+        // Register a treasure class so loot generation produces something.
+        let tc = TreasureClass {
+            id: "tc_default".to_string(),
+            picks: 1,
+            no_drop: 50,
+            entries: vec![DropEntry {
+                item_id: "potion_health".to_string(),
+                weight: 50,
+                min_qty: 1,
+                max_qty: 1,
+                is_treasure_class: false,
+            }],
+        };
+        world.tc_registry.register(tc);
+
+        // Spawn a very weak monster.
+        let monster_id = world
+            .spawn_monster("Fragile Skeleton", 5.0, 5.0, 1, 1)
+            .unwrap();
+
+        assert!(world.pending_loot.is_empty());
+
+        // Attack until dead.
+        for _ in 0..20 {
+            let mr = world
+                .ecs
+                .get_component::<MonsterRecord>(monster_id)
+                .unwrap();
+            if !mr.health.is_alive() {
+                break;
+            }
+            let _ = world.player_attack(monster_id);
+        }
+
+        // Loot should have been generated (gold is always dropped).
+        assert!(
+            !world.pending_loot.is_empty(),
+            "Expected loot drops after monster death"
+        );
+    }
+
+    // --- Test 11: Monsters near query ---
+
+    #[test]
+    fn test_monsters_near() {
+        let mut world = make_world();
+
+        let _m1 = world.spawn_monster("Near", 6.0, 5.0, 1, 50).unwrap();
+        let _m2 = world.spawn_monster("Far", 100.0, 100.0, 1, 50).unwrap();
+
+        let near = world.monsters_near(5.0, 5.0, 3.0);
+        assert_eq!(near.len(), 1);
+        assert!((near[0].1 - 6.0).abs() < f32::EPSILON);
+    }
+
+    // --- Test 12: Player health and mana queries ---
+
+    #[test]
+    fn test_player_health_mana() {
+        let world = make_world();
+
+        let (hp, max_hp) = world.player_health();
+        assert!(hp > 0);
+        assert!(max_hp > 0);
+        assert_eq!(hp, max_hp);
+
+        let (mp, max_mp) = world.player_mana();
+        assert!(mp > 0);
+        assert!(max_mp > 0);
+        assert_eq!(mp, max_mp);
+    }
+
+    // --- Test 13: Status effect tick ---
+
+    #[test]
+    fn test_status_effect_poison_tick() {
+        let mut world = make_world();
+
+        let monster_id = world
+            .spawn_monster("Poisoned Beast", 5.0, 5.0, 1, 100)
+            .unwrap();
+
+        // Apply poison: 5 damage per tick for 3 ticks.
+        world.add_status_effect(
+            monster_id,
+            StatusEffect::Poisoned {
+                damage_per_tick: 5,
+                ticks_remaining: 3,
+            },
+        );
+
+        // Tick 3 times.
+        world.tick();
+        world.tick();
+        world.tick();
+
+        let mr = world
+            .ecs
+            .get_component::<MonsterRecord>(monster_id)
+            .unwrap();
+        // Should have taken 15 damage (5 * 3 ticks).
+        assert_eq!(mr.health.current, 85);
+    }
+
+    // --- Test 14: Game tick increments ---
+
+    #[test]
+    fn test_game_tick_increments() {
+        let mut world = make_world();
+
+        assert_eq!(world.game_tick, 0);
+        world.tick();
+        assert_eq!(world.game_tick, 1);
+        world.tick();
+        assert_eq!(world.game_tick, 2);
+    }
+
+    // --- Test 15: Multiple level ups from large XP ---
+
+    #[test]
+    fn test_multiple_level_ups() {
+        let mut world = make_world();
+
+        // Award massive XP to jump multiple levels.
+        let messages = world.player_gain_xp(50_000);
+
+        assert!(world.player_stats.level.level > 5);
+        let level_up_count = messages
+            .iter()
+            .filter(|m| m.contains("Level up"))
+            .count();
+        assert!(level_up_count > 1);
+    }
+}

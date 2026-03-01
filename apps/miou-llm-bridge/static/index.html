@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Miyukini AI Studio</title>
+<style>
+:root {
+  --bg-primary: #0f0f14;
+  --bg-secondary: #16161e;
+  --bg-tertiary: #1e1e2a;
+  --bg-hover: #262636;
+  --bg-active: #2a2a3e;
+  --border: #2e2e42;
+  --text-primary: #e8e8f0;
+  --text-secondary: #9898b0;
+  --text-muted: #6868808;
+  --accent: #a78bfa;
+  --accent-dim: #7c5cbf;
+  --accent-bg: rgba(167,139,250,0.1);
+  --green: #34d399;
+  --green-bg: rgba(52,211,153,0.1);
+  --orange: #fbbf24;
+  --orange-bg: rgba(251,191,36,0.1);
+  --red: #f87171;
+  --red-bg: rgba(248,113,113,0.1);
+  --user-bg: #1a1a2e;
+  --assistant-bg: #12121a;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Layout ────────────────────────────────────────────── */
+.app {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: 100vh;
+}
+
+/* ── Sidebar ───────────────────────────────────────────── */
+.sidebar {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  padding: 20px 16px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-header h1 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+}
+
+.sidebar-header .subtitle {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.sidebar-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-tab {
+  flex: 1;
+  padding: 10px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.sidebar-tab:hover { color: var(--text-primary); }
+.sidebar-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.sidebar-content::-webkit-scrollbar { width: 4px; }
+.sidebar-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── Agent list ────────────────────────────────────────── */
+.agent-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 2px;
+}
+
+.agent-item:hover { background: var(--bg-hover); }
+.agent-item.active { background: var(--bg-active); }
+
+.agent-icon {
+  font-size: 20px;
+  width: 32px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.agent-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.agent-name {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agent-role {
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Model management ──────────────────────────────────── */
+.model-section {
+  margin-bottom: 16px;
+}
+
+.model-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 8px 12px 6px;
+}
+
+.model-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 2px;
+}
+
+.model-status {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.model-status.loaded { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.model-status.local { background: var(--text-secondary); }
+.model-status.upstream { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+
+.model-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.model-name {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.model-meta {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.model-action {
+  padding: 4px 10px;
+  font-size: 11px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.model-action:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent-dim);
+  color: var(--accent);
+}
+
+.model-action.unload {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.model-action.unload:hover {
+  background: var(--red-bg);
+}
+
+/* ── Status bar (bottom sidebar) ───────────────────────── */
+.sidebar-status {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 0;
+}
+
+.status-label { color: var(--text-secondary); }
+.status-value { font-weight: 500; }
+.status-value.online { color: var(--green); }
+.status-value.offline { color: var(--red); }
+.status-value.degraded { color: var(--orange); }
+
+/* ── Main area ─────────────────────────────────────────── */
+.main {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.chat-agent-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chat-agent-icon { font-size: 24px; }
+
+.chat-agent-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.chat-agent-role {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.main-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.header-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.header-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* ── Chat area ─────────────────────────────────────────── */
+.chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chat-area::-webkit-scrollbar { width: 6px; }
+.chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.chat-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  gap: 12px;
+}
+
+.chat-empty-icon { font-size: 48px; opacity: 0.5; }
+.chat-empty h2 { font-size: 18px; font-weight: 500; color: var(--text-primary); }
+.chat-empty p { font-size: 13px; max-width: 400px; text-align: center; line-height: 1.5; }
+
+/* ── Messages ──────────────────────────────────────────── */
+.message {
+  display: flex;
+  gap: 12px;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.message.user .message-avatar {
+  background: var(--accent-bg);
+}
+
+.message.assistant .message-avatar {
+  background: var(--green-bg);
+}
+
+.message-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.message-sender {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.message-time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.message-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.badge-native { background: var(--green-bg); color: var(--green); }
+.badge-upstream { background: var(--orange-bg); color: var(--orange); }
+.badge-fallback { background: var(--red-bg); color: var(--red); }
+
+.message-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.message-text code {
+  background: var(--bg-tertiary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+}
+
+.message-text pre {
+  background: var(--bg-tertiary);
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  margin: 8px 0;
+  overflow-x: auto;
+  font-size: 13px;
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  border: 1px solid var(--border);
+}
+
+.message-tools {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.tool-call-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.tool-call-icon { color: var(--accent); }
+
+/* ── Typing indicator ──────────────────────────────────── */
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  animation: typingPulse 1.2s infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingPulse {
+  0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
+  30% { opacity: 1; transform: scale(1); }
+}
+
+/* ── Input area ────────────────────────────────────────── */
+.input-area {
+  padding: 16px 24px 24px;
+  border-top: 1px solid var(--border);
+}
+
+.input-container {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.input-box {
+  width: 100%;
+  min-height: 52px;
+  max-height: 200px;
+  padding: 14px 52px 14px 18px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input-box::placeholder { color: var(--text-muted); }
+
+.input-box:focus {
+  border-color: var(--accent-dim);
+}
+
+.send-btn {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  font-size: 16px;
+}
+
+.send-btn:hover { background: var(--accent-dim); }
+.send-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.input-hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+/* ── Context selector ──────────────────────────────────── */
+.context-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0 0;
+  flex-wrap: wrap;
+}
+
+.context-chip {
+  padding: 3px 10px;
+  font-size: 11px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.context-chip:hover, .context-chip.active {
+  background: var(--accent-bg);
+  border-color: var(--accent-dim);
+  color: var(--accent);
+}
+
+/* ── Toast notifications ───────────────────────────────── */
+.toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  animation: slideIn 0.2s ease;
+  max-width: 400px;
+}
+
+.toast.success { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+.toast.error { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+.toast.info { background: var(--accent-bg); color: var(--accent); border: 1px solid rgba(167,139,250,0.3); }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h1>Miyukini AI Studio</h1>
+      <div class="subtitle">v<span id="version">0.1.0</span> &mdash; <span id="hw-tier">...</span></div>
+    </div>
+
+    <div class="sidebar-tabs">
+      <button class="sidebar-tab active" onclick="switchTab('agents')">Agents</button>
+      <button class="sidebar-tab" onclick="switchTab('models')">Modeles</button>
+      <button class="sidebar-tab" onclick="switchTab('security')">Securite</button>
+    </div>
+
+    <!-- Agents tab -->
+    <div class="sidebar-content" id="tab-agents"></div>
+
+    <!-- Models tab -->
+    <div class="sidebar-content" id="tab-models" style="display:none"></div>
+
+    <!-- Security tab -->
+    <div class="sidebar-content" id="tab-security" style="display:none"></div>
+
+    <div class="sidebar-status" id="status-bar">
+      <div class="status-row">
+        <span class="status-label">Natif</span>
+        <span class="status-value" id="status-native">...</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Upstream</span>
+        <span class="status-value" id="status-upstream">...</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Mode</span>
+        <span class="status-value" id="status-mode">...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="main-header">
+      <div class="chat-agent-info" id="chat-header">
+        <span class="chat-agent-icon" id="chat-icon">&#129302;</span>
+        <div>
+          <div class="chat-agent-name" id="chat-name">Miyukini AI Studio</div>
+          <div class="chat-agent-role" id="chat-role">Selectionnez un agent</div>
+        </div>
+      </div>
+      <div class="main-header-actions">
+        <button class="header-btn" onclick="clearChat()">Nouveau chat</button>
+        <button class="header-btn" onclick="refreshAll()">Actualiser</button>
+      </div>
+    </div>
+
+    <div class="chat-area" id="chat-area">
+      <div class="chat-empty" id="empty-state">
+        <div class="chat-empty-icon">&#127800;</div>
+        <h2>Bienvenue dans AI Studio</h2>
+        <p>Selectionnez un agent dans la barre laterale pour commencer une conversation. Chargez un modele GGUF ou connectez LM Studio en upstream.</p>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-container">
+        <textarea
+          class="input-box"
+          id="msg-input"
+          placeholder="Ecrivez votre message..."
+          rows="1"
+          onkeydown="handleKey(event)"
+          oninput="autoResize(this)"
+        ></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()" disabled>&#9654;</button>
+      </div>
+      <div class="input-hint">
+        Entree pour envoyer &bull; Shift+Entree pour un retour a la ligne
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────
+let state = {
+  agents: [],
+  selectedAgent: null,
+  messages: [],
+  sending: false,
+  contexts: [],
+  selectedContexts: [],
+};
+
+const API = '';
+
+// ── API calls ──────────────────────────────────────────────────────
+async function api(path, opts = {}) {
+  const resp = await fetch(API + path, {
+    headers: { 'Content-Type': 'application/json', ...opts.headers },
+    ...opts,
+  });
+  return resp.json();
+}
+
+// ── Init ───────────────────────────────────────────────────────────
+async function init() {
+  await Promise.all([
+    loadAgents(),
+    loadStatus(),
+    loadModels(),
+    loadContexts(),
+    loadSecurityStatus(),
+  ]);
+  // Poll status every 10s
+  setInterval(loadStatus, 10000);
+}
+
+async function refreshAll() {
+  await Promise.all([
+    loadAgents(),
+    loadStatus(),
+    loadModels(),
+    loadContexts(),
+    loadSecurityStatus(),
+  ]);
+  toast('Actualise', 'info');
+}
+
+// ── Agents ─────────────────────────────────────────────────────────
+async function loadAgents() {
+  const data = await api('/v1/agents');
+  state.agents = data.agents || [];
+  renderAgents();
+}
+
+function renderAgents() {
+  const el = document.getElementById('tab-agents');
+  el.innerHTML = state.agents.map(a => `
+    <div class="agent-item ${state.selectedAgent?.id === a.id ? 'active' : ''}"
+         onclick="selectAgent('${a.id}')">
+      <span class="agent-icon">${a.icon || '&#129302;'}</span>
+      <div class="agent-info">
+        <div class="agent-name">${esc(a.display_name)}</div>
+        <div class="agent-role">${esc(a.role)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectAgent(id) {
+  state.selectedAgent = state.agents.find(a => a.id === id);
+  state.messages = [];
+  renderAgents();
+  renderChat();
+  updateChatHeader();
+  document.getElementById('msg-input').focus();
+  document.getElementById('send-btn').disabled = false;
+}
+
+function updateChatHeader() {
+  const a = state.selectedAgent;
+  if (!a) return;
+  document.getElementById('chat-icon').textContent = a.icon || '\u{1F916}';
+  document.getElementById('chat-name').textContent = a.display_name;
+  document.getElementById('chat-role').textContent = a.role;
+}
+
+// ── Models ─────────────────────────────────────────────────────────
+async function loadModels() {
+  const data = await api('/v1/llm/models');
+  renderModels(data.models || []);
+}
+
+function renderModels(models) {
+  const el = document.getElementById('tab-models');
+
+  const loaded = models.filter(m => m.loaded);
+  const local = models.filter(m => !m.loaded);
+
+  let html = '';
+
+  // Loaded models
+  html += '<div class="model-section">';
+  html += '<div class="model-section-title">Charges</div>';
+  if (loaded.length === 0) {
+    html += '<div style="padding:8px 12px;font-size:12px;color:var(--text-secondary)">Aucun modele charge</div>';
+  }
+  loaded.forEach(m => {
+    const statusClass = m.backend === 'native' ? 'loaded' : 'upstream';
+    html += `
+      <div class="model-item">
+        <span class="model-status ${statusClass}"></span>
+        <div class="model-info">
+          <div class="model-name">${esc(m.display_name || m.id)}</div>
+          <div class="model-meta">${esc(m.backend)}${m.params ? ' &bull; ' + esc(m.params) : ''}${m.quantization ? ' &bull; ' + esc(m.quantization) : ''}</div>
+        </div>
+        ${m.backend === 'native' ? `<button class="model-action unload" onclick="unloadModel()">Decharger</button>` : ''}
+      </div>
+    `;
+  });
+  html += '</div>';
+
+  // Local models
+  html += '<div class="model-section">';
+  html += '<div class="model-section-title">GGUF locaux</div>';
+  if (local.length === 0) {
+    html += '<div style="padding:8px 12px;font-size:12px;color:var(--text-secondary)">Aucun fichier .gguf dans le dossier models/</div>';
+  }
+  local.forEach(m => {
+    html += `
+      <div class="model-item">
+        <span class="model-status local"></span>
+        <div class="model-info">
+          <div class="model-name">${esc(m.display_name || m.id)}</div>
+          <div class="model-meta">${esc(m.id)}</div>
+        </div>
+        <button class="model-action" onclick="loadModel('${esc(m.id)}')">Charger</button>
+      </div>
+    `;
+  });
+  html += '</div>';
+
+  el.innerHTML = html;
+}
+
+async function loadModel(filename) {
+  toast('Chargement de ' + filename + '...', 'info');
+  try {
+    const data = await api('/v1/models/load', {
+      method: 'POST',
+      body: JSON.stringify({ filename }),
+    });
+    if (data.error) {
+      toast(data.error, 'error');
+    } else {
+      toast('Modele charge : ' + (data.loaded || filename), 'success');
+      await loadModels();
+      await loadStatus();
+    }
+  } catch (e) {
+    toast('Erreur : ' + e.message, 'error');
+  }
+}
+
+async function unloadModel() {
+  const data = await api('/v1/models/unload', { method: 'POST' });
+  toast(data.unloaded ? 'Modele decharge' : 'Aucun modele', 'info');
+  await loadModels();
+  await loadStatus();
+}
+
+// ── Contexts ───────────────────────────────────────────────────────
+async function loadContexts() {
+  try {
+    const data = await api('/v1/contexts');
+    state.contexts = data.contexts || [];
+  } catch (e) {
+    state.contexts = [];
+  }
+}
+
+// ── Status ─────────────────────────────────────────────────────────
+async function loadStatus() {
+  try {
+    const data = await api('/status');
+    document.getElementById('version', data.version);
+    document.getElementById('hw-tier').textContent = data.hardware_tier || '?';
+
+    const nEl = document.getElementById('status-native');
+    if (data.native_loaded) {
+      nEl.textContent = data.native_model || 'charge';
+      nEl.className = 'status-value online';
+    } else {
+      nEl.textContent = (data.local_models_count || 0) + ' GGUF';
+      nEl.className = 'status-value offline';
+    }
+
+    const uEl = document.getElementById('status-upstream');
+    if (data.upstream === 'connected') {
+      uEl.textContent = 'connecte';
+      uEl.className = 'status-value online';
+    } else {
+      uEl.textContent = 'hors ligne';
+      uEl.className = 'status-value offline';
+    }
+
+    const mEl = document.getElementById('status-mode');
+    if (data.native_loaded) {
+      mEl.textContent = 'Natif (GGUF)';
+      mEl.className = 'status-value online';
+    } else if (data.upstream === 'connected') {
+      mEl.textContent = 'Upstream';
+      mEl.className = 'status-value degraded';
+    } else {
+      mEl.textContent = 'Fallback';
+      mEl.className = 'status-value offline';
+    }
+  } catch (e) {
+    document.getElementById('status-mode').textContent = 'erreur';
+  }
+}
+
+// ── Security ───────────────────────────────────────────────────────
+async function loadSecurityStatus() {
+  try {
+    const data = await api('/v1/security/status');
+    renderSecurity(data);
+  } catch (e) {
+    document.getElementById('tab-security').innerHTML =
+      '<div style="padding:12px;font-size:12px;color:var(--text-secondary)">Erreur de chargement</div>';
+  }
+}
+
+function renderSecurity(data) {
+  const el = document.getElementById('tab-security');
+  const o = data.origin_validation || {};
+  const a = data.authentication || {};
+  const h = data.hmac_signing || {};
+  const e = data.encryption || {};
+
+  el.innerHTML = `
+    <div class="model-section">
+      <div class="model-section-title">Validation d'origine</div>
+      <div class="model-item">
+        <span class="model-status ${o.enabled ? 'loaded' : 'local'}"></span>
+        <div class="model-info">
+          <div class="model-name">${o.enabled ? 'Active' : 'Desactive'}</div>
+          <div class="model-meta">${o.strict_user_agent ? 'User-Agent COG requis' : 'localhost only'}${o.allowed_origins?.length ? ' &bull; ' + o.allowed_origins.length + ' origines' : ''}</div>
+        </div>
+      </div>
+    </div>
+    <div class="model-section">
+      <div class="model-section-title">Authentification</div>
+      <div class="model-item">
+        <span class="model-status ${a.bearer_token_configured ? 'loaded' : 'local'}"></span>
+        <div class="model-info">
+          <div class="model-name">Bearer token ${a.bearer_token_configured ? 'configure' : 'non configure'}</div>
+          <div class="model-meta">${a.require_auth_all ? 'Requis partout' : 'Proxy seulement'}</div>
+        </div>
+      </div>
+    </div>
+    <div class="model-section">
+      <div class="model-section-title">Anti-MITM (HMAC)</div>
+      <div class="model-item">
+        <span class="model-status ${h.enabled ? 'loaded' : 'local'}"></span>
+        <div class="model-info">
+          <div class="model-name">HMAC-SHA256 ${h.enabled ? 'active' : 'desactive'}</div>
+          <div class="model-meta">Anti-replay : ${h.max_age_secs || 300}s</div>
+        </div>
+      </div>
+    </div>
+    <div class="model-section">
+      <div class="model-section-title">Chiffrement</div>
+      <div class="model-item">
+        <span class="model-status ${e.enabled ? 'loaded' : 'local'}"></span>
+        <div class="model-info">
+          <div class="model-name">${e.algorithm || 'AES-256-GCM'} ${e.enabled ? 'active' : 'desactive'}</div>
+          <div class="model-meta">X-COG-Encrypt: true</div>
+        </div>
+      </div>
+    </div>
+    ${data.blocked_ips?.length ? `
+    <div class="model-section">
+      <div class="model-section-title">IPs bloquees (${data.blocked_ips.length})</div>
+      ${data.blocked_ips.map(ip => `
+        <div class="model-item">
+          <span class="model-status" style="background:var(--red)"></span>
+          <div class="model-info"><div class="model-name">${esc(ip)}</div></div>
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+  `;
+}
+
+// ── Chat ───────────────────────────────────────────────────────────
+function renderChat() {
+  const area = document.getElementById('chat-area');
+  const empty = document.getElementById('empty-state');
+
+  if (state.messages.length === 0) {
+    if (state.selectedAgent) {
+      area.innerHTML = `
+        <div class="chat-empty">
+          <div class="chat-empty-icon">${state.selectedAgent.icon || '&#129302;'}</div>
+          <h2>${esc(state.selectedAgent.display_name)}</h2>
+          <p>${esc(state.selectedAgent.description || state.selectedAgent.role)}</p>
+          <div style="margin-top:8px;font-size:12px;color:var(--text-secondary)">
+            Skills : ${state.selectedAgent.skill_ids?.length ? state.selectedAgent.skill_ids.join(', ') : 'aucun'}
+            &bull; Securite : ${state.selectedAgent.security_level}
+          </div>
+        </div>
+      `;
+    }
+    return;
+  }
+
+  area.innerHTML = state.messages.map(m => {
+    if (m.role === 'user') {
+      return `
+        <div class="message user">
+          <div class="message-avatar">&#128100;</div>
+          <div class="message-content">
+            <div class="message-header">
+              <span class="message-sender">Vous</span>
+              <span class="message-time">${m.time || ''}</span>
+            </div>
+            <div class="message-text">${esc(m.content)}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (m.role === 'typing') {
+      return `
+        <div class="message assistant">
+          <div class="message-avatar">${state.selectedAgent?.icon || '&#129302;'}</div>
+          <div class="message-content">
+            <div class="typing-indicator">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Assistant message
+    const badge = m.backend === 'native'
+      ? '<span class="message-badge badge-native">natif</span>'
+      : m.fallback
+      ? '<span class="message-badge badge-fallback">fallback</span>'
+      : m.backend === 'upstream'
+      ? '<span class="message-badge badge-upstream">upstream</span>'
+      : '';
+
+    const tools = m.tool_calls?.length
+      ? `<div class="message-tools">
+          <div style="font-weight:500;margin-bottom:4px">${m.tool_calls.length} outil(s) utilise(s) &bull; ${m.iterations || 1} iteration(s)</div>
+          ${m.tool_calls.map(tc => `
+            <div class="tool-call-item">
+              <span class="tool-call-icon">${tc.result_success ? '&#9989;' : '&#10060;'}</span>
+              <span>${esc(tc.skill_id)}</span>
+              <span style="color:var(--text-muted)">${tc.duration_ms || 0}ms</span>
+            </div>
+          `).join('')}
+        </div>`
+      : '';
+
+    return `
+      <div class="message assistant">
+        <div class="message-avatar">${state.selectedAgent?.icon || '&#129302;'}</div>
+        <div class="message-content">
+          <div class="message-header">
+            <span class="message-sender">${esc(m.agent || state.selectedAgent?.display_name || 'Assistant')}</span>
+            ${badge}
+            <span class="message-time">${m.time || ''}</span>
+            ${m.model ? `<span style="font-size:10px;color:var(--text-muted)">${esc(m.model)}</span>` : ''}
+          </div>
+          <div class="message-text">${formatMessage(m.content || '')}</div>
+          ${tools}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  area.scrollTop = area.scrollHeight;
+}
+
+function formatMessage(text) {
+  // Basic markdown-like formatting
+  return esc(text)
+    .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+}
+
+async function sendMessage() {
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim();
+  if (!text || !state.selectedAgent || state.sending) return;
+
+  const now = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+  state.messages.push({ role: 'user', content: text, time: now });
+  state.messages.push({ role: 'typing' });
+  input.value = '';
+  autoResize(input);
+  state.sending = true;
+  document.getElementById('send-btn').disabled = true;
+  renderChat();
+
+  try {
+    const body = {
+      message: text,
+      context_ids: state.selectedContexts,
+      enable_tools: true,
+    };
+
+    const data = await api(`/v1/agents/${state.selectedAgent.id}/chat`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+
+    // Remove typing indicator
+    state.messages = state.messages.filter(m => m.role !== 'typing');
+
+    state.messages.push({
+      role: 'assistant',
+      content: data.content || data.error || 'Pas de reponse',
+      agent: data.agent,
+      model: data.model,
+      backend: data.backend,
+      fallback: data.fallback,
+      tool_calls: data.tool_calls,
+      iterations: data.iterations,
+      time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+    });
+  } catch (e) {
+    state.messages = state.messages.filter(m => m.role !== 'typing');
+    state.messages.push({
+      role: 'assistant',
+      content: 'Erreur de connexion : ' + e.message,
+      fallback: true,
+      time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+    });
+  }
+
+  state.sending = false;
+  document.getElementById('send-btn').disabled = false;
+  renderChat();
+  input.focus();
+}
+
+function clearChat() {
+  state.messages = [];
+  renderChat();
+}
+
+// ── Tabs ───────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.sidebar-tab').forEach((el, i) => {
+    el.classList.toggle('active', ['agents', 'models', 'security'][i] === tab);
+  });
+  document.getElementById('tab-agents').style.display = tab === 'agents' ? '' : 'none';
+  document.getElementById('tab-models').style.display = tab === 'models' ? '' : 'none';
+  document.getElementById('tab-security').style.display = tab === 'security' ? '' : 'none';
+}
+
+// ── Utils ──────────────────────────────────────────────────────────
+function esc(s) {
+  if (!s) return '';
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+}
+
+function toast(msg, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+// ── Start ──────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

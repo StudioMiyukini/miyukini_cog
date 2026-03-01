@@ -1,0 +1,45 @@
+# @id: Sodomight-Server @do: game @role: back-end @layer: 4 @human: miyuk
+# sodomight-server — Sodomight dedicated server: authoritative logic, no rendering
+
+[package]
+name = "sodomight-server"
+version.workspace = true
+edition.workspace = true
+description = "Sodomight dedicated server: authoritative logic, no rendering"
+
+[[bin]]
+name = "sodomight-server"
+path = "src/main.rs"
+
+[dependencies]
+mge-core = { path = "../../crates/kernel/mge-core" }
+mge-ecs = { path = "../../crates/kernel/mge-ecs" }
+mge-math = { path = "../../crates/kernel/mge-math" }
+mge-asset = { path = "../../crates/kernel/mge-asset" }
+mge-net = { path = "../../crates/engine/mge-net" }
+mge-save = { path = "../../crates/engine/mge-save" }
+mge-collision = { path = "../../crates/engine/mge-collision" }
+mge-pathfinding = { path = "../../crates/engine/mge-pathfinding" }
+mge-script = { path = "../../crates/engine/mge-script" }
+
+# ARPG pack (logique uniquement, pas d'UI)
+mge-arpg-world = { path = "../../crates/arpg/mge-arpg-world" }
+mge-arpg-entity = { path = "../../crates/arpg/mge-arpg-entity" }
+mge-arpg-combat = { path = "../../crates/arpg/mge-arpg-combat" }
+mge-arpg-items = { path = "../../crates/arpg/mge-arpg-items" }
+mge-arpg-stats = { path = "../../crates/arpg/mge-arpg-stats" }
+mge-arpg-skills = { path = "../../crates/arpg/mge-arpg-skills" }
+mge-arpg-loot = { path = "../../crates/arpg/mge-arpg-loot" }
+mge-arpg-ai = { path = "../../crates/arpg/mge-arpg-ai" }
+mge-arpg-quest = { path = "../../crates/arpg/mge-arpg-quest" }
+mge-arpg-trade = { path = "../../crates/arpg/mge-arpg-trade" }
+
+serde = { workspace = true }
+toml = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

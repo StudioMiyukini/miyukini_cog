@@ -1,0 +1,16 @@
+# @id: MGE-ARPG-Loot @do: arpg @role: back-end @layer: 3 @human: miyuk
+# mge-arpg-loot — MGE ARPG loot: drop tables, treasure classes, MF, NoDrop
+
+[package]
+name = "mge-arpg-loot"
+version.workspace = true
+edition.workspace = true
+description = "MGE ARPG loot: drop tables, treasure classes, MF, NoDrop"
+
+[dependencies]
+serde = { workspace = true }
+rand = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

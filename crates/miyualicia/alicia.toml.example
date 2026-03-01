@@ -1,0 +1,45 @@
+# Configuration Alicia Home Assistante
+# Copier vers alicia.toml et adapter a votre installation.
+
+# URL du bridge NLU (miou-llm-bridge). Doit etre sur le reseau local.
+llm_bridge_url = "http://127.0.0.1:3003"
+
+# Chemin vers la base de donnees KindMother.
+db_path = "alicia.db"
+
+# --- MQTT (optionnel) ---
+# Decommenter pour activer le transport MQTT (broker Mosquitto local).
+# [mqtt]
+# broker_host = "localhost"
+# broker_port = 1883
+# client_id = "alicia-home"
+# keepalive_secs = 60
+# reconnect_delay_secs = 5
+
+# --- API REST ---
+[api]
+port = 7890
+host = "0.0.0.0"
+
+# --- Wake Word ---
+[wake_word]
+keyword = "hey alicia"
+threshold = 0.5
+enabled = true
+
+# --- Pieces ---
+[[rooms]]
+id = "salon"
+name = "Salon"
+
+[[rooms]]
+id = "chambre-parentale"
+name = "Chambre parentale"
+
+[[rooms]]
+id = "chambre-theresa"
+name = "Chambre Theresa"
+
+[[rooms]]
+id = "chambre-eleanore"
+name = "Chambre Eleanore"

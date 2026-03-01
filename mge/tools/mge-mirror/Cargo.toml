@@ -1,0 +1,17 @@
+# @id: MGE-Mirror @do: tool @role: back-end @layer: 6 @human: miyuk
+# mge-mirror — MGE CLI: horizontal mirror for sprite direction generation
+
+[package]
+name = "mge-mirror"
+version.workspace = true
+edition.workspace = true
+description = "MGE CLI: horizontal mirror for sprite direction generation"
+
+[dependencies]
+image = { workspace = true }
+serde = { workspace = true }
+toml = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

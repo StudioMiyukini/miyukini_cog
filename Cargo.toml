@@ -86,6 +86,16 @@ members = [
     "crates/miyukinibb",
     "crates/jaymanga",
 
+    # === Alicia Home Assistante ===
+    "crates/miyuvoicecapture",
+    "crates/miyuwakeword",
+    "crates/miyualicia-devices",
+    "crates/miyualicia-mqtt",
+    "crates/miyualicia-http",
+    "crates/miyualicia-automations",
+    "crates/miyualicia",
+    "crates/miyualicia-api",
+
     # === Services avec UI native ===
     "crates/lord_of_the_castle",  # MiyukiniSurvivor — Dioxus + Blitz
     
@@ -101,6 +111,7 @@ members = [
     "apps/jay1tribu",
     "apps/jaymanga",
     "apps/miyuclicker",
+    "apps/miou-llm-bridge",
 
     # === MWS Origin ===
     "apps/origin",

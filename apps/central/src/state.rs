@@ -158,6 +158,8 @@ const OFFICIAL_CATALOG: &[ServiceMeta] = &[
     ServiceMeta { id: "jaymanga",     name: "JayManga",         description: "Lecture et vente de manga en ligne — catalogue, lecteur, boutique, portail agrégé", icon: "\u{1F4DA}", service_type: ServiceType::SurfaceWeb, is_favorite: false },
     ServiceMeta { id: "miyuclicker",  name: "Lord of the Click", description: "Premier jeu officiel Miyukini (Idle/Clicker + Carte stratégique)",      icon: "\u{1F3AE}", service_type: ServiceType::InterCog, is_favorite: true },
     ServiceMeta { id: "lord_of_the_castle", name: "Miyukini Survivor", description: "Jeu Survivor/Tower Defense officiel Miyukini",                    icon: "\u{1F3F0}", service_type: ServiceType::InterCog, is_favorite: false },
+    ServiceMeta { id: "miou-llm-bridge", name: "Miyukini AI Studio",   description: "Service IA local — inférence GGUF native, agents spécialisés, skills, tool calling", icon: "\u{1F9E0}", service_type: ServiceType::InterneCog, is_favorite: false },
+    ServiceMeta { id: "alicia",          name: "Alicia Home Assistante", description: "Assistant vocal local Alicia — capture audio, détection de mot-clé, domotique 100% hors-ligne", icon: "\u{1F399}", service_type: ServiceType::InterneCog, is_favorite: false },
 ];
 
 impl ServiceMeta {

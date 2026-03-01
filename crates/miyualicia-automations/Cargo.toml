@@ -1,0 +1,27 @@
+[package]
+name = "miyualicia-automations"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Moteur d'automatisations domotiques — Alicia Home Assistante. Triggers, conditions, actions, scheduler."
+
+[dependencies]
+miyualicia-devices = { path = "../miyualicia-devices" }
+
+tokio      = { version = "1", features = ["full"] }
+serde      = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml       = "0.8"
+chrono     = { version = "0.4", features = ["serde"] }
+uuid       = { version = "1", features = ["v4", "serde"] }
+thiserror  = "2"
+tracing    = "0.1"
+
+[lints]
+workspace = true

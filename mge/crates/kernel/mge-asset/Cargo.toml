@@ -1,0 +1,26 @@
+# @id: MGE-Asset @do: kernel @role: back-end @layer: 1 @human: miyuk
+# mge-asset — MGE asset: TOML data loading, hot-reload, asset registry
+
+[package]
+name = "mge-asset"
+version.workspace = true
+edition.workspace = true
+description = "MGE asset: TOML data loading, hot-reload, asset registry"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+toml = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+notify = { workspace = true, optional = true }
+
+[dev-dependencies]
+tracing-subscriber = { workspace = true }
+
+[features]
+default = []
+dev-hotreload = ["dep:notify"]
+
+[lints]
+workspace = true

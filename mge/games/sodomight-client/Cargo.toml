@@ -1,0 +1,38 @@
+# @id: Sodomight-Client @do: game @role: back-end @layer: 4 @human: miyuk
+# sodomight-client — Sodomight client: rendering + input, no authoritative logic
+
+[package]
+name = "sodomight-client"
+version.workspace = true
+edition.workspace = true
+description = "Sodomight client: rendering + input, no authoritative logic"
+
+[[bin]]
+name = "sodomight-client"
+path = "src/main.rs"
+
+[dependencies]
+mge-core = { path = "../../crates/kernel/mge-core" }
+mge-ecs = { path = "../../crates/kernel/mge-ecs" }
+mge-math = { path = "../../crates/kernel/mge-math" }
+mge-asset = { path = "../../crates/kernel/mge-asset" }
+mge-platform = { path = "../../crates/kernel/mge-platform" }
+mge-render = { path = "../../crates/engine/mge-render" }
+mge-audio = { path = "../../crates/engine/mge-audio" }
+mge-ui = { path = "../../crates/engine/mge-ui" }
+mge-net = { path = "../../crates/engine/mge-net" }
+
+# Game logic
+sodomight-game = { path = "../sodomight" }
+mge-arpg-stats = { path = "../../crates/arpg/mge-arpg-stats" }
+mge-arpg-entity = { path = "../../crates/arpg/mge-arpg-entity" }
+
+image = { workspace = true }
+wgpu = { workspace = true }
+serde = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,0 +1,14 @@
+# @id: MGE-Math-Crate @do: build @role: back-end @layer: 1 @human: miyuk
+# mge-math -- Math utilitaires : coordonnees isometriques 2:1, Vec2, AABB, interpolation.
+
+[package]
+name = "mge-math"
+version.workspace = true
+edition.workspace = true
+description = "MGE math: iso coords, Vec2/Vec3, AABB, interpolation"
+
+[dependencies]
+serde = { workspace = true }
+
+[lints]
+workspace = true

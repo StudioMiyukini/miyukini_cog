@@ -1,0 +1,17 @@
+# @id: MGE-Packer @do: tool @role: back-end @layer: 6 @human: miyuk
+# mge-packer — MGE CLI: atlas packer (sprite sheets from individual PNGs)
+
+[package]
+name = "mge-packer"
+version.workspace = true
+edition.workspace = true
+description = "MGE CLI: atlas packer (sprite sheets from individual PNGs)"
+
+[dependencies]
+image = { workspace = true }
+serde = { workspace = true }
+toml = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

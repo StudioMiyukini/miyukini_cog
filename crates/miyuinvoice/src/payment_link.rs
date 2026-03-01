@@ -13,5 +13,5 @@ pub fn generate(ctx: &GovernedContext, invoice_id: &str) -> Result<String, Miyui
     if !ctx.has_mandate() {
         return Err(MiyuinvoiceError::NoMandate);
     }
-    Ok(format!("https://pay.example/{}", invoice_id))
+    Ok(format!("https://pay.example/{invoice_id}"))
 }

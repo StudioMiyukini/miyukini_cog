@@ -290,7 +290,15 @@ fn MiouChatPanel() -> Element {
         } else {
             spawn(async move {
                 status.set(ChatStatus::Connecting);
-                let client = LlmClient::new();
+                let endpoint = {
+                    let p = app.read();
+                    if p.miou_prefs.use_remote_session && !p.miou_prefs.remote_session_url.is_empty() {
+                        p.miou_prefs.remote_session_url.clone()
+                    } else {
+                        p.miou_prefs.llm_endpoint.clone()
+                    }
+                };
+                let client = LlmClient::new(&endpoint);
                 match client.ensure_model().await {
                     Ok(model) => {
                         app.write().miou_chat_model = Some(model.clone());
@@ -320,6 +328,15 @@ fn MiouChatPanel() -> Element {
         _ => "#6b7280",
     };
 
+    // Session distante
+    let is_remote = app.read().miou_prefs.use_remote_session;
+    let session_label = if is_remote { "Distant" } else { "Local" };
+    let session_pill_style = if is_remote {
+        "padding: 2px 8px; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.4); border-radius: 10px; color: #f59e0b; font-size: 10px; font-weight: 600; cursor: pointer; font-family: inherit; line-height: 1.4;"
+    } else {
+        "padding: 2px 8px; background: rgba(107,114,128,0.1); border: 1px solid rgba(107,114,128,0.25); border-radius: 10px; color: #9ca3af; font-size: 10px; font-weight: 600; cursor: pointer; font-family: inherit; line-height: 1.4;"
+    };
+
     // Lire les messages depuis AppState
     let messages = app.read().miou_chat_messages.clone();
 
@@ -334,6 +351,16 @@ fn MiouChatPanel() -> Element {
                     style: "display: flex; align-items: center; gap: 8px;",
                     span { style: "font-size: 18px;", "\u{1F338}" }
                     span { style: "font-size: 15px; color: #ffd4e5; font-weight: 600;", "Chat Miou" }
+                    button {
+                        style: "{session_pill_style}",
+                        title: "Basculer entre session locale et distante",
+                        onclick: move |_| {
+                            let mut w = app.write();
+                            w.miou_prefs.use_remote_session = !w.miou_prefs.use_remote_session;
+                            w.miou_chat_model = None;
+                        },
+                        "{session_label}"
+                    }
                 }
                 div {
                     style: "display: flex; align-items: center; gap: 6px;",
@@ -446,7 +473,15 @@ fn send_chat_message(
     }
 
     spawn(async move {
-        let client = LlmClient::new();
+        let endpoint = {
+            let p = app.read();
+            if p.miou_prefs.use_remote_session && !p.miou_prefs.remote_session_url.is_empty() {
+                p.miou_prefs.remote_session_url.clone()
+            } else {
+                p.miou_prefs.llm_endpoint.clone()
+            }
+        };
+        let client = LlmClient::new(&endpoint);
         match client.chat(&model, &api_messages).await {
             Ok(reply) => {
                 app.write().miou_chat_messages.push(MiouChatMsg {
@@ -579,6 +614,12 @@ fn MiouSettingsPanel() -> Element {
     let mut rappels_pause = use_signal(|| prefs.rappels_pause_actives);
     let mut voix_enabled = use_signal(|| prefs.voix_enabled);
     let mut tts_enabled = use_signal(|| prefs.tts_enabled);
+    let mut llm_enabled = use_signal(|| prefs.llm_enabled);
+    let mut llm_endpoint = use_signal(|| prefs.llm_endpoint.clone());
+    let mut llm_bridge_status: Signal<Option<bool>> = use_signal(|| None);
+    let mut use_remote_session = use_signal(|| prefs.use_remote_session);
+    let mut remote_session_url = use_signal(|| prefs.remote_session_url.clone());
+    let mut remote_session_status: Signal<Option<bool>> = use_signal(|| None);
 
     let panel_style = format!(
         "background: {}; border-radius: 8px; padding: 20px; margin-left: 40px; border-left: 2px solid #ffd4e5;",
@@ -617,6 +658,9 @@ fn MiouSettingsPanel() -> Element {
     let btn_1h = if seuil_pause() == 60 { &btn_active } else { &btn_inactive };
     let btn_2h = if seuil_pause() == 120 { &btn_active } else { &btn_inactive };
     let btn_3h = if seuil_pause() == 180 { &btn_active } else { &btn_inactive };
+
+    let remote_toggle = if use_remote_session() { toggle_on } else { toggle_off };
+    let remote_thumb = if use_remote_session() { thumb_on } else { thumb_off };
 
     rsx! {
         div {
@@ -768,16 +812,180 @@ fn MiouSettingsPanel() -> Element {
                 }
             }
 
+            // ── Section LLM ──────────────────────────────────────────
+
             div {
-                style: "display: flex; align-items: center; justify-content: space-between; padding: 12px 0; opacity: 0.5;",
-                div {
-                    span { style: "{label_style}", "Mode LLM" }
-                    p { style: "{desc_style}", "Intelligence avancée (bientôt disponible)" }
+                style: "margin-top: 16px; margin-bottom: 12px;",
+                h4 { style: "font-size: 14px; color: #ffd4e5; margin-bottom: 2px;", "\u{1F9E0} MiouLLM Bridge" }
+                p { style: "{desc_style}", "Expose LM Studio sur le réseau via un proxy HTTP." }
+            }
+
+            {
+                let llm_toggle = if llm_enabled() { toggle_on } else { toggle_off };
+                let llm_thumb = if llm_enabled() { thumb_on } else { thumb_off };
+                rsx! {
+                    div {
+                        style: "{row_style}",
+                        div {
+                            span { style: "{label_style}", "Mode LLM" }
+                            p { style: "{desc_style}", "Chat Miou connecté au bridge LLM" }
+                        }
+                        div {
+                            style: "{llm_toggle}",
+                            onclick: move |_| {
+                                let new_val = !llm_enabled();
+                                llm_enabled.set(new_val);
+                                ctx.state.write().miou_prefs.llm_enabled = new_val;
+                            },
+                            div { style: "{llm_thumb}" }
+                        }
+                    }
                 }
+            }
+
+            if llm_enabled() {
                 div {
-                    style: "width: 48px; height: 24px; background: #4a5568; border-radius: 12px; position: relative; cursor: not-allowed;",
-                    title: "Non disponible en version 0.1.x",
-                    div { style: "width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px;" }
+                    style: "{row_style}",
+                    div {
+                        span { style: "{label_style}", "Endpoint LLM" }
+                        p { style: "{desc_style}", "URL du bridge MiouLLM (ex: http://localhost:11435)" }
+                    }
+                    input {
+                        style: "padding: 6px 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #e2e8f0; font-size: 12px; width: 220px; outline: none;",
+                        r#type: "text",
+                        value: "{llm_endpoint}",
+                        oninput: move |evt| {
+                            llm_endpoint.set(evt.value());
+                            ctx.state.write().miou_prefs.llm_endpoint = evt.value();
+                        },
+                    }
+                }
+
+                div {
+                    style: "{row_style}",
+                    div {
+                        span { style: "{label_style}", "Statut bridge" }
+                        p { style: "{desc_style}", "Connectivité vers le proxy LLM" }
+                    }
+                    div {
+                        style: "display: flex; align-items: center; gap: 8px;",
+                        {
+                            let (dot_color, status_label) = match *llm_bridge_status.read() {
+                                Some(true) => ("#10b981", "Connecté"),
+                                Some(false) => ("#ef4444", "Injoignable"),
+                                None => ("#6b7280", "Non testé"),
+                            };
+                            rsx! {
+                                span { style: "width: 8px; height: 8px; border-radius: 50%; background: {dot_color};" }
+                                span { style: "font-size: 12px; color: {dot_color};", "{status_label}" }
+                            }
+                        }
+                        button {
+                            style: "padding: 4px 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #e2e8f0; font-size: 11px; cursor: pointer;",
+                            onclick: move |_| {
+                                let endpoint = llm_endpoint.read().clone();
+                                let mut bridge_status = llm_bridge_status;
+                                spawn(async move {
+                                    let url = format!("{}/health", endpoint.trim_end_matches('/'));
+                                    let ok = reqwest::Client::new()
+                                        .get(&url)
+                                        .timeout(std::time::Duration::from_secs(5))
+                                        .send()
+                                        .await
+                                        .map(|r| r.status().is_success())
+                                        .unwrap_or(false);
+                                    bridge_status.set(Some(ok));
+                                });
+                            },
+                            "Tester"
+                        }
+                    }
+                }
+
+                // ── Session LM Studio distante ────────────────────────
+                div {
+                    style: "margin-top: 16px; margin-bottom: 8px;",
+                    h5 { style: "font-size: 11px; color: rgba(255,212,229,0.6); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;", "Session distante" }
+                }
+
+                div {
+                    style: "{row_style}",
+                    div {
+                        span { style: "{label_style}", "LM Studio distant" }
+                        p { style: "{desc_style}", "Pointer vers un LM Studio sur le réseau local" }
+                    }
+                    div {
+                        style: "{remote_toggle}",
+                        onclick: move |_| {
+                            let new_val = !use_remote_session();
+                            use_remote_session.set(new_val);
+                            let mut w = ctx.state.write();
+                            w.miou_prefs.use_remote_session = new_val;
+                            w.miou_chat_model = None;
+                        },
+                        div { style: "{remote_thumb}" }
+                    }
+                }
+
+                if use_remote_session() {
+                    div {
+                        style: "{row_style}",
+                        div {
+                            span { style: "{label_style}", "URL distante" }
+                            p { style: "{desc_style}", "ex: http://192.168.1.100:1234" }
+                        }
+                        input {
+                            style: "padding: 6px 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #e2e8f0; font-size: 12px; width: 220px; outline: none;",
+                            r#type: "text",
+                            placeholder: "http://192.168.1.100:1234",
+                            value: "{remote_session_url}",
+                            oninput: move |evt| {
+                                remote_session_url.set(evt.value());
+                                ctx.state.write().miou_prefs.remote_session_url = evt.value();
+                            },
+                        }
+                    }
+
+                    div {
+                        style: "{row_style_last}",
+                        div {
+                            span { style: "{label_style}", "Test connexion" }
+                            p { style: "{desc_style}", "Vérifier la disponibilité du LM Studio distant" }
+                        }
+                        div {
+                            style: "display: flex; align-items: center; gap: 8px;",
+                            {
+                                let (dot_color, status_label) = match *remote_session_status.read() {
+                                    Some(true) => ("#10b981", "Connecté"),
+                                    Some(false) => ("#ef4444", "Injoignable"),
+                                    None => ("#6b7280", "Non testé"),
+                                };
+                                rsx! {
+                                    span { style: "width: 8px; height: 8px; border-radius: 50%; background: {dot_color};" }
+                                    span { style: "font-size: 12px; color: {dot_color};", "{status_label}" }
+                                }
+                            }
+                            button {
+                                style: "padding: 4px 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #e2e8f0; font-size: 11px; cursor: pointer;",
+                                onclick: move |_| {
+                                    let url = remote_session_url.read().clone();
+                                    let mut rstat = remote_session_status;
+                                    spawn(async move {
+                                        let test_url = format!("{}/v1/models", url.trim_end_matches('/'));
+                                        let ok = reqwest::Client::new()
+                                            .get(&test_url)
+                                            .timeout(std::time::Duration::from_secs(5))
+                                            .send()
+                                            .await
+                                            .map(|r| r.status().is_success())
+                                            .unwrap_or(false);
+                                        rstat.set(Some(ok));
+                                    });
+                                },
+                                "Tester"
+                            }
+                        }
+                    }
                 }
             }
         }

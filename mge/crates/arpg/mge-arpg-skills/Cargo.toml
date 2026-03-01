@@ -1,0 +1,15 @@
+# @id: MGE-ARPG-Skills @do: arpg @role: back-end @layer: 3 @human: miyuk
+# mge-arpg-skills — MGE ARPG skills: skill trees, synergies, cooldowns, activation
+
+[package]
+name = "mge-arpg-skills"
+version.workspace = true
+edition.workspace = true
+description = "MGE ARPG skills: skill trees, synergies, cooldowns, activation"
+
+[dependencies]
+serde = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,0 +1,51 @@
+[package]
+name = "miyualicia-capture"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Alicia Home Assistante audio capture toolkit - device enumeration, VAD, circular buffer, multi-room capture (WASAPI/cpal)"
+
+[dependencies]
+miyukini-kernel = { path = "../miyukini-kernel" }
+cpal = "0.17"
+ringbuf = "0.4"
+blake3 = "1"
+tracing = "0.1"
+thiserror = "2"
+serde = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+serde_json = "1"
+hound = "3.5"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+doc_markdown = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+return_self_not_must_use = "allow"
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+cast_precision_loss = "allow"
+cast_lossless = "allow"
+module_name_repetitions = "allow"
+struct_excessive_bools = "allow"
+too_many_lines = "allow"
+wildcard_imports = "allow"
+unused_self = "allow"
+needless_pass_by_value = "allow"
+similar_names = "allow"
+unreadable_literal = "allow"
+items_after_statements = "allow"

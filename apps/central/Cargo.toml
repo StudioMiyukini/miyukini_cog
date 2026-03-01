@@ -52,6 +52,10 @@ miyuwebway_participant = { path = "../../crates/miyuwebway_participant" }
 # Service Market (protocole + manifeste partagé Central/Origin)
 miyumarket = { path = "../../crates/miyumarket" }
 
+# Alicia Home Assistante — capture audio locale + détection de wake word
+miyualicia-capture = { path = "../../crates/miyuvoicecapture" }
+miyualicia-wakeword = { path = "../../crates/miyuwakeword" }
+
 [lints.rust]
 unsafe_code = "forbid"
 

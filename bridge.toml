@@ -1,0 +1,18 @@
+bind_addr = "0.0.0.0:11435"
+upstream_url = "http://localhost:1234"
+log_requests = true
+
+[native]
+models_dir = "models"
+prefer_native = true
+gpu_layers = -1
+context_size = 4096
+threads = 0
+auto_load = true
+
+[security]
+allowed_origins = []
+require_auth_all = false
+strict_user_agent = false
+hmac_max_age_secs = 300
+admin_origins = []

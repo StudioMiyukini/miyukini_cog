@@ -13,5 +13,5 @@ pub fn submit(ctx: &GovernedContext, invoice_id: &str, _payload: Option<&str>) -
     if !ctx.has_mandate() {
         return Err(MiyuinvoiceError::NoMandate);
     }
-    Ok(format!("submitted:{}", invoice_id))
+    Ok(format!("submitted:{invoice_id}"))
 }

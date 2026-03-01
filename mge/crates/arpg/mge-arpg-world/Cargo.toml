@@ -1,0 +1,20 @@
+# @id: MGE-ARPG-World @do: arpg @role: back-end @layer: 3 @human: miyuk
+# mge-arpg-world — MGE ARPG world: zones, tiles, chunks, waypoints, portals
+
+[package]
+name = "mge-arpg-world"
+version.workspace = true
+edition.workspace = true
+description = "MGE ARPG world: zones, tiles, chunks, waypoints, portals"
+
+[dependencies]
+mge-ecs = { path = "../../kernel/mge-ecs" }
+mge-math = { path = "../../kernel/mge-math" }
+mge-asset = { path = "../../kernel/mge-asset" }
+mge-collision = { path = "../../engine/mge-collision" }
+serde = { workspace = true }
+toml = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

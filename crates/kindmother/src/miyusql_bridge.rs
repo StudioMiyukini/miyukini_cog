@@ -15,7 +15,6 @@ use miyusql::{
 /// @human: Trait de délégation d'exécution SQL à MiyuSQL sous mandat KindMother.
 /// @do: delegate_execution_to_miyusql
 /// KindMother invoque ce bridge après validation WriteIntent pour exécution effective.
-
 /// @id: kindmother_miyusql_bridge_trait
 /// @role: infrastructure
 /// @layer: core

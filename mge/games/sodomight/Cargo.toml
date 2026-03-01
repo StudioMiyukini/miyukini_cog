@@ -1,0 +1,59 @@
+# @id: Sodomight-Game @do: game @role: back-end @layer: 4 @human: miyuk
+# sodomight-game — Sodomight: D2-like ARPG built on MGE
+
+[package]
+name = "sodomight-game"
+version.workspace = true
+edition.workspace = true
+description = "Sodomight: D2-like ARPG built on MGE"
+
+[[bin]]
+name = "sodomight"
+path = "src/main.rs"
+
+[dependencies]
+# Kernel
+mge-core = { path = "../../crates/kernel/mge-core" }
+mge-ecs = { path = "../../crates/kernel/mge-ecs" }
+mge-math = { path = "../../crates/kernel/mge-math" }
+mge-asset = { path = "../../crates/kernel/mge-asset" }
+mge-platform = { path = "../../crates/kernel/mge-platform" }
+
+# Engine
+mge-render = { path = "../../crates/engine/mge-render" }
+mge-audio = { path = "../../crates/engine/mge-audio" }
+mge-ui = { path = "../../crates/engine/mge-ui" }
+mge-pathfinding = { path = "../../crates/engine/mge-pathfinding" }
+mge-collision = { path = "../../crates/engine/mge-collision" }
+mge-script = { path = "../../crates/engine/mge-script" }
+mge-net = { path = "../../crates/engine/mge-net" }
+mge-save = { path = "../../crates/engine/mge-save" }
+
+# ARPG pack
+mge-arpg-world = { path = "../../crates/arpg/mge-arpg-world" }
+mge-arpg-entity = { path = "../../crates/arpg/mge-arpg-entity" }
+mge-arpg-combat = { path = "../../crates/arpg/mge-arpg-combat" }
+mge-arpg-items = { path = "../../crates/arpg/mge-arpg-items" }
+mge-arpg-stats = { path = "../../crates/arpg/mge-arpg-stats" }
+mge-arpg-skills = { path = "../../crates/arpg/mge-arpg-skills" }
+mge-arpg-loot = { path = "../../crates/arpg/mge-arpg-loot" }
+mge-arpg-ai = { path = "../../crates/arpg/mge-arpg-ai" }
+mge-arpg-quest = { path = "../../crates/arpg/mge-arpg-quest" }
+mge-arpg-trade = { path = "../../crates/arpg/mge-arpg-trade" }
+
+# Utilitaires
+serde = { workspace = true }
+toml = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+thiserror = { workspace = true }
+rand = { workspace = true }
+rand_chacha = { workspace = true }
+
+[features]
+default = []
+dev-hotreload = []
+dev-cheats = []
+
+[lints]
+workspace = true
