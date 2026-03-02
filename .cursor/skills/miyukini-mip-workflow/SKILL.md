@@ -226,6 +226,102 @@ APPROUVE / REJETE / MODIFIE
 
 ---
 
+## Metriques & Horodatage — Collecte continue
+
+> Tout au long de la sequence MIP, les agents collectent des metriques pour mesurer la performance de l'equipe et alimenter le rapport final.
+
+### Initialisation (debut de sequence)
+
+A l'ouverture de chaque sequence MIP, Maria cree le fichier `.mip/metrics/YYYY-MM-DD-<slug>.json` avec la structure suivante :
+
+```json
+{
+  "project": {
+    "title": "<titre du brief>",
+    "description": "<description courte>",
+    "class": "T3|T4|T5",
+    "slug": "<slug>",
+    "mip_sequence_number": 1
+  },
+  "timestamps": {
+    "p0_start": "ISO8601",
+    "p0_end": null,
+    "autopilot_start": null,
+    "p3_start": null, "p3_end": null,
+    "p4_start": null, "p4_end": null,
+    "p5_start": null, "p5_end": null,
+    "p5_test_start": null, "p5_test_end": null,
+    "p6_start": null, "p6_end": null,
+    "total_end": null
+  },
+  "counters": {
+    "lines_written": 0,
+    "lines_deleted": 0,
+    "crates_touched": [],
+    "crates_created": [],
+    "files_created": 0,
+    "files_modified": 0,
+    "commits": 0,
+    "agents_engaged": [],
+    "mip_loops": 1,
+    "unit_tests_total": 0,
+    "unit_tests_failed": 0,
+    "integration_tests_total": 0,
+    "integration_tests_failed": 0,
+    "global_tests_total": 0,
+    "global_tests_failed": 0,
+    "auto_corrections": 0,
+    "audits": 0,
+    "audit_defects": [],
+    "emergency_brakes": 0
+  },
+  "human_interventions": [],
+  "agent_questions": [],
+  "satisfaction": null,
+  "notes": null
+}
+```
+
+### Collecte par phase
+
+| Phase | Qui collecte | Quoi |
+|-------|-------------|------|
+| **P0** | Maria | `p0_start`, `p0_end`, `agents_engaged`, questions posees a l'humain |
+| **Git** | Denis | `autopilot_start` |
+| **P3** | Francois/Lise | `p3_start`, `p3_end`, `lines_written/deleted`, `commits`, `unit_tests_*`, `auto_corrections`, `crates_touched` |
+| **P4** | Denis/George | `p4_start`, `p4_end`, `audits`, `audit_defects[]`, `global_tests_*`, `integration_tests_*` |
+| **P5** | Denis | `p5_start`, `p5_end`, `p5_test_start`, `p5_test_end`, `satisfaction`, `human_interventions[]` |
+| **P6** | Arianne | `p6_start`, `p6_end`, `total_end`, compilation du rapport final |
+
+### Enregistrement des interventions humaines
+
+Chaque intervention humaine est loggee avec :
+```json
+{
+  "timestamp": "ISO8601",
+  "type": "precision|arret|pause|changement_direction|constat_erreur|delta|autre",
+  "phase": "P0|P3|P4|P5",
+  "description": "<description de l'intervention>",
+  "impact": "aucun|mineur|majeur|critique"
+}
+```
+
+### Enregistrement des questions agents → humain
+
+Chaque question posee a l'utilisateur est loggee avec :
+```json
+{
+  "timestamp": "ISO8601",
+  "agent": "Maria|Denis|Francois|Lise|George|Arianne|Fabrice",
+  "phase": "P0|P3|P4|P5",
+  "nature": "clarification|validation|choix_technique|choix_design|blocage|autre",
+  "question": "<texte de la question>",
+  "response_summary": "<resume de la reponse>"
+}
+```
+
+---
+
 ## MODE AUTOPILOT — P3 a P6 (apres approbation P0)
 
 > **PRINCIPE FONDAMENTAL** : Apres l'approbation du brief P0, l'execution est **entierement automatique**. L'utilisateur n'intervient plus sauf en cas de **bug bloquant** ou de **delta majeur** par rapport au plan.
@@ -345,54 +441,258 @@ Artefact : `.mip/audits/YYYY-MM-DD-<slug>.md`
 
 ---
 
-### P5 — Livraison automatique (toutes classes)
+### P5 — Livraison, Test humain & Validation (toutes classes)
 
-**Agent** : Denis
+**Agent** : Denis (livraison) + George (assistance test)
+
+#### Etape 1 — Presentation du livrable
 
 1. **Commit final** si necessaire (message conventionnel)
 2. **Push final** — `git push` sur la feature branch
-3. **Presenter le resume a l'utilisateur** : ce qui a ete fait, nombre de fichiers, tests passes, anomalies corrigees
-4. **[GATE] Utilisateur confirme** la livraison
+3. **Horodater** : `p5_start` dans le fichier metriques
+4. **Presenter le resume a l'utilisateur** :
+   - Ce qui a ete fait (fonctionnalites implementees)
+   - Nombre de fichiers crees/modifies, lignes ecrites
+   - Tests passes (unitaires, integration, globaux)
+   - Anomalies detectees et corrigees
+   - Instructions pour tester le livrable (commandes, parcours utilisateur)
 
-Apres confirmation utilisateur :
+#### Etape 2 — Test humain
 
-5. **Merge vers main** — processus standard Git :
-   ```bash
-   git checkout main
-   git pull origin main
-   git merge feat/<slug> --no-ff    # merge explicite avec commit de merge
-   git push origin main
-   ```
-6. **Tag si release** : `git tag -a vX.Y.Z -m "description"` + `git push origin vX.Y.Z`
-7. **Nettoyage** : supprimer la branche de feature
-   ```bash
-   git branch -d feat/<slug>
-   git push origin --delete feat/<slug>
-   ```
-8. **LOG** : `TodoWrite` marquer livraison `completed`
+5. **Horodater** : `p5_test_start`
+6. **L'utilisateur teste le livrable** dans son environnement
+7. George fournit une **checklist de test** adaptee au projet :
+   - [ ] Build OK (`cargo build --workspace`)
+   - [ ] Lancement de l'application OK
+   - [ ] Parcours utilisateur principal fonctionne
+   - [ ] Cas limites testes (si applicable)
+   - [ ] Performance acceptable
+   - [ ] UI conforme a la direction visuelle (si applicable)
 
-**Alternative PR** : Si le projet utilise des pull requests, remplacer le merge direct par :
-```bash
-gh pr create --title "feat(<slug>): <description>" --body "<resume des changements>"
+#### Etape 3 — Questionnaire de satisfaction
+
+8. **Horodater** : `p5_test_end`
+9. Denis presente le **questionnaire de satisfaction** :
+
 ```
-L'utilisateur merge la PR manuellement sur GitHub.
+## Questionnaire de satisfaction — <titre du projet>
 
-**Quality Gate P5** : Utilisateur confirme la livraison.
+### Conformite fonctionnelle
+1. Le livrable correspond-il a votre demande initiale ? (OUI / PARTIELLEMENT / NON)
+2. Si non/partiellement, quels ecarts constatez-vous ?
+
+### Qualite percue
+3. Le code est-il propre et comprehensible ? (1-5)
+4. L'UI est-elle satisfaisante ? (1-5, si applicable)
+5. La performance est-elle acceptable ? (1-5)
+
+### Satisfaction globale
+6. Note globale de satisfaction (1-5) :
+   1 = Inacceptable, 2 = Insuffisant, 3 = Acceptable, 4 = Bon, 5 = Excellent
+7. Commentaires libres :
+
+### Verdict
+- [ ] ACCEPTE — Merger vers main
+- [ ] ACCEPTE AVEC RESERVES — Merger, mais corrections mineures a planifier
+- [ ] REFUSE — Retour en correction (boucle MIP)
+```
+
+#### Etape 4 — Decision
+
+**Si ACCEPTE ou ACCEPTE AVEC RESERVES** :
+
+10. **Horodater** : `p5_end`
+11. **Merger les reserves** dans une liste de taches futures si applicable
+12. **Merge vers main** — processus standard Git :
+    ```bash
+    git checkout main
+    git pull origin main
+    git merge feat/<slug> --no-ff
+    git push origin main
+    ```
+13. **Tag si release** : `git tag -a vX.Y.Z -m "description"` + `git push origin vX.Y.Z`
+14. **Nettoyage** : supprimer la branche de feature
+    ```bash
+    git branch -d feat/<slug>
+    git push origin --delete feat/<slug>
+    ```
+15. **LOG** : `TodoWrite` marquer livraison `completed`
+16. **Enregistrer** la satisfaction dans le fichier metriques
+
+**Si REFUSE — Boucle MIP** :
+
+10. **Logger l'intervention humaine** : type `constat_erreur` ou `delta`, impact `majeur`
+11. **Incrementer** `mip_loops` dans le fichier metriques
+12. **NE PAS merger** — la feature branch reste en l'etat
+13. **Retour en P0** avec le contexte suivant :
+    - Problemes constates par l'utilisateur (verbatim)
+    - Ecarts entre l'attendu et le livre
+    - Metriques de la boucle precedente
+    - Maria reprend en **Temps 1** avec les problemes comme input
+    - Le brief precedent sert de reference (pas de repartir de zero)
+14. **Nouvelle sequence AUTOPILOT** sur la meme feature branch (pas de nouvelle branche)
+
+**Alternative PR** : Remplacer le merge direct par `gh pr create`. L'utilisateur merge manuellement.
+
+**Quality Gate P5** : Verdict utilisateur = ACCEPTE ou ACCEPTE AVEC RESERVES.
 
 ---
 
-### P6 — Archivage & Capitalisation automatique (T3+)
+### P6 — Rapport final, Archivage & Capitalisation (T3+)
 
 **Agent** : Arianne
 
-1. Archiver les artefacts MIP (brief, spec, plan, audit)
-2. Extraire les apprentissages :
+#### Etape 1 — Rapport final de developpement
+
+Arianne compile toutes les metriques collectees et produit le **rapport final independant du livrable**.
+
+Artefact : `.mip/reports/YYYY-MM-DD-<slug>-report.md`
+
+**Template du rapport final** :
+
+```markdown
+# Rapport MIP — <titre du projet>
+
+## 1. Identite du projet
+- **Titre** : <titre>
+- **Description** : <description courte>
+- **Type** : T3/T4/T5 — <description du type>
+- **Complexite** : <evaluation qualitative : simple / moderee / complexe / tres complexe>
+- **Branche** : feat/<slug>
+
+## 2. Chrono & Duree
+- **Debut** : <YYYY-MM-DD HH:MM> (debut P0)
+- **Fin** : <YYYY-MM-DD HH:MM> (fin P6)
+- **Duree totale IRL** : <Xh Ymin>
+- **Decomposition** :
+  | Phase | Debut | Fin | Duree |
+  |-------|-------|-----|-------|
+  | P0 Cadrage | ... | ... | ... |
+  | P3 Implementation | ... | ... | ... |
+  | P4 Integration & Audit | ... | ... | ... |
+  | P5 Livraison & Test | ... | ... | ... |
+  | P5 Test humain | ... | ... | ... |
+  | P6 Rapport & Archivage | ... | ... | ... |
+
+## 3. Ressources
+- **Modele LLM** : <nom du modele> (ex: Claude Opus 4.6)
+- **Tokens utilises** : ~<estimation> (entree: X, sortie: Y)
+- **Nombre de boucles MIP** : <N> (1 = pas de retour)
+
+## 4. Production
+- **Lignes ecrites** : <N>
+- **Lignes supprimees** : <N>
+- **Fichiers crees** : <N>
+- **Fichiers modifies** : <N>
+- **Crates touches** : <N> (<liste>)
+- **Crates crees** : <N> (<liste>)
+- **Commits** : <N>
+
+## 5. Equipe
+- **Agents engages** : <N> (<liste avec roles>)
+  | Agent | Role | Phases | Taches |
+  |-------|------|--------|--------|
+  | Maria | Chef de Projet | P0 | ... |
+  | ... | ... | ... | ... |
+
+## 6. Interactions humaines
+- **Interventions humaines** : <N>
+  | # | Timestamp | Type | Phase | Description | Impact |
+  |---|-----------|------|-------|-------------|--------|
+  | 1 | ... | precision | P0 | ... | mineur |
+  | ... | ... | ... | ... | ... | ... |
+
+- **Questions agents → humain** : <N>
+  | # | Timestamp | Agent | Phase | Nature | Question |
+  |---|-----------|-------|-------|--------|----------|
+  | 1 | ... | Maria | P0 | clarification | ... |
+  | ... | ... | ... | ... | ... | ... |
+
+## 7. Tests
+### Tests unitaires
+- **Total** : <N>
+- **Erreurs** : <N> (<N> corrigees, <N> restantes)
+
+### Tests d'integration
+- **Total** : <N>
+- **Erreurs** : <N>
+
+### Tests globaux
+- **Total** : <N>
+- **Erreurs** : <N>
+
+### Auto-corrections
+- **Nombre d'erreurs auto-corrigees** : <N>
+- **Freins d'urgence declenches** : <N>
+
+## 8. Audits
+- **Nombre d'audits** : <N>
+  | # | Type | Defauts | Gravite | Nature | Resolution |
+  |---|------|---------|---------|--------|------------|
+  | 1 | conformite | ... | bloquant/non-bloquant | ... | corrige/accepte |
+  | ... | ... | ... | ... | ... | ... |
+
+## 9. Satisfaction utilisateur
+- **Verdict** : ACCEPTE / ACCEPTE AVEC RESERVES / REFUSE (boucle N)
+- **Note satisfaction** : <1-5>
+- **Commentaires** : <verbatim>
+
+## 10. Notation globale
+
+| Critere | Note /20 | Commentaire |
+|---------|----------|-------------|
+| **Note globale** | /20 | Moyenne ponderee des notes ci-dessous |
+| Vitesse de dev (vs historique MIP) | /20 | Comparaison avec les sequences precedentes |
+| Qualite des interventions agents | /20 | Pertinence, precision, autonomie |
+| Qualite du code | /20 | Lisibilite, patterns, clippy, tests |
+| Qualite de gestion des erreurs | /20 | Detection, correction, prevention |
+| Qualite des interactions utilisateur | /20 | Clarte, pertinence des questions, ecoute |
+| Respect du protocole MIP | /20 | Gates, artefacts, logging, TDD |
+| Qualite de l'indexation MSCM | /20 | Couverture, precision des annotations |
+
+**Bareme** :
+- 18-20 : Excellent — reference pour les futures sequences
+- 14-17 : Bon — quelques axes d'amelioration
+- 10-13 : Acceptable — ameliorations significatives necessaires
+- 6-9 : Insuffisant — problemes majeurs a resoudre
+- 0-5 : Inacceptable — remise en question du processus
+
+**Methode de notation** : Arianne evalue sur base des metriques objectives (tests, erreurs, timings) et du feedback utilisateur. La note est comparee a l'historique stocke dans `memory/mip-performance-history.md`.
+
+## 11. Resume du developpement
+<Resume narratif : ce qui a ete fait, les difficultes rencontrees, les decisions prises, les points forts et faibles de la sequence>
+
+## 12. Profil utilisateur — Apprentissages
+- **Competences techniques observees** : <ce que l'utilisateur connait/maitrise>
+- **Connaissances domaine** : <expertise metier observee>
+- **Preferences de travail** : <style de communication, niveau de detail souhaite, degre d'autonomie attendu>
+- **Points d'attention** : <sujets sensibles, exigences recurrentes>
+
+## 13. Capitalisation agents
+- **Patterns confirmes** : <nouveaux patterns a ajouter a mip-decisions.md>
+- **Anti-patterns decouverts** : <erreurs a ajouter a mip-antipatterns.md>
+- **Configurations agents** : <ajustements recommandes pour les agents>
+- **Ameliorations protocole** : <suggestions d'evolution du MIP>
+```
+
+#### Etape 2 — Archivage des artefacts
+
+1. Archiver les artefacts MIP (brief, spec, plan, audit, rapport) dans `.mip/`
+2. Verifier que tous les artefacts sont complets et coherents
+
+#### Etape 3 — Capitalisation
+
+3. Extraire les apprentissages :
    - Patterns confirmes → `memory/mip-decisions.md`
    - Erreurs a eviter → `memory/mip-antipatterns.md`
    - Lecons par chantier → `memory/mip-lessons.md`
    - Competences par agent → `memory/team-skills-audit.md`
-3. Mettre a jour `memory/MEMORY.md` (index, max 200 lignes)
-4. **LOG** : `TodoWrite` marquer archivage `completed`
+4. **Enregistrer les notes** dans `memory/mip-performance-history.md` pour comparaison future
+5. **Enregistrer le profil utilisateur** dans `memory/user-profile.md` (cumulatif)
+6. **Enregistrer les configurations agents** dans `memory/agent-tuning.md`
+7. Mettre a jour `memory/MEMORY.md` (index, max 200 lignes)
+8. **Horodater** : `p6_end`, `total_end`
+9. **LOG** : `TodoWrite` marquer archivage `completed`
 
 ---
 
@@ -415,6 +715,11 @@ L'utilisateur merge la PR manuellement sur GitHub.
 15. **Autopilot apres P0** — Aucune intervention humaine sauf frein d'urgence
 16. **Feature branch obligatoire** (T2+) — Tout travail sur branche, merge vers main apres validation
 17. **Push regulier** — Chaque commit est pousse sur le remote pour sauvegarde
+18. **Metriques obligatoires** — Horodatage et compteurs collectes tout au long de la sequence
+19. **Test humain en P5** — L'utilisateur teste le livrable avant merge
+20. **Questionnaire satisfaction** — Feedback structure avant decision de merge
+21. **Boucle MIP si refus** — Retour en P0 avec les problemes constates, pas de merge
+22. **Rapport final en P6** — Rapport complet independant du livrable, notes /20, capitalisation
 
 ---
 
@@ -454,7 +759,8 @@ Ce protocole s'appuie sur les skills SuperClaude quand ils sont disponibles :
 | P3 | `test-driven-development` | Cycle RED-GREEN-REFACTOR |
 | P3 | `systematic-debugging` | Root cause avant tout fix + auto-correction |
 | P4 | `verification-before-completion` | George verifie |
-| P5 | `finishing-a-development-branch` | Denis finalise |
+| P5 | `finishing-a-development-branch` | Denis finalise + test humain + questionnaire |
+| P6 | — | Arianne : rapport final + capitalisation + profil utilisateur |
 
 ---
 
@@ -490,30 +796,36 @@ Utilisateur : "Je veux ajouter MiyuVoice"
   +-- Maria (Temps 6) : Synthese → Brief complet
   |   [GATE] Utilisateur approuve le brief
   |
-  +=== AUTOPILOT START ===================================
+  +=== AUTOPILOT START (metriques initialisees) ============
   |
-  +-- Git : git checkout -b feat/miyuvoice + git push -u origin feat/miyuvoice
+  +-- Git : git checkout -b feat/miyuvoice + git push -u origin
   |
   +-- P3 PARALLELE (automatique) :
   |   +-- Pre-flight : Context7 spot-check + anti-patterns par tache
-  |   +-- Francois : Taches CODE back-end (TDD) → commit → push → TodoWrite
-  |   +-- Lise : Taches CODE front-end (TDD) → commit → push → TodoWrite
+  |   +-- Francois : Taches CODE back-end (TDD) → commit → push → metriques → TodoWrite
+  |   +-- Lise : Taches CODE front-end (TDD) → commit → push → metriques → TodoWrite
   |   +-- [Checkpoint toutes les 5 taches : mini-audit Denis + push]
   |   +-- [Auto-correction intelligente : root cause + Context7 + 2 tentatives]
   |
   +-- P4 (automatique) :
   |   +-- Denis : Integration workspace (build/test/clippy)
-  |   +-- George : Audit conformite → .mip/audits/
+  |   +-- George : Audit conformite → .mip/audits/ + metriques audit
   |   [Auto-correction defauts non-bloquants, frein d'urgence si critique]
   |
-  +-- P5 (automatique) : Denis → Push final + resume a l'utilisateur
-  |   [GATE] Utilisateur confirme la livraison
-  |   +-- git merge feat/miyuvoice → main + push main
-  |   +-- git tag (si release) + nettoyage branche
+  +-- P5 (automatique) :
+  |   +-- Denis : Push final + resume a l'utilisateur + instructions test
+  |   +-- [Utilisateur teste le livrable]
+  |   +-- Denis : Questionnaire satisfaction
+  |   +-- [GATE] Verdict utilisateur :
+  |       +-- ACCEPTE → merge main + push + tag + nettoyage branche
+  |       +-- RESERVES → merge main + ajout taches futures
+  |       +-- REFUSE → log intervention + increment boucle → retour P0
   |
-  +-- P6 (automatique) : Arianne → Archivage + capitalisation
-  |   +-- Nouvelles erreurs → mip-antipatterns.md
-  |   +-- Nouveaux patterns → mip-decisions.md
+  +-- P6 (automatique) : Arianne
+  |   +-- Rapport final (notes /20, metriques, profil utilisateur)
+  |   +-- → .mip/reports/ + memory/mip-performance-history.md
+  |   +-- Capitalisation : anti-patterns, decisions, agent-tuning
+  |   +-- Profil utilisateur → memory/user-profile.md
   |
   +=== AUTOPILOT END =====================================
 ```

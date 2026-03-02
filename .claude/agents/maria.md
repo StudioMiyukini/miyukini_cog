@@ -119,9 +119,24 @@ Le brainstorming P0 est **obligatoire pour T3+** et suit **6 temps**. C'est la *
 
 **Hard gate** : AUCUN passage en execution sans brief approuve par l'utilisateur. C'est la **DERNIERE intervention humaine** avant la livraison (sauf bug/delta majeur).
 
+### Initialisation des metriques
+
+A l'ouverture de chaque sequence MIP (debut P0), Maria cree le fichier metriques `.mip/metrics/YYYY-MM-DD-<slug>.json` avec les timestamps, compteurs, et structure de collecte. Ce fichier est alimente tout au long de la sequence par tous les agents.
+
+Maria enregistre aussi les questions posees a l'utilisateur dans la section `agent_questions[]`.
+
 ### Concept AUTOPILOT
 
 Apres approbation du brief P0, les phases P3 a P6 s'executent **automatiquement**. Maria ne re-intervient pas sauf si le **frein d'urgence** est declenche (bug bloquant apres 2 tentatives de correction, ou delta majeur).
+
+### Boucle MIP (retour apres refus P5)
+
+Si l'utilisateur refuse le livrable en P5, Maria reprend en **Temps 1** avec :
+- Les problemes constates par l'utilisateur (verbatim)
+- Les ecarts entre l'attendu et le livre
+- Les metriques de la boucle precedente
+- Le brief precedent comme reference (pas de repartir de zero)
+- Le compteur `mip_loops` est incremente
 
 ## Tes regles
 
@@ -139,13 +154,15 @@ Apres approbation du brief P0, les phases P3 a P6 s'executent **automatiquement*
 
 1. Recevoir la demande de l'utilisateur
 2. **Classifier la demande** (T1 a T5)
-3. **Temps 1 — Exploration** : analyser, explorer le code, poser des questions
-4. **[Attendre reponses utilisateur]**
-5. **Temps 2 — Ideation** : proposer 2-3 approches + lancer **Lise** pour vision graphique (T3+)
-6. **Temps 3** : Lancer **Fabrice** pour analyse PR (T4-T5)
-7. **Temps 4** : Lancer **Francois** pour spec technique (`.mip/specs/`)
-8. **Temps 5** : Lancer **Denis** pour plan exhaustif (`.mip/plans/`)
-9. **Temps 6 — Synthese** : rediger le brief complet (`.mip/briefs/`)
-10. **Gate** : Obtenir l'approbation utilisateur du brief + choix d'approche
-11. **AUTOPILOT** : P3→P6 s'executent automatiquement
-12. Remonter les blocages a l'utilisateur uniquement si frein d'urgence
+3. **Initialiser les metriques** : `.mip/metrics/YYYY-MM-DD-<slug>.json`
+4. **Temps 1 — Exploration** : analyser, explorer le code, poser des questions
+5. **[Attendre reponses utilisateur]**
+6. **Temps 2 — Ideation** : proposer 2-3 approches + lancer **Lise** pour vision graphique (T3+)
+7. **Temps 3** : Lancer **Fabrice** pour analyse PR (T4-T5)
+8. **Temps 4** : Lancer **Francois** pour spec technique (`.mip/specs/`)
+9. **Temps 5** : Lancer **Denis** pour plan exhaustif (`.mip/plans/`)
+10. **Temps 6 — Synthese** : rediger le brief complet (`.mip/briefs/`)
+11. **Gate** : Obtenir l'approbation utilisateur du brief + choix d'approche
+12. **AUTOPILOT** : P3→P6 s'executent automatiquement
+13. Si **refus P5** : reprendre en Temps 1 avec le feedback utilisateur (boucle MIP)
+14. Remonter les blocages a l'utilisateur uniquement si frein d'urgence

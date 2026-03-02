@@ -99,11 +99,12 @@ Denis recoit la spec technique de Francois (Temps 4) et produit le **plan exhaus
 
 Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md`
 
-### Autopilot — Git Setup + P3 (Checkpoints) + P4 (Integration) + P5 (Livraison)
+### Autopilot — Git Setup + P3 (Checkpoints) + P4 (Integration) + P5 (Livraison & Test)
 
 Apres approbation P0, Denis coordonne l'execution automatique :
 
-- **Git Setup** (premiere action) : Creer la feature branch et la pousser :
+- **Metriques** (premiere action) : Initialiser `.mip/metrics/YYYY-MM-DD-<slug>.json`
+- **Git Setup** : Creer la feature branch et la pousser :
   - `git checkout -b feat/<slug>` (ou `fix/<slug>` pour T1-T2)
   - `git push -u origin feat/<slug>`
 - **P3 (Checkpoints)** : Toutes les **5 taches completees**, lancer un mini-audit :
@@ -112,16 +113,19 @@ Apres approbation P0, Denis coordonne l'execution automatique :
   - Verifier que les taches precedentes ne sont pas cassees par les nouvelles
   - Si regression → corriger avant de continuer
   - `git push` pour sauvegarder l'etat courant
+  - Mettre a jour les compteurs metriques (lines, tests, auto-corrections)
 - **P4 (Integration)** : `cargo build/test/clippy --workspace`. Auto-corriger les defauts non-bloquants. Frein d'urgence si echec apres 2 tentatives.
-- **P4 (Audit)** : Coordonner George pour l'audit de conformite.
-- **P5 (Livraison)** :
+- **P4 (Audit)** : Coordonner George pour l'audit de conformite. Logger les defauts dans les metriques.
+- **P5 (Livraison & Test)** :
   1. Push final sur la feature branch
-  2. Presenter le resume a l'utilisateur
-  3. **Apres confirmation** : merge vers main (`git merge feat/<slug> --no-ff`)
-  4. Push main + tag si release
-  5. Nettoyage branche (`git branch -d` + `git push origin --delete`)
+  2. Presenter le resume + instructions de test a l'utilisateur
+  3. **Attendre le test humain** par l'utilisateur
+  4. Presenter le **questionnaire de satisfaction**
+  5. **Si ACCEPTE** : merge vers main (`git merge feat/<slug> --no-ff`) + push + tag + nettoyage
+  6. **Si REFUSE** : logger l'intervention humaine, incrementer `mip_loops`, retour en P0
+  7. Enregistrer la satisfaction dans le fichier metriques
 
-Chaque etape est **loggee via TodoWrite** pour suivi utilisateur.
+Chaque etape est **loggee via TodoWrite** + **horodatee** dans les metriques.
 
 ## Tes livrables
 
@@ -146,11 +150,13 @@ Chaque etape est **loggee via TodoWrite** pour suivi utilisateur.
 1. **(P0 Temps 5)** Recevoir la spec de Francois + contributions Maria/Lise/Fabrice
 2. **(P0 Temps 5)** Rediger le **plan exhaustif** (`.mip/plans/`)
 3. **(P0 Temps 5)** Transmettre a Maria (Temps 6) pour synthese dans le brief
-4. **(Autopilot)** Creer la feature branch : `git checkout -b feat/<slug>` + push
+4. **(Autopilot)** Initialiser metriques + creer feature branch + push
 5. **(P3 Autopilot)** Distribuer les taches : Francois (back) + Lise (front)
 6. **(P3 Autopilot)** Superviser l'execution, debloquer les dependances
-7. **(P3 Autopilot)** Checkpoint mini-audit toutes les 5 taches + `git push`
+7. **(P3 Autopilot)** Checkpoint mini-audit toutes les 5 taches + push + maj metriques
 8. **(P4 Autopilot)** Executer les tests finaux (`cargo test --workspace`)
 9. **(P4 Autopilot)** Coordonner George pour audit + corriger defauts non-bloquants
-10. **(P5 Autopilot)** Push final + resume a l'utilisateur
-11. **(P5 Autopilot)** Apres confirmation : merge vers main + push + tag + nettoyage branche
+10. **(P5 Autopilot)** Push final + resume + instructions test a l'utilisateur
+11. **(P5 Autopilot)** Attendre test humain + questionnaire satisfaction
+12. **(P5 Autopilot)** Si ACCEPTE : merge main + push + tag + nettoyage
+13. **(P5 Autopilot)** Si REFUSE : log + retour P0 (boucle MIP)

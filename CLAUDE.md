@@ -95,27 +95,32 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 | Git | Creation feature branch + push | Denis | Branch prete |
 | P3 | Implementation TDD parallele | Francois + Lise | Tests + clippy + push par tache |
 | P4 | Integration & Audit | Denis + George | 0 defaut bloquant |
-| P5 | Livraison + Merge | Denis | Utilisateur confirme → merge main |
-| P6 | Archivage & Capitalisation | Arianne | Memoire a jour |
+| P5 | Livraison, Test humain & Validation | Denis + George | Verdict utilisateur (ACCEPTE/REFUSE) |
+| P6 | Rapport final, Archivage & Capitalisation | Arianne | Rapport + memoire a jour |
 
 **Git workflow** : Feature branch (`feat/<slug>`) creee au debut, push apres chaque commit, merge vers main apres validation.
+**Metriques** : Horodatage + compteurs collectes tout au long dans `.mip/metrics/`. Maria initialise, tous les agents alimentent.
 **Frein d'urgence** : L'autopilot s'arrete si bug bloquant apres 2 auto-corrections, ou delta majeur.
 **Logging** : Chaque tache tracee via TodoWrite pour suivi utilisateur temps reel.
 **Context7** : Verification docs libs (Dioxus, axum, serde) en P0-T4 + spot-checks en P3.
 **Checkpoints** : Mini-audit Denis toutes les 5 taches en P3.
+**Boucle MIP** : Si refus P5, retour en P0 avec feedback utilisateur (increment `mip_loops`).
+**Rapport final** : Notes /20 sur 8 criteres, resume dev, profil utilisateur, capitalisation agents.
 
 ### Workflow standard
 
 ```
-Utilisateur → Maria (P0 : 6 temps) + Lise + Fabrice + Francois (Context7) + Denis
+Utilisateur → Maria (P0 : 6 temps + init metriques) + Lise + Fabrice + Francois (Context7) + Denis
 → [GATE] Brief approuve
 → === AUTOPILOT ===
 → Git : checkout -b feat/<slug> + push -u origin
-→ Francois (P3 back) + Lise (P3 front) en PARALLELE [TDD + commit + push + TodoWrite]
+→ Francois (P3 back) + Lise (P3 front) en PARALLELE [TDD + commit + push + metriques + TodoWrite]
 → Denis (P3 checkpoint /5 taches + push) → Denis (P4 integration) + George (P4 audit)
-→ Denis (P5 push final + resume) → [GATE] Utilisateur confirme
-→ Denis (P5 merge main + push + tag + nettoyage branche)
-→ Arianne (P6 archivage + capitalisation anti-patterns)
+→ Denis (P5 push final + resume + instructions test) → [Utilisateur teste]
+→ Denis (P5 questionnaire satisfaction) → [GATE] Verdict utilisateur
+→   Si ACCEPTE : Denis (P5 merge main + push + tag + nettoyage branche)
+→   Si REFUSE : Maria (retour P0 avec feedback, boucle MIP)
+→ Arianne (P6 rapport final /20 + archivage + capitalisation + profil utilisateur)
 ```
 
 ### Artefacts MIP
@@ -124,6 +129,8 @@ Utilisateur → Maria (P0 : 6 temps) + Lise + Fabrice + Francois (Context7) + De
 - `.mip/specs/` — Specs techniques (P0 Temps 4)
 - `.mip/plans/` — Plans exhaustifs (P0 Temps 5)
 - `.mip/audits/` — Rapports d'audit (P4)
+- `.mip/metrics/` — Metriques et horodatage (collecte continue)
+- `.mip/reports/` — Rapports finaux de developpement (P6)
 
 Skill complet : `.cursor/skills/miyukini-mip-workflow/SKILL.md`
 
