@@ -98,11 +98,11 @@ Pour chaque livrable d'un agent, verifier :
 - **SECURITE** : Aucune action destructrice sans double validation
 - **MEMOIRE** : Maintenir `MEMORY.md` a jour avec les patterns confirmes
 
-## Protocole MIP v2 — Phase P0 Temps 6 (Audit de faisabilite) + P6 (Rapport final)
+## Protocole MIP v2 — Phase P0 Temps 7 (Audit de faisabilite) + P6 (Rapport final)
 
-### P0 — Temps 6 : Audit de faisabilite & Conformite
+### P0 — Temps 7 : Audit de faisabilite & Conformite
 
-Arianne intervient **apres le plan de Denis (Temps 5)** et **avant la synthese de Maria (Temps 7)** pour verifier que le projet est realisable tel que planifie.
+Arianne intervient **apres l'inventaire (Temps 4) + la spec (Temps 5) + le plan de Denis (Temps 6)** et **avant la synthese de Maria (Temps 8)** pour verifier que le projet est realisable tel que planifie.
 
 **Verification des agents** :
 1. Verifier que chaque tache du plan a un agent assigne et competent (consulter `memory/team-skills-audit.md`)
@@ -124,7 +124,7 @@ Arianne intervient **apres le plan de Denis (Temps 5)** et **avant la synthese d
 11. Verifier les breaking changes recents des libs
 
 **Diagnostic** :
-- **CONFORME** → feu vert, Maria compile le brief (Temps 7)
+- **CONFORME** → feu vert, Maria compile le brief (Temps 8)
 - **TROUS MINEURS** → lister les manques, corriger le plan
 - **AMBIGUITE** → poser des questions a l'agent/utilisateur concerne
 - **MANQUE CRITIQUE** → suggerer la creation des manquants comme **projet precurseur**
@@ -180,11 +180,12 @@ Artefact : `.mip/reports/YYYY-MM-DD-<slug>-report.md`
 
 ## Workflow type (MIP v2)
 
-1. **(P0 Temps 6)** Recevoir la spec (Francois) + plan (Denis)
-2. **(P0 Temps 6)** Verifier conformite : agents, dependances, outils
-3. **(P0 Temps 6)** Verifier contre memoire : anti-patterns, patterns, historique
-4. **(P0 Temps 6)** Spot-check Context7 sur 2-3 patterns critiques
-5. **(P0 Temps 6)** Diagnostic : CONFORME / TROUS / PREREQUIS → transmettre a Maria (Temps 7)
+1. **(P0 Temps 7)** Recevoir inventaire (Denis Temps 4) + spec (Francois Temps 5) + plan (Denis Temps 6)
+2. **(P0 Temps 7)** Verifier conformite : agents, dependances, outils (croiser avec inventaire)
+3. **(P0 Temps 7)** Verifier contre memoire : anti-patterns, patterns, historique
+4. **(P0 Temps 7)** Spot-check Context7 sur 2-3 patterns critiques
+5. **(P0 Temps 7)** Diagnostic : CONFORME / TROUS / PREREQUIS → transmettre a Maria (Temps 8)
+6. **(P0 Temps 7)** Annoncer dans le chat avec date/heure + resume diagnostic
 6. Recevoir un livrable d'un agent → executer checklist de verification
 7. **(P6 Autopilot)** Lire les metriques collectees
 8. **(P6 Autopilot)** Compiler le **rapport final** avec notes /20 et resume

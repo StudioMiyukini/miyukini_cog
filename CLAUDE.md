@@ -75,17 +75,18 @@ cargo test -p {crate} -- --nocapture       # Tests verbose d'un crate
 
 En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 
-### P0 — Cadrage complet en 7 temps (SEULE phase humaine)
+### P0 — Cadrage complet en 8 temps (SEULE phase humaine)
 
 | Temps | Nom | Agent(s) |
 |-------|-----|----------|
 | 1 | Exploration + Questionnaire brainstorming | Maria |
 | 2 | Ideation | Maria + Lise (parallele) |
 | 3 | Analyse concurrentielle | Fabrice (T4-T5, parallele Temps 2) |
-| 4 | Specification technique + Context7 | Francois |
-| 5 | Plan exhaustif | Denis |
-| 6 | Audit de faisabilite | Arianne (agents, deps, outils, memoire) |
-| 7 | Synthese & Brief | Maria |
+| 4 | Inventaire des prerequis | Denis (lead) + Francois + Lise |
+| 5 | Specification technique + Context7 | Francois |
+| 6 | Plan exhaustif + Guide d'implementation | Denis |
+| 7 | Audit de faisabilite | Arianne (agents, deps, outils, memoire) |
+| 8 | Synthese & Brief | Maria |
 
 **Gate P0** : Brief approuve par l'utilisateur = **derniere intervention humaine**.
 
@@ -105,6 +106,8 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 **Logging** : Chaque tache tracee via TodoWrite pour suivi utilisateur temps reel.
 **Context7** : Verification docs libs (Dioxus, axum, serde) en P0-T4 + spot-checks en P3.
 **Brainstorming** : Questionnaire standard en 5 sections (Comprendre/Cadrer/Imaginer/Evaluer/Decider) inspire Design Thinking, Six Thinking Hats, SCAMPER, 5 Whys, HMW, LDJ. Maria administre en Temps 1.
+**Inventaire** : Denis inventorie competences, connaissances, outils, etapes generales en Temps 4. Alimente la spec et le plan.
+**Annonces** : Chaque Temps P0 et etape macro P3 annonces dans le chat avec date/heure. TodoWrite suit la progression.
 **Checkpoints** : Mini-audit Denis toutes les 5 taches en P3.
 **Boucle MIP** : Si refus P5, retour en P0 avec feedback utilisateur (increment `mip_loops`).
 **Rapport final** : Notes /20 sur 8 criteres, resume dev, profil utilisateur, capitalisation agents.
@@ -112,7 +115,7 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 ### Workflow standard
 
 ```
-Utilisateur → Maria (P0 : 7 temps + init metriques) + Lise + Fabrice + Francois (Context7) + Denis + Arianne (audit faisabilite)
+Utilisateur → Maria (P0 : 8 temps + init metriques) + Lise + Fabrice + Denis (inventaire) + Francois (Context7) + Denis (plan+guide) + Arianne (audit)
 → [GATE] Brief approuve
 → === AUTOPILOT ===
 → Git : checkout -b feat/<slug> + push -u origin
@@ -127,9 +130,9 @@ Utilisateur → Maria (P0 : 7 temps + init metriques) + Lise + Fabrice + Francoi
 
 ### Artefacts MIP
 
-- `.mip/briefs/` — Briefs de cadrage (P0 Temps 6)
-- `.mip/specs/` — Specs techniques (P0 Temps 4)
-- `.mip/plans/` — Plans exhaustifs (P0 Temps 5)
+- `.mip/briefs/` — Briefs de cadrage (P0 Temps 8)
+- `.mip/specs/` — Specs techniques (P0 Temps 5)
+- `.mip/plans/` — Plans exhaustifs + guides d'implementation (P0 Temps 6)
 - `.mip/audits/` — Rapports d'audit (P4)
 - `.mip/metrics/` — Metriques et horodatage (collecte continue)
 - `.mip/reports/` — Rapports finaux de developpement (P6)

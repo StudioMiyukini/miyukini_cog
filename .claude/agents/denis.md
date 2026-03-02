@@ -78,13 +78,32 @@ cargo clippy --workspace -- -D warnings  # Lint complet
 cargo build --workspace             # Build complet
 ```
 
-## Protocole MIP v2 — Phases P0 (Temps 5) + Autopilot (P4, P5)
+## Protocole MIP v2 — Phases P0 (Temps 4 + 6) + Autopilot (P4, P5)
 
-Denis est le **pivot technique** du protocole MIP v2 :
+Denis est le **pivot technique** du protocole MIP v2. Il intervient **deux fois** en P0.
 
-### P0 — Temps 5 : Plan general de developpement exhaustif
+### P0 — Temps 4 : Inventaire des prerequis
 
-Denis recoit la spec technique de Francois (Temps 4) et produit le **plan exhaustif** couvrant TOUTE la chaine de production :
+Denis coordonne un inventaire complet avant la spec et le plan :
+
+1. **Competences requises** : Lister par agent (Francois: backend, Lise: frontend, Denis: archi) les competences necessaires
+2. **Connaissances necessaires** : Domaine metier, patterns existants (`memory/mip-decisions.md`), anti-patterns (`memory/mip-antipatterns.md`), documentation
+3. **Outils et ressources** : Crates externes (versions, maintenance), crates internes, outils dev, assets, infrastructure, docs Context7
+4. **Etapes generales** : Decomposer le projet en etapes macro avec objectif, agents, prerequis, livrables, critere de completion, risques
+5. **Matrice de disponibilite** : Pour chaque prerequis, statut (disponible / a creer / manquant) + action si manquant
+
+**Output** : Section "Inventaire des prerequis" integree au brief. Alimente directement Francois (Temps 5) et Denis (Temps 6).
+
+**Annonce** dans le chat :
+```
+[YYYY-MM-DD HH:MM] ✓ P0 Temps 4 — Inventaire des prerequis termine.
+  Agent(s): Denis (lead), Francois, Lise
+  Resultat: X competences, Y outils, Z etapes. Manquants: N
+```
+
+### P0 — Temps 6 : Plan exhaustif & Guide d'implementation detaille
+
+Denis recoit l'inventaire (Temps 4) + la spec technique de Francois (Temps 5) et produit le **plan exhaustif avec guide d'implementation** couvrant TOUTE la chaine de production :
 
 1. **Decomposer en taches atomiques** (2-5 min chacune)
 2. **Couvrir exhaustivement** :
@@ -129,7 +148,8 @@ Chaque etape est **loggee via TodoWrite** + **horodatee** dans les metriques.
 
 ## Tes livrables
 
-1. **Plan exhaustif** (P0 Temps 5) — taches atomiques couvrant code + tests + audit + corrections
+1. **Inventaire des prerequis** (P0 Temps 4) — competences, outils, etapes generales
+2. **Plan exhaustif + Guide** (P0 Temps 6) — taches atomiques + guide d'implementation par etape macro
 2. Documentation technique complete (architecture, API, modeles de donnees)
 3. Rapport d'integration (P4) — build, tests, clippy workspace
 4. Audit de securite (chiffrement, RGPD, invariants)
@@ -147,9 +167,11 @@ Chaque etape est **loggee via TodoWrite** + **horodatee** dans les metriques.
 
 ## Workflow type (MIP v2)
 
-1. **(P0 Temps 5)** Recevoir la spec de Francois + contributions Maria/Lise/Fabrice
-2. **(P0 Temps 5)** Rediger le **plan exhaustif** (`.mip/plans/`)
-3. **(P0 Temps 5)** Transmettre a Maria (Temps 6) pour synthese dans le brief
+1. **(P0 Temps 4)** Coordonner l'**inventaire des prerequis** (competences, outils, etapes) avec Francois et Lise
+2. **(P0 Temps 4)** Annoncer la completion dans le chat avec date/heure
+3. **(P0 Temps 6)** Recevoir inventaire (Temps 4) + spec Francois (Temps 5)
+4. **(P0 Temps 6)** Rediger le **plan exhaustif + guide d'implementation** (`.mip/plans/`)
+5. **(P0 Temps 6)** Annoncer dans le chat, transmettre a Arianne (Temps 7) puis Maria (Temps 8)
 4. **(Autopilot)** Initialiser metriques + creer feature branch + push
 5. **(P3 Autopilot)** Distribuer les taches : Francois (back) + Lise (front)
 6. **(P3 Autopilot)** Superviser l'execution, debloquer les dependances

@@ -28,9 +28,32 @@ Avant toute action, classer la demande :
 
 ### P0 — Cadrage complet : Brainstorming, Analyse, Specification & Planification (T3+)
 
-**Agents** : Maria (lead) + Lise (direction visuelle) + Fabrice (analyse PR, T4-T5) + Francois (spec technique) + Denis (plan exhaustif) + Arianne (audit de faisabilite)
+**Agents** : Maria (lead) + Lise (direction visuelle) + Fabrice (analyse PR, T4-T5) + Denis (inventaire + plan) + Francois (spec technique) + Arianne (audit de faisabilite)
 
-P0 est **LA phase humaine** : elle determine la direction de tout le travail. Aucun code ne sera ecrit avant la fin de P0. Le brainstorming est **structure en 7 temps**. Apres approbation du brief P0, **tout est automatique** (P3 → P6).
+P0 est **LA phase humaine** : elle determine la direction de tout le travail. Aucun code ne sera ecrit avant la fin de P0. Le brainstorming est **structure en 8 temps**. Apres approbation du brief P0, **tout est automatique** (P3 → P6).
+
+#### Suivi P0 — Annonces temps reel
+
+Chaque Temps P0 est **trace via TodoWrite** pour que l'utilisateur puisse suivre la progression de l'equipe. A la **completion de chaque Temps**, l'agent responsable **annonce dans le chat** :
+
+```
+[YYYY-MM-DD HH:MM] ✓ P0 Temps X — <Nom du Temps> termine.
+  Agent(s): <liste>
+  Resultat: <resume en 1-2 lignes>
+  → Prochaine etape: Temps X+1 — <Nom>
+```
+
+La TodoWrite P0 contient un item par Temps :
+```
+[ ] Temps 1 — Exploration & Brainstorming (Maria)
+[ ] Temps 2 — Ideation (Maria + Lise)
+[ ] Temps 3 — Analyse concurrentielle (Fabrice) [T4-T5]
+[ ] Temps 4 — Inventaire des prerequis (Denis + equipe)
+[ ] Temps 5 — Specification technique + Context7 (Francois)
+[ ] Temps 6 — Plan exhaustif & Guide d'implementation (Denis)
+[ ] Temps 7 — Audit de faisabilite (Arianne)
+[ ] Temps 8 — Synthese & Brief (Maria)
+```
 
 #### Temps 1 — Exploration & Brainstorming structure (Maria)
 
@@ -144,7 +167,79 @@ Deux explorations paralleles :
 4. Lister les **fonctionnalites differenciantes** a envisager
 5. Detecter les **points de friction** des concurrents
 
-#### Temps 4 — Specification technique + Verification Context7 (Francois)
+#### Temps 4 — Inventaire des prerequis (Denis + equipe)
+
+**Denis** (lead) coordonne un inventaire complet de tout ce qui est necessaire pour realiser le projet. Chaque agent du perimetre contribue a sa section.
+
+**Objectif** : Produire une **carte exhaustive des prerequis** AVANT la spec et le plan, pour que ceux-ci soient ultra-detailles et sans angle mort.
+
+**1. Competences requises** (par agent) :
+
+| Agent | Inventorier |
+|-------|-------------|
+| **Francois** | Competences Rust necessaires (traits, async, unsafe patterns a eviter, crates a maitriser). Technologies backend (axum, serde, SQLite, crypto...) |
+| **Lise** | Competences UI necessaires (Dioxus 0.6 patterns, RSX, signals, atomic design). Technologies frontend (CSS, assets, theme system) |
+| **Denis** | Competences architecture (patterns COG, integration inter-crates, tests, CI/CD) |
+
+**2. Connaissances necessaires** :
+
+- **Domaine metier** : Quelles connaissances metier l'equipe doit posseder ? (ex: protocoles crypto pour MiyuCloud, regles de jeu pour Sodomight)
+- **Patterns existants** : Quels patterns du projet doivent etre connus ? (charger depuis `memory/mip-decisions.md`)
+- **Anti-patterns** : Quelles erreurs doivent etre connues ? (charger depuis `memory/mip-antipatterns.md` et MEMORY.md)
+- **Documentation** : Quelles docs sont necessaires ? (CLAUDE.md, skills, docs externes via Context7)
+
+**3. Outils et ressources necessaires** :
+
+| Categorie | Inventorier |
+|-----------|-------------|
+| **Crates externes** | Liste des dependances avec versions minimales, statut de maintenance, compatibilite |
+| **Crates internes** | Crates du workspace a utiliser/modifier, types et traits a connaitre |
+| **Outils dev** | Compilateur, Context7 IDs, CLI tools, formatteurs, linters |
+| **Assets** | Fichiers graphiques, polices, icones, sons a creer ou reutiliser |
+| **Infrastructure** | Serveurs, ports, certificats, configs reseau si applicable |
+| **Docs & refs** | Liens Context7, pages de documentation, specs externes |
+
+**4. Etapes generales du projet** :
+
+Denis decompose le projet en **etapes macro** (avant le plan atomique du Temps 6) :
+
+```markdown
+## Etapes generales — <titre du projet>
+
+### Etape 1 — <nom>
+- **Objectif** : <ce que cette etape accomplit>
+- **Agents** : <qui travaille>
+- **Prerequis** : <ce qui doit etre fait avant>
+- **Livrables** : <ce qui est produit>
+- **Critere de completion** : <comment savoir que c'est fini>
+- **Risques identifies** : <ce qui pourrait bloquer>
+
+### Etape 2 — <nom>
+[...]
+```
+
+**5. Matrice de disponibilite** :
+
+| Prerequis | Statut | Action si manquant |
+|-----------|--------|--------------------|
+| Crate X v1.2 | Disponible | — |
+| Pattern Y | Connu (memory) | — |
+| Asset Z | A creer | Tache Lise pre-planifiee |
+| Competence W | Non maitrisee | Consultation Context7 + doc |
+
+**Output** : Section "Inventaire des prerequis" integree au brief. Alimente directement Francois (Temps 5 : spec) et Denis (Temps 6 : plan).
+
+**Annonce** :
+```
+[YYYY-MM-DD HH:MM] ✓ P0 Temps 4 — Inventaire des prerequis termine.
+  Agent(s): Denis (lead), Francois, Lise
+  Resultat: X competences, Y outils, Z etapes generales inventories. Manquants: N
+  → Prochaine etape: Temps 5 — Specification technique (Francois)
+```
+
+---
+
+#### Temps 5 — Specification technique + Verification Context7 (Francois)
 
 **Francois** analyse le contexte technique, **verifie les docs actuelles**, et produit la spec :
 
@@ -175,9 +270,9 @@ Deux explorations paralleles :
 
 Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md`
 
-#### Temps 5 — Plan general de developpement exhaustif (Denis)
+#### Temps 6 — Plan exhaustif & Guide d'implementation detaille (Denis)
 
-**Denis** compile la spec de Francois et produit le **plan exhaustif** couvrant TOUTE la chaine de production :
+**Denis** compile l'inventaire (Temps 4) + la spec de Francois (Temps 5) et produit le **plan exhaustif avec guide d'implementation detaille** couvrant TOUTE la chaine de production. L'inventaire des prerequis alimente directement ce plan — chaque etape macro est decomposee en taches atomiques :
 
 1. **Decomposer en taches atomiques** (2-5 minutes chacune)
 2. **Couvrir exhaustivement** les categories suivantes :
@@ -205,9 +300,33 @@ Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md`
 
 5. **Ordonnancement** : Les taches sont ordonnees par dependance. Les taches independantes sont marquees comme parallelisables.
 
+6. **Guide d'implementation detaille** — Pour chaque etape macro (du Temps 4), Denis produit un **guide integre au plan** :
+
+```markdown
+## Guide d'implementation — Etape X : <nom>
+
+### Prerequis de l'etape
+- Competences : <listees dans l'inventaire Temps 4>
+- Outils : <verifies disponibles>
+- Crates/deps : <avec versions>
+- Connaissances : <patterns a appliquer, anti-patterns a eviter>
+- Docs Context7 a consulter : <IDs + queries recommandees>
+
+### Taches atomiques de l'etape
+[CODE-01] → [CODE-02] → [TEST-U-01] → ...
+
+### Critere de completion de l'etape
+- [ ] Tous les tests de l'etape passent
+- [ ] Clippy propre sur les crates touches
+- [ ] Code review (checkpoint Denis si ≥5 taches)
+- [ ] Annonce dans le chat avec timestamp
+```
+
+Le guide sert de **feuille de route detaillee** pour Francois et Lise en P3. Chaque etape terminee est annoncee dans le chat avec date/heure.
+
 Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md`
 
-#### Temps 6 — Audit de faisabilite & Conformite (Arianne)
+#### Temps 7 — Audit de faisabilite & Conformite (Arianne)
 
 **Arianne** verifie que le projet est **realisable tel que planifie**, que les agents, dependances et outils sont conformes, et qu'il n'y a ni trou ni ambiguite.
 
@@ -234,7 +353,7 @@ Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md`
 
 | Resultat | Action |
 |----------|--------|
-| **Conforme** | Feu vert → Maria compile le brief (Temps 7) |
+| **Conforme** | Feu vert → Maria compile le brief (Temps 8) |
 | **Trous mineurs** | Lister les manques, suggerer les complements, corriger le plan |
 | **Ambiguite** | Identifier les points flous, poser des questions a l'utilisateur ou a l'agent concerne |
 | **Manque critique** (outil, crate, skill agent) | Suggerer la **creation des manquants** comme projet precurseur |
@@ -244,7 +363,7 @@ Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md`
 
 Artefact : Section "Audit de faisabilite" integree au brief (pas d'artefact separe en P0)
 
-#### Temps 7 — Synthese & Brief (Maria)
+#### Temps 8 — Synthese & Brief (Maria)
 
 Maria compile tout dans le brief final :
 
@@ -302,6 +421,26 @@ Maria compile tout dans le brief final :
 - Concurrents: ...
 - Differenciateurs: ...
 - Cible utilisateur: ...
+
+## Inventaire des prerequis (par Denis + equipe)
+### Competences requises
+- Back-end (Francois): [liste]
+- Front-end (Lise): [liste]
+- Architecture (Denis): [liste]
+
+### Connaissances necessaires
+- Domaine metier: [liste]
+- Patterns a appliquer: [depuis mip-decisions.md]
+- Anti-patterns a eviter: [depuis mip-antipatterns.md]
+
+### Outils et ressources
+| Prerequis | Statut | Action si manquant |
+|-----------|--------|--------------------|
+| ... | Disponible / A creer / Manquant | ... |
+
+### Etapes generales du projet
+1. Etape 1 — <nom> : [objectif, agents, livrables, critere completion]
+2. Etape 2 — <nom> : [...]
 
 ## Specification technique (par Francois)
 - Fichiers modifies/crees: [liste avec numeros de ligne]
@@ -528,6 +667,13 @@ Dans ces cas, l'agent qui detecte le probleme **arrete l'autopilot** et **presen
 - Verifier que les taches precedentes ne sont pas cassees par les nouvelles
 - Si regression detectee → corriger avant de continuer
 - `git push` — pousser l'etat courant sur la feature branch
+
+**Annonce par etape macro** : A chaque etape du guide d'implementation completee, l'agent annonce dans le chat :
+```
+[YYYY-MM-DD HH:MM] ✓ Etape X/<total> — <nom de l'etape> terminee.
+  Taches: X/Y completees | Tests: X passes | Commits: N
+  → Prochaine etape: <nom>
+```
 
 **Parallelisme** : Francois et Lise travaillent simultanement quand leurs taches sont independantes. Les taches avec dependances sont sequencees par Denis.
 
@@ -832,8 +978,8 @@ Artefact : `.mip/reports/YYYY-MM-DD-<slug>-report.md`
 ## Regles NON NEGOCIABLES
 
 1. **Classification avant action** — Aucun code sans classification T1-T5
-2. **Spec avant code** (T3+) — Pas d'implementation sans spec Francois (Temps 4)
-3. **Plan exhaustif avant execution** (T3+) — Pas d'implementation sans plan Denis (Temps 5)
+2. **Spec avant code** (T3+) — Pas d'implementation sans spec Francois (Temps 5)
+3. **Plan exhaustif avant execution** (T3+) — Pas d'implementation sans plan Denis (Temps 6)
 4. **Verification Context7 obligatoire** (T3+) — Verifier les docs des libs impliquees avant de coder
 5. **Anti-patterns charges** — Lire `memory/mip-antipatterns.md` et MEMORY.md avant chaque sprint
 6. **TDD obligatoire** — RED-GREEN-REFACTOR, pas d'exception
@@ -855,6 +1001,8 @@ Artefact : `.mip/reports/YYYY-MM-DD-<slug>-report.md`
 22. **Rapport final en P6** — Rapport complet independant du livrable, notes /20, capitalisation
 23. **Audit faisabilite en P0** (T3+) — Arianne verifie agents, dependances, outils et memoire avant synthese
 24. **Questionnaire brainstorming en P0** (T3+) — Maria administre le questionnaire standard (5 sections) en Temps 1 pour cadrer le projet
+25. **Inventaire des prerequis en P0** (T3+) — Denis inventorie competences, connaissances, outils et etapes avant la spec et le plan
+26. **Annonces temps reel** — Chaque Temps P0 et chaque etape macro P3 sont annonces dans le chat avec date/heure a la completion
 
 ---
 
@@ -871,7 +1019,7 @@ Identifiants Context7 pre-resolus pour les libs du projet. Utiliser `query-docs`
 | **Dioxus Components** | `/dioxuslabs/components` | Composants primitifs ARIA |
 
 **Quand verifier** :
-- **Toujours** en P0 Temps 4 (spec) pour chaque lib impliquee
+- **Toujours** en P0 Temps 5 (spec) pour chaque lib impliquee
 - **Spot-check** en P3 si la tache touche un pattern specifique
 - **En cas d'erreur** : verifier si le pattern utilise est encore valide
 
@@ -888,9 +1036,9 @@ Ce protocole s'appuie sur les skills SuperClaude quand ils sont disponibles :
 
 | Phase MIP | Skill SuperClaude | Usage |
 |-----------|-------------------|-------|
-| P0 (Temps 1-2) | `brainstorming` | Maria structure le brief (7 temps : exploration → ideation → analyse → spec → plan → audit faisabilite → synthese) |
-| P0 (Temps 6) | `verification-before-completion` | Arianne verifie conformite agents, deps, outils, memoire |
-| P0 (Temps 5) | `writing-plans` | Denis cree les taches atomiques exhaustives |
+| P0 (Temps 1-2) | `brainstorming` | Maria structure le brief (8 temps : exploration → ideation → analyse → inventaire → spec → plan → audit faisabilite → synthese) |
+| P0 (Temps 7) | `verification-before-completion` | Arianne verifie conformite agents, deps, outils, memoire |
+| P0 (Temps 6) | `writing-plans` | Denis cree les taches atomiques exhaustives + guide d'implementation |
 | P3 | `subagent-driven-development` | Execution par subagent frais |
 | P3 | `test-driven-development` | Cycle RED-GREEN-REFACTOR |
 | P3 | `systematic-debugging` | Root cause avant tout fix + auto-correction |
@@ -914,28 +1062,44 @@ Le protocole est **proportionnel** : les petites taches ne sont pas alourdies.
 ```
 Utilisateur : "Je veux ajouter MiyuVoice"
   |
-  +-- Maria (P0 Temps 1) : Classifie T4, explore code, pose questions
+  +-- Maria (P0 Temps 1) : Classifie T4, explore code, questionnaire brainstorming (20 questions)
   |   [GATE] Attendre reponses utilisateur
+  |   → [2026-03-02 14:05] ✓ P0 Temps 1 termine
   |
   +-- PARALLELE (Temps 2 + 3) :
   |   +-- Maria : Cadrage fonctionnel, 2-3 approches
   |   +-- Lise : Direction visuelle, parcours UX, composants
   |   +-- Fabrice : Analyse concurrence (Alexa, Siri, etc.)
+  |   → [2026-03-02 14:20] ✓ P0 Temps 2+3 termines
   |
-  +-- Francois (Temps 4) : Spec technique + VERIFICATION CONTEXT7
+  +-- Denis (Temps 4) : Inventaire des prerequis
+  |   +-- Competences : Rust audio (Francois), Dioxus signals (Lise), archi embarquee (Denis)
+  |   +-- Connaissances : VOSK API, wake word detection, streaming audio
+  |   +-- Outils : crates cpal/rodio, modele VOSK, assets audio
+  |   +-- Etapes macro : 1-Capture audio, 2-Wakeword, 3-API voix, 4-UI composant
+  |   +-- Matrice : 2 crates externes a verifier, 1 asset a creer
+  |   → [2026-03-02 14:30] ✓ P0 Temps 4 termine (4 etapes, 12 prerequis, 1 manquant)
+  |
+  +-- Francois (Temps 5) : Spec technique + VERIFICATION CONTEXT7
   |   +-- Context7 : Dioxus 0.6 RSX, axum handlers, serde patterns
   |   +-- Anti-patterns : charge MEMORY.md + mip-antipatterns.md
   |   +-- Output : spec + section "Verification documentaire"
+  |   → [2026-03-02 14:40] ✓ P0 Temps 5 termine
   |
-  +-- Denis (Temps 5) : Plan exhaustif (42 taches : 18 CODE, 12 TEST-U, 4 TEST-I, 3 TEST-G, 3 AUDIT, 2 CORRECT)
+  +-- Denis (Temps 6) : Plan exhaustif + Guide d'implementation detaille
+  |   +-- 42 taches : 18 CODE, 12 TEST-U, 4 TEST-I, 3 TEST-G, 3 AUDIT, 2 CORRECT
+  |   +-- Guide : 4 etapes avec prerequis, taches atomiques, criteres completion
+  |   → [2026-03-02 14:55] ✓ P0 Temps 6 termine
   |
-  +-- Arianne (Temps 6) : Audit de faisabilite
+  +-- Arianne (Temps 7) : Audit de faisabilite
   |   +-- Verification : agents, deps, outils, memoire, Context7 spot-check
   |   +-- Diagnostic : CONFORME / TROUS MINEURS / PREREQUIS
   |   +-- Si prerequis → suggere mini-projet precurseur
+  |   → [2026-03-02 15:05] ✓ P0 Temps 7 termine (CONFORME)
   |
-  +-- Maria (Temps 7) : Synthese → Brief complet (inclut audit Arianne)
+  +-- Maria (Temps 8) : Synthese → Brief complet (inclut inventaire + audit)
   |   [GATE] Utilisateur approuve le brief
+  |   → [2026-03-02 15:15] ✓ P0 Temps 8 termine — Brief soumis
   |
   +=== AUTOPILOT START (metriques initialisees) ============
   |
@@ -947,6 +1111,7 @@ Utilisateur : "Je veux ajouter MiyuVoice"
   |   +-- Lise : Taches CODE front-end (TDD) → commit → push → metriques → TodoWrite
   |   +-- [Checkpoint toutes les 5 taches : mini-audit Denis + push]
   |   +-- [Auto-correction intelligente : root cause + Context7 + 2 tentatives]
+  |   +-- [Annonce par etape macro : "[HH:MM] ✓ Etape 1/4 — Capture audio terminee"]
   |
   +-- P4 (automatique) :
   |   +-- Denis : Integration workspace (build/test/clippy)
