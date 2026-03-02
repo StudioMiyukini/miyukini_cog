@@ -133,7 +133,8 @@ mod tests {
     fn render_error_implements_error_trait() {
         let err = RenderError::TextureArrayFull { max_layers: 16 };
         // std::error::Error is implemented by thiserror.
-        let _as_error: &dyn std::error::Error = &err;
+        let as_error: &dyn std::error::Error = &err;
+        let _ = as_error;
         let msg = format!("{err}");
         assert!(msg.contains("16"));
     }
