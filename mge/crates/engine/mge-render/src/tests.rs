@@ -3,7 +3,7 @@
 //! Unit tests for mge-render (no GPU required).
 
 #[cfg(test)]
-#[allow(deprecated)]
+#[allow(deprecated, clippy::module_inception)]
 mod tests {
     use crate::atlas::{AtlasRegistry, TextureAtlas};
     use crate::camera::Camera2D;

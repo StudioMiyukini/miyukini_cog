@@ -94,6 +94,20 @@ pub enum RenderError {
         /// Description of the animation loading failure.
         details: String,
     },
+
+    /// A TTF/OTF font could not be loaded or parsed.
+    #[error("font load failed: {details}")]
+    FontLoadFailed {
+        /// Description of the font loading failure.
+        details: String,
+    },
+
+    /// The glyph atlas has no remaining space for new glyphs.
+    #[error("glyph atlas full: atlas size {atlas_size}x{atlas_size}")]
+    GlyphAtlasFull {
+        /// The atlas dimension in pixels (square atlas).
+        atlas_size: u32,
+    },
 }
 
 // ---------------------------------------------------------------------------
@@ -119,7 +133,8 @@ mod tests {
     fn render_error_implements_error_trait() {
         let err = RenderError::TextureArrayFull { max_layers: 16 };
         // std::error::Error is implemented by thiserror.
-        let _as_error: &dyn std::error::Error = &err;
+        let as_error: &dyn std::error::Error = &err;
+        let _ = as_error;
         let msg = format!("{err}");
         assert!(msg.contains("16"));
     }
@@ -144,5 +159,23 @@ mod tests {
         let msg = format!("{err}");
         assert!(msg.contains("512x512"));
         assert!(msg.contains("256x256"));
+    }
+
+    #[test]
+    fn render_error_font_load_failed_display() {
+        let err = RenderError::FontLoadFailed {
+            details: "invalid magic number".to_string(),
+        };
+        let msg = format!("{err}");
+        assert!(msg.contains("font load failed"));
+        assert!(msg.contains("invalid magic number"));
+    }
+
+    #[test]
+    fn render_error_glyph_atlas_full_display() {
+        let err = RenderError::GlyphAtlasFull { atlas_size: 1024 };
+        let msg = format!("{err}");
+        assert!(msg.contains("glyph atlas full"));
+        assert!(msg.contains("1024"));
     }
 }

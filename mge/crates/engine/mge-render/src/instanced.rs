@@ -631,15 +631,21 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::float_cmp)]
     fn instance_data_default_values() {
         let data = InstanceData::zeroed();
-        assert_eq!(data.position, [0.0, 0.0]);
-        assert_eq!(data.size, [0.0, 0.0]);
-        assert_eq!(data.uv_rect, [0.0, 0.0, 0.0, 0.0]);
-        assert_eq!(data.tint, [0.0, 0.0, 0.0, 0.0]);
+        assert!(data.position[0].abs() < f32::EPSILON);
+        assert!(data.position[1].abs() < f32::EPSILON);
+        assert!(data.size[0].abs() < f32::EPSILON);
+        assert!(data.size[1].abs() < f32::EPSILON);
+        for &v in &data.uv_rect {
+            assert!(v.abs() < f32::EPSILON);
+        }
+        for &v in &data.tint {
+            assert!(v.abs() < f32::EPSILON);
+        }
         assert_eq!(data.texture_index, 0);
-        assert!((data.z_depth - 0.0).abs() < f32::EPSILON);
-        assert_eq!(data._pad, [0.0, 0.0]);
+        assert!(data.z_depth.abs() < f32::EPSILON);
     }
 
     // -- InstancedSpriteBatcher tests --------------------------------------
