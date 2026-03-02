@@ -49,4 +49,11 @@ pub enum RenderError {
         /// Description of the TOML parse failure.
         message: String,
     },
+
+    /// An animation definition could not be loaded or is invalid.
+    #[error("animation load failed: {details}")]
+    AnimationLoadFailed {
+        /// Description of the animation loading failure.
+        details: String,
+    },
 }

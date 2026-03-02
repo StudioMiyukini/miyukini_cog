@@ -11,6 +11,8 @@
 //! - **`AnimationController`** -- FSM that drives playback and emits events.
 //! - **`SpriteSize`** -- Standard sprite size classes for atlas packing.
 
+use crate::errors::RenderError;
+
 // ---------------------------------------------------------------------------
 // AnimationState
 // ---------------------------------------------------------------------------
@@ -168,6 +170,61 @@ impl AnimationClip {
 }
 
 // ---------------------------------------------------------------------------
+// AnimationBank
+// ---------------------------------------------------------------------------
+
+/// Registry of animation clips for a single entity, loaded from TOML.
+///
+/// The TOML format expects:
+/// ```toml
+/// entity_id = "fallen"
+/// [[clips]]
+/// state = "Idle"
+/// direction = "S"
+/// frame_count = 8
+/// frame_duration_ms = 120
+/// looping = true
+/// atlas_start_frame = 0
+/// ```
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct AnimationBank {
+    /// Identifier of the entity these animations belong to.
+    pub entity_id: String,
+    /// All animation clips for this entity.
+    pub clips: Vec<AnimationClip>,
+}
+
+impl AnimationBank {
+    /// Load an `AnimationBank` from a TOML string.
+    ///
+    /// # Errors
+    ///
+    /// Returns `RenderError::AnimationLoadFailed` if the TOML is invalid or
+    /// cannot be deserialized into an `AnimationBank`.
+    pub fn from_toml(toml_str: &str) -> Result<Self, RenderError> {
+        toml::from_str(toml_str).map_err(|e| RenderError::AnimationLoadFailed {
+            details: e.to_string(),
+        })
+    }
+
+    /// Find a clip by state and direction.
+    ///
+    /// First tries an exact match. If not found, falls back to the rendered
+    /// source direction from `Direction::mirror_source()`.
+    pub fn get_clip(&self, state: AnimationState, direction: Direction) -> Option<&AnimationClip> {
+        self.clips
+            .iter()
+            .find(|c| c.state == state && c.direction == direction)
+            .or_else(|| {
+                let (src_dir, _) = direction.mirror_source();
+                self.clips
+                    .iter()
+                    .find(|c| c.state == state && c.direction == src_dir)
+            })
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
@@ -260,5 +317,71 @@ mod tests {
         assert_eq!(event.frame, 2);
         assert_eq!(event.kind, FrameEventKind::Sfx);
         assert_eq!(event.data, "");
+    }
+
+    // -- S1-T03: AnimationBank tests --
+
+    const BANK_TOML: &str = r#"
+entity_id = "fallen"
+
+[[clips]]
+state = "Idle"
+direction = "S"
+frame_count = 8
+frame_duration_ms = 120
+looping = true
+atlas_start_frame = 0
+
+[[clips]]
+state = "Idle"
+direction = "SW"
+frame_count = 8
+frame_duration_ms = 120
+looping = true
+atlas_start_frame = 8
+"#;
+
+    #[test]
+    fn animation_bank_from_toml() {
+        let bank = AnimationBank::from_toml(BANK_TOML).unwrap();
+        assert_eq!(bank.entity_id, "fallen");
+        assert_eq!(bank.clips.len(), 2);
+    }
+
+    #[test]
+    fn animation_bank_get_clip_exact() {
+        let bank = AnimationBank::from_toml(BANK_TOML).unwrap();
+        let clip = bank.get_clip(AnimationState::Idle, Direction::S);
+        assert!(clip.is_some());
+        let clip = clip.unwrap();
+        assert_eq!(clip.state, AnimationState::Idle);
+        assert_eq!(clip.direction, Direction::S);
+        assert_eq!(clip.frame_count, 8);
+    }
+
+    #[test]
+    fn animation_bank_get_clip_mirror() {
+        // SE mirrors to SW, so get_clip(Idle, SE) should return the Idle-SW clip.
+        let bank = AnimationBank::from_toml(BANK_TOML).unwrap();
+        let clip = bank.get_clip(AnimationState::Idle, Direction::SE);
+        assert!(clip.is_some());
+        let clip = clip.unwrap();
+        assert_eq!(clip.direction, Direction::SW);
+    }
+
+    #[test]
+    fn animation_bank_get_clip_missing() {
+        let bank = AnimationBank::from_toml(BANK_TOML).unwrap();
+        let clip = bank.get_clip(AnimationState::Death, Direction::S);
+        assert!(clip.is_none());
+    }
+
+    #[test]
+    fn animation_bank_invalid_toml() {
+        let result = AnimationBank::from_toml("this is { not valid { toml");
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        let msg = format!("{err}");
+        assert!(msg.contains("animation load failed"));
     }
 }
