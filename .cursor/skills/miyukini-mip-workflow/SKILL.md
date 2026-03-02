@@ -4,6 +4,466 @@
 
 Utiliser ce skill pour **toute demande de developpement** impliquant du code, une nouvelle fonctionnalite, un fix, un refactor, ou un nouveau crate/service. Le protocole MIP v2 orchestre l'equipe et structure le travail.
 
+MIP v2 est **universel** : il s'adapte a n'importe quel projet, stack, et environnement. Le noyau du protocole (classification, phases, gates, agents) est invariant. Seule la **configuration projet** change via la Phase SETUP.
+
+---
+
+## Phase SETUP — Onboarding Universel (UNE SEULE FOIS par environnement)
+
+> La Phase SETUP s'execute **une seule fois** lors de la premiere utilisation de MIP dans un nouvel environnement. Elle produit un fichier `.mip/environment.md` qui configure tout le reste du protocole. Si `.mip/environment.md` existe deja, cette phase est **sautee**.
+
+### Declenchement
+
+La Phase SETUP est declenchee automatiquement si :
+- Le fichier `.mip/environment.md` n'existe pas
+- L'utilisateur lance la commande `/mip_setup`
+- L'utilisateur demande une reconfiguration de l'environnement
+
+### Structure de la Phase SETUP — 6 etapes
+
+```
+SETUP-1 : Detection automatique de l'environnement (scan systeme)
+SETUP-2 : Configuration de l'environnement (questionnaire interactif)
+SETUP-3 : Profil utilisateur (questionnaire interactif)
+SETUP-4 : Detection du support IA (outil de travail)
+SETUP-5 : Detection et installation des dependances
+SETUP-6 : Inventaire des capacites et installation des agents
+```
+
+---
+
+### SETUP-1 — Detection automatique de l'environnement
+
+> L'agent scanne le terminal et le systeme pour collecter les informations de base. **Aucune interaction utilisateur requise.**
+
+**Scan systeme** (via Bash) :
+
+```bash
+# OS et architecture
+uname -a || systeminfo        # Linux/macOS || Windows
+# Shell
+echo $SHELL || echo $0        # Shell courant
+# Hardware
+nproc                         # CPU cores
+free -h || systeminfo         # RAM disponible
+df -h . || wmic logicaldisk   # Espace disque
+nvidia-smi || rocm-smi        # GPU (si present)
+# Reseau
+ping -c 1 github.com          # Acces internet
+curl -s ifconfig.me            # IP publique (si souhaitee)
+# Git
+git --version && git config user.name && git config user.email
+git remote -v                  # Remotes configures
+```
+
+**Informations collectees** :
+
+| Categorie | Donnees |
+|-----------|---------|
+| **OS** | Nom, version, architecture (x86_64, arm64) |
+| **Shell** | Type (bash, zsh, powershell, fish, cmd), version |
+| **CPU** | Modele, nombre de coeurs, frequence |
+| **RAM** | Totale, disponible |
+| **GPU** | Modele, VRAM (si present — important pour inference locale) |
+| **Disque** | Espace total et libre sur la partition de travail |
+| **Reseau** | Acces internet (oui/non), proxy detecte, VPN |
+| **Git** | Version, user.name, user.email, remotes |
+| **Container runtime** | Docker/Podman (detecte via `docker version` ou `podman version`) |
+
+---
+
+### SETUP-2 — Configuration de l'environnement (questionnaire interactif)
+
+> L'utilisateur repond aux questions pour definir les contraintes du projet. Maria administre ce questionnaire.
+
+#### 2.1 — Stack technique
+
+| # | Question | Exemples de reponse |
+|---|----------|---------------------|
+| S2.1 | **Quel(s) langage(s) de programmation utilisez-vous ?** | Rust, Python, TypeScript, Go, Java, C#, C++, Kotlin, Swift, Ruby, PHP, etc. |
+| S2.2 | **Quel(s) framework(s) ou librairies principales ?** | Dioxus, React, Vue, Angular, Django, FastAPI, Spring, .NET, Rails, etc. |
+| S2.3 | **Quelle(s) base(s) de donnees ?** | SQLite, PostgreSQL, MySQL, MongoDB, Redis, DynamoDB, Supabase, Firebase, etc. |
+| S2.4 | **Quel style d'API ?** | REST, GraphQL, gRPC, WebSocket, tRPC, aucun (monolithe), etc. |
+| S2.5 | **Quel gestionnaire de paquets / build tool ?** | Cargo, npm/yarn/pnpm/bun, pip/poetry/uv, Maven/Gradle, CMake, Go modules, etc. |
+| S2.6 | **Monorepo ou multi-repo ?** | Monorepo (Cargo workspace, Nx, Turborepo, Lerna) / Multi-repo / Repo unique |
+| S2.7 | **Y a-t-il des conventions de code existantes ?** (linter, formatteur, styleguide) | Clippy, ESLint, Prettier, Black, gofmt, .editorconfig, etc. |
+
+#### 2.2 — Securite & conformite
+
+| # | Question | Exemples de reponse |
+|---|----------|---------------------|
+| S2.8 | **Quel niveau de securite est requis ?** | Standard, renforce (crypto, audit), critique (finance, sante, defense) |
+| S2.9 | **Conformite reglementaire ?** | RGPD, HIPAA, SOC2, PCI-DSS, aucune, autre |
+| S2.10 | **Chiffrement des donnees ?** | At-rest, in-transit, E2E, aucun, deja en place |
+| S2.11 | **Gestion des secrets ?** | Variables d'environnement, vault (HashiCorp, AWS Secrets Manager), fichier .env, aucune |
+
+#### 2.3 — Infrastructure & deploiement
+
+| # | Question | Exemples de reponse |
+|---|----------|---------------------|
+| S2.12 | **Ou le code est-il heberge ?** | GitHub, GitLab, Bitbucket, Gitea, auto-heberge, aucun |
+| S2.13 | **CI/CD en place ?** | GitHub Actions, GitLab CI, Jenkins, CircleCI, aucun |
+| S2.14 | **Conteneurisation ?** | Docker, Podman, Kubernetes, Docker Compose, aucun |
+| S2.15 | **Hebergement / deploiement ?** | VPS (OVH, Hetzner, DigitalOcean), cloud (AWS, GCP, Azure), PaaS (Vercel, Railway, Fly.io), self-hosted, local uniquement |
+| S2.16 | **Authentification ?** | OAuth2, JWT, sessions, SAML, passkeys, auth maison, aucun |
+
+#### 2.4 — Dossier de travail & structure
+
+| # | Question | Exemples de reponse |
+|---|----------|---------------------|
+| S2.17 | **Quel est le dossier racine du projet ?** | (auto-detecte si possible, sinon demander) |
+| S2.18 | **Y a-t-il une structure de dossiers imposee ?** | Convention du framework, custom, aucune |
+| S2.19 | **Existe-t-il deja un CLAUDE.md / AGENTS.md / rules ?** | Oui (les lire) / Non (les creer) |
+
+---
+
+### SETUP-3 — Profil utilisateur (questionnaire interactif)
+
+> L'utilisateur se presente pour que les agents adaptent leur communication et leur niveau de detail.
+
+| # | Question | Type |
+|---|----------|------|
+| S3.1 | **Quel est votre role ?** | Solo dev, dev en equipe, tech lead, CTO, architecte, etudiant, designer, PM, autre |
+| S3.2 | **Quel est votre niveau d'experience en dev ?** | Debutant (<1 an), junior (1-3 ans), intermediaire (3-5 ans), senior (5-10 ans), expert (10+ ans) |
+| S3.3 | **Quels langages maitrisez-vous ?** | Liste libre |
+| S3.4 | **Quels domaines de connaissance maitrisez-vous ?** | Web, mobile, systeme, embarque, data, IA/ML, securite, devops, game dev, autre |
+| S3.5 | **Quel est votre style de travail prefere ?** | Autonome (laissez l'IA faire), collaboratif (discuter avant d'agir), superviseur (valider chaque etape) |
+| S3.6 | **Quel niveau de detail attendez-vous dans les communications ?** | Concis (resultat seulement), normal (resultat + explication courte), detaille (tout expliquer) |
+| S3.7 | **Quel est votre objectif principal avec ce projet ?** | Livrer un produit, apprendre, prototyper, maintenir, refactorer, autre |
+| S3.8 | **Y a-t-il des regles ou conventions NON NEGOCIABLES pour vous ?** | Liste libre (ex: "jamais de unwrap", "toujours des tests", "pas de dependances externes", etc.) |
+
+**Mapping automatique** :
+
+| Style S3.5 | Mode d'autonomie par defaut |
+|------------|----------------------------|
+| Autonome | FULL |
+| Collaboratif | BIG_STEPS |
+| Superviseur | GUIDED |
+
+---
+
+### SETUP-4 — Detection du support IA (outil de travail)
+
+> Identifier l'outil IA avec lequel l'utilisateur travaille et ses capacites.
+
+#### 4.1 — Auto-detection
+
+L'agent detecte l'outil courant via des indices d'environnement :
+
+| Indice | Outil detecte |
+|--------|---------------|
+| Variable `CLAUDE_CODE` ou contexte `claude-code` | **Claude Code CLI** |
+| Variable `CURSOR_*` ou `.cursor/` present | **Cursor IDE** |
+| Variable `VSCODE_*` sans `CURSOR_*` | **VS Code** (verifier extensions) |
+| Variable `CODEX_*` ou `openai-codex` | **OpenAI Codex CLI** |
+| Contexte MCP server actif | Outil MCP-compatible (identifier lequel) |
+| Aucun indice | Demander a l'utilisateur |
+
+#### 4.2 — Questionnaire complementaire
+
+| # | Question | Options |
+|---|----------|---------|
+| S4.1 | **Quel est votre outil IA principal ?** (auto-detecte : `{outil}`) | Claude Code, Cursor, VS Code + Copilot, VS Code + Continue.dev, VS Code + Cline, OpenAI Codex, Gemini Code Assist, JetBrains AI, Zed, Windsurf, Amazon Q, Aider, OpenCode, Goose, Gemini CLI, Autre |
+| S4.2 | **Utilisez-vous de l'inference locale ?** | LM Studio, Ollama, llama.cpp, vLLM, Jan, LocalAI, aucun |
+| S4.3 | **Modele(s) IA prefere(s) ?** | Claude Opus, Claude Sonnet, Claude Haiku, GPT-4.5, GPT-5, Gemini 2.0, Codestral, DeepSeek, Qwen, Llama, Mixtral, autre, pas de preference |
+| S4.4 | **Budget IA mensuel ?** | Gratuit, <$20/mois, $20-100/mois, $100+/mois, budget entreprise, illimite |
+
+#### 4.3 — Matrice de compatibilite MIP
+
+En fonction de l'outil detecte, MIP adapte ses capacites :
+
+| Capacite MIP | Requis | Claude Code | Cursor | VS Code + ext | Codex CLI | Aider | JetBrains | Inference locale |
+|--------------|--------|-------------|--------|---------------|-----------|-------|-----------|-----------------|
+| **Agents paralleles** (subagent) | T3+ | Natif | Via Agent | Via extension | Natif | Non | Non | Non |
+| **Terminal access** (Bash) | Toutes | Natif | Natif | Via terminal | Natif | Natif | Limite | Via shell |
+| **Multi-file edit** | T2+ | Natif | Natif | Selon ext | Natif | Natif | Natif | Selon outil |
+| **MCP support** | Opt | Client+Srv | Client | Selon ext | Client+Srv | Non | Server | Selon runtime |
+| **Git integration** | T2+ | Natif | Natif | Via terminal | Natif | Natif | Natif | Via terminal |
+| **TodoWrite tracking** | Toutes | Natif | Non | Non | Non | Non | Non | Non |
+| **Background tasks** | T3+ | Natif | Limite | Non | Natif | Non | Non | Non |
+| **Context7 docs** | T3+ | Via MCP | Via MCP | Via MCP | Via MCP | Non | Via MCP | Non |
+
+**Adaptations automatiques** :
+
+| Si l'outil ne supporte PAS... | MIP fait... |
+|-------------------------------|-------------|
+| Agents paralleles | Execution sequentielle (Francois puis Lise) |
+| TodoWrite | Annonces texte dans le chat uniquement |
+| MCP / Context7 | Skip les verifications Context7, s'appuyer sur la memoire locale |
+| Background tasks | Tout en foreground, checkpoints plus frequents |
+| Terminal access | Demander a l'utilisateur de lancer les commandes manuellement |
+
+---
+
+### SETUP-5 — Detection et installation des dependances
+
+> Scanner l'environnement pour verifier que les outils necessaires sont installes. Proposer l'installation des manquants.
+
+#### 5.1 — Invariants universels (toujours verifies)
+
+| Categorie | Outil | Commande de detection | Installation si manquant |
+|-----------|-------|-----------------------|--------------------------|
+| **VCS** | git | `git --version` | `winget install Git.Git` / `brew install git` / `apt install git` |
+| **Shell** | bash/zsh | `echo $SHELL` | Generalement pre-installe |
+
+#### 5.2 — Detection par stack (selon SETUP-2)
+
+**Rust** :
+```bash
+rustc --version          # Compilateur
+cargo --version          # Build tool
+rustup show              # Toolchain
+cargo clippy --version   # Linter
+cargo fmt --version      # Formatteur
+```
+
+**JavaScript/TypeScript** :
+```bash
+node --version           # Runtime
+npm --version / yarn --version / pnpm --version / bun --version  # Package manager
+npx tsc --version        # TypeScript compiler
+npx eslint --version     # Linter
+npx prettier --version   # Formatteur
+```
+
+**Python** :
+```bash
+python3 --version        # Runtime
+pip --version / poetry --version / uv --version  # Package manager
+python3 -m pytest --version  # Test framework
+python3 -m mypy --version    # Type checker
+ruff --version               # Linter/formatteur
+```
+
+**Go** :
+```bash
+go version               # Runtime + compilateur
+golangci-lint --version  # Linter
+```
+
+**Java/Kotlin** :
+```bash
+java --version           # JDK
+mvn --version / gradle --version  # Build tool
+```
+
+**C/C++** :
+```bash
+gcc --version / clang --version  # Compilateur
+cmake --version                  # Build system
+```
+
+#### 5.3 — Outils transversaux
+
+| Outil | Detection | Usage |
+|-------|-----------|-------|
+| Docker | `docker version` | Conteneurisation |
+| docker-compose | `docker compose version` | Orchestration |
+| kubectl | `kubectl version --client` | Kubernetes |
+| gh (GitHub CLI) | `gh --version` | GitHub API |
+| curl | `curl --version` | HTTP requests |
+| jq | `jq --version` | JSON processing |
+| openssl | `openssl version` | Crypto |
+
+#### 5.4 — Rapport de detection
+
+```markdown
+## Rapport de detection des dependances
+
+### Installes
+- git 2.43.0
+- rustc 1.77.0
+- cargo 1.77.0
+- clippy 0.1.77
+- ...
+
+### Manquants
+- docker : Non installe → Installer ? (requis pour S2.14: Docker Compose)
+- gh : Non installe → Installer ? (recommande pour GitHub integration)
+
+### Avertissements
+- rustc 1.77.0 : Version 1.80+ recommandee pour async closures
+```
+
+L'agent propose l'installation des outils manquants (avec la commande adaptee a l'OS detecte en SETUP-1). L'utilisateur valide chaque installation.
+
+---
+
+### SETUP-6 — Inventaire des capacites et installation des agents
+
+> Configurer les agents MIP en fonction de l'environnement et de la stack detectes.
+
+#### 6.1 — Agents MIP universels (noyau invariant)
+
+Le noyau MIP definit **7 roles fonctionnels** independants de la stack :
+
+| Role | Agent par defaut | Responsabilite universelle |
+|------|-----------------|---------------------------|
+| **Chef de Projet** | Maria | Classification, brainstorming, coordination, synthese |
+| **Analyste Produit** | Fabrice | Audit concurrence, cibles, fonctionnalites, points de friction |
+| **Chef Dev** | Denis | Architecture, documentation technique, plan, integration, livraison |
+| **Dev Back-End** | Francois | Implementation logique metier, API, DB, tests |
+| **Dev Front-End** | Lise | Implementation UI/UX, composants, theme, assets |
+| **Team Manager** | Arianne | Qualite, memoire, anti-hallucination, archivage, capitalisation |
+| **Audit Expert** | George | Conformite, tests globaux, UX audit, securite |
+
+#### 6.2 — Adaptation des agents a la stack
+
+En fonction de la stack detectee (SETUP-2), les agents sont configures avec :
+
+| Element adapte | Source | Exemple Rust | Exemple TypeScript | Exemple Python |
+|----------------|--------|-------------|-------------------|----------------|
+| **Commande build** | S2.5 | `cargo build --workspace` | `npm run build` | `python -m build` |
+| **Commande test** | S2.5 | `cargo test --workspace` | `npm test` | `pytest` |
+| **Commande lint** | S2.7 | `cargo clippy -- -D warnings` | `npx eslint .` | `ruff check .` |
+| **Commande format** | S2.7 | `cargo fmt` | `npx prettier --write .` | `ruff format .` |
+| **Structure crate/package** | S2.6 | `crates/{nom}/src/` | `packages/{nom}/src/` | `src/{nom}/` |
+| **Convention commit** | S2.12 | `type(scope): msg` | `type(scope): msg` | `type(scope): msg` |
+| **Annotations code** | Config | MSCM (`@id`, `@do`) | JSDoc / TSDoc | Docstrings |
+| **Pattern test** | S2.5 | `#[test]` + `#[cfg(test)]` | `describe/it` (Jest/Vitest) | `def test_*` (pytest) |
+| **Gestion erreurs** | Config | `Result<T, Error>` | `try/catch` + types | `try/except` + types |
+| **Feature flags** | Config | Cargo features | Env vars / config | Env vars / config |
+
+#### 6.3 — Generation des fichiers de configuration
+
+La Phase SETUP produit les fichiers suivants :
+
+| Fichier | Contenu |
+|---------|---------|
+| `.mip/environment.md` | **Configuration maitre** : OS, hardware, stack, securite, infra, outil IA, dependances |
+| `memory/user-profile.md` | Profil utilisateur : role, experience, preferences, mode autonomie |
+| `memory/project-file-map.md` | Carte des fichiers cles du projet (generee par scan du dossier) |
+| `memory/stack-patterns.md` | Patterns specifiques a la stack (equivalent de rust-patterns.md, adapte) |
+| `memory/stack-cheatsheet.md` | Cheatsheet du framework principal (equivalent de dioxus-cheatsheet.md, adapte) |
+| `CLAUDE.md` | Conventions projet (cree ou augmente si existant) |
+| `.claude/agents/*.md` | Agents adaptes a la stack (si Claude Code) |
+
+#### 6.4 — Template `.mip/environment.md`
+
+```markdown
+# MIP Environment Configuration
+
+## TL;DR
+<Stack, OS, outil IA, mode autonomie, resume en 3 lignes>
+
+## Metadata
+- Date de configuration: YYYY-MM-DD
+- Version MIP: v2.1
+- Reconfigurable via: `/mip_setup`
+
+## Systeme
+- OS: <nom> <version> (<arch>)
+- Shell: <type> <version>
+- CPU: <modele> (<N> coeurs)
+- RAM: <total> (<disponible> libre)
+- GPU: <modele> (<VRAM>) | Aucun
+- Disque: <total> (<libre> libre)
+- Reseau: Internet <oui/non>, Proxy <oui/non>
+
+## Stack technique
+- Langage(s): <liste>
+- Framework(s): <liste>
+- Base(s) de donnees: <liste>
+- API style: <REST/GraphQL/gRPC/etc.>
+- Package manager: <nom>
+- Monorepo: <oui/non> (<type>)
+- Linter: <nom + config>
+- Formatteur: <nom + config>
+- Test framework: <nom>
+
+## Commandes standard
+- Build: `<commande>`
+- Test: `<commande>`
+- Lint: `<commande>`
+- Format: `<commande>`
+- Test single: `<commande avec placeholder>`
+
+## Securite
+- Niveau: <standard/renforce/critique>
+- Conformite: <RGPD/HIPAA/SOC2/aucune>
+- Chiffrement: <at-rest/in-transit/E2E/aucun>
+- Secrets: <env vars/vault/fichier .env>
+
+## Infrastructure
+- Hebergement code: <GitHub/GitLab/Bitbucket/etc.>
+- CI/CD: <GitHub Actions/etc./aucun>
+- Conteneurisation: <Docker/Podman/aucun>
+- Deploiement: <VPS/Cloud/PaaS/local>
+- Auth: <OAuth2/JWT/sessions/aucun>
+
+## Outil IA
+- Outil principal: <nom>
+- Inference locale: <LM Studio/Ollama/aucun>
+- Modele(s): <liste>
+- Budget: <fourchette>
+- Capacites MIP adaptees:
+  - Agents paralleles: <oui/non>
+  - TodoWrite: <oui/non>
+  - Context7/MCP: <oui/non>
+  - Background tasks: <oui/non>
+  - Terminal access: <oui/non>
+
+## Dependances
+### Installees
+- <outil>: <version>
+
+### Manquantes (installees durant SETUP)
+- <outil>: <version installee>
+
+### Avertissements
+- <outil>: <avertissement>
+
+## Conventions du projet
+- Convention commit: <Conventional Commits / custom / aucune>
+- Annotations code: <MSCM / JSDoc / Docstrings / aucune>
+- Pattern erreurs: <Result<T,E> / try-catch / try-except / custom>
+- Regles NON NEGOCIABLES utilisateur: <liste depuis S3.8>
+```
+
+---
+
+### SETUP — Invariants universels MIP
+
+Les elements suivants sont des **invariants** du protocole MIP, independants de la stack, du langage, ou de l'environnement :
+
+| Invariant | Description | Universel car... |
+|-----------|-------------|------------------|
+| **Classification T1-T5** | Trier la complexite avant d'agir | Toute tache a une taille |
+| **Git (VCS)** | Branching, commits, merge | Standard industrie universel |
+| **Tests avant livraison** | Verifier que le code fonctionne | Fondamental, tout langage |
+| **Linting/formatting** | Code propre et coherent | Chaque langage a ses outils |
+| **Code review / audit** | Verification par un tiers | Bonne pratique universelle |
+| **Chiffrement** | Proteger les donnees sensibles | Obligation legale et technique |
+| **Gestion des secrets** | Ne pas hardcoder de credentials | OWASP Top 10, universel |
+| **CI/CD** | Automatiser build/test/deploy | Standard industrie |
+| **Documentation** | Expliquer le code et les decisions | Maintenance long terme |
+| **Metriques & feedback** | Mesurer pour ameliorer | Kaizen / amelioration continue |
+
+### SETUP — Elements projet-specifiques (configures)
+
+| Element | Miyukini COG | Autre projet (exemple) |
+|---------|-------------|----------------------|
+| Langage | Rust | TypeScript |
+| Framework UI | Dioxus 0.6 | React + Next.js |
+| DB | KindMother (SQLite) | PostgreSQL + Prisma |
+| API | axum REST | tRPC |
+| Architecture | Pyramide COG, Strates 0-9 | Clean Architecture |
+| Annotations | MSCM (@id, @do, @role) | TSDoc + ESLint rules |
+| Lois/regles | LOI-1 a LOI-8 | Pas de dependance critique |
+| Build | `cargo build --workspace` | `npm run build` |
+| Test | `cargo test --workspace` | `npx vitest` |
+| Lint | `cargo clippy -- -D warnings` | `npx eslint .` |
+
+---
+
+### Commandes universelles
+
+| Commande | Action |
+|----------|--------|
+| `/mip_setup` | Relancer la Phase SETUP (reconfiguration) |
+| `/mip_status` | Afficher le statut de l'environnement MIP |
+| `/autonomy_mode <mode>` | Changer le mode d'autonomie (FULL/BIG_STEPS/GUIDED) |
+
 ---
 
 ## Etape 1 — Classification (OBLIGATOIRE)
@@ -1105,8 +1565,8 @@ Artefact : `.mip/reports/YYYY-MM-DD-<slug>-report.md`
 8. **Checkpoint toutes les 5 taches** — Mini-audit intermediaire en P3
 9. **Gates non-bypassables** — Chaque gate doit etre explicitement validee
 10. **Artefacts obligatoires** — Chaque phase produit son artefact dans `.mip/`
-11. **Clippy propre** — `cargo clippy -p {crate} -- -D warnings` apres chaque tache
-12. **Pas de unwrap() en prod** — Uniquement dans `#[cfg(test)]`
+11. **Lint propre** — Linter du projet (ex: `cargo clippy -- -D warnings`, `eslint .`, `ruff check .`) apres chaque tache
+12. **Pas de code dangereux en prod** — Pas de `unwrap()` (Rust), pas de `any` (TS), pas de `bare except` (Python) en production
 13. **Archivage systematique** (T3+) — Arianne capitalise apres chaque livraison
 14. **Logging obligatoire** — Chaque tache tracee via TodoWrite
 15. **Autopilot apres P0** — Aucune intervention humaine sauf frein d'urgence
@@ -1124,6 +1584,9 @@ Artefact : `.mip/reports/YYYY-MM-DD-<slug>-report.md`
 27. **Mode d'autonomie** — L'utilisateur choisit FULL/BIG_STEPS/GUIDED en P0. Persistance dans `memory/user-profile.md`. Changeable via `/autonomy_mode`
 28. **Smoke test prioritaire** — Un test e2e happy path est ecrit AVANT le TDD tache par tache en P3 (doit compiler, peut echouer)
 29. **TL;DR obligatoire** — Chaque artefact MIP (brief, spec, plan, audit) commence par un resume de 5 lignes max
+30. **Phase SETUP obligatoire** — Tout nouvel environnement MIP doit passer par la Phase SETUP avant le premier P0. Produit `.mip/environment.md`
+31. **Environment.md referentiel** — Les commandes build/test/lint et conventions sont lues depuis `.mip/environment.md`, pas hardcodees dans les agents
+32. **Adaptation automatique** — MIP adapte ses capacites (parallelisme, TodoWrite, Context7) a l'outil IA detecte en SETUP-4
 
 ---
 
@@ -1131,29 +1594,31 @@ Artefact : `.mip/reports/YYYY-MM-DD-<slug>-report.md`
 
 Pour maximiser l'efficacite de chaque token, les agents chargent des **fichiers memoire pre-compiles** au lieu de rechercher les informations a chaque session.
 
-### Fichiers memoire a maintenir
+### Fichiers memoire universels (generes par Phase SETUP)
 
 | Fichier | Contenu | Agents consommateurs |
 |---------|---------|---------------------|
-| `memory/rust-patterns.md` | Patterns Rust du projet : admin_cell, context, errors, serde(default), spawn_blocking, extracteurs axum | Francois, Denis |
-| `memory/dioxus-cheatsheet.md` | RSX pitfalls complets, signal patterns, component templates, hook patterns Dioxus 0.6 | Lise |
+| `memory/stack-patterns.md` | Patterns specifiques a la stack du projet (adapte au langage/framework detecte) | Dev Back, Chef Dev |
+| `memory/stack-cheatsheet.md` | Cheatsheet du framework principal (pitfalls, patterns, templates) | Dev Front |
 | `memory/project-file-map.md` | Carte des fichiers cles du projet (50-80 entrees, 1 ligne chacune) | Tous |
-| `memory/api-contracts.md` | Types et traits partages inter-crates (signatures exactes) | Francois, Lise |
-| `memory/test-templates.md` | Templates de tests standard (unit, integration, MiyukiniSQLtest) | Francois, Lise |
-| `memory/mscm-templates.md` | Templates d'annotations MSCM par type de fichier | Tous |
-| `memory/context7-cache.md` | Resultats des queries Context7 les plus frequentes (evite les re-queries) | Francois, Lise |
+| `memory/api-contracts.md` | Types et interfaces partages inter-modules (signatures exactes) | Dev Back, Dev Front |
+| `memory/test-templates.md` | Templates de tests standard (unit, integration, e2e) adaptes au framework de test | Dev Back, Dev Front |
+| `memory/code-annotations-templates.md` | Templates d'annotations de code par type de fichier (MSCM, JSDoc, Docstrings, etc.) | Tous |
+| `memory/context7-cache.md` | Resultats des queries Context7 les plus frequentes (evite les re-queries) | Dev Back, Dev Front |
+
+**Note** : Dans le contexte Miyukini COG, ces fichiers sont nommes plus specifiquement : `rust-patterns.md`, `dioxus-cheatsheet.md`, `mscm-templates.md`. Les noms universels ci-dessus sont utilises dans un nouvel environnement.
 
 ### Protocole de chargement par agent
 
 Chaque agent charge **uniquement ses fichiers pertinents** en debut de tache :
 
-| Agent | Fichiers a charger |
+| Agent (role) | Fichiers a charger |
 |-------|-------------------|
-| **Francois** | `rust-patterns.md`, `api-contracts.md`, `test-templates.md`, `mscm-templates.md` |
-| **Lise** | `dioxus-cheatsheet.md`, `api-contracts.md`, `project-file-map.md`, `mscm-templates.md` |
-| **Denis** | `project-file-map.md`, `rust-patterns.md`, `mip-decisions.md`, `mip-antipatterns.md` |
-| **George** | `project-file-map.md`, `mscm-templates.md`, `mip-antipatterns.md` |
-| **Arianne** | `mip-decisions.md`, `mip-antipatterns.md`, `mip-performance-history.md`, `team-skills-audit.md` |
+| **Dev Back-End** (Francois) | `stack-patterns.md`, `api-contracts.md`, `test-templates.md`, `code-annotations-templates.md` |
+| **Dev Front-End** (Lise) | `stack-cheatsheet.md`, `api-contracts.md`, `project-file-map.md`, `code-annotations-templates.md` |
+| **Chef Dev** (Denis) | `project-file-map.md`, `stack-patterns.md`, `mip-decisions.md`, `mip-antipatterns.md` |
+| **Audit Expert** (George) | `project-file-map.md`, `code-annotations-templates.md`, `mip-antipatterns.md` |
+| **Team Manager** (Arianne) | `mip-decisions.md`, `mip-antipatterns.md`, `mip-performance-history.md`, `team-skills-audit.md` |
 
 ### TL;DR obligatoire sur chaque artefact
 
@@ -1163,7 +1628,9 @@ Chaque artefact MIP (brief, spec, plan, audit, rapport) **DOIT** commencer par u
 
 ## Registre Context7 — Libs a verifier
 
-Identifiants Context7 pre-resolus pour les libs du projet. Utiliser `query-docs` directement avec ces IDs.
+> Ce registre est **projet-specifique**. Les IDs sont pre-resolus en SETUP-5 ou lors du premier P0. Les libs sont ajoutees au fur et a mesure des sprints.
+
+### Miyukini COG — IDs pre-resolus
 
 | Lib | Context7 ID | Quand verifier |
 |-----|-------------|----------------|
@@ -1173,15 +1640,18 @@ Identifiants Context7 pre-resolus pour les libs du projet. Utiliser `query-docs`
 | **serde** | `/serde-rs/serde` | Serialization custom, derive macros, attributes |
 | **Dioxus Components** | `/dioxuslabs/components` | Composants primitifs ARIA |
 
+### Protocole universel Context7
+
 **Quand verifier** :
 - **Toujours** en P0 Temps 5 (spec) pour chaque lib impliquee
 - **Spot-check** en P3 si la tache touche un pattern specifique
 - **En cas d'erreur** : verifier si le pattern utilise est encore valide
+- **Premier P0 d'un nouveau projet** : resoudre les IDs de toutes les libs de la stack via `resolve-library-id`
 
-**Queries recommandees** :
-- Dioxus : `RSX syntax`, `use_signal hooks`, `component props`, `event handlers`, `async spawn`
-- axum : `Router handlers`, `extractors State Json`, `error handling`, `middleware layers`
-- serde : `derive attributes`, `custom serialization`, `default values`, `rename`
+**Procedure pour une nouvelle stack** :
+1. Lister les frameworks/libs du projet (depuis `.mip/environment.md`)
+2. Pour chaque lib : `resolve-library-id` → noter l'ID dans ce registre
+3. Stocker dans `memory/context7-cache.md` les resultats des queries les plus frequentes
 
 ---
 
@@ -1297,3 +1767,74 @@ Utilisateur : "Je veux ajouter MiyuVoice"
   |
   +=== EXECUTION END ==========================================
 ```
+
+---
+
+## Reference — Outils IA compatibles MIP
+
+> Liste des outils IA de dev valides pour executer MIP v2 (mars 2026). L'outil est detecte en SETUP-4.
+
+### Categorie 1 — CLI agentiques (execution complete MIP)
+
+| Outil | Editeur | Agents // | Terminal | MCP | Open Source | Execution |
+|-------|---------|-----------|----------|-----|-------------|-----------|
+| **Claude Code** | Anthropic | Natif | Natif | Client+Srv | Non | Cloud |
+| **OpenAI Codex CLI** | OpenAI | Natif | Natif | Client+Srv | Non | Cloud |
+| **Aider** | OSS (Paul Gauthier) | Non | Natif | Non | Oui (Apache 2) | Cloud/Local |
+| **OpenCode** | OSS | Partiel | Natif | Partiel | Oui | Cloud/Local |
+| **Goose** | Block (ex-Square) | Non | Natif | Partiel | Oui | Cloud/Local |
+| **Gemini CLI** | Google | Non | Natif | Oui | Non | Cloud |
+
+### Categorie 2 — IDEs natifs IA
+
+| Outil | Editeur | Agents // | Terminal | MCP | Open Source | Execution |
+|-------|---------|-----------|----------|-----|-------------|-----------|
+| **Cursor** | Anysphere | Via Agent | Natif | Client | Non | Cloud |
+| **Windsurf** | Cognition AI | Via Cascade | Natif | Non | Non | Cloud |
+| **Zed** | Zed Industries | Via Agent Panel | Natif | Client | Oui (GPL) | Cloud/Local |
+
+### Categorie 3 — Extensions IDE
+
+| Outil | Editeur | Agents // | Terminal | MCP | Open Source | Execution |
+|-------|---------|-----------|----------|-----|-------------|-----------|
+| **GitHub Copilot** | Microsoft | Agent Mode | Oui | Client | Non | Cloud |
+| **Gemini Code Assist** | Google | Agent Mode | Oui | Client+Srv | Non | Cloud |
+| **Amazon Q Developer** | AWS | Agent `/dev` | CLI agent | Partiel | Non | Cloud |
+| **JetBrains AI** | JetBrains | Partiel | Limite | Server | Non | Cloud/Local |
+| **Continue.dev** | OSS | Partiel | Non | Client | Oui (Apache 2) | Cloud/Local |
+| **Cline** | OSS | Complet | Oui | Client | Oui | Cloud/Local |
+| **Cody** | Sourcegraph | Partiel | Non | Non | Oui | Cloud/Self-hosted |
+| **Tabnine** | Tabnine | Non | Non | Non | Non | Cloud/Local |
+| **Augment Code** | Augment | Partiel | Non | Non | Non | Cloud |
+
+### Categorie 4 — Runtimes inference locale
+
+| Outil | Type | API compatible | MCP | Usage MIP |
+|-------|------|---------------|-----|-----------|
+| **LM Studio** | GUI + API server | OpenAI-compat `localhost:1234` | Server natif | Backend pour Continue.dev, JetBrains, miou-llm-bridge |
+| **Ollama** | CLI + API server | OpenAI-compat | Via wrappers | Backend headless pour scripts et agents |
+| **llama.cpp** | CLI | OpenAI-compat (server mode) | Non | Performance maximale, usage avance |
+| **vLLM** | Server Python | OpenAI-compat | Non | Haute performance GPU, batching |
+| **Jan** | GUI desktop | OpenAI-compat | Non | Alternative LM Studio plus legere |
+| **LocalAI** | Container API | OpenAI-compat | Non | Docker-first, multi-modele |
+
+### Categorie 5 — Plateformes cloud autonomes (usage limite MIP)
+
+| Outil | Usage MIP | Limitation |
+|-------|-----------|------------|
+| **Devin 2.0** | Taches isolees T1-T2 | Pas d'acces aux repos locaux |
+| **Replit Agent 3** | Prototypage rapide | JS/TS seulement, pas de monorepo complexe |
+| **Bolt.new** | Prototypage front | JS/TS seulement, WebContainers |
+| **v0** | Generation UI React | Front-end React seulement |
+
+### Recommandations par scenario
+
+| Scenario | Outil recommande | Raison |
+|----------|-----------------|--------|
+| **MIP complet (T3-T5)** | Claude Code / Codex CLI | Agents paralleles natifs, terminal, MCP, TodoWrite |
+| **Edition quotidienne + MIP leger** | Cursor + Claude Code | Navigation rapide + heavy-lift |
+| **Budget gratuit / open-source** | Aider + Ollama | Git-first, local, pas de frais |
+| **Confidentialite maximale** | Continue.dev + LM Studio | Tout local, zero fuite de donnees |
+| **Enterprise multi-IDE** | GitHub Copilot (extension) | Compatible VS Code, JetBrains, CLI |
+| **AWS-native** | Amazon Q Developer | Integration IAM, CDK, CloudFormation |
+| **Gros monorepo (50k+ fichiers)** | Augment Code ou Cody | Indexation semantique avancee |

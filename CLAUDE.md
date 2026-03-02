@@ -63,6 +63,15 @@ cargo test -p {crate} -- --nocapture       # Tests verbose d'un crate
 
 ## Protocole MIP v2 — Miyukini Implementation Protocol
 
+MIP v2 est **universel** : il s'adapte a n'importe quel projet, stack, et environnement. La Phase SETUP configure l'environnement une seule fois. Le noyau (classification, phases, gates, agents) est invariant.
+
+### Phase SETUP — Onboarding (UNE SEULE FOIS par environnement)
+
+6 etapes : Detection systeme → Config environnement → Profil utilisateur → Detection outil IA → Dependencies → Agents.
+Produit `.mip/environment.md` (configuration maitre). Commande : `/mip_setup` pour reconfigurer.
+25+ outils IA supportes : Claude Code, Cursor, Codex CLI, Aider, Copilot, Continue.dev, Cline, JetBrains, Zed, Windsurf, LM Studio, Ollama, etc.
+MIP adapte automatiquement ses capacites (parallelisme, TodoWrite, Context7, terminal) a l'outil detecte.
+
 ### Classification des taches (AVANT toute action)
 
 | Classe | Critere | Phases | Exemple |
@@ -114,6 +123,8 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 **Checkpoints** : Mini-audit Denis toutes les 5 taches en P3.
 **Boucle MIP** : Si refus P5, retour en P0 avec feedback utilisateur (increment `mip_loops`).
 **Rapport final** : Notes /20 sur 8 criteres, resume dev, profil utilisateur, capitalisation agents.
+**Phase SETUP** : Onboarding universel en 6 etapes. Scan systeme + config environnement + profil utilisateur + detection outil IA + dependencies + agents. Produit `.mip/environment.md`. Run once.
+**Universalite** : Noyau MIP invariant (classification, phases, gates, TDD, metriques). Config projet dans `.mip/environment.md`. Commandes adaptees a la stack detectee.
 
 ### Workflow standard
 
@@ -135,6 +146,7 @@ Utilisateur → Maria (P0 : 8 temps + init metriques) + Lise + Fabrice + Denis (
 
 ### Artefacts MIP
 
+- `.mip/environment.md` — Configuration maitre de l'environnement (Phase SETUP, run once)
 - `.mip/briefs/` — Briefs de cadrage (P0 Temps 8)
 - `.mip/specs/` — Specs techniques (P0 Temps 5)
 - `.mip/plans/` — Plans exhaustifs + guides d'implementation (P0 Temps 6)

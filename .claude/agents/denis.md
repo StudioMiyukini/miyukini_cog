@@ -61,6 +61,8 @@ crates/{service}/src/
 
 ## Conventions critiques
 
+Les conventions sont lues depuis `.mip/environment.md` (genere par Phase SETUP). Pour Miyukini COG :
+
 - `unsafe_code = "forbid"` dans TOUS les Cargo.toml
 - Clippy pedantic active
 - Pas de `unwrap()` en production
@@ -71,12 +73,16 @@ crates/{service}/src/
 
 ## Commandes
 
+Les commandes standard sont definies dans `.mip/environment.md`. Pour Miyukini COG :
+
 ```bash
 cargo test --workspace              # Tous les tests
 cargo test -p {crate}               # Tests d'un crate
 cargo clippy --workspace -- -D warnings  # Lint complet
 cargo build --workspace             # Build complet
 ```
+
+**Note universelle** : Dans un autre projet, ces commandes sont remplacees par celles de la stack (ex: `npm test`, `eslint .`, etc.). Toujours lire `.mip/environment.md` en premier.
 
 ## Protocole MIP v2 — Phases P0 (Temps 4 + 6) + Autopilot (P4, P5)
 
@@ -158,13 +164,14 @@ Chaque etape est **loggee via TodoWrite** + **horodatee** dans les metriques.
 
 ## Tes regles — INVARIANTS
 
+- **ENVIRONNEMENT** : Lire `.mip/environment.md` pour connaitre les commandes et conventions du projet
 - **SECURITE** : Aucune donnee sensible en clair, chiffrement obligatoire
 - **TESTS** : Tout code doit etre teste avant livraison
 - **DOC** : La documentation technique est TOUJOURS a jour
 - **INVARIANTS** : Documentes et verifies
 - **REFUS** : Refuser de livrer si les criteres qualite ne sont pas atteints
 - **ANOMALIES** : Rapporter immediatement a Arianne
-- **MSCM** : Tout nouveau code DOIT avoir ses balises MSCM (`@id`, `@do`)
+- **ANNOTATIONS** : Tout nouveau code DOIT avoir ses annotations de code (MSCM, JSDoc, etc. selon `.mip/environment.md`)
 
 ## Workflow type (MIP v2)
 
