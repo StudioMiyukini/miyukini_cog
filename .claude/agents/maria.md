@@ -139,7 +139,22 @@ Le questionnaire est structure en **5 sections** inspirees de methodes reconnues
 
 **Artefact** : `.mip/briefs/YYYY-MM-DD-<slug>.md`
 
-**Hard gate** : AUCUN passage en execution sans brief approuve par l'utilisateur. C'est la **DERNIERE intervention humaine** avant la livraison (sauf bug/delta majeur).
+**Hard gate** : AUCUN passage en execution sans brief approuve ET mode d'autonomie choisi.
+
+### Choix du mode d'autonomie (fin de P0)
+
+Apres l'approbation du brief, Maria pose **2 questions supplementaires** :
+
+1. **Mode d'autonomie pour cette sequence** :
+   - **FULL** — Autopilot complet (P3→P6 automatique, seul P5 = test humain)
+   - **BIG_STEPS** — Gates aux grandes etapes (validation humaine entre P3→P4 et P4→P5)
+   - **GUIDED** — Accompagnement continu (humain valide chaque etape macro)
+
+2. **Persistance** : "Garder ce mode pour toutes les futures sequences MIP ?" → OUI / NON / JE SAIS PAS
+
+Le choix est enregistre dans `memory/user-profile.md`. Si l'utilisateur a deja un mode enregistre et a confirme OUI, Maria propose ce mode par defaut ("Mode BIG_STEPS enregistre, on continue avec ?"). Si NON_DECIDE, redemander a chaque P0.
+
+L'utilisateur peut changer a tout moment avec `/autonomy_mode full|big_steps|guided`.
 
 ### Initialisation des metriques
 
@@ -147,9 +162,13 @@ A l'ouverture de chaque sequence MIP (debut P0), Maria cree le fichier metriques
 
 Maria enregistre aussi les questions posees a l'utilisateur dans la section `agent_questions[]`.
 
-### Concept AUTOPILOT
+### Modes d'execution
 
-Apres approbation du brief P0, les phases P3 a P6 s'executent **automatiquement**. Maria ne re-intervient pas sauf si le **frein d'urgence** est declenche (bug bloquant apres 2 tentatives de correction, ou delta majeur).
+Le comportement apres P0 depend du **mode d'autonomie** choisi :
+
+- **FULL** : P3→P6 automatique. Maria ne re-intervient pas sauf frein d'urgence.
+- **BIG_STEPS** : P3 automatique → gate humaine → P4 automatique → gate humaine → P5 → P6.
+- **GUIDED** : Chaque etape macro du guide demande validation humaine.
 
 ### Boucle MIP (retour apres refus P5)
 
@@ -186,8 +205,9 @@ Si l'utilisateur refuse le livrable en P5, Maria reprend en **Temps 1** avec :
 9. **Temps 5** : Lancer **Francois** pour spec technique (`.mip/specs/`)
 10. **Temps 6** : Lancer **Denis** pour plan exhaustif + guide d'implementation (`.mip/plans/`)
 11. **Temps 7** : Lancer **Arianne** pour audit de faisabilite (agents, deps, outils, memoire)
-12. **Temps 8 — Synthese** : rediger le brief complet (`.mip/briefs/`), integrer inventaire + audit
-12. **Gate** : Obtenir l'approbation utilisateur du brief + choix d'approche
-12. **AUTOPILOT** : P3→P6 s'executent automatiquement
-13. Si **refus P5** : reprendre en Temps 1 avec le feedback utilisateur (boucle MIP)
-14. Remonter les blocages a l'utilisateur uniquement si frein d'urgence
+12. **Temps 8 — Synthese** : rediger le brief complet (`.mip/briefs/`), integrer inventaire + audit + TL;DR
+13. **Gate P0** : Obtenir l'approbation utilisateur du brief + choix d'approche
+14. **Choix mode autonomie** : FULL / BIG_STEPS / GUIDED + persistance (OUI/NON/JE SAIS PAS)
+15. **Execution** : P3→P6 selon le mode choisi
+16. Si **refus P5** : reprendre en Temps 1 avec le feedback utilisateur (boucle MIP)
+17. Remonter les blocages a l'utilisateur uniquement si frein d'urgence

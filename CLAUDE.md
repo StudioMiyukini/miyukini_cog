@@ -88,9 +88,9 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 | 7 | Audit de faisabilite | Arianne (agents, deps, outils, memoire) |
 | 8 | Synthese & Brief | Maria |
 
-**Gate P0** : Brief approuve par l'utilisateur = **derniere intervention humaine**.
+**Gate P0** : Brief approuve + mode d'autonomie choisi (FULL/BIG_STEPS/GUIDED).
 
-### AUTOPILOT (P3 → P6 — execution automatique)
+### Execution (P3 → P6 — adapte au mode d'autonomie)
 
 | Phase | Nom | Agents | Gate |
 |-------|-----|--------|------|
@@ -108,6 +108,9 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 **Brainstorming** : Questionnaire standard en 5 sections (Comprendre/Cadrer/Imaginer/Evaluer/Decider) inspire Design Thinking, Six Thinking Hats, SCAMPER, 5 Whys, HMW, LDJ. Maria administre en Temps 1.
 **Inventaire** : Denis inventorie competences, connaissances, outils, etapes generales en Temps 4. Alimente la spec et le plan.
 **Annonces** : Chaque Temps P0 et etape macro P3 annonces dans le chat avec date/heure. TodoWrite suit la progression.
+**Mode autonomie** : FULL (autopilot complet), BIG_STEPS (gates P3→P4, P4→P5), GUIDED (gate par etape macro). Persistance dans `memory/user-profile.md`. Changeable via `/autonomy_mode`.
+**Smoke test** : Test e2e happy path compile-mais-echoue AVANT le TDD tache par tache (valide la structure du plan).
+**Token efficiency** : Fichiers memoire pre-indexes par agent. TL;DR 5 lignes sur chaque artefact.
 **Checkpoints** : Mini-audit Denis toutes les 5 taches en P3.
 **Boucle MIP** : Si refus P5, retour en P0 avec feedback utilisateur (increment `mip_loops`).
 **Rapport final** : Notes /20 sur 8 criteres, resume dev, profil utilisateur, capitalisation agents.
@@ -116,11 +119,13 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 
 ```
 Utilisateur → Maria (P0 : 8 temps + init metriques) + Lise + Fabrice + Denis (inventaire) + Francois (Context7) + Denis (plan+guide) + Arianne (audit)
-→ [GATE] Brief approuve
-→ === AUTOPILOT ===
+→ [GATE] Brief approuve + mode autonomie (FULL/BIG_STEPS/GUIDED)
+→ === EXECUTION (mode choisi) ===
 → Git : checkout -b feat/<slug> + push -u origin
+→ Denis : Smoke test e2e (compile mais echoue → valide structure)
 → Francois (P3 back) + Lise (P3 front) en PARALLELE [TDD + commit + push + metriques + TodoWrite]
-→ Denis (P3 checkpoint /5 taches + push) → Denis (P4 integration) + George (P4 audit)
+→ Denis (P3 checkpoint /5 taches + push) [BIG_STEPS: gate P3→P4] [GUIDED: gate/etape macro]
+→ Denis (P4 integration) + George (P4 audit) [BIG_STEPS: gate P4→P5]
 → Denis (P5 push final + resume + instructions test) → [Utilisateur teste]
 → Denis (P5 questionnaire satisfaction) → [GATE] Verdict utilisateur
 →   Si ACCEPTE : Denis (P5 merge main + push + tag + nettoyage branche)

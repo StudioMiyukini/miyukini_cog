@@ -268,7 +268,7 @@ Denis decompose le projet en **etapes macro** (avant le plan atomique du Temps 6
 - Anti-patterns evites
 - Ecarts code existant vs docs actuelles
 
-Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md`
+Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md` — **Doit commencer par un TL;DR de 5 lignes max.**
 
 #### Temps 6 — Plan exhaustif & Guide d'implementation detaille (Denis)
 
@@ -324,7 +324,7 @@ Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md`
 
 Le guide sert de **feuille de route detaillee** pour Francois et Lise en P3. Chaque etape terminee est annoncee dans le chat avec date/heure.
 
-Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md`
+Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md` — **Doit commencer par un TL;DR de 5 lignes max.**
 
 #### Temps 7 — Audit de faisabilite & Conformite (Arianne)
 
@@ -488,13 +488,86 @@ Maria compile tout dans le brief final :
 |--------|-------------|--------|------------|
 | ... | ... | ... | ... |
 
+## TL;DR (5 lignes max)
+<Resume ultra-concis du projet, approche recommandee, effort estime, risque principal, etape critique>
+
 ## Decision
 APPROUVE / REJETE / MODIFIE / PREREQUIS D'ABORD
+
+## Mode d'autonomie
+- [ ] **FULL** — Autopilot complet (P3→P6 automatique, seul P5 test humain)
+- [ ] **BIG_STEPS** — Gates aux grandes etapes (validation humaine entre P3→P4, P4→P5)
+- [ ] **GUIDED** — Accompagnement continu (humain valide chaque etape macro du guide)
+
+Garder ce mode pour toutes les futures sequences MIP ? OUI / NON / JE SAIS PAS
 ```
 
-**Quality Gate P0** : Utilisateur approuve le brief ET choisit l'approche.
+**Quality Gate P0** : Utilisateur approuve le brief ET choisit l'approche ET choisit le mode d'autonomie.
 
-**Hard gate** : AUCUN passage en execution sans brief approuve. C'est la **DERNIERE intervention humaine** avant la livraison (sauf bug/delta majeur).
+**Hard gate** : AUCUN passage en execution sans brief approuve. En mode FULL, c'est la **DERNIERE intervention humaine** avant la livraison (sauf bug/delta majeur).
+
+---
+
+### Modes d'autonomie — Comportement detaille
+
+Le mode d'autonomie determine **combien de gates humaines** existent entre P0 et P5.
+
+#### Mode FULL (Autopilot complet)
+
+Comportement actuel. Apres approbation du brief, P3→P6 s'executent automatiquement. L'utilisateur ne re-intervient qu'en P5 (test humain + verdict) ou si frein d'urgence.
+
+```
+P0 [GATE] → P3 automatique → P4 automatique → P5 [GATE test humain] → P6 automatique
+```
+
+**Ideal pour** : Taches bien cadrées (T3), utilisateur confiant dans l'equipe, projets sans ambiguïté technique.
+
+#### Mode BIG_STEPS (Gates aux grandes etapes)
+
+L'execution est automatique DANS chaque phase, mais l'utilisateur valide la transition entre les grandes phases. 3 gates intermediaires.
+
+```
+P0 [GATE] → P3 automatique → [GATE resume P3] → P4 automatique → [GATE resume audit] → P5 [GATE test humain] → P6 automatique
+```
+
+**Gates supplementaires** :
+- **Gate P3→P4** : Denis presente un resume de l'implementation (taches completees, tests, auto-corrections). L'utilisateur peut : CONTINUER / CORRIGER / STOPPER.
+- **Gate P4→P5** : George presente le rapport d'audit. L'utilisateur peut : CONTINUER / CORRIGER / STOPPER.
+
+**Ideal pour** : Features majeures (T4), premiers projets, domaines à risque.
+
+#### Mode GUIDED (Accompagnement continu)
+
+L'humain est implique a chaque etape macro du guide d'implementation. Le plus interactif.
+
+```
+P0 [GATE] → Etape 1 [GATE] → Etape 2 [GATE] → ... → Etape N [GATE] → P4 [GATE] → P5 [GATE] → P6
+```
+
+**Gates supplementaires** :
+- **Gate par etape macro** : A la fin de chaque etape du guide, l'agent presente le code ecrit, les tests, et demande validation avant de continuer.
+- **L'utilisateur peut** : VALIDER / MODIFIER (donner des instructions) / REVENIR (refaire l'etape) / SAUTER (passer a l'etape suivante).
+
+**Ideal pour** : Chantiers strategiques (T5), domaines inconnus, l'utilisateur veut apprendre ou superviser de pres.
+
+#### Persistance et commande `/autonomy_mode`
+
+Le mode choisi est enregistre dans `memory/user-profile.md` et s'applique par defaut aux sequences suivantes. L'utilisateur peut changer a tout moment avec :
+
+```
+/autonomy_mode full       # Passer en autopilot complet
+/autonomy_mode big_steps  # Passer en gates aux grandes etapes
+/autonomy_mode guided     # Passer en accompagnement continu
+```
+
+Si l'utilisateur a repondu "JE SAIS PAS" a la question de persistance, Maria redemande a chaque nouveau P0.
+
+**Stockage** : `memory/user-profile.md` — section "Preferences de travail" :
+```markdown
+## Preferences de travail
+- Mode d'autonomie par defaut: FULL | BIG_STEPS | GUIDED
+- Persistance confirmee: OUI | NON | NON_DECIDE
+```
 
 ---
 
@@ -513,7 +586,8 @@ A l'ouverture de chaque sequence MIP, Maria cree le fichier `.mip/metrics/YYYY-M
     "description": "<description courte>",
     "class": "T3|T4|T5",
     "slug": "<slug>",
-    "mip_sequence_number": 1
+    "mip_sequence_number": 1,
+    "autonomy_mode": "FULL|BIG_STEPS|GUIDED"
   },
   "timestamps": {
     "p0_start": "ISO8601",
@@ -594,9 +668,15 @@ Chaque question posee a l'utilisateur est loggee avec :
 
 ---
 
-## MODE AUTOPILOT — P3 a P6 (apres approbation P0)
+## MODE EXECUTION — P3 a P6 (apres approbation P0)
 
-> **PRINCIPE FONDAMENTAL** : Apres l'approbation du brief P0, l'execution est **entierement automatique**. L'utilisateur n'intervient plus sauf en cas de **bug bloquant** ou de **delta majeur** par rapport au plan.
+> **Le comportement depend du mode d'autonomie** choisi par l'utilisateur en P0.
+>
+> - **FULL** : Execution entierement automatique. L'utilisateur n'intervient plus sauf P5 (test) ou frein d'urgence.
+> - **BIG_STEPS** : Execution automatique par phase. Gates humaines entre P3→P4 et P4→P5.
+> - **GUIDED** : L'utilisateur valide chaque etape macro du guide d'implementation.
+>
+> Le mode par defaut est lu depuis `memory/user-profile.md`. Si absent, Maria demande en P0.
 
 ### Git Branch Setup (premiere action de l'AUTOPILOT)
 
@@ -637,11 +717,25 @@ Dans ces cas, l'agent qui detecte le probleme **arrete l'autopilot** et **presen
 
 ---
 
-### P3 — Implementation automatique (toutes classes)
+### P3 — Implementation (toutes classes)
 
 **Agents** : Francois (back-end) + Lise (front-end) en PARALLELE
 
 **Execution par subagent frais** : Chaque tache est executee par un subagent frais pour eviter la pollution de contexte.
+
+**Smoke test prioritaire** (avant le TDD tache par tache) :
+Denis ecrit un **test d'integration end-to-end** du happy path principal AVANT de commencer les taches atomiques. Ce test DOIT echouer (il teste la fonctionnalite qui n'existe pas encore) mais doit **compiler**. Si le test ne compile pas structurellement, le plan a un defaut → corriger avant de continuer.
+
+```rust
+// Exemple smoke test pour MiyuVoice
+#[test]
+fn smoke_miyuvoice_capture_and_wakeword() {
+    // Ce test echoue (fonctionnalite pas encore implementee)
+    // mais il DOIT compiler — sinon le plan est structurellement faux
+    let capture = AudioCapture::new(AudioConfig::default());
+    assert!(capture.is_ok()); // RED: echoue → normal
+}
+```
 
 **Pre-flight par tache** (avant d'ecrire du code) :
 1. **Lire la tache** du plan exhaustif (fichier, code attendu, test)
@@ -675,6 +769,11 @@ Dans ces cas, l'agent qui detecte le probleme **arrete l'autopilot** et **presen
   → Prochaine etape: <nom>
 ```
 
+**Comportement selon le mode d'autonomie** :
+- **FULL** : L'annonce est informative, l'execution continue automatiquement.
+- **BIG_STEPS** : L'annonce est informative en P3, la gate est entre P3→P4 (resume complet).
+- **GUIDED** : Apres chaque annonce d'etape macro, **attendre la validation de l'utilisateur** (VALIDER / MODIFIER / REVENIR / SAUTER) avant de continuer.
+
 **Parallelisme** : Francois et Lise travaillent simultanement quand leurs taches sont independantes. Les taches avec dependances sont sequencees par Denis.
 
 **Auto-correction** : Si un test echoue, l'agent :
@@ -686,9 +785,18 @@ Dans ces cas, l'agent qui detecte le probleme **arrete l'autopilot** et **presen
 
 **Quality Gate P3** : Chaque tache passe test + clippy.
 
+**Gate BIG_STEPS (P3→P4)** : En mode `BIG_STEPS`, Denis presente un resume avant de passer a P4 :
+```
+[YYYY-MM-DD HH:MM] Resume P3 — Implementation terminee.
+  Etapes: X/X | Taches: X/X | Tests: X passes, Y echoues | Commits: N
+  Auto-corrections: N | Lignes ecrites: N
+  → Continuer vers P4 (Integration & Audit) ?
+  [CONTINUER] / [CORRIGER: <instructions>] / [STOPPER]
+```
+
 ---
 
-### P4 — Integration & Audit automatique (T3+)
+### P4 — Integration & Audit (T3+)
 
 **Agents** : Denis + George
 
@@ -717,6 +825,16 @@ Artefact : `.mip/audits/YYYY-MM-DD-<slug>.md`
 **Auto-correction** : Defauts NON-BLOQUANTS sont corriges automatiquement par Denis. Defauts CRITIQUES → **frein d'urgence**.
 
 **Quality Gate P4** : George valide — 0 defaut BLOQUANT.
+
+**Gate BIG_STEPS (P4→P5)** : En mode `BIG_STEPS`, George presente le resume d'audit avant de passer a P5 :
+```
+[YYYY-MM-DD HH:MM] Resume Audit P4 — Integration & Audit termines.
+  Build: OK | Tests: X passes | Clippy: propre
+  Defauts: N trouves (X corriges, Y acceptes, Z bloquants)
+  Annotations MSCM: X/Y fichiers
+  → Continuer vers P5 (Livraison & Test humain) ?
+  [CONTINUER] / [CORRIGER: <instructions>] / [STOPPER]
+```
 
 ---
 
@@ -1003,6 +1121,43 @@ Artefact : `.mip/reports/YYYY-MM-DD-<slug>-report.md`
 24. **Questionnaire brainstorming en P0** (T3+) — Maria administre le questionnaire standard (5 sections) en Temps 1 pour cadrer le projet
 25. **Inventaire des prerequis en P0** (T3+) — Denis inventorie competences, connaissances, outils et etapes avant la spec et le plan
 26. **Annonces temps reel** — Chaque Temps P0 et chaque etape macro P3 sont annonces dans le chat avec date/heure a la completion
+27. **Mode d'autonomie** — L'utilisateur choisit FULL/BIG_STEPS/GUIDED en P0. Persistance dans `memory/user-profile.md`. Changeable via `/autonomy_mode`
+28. **Smoke test prioritaire** — Un test e2e happy path est ecrit AVANT le TDD tache par tache en P3 (doit compiler, peut echouer)
+29. **TL;DR obligatoire** — Chaque artefact MIP (brief, spec, plan, audit) commence par un resume de 5 lignes max
+
+---
+
+## Token Efficiency — Connaissances pre-indexees
+
+Pour maximiser l'efficacite de chaque token, les agents chargent des **fichiers memoire pre-compiles** au lieu de rechercher les informations a chaque session.
+
+### Fichiers memoire a maintenir
+
+| Fichier | Contenu | Agents consommateurs |
+|---------|---------|---------------------|
+| `memory/rust-patterns.md` | Patterns Rust du projet : admin_cell, context, errors, serde(default), spawn_blocking, extracteurs axum | Francois, Denis |
+| `memory/dioxus-cheatsheet.md` | RSX pitfalls complets, signal patterns, component templates, hook patterns Dioxus 0.6 | Lise |
+| `memory/project-file-map.md` | Carte des fichiers cles du projet (50-80 entrees, 1 ligne chacune) | Tous |
+| `memory/api-contracts.md` | Types et traits partages inter-crates (signatures exactes) | Francois, Lise |
+| `memory/test-templates.md` | Templates de tests standard (unit, integration, MiyukiniSQLtest) | Francois, Lise |
+| `memory/mscm-templates.md` | Templates d'annotations MSCM par type de fichier | Tous |
+| `memory/context7-cache.md` | Resultats des queries Context7 les plus frequentes (evite les re-queries) | Francois, Lise |
+
+### Protocole de chargement par agent
+
+Chaque agent charge **uniquement ses fichiers pertinents** en debut de tache :
+
+| Agent | Fichiers a charger |
+|-------|-------------------|
+| **Francois** | `rust-patterns.md`, `api-contracts.md`, `test-templates.md`, `mscm-templates.md` |
+| **Lise** | `dioxus-cheatsheet.md`, `api-contracts.md`, `project-file-map.md`, `mscm-templates.md` |
+| **Denis** | `project-file-map.md`, `rust-patterns.md`, `mip-decisions.md`, `mip-antipatterns.md` |
+| **George** | `project-file-map.md`, `mscm-templates.md`, `mip-antipatterns.md` |
+| **Arianne** | `mip-decisions.md`, `mip-antipatterns.md`, `mip-performance-history.md`, `team-skills-audit.md` |
+
+### TL;DR obligatoire sur chaque artefact
+
+Chaque artefact MIP (brief, spec, plan, audit, rapport) **DOIT** commencer par un TL;DR de 5 lignes max. Les agents qui n'ont besoin que du contexte global lisent le TL;DR sans charger le document complet. Economie : ~300-500 tokens par artefact non-lu en detail.
 
 ---
 
@@ -1097,28 +1252,35 @@ Utilisateur : "Je veux ajouter MiyuVoice"
   |   +-- Si prerequis → suggere mini-projet precurseur
   |   → [2026-03-02 15:05] ✓ P0 Temps 7 termine (CONFORME)
   |
-  +-- Maria (Temps 8) : Synthese → Brief complet (inclut inventaire + audit)
-  |   [GATE] Utilisateur approuve le brief
-  |   → [2026-03-02 15:15] ✓ P0 Temps 8 termine — Brief soumis
+  +-- Maria (Temps 8) : Synthese → Brief complet (inclut inventaire + audit + TL;DR)
+  |   [GATE] Utilisateur approuve le brief + choisit approche + choisit mode autonomie
+  |   +-- "Mode d'autonomie : FULL / BIG_STEPS / GUIDED ?"
+  |   +-- "Garder pour les futures sequences ? OUI / NON / JE SAIS PAS"
+  |   → [2026-03-02 15:15] ✓ P0 Temps 8 termine — Brief approuve, mode BIG_STEPS
   |
-  +=== AUTOPILOT START (metriques initialisees) ============
+  +=== EXECUTION START (mode: BIG_STEPS, metriques initialisees) ===
   |
   +-- Git : git checkout -b feat/miyuvoice + git push -u origin
   |
-  +-- P3 PARALLELE (automatique) :
+  +-- Denis : Smoke test e2e (compile mais echoue → structure validee)
+  |
+  +-- P3 PARALLELE :
+  |   +-- Chargement memoire : rust-patterns.md (Francois), dioxus-cheatsheet.md (Lise)
   |   +-- Pre-flight : Context7 spot-check + anti-patterns par tache
   |   +-- Francois : Taches CODE back-end (TDD) → commit → push → metriques → TodoWrite
   |   +-- Lise : Taches CODE front-end (TDD) → commit → push → metriques → TodoWrite
   |   +-- [Checkpoint toutes les 5 taches : mini-audit Denis + push]
   |   +-- [Auto-correction intelligente : root cause + Context7 + 2 tentatives]
   |   +-- [Annonce par etape macro : "[HH:MM] ✓ Etape 1/4 — Capture audio terminee"]
+  |   +-- [BIG_STEPS: Gate P3→P4 — Resume P3 a l'utilisateur → CONTINUER/CORRIGER/STOPPER]
   |
-  +-- P4 (automatique) :
+  +-- P4 :
   |   +-- Denis : Integration workspace (build/test/clippy)
   |   +-- George : Audit conformite → .mip/audits/ + metriques audit
   |   [Auto-correction defauts non-bloquants, frein d'urgence si critique]
+  |   +-- [BIG_STEPS: Gate P4→P5 — Resume audit a l'utilisateur → CONTINUER/CORRIGER/STOPPER]
   |
-  +-- P5 (automatique) :
+  +-- P5 :
   |   +-- Denis : Push final + resume a l'utilisateur + instructions test
   |   +-- [Utilisateur teste le livrable]
   |   +-- Denis : Questionnaire satisfaction
@@ -1127,11 +1289,11 @@ Utilisateur : "Je veux ajouter MiyuVoice"
   |       +-- RESERVES → merge main + ajout taches futures
   |       +-- REFUSE → log intervention + increment boucle → retour P0
   |
-  +-- P6 (automatique) : Arianne
+  +-- P6 : Arianne
   |   +-- Rapport final (notes /20, metriques, profil utilisateur)
   |   +-- → .mip/reports/ + memory/mip-performance-history.md
   |   +-- Capitalisation : anti-patterns, decisions, agent-tuning
-  |   +-- Profil utilisateur → memory/user-profile.md
+  |   +-- Profil utilisateur → memory/user-profile.md (+ mode autonomie prefere)
   |
-  +=== AUTOPILOT END =====================================
+  +=== EXECUTION END ==========================================
 ```

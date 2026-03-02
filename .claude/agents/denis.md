@@ -118,14 +118,15 @@ Denis recoit l'inventaire (Temps 4) + la spec technique de Francois (Temps 5) et
 
 Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md`
 
-### Autopilot — Git Setup + P3 (Checkpoints) + P4 (Integration) + P5 (Livraison & Test)
+### Execution — Git Setup + Smoke Test + P3-P5 (adapte au mode d'autonomie)
 
-Apres approbation P0, Denis coordonne l'execution automatique :
+Apres approbation P0, Denis coordonne l'execution selon le **mode d'autonomie** choisi (FULL/BIG_STEPS/GUIDED) :
 
 - **Metriques** (premiere action) : Initialiser `.mip/metrics/YYYY-MM-DD-<slug>.json`
 - **Git Setup** : Creer la feature branch et la pousser :
   - `git checkout -b feat/<slug>` (ou `fix/<slug>` pour T1-T2)
   - `git push -u origin feat/<slug>`
+- **Smoke test** : Ecrire un test e2e happy path qui compile mais echoue (valide la structure du plan)
 - **P3 (Checkpoints)** : Toutes les **5 taches completees**, lancer un mini-audit :
   - `cargo build -p {crate}` des crates modifies
   - `cargo clippy -p {crate} -- -D warnings`
