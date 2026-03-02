@@ -127,6 +127,178 @@ impl InstancedSpriteBatcher {
 }
 
 // ---------------------------------------------------------------------------
+// TextureArray
+// ---------------------------------------------------------------------------
+
+/// GPU-backed 2D texture array for instanced sprite rendering.
+///
+/// All layers share the same `width x height` dimensions and use
+/// `Rgba8UnormSrgb` format. New layers are added via [`add_layer`](Self::add_layer)
+/// which writes image data to the next available array slice.
+///
+/// The texture is created with `max_layers` slices up front. Layers are
+/// populated on demand; the GPU texture itself is valid (but uninitialised)
+/// for unpopulated layers.
+pub struct TextureArray {
+    /// The underlying wgpu 2D array texture.
+    texture: wgpu::Texture,
+    /// Default view spanning all layers.
+    view: wgpu::TextureView,
+    /// Number of layers currently populated with image data.
+    layer_count: u32,
+    /// Maximum number of layers this array supports.
+    max_layers: u32,
+    /// Width of each layer in pixels.
+    width: u32,
+    /// Height of each layer in pixels.
+    height: u32,
+}
+
+impl TextureArray {
+    /// Create a new texture array on the GPU.
+    ///
+    /// The texture is immediately usable but layers are empty until
+    /// populated via [`add_layer`](Self::add_layer).
+    pub fn new(device: &wgpu::Device, width: u32, height: u32, max_layers: u32) -> Self {
+        let size = wgpu::Extent3d {
+            width,
+            height,
+            depth_or_array_layers: max_layers,
+        };
+
+        let texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("Instanced Sprite Texture Array"),
+            size,
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+            view_formats: &[],
+        });
+
+        let view = texture.create_view(&wgpu::TextureViewDescriptor {
+            dimension: Some(wgpu::TextureViewDimension::D2Array),
+            ..Default::default()
+        });
+
+        Self {
+            texture,
+            view,
+            layer_count: 0,
+            max_layers,
+            width,
+            height,
+        }
+    }
+
+    /// Upload RGBA8 image data as the next layer in the array.
+    ///
+    /// Returns the layer index on success. The `image_data` must contain
+    /// exactly `width * height * 4` bytes.
+    ///
+    /// Returns `RenderError::TextureArrayFull` if all layers are occupied,
+    /// or `RenderError::InvalidTextureSize` if the data length is wrong.
+    pub fn add_layer(
+        &mut self,
+        queue: &wgpu::Queue,
+        image_data: &[u8],
+    ) -> Result<u32, RenderError> {
+        if self.layer_count >= self.max_layers {
+            return Err(RenderError::TextureArrayFull {
+                max_layers: self.max_layers,
+            });
+        }
+
+        let expected_len = (self.width * self.height * 4) as usize;
+        if image_data.len() != expected_len {
+            // Infer dimensions from data length for error reporting.
+            let got_pixels = image_data.len() / 4;
+            return Err(RenderError::InvalidTextureSize {
+                expected_w: self.width,
+                expected_h: self.height,
+                got_w: got_pixels as u32,
+                got_h: 1,
+            });
+        }
+
+        let layer_index = self.layer_count;
+
+        queue.write_texture(
+            wgpu::TexelCopyTextureInfo {
+                texture: &self.texture,
+                mip_level: 0,
+                origin: wgpu::Origin3d {
+                    x: 0,
+                    y: 0,
+                    z: layer_index,
+                },
+                aspect: wgpu::TextureAspect::All,
+            },
+            image_data,
+            wgpu::TexelCopyBufferLayout {
+                offset: 0,
+                bytes_per_row: Some(4 * self.width),
+                rows_per_image: Some(self.height),
+            },
+            wgpu::Extent3d {
+                width: self.width,
+                height: self.height,
+                depth_or_array_layers: 1,
+            },
+        );
+
+        self.layer_count += 1;
+        Ok(layer_index)
+    }
+
+    /// Return a reference to the texture view spanning all layers.
+    pub fn view(&self) -> &wgpu::TextureView {
+        &self.view
+    }
+
+    /// Return the number of populated layers.
+    pub fn layer_count(&self) -> u32 {
+        self.layer_count
+    }
+}
+
+/// CPU-side texture array layer tracker for unit testing without GPU.
+///
+/// This mirrors the layer counting logic of [`TextureArray`] but does not
+/// require a wgpu device. Used exclusively in tests.
+#[cfg(test)]
+struct MockTextureArrayTracker {
+    layer_count: u32,
+    max_layers: u32,
+}
+
+#[cfg(test)]
+impl MockTextureArrayTracker {
+    fn new(max_layers: u32) -> Self {
+        Self {
+            layer_count: 0,
+            max_layers,
+        }
+    }
+
+    fn add_layer(&mut self) -> Result<u32, RenderError> {
+        if self.layer_count >= self.max_layers {
+            return Err(RenderError::TextureArrayFull {
+                max_layers: self.max_layers,
+            });
+        }
+        let index = self.layer_count;
+        self.layer_count += 1;
+        Ok(index)
+    }
+
+    fn layer_count(&self) -> u32 {
+        self.layer_count
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
@@ -226,5 +398,42 @@ mod tests {
         assert!((sorted[0].z_depth - 1.0).abs() < f32::EPSILON);
         assert!((sorted[1].z_depth - 2.0).abs() < f32::EPSILON);
         assert!((sorted[2].z_depth - 3.0).abs() < f32::EPSILON);
+    }
+
+    // -- TextureArray (mock tracker) tests ---------------------------------
+
+    #[test]
+    fn texture_array_layer_count_increments() {
+        let mut tracker = MockTextureArrayTracker::new(8);
+        assert_eq!(tracker.layer_count(), 0);
+
+        let idx0 = tracker.add_layer().unwrap();
+        assert_eq!(idx0, 0);
+        assert_eq!(tracker.layer_count(), 1);
+
+        let idx1 = tracker.add_layer().unwrap();
+        assert_eq!(idx1, 1);
+        assert_eq!(tracker.layer_count(), 2);
+
+        let idx2 = tracker.add_layer().unwrap();
+        assert_eq!(idx2, 2);
+        assert_eq!(tracker.layer_count(), 3);
+    }
+
+    #[test]
+    fn texture_array_exceeds_max_layers() {
+        let mut tracker = MockTextureArrayTracker::new(2);
+        tracker.add_layer().unwrap();
+        tracker.add_layer().unwrap();
+
+        // Third layer should fail.
+        let result = tracker.add_layer();
+        assert!(result.is_err());
+        match result {
+            Err(RenderError::TextureArrayFull { max_layers }) => {
+                assert_eq!(max_layers, 2);
+            }
+            _ => panic!("expected TextureArrayFull error"),
+        }
     }
 }
