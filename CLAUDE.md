@@ -55,11 +55,13 @@ cargo test -p {crate} -- --nocapture       # Tests verbose d'un crate
 |-------|------|----------------|
 | **Maria** | Chef de Projet | Analyse requetes, plan projet, suivi |
 | **Fabrice** | Analyste PR | Audit concurrence, qualites/defauts, cibles, fonctionnalites, points de friction |
-| **Denis** | Chef Dev Senior | Doc technique, coordination, tests finaux, securite |
+| **Denis** | Chef Dev Senior | Doc technique, coordination, tests finaux |
 | **Francois** | Dev Back-End | Implementation Rust, API, DB, tests |
 | **Lise** | Dev Front-End | UI/UX Dioxus, atomic design, assets |
 | **Arianne** | Team Manager | Qualite, memoire, anti-hallucination, archivage |
 | **George** | Audit Expert | Conformite, UX audit, tests globaux |
+| **Victor** | Expert Cybersecurite | Threat modeling, surfaces d'attaque, audit securite, OWASP |
+| **Hugo** | DevOps & Infrastructure | CI/CD, conteneurisation, deploiement, monitoring |
 
 ## Protocole MIP v2 — Miyukini Implementation Protocol
 
@@ -84,18 +86,20 @@ MIP adapte automatiquement ses capacites (parallelisme, TodoWrite, Context7, ter
 
 En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 
-### P0 — Cadrage complet en 8 temps (SEULE phase humaine)
+### P0 — Cadrage complet en 10 temps (SEULE phase humaine)
 
 | Temps | Nom | Agent(s) |
 |-------|-----|----------|
 | 1 | Exploration + Questionnaire brainstorming | Maria |
 | 2 | Ideation | Maria + Lise (parallele) |
 | 3 | Analyse concurrentielle | Fabrice (T4-T5, parallele Temps 2) |
-| 4 | Inventaire des prerequis | Denis (lead) + Francois + Lise |
-| 5 | Specification technique + Context7 | Francois |
-| 6 | Plan exhaustif + Guide d'implementation | Denis |
-| 7 | Audit de faisabilite | Arianne (agents, deps, outils, memoire) |
-| 8 | Synthese & Brief | Maria |
+| 4 | Inventaire prerequis + Evaluation infra | Denis (lead) + Hugo (T4-T5) + Francois + Lise |
+| 5 | Analyse de securite | Victor (T3+) |
+| 6 | Specification technique + Context7 | Francois |
+| 7 | Plan exhaustif + Guide d'implementation | Denis |
+| 8 | Audit de faisabilite | Arianne (agents, deps, outils, memoire) |
+| 9 | Verification pipeline CI/CD | Hugo (si CI/CD en place) |
+| 10 | Synthese & Brief | Maria |
 
 **Gate P0** : Brief approuve + mode d'autonomie choisi (FULL/BIG_STEPS/GUIDED).
 
@@ -104,8 +108,8 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 | Phase | Nom | Agents | Gate |
 |-------|-----|--------|------|
 | Git | Creation feature branch + push | Denis | Branch prete |
-| P3 | Implementation TDD parallele | Francois + Lise | Tests + clippy + push par tache |
-| P4 | Integration & Audit | Denis + George | 0 defaut bloquant |
+| P3 | Implementation TDD parallele | Francois + Lise (+ Victor spot-checks) | Tests + clippy + push par tache |
+| P4 | Integration, Audit & Securite | Denis + George + Victor + Hugo (T4-T5) | 0 defaut bloquant + score securite conforme |
 | P5 | Livraison, Test humain & Validation | Denis + George | Verdict utilisateur (ACCEPTE/REFUSE) |
 | P6 | Rapport final, Archivage & Capitalisation | Arianne | Rapport + memoire a jour |
 
@@ -115,7 +119,9 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 **Logging** : Chaque tache tracee via TodoWrite pour suivi utilisateur temps reel.
 **Context7** : Verification docs libs (Dioxus, axum, serde) en P0-T4 + spot-checks en P3.
 **Brainstorming** : Questionnaire standard en 5 sections (Comprendre/Cadrer/Imaginer/Evaluer/Decider) inspire Design Thinking, Six Thinking Hats, SCAMPER, 5 Whys, HMW, LDJ. Maria administre en Temps 1.
-**Inventaire** : Denis inventorie competences, connaissances, outils, etapes generales en Temps 4. Alimente la spec et le plan.
+**Inventaire** : Denis + Hugo inventorient competences, connaissances, outils, infra, etapes generales en Temps 4.
+**Securite** : Victor analyse surfaces d'attaque et transmet checklist securite a Francois en Temps 5. Audit securite /100 en P4.
+**Infrastructure** : Hugo evalue l'infra en Temps 4, verifie CI/CD en Temps 9, et verifie le deploiement en P4 (T4-T5).
 **Annonces** : Chaque Temps P0 et etape macro P3 annonces dans le chat avec date/heure. TodoWrite suit la progression.
 **Mode autonomie** : FULL (autopilot complet), BIG_STEPS (gates P3→P4, P4→P5), GUIDED (gate par etape macro). Persistance dans `memory/user-profile.md`. Changeable via `/autonomy_mode`.
 **Smoke test** : Test e2e happy path compile-mais-echoue AVANT le TDD tache par tache (valide la structure du plan).
@@ -129,19 +135,19 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 ### Workflow standard
 
 ```
-Utilisateur → Maria (P0 : 8 temps + init metriques) + Lise + Fabrice + Denis (inventaire) + Francois (Context7) + Denis (plan+guide) + Arianne (audit)
+Utilisateur → Maria (P0 : 10 temps + init metriques) + Lise + Fabrice + Denis+Hugo (inventaire+infra) + Victor (securite) + Francois (Context7) + Denis (plan) + Arianne (audit) + Hugo (CI/CD)
 → [GATE] Brief approuve + mode autonomie (FULL/BIG_STEPS/GUIDED)
 → === EXECUTION (mode choisi) ===
 → Git : checkout -b feat/<slug> + push -u origin
 → Denis : Smoke test e2e (compile mais echoue → valide structure)
 → Francois (P3 back) + Lise (P3 front) en PARALLELE [TDD + commit + push + metriques + TodoWrite]
-→ Denis (P3 checkpoint /5 taches + push) [BIG_STEPS: gate P3→P4] [GUIDED: gate/etape macro]
-→ Denis (P4 integration) + George (P4 audit) [BIG_STEPS: gate P4→P5]
+→ Denis (P3 checkpoint /5 taches + Victor spot-check securite + push)
+→ Denis (P4 integration) + George (P4 audit) + Victor (P4 audit securite /100) + Hugo (P4 verif deploiement T4-T5)
 → Denis (P5 push final + resume + instructions test) → [Utilisateur teste]
 → Denis (P5 questionnaire satisfaction) → [GATE] Verdict utilisateur
 →   Si ACCEPTE : Denis (P5 merge main + push + tag + nettoyage branche)
 →   Si REFUSE : Maria (retour P0 avec feedback, boucle MIP)
-→ Arianne (P6 rapport final /20 + archivage + capitalisation + profil utilisateur)
+→ Arianne (P6 rapport final /20 + score securite + archivage + capitalisation)
 ```
 
 ### Artefacts MIP

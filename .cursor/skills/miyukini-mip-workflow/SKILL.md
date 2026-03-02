@@ -295,7 +295,7 @@ L'agent propose l'installation des outils manquants (avec la commande adaptee a 
 
 #### 6.1 — Agents MIP universels (noyau invariant)
 
-Le noyau MIP definit **7 roles fonctionnels** independants de la stack :
+Le noyau MIP definit **9 roles fonctionnels** independants de la stack :
 
 | Role | Agent par defaut | Responsabilite universelle |
 |------|-----------------|---------------------------|
@@ -305,7 +305,9 @@ Le noyau MIP definit **7 roles fonctionnels** independants de la stack :
 | **Dev Back-End** | Francois | Implementation logique metier, API, DB, tests |
 | **Dev Front-End** | Lise | Implementation UI/UX, composants, theme, assets |
 | **Team Manager** | Arianne | Qualite, memoire, anti-hallucination, archivage, capitalisation |
-| **Audit Expert** | George | Conformite, tests globaux, UX audit, securite |
+| **Audit Expert** | George | Conformite, tests globaux, UX audit |
+| **Expert Cybersecurite** | Victor | Threat modeling, surfaces d'attaque, audit securite, crypto, OWASP |
+| **DevOps & Infrastructure** | Hugo | CI/CD, conteneurisation, deploiement, monitoring, infra as code |
 
 #### 6.2 — Adaptation des agents a la stack
 
@@ -488,9 +490,9 @@ Avant toute action, classer la demande :
 
 ### P0 — Cadrage complet : Brainstorming, Analyse, Specification & Planification (T3+)
 
-**Agents** : Maria (lead) + Lise (direction visuelle) + Fabrice (analyse PR, T4-T5) + Denis (inventaire + plan) + Francois (spec technique) + Arianne (audit de faisabilite)
+**Agents** : Maria (lead) + Lise (direction visuelle) + Fabrice (analyse PR, T4-T5) + Denis (inventaire + plan) + Francois (spec technique) + Victor (analyse securite, T3+) + Hugo (evaluation infra, T4-T5) + Arianne (audit de faisabilite)
 
-P0 est **LA phase humaine** : elle determine la direction de tout le travail. Aucun code ne sera ecrit avant la fin de P0. Le brainstorming est **structure en 8 temps**. Apres approbation du brief P0, **tout est automatique** (P3 → P6).
+P0 est **LA phase humaine** : elle determine la direction de tout le travail. Aucun code ne sera ecrit avant la fin de P0. Le brainstorming est **structure en 10 temps**. Apres approbation du brief P0, **tout est automatique** (P3 → P6).
 
 #### Suivi P0 — Annonces temps reel
 
@@ -508,11 +510,13 @@ La TodoWrite P0 contient un item par Temps :
 [ ] Temps 1 — Exploration & Brainstorming (Maria)
 [ ] Temps 2 — Ideation (Maria + Lise)
 [ ] Temps 3 — Analyse concurrentielle (Fabrice) [T4-T5]
-[ ] Temps 4 — Inventaire des prerequis (Denis + equipe)
-[ ] Temps 5 — Specification technique + Context7 (Francois)
-[ ] Temps 6 — Plan exhaustif & Guide d'implementation (Denis)
-[ ] Temps 7 — Audit de faisabilite (Arianne)
-[ ] Temps 8 — Synthese & Brief (Maria)
+[ ] Temps 4 — Inventaire des prerequis (Denis + Hugo) + Evaluation infra (Hugo) [T4-T5]
+[ ] Temps 5 — Analyse de securite (Victor) [T3+]
+[ ] Temps 6 — Specification technique + Context7 (Francois)
+[ ] Temps 7 — Plan exhaustif & Guide d'implementation (Denis)
+[ ] Temps 8 — Audit de faisabilite (Arianne)
+[ ] Temps 9 — Verification pipeline CI/CD (Hugo) [si CI/CD en place]
+[ ] Temps 10 — Synthese & Brief (Maria)
 ```
 
 #### Temps 1 — Exploration & Brainstorming structure (Maria)
@@ -627,9 +631,9 @@ Deux explorations paralleles :
 4. Lister les **fonctionnalites differenciantes** a envisager
 5. Detecter les **points de friction** des concurrents
 
-#### Temps 4 — Inventaire des prerequis (Denis + equipe)
+#### Temps 4 — Inventaire des prerequis + Evaluation infra (Denis + Hugo + equipe)
 
-**Denis** (lead) coordonne un inventaire complet de tout ce qui est necessaire pour realiser le projet. Chaque agent du perimetre contribue a sa section.
+**Denis** (lead) coordonne un inventaire complet de tout ce qui est necessaire pour realiser le projet. Chaque agent du perimetre contribue a sa section. **Hugo** (T4-T5) contribue a l'evaluation infrastructure.
 
 **Objectif** : Produire une **carte exhaustive des prerequis** AVANT la spec et le plan, pour que ceux-ci soient ultra-detailles et sans angle mort.
 
@@ -689,19 +693,85 @@ Denis decompose le projet en **etapes macro** (avant le plan atomique du Temps 6
 
 **Output** : Section "Inventaire des prerequis" integree au brief. Alimente directement Francois (Temps 5 : spec) et Denis (Temps 6 : plan).
 
+**6. Evaluation infrastructure** (Hugo, T4-T5) :
+
+| Categorie | Inventorier |
+|-----------|-------------|
+| **Serveurs** | CPU, RAM, stockage necessaires pour le projet |
+| **Reseau** | Ports a ouvrir, certificats TLS, DNS a configurer |
+| **Persistance** | Volumes de donnees, strategie de backup |
+| **Conteneurisation** | Dockerfiles necessaires, images de base, orchestration |
+| **CI/CD** | Pipeline existante compatible ? Adaptations necessaires ? |
+| **Scalabilite** | Single point of failure, load balancing, replicas |
+
+Hugo transmet ses conclusions a Denis (integration dans la matrice de disponibilite) et a Victor (surfaces d'attaque reseau/infra).
+
 **Annonce** :
 ```
-[YYYY-MM-DD HH:MM] ✓ P0 Temps 4 — Inventaire des prerequis termine.
-  Agent(s): Denis (lead), Francois, Lise
-  Resultat: X competences, Y outils, Z etapes generales inventories. Manquants: N
-  → Prochaine etape: Temps 5 — Specification technique (Francois)
+[YYYY-MM-DD HH:MM] ✓ P0 Temps 4 — Inventaire des prerequis + Evaluation infra termine.
+  Agent(s): Denis (lead), Francois, Lise, Hugo (infra)
+  Resultat: X competences, Y outils, Z etapes generales inventories. Infra: N services, M ports. Manquants: N
+  → Prochaine etape: Temps 5 — Analyse de securite (Victor)
 ```
 
 ---
 
-#### Temps 5 — Specification technique + Verification Context7 (Francois)
+#### Temps 5 — Analyse de securite (Victor, T3+)
 
-**Francois** analyse le contexte technique, **verifie les docs actuelles**, et produit la spec :
+**Victor** intervient apres l'inventaire des prerequis (Denis + Hugo, Temps 4) et avant la spec technique (Francois, Temps 6) pour identifier les surfaces d'attaque du projet.
+
+**Analyse en 5 volets** :
+
+1. **Threat Model** — Identifier les menaces selon le contexte du projet :
+   - **Assets** : quelles donnees/ressources sont a proteger ?
+   - **Acteurs** : qui sont les attaquants potentiels ? (utilisateur malveillant, MITM, insider, bot)
+   - **Surfaces d'attaque** : quels points d'entree expose le systeme ? (API, UI, fichiers, reseau, DB)
+   - **Scenarios d'attaque** : pour chaque surface, quels sont les scenarios credibles ?
+   - **Impact** : quel est l'impact de chaque scenario ? (confidentialite, integrite, disponibilite)
+
+2. **Niveau de securite requis** — Evaluer selon `.mip/environment.md` (SETUP-2, S2.8-S2.11) :
+   - **Standard** : OWASP basics, pas de donnees sensibles critiques
+   - **Renforce** : Crypto obligatoire, audit regulier, conformite RGPD
+   - **Critique** : Zero-trust, audit formel, conformite sectorielle (finance, sante, defense)
+
+3. **Audit des dependances** — Pour chaque dependance externe :
+   - CVE connues ? (`cargo audit`, `npm audit`, `pip-audit`, `snyk`)
+   - Dernier commit ? (>6 mois = risque supply chain)
+   - Nombre de mainteneurs ? (<2 = risque supply chain)
+   - Licence compatible ?
+
+4. **Checklist securite pour la spec** — Transmettre a Francois (Temps 6) :
+   - [ ] Authentification : quel mecanisme ? (JWT, sessions, OAuth2)
+   - [ ] Autorisation : quel modele ? (RBAC, ABAC, ACL)
+   - [ ] Validation des entrees : quels points d'entree ?
+   - [ ] Chiffrement : quelles donnees ? quel algorithme ?
+   - [ ] Gestion des secrets : ou sont stockes les secrets ?
+   - [ ] Logging securite : quels evenements logger ?
+   - [ ] Rate limiting : quels endpoints proteger ?
+   - [ ] CORS : quelle politique ?
+
+5. **Recommandations de durcissement** — Mesures proportionnees au niveau de securite :
+   - Headers HTTP securite (CSP, HSTS, X-Frame-Options)
+   - Politique de mots de passe
+   - Rotation des tokens/sessions
+   - Backup et recovery
+   - Monitoring et alertes
+
+**Output** : Section "Analyse de securite" integree au brief (Temps 10). Checklist transmise a Francois (Temps 6).
+
+**Annonce** :
+```
+[YYYY-MM-DD HH:MM] ✓ P0 Temps 5 — Analyse de securite terminee.
+  Agent(s): Victor
+  Resultat: X surfaces d'attaque, Y recommandations, Z dependances auditees. Niveau: <standard/renforce/critique>
+  → Prochaine etape: Temps 6 — Specification technique (Francois)
+```
+
+---
+
+#### Temps 6 — Specification technique + Verification Context7 (Francois)
+
+**Francois** analyse le contexte technique, **verifie les docs actuelles**, et produit la spec. Il **integre la checklist securite de Victor** (Temps 5) dans ses decisions techniques :
 
 1. **Explorer le code existant** en profondeur (Glob, Grep, Read)
 2. **Verification Context7 obligatoire** — Pour chaque librairie/framework implique :
@@ -720,7 +790,13 @@ Denis decompose le projet en **etapes macro** (avant le plan atomique du Temps 6
    - [ ] Strate correcte dans la pyramide COG
    - [ ] Annotations MSCM planifiees (@id, @do, @role, @layer)
    - [ ] Versions des dependances a jour (pas de crates deprecated)
-8. **Documenter** les risques techniques identifies
+8. **Integrer la checklist securite de Victor** (Temps 5) :
+   - [ ] Mecanisme d'authentification conforme
+   - [ ] Validation des entrees sur chaque point d'entree identifie
+   - [ ] Chiffrement conforme aux algorithmes approuves
+   - [ ] Gestion des secrets (pas de hardcode)
+   - [ ] Rate limiting planifie si API exposee
+9. **Documenter** les risques techniques identifies
 
 **Output supplementaire** : Section "Verification documentaire" dans la spec avec :
 - Libs verifiees + versions
@@ -730,9 +806,9 @@ Denis decompose le projet en **etapes macro** (avant le plan atomique du Temps 6
 
 Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md` — **Doit commencer par un TL;DR de 5 lignes max.**
 
-#### Temps 6 — Plan exhaustif & Guide d'implementation detaille (Denis)
+#### Temps 7 — Plan exhaustif & Guide d'implementation detaille (Denis)
 
-**Denis** compile l'inventaire (Temps 4) + la spec de Francois (Temps 5) et produit le **plan exhaustif avec guide d'implementation detaille** couvrant TOUTE la chaine de production. L'inventaire des prerequis alimente directement ce plan — chaque etape macro est decomposee en taches atomiques :
+**Denis** compile l'inventaire (Temps 4) + l'analyse de securite (Victor, Temps 5) + la spec de Francois (Temps 6) et produit le **plan exhaustif avec guide d'implementation detaille** couvrant TOUTE la chaine de production. L'inventaire des prerequis alimente directement ce plan — chaque etape macro est decomposee en taches atomiques :
 
 1. **Decomposer en taches atomiques** (2-5 minutes chacune)
 2. **Couvrir exhaustivement** les categories suivantes :
@@ -742,12 +818,14 @@ Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md` — **Doit commencer par un TL;DR d
 | **Code** | Implementation back-end (Francois) + front-end (Lise) |
 | **Tests unitaires** | Un test minimum par fonction/methode ajoutee |
 | **Tests d'integration** | Tests de flux complets (API, UI flows) |
+| **Tests securite** | Tests de Victor : injection, auth bypass, crypto, validation inputs |
 | **Tests generaux** | `cargo test --workspace`, `cargo clippy --workspace -- -D warnings` |
-| **Audit** | Checklist George (MSCM, securite, UX, conformite) |
+| **Audit** | Checklist George (MSCM, UX, conformite) + Rapport securite Victor (score /100) |
+| **Infra** | Verification Hugo : Dockerfiles, CI/CD, health checks, config prod (T4-T5) |
 | **Corrections** | Taches de correction pre-planifiees (buffer 20% des taches) |
 
 3. **Chaque tache DOIT contenir** :
-   - Numero sequentiel et categorie (`[CODE-01]`, `[TEST-U-01]`, `[TEST-I-01]`, `[AUDIT-01]`, etc.)
+   - Numero sequentiel et categorie (`[CODE-01]`, `[TEST-U-01]`, `[TEST-I-01]`, `[TEST-S-01]`, `[AUDIT-01]`, `[INFRA-01]`, etc.)
    - Agent assigne (Francois, Lise, Denis, George)
    - Fichier(s) exact(s) a modifier (chemin complet)
    - Code complet a ecrire (pas de "ajouter de la validation")
@@ -786,7 +864,7 @@ Le guide sert de **feuille de route detaillee** pour Francois et Lise en P3. Cha
 
 Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md` — **Doit commencer par un TL;DR de 5 lignes max.**
 
-#### Temps 7 — Audit de faisabilite & Conformite (Arianne)
+#### Temps 8 — Audit de faisabilite & Conformite (Arianne)
 
 **Arianne** verifie que le projet est **realisable tel que planifie**, que les agents, dependances et outils sont conformes, et qu'il n'y a ni trou ni ambiguite.
 
@@ -823,11 +901,34 @@ Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md` — **Doit commencer par un TL;DR d
 
 Artefact : Section "Audit de faisabilite" integree au brief (pas d'artefact separe en P0)
 
-#### Temps 8 — Synthese & Brief (Maria)
+#### Temps 9 — Verification pipeline CI/CD (Hugo, si CI/CD en place)
+
+**Hugo** verifie que la pipeline CI/CD existante (detectee en SETUP-2, S2.13) est compatible avec le nouveau code planifie.
+
+**Verification** :
+1. **Pipeline existante** : Relire la config CI/CD (`.github/workflows/`, `.gitlab-ci.yml`, etc.)
+2. **Compatibilite** : Les etapes existantes (lint, test, build, deploy) fonctionnent-elles avec les nouveaux crates/fichiers ?
+3. **Adaptations necessaires** : Nouveaux jobs ? Nouvelles variables d'environnement ? Nouveaux secrets CI ?
+4. **Estimation** : Temps de build additionnel, cache a ajuster, artefacts a produire
+5. **Si pas de CI/CD** : Proposer une configuration initiale adaptee a la stack
+
+**Output** : Section "Pipeline CI/CD" integree au brief. Taches `[INFRA-*]` ajoutees au plan (Temps 7) si adaptations necessaires.
+
+**Annonce** :
+```
+[YYYY-MM-DD HH:MM] ✓ P0 Temps 9 — Verification pipeline CI/CD terminee.
+  Agent(s): Hugo
+  Resultat: Pipeline <compatible/a adapter>. N adaptations necessaires.
+  → Prochaine etape: Temps 10 — Synthese & Brief (Maria)
+```
+
+---
+
+#### Temps 10 — Synthese & Brief (Maria)
 
 Maria compile tout dans le brief final :
 
-1. **Fusionner** les contributions de tous les agents (Maria + Lise + Fabrice + Francois + Denis + Arianne)
+1. **Fusionner** les contributions de tous les agents (Maria + Lise + Fabrice + Victor + Hugo + Francois + Denis + Arianne)
 2. **Integrer l'audit d'Arianne** : section conformite, alertes, prerequis eventuels
 3. **Rediger le brief structure** avec toutes les sections
 4. **Presenter les approches** avec la recommandation de l'equipe
@@ -882,7 +983,33 @@ Maria compile tout dans le brief final :
 - Differenciateurs: ...
 - Cible utilisateur: ...
 
-## Inventaire des prerequis (par Denis + equipe)
+## Analyse de securite (par Victor, T3+)
+### Threat Model
+| Surface | Scenario | Impact | Mitigation |
+|---------|----------|--------|------------|
+| ... | ... | ... | ... |
+
+### Niveau de securite
+- Niveau: <standard/renforce/critique>
+- Conformite: <RGPD/HIPAA/SOC2/aucune>
+- Dependances auditees: X/Y (CVE: N)
+
+### Checklist securite
+- [ ] Auth: ...
+- [ ] Validation inputs: ...
+- [ ] Chiffrement: ...
+- [ ] Secrets: ...
+- [ ] Rate limiting: ...
+
+### Recommandations de durcissement
+- [liste proportionnee au niveau]
+
+## Pipeline CI/CD (par Hugo, si applicable)
+- Pipeline: <compatible/a adapter/a creer>
+- Adaptations: [liste]
+- Estimation impact build: ...
+
+## Inventaire des prerequis (par Denis + Hugo + equipe)
 ### Competences requises
 - Back-end (Francois): [liste]
 - Front-end (Lise): [liste]
@@ -914,8 +1041,10 @@ Maria compile tout dans le brief final :
   - Code: X taches (Y Francois, Z Lise)
   - Tests unitaires: X taches
   - Tests integration: X taches
+  - Tests securite: X taches (Victor)
   - Tests generaux: X taches
-  - Audit: X taches
+  - Audit: X taches (George + Victor)
+  - Infra: X taches (Hugo)
   - Buffer corrections: X taches
 
 ## Audit de faisabilite (par Arianne)
@@ -962,7 +1091,7 @@ APPROUVE / REJETE / MODIFIE / PREREQUIS D'ABORD
 Garder ce mode pour toutes les futures sequences MIP ? OUI / NON / JE SAIS PAS
 ```
 
-**Quality Gate P0** : Utilisateur approuve le brief ET choisit l'approche ET choisit le mode d'autonomie.
+**Quality Gate P0** : Utilisateur approuve le brief ET choisit l'approche ET choisit le mode d'autonomie. Victor et Hugo ont valide la securite et l'infrastructure.
 
 **Hard gate** : AUCUN passage en execution sans brief approuve. En mode FULL, c'est la **DERNIERE intervention humaine** avant la livraison (sauf bug/delta majeur).
 
@@ -1079,6 +1208,9 @@ A l'ouverture de chaque sequence MIP, Maria cree le fichier `.mip/metrics/YYYY-M
     "auto_corrections": 0,
     "audits": 0,
     "audit_defects": [],
+    "security_score": null,
+    "security_defects": [],
+    "infra_checks_passed": null,
     "emergency_brakes": 0
   },
   "human_interventions": [],
@@ -1095,7 +1227,7 @@ A l'ouverture de chaque sequence MIP, Maria cree le fichier `.mip/metrics/YYYY-M
 | **P0** | Maria | `p0_start`, `p0_end`, `agents_engaged`, questions posees a l'humain |
 | **Git** | Denis | `autopilot_start` |
 | **P3** | Francois/Lise | `p3_start`, `p3_end`, `lines_written/deleted`, `commits`, `unit_tests_*`, `auto_corrections`, `crates_touched` |
-| **P4** | Denis/George | `p4_start`, `p4_end`, `audits`, `audit_defects[]`, `global_tests_*`, `integration_tests_*` |
+| **P4** | Denis/George/Victor/Hugo | `p4_start`, `p4_end`, `audits`, `audit_defects[]`, `security_score`, `global_tests_*`, `integration_tests_*` |
 | **P5** | Denis | `p5_start`, `p5_end`, `p5_test_start`, `p5_test_end`, `satisfaction`, `human_interventions[]` |
 | **P6** | Arianne | `p6_start`, `p6_end`, `total_end`, compilation du rapport final |
 
@@ -1118,7 +1250,7 @@ Chaque question posee a l'utilisateur est loggee avec :
 ```json
 {
   "timestamp": "ISO8601",
-  "agent": "Maria|Denis|Francois|Lise|George|Arianne|Fabrice",
+  "agent": "Maria|Denis|Francois|Lise|George|Arianne|Fabrice|Victor|Hugo",
   "phase": "P0|P3|P4|P5",
   "nature": "clarification|validation|choix_technique|choix_design|blocage|autre",
   "question": "<texte de la question>",
@@ -1219,6 +1351,10 @@ fn smoke_miyuvoice_capture_and_wakeword() {
 - `cargo build -p {crate}` des crates modifies
 - `cargo clippy -p {crate} -- -D warnings`
 - Verifier que les taches precedentes ne sont pas cassees par les nouvelles
+- **Victor spot-check securite** (si la tache touche auth, crypto, validation inputs, secrets) :
+  - Grep pour patterns dangereux : `unwrap()`, URLs en dur, secrets hardcodes, `eval()`, SQL non-parametre
+  - Verification des algorithmes crypto (table algorithmes approuves)
+  - Verification de la validation des entrees utilisateur
 - Si regression detectee → corriger avant de continuer
 - `git push` — pousser l'etat courant sur la feature branch
 
@@ -1256,9 +1392,9 @@ fn smoke_miyuvoice_capture_and_wakeword() {
 
 ---
 
-### P4 — Integration & Audit (T3+)
+### P4 — Integration, Audit & Securite (T3+)
 
-**Agents** : Denis + George
+**Agents** : Denis + George + Victor + Hugo (T4-T5)
 
 **Denis** — Integration :
 1. `cargo build --workspace`
@@ -1273,24 +1409,51 @@ fn smoke_miyuvoice_capture_and_wakeword() {
 - [ ] Build workspace OK
 - [ ] Tests workspace OK
 - [ ] Clippy propre
-- [ ] Pas de `unwrap()` en production (hors `#[cfg(test)]`)
-- [ ] Pas d'URL hardcodees
-- [ ] Pas de donnees sensibles en clair
 - [ ] Annotations MSCM presentes sur les nouveaux fichiers
 - [ ] Lois d'Autonomie respectees
 - [ ] Parcours utilisateur coherent (si UI)
 
-Artefact : `.mip/audits/YYYY-MM-DD-<slug>.md`
+**Victor** — Audit de securite (score /100) :
+- [ ] Pas de `unwrap()` en production (hors `#[cfg(test)]`)
+- [ ] Pas d'URL hardcodees
+- [ ] Pas de donnees sensibles en clair (secrets, passphrases, tokens)
+- [ ] Validation des entrees sur tous les endpoints
+- [ ] Chiffrement conforme (algorithmes approuves uniquement)
+- [ ] Comparaison de secrets en temps constant
+- [ ] Logging securite en place
+- [ ] Rate limiting sur les endpoints d'auth
+- [ ] Dependances auditees (0 CVE critique)
+- [ ] Tests de securite executes (injection, auth bypass, XSS)
 
-**Auto-correction** : Defauts NON-BLOQUANTS sont corriges automatiquement par Denis. Defauts CRITIQUES → **frein d'urgence**.
+Score securite /100 (5 criteres x /20) :
+| Critere | Score /20 |
+|---------|----------|
+| Authentification & autorisation | /20 |
+| Chiffrement & secrets | /20 |
+| Validation des entrees | /20 |
+| Dependances & supply chain | /20 |
+| Logging & monitoring | /20 |
 
-**Quality Gate P4** : George valide — 0 defaut BLOQUANT.
+**Hugo** (T4-T5) — Verification deploiement :
+- [ ] Build de production reussit (optimisations, stripping)
+- [ ] Image Docker se construit et demarre (si applicable)
+- [ ] Pipeline CI/CD passe au vert
+- [ ] Health checks fonctionnent
+- [ ] Configuration prod separee de la config dev
 
-**Gate BIG_STEPS (P4→P5)** : En mode `BIG_STEPS`, George presente le resume d'audit avant de passer a P5 :
+Artefact : `.mip/audits/YYYY-MM-DD-<slug>.md` (audit George + rapport securite Victor)
+
+**Auto-correction** : Defauts NON-BLOQUANTS sont corriges automatiquement par Denis. Defauts securite CRITIQUES identifie par Victor → **BLOQUANT, pas de livraison sans correction**. Defauts infra identifies par Hugo → corrections ou documentation.
+
+**Quality Gate P4** : George valide — 0 defaut BLOQUANT. Victor valide — score securite conforme au niveau requis.
+
+**Gate BIG_STEPS (P4→P5)** : En mode `BIG_STEPS`, George et Victor presentent le resume d'audit avant de passer a P5 :
 ```
-[YYYY-MM-DD HH:MM] Resume Audit P4 — Integration & Audit termines.
+[YYYY-MM-DD HH:MM] Resume Audit P4 — Integration, Audit & Securite termines.
   Build: OK | Tests: X passes | Clippy: propre
-  Defauts: N trouves (X corriges, Y acceptes, Z bloquants)
+  Defauts conformite: N trouves (X corriges, Y acceptes, Z bloquants)
+  Score securite Victor: XX/100 | Defauts securite: N (X corriges)
+  Infra Hugo: OK / N adaptations
   Annotations MSCM: X/Y fichiers
   → Continuer vers P5 (Livraison & Test humain) ?
   [CONTINUER] / [CORRIGER: <instructions>] / [STOPPER]
@@ -1484,10 +1647,21 @@ Artefact : `.mip/reports/YYYY-MM-DD-<slug>-report.md`
 
 ## 8. Audits
 - **Nombre d'audits** : <N>
-  | # | Type | Defauts | Gravite | Nature | Resolution |
-  |---|------|---------|---------|--------|------------|
-  | 1 | conformite | ... | bloquant/non-bloquant | ... | corrige/accepte |
-  | ... | ... | ... | ... | ... | ... |
+  | # | Type | Agent | Defauts | Gravite | Nature | Resolution |
+  |---|------|-------|---------|---------|--------|------------|
+  | 1 | conformite | George | ... | bloquant/non-bloquant | ... | corrige/accepte |
+  | 2 | securite | Victor | ... | critique/eleve/moyen | ... | corrige/accepte |
+  | 3 | infra | Hugo | ... | bloquant/non-bloquant | ... | corrige/accepte |
+  | ... | ... | ... | ... | ... | ... | ... |
+
+- **Score securite Victor** : <N>/100
+  | Critere | Score /20 |
+  |---------|----------|
+  | Auth & autorisation | /20 |
+  | Chiffrement & secrets | /20 |
+  | Validation entrees | /20 |
+  | Dependances & supply chain | /20 |
+  | Logging & monitoring | /20 |
 
 ## 9. Satisfaction utilisateur
 - **Verdict** : ACCEPTE / ACCEPTE AVEC RESERVES / REFUSE (boucle N)
@@ -1506,6 +1680,7 @@ Artefact : `.mip/reports/YYYY-MM-DD-<slug>-report.md`
 | Qualite des interactions utilisateur | /20 | Clarte, pertinence des questions, ecoute |
 | Respect du protocole MIP | /20 | Gates, artefacts, logging, TDD |
 | Qualite de l'indexation MSCM | /20 | Couverture, precision des annotations |
+| Securite (score Victor) | /20 | Score securite /100 ramene a /20 |
 
 **Bareme** :
 - 18-20 : Excellent — reference pour les futures sequences
@@ -1587,6 +1762,9 @@ Artefact : `.mip/reports/YYYY-MM-DD-<slug>-report.md`
 30. **Phase SETUP obligatoire** — Tout nouvel environnement MIP doit passer par la Phase SETUP avant le premier P0. Produit `.mip/environment.md`
 31. **Environment.md referentiel** — Les commandes build/test/lint et conventions sont lues depuis `.mip/environment.md`, pas hardcodees dans les agents
 32. **Adaptation automatique** — MIP adapte ses capacites (parallelisme, TodoWrite, Context7) a l'outil IA detecte en SETUP-4
+33. **Analyse securite obligatoire** (T3+) — Victor analyse les surfaces d'attaque et transmet une checklist a Francois AVANT la spec technique
+34. **Audit securite avant livraison** (T3+) — Victor produit un score securite /100 en P4. Defaut critique = BLOQUANT
+35. **Verification infra** (T4-T5) — Hugo evalue l'infrastructure et verifie la pipeline CI/CD en P0 et P4
 
 ---
 
@@ -1618,6 +1796,8 @@ Chaque agent charge **uniquement ses fichiers pertinents** en debut de tache :
 | **Dev Front-End** (Lise) | `stack-cheatsheet.md`, `api-contracts.md`, `project-file-map.md`, `code-annotations-templates.md` |
 | **Chef Dev** (Denis) | `project-file-map.md`, `stack-patterns.md`, `mip-decisions.md`, `mip-antipatterns.md` |
 | **Audit Expert** (George) | `project-file-map.md`, `code-annotations-templates.md`, `mip-antipatterns.md` |
+| **Expert Cybersecurite** (Victor) | `security-patterns.md`, `mip-antipatterns.md`, `stack-patterns.md`, `project-file-map.md` |
+| **DevOps & Infra** (Hugo) | `project-file-map.md`, `.mip/environment.md` (section Infrastructure), `mip-decisions.md` |
 | **Team Manager** (Arianne) | `mip-decisions.md`, `mip-antipatterns.md`, `mip-performance-history.md`, `team-skills-audit.md` |
 
 ### TL;DR obligatoire sur chaque artefact
@@ -1661,9 +1841,9 @@ Ce protocole s'appuie sur les skills SuperClaude quand ils sont disponibles :
 
 | Phase MIP | Skill SuperClaude | Usage |
 |-----------|-------------------|-------|
-| P0 (Temps 1-2) | `brainstorming` | Maria structure le brief (8 temps : exploration → ideation → analyse → inventaire → spec → plan → audit faisabilite → synthese) |
-| P0 (Temps 7) | `verification-before-completion` | Arianne verifie conformite agents, deps, outils, memoire |
-| P0 (Temps 6) | `writing-plans` | Denis cree les taches atomiques exhaustives + guide d'implementation |
+| P0 (Temps 1-2) | `brainstorming` | Maria structure le brief (10 temps : exploration → ideation → analyse → inventaire+infra → securite → spec → plan → audit faisabilite → CI/CD → synthese) |
+| P0 (Temps 8) | `verification-before-completion` | Arianne verifie conformite agents, deps, outils, memoire |
+| P0 (Temps 7) | `writing-plans` | Denis cree les taches atomiques exhaustives + guide d'implementation |
 | P3 | `subagent-driven-development` | Execution par subagent frais |
 | P3 | `test-driven-development` | Cycle RED-GREEN-REFACTOR |
 | P3 | `systematic-debugging` | Root cause avant tout fix + auto-correction |
@@ -1697,36 +1877,49 @@ Utilisateur : "Je veux ajouter MiyuVoice"
   |   +-- Fabrice : Analyse concurrence (Alexa, Siri, etc.)
   |   → [2026-03-02 14:20] ✓ P0 Temps 2+3 termines
   |
-  +-- Denis (Temps 4) : Inventaire des prerequis
+  +-- Denis + Hugo (Temps 4) : Inventaire des prerequis + Evaluation infra
   |   +-- Competences : Rust audio (Francois), Dioxus signals (Lise), archi embarquee (Denis)
   |   +-- Connaissances : VOSK API, wake word detection, streaming audio
   |   +-- Outils : crates cpal/rodio, modele VOSK, assets audio
   |   +-- Etapes macro : 1-Capture audio, 2-Wakeword, 3-API voix, 4-UI composant
+  |   +-- Hugo : Ports audio (microphone), pas de serveur requis, embarque dans Central
   |   +-- Matrice : 2 crates externes a verifier, 1 asset a creer
   |   → [2026-03-02 14:30] ✓ P0 Temps 4 termine (4 etapes, 12 prerequis, 1 manquant)
   |
-  +-- Francois (Temps 5) : Spec technique + VERIFICATION CONTEXT7
+  +-- Victor (Temps 5) : Analyse de securite
+  |   +-- Threat model : acces microphone (surface), donnees audio (asset), injection commande (scenario)
+  |   +-- Niveau : standard (pas de donnees sensibles stockees)
+  |   +-- Audit deps : cpal 0.15 (OK), vosk 0.2 (maintenance active)
+  |   +-- Checklist : validation entrees audio, pas de secrets, permissions micro
+  |   → [2026-03-02 14:40] ✓ P0 Temps 5 termine (3 surfaces, 5 recommandations)
+  |
+  +-- Francois (Temps 6) : Spec technique + VERIFICATION CONTEXT7
   |   +-- Context7 : Dioxus 0.6 RSX, axum handlers, serde patterns
   |   +-- Anti-patterns : charge MEMORY.md + mip-antipatterns.md
+  |   +-- Integre checklist securite Victor
   |   +-- Output : spec + section "Verification documentaire"
-  |   → [2026-03-02 14:40] ✓ P0 Temps 5 termine
+  |   → [2026-03-02 14:50] ✓ P0 Temps 6 termine
   |
-  +-- Denis (Temps 6) : Plan exhaustif + Guide d'implementation detaille
-  |   +-- 42 taches : 18 CODE, 12 TEST-U, 4 TEST-I, 3 TEST-G, 3 AUDIT, 2 CORRECT
+  +-- Denis (Temps 7) : Plan exhaustif + Guide d'implementation detaille
+  |   +-- 48 taches : 18 CODE, 12 TEST-U, 4 TEST-I, 3 TEST-S, 3 TEST-G, 4 AUDIT, 2 INFRA, 2 CORRECT
   |   +-- Guide : 4 etapes avec prerequis, taches atomiques, criteres completion
-  |   → [2026-03-02 14:55] ✓ P0 Temps 6 termine
+  |   → [2026-03-02 15:05] ✓ P0 Temps 7 termine
   |
-  +-- Arianne (Temps 7) : Audit de faisabilite
-  |   +-- Verification : agents, deps, outils, memoire, Context7 spot-check
+  +-- Arianne (Temps 8) : Audit de faisabilite
+  |   +-- Verification : agents (9), deps, outils, memoire, Context7 spot-check
   |   +-- Diagnostic : CONFORME / TROUS MINEURS / PREREQUIS
   |   +-- Si prerequis → suggere mini-projet precurseur
-  |   → [2026-03-02 15:05] ✓ P0 Temps 7 termine (CONFORME)
+  |   → [2026-03-02 15:15] ✓ P0 Temps 8 termine (CONFORME)
   |
-  +-- Maria (Temps 8) : Synthese → Brief complet (inclut inventaire + audit + TL;DR)
+  +-- Hugo (Temps 9) : Verification pipeline CI/CD
+  |   +-- Pipeline GitHub Actions : compatible, pas de nouveau job necessaire
+  |   → [2026-03-02 15:20] ✓ P0 Temps 9 termine (pipeline compatible)
+  |
+  +-- Maria (Temps 10) : Synthese → Brief complet (inclut securite + infra + audit + TL;DR)
   |   [GATE] Utilisateur approuve le brief + choisit approche + choisit mode autonomie
   |   +-- "Mode d'autonomie : FULL / BIG_STEPS / GUIDED ?"
   |   +-- "Garder pour les futures sequences ? OUI / NON / JE SAIS PAS"
-  |   → [2026-03-02 15:15] ✓ P0 Temps 8 termine — Brief approuve, mode BIG_STEPS
+  |   → [2026-03-02 15:30] ✓ P0 Temps 10 termine — Brief approuve, mode BIG_STEPS
   |
   +=== EXECUTION START (mode: BIG_STEPS, metriques initialisees) ===
   |
@@ -1735,20 +1928,22 @@ Utilisateur : "Je veux ajouter MiyuVoice"
   +-- Denis : Smoke test e2e (compile mais echoue → structure validee)
   |
   +-- P3 PARALLELE :
-  |   +-- Chargement memoire : rust-patterns.md (Francois), dioxus-cheatsheet.md (Lise)
+  |   +-- Chargement memoire : rust-patterns.md (Francois), dioxus-cheatsheet.md (Lise), security-patterns.md (Victor)
   |   +-- Pre-flight : Context7 spot-check + anti-patterns par tache
   |   +-- Francois : Taches CODE back-end (TDD) → commit → push → metriques → TodoWrite
   |   +-- Lise : Taches CODE front-end (TDD) → commit → push → metriques → TodoWrite
-  |   +-- [Checkpoint toutes les 5 taches : mini-audit Denis + push]
+  |   +-- [Checkpoint toutes les 5 taches : mini-audit Denis + spot-check securite Victor + push]
   |   +-- [Auto-correction intelligente : root cause + Context7 + 2 tentatives]
   |   +-- [Annonce par etape macro : "[HH:MM] ✓ Etape 1/4 — Capture audio terminee"]
   |   +-- [BIG_STEPS: Gate P3→P4 — Resume P3 a l'utilisateur → CONTINUER/CORRIGER/STOPPER]
   |
   +-- P4 :
   |   +-- Denis : Integration workspace (build/test/clippy)
-  |   +-- George : Audit conformite → .mip/audits/ + metriques audit
-  |   [Auto-correction defauts non-bloquants, frein d'urgence si critique]
-  |   +-- [BIG_STEPS: Gate P4→P5 — Resume audit a l'utilisateur → CONTINUER/CORRIGER/STOPPER]
+  |   +-- George : Audit conformite → .mip/audits/
+  |   +-- Victor : Audit securite → score /100, defauts, verdict
+  |   +-- Hugo (T4-T5) : Verification deploiement (Docker, CI/CD, health checks)
+  |   [Auto-correction defauts non-bloquants, frein d'urgence si critique securite]
+  |   +-- [BIG_STEPS: Gate P4→P5 — Resume audit + securite a l'utilisateur → CONTINUER/CORRIGER/STOPPER]
   |
   +-- P5 :
   |   +-- Denis : Push final + resume a l'utilisateur + instructions test
@@ -1760,9 +1955,9 @@ Utilisateur : "Je veux ajouter MiyuVoice"
   |       +-- REFUSE → log intervention + increment boucle → retour P0
   |
   +-- P6 : Arianne
-  |   +-- Rapport final (notes /20, metriques, profil utilisateur)
+  |   +-- Rapport final (notes /20, metriques, score securite, profil utilisateur)
   |   +-- → .mip/reports/ + memory/mip-performance-history.md
-  |   +-- Capitalisation : anti-patterns, decisions, agent-tuning
+  |   +-- Capitalisation : anti-patterns, decisions, security-patterns, agent-tuning
   |   +-- Profil utilisateur → memory/user-profile.md (+ mode autonomie prefere)
   |
   +=== EXECUTION END ==========================================
