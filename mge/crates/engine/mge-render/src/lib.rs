@@ -10,6 +10,7 @@
 //! - **Sprite** -- per-layer sprite batching and depth sorting.
 //! - **Tile** -- isometric tile grid rendering.
 //! - **Renderer** -- top-level GPU renderer stub (full init requires `mge-platform`).
+//! - **Text** -- TTF/OTF text rendering with glyph caching (replaces `BitmapFont`).
 //! - **Errors** -- explicit error types via `thiserror`.
 
 pub mod animation;
@@ -53,4 +54,10 @@ pub use culling::{FrustumCuller, RenderEntity, RenderSpatialGrid};
 pub use instanced::{
     InstanceData, InstancedSpriteBatcher, InstancedSpritePipeline, QuadVertex,
     TextureArray,
+};
+
+// -- Text rendering re-exports --
+
+pub use text::{
+    CachedGlyph, FontId, GlyphCache, GlyphKey, GlyphMetrics, TextRenderer, TtfFont,
 };
