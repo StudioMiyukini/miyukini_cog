@@ -451,7 +451,7 @@ Les elements suivants sont des **invariants** du protocole MIP, independants de 
 | API | axum REST | tRPC |
 | Architecture | Pyramide COG, Strates 0-9 | Clean Architecture |
 | Annotations | MSCM (@id, @do, @role) | TSDoc + ESLint rules |
-| Lois/regles | LOI-1 a LOI-8 | Pas de dependance critique |
+| Lois/regles | LOI-1 a LOI-9 | Pas de dependance critique |
 | Build | `cargo build --workspace` | `npm run build` |
 | Test | `cargo test --workspace` | `npx vitest` |
 | Lint | `cargo clippy -- -D warnings` | `npx eslint .` |
@@ -785,7 +785,7 @@ Hugo transmet ses conclusions a Denis (integration dans la matrice de disponibil
 5. **Definir les types, traits, API** (signatures completes — validees contre les docs Context7)
 6. **Evaluer les dependances** entre modules et crates
 7. **Verifier la conformite architecturale** :
-   - [ ] Lois d'Autonomie respectees (LOI-1 a LOI-8)
+   - [ ] Lois d'Autonomie respectees (LOI-1 a LOI-9)
    - [ ] `unsafe_code = "forbid"` dans tout nouveau Cargo.toml
    - [ ] Strate correcte dans la pyramide COG
    - [ ] Annotations MSCM planifiees (@id, @do, @role, @layer)
@@ -2033,3 +2033,289 @@ Utilisateur : "Je veux ajouter MiyuVoice"
 | **Enterprise multi-IDE** | GitHub Copilot (extension) | Compatible VS Code, JetBrains, CLI |
 | **AWS-native** | Amazon Q Developer | Integration IAM, CDK, CloudFormation |
 | **Gros monorepo (50k+ fichiers)** | Augment Code ou Cody | Indexation semantique avancee |
+
+---
+
+<!-- @id: mas -->
+<!-- @do: Pattern de parallelisation des taches MIP via DAG de dependances et vagues d'execution -->
+<!-- @role: Maria (orchestrateur), Denis (merge coordinator), Workers (Francois, Lise, Victor) -->
+<!-- @layer: Protocole MIP v2 -->
+<!-- @human: miyukini-user -->
+
+## MASS — Miyukini Agent Swarm System (Pattern de parallelisation)
+
+> **TL;DR** : MASS permet d'executer les taches MIP en parallele via un DAG de dependances decompose en vagues. 3 couches : Orchestrateur (Maria/DAG) -> Pool Workers (agents) -> Synchronisation (Denis/merge). Loi 9 : si >3 taches independantes, parallelisation OBLIGATOIRE.
+
+<!-- @id: mass.architecture -->
+<!-- @do: Definit les 3 couches du pattern MASS (orchestrateur, workers, synchronisation) -->
+<!-- @role: Denis (architecte MASS) -->
+
+### Architecture en 3 couches
+
+**Couche 1 — Orchestrateur (Maria)**
+
+Maria decompose le plan exhaustif (Denis, Temps 7) en un DAG de dependances. Elle identifie les vagues paralleles (groupes de taches sans dependance entre elles) et previent le serial collapse. Le DAG est stocke dans `.mip/dags/YYYY-MM-DD-<slug>.json`.
+
+Responsabilites :
+- Generer le DAG a partir du plan (extraction des dependances)
+- Calculer les vagues par tri topologique
+- Appliquer la Loi 9 (detection du seuil >3 taches independantes)
+- Choisir le mode de dispatch adapte a la classe et a la vague
+
+**Couche 2 — Pool Workers (agents)**
+
+Les agents (Francois, Lise, Victor en spot-check) executent les taches de chaque vague en parallele. Chaque agent recoit une tache isolee avec ses fichiers, le contexte necessaire, et ne touche JAMAIS un fichier assigne a un autre agent dans la meme vague.
+
+3 modes de dispatch :
+- **Subagent burst** : T2-T3 ou vague <=3 taches. Maria lance N subagents via Task tool.
+- **Worktree swarm** : T4 ou vague >3 taches avec fichiers disjoints. Git worktrees.
+- **Team swarm** : T5, vagues complexes. Flag Agent Teams experimental.
+
+**Couche 3 — Synchronisation (Denis)**
+
+Denis merge les resultats de chaque vague, verifie la coherence (build + test + clippy), et lance la vague suivante. Si conflit de merge : resolution, log dans les metriques.
+
+---
+
+<!-- @id: mass.dag-format -->
+<!-- @do: Definit le format JSON du DAG de dependances et ses regles de validation -->
+<!-- @role: Maria (generateur), Denis (validateur) -->
+
+### Format DAG JSON
+
+> **TL;DR** : Le DAG est un fichier JSON dans `.mip/dags/` contenant les noeuds (taches), aretes (dependances) et vagues (groupes paralleles) avec validation stricte (acyclique, pas de chevauchement fichier intra-vague).
+
+Le DAG est stocke dans `.mip/dags/YYYY-MM-DD-<slug>.json`. Il est genere par Maria en P0 Temps 10 (synthese) ou au debut de P3 si le brief est deja approuve.
+
+#### Schema
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| `version` | string | Version du schema ("1.0") |
+| `slug` | string | Identifiant du chantier |
+| `generated_by` | string | Agent generateur ("Maria") |
+| `generated_at` | string | ISO 8601 timestamp |
+| `dispatch_mode` | enum | "subagent_burst" / "worktree_swarm" / "team_swarm" |
+| `total_tasks` | number | Nombre total de taches |
+| `total_waves` | number | Nombre de vagues |
+| `anti_serial_threshold` | number | Seuil Loi 9 (defaut: 3) |
+| `nodes[]` | array | Taches du DAG |
+| `nodes[].id` | string | Identifiant unique (ex: "CODE-01") |
+| `nodes[].label` | string | Description courte |
+| `nodes[].agent` | string | Agent assigne |
+| `nodes[].type` | enum | "code" / "test_unit" / "test_integration" / "test_global" / "audit" / "correct" |
+| `nodes[].wave` | number | Numero de vague |
+| `nodes[].deps` | string[] | IDs des taches prerequises |
+| `nodes[].estimated_minutes` | number | Estimation en minutes |
+| `nodes[].files` | string[] | Fichiers concernes |
+| `nodes[].status` | enum | "pending" / "running" / "done" / "failed" / "skipped" |
+| `edges[]` | array | Aretes du graphe |
+| `edges[].from` | string | ID source |
+| `edges[].to` | string | ID destination |
+| `waves[]` | array | Vagues d'execution |
+| `waves[].number` | number | Numero de vague |
+| `waves[].tasks` | string[] | IDs des taches de la vague |
+| `waves[].parallelism` | number | Nombre de taches paralleles |
+| `waves[].estimated_minutes` | number | Duree estimee (= tache la plus longue) |
+| `waves[].status` | enum | "pending" / "running" / "done" |
+
+#### Validation
+
+Le DAG DOIT respecter :
+- Aucun cycle (graphe acyclique)
+- Aucune dependance a soi-meme
+- Chaque tache appartient a exactement une vague
+- Les taches d'une vague n'ont pas de dependances entre elles
+- Les dependances d'une tache sont dans des vagues anterieures
+
+---
+
+<!-- @id: mass.dispatch-modes -->
+<!-- @do: Definit les 3 modes de dispatch (subagent burst, worktree swarm, team swarm) avec regles de selection et isolation fichiers -->
+<!-- @role: Maria (selection), Denis (execution worktree) -->
+
+### Modes de dispatch
+
+> **TL;DR** : 3 modes adaptes a la complexite : subagent burst (T2-T3, <=3 taches), worktree swarm (T4, >3 taches), team swarm (T5, experimental). Regle absolue : deux agents ne PEUVENT PAS toucher le meme fichier dans une meme vague.
+
+Maria selectionne le mode de dispatch en fonction de la classe de la tache et de la taille de la vague. Le choix est inscrit dans le DAG JSON (`dispatch_mode`).
+
+| Mode | Declencheur | Mecanisme | Git strategy | Parallelisme max |
+|------|-------------|-----------|-------------|------------------|
+| **Subagent burst** | T2-T3 ou vague <=3 taches | Maria lance N subagents (Task tool), chacun une tache isolee. Denis merge au retour. | Branche unique, commits sequentiels apres merge | ~3 agents |
+| **Worktree swarm** | T4 ou vague >3 taches, fichiers disjoints | Denis cree N git worktrees, chaque agent travaille dans son worktree. Denis merge les worktrees. | 1 worktree par agent, merge dans branche principale | ~5 agents |
+| **Team swarm** | T5, vagues complexes | Utilise le flag Agent Teams de Claude Code (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`). L'orchestrateur lance des teams. | Gere par Agent Teams (experimental) | Limite plateforme |
+
+#### Regles de selection (Maria)
+
+1. Si classe <= T3 ET vague a <=3 taches independantes -> **subagent burst**
+2. Si classe T4 OU vague a >3 taches ET fichiers disjoints -> **worktree swarm**
+3. Si classe T5 ET Agent Teams active -> **team swarm**
+4. Fallback si Agent Teams non dispo -> **worktree swarm**
+5. Loi 9 : Si >3 taches independantes dans une vague -> parallelisation OBLIGATOIRE
+
+#### Isolation des fichiers
+
+Regle ABSOLUE : dans une vague parallele, deux agents ne PEUVENT PAS toucher le meme fichier. Si le plan cree un chevauchement de fichier entre deux taches de la meme vague, Denis DOIT reordonnancer pour placer les taches conflictuelles dans des vagues differentes.
+
+#### Worktree swarm — detail
+
+```bash
+# Denis cree les worktrees
+git worktree add ../wt-francois feat/slug
+git worktree add ../wt-lise feat/slug
+
+# Chaque agent travaille dans son worktree
+# Apres completion, Denis merge
+git worktree remove ../wt-francois
+git worktree remove ../wt-lise
+```
+
+#### Agent Teams — detail
+
+Le flag `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` dans `.claude/settings.local.json` active la fonctionnalite native de Claude Code. MASS utilise cette fonctionnalite comme backend pour le mode team swarm. Si le flag n'est pas actif ou la feature pas disponible, MASS retombe sur le mode worktree swarm.
+
+---
+
+<!-- @id: mass.merge-coordination -->
+<!-- @do: Definit le protocole de merge coordination (avant/pendant/apres chaque vague) avec metriques collectees -->
+<!-- @role: Denis (merge coordinator) -->
+
+### Protocole de merge coordination (Denis)
+
+> **TL;DR** : Denis orchestre la fusion des contributions a chaque vague en 3 phases (avant/pendant/apres) avec checkpoint build+test+lint et collecte de metriques par vague.
+
+Denis est le **Merge Coordinator** : il orchestre la fusion des contributions a chaque vague.
+
+#### Avant chaque vague
+1. Lire la liste des taches de la vague et leurs fichiers assignes
+2. Verifier qu'aucun fichier n'est touche par deux agents (si conflit -> reordonnancer)
+3. Preparer le contexte pour chaque agent (tache + fichiers + anti-patterns)
+4. Lancer les agents selon le mode dispatch
+
+#### Pendant la vague
+- Chaque agent travaille sur ses fichiers assignes UNIQUEMENT
+- Chaque agent commit ses changements dans sa branche/worktree
+- Denis monitore la progression (si possible via Agent Teams ou TodoWrite)
+
+#### Apres la vague (merge sequence)
+1. Collecter les commits de chaque agent
+2. Merge sequentiellement dans la branche principale :
+   - `git merge --no-ff <worktree-branch>` (si worktree swarm)
+   - Direct commit (si subagent burst, car branche unique)
+3. Si conflit de merge :
+   a. Identifier les fichiers en conflit
+   b. Resoudre (priorite a la derniere tache dans l'ordre du DAG)
+   c. Logger le conflit dans les metriques swarm (`merge_conflicts++`)
+4. Checkpoint :
+   - `cargo build --workspace` (ou commande build du projet)
+   - `cargo clippy --workspace -- -D warnings` (ou commande lint)
+   - `cargo test --workspace` (ou commande test)
+5. Si checkpoint echoue : corriger AVANT la vague suivante
+6. Mettre a jour les metriques swarm (wave.status = "done", duree, parallelisme)
+7. Lancer la vague suivante
+
+#### Metriques collectees par vague
+- `parallelism_effective` : nombre de taches reellement executees en parallele
+- `duration_seconds` : duree mur-a-mur de la vague
+- `merge_conflicts` : nombre de conflits de merge
+- `started_at` / `ended_at` : horodatage ISO 8601
+
+---
+
+<!-- @id: mass.law-9 -->
+<!-- @do: Definit la Loi 9 anti-serial-collapse (seuil, detection, consequence, exception, metriques) -->
+<!-- @role: Maria (detection), Denis (enforcement) -->
+
+### Loi 9 — Anti-Serial-Collapse (NON NEGOCIABLE)
+
+> **TL;DR** : Si une vague contient >3 taches independantes, ces taches DOIVENT etre executees en parallele. Exception : outil IA sans support agents paralleles.
+
+> "Si le DAG d'une sequence MIP contient une vague de plus de 3 taches independantes, ces taches DOIVENT etre executees en parallele. Le traitement sequentiel de taches independantes est interdit."
+
+**Seuil** : >3 taches independantes dans une meme vague
+
+**Detection** : Maria, lors de la generation du DAG (P0 Temps 10 ou debut P3)
+
+**Consequence** : Maria selectionne le mode dispatch le plus adapte
+
+**Exception** : Si l'outil IA ne supporte pas les agents paralleles (detecte en SETUP-4, colonne "Agents paralleles" = Non), la Loi 9 est **suspendue** et un warning est emis :
+"[WARNING] Loi 9 suspendue : outil IA {nom} ne supporte pas les agents paralleles. Execution sequentielle forcee."
+
+**Metriques** : Le compteur `serial_collapses_prevented` dans les metriques swarm enregistre chaque fois que la Loi 9 force une parallelisation.
+
+---
+
+<!-- @id: mass.metrics -->
+<!-- @do: Definit les champs metriques swarm dans le fichier metriques MIP et les indicateurs derives -->
+<!-- @role: Maria (initialisation), Denis (alimentation), Arianne (indicateurs derives en P6) -->
+
+### Metriques swarm
+
+> **TL;DR** : Les metriques swarm etendent le fichier `.mip/metrics/` avec une section `swarm` contenant le detail par vague, les compteurs de parallelisme, conflits et serial collapses, plus 4 indicateurs derives calcules en P6.
+
+Les metriques swarm etendent le fichier `.mip/metrics/YYYY-MM-DD-<slug>.json` avec une section `swarm`. Maria initialise la section, Denis alimente apres chaque vague.
+
+#### Champs swarm
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| `swarm.enabled` | boolean | true si MASS est active pour cette sequence |
+| `swarm.dispatch_mode` | string | Mode choisi par Maria |
+| `swarm.dag_file` | string | Chemin relatif vers le DAG JSON |
+| `swarm.total_waves` | number | Nombre total de vagues |
+| `swarm.waves_completed` | number | Vagues completees |
+| `swarm.total_parallel_tasks` | number | Taches executees en parallele (cumul) |
+| `swarm.total_serial_tasks` | number | Taches executees en serie (cumul) |
+| `swarm.max_parallelism_achieved` | number | Max taches paralleles dans une vague |
+| `swarm.merge_conflicts` | number | Total conflits de merge |
+| `swarm.serial_collapses_prevented` | number | Fois ou Loi 9 a force le parallele |
+| `swarm.wave_details[]` | array | Detail par vague |
+| `swarm.wave_details[].wave` | number | Numero |
+| `swarm.wave_details[].tasks_planned` | number | Taches prevues |
+| `swarm.wave_details[].tasks_completed` | number | Taches completees |
+| `swarm.wave_details[].parallelism_effective` | number | Parallelisme reel |
+| `swarm.wave_details[].duration_seconds` | number | Duree mur-a-mur |
+| `swarm.wave_details[].merge_conflicts` | number | Conflits dans cette vague |
+| `swarm.wave_details[].started_at` | string/null | ISO 8601 |
+| `swarm.wave_details[].ended_at` | string/null | ISO 8601 |
+
+#### Indicateurs derives (calcules en P6 par Arianne)
+
+- **Parallelisme effectif** = total_parallel_tasks / (total_parallel_tasks + total_serial_tasks)
+- **Ratio serial/parallel** = vagues a 1 tache / total vagues
+- **Throughput** = total_tasks / duree totale P3
+- **Merge conflict rate** = merge_conflicts / total_waves
+
+---
+
+<!-- @id: mass.mip-integration -->
+<!-- @do: Definit comment MASS s'integre dans chaque phase du workflow MIP (P0, P3, P4, P5, P6) -->
+<!-- @role: Maria (P0), Denis (P3/P4/P5), George (P4), Arianne (P6) -->
+
+### Integration MASS dans le workflow MIP
+
+> **TL;DR** : MASS s'integre a chaque phase MIP : generation du DAG en P0 Temps 10, execution par vagues en P3, audit post-merge en P4, stats swarm en P5, capitalisation en P6.
+
+#### P0 — Cadrage
+- **Temps 7 (Denis)** : Le plan exhaustif inclut les dependances entre taches (`deps[]`)
+- **Temps 10 (Maria)** : Generation du DAG JSON a partir du plan. Classification des vagues. Selection du mode dispatch. Inclusion du TL;DR DAG dans le brief.
+
+#### P3 — Implementation
+- **Debut P3** : Denis valide le DAG (pas de cycle, fichiers disjoints par vague)
+- **Par vague** : Denis lance les agents selon le mode dispatch, merge apres chaque vague, checkpoint (build + test + lint), met a jour les metriques
+- **Checkpoints Denis (/5 taches)** : Inchanges. S'appliquent au cumul des taches toutes vagues confondues.
+- **Victor spot-check** : S'applique a chaque checkpoint, peu importe si les taches sont paralleles ou series
+
+#### P4 — Audit
+- George verifie la coherence globale post-merge (pas de regression inter-vagues)
+- Les metriques swarm sont incluses dans le rapport d'audit
+
+#### P5 — Livraison
+- Denis presente le resume incluant les stats swarm (parallelisme, vagues, conflits)
+- L'utilisateur peut voir le DAG dans `.mip/dags/`
+
+#### P6 — Rapport
+- Arianne calcule les indicateurs derives (parallelisme effectif, throughput)
+- Capitalisation : patterns swarm dans `memory/mip-decisions.md`
+- Anti-patterns : serial collapses detectes dans `memory/mip-antipatterns.md`
