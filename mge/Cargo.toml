@@ -104,6 +104,10 @@ egui = "0.28"
 egui-wgpu = "0.28"
 egui-winit = "0.28"
 
+# UI tokens & adapters (cross-workspace)
+miyuki-ui-tokens = { path = "../crates/miyuki-ui-tokens" }
+miyuki-ui-egui = { path = "../crates/miyuki-ui-egui" }
+
 # Audio
 kira = "0.9"
 
