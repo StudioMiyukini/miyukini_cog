@@ -43,6 +43,90 @@ pub struct InstanceData {
 }
 
 // ---------------------------------------------------------------------------
+// InstancedSpriteBatcher
+// ---------------------------------------------------------------------------
+
+use crate::errors::RenderError;
+
+/// CPU-side staging buffer for instanced sprite data.
+///
+/// Collects [`InstanceData`] entries each frame, then exposes them as a
+/// contiguous byte slice for upload to a GPU storage buffer. The batcher
+/// enforces a maximum capacity to prevent unbounded memory growth.
+///
+/// # Per-frame usage
+///
+/// ```text
+/// batcher.clear();
+/// for sprite in visible_sprites {
+///     batcher.push(instance)?;
+/// }
+/// batcher.sort_by_depth();
+/// let bytes = batcher.as_bytes();
+/// queue.write_buffer(&storage_buffer, 0, bytes);
+/// ```
+pub struct InstancedSpriteBatcher {
+    /// CPU-side instance data staging area.
+    instances: Vec<InstanceData>,
+    /// Maximum number of instances this batcher can hold.
+    capacity: usize,
+}
+
+impl InstancedSpriteBatcher {
+    /// Create a new batcher with the given maximum capacity.
+    pub fn new(capacity: usize) -> Self {
+        Self {
+            instances: Vec::with_capacity(capacity),
+            capacity,
+        }
+    }
+
+    /// Remove all instances from the staging buffer.
+    pub fn clear(&mut self) {
+        self.instances.clear();
+    }
+
+    /// Push a sprite instance into the staging buffer.
+    ///
+    /// Returns `RenderError::BatcherOverflow` if the batcher is full.
+    pub fn push(&mut self, instance: InstanceData) -> Result<(), RenderError> {
+        if self.instances.len() >= self.capacity {
+            return Err(RenderError::BatcherOverflow {
+                capacity: self.capacity,
+                attempted: self.instances.len() + 1,
+            });
+        }
+        self.instances.push(instance);
+        Ok(())
+    }
+
+    /// Number of instances currently in the staging buffer.
+    pub fn len(&self) -> usize {
+        self.instances.len()
+    }
+
+    /// Returns `true` when the staging buffer contains no instances.
+    pub fn is_empty(&self) -> bool {
+        self.instances.is_empty()
+    }
+
+    /// Return the instance data as a contiguous byte slice suitable for
+    /// GPU buffer upload via `queue.write_buffer`.
+    pub fn as_bytes(&self) -> &[u8] {
+        bytemuck::cast_slice(&self.instances)
+    }
+
+    /// Sort instances by `z_depth` ascending (back-to-front painter order).
+    pub fn sort_by_depth(&mut self) {
+        self.instances.sort_by(|a, b| {
+            a.z_depth
+                .partial_cmp(&b.z_depth)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
@@ -74,5 +158,73 @@ mod tests {
         assert_eq!(data.texture_index, 0);
         assert!((data.z_depth - 0.0).abs() < f32::EPSILON);
         assert_eq!(data._pad, [0.0, 0.0]);
+    }
+
+    // -- InstancedSpriteBatcher tests --------------------------------------
+
+    fn make_instance(z: f32) -> InstanceData {
+        InstanceData {
+            position: [0.0, 0.0],
+            size: [64.0, 32.0],
+            uv_rect: [0.0, 0.0, 1.0, 1.0],
+            tint: [1.0, 1.0, 1.0, 1.0],
+            texture_index: 0,
+            z_depth: z,
+            _pad: [0.0, 0.0],
+        }
+    }
+
+    #[test]
+    fn batcher_push_and_len() {
+        let mut batcher = InstancedSpriteBatcher::new(100);
+        for i in 0..10 {
+            batcher.push(make_instance(i as f32)).unwrap();
+        }
+        assert_eq!(batcher.len(), 10);
+    }
+
+    #[test]
+    fn batcher_clear() {
+        let mut batcher = InstancedSpriteBatcher::new(100);
+        for i in 0..5 {
+            batcher.push(make_instance(i as f32)).unwrap();
+        }
+        assert!(!batcher.is_empty());
+        batcher.clear();
+        assert!(batcher.is_empty());
+        assert_eq!(batcher.len(), 0);
+    }
+
+    #[test]
+    fn batcher_overflow() {
+        let mut batcher = InstancedSpriteBatcher::new(5);
+        for i in 0..5 {
+            batcher.push(make_instance(i as f32)).unwrap();
+        }
+        // The 6th push should fail.
+        let result = batcher.push(make_instance(5.0));
+        assert!(result.is_err());
+        match result {
+            Err(RenderError::BatcherOverflow { capacity, attempted }) => {
+                assert_eq!(capacity, 5);
+                assert_eq!(attempted, 6);
+            }
+            _ => panic!("expected BatcherOverflow error"),
+        }
+    }
+
+    #[test]
+    fn batcher_sort_by_depth() {
+        let mut batcher = InstancedSpriteBatcher::new(10);
+        batcher.push(make_instance(3.0)).unwrap();
+        batcher.push(make_instance(1.0)).unwrap();
+        batcher.push(make_instance(2.0)).unwrap();
+        batcher.sort_by_depth();
+
+        let bytes = batcher.as_bytes();
+        let sorted: &[InstanceData] = bytemuck::cast_slice(bytes);
+        assert!((sorted[0].z_depth - 1.0).abs() < f32::EPSILON);
+        assert!((sorted[1].z_depth - 2.0).abs() < f32::EPSILON);
+        assert!((sorted[2].z_depth - 3.0).abs() < f32::EPSILON);
     }
 }

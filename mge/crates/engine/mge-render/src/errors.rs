@@ -49,4 +49,42 @@ pub enum RenderError {
         /// Description of the TOML parse failure.
         message: String,
     },
+
+    /// The instanced sprite batcher exceeded its maximum capacity.
+    #[error("batcher overflow: capacity {capacity}, attempted {attempted}")]
+    BatcherOverflow {
+        /// Maximum allowed instances.
+        capacity: usize,
+        /// Number of instances that were attempted.
+        attempted: usize,
+    },
+
+    /// The texture array has no remaining layers.
+    #[error("texture array full: max layers {max_layers}")]
+    TextureArrayFull {
+        /// Maximum number of layers the texture array supports.
+        max_layers: u32,
+    },
+
+    /// A shader failed to compile.
+    #[error("shader compilation failed: {details}")]
+    ShaderCompilationFailed {
+        /// Detailed shader compilation error message.
+        details: String,
+    },
+
+    /// A texture had unexpected dimensions.
+    #[error(
+        "invalid texture size: expected {expected_w}x{expected_h}, got {got_w}x{got_h}"
+    )]
+    InvalidTextureSize {
+        /// Expected width.
+        expected_w: u32,
+        /// Expected height.
+        expected_h: u32,
+        /// Actual width.
+        got_w: u32,
+        /// Actual height.
+        got_h: u32,
+    },
 }
