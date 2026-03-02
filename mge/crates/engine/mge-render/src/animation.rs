@@ -225,6 +225,55 @@ impl AnimationBank {
 }
 
 // ---------------------------------------------------------------------------
+// SpriteSize
+// ---------------------------------------------------------------------------
+
+/// Standard sprite size classes for consistent atlas packing.
+///
+/// All sprites in the engine must conform to one of these sizes. This
+/// ensures uniform atlas layouts and predictable memory usage.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+pub enum SpriteSize {
+    /// Small objects: barrels, chests, potions. 128x128px.
+    Small,
+    /// Medium bipeds: fallen, zombies. 128x256px.
+    Medium,
+    /// Humanoid characters: player, NPCs. 128x384px.
+    Humanoid,
+    /// Large entities: bosses, mounts. 192x384px.
+    Large,
+    /// Boss entities: act bosses, world bosses. 256x768px.
+    Boss,
+}
+
+impl SpriteSize {
+    /// Returns the (width, height) in pixels for this size class.
+    pub fn dimensions(&self) -> (u32, u32) {
+        match self {
+            SpriteSize::Small => (128, 128),
+            SpriteSize::Medium => (128, 256),
+            SpriteSize::Humanoid => (128, 384),
+            SpriteSize::Large => (192, 384),
+            SpriteSize::Boss => (256, 768),
+        }
+    }
+
+    /// Look up the size class from pixel dimensions.
+    ///
+    /// Returns `None` if the dimensions do not match any standard size.
+    pub fn from_dimensions(w: u32, h: u32) -> Option<Self> {
+        match (w, h) {
+            (128, 128) => Some(SpriteSize::Small),
+            (128, 256) => Some(SpriteSize::Medium),
+            (128, 384) => Some(SpriteSize::Humanoid),
+            (192, 384) => Some(SpriteSize::Large),
+            (256, 768) => Some(SpriteSize::Boss),
+            _ => None,
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
 // AnimationController
 // ---------------------------------------------------------------------------
 
@@ -611,5 +660,36 @@ events = [{ frame = 2, kind = "Damage", data = "hit" }]
         assert!(ctrl.is_mirrored(), "SE should be mirrored");
         ctrl.set_direction(Direction::S);
         assert!(!ctrl.is_mirrored(), "S should not be mirrored");
+    }
+
+    // -- S1-T05: SpriteSize tests --
+
+    #[test]
+    fn sprite_size_dimensions() {
+        assert_eq!(SpriteSize::Small.dimensions(), (128, 128));
+        assert_eq!(SpriteSize::Medium.dimensions(), (128, 256));
+        assert_eq!(SpriteSize::Humanoid.dimensions(), (128, 384));
+        assert_eq!(SpriteSize::Large.dimensions(), (192, 384));
+        assert_eq!(SpriteSize::Boss.dimensions(), (256, 768));
+    }
+
+    #[test]
+    fn sprite_size_from_dimensions_valid() {
+        assert_eq!(SpriteSize::from_dimensions(128, 384), Some(SpriteSize::Humanoid));
+        assert_eq!(SpriteSize::from_dimensions(256, 768), Some(SpriteSize::Boss));
+    }
+
+    #[test]
+    fn sprite_size_from_dimensions_invalid() {
+        assert_eq!(SpriteSize::from_dimensions(100, 200), None);
+        assert_eq!(SpriteSize::from_dimensions(0, 0), None);
+    }
+
+    #[test]
+    fn sprite_size_serde_roundtrip() {
+        let size = SpriteSize::Humanoid;
+        let json = serde_json::to_string(&size).unwrap();
+        let back: SpriteSize = serde_json::from_str(&json).unwrap();
+        assert_eq!(back, size);
     }
 }
