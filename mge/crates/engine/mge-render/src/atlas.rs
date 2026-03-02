@@ -44,6 +44,10 @@ pub struct AtlasFrame {
     /// Original source image height before trimming.
     #[serde(default)]
     pub source_h: u32,
+    /// Index into the instanced texture array layer (populated at runtime
+    /// when the atlas is loaded into a [`TextureArray`](crate::instanced::TextureArray)).
+    #[serde(default)]
+    pub layer_index: Option<u32>,
 }
 
 // ---------------------------------------------------------------------------
