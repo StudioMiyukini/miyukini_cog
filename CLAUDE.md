@@ -23,6 +23,7 @@
 6. Autonomie n'empeche pas la federation
 7. Strate Cores immuable
 8. Migration = diplomatie entre environnements
+9. Anti-serial-collapse : si >3 taches independantes, parallelisation obligatoire
 
 ## Regles de code
 
@@ -131,6 +132,7 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 **Rapport final** : Notes /20 sur 8 criteres, resume dev, profil utilisateur, capitalisation agents.
 **Phase SETUP** : Onboarding universel en 6 etapes. Scan systeme + config environnement + profil utilisateur + detection outil IA + dependencies + agents. Produit `.mip/environment.md`. Run once.
 **Universalite** : Noyau MIP invariant (classification, phases, gates, TDD, metriques). Config projet dans `.mip/environment.md`. Commandes adaptees a la stack detectee.
+**MASS (Agent Swarm)** : Parallelisation par DAG de dependances et vagues d'execution. 3 modes : subagent burst (T2-T3), worktree swarm (T4), team swarm (T5). Merge coordination par Denis. DAG dans `.mip/dags/`. Metriques swarm dans `.mip/metrics/`. Loi 9 : >3 taches independantes -> parallelisation obligatoire.
 
 ### Workflow standard
 
@@ -159,6 +161,7 @@ Utilisateur → Maria (P0 : 10 temps + init metriques) + Lise + Fabrice + Denis+
 - `.mip/audits/` — Rapports d'audit (P4)
 - `.mip/metrics/` — Metriques et horodatage (collecte continue)
 - `.mip/reports/` — Rapports finaux de developpement (P6)
+- `.mip/dags/` — DAG de dependances pour parallelisation swarm (P3)
 
 Skill complet : `.cursor/skills/miyukini-mip-workflow/SKILL.md`
 
