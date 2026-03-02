@@ -35,5 +35,6 @@ pub use camera::Camera2D;
 pub use errors::{RenderError, RenderResult};
 pub use pipeline::{GpuTexture, SpriteBatcher, SpritePipeline, SpriteVertex};
 pub use renderer::{RenderConfig, Renderer};
+#[allow(deprecated)]
 pub use sprite::{RenderLayer, SpriteBatch, SpriteInstance, SpriteRenderer};
 pub use tile::{TilePos, TileRenderArgs, TileRenderer};

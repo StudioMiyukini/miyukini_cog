@@ -46,6 +46,7 @@ impl RenderLayer {
 /// This is the user-facing sprite struct. The GPU-side representation
 /// (`SpriteInstanceGpu`) lives in `renderer.rs` and is derived from this
 /// during the flush step.
+#[deprecated(note = "Use the animation module (AnimationController + AnimationBank) for animated sprites")]
 #[derive(Debug, Clone, Copy)]
 pub struct SpriteInstance {
     /// World X position (tile float).
@@ -62,6 +63,7 @@ pub struct SpriteInstance {
     pub layer: RenderLayer,
 }
 
+#[allow(deprecated)]
 impl Default for SpriteInstance {
     fn default() -> Self {
         Self {
@@ -80,11 +82,14 @@ impl Default for SpriteInstance {
 // ---------------------------------------------------------------------------
 
 /// Collection of sprite instances for a single render layer.
+#[deprecated(note = "Use the animation module (AnimationController + AnimationBank) for animated sprites")]
 #[derive(Debug, Clone, Default)]
 pub struct SpriteBatch {
+    #[allow(deprecated)]
     instances: Vec<SpriteInstance>,
 }
 
+#[allow(deprecated)]
 impl SpriteBatch {
     /// Create an empty batch.
     pub fn new() -> Self {
@@ -128,11 +133,13 @@ impl SpriteBatch {
 // ---------------------------------------------------------------------------
 
 /// Collects sprites into per-layer batches and produces a sorted draw list.
+#[allow(deprecated)]
 #[derive(Debug, Clone, Default)]
 pub struct SpriteRenderer {
     batches: HashMap<u8, SpriteBatch>,
 }
 
+#[allow(deprecated)]
 impl SpriteRenderer {
     /// Create a new sprite renderer with empty batches.
     pub fn new() -> Self {
