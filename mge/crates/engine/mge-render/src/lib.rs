@@ -25,6 +25,7 @@ pub mod tile;
 pub mod culling;
 #[cfg(feature = "instanced")]
 pub mod instanced;
+pub mod text;
 
 #[cfg(test)]
 mod tests;
