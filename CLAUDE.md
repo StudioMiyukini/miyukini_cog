@@ -75,7 +75,7 @@ cargo test -p {crate} -- --nocapture       # Tests verbose d'un crate
 
 En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 
-### P0 — Cadrage complet en 6 temps (SEULE phase humaine)
+### P0 — Cadrage complet en 7 temps (SEULE phase humaine)
 
 | Temps | Nom | Agent(s) |
 |-------|-----|----------|
@@ -84,7 +84,8 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 | 3 | Analyse concurrentielle | Fabrice (T4-T5, parallele Temps 2) |
 | 4 | Specification technique + Context7 | Francois |
 | 5 | Plan exhaustif | Denis |
-| 6 | Synthese & Brief | Maria |
+| 6 | Audit de faisabilite | Arianne (agents, deps, outils, memoire) |
+| 7 | Synthese & Brief | Maria |
 
 **Gate P0** : Brief approuve par l'utilisateur = **derniere intervention humaine**.
 
@@ -110,7 +111,7 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 ### Workflow standard
 
 ```
-Utilisateur → Maria (P0 : 6 temps + init metriques) + Lise + Fabrice + Francois (Context7) + Denis
+Utilisateur → Maria (P0 : 7 temps + init metriques) + Lise + Fabrice + Francois (Context7) + Denis + Arianne (audit faisabilite)
 → [GATE] Brief approuve
 → === AUTOPILOT ===
 → Git : checkout -b feat/<slug> + push -u origin

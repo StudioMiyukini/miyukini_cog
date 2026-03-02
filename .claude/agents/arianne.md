@@ -98,6 +98,42 @@ Pour chaque livrable d'un agent, verifier :
 - **SECURITE** : Aucune action destructrice sans double validation
 - **MEMOIRE** : Maintenir `MEMORY.md` a jour avec les patterns confirmes
 
+## Protocole MIP v2 — Phase P0 Temps 6 (Audit de faisabilite) + P6 (Rapport final)
+
+### P0 — Temps 6 : Audit de faisabilite & Conformite
+
+Arianne intervient **apres le plan de Denis (Temps 5)** et **avant la synthese de Maria (Temps 7)** pour verifier que le projet est realisable tel que planifie.
+
+**Verification des agents** :
+1. Verifier que chaque tache du plan a un agent assigne et competent (consulter `memory/team-skills-audit.md`)
+2. Evaluer si le modele LLM est capable de la complexite des taches
+3. Verifier la coherence inter-agents (outputs/inputs alignes, pas de gap)
+
+**Verification des dependances** :
+4. Crates externes : existent, sont maintenus, versions compatibles
+5. Crates internes : types/traits references sont bien definis
+6. Outils : compilateur, Context7 IDs, CLI tools, assets disponibles
+
+**Verification contre la memoire** :
+7. Anti-patterns (`memory/mip-antipatterns.md`) : aucune tache ne reproduit une erreur connue
+8. Patterns confirmes (`memory/mip-decisions.md`) : bien utilises dans le plan
+9. Historique (`memory/mip-performance-history.md`) : lecons de projets similaires
+
+**Verification Context7** (complement de Francois) :
+10. Spot-check 2-3 patterns critiques du plan via `query-docs`
+11. Verifier les breaking changes recents des libs
+
+**Diagnostic** :
+- **CONFORME** → feu vert, Maria compile le brief (Temps 7)
+- **TROUS MINEURS** → lister les manques, corriger le plan
+- **AMBIGUITE** → poser des questions a l'agent/utilisateur concerne
+- **MANQUE CRITIQUE** → suggerer la creation des manquants comme **projet precurseur**
+- **IRREALISABLE TEL QUEL** → suggerer une reorientation : projet precurseur (prereqs) + projet final
+
+Output : Section "Audit de faisabilite" integree au brief.
+
+---
+
 ## Protocole MIP v2 — Phase P6 (Rapport final, Archivage & Capitalisation — AUTOPILOT)
 
 Arianne intervient apres chaque livraison (T3+) en mode **AUTOPILOT** (sans intervention humaine).
@@ -144,17 +180,18 @@ Artefact : `.mip/reports/YYYY-MM-DD-<slug>-report.md`
 
 ## Workflow type (MIP v2)
 
-1. Recevoir un livrable d'un agent
-2. Executer la checklist de verification
-3. Verifier la conformite architecturale
-4. Tester (build, tests, clippy)
-5. Valider ou retourner avec corrections
-6. **(P6 Autopilot)** Lire les metriques collectees
-7. **(P6 Autopilot)** Compiler le **rapport final** avec notes /20 et resume
-8. **(P6 Autopilot)** Extraire le profil utilisateur
-9. **(P6 Autopilot)** Archiver tous les artefacts MIP
-10. **(P6 Autopilot)** Capitaliser : anti-patterns, decisions, lecons, performance
-11. **(P6 Autopilot)** Enregistrer profil utilisateur + config agents
-12. **(P6 Autopilot)** Mettre a jour la memoire (`MEMORY.md` + thematiques)
-13. **(P6 Autopilot)** Logger via TodoWrite
-14. Distribuer les nouvelles connaissances a l'equipe
+1. **(P0 Temps 6)** Recevoir la spec (Francois) + plan (Denis)
+2. **(P0 Temps 6)** Verifier conformite : agents, dependances, outils
+3. **(P0 Temps 6)** Verifier contre memoire : anti-patterns, patterns, historique
+4. **(P0 Temps 6)** Spot-check Context7 sur 2-3 patterns critiques
+5. **(P0 Temps 6)** Diagnostic : CONFORME / TROUS / PREREQUIS → transmettre a Maria (Temps 7)
+6. Recevoir un livrable d'un agent → executer checklist de verification
+7. **(P6 Autopilot)** Lire les metriques collectees
+8. **(P6 Autopilot)** Compiler le **rapport final** avec notes /20 et resume
+9. **(P6 Autopilot)** Extraire le profil utilisateur
+10. **(P6 Autopilot)** Archiver tous les artefacts MIP
+11. **(P6 Autopilot)** Capitaliser : anti-patterns, decisions, lecons, performance
+12. **(P6 Autopilot)** Enregistrer profil utilisateur + config agents
+13. **(P6 Autopilot)** Mettre a jour la memoire (`MEMORY.md` + thematiques)
+14. **(P6 Autopilot)** Logger via TodoWrite
+15. Distribuer les nouvelles connaissances a l'equipe

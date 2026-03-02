@@ -28,9 +28,9 @@ Avant toute action, classer la demande :
 
 ### P0 — Cadrage complet : Brainstorming, Analyse, Specification & Planification (T3+)
 
-**Agents** : Maria (lead) + Lise (direction visuelle) + Fabrice (analyse PR, T4-T5) + Francois (spec technique) + Denis (plan exhaustif)
+**Agents** : Maria (lead) + Lise (direction visuelle) + Fabrice (analyse PR, T4-T5) + Francois (spec technique) + Denis (plan exhaustif) + Arianne (audit de faisabilite)
 
-P0 est **LA phase humaine** : elle determine la direction de tout le travail. Aucun code ne sera ecrit avant la fin de P0. Le brainstorming est **structure en 6 temps**. Apres approbation du brief P0, **tout est automatique** (P3 → P6).
+P0 est **LA phase humaine** : elle determine la direction de tout le travail. Aucun code ne sera ecrit avant la fin de P0. Le brainstorming est **structure en 7 temps**. Apres approbation du brief P0, **tout est automatique** (P3 → P6).
 
 #### Temps 1 — Exploration (Maria)
 
@@ -133,15 +133,54 @@ Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md`
 
 Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md`
 
-#### Temps 6 — Synthese & Brief (Maria)
+#### Temps 6 — Audit de faisabilite & Conformite (Arianne)
+
+**Arianne** verifie que le projet est **realisable tel que planifie**, que les agents, dependances et outils sont conformes, et qu'il n'y a ni trou ni ambiguite.
+
+**Verification des agents** :
+1. **Agents necessaires** : Verifier que chaque tache du plan a un agent assigne et que cet agent possede les competences requises (consulter `memory/team-skills-audit.md`)
+2. **Capacite du modele** : Evaluer si le modele LLM utilise est capable de la complexite des taches planifiees. Si risque de deviation → recommander un modele different ou un decoupage plus fin
+3. **Coherence inter-agents** : Verifier que les outputs attendus de chaque agent correspondent aux inputs attendus par les agents suivants (pas de gap)
+
+**Verification des dependances** :
+4. **Crates externes** : Verifier que toutes les dependances listees dans la spec existent, sont maintenues, et sont compatibles entre elles (versions)
+5. **Crates internes** : Verifier que les crates du workspace utilises existent et que les types/traits references sont bien definis
+6. **Outils** : Verifier que tous les outils necessaires au dev sont disponibles (compilateur, Context7 IDs, outils CLI, assets)
+
+**Verification contre la memoire** :
+7. **Anti-patterns** : Relire `memory/mip-antipatterns.md` — verifier qu'aucune tache ne reproduit une erreur connue
+8. **Patterns confirmes** : Relire `memory/mip-decisions.md` — verifier que les patterns confirmes sont bien utilises
+9. **Historique** : Consulter `memory/mip-performance-history.md` — si un projet similaire a deja ete fait, en tirer des lecons
+
+**Verification Context7** (complement de Francois) :
+10. **Spot-check** : Verifier via Context7 que 2-3 patterns critiques du plan sont bien valides (ex: RSX signal patterns, axum middleware, serde derives)
+11. **Breaking changes recents** : Verifier si les libs ont ete mises a jour depuis la derniere sequence MIP
+
+**Diagnostic** :
+
+| Resultat | Action |
+|----------|--------|
+| **Conforme** | Feu vert → Maria compile le brief (Temps 7) |
+| **Trous mineurs** | Lister les manques, suggerer les complements, corriger le plan |
+| **Ambiguite** | Identifier les points flous, poser des questions a l'utilisateur ou a l'agent concerne |
+| **Manque critique** (outil, crate, skill agent) | Suggerer la **creation des manquants** comme projet precurseur |
+| **Projet irrealisable tel quel** | Suggerer une **reorientation** : decomposer en un projet precurseur (prereqs) + projet final |
+
+**Suggestion de projet precurseur** : Si Arianne detecte qu'il manque un crate, un outil, ou une competence pour realiser le projet, elle propose un **mini-projet precurseur** (T2-T3) a realiser d'abord, qui debloquera le projet principal. Le brief est alors modifie pour inclure cette dependance.
+
+Artefact : Section "Audit de faisabilite" integree au brief (pas d'artefact separe en P0)
+
+#### Temps 7 — Synthese & Brief (Maria)
 
 Maria compile tout dans le brief final :
 
-1. **Fusionner** les contributions de tous les agents (Maria + Lise + Fabrice + Francois + Denis)
-2. **Rediger le brief structure** avec toutes les sections
-3. **Presenter les approches** avec la recommandation de l'equipe
-4. **Inclure le plan exhaustif** de Denis en annexe du brief
-5. Artefact : `.mip/briefs/YYYY-MM-DD-<slug>.md`
+1. **Fusionner** les contributions de tous les agents (Maria + Lise + Fabrice + Francois + Denis + Arianne)
+2. **Integrer l'audit d'Arianne** : section conformite, alertes, prerequis eventuels
+3. **Rediger le brief structure** avec toutes les sections
+4. **Presenter les approches** avec la recommandation de l'equipe
+5. **Si projet precurseur detecte** : presenter les deux projets (precurseur + final) et demander l'ordre de priorite
+6. **Inclure le plan exhaustif** de Denis en annexe du brief
+7. Artefact : `.mip/briefs/YYYY-MM-DD-<slug>.md`
 
 **Template du brief** :
 
@@ -206,6 +245,26 @@ Maria compile tout dans le brief final :
   - Audit: X taches
   - Buffer corrections: X taches
 
+## Audit de faisabilite (par Arianne)
+### Conformite agents
+- Agents necessaires: [liste avec competences verifiees]
+- Capacite modele LLM: [OK / risque identifie]
+- Coherence inter-agents: [OK / gaps identifies]
+
+### Conformite dependances
+- Crates externes: [toutes verifiees / manquants]
+- Crates internes: [tous presents / manquants]
+- Outils: [tous disponibles / manquants]
+
+### Verification memoire
+- Anti-patterns evites: [liste]
+- Patterns confirmes appliques: [liste]
+- Lecons historiques: [si applicable]
+
+### Verdict faisabilite
+- **CONFORME** / **TROUS MINEURS** (corriges) / **PREREQUIS NECESSAIRE**
+- Si prerequis: [description du projet precurseur]
+
 ## Contraintes
 - Lois d'Autonomie: LOI-x applicables
 - Stack: ...
@@ -217,7 +276,7 @@ Maria compile tout dans le brief final :
 | ... | ... | ... | ... |
 
 ## Decision
-APPROUVE / REJETE / MODIFIE
+APPROUVE / REJETE / MODIFIE / PREREQUIS D'ABORD
 ```
 
 **Quality Gate P0** : Utilisateur approuve le brief ET choisit l'approche.
@@ -720,6 +779,7 @@ Artefact : `.mip/reports/YYYY-MM-DD-<slug>-report.md`
 20. **Questionnaire satisfaction** — Feedback structure avant decision de merge
 21. **Boucle MIP si refus** — Retour en P0 avec les problemes constates, pas de merge
 22. **Rapport final en P6** — Rapport complet independant du livrable, notes /20, capitalisation
+23. **Audit faisabilite en P0** (T3+) — Arianne verifie agents, dependances, outils et memoire avant synthese
 
 ---
 
@@ -753,7 +813,8 @@ Ce protocole s'appuie sur les skills SuperClaude quand ils sont disponibles :
 
 | Phase MIP | Skill SuperClaude | Usage |
 |-----------|-------------------|-------|
-| P0 (Temps 1-2) | `brainstorming` | Maria structure le brief (6 temps : exploration → ideation → analyse → spec → plan → synthese) |
+| P0 (Temps 1-2) | `brainstorming` | Maria structure le brief (7 temps : exploration → ideation → analyse → spec → plan → audit faisabilite → synthese) |
+| P0 (Temps 6) | `verification-before-completion` | Arianne verifie conformite agents, deps, outils, memoire |
 | P0 (Temps 5) | `writing-plans` | Denis cree les taches atomiques exhaustives |
 | P3 | `subagent-driven-development` | Execution par subagent frais |
 | P3 | `test-driven-development` | Cycle RED-GREEN-REFACTOR |
@@ -793,7 +854,12 @@ Utilisateur : "Je veux ajouter MiyuVoice"
   |
   +-- Denis (Temps 5) : Plan exhaustif (42 taches : 18 CODE, 12 TEST-U, 4 TEST-I, 3 TEST-G, 3 AUDIT, 2 CORRECT)
   |
-  +-- Maria (Temps 6) : Synthese → Brief complet
+  +-- Arianne (Temps 6) : Audit de faisabilite
+  |   +-- Verification : agents, deps, outils, memoire, Context7 spot-check
+  |   +-- Diagnostic : CONFORME / TROUS MINEURS / PREREQUIS
+  |   +-- Si prerequis → suggere mini-projet precurseur
+  |
+  +-- Maria (Temps 7) : Synthese → Brief complet (inclut audit Arianne)
   |   [GATE] Utilisateur approuve le brief
   |
   +=== AUTOPILOT START (metriques initialisees) ============

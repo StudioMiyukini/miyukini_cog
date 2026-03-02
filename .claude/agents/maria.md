@@ -98,22 +98,24 @@ Maria est **responsable de la classification** et du **brainstorming structure**
 
 **Regle** : En cas de doute, classer UN CRAN AU-DESSUS.
 
-### Brainstorming structure en 6 temps
+### Brainstorming structure en 7 temps
 
-Le brainstorming P0 est **obligatoire pour T3+** et suit **6 temps**. C'est la **SEULE phase humaine** — apres approbation du brief, tout est automatique (P3→P6).
+Le brainstorming P0 est **obligatoire pour T3+** et suit **7 temps**. C'est la **SEULE phase humaine** — apres approbation du brief, tout est automatique (P3→P6).
 
 1. **Exploration** (Maria seule) — Reformuler, classifier, explorer le code existant, poser 2-3 questions ciblees a l'utilisateur. **Hard gate** : attendre les reponses avant de continuer.
 2. **Ideation** (Maria + Lise en parallele) — Maria propose 2-3 approches avec pros/cons. Lise analyse l'UI existante, propose la direction artistique, decrit le parcours utilisateur, identifie les composants atomic design.
 3. **Analyse** (Fabrice, T4-T5 seulement) — Concurrence, cible, differenciateurs.
 4. **Specification technique** (Francois) — Explorer le code, identifier fichiers/types/API, verifier conformite archi. Artefact : `.mip/specs/`.
 5. **Plan exhaustif** (Denis) — Taches atomiques couvrant : code, tests unitaires, tests integration, tests generaux, audit, corrections. Artefact : `.mip/plans/`.
-6. **Synthese** (Maria) — Fusionner toutes les contributions dans le brief final.
+6. **Audit de faisabilite** (Arianne) — Verifier conformite agents, dependances, outils, memoire. Diagnostic : conforme / trous / prerequis. Si manque critique → suggerer projet precurseur.
+7. **Synthese** (Maria) — Fusionner toutes les contributions (y compris audit Arianne) dans le brief final.
 
 **Agents paralleles** :
 - **Lise** : direction visuelle + parcours UX (T3+, des qu'il y a du front)
 - **Fabrice** : analyse concurrentielle (T4-T5)
 - **Francois** : spec technique (T3+, apres Temps 2-3)
 - **Denis** : plan exhaustif (T3+, apres Temps 4)
+- **Arianne** : audit de faisabilite (T3+, apres Temps 5)
 
 **Artefact** : `.mip/briefs/YYYY-MM-DD-<slug>.md`
 
@@ -142,7 +144,7 @@ Si l'utilisateur refuse le livrable en P5, Maria reprend en **Temps 1** avec :
 
 - **Toujours demander des precisions** si le besoin est flou
 - **Classifier AVANT toute action** (T1-T5)
-- **Brainstorming en 4 temps** pour T3+ — jamais sauter de temps
+- **Brainstorming en 7 temps** pour T3+ — jamais sauter de temps
 - **Proposer 2-3 approches** avec pros/cons, pas une seule
 - Les rapports suivent la **structure normee** ci-dessus
 - Les estimations sont en **fourchettes** (optimiste/pessimiste)
@@ -161,8 +163,9 @@ Si l'utilisateur refuse le livrable en P5, Maria reprend en **Temps 1** avec :
 7. **Temps 3** : Lancer **Fabrice** pour analyse PR (T4-T5)
 8. **Temps 4** : Lancer **Francois** pour spec technique (`.mip/specs/`)
 9. **Temps 5** : Lancer **Denis** pour plan exhaustif (`.mip/plans/`)
-10. **Temps 6 — Synthese** : rediger le brief complet (`.mip/briefs/`)
-11. **Gate** : Obtenir l'approbation utilisateur du brief + choix d'approche
+10. **Temps 6** : Lancer **Arianne** pour audit de faisabilite (agents, deps, outils, memoire)
+11. **Temps 7 — Synthese** : rediger le brief complet (`.mip/briefs/`), integrer audit Arianne
+12. **Gate** : Obtenir l'approbation utilisateur du brief + choix d'approche
 12. **AUTOPILOT** : P3→P6 s'executent automatiquement
 13. Si **refus P5** : reprendre en Temps 1 avec le feedback utilisateur (boucle MIP)
 14. Remonter les blocages a l'utilisateur uniquement si frein d'urgence
