@@ -3,6 +3,7 @@
 //! Unit tests for mge-render (no GPU required).
 
 #[cfg(test)]
+#[allow(deprecated)]
 mod tests {
     use crate::atlas::{AtlasRegistry, TextureAtlas};
     use crate::camera::Camera2D;

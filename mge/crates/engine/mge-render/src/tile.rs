@@ -4,7 +4,9 @@
 
 use crate::atlas::AtlasRegistry;
 use crate::camera::Camera2D;
-use crate::sprite::{RenderLayer, SpriteInstance, SpriteRenderer};
+#[allow(deprecated)]
+use crate::sprite::SpriteInstance;
+use crate::sprite::{RenderLayer, SpriteRenderer};
 
 // ---------------------------------------------------------------------------
 // TilePos
@@ -80,6 +82,7 @@ impl TileRenderer {
     /// The tile is placed at `args.pos` using the UV coordinates looked up
     /// from the atlas. If the atlas or frame is not found the tile is
     /// silently skipped (a warning is logged).
+    #[allow(deprecated)]
     pub fn render_tile(&self, args: &TileRenderArgs<'_>, renderer: &mut SpriteRenderer) {
         let Some(atlas) = args.registry.get(args.atlas_id) else {
             tracing::warn!("TileRenderer: atlas '{}' not in registry", args.atlas_id);

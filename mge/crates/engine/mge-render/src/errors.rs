@@ -87,6 +87,13 @@ pub enum RenderError {
         /// Actual height.
         got_h: u32,
     },
+
+    /// An animation definition could not be loaded or is invalid.
+    #[error("animation load failed: {details}")]
+    AnimationLoadFailed {
+        /// Description of the animation loading failure.
+        details: String,
+    },
 }
 
 // ---------------------------------------------------------------------------
