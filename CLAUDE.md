@@ -79,7 +79,7 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 
 | Temps | Nom | Agent(s) |
 |-------|-----|----------|
-| 1 | Exploration | Maria |
+| 1 | Exploration + Questionnaire brainstorming | Maria |
 | 2 | Ideation | Maria + Lise (parallele) |
 | 3 | Analyse concurrentielle | Fabrice (T4-T5, parallele Temps 2) |
 | 4 | Specification technique + Context7 | Francois |
@@ -104,6 +104,7 @@ En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 **Frein d'urgence** : L'autopilot s'arrete si bug bloquant apres 2 auto-corrections, ou delta majeur.
 **Logging** : Chaque tache tracee via TodoWrite pour suivi utilisateur temps reel.
 **Context7** : Verification docs libs (Dioxus, axum, serde) en P0-T4 + spot-checks en P3.
+**Brainstorming** : Questionnaire standard en 5 sections (Comprendre/Cadrer/Imaginer/Evaluer/Decider) inspire Design Thinking, Six Thinking Hats, SCAMPER, 5 Whys, HMW, LDJ. Maria administre en Temps 1.
 **Checkpoints** : Mini-audit Denis toutes les 5 taches en P3.
 **Boucle MIP** : Si refus P5, retour en P0 avec feedback utilisateur (increment `mip_loops`).
 **Rapport final** : Notes /20 sur 8 criteres, resume dev, profil utilisateur, capitalisation agents.

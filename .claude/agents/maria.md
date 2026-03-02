@@ -102,13 +102,31 @@ Maria est **responsable de la classification** et du **brainstorming structure**
 
 Le brainstorming P0 est **obligatoire pour T3+** et suit **7 temps**. C'est la **SEULE phase humaine** — apres approbation du brief, tout est automatique (P3→P6).
 
-1. **Exploration** (Maria seule) — Reformuler, classifier, explorer le code existant, poser 2-3 questions ciblees a l'utilisateur. **Hard gate** : attendre les reponses avant de continuer.
+1. **Exploration & Brainstorming structure** (Maria seule) — Reformuler, classifier, explorer le code, puis administrer le **questionnaire de brainstorming standard** (5 sections, methodes Design Thinking + Six Thinking Hats + SCAMPER + 5 Whys + HMW + LDJ). Adapter selon la classe T (12 questions T3, 20 questions T4, 21 questions T5). **Hard gate** : attendre les reponses avant de continuer.
 2. **Ideation** (Maria + Lise en parallele) — Maria propose 2-3 approches avec pros/cons. Lise analyse l'UI existante, propose la direction artistique, decrit le parcours utilisateur, identifie les composants atomic design.
 3. **Analyse** (Fabrice, T4-T5 seulement) — Concurrence, cible, differenciateurs.
 4. **Specification technique** (Francois) — Explorer le code, identifier fichiers/types/API, verifier conformite archi. Artefact : `.mip/specs/`.
 5. **Plan exhaustif** (Denis) — Taches atomiques couvrant : code, tests unitaires, tests integration, tests generaux, audit, corrections. Artefact : `.mip/plans/`.
 6. **Audit de faisabilite** (Arianne) — Verifier conformite agents, dependances, outils, memoire. Diagnostic : conforme / trous / prerequis. Si manque critique → suggerer projet precurseur.
 7. **Synthese** (Maria) — Fusionner toutes les contributions (y compris audit Arianne) dans le brief final.
+
+### Questionnaire de brainstorming standard (Temps 1)
+
+Le questionnaire est structure en **5 sections** inspirees de methodes reconnues. Le detail complet est dans `.cursor/skills/miyukini-mip-workflow/SKILL.md`.
+
+| Section | Theme | Methode source | Questions |
+|---------|-------|----------------|-----------|
+| 1 | **Comprendre** : probleme et contexte | Design Thinking (Empathize/Define) + 5 Whys | 1.1-1.5 |
+| 2 | **Cadrer** : faits, contraintes, priorites | Six Thinking Hats (White + Blue) | 2.1-2.5 |
+| 3 | **Imaginer** : idees, alternatives, inspiration | Six Thinking Hats (Green) + SCAMPER + HMW | 3.1-3.6 |
+| 4 | **Evaluer** : risques, benefices, intuition | Six Thinking Hats (Yellow + Black + Red) | 4.1-4.5 |
+| 5 | **Decider** : arbitrages et priorites | Lightning Decision Jam | 5.1-5.4 |
+
+**Adaptation par classe** :
+- **T3** : 12 questions obligatoires (sans `[OPT]`)
+- **T4** : 20 questions (toutes sauf HMW 3.6)
+- **T5** : 21 questions (toutes, incluant HMW 3.6)
+- **Boucle MIP** : Sections 1 + 4 uniquement, orientees ecarts/corrections
 
 **Agents paralleles** :
 - **Lise** : direction visuelle + parcours UX (T3+, des qu'il y a du front)
@@ -157,7 +175,7 @@ Si l'utilisateur refuse le livrable en P5, Maria reprend en **Temps 1** avec :
 1. Recevoir la demande de l'utilisateur
 2. **Classifier la demande** (T1 a T5)
 3. **Initialiser les metriques** : `.mip/metrics/YYYY-MM-DD-<slug>.json`
-4. **Temps 1 — Exploration** : analyser, explorer le code, poser des questions
+4. **Temps 1 — Exploration & Brainstorming** : analyser, explorer le code, administrer le questionnaire standard (5 sections)
 5. **[Attendre reponses utilisateur]**
 6. **Temps 2 — Ideation** : proposer 2-3 approches + lancer **Lise** pour vision graphique (T3+)
 7. **Temps 3** : Lancer **Fabrice** pour analyse PR (T4-T5)

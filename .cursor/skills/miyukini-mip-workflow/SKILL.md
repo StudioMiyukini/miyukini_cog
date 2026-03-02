@@ -32,17 +32,91 @@ Avant toute action, classer la demande :
 
 P0 est **LA phase humaine** : elle determine la direction de tout le travail. Aucun code ne sera ecrit avant la fin de P0. Le brainstorming est **structure en 7 temps**. Apres approbation du brief P0, **tout est automatique** (P3 → P6).
 
-#### Temps 1 — Exploration (Maria)
+#### Temps 1 — Exploration & Brainstorming structure (Maria)
 
-Maria reformule la demande et creuse le contexte :
+Maria reformule la demande, creuse le contexte, et guide l'utilisateur a travers un **questionnaire de brainstorming structure** inspire de methodes reconnues (Design Thinking, Six Thinking Hats, SCAMPER, 5 Whys, How Might We).
+
+**Etapes** :
 
 1. **Reformuler** la demande utilisateur en termes precis
 2. **Classifier** la demande (T1-T5)
 3. **Explorer le code existant** : lire les fichiers concernes (Glob, Grep, Read) pour comprendre l'etat actuel
-4. **Poser des questions** de clarification a l'utilisateur (minimum 2-3 questions ciblees)
+4. **Administrer le questionnaire de brainstorming** (voir ci-dessous) — poser les questions par section, adapter selon la classe T et le contexte
 5. **Identifier les contraintes** : Lois d'Autonomie applicables, stack technique, compatibilite existante
 
 **Hard gate** : NE PAS passer au temps 2 sans reponses de l'utilisateur.
+
+---
+
+#### Questionnaire de Brainstorming Standard — P0
+
+> **Objectif** : Guider l'utilisateur pour extraire les informations et decisions necessaires au cadrage du projet. Chaque section s'inspire d'une methode de brainstorming reconnue. Maria **adapte les questions** au contexte : certaines sont universelles, d'autres reservees aux projets complexes (T4-T5). Les questions marquees `[OPT]` sont optionnelles pour T3.
+
+##### Section 1 — COMPRENDRE : Le probleme et son contexte
+*Inspire de : Design Thinking (Empathize/Define) + 5 Whys*
+
+| # | Question | Methode | Classes |
+|---|----------|---------|---------|
+| 1.1 | **Quel probleme ou besoin cette demande resout-elle ?** Decrivez la situation actuelle et ce qui ne va pas ou manque. | Design Thinking: Empathize | T3-T5 |
+| 1.2 | **Pourquoi maintenant ?** Qu'est-ce qui declenche cette demande aujourd'hui ? (urgence, opportunite, prerequis pour un autre projet...) | 5 Whys (niveau 1) | T3-T5 |
+| 1.3 | **Qui est l'utilisateur final ?** Qui va utiliser cette fonctionnalite au quotidien ? (vous-meme, un autre utilisateur, un service, une API...) | Design Thinking: Define | T3-T5 |
+| 1.4 | **Quel est le parcours actuel ?** Si une solution partielle existe deja, comment l'utilisateur fait-il aujourd'hui ? Quels sont les points de friction ? | Design Thinking: Empathize | T3-T5 |
+| 1.5 | `[OPT]` **Pourquoi cette approche plutot qu'une autre ?** Si vous avez deja une idee de solution, qu'est-ce qui vous y a mene ? (creuser les "pourquoi" sous-jacents) | 5 Whys (niveaux 2-3) | T4-T5 |
+
+##### Section 2 — CADRER : Faits, contraintes et priorites
+*Inspire de : Six Thinking Hats (White Hat: faits, Blue Hat: processus)*
+
+| # | Question | Methode | Classes |
+|---|----------|---------|---------|
+| 2.1 | **Quelles sont les contraintes techniques connues ?** (stack, versions, dependances, performance, compatibilite, plateforme...) | White Hat: Faits | T3-T5 |
+| 2.2 | **Quel est le perimetre souhaite ?** Listez ce qui doit etre INCLUS et ce qui est EXCLU explicitement. | Blue Hat: Processus | T3-T5 |
+| 2.3 | **Quelle est la priorite ?** Classez par importance : (a) fonctionnalite minimale viable, (b) ameliorations souhaitees, (c) bonus / nice-to-have. | Blue Hat: Processus | T3-T5 |
+| 2.4 | `[OPT]` **Y a-t-il une deadline ou un jalon externe ?** (release, demo, dependance d'un autre projet...) | White Hat: Faits | T4-T5 |
+| 2.5 | `[OPT]` **Quelles donnees ou references avez-vous ?** (maquettes, specs existantes, exemples, liens, captures d'ecran...) | White Hat: Faits | T4-T5 |
+
+##### Section 3 — IMAGINER : Idees, alternatives et inspiration
+*Inspire de : Six Thinking Hats (Green Hat: creativite) + SCAMPER*
+
+| # | Question | Methode | Classes |
+|---|----------|---------|---------|
+| 3.1 | **Avez-vous deja des idees ou preferences d'approche technique ?** Decrivez meme partiellement — toute piste est utile. | Green Hat: Creativite | T3-T5 |
+| 3.2 | **Existe-t-il dans le projet quelque chose de similaire qu'on pourrait adapter ?** (un service, composant, pattern, crate existant...) | SCAMPER: Adapter | T3-T5 |
+| 3.3 | `[OPT]` **Peut-on combiner avec une fonctionnalite existante ou prevue ?** (fusionner deux besoins en un seul dev) | SCAMPER: Combiner | T4-T5 |
+| 3.4 | `[OPT]` **Que peut-on eliminer pour simplifier ?** Y a-t-il des aspects non-essentiels qu'on pourrait retirer pour un MVP plus rapide ? | SCAMPER: Eliminer | T4-T5 |
+| 3.5 | `[OPT]` **Connaissez-vous des produits/services qui font quelque chose de similaire ?** (inspiration concurrence, references visuelles ou fonctionnelles) | SCAMPER: Adapter | T4-T5 |
+| 3.6 | `[OPT]` **"How Might We..."** — Comment pourrait-on reformuler le probleme en opportunite ? (ex: "Comment pourrait-on rendre le partage de fichiers aussi simple qu'un glisser-deposer ?") | How Might We | T5 |
+
+##### Section 4 — EVALUER : Risques, benefices et intuition
+*Inspire de : Six Thinking Hats (Yellow Hat: valeur, Black Hat: risques, Red Hat: intuition)*
+
+| # | Question | Methode | Classes |
+|---|----------|---------|---------|
+| 4.1 | **Quel est le benefice principal attendu ?** Une fois livre, quelle est LA chose qui doit fonctionner ? | Yellow Hat: Valeur | T3-T5 |
+| 4.2 | **Quels risques ou difficultes anticipez-vous ?** (techniques, UX, compatibilite, performance, securite...) | Black Hat: Risques | T3-T5 |
+| 4.3 | **Quelle est votre intuition sur la complexite ?** (simple / modere / complexe / tres complexe) | Red Hat: Intuition | T3-T5 |
+| 4.4 | `[OPT]` **Quelle importance strategique ?** (1 = utilitaire, 5 = critique pour l'ecosysteme Miyukini) | Red Hat: Intuition | T4-T5 |
+| 4.5 | `[OPT]` **Que se passe-t-il si on ne fait PAS ce projet ?** (impact de l'inaction) | Reverse Brainstorming | T4-T5 |
+
+##### Section 5 — DECIDER : Arbitrages et priorites
+*Inspire de : Lightning Decision Jam (LDJ)*
+
+| # | Question | Methode | Classes |
+|---|----------|---------|---------|
+| 5.1 | **Quelle est la fonctionnalite MINIMALE viable ?** Si on ne pouvait livrer qu'une seule chose, ce serait quoi ? | LDJ: Prioriser | T3-T5 |
+| 5.2 | **Preference de compromis ?** En cas de tension, que privilegier : (a) rapidite de livraison, (b) exhaustivite fonctionnelle, (c) robustesse/qualite ? | LDJ: Arbitrer | T3-T5 |
+| 5.3 | `[OPT]` **Qu'est-ce qui peut etre reporte a un prochain sprint ?** (fonctionnalites phase 2, optimisations, polish...) | LDJ: Reporter | T4-T5 |
+| 5.4 | `[OPT]` **Y a-t-il des decisions deja verrouillees ?** (choix techniques, patterns, conventions qui ne sont pas negociables pour ce projet) | LDJ: Contraindre | T4-T5 |
+
+---
+
+**Utilisation par Maria** :
+
+- **T3** : Poser les questions non-`[OPT]` (12 questions). Adapter selon le contexte — si la reponse est evidente, ne pas insister.
+- **T4** : Poser toutes les questions (20 questions). Regrouper en 2-3 messages pour ne pas submerger l'utilisateur.
+- **T5** : Poser toutes les questions (21 questions) + question HMW (3.6). Accepter des reponses longues et encourager la reflexion.
+- **Boucle MIP** (retour P5 → P0) : Ne re-poser que les sections 1 et 4 en les orientant sur les **ecarts constates** et les **corrections souhaitees**.
+
+**Hard gate inchangee** : NE PAS passer au temps 2 sans reponses suffisantes de l'utilisateur.
 
 #### Temps 2 — Ideation (Maria + Lise en parallele)
 
@@ -780,6 +854,7 @@ Artefact : `.mip/reports/YYYY-MM-DD-<slug>-report.md`
 21. **Boucle MIP si refus** — Retour en P0 avec les problemes constates, pas de merge
 22. **Rapport final en P6** — Rapport complet independant du livrable, notes /20, capitalisation
 23. **Audit faisabilite en P0** (T3+) — Arianne verifie agents, dependances, outils et memoire avant synthese
+24. **Questionnaire brainstorming en P0** (T3+) — Maria administre le questionnaire standard (5 sections) en Temps 1 pour cadrer le projet
 
 ---
 
