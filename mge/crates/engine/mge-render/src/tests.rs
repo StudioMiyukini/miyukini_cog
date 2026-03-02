@@ -399,4 +399,57 @@ h = 32
         assert!((rect[2] - 500.0).abs() < f32::EPSILON, "max_x: {}", rect[2]);
         assert!((rect[3] - 350.0).abs() < f32::EPSILON, "max_y: {}", rect[3]);
     }
+
+    // -----------------------------------------------------------------------
+    // 19. RenderConfig: default uses u16 limit
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn render_config_default_uses_u16_limit() {
+        let cfg = crate::renderer::RenderConfig::default();
+        assert_eq!(
+            cfg.max_sprites,
+            crate::renderer::MAX_SPRITES_U16,
+            "Default max_sprites should equal MAX_SPRITES_U16"
+        );
+        assert_eq!(cfg.max_sprites, 16_384);
+    }
+
+    // -----------------------------------------------------------------------
+    // 20. RenderConfig: effective_max_sprites caps to ceiling
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn render_config_effective_max_sprites_caps_to_ceiling() {
+        let cfg = crate::renderer::RenderConfig {
+            max_sprites: 999_999,
+            ..crate::renderer::RenderConfig::default()
+        };
+        let effective = cfg.effective_max_sprites();
+        let ceiling = crate::renderer::RenderConfig::max_sprites_ceiling();
+        assert_eq!(
+            effective, ceiling,
+            "effective_max_sprites should be capped to ceiling"
+        );
+    }
+
+    // -----------------------------------------------------------------------
+    // 21. RenderConfig: u32 feature allows large batches
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn render_config_u32_allows_large_batches() {
+        let ceiling = crate::renderer::RenderConfig::max_sprites_ceiling();
+        let cfg = crate::renderer::RenderConfig {
+            max_sprites: ceiling,
+            ..crate::renderer::RenderConfig::default()
+        };
+        assert_eq!(cfg.effective_max_sprites(), ceiling);
+
+        if cfg!(feature = "index-u32") {
+            assert_eq!(ceiling, crate::renderer::MAX_SPRITES_U32);
+        } else {
+            assert_eq!(ceiling, crate::renderer::MAX_SPRITES_U16);
+        }
+    }
 }

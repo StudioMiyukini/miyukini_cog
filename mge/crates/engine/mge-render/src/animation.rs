@@ -366,6 +366,52 @@ impl SpriteSize {
 }
 
 // ---------------------------------------------------------------------------
+// AnimationLod
+// ---------------------------------------------------------------------------
+
+/// Level-of-Detail tier for animation quality.
+///
+/// Entities far from the camera receive progressively simplified animation:
+///
+/// | LOD       | Distance (tiles) | Directions | Frames      |
+/// |-----------|------------------|------------|-------------|
+/// | `Full`    | < 10             | 8          | all         |
+/// | `Reduced` | 10 -- 20         | 4          | 50% skip    |
+/// | `Minimal` | 20 -- 40         | 4          | idle only   |
+/// | `Static`  | > 40             | 1          | 1 (frozen)  |
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum AnimationLod {
+    /// Full quality: 8 directions, all frames.
+    Full,
+    /// Reduced quality: 4 directions (S, SW, W, NW), skip every other frame.
+    Reduced,
+    /// Minimal quality: 4 directions, idle animation only.
+    Minimal,
+    /// Static: single frame, single direction (frozen sprite).
+    Static,
+}
+
+/// Compute the animation LOD tier from the camera distance in tiles.
+///
+/// | Range          | LOD       |
+/// |----------------|-----------|
+/// | `< 10.0`       | `Full`    |
+/// | `10.0 .. 20.0` | `Reduced` |
+/// | `20.0 .. 40.0` | `Minimal` |
+/// | `>= 40.0`      | `Static`  |
+pub fn compute_lod(distance_tiles: f32) -> AnimationLod {
+    if distance_tiles < 10.0 {
+        AnimationLod::Full
+    } else if distance_tiles < 20.0 {
+        AnimationLod::Reduced
+    } else if distance_tiles < 40.0 {
+        AnimationLod::Minimal
+    } else {
+        AnimationLod::Static
+    }
+}
+
+// ---------------------------------------------------------------------------
 // AnimationController
 // ---------------------------------------------------------------------------
 
@@ -380,6 +426,8 @@ pub struct AnimationController {
     current_frame: u32,
     elapsed_ms: u32,
     pending_events: Vec<FrameEvent>,
+    /// Internal tick counter used for LOD Reduced frame skipping.
+    tick_counter: u64,
 }
 
 impl Default for AnimationController {
@@ -397,6 +445,7 @@ impl AnimationController {
             current_frame: 0,
             elapsed_ms: 0,
             pending_events: Vec::new(),
+            tick_counter: 0,
         }
     }
 
@@ -413,6 +462,40 @@ impl AnimationController {
     /// Set facing direction. Does not reset the current frame.
     pub fn set_direction(&mut self, direction: Direction) {
         self.current_direction = direction;
+    }
+
+    /// Advance the animation by `dt_ms` milliseconds, respecting an LOD tier.
+    ///
+    /// - **Full**: normal frame advance.
+    /// - **Reduced**: only advance on even ticks (effectively half speed).
+    /// - **Minimal**: force idle state, reset to frame 0.
+    /// - **Static**: no-op (frame is frozen).
+    pub fn tick_with_lod(
+        &mut self,
+        dt_ms: u32,
+        bank: &AnimationBank,
+        lod: AnimationLod,
+    ) -> Vec<FrameEvent> {
+        match lod {
+            AnimationLod::Static => Vec::new(),
+            AnimationLod::Minimal => {
+                self.set_state(AnimationState::Idle);
+                self.current_frame = 0;
+                self.elapsed_ms = 0;
+                Vec::new()
+            }
+            AnimationLod::Reduced => {
+                self.tick_counter += 1;
+                if !self.tick_counter.is_multiple_of(2) {
+                    return Vec::new();
+                }
+                self.tick(dt_ms, bank)
+            }
+            AnimationLod::Full => {
+                self.tick_counter += 1;
+                self.tick(dt_ms, bank)
+            }
+        }
     }
 
     /// Advance the animation by `dt_ms` milliseconds.
@@ -860,6 +943,78 @@ atlas_start_frame = 0
             errors.iter().any(|e| e.contains("missing direction NW")),
             "should report missing NW, got: {errors:?}"
         );
+    }
+
+    // -- S4-T02: AnimationLod tests --
+
+    #[test]
+    fn animation_lod_thresholds() {
+        assert_eq!(compute_lod(0.0), AnimationLod::Full);
+        assert_eq!(compute_lod(5.0), AnimationLod::Full);
+        assert_eq!(compute_lod(9.99), AnimationLod::Full);
+
+        assert_eq!(compute_lod(10.0), AnimationLod::Reduced);
+        assert_eq!(compute_lod(15.0), AnimationLod::Reduced);
+        assert_eq!(compute_lod(19.99), AnimationLod::Reduced);
+
+        assert_eq!(compute_lod(20.0), AnimationLod::Minimal);
+        assert_eq!(compute_lod(30.0), AnimationLod::Minimal);
+        assert_eq!(compute_lod(39.99), AnimationLod::Minimal);
+
+        assert_eq!(compute_lod(40.0), AnimationLod::Static);
+        assert_eq!(compute_lod(50.0), AnimationLod::Static);
+        assert_eq!(compute_lod(1000.0), AnimationLod::Static);
+    }
+
+    #[test]
+    fn animation_lod_reduced_skips_frames() {
+        let bank = AnimationBank::from_toml(CTRL_BANK_TOML).unwrap();
+        let mut ctrl_full = AnimationController::new();
+        let mut ctrl_reduced = AnimationController::new();
+
+        // Tick both 4 times with 100ms each.
+        for _ in 0..4 {
+            ctrl_full.tick_with_lod(100, &bank, AnimationLod::Full);
+            ctrl_reduced.tick_with_lod(100, &bank, AnimationLod::Reduced);
+        }
+
+        // Full: 4 ticks of 100ms on 4-frame clip = wraps to frame 0.
+        assert_eq!(ctrl_full.current_frame(), 0);
+        // Reduced: only 2 of 4 ticks actually advance = frame 2.
+        assert_eq!(ctrl_reduced.current_frame(), 2);
+    }
+
+    #[test]
+    fn animation_lod_static_freezes() {
+        let bank = AnimationBank::from_toml(CTRL_BANK_TOML).unwrap();
+        let mut ctrl = AnimationController::new();
+
+        // Advance to frame 2 first.
+        ctrl.tick(200, &bank);
+        assert_eq!(ctrl.current_frame(), 2);
+
+        // Now tick many times with Static: frame should not change.
+        for _ in 0..100 {
+            ctrl.tick_with_lod(100, &bank, AnimationLod::Static);
+        }
+        assert_eq!(ctrl.current_frame(), 2);
+    }
+
+    #[test]
+    fn animation_lod_minimal_forces_idle() {
+        let bank = AnimationBank::from_toml(CTRL_BANK_TOML).unwrap();
+        let mut ctrl = AnimationController::new();
+
+        // Set to Walk and advance.
+        ctrl.set_state(AnimationState::Walk);
+        ctrl.tick(200, &bank);
+        assert_eq!(ctrl.current_state(), AnimationState::Walk);
+        assert_eq!(ctrl.current_frame(), 2);
+
+        // Switch to Minimal: should force idle at frame 0.
+        ctrl.tick_with_lod(100, &bank, AnimationLod::Minimal);
+        assert_eq!(ctrl.current_state(), AnimationState::Idle);
+        assert_eq!(ctrl.current_frame(), 0);
     }
 
     #[test]

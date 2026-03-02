@@ -36,14 +36,14 @@ mod tests;
 // -- Re-exports for convenience --
 
 pub use animation::{
-    AnimationBank, AnimationClip, AnimationController, AnimationState, Direction, FrameEvent,
-    FrameEventKind, SpriteSize,
+    AnimationBank, AnimationClip, AnimationController, AnimationLod, AnimationState, Direction,
+    FrameEvent, FrameEventKind, SpriteSize, compute_lod,
 };
 pub use atlas::{AtlasDescriptor, AtlasEntry, AtlasFrame, AtlasRegistry, TextureAtlas};
 pub use camera::Camera2D;
 pub use errors::{RenderError, RenderResult};
 pub use pipeline::{GpuTexture, SpriteBatcher, SpritePipeline, SpriteVertex};
-pub use renderer::{RenderConfig, Renderer};
+pub use renderer::{RenderConfig, Renderer, MAX_SPRITES_U16, MAX_SPRITES_U32};
 #[allow(deprecated)]
 pub use sprite::{RenderLayer, SpriteBatch, SpriteInstance, SpriteRenderer};
 pub use tile::{TilePos, TileRenderArgs, TileRenderer};

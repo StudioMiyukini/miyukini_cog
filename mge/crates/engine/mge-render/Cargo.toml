@@ -27,6 +27,7 @@ dual-res = []
 post-process = []
 instanced = []
 legacy-batcher = []
+index-u32 = []
 
 [lints]
 workspace = true
