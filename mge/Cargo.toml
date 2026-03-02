@@ -39,13 +39,14 @@ members = [
     "games/sodomight-server",
     "games/sodomight-client",
 
-    # === Outils (6 crates) ===
+    # === Outils (7 crates) ===
     "tools/mge-studio",
     "tools/mge-packer",
     "tools/mge-slicer",
     "tools/mge-rescale",
     "tools/mge-mirror",
     "tools/mge-remap",
+    "tools/mge-anim-pack",
 ]
 
 [workspace.package]
