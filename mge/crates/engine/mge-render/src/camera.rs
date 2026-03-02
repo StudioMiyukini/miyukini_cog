@@ -124,8 +124,13 @@ impl Camera2D {
     }
 
     /// Set the follow target from world tile coordinates.
+    ///
+    /// Uses the zoom-independent iso conversion so that the camera centre
+    /// lives in the same coordinate space as sprite positions (unzoomed
+    /// screen pixels). The pipeline ortho matrix handles zoom for both.
     pub fn follow(&mut self, tile_x: f32, tile_y: f32) {
-        let (sx, sy) = self.world_to_screen(tile_x, tile_y);
+        let sx = (tile_x - tile_y) * (TILE_WIDTH / 2.0);
+        let sy = (tile_x + tile_y) * (TILE_HEIGHT / 2.0);
         self.target_x = sx;
         self.target_y = sy;
     }
