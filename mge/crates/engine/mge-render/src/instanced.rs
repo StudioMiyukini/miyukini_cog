@@ -746,4 +746,89 @@ mod tests {
             _ => panic!("expected TextureArrayFull error"),
         }
     }
+
+    // -- Integration tests (CPU-side, no GPU) ------------------------------
+
+    #[test]
+    fn integration_instanced_pipeline_100_instances() {
+        let mut batcher = InstancedSpriteBatcher::new(1024);
+        for i in 0..100 {
+            batcher
+                .push(InstanceData {
+                    position: [i as f32 * 10.0, i as f32 * 5.0],
+                    size: [64.0, 32.0],
+                    uv_rect: [0.0, 0.0, 1.0, 1.0],
+                    tint: [1.0, 1.0, 1.0, 1.0],
+                    texture_index: i % 4,
+                    z_depth: i as f32,
+                    _pad: [0.0, 0.0],
+                })
+                .unwrap();
+        }
+
+        batcher.sort_by_depth();
+
+        let bytes = batcher.as_bytes();
+        // 100 instances * 64 bytes each = 6400 bytes
+        assert_eq!(bytes.len(), 6400);
+        assert_eq!(batcher.len(), 100);
+
+        // Verify sort order: z_depth should be ascending.
+        let data: &[InstanceData] = bytemuck::cast_slice(bytes);
+        for i in 1..data.len() {
+            assert!(
+                data[i].z_depth >= data[i - 1].z_depth,
+                "sort broken at index {}: {} < {}",
+                i,
+                data[i].z_depth,
+                data[i - 1].z_depth
+            );
+        }
+    }
+
+    #[test]
+    fn integration_frustum_cull_and_batch() {
+        use crate::culling::{FrustumCuller, RenderEntity};
+
+        // Create 50 entities spread across a large area.
+        let mut entities = Vec::new();
+        for i in 0..50 {
+            entities.push(RenderEntity {
+                id: i,
+                position: [i as f32 * 100.0, i as f32 * 50.0],
+                size: [32.0, 32.0],
+            });
+        }
+
+        let mut culler = FrustumCuller::new(256.0);
+        culler.rebuild(&entities);
+
+        // Visible rect covers roughly entities at positions (0,0) to (2000, 1000).
+        // That's entities with x=0..2000 and y=0..1000, i.e. indices 0..20
+        // (since entity i is at x=100*i, y=50*i; y=1000 => i=20).
+        let visible = culler.cull([0.0, 0.0, 2000.0, 1000.0]);
+
+        // We expect approximately 20 entities (indices 0 through ~20).
+        assert!(
+            visible.len() >= 18 && visible.len() <= 25,
+            "expected ~20 visible entities, got {}",
+            visible.len()
+        );
+
+        // Verify they are sorted by Y (position[1]).
+        // Since entities are indexed by culler using ID, verify the IDs
+        // correspond to ascending Y positions.
+        for i in 1..visible.len() {
+            let prev_y = entities[visible[i - 1] as usize].position[1];
+            let curr_y = entities[visible[i] as usize].position[1];
+            assert!(
+                curr_y >= prev_y,
+                "cull result not sorted: y[{}]={} > y[{}]={}",
+                i - 1,
+                prev_y,
+                i,
+                curr_y
+            );
+        }
+    }
 }
