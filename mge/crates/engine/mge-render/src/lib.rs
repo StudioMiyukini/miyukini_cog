@@ -20,6 +20,8 @@ pub mod sprite;
 pub mod tile;
 
 #[cfg(feature = "instanced")]
+pub mod culling;
+#[cfg(feature = "instanced")]
 pub mod instanced;
 
 #[cfg(test)]
