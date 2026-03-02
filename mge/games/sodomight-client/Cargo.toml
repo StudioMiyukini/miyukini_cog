@@ -17,7 +17,7 @@ mge-ecs = { path = "../../crates/kernel/mge-ecs" }
 mge-math = { path = "../../crates/kernel/mge-math" }
 mge-asset = { path = "../../crates/kernel/mge-asset" }
 mge-platform = { path = "../../crates/kernel/mge-platform" }
-mge-render = { path = "../../crates/engine/mge-render" }
+mge-render = { path = "../../crates/engine/mge-render", features = ["instanced"] }
 mge-audio = { path = "../../crates/engine/mge-audio" }
 mge-ui = { path = "../../crates/engine/mge-ui" }
 mge-net = { path = "../../crates/engine/mge-net" }
@@ -33,6 +33,7 @@ serde = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 thiserror = { workspace = true }
+bytemuck = { version = "1.16", features = ["derive"] }
 
 [lints]
 workspace = true
