@@ -1,0 +1,20 @@
+# @id: MGE-AnimPack @do: tool @role: back-end @layer: 6 @human: francois
+# mge-anim-pack — MGE CLI: animation atlas packer (Aseprite + PNG frames -> atlas + TOML)
+
+[package]
+name = "mge-anim-pack"
+version.workspace = true
+edition.workspace = true
+description = "MGE CLI: animation atlas packer (Aseprite + PNG frames -> atlas + TOML)"
+
+[dependencies]
+asefile = "0.3"
+image = { workspace = true }
+serde = { workspace = true }
+toml = { workspace = true }
+thiserror = { workspace = true }
+clap = { version = "4.5", features = ["derive"] }
+tracing = { workspace = true }
+
+[lints]
+workspace = true
