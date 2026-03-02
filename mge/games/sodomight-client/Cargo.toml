@@ -26,6 +26,7 @@ mge-net = { path = "../../crates/engine/mge-net" }
 sodomight-game = { path = "../sodomight" }
 mge-arpg-stats = { path = "../../crates/arpg/mge-arpg-stats" }
 mge-arpg-entity = { path = "../../crates/arpg/mge-arpg-entity" }
+mge-arpg-items = { path = "../../crates/arpg/mge-arpg-items" }
 
 image = { workspace = true }
 wgpu = { workspace = true }

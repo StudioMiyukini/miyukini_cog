@@ -365,7 +365,6 @@ impl SodomightApp {
     /// Handle a GUI action resulting from user input.
     fn handle_gui_action(&mut self, action: &GuiAction) {
         match *action {
-            GuiAction::None => {}
             GuiAction::ToggleInventory => self.gui.toggle_inventory(),
             GuiAction::ToggleSkills => self.gui.toggle_skills(),
             GuiAction::UseSkill(slot) => {
@@ -377,6 +376,11 @@ impl SodomightApp {
             GuiAction::ClickWorld(sx, sy) => {
                 self.handle_world_click(sx, sy);
             }
+            GuiAction::None
+            | GuiAction::ToggleCharacter
+            | GuiAction::ToggleAutomap
+            | GuiAction::ToggleRunWalk
+            | GuiAction::ToggleQuestLog => {}
         }
     }
 
