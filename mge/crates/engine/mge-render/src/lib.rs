@@ -19,6 +19,9 @@ pub mod renderer;
 pub mod sprite;
 pub mod tile;
 
+#[cfg(feature = "instanced")]
+pub mod instanced;
+
 #[cfg(test)]
 mod tests;
 
