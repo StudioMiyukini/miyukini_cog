@@ -225,6 +225,133 @@ impl AnimationBank {
 }
 
 // ---------------------------------------------------------------------------
+// AnimationController
+// ---------------------------------------------------------------------------
+
+/// FSM-driven animation controller.
+///
+/// Drives playback of animation clips from an `AnimationBank`, advancing
+/// frames based on elapsed time and emitting `FrameEvent`s when triggered.
+#[derive(Debug, Clone)]
+pub struct AnimationController {
+    current_state: AnimationState,
+    current_direction: Direction,
+    current_frame: u32,
+    elapsed_ms: u32,
+    pending_events: Vec<FrameEvent>,
+}
+
+impl Default for AnimationController {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl AnimationController {
+    /// Create a new controller in Idle state, facing South, at frame 0.
+    pub fn new() -> Self {
+        Self {
+            current_state: AnimationState::Idle,
+            current_direction: Direction::S,
+            current_frame: 0,
+            elapsed_ms: 0,
+            pending_events: Vec::new(),
+        }
+    }
+
+    /// Transition to a new state. Resets frame to 0 and clears elapsed time.
+    pub fn set_state(&mut self, state: AnimationState) {
+        if self.current_state != state {
+            self.current_state = state;
+            self.current_frame = 0;
+            self.elapsed_ms = 0;
+            self.pending_events.clear();
+        }
+    }
+
+    /// Set facing direction. Does not reset the current frame.
+    pub fn set_direction(&mut self, direction: Direction) {
+        self.current_direction = direction;
+    }
+
+    /// Advance the animation by `dt_ms` milliseconds.
+    ///
+    /// Returns events triggered during this tick. If no matching clip is
+    /// found in the bank, returns an empty vec and the controller state
+    /// is unchanged.
+    pub fn tick(&mut self, dt_ms: u32, bank: &AnimationBank) -> Vec<FrameEvent> {
+        let Some(clip) = bank.get_clip(self.current_state, self.current_direction) else {
+            return Vec::new();
+        };
+
+        if clip.frame_count == 0 || clip.frame_duration_ms == 0 {
+            return Vec::new();
+        }
+
+        self.elapsed_ms += dt_ms;
+        let mut triggered = Vec::new();
+
+        // Advance frames as many times as needed for the elapsed time.
+        while self.elapsed_ms >= clip.frame_duration_ms {
+            self.elapsed_ms -= clip.frame_duration_ms;
+            let prev_frame = self.current_frame;
+            let next_frame = prev_frame + 1;
+
+            if next_frame >= clip.frame_count {
+                if clip.looping {
+                    self.current_frame = 0;
+                } else {
+                    // Stay on the last frame.
+                    self.current_frame = clip.frame_count - 1;
+                    self.elapsed_ms = 0;
+                    break;
+                }
+            } else {
+                self.current_frame = next_frame;
+            }
+
+            // Collect events for the new frame.
+            for event in &clip.events {
+                if event.frame == self.current_frame {
+                    triggered.push(event.clone());
+                }
+            }
+        }
+
+        triggered
+    }
+
+    /// Current frame index into the atlas, accounting for the clip's
+    /// `atlas_start_frame` offset.
+    ///
+    /// Returns `None` if no matching clip exists in the bank.
+    pub fn current_atlas_frame(&self, bank: &AnimationBank) -> Option<u32> {
+        bank.get_clip(self.current_state, self.current_direction)
+            .map(|clip| clip.atlas_start_frame + self.current_frame)
+    }
+
+    /// Whether the current direction should be mirrored horizontally.
+    pub fn is_mirrored(&self) -> bool {
+        self.current_direction.mirror_source().1
+    }
+
+    /// Current FSM state.
+    pub fn current_state(&self) -> AnimationState {
+        self.current_state
+    }
+
+    /// Current facing direction.
+    pub fn current_direction(&self) -> Direction {
+        self.current_direction
+    }
+
+    /// Current frame index (0-based, within the clip).
+    pub fn current_frame(&self) -> u32 {
+        self.current_frame
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
@@ -383,5 +510,106 @@ atlas_start_frame = 8
         let err = result.unwrap_err();
         let msg = format!("{err}");
         assert!(msg.contains("animation load failed"));
+    }
+
+    // -- S1-T04: AnimationController tests --
+
+    /// TOML bank with looping Idle (S) and non-looping Attack (S, with event at frame 2).
+    const CTRL_BANK_TOML: &str = r#"
+entity_id = "test_entity"
+
+[[clips]]
+state = "Idle"
+direction = "S"
+frame_count = 4
+frame_duration_ms = 100
+looping = true
+atlas_start_frame = 0
+
+[[clips]]
+state = "Walk"
+direction = "S"
+frame_count = 4
+frame_duration_ms = 100
+looping = true
+atlas_start_frame = 4
+
+[[clips]]
+state = "Attack"
+direction = "S"
+frame_count = 4
+frame_duration_ms = 100
+looping = false
+atlas_start_frame = 8
+events = [{ frame = 2, kind = "Damage", data = "hit" }]
+"#;
+
+    #[test]
+    fn controller_default_state() {
+        let ctrl = AnimationController::new();
+        assert_eq!(ctrl.current_state(), AnimationState::Idle);
+        assert_eq!(ctrl.current_direction(), Direction::S);
+        assert_eq!(ctrl.current_frame(), 0);
+    }
+
+    #[test]
+    fn controller_tick_advances_frame() {
+        let bank = AnimationBank::from_toml(CTRL_BANK_TOML).unwrap();
+        let mut ctrl = AnimationController::new();
+        // Tick 100ms -- should advance from frame 0 to frame 1.
+        ctrl.tick(100, &bank);
+        assert_eq!(ctrl.current_frame(), 1);
+    }
+
+    #[test]
+    fn controller_loops() {
+        let bank = AnimationBank::from_toml(CTRL_BANK_TOML).unwrap();
+        let mut ctrl = AnimationController::new(); // Idle, looping
+        // Tick 400ms = 4 frames, which wraps around (frame_count=4, looping).
+        ctrl.tick(400, &bank);
+        assert_eq!(ctrl.current_frame(), 0, "should loop back to 0");
+    }
+
+    #[test]
+    fn controller_no_loop_stops() {
+        let bank = AnimationBank::from_toml(CTRL_BANK_TOML).unwrap();
+        let mut ctrl = AnimationController::new();
+        ctrl.set_state(AnimationState::Attack);
+        // Tick 500ms = 5 frames worth, but Attack has 4 frames, non-looping.
+        ctrl.tick(500, &bank);
+        assert_eq!(ctrl.current_frame(), 3, "should stop at last frame (3)");
+    }
+
+    #[test]
+    fn controller_set_state_resets() {
+        let bank = AnimationBank::from_toml(CTRL_BANK_TOML).unwrap();
+        let mut ctrl = AnimationController::new();
+        ctrl.tick(200, &bank); // advance to frame 2
+        assert_eq!(ctrl.current_frame(), 2);
+        ctrl.set_state(AnimationState::Walk);
+        assert_eq!(ctrl.current_frame(), 0, "set_state should reset frame to 0");
+        assert_eq!(ctrl.current_state(), AnimationState::Walk);
+    }
+
+    #[test]
+    fn controller_events_triggered() {
+        let bank = AnimationBank::from_toml(CTRL_BANK_TOML).unwrap();
+        let mut ctrl = AnimationController::new();
+        ctrl.set_state(AnimationState::Attack);
+        // Tick to reach frame 2 (200ms from frame 0 -> frame 1 -> frame 2).
+        let events = ctrl.tick(200, &bank);
+        assert_eq!(ctrl.current_frame(), 2);
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].kind, FrameEventKind::Damage);
+        assert_eq!(events[0].data, "hit");
+    }
+
+    #[test]
+    fn controller_mirror_detection() {
+        let mut ctrl = AnimationController::new();
+        ctrl.set_direction(Direction::SE);
+        assert!(ctrl.is_mirrored(), "SE should be mirrored");
+        ctrl.set_direction(Direction::S);
+        assert!(!ctrl.is_mirrored(), "S should not be mirrored");
     }
 }
