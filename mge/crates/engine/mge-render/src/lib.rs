@@ -11,6 +11,7 @@
 //! - **Renderer** -- top-level GPU renderer stub (full init requires `mge-platform`).
 //! - **Errors** -- explicit error types via `thiserror`.
 
+pub mod animation;
 pub mod atlas;
 pub mod camera;
 pub mod errors;
