@@ -2,7 +2,9 @@
 //! Sodomight client: handles rendering and input, delegates logic to server.
 #![deny(unsafe_code)]
 
+pub mod bitmap_font;
 pub mod config;
+pub mod d2_sprites;
 pub mod error;
 pub mod game;
 pub mod gui;

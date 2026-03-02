@@ -14,6 +14,12 @@
 // RenderConfig
 // ---------------------------------------------------------------------------
 
+/// Maximum sprites with u16 index buffers (65 536 / 4 vertices = 16 384).
+pub const MAX_SPRITES_U16: u32 = 16_384;
+
+/// Maximum sprites with u32 index buffers (requires `index-u32` feature).
+pub const MAX_SPRITES_U32: u32 = 262_144;
+
 /// Configuration parameters for the renderer.
 #[derive(Debug, Clone)]
 pub struct RenderConfig {
@@ -24,7 +30,31 @@ pub struct RenderConfig {
     /// Enable vertical sync.
     pub vsync: bool,
     /// Maximum number of sprites per frame.
+    ///
+    /// Without the `index-u32` feature, this is capped at [`MAX_SPRITES_U16`]
+    /// (16 384). With `index-u32` enabled, values up to [`MAX_SPRITES_U32`]
+    /// (262 144) are accepted.
     pub max_sprites: u32,
+}
+
+impl RenderConfig {
+    /// Return the effective `max_sprites` capped to the index buffer limit.
+    ///
+    /// Without `index-u32`: capped at [`MAX_SPRITES_U16`].
+    /// With `index-u32`: capped at [`MAX_SPRITES_U32`].
+    pub fn effective_max_sprites(&self) -> u32 {
+        let ceiling = Self::max_sprites_ceiling();
+        self.max_sprites.min(ceiling)
+    }
+
+    /// Return the absolute ceiling for `max_sprites` given the active features.
+    pub fn max_sprites_ceiling() -> u32 {
+        if cfg!(feature = "index-u32") {
+            MAX_SPRITES_U32
+        } else {
+            MAX_SPRITES_U16
+        }
+    }
 }
 
 impl Default for RenderConfig {
@@ -33,7 +63,7 @@ impl Default for RenderConfig {
             width: 800,
             height: 600,
             vsync: true,
-            max_sprites: 16_384,
+            max_sprites: MAX_SPRITES_U16,
         }
     }
 }

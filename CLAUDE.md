@@ -75,55 +75,72 @@ cargo test -p {crate} -- --nocapture       # Tests verbose d'un crate
 
 En cas de doute, classer **UN CRAN AU-DESSUS**. Maria classifie.
 
-### P0 — Cadrage complet en 6 temps (SEULE phase humaine)
+### P0 — Cadrage complet en 8 temps (SEULE phase humaine)
 
 | Temps | Nom | Agent(s) |
 |-------|-----|----------|
-| 1 | Exploration | Maria |
+| 1 | Exploration + Questionnaire brainstorming | Maria |
 | 2 | Ideation | Maria + Lise (parallele) |
 | 3 | Analyse concurrentielle | Fabrice (T4-T5, parallele Temps 2) |
-| 4 | Specification technique + Context7 | Francois |
-| 5 | Plan exhaustif | Denis |
-| 6 | Synthese & Brief | Maria |
+| 4 | Inventaire des prerequis | Denis (lead) + Francois + Lise |
+| 5 | Specification technique + Context7 | Francois |
+| 6 | Plan exhaustif + Guide d'implementation | Denis |
+| 7 | Audit de faisabilite | Arianne (agents, deps, outils, memoire) |
+| 8 | Synthese & Brief | Maria |
 
-**Gate P0** : Brief approuve par l'utilisateur = **derniere intervention humaine**.
+**Gate P0** : Brief approuve + mode d'autonomie choisi (FULL/BIG_STEPS/GUIDED).
 
-### AUTOPILOT (P3 → P6 — execution automatique)
+### Execution (P3 → P6 — adapte au mode d'autonomie)
 
 | Phase | Nom | Agents | Gate |
 |-------|-----|--------|------|
 | Git | Creation feature branch + push | Denis | Branch prete |
 | P3 | Implementation TDD parallele | Francois + Lise | Tests + clippy + push par tache |
 | P4 | Integration & Audit | Denis + George | 0 defaut bloquant |
-| P5 | Livraison + Merge | Denis | Utilisateur confirme → merge main |
-| P6 | Archivage & Capitalisation | Arianne | Memoire a jour |
+| P5 | Livraison, Test humain & Validation | Denis + George | Verdict utilisateur (ACCEPTE/REFUSE) |
+| P6 | Rapport final, Archivage & Capitalisation | Arianne | Rapport + memoire a jour |
 
 **Git workflow** : Feature branch (`feat/<slug>`) creee au debut, push apres chaque commit, merge vers main apres validation.
+**Metriques** : Horodatage + compteurs collectes tout au long dans `.mip/metrics/`. Maria initialise, tous les agents alimentent.
 **Frein d'urgence** : L'autopilot s'arrete si bug bloquant apres 2 auto-corrections, ou delta majeur.
 **Logging** : Chaque tache tracee via TodoWrite pour suivi utilisateur temps reel.
 **Context7** : Verification docs libs (Dioxus, axum, serde) en P0-T4 + spot-checks en P3.
+**Brainstorming** : Questionnaire standard en 5 sections (Comprendre/Cadrer/Imaginer/Evaluer/Decider) inspire Design Thinking, Six Thinking Hats, SCAMPER, 5 Whys, HMW, LDJ. Maria administre en Temps 1.
+**Inventaire** : Denis inventorie competences, connaissances, outils, etapes generales en Temps 4. Alimente la spec et le plan.
+**Annonces** : Chaque Temps P0 et etape macro P3 annonces dans le chat avec date/heure. TodoWrite suit la progression.
+**Mode autonomie** : FULL (autopilot complet), BIG_STEPS (gates P3→P4, P4→P5), GUIDED (gate par etape macro). Persistance dans `memory/user-profile.md`. Changeable via `/autonomy_mode`.
+**Smoke test** : Test e2e happy path compile-mais-echoue AVANT le TDD tache par tache (valide la structure du plan).
+**Token efficiency** : Fichiers memoire pre-indexes par agent. TL;DR 5 lignes sur chaque artefact.
 **Checkpoints** : Mini-audit Denis toutes les 5 taches en P3.
+**Boucle MIP** : Si refus P5, retour en P0 avec feedback utilisateur (increment `mip_loops`).
+**Rapport final** : Notes /20 sur 8 criteres, resume dev, profil utilisateur, capitalisation agents.
 
 ### Workflow standard
 
 ```
-Utilisateur → Maria (P0 : 6 temps) + Lise + Fabrice + Francois (Context7) + Denis
-→ [GATE] Brief approuve
-→ === AUTOPILOT ===
+Utilisateur → Maria (P0 : 8 temps + init metriques) + Lise + Fabrice + Denis (inventaire) + Francois (Context7) + Denis (plan+guide) + Arianne (audit)
+→ [GATE] Brief approuve + mode autonomie (FULL/BIG_STEPS/GUIDED)
+→ === EXECUTION (mode choisi) ===
 → Git : checkout -b feat/<slug> + push -u origin
-→ Francois (P3 back) + Lise (P3 front) en PARALLELE [TDD + commit + push + TodoWrite]
-→ Denis (P3 checkpoint /5 taches + push) → Denis (P4 integration) + George (P4 audit)
-→ Denis (P5 push final + resume) → [GATE] Utilisateur confirme
-→ Denis (P5 merge main + push + tag + nettoyage branche)
-→ Arianne (P6 archivage + capitalisation anti-patterns)
+→ Denis : Smoke test e2e (compile mais echoue → valide structure)
+→ Francois (P3 back) + Lise (P3 front) en PARALLELE [TDD + commit + push + metriques + TodoWrite]
+→ Denis (P3 checkpoint /5 taches + push) [BIG_STEPS: gate P3→P4] [GUIDED: gate/etape macro]
+→ Denis (P4 integration) + George (P4 audit) [BIG_STEPS: gate P4→P5]
+→ Denis (P5 push final + resume + instructions test) → [Utilisateur teste]
+→ Denis (P5 questionnaire satisfaction) → [GATE] Verdict utilisateur
+→   Si ACCEPTE : Denis (P5 merge main + push + tag + nettoyage branche)
+→   Si REFUSE : Maria (retour P0 avec feedback, boucle MIP)
+→ Arianne (P6 rapport final /20 + archivage + capitalisation + profil utilisateur)
 ```
 
 ### Artefacts MIP
 
-- `.mip/briefs/` — Briefs de cadrage (P0 Temps 6)
-- `.mip/specs/` — Specs techniques (P0 Temps 4)
-- `.mip/plans/` — Plans exhaustifs (P0 Temps 5)
+- `.mip/briefs/` — Briefs de cadrage (P0 Temps 8)
+- `.mip/specs/` — Specs techniques (P0 Temps 5)
+- `.mip/plans/` — Plans exhaustifs + guides d'implementation (P0 Temps 6)
 - `.mip/audits/` — Rapports d'audit (P4)
+- `.mip/metrics/` — Metriques et horodatage (collecte continue)
+- `.mip/reports/` — Rapports finaux de developpement (P6)
 
 Skill complet : `.cursor/skills/miyukini-mip-workflow/SKILL.md`
 

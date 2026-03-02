@@ -49,4 +49,133 @@ pub enum RenderError {
         /// Description of the TOML parse failure.
         message: String,
     },
+
+    /// The instanced sprite batcher exceeded its maximum capacity.
+    #[error("batcher overflow: capacity {capacity}, attempted {attempted}")]
+    BatcherOverflow {
+        /// Maximum allowed instances.
+        capacity: usize,
+        /// Number of instances that were attempted.
+        attempted: usize,
+    },
+
+    /// The texture array has no remaining layers.
+    #[error("texture array full: max layers {max_layers}")]
+    TextureArrayFull {
+        /// Maximum number of layers the texture array supports.
+        max_layers: u32,
+    },
+
+    /// A shader failed to compile.
+    #[error("shader compilation failed: {details}")]
+    ShaderCompilationFailed {
+        /// Detailed shader compilation error message.
+        details: String,
+    },
+
+    /// A texture had unexpected dimensions.
+    #[error(
+        "invalid texture size: expected {expected_w}x{expected_h}, got {got_w}x{got_h}"
+    )]
+    InvalidTextureSize {
+        /// Expected width.
+        expected_w: u32,
+        /// Expected height.
+        expected_h: u32,
+        /// Actual width.
+        got_w: u32,
+        /// Actual height.
+        got_h: u32,
+    },
+
+    /// An animation definition could not be loaded or is invalid.
+    #[error("animation load failed: {details}")]
+    AnimationLoadFailed {
+        /// Description of the animation loading failure.
+        details: String,
+    },
+
+    /// A TTF/OTF font could not be loaded or parsed.
+    #[error("font load failed: {details}")]
+    FontLoadFailed {
+        /// Description of the font loading failure.
+        details: String,
+    },
+
+    /// The glyph atlas has no remaining space for new glyphs.
+    #[error("glyph atlas full: atlas size {atlas_size}x{atlas_size}")]
+    GlyphAtlasFull {
+        /// The atlas dimension in pixels (square atlas).
+        atlas_size: u32,
+    },
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn render_error_implements_display() {
+        let err = RenderError::BatcherOverflow {
+            capacity: 100,
+            attempted: 101,
+        };
+        let msg = format!("{err}");
+        assert!(msg.contains("100"));
+        assert!(msg.contains("101"));
+    }
+
+    #[test]
+    fn render_error_implements_error_trait() {
+        let err = RenderError::TextureArrayFull { max_layers: 16 };
+        // std::error::Error is implemented by thiserror.
+        let as_error: &dyn std::error::Error = &err;
+        let _ = as_error;
+        let msg = format!("{err}");
+        assert!(msg.contains("16"));
+    }
+
+    #[test]
+    fn render_error_shader_compilation_failed_display() {
+        let err = RenderError::ShaderCompilationFailed {
+            details: "syntax error at line 42".to_string(),
+        };
+        let msg = format!("{err}");
+        assert!(msg.contains("syntax error at line 42"));
+    }
+
+    #[test]
+    fn render_error_invalid_texture_size_display() {
+        let err = RenderError::InvalidTextureSize {
+            expected_w: 512,
+            expected_h: 512,
+            got_w: 256,
+            got_h: 256,
+        };
+        let msg = format!("{err}");
+        assert!(msg.contains("512x512"));
+        assert!(msg.contains("256x256"));
+    }
+
+    #[test]
+    fn render_error_font_load_failed_display() {
+        let err = RenderError::FontLoadFailed {
+            details: "invalid magic number".to_string(),
+        };
+        let msg = format!("{err}");
+        assert!(msg.contains("font load failed"));
+        assert!(msg.contains("invalid magic number"));
+    }
+
+    #[test]
+    fn render_error_glyph_atlas_full_display() {
+        let err = RenderError::GlyphAtlasFull { atlas_size: 1024 };
+        let msg = format!("{err}");
+        assert!(msg.contains("glyph atlas full"));
+        assert!(msg.contains("1024"));
+    }
 }

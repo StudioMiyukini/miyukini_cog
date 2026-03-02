@@ -3,6 +3,7 @@
 //! Unit tests for mge-render (no GPU required).
 
 #[cfg(test)]
+#[allow(deprecated, clippy::module_inception)]
 mod tests {
     use crate::atlas::{AtlasRegistry, TextureAtlas};
     use crate::camera::Camera2D;
@@ -345,5 +346,110 @@ h = 32
         let bad_toml = "this is not valid TOML { { {";
         let result = TextureAtlas::from_toml("bad", bad_toml, 256, 256);
         assert!(result.is_err());
+    }
+
+    // -----------------------------------------------------------------------
+    // 16. Camera: visible_rect at default zoom
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn visible_rect_default_zoom() {
+        let cam = Camera2D::new(800, 600);
+        // zoom=1.0, position=(0,0), screen 800x600
+        // half_w = 800/(2*1) = 400, half_h = 600/(2*1) = 300
+        // rect = [-400, -300, 400, 300]
+        let rect = cam.visible_rect(800.0, 600.0);
+        assert!((rect[0] - (-400.0)).abs() < f32::EPSILON, "min_x: {}", rect[0]);
+        assert!((rect[1] - (-300.0)).abs() < f32::EPSILON, "min_y: {}", rect[1]);
+        assert!((rect[2] - 400.0).abs() < f32::EPSILON, "max_x: {}", rect[2]);
+        assert!((rect[3] - 300.0).abs() < f32::EPSILON, "max_y: {}", rect[3]);
+    }
+
+    // -----------------------------------------------------------------------
+    // 17. Camera: visible_rect zoomed in
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn visible_rect_zoomed_in() {
+        let mut cam = Camera2D::new(800, 600);
+        cam.zoom = 2.0;
+        // half_w = 800/(2*2) = 200, half_h = 600/(2*2) = 150
+        // rect = [-200, -150, 200, 150]
+        let rect = cam.visible_rect(800.0, 600.0);
+        assert!((rect[0] - (-200.0)).abs() < f32::EPSILON, "min_x: {}", rect[0]);
+        assert!((rect[1] - (-150.0)).abs() < f32::EPSILON, "min_y: {}", rect[1]);
+        assert!((rect[2] - 200.0).abs() < f32::EPSILON, "max_x: {}", rect[2]);
+        assert!((rect[3] - 150.0).abs() < f32::EPSILON, "max_y: {}", rect[3]);
+    }
+
+    // -----------------------------------------------------------------------
+    // 18. Camera: visible_rect with offset
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn visible_rect_offset() {
+        let mut cam = Camera2D::new(800, 600);
+        cam.world_x = 100.0;
+        cam.world_y = 50.0;
+        // zoom=1.0, half_w=400, half_h=300
+        // rect = [100-400, 50-300, 100+400, 50+300] = [-300, -250, 500, 350]
+        let rect = cam.visible_rect(800.0, 600.0);
+        assert!((rect[0] - (-300.0)).abs() < f32::EPSILON, "min_x: {}", rect[0]);
+        assert!((rect[1] - (-250.0)).abs() < f32::EPSILON, "min_y: {}", rect[1]);
+        assert!((rect[2] - 500.0).abs() < f32::EPSILON, "max_x: {}", rect[2]);
+        assert!((rect[3] - 350.0).abs() < f32::EPSILON, "max_y: {}", rect[3]);
+    }
+
+    // -----------------------------------------------------------------------
+    // 19. RenderConfig: default uses u16 limit
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn render_config_default_uses_u16_limit() {
+        let cfg = crate::renderer::RenderConfig::default();
+        assert_eq!(
+            cfg.max_sprites,
+            crate::renderer::MAX_SPRITES_U16,
+            "Default max_sprites should equal MAX_SPRITES_U16"
+        );
+        assert_eq!(cfg.max_sprites, 16_384);
+    }
+
+    // -----------------------------------------------------------------------
+    // 20. RenderConfig: effective_max_sprites caps to ceiling
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn render_config_effective_max_sprites_caps_to_ceiling() {
+        let cfg = crate::renderer::RenderConfig {
+            max_sprites: 999_999,
+            ..crate::renderer::RenderConfig::default()
+        };
+        let effective = cfg.effective_max_sprites();
+        let ceiling = crate::renderer::RenderConfig::max_sprites_ceiling();
+        assert_eq!(
+            effective, ceiling,
+            "effective_max_sprites should be capped to ceiling"
+        );
+    }
+
+    // -----------------------------------------------------------------------
+    // 21. RenderConfig: u32 feature allows large batches
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn render_config_u32_allows_large_batches() {
+        let ceiling = crate::renderer::RenderConfig::max_sprites_ceiling();
+        let cfg = crate::renderer::RenderConfig {
+            max_sprites: ceiling,
+            ..crate::renderer::RenderConfig::default()
+        };
+        assert_eq!(cfg.effective_max_sprites(), ceiling);
+
+        if cfg!(feature = "index-u32") {
+            assert_eq!(ceiling, crate::renderer::MAX_SPRITES_U32);
+        } else {
+            assert_eq!(ceiling, crate::renderer::MAX_SPRITES_U16);
+        }
     }
 }

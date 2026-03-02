@@ -28,21 +28,118 @@ Avant toute action, classer la demande :
 
 ### P0 — Cadrage complet : Brainstorming, Analyse, Specification & Planification (T3+)
 
-**Agents** : Maria (lead) + Lise (direction visuelle) + Fabrice (analyse PR, T4-T5) + Francois (spec technique) + Denis (plan exhaustif)
+**Agents** : Maria (lead) + Lise (direction visuelle) + Fabrice (analyse PR, T4-T5) + Denis (inventaire + plan) + Francois (spec technique) + Arianne (audit de faisabilite)
 
-P0 est **LA phase humaine** : elle determine la direction de tout le travail. Aucun code ne sera ecrit avant la fin de P0. Le brainstorming est **structure en 6 temps**. Apres approbation du brief P0, **tout est automatique** (P3 → P6).
+P0 est **LA phase humaine** : elle determine la direction de tout le travail. Aucun code ne sera ecrit avant la fin de P0. Le brainstorming est **structure en 8 temps**. Apres approbation du brief P0, **tout est automatique** (P3 → P6).
 
-#### Temps 1 — Exploration (Maria)
+#### Suivi P0 — Annonces temps reel
 
-Maria reformule la demande et creuse le contexte :
+Chaque Temps P0 est **trace via TodoWrite** pour que l'utilisateur puisse suivre la progression de l'equipe. A la **completion de chaque Temps**, l'agent responsable **annonce dans le chat** :
+
+```
+[YYYY-MM-DD HH:MM] ✓ P0 Temps X — <Nom du Temps> termine.
+  Agent(s): <liste>
+  Resultat: <resume en 1-2 lignes>
+  → Prochaine etape: Temps X+1 — <Nom>
+```
+
+La TodoWrite P0 contient un item par Temps :
+```
+[ ] Temps 1 — Exploration & Brainstorming (Maria)
+[ ] Temps 2 — Ideation (Maria + Lise)
+[ ] Temps 3 — Analyse concurrentielle (Fabrice) [T4-T5]
+[ ] Temps 4 — Inventaire des prerequis (Denis + equipe)
+[ ] Temps 5 — Specification technique + Context7 (Francois)
+[ ] Temps 6 — Plan exhaustif & Guide d'implementation (Denis)
+[ ] Temps 7 — Audit de faisabilite (Arianne)
+[ ] Temps 8 — Synthese & Brief (Maria)
+```
+
+#### Temps 1 — Exploration & Brainstorming structure (Maria)
+
+Maria reformule la demande, creuse le contexte, et guide l'utilisateur a travers un **questionnaire de brainstorming structure** inspire de methodes reconnues (Design Thinking, Six Thinking Hats, SCAMPER, 5 Whys, How Might We).
+
+**Etapes** :
 
 1. **Reformuler** la demande utilisateur en termes precis
 2. **Classifier** la demande (T1-T5)
 3. **Explorer le code existant** : lire les fichiers concernes (Glob, Grep, Read) pour comprendre l'etat actuel
-4. **Poser des questions** de clarification a l'utilisateur (minimum 2-3 questions ciblees)
+4. **Administrer le questionnaire de brainstorming** (voir ci-dessous) — poser les questions par section, adapter selon la classe T et le contexte
 5. **Identifier les contraintes** : Lois d'Autonomie applicables, stack technique, compatibilite existante
 
 **Hard gate** : NE PAS passer au temps 2 sans reponses de l'utilisateur.
+
+---
+
+#### Questionnaire de Brainstorming Standard — P0
+
+> **Objectif** : Guider l'utilisateur pour extraire les informations et decisions necessaires au cadrage du projet. Chaque section s'inspire d'une methode de brainstorming reconnue. Maria **adapte les questions** au contexte : certaines sont universelles, d'autres reservees aux projets complexes (T4-T5). Les questions marquees `[OPT]` sont optionnelles pour T3.
+
+##### Section 1 — COMPRENDRE : Le probleme et son contexte
+*Inspire de : Design Thinking (Empathize/Define) + 5 Whys*
+
+| # | Question | Methode | Classes |
+|---|----------|---------|---------|
+| 1.1 | **Quel probleme ou besoin cette demande resout-elle ?** Decrivez la situation actuelle et ce qui ne va pas ou manque. | Design Thinking: Empathize | T3-T5 |
+| 1.2 | **Pourquoi maintenant ?** Qu'est-ce qui declenche cette demande aujourd'hui ? (urgence, opportunite, prerequis pour un autre projet...) | 5 Whys (niveau 1) | T3-T5 |
+| 1.3 | **Qui est l'utilisateur final ?** Qui va utiliser cette fonctionnalite au quotidien ? (vous-meme, un autre utilisateur, un service, une API...) | Design Thinking: Define | T3-T5 |
+| 1.4 | **Quel est le parcours actuel ?** Si une solution partielle existe deja, comment l'utilisateur fait-il aujourd'hui ? Quels sont les points de friction ? | Design Thinking: Empathize | T3-T5 |
+| 1.5 | `[OPT]` **Pourquoi cette approche plutot qu'une autre ?** Si vous avez deja une idee de solution, qu'est-ce qui vous y a mene ? (creuser les "pourquoi" sous-jacents) | 5 Whys (niveaux 2-3) | T4-T5 |
+
+##### Section 2 — CADRER : Faits, contraintes et priorites
+*Inspire de : Six Thinking Hats (White Hat: faits, Blue Hat: processus)*
+
+| # | Question | Methode | Classes |
+|---|----------|---------|---------|
+| 2.1 | **Quelles sont les contraintes techniques connues ?** (stack, versions, dependances, performance, compatibilite, plateforme...) | White Hat: Faits | T3-T5 |
+| 2.2 | **Quel est le perimetre souhaite ?** Listez ce qui doit etre INCLUS et ce qui est EXCLU explicitement. | Blue Hat: Processus | T3-T5 |
+| 2.3 | **Quelle est la priorite ?** Classez par importance : (a) fonctionnalite minimale viable, (b) ameliorations souhaitees, (c) bonus / nice-to-have. | Blue Hat: Processus | T3-T5 |
+| 2.4 | `[OPT]` **Y a-t-il une deadline ou un jalon externe ?** (release, demo, dependance d'un autre projet...) | White Hat: Faits | T4-T5 |
+| 2.5 | `[OPT]` **Quelles donnees ou references avez-vous ?** (maquettes, specs existantes, exemples, liens, captures d'ecran...) | White Hat: Faits | T4-T5 |
+
+##### Section 3 — IMAGINER : Idees, alternatives et inspiration
+*Inspire de : Six Thinking Hats (Green Hat: creativite) + SCAMPER*
+
+| # | Question | Methode | Classes |
+|---|----------|---------|---------|
+| 3.1 | **Avez-vous deja des idees ou preferences d'approche technique ?** Decrivez meme partiellement — toute piste est utile. | Green Hat: Creativite | T3-T5 |
+| 3.2 | **Existe-t-il dans le projet quelque chose de similaire qu'on pourrait adapter ?** (un service, composant, pattern, crate existant...) | SCAMPER: Adapter | T3-T5 |
+| 3.3 | `[OPT]` **Peut-on combiner avec une fonctionnalite existante ou prevue ?** (fusionner deux besoins en un seul dev) | SCAMPER: Combiner | T4-T5 |
+| 3.4 | `[OPT]` **Que peut-on eliminer pour simplifier ?** Y a-t-il des aspects non-essentiels qu'on pourrait retirer pour un MVP plus rapide ? | SCAMPER: Eliminer | T4-T5 |
+| 3.5 | `[OPT]` **Connaissez-vous des produits/services qui font quelque chose de similaire ?** (inspiration concurrence, references visuelles ou fonctionnelles) | SCAMPER: Adapter | T4-T5 |
+| 3.6 | `[OPT]` **"How Might We..."** — Comment pourrait-on reformuler le probleme en opportunite ? (ex: "Comment pourrait-on rendre le partage de fichiers aussi simple qu'un glisser-deposer ?") | How Might We | T5 |
+
+##### Section 4 — EVALUER : Risques, benefices et intuition
+*Inspire de : Six Thinking Hats (Yellow Hat: valeur, Black Hat: risques, Red Hat: intuition)*
+
+| # | Question | Methode | Classes |
+|---|----------|---------|---------|
+| 4.1 | **Quel est le benefice principal attendu ?** Une fois livre, quelle est LA chose qui doit fonctionner ? | Yellow Hat: Valeur | T3-T5 |
+| 4.2 | **Quels risques ou difficultes anticipez-vous ?** (techniques, UX, compatibilite, performance, securite...) | Black Hat: Risques | T3-T5 |
+| 4.3 | **Quelle est votre intuition sur la complexite ?** (simple / modere / complexe / tres complexe) | Red Hat: Intuition | T3-T5 |
+| 4.4 | `[OPT]` **Quelle importance strategique ?** (1 = utilitaire, 5 = critique pour l'ecosysteme Miyukini) | Red Hat: Intuition | T4-T5 |
+| 4.5 | `[OPT]` **Que se passe-t-il si on ne fait PAS ce projet ?** (impact de l'inaction) | Reverse Brainstorming | T4-T5 |
+
+##### Section 5 — DECIDER : Arbitrages et priorites
+*Inspire de : Lightning Decision Jam (LDJ)*
+
+| # | Question | Methode | Classes |
+|---|----------|---------|---------|
+| 5.1 | **Quelle est la fonctionnalite MINIMALE viable ?** Si on ne pouvait livrer qu'une seule chose, ce serait quoi ? | LDJ: Prioriser | T3-T5 |
+| 5.2 | **Preference de compromis ?** En cas de tension, que privilegier : (a) rapidite de livraison, (b) exhaustivite fonctionnelle, (c) robustesse/qualite ? | LDJ: Arbitrer | T3-T5 |
+| 5.3 | `[OPT]` **Qu'est-ce qui peut etre reporte a un prochain sprint ?** (fonctionnalites phase 2, optimisations, polish...) | LDJ: Reporter | T4-T5 |
+| 5.4 | `[OPT]` **Y a-t-il des decisions deja verrouillees ?** (choix techniques, patterns, conventions qui ne sont pas negociables pour ce projet) | LDJ: Contraindre | T4-T5 |
+
+---
+
+**Utilisation par Maria** :
+
+- **T3** : Poser les questions non-`[OPT]` (12 questions). Adapter selon le contexte — si la reponse est evidente, ne pas insister.
+- **T4** : Poser toutes les questions (20 questions). Regrouper en 2-3 messages pour ne pas submerger l'utilisateur.
+- **T5** : Poser toutes les questions (21 questions) + question HMW (3.6). Accepter des reponses longues et encourager la reflexion.
+- **Boucle MIP** (retour P5 → P0) : Ne re-poser que les sections 1 et 4 en les orientant sur les **ecarts constates** et les **corrections souhaitees**.
+
+**Hard gate inchangee** : NE PAS passer au temps 2 sans reponses suffisantes de l'utilisateur.
 
 #### Temps 2 — Ideation (Maria + Lise en parallele)
 
@@ -70,7 +167,79 @@ Deux explorations paralleles :
 4. Lister les **fonctionnalites differenciantes** a envisager
 5. Detecter les **points de friction** des concurrents
 
-#### Temps 4 — Specification technique + Verification Context7 (Francois)
+#### Temps 4 — Inventaire des prerequis (Denis + equipe)
+
+**Denis** (lead) coordonne un inventaire complet de tout ce qui est necessaire pour realiser le projet. Chaque agent du perimetre contribue a sa section.
+
+**Objectif** : Produire une **carte exhaustive des prerequis** AVANT la spec et le plan, pour que ceux-ci soient ultra-detailles et sans angle mort.
+
+**1. Competences requises** (par agent) :
+
+| Agent | Inventorier |
+|-------|-------------|
+| **Francois** | Competences Rust necessaires (traits, async, unsafe patterns a eviter, crates a maitriser). Technologies backend (axum, serde, SQLite, crypto...) |
+| **Lise** | Competences UI necessaires (Dioxus 0.6 patterns, RSX, signals, atomic design). Technologies frontend (CSS, assets, theme system) |
+| **Denis** | Competences architecture (patterns COG, integration inter-crates, tests, CI/CD) |
+
+**2. Connaissances necessaires** :
+
+- **Domaine metier** : Quelles connaissances metier l'equipe doit posseder ? (ex: protocoles crypto pour MiyuCloud, regles de jeu pour Sodomight)
+- **Patterns existants** : Quels patterns du projet doivent etre connus ? (charger depuis `memory/mip-decisions.md`)
+- **Anti-patterns** : Quelles erreurs doivent etre connues ? (charger depuis `memory/mip-antipatterns.md` et MEMORY.md)
+- **Documentation** : Quelles docs sont necessaires ? (CLAUDE.md, skills, docs externes via Context7)
+
+**3. Outils et ressources necessaires** :
+
+| Categorie | Inventorier |
+|-----------|-------------|
+| **Crates externes** | Liste des dependances avec versions minimales, statut de maintenance, compatibilite |
+| **Crates internes** | Crates du workspace a utiliser/modifier, types et traits a connaitre |
+| **Outils dev** | Compilateur, Context7 IDs, CLI tools, formatteurs, linters |
+| **Assets** | Fichiers graphiques, polices, icones, sons a creer ou reutiliser |
+| **Infrastructure** | Serveurs, ports, certificats, configs reseau si applicable |
+| **Docs & refs** | Liens Context7, pages de documentation, specs externes |
+
+**4. Etapes generales du projet** :
+
+Denis decompose le projet en **etapes macro** (avant le plan atomique du Temps 6) :
+
+```markdown
+## Etapes generales — <titre du projet>
+
+### Etape 1 — <nom>
+- **Objectif** : <ce que cette etape accomplit>
+- **Agents** : <qui travaille>
+- **Prerequis** : <ce qui doit etre fait avant>
+- **Livrables** : <ce qui est produit>
+- **Critere de completion** : <comment savoir que c'est fini>
+- **Risques identifies** : <ce qui pourrait bloquer>
+
+### Etape 2 — <nom>
+[...]
+```
+
+**5. Matrice de disponibilite** :
+
+| Prerequis | Statut | Action si manquant |
+|-----------|--------|--------------------|
+| Crate X v1.2 | Disponible | — |
+| Pattern Y | Connu (memory) | — |
+| Asset Z | A creer | Tache Lise pre-planifiee |
+| Competence W | Non maitrisee | Consultation Context7 + doc |
+
+**Output** : Section "Inventaire des prerequis" integree au brief. Alimente directement Francois (Temps 5 : spec) et Denis (Temps 6 : plan).
+
+**Annonce** :
+```
+[YYYY-MM-DD HH:MM] ✓ P0 Temps 4 — Inventaire des prerequis termine.
+  Agent(s): Denis (lead), Francois, Lise
+  Resultat: X competences, Y outils, Z etapes generales inventories. Manquants: N
+  → Prochaine etape: Temps 5 — Specification technique (Francois)
+```
+
+---
+
+#### Temps 5 — Specification technique + Verification Context7 (Francois)
 
 **Francois** analyse le contexte technique, **verifie les docs actuelles**, et produit la spec :
 
@@ -99,11 +268,11 @@ Deux explorations paralleles :
 - Anti-patterns evites
 - Ecarts code existant vs docs actuelles
 
-Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md`
+Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md` — **Doit commencer par un TL;DR de 5 lignes max.**
 
-#### Temps 5 — Plan general de developpement exhaustif (Denis)
+#### Temps 6 — Plan exhaustif & Guide d'implementation detaille (Denis)
 
-**Denis** compile la spec de Francois et produit le **plan exhaustif** couvrant TOUTE la chaine de production :
+**Denis** compile l'inventaire (Temps 4) + la spec de Francois (Temps 5) et produit le **plan exhaustif avec guide d'implementation detaille** couvrant TOUTE la chaine de production. L'inventaire des prerequis alimente directement ce plan — chaque etape macro est decomposee en taches atomiques :
 
 1. **Decomposer en taches atomiques** (2-5 minutes chacune)
 2. **Couvrir exhaustivement** les categories suivantes :
@@ -131,17 +300,80 @@ Artefact : `.mip/specs/YYYY-MM-DD-<slug>.md`
 
 5. **Ordonnancement** : Les taches sont ordonnees par dependance. Les taches independantes sont marquees comme parallelisables.
 
-Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md`
+6. **Guide d'implementation detaille** — Pour chaque etape macro (du Temps 4), Denis produit un **guide integre au plan** :
 
-#### Temps 6 — Synthese & Brief (Maria)
+```markdown
+## Guide d'implementation — Etape X : <nom>
+
+### Prerequis de l'etape
+- Competences : <listees dans l'inventaire Temps 4>
+- Outils : <verifies disponibles>
+- Crates/deps : <avec versions>
+- Connaissances : <patterns a appliquer, anti-patterns a eviter>
+- Docs Context7 a consulter : <IDs + queries recommandees>
+
+### Taches atomiques de l'etape
+[CODE-01] → [CODE-02] → [TEST-U-01] → ...
+
+### Critere de completion de l'etape
+- [ ] Tous les tests de l'etape passent
+- [ ] Clippy propre sur les crates touches
+- [ ] Code review (checkpoint Denis si ≥5 taches)
+- [ ] Annonce dans le chat avec timestamp
+```
+
+Le guide sert de **feuille de route detaillee** pour Francois et Lise en P3. Chaque etape terminee est annoncee dans le chat avec date/heure.
+
+Artefact : `.mip/plans/YYYY-MM-DD-<slug>.md` — **Doit commencer par un TL;DR de 5 lignes max.**
+
+#### Temps 7 — Audit de faisabilite & Conformite (Arianne)
+
+**Arianne** verifie que le projet est **realisable tel que planifie**, que les agents, dependances et outils sont conformes, et qu'il n'y a ni trou ni ambiguite.
+
+**Verification des agents** :
+1. **Agents necessaires** : Verifier que chaque tache du plan a un agent assigne et que cet agent possede les competences requises (consulter `memory/team-skills-audit.md`)
+2. **Capacite du modele** : Evaluer si le modele LLM utilise est capable de la complexite des taches planifiees. Si risque de deviation → recommander un modele different ou un decoupage plus fin
+3. **Coherence inter-agents** : Verifier que les outputs attendus de chaque agent correspondent aux inputs attendus par les agents suivants (pas de gap)
+
+**Verification des dependances** :
+4. **Crates externes** : Verifier que toutes les dependances listees dans la spec existent, sont maintenues, et sont compatibles entre elles (versions)
+5. **Crates internes** : Verifier que les crates du workspace utilises existent et que les types/traits references sont bien definis
+6. **Outils** : Verifier que tous les outils necessaires au dev sont disponibles (compilateur, Context7 IDs, outils CLI, assets)
+
+**Verification contre la memoire** :
+7. **Anti-patterns** : Relire `memory/mip-antipatterns.md` — verifier qu'aucune tache ne reproduit une erreur connue
+8. **Patterns confirmes** : Relire `memory/mip-decisions.md` — verifier que les patterns confirmes sont bien utilises
+9. **Historique** : Consulter `memory/mip-performance-history.md` — si un projet similaire a deja ete fait, en tirer des lecons
+
+**Verification Context7** (complement de Francois) :
+10. **Spot-check** : Verifier via Context7 que 2-3 patterns critiques du plan sont bien valides (ex: RSX signal patterns, axum middleware, serde derives)
+11. **Breaking changes recents** : Verifier si les libs ont ete mises a jour depuis la derniere sequence MIP
+
+**Diagnostic** :
+
+| Resultat | Action |
+|----------|--------|
+| **Conforme** | Feu vert → Maria compile le brief (Temps 8) |
+| **Trous mineurs** | Lister les manques, suggerer les complements, corriger le plan |
+| **Ambiguite** | Identifier les points flous, poser des questions a l'utilisateur ou a l'agent concerne |
+| **Manque critique** (outil, crate, skill agent) | Suggerer la **creation des manquants** comme projet precurseur |
+| **Projet irrealisable tel quel** | Suggerer une **reorientation** : decomposer en un projet precurseur (prereqs) + projet final |
+
+**Suggestion de projet precurseur** : Si Arianne detecte qu'il manque un crate, un outil, ou une competence pour realiser le projet, elle propose un **mini-projet precurseur** (T2-T3) a realiser d'abord, qui debloquera le projet principal. Le brief est alors modifie pour inclure cette dependance.
+
+Artefact : Section "Audit de faisabilite" integree au brief (pas d'artefact separe en P0)
+
+#### Temps 8 — Synthese & Brief (Maria)
 
 Maria compile tout dans le brief final :
 
-1. **Fusionner** les contributions de tous les agents (Maria + Lise + Fabrice + Francois + Denis)
-2. **Rediger le brief structure** avec toutes les sections
-3. **Presenter les approches** avec la recommandation de l'equipe
-4. **Inclure le plan exhaustif** de Denis en annexe du brief
-5. Artefact : `.mip/briefs/YYYY-MM-DD-<slug>.md`
+1. **Fusionner** les contributions de tous les agents (Maria + Lise + Fabrice + Francois + Denis + Arianne)
+2. **Integrer l'audit d'Arianne** : section conformite, alertes, prerequis eventuels
+3. **Rediger le brief structure** avec toutes les sections
+4. **Presenter les approches** avec la recommandation de l'equipe
+5. **Si projet precurseur detecte** : presenter les deux projets (precurseur + final) et demander l'ordre de priorite
+6. **Inclure le plan exhaustif** de Denis en annexe du brief
+7. Artefact : `.mip/briefs/YYYY-MM-DD-<slug>.md`
 
 **Template du brief** :
 
@@ -190,6 +422,26 @@ Maria compile tout dans le brief final :
 - Differenciateurs: ...
 - Cible utilisateur: ...
 
+## Inventaire des prerequis (par Denis + equipe)
+### Competences requises
+- Back-end (Francois): [liste]
+- Front-end (Lise): [liste]
+- Architecture (Denis): [liste]
+
+### Connaissances necessaires
+- Domaine metier: [liste]
+- Patterns a appliquer: [depuis mip-decisions.md]
+- Anti-patterns a eviter: [depuis mip-antipatterns.md]
+
+### Outils et ressources
+| Prerequis | Statut | Action si manquant |
+|-----------|--------|--------------------|
+| ... | Disponible / A creer / Manquant | ... |
+
+### Etapes generales du projet
+1. Etape 1 — <nom> : [objectif, agents, livrables, critere completion]
+2. Etape 2 — <nom> : [...]
+
 ## Specification technique (par Francois)
 - Fichiers modifies/crees: [liste avec numeros de ligne]
 - Types et API definis: [signatures]
@@ -206,6 +458,26 @@ Maria compile tout dans le brief final :
   - Audit: X taches
   - Buffer corrections: X taches
 
+## Audit de faisabilite (par Arianne)
+### Conformite agents
+- Agents necessaires: [liste avec competences verifiees]
+- Capacite modele LLM: [OK / risque identifie]
+- Coherence inter-agents: [OK / gaps identifies]
+
+### Conformite dependances
+- Crates externes: [toutes verifiees / manquants]
+- Crates internes: [tous presents / manquants]
+- Outils: [tous disponibles / manquants]
+
+### Verification memoire
+- Anti-patterns evites: [liste]
+- Patterns confirmes appliques: [liste]
+- Lecons historiques: [si applicable]
+
+### Verdict faisabilite
+- **CONFORME** / **TROUS MINEURS** (corriges) / **PREREQUIS NECESSAIRE**
+- Si prerequis: [description du projet precurseur]
+
 ## Contraintes
 - Lois d'Autonomie: LOI-x applicables
 - Stack: ...
@@ -216,19 +488,195 @@ Maria compile tout dans le brief final :
 |--------|-------------|--------|------------|
 | ... | ... | ... | ... |
 
+## TL;DR (5 lignes max)
+<Resume ultra-concis du projet, approche recommandee, effort estime, risque principal, etape critique>
+
 ## Decision
-APPROUVE / REJETE / MODIFIE
+APPROUVE / REJETE / MODIFIE / PREREQUIS D'ABORD
+
+## Mode d'autonomie
+- [ ] **FULL** — Autopilot complet (P3→P6 automatique, seul P5 test humain)
+- [ ] **BIG_STEPS** — Gates aux grandes etapes (validation humaine entre P3→P4, P4→P5)
+- [ ] **GUIDED** — Accompagnement continu (humain valide chaque etape macro du guide)
+
+Garder ce mode pour toutes les futures sequences MIP ? OUI / NON / JE SAIS PAS
 ```
 
-**Quality Gate P0** : Utilisateur approuve le brief ET choisit l'approche.
+**Quality Gate P0** : Utilisateur approuve le brief ET choisit l'approche ET choisit le mode d'autonomie.
 
-**Hard gate** : AUCUN passage en execution sans brief approuve. C'est la **DERNIERE intervention humaine** avant la livraison (sauf bug/delta majeur).
+**Hard gate** : AUCUN passage en execution sans brief approuve. En mode FULL, c'est la **DERNIERE intervention humaine** avant la livraison (sauf bug/delta majeur).
 
 ---
 
-## MODE AUTOPILOT — P3 a P6 (apres approbation P0)
+### Modes d'autonomie — Comportement detaille
 
-> **PRINCIPE FONDAMENTAL** : Apres l'approbation du brief P0, l'execution est **entierement automatique**. L'utilisateur n'intervient plus sauf en cas de **bug bloquant** ou de **delta majeur** par rapport au plan.
+Le mode d'autonomie determine **combien de gates humaines** existent entre P0 et P5.
+
+#### Mode FULL (Autopilot complet)
+
+Comportement actuel. Apres approbation du brief, P3→P6 s'executent automatiquement. L'utilisateur ne re-intervient qu'en P5 (test humain + verdict) ou si frein d'urgence.
+
+```
+P0 [GATE] → P3 automatique → P4 automatique → P5 [GATE test humain] → P6 automatique
+```
+
+**Ideal pour** : Taches bien cadrées (T3), utilisateur confiant dans l'equipe, projets sans ambiguïté technique.
+
+#### Mode BIG_STEPS (Gates aux grandes etapes)
+
+L'execution est automatique DANS chaque phase, mais l'utilisateur valide la transition entre les grandes phases. 3 gates intermediaires.
+
+```
+P0 [GATE] → P3 automatique → [GATE resume P3] → P4 automatique → [GATE resume audit] → P5 [GATE test humain] → P6 automatique
+```
+
+**Gates supplementaires** :
+- **Gate P3→P4** : Denis presente un resume de l'implementation (taches completees, tests, auto-corrections). L'utilisateur peut : CONTINUER / CORRIGER / STOPPER.
+- **Gate P4→P5** : George presente le rapport d'audit. L'utilisateur peut : CONTINUER / CORRIGER / STOPPER.
+
+**Ideal pour** : Features majeures (T4), premiers projets, domaines à risque.
+
+#### Mode GUIDED (Accompagnement continu)
+
+L'humain est implique a chaque etape macro du guide d'implementation. Le plus interactif.
+
+```
+P0 [GATE] → Etape 1 [GATE] → Etape 2 [GATE] → ... → Etape N [GATE] → P4 [GATE] → P5 [GATE] → P6
+```
+
+**Gates supplementaires** :
+- **Gate par etape macro** : A la fin de chaque etape du guide, l'agent presente le code ecrit, les tests, et demande validation avant de continuer.
+- **L'utilisateur peut** : VALIDER / MODIFIER (donner des instructions) / REVENIR (refaire l'etape) / SAUTER (passer a l'etape suivante).
+
+**Ideal pour** : Chantiers strategiques (T5), domaines inconnus, l'utilisateur veut apprendre ou superviser de pres.
+
+#### Persistance et commande `/autonomy_mode`
+
+Le mode choisi est enregistre dans `memory/user-profile.md` et s'applique par defaut aux sequences suivantes. L'utilisateur peut changer a tout moment avec :
+
+```
+/autonomy_mode full       # Passer en autopilot complet
+/autonomy_mode big_steps  # Passer en gates aux grandes etapes
+/autonomy_mode guided     # Passer en accompagnement continu
+```
+
+Si l'utilisateur a repondu "JE SAIS PAS" a la question de persistance, Maria redemande a chaque nouveau P0.
+
+**Stockage** : `memory/user-profile.md` — section "Preferences de travail" :
+```markdown
+## Preferences de travail
+- Mode d'autonomie par defaut: FULL | BIG_STEPS | GUIDED
+- Persistance confirmee: OUI | NON | NON_DECIDE
+```
+
+---
+
+## Metriques & Horodatage — Collecte continue
+
+> Tout au long de la sequence MIP, les agents collectent des metriques pour mesurer la performance de l'equipe et alimenter le rapport final.
+
+### Initialisation (debut de sequence)
+
+A l'ouverture de chaque sequence MIP, Maria cree le fichier `.mip/metrics/YYYY-MM-DD-<slug>.json` avec la structure suivante :
+
+```json
+{
+  "project": {
+    "title": "<titre du brief>",
+    "description": "<description courte>",
+    "class": "T3|T4|T5",
+    "slug": "<slug>",
+    "mip_sequence_number": 1,
+    "autonomy_mode": "FULL|BIG_STEPS|GUIDED"
+  },
+  "timestamps": {
+    "p0_start": "ISO8601",
+    "p0_end": null,
+    "autopilot_start": null,
+    "p3_start": null, "p3_end": null,
+    "p4_start": null, "p4_end": null,
+    "p5_start": null, "p5_end": null,
+    "p5_test_start": null, "p5_test_end": null,
+    "p6_start": null, "p6_end": null,
+    "total_end": null
+  },
+  "counters": {
+    "lines_written": 0,
+    "lines_deleted": 0,
+    "crates_touched": [],
+    "crates_created": [],
+    "files_created": 0,
+    "files_modified": 0,
+    "commits": 0,
+    "agents_engaged": [],
+    "mip_loops": 1,
+    "unit_tests_total": 0,
+    "unit_tests_failed": 0,
+    "integration_tests_total": 0,
+    "integration_tests_failed": 0,
+    "global_tests_total": 0,
+    "global_tests_failed": 0,
+    "auto_corrections": 0,
+    "audits": 0,
+    "audit_defects": [],
+    "emergency_brakes": 0
+  },
+  "human_interventions": [],
+  "agent_questions": [],
+  "satisfaction": null,
+  "notes": null
+}
+```
+
+### Collecte par phase
+
+| Phase | Qui collecte | Quoi |
+|-------|-------------|------|
+| **P0** | Maria | `p0_start`, `p0_end`, `agents_engaged`, questions posees a l'humain |
+| **Git** | Denis | `autopilot_start` |
+| **P3** | Francois/Lise | `p3_start`, `p3_end`, `lines_written/deleted`, `commits`, `unit_tests_*`, `auto_corrections`, `crates_touched` |
+| **P4** | Denis/George | `p4_start`, `p4_end`, `audits`, `audit_defects[]`, `global_tests_*`, `integration_tests_*` |
+| **P5** | Denis | `p5_start`, `p5_end`, `p5_test_start`, `p5_test_end`, `satisfaction`, `human_interventions[]` |
+| **P6** | Arianne | `p6_start`, `p6_end`, `total_end`, compilation du rapport final |
+
+### Enregistrement des interventions humaines
+
+Chaque intervention humaine est loggee avec :
+```json
+{
+  "timestamp": "ISO8601",
+  "type": "precision|arret|pause|changement_direction|constat_erreur|delta|autre",
+  "phase": "P0|P3|P4|P5",
+  "description": "<description de l'intervention>",
+  "impact": "aucun|mineur|majeur|critique"
+}
+```
+
+### Enregistrement des questions agents → humain
+
+Chaque question posee a l'utilisateur est loggee avec :
+```json
+{
+  "timestamp": "ISO8601",
+  "agent": "Maria|Denis|Francois|Lise|George|Arianne|Fabrice",
+  "phase": "P0|P3|P4|P5",
+  "nature": "clarification|validation|choix_technique|choix_design|blocage|autre",
+  "question": "<texte de la question>",
+  "response_summary": "<resume de la reponse>"
+}
+```
+
+---
+
+## MODE EXECUTION — P3 a P6 (apres approbation P0)
+
+> **Le comportement depend du mode d'autonomie** choisi par l'utilisateur en P0.
+>
+> - **FULL** : Execution entierement automatique. L'utilisateur n'intervient plus sauf P5 (test) ou frein d'urgence.
+> - **BIG_STEPS** : Execution automatique par phase. Gates humaines entre P3→P4 et P4→P5.
+> - **GUIDED** : L'utilisateur valide chaque etape macro du guide d'implementation.
+>
+> Le mode par defaut est lu depuis `memory/user-profile.md`. Si absent, Maria demande en P0.
 
 ### Git Branch Setup (premiere action de l'AUTOPILOT)
 
@@ -269,11 +717,25 @@ Dans ces cas, l'agent qui detecte le probleme **arrete l'autopilot** et **presen
 
 ---
 
-### P3 — Implementation automatique (toutes classes)
+### P3 — Implementation (toutes classes)
 
 **Agents** : Francois (back-end) + Lise (front-end) en PARALLELE
 
 **Execution par subagent frais** : Chaque tache est executee par un subagent frais pour eviter la pollution de contexte.
+
+**Smoke test prioritaire** (avant le TDD tache par tache) :
+Denis ecrit un **test d'integration end-to-end** du happy path principal AVANT de commencer les taches atomiques. Ce test DOIT echouer (il teste la fonctionnalite qui n'existe pas encore) mais doit **compiler**. Si le test ne compile pas structurellement, le plan a un defaut → corriger avant de continuer.
+
+```rust
+// Exemple smoke test pour MiyuVoice
+#[test]
+fn smoke_miyuvoice_capture_and_wakeword() {
+    // Ce test echoue (fonctionnalite pas encore implementee)
+    // mais il DOIT compiler — sinon le plan est structurellement faux
+    let capture = AudioCapture::new(AudioConfig::default());
+    assert!(capture.is_ok()); // RED: echoue → normal
+}
+```
 
 **Pre-flight par tache** (avant d'ecrire du code) :
 1. **Lire la tache** du plan exhaustif (fichier, code attendu, test)
@@ -300,6 +762,18 @@ Dans ces cas, l'agent qui detecte le probleme **arrete l'autopilot** et **presen
 - Si regression detectee → corriger avant de continuer
 - `git push` — pousser l'etat courant sur la feature branch
 
+**Annonce par etape macro** : A chaque etape du guide d'implementation completee, l'agent annonce dans le chat :
+```
+[YYYY-MM-DD HH:MM] ✓ Etape X/<total> — <nom de l'etape> terminee.
+  Taches: X/Y completees | Tests: X passes | Commits: N
+  → Prochaine etape: <nom>
+```
+
+**Comportement selon le mode d'autonomie** :
+- **FULL** : L'annonce est informative, l'execution continue automatiquement.
+- **BIG_STEPS** : L'annonce est informative en P3, la gate est entre P3→P4 (resume complet).
+- **GUIDED** : Apres chaque annonce d'etape macro, **attendre la validation de l'utilisateur** (VALIDER / MODIFIER / REVENIR / SAUTER) avant de continuer.
+
 **Parallelisme** : Francois et Lise travaillent simultanement quand leurs taches sont independantes. Les taches avec dependances sont sequencees par Denis.
 
 **Auto-correction** : Si un test echoue, l'agent :
@@ -311,9 +785,18 @@ Dans ces cas, l'agent qui detecte le probleme **arrete l'autopilot** et **presen
 
 **Quality Gate P3** : Chaque tache passe test + clippy.
 
+**Gate BIG_STEPS (P3→P4)** : En mode `BIG_STEPS`, Denis presente un resume avant de passer a P4 :
+```
+[YYYY-MM-DD HH:MM] Resume P3 — Implementation terminee.
+  Etapes: X/X | Taches: X/X | Tests: X passes, Y echoues | Commits: N
+  Auto-corrections: N | Lignes ecrites: N
+  → Continuer vers P4 (Integration & Audit) ?
+  [CONTINUER] / [CORRIGER: <instructions>] / [STOPPER]
+```
+
 ---
 
-### P4 — Integration & Audit automatique (T3+)
+### P4 — Integration & Audit (T3+)
 
 **Agents** : Denis + George
 
@@ -343,64 +826,278 @@ Artefact : `.mip/audits/YYYY-MM-DD-<slug>.md`
 
 **Quality Gate P4** : George valide — 0 defaut BLOQUANT.
 
+**Gate BIG_STEPS (P4→P5)** : En mode `BIG_STEPS`, George presente le resume d'audit avant de passer a P5 :
+```
+[YYYY-MM-DD HH:MM] Resume Audit P4 — Integration & Audit termines.
+  Build: OK | Tests: X passes | Clippy: propre
+  Defauts: N trouves (X corriges, Y acceptes, Z bloquants)
+  Annotations MSCM: X/Y fichiers
+  → Continuer vers P5 (Livraison & Test humain) ?
+  [CONTINUER] / [CORRIGER: <instructions>] / [STOPPER]
+```
+
 ---
 
-### P5 — Livraison automatique (toutes classes)
+### P5 — Livraison, Test humain & Validation (toutes classes)
 
-**Agent** : Denis
+**Agent** : Denis (livraison) + George (assistance test)
+
+#### Etape 1 — Presentation du livrable
 
 1. **Commit final** si necessaire (message conventionnel)
 2. **Push final** — `git push` sur la feature branch
-3. **Presenter le resume a l'utilisateur** : ce qui a ete fait, nombre de fichiers, tests passes, anomalies corrigees
-4. **[GATE] Utilisateur confirme** la livraison
+3. **Horodater** : `p5_start` dans le fichier metriques
+4. **Presenter le resume a l'utilisateur** :
+   - Ce qui a ete fait (fonctionnalites implementees)
+   - Nombre de fichiers crees/modifies, lignes ecrites
+   - Tests passes (unitaires, integration, globaux)
+   - Anomalies detectees et corrigees
+   - Instructions pour tester le livrable (commandes, parcours utilisateur)
 
-Apres confirmation utilisateur :
+#### Etape 2 — Test humain
 
-5. **Merge vers main** — processus standard Git :
-   ```bash
-   git checkout main
-   git pull origin main
-   git merge feat/<slug> --no-ff    # merge explicite avec commit de merge
-   git push origin main
-   ```
-6. **Tag si release** : `git tag -a vX.Y.Z -m "description"` + `git push origin vX.Y.Z`
-7. **Nettoyage** : supprimer la branche de feature
-   ```bash
-   git branch -d feat/<slug>
-   git push origin --delete feat/<slug>
-   ```
-8. **LOG** : `TodoWrite` marquer livraison `completed`
+5. **Horodater** : `p5_test_start`
+6. **L'utilisateur teste le livrable** dans son environnement
+7. George fournit une **checklist de test** adaptee au projet :
+   - [ ] Build OK (`cargo build --workspace`)
+   - [ ] Lancement de l'application OK
+   - [ ] Parcours utilisateur principal fonctionne
+   - [ ] Cas limites testes (si applicable)
+   - [ ] Performance acceptable
+   - [ ] UI conforme a la direction visuelle (si applicable)
 
-**Alternative PR** : Si le projet utilise des pull requests, remplacer le merge direct par :
-```bash
-gh pr create --title "feat(<slug>): <description>" --body "<resume des changements>"
+#### Etape 3 — Questionnaire de satisfaction
+
+8. **Horodater** : `p5_test_end`
+9. Denis presente le **questionnaire de satisfaction** :
+
 ```
-L'utilisateur merge la PR manuellement sur GitHub.
+## Questionnaire de satisfaction — <titre du projet>
 
-**Quality Gate P5** : Utilisateur confirme la livraison.
+### Conformite fonctionnelle
+1. Le livrable correspond-il a votre demande initiale ? (OUI / PARTIELLEMENT / NON)
+2. Si non/partiellement, quels ecarts constatez-vous ?
+
+### Qualite percue
+3. Le code est-il propre et comprehensible ? (1-5)
+4. L'UI est-elle satisfaisante ? (1-5, si applicable)
+5. La performance est-elle acceptable ? (1-5)
+
+### Satisfaction globale
+6. Note globale de satisfaction (1-5) :
+   1 = Inacceptable, 2 = Insuffisant, 3 = Acceptable, 4 = Bon, 5 = Excellent
+7. Commentaires libres :
+
+### Verdict
+- [ ] ACCEPTE — Merger vers main
+- [ ] ACCEPTE AVEC RESERVES — Merger, mais corrections mineures a planifier
+- [ ] REFUSE — Retour en correction (boucle MIP)
+```
+
+#### Etape 4 — Decision
+
+**Si ACCEPTE ou ACCEPTE AVEC RESERVES** :
+
+10. **Horodater** : `p5_end`
+11. **Merger les reserves** dans une liste de taches futures si applicable
+12. **Merge vers main** — processus standard Git :
+    ```bash
+    git checkout main
+    git pull origin main
+    git merge feat/<slug> --no-ff
+    git push origin main
+    ```
+13. **Tag si release** : `git tag -a vX.Y.Z -m "description"` + `git push origin vX.Y.Z`
+14. **Nettoyage** : supprimer la branche de feature
+    ```bash
+    git branch -d feat/<slug>
+    git push origin --delete feat/<slug>
+    ```
+15. **LOG** : `TodoWrite` marquer livraison `completed`
+16. **Enregistrer** la satisfaction dans le fichier metriques
+
+**Si REFUSE — Boucle MIP** :
+
+10. **Logger l'intervention humaine** : type `constat_erreur` ou `delta`, impact `majeur`
+11. **Incrementer** `mip_loops` dans le fichier metriques
+12. **NE PAS merger** — la feature branch reste en l'etat
+13. **Retour en P0** avec le contexte suivant :
+    - Problemes constates par l'utilisateur (verbatim)
+    - Ecarts entre l'attendu et le livre
+    - Metriques de la boucle precedente
+    - Maria reprend en **Temps 1** avec les problemes comme input
+    - Le brief precedent sert de reference (pas de repartir de zero)
+14. **Nouvelle sequence AUTOPILOT** sur la meme feature branch (pas de nouvelle branche)
+
+**Alternative PR** : Remplacer le merge direct par `gh pr create`. L'utilisateur merge manuellement.
+
+**Quality Gate P5** : Verdict utilisateur = ACCEPTE ou ACCEPTE AVEC RESERVES.
 
 ---
 
-### P6 — Archivage & Capitalisation automatique (T3+)
+### P6 — Rapport final, Archivage & Capitalisation (T3+)
 
 **Agent** : Arianne
 
-1. Archiver les artefacts MIP (brief, spec, plan, audit)
-2. Extraire les apprentissages :
+#### Etape 1 — Rapport final de developpement
+
+Arianne compile toutes les metriques collectees et produit le **rapport final independant du livrable**.
+
+Artefact : `.mip/reports/YYYY-MM-DD-<slug>-report.md`
+
+**Template du rapport final** :
+
+```markdown
+# Rapport MIP — <titre du projet>
+
+## 1. Identite du projet
+- **Titre** : <titre>
+- **Description** : <description courte>
+- **Type** : T3/T4/T5 — <description du type>
+- **Complexite** : <evaluation qualitative : simple / moderee / complexe / tres complexe>
+- **Branche** : feat/<slug>
+
+## 2. Chrono & Duree
+- **Debut** : <YYYY-MM-DD HH:MM> (debut P0)
+- **Fin** : <YYYY-MM-DD HH:MM> (fin P6)
+- **Duree totale IRL** : <Xh Ymin>
+- **Decomposition** :
+  | Phase | Debut | Fin | Duree |
+  |-------|-------|-----|-------|
+  | P0 Cadrage | ... | ... | ... |
+  | P3 Implementation | ... | ... | ... |
+  | P4 Integration & Audit | ... | ... | ... |
+  | P5 Livraison & Test | ... | ... | ... |
+  | P5 Test humain | ... | ... | ... |
+  | P6 Rapport & Archivage | ... | ... | ... |
+
+## 3. Ressources
+- **Modele LLM** : <nom du modele> (ex: Claude Opus 4.6)
+- **Tokens utilises** : ~<estimation> (entree: X, sortie: Y)
+- **Nombre de boucles MIP** : <N> (1 = pas de retour)
+
+## 4. Production
+- **Lignes ecrites** : <N>
+- **Lignes supprimees** : <N>
+- **Fichiers crees** : <N>
+- **Fichiers modifies** : <N>
+- **Crates touches** : <N> (<liste>)
+- **Crates crees** : <N> (<liste>)
+- **Commits** : <N>
+
+## 5. Equipe
+- **Agents engages** : <N> (<liste avec roles>)
+  | Agent | Role | Phases | Taches |
+  |-------|------|--------|--------|
+  | Maria | Chef de Projet | P0 | ... |
+  | ... | ... | ... | ... |
+
+## 6. Interactions humaines
+- **Interventions humaines** : <N>
+  | # | Timestamp | Type | Phase | Description | Impact |
+  |---|-----------|------|-------|-------------|--------|
+  | 1 | ... | precision | P0 | ... | mineur |
+  | ... | ... | ... | ... | ... | ... |
+
+- **Questions agents → humain** : <N>
+  | # | Timestamp | Agent | Phase | Nature | Question |
+  |---|-----------|-------|-------|--------|----------|
+  | 1 | ... | Maria | P0 | clarification | ... |
+  | ... | ... | ... | ... | ... | ... |
+
+## 7. Tests
+### Tests unitaires
+- **Total** : <N>
+- **Erreurs** : <N> (<N> corrigees, <N> restantes)
+
+### Tests d'integration
+- **Total** : <N>
+- **Erreurs** : <N>
+
+### Tests globaux
+- **Total** : <N>
+- **Erreurs** : <N>
+
+### Auto-corrections
+- **Nombre d'erreurs auto-corrigees** : <N>
+- **Freins d'urgence declenches** : <N>
+
+## 8. Audits
+- **Nombre d'audits** : <N>
+  | # | Type | Defauts | Gravite | Nature | Resolution |
+  |---|------|---------|---------|--------|------------|
+  | 1 | conformite | ... | bloquant/non-bloquant | ... | corrige/accepte |
+  | ... | ... | ... | ... | ... | ... |
+
+## 9. Satisfaction utilisateur
+- **Verdict** : ACCEPTE / ACCEPTE AVEC RESERVES / REFUSE (boucle N)
+- **Note satisfaction** : <1-5>
+- **Commentaires** : <verbatim>
+
+## 10. Notation globale
+
+| Critere | Note /20 | Commentaire |
+|---------|----------|-------------|
+| **Note globale** | /20 | Moyenne ponderee des notes ci-dessous |
+| Vitesse de dev (vs historique MIP) | /20 | Comparaison avec les sequences precedentes |
+| Qualite des interventions agents | /20 | Pertinence, precision, autonomie |
+| Qualite du code | /20 | Lisibilite, patterns, clippy, tests |
+| Qualite de gestion des erreurs | /20 | Detection, correction, prevention |
+| Qualite des interactions utilisateur | /20 | Clarte, pertinence des questions, ecoute |
+| Respect du protocole MIP | /20 | Gates, artefacts, logging, TDD |
+| Qualite de l'indexation MSCM | /20 | Couverture, precision des annotations |
+
+**Bareme** :
+- 18-20 : Excellent — reference pour les futures sequences
+- 14-17 : Bon — quelques axes d'amelioration
+- 10-13 : Acceptable — ameliorations significatives necessaires
+- 6-9 : Insuffisant — problemes majeurs a resoudre
+- 0-5 : Inacceptable — remise en question du processus
+
+**Methode de notation** : Arianne evalue sur base des metriques objectives (tests, erreurs, timings) et du feedback utilisateur. La note est comparee a l'historique stocke dans `memory/mip-performance-history.md`.
+
+## 11. Resume du developpement
+<Resume narratif : ce qui a ete fait, les difficultes rencontrees, les decisions prises, les points forts et faibles de la sequence>
+
+## 12. Profil utilisateur — Apprentissages
+- **Competences techniques observees** : <ce que l'utilisateur connait/maitrise>
+- **Connaissances domaine** : <expertise metier observee>
+- **Preferences de travail** : <style de communication, niveau de detail souhaite, degre d'autonomie attendu>
+- **Points d'attention** : <sujets sensibles, exigences recurrentes>
+
+## 13. Capitalisation agents
+- **Patterns confirmes** : <nouveaux patterns a ajouter a mip-decisions.md>
+- **Anti-patterns decouverts** : <erreurs a ajouter a mip-antipatterns.md>
+- **Configurations agents** : <ajustements recommandes pour les agents>
+- **Ameliorations protocole** : <suggestions d'evolution du MIP>
+```
+
+#### Etape 2 — Archivage des artefacts
+
+1. Archiver les artefacts MIP (brief, spec, plan, audit, rapport) dans `.mip/`
+2. Verifier que tous les artefacts sont complets et coherents
+
+#### Etape 3 — Capitalisation
+
+3. Extraire les apprentissages :
    - Patterns confirmes → `memory/mip-decisions.md`
    - Erreurs a eviter → `memory/mip-antipatterns.md`
    - Lecons par chantier → `memory/mip-lessons.md`
    - Competences par agent → `memory/team-skills-audit.md`
-3. Mettre a jour `memory/MEMORY.md` (index, max 200 lignes)
-4. **LOG** : `TodoWrite` marquer archivage `completed`
+4. **Enregistrer les notes** dans `memory/mip-performance-history.md` pour comparaison future
+5. **Enregistrer le profil utilisateur** dans `memory/user-profile.md` (cumulatif)
+6. **Enregistrer les configurations agents** dans `memory/agent-tuning.md`
+7. Mettre a jour `memory/MEMORY.md` (index, max 200 lignes)
+8. **Horodater** : `p6_end`, `total_end`
+9. **LOG** : `TodoWrite` marquer archivage `completed`
 
 ---
 
 ## Regles NON NEGOCIABLES
 
 1. **Classification avant action** — Aucun code sans classification T1-T5
-2. **Spec avant code** (T3+) — Pas d'implementation sans spec Francois (Temps 4)
-3. **Plan exhaustif avant execution** (T3+) — Pas d'implementation sans plan Denis (Temps 5)
+2. **Spec avant code** (T3+) — Pas d'implementation sans spec Francois (Temps 5)
+3. **Plan exhaustif avant execution** (T3+) — Pas d'implementation sans plan Denis (Temps 6)
 4. **Verification Context7 obligatoire** (T3+) — Verifier les docs des libs impliquees avant de coder
 5. **Anti-patterns charges** — Lire `memory/mip-antipatterns.md` et MEMORY.md avant chaque sprint
 6. **TDD obligatoire** — RED-GREEN-REFACTOR, pas d'exception
@@ -415,6 +1112,52 @@ L'utilisateur merge la PR manuellement sur GitHub.
 15. **Autopilot apres P0** — Aucune intervention humaine sauf frein d'urgence
 16. **Feature branch obligatoire** (T2+) — Tout travail sur branche, merge vers main apres validation
 17. **Push regulier** — Chaque commit est pousse sur le remote pour sauvegarde
+18. **Metriques obligatoires** — Horodatage et compteurs collectes tout au long de la sequence
+19. **Test humain en P5** — L'utilisateur teste le livrable avant merge
+20. **Questionnaire satisfaction** — Feedback structure avant decision de merge
+21. **Boucle MIP si refus** — Retour en P0 avec les problemes constates, pas de merge
+22. **Rapport final en P6** — Rapport complet independant du livrable, notes /20, capitalisation
+23. **Audit faisabilite en P0** (T3+) — Arianne verifie agents, dependances, outils et memoire avant synthese
+24. **Questionnaire brainstorming en P0** (T3+) — Maria administre le questionnaire standard (5 sections) en Temps 1 pour cadrer le projet
+25. **Inventaire des prerequis en P0** (T3+) — Denis inventorie competences, connaissances, outils et etapes avant la spec et le plan
+26. **Annonces temps reel** — Chaque Temps P0 et chaque etape macro P3 sont annonces dans le chat avec date/heure a la completion
+27. **Mode d'autonomie** — L'utilisateur choisit FULL/BIG_STEPS/GUIDED en P0. Persistance dans `memory/user-profile.md`. Changeable via `/autonomy_mode`
+28. **Smoke test prioritaire** — Un test e2e happy path est ecrit AVANT le TDD tache par tache en P3 (doit compiler, peut echouer)
+29. **TL;DR obligatoire** — Chaque artefact MIP (brief, spec, plan, audit) commence par un resume de 5 lignes max
+
+---
+
+## Token Efficiency — Connaissances pre-indexees
+
+Pour maximiser l'efficacite de chaque token, les agents chargent des **fichiers memoire pre-compiles** au lieu de rechercher les informations a chaque session.
+
+### Fichiers memoire a maintenir
+
+| Fichier | Contenu | Agents consommateurs |
+|---------|---------|---------------------|
+| `memory/rust-patterns.md` | Patterns Rust du projet : admin_cell, context, errors, serde(default), spawn_blocking, extracteurs axum | Francois, Denis |
+| `memory/dioxus-cheatsheet.md` | RSX pitfalls complets, signal patterns, component templates, hook patterns Dioxus 0.6 | Lise |
+| `memory/project-file-map.md` | Carte des fichiers cles du projet (50-80 entrees, 1 ligne chacune) | Tous |
+| `memory/api-contracts.md` | Types et traits partages inter-crates (signatures exactes) | Francois, Lise |
+| `memory/test-templates.md` | Templates de tests standard (unit, integration, MiyukiniSQLtest) | Francois, Lise |
+| `memory/mscm-templates.md` | Templates d'annotations MSCM par type de fichier | Tous |
+| `memory/context7-cache.md` | Resultats des queries Context7 les plus frequentes (evite les re-queries) | Francois, Lise |
+
+### Protocole de chargement par agent
+
+Chaque agent charge **uniquement ses fichiers pertinents** en debut de tache :
+
+| Agent | Fichiers a charger |
+|-------|-------------------|
+| **Francois** | `rust-patterns.md`, `api-contracts.md`, `test-templates.md`, `mscm-templates.md` |
+| **Lise** | `dioxus-cheatsheet.md`, `api-contracts.md`, `project-file-map.md`, `mscm-templates.md` |
+| **Denis** | `project-file-map.md`, `rust-patterns.md`, `mip-decisions.md`, `mip-antipatterns.md` |
+| **George** | `project-file-map.md`, `mscm-templates.md`, `mip-antipatterns.md` |
+| **Arianne** | `mip-decisions.md`, `mip-antipatterns.md`, `mip-performance-history.md`, `team-skills-audit.md` |
+
+### TL;DR obligatoire sur chaque artefact
+
+Chaque artefact MIP (brief, spec, plan, audit, rapport) **DOIT** commencer par un TL;DR de 5 lignes max. Les agents qui n'ont besoin que du contexte global lisent le TL;DR sans charger le document complet. Economie : ~300-500 tokens par artefact non-lu en detail.
 
 ---
 
@@ -431,7 +1174,7 @@ Identifiants Context7 pre-resolus pour les libs du projet. Utiliser `query-docs`
 | **Dioxus Components** | `/dioxuslabs/components` | Composants primitifs ARIA |
 
 **Quand verifier** :
-- **Toujours** en P0 Temps 4 (spec) pour chaque lib impliquee
+- **Toujours** en P0 Temps 5 (spec) pour chaque lib impliquee
 - **Spot-check** en P3 si la tache touche un pattern specifique
 - **En cas d'erreur** : verifier si le pattern utilise est encore valide
 
@@ -448,13 +1191,15 @@ Ce protocole s'appuie sur les skills SuperClaude quand ils sont disponibles :
 
 | Phase MIP | Skill SuperClaude | Usage |
 |-----------|-------------------|-------|
-| P0 (Temps 1-2) | `brainstorming` | Maria structure le brief (6 temps : exploration → ideation → analyse → spec → plan → synthese) |
-| P0 (Temps 5) | `writing-plans` | Denis cree les taches atomiques exhaustives |
+| P0 (Temps 1-2) | `brainstorming` | Maria structure le brief (8 temps : exploration → ideation → analyse → inventaire → spec → plan → audit faisabilite → synthese) |
+| P0 (Temps 7) | `verification-before-completion` | Arianne verifie conformite agents, deps, outils, memoire |
+| P0 (Temps 6) | `writing-plans` | Denis cree les taches atomiques exhaustives + guide d'implementation |
 | P3 | `subagent-driven-development` | Execution par subagent frais |
 | P3 | `test-driven-development` | Cycle RED-GREEN-REFACTOR |
 | P3 | `systematic-debugging` | Root cause avant tout fix + auto-correction |
 | P4 | `verification-before-completion` | George verifie |
-| P5 | `finishing-a-development-branch` | Denis finalise |
+| P5 | `finishing-a-development-branch` | Denis finalise + test humain + questionnaire |
+| P6 | — | Arianne : rapport final + capitalisation + profil utilisateur |
 
 ---
 
@@ -472,48 +1217,83 @@ Le protocole est **proportionnel** : les petites taches ne sont pas alourdies.
 ```
 Utilisateur : "Je veux ajouter MiyuVoice"
   |
-  +-- Maria (P0 Temps 1) : Classifie T4, explore code, pose questions
+  +-- Maria (P0 Temps 1) : Classifie T4, explore code, questionnaire brainstorming (20 questions)
   |   [GATE] Attendre reponses utilisateur
+  |   → [2026-03-02 14:05] ✓ P0 Temps 1 termine
   |
   +-- PARALLELE (Temps 2 + 3) :
   |   +-- Maria : Cadrage fonctionnel, 2-3 approches
   |   +-- Lise : Direction visuelle, parcours UX, composants
   |   +-- Fabrice : Analyse concurrence (Alexa, Siri, etc.)
+  |   → [2026-03-02 14:20] ✓ P0 Temps 2+3 termines
   |
-  +-- Francois (Temps 4) : Spec technique + VERIFICATION CONTEXT7
+  +-- Denis (Temps 4) : Inventaire des prerequis
+  |   +-- Competences : Rust audio (Francois), Dioxus signals (Lise), archi embarquee (Denis)
+  |   +-- Connaissances : VOSK API, wake word detection, streaming audio
+  |   +-- Outils : crates cpal/rodio, modele VOSK, assets audio
+  |   +-- Etapes macro : 1-Capture audio, 2-Wakeword, 3-API voix, 4-UI composant
+  |   +-- Matrice : 2 crates externes a verifier, 1 asset a creer
+  |   → [2026-03-02 14:30] ✓ P0 Temps 4 termine (4 etapes, 12 prerequis, 1 manquant)
+  |
+  +-- Francois (Temps 5) : Spec technique + VERIFICATION CONTEXT7
   |   +-- Context7 : Dioxus 0.6 RSX, axum handlers, serde patterns
   |   +-- Anti-patterns : charge MEMORY.md + mip-antipatterns.md
   |   +-- Output : spec + section "Verification documentaire"
+  |   → [2026-03-02 14:40] ✓ P0 Temps 5 termine
   |
-  +-- Denis (Temps 5) : Plan exhaustif (42 taches : 18 CODE, 12 TEST-U, 4 TEST-I, 3 TEST-G, 3 AUDIT, 2 CORRECT)
+  +-- Denis (Temps 6) : Plan exhaustif + Guide d'implementation detaille
+  |   +-- 42 taches : 18 CODE, 12 TEST-U, 4 TEST-I, 3 TEST-G, 3 AUDIT, 2 CORRECT
+  |   +-- Guide : 4 etapes avec prerequis, taches atomiques, criteres completion
+  |   → [2026-03-02 14:55] ✓ P0 Temps 6 termine
   |
-  +-- Maria (Temps 6) : Synthese → Brief complet
-  |   [GATE] Utilisateur approuve le brief
+  +-- Arianne (Temps 7) : Audit de faisabilite
+  |   +-- Verification : agents, deps, outils, memoire, Context7 spot-check
+  |   +-- Diagnostic : CONFORME / TROUS MINEURS / PREREQUIS
+  |   +-- Si prerequis → suggere mini-projet precurseur
+  |   → [2026-03-02 15:05] ✓ P0 Temps 7 termine (CONFORME)
   |
-  +=== AUTOPILOT START ===================================
+  +-- Maria (Temps 8) : Synthese → Brief complet (inclut inventaire + audit + TL;DR)
+  |   [GATE] Utilisateur approuve le brief + choisit approche + choisit mode autonomie
+  |   +-- "Mode d'autonomie : FULL / BIG_STEPS / GUIDED ?"
+  |   +-- "Garder pour les futures sequences ? OUI / NON / JE SAIS PAS"
+  |   → [2026-03-02 15:15] ✓ P0 Temps 8 termine — Brief approuve, mode BIG_STEPS
   |
-  +-- Git : git checkout -b feat/miyuvoice + git push -u origin feat/miyuvoice
+  +=== EXECUTION START (mode: BIG_STEPS, metriques initialisees) ===
   |
-  +-- P3 PARALLELE (automatique) :
+  +-- Git : git checkout -b feat/miyuvoice + git push -u origin
+  |
+  +-- Denis : Smoke test e2e (compile mais echoue → structure validee)
+  |
+  +-- P3 PARALLELE :
+  |   +-- Chargement memoire : rust-patterns.md (Francois), dioxus-cheatsheet.md (Lise)
   |   +-- Pre-flight : Context7 spot-check + anti-patterns par tache
-  |   +-- Francois : Taches CODE back-end (TDD) → commit → push → TodoWrite
-  |   +-- Lise : Taches CODE front-end (TDD) → commit → push → TodoWrite
+  |   +-- Francois : Taches CODE back-end (TDD) → commit → push → metriques → TodoWrite
+  |   +-- Lise : Taches CODE front-end (TDD) → commit → push → metriques → TodoWrite
   |   +-- [Checkpoint toutes les 5 taches : mini-audit Denis + push]
   |   +-- [Auto-correction intelligente : root cause + Context7 + 2 tentatives]
+  |   +-- [Annonce par etape macro : "[HH:MM] ✓ Etape 1/4 — Capture audio terminee"]
+  |   +-- [BIG_STEPS: Gate P3→P4 — Resume P3 a l'utilisateur → CONTINUER/CORRIGER/STOPPER]
   |
-  +-- P4 (automatique) :
+  +-- P4 :
   |   +-- Denis : Integration workspace (build/test/clippy)
-  |   +-- George : Audit conformite → .mip/audits/
+  |   +-- George : Audit conformite → .mip/audits/ + metriques audit
   |   [Auto-correction defauts non-bloquants, frein d'urgence si critique]
+  |   +-- [BIG_STEPS: Gate P4→P5 — Resume audit a l'utilisateur → CONTINUER/CORRIGER/STOPPER]
   |
-  +-- P5 (automatique) : Denis → Push final + resume a l'utilisateur
-  |   [GATE] Utilisateur confirme la livraison
-  |   +-- git merge feat/miyuvoice → main + push main
-  |   +-- git tag (si release) + nettoyage branche
+  +-- P5 :
+  |   +-- Denis : Push final + resume a l'utilisateur + instructions test
+  |   +-- [Utilisateur teste le livrable]
+  |   +-- Denis : Questionnaire satisfaction
+  |   +-- [GATE] Verdict utilisateur :
+  |       +-- ACCEPTE → merge main + push + tag + nettoyage branche
+  |       +-- RESERVES → merge main + ajout taches futures
+  |       +-- REFUSE → log intervention + increment boucle → retour P0
   |
-  +-- P6 (automatique) : Arianne → Archivage + capitalisation
-  |   +-- Nouvelles erreurs → mip-antipatterns.md
-  |   +-- Nouveaux patterns → mip-decisions.md
+  +-- P6 : Arianne
+  |   +-- Rapport final (notes /20, metriques, profil utilisateur)
+  |   +-- → .mip/reports/ + memory/mip-performance-history.md
+  |   +-- Capitalisation : anti-patterns, decisions, agent-tuning
+  |   +-- Profil utilisateur → memory/user-profile.md (+ mode autonomie prefere)
   |
-  +=== AUTOPILOT END =====================================
+  +=== EXECUTION END ==========================================
 ```

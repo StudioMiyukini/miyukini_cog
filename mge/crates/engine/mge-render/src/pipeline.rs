@@ -405,13 +405,18 @@ impl GpuTexture {
 // SpriteBatcher
 // ---------------------------------------------------------------------------
 
-/// Number of `u16` indices per sprite quad (2 triangles).
+/// Number of indices per sprite quad (2 triangles).
 const INDICES_PER_SPRITE: u32 = 6;
 /// Number of vertices per sprite quad.
 const VERTS_PER_SPRITE: u32 = 4;
 
 /// Dynamic sprite batcher: collects quads into a vertex buffer and draws
 /// them with a static index buffer.
+///
+/// # Index format
+///
+/// Without the `index-u32` feature, indices are `u16` (max 16 384 sprites).
+/// With `index-u32` enabled, indices are `u32` (max 262 144 sprites).
 ///
 /// # Usage per frame
 ///
@@ -438,6 +443,12 @@ impl SpriteBatcher {
     /// The index buffer is filled once with the repeating quad pattern
     /// `[0,1,2, 2,3,0]` offset per sprite. The vertex buffer is empty
     /// and written each frame via [`flush`](Self::flush).
+    ///
+    /// # Index format
+    ///
+    /// With the `index-u32` feature enabled, indices use `u32` to support
+    /// large sprite counts (up to 262 144). Otherwise indices are `u16`
+    /// (max 16 384 sprites).
     pub fn new(device: &wgpu::Device, max_sprites: u32) -> Self {
         let vertex_count = max_sprites as usize * VERTS_PER_SPRITE as usize;
         let vertex_buffer_size =
@@ -453,19 +464,36 @@ impl SpriteBatcher {
         // Build the static index data: for sprite N, vertices are
         // [4N, 4N+1, 4N+2, 4N+3] and we draw triangles (0,1,2) (2,3,0).
         let index_count = max_sprites as usize * INDICES_PER_SPRITE as usize;
-        let mut indices: Vec<u16> = Vec::with_capacity(index_count);
-        for i in 0..max_sprites {
-            let base = i as u16 * VERTS_PER_SPRITE as u16;
-            indices.push(base);
-            indices.push(base + 1);
-            indices.push(base + 2);
-            indices.push(base + 2);
-            indices.push(base + 3);
-            indices.push(base);
-        }
 
-        let index_buffer_size =
-            (index_count * std::mem::size_of::<u16>()) as u64;
+        let (index_buffer_size, index_bytes) = if cfg!(feature = "index-u32") {
+            let mut indices: Vec<u32> = Vec::with_capacity(index_count);
+            for i in 0..max_sprites {
+                let base = i * VERTS_PER_SPRITE;
+                indices.push(base);
+                indices.push(base + 1);
+                indices.push(base + 2);
+                indices.push(base + 2);
+                indices.push(base + 3);
+                indices.push(base);
+            }
+            let size = (index_count * std::mem::size_of::<u32>()) as u64;
+            let bytes: Vec<u8> = bytemuck::cast_slice(&indices).to_vec();
+            (size, bytes)
+        } else {
+            let mut indices: Vec<u16> = Vec::with_capacity(index_count);
+            for i in 0..max_sprites {
+                let base = i as u16 * VERTS_PER_SPRITE as u16;
+                indices.push(base);
+                indices.push(base + 1);
+                indices.push(base + 2);
+                indices.push(base + 2);
+                indices.push(base + 3);
+                indices.push(base);
+            }
+            let size = (index_count * std::mem::size_of::<u16>()) as u64;
+            let bytes: Vec<u8> = bytemuck::cast_slice(&indices).to_vec();
+            (size, bytes)
+        };
 
         // The index pattern is static and never changes. We use
         // `mapped_at_creation` to write the data without needing a queue.
@@ -480,7 +508,7 @@ impl SpriteBatcher {
         index_buffer
             .slice(..)
             .get_mapped_range_mut()
-            .copy_from_slice(bytemuck::cast_slice(&indices));
+            .copy_from_slice(&index_bytes);
         index_buffer.unmap();
 
         Self {
@@ -582,8 +610,14 @@ impl SpriteBatcher {
         let sprite_count = vertex_count / VERTS_PER_SPRITE;
         let index_count = sprite_count * INDICES_PER_SPRITE;
 
+        let index_format = if cfg!(feature = "index-u32") {
+            wgpu::IndexFormat::Uint32
+        } else {
+            wgpu::IndexFormat::Uint16
+        };
+
         pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-        pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+        pass.set_index_buffer(self.index_buffer.slice(..), index_format);
         pass.draw_indexed(0..index_count, 0, 0..1);
     }
 }

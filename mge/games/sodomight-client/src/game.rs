@@ -1,13 +1,20 @@
 // @id: Sodomight-Client-Game @do: game-app @role: back-end @layer: 4 @human: miyuk
-//! Sodomight game application — implements the mge-platform GameApp trait.
+//! Sodomight game application -- implements the mge-platform GameApp trait.
 //!
-//! Wires together the game world (SodomightWorld), GUI overlay, content data,
-//! and the wgpu sprite rendering pipeline into a playable game loop.
+//! Sprint 3 migration: uses instanced pipeline (TextureArray, InstancedSpriteBatcher,
+//! FrustumCuller), AnimationController, TextRenderer (TTF/OTF), and Overhead UI.
 
 use mge_core::game_loop::{GameLoop, LoopConfig};
 use mge_platform::{GameApp, GpuContext, InputEvent, KeyCode};
 use mge_render::camera::{TILE_HEIGHT, TILE_WIDTH};
-use mge_render::{Camera2D, SpriteBatcher, SpritePipeline};
+use mge_ecs::EntityId;
+use mge_render::{
+    AnimationBank, AnimationController, AnimationState, Camera2D, Direction,
+    EmoteKind, EmoteManager, FloatingTextKind, FloatingTextManager,
+    FontId, FrustumCuller, InstanceData, InstancedSpriteBatcher,
+    InstancedSpritePipeline, ProgressBarManager, RenderEntity, SpriteBatcher,
+    SpritePipeline, TextRenderer, TextureArray, TtfFont,
+};
 use sodomight_game::content;
 use sodomight_game::world::MonsterRecord;
 use sodomight_game::SodomightWorld;
@@ -42,14 +49,62 @@ const LOOT_TINT: [f32; 4] = [1.0, 0.85, 0.2, 1.0];
 /// Player rendering tint (blue).
 const PLAYER_TINT: [f32; 4] = [0.2, 0.5, 1.0, 1.0];
 
-/// GPU resources initialised at startup. Separated into its own struct
-/// to keep `SodomightApp` free of excessive `Option` fields.
-struct GpuResources {
-    pipeline: SpritePipeline,
-    batcher: SpriteBatcher,
-    grass_texture: mge_render::GpuTexture,
+/// Tile rendering tint (plain white).
+const TILE_TINT: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
+
+/// Maximum number of instanced sprites per frame.
+const MAX_INSTANCES: usize = 16_384;
+
+/// Maximum number of texture array layers.
+const MAX_TEXTURE_LAYERS: u32 = 16;
+
+/// Texture array layer index for the grass tile.
+const LAYER_GRASS: u32 = 0;
+/// Texture array layer index for the white GUI texture.
+const LAYER_WHITE: u32 = 1;
+/// Texture array layer index for the glyph atlas (reserved for text rendering).
+#[allow(dead_code)]
+const LAYER_GLYPH: u32 = 2;
+
+/// Standard texture dimensions for the texture array (all layers must match).
+const TEX_ARRAY_W: u32 = 256;
+const TEX_ARRAY_H: u32 = 256;
+
+// ---------------------------------------------------------------------------
+// GPU Resources
+// ---------------------------------------------------------------------------
+
+/// Instanced GPU resources initialised at startup.
+struct InstancedGpuResources {
+    /// Instanced sprite pipeline (storage buffer + texture array).
+    instanced_pipeline: InstancedSpritePipeline,
+    /// CPU-side staging buffer for sprite instances.
+    instanced_batcher: InstancedSpriteBatcher,
+    /// GPU texture array (grass, white, glyph atlas, etc.).
+    /// Kept alive for RAII; the GPU references it via bind groups.
+    #[allow(dead_code)]
+    texture_array: TextureArray,
+    /// GPU storage buffer for instance data.
+    storage_buffer: wgpu::Buffer,
+    /// Bind group for the camera uniform.
+    camera_buffer: wgpu::Buffer,
+    camera_bind_group: wgpu::BindGroup,
+    /// Bind group for the texture array + sampler.
+    texture_bind_group: wgpu::BindGroup,
+    /// Bind group for the storage buffer.
+    storage_bind_group: wgpu::BindGroup,
+    /// Sampler for the texture array (kept alive for RAII).
+    #[allow(dead_code)]
+    sampler: wgpu::Sampler,
+    /// Legacy pipeline (kept for GUI rendering which uses per-texture bind groups).
+    legacy_pipeline: SpritePipeline,
+    legacy_batcher: SpriteBatcher,
     gui_texture: mge_render::GpuTexture,
 }
+
+// ---------------------------------------------------------------------------
+// SodomightApp
+// ---------------------------------------------------------------------------
 
 /// Main Sodomight client application.
 pub struct SodomightApp {
@@ -59,11 +114,32 @@ pub struct SodomightApp {
     move_dirs: u8,
     frame_count: u64,
     /// GPU resources (initialised in `on_init`).
-    gpu_res: Option<GpuResources>,
+    gpu_res: Option<InstancedGpuResources>,
     /// Game world with all gameplay systems.
     world: Option<SodomightWorld>,
     /// GUI overlay.
     gui: GameGui,
+    /// Player animation controller (S3-T02).
+    player_anim: AnimationController,
+    /// Minimal animation bank for the player (single-frame placeholder).
+    player_anim_bank: AnimationBank,
+    /// Frustum culler for entity visibility (S3-T04).
+    culler: FrustumCuller,
+    /// TTF text renderer (S3-T06).
+    text_renderer: Option<TextRenderer>,
+    /// Font IDs for loaded fonts.
+    font_hud: FontId,
+    #[allow(dead_code)]
+    font_narrative: FontId,
+    /// Floating text manager for combat feedback (S3-T06b).
+    floating_texts: FloatingTextManager,
+    /// Emote manager for NPC indicators (S3-T06b).
+    emotes: EmoteManager,
+    /// Progress bar manager (prepared, not yet active) (S3-T06b).
+    #[allow(dead_code)]
+    progress_bars: ProgressBarManager,
+    /// Previous combat log length for detecting new messages.
+    prev_combat_log_len: usize,
 }
 
 impl SodomightApp {
@@ -78,6 +154,16 @@ impl SodomightApp {
             gpu_res: None,
             world: None,
             gui: GameGui::new(1280.0, 720.0),
+            player_anim: AnimationController::new(),
+            player_anim_bank: create_placeholder_anim_bank(),
+            culler: FrustumCuller::new(256.0),
+            text_renderer: None,
+            font_hud: FontId(0),
+            font_narrative: FontId(0),
+            floating_texts: FloatingTextManager::new(64),
+            emotes: EmoteManager::new(),
+            progress_bars: ProgressBarManager::new(),
+            prev_combat_log_len: 0,
         }
     }
 
@@ -120,12 +206,9 @@ impl SodomightApp {
         world.quest_registry = content::act1_quests();
 
         // Learn default skill (normal attack) at level 1.
-        // Give player 1 skill point, then invest it.
         world.player_skills.add_points(1);
-        // Use the first skill's ID from Act 1 content (normal_attack).
         let skill_defs = content::act1_skills();
         let normal_attack = skill_defs[0].id.clone();
-        // Clone registry ref to avoid borrow conflict.
         let registry_clone = world.skill_registry.clone();
         let _ = world.player_skills.invest(&normal_attack, &registry_clone);
 
@@ -139,7 +222,6 @@ impl SodomightApp {
 
             for monster_id_str in &zone.monster_ids {
                 if let Some(mdef) = monsters.iter().find(|m| &m.id == monster_id_str) {
-                    // Spawn a few of each type.
                     for i in 0..3 {
                         let x = spawn_x + i as f32 * 2.5;
                         let y = spawn_y + i as f32 * 1.5;
@@ -166,6 +248,29 @@ impl SodomightApp {
         );
 
         self.world = Some(world);
+    }
+
+    /// Initialize TTF text renderer (S3-T06).
+    fn init_text_renderer(&mut self) {
+        let mut text_renderer = TextRenderer::new(TEX_ARRAY_W, TEX_ARRAY_H);
+
+        // Load HUD font (DigitalDisco).
+        let hud_font = load_ttf_font("DigitalDisco.ttf");
+        self.font_hud = if let Some(font) = hud_font {
+            text_renderer.add_font(font)
+        } else {
+            FontId(0)
+        };
+
+        // Load narrative font (GentiumBookPlus-Regular).
+        let narrative_font = load_ttf_font("GentiumBookPlus-Regular.ttf");
+        self.font_narrative = if let Some(font) = narrative_font {
+            text_renderer.add_font(font)
+        } else {
+            FontId(0)
+        };
+
+        self.text_renderer = Some(text_renderer);
     }
 
     /// Sync GUI state from the authoritative game world.
@@ -200,10 +305,66 @@ impl SodomightApp {
         }
     }
 
+    /// Spawn floating texts for new combat log messages (S3-T06b).
+    fn spawn_floating_texts_from_combat_log(&mut self) {
+        let Some(ref world) = self.world else {
+            return;
+        };
+
+        let world_log_len = world.combat_log.len();
+        if world_log_len > self.prev_combat_log_len {
+            let (px, py) = world.player_position();
+            let sx = (px - py) * (TILE_WIDTH / 2.0);
+            let sy = (px + py) * (TILE_HEIGHT / 2.0);
+
+            for msg in &world.combat_log[self.prev_combat_log_len..] {
+                // Heuristic: determine floating text kind from message content.
+                let kind = if msg.contains("critical") || msg.contains("Critical") {
+                    FloatingTextKind::Critical
+                } else if msg.contains("miss") || msg.contains("Miss") || msg.contains("MISS") {
+                    FloatingTextKind::Evade
+                } else if msg.contains("heal") || msg.contains("Heal") {
+                    FloatingTextKind::Heal
+                } else if msg.contains("XP") || msg.contains("experience") {
+                    FloatingTextKind::Experience
+                } else {
+                    FloatingTextKind::Damage
+                };
+
+                // Extract numeric portion for display if present, else use short msg.
+                let display = if msg.len() > 20 {
+                    msg.chars().take(20).collect::<String>()
+                } else {
+                    msg.clone()
+                };
+
+                self.floating_texts.spawn([sx, sy - 32.0], display, kind);
+            }
+            self.prev_combat_log_len = world_log_len;
+        }
+    }
+
+    /// Update NPC emotes based on player proximity (S3-T06b).
+    fn update_npc_emotes(&mut self) {
+        let Some(ref world) = self.world else {
+            return;
+        };
+
+        let (px, py) = world.player_position();
+
+        // Check monsters near the player for emote triggers.
+        // For MVP: spawn Exclamation emote on alive monsters close to the player.
+        let nearby = world.monsters_near(px, py, 5.0);
+        for &(monster_id, mx, my, _) in &nearby {
+            let sx = (mx - my) * (TILE_WIDTH / 2.0);
+            let sy = (mx + my) * (TILE_HEIGHT / 2.0);
+            self.emotes.spawn(monster_id.index, [sx, sy - 40.0], EmoteKind::Exclamation);
+        }
+    }
+
     /// Handle a GUI action resulting from user input.
     fn handle_gui_action(&mut self, action: &GuiAction) {
         match *action {
-            GuiAction::None => {}
             GuiAction::ToggleInventory => self.gui.toggle_inventory(),
             GuiAction::ToggleSkills => self.gui.toggle_skills(),
             GuiAction::UseSkill(slot) => {
@@ -215,6 +376,11 @@ impl SodomightApp {
             GuiAction::ClickWorld(sx, sy) => {
                 self.handle_world_click(sx, sy);
             }
+            GuiAction::None
+            | GuiAction::ToggleCharacter
+            | GuiAction::ToggleAutomap
+            | GuiAction::ToggleRunWalk
+            | GuiAction::ToggleQuestLog => {}
         }
     }
 
@@ -224,14 +390,12 @@ impl SodomightApp {
             return;
         };
 
-        // Convert screen coords to world coords using camera.
         let (sw, sh) = (self.camera.screen_w as f32, self.camera.screen_h as f32);
         let cam_left = self.camera.world_x - sw / (2.0 * self.camera.zoom);
         let cam_top = self.camera.world_y - sh / (2.0 * self.camera.zoom);
         let world_sx = screen_x / self.camera.zoom + cam_left;
         let world_sy = screen_y / self.camera.zoom + cam_top;
 
-        // Convert from iso screen to tile coordinates.
         let tile_x = (world_sx / (TILE_WIDTH / 2.0) + world_sy / (TILE_HEIGHT / 2.0)) / 2.0;
         let tile_y = (world_sy / (TILE_HEIGHT / 2.0) - world_sx / (TILE_WIDTH / 2.0)) / 2.0;
 
@@ -255,7 +419,6 @@ impl SodomightApp {
             }
 
             if let Some((loot_idx, _)) = closest_loot {
-                // Pick up first item in the pile.
                 match world.player_pickup_loot(loot_idx, 0) {
                     Ok(msg) => tracing::info!("{msg}"),
                     Err(e) => tracing::warn!("Loot pickup failed: {e}"),
@@ -264,7 +427,6 @@ impl SodomightApp {
             }
         }
 
-        // Try to attack nearest monster to the click location.
         let monsters_near = world.monsters_near(tile_x, tile_y, ATTACK_RANGE);
         if let Some(&(monster_id, _, _, _)) = monsters_near.first() {
             match world.player_attack(monster_id) {
@@ -289,7 +451,6 @@ impl SodomightApp {
             return;
         };
 
-        // Find nearest monster to use skill on.
         let (px, py) = world.player_position();
         let nearby = world.monsters_near(px, py, 10.0);
         let target = nearby.first().map(|&(id, _, _, _)| id);
@@ -303,6 +464,24 @@ impl SodomightApp {
             Err(e) => tracing::debug!("Skill use failed: {e}"),
         }
     }
+
+    /// Update player animation controller based on movement (S3-T02).
+    fn update_player_animation(&mut self) {
+        let is_moving = self.move_dirs != 0;
+        let new_state = if is_moving {
+            AnimationState::Walk
+        } else {
+            AnimationState::Idle
+        };
+        self.player_anim.set_state(new_state);
+
+        // Determine direction from movement bitflags.
+        let dir = movement_direction(self.move_dirs);
+        self.player_anim.set_direction(dir);
+
+        // Tick animation (16ms per frame at 60fps).
+        let _events = self.player_anim.tick(16, &self.player_anim_bank);
+    }
 }
 
 impl Default for SodomightApp {
@@ -310,6 +489,10 @@ impl Default for SodomightApp {
         Self::new()
     }
 }
+
+// ---------------------------------------------------------------------------
+// Helper functions
+// ---------------------------------------------------------------------------
 
 /// Try to load a grass tile image from the Dev_assets directory.
 fn load_grass_image() -> Option<image::RgbaImage> {
@@ -344,9 +527,128 @@ fn checkerboard_fallback() -> image::RgbaImage {
     img
 }
 
-/// Batch visible isometric tiles into the sprite batcher.
-fn batch_tiles(
-    batcher: &mut SpriteBatcher,
+/// Resize an image to fit the texture array dimensions.
+///
+/// If the image is already the right size, returns a clone. Otherwise scales
+/// to fit within `TEX_ARRAY_W x TEX_ARRAY_H` and pads with transparent black.
+fn fit_to_texture_array(img: &image::RgbaImage) -> Vec<u8> {
+    let (iw, ih) = img.dimensions();
+    let tw = TEX_ARRAY_W;
+    let th = TEX_ARRAY_H;
+
+    let mut data = vec![0u8; (tw * th * 4) as usize];
+
+    // Copy the source image into the top-left corner, clamping dimensions.
+    let copy_w = iw.min(tw);
+    let copy_h = ih.min(th);
+
+    for y in 0..copy_h {
+        for x in 0..copy_w {
+            let pixel = img.get_pixel(x, y);
+            let dst_idx = ((y * tw + x) * 4) as usize;
+            data[dst_idx] = pixel[0];
+            data[dst_idx + 1] = pixel[1];
+            data[dst_idx + 2] = pixel[2];
+            data[dst_idx + 3] = pixel[3];
+        }
+    }
+
+    data
+}
+
+/// Create a solid white texture data for the texture array.
+fn white_texture_data() -> Vec<u8> {
+    vec![255u8; (TEX_ARRAY_W * TEX_ARRAY_H * 4) as usize]
+}
+
+/// Try to load a TTF font from the mge/assets/fonts/ directory.
+fn load_ttf_font(filename: &str) -> Option<TtfFont> {
+    let paths = [
+        format!("assets/fonts/{filename}"),
+        format!("mge/assets/fonts/{filename}"),
+        format!("../mge/assets/fonts/{filename}"),
+    ];
+
+    for path in &paths {
+        let p = std::path::Path::new(path);
+        if p.exists() {
+            match TtfFont::from_file(p) {
+                Ok(font) => {
+                    tracing::info!("Loaded font from {path}");
+                    return Some(font);
+                }
+                Err(e) => {
+                    tracing::warn!("Failed to load font {path}: {e}");
+                }
+            }
+        }
+    }
+
+    tracing::warn!("Font {filename} not found in any search path");
+    None
+}
+
+/// Create a placeholder animation bank with single-frame Idle and Walk clips.
+fn create_placeholder_anim_bank() -> AnimationBank {
+    use mge_render::AnimationClip;
+
+    let mut clips = Vec::new();
+
+    // Create Idle and Walk clips for all 4 rendered directions.
+    for &dir in Direction::rendered() {
+        clips.push(AnimationClip {
+            state: AnimationState::Idle,
+            direction: dir,
+            frame_count: 1,
+            frame_duration_ms: 1000,
+            looping: true,
+            events: Vec::new(),
+            atlas_start_frame: 0,
+        });
+
+        clips.push(AnimationClip {
+            state: AnimationState::Walk,
+            direction: dir,
+            frame_count: 1,
+            frame_duration_ms: 200,
+            looping: true,
+            events: Vec::new(),
+            atlas_start_frame: 0,
+        });
+    }
+
+    AnimationBank {
+        entity_id: "player_placeholder".to_string(),
+        clips,
+    }
+}
+
+/// Determine facing direction from movement bitflags.
+fn movement_direction(move_dirs: u8) -> Direction {
+    let up = move_dirs & DIR_UP != 0;
+    let down = move_dirs & DIR_DOWN != 0;
+    let left = move_dirs & DIR_LEFT != 0;
+    let right = move_dirs & DIR_RIGHT != 0;
+
+    match (up, down, left, right) {
+        (true, false, false, false) => Direction::NW,
+        (false, true, false, false) => Direction::SE,
+        (false, false, true, false) => Direction::SW,
+        (false, false, false, true) => Direction::NE,
+        (true, false, true, false) => Direction::W,
+        (true, false, false, true) => Direction::N,
+        (false, true, false, true) => Direction::E,
+        _ => Direction::S,
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Instanced batching functions (S3-T03)
+// ---------------------------------------------------------------------------
+
+/// Push visible isometric tiles as instances into the batcher (S3-T03).
+fn batch_tiles_instanced(
+    batcher: &mut InstancedSpriteBatcher,
     cam_left: f32,
     cam_top: f32,
     screen_w: f32,
@@ -354,15 +656,13 @@ fn batch_tiles(
 ) {
     let tile_w = TILE_WIDTH;
     let tile_h = TILE_HEIGHT;
-    let uv = [0.0_f32, 0.0, 1.0, 1.0];
-    let tint = [1.0_f32, 1.0, 1.0, 1.0];
 
     for ty in 0..MAP_H {
         for tx in 0..MAP_W {
             let sx = (tx - ty) as f32 * (tile_w / 2.0);
             let sy = (tx + ty) as f32 * (tile_h / 2.0);
 
-            // Simple frustum cull
+            // Simple frustum cull.
             let screen_x = sx - cam_left;
             let screen_y = sy - cam_top;
             if screen_x + tile_w < 0.0
@@ -373,30 +673,43 @@ fn batch_tiles(
                 continue;
             }
 
-            batcher.push(sx, sy, tile_w, tile_h, uv, tint);
+            // z_depth: tiles are always behind entities. Use a large z_depth
+            // so they sort to the back (ascending sort = back-to-front).
+            // Tile depth based on row (tx+ty) for correct iso ordering.
+            let row_depth = (tx + ty) as f32;
+            let z_depth = 10000.0 + row_depth;
+
+            let instance = InstanceData {
+                position: [sx, sy],
+                size: [tile_w, tile_h],
+                uv_rect: [0.0, 0.0, tile_w / TEX_ARRAY_W as f32, tile_h / TEX_ARRAY_H as f32],
+                tint: TILE_TINT,
+                texture_index: LAYER_GRASS,
+                z_depth,
+                _pad: [0.0, 0.0],
+            };
+
+            if batcher.push(instance).is_err() {
+                return;
+            }
         }
     }
 }
 
-/// Batch monster sprites as coloured quads on the isometric map.
-fn batch_monsters(
-    batcher: &mut SpriteBatcher,
+/// Push monster sprites as instanced coloured quads (S3-T03).
+fn batch_monsters_instanced(
+    batcher: &mut InstancedSpriteBatcher,
     world: &SodomightWorld,
-    cam_left: f32,
-    cam_top: f32,
-    screen_w: f32,
-    screen_h: f32,
+    visible_ids: &[EntityId],
 ) {
-    let uv = [0.0_f32, 0.0, 1.0, 1.0];
     let monster_size = 24.0_f32;
 
-    // Iterate all living monsters through the public ECS.
-    for &entity_id in world.ai_agents_keys() {
-        if !world.ecs.is_alive(entity_id) {
+    for &vis_id in visible_ids {
+        if !world.ecs.is_alive(vis_id) {
             continue;
         }
 
-        let Ok(mr) = world.ecs.get_component::<MonsterRecord>(entity_id) else {
+        let Ok(mr) = world.ecs.get_component::<MonsterRecord>(vis_id) else {
             continue;
         };
 
@@ -407,37 +720,41 @@ fn batch_monsters(
         let mx = mr.position.x();
         let my = mr.position.y();
 
-        // Convert world tile coords to iso screen coords.
         let sx = (mx - my) * (TILE_WIDTH / 2.0);
         let sy = (mx + my) * (TILE_HEIGHT / 2.0);
 
-        // Frustum cull.
-        let screen_x = sx - cam_left;
-        let screen_y = sy - cam_top;
-        if screen_x + monster_size < 0.0
-            || screen_x > screen_w
-            || screen_y + monster_size < 0.0
-            || screen_y > screen_h
-        {
-            continue;
-        }
-
-        // Centre the monster quad on the tile.
         let offset = (TILE_WIDTH - monster_size) / 2.0;
-        batcher.push(sx + offset, sy - monster_size, monster_size, monster_size, uv, MONSTER_TINT);
+
+        // z_depth: based on Y position for iso depth sorting. Lower z = drawn later (in front).
+        // Entity tile_y = (mx+my), higher tile_y = closer to camera = smaller z_depth.
+        let tile_y_sum = mx + my;
+        let z_depth = 5000.0 - tile_y_sum;
+
+        let instance = InstanceData {
+            position: [sx + offset, sy - monster_size],
+            size: [monster_size, monster_size],
+            uv_rect: [0.0, 0.0, 1.0, 1.0],
+            tint: MONSTER_TINT,
+            texture_index: LAYER_WHITE,
+            z_depth,
+            _pad: [0.0, 0.0],
+        };
+
+        if batcher.push(instance).is_err() {
+            return;
+        }
     }
 }
 
-/// Batch loot piles as small gold quads.
-fn batch_loot(
-    batcher: &mut SpriteBatcher,
+/// Push loot piles as instanced coloured quads (S3-T03).
+fn batch_loot_instanced(
+    batcher: &mut InstancedSpriteBatcher,
     world: &SodomightWorld,
     cam_left: f32,
     cam_top: f32,
     screen_w: f32,
     screen_h: f32,
 ) {
-    let uv = [0.0_f32, 0.0, 1.0, 1.0];
     let loot_size = 12.0_f32;
 
     for (lx, ly, _drops) in &world.pending_loot {
@@ -455,13 +772,28 @@ fn batch_loot(
         }
 
         let offset = (TILE_WIDTH - loot_size) / 2.0;
-        batcher.push(sx + offset, sy, loot_size, loot_size, uv, LOOT_TINT);
+        let tile_y_sum = lx + ly;
+        let z_depth = 5000.0 - tile_y_sum + 0.1;
+
+        let instance = InstanceData {
+            position: [sx + offset, sy],
+            size: [loot_size, loot_size],
+            uv_rect: [0.0, 0.0, 1.0, 1.0],
+            tint: LOOT_TINT,
+            texture_index: LAYER_WHITE,
+            z_depth,
+            _pad: [0.0, 0.0],
+        };
+
+        if batcher.push(instance).is_err() {
+            return;
+        }
     }
 }
 
-/// Batch the player character as a coloured quad.
-fn batch_player(
-    batcher: &mut SpriteBatcher,
+/// Push the player character as an instanced coloured quad (S3-T03).
+fn batch_player_instanced(
+    batcher: &mut InstancedSpriteBatcher,
     px: f32,
     py: f32,
     cam_left: f32,
@@ -469,7 +801,6 @@ fn batch_player(
     screen_w: f32,
     screen_h: f32,
 ) {
-    let uv = [0.0_f32, 0.0, 1.0, 1.0];
     let player_size = 28.0_f32;
 
     let sx = (px - py) * (TILE_WIDTH / 2.0);
@@ -486,10 +817,28 @@ fn batch_player(
     }
 
     let offset = (TILE_WIDTH - player_size) / 2.0;
-    batcher.push(sx + offset, sy - player_size, player_size, player_size, uv, PLAYER_TINT);
+    let tile_y_sum = px + py;
+    let z_depth = 5000.0 - tile_y_sum;
+
+    let instance = InstanceData {
+        position: [sx + offset, sy - player_size],
+        size: [player_size, player_size],
+        uv_rect: [0.0, 0.0, 1.0, 1.0],
+        tint: PLAYER_TINT,
+        texture_index: LAYER_WHITE,
+        z_depth,
+        _pad: [0.0, 0.0],
+    };
+
+    let _ = batcher.push(instance);
 }
 
+// ---------------------------------------------------------------------------
+// GameApp implementation
+// ---------------------------------------------------------------------------
+
 impl GameApp for SodomightApp {
+    #[allow(clippy::too_many_lines)]
     fn on_init(&mut self, gpu: &GpuContext) {
         let (w, h) = gpu.surface_size();
         self.camera = Camera2D::new(w, h);
@@ -501,33 +850,131 @@ impl GameApp for SodomightApp {
         // Set camera to player position.
         if let Some(ref world) = self.world {
             let (px, py) = world.player_position();
-            let sx = (px - py) * (TILE_WIDTH / 2.0);
-            let sy = (px + py) * (TILE_HEIGHT / 2.0);
-            self.camera.follow(sx, sy);
+            self.camera.follow(px, py);
         }
 
-        let pipeline = SpritePipeline::new(&gpu.device, gpu.surface_format());
-        let batcher = SpriteBatcher::new(&gpu.device, 8192);
+        // Init text renderer (S3-T06).
+        self.init_text_renderer();
 
-        let grass_img = load_grass_image().unwrap_or_else(checkerboard_fallback);
-        let grass_texture = mge_render::GpuTexture::from_image(
+        // --- Instanced pipeline setup (S3-T01, S3-T03) ---
+        let instanced_pipeline = InstancedSpritePipeline::new(&gpu.device, gpu.surface_format());
+        let instanced_batcher = InstancedSpriteBatcher::new(MAX_INSTANCES);
+
+        // Create texture array (S3-T01).
+        let mut texture_array = TextureArray::new(
             &gpu.device,
-            &gpu.queue,
-            &pipeline,
-            &grass_img,
-            "grass_tile",
+            TEX_ARRAY_W,
+            TEX_ARRAY_H,
+            MAX_TEXTURE_LAYERS,
         );
 
-        let gui_texture = gui::create_white_texture(&gpu.device, &gpu.queue, &pipeline);
+        // Layer 0: grass tile.
+        let grass_img = load_grass_image().unwrap_or_else(checkerboard_fallback);
+        let grass_data = fit_to_texture_array(&grass_img);
+        if let Err(e) = texture_array.add_layer(&gpu.queue, &grass_data) {
+            tracing::error!("Failed to add grass layer to texture array: {e}");
+        }
 
-        self.gpu_res = Some(GpuResources {
-            pipeline,
-            batcher,
-            grass_texture,
+        // Layer 1: solid white (for tinted quads: monsters, loot, player, GUI).
+        let white_data = white_texture_data();
+        if let Err(e) = texture_array.add_layer(&gpu.queue, &white_data) {
+            tracing::error!("Failed to add white layer to texture array: {e}");
+        }
+
+        // Layer 2: glyph atlas (initially transparent, updated when text is rendered).
+        let glyph_data = vec![0u8; (TEX_ARRAY_W * TEX_ARRAY_H * 4) as usize];
+        if let Err(e) = texture_array.add_layer(&gpu.queue, &glyph_data) {
+            tracing::error!("Failed to add glyph atlas layer to texture array: {e}");
+        }
+
+        // Create camera uniform buffer + bind group.
+        let camera_buffer = gpu.device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Instanced Camera Uniform Buffer"),
+            size: 64,
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+
+        let camera_bind_group = gpu.device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("Instanced Camera Bind Group"),
+            layout: &instanced_pipeline.camera_bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: camera_buffer.as_entire_binding(),
+            }],
+        });
+
+        // Create sampler.
+        let sampler = gpu.device.create_sampler(&wgpu::SamplerDescriptor {
+            label: Some("Instanced Sprite Sampler"),
+            address_mode_u: wgpu::AddressMode::ClampToEdge,
+            address_mode_v: wgpu::AddressMode::ClampToEdge,
+            address_mode_w: wgpu::AddressMode::ClampToEdge,
+            mag_filter: wgpu::FilterMode::Linear,
+            min_filter: wgpu::FilterMode::Linear,
+            mipmap_filter: wgpu::FilterMode::Linear,
+            ..Default::default()
+        });
+
+        // Create texture bind group (texture array + sampler).
+        let texture_bind_group = gpu.device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("Instanced Texture Array Bind Group"),
+            layout: &instanced_pipeline.texture_bind_group_layout,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(texture_array.view()),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&sampler),
+                },
+            ],
+        });
+
+        // Create storage buffer for instance data.
+        let storage_buffer_size = (MAX_INSTANCES * std::mem::size_of::<InstanceData>()) as u64;
+        let storage_buffer = gpu.device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Instanced Storage Buffer"),
+            size: storage_buffer_size,
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+
+        let storage_bind_group = gpu.device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("Instanced Storage Bind Group"),
+            layout: &instanced_pipeline.storage_bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: storage_buffer.as_entire_binding(),
+            }],
+        });
+
+        // --- Legacy pipeline (for GUI only) ---
+        let legacy_pipeline = SpritePipeline::new(&gpu.device, gpu.surface_format());
+        let legacy_batcher = SpriteBatcher::new(&gpu.device, 4096);
+        let gui_texture = gui::create_white_texture(&gpu.device, &gpu.queue, &legacy_pipeline);
+
+        let layer_count = texture_array.layer_count();
+
+        self.gpu_res = Some(InstancedGpuResources {
+            instanced_pipeline,
+            instanced_batcher,
+            texture_array,
+            storage_buffer,
+            camera_buffer,
+            camera_bind_group,
+            texture_bind_group,
+            storage_bind_group,
+            sampler,
+            legacy_pipeline,
+            legacy_batcher,
             gui_texture,
         });
 
-        tracing::info!("Sodomight initialised: {w}x{h}, sprite pipeline + world ready");
+        tracing::info!(
+            "Sodomight initialised: {w}x{h}, instanced pipeline + {layer_count} texture layers",
+        );
     }
 
     #[allow(clippy::too_many_lines)]
@@ -535,7 +982,6 @@ impl GameApp for SodomightApp {
         // --- Fixed timestep ticks ---
         let ticks = self.game_loop.begin_frame();
 
-        // Get player position for movement.
         let (mut px, mut py) = self
             .world
             .as_ref()
@@ -555,23 +1001,34 @@ impl GameApp for SodomightApp {
                 px += MOVE_SPEED;
             }
 
-            // Update world player position.
             if let Some(ref mut world) = self.world {
                 world.set_player_position(px, py);
                 world.tick();
             }
         }
 
-        // Update camera to follow player's iso position.
-        let sx = (px - py) * (TILE_WIDTH / 2.0);
-        let sy = (px + py) * (TILE_HEIGHT / 2.0);
-        self.camera.follow(sx, sy);
+        // Update camera to follow player.
+        self.camera.follow(px, py);
 
         let alpha = self.game_loop.alpha();
         self.camera.update(alpha);
 
+        // Update player animation (S3-T02).
+        self.update_player_animation();
+
         // Sync GUI from world state.
         self.sync_gui_from_world();
+
+        // Spawn floating texts from new combat log messages (S3-T06b).
+        self.spawn_floating_texts_from_combat_log();
+
+        // Update NPC emotes (S3-T06b).
+        self.update_npc_emotes();
+
+        // Tick overhead UI managers (S3-T06b).
+        let dt = 1.0 / 60.0;
+        self.floating_texts.tick(dt);
+        self.emotes.tick(dt);
 
         let frame = match gpu.begin_frame() {
             Ok(f) => f,
@@ -586,41 +1043,123 @@ impl GameApp for SodomightApp {
             return;
         };
 
-        // Camera top-left in screen-pixel space.
         let (sw, sh) = gpu.surface_size();
         let screen_w = sw as f32;
         let screen_h = sh as f32;
         let cam_left = self.camera.world_x - screen_w / (2.0 * self.camera.zoom);
         let cam_top = self.camera.world_y - screen_h / (2.0 * self.camera.zoom);
 
-        res.pipeline.update_camera(
-            &gpu.queue,
-            screen_w,
-            screen_h,
-            cam_left,
-            cam_top,
-            self.camera.zoom,
+        // Update camera uniform (instanced pipeline).
+        let ew = screen_w / self.camera.zoom;
+        let eh = screen_h / self.camera.zoom;
+        #[rustfmt::skip]
+        let proj: [[f32; 4]; 4] = [
+            [ 2.0 / ew,                                  0.0,   0.0, 0.0],
+            [      0.0,                        -2.0 / eh,       0.0, 0.0],
+            [      0.0,                                  0.0,   1.0, 0.0],
+            [-(1.0 + 2.0 * cam_left / ew), 1.0 + 2.0 * cam_top / eh, 0.0, 1.0],
+        ];
+        gpu.queue.write_buffer(
+            &res.camera_buffer,
+            0,
+            bytemuck::cast_slice(&proj),
         );
 
-        // --- Batch world geometry (tiles + entities) ---
-        res.batcher.begin();
-        batch_tiles(&mut res.batcher, cam_left, cam_top, screen_w, screen_h);
+        // --- Build instanced batch (S3-T03) ---
+        res.instanced_batcher.clear();
 
-        // Batch game entities.
+        // Tiles (S3-T03).
+        batch_tiles_instanced(
+            &mut res.instanced_batcher,
+            cam_left,
+            cam_top,
+            screen_w,
+            screen_h,
+        );
+
+        // Entity frustum culling (S3-T04).
         if let Some(ref world) = self.world {
-            batch_loot(&mut res.batcher, world, cam_left, cam_top, screen_w, screen_h);
-            batch_monsters(&mut res.batcher, world, cam_left, cam_top, screen_w, screen_h);
+            // Build render entities for the culler.
+            // We use entity_id.index as the u32 ID for the culler, and store
+            // a mapping from index -> EntityId for reconstruction.
+            let mut render_entities = Vec::new();
+            let mut id_map: Vec<EntityId> = Vec::new();
+            for &entity_id in world.ai_agents_keys() {
+                if !world.ecs.is_alive(entity_id) {
+                    continue;
+                }
+                let Ok(mr) = world.ecs.get_component::<MonsterRecord>(entity_id) else {
+                    continue;
+                };
+                if !mr.health.is_alive() {
+                    continue;
+                }
+
+                let mx = mr.position.x();
+                let my = mr.position.y();
+                let sx = (mx - my) * (TILE_WIDTH / 2.0);
+                let sy = (mx + my) * (TILE_HEIGHT / 2.0);
+
+                let culler_id = id_map.len() as u32;
+                id_map.push(entity_id);
+                render_entities.push(RenderEntity {
+                    id: culler_id,
+                    position: [sx, sy],
+                    size: [24.0, 24.0],
+                });
+            }
+
+            // Rebuild spatial grid and cull (S3-T04).
+            self.culler.rebuild(&render_entities);
+            let visible_rect = self.camera.visible_rect(screen_w, screen_h);
+            let visible_culler_ids = self.culler.cull(visible_rect);
+
+            // Map culler IDs back to EntityIds for the batcher.
+            let visible_entity_ids: Vec<EntityId> = visible_culler_ids
+                .iter()
+                .filter_map(|&cid| id_map.get(cid as usize).copied())
+                .collect();
+
+            // Batch visible entities (S3-T03 + S3-T04 + S3-T05 depth sorting).
+            batch_monsters_instanced(&mut res.instanced_batcher, world, &visible_entity_ids);
+            batch_loot_instanced(
+                &mut res.instanced_batcher,
+                world,
+                cam_left,
+                cam_top,
+                screen_w,
+                screen_h,
+            );
         }
 
-        batch_player(&mut res.batcher, px, py, cam_left, cam_top, screen_w, screen_h);
+        // Player (S3-T03).
+        batch_player_instanced(
+            &mut res.instanced_batcher,
+            px,
+            py,
+            cam_left,
+            cam_top,
+            screen_w,
+            screen_h,
+        );
 
-        let world_vert_count = res.batcher.flush(&gpu.queue);
+        // Sort all instances by z_depth (S3-T05).
+        res.instanced_batcher.sort_by_depth();
+
+        // Upload instance data to GPU storage buffer.
+        let instance_count = res.instanced_batcher.len() as u32;
+        let instance_bytes = res.instanced_batcher.as_bytes();
+        if !instance_bytes.is_empty() {
+            gpu.queue.write_buffer(&res.storage_buffer, 0, instance_bytes);
+        }
 
         // --- Render ---
         let (mut encoder, view, output) = frame.into_parts();
+
+        // Clear pass.
         {
-            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: Some("sprite_pass"),
+            let _pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("clear_pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                     view: &view,
                     resolve_target: None,
@@ -636,20 +1175,32 @@ impl GameApp for SodomightApp {
                 })],
                 ..Default::default()
             });
-
-            // Draw world (tiles + entities) with grass texture.
-            pass.set_pipeline(&res.pipeline.render_pipeline);
-            pass.set_bind_group(0, &res.pipeline.camera_bind_group, &[]);
-            pass.set_bind_group(1, &res.grass_texture.bind_group, &[]);
-            res.batcher.draw(&mut pass, world_vert_count);
+            // Pass drops here, clearing the framebuffer.
         }
 
-        // --- GUI pass (uses identity camera so GUI is in screen space) ---
-        res.pipeline.update_camera(&gpu.queue, screen_w, screen_h, 0.0, 0.0, 1.0);
+        // Instanced world draw (S3-T03): single draw call for tiles + entities.
+        res.instanced_pipeline.render(
+            &mut encoder,
+            &view,
+            &res.camera_bind_group,
+            &res.texture_bind_group,
+            &res.storage_bind_group,
+            instance_count,
+        );
 
-        res.batcher.begin();
-        self.gui.draw(&mut res.batcher);
-        let gui_vert_count = res.batcher.flush(&gpu.queue);
+        // --- GUI pass (legacy pipeline, screen space) ---
+        res.legacy_pipeline.update_camera(
+            &gpu.queue,
+            screen_w,
+            screen_h,
+            0.0,
+            0.0,
+            1.0,
+        );
+
+        res.legacy_batcher.begin();
+        self.gui.draw(&mut res.legacy_batcher);
+        let gui_vert_count = res.legacy_batcher.flush(&gpu.queue);
 
         if gui_vert_count > 0 {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -665,10 +1216,10 @@ impl GameApp for SodomightApp {
                 ..Default::default()
             });
 
-            pass.set_pipeline(&res.pipeline.render_pipeline);
-            pass.set_bind_group(0, &res.pipeline.camera_bind_group, &[]);
+            pass.set_pipeline(&res.legacy_pipeline.render_pipeline);
+            pass.set_bind_group(0, &res.legacy_pipeline.camera_bind_group, &[]);
             pass.set_bind_group(1, &res.gui_texture.bind_group, &[]);
-            res.batcher.draw(&mut pass, gui_vert_count);
+            res.legacy_batcher.draw(&mut pass, gui_vert_count);
         }
 
         gpu.queue.submit(std::iter::once(encoder.finish()));
@@ -676,21 +1227,22 @@ impl GameApp for SodomightApp {
 
         self.frame_count += 1;
         if self.frame_count.is_multiple_of(300) {
-            let sprite_count = world_vert_count / 4;
             let player_pos = self
                 .world
                 .as_ref()
                 .map_or((0.0, 0.0), SodomightWorld::player_position);
 
             tracing::debug!(
-                "Frame {} | Player ({:.1}, {:.1}) | Camera ({:.1}, {:.1}) | Sprites: {} | GUI quads: {}",
+                "Frame {} | Player ({:.1}, {:.1}) | Camera ({:.1}, {:.1}) | Instanced: {} | GUI quads: {} | Floating texts: {} | Emotes: {}",
                 self.frame_count,
                 player_pos.0,
                 player_pos.1,
                 self.camera.world_x,
                 self.camera.world_y,
-                sprite_count,
+                instance_count,
                 gui_vert_count / 4,
+                self.floating_texts.len(),
+                self.emotes.len(),
             );
         }
     }
@@ -726,6 +1278,10 @@ impl GameApp for SodomightApp {
         }
     }
 }
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
 
 #[cfg(test)]
 mod tests {
@@ -797,7 +1353,7 @@ mod tests {
         app.init_world();
         assert!(app.world.is_some());
 
-        let world = app.world.as_ref().unwrap();
+        let world = app.world.as_ref().expect("world should exist after init");
         // Player + 6 monsters (3 fallen + 3 quill rats).
         assert!(world.ecs.entity_count() >= 7);
     }
@@ -807,5 +1363,83 @@ mod tests {
         let mut app = SodomightApp::new();
         app.on_input(InputEvent::KeyDown { key: KeyCode::Num1 });
         // Skill use without world is a no-op; verify no panic.
+    }
+
+    #[test]
+    fn test_movement_direction_mapping() {
+        assert_eq!(movement_direction(DIR_UP), Direction::NW);
+        assert_eq!(movement_direction(DIR_DOWN), Direction::SE);
+        assert_eq!(movement_direction(DIR_LEFT), Direction::SW);
+        assert_eq!(movement_direction(DIR_RIGHT), Direction::NE);
+        assert_eq!(movement_direction(DIR_UP | DIR_LEFT), Direction::W);
+        assert_eq!(movement_direction(DIR_DOWN | DIR_RIGHT), Direction::E);
+        assert_eq!(movement_direction(0), Direction::S);
+    }
+
+    #[test]
+    fn test_placeholder_anim_bank_valid() {
+        let bank = create_placeholder_anim_bank();
+        assert_eq!(bank.entity_id, "player_placeholder");
+        assert_eq!(bank.clips.len(), 8); // 2 states * 4 directions
+
+        // Check that Idle and Walk clips exist for all rendered directions.
+        for &dir in Direction::rendered() {
+            assert!(
+                bank.get_clip(AnimationState::Idle, dir).is_some(),
+                "missing Idle clip for {dir:?}"
+            );
+            assert!(
+                bank.get_clip(AnimationState::Walk, dir).is_some(),
+                "missing Walk clip for {dir:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_fit_to_texture_array_small_image() {
+        let img = image::RgbaImage::new(32, 16);
+        let data = fit_to_texture_array(&img);
+        let expected_size = (TEX_ARRAY_W * TEX_ARRAY_H * 4) as usize;
+        assert_eq!(data.len(), expected_size);
+    }
+
+    #[test]
+    fn test_white_texture_data() {
+        let data = white_texture_data();
+        let expected_size = (TEX_ARRAY_W * TEX_ARRAY_H * 4) as usize;
+        assert_eq!(data.len(), expected_size);
+        assert!(data.iter().all(|&b| b == 255));
+    }
+
+    #[test]
+    fn test_instanced_batcher_tiles() {
+        let mut batcher = InstancedSpriteBatcher::new(MAX_INSTANCES);
+        batch_tiles_instanced(&mut batcher, 0.0, 0.0, 1280.0, 720.0);
+        // Should have pushed some tiles (not all 32x32 = 1024, but the visible ones).
+        assert!(batcher.len() > 0);
+        assert!(batcher.len() <= 1024);
+    }
+
+    #[test]
+    fn test_player_animation_controller() {
+        let mut app = SodomightApp::new();
+        assert_eq!(app.player_anim.current_state(), AnimationState::Idle);
+
+        app.press_dir(DIR_UP);
+        app.update_player_animation();
+        assert_eq!(app.player_anim.current_state(), AnimationState::Walk);
+        assert_eq!(app.player_anim.current_direction(), Direction::NW);
+
+        app.release_dir(DIR_UP);
+        app.update_player_animation();
+        assert_eq!(app.player_anim.current_state(), AnimationState::Idle);
+    }
+
+    #[test]
+    fn test_floating_text_manager_init() {
+        let app = SodomightApp::new();
+        assert!(app.floating_texts.is_empty());
+        assert!(app.emotes.is_empty());
+        assert!(app.progress_bars.is_empty());
     }
 }

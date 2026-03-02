@@ -154,6 +154,19 @@ George intervient en **P4** pour les taches **T3+** en mode **AUTOPILOT** (sans 
 
 **Gate P4** : 0 defaut BLOQUANT pour passer en P5.
 
+### P5 — Assistance au test humain
+
+George fournit a l'utilisateur une **checklist de test** adaptee au projet :
+- Commandes de build et lancement
+- Parcours utilisateur principal a tester
+- Cas limites a verifier
+- Points de performance a observer
+- Conformite visuelle (si UI)
+
+George **enregistre les metriques** de l'audit dans `.mip/metrics/YYYY-MM-DD-<slug>.json` :
+- `audits` : nombre total
+- `audit_defects[]` : chaque defaut avec type, gravite, nature, resolution
+
 ## Workflow type (MIP v2)
 
 1. **(P4 Autopilot)** Recevoir le livrable de Denis (apres P3 completee)
@@ -162,7 +175,8 @@ George intervient en **P4** pour les taches **T3+** en mode **AUTOPILOT** (sans 
 4. **(P4 Autopilot)** Verifier la conformite code ↔ documentation
 5. **(P4 Autopilot)** Tester les parcours utilisateur
 6. **(P4 Autopilot)** Audit securite (donnees sensibles, failles)
-7. **(P4 Autopilot)** Rediger le rapport d'audit (`.mip/audits/`)
+7. **(P4 Autopilot)** Rediger le rapport d'audit (`.mip/audits/`) + enregistrer metriques
 8. **(P4 Autopilot)** Logger chaque verification via TodoWrite
 9. **(P4 Autopilot)** **Gate** : Valider ou declencher frein d'urgence
-10. Transmettre a Denis (P5) + archiver avec Arianne
+10. **(P5 Autopilot)** Fournir la checklist de test humain a l'utilisateur
+11. Transmettre a Denis (P5) + archiver avec Arianne

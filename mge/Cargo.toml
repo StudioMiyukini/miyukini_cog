@@ -39,13 +39,14 @@ members = [
     "games/sodomight-server",
     "games/sodomight-client",
 
-    # === Outils (6 crates) ===
+    # === Outils (7 crates) ===
     "tools/mge-studio",
     "tools/mge-packer",
     "tools/mge-slicer",
     "tools/mge-rescale",
     "tools/mge-mirror",
     "tools/mge-remap",
+    "tools/mge-anim-pack",
 ]
 
 [workspace.package]
@@ -102,6 +103,10 @@ image = { version = "0.25", default-features = false, features = ["png"] }
 egui = "0.28"
 egui-wgpu = "0.28"
 egui-winit = "0.28"
+
+# UI tokens & adapters (cross-workspace)
+miyuki-ui-tokens = { path = "../crates/miyuki-ui-tokens" }
+miyuki-ui-egui = { path = "../crates/miyuki-ui-egui" }
 
 # Audio
 kira = "0.9"
