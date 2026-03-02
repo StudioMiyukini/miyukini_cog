@@ -263,6 +263,316 @@ impl TextureArray {
     }
 }
 
+// ---------------------------------------------------------------------------
+// InstancedSpritePipeline
+// ---------------------------------------------------------------------------
+
+/// Vertex for the static unit quad (2 floats: x, y).
+#[repr(C)]
+#[derive(Debug, Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct QuadVertex {
+    /// Position in the unit square `[0..1, 0..1]`.
+    pub position: [f32; 2],
+}
+
+impl QuadVertex {
+    /// Vertex buffer layout for the unit quad.
+    pub fn desc() -> wgpu::VertexBufferLayout<'static> {
+        const ATTRIBS: [wgpu::VertexAttribute; 1] = wgpu::vertex_attr_array![
+            0 => Float32x2,
+        ];
+
+        wgpu::VertexBufferLayout {
+            array_stride: std::mem::size_of::<QuadVertex>() as u64,
+            step_mode: wgpu::VertexStepMode::Vertex,
+            attributes: &ATTRIBS,
+        }
+    }
+}
+
+/// Static unit quad vertices: (0,0), (1,0), (1,1), (0,1).
+const QUAD_VERTICES: [QuadVertex; 4] = [
+    QuadVertex { position: [0.0, 0.0] },
+    QuadVertex { position: [1.0, 0.0] },
+    QuadVertex { position: [1.0, 1.0] },
+    QuadVertex { position: [0.0, 1.0] },
+];
+
+/// Static quad indices: two triangles (0,1,2) and (2,3,0).
+const QUAD_INDICES: [u16; 6] = [0, 1, 2, 2, 3, 0];
+
+/// Size of a 4x4 f32 matrix in bytes (used for camera uniform).
+const MAT4_SIZE: u64 = 64;
+
+/// GPU render pipeline for instanced sprite drawing.
+///
+/// Uses a single draw call with GPU instancing: one static unit quad is
+/// drawn `N` times, with per-instance data read from a storage buffer.
+///
+/// Bind group layout:
+/// - Group 0: camera uniform (mat4x4, vertex stage)
+/// - Group 1: texture_2d_array + sampler (fragment stage)
+/// - Group 2: storage buffer of [`InstanceData`] (vertex stage, read-only)
+pub struct InstancedSpritePipeline {
+    /// Compiled wgpu render pipeline.
+    pub render_pipeline: wgpu::RenderPipeline,
+    /// Layout for bind group 0 (camera uniform).
+    pub camera_bind_group_layout: wgpu::BindGroupLayout,
+    /// Layout for bind group 1 (texture array + sampler).
+    pub texture_bind_group_layout: wgpu::BindGroupLayout,
+    /// Layout for bind group 2 (instance storage buffer).
+    pub storage_bind_group_layout: wgpu::BindGroupLayout,
+    /// Static vertex buffer (4 vertices of the unit quad).
+    pub vertex_buffer: wgpu::Buffer,
+    /// Static index buffer (6 indices for 2 triangles).
+    pub index_buffer: wgpu::Buffer,
+}
+
+/// Create the camera bind group layout (group 0: uniform, vertex stage).
+fn create_instanced_camera_bgl(device: &wgpu::Device) -> wgpu::BindGroupLayout {
+    device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        label: Some("Instanced Camera BGL"),
+        entries: &[wgpu::BindGroupLayoutEntry {
+            binding: 0,
+            visibility: wgpu::ShaderStages::VERTEX,
+            ty: wgpu::BindingType::Buffer {
+                ty: wgpu::BufferBindingType::Uniform,
+                has_dynamic_offset: false,
+                min_binding_size: wgpu::BufferSize::new(MAT4_SIZE),
+            },
+            count: None,
+        }],
+    })
+}
+
+/// Create the texture array bind group layout (group 1: texture_2d_array + sampler).
+fn create_instanced_texture_bgl(device: &wgpu::Device) -> wgpu::BindGroupLayout {
+    device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        label: Some("Instanced Texture Array BGL"),
+        entries: &[
+            wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Texture {
+                    sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                    view_dimension: wgpu::TextureViewDimension::D2Array,
+                    multisampled: false,
+                },
+                count: None,
+            },
+            wgpu::BindGroupLayoutEntry {
+                binding: 1,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                count: None,
+            },
+        ],
+    })
+}
+
+/// Create the instance storage bind group layout (group 2: read-only storage).
+fn create_instanced_storage_bgl(device: &wgpu::Device) -> wgpu::BindGroupLayout {
+    device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        label: Some("Instanced Storage BGL"),
+        entries: &[wgpu::BindGroupLayoutEntry {
+            binding: 0,
+            visibility: wgpu::ShaderStages::VERTEX,
+            ty: wgpu::BindingType::Buffer {
+                ty: wgpu::BufferBindingType::Storage { read_only: true },
+                has_dynamic_offset: false,
+                min_binding_size: None,
+            },
+            count: None,
+        }],
+    })
+}
+
+/// Build the wgpu render pipeline for instanced sprite drawing.
+fn create_instanced_render_pipeline(
+    device: &wgpu::Device,
+    format: wgpu::TextureFormat,
+    shader: &wgpu::ShaderModule,
+    camera_layout: &wgpu::BindGroupLayout,
+    texture_layout: &wgpu::BindGroupLayout,
+    storage_layout: &wgpu::BindGroupLayout,
+) -> wgpu::RenderPipeline {
+    let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: Some("Instanced Sprite Pipeline Layout"),
+        bind_group_layouts: &[camera_layout, texture_layout, storage_layout],
+        push_constant_ranges: &[],
+    });
+
+    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: Some("Instanced Sprite Render Pipeline"),
+        layout: Some(&pipeline_layout),
+        vertex: wgpu::VertexState {
+            module: shader,
+            entry_point: Some("vs_main"),
+            buffers: &[QuadVertex::desc()],
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
+        },
+        fragment: Some(wgpu::FragmentState {
+            module: shader,
+            entry_point: Some("fs_main"),
+            targets: &[Some(wgpu::ColorTargetState {
+                format,
+                blend: Some(wgpu::BlendState {
+                    color: wgpu::BlendComponent {
+                        src_factor: wgpu::BlendFactor::SrcAlpha,
+                        dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
+                        operation: wgpu::BlendOperation::Add,
+                    },
+                    alpha: wgpu::BlendComponent {
+                        src_factor: wgpu::BlendFactor::One,
+                        dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
+                        operation: wgpu::BlendOperation::Add,
+                    },
+                }),
+                write_mask: wgpu::ColorWrites::ALL,
+            })],
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
+        }),
+        primitive: wgpu::PrimitiveState {
+            topology: wgpu::PrimitiveTopology::TriangleList,
+            strip_index_format: None,
+            front_face: wgpu::FrontFace::Ccw,
+            cull_mode: None,
+            unclipped_depth: false,
+            polygon_mode: wgpu::PolygonMode::Fill,
+            conservative: false,
+        },
+        depth_stencil: None,
+        multisample: wgpu::MultisampleState {
+            count: 1,
+            mask: !0,
+            alpha_to_coverage_enabled: false,
+        },
+        multiview: None,
+        cache: None,
+    })
+}
+
+/// Create the static unit-quad vertex buffer (mapped at creation).
+fn create_quad_vertex_buffer(device: &wgpu::Device) -> wgpu::Buffer {
+    let buffer = device.create_buffer(&wgpu::BufferDescriptor {
+        label: Some("Instanced Quad Vertex Buffer"),
+        size: (std::mem::size_of::<QuadVertex>() * QUAD_VERTICES.len()) as u64,
+        usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+        mapped_at_creation: true,
+    });
+    buffer
+        .slice(..)
+        .get_mapped_range_mut()
+        .copy_from_slice(bytemuck::cast_slice(&QUAD_VERTICES));
+    buffer.unmap();
+    buffer
+}
+
+/// Create the static unit-quad index buffer (mapped at creation).
+fn create_quad_index_buffer(device: &wgpu::Device) -> wgpu::Buffer {
+    let buffer = device.create_buffer(&wgpu::BufferDescriptor {
+        label: Some("Instanced Quad Index Buffer"),
+        size: (std::mem::size_of::<u16>() * QUAD_INDICES.len()) as u64,
+        usage: wgpu::BufferUsages::INDEX | wgpu::BufferUsages::COPY_DST,
+        mapped_at_creation: true,
+    });
+    buffer
+        .slice(..)
+        .get_mapped_range_mut()
+        .copy_from_slice(bytemuck::cast_slice(&QUAD_INDICES));
+    buffer.unmap();
+    buffer
+}
+
+impl InstancedSpritePipeline {
+    /// Create the instanced sprite pipeline.
+    ///
+    /// # Arguments
+    ///
+    /// * `device` -- wgpu device.
+    /// * `format` -- surface texture format (e.g. `Bgra8UnormSrgb`).
+    pub fn new(device: &wgpu::Device, format: wgpu::TextureFormat) -> Self {
+        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("Instanced Sprite Shader"),
+            source: wgpu::ShaderSource::Wgsl(
+                include_str!("sprite_instanced.wgsl").into(),
+            ),
+        });
+
+        let camera_bind_group_layout = create_instanced_camera_bgl(device);
+        let texture_bind_group_layout = create_instanced_texture_bgl(device);
+        let storage_bind_group_layout = create_instanced_storage_bgl(device);
+
+        let render_pipeline = create_instanced_render_pipeline(
+            device,
+            format,
+            &shader,
+            &camera_bind_group_layout,
+            &texture_bind_group_layout,
+            &storage_bind_group_layout,
+        );
+
+        let vertex_buffer = create_quad_vertex_buffer(device);
+        let index_buffer = create_quad_index_buffer(device);
+
+        Self {
+            render_pipeline,
+            camera_bind_group_layout,
+            texture_bind_group_layout,
+            storage_bind_group_layout,
+            vertex_buffer,
+            index_buffer,
+        }
+    }
+
+    /// Execute the instanced draw call.
+    ///
+    /// # Arguments
+    ///
+    /// * `encoder` -- command encoder for the current frame.
+    /// * `view` -- texture view of the render target.
+    /// * `camera_bind_group` -- bind group 0 (camera uniform).
+    /// * `texture_bind_group` -- bind group 1 (texture array + sampler).
+    /// * `storage_bind_group` -- bind group 2 (instance storage buffer).
+    /// * `instance_count` -- number of sprite instances to draw.
+    pub fn render(
+        &self,
+        encoder: &mut wgpu::CommandEncoder,
+        view: &wgpu::TextureView,
+        camera_bind_group: &wgpu::BindGroup,
+        texture_bind_group: &wgpu::BindGroup,
+        storage_bind_group: &wgpu::BindGroup,
+        instance_count: u32,
+    ) {
+        if instance_count == 0 {
+            return;
+        }
+
+        let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: Some("Instanced Sprite Render Pass"),
+            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                view,
+                resolve_target: None,
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Load,
+                    store: wgpu::StoreOp::Store,
+                },
+            })],
+            depth_stencil_attachment: None,
+            timestamp_writes: None,
+            occlusion_query_set: None,
+        });
+
+        pass.set_pipeline(&self.render_pipeline);
+        pass.set_bind_group(0, camera_bind_group, &[]);
+        pass.set_bind_group(1, texture_bind_group, &[]);
+        pass.set_bind_group(2, storage_bind_group, &[]);
+        pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+        pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+        pass.draw_indexed(0..6, 0, 0..instance_count);
+    }
+}
+
 /// CPU-side texture array layer tracker for unit testing without GPU.
 ///
 /// This mirrors the layer counting logic of [`TextureArray`] but does not
