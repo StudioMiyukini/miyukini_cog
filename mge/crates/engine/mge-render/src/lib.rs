@@ -9,6 +9,7 @@
 //! - **Atlas** -- TOML-described texture atlas parsing and frame lookup.
 //! - **Sprite** -- per-layer sprite batching and depth sorting.
 //! - **Tile** -- isometric tile grid rendering.
+//! - **Overhead** -- world-space overlay UI: floating text, emotes, progress bars.
 //! - **Renderer** -- top-level GPU renderer stub (full init requires `mge-platform`).
 //! - **Errors** -- explicit error types via `thiserror`.
 
@@ -16,6 +17,7 @@ pub mod animation;
 pub mod atlas;
 pub mod camera;
 pub mod errors;
+pub mod overhead;
 pub mod pipeline;
 pub mod renderer;
 pub mod sprite;
@@ -43,6 +45,14 @@ pub use renderer::{RenderConfig, Renderer};
 #[allow(deprecated)]
 pub use sprite::{RenderLayer, SpriteBatch, SpriteInstance, SpriteRenderer};
 pub use tile::{TilePos, TileRenderArgs, TileRenderer};
+
+// -- Overhead UI re-exports --
+
+pub use overhead::{
+    EmoteKind, EmoteManager, FloatingText, FloatingTextKind, FloatingTextManager,
+    FloatingTextPreset, OverheadProgressBar, ProgressBarManager, SpriteEmote,
+    CASTING_COLOR, CRAFTING_COLOR, GATHERING_COLOR, LOADING_COLOR,
+};
 
 // -- Instanced pipeline re-exports (behind feature flag) --
 
