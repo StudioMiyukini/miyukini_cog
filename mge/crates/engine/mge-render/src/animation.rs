@@ -222,6 +222,98 @@ impl AnimationBank {
                     .find(|c| c.state == state && c.direction == src_dir)
             })
     }
+
+    /// Validate the animation bank for completeness and consistency.
+    ///
+    /// Checks:
+    /// - Each clip has `frame_count > 0`.
+    /// - Each clip has `frame_duration_ms > 0`.
+    /// - For each state present, all 4 rendered directions (S, SW, W, NW) exist.
+    /// - No two clips have overlapping `atlas_start_frame` ranges.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Ok(())` if all checks pass, or `Err(Vec<String>)` with all
+    /// validation errors found.
+    pub fn validate(&self) -> Result<(), Vec<String>> {
+        let mut errors = Vec::new();
+
+        // Check frame_count and frame_duration_ms.
+        for clip in &self.clips {
+            if clip.frame_count == 0 {
+                errors.push(format!(
+                    "clip {:?}/{:?}: frame_count must be > 0",
+                    clip.state, clip.direction
+                ));
+            }
+            if clip.frame_duration_ms == 0 {
+                errors.push(format!(
+                    "clip {:?}/{:?}: frame_duration_ms must be > 0",
+                    clip.state, clip.direction
+                ));
+            }
+        }
+
+        // Collect all unique states present.
+        let mut states = std::collections::HashSet::new();
+        for clip in &self.clips {
+            states.insert(clip.state);
+        }
+
+        // Check that each state has all 4 rendered directions.
+        for state in &states {
+            for dir in Direction::rendered() {
+                let found = self
+                    .clips
+                    .iter()
+                    .any(|c| c.state == *state && c.direction == *dir);
+                if !found {
+                    errors.push(format!(
+                        "missing direction {dir:?} for state {state:?}"
+                    ));
+                }
+            }
+        }
+
+        // Check for overlapping atlas_start_frame ranges.
+        // Build (start, end) ranges and detect overlaps.
+        let mut ranges: Vec<(u32, u32, AnimationState, Direction)> = self
+            .clips
+            .iter()
+            .filter(|c| c.frame_count > 0)
+            .map(|c| {
+                (
+                    c.atlas_start_frame,
+                    c.atlas_start_frame + c.frame_count - 1,
+                    c.state,
+                    c.direction,
+                )
+            })
+            .collect();
+
+        // Sort by start frame for pairwise comparison.
+        ranges.sort_by_key(|r| r.0);
+
+        for i in 0..ranges.len() {
+            for j in (i + 1)..ranges.len() {
+                let (start_a, end_a, state_a, dir_a) = ranges[i];
+                let (start_b, _end_b, state_b, dir_b) = ranges[j];
+                // If range B starts within range A, they overlap.
+                if start_b <= end_a {
+                    errors.push(format!(
+                        "atlas frame overlap: {:?}/{:?} [{}..={}] and {:?}/{:?} [{}..={}]",
+                        state_a, dir_a, start_a, end_a, state_b, dir_b, ranges[j].0, ranges[j].1
+                    ));
+                }
+            }
+        }
+
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(errors)
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -691,5 +783,129 @@ events = [{ frame = 2, kind = "Damage", data = "hit" }]
         let json = serde_json::to_string(&size).unwrap();
         let back: SpriteSize = serde_json::from_str(&json).unwrap();
         assert_eq!(back, size);
+    }
+
+    // -- S1-T11: AnimationBank::validate() tests --
+
+    /// Complete valid bank: Idle with all 4 rendered directions, non-overlapping frames.
+    const VALID_BANK_TOML: &str = r#"
+entity_id = "warrior"
+
+[[clips]]
+state = "Idle"
+direction = "S"
+frame_count = 4
+frame_duration_ms = 100
+looping = true
+atlas_start_frame = 0
+
+[[clips]]
+state = "Idle"
+direction = "SW"
+frame_count = 4
+frame_duration_ms = 100
+looping = true
+atlas_start_frame = 4
+
+[[clips]]
+state = "Idle"
+direction = "W"
+frame_count = 4
+frame_duration_ms = 100
+looping = true
+atlas_start_frame = 8
+
+[[clips]]
+state = "Idle"
+direction = "NW"
+frame_count = 4
+frame_duration_ms = 100
+looping = true
+atlas_start_frame = 12
+"#;
+
+    #[test]
+    fn validate_valid_bank() {
+        let bank = AnimationBank::from_toml(VALID_BANK_TOML).unwrap();
+        assert!(bank.validate().is_ok());
+    }
+
+    #[test]
+    fn validate_missing_direction() {
+        // Bank with only S direction for Idle -- missing SW, W, NW.
+        let toml = r#"
+entity_id = "incomplete"
+
+[[clips]]
+state = "Idle"
+direction = "S"
+frame_count = 4
+frame_duration_ms = 100
+looping = true
+atlas_start_frame = 0
+"#;
+        let bank = AnimationBank::from_toml(toml).unwrap();
+        let result = bank.validate();
+        assert!(result.is_err());
+        let errors = result.unwrap_err();
+        assert!(
+            errors.iter().any(|e| e.contains("missing direction SW")),
+            "should report missing SW, got: {errors:?}"
+        );
+        assert!(
+            errors.iter().any(|e| e.contains("missing direction W")),
+            "should report missing W, got: {errors:?}"
+        );
+        assert!(
+            errors.iter().any(|e| e.contains("missing direction NW")),
+            "should report missing NW, got: {errors:?}"
+        );
+    }
+
+    #[test]
+    fn validate_zero_frames() {
+        let toml = r#"
+entity_id = "bad"
+
+[[clips]]
+state = "Idle"
+direction = "S"
+frame_count = 0
+frame_duration_ms = 100
+looping = true
+atlas_start_frame = 0
+
+[[clips]]
+state = "Idle"
+direction = "SW"
+frame_count = 4
+frame_duration_ms = 100
+looping = true
+atlas_start_frame = 0
+
+[[clips]]
+state = "Idle"
+direction = "W"
+frame_count = 4
+frame_duration_ms = 100
+looping = true
+atlas_start_frame = 4
+
+[[clips]]
+state = "Idle"
+direction = "NW"
+frame_count = 4
+frame_duration_ms = 100
+looping = true
+atlas_start_frame = 8
+"#;
+        let bank = AnimationBank::from_toml(toml).unwrap();
+        let result = bank.validate();
+        assert!(result.is_err());
+        let errors = result.unwrap_err();
+        assert!(
+            errors.iter().any(|e| e.contains("frame_count must be > 0")),
+            "should report zero frame_count, got: {errors:?}"
+        );
     }
 }
