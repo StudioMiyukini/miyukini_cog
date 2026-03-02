@@ -19,6 +19,11 @@ pub mod renderer;
 pub mod sprite;
 pub mod tile;
 
+#[cfg(feature = "instanced")]
+pub mod culling;
+#[cfg(feature = "instanced")]
+pub mod instanced;
+
 #[cfg(test)]
 mod tests;
 
@@ -31,3 +36,13 @@ pub use renderer::{RenderConfig, Renderer};
 pub use pipeline::{GpuTexture, SpriteBatcher, SpritePipeline, SpriteVertex};
 pub use sprite::{RenderLayer, SpriteBatch, SpriteInstance, SpriteRenderer};
 pub use tile::{TilePos, TileRenderArgs, TileRenderer};
+
+// -- Instanced pipeline re-exports (behind feature flag) --
+
+#[cfg(feature = "instanced")]
+pub use culling::{FrustumCuller, RenderEntity, RenderSpatialGrid};
+#[cfg(feature = "instanced")]
+pub use instanced::{
+    InstanceData, InstancedSpriteBatcher, InstancedSpritePipeline, QuadVertex,
+    TextureArray,
+};

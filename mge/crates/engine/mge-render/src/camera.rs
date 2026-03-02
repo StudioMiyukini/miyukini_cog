@@ -106,6 +106,23 @@ impl Camera2D {
         }
     }
 
+    /// Returns the axis-aligned bounding box of the visible area in world
+    /// coordinates (screen-pixel space).
+    ///
+    /// The result is `[min_x, min_y, max_x, max_y]` where the camera
+    /// position is the centre of the viewport. The effective viewport size
+    /// is `screen_width / zoom` by `screen_height / zoom`.
+    pub fn visible_rect(&self, screen_width: f32, screen_height: f32) -> [f32; 4] {
+        let half_w = screen_width / (2.0 * self.zoom);
+        let half_h = screen_height / (2.0 * self.zoom);
+        [
+            self.world_x - half_w,
+            self.world_y - half_h,
+            self.world_x + half_w,
+            self.world_y + half_h,
+        ]
+    }
+
     /// Set the follow target from world tile coordinates.
     pub fn follow(&mut self, tile_x: f32, tile_y: f32) {
         let (sx, sy) = self.world_to_screen(tile_x, tile_y);

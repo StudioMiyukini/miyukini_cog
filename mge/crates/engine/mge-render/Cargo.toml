@@ -15,14 +15,17 @@ toml = { workspace = true }
 tracing = { workspace = true }
 thiserror = { workspace = true }
 bytemuck = { version = "1.16", features = ["derive"] }
+mge-math = { path = "../../kernel/mge-math" }
 
 [dev-dependencies]
 serde_json = { workspace = true }
 
 [features]
-default = ["dual-res"]
+default = ["dual-res", "instanced"]
 dual-res = []
 post-process = []
+instanced = []
+legacy-batcher = []
 
 [lints]
 workspace = true
