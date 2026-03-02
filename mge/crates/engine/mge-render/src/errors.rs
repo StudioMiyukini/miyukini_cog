@@ -88,3 +88,54 @@ pub enum RenderError {
         got_h: u32,
     },
 }
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn render_error_implements_display() {
+        let err = RenderError::BatcherOverflow {
+            capacity: 100,
+            attempted: 101,
+        };
+        let msg = format!("{err}");
+        assert!(msg.contains("100"));
+        assert!(msg.contains("101"));
+    }
+
+    #[test]
+    fn render_error_implements_error_trait() {
+        let err = RenderError::TextureArrayFull { max_layers: 16 };
+        // std::error::Error is implemented by thiserror.
+        let _as_error: &dyn std::error::Error = &err;
+        let msg = format!("{err}");
+        assert!(msg.contains("16"));
+    }
+
+    #[test]
+    fn render_error_shader_compilation_failed_display() {
+        let err = RenderError::ShaderCompilationFailed {
+            details: "syntax error at line 42".to_string(),
+        };
+        let msg = format!("{err}");
+        assert!(msg.contains("syntax error at line 42"));
+    }
+
+    #[test]
+    fn render_error_invalid_texture_size_display() {
+        let err = RenderError::InvalidTextureSize {
+            expected_w: 512,
+            expected_h: 512,
+            got_w: 256,
+            got_h: 256,
+        };
+        let msg = format!("{err}");
+        assert!(msg.contains("512x512"));
+        assert!(msg.contains("256x256"));
+    }
+}
