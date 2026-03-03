@@ -119,7 +119,10 @@ impl<G: GameApp> ApplicationHandler for AppRunner<G> {
             }
 
             WindowEvent::RedrawRequested => {
-                if let Some(ref gpu) = self.gpu {
+                if let Some(ref mut gpu) = self.gpu {
+                    // Reconfigure surface if window size changed (prevents
+                    // "Suboptimal present" spam from Vulkan HAL).
+                    gpu.ensure_surface_current();
                     self.game.on_frame(gpu);
                 }
             }

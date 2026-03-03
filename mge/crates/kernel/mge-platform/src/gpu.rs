@@ -128,6 +128,21 @@ impl GpuContext {
         self.surface.configure(&self.device, &self.surface_config);
     }
 
+    /// Ensure the surface matches the current window size.
+    ///
+    /// Prevents "Suboptimal present" warnings from the Vulkan HAL
+    /// when the window has been resized or DPI-changed between frames.
+    pub fn ensure_surface_current(&mut self) {
+        let size = self.window.inner_size();
+        if size.width > 0
+            && size.height > 0
+            && (size.width != self.surface_config.width
+                || size.height != self.surface_config.height)
+        {
+            self.resize(size.width, size.height);
+        }
+    }
+
     /// Get a frame to render into.
     pub fn begin_frame(&self) -> Result<GpuFrame, PlatformError> {
         let output = self
