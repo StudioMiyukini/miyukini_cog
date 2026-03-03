@@ -42,7 +42,8 @@ const WALK_SPEED: f32 = 0.05;
 const LOOT_PICKUP_RANGE: f32 = 2.0;
 
 /// Click radius for attacking monsters (world units).
-const ATTACK_RANGE: f32 = 3.0;
+/// Client-side click-to-attack range. Must match server-side `PLAYER_MELEE_RANGE`.
+const ATTACK_RANGE: f32 = 2.5;
 
 /// Monster rendering tint (red-ish).
 const MONSTER_TINT: [f32; 4] = [0.9, 0.2, 0.2, 1.0];
@@ -1719,6 +1720,13 @@ impl GameApp for SodomightApp {
         let (sw, sh) = gpu.surface_size();
         let screen_w = sw as f32;
         let screen_h = sh as f32;
+
+        // Always sync GUI and camera viewport to actual surface size so
+        // the HUD repositions correctly after any resize or DPI change.
+        self.gui.set_screen_size(screen_w, screen_h);
+        self.camera.screen_w = sw;
+        self.camera.screen_h = sh;
+
         let cam_left = self.camera.world_x - screen_w / (2.0 * self.camera.zoom);
         let cam_top = self.camera.world_y - screen_h / (2.0 * self.camera.zoom);
 
