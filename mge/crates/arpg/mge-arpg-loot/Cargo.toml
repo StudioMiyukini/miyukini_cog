@@ -8,6 +8,7 @@ edition.workspace = true
 description = "MGE ARPG loot: drop tables, treasure classes, MF, NoDrop"
 
 [dependencies]
+mge-arpg-items = { path = "../mge-arpg-items" }
 serde = { workspace = true }
 rand = { workspace = true }
 thiserror = { workspace = true }

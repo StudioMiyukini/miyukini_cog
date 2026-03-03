@@ -29,7 +29,7 @@ mod tests;
 
 pub use drop::{DropRoll, LootGenerator};
 pub use entry::{DropEntry, TreasureClass};
-pub use quality::{DropQuality, QualityRoller};
+pub use quality::{effective_mf, roll_quality, DropQuality, QualityRoller};
 pub use registry::TreasureClassRegistry;
 
 /// Errors that can occur during loot generation.

@@ -6,8 +6,9 @@ mod tests {
 
     use crate::drop::LootGenerator;
     use crate::entry::{DropEntry, TreasureClass};
-    use crate::quality::{DropQuality, QualityRoller};
+    use crate::quality::{effective_mf, roll_quality, DropQuality, QualityRoller};
     use crate::registry::TreasureClassRegistry;
+    use mge_arpg_items::ItemQuality;
 
     /// Helper: deterministic RNG for reproducible tests.
     fn test_rng() -> rand::rngs::StdRng {
@@ -259,6 +260,69 @@ mod tests {
         assert!(
             drops.is_empty(),
             "Cyclic TCs should resolve to empty (recursion cap)"
+        );
+    }
+
+    // -----------------------------------------------------------------------
+    // 13. mf_diminishing_unique
+    //     1000 raw MF -> effective MF for Unique should be ~200
+    //     Formula: 1000 * 250 / (1000 + 250) = 250000 / 1250 = 200
+    // -----------------------------------------------------------------------
+    #[test]
+    fn mf_diminishing_unique() {
+        let raw = 1000_i32;
+        let eff = effective_mf(raw, ItemQuality::Unique);
+        // Exact formula: 1000 * 250 / (1000 + 250) = 200
+        assert_eq!(eff, 200, "effective_mf(1000, Unique) should equal 200, got {eff}");
+    }
+
+    // -----------------------------------------------------------------------
+    // 14. quality_cascade_normal
+    //     With MF=0, Normal items are the most common outcome.
+    //     Over many trials, the majority should be Normal.
+    // -----------------------------------------------------------------------
+    #[test]
+    fn quality_cascade_normal() {
+        let mut rng = rand::rngs::StdRng::seed_from_u64(99);
+        let mut normal_count = 0u32;
+        let trials = 1_000u32;
+
+        for _ in 0..trials {
+            if roll_quality(1, 0, &mut rng) == ItemQuality::Normal {
+                normal_count += 1;
+            }
+        }
+
+        // With MF=0, base chance of non-Normal:
+        //   Magic ~25%, Rare ~6.25%, Set ~0.6%, Unique ~0.25%
+        // => roughly 30% non-Normal at most. Normal should be > 50%.
+        assert!(
+            normal_count > trials / 2,
+            "Expected mostly Normal drops with MF=0, got {normal_count}/{trials} Normal"
+        );
+    }
+
+    // -----------------------------------------------------------------------
+    // 15. quality_roll_deterministic
+    //     Same RNG seed must produce the same quality sequence.
+    // -----------------------------------------------------------------------
+    #[test]
+    fn quality_roll_deterministic() {
+        let seed = 12_345_u64;
+        let rolls = 10u32;
+
+        let qualities_a: Vec<ItemQuality> = {
+            let mut rng = rand::rngs::StdRng::seed_from_u64(seed);
+            (0..rolls).map(|_| roll_quality(30, 150, &mut rng)).collect()
+        };
+        let qualities_b: Vec<ItemQuality> = {
+            let mut rng = rand::rngs::StdRng::seed_from_u64(seed);
+            (0..rolls).map(|_| roll_quality(30, 150, &mut rng)).collect()
+        };
+
+        assert_eq!(
+            qualities_a, qualities_b,
+            "Same seed must produce identical quality sequence"
         );
     }
 }

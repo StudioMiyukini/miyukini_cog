@@ -1,9 +1,136 @@
+// @id: MGE-UI-HUD @do: hud-orbs @role: front-end @layer: 3 @human: miyuk
+
 //! In-game HUD: life/mana orbs, skill hotbar (8 slots), belt (4 slots),
 //! experience bar, level indicator, and gold display.
+//!
+//! ## HUD orb state
+//!
+//! [`OrbState`] tracks current/max values with a smoothly lerped `display_percent`
+//! suitable for filling the circular orb sprite. [`HudState`] bundles the HP and
+//! mana orbs and provides a single `update` call driven by the game loop `dt`.
 
 use egui::{Color32, Context, Pos2, Rect, Vec2};
 
 use crate::theme::D2Colors;
+
+// ---------------------------------------------------------------------------
+// OrbState
+// ---------------------------------------------------------------------------
+
+/// Animated state for a single life or mana orb.
+///
+/// `display_percent` lags behind the real fill ratio so the orb drains /
+/// refills with a smooth visual interpolation instead of jumping instantly.
+#[derive(Debug, Clone, PartialEq)]
+pub struct OrbState {
+    /// Raw current value (e.g. current HP).
+    pub current: f32,
+    /// Raw maximum value (e.g. max HP).
+    pub max: f32,
+    /// Smoothly interpolated fill ratio used for rendering (0.0 ..= 1.0).
+    pub display_percent: f32,
+}
+
+impl OrbState {
+    /// Create a new `OrbState` with both `current` and `display_percent`
+    /// initialised to the exact fill ratio — no initial lerp lag.
+    #[must_use]
+    pub fn new(current: f32, max: f32) -> Self {
+        let display_percent = if max > 0.0 {
+            (current / max).clamp(0.0, 1.0)
+        } else {
+            0.0
+        };
+        Self {
+            current,
+            max,
+            display_percent,
+        }
+    }
+
+    /// Advance the orb state for one frame.
+    ///
+    /// Updates `current` and `max`, then smoothly moves `display_percent`
+    /// toward the true fill ratio at `lerp_speed` (units: fraction per second).
+    /// Pass `lerp_speed = 1.0` to cover the full 0→1 range in one second.
+    pub fn update(&mut self, current: f32, max: f32, lerp_speed: f32) {
+        self.current = current;
+        self.max = max;
+
+        let target = if max > 0.0 {
+            (current / max).clamp(0.0, 1.0)
+        } else {
+            0.0
+        };
+
+        // Linear interpolation toward target; clamp result to valid range.
+        let delta = target - self.display_percent;
+        self.display_percent = (self.display_percent + delta * lerp_speed).clamp(0.0, 1.0);
+    }
+
+    /// Return the clamped fill ratio (0.0 ..= 1.0) based on raw values.
+    ///
+    /// Returns `0.0` when `max` is zero to avoid division by zero.
+    #[must_use]
+    pub fn percent(&self) -> f32 {
+        if self.max <= 0.0 {
+            return 0.0;
+        }
+        (self.current / self.max).clamp(0.0, 1.0)
+    }
+}
+
+// ---------------------------------------------------------------------------
+// HudState
+// ---------------------------------------------------------------------------
+
+/// Persistent per-frame state for the full HUD (HP + mana orbs).
+///
+/// Keep one `HudState` alive for the lifetime of a game session and call
+/// [`HudState::update`] every frame with the latest values and delta time.
+#[derive(Debug, Clone, PartialEq)]
+pub struct HudState {
+    /// Animated HP orb.
+    pub hp_orb: OrbState,
+    /// Animated mana orb.
+    pub mana_orb: OrbState,
+}
+
+impl HudState {
+    /// Create a new `HudState` with both orbs at zero (max = 1 placeholder).
+    ///
+    /// Call [`HudState::update`] immediately after creation with real values.
+    #[must_use]
+    pub fn new() -> Self {
+        Self {
+            hp_orb: OrbState::new(0.0, 1.0),
+            mana_orb: OrbState::new(0.0, 1.0),
+        }
+    }
+
+    /// Update both orbs for the current frame.
+    ///
+    /// `dt` is the frame delta time in seconds. The lerp speed is fixed at
+    /// `4.0` (full range in ~250 ms), which matches the classic D2 feel.
+    pub fn update(
+        &mut self,
+        hp_current: f32,
+        hp_max: f32,
+        mana_current: f32,
+        mana_max: f32,
+        dt: f32,
+    ) {
+        let lerp_speed = 4.0 * dt;
+        self.hp_orb.update(hp_current, hp_max, lerp_speed);
+        self.mana_orb.update(mana_current, mana_max, lerp_speed);
+    }
+}
+
+impl Default for HudState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 // ---------------------------------------------------------------------------
 // Data structs
@@ -297,4 +424,63 @@ fn draw_belt(ui: &mut egui::Ui, slots: &[BeltSlotData; 4]) {
             );
         }
     });
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::OrbState;
+
+    /// Clamping test: current > max must return percent = 1.0.
+    #[test]
+    fn orb_percent_clamp() {
+        let orb = OrbState::new(150.0, 100.0);
+        assert!(
+            (orb.percent() - 1.0).abs() < f32::EPSILON,
+            "percent should be clamped to 1.0, got {}",
+            orb.percent()
+        );
+    }
+
+    /// Division-by-zero guard: max = 0 must return 0.0 without panicking.
+    #[test]
+    fn orb_div_by_zero() {
+        let orb = OrbState::new(50.0, 0.0);
+        assert!(
+            orb.percent().abs() < f32::EPSILON,
+            "percent should be 0.0 when max is zero, got {}",
+            orb.percent()
+        );
+    }
+
+    /// Lerp direction test: after one update, display_percent must move toward
+    /// the target ratio (not away from it, and not stay at the same value).
+    #[test]
+    fn orb_lerp_update() {
+        // Start at 0% fill.
+        let mut orb = OrbState::new(0.0, 100.0);
+        assert!(
+            orb.display_percent.abs() < f32::EPSILON,
+            "initial display_percent should be 0.0"
+        );
+
+        // Ask for 80% fill with a large lerp_speed so we get noticeable movement.
+        orb.update(80.0, 100.0, 0.5);
+
+        // display_percent must have moved toward 0.8 (i.e. > 0.0).
+        assert!(
+            orb.display_percent > 0.0,
+            "display_percent should have moved toward target after update, got {}",
+            orb.display_percent
+        );
+        // Must not overshoot.
+        assert!(
+            orb.display_percent <= 0.8 + f32::EPSILON,
+            "display_percent must not overshoot target 0.8, got {}",
+            orb.display_percent
+        );
+    }
 }
