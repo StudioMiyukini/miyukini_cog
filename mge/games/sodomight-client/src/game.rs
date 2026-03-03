@@ -5,6 +5,7 @@
 //! FrustumCuller), AnimationController, TextRenderer (TTF/OTF), and Overhead UI.
 
 use mge_core::game_loop::{GameLoop, LoopConfig};
+use mge_pathfinding::{AStarPathfinder, NavGrid, PathResult, PathSmoother, TileCoord};
 use mge_platform::{GameApp, GpuContext, InputEvent, KeyCode, MouseButton};
 use mge_render::camera::{TILE_HEIGHT, TILE_WIDTH};
 use mge_ecs::EntityId;
@@ -158,8 +159,14 @@ pub struct SodomightApp {
     prev_combat_log_len: usize,
     /// Procedural dungeon tilemap.
     tilemap: Option<TileMap>,
-    /// Target position for click-to-move (world coords).
+    /// Target position for click-to-move (world coords, fallback if no navgrid).
     move_target: Option<(f32, f32)>,
+    /// A* pathfinder instance (reusable across queries).
+    pathfinder: AStarPathfinder,
+    /// Navigation grid built from the tilemap for A* queries.
+    nav_grid: Option<NavGrid>,
+    /// Waypoints from A* path (world coords). Player walks to index 0, then pops.
+    move_path: Vec<(f32, f32)>,
     /// Current mouse position (screen coords).
     mouse_screen: (f32, f32),
     /// Whether left mouse button is currently held (for auto-attack).
@@ -217,6 +224,9 @@ impl SodomightApp {
             prev_combat_log_len: 0,
             tilemap: None,
             move_target: None,
+            pathfinder: AStarPathfinder::new(),
+            nav_grid: None,
+            move_path: Vec::new(),
             mouse_screen: (0.0, 0.0),
             left_mouse_held: false,
             auto_attack_cooldown: 0,
@@ -304,6 +314,17 @@ impl SodomightApp {
             tilemap.height,
             tilemap.spawn_points.len(),
         );
+
+        // Build NavGrid from tilemap for A* pathfinding.
+        let mut nav = NavGrid::new(tilemap.width as u32, tilemap.height as u32);
+        for ty in 0..tilemap.height {
+            for tx in 0..tilemap.width {
+                if !tilemap.get(tx, ty).walkable() {
+                    nav.set_blocked(TileCoord::new(tx, ty), true);
+                }
+            }
+        }
+        self.nav_grid = Some(nav);
 
         // Send tilemap data to minimap for dungeon layout rendering.
         self.gui
@@ -575,13 +596,46 @@ impl SodomightApp {
             return;
         }
 
-        // No loot or monster found: click-to-move to the target tile.
-        let walkable = self
-            .tilemap
-            .as_ref()
-            .is_none_or(|t| t.is_walkable(tile_x, tile_y));
-        if walkable {
-            self.move_target = Some((tile_x, tile_y));
+        // No loot or monster found: click-to-move via A* pathfinding.
+        if let Some(ref nav) = self.nav_grid {
+            let start = TileCoord::new(px as i32, py as i32);
+            let goal = TileCoord::new(tile_x as i32, tile_y as i32);
+            match self.pathfinder.find_path(nav, start, goal) {
+                PathResult::Found(raw_path) => {
+                    let smoothed = PathSmoother::smooth(&raw_path, nav);
+                    // Convert tile coords to world float coords (tile center).
+                    self.move_path = smoothed
+                        .into_iter()
+                        .skip(1) // skip current position
+                        .map(|tc| (tc.tx as f32 + 0.5, tc.ty as f32 + 0.5))
+                        .collect();
+                    self.move_target = None;
+                }
+                PathResult::SamePosition => {
+                    self.move_path.clear();
+                    self.move_target = None;
+                }
+                PathResult::Unreachable => {
+                    // Fallback: direct move if A* can't reach (e.g., player on edge tile).
+                    let walkable = self
+                        .tilemap
+                        .as_ref()
+                        .is_none_or(|t| t.is_walkable(tile_x, tile_y));
+                    if walkable {
+                        self.move_path.clear();
+                        self.move_target = Some((tile_x, tile_y));
+                    }
+                }
+            }
+        } else {
+            // No navgrid: fallback to direct move.
+            let walkable = self
+                .tilemap
+                .as_ref()
+                .is_none_or(|t| t.is_walkable(tile_x, tile_y));
+            if walkable {
+                self.move_target = Some((tile_x, tile_y));
+            }
         }
     }
 
@@ -703,6 +757,7 @@ impl SodomightApp {
         if hp <= 0 && !self.player_dead {
             self.player_dead = true;
             self.move_target = None;
+            self.move_path.clear();
             tracing::info!("Player has died! Press Space to respawn.");
         }
     }
@@ -1529,15 +1584,24 @@ impl GameApp for SodomightApp {
                 dy -= speed;
             }
 
-            // Click-to-move: walk towards target position.
+            // Click-to-move: follow A* path waypoints, fallback to direct target.
             if dx == 0.0 && dy == 0.0 {
-                if let Some((tx, ty)) = self.move_target {
+                // Try A* path first, then direct move_target.
+                let target = if let Some(&(wx, wy)) = self.move_path.first() {
+                    Some((wx, wy))
+                } else {
+                    self.move_target
+                };
+                if let Some((tx, ty)) = target {
                     let to_x = tx - px;
                     let to_y = ty - py;
                     let dist = (to_x * to_x + to_y * to_y).sqrt();
                     if dist > 0.15 {
                         dx = to_x / dist * speed;
                         dy = to_y / dist * speed;
+                    } else if !self.move_path.is_empty() {
+                        // Reached waypoint, advance to next.
+                        self.move_path.remove(0);
                     } else {
                         self.move_target = None;
                     }
@@ -1545,6 +1609,7 @@ impl GameApp for SodomightApp {
             } else {
                 // WASD cancels click-to-move.
                 self.move_target = None;
+                self.move_path.clear();
             }
 
             // Tilemap collision: only move if destination is walkable.

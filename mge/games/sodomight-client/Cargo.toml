@@ -21,12 +21,14 @@ mge-render = { path = "../../crates/engine/mge-render", features = ["instanced"]
 mge-audio = { path = "../../crates/engine/mge-audio" }
 mge-ui = { path = "../../crates/engine/mge-ui" }
 mge-net = { path = "../../crates/engine/mge-net" }
+mge-pathfinding = { path = "../../crates/engine/mge-pathfinding" }
 
 # Game logic
 sodomight-game = { path = "../sodomight" }
 mge-arpg-stats = { path = "../../crates/arpg/mge-arpg-stats" }
 mge-arpg-entity = { path = "../../crates/arpg/mge-arpg-entity" }
 mge-arpg-items = { path = "../../crates/arpg/mge-arpg-items" }
+mge-arpg-loot = { path = "../../crates/arpg/mge-arpg-loot" }
 
 image = { workspace = true }
 wgpu = { workspace = true }
@@ -35,6 +37,8 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 thiserror = { workspace = true }
 bytemuck = { version = "1.16", features = ["derive"] }
+rand = { workspace = true }
+rand_chacha = { workspace = true }
 
 [lints]
 workspace = true
