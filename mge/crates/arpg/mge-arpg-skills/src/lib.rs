@@ -11,10 +11,12 @@
 //! - **Necromancer content** ([`necro`]) with Bone Spear, Raise Skeleton, Corpse Explosion
 //! - **Summoning content** ([`summoning`]) with 10 Summoning tree skills
 //! - **Poison & Bone content** ([`poison_bone`]) with 10 Poison & Bone tree skills
+//! - **Curses content** ([`curses`]) with 10 Curses tree skills
 
 mod activation;
 mod book;
 mod cooldown;
+pub mod curses;
 mod def;
 pub mod necro;
 pub mod poison_bone;
