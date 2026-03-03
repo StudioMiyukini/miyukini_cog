@@ -19,7 +19,7 @@ pub trait GameApp {
     /// Called once after GPU initialisation.
     fn on_init(&mut self, gpu: &GpuContext);
     /// Called each frame (handle ticks + render).
-    fn on_frame(&mut self, gpu: &GpuContext);
+    fn on_frame(&mut self, gpu: &mut GpuContext);
     /// Called for each mapped input event.
     fn on_input(&mut self, event: InputEvent);
 }

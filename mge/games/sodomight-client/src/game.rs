@@ -611,6 +611,17 @@ impl SodomightApp {
             }
         }
 
+        // Check NPC interaction (click within 2 tiles of an NPC).
+        if let Some(npc) = self.npcs.iter().find(|n| {
+            let dx = n.x - tile_x;
+            let dy = n.y - tile_y;
+            (dx * dx + dy * dy).sqrt() < 2.0
+        }) {
+            let greeting = npc_greeting(&npc.name);
+            world.combat_log.push(greeting);
+            return;
+        }
+
         let monsters_near = world.monsters_near(tile_x, tile_y, ATTACK_RANGE);
         if let Some(&(monster_id, _, _, _)) = monsters_near.first() {
             match world.player_attack(monster_id) {
@@ -1192,6 +1203,18 @@ fn quality_color(quality: mge_arpg_loot::DropQuality) -> [f32; 4] {
     }
 }
 
+/// Returns an in-character greeting for a given NPC name (D2 Act 1 style).
+fn npc_greeting(name: &str) -> String {
+    match name {
+        "Akara" => format!("{name}: I sense a soul in search of answers."),
+        "Charsi" => format!("{name}: Good day! I can forge and repair your weapons."),
+        "Kashya" => format!("{name}: Greetings, outlander. The Rogues are in your debt."),
+        "Gheed" => format!("{name}: Good day to you, partner! Browse my wares."),
+        "Warriv" => format!("{name}: I can take you east, when you are ready."),
+        _ => format!("{name}: Hello, traveller."),
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Instanced batching functions (S3-T03)
 // ---------------------------------------------------------------------------
@@ -1600,7 +1623,7 @@ impl GameApp for SodomightApp {
     }
 
     #[allow(clippy::too_many_lines)]
-    fn on_frame(&mut self, gpu: &GpuContext) {
+    fn on_frame(&mut self, gpu: &mut GpuContext) {
         // --- Fixed timestep ticks ---
         let ticks = self.game_loop.begin_frame();
 

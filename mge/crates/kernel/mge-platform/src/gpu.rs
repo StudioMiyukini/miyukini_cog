@@ -144,13 +144,23 @@ impl GpuContext {
     }
 
     /// Get a frame to render into.
-    pub fn begin_frame(&self) -> Result<GpuFrame, PlatformError> {
-        let output = self
-            .surface
-            .get_current_texture()
-            .map_err(|e| PlatformError::GpuInit {
-                message: format!("Failed to get surface texture: {e}"),
-            })?;
+    ///
+    /// If the Vulkan swapchain reports a suboptimal texture, the surface
+    /// is reconfigured and a fresh texture is acquired. This eliminates
+    /// the "Suboptimal present" warning spam from the Vulkan HAL.
+    pub fn begin_frame(&mut self) -> Result<GpuFrame, PlatformError> {
+        let output = self.acquire_texture()?;
+
+        // If the swapchain is suboptimal (DPI change, compositor hint),
+        // drop the stale texture, reconfigure, and re-acquire.
+        let output = if output.suboptimal {
+            drop(output);
+            self.surface.configure(&self.device, &self.surface_config);
+            self.acquire_texture()?
+        } else {
+            output
+        };
+
         let view = output
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
@@ -164,6 +174,15 @@ impl GpuContext {
             view,
             encoder,
         })
+    }
+
+    /// Acquire the next surface texture.
+    fn acquire_texture(&self) -> Result<wgpu::SurfaceTexture, PlatformError> {
+        self.surface
+            .get_current_texture()
+            .map_err(|e| PlatformError::GpuInit {
+                message: format!("Failed to get surface texture: {e}"),
+            })
     }
 
     /// Current surface dimensions.
