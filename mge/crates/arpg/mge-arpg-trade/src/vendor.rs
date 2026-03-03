@@ -91,7 +91,12 @@ impl NpcVendor {
         };
 
         // Withdraw gold (may fail with InsufficientGold).
-        wallet.withdraw(price)?;
+        wallet
+            .remove_gold(i64::try_from(price).unwrap_or(i64::MAX))
+            .map_err(|_| TradeError::InsufficientGold {
+                have: u64::try_from(wallet.gold()).unwrap_or(0),
+                need: price,
+            })?;
 
         // Decrement stock if finite.
         if let Some(item) = self.find_item_mut(item_id) {
@@ -105,7 +110,8 @@ impl NpcVendor {
 
     /// Player sells an item to the vendor. Adds `price` gold to the player's wallet.
     pub fn sell_to_vendor(&self, _item_id: &str, wallet: &mut Wallet, price: u64) {
-        wallet.deposit(price);
+        // Saturating add: if the wallet is at max, the excess is silently dropped.
+        let _ = wallet.add_gold(i64::try_from(price).unwrap_or(i64::MAX));
     }
 }
 
@@ -124,10 +130,16 @@ mod tests {
         v
     }
 
+    fn wallet_with(gold: i64) -> Wallet {
+        let mut w = Wallet::new();
+        w.add_gold(gold).unwrap();
+        w
+    }
+
     #[test]
     fn test_vendor_buy_success() {
         let mut vendor = make_vendor();
-        let mut wallet = Wallet::new(500);
+        let mut wallet = wallet_with(500);
 
         let bought = vendor.buy("short_sword", &mut wallet).unwrap();
         assert_eq!(bought, "short_sword");
@@ -141,7 +153,7 @@ mod tests {
     #[test]
     fn test_vendor_buy_insufficient_gold() {
         let mut vendor = make_vendor();
-        let mut wallet = Wallet::new(10);
+        let mut wallet = wallet_with(10);
 
         let err = vendor.buy("short_sword", &mut wallet).unwrap_err();
         assert_eq!(
@@ -158,7 +170,7 @@ mod tests {
         let mut vendor = NpcVendor::new("merchant-02");
         vendor.add_item(VendorItem::new("rare_gem", 500, 200).with_stock(0));
 
-        let mut wallet = Wallet::new(10_000);
+        let mut wallet = wallet_with(10_000);
         let err = vendor.buy("rare_gem", &mut wallet).unwrap_err();
         assert_eq!(
             err,
@@ -171,7 +183,7 @@ mod tests {
     #[test]
     fn test_vendor_buy_unlimited_stock() {
         let mut vendor = make_vendor();
-        let mut wallet = Wallet::new(1000);
+        let mut wallet = wallet_with(1000);
 
         // health_pot has unlimited stock -- buy it several times.
         vendor.buy("health_pot", &mut wallet).unwrap();
@@ -188,7 +200,7 @@ mod tests {
     #[test]
     fn test_vendor_sell_to_vendor() {
         let vendor = make_vendor();
-        let mut wallet = Wallet::new(100);
+        let mut wallet = wallet_with(100);
 
         vendor.sell_to_vendor("short_sword", &mut wallet, 40);
         assert_eq!(wallet.gold(), 140);

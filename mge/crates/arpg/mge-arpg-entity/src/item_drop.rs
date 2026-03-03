@@ -1,5 +1,5 @@
-// @id: MGE-ARPG-Entity-ItemDrop @do: item-drop-bundle @role: back-end @layer: 3 @human: miyuk
-//! Item drop entity bundle (items on the ground).
+// @id: MGE-ARPG-ItemDrop @do: item-drop @role: back-end @layer: 3 @human: miyuk
+//! Item drop ECS component and bundle (items on the ground).
 
 use crate::components::Position;
 
@@ -61,5 +61,54 @@ impl ItemDropBundle {
     /// Returns `true` if the item can be picked up by anyone.
     pub fn is_public(&self) -> bool {
         self.owner_id.is_none() || self.pickup_lock_ticks == 0
+    }
+}
+
+// ---------------------------------------------------------------------------
+// ItemDrop — lightweight ECS component for the game world
+// ---------------------------------------------------------------------------
+
+/// Lightweight ECS component representing an item lying on the ground.
+///
+/// Designed to be stored directly in the ECS via `spawn_with_1`.
+/// `quality_color` is a linear RGBA value used by the renderer to tint the
+/// drop label (matching D2 rarity colours: white, blue, yellow, gold, …).
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct ItemDrop {
+    /// Identifier of the item type that was dropped (e.g. `"short_sword"`).
+    pub item_id: String,
+    /// Linear RGBA tint colour for the drop label `[r, g, b, a]`.
+    pub quality_color: [f32; 4],
+    /// World X coordinate (in world units).
+    pub position_x: f32,
+    /// World Y coordinate (in world units).
+    pub position_y: f32,
+    /// Timestamp (in milliseconds) at which this drop was created.
+    pub spawn_time_ms: u64,
+}
+
+impl ItemDrop {
+    /// Creates a new `ItemDrop` component.
+    ///
+    /// # Arguments
+    /// * `item_id`       — identifier of the dropped item type
+    /// * `quality_color` — linear RGBA label colour `[r, g, b, a]`
+    /// * `x`             — world X position
+    /// * `y`             — world Y position
+    /// * `time`          — spawn timestamp in milliseconds
+    pub fn new(
+        item_id: impl Into<String>,
+        quality_color: [f32; 4],
+        x: f32,
+        y: f32,
+        time: u64,
+    ) -> Self {
+        Self {
+            item_id: item_id.into(),
+            quality_color,
+            position_x: x,
+            position_y: y,
+            spawn_time_ms: time,
+        }
     }
 }

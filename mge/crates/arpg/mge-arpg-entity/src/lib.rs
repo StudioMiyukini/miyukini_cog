@@ -12,6 +12,6 @@ pub mod projectile;
 pub use archetype::EntityArchetype;
 pub use character::CharacterBundle;
 pub use components::{Health, Level, Position, Team, Velocity};
-pub use item_drop::ItemDropBundle;
+pub use item_drop::{ItemDrop, ItemDropBundle};
 pub use monster::{MonsterBundle, MonsterKind};
 pub use projectile::ProjectileBundle;

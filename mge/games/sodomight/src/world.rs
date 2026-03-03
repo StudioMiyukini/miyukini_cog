@@ -14,7 +14,7 @@ use mge_arpg_combat::{
     AttackerStats, CombatEvent, CombatProcessor, DamageType, DefenderStats, StatusEffect,
     StatusTracker, StatusType,
 };
-use mge_arpg_entity::{Health, Level, Position, Team};
+use mge_arpg_entity::{Health, ItemDrop, Level, Position, Team};
 use mge_arpg_items::{Equipment, Inventory, ItemInstance, ItemSlot};
 use mge_arpg_loot::{DropRoll, LootGenerator, TreasureClassRegistry};
 use mge_arpg_quest::{QuestDef, QuestJournal};
@@ -133,6 +133,15 @@ pub enum WorldError {
     /// An ECS operation failed.
     #[error("ECS error: {0}")]
     EcsError(String),
+
+    /// The player is too far from the item drop to pick it up.
+    #[error("Too far to pick up item (distance {distance:.2}, max {max:.2})")]
+    TooFar {
+        /// Actual distance to the drop.
+        distance: f32,
+        /// Maximum allowed pickup distance.
+        max: f32,
+    },
 
     /// The target equipment slot is invalid.
     #[error("Invalid equipment slot")]
@@ -367,6 +376,70 @@ impl SodomightWorld {
             .insert(entity_id, def.tc_id.clone());
 
         Ok(entity_id)
+    }
+
+    // -------------------------------------------------------------------
+    // Item drop spawning and pickup
+    // -------------------------------------------------------------------
+
+    /// Maximum pickup distance (world units). Matches D2 ~2-tile radius.
+    const PICKUP_RADIUS: f32 = 2.0;
+
+    /// Spawn an item drop entity at `(x, y)`.
+    ///
+    /// Creates a new ECS entity whose sole component is [`ItemDrop`]. The
+    /// returned [`EntityId`] can be passed to [`pickup_item`] when the player
+    /// walks nearby.
+    pub fn spawn_item_drop(
+        &mut self,
+        item_id: &str,
+        quality_color: [f32; 4],
+        x: f32,
+        y: f32,
+    ) -> EntityId {
+        let drop = ItemDrop::new(item_id, quality_color, x, y, self.game_tick);
+        // spawn_with_1 only fails on allocation; the ECS is infallible here.
+        self.ecs.spawn_with_1(drop).unwrap_or_else(|_| {
+            // Unreachable in practice — the ECS allocator is not bounded.
+            panic!("ECS allocation failed while spawning ItemDrop")
+        })
+    }
+
+    /// Attempt to pick up an item drop entity.
+    ///
+    /// Checks that the player is within [`PICKUP_RADIUS`] of the drop. If so,
+    /// the drop entity is despawned and the `item_id` is returned so the caller
+    /// can add the item to the player's inventory.
+    ///
+    /// # Errors
+    /// - [`WorldError::EntityNotFound`] if `drop_entity_id` is no longer alive.
+    /// - [`WorldError::TooFar`] if the player is more than `PICKUP_RADIUS` world
+    ///   units away from the drop.
+    pub fn pickup_item(&mut self, drop_entity_id: EntityId) -> Result<String, WorldError> {
+        // Verify the entity is alive and get the drop data.
+        let drop = self
+            .ecs
+            .get_component::<ItemDrop>(drop_entity_id)
+            .map_err(|_| WorldError::EntityNotFound)?
+            .clone();
+
+        // Check proximity.
+        let (px, py) = self.player_position();
+        let dx = drop.position_x - px;
+        let dy = drop.position_y - py;
+        let dist = (dx * dx + dy * dy).sqrt();
+
+        if dist > Self::PICKUP_RADIUS {
+            return Err(WorldError::TooFar {
+                distance: dist,
+                max: Self::PICKUP_RADIUS,
+            });
+        }
+
+        // Despawn the drop entity.
+        let _ = self.ecs.despawn(drop_entity_id);
+
+        Ok(drop.item_id)
     }
 
     // -------------------------------------------------------------------
@@ -1861,6 +1934,65 @@ mod tests {
         assert!(
             xp_after > xp_before,
             "Player should have gained XP when monster was cleaned up (before={xp_before}, after={xp_after})"
+        );
+    }
+
+    // --- Test 18: item_drop_spawn — spawn a drop, verify entity and component ---
+
+    #[test]
+    fn item_drop_spawn() {
+        let mut world = make_world();
+
+        let white = [1.0_f32, 1.0, 1.0, 1.0];
+        let drop_id = world.spawn_item_drop("short_sword", white, 5.0, 6.0);
+
+        // The entity must be alive in the ECS.
+        assert!(
+            world.ecs.is_alive(drop_id),
+            "ItemDrop entity must be alive after spawning"
+        );
+
+        // The component must be retrievable and carry the correct data.
+        let drop = world
+            .ecs
+            .get_component::<ItemDrop>(drop_id)
+            .expect("ItemDrop component must exist on the spawned entity");
+
+        assert_eq!(drop.item_id, "short_sword");
+        assert!((drop.position_x - 5.0).abs() < f32::EPSILON);
+        assert!((drop.position_y - 6.0).abs() < f32::EPSILON);
+    }
+
+    // --- Test 19: item_pickup_distance — too far, pickup must fail ---
+
+    #[test]
+    fn item_pickup_distance() {
+        let mut world = make_world();
+
+        // Player starts at (16, 16).  Drop placed far away.
+        let gold = [1.0_f32, 0.84, 0.0, 1.0];
+        let drop_id = world.spawn_item_drop("rare_ring", gold, 50.0, 50.0);
+
+        let result = world.pickup_item(drop_id);
+
+        assert!(
+            result.is_err(),
+            "pickup_item must fail when the player is too far from the drop"
+        );
+        match result {
+            Err(WorldError::TooFar { distance, max }) => {
+                assert!(
+                    distance > max,
+                    "distance ({distance:.2}) must exceed max ({max:.2})"
+                );
+            }
+            other => panic!("Expected TooFar, got: {other:?}"),
+        }
+
+        // The entity must still be alive (not consumed on failure).
+        assert!(
+            world.ecs.is_alive(drop_id),
+            "ItemDrop entity must remain alive after a failed pickup"
         );
     }
 }

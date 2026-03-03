@@ -10,4 +10,4 @@ pub mod wallet;
 pub use error::TradeError;
 pub use trade_session::{TradeParty, TradeSession, TradeState};
 pub use vendor::{NpcVendor, VendorItem};
-pub use wallet::Wallet;
+pub use wallet::{Wallet, WalletError};
