@@ -30,6 +30,9 @@ mod minimap;
 mod skill_bar;
 mod combat_log;
 
+#[cfg(test)]
+mod hud_tests;
+
 /// Menu screens (main menu, character select, lobby browser, pause).
 pub mod menus;
 

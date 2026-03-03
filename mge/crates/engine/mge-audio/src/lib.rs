@@ -10,18 +10,24 @@
 
 mod bank;
 mod bgm;
+mod bgm_types;
 mod config;
 mod manager;
+mod settings;
 mod sfx;
+mod sfx_types;
 
 #[cfg(test)]
 mod tests;
 
 pub use bank::SoundBank;
 pub use bgm::BgmPlayer;
+pub use bgm_types::{BgmId, BgmPlayback};
 pub use config::AudioConfig;
 pub use manager::AudioManager;
+pub use settings::AudioSettings;
 pub use sfx::SfxPool;
+pub use sfx_types::{SfxBank, SfxId};
 
 /// Alias for audio-specific results.
 pub type AudioResult<T> = Result<T, AudioError>;

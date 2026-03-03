@@ -1,4 +1,4 @@
-// @id: MGE-Save-Items @do: dal-items @role: back-end @layer: 3 @human: denis
+// @id: MGE-Save-Items @do: inventory-persistence @role: back-end @layer: 2 @human: miyuk
 //! DAL pour les items (strategie JSON blob).
 //!
 //! Les items sont stockes avec leurs donnees variables (affixes, sockets, qualite)
@@ -179,5 +179,111 @@ impl ItemDal<'_> {
             conn.execute("DELETE FROM items WHERE id=?1", params![item_id])?;
             Ok(())
         })
+    }
+}
+
+// =========================================================================
+// InventorySave — serialisation JSON portable de l'inventaire
+// =========================================================================
+
+/// Sauvegarde portable de l'inventaire d'un personnage, serialisable en JSON.
+///
+/// Chaque slot est soit `None` (vide) soit une `String` contenant le JSON
+/// d'un `ItemInstance`. Cette representation permet un roundtrip sans perte
+/// independamment du schema SQL, pour les exports/imports et les sauvegardes
+/// fichier portables.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct InventorySave {
+    /// Identifiant du personnage proprietaire (UUID v4).
+    pub character_id: String,
+    /// Slots de l'inventaire : `None` = vide, `Some(json)` = item serialise.
+    pub slots: Vec<Option<String>>,
+}
+
+/// Cree un `InventorySave` et le serialise en octets JSON.
+///
+/// # Arguments
+///
+/// * `character_id` — UUID v4 du personnage proprietaire.
+/// * `items` — Tranche de slots : `None` pour un slot vide, `Some(json)` pour un item.
+///
+/// # Erreurs
+///
+/// Retourne `PersistenceError::Json` si la serialisation echoue.
+pub fn save_inventory(
+    character_id: &str,
+    items: &[Option<String>],
+) -> Result<Vec<u8>, crate::PersistenceError> {
+    let save = InventorySave {
+        character_id: character_id.to_string(),
+        slots: items.to_vec(),
+    };
+    let bytes = serde_json::to_vec(&save)?;
+    Ok(bytes)
+}
+
+/// Deserialise des octets JSON en `InventorySave`.
+///
+/// # Erreurs
+///
+/// Retourne `PersistenceError::Json` si la deserialisation echoue.
+pub fn load_inventory(data: &[u8]) -> Result<InventorySave, crate::PersistenceError> {
+    let save = serde_json::from_slice(data)?;
+    Ok(save)
+}
+
+// =========================================================================
+// Tests — InventorySave
+// =========================================================================
+
+#[cfg(test)]
+mod tests {
+    use super::{load_inventory, save_inventory};
+
+    /// Construit 40 slots : slots pairs avec un JSON item factice, slots impairs vides.
+    fn make_slots(count: usize) -> Vec<Option<String>> {
+        (0..count)
+            .map(|i| {
+                if i % 2 == 0 {
+                    Some(format!(r#"{{"base_id":"item_{i}","slot":{i}}}"#))
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+
+    #[test]
+    fn inventory_save_load_roundtrip() {
+        let character_id = uuid::Uuid::new_v4().to_string();
+        let slots = make_slots(40);
+
+        let bytes = save_inventory(&character_id, &slots).expect("save_inventory should succeed");
+        let loaded = load_inventory(&bytes).expect("load_inventory should succeed");
+
+        assert_eq!(loaded.character_id, character_id);
+        assert_eq!(loaded.slots.len(), 40);
+
+        for (i, (original, restored)) in slots.iter().zip(loaded.slots.iter()).enumerate() {
+            assert_eq!(
+                original, restored,
+                "slot {i} mismatch after roundtrip"
+            );
+        }
+    }
+
+    #[test]
+    fn inventory_empty_slot() {
+        let character_id = uuid::Uuid::new_v4().to_string();
+        // Inventaire vide : tous les slots a None
+        let slots: Vec<Option<String>> = vec![None; 40];
+
+        let bytes = save_inventory(&character_id, &slots).expect("save_inventory should succeed");
+        let loaded = load_inventory(&bytes).expect("load_inventory should succeed");
+
+        assert_eq!(loaded.slots.len(), 40);
+        for (i, slot) in loaded.slots.iter().enumerate() {
+            assert!(slot.is_none(), "slot {i} should be None after roundtrip");
+        }
     }
 }

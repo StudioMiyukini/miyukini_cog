@@ -132,4 +132,69 @@ mod tests {
         assert!((cfg.sfx_volume - 1.0).abs() < f32::EPSILON);
         assert_eq!(cfg.max_sfx_concurrent, 16);
     }
+
+    // ── SfxBank ─────────────────────────────────────────────────
+
+    #[test]
+    fn sfx_bank_register_get() {
+        use crate::sfx_types::{SfxBank, SfxId};
+        use std::path::Path;
+
+        let mut bank = SfxBank::new();
+        bank.register(SfxId::HitMelee, "assets/sfx/hit_melee.ogg");
+        bank.register(SfxId::Death, "assets/sfx/death.ogg");
+
+        assert_eq!(
+            bank.get(SfxId::HitMelee),
+            Some(Path::new("assets/sfx/hit_melee.ogg"))
+        );
+        assert_eq!(
+            bank.get(SfxId::Death),
+            Some(Path::new("assets/sfx/death.ogg"))
+        );
+        assert_eq!(bank.get(SfxId::Potion), None);
+        assert_eq!(bank.len(), 2);
+        assert!(!bank.is_empty());
+    }
+
+    // ── BgmPlayback ─────────────────────────────────────────────
+
+    #[test]
+    fn bgm_play_stop() {
+        use crate::bgm_types::{BgmId, BgmPlayback};
+
+        let mut pb = BgmPlayback::new();
+        assert_eq!(pb.current, None);
+
+        pb.play(BgmId::TownTristram);
+        assert_eq!(pb.current, Some(BgmId::TownTristram));
+
+        pb.play(BgmId::Boss);
+        assert_eq!(pb.current, Some(BgmId::Boss));
+
+        pb.stop();
+        assert_eq!(pb.current, None);
+    }
+
+    // ── AudioSettings ───────────────────────────────────────────
+
+    #[test]
+    fn audio_settings_clamp() {
+        use crate::settings::AudioSettings;
+
+        // Values above 1.0 and below 0.0 must be clamped on construction.
+        let s = AudioSettings::new(2.0, -0.5, 0.5);
+        assert!((s.master_volume - 1.0).abs() < f32::EPSILON);
+        assert!((s.sfx_volume - 0.0).abs() < f32::EPSILON);
+        assert!((s.bgm_volume - 0.5).abs() < f32::EPSILON);
+
+        // Setters must also clamp.
+        let mut s2 = AudioSettings::default();
+        s2.set_master(1.5);
+        assert!((s2.master_volume - 1.0).abs() < f32::EPSILON);
+        s2.set_sfx(-1.0);
+        assert!((s2.sfx_volume - 0.0).abs() < f32::EPSILON);
+        s2.set_bgm(0.42);
+        assert!((s2.bgm_volume - 0.42).abs() < f32::EPSILON);
+    }
 }

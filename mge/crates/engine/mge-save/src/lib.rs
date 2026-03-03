@@ -43,8 +43,14 @@ pub type PersistResult<T> = Result<T, PersistenceError>;
 
 pub use db::DbPool;
 pub use accounts::{Account, AccountDal, CreateAccountParams, hash_password, verify_password};
-pub use characters::{CharacterDal, CharacterRow};
-pub use items::{ItemAffix, ItemDal, ItemData, ItemRow};
+pub use characters::{
+    CharacterDal, CharacterRow, CharacterSave, CharacterSummary,
+    validate_character, save_character, load_character,
+};
+pub use items::{
+    ItemAffix, ItemDal, ItemData, ItemRow,
+    InventorySave, save_inventory, load_inventory,
+};
 pub use skills::SkillDal;
 pub use waypoints::WaypointDal;
 pub use sessions::SessionDal;
