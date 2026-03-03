@@ -71,12 +71,13 @@ impl CharacterDal<'_> {
         name: &str,
         class: &str,
     ) -> PersistResult<CharacterRow> {
+        let validated_name = validate_name(name)?;
         let id = Uuid::new_v4().to_string();
         let now = Utc::now().to_rfc3339();
         let row = CharacterRow {
             id: id.clone(),
             account_id: account_id.to_string(),
-            name: name.to_string(),
+            name: validated_name,
             class: class.to_string(),
             level: 1,
             experience: 0,
@@ -210,6 +211,59 @@ impl CharacterDal<'_> {
 }
 
 // =========================================================================
+// validate_name — SEC-17 : validation du nom de personnage
+// =========================================================================
+
+/// Valide un nom de personnage selon les regles SEC-17.
+///
+/// Regles appliquees :
+/// - Longueur : 2..=24 caracteres (apres trim)
+/// - Caracteres autorises : alphanumerique, espace, tiret, underscore
+/// - Caracteres HTML interdits : `< > & " '`
+/// - Pas d'espaces consecutifs
+/// - Les espaces en debut/fin sont ignores (trim automatique)
+///
+/// # Retour
+///
+/// Retourne le nom trimme si valide, ou `PersistenceError::Duplicate` avec
+/// un message descriptif en cas de violation.
+pub fn validate_name(name: &str) -> Result<String, PersistenceError> {
+    let trimmed = name.trim();
+
+    if trimmed.len() < 2 {
+        return Err(PersistenceError::Duplicate(
+            "character name too short (min 2 chars)".to_owned(),
+        ));
+    }
+    if trimmed.len() > 24 {
+        return Err(PersistenceError::Duplicate(
+            "character name too long (max 24 chars)".to_owned(),
+        ));
+    }
+
+    for c in trimmed.chars() {
+        if matches!(c, '<' | '>' | '&' | '"' | '\'') {
+            return Err(PersistenceError::Duplicate(format!(
+                "character name contains forbidden character '{c}'"
+            )));
+        }
+        if !c.is_alphanumeric() && c != ' ' && c != '-' && c != '_' {
+            return Err(PersistenceError::Duplicate(format!(
+                "character name contains invalid character '{c}'"
+            )));
+        }
+    }
+
+    if trimmed.contains("  ") {
+        return Err(PersistenceError::Duplicate(
+            "character name contains consecutive spaces".to_owned(),
+        ));
+    }
+
+    Ok(trimmed.to_owned())
+}
+
+// =========================================================================
 // CharacterSave — serialisation JSON portable (fichiers de sauvegarde)
 // =========================================================================
 
@@ -328,7 +382,7 @@ pub fn load_character(data: &[u8]) -> Result<CharacterSave, crate::PersistenceEr
 
 #[cfg(test)]
 mod tests {
-    use super::{CharacterSave, load_character, save_character, validate_character};
+    use super::{CharacterSave, load_character, save_character, validate_character, validate_name};
 
     fn make_save() -> CharacterSave {
         CharacterSave {
@@ -393,5 +447,63 @@ mod tests {
             result.is_err(),
             "strength 1024 must fail validation"
         );
+    }
+
+    // -------------------------------------------------------------------------
+    // Tests SEC-17 : validate_name
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn name_valid() {
+        assert!(validate_name("Miyuki").is_ok());
+        assert_eq!(validate_name("Miyuki").unwrap(), "Miyuki");
+    }
+
+    #[test]
+    fn name_valid_with_spaces() {
+        assert!(validate_name("Dark Knight").is_ok());
+    }
+
+    #[test]
+    fn name_valid_trimmed() {
+        // Les espaces en debut/fin sont trimmes
+        let result = validate_name("  Hero  ").unwrap();
+        assert_eq!(result, "Hero");
+    }
+
+    #[test]
+    fn name_too_short() {
+        assert!(validate_name("A").is_err());
+        assert!(validate_name("").is_err());
+    }
+
+    #[test]
+    fn name_too_long() {
+        let long = "A".repeat(25);
+        assert!(validate_name(&long).is_err());
+    }
+
+    #[test]
+    fn name_html_inject() {
+        assert!(validate_name("<script>alert(1)</script>").is_err());
+        assert!(validate_name("hero&villain").is_err());
+        assert!(validate_name("hero\"quote").is_err());
+    }
+
+    #[test]
+    fn name_consecutive_spaces() {
+        assert!(validate_name("Dark  Knight").is_err());
+    }
+
+    #[test]
+    fn name_special_chars_rejected() {
+        assert!(validate_name("hero@world").is_err());
+        assert!(validate_name("hero!").is_err());
+    }
+
+    #[test]
+    fn name_hyphen_underscore_ok() {
+        assert!(validate_name("Dark-Knight").is_ok());
+        assert!(validate_name("Dark_Knight").is_ok());
     }
 }
