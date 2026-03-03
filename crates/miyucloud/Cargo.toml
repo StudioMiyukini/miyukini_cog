@@ -1,0 +1,74 @@
+[package]
+name = "miyucloud"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "MiyuCloud -- Cloud prive auto-heberge, chiffre et pair-a-pair"
+
+[dependencies]
+miyukini-kernel = { path = "../miyukini-kernel" }
+kindmother = { path = "../kindmother" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "2"
+sha2 = "0.10"
+# Chiffrement (Decision D4)
+chacha20poly1305 = "0.10"
+x25519-dalek = { version = "2", features = ["static_secrets"] }
+argon2 = "0.5"
+hkdf = "0.12"
+rand = "0.8"
+# SQLite direct (feature legacy-sqlite)
+rusqlite = { version = "0.32", features = ["bundled"], optional = true }
+# KindMother client (feature kindmother-only)
+kindmother-client = { path = "../kindmother-client", optional = true }
+kindmother-db-key = { path = "../kindmother-db-key", optional = true }
+tokio = { version = "1", features = ["rt-multi-thread", "fs", "io-util"], optional = true }
+zip = { version = "2", default-features = false, features = ["deflate"] }
+tracing = "0.1"
+# V2: Securite + Auth 2FA
+subtle = "2"
+zeroize = { version = "1", features = ["derive"] }
+base64_crate = { version = "0.22", package = "base64" }
+totp-rs = { version = "5", features = ["otpauth"] }
+
+[dev-dependencies]
+tempfile = "3"
+
+[features]
+default = ["legacy-sqlite"]
+legacy-sqlite = ["rusqlite"]
+kindmother-only = ["dep:kindmother-client", "dep:tokio"]
+db-encryption = ["dep:kindmother-db-key", "rusqlite/bundled-sqlcipher"]
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+doc_markdown = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+return_self_not_must_use = "allow"
+module_name_repetitions = "allow"
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+cast_precision_loss = "allow"
+cast_lossless = "allow"
+cast_possible_wrap = "allow"
+struct_excessive_bools = "allow"
+too_many_lines = "allow"
+wildcard_imports = "allow"
+unused_self = "allow"
+needless_pass_by_value = "allow"
+similar_names = "allow"
+unreadable_literal = "allow"
+items_after_statements = "allow"
+too_many_arguments = "allow"
