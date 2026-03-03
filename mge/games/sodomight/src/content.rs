@@ -50,41 +50,14 @@ pub struct MonsterDef {
 
 /// Returns all Act 1 monster definitions.
 ///
-/// Includes regular monsters, a super-unique (Blood Raven), and the act boss
-/// (Andariel).
+/// Includes the 15 bestiary families, legacy entries (Quill Rat, Dark Ranger),
+/// a super-unique (Blood Raven), and the act boss (Andariel).
 #[must_use]
 pub fn act1_monsters() -> Vec<MonsterDef> {
-    vec![
-        // Fallen: weak but fast, closes distance quickly.
-        MonsterDef {
-            id: "fallen".into(),
-            name: "Fallen".into(),
-            level: 1,
-            health: 15,
-            min_damage: 2,
-            max_damage: 4,
-            attack_rating: 15,
-            defense_rating: 5,
-            speed: 0.06,
-            aggro_range: 10.0,
-            xp_reward: 50,
-            tc_id: "tc_fallen".into(),
-        },
-        // Zombie: slow and tanky, poisons on hit.
-        MonsterDef {
-            id: "zombie".into(),
-            name: "Zombie".into(),
-            level: 2,
-            health: 25,
-            min_damage: 3,
-            max_damage: 6,
-            attack_rating: 18,
-            defense_rating: 8,
-            speed: 0.02,
-            aggro_range: 6.0,
-            xp_reward: 80,
-            tc_id: "tc_zombie".into(),
-        },
+    let mut defs = act1_bestiary();
+
+    // Legacy entries kept for quest/zone backward compatibility.
+    defs.extend([
         // Quill Rat: small ranged pest, moderate speed.
         MonsterDef {
             id: "quill_rat".into(),
@@ -99,21 +72,6 @@ pub fn act1_monsters() -> Vec<MonsterDef> {
             aggro_range: 12.0,
             xp_reward: 60,
             tc_id: "tc_fallen".into(),
-        },
-        // Skeleton: medium speed, balanced stats.
-        MonsterDef {
-            id: "skeleton".into(),
-            name: "Skeleton".into(),
-            level: 3,
-            health: 30,
-            min_damage: 4,
-            max_damage: 8,
-            attack_rating: 25,
-            defense_rating: 12,
-            speed: 0.04,
-            aggro_range: 8.0,
-            xp_reward: 120,
-            tc_id: "tc_skeleton".into(),
         },
         // Dark Ranger: ranged skeleton variant, keeps distance.
         MonsterDef {
@@ -159,6 +117,256 @@ pub fn act1_monsters() -> Vec<MonsterDef> {
             aggro_range: 20.0,
             xp_reward: 5000,
             tc_id: "tc_andariel".into(),
+        },
+    ]);
+
+    defs
+}
+
+// ---------------------------------------------------------------------------
+// Act 1 bestiary — 15 monster families
+// ---------------------------------------------------------------------------
+
+/// Returns the 15 core Act 1 monster families.
+///
+/// Each family represents a distinct archetype with unique combat behaviour:
+/// melee, ranged, caster, tank, or fast. Stats are tuned for Normal difficulty,
+/// levels 1-8.
+#[must_use]
+pub fn act1_bestiary() -> Vec<MonsterDef> {
+    vec![
+        // -- Fallen family (levels 1-2) ------------------------------------
+        // Fallen: weak melee, fast, flees when shaman dies.
+        MonsterDef {
+            id: "fallen".into(),
+            name: "Fallen".into(),
+            level: 1,
+            health: 15,
+            min_damage: 2,
+            max_damage: 4,
+            attack_rating: 15,
+            defense_rating: 5,
+            speed: 0.06,
+            aggro_range: 10.0,
+            xp_reward: 50,
+            tc_id: "tc_fallen".into(),
+        },
+        // Fallen Shaman: caster, resurrects fallen, fire enchanted.
+        MonsterDef {
+            id: "fallen_shaman".into(),
+            name: "Fallen Shaman".into(),
+            level: 2,
+            health: 18,
+            min_damage: 1,
+            max_damage: 3,
+            attack_rating: 12,
+            defense_rating: 4,
+            speed: 0.03,
+            aggro_range: 12.0,
+            xp_reward: 70,
+            tc_id: "tc_fallen".into(),
+        },
+        // -- Undead family (levels 2-5) ------------------------------------
+        // Zombie: slow, high HP, poisons on hit.
+        MonsterDef {
+            id: "zombie".into(),
+            name: "Zombie".into(),
+            level: 2,
+            health: 25,
+            min_damage: 3,
+            max_damage: 6,
+            attack_rating: 18,
+            defense_rating: 8,
+            speed: 0.02,
+            aggro_range: 6.0,
+            xp_reward: 80,
+            tc_id: "tc_zombie".into(),
+        },
+        // Skeleton Warrior: melee, balanced stats.
+        MonsterDef {
+            id: "skeleton_warrior".into(),
+            name: "Skeleton Warrior".into(),
+            level: 3,
+            health: 30,
+            min_damage: 4,
+            max_damage: 8,
+            attack_rating: 25,
+            defense_rating: 12,
+            speed: 0.04,
+            aggro_range: 8.0,
+            xp_reward: 120,
+            tc_id: "tc_skeleton".into(),
+        },
+        // Skeleton Archer: ranged, lower HP, keeps distance.
+        MonsterDef {
+            id: "skeleton_archer".into(),
+            name: "Skeleton Archer".into(),
+            level: 3,
+            health: 22,
+            min_damage: 3,
+            max_damage: 7,
+            attack_rating: 28,
+            defense_rating: 8,
+            speed: 0.03,
+            aggro_range: 14.0,
+            xp_reward: 110,
+            tc_id: "tc_skeleton".into(),
+        },
+        // Skeleton Mage: caster, elemental damage, fragile.
+        MonsterDef {
+            id: "skeleton_mage".into(),
+            name: "Skeleton Mage".into(),
+            level: 5,
+            health: 20,
+            min_damage: 5,
+            max_damage: 10,
+            attack_rating: 22,
+            defense_rating: 6,
+            speed: 0.03,
+            aggro_range: 14.0,
+            xp_reward: 140,
+            tc_id: "tc_skeleton".into(),
+        },
+        // -- Cold highlands (levels 4-6) -----------------------------------
+        // Wendigo: high HP, cold aura, slow.
+        MonsterDef {
+            id: "wendigo".into(),
+            name: "Wendigo".into(),
+            level: 5,
+            health: 55,
+            min_damage: 6,
+            max_damage: 12,
+            attack_rating: 35,
+            defense_rating: 18,
+            speed: 0.025,
+            aggro_range: 7.0,
+            xp_reward: 180,
+            tc_id: "tc_wendigo".into(),
+        },
+        // -- Corrupted Rogue family (levels 4-6) ---------------------------
+        // Corrupted Rogue Melee: sword-wielding, moderate stats.
+        MonsterDef {
+            id: "corrupted_rogue_melee".into(),
+            name: "Corrupted Rogue".into(),
+            level: 4,
+            health: 35,
+            min_damage: 4,
+            max_damage: 9,
+            attack_rating: 30,
+            defense_rating: 14,
+            speed: 0.045,
+            aggro_range: 9.0,
+            xp_reward: 130,
+            tc_id: "tc_rogue".into(),
+        },
+        // Corrupted Rogue Archer: ranged, high AR, lower HP.
+        MonsterDef {
+            id: "corrupted_rogue_archer".into(),
+            name: "Corrupted Rogue Archer".into(),
+            level: 5,
+            health: 28,
+            min_damage: 5,
+            max_damage: 11,
+            attack_rating: 35,
+            defense_rating: 10,
+            speed: 0.04,
+            aggro_range: 16.0,
+            xp_reward: 150,
+            tc_id: "tc_rogue".into(),
+        },
+        // -- Goatman family (levels 4-6) -----------------------------------
+        // Goatman Melee: sturdy melee, moderate speed.
+        MonsterDef {
+            id: "goatman_melee".into(),
+            name: "Goatman".into(),
+            level: 5,
+            health: 42,
+            min_damage: 5,
+            max_damage: 11,
+            attack_rating: 32,
+            defense_rating: 16,
+            speed: 0.04,
+            aggro_range: 8.0,
+            xp_reward: 160,
+            tc_id: "tc_goatman".into(),
+        },
+        // Goatman Fire: caster, fire bolts, stays back.
+        MonsterDef {
+            id: "goatman_fire".into(),
+            name: "Goatman Fire Clan".into(),
+            level: 5,
+            health: 30,
+            min_damage: 6,
+            max_damage: 12,
+            attack_rating: 28,
+            defense_rating: 10,
+            speed: 0.035,
+            aggro_range: 14.0,
+            xp_reward: 170,
+            tc_id: "tc_goatman".into(),
+        },
+        // -- Brute / Tainted (levels 5-7) ----------------------------------
+        // Brute: very slow, very high HP, devastating melee.
+        MonsterDef {
+            id: "brute".into(),
+            name: "Brute".into(),
+            level: 6,
+            health: 70,
+            min_damage: 8,
+            max_damage: 16,
+            attack_rating: 38,
+            defense_rating: 20,
+            speed: 0.02,
+            aggro_range: 6.0,
+            xp_reward: 200,
+            tc_id: "tc_brute".into(),
+        },
+        // Tainted: physical berserker, medium HP.
+        MonsterDef {
+            id: "tainted".into(),
+            name: "Tainted".into(),
+            level: 6,
+            health: 38,
+            min_damage: 6,
+            max_damage: 13,
+            attack_rating: 34,
+            defense_rating: 14,
+            speed: 0.045,
+            aggro_range: 9.0,
+            xp_reward: 170,
+            tc_id: "tc_tainted".into(),
+        },
+        // -- Ghoul (level 6) -----------------------------------------------
+        // Ghoul: fast, poison damage, low HP.
+        MonsterDef {
+            id: "ghoul".into(),
+            name: "Ghoul".into(),
+            level: 6,
+            health: 28,
+            min_damage: 5,
+            max_damage: 10,
+            attack_rating: 32,
+            defense_rating: 10,
+            speed: 0.055,
+            aggro_range: 10.0,
+            xp_reward: 160,
+            tc_id: "tc_ghoul".into(),
+        },
+        // -- Dark Hunter / Vile Hunter (levels 6-7) ------------------------
+        // Dark Hunter: ranged, high damage, moderate HP.
+        MonsterDef {
+            id: "dark_hunter".into(),
+            name: "Dark Hunter".into(),
+            level: 7,
+            health: 40,
+            min_damage: 7,
+            max_damage: 14,
+            attack_rating: 40,
+            defense_rating: 16,
+            speed: 0.04,
+            aggro_range: 16.0,
+            xp_reward: 190,
+            tc_id: "tc_hunter".into(),
         },
     ]
 }
@@ -556,6 +764,89 @@ pub fn act1_treasure_classes() -> Vec<TreasureClass> {
                 drop("cap", 5, 1, 1),
             ],
         },
+        // Wendigo: mid-tier loot, occasional armor.
+        TreasureClass {
+            id: "tc_wendigo".into(),
+            picks: 1,
+            no_drop: 35,
+            entries: vec![
+                drop("gold", 30, 4, 15),
+                drop("minor_health_potion", 15, 1, 1),
+                drop("quilted_armor", 8, 1, 1),
+                drop("leather_boots", 7, 1, 1),
+            ],
+        },
+        // Corrupted Rogue: balanced table, weapon-heavy.
+        TreasureClass {
+            id: "tc_rogue".into(),
+            picks: 1,
+            no_drop: 38,
+            entries: vec![
+                drop("gold", 28, 3, 12),
+                drop("minor_health_potion", 12, 1, 1),
+                drop("short_sword", 8, 1, 1),
+                drop("buckler", 6, 1, 1),
+            ],
+        },
+        // Goatman: mid-tier table, armor bias.
+        TreasureClass {
+            id: "tc_goatman".into(),
+            picks: 1,
+            no_drop: 36,
+            entries: vec![
+                drop("gold", 28, 4, 14),
+                drop("minor_health_potion", 12, 1, 1),
+                drop("cap", 8, 1, 1),
+                drop("hand_axe", 8, 1, 1),
+            ],
+        },
+        // Brute: high-tier table, better drops for the HP wall.
+        TreasureClass {
+            id: "tc_brute".into(),
+            picks: 1,
+            no_drop: 30,
+            entries: vec![
+                drop("gold", 25, 5, 18),
+                drop("minor_health_potion", 15, 1, 1),
+                drop("leather_armor", 10, 1, 1),
+                drop("hand_axe", 10, 1, 1),
+            ],
+        },
+        // Tainted: physical fighter, balanced table.
+        TreasureClass {
+            id: "tc_tainted".into(),
+            picks: 1,
+            no_drop: 35,
+            entries: vec![
+                drop("gold", 28, 4, 14),
+                drop("minor_health_potion", 14, 1, 1),
+                drop("leather_gloves", 8, 1, 1),
+                drop("sash", 7, 1, 1),
+            ],
+        },
+        // Ghoul: poison-themed, potion-heavy.
+        TreasureClass {
+            id: "tc_ghoul".into(),
+            picks: 1,
+            no_drop: 38,
+            entries: vec![
+                drop("gold", 25, 3, 12),
+                drop("minor_health_potion", 18, 1, 1),
+                drop("minor_mana_potion", 10, 1, 1),
+            ],
+        },
+        // Dark Hunter / Vile Hunter: high-tier ranged.
+        TreasureClass {
+            id: "tc_hunter".into(),
+            picks: 1,
+            no_drop: 32,
+            entries: vec![
+                drop("gold", 28, 5, 16),
+                drop("minor_health_potion", 12, 1, 1),
+                drop("leather_armor", 10, 1, 1),
+                drop("leather_boots", 8, 1, 1),
+            ],
+        },
         TreasureClass {
             id: "tc_blood_raven".into(),
             picks: 3,
@@ -803,7 +1094,8 @@ pub struct ContentZoneDef {
 /// Returns Act 1 zone definitions.
 ///
 /// Zones are ordered by intended progression: town, then increasing
-/// difficulty areas through to the act boss arena.
+/// difficulty areas through to the act boss arena. Monster populations use
+/// the 15-family bestiary IDs.
 #[must_use]
 pub fn act1_zones() -> Vec<ContentZoneDef> {
     vec![
@@ -823,7 +1115,12 @@ pub fn act1_zones() -> Vec<ContentZoneDef> {
             act: 1,
             width_tiles: 40,
             height_tiles: 40,
-            monster_ids: vec!["fallen".into(), "quill_rat".into()],
+            monster_ids: vec![
+                "fallen".into(),
+                "fallen_shaman".into(),
+                "zombie".into(),
+                "quill_rat".into(),
+            ],
             monster_density: 8,
             is_town: false,
         },
@@ -833,7 +1130,7 @@ pub fn act1_zones() -> Vec<ContentZoneDef> {
             act: 1,
             width_tiles: 20,
             height_tiles: 15,
-            monster_ids: vec!["fallen".into(), "zombie".into()],
+            monster_ids: vec!["fallen".into(), "fallen_shaman".into(), "zombie".into()],
             monster_density: 15,
             is_town: false,
         },
@@ -843,8 +1140,68 @@ pub fn act1_zones() -> Vec<ContentZoneDef> {
             act: 1,
             width_tiles: 50,
             height_tiles: 50,
-            monster_ids: vec!["skeleton".into(), "dark_ranger".into()],
+            monster_ids: vec![
+                "skeleton_warrior".into(),
+                "skeleton_archer".into(),
+                "corrupted_rogue_melee".into(),
+            ],
             monster_density: 6,
+            is_town: false,
+        },
+        ContentZoneDef {
+            id: "stony_field".into(),
+            name: "Stony Field".into(),
+            act: 1,
+            width_tiles: 45,
+            height_tiles: 45,
+            monster_ids: vec![
+                "skeleton_warrior".into(),
+                "goatman_melee".into(),
+                "goatman_fire".into(),
+            ],
+            monster_density: 7,
+            is_town: false,
+        },
+        ContentZoneDef {
+            id: "dark_wood".into(),
+            name: "Dark Wood".into(),
+            act: 1,
+            width_tiles: 40,
+            height_tiles: 40,
+            monster_ids: vec![
+                "brute".into(),
+                "corrupted_rogue_melee".into(),
+                "corrupted_rogue_archer".into(),
+            ],
+            monster_density: 8,
+            is_town: false,
+        },
+        ContentZoneDef {
+            id: "black_marsh".into(),
+            name: "Black Marsh".into(),
+            act: 1,
+            width_tiles: 50,
+            height_tiles: 50,
+            monster_ids: vec![
+                "tainted".into(),
+                "ghoul".into(),
+                "dark_hunter".into(),
+            ],
+            monster_density: 7,
+            is_town: false,
+        },
+        ContentZoneDef {
+            id: "tamoe_highland".into(),
+            name: "Tamoe Highland".into(),
+            act: 1,
+            width_tiles: 45,
+            height_tiles: 45,
+            monster_ids: vec![
+                "dark_hunter".into(),
+                "skeleton_mage".into(),
+                "corrupted_rogue_archer".into(),
+            ],
+            monster_density: 8,
             is_town: false,
         },
         ContentZoneDef {
@@ -853,7 +1210,7 @@ pub fn act1_zones() -> Vec<ContentZoneDef> {
             act: 1,
             width_tiles: 25,
             height_tiles: 25,
-            monster_ids: vec!["skeleton".into(), "dark_ranger".into()],
+            monster_ids: vec!["skeleton_warrior".into(), "skeleton_archer".into()],
             monster_density: 10,
             is_town: false,
         },
@@ -863,7 +1220,11 @@ pub fn act1_zones() -> Vec<ContentZoneDef> {
             act: 1,
             width_tiles: 30,
             height_tiles: 30,
-            monster_ids: vec!["skeleton".into(), "dark_ranger".into()],
+            monster_ids: vec![
+                "skeleton_warrior".into(),
+                "skeleton_mage".into(),
+                "dark_hunter".into(),
+            ],
             monster_density: 12,
             is_town: false,
         },
@@ -914,6 +1275,27 @@ pub fn find_quest(id: &str) -> Option<QuestDef> {
 #[must_use]
 pub fn find_zone(id: &str) -> Option<ContentZoneDef> {
     act1_zones().into_iter().find(|z| z.id == id)
+}
+
+/// Returns the monster family names that can spawn in a given zone.
+///
+/// Zone IDs follow the `act1_*` convention (e.g. `"act1_blood_moor"`).
+/// The prefix `act1_` is stripped internally so the mapping matches
+/// `ContentZoneDef::id` values. Returns an empty vec for unknown zones.
+#[must_use]
+pub fn monsters_for_zone(zone_id: &str) -> Vec<&'static str> {
+    // Strip the act prefix if present so callers can use either form.
+    let key = zone_id.strip_prefix("act1_").unwrap_or(zone_id);
+
+    match key {
+        "blood_moor" => vec!["Fallen", "Fallen Shaman", "Zombie"],
+        "cold_plains" => vec!["Skeleton Warrior", "Skeleton Archer", "Corrupted Rogue"],
+        "stony_field" => vec!["Skeleton Warrior", "Goatman", "Goatman Fire Clan"],
+        "dark_wood" => vec!["Brute", "Corrupted Rogue", "Corrupted Rogue Archer"],
+        "black_marsh" => vec!["Tainted", "Ghoul", "Dark Hunter"],
+        "tamoe_highland" => vec!["Dark Hunter", "Skeleton Mage", "Corrupted Rogue Archer"],
+        _ => vec![],
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1008,7 +1390,8 @@ mod tests {
     #[test]
     fn test_act1_monsters_count() {
         let monsters = act1_monsters();
-        assert_eq!(monsters.len(), 7);
+        // 15 bestiary + 4 legacy/boss (quill_rat, dark_ranger, blood_raven, andariel)
+        assert_eq!(monsters.len(), 19);
     }
 
     #[test]
@@ -1020,7 +1403,7 @@ mod tests {
         assert_eq!(fallen.max_damage, 4);
         assert_eq!(fallen.xp_reward, 50);
         assert_eq!(fallen.tc_id, "tc_fallen");
-        // Fallen are fast (speed > skeleton).
+        // Fallen are fast (speed > skeleton_warrior).
         assert!(fallen.speed > 0.04);
         assert!(fallen.aggro_range > 0.0);
     }
@@ -1036,8 +1419,8 @@ mod tests {
     }
 
     #[test]
-    fn test_skeleton_is_balanced() {
-        let skeleton = find_monster("skeleton").expect("skeleton must exist");
+    fn test_skeleton_warrior_is_balanced() {
+        let skeleton = find_monster("skeleton_warrior").expect("skeleton_warrior must exist");
         let fallen = find_monster("fallen").expect("fallen must exist");
         let zombie = find_monster("zombie").expect("zombie must exist");
         // Skeleton speed is between zombie and fallen.
@@ -1121,7 +1504,8 @@ mod tests {
     #[test]
     fn test_act1_treasure_classes_count() {
         let tcs = act1_treasure_classes();
-        assert_eq!(tcs.len(), 5);
+        // 5 original + 7 bestiary TCs = 12
+        assert_eq!(tcs.len(), 12);
     }
 
     #[test]
@@ -1192,7 +1576,8 @@ mod tests {
     #[test]
     fn test_act1_zones_count() {
         let zones = act1_zones();
-        assert_eq!(zones.len(), 6);
+        // Town + 9 combat zones = 10
+        assert_eq!(zones.len(), 10);
     }
 
     #[test]
@@ -1209,6 +1594,8 @@ mod tests {
         assert!(!zone.is_town);
         assert_eq!(zone.monster_density, 8);
         assert!(zone.monster_ids.contains(&"fallen".to_string()));
+        assert!(zone.monster_ids.contains(&"fallen_shaman".to_string()));
+        assert!(zone.monster_ids.contains(&"zombie".to_string()));
         assert!(zone.monster_ids.contains(&"quill_rat".to_string()));
     }
 
@@ -1337,5 +1724,115 @@ mod tests {
     fn skeleton_ar() {
         let m = skeleton_def();
         assert_eq!(m.attack_rating, 30, "skeleton AR must be 30");
+    }
+
+    // -- Bestiary (TASK-134) -----------------------------------------------
+
+    #[test]
+    fn bestiary_15_families() {
+        let bestiary = act1_bestiary();
+        assert!(
+            bestiary.len() >= 15,
+            "act1_bestiary must return at least 15 monster families, got {}",
+            bestiary.len(),
+        );
+        // Verify all 15 expected IDs are present.
+        let ids: Vec<&str> = bestiary.iter().map(|m| m.id.as_str()).collect();
+        let expected = [
+            "fallen",
+            "fallen_shaman",
+            "zombie",
+            "skeleton_warrior",
+            "skeleton_archer",
+            "skeleton_mage",
+            "wendigo",
+            "corrupted_rogue_melee",
+            "corrupted_rogue_archer",
+            "goatman_melee",
+            "goatman_fire",
+            "brute",
+            "tainted",
+            "ghoul",
+            "dark_hunter",
+        ];
+        for id in &expected {
+            assert!(
+                ids.contains(id),
+                "bestiary missing expected family: {id}",
+            );
+        }
+    }
+
+    #[test]
+    fn bestiary_zone_assignment() {
+        let blood_moor = monsters_for_zone("act1_blood_moor");
+        assert!(
+            blood_moor.contains(&"Fallen"),
+            "blood_moor zone must contain Fallen, got: {blood_moor:?}",
+        );
+        assert!(
+            blood_moor.contains(&"Fallen Shaman"),
+            "blood_moor zone must contain Fallen Shaman",
+        );
+        assert!(
+            blood_moor.contains(&"Zombie"),
+            "blood_moor zone must contain Zombie",
+        );
+    }
+
+    #[test]
+    fn bestiary_zone_all_mapped() {
+        // Every zone in monsters_for_zone returns a non-empty vec.
+        let zones = [
+            "blood_moor",
+            "cold_plains",
+            "stony_field",
+            "dark_wood",
+            "black_marsh",
+            "tamoe_highland",
+        ];
+        for zone in &zones {
+            let monsters = monsters_for_zone(zone);
+            assert!(
+                !monsters.is_empty(),
+                "monsters_for_zone(\"{zone}\") must not be empty",
+            );
+        }
+    }
+
+    #[test]
+    fn bestiary_zone_unknown_returns_empty() {
+        let unknown = monsters_for_zone("act5_pandemonium");
+        assert!(
+            unknown.is_empty(),
+            "unknown zone must return empty vec, got: {unknown:?}",
+        );
+    }
+
+    #[test]
+    fn bestiary_no_duplicate_ids() {
+        let bestiary = act1_bestiary();
+        let mut ids: Vec<&str> = bestiary.iter().map(|m| m.id.as_str()).collect();
+        ids.sort_unstable();
+        ids.dedup();
+        assert_eq!(
+            ids.len(),
+            bestiary.len(),
+            "bestiary contains duplicate monster IDs",
+        );
+    }
+
+    #[test]
+    fn bestiary_all_have_valid_tc() {
+        let bestiary = act1_bestiary();
+        let tcs = act1_treasure_classes();
+        for monster in &bestiary {
+            assert!(
+                tcs.iter().any(|tc| tc.id == monster.tc_id),
+                "Bestiary monster '{}' references unknown TC '{}'",
+                monster.id,
+                monster.tc_id,
+            );
+        }
     }
 }

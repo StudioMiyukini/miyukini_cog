@@ -33,4 +33,10 @@ pub enum WorldError {
         /// The waypoint identifier that was not found.
         id: String,
     },
+    /// The waypoint exists but has not been activated yet.
+    #[error("Waypoint not activated: '{id}'")]
+    WaypointNotActivated {
+        /// The waypoint identifier that was not activated.
+        id: String,
+    },
 }

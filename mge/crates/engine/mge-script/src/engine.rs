@@ -29,6 +29,8 @@ impl ScriptEngine {
         engine.set_max_call_levels(32);
         engine.set_max_string_size(4096);
         engine.set_max_array_size(1024);
+        engine.set_max_map_size(256); // anti-huge-map
+        engine.set_max_expr_depths(32, 32); // anti-deeply-nested-expr
 
         // Disable dangerous features
         engine.disable_symbol("eval");

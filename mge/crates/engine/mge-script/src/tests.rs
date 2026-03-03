@@ -279,6 +279,46 @@ mod tests {
     }
 
     #[test]
+    fn rhai_max_map_overflow() {
+        let mut engine = make_engine();
+        // Build a map literal with 300 entries (limit is 256).
+        // Rhai enforces max_map_size on map literal construction.
+        let mut entries = Vec::with_capacity(300);
+        for i in 0..300 {
+            entries.push(format!("k{i}: {i}"));
+        }
+        let script = format!("let m = #{{ {} }};", entries.join(", "));
+        let result = engine.compile("test_map_overflow", &script);
+        // Rhai may reject at compile or runtime; either is acceptable.
+        if let Ok(()) = result {
+            let mut ctx = make_ctx();
+            let run_result = engine.run("test_map_overflow", &mut ctx);
+            assert!(
+                run_result.is_err(),
+                "Map with >256 entries must be rejected by the sandbox"
+            );
+        }
+        // If compile itself errored, the limit was enforced — test passes.
+    }
+
+    #[test]
+    fn rhai_max_expr_depth() {
+        let mut engine = make_engine();
+        // Build a deeply nested expression: (((((...1 + 1) + 1) + 1)...))
+        // 40 levels of nesting exceeds the max_expr_depth of 32.
+        let mut expr = String::from("1");
+        for _ in 0..40 {
+            expr = format!("({expr} + 1)");
+        }
+        let script = format!("let x = {expr};");
+        let result = engine.compile("test_deep_expr", &script);
+        assert!(
+            result.is_err(),
+            "Expression with >32 nesting depth must be rejected at compile time"
+        );
+    }
+
+    #[test]
     fn test_world_unlock_waypoint() {
         let mut engine = make_engine();
         engine

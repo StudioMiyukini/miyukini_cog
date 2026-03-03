@@ -98,6 +98,53 @@ impl WaypointRegistry {
     pub fn is_empty(&self) -> bool {
         self.waypoints.is_empty()
     }
+
+    /// Teleport from one waypoint to another.
+    ///
+    /// Both the source and destination waypoints must exist and be activated.
+    /// Returns a reference to the destination waypoint on success.
+    ///
+    /// # Errors
+    ///
+    /// Returns `WorldError::WaypointNotFound` if either waypoint does not exist.
+    /// Returns `WorldError::WaypointNotActivated` if either waypoint is not activated.
+    pub fn teleport(&self, from_id: &str, to_id: &str) -> Result<&Waypoint, WorldError> {
+        let from = self.find(from_id).ok_or_else(|| WorldError::WaypointNotFound {
+            id: from_id.to_string(),
+        })?;
+        if !from.activated {
+            return Err(WorldError::WaypointNotActivated {
+                id: from_id.to_string(),
+            });
+        }
+
+        let to = self.find(to_id).ok_or_else(|| WorldError::WaypointNotFound {
+            id: to_id.to_string(),
+        })?;
+        if !to.activated {
+            return Err(WorldError::WaypointNotActivated {
+                id: to_id.to_string(),
+            });
+        }
+
+        Ok(to)
+    }
+}
+
+/// Create the 9 Act 1 waypoints (all initially inactive).
+#[must_use]
+pub fn act1_waypoints() -> Vec<Waypoint> {
+    vec![
+        Waypoint::new("act1_rogue_encampment_wp", ZoneId::new("act1_rogue_encampment"), Vec2::new(100.0, 100.0)),
+        Waypoint::new("act1_cold_plains_wp", ZoneId::new("act1_cold_plains"), Vec2::new(200.0, 150.0)),
+        Waypoint::new("act1_stony_field_wp", ZoneId::new("act1_stony_field"), Vec2::new(300.0, 200.0)),
+        Waypoint::new("act1_dark_wood_wp", ZoneId::new("act1_dark_wood"), Vec2::new(400.0, 250.0)),
+        Waypoint::new("act1_black_marsh_wp", ZoneId::new("act1_black_marsh"), Vec2::new(500.0, 300.0)),
+        Waypoint::new("act1_outer_cloister_wp", ZoneId::new("act1_outer_cloister"), Vec2::new(600.0, 350.0)),
+        Waypoint::new("act1_jail_l1_wp", ZoneId::new("act1_jail_l1"), Vec2::new(700.0, 400.0)),
+        Waypoint::new("act1_inner_cloister_wp", ZoneId::new("act1_inner_cloister"), Vec2::new(800.0, 450.0)),
+        Waypoint::new("act1_catacombs_l2_wp", ZoneId::new("act1_catacombs_l2"), Vec2::new(900.0, 500.0)),
+    ]
 }
 
 #[cfg(test)]
@@ -143,5 +190,41 @@ mod tests {
         assert!(registry.activate("wp1").is_ok());
         assert!(registry.find("wp1").unwrap().activated);
         assert_eq!(registry.activated().count(), 1);
+    }
+
+    #[test]
+    fn act1_9_waypoints() {
+        let waypoints = act1_waypoints();
+        assert_eq!(waypoints.len(), 9);
+    }
+
+    #[test]
+    fn waypoint_teleport_both_active() {
+        let mut registry = WaypointRegistry::new();
+        let wps = act1_waypoints();
+        for wp in wps {
+            registry.register(wp);
+        }
+        registry.activate("act1_rogue_encampment_wp").unwrap();
+        registry.activate("act1_cold_plains_wp").unwrap();
+
+        let dest = registry.teleport("act1_rogue_encampment_wp", "act1_cold_plains_wp");
+        assert!(dest.is_ok());
+        let dest = dest.unwrap();
+        assert_eq!(dest.id, "act1_cold_plains_wp");
+    }
+
+    #[test]
+    fn waypoint_teleport_inactive() {
+        let mut registry = WaypointRegistry::new();
+        let wps = act1_waypoints();
+        for wp in wps {
+            registry.register(wp);
+        }
+        // Only activate the source, leave destination inactive.
+        registry.activate("act1_rogue_encampment_wp").unwrap();
+
+        let result = registry.teleport("act1_rogue_encampment_wp", "act1_cold_plains_wp");
+        assert!(result.is_err());
     }
 }
