@@ -4,9 +4,11 @@
 //! Provides a Diablo 2-style quest framework with multi-act structure,
 //! prerequisite chains, typed objectives, and per-character quest journals.
 
+pub mod act1_quests;
 pub mod def;
 pub mod error;
 pub mod journal;
+pub mod npc;
 pub mod objective;
 pub mod quest_id;
 pub mod reward;
@@ -16,9 +18,14 @@ pub mod state;
 mod tests;
 
 // Re-exports for convenience.
+pub use act1_quests::*;
 pub use def::QuestDef;
 pub use error::QuestError;
 pub use journal::QuestJournal;
+pub use npc::{
+    act1_npcs, akara, charsi, deckard_cain, DialogueAction, DialogueNode, DialogueResponse,
+    DialogueState, NpcDef,
+};
 pub use objective::{Objective, ObjectiveKind};
 pub use quest_id::QuestId;
 pub use reward::QuestReward;
