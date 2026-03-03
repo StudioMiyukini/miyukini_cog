@@ -9,6 +9,7 @@
 //! - **Synergy calculation** ([`SynergyCalculator`]) for passive inter-skill bonuses
 //! - **Skill activation** ([`can_use_skill`]) combining mana, cooldown, and level checks
 //! - **Necromancer content** ([`necro`]) with Bone Spear, Raise Skeleton, Corpse Explosion
+//! - **Summoning content** ([`summoning`]) with 10 Summoning tree skills
 
 mod activation;
 mod book;
@@ -17,6 +18,7 @@ mod def;
 pub mod necro;
 mod registry;
 mod skill_id;
+pub mod summoning;
 mod synergy;
 
 #[cfg(test)]
