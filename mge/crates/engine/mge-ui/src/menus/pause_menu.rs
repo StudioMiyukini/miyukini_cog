@@ -5,6 +5,7 @@ use egui::Context;
 use crate::theme::D2Colors;
 
 /// Actions that can be triggered from the pause menu.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PauseAction {
     /// Resume gameplay.
     Resume,
@@ -12,6 +13,33 @@ pub enum PauseAction {
     Options,
     /// Save the game and return to the main menu.
     SaveAndQuit,
+}
+
+/// State tracking whether the game is currently paused.
+#[derive(Debug, Clone)]
+pub struct PauseMenuState {
+    /// `true` while the game loop should be frozen.
+    pub game_paused: bool,
+}
+
+impl PauseMenuState {
+    /// Create a new pause state (un-paused by default).
+    pub fn new() -> Self {
+        Self {
+            game_paused: false,
+        }
+    }
+
+    /// Toggle the pause flag.
+    pub fn toggle(&mut self) {
+        self.game_paused = !self.game_paused;
+    }
+}
+
+impl Default for PauseMenuState {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 /// A labeled button definition for the pause menu.

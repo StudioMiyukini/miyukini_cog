@@ -1,3 +1,4 @@
+// @id: MGE-UI-Menus @do: game-menus @role: front-end @layer: 2 @human: miyuk
 //! Menu screens: main menu, character select, lobby browser, pause menu.
 
 /// Main menu (title screen).

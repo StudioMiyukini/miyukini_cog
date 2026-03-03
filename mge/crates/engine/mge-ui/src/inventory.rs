@@ -383,6 +383,195 @@ impl Default for InventoryGrid {
 }
 
 // ---------------------------------------------------------------------------
+// Data model — LootFilter (TASK-137)
+// ---------------------------------------------------------------------------
+
+/// Loot filter controlling which item qualities are visible on the ground.
+#[derive(Debug, Clone)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct LootFilter {
+    /// Show items of Normal quality.
+    pub show_normal: bool,
+    /// Show items of Magic quality.
+    pub show_magic: bool,
+    /// Show items of Rare quality.
+    pub show_rare: bool,
+    /// Show items of Set quality.
+    pub show_set: bool,
+    /// Show items of Unique quality.
+    pub show_unique: bool,
+    /// Show gold piles.
+    pub show_gold: bool,
+}
+
+impl Default for LootFilter {
+    fn default() -> Self {
+        Self {
+            show_normal: true,
+            show_magic: true,
+            show_rare: true,
+            show_set: true,
+            show_unique: true,
+            show_gold: true,
+        }
+    }
+}
+
+impl LootFilter {
+    /// Determine whether an item of the given `quality` string should be shown.
+    ///
+    /// Quality matching is case-insensitive. Unknown qualities default to
+    /// visible so the player never misses unexpected drops.
+    pub fn should_show(&self, quality: &str) -> bool {
+        match quality.to_ascii_lowercase().as_str() {
+            "normal" => self.show_normal,
+            "magic" => self.show_magic,
+            "rare" => self.show_rare,
+            "set" => self.show_set,
+            "unique" => self.show_unique,
+            "gold" => self.show_gold,
+            _ => true,
+        }
+    }
+
+    /// Toggle the visibility flag for the given `quality` string.
+    ///
+    /// Quality matching is case-insensitive. Unknown qualities are ignored.
+    pub fn toggle(&mut self, quality: &str) {
+        match quality.to_ascii_lowercase().as_str() {
+            "normal" => self.show_normal = !self.show_normal,
+            "magic" => self.show_magic = !self.show_magic,
+            "rare" => self.show_rare = !self.show_rare,
+            "set" => self.show_set = !self.show_set,
+            "unique" => self.show_unique = !self.show_unique,
+            "gold" => self.show_gold = !self.show_gold,
+            _ => {}
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Data model — StashGrid (TASK-148)
+// ---------------------------------------------------------------------------
+
+/// Width of the stash grid in cells.
+pub const STASH_WIDTH: usize = 10;
+/// Height of the stash grid in cells.
+pub const STASH_HEIGHT: usize = 10;
+
+/// An item placed in the stash grid.
+#[derive(Debug, Clone)]
+pub struct StashSlot {
+    /// Unique item identifier.
+    pub item_id: String,
+    /// Top-left column (0-based).
+    pub x: usize,
+    /// Top-left row (0-based).
+    pub y: usize,
+    /// Width in cells.
+    pub width: usize,
+    /// Height in cells.
+    pub height: usize,
+}
+
+/// A 10x10 shared stash grid, only accessible in town.
+#[derive(Debug, Clone)]
+pub struct StashGrid {
+    /// Grid width in cells.
+    pub width: usize,
+    /// Grid height in cells.
+    pub height: usize,
+    /// `occupied[row][col]` — true if a stash item covers this cell.
+    occupied: Vec<Vec<bool>>,
+    /// Items currently placed in the stash.
+    pub items: Vec<StashSlot>,
+    /// Whether the player is currently in town (stash access requires town).
+    pub in_town: bool,
+}
+
+impl StashGrid {
+    /// Create an empty 10x10 stash grid.
+    ///
+    /// `in_town` defaults to `false` — the caller must set it when the player
+    /// enters a town area.
+    pub fn new() -> Self {
+        Self {
+            width: STASH_WIDTH,
+            height: STASH_HEIGHT,
+            occupied: vec![vec![false; STASH_WIDTH]; STASH_HEIGHT],
+            items: Vec::new(),
+            in_town: false,
+        }
+    }
+
+    /// Attempt to place an item in the stash.
+    ///
+    /// # Errors
+    ///
+    /// - Returns an error if the player is not in town.
+    /// - Returns an error if the slot extends beyond the grid bounds.
+    /// - Returns an error if any covered cell is already occupied.
+    pub fn place_item(&mut self, slot: StashSlot) -> Result<(), String> {
+        if !self.in_town {
+            return Err("Not in town".into());
+        }
+
+        let end_x = slot.x.saturating_add(slot.width);
+        let end_y = slot.y.saturating_add(slot.height);
+
+        if end_x > self.width || end_y > self.height {
+            return Err(format!(
+                "Out of bounds: ({}, {}) + {}x{} exceeds {}x{}",
+                slot.x, slot.y, slot.width, slot.height, self.width, self.height
+            ));
+        }
+
+        // Overlap check.
+        for r in slot.y..end_y {
+            for c in slot.x..end_x {
+                if self.occupied[r][c] {
+                    return Err(format!("Overlap at ({c}, {r})"));
+                }
+            }
+        }
+
+        // Commit.
+        for r in slot.y..end_y {
+            for c in slot.x..end_x {
+                self.occupied[r][c] = true;
+            }
+        }
+
+        self.items.push(slot);
+        Ok(())
+    }
+
+    /// Remove the first item whose top-left corner matches `(x, y)`.
+    ///
+    /// Returns the removed `StashSlot`, or `None` if no item starts there.
+    pub fn remove_item(&mut self, x: usize, y: usize) -> Option<StashSlot> {
+        let idx = self.items.iter().position(|s| s.x == x && s.y == y)?;
+        let slot = self.items.remove(idx);
+
+        let end_x = slot.x + slot.width;
+        let end_y = slot.y + slot.height;
+        for r in slot.y..end_y {
+            for c in slot.x..end_x {
+                self.occupied[r][c] = false;
+            }
+        }
+
+        Some(slot)
+    }
+}
+
+impl Default for StashGrid {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 

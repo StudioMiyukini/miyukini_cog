@@ -16,7 +16,7 @@ pub use chunk::{Chunk, CHUNK_SIZE};
 pub use dungeon::{DungeonDef, act1_dungeon_zones, act1_dungeons};
 pub use error::WorldError;
 pub use portal::Portal;
-pub use tile::{Tile, TileKind};
+pub use tile::{Tile, TileGrid, TileKind, generate_zone, place_spawn_points};
 pub use waypoint::{Waypoint, WaypointRegistry, act1_waypoints};
 pub use world_map::{WorldMap, act1_monastery_zones};
 pub use zone::{Zone, ZoneDef, ZoneId};

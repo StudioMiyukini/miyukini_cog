@@ -197,4 +197,67 @@ mod tests {
         s2.set_bgm(0.42);
         assert!((s2.bgm_volume - 0.42).abs() < f32::EPSILON);
     }
+
+    // ── BgmZoneMap (TASK-138) ─────────────────────────────────
+
+    #[test]
+    fn bgm_zone_mapping() {
+        use crate::bgm::BgmZoneMap;
+
+        let map = BgmZoneMap::act1();
+        // blood_moor is a known Act 1 outdoor zone
+        assert!(
+            map.get_bgm("blood_moor").is_some(),
+            "act1 map must contain blood_moor"
+        );
+    }
+
+    #[test]
+    fn bgm_town_mapping() {
+        use crate::bgm::BgmZoneMap;
+
+        let map = BgmZoneMap::act1();
+        assert_eq!(map.get_bgm("act1_rogue_encampment"), Some("bgm_town"));
+    }
+
+    #[test]
+    fn bgm_boss_mapping() {
+        use crate::bgm::BgmZoneMap;
+
+        let map = BgmZoneMap::act1();
+        assert_eq!(map.get_bgm("act1_catacombs_l4"), Some("bgm_boss"));
+    }
+
+    // ── SfxEventBank (TASK-139) ───────────────────────────────
+
+    #[test]
+    fn sfx_bank_15_sounds() {
+        use crate::sfx::SfxEventBank;
+
+        let bank = SfxEventBank::act1();
+        assert_eq!(bank.len(), 15, "act1 SfxEventBank must have exactly 15 entries");
+    }
+
+    #[test]
+    fn sfx_event_mapping() {
+        use crate::sfx::{SfxEvent, SfxEventBank};
+
+        let bank = SfxEventBank::act1();
+        let sfx_id = bank.get_sfx(SfxEvent::MeleeHit);
+        assert!(sfx_id.is_some(), "MeleeHit must be mapped");
+        assert!(
+            !sfx_id.unwrap().is_empty(),
+            "MeleeHit SFX ID must be non-empty"
+        );
+    }
+
+    // ── AmbientMap (TASK-140) ─────────────────────────────────
+
+    #[test]
+    fn ambient_zone_type() {
+        use crate::manager::AmbientMap;
+
+        let map = AmbientMap::act1();
+        assert_eq!(map.get_ambient("outdoor"), Some("ambient_birds_wind"));
+    }
 }

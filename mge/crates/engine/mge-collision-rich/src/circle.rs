@@ -47,6 +47,19 @@ impl CircleCollider {
     }
 }
 
+/// Circle vs circle overlap test (free function).
+///
+/// Returns true if the distance between centers is less than or equal to
+/// the sum of the radii. Handles zero-radius circles correctly (degenerates
+/// to point-in-circle or point-point coincidence).
+pub fn circle_circle_intersect(a: &CircleCollider, b: &CircleCollider) -> bool {
+    let dx = a.center.x - b.center.x;
+    let dy = a.center.y - b.center.y;
+    let dist_sq = dx * dx + dy * dy;
+    let sum_r = a.radius + b.radius;
+    dist_sq <= sum_r * sum_r
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -95,5 +108,42 @@ mod tests {
         assert!((bb.min.y - 3.0).abs() < f32::EPSILON);
         assert!((bb.max.x - 7.0).abs() < f32::EPSILON);
         assert!((bb.max.y - 7.0).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    fn circle_circle_overlap() {
+        // Close centers: distance=3, sum_radii=7 => overlap.
+        let a = CircleCollider::new(Vec2::new(0.0, 0.0), 5.0);
+        let b = CircleCollider::new(Vec2::new(3.0, 0.0), 2.0);
+        assert!(circle_circle_intersect(&a, &b));
+    }
+
+    #[test]
+    fn circle_circle_apart() {
+        // Far apart: distance=100, sum_radii=3 => no overlap.
+        let a = CircleCollider::new(Vec2::new(0.0, 0.0), 1.0);
+        let b = CircleCollider::new(Vec2::new(100.0, 0.0), 2.0);
+        assert!(!circle_circle_intersect(&a, &b));
+    }
+
+    #[test]
+    fn circle_circle_zero_radius() {
+        // Both radii zero, same center => overlap (point coincidence).
+        let a = CircleCollider::new(Vec2::new(5.0, 5.0), 0.0);
+        let b = CircleCollider::new(Vec2::new(5.0, 5.0), 0.0);
+        assert!(circle_circle_intersect(&a, &b));
+
+        // Both radii zero, different centers => no overlap.
+        let c = CircleCollider::new(Vec2::new(0.0, 0.0), 0.0);
+        let d = CircleCollider::new(Vec2::new(1.0, 0.0), 0.0);
+        assert!(!circle_circle_intersect(&c, &d));
+    }
+
+    #[test]
+    fn circle_circle_touching() {
+        // Exactly touching: distance=5, sum_radii=5 => overlap (<= boundary).
+        let a = CircleCollider::new(Vec2::new(0.0, 0.0), 3.0);
+        let b = CircleCollider::new(Vec2::new(5.0, 0.0), 2.0);
+        assert!(circle_circle_intersect(&a, &b));
     }
 }

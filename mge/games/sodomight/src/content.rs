@@ -48,6 +48,200 @@ pub struct MonsterDef {
     pub tc_id: String,
 }
 
+// ---------------------------------------------------------------------------
+// Monster ranks and affixes
+// ---------------------------------------------------------------------------
+
+/// Rarity rank of a monster instance.
+///
+/// Normal monsters have base stats. Higher ranks receive HP, damage, and XP
+/// multipliers plus random affixes that modify their behaviour.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub enum MonsterRank {
+    /// Base monster, no modifiers.
+    Normal,
+    /// Elite pack leader: HP x3, damage x1.5, XP x3, 1-2 affixes.
+    Champion,
+    /// Named rare: HP x5, damage x2, XP x5, 3 affixes.
+    Unique,
+    /// Hand-placed boss with fixed name and affixes defined elsewhere.
+    /// HP x8, damage x3, XP x10.
+    SuperUnique,
+}
+
+/// Modifier applied to Champion / Unique / `SuperUnique` monsters.
+///
+/// Each affix alters one or more stats of the promoted monster and may grant
+/// a special on-hit or aura effect at the gameplay layer.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub enum MonsterAffix {
+    /// Movement speed x1.5.
+    ExtraFast,
+    /// Min and max damage x1.5.
+    ExtraStrong,
+    /// Nearby players suffer a slow debuff (gameplay layer).
+    CursedAura,
+    /// Deals bonus fire damage on hit (gameplay layer).
+    FireEnchanted,
+    /// Deals bonus cold damage on hit (gameplay layer).
+    ColdEnchanted,
+    /// Deals bonus lightning damage on hit (gameplay layer).
+    LightningEnchanted,
+    /// Monster can teleport to the player periodically.
+    Teleportation,
+    /// Defense rating x2.
+    StoneSkin,
+    /// Attacks ignore a portion of player defense (gameplay layer).
+    SpectralHit,
+    /// Ranged attacks fire multiple projectiles (gameplay layer).
+    Multishot,
+}
+
+/// All affix variants in declaration order, used for deterministic selection.
+const ALL_AFFIXES: [MonsterAffix; 10] = [
+    MonsterAffix::ExtraFast,
+    MonsterAffix::ExtraStrong,
+    MonsterAffix::CursedAura,
+    MonsterAffix::FireEnchanted,
+    MonsterAffix::ColdEnchanted,
+    MonsterAffix::LightningEnchanted,
+    MonsterAffix::Teleportation,
+    MonsterAffix::StoneSkin,
+    MonsterAffix::SpectralHit,
+    MonsterAffix::Multishot,
+];
+
+/// Promote a base monster to a higher rank, applying stat multipliers and affix
+/// effects.
+///
+/// # Arguments
+/// * `base` - The base `MonsterDef` to promote.
+/// * `rank` - Target `MonsterRank` (Normal returns a plain clone).
+/// * `affixes` - Slice of `MonsterAffix` modifiers to apply after rank multipliers.
+///
+/// # Stat multipliers by rank
+///
+/// | Rank | HP | Damage | XP | Name prefix |
+/// |------|----|--------|----|-------------|
+/// | Normal | x1 | x1 | x1 | -- |
+/// | Champion | x3 | x1.5 | x3 | "Champion " |
+/// | Unique | x5 | x2 | x5 | "Unique " |
+/// | SuperUnique | x8 | x3 | x10 | unchanged |
+#[must_use]
+pub fn promote_monster(
+    base: &MonsterDef,
+    rank: MonsterRank,
+    affixes: &[MonsterAffix],
+) -> MonsterDef {
+    let (hp_mult, dmg_mult, xp_mult, name) = match rank {
+        MonsterRank::Normal => (1.0_f64, 1.0_f64, 1_i64, base.name.clone()),
+        MonsterRank::Champion => (3.0, 1.5, 3, format!("Champion {}", base.name)),
+        MonsterRank::Unique => (5.0, 2.0, 5, format!("Unique {}", base.name)),
+        MonsterRank::SuperUnique => (8.0, 3.0, 10, base.name.clone()),
+    };
+
+    #[allow(clippy::cast_possible_truncation)]
+    let mut promoted = MonsterDef {
+        id: base.id.clone(),
+        name,
+        level: base.level,
+        health: (f64::from(base.health) * hp_mult) as i32,
+        min_damage: (f64::from(base.min_damage) * dmg_mult) as i32,
+        max_damage: (f64::from(base.max_damage) * dmg_mult) as i32,
+        attack_rating: base.attack_rating,
+        defense_rating: base.defense_rating,
+        speed: base.speed,
+        aggro_range: base.aggro_range,
+        xp_reward: base.xp_reward * xp_mult,
+        tc_id: base.tc_id.clone(),
+    };
+
+    for affix in affixes {
+        apply_affix(&mut promoted, *affix);
+    }
+
+    promoted
+}
+
+/// Apply a single affix modifier to an already-promoted monster.
+///
+/// Stat-based affixes (`ExtraFast`, `ExtraStrong`, `StoneSkin`) mutate the
+/// definition directly. Behavioural affixes (auras, enchantments, teleport,
+/// multishot, spectral hit) are resolved at the gameplay layer and leave stats
+/// unchanged here.
+fn apply_affix(monster: &mut MonsterDef, affix: MonsterAffix) {
+    match affix {
+        MonsterAffix::ExtraFast => {
+            monster.speed *= 1.5;
+        }
+        MonsterAffix::ExtraStrong => {
+            #[allow(clippy::cast_possible_truncation)]
+            {
+                monster.min_damage = (f64::from(monster.min_damage) * 1.5) as i32;
+                monster.max_damage = (f64::from(monster.max_damage) * 1.5) as i32;
+            }
+        }
+        MonsterAffix::StoneSkin => {
+            monster.defense_rating *= 2;
+        }
+        // Behavioural affixes — no stat mutation, resolved at gameplay layer.
+        MonsterAffix::CursedAura
+        | MonsterAffix::FireEnchanted
+        | MonsterAffix::ColdEnchanted
+        | MonsterAffix::LightningEnchanted
+        | MonsterAffix::Teleportation
+        | MonsterAffix::SpectralHit
+        | MonsterAffix::Multishot => {}
+    }
+}
+
+/// Deterministically pick random affixes for a given rank and seed.
+///
+/// # Affix count by rank (Normal difficulty)
+///
+/// | Rank | Count |
+/// |------|-------|
+/// | Normal | 0 |
+/// | Champion | 1-2 |
+/// | Unique | 3 |
+/// | SuperUnique | 0 (fixed affixes defined elsewhere) |
+///
+/// Selection is deterministic: the same `seed` always produces the same
+/// affix set, enabling reproducible world generation.
+#[must_use]
+pub fn random_affixes(rank: MonsterRank, seed: u64) -> Vec<MonsterAffix> {
+    let count = match rank {
+        MonsterRank::Normal | MonsterRank::SuperUnique => return Vec::new(),
+        MonsterRank::Champion => {
+            // 1 or 2 affixes — bit 0 of seed decides.
+            if seed & 1 == 0 { 1 } else { 2 }
+        }
+        MonsterRank::Unique => 3,
+    };
+
+    let pool_len = ALL_AFFIXES.len() as u64;
+    let mut picked: Vec<MonsterAffix> = Vec::with_capacity(count);
+    let mut s = seed;
+
+    for _ in 0..count {
+        // Simple deterministic hash step (xorshift-style).
+        s ^= s.wrapping_shl(13);
+        s ^= s.wrapping_shr(7);
+        s ^= s.wrapping_shl(17);
+
+        let idx = (s % pool_len) as usize;
+
+        // Avoid duplicates: walk forward until we find one not already picked.
+        let mut final_idx = idx;
+        while picked.contains(&ALL_AFFIXES[final_idx]) {
+            final_idx = (final_idx + 1) % ALL_AFFIXES.len();
+        }
+        picked.push(ALL_AFFIXES[final_idx]);
+    }
+
+    picked
+}
+
 /// Returns all Act 1 monster definitions.
 ///
 /// Includes the 15 bestiary families, legacy entries (Quill Rat, Dark Ranger),
@@ -1832,6 +2026,143 @@ mod tests {
                 "Bestiary monster '{}' references unknown TC '{}'",
                 monster.id,
                 monster.tc_id,
+            );
+        }
+    }
+
+    // -- Monster ranks & affixes ---------------------------------------------
+
+    #[test]
+    fn champion_bonus_hp() {
+        let base = fallen_def();
+        let champion = promote_monster(&base, MonsterRank::Champion, &[]);
+        assert!(
+            champion.health > base.health,
+            "Champion HP ({}) must exceed base HP ({})",
+            champion.health,
+            base.health,
+        );
+        // Champion HP is exactly 3x base.
+        assert_eq!(champion.health, base.health * 3);
+    }
+
+    #[test]
+    fn unique_3_affixes() {
+        let affixes = random_affixes(MonsterRank::Unique, 42);
+        assert_eq!(
+            affixes.len(),
+            3,
+            "Unique rank must receive exactly 3 affixes in Normal difficulty, got {}",
+            affixes.len(),
+        );
+        // All affixes must be distinct.
+        for (i, a) in affixes.iter().enumerate() {
+            for (j, b) in affixes.iter().enumerate() {
+                if i != j {
+                    assert_ne!(a, b, "Affix at index {i} must differ from index {j}");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn promote_preserves_id() {
+        let base = fallen_def();
+        let champion = promote_monster(&base, MonsterRank::Champion, &[]);
+        let unique = promote_monster(&base, MonsterRank::Unique, &[MonsterAffix::ExtraFast]);
+        let super_unique = promote_monster(&base, MonsterRank::SuperUnique, &[]);
+
+        assert_eq!(champion.id, base.id, "Champion id must match base id");
+        assert_eq!(unique.id, base.id, "Unique id must match base id");
+        assert_eq!(super_unique.id, base.id, "SuperUnique id must match base id");
+    }
+
+    #[test]
+    fn normal_rank_returns_clone() {
+        let base = fallen_def();
+        let normal = promote_monster(&base, MonsterRank::Normal, &[]);
+        assert_eq!(normal.health, base.health);
+        assert_eq!(normal.min_damage, base.min_damage);
+        assert_eq!(normal.max_damage, base.max_damage);
+        assert_eq!(normal.xp_reward, base.xp_reward);
+        assert_eq!(normal.name, base.name);
+    }
+
+    #[test]
+    fn super_unique_keeps_base_name() {
+        let base = fallen_def();
+        let su = promote_monster(&base, MonsterRank::SuperUnique, &[]);
+        assert_eq!(
+            su.name, base.name,
+            "SuperUnique must keep the original name unchanged",
+        );
+    }
+
+    #[test]
+    fn champion_name_prefix() {
+        let base = fallen_def();
+        let champion = promote_monster(&base, MonsterRank::Champion, &[]);
+        assert!(
+            champion.name.starts_with("Champion "),
+            "Champion name must start with 'Champion ', got '{}'",
+            champion.name,
+        );
+    }
+
+    #[test]
+    fn affix_extra_fast_increases_speed() {
+        let base = fallen_def();
+        let fast = promote_monster(&base, MonsterRank::Champion, &[MonsterAffix::ExtraFast]);
+        // Champion base speed = base.speed (no rank speed change).
+        // ExtraFast multiplies speed by 1.5.
+        let expected = base.speed * 1.5;
+        let diff = (fast.speed - expected).abs();
+        assert!(
+            diff < f32::EPSILON,
+            "ExtraFast speed expected {expected}, got {}",
+            fast.speed,
+        );
+    }
+
+    #[test]
+    fn affix_stone_skin_doubles_defense() {
+        let base = fallen_def();
+        let tank = promote_monster(&base, MonsterRank::Champion, &[MonsterAffix::StoneSkin]);
+        assert_eq!(
+            tank.defense_rating,
+            base.defense_rating * 2,
+            "StoneSkin must double defense_rating",
+        );
+    }
+
+    #[test]
+    fn random_affixes_normal_returns_empty() {
+        let affixes = random_affixes(MonsterRank::Normal, 123);
+        assert!(affixes.is_empty(), "Normal rank must have 0 affixes");
+    }
+
+    #[test]
+    fn random_affixes_super_unique_returns_empty() {
+        let affixes = random_affixes(MonsterRank::SuperUnique, 999);
+        assert!(affixes.is_empty(), "SuperUnique rank must have 0 affixes (defined elsewhere)");
+    }
+
+    #[test]
+    fn random_affixes_deterministic() {
+        let a = random_affixes(MonsterRank::Unique, 777);
+        let b = random_affixes(MonsterRank::Unique, 777);
+        assert_eq!(a, b, "Same seed must produce identical affixes");
+    }
+
+    #[test]
+    fn champion_affix_count_is_1_or_2() {
+        // Test multiple seeds to cover both branches (seed & 1).
+        for seed in 0..20_u64 {
+            let affixes = random_affixes(MonsterRank::Champion, seed);
+            assert!(
+                affixes.len() == 1 || affixes.len() == 2,
+                "Champion must get 1-2 affixes, seed {seed} gave {}",
+                affixes.len(),
             );
         }
     }

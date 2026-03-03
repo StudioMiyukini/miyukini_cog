@@ -18,6 +18,7 @@ pub mod equipment;
 pub mod uniques;
 pub mod identify;
 pub mod sockets;
+pub mod runewords;
 
 #[cfg(test)]
 mod tests;
@@ -41,4 +42,8 @@ pub use uniques::{
 pub use sockets::{
     GemQuality, GemType, SocketError, SocketFiller, SocketedItem,
     max_sockets_for_base,
+};
+pub use runewords::{
+    RunewordDef, all_runewords, check_runeword,
+    rune_name_to_id, rune_id_to_name,
 };

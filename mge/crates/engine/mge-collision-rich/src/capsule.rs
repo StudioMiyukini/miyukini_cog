@@ -74,6 +74,58 @@ impl CapsuleCollider {
     }
 }
 
+/// Capsule vs AABB overlap test.
+///
+/// Finds the closest point on the capsule segment to the AABB, then checks
+/// if the distance between that closest point and the AABB is within the
+/// capsule radius. This reduces the problem to a circle-AABB test at the
+/// optimal point along the segment.
+pub fn capsule_aabb_intersect(cap: &CapsuleCollider, min: Vec2, max: Vec2) -> bool {
+    // Find the closest point on the capsule segment to the AABB center,
+    // then check if the expanded circle at that point overlaps the AABB.
+    // However, using AABB center is not exact for all configurations.
+    //
+    // Correct approach: find the closest point on the segment to the AABB
+    // by clamping the segment's closest point to the AABB, iterating once.
+    //
+    // Step 1: Clamp the AABB to get a candidate point on/in the AABB closest
+    //         to the segment. Start with the AABB center as initial guess.
+    // Step 2: Project that candidate onto the segment -> closest_on_seg.
+    // Step 3: Clamp closest_on_seg to the AABB -> closest_on_aabb.
+    // Step 4: Measure distance between closest_on_seg and closest_on_aabb.
+    //
+    // Two iterations converges for convex shapes.
+
+    let closest_on_seg = refine_closest_seg_to_aabb(cap, min, max);
+
+    // Now check: is the circle centered at closest_on_seg with cap.radius
+    // overlapping the AABB [min, max]?
+    let nearest_x = closest_on_seg.x.clamp(min.x, max.x);
+    let nearest_y = closest_on_seg.y.clamp(min.y, max.y);
+    let dx = closest_on_seg.x - nearest_x;
+    let dy = closest_on_seg.y - nearest_y;
+    dx * dx + dy * dy <= cap.radius * cap.radius
+}
+
+/// Iteratively refines the closest point on the capsule segment to the AABB.
+///
+/// Two passes of project-clamp converge for convex shapes.
+fn refine_closest_seg_to_aabb(cap: &CapsuleCollider, min: Vec2, max: Vec2) -> Vec2 {
+    // Pass 1: start from AABB center
+    let center = Vec2::new(
+        (min.x + max.x) * 0.5,
+        (min.y + max.y) * 0.5,
+    );
+    let on_seg = cap.closest_point_on_segment(center);
+    let on_aabb = Vec2::new(
+        on_seg.x.clamp(min.x, max.x),
+        on_seg.y.clamp(min.y, max.y),
+    );
+
+    // Pass 2: refine from the clamped point
+    cap.closest_point_on_segment(on_aabb)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -140,5 +192,64 @@ mod tests {
         assert!(cap.contains_point(Vec2::new(5.0, 1.5)));
         // Point outside the capsule
         assert!(!cap.contains_point(Vec2::new(5.0, 50.0)));
+    }
+
+    #[test]
+    fn capsule_aabb_overlap() {
+        // Horizontal capsule from (0,0) to (10,0) with radius 2.
+        // AABB from (4,-1) to (6,1) -- segment passes through the AABB.
+        let cap = CapsuleCollider::new(
+            Vec2::new(0.0, 0.0),
+            Vec2::new(10.0, 0.0),
+            2.0,
+        );
+        let min = Vec2::new(4.0, -1.0);
+        let max = Vec2::new(6.0, 1.0);
+        assert!(capsule_aabb_intersect(&cap, min, max));
+    }
+
+    #[test]
+    fn capsule_aabb_miss() {
+        // Horizontal capsule from (0,0) to (10,0) with radius 1.
+        // AABB from (50,50) to (60,60) -- far away, no overlap.
+        let cap = CapsuleCollider::new(
+            Vec2::new(0.0, 0.0),
+            Vec2::new(10.0, 0.0),
+            1.0,
+        );
+        let min = Vec2::new(50.0, 50.0);
+        let max = Vec2::new(60.0, 60.0);
+        assert!(!capsule_aabb_intersect(&cap, min, max));
+    }
+
+    #[test]
+    fn capsule_aabb_radius_reach() {
+        // Capsule segment does not reach the AABB, but radius does.
+        // Vertical capsule from (0,0) to (0,10) with radius 3.
+        // AABB from (2,4) to (4,6) -- closest segment point is (0,5),
+        // distance to AABB nearest point (2,5) = 2.0, which is <= radius 3.
+        let cap = CapsuleCollider::new(
+            Vec2::new(0.0, 0.0),
+            Vec2::new(0.0, 10.0),
+            3.0,
+        );
+        let min = Vec2::new(2.0, 4.0);
+        let max = Vec2::new(4.0, 6.0);
+        assert!(capsule_aabb_intersect(&cap, min, max));
+    }
+
+    #[test]
+    fn capsule_aabb_degenerate_point_capsule() {
+        // Degenerate capsule (zero-length segment) = circle at (5,5) radius 2.
+        // AABB from (6,5) to (8,7) -- distance from (5,5) to nearest AABB
+        // point (6,5) = 1.0, which is <= radius 2.
+        let cap = CapsuleCollider::new(
+            Vec2::new(5.0, 5.0),
+            Vec2::new(5.0, 5.0),
+            2.0,
+        );
+        let min = Vec2::new(6.0, 5.0);
+        let max = Vec2::new(8.0, 7.0);
+        assert!(capsule_aabb_intersect(&cap, min, max));
     }
 }

@@ -36,6 +36,9 @@ mod hud_tests;
 #[cfg(test)]
 mod ui_tests;
 
+#[cfg(test)]
+mod menus_tests;
+
 /// Menu screens (main menu, character select, lobby browser, pause).
 pub mod menus;
 
@@ -66,10 +69,15 @@ pub use inventory::{
     InventoryGrid,
     InventorySlot,
     ItemSize,
+    LootFilter,
+    StashGrid,
+    StashSlot,
     UiItem,
     CELL_SIZE,
     GRID_COLS,
     GRID_ROWS,
+    STASH_HEIGHT,
+    STASH_WIDTH,
 };
 pub use character::{
     can_equip,
@@ -81,10 +89,12 @@ pub use character::{
     PaperdollState,
 };
 pub use skill_tree::{draw_skill_tree, SkillNodeState, SkillTreeState, SkillTreeTab};
-pub use menus::main_menu::{draw_main_menu, MainMenuAction};
-pub use menus::char_select::draw_char_select;
+pub use menus::main_menu::{draw_main_menu, MainMenuAction, MainMenuState};
+pub use menus::char_select::{
+    draw_char_select, CharacterSlot, CharSelectState, CreateCharState,
+};
 pub use menus::lobby_browser::draw_lobby_browser;
-pub use menus::pause_menu::{draw_pause_menu, PauseAction};
+pub use menus::pause_menu::{draw_pause_menu, PauseAction, PauseMenuState};
 pub use dialog::draw_npc_dialog;
 pub use tooltip::{
     draw_tooltip,

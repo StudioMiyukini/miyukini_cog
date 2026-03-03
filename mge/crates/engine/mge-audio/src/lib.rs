@@ -21,12 +21,12 @@ mod sfx_types;
 mod tests;
 
 pub use bank::SoundBank;
-pub use bgm::BgmPlayer;
+pub use bgm::{BgmPlayer, BgmZoneMap};
 pub use bgm_types::{BgmId, BgmPlayback};
 pub use config::AudioConfig;
-pub use manager::AudioManager;
+pub use manager::{AmbientMap, AudioManager};
 pub use settings::AudioSettings;
-pub use sfx::SfxPool;
+pub use sfx::{SfxEvent, SfxEventBank, SfxPool};
 pub use sfx_types::{SfxBank, SfxId};
 
 /// Alias for audio-specific results.

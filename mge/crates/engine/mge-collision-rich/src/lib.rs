@@ -19,9 +19,12 @@ pub mod intersect;
 pub mod error;
 
 pub use circle::CircleCollider;
+pub use circle::circle_circle_intersect;
 pub use capsule::CapsuleCollider;
+pub use capsule::capsule_aabb_intersect;
 pub use obb::ObbCollider;
 pub use intersect::ShapeIntersect;
+pub use intersect::narrowphase_intersect;
 pub use error::CollisionRichError;
 
 /// Unified collider wrapping all shape types for broadphase/narrowphase dispatch.

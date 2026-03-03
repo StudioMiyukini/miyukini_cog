@@ -221,6 +221,55 @@ pub fn xp_death_penalty(
 }
 
 // ---------------------------------------------------------------------------
+// Town Portal
+// ---------------------------------------------------------------------------
+
+/// A one-use portal that remembers where the player was in the field and
+/// teleports them back to town.  After the player re-enters the portal in
+/// town the portal is consumed (becomes inactive).
+///
+/// Modelled after the D2 Town Portal scroll mechanic: the portal persists
+/// until used once, then disappears.
+#[derive(Debug, Clone)]
+pub struct TownPortal {
+    /// The zone the player will return to when re-entering the portal.
+    pub return_zone: String,
+    /// The `(x, y)` position the player will land at on return.
+    pub return_position: (f32, f32),
+    /// Whether the portal is still usable.  Becomes `false` after the
+    /// player travels back through it.
+    pub active: bool,
+}
+
+impl TownPortal {
+    /// Consume the portal, teleporting the player back to the field.
+    ///
+    /// After this call `active` is `false` and the portal should be
+    /// discarded by the game world.
+    pub fn use_portal(&mut self) {
+        self.active = false;
+    }
+}
+
+/// Cast a new Town Portal scroll, creating an active portal that records
+/// the player's current zone and position so they can return later.
+///
+/// # Parameters
+/// - `zone_id`  — identifier of the zone the player is currently in.
+/// - `position` — the player's `(x, y)` coordinates at the moment of cast.
+///
+/// # Returns
+/// A freshly created, **active** `TownPortal`.
+#[must_use]
+pub fn cast_town_portal(zone_id: &str, position: (f32, f32)) -> TownPortal {
+    TownPortal {
+        return_zone: zone_id.to_string(),
+        return_position: position,
+        active: true,
+    }
+}
+
+// ---------------------------------------------------------------------------
 // SodomightWorld
 // ---------------------------------------------------------------------------
 
@@ -2203,6 +2252,56 @@ mod tests {
         assert_eq!(
             mp, max_mp,
             "After respawn, current mana ({mp}) must equal max mana ({max_mp})"
+        );
+    }
+
+    // --- Test 23: town_portal_roundtrip — cast, verify active, use, verify inactive ---
+
+    #[test]
+    fn town_portal_roundtrip() {
+        let mut portal = cast_town_portal("act1_wilderness", (25.0, 30.0));
+
+        // Portal should be active immediately after casting.
+        assert!(portal.active, "Portal must be active right after casting");
+        assert_eq!(portal.return_zone, "act1_wilderness");
+        assert!((portal.return_position.0 - 25.0).abs() < f32::EPSILON);
+        assert!((portal.return_position.1 - 30.0).abs() < f32::EPSILON);
+
+        // Use the portal — player returns to the field.
+        portal.use_portal();
+
+        // After use, the portal must be inactive.
+        assert!(
+            !portal.active,
+            "Portal must be inactive after use_portal()"
+        );
+
+        // Return coordinates must still be readable even after deactivation.
+        assert_eq!(portal.return_zone, "act1_wilderness");
+        assert!((portal.return_position.0 - 25.0).abs() < f32::EPSILON);
+        assert!((portal.return_position.1 - 30.0).abs() < f32::EPSILON);
+    }
+
+    // --- Test 24: town_portal_disappear — after use, active = false ---
+
+    #[test]
+    fn town_portal_disappear() {
+        let mut portal = cast_town_portal("act2_desert", (10.0, 42.0));
+
+        assert!(portal.active, "Freshly cast portal must be active");
+
+        portal.use_portal();
+
+        assert!(
+            !portal.active,
+            "Portal must disappear (active = false) after a single use"
+        );
+
+        // Using the portal a second time should remain inactive (idempotent).
+        portal.use_portal();
+        assert!(
+            !portal.active,
+            "Portal must stay inactive on repeated use_portal() calls"
         );
     }
 }

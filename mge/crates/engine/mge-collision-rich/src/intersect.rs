@@ -4,8 +4,9 @@
 
 use mge_math::Vec2;
 
-use crate::capsule::CapsuleCollider;
-use crate::circle::CircleCollider;
+use crate::UnifiedCollider;
+use crate::capsule::{self, CapsuleCollider};
+use crate::circle::{self, CircleCollider};
 
 /// Stateless shape intersection tests.
 ///
@@ -51,6 +52,78 @@ impl ShapeIntersect {
         let sum_r = a.radius + b.radius;
         dist_sq <= sum_r * sum_r
     }
+}
+
+/// Narrowphase intersection dispatch for [`UnifiedCollider`] pairs.
+///
+/// Matches on `(a, b)` shape variants and dispatches to the most specific
+/// intersection test available. For pairs without a dedicated test, falls
+/// back to AABB-vs-AABB overlap using each collider's bounding AABB.
+///
+/// # AABB overlap semantics
+///
+/// The AABB fallback uses `<=` (inclusive boundary) to stay consistent with
+/// the circle and capsule tests that also treat touching as overlapping.
+pub fn narrowphase_intersect(a: &UnifiedCollider, b: &UnifiedCollider) -> bool {
+    match (a, b) {
+        // --- Circle-Circle ---
+        (UnifiedCollider::Circle(ca), UnifiedCollider::Circle(cb)) => {
+            circle::circle_circle_intersect(ca, cb)
+        }
+
+        // --- Circle-AABB / AABB-Circle ---
+        (UnifiedCollider::Circle(c), UnifiedCollider::Aabb { min, max })
+        | (UnifiedCollider::Aabb { min, max }, UnifiedCollider::Circle(c)) => {
+            c.overlaps_aabb(&mge_math::Aabb::new(*min, *max))
+        }
+
+        // --- Circle-Capsule / Capsule-Circle ---
+        (UnifiedCollider::Circle(c), UnifiedCollider::Capsule(cap))
+        | (UnifiedCollider::Capsule(cap), UnifiedCollider::Circle(c)) => {
+            ShapeIntersect::circle_capsule(c, cap)
+        }
+
+        // --- Capsule-AABB / AABB-Capsule ---
+        (UnifiedCollider::Capsule(cap), UnifiedCollider::Aabb { min, max })
+        | (UnifiedCollider::Aabb { min, max }, UnifiedCollider::Capsule(cap)) => {
+            capsule::capsule_aabb_intersect(cap, *min, *max)
+        }
+
+        // --- Capsule-Capsule ---
+        (UnifiedCollider::Capsule(ca), UnifiedCollider::Capsule(cb)) => {
+            ShapeIntersect::capsule_capsule(ca, cb)
+        }
+
+        // --- AABB-AABB ---
+        (UnifiedCollider::Aabb { min: min_a, max: max_a },
+         UnifiedCollider::Aabb { min: min_b, max: max_b }) => {
+            aabb_overlap_inclusive(*min_a, *max_a, *min_b, *max_b)
+        }
+
+        // --- OBB-OBB ---
+        (UnifiedCollider::Obb(oa), UnifiedCollider::Obb(ob)) => {
+            oa.overlaps_obb(ob)
+        }
+
+        // --- Fallback: bounding AABB overlap for any unhandled pair ---
+        _ => {
+            let bb_a = a.bounding_aabb();
+            let bb_b = b.bounding_aabb();
+            aabb_overlap_inclusive(bb_a.min, bb_a.max, bb_b.min, bb_b.max)
+        }
+    }
+}
+
+/// Inclusive AABB overlap test (touching edges count as overlapping).
+///
+/// Differs from [`mge_math::Aabb::intersects`] which uses strict `<`/`>`
+/// comparisons. This version uses `<=` for consistency with the circle and
+/// capsule overlap semantics where touching = overlapping.
+fn aabb_overlap_inclusive(min_a: mge_math::Vec2, max_a: mge_math::Vec2, min_b: mge_math::Vec2, max_b: mge_math::Vec2) -> bool {
+    min_a.x <= max_b.x
+        && max_a.x >= min_b.x
+        && min_a.y <= max_b.y
+        && max_a.y >= min_b.y
 }
 
 /// Finds the closest pair of points between two capsule segments.
@@ -153,5 +226,106 @@ mod tests {
         // Closest points: (5,0) on a and (5,1.5) on b.
         // Distance = 1.5, sum of radii = 2 => overlap.
         assert!(ShapeIntersect::capsule_capsule(&a, &b));
+    }
+
+    // --- TASK-150: narrowphase dispatch tests ---
+
+    #[test]
+    fn broadphase_narrowphase_circle_aabb() {
+        // Circle at (5,5) r=3 vs AABB (3,3)-(7,7) -- circle center inside AABB.
+        let circle = UnifiedCollider::Circle(
+            CircleCollider::new(Vec2::new(5.0, 5.0), 3.0),
+        );
+        let aabb = UnifiedCollider::Aabb {
+            min: Vec2::new(3.0, 3.0),
+            max: Vec2::new(7.0, 7.0),
+        };
+        assert!(narrowphase_intersect(&circle, &aabb));
+        // Symmetric: AABB vs Circle should also work.
+        assert!(narrowphase_intersect(&aabb, &circle));
+    }
+
+    #[test]
+    fn broadphase_no_overlap() {
+        // Circle at (0,0) r=1 vs AABB (100,100)-(200,200) -- far apart.
+        let circle = UnifiedCollider::Circle(
+            CircleCollider::new(Vec2::new(0.0, 0.0), 1.0),
+        );
+        let aabb = UnifiedCollider::Aabb {
+            min: Vec2::new(100.0, 100.0),
+            max: Vec2::new(200.0, 200.0),
+        };
+        assert!(!narrowphase_intersect(&circle, &aabb));
+    }
+
+    #[test]
+    fn dispatch_circle_circle() {
+        // Two circles overlapping: distance=4, sum_radii=6 => overlap.
+        let a = UnifiedCollider::Circle(
+            CircleCollider::new(Vec2::new(0.0, 0.0), 3.0),
+        );
+        let b = UnifiedCollider::Circle(
+            CircleCollider::new(Vec2::new(4.0, 0.0), 3.0),
+        );
+        assert!(narrowphase_intersect(&a, &b));
+    }
+
+    #[test]
+    fn dispatch_aabb_aabb_overlap() {
+        let a = UnifiedCollider::Aabb {
+            min: Vec2::new(0.0, 0.0),
+            max: Vec2::new(5.0, 5.0),
+        };
+        let b = UnifiedCollider::Aabb {
+            min: Vec2::new(3.0, 3.0),
+            max: Vec2::new(8.0, 8.0),
+        };
+        assert!(narrowphase_intersect(&a, &b));
+    }
+
+    #[test]
+    fn dispatch_aabb_aabb_no_overlap() {
+        let a = UnifiedCollider::Aabb {
+            min: Vec2::new(0.0, 0.0),
+            max: Vec2::new(2.0, 2.0),
+        };
+        let b = UnifiedCollider::Aabb {
+            min: Vec2::new(10.0, 10.0),
+            max: Vec2::new(12.0, 12.0),
+        };
+        assert!(!narrowphase_intersect(&a, &b));
+    }
+
+    #[test]
+    fn dispatch_capsule_aabb() {
+        // Capsule (0,0)-(10,0) r=2 vs AABB (4,-1)-(6,1) -- overlaps.
+        let cap = UnifiedCollider::Capsule(
+            CapsuleCollider::new(Vec2::new(0.0, 0.0), Vec2::new(10.0, 0.0), 2.0),
+        );
+        let aabb = UnifiedCollider::Aabb {
+            min: Vec2::new(4.0, -1.0),
+            max: Vec2::new(6.0, 1.0),
+        };
+        assert!(narrowphase_intersect(&cap, &aabb));
+        // Symmetric
+        assert!(narrowphase_intersect(&aabb, &cap));
+    }
+
+    #[test]
+    fn dispatch_obb_fallback() {
+        // OBB vs Circle: should fallback to AABB overlap.
+        // OBB at (0,0) half-extents (5,5) no rotation -> AABB (-5,-5)-(5,5)
+        // Circle at (3,3) r=1 -> AABB (2,2)-(4,4) -- overlaps.
+        let obb = UnifiedCollider::Obb(
+            crate::obb::ObbCollider::new(
+                Vec2::new(0.0, 0.0),
+                Vec2::new(5.0, 5.0),
+                0.0,
+            ),
+        );
+        let circle = UnifiedCollider::Circle(
+            CircleCollider::new(Vec2::new(3.0, 3.0), 1.0),
+        );
+        assert!(narrowphase_intersect(&obb, &circle));
     }
 }
