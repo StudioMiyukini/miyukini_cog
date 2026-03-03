@@ -1,4 +1,4 @@
-// @id: MGE-Render-Overhead @do: implement @role: back-end @layer: 2 @human: francois
+// @id: MGE-Render-Overhead @do: floating-text @role: back-end @layer: 2 @human: miyuk
 
 //! World-space overhead UI: floating combat text, emotes, and progress bars.
 //!
@@ -406,6 +406,23 @@ impl Default for EmoteManager {
         Self::new()
     }
 }
+
+// ---------------------------------------------------------------------------
+// Damage colour constants (Sodomight / D2-like ARPG)
+// ---------------------------------------------------------------------------
+
+/// Physical damage colour: white (neutral, sword/arrow hits).
+pub const DAMAGE_COLOR_PHYSICAL: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
+/// Fire damage colour: orange.
+pub const DAMAGE_COLOR_FIRE: [f32; 4] = [1.0, 0.45, 0.0, 1.0];
+/// Cold damage colour: blue.
+pub const DAMAGE_COLOR_COLD: [f32; 4] = [0.2, 0.6, 1.0, 1.0];
+/// Lightning damage colour: yellow.
+pub const DAMAGE_COLOR_LIGHTNING: [f32; 4] = [1.0, 0.95, 0.0, 1.0];
+/// Poison damage colour: green.
+pub const DAMAGE_COLOR_POISON: [f32; 4] = [0.2, 0.8, 0.1, 1.0];
+/// Magic damage colour: purple.
+pub const DAMAGE_COLOR_MAGIC: [f32; 4] = [0.7, 0.2, 1.0, 1.0];
 
 // ---------------------------------------------------------------------------
 // OverheadProgressBar
@@ -823,5 +840,83 @@ mod tests {
         assert!((CRAFTING_COLOR[3] - 1.0).abs() < f32::EPSILON);
         assert!((CASTING_COLOR[3] - 1.0).abs() < f32::EPSILON);
         assert!((LOADING_COLOR[3] - 1.0).abs() < f32::EPSILON);
+    }
+
+    // === Damage colour constants (TASK-072) ===
+
+    #[test]
+    fn damage_colour_constants_alpha_is_one() {
+        let all = [
+            DAMAGE_COLOR_PHYSICAL,
+            DAMAGE_COLOR_FIRE,
+            DAMAGE_COLOR_COLD,
+            DAMAGE_COLOR_LIGHTNING,
+            DAMAGE_COLOR_POISON,
+            DAMAGE_COLOR_MAGIC,
+        ];
+        for color in &all {
+            assert!(
+                (color[3] - 1.0).abs() < f32::EPSILON,
+                "damage colour alpha must be 1.0, got {}",
+                color[3]
+            );
+        }
+    }
+
+    // === TASK-072 tests ===
+
+    /// `floating_text_fade` — alpha (opacity) reaches 0.0 after the full
+    /// lifetime has elapsed.
+    #[test]
+    fn floating_text_fade() {
+        let mut mgr = FloatingTextManager::new(100);
+        // Use Critical kind (lifetime = 1.5s).
+        mgr.spawn([0.0, 0.0], "99".to_string(), FloatingTextKind::Critical);
+
+        // Tick exactly to the lifetime boundary.
+        let lifetime = FloatingTextKind::Critical.preset().lifetime;
+        mgr.tick(lifetime);
+
+        // After expiry tick, the text is removed (retain uses age < lifetime).
+        // We tick just below lifetime so the text is still present but opacity = 0.
+        let mut mgr2 = FloatingTextManager::new(100);
+        mgr2.spawn([0.0, 0.0], "99".to_string(), FloatingTextKind::Critical);
+        // Tick to exactly lifetime - epsilon so retain keeps it.
+        mgr2.tick(lifetime - f32::EPSILON);
+        // opacity = 1 - (age / lifetime). At age ≈ lifetime, opacity ≈ 0.
+        let opacity = mgr2.texts()[0].opacity;
+        assert!(
+            opacity >= 0.0 && opacity < 0.01,
+            "opacity near end of lifetime should be ~0, got {opacity}"
+        );
+    }
+
+    /// `floating_text_critical_flag` — a Critical floating text has shake enabled.
+    #[test]
+    fn floating_text_critical_flag() {
+        let ft = FloatingText::new([5.0, 10.0], "999".to_string(), FloatingTextKind::Critical);
+        assert!(
+            ft.has_shake,
+            "Critical FloatingText must have has_shake = true"
+        );
+        assert_eq!(ft.kind, FloatingTextKind::Critical);
+    }
+
+    /// `manager_removes_expired` — expired texts are purged from the manager
+    /// after a tick that exceeds their lifetime.
+    #[test]
+    fn manager_removes_expired() {
+        let mut mgr = FloatingTextManager::new(100);
+        // Evade lifetime = 1.0s — the shortest preset.
+        mgr.spawn([0.0, 0.0], "DODGE".to_string(), FloatingTextKind::Evade);
+        assert_eq!(mgr.len(), 1, "should have 1 text before tick");
+
+        // Tick past the 1.0s lifetime.
+        mgr.tick(1.5);
+        assert_eq!(
+            mgr.len(),
+            0,
+            "expired text should be removed after tick past lifetime"
+        );
     }
 }

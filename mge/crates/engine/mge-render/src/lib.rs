@@ -54,6 +54,8 @@ pub use overhead::{
     EmoteKind, EmoteManager, FloatingText, FloatingTextKind, FloatingTextManager,
     FloatingTextPreset, OverheadProgressBar, ProgressBarManager, SpriteEmote,
     CASTING_COLOR, CRAFTING_COLOR, GATHERING_COLOR, LOADING_COLOR,
+    DAMAGE_COLOR_PHYSICAL, DAMAGE_COLOR_FIRE, DAMAGE_COLOR_COLD,
+    DAMAGE_COLOR_LIGHTNING, DAMAGE_COLOR_POISON, DAMAGE_COLOR_MAGIC,
 };
 
 // -- Instanced pipeline re-exports (behind feature flag) --
