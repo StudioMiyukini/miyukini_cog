@@ -9,6 +9,7 @@ pub mod error;
 pub mod game;
 pub mod gui;
 pub mod state;
+pub mod tilemap;
 
 pub use config::{default_client_config, ClientConfig};
 pub use error::ClientError;

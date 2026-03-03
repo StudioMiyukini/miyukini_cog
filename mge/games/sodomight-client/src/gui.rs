@@ -142,10 +142,10 @@ const COL_SLOT_BORDER: [f32; 4] = [0.55, 0.45, 0.25, 0.9];
 /// Inventory panel background.
 const COL_INV_PANEL_BG: [f32; 4] = [0.05, 0.04, 0.06, 0.95];
 
-/// Combat log background.
-const COL_LOG_BG: [f32; 4] = [0.03, 0.02, 0.04, 0.65];
+/// Combat log background — darkened for text contrast.
+const COL_LOG_BG: [f32; 4] = [0.02, 0.01, 0.03, 0.85];
 /// Combat log border.
-const COL_LOG_BORDER: [f32; 4] = [0.35, 0.30, 0.20, 0.5];
+const COL_LOG_BORDER: [f32; 4] = [0.35, 0.30, 0.20, 0.6];
 
 /// Minimap background.
 const COL_MINIMAP_BG: [f32; 4] = [0.03, 0.03, 0.05, 0.85];
@@ -289,6 +289,14 @@ pub enum GuiAction {
     ClickInventorySlot(usize),
     /// Click passed through to the world (screen coordinates).
     ClickWorld(f32, f32),
+    /// Use a belt potion slot (0-3, mapped from keys 1-4).
+    UseBeltPotion(usize),
+    /// Right-click on the game world (screen coordinates) — cast right-click skill.
+    RightClickWorld(f32, f32),
+    /// Allocate a stat point (0=str, 1=dex, 2=vit, 3=ene).
+    AllocateStat(u8),
+    /// Invest a skill point into a skill (slot index in current skill tree tab).
+    InvestSkill(usize),
 }
 
 // ---------------------------------------------------------------------------
@@ -399,6 +407,9 @@ pub struct GameGui {
     damage_max: i32,
     attack_rating: i32,
 
+    /// Unspent skill points.
+    skill_points_available: i32,
+
     // -- equipment slots (7 slots: helm, armor, weapon, shield, gloves, boots, belt) --
     equipment_slots: [Option<GuiItemSlot>; 7],
 
@@ -422,6 +433,10 @@ pub struct GameGui {
     minimap_player: (f32, f32),
     /// Monster positions for minimap dots.
     minimap_monsters: Vec<MinimapEntity>,
+    /// Minimap map dimensions (width, height in tiles).
+    minimap_map_size: (f32, f32),
+    /// Condensed tilemap for minimap rendering (one byte per tile: 0=void, 1=walkable, 2=wall, 3=water).
+    minimap_tiles: Vec<u8>,
 
     // -- automap tile data (for the overlay) --
     /// Walkable tiles for the automap.
@@ -473,6 +488,7 @@ impl GameGui {
             damage_min: 2,
             damage_max: 6,
             attack_rating: 50,
+            skill_points_available: 0,
             equipment_slots: [
                 Option::None,
                 Option::None,
@@ -496,6 +512,8 @@ impl GameGui {
             tooltip_slot: Option::None,
             minimap_player: (16.0, 16.0),
             minimap_monsters: Vec::new(),
+            minimap_map_size: (64.0, 64.0),
+            minimap_tiles: Vec::new(),
             automap_tiles: Vec::new(),
             monster_overlays: Vec::new(),
             mouse_x: 0.0,
@@ -608,6 +626,13 @@ impl GameGui {
         }
     }
 
+    /// Set condensed tilemap data for minimap rendering.
+    /// Each byte: 0=void, 1=walkable (floor/grass/path), 2=wall, 3=water.
+    pub fn set_minimap_tiles(&mut self, width: i32, height: i32, tiles: Vec<u8>) {
+        self.minimap_map_size = (width as f32, height as f32);
+        self.minimap_tiles = tiles;
+    }
+
     /// Toggle the inventory panel open/closed.
     pub fn toggle_inventory(&mut self) {
         self.inventory_open = !self.inventory_open;
@@ -646,6 +671,11 @@ impl GameGui {
     /// Update visible monster overlays for health bar / name rendering.
     pub fn set_monster_overlays(&mut self, overlays: Vec<MonsterOverlay>) {
         self.monster_overlays = overlays;
+    }
+
+    /// Update skill points available count.
+    pub fn set_skill_points(&mut self, points: i32) {
+        self.skill_points_available = points;
     }
 
     /// Set the active skill tree tab (0, 1, or 2).
@@ -689,6 +719,18 @@ impl GameGui {
     pub fn set_screen_size(&mut self, w: f32, h: f32) {
         self.screen_w = w;
         self.screen_h = h;
+    }
+
+    /// Current viewport width.
+    #[must_use]
+    pub fn screen_w(&self) -> f32 {
+        self.screen_w
+    }
+
+    /// Current viewport height.
+    #[must_use]
+    pub fn screen_h(&self) -> f32 {
+        self.screen_h
     }
 
     /// Whether the inventory panel is currently visible.
@@ -759,6 +801,10 @@ impl GameGui {
                 button: MouseButton::Left,
                 pressed: true,
             } => self.handle_left_click(),
+            InputEvent::MouseButtonEvent {
+                button: MouseButton::Right,
+                pressed: true,
+            } => self.handle_right_click(),
             _ => GuiAction::None,
         }
     }
@@ -773,12 +819,17 @@ impl GameGui {
             KeyCode::Tab => GuiAction::ToggleAutomap,
             KeyCode::R => GuiAction::ToggleRunWalk,
             KeyCode::Q => GuiAction::ToggleQuestLog,
-            KeyCode::Num1 => GuiAction::UseSkill(0),
-            KeyCode::Num2 => GuiAction::UseSkill(1),
-            KeyCode::Num3 => GuiAction::UseSkill(2),
-            KeyCode::Num4 => GuiAction::UseSkill(3),
-            KeyCode::Num5 => GuiAction::UseSkill(4),
-            KeyCode::Num6 => GuiAction::UseSkill(5),
+            // D2-style: 1-4 = belt potions, F1-F6 = skill hotkeys.
+            KeyCode::Num1 => GuiAction::UseBeltPotion(0),
+            KeyCode::Num2 => GuiAction::UseBeltPotion(1),
+            KeyCode::Num3 => GuiAction::UseBeltPotion(2),
+            KeyCode::Num4 => GuiAction::UseBeltPotion(3),
+            KeyCode::F1 => GuiAction::UseSkill(0),
+            KeyCode::F2 => GuiAction::UseSkill(1),
+            KeyCode::F3 => GuiAction::UseSkill(2),
+            KeyCode::F4 => GuiAction::UseSkill(3),
+            KeyCode::F5 => GuiAction::UseSkill(4),
+            KeyCode::F6 => GuiAction::UseSkill(5),
             _ => GuiAction::None,
         }
     }
@@ -790,6 +841,13 @@ impl GameGui {
         if self.mouse_y >= panel_y {
             // Click on control panel area -- do not pass to world.
             return GuiAction::None;
+        }
+
+        // Test character panel stat "+" buttons if open.
+        if self.character_open && self.stat_points_available > 0 {
+            if let Some(stat_idx) = self.hit_test_stat_buttons(self.mouse_x, self.mouse_y) {
+                return GuiAction::AllocateStat(stat_idx);
+            }
         }
 
         // Test inventory panel hit if open.
@@ -809,6 +867,79 @@ impl GameGui {
         }
 
         GuiAction::ClickWorld(self.mouse_x, self.mouse_y)
+    }
+
+    /// Handle right mouse click: cast right-click skill at world position.
+    fn handle_right_click(&self) -> GuiAction {
+        // Ignore clicks on the control panel.
+        let panel_y = self.screen_h - PANEL_H - XP_BAR_H;
+        if self.mouse_y >= panel_y {
+            return GuiAction::None;
+        }
+
+        // Test character panel stat "+" buttons if open.
+        if self.character_open && self.stat_points_available > 0 {
+            if let Some(stat_idx) = self.hit_test_stat_buttons(self.mouse_x, self.mouse_y) {
+                return GuiAction::AllocateStat(stat_idx);
+            }
+        }
+
+        // Test skill panel skill slots if open.
+        if self.skill_panel_open {
+            if let Some(skill_idx) = self.hit_test_skill_panel(self.mouse_x, self.mouse_y) {
+                return GuiAction::InvestSkill(skill_idx);
+            }
+        }
+
+        GuiAction::RightClickWorld(self.mouse_x, self.mouse_y)
+    }
+
+    /// Hit-test the stat allocation "+" buttons on the character panel.
+    /// Returns the stat index (0=str, 1=dex, 2=vit, 3=ene) if a button is hit.
+    fn hit_test_stat_buttons(&self, mx: f32, my: f32) -> Option<u8> {
+        let panel_h = 320.0_f32;
+        let panel_x = MARGIN;
+        let panel_y = (self.screen_h - PANEL_H - XP_BAR_H - panel_h) / 2.0;
+        let stat_start_y = panel_y + INV_HEADER_H + 8.0;
+        let stat_bar_w = 160.0_f32;
+        let stat_x = panel_x + 90.0;
+        let btn_size = 16.0_f32;
+        let btn_x = stat_x + stat_bar_w + 6.0;
+
+        for i in 0..4_u8 {
+            let row_y = stat_start_y + f32::from(i) * CHAR_STAT_ROW_H;
+            if mx >= btn_x && mx <= btn_x + btn_size && my >= row_y && my <= row_y + btn_size {
+                return Some(i);
+            }
+        }
+        None
+    }
+
+    /// Hit-test skill slots in the skill panel for skill point investment.
+    /// Returns the skill index in the current tab.
+    fn hit_test_skill_panel(&self, mx: f32, my: f32) -> Option<usize> {
+        // Skill panel is drawn on the right side.
+        let panel_w = 280.0_f32;
+        let panel_h = 360.0_f32;
+        let panel_x = self.screen_w - panel_w - MARGIN;
+        let panel_y = (self.screen_h - PANEL_H - XP_BAR_H - panel_h) / 2.0;
+
+        let grid_start_y = panel_y + INV_HEADER_H + 40.0; // After tabs.
+        let slot_size = 48.0_f32;
+        let gap = 8.0_f32;
+        let cols = 4_usize;
+        let grid_x = panel_x + 16.0;
+
+        for i in 0..12_usize {
+            let col = i % cols;
+            let row = i / cols;
+            let sx = grid_x + col as f32 * (slot_size + gap);
+            let sy = grid_start_y + row as f32 * (slot_size + gap);
+            if mx >= sx && mx <= sx + slot_size && my >= sy && my <= sy + slot_size {
+                return Some(i);
+            }
+        }
+        None
     }
 
     /// Return the inventory slot index under `(mx, my)`, if any.
@@ -932,6 +1063,60 @@ impl GameGui {
         // Tooltip (drawn last, on top of everything).
         if self.tooltip.is_some() {
             self.draw_tooltip(batcher);
+        }
+    }
+
+    /// Draw all HUD text labels using the bitmap font.
+    ///
+    /// Called from a separate render pass in `game.rs` with the bitmap font
+    /// texture bound instead of the white GUI texture.
+    pub fn draw_all_text(&self, batcher: &mut SpriteBatcher) {
+        // Always-visible text.
+        self.draw_minimap_text(batcher);
+        self.draw_active_skill_text(batcher);
+        self.draw_run_walk_text(batcher);
+        self.draw_menu_button_text(batcher);
+        self.draw_combat_log_text(batcher);
+
+        // Conditional panels.
+        if self.automap_open {
+            self.draw_automap_label(batcher);
+        }
+        if self.inventory_open {
+            self.draw_inventory_text(batcher);
+        }
+        if self.character_open {
+            self.draw_character_panel_text(batcher);
+        }
+        if self.skill_panel_open {
+            self.draw_skill_panel_text(batcher);
+        }
+        if self.quest_log_open {
+            self.draw_quest_log_text(batcher);
+        }
+        self.draw_monster_overlay_text(batcher);
+        if self.tooltip.is_some() {
+            self.draw_tooltip_text(batcher);
+        }
+    }
+
+    /// Render combat log message text.
+    pub fn draw_combat_log_text(&self, batcher: &mut SpriteBatcher) {
+        use crate::bitmap_font::BitmapFont;
+
+        if self.combat_log.is_empty() {
+            return;
+        }
+
+        let x = MARGIN;
+        let y = MARGIN;
+        let scale = 1.8_f32;
+        let mut entry_y = y + 4.0;
+
+        for msg in &self.combat_log {
+            let text_y = entry_y + (LOG_ENTRY_H - BitmapFont::line_height(scale)) / 2.0;
+            BitmapFont::push_text(batcher, x + 6.0, text_y, msg, COL_TEXT_PARCHMENT, scale);
+            entry_y += LOG_ENTRY_H + 2.0;
         }
     }
 
@@ -1217,8 +1402,8 @@ impl GameGui {
         let map_h = self.screen_h - PANEL_H - XP_BAR_H;
         batcher.push(0.0, 0.0, self.screen_w, map_h, UV_FULL, COL_AUTOMAP_BG);
 
-        // Map covers 32x32 tiles. Scale to fit the screen width.
-        let map_tiles = 32.0_f32;
+        // Map covers map_size tiles. Scale to fit the screen.
+        let map_tiles = self.minimap_map_size.0.max(self.minimap_map_size.1);
         let tile_px = (self.screen_w / map_tiles).min(map_h / map_tiles) * 0.6;
         let offset_x = (self.screen_w - map_tiles * tile_px) / 2.0;
         let offset_y = (map_h - map_tiles * tile_px) / 2.0;
@@ -1318,8 +1503,21 @@ impl GameGui {
             batcher.push(stat_x, row_y + stat_bar_h - 1.0, stat_bar_w, 1.0, UV_FULL, COL_BORDER_GOLD);
         }
 
-        // Stat points available indicator.
+        // Stat points available: draw "+" buttons next to each primary stat.
         if self.stat_points_available > 0 {
+            let btn_size = 16.0_f32;
+            let btn_x = stat_x + stat_bar_w + 6.0;
+            let btn_color: [f32; 4] = [0.3, 0.6, 0.2, 0.9];
+            for i in 0..4_usize {
+                let row_y = stat_start_y + i as f32 * CHAR_STAT_ROW_H;
+                // Button background.
+                batcher.push(btn_x, row_y, btn_size, btn_size, UV_FULL, btn_color);
+                // Border.
+                batcher.push(btn_x, row_y, btn_size, 1.0, UV_FULL, COL_BORDER_GOLD);
+                batcher.push(btn_x, row_y + btn_size - 1.0, btn_size, 1.0, UV_FULL, COL_BORDER_GOLD);
+            }
+
+            // Stat points indicator below secondary stats.
             let sp_y = sec_start_y + 3.0 * CHAR_STAT_ROW_H + 8.0;
             let sp_bg: [f32; 4] = [0.3, 0.25, 0.1, 0.8];
             batcher.push(panel_x + 8.0, sp_y, CHAR_PANEL_W - 16.0, 20.0, UV_FULL, sp_bg);
@@ -1424,8 +1622,8 @@ impl GameGui {
         // Individual message backgrounds (alternating for readability).
         let mut entry_y = y + 4.0;
         for i in 0..msg_count {
-            let alpha = if i % 2 == 0 { 0.05 } else { 0.0 };
-            let row_bg: [f32; 4] = [0.2, 0.2, 0.2, alpha];
+            let alpha = if i % 2 == 0 { 0.12 } else { 0.04 };
+            let row_bg: [f32; 4] = [0.1, 0.08, 0.12, alpha];
             batcher.push(x + 2.0, entry_y, LOG_W - 4.0, LOG_ENTRY_H, UV_FULL, row_bg);
             entry_y += LOG_ENTRY_H + 2.0;
         }
@@ -1433,7 +1631,7 @@ impl GameGui {
 
     // -- Minimap (top-right) -----------------------------------------------
 
-    /// Draw the minimap placeholder with player and monster dots.
+    /// Draw the minimap with dungeon layout, player and monster dots.
     fn draw_minimap(&self, batcher: &mut SpriteBatcher) {
         let x = self.screen_w - MINIMAP_SIZE - MARGIN;
         let y = MARGIN;
@@ -1451,17 +1649,47 @@ impl GameGui {
         // Background.
         batcher.push(x, y, MINIMAP_SIZE, MINIMAP_SIZE, UV_FULL, COL_MINIMAP_BG);
 
-        // Map covers tiles 0..32 in both axes.
-        let map_size = 32.0_f32;
-        let scale = MINIMAP_SIZE / map_size;
+        let (map_w, map_h) = self.minimap_map_size;
+        let scale_x = MINIMAP_SIZE / map_w;
+        let scale_y = MINIMAP_SIZE / map_h;
 
-        // Monster dots (drawn first, under player).
+        // Render dungeon tiles (condensed: every 2x2 block as one pixel for performance).
+        let mw = map_w as i32;
+        let mh = map_h as i32;
+        if self.minimap_tiles.len() == (mw * mh) as usize {
+            let step = 2; // Render every 2nd tile for performance.
+            let tile_px_w = scale_x * step as f32;
+            let tile_px_h = scale_y * step as f32;
+            let mut ty_coord = 0;
+            while ty_coord < mh {
+                let mut tx_coord = 0;
+                while tx_coord < mw {
+                    let idx = (ty_coord * mw + tx_coord) as usize;
+                    let tile_byte = self.minimap_tiles[idx];
+                    let color = match tile_byte {
+                        1 => [0.25, 0.22, 0.18, 0.6], // walkable (tan)
+                        2 => [0.40, 0.35, 0.25, 0.8], // wall (brown)
+                        3 => [0.15, 0.20, 0.50, 0.7], // water (blue)
+                        _ => {
+                            tx_coord += step;
+                            continue; // void: skip (transparent)
+                        }
+                    };
+                    let px = x + tx_coord as f32 * scale_x;
+                    let py = y + ty_coord as f32 * scale_y;
+                    batcher.push(px, py, tile_px_w, tile_px_h, UV_FULL, color);
+                    tx_coord += step;
+                }
+                ty_coord += step;
+            }
+        }
+
+        // Monster dots (drawn on top of tiles, under player).
         let dot_size = 3.0_f32;
         let half_dot = dot_size / 2.0;
         for monster in &self.minimap_monsters {
-            let mx = x + monster.x * scale - half_dot;
-            let my = y + monster.y * scale - half_dot;
-            // Clamp to minimap bounds.
+            let mx = x + monster.x * scale_x - half_dot;
+            let my = y + monster.y * scale_y - half_dot;
             if mx >= x && mx + dot_size <= x + MINIMAP_SIZE
                 && my >= y && my + dot_size <= y + MINIMAP_SIZE
             {
@@ -1472,8 +1700,8 @@ impl GameGui {
         // Player dot (white, slightly larger).
         let player_dot = 4.0_f32;
         let half_player = player_dot / 2.0;
-        let px = x + self.minimap_player.0 * scale - half_player;
-        let py = y + self.minimap_player.1 * scale - half_player;
+        let px = x + self.minimap_player.0 * scale_x - half_player;
+        let py = y + self.minimap_player.1 * scale_y - half_player;
         batcher.push(
             px.clamp(x, x + MINIMAP_SIZE - player_dot),
             py.clamp(y, y + MINIMAP_SIZE - player_dot),
@@ -1983,9 +2211,10 @@ impl GameGui {
         let y = MARGIN + MINIMAP_SIZE + 2.0;
 
         let label = "MINIMAP";
-        let label_w = label.len() as f32 * BitmapFont::char_width(1.0);
+        let scale = 1.5_f32;
+        let label_w = label.len() as f32 * BitmapFont::char_width(scale);
         let label_x = x + (MINIMAP_SIZE - label_w) / 2.0;
-        BitmapFont::push_text(batcher, label_x, y, label, COL_TEXT_PARCHMENT, 1.0);
+        BitmapFont::push_text(batcher, label_x, y, label, COL_TEXT_PARCHMENT, scale);
     }
 
     /// Render active skill labels on the left/right skill selectors.
@@ -1994,7 +2223,7 @@ impl GameGui {
 
         let panel_y = self.screen_h - PANEL_H - XP_BAR_H;
         let orb_cy = panel_y + 2.0 + PANEL_H / 2.0;
-        let scale = 1.2_f32;
+        let scale = 1.5_f32;
         let text_h = BitmapFont::line_height(scale);
 
         // Left-click skill name.
@@ -2023,7 +2252,7 @@ impl GameGui {
         }
 
         let label = if self.is_running { "R" } else { "W" };
-        let scale = 1.0_f32;
+        let scale = 1.5_f32;
         let lw = BitmapFont::char_width(scale);
         let lh = BitmapFont::line_height(scale);
         BitmapFont::push_text(
@@ -2090,8 +2319,19 @@ impl GameGui {
             BitmapFont::push_text(batcher, value_x, text_y, &sec_values[i], COL_TEXT_PARCHMENT, scale);
         }
 
-        // Stat points available.
+        // Stat points: draw "+" labels and stat points count.
         if self.stat_points_available > 0 {
+            let stat_bar_w = 160.0_f32;
+            let btn_size = 16.0_f32;
+            let stat_x = panel_x + 90.0;
+            let btn_x = stat_x + stat_bar_w + 6.0;
+            for i in 0..4_usize {
+                let row_y = stat_start_y + i as f32 * CHAR_STAT_ROW_H;
+                let text_y = row_y + (btn_size - BitmapFont::line_height(scale)) / 2.0;
+                let text_x = btn_x + (btn_size - BitmapFont::char_width(scale)) / 2.0;
+                BitmapFont::push_text(batcher, text_x, text_y, "+", [1.0, 1.0, 1.0, 1.0], scale);
+            }
+
             let sp_y = sec_start_y + 3.0 * CHAR_STAT_ROW_H + 8.0;
             let sp_text = format!("{} stat points available", self.stat_points_available);
             BitmapFont::push_text(batcher, panel_x + 12.0, sp_y + 3.0, &sp_text, [1.0, 0.85, 0.2, 1.0], scale);
@@ -2198,7 +2438,7 @@ impl GameGui {
         let left_orb_right = ORB_INSET + ORB_DIAMETER + ACTIVE_SKILL_GAP + ACTIVE_SKILL_SIZE + 8.0;
         let right_orb_left = self.screen_w - ORB_INSET - ORB_DIAMETER - ACTIVE_SKILL_GAP - ACTIVE_SKILL_SIZE - 8.0;
 
-        let scale = 1.0_f32;
+        let scale = 1.5_f32;
         let lh = BitmapFont::line_height(scale);
 
         // Left buttons: C, I
@@ -2594,24 +2834,24 @@ mod tests {
         assert_eq!(action, GuiAction::ToggleSkills);
     }
 
-    // -- handle_input: Num1 -> UseSkill(0) --------------------------------
+    // -- handle_input: Num1 -> UseBeltPotion(0) (D2-style) ----------------
 
     #[test]
-    fn handle_input_num1_uses_skill_0() {
+    fn handle_input_num1_uses_belt_potion_0() {
         let mut gui = GameGui::new(800.0, 600.0);
         let event = InputEvent::KeyDown { key: KeyCode::Num1 };
         let action = gui.handle_input(&event);
-        assert_eq!(action, GuiAction::UseSkill(0));
+        assert_eq!(action, GuiAction::UseBeltPotion(0));
     }
 
-    // -- handle_input: Num6 -> UseSkill(5) --------------------------------
+    // -- handle_input: F1 -> UseSkill(0) (D2-style) -----------------------
 
     #[test]
-    fn handle_input_num6_uses_skill_5() {
+    fn handle_input_f1_uses_skill_0() {
         let mut gui = GameGui::new(800.0, 600.0);
-        let event = InputEvent::KeyDown { key: KeyCode::Num6 };
+        let event = InputEvent::KeyDown { key: KeyCode::F1 };
         let action = gui.handle_input(&event);
-        assert_eq!(action, GuiAction::UseSkill(5));
+        assert_eq!(action, GuiAction::UseSkill(0));
     }
 
     // -- GuiAction default is None ----------------------------------------

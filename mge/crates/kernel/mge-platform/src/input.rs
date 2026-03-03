@@ -76,6 +76,10 @@ pub enum KeyCode {
     /// 9 key.
     Num9,
     // Letters
+    /// B key.
+    B,
+    /// C key.
+    C,
     /// E key.
     E,
     /// F key.

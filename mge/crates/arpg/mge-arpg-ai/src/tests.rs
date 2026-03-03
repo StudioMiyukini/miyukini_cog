@@ -242,4 +242,142 @@ mod tests {
         agent.update(Some(8.0), 1.0);
         assert_eq!(agent.fsm.current(), AiState::Chase);
     }
+
+    // ── tick()-based FSM tests (TASK-042) ────────────────────────────────
+
+    #[test]
+    fn fsm_idle_to_chase() {
+        // Target inside aggro range should move through Idle -> Alert -> Chase
+        // after two ticks (Idle->Alert on first sight, Alert->Chase on confirm).
+        let aggro = AggroRange::new(10.0, 2.0);
+        let mut agent = AiAgent::with_attack_cooldown(1, aggro, 0.5);
+
+        let dt = 0.016; // ~60 FPS frame
+        let hp = 100;
+        let max_hp = 100;
+        let dist = 7.0; // inside aggro (10.0) but outside attack (2.0)
+
+        // Tick 1: Idle -> Alert (target spotted).
+        let state = agent.tick(hp, max_hp, dist, 10.0, 2.0, dt);
+        assert_eq!(state, AiState::Alert);
+
+        // Tick 2: Alert -> Chase (target still visible, escalation).
+        let state = agent.tick(hp, max_hp, dist, 10.0, 2.0, dt);
+        assert_eq!(state, AiState::Chase);
+    }
+
+    #[test]
+    fn fsm_flee_low_hp() {
+        // Agent below 20% HP while chasing should transition to Flee.
+        let aggro = AggroRange::new(10.0, 2.0);
+        let mut agent = AiAgent::with_attack_cooldown(1, aggro, 0.5);
+
+        let dt = 0.016;
+
+        // Get to Chase state first (Idle -> Alert -> Chase).
+        agent.tick(100, 100, 7.0, 10.0, 2.0, dt);
+        agent.tick(100, 100, 7.0, 10.0, 2.0, dt);
+        assert_eq!(agent.fsm.current(), AiState::Chase);
+
+        // Now tick with low HP (10/100 = 10%, below the 20% threshold).
+        let state = agent.tick(10, 100, 7.0, 10.0, 2.0, dt);
+        assert_eq!(state, AiState::Flee);
+    }
+
+    #[test]
+    fn fsm_dead() {
+        // 0 HP from any state should result in Dead.
+        let aggro = AggroRange::new(10.0, 2.0);
+        let mut agent = AiAgent::with_attack_cooldown(1, aggro, 0.5);
+
+        let dt = 0.016;
+
+        // From Idle with 0 HP.
+        let state = agent.tick(0, 100, 50.0, 10.0, 2.0, dt);
+        assert_eq!(state, AiState::Dead);
+
+        // Also verify a second agent dying from Chase.
+        let aggro2 = AggroRange::new(10.0, 2.0);
+        let mut agent2 = AiAgent::with_attack_cooldown(2, aggro2, 0.5);
+        agent2.tick(100, 100, 7.0, 10.0, 2.0, dt);
+        agent2.tick(100, 100, 7.0, 10.0, 2.0, dt);
+        assert_eq!(agent2.fsm.current(), AiState::Chase);
+
+        let state2 = agent2.tick(0, 100, 7.0, 10.0, 2.0, dt);
+        assert_eq!(state2, AiState::Dead);
+    }
+
+    #[test]
+    fn fsm_attack_range() {
+        // Target close enough should trigger Attack from Chase.
+        let aggro = AggroRange::new(10.0, 2.0);
+        let mut agent = AiAgent::with_attack_cooldown(1, aggro, 0.5);
+
+        let dt = 0.016;
+
+        // Idle -> Alert -> Chase.
+        agent.tick(100, 100, 7.0, 10.0, 2.0, dt);
+        agent.tick(100, 100, 7.0, 10.0, 2.0, dt);
+        assert_eq!(agent.fsm.current(), AiState::Chase);
+
+        // Target now at distance 1.5 -- within attack range (2.0).
+        let state = agent.tick(100, 100, 1.5, 10.0, 2.0, dt);
+        assert_eq!(state, AiState::Attack);
+    }
+
+    // ── Attack timer tests ──────────────────────────────────────────────
+
+    #[test]
+    fn attack_timer_decrements_in_attack_state() {
+        let aggro = AggroRange::new(10.0, 2.0);
+        let mut agent = AiAgent::with_attack_cooldown(1, aggro, 1.0);
+
+        let dt = 0.016;
+
+        // Drive to Attack state: Idle -> Alert -> Chase -> Attack.
+        agent.tick(100, 100, 7.0, 10.0, 2.0, dt);
+        agent.tick(100, 100, 7.0, 10.0, 2.0, dt);
+        agent.tick(100, 100, 1.5, 10.0, 2.0, dt);
+        assert_eq!(agent.fsm.current(), AiState::Attack);
+
+        // First tick in Attack: timer starts at 0.0, so attack is ready
+        // immediately (first attack fires right away).
+        assert!(agent.is_attack_ready());
+
+        // Simulate the caller resetting the timer after an attack.
+        agent.reset_attack_timer();
+        assert!(!agent.is_attack_ready());
+
+        // Tick down: 1.0 - 0.5 = 0.5 (not ready yet).
+        agent.tick(100, 100, 1.5, 10.0, 2.0, 0.5);
+        assert!(!agent.is_attack_ready());
+
+        // Tick down: 0.5 - 0.6 = -0.1 (ready).
+        agent.tick(100, 100, 1.5, 10.0, 2.0, 0.6);
+        assert!(agent.is_attack_ready());
+    }
+
+    #[test]
+    fn attack_timer_resets_outside_attack_state() {
+        let aggro = AggroRange::new(10.0, 2.0);
+        let mut agent = AiAgent::with_attack_cooldown(1, aggro, 1.0);
+
+        let dt = 0.016;
+
+        // Drive to Attack state.
+        agent.tick(100, 100, 7.0, 10.0, 2.0, dt);
+        agent.tick(100, 100, 7.0, 10.0, 2.0, dt);
+        agent.tick(100, 100, 1.5, 10.0, 2.0, dt);
+        assert_eq!(agent.fsm.current(), AiState::Attack);
+
+        // Reset timer (simulating attack was performed).
+        agent.reset_attack_timer();
+        assert!(!agent.is_attack_ready());
+
+        // Target moves out of range -> back to Chase. Timer should reset.
+        agent.tick(100, 100, 5.0, 10.0, 2.0, dt);
+        assert_eq!(agent.fsm.current(), AiState::Chase);
+        // attack_timer should be 0.0 now (reset outside Attack).
+        assert!(agent.attack_timer <= 0.0);
+    }
 }

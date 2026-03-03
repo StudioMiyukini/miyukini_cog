@@ -107,4 +107,27 @@ impl Inventory {
     pub fn is_full(&self) -> bool {
         self.slots.iter().all(Option::is_some)
     }
+
+    /// Find the first item matching `base_id`, scanning left-to-right then top-to-bottom.
+    ///
+    /// Returns `Some((col, row))` or `None` if not found.
+    #[must_use]
+    pub fn find_item(&self, base_id: &str) -> Option<(usize, usize)> {
+        for (i, slot) in self.slots.iter().enumerate() {
+            if let Some(item) = slot {
+                if item.base_id == base_id {
+                    let col = i % INV_COLS;
+                    let row = i / INV_COLS;
+                    return Some((col, row));
+                }
+            }
+        }
+        None
+    }
+
+    /// Read-only access to the full slot array for GUI rendering.
+    #[must_use]
+    pub fn slots(&self) -> &[Option<ItemInstance>] {
+        &self.slots
+    }
 }

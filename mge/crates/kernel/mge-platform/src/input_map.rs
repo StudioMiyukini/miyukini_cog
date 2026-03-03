@@ -12,6 +12,8 @@ pub fn map_key_code(code: WinitKeyCode) -> KeyCode {
         WinitKeyCode::KeyW => KeyCode::W,
         WinitKeyCode::KeyA => KeyCode::A,
         WinitKeyCode::KeyS => KeyCode::S,
+        WinitKeyCode::KeyB => KeyCode::B,
+        WinitKeyCode::KeyC => KeyCode::C,
         WinitKeyCode::KeyD => KeyCode::D,
         WinitKeyCode::KeyE => KeyCode::E,
         WinitKeyCode::KeyF => KeyCode::F,

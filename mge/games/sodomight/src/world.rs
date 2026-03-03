@@ -153,6 +153,74 @@ pub enum WorldError {
 }
 
 // ---------------------------------------------------------------------------
+// Difficulty
+// ---------------------------------------------------------------------------
+
+/// Game difficulty, determining XP loss on player death (D2-style).
+///
+/// - `Normal`: no XP penalty.
+/// - `Nightmare`: 5 % of the current level's XP range is deducted.
+/// - `Hell`: 10 % of the current level's XP range is deducted.
+///
+/// The penalty never reduces the player's XP below the threshold of their
+/// current level, preventing an involuntary de-level.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Difficulty {
+    /// No XP loss on death.
+    #[default]
+    Normal,
+    /// 5 % of the current level's XP range is lost on death.
+    Nightmare,
+    /// 10 % of the current level's XP range is lost on death.
+    Hell,
+}
+
+/// Compute the XP penalty incurred on death for a given difficulty.
+///
+/// # Parameters
+/// - `difficulty` — active difficulty mode.
+/// - `current_xp` — player's cumulative XP **before** the penalty.
+/// - `level` — player's current level (1-based).
+/// - `table` — experience table used for level thresholds.
+///
+/// # Returns
+/// New cumulative XP after applying the penalty. The result is clamped to
+/// `table.xp_for_level(level)` so the player cannot drop below the floor of
+/// their current level.
+#[must_use]
+pub fn xp_death_penalty(
+    difficulty: Difficulty,
+    current_xp: u64,
+    level: u32,
+    table: &mge_arpg_stats::ExpTable,
+) -> u64 {
+    // Normal: no loss.
+    if difficulty == Difficulty::Normal || level == 0 {
+        return current_xp;
+    }
+
+    // Floor XP: the minimum required to be at `level` (cannot drop below it).
+    let floor_xp = table.xp_for_level(level).unwrap_or(0);
+
+    // Ceiling XP: threshold for the next level.
+    let ceil_xp = table.xp_for_level(level + 1).unwrap_or(current_xp);
+
+    // Level range: the span of XP covered by this level.
+    let range = ceil_xp.saturating_sub(floor_xp);
+
+    // Penalty fraction: 5 % for Nightmare, 10 % for Hell.
+    // Integer arithmetic — round the division down (conservative).
+    let penalty = match difficulty {
+        Difficulty::Normal => 0,
+        Difficulty::Nightmare => range / 20, // 5 % = range / 20
+        Difficulty::Hell => range / 10,      // 10 % = range / 10
+    };
+
+    // Deduct penalty, but never fall below the level floor.
+    current_xp.saturating_sub(penalty).max(floor_xp)
+}
+
+// ---------------------------------------------------------------------------
 // SodomightWorld
 // ---------------------------------------------------------------------------
 
@@ -230,6 +298,9 @@ pub struct SodomightWorld {
     /// `StatusTracker` per entity — used by `combat_tick` for the ECS-integrated
     /// status pipeline. Complements the legacy `status_effects` map.
     status_trackers: HashMap<EntityId, StatusTracker>,
+
+    /// Active difficulty level, governing XP loss on player death.
+    pub difficulty: Difficulty,
 }
 
 impl std::fmt::Debug for SodomightWorld {
@@ -296,6 +367,7 @@ impl SodomightWorld {
             monster_xp_rewards: HashMap::new(),
             monster_tc_ids: HashMap::new(),
             status_trackers: HashMap::new(),
+            difficulty: Difficulty::Normal,
         })
     }
 
@@ -1238,6 +1310,49 @@ impl SodomightWorld {
     }
 
     // -------------------------------------------------------------------
+    // Death and respawn
+    // -------------------------------------------------------------------
+
+    /// Respawn the player after death (D2-style).
+    ///
+    /// Steps performed:
+    /// 1. Apply XP penalty according to [`self.difficulty`].
+    /// 2. Restore HP and mana to their maximum values.
+    /// 3. Teleport the player to the town spawn point `(0.0, 0.0)`.
+    /// 4. Sync the ECS [`PlayerRecord`] to reflect the new position and HP.
+    ///
+    /// The XP penalty is calculated via [`xp_death_penalty`] and is guaranteed
+    /// never to reduce the player below their current level's XP floor.
+    pub fn respawn_player(&mut self) {
+        // 1. Apply XP penalty.
+        let new_xp = xp_death_penalty(
+            self.difficulty,
+            self.player_stats.level.experience,
+            self.player_stats.level.level,
+            &self.exp_table,
+        );
+        self.player_stats.level.experience = new_xp;
+
+        // 2. Restore HP and mana to full.
+        let max_life = self.player_stats.derived.max_life;
+        let max_mana = self.player_stats.derived.max_mana;
+        self.player_stats.current_life = max_life;
+        self.player_stats.current_mana = max_mana;
+
+        // 3 + 4. Move player to town and sync ECS component.
+        let _ = self
+            .ecs
+            .modify_component::<PlayerRecord>(self.player_id, |pr| {
+                pr.position = Position::new(0.0, 0.0);
+                pr.health.current = max_life.max(0) as u32;
+                pr.health.max = max_life.max(0) as u32;
+            });
+
+        self.combat_log
+            .push("You have been resurrected in town.".to_string());
+    }
+
+    // -------------------------------------------------------------------
     // Registration helpers
     // -------------------------------------------------------------------
 
@@ -1993,6 +2108,101 @@ mod tests {
         assert!(
             world.ecs.is_alive(drop_id),
             "ItemDrop entity must remain alive after a failed pickup"
+        );
+    }
+
+    // --- Test 20: death_xp_penalty_normal — Normal difficulty = 0 XP loss ---
+
+    #[test]
+    fn death_xp_penalty_normal() {
+        let table = mge_arpg_stats::ExpTable::d2_standard();
+
+        // Player at level 2 with some XP above the level-2 threshold.
+        let level2_xp = table.xp_for_level(2).unwrap(); // 500
+        let current_xp = level2_xp + 100;               // 600
+
+        let result = xp_death_penalty(Difficulty::Normal, current_xp, 2, &table);
+
+        assert_eq!(
+            result, current_xp,
+            "Normal difficulty must not deduct any XP"
+        );
+    }
+
+    // --- Test 21: death_xp_penalty_hell — Hell loses XP but stays at current level ---
+
+    #[test]
+    fn death_xp_penalty_hell() {
+        let table = mge_arpg_stats::ExpTable::d2_standard();
+
+        // Use level 2.  Threshold: level 2 = 500 XP, level 3 = 575 XP (500 * 1.15).
+        // Range = 575 - 500 = 75 XP.  10 % penalty = 7 XP.
+        // Start right at the top of level 2: current_xp = 574 (just below level 3).
+        let level2_floor = table.xp_for_level(2).unwrap();
+        let level3_ceil = table.xp_for_level(3).unwrap();
+        let current_xp = level3_ceil - 1; // just under level 3
+
+        let result = xp_death_penalty(Difficulty::Hell, current_xp, 2, &table);
+
+        // After penalty the player must still be at least at level 2's floor.
+        assert!(
+            result >= level2_floor,
+            "XP after Hell penalty ({result}) must be >= level 2 floor ({level2_floor})"
+        );
+
+        // A penalty must have been applied.
+        assert!(
+            result < current_xp,
+            "Hell difficulty must deduct XP (before={current_xp}, after={result})"
+        );
+
+        // The player must not have been de-levelled: computed level must still be 2.
+        let new_level = table.level_for_xp(result);
+        assert_eq!(
+            new_level, 2,
+            "Player must remain at level 2 after Hell death penalty (got {new_level})"
+        );
+    }
+
+    // --- Test 22: respawn_town — after respawn, position = (0.0, 0.0) and HP = max ---
+
+    #[test]
+    fn respawn_town() {
+        let mut world = make_world();
+
+        // Damage the player severely.
+        world.player_stats.current_life = 1;
+        world.player_stats.current_mana = 0;
+
+        // Move the player away from town.
+        world.set_player_position(20.0, 15.0);
+
+        // Respawn.
+        world.respawn_player();
+
+        // Position must be town spawn (0.0, 0.0).
+        let (px, py) = world.player_position();
+        assert!(
+            (px - 0.0).abs() < f32::EPSILON,
+            "After respawn, player X must be 0.0 (got {px})"
+        );
+        assert!(
+            (py - 0.0).abs() < f32::EPSILON,
+            "After respawn, player Y must be 0.0 (got {py})"
+        );
+
+        // HP must be fully restored.
+        let (hp, max_hp) = world.player_health();
+        assert_eq!(
+            hp, max_hp,
+            "After respawn, current HP ({hp}) must equal max HP ({max_hp})"
+        );
+
+        // Mana must also be fully restored.
+        let (mp, max_mp) = world.player_mana();
+        assert_eq!(
+            mp, max_mp,
+            "After respawn, current mana ({mp}) must equal max mana ({max_mp})"
         );
     }
 }
