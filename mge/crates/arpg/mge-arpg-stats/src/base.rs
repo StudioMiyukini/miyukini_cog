@@ -1,6 +1,7 @@
 // @id: MGE-ARPG-Stats-Base @do: base-stats @role: back-end @layer: 3 @human: miyuk
 //! Primary (base) stats for an ARPG character: Strength, Dexterity, Vitality, Energy.
 
+use crate::class::CharacterClass;
 use crate::stat_value::StatValue;
 
 /// The four primary attributes, mirroring D2-style stat allocation.
@@ -36,6 +37,22 @@ impl BaseStats {
             dexterity: StatValue::new(dex),
             vitality: StatValue::new(vit),
             energy: StatValue::new(ene),
+        }
+    }
+
+    /// Create the starting base stats for a given character class.
+    ///
+    /// These are the level-1 attribute values before any allocation.
+    #[must_use]
+    pub fn for_class(class: CharacterClass) -> Self {
+        match class {
+            CharacterClass::Necromancer => Self::new(15, 25, 15, 25),
+            CharacterClass::Sorceress => Self::new(10, 25, 10, 35),
+            CharacterClass::Paladin => Self::new(25, 20, 25, 15),
+            CharacterClass::Amazon => Self::new(20, 25, 20, 15),
+            CharacterClass::Barbarian => Self::new(30, 20, 25, 10),
+            CharacterClass::Druid => Self::new(15, 20, 25, 20),
+            CharacterClass::Assassin => Self::new(20, 20, 20, 25),
         }
     }
 }

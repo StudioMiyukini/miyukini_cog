@@ -3,6 +3,8 @@
 //!
 //! CRUD : creation, recherche par username, mise a jour du dernier login.
 
+use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
+use password_hash::{SaltString, rand_core::OsRng};
 use rusqlite::params;
 use uuid::Uuid;
 use chrono::Utc;
@@ -18,7 +20,7 @@ pub struct Account {
     pub id: String,
     /// Nom d'utilisateur (unique).
     pub username: String,
-    /// Hash bcrypt du mot de passe.
+    /// Hash Argon2 du mot de passe (chaine PHC).
     pub password_hash: String,
     /// Adresse email (unique).
     pub email: String,
@@ -37,7 +39,7 @@ pub struct Account {
 pub struct CreateAccountParams<'a> {
     /// Nom d'utilisateur souhaite.
     pub username: &'a str,
-    /// Hash bcrypt du mot de passe.
+    /// Hash Argon2 du mot de passe (chaine PHC).
     pub password_hash: &'a str,
     /// Adresse email.
     pub email: &'a str,
@@ -120,4 +122,35 @@ impl AccountDal<'_> {
             Ok(())
         })
     }
+}
+
+// =========================================================================
+// Password hashing utilities (Argon2id)
+// =========================================================================
+
+/// Hache un mot de passe en clair avec Argon2id et retourne la chaine PHC.
+///
+/// Utilise un sel aleatoire genere par `OsRng`. Le resultat est une chaine
+/// PHC portable (ex: `$argon2id$v=19$m=19456,...`).
+///
+/// Les appelants doivent stocker la valeur retournee dans
+/// `CreateAccountParams.password_hash`.
+pub fn hash_password(password: &str) -> PersistResult<String> {
+    let salt = SaltString::generate(&mut OsRng);
+    let hash = Argon2::default()
+        .hash_password(password.as_bytes(), &salt)
+        .map_err(|e| PersistenceError::PasswordHash(e.to_string()))?;
+    Ok(hash.to_string())
+}
+
+/// Verifie un mot de passe en clair contre un hash PHC Argon2.
+///
+/// Retourne `Ok(true)` si le mot de passe correspond, `Ok(false)` sinon.
+/// Ne retourne une erreur que si le hash est malformed (pas un PHC valide).
+pub fn verify_password(password: &str, hash: &str) -> PersistResult<bool> {
+    let parsed = PasswordHash::new(hash)
+        .map_err(|e| PersistenceError::PasswordHash(e.to_string()))?;
+    Ok(Argon2::default()
+        .verify_password(password.as_bytes(), &parsed)
+        .is_ok())
 }

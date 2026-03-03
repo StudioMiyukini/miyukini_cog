@@ -2,6 +2,7 @@
 //! Derived (secondary) stats computed from base attributes and class identity.
 
 use crate::base::BaseStats;
+use crate::class::CharacterClass;
 
 /// Maximum resistance cap (D2 standard: 75%).
 pub const RESISTANCE_CAP: i32 = 75;
@@ -42,21 +43,23 @@ pub struct DerivedStats {
 }
 
 impl DerivedStats {
-    /// Compute derived stats from base attributes and a class identifier.
+    /// Compute derived stats from base attributes and a character class.
     ///
-    /// The `class_id` is reserved for future per-class modifiers (e.g.
-    /// Barbarian gets more life per vitality). Currently all classes share
-    /// the same D2-approximate formulas.
+    /// Per-class coefficients (base HP, VIT-per-HP, base mana, ENE-per-mana)
+    /// allow each class to scale differently. Currently all classes share the
+    /// same D2-approximate formulas; class-specific tuning will follow.
     #[must_use]
-    pub fn from_base(base: &BaseStats, _class_id: &str) -> Self {
+    pub fn from_base(base: &BaseStats, class: CharacterClass) -> Self {
+        let (base_hp, vit_per_hp, base_mana, ene_per_mana) = Self::class_coefficients(class);
+
         let vit_eff = base.vitality.effective();
         let ene_eff = base.energy.effective();
         let str_eff = base.strength.effective();
         let dex_eff = base.dexterity.effective();
 
         Self {
-            max_life: vit_eff * 4 + 50,
-            max_mana: ene_eff * 2 + 10,
+            max_life: base_hp + vit_eff * vit_per_hp,
+            max_mana: base_mana + ene_eff * ene_per_mana,
             max_stamina: vit_eff * 2 + 80,
             armor: dex_eff / 4,
             min_damage: 1 + str_eff / 10,
@@ -71,6 +74,17 @@ impl DerivedStats {
             faster_cast_rate: 0,
             increased_attack_speed: 0,
         }
+    }
+
+    /// Returns `(base_hp, vit_per_hp, base_mana, ene_per_mana)` for a class.
+    ///
+    /// All classes currently share the Necromancer formula: `base_hp=45`,
+    /// `vit_per_hp=2`, `base_mana=25`, `ene_per_mana=2`. Per-class
+    /// differentiation will be added in a future task.
+    #[must_use]
+    const fn class_coefficients(_class: CharacterClass) -> (i32, i32, i32, i32) {
+        // Uniform for now — differentiation tracked as future work.
+        (45, 2, 25, 2)
     }
 
     /// Clamp all four elemental resistances to [`RESISTANCE_CAP`].

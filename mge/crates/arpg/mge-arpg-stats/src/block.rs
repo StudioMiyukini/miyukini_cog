@@ -2,6 +2,7 @@
 //! Complete stat block combining base, derived, current pools, and level.
 
 use crate::base::BaseStats;
+use crate::class::CharacterClass;
 use crate::derived::DerivedStats;
 use crate::level::CharacterLevel;
 
@@ -12,6 +13,8 @@ pub struct StatBlock {
     pub base: BaseStats,
     /// Computed secondary stats (life formula, mana formula, resistances, etc.).
     pub derived: DerivedStats,
+    /// Character class (determines derived-stat formulas).
+    pub class: CharacterClass,
     /// Current hit points (0 = dead).
     pub current_life: i32,
     /// Current mana points.
@@ -23,18 +26,19 @@ pub struct StatBlock {
 }
 
 impl StatBlock {
-    /// Build a new stat block from base attributes and a class identifier.
+    /// Build a new stat block from base attributes and a character class.
     ///
     /// All current pools start at their maximum values.
     #[must_use]
-    pub fn new(base: BaseStats, class_id: &str) -> Self {
-        let derived = DerivedStats::from_base(&base, class_id);
+    pub fn new(base: BaseStats, class: CharacterClass) -> Self {
+        let derived = DerivedStats::from_base(&base, class);
         Self {
             current_life: derived.max_life,
             current_mana: derived.max_mana,
             current_stamina: derived.max_stamina,
             base,
             derived,
+            class,
             level: CharacterLevel::new(),
         }
     }
@@ -67,7 +71,7 @@ impl StatBlock {
     /// Call this after modifying base stats (e.g. equipping an item that adds
     /// strength). Current pools are clamped to new maximums.
     pub fn recalculate(&mut self) {
-        self.derived = DerivedStats::from_base(&self.base, "");
+        self.derived = DerivedStats::from_base(&self.base, self.class);
         self.derived.apply_resistance_cap();
         self.current_life = self.current_life.min(self.derived.max_life);
         self.current_mana = self.current_mana.min(self.derived.max_mana);

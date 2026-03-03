@@ -123,6 +123,10 @@ tokio = { version = "1.0", features = ["rt-multi-thread", "net", "sync", "macros
 # Base de donnees
 rusqlite = { version = "0.32", features = ["bundled"] }
 
+# Securite — hashing mot de passe
+argon2 = { version = "0.5", features = ["rand"] }
+password-hash = { version = "0.5", features = ["getrandom"] }
+
 # Logging
 tracing = "0.1"
 tracing-subscriber = "0.3"

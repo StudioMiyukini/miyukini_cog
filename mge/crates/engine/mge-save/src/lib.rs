@@ -33,13 +33,16 @@ pub enum PersistenceError {
     /// Erreur lors de l'application d'une migration.
     #[error("Migration error: {0}")]
     Migration(String),
+    /// Erreur de hashing ou verification de mot de passe.
+    #[error("Password hash error: {0}")]
+    PasswordHash(String),
 }
 
 /// Alias de resultat pour la couche persistance.
 pub type PersistResult<T> = Result<T, PersistenceError>;
 
 pub use db::DbPool;
-pub use accounts::{Account, AccountDal, CreateAccountParams};
+pub use accounts::{Account, AccountDal, CreateAccountParams, hash_password, verify_password};
 pub use characters::{CharacterDal, CharacterRow};
 pub use items::{ItemAffix, ItemDal, ItemData, ItemRow};
 pub use skills::SkillDal;

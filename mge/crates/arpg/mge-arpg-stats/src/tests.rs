@@ -5,6 +5,7 @@
 mod tests {
     use crate::base::BaseStats;
     use crate::block::StatBlock;
+    use crate::class::CharacterClass;
     use crate::derived::DerivedStats;
     use crate::level::{CharacterLevel, ExpTable};
     use crate::stat_value::StatValue;
@@ -47,23 +48,23 @@ mod tests {
     #[test]
     fn derived_stats_life_from_vitality() {
         let base = BaseStats::new(10, 10, 30, 10);
-        let derived = DerivedStats::from_base(&base, "barbarian");
-        // max_life = 30 * 4 + 50 = 170
-        assert_eq!(derived.max_life, 170);
+        let derived = DerivedStats::from_base(&base, CharacterClass::Barbarian);
+        // max_life = 45 + 30 * 2 = 105
+        assert_eq!(derived.max_life, 105);
     }
 
     #[test]
     fn derived_stats_mana_from_energy() {
         let base = BaseStats::new(10, 10, 10, 50);
-        let derived = DerivedStats::from_base(&base, "sorceress");
-        // max_mana = 50 * 2 + 10 = 110
-        assert_eq!(derived.max_mana, 110);
+        let derived = DerivedStats::from_base(&base, CharacterClass::Sorceress);
+        // max_mana = 25 + 50 * 2 = 125
+        assert_eq!(derived.max_mana, 125);
     }
 
     #[test]
     fn derived_stats_resistance_cap() {
         let base = BaseStats::new(10, 10, 10, 10);
-        let mut derived = DerivedStats::from_base(&base, "paladin");
+        let mut derived = DerivedStats::from_base(&base, CharacterClass::Paladin);
         derived.fire_res = 100;
         derived.cold_res = 80;
         derived.light_res = 75;
@@ -139,7 +140,7 @@ mod tests {
     #[test]
     fn stat_block_take_damage_reduces_life() {
         let base = BaseStats::new(10, 10, 20, 10);
-        let mut block = StatBlock::new(base, "amazon");
+        let mut block = StatBlock::new(base, CharacterClass::Amazon);
         let initial = block.current_life;
         let dealt = block.take_damage(30);
         assert_eq!(dealt, 30);
@@ -149,7 +150,7 @@ mod tests {
     #[test]
     fn stat_block_take_damage_not_below_zero() {
         let base = BaseStats::new(10, 10, 10, 10);
-        let mut block = StatBlock::new(base, "necromancer");
+        let mut block = StatBlock::new(base, CharacterClass::Necromancer);
         let max = block.derived.max_life;
         let dealt = block.take_damage(max + 999);
         assert_eq!(dealt, max);
@@ -159,7 +160,7 @@ mod tests {
     #[test]
     fn stat_block_is_alive_dead_at_zero() {
         let base = BaseStats::new(10, 10, 10, 10);
-        let mut block = StatBlock::new(base, "druid");
+        let mut block = StatBlock::new(base, CharacterClass::Druid);
         assert!(block.is_alive());
         block.take_damage(block.derived.max_life);
         assert!(!block.is_alive());
@@ -168,10 +169,54 @@ mod tests {
     #[test]
     fn stat_block_restore_life_caps_at_max() {
         let base = BaseStats::new(10, 10, 20, 10);
-        let mut block = StatBlock::new(base, "paladin");
+        let mut block = StatBlock::new(base, CharacterClass::Paladin);
         let max_life = block.derived.max_life;
         block.take_damage(50);
         block.restore_life(9999);
         assert_eq!(block.current_life, max_life);
+    }
+
+    // ---- CharacterClass ----
+
+    #[test]
+    fn necro_base_stats() {
+        let base = BaseStats::for_class(CharacterClass::Necromancer);
+        assert_eq!(base.strength.effective(), 15);
+        assert_eq!(base.dexterity.effective(), 25);
+        assert_eq!(base.vitality.effective(), 15);
+        assert_eq!(base.energy.effective(), 25);
+    }
+
+    #[test]
+    fn necro_hp_level_1() {
+        let base = BaseStats::for_class(CharacterClass::Necromancer);
+        let derived = DerivedStats::from_base(&base, CharacterClass::Necromancer);
+        // base_hp(45) + vit(15) * vit_per_hp(2) = 45 + 30 = 75
+        assert_eq!(derived.max_life, 75);
+        // base_mana(25) + ene(25) * ene_per_mana(2) = 25 + 50 = 75
+        assert_eq!(derived.max_mana, 75);
+    }
+
+    #[test]
+    fn all_classes_have_stats() {
+        for class in CharacterClass::all() {
+            let base = BaseStats::for_class(class);
+            let derived = DerivedStats::from_base(&base, class);
+            // Every class must have positive life and mana.
+            assert!(derived.max_life > 0, "{class} has non-positive max_life");
+            assert!(derived.max_mana > 0, "{class} has non-positive max_mana");
+        }
+    }
+
+    #[test]
+    fn character_class_display() {
+        assert_eq!(CharacterClass::Necromancer.to_string(), "necromancer");
+        assert_eq!(CharacterClass::Barbarian.to_string(), "barbarian");
+    }
+
+    #[test]
+    fn character_class_as_str() {
+        assert_eq!(CharacterClass::Sorceress.as_str(), "sorceress");
+        assert_eq!(CharacterClass::Assassin.as_str(), "assassin");
     }
 }

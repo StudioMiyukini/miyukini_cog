@@ -17,7 +17,7 @@ use mge_arpg_items::{Equipment, Inventory, ItemInstance, ItemSlot};
 use mge_arpg_loot::{DropRoll, LootGenerator, TreasureClassRegistry};
 use mge_arpg_quest::{QuestDef, QuestJournal};
 use mge_arpg_skills::{SkillBook, SkillCooldownTracker, SkillDef, SkillId, SkillRegistry};
-use mge_arpg_stats::{BaseStats, ExpTable, StatBlock};
+use mge_arpg_stats::{BaseStats, CharacterClass, ExpTable, StatBlock};
 use mge_ecs::EntityId;
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
@@ -34,8 +34,23 @@ const DEFAULT_ATTACK_RANGE: f32 = 1.5;
 /// Default XP base reward per monster kill.
 const BASE_XP_PER_KILL: u64 = 50;
 
-/// Fixed RNG seed for deterministic debug sessions.
-const DEBUG_SEED: u64 = 0xDEAD_BEEF_CAFE;
+/// Minimum number of ticks between successive monster attacks (25 Hz → 2.0s).
+const ATTACK_COOLDOWN_TICKS: u64 = 50;
+
+/// Monster chase speed in world units per tick.
+const MONSTER_MOVE_SPEED: f32 = 0.04;
+
+/// Ticks between life regeneration ticks (25 Hz → every 4 seconds).
+const LIFE_REGEN_INTERVAL: u64 = 100;
+
+/// Ticks between mana regeneration ticks (25 Hz → every 2 seconds).
+const MANA_REGEN_INTERVAL: u64 = 50;
+
+/// Life restored per regen tick.
+const LIFE_REGEN_AMOUNT: i32 = 1;
+
+/// Mana restored per regen tick.
+const MANA_REGEN_AMOUNT: i32 = 2;
 
 // ---------------------------------------------------------------------------
 // Monster record (ECS-side data stored alongside each monster entity)
@@ -188,6 +203,12 @@ pub struct SodomightWorld {
 
     /// Active status effects per entity.
     status_effects: HashMap<EntityId, Vec<StatusEffect>>,
+
+    /// Last tick at which each monster successfully attacked.
+    attack_cooldowns: HashMap<EntityId, u64>,
+
+    /// The player's gold counter.
+    pub player_gold: u32,
 }
 
 impl std::fmt::Debug for SodomightWorld {
@@ -207,16 +228,16 @@ impl SodomightWorld {
     // Construction
     // -------------------------------------------------------------------
 
-    /// Create a new Sodomight world with a level-1 player at position (5, 5).
+    /// Create a new Sodomight world with a level-1 player at the map centre.
     ///
     /// All registries start empty. Call `register_skill`, `register_tc`, etc.
     /// to populate game data.
     pub fn new() -> Result<Self, WorldError> {
         let mut ecs = mge_ecs::World::new();
 
-        // Spawn the player entity.
+        // Spawn the player entity at the centre of the 32×32 map.
         let player_record = PlayerRecord {
-            position: Position::new(5.0, 5.0),
+            position: Position::new(16.0, 16.0),
             health: Health::new(100),
             level: Level::new(1),
             team: Team::PLAYER,
@@ -227,7 +248,8 @@ impl SodomightWorld {
             .map_err(|e| WorldError::EcsError(e.to_string()))?;
 
         // Build default player stats (all base stats = 10).
-        let player_stats = StatBlock::new(BaseStats::default(), "warrior");
+        // TODO: accept player-chosen class instead of defaulting to Barbarian.
+        let player_stats = StatBlock::new(BaseStats::default(), CharacterClass::Barbarian);
 
         Ok(Self {
             ecs,
@@ -244,10 +266,12 @@ impl SodomightWorld {
             combat_log: Vec::new(),
             pending_loot: Vec::new(),
             game_tick: 0,
-            rng: ChaCha8Rng::seed_from_u64(DEBUG_SEED),
+            rng: ChaCha8Rng::from_entropy(),
             exp_table: ExpTable::d2_standard(),
             ai_agents: HashMap::new(),
             status_effects: HashMap::new(),
+            attack_cooldowns: HashMap::new(),
+            player_gold: 0,
         })
     }
 
@@ -314,6 +338,16 @@ impl SodomightWorld {
 
         // 3. AI decisions and monster attacks.
         self.tick_ai();
+
+        // 4. Life / mana regeneration (D2-style slow passive regen).
+        if self.player_stats.is_alive() {
+            if self.game_tick.is_multiple_of(LIFE_REGEN_INTERVAL) {
+                self.player_stats.restore_life(LIFE_REGEN_AMOUNT);
+            }
+            if self.game_tick.is_multiple_of(MANA_REGEN_INTERVAL) {
+                self.player_stats.restore_mana(MANA_REGEN_AMOUNT);
+            }
+        }
     }
 
     /// Process all active status effects (poison, burn, etc.).
@@ -351,11 +385,18 @@ impl SodomightWorld {
     }
 
     /// Run AI evaluation for all monster agents.
+    ///
+    /// Steps per monster:
+    /// 1. FSM update (aggro evaluation).
+    /// 2. Chase movement: walk toward player when in Chase state.
+    /// 3. Attack with cooldown enforcement.
     fn tick_ai(&mut self) {
         let player_pos = self.player_position();
+        let current_tick = self.game_tick;
 
-        // Collect AI decisions first, then apply attacks.
+        // Collect AI decisions first, then apply.
         let mut attacks: Vec<EntityId> = Vec::new();
+        let mut moves: Vec<(EntityId, f32, f32)> = Vec::new();
 
         let agent_ids: Vec<EntityId> = self.ai_agents.keys().copied().collect();
 
@@ -384,13 +425,41 @@ impl SodomightWorld {
             if let Some(agent) = self.ai_agents.get_mut(monster_id) {
                 agent.update(Some(distance), hp_ratio);
 
-                if agent.fsm.can_attack() {
-                    attacks.push(*monster_id);
+                // Chase movement: walk toward the player.
+                if agent.fsm.can_move()
+                    && agent.fsm.is_hostile()
+                    && distance > agent.aggro.attack_range
+                    && distance > 0.01
+                {
+                    let inv = MONSTER_MOVE_SPEED / distance;
+                    let new_x = mx + dx * inv;
+                    let new_y = my + dy * inv;
+                    moves.push((*monster_id, new_x, new_y));
+                }
+
+                // Attack with cooldown.
+                if agent.fsm.can_attack() && agent.aggro.can_attack(distance) {
+                    let last = self.attack_cooldowns.get(monster_id).copied().unwrap_or(0);
+                    if current_tick.saturating_sub(last) >= ATTACK_COOLDOWN_TICKS {
+                        attacks.push(*monster_id);
+                    }
                 }
             }
         }
 
+        // Apply monster movement.
+        for (monster_id, new_x, new_y) in moves {
+            let _ = self
+                .ecs
+                .modify_component::<MonsterRecord>(monster_id, |mr| {
+                    mr.position = Position::new(new_x, new_y);
+                });
+        }
+
         // Process monster attacks against the player.
+        for monster_id in &attacks {
+            self.attack_cooldowns.insert(*monster_id, current_tick);
+        }
         for monster_id in attacks {
             self.monster_attack_player(monster_id);
         }
@@ -678,9 +747,8 @@ impl SodomightWorld {
             .ok_or(WorldError::InvalidLootIndex(drop_index))?;
 
         if drop.item_id == "gold" {
-            // Gold goes directly to... well, we don't have a gold counter yet.
-            // For now, log it.
-            let msg = format!("Picked up {} gold", drop.quantity);
+            self.player_gold = self.player_gold.saturating_add(drop.quantity);
+            let msg = format!("Picked up {} gold (total: {})", drop.quantity, self.player_gold);
             self.combat_log.push(msg.clone());
             // Remove the drop from the pile.
             let pile_mut = &mut self.pending_loot[loot_index];
@@ -957,7 +1025,7 @@ impl SodomightWorld {
         self.ecs
             .get_component::<PlayerRecord>(self.player_id)
             .map(|pr| (pr.position.x(), pr.position.y()))
-            .unwrap_or((5.0, 5.0))
+            .unwrap_or((16.0, 16.0))
     }
 
     /// Returns the player's current and maximum health.
@@ -974,6 +1042,44 @@ impl SodomightWorld {
             self.player_stats.current_mana,
             self.player_stats.derived.max_mana,
         )
+    }
+
+    /// Use a health potion from the player's inventory.
+    ///
+    /// Scans the inventory for the first `minor_health_potion` and consumes it,
+    /// restoring 50 HP. Returns a message describing the result.
+    pub fn use_health_potion(&mut self) -> Result<String, WorldError> {
+        let slot = self
+            .player_inventory
+            .find_item("minor_health_potion")
+            .ok_or(WorldError::SkillError("No health potions".to_string()))?;
+        let _ = self.player_inventory.remove(slot.0, slot.1);
+        self.player_stats.restore_life(50);
+        let msg = format!(
+            "Used health potion (HP: {}/{})",
+            self.player_stats.current_life, self.player_stats.derived.max_life
+        );
+        self.combat_log.push(msg.clone());
+        Ok(msg)
+    }
+
+    /// Use a mana potion from the player's inventory.
+    ///
+    /// Scans the inventory for the first `minor_mana_potion` and consumes it,
+    /// restoring 30 MP. Returns a message describing the result.
+    pub fn use_mana_potion(&mut self) -> Result<String, WorldError> {
+        let slot = self
+            .player_inventory
+            .find_item("minor_mana_potion")
+            .ok_or(WorldError::SkillError("No mana potions".to_string()))?;
+        let _ = self.player_inventory.remove(slot.0, slot.1);
+        self.player_stats.restore_mana(30);
+        let msg = format!(
+            "Used mana potion (MP: {}/{})",
+            self.player_stats.current_mana, self.player_stats.derived.max_mana
+        );
+        self.combat_log.push(msg.clone());
+        Ok(msg)
     }
 
     /// Move the player to a new position.
@@ -1038,8 +1144,8 @@ mod tests {
         assert!(world.player_stats.current_mana > 0);
 
         let (px, py) = world.player_position();
-        assert!((px - 5.0).abs() < f32::EPSILON);
-        assert!((py - 5.0).abs() < f32::EPSILON);
+        assert!((px - 16.0).abs() < f32::EPSILON);
+        assert!((py - 16.0).abs() < f32::EPSILON);
     }
 
     // --- Test 2: Spawn monster and verify ---

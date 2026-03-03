@@ -4,7 +4,7 @@
 //! Tous les tests utilisent `DbPool::in_memory()` -- aucun fichier disque requis.
 //! Chaque test cree sa propre base, donc les tests sont isoles et parallelisables.
 
-use crate::accounts::{AccountDal, CreateAccountParams};
+use crate::accounts::{AccountDal, CreateAccountParams, hash_password, verify_password};
 use crate::characters::CharacterDal;
 use crate::items::{ItemAffix, ItemDal, ItemData};
 use crate::quest_flags::{QuestFlagDal, QuestState};
@@ -69,6 +69,29 @@ fn test_account_not_found() {
     let dal = AccountDal(&pool);
     let result = dal.find_by_username("nobody");
     assert!(matches!(result, Err(PersistenceError::NotFound { .. })));
+}
+
+#[test]
+fn account_hash_verify() {
+    let password = "S3cur3P@ssw0rd!";
+    let hashed = hash_password(password).expect("hash_password should succeed");
+
+    // Le hash PHC doit commencer par $argon2
+    assert!(hashed.starts_with("$argon2"), "expected PHC argon2 prefix, got: {hashed}");
+
+    // La verification avec le bon mot de passe doit reussir
+    let ok = verify_password(password, &hashed).expect("verify_password should succeed");
+    assert!(ok, "correct password must verify as true");
+}
+
+#[test]
+fn account_wrong_password() {
+    let password = "RightPassword";
+    let hashed = hash_password(password).expect("hash_password should succeed");
+
+    // Un mauvais mot de passe doit retourner Ok(false), pas une erreur
+    let wrong = verify_password("WrongPassword", &hashed).expect("verify_password should succeed");
+    assert!(!wrong, "wrong password must verify as false");
 }
 
 // =========================================================================

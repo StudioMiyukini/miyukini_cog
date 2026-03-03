@@ -10,6 +10,7 @@
 
 pub mod base;
 pub mod block;
+pub mod class;
 pub mod derived;
 pub mod level;
 pub mod stat_value;
@@ -19,6 +20,7 @@ mod tests;
 
 pub use base::BaseStats;
 pub use block::StatBlock;
+pub use class::CharacterClass;
 pub use derived::DerivedStats;
 pub use level::{CharacterLevel, ExpTable};
 pub use stat_value::StatValue;
