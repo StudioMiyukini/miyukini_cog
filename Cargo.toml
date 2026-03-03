@@ -19,6 +19,9 @@ members = [
     "crates/logisticssteward",
     
     # === Toolkits (strate 5-6) ===
+    "crates/miyuki-ui-tokens",
+    "crates/miyuki-ui-egui",
+    "crates/miyuki-ui-dioxus",
     "crates/miyusql",
     "crates/miyucalc",
     "crates/miyutext",
@@ -85,6 +88,7 @@ members = [
     "crates/miyukiniwatch",
     "crates/miyukinibb",
     "crates/jaymanga",
+    "crates/miyucloud",
 
     # === Alicia Home Assistante ===
     "crates/miyuvoicecapture",
@@ -112,6 +116,7 @@ members = [
     "apps/jaymanga",
     "apps/miyuclicker",
     "apps/miou-llm-bridge",
+    "apps/miyucloud",
 
     # === MWS Origin ===
     "apps/origin",

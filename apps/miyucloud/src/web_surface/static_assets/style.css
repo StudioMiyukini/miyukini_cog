@@ -1,0 +1,319 @@
+/*
+ * MiyuCloud -- Page de partage web
+ *
+ * Design : fond sombre, typographie lisible, responsive mobile.
+ * Zero framework, zero CDN (LOI-1).
+ * Accessible (couleurs contrastees, focus visible, aria).
+ */
+
+/* ============================================================
+   Reset & Base
+   ============================================================ */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+    background: #1a1a2e;
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.6;
+    padding: 16px;
+}
+
+/* ============================================================
+   Layout
+   ============================================================ */
+
+.container {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+/* ============================================================
+   Header
+   ============================================================ */
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #a78bfa;
+    letter-spacing: 0.5px;
+}
+
+/* ============================================================
+   Card
+   ============================================================ */
+
+.card {
+    width: 100%;
+    background: #16213e;
+    border: 1px solid #2d3748;
+    border-radius: 12px;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+}
+
+/* ============================================================
+   File info
+   ============================================================ */
+
+.file-icon,
+.lock-icon,
+.expired-icon {
+    margin-bottom: 4px;
+}
+
+.file-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: #f1f5f9;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.file-size {
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+.file-expires {
+    font-size: 13px;
+    color: #64748b;
+    font-style: italic;
+}
+
+.download-count {
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    text-decoration: none;
+    line-height: 1;
+}
+
+.btn:focus-visible {
+    outline: 2px solid #a78bfa;
+    outline-offset: 2px;
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-primary {
+    background: #7c3aed;
+    color: #ffffff;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #6d28d9;
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+}
+
+.btn-secondary {
+    background: #374151;
+    color: #e2e8f0;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #4b5563;
+}
+
+/* ============================================================
+   Password form
+   ============================================================ */
+
+.password-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.password-label {
+    font-size: 13px;
+    color: #94a3b8;
+    text-align: left;
+}
+
+.password-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.password-input {
+    flex: 1;
+    padding: 10px 14px;
+    background: #1e293b;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    color: #e2e8f0;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.password-input:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+}
+
+.password-input::placeholder {
+    color: #64748b;
+}
+
+.error-text {
+    font-size: 13px;
+    color: #ef4444;
+    text-align: left;
+}
+
+/* ============================================================
+   Loading
+   ============================================================ */
+
+.loading-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid #374151;
+    border-top-color: #7c3aed;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   Footer
+   ============================================================ */
+
+.footer {
+    padding: 8px 0;
+    text-align: center;
+}
+
+.footer p {
+    font-size: 12px;
+    color: #475569;
+}
+
+/* ============================================================
+   Utilities
+   ============================================================ */
+
+.hidden {
+    display: none !important;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 480px) {
+    .card {
+        padding: 24px 16px;
+        border-radius: 8px;
+    }
+
+    .file-name {
+        font-size: 18px;
+    }
+
+    .btn {
+        padding: 12px 20px;
+        font-size: 14px;
+        width: 100%;
+    }
+
+    .password-row {
+        flex-direction: column;
+    }
+
+    .password-row .btn {
+        width: 100%;
+    }
+}
+
+/* ============================================================
+   High contrast / reduced motion
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .loading-spinner {
+        animation-duration: 2s;
+    }
+
+    .btn {
+        transition: none;
+    }
+}
+
+@media (prefers-contrast: high) {
+    .card {
+        border-color: #94a3b8;
+    }
+
+    .password-input {
+        border-color: #94a3b8;
+    }
+}
