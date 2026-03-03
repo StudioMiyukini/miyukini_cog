@@ -4,6 +4,7 @@
 
 pub mod config;
 pub mod content;
+pub mod data_loader;
 pub mod error;
 pub mod state;
 pub mod world;

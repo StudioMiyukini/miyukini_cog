@@ -1,0 +1,17 @@
+# @id: Sodomight-Skill-BoneSpear @do: skill-def @role: back-end @layer: 4 @human: miyuk
+# Bone Spear -- Arbre Os (tree=1)
+
+[skill]
+id = "necro_bone_spear"
+name = "Bone Spear"
+tree = 1
+kind = "Projectile"
+damage_type = "Physical"
+max_level = 20
+mana_cost_base = 9.0
+mana_cost_per_level = 0.5
+cooldown_ms = 0
+base_damage_min = 5
+base_damage_max = 10
+damage_per_level = 3
+prerequisites = ["necro_teeth"]

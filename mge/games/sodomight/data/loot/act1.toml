@@ -1,0 +1,20 @@
+# @id: Sodomight-Loot-Act1 @do: loot-tables @role: back-end @layer: 4 @human: miyuk
+# Tables de loot Act 1
+
+[[treasure_class]]
+id = "tc_fallen"
+monster_id = "fallen"
+items = ["gold", "short_sword", "buckler"]
+chances = [60, 25, 15]
+
+[[treasure_class]]
+id = "tc_zombie"
+monster_id = "zombie"
+items = ["gold", "minor_health_potion", "short_sword"]
+chances = [55, 30, 15]
+
+[[treasure_class]]
+id = "tc_skeleton"
+monster_id = "skeleton"
+items = ["gold", "minor_health_potion", "buckler", "cap"]
+chances = [50, 25, 15, 10]

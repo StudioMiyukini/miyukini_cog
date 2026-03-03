@@ -1,0 +1,17 @@
+# @id: Sodomight-Skill-AmplifyDamage @do: skill-def @role: back-end @layer: 4 @human: miyuk
+# Amplify Damage -- Arbre Maledictions (tree=2)
+
+[skill]
+id = "necro_amplify_damage"
+name = "Amplify Damage"
+tree = 2
+kind = "Curse"
+damage_type = "Physical"
+max_level = 20
+mana_cost_base = 4.0
+mana_cost_per_level = 0.0
+cooldown_ms = 0
+base_damage_min = 0
+base_damage_max = 0
+damage_per_level = 0
+prerequisites = []
