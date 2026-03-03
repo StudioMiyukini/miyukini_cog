@@ -12,6 +12,7 @@ use crate::content::MonsterDef;
 use mge_arpg_ai::{AggroRange, AiAgent};
 use mge_arpg_combat::{
     AttackerStats, CombatEvent, CombatProcessor, DamageType, DefenderStats, StatusEffect,
+    StatusTracker, StatusType,
 };
 use mge_arpg_entity::{Health, Level, Position, Team};
 use mge_arpg_items::{Equipment, Inventory, ItemInstance, ItemSlot};
@@ -216,6 +217,10 @@ pub struct SodomightWorld {
 
     /// Per-monster treasure class id overrides (from `MonsterDef`).
     monster_tc_ids: HashMap<EntityId, String>,
+
+    /// `StatusTracker` per entity — used by `combat_tick` for the ECS-integrated
+    /// status pipeline. Complements the legacy `status_effects` map.
+    status_trackers: HashMap<EntityId, StatusTracker>,
 }
 
 impl std::fmt::Debug for SodomightWorld {
@@ -281,6 +286,7 @@ impl SodomightWorld {
             player_gold: 0,
             monster_xp_rewards: HashMap::new(),
             monster_tc_ids: HashMap::new(),
+            status_trackers: HashMap::new(),
         })
     }
 
@@ -405,26 +411,26 @@ impl SodomightWorld {
         let entity_ids: Vec<EntityId> = self.status_effects.keys().copied().collect();
 
         for entity_id in &entity_ids {
-            let mut poison_damage = 0;
+            let mut poison_damage = 0i32;
 
             if let Some(effects) = self.status_effects.get_mut(entity_id) {
                 for effect in effects.iter_mut() {
-                    if let StatusEffect::Poisoned {
-                        damage_per_tick,
-                        ticks_remaining,
-                    } = effect
-                    {
-                        if *ticks_remaining > 0 {
-                            poison_damage += *damage_per_tick;
-                        }
+                    // Accumulate poison damage from active Poison effects.
+                    // `potency` is treated as damage per tick (i32 truncation is
+                    // intentional — sub-1 DPS effects are simply floored to 0).
+                    if effect.kind == StatusType::Poison && effect.remaining_ms > 0 {
+                        #[allow(clippy::cast_possible_truncation)]
+                        let dmg = effect.potency as i32;
+                        poison_damage += dmg;
                     }
-                    let _ = effect.tick();
+                    // Advance the effect timer by one tick.
+                    effect.remaining_ms = effect.remaining_ms.saturating_sub(TICK_DELTA_MS);
                 }
-                // Remove expired effects.
-                effects.retain(|e| !e.is_expired());
+                // Remove fully expired effects.
+                effects.retain(|e| e.remaining_ms > 0);
             }
 
-            // Apply poison damage.
+            // Apply accumulated poison damage for this tick.
             if poison_damage > 0 {
                 self.apply_damage_to_entity(*entity_id, poison_damage);
             }
@@ -1183,6 +1189,148 @@ impl SodomightWorld {
     pub fn ai_agents_keys(&self) -> impl Iterator<Item = &EntityId> {
         self.ai_agents.keys()
     }
+
+    /// Apply a status effect to an entity's [`StatusTracker`] (ECS-integrated path).
+    ///
+    /// This is the preferred mutation point for the `combat_tick` pipeline.
+    /// For the legacy `Vec<StatusEffect>` path use [`add_status_effect`].
+    pub fn apply_status_tracked(&mut self, entity_id: EntityId, effect: StatusEffect) {
+        self.status_trackers
+            .entry(entity_id)
+            .or_default()
+            .apply(effect);
+    }
+
+    /// Returns a shared reference to the [`StatusTracker`] for `entity_id`, if any.
+    #[must_use]
+    pub fn status_tracker(&self, entity_id: EntityId) -> Option<&StatusTracker> {
+        self.status_trackers.get(&entity_id)
+    }
+
+    // -------------------------------------------------------------------
+    // ECS combat tick — integrates AI FSM + StatusTracker into the loop
+    // -------------------------------------------------------------------
+
+    /// Execute the combat sub-tick for one simulation step.
+    ///
+    /// Designed to be called from [`tick`] (or directly by the game loop when a
+    /// finer-grained split is needed).  Steps, in order:
+    ///
+    /// 1. **AI FSM tick** — calls [`AiAgent::tick`] for every live monster,
+    ///    advancing the finite state machine (Idle → Alert → Chase → Attack …).
+    /// 2. **Status tick** — calls [`StatusTracker::tick`] for every entity that
+    ///    has an active tracker, decrementing timers and pruning expired effects.
+    /// 3. **Dead-entity cleanup** — marks every monster whose HP has reached 0
+    ///    for removal: awards XP to the player, generates loot, and despawns the
+    ///    ECS entity.
+    pub fn combat_tick(&mut self, dt_ms: u32) {
+        // Convert milliseconds to seconds for APIs that take seconds.
+        #[allow(clippy::cast_precision_loss)]
+        let dt_secs: f32 = dt_ms as f32 / 1_000.0;
+
+        let player_pos = self.player_position();
+
+        // ----------------------------------------------------------------
+        // 1. AI FSM tick — advance state machines for every live monster.
+        // ----------------------------------------------------------------
+        // Snapshot the keys first to satisfy the borrow checker: we need
+        // `&mut self.ai_agents` while also reading `self.ecs`.
+        let agent_ids: Vec<EntityId> = self.ai_agents.keys().copied().collect();
+
+        for monster_id in &agent_ids {
+            if !self.ecs.is_alive(*monster_id) {
+                continue;
+            }
+
+            let mr = match self.ecs.get_component::<MonsterRecord>(*monster_id) {
+                Ok(r) => r.clone(),
+                Err(_) => continue,
+            };
+
+            if !mr.health.is_alive() {
+                continue;
+            }
+
+            // Compute inputs for agent.tick().
+            let mx = mr.position.x();
+            let my = mr.position.y();
+            let dx = player_pos.0 - mx;
+            let dy = player_pos.1 - my;
+            let dist = (dx * dx + dy * dy).sqrt();
+
+            let current_hp = i32::try_from(mr.health.current).unwrap_or(i32::MAX);
+            let max_hp = i32::try_from(mr.health.max).unwrap_or(i32::MAX);
+
+            // Extract aggro thresholds before taking &mut borrow on the agent.
+            let (sight, attack) = self
+                .ai_agents
+                .get(monster_id)
+                .map_or((DEFAULT_SIGHT_RANGE, DEFAULT_ATTACK_RANGE), |a| {
+                    (a.aggro.sight_range, a.aggro.attack_range)
+                });
+
+            if let Some(agent) = self.ai_agents.get_mut(monster_id) {
+                agent.tick(current_hp, max_hp, dist, sight, attack, dt_secs);
+            }
+        }
+
+        // ----------------------------------------------------------------
+        // 2. Status tick — advance all active StatusTrackers.
+        // ----------------------------------------------------------------
+        let tracker_ids: Vec<EntityId> = self.status_trackers.keys().copied().collect();
+
+        for entity_id in &tracker_ids {
+            if let Some(tracker) = self.status_trackers.get_mut(entity_id) {
+                tracker.tick(dt_ms);
+            }
+        }
+
+        // Prune trackers with no remaining effects (check Poison as a sentinel;
+        // trackers for entities without any active type are left in place and
+        // will be cleaned up when the entity is despawned).
+        // Note: StatusTracker does not expose an `is_empty()` — we leave
+        // exhausted trackers; they are freed during dead-entity cleanup.
+
+        // ----------------------------------------------------------------
+        // 3. Dead-entity cleanup — collect monsters with HP == 0.
+        // ----------------------------------------------------------------
+        let all_monster_ids: Vec<EntityId> = self.ai_agents.keys().copied().collect();
+        let mut dead: Vec<EntityId> = Vec::new();
+
+        for monster_id in &all_monster_ids {
+            if !self.ecs.is_alive(*monster_id) {
+                continue;
+            }
+
+            if let Ok(mr) = self.ecs.get_component::<MonsterRecord>(*monster_id) {
+                if !mr.health.is_alive() {
+                    dead.push(*monster_id);
+                }
+            }
+        }
+
+        // Process each dead monster: XP + loot + despawn.
+        for monster_id in dead {
+            let mr = match self.ecs.get_component::<MonsterRecord>(monster_id) {
+                Ok(r) => r.clone(),
+                Err(_) => continue,
+            };
+
+            // handle_monster_death pushes all messages to self.combat_log
+            // internally; we pass a throwaway Vec to satisfy the signature.
+            let mut death_msgs: Vec<String> = Vec::new();
+            self.handle_monster_death(monster_id, &mr, &mut death_msgs);
+            // Messages are already mirrored to self.combat_log by the callee.
+            drop(death_msgs);
+
+            // Remove the ECS entity.
+            let _ = self.ecs.despawn(monster_id);
+
+            // Clean up side-maps that handle_monster_death may not have reached.
+            self.attack_cooldowns.remove(&monster_id);
+            self.status_trackers.remove(&monster_id);
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1552,11 +1700,14 @@ mod tests {
             .unwrap();
 
         // Apply poison: 5 damage per tick for 3 ticks.
+        // `potency` = damage per tick, `remaining_ms` = 3 * TICK_DELTA_MS so
+        // that the effect stays active for exactly three ticks before expiring.
         world.add_status_effect(
             monster_id,
-            StatusEffect::Poisoned {
-                damage_per_tick: 5,
-                ticks_remaining: 3,
+            StatusEffect {
+                kind: StatusType::Poison,
+                potency: 5.0,
+                remaining_ms: 3 * TICK_DELTA_MS,
             },
         );
 
@@ -1601,5 +1752,115 @@ mod tests {
             .filter(|m| m.contains("Level up"))
             .count();
         assert!(level_up_count > 1);
+    }
+
+    // --- Test 16: combat_tick — StatusTracker timer decrements ---
+    //
+    // Applies a Poison effect via `apply_status_tracked`, calls `combat_tick`,
+    // and verifies that `remaining_ms` has been decremented by `dt_ms`.
+
+    #[test]
+    fn combat_system_status_tick() {
+        let mut world = make_world();
+
+        let monster_id = world
+            .spawn_monster("StatusBeast", 10.0, 10.0, 1, 100)
+            .unwrap();
+
+        // Apply a 500 ms poison via the tracker path.
+        world.apply_status_tracked(
+            monster_id,
+            StatusEffect {
+                kind: StatusType::Poison,
+                remaining_ms: 500,
+                potency: 5.0,
+            },
+        );
+
+        // Verify the effect is registered.
+        assert!(
+            world
+                .status_tracker(monster_id)
+                .is_some_and(|t| t.is_affected(StatusType::Poison)),
+            "Poison should be active before tick"
+        );
+
+        // Advance by TICK_DELTA_MS (40 ms).
+        world.combat_tick(TICK_DELTA_MS);
+
+        // remaining_ms should now be 500 - 40 = 460.
+        let tracker = world
+            .status_tracker(monster_id)
+            .expect("tracker should still be present");
+        assert!(
+            tracker.is_affected(StatusType::Poison),
+            "Poison should still be active after a single tick"
+        );
+        // We cannot read remaining_ms directly (private field), but we can
+        // verify the effect has NOT expired yet (500 ms > 40 ms tick).
+        // The effect would only expire if remaining_ms reached 0.
+        // A second check: tick 20 more times (20 * 40 = 800 ms > 500 ms total).
+        for _ in 0..20 {
+            world.combat_tick(TICK_DELTA_MS);
+        }
+        // After 21 ticks (840 ms) the 500 ms effect must have expired.
+        let still_poisoned = world
+            .status_tracker(monster_id)
+            .is_some_and(|t| t.is_affected(StatusType::Poison));
+        assert!(
+            !still_poisoned,
+            "Poison effect should have expired after enough ticks"
+        );
+    }
+
+    // --- Test 17: combat_tick — dead entity cleanup + XP ---
+    //
+    // Spawns a monster, kills it directly (set HP to 0 via modify_component),
+    // then calls `combat_tick` and verifies the entity is no longer alive and
+    // that the player gained XP.
+
+    #[test]
+    fn combat_system_dead_cleanup() {
+        let mut world = make_world();
+
+        let monster_id = world
+            .spawn_monster("DeadDummy", 5.0, 5.0, 1, 50)
+            .unwrap();
+
+        // Zero out the monster's HP directly in the ECS to simulate a kill.
+        world
+            .ecs
+            .modify_component::<MonsterRecord>(monster_id, |mr| {
+                mr.health.current = 0;
+            })
+            .unwrap();
+
+        // Verify the monster reads as dead before the tick.
+        let mr = world.ecs.get_component::<MonsterRecord>(monster_id).unwrap();
+        assert!(!mr.health.is_alive(), "Monster should be dead before combat_tick");
+
+        let xp_before = world.player_stats.level.experience;
+
+        // combat_tick should detect the dead entity and award XP.
+        world.combat_tick(TICK_DELTA_MS);
+
+        // The entity should have been despawned.
+        assert!(
+            !world.ecs.is_alive(monster_id),
+            "Dead entity must be despawned after combat_tick"
+        );
+
+        // The AI agent map should no longer contain the dead monster.
+        assert!(
+            !world.ai_agents.contains_key(&monster_id),
+            "AI agent entry must be removed after death cleanup"
+        );
+
+        // XP should have been awarded to the player.
+        let xp_after = world.player_stats.level.experience;
+        assert!(
+            xp_after > xp_before,
+            "Player should have gained XP when monster was cleaned up (before={xp_before}, after={xp_after})"
+        );
     }
 }
