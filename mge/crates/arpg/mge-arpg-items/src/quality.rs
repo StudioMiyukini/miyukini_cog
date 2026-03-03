@@ -151,6 +151,192 @@ pub static AFFIX_POOL_SUFFIXES: &[AffixDef] = &[
 ];
 
 // ============================================================================
+// Rare item generation
+// ============================================================================
+
+/// Name component tables for procedural Rare item naming.
+pub const RARE_PREFIXES: &[&str] = &[
+    "Doom", "Storm", "Death", "Blood", "Shadow",
+    "Plague", "Grim", "Skull", "Bone", "Dark",
+];
+
+/// Name component tables for procedural Rare item naming.
+pub const RARE_SUFFIXES: &[&str] = &[
+    "Bane", "Bite", "Fang", "Mark", "Touch",
+    "Grip", "Gaze", "Brow", "Song", "Star",
+];
+
+/// A single affix rolled onto a Rare or higher-quality item.
+///
+/// Carries the definition ID, stat key, and the rolled value.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct AffixInstance {
+    /// The `AffixDef` identifier this instance was generated from.
+    pub def_id: String,
+    /// The stat key this affix modifies (e.g. `"strength"`, `"fire_res"`).
+    pub stat: String,
+    /// The rolled value for this instance.
+    pub value: i32,
+}
+
+/// Result of generating a Rare-quality item.
+///
+/// A Rare item has 2-6 affixes (a mix of prefixes and suffixes) and a
+/// procedurally generated name from `RARE_PREFIXES` + `RARE_SUFFIXES`.
+#[derive(Debug, Clone)]
+pub struct RareItemResult {
+    /// The base item type identifier.
+    pub base_id: String,
+    /// Procedurally generated name (e.g. `"Doom Bane"`).
+    pub name: String,
+    /// All affixes rolled on this item.
+    pub affixes: Vec<AffixInstance>,
+}
+
+/// Affix count weights: index 0 = 2 affixes, index 4 = 6 affixes.
+/// Weights: 2=10%, 3=25%, 4=30%, 5=25%, 6=10%.
+const RARE_AFFIX_COUNT_WEIGHTS: &[u32] = &[10, 25, 30, 25, 10];
+
+/// Sample a weighted index from the given weight slice.
+///
+/// Returns `0` if the slice is empty or total weight is zero.
+fn sample_weighted(weights: &[u32], rng: &mut impl Rng) -> usize {
+    let total: u32 = weights.iter().sum();
+    if total == 0 {
+        return 0;
+    }
+    let mut roll = rng.gen_range(0..total);
+    for (i, &w) in weights.iter().enumerate() {
+        if roll < w {
+            return i;
+        }
+        roll -= w;
+    }
+    weights.len().saturating_sub(1)
+}
+
+/// Generate the affixes for a Rare item.
+///
+/// Rolls 2-6 affixes weighted by `RARE_AFFIX_COUNT_WEIGHTS`, splits them
+/// evenly between prefixes and suffixes (rounded towards prefixes), filters
+/// the pool by `alvl`, and rejects duplicate `def_id` entries.
+///
+/// # Arguments
+/// * `base_id` - The base item identifier.
+/// * `alvl`    - Area/item level used to filter eligible affixes.
+/// * `rng`     - Mutable reference to any `Rng` implementor.
+///
+/// # Returns
+/// A `RareItemResult` with a random name and rolled affixes.
+#[must_use]
+pub fn generate_rare_item(
+    base_id: &str,
+    alvl: i32,
+    rng: &mut impl Rng,
+) -> RareItemResult {
+    let alvl_u32 = u32::try_from(alvl.max(0)).unwrap_or(0);
+
+    // Determine number of affixes: weight index 0 = 2, index 4 = 6.
+    let count_idx = sample_weighted(RARE_AFFIX_COUNT_WEIGHTS, rng);
+    let affix_count = count_idx + 2; // 2..=6
+
+    // Split: first half (rounded up) are prefixes, rest are suffixes.
+    let prefix_count = affix_count.div_ceil(2);
+    let suffix_count = affix_count - prefix_count;
+
+    // Build eligible pools filtered by alvl — fall back to full pool if empty.
+    let eligible_prefixes: Vec<&AffixDef> = AFFIX_POOL_PREFIXES
+        .iter()
+        .filter(|d| d.required_alvl <= alvl_u32)
+        .collect();
+
+    let eligible_suffixes: Vec<&AffixDef> = AFFIX_POOL_SUFFIXES
+        .iter()
+        .filter(|d| d.required_alvl <= alvl_u32)
+        .collect();
+
+    // Keep full-pool fallbacks alive for the duration of this call.
+    let full_prefix_pool: Vec<&AffixDef> = AFFIX_POOL_PREFIXES.iter().collect();
+    let full_suffix_pool: Vec<&AffixDef> = AFFIX_POOL_SUFFIXES.iter().collect();
+
+    let prefix_pool: &[&AffixDef] = if eligible_prefixes.is_empty() {
+        full_prefix_pool.as_slice()
+    } else {
+        eligible_prefixes.as_slice()
+    };
+
+    let suffix_pool: &[&AffixDef] = if eligible_suffixes.is_empty() {
+        full_suffix_pool.as_slice()
+    } else {
+        eligible_suffixes.as_slice()
+    };
+
+    let mut affixes: Vec<AffixInstance> = Vec::with_capacity(affix_count);
+    let mut used_ids: std::collections::HashSet<&'static str> = std::collections::HashSet::new();
+
+    // Roll prefixes.
+    roll_from_pool(prefix_pool, prefix_count, &mut affixes, &mut used_ids, rng);
+    // Roll suffixes.
+    roll_from_pool(suffix_pool, suffix_count, &mut affixes, &mut used_ids, rng);
+
+    // Generate name.
+    let name_prefix_idx = rng.gen_range(0..RARE_PREFIXES.len());
+    let name_suffix_idx = rng.gen_range(0..RARE_SUFFIXES.len());
+    let name = format!(
+        "{} {}",
+        RARE_PREFIXES[name_prefix_idx], RARE_SUFFIXES[name_suffix_idx]
+    );
+
+    RareItemResult {
+        base_id: base_id.to_string(),
+        name,
+        affixes,
+    }
+}
+
+/// Roll `count` unique affixes from `pool` into `out`, avoiding `used_ids`.
+///
+/// If the pool is smaller than `count`, rolls as many unique entries as
+/// possible without panicking.
+fn roll_from_pool(
+    pool: &[&AffixDef],
+    count: usize,
+    out: &mut Vec<AffixInstance>,
+    used_ids: &mut std::collections::HashSet<&'static str>,
+    rng: &mut impl Rng,
+) {
+    // Collect entries not yet used, respecting duplicate-group constraint.
+    let available: Vec<&AffixDef> = pool
+        .iter()
+        .copied()
+        .filter(|d| !used_ids.contains(d.id))
+        .collect();
+
+    let take = count.min(available.len());
+
+    // Reservoir-sample `take` entries without replacement.
+    let mut candidates: Vec<&AffixDef> = available;
+    for i in 0..take {
+        let j = rng.gen_range(i..candidates.len());
+        candidates.swap(i, j);
+    }
+
+    for def in &candidates[..take] {
+        used_ids.insert(def.id);
+        let rolled = if def.value_min >= def.value_max {
+            def.value_min
+        } else {
+            rng.gen_range(def.value_min..=def.value_max)
+        };
+        out.push(AffixInstance {
+            def_id: def.id.to_string(),
+            stat: def.stat.to_string(),
+            value: rolled,
+        });
+    }
+}
+
+// ============================================================================
 // Magic item generation
 // ============================================================================
 
@@ -273,5 +459,39 @@ mod tests {
         // An empty affix vec represents the Normal state.
         let affixes: Vec<Affix> = Vec::new();
         assert!(affixes.is_empty(), "Normal items must have no affixes");
+    }
+
+    // ------------------------------------------------------------------------
+    // Rare item tests
+    // ------------------------------------------------------------------------
+
+    #[test]
+    fn rare_item_2_to_6_affixes() {
+        let mut rng = test_rng();
+        for i in 0..100 {
+            let result = generate_rare_item("long_sword", 30, &mut rng);
+            let count = result.affixes.len();
+            assert!(
+                (2..=6).contains(&count),
+                "Iteration {i}: expected 2-6 affixes, got {count}"
+            );
+        }
+    }
+
+    #[test]
+    fn rare_no_duplicate_group() {
+        let mut rng = test_rng();
+        for i in 0..50 {
+            let result = generate_rare_item("broad_sword", 30, &mut rng);
+            let mut seen = std::collections::HashSet::new();
+            for affix in &result.affixes {
+                let was_new = seen.insert(affix.def_id.as_str());
+                assert!(
+                    was_new,
+                    "Iteration {i}: duplicate def_id '{}' found in rare affixes",
+                    affix.def_id
+                );
+            }
+        }
     }
 }

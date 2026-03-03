@@ -7,12 +7,16 @@
 //! - [`DerivedStats`] -- computed secondary stats (life, mana, resistances, etc.)
 //! - [`CharacterLevel`] / [`ExpTable`] -- experience and leveling
 //! - [`StatBlock`] -- full entity stat profile
+//! - [`Resistances`] / [`Absorb`] -- elemental resistance system with difficulty penalties
+//! - [`damage_after_resist`] / [`difficulty_resist_penalty`] -- damage calculation helpers
 
 pub mod base;
 pub mod block;
+pub mod breakpoints;
 pub mod class;
 pub mod derived;
 pub mod level;
+pub mod resistances;
 pub mod stat_value;
 
 #[cfg(test)]
@@ -20,9 +24,13 @@ mod tests;
 
 pub use base::BaseStats;
 pub use block::StatBlock;
+pub use breakpoints::BreakpointTable;
 pub use class::CharacterClass;
 pub use derived::DerivedStats;
 pub use level::{CharacterLevel, ExpTable};
+pub use resistances::{
+    damage_after_resist, difficulty_resist_penalty, Absorb, Resistances,
+};
 pub use stat_value::StatValue;
 
 /// Errors that can occur in stat operations.

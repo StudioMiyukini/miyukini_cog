@@ -15,6 +15,7 @@ pub mod quality;
 pub mod instance;
 pub mod inventory;
 pub mod equipment;
+pub mod uniques;
 
 #[cfg(test)]
 mod tests;
@@ -22,11 +23,15 @@ mod tests;
 // Re-exports for convenience.
 pub use errors::ItemError;
 pub use quality::{
-    Affix, AffixDef, AffixKind, ItemQuality, MagicItemResult,
-    AFFIX_POOL_PREFIXES, AFFIX_POOL_SUFFIXES,
-    generate_magic_item,
+    Affix, AffixDef, AffixInstance, AffixKind, ItemQuality, MagicItemResult, RareItemResult,
+    AFFIX_POOL_PREFIXES, AFFIX_POOL_SUFFIXES, RARE_PREFIXES, RARE_SUFFIXES,
+    generate_magic_item, generate_rare_item,
 };
 pub use instance::ItemInstance;
 pub use slot::ItemSlot;
 pub use inventory::{Inventory, INV_COLS, INV_ROWS};
 pub use equipment::Equipment;
+pub use uniques::{
+    UniqueItemDef, UniqueItemInstance, ACT1_UNIQUES,
+    all_act1_uniques, generate_unique_item, get_unique_def,
+};
