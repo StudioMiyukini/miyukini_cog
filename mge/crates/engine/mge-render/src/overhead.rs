@@ -20,15 +20,19 @@
 // ---------------------------------------------------------------------------
 
 /// Type of floating text, each with a distinct visual preset.
+///
+/// Visual style inspired by Ragnarok Online: damage in red, critical in
+/// white-on-red, dodge/block as keyword labels.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum FloatingTextKind {
-    /// Physical damage (white, 18px).
+    /// Physical damage (red, 20px) — Ragnarok Online style.
     Damage,
-    /// Critical hit (orange #FFA500, 24px, horizontal shake).
+    /// Critical hit (white text, 26px, shake) — rendered with red background
+    /// quad by the client.
     Critical,
-    /// Evade / miss (grey #AAAAAA, 14px, "MISS").
+    /// Evade / dodge (yellow #FFD700, 16px, "DODGE").
     Evade,
-    /// Blocked hit (blue #4488FF, 16px, "BLOCK").
+    /// Blocked hit (cyan #66CCFF, 18px, "BLOCK").
     Block,
     /// Heal (green #44FF44, 16px, "+HP").
     Heal,
@@ -67,29 +71,29 @@ impl FloatingTextKind {
     pub fn preset(self) -> FloatingTextPreset {
         match self {
             Self::Damage => FloatingTextPreset {
-                color: [1.0, 1.0, 1.0, 1.0],
-                font_size: 18.0,
-                rise_speed: 40.0,
+                color: [1.0, 0.15, 0.15, 1.0], // bright red (RO style)
+                font_size: 20.0,
+                rise_speed: 45.0,
                 lifetime: 1.2,
                 has_shake: false,
             },
             Self::Critical => FloatingTextPreset {
-                color: [1.0, 0.65, 0.0, 1.0],
-                font_size: 24.0,
+                color: [1.0, 1.0, 1.0, 1.0], // white text (rendered on red bg)
+                font_size: 26.0,
                 rise_speed: 50.0,
                 lifetime: 1.5,
                 has_shake: true,
             },
             Self::Evade => FloatingTextPreset {
-                color: [0.667, 0.667, 0.667, 1.0],
-                font_size: 14.0,
-                rise_speed: 30.0,
+                color: [1.0, 0.84, 0.0, 1.0], // gold/yellow (RO "MISS"/"DODGE")
+                font_size: 16.0,
+                rise_speed: 35.0,
                 lifetime: 1.0,
                 has_shake: false,
             },
             Self::Block => FloatingTextPreset {
-                color: [0.267, 0.533, 1.0, 1.0],
-                font_size: 16.0,
+                color: [0.4, 0.8, 1.0, 1.0], // cyan-blue
+                font_size: 18.0,
                 rise_speed: 35.0,
                 lifetime: 1.0,
                 has_shake: false,
@@ -593,8 +597,8 @@ mod tests {
         let ft = FloatingText::new([0.0, 0.0], "999".to_string(), FloatingTextKind::Critical);
         assert!(ft.has_shake, "Critical should have shake");
         assert!(
-            (ft.font_size - 24.0).abs() < f32::EPSILON,
-            "Critical font_size should be 24"
+            (ft.font_size - 26.0).abs() < f32::EPSILON,
+            "Critical font_size should be 26"
         );
     }
 

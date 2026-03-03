@@ -5,7 +5,7 @@
 //! FrustumCuller), AnimationController, TextRenderer (TTF/OTF), and Overhead UI.
 
 use mge_core::game_loop::{GameLoop, LoopConfig};
-use mge_platform::{GameApp, GpuContext, InputEvent, KeyCode};
+use mge_platform::{GameApp, GpuContext, InputEvent, KeyCode, MouseButton};
 use mge_render::camera::{TILE_HEIGHT, TILE_WIDTH};
 use mge_ecs::EntityId;
 use mge_render::{
@@ -20,6 +20,7 @@ use sodomight_game::world::MonsterRecord;
 use sodomight_game::SodomightWorld;
 
 use crate::gui::{self, GameGui, GuiAction};
+use crate::tilemap::{Tile, TileMap};
 
 /// Bitflag constants for movement directions.
 const DIR_UP: u8 = 0b0001;
@@ -27,12 +28,14 @@ const DIR_DOWN: u8 = 0b0010;
 const DIR_LEFT: u8 = 0b0100;
 const DIR_RIGHT: u8 = 0b1000;
 
-/// Map size in tiles.
-const MAP_W: i32 = 32;
-const MAP_H: i32 = 32;
+/// Map size in tiles (procedurally generated).
+const MAP_W: i32 = 64;
+const MAP_H: i32 = 64;
 
-/// Player movement speed in world units per tick.
-const MOVE_SPEED: f32 = 0.1;
+/// Player run speed in world units per tick.
+const RUN_SPEED: f32 = 0.1;
+/// Player walk speed in world units per tick.
+const WALK_SPEED: f32 = 0.05;
 
 /// Click radius for picking up loot (world units).
 const LOOT_PICKUP_RANGE: f32 = 2.0;
@@ -65,6 +68,17 @@ const LAYER_WHITE: u32 = 1;
 /// Texture array layer index for the glyph atlas (reserved for text rendering).
 #[allow(dead_code)]
 const LAYER_GLYPH: u32 = 2;
+/// Texture array layer index for the stone floor tile.
+const LAYER_STONE: u32 = 3;
+
+/// Wall tile tint (dark grey stone).
+const WALL_TINT: [f32; 4] = [0.25, 0.22, 0.20, 1.0];
+/// Stone floor tint (slightly desaturated tan).
+const FLOOR_TINT: [f32; 4] = [0.65, 0.58, 0.45, 1.0];
+/// Path/corridor tint (dirt brown).
+const PATH_TINT: [f32; 4] = [0.50, 0.42, 0.30, 1.0];
+/// Water tint (dark blue).
+const WATER_TINT: [f32; 4] = [0.15, 0.20, 0.45, 1.0];
 
 /// Standard texture dimensions for the texture array (all layers must match).
 const TEX_ARRAY_W: u32 = 256;
@@ -100,6 +114,8 @@ struct InstancedGpuResources {
     legacy_pipeline: SpritePipeline,
     legacy_batcher: SpriteBatcher,
     gui_texture: mge_render::GpuTexture,
+    /// Bitmap font for HUD text rendering.
+    bitmap_font: crate::bitmap_font::BitmapFont,
 }
 
 // ---------------------------------------------------------------------------
@@ -140,6 +156,41 @@ pub struct SodomightApp {
     progress_bars: ProgressBarManager,
     /// Previous combat log length for detecting new messages.
     prev_combat_log_len: usize,
+    /// Procedural dungeon tilemap.
+    tilemap: Option<TileMap>,
+    /// Target position for click-to-move (world coords).
+    move_target: Option<(f32, f32)>,
+    /// Current mouse position (screen coords).
+    mouse_screen: (f32, f32),
+    /// Whether left mouse button is currently held (for auto-attack).
+    left_mouse_held: bool,
+    /// Cooldown ticks remaining before next auto-attack.
+    auto_attack_cooldown: u32,
+    /// Whether the player is dead (waiting for respawn).
+    player_dead: bool,
+    /// Whether Alt key is held (show loot labels on ground).
+    show_loot_labels: bool,
+}
+
+/// Extract the first numeric substring from a combat log message.
+/// Returns the number as a string, or "?" if none found.
+fn extract_number(msg: &str) -> String {
+    let mut start = None;
+    for (i, ch) in msg.char_indices() {
+        if ch.is_ascii_digit() {
+            if start.is_none() {
+                start = Some(i);
+            }
+        } else if start.is_some() {
+            // SAFETY: char_indices guarantees valid UTF-8 boundaries.
+            #[allow(clippy::unwrap_used)]
+            return msg[start.unwrap()..i].to_owned();
+        }
+    }
+    if let Some(s) = start {
+        return msg[s..].to_owned();
+    }
+    "?".to_owned()
 }
 
 impl SodomightApp {
@@ -164,6 +215,13 @@ impl SodomightApp {
             emotes: EmoteManager::new(),
             progress_bars: ProgressBarManager::new(),
             prev_combat_log_len: 0,
+            tilemap: None,
+            move_target: None,
+            mouse_screen: (0.0, 0.0),
+            left_mouse_held: false,
+            auto_attack_cooldown: 0,
+            player_dead: false,
+            show_loot_labels: false,
         }
     }
 
@@ -212,41 +270,58 @@ impl SodomightApp {
         let registry_clone = world.skill_registry.clone();
         let _ = world.player_skills.invest(&normal_attack, &registry_clone);
 
-        // Spawn Act 1 monsters based on Blood Moor zone definition.
+        // Generate procedural dungeon tilemap.
         let monsters = content::act1_monsters();
-        let zone = content::find_zone("blood_moor");
+        let tilemap = TileMap::generate_dungeon(
+            MAP_W,
+            MAP_H,
+            &mut world.rng,
+            monsters.len().min(5), // Use first 5 monster types
+        );
 
-        if let Some(zone) = zone {
-            let mut spawn_x = 8.0_f32;
-            let mut spawn_y = 8.0_f32;
+        // Set player position to tilemap's spawn point.
+        let (spawn_x, spawn_y) = tilemap.player_spawn;
+        world.set_player_position(spawn_x, spawn_y);
 
-            for monster_id_str in &zone.monster_ids {
-                if let Some(mdef) = monsters.iter().find(|m| &m.id == monster_id_str) {
-                    for i in 0..3 {
-                        let x = spawn_x + i as f32 * 2.5;
-                        let y = spawn_y + i as f32 * 1.5;
-
-                        if let Err(e) = world.spawn_monster(
-                            &mdef.name,
-                            x,
-                            y,
-                            mdef.level,
-                            mdef.health as u32,
-                        ) {
-                            tracing::warn!("Failed to spawn {}: {e}", mdef.name);
-                        }
-                    }
-                    spawn_x += 6.0;
-                    spawn_y += 3.0;
-                }
+        // Spawn monsters at generated spawn points.
+        for &(mx, my, type_idx) in &tilemap.spawn_points {
+            let mdef = &monsters[type_idx.min(monsters.len() - 1)];
+            if let Err(e) = world.spawn_monster(
+                &mdef.name,
+                mx,
+                my,
+                mdef.level,
+                mdef.health as u32,
+            ) {
+                tracing::warn!("Failed to spawn {}: {e}", mdef.name);
             }
         }
 
         tracing::info!(
-            "World initialised: {} entities",
-            world.ecs.entity_count()
+            "World initialised: {} entities, map {}x{}, {} spawn points",
+            world.ecs.entity_count(),
+            tilemap.width,
+            tilemap.height,
+            tilemap.spawn_points.len(),
         );
 
+        // Send tilemap data to minimap for dungeon layout rendering.
+        self.gui
+            .set_minimap_tiles(tilemap.width, tilemap.height, tilemap.minimap_data());
+
+        // Build automap tile positions (all non-void tiles for Tab overlay).
+        let mut automap_tiles = Vec::new();
+        for y in 0..tilemap.height {
+            for x in 0..tilemap.width {
+                let tile = tilemap.get(x, y);
+                if tile != Tile::Void {
+                    automap_tiles.push((x as f32, y as f32));
+                }
+            }
+        }
+        self.gui.update_automap_tiles(&automap_tiles);
+
+        self.tilemap = Some(tilemap);
         self.world = Some(world);
     }
 
@@ -291,9 +366,32 @@ impl SodomightApp {
             .xp_for_level(current_level + 1)
             .unwrap_or(u64::MAX) as i64;
 
+        let gold = world.player_gold;
         self.gui.update_from_world(
-            hp, hp_max, mana, mana_max, xp, xp_next, level, 0,
+            hp, hp_max, mana, mana_max, xp, xp_next, level, gold,
         );
+
+        // Sync character stats (for C panel).
+        let base = &world.player_stats.base;
+        let derived = &world.player_stats.derived;
+        #[allow(clippy::cast_possible_wrap)]
+        let stat_pts = world.player_stats.level.stat_points as i32;
+        self.gui.update_character_stats(
+            base.strength.effective(),
+            base.dexterity.effective(),
+            base.vitality.effective(),
+            base.energy.effective(),
+            stat_pts,
+            derived.defense_rating,
+            derived.min_damage,
+            derived.max_damage,
+            derived.attack_rating,
+        );
+
+        // Sync skill points.
+        #[allow(clippy::cast_possible_wrap)]
+        let skill_pts = world.player_stats.level.skill_points as i32;
+        self.gui.set_skill_points(skill_pts);
 
         // Sync combat log messages.
         let gui_log_len = self.gui.combat_log().len();
@@ -303,6 +401,21 @@ impl SodomightApp {
                 self.gui.push_combat_message(msg.clone());
             }
         }
+
+        // Sync minimap: player position + alive monster positions.
+        let (px, py) = world.player_position();
+        let monster_positions: Vec<(f32, f32)> = world
+            .ai_agents_keys()
+            .filter_map(|&eid| {
+                let mr = world.ecs.get_component::<MonsterRecord>(eid).ok()?;
+                if mr.health.is_alive() {
+                    Some((mr.position.x(), mr.position.y()))
+                } else {
+                    None
+                }
+            })
+            .collect();
+        self.gui.update_minimap((px, py), &monster_positions);
     }
 
     /// Spawn floating texts for new combat log messages (S3-T06b).
@@ -319,24 +432,34 @@ impl SodomightApp {
 
             for msg in &world.combat_log[self.prev_combat_log_len..] {
                 // Heuristic: determine floating text kind from message content.
-                let kind = if msg.contains("critical") || msg.contains("Critical") {
-                    FloatingTextKind::Critical
-                } else if msg.contains("miss") || msg.contains("Miss") || msg.contains("MISS") {
-                    FloatingTextKind::Evade
-                } else if msg.contains("heal") || msg.contains("Heal") {
-                    FloatingTextKind::Heal
-                } else if msg.contains("XP") || msg.contains("experience") {
-                    FloatingTextKind::Experience
-                } else {
-                    FloatingTextKind::Damage
-                };
-
-                // Extract numeric portion for display if present, else use short msg.
-                let display = if msg.len() > 20 {
-                    msg.chars().take(20).collect::<String>()
-                } else {
-                    msg.clone()
-                };
+                let (kind, display) =
+                    if msg.contains("critical") || msg.contains("Critical") {
+                        // Critical: extract damage number, Ragnarok Online style.
+                        let num = extract_number(msg);
+                        (FloatingTextKind::Critical, num)
+                    } else if msg.contains("miss") || msg.contains("Miss") || msg.contains("MISS") {
+                        (FloatingTextKind::Evade, "DODGE".to_owned())
+                    } else if msg.contains("block") || msg.contains("Block") || msg.contains("BLOCK") {
+                        (FloatingTextKind::Block, "BLOCK".to_owned())
+                    } else if msg.contains("heal") || msg.contains("Heal") {
+                        let num = extract_number(msg);
+                        (FloatingTextKind::Heal, format!("+{num}"))
+                    } else if msg.contains("XP") || msg.contains("experience") {
+                        let num = extract_number(msg);
+                        (FloatingTextKind::Experience, format!("+{num} XP"))
+                    } else if msg.contains("hit") || msg.contains("damage") {
+                        // Normal damage: just the number, RO style.
+                        let num = extract_number(msg);
+                        (FloatingTextKind::Damage, num)
+                    } else {
+                        // Fallback: short truncated message.
+                        let short = if msg.len() > 20 {
+                            msg.chars().take(20).collect::<String>()
+                        } else {
+                            msg.clone()
+                        };
+                        (FloatingTextKind::Damage, short)
+                    };
 
                 self.floating_texts.spawn([sx, sy - 32.0], display, kind);
             }
@@ -370,17 +493,29 @@ impl SodomightApp {
             GuiAction::UseSkill(slot) => {
                 self.use_skill_slot(slot);
             }
-            GuiAction::ClickInventorySlot(_slot) => {
-                // Future: item interaction.
+            GuiAction::ClickInventorySlot(slot) => {
+                self.handle_inventory_click(slot);
+            }
+            GuiAction::RightClickWorld(sx, sy) => {
+                self.handle_right_click_world(sx, sy);
+            }
+            GuiAction::AllocateStat(stat_idx) => {
+                self.allocate_stat_point(stat_idx);
+            }
+            GuiAction::InvestSkill(skill_idx) => {
+                self.invest_skill_point(skill_idx);
             }
             GuiAction::ClickWorld(sx, sy) => {
                 self.handle_world_click(sx, sy);
             }
-            GuiAction::None
-            | GuiAction::ToggleCharacter
-            | GuiAction::ToggleAutomap
-            | GuiAction::ToggleRunWalk
-            | GuiAction::ToggleQuestLog => {}
+            GuiAction::UseBeltPotion(slot) => {
+                self.use_belt_potion(slot);
+            }
+            GuiAction::ToggleCharacter => self.gui.toggle_character(),
+            GuiAction::ToggleAutomap => self.gui.toggle_automap(),
+            GuiAction::ToggleRunWalk => self.gui.toggle_run_walk(),
+            GuiAction::ToggleQuestLog => self.gui.toggle_quest_log(),
+            GuiAction::None => {}
         }
     }
 
@@ -437,6 +572,16 @@ impl SodomightApp {
                 }
                 Err(e) => tracing::debug!("Attack failed: {e}"),
             }
+            return;
+        }
+
+        // No loot or monster found: click-to-move to the target tile.
+        let walkable = self
+            .tilemap
+            .as_ref()
+            .is_none_or(|t| t.is_walkable(tile_x, tile_y));
+        if walkable {
+            self.move_target = Some((tile_x, tile_y));
         }
     }
 
@@ -462,6 +607,247 @@ impl SodomightApp {
                 }
             }
             Err(e) => tracing::debug!("Skill use failed: {e}"),
+        }
+    }
+
+    /// Use a belt potion slot (D2-style: 1-4 keys).
+    /// Slot 0-1 = health potion, slot 2 = mana potion, slot 3 = reserved.
+    fn use_belt_potion(&mut self, slot: usize) {
+        let Some(ref mut world) = self.world else {
+            return;
+        };
+        // Belt layout: slots 0-1 default HP, slot 2 default mana.
+        let result = match slot {
+            0 | 1 => world.use_health_potion(),
+            2 | 3 => world.use_mana_potion(),
+            _ => return,
+        };
+        match result {
+            Ok(msg) => tracing::info!("{msg}"),
+            Err(e) => tracing::debug!("Potion use failed: {e}"),
+        }
+    }
+
+    /// Auto-attack: if left mouse is held and a monster is nearby, attack it.
+    fn tick_auto_attack(&mut self) {
+        if !self.left_mouse_held || self.player_dead {
+            return;
+        }
+        if self.auto_attack_cooldown > 0 {
+            self.auto_attack_cooldown -= 1;
+            return;
+        }
+
+        let (mx, my) = self.mouse_screen;
+        let Some(ref mut world) = self.world else {
+            return;
+        };
+
+        // Convert screen to world tile coords.
+        let (sw, sh) = (self.camera.screen_w as f32, self.camera.screen_h as f32);
+        let cam_left = self.camera.world_x - sw / (2.0 * self.camera.zoom);
+        let cam_top = self.camera.world_y - sh / (2.0 * self.camera.zoom);
+        let world_sx = mx / self.camera.zoom + cam_left;
+        let world_sy = my / self.camera.zoom + cam_top;
+        let tile_x = (world_sx / (TILE_WIDTH / 2.0) + world_sy / (TILE_HEIGHT / 2.0)) / 2.0;
+        let tile_y = (world_sy / (TILE_HEIGHT / 2.0) - world_sx / (TILE_WIDTH / 2.0)) / 2.0;
+
+        let monsters_near = world.monsters_near(tile_x, tile_y, ATTACK_RANGE);
+        if let Some(&(monster_id, _, _, _)) = monsters_near.first() {
+            match world.player_attack(monster_id) {
+                Ok(msgs) => {
+                    for msg in &msgs {
+                        tracing::debug!("{msg}");
+                    }
+                }
+                Err(e) => tracing::debug!("Auto-attack failed: {e}"),
+            }
+            // ~2 attacks per second at 60fps.
+            self.auto_attack_cooldown = 30;
+        }
+    }
+
+    /// Auto-pickup: collect loot piles the player walks over.
+    fn tick_auto_pickup(&mut self) {
+        let Some(ref mut world) = self.world else {
+            return;
+        };
+        let (px, py) = world.player_position();
+        // Check all loot piles within pickup range.
+        let mut picked = true;
+        while picked {
+            picked = false;
+            for i in 0..world.pending_loot.len() {
+                let (lx, ly, _) = &world.pending_loot[i];
+                let dx = lx - px;
+                let dy = ly - py;
+                let dist = (dx * dx + dy * dy).sqrt();
+                if dist < 1.5 {
+                    match world.player_pickup_loot(i, 0) {
+                        Ok(msg) => tracing::info!("{msg}"),
+                        Err(e) => tracing::warn!("Auto-pickup failed: {e}"),
+                    }
+                    picked = true;
+                    break; // Index shifted, restart.
+                }
+            }
+        }
+    }
+
+    /// Check if player is dead and handle death state.
+    fn check_player_death(&mut self) {
+        let Some(ref world) = self.world else {
+            return;
+        };
+        let (hp, _) = world.player_health();
+        if hp <= 0 && !self.player_dead {
+            self.player_dead = true;
+            self.move_target = None;
+            tracing::info!("Player has died! Press Space to respawn.");
+        }
+    }
+
+    /// Respawn the player at the dungeon spawn point.
+    fn respawn_player(&mut self) {
+        let Some(ref mut world) = self.world else {
+            return;
+        };
+        // Restore health to full.
+        let (_, max_hp) = world.player_health();
+        world.player_stats.restore_life(max_hp);
+        let (_, max_mana) = world.player_mana();
+        world.player_stats.restore_mana(max_mana);
+
+        // Move to spawn point.
+        if let Some(ref tilemap) = self.tilemap {
+            let (sx, sy) = tilemap.player_spawn;
+            world.set_player_position(sx, sy);
+        }
+
+        self.player_dead = false;
+        tracing::info!("Player respawned.");
+    }
+
+    /// Handle right-click on the game world: cast the right-assigned skill on the nearest monster.
+    fn handle_right_click_world(&mut self, screen_x: f32, screen_y: f32) {
+        let Some(ref mut world) = self.world else {
+            return;
+        };
+
+        // Convert screen to world tile coords.
+        let (sw, sh) = (self.camera.screen_w as f32, self.camera.screen_h as f32);
+        let cam_left = self.camera.world_x - sw / (2.0 * self.camera.zoom);
+        let cam_top = self.camera.world_y - sh / (2.0 * self.camera.zoom);
+        let world_sx = screen_x / self.camera.zoom + cam_left;
+        let world_sy = screen_y / self.camera.zoom + cam_top;
+        let tile_x = (world_sx / (TILE_WIDTH / 2.0) + world_sy / (TILE_HEIGHT / 2.0)) / 2.0;
+        let tile_y = (world_sy / (TILE_HEIGHT / 2.0) - world_sx / (TILE_WIDTH / 2.0)) / 2.0;
+
+        // Find the right-click skill from Act 1 skills (default: index 1 = Fire Bolt).
+        let skills = content::act1_skills();
+        let right_skill = skills.get(1).or_else(|| skills.first());
+        let Some(skill_def) = right_skill else {
+            return;
+        };
+
+        let monsters_near = world.monsters_near(tile_x, tile_y, ATTACK_RANGE * 2.0);
+        let target = monsters_near.first().map(|&(id, _, _, _)| id);
+
+        match world.player_use_skill(&skill_def.id, target) {
+            Ok(msgs) => {
+                for msg in &msgs {
+                    tracing::debug!("{msg}");
+                }
+            }
+            Err(e) => tracing::debug!("Right-click skill failed: {e}"),
+        }
+    }
+
+    /// Handle clicking on an inventory slot: attempt to equip the item.
+    fn handle_inventory_click(&mut self, slot: usize) {
+        let Some(ref mut world) = self.world else {
+            return;
+        };
+
+        let col = slot % 10; // INV_COLS
+        let row = slot / 10;
+
+        // Check if there's an item in this slot.
+        let item = world.player_inventory.get(col, row);
+        let Some(item) = item else {
+            return;
+        };
+
+        // Determine equip slot from item type (use base_id heuristic).
+        let base_id = item.base_id.clone();
+        let equip_slot = guess_equip_slot(&base_id);
+
+        match world.player_equip(col, row, equip_slot) {
+            Ok(msg) => tracing::info!("{msg}"),
+            Err(e) => tracing::debug!("Equip failed: {e}"),
+        }
+    }
+
+    /// Allocate a stat point to a primary attribute (0=str, 1=dex, 2=vit, 3=ene).
+    fn allocate_stat_point(&mut self, stat_idx: u8) {
+        let Some(ref mut world) = self.world else {
+            return;
+        };
+
+        if !world.player_stats.level.spend_stat_point() {
+            tracing::debug!("No stat points available.");
+            return;
+        }
+
+        match stat_idx {
+            0 => world.player_stats.base.strength.add(1),
+            1 => world.player_stats.base.dexterity.add(1),
+            2 => world.player_stats.base.vitality.add(1),
+            3 => world.player_stats.base.energy.add(1),
+            _ => return,
+        }
+
+        // Recalculate derived stats after allocation.
+        world.player_stats.recalculate();
+
+        let stat_name = match stat_idx {
+            0 => "Strength",
+            1 => "Dexterity",
+            2 => "Vitality",
+            3 => "Energy",
+            _ => "Unknown",
+        };
+        tracing::info!("Allocated 1 point to {stat_name}.");
+    }
+
+    /// Invest a skill point into a skill at the given slot index.
+    fn invest_skill_point(&mut self, skill_idx: usize) {
+        let Some(ref mut world) = self.world else {
+            return;
+        };
+
+        let skills = content::act1_skills();
+        let Some(skill_def) = skills.get(skill_idx) else {
+            tracing::debug!("No skill at index {skill_idx}.");
+            return;
+        };
+
+        if !world.player_stats.level.spend_skill_point() {
+            tracing::debug!("No skill points available.");
+            return;
+        }
+
+        let registry_clone = world.skill_registry.clone();
+        match world.player_skills.invest(&skill_def.id, &registry_clone) {
+            Ok(()) => {
+                let new_level = world.player_skills.level_of(&skill_def.id);
+                tracing::info!("Invested in {}: now level {new_level}.", skill_def.name);
+            }
+            Err(e) => {
+                // Refund the point if invest fails.
+                world.player_stats.level.skill_points += 1;
+                tracing::debug!("Skill invest failed: {e}");
+            }
         }
     }
 
@@ -561,12 +947,55 @@ fn white_texture_data() -> Vec<u8> {
     vec![255u8; (TEX_ARRAY_W * TEX_ARRAY_H * 4) as usize]
 }
 
+/// Generate a procedural stone floor texture (grey noise with crack lines).
+fn generate_stone_texture() -> Vec<u8> {
+    let w = TEX_ARRAY_W as usize;
+    let h = TEX_ARRAY_H as usize;
+    let mut data = vec![0u8; w * h * 4];
+
+    // Simple pseudo-random noise for stone appearance.
+    let mut seed: u32 = 0xCAFE_BABE;
+    for y in 0..h {
+        for x in 0..w {
+            // LCG pseudo-random.
+            seed = seed.wrapping_mul(1_664_525).wrapping_add(1_013_904_223);
+            let noise = ((seed >> 16) & 0xFF) as u8;
+
+            // Base stone colour: grey with slight warm tint.
+            let base_r = 180_u8.saturating_add(noise / 8);
+            let base_g = 170_u8.saturating_add(noise / 10);
+            let base_b = 155_u8.saturating_add(noise / 12);
+
+            // Add grid lines for tile/brick pattern.
+            let grid_x = x % 32 == 0 || x % 32 == 31;
+            let grid_y = y % 32 == 0 || y % 32 == 31;
+            let on_grid = grid_x || grid_y;
+
+            let idx = (y * w + x) * 4;
+            if on_grid {
+                // Dark mortar lines.
+                data[idx] = 60;
+                data[idx + 1] = 55;
+                data[idx + 2] = 50;
+            } else {
+                data[idx] = base_r;
+                data[idx + 1] = base_g;
+                data[idx + 2] = base_b;
+            }
+            data[idx + 3] = 255;
+        }
+    }
+    data
+}
+
 /// Try to load a TTF font from the mge/assets/fonts/ directory.
 fn load_ttf_font(filename: &str) -> Option<TtfFont> {
+    let manifest_dir = env!("CARGO_MANIFEST_DIR");
     let paths = [
         format!("assets/fonts/{filename}"),
         format!("mge/assets/fonts/{filename}"),
         format!("../mge/assets/fonts/{filename}"),
+        format!("{manifest_dir}/../../assets/fonts/{filename}"),
     ];
 
     for path in &paths {
@@ -642,13 +1071,55 @@ fn movement_direction(move_dirs: u8) -> Direction {
     }
 }
 
+/// Guess the equipment slot based on item base_id naming convention.
+fn guess_equip_slot(base_id: &str) -> mge_arpg_items::ItemSlot {
+    use mge_arpg_items::ItemSlot;
+    let lower = base_id.to_lowercase();
+    if lower.contains("helm") || lower.contains("cap") || lower.contains("crown") {
+        ItemSlot::Helm
+    } else if lower.contains("armor") || lower.contains("plate") || lower.contains("robe") {
+        ItemSlot::Armor
+    } else if lower.contains("glove") || lower.contains("gauntlet") {
+        ItemSlot::Gloves
+    } else if lower.contains("belt") || lower.contains("sash") {
+        ItemSlot::Belt
+    } else if lower.contains("boot") || lower.contains("greave") {
+        ItemSlot::Boots
+    } else if lower.contains("amulet") || lower.contains("necklace") {
+        ItemSlot::Amulet
+    } else if lower.contains("ring") {
+        ItemSlot::Ring1
+    } else if lower.contains("shield") || lower.contains("buckler") {
+        ItemSlot::WeaponOff
+    } else {
+        // Default: treat as weapon.
+        ItemSlot::WeaponMain
+    }
+}
+
+/// Map a loot quality to D2-style colors for item labels.
+fn quality_color(quality: &mge_arpg_loot::DropQuality) -> [f32; 4] {
+    use mge_arpg_loot::DropQuality;
+    match quality {
+        DropQuality::Normal => [1.0, 1.0, 1.0, 1.0],       // White
+        DropQuality::Magic => [0.35, 0.45, 1.0, 1.0],       // Blue
+        DropQuality::Rare => [1.0, 1.0, 0.2, 1.0],          // Yellow
+        DropQuality::Unique => [0.65, 0.5, 0.15, 1.0],      // Gold/brown
+        DropQuality::Set => [0.0, 0.85, 0.0, 1.0],          // Green
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Instanced batching functions (S3-T03)
 // ---------------------------------------------------------------------------
 
 /// Push visible isometric tiles as instances into the batcher (S3-T03).
+///
+/// Uses the procedural tilemap to render different tile types with distinct
+/// textures and tints (grass, stone floor, walls, water, paths).
 fn batch_tiles_instanced(
     batcher: &mut InstancedSpriteBatcher,
+    tilemap: Option<&TileMap>,
     cam_left: f32,
     cam_top: f32,
     screen_w: f32,
@@ -657,8 +1128,11 @@ fn batch_tiles_instanced(
     let tile_w = TILE_WIDTH;
     let tile_h = TILE_HEIGHT;
 
-    for ty in 0..MAP_H {
-        for tx in 0..MAP_W {
+    let map_w = tilemap.map_or(MAP_W, |t| t.width);
+    let map_h = tilemap.map_or(MAP_H, |t| t.height);
+
+    for ty in 0..map_h {
+        for tx in 0..map_w {
             let sx = (tx - ty) as f32 * (tile_w / 2.0);
             let sy = (tx + ty) as f32 * (tile_h / 2.0);
 
@@ -673,18 +1147,39 @@ fn batch_tiles_instanced(
                 continue;
             }
 
-            // z_depth: tiles are always behind entities. Use a large z_depth
-            // so they sort to the back (ascending sort = back-to-front).
-            // Tile depth based on row (tx+ty) for correct iso ordering.
+            let tile = tilemap.map_or(Tile::Grass, |t| t.get(tx, ty));
+
+            // Skip void tiles (nothing to render).
+            if tile == Tile::Void {
+                continue;
+            }
+
+            // Choose texture layer and tint based on tile type.
+            let (texture_index, tint) = match tile {
+                Tile::Grass => (LAYER_GRASS, TILE_TINT),
+                Tile::Floor => (LAYER_STONE, FLOOR_TINT),
+                Tile::Wall => (LAYER_WHITE, WALL_TINT),
+                Tile::Water => (LAYER_WHITE, WATER_TINT),
+                Tile::Path => (LAYER_STONE, PATH_TINT),
+                Tile::Void => unreachable!(),
+            };
+
+            // Wall tiles are taller for a pseudo-3D effect.
+            let (render_h, y_offset) = if tile == Tile::Wall {
+                (tile_h * 1.5, -tile_h * 0.5)
+            } else {
+                (tile_h, 0.0)
+            };
+
             let row_depth = (tx + ty) as f32;
-            let z_depth = 10000.0 + row_depth;
+            let z_depth = row_depth;
 
             let instance = InstanceData {
-                position: [sx, sy],
-                size: [tile_w, tile_h],
+                position: [sx, sy + y_offset],
+                size: [tile_w, render_h],
                 uv_rect: [0.0, 0.0, tile_w / TEX_ARRAY_W as f32, tile_h / TEX_ARRAY_H as f32],
-                tint: TILE_TINT,
-                texture_index: LAYER_GRASS,
+                tint,
+                texture_index,
                 z_depth,
                 _pad: [0.0, 0.0],
             };
@@ -702,7 +1197,9 @@ fn batch_monsters_instanced(
     world: &SodomightWorld,
     visible_ids: &[EntityId],
 ) {
-    let monster_size = 24.0_f32;
+    // Placeholder: ~0.6 tile wide, ~2.25 tiles tall.
+    let monster_w = 40.0_f32;
+    let monster_h = 72.0_f32;
 
     for &vis_id in visible_ids {
         if !world.ecs.is_alive(vis_id) {
@@ -723,16 +1220,16 @@ fn batch_monsters_instanced(
         let sx = (mx - my) * (TILE_WIDTH / 2.0);
         let sy = (mx + my) * (TILE_HEIGHT / 2.0);
 
-        let offset = (TILE_WIDTH - monster_size) / 2.0;
+        let offset_x = (TILE_WIDTH - monster_w) / 2.0;
 
-        // z_depth: based on Y position for iso depth sorting. Lower z = drawn later (in front).
-        // Entity tile_y = (mx+my), higher tile_y = closer to camera = smaller z_depth.
+        // z_depth: entities are foreground (drawn after tiles in ascending sort).
+        // Higher tile_y = closer to camera = larger z = drawn later = in front.
         let tile_y_sum = mx + my;
-        let z_depth = 5000.0 - tile_y_sum;
+        let z_depth = 10000.0 + tile_y_sum;
 
         let instance = InstanceData {
-            position: [sx + offset, sy - monster_size],
-            size: [monster_size, monster_size],
+            position: [sx + offset_x, sy - monster_h],
+            size: [monster_w, monster_h],
             uv_rect: [0.0, 0.0, 1.0, 1.0],
             tint: MONSTER_TINT,
             texture_index: LAYER_WHITE,
@@ -755,7 +1252,9 @@ fn batch_loot_instanced(
     screen_w: f32,
     screen_h: f32,
 ) {
-    let loot_size = 12.0_f32;
+    // Placeholder: small ground item.
+    let loot_w = 20.0_f32;
+    let loot_h = 20.0_f32;
 
     for (lx, ly, _drops) in &world.pending_loot {
         let sx = (lx - ly) * (TILE_WIDTH / 2.0);
@@ -763,21 +1262,22 @@ fn batch_loot_instanced(
 
         let screen_x = sx - cam_left;
         let screen_y = sy - cam_top;
-        if screen_x + loot_size < 0.0
+        if screen_x + loot_w < 0.0
             || screen_x > screen_w
-            || screen_y + loot_size < 0.0
+            || screen_y + loot_h < 0.0
             || screen_y > screen_h
         {
             continue;
         }
 
-        let offset = (TILE_WIDTH - loot_size) / 2.0;
+        let offset_x = (TILE_WIDTH - loot_w) / 2.0;
+        // Loot sits on the ground: between tiles and standing entities.
         let tile_y_sum = lx + ly;
-        let z_depth = 5000.0 - tile_y_sum + 0.1;
+        let z_depth = 5000.0 + tile_y_sum;
 
         let instance = InstanceData {
-            position: [sx + offset, sy],
-            size: [loot_size, loot_size],
+            position: [sx + offset_x, sy - loot_h],
+            size: [loot_w, loot_h],
             uv_rect: [0.0, 0.0, 1.0, 1.0],
             tint: LOOT_TINT,
             texture_index: LAYER_WHITE,
@@ -801,28 +1301,31 @@ fn batch_player_instanced(
     screen_w: f32,
     screen_h: f32,
 ) {
-    let player_size = 28.0_f32;
+    // Placeholder: ~0.75 tile wide, ~3 tiles tall.
+    let player_w = 48.0_f32;
+    let player_h = 96.0_f32;
 
     let sx = (px - py) * (TILE_WIDTH / 2.0);
     let sy = (px + py) * (TILE_HEIGHT / 2.0);
 
     let screen_x = sx - cam_left;
     let screen_y = sy - cam_top;
-    if screen_x + player_size < 0.0
+    if screen_x + player_w < 0.0
         || screen_x > screen_w
-        || screen_y + player_size < 0.0
+        || screen_y + player_h < 0.0
         || screen_y > screen_h
     {
         return;
     }
 
-    let offset = (TILE_WIDTH - player_size) / 2.0;
+    let offset_x = (TILE_WIDTH - player_w) / 2.0;
+    // Player is foreground, same layer as monsters.
     let tile_y_sum = px + py;
-    let z_depth = 5000.0 - tile_y_sum;
+    let z_depth = 10000.0 + tile_y_sum;
 
     let instance = InstanceData {
-        position: [sx + offset, sy - player_size],
-        size: [player_size, player_size],
+        position: [sx + offset_x, sy - player_h],
+        size: [player_w, player_h],
         uv_rect: [0.0, 0.0, 1.0, 1.0],
         tint: PLAYER_TINT,
         texture_index: LAYER_WHITE,
@@ -885,6 +1388,12 @@ impl GameApp for SodomightApp {
         let glyph_data = vec![0u8; (TEX_ARRAY_W * TEX_ARRAY_H * 4) as usize];
         if let Err(e) = texture_array.add_layer(&gpu.queue, &glyph_data) {
             tracing::error!("Failed to add glyph atlas layer to texture array: {e}");
+        }
+
+        // Layer 3: stone floor tile (procedural noise texture).
+        let stone_data = generate_stone_texture();
+        if let Err(e) = texture_array.add_layer(&gpu.queue, &stone_data) {
+            tracing::error!("Failed to add stone layer to texture array: {e}");
         }
 
         // Create camera uniform buffer + bind group.
@@ -954,6 +1463,7 @@ impl GameApp for SodomightApp {
         let legacy_pipeline = SpritePipeline::new(&gpu.device, gpu.surface_format());
         let legacy_batcher = SpriteBatcher::new(&gpu.device, 4096);
         let gui_texture = gui::create_white_texture(&gpu.device, &gpu.queue, &legacy_pipeline);
+        let bitmap_font = crate::bitmap_font::BitmapFont::new(&gpu.device, &gpu.queue, &legacy_pipeline);
 
         let layer_count = texture_array.layer_count();
 
@@ -970,6 +1480,7 @@ impl GameApp for SodomightApp {
             legacy_pipeline,
             legacy_batcher,
             gui_texture,
+            bitmap_font,
         });
 
         tracing::info!(
@@ -988,24 +1499,121 @@ impl GameApp for SodomightApp {
             .map_or((5.0, 5.0), SodomightWorld::player_position);
 
         for _ in 0..ticks {
+            // Skip movement when dead.
+            if self.player_dead {
+                if let Some(ref mut world) = self.world {
+                    world.tick();
+                }
+                continue;
+            }
+
+            let mut dx = 0.0_f32;
+            let mut dy = 0.0_f32;
+            let speed = if self.gui.is_running() { RUN_SPEED } else { WALK_SPEED };
+
+            // Screen-aligned movement in dimetric 2:1 isometric space.
             if self.moving(DIR_UP) {
-                py -= MOVE_SPEED;
+                dx -= speed;
+                dy -= speed;
             }
             if self.moving(DIR_DOWN) {
-                py += MOVE_SPEED;
+                dx += speed;
+                dy += speed;
             }
             if self.moving(DIR_LEFT) {
-                px -= MOVE_SPEED;
+                dx -= speed;
+                dy += speed;
             }
             if self.moving(DIR_RIGHT) {
-                px += MOVE_SPEED;
+                dx += speed;
+                dy -= speed;
+            }
+
+            // Click-to-move: walk towards target position.
+            if dx == 0.0 && dy == 0.0 {
+                if let Some((tx, ty)) = self.move_target {
+                    let to_x = tx - px;
+                    let to_y = ty - py;
+                    let dist = (to_x * to_x + to_y * to_y).sqrt();
+                    if dist > 0.15 {
+                        dx = to_x / dist * speed;
+                        dy = to_y / dist * speed;
+                    } else {
+                        self.move_target = None;
+                    }
+                }
+            } else {
+                // WASD cancels click-to-move.
+                self.move_target = None;
+            }
+
+            // Tilemap collision: only move if destination is walkable.
+            if dx != 0.0 || dy != 0.0 {
+                let new_x = px + dx;
+                let new_y = py + dy;
+                let walkable = self
+                    .tilemap
+                    .as_ref()
+                    .is_none_or(|t| t.is_walkable(new_x, new_y));
+                if walkable {
+                    px = new_x;
+                    py = new_y;
+                } else {
+                    // Try sliding along axes individually.
+                    let walk_x = self
+                        .tilemap
+                        .as_ref()
+                        .is_none_or(|t| t.is_walkable(px + dx, py));
+                    let walk_y = self
+                        .tilemap
+                        .as_ref()
+                        .is_none_or(|t| t.is_walkable(px, py + dy));
+                    if walk_x {
+                        px += dx;
+                    }
+                    if walk_y {
+                        py += dy;
+                    }
+                }
             }
 
             if let Some(ref mut world) = self.world {
                 world.set_player_position(px, py);
                 world.tick();
+
+                // Enforce tilemap collision on monsters (prevent walking through walls).
+                if let Some(ref tilemap) = self.tilemap {
+                    let monster_ids: Vec<EntityId> =
+                        world.ai_agents_keys().copied().collect();
+                    for mid in monster_ids {
+                        let Ok(mr) = world.ecs.get_component::<MonsterRecord>(mid) else {
+                            continue;
+                        };
+                        let mx = mr.position.x();
+                        let my = mr.position.y();
+                        if !tilemap.is_walkable(mx, my) {
+                            // Snap monster back to nearest walkable tile.
+                            let best_x = mx.round();
+                            let best_y = my.round();
+                            if tilemap.is_walkable(best_x, best_y) {
+                                let _ = world.ecs.modify_component::<MonsterRecord>(mid, |m| {
+                                    m.position = mge_arpg_entity::Position::new(best_x, best_y);
+                                });
+                            }
+                        }
+                    }
+                }
             }
         }
+
+        // Auto-attack (hold left mouse button on monster).
+        self.tick_auto_attack();
+
+        // Auto-pickup loot when walking nearby.
+        self.tick_auto_pickup();
+
+        // Check for player death.
+        self.check_player_death();
 
         // Update camera to follow player.
         self.camera.follow(px, py);
@@ -1052,11 +1660,13 @@ impl GameApp for SodomightApp {
         // Update camera uniform (instanced pipeline).
         let ew = screen_w / self.camera.zoom;
         let eh = screen_h / self.camera.zoom;
+        // z_depth is used only for CPU-side painter's-algorithm sorting;
+        // zero out the Z column so clip.z = 0 (always inside [0,1] NDC range).
         #[rustfmt::skip]
         let proj: [[f32; 4]; 4] = [
             [ 2.0 / ew,                                  0.0,   0.0, 0.0],
             [      0.0,                        -2.0 / eh,       0.0, 0.0],
-            [      0.0,                                  0.0,   1.0, 0.0],
+            [      0.0,                                  0.0,   0.0, 0.0],
             [-(1.0 + 2.0 * cam_left / ew), 1.0 + 2.0 * cam_top / eh, 0.0, 1.0],
         ];
         gpu.queue.write_buffer(
@@ -1071,6 +1681,7 @@ impl GameApp for SodomightApp {
         // Tiles (S3-T03).
         batch_tiles_instanced(
             &mut res.instanced_batcher,
+            self.tilemap.as_ref(),
             cam_left,
             cam_top,
             screen_w,
@@ -1105,7 +1716,7 @@ impl GameApp for SodomightApp {
                 render_entities.push(RenderEntity {
                     id: culler_id,
                     position: [sx, sy],
-                    size: [24.0, 24.0],
+                    size: [40.0, 72.0],
                 });
             }
 
@@ -1130,6 +1741,27 @@ impl GameApp for SodomightApp {
                 screen_w,
                 screen_h,
             );
+
+            // Populate monster health bar overlays for visible monsters.
+            let mut overlays = Vec::with_capacity(visible_entity_ids.len());
+            for &eid in &visible_entity_ids {
+                if let Ok(mr) = world.ecs.get_component::<MonsterRecord>(eid) {
+                    if mr.health.is_alive() {
+                        let mx = mr.position.x();
+                        let my = mr.position.y();
+                        let sx = (mx - my) * (TILE_WIDTH / 2.0) - cam_left;
+                        let sy = (mx + my) * (TILE_HEIGHT / 2.0) - cam_top;
+                        overlays.push(gui::MonsterOverlay {
+                            screen_x: sx,
+                            screen_y: sy - 36.0, // Above sprite.
+                            name: mr.name.clone(),
+                            level: mr.level.get(),
+                            hp_ratio: mr.health.ratio(),
+                        });
+                    }
+                }
+            }
+            self.gui.set_monster_overlays(overlays);
         }
 
         // Player (S3-T03).
@@ -1222,6 +1854,212 @@ impl GameApp for SodomightApp {
             res.legacy_batcher.draw(&mut pass, gui_vert_count);
         }
 
+        // --- Floating text background pass (white texture for coloured quads) ---
+        res.legacy_batcher.begin();
+        for ft in self.floating_texts.texts() {
+            let sx = ft.world_pos[0] - cam_left;
+            let sy = ft.world_pos[1] - cam_top - ft.y_offset;
+            if sx < -200.0 || sx > screen_w + 200.0 || sy < -100.0 || sy > screen_h + 100.0 {
+                continue;
+            }
+            let scale = ft.font_size / 8.0;
+            let shake_x = if ft.has_shake {
+                (ft.age * 30.0).sin() * 3.0 * ft.opacity
+            } else {
+                0.0
+            };
+            let char_w = crate::bitmap_font::BitmapFont::char_width(scale);
+            let text_w = char_w * ft.text.len() as f32;
+            let text_h = crate::bitmap_font::BitmapFont::line_height(scale);
+            let pad = 4.0_f32;
+            let uv_white: [f32; 4] = [0.0, 0.0, 1.0, 1.0];
+
+            // Critical: red background rectangle behind text (RO style).
+            if ft.kind == mge_render::FloatingTextKind::Critical {
+                let bg_col = [0.85, 0.05, 0.05, 0.85 * ft.opacity];
+                res.legacy_batcher.push(
+                    sx + shake_x - pad,
+                    sy - pad,
+                    text_w + pad * 2.0,
+                    text_h + pad * 2.0,
+                    uv_white,
+                    bg_col,
+                );
+            }
+
+            // Dark outline/shadow behind all floating texts for contrast.
+            let shadow_col = [0.0, 0.0, 0.0, 0.6 * ft.opacity];
+            let outline = 2.0_f32;
+            res.legacy_batcher.push(
+                sx + shake_x - outline,
+                sy - outline,
+                text_w + outline * 2.0,
+                text_h + outline * 2.0,
+                uv_white,
+                shadow_col,
+            );
+        }
+        let float_bg_count = res.legacy_batcher.flush(&gpu.queue);
+        if float_bg_count > 0 {
+            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("float_bg_pass"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &view,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Load,
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                ..Default::default()
+            });
+            pass.set_pipeline(&res.legacy_pipeline.render_pipeline);
+            pass.set_bind_group(0, &res.legacy_pipeline.camera_bind_group, &[]);
+            pass.set_bind_group(1, &res.gui_texture.bind_group, &[]);
+            res.legacy_batcher.draw(&mut pass, float_bg_count);
+        }
+
+        // --- Text pass (bitmap font) ---
+        res.legacy_batcher.begin();
+        self.gui.draw_all_text(&mut res.legacy_batcher);
+
+        // Floating combat texts (world-space → screen-space).
+        for ft in self.floating_texts.texts() {
+            let sx = ft.world_pos[0] - cam_left;
+            let sy = ft.world_pos[1] - cam_top - ft.y_offset;
+
+            // Skip if off-screen.
+            if sx < -200.0 || sx > screen_w + 200.0 || sy < -100.0 || sy > screen_h + 100.0 {
+                continue;
+            }
+
+            let scale = ft.font_size / 8.0;
+            let color = [ft.color[0], ft.color[1], ft.color[2], ft.opacity];
+
+            // Horizontal shake for critical hits.
+            let shake_x = if ft.has_shake {
+                (ft.age * 30.0).sin() * 3.0 * ft.opacity
+            } else {
+                0.0
+            };
+
+            crate::bitmap_font::BitmapFont::push_text(
+                &mut res.legacy_batcher,
+                sx + shake_x,
+                sy,
+                &ft.text,
+                color,
+                scale,
+            );
+        }
+
+        // Loot labels on ground (Alt key held, D2 style).
+        if self.show_loot_labels {
+            if let Some(ref world) = self.world {
+                let label_scale = 1.5_f32;
+                for (lx, ly, drops) in &world.pending_loot {
+                    let sx = (*lx - *ly) * (TILE_WIDTH / 2.0) - cam_left;
+                    let sy = (*lx + *ly) * (TILE_HEIGHT / 2.0) - cam_top - 20.0;
+                    if sx < -200.0 || sx > screen_w + 200.0 || sy < -50.0 || sy > screen_h {
+                        continue;
+                    }
+                    for (di, drop) in drops.iter().enumerate() {
+                        let label = if drop.item_id == "gold" {
+                            format!("{} Gold", drop.quantity)
+                        } else {
+                            drop.item_id.replace('_', " ")
+                        };
+                        let label_y = sy - di as f32 * 14.0;
+                        // Gold = yellow, items = D2 quality color.
+                        let color = if drop.item_id == "gold" {
+                            [1.0, 0.85, 0.2, 1.0]
+                        } else {
+                            quality_color(&drop.quality)
+                        };
+                        // Shadow.
+                        crate::bitmap_font::BitmapFont::push_text(
+                            &mut res.legacy_batcher,
+                            sx + 1.0,
+                            label_y + 1.0,
+                            &label,
+                            [0.0, 0.0, 0.0, 0.7],
+                            label_scale,
+                        );
+                        // Text.
+                        crate::bitmap_font::BitmapFont::push_text(
+                            &mut res.legacy_batcher,
+                            sx,
+                            label_y,
+                            &label,
+                            color,
+                            label_scale,
+                        );
+                    }
+                }
+            }
+        }
+
+        // Death overlay text.
+        if self.player_dead {
+            let death_scale = 4.0;
+            let death_text = "YOU DIED";
+            let text_w = death_text.len() as f32 * 8.0 * death_scale;
+            let cx = screen_w / 2.0 - text_w / 2.0;
+            let cy = screen_h / 3.0;
+            // Dark shadow.
+            crate::bitmap_font::BitmapFont::push_text(
+                &mut res.legacy_batcher,
+                cx + 2.0,
+                cy + 2.0,
+                death_text,
+                [0.0, 0.0, 0.0, 0.8],
+                death_scale,
+            );
+            // Red text.
+            crate::bitmap_font::BitmapFont::push_text(
+                &mut res.legacy_batcher,
+                cx,
+                cy,
+                death_text,
+                [0.9, 0.1, 0.1, 1.0],
+                death_scale,
+            );
+            // Subtitle.
+            let sub_text = "Press SPACE to respawn";
+            let sub_scale = 2.0;
+            let sub_w = sub_text.len() as f32 * 8.0 * sub_scale;
+            crate::bitmap_font::BitmapFont::push_text(
+                &mut res.legacy_batcher,
+                screen_w / 2.0 - sub_w / 2.0,
+                cy + 40.0,
+                sub_text,
+                [0.8, 0.7, 0.5, 1.0],
+                sub_scale,
+            );
+        }
+
+        let text_vert_count = res.legacy_batcher.flush(&gpu.queue);
+
+        if text_vert_count > 0 {
+            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("text_pass"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &view,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Load,
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                ..Default::default()
+            });
+
+            pass.set_pipeline(&res.legacy_pipeline.render_pipeline);
+            pass.set_bind_group(0, &res.legacy_pipeline.camera_bind_group, &[]);
+            pass.set_bind_group(1, &res.bitmap_font.texture.bind_group, &[]);
+            res.legacy_batcher.draw(&mut pass, text_vert_count);
+        }
+
         gpu.queue.submit(std::iter::once(encoder.finish()));
         output.present();
 
@@ -1262,6 +2100,12 @@ impl GameApp for SodomightApp {
                 KeyCode::S | KeyCode::Down => self.press_dir(DIR_DOWN),
                 KeyCode::A | KeyCode::Left => self.press_dir(DIR_LEFT),
                 KeyCode::D | KeyCode::Right => self.press_dir(DIR_RIGHT),
+                KeyCode::Space => {
+                    if self.player_dead {
+                        self.respawn_player();
+                    }
+                }
+                KeyCode::Alt => self.show_loot_labels = true,
                 _ => {}
             },
             InputEvent::KeyUp { key } => match key {
@@ -1269,8 +2113,23 @@ impl GameApp for SodomightApp {
                 KeyCode::S | KeyCode::Down => self.release_dir(DIR_DOWN),
                 KeyCode::A | KeyCode::Left => self.release_dir(DIR_LEFT),
                 KeyCode::D | KeyCode::Right => self.release_dir(DIR_RIGHT),
+                KeyCode::Alt => self.show_loot_labels = false,
                 _ => {}
             },
+            InputEvent::MouseMove { x, y } => {
+                self.mouse_screen = (x as f32, y as f32);
+            }
+            InputEvent::MouseButtonEvent {
+                button: MouseButton::Left,
+                pressed,
+            } => {
+                self.left_mouse_held = pressed;
+                if pressed {
+                    // Left click: attack/loot/move via handle_world_click.
+                    let (mx, my) = self.mouse_screen;
+                    self.handle_world_click(mx, my);
+                }
+            }
             InputEvent::WindowResize { width, height } => {
                 self.gui.set_screen_size(width as f32, height as f32);
             }
@@ -1359,9 +2218,16 @@ mod tests {
     }
 
     #[test]
-    fn test_skill_bar_keys() {
+    fn test_belt_potion_keys() {
         let mut app = SodomightApp::new();
         app.on_input(InputEvent::KeyDown { key: KeyCode::Num1 });
+        // Belt potion use without world is a no-op; verify no panic.
+    }
+
+    #[test]
+    fn test_skill_bar_keys_f1() {
+        let mut app = SodomightApp::new();
+        app.on_input(InputEvent::KeyDown { key: KeyCode::F1 });
         // Skill use without world is a no-op; verify no panic.
     }
 
@@ -1414,10 +2280,9 @@ mod tests {
     #[test]
     fn test_instanced_batcher_tiles() {
         let mut batcher = InstancedSpriteBatcher::new(MAX_INSTANCES);
-        batch_tiles_instanced(&mut batcher, 0.0, 0.0, 1280.0, 720.0);
-        // Should have pushed some tiles (not all 32x32 = 1024, but the visible ones).
+        batch_tiles_instanced(&mut batcher, None, 0.0, 0.0, 1280.0, 720.0);
+        // Should have pushed some tiles (visible portion of 64x64 map).
         assert!(batcher.len() > 0);
-        assert!(batcher.len() <= 1024);
     }
 
     #[test]
