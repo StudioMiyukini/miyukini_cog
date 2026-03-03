@@ -427,12 +427,151 @@ fn draw_belt(ui: &mut egui::Ui, slots: &[BeltSlotData; 4]) {
 }
 
 // ---------------------------------------------------------------------------
+// PotionType (TASK-057)
+// ---------------------------------------------------------------------------
+
+/// Type of potion occupying a belt slot.
+///
+/// Used by [`BeltState`] to track which potions the player has equipped in the
+/// 4 quick-access belt slots (keys 5-8 in classic D2).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PotionType {
+    /// Small healing potion — restores 70 HP.
+    HpSmall,
+    /// Medium healing potion — restores 140 HP.
+    HpMedium,
+    /// Small mana potion — restores 40 mana.
+    ManaSmall,
+    /// Medium mana potion — restores 80 mana.
+    ManaMedium,
+    /// Rejuvenation potion — restores 35% HP and mana (special case).
+    Rejuvenation,
+}
+
+impl PotionType {
+    /// Returns the `(hp_heal, mana_heal)` pair for this potion.
+    ///
+    /// Rejuvenation is a percentage-based heal; by convention this method
+    /// returns `(0, 0)` as a sentinel — callers must handle that variant
+    /// separately (apply 35 % of max HP and max mana).
+    #[must_use]
+    pub fn heal_amount(&self) -> (i32, i32) {
+        match self {
+            Self::HpSmall => (70, 0),
+            Self::HpMedium => (140, 0),
+            Self::ManaSmall => (0, 40),
+            Self::ManaMedium => (0, 80),
+            // 35 % — special case; sentinel (0,0) signals percentage healing.
+            Self::Rejuvenation => (0, 0),
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// BeltState (TASK-057)
+// ---------------------------------------------------------------------------
+
+/// State of the player's 4-slot potion belt.
+///
+/// The belt maps directly to keys 5-8. Each slot holds at most one potion
+/// type at a time (D2 stacks are represented externally; this tracks the
+/// equipped type only).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BeltState {
+    /// The four belt slots; `None` = empty.
+    pub slots: [Option<PotionType>; 4],
+}
+
+impl BeltState {
+    /// Create a new `BeltState` with all slots empty.
+    #[must_use]
+    pub fn new() -> Self {
+        Self { slots: [None; 4] }
+    }
+
+    /// Set the potion in `index` (clamped to `0..=3`).
+    ///
+    /// Passing `potion = None` clears the slot.
+    pub fn set_slot(&mut self, index: usize, potion: Option<PotionType>) {
+        let i = index.min(3);
+        self.slots[i] = potion;
+    }
+
+    /// Consume the potion in `index` (clamped to `0..=3`).
+    ///
+    /// Returns the [`PotionType`] that was in the slot (or `None` if empty),
+    /// and leaves the slot empty.
+    pub fn use_slot(&mut self, index: usize) -> Option<PotionType> {
+        let i = index.min(3);
+        self.slots[i].take()
+    }
+}
+
+impl Default for BeltState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+// ---------------------------------------------------------------------------
+// XpBarState (TASK-059)
+// ---------------------------------------------------------------------------
+
+/// Persistent state for the experience bar shown at the bottom of the screen.
+///
+/// [`XpBarState::update`] recomputes the fill ratio each frame; the result is
+/// clamped to `0.0..=1.0` and exposed via [`XpBarState::progress`].
+#[derive(Debug, Clone, PartialEq)]
+pub struct XpBarState {
+    /// Current player level.
+    pub level: u32,
+    /// Fill ratio for the XP bar (`0.0` = no progress, `1.0` = level-up ready).
+    progress: f32,
+}
+
+impl XpBarState {
+    /// Create a new `XpBarState` at level 1 with no XP progress.
+    #[must_use]
+    pub fn new() -> Self {
+        Self {
+            level: 1,
+            progress: 0.0,
+        }
+    }
+
+    /// Recompute the XP bar progress from raw XP values.
+    ///
+    /// When `next_level_xp` is zero (e.g. at max level), `progress` is forced
+    /// to `1.0` — the bar displays as full.
+    pub fn update(&mut self, level: u32, current_xp: u64, next_level_xp: u64) {
+        self.level = level;
+        self.progress = if next_level_xp == 0 {
+            1.0
+        } else {
+            (current_xp as f32 / next_level_xp as f32).clamp(0.0, 1.0)
+        };
+    }
+
+    /// Return the clamped XP fill ratio (`0.0..=1.0`).
+    #[must_use]
+    pub fn progress(&self) -> f32 {
+        self.progress.clamp(0.0, 1.0)
+    }
+}
+
+impl Default for XpBarState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
 #[cfg(test)]
 mod tests {
-    use super::OrbState;
+    use super::{BeltState, OrbState, PotionType, XpBarState};
 
     /// Clamping test: current > max must return percent = 1.0.
     #[test]
@@ -481,6 +620,80 @@ mod tests {
             orb.display_percent <= 0.8 + f32::EPSILON,
             "display_percent must not overshoot target 0.8, got {}",
             orb.display_percent
+        );
+    }
+
+    // -----------------------------------------------------------------------
+    // TASK-057 — BeltState tests
+    // -----------------------------------------------------------------------
+
+    /// Using a potion slot returns it and leaves the slot empty.
+    #[test]
+    fn belt_use_potion() {
+        let mut belt = BeltState::new();
+        belt.set_slot(0, Some(PotionType::HpSmall));
+
+        let taken = belt.use_slot(0);
+        assert_eq!(
+            taken,
+            Some(PotionType::HpSmall),
+            "use_slot(0) should return Some(HpSmall)"
+        );
+        assert_eq!(
+            belt.slots[0], None,
+            "slot 0 should be None after use_slot"
+        );
+    }
+
+    /// Setting a slot with a different potion overwrites the previous value.
+    #[test]
+    fn belt_stack_potions() {
+        let mut belt = BeltState::new();
+        // Fill all 4 slots.
+        belt.set_slot(0, Some(PotionType::HpSmall));
+        belt.set_slot(1, Some(PotionType::HpMedium));
+        belt.set_slot(2, Some(PotionType::ManaSmall));
+        belt.set_slot(3, Some(PotionType::ManaMedium));
+
+        // Overwrite slot 1 — simulates replacing a consumed potion.
+        belt.set_slot(1, Some(PotionType::Rejuvenation));
+        assert_eq!(
+            belt.slots[1],
+            Some(PotionType::Rejuvenation),
+            "set_slot should overwrite the previous potion"
+        );
+
+        // Other slots must be unchanged.
+        assert_eq!(belt.slots[0], Some(PotionType::HpSmall));
+        assert_eq!(belt.slots[2], Some(PotionType::ManaSmall));
+        assert_eq!(belt.slots[3], Some(PotionType::ManaMedium));
+    }
+
+    // -----------------------------------------------------------------------
+    // TASK-059 — XpBarState tests
+    // -----------------------------------------------------------------------
+
+    /// 50 XP out of 100 required → progress = 0.5.
+    #[test]
+    fn xp_bar_progress() {
+        let mut xp = XpBarState::new();
+        xp.update(10, 50, 100);
+        let got = xp.progress();
+        assert!(
+            (got - 0.5).abs() < f32::EPSILON,
+            "50/100 XP should yield progress 0.5, got {got}"
+        );
+    }
+
+    /// At max level (next_level_xp = 0) → progress must be clamped to 1.0.
+    #[test]
+    fn xp_bar_level_99() {
+        let mut xp = XpBarState::new();
+        xp.update(99, 0, 0);
+        let got = xp.progress();
+        assert!(
+            (got - 1.0).abs() < f32::EPSILON,
+            "max level with next_level_xp=0 should yield progress 1.0, got {got}"
         );
     }
 }

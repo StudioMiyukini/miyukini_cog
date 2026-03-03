@@ -48,7 +48,10 @@ pub use miyuki_ui_egui;
 // ---------------------------------------------------------------------------
 
 pub use theme::{apply_d2_theme, D2Colors, item_quality_color};
-pub use hud::{draw_hud, BeltSlotData, HudData, HudState, OrbState, SkillSlotData};
+pub use hud::{
+    draw_hud, BeltSlotData, BeltState, HudData, HudState, OrbState, PotionType, SkillSlotData,
+    XpBarState,
+};
 pub use inventory::{draw_inventory, EquipSlots, UiItem, CELL_SIZE, GRID_COLS, GRID_ROWS};
 pub use character::{draw_character_panel, CharacterData};
 pub use skill_tree::draw_skill_tree;
