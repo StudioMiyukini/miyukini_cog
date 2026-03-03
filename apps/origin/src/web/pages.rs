@@ -313,6 +313,7 @@ fn layout(title: &str, content: &str, active_nav: &str) -> String {
                 <a href="/services" class="{services_active}">Services</a>
                 <a href="/downloads" class="{downloads_active}">Télécharger</a>
                 <a href="/docs" class="{docs_active}">Docs</a>
+                <a href="/mip" class="{mip_active}">MIP</a>
                 <a href="/about" class="{about_active}">À propos</a>
                 <a href="/?onboarding=1" class="nav-miou-replay" title="Redécouvrir avec Miou" style="font-size:1.1rem;-webkit-text-fill-color:initial;">🌸</a>
             </nav>
@@ -374,6 +375,7 @@ fn layout(title: &str, content: &str, active_nav: &str) -> String {
         catalog_active = if active_nav == "catalog" || active_nav == "mws" { "active" } else { "" },
         services_active = if active_nav == "services" { "active" } else { "" },
         about_active = if active_nav == "about" { "active" } else { "" },
+        mip_active = if active_nav == "mip" { "active" } else { "" },
     )
 }
 
@@ -2379,6 +2381,709 @@ pub fn about_page() -> String {
         "#;
 
     layout("À propos", &content, "about")
+}
+
+/// Page MIP v2 & MSCM — Présentation et distribution du protocole.
+pub fn mip_page() -> String {
+    let content = r##"
+<!-- ══════════════════════════════════════════════════ -->
+<!--  VN OVERLAY : ONBOARDING MIP IMMERSIF             -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="mip-vn-overlay">
+
+  <!-- === SCREEN 1 : TITLE === -->
+  <div class="mip-vn-screen active" id="mip-vn-s1">
+    <div class="mip-vn-ornament top-left"></div>
+    <div class="mip-vn-ornament top-right"></div>
+    <div class="mip-vn-ornament bottom-left"></div>
+    <div class="mip-vn-ornament bottom-right"></div>
+    <div class="mip-vn-title-center">
+      <div class="mip-vn-title-logo">MIP v2</div>
+      <div class="mip-vn-title-sub">&amp; MSCM</div>
+      <div class="mip-vn-title-tagline">Miyukini Implementation Protocol &mdash; AI-Governed Development</div>
+      <div class="mip-vn-click" id="mip-vn-click" onclick="mipVnNext(1)">Cliquez pour d&eacute;couvrir</div>
+    </div>
+    <div class="mip-vn-skip-area">
+      <button class="mip-vn-skip-btn" onclick="mipVnSkip()">Acc&egrave;s documentation directe &rarr;</button>
+    </div>
+  </div>
+
+  <!-- === SCREEN 2 : MIOU + PATH CHOICE === -->
+  <div class="mip-vn-screen" id="mip-vn-s2">
+    <div class="mip-vn-s2-center">
+      <div class="mip-miou-large">
+        <span class="mip-miou-char">&#x1f338;</span>
+        <div class="mip-miou-glow"></div>
+      </div>
+      <div class="mip-miou-dialogue" id="mip-s2-dialogue">
+        <span id="mip-s2-text"></span><span class="mip-miou-caret">|</span>
+      </div>
+      <div class="mip-vn-paths" id="mip-vn-paths">
+        <button class="mip-path-btn" onclick="mipVnStartImmersif()">
+          <span class="mip-path-icon">&#x1f338;</span>
+          <span class="mip-path-label">Immersif</span>
+          <span class="mip-path-desc">Miou m'explique tout</span>
+        </button>
+        <button class="mip-path-btn" onclick="mipVnSkip()">
+          <span class="mip-path-icon">&#x2699;&#xfe0f;</span>
+          <span class="mip-path-label">Dev</span>
+          <span class="mip-path-desc">Documentation directe</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- === SCREEN 3 : IMMERSIVE EXPLORATION === -->
+  <div class="mip-vn-screen" id="mip-vn-s3">
+    <div class="mip-vn-s3-layout">
+      <div class="mip-vn-s3-menu" id="mip-vn-menu"></div>
+      <div class="mip-vn-s3-miou">
+        <div class="mip-miou-medium">
+          <span class="mip-miou-char">&#x1f338;</span>
+          <div class="mip-miou-glow"></div>
+        </div>
+      </div>
+      <div class="mip-vn-s3-dialogue">
+        <div class="mip-vn-topic-title" id="mip-topic-title"></div>
+        <div class="mip-vn-topic-body" id="mip-topic-body"></div>
+        <div class="mip-vn-topic-miou">
+          <span class="mip-miou-mini">&#x1f338;</span>
+          <span id="mip-miou-comment"></span>
+        </div>
+        <div class="mip-vn-choices" id="mip-vn-choices"></div>
+        <button class="mip-vn-next" id="mip-next-btn" onclick="mipVnNextTopic()">Suivant &rarr;</button>
+        <button class="mip-vn-finish" id="mip-finish-btn" onclick="mipVnSkip()" style="display:none">
+          Voir la documentation compl&egrave;te &#x1f338;
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!--  DEV CONTENT (direct path)                        -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="mip-dev-content" style="display:none">
+
+  <!-- Hero -->
+  <section class="hero" style="padding: 3rem 0;">
+    <h1>MIP v2 &amp; MSCM</h1>
+    <p style="max-width:700px; margin:0 auto 1.5rem;">Protocole universel de gouvernance du d&eacute;veloppement assist&eacute; par IA &mdash; 10 agents sp&eacute;cialis&eacute;s, lifecycle complet, m&eacute;triques z&eacute;ro-estimation.</p>
+    <div class="hero-buttons">
+      <a href="https://github.com/StudioMiyukini/mip" class="btn btn-primary" target="_blank">GitHub &mdash; Installer MIP</a>
+      <button class="btn btn-secondary" onclick="mipShowVn()">&#x1f338; D&eacute;couvrir avec Miou</button>
+    </div>
+  </section>
+
+  <!-- TOC + Content layout -->
+  <div class="mip-layout">
+    <aside class="mip-toc">
+      <nav class="docs-nav mip-toc-inner">
+        <a href="#mip-what" class="active">Qu'est-ce que MIP&nbsp;?</a>
+        <a href="#mscm-what">Qu'est-ce que MSCM&nbsp;?</a>
+        <a href="#mip-architecture">Architecture</a>
+        <a href="#mip-agents">Les 10 agents</a>
+        <a href="#mip-compare">Comparaison</a>
+        <a href="#mip-pros-cons">Forces &amp; limites</a>
+        <a href="#mip-quickstart">Quick Start</a>
+        <a href="#mip-conclusion">Conclusion</a>
+      </nav>
+    </aside>
+
+    <div class="mip-main">
+
+      <!-- Section: What is MIP -->
+      <section class="section" id="mip-what">
+        <h2 class="section-title">Qu'est-ce que MIP v2&nbsp;?</h2>
+        <p class="section-subtitle">Miyukini Implementation Protocol &mdash; version 2</p>
+        <div class="card" style="padding:2rem;">
+          <p><strong>MIP v2</strong> est un protocole universel de gouvernance du d&eacute;veloppement logiciel assist&eacute; par IA. Il structure le travail d'un agent IA (ou d'un essaim d'agents) en <strong>phases bien d&eacute;finies</strong>, avec des <strong>quality gates</strong> &agrave; chaque &eacute;tape, des <strong>agents sp&eacute;cialis&eacute;s par domaine</strong> et des <strong>m&eacute;triques mesur&eacute;es</strong> (jamais estim&eacute;es).</p>
+          <p style="margin-top:1rem;">N&eacute; dans le projet Miyukini COG (Rust/Dioxus), MIP est <strong>stack-agnostique</strong> : son noyau (classification, phases, gates, agents) est invariant. Seule la configuration projet s'adapte &agrave; votre stack.</p>
+        </div>
+        <div class="grid grid-3" style="margin-top:1.5rem;">
+          <div class="card">
+            <div class="feature-icon">&#x1f3af;</div>
+            <h3>5 classes de t&acirc;ches</h3>
+            <p>T1 (micro-fix, 1 fichier) &rarr; T5 (chantier strat&eacute;gique, 10+ fichiers). Routing automatique vers les bonnes phases.</p>
+          </div>
+          <div class="card">
+            <div class="feature-icon">&#x1f504;</div>
+            <h3>7 phases</h3>
+            <p>SETUP &rarr; P0 (cadrage 10 temps) &rarr; P3 (TDD parall&egrave;le) &rarr; P4 (audit) &rarr; P5 (livraison) &rarr; P6 (rapport final).</p>
+          </div>
+          <div class="card">
+            <div class="feature-icon">&#x1f916;</div>
+            <h3>3 modes d'autonomie</h3>
+            <p><strong>FULL</strong> (autopilot), <strong>BIG_STEPS</strong> (gates inter-phases), <strong>GUIDED</strong> (validation &agrave; chaque &eacute;tape).</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: What is MSCM -->
+      <section class="section" id="mscm-what">
+        <h2 class="section-title">Qu'est-ce que MSCM&nbsp;?</h2>
+        <p class="section-subtitle">Miyukini Semantic Code Markup</p>
+        <div class="card" style="padding:2rem;">
+          <p><strong>MSCM</strong> est un syst&egrave;me de balisage s&eacute;mantique du code source. Il permet &agrave; l'IA de <strong>raisonner sur la structure</strong> du code, valider son int&eacute;grit&eacute;, et effectuer du refactoring guid&eacute; par des m&eacute;tadonn&eacute;es.</p>
+        </div>
+        <div class="grid grid-2" style="margin-top:1.5rem;">
+          <div class="card">
+            <h3>5 annotations</h3>
+            <p><code>@id</code> identifiant unique &bull; <code>@do</code> description fonctionnelle &bull; <code>@role</code> r&ocirc;le s&eacute;mantique &bull; <code>@layer</code> couche architecturale &bull; <code>@human</code> description lisible</p>
+          </div>
+          <div class="card">
+            <h3>MSCM Index</h3>
+            <p>10 fichiers JSON g&eacute;n&eacute;r&eacute;s automatiquement : blocks, hierarchy, graph, flows, domains, layers, dependencies, files, stats, registry.</p>
+          </div>
+        </div>
+        <div class="card" style="margin-top:1rem; padding:1.5rem;">
+          <h3>Exemple d'annotation</h3>
+          <pre><code>// @id MGE-RENDER-001
+// @do Rend le monde de jeu a l'ecran via le pipeline de rendu
+// @role renderer
+// @layer presentation
+// @human Fonction principale de rendu du moteur de jeu
+pub fn render_world(state: &amp;GameState) -&gt; Result&lt;()&gt; { ... }</code></pre>
+        </div>
+      </section>
+
+      <!-- Section: Architecture -->
+      <section class="section" id="mip-architecture">
+        <h2 class="section-title">Architecture MIP</h2>
+        <p class="section-subtitle">Lifecycle complet du cadrage au rapport final</p>
+        <div class="card" style="padding:2rem;">
+          <h3>Flux de travail standard</h3>
+          <pre><code>Utilisateur
+  &darr;
+SETUP (une seule fois par environnement)
+  &darr;
+P0 &mdash; Cadrage (10 temps : exploration, ideation, concurrence,
+      inventaire, securite, specs, plan, audit, CI/CD, synthese)
+  &darr; [GATE : brief approuve + mode autonomie choisi]
+P3 &mdash; Implementation TDD parallele (back + front)
+  &darr; [GATE : tests + clippy + push]
+P4 &mdash; Integration + Audit securite + Audit efficience
+  &darr; [GATE : 0 defaut bloquant]
+P5 &mdash; Livraison + Test humain
+  &darr; [GATE : verdict utilisateur ACCEPTE/REFUSE]
+P6 &mdash; Rapport final + Archivage + Capitalisation</code></pre>
+        </div>
+        <div class="grid grid-2" style="margin-top:1.5rem;">
+          <div class="card">
+            <h3>Classification T1-T5</h3>
+            <table style="width:100%; font-size:0.85rem; margin-top:0.5rem;">
+              <tr style="border-bottom:1px solid var(--border);"><td><strong>T1</strong></td><td>Micro-fix, 1 fichier, &lt;20 lignes</td><td>P3&rarr;P5</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td><strong>T2</strong></td><td>Fix cibl&eacute;, 1-3 fichiers</td><td>P2&rarr;P3&rarr;P5</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td><strong>T3</strong></td><td>Feature mod&eacute;r&eacute;e, 3-10 fichiers</td><td>P0&rarr;P6</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td><strong>T4</strong></td><td>Feature majeure, 10+ fichiers</td><td>P0&rarr;P6</td></tr>
+              <tr><td><strong>T5</strong></td><td>Chantier strat&eacute;gique</td><td>P0&rarr;P6</td></tr>
+            </table>
+          </div>
+          <div class="card">
+            <h3>MASS &mdash; Agent Swarm System</h3>
+            <p>Parall&eacute;lisation par DAG de d&eacute;pendances. 3 modes :</p>
+            <ul style="margin:0.5rem 0 0 1rem; line-height:1.8;">
+              <li><strong>Subagent burst</strong> (T2-T3) : agents l&eacute;gers en parall&egrave;le</li>
+              <li><strong>Worktree swarm</strong> (T4) : chaque agent dans son worktree Git</li>
+              <li><strong>Team swarm</strong> (T5) : &eacute;quipe compl&egrave;te coordonn&eacute;e</li>
+            </ul>
+            <p style="margin-top:0.5rem;">Loi 9 : si &gt;3 t&acirc;ches ind&eacute;pendantes &rarr; parall&eacute;lisation obligatoire.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Agents -->
+      <section class="section" id="mip-agents">
+        <h2 class="section-title">Les 10 agents sp&eacute;cialis&eacute;s</h2>
+        <p class="section-subtitle">Chaque agent a un domaine d'expertise et des certifications</p>
+        <div class="grid grid-2">
+          <div class="card"><h3>&#x1f4cb; Maria &mdash; Chef de Projet</h3><p>Classifie les t&acirc;ches, dirige P0, brainstorming, suivi d'avancement, m&eacute;triques. Certifications : PMP, PRINCE2, PSM, ITIL 4.</p></div>
+          <div class="card"><h3>&#x1f527; Denis &mdash; Lead Dev</h3><p>Architecture technique, plans d'impl&eacute;mentation, coordination back+front, tests finaux, merge. Certifications : TOGAF, ISO 25010.</p></div>
+          <div class="card"><h3>&#x2699;&#xfe0f; Fran&ccedil;ois &mdash; Dev Back-End</h3><p>Impl&eacute;mentation back-end, API, DB, tests unitaires et int&eacute;gration. Certifications : ISTQB, OpenAPI 3.1.</p></div>
+          <div class="card"><h3>&#x1f3a8; Lise &mdash; Dev Front-End</h3><p>UI/UX, composants, th&egrave;mes, onboarding, SEO, direction artistique. Certifications : WCAG 2.2, ISO 9241.</p></div>
+          <div class="card"><h3>&#x1f4ca; Arianne &mdash; Team Manager QA</h3><p>Contr&ocirc;le qualit&eacute;, m&eacute;moire agents, anti-hallucination, archivage. Certifications : ISO 9001, Six Sigma.</p></div>
+          <div class="card"><h3>&#x1f50d; George &mdash; Audit Expert</h3><p>Conformit&eacute; code vs doc, tests UX, tests globaux, benchmarks. Certifications : ISO 19011, CISA, RGPD.</p></div>
+          <div class="card"><h3>&#x1f6e1;&#xfe0f; Victor &mdash; Cybers&eacute;curit&eacute;</h3><p>Threat modeling, audit surfaces d'attaque, OWASP, score s&eacute;curit&eacute; /100. Certifications : ISO 27001, CISSP, CEH.</p></div>
+          <div class="card"><h3>&#x1f680; Hugo &mdash; DevOps</h3><p>CI/CD, conteneurisation, d&eacute;ploiement, monitoring, infra as code. Certifications : DevOps Foundation, AWS, CKA.</p></div>
+          <div class="card"><h3>&#x26a1; Jean &mdash; Efficience IA</h3><p>Optimisation prompts, comptage tokens, audit consommation, benchmarks efficience. Certifications : FinOps, MLOps.</p></div>
+          <div class="card"><h3>&#x1f4c8; Fabrice &mdash; Analyste PR</h3><p>Audit concurrentiel, cibles utilisateurs, points de friction, recommandations. Certifications : PSPO, Lean Startup.</p></div>
+        </div>
+      </section>
+
+      <!-- Section: Comparison -->
+      <section class="section" id="mip-compare">
+        <h2 class="section-title">Comparaison avec les alternatives</h2>
+        <p class="section-subtitle">7 frameworks analys&eacute;s &mdash; Mars 2026</p>
+        <div style="overflow-x:auto;">
+          <table class="mip-compare-table">
+            <thead>
+              <tr>
+                <th>Dimension</th><th>MIP&nbsp;v2</th><th>BMAD</th><th>Spec&nbsp;Kit</th><th>OpenSpec</th><th>Kiro</th><th>GSD</th><th>Task&nbsp;Master</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Multi-agent</td><td class="mip-highlight">10 agents</td><td>8+ personas</td><td>Non</td><td>Non</td><td>Non</td><td>4 types</td><td>Non</td></tr>
+              <tr><td>Phases lifecycle</td><td class="mip-highlight">7 phases</td><td>4 + Quick</td><td>4</td><td>3</td><td>3</td><td>6</td><td>3</td></tr>
+              <tr><td>Quality gates</td><td class="mip-highlight">Par phase</td><td>Phase 3</td><td>3 gates</td><td>Minimal</td><td>Hooks</td><td>Verify</td><td>Deps</td></tr>
+              <tr><td>S&eacute;curit&eacute; d&eacute;di&eacute;e</td><td class="mip-highlight">Victor /100</td><td>Non</td><td>Non</td><td>Non</td><td>Hooks</td><td>Minimal</td><td>Script</td></tr>
+              <tr><td>M&eacute;triques</td><td class="mip-highlight">Zero-estimation</td><td>Non</td><td>Non</td><td>Non</td><td>Non</td><td>Alertes</td><td>Datetime</td></tr>
+              <tr><td>Parall&eacute;lisation</td><td class="mip-highlight">MASS DAG</td><td>Party Mode</td><td>[P]</td><td>Non</td><td>Non</td><td>Vagues</td><td>Non</td></tr>
+              <tr><td>Portabilit&eacute;</td><td>Claude Code</td><td>Multi-IDE</td><td class="mip-highlight">18+ outils</td><td class="mip-highlight">20+ outils</td><td>Kiro only</td><td>4 CLIs</td><td class="mip-highlight">7+ / 10+ IA</td></tr>
+              <tr><td>Co&ucirc;t</td><td>Gratuit</td><td>Gratuit</td><td>Gratuit</td><td>Gratuit</td><td>$39-200/mo</td><td>Gratuit</td><td>BYOK</td></tr>
+              <tr><td>Classification</td><td class="mip-highlight">T1-T5</td><td>L0-L4</td><td>Non</td><td>Non</td><td>Non</td><td>Quick/Full</td><td>Non</td></tr>
+              <tr><td>Gouvernance code</td><td class="mip-highlight">MSCM</td><td>Non</td><td>Constitution</td><td>Non</td><td>Steering</td><td>Non</td><td>Non</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="grid grid-2" style="margin-top:1.5rem;">
+          <div class="card">
+            <h3>&#x1f3c6; BMAD Method <span style="color:var(--text-muted); font-weight:400;">~2k stars</span></h3>
+            <p>Framework Agile le plus proche de MIP. 8+ personas, 34+ workflows. Manque : s&eacute;curit&eacute; d&eacute;di&eacute;e, m&eacute;triques, parall&eacute;lisation DAG.</p>
+          </div>
+          <div class="card">
+            <h3>&#x1f4d0; GitHub Spec Kit <span style="color:var(--text-muted); font-weight:400;">~73k stars</span></h3>
+            <p>Le plus populaire. Constitution system &eacute;l&eacute;gant. G&eacute;n&egrave;re ~2500 lignes de markdown par feature. Pas de multi-agent r&eacute;el.</p>
+          </div>
+          <div class="card">
+            <h3>&#x26a1; OpenSpec <span style="color:var(--text-muted); font-weight:400;">~27k stars</span></h3>
+            <p>L&eacute;ger et token-efficient. Delta specs + Gherkin. Aucune gouvernance ni s&eacute;curit&eacute;.</p>
+          </div>
+          <div class="card">
+            <h3>&#x2601;&#xfe0f; AWS Kiro <span style="color:var(--text-muted); font-weight:400;">IDE propri&eacute;taire</span></h3>
+            <p>Agent Hooks innovants. Lock-in IDE total. $39-200/mois. Pas de parall&eacute;lisation.</p>
+          </div>
+          <div class="card">
+            <h3>&#x1f4aa; GSD <span style="color:var(--text-muted); font-weight:400;">~23k stars</span></h3>
+            <p>R&eacute;sout le &laquo;context rot&raquo; avec des subagents frais. Vagues parall&egrave;les. Manque : agents sp&eacute;cialis&eacute;s par domaine.</p>
+          </div>
+          <div class="card">
+            <h3>&#x1f4cb; Claude Task Master <span style="color:var(--text-muted); font-weight:400;">~15k stars</span></h3>
+            <p>Le plus portable (7+ &eacute;diteurs, 10+ IA). Gestionnaire de t&acirc;ches, pas un protocole complet.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Pros/Cons -->
+      <section class="section" id="mip-pros-cons">
+        <h2 class="section-title">Forces &amp; limites</h2>
+        <p class="section-subtitle">Une analyse honn&ecirc;te</p>
+        <div class="grid grid-2">
+          <div class="card" style="border-color: rgba(16,185,129,0.3);">
+            <h3 style="color: var(--success);">&#x2705; Forces</h3>
+            <ul style="margin:0.5rem 0 0 1rem; line-height:2;">
+              <li><strong>10 agents sp&eacute;cialis&eacute;s</strong> dont 4 non-dev (s&eacute;curit&eacute;, infra, efficience, qualit&eacute;)</li>
+              <li><strong>Lifecycle complet P0-P6</strong> avec quality gates explicites</li>
+              <li><strong>MASS swarm</strong> &mdash; parall&eacute;lisation DAG, 3 modes</li>
+              <li><strong>M&eacute;triques zero-estimation</strong> &mdash; valeurs mesur&eacute;es uniquement</li>
+              <li><strong>MSCM</strong> &mdash; balisage s&eacute;mantique du code (unique)</li>
+              <li><strong>Cadrage structur&eacute;</strong> &mdash; P0 en 10 temps pr&eacute;vient les d&eacute;rives</li>
+              <li><strong>Audit s&eacute;curit&eacute; /100</strong> &mdash; agent Victor d&eacute;di&eacute;</li>
+              <li><strong>Brainstorming standardis&eacute;</strong> &mdash; 5 sections, AskUserQuestion</li>
+            </ul>
+          </div>
+          <div class="card" style="border-color: rgba(239,68,68,0.3);">
+            <h3 style="color: var(--error);">&#x26a0;&#xfe0f; Limites</h3>
+            <ul style="margin:0.5rem 0 0 1rem; line-height:2;">
+              <li><strong>Portabilit&eacute; limit&eacute;e</strong> &mdash; coupl&eacute; &agrave; Claude Code (vs 20+ pour OpenSpec)</li>
+              <li><strong>Courbe d'apprentissage</strong> &mdash; 10 agents, 7 phases, T1-T5</li>
+              <li><strong>Overhead T1/T2</strong> &mdash; un simple fix n'a pas besoin de 10 temps de P0</li>
+              <li><strong>CLAUDE.md dense</strong> &mdash; 200+ lignes (Anthropic recommande &lt;60)</li>
+              <li><strong>Pas de communaut&eacute; publique</strong> &mdash; premier release</li>
+              <li><strong>Token-hungry sur P0</strong> &mdash; 10 temps de cadrage consomment du contexte</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Quick Start -->
+      <section class="section" id="mip-quickstart">
+        <h2 class="section-title">Quick Start</h2>
+        <p class="section-subtitle">Installer MIP en 3 &eacute;tapes</p>
+        <div class="card" style="padding:2rem;">
+          <h3>1. Cloner le repo</h3>
+          <pre><code>git clone https://github.com/StudioMiyukini/mip.git</code></pre>
+          <h3 style="margin-top:1.5rem;">2. Copier dans votre projet</h3>
+          <pre><code># Copier le skill MIP dans votre projet
+cp -r mip/SKILL.md .cursor/skills/mip/SKILL.md
+cp -r mip/modules/ .cursor/skills/mip/modules/
+
+# OU pour Claude Code : ajouter la section MIP a votre CLAUDE.md
+cat mip/templates/CLAUDE.md.template >> CLAUDE.md</code></pre>
+          <h3 style="margin-top:1.5rem;">3. Lancer MIP</h3>
+          <pre><code># Dans votre outil IA, lancez :
+"Classe cette tache et lance le protocole MIP"
+
+# MIP classifie automatiquement (T1-T5)
+# et route vers les bonnes phases.</code></pre>
+        </div>
+        <div class="grid grid-3" style="margin-top:1.5rem;">
+          <div class="card">
+            <h3>Claude Code</h3>
+            <p>Ajoutez la section MIP &agrave; votre <code>CLAUDE.md</code>. Les 10 agents sont automatiquement disponibles.</p>
+          </div>
+          <div class="card">
+            <h3>Cursor</h3>
+            <p>Placez <code>SKILL.md</code> + <code>modules/</code> dans <code>.cursor/skills/mip/</code>. R&eacute;f&eacute;rencez le skill dans votre workflow.</p>
+          </div>
+          <div class="card">
+            <h3>Autres outils</h3>
+            <p>Ajoutez le contenu de <code>SKILL.md</code> &agrave; votre fichier de contexte principal (<code>.cursorrules</code>, system prompt, etc.).</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Conclusion -->
+      <section class="section" id="mip-conclusion">
+        <h2 class="section-title">Conclusion</h2>
+        <div class="card" style="padding:2rem;">
+          <p>MIP v2 est le premier protocole qui traite le d&eacute;veloppement assist&eacute; par IA comme un <strong>vrai processus industriel</strong> : avec des phases, des gates, des agents sp&eacute;cialis&eacute;s (y compris s&eacute;curit&eacute; et efficience), et des m&eacute;triques mesur&eacute;es &mdash; pas estim&eacute;es.</p>
+          <p style="margin-top:1rem;">Combin&eacute; &agrave; <strong>MSCM</strong> pour la gouvernance s&eacute;mantique du code, il offre un cadre complet pour les projets ambitieux o&ugrave; la qualit&eacute;, la s&eacute;curit&eacute; et la tra&ccedil;abilit&eacute; comptent.</p>
+          <div style="margin-top:2rem; text-align:center;">
+            <a href="https://github.com/StudioMiyukini/mip" class="btn btn-primary" target="_blank" style="font-size:1.1rem; padding:1rem 2rem;">Installer MIP depuis GitHub</a>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- .mip-main -->
+  </div><!-- .mip-layout -->
+</div><!-- #mip-dev-content -->
+
+<!-- ══════════════════════════════════════════════════ -->
+<!--  STYLES MIP PAGE                                  -->
+<!-- ══════════════════════════════════════════════════ -->
+<style>
+/* === VN OVERLAY === */
+#mip-vn-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #0a0a14;
+}
+#mip-vn-overlay.hidden { display: none; }
+.mip-vn-screen {
+  position: absolute; inset: 0;
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, rgba(139,92,246,0.08) 0%, #0a0a14 70%);
+}
+.mip-vn-screen.active { display: flex; }
+.mip-vn-ornament {
+  position: absolute; width: 80px; height: 80px; z-index: 1;
+  border-color: rgba(139,92,246,0.3); border-style: solid; border-width: 0;
+}
+.mip-vn-ornament.top-left { top:20px; left:20px; border-top-width:2px; border-left-width:2px; border-top-left-radius:12px; }
+.mip-vn-ornament.top-right { top:20px; right:20px; border-top-width:2px; border-right-width:2px; border-top-right-radius:12px; }
+.mip-vn-ornament.bottom-left { bottom:20px; left:20px; border-bottom-width:2px; border-left-width:2px; border-bottom-left-radius:12px; }
+.mip-vn-ornament.bottom-right { bottom:20px; right:20px; border-bottom-width:2px; border-right-width:2px; border-bottom-right-radius:12px; }
+
+.mip-vn-title-center { z-index:2; text-align:center; }
+.mip-vn-title-logo {
+  font-size:4.5rem; font-weight:800; letter-spacing:0.15em;
+  background: linear-gradient(135deg, #8b5cf6, #06b6d4, #8b5cf6);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  animation: mipTitlePulse 3s ease-in-out infinite;
+}
+.mip-vn-title-sub {
+  font-size:2rem; font-weight:300; letter-spacing:0.5em;
+  color:rgba(255,255,255,0.7); margin-top:-8px;
+}
+.mip-vn-title-tagline {
+  font-size:0.9rem; color:rgba(139,92,246,0.6); margin-top:16px;
+  letter-spacing:0.15em; text-transform:uppercase;
+}
+.mip-vn-click {
+  margin-top:48px; font-size:1rem; color:rgba(255,255,255,0.5);
+  animation: mipPromptFade 2s ease-in-out infinite; cursor:pointer;
+}
+@keyframes mipTitlePulse { 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.2);} }
+@keyframes mipPromptFade { 0%,100%{opacity:0.4;} 50%{opacity:1;} }
+
+.mip-vn-skip-area { position:absolute; bottom:24px; right:28px; z-index:2; }
+.mip-vn-skip-btn {
+  background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3);
+  color:#8b5cf6; padding:10px 24px; border-radius:8px; cursor:pointer;
+  font-size:0.9rem; transition:all 0.3s;
+}
+.mip-vn-skip-btn:hover { background:rgba(139,92,246,0.25); }
+
+/* Screen 2 */
+.mip-vn-s2-center {
+  z-index:2; display:flex; flex-direction:column;
+  align-items:center; gap:24px;
+}
+.mip-miou-large { position:relative; font-size:5rem; animation:mipMiouFloat 3s ease-in-out infinite; }
+.mip-miou-medium { position:relative; font-size:3.5rem; animation:mipMiouFloat 3s ease-in-out infinite; }
+.mip-miou-char { position:relative; z-index:1; }
+.mip-miou-glow {
+  position:absolute; inset:-20px; border-radius:50%;
+  background:radial-gradient(circle, rgba(139,92,246,0.3), transparent 70%);
+  animation:mipGlowPulse 2s ease-in-out infinite;
+}
+@keyframes mipMiouFloat { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+@keyframes mipGlowPulse { 0%,100%{opacity:0.5;transform:scale(1);} 50%{opacity:1;transform:scale(1.15);} }
+.mip-miou-large.talking { animation:mipMiouTalk 0.15s ease-in-out infinite; }
+@keyframes mipMiouTalk { 0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-3px) scale(1.03);} }
+
+.mip-miou-dialogue {
+  background:rgba(20,20,40,0.85); border:1px solid rgba(139,92,246,0.3);
+  border-radius:16px; padding:20px 28px; max-width:540px; min-height:60px;
+  color:#fff; font-size:1rem; line-height:1.6;
+  box-shadow:0 0 30px rgba(139,92,246,0.1);
+}
+.mip-miou-caret { color:#8b5cf6; animation:mipCaretBlink 0.8s step-end infinite; }
+@keyframes mipCaretBlink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+.mip-vn-paths {
+  display:flex; gap:16px; margin-top:12px;
+  opacity:0; transform:translateY(20px); transition:all 0.6s ease;
+}
+.mip-vn-paths.visible { opacity:1; transform:translateY(0); }
+.mip-path-btn {
+  background:rgba(255,255,255,0.05); border:1px solid rgba(139,92,246,0.2);
+  border-radius:12px; padding:20px 28px; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  transition:all 0.3s; color:#fff; min-width:160px;
+}
+.mip-path-btn:hover {
+  background:rgba(139,92,246,0.15); border-color:#8b5cf6;
+  transform:translateY(-4px); box-shadow:0 8px 24px rgba(139,92,246,0.2);
+}
+.mip-path-icon { font-size:2rem; }
+.mip-path-label { font-size:1.1rem; font-weight:600; }
+.mip-path-desc { font-size:0.8rem; color:rgba(255,255,255,0.5); }
+
+/* Screen 3 */
+.mip-vn-s3-layout {
+  position:relative; z-index:2;
+  display:grid; grid-template-columns:260px 1fr 420px;
+  width:100%; height:100%; padding:32px; gap:24px; align-items:start;
+}
+.mip-vn-s3-menu { display:flex; flex-direction:column; gap:4px; margin-top:40px; }
+.mip-vn-menu-item {
+  background:rgba(255,255,255,0.04); border:1px solid rgba(139,92,246,0.1);
+  border-radius:8px; padding:12px 16px; cursor:pointer;
+  color:rgba(255,255,255,0.6); font-size:0.85rem;
+  transition:all 0.3s; display:flex; align-items:center; gap:8px;
+}
+.mip-vn-menu-item:hover { background:rgba(139,92,246,0.1); color:#fff; }
+.mip-vn-menu-item.active {
+  background:rgba(139,92,246,0.15); border-color:#8b5cf6;
+  color:#8b5cf6; font-weight:600;
+}
+.mip-vn-menu-icon { font-size:1.1rem; }
+.mip-vn-s3-miou { display:flex; align-items:center; justify-content:center; height:100%; }
+
+.mip-vn-s3-dialogue {
+  background:rgba(20,20,40,0.9); border:1px solid rgba(139,92,246,0.25);
+  border-radius:16px; padding:28px; margin-top:32px;
+  display:flex; flex-direction:column; gap:16px;
+  max-height:calc(100vh - 120px); overflow-y:auto;
+}
+.mip-vn-topic-title {
+  font-size:1.15rem; font-weight:700; color:#8b5cf6;
+  padding-bottom:12px; border-bottom:1px solid rgba(139,92,246,0.15);
+}
+.mip-vn-topic-body { font-size:0.9rem; color:rgba(255,255,255,0.85); line-height:1.7; }
+.mip-vn-topic-miou {
+  display:flex; align-items:flex-start; gap:10px;
+  background:rgba(139,92,246,0.08); border-radius:10px; padding:12px 16px;
+  font-size:0.85rem; color:rgba(255,255,255,0.7); font-style:italic;
+}
+.mip-miou-mini { font-size:1.2rem; flex-shrink:0; }
+.mip-vn-choices { display:flex; flex-direction:column; gap:8px; }
+.mip-vn-choice-btn {
+  background:rgba(255,255,255,0.05); border:1px solid rgba(139,92,246,0.2);
+  border-radius:8px; padding:10px 16px; cursor:pointer;
+  color:#fff; font-size:0.85rem; text-align:left; transition:all 0.3s;
+}
+.mip-vn-choice-btn:hover { background:rgba(139,92,246,0.15); border-color:#8b5cf6; }
+.mip-vn-next, .mip-vn-finish {
+  background:linear-gradient(135deg, rgba(139,92,246,0.2), rgba(6,182,212,0.1));
+  border:1px solid rgba(139,92,246,0.3); border-radius:10px;
+  padding:12px 24px; color:#8b5cf6; cursor:pointer;
+  font-size:0.9rem; font-weight:600; transition:all 0.3s; align-self:flex-end;
+}
+.mip-vn-next:hover, .mip-vn-finish:hover { background:rgba(139,92,246,0.25); transform:translateY(-2px); }
+
+/* === DEV CONTENT === */
+.mip-layout {
+  display:grid; grid-template-columns:220px 1fr; gap:2rem; align-items:start;
+}
+.mip-toc { position:sticky; top:90px; }
+.mip-toc-inner a {
+  display:block; padding:0.4rem 0.75rem; border-radius:0.5rem;
+  color:var(--text-muted); font-size:0.85rem; margin-bottom:0.15rem;
+}
+.mip-toc-inner a:hover { background:var(--bg-elevated); color:var(--text); }
+.mip-toc-inner a.active { background:rgba(139,92,246,0.15); color:var(--primary); }
+.mip-main { min-width:0; }
+
+/* Compare table */
+.mip-compare-table {
+  width:100%; border-collapse:collapse; font-size:0.8rem;
+  background:var(--bg-surface); border:1px solid var(--border); border-radius:0.5rem;
+}
+.mip-compare-table th {
+  background:var(--bg-elevated); padding:0.6rem 0.5rem; text-align:left;
+  border-bottom:1px solid var(--border); font-weight:600; white-space:nowrap;
+}
+.mip-compare-table td {
+  padding:0.5rem; border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.mip-compare-table tr:hover { background:rgba(139,92,246,0.05); }
+.mip-highlight { color:var(--primary); font-weight:600; }
+
+/* Responsive */
+@media (max-width:1200px) {
+  .mip-vn-s3-layout { grid-template-columns:200px 1fr 340px; padding:20px; }
+}
+@media (max-width:900px) {
+  .mip-vn-paths { flex-wrap:wrap; justify-content:center; }
+  .mip-vn-s3-layout { grid-template-columns:1fr; padding:16px; }
+  .mip-vn-s3-miou { display:none; }
+  .mip-layout { grid-template-columns:1fr; }
+  .mip-toc { display:none; }
+}
+</style>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!--  JAVASCRIPT MIP VN ENGINE                         -->
+<!-- ══════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  const MIP_TOPICS = [
+    {
+      id:'what-mip', icon:'\u{1f3af}', title:'Qu\u0027est-ce que MIP\u00a0?',
+      body:'<strong>MIP v2</strong> (Miyukini Implementation Protocol) est un protocole universel de gouvernance du d\u00e9veloppement assist\u00e9 par IA. Il structure le travail en <strong>phases bien d\u00e9finies</strong> avec des <strong>quality gates</strong>, des <strong>agents sp\u00e9cialis\u00e9s</strong> et des <strong>m\u00e9triques mesur\u00e9es</strong>.<br><br>5 classes de t\u00e2ches (T1 micro-fix \u2192 T5 chantier strat\u00e9gique), 7 phases (SETUP \u2192 P6), 3 modes d\u0027autonomie (FULL, BIG_STEPS, GUIDED).',
+      miou:'Imagine un chef d\u0027orchestre pour ton \u00e9quipe IA. MIP dit qui fait quoi, quand, et v\u00e9rifie que c\u0027est bien fait\u00a0!'
+    },
+    {
+      id:'what-mscm', icon:'\u{1f3f7}\ufe0f', title:'Qu\u0027est-ce que MSCM\u00a0?',
+      body:'<strong>MSCM</strong> (Miyukini Semantic Code Markup) est un syst\u00e8me de balisage s\u00e9mantique du code source. 5 annotations (<code>@id</code>, <code>@do</code>, <code>@role</code>, <code>@layer</code>, <code>@human</code>) permettent \u00e0 l\u0027IA de <strong>raisonner sur la structure</strong> du code.<br><br>Le MSCM Index g\u00e9n\u00e8re 10 fichiers JSON : blocks, hierarchy, graph, flows, domains, layers, dependencies, files, stats, registry.',
+      miou:'C\u0027est comme des \u00e9tiquettes intelligentes sur ton code. L\u0027IA peut les lire et comprendre la structure sans tout analyser\u00a0!'
+    },
+    {
+      id:'agents', icon:'\u{1f465}', title:'Les 10 agents',
+      body:'MIP d\u00e9finit 10 agents sp\u00e9cialis\u00e9s :<br><br>\u2022 <strong>Maria</strong> \u2014 Chef de Projet (PMP, PRINCE2)<br>\u2022 <strong>Denis</strong> \u2014 Lead Dev (TOGAF, ISO 25010)<br>\u2022 <strong>Fran\u00e7ois</strong> \u2014 Back-End (ISTQB, OpenAPI)<br>\u2022 <strong>Lise</strong> \u2014 Front-End (WCAG 2.2, ISO 9241)<br>\u2022 <strong>Arianne</strong> \u2014 QA Manager (ISO 9001, Six Sigma)<br>\u2022 <strong>George</strong> \u2014 Audit (ISO 19011, CISA)<br>\u2022 <strong>Victor</strong> \u2014 Cybers\u00e9curit\u00e9 (ISO 27001, CISSP)<br>\u2022 <strong>Hugo</strong> \u2014 DevOps (AWS, CKA)<br>\u2022 <strong>Jean</strong> \u2014 Efficience IA (FinOps, MLOps)<br>\u2022 <strong>Fabrice</strong> \u2014 Analyste PR (PSPO, Lean Startup)',
+      miou:'4 agents ne sont m\u00eame pas des d\u00e9veloppeurs\u00a0! S\u00e9curit\u00e9, infra, efficience, qualit\u00e9\u2026 C\u0027est ce qui rend MIP unique.'
+    },
+    {
+      id:'phases', icon:'\u{1f504}', title:'Les 7 phases',
+      body:'<strong>SETUP</strong> \u2014 Onboarding environnement (une seule fois)<br><strong>P0</strong> \u2014 Cadrage complet en 10 temps (exploration, id\u00e9ation, concurrence, inventaire, s\u00e9curit\u00e9, specs, plan, audit, CI/CD, synth\u00e8se)<br><strong>P3</strong> \u2014 Impl\u00e9mentation TDD parall\u00e8le (back + front)<br><strong>P4</strong> \u2014 Int\u00e9gration + Audit s\u00e9curit\u00e9 + Audit efficience<br><strong>P5</strong> \u2014 Livraison + Test humain<br><strong>P6</strong> \u2014 Rapport final + Archivage + Capitalisation<br><br>Chaque transition a un <strong>quality gate</strong> explicite.',
+      miou:'P0 c\u0027est le plus important\u00a0: 10 temps de r\u00e9flexion avant de coder. \u00c7a \u00e9vite de foncer dans le mur\u00a0!'
+    },
+    {
+      id:'compare', icon:'\u{2696}\ufe0f', title:'Comparaison',
+      body:'MIP v2 se compare \u00e0 7 alternatives :<br><br>\u2022 <strong>BMAD</strong> \u2014 8+ personas, pas de m\u00e9triques ni DAG<br>\u2022 <strong>GitHub Spec Kit</strong> \u2014 73k stars, 2500+ lignes/feature, pas de multi-agent<br>\u2022 <strong>OpenSpec</strong> \u2014 27k stars, l\u00e9ger mais aucune gouvernance<br>\u2022 <strong>AWS Kiro</strong> \u2014 IDE propri\u00e9taire, $39-200/mo<br>\u2022 <strong>GSD</strong> \u2014 23k stars, r\u00e9sout le context rot, pas d\u0027agents domaine<br>\u2022 <strong>Claude Task Master</strong> \u2014 15k stars, le plus portable, pas un protocole complet<br>\u2022 <strong>Better Agents</strong> \u2014 Standards + testing, pas un lifecycle',
+      miou:'Aucun concurrent ne combine les 5 piliers de MIP\u00a0: multi-agent, lifecycle, MASS swarm, m\u00e9triques zero-estimation et MSCM\u00a0!'
+    },
+    {
+      id:'quickstart', icon:'\u{1f680}', title:'Installation',
+      body:'3 \u00e9tapes :<br><br><strong>1.</strong> <code>git clone https://github.com/StudioMiyukini/mip.git</code><br><br><strong>2.</strong> Copiez <code>SKILL.md</code> + <code>modules/</code> dans votre projet :<br>\u2022 Claude Code \u2192 ajoutez \u00e0 <code>CLAUDE.md</code><br>\u2022 Cursor \u2192 <code>.cursor/skills/mip/</code><br>\u2022 Autres \u2192 contexte/system prompt<br><br><strong>3.</strong> Dites \u00e0 votre IA : <em>\u00ab Classe cette t\u00e2che et lance MIP \u00bb</em>',
+      miou:'C\u0027est litt\u00e9ralement 3 commandes. Clone, copie, lance. Ton IA fait le reste\u00a0!'
+    },
+    {
+      id:'conclusion', icon:'\u{2728}', title:'Conclusion',
+      body:'MIP v2 traite le d\u00e9veloppement assist\u00e9 par IA comme un <strong>vrai processus industriel</strong>\u00a0: phases, gates, agents sp\u00e9cialis\u00e9s, m\u00e9triques mesur\u00e9es. Combin\u00e9 \u00e0 MSCM pour la gouvernance s\u00e9mantique du code, il offre un cadre complet pour les projets ambitieux.<br><br><a href="https://github.com/StudioMiyukini/mip" target="_blank" style="color:#8b5cf6;font-weight:600;">Installer MIP depuis GitHub \u2192</a>',
+      miou:'Merci d\u0027avoir explor\u00e9 MIP avec moi\u00a0! Si tu as des questions, le repo GitHub est l\u00e0 pour \u00e7a. \u00c0 bient\u00f4t\u00a0!'
+    }
+  ];
+
+  let currentTopic = 0;
+
+  function mipTypeText(el, text, cb) {
+    el.textContent = '';
+    let i = 0;
+    const miouEl = document.querySelector('.mip-miou-large') || document.querySelector('.mip-miou-medium');
+    if (miouEl) miouEl.classList.add('talking');
+    const iv = setInterval(function() {
+      if (i < text.length) { el.textContent += text[i]; i++; }
+      else { clearInterval(iv); if (miouEl) miouEl.classList.remove('talking'); if (cb) cb(); }
+    }, 28);
+  }
+
+  window.mipVnNext = function(from) {
+    document.getElementById('mip-vn-s' + from).classList.remove('active');
+    var next = from + 1;
+    document.getElementById('mip-vn-s' + next).classList.add('active');
+    if (next === 2) {
+      setTimeout(function() {
+        mipTypeText(document.getElementById('mip-s2-text'),
+          'Salut\u00a0! Je suis Miou. Je vais te pr\u00e9senter MIP et MSCM, les protocoles qui gouvernent le d\u00e9veloppement IA chez Miyukini. Comment veux-tu d\u00e9couvrir\u00a0?',
+          function() { document.getElementById('mip-vn-paths').classList.add('visible'); }
+        );
+      }, 400);
+    }
+  };
+
+  window.mipVnStartImmersif = function() {
+    document.getElementById('mip-vn-s2').classList.remove('active');
+    document.getElementById('mip-vn-s3').classList.add('active');
+    buildMenu();
+    showTopic(0);
+  };
+
+  window.mipVnSkip = function() {
+    document.getElementById('mip-vn-overlay').classList.add('hidden');
+    document.getElementById('mip-dev-content').style.display = '';
+  };
+
+  window.mipShowVn = function() {
+    document.getElementById('mip-dev-content').style.display = 'none';
+    var overlay = document.getElementById('mip-vn-overlay');
+    overlay.classList.remove('hidden');
+    overlay.querySelector('.mip-vn-screen.active') ||
+      document.getElementById('mip-vn-s1').classList.add('active');
+  };
+
+  function buildMenu() {
+    var menu = document.getElementById('mip-vn-menu');
+    menu.innerHTML = '';
+    MIP_TOPICS.forEach(function(t, i) {
+      var el = document.createElement('div');
+      el.className = 'mip-vn-menu-item' + (i === 0 ? ' active' : '');
+      el.innerHTML = '<span class="mip-vn-menu-icon">' + t.icon + '</span>' + t.title;
+      el.onclick = function() { showTopic(i); };
+      menu.appendChild(el);
+    });
+  }
+
+  function showTopic(idx) {
+    currentTopic = idx;
+    var t = MIP_TOPICS[idx];
+    document.getElementById('mip-topic-title').textContent = t.icon + ' ' + t.title;
+    document.getElementById('mip-topic-body').innerHTML = t.body;
+    document.getElementById('mip-miou-comment').textContent = t.miou;
+    document.getElementById('mip-vn-choices').innerHTML = '';
+    var items = document.querySelectorAll('.mip-vn-menu-item');
+    items.forEach(function(el, i) { el.classList.toggle('active', i === idx); });
+    var nextBtn = document.getElementById('mip-next-btn');
+    var finishBtn = document.getElementById('mip-finish-btn');
+    if (idx >= MIP_TOPICS.length - 1) {
+      nextBtn.style.display = 'none';
+      finishBtn.style.display = '';
+    } else {
+      nextBtn.style.display = '';
+      finishBtn.style.display = 'none';
+    }
+  }
+
+  window.mipVnNextTopic = function() {
+    if (currentTopic < MIP_TOPICS.length - 1) showTopic(currentTopic + 1);
+  };
+
+  // Auto-show VN on first visit, dev content on return
+  if (!sessionStorage.getItem('mip-visited')) {
+    sessionStorage.setItem('mip-visited', '1');
+  } else {
+    mipVnSkip();
+  }
+})();
+</script>
+"##;
+
+    layout("MIP v2 & MSCM", content, "mip")
 }
 
 /// Page du blog.

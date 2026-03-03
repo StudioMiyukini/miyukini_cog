@@ -949,6 +949,15 @@ async fn route_request(
             }
         }
 
+        "/mip" => {
+            let body = pages::mip_page();
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
+        }
+
         "/about" => {
             let body = pages::about_page();
             RouteResponse::Normal {
