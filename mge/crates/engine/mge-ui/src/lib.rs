@@ -33,6 +33,9 @@ mod combat_log;
 #[cfg(test)]
 mod hud_tests;
 
+#[cfg(test)]
+mod ui_tests;
+
 /// Menu screens (main menu, character select, lobby browser, pause).
 pub mod menus;
 
@@ -68,14 +71,36 @@ pub use inventory::{
     GRID_COLS,
     GRID_ROWS,
 };
-pub use character::{draw_character_panel, CharacterData};
+pub use character::{
+    can_equip,
+    draw_character_panel,
+    CharacterData,
+    EquipError,
+    EquipSlot,
+    EquippedItem,
+    PaperdollState,
+};
 pub use skill_tree::{draw_skill_tree, SkillNodeState, SkillTreeState, SkillTreeTab};
 pub use menus::main_menu::{draw_main_menu, MainMenuAction};
 pub use menus::char_select::draw_char_select;
 pub use menus::lobby_browser::draw_lobby_browser;
 pub use menus::pause_menu::{draw_pause_menu, PauseAction};
 pub use dialog::draw_npc_dialog;
-pub use tooltip::{draw_tooltip, ItemTooltipData};
+pub use tooltip::{
+    draw_tooltip,
+    color_for_quality,
+    compare_stats,
+    unidentified_tooltip,
+    ItemTooltipData,
+    TooltipLine,
+    COLOR_NORMAL,
+    COLOR_MAGIC,
+    COLOR_RARE,
+    COLOR_SET,
+    COLOR_UNIQUE,
+    COLOR_BETTER,
+    COLOR_WORSE,
+};
 pub use minimap::{draw_minimap, MarkerKind, MinimapMarker, MinimapState};
 pub use skill_bar::{SkillBarState, SkillSlot};
 pub use combat_log::{CombatLogState, LogEntry};
