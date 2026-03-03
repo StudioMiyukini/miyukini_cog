@@ -21,7 +21,7 @@ impl Default for ServerConfig {
         Self {
             bind_addr: "0.0.0.0:7777".to_owned(),
             max_clients: 200,
-            max_message_size: 1_048_576,
+            max_message_size: 65_536, // SEC-16: 64 KiB
             tick_rate: 25,
         }
     }

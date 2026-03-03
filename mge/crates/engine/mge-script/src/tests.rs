@@ -337,4 +337,94 @@ mod tests {
         assert_eq!(ctx.waypoints.get(&1).unwrap().len(), 2);
         assert_eq!(ctx.waypoints.get(&2).unwrap().len(), 1);
     }
+
+    // --- SEC-09: script hash verification ---
+
+    #[test]
+    fn rhai_script_hash_fnv1a_empty() {
+        // FNV-1a of empty data must equal the FNV offset basis.
+        let hash = crate::engine::fnv1a_64(b"");
+        assert_eq!(format!("{hash:016x}"), "cbf29ce484222325");
+    }
+
+    #[test]
+    fn rhai_script_hash_fnv1a_known_content() {
+        // Any non-empty content must differ from the empty hash.
+        let hash_empty = crate::engine::fnv1a_64(b"");
+        let hash_hello = crate::engine::fnv1a_64(b"hello");
+        assert_ne!(
+            format!("{hash_hello:016x}"),
+            format!("{hash_empty:016x}"),
+            "FNV-1a of 'hello' must differ from empty hash"
+        );
+    }
+
+    #[test]
+    fn rhai_script_hash_deterministic() {
+        // Same input must always produce the same hash.
+        let h1 = crate::engine::fnv1a_64(b"sodomight_script");
+        let h2 = crate::engine::fnv1a_64(b"sodomight_script");
+        assert_eq!(h1, h2, "FNV-1a must be deterministic");
+    }
+
+    // --- SEC-18: reward caps ---
+
+    #[test]
+    fn rhai_reward_xp_capped_at_100k() {
+        let mut engine = make_engine();
+        engine
+            .compile(
+                "test_xp_cap",
+                r#"
+            reward_xp(ctx, 999999);
+        "#,
+            )
+            .unwrap();
+
+        let mut ctx = make_ctx();
+        engine.run("test_xp_cap", &mut ctx).unwrap();
+        assert_eq!(
+            ctx.pending_xp, 100_000,
+            "XP must be capped at 100_000 (SEC-18)"
+        );
+    }
+
+    #[test]
+    fn rhai_reward_item_qty_capped_at_100() {
+        let mut engine = make_engine();
+        engine
+            .compile(
+                "test_item_cap",
+                r#"
+            reward_item(ctx, "potion", 9999);
+        "#,
+            )
+            .unwrap();
+
+        let mut ctx = make_ctx();
+        engine.run("test_item_cap", &mut ctx).unwrap();
+        assert_eq!(ctx.pending_item_grants.len(), 1);
+        assert_eq!(
+            ctx.pending_item_grants[0],
+            ("potion".to_string(), 100),
+            "Item quantity must be capped at 100 (SEC-18)"
+        );
+    }
+
+    #[test]
+    fn rhai_reward_xp_below_cap_unchanged() {
+        let mut engine = make_engine();
+        engine
+            .compile(
+                "test_xp_under_cap",
+                r#"
+            reward_xp(ctx, 500);
+        "#,
+            )
+            .unwrap();
+
+        let mut ctx = make_ctx();
+        engine.run("test_xp_under_cap", &mut ctx).unwrap();
+        assert_eq!(ctx.pending_xp, 500, "XP under cap must be unchanged");
+    }
 }

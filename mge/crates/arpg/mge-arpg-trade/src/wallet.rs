@@ -52,8 +52,16 @@ impl Wallet {
     ///
     /// # Errors
     ///
+    /// Returns [`WalletError::Underflow`] if `amount` is negative (SEC-19).
     /// Returns [`WalletError::Overflow`] if the resulting balance would exceed [`GOLD_MAX`].
     pub fn add_gold(&mut self, amount: i64) -> Result<(), WalletError> {
+        // SEC-19: reject negative amounts — callers must use remove_gold instead.
+        if amount < 0 {
+            return Err(WalletError::Underflow {
+                attempted: amount,
+                current: self.gold,
+            });
+        }
         if self.gold + amount > GOLD_MAX {
             return Err(WalletError::Overflow {
                 attempted: amount,
@@ -68,8 +76,16 @@ impl Wallet {
     ///
     /// # Errors
     ///
+    /// Returns [`WalletError::Overflow`] if `amount` is negative (SEC-19).
     /// Returns [`WalletError::Underflow`] if the resulting balance would drop below zero.
     pub fn remove_gold(&mut self, amount: i64) -> Result<(), WalletError> {
+        // SEC-19: reject negative amounts — callers must use add_gold instead.
+        if amount < 0 {
+            return Err(WalletError::Overflow {
+                attempted: amount,
+                max: GOLD_MAX,
+            });
+        }
         if self.gold < amount {
             return Err(WalletError::Underflow {
                 attempted: amount,
@@ -208,5 +224,27 @@ mod tests {
                 current: 0,
             }
         );
+    }
+
+    // -----------------------------------------------------------------------
+    // SEC-19: i64 negative amount validation
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn gold_i64_negative_add_rejected() {
+        let mut w = Wallet::new();
+        w.add_gold(100).unwrap();
+        let result = w.add_gold(-50);
+        assert!(result.is_err(), "negative add_gold must be rejected (SEC-19)");
+        assert_eq!(w.gold(), 100, "balance must be unchanged after rejected add");
+    }
+
+    #[test]
+    fn gold_i64_negative_remove_rejected() {
+        let mut w = Wallet::new();
+        w.add_gold(100).unwrap();
+        let result = w.remove_gold(-50);
+        assert!(result.is_err(), "negative remove_gold must be rejected (SEC-19)");
+        assert_eq!(w.gold(), 100, "balance must be unchanged after rejected remove");
     }
 }

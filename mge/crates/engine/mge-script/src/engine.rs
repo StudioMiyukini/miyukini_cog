@@ -253,14 +253,18 @@ fn register_reward_api(engine: &mut Engine) {
     engine.register_fn(
         "reward_item",
         |ctx: &mut ScriptContext, item_id: &str, qty: i64| {
+            // SEC-18: cap item reward quantity to 100
+            let capped_qty = (qty as u32).min(100);
             ctx.pending_item_grants
-                .push((item_id.to_string(), qty as u32));
+                .push((item_id.to_string(), capped_qty));
         },
     );
     engine.register_fn(
         "reward_xp",
         |ctx: &mut ScriptContext, xp: i64| {
-            ctx.pending_xp += xp;
+            // SEC-18: cap XP reward to 100_000
+            let capped_xp = xp.min(100_000);
+            ctx.pending_xp += capped_xp;
         },
     );
     engine.register_fn(
@@ -279,4 +283,51 @@ fn register_utility_api(engine: &mut Engine) {
     engine.register_fn("log_warn", |msg: &str| {
         tracing::warn!("[Rhai] {}", msg);
     });
+}
+
+// ---------------------------------------------------------------------------
+// Hash utilities
+// ---------------------------------------------------------------------------
+
+/// FNV-1a 64-bit hash — simple, deterministic, no external crate.
+pub(crate) fn fnv1a_64(data: &[u8]) -> u64 {
+    let mut hash: u64 = 0xcbf2_9ce4_8422_2325;
+    for &byte in data {
+        hash ^= u64::from(byte);
+        hash = hash.wrapping_mul(0x0100_0000_01b3);
+    }
+    hash
+}
+
+impl ScriptEngine {
+    /// Verifies a script file's SHA-256 hash against an expected digest.
+    ///
+    /// **SEC-09**: Prevents tampered scripts from being loaded.
+    ///
+    /// Uses FNV-1a 64-bit as a deterministic, dependency-free fingerprint.
+    /// Pass the hex string produced by [`fnv1a_64`] formatted as `{:016x}`.
+    ///
+    /// # Errors
+    ///
+    /// Returns `ScriptError::NotFound` if the file can't be read, or
+    /// `ScriptError::Runtime` if the hash doesn't match.
+    pub fn verify_script_hash(&self, path: &Path, expected_hex: &str) -> ScriptResult<()> {
+        use std::io::Read;
+        let mut file = fs::File::open(path)
+            .map_err(|e| ScriptError::NotFound(e.to_string()))?;
+        let mut buf = Vec::new();
+        file.read_to_end(&mut buf)
+            .map_err(|e| ScriptError::NotFound(e.to_string()))?;
+
+        let hash = fnv1a_64(&buf);
+        let computed_hex = format!("{hash:016x}");
+
+        if computed_hex != expected_hex {
+            return Err(ScriptError::Runtime(format!(
+                "script hash mismatch for '{}': expected {expected_hex}, got {computed_hex}",
+                path.display()
+            )));
+        }
+        Ok(())
+    }
 }

@@ -47,6 +47,9 @@ pub struct NpcVendor {
     pub npc_id: String,
     /// Catalogue of items offered by the vendor.
     pub items: Vec<VendorItem>,
+    /// Ticks until next inventory refresh (0 = refresh now).
+    #[serde(default)]
+    pub refresh_timer: u32,
 }
 
 impl NpcVendor {
@@ -55,6 +58,7 @@ impl NpcVendor {
         Self {
             npc_id: npc_id.into(),
             items: Vec::new(),
+            refresh_timer: 0,
         }
     }
 
@@ -109,11 +113,59 @@ impl NpcVendor {
         Ok(item_id.to_string())
     }
 
-    /// Player sells an item to the vendor. Adds `price` gold to the player's wallet.
-    pub fn sell_to_vendor(&self, _item_id: &str, wallet: &mut Wallet, price: u64) {
-        // Saturating add: if the wallet is at max, the excess is silently dropped.
-        let _ = wallet.add_gold(i64::try_from(price).unwrap_or(i64::MAX));
+    /// Player sells an item to the vendor.
+    ///
+    /// **SEC-21**: The sell price is read from the vendor's catalogue (`price_sell`),
+    /// NOT from the client. If the item is not in the vendor's catalogue, a default
+    /// sell price of `base_value / 4` is used.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`TradeError::ItemNotFound`] if `item_id` is not recognized by the vendor
+    /// and no `fallback_value` is provided.
+    pub fn sell_to_vendor(
+        &self,
+        item_id: &str,
+        wallet: &mut Wallet,
+        fallback_value: Option<u64>,
+    ) -> Result<u64, TradeError> {
+        let sell_price = if let Some(vendor_item) = self.find_item(item_id) {
+            vendor_item.price_sell
+        } else if let Some(base_val) = fallback_value {
+            base_val / 4
+        } else {
+            return Err(TradeError::ItemNotFound {
+                item_id: item_id.to_string(),
+            });
+        };
+
+        let gold_i64 = i64::try_from(sell_price).unwrap_or(i64::MAX);
+        let _ = wallet.add_gold(gold_i64);
+        Ok(sell_price)
     }
+
+    /// Decrements the refresh timer. Returns `true` when a refresh is due.
+    pub fn tick_refresh(&mut self) -> bool {
+        if self.refresh_timer == 0 {
+            return false;
+        }
+        self.refresh_timer = self.refresh_timer.saturating_sub(1);
+        self.refresh_timer == 0
+    }
+}
+
+/// Pre-built vendor for Act 1 (Charsi-style).
+#[must_use]
+pub fn act1_vendor() -> NpcVendor {
+    let mut v = NpcVendor::new("charsi");
+    v.add_item(VendorItem::new("short_sword", 250, 62));
+    v.add_item(VendorItem::new("buckler", 100, 25));
+    v.add_item(VendorItem::new("leather_armor", 200, 50));
+    v.add_item(VendorItem::new("health_potion", 30, 7));
+    v.add_item(VendorItem::new("mana_potion", 40, 10));
+    v.add_item(VendorItem::new("scroll_identify", 80, 20));
+    v.add_item(VendorItem::new("scroll_tp", 100, 25));
+    v
 }
 
 // ---------------------------------------------------------------------------
@@ -203,8 +255,54 @@ mod tests {
         let vendor = make_vendor();
         let mut wallet = wallet_with(100);
 
-        vendor.sell_to_vendor("short_sword", &mut wallet, 40);
+        // SEC-21: price comes from VendorItem.price_sell (40), not from the caller.
+        vendor.sell_to_vendor("short_sword", &mut wallet, None).unwrap();
         assert_eq!(wallet.gold(), 140);
+    }
+
+    #[test]
+    fn vendor_sell_price_from_def() {
+        // SEC-21: price comes from vendor definition, not client
+        let vendor = make_vendor();
+        let mut wallet = wallet_with(0);
+        let price = vendor.sell_to_vendor("short_sword", &mut wallet, None).unwrap();
+        assert_eq!(price, 40, "sell price must come from VendorItem.price_sell");
+        assert_eq!(wallet.gold(), 40);
+    }
+
+    #[test]
+    fn vendor_sell_fallback_div4() {
+        let vendor = make_vendor();
+        let mut wallet = wallet_with(0);
+        // Item not in vendor catalogue, fallback_value = 200 -> sell price = 200/4 = 50
+        let price = vendor
+            .sell_to_vendor("unknown_item", &mut wallet, Some(200))
+            .unwrap();
+        assert_eq!(price, 50, "fallback sell price must be base_value / 4");
+    }
+
+    #[test]
+    fn vendor_sell_unknown_no_fallback() {
+        let vendor = make_vendor();
+        let mut wallet = wallet_with(0);
+        let result = vendor.sell_to_vendor("unknown_item", &mut wallet, None);
+        assert!(result.is_err(), "unknown item with no fallback must error");
+    }
+
+    #[test]
+    fn act1_vendor_items() {
+        let v = act1_vendor();
+        assert_eq!(v.items.len(), 7, "Act 1 vendor must have 7 items");
+        assert_eq!(v.npc_id, "charsi");
+    }
+
+    #[test]
+    fn vendor_refresh_timer() {
+        let mut v = act1_vendor();
+        v.refresh_timer = 3;
+        assert!(!v.tick_refresh()); // 3 -> 2
+        assert!(!v.tick_refresh()); // 2 -> 1
+        assert!(v.tick_refresh()); // 1 -> 0 -> true
     }
 
     #[test]

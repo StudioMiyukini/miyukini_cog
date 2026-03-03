@@ -168,7 +168,7 @@ mod tests {
         let cfg = ServerConfig::default();
         assert_eq!(cfg.bind_addr, "0.0.0.0:7777");
         assert_eq!(cfg.max_clients, 200);
-        assert_eq!(cfg.max_message_size, 1_048_576);
+        assert_eq!(cfg.max_message_size, 65_536, "SEC-16: default must be 64 KiB");
         assert_eq!(cfg.tick_rate, 25);
     }
 
@@ -239,6 +239,55 @@ mod tests {
             is_invalid_client_message(&bytes),
             "is_invalid_client_message must return true for ServerMessage bytes"
         );
+    }
+
+    // ── SEC-16: 64 KiB limit ───────────────────────────────────
+
+    #[test]
+    fn net_max_message_64k() {
+        // The default codec must reject a frame declaring 65_537 bytes (one above 64 KiB).
+        let codec = FrameCodec::default();
+        let over_limit: u32 = 65_537;
+        let mut buf = Vec::new();
+        buf.extend_from_slice(&over_limit.to_le_bytes());
+        buf.extend_from_slice(&vec![0u8; over_limit as usize]);
+        let err = codec.decode(&buf);
+        assert!(err.is_err(), "SEC-16: frame > 64 KiB must be rejected by default codec");
+    }
+
+    // ── SEC-20: CRC32 codec ────────────────────────────────────
+
+    #[test]
+    fn codec_crc32_roundtrip() {
+        let data = b"Hello, Sodomight!";
+        let encoded = crate::codec::encode_with_crc(data);
+        let decoded = crate::codec::decode_verify_crc(&encoded).unwrap();
+        assert_eq!(decoded, data, "CRC32 roundtrip must preserve payload");
+    }
+
+    #[test]
+    fn codec_crc32_tampered() {
+        let data = b"Original data";
+        let mut encoded = crate::codec::encode_with_crc(data);
+        // Tamper one byte in the payload (index 5 = first byte of payload, after 4-byte length)
+        encoded[5] ^= 0xFF;
+        let result = crate::codec::decode_verify_crc(&encoded);
+        assert!(result.is_err(), "Tampered data must fail CRC check (SEC-20)");
+    }
+
+    #[test]
+    fn codec_crc32_empty_payload() {
+        let data = b"";
+        let encoded = crate::codec::encode_with_crc(data);
+        let decoded = crate::codec::decode_verify_crc(&encoded).unwrap();
+        assert_eq!(decoded, data, "Empty payload must roundtrip cleanly");
+    }
+
+    #[test]
+    fn codec_crc32_too_short_buffer() {
+        // Buffer under 8 bytes must return an error.
+        let result = crate::codec::decode_verify_crc(b"short");
+        assert!(result.is_err(), "Buffer < 8 bytes must fail");
     }
 
     // ── Multi-message ──────────────────────────────────────────

@@ -57,4 +57,59 @@ impl DbPool {
         })?;
         f(&guard)
     }
+
+    /// Creates a backup copy of the database file before a new session.
+    ///
+    /// **SEC-22**: Prevents data loss on crash or corruption.
+    ///
+    /// Copies `db_path` to `db_path.bak` (overwriting any previous backup).
+    /// Does nothing for in-memory databases or when the file does not yet exist.
+    ///
+    /// # Errors
+    ///
+    /// Returns an I/O error if the copy fails (e.g. permission denied).
+    pub fn backup_before_session(db_path: &Path) -> std::io::Result<()> {
+        if !db_path.exists() {
+            return Ok(());
+        }
+        let backup_path = db_path.with_extension("db.bak");
+        std::fs::copy(db_path, &backup_path)?;
+        Ok(())
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tests SEC-22
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    #[test]
+    fn db_backup_creates_file() {
+        let dir = std::env::temp_dir().join("mge_test_backup");
+        std::fs::create_dir_all(&dir).unwrap();
+        let db_path = dir.join("test.db");
+        // Create a fake DB file
+        std::fs::write(&db_path, b"fake db content").unwrap();
+
+        DbPool::backup_before_session(&db_path).unwrap();
+
+        let backup = dir.join("test.db.bak");
+        assert!(backup.exists(), "backup file must exist after backup_before_session");
+        let content = std::fs::read(&backup).unwrap();
+        assert_eq!(content, b"fake db content");
+
+        // Cleanup
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn db_backup_nonexistent_noop() {
+        let path = PathBuf::from("/tmp/does_not_exist_mge_12345.db");
+        // Should succeed silently for non-existent files
+        DbPool::backup_before_session(&path).unwrap();
+    }
 }

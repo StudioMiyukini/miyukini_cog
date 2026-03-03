@@ -2,6 +2,7 @@
 //! Sodomight -- D2-like ARPG built on MGE.
 #![deny(unsafe_code)]
 
+pub mod boss;
 pub mod config;
 pub mod content;
 pub mod data_loader;
