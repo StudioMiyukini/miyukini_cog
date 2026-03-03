@@ -16,12 +16,15 @@ pub mod instance;
 pub mod inventory;
 pub mod equipment;
 pub mod uniques;
+pub mod identify;
+pub mod sockets;
 
 #[cfg(test)]
 mod tests;
 
 // Re-exports for convenience.
 pub use errors::ItemError;
+pub use identify::{IdentifiableItem, IdentifyError, IdentifyMethod};
 pub use quality::{
     Affix, AffixDef, AffixInstance, AffixKind, ItemQuality, MagicItemResult, RareItemResult,
     AFFIX_POOL_PREFIXES, AFFIX_POOL_SUFFIXES, RARE_PREFIXES, RARE_SUFFIXES,
@@ -34,4 +37,8 @@ pub use equipment::Equipment;
 pub use uniques::{
     UniqueItemDef, UniqueItemInstance, ACT1_UNIQUES,
     all_act1_uniques, generate_unique_item, get_unique_def,
+};
+pub use sockets::{
+    GemQuality, GemType, SocketError, SocketFiller, SocketedItem,
+    max_sockets_for_base,
 };

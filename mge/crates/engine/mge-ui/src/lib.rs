@@ -55,9 +55,21 @@ pub use hud::{
     draw_hud, BeltSlotData, BeltState, HudData, HudState, OrbState, PotionType, SkillSlotData,
     XpBarState,
 };
-pub use inventory::{draw_inventory, EquipSlots, UiItem, CELL_SIZE, GRID_COLS, GRID_ROWS};
+pub use inventory::{
+    draw_inventory,
+    item_size,
+    EquipSlots,
+    InventoryError,
+    InventoryGrid,
+    InventorySlot,
+    ItemSize,
+    UiItem,
+    CELL_SIZE,
+    GRID_COLS,
+    GRID_ROWS,
+};
 pub use character::{draw_character_panel, CharacterData};
-pub use skill_tree::draw_skill_tree;
+pub use skill_tree::{draw_skill_tree, SkillNodeState, SkillTreeState, SkillTreeTab};
 pub use menus::main_menu::{draw_main_menu, MainMenuAction};
 pub use menus::char_select::draw_char_select;
 pub use menus::lobby_browser::draw_lobby_browser;
