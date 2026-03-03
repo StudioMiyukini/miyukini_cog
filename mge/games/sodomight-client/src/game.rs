@@ -1098,7 +1098,7 @@ fn guess_equip_slot(base_id: &str) -> mge_arpg_items::ItemSlot {
 }
 
 /// Map a loot quality to D2-style colors for item labels.
-fn quality_color(quality: &mge_arpg_loot::DropQuality) -> [f32; 4] {
+fn quality_color(quality: mge_arpg_loot::DropQuality) -> [f32; 4] {
     use mge_arpg_loot::DropQuality;
     match quality {
         DropQuality::Normal => [1.0, 1.0, 1.0, 1.0],       // White
@@ -1974,7 +1974,7 @@ impl GameApp for SodomightApp {
                         let color = if drop.item_id == "gold" {
                             [1.0, 0.85, 0.2, 1.0]
                         } else {
-                            quality_color(&drop.quality)
+                            quality_color(drop.quality)
                         };
                         // Shadow.
                         crate::bitmap_font::BitmapFont::push_text(
