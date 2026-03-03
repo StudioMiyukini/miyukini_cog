@@ -5,7 +5,9 @@
 pub mod config;
 pub mod error;
 pub mod tick;
+pub mod validation;
 
 pub use config::{default_server_config, ServerConfig};
 pub use error::ServerError;
 pub use tick::TickState;
+pub use validation::{default_move_validator, MoveValidationResult, MoveValidator};

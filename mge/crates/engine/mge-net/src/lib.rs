@@ -6,7 +6,11 @@
 //! This crate provides:
 //! - [`ClientId`] -- unique client identity (UUID v4)
 //! - [`Packet`] -- generic envelope wrapping any serializable payload
-//! - [`GameMessage`] -- enum of all client/server game messages
+//! - [`GameMessage`] -- unified enum of all client/server game messages (legacy)
+//! - [`ClientMessage`] -- messages the client sends to the server
+//! - [`ServerMessage`] -- messages the server sends to clients
+//! - [`parse_client_message`] / [`parse_server_message`] -- directional parsers
+//! - [`is_invalid_client_message`] -- security guard for direction violations
 //! - [`FrameCodec`] -- length-prefixed (u32 LE) frame encoder/decoder
 //! - [`ServerConfig`] / [`ConnectionInfo`] -- server and connection metadata
 //! - [`NetError`] / [`NetResult`] -- error types
@@ -14,6 +18,7 @@
 pub mod client_id;
 pub mod codec;
 pub mod config;
+pub mod message;
 pub mod packet;
 
 mod tests;
@@ -22,6 +27,10 @@ mod tests;
 pub use client_id::ClientId;
 pub use codec::FrameCodec;
 pub use config::{ConnectionInfo, ServerConfig};
+pub use message::{
+    is_invalid_client_message, parse_client_message, parse_server_message, ClientMessage,
+    ServerMessage,
+};
 pub use packet::{GameMessage, Packet};
 
 /// Network error type for mge-net.

@@ -91,11 +91,12 @@ impl NpcVendor {
         };
 
         // Withdraw gold (may fail with InsufficientGold).
+        let price_i64 = i64::try_from(price).unwrap_or(i64::MAX);
         wallet
-            .remove_gold(i64::try_from(price).unwrap_or(i64::MAX))
+            .remove_gold(price_i64)
             .map_err(|_| TradeError::InsufficientGold {
-                have: u64::try_from(wallet.gold()).unwrap_or(0),
-                need: price,
+                have: wallet.gold(),
+                need: price_i64,
             })?;
 
         // Decrement stock if finite.

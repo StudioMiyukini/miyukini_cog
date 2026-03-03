@@ -6,6 +6,10 @@ mod tests {
     use crate::client_id::ClientId;
     use crate::codec::FrameCodec;
     use crate::config::ServerConfig;
+    use crate::message::{
+        is_invalid_client_message, parse_client_message, parse_server_message, ClientMessage,
+        ServerMessage,
+    };
     use crate::packet::{GameMessage, Packet};
 
     // ── ClientId ───────────────────────────────────────────────
@@ -166,6 +170,75 @@ mod tests {
         assert_eq!(cfg.max_clients, 200);
         assert_eq!(cfg.max_message_size, 1_048_576);
         assert_eq!(cfg.tick_rate, 25);
+    }
+
+    // ── ClientMessage / ServerMessage ──────────────────────────
+
+    #[test]
+    fn client_message_roundtrip() {
+        let msg = ClientMessage::Move { dx: 2.5, dy: -1.0 };
+        let bytes = serde_json::to_vec(&msg).expect("serialize ClientMessage");
+        let restored = parse_client_message(&bytes);
+        assert!(restored.is_some(), "ClientMessage must round-trip through JSON");
+        match restored.unwrap() {
+            ClientMessage::Move { dx, dy } => {
+                assert!((dx - 2.5).abs() < f32::EPSILON, "dx must be preserved");
+                assert!((dy - (-1.0)).abs() < f32::EPSILON, "dy must be preserved");
+            }
+            other => panic!("Expected ClientMessage::Move, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn server_message_roundtrip() {
+        let msg = ServerMessage::SpawnEntity {
+            entity_id: 99,
+            entity_type: "goblin".to_string(),
+            x: 10.0,
+            y: 20.0,
+        };
+        let bytes = serde_json::to_vec(&msg).expect("serialize ServerMessage");
+        let restored = parse_server_message(&bytes);
+        assert!(restored.is_some(), "ServerMessage must round-trip through JSON");
+        match restored.unwrap() {
+            ServerMessage::SpawnEntity {
+                entity_id,
+                entity_type,
+                x,
+                y,
+            } => {
+                assert_eq!(entity_id, 99);
+                assert_eq!(entity_type, "goblin");
+                assert!((x - 10.0).abs() < f32::EPSILON, "x must be preserved");
+                assert!((y - 20.0).abs() < f32::EPSILON, "y must be preserved");
+            }
+            other => panic!("Expected ServerMessage::SpawnEntity, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn client_cannot_send_server_msg() {
+        // Serialize a ServerMessage and try to parse it as a ClientMessage.
+        let server_msg = ServerMessage::Disconnect {
+            reason: "test".to_string(),
+        };
+        let bytes = serde_json::to_vec(&server_msg).expect("serialize ServerMessage");
+        let result = parse_client_message(&bytes);
+        assert!(
+            result.is_none(),
+            "A ServerMessage must NOT be parseable as a ClientMessage"
+        );
+    }
+
+    #[test]
+    fn is_invalid_detects_server_as_client() {
+        // ServerMessage bytes should trigger the security guard.
+        let server_msg = ServerMessage::DespawnEntity { entity_id: 7 };
+        let bytes = serde_json::to_vec(&server_msg).expect("serialize ServerMessage");
+        assert!(
+            is_invalid_client_message(&bytes),
+            "is_invalid_client_message must return true for ServerMessage bytes"
+        );
     }
 
     // ── Multi-message ──────────────────────────────────────────
