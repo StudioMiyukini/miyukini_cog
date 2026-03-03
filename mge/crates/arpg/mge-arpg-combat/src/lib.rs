@@ -26,7 +26,7 @@ mod tests;
 pub use calculator::DamageCalculator;
 pub use damage::{AttackerStats, DamageRoll, DamageType, DefenderStats};
 pub use events::{CombatEvent, CombatResult};
-pub use hit::HitChance;
+pub use hit::{hit_chance, roll_hit, HitChance};
 pub use processor::CombatProcessor;
 pub use status::StatusEffect;
 

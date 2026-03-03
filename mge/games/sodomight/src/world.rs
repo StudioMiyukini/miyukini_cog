@@ -8,6 +8,7 @@
 
 use std::collections::HashMap;
 
+use crate::content::MonsterDef;
 use mge_arpg_ai::{AggroRange, AiAgent};
 use mge_arpg_combat::{
     AttackerStats, CombatEvent, CombatProcessor, DamageType, DefenderStats, StatusEffect,
@@ -209,6 +210,12 @@ pub struct SodomightWorld {
 
     /// The player's gold counter.
     pub player_gold: u32,
+
+    /// Per-monster XP reward overrides (from `MonsterDef`).
+    monster_xp_rewards: HashMap<EntityId, i64>,
+
+    /// Per-monster treasure class id overrides (from `MonsterDef`).
+    monster_tc_ids: HashMap<EntityId, String>,
 }
 
 impl std::fmt::Debug for SodomightWorld {
@@ -272,6 +279,8 @@ impl SodomightWorld {
             status_effects: HashMap::new(),
             attack_cooldowns: HashMap::new(),
             player_gold: 0,
+            monster_xp_rewards: HashMap::new(),
+            monster_tc_ids: HashMap::new(),
         })
     }
 
@@ -309,6 +318,47 @@ impl SodomightWorld {
             AggroRange::new(DEFAULT_SIGHT_RANGE, DEFAULT_ATTACK_RANGE),
         );
         self.ai_agents.insert(entity_id, agent);
+
+        Ok(entity_id)
+    }
+
+    /// Spawn a monster from a [`MonsterDef`], using its stats for XP, loot,
+    /// speed, and aggro range.
+    ///
+    /// This is the preferred way to spawn content-defined monsters. The
+    /// original [`spawn_monster`](Self::spawn_monster) remains available for
+    /// test helpers and ad-hoc spawning.
+    pub fn spawn_monster_from_def(
+        &mut self,
+        def: &MonsterDef,
+        x: f32,
+        y: f32,
+    ) -> Result<EntityId, WorldError> {
+        let health_u32 = u32::try_from(def.health.max(0)).unwrap_or(1);
+        let record = MonsterRecord {
+            name: def.name.clone(),
+            position: Position::new(x, y),
+            health: Health::new(health_u32),
+            level: Level::new(def.level),
+            team: Team::ENEMY,
+        };
+
+        let entity_id = self
+            .ecs
+            .spawn_with_1(record)
+            .map_err(|e| WorldError::EcsError(e.to_string()))?;
+
+        // Use the def's aggro range, fall back to defaults for attack range.
+        let agent = AiAgent::new(
+            entity_id.index,
+            AggroRange::new(def.aggro_range, DEFAULT_ATTACK_RANGE),
+        );
+        self.ai_agents.insert(entity_id, agent);
+
+        // Store per-monster overrides for death handling.
+        self.monster_xp_rewards.insert(entity_id, def.xp_reward);
+        self.monster_tc_ids
+            .insert(entity_id, def.tc_id.clone());
 
         Ok(entity_id)
     }
@@ -684,16 +734,30 @@ impl SodomightWorld {
         messages.push(death_msg.clone());
         self.combat_log.push(death_msg);
 
-        // Award XP based on monster level.
-        let monster_level = u64::from(monster.level.get());
-        let xp_reward = BASE_XP_PER_KILL * monster_level;
+        // Award XP -- prefer per-monster override from MonsterDef, fall back
+        // to the legacy formula (BASE_XP_PER_KILL * level).
+        let xp_reward = self
+            .monster_xp_rewards
+            .remove(&target_id)
+            .map_or_else(
+                || {
+                    let monster_level = u64::from(monster.level.get());
+                    BASE_XP_PER_KILL * monster_level
+                },
+                |xp| u64::try_from(xp.max(0)).unwrap_or(0),
+            );
         let mut xp_messages = self.player_gain_xp(xp_reward);
         messages.append(&mut xp_messages);
 
-        // Generate loot.
+        // Generate loot -- prefer per-monster TC from MonsterDef, fall back
+        // to "tc_default".
+        let tc_id = self
+            .monster_tc_ids
+            .remove(&target_id)
+            .unwrap_or_else(|| "tc_default".to_string());
         let mlvl = u32::from(monster.level.get());
         let drops = LootGenerator::generate(
-            "tc_default",
+            &tc_id,
             &self.tc_registry,
             mlvl,
             0,
@@ -859,20 +923,11 @@ impl SodomightWorld {
             messages.push(dmg_msg.clone());
             self.combat_log.push(dmg_msg);
 
-            // Check if monster died.
+            // Check if monster died — delegate to the shared death handler.
             if let Ok(mr) = self.ecs.get_component::<MonsterRecord>(target_id) {
                 if !mr.health.is_alive() {
-                    let death_msg = format!("{} has been slain!", mr.name);
-                    messages.push(death_msg.clone());
-                    self.combat_log.push(death_msg);
-
-                    let monster_level = u64::from(mr.level.get());
-                    let xp_reward = BASE_XP_PER_KILL * monster_level;
-                    let mut xp_msgs = self.player_gain_xp(xp_reward);
-                    messages.append(&mut xp_msgs);
-
-                    self.ai_agents.remove(&target_id);
-                    self.status_effects.remove(&target_id);
+                    let mr_clone = mr.clone();
+                    self.handle_monster_death(target_id, &mr_clone, &mut messages);
                 }
             }
         }

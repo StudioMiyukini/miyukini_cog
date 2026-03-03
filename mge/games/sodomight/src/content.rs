@@ -37,6 +37,10 @@ pub struct MonsterDef {
     pub attack_rating: i32,
     /// Defense rating used for hit-chance calculations.
     pub defense_rating: i32,
+    /// Movement speed in world units per tick.
+    pub speed: f32,
+    /// Aggro sight range in world units.
+    pub aggro_range: f32,
     /// Experience points awarded on kill.
     pub xp_reward: i64,
     /// Treasure class identifier for loot generation.
@@ -50,6 +54,7 @@ pub struct MonsterDef {
 #[must_use]
 pub fn act1_monsters() -> Vec<MonsterDef> {
     vec![
+        // Fallen: weak but fast, closes distance quickly.
         MonsterDef {
             id: "fallen".into(),
             name: "Fallen".into(),
@@ -59,9 +64,12 @@ pub fn act1_monsters() -> Vec<MonsterDef> {
             max_damage: 4,
             attack_rating: 15,
             defense_rating: 5,
+            speed: 0.06,
+            aggro_range: 10.0,
             xp_reward: 50,
             tc_id: "tc_fallen".into(),
         },
+        // Zombie: slow and tanky, poisons on hit.
         MonsterDef {
             id: "zombie".into(),
             name: "Zombie".into(),
@@ -71,9 +79,12 @@ pub fn act1_monsters() -> Vec<MonsterDef> {
             max_damage: 6,
             attack_rating: 18,
             defense_rating: 8,
+            speed: 0.02,
+            aggro_range: 6.0,
             xp_reward: 80,
             tc_id: "tc_zombie".into(),
         },
+        // Quill Rat: small ranged pest, moderate speed.
         MonsterDef {
             id: "quill_rat".into(),
             name: "Quill Rat".into(),
@@ -83,9 +94,12 @@ pub fn act1_monsters() -> Vec<MonsterDef> {
             max_damage: 5,
             attack_rating: 20,
             defense_rating: 6,
+            speed: 0.05,
+            aggro_range: 12.0,
             xp_reward: 60,
             tc_id: "tc_fallen".into(),
         },
+        // Skeleton: medium speed, balanced stats.
         MonsterDef {
             id: "skeleton".into(),
             name: "Skeleton".into(),
@@ -95,9 +109,12 @@ pub fn act1_monsters() -> Vec<MonsterDef> {
             max_damage: 8,
             attack_rating: 25,
             defense_rating: 12,
+            speed: 0.04,
+            aggro_range: 8.0,
             xp_reward: 120,
             tc_id: "tc_skeleton".into(),
         },
+        // Dark Ranger: ranged skeleton variant, keeps distance.
         MonsterDef {
             id: "dark_ranger".into(),
             name: "Dark Ranger".into(),
@@ -107,9 +124,12 @@ pub fn act1_monsters() -> Vec<MonsterDef> {
             max_damage: 10,
             attack_rating: 30,
             defense_rating: 15,
+            speed: 0.03,
+            aggro_range: 14.0,
             xp_reward: 150,
             tc_id: "tc_skeleton".into(),
         },
+        // Blood Raven: super-unique, fast and aggressive.
         MonsterDef {
             id: "blood_raven".into(),
             name: "Blood Raven".into(),
@@ -119,9 +139,12 @@ pub fn act1_monsters() -> Vec<MonsterDef> {
             max_damage: 16,
             attack_rating: 50,
             defense_rating: 30,
+            speed: 0.05,
+            aggro_range: 16.0,
             xp_reward: 1000,
             tc_id: "tc_blood_raven".into(),
         },
+        // Andariel: Act 1 boss, slow but devastating.
         MonsterDef {
             id: "andariel".into(),
             name: "Andariel".into(),
@@ -131,6 +154,8 @@ pub fn act1_monsters() -> Vec<MonsterDef> {
             max_damage: 30,
             attack_rating: 80,
             defense_rating: 50,
+            speed: 0.03,
+            aggro_range: 20.0,
             xp_reward: 5000,
             tc_id: "tc_andariel".into(),
         },
@@ -817,6 +842,29 @@ mod tests {
         assert_eq!(fallen.max_damage, 4);
         assert_eq!(fallen.xp_reward, 50);
         assert_eq!(fallen.tc_id, "tc_fallen");
+        // Fallen are fast (speed > skeleton).
+        assert!(fallen.speed > 0.04);
+        assert!(fallen.aggro_range > 0.0);
+    }
+
+    #[test]
+    fn test_zombie_is_slow_and_tanky() {
+        let zombie = find_monster("zombie").expect("zombie must exist");
+        let fallen = find_monster("fallen").expect("fallen must exist");
+        // Zombie is slower than Fallen.
+        assert!(zombie.speed < fallen.speed);
+        // Zombie has more health than Fallen.
+        assert!(zombie.health > fallen.health);
+    }
+
+    #[test]
+    fn test_skeleton_is_balanced() {
+        let skeleton = find_monster("skeleton").expect("skeleton must exist");
+        let fallen = find_monster("fallen").expect("fallen must exist");
+        let zombie = find_monster("zombie").expect("zombie must exist");
+        // Skeleton speed is between zombie and fallen.
+        assert!(skeleton.speed > zombie.speed);
+        assert!(skeleton.speed <= fallen.speed);
     }
 
     #[test]
@@ -825,6 +873,8 @@ mod tests {
         assert_eq!(andy.level, 12);
         assert_eq!(andy.health, 500);
         assert_eq!(andy.xp_reward, 5000);
+        // Boss has the largest aggro range.
+        assert!(andy.aggro_range >= 20.0);
     }
 
     // -- Items -------------------------------------------------------------
