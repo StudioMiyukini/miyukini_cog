@@ -3,9 +3,11 @@
 
 #[cfg(test)]
 mod tests {
+    use mge_arpg_combat::DamageType;
+
     use crate::{
-        Cooldown, SkillBook, SkillCooldownTracker, SkillDef, SkillError, SkillId, SkillRegistry,
-        SynergyCalculator, SynergyDef,
+        can_use_skill, necro, Cooldown, SkillBook, SkillCooldownTracker, SkillDef, SkillError,
+        SkillId, SkillKind, SkillRegistry, SynergyCalculator, SynergyDef,
     };
 
     // ── Helpers ──────────────────────────────────────────────────────────
@@ -21,6 +23,12 @@ mod tests {
             mana_cost_per_level: 1.5,
             cooldown_ms: 0,
             tree: 0,
+            damage_type: DamageType::Physical,
+            kind: SkillKind::Projectile,
+            base_damage_min: 10,
+            base_damage_max: 15,
+            damage_per_level: 3,
+            synergy_ids: Vec::new(),
         }
     }
 
@@ -255,5 +263,118 @@ mod tests {
         );
         // 0.06 * 5 = 0.30
         assert!((bonus - 0.30).abs() < f32::EPSILON);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // TASK-040 : Necromancer skill definitions
+    // ══════════════════════════════════════════════════════════════════════
+
+    #[test]
+    fn bone_spear_def() {
+        let def = necro::bone_spear();
+        assert_eq!(def.id.as_str(), necro::BONE_SPEAR_ID);
+        assert_eq!(def.name, "Bone Spear");
+        assert_eq!(def.damage_type, DamageType::Magic);
+        assert_eq!(def.kind, SkillKind::Projectile);
+        assert!((def.mana_cost_base - 7.0).abs() < f32::EPSILON);
+        assert_eq!(def.base_damage_min, 15);
+        assert_eq!(def.base_damage_max, 17);
+        assert_eq!(def.damage_per_level, 5);
+        // At level 5: min=15+25=40, max=17+25=42
+        let (dmin, dmax) = def.damage_range(5);
+        assert_eq!(dmin, 40);
+        assert_eq!(dmax, 42);
+    }
+
+    #[test]
+    fn raise_skeleton_max_count() {
+        // level 0 -> 2, level 1 -> 2, level 3 -> 3, level 6 -> 4,
+        // level 9 -> 5, level 12 -> 6, level 18 -> 8, level 20 -> 8
+        assert_eq!(necro::raise_skeleton_max_count(0), 2);
+        assert_eq!(necro::raise_skeleton_max_count(1), 2);
+        assert_eq!(necro::raise_skeleton_max_count(3), 3);
+        assert_eq!(necro::raise_skeleton_max_count(6), 4);
+        assert_eq!(necro::raise_skeleton_max_count(9), 5);
+        assert_eq!(necro::raise_skeleton_max_count(12), 6);
+        assert_eq!(necro::raise_skeleton_max_count(18), 8);
+        assert_eq!(necro::raise_skeleton_max_count(20), 8);
+    }
+
+    #[test]
+    fn registry_get_necro() {
+        let mut reg = SkillRegistry::new();
+        necro::register_all(&mut reg);
+        assert_eq!(reg.len(), 3);
+
+        let bs = reg.get(&SkillId::new(necro::BONE_SPEAR_ID));
+        assert!(bs.is_some());
+        assert_eq!(bs.unwrap().name, "Bone Spear");
+
+        let rs = reg.get(&SkillId::new(necro::RAISE_SKELETON_ID));
+        assert!(rs.is_some());
+        assert_eq!(rs.unwrap().name, "Raise Skeleton");
+
+        let ce = reg.get(&SkillId::new(necro::CORPSE_EXPLOSION_ID));
+        assert!(ce.is_some());
+        assert_eq!(ce.unwrap().name, "Corpse Explosion");
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // TASK-041 : Skill activation (mana + cooldown + level)
+    // ══════════════════════════════════════════════════════════════════════
+
+    /// Helper: set up a registry with necro skills and a book with Bone Spear at level 1.
+    fn necro_setup() -> (SkillRegistry, SkillBook, SkillCooldownTracker) {
+        let mut reg = SkillRegistry::new();
+        necro::register_all(&mut reg);
+
+        let mut book = SkillBook::new(5);
+        let bs_id = SkillId::new(necro::BONE_SPEAR_ID);
+        book.invest(&bs_id, &reg).unwrap();
+
+        let mut cooldowns = SkillCooldownTracker::new();
+        // Bone Spear has 0 ms cooldown, but register it anyway for completeness.
+        cooldowns.register(bs_id, 0);
+
+        (reg, book, cooldowns)
+    }
+
+    #[test]
+    fn activate_mana_check() {
+        let (reg, book, cooldowns) = necro_setup();
+        let bs_id = SkillId::new(necro::BONE_SPEAR_ID);
+        // Bone Spear costs 7.0 mana. Give the character only 3.0 mana.
+        assert!(!can_use_skill(&bs_id, &book, 3.0, &cooldowns, &reg));
+    }
+
+    #[test]
+    fn activate_cooldown() {
+        let mut reg = SkillRegistry::new();
+        necro::register_all(&mut reg);
+
+        let mut book = SkillBook::new(5);
+        let rs_id = SkillId::new(necro::RAISE_SKELETON_ID);
+        book.invest(&rs_id, &reg).unwrap();
+
+        let mut cooldowns = SkillCooldownTracker::new();
+        // Raise Skeleton has 500 ms cooldown.
+        cooldowns.register(rs_id.clone(), 500);
+        cooldowns.trigger(&rs_id);
+
+        // Plenty of mana (100) but cooldown is active => cannot use.
+        assert!(!can_use_skill(&rs_id, &book, 100.0, &cooldowns, &reg));
+
+        // Tick the cooldown to completion.
+        cooldowns.tick_all(500);
+        assert!(can_use_skill(&rs_id, &book, 100.0, &cooldowns, &reg));
+    }
+
+    #[test]
+    fn activate_success() {
+        let (reg, book, cooldowns) = necro_setup();
+        let bs_id = SkillId::new(necro::BONE_SPEAR_ID);
+        // Bone Spear: level 1, mana cost 7.0, no cooldown.
+        // Give character 50.0 mana => should succeed.
+        assert!(can_use_skill(&bs_id, &book, 50.0, &cooldowns, &reg));
     }
 }

@@ -24,10 +24,13 @@ mod tests;
 // ----- Re-exports for ergonomic top-level access ----- //
 
 pub use calculator::DamageCalculator;
-pub use damage::{AttackerStats, DamageRoll, DamageType, DefenderStats};
+pub use damage::{
+    elemental_damage, physical_damage, poison_damage_per_tick, AttackerStats, DamageRoll,
+    DamageType, DefenderStats, PhysicalDamageInput, PhysicalDamageResult, PoisonDamage,
+};
 pub use events::{CombatEvent, CombatResult};
 pub use hit::{hit_chance, roll_hit, HitChance};
-pub use processor::CombatProcessor;
+pub use processor::{AttackResult, CombatProcessor};
 pub use status::StatusEffect;
 
 use thiserror::Error;

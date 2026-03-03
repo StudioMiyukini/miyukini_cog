@@ -530,6 +530,9 @@ impl SodomightWorld {
             crit_chance: 0.05,
             crit_multiplier: 1.5,
             damage_type: DamageType::Physical,
+            level: monster.level.get(),
+            str_bonus: 0.0,
+            skill_bonus: 0.0,
         };
 
         let defender = DefenderStats {
@@ -540,6 +543,9 @@ impl SodomightWorld {
             poison_res: self.player_stats.derived.poison_res,
             physical_res: 0,
             is_immune_to: Vec::new(),
+            level: u8::try_from(self.player_stats.level.level).unwrap_or(1),
+            absorb: 0,
+            current_hp: self.player_stats.current_life,
         };
 
         let result = CombatProcessor::process_attack(
@@ -637,6 +643,9 @@ impl SodomightWorld {
             crit_chance: 0.05,
             crit_multiplier: 1.5,
             damage_type: DamageType::Physical,
+            level: u8::try_from(self.player_stats.level.level).unwrap_or(1),
+            str_bonus: 0.0,
+            skill_bonus: 0.0,
         };
 
         let defender = DefenderStats {
@@ -647,6 +656,9 @@ impl SodomightWorld {
             poison_res: 0,
             physical_res: 0,
             is_immune_to: Vec::new(),
+            level: monster.level.get(),
+            absorb: 0,
+            current_hp: i32::try_from(monster.health.current).unwrap_or(i32::MAX),
         };
 
         let result = CombatProcessor::process_attack(
@@ -1181,6 +1193,7 @@ impl SodomightWorld {
 mod tests {
     use super::*;
     use mge_arpg_loot::{DropEntry, TreasureClass};
+    use mge_arpg_skills::SkillKind;
 
     fn make_world() -> SodomightWorld {
         SodomightWorld::new().unwrap()
@@ -1409,6 +1422,12 @@ mod tests {
             mana_cost_per_level: 1.0,
             cooldown_ms: 100,
             tree: 0,
+            damage_type: DamageType::Fire,
+            kind: SkillKind::Projectile,
+            base_damage_min: 6,
+            base_damage_max: 12,
+            damage_per_level: 3,
+            synergy_ids: Vec::new(),
         };
         world.register_skill(skill_def);
 

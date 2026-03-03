@@ -8,6 +8,7 @@ edition.workspace = true
 description = "MGE ARPG skills: skill trees, synergies, cooldowns, activation"
 
 [dependencies]
+mge-arpg-combat = { path = "../mge-arpg-combat" }
 serde = { workspace = true }
 thiserror = { workspace = true }
 

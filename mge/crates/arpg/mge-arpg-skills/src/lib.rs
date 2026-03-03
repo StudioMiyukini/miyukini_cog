@@ -7,10 +7,14 @@
 //! - **Skill book** ([`SkillBook`]) tracking a character's invested skill levels
 //! - **Cooldown tracking** ([`Cooldown`], [`SkillCooldownTracker`])
 //! - **Synergy calculation** ([`SynergyCalculator`]) for passive inter-skill bonuses
+//! - **Skill activation** ([`can_use_skill`]) combining mana, cooldown, and level checks
+//! - **Necromancer content** ([`necro`]) with Bone Spear, Raise Skeleton, Corpse Explosion
 
+mod activation;
 mod book;
 mod cooldown;
 mod def;
+pub mod necro;
 mod registry;
 mod skill_id;
 mod synergy;
@@ -18,9 +22,10 @@ mod synergy;
 #[cfg(test)]
 mod tests;
 
+pub use activation::can_use_skill;
 pub use book::SkillBook;
 pub use cooldown::{Cooldown, SkillCooldownTracker};
-pub use def::{SkillDef, SynergyDef};
+pub use def::{SkillDef, SkillKind, SynergyDef};
 pub use registry::SkillRegistry;
 pub use skill_id::SkillId;
 pub use synergy::SynergyCalculator;

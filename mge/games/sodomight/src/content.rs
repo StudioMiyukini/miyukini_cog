@@ -10,7 +10,8 @@ use mge_arpg_loot::{DropEntry, TreasureClass};
 use mge_arpg_quest::{
     Objective, ObjectiveKind, QuestDef, QuestId, QuestReward,
 };
-use mge_arpg_skills::{SkillDef, SkillId};
+use mge_arpg_combat::DamageType;
+use mge_arpg_skills::{SkillDef, SkillId, SkillKind};
 
 // ---------------------------------------------------------------------------
 // Monster definitions
@@ -408,6 +409,12 @@ pub fn act1_skills() -> Vec<SkillDef> {
             mana_cost_per_level: 0.0,
             cooldown_ms: 0,
             tree: 0,
+            damage_type: DamageType::Physical,
+            kind: SkillKind::Projectile,
+            base_damage_min: 0,
+            base_damage_max: 0,
+            damage_per_level: 0,
+            synergy_ids: vec![],
         },
         SkillDef {
             id: SkillId::new("fire_bolt"),
@@ -419,6 +426,12 @@ pub fn act1_skills() -> Vec<SkillDef> {
             mana_cost_per_level: 0.5,
             cooldown_ms: 0,
             tree: 0,
+            damage_type: DamageType::Fire,
+            kind: SkillKind::Projectile,
+            base_damage_min: 3,
+            base_damage_max: 6,
+            damage_per_level: 2,
+            synergy_ids: vec![],
         },
         SkillDef {
             id: SkillId::new("ice_bolt"),
@@ -430,6 +443,12 @@ pub fn act1_skills() -> Vec<SkillDef> {
             mana_cost_per_level: 0.5,
             cooldown_ms: 0,
             tree: 1,
+            damage_type: DamageType::Cold,
+            kind: SkillKind::Projectile,
+            base_damage_min: 3,
+            base_damage_max: 5,
+            damage_per_level: 2,
+            synergy_ids: vec![],
         },
         SkillDef {
             id: SkillId::new("charged_bolt"),
@@ -441,6 +460,12 @@ pub fn act1_skills() -> Vec<SkillDef> {
             mana_cost_per_level: 0.5,
             cooldown_ms: 0,
             tree: 2,
+            damage_type: DamageType::Lightning,
+            kind: SkillKind::Projectile,
+            base_damage_min: 1,
+            base_damage_max: 8,
+            damage_per_level: 1,
+            synergy_ids: vec![],
         },
         SkillDef {
             id: SkillId::new("bash"),
@@ -452,6 +477,12 @@ pub fn act1_skills() -> Vec<SkillDef> {
             mana_cost_per_level: 0.0,
             cooldown_ms: 0,
             tree: 0,
+            damage_type: DamageType::Physical,
+            kind: SkillKind::Projectile,
+            base_damage_min: 0,
+            base_damage_max: 0,
+            damage_per_level: 3,
+            synergy_ids: vec![],
         },
         SkillDef {
             id: SkillId::new("double_swing"),
@@ -463,6 +494,12 @@ pub fn act1_skills() -> Vec<SkillDef> {
             mana_cost_per_level: 0.0,
             cooldown_ms: 0,
             tree: 0,
+            damage_type: DamageType::Physical,
+            kind: SkillKind::Projectile,
+            base_damage_min: 0,
+            base_damage_max: 0,
+            damage_per_level: 2,
+            synergy_ids: vec![],
         },
     ]
 }
