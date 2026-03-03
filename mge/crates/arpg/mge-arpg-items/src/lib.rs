@@ -21,7 +21,11 @@ mod tests;
 
 // Re-exports for convenience.
 pub use errors::ItemError;
-pub use quality::{Affix, AffixKind, ItemQuality};
+pub use quality::{
+    Affix, AffixDef, AffixKind, ItemQuality, MagicItemResult,
+    AFFIX_POOL_PREFIXES, AFFIX_POOL_SUFFIXES,
+    generate_magic_item,
+};
 pub use instance::ItemInstance;
 pub use slot::ItemSlot;
 pub use inventory::{Inventory, INV_COLS, INV_ROWS};

@@ -583,6 +583,68 @@ pub fn act1_treasure_classes() -> Vec<TreasureClass> {
 }
 
 // ---------------------------------------------------------------------------
+// Act 1 canonical treasure class definitions (TC1–TC4)
+// ---------------------------------------------------------------------------
+
+/// Returns the four canonical Act 1 treasure classes used for unit testing
+/// and registry seeding.
+#[cfg(test)]
+///
+/// These TCs represent the canonical D2-style progression:
+/// - TC1 `tc_fallen`  : high NoDrop (60), light loot, early zone.
+/// - TC2 `tc_zombie`  : medium NoDrop (40), balanced loot.
+/// - TC3 `tc_skeleton`: lower NoDrop (30), higher item chance.
+/// - TC4 `tc_boss`    : NoDrop=0 (guaranteed drop), Andariel-tier.
+///
+/// Drop entry layout per TC:
+/// `NoDrop | Gold(min–max) | Item` — only the NoDrop weight lives in
+/// `TreasureClass::no_drop`; Gold and Item are `DropEntry` rows.
+fn act1_treasure_classes_canonical() -> Vec<TreasureClass> {
+    vec![
+        // TC1 — Fallen: very likely to drop nothing, small gold or potion.
+        TreasureClass {
+            id: "tc_fallen".into(),
+            picks: 1,
+            no_drop: 60,
+            entries: vec![
+                drop("gold", 25, 1, 5),
+                drop("minor_health_potion", 15, 1, 1),
+            ],
+        },
+        // TC2 — Zombie: balanced early-game table.
+        TreasureClass {
+            id: "tc_zombie".into(),
+            picks: 1,
+            no_drop: 40,
+            entries: vec![
+                drop("gold", 30, 2, 10),
+                drop("minor_health_potion", 30, 1, 1),
+            ],
+        },
+        // TC3 — Skeleton: item drop more common than NoDrop.
+        TreasureClass {
+            id: "tc_skeleton".into(),
+            picks: 1,
+            no_drop: 30,
+            entries: vec![
+                drop("gold", 35, 3, 12),
+                drop("buckler", 35, 1, 1),
+            ],
+        },
+        // TC4 — Boss (Andariel): guaranteed drop (NoDrop=0), rich loot.
+        TreasureClass {
+            id: "tc_boss".into(),
+            picks: 1,
+            no_drop: 0,
+            entries: vec![
+                drop("gold", 40, 10, 50),
+                drop("leather_armor", 60, 1, 1),
+            ],
+        },
+    ]
+}
+
+// ---------------------------------------------------------------------------
 // Quest definitions
 // ---------------------------------------------------------------------------
 
@@ -855,6 +917,85 @@ pub fn find_zone(id: &str) -> Option<ContentZoneDef> {
 }
 
 // ---------------------------------------------------------------------------
+// Act 1 monster factory functions
+// ---------------------------------------------------------------------------
+
+/// Returns a `MonsterDef` for the Fallen archetype.
+///
+/// Fallen are weak but fast melee units that close distance quickly.
+/// HP range: 8–10, AR: 20, speed: 6.0, aggro: 8.0, XP: 5, TC: tc_fallen.
+#[must_use]
+pub fn fallen_def() -> MonsterDef {
+    MonsterDef {
+        id: "fallen_factory".into(),
+        name: "Fallen".into(),
+        level: 1,
+        health: 9,
+        min_damage: 1,
+        max_damage: 3,
+        attack_rating: 20,
+        defense_rating: 5,
+        speed: 6.0,
+        aggro_range: 8.0,
+        xp_reward: 5,
+        tc_id: "tc_fallen".into(),
+    }
+}
+
+/// Returns a `MonsterDef` for the Zombie archetype.
+///
+/// Zombies are slow and tanky. HP range: 20–25, AR: 12, speed: 2.5,
+/// aggro: 5.0, XP: 12, TC: tc_zombie.
+#[must_use]
+pub fn zombie_def() -> MonsterDef {
+    MonsterDef {
+        id: "zombie_factory".into(),
+        name: "Zombie".into(),
+        level: 2,
+        health: 22,
+        min_damage: 3,
+        max_damage: 6,
+        attack_rating: 12,
+        defense_rating: 8,
+        speed: 2.5,
+        aggro_range: 5.0,
+        xp_reward: 12,
+        tc_id: "tc_zombie".into(),
+    }
+}
+
+/// Returns a `MonsterDef` for the Skeleton archetype.
+///
+/// Skeletons are balanced fighters. HP range: 15–18, AR: 30, speed: 4.0,
+/// aggro: 7.0, XP: 8, TC: tc_skeleton.
+#[must_use]
+pub fn skeleton_def() -> MonsterDef {
+    MonsterDef {
+        id: "skeleton_factory".into(),
+        name: "Skeleton".into(),
+        level: 3,
+        health: 16,
+        min_damage: 3,
+        max_damage: 7,
+        attack_rating: 30,
+        defense_rating: 12,
+        speed: 4.0,
+        aggro_range: 7.0,
+        xp_reward: 8,
+        tc_id: "tc_skeleton".into(),
+    }
+}
+
+/// Returns the Act 1 monster trio: Fallen, Zombie, and Skeleton.
+///
+/// Convenience function that aggregates the three base Act 1 factory
+/// definitions into a single `Vec` for batch registration or testing.
+#[must_use]
+pub fn act1_monster_trio() -> Vec<MonsterDef> {
+    vec![fallen_def(), zombie_def(), skeleton_def()]
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
@@ -1079,6 +1220,52 @@ mod tests {
         assert_eq!(zone.height_tiles, 30);
     }
 
+    // -- Canonical TC1–TC4 (act1_treasure_classes_canonical) --------------
+
+    /// TC1 (tc_fallen): NoDrop weight must be > 50 % of total weight.
+    ///
+    /// Spec: NoDrop=60, Gold weight=25, Item weight=15 → total=100.
+    /// NoDrop fraction = 60/100 = 60 % > 50 %.
+    #[test]
+    fn tc1_no_drop_common() {
+        let tcs = act1_treasure_classes_canonical();
+        let tc1 = tcs.iter().find(|tc| tc.id == "tc_fallen").expect("tc_fallen must exist");
+        let total = tc1.total_weight();
+        // NoDrop must represent more than half of the total weight.
+        assert!(
+            tc1.no_drop * 2 > total,
+            "tc_fallen NoDrop ({}) should be > 50% of total ({})",
+            tc1.no_drop,
+            total,
+        );
+    }
+
+    /// TC4 (tc_boss/Andariel): NoDrop weight must be exactly 0.
+    ///
+    /// Spec: NoDrop=0 → every pick is guaranteed to yield an item.
+    #[test]
+    fn tc4_guaranteed_drop() {
+        let tcs = act1_treasure_classes_canonical();
+        let tc4 = tcs.iter().find(|tc| tc.id == "tc_boss").expect("tc_boss must exist");
+        assert_eq!(
+            tc4.no_drop, 0,
+            "tc_boss NoDrop must be 0 (guaranteed drop), got {}",
+            tc4.no_drop,
+        );
+    }
+
+    /// act1_treasure_classes_canonical must return exactly 4 TCs.
+    #[test]
+    fn tc_count() {
+        let tcs = act1_treasure_classes_canonical();
+        assert_eq!(
+            tcs.len(),
+            4,
+            "act1_treasure_classes_canonical must contain exactly 4 TCs, got {}",
+            tcs.len(),
+        );
+    }
+
     // -- Cross-referential integrity ---------------------------------------
 
     #[test]
@@ -1125,5 +1312,30 @@ mod tests {
                 );
             }
         }
+    }
+
+    // -- Factory functions -------------------------------------------------
+
+    #[test]
+    fn fallen_stats() {
+        let m = fallen_def();
+        assert!(
+            m.health >= 8 && m.health <= 10,
+            "fallen health {} not in range 8-10",
+            m.health
+        );
+        assert!((m.speed - 6.0_f32).abs() < f32::EPSILON, "fallen speed must be 6.0");
+    }
+
+    #[test]
+    fn zombie_slow() {
+        let m = zombie_def();
+        assert!(m.speed < 3.0, "zombie speed {} must be < 3.0", m.speed);
+    }
+
+    #[test]
+    fn skeleton_ar() {
+        let m = skeleton_def();
+        assert_eq!(m.attack_rating, 30, "skeleton AR must be 30");
     }
 }

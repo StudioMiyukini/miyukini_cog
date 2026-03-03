@@ -267,4 +267,70 @@ mod tests {
         let result = eq.unequip(ItemSlot::Boots);
         assert!(result.is_none());
     }
+
+    // ========================================================================
+    // Quality / affix generation tests (TASK-047)
+    // ========================================================================
+
+    #[test]
+    fn magic_item_has_prefix() {
+        // A generated Magic item must always have at least 1 prefix.
+        use crate::quality::generate_magic_item;
+        let mut rng = test_rng();
+        // Run multiple times to account for RNG variance.
+        for _ in 0..20 {
+            let result = generate_magic_item("long_sword", 30, &mut rng);
+            assert!(
+                result.prefix.is_some(),
+                "Magic item must always have a prefix"
+            );
+        }
+    }
+
+    #[test]
+    fn magic_item_alvl_filter() {
+        // At alvl=1, only affixes with required_alvl <= 1 should appear.
+        // No high-level affix (required_alvl > 10) must be present.
+        use crate::quality::{generate_magic_item, AFFIX_POOL_PREFIXES, AFFIX_POOL_SUFFIXES};
+        let mut rng = test_rng();
+        let high_lvl_prefix_ids: Vec<&str> = AFFIX_POOL_PREFIXES
+            .iter()
+            .filter(|d| d.required_alvl > 10)
+            .map(|d| d.id)
+            .collect();
+        let high_lvl_suffix_ids: Vec<&str> = AFFIX_POOL_SUFFIXES
+            .iter()
+            .filter(|d| d.required_alvl > 10)
+            .map(|d| d.id)
+            .collect();
+
+        for _ in 0..50 {
+            let result = generate_magic_item("cap", 1, &mut rng);
+            if let Some(ref pfx) = result.prefix {
+                assert!(
+                    !high_lvl_prefix_ids.contains(&pfx.id.as_str()),
+                    "alvl=1 produced high-level prefix '{}'",
+                    pfx.id
+                );
+            }
+            if let Some(ref sfx) = result.suffix {
+                assert!(
+                    !high_lvl_suffix_ids.contains(&sfx.id.as_str()),
+                    "alvl=1 produced high-level suffix '{}'",
+                    sfx.id
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn normal_item_no_affix() {
+        // Normal quality is defined in the enum — it carries no affixes.
+        let item = make_item("short_sword");
+        assert_eq!(item.quality, ItemQuality::Normal);
+        assert!(
+            item.affixes.is_empty(),
+            "Normal items must have no affixes"
+        );
+    }
 }

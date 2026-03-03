@@ -31,7 +31,7 @@ pub use damage::{
 pub use events::{CombatEvent, CombatResult};
 pub use hit::{hit_chance, roll_hit, HitChance};
 pub use processor::{AttackResult, CombatProcessor};
-pub use status::StatusEffect;
+pub use status::{StatusEffect, StatusTracker, StatusType};
 
 use thiserror::Error;
 
