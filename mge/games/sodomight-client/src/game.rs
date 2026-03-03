@@ -82,6 +82,9 @@ const PATH_TINT: [f32; 4] = [0.50, 0.42, 0.30, 1.0];
 /// Water tint (dark blue).
 const WATER_TINT: [f32; 4] = [0.15, 0.20, 0.45, 1.0];
 
+/// NPC rendering tint (green — friendly).
+const NPC_TINT: [f32; 4] = [0.2, 0.8, 0.3, 1.0];
+
 /// Standard texture dimensions for the texture array (all layers must match).
 const TEX_ARRAY_W: u32 = 256;
 const TEX_ARRAY_H: u32 = 256;
@@ -123,6 +126,15 @@ struct InstancedGpuResources {
 // ---------------------------------------------------------------------------
 // SodomightApp
 // ---------------------------------------------------------------------------
+
+/// A friendly NPC in the town/camp area.
+struct Npc {
+    /// Display name shown above the NPC.
+    name: String,
+    /// World-tile position.
+    x: f32,
+    y: f32,
+}
 
 /// Main Sodomight client application.
 pub struct SodomightApp {
@@ -178,6 +190,8 @@ pub struct SodomightApp {
     player_dead: bool,
     /// Whether Alt key is held (show loot labels on ground).
     show_loot_labels: bool,
+    /// Friendly NPCs in the town/camp area.
+    npcs: Vec<Npc>,
 }
 
 /// Extract the first numeric substring from a combat log message.
@@ -233,6 +247,7 @@ impl SodomightApp {
             auto_attack_cooldown: 0,
             player_dead: false,
             show_loot_labels: false,
+            npcs: Vec::new(),
         }
     }
 
@@ -308,12 +323,24 @@ impl SodomightApp {
             }
         }
 
+        // Populate NPCs from tilemap's town/camp spawn points.
+        self.npcs = tilemap
+            .npc_spawns
+            .iter()
+            .map(|(x, y, name)| Npc {
+                name: name.clone(),
+                x: *x,
+                y: *y,
+            })
+            .collect();
+
         tracing::info!(
-            "World initialised: {} entities, map {}x{}, {} spawn points",
+            "World initialised: {} entities, map {}x{}, {} spawn points, {} NPCs",
             world.ecs.entity_count(),
             tilemap.width,
             tilemap.height,
             tilemap.spawn_points.len(),
+            self.npcs.len(),
         );
 
         // Build NavGrid from tilemap for A* pathfinding.
@@ -1299,6 +1326,34 @@ fn batch_monsters_instanced(
     }
 }
 
+/// Push NPC sprites as instanced coloured quads (green, town camp).
+fn batch_npcs_instanced(batcher: &mut InstancedSpriteBatcher, npcs: &[Npc]) {
+    let npc_w = 36.0_f32;
+    let npc_h = 64.0_f32;
+
+    for npc in npcs {
+        let sx = (npc.x - npc.y) * (TILE_WIDTH / 2.0);
+        let sy = (npc.x + npc.y) * (TILE_HEIGHT / 2.0);
+        let offset_x = (TILE_WIDTH - npc_w) / 2.0;
+        let tile_y_sum = npc.x + npc.y;
+        let z_depth = 10000.0 + tile_y_sum;
+
+        let instance = InstanceData {
+            position: [sx + offset_x, sy - npc_h],
+            size: [npc_w, npc_h],
+            uv_rect: [0.0, 0.0, 1.0, 1.0],
+            tint: NPC_TINT,
+            texture_index: LAYER_WHITE,
+            z_depth,
+            _pad: [0.0, 0.0],
+        };
+
+        if batcher.push(instance).is_err() {
+            return;
+        }
+    }
+}
+
 /// Push loot piles as instanced coloured quads (S3-T03).
 fn batch_loot_instanced(
     batcher: &mut InstancedSpriteBatcher,
@@ -1806,6 +1861,7 @@ impl GameApp for SodomightApp {
 
             // Batch visible entities (S3-T03 + S3-T04 + S3-T05 depth sorting).
             batch_monsters_instanced(&mut res.instanced_batcher, world, &visible_entity_ids);
+            batch_npcs_instanced(&mut res.instanced_batcher, &self.npcs);
             batch_loot_instanced(
                 &mut res.instanced_batcher,
                 world,
@@ -2024,6 +2080,39 @@ impl GameApp for SodomightApp {
                 color,
                 scale,
             );
+        }
+
+        // NPC name labels (always visible, D2 town style).
+        {
+            let npc_scale = 1.5_f32;
+            for npc in &self.npcs {
+                let sx = (npc.x - npc.y) * (TILE_WIDTH / 2.0) - cam_left;
+                let sy = (npc.x + npc.y) * (TILE_HEIGHT / 2.0) - cam_top - 72.0;
+                if sx < -200.0 || sx > screen_w + 200.0 || sy < -50.0 || sy > screen_h {
+                    continue;
+                }
+                let char_w = crate::bitmap_font::BitmapFont::char_width(npc_scale);
+                let text_w = char_w * npc.name.len() as f32;
+                let centered_x = sx + (TILE_WIDTH - text_w) / 2.0;
+                // Shadow.
+                crate::bitmap_font::BitmapFont::push_text(
+                    &mut res.legacy_batcher,
+                    centered_x + 1.0,
+                    sy + 1.0,
+                    &npc.name,
+                    [0.0, 0.0, 0.0, 0.8],
+                    npc_scale,
+                );
+                // Green name.
+                crate::bitmap_font::BitmapFont::push_text(
+                    &mut res.legacy_batcher,
+                    centered_x,
+                    sy,
+                    &npc.name,
+                    [0.2, 0.9, 0.3, 1.0],
+                    npc_scale,
+                );
+            }
         }
 
         // Loot labels on ground (Alt key held, D2 style).
