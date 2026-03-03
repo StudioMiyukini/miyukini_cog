@@ -10,12 +10,14 @@
 //! - **Skill activation** ([`can_use_skill`]) combining mana, cooldown, and level checks
 //! - **Necromancer content** ([`necro`]) with Bone Spear, Raise Skeleton, Corpse Explosion
 //! - **Summoning content** ([`summoning`]) with 10 Summoning tree skills
+//! - **Poison & Bone content** ([`poison_bone`]) with 10 Poison & Bone tree skills
 
 mod activation;
 mod book;
 mod cooldown;
 mod def;
 pub mod necro;
+pub mod poison_bone;
 mod registry;
 mod skill_id;
 pub mod summoning;
