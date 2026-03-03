@@ -1,12 +1,121 @@
-//! Minimap overlay (stub).
+// @id: MGE-UI-Minimap @do: minimap @role: front-end @layer: 3 @human: miyuk
+//! Minimap data model and overlay (stub).
 //!
-//! Full implementation will render a top-right minimap with fog-of-war,
-//! entity blips, and a toggle for full-screen map view. Currently a minimal
-//! placeholder.
+//! The data model tracks player position, explored tiles, and map markers.
+//! The render function is a minimal placeholder; full fog-of-war rendering
+//! will be added in a later iteration.
+
+use std::collections::HashSet;
 
 use egui::Context;
 
 use crate::theme::D2Colors;
+
+// ---------------------------------------------------------------------------
+// MarkerKind
+// ---------------------------------------------------------------------------
+
+/// Category of a map marker, used to choose icon and colour.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum MarkerKind {
+    /// The local player character.
+    Player,
+    /// An enemy monster.
+    Monster,
+    /// A non-player character.
+    Npc,
+    /// A town portal or waypoint.
+    Waypoint,
+}
+
+// ---------------------------------------------------------------------------
+// MinimapMarker
+// ---------------------------------------------------------------------------
+
+/// A single point of interest shown on the minimap.
+#[derive(Debug, Clone, PartialEq)]
+pub struct MinimapMarker {
+    /// World-space X position.
+    pub x: f32,
+    /// World-space Y position.
+    pub y: f32,
+    /// Marker category.
+    pub kind: MarkerKind,
+}
+
+// ---------------------------------------------------------------------------
+// MinimapState
+// ---------------------------------------------------------------------------
+
+/// State for the minimap: markers, explored tiles, and camera centre.
+#[derive(Debug, Clone)]
+pub struct MinimapState {
+    /// All entities to display as blips.
+    pub markers: Vec<MinimapMarker>,
+    /// Set of tile coordinates `(tx, ty)` the player has visited.
+    pub explored: HashSet<(i32, i32)>,
+    /// World-space X coordinate shown at the minimap centre.
+    pub center_x: f32,
+    /// World-space Y coordinate shown at the minimap centre.
+    pub center_y: f32,
+}
+
+impl MinimapState {
+    /// Create an empty minimap state centred at the world origin.
+    pub fn new() -> Self {
+        Self {
+            markers: Vec::new(),
+            explored: HashSet::new(),
+            center_x: 0.0,
+            center_y: 0.0,
+        }
+    }
+
+    /// Update the minimap centre to follow the player.
+    pub fn update_center(&mut self, x: f32, y: f32) {
+        self.center_x = x;
+        self.center_y = y;
+    }
+
+    /// Mark tile `(tx, ty)` as explored (fog-of-war reveal).
+    pub fn mark_explored(&mut self, tx: i32, ty: i32) {
+        self.explored.insert((tx, ty));
+    }
+
+    /// Returns `true` when tile `(tx, ty)` has been explored.
+    pub fn is_explored(&self, tx: i32, ty: i32) -> bool {
+        self.explored.contains(&(tx, ty))
+    }
+}
+
+impl Default for MinimapState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn minimap_player_center() {
+        let mut state = MinimapState::new();
+        state.update_center(42.0, -7.5);
+        assert_eq!(state.center_x, 42.0);
+        assert_eq!(state.center_y, -7.5);
+    }
+
+    #[test]
+    fn minimap_unexplored() {
+        let state = MinimapState::new();
+        assert!(!state.is_explored(5, 3), "fresh state: tile (5,3) must not be explored");
+    }
+}
 
 /// Draw the minimap overlay (stub).
 ///

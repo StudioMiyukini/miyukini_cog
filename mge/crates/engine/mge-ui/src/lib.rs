@@ -5,6 +5,13 @@
 //! Built on **egui 0.28** + wgpu. Provides HUD, inventory grid, character panel,
 //! skill tree, tooltips, NPC dialogs, and full menu screens (main menu, character
 //! select, lobby browser, pause menu).
+//!
+//! ## Design tokens
+//!
+//! The crate re-exports [`miyuki_ui_tokens`] (agnostic design tokens) and
+//! [`miyuki_ui_egui`] (egui component library). The function
+//! [`apply_d2_theme_from_tokens`] applies the canonical D2 theme via the token
+//! system instead of the local hard-coded values.
 
 use serde::{Deserialize, Serialize};
 
@@ -20,16 +27,28 @@ mod skill_tree;
 mod dialog;
 mod tooltip;
 mod minimap;
+mod skill_bar;
+mod combat_log;
 
 /// Menu screens (main menu, character select, lobby browser, pause).
 pub mod menus;
 
 // ---------------------------------------------------------------------------
-// Re-exports
+// Cross-workspace re-exports (design tokens + egui components)
+// ---------------------------------------------------------------------------
+
+/// Design tokens -- colors, spacing, typography, themes (D2 + COG).
+pub use miyuki_ui_tokens;
+
+/// Egui component library -- atoms, molecules, organisms, templates (D2 style).
+pub use miyuki_ui_egui;
+
+// ---------------------------------------------------------------------------
+// Re-exports (local mge-ui modules)
 // ---------------------------------------------------------------------------
 
 pub use theme::{apply_d2_theme, D2Colors, item_quality_color};
-pub use hud::{draw_hud, BeltSlotData, HudData, SkillSlotData};
+pub use hud::{draw_hud, BeltSlotData, HudData, HudState, OrbState, SkillSlotData};
 pub use inventory::{draw_inventory, EquipSlots, UiItem, CELL_SIZE, GRID_COLS, GRID_ROWS};
 pub use character::{draw_character_panel, CharacterData};
 pub use skill_tree::draw_skill_tree;
@@ -39,7 +58,24 @@ pub use menus::lobby_browser::draw_lobby_browser;
 pub use menus::pause_menu::{draw_pause_menu, PauseAction};
 pub use dialog::draw_npc_dialog;
 pub use tooltip::{draw_tooltip, ItemTooltipData};
-pub use minimap::draw_minimap;
+pub use minimap::{draw_minimap, MarkerKind, MinimapMarker, MinimapState};
+pub use skill_bar::{SkillBarState, SkillSlot};
+pub use combat_log::{CombatLogState, LogEntry};
+
+// ---------------------------------------------------------------------------
+// Token-based theme application
+// ---------------------------------------------------------------------------
+
+/// Apply the Diablo II theme via the canonical design token system.
+///
+/// This is the recommended path for new code. It delegates to
+/// [`miyuki_ui_egui::apply_theme`] with the [`miyuki_ui_tokens::D2_THEME`],
+/// ensuring visual consistency with the full Miyukini UI ecosystem.
+///
+/// For legacy code, [`apply_d2_theme`] is still available (hard-coded values).
+pub fn apply_d2_theme_from_tokens(ctx: &egui::Context) {
+    miyuki_ui_egui::apply_theme(ctx, &miyuki_ui_tokens::D2_THEME);
+}
 
 // ---------------------------------------------------------------------------
 // UiScreen
