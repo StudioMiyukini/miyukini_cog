@@ -2475,22 +2475,22 @@ pub fn mip_page() -> String {
     </div>
   </section>
 
-  <!-- TOC + Content layout -->
-  <div class="mip-layout">
-    <aside class="mip-toc">
-      <nav class="docs-nav mip-toc-inner">
-        <a href="#mip-what" class="active">Qu'est-ce que MIP&nbsp;?</a>
-        <a href="#mscm-what">Qu'est-ce que MSCM&nbsp;?</a>
-        <a href="#mip-architecture">Architecture</a>
-        <a href="#mip-agents">Les 10 agents</a>
-        <a href="#mip-compare">Comparaison</a>
-        <a href="#mip-pros-cons">Forces &amp; limites</a>
-        <a href="#mip-quickstart">Quick Start</a>
-        <a href="#mip-conclusion">Conclusion</a>
-      </nav>
-    </aside>
+  <!-- Sticky TOC bar -->
+  <nav class="mip-toc-bar" id="mip-toc-bar">
+    <div class="mip-toc-track">
+      <a href="#mip-what" class="mip-toc-link active" data-section="mip-what">MIP v2</a>
+      <a href="#mscm-what" class="mip-toc-link" data-section="mscm-what">MSCM</a>
+      <a href="#mip-architecture" class="mip-toc-link" data-section="mip-architecture">Architecture</a>
+      <a href="#mip-agents" class="mip-toc-link" data-section="mip-agents">Agents</a>
+      <a href="#mip-compare" class="mip-toc-link" data-section="mip-compare">Comparaison</a>
+      <a href="#mip-pros-cons" class="mip-toc-link" data-section="mip-pros-cons">Forces &amp; limites</a>
+      <a href="#mip-quickstart" class="mip-toc-link" data-section="mip-quickstart">Quick Start</a>
+      <a href="#mip-conclusion" class="mip-toc-link" data-section="mip-conclusion">Conclusion</a>
+    </div>
+  </nav>
 
-    <div class="mip-main">
+  <!-- Content -->
+  <div class="mip-content">
 
       <!-- Section: What is MIP -->
       <section class="section" id="mip-what">
@@ -2744,8 +2744,7 @@ cat mip/templates/CLAUDE.md.template >> CLAUDE.md</code></pre>
         </div>
       </section>
 
-    </div><!-- .mip-main -->
-  </div><!-- .mip-layout -->
+  </div><!-- .mip-content -->
 </div><!-- #mip-dev-content -->
 
 <!-- ══════════════════════════════════════════════════ -->
@@ -2905,17 +2904,30 @@ cat mip/templates/CLAUDE.md.template >> CLAUDE.md</code></pre>
 .mip-vn-next:hover, .mip-vn-finish:hover { background:rgba(139,92,246,0.25); transform:translateY(-2px); }
 
 /* === DEV CONTENT === */
-.mip-layout {
-  display:grid; grid-template-columns:220px 1fr; gap:2rem; align-items:start;
+.mip-toc-bar {
+  position:sticky; top:64px; z-index:100;
+  background:rgba(10,10,15,0.85); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(139,92,246,0.15);
+  padding:0 1rem;
+  margin: 0 -2rem;
 }
-.mip-toc { position:sticky; top:90px; }
-.mip-toc-inner a {
-  display:block; padding:0.4rem 0.75rem; border-radius:0.5rem;
-  color:var(--text-muted); font-size:0.85rem; margin-bottom:0.15rem;
+.mip-toc-track {
+  display:flex; gap:0.25rem; overflow-x:auto; scrollbar-width:none;
+  max-width:1200px; margin:0 auto; padding:0.5rem 0;
 }
-.mip-toc-inner a:hover { background:var(--bg-elevated); color:var(--text); }
-.mip-toc-inner a.active { background:rgba(139,92,246,0.15); color:var(--primary); }
-.mip-main { min-width:0; }
+.mip-toc-track::-webkit-scrollbar { display:none; }
+.mip-toc-link {
+  flex-shrink:0; padding:0.45rem 1rem; border-radius:2rem;
+  font-size:0.8rem; font-weight:500; white-space:nowrap;
+  color:var(--text-muted); background:transparent;
+  transition:all 0.2s ease; border:1px solid transparent;
+}
+.mip-toc-link:hover { color:var(--text); background:var(--bg-elevated); }
+.mip-toc-link.active {
+  color:#fff; background:rgba(139,92,246,0.2);
+  border-color:rgba(139,92,246,0.4);
+}
+.mip-content { max-width:960px; margin:0 auto; }
 
 /* Compare table */
 .mip-compare-table {
@@ -2940,8 +2952,7 @@ cat mip/templates/CLAUDE.md.template >> CLAUDE.md</code></pre>
   .mip-vn-paths { flex-wrap:wrap; justify-content:center; }
   .mip-vn-s3-layout { grid-template-columns:1fr; padding:16px; }
   .mip-vn-s3-miou { display:none; }
-  .mip-layout { grid-template-columns:1fr; }
-  .mip-toc { display:none; }
+  .mip-toc-link { font-size:0.75rem; padding:0.4rem 0.75rem; }
 }
 </style>
 
@@ -3079,6 +3090,27 @@ cat mip/templates/CLAUDE.md.template >> CLAUDE.md</code></pre>
   } else {
     mipVnSkip();
   }
+
+  // Scroll-spy for TOC bar
+  var tocLinks = document.querySelectorAll('.mip-toc-link');
+  var sections = [];
+  tocLinks.forEach(function(link) {
+    var s = document.getElementById(link.getAttribute('data-section'));
+    if (s) sections.push({el:s, link:link});
+  });
+  function updateToc() {
+    var scrollY = window.scrollY + 140;
+    var current = null;
+    sections.forEach(function(item) {
+      if (item.el.offsetTop <= scrollY) current = item;
+    });
+    tocLinks.forEach(function(l) { l.classList.remove('active'); });
+    if (current) {
+      current.link.classList.add('active');
+      current.link.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+    }
+  }
+  window.addEventListener('scroll', updateToc, {passive:true});
 })();
 </script>
 "##;
