@@ -599,16 +599,16 @@ fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: 
                     evt.prevent_default();
                     is_drag_over.set(false);
 
-                    if let Some(file_engine) = evt.files() {
-                        let paths: Vec<String> = file_engine.files().into_iter()
-                            .filter(|f| is_image_file(f))
-                            .collect();
-                        if !paths.is_empty() {
-                            let mut current = selected_files.write();
-                            current.extend(paths);
-                            current.sort();
-                            current.dedup();
-                        }
+                    let files = evt.files();
+                    let paths: Vec<String> = files.into_iter()
+                        .map(|f| f.name())
+                        .filter(|f| is_image_file(f))
+                        .collect();
+                    if !paths.is_empty() {
+                        let mut current = selected_files.write();
+                        current.extend(paths);
+                        current.sort();
+                        current.dedup();
                     }
                 },
 
@@ -639,16 +639,16 @@ fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: 
                         multiple: true,
                         style: "display: none;",
                         onchange: move |evt: FormEvent| {
-                            if let Some(file_engine) = evt.files() {
-                                let paths: Vec<String> = file_engine.files().into_iter()
-                                    .filter(|f| is_image_file(f))
-                                    .collect();
-                                if !paths.is_empty() {
-                                    let mut current = selected_files.write();
-                                    current.extend(paths);
-                                    current.sort();
-                                    current.dedup();
-                                }
+                            let files = evt.files();
+                            let paths: Vec<String> = files.into_iter()
+                                .map(|f| f.name())
+                                .filter(|f| is_image_file(f))
+                                .collect();
+                            if !paths.is_empty() {
+                                let mut current = selected_files.write();
+                                current.extend(paths);
+                                current.sort();
+                                current.dedup();
                             }
                         },
                     }

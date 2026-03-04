@@ -12,7 +12,7 @@ description = "Jay1Tribu — Messagerie P2P, tribus, salons et amis (standalone)
 jay1tribu = { path = "../../crates/jay1tribu" }
 kindmother = { path = "../../crates/kindmother" }
 miyukini-service-ui = { path = "../../crates/miyukini-service-ui" }
-dioxus = { version = "0.6", features = ["desktop"] }
+dioxus = { version = "0.7", features = ["desktop"] }
 tokio = { version = "1", features = ["time"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

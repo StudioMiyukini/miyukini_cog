@@ -16,7 +16,7 @@ path = "src/main.rs"
 
 [dependencies]
 # Dioxus pour l'UI déclarative
-dioxus = { version = "0.6", features = ["desktop"] }
+dioxus = { version = "0.7", features = ["desktop"] }
 
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
@@ -30,7 +30,7 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # HTTP client (LLM Studio, API Market, téléchargement packages)
-reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+reqwest = { version = "0.12", features = ["json", "rustls-tls", "multipart"], default-features = false }
 
 # Utilities
 chrono = "0.4"
@@ -55,6 +55,14 @@ miyumarket = { path = "../../crates/miyumarket" }
 # Alicia Home Assistante — capture audio locale + détection de wake word
 miyualicia-capture = { path = "../../crates/miyuvoicecapture" }
 miyualicia-wakeword = { path = "../../crates/miyuwakeword" }
+
+# File dialog natif (selecteur de fichiers pour MiyuCloud upload)
+rfd = "0.15"
+
+# UI unifiee Miyukini (theme, composants, tokens)
+miyuki-ui-dioxus = { path = "../../crates/miyuki-ui-dioxus" }
+miyuki-ui-tokens = { path = "../../crates/miyuki-ui-tokens" }
+miyukini-service-ui = { path = "../../crates/miyukini-service-ui" }
 
 [lints.rust]
 unsafe_code = "forbid"

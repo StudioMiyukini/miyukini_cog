@@ -10,6 +10,7 @@ mod home;
 mod market;
 mod external_service_view;
 pub mod alicia;
+pub mod miyucloud;
 
 pub use home::HomeView;
 pub use market::MarketView;
@@ -32,6 +33,7 @@ pub fn ActiveServiceView() -> Element {
             None => rsx! { HomeView {} },
             Some("market") => rsx! { MarketView {} },
             Some("alicia") => rsx! { alicia::AliciaView {} },
+            Some("miyucloud") => rsx! { miyucloud::MiyuCloudView {} },
             Some(id) => rsx! {
                 ExternalServiceView { service_id: id.to_string() }
             },

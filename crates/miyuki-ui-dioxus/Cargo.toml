@@ -1,0 +1,15 @@
+# @id: MUID-Cargo @do: build-config @role: infra @layer: 6 @human: miyuk
+
+[package]
+name = "miyuki-ui-dioxus"
+version = "0.1.0"
+edition = "2021"
+description = "Dioxus 0.7 UI component library for the Miyukini ecosystem"
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+miyuki-ui-tokens = { path = "../miyuki-ui-tokens" }
+dioxus = { version = "0.7", features = ["desktop"] }

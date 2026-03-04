@@ -96,6 +96,7 @@ mod tests {
             project_id: Some("proj".into()),
             anon_key: Some("anon".into()),
             service_role_key: None,
+            mother_db_url: None,
         };
         assert!(c.is_available());
     }

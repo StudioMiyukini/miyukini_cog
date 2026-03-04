@@ -12,7 +12,7 @@ description = "JayKonta — Comptabilité COG unifiée Purse + Account (standalo
 jaykonta = { path = "../../crates/jaykonta" }
 kindmother = { path = "../../crates/kindmother" }
 miyukini-service-ui = { path = "../../crates/miyukini-service-ui" }
-dioxus = { version = "0.6", features = ["desktop"] }
+dioxus = { version = "0.7", features = ["desktop"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 chrono = "0.4"

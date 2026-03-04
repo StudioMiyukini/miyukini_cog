@@ -20,6 +20,7 @@ pub use data::{
     Friend, FriendWithPresence, Jay1TribuDb, Message, Salon, SalonMember, SalonType, Tribe,
     TribeMember, TribeRole,
 };
+#[allow(deprecated)]
 pub use domain::{
     accept_tribe_invitation, check_can_transfer_file, create_salon, create_tribe,
     find_direct_salon_between, get_friends_list, get_friends_with_presence,

@@ -111,7 +111,8 @@ pub fn UncConnexion(state: Signal<JayFestivalState>) -> Element {
     let mut error = use_signal(|| None::<String>);
     let mut loading = use_signal(|| false);
 
-    let handle_submit = move |_| {
+    let handle_submit = move |evt: FormEvent| {
+        evt.prevent_default();
         loading.set(true);
         error.set(None);
 
@@ -266,7 +267,8 @@ pub fn UncInscription(state: Signal<JayFestivalState>) -> Element {
 
     let handle_submit = {
         let user_type = user_type.clone();
-        move |_| {
+        move |evt: FormEvent| {
+            evt.prevent_default();
             // Validation
             if password.read().len() < 6 {
                 error.set(Some("Le mot de passe doit contenir au moins 6 caracteres".to_string()));

@@ -1,5 +1,10 @@
-# miyukini-service-ui — Fondations UI partagées entre tous les services standalone.
-# Thème, palette, styles, hooks Dioxus communs.
+# miyukini-service-ui -- Fondations UI partagees entre tous les services standalone.
+# Theme, palette, styles, hooks Dioxus communs.
+#
+# NOTE: Ce crate est une FACADE de retrocompatibilite. Le code canonique
+# vit dans miyuki-ui-dioxus et miyuki-ui-tokens. Les types publics
+# (Theme, ThemePalette, ThemeContext, use_theme, use_palette) sont
+# conserves a l'identique pour ne pas casser les 8 apps standalone.
 
 [package]
 name = "miyukini-service-ui"
@@ -7,10 +12,12 @@ version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
-description = "Fondations UI Miyukini — thème, palette, styles partagés entre services"
+description = "Fondations UI Miyukini -- theme, palette, styles partages entre services (facade)"
 
 [dependencies]
-dioxus = { version = "0.6", features = ["desktop"] }
+dioxus = { version = "0.7", features = ["desktop"] }
+miyuki-ui-dioxus = { path = "../miyuki-ui-dioxus" }
+miyuki-ui-tokens = { path = "../miyuki-ui-tokens" }
 
 [lints]
 workspace = true

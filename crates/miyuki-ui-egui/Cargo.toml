@@ -1,0 +1,17 @@
+# @id: MUIE-Cargo @do: build-config @role: infra @layer: 6 @human: miyuk
+# miyuki-ui-egui -- Composants egui Diablo 2 style pour Miyukini Game Engine
+
+[package]
+name = "miyuki-ui-egui"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "D2-style egui components for the Miyukini Game Engine"
+publish = false
+
+[dependencies]
+miyuki-ui-tokens = { path = "../miyuki-ui-tokens" }
+egui = "0.28"
+
+[lints]
+workspace = true

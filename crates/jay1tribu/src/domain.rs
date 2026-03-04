@@ -110,6 +110,15 @@ pub fn get_online_friends(
 /// Envoi d'un fichier ou d'une image dans un salon (restriction amis, spec §2.4).
 /// Crée un message avec contenu de référence, enregistre la pièce jointe, puis
 /// dispatch ou file d'attente selon présence Webway et destinataires en ligne.
+///
+/// # Deprecation
+/// Cette fonction sera remplacee par MiyuCloud (transfert chiffre via lien de partage).
+/// Voir `miyucloud::domain::FileOps::upload_file` + `ShareLink` pour le nouveau flux.
+#[deprecated(
+    since = "0.2.0",
+    note = "Utiliser MiyuCloud pour le transfert de fichiers. send_file sera supprime dans la v0.3.0."
+)]
+#[allow(deprecated)]
 pub fn send_file(
     db: &Jay1TribuDb,
     salon_id: &str,
@@ -156,6 +165,13 @@ pub fn send_file(
 
 /// Vérifie que l'émetteur peut transférer un fichier vers les destinataires.
 /// Règle : les transferts de fichier ne peuvent se faire qu'entre amis.
+///
+/// # Deprecation
+/// Cette fonction sera remplacee par le systeme de permissions MiyuCloud (`SharePermission`).
+#[deprecated(
+    since = "0.2.0",
+    note = "Utiliser MiyuCloud SharePermission pour le controle d'acces fichiers. Sera supprime dans la v0.3.0."
+)]
 pub fn check_can_transfer_file(
     db: &Jay1TribuDb,
     sender_profile_id: &str,

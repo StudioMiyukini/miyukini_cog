@@ -165,7 +165,7 @@ pub fn GameScreen(
             onmounted: move |evt| {
                 spawn(async move {
                     tokio::time::sleep(Duration::from_millis(50)).await;
-                    let _ = evt.set_focus(true);
+                    let _ = evt.set_focus(true).await;
                 });
             },
             onkeydown: move |evt| {
