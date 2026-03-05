@@ -1648,8 +1648,6 @@ pub async fn services_page(content_mgr: &ContentManager) -> String {
             "miyukiniwatch" => "&#x1F441;",
             "jay1tribu" => "&#x1F4AC;",
             "jaymanga" => "&#x1F4DA;",
-            "miyuclicker" => "&#x1F3AE;",
-            "lord_of_the_castle" => "&#x1F3F0;",
             _ => "&#x1F4E6;",
         }
     };
@@ -1661,7 +1659,6 @@ pub async fn services_page(content_mgr: &ContentManager) -> String {
             "jaykoa" | "jaykonta" => "rarity-4",        // violet — productivité
             "jay1tribu" => "rarity-4",                  // violet — social
             "jaymanga" | "miyukiniwatch" => "rarity-3", // bleu — style de vie
-            "miyuclicker" | "lord_of_the_castle" => "rarity-5", // or — jeux
             _ => "rarity-3",
         }
     };

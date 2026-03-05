@@ -23,7 +23,6 @@ enum UiBuilderTab {
     Barres,
     Curseurs,
     Maquettes,
-    MiyuClicker,
 }
 
 #[allow(dead_code)]
@@ -36,7 +35,6 @@ impl UiBuilderTab {
             Self::Barres => "Barres",
             Self::Curseurs => "Curseurs",
             Self::Maquettes => "Maquettes",
-            Self::MiyuClicker => "MiyuClicker",
         }
     }
 
@@ -48,7 +46,6 @@ impl UiBuilderTab {
             UiBuilderTab::Barres,
             UiBuilderTab::Curseurs,
             UiBuilderTab::Maquettes,
-            UiBuilderTab::MiyuClicker,
         ]
     }
 }
@@ -123,7 +120,6 @@ pub fn UiBuilderView() -> Element {
                     TabButton { label: "Barres", tab: UiBuilderTab::Barres, active_tab }
                     TabButton { label: "Curseurs", tab: UiBuilderTab::Curseurs, active_tab }
                     TabButton { label: "Maquettes", tab: UiBuilderTab::Maquettes, active_tab }
-                    TabButton { label: "MiyuClicker", tab: UiBuilderTab::MiyuClicker, active_tab }
                 }
             }
 
@@ -143,7 +139,6 @@ pub fn UiBuilderView() -> Element {
                             UiBuilderTab::Barres => rsx! { TabBarres {} },
                             UiBuilderTab::Curseurs => rsx! { TabCurseurs {} },
                             UiBuilderTab::Maquettes => rsx! { TabMaquettes {} },
-                            UiBuilderTab::MiyuClicker => rsx! { TabMiyuClicker {} },
                         }
                     }
                 }

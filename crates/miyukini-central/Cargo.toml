@@ -26,8 +26,6 @@ jayfestival = { path = "../jayfestival" }
 jaykoa = { path = "../jaykoa" }
 jayxpose = { path = "../jayxpose" }
 jaykonta = { path = "../jaykonta" }
-lord_of_the_castle = { path = "../lord_of_the_castle" }
-miyuclicker = { path = "../miyuclicker" }
 rusqlite = { version = "0.32", features = ["bundled"], optional = true }
 kindmother-db-key = { path = "../kindmother-db-key", optional = true }
 rand = "0.8"
