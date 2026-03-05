@@ -1,4 +1,4 @@
-# MiyukiniAdmin — DB Metrics Contract
+﻿# MiyukiniAdmin â€” DB Metrics Contract
 
 ## 1. Contexte
 
@@ -384,22 +384,22 @@ Ce document **ne couvre pas** :
 
 ```
 MiyukiniAdmin                 BondingBrother         CaringNanny    KindMother
-     │                              │                     │             │
-     │──DBMetricsRequest────────────▶│                     │             │
-     │  (type: db_metrics)           │                     │             │
-     │                              │                     │             │
-     │                              │──ReadSystemMetrics──▶│             │
-     │                              │                     │             │
-     │                              │◀─SystemData─────────│             │
-     │                              │                     │             │
-     │                              │──ReadDBMetrics───────────────────▶│
-     │                              │                     │             │
-     │                              │◀─DBData─────────────────────────│
-     │                              │                     │             │
-     │◀─DBMetricsResponse───────────│                     │             │
-     │  (queries, latency, pool,    │                     │             │
-     │   health, size)              │                     │             │
-     │                              │                     │             │
+     â”‚                              â”‚                     â”‚             â”‚
+     â”‚â”€â”€DBMetricsRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                     â”‚             â”‚
+     â”‚  (type: db_metrics)           â”‚                     â”‚             â”‚
+     â”‚                              â”‚                     â”‚             â”‚
+     â”‚                              â”‚â”€â”€ReadSystemMetricsâ”€â”€â–¶â”‚             â”‚
+     â”‚                              â”‚                     â”‚             â”‚
+     â”‚                              â”‚â—€â”€SystemDataâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚             â”‚
+     â”‚                              â”‚                     â”‚             â”‚
+     â”‚                              â”‚â”€â”€ReadDBMetricsâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                              â”‚                     â”‚             â”‚
+     â”‚                              â”‚â—€â”€DBDataâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                              â”‚                     â”‚             â”‚
+     â”‚â—€â”€DBMetricsResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                     â”‚             â”‚
+     â”‚  (queries, latency, pool,    â”‚                     â”‚             â”‚
+     â”‚   health, size)              â”‚                     â”‚             â”‚
+     â”‚                              â”‚                     â”‚             â”‚
 ```
 
 ---
@@ -453,7 +453,7 @@ OBLIGATOIRE :
 | **Segregation** | KindMother valide l'acces aux tables |
 | **Audit** | Toute consultation tracee avec query hash |
 
-### 13.5 Top Queries — Securite
+### 13.5 Top Queries â€” Securite
 
 Les "Top Queries" (section 9) presentent des risques specifiques :
 
@@ -485,9 +485,9 @@ Les "Top Queries" (section 9) presentent des risques specifiques :
 
 ### 13.8 References Securite
 
-- [Security - Core Integration Map](../../../../security/architecture/Security%20-%20Core%20Integration%20Map.md)
-- [Security - Documentation Fondatrice](../../../../security/foundation/Security%20-%20Documentation%20Fondatrice.md)
-- [KindMother - Security Contract](../../../KindMother/contracts/security/KindMother%20-%20Security%20Contract.md)
+- [Security - Core Integration Map](..//..//..//..//cores//WorrySentinel//_index.md)
+- [Security - Documentation Fondatrice](..//..//..//..//cores//WorrySentinel//_index.md)
+- [KindMother - Security Contract](..//..//..//..//_index.md)
 
 ---
 
@@ -496,10 +496,13 @@ Les "Top Queries" (section 9) presentent des risques specifiques :
 - [MiyukiniAdmin - Consumption Metrics Contract](./MiyukiniAdmin%20-%20Consumption%20Metrics%20Contract.md)
 - [MiyukiniAdmin - DB Operations Contract](../database/MiyukiniAdmin%20-%20DB%20Operations%20Contract.md)
 - [MiyukiniAdmin - DB Management Interface](../../ui/MiyukiniAdmin%20-%20DB%20Management%20Interface.md)
-- [KindMother - Documentation Fondatrice](../../../KindMother/foundation/KindMother%20-%20Documentation%20Fondatrice.md)
+- [KindMother - Documentation Fondatrice](..//..//..//..//cores//KindMother//foundation//KindMother%20-%20Documentation%20Fondatrice.md)
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
 **Statut :** Contrat de reference
+
+
+

@@ -1,4 +1,4 @@
-# MiyukiniAdmin — Vocabulary & Glossary
+﻿# MiyukiniAdmin â€” Vocabulary & Glossary
 
 ## 1. Contexte
 
@@ -27,9 +27,9 @@ Ce document definit :
 - Acces exclusif via BondingBrother
 
 **Usage :**
-- ✓ "MiyukiniAdmin est la console root"
-- ✗ "MiyukiniAdmin est un outil"
-- ✗ "MiyukiniAdmin est une API"
+- âœ“ "MiyukiniAdmin est la console root"
+- âœ— "MiyukiniAdmin est un outil"
+- âœ— "MiyukiniAdmin est une API"
 
 ---
 
@@ -43,8 +43,8 @@ Ce document definit :
 - Acces aux operations critiques
 
 **Usage :**
-- ✓ "MiyukiniAdmin fonctionne comme une console root"
-- ✗ "MiyukiniAdmin est un backoffice"
+- âœ“ "MiyukiniAdmin fonctionne comme une console root"
+- âœ— "MiyukiniAdmin est un backoffice"
 
 ---
 
@@ -58,8 +58,8 @@ Ce document definit :
 - Autorite administrative sur le systeme
 
 **Usage :**
-- ✓ "MiyukiniAdmin est l'unique Operateur Souverain"
-- ✗ "Les Operateurs Souverains sont..."
+- âœ“ "MiyukiniAdmin est l'unique Operateur Souverain"
+- âœ— "Les Operateurs Souverains sont..."
 
 ---
 
@@ -75,8 +75,8 @@ Ce document definit :
 - Serialisation/deserialisation
 
 **Usage :**
-- ✓ "L'Admin Bridge communique avec BondingBrother"
-- ✗ "L'Admin Bridge accede directement aux cores"
+- âœ“ "L'Admin Bridge communique avec BondingBrother"
+- âœ— "L'Admin Bridge accede directement aux cores"
 
 ---
 
@@ -146,17 +146,17 @@ Ce document definit :
 
 ### 5.5 Environnement compromis (attaque, troncature, alteration)
 
-**Definition :** Etat de l'environnement ou des donnees critiques sont **presentes mais invalides** (EIP corrompu ou tag/hash invalides, registre admin incoherent, schema tronque) ou **incoherentes** entre elles. Indique une intrusion, une panne grave ou une alteration malveillante. Un environnement compromis **n'est pas** un environnement vierge ; il declenche une **reponse securitaire** (mode degrade, blocage login, alerte, procedure de recovery gouvernée), pas le parcours d'installation (Futur Admin).
+**Definition :** Etat de l'environnement ou des donnees critiques sont **presentes mais invalides** (EIP corrompu ou tag/hash invalides, registre admin incoherent, schema tronque) ou **incoherentes** entre elles. Indique une intrusion, une panne grave ou une alteration malveillante. Un environnement compromis **n'est pas** un environnement vierge ; il declenche une **reponse securitaire** (mode degrade, blocage login, alerte, procedure de recovery gouvernÃ©e), pas le parcours d'installation (Futur Admin).
 
 **Usage :** "L'environnement a ete detecte comme compromis ; la reponse securitaire est activee."
 
-**Voir :** [Auth and First-Boot Contract](../contracts/security/MiyukiniAdmin%20-%20Auth%20and%20First-Boot%20Contract.md) sections 3.2 à 3.5
+**Voir :** [Auth and First-Boot Contract](../contracts/security/MiyukiniAdmin%20-%20Auth%20and%20First-Boot%20Contract.md) sections 3.2 Ã  3.5
 
 ---
 
 ### 5.6 Reponse securitaire (environnement compromis)
 
-**Definition :** Ensemble de mesures appliquees lorsque l'environnement est classe **compromis** (attaque, troncature, alteration) : passage WorrySentinel en T3/T4 (mode degrade / lockdown), affichage page dediee « Environnement compromis » (pas de login, pas de parcours installation), alerte et audit (ENVIRONMENT_COMPROMISED). Si l'humain peut intervenir : reprise uniquement via **procedure de recovery gouvernée**. Si l'**interface humaine est compromise** (auth, donnees admin, MiyukiniAdmin) et l'**humain ne peut pas intervenir** : **recovery/rollback automatique** lancee ; si echec, donnees DB detruites (jugees perdues), environnement reinitialise en **vierge avec memoire de corruption passee**.
+**Definition :** Ensemble de mesures appliquees lorsque l'environnement est classe **compromis** (attaque, troncature, alteration) : passage WorrySentinel en T3/T4 (mode degrade / lockdown), affichage page dediee Â« Environnement compromis Â» (pas de login, pas de parcours installation), alerte et audit (ENVIRONMENT_COMPROMISED). Si l'humain peut intervenir : reprise uniquement via **procedure de recovery gouvernÃ©e**. Si l'**interface humaine est compromise** (auth, donnees admin, MiyukiniAdmin) et l'**humain ne peut pas intervenir** : **recovery/rollback automatique** lancee ; si echec, donnees DB detruites (jugees perdues), environnement reinitialise en **vierge avec memoire de corruption passee**.
 
 **Usage :** "La reponse securitaire est en vigueur ; la procedure de recovery doit etre suivie (ou la recovery automatique s'applique)."
 
@@ -166,7 +166,7 @@ Ce document definit :
 
 ### 5.6bis Vierge avec memoire de corruption (Virgin with memory of past corruption)
 
-**Definition :** Etat d'un environnement **reinitialise en vierge** apres echec de la **recovery automatique** (interface humaine compromise, humain ne pouvant pas intervenir). **Avant destruction** : si aucune sauvegarde locale antérieure des donnees DB n'existait, une **sauvegarde compressee** a ete effectuee (dernier recours pour examen forensique ou recuperation ultérieure). Les donnees DB ont ensuite ete **totalement detruites** et **jugees perdues**. L'environnement est **vierge** (parcours Futur Admin, premier boot) mais conserve une **memoire de sa corruption passee** : une trace persistante (audit, pas de donnees sensibles) indique qu'il a deja ete compromis et reinitialise apres echec de recovery automatique. Cette memoire sert a l'audit, au diagnostic et eventuellement a des politiques renforcees (vigilance, alerte).
+**Definition :** Etat d'un environnement **reinitialise en vierge** apres echec de la **recovery automatique** (interface humaine compromise, humain ne pouvant pas intervenir). **Avant destruction** : si aucune sauvegarde locale antÃ©rieure des donnees DB n'existait, une **sauvegarde compressee** a ete effectuee (dernier recours pour examen forensique ou recuperation ultÃ©rieure). Les donnees DB ont ensuite ete **totalement detruites** et **jugees perdues**. L'environnement est **vierge** (parcours Futur Admin, premier boot) mais conserve une **memoire de sa corruption passee** : une trace persistante (audit, pas de donnees sensibles) indique qu'il a deja ete compromis et reinitialise apres echec de recovery automatique. Cette memoire sert a l'audit, au diagnostic et eventuellement a des politiques renforcees (vigilance, alerte).
 
 **Usage :** "L'environnement est vierge avec memoire de corruption ; le parcours d'installation s'applique, mais une trace de la compromission passee est conservee."
 
@@ -180,13 +180,13 @@ Ce document definit :
 
 **Usage :** "La generation de l'identite environnement suit le protocole EIP."
 
-**Voir :** [Environment Identity Protocol EIP](../../../protocols/MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md)
+**Voir :** [Environment Identity Protocol EIP](..//..//..//contrats//MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md)
 
 ---
 
 ### 5.8 RBAC MiyukiniAdmin (Roles et capacites)
 
-**Definition :** Modele d'autorisation par rôles integre a MiyukiniAdmin. Chaque compte admin a **un seul role** (Admin, Recovery ou Audit). Chaque role possede un ensemble **explicite** de **capacites** (permissions). Une action sensible est autorisee si le role du compte possede la capacite requise.
+**Definition :** Modele d'autorisation par rÃ´les integre a MiyukiniAdmin. Chaque compte admin a **un seul role** (Admin, Recovery ou Audit). Chaque role possede un ensemble **explicite** de **capacites** (permissions). Une action sensible est autorisee si le role du compte possede la capacite requise.
 
 **Roles :**
 - **Admin** : capacites standard (dashboard, metriques, securite, DB via KindMother, tests, gestion comptes Admin/Audit).
@@ -343,11 +343,13 @@ Ce document definit :
 ## 12. Documents Associes
 
 - [MiyukiniAdmin - Documentation Fondatrice](../foundation/MiyukiniAdmin%20-%20Documentation%20Fondatrice.md)
-- [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-- [Miyukini Conceptual References - Security Levels](../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md)
+- [Miyukini Conceptual References - Glossaire](..//..//..//miyukini-webway-system//reference//_index.md)
+- [Miyukini Conceptual References - Security Levels](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
 **Statut :** Document de reference
+
+

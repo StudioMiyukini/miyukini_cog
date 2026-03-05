@@ -1,132 +1,132 @@
-# StrongFather — Policy Language Specification
+﻿# StrongFather â€” Policy Language Specification
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **StrongFather — Policy Language Specification** : un contrat normatif, non négociable, et de statut FONDATION qui établit la spécification formelle du langage de politiques StrongFather, définissant la syntaxe conceptuelle, les règles de composition, la résolution de conflits, et les interdictions explicites pour l'expression de politiques dans le système Miyukini Core System v2.4.
+Ce document dÃ©finit le **StrongFather â€” Policy Language Specification** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit la spÃ©cification formelle du langage de politiques StrongFather, dÃ©finissant la syntaxe conceptuelle, les rÃ¨gles de composition, la rÃ©solution de conflits, et les interdictions explicites pour l'expression de politiques dans le systÃ¨me Miyukini Core System v2.4.
 
-Ce contrat précise uniquement la syntaxe conceptuelle du langage de politiques, sans jamais introduire de détail d'implémentation technique, de format de sérialisation, ou de mécanisme d'exécution.
+Ce contrat prÃ©cise uniquement la syntaxe conceptuelle du langage de politiques, sans jamais introduire de dÃ©tail d'implÃ©mentation technique, de format de sÃ©rialisation, ou de mÃ©canisme d'exÃ©cution.
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **toute expression de politique StrongFather** et définit de manière absolue :
-- la typologie fermée des types de politiques,
+Ce contrat s'applique Ã  **toute expression de politique StrongFather** et dÃ©finit de maniÃ¨re absolue :
+- la typologie fermÃ©e des types de politiques,
 - la syntaxe conceptuelle du langage de politiques,
-- les règles de composition des politiques,
-- la résolution de conflits entre politiques,
+- les rÃ¨gles de composition des politiques,
+- la rÃ©solution de conflits entre politiques,
 - les exemples valides et invalides,
 - les interdictions explicites.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complète et respecte les documents contractuels existants :
-- **StrongFather — Policy Engine Contract** : Définit la nature conceptuelle des politiques et leur application
-- **StrongFather — Documentation Fondatrice** : Définit le rôle systémique de StrongFather
-- **StrongFather — Invariants & Guarantees** : Définit les invariants et garanties applicables aux politiques
-- **StrongFather — Policy Source Contract** : Définit la source et la validation des politiques
-- **[Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Conformité aux lois d'autonomie, notamment **LOI-1** (aucune dépendance externe critique) : les politiques sont locales
+Ce contrat complÃ¨te et respecte les documents contractuels existants :
+- **StrongFather â€” Policy Engine Contract** : DÃ©finit la nature conceptuelle des politiques et leur application
+- **StrongFather â€” Documentation Fondatrice** : DÃ©finit le rÃ´le systÃ©mique de StrongFather
+- **StrongFather â€” Invariants & Guarantees** : DÃ©finit les invariants et garanties applicables aux politiques
+- **StrongFather â€” Policy Source Contract** : DÃ©finit la source et la validation des politiques
+- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : ConformitÃ© aux lois d'autonomie, notamment **LOI-1** (aucune dÃ©pendance externe critique) : les politiques sont locales
 
-Il n'introduit aucune contradiction, et constitue la spécification formelle du langage conceptuel pour exprimer des politiques StrongFather.
+Il n'introduit aucune contradiction, et constitue la spÃ©cification formelle du langage conceptuel pour exprimer des politiques StrongFather.
 
 ---
 
-## 2. Typologie fermée des types de politiques
+## 2. Typologie fermÃ©e des types de politiques
 
 ### 2.1. Principe de fermeture
 
-La typologie des politiques StrongFather est **fermée**. Seuls les types explicitement définis dans cette section sont autorisés. Aucun type de politique non défini n'est reconnu.
+La typologie des politiques StrongFather est **fermÃ©e**. Seuls les types explicitement dÃ©finis dans cette section sont autorisÃ©s. Aucun type de politique non dÃ©fini n'est reconnu.
 
-**RÈGLE-TYPE-1 : Fermeture stricte**
+**RÃˆGLE-TYPE-1 : Fermeture stricte**
 
-Aucun type de politique non défini dans cette section n'est autorisé. Toute tentative d'utiliser un type non défini est invalide.
+Aucun type de politique non dÃ©fini dans cette section n'est autorisÃ©. Toute tentative d'utiliser un type non dÃ©fini est invalide.
 
-### 2.2. Types autorisés
+### 2.2. Types autorisÃ©s
 
-Les types de politiques autorisés sont exactement les suivants :
+Les types de politiques autorisÃ©s sont exactement les suivants :
 
 #### 2.2.1. Type PERMISSION
 
-**Définition :**
+**DÃ©finition :**
 
-Une politique de type **PERMISSION** détermine si un acteur (utilisateur, rôle, groupe) est autorisé à effectuer une action spécifique selon des conditions définies.
+Une politique de type **PERMISSION** dÃ©termine si un acteur (utilisateur, rÃ´le, groupe) est autorisÃ© Ã  effectuer une action spÃ©cifique selon des conditions dÃ©finies.
 
-**Caractéristiques obligatoires :**
+**CaractÃ©ristiques obligatoires :**
 - Cible un acteur ou un groupe d'acteurs
-- Spécifie une action (autoriser ou interdire)
+- SpÃ©cifie une action (autoriser ou interdire)
 - Peut inclure des conditions contextuelles
 
-**Référence :** Policy Engine Contract, section 3.1
+**RÃ©fÃ©rence :** Policy Engine Contract, section 3.1
 
 #### 2.2.2. Type CONSTRAINT
 
-**Définition :**
+**DÃ©finition :**
 
-Une politique de type **CONSTRAINT** définit des conditions qui doivent être satisfaites pour qu'une intention soit valide, indépendamment de l'acteur.
+Une politique de type **CONSTRAINT** dÃ©finit des conditions qui doivent Ãªtre satisfaites pour qu'une intention soit valide, indÃ©pendamment de l'acteur.
 
-**Caractéristiques obligatoires :**
-- Condition obligatoire à satisfaire
-- Indépendance de l'acteur
-- Validation de cohérence
+**CaractÃ©ristiques obligatoires :**
+- Condition obligatoire Ã  satisfaire
+- IndÃ©pendance de l'acteur
+- Validation de cohÃ©rence
 
-**Référence :** Policy Engine Contract, section 3.2
+**RÃ©fÃ©rence :** Policy Engine Contract, section 3.2
 
 #### 2.2.3. Type PRIORITY
 
-**Définition :**
+**DÃ©finition :**
 
-Une politique de type **PRIORITY** détermine l'ordre d'importance relative d'une intention par rapport à d'autres intentions selon des critères définis.
+Une politique de type **PRIORITY** dÃ©termine l'ordre d'importance relative d'une intention par rapport Ã  d'autres intentions selon des critÃ¨res dÃ©finis.
 
-**Caractéristiques obligatoires :**
+**CaractÃ©ristiques obligatoires :**
 - Ordre relatif (pas absolu)
-- Critères explicites
-- Capacité de comparaison
+- CritÃ¨res explicites
+- CapacitÃ© de comparaison
 
-**Référence :** Policy Engine Contract, section 3.3
+**RÃ©fÃ©rence :** Policy Engine Contract, section 3.3
 
 #### 2.2.4. Type VALIDATION
 
-**Définition :**
+**DÃ©finition :**
 
-Une politique de type **VALIDATION** définit des vérifications qui doivent être effectuées pour qu'une intention soit valide, sans être une contrainte de cohérence.
+Une politique de type **VALIDATION** dÃ©finit des vÃ©rifications qui doivent Ãªtre effectuÃ©es pour qu'une intention soit valide, sans Ãªtre une contrainte de cohÃ©rence.
 
-**Caractéristiques obligatoires :**
-- Vérification obligatoire
-- Vérification conceptuelle (pas technique)
-- Condition de validité
+**CaractÃ©ristiques obligatoires :**
+- VÃ©rification obligatoire
+- VÃ©rification conceptuelle (pas technique)
+- Condition de validitÃ©
 
-**Référence :** Policy Engine Contract, section 3.4
+**RÃ©fÃ©rence :** Policy Engine Contract, section 3.4
 
 #### 2.2.5. Type COMPOSITE
 
-**Définition :**
+**DÃ©finition :**
 
-Une politique de type **COMPOSITE** combine plusieurs politiques élémentaires selon des opérateurs logiques (ET, OU, NON).
+Une politique de type **COMPOSITE** combine plusieurs politiques Ã©lÃ©mentaires selon des opÃ©rateurs logiques (ET, OU, NON).
 
-**Caractéristiques obligatoires :**
+**CaractÃ©ristiques obligatoires :**
 - Combinaison de politiques
-- Opérateurs logiques explicites
-- Hiérarchie possible (composites de composites)
+- OpÃ©rateurs logiques explicites
+- HiÃ©rarchie possible (composites de composites)
 
-**Référence :** Policy Engine Contract, section 3.5
+**RÃ©fÃ©rence :** Policy Engine Contract, section 3.5
 
-### 2.3. Règles de typologie
+### 2.3. RÃ¨gles de typologie
 
-**RÈGLE-TYPE-2 : Type obligatoire**
+**RÃˆGLE-TYPE-2 : Type obligatoire**
 
-Toute politique DOIT avoir un type explicitement défini. Le type DOIT être l'un des types autorisés (PERMISSION, CONSTRAINT, PRIORITY, VALIDATION, COMPOSITE).
+Toute politique DOIT avoir un type explicitement dÃ©fini. Le type DOIT Ãªtre l'un des types autorisÃ©s (PERMISSION, CONSTRAINT, PRIORITY, VALIDATION, COMPOSITE).
 
-**RÈGLE-TYPE-3 : Type unique**
+**RÃˆGLE-TYPE-3 : Type unique**
 
-Toute politique a exactement un type. Une politique ne peut pas avoir plusieurs types simultanément.
+Toute politique a exactement un type. Une politique ne peut pas avoir plusieurs types simultanÃ©ment.
 
-**RÈGLE-TYPE-4 : Type immutable**
+**RÃˆGLE-TYPE-4 : Type immutable**
 
-Le type d'une politique est immutable. Une fois défini, le type ne peut pas être modifié.
+Le type d'une politique est immutable. Une fois dÃ©fini, le type ne peut pas Ãªtre modifiÃ©.
 
 ---
 
@@ -134,9 +134,9 @@ Le type d'une politique est immutable. Une fois défini, le type ne peut pas êt
 
 ### 3.1. Principe de syntaxe conceptuelle
 
-La syntaxe du langage de politiques StrongFather est **conceptuelle**. Elle exprime la structure et la composition des politiques sans présupposer aucun format technique, aucune technologie, ou aucun mécanisme de sérialisation.
+La syntaxe du langage de politiques StrongFather est **conceptuelle**. Elle exprime la structure et la composition des politiques sans prÃ©supposer aucun format technique, aucune technologie, ou aucun mÃ©canisme de sÃ©rialisation.
 
-**Important :** Cette syntaxe est purement conceptuelle. Elle ne définit pas de format JSON, YAML, XML, ou autre. Elle définit uniquement la structure conceptuelle que toute représentation technique doit respecter.
+**Important :** Cette syntaxe est purement conceptuelle. Elle ne dÃ©finit pas de format JSON, YAML, XML, ou autre. Elle dÃ©finit uniquement la structure conceptuelle que toute reprÃ©sentation technique doit respecter.
 
 ### 3.2. Structure de base d'une politique
 
@@ -170,9 +170,9 @@ La syntaxe du langage de politiques StrongFather est **conceptuelle**. Elle expr
 <identifier> ::= <unique_string>
 ```
 
-- DOIT être unique dans l'ensemble des politiques
-- DOIT être immutable
-- DOIT être non vide
+- DOIT Ãªtre unique dans l'ensemble des politiques
+- DOIT Ãªtre immutable
+- DOIT Ãªtre non vide
 
 **Type :**
 
@@ -180,8 +180,8 @@ La syntaxe du langage de politiques StrongFather est **conceptuelle**. Elle expr
 <type> ::= PERMISSION | CONSTRAINT | PRIORITY | VALIDATION | COMPOSITE
 ```
 
-- DOIT être l'un des types autorisés
-- DOIT être explicitement défini
+- DOIT Ãªtre l'un des types autorisÃ©s
+- DOIT Ãªtre explicitement dÃ©fini
 
 **Condition d'application :**
 
@@ -189,19 +189,19 @@ La syntaxe du langage de politiques StrongFather est **conceptuelle**. Elle expr
 <condition_application> ::= <condition_expression>
 ```
 
-- DOIT déterminer quand la politique s'applique
-- DOIT être évaluable conceptuellement
-- DOIT être non ambiguë
+- DOIT dÃ©terminer quand la politique s'applique
+- DOIT Ãªtre Ã©valuable conceptuellement
+- DOIT Ãªtre non ambiguÃ«
 
-**Règle déclarative :**
+**RÃ¨gle dÃ©clarative :**
 
 ```
 <rule> ::= <declarative_expression>
 ```
 
-- DOIT exprimer ce qui est autorisé, interdit, ou requis
-- DOIT être déclarative (pas impérative)
-- DOIT être non ambiguë
+- DOIT exprimer ce qui est autorisÃ©, interdit, ou requis
+- DOIT Ãªtre dÃ©clarative (pas impÃ©rative)
+- DOIT Ãªtre non ambiguÃ«
 
 **Effet :**
 
@@ -210,7 +210,7 @@ La syntaxe du langage de politiques StrongFather est **conceptuelle**. Elle expr
 ```
 
 - DOIT correspondre au type de politique
-- DOIT être explicitement défini
+- DOIT Ãªtre explicitement dÃ©fini
 
 ### 3.3. Syntaxe par type de politique
 
@@ -390,40 +390,40 @@ Policy {
 }
 ```
 
-### 3.4. Règles de syntaxe
+### 3.4. RÃ¨gles de syntaxe
 
-**RÈGLE-SYNTAX-1 : Complétude obligatoire**
+**RÃˆGLE-SYNTAX-1 : ComplÃ©tude obligatoire**
 
-Toute politique DOIT contenir tous les composants obligatoires définis dans la syntaxe.
+Toute politique DOIT contenir tous les composants obligatoires dÃ©finis dans la syntaxe.
 
-**RÈGLE-SYNTAX-2 : Cohérence type-effet**
+**RÃˆGLE-SYNTAX-2 : CohÃ©rence type-effet**
 
-L'effet d'une politique DOIT être cohérent avec son type :
-- PERMISSION → AUTHORIZE ou DENY
-- CONSTRAINT → CONSTRAIN
-- PRIORITY → PRIORITIZE
-- VALIDATION → VALIDATE
-- COMPOSITE → DERIVED
+L'effet d'une politique DOIT Ãªtre cohÃ©rent avec son type :
+- PERMISSION â†’ AUTHORIZE ou DENY
+- CONSTRAINT â†’ CONSTRAIN
+- PRIORITY â†’ PRIORITIZE
+- VALIDATION â†’ VALIDATE
+- COMPOSITE â†’ DERIVED
 
-**RÈGLE-SYNTAX-3 : Non-ambiguïté**
+**RÃˆGLE-SYNTAX-3 : Non-ambiguÃ¯tÃ©**
 
-Toute expression dans une politique DOIT être non ambiguë. Aucune interprétation multiple n'est autorisée.
+Toute expression dans une politique DOIT Ãªtre non ambiguÃ«. Aucune interprÃ©tation multiple n'est autorisÃ©e.
 
-**RÈGLE-SYNTAX-4 : Déclarativité**
+**RÃˆGLE-SYNTAX-4 : DÃ©clarativitÃ©**
 
-Toute règle DOIT être déclarative. Aucune instruction impérative n'est autorisée.
+Toute rÃ¨gle DOIT Ãªtre dÃ©clarative. Aucune instruction impÃ©rative n'est autorisÃ©e.
 
 ---
 
-## 4. Règles de composition
+## 4. RÃ¨gles de composition
 
 ### 4.1. Principe de composition
 
-Les politiques peuvent être composées selon des règles explicites définies dans cette section. La composition permet d'exprimer des règles complexes à partir de politiques élémentaires.
+Les politiques peuvent Ãªtre composÃ©es selon des rÃ¨gles explicites dÃ©finies dans cette section. La composition permet d'exprimer des rÃ¨gles complexes Ã  partir de politiques Ã©lÃ©mentaires.
 
-### 4.2. Composition par opérateurs logiques
+### 4.2. Composition par opÃ©rateurs logiques
 
-#### 4.2.1. Opérateur AND
+#### 4.2.1. OpÃ©rateur AND
 
 **Syntaxe :**
 
@@ -436,19 +436,19 @@ Les politiques peuvent être composées selon des règles explicites définies d
     <derived_effect>
 ```
 
-**Sémantique :**
+**SÃ©mantique :**
 
-Une politique composite avec opérateur AND est satisfaite si et seulement si toutes les politiques référencées sont satisfaites.
+Une politique composite avec opÃ©rateur AND est satisfaite si et seulement si toutes les politiques rÃ©fÃ©rencÃ©es sont satisfaites.
 
-**RÈGLE-COMP-AND-1 : Évaluation complète**
+**RÃˆGLE-COMP-AND-1 : Ã‰valuation complÃ¨te**
 
-Toutes les politiques référencées dans un AND DOIVENT être évaluées, même si une politique est non satisfaite.
+Toutes les politiques rÃ©fÃ©rencÃ©es dans un AND DOIVENT Ãªtre Ã©valuÃ©es, mÃªme si une politique est non satisfaite.
 
-**RÈGLE-COMP-AND-2 : Ordre d'évaluation**
+**RÃˆGLE-COMP-AND-2 : Ordre d'Ã©valuation**
 
-L'ordre d'évaluation des politiques dans un AND n'affecte pas le résultat (propriété commutative).
+L'ordre d'Ã©valuation des politiques dans un AND n'affecte pas le rÃ©sultat (propriÃ©tÃ© commutative).
 
-#### 4.2.2. Opérateur OR
+#### 4.2.2. OpÃ©rateur OR
 
 **Syntaxe :**
 
@@ -461,19 +461,19 @@ L'ordre d'évaluation des politiques dans un AND n'affecte pas le résultat (pro
     <derived_effect>
 ```
 
-**Sémantique :**
+**SÃ©mantique :**
 
-Une politique composite avec opérateur OR est satisfaite si au moins une des politiques référencées est satisfaite.
+Une politique composite avec opÃ©rateur OR est satisfaite si au moins une des politiques rÃ©fÃ©rencÃ©es est satisfaite.
 
-**RÈGLE-COMP-OR-1 : Évaluation jusqu'à satisfaction**
+**RÃˆGLE-COMP-OR-1 : Ã‰valuation jusqu'Ã  satisfaction**
 
-L'évaluation des politiques dans un OR peut s'arrêter dès qu'une politique est satisfaite (court-circuit), mais toutes les politiques DOIVENT être évaluables conceptuellement.
+L'Ã©valuation des politiques dans un OR peut s'arrÃªter dÃ¨s qu'une politique est satisfaite (court-circuit), mais toutes les politiques DOIVENT Ãªtre Ã©valuables conceptuellement.
 
-**RÈGLE-COMP-OR-2 : Ordre d'évaluation**
+**RÃˆGLE-COMP-OR-2 : Ordre d'Ã©valuation**
 
-L'ordre d'évaluation des politiques dans un OR peut affecter la traçabilité mais pas le résultat logique final.
+L'ordre d'Ã©valuation des politiques dans un OR peut affecter la traÃ§abilitÃ© mais pas le rÃ©sultat logique final.
 
-#### 4.2.3. Opérateur NOT
+#### 4.2.3. OpÃ©rateur NOT
 
 **Syntaxe :**
 
@@ -486,19 +486,19 @@ L'ordre d'évaluation des politiques dans un OR peut affecter la traçabilité m
     <derived_effect>
 ```
 
-**Sémantique :**
+**SÃ©mantique :**
 
-Une politique composite avec opérateur NOT est satisfaite si et seulement si la politique référencée n'est pas satisfaite.
+Une politique composite avec opÃ©rateur NOT est satisfaite si et seulement si la politique rÃ©fÃ©rencÃ©e n'est pas satisfaite.
 
-**RÈGLE-COMP-NOT-1 : Référence unique**
+**RÃˆGLE-COMP-NOT-1 : RÃ©fÃ©rence unique**
 
-L'opérateur NOT DOIT référencer exactement une politique. Aucune référence multiple n'est autorisée.
+L'opÃ©rateur NOT DOIT rÃ©fÃ©rencer exactement une politique. Aucune rÃ©fÃ©rence multiple n'est autorisÃ©e.
 
-**RÈGLE-COMP-NOT-2 : Non-ambiguïté**
+**RÃˆGLE-COMP-NOT-2 : Non-ambiguÃ¯tÃ©**
 
-La politique référencée dans un NOT DOIT être non ambiguë pour que le NOT soit évaluable.
+La politique rÃ©fÃ©rencÃ©e dans un NOT DOIT Ãªtre non ambiguÃ« pour que le NOT soit Ã©valuable.
 
-### 4.3. Composition hiérarchique
+### 4.3. Composition hiÃ©rarchique
 
 #### 4.3.1. Politiques composites de politiques composites
 
@@ -515,49 +515,49 @@ La politique référencée dans un NOT DOIT être non ambiguë pour que le NOT s
     <derived_effect>
 ```
 
-**Sémantique :**
+**SÃ©mantique :**
 
-Une politique composite peut référencer d'autres politiques composites, créant une hiérarchie de composition.
+Une politique composite peut rÃ©fÃ©rencer d'autres politiques composites, crÃ©ant une hiÃ©rarchie de composition.
 
-**RÈGLE-COMP-HIER-1 : Acyclicité**
+**RÃˆGLE-COMP-HIER-1 : AcyclicitÃ©**
 
-La hiérarchie de composition DOIT être acyclique. Aucune politique ne peut référencer directement ou indirectement elle-même.
+La hiÃ©rarchie de composition DOIT Ãªtre acyclique. Aucune politique ne peut rÃ©fÃ©rencer directement ou indirectement elle-mÃªme.
 
-**RÈGLE-COMP-HIER-2 : Terminaison garantie**
+**RÃˆGLE-COMP-HIER-2 : Terminaison garantie**
 
-La hiérarchie de composition DOIT terminer sur des politiques élémentaires (non composites). Toute chaîne de références DOIT terminer sur une politique de type PERMISSION, CONSTRAINT, PRIORITY, ou VALIDATION.
+La hiÃ©rarchie de composition DOIT terminer sur des politiques Ã©lÃ©mentaires (non composites). Toute chaÃ®ne de rÃ©fÃ©rences DOIT terminer sur une politique de type PERMISSION, CONSTRAINT, PRIORITY, ou VALIDATION.
 
-### 4.4. Règles générales de composition
+### 4.4. RÃ¨gles gÃ©nÃ©rales de composition
 
-**RÈGLE-COMP-GEN-1 : Références valides**
+**RÃˆGLE-COMP-GEN-1 : RÃ©fÃ©rences valides**
 
-Toute référence à une politique dans une composition DOIT référencer une politique existante et valide.
+Toute rÃ©fÃ©rence Ã  une politique dans une composition DOIT rÃ©fÃ©rencer une politique existante et valide.
 
-**RÈGLE-COMP-GEN-2 : Cohérence de type**
+**RÃˆGLE-COMP-GEN-2 : CohÃ©rence de type**
 
-Les politiques composées DOIVENT être cohérentes entre elles. Une composition de politiques de types incompatibles peut être invalide selon le contexte.
+Les politiques composÃ©es DOIVENT Ãªtre cohÃ©rentes entre elles. Une composition de politiques de types incompatibles peut Ãªtre invalide selon le contexte.
 
-**RÈGLE-COMP-GEN-3 : Déterminisme**
+**RÃˆGLE-COMP-GEN-3 : DÃ©terminisme**
 
-La composition de politiques DOIT être déterministe. Pour un même ensemble de politiques composées, le résultat DOIT toujours être le même.
+La composition de politiques DOIT Ãªtre dÃ©terministe. Pour un mÃªme ensemble de politiques composÃ©es, le rÃ©sultat DOIT toujours Ãªtre le mÃªme.
 
 ---
 
-## 5. Résolution de conflits
+## 5. RÃ©solution de conflits
 
-### 5.1. Principe de résolution
+### 5.1. Principe de rÃ©solution
 
-Lorsque plusieurs politiques applicables à une intention produisent des effets contradictoires, les conflits sont résolus selon des règles explicites définies dans cette section.
+Lorsque plusieurs politiques applicables Ã  une intention produisent des effets contradictoires, les conflits sont rÃ©solus selon des rÃ¨gles explicites dÃ©finies dans cette section.
 
 ### 5.2. Types de conflits
 
 #### 5.2.1. Conflit d'autorisation
 
-**Définition :**
+**DÃ©finition :**
 
 Un conflit d'autorisation se produit lorsqu'une politique autorise une intention (AUTHORIZE) et qu'une autre l'interdit (DENY).
 
-**Syntaxe de détection :**
+**Syntaxe de dÃ©tection :**
 
 ```
 <conflict_authorization> ::= 
@@ -570,11 +570,11 @@ Un conflit d'autorisation se produit lorsqu'une politique autorise une intention
 
 #### 5.2.2. Conflit de contrainte
 
-**Définition :**
+**DÃ©finition :**
 
 Un conflit de contrainte se produit lorsqu'une politique impose une contrainte et qu'une autre l'interdit ou la contredit.
 
-**Syntaxe de détection :**
+**Syntaxe de dÃ©tection :**
 
 ```
 <conflict_constraint> ::= 
@@ -585,13 +585,13 @@ Un conflit de contrainte se produit lorsqu'une politique impose une contrainte e
     <contradictory_conditions>
 ```
 
-#### 5.2.3. Conflit de priorité
+#### 5.2.3. Conflit de prioritÃ©
 
-**Définition :**
+**DÃ©finition :**
 
-Un conflit de priorité se produit lorsque plusieurs politiques établissent des priorités contradictoires pour une intention.
+Un conflit de prioritÃ© se produit lorsque plusieurs politiques Ã©tablissent des prioritÃ©s contradictoires pour une intention.
 
-**Syntaxe de détection :**
+**Syntaxe de dÃ©tection :**
 
 ```
 <conflict_priority> ::= 
@@ -602,13 +602,13 @@ Un conflit de priorité se produit lorsque plusieurs politiques établissent des
     <value_1> != <value_2>
 ```
 
-### 5.3. Règles de résolution
+### 5.3. RÃ¨gles de rÃ©solution
 
-#### 5.3.1. Règle de priorité
+#### 5.3.1. RÃ¨gle de prioritÃ©
 
-**RÈGLE-RESOL-1 : Priorité prime**
+**RÃˆGLE-RESOL-1 : PrioritÃ© prime**
 
-En cas de conflit, la politique de priorité la plus élevée prime. L'effet de la politique de priorité élevée est appliqué, et l'effet de la politique de priorité faible est ignoré.
+En cas de conflit, la politique de prioritÃ© la plus Ã©levÃ©e prime. L'effet de la politique de prioritÃ© Ã©levÃ©e est appliquÃ©, et l'effet de la politique de prioritÃ© faible est ignorÃ©.
 
 **Syntaxe :**
 
@@ -619,11 +619,11 @@ En cas de conflit, la politique de priorité la plus élevée prime. L'effet de 
     ELSE <policy_2>.effect
 ```
 
-#### 5.3.2. Règle d'interdiction
+#### 5.3.2. RÃ¨gle d'interdiction
 
-**RÈGLE-RESOL-2 : Interdiction prime sur autorisation**
+**RÃˆGLE-RESOL-2 : Interdiction prime sur autorisation**
 
-Si une politique interdit (DENY) et qu'une autre autorise (AUTHORIZE), l'interdiction prime, indépendamment de la priorité, sauf si la politique d'autorisation est critique.
+Si une politique interdit (DENY) et qu'une autre autorise (AUTHORIZE), l'interdiction prime, indÃ©pendamment de la prioritÃ©, sauf si la politique d'autorisation est critique.
 
 **Syntaxe :**
 
@@ -636,11 +636,11 @@ Si une politique interdit (DENY) et qu'une autre autorise (AUTHORIZE), l'interdi
     ELSE <apply_priority_rule>
 ```
 
-#### 5.3.3. Règle de criticité
+#### 5.3.3. RÃ¨gle de criticitÃ©
 
-**RÈGLE-RESOL-3 : Politique critique prime**
+**RÃˆGLE-RESOL-3 : Politique critique prime**
 
-Une politique critique prime toujours sur une politique non critique, même si la politique non critique a une priorité plus élevée.
+Une politique critique prime toujours sur une politique non critique, mÃªme si la politique non critique a une prioritÃ© plus Ã©levÃ©e.
 
 **Syntaxe :**
 
@@ -652,11 +652,11 @@ Une politique critique prime toujours sur une politique non critique, même si l
     ELSE <apply_priority_rule>
 ```
 
-#### 5.3.4. Règle d'ambiguïté
+#### 5.3.4. RÃ¨gle d'ambiguÃ¯tÃ©
 
-**RÈGLE-RESOL-4 : Ambiguïté en cas d'égalité**
+**RÃˆGLE-RESOL-4 : AmbiguÃ¯tÃ© en cas d'Ã©galitÃ©**
 
-Si deux politiques de même priorité et de même criticité sont en conflit, l'intention est marquée comme ambiguë et nécessite une clarification.
+Si deux politiques de mÃªme prioritÃ© et de mÃªme criticitÃ© sont en conflit, l'intention est marquÃ©e comme ambiguÃ« et nÃ©cessite une clarification.
 
 **Syntaxe :**
 
@@ -668,34 +668,34 @@ Si deux politiques de même priorité et de même criticité sont en conflit, l'
     THEN AMBIGUOUS
 ```
 
-### 5.4. Ordre d'application des règles
+### 5.4. Ordre d'application des rÃ¨gles
 
-**RÈGLE-RESOL-ORDER-1 : Ordre de résolution**
+**RÃˆGLE-RESOL-ORDER-1 : Ordre de rÃ©solution**
 
-Les règles de résolution sont appliquées dans l'ordre suivant :
+Les rÃ¨gles de rÃ©solution sont appliquÃ©es dans l'ordre suivant :
 
-1. RÈGLE-RESOL-3 (criticité)
-2. RÈGLE-RESOL-2 (interdiction)
-3. RÈGLE-RESOL-1 (priorité)
-4. RÈGLE-RESOL-4 (ambiguïté)
+1. RÃˆGLE-RESOL-3 (criticitÃ©)
+2. RÃˆGLE-RESOL-2 (interdiction)
+3. RÃˆGLE-RESOL-1 (prioritÃ©)
+4. RÃˆGLE-RESOL-4 (ambiguÃ¯tÃ©)
 
-**RÈGLE-RESOL-ORDER-2 : Application séquentielle**
+**RÃˆGLE-RESOL-ORDER-2 : Application sÃ©quentielle**
 
-Les règles sont appliquées séquentiellement. Si une règle résout le conflit, les règles suivantes ne sont pas appliquées.
+Les rÃ¨gles sont appliquÃ©es sÃ©quentiellement. Si une rÃ¨gle rÃ©sout le conflit, les rÃ¨gles suivantes ne sont pas appliquÃ©es.
 
-### 5.5. Garanties de résolution
+### 5.5. Garanties de rÃ©solution
 
-**G-RESOL-LANG-1 : Résolution déterministe**
+**G-RESOL-LANG-1 : RÃ©solution dÃ©terministe**
 
-La résolution d'un conflit est déterministe. Pour un même conflit, la même résolution est toujours produite selon les règles définies.
+La rÃ©solution d'un conflit est dÃ©terministe. Pour un mÃªme conflit, la mÃªme rÃ©solution est toujours produite selon les rÃ¨gles dÃ©finies.
 
-**G-RESOL-LANG-2 : Résolution justifiable**
+**G-RESOL-LANG-2 : RÃ©solution justifiable**
 
-La résolution d'un conflit est toujours justifiable selon les règles de résolution définies. La règle appliquée est traçable.
+La rÃ©solution d'un conflit est toujours justifiable selon les rÃ¨gles de rÃ©solution dÃ©finies. La rÃ¨gle appliquÃ©e est traÃ§able.
 
-**G-RESOL-LANG-3 : Résolution traçable**
+**G-RESOL-LANG-3 : RÃ©solution traÃ§able**
 
-La résolution d'un conflit est traçable. Les politiques en conflit et la règle de résolution appliquée sont enregistrées.
+La rÃ©solution d'un conflit est traÃ§able. Les politiques en conflit et la rÃ¨gle de rÃ©solution appliquÃ©e sont enregistrÃ©es.
 
 ---
 
@@ -719,11 +719,11 @@ Policy {
 }
 ```
 
-**Justification :** Respecte la syntaxe PERMISSION, contient tous les composants obligatoires, règle déclarative non ambiguë.
+**Justification :** Respecte la syntaxe PERMISSION, contient tous les composants obligatoires, rÃ¨gle dÃ©clarative non ambiguÃ«.
 
 ### 6.2. Politique de contrainte valide
 
-**Exemple 2 : Contrainte de dépendance**
+**Exemple 2 : Contrainte de dÃ©pendance**
 
 ```
 Policy {
@@ -737,7 +737,7 @@ Policy {
 }
 ```
 
-**Justification :** Respecte la syntaxe CONSTRAINT, condition non ambiguë, effet cohérent avec le type.
+**Justification :** Respecte la syntaxe CONSTRAINT, condition non ambiguÃ«, effet cohÃ©rent avec le type.
 
 ### 6.3. Politique composite valide
 
@@ -756,11 +756,11 @@ Policy {
 }
 ```
 
-**Justification :** Respecte la syntaxe COMPOSITE, opérateur logique valide, références valides, hiérarchie acyclique.
+**Justification :** Respecte la syntaxe COMPOSITE, opÃ©rateur logique valide, rÃ©fÃ©rences valides, hiÃ©rarchie acyclique.
 
-### 6.4. Politique de priorité valide
+### 6.4. Politique de prioritÃ© valide
 
-**Exemple 4 : Priorité relative**
+**Exemple 4 : PrioritÃ© relative**
 
 ```
 Policy {
@@ -775,11 +775,11 @@ Policy {
 }
 ```
 
-**Justification :** Respecte la syntaxe PRIORITY, critères explicites, valeur relative non ambiguë.
+**Justification :** Respecte la syntaxe PRIORITY, critÃ¨res explicites, valeur relative non ambiguÃ«.
 
 ### 6.5. Politique de validation valide
 
-**Exemple 5 : Validation de complétude**
+**Exemple 5 : Validation de complÃ©tude**
 
 ```
 Policy {
@@ -794,47 +794,47 @@ Policy {
 }
 ```
 
-**Justification :** Respecte la syntaxe VALIDATION, vérification conceptuelle, non technique.
+**Justification :** Respecte la syntaxe VALIDATION, vÃ©rification conceptuelle, non technique.
 
 ---
 
 ## 7. Exemples invalides
 
-### 7.1. Politique avec type non autorisé
+### 7.1. Politique avec type non autorisÃ©
 
 **Exemple invalide 1 : Type EXECUTION**
 
 ```
 Policy {
     identifier: "POL-INV-001"
-    type: EXECUTION  // INVALIDE : Type non autorisé
+    type: EXECUTION  // INVALIDE : Type non autorisÃ©
     condition_application: "condition"
     rule: { ... }
     effect: EXECUTE
 }
 ```
 
-**Violation :** RÈGLE-TYPE-1 (fermeture stricte), RÈGLE-TYPE-2 (type obligatoire). Le type EXECUTION n'est pas dans la liste des types autorisés.
+**Violation :** RÃˆGLE-TYPE-1 (fermeture stricte), RÃˆGLE-TYPE-2 (type obligatoire). Le type EXECUTION n'est pas dans la liste des types autorisÃ©s.
 
 ### 7.2. Politique avec composant manquant
 
-**Exemple invalide 2 : Règle manquante**
+**Exemple invalide 2 : RÃ¨gle manquante**
 
 ```
 Policy {
     identifier: "POL-INV-002"
     type: PERMISSION
     condition_application: "condition"
-    // INVALIDE : Règle déclarative manquante
+    // INVALIDE : RÃ¨gle dÃ©clarative manquante
     effect: AUTHORIZE
 }
 ```
 
-**Violation :** RÈGLE-SYNTAX-1 (complétude obligatoire), RÈGLE-STRUCT-4 (règle déclarative obligatoire).
+**Violation :** RÃˆGLE-SYNTAX-1 (complÃ©tude obligatoire), RÃˆGLE-STRUCT-4 (rÃ¨gle dÃ©clarative obligatoire).
 
-### 7.3. Politique avec effet incohérent
+### 7.3. Politique avec effet incohÃ©rent
 
-**Exemple invalide 3 : Effet incohérent avec le type**
+**Exemple invalide 3 : Effet incohÃ©rent avec le type**
 
 ```
 Policy {
@@ -842,15 +842,15 @@ Policy {
     type: CONSTRAINT
     condition_application: "condition"
     rule: { condition: "..." }
-    effect: AUTHORIZE  // INVALIDE : Effet incohérent avec type CONSTRAINT
+    effect: AUTHORIZE  // INVALIDE : Effet incohÃ©rent avec type CONSTRAINT
 }
 ```
 
-**Violation :** RÈGLE-SYNTAX-2 (cohérence type-effet). Un CONSTRAINT doit avoir l'effet CONSTRAIN, pas AUTHORIZE.
+**Violation :** RÃˆGLE-SYNTAX-2 (cohÃ©rence type-effet). Un CONSTRAINT doit avoir l'effet CONSTRAIN, pas AUTHORIZE.
 
-### 7.4. Politique avec instruction impérative
+### 7.4. Politique avec instruction impÃ©rative
 
-**Exemple invalide 4 : Règle impérative**
+**Exemple invalide 4 : RÃ¨gle impÃ©rative**
 
 ```
 Policy {
@@ -858,7 +858,7 @@ Policy {
     type: PERMISSION
     condition_application: "condition"
     rule: {
-        // INVALIDE : Instruction impérative
+        // INVALIDE : Instruction impÃ©rative
         command: "create_entity()"
         action: "execute"
     }
@@ -866,11 +866,11 @@ Policy {
 }
 ```
 
-**Violation :** RÈGLE-SYNTAX-4 (déclarativité), Policy Engine Contract section 2 (pas de commande d'exécution).
+**Violation :** RÃˆGLE-SYNTAX-4 (dÃ©clarativitÃ©), Policy Engine Contract section 2 (pas de commande d'exÃ©cution).
 
-### 7.5. Politique composite avec référence circulaire
+### 7.5. Politique composite avec rÃ©fÃ©rence circulaire
 
-**Exemple invalide 5 : Référence circulaire**
+**Exemple invalide 5 : RÃ©fÃ©rence circulaire**
 
 ```
 Policy {
@@ -879,33 +879,33 @@ Policy {
     condition_application: "always"
     rule: {
         operator: AND
-        policies: ["POL-INV-005"]  // INVALIDE : Auto-référence
+        policies: ["POL-INV-005"]  // INVALIDE : Auto-rÃ©fÃ©rence
     }
     effect: DERIVED
 }
 ```
 
-**Violation :** RÈGLE-COMP-HIER-1 (acyclicité). Une politique ne peut pas référencer elle-même.
+**Violation :** RÃˆGLE-COMP-HIER-1 (acyclicitÃ©). Une politique ne peut pas rÃ©fÃ©rencer elle-mÃªme.
 
-### 7.6. Politique avec ambiguïté non résolue
+### 7.6. Politique avec ambiguÃ¯tÃ© non rÃ©solue
 
-**Exemple invalide 6 : Condition ambiguë**
+**Exemple invalide 6 : Condition ambiguÃ«**
 
 ```
 Policy {
     identifier: "POL-INV-006"
     type: PERMISSION
-    condition_application: "user.role"  // INVALIDE : Condition ambiguë
+    condition_application: "user.role"  // INVALIDE : Condition ambiguÃ«
     rule: { ... }
     effect: AUTHORIZE
 }
 ```
 
-**Violation :** RÈGLE-SYNTAX-3 (non-ambiguïté). La condition "user.role" est ambiguë (égalité ? comparaison ?).
+**Violation :** RÃˆGLE-SYNTAX-3 (non-ambiguÃ¯tÃ©). La condition "user.role" est ambiguÃ« (Ã©galitÃ© ? comparaison ?).
 
-### 7.7. Politique avec logique métier spécifique
+### 7.7. Politique avec logique mÃ©tier spÃ©cifique
 
-**Exemple invalide 7 : Logique métier**
+**Exemple invalide 7 : Logique mÃ©tier**
 
 ```
 Policy {
@@ -913,14 +913,14 @@ Policy {
     type: CONSTRAINT
     condition_application: "product == 'Facturation'"
     rule: {
-        // INVALIDE : Logique métier spécifique
+        // INVALIDE : Logique mÃ©tier spÃ©cifique
         business_rule: "apply_facturation_specific_rule()"
     }
     effect: CONSTRAIN
 }
 ```
 
-**Violation :** Policy Engine Contract section 2 (pas de logique métier spécifique). Les politiques doivent être générales et réutilisables.
+**Violation :** Policy Engine Contract section 2 (pas de logique mÃ©tier spÃ©cifique). Les politiques doivent Ãªtre gÃ©nÃ©rales et rÃ©utilisables.
 
 ### 7.8. Politique avec validation technique
 
@@ -939,7 +939,7 @@ Policy {
 }
 ```
 
-**Violation :** Policy Engine Contract section 2 (pas de validation technique). Les validations doivent être conceptuelles, pas techniques.
+**Violation :** Policy Engine Contract section 2 (pas de validation technique). Les validations doivent Ãªtre conceptuelles, pas techniques.
 
 ---
 
@@ -947,100 +947,100 @@ Policy {
 
 ### 8.1. Interdictions de syntaxe
 
-**INTERD-SYNTAX-1 : Aucune instruction impérative**
+**INTERD-SYNTAX-1 : Aucune instruction impÃ©rative**
 
-Aucune instruction impérative n'est autorisée dans une politique. Toute règle DOIT être déclarative.
+Aucune instruction impÃ©rative n'est autorisÃ©e dans une politique. Toute rÃ¨gle DOIT Ãªtre dÃ©clarative.
 
-**INTERD-SYNTAX-2 : Aucune commande d'exécution**
+**INTERD-SYNTAX-2 : Aucune commande d'exÃ©cution**
 
-Aucune commande d'exécution n'est autorisée dans une politique. Les politiques n'exécutent jamais d'actions.
+Aucune commande d'exÃ©cution n'est autorisÃ©e dans une politique. Les politiques n'exÃ©cutent jamais d'actions.
 
-**INTERD-SYNTAX-3 : Aucune modification d'état**
+**INTERD-SYNTAX-3 : Aucune modification d'Ã©tat**
 
-Aucune modification d'état n'est autorisée dans une politique. Les politiques n'ont aucun effet de bord.
+Aucune modification d'Ã©tat n'est autorisÃ©e dans une politique. Les politiques n'ont aucun effet de bord.
 
 **INTERD-SYNTAX-4 : Aucune persistance**
 
-Aucune persistance opérationnelle n'est autorisée dans une politique. Les politiques ne persistent jamais de données.
+Aucune persistance opÃ©rationnelle n'est autorisÃ©e dans une politique. Les politiques ne persistent jamais de donnÃ©es.
 
 ### 8.2. Interdictions de type
 
-**INTERD-TYPE-1 : Aucun type non défini**
+**INTERD-TYPE-1 : Aucun type non dÃ©fini**
 
-Aucun type de politique non défini dans la section 2 n'est autorisé. Seuls les types PERMISSION, CONSTRAINT, PRIORITY, VALIDATION, et COMPOSITE sont valides.
+Aucun type de politique non dÃ©fini dans la section 2 n'est autorisÃ©. Seuls les types PERMISSION, CONSTRAINT, PRIORITY, VALIDATION, et COMPOSITE sont valides.
 
 **INTERD-TYPE-2 : Aucun type multiple**
 
-Aucune politique ne peut avoir plusieurs types simultanément. Chaque politique a exactement un type.
+Aucune politique ne peut avoir plusieurs types simultanÃ©ment. Chaque politique a exactement un type.
 
 ### 8.3. Interdictions de composition
 
-**INTERD-COMP-1 : Aucune référence circulaire**
+**INTERD-COMP-1 : Aucune rÃ©fÃ©rence circulaire**
 
-Aucune politique composite ne peut créer une référence circulaire, directe ou indirecte.
+Aucune politique composite ne peut crÃ©er une rÃ©fÃ©rence circulaire, directe ou indirecte.
 
-**INTERD-COMP-2 : Aucune référence invalide**
+**INTERD-COMP-2 : Aucune rÃ©fÃ©rence invalide**
 
-Aucune politique composite ne peut référencer une politique inexistante ou invalide.
+Aucune politique composite ne peut rÃ©fÃ©rencer une politique inexistante ou invalide.
 
-**INTERD-COMP-3 : Aucun opérateur non logique**
+**INTERD-COMP-3 : Aucun opÃ©rateur non logique**
 
-Aucun opérateur autre que AND, OR, et NOT n'est autorisé dans une politique composite.
+Aucun opÃ©rateur autre que AND, OR, et NOT n'est autorisÃ© dans une politique composite.
 
 ### 8.4. Interdictions de contenu
 
-**INTERD-CONT-1 : Aucune logique métier spécifique**
+**INTERD-CONT-1 : Aucune logique mÃ©tier spÃ©cifique**
 
-Aucune logique métier spécifique à un produit n'est autorisée dans une politique. Les politiques doivent être générales et réutilisables.
+Aucune logique mÃ©tier spÃ©cifique Ã  un produit n'est autorisÃ©e dans une politique. Les politiques doivent Ãªtre gÃ©nÃ©rales et rÃ©utilisables.
 
 **INTERD-CONT-2 : Aucune validation technique**
 
-Aucune validation technique (structure de données, schémas, formats) n'est autorisée dans une politique. Les validations doivent être conceptuelles.
+Aucune validation technique (structure de donnÃ©es, schÃ©mas, formats) n'est autorisÃ©e dans une politique. Les validations doivent Ãªtre conceptuelles.
 
 **INTERD-CONT-3 : Aucun appel externe**
 
-Aucun appel à un composant externe (KindMother, modules SPM, etc.) n'est autorisé dans une politique.
+Aucun appel Ã  un composant externe (KindMother, modules SPM, etc.) n'est autorisÃ© dans une politique.
 
-**INTERD-CONT-4 : Aucune dépendance temporelle technique**
+**INTERD-CONT-4 : Aucune dÃ©pendance temporelle technique**
 
-Aucune dépendance au temps technique (horodatages, ordonnancement) n'est autorisée dans une politique.
+Aucune dÃ©pendance au temps technique (horodatages, ordonnancement) n'est autorisÃ©e dans une politique.
 
-### 8.5. Interdictions de résolution
+### 8.5. Interdictions de rÃ©solution
 
-**INTERD-RESOL-1 : Aucune résolution implicite**
+**INTERD-RESOL-1 : Aucune rÃ©solution implicite**
 
-Aucun conflit ne peut être résolu par interprétation implicite. Tous les conflits DOIVENT être résolus selon les règles explicites définies dans la section 5.
+Aucun conflit ne peut Ãªtre rÃ©solu par interprÃ©tation implicite. Tous les conflits DOIVENT Ãªtre rÃ©solus selon les rÃ¨gles explicites dÃ©finies dans la section 5.
 
-**INTERD-RESOL-2 : Aucune résolution non traçable**
+**INTERD-RESOL-2 : Aucune rÃ©solution non traÃ§able**
 
-Aucune résolution de conflit ne peut être effectuée sans traçabilité. Toute résolution DOIT être traçable avec les politiques en conflit et la règle appliquée.
+Aucune rÃ©solution de conflit ne peut Ãªtre effectuÃ©e sans traÃ§abilitÃ©. Toute rÃ©solution DOIT Ãªtre traÃ§able avec les politiques en conflit et la rÃ¨gle appliquÃ©e.
 
 ---
 
-## 9. Règles de fermeture du contrat
+## 9. RÃ¨gles de fermeture du contrat
 
-### 9.1. Contrat fermé
+### 9.1. Contrat fermÃ©
 
-Ce contrat est **fermé**. Seuls les types, la syntaxe, les règles, et les interdictions explicitement définis dans ce contrat sont autorisés. Toute extension non explicitement définie est **interdite**.
+Ce contrat est **fermÃ©**. Seuls les types, la syntaxe, les rÃ¨gles, et les interdictions explicitement dÃ©finis dans ce contrat sont autorisÃ©s. Toute extension non explicitement dÃ©finie est **interdite**.
 
 ### 9.2. Interdiction d'extension implicite
 
-Aucune extension implicite de ce contrat n'est autorisée. Les règles suivantes s'appliquent :
+Aucune extension implicite de ce contrat n'est autorisÃ©e. Les rÃ¨gles suivantes s'appliquent :
 
-- **INTERD-EXT-1** : Aucun type de politique non défini n'est autorisé
-- **INTERD-EXT-2** : Aucune syntaxe non définie n'est autorisée
-- **INTERD-EXT-3** : Aucune règle de composition non définie n'est autorisée
-- **INTERD-EXT-4** : Aucune règle de résolution non définie n'est autorisée
-- **INTERD-EXT-5** : Aucun mécanisme d'exécution n'est autorisé
+- **INTERD-EXT-1** : Aucun type de politique non dÃ©fini n'est autorisÃ©
+- **INTERD-EXT-2** : Aucune syntaxe non dÃ©finie n'est autorisÃ©e
+- **INTERD-EXT-3** : Aucune rÃ¨gle de composition non dÃ©finie n'est autorisÃ©e
+- **INTERD-EXT-4** : Aucune rÃ¨gle de rÃ©solution non dÃ©finie n'est autorisÃ©e
+- **INTERD-EXT-5** : Aucun mÃ©canisme d'exÃ©cution n'est autorisÃ©
 
-### 9.3. Conditions d'évolution du contrat
+### 9.3. Conditions d'Ã©volution du contrat
 
-Ce contrat peut être évolué uniquement selon les conditions suivantes :
+Ce contrat peut Ãªtre Ã©voluÃ© uniquement selon les conditions suivantes :
 
-1. **Modification explicite** : Toute modification doit être explicite et documentée
-2. **Rétrocompatibilité** : Toute modification doit préserver la rétrocompatibilité avec les versions antérieures
-3. **Validation contractuelle** : Toute modification doit être validée selon les processus contractuels
-4. **Documentation complète** : Toute modification doit être documentée de manière complète
+1. **Modification explicite** : Toute modification doit Ãªtre explicite et documentÃ©e
+2. **RÃ©trocompatibilitÃ©** : Toute modification doit prÃ©server la rÃ©trocompatibilitÃ© avec les versions antÃ©rieures
+3. **Validation contractuelle** : Toute modification doit Ãªtre validÃ©e selon les processus contractuels
+4. **Documentation complÃ¨te** : Toute modification doit Ãªtre documentÃ©e de maniÃ¨re complÃ¨te
 
 **Important :** Ce contrat est de statut FONDATION. Toute modification doit respecter ce statut et ne peut pas introduire de contradictions avec les autres contrats FONDATION.
 
@@ -1048,136 +1048,137 @@ Ce contrat peut être évolué uniquement selon les conditions suivantes :
 
 ## 10. Conclusion contractuelle
 
-Ce contrat établit de manière définitive et non négociable la spécification formelle du langage de politiques StrongFather.
+Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable la spÃ©cification formelle du langage de politiques StrongFather.
 
 Il garantit que :
-- la typologie des politiques est fermée et exhaustive,
-- la syntaxe conceptuelle est définie et non ambiguë,
-- les règles de composition sont explicites et déterministes,
-- la résolution de conflits est traçable et justifiable,
-- les exemples valides et invalides sont documentés,
-- les interdictions sont explicites et non négociables,
-- le contrat est fermé et non extensible implicitement.
+- la typologie des politiques est fermÃ©e et exhaustive,
+- la syntaxe conceptuelle est dÃ©finie et non ambiguÃ«,
+- les rÃ¨gles de composition sont explicites et dÃ©terministes,
+- la rÃ©solution de conflits est traÃ§able et justifiable,
+- les exemples valides et invalides sont documentÃ©s,
+- les interdictions sont explicites et non nÃ©gociables,
+- le contrat est fermÃ© et non extensible implicitement.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
 
 ---
 
 ## 11. Validation conceptuelle
 
-### 11.1. Vérification de complétude
+### 11.1. VÃ©rification de complÃ©tude
 
-Ce document spécifie :
-- ✅ Typologie fermée : 5 types définis (PERMISSION, CONSTRAINT, PRIORITY, VALIDATION, COMPOSITE)
-- ✅ Syntaxe conceptuelle : BNF conceptuelle définie pour chaque type
-- ✅ Règles de composition : AND, OR, NOT avec règles explicites
-- ✅ Résolution de conflits : 4 règles de résolution avec ordre d'application
-- ✅ Exemples valides : 5 exemples documentés
-- ✅ Exemples invalides : 8 exemples documentés avec violations
-- ✅ Interdictions explicites : 15 interdictions cataloguées
+Ce document spÃ©cifie :
+- âœ… Typologie fermÃ©e : 5 types dÃ©finis (PERMISSION, CONSTRAINT, PRIORITY, VALIDATION, COMPOSITE)
+- âœ… Syntaxe conceptuelle : BNF conceptuelle dÃ©finie pour chaque type
+- âœ… RÃ¨gles de composition : AND, OR, NOT avec rÃ¨gles explicites
+- âœ… RÃ©solution de conflits : 4 rÃ¨gles de rÃ©solution avec ordre d'application
+- âœ… Exemples valides : 5 exemples documentÃ©s
+- âœ… Exemples invalides : 8 exemples documentÃ©s avec violations
+- âœ… Interdictions explicites : 15 interdictions cataloguÃ©es
 
-### 11.2. Vérification de cohérence
+### 11.2. VÃ©rification de cohÃ©rence
 
-- ✅ Cohérence avec Policy Engine Contract : Confirmée (types, structure, règles)
-- ✅ Cohérence avec Documentation Fondatrice : Confirmée (pas d'exécution, pas de modification d'état)
-- ✅ Cohérence avec Invariants & Guarantees : Confirmée (déterminisme, traçabilité)
-- ✅ Aucune contradiction détectée
-- ✅ Syntaxe conceptuelle uniquement (pas d'implémentation)
-- ✅ Respect strict des contrats FONDATION
+- âœ… CohÃ©rence avec Policy Engine Contract : ConfirmÃ©e (types, structure, rÃ¨gles)
+- âœ… CohÃ©rence avec Documentation Fondatrice : ConfirmÃ©e (pas d'exÃ©cution, pas de modification d'Ã©tat)
+- âœ… CohÃ©rence avec Invariants & Guarantees : ConfirmÃ©e (dÃ©terminisme, traÃ§abilitÃ©)
+- âœ… Aucune contradiction dÃ©tectÃ©e
+- âœ… Syntaxe conceptuelle uniquement (pas d'implÃ©mentation)
+- âœ… Respect strict des contrats FONDATION
 
 ---
 
-**Document créé le :** 2026-01-26  
+**Document crÃ©Ã© le :** 2026-01-26  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, StrongFather Policy Engine Contract  
-**Type :** Spécification formelle du langage de politiques non négociable
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, StrongFather Policy Engine Contract  
+**Type :** SpÃ©cification formelle du langage de politiques non nÃ©gociable
 
 ---
 
-## 12. Mini log de génération
+## 12. Mini log de gÃ©nÃ©ration
 
 ### Warning W1 : Syntaxe conceptuelle vs syntaxe technique
 
-**Warning rencontré :** Risque de confusion entre la syntaxe conceptuelle (BNF conceptuelle) et une syntaxe technique spécifique (JSON, YAML, etc.).
+**Warning rencontrÃ© :** Risque de confusion entre la syntaxe conceptuelle (BNF conceptuelle) et une syntaxe technique spÃ©cifique (JSON, YAML, etc.).
 
-**Décision prise :** Clarification explicite dans la section 3.1 que la syntaxe est purement conceptuelle et ne présuppose aucun format technique. Les exemples utilisent une notation conceptuelle générique, pas un format technique spécifique.
+**DÃ©cision prise :** Clarification explicite dans la section 3.1 que la syntaxe est purement conceptuelle et ne prÃ©suppose aucun format technique. Les exemples utilisent une notation conceptuelle gÃ©nÃ©rique, pas un format technique spÃ©cifique.
 
-**Correction effectuée :** Section 3.1 rédigée avec distinction explicite entre syntaxe conceptuelle et formats techniques. Tous les exemples utilisent une notation conceptuelle générique.
+**Correction effectuÃ©e :** Section 3.1 rÃ©digÃ©e avec distinction explicite entre syntaxe conceptuelle et formats techniques. Tous les exemples utilisent une notation conceptuelle gÃ©nÃ©rique.
 
-### Warning W2 : BNF conceptuelle et expressivité
+### Warning W2 : BNF conceptuelle et expressivitÃ©
 
-**Warning rencontré :** La BNF conceptuelle peut être perçue comme limitative ou trop formelle pour un document normatif conceptuel.
+**Warning rencontrÃ© :** La BNF conceptuelle peut Ãªtre perÃ§ue comme limitative ou trop formelle pour un document normatif conceptuel.
 
-**Décision prise :** La BNF conceptuelle est utilisée uniquement pour clarifier la structure conceptuelle, pas pour imposer une syntaxe technique. Elle est présentée comme "pseudo-BNF autorisé" selon les instructions, et reste purement conceptuelle.
+**DÃ©cision prise :** La BNF conceptuelle est utilisÃ©e uniquement pour clarifier la structure conceptuelle, pas pour imposer une syntaxe technique. Elle est prÃ©sentÃ©e comme "pseudo-BNF autorisÃ©" selon les instructions, et reste purement conceptuelle.
 
-**Correction effectuée :** Section 3.2 utilise une BNF conceptuelle avec notation générique, explicitement présentée comme conceptuelle et non technique.
+**Correction effectuÃ©e :** Section 3.2 utilise une BNF conceptuelle avec notation gÃ©nÃ©rique, explicitement prÃ©sentÃ©e comme conceptuelle et non technique.
 
-### Ambiguïté A1 : Opérateur NOT et politique unique
+### AmbiguÃ¯tÃ© A1 : OpÃ©rateur NOT et politique unique
 
-**Ambiguïté rencontrée :** L'opérateur NOT dans une politique composite doit-il référencer exactement une politique, ou peut-il référencer une expression composite ?
+**AmbiguÃ¯tÃ© rencontrÃ©e :** L'opÃ©rateur NOT dans une politique composite doit-il rÃ©fÃ©rencer exactement une politique, ou peut-il rÃ©fÃ©rencer une expression composite ?
 
-**Décision prise :** L'opérateur NOT DOIT référencer exactement une politique (élémentaire ou composite). La règle RÈGLE-COMP-NOT-1 établit cette contrainte. Une politique composite peut être référencée dans un NOT, mais le NOT lui-même ne peut pas contenir une expression composite directement.
+**DÃ©cision prise :** L'opÃ©rateur NOT DOIT rÃ©fÃ©rencer exactement une politique (Ã©lÃ©mentaire ou composite). La rÃ¨gle RÃˆGLE-COMP-NOT-1 Ã©tablit cette contrainte. Une politique composite peut Ãªtre rÃ©fÃ©rencÃ©e dans un NOT, mais le NOT lui-mÃªme ne peut pas contenir une expression composite directement.
 
-**Correction effectuée :** Section 4.2.3 précise que NOT référence une politique (qui peut être composite), et RÈGLE-COMP-NOT-1 établit la contrainte d'unicité de référence.
+**Correction effectuÃ©e :** Section 4.2.3 prÃ©cise que NOT rÃ©fÃ©rence une politique (qui peut Ãªtre composite), et RÃˆGLE-COMP-NOT-1 Ã©tablit la contrainte d'unicitÃ© de rÃ©fÃ©rence.
 
-### Ambiguïté A2 : Résolution de conflits et ordre d'application
+### AmbiguÃ¯tÃ© A2 : RÃ©solution de conflits et ordre d'application
 
-**Ambiguïté rencontrée :** Comment garantir l'ordre d'application des règles de résolution si plusieurs règles sont applicables simultanément ?
+**AmbiguÃ¯tÃ© rencontrÃ©e :** Comment garantir l'ordre d'application des rÃ¨gles de rÃ©solution si plusieurs rÃ¨gles sont applicables simultanÃ©ment ?
 
-**Décision prise :** Section 5.4 définit un ordre d'application strict (RÈGLE-RESOL-ORDER-1) et une règle d'application séquentielle (RÈGLE-RESOL-ORDER-2) qui garantit qu'une seule règle est appliquée à la fois.
+**DÃ©cision prise :** Section 5.4 dÃ©finit un ordre d'application strict (RÃˆGLE-RESOL-ORDER-1) et une rÃ¨gle d'application sÃ©quentielle (RÃˆGLE-RESOL-ORDER-2) qui garantit qu'une seule rÃ¨gle est appliquÃ©e Ã  la fois.
 
-**Correction effectuée :** Section 5.4 créée avec ordre d'application explicite et règle d'application séquentielle.
+**Correction effectuÃ©e :** Section 5.4 crÃ©Ã©e avec ordre d'application explicite et rÃ¨gle d'application sÃ©quentielle.
 
-### Incohérence I1 : Politique composite et effet DERIVED
+### IncohÃ©rence I1 : Politique composite et effet DERIVED
 
-**Incohérence rencontrée :** L'effet d'une politique composite est défini comme DERIVED, mais comment est-il déterminé ?
+**IncohÃ©rence rencontrÃ©e :** L'effet d'une politique composite est dÃ©fini comme DERIVED, mais comment est-il dÃ©terminÃ© ?
 
-**Décision prise :** L'effet DERIVED est dérivé des politiques composantes selon l'opérateur logique. Pour AND : toutes satisfaites → effet combiné. Pour OR : au moins une satisfaite → effet de la première satisfaite. Pour NOT : inverse de l'effet de la politique référencée. Cette dérivation est conceptuelle et non ambiguë.
+**DÃ©cision prise :** L'effet DERIVED est dÃ©rivÃ© des politiques composantes selon l'opÃ©rateur logique. Pour AND : toutes satisfaites â†’ effet combinÃ©. Pour OR : au moins une satisfaite â†’ effet de la premiÃ¨re satisfaite. Pour NOT : inverse de l'effet de la politique rÃ©fÃ©rencÃ©e. Cette dÃ©rivation est conceptuelle et non ambiguÃ«.
 
-**Correction effectuée :** Section 3.3.5 précise que l'effet est DERIVED et dérivé conceptuellement des politiques composantes. Les exemples montrent cette dérivation.
+**Correction effectuÃ©e :** Section 3.3.5 prÃ©cise que l'effet est DERIVED et dÃ©rivÃ© conceptuellement des politiques composantes. Les exemples montrent cette dÃ©rivation.
 
-### Décision éditoriale E1 : Structure du document
+### DÃ©cision Ã©ditoriale E1 : Structure du document
 
-**Décision prise :** Respect strict de la structure imposée par l'utilisateur. Sections obligatoires : types de politiques (fermés), syntaxe conceptuelle, règles de composition, résolution de conflits, exemples valides/invalides, interdictions explicites.
+**DÃ©cision prise :** Respect strict de la structure imposÃ©e par l'utilisateur. Sections obligatoires : types de politiques (fermÃ©s), syntaxe conceptuelle, rÃ¨gles de composition, rÃ©solution de conflits, exemples valides/invalides, interdictions explicites.
 
-**Application :** Structure respectée exactement comme demandé. Chaque section contient du contenu substantiel et non ambigu.
+**Application :** Structure respectÃ©e exactement comme demandÃ©. Chaque section contient du contenu substantiel et non ambigu.
 
-### Décision éditoriale E2 : Ton normatif
+### DÃ©cision Ã©ditoriale E2 : Ton normatif
 
-**Décision prise :** Utilisation d'un ton normatif, contractuel, non ambigu, comparable au niveau de rigueur des autres contrats StrongFather. Utilisation de formulations absolues ("DOIT", "est interdit", "garantit").
+**DÃ©cision prise :** Utilisation d'un ton normatif, contractuel, non ambigu, comparable au niveau de rigueur des autres contrats StrongFather. Utilisation de formulations absolues ("DOIT", "est interdit", "garantit").
 
-**Application :** Tout le document utilise un ton normatif avec des formulations absolues. Les règles sont énoncées de manière non négociable.
+**Application :** Tout le document utilise un ton normatif avec des formulations absolues. Les rÃ¨gles sont Ã©noncÃ©es de maniÃ¨re non nÃ©gociable.
 
-### Décision éditoriale E3 : Exemples valides et invalides
+### DÃ©cision Ã©ditoriale E3 : Exemples valides et invalides
 
-**Décision prise :** Inclusion d'exemples valides (section 6) et invalides (section 7) avec justification pour chaque cas. Les exemples invalides référencent explicitement les violations contractuelles.
+**DÃ©cision prise :** Inclusion d'exemples valides (section 6) et invalides (section 7) avec justification pour chaque cas. Les exemples invalides rÃ©fÃ©rencent explicitement les violations contractuelles.
 
-**Application :** Sections 6 et 7 créées avec exemples documentés. Chaque exemple invalide référence la règle ou l'interdiction violée.
+**Application :** Sections 6 et 7 crÃ©Ã©es avec exemples documentÃ©s. Chaque exemple invalide rÃ©fÃ©rence la rÃ¨gle ou l'interdiction violÃ©e.
 
-### Décision éditoriale E4 : BNF conceptuelle
+### DÃ©cision Ã©ditoriale E4 : BNF conceptuelle
 
-**Décision prise :** Utilisation d'une notation BNF conceptuelle (pseudo-BNF) pour clarifier la structure syntaxique, tout en restant purement conceptuelle et non technique.
+**DÃ©cision prise :** Utilisation d'une notation BNF conceptuelle (pseudo-BNF) pour clarifier la structure syntaxique, tout en restant purement conceptuelle et non technique.
 
-**Application :** Section 3 utilise une BNF conceptuelle avec notation générique, explicitement présentée comme conceptuelle.
+**Application :** Section 3 utilise une BNF conceptuelle avec notation gÃ©nÃ©rique, explicitement prÃ©sentÃ©e comme conceptuelle.
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-**Vérification effectuée :**
-- ✅ Cohérence avec Policy Engine Contract : Confirmée (types, structure, règles de résolution)
-- ✅ Cohérence avec Documentation Fondatrice : Confirmée (pas d'exécution, pas de modification d'état)
-- ✅ Cohérence avec Invariants & Guarantees : Confirmée (déterminisme, traçabilité)
-- ✅ Typologie fermée : Confirmée (5 types, aucun autre autorisé)
-- ✅ Syntaxe conceptuelle uniquement : Confirmée (pas d'implémentation)
-- ✅ Règles de composition explicites : Confirmée
-- ✅ Résolution de conflits traçable : Confirmée
-- ✅ Exemples valides/invalides documentés : Confirmée
-- ✅ Interdictions explicites : Confirmée (15 interdictions)
-- ✅ Contrat fermé : Confirmé (section 9)
-- ✅ Aucune contradiction détectée
+**VÃ©rification effectuÃ©e :**
+- âœ… CohÃ©rence avec Policy Engine Contract : ConfirmÃ©e (types, structure, rÃ¨gles de rÃ©solution)
+- âœ… CohÃ©rence avec Documentation Fondatrice : ConfirmÃ©e (pas d'exÃ©cution, pas de modification d'Ã©tat)
+- âœ… CohÃ©rence avec Invariants & Guarantees : ConfirmÃ©e (dÃ©terminisme, traÃ§abilitÃ©)
+- âœ… Typologie fermÃ©e : ConfirmÃ©e (5 types, aucun autre autorisÃ©)
+- âœ… Syntaxe conceptuelle uniquement : ConfirmÃ©e (pas d'implÃ©mentation)
+- âœ… RÃ¨gles de composition explicites : ConfirmÃ©e
+- âœ… RÃ©solution de conflits traÃ§able : ConfirmÃ©e
+- âœ… Exemples valides/invalides documentÃ©s : ConfirmÃ©e
+- âœ… Interdictions explicites : ConfirmÃ©e (15 interdictions)
+- âœ… Contrat fermÃ© : ConfirmÃ© (section 9)
+- âœ… Aucune contradiction dÃ©tectÃ©e
 
-**Conclusion :** Aucune contradiction détectée. Le document est cohérent et non ambigu.
+**Conclusion :** Aucune contradiction dÃ©tectÃ©e. Le document est cohÃ©rent et non ambigu.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

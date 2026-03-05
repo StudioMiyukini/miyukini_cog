@@ -1,4 +1,4 @@
-# MiyukiniAdmin — LogisticsSteward Integration Contract
+﻿# MiyukiniAdmin â€” LogisticsSteward Integration Contract
 
 ## 1. Contexte
 
@@ -176,62 +176,62 @@ Le protocole d'exception permet a MiyukiniAdmin d'obtenir des privileges au-dela
 
 ```
 MiyukiniAdmin           BondingBrother          LogisticsSteward
-     │                        │                        │
-     │──ResourceRequest───────▶│                        │
-     │  (priority: P2)         │                        │
-     │                        │                        │
-     │                        │──ArbitrationRequest────▶│
-     │                        │                        │
-     │                        │                        │  [Evaluation]
-     │                        │                        │  - Quotas
-     │                        │                        │  - Regles
-     │                        │                        │  - Etat systeme
-     │                        │                        │
-     │                        │◀─ArbitrationDecision───│
-     │                        │  (ALLOWED, priority: P2)│
-     │                        │                        │
-     │◀─ResourceResponse──────│                        │
-     │  (granted)              │                        │
+     â”‚                        â”‚                        â”‚
+     â”‚â”€â”€ResourceRequestâ”€â”€â”€â”€â”€â”€â”€â–¶â”‚                        â”‚
+     â”‚  (priority: P2)         â”‚                        â”‚
+     â”‚                        â”‚                        â”‚
+     â”‚                        â”‚â”€â”€ArbitrationRequestâ”€â”€â”€â”€â–¶â”‚
+     â”‚                        â”‚                        â”‚
+     â”‚                        â”‚                        â”‚  [Evaluation]
+     â”‚                        â”‚                        â”‚  - Quotas
+     â”‚                        â”‚                        â”‚  - Regles
+     â”‚                        â”‚                        â”‚  - Etat systeme
+     â”‚                        â”‚                        â”‚
+     â”‚                        â”‚â—€â”€ArbitrationDecisionâ”€â”€â”€â”‚
+     â”‚                        â”‚  (ALLOWED, priority: P2)â”‚
+     â”‚                        â”‚                        â”‚
+     â”‚â—€â”€ResourceResponseâ”€â”€â”€â”€â”€â”€â”‚                        â”‚
+     â”‚  (granted)              â”‚                        â”‚
 ```
 
 ### 7.2 Flux avec Demande d'Exception
 
 ```
 MiyukiniAdmin           BondingBrother          LogisticsSteward        StrongFather
-     │                        │                        │                      │
-     │──ExceptionRequest──────▶│                        │                      │
-     │  (priority: P0)         │                        │                      │
-     │                        │                        │                      │
-     │                        │──ExceptionArbitration──▶│                      │
-     │                        │                        │                      │
-     │                        │                        │──ValidationRequest───▶│
-     │                        │                        │                      │
-     │                        │                        │◀─Decision─────────────│
-     │                        │                        │  (APPROVED)           │
-     │                        │                        │                      │
-     │                        │◀─ExceptionGranted──────│                      │
-     │                        │  (P0, conditions)       │                      │
-     │                        │                        │                      │
-     │◀─ExceptionResponse─────│                        │                      │
-     │  (granted, validity)    │                        │                      │
+     â”‚                        â”‚                        â”‚                      â”‚
+     â”‚â”€â”€ExceptionRequestâ”€â”€â”€â”€â”€â”€â–¶â”‚                        â”‚                      â”‚
+     â”‚  (priority: P0)         â”‚                        â”‚                      â”‚
+     â”‚                        â”‚                        â”‚                      â”‚
+     â”‚                        â”‚â”€â”€ExceptionArbitrationâ”€â”€â–¶â”‚                      â”‚
+     â”‚                        â”‚                        â”‚                      â”‚
+     â”‚                        â”‚                        â”‚â”€â”€ValidationRequestâ”€â”€â”€â–¶â”‚
+     â”‚                        â”‚                        â”‚                      â”‚
+     â”‚                        â”‚                        â”‚â—€â”€Decisionâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                        â”‚                        â”‚  (APPROVED)           â”‚
+     â”‚                        â”‚                        â”‚                      â”‚
+     â”‚                        â”‚â—€â”€ExceptionGrantedâ”€â”€â”€â”€â”€â”€â”‚                      â”‚
+     â”‚                        â”‚  (P0, conditions)       â”‚                      â”‚
+     â”‚                        â”‚                        â”‚                      â”‚
+     â”‚â—€â”€ExceptionResponseâ”€â”€â”€â”€â”€â”‚                        â”‚                      â”‚
+     â”‚  (granted, validity)    â”‚                        â”‚                      â”‚
 ```
 
 ### 7.3 Flux avec Refus
 
 ```
 MiyukiniAdmin           BondingBrother          LogisticsSteward
-     │                        │                        │
-     │──ResourceRequest───────▶│                        │
-     │  (exceeds quota)        │                        │
-     │                        │                        │
-     │                        │──ArbitrationRequest────▶│
-     │                        │                        │
-     │                        │◀─ArbitrationDecision───│
-     │                        │  (DENIED)               │
-     │                        │  (reason: quota_exceeded)│
-     │                        │                        │
-     │◀─ResourceResponse──────│                        │
-     │  (denied, reason)       │                        │
+     â”‚                        â”‚                        â”‚
+     â”‚â”€â”€ResourceRequestâ”€â”€â”€â”€â”€â”€â”€â–¶â”‚                        â”‚
+     â”‚  (exceeds quota)        â”‚                        â”‚
+     â”‚                        â”‚                        â”‚
+     â”‚                        â”‚â”€â”€ArbitrationRequestâ”€â”€â”€â”€â–¶â”‚
+     â”‚                        â”‚                        â”‚
+     â”‚                        â”‚â—€â”€ArbitrationDecisionâ”€â”€â”€â”‚
+     â”‚                        â”‚  (DENIED)               â”‚
+     â”‚                        â”‚  (reason: quota_exceeded)â”‚
+     â”‚                        â”‚                        â”‚
+     â”‚â—€â”€ResourceResponseâ”€â”€â”€â”€â”€â”€â”‚                        â”‚
+     â”‚  (denied, reason)       â”‚                        â”‚
 ```
 
 ---
@@ -308,69 +308,69 @@ En mode degrade, MiyukiniAdmin conserve :
 ### 11.1 Indicateur de Quota
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ Ressources MiyukiniAdmin                                    │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│ Operations simultanees:  [████████░░] 4/5                  │
-│ Requetes DB/minute:      [███░░░░░░░] 32/100               │
-│ Exceptions actives:      [██░░░░░░░░] 1/3                  │
-│                                                             │
-│ Priorite actuelle: P2 (Normale)                            │
-│ Niveau degradation: D0 (Normal)                            │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Ressources MiyukiniAdmin                                    â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                             â”‚
+â”‚ Operations simultanees:  [â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–‘â–‘] 4/5                  â”‚
+â”‚ Requetes DB/minute:      [â–ˆâ–ˆâ–ˆâ–‘â–‘â–‘â–‘â–‘â–‘â–‘] 32/100               â”‚
+â”‚ Exceptions actives:      [â–ˆâ–ˆâ–‘â–‘â–‘â–‘â–‘â–‘â–‘â–‘] 1/3                  â”‚
+â”‚                                                             â”‚
+â”‚ Priorite actuelle: P2 (Normale)                            â”‚
+â”‚ Niveau degradation: D0 (Normal)                            â”‚
+â”‚                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 11.2 Dialogue de Demande d'Exception
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ Demande de Priorite Exceptionnelle                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│ Operation: Acces DB Recovery                                │
-│ Priorite actuelle: P1                                       │
-│ Priorite demandee: P0 (Critique)                           │
-│                                                             │
-│ Justification: (obligatoire)                                │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │ Corruption DB detectee suite a coupure electrique.     │ │
-│ │ Incident #INC-2026-0128. Intervention urgente requise. │ │
-│ └─────────────────────────────────────────────────────────┘ │
-│                                                             │
-│ Duree estimee: [30] minutes                                │
-│                                                             │
-│ ⚠ Cette demande sera validee par StrongFather              │
-│                                                             │
-│ [Soumettre]                    [Annuler]                   │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Demande de Priorite Exceptionnelle                          â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                             â”‚
+â”‚ Operation: Acces DB Recovery                                â”‚
+â”‚ Priorite actuelle: P1                                       â”‚
+â”‚ Priorite demandee: P0 (Critique)                           â”‚
+â”‚                                                             â”‚
+â”‚ Justification: (obligatoire)                                â”‚
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚ â”‚ Corruption DB detectee suite a coupure electrique.     â”‚ â”‚
+â”‚ â”‚ Incident #INC-2026-0128. Intervention urgente requise. â”‚ â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                             â”‚
+â”‚ Duree estimee: [30] minutes                                â”‚
+â”‚                                                             â”‚
+â”‚ âš  Cette demande sera validee par StrongFather              â”‚
+â”‚                                                             â”‚
+â”‚ [Soumettre]                    [Annuler]                   â”‚
+â”‚                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 11.3 Resultat de Demande
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ Decision LogisticsSteward                                   │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│ [✓] EXCEPTION ACCORDEE                                      │
-│                                                             │
-│ Priorite accordee: P0 (Critique)                           │
-│ Validite: 30 minutes (expire a 12:30)                      │
-│                                                             │
-│ Conditions:                                                 │
-│  • Monitoring intensif active                               │
-│  • Ressources CPU/Memoire reservees                         │
-│  • Non renouvelable automatiquement                         │
-│                                                             │
-│ ID Exception: EXC-2026-0128-001                            │
-│ Validation SF: DEC-2026-0128-045                           │
-│                                                             │
-│ [Commencer l'operation]        [Annuler]                   │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Decision LogisticsSteward                                   â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                             â”‚
+â”‚ [âœ“] EXCEPTION ACCORDEE                                      â”‚
+â”‚                                                             â”‚
+â”‚ Priorite accordee: P0 (Critique)                           â”‚
+â”‚ Validite: 30 minutes (expire a 12:30)                      â”‚
+â”‚                                                             â”‚
+â”‚ Conditions:                                                 â”‚
+â”‚  â€¢ Monitoring intensif active                               â”‚
+â”‚  â€¢ Ressources CPU/Memoire reservees                         â”‚
+â”‚  â€¢ Non renouvelable automatiquement                         â”‚
+â”‚                                                             â”‚
+â”‚ ID Exception: EXC-2026-0128-001                            â”‚
+â”‚ Validation SF: DEC-2026-0128-045                           â”‚
+â”‚                                                             â”‚
+â”‚ [Commencer l'operation]        [Annuler]                   â”‚
+â”‚                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
@@ -392,12 +392,14 @@ En mode degrade, MiyukiniAdmin conserve :
 - [MiyukiniAdmin - Core Interaction Contract](../../architecture/MiyukiniAdmin%20-%20Core%20Interaction%20Contract.md)
 - [MiyukiniAdmin - BondingBrother Integration Contract](./MiyukiniAdmin%20-%20BondingBrother%20Integration%20Contract.md)
 - [MiyukiniAdmin - StrongFather Integration Contract](./MiyukiniAdmin%20-%20StrongFather%20Integration%20Contract.md)
-- [LogisticsSteward - Documentation Fondatrice](../../../LogisticsSteward/foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md)
-- [LogisticsSteward - MiyukiniAdmin Integration Contract](../../../LogisticsSteward/contracts/integration/LogisticsSteward%20-%20MiyukiniAdmin%20Integration%20Contract.md)
-- [LogisticsSteward - Priority Management Contract](../../../LogisticsSteward/contracts/resources/LogisticsSteward%20-%20Priority%20Management%20Contract.md)
+- [LogisticsSteward - Documentation Fondatrice](..//..//..//..//cores//LogisticsSteward//foundation//LogisticsSteward%20-%20Documentation%20Fondatrice.md)
+- [LogisticsSteward - MiyukiniAdmin Integration Contract](..//..//..//..//_index.md)
+- [LogisticsSteward - Priority Management Contract](..//..//..//..//cores//LogisticsSteward//contracts//resources//LogisticsSteward%20-%20Priority%20Management%20Contract.md)
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
 **Statut :** Contrat de reference
+
+

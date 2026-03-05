@@ -1,266 +1,266 @@
-# Ever Buddy - Compatibility Rules Contract
+﻿# Ever Buddy - Compatibility Rules Contract
 
 ## 1. Contexte
 
-Ce document définit les **règles de compatibilité** gouvernées par Ever Buddy dans l'écosystème Miyukini. Il spécifie les niveaux de compatibilité, les critères d'évaluation, et les obligations associées à chaque type de changement.
+Ce document dÃ©finit les **rÃ¨gles de compatibilitÃ©** gouvernÃ©es par Ever Buddy dans l'Ã©cosystÃ¨me Miyukini. Il spÃ©cifie les niveaux de compatibilitÃ©, les critÃ¨res d'Ã©valuation, et les obligations associÃ©es Ã  chaque type de changement.
 
 **Document fondateur :** [Ever Buddy - Documentation Fondatrice](../../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md)
 
-**Statut contractuel :** Ce document est **contractuel, normatif, et non négociable**. Il dérive directement de la Documentation Fondatrice (Section 4 - Concepts fondamentaux : Compatibilité).
+**Statut contractuel :** Ce document est **contractuel, normatif, et non nÃ©gociable**. Il dÃ©rive directement de la Documentation Fondatrice (Section 4 - Concepts fondamentaux : CompatibilitÃ©).
 
 ---
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
-- **Applicable à :** Tous les éléments du système possédant un cycle de vie (contrats, structures, interfaces, éléments internes)
-- **Responsable :** Ever Buddy (responsabilité exclusive de définition des règles de compatibilité - Section 5)
-- **Consommateurs :** Tous les cores, opérateurs, et produits de l'écosystème Miyukini
-- **Ne couvre pas :** L'exécution technique de la compatibilité (responsabilité des implémentations)
-
----
-
-## 3. Définition canonique de la compatibilité
-
-### 3.1 Qu'est-ce que la compatibilité ?
-
-La **compatibilité** est la capacité d'un élément à fonctionner avec des éléments d'autres versions. Elle caractérise la relation entre différentes versions d'un même élément ou entre éléments interdépendants.
-
-**Référence glossaire :** La compatibilité n'est pas une garantie technique — c'est une **règle de gouvernance** définissant les attentes et obligations lors des évolutions.
-
-### 3.2 Responsabilité d'Ever Buddy
-
-Ever Buddy est **exclusivement responsable** de la définition des règles de compatibilité entre versions. Cette responsabilité inclut :
-
-- Définir ce qui constitue un changement rétrocompatible
-- Définir ce qui constitue une rupture de compatibilité
-- Définir les périodes de transition minimales pour chaque type de changement
-- Définir les exceptions autorisées (et leurs conditions strictes)
-
-**Invariant associé :** INV-EB-5 — Toute évolution est **présumée rétrocompatible** sauf déclaration explicite contraire.
+- **Applicable Ã  :** Tous les Ã©lÃ©ments du systÃ¨me possÃ©dant un cycle de vie (contrats, structures, interfaces, Ã©lÃ©ments internes)
+- **Responsable :** Ever Buddy (responsabilitÃ© exclusive de dÃ©finition des rÃ¨gles de compatibilitÃ© - Section 5)
+- **Consommateurs :** Tous les cores, opÃ©rateurs, et produits de l'Ã©cosystÃ¨me Miyukini
+- **Ne couvre pas :** L'exÃ©cution technique de la compatibilitÃ© (responsabilitÃ© des implÃ©mentations)
 
 ---
 
-## 4. Niveaux de compatibilité
+## 3. DÃ©finition canonique de la compatibilitÃ©
 
-Ever Buddy distingue trois niveaux de compatibilité, chacun avec des implications et des obligations spécifiques.
+### 3.1 Qu'est-ce que la compatibilitÃ© ?
 
-### 4.1 Rétrocompatible (Backward Compatible)
+La **compatibilitÃ©** est la capacitÃ© d'un Ã©lÃ©ment Ã  fonctionner avec des Ã©lÃ©ments d'autres versions. Elle caractÃ©rise la relation entre diffÃ©rentes versions d'un mÃªme Ã©lÃ©ment ou entre Ã©lÃ©ments interdÃ©pendants.
 
-**Définition :** Le nouveau fonctionne avec l'ancien. Les consommateurs existants continuent de fonctionner sans modification.
+**RÃ©fÃ©rence glossaire :** La compatibilitÃ© n'est pas une garantie technique â€” c'est une **rÃ¨gle de gouvernance** dÃ©finissant les attentes et obligations lors des Ã©volutions.
 
-| Aspect | Spécification |
+### 3.2 ResponsabilitÃ© d'Ever Buddy
+
+Ever Buddy est **exclusivement responsable** de la dÃ©finition des rÃ¨gles de compatibilitÃ© entre versions. Cette responsabilitÃ© inclut :
+
+- DÃ©finir ce qui constitue un changement rÃ©trocompatible
+- DÃ©finir ce qui constitue une rupture de compatibilitÃ©
+- DÃ©finir les pÃ©riodes de transition minimales pour chaque type de changement
+- DÃ©finir les exceptions autorisÃ©es (et leurs conditions strictes)
+
+**Invariant associÃ© :** INV-EB-5 â€” Toute Ã©volution est **prÃ©sumÃ©e rÃ©trocompatible** sauf dÃ©claration explicite contraire.
+
+---
+
+## 4. Niveaux de compatibilitÃ©
+
+Ever Buddy distingue trois niveaux de compatibilitÃ©, chacun avec des implications et des obligations spÃ©cifiques.
+
+### 4.1 RÃ©trocompatible (Backward Compatible)
+
+**DÃ©finition :** Le nouveau fonctionne avec l'ancien. Les consommateurs existants continuent de fonctionner sans modification.
+
+| Aspect | SpÃ©cification |
 |--------|---------------|
-| **Direction** | Nouveau → Ancien |
+| **Direction** | Nouveau â†’ Ancien |
 | **Impact consommateur** | Aucune modification requise |
 | **Migration** | Optionnelle |
-| **Coexistence** | Naturelle et illimitée |
+| **Coexistence** | Naturelle et illimitÃ©e |
 | **Version** | Changement mineur ou correctif |
 
-**Critères de rétrocompatibilité :**
+**CritÃ¨res de rÃ©trocompatibilitÃ© :**
 
-1. **Interface préservée** — Toutes les interfaces existantes restent fonctionnelles
-2. **Comportement préservé** — Les comportements existants produisent les mêmes résultats
-3. **Contrats préservés** — Les contrats établis restent valides
-4. **Données préservées** — Les structures de données existantes restent exploitables
+1. **Interface prÃ©servÃ©e** â€” Toutes les interfaces existantes restent fonctionnelles
+2. **Comportement prÃ©servÃ©** â€” Les comportements existants produisent les mÃªmes rÃ©sultats
+3. **Contrats prÃ©servÃ©s** â€” Les contrats Ã©tablis restent valides
+4. **DonnÃ©es prÃ©servÃ©es** â€” Les structures de donnÃ©es existantes restent exploitables
 
-**Exemples de changements rétrocompatibles :**
+**Exemples de changements rÃ©trocompatibles :**
 
-- Ajout d'un champ optionnel à une structure
-- Ajout d'une nouvelle méthode à une interface
-- Correction d'un bug sans changement de comportement documenté
-- Amélioration de performance sans changement d'interface
-- Ajout d'une nouvelle fonctionnalité indépendante
+- Ajout d'un champ optionnel Ã  une structure
+- Ajout d'une nouvelle mÃ©thode Ã  une interface
+- Correction d'un bug sans changement de comportement documentÃ©
+- AmÃ©lioration de performance sans changement d'interface
+- Ajout d'une nouvelle fonctionnalitÃ© indÃ©pendante
 
 ### 4.2 Compatible en amont (Forward Compatible)
 
-**Définition :** L'ancien fonctionne avec le nouveau. Les anciennes versions peuvent consommer les nouvelles fonctionnalités (rare, souvent impossible).
+**DÃ©finition :** L'ancien fonctionne avec le nouveau. Les anciennes versions peuvent consommer les nouvelles fonctionnalitÃ©s (rare, souvent impossible).
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
-| **Direction** | Ancien → Nouveau |
+| **Direction** | Ancien â†’ Nouveau |
 | **Impact consommateur** | Aucune modification requise pour l'ancien |
-| **Migration** | Non nécessaire |
+| **Migration** | Non nÃ©cessaire |
 | **Coexistence** | Requiert une conception explicite |
 | **Version** | Cas particulier, rarement applicable |
 
-**Critères de compatibilité en amont :**
+**CritÃ¨res de compatibilitÃ© en amont :**
 
-1. **Extensibilité conçue** — L'élément ancien a été conçu pour ignorer les extensions inconnues
-2. **Dégradation gracieuse** — L'absence de nouvelles fonctionnalités n'empêche pas le fonctionnement
-3. **Protocole ouvert** — Le protocole de communication permet l'ajout de nouveaux éléments
+1. **ExtensibilitÃ© conÃ§ue** â€” L'Ã©lÃ©ment ancien a Ã©tÃ© conÃ§u pour ignorer les extensions inconnues
+2. **DÃ©gradation gracieuse** â€” L'absence de nouvelles fonctionnalitÃ©s n'empÃªche pas le fonctionnement
+3. **Protocole ouvert** â€” Le protocole de communication permet l'ajout de nouveaux Ã©lÃ©ments
 
-**Exemples de compatibilité en amont :**
+**Exemples de compatibilitÃ© en amont :**
 
-- Format de données avec champs ignorés si inconnus (JSON extensible)
-- Protocole de communication avec version négociée
-- Interface avec méthodes optionnelles
+- Format de donnÃ©es avec champs ignorÃ©s si inconnus (JSON extensible)
+- Protocole de communication avec version nÃ©gociÃ©e
+- Interface avec mÃ©thodes optionnelles
 
-**Avertissement :** La compatibilité en amont est **exceptionnelle**. Elle requiert une conception anticipée et ne peut être garantie rétroactivement.
+**Avertissement :** La compatibilitÃ© en amont est **exceptionnelle**. Elle requiert une conception anticipÃ©e et ne peut Ãªtre garantie rÃ©troactivement.
 
 ### 4.3 Incompatible (Breaking)
 
-**Définition :** Le nouveau ne fonctionne pas avec l'ancien. Une migration est obligatoire.
+**DÃ©finition :** Le nouveau ne fonctionne pas avec l'ancien. Une migration est obligatoire.
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
 | **Direction** | Aucune coexistence naturelle |
 | **Impact consommateur** | Modification obligatoire |
-| **Migration** | Obligatoire avec chemin documenté |
-| **Coexistence** | Temporaire, période de transition |
+| **Migration** | Obligatoire avec chemin documentÃ© |
+| **Coexistence** | Temporaire, pÃ©riode de transition |
 | **Version** | Changement majeur obligatoire |
 
-**Critères d'incompatibilité (un seul suffit) :**
+**CritÃ¨res d'incompatibilitÃ© (un seul suffit) :**
 
-1. **Interface rompue** — Une interface existante est modifiée ou supprimée
-2. **Comportement modifié** — Un comportement existant produit des résultats différents
-3. **Contrat violé** — Un contrat établi n'est plus respecté
-4. **Données incompatibles** — Les structures de données existantes ne sont plus exploitables
+1. **Interface rompue** â€” Une interface existante est modifiÃ©e ou supprimÃ©e
+2. **Comportement modifiÃ©** â€” Un comportement existant produit des rÃ©sultats diffÃ©rents
+3. **Contrat violÃ©** â€” Un contrat Ã©tabli n'est plus respectÃ©
+4. **DonnÃ©es incompatibles** â€” Les structures de donnÃ©es existantes ne sont plus exploitables
 
 **Exemples de changements incompatibles :**
 
 - Suppression d'un champ obligatoire
-- Modification de la sémantique d'une méthode
-- Changement de type d'un paramètre
+- Modification de la sÃ©mantique d'une mÃ©thode
+- Changement de type d'un paramÃ¨tre
 - Renommage d'une interface publique
-- Modification du format de sérialisation
+- Modification du format de sÃ©rialisation
 
 ---
 
-## 5. Obligations selon le niveau de compatibilité
+## 5. Obligations selon le niveau de compatibilitÃ©
 
-### 5.1 Obligations pour les changements rétrocompatibles
+### 5.1 Obligations pour les changements rÃ©trocompatibles
 
 | Obligation | Requis | Description |
 |------------|--------|-------------|
-| Annonce préalable | ❌ Non | Peut être publié sans annonce formelle |
-| Période de transition | ❌ Non | Pas de période de transition requise |
-| Documentation | ✅ Oui | Changement documenté dans les notes de version |
-| Chemin de migration | ❌ Non | Pas de migration nécessaire |
-| Test de non-régression | ✅ Oui | Vérification que l'existant fonctionne |
+| Annonce prÃ©alable | âŒ Non | Peut Ãªtre publiÃ© sans annonce formelle |
+| PÃ©riode de transition | âŒ Non | Pas de pÃ©riode de transition requise |
+| Documentation | âœ… Oui | Changement documentÃ© dans les notes de version |
+| Chemin de migration | âŒ Non | Pas de migration nÃ©cessaire |
+| Test de non-rÃ©gression | âœ… Oui | VÃ©rification que l'existant fonctionne |
 
 ### 5.2 Obligations pour les changements incompatibles
 
 | Obligation | Requis | Description |
 |------------|--------|-------------|
-| Annonce préalable | ✅ Oui | Communication formelle avant mise en œuvre |
-| Période de transition | ✅ Oui | Période de dépréciation obligatoire (INV-EB-4) |
-| Documentation | ✅ Oui | Documentation complète des différences |
-| Chemin de migration | ✅ Oui | Guide de migration fourni |
-| Justification | ✅ Oui | Raison documentée de la rupture |
-| Impact évalué | ✅ Oui | Analyse d'impact sur les consommateurs |
+| Annonce prÃ©alable | âœ… Oui | Communication formelle avant mise en Å“uvre |
+| PÃ©riode de transition | âœ… Oui | PÃ©riode de dÃ©prÃ©ciation obligatoire (INV-EB-4) |
+| Documentation | âœ… Oui | Documentation complÃ¨te des diffÃ©rences |
+| Chemin de migration | âœ… Oui | Guide de migration fourni |
+| Justification | âœ… Oui | Raison documentÃ©e de la rupture |
+| Impact Ã©valuÃ© | âœ… Oui | Analyse d'impact sur les consommateurs |
 
-**Règle absolue (INV-EB-4) :** Aucun élément ACTIVE ne peut passer directement à RETIRED ou ARCHIVED. La transition par DEPRECATED est **obligatoire**. Cela s'applique à tous les changements incompatibles.
+**RÃ¨gle absolue (INV-EB-4) :** Aucun Ã©lÃ©ment ACTIVE ne peut passer directement Ã  RETIRED ou ARCHIVED. La transition par DEPRECATED est **obligatoire**. Cela s'applique Ã  tous les changements incompatibles.
 
 ---
 
-## 6. Fenêtre de compatibilité (Compatibility Window)
+## 6. FenÃªtre de compatibilitÃ© (Compatibility Window)
 
-### 6.1 Définition
+### 6.1 DÃ©finition
 
-La **fenêtre de compatibilité** est la plage de versions avec lesquelles un élément garantit la compatibilité.
+La **fenÃªtre de compatibilitÃ©** est la plage de versions avec lesquelles un Ã©lÃ©ment garantit la compatibilitÃ©.
 
 **Format :** `[version_min, version_max]` ou `[version_min, *)` pour les versions ouvertes
 
 **Exemples :**
 
-- `[v2.0, v2.4]` — Compatible avec les versions 2.0 à 2.4 incluses
-- `[v3.0, *)` — Compatible avec toutes les versions à partir de 3.0
+- `[v2.0, v2.4]` â€” Compatible avec les versions 2.0 Ã  2.4 incluses
+- `[v3.0, *)` â€” Compatible avec toutes les versions Ã  partir de 3.0
 
-### 6.2 Règles de fenêtre
+### 6.2 RÃ¨gles de fenÃªtre
 
-| Règle | Description |
+| RÃ¨gle | Description |
 |-------|-------------|
-| **RÈGLE-COMPAT-1** | Toute fenêtre de compatibilité est **explicite et documentée** |
-| **RÈGLE-COMPAT-2** | La fermeture d'une fenêtre requiert une **période de transition** |
-| **RÈGLE-COMPAT-3** | L'extension d'une fenêtre est **toujours autorisée** sans formalité |
-| **RÈGLE-COMPAT-4** | La réduction d'une fenêtre est un **changement incompatible** |
+| **RÃˆGLE-COMPAT-1** | Toute fenÃªtre de compatibilitÃ© est **explicite et documentÃ©e** |
+| **RÃˆGLE-COMPAT-2** | La fermeture d'une fenÃªtre requiert une **pÃ©riode de transition** |
+| **RÃˆGLE-COMPAT-3** | L'extension d'une fenÃªtre est **toujours autorisÃ©e** sans formalitÃ© |
+| **RÃˆGLE-COMPAT-4** | La rÃ©duction d'une fenÃªtre est un **changement incompatible** |
 
-### 6.3 Gestion des fenêtres par catégorie
+### 6.3 Gestion des fenÃªtres par catÃ©gorie
 
-| Catégorie | Fenêtre minimale recommandée | Fermeture |
+| CatÃ©gorie | FenÃªtre minimale recommandÃ©e | Fermeture |
 |-----------|------------------------------|-----------|
-| Contrats fondateurs (FONDATION) | 3 générations majeures | Quasi interdite |
-| Contrats opérationnels | 2 générations majeures | Avec justification |
-| Interfaces techniques | 1 génération majeure | Avec documentation |
-| Éléments internes | Aucune garantie | Libre |
+| Contrats fondateurs (FONDATION) | 3 gÃ©nÃ©rations majeures | Quasi interdite |
+| Contrats opÃ©rationnels | 2 gÃ©nÃ©rations majeures | Avec justification |
+| Interfaces techniques | 1 gÃ©nÃ©ration majeure | Avec documentation |
+| Ã‰lÃ©ments internes | Aucune garantie | Libre |
 
 ---
 
-## 7. Évaluation de la compatibilité
+## 7. Ã‰valuation de la compatibilitÃ©
 
-### 7.1 Processus d'évaluation
+### 7.1 Processus d'Ã©valuation
 
-Toute évolution doit être évaluée pour déterminer son niveau de compatibilité :
+Toute Ã©volution doit Ãªtre Ã©valuÃ©e pour dÃ©terminer son niveau de compatibilitÃ© :
 
 ```
 1. Identification des changements
-   ↓
+   â†“
 2. Analyse d'impact sur les interfaces
-   ↓
+   â†“
 3. Analyse d'impact sur les comportements
-   ↓
+   â†“
 4. Analyse d'impact sur les contrats
-   ↓
-5. Analyse d'impact sur les données
-   ↓
-6. Classification du niveau de compatibilité
-   ↓
-7. Détermination des obligations associées
+   â†“
+5. Analyse d'impact sur les donnÃ©es
+   â†“
+6. Classification du niveau de compatibilitÃ©
+   â†“
+7. DÃ©termination des obligations associÃ©es
 ```
 
-### 7.2 Questions d'évaluation
+### 7.2 Questions d'Ã©valuation
 
-Pour chaque changement proposé, répondre aux questions suivantes :
+Pour chaque changement proposÃ©, rÃ©pondre aux questions suivantes :
 
 **Interface :**
-- [ ] Les interfaces existantes sont-elles préservées ?
-- [ ] Les signatures de méthodes sont-elles inchangées ?
-- [ ] Les points d'entrée existants restent-ils fonctionnels ?
+- [ ] Les interfaces existantes sont-elles prÃ©servÃ©es ?
+- [ ] Les signatures de mÃ©thodes sont-elles inchangÃ©es ?
+- [ ] Les points d'entrÃ©e existants restent-ils fonctionnels ?
 
 **Comportement :**
-- [ ] Les comportements documentés produisent-ils les mêmes résultats ?
+- [ ] Les comportements documentÃ©s produisent-ils les mÃªmes rÃ©sultats ?
 - [ ] Les effets de bord sont-ils identiques ?
-- [ ] Les erreurs sont-elles levées dans les mêmes conditions ?
+- [ ] Les erreurs sont-elles levÃ©es dans les mÃªmes conditions ?
 
 **Contrat :**
-- [ ] Les invariants existants sont-ils toujours respectés ?
-- [ ] Les garanties documentées sont-elles maintenues ?
-- [ ] Les pré/post-conditions sont-elles inchangées ?
+- [ ] Les invariants existants sont-ils toujours respectÃ©s ?
+- [ ] Les garanties documentÃ©es sont-elles maintenues ?
+- [ ] Les prÃ©/post-conditions sont-elles inchangÃ©es ?
 
-**Données :**
+**DonnÃ©es :**
 - [ ] Les structures existantes sont-elles toujours valides ?
-- [ ] Les formats de sérialisation sont-ils compatibles ?
-- [ ] Les migrations de données sont-elles évitées ?
+- [ ] Les formats de sÃ©rialisation sont-ils compatibles ?
+- [ ] Les migrations de donnÃ©es sont-elles Ã©vitÃ©es ?
 
-**Résultat :**
-- Si **toutes les réponses sont "Oui"** → Changement **rétrocompatible**
-- Si **une seule réponse est "Non"** → Changement **incompatible**
+**RÃ©sultat :**
+- Si **toutes les rÃ©ponses sont "Oui"** â†’ Changement **rÃ©trocompatible**
+- Si **une seule rÃ©ponse est "Non"** â†’ Changement **incompatible**
 
 ---
 
-## 8. Règles de rupture de compatibilité
+## 8. RÃ¨gles de rupture de compatibilitÃ©
 
-### 8.1 Conditions de rupture autorisée
+### 8.1 Conditions de rupture autorisÃ©e
 
-Une rupture de compatibilité est autorisée **uniquement** si :
+Une rupture de compatibilitÃ© est autorisÃ©e **uniquement** si :
 
-1. **Justification documentée** — La rupture est nécessaire et les alternatives ont été évaluées
-2. **Impact évalué** — L'impact sur les consommateurs est documenté
-3. **Période de transition** — Une période de dépréciation est planifiée
-4. **Chemin de migration** — Un guide de migration est fourni
-5. **Communication préalable** — L'annonce est faite en avance (minimum 1 cycle de release)
+1. **Justification documentÃ©e** â€” La rupture est nÃ©cessaire et les alternatives ont Ã©tÃ© Ã©valuÃ©es
+2. **Impact Ã©valuÃ©** â€” L'impact sur les consommateurs est documentÃ©
+3. **PÃ©riode de transition** â€” Une pÃ©riode de dÃ©prÃ©ciation est planifiÃ©e
+4. **Chemin de migration** â€” Un guide de migration est fourni
+5. **Communication prÃ©alable** â€” L'annonce est faite en avance (minimum 1 cycle de release)
 
 ### 8.2 Ruptures exceptionnelles
 
-Certaines ruptures peuvent être accélérées en cas de :
+Certaines ruptures peuvent Ãªtre accÃ©lÃ©rÃ©es en cas de :
 
-| Cas | Période minimale | Condition |
+| Cas | PÃ©riode minimale | Condition |
 |-----|------------------|-----------|
-| Faille de sécurité critique | Immédiate | Documentation post-facto |
-| Violation légale | Immédiate | Obligation réglementaire documentée |
-| Corruption de données | 1 cycle de release | Risque de perte de données |
+| Faille de sÃ©curitÃ© critique | ImmÃ©diate | Documentation post-facto |
+| Violation lÃ©gale | ImmÃ©diate | Obligation rÃ©glementaire documentÃ©e |
+| Corruption de donnÃ©es | 1 cycle de release | Risque de perte de donnÃ©es |
 
-**Avertissement :** Ces exceptions sont **strictement encadrées** et requièrent une justification formelle. Elles ne peuvent pas être utilisées pour contourner la discipline normale.
+**Avertissement :** Ces exceptions sont **strictement encadrÃ©es** et requiÃ¨rent une justification formelle. Elles ne peuvent pas Ãªtre utilisÃ©es pour contourner la discipline normale.
 
 ### 8.3 Ruptures interdites
 
@@ -268,114 +268,115 @@ Les ruptures suivantes sont **structurellement interdites** :
 
 | Rupture interdite | Raison |
 |-------------------|--------|
-| Rupture rétroactive | INV-EB-11 — Les règles ne peuvent pas modifier le passé |
-| Rupture sans transition | INV-EB-4 — DEPRECATED est obligatoire |
-| Rupture sans documentation | INV-EB-7 — Documentation obligatoire |
-| Rupture discriminatoire | INV-EB-8 — Règles universelles |
+| Rupture rÃ©troactive | INV-EB-11 â€” Les rÃ¨gles ne peuvent pas modifier le passÃ© |
+| Rupture sans transition | INV-EB-4 â€” DEPRECATED est obligatoire |
+| Rupture sans documentation | INV-EB-7 â€” Documentation obligatoire |
+| Rupture discriminatoire | INV-EB-8 â€” RÃ¨gles universelles |
 
 ---
 
 ## 9. Interactions avec le versionnement
 
-### 9.1 Correspondance compatibilité-version
+### 9.1 Correspondance compatibilitÃ©-version
 
-| Type de changement | Version | Compatibilité |
+| Type de changement | Version | CompatibilitÃ© |
 |--------------------|---------|---------------|
-| Correction de bug | Correctif (+0.0.1) | Rétrocompatible |
-| Ajout de fonctionnalité | Mineur (+0.1.0) | Rétrocompatible |
-| Rupture de compatibilité | Majeur (+1.0.0) | Incompatible |
+| Correction de bug | Correctif (+0.0.1) | RÃ©trocompatible |
+| Ajout de fonctionnalitÃ© | Mineur (+0.1.0) | RÃ©trocompatible |
+| Rupture de compatibilitÃ© | Majeur (+1.0.0) | Incompatible |
 
-**Règle absolue :** Un changement incompatible **doit** être accompagné d'un changement de version majeure. Un changement mineur ou correctif **ne peut jamais** être incompatible.
+**RÃ¨gle absolue :** Un changement incompatible **doit** Ãªtre accompagnÃ© d'un changement de version majeure. Un changement mineur ou correctif **ne peut jamais** Ãªtre incompatible.
 
-### 9.2 Relation avec le contrat de sémantique de version
+### 9.2 Relation avec le contrat de sÃ©mantique de version
 
-Les règles de compatibilité sont complémentaires au contrat de sémantique de version :
+Les rÃ¨gles de compatibilitÃ© sont complÃ©mentaires au contrat de sÃ©mantique de version :
 
-- **Compatibilité** définit la relation entre versions
-- **Sémantique de version** définit comment les versions sont numérotées
+- **CompatibilitÃ©** dÃ©finit la relation entre versions
+- **SÃ©mantique de version** dÃ©finit comment les versions sont numÃ©rotÃ©es
 
-**Référence :** [Ever Buddy - Version Semantics Contract](./Ever%20Buddy%20-%20Version%20Semantics%20Contract.md)
-
----
-
-## 10. Métriques de compatibilité
-
-Ever Buddy surveille les métriques suivantes relatives à la compatibilité :
-
-### 10.1 Métriques d'évolution
-
-| Métrique | Description | Seuil d'alerte |
-|----------|-------------|----------------|
-| Taux de ruptures | Ratio ruptures / évolutions totales | > 20% sur 1 génération |
-| Durée moyenne de transition | Temps entre DEPRECATED et RETIRED | < minimum défini |
-| Fenêtre moyenne | Largeur moyenne des fenêtres de compatibilité | Réduction tendancielle |
-
-### 10.2 Métriques d'adoption
-
-| Métrique | Description | Seuil d'alerte |
-|----------|-------------|----------------|
-| Taux d'adoption du successeur | % de consommateurs ayant migré | < 80% à mi-transition |
-| Consommateurs non migrés | Nombre de consommateurs restant sur l'ancien | > 0 à fin de transition |
-| Temps de migration moyen | Durée moyenne de migration par consommateur | > période de transition |
+**RÃ©fÃ©rence :** [Ever Buddy - Version Semantics Contract](./Ever%20Buddy%20-%20Version%20Semantics%20Contract.md)
 
 ---
 
-## 11. Références croisées
+## 10. MÃ©triques de compatibilitÃ©
 
-### Invariants associés (Documentation Fondatrice - Section 7)
+Ever Buddy surveille les mÃ©triques suivantes relatives Ã  la compatibilitÃ© :
 
-| Invariant | Énoncé | Relation |
+### 10.1 MÃ©triques d'Ã©volution
+
+| MÃ©trique | Description | Seuil d'alerte |
+|----------|-------------|----------------|
+| Taux de ruptures | Ratio ruptures / Ã©volutions totales | > 20% sur 1 gÃ©nÃ©ration |
+| DurÃ©e moyenne de transition | Temps entre DEPRECATED et RETIRED | < minimum dÃ©fini |
+| FenÃªtre moyenne | Largeur moyenne des fenÃªtres de compatibilitÃ© | RÃ©duction tendancielle |
+
+### 10.2 MÃ©triques d'adoption
+
+| MÃ©trique | Description | Seuil d'alerte |
+|----------|-------------|----------------|
+| Taux d'adoption du successeur | % de consommateurs ayant migrÃ© | < 80% Ã  mi-transition |
+| Consommateurs non migrÃ©s | Nombre de consommateurs restant sur l'ancien | > 0 Ã  fin de transition |
+| Temps de migration moyen | DurÃ©e moyenne de migration par consommateur | > pÃ©riode de transition |
+
+---
+
+## 11. RÃ©fÃ©rences croisÃ©es
+
+### Invariants associÃ©s (Documentation Fondatrice - Section 7)
+
+| Invariant | Ã‰noncÃ© | Relation |
 |-----------|--------|----------|
-| INV-EB-4 | Période de dépréciation obligatoire | Appliqué à toute rupture |
-| INV-EB-5 | Rétrocompatibilité par défaut | Présomption de base |
-| INV-EB-7 | Documentation obligatoire | Toute rupture documentée |
-| INV-EB-8 | Indépendance des décisions | Règles universelles |
-| INV-EB-9 | Prédictibilité des transitions | Règles publiques et stables |
-| INV-EB-11 | Non-rétroactivité | Pas de rupture rétroactive |
+| INV-EB-4 | PÃ©riode de dÃ©prÃ©ciation obligatoire | AppliquÃ© Ã  toute rupture |
+| INV-EB-5 | RÃ©trocompatibilitÃ© par dÃ©faut | PrÃ©somption de base |
+| INV-EB-7 | Documentation obligatoire | Toute rupture documentÃ©e |
+| INV-EB-8 | IndÃ©pendance des dÃ©cisions | RÃ¨gles universelles |
+| INV-EB-9 | PrÃ©dictibilitÃ© des transitions | RÃ¨gles publiques et stables |
+| INV-EB-11 | Non-rÃ©troactivitÃ© | Pas de rupture rÃ©troactive |
 
-### Documents associés
+### Documents associÃ©s
 
 | Document | Relation |
 |----------|----------|
 | [Ever Buddy - Documentation Fondatrice](../../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md) | Document source |
-| [Ever Buddy - Version Semantics Contract](./Ever%20Buddy%20-%20Version%20Semantics%20Contract.md) | Numérotation des versions |
-| [Ever Buddy - Lifecycle States Contract](../lifecycle/Ever%20Buddy%20-%20Lifecycle%20States%20Contract.md) | États de cycle de vie |
-| [Ever Buddy - Transition Rules Contract](../lifecycle/Ever%20Buddy%20-%20Transition%20Rules%20Contract.md) | Règles de transition |
+| [Ever Buddy - Version Semantics Contract](./Ever%20Buddy%20-%20Version%20Semantics%20Contract.md) | NumÃ©rotation des versions |
+| [Ever Buddy - Lifecycle States Contract](../lifecycle/Ever%20Buddy%20-%20Lifecycle%20States%20Contract.md) | Ã‰tats de cycle de vie |
+| [Ever Buddy - Transition Rules Contract](../lifecycle/Ever%20Buddy%20-%20Transition%20Rules%20Contract.md) | RÃ¨gles de transition |
 
-### Références glossaire
+### RÃ©fÃ©rences glossaire
 
-| Terme | Définition |
+| Terme | DÃ©finition |
 |-------|------------|
-| **Rétrocompatible** | Le nouveau fonctionne avec l'ancien |
+| **RÃ©trocompatible** | Le nouveau fonctionne avec l'ancien |
 | **Compatible en amont** | L'ancien fonctionne avec le nouveau |
 | **Incompatible** | Le nouveau ne fonctionne pas avec l'ancien |
-| **Fenêtre de compatibilité** | Plage de versions garantissant la compatibilité |
-| **Breaking change** | Changement qui rompt la compatibilité |
+| **FenÃªtre de compatibilitÃ©** | Plage de versions garantissant la compatibilitÃ© |
+| **Breaking change** | Changement qui rompt la compatibilitÃ© |
 
-**Source :** [Miyukini Conceptual References - Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Source :** [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 12. Synthèse contractuelle
+## 12. SynthÃ¨se contractuelle
 
 ### Garanties de ce contrat
 
 Ce contrat garantit que :
 
-1. **La compatibilité est définie** — Trois niveaux clairs avec critères explicites
-2. **Les obligations sont connues** — Chaque niveau de compatibilité a des obligations documentées
-3. **Les ruptures sont encadrées** — Conditions strictes pour les changements incompatibles
-4. **La rétrocompatibilité est la norme** — Présomption par défaut (INV-EB-5)
-5. **Les transitions sont protégées** — Période de dépréciation obligatoire (INV-EB-4)
+1. **La compatibilitÃ© est dÃ©finie** â€” Trois niveaux clairs avec critÃ¨res explicites
+2. **Les obligations sont connues** â€” Chaque niveau de compatibilitÃ© a des obligations documentÃ©es
+3. **Les ruptures sont encadrÃ©es** â€” Conditions strictes pour les changements incompatibles
+4. **La rÃ©trocompatibilitÃ© est la norme** â€” PrÃ©somption par dÃ©faut (INV-EB-5)
+5. **Les transitions sont protÃ©gÃ©es** â€” PÃ©riode de dÃ©prÃ©ciation obligatoire (INV-EB-4)
 
-### Phrase de synthèse
+### Phrase de synthÃ¨se
 
-> **La compatibilité est la promesse faite aux consommateurs : ce qui fonctionne aujourd'hui fonctionnera demain, sauf annonce explicite, période de transition, et chemin de migration.**
+> **La compatibilitÃ© est la promesse faite aux consommateurs : ce qui fonctionne aujourd'hui fonctionnera demain, sauf annonce explicite, pÃ©riode de transition, et chemin de migration.**
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-27  
-**Statut :** Contrat — Normatif  
-**Référence :** Ever Buddy v1.0, Documentation Fondatrice Section 4  
-**Type :** Contrat de compatibilité
+**Statut :** Contrat â€” Normatif  
+**RÃ©fÃ©rence :** Ever Buddy v1.0, Documentation Fondatrice Section 4  
+**Type :** Contrat de compatibilitÃ©
+

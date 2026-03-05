@@ -1,25 +1,25 @@
-# Exposants — Parcours, capacités et dashboard
+﻿# Exposants â€” Parcours, capacitÃ©s et dashboard
 
 ## Contexte
 
-Ce document détaille le **parcours**, les **capacités** et le **dashboard** du public cible **Exposants** dans le cadre du service Miyukini Festival Service. Il complète le [document fondateur](../../Miyukini%20Festival%20Service%20-%20Document%20Fondateur.md).
+Ce document dÃ©taille le **parcours**, les **capacitÃ©s** et le **dashboard** du public cible **Exposants** dans le cadre du service Miyukini Festival Service. Il complÃ¨te le [document fondateur](..//..//_index.md).
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Public** : Exposants (professionnels ou structures participant à des événements en tant qu’exposants).
-- **Périmètre** : onboarding, dashboard dédié, candidatures, participations, agenda, conflits de dates, limites.
-- **Hors périmètre** : spécifications techniques d’implémentation (Opérateurs, Kits, API).
+- **Public** : Exposants (professionnels ou structures participant Ã  des Ã©vÃ©nements en tant quâ€™exposants).
+- **PÃ©rimÃ¨tre** : onboarding, dashboard dÃ©diÃ©, candidatures, participations, agenda, conflits de dates, limites.
+- **Hors pÃ©rimÃ¨tre** : spÃ©cifications techniques dâ€™implÃ©mentation (OpÃ©rateurs, Kits, API).
 
 ---
 
 ## 1. Profil du public
 
-| Critère | Description |
+| CritÃ¨re | Description |
 |---------|-------------|
-| **Qui** | Professionnels, entreprises, associations participant à des festivals/événements avec un stand ou une présence exposant. |
-| **Compte** | Cross-événements : un même exposant peut **participer à plusieurs festivals**. |
-| **Accès** | Authentification (Miyauth), permissions (Master Butler), rôle exposant. |
-| **Espace** | **Dashboard exposant dédié** : vue unifiée sur toutes ses candidatures, participations, documents, factures et **agenda**. |
+| **Qui** | Professionnels, entreprises, associations participant Ã  des festivals/Ã©vÃ©nements avec un stand ou une prÃ©sence exposant. |
+| **Compte** | Cross-Ã©vÃ©nements : un mÃªme exposant peut **participer Ã  plusieurs festivals**. |
+| **AccÃ¨s** | Authentification (Miyauth), permissions (Master Butler), rÃ´le exposant. |
+| **Espace** | **Dashboard exposant dÃ©diÃ©** : vue unifiÃ©e sur toutes ses candidatures, participations, documents, factures et **agenda**. |
 
 ---
 
@@ -27,92 +27,93 @@ Ce document détaille le **parcours**, les **capacités** et le **dashboard** du
 
 ### 2.1 Onboarding
 
-1. **Création de compte** : inscription en tant qu’exposant (Miyauth, Miyuprofile, fiche entreprise/contact).
-2. **Validation** : selon politique plateforme ou selon validation par l’organisateur pour une édition donnée.
-3. **Attribution des permissions** : rôle exposant (Master Butler).
-4. **Première candidature** : dépôt d’une candidature pour une édition (festival) ; l’exposant peut ensuite en déposer d’autres pour d’autres éditions.
+1. **CrÃ©ation de compte** : inscription en tant quâ€™exposant (Miyauth, Miyuprofile, fiche entreprise/contact).
+2. **Validation** : selon politique plateforme ou selon validation par lâ€™organisateur pour une Ã©dition donnÃ©e.
+3. **Attribution des permissions** : rÃ´le exposant (Master Butler).
+4. **PremiÃ¨re candidature** : dÃ©pÃ´t dâ€™une candidature pour une Ã©dition (festival) ; lâ€™exposant peut ensuite en dÃ©poser dâ€™autres pour dâ€™autres Ã©ditions.
 
-Le compte est **cross-événements** dès l’origine : l’exposant peut candidater et participer à autant de festivals que souhaité, sous réserve des règles d’agenda (conflits de dates).
+Le compte est **cross-Ã©vÃ©nements** dÃ¨s lâ€™origine : lâ€™exposant peut candidater et participer Ã  autant de festivals que souhaitÃ©, sous rÃ©serve des rÃ¨gles dâ€™agenda (conflits de dates).
 
 ### 2.2 Parcours type (cycle de vie)
 
-| Étape | Action | Résultat |
+| Ã‰tape | Action | RÃ©sultat |
 |-------|--------|----------|
-| **Connexion** | Connexion avec identifiants exposant. | Accès au **dashboard exposant**. |
-| **Vue d’ensemble** | Consultation du dashboard : candidatures, participations, agenda, documents, factures. | Vue unifiée sur **tous les festivals** concernés. |
-| **Découverte** | Consultation de l’annuaire des événements (catalogue). | Liste des festivals ouverts aux candidatures. |
-| **Candidature** | Dépôt d’une candidature pour une édition ; saisie des informations demandées par l’organisateur. | Candidature en attente ; **vérification agenda** (conflit de dates ?). |
-| **Suivi** | Consultation du statut (en attente, validée, refusée) ; réception des documents, devis, factures. | Suivi par édition. |
-| **Participation** | Une fois validé : accès aux documents de l’édition, emplacement, programme, facturation (Miyuinvoice). | Participation active à l’édition. |
-| **Clôture** | Fin de l’édition : archivage des documents et factures dans le dashboard. | Historique conservé ; possibilité de candidater à d’autres éditions. |
+| **Connexion** | Connexion avec identifiants exposant. | AccÃ¨s au **dashboard exposant**. |
+| **Vue dâ€™ensemble** | Consultation du dashboard : candidatures, participations, agenda, documents, factures. | Vue unifiÃ©e sur **tous les festivals** concernÃ©s. |
+| **DÃ©couverte** | Consultation de lâ€™annuaire des Ã©vÃ©nements (catalogue). | Liste des festivals ouverts aux candidatures. |
+| **Candidature** | DÃ©pÃ´t dâ€™une candidature pour une Ã©dition ; saisie des informations demandÃ©es par lâ€™organisateur. | Candidature en attente ; **vÃ©rification agenda** (conflit de dates ?). |
+| **Suivi** | Consultation du statut (en attente, validÃ©e, refusÃ©e) ; rÃ©ception des documents, devis, factures. | Suivi par Ã©dition. |
+| **Participation** | Une fois validÃ© : accÃ¨s aux documents de lâ€™Ã©dition, emplacement, programme, facturation (Miyuinvoice). | Participation active Ã  lâ€™Ã©dition. |
+| **ClÃ´ture** | Fin de lâ€™Ã©dition : archivage des documents et factures dans le dashboard. | Historique conservÃ© ; possibilitÃ© de candidater Ã  dâ€™autres Ã©ditions. |
 
-### 2.3 Gestion d’agenda et conflits de dates
+### 2.3 Gestion dâ€™agenda et conflits de dates
 
-- **Problématique** : un exposant ne doit pas s’inscrire à **deux événements à la même date** (besoin déjà rencontré en pratique — « déjà vu »).
-- **Solution** : **gestion d’agenda** (calendrier cross-événements) :
-  - Visualisation des dates des événements auxquels l’exposant est inscrit ou candidat.
-  - **Alerte ou blocage** en cas de chevauchement de dates avant validation d’une nouvelle candidature.
-  - L’exposant peut organiser son planning sur plusieurs festivals sans double engagement.
+- **ProblÃ©matique** : un exposant ne doit pas sâ€™inscrire Ã  **deux Ã©vÃ©nements Ã  la mÃªme date** (besoin dÃ©jÃ  rencontrÃ© en pratique â€” Â« dÃ©jÃ  vu Â»).
+- **Solution** : **gestion dâ€™agenda** (calendrier cross-Ã©vÃ©nements) :
+  - Visualisation des dates des Ã©vÃ©nements auxquels lâ€™exposant est inscrit ou candidat.
+  - **Alerte ou blocage** en cas de chevauchement de dates avant validation dâ€™une nouvelle candidature.
+  - Lâ€™exposant peut organiser son planning sur plusieurs festivals sans double engagement.
 
-Cette capacité relève de l’Opérateur ou Kit **Agenda cross-événements** (MiyuClock, Miyubooking, données d’édition).
+Cette capacitÃ© relÃ¨ve de lâ€™OpÃ©rateur ou Kit **Agenda cross-Ã©vÃ©nements** (MiyuClock, Miyubooking, donnÃ©es dâ€™Ã©dition).
 
 ### 2.4 Points de sortie / passerelles
 
-- **Vers organisateurs** : les candidatures et participations sont gérées par les organisateurs de chaque édition ; l’exposant ne modifie pas les paramètres des éditions.
-- **Vers catalogue** : la fiche exposant peut apparaître dans le **répertoire des exposants** (selon politique plateforme), visible par [utilisateur non connecté](../UtilisateurNonConnecte/_index.md) et tous les publics.
-- **Vers visiteurs** : un exposant peut aussi être visiteur sur d’autres événements (compte distinct ou même personne avec deux rôles selon modèle plateforme).
+- **Vers organisateurs** : les candidatures et participations sont gÃ©rÃ©es par les organisateurs de chaque Ã©dition ; lâ€™exposant ne modifie pas les paramÃ¨tres des Ã©ditions.
+- **Vers catalogue** : la fiche exposant peut apparaÃ®tre dans le **rÃ©pertoire des exposants** (selon politique plateforme), visible par [utilisateur non connectÃ©](../UtilisateurNonConnecte/_index.md) et tous les publics.
+- **Vers visiteurs** : un exposant peut aussi Ãªtre visiteur sur dâ€™autres Ã©vÃ©nements (compte distinct ou mÃªme personne avec deux rÃ´les selon modÃ¨le plateforme).
 
 ---
 
-## 3. Dashboard exposant : capacités et livrables
+## 3. Dashboard exposant : capacitÃ©s et livrables
 
-### 3.1 Vue d’ensemble
+### 3.1 Vue dâ€™ensemble
 
 | Bloc | Contenu |
 |------|---------|
-| **Candidatures** | Liste des candidatures (en attente, validées, refusées) par édition ; accès au détail et aux pièces jointes. |
-| **Participations** | Liste des éditions auxquelles l’exposant participe (validé) ; accès aux documents, emplacement, programme de l’édition. |
-| **Agenda** | Calendrier cross-événements : dates des événements (candidat ou inscrit) ; alerte conflits de dates. |
-| **Documents** | Documents reçus ou à renvoyer par édition (contrats, règlements, conventions). |
-| **Factures** | Devis et factures (Miyuinvoice) par édition ; statut de paiement, téléchargement. |
+| **Candidatures** | Liste des candidatures (en attente, validÃ©es, refusÃ©es) par Ã©dition ; accÃ¨s au dÃ©tail et aux piÃ¨ces jointes. |
+| **Participations** | Liste des Ã©ditions auxquelles lâ€™exposant participe (validÃ©) ; accÃ¨s aux documents, emplacement, programme de lâ€™Ã©dition. |
+| **Agenda** | Calendrier cross-Ã©vÃ©nements : dates des Ã©vÃ©nements (candidat ou inscrit) ; alerte conflits de dates. |
+| **Documents** | Documents reÃ§us ou Ã  renvoyer par Ã©dition (contrats, rÃ¨glements, conventions). |
+| **Factures** | Devis et factures (Miyuinvoice) par Ã©dition ; statut de paiement, tÃ©lÃ©chargement. |
 
 ### 3.2 Candidatures
 
-- **Dépôt** : formulaire de candidature par édition (champs définis par l’organisateur).
-- **Pièces jointes** : upload de documents (fiche entreprise, logo, etc.).
-- **Statuts** : en attente, validée, refusée ; notification (Miyunotify) selon paramétrage organisateur.
-- **Vérification agenda** : avant validation côté organisateur ou à la soumission, la plateforme peut signaler un conflit de dates avec une autre édition à laquelle l’exposant est déjà inscrit ou candidat.
+- **DÃ©pÃ´t** : formulaire de candidature par Ã©dition (champs dÃ©finis par lâ€™organisateur).
+- **PiÃ¨ces jointes** : upload de documents (fiche entreprise, logo, etc.).
+- **Statuts** : en attente, validÃ©e, refusÃ©e ; notification (Miyunotify) selon paramÃ©trage organisateur.
+- **VÃ©rification agenda** : avant validation cÃ´tÃ© organisateur ou Ã  la soumission, la plateforme peut signaler un conflit de dates avec une autre Ã©dition Ã  laquelle lâ€™exposant est dÃ©jÃ  inscrit ou candidat.
 
-### 3.3 Participations (éditions validées)
+### 3.3 Participations (Ã©ditions validÃ©es)
 
-- **Fiche par édition** : résumé (dates, lieu, statut), lien vers les documents et la facturation.
-- **Emplacement** : stand ou zone attribué (lien vers plan de salle si exposé par l’organisateur).
-- **Programme** : accès au programme public de l’édition si mis à disposition.
+- **Fiche par Ã©dition** : rÃ©sumÃ© (dates, lieu, statut), lien vers les documents et la facturation.
+- **Emplacement** : stand ou zone attribuÃ© (lien vers plan de salle si exposÃ© par lâ€™organisateur).
+- **Programme** : accÃ¨s au programme public de lâ€™Ã©dition si mis Ã  disposition.
 
 ### 3.4 Documents et facturation
 
-- **Documents** : consultation et téléchargement des contrats, règlements, conventions ; envoi des documents signés ou complétés selon workflow organisateur.
-- **Devis et factures** (Miyuinvoice) : consultation, téléchargement PDF, suivi du statut de paiement (payé / en attente).
+- **Documents** : consultation et tÃ©lÃ©chargement des contrats, rÃ¨glements, conventions ; envoi des documents signÃ©s ou complÃ©tÃ©s selon workflow organisateur.
+- **Devis et factures** (Miyuinvoice) : consultation, tÃ©lÃ©chargement PDF, suivi du statut de paiement (payÃ© / en attente).
 
-### 3.5 Répertoire des exposants
+### 3.5 RÃ©pertoire des exposants
 
-- **Visibilité** : la fiche exposant (entreprise, contact, éditions participées, etc.) peut être publiée dans le **répertoire des exposants** du catalogue (annuaire), selon la politique plateforme et les choix de l’organisateur.
-- **Bénéfice** : mise en visibilité pour les visiteurs et les autres organisateurs.
+- **VisibilitÃ©** : la fiche exposant (entreprise, contact, Ã©ditions participÃ©es, etc.) peut Ãªtre publiÃ©e dans le **rÃ©pertoire des exposants** du catalogue (annuaire), selon la politique plateforme et les choix de lâ€™organisateur.
+- **BÃ©nÃ©fice** : mise en visibilitÃ© pour les visiteurs et les autres organisateurs.
 
 ---
 
 ## 4. Limites et gouvernance
 
-| Aspect | Règle |
+| Aspect | RÃ¨gle |
 |--------|--------|
-| **Candidatures** | L’exposant ne peut pas modifier les paramètres des éditions ; il dépose une candidature et attend la décision de l’organisateur (StrongFather, validation). |
-| **Agenda** | La plateforme signale ou bloque les conflits de dates ; l’exposant reste responsable de la cohérence de son planning. |
-| **Données** | Les données exposant (fiche, candidatures, factures) sont souveraines et protégées ; accès restreint selon Mandat et rôle (Master Butler). |
-| **Facturation** | Émise par l’organisateur via Miyuinvoice ; l’exposant consulte et paie selon les modalités de l’édition. |
+| **Candidatures** | Lâ€™exposant ne peut pas modifier les paramÃ¨tres des Ã©ditions ; il dÃ©pose une candidature et attend la dÃ©cision de lâ€™organisateur (StrongFather, validation). |
+| **Agenda** | La plateforme signale ou bloque les conflits de dates ; lâ€™exposant reste responsable de la cohÃ©rence de son planning. |
+| **DonnÃ©es** | Les donnÃ©es exposant (fiche, candidatures, factures) sont souveraines et protÃ©gÃ©es ; accÃ¨s restreint selon Mandat et rÃ´le (Master Butler). |
+| **Facturation** | Ã‰mise par lâ€™organisateur via Miyuinvoice ; lâ€™exposant consulte et paie selon les modalitÃ©s de lâ€™Ã©dition. |
 
 ---
 
-## 5. Références
+## 5. RÃ©fÃ©rences
 
-- [Document fondateur Miyukini Festival Service](../../Miyukini%20Festival%20Service%20-%20Document%20Fondateur.md) — § 5 Distribution exposants
-- [Public Organisateurs](../Organisateurs/_index.md) | [Public Visiteurs](../Visiteurs/_index.md) | [Utilisateur non connecté](../UtilisateurNonConnecte/_index.md)
+- [Document fondateur Miyukini Festival Service](..//..//_index.md) â€” Â§ 5 Distribution exposants
+- [Public Organisateurs](../Organisateurs/_index.md) | [Public Visiteurs](../Visiteurs/_index.md) | [Utilisateur non connectÃ©](../UtilisateurNonConnecte/_index.md)
+

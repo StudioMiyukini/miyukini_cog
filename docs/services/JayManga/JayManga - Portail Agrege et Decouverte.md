@@ -1,10 +1,10 @@
-# JayManga — Portail Agrege et Decouverte
+﻿# JayManga â€” Portail Agrege et Decouverte
 
 ## Contexte
 
 Ce document detaille le **Portail Agrege** de JayManga : une interface inter-COG (Type 3) qui collecte les catalogues des COGs proposant JayManga et les presente dans une **vue unifiee**, emulant l'experience d'un catalogue en ligne centralise (Mangadraft, Manga.io) tout en restant **entierement decentralise**.
 
-Le Portail Agrege permet au lecteur de parcourir un catalogue global de manga sans avoir a visiter chaque COG individuellement. Les oeuvres provenant de COGs actuellement hors-ligne sont **visibles mais grisees** — leurs metadonnees restent en cache, mais la lecture n'est pas possible tant que le COG vendeur n'est pas en ligne. Lorsque le lecteur clique sur une oeuvre, il est **redirige vers le Portail du COG vendeur d'origine** pour la lecture, l'achat et le telechargement.
+Le Portail Agrege permet au lecteur de parcourir un catalogue global de manga sans avoir a visiter chaque COG individuellement. Les oeuvres provenant de COGs actuellement hors-ligne sont **visibles mais grisees** â€” leurs metadonnees restent en cache, mais la lecture n'est pas possible tant que le COG vendeur n'est pas en ligne. Lorsque le lecteur clique sur une oeuvre, il est **redirige vers le Portail du COG vendeur d'origine** pour la lecture, l'achat et le telechargement.
 
 **Principe fondamental** : les fichiers manga ne transitent **jamais** par le COG aggregateur. Celui-ci ne stocke que des metadonnees en cache (titre, couverture, auteurs, genres, prix, statut de presence). La souverainete de chaque COG vendeur est preservee (LOI-3).
 
@@ -50,33 +50,33 @@ Ce modele est fonctionnel mais freine la decouverte et l'engagement. Les platefo
 ### 2.1 Vue d'ensemble
 
 ```
-                    ┌─────────────────────────┐
-                    │   Trackers MWS           │
-                    │   (decouverte des COGs   │
-                    │    proposant JayManga)    │
-                    └────────────┬────────────┘
-                                 │ liste des COGs JayManga
-                                 ▼
-┌─────────────────────────────────────────────────────────┐
-│                COG Aggregateur                          │
-│                                                         │
-│  ┌───────────────┐    ┌──────────────────────────────┐  │
-│  │  Collecteur   │───→│  Cache de catalogues         │  │
-│  │  (cron MWS)   │    │  (metadonnees par COG)       │  │
-│  └───────────────┘    └──────────────┬───────────────┘  │
-│                                      │                  │
-│  ┌───────────────────────────────────▼───────────────┐  │
-│  │         Portail Agrege (surface web)              │  │
-│  │  Catalogue unifie, recherche, filtres, presence   │  │
-│  └───────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────┘
-         │                          │                │
-         ▼                          ▼                ▼
-   ┌──────────┐            ┌──────────┐       ┌──────────┐
-   │ COG A    │            │ COG B    │       │ COG C    │
-   │ 🟢 online│            │ ⚫ offline│       │ 🟢 online│
-   │ 42 manga │            │ 15 manga │       │ 8 manga  │
-   └──────────┘            └──────────┘       └──────────┘
+                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                    â”‚   Trackers MWS           â”‚
+                    â”‚   (decouverte des COGs   â”‚
+                    â”‚    proposant JayManga)    â”‚
+                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                 â”‚ liste des COGs JayManga
+                                 â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                COG Aggregateur                          â”‚
+â”‚                                                         â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  Collecteur   â”‚â”€â”€â”€â†’â”‚  Cache de catalogues         â”‚  â”‚
+â”‚  â”‚  (cron MWS)   â”‚    â”‚  (metadonnees par COG)       â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                      â”‚                  â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚         Portail Agrege (surface web)              â”‚  â”‚
+â”‚  â”‚  Catalogue unifie, recherche, filtres, presence   â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚                          â”‚                â”‚
+         â–¼                          â–¼                â–¼
+   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+   â”‚ COG A    â”‚            â”‚ COG B    â”‚       â”‚ COG C    â”‚
+   â”‚ ðŸŸ¢ onlineâ”‚            â”‚ âš« offlineâ”‚       â”‚ ðŸŸ¢ onlineâ”‚
+   â”‚ 42 manga â”‚            â”‚ 15 manga â”‚       â”‚ 8 manga  â”‚
+   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 2.2 Roles
@@ -93,7 +93,7 @@ N'importe quel COG peut activer la fonction Portail Agrege. Cas d'usage typiques
 
 | Scenario | Description |
 |----------|-------------|
-| **COG vendeur qui est aussi aggregateur** | Un vendeur propose son propre catalogue ET affiche les catalogues des autres COGs. Son propre catalogue est mis en avant (section « Notre collection ») tandis que les autres apparaissent dans la section globale. |
+| **COG vendeur qui est aussi aggregateur** | Un vendeur propose son propre catalogue ET affiche les catalogues des autres COGs. Son propre catalogue est mis en avant (section Â« Notre collection Â») tandis que les autres apparaissent dans la section globale. |
 | **COG dedie a l'aggregation** | Un COG ne publie pas de manga lui-meme mais heberge uniquement le Portail Agrege comme service communautaire. |
 | **Plusieurs aggregateurs concurrents** | Plusieurs COGs hebergent chacun leur Portail Agrege. Chacun voit les COGs que ses trackers MWS connaissent, ce qui peut varier. Pas de monopole. |
 
@@ -107,12 +107,12 @@ L'aggregateur utilise le MWS pour decouvrir les COGs proposant JayManga. Depuis 
 
 ```
 COG Aggregateur
-  → Requete QUERY_MANIFESTS_BY_SERVICE("jaymanga") au Tracker
-  → Obtient : liste de manifestes JayManga avec resume du catalogue
+  â†’ Requete QUERY_MANIFESTS_BY_SERVICE("jaymanga") au Tracker
+  â†’ Obtient : liste de manifestes JayManga avec resume du catalogue
     (shop_name, work_count, genres, formats, allow_aggregation, presence)
-  → Filtre : COGs avec allow_aggregation = true
-  → Compare last_catalog_update avec le cache local
-  → Ne contacte directement que les COGs ayant du contenu modifie
+  â†’ Filtre : COGs avec allow_aggregation = true
+  â†’ Compare last_catalog_update avec le cache local
+  â†’ Ne contacte directement que les COGs ayant du contenu modifie
 ```
 
 Ce mecanisme remplace l'ancien flux de decouverte simple (filtrage Passeport uniquement) par une **decouverte enrichie** ou l'aggregateur obtient un apercu du catalogue de chaque vendeur directement depuis le Tracker, sans multiplier les connexions directes.
@@ -156,19 +156,19 @@ Pour chaque oeuvre publiee, l'API de federation retourne :
 ### 3.4 Processus de collecte
 
 ```
-[Periodique — configurable, defaut : toutes les 30 minutes]
+[Periodique â€” configurable, defaut : toutes les 30 minutes]
 
-Phase 1 — Decouverte via manifestes Tracker :
+Phase 1 â€” Decouverte via manifestes Tracker :
 1. QUERY_MANIFESTS_BY_SERVICE("jaymanga") au Tracker
-   → Obtenir les manifestes avec resume catalogue et statut presence
+   â†’ Obtenir les manifestes avec resume catalogue et statut presence
 2. Identifier les COGs avec allow_aggregation = true
 3. Comparer last_catalog_update avec le cache local
-   → Determiner quels COGs necessitent une synchronisation
+   â†’ Determiner quels COGs necessitent une synchronisation
 
-Phase 2 — Synchronisation directe (COGs modifies uniquement) :
+Phase 2 â€” Synchronisation directe (COGs modifies uniquement) :
 4. Pour chaque COG en ligne, opt-in, et modifie depuis la derniere sync :
-   a. GET /api/jaymanga/federation/info → maj infos vendeur
-   b. GET /api/jaymanga/federation/catalog/since/{last_sync} → delta catalogue
+   a. GET /api/jaymanga/federation/info â†’ maj infos vendeur
+   b. GET /api/jaymanga/federation/catalog/since/{last_sync} â†’ delta catalogue
    c. Telecharger les nouvelles miniatures de couverture
    d. Mettre a jour le cache local
 5. Pour les COGs hors-ligne : conserver le cache existant, marquer comme offline
@@ -195,31 +195,31 @@ Le vendeur peut modifier ces parametres a tout moment depuis Central. Les change
 ### 4.1 Page d'accueil
 
 ```
-┌───────────────────────────────────────────────────────────────┐
-│  🔍 Rechercher un manga, un auteur, un genre...              │
-├───────────────────────────────────────────────────────────────┤
-│                                                               │
-│  ▶ Tendances             ▶ Nouveautes           ▶ Gratuit    │
-│  ┌─────┐ ┌─────┐        ┌─────┐ ┌─────┐       ┌─────┐      │
-│  │cover│ │cover│        │cover│ │cover│       │cover│      │
-│  │  🟢 │ │  🟢 │        │  ⚫ │ │  🟢 │       │  🟢 │      │
-│  └─────┘ └─────┘        └─────┘ └─────┘       └─────┘      │
-│                                                               │
-│  ▶ Vendeurs en ligne (12)         ▶ Vendeurs hors-ligne (3)  │
-│  ┌────────────┐ ┌────────────┐    ┌────────────┐             │
-│  │ COG Alpha  │ │ COG Beta   │    │ COG Gamma  │ (grise)     │
-│  │ 🟢 42 manga│ │ 🟢 8 manga │    │ ⚫ 15 manga│             │
-│  └────────────┘ └────────────┘    └────────────┘             │
-│                                                               │
-│  ▶ Catalogue complet                                          │
-│  [Filtres] Genre ▼  Format ▼  Prix ▼  Langue ▼  Statut ▼    │
-│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐          │
-│  │cover│ │cover│ │cover│ │cover│ │cover│ │cover│          │
-│  │  🟢 │ │  🟢 │ │  ⚫ │ │  🟢 │ │  🟢 │ │  ⚫ │          │
-│  │Titre│ │Titre│ │Titre│ │Titre│ │Titre│ │Titre│          │
-│  │Auteur│ │Auteur│ │Auteur│ │Auteur│ │Auteur│ │Auteur│     │
-│  └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ └─────┘          │
-└───────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  ðŸ” Rechercher un manga, un auteur, un genre...              â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                               â”‚
+â”‚  â–¶ Tendances             â–¶ Nouveautes           â–¶ Gratuit    â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”        â”Œâ”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”       â”Œâ”€â”€â”€â”€â”€â”      â”‚
+â”‚  â”‚coverâ”‚ â”‚coverâ”‚        â”‚coverâ”‚ â”‚coverâ”‚       â”‚coverâ”‚      â”‚
+â”‚  â”‚  ðŸŸ¢ â”‚ â”‚  ðŸŸ¢ â”‚        â”‚  âš« â”‚ â”‚  ðŸŸ¢ â”‚       â”‚  ðŸŸ¢ â”‚      â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”˜        â””â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”˜       â””â”€â”€â”€â”€â”€â”˜      â”‚
+â”‚                                                               â”‚
+â”‚  â–¶ Vendeurs en ligne (12)         â–¶ Vendeurs hors-ligne (3)  â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”             â”‚
+â”‚  â”‚ COG Alpha  â”‚ â”‚ COG Beta   â”‚    â”‚ COG Gamma  â”‚ (grise)     â”‚
+â”‚  â”‚ ðŸŸ¢ 42 mangaâ”‚ â”‚ ðŸŸ¢ 8 manga â”‚    â”‚ âš« 15 mangaâ”‚             â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜             â”‚
+â”‚                                                               â”‚
+â”‚  â–¶ Catalogue complet                                          â”‚
+â”‚  [Filtres] Genre â–¼  Format â–¼  Prix â–¼  Langue â–¼  Statut â–¼    â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”          â”‚
+â”‚  â”‚coverâ”‚ â”‚coverâ”‚ â”‚coverâ”‚ â”‚coverâ”‚ â”‚coverâ”‚ â”‚coverâ”‚          â”‚
+â”‚  â”‚  ðŸŸ¢ â”‚ â”‚  ðŸŸ¢ â”‚ â”‚  âš« â”‚ â”‚  ðŸŸ¢ â”‚ â”‚  ðŸŸ¢ â”‚ â”‚  âš« â”‚          â”‚
+â”‚  â”‚Titreâ”‚ â”‚Titreâ”‚ â”‚Titreâ”‚ â”‚Titreâ”‚ â”‚Titreâ”‚ â”‚Titreâ”‚          â”‚
+â”‚  â”‚Auteurâ”‚ â”‚Auteurâ”‚ â”‚Auteurâ”‚ â”‚Auteurâ”‚ â”‚Auteurâ”‚ â”‚Auteurâ”‚     â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”˜          â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 4.2 Sections principales
@@ -257,38 +257,38 @@ Le vendeur peut modifier ces parametres a tout moment depuis Central. Les change
 La fiche oeuvre sur le Portail Agrege est une **fiche intermediaire** qui affiche les metadonnees en cache et redirige vers le COG vendeur :
 
 ```
-┌───────────────────────────────────────────────────────────┐
-│                                                           │
-│  [Couverture]    Titre de l'Oeuvre                        │
-│                  Auteur(s) — Genre(s)                     │
-│                  Format : Webtoon                         │
-│                  12 chapitres · 248 pages                 │
-│                  Prix : 3,99 € — 10 pages de demo         │
-│                  Langue : FR                              │
-│                                                           │
-│                  Synopsis :                               │
-│                  Lorem ipsum dolor sit amet...            │
-│                                                           │
-│                  Heberge par : COG Alpha 🟢               │
-│                                                           │
-│          ┌───────────────────────────────┐                │
-│          │  Lire / Acheter sur COG Alpha  │  → redirection│
-│          └───────────────────────────────┘                │
-│                                                           │
-│          OU (si COG hors-ligne) :                         │
-│                                                           │
-│          ┌───────────────────────────────┐                │
-│          │  COG hors-ligne ⚫             │  (grise)      │
-│          │  Ajouter aux favoris pour      │                │
-│          │  etre notifie quand disponible  │                │
-│          └───────────────────────────────┘                │
-│                                                           │
-│  Oeuvres similaires :                                     │
-│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐                        │
-│  │cover│ │cover│ │cover│ │cover│                        │
-│  └─────┘ └─────┘ └─────┘ └─────┘                        │
-│                                                           │
-└───────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                                                           â”‚
+â”‚  [Couverture]    Titre de l'Oeuvre                        â”‚
+â”‚                  Auteur(s) â€” Genre(s)                     â”‚
+â”‚                  Format : Webtoon                         â”‚
+â”‚                  12 chapitres Â· 248 pages                 â”‚
+â”‚                  Prix : 3,99 â‚¬ â€” 10 pages de demo         â”‚
+â”‚                  Langue : FR                              â”‚
+â”‚                                                           â”‚
+â”‚                  Synopsis :                               â”‚
+â”‚                  Lorem ipsum dolor sit amet...            â”‚
+â”‚                                                           â”‚
+â”‚                  Heberge par : COG Alpha ðŸŸ¢               â”‚
+â”‚                                                           â”‚
+â”‚          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                â”‚
+â”‚          â”‚  Lire / Acheter sur COG Alpha  â”‚  â†’ redirectionâ”‚
+â”‚          â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                â”‚
+â”‚                                                           â”‚
+â”‚          OU (si COG hors-ligne) :                         â”‚
+â”‚                                                           â”‚
+â”‚          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                â”‚
+â”‚          â”‚  COG hors-ligne âš«             â”‚  (grise)      â”‚
+â”‚          â”‚  Ajouter aux favoris pour      â”‚                â”‚
+â”‚          â”‚  etre notifie quand disponible  â”‚                â”‚
+â”‚          â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                â”‚
+â”‚                                                           â”‚
+â”‚  Oeuvres similaires :                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”                        â”‚
+â”‚  â”‚coverâ”‚ â”‚coverâ”‚ â”‚coverâ”‚ â”‚coverâ”‚                        â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”˜                        â”‚
+â”‚                                                           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 4.5 Page vendeur sur le Portail Agrege
@@ -296,21 +296,21 @@ La fiche oeuvre sur le Portail Agrege est une **fiche intermediaire** qui affich
 Chaque COG vendeur dispose d'une **page vitrine** sur le Portail Agrege :
 
 ```
-┌───────────────────────────────────────────────────────────┐
-│  [Avatar]  Nom de la librairie                            │
-│            Description du vendeur                         │
-│            🟢 En ligne — 42 oeuvres — Depuis 2025         │
-│                                                           │
-│            ┌──────────────────────────┐                   │
-│            │  Visiter le Portail ↗    │  → redirection    │
-│            └──────────────────────────┘                   │
-│                                                           │
-│  Catalogue de ce vendeur :                                │
-│  [Filtres] Genre ▼  Format ▼  Prix ▼                     │
-│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐               │
-│  │cover│ │cover│ │cover│ │cover│ │cover│               │
-│  └─────┘ └─────┘ └─────┘ └─────┘ └─────┘               │
-└───────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  [Avatar]  Nom de la librairie                            â”‚
+â”‚            Description du vendeur                         â”‚
+â”‚            ðŸŸ¢ En ligne â€” 42 oeuvres â€” Depuis 2025         â”‚
+â”‚                                                           â”‚
+â”‚            â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                   â”‚
+â”‚            â”‚  Visiter le Portail â†—    â”‚  â†’ redirection    â”‚
+â”‚            â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                   â”‚
+â”‚                                                           â”‚
+â”‚  Catalogue de ce vendeur :                                â”‚
+â”‚  [Filtres] Genre â–¼  Format â–¼  Prix â–¼                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”               â”‚
+â”‚  â”‚coverâ”‚ â”‚coverâ”‚ â”‚coverâ”‚ â”‚coverâ”‚ â”‚coverâ”‚               â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”˜               â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
@@ -322,11 +322,11 @@ Chaque COG vendeur dispose d'une **page vitrine** sur le Portail Agrege :
 | Element | Comportement en ligne | Comportement hors-ligne |
 |---------|----------------------|------------------------|
 | **Couverture** | Affichee normalement | Affichee en **niveaux de gris** avec opacite reduite (50%). |
-| **Badge de statut** | 🟢 vert | ⚫ gris fonce |
-| **Bouton d'action** | « Lire / Acheter sur [COG] » (cliquable) | « COG hors-ligne » (desactive, grise) |
+| **Badge de statut** | ðŸŸ¢ vert | âš« gris fonce |
+| **Bouton d'action** | Â« Lire / Acheter sur [COG] Â» (cliquable) | Â« COG hors-ligne Â» (desactive, grise) |
 | **Position dans les listes** | Melange avec les resultats normaux | Positionne **apres** les oeuvres en ligne, sauf si le tri explicite (prix, titre) est applique. |
-| **Fiche oeuvre** | Lien de redirection actif | Lien desactive + suggestion « Ajouter aux favoris pour etre notifie ». |
-| **Page vendeur** | Lien « Visiter le Portail » actif | Lien desactive + message « Ce vendeur est actuellement hors-ligne ». |
+| **Fiche oeuvre** | Lien de redirection actif | Lien desactive + suggestion Â« Ajouter aux favoris pour etre notifie Â». |
+| **Page vendeur** | Lien Â« Visiter le Portail Â» actif | Lien desactive + message Â« Ce vendeur est actuellement hors-ligne Â». |
 
 ### 5.2 Filtre de disponibilite
 
@@ -343,8 +343,8 @@ Si le lecteur a un COG propre et a mis en favoris une oeuvre dont le COG vendeur
 
 ```
 Bibliotheque (Central)
-  → Verification periodique de la presence des COGs favoris
-  → Si un COG passe de offline a online → notification locale
+  â†’ Verification periodique de la presence des COGs favoris
+  â†’ Si un COG passe de offline a online â†’ notification locale
 ```
 
 ---
@@ -380,8 +380,8 @@ Le Portail Agrege affiche pour chaque vendeur l'indicateur de fraicheur du cache
 | Anciennete du cache | Affichage |
 |--------------------|-----------|
 | < 1 heure | Aucun indicateur (considere frais). |
-| 1 heure - 24 heures | « Mis a jour il y a X heures ». |
-| > 24 heures | « Donnees potentiellement obsoletes — derniere synchronisation il y a X jours ». |
+| 1 heure - 24 heures | Â« Mis a jour il y a X heures Â». |
+| > 24 heures | Â« Donnees potentiellement obsoletes â€” derniere synchronisation il y a X jours Â». |
 
 ### 6.4 Volume de donnees
 
@@ -390,7 +390,7 @@ Estimation pour un Portail Agrege indexant 100 COGs avec en moyenne 50 oeuvres c
 | Donnee | Taille estimee |
 |--------|---------------|
 | Metadonnees (5000 oeuvres) | ~5 Mo (JSON) |
-| Miniatures de couverture (5000 × 30 Ko) | ~150 Mo |
+| Miniatures de couverture (5000 Ã— 30 Ko) | ~150 Mo |
 | **Total** | **~155 Mo** |
 
 Le stockage necessaire est minimal et ne represente pas une contrainte pour le COG aggregateur.
@@ -418,10 +418,10 @@ L'aggregateur collecte des statistiques anonymes d'engagement :
 | Statistique | Description |
 |-------------|-------------|
 | Clics sur fiche oeuvre | Nombre de fois que la fiche intermediaire est consultee. |
-| Redirections vers le COG vendeur | Nombre de fois que le lecteur clique « Lire / Acheter ». |
+| Redirections vers le COG vendeur | Nombre de fois que le lecteur clique Â« Lire / Acheter Â». |
 | Ajouts aux favoris (si authentifie) | Si le lecteur a un COG et ajoute un favori depuis le Portail Agrege. |
 
-Ces statistiques alimentent la section « Tendances » et le tri par popularite. Elles sont **locales a l'aggregateur** et ne sont pas partagees avec les COGs vendeurs (respect de la vie privee du lecteur).
+Ces statistiques alimentent la section Â« Tendances Â» et le tri par popularite. Elles sont **locales a l'aggregateur** et ne sont pas partagees avec les COGs vendeurs (respect de la vie privee du lecteur).
 
 ---
 
@@ -434,8 +434,8 @@ L'admin du COG aggregateur configure le Portail Agrege depuis Central :
 | Parametre | Type | Defaut | Description |
 |-----------|------|--------|-------------|
 | `aggregator_enabled` | BOOLEAN | false | Active/desactive le Portail Agrege. |
-| `aggregator_name` | TEXT | — | Nom du Portail Agrege affiche aux lecteurs. |
-| `aggregator_description` | TEXT | — | Description / sous-titre. |
+| `aggregator_name` | TEXT | â€” | Nom du Portail Agrege affiche aux lecteurs. |
+| `aggregator_description` | TEXT | â€” | Description / sous-titre. |
 | `sync_interval_minutes` | INTEGER | 30 | Intervalle de synchronisation des catalogues. |
 | `show_offline_works` | BOOLEAN | true | Afficher les oeuvres de COGs hors-ligne (grisees). |
 | `highlight_own_catalog` | BOOLEAN | true | Mettre en avant les propres oeuvres du COG aggregateur (si il est aussi vendeur). |
@@ -446,7 +446,7 @@ L'admin du COG aggregateur configure le Portail Agrege depuis Central :
 | Parametre | Description |
 |-----------|-------------|
 | `theme` | Couleurs, banniere, logo du Portail Agrege. |
-| `featured_works` | Liste d'oeuvres mises en avant manuellement par l'admin (section « Selection de la redaction »). |
+| `featured_works` | Liste d'oeuvres mises en avant manuellement par l'admin (section Â« Selection de la redaction Â»). |
 | `blocked_cogs` | Liste de COGs explicitement exclus de l'indexation (moderation). |
 
 ### 8.3 Moderation
@@ -463,36 +463,36 @@ L'admin de l'aggregateur peut :
 
 ## 9. Flux utilisateur
 
-### 9.1 Lecteur — decouverte et lecture via le Portail Agrege
+### 9.1 Lecteur â€” decouverte et lecture via le Portail Agrege
 
 ```
-Lecteur → Portail Agrege (surface web du COG aggregateur)
-  → Parcourir le catalogue unifie (recherche, filtres, tendances)
-  → Ouvrir une fiche oeuvre (fiche intermediaire sur l'aggregateur)
-  → [Si COG en ligne] → Clic "Lire / Acheter" → Redirection vers le Portail du COG vendeur
-    → Lecture demo / Achat / Telechargement (sur le COG vendeur)
-  → [Si COG hors-ligne] → Fiche grisee → Option "Ajouter aux favoris"
+Lecteur â†’ Portail Agrege (surface web du COG aggregateur)
+  â†’ Parcourir le catalogue unifie (recherche, filtres, tendances)
+  â†’ Ouvrir une fiche oeuvre (fiche intermediaire sur l'aggregateur)
+  â†’ [Si COG en ligne] â†’ Clic "Lire / Acheter" â†’ Redirection vers le Portail du COG vendeur
+    â†’ Lecture demo / Achat / Telechargement (sur le COG vendeur)
+  â†’ [Si COG hors-ligne] â†’ Fiche grisee â†’ Option "Ajouter aux favoris"
 ```
 
-### 9.2 Vendeur — opt-in a l'aggregation
+### 9.2 Vendeur â€” opt-in a l'aggregation
 
 ```
-Vendeur → Central → JayManga (configuration)
-  → Parametres de federation
-  → Activer/Desactiver allow_aggregation
-  → Configurer les donnees exposees (synopsis, prix)
-  → Les Portails Agreges collectent automatiquement au prochain cycle
+Vendeur â†’ Central â†’ JayManga (configuration)
+  â†’ Parametres de federation
+  â†’ Activer/Desactiver allow_aggregation
+  â†’ Configurer les donnees exposees (synopsis, prix)
+  â†’ Les Portails Agreges collectent automatiquement au prochain cycle
 ```
 
-### 9.3 Admin aggregateur — gestion du Portail Agrege
+### 9.3 Admin aggregateur â€” gestion du Portail Agrege
 
 ```
-Admin → Central → JayManga (configuration Portail Agrege)
-  → Activer le Portail Agrege
-  → Configurer le nom, la description, le theme
-  → Gerer les COGs bloques
-  → Voir les statistiques d'engagement
-  → Definir les oeuvres mises en avant
+Admin â†’ Central â†’ JayManga (configuration Portail Agrege)
+  â†’ Activer le Portail Agrege
+  â†’ Configurer le nom, la description, le theme
+  â†’ Gerer les COGs bloques
+  â†’ Voir les statistiques d'engagement
+  â†’ Definir les oeuvres mises en avant
 ```
 
 ---
@@ -524,7 +524,7 @@ Admin → Central → JayManga (configuration Portail Agrege)
 | portal_url | TEXT | URL directe vers la fiche sur le Portail du vendeur. |
 | published_at | TEXT | ISO 8601. |
 | updated_at | TEXT | ISO 8601. |
-| cached_at | TEXT | ISO 8601 — date de mise en cache. |
+| cached_at | TEXT | ISO 8601 â€” date de mise en cache. |
 
 ### 10.2 Vendeur indexe (IndexedSeller)
 
@@ -575,12 +575,13 @@ Admin → Central → JayManga (configuration Portail Agrege)
 | [JayManga - Lecture et Liseuse](./JayManga%20-%20Lecture%20et%20Liseuse.md) | Liseuse (la lecture passe toujours par le COG vendeur). |
 | [MWS - Document Fondateur](../../miyukini-webway-system/MWS%20-%20Document%20Fondateur.md) | Presence et decouverte des COGs. |
 | [MWS - Trackers](../../miyukini-webway-system/acteurs/MWS%20-%20Trackers.md) | Tracker, manifestes de services (section 5.5). |
-| [MWS - Manifestes de Services](../../miyukini-webway-system/protocole/MWS%20-%20Manifestes%20de%20Services.md) | Protocole de manifestes — schema JayManga. |
-| [Miyukini Conceptual References - Types de Services et Espaces](../../reference/Miyukini%20Conceptual%20References%20-%20Types%20de%20Services%20et%20Espaces.md) | Classification Type 3 (inter-COG). |
+| [MWS - Manifestes de Services](../../miyukini-webway-system/protocole/MWS%20-%20Manifestes%20de%20Services.md) | Protocole de manifestes â€” schema JayManga. |
+| [Miyukini Conceptual References - Types de Services et Espaces](..//..//miyukini-webway-system//reference//_index.md) | Classification Type 3 (inter-COG). |
 
 ---
 
-**Document** : JayManga — Portail Agrege et Decouverte
+**Document** : JayManga â€” Portail Agrege et Decouverte
 **Version** : 1.1
 **Date** : 2026-02-24
 **Statut** : Specification fonctionnelle detaillee.
+

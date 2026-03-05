@@ -1,4 +1,4 @@
-# TAMR - Security Contract
+﻿# TAMR - Security Contract
 
 ## 1. Contexte
 
@@ -13,8 +13,8 @@ TAMR est le **Gardien de la Gouvernance Humaine** : il definit les points d'inte
 **References fondatrices :**
 
 - [TAMR - Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md)
-- [Security - Core Integration Map](../../../../security/architecture/Security%20-%20Core%20Integration%20Map.md)
-- [Doctrine Securite Fondamentale](../../../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md)
+- [Security - Core Integration Map](..//..//..//WorrySentinel//_index.md)
+- [Doctrine Securite Fondamentale](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -130,7 +130,7 @@ TAMR est implique dans les protocoles suivants :
 | **RT-SEC-5** | Tracabilite immediate | **Responsable** : TAMR garantit la tracabilite immediate de toute intervention humaine |
 | **AS-SEC-5** | Degradation graduee / Information utilisateur | **Responsable** : TAMR informe l'utilisateur et gere l'escalade en cas de degradation |
 
-### 5.2 RT-SEC-5 — Tracabilite Immediate
+### 5.2 RT-SEC-5 â€” Tracabilite Immediate
 
 **Exigence :** Toute modification doit etre tracable dans les 500ms suivant son execution.
 
@@ -143,10 +143,10 @@ TAMR est implique dans les protocoles suivants :
 **Implementation :**
 
 ```
-Intervention humaine → TAMR capture le contexte → Trace immediate → Audit Engine
+Intervention humaine â†’ TAMR capture le contexte â†’ Trace immediate â†’ Audit Engine
 ```
 
-### 5.3 AS-SEC-5 — Degradation Graduee
+### 5.3 AS-SEC-5 â€” Degradation Graduee
 
 **Exigence :** Le systeme se degrade de maniere controlee, informant l'utilisateur a chaque etape.
 
@@ -160,9 +160,9 @@ Intervention humaine → TAMR capture le contexte → Trace immediate → Audit 
 **Implementation :**
 
 ```
-Degradation detectee → CaringNanny/StrongFather evaluent → TAMR informe l'humain
-                                                       → TAMR propose les actions
-                                                       → TAMR trace l'intervention
+Degradation detectee â†’ CaringNanny/StrongFather evaluent â†’ TAMR informe l'humain
+                                                       â†’ TAMR propose les actions
+                                                       â†’ TAMR trace l'intervention
 ```
 
 ---
@@ -175,40 +175,40 @@ Le comportement de TAMR s'adapte au niveau de confiance du systeme :
 
 | Niveau | Etat | Comportement TAMR |
 |--------|------|-------------------|
-| **T0** | Normal | Non requis — Interventions optionnelles |
-| **T1** | Instable | Optionnel — Surveillance humaine recommandee |
-| **T2** | Degrade | Possible — Intervention humaine disponible |
-| **T3** | Restreint | **Requis pour override** — Seul TAMR peut autoriser un deblocage |
-| **T4** | Bloque | **Intervention humaine obligatoire** — Canal unique d'intervention |
+| **T0** | Normal | Non requis â€” Interventions optionnelles |
+| **T1** | Instable | Optionnel â€” Surveillance humaine recommandee |
+| **T2** | Degrade | Possible â€” Intervention humaine disponible |
+| **T3** | Restreint | **Requis pour override** â€” Seul TAMR peut autoriser un deblocage |
+| **T4** | Bloque | **Intervention humaine obligatoire** â€” Canal unique d'intervention |
 
 ### 6.2 Detail par Niveau
 
-#### T0 — Normal
+#### T0 â€” Normal
 
 - TAMR est disponible mais non sollicite
 - Les interventions humaines sont optionnelles
 - Le systeme fonctionne de maniere autonome
 
-#### T1 — Instable
+#### T1 â€” Instable
 
 - TAMR notifie optionnellement l'humain de l'instabilite
 - L'humain peut choisir de superviser
 - Les interventions restent optionnelles
 
-#### T2 — Degrade
+#### T2 â€” Degrade
 
 - TAMR informe l'humain de la degradation
 - L'humain peut intervenir pour corriger
 - Les interventions sont possibles mais non obligatoires
 
-#### T3 — Restreint
+#### T3 â€” Restreint
 
 - **TAMR devient critique**
 - Toute tentative d'override necessite TAMR
 - L'humain doit certifier son intervention
 - Les decisions critiques passent par TAMR
 
-#### T4 — Bloque
+#### T4 â€” Bloque
 
 - TAMR est le **seul canal d'intervention**
 - L'humain doit intervenir pour restaurer le systeme
@@ -220,10 +220,10 @@ Le comportement de TAMR s'adapte au niveau de confiance du systeme :
 | Niveau | Caring Nanny | StrongFather | Border Guard | TAMR | BondingBrother |
 |--------|--------------|--------------|--------------|------|----------------|
 | **Detection T1** | **R** | C | C | I | I |
-| **Decision T1→T2** | C | **R** | C | I | I |
-| **Decision T2→T3** | C | **R** | C | I | **R** (notification) |
+| **Decision T1â†’T2** | C | **R** | C | I | I |
+| **Decision T2â†’T3** | C | **R** | C | I | **R** (notification) |
 | **Override T3** | I | C | I | **R** | I |
-| **Decision T3→T4** | C | **R** | C | A | **R** (notification) |
+| **Decision T3â†’T4** | C | **R** | C | A | **R** (notification) |
 | **Sortie T4** | C | **R** | C | A | I |
 
 **Legende :** R = Responsable, A = Approbateur, C = Consulte, I = Informe
@@ -246,32 +246,32 @@ Le comportement de TAMR s'adapte au niveau de securite declare par l'Operateur :
 
 ### 7.2 Detail par Niveau de Securite
 
-#### Niveau 0 — PUBLIC / DISPLAY
+#### Niveau 0 â€” PUBLIC / DISPLAY
 
 - TAMR n'intervient pas
 - Les donnees sont publiques, pas de validation humaine requise
 - "Si ca casse, ce n'est pas grave"
 
-#### Niveau 1 — STANDARD / CMS
+#### Niveau 1 â€” STANDARD / CMS
 
 - TAMR est disponible mais optionnel
 - L'humain peut intervenir s'il le souhaite
 - Protection basique de l'acces
 
-#### Niveau 2 — SENSITIVE DATA
+#### Niveau 2 â€” SENSITIVE DATA
 
 - TAMR peut etre sollicite pour les operations sensibles
 - L'humain peut certifier les actions sur les donnees sensibles
 - Tracabilite complete des interventions
 
-#### Niveau 3 — CRITICAL SYSTEM
+#### Niveau 3 â€” CRITICAL SYSTEM
 
 - TAMR est **requis en cas de doute**
 - Toute decision AMBIGUE ou DIFFEREE peut declencher TAMR
 - L'humain valide les operations critiques
 - Zero-trust inclut la validation humaine
 
-#### Niveau 4 — HARDENED / ISOLATED
+#### Niveau 4 â€” HARDENED / ISOLATED
 
 - TAMR est **systematiquement implique**
 - Toute operation critique requiert une validation humaine
@@ -285,98 +285,98 @@ Le comportement de TAMR s'adapte au niveau de securite declare par l'Operateur :
 ### 8.1 Flux d'Escalade Securise
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    SITUATION NECESSITANT ESCALADE               │
-│        (Decision AMBIGUE, anomalie grave, conflit non resolu)   │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  [1] TAMR — Reception de l'escalade                             │
-│      • Categorisation du type d'intervention                    │
-│      • Verification des limites d'autorite                      │
-│      • Preparation du contexte pour l'humain                    │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  [2] STRONGFATHER — Evaluation de l'autorisation               │
-│      • L'humain est-il autorise a intervenir ?                  │
-│      • Les conditions d'intervention sont-elles remplies ?      │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  [3] PRODUIT — Notification et interface                        │
-│      • L'humain est informe                                     │
-│      • L'interface d'intervention est presentee                 │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  [4] HUMAIN — Decision et certification                         │
-│      • L'humain prend sa decision                               │
-│      • L'humain certifie explicitement son intervention         │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  [5] TAMR — Enregistrement et transmission                      │
-│      • Trace complete de l'intervention (INV-TAMR-2)            │
-│      • Transmission de la decision vers StrongFather            │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  [6] STRONGFATHER — Application de la decision humaine          │
-│      • Execution si les limites infranchissables sont respectees│
-│      • Refus si une limite absolue est violee                   │
-└─────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    SITUATION NECESSITANT ESCALADE               â”‚
+â”‚        (Decision AMBIGUE, anomalie grave, conflit non resolu)   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  [1] TAMR â€” Reception de l'escalade                             â”‚
+â”‚      â€¢ Categorisation du type d'intervention                    â”‚
+â”‚      â€¢ Verification des limites d'autorite                      â”‚
+â”‚      â€¢ Preparation du contexte pour l'humain                    â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  [2] STRONGFATHER â€” Evaluation de l'autorisation               â”‚
+â”‚      â€¢ L'humain est-il autorise a intervenir ?                  â”‚
+â”‚      â€¢ Les conditions d'intervention sont-elles remplies ?      â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  [3] PRODUIT â€” Notification et interface                        â”‚
+â”‚      â€¢ L'humain est informe                                     â”‚
+â”‚      â€¢ L'interface d'intervention est presentee                 â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  [4] HUMAIN â€” Decision et certification                         â”‚
+â”‚      â€¢ L'humain prend sa decision                               â”‚
+â”‚      â€¢ L'humain certifie explicitement son intervention         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  [5] TAMR â€” Enregistrement et transmission                      â”‚
+â”‚      â€¢ Trace complete de l'intervention (INV-TAMR-2)            â”‚
+â”‚      â€¢ Transmission de la decision vers StrongFather            â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  [6] STRONGFATHER â€” Application de la decision humaine          â”‚
+â”‚      â€¢ Execution si les limites infranchissables sont respecteesâ”‚
+â”‚      â€¢ Refus si une limite absolue est violee                   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 8.2 Flux d'Override en T3
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                   SYSTEME EN MODE RESTREINT (T3)                │
-│                 Decision bloquee necessite override             │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  [1] STRONGFATHER — Demande d'override                          │
-│      • Decision AMBIGUE ou DIFFEREE                             │
-│      • Niveau T3 : override necessite TAMR                      │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  [2] TAMR — Activation du canal d'override                      │
-│      • Verification que l'override est autorise                 │
-│      • Preparation du contexte complet                          │
-│      • Transmission vers le produit pour notification           │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  [3] HUMAIN — Override avec justification (INV-TAMR-7)          │
-│      • Justification obligatoire                                │
-│      • Certification explicite                                  │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  [4] TAMR — Enregistrement renforce                             │
-│      • Trace complete avec justification                        │
-│      • Audit renforce de l'override                             │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  [5] STRONGFATHER — Verification limites infranchissables       │
-│      • Si limite infranchissable violee : REFUS                 │
-│      • Si OK : execution de l'override                          │
-└─────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                   SYSTEME EN MODE RESTREINT (T3)                â”‚
+â”‚                 Decision bloquee necessite override             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  [1] STRONGFATHER â€” Demande d'override                          â”‚
+â”‚      â€¢ Decision AMBIGUE ou DIFFEREE                             â”‚
+â”‚      â€¢ Niveau T3 : override necessite TAMR                      â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  [2] TAMR â€” Activation du canal d'override                      â”‚
+â”‚      â€¢ Verification que l'override est autorise                 â”‚
+â”‚      â€¢ Preparation du contexte complet                          â”‚
+â”‚      â€¢ Transmission vers le produit pour notification           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  [3] HUMAIN â€” Override avec justification (INV-TAMR-7)          â”‚
+â”‚      â€¢ Justification obligatoire                                â”‚
+â”‚      â€¢ Certification explicite                                  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  [4] TAMR â€” Enregistrement renforce                             â”‚
+â”‚      â€¢ Trace complete avec justification                        â”‚
+â”‚      â€¢ Audit renforce de l'override                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  [5] STRONGFATHER â€” Verification limites infranchissables       â”‚
+â”‚      â€¢ Si limite infranchissable violee : REFUS                 â”‚
+â”‚      â€¢ Si OK : execution de l'override                          â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
@@ -404,7 +404,7 @@ StrongFather verifie **toujours** les limites infranchissables, meme apres une c
 
 ## 10. Integration avec les Regles de Gouvernance (G1-G4)
 
-TAMR est central aux regles de gouvernance humaine definies dans [Security - Invariants & Guarantees](../../../../security/contracts/governance/Security%20-%20Invariants%20&%20Guarantees.md) :
+TAMR est central aux regles de gouvernance humaine definies dans [Security - Invariants & Guarantees](..//..//..//WorrySentinel//_index.md) :
 
 | Regle | Enonce | Role de TAMR |
 |-------|--------|--------------|
@@ -421,9 +421,9 @@ TAMR est central aux regles de gouvernance humaine definies dans [Security - Inv
 
 | Document | Description |
 |----------|-------------|
-| [Security - Core Integration Map](../../../../security/architecture/Security%20-%20Core%20Integration%20Map.md) | Cartographie des responsabilites securite des Cores |
-| [Security - Invariants & Guarantees](../../../../security/contracts/governance/Security%20-%20Invariants%20&%20Guarantees.md) | Lois L1-L6, Contraintes C1-C4, Regles G1-G4 |
-| [Doctrine Securite Fondamentale](../../../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md) | Fondation philosophique de la securite |
+| [Security - Core Integration Map](..//..//..//WorrySentinel//_index.md) | Cartographie des responsabilites securite des Cores |
+| [Security - Invariants & Guarantees](..//..//..//WorrySentinel//_index.md) | Lois L1-L6, Contraintes C1-C4, Regles G1-G4 |
+| [Doctrine Securite Fondamentale](..//..//..//..//miyukini-webway-system//reference//_index.md) | Fondation philosophique de la securite |
 
 ### Documents TAMR
 
@@ -445,10 +445,10 @@ TAMR est central aux regles de gouvernance humaine definies dans [Security - Inv
 
 TAMR est le **gardien de la gouvernance humaine** dans le dispositif de securite Miyukini. Il garantit que :
 
-- ✅ **L'escalade humaine est toujours possible** (INV-TAMR-1)
-- ✅ **Toute intervention est tracee** (INV-TAMR-2)
-- ✅ **Les operations sensibles sont certifiees** (INV-TAMR-3)
-- ✅ **L'humain reste l'arbitre final** (INV-TAMR-4)
+- âœ… **L'escalade humaine est toujours possible** (INV-TAMR-1)
+- âœ… **Toute intervention est tracee** (INV-TAMR-2)
+- âœ… **Les operations sensibles sont certifiees** (INV-TAMR-3)
+- âœ… **L'humain reste l'arbitre final** (INV-TAMR-4)
 
 **Principe fondateur :**
 
@@ -458,5 +458,6 @@ TAMR est le **gardien de la gouvernance humaine** dans le dispositif de securite
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0  
-**Statut :** CONTRAT — Document contractuel de securite  
-**Reference :** Miyukini Core System v2.4, [Security - Core Integration Map](../../../../security/architecture/Security%20-%20Core%20Integration%20Map.md)
+**Statut :** CONTRAT â€” Document contractuel de securite  
+**Reference :** Miyukini Core System v2.4, [Security - Core Integration Map](..//..//..//WorrySentinel//_index.md)
+

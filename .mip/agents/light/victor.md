@@ -2,7 +2,7 @@
 name: victor-light
 description: >
   Version light de Victor pour workers MASS (spot-check sécurité).
-  Référence complète : .mip/agents/victor.md
+  Référence complète : .mip/agents/victor/FULL_victor.md
 ---
 
 ## Rôle

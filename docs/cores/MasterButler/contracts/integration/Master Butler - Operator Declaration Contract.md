@@ -1,45 +1,45 @@
-# Master Butler — Operator Declaration Contract
+﻿# Master Butler â€” Operator Declaration Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **Master Butler — Operator Declaration Contract** : un contrat normatif, non négociable, et de statut FONDATION qui établit les règles de déclaration des capacités et permissions par les Opérateurs auprès de Master Butler.
+Ce document dÃ©finit le **Master Butler â€” Operator Declaration Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit les rÃ¨gles de dÃ©claration des capacitÃ©s et permissions par les OpÃ©rateurs auprÃ¨s de Master Butler.
 
-Ce contrat spécifie le protocole de déclaration, les formats requis, les règles de validation, les responsabilités des Opérateurs et de Master Butler, les invariants associés, et les garanties offertes par ce processus.
+Ce contrat spÃ©cifie le protocole de dÃ©claration, les formats requis, les rÃ¨gles de validation, les responsabilitÃ©s des OpÃ©rateurs et de Master Butler, les invariants associÃ©s, et les garanties offertes par ce processus.
 
-### Portée / Scope
+### PortÃ©e / Scope
 
-Ce contrat s'applique à **toute déclaration de capacité ou de permission** effectuée par un Opérateur et définit de manière absolue :
-- le protocole de déclaration des capacités,
-- le protocole de définition des permissions,
+Ce contrat s'applique Ã  **toute dÃ©claration de capacitÃ© ou de permission** effectuÃ©e par un OpÃ©rateur et dÃ©finit de maniÃ¨re absolue :
+- le protocole de dÃ©claration des capacitÃ©s,
+- le protocole de dÃ©finition des permissions,
 - les formats et structures requis,
-- les règles de validation des déclarations,
-- les responsabilités des Opérateurs déclarants,
-- les responsabilités de Master Butler lors de l'enregistrement,
-- ce que la déclaration PEUT et NE PEUT JAMAIS faire,
-- les invariants systémiques associés.
+- les rÃ¨gles de validation des dÃ©clarations,
+- les responsabilitÃ©s des OpÃ©rateurs dÃ©clarants,
+- les responsabilitÃ©s de Master Butler lors de l'enregistrement,
+- ce que la dÃ©claration PEUT et NE PEUT JAMAIS faire,
+- les invariants systÃ©miques associÃ©s.
 
 Ce document **ne couvre pas** :
-- L'interrogation des capacités (voir [Capability API Contract](../api/Master%20Butler%20-%20Capability%20API%20Contract.md))
+- L'interrogation des capacitÃ©s (voir [Capability API Contract](../api/Master%20Butler%20-%20Capability%20API%20Contract.md))
 - L'interrogation des permissions (voir [Permission API Contract](../api/Master%20Butler%20-%20Permission%20API%20Contract.md))
-- La découverte (voir [Discovery API Contract](../api/Master%20Butler%20-%20Discovery%20API%20Contract.md))
-- L'intégration avec StrongFather (voir [StrongFather Integration Contract](./Master%20Butler%20-%20StrongFather%20Integration%20Contract.md))
-- L'intégration avec BondingBrother (voir [BondingBrother Integration Contract](./Master%20Butler%20-%20BondingBrother%20Integration%20Contract.md))
+- La dÃ©couverte (voir [Discovery API Contract](../api/Master%20Butler%20-%20Discovery%20API%20Contract.md))
+- L'intÃ©gration avec StrongFather (voir [StrongFather Integration Contract](./Master%20Butler%20-%20StrongFather%20Integration%20Contract.md))
+- L'intÃ©gration avec BondingBrother (voir [BondingBrother Integration Contract](./Master%20Butler%20-%20BondingBrother%20Integration%20Contract.md))
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complète et respecte les documents contractuels existants :
-- **[Master Butler — Documentation Fondatrice](../../foundation/Master%20Butler%20-%20Documentation%20Fondatrice.md)** : Définition fondamentale du rôle de Master Butler
-- **[Master Butler — Capability Registry Contract](../registry/Master%20Butler%20-%20Capability%20Registry%20Contract.md)** : Structure du registre des capacités
-- **[Master Butler — Permission Registry Contract](../registry/Master%20Butler%20-%20Permission%20Registry%20Contract.md)** : Structure du registre des permissions
-- **[Miyukini Conceptual References — Operators et Terminologie](../../../../reference/Miyukini%20Conceptual%20References%20-%20Operators%20et%20Terminologie.md)** : Définition canonique des Opérateurs
-- **[Miyukini Conceptual References — Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)** : Terminologie officielle
-- **[Miyukini Conceptual References — Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Conformité aux lois d'autonomie
+Ce contrat complÃ¨te et respecte les documents contractuels existants :
+- **[Master Butler â€” Documentation Fondatrice](../../foundation/Master%20Butler%20-%20Documentation%20Fondatrice.md)** : DÃ©finition fondamentale du rÃ´le de Master Butler
+- **[Master Butler â€” Capability Registry Contract](../registry/Master%20Butler%20-%20Capability%20Registry%20Contract.md)** : Structure du registre des capacitÃ©s
+- **[Master Butler â€” Permission Registry Contract](../registry/Master%20Butler%20-%20Permission%20Registry%20Contract.md)** : Structure du registre des permissions
+- **[Miyukini Conceptual References â€” Operators et Terminologie](..//..//..//..//miyukini-webway-system//reference//_index.md)** : DÃ©finition canonique des OpÃ©rateurs
+- **[Miyukini Conceptual References â€” Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Terminologie officielle
+- **[Miyukini Conceptual References â€” Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : ConformitÃ© aux lois d'autonomie
 
 Il n'introduit aucune contradiction avec le corpus documentaire existant.
 
@@ -47,60 +47,60 @@ Il n'introduit aucune contradiction avec le corpus documentaire existant.
 
 ## 2. Principes fondamentaux
 
-### 2.1 Définition de la déclaration
+### 2.1 DÃ©finition de la dÃ©claration
 
-> **Une déclaration est l'acte par lequel un Opérateur informe Master Butler des capacités qu'il expose et des permissions qu'il définit.**
+> **Une dÃ©claration est l'acte par lequel un OpÃ©rateur informe Master Butler des capacitÃ©s qu'il expose et des permissions qu'il dÃ©finit.**
 
-La déclaration est un acte fondateur : sans déclaration, aucune capacité n'existe officiellement dans l'environnement. Master Butler est le réceptacle unique de ces déclarations (INV-MB-1 : Exhaustivité du registre).
+La dÃ©claration est un acte fondateur : sans dÃ©claration, aucune capacitÃ© n'existe officiellement dans l'environnement. Master Butler est le rÃ©ceptacle unique de ces dÃ©clarations (INV-MB-1 : ExhaustivitÃ© du registre).
 
-### 2.2 Principe de déclaration obligatoire
+### 2.2 Principe de dÃ©claration obligatoire
 
-> **Toute capacité exposée par un Opérateur DOIT être déclarée à Master Butler.**
+> **Toute capacitÃ© exposÃ©e par un OpÃ©rateur DOIT Ãªtre dÃ©clarÃ©e Ã  Master Butler.**
 
-Aucun Opérateur ne peut exposer une capacité sans la déclarer préalablement. Une capacité non déclarée n'existe pas dans l'écosystème Miyukini.
+Aucun OpÃ©rateur ne peut exposer une capacitÃ© sans la dÃ©clarer prÃ©alablement. Une capacitÃ© non dÃ©clarÃ©e n'existe pas dans l'Ã©cosystÃ¨me Miyukini.
 
-**Règle DECL-01 : Déclaration préalable obligatoire**
+**RÃ¨gle DECL-01 : DÃ©claration prÃ©alable obligatoire**
 
-Un Opérateur NE PEUT PAS utiliser une capacité qu'il n'a pas déclarée à Master Butler. La déclaration précède toujours l'usage.
+Un OpÃ©rateur NE PEUT PAS utiliser une capacitÃ© qu'il n'a pas dÃ©clarÃ©e Ã  Master Butler. La dÃ©claration prÃ©cÃ¨de toujours l'usage.
 
-### 2.3 Principe de souveraineté applicative
+### 2.3 Principe de souverainetÃ© applicative
 
-> **Un environnement Miyukini possède une bibliothèque de capacités finie, déclarée, gouvernée.**
+> **Un environnement Miyukini possÃ¨de une bibliothÃ¨que de capacitÃ©s finie, dÃ©clarÃ©e, gouvernÃ©e.**
 
-Ce principe est non négociable :
+Ce principe est non nÃ©gociable :
 
-| Règle | Description |
+| RÃ¨gle | Description |
 |-------|-------------|
-| **Pas d'injection sauvage** | Aucune capacité ne peut être ajoutée sans déclaration dans Master Butler |
-| **Pas de capacité locale** | Toute capacité doit être déclarée dans l'environnement |
-| **Pas de dépendance cachée** | Aucune capacité externe non gouvernée |
+| **Pas d'injection sauvage** | Aucune capacitÃ© ne peut Ãªtre ajoutÃ©e sans dÃ©claration dans Master Butler |
+| **Pas de capacitÃ© locale** | Toute capacitÃ© doit Ãªtre dÃ©clarÃ©e dans l'environnement |
+| **Pas de dÃ©pendance cachÃ©e** | Aucune capacitÃ© externe non gouvernÃ©e |
 
 ---
 
-## 3. Types de déclarations
+## 3. Types de dÃ©clarations
 
-### 3.1 Déclaration de capacité
+### 3.1 DÃ©claration de capacitÃ©
 
-Une **déclaration de capacité** enregistre un pouvoir technique qu'un Opérateur possède.
+Une **dÃ©claration de capacitÃ©** enregistre un pouvoir technique qu'un OpÃ©rateur possÃ¨de.
 
 **Structure de base :**
 
 | Champ | Type | Obligatoire | Description |
 |-------|------|-------------|-------------|
-| `capability_id` | string | ✅ Oui | Identifiant unique et stable de la capacité |
-| `name` | string | ✅ Oui | Nom lisible de la capacité |
-| `description` | string | ✅ Oui | Description fonctionnelle |
-| `operator_id` | string | ✅ Oui | Identifiant de l'Opérateur déclarant |
-| `module_origin` | string | ✅ Oui | Module d'origine de la capacité |
-| `action_type` | string | ✅ Oui | Type d'action (create, read, update, delete, execute, etc.) |
-| `target_type` | string | ✅ Oui | Type de ressource ciblée |
-| `exposure_level` | enum | ✅ Oui | Niveau d'exposition (internal, operator, inter_cog, public) |
-| `security_level` | enum | ✅ Oui | Niveau de sécurité requis (0-4) |
-| `metadata` | object | ❌ Non | Métadonnées additionnelles |
-| `dependencies` | array | ❌ Non | Capacités dont cette capacité dépend |
-| `version` | string | ✅ Oui | Version de la capacité |
+| `capability_id` | string | âœ… Oui | Identifiant unique et stable de la capacitÃ© |
+| `name` | string | âœ… Oui | Nom lisible de la capacitÃ© |
+| `description` | string | âœ… Oui | Description fonctionnelle |
+| `operator_id` | string | âœ… Oui | Identifiant de l'OpÃ©rateur dÃ©clarant |
+| `module_origin` | string | âœ… Oui | Module d'origine de la capacitÃ© |
+| `action_type` | string | âœ… Oui | Type d'action (create, read, update, delete, execute, etc.) |
+| `target_type` | string | âœ… Oui | Type de ressource ciblÃ©e |
+| `exposure_level` | enum | âœ… Oui | Niveau d'exposition (internal, operator, inter_cog, public) |
+| `security_level` | enum | âœ… Oui | Niveau de sÃ©curitÃ© requis (0-4) |
+| `metadata` | object | âŒ Non | MÃ©tadonnÃ©es additionnelles |
+| `dependencies` | array | âŒ Non | CapacitÃ©s dont cette capacitÃ© dÃ©pend |
+| `version` | string | âœ… Oui | Version de la capacitÃ© |
 
-**Exemple de déclaration de capacité :**
+**Exemple de dÃ©claration de capacitÃ© :**
 
 ```
 {
@@ -122,26 +122,26 @@ Une **déclaration de capacité** enregistre un pouvoir technique qu'un Opérate
 }
 ```
 
-### 3.2 Définition de permission
+### 3.2 DÃ©finition de permission
 
-Une **définition de permission** crée un droit accordable pour accéder à une ou plusieurs capacités.
+Une **dÃ©finition de permission** crÃ©e un droit accordable pour accÃ©der Ã  une ou plusieurs capacitÃ©s.
 
 **Structure de base :**
 
 | Champ | Type | Obligatoire | Description |
 |-------|------|-------------|-------------|
-| `permission_id` | string | ✅ Oui | Identifiant unique de la permission |
-| `name` | string | ✅ Oui | Nom lisible de la permission |
-| `description` | string | ✅ Oui | Description de ce que la permission autorise |
-| `operator_id` | string | ✅ Oui | Identifiant de l'Opérateur définissant |
-| `associated_capabilities` | array | ✅ Oui | Liste des capacités couvertes (minimum 1) |
-| `permission_level` | enum | ✅ Oui | Niveau de permission (basic, standard, elevated, admin) |
-| `scope` | enum | ✅ Oui | Portée (own, team, all) |
-| `conditions` | object | ❌ Non | Conditions d'application |
-| `metadata` | object | ❌ Non | Métadonnées additionnelles |
-| `version` | string | ✅ Oui | Version de la permission |
+| `permission_id` | string | âœ… Oui | Identifiant unique de la permission |
+| `name` | string | âœ… Oui | Nom lisible de la permission |
+| `description` | string | âœ… Oui | Description de ce que la permission autorise |
+| `operator_id` | string | âœ… Oui | Identifiant de l'OpÃ©rateur dÃ©finissant |
+| `associated_capabilities` | array | âœ… Oui | Liste des capacitÃ©s couvertes (minimum 1) |
+| `permission_level` | enum | âœ… Oui | Niveau de permission (basic, standard, elevated, admin) |
+| `scope` | enum | âœ… Oui | PortÃ©e (own, team, all) |
+| `conditions` | object | âŒ Non | Conditions d'application |
+| `metadata` | object | âŒ Non | MÃ©tadonnÃ©es additionnelles |
+| `version` | string | âœ… Oui | Version de la permission |
 
-**Exemple de définition de permission :**
+**Exemple de dÃ©finition de permission :**
 
 ```
 {
@@ -162,477 +162,477 @@ Une **définition de permission** crée un droit accordable pour accéder à une
 }
 ```
 
-### 3.3 Déclaration de Tool
+### 3.3 DÃ©claration de Tool
 
-Une **déclaration de Tool** enregistre une capacité exécutable gouvernée.
-
-**Structure de base :**
-
-| Champ | Type | Obligatoire | Description |
-|-------|------|-------------|-------------|
-| `tool_id` | string | ✅ Oui | Identifiant unique du Tool |
-| `name` | string | ✅ Oui | Nom lisible du Tool |
-| `description` | string | ✅ Oui | Description fonctionnelle |
-| `operator_id` | string | ✅ Oui | Identifiant de l'Opérateur déclarant |
-| `linked_capability` | string | ✅ Oui | Capacité liée au Tool |
-| `input_schema` | object | ✅ Oui | Schéma des entrées |
-| `output_schema` | object | ✅ Oui | Schéma des sorties |
-| `security_level` | enum | ✅ Oui | Niveau de sécurité requis (0-4) |
-| `idempotent` | boolean | ✅ Oui | Indique si le Tool est idempotent |
-| `side_effects` | boolean | ✅ Oui | Indique si le Tool a des effets de bord |
-| `metadata` | object | ❌ Non | Métadonnées additionnelles |
-| `version` | string | ✅ Oui | Version du Tool |
-
-### 3.4 Déclaration de Toolkit
-
-Une **déclaration de Toolkit** enregistre une composition officielle de Tools.
+Une **dÃ©claration de Tool** enregistre une capacitÃ© exÃ©cutable gouvernÃ©e.
 
 **Structure de base :**
 
 | Champ | Type | Obligatoire | Description |
 |-------|------|-------------|-------------|
-| `toolkit_id` | string | ✅ Oui | Identifiant unique du Toolkit |
-| `name` | string | ✅ Oui | Nom lisible du Toolkit |
-| `description` | string | ✅ Oui | Description fonctionnelle |
-| `operator_id` | string | ✅ Oui | Identifiant de l'Opérateur déclarant |
-| `composed_tools` | array | ✅ Oui | Liste des Tools composant le Toolkit (minimum 2) |
-| `orchestration_rules` | object | ❌ Non | Règles d'orchestration des Tools |
-| `metadata` | object | ❌ Non | Métadonnées additionnelles |
-| `version` | string | ✅ Oui | Version du Toolkit |
+| `tool_id` | string | âœ… Oui | Identifiant unique du Tool |
+| `name` | string | âœ… Oui | Nom lisible du Tool |
+| `description` | string | âœ… Oui | Description fonctionnelle |
+| `operator_id` | string | âœ… Oui | Identifiant de l'OpÃ©rateur dÃ©clarant |
+| `linked_capability` | string | âœ… Oui | CapacitÃ© liÃ©e au Tool |
+| `input_schema` | object | âœ… Oui | SchÃ©ma des entrÃ©es |
+| `output_schema` | object | âœ… Oui | SchÃ©ma des sorties |
+| `security_level` | enum | âœ… Oui | Niveau de sÃ©curitÃ© requis (0-4) |
+| `idempotent` | boolean | âœ… Oui | Indique si le Tool est idempotent |
+| `side_effects` | boolean | âœ… Oui | Indique si le Tool a des effets de bord |
+| `metadata` | object | âŒ Non | MÃ©tadonnÃ©es additionnelles |
+| `version` | string | âœ… Oui | Version du Tool |
+
+### 3.4 DÃ©claration de Toolkit
+
+Une **dÃ©claration de Toolkit** enregistre une composition officielle de Tools.
+
+**Structure de base :**
+
+| Champ | Type | Obligatoire | Description |
+|-------|------|-------------|-------------|
+| `toolkit_id` | string | âœ… Oui | Identifiant unique du Toolkit |
+| `name` | string | âœ… Oui | Nom lisible du Toolkit |
+| `description` | string | âœ… Oui | Description fonctionnelle |
+| `operator_id` | string | âœ… Oui | Identifiant de l'OpÃ©rateur dÃ©clarant |
+| `composed_tools` | array | âœ… Oui | Liste des Tools composant le Toolkit (minimum 2) |
+| `orchestration_rules` | object | âŒ Non | RÃ¨gles d'orchestration des Tools |
+| `metadata` | object | âŒ Non | MÃ©tadonnÃ©es additionnelles |
+| `version` | string | âœ… Oui | Version du Toolkit |
 
 ---
 
-## 4. Protocole de déclaration
+## 4. Protocole de dÃ©claration
 
-### 4.1 Flux de déclaration de capacité
+### 4.1 Flux de dÃ©claration de capacitÃ©
 
-**Acteurs :** Opérateur, BondingBrother (optionnel), Master Butler
+**Acteurs :** OpÃ©rateur, BondingBrother (optionnel), Master Butler
 
-**Séquence :**
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│           FLUX DE DÉCLARATION DE CAPACITÉ                        │
-│                                                                   │
-│  OPÉRATEUR                                                       │
-│      │                                                            │
-│      │ 1. Prépare la déclaration de capacité                     │
-│      │    - Identifiant unique                                   │
-│      │    - Métadonnées complètes                                │
-│      │    - Version                                              │
-│      │                                                            │
-│      ▼                                                            │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  SOUMISSION À MASTER BUTLER                              │ │
-│  │                                                            │ │
-│  │  → declaration_api.declare_capability(declaration)        │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│      │                                                            │
-│      ▼                                                            │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  MASTER BUTLER — VALIDATION                              │ │
-│  │                                                            │ │
-│  │  1. Validation structurelle (champs obligatoires)        │ │
-│  │  2. Validation d'unicité (capability_id)                 │ │
-│  │  3. Validation des dépendances (si présentes)            │ │
-│  │  4. Validation de l'Opérateur déclarant                  │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│      │                                                            │
-│      ▼                                                            │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  MASTER BUTLER — ENREGISTREMENT                          │ │
-│  │                                                            │ │
-│  │  Si validation OK :                                       │ │
-│  │    - Enregistrement dans le registre                     │ │
-│  │    - Journalisation de la déclaration                    │ │
-│  │    - Retour : DECLARATION_ACCEPTED                       │ │
-│  │                                                            │ │
-│  │  Si validation KO :                                       │ │
-│  │    - Rejet de la déclaration                             │ │
-│  │    - Retour : DECLARATION_REJECTED + raison              │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│      │                                                            │
-│      ▼                                                            │
-│  OPÉRATEUR REÇOIT LA CONFIRMATION                               │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### 4.2 Flux de définition de permission
-
-**Acteurs :** Opérateur, Master Butler
-
-**Séquence :**
+**SÃ©quence :**
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│           FLUX DE DÉFINITION DE PERMISSION                       │
-│                                                                   │
-│  OPÉRATEUR                                                       │
-│      │                                                            │
-│      │ 1. Prépare la définition de permission                    │
-│      │    - Identifiant unique                                   │
-│      │    - Capacités associées (doivent exister)               │
-│      │    - Métadonnées complètes                                │
-│      │                                                            │
-│      ▼                                                            │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  SOUMISSION À MASTER BUTLER                              │ │
-│  │                                                            │ │
-│  │  → declaration_api.define_permission(definition)          │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│      │                                                            │
-│      ▼                                                            │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  MASTER BUTLER — VALIDATION                              │ │
-│  │                                                            │ │
-│  │  1. Validation structurelle (champs obligatoires)        │ │
-│  │  2. Validation d'unicité (permission_id)                 │ │
-│  │  3. Validation des capacités associées (DOIVENT EXISTER) │ │
-│  │  4. Validation de l'Opérateur définissant               │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│      │                                                            │
-│      ▼                                                            │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  MASTER BUTLER — ENREGISTREMENT                          │ │
-│  │                                                            │ │
-│  │  Si validation OK :                                       │ │
-│  │    - Enregistrement dans le registre                     │ │
-│  │    - Création des associations capability-permission     │ │
-│  │    - Journalisation de la définition                     │ │
-│  │    - Retour : DEFINITION_ACCEPTED                        │ │
-│  │                                                            │ │
-│  │  Si validation KO :                                       │ │
-│  │    - Rejet de la définition                              │ │
-│  │    - Retour : DEFINITION_REJECTED + raison               │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│      │                                                            │
-│      ▼                                                            │
-│  OPÉRATEUR REÇOIT LA CONFIRMATION                               │
-└─────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚           FLUX DE DÃ‰CLARATION DE CAPACITÃ‰                        â”‚
+â”‚                                                                   â”‚
+â”‚  OPÃ‰RATEUR                                                       â”‚
+â”‚      â”‚                                                            â”‚
+â”‚      â”‚ 1. PrÃ©pare la dÃ©claration de capacitÃ©                     â”‚
+â”‚      â”‚    - Identifiant unique                                   â”‚
+â”‚      â”‚    - MÃ©tadonnÃ©es complÃ¨tes                                â”‚
+â”‚      â”‚    - Version                                              â”‚
+â”‚      â”‚                                                            â”‚
+â”‚      â–¼                                                            â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  SOUMISSION Ã€ MASTER BUTLER                              â”‚ â”‚
+â”‚  â”‚                                                            â”‚ â”‚
+â”‚  â”‚  â†’ declaration_api.declare_capability(declaration)        â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚      â”‚                                                            â”‚
+â”‚      â–¼                                                            â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  MASTER BUTLER â€” VALIDATION                              â”‚ â”‚
+â”‚  â”‚                                                            â”‚ â”‚
+â”‚  â”‚  1. Validation structurelle (champs obligatoires)        â”‚ â”‚
+â”‚  â”‚  2. Validation d'unicitÃ© (capability_id)                 â”‚ â”‚
+â”‚  â”‚  3. Validation des dÃ©pendances (si prÃ©sentes)            â”‚ â”‚
+â”‚  â”‚  4. Validation de l'OpÃ©rateur dÃ©clarant                  â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚      â”‚                                                            â”‚
+â”‚      â–¼                                                            â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  MASTER BUTLER â€” ENREGISTREMENT                          â”‚ â”‚
+â”‚  â”‚                                                            â”‚ â”‚
+â”‚  â”‚  Si validation OK :                                       â”‚ â”‚
+â”‚  â”‚    - Enregistrement dans le registre                     â”‚ â”‚
+â”‚  â”‚    - Journalisation de la dÃ©claration                    â”‚ â”‚
+â”‚  â”‚    - Retour : DECLARATION_ACCEPTED                       â”‚ â”‚
+â”‚  â”‚                                                            â”‚ â”‚
+â”‚  â”‚  Si validation KO :                                       â”‚ â”‚
+â”‚  â”‚    - Rejet de la dÃ©claration                             â”‚ â”‚
+â”‚  â”‚    - Retour : DECLARATION_REJECTED + raison              â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚      â”‚                                                            â”‚
+â”‚      â–¼                                                            â”‚
+â”‚  OPÃ‰RATEUR REÃ‡OIT LA CONFIRMATION                               â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### 4.3 Règle d'ordre de déclaration
+### 4.2 Flux de dÃ©finition de permission
 
-**Règle DECL-02 : Dépendances préalables**
+**Acteurs :** OpÃ©rateur, Master Butler
 
-Les capacités DOIVENT être déclarées avant les permissions qui les référencent. Une permission ne peut pas référencer une capacité inexistante.
+**SÃ©quence :**
+
+```
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚           FLUX DE DÃ‰FINITION DE PERMISSION                       â”‚
+â”‚                                                                   â”‚
+â”‚  OPÃ‰RATEUR                                                       â”‚
+â”‚      â”‚                                                            â”‚
+â”‚      â”‚ 1. PrÃ©pare la dÃ©finition de permission                    â”‚
+â”‚      â”‚    - Identifiant unique                                   â”‚
+â”‚      â”‚    - CapacitÃ©s associÃ©es (doivent exister)               â”‚
+â”‚      â”‚    - MÃ©tadonnÃ©es complÃ¨tes                                â”‚
+â”‚      â”‚                                                            â”‚
+â”‚      â–¼                                                            â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  SOUMISSION Ã€ MASTER BUTLER                              â”‚ â”‚
+â”‚  â”‚                                                            â”‚ â”‚
+â”‚  â”‚  â†’ declaration_api.define_permission(definition)          â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚      â”‚                                                            â”‚
+â”‚      â–¼                                                            â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  MASTER BUTLER â€” VALIDATION                              â”‚ â”‚
+â”‚  â”‚                                                            â”‚ â”‚
+â”‚  â”‚  1. Validation structurelle (champs obligatoires)        â”‚ â”‚
+â”‚  â”‚  2. Validation d'unicitÃ© (permission_id)                 â”‚ â”‚
+â”‚  â”‚  3. Validation des capacitÃ©s associÃ©es (DOIVENT EXISTER) â”‚ â”‚
+â”‚  â”‚  4. Validation de l'OpÃ©rateur dÃ©finissant               â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚      â”‚                                                            â”‚
+â”‚      â–¼                                                            â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  MASTER BUTLER â€” ENREGISTREMENT                          â”‚ â”‚
+â”‚  â”‚                                                            â”‚ â”‚
+â”‚  â”‚  Si validation OK :                                       â”‚ â”‚
+â”‚  â”‚    - Enregistrement dans le registre                     â”‚ â”‚
+â”‚  â”‚    - CrÃ©ation des associations capability-permission     â”‚ â”‚
+â”‚  â”‚    - Journalisation de la dÃ©finition                     â”‚ â”‚
+â”‚  â”‚    - Retour : DEFINITION_ACCEPTED                        â”‚ â”‚
+â”‚  â”‚                                                            â”‚ â”‚
+â”‚  â”‚  Si validation KO :                                       â”‚ â”‚
+â”‚  â”‚    - Rejet de la dÃ©finition                              â”‚ â”‚
+â”‚  â”‚    - Retour : DEFINITION_REJECTED + raison               â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚      â”‚                                                            â”‚
+â”‚      â–¼                                                            â”‚
+â”‚  OPÃ‰RATEUR REÃ‡OIT LA CONFIRMATION                               â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```
+
+### 4.3 RÃ¨gle d'ordre de dÃ©claration
+
+**RÃ¨gle DECL-02 : DÃ©pendances prÃ©alables**
+
+Les capacitÃ©s DOIVENT Ãªtre dÃ©clarÃ©es avant les permissions qui les rÃ©fÃ©rencent. Une permission ne peut pas rÃ©fÃ©rencer une capacitÃ© inexistante.
 
 **Ordre obligatoire :**
-1. Déclaration des capacités
-2. Définition des permissions (référençant les capacités existantes)
-3. Déclaration des Tools (liant aux capacités existantes)
-4. Déclaration des Toolkits (composant des Tools existants)
+1. DÃ©claration des capacitÃ©s
+2. DÃ©finition des permissions (rÃ©fÃ©renÃ§ant les capacitÃ©s existantes)
+3. DÃ©claration des Tools (liant aux capacitÃ©s existantes)
+4. DÃ©claration des Toolkits (composant des Tools existants)
 
 ---
 
-## 5. Règles de validation
+## 5. RÃ¨gles de validation
 
 ### 5.1 Validation structurelle
 
-**Règle VAL-01 : Champs obligatoires**
+**RÃ¨gle VAL-01 : Champs obligatoires**
 
-Tous les champs marqués comme obligatoires DOIVENT être présents et non vides. Une déclaration incomplète est rejetée.
+Tous les champs marquÃ©s comme obligatoires DOIVENT Ãªtre prÃ©sents et non vides. Une dÃ©claration incomplÃ¨te est rejetÃ©e.
 
-**Règle VAL-02 : Format des identifiants**
+**RÃ¨gle VAL-02 : Format des identifiants**
 
 Les identifiants (`capability_id`, `permission_id`, `tool_id`, `toolkit_id`) DOIVENT respecter le format suivant :
-- Caractères autorisés : `a-z`, `0-9`, `.`, `-`, `_`
+- CaractÃ¨res autorisÃ©s : `a-z`, `0-9`, `.`, `-`, `_`
 - Pas d'espaces
-- Longueur minimale : 3 caractères
-- Longueur maximale : 128 caractères
-- Format recommandé : `domain.action.scope` (ex: `content.create.own`)
+- Longueur minimale : 3 caractÃ¨res
+- Longueur maximale : 128 caractÃ¨res
+- Format recommandÃ© : `domain.action.scope` (ex: `content.create.own`)
 
-### 5.2 Validation d'unicité
+### 5.2 Validation d'unicitÃ©
 
-**Règle VAL-03 : Unicité des identifiants**
+**RÃ¨gle VAL-03 : UnicitÃ© des identifiants**
 
-Les identifiants DOIVENT être uniques dans leur registre respectif. Une déclaration avec un identifiant déjà existant est traitée selon les règles d'idempotence (voir section 6).
+Les identifiants DOIVENT Ãªtre uniques dans leur registre respectif. Une dÃ©claration avec un identifiant dÃ©jÃ  existant est traitÃ©e selon les rÃ¨gles d'idempotence (voir section 6).
 
-### 5.3 Validation des références
+### 5.3 Validation des rÃ©fÃ©rences
 
-**Règle VAL-04 : Existence des capacités référencées**
+**RÃ¨gle VAL-04 : Existence des capacitÃ©s rÃ©fÃ©rencÃ©es**
 
-Une permission DOIT référencer au moins une capacité existante. Toutes les capacités référencées DOIVENT exister dans le registre.
+Une permission DOIT rÃ©fÃ©rencer au moins une capacitÃ© existante. Toutes les capacitÃ©s rÃ©fÃ©rencÃ©es DOIVENT exister dans le registre.
 
-**Règle VAL-05 : Existence des Tools référencés**
+**RÃ¨gle VAL-05 : Existence des Tools rÃ©fÃ©rencÃ©s**
 
-Un Toolkit DOIT référencer au moins deux Tools existants. Tous les Tools référencés DOIVENT exister dans le registre.
+Un Toolkit DOIT rÃ©fÃ©rencer au moins deux Tools existants. Tous les Tools rÃ©fÃ©rencÃ©s DOIVENT exister dans le registre.
 
-**Règle VAL-06 : Existence des dépendances**
+**RÃ¨gle VAL-06 : Existence des dÃ©pendances**
 
-Si une capacité déclare des dépendances, toutes les dépendances DOIVENT exister dans le registre.
+Si une capacitÃ© dÃ©clare des dÃ©pendances, toutes les dÃ©pendances DOIVENT exister dans le registre.
 
-### 5.4 Validation de l'Opérateur
+### 5.4 Validation de l'OpÃ©rateur
 
-**Règle VAL-07 : Opérateur reconnu**
+**RÃ¨gle VAL-07 : OpÃ©rateur reconnu**
 
-L'Opérateur déclarant DOIT être un Opérateur reconnu dans l'environnement. Un Opérateur inconnu ne peut pas déclarer de capacités.
+L'OpÃ©rateur dÃ©clarant DOIT Ãªtre un OpÃ©rateur reconnu dans l'environnement. Un OpÃ©rateur inconnu ne peut pas dÃ©clarer de capacitÃ©s.
 
-**Règle VAL-08 : Cohérence Opérateur-Module**
+**RÃ¨gle VAL-08 : CohÃ©rence OpÃ©rateur-Module**
 
-L'Opérateur déclarant DOIT être autorisé à déclarer des capacités pour le module d'origine spécifié.
+L'OpÃ©rateur dÃ©clarant DOIT Ãªtre autorisÃ© Ã  dÃ©clarer des capacitÃ©s pour le module d'origine spÃ©cifiÃ©.
 
 ---
 
-## 6. Règles d'idempotence
+## 6. RÃ¨gles d'idempotence
 
 ### 6.1 Principe d'idempotence
 
-**Règle IDEM-01 : Déclarations idempotentes**
+**RÃ¨gle IDEM-01 : DÃ©clarations idempotentes**
 
-Les déclarations de capacités sont idempotentes. Déclarer deux fois la même capacité avec les mêmes données n'a pas d'effet supplémentaire. Le registre reste cohérent quel que soit l'ordre ou le nombre de déclarations.
+Les dÃ©clarations de capacitÃ©s sont idempotentes. DÃ©clarer deux fois la mÃªme capacitÃ© avec les mÃªmes donnÃ©es n'a pas d'effet supplÃ©mentaire. Le registre reste cohÃ©rent quel que soit l'ordre ou le nombre de dÃ©clarations.
 
-### 6.2 Comportement en cas de redéclaration
+### 6.2 Comportement en cas de redÃ©claration
 
-**Scénario 1 : Redéclaration identique**
+**ScÃ©nario 1 : RedÃ©claration identique**
 
-Si une capacité est déclarée avec exactement les mêmes données qu'une capacité existante :
+Si une capacitÃ© est dÃ©clarÃ©e avec exactement les mÃªmes donnÃ©es qu'une capacitÃ© existante :
 - Aucune modification du registre
-- Retour : `DECLARATION_ACCEPTED` (déjà présente)
+- Retour : `DECLARATION_ACCEPTED` (dÃ©jÃ  prÃ©sente)
 
-**Scénario 2 : Redéclaration avec différences**
+**ScÃ©nario 2 : RedÃ©claration avec diffÃ©rences**
 
-Si une capacité est déclarée avec le même identifiant mais des données différentes :
-- Rejet de la déclaration
+Si une capacitÃ© est dÃ©clarÃ©e avec le mÃªme identifiant mais des donnÃ©es diffÃ©rentes :
+- Rejet de la dÃ©claration
 - Retour : `DECLARATION_REJECTED` (conflit de version)
-- L'Opérateur DOIT utiliser le protocole de mise à jour (voir section 8)
+- L'OpÃ©rateur DOIT utiliser le protocole de mise Ã  jour (voir section 8)
 
 ### 6.3 Implications pratiques
 
-**Règle IDEM-02 : Redéclaration au démarrage**
+**RÃ¨gle IDEM-02 : RedÃ©claration au dÃ©marrage**
 
-Les Opérateurs PEUVENT redéclarer leurs capacités à chaque démarrage sans effet indésirable. Cette pratique est encouragée pour garantir la cohérence du registre.
+Les OpÃ©rateurs PEUVENT redÃ©clarer leurs capacitÃ©s Ã  chaque dÃ©marrage sans effet indÃ©sirable. Cette pratique est encouragÃ©e pour garantir la cohÃ©rence du registre.
 
 ---
 
-## 7. Immutabilité des identifiants
+## 7. ImmutabilitÃ© des identifiants
 
-### 7.1 Principe d'immutabilité
+### 7.1 Principe d'immutabilitÃ©
 
-**Règle IMMUT-01 : Identifiants immuables**
+**RÃ¨gle IMMUT-01 : Identifiants immuables**
 
-Les identifiants de capacités sont immuables. Une fois qu'une capacité est déclarée avec un identifiant, cet identifiant ne change jamais.
+Les identifiants de capacitÃ©s sont immuables. Une fois qu'une capacitÃ© est dÃ©clarÃ©e avec un identifiant, cet identifiant ne change jamais.
 
-### 7.2 Conséquences de l'immutabilité
+### 7.2 ConsÃ©quences de l'immutabilitÃ©
 
 | Situation | Action requise |
 |-----------|----------------|
-| Capacité évolue significativement | Créer une nouvelle capacité avec un nouvel identifiant |
-| Correction mineure | Utiliser le protocole de mise à jour (même identifiant, nouvelle version) |
-| Renommage fonctionnel | Créer une nouvelle capacité, déprécier l'ancienne |
+| CapacitÃ© Ã©volue significativement | CrÃ©er une nouvelle capacitÃ© avec un nouvel identifiant |
+| Correction mineure | Utiliser le protocole de mise Ã  jour (mÃªme identifiant, nouvelle version) |
+| Renommage fonctionnel | CrÃ©er une nouvelle capacitÃ©, dÃ©prÃ©cier l'ancienne |
 
-**Règle IMMUT-02 : Stabilité des références**
+**RÃ¨gle IMMUT-02 : StabilitÃ© des rÃ©fÃ©rences**
 
-Les références aux capacités (dans les permissions, les logs, les configurations) DOIVENT rester valides dans le temps grâce à l'immutabilité des identifiants.
+Les rÃ©fÃ©rences aux capacitÃ©s (dans les permissions, les logs, les configurations) DOIVENT rester valides dans le temps grÃ¢ce Ã  l'immutabilitÃ© des identifiants.
 
 ---
 
-## 8. Protocole de mise à jour
+## 8. Protocole de mise Ã  jour
 
-### 8.1 Mise à jour d'une capacité
+### 8.1 Mise Ã  jour d'une capacitÃ©
 
-Une capacité existante peut être mise à jour dans les limites suivantes :
+Une capacitÃ© existante peut Ãªtre mise Ã  jour dans les limites suivantes :
 
 **Champs modifiables :**
 - `name` (avec contraintes)
 - `description`
 - `metadata`
-- `version` (obligatoirement incrémentée)
+- `version` (obligatoirement incrÃ©mentÃ©e)
 
 **Champs NON modifiables :**
 - `capability_id` (immutable)
-- `operator_id` (propriétaire fixe)
-- `module_origin` (fixé à la déclaration)
-- `action_type` (changement = nouvelle capacité)
-- `target_type` (changement = nouvelle capacité)
+- `operator_id` (propriÃ©taire fixe)
+- `module_origin` (fixÃ© Ã  la dÃ©claration)
+- `action_type` (changement = nouvelle capacitÃ©)
+- `target_type` (changement = nouvelle capacitÃ©)
 
-**Flux de mise à jour :**
+**Flux de mise Ã  jour :**
 
 ```
-Opérateur → Master Butler : update_capability(capability_id, updates)
+OpÃ©rateur â†’ Master Butler : update_capability(capability_id, updates)
 Master Butler :
-  1. Vérifie l'existence de la capacité
-  2. Vérifie que l'Opérateur est le propriétaire
-  3. Vérifie que seuls les champs autorisés sont modifiés
-  4. Vérifie que la version est incrémentée
-  5. Applique la mise à jour
+  1. VÃ©rifie l'existence de la capacitÃ©
+  2. VÃ©rifie que l'OpÃ©rateur est le propriÃ©taire
+  3. VÃ©rifie que seuls les champs autorisÃ©s sont modifiÃ©s
+  4. VÃ©rifie que la version est incrÃ©mentÃ©e
+  5. Applique la mise Ã  jour
   6. Journalise la modification
   7. Retourne : UPDATE_ACCEPTED
 ```
 
-### 8.2 Dépréciation d'une capacité
+### 8.2 DÃ©prÃ©ciation d'une capacitÃ©
 
-Une capacité peut être dépréciée mais pas supprimée immédiatement.
+Une capacitÃ© peut Ãªtre dÃ©prÃ©ciÃ©e mais pas supprimÃ©e immÃ©diatement.
 
-**Flux de dépréciation :**
+**Flux de dÃ©prÃ©ciation :**
 
 ```
-Opérateur → Master Butler : deprecate_capability(capability_id, reason, successor_id?)
+OpÃ©rateur â†’ Master Butler : deprecate_capability(capability_id, reason, successor_id?)
 Master Butler :
-  1. Vérifie l'existence de la capacité
-  2. Vérifie que l'Opérateur est le propriétaire
-  3. Marque la capacité comme DEPRECATED
+  1. VÃ©rifie l'existence de la capacitÃ©
+  2. VÃ©rifie que l'OpÃ©rateur est le propriÃ©taire
+  3. Marque la capacitÃ© comme DEPRECATED
   4. Enregistre la raison et le successeur (si fourni)
-  5. Journalise la dépréciation
+  5. Journalise la dÃ©prÃ©ciation
   6. Retourne : DEPRECATION_ACCEPTED
 ```
 
-**Règle DEPR-01 : Période de dépréciation**
+**RÃ¨gle DEPR-01 : PÃ©riode de dÃ©prÃ©ciation**
 
-Une capacité dépréciée reste fonctionnelle pendant une période de grâce définie. Les consommateurs sont avertis de migrer vers le successeur.
+Une capacitÃ© dÃ©prÃ©ciÃ©e reste fonctionnelle pendant une pÃ©riode de grÃ¢ce dÃ©finie. Les consommateurs sont avertis de migrer vers le successeur.
 
 ---
 
-## 9. Responsabilités
+## 9. ResponsabilitÃ©s
 
-### 9.1 Responsabilités de l'Opérateur déclarant
+### 9.1 ResponsabilitÃ©s de l'OpÃ©rateur dÃ©clarant
 
-| Responsabilité | Description |
+| ResponsabilitÃ© | Description |
 |----------------|-------------|
-| **RESP-OP-1** | Déclarer toutes ses capacités avant de les exposer |
+| **RESP-OP-1** | DÃ©clarer toutes ses capacitÃ©s avant de les exposer |
 | **RESP-OP-2** | Fournir des identifiants uniques et stables |
-| **RESP-OP-3** | Fournir des métadonnées complètes et exactes |
-| **RESP-OP-4** | Maintenir la cohérence des déclarations |
-| **RESP-OP-5** | Gérer les versions de ses capacités |
-| **RESP-OP-6** | Déprécier proprement les capacités obsolètes |
-| **RESP-OP-7** | Ne jamais exposer une capacité non déclarée |
+| **RESP-OP-3** | Fournir des mÃ©tadonnÃ©es complÃ¨tes et exactes |
+| **RESP-OP-4** | Maintenir la cohÃ©rence des dÃ©clarations |
+| **RESP-OP-5** | GÃ©rer les versions de ses capacitÃ©s |
+| **RESP-OP-6** | DÃ©prÃ©cier proprement les capacitÃ©s obsolÃ¨tes |
+| **RESP-OP-7** | Ne jamais exposer une capacitÃ© non dÃ©clarÃ©e |
 
-### 9.2 Responsabilités de Master Butler
+### 9.2 ResponsabilitÃ©s de Master Butler
 
-| Responsabilité | Description |
+| ResponsabilitÃ© | Description |
 |----------------|-------------|
-| **RESP-MB-1** | Valider toutes les déclarations selon les règles |
-| **RESP-MB-2** | Enregistrer les déclarations validées |
-| **RESP-MB-3** | Rejeter les déclarations non conformes |
-| **RESP-MB-4** | Garantir l'exhaustivité du registre |
-| **RESP-MB-5** | Journaliser toutes les déclarations |
-| **RESP-MB-6** | Garantir l'idempotence des déclarations |
-| **RESP-MB-7** | Préserver l'immutabilité des identifiants |
+| **RESP-MB-1** | Valider toutes les dÃ©clarations selon les rÃ¨gles |
+| **RESP-MB-2** | Enregistrer les dÃ©clarations validÃ©es |
+| **RESP-MB-3** | Rejeter les dÃ©clarations non conformes |
+| **RESP-MB-4** | Garantir l'exhaustivitÃ© du registre |
+| **RESP-MB-5** | Journaliser toutes les dÃ©clarations |
+| **RESP-MB-6** | Garantir l'idempotence des dÃ©clarations |
+| **RESP-MB-7** | PrÃ©server l'immutabilitÃ© des identifiants |
 
 ---
 
-## 10. Ce que la déclaration PEUT faire
+## 10. Ce que la dÃ©claration PEUT faire
 
-### 10.1 Opérations autorisées
+### 10.1 OpÃ©rations autorisÃ©es
 
-**PEUT-DECL-1 : Enregistrer des capacités**
+**PEUT-DECL-1 : Enregistrer des capacitÃ©s**
 
-Un Opérateur PEUT déclarer des capacités qu'il expose légitimement.
+Un OpÃ©rateur PEUT dÃ©clarer des capacitÃ©s qu'il expose lÃ©gitimement.
 
-**PEUT-DECL-2 : Définir des permissions**
+**PEUT-DECL-2 : DÃ©finir des permissions**
 
-Un Opérateur PEUT définir des permissions associées à ses capacités.
+Un OpÃ©rateur PEUT dÃ©finir des permissions associÃ©es Ã  ses capacitÃ©s.
 
-**PEUT-DECL-3 : Déclarer des Tools**
+**PEUT-DECL-3 : DÃ©clarer des Tools**
 
-Un Opérateur PEUT déclarer des Tools liés à ses capacités.
+Un OpÃ©rateur PEUT dÃ©clarer des Tools liÃ©s Ã  ses capacitÃ©s.
 
-**PEUT-DECL-4 : Déclarer des Toolkits**
+**PEUT-DECL-4 : DÃ©clarer des Toolkits**
 
-Un Opérateur PEUT déclarer des Toolkits composés de ses Tools.
+Un OpÃ©rateur PEUT dÃ©clarer des Toolkits composÃ©s de ses Tools.
 
-**PEUT-DECL-5 : Mettre à jour ses déclarations**
+**PEUT-DECL-5 : Mettre Ã  jour ses dÃ©clarations**
 
-Un Opérateur PEUT mettre à jour ses capacités dans les limites définies.
+Un OpÃ©rateur PEUT mettre Ã  jour ses capacitÃ©s dans les limites dÃ©finies.
 
-**PEUT-DECL-6 : Déprécier ses capacités**
+**PEUT-DECL-6 : DÃ©prÃ©cier ses capacitÃ©s**
 
-Un Opérateur PEUT déprécier ses capacités obsolètes.
+Un OpÃ©rateur PEUT dÃ©prÃ©cier ses capacitÃ©s obsolÃ¨tes.
 
-**PEUT-DECL-7 : Redéclarer au démarrage**
+**PEUT-DECL-7 : RedÃ©clarer au dÃ©marrage**
 
-Un Opérateur PEUT redéclarer ses capacités à chaque démarrage (idempotence).
+Un OpÃ©rateur PEUT redÃ©clarer ses capacitÃ©s Ã  chaque dÃ©marrage (idempotence).
 
 ---
 
-## 11. Ce que la déclaration NE PEUT JAMAIS faire
+## 11. Ce que la dÃ©claration NE PEUT JAMAIS faire
 
 ### 11.1 Interdictions absolues
 
-**INTERDIT-DECL-1 : Déclarer des capacités d'un autre Opérateur**
+**INTERDIT-DECL-1 : DÃ©clarer des capacitÃ©s d'un autre OpÃ©rateur**
 
-Un Opérateur NE PEUT JAMAIS déclarer des capacités appartenant à un autre Opérateur.
+Un OpÃ©rateur NE PEUT JAMAIS dÃ©clarer des capacitÃ©s appartenant Ã  un autre OpÃ©rateur.
 
-**INTERDIT-DECL-2 : Modifier l'identifiant d'une capacité**
+**INTERDIT-DECL-2 : Modifier l'identifiant d'une capacitÃ©**
 
-Un Opérateur NE PEUT JAMAIS modifier l'identifiant d'une capacité existante. Les identifiants sont immuables.
+Un OpÃ©rateur NE PEUT JAMAIS modifier l'identifiant d'une capacitÃ© existante. Les identifiants sont immuables.
 
-**INTERDIT-DECL-3 : Référencer des capacités inexistantes**
+**INTERDIT-DECL-3 : RÃ©fÃ©rencer des capacitÃ©s inexistantes**
 
-Une permission NE PEUT JAMAIS référencer des capacités qui n'existent pas dans le registre.
+Une permission NE PEUT JAMAIS rÃ©fÃ©rencer des capacitÃ©s qui n'existent pas dans le registre.
 
-**INTERDIT-DECL-4 : Supprimer une capacité directement**
+**INTERDIT-DECL-4 : Supprimer une capacitÃ© directement**
 
-Un Opérateur NE PEUT JAMAIS supprimer une capacité directement. Le processus de dépréciation → retrait est obligatoire.
+Un OpÃ©rateur NE PEUT JAMAIS supprimer une capacitÃ© directement. Le processus de dÃ©prÃ©ciation â†’ retrait est obligatoire.
 
 **INTERDIT-DECL-5 : Contourner la validation**
 
-Un Opérateur NE PEUT JAMAIS contourner les règles de validation de Master Butler.
+Un OpÃ©rateur NE PEUT JAMAIS contourner les rÃ¨gles de validation de Master Butler.
 
-**INTERDIT-DECL-6 : Exposer sans déclarer**
+**INTERDIT-DECL-6 : Exposer sans dÃ©clarer**
 
-Un Opérateur NE PEUT JAMAIS exposer une capacité sans l'avoir préalablement déclarée.
+Un OpÃ©rateur NE PEUT JAMAIS exposer une capacitÃ© sans l'avoir prÃ©alablement dÃ©clarÃ©e.
 
-**INTERDIT-DECL-7 : Modifier les métadonnées d'un autre**
+**INTERDIT-DECL-7 : Modifier les mÃ©tadonnÃ©es d'un autre**
 
-Un Opérateur NE PEUT JAMAIS modifier les capacités ou permissions d'un autre Opérateur.
+Un OpÃ©rateur NE PEUT JAMAIS modifier les capacitÃ©s ou permissions d'un autre OpÃ©rateur.
 
 ---
 
-## 12. Invariants de déclaration
+## 12. Invariants de dÃ©claration
 
 ### 12.1 Invariants globaux
 
-**INV-DECL-1 : Exhaustivité**
+**INV-DECL-1 : ExhaustivitÃ©**
 
-Toute capacité exposée dans l'environnement DOIT être présente dans le registre de Master Butler. Aucune capacité fantôme n'est autorisée.
+Toute capacitÃ© exposÃ©e dans l'environnement DOIT Ãªtre prÃ©sente dans le registre de Master Butler. Aucune capacitÃ© fantÃ´me n'est autorisÃ©e.
 
-**INV-DECL-2 : Propriété exclusive**
+**INV-DECL-2 : PropriÃ©tÃ© exclusive**
 
-Chaque capacité appartient à un Opérateur unique. Seul le propriétaire peut modifier ou déprécier sa capacité.
+Chaque capacitÃ© appartient Ã  un OpÃ©rateur unique. Seul le propriÃ©taire peut modifier ou dÃ©prÃ©cier sa capacitÃ©.
 
 **INV-DECL-3 : Idempotence garantie**
 
-Les déclarations sont idempotentes. La même déclaration peut être effectuée plusieurs fois sans effet de bord.
+Les dÃ©clarations sont idempotentes. La mÃªme dÃ©claration peut Ãªtre effectuÃ©e plusieurs fois sans effet de bord.
 
-**INV-DECL-4 : Immutabilité des identifiants**
+**INV-DECL-4 : ImmutabilitÃ© des identifiants**
 
-Les identifiants de capacités ne changent jamais après leur création.
+Les identifiants de capacitÃ©s ne changent jamais aprÃ¨s leur crÃ©ation.
 
-**INV-DECL-5 : Traçabilité complète**
+**INV-DECL-5 : TraÃ§abilitÃ© complÃ¨te**
 
-Toute déclaration, modification, ou dépréciation est journalisée avec son contexte complet.
+Toute dÃ©claration, modification, ou dÃ©prÃ©ciation est journalisÃ©e avec son contexte complet.
 
-**INV-DECL-6 : Cohérence des références**
+**INV-DECL-6 : CohÃ©rence des rÃ©fÃ©rences**
 
-Toutes les références entre entités (permission → capacité, Tool → capacité, Toolkit → Tools) pointent vers des entités existantes.
+Toutes les rÃ©fÃ©rences entre entitÃ©s (permission â†’ capacitÃ©, Tool â†’ capacitÃ©, Toolkit â†’ Tools) pointent vers des entitÃ©s existantes.
 
-**INV-DECL-7 : Ordre de dépendance**
+**INV-DECL-7 : Ordre de dÃ©pendance**
 
-Les entités dépendantes sont toujours créées après leurs dépendances (capacités avant permissions, Tools avant Toolkits).
+Les entitÃ©s dÃ©pendantes sont toujours crÃ©Ã©es aprÃ¨s leurs dÃ©pendances (capacitÃ©s avant permissions, Tools avant Toolkits).
 
 ---
 
-## 13. Traçabilité des déclarations
+## 13. TraÃ§abilitÃ© des dÃ©clarations
 
-### 13.1 Éléments à tracer
+### 13.1 Ã‰lÃ©ments Ã  tracer
 
-| Élément | Description |
+| Ã‰lÃ©ment | Description |
 |---------|-------------|
-| `declaration_id` | Identifiant unique de la déclaration |
-| `timestamp` | Horodatage de la déclaration |
-| `operator_id` | Opérateur déclarant |
+| `declaration_id` | Identifiant unique de la dÃ©claration |
+| `timestamp` | Horodatage de la dÃ©claration |
+| `operator_id` | OpÃ©rateur dÃ©clarant |
 | `declaration_type` | Type (capability, permission, tool, toolkit) |
-| `entity_id` | Identifiant de l'entité déclarée |
+| `entity_id` | Identifiant de l'entitÃ© dÃ©clarÃ©e |
 | `action` | Action (create, update, deprecate) |
-| `previous_state` | État précédent (si modification) |
-| `new_state` | Nouvel état |
-| `validation_result` | Résultat de validation (accepted, rejected) |
+| `previous_state` | Ã‰tat prÃ©cÃ©dent (si modification) |
+| `new_state` | Nouvel Ã©tat |
+| `validation_result` | RÃ©sultat de validation (accepted, rejected) |
 | `rejection_reason` | Raison du rejet (si applicable) |
 
-### 13.2 Rétention des traces
+### 13.2 RÃ©tention des traces
 
-Les traces de déclaration sont conservées indéfiniment. Elles constituent l'historique officiel du registre.
+Les traces de dÃ©claration sont conservÃ©es indÃ©finiment. Elles constituent l'historique officiel du registre.
 
 ---
 
@@ -640,29 +640,29 @@ Les traces de déclaration sont conservées indéfiniment. Elles constituent l'h
 
 ### 14.1 Types de rejets
 
-| Code | Signification | Action Opérateur |
+| Code | Signification | Action OpÃ©rateur |
 |------|---------------|------------------|
-| `MISSING_REQUIRED_FIELD` | Champ obligatoire manquant | Compléter la déclaration |
+| `MISSING_REQUIRED_FIELD` | Champ obligatoire manquant | ComplÃ©ter la dÃ©claration |
 | `INVALID_IDENTIFIER` | Format d'identifiant invalide | Corriger le format |
-| `DUPLICATE_IDENTIFIER` | Identifiant déjà utilisé | Choisir un autre identifiant ou vérifier l'idempotence |
-| `UNKNOWN_CAPABILITY` | Capacité référencée inexistante | Déclarer la capacité d'abord |
-| `UNKNOWN_TOOL` | Tool référencé inexistant | Déclarer le Tool d'abord |
-| `UNAUTHORIZED_OPERATOR` | Opérateur non autorisé | Vérifier l'identité de l'Opérateur |
-| `MODULE_MISMATCH` | Incohérence Opérateur-Module | Vérifier le module d'origine |
-| `IMMUTABLE_FIELD_CHANGE` | Tentative de modification d'un champ immutable | Créer une nouvelle entité |
+| `DUPLICATE_IDENTIFIER` | Identifiant dÃ©jÃ  utilisÃ© | Choisir un autre identifiant ou vÃ©rifier l'idempotence |
+| `UNKNOWN_CAPABILITY` | CapacitÃ© rÃ©fÃ©rencÃ©e inexistante | DÃ©clarer la capacitÃ© d'abord |
+| `UNKNOWN_TOOL` | Tool rÃ©fÃ©rencÃ© inexistant | DÃ©clarer le Tool d'abord |
+| `UNAUTHORIZED_OPERATOR` | OpÃ©rateur non autorisÃ© | VÃ©rifier l'identitÃ© de l'OpÃ©rateur |
+| `MODULE_MISMATCH` | IncohÃ©rence OpÃ©rateur-Module | VÃ©rifier le module d'origine |
+| `IMMUTABLE_FIELD_CHANGE` | Tentative de modification d'un champ immutable | CrÃ©er une nouvelle entitÃ© |
 
 ### 14.2 Principe de gestion
 
-> **En cas d'erreur, la déclaration est rejetée entièrement. Aucune déclaration partielle n'est acceptée.**
+> **En cas d'erreur, la dÃ©claration est rejetÃ©e entiÃ¨rement. Aucune dÃ©claration partielle n'est acceptÃ©e.**
 
 ---
 
 ## 15. Exemples complets
 
-### 15.1 Déclaration complète d'un Opérateur CMS
+### 15.1 DÃ©claration complÃ¨te d'un OpÃ©rateur CMS
 
 ```
-// Étape 1 : Déclaration des capacités
+// Ã‰tape 1 : DÃ©claration des capacitÃ©s
 declare_capability({
   capability_id: "content.create",
   name: "Create Content",
@@ -689,7 +689,7 @@ declare_capability({
   version: "1.0.0"
 })
 
-// Étape 2 : Définition des permissions
+// Ã‰tape 2 : DÃ©finition des permissions
 define_permission({
   permission_id: "content.create.own",
   name: "Create Own Content",
@@ -712,7 +712,7 @@ define_permission({
   version: "1.0.0"
 })
 
-// Étape 3 : Déclaration des Tools
+// Ã‰tape 3 : DÃ©claration des Tools
 declare_tool({
   tool_id: "content.create.tool",
   name: "Content Creation Tool",
@@ -730,88 +730,89 @@ declare_tool({
 
 ---
 
-## 16. Conformité aux Lois d'Autonomie
+## 16. ConformitÃ© aux Lois d'Autonomie
 
-### 16.1 LOI-1 : Aucune dépendance externe
+### 16.1 LOI-1 : Aucune dÃ©pendance externe
 
-Le protocole de déclaration fonctionne entièrement en local. Aucune dépendance externe n'est requise pour déclarer, valider, ou enregistrer des capacités.
+Le protocole de dÃ©claration fonctionne entiÃ¨rement en local. Aucune dÃ©pendance externe n'est requise pour dÃ©clarer, valider, ou enregistrer des capacitÃ©s.
 
-### 16.2 LOI-5 : Coût proportionnel
+### 16.2 LOI-5 : CoÃ»t proportionnel
 
-Les déclarations sont des opérations légères. Le coût de stockage et de traitement est proportionnel au nombre de capacités déclarées, qui reste borné et prévisible.
+Les dÃ©clarations sont des opÃ©rations lÃ©gÃ¨res. Le coÃ»t de stockage et de traitement est proportionnel au nombre de capacitÃ©s dÃ©clarÃ©es, qui reste bornÃ© et prÃ©visible.
 
 ---
 
 ## 17. Conclusion contractuelle
 
-Ce contrat établit de manière définitive et non négociable les règles de déclaration des capacités et permissions par les Opérateurs auprès de Master Butler.
+Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable les rÃ¨gles de dÃ©claration des capacitÃ©s et permissions par les OpÃ©rateurs auprÃ¨s de Master Butler.
 
 Il garantit que :
-- toute capacité est déclarée avant d'être exposée,
+- toute capacitÃ© est dÃ©clarÃ©e avant d'Ãªtre exposÃ©e,
 - les identifiants sont uniques et immuables,
-- les déclarations sont idempotentes,
-- la validation est stricte et complète,
-- la traçabilité est assurée,
-- les responsabilités sont clairement réparties,
-- les invariants sont respectés.
+- les dÃ©clarations sont idempotentes,
+- la validation est stricte et complÃ¨te,
+- la traÃ§abilitÃ© est assurÃ©e,
+- les responsabilitÃ©s sont clairement rÃ©parties,
+- les invariants sont respectÃ©s.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
 
 ---
 
-**Document créé le :** 2026-01-27  
+**Document crÃ©Ã© le :** 2026-01-27  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, Master Butler Documentation Fondatrice v1.4, [Miyukini Conceptual References — Operators et Terminologie](../../../../reference/Miyukini%20Conceptual%20References%20-%20Operators%20et%20Terminologie.md), [Miyukini Conceptual References — Tools et Toolkits](../../../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)  
-**Type :** Contrat de déclaration non négociable
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, Master Butler Documentation Fondatrice v1.4, [Miyukini Conceptual References â€” Operators et Terminologie](..//..//..//..//miyukini-webway-system//reference//_index.md), [Miyukini Conceptual References â€” Tools et Toolkits](..//..//..//..//miyukini-webway-system//reference//_index.md)  
+**Type :** Contrat de dÃ©claration non nÃ©gociable
 
 ---
 
-## 18. Mini log — erreurs / warnings / ambiguïtés rencontrées et corrigées
+## 18. Mini log â€” erreurs / warnings / ambiguÃ¯tÃ©s rencontrÃ©es et corrigÃ©es
 
-### Ambiguïté A1 : Ordre de déclaration des entités
+### AmbiguÃ¯tÃ© A1 : Ordre de dÃ©claration des entitÃ©s
 
-**Ambiguïté rencontrée :** Risque de confusion sur l'ordre de déclaration entre capacités, permissions, Tools et Toolkits.
+**AmbiguÃ¯tÃ© rencontrÃ©e :** Risque de confusion sur l'ordre de dÃ©claration entre capacitÃ©s, permissions, Tools et Toolkits.
 
-**Décision prise :** Section 4.3 définit explicitement l'ordre obligatoire : capacités → permissions → Tools → Toolkits.
+**DÃ©cision prise :** Section 4.3 dÃ©finit explicitement l'ordre obligatoire : capacitÃ©s â†’ permissions â†’ Tools â†’ Toolkits.
 
-**Correction effectuée :** Règle DECL-02 et section 4.3 rédigées avec ordre explicite.
+**Correction effectuÃ©e :** RÃ¨gle DECL-02 et section 4.3 rÃ©digÃ©es avec ordre explicite.
 
-### Ambiguïté A2 : Redéclaration avec différences vs mise à jour
+### AmbiguÃ¯tÃ© A2 : RedÃ©claration avec diffÃ©rences vs mise Ã  jour
 
-**Ambiguïté rencontrée :** Confusion possible entre une redéclaration idempotente et une tentative de modification.
+**AmbiguÃ¯tÃ© rencontrÃ©e :** Confusion possible entre une redÃ©claration idempotente et une tentative de modification.
 
-**Décision prise :** Section 6.2 distingue explicitement les deux scénarios : redéclaration identique (acceptée) vs redéclaration avec différences (rejetée, utiliser le protocole de mise à jour).
+**DÃ©cision prise :** Section 6.2 distingue explicitement les deux scÃ©narios : redÃ©claration identique (acceptÃ©e) vs redÃ©claration avec diffÃ©rences (rejetÃ©e, utiliser le protocole de mise Ã  jour).
 
-**Correction effectuée :** Section 6.2 et section 8 clarifient les deux cas.
+**Correction effectuÃ©e :** Section 6.2 et section 8 clarifient les deux cas.
 
-### Ambiguïté A3 : Propriété des capacités
+### AmbiguÃ¯tÃ© A3 : PropriÃ©tÃ© des capacitÃ©s
 
-**Ambiguïté rencontrée :** Question sur qui peut modifier une capacité.
+**AmbiguÃ¯tÃ© rencontrÃ©e :** Question sur qui peut modifier une capacitÃ©.
 
-**Décision prise :** Invariant INV-DECL-2 établit la propriété exclusive : seul l'Opérateur propriétaire peut modifier ou déprécier sa capacité.
+**DÃ©cision prise :** Invariant INV-DECL-2 Ã©tablit la propriÃ©tÃ© exclusive : seul l'OpÃ©rateur propriÃ©taire peut modifier ou dÃ©prÃ©cier sa capacitÃ©.
 
-**Correction effectuée :** Invariant explicite ajouté, ainsi que les règles VAL-08 et INTERDIT-DECL-7.
+**Correction effectuÃ©e :** Invariant explicite ajoutÃ©, ainsi que les rÃ¨gles VAL-08 et INTERDIT-DECL-7.
 
-### Warning W1 : Suppression directe de capacités
+### Warning W1 : Suppression directe de capacitÃ©s
 
-**Warning rencontré :** Risque d'incohérence si une capacité est supprimée alors que des permissions la référencent.
+**Warning rencontrÃ© :** Risque d'incohÃ©rence si une capacitÃ© est supprimÃ©e alors que des permissions la rÃ©fÃ©rencent.
 
-**Décision prise :** Interdiction INTERDIT-DECL-4 : aucune suppression directe. Le processus de dépréciation est obligatoire.
+**DÃ©cision prise :** Interdiction INTERDIT-DECL-4 : aucune suppression directe. Le processus de dÃ©prÃ©ciation est obligatoire.
 
-**Correction effectuée :** Section 8.2 définit le protocole de dépréciation avec période de grâce.
+**Correction effectuÃ©e :** Section 8.2 dÃ©finit le protocole de dÃ©prÃ©ciation avec pÃ©riode de grÃ¢ce.
 
-### Vérification de compatibilité
+### VÃ©rification de compatibilitÃ©
 
-**Vérification effectuée :**
-- ✅ Cohérence avec Master Butler - Documentation Fondatrice : Confirmée (flux de déclaration, INV-MB-1, INV-MB-3, INV-MB-4, INV-MB-5)
-- ✅ Cohérence avec Operators et Terminologie : Confirmée (définition des Opérateurs, responsabilités)
-- ✅ Cohérence avec Tools et Toolkits : Confirmée (déclaration des Tools et Toolkits)
-- ✅ Conformité LOI-1 : Confirmée (aucune dépendance externe)
-- ✅ Conformité LOI-5 : Confirmée (opérations légères, coût proportionnel)
+**VÃ©rification effectuÃ©e :**
+- âœ… CohÃ©rence avec Master Butler - Documentation Fondatrice : ConfirmÃ©e (flux de dÃ©claration, INV-MB-1, INV-MB-3, INV-MB-4, INV-MB-5)
+- âœ… CohÃ©rence avec Operators et Terminologie : ConfirmÃ©e (dÃ©finition des OpÃ©rateurs, responsabilitÃ©s)
+- âœ… CohÃ©rence avec Tools et Toolkits : ConfirmÃ©e (dÃ©claration des Tools et Toolkits)
+- âœ… ConformitÃ© LOI-1 : ConfirmÃ©e (aucune dÃ©pendance externe)
+- âœ… ConformitÃ© LOI-5 : ConfirmÃ©e (opÃ©rations lÃ©gÃ¨res, coÃ»t proportionnel)
 
-**Conclusion :** Aucune contradiction détectée. Le document est cohérent avec le système contractuel existant.
+**Conclusion :** Aucune contradiction dÃ©tectÃ©e. Le document est cohÃ©rent avec le systÃ¨me contractuel existant.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

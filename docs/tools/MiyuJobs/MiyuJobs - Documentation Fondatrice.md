@@ -1,55 +1,55 @@
-# MiyuJobs — Documentation Fondatrice
+﻿# MiyuJobs â€” Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuJobs** est le **kit d'outils (Toolkit)** de planification et de file d'attente de l'écosystème Miyukini. Il intègre les outils de planification (à une date/heure ou selon expression cron), d'enfilement et de traitement de tâches asynchrones (queue), sans logique métier — la décision de planifier ou d'enfiler relève de **StrongFather** ; MiyuJobs exécute la planification et l'enfilement.
+**MiyuJobs** est le **kit d'outils (Toolkit)** de planification et de file d'attente de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils de planification (Ã  une date/heure ou selon expression cron), d'enfilement et de traitement de tÃ¢ches asynchrones (queue), sans logique mÃ©tier â€” la dÃ©cision de planifier ou d'enfiler relÃ¨ve de **StrongFather** ; MiyuJobs exÃ©cute la planification et l'enfilement.
 
-L'autorité sur les données métier (contenu des jobs, résultats) appartient à **KindMother**. MiyuJobs expose des capacités d'exécution gouvernée (planifier à, planifier cron, enfiler, traiter) ; les décisions (quoi planifier, quand, quoi enfiler) relèvent de **StrongFather** et des Opérateurs.
+L'autoritÃ© sur les donnÃ©es mÃ©tier (contenu des jobs, rÃ©sultats) appartient Ã  **KindMother**. MiyuJobs expose des capacitÃ©s d'exÃ©cution gouvernÃ©e (planifier Ã , planifier cron, enfiler, traiter) ; les dÃ©cisions (quoi planifier, quand, quoi enfiler) relÃ¨vent de **StrongFather** et des OpÃ©rateurs.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-
----
-
-## 2. Portée / Scope
-
-**Ce document définit :** l'identité et la définition canonique de MiyuJobs, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother.
-
-**Hors scope :** l'implémentation détaillée (scheduler, broker de queue) ; la logique métier des tâches exécutées (Opérateurs / StrongFather).
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 3. Définition canonique
+## 2. PortÃ©e / Scope
 
-> **MiyuJobs est une composition officielle d'outils de planification et de file d'attente (schedule at, cron, enqueue, process), déclarée et gouvernée par l'environnement.**
+**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de MiyuJobs, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother.
 
-- MiyuJobs **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
-- MiyuJobs **n'ajoute aucune logique métier** : il orchestre des capacités atomiques (planifier à une date, planifier cron, enfiler une tâche, traiter une tâche) ; décision de planifier/enfiler = StrongFather ; contenu de la tâche fourni dans le flux.
+**Hors scope :** l'implÃ©mentation dÃ©taillÃ©e (scheduler, broker de queue) ; la logique mÃ©tier des tÃ¢ches exÃ©cutÃ©es (OpÃ©rateurs / StrongFather).
 
-**Règle fondamentale :** Un Tool MiyuJobs **exécute** la planification ou l'enfilement ; il **ne décide pas** ce qui doit être planifié ou exécuté — cela relève de StrongFather et des Opérateurs.
+---
+
+## 3. DÃ©finition canonique
+
+> **MiyuJobs est une composition officielle d'outils de planification et de file d'attente (schedule at, cron, enqueue, process), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+
+- MiyuJobs **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
+- MiyuJobs **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques (planifier Ã  une date, planifier cron, enfiler une tÃ¢che, traiter une tÃ¢che) ; dÃ©cision de planifier/enfiler = StrongFather ; contenu de la tÃ¢che fourni dans le flux.
+
+**RÃ¨gle fondamentale :** Un Tool MiyuJobs **exÃ©cute** la planification ou l'enfilement ; il **ne dÃ©cide pas** ce qui doit Ãªtre planifiÃ© ou exÃ©cutÃ© â€” cela relÃ¨ve de StrongFather et des OpÃ©rateurs.
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.jobs.miyujobs` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `jobs` |
-| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le détail de chaque outil est décrit dans [MiyuJobs - Reference Outils](./MiyuJobs%20-%20Reference%20Outils.md).
+Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuJobs - Reference Outils](./MiyuJobs%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
-| `tool.jobs.schedule.at` | Planifie une exécution à une date/heure fournie ; autorisation = StrongFather |
-| `tool.jobs.schedule.cron` | Planifie une exécution selon expression cron fournie ; autorisation = StrongFather |
-| `tool.jobs.queue.enqueue` | Enfile une tâche (payload fourni) dans une queue ; autorisation = StrongFather |
-| `tool.jobs.queue.process` | Traite une tâche (ou un lot) depuis une queue ; exécution selon handler fourni dans le flux |
+| `tool.jobs.schedule.at` | Planifie une exÃ©cution Ã  une date/heure fournie ; autorisation = StrongFather |
+| `tool.jobs.schedule.cron` | Planifie une exÃ©cution selon expression cron fournie ; autorisation = StrongFather |
+| `tool.jobs.queue.enqueue` | Enfile une tÃ¢che (payload fourni) dans une queue ; autorisation = StrongFather |
+| `tool.jobs.queue.process` | Traite une tÃ¢che (ou un lot) depuis une queue ; exÃ©cution selon handler fourni dans le flux |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuJobs en contient quatre.
 
@@ -57,44 +57,46 @@ Le détail de chaque outil est décrit dans [MiyuJobs - Reference Outils](./Miyu
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : **décision de planifier/enfiler = StrongFather** ; contenu des tâches fourni dans le flux ; exécution des tâches = Opérateurs / gouvernance.
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : **dÃ©cision de planifier/enfiler = StrongFather** ; contenu des tÃ¢ches fourni dans le flux ; exÃ©cution des tÃ¢ches = OpÃ©rateurs / gouvernance.
 
 ---
 
-## 7. Niveau de sécurité et états
+## 7. Niveau de sÃ©curitÃ© et Ã©tats
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
-| **Niveau de sécurité du kit** | **1 à 2** (tâches peuvent contenir des données sensibles) |
-| **États autorisés** | Tous sauf restriction WorrySentinel / Caring Nanny |
-| **États interdits** | Selon politique (ex. blocage planification en DEGRADED) |
+| **Niveau de sÃ©curitÃ© du kit** | **1 Ã  2** (tÃ¢ches peuvent contenir des donnÃ©es sensibles) |
+| **Ã‰tats autorisÃ©s** | Tous sauf restriction WorrySentinel / Caring Nanny |
+| **Ã‰tats interdits** | Selon politique (ex. blocage planification en DEGRADED) |
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autorité sur les données métier. Les payloads des jobs peuvent être persistés (queue, historique) ; écriture = **WriteIntent** vers KindMother ou stockage gouverné. MiyuJobs n'exécute pas la logique métier des tâches : il planifie, enfile et déclenche le traitement ; le contenu et le handler sont fournis dans le flux gouverné.
+**KindMother** est l'autoritÃ© sur les donnÃ©es mÃ©tier. Les payloads des jobs peuvent Ãªtre persistÃ©s (queue, historique) ; Ã©criture = **WriteIntent** vers KindMother ou stockage gouvernÃ©. MiyuJobs n'exÃ©cute pas la logique mÃ©tier des tÃ¢ches : il planifie, enfile et dÃ©clenche le traitement ; le contenu et le handler sont fournis dans le flux gouvernÃ©.
 
-Les obligations de conformité détaillées sont dans [MiyuJobs - Tool Governance Compliance Contract](./contracts/governance/MiyuJobs%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuJobs - Tool Governance Compliance Contract](./contracts/governance/MiyuJobs%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-À l'implémentation : chaque Tool MiyuJobs est une unité logique pouvant devenir un **bloc MSCM** : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
+Ã€ l'implÃ©mentation : chaque Tool MiyuJobs est une unitÃ© logique pouvant devenir un **bloc MSCM** : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
 
 ---
 
-## 10. Références croisées
+## 10. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
+| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence fondateur
+**Statut :** Document de rÃ©fÃ©rence fondateur
+
+

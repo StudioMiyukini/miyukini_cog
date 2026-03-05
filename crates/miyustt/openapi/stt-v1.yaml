@@ -2,6 +2,12 @@ openapi: 3.1.0
 info:
   title: MiyuSTT API
   version: 0.1.0
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Token
 paths:
   /api/health:
     get:
@@ -12,6 +18,8 @@ paths:
   /api/stt:
     post:
       summary: Batch transcription
+      security:
+        - bearerAuth: []
       parameters:
         - in: header
           name: X-Request-ID
@@ -37,6 +45,8 @@ paths:
   /api/stt/stream:
     get:
       summary: Streaming transcription (WS upgrade)
+      security:
+        - bearerAuth: []
       responses:
         "101":
           description: Protocol switch

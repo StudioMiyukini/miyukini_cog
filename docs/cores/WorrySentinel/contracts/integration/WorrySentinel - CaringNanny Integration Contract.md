@@ -1,382 +1,382 @@
-# WorrySentinel - CaringNanny Integration Contract
+﻿# WorrySentinel - CaringNanny Integration Contract
 
 ## 1. Contexte
 
-Ce document définit le **contrat d'intégration entre WorrySentinel et CaringNanny**. Il spécifie l'interface, le protocole, les règles de communication, et les garanties associées à l'intégration entre le gouvernant de la sécurité (WorrySentinel) et l'observateur d'état du système (CaringNanny).
+Ce document dÃ©finit le **contrat d'intÃ©gration entre WorrySentinel et CaringNanny**. Il spÃ©cifie l'interface, le protocole, les rÃ¨gles de communication, et les garanties associÃ©es Ã  l'intÃ©gration entre le gouvernant de la sÃ©curitÃ© (WorrySentinel) et l'observateur d'Ã©tat du systÃ¨me (CaringNanny).
 
-Ce document complète la Section 9 "Relation avec CaringNanny" de la [Documentation Fondatrice WorrySentinel](../../foundation/WorrySentinel%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
+Ce document complÃ¨te la Section 9 "Relation avec CaringNanny" de la [Documentation Fondatrice WorrySentinel](../../foundation/WorrySentinel%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
 - [CaringNanny - Documentation Fondatrice](../../../CaringNanny/foundation/Caring%20Nanny%20-%20Documentation%20Fondatrice.md) pour la nature de CaringNanny
-- [Miyukini Conceptual References - Integrity Degradation System](../../../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md) pour les états de confiance T0-T4
-- [Miyukini Conceptual References - Security Levels](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) pour les niveaux de sécurité 0-4
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) pour la conformité LOI-1 à LOI-6
+- [Miyukini Conceptual References - Integrity Degradation System](..//..//..//..//miyukini-webway-system//reference//_index.md) pour les Ã©tats de confiance T0-T4
+- [Miyukini Conceptual References - Security Levels](..//..//..//..//miyukini-webway-system//reference//_index.md) pour les niveaux de sÃ©curitÃ© 0-4
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) pour la conformitÃ© LOI-1 Ã  LOI-6
 
-L'intégration respecte les Lois d'Autonomie Système : toutes les observations et règles de gouvernance sont locales et ne requièrent aucune dépendance externe (**LOI-1**).
+L'intÃ©gration respecte les Lois d'Autonomie SystÃ¨me : toutes les observations et rÃ¨gles de gouvernance sont locales et ne requiÃ¨rent aucune dÃ©pendance externe (**LOI-1**).
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
 Ce document couvre :
 - L'interface contractuelle entre WorrySentinel et CaringNanny
-- Le protocole de communication bidirectionnel asymétrique
-- Les types d'informations échangées (signaux d'observation et règles de gouvernance)
-- L'alimentation des états de confiance par les signaux d'observation
-- Les règles de consolidation des signaux
-- Les garanties de l'intégration
+- Le protocole de communication bidirectionnel asymÃ©trique
+- Les types d'informations Ã©changÃ©es (signaux d'observation et rÃ¨gles de gouvernance)
+- L'alimentation des Ã©tats de confiance par les signaux d'observation
+- Les rÃ¨gles de consolidation des signaux
+- Les garanties de l'intÃ©gration
 
 Ce document **ne couvre pas** :
-- Les détails internes de CaringNanny (voir documentation CaringNanny)
-- Les détails internes de WorrySentinel (voir Architecture WorrySentinel)
-- L'intégration avec StrongFather (voir StrongFather Integration Contract)
-- L'intégration avec BorderGuard (voir BorderGuard Integration Contract)
-- L'intégration avec LogisticsSteward (voir LogisticsSteward Integration Contract)
+- Les dÃ©tails internes de CaringNanny (voir documentation CaringNanny)
+- Les dÃ©tails internes de WorrySentinel (voir Architecture WorrySentinel)
+- L'intÃ©gration avec StrongFather (voir StrongFather Integration Contract)
+- L'intÃ©gration avec BorderGuard (voir BorderGuard Integration Contract)
+- L'intÃ©gration avec LogisticsSteward (voir LogisticsSteward Integration Contract)
 
 ---
 
 ## 3. Principe fondamental
 
-**CaringNanny consolide les signaux d'intégrité qui alimentent la gouvernance des états de confiance. WorrySentinel gouverne les règles selon lesquelles CaringNanny doit consolider ces signaux. CaringNanny observe et rapporte, WorrySentinel gouverne et décide des transitions d'état.**
+**CaringNanny consolide les signaux d'intÃ©gritÃ© qui alimentent la gouvernance des Ã©tats de confiance. WorrySentinel gouverne les rÃ¨gles selon lesquelles CaringNanny doit consolider ces signaux. CaringNanny observe et rapporte, WorrySentinel gouverne et dÃ©cide des transitions d'Ã©tat.**
 
-La relation est **bidirectionnelle asymétrique** :
-- **Flux montant** : CaringNanny fournit des signaux d'observation à WorrySentinel
-- **Flux descendant** : WorrySentinel impose des règles de consolidation à CaringNanny
+La relation est **bidirectionnelle asymÃ©trique** :
+- **Flux montant** : CaringNanny fournit des signaux d'observation Ã  WorrySentinel
+- **Flux descendant** : WorrySentinel impose des rÃ¨gles de consolidation Ã  CaringNanny
 
 ---
 
-## 4. Nature de la relation WorrySentinel — CaringNanny
+## 4. Nature de la relation WorrySentinel â€” CaringNanny
 
-### 4.1 Relation de collaboration asymétrique
+### 4.1 Relation de collaboration asymÃ©trique
 
-**CaringNanny contribue à WorrySentinel par :**
-- La consolidation des signaux d'intégrité de tous les composants
-- La détection des anomalies et leur classification
-- L'agrégation des états partiels en vision globale
-- La proposition de transitions d'état basées sur les observations
+**CaringNanny contribue Ã  WorrySentinel par :**
+- La consolidation des signaux d'intÃ©gritÃ© de tous les composants
+- La dÃ©tection des anomalies et leur classification
+- L'agrÃ©gation des Ã©tats partiels en vision globale
+- La proposition de transitions d'Ã©tat basÃ©es sur les observations
 
 **WorrySentinel gouverne CaringNanny par :**
-- Les règles de classification des signaux
-- Les seuils de transition entre états de confiance
-- Les priorités de consolidation selon les niveaux de sécurité
-- L'activation de modes d'observation renforcée
+- Les rÃ¨gles de classification des signaux
+- Les seuils de transition entre Ã©tats de confiance
+- Les prioritÃ©s de consolidation selon les niveaux de sÃ©curitÃ©
+- L'activation de modes d'observation renforcÃ©e
 
-**Règle WS-CN-01 : Observation sans décision**
+**RÃ¨gle WS-CN-01 : Observation sans dÃ©cision**
 
-CaringNanny observe, consolide et rapporte, mais ne décide jamais des transitions d'état de confiance. La décision de transition appartient exclusivement à WorrySentinel.
+CaringNanny observe, consolide et rapporte, mais ne dÃ©cide jamais des transitions d'Ã©tat de confiance. La dÃ©cision de transition appartient exclusivement Ã  WorrySentinel.
 
-**Règle WS-CN-02 : Gouvernance sans observation**
+**RÃ¨gle WS-CN-02 : Gouvernance sans observation**
 
-WorrySentinel gouverne les règles de consolidation, mais n'observe jamais directement les composants. L'observation appartient exclusivement à CaringNanny.
+WorrySentinel gouverne les rÃ¨gles de consolidation, mais n'observe jamais directement les composants. L'observation appartient exclusivement Ã  CaringNanny.
 
-**Règle WS-CN-03 : Séparation stricte**
+**RÃ¨gle WS-CN-03 : SÃ©paration stricte**
 
-CaringNanny ne modifie jamais un état de confiance. WorrySentinel ne collecte jamais de signal directement.
+CaringNanny ne modifie jamais un Ã©tat de confiance. WorrySentinel ne collecte jamais de signal directement.
 
-### 4.2 Séparation des responsabilités
+### 4.2 SÃ©paration des responsabilitÃ©s
 
-| Responsabilité | WorrySentinel | CaringNanny |
+| ResponsabilitÃ© | WorrySentinel | CaringNanny |
 |----------------|---------------|-------------|
-| **Observer les composants** | ❌ Jamais | ✅ Exclusif |
-| **Détecter les anomalies** | ❌ Jamais | ✅ Exclusif |
-| **Consolider les signaux** | ❌ Jamais | ✅ Exclusif |
-| **Agréger en vision globale** | ❌ Consomme | ✅ Exclusif |
-| **Définir les règles de classification** | ✅ Exclusif | ❌ Applique |
-| **Définir les seuils de transition** | ✅ Exclusif | ❌ Utilise |
-| **Décider des transitions T0-T4** | ✅ Exclusif | ❌ Propose |
-| **Gouverner les états de confiance** | ✅ Exclusif | ❌ Jamais |
-| **Modifier les états de confiance** | ✅ Exclusif | ❌ Jamais |
+| **Observer les composants** | âŒ Jamais | âœ… Exclusif |
+| **DÃ©tecter les anomalies** | âŒ Jamais | âœ… Exclusif |
+| **Consolider les signaux** | âŒ Jamais | âœ… Exclusif |
+| **AgrÃ©ger en vision globale** | âŒ Consomme | âœ… Exclusif |
+| **DÃ©finir les rÃ¨gles de classification** | âœ… Exclusif | âŒ Applique |
+| **DÃ©finir les seuils de transition** | âœ… Exclusif | âŒ Utilise |
+| **DÃ©cider des transitions T0-T4** | âœ… Exclusif | âŒ Propose |
+| **Gouverner les Ã©tats de confiance** | âœ… Exclusif | âŒ Jamais |
+| **Modifier les Ã©tats de confiance** | âœ… Exclusif | âŒ Jamais |
 
-**Règle WS-CN-04 : Aucun chevauchement**
+**RÃ¨gle WS-CN-04 : Aucun chevauchement**
 
-Aucun chevauchement de responsabilités n'est autorisé. CaringNanny ne gouverne jamais les états de confiance, WorrySentinel n'observe jamais directement les composants.
+Aucun chevauchement de responsabilitÃ©s n'est autorisÃ©. CaringNanny ne gouverne jamais les Ã©tats de confiance, WorrySentinel n'observe jamais directement les composants.
 
-### 4.3 Cycle de gouvernance des états de confiance
+### 4.3 Cycle de gouvernance des Ã©tats de confiance
 
-Le cycle de gouvernance des états de confiance implique les deux cores :
+Le cycle de gouvernance des Ã©tats de confiance implique les deux cores :
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                   CYCLE DE GOUVERNANCE T0-T4                         │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│   1. OBSERVATION (CaringNanny)                                       │
-│      │                                                               │
-│      ├── Détecte les conditions des composants                       │
-│      ├── Classifie selon les règles de WorrySentinel                │
-│      └── Agrège en signaux consolidés                                │
-│                                                                      │
-│   2. RAPPORTAGE (CaringNanny → WorrySentinel)                       │
-│      │                                                               │
-│      ├── Transmet les signaux consolidés                             │
-│      ├── Propose des transitions si seuils atteints                  │
-│      └── Fournit le contexte et la justification                     │
-│                                                                      │
-│   3. GOUVERNANCE (WorrySentinel)                                     │
-│      │                                                               │
-│      ├── Évalue les signaux selon les règles                         │
-│      ├── Décide de la transition (ou non)                            │
-│      └── Déclare le nouvel état de confiance                         │
-│                                                                      │
-│   4. PROPAGATION (WorrySentinel → tous les cores)                   │
-│      │                                                               │
-│      └── Notifie tous les cores du nouvel état                       │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                   CYCLE DE GOUVERNANCE T0-T4                         â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                      â”‚
+â”‚   1. OBSERVATION (CaringNanny)                                       â”‚
+â”‚      â”‚                                                               â”‚
+â”‚      â”œâ”€â”€ DÃ©tecte les conditions des composants                       â”‚
+â”‚      â”œâ”€â”€ Classifie selon les rÃ¨gles de WorrySentinel                â”‚
+â”‚      â””â”€â”€ AgrÃ¨ge en signaux consolidÃ©s                                â”‚
+â”‚                                                                      â”‚
+â”‚   2. RAPPORTAGE (CaringNanny â†’ WorrySentinel)                       â”‚
+â”‚      â”‚                                                               â”‚
+â”‚      â”œâ”€â”€ Transmet les signaux consolidÃ©s                             â”‚
+â”‚      â”œâ”€â”€ Propose des transitions si seuils atteints                  â”‚
+â”‚      â””â”€â”€ Fournit le contexte et la justification                     â”‚
+â”‚                                                                      â”‚
+â”‚   3. GOUVERNANCE (WorrySentinel)                                     â”‚
+â”‚      â”‚                                                               â”‚
+â”‚      â”œâ”€â”€ Ã‰value les signaux selon les rÃ¨gles                         â”‚
+â”‚      â”œâ”€â”€ DÃ©cide de la transition (ou non)                            â”‚
+â”‚      â””â”€â”€ DÃ©clare le nouvel Ã©tat de confiance                         â”‚
+â”‚                                                                      â”‚
+â”‚   4. PROPAGATION (WorrySentinel â†’ tous les cores)                   â”‚
+â”‚      â”‚                                                               â”‚
+â”‚      â””â”€â”€ Notifie tous les cores du nouvel Ã©tat                       â”‚
+â”‚                                                                      â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
 
-## 5. Ce que WorrySentinel ne fait JAMAIS vis-à-vis de CaringNanny
+## 5. Ce que WorrySentinel ne fait JAMAIS vis-Ã -vis de CaringNanny
 
 ### 5.1 Interdictions absolues
 
 **INV-WS-CN-NEVER-1 : N'observe jamais directement**
 
-WorrySentinel n'observe **jamais** directement les composants du système. L'observation est la responsabilité exclusive de CaringNanny.
+WorrySentinel n'observe **jamais** directement les composants du systÃ¨me. L'observation est la responsabilitÃ© exclusive de CaringNanny.
 
 **INV-WS-CN-NEVER-2 : Ne collecte jamais de signaux**
 
 WorrySentinel ne collecte **jamais** de signaux directement des composants. Tous les signaux transitent par CaringNanny.
 
-**INV-WS-CN-NEVER-3 : Ne modifie jamais l'état d'un composant**
+**INV-WS-CN-NEVER-3 : Ne modifie jamais l'Ã©tat d'un composant**
 
-WorrySentinel ne modifie **jamais** l'état d'un composant. La modification d'état est hors-scope des deux cores (pas d'action corrective).
+WorrySentinel ne modifie **jamais** l'Ã©tat d'un composant. La modification d'Ã©tat est hors-scope des deux cores (pas d'action corrective).
 
-**INV-WS-CN-NEVER-4 : N'agrège jamais les états partiels**
+**INV-WS-CN-NEVER-4 : N'agrÃ¨ge jamais les Ã©tats partiels**
 
-WorrySentinel n'agrège **jamais** les états partiels en vision globale. L'agrégation est la responsabilité exclusive de CaringNanny.
+WorrySentinel n'agrÃ¨ge **jamais** les Ã©tats partiels en vision globale. L'agrÃ©gation est la responsabilitÃ© exclusive de CaringNanny.
 
-**INV-WS-CN-NEVER-5 : N'interfère jamais avec l'observation**
+**INV-WS-CN-NEVER-5 : N'interfÃ¨re jamais avec l'observation**
 
-WorrySentinel n'interfère **jamais** avec le processus d'observation de CaringNanny. Les règles de gouvernance guident, elles n'imposent pas de méthode d'observation.
+WorrySentinel n'interfÃ¨re **jamais** avec le processus d'observation de CaringNanny. Les rÃ¨gles de gouvernance guident, elles n'imposent pas de mÃ©thode d'observation.
 
 ---
 
-## 6. Ce que CaringNanny ne fait JAMAIS vis-à-vis de WorrySentinel
+## 6. Ce que CaringNanny ne fait JAMAIS vis-Ã -vis de WorrySentinel
 
 ### 6.1 Interdictions absolues
 
-**INV-CN-WS-NEVER-1 : Ne gouverne jamais les états de confiance**
+**INV-CN-WS-NEVER-1 : Ne gouverne jamais les Ã©tats de confiance**
 
-CaringNanny ne gouverne **jamais** les états de confiance (T0-T4). La gouvernance est la responsabilité exclusive de WorrySentinel.
+CaringNanny ne gouverne **jamais** les Ã©tats de confiance (T0-T4). La gouvernance est la responsabilitÃ© exclusive de WorrySentinel.
 
-**INV-CN-WS-NEVER-2 : Ne décide jamais des transitions**
+**INV-CN-WS-NEVER-2 : Ne dÃ©cide jamais des transitions**
 
-CaringNanny ne décide **jamais** des transitions entre états de confiance. Elle propose des transitions basées sur les seuils, mais c'est WorrySentinel qui décide.
+CaringNanny ne dÃ©cide **jamais** des transitions entre Ã©tats de confiance. Elle propose des transitions basÃ©es sur les seuils, mais c'est WorrySentinel qui dÃ©cide.
 
-**INV-CN-WS-NEVER-3 : Ne modifie jamais un état de confiance**
+**INV-CN-WS-NEVER-3 : Ne modifie jamais un Ã©tat de confiance**
 
-CaringNanny ne modifie **jamais** un état de confiance. Seul WorrySentinel peut déclarer un changement d'état.
+CaringNanny ne modifie **jamais** un Ã©tat de confiance. Seul WorrySentinel peut dÃ©clarer un changement d'Ã©tat.
 
-**INV-CN-WS-NEVER-4 : Ne définit jamais les règles de classification**
+**INV-CN-WS-NEVER-4 : Ne dÃ©finit jamais les rÃ¨gles de classification**
 
-CaringNanny ne définit **jamais** les règles de classification des signaux. Les règles sont définies par WorrySentinel (ou l'écosystème), CaringNanny les applique.
+CaringNanny ne dÃ©finit **jamais** les rÃ¨gles de classification des signaux. Les rÃ¨gles sont dÃ©finies par WorrySentinel (ou l'Ã©cosystÃ¨me), CaringNanny les applique.
 
-**INV-CN-WS-NEVER-5 : N'ignore jamais les règles de WorrySentinel**
+**INV-CN-WS-NEVER-5 : N'ignore jamais les rÃ¨gles de WorrySentinel**
 
-CaringNanny n'ignore **jamais** les règles de consolidation imposées par WorrySentinel. L'application des règles est obligatoire.
+CaringNanny n'ignore **jamais** les rÃ¨gles de consolidation imposÃ©es par WorrySentinel. L'application des rÃ¨gles est obligatoire.
 
 ---
 
-## 7. Types d'informations échangées
+## 7. Types d'informations Ã©changÃ©es
 
-### 7.1 Flux montant : CaringNanny → WorrySentinel
+### 7.1 Flux montant : CaringNanny â†’ WorrySentinel
 
 **INTEGRITY_SIGNAL**
-- **Objectif :** Transmettre un signal d'intégrité consolidé
-- **Contenu :** Source, nature du signal, classification, sévérité
-- **Déclencheur :** Détection d'une condition significative
+- **Objectif :** Transmettre un signal d'intÃ©gritÃ© consolidÃ©
+- **Contenu :** Source, nature du signal, classification, sÃ©vÃ©ritÃ©
+- **DÃ©clencheur :** DÃ©tection d'une condition significative
 
-**Structure du signal d'intégrité :**
+**Structure du signal d'intÃ©gritÃ© :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `signal_id` | Identifiant unique du signal | ✅ Oui |
-| `source` | Composant source (core, module, produit) | ✅ Oui |
-| `signal_type` | Type de signal (anomaly, degradation, recovery, nominal) | ✅ Oui |
-| `classification` | Classification selon règles WorrySentinel | ✅ Oui |
-| `severity` | Sévérité (info, warning, critical, emergency) | ✅ Oui |
-| `context` | Contexte de l'observation | ✅ Oui |
-| `timestamp` | Horodatage de l'observation | ✅ Oui |
+| `signal_id` | Identifiant unique du signal | âœ… Oui |
+| `source` | Composant source (core, module, produit) | âœ… Oui |
+| `signal_type` | Type de signal (anomaly, degradation, recovery, nominal) | âœ… Oui |
+| `classification` | Classification selon rÃ¨gles WorrySentinel | âœ… Oui |
+| `severity` | SÃ©vÃ©ritÃ© (info, warning, critical, emergency) | âœ… Oui |
+| `context` | Contexte de l'observation | âœ… Oui |
+| `timestamp` | Horodatage de l'observation | âœ… Oui |
 
 **TRANSITION_PROPOSAL**
-- **Objectif :** Proposer une transition d'état de confiance
-- **Contenu :** État actuel, état proposé, signaux justificatifs
-- **Déclencheur :** Seuils de transition atteints selon les règles
+- **Objectif :** Proposer une transition d'Ã©tat de confiance
+- **Contenu :** Ã‰tat actuel, Ã©tat proposÃ©, signaux justificatifs
+- **DÃ©clencheur :** Seuils de transition atteints selon les rÃ¨gles
 
 **Structure de la proposition de transition :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `proposal_id` | Identifiant unique de la proposition | ✅ Oui |
-| `current_state` | État de confiance actuel (T0-T4) | ✅ Oui |
-| `proposed_state` | État de confiance proposé (T0-T4) | ✅ Oui |
-| `justifying_signals` | Liste des signaux justifiant la proposition | ✅ Oui |
-| `threshold_met` | Seuil atteint selon les règles | ✅ Oui |
-| `confidence_score` | Score de confiance de la proposition | ✅ Oui |
-| `timestamp` | Horodatage de la proposition | ✅ Oui |
+| `proposal_id` | Identifiant unique de la proposition | âœ… Oui |
+| `current_state` | Ã‰tat de confiance actuel (T0-T4) | âœ… Oui |
+| `proposed_state` | Ã‰tat de confiance proposÃ© (T0-T4) | âœ… Oui |
+| `justifying_signals` | Liste des signaux justifiant la proposition | âœ… Oui |
+| `threshold_met` | Seuil atteint selon les rÃ¨gles | âœ… Oui |
+| `confidence_score` | Score de confiance de la proposition | âœ… Oui |
+| `timestamp` | Horodatage de la proposition | âœ… Oui |
 
 **CONSOLIDATED_STATE**
-- **Objectif :** Fournir une vision consolidée de l'état global
-- **Contenu :** États partiels agrégés, tendances, indicateurs
-- **Déclencheur :** Demande de WorrySentinel ou périodique
+- **Objectif :** Fournir une vision consolidÃ©e de l'Ã©tat global
+- **Contenu :** Ã‰tats partiels agrÃ©gÃ©s, tendances, indicateurs
+- **DÃ©clencheur :** Demande de WorrySentinel ou pÃ©riodique
 
-**Structure de l'état consolidé :**
+**Structure de l'Ã©tat consolidÃ© :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `consolidation_id` | Identifiant unique de la consolidation | ✅ Oui |
-| `observation_window` | Fenêtre d'observation | ✅ Oui |
-| `component_states` | États partiels par composant | ✅ Oui |
-| `anomaly_count` | Nombre d'anomalies détectées | ✅ Oui |
-| `trend` | Tendance générale (improving, stable, degrading) | ✅ Oui |
-| `timestamp` | Horodatage de la consolidation | ✅ Oui |
+| `consolidation_id` | Identifiant unique de la consolidation | âœ… Oui |
+| `observation_window` | FenÃªtre d'observation | âœ… Oui |
+| `component_states` | Ã‰tats partiels par composant | âœ… Oui |
+| `anomaly_count` | Nombre d'anomalies dÃ©tectÃ©es | âœ… Oui |
+| `trend` | Tendance gÃ©nÃ©rale (improving, stable, degrading) | âœ… Oui |
+| `timestamp` | Horodatage de la consolidation | âœ… Oui |
 
-### 7.2 Flux descendant : WorrySentinel → CaringNanny
+### 7.2 Flux descendant : WorrySentinel â†’ CaringNanny
 
 **CLASSIFICATION_RULES**
-- **Objectif :** Définir ou mettre à jour les règles de classification
-- **Contenu :** Règles de classification des signaux par type et sévérité
-- **Déclencheur :** Initialisation ou mise à jour des règles
+- **Objectif :** DÃ©finir ou mettre Ã  jour les rÃ¨gles de classification
+- **Contenu :** RÃ¨gles de classification des signaux par type et sÃ©vÃ©ritÃ©
+- **DÃ©clencheur :** Initialisation ou mise Ã  jour des rÃ¨gles
 
-**Structure des règles de classification :**
+**Structure des rÃ¨gles de classification :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `rules_id` | Identifiant unique du jeu de règles | ✅ Oui |
-| `rules_version` | Version des règles | ✅ Oui |
-| `signal_classifications` | Mapping signal → classification | ✅ Oui |
-| `severity_weights` | Pondérations par sévérité | ✅ Oui |
-| `effective_from` | Date d'effet des règles | ✅ Oui |
+| `rules_id` | Identifiant unique du jeu de rÃ¨gles | âœ… Oui |
+| `rules_version` | Version des rÃ¨gles | âœ… Oui |
+| `signal_classifications` | Mapping signal â†’ classification | âœ… Oui |
+| `severity_weights` | PondÃ©rations par sÃ©vÃ©ritÃ© | âœ… Oui |
+| `effective_from` | Date d'effet des rÃ¨gles | âœ… Oui |
 
 **TRANSITION_THRESHOLDS**
-- **Objectif :** Définir les seuils de transition T0-T4
-- **Contenu :** Seuils pour chaque transition autorisée
-- **Déclencheur :** Initialisation ou mise à jour des seuils
+- **Objectif :** DÃ©finir les seuils de transition T0-T4
+- **Contenu :** Seuils pour chaque transition autorisÃ©e
+- **DÃ©clencheur :** Initialisation ou mise Ã  jour des seuils
 
 **Structure des seuils de transition :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `thresholds_id` | Identifiant unique des seuils | ✅ Oui |
-| `thresholds_version` | Version des seuils | ✅ Oui |
-| `transitions` | Liste des transitions avec leurs seuils | ✅ Oui |
-| `effective_from` | Date d'effet des seuils | ✅ Oui |
+| `thresholds_id` | Identifiant unique des seuils | âœ… Oui |
+| `thresholds_version` | Version des seuils | âœ… Oui |
+| `transitions` | Liste des transitions avec leurs seuils | âœ… Oui |
+| `effective_from` | Date d'effet des seuils | âœ… Oui |
 
 **OBSERVATION_MODE**
-- **Objectif :** Activer un mode d'observation spécifique
-- **Contenu :** Mode (normal, enhanced, emergency), durée
-- **Déclencheur :** Changement d'état de confiance ou alerte
+- **Objectif :** Activer un mode d'observation spÃ©cifique
+- **Contenu :** Mode (normal, enhanced, emergency), durÃ©e
+- **DÃ©clencheur :** Changement d'Ã©tat de confiance ou alerte
 
 **Structure du mode d'observation :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `mode_id` | Identifiant unique du mode | ✅ Oui |
-| `mode_type` | Type (normal, enhanced, emergency) | ✅ Oui |
-| `focus_areas` | Composants à surveiller en priorité | ❌ Optionnel |
-| `sampling_rate` | Fréquence d'observation | ❌ Optionnel |
-| `duration` | Durée du mode (null = jusqu'à nouvel ordre) | ❌ Optionnel |
-| `timestamp` | Horodatage de l'activation | ✅ Oui |
+| `mode_id` | Identifiant unique du mode | âœ… Oui |
+| `mode_type` | Type (normal, enhanced, emergency) | âœ… Oui |
+| `focus_areas` | Composants Ã  surveiller en prioritÃ© | âŒ Optionnel |
+| `sampling_rate` | FrÃ©quence d'observation | âŒ Optionnel |
+| `duration` | DurÃ©e du mode (null = jusqu'Ã  nouvel ordre) | âŒ Optionnel |
+| `timestamp` | Horodatage de l'activation | âœ… Oui |
 
 **STATE_DECLARATION**
-- **Objectif :** Notifier le nouvel état de confiance décidé
-- **Contenu :** État précédent, nouvel état, justification
-- **Déclencheur :** Décision de transition par WorrySentinel
+- **Objectif :** Notifier le nouvel Ã©tat de confiance dÃ©cidÃ©
+- **Contenu :** Ã‰tat prÃ©cÃ©dent, nouvel Ã©tat, justification
+- **DÃ©clencheur :** DÃ©cision de transition par WorrySentinel
 
-**Structure de la déclaration d'état :**
+**Structure de la dÃ©claration d'Ã©tat :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `declaration_id` | Identifiant unique de la déclaration | ✅ Oui |
-| `previous_state` | État de confiance précédent (T0-T4) | ✅ Oui |
-| `new_state` | Nouvel état de confiance (T0-T4) | ✅ Oui |
-| `justification` | Justification de la transition | ✅ Oui |
-| `accepted_proposal` | Référence à la proposition acceptée (si applicable) | ❌ Optionnel |
-| `timestamp` | Horodatage de la déclaration | ✅ Oui |
+| `declaration_id` | Identifiant unique de la dÃ©claration | âœ… Oui |
+| `previous_state` | Ã‰tat de confiance prÃ©cÃ©dent (T0-T4) | âœ… Oui |
+| `new_state` | Nouvel Ã©tat de confiance (T0-T4) | âœ… Oui |
+| `justification` | Justification de la transition | âœ… Oui |
+| `accepted_proposal` | RÃ©fÃ©rence Ã  la proposition acceptÃ©e (si applicable) | âŒ Optionnel |
+| `timestamp` | Horodatage de la dÃ©claration | âœ… Oui |
 
 ---
 
-## 8. Adaptation de l'observation par état de confiance
+## 8. Adaptation de l'observation par Ã©tat de confiance
 
-### 8.1 Mode d'observation par état
+### 8.1 Mode d'observation par Ã©tat
 
-WorrySentinel active des modes d'observation différents selon l'état de confiance :
+WorrySentinel active des modes d'observation diffÃ©rents selon l'Ã©tat de confiance :
 
-**T0 — Normal**
+**T0 â€” Normal**
 
 | Aspect | Comportement |
 |--------|--------------|
 | **Mode d'observation** | Normal |
-| **Fréquence** | Standard |
-| **Focus** | Tous les composants équitablement |
+| **FrÃ©quence** | Standard |
+| **Focus** | Tous les composants Ã©quitablement |
 | **Seuils d'alerte** | Standards |
 | **Journalisation** | Standard |
 
-**T1 — Instable**
+**T1 â€” Instable**
 
 | Aspect | Comportement |
 |--------|--------------|
 | **Mode d'observation** | Enhanced |
-| **Fréquence** | Augmentée (+50%) |
+| **FrÃ©quence** | AugmentÃ©e (+50%) |
 | **Focus** | Composants sources d'anomalies |
-| **Seuils d'alerte** | Abaissés (-20%) |
-| **Journalisation** | Détaillée |
+| **Seuils d'alerte** | AbaissÃ©s (-20%) |
+| **Journalisation** | DÃ©taillÃ©e |
 
-**T2 — Dégradé**
+**T2 â€” DÃ©gradÃ©**
 
 | Aspect | Comportement |
 |--------|--------------|
 | **Mode d'observation** | Enhanced |
-| **Fréquence** | Haute (+100%) |
-| **Focus** | Composants critiques et frontières |
-| **Seuils d'alerte** | Abaissés (-40%) |
-| **Journalisation** | Complète avec contexte |
+| **FrÃ©quence** | Haute (+100%) |
+| **Focus** | Composants critiques et frontiÃ¨res |
+| **Seuils d'alerte** | AbaissÃ©s (-40%) |
+| **Journalisation** | ComplÃ¨te avec contexte |
 
-**T3 — Restreint**
+**T3 â€” Restreint**
 
 | Aspect | Comportement |
 |--------|--------------|
 | **Mode d'observation** | Emergency |
-| **Fréquence** | Maximale |
+| **FrÃ©quence** | Maximale |
 | **Focus** | Composants vitaux uniquement |
 | **Seuils d'alerte** | Minimaux |
 | **Journalisation** | Exhaustive |
 
-**T4 — Bloqué**
+**T4 â€” BloquÃ©**
 
 | Aspect | Comportement |
 |--------|--------------|
 | **Mode d'observation** | Emergency |
-| **Fréquence** | Minimale (préservation ressources) |
-| **Focus** | Signes de récupération |
-| **Seuils d'alerte** | Uniquement récupération |
-| **Journalisation** | Minimale (préservation) |
+| **FrÃ©quence** | Minimale (prÃ©servation ressources) |
+| **Focus** | Signes de rÃ©cupÃ©ration |
+| **Seuils d'alerte** | Uniquement rÃ©cupÃ©ration |
+| **Journalisation** | Minimale (prÃ©servation) |
 
-**Règle WS-CN-STATE-01 : Adaptation immédiate**
+**RÃ¨gle WS-CN-STATE-01 : Adaptation immÃ©diate**
 
-L'adaptation du mode d'observation à un changement d'état de confiance est immédiate. Aucun délai n'est autorisé.
+L'adaptation du mode d'observation Ã  un changement d'Ã©tat de confiance est immÃ©diate. Aucun dÃ©lai n'est autorisÃ©.
 
-**Règle WS-CN-STATE-02 : Préservation en T4**
+**RÃ¨gle WS-CN-STATE-02 : PrÃ©servation en T4**
 
-En état T4, l'observation est minimale pour préserver les ressources du système en mode survie.
+En Ã©tat T4, l'observation est minimale pour prÃ©server les ressources du systÃ¨me en mode survie.
 
-### 8.2 Priorités de consolidation par niveau de sécurité
+### 8.2 PrioritÃ©s de consolidation par niveau de sÃ©curitÃ©
 
-WorrySentinel définit des priorités de consolidation selon les niveaux de sécurité :
+WorrySentinel dÃ©finit des prioritÃ©s de consolidation selon les niveaux de sÃ©curitÃ© :
 
-| Niveau de sécurité | Priorité de consolidation |
+| Niveau de sÃ©curitÃ© | PrioritÃ© de consolidation |
 |--------------------|---------------------------|
-| **Niveau 0 - Public** | Basse — consolidation en arrière-plan |
-| **Niveau 1 - Standard** | Normale — consolidation régulière |
-| **Niveau 2 - Sensitive** | Haute — consolidation prioritaire |
-| **Niveau 3 - Critical** | Très haute — consolidation immédiate |
-| **Niveau 4 - Highest** | Maximale — consolidation en temps réel |
+| **Niveau 0 - Public** | Basse â€” consolidation en arriÃ¨re-plan |
+| **Niveau 1 - Standard** | Normale â€” consolidation rÃ©guliÃ¨re |
+| **Niveau 2 - Sensitive** | Haute â€” consolidation prioritaire |
+| **Niveau 3 - Critical** | TrÃ¨s haute â€” consolidation immÃ©diate |
+| **Niveau 4 - Highest** | Maximale â€” consolidation en temps rÃ©el |
 
-**Règle WS-CN-SEC-01 : Priorisation des signaux**
+**RÃ¨gle WS-CN-SEC-01 : Priorisation des signaux**
 
-Les signaux provenant de composants de niveau de sécurité élevé sont prioritaires dans la consolidation.
+Les signaux provenant de composants de niveau de sÃ©curitÃ© Ã©levÃ© sont prioritaires dans la consolidation.
 
-**Règle WS-CN-SEC-02 : Cumul état-niveau**
+**RÃ¨gle WS-CN-SEC-02 : Cumul Ã©tat-niveau**
 
-En cas d'état de confiance dégradé ET de niveau de sécurité élevé, la priorité est maximale.
+En cas d'Ã©tat de confiance dÃ©gradÃ© ET de niveau de sÃ©curitÃ© Ã©levÃ©, la prioritÃ© est maximale.
 
 ---
 
@@ -384,174 +384,174 @@ En cas d'état de confiance dégradé ET de niveau de sécurité élevé, la pri
 
 ### 9.1 Format des signaux montants
 
-Les signaux de CaringNanny suivent un format standardisé.
+Les signaux de CaringNanny suivent un format standardisÃ©.
 
 **Structure de base :**
 
-| Élément | Description | Obligatoire |
+| Ã‰lÃ©ment | Description | Obligatoire |
 |---------|-------------|-------------|
-| `signal_id` | Identifiant unique du signal | ✅ Oui |
-| `type` | Type de signal (INTEGRITY_SIGNAL, TRANSITION_PROPOSAL, CONSOLIDATED_STATE) | ✅ Oui |
-| `priority` | Priorité (low, normal, high, critical) | ✅ Oui |
-| `payload` | Données spécifiques au signal | ✅ Oui |
-| `timestamp` | Horodatage du signal | ✅ Oui |
+| `signal_id` | Identifiant unique du signal | âœ… Oui |
+| `type` | Type de signal (INTEGRITY_SIGNAL, TRANSITION_PROPOSAL, CONSOLIDATED_STATE) | âœ… Oui |
+| `priority` | PrioritÃ© (low, normal, high, critical) | âœ… Oui |
+| `payload` | DonnÃ©es spÃ©cifiques au signal | âœ… Oui |
+| `timestamp` | Horodatage du signal | âœ… Oui |
 
-**Règle WS-CN-PROT-01 : Signaux non bloquants**
+**RÃ¨gle WS-CN-PROT-01 : Signaux non bloquants**
 
-Les signaux montants sont non bloquants. CaringNanny continue son observation après l'envoi.
+Les signaux montants sont non bloquants. CaringNanny continue son observation aprÃ¨s l'envoi.
 
 ### 9.2 Format des directives descendantes
 
-Les directives de WorrySentinel suivent un format standardisé.
+Les directives de WorrySentinel suivent un format standardisÃ©.
 
 **Structure de base :**
 
-| Élément | Description | Obligatoire |
+| Ã‰lÃ©ment | Description | Obligatoire |
 |---------|-------------|-------------|
-| `directive_id` | Identifiant unique de la directive | ✅ Oui |
-| `type` | Type de directive (CLASSIFICATION_RULES, TRANSITION_THRESHOLDS, OBSERVATION_MODE, STATE_DECLARATION) | ✅ Oui |
-| `payload` | Données spécifiques à la directive | ✅ Oui |
-| `requires_ack` | Si une confirmation est requise | ✅ Oui |
-| `timestamp` | Horodatage de la directive | ✅ Oui |
+| `directive_id` | Identifiant unique de la directive | âœ… Oui |
+| `type` | Type de directive (CLASSIFICATION_RULES, TRANSITION_THRESHOLDS, OBSERVATION_MODE, STATE_DECLARATION) | âœ… Oui |
+| `payload` | DonnÃ©es spÃ©cifiques Ã  la directive | âœ… Oui |
+| `requires_ack` | Si une confirmation est requise | âœ… Oui |
+| `timestamp` | Horodatage de la directive | âœ… Oui |
 
-**Règle WS-CN-PROT-02 : Traitement immédiat**
+**RÃ¨gle WS-CN-PROT-02 : Traitement immÃ©diat**
 
-Toutes les directives de WorrySentinel sont traitées immédiatement par CaringNanny.
+Toutes les directives de WorrySentinel sont traitÃ©es immÃ©diatement par CaringNanny.
 
 ### 9.3 Acquittements
 
-**Règle WS-CN-PROT-03 : Acquittement obligatoire**
+**RÃ¨gle WS-CN-PROT-03 : Acquittement obligatoire**
 
 CaringNanny acquitte toutes les directives avec `requires_ack: true`.
 
 **Structure de l'acquittement :**
 
-| Élément | Description | Obligatoire |
+| Ã‰lÃ©ment | Description | Obligatoire |
 |---------|-------------|-------------|
-| `ack_id` | Identifiant unique de l'acquittement | ✅ Oui |
-| `directive_id` | Référence à la directive | ✅ Oui |
-| `status` | Statut (ACK_OK, ACK_PARTIAL, ACK_ERROR) | ✅ Oui |
-| `adaptation_applied` | Confirmation de l'adaptation | ✅ Oui |
-| `timestamp` | Horodatage de l'acquittement | ✅ Oui |
+| `ack_id` | Identifiant unique de l'acquittement | âœ… Oui |
+| `directive_id` | RÃ©fÃ©rence Ã  la directive | âœ… Oui |
+| `status` | Statut (ACK_OK, ACK_PARTIAL, ACK_ERROR) | âœ… Oui |
+| `adaptation_applied` | Confirmation de l'adaptation | âœ… Oui |
+| `timestamp` | Horodatage de l'acquittement | âœ… Oui |
 
 ---
 
-## 10. Flux d'intégration typiques
+## 10. Flux d'intÃ©gration typiques
 
 ### 10.1 Flux de proposition de transition
 
 **Acteurs :** CaringNanny, WorrySentinel
 
-**Séquence :**
+**SÃ©quence :**
 
 1. CaringNanny observe des anomalies sur plusieurs composants
-2. CaringNanny classifie les anomalies selon les règles de WorrySentinel
-3. CaringNanny calcule que le seuil T0→T1 est atteint
-4. CaringNanny envoie `TRANSITION_PROPOSAL` à WorrySentinel
-5. WorrySentinel évalue la proposition
-6. WorrySentinel décide d'accepter ou rejeter la transition
-7. Si acceptée, WorrySentinel envoie `STATE_DECLARATION` (T0→T1)
-8. WorrySentinel envoie `OBSERVATION_MODE` (enhanced) à CaringNanny
+2. CaringNanny classifie les anomalies selon les rÃ¨gles de WorrySentinel
+3. CaringNanny calcule que le seuil T0â†’T1 est atteint
+4. CaringNanny envoie `TRANSITION_PROPOSAL` Ã  WorrySentinel
+5. WorrySentinel Ã©value la proposition
+6. WorrySentinel dÃ©cide d'accepter ou rejeter la transition
+7. Si acceptÃ©e, WorrySentinel envoie `STATE_DECLARATION` (T0â†’T1)
+8. WorrySentinel envoie `OBSERVATION_MODE` (enhanced) Ã  CaringNanny
 9. CaringNanny acquitte et adapte son mode d'observation
 
-### 10.2 Flux de mise à jour des règles
+### 10.2 Flux de mise Ã  jour des rÃ¨gles
 
 **Acteurs :** WorrySentinel, CaringNanny
 
-**Séquence :**
+**SÃ©quence :**
 
-1. WorrySentinel décide de modifier les seuils de transition
-2. WorrySentinel envoie `TRANSITION_THRESHOLDS` à CaringNanny
-3. CaringNanny reçoit les nouveaux seuils
+1. WorrySentinel dÃ©cide de modifier les seuils de transition
+2. WorrySentinel envoie `TRANSITION_THRESHOLDS` Ã  CaringNanny
+3. CaringNanny reÃ§oit les nouveaux seuils
 4. CaringNanny acquitte avec `ACK_OK`
 5. CaringNanny applique les nouveaux seuils pour les futures propositions
 
-### 10.3 Flux de détection d'anomalie critique
+### 10.3 Flux de dÃ©tection d'anomalie critique
 
 **Acteurs :** CaringNanny, WorrySentinel
 
-**Séquence :**
+**SÃ©quence :**
 
-1. CaringNanny détecte une anomalie critique sur un composant de sécurité niveau 4
-2. CaringNanny envoie immédiatement `INTEGRITY_SIGNAL` (priority: critical)
-3. WorrySentinel évalue le signal
-4. WorrySentinel peut décider une transition d'état immédiate
+1. CaringNanny dÃ©tecte une anomalie critique sur un composant de sÃ©curitÃ© niveau 4
+2. CaringNanny envoie immÃ©diatement `INTEGRITY_SIGNAL` (priority: critical)
+3. WorrySentinel Ã©value le signal
+4. WorrySentinel peut dÃ©cider une transition d'Ã©tat immÃ©diate
 5. WorrySentinel notifie CaringNanny et tous les cores de la transition
 
-### 10.4 Diagramme de séquence
+### 10.4 Diagramme de sÃ©quence
 
 ```
-┌─────────────────┐                    ┌─────────────────┐
-│  CaringNanny    │                    │  WorrySentinel  │
-└────────┬────────┘                    └────────┬────────┘
-         │                                      │
-         │  (Observation d'anomalies)           │
-         │                                      │
-         ├── INTEGRITY_SIGNAL ────────────────► │
-         │   (anomaly, warning)                 │
-         │                                      │
-         ├── INTEGRITY_SIGNAL ────────────────► │
-         │   (anomaly, warning)                 │
-         │                                      │
-         │  (Seuil T0→T1 atteint)               │
-         │                                      │
-         ├── TRANSITION_PROPOSAL ─────────────► │
-         │   (T0 → T1)                          │
-         │                                      ├── Évalue proposition
-         │                                      │
-         │ ◄──────────── STATE_DECLARATION ─────┤
-         │              (T0 → T1 accepté)       │
-         │                                      │
-         │ ◄──────────── OBSERVATION_MODE ──────┤
-         │              (mode: enhanced)        │
-         │                                      │
-         ├── ACK_OK ───────────────────────────►│
-         │                                      │
-         │  (Observation renforcée)             │
-         │                                      │
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  CaringNanny    â”‚                    â”‚  WorrySentinel  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚                                      â”‚
+         â”‚  (Observation d'anomalies)           â”‚
+         â”‚                                      â”‚
+         â”œâ”€â”€ INTEGRITY_SIGNAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚
+         â”‚   (anomaly, warning)                 â”‚
+         â”‚                                      â”‚
+         â”œâ”€â”€ INTEGRITY_SIGNAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚
+         â”‚   (anomaly, warning)                 â”‚
+         â”‚                                      â”‚
+         â”‚  (Seuil T0â†’T1 atteint)               â”‚
+         â”‚                                      â”‚
+         â”œâ”€â”€ TRANSITION_PROPOSAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚
+         â”‚   (T0 â†’ T1)                          â”‚
+         â”‚                                      â”œâ”€â”€ Ã‰value proposition
+         â”‚                                      â”‚
+         â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ STATE_DECLARATION â”€â”€â”€â”€â”€â”¤
+         â”‚              (T0 â†’ T1 acceptÃ©)       â”‚
+         â”‚                                      â”‚
+         â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ OBSERVATION_MODE â”€â”€â”€â”€â”€â”€â”¤
+         â”‚              (mode: enhanced)        â”‚
+         â”‚                                      â”‚
+         â”œâ”€â”€ ACK_OK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
+         â”‚                                      â”‚
+         â”‚  (Observation renforcÃ©e)             â”‚
+         â”‚                                      â”‚
 ```
 
 ---
 
-## 11. Règles d'intégration
+## 11. RÃ¨gles d'intÃ©gration
 
-### 11.1 Règles de communication
+### 11.1 RÃ¨gles de communication
 
-**Règle WS-CN-INT-01 : Bidirectionnel asymétrique**
+**RÃ¨gle WS-CN-INT-01 : Bidirectionnel asymÃ©trique**
 
-La communication est bidirectionnelle mais asymétrique. CaringNanny rapporte et propose, WorrySentinel gouverne et décide.
+La communication est bidirectionnelle mais asymÃ©trique. CaringNanny rapporte et propose, WorrySentinel gouverne et dÃ©cide.
 
-**Règle WS-CN-INT-02 : Priorité aux directives**
+**RÃ¨gle WS-CN-INT-02 : PrioritÃ© aux directives**
 
-Les directives de WorrySentinel sont prioritaires. CaringNanny adapte immédiatement son comportement.
+Les directives de WorrySentinel sont prioritaires. CaringNanny adapte immÃ©diatement son comportement.
 
-**Règle WS-CN-INT-03 : Signaux continus**
+**RÃ¨gle WS-CN-INT-03 : Signaux continus**
 
-CaringNanny fournit des signaux de manière continue, pas uniquement lors d'anomalies.
+CaringNanny fournit des signaux de maniÃ¨re continue, pas uniquement lors d'anomalies.
 
-### 11.2 Règles de données
+### 11.2 RÃ¨gles de donnÃ©es
 
-**Règle WS-CN-INT-04 : Signaux factuels**
+**RÃ¨gle WS-CN-INT-04 : Signaux factuels**
 
-Les signaux de CaringNanny sont factuels (observations, classifications). Aucune décision n'est incluse.
+Les signaux de CaringNanny sont factuels (observations, classifications). Aucune dÃ©cision n'est incluse.
 
-**Règle WS-CN-INT-05 : Règles explicites**
+**RÃ¨gle WS-CN-INT-05 : RÃ¨gles explicites**
 
-Les règles de WorrySentinel sont explicites et déclaratives. Aucune règle implicite.
+Les rÃ¨gles de WorrySentinel sont explicites et dÃ©claratives. Aucune rÃ¨gle implicite.
 
-**Règle WS-CN-INT-06 : Cohérence garantie**
+**RÃ¨gle WS-CN-INT-06 : CohÃ©rence garantie**
 
-WorrySentinel garantit la cohérence des règles et seuils communiqués.
+WorrySentinel garantit la cohÃ©rence des rÃ¨gles et seuils communiquÃ©s.
 
-### 11.3 Règles de traçabilité
+### 11.3 RÃ¨gles de traÃ§abilitÃ©
 
-**Règle WS-CN-INT-07 : Traçabilité complète**
+**RÃ¨gle WS-CN-INT-07 : TraÃ§abilitÃ© complÃ¨te**
 
-Toutes les interactions sont tracées avec contexte complet.
+Toutes les interactions sont tracÃ©es avec contexte complet.
 
-**Règle WS-CN-INT-08 : Corrélation possible**
+**RÃ¨gle WS-CN-INT-08 : CorrÃ©lation possible**
 
-Chaque transition d'état peut être corrélée aux signaux et propositions qui l'ont provoquée.
+Chaque transition d'Ã©tat peut Ãªtre corrÃ©lÃ©e aux signaux et propositions qui l'ont provoquÃ©e.
 
 ---
 
@@ -560,177 +560,177 @@ Chaque transition d'état peut être corrélée aux signaux et propositions qui 
 ### 12.1 Types d'erreurs
 
 **Erreurs de format :**
-- Signal mal formé
-- Directive mal formée
+- Signal mal formÃ©
+- Directive mal formÃ©e
 - Type de message inconnu
 
 **Erreurs de classification :**
-- Signal inclassifiable selon les règles
-- Règles incohérentes reçues
+- Signal inclassifiable selon les rÃ¨gles
+- RÃ¨gles incohÃ©rentes reÃ§ues
 
 **Erreurs internes :**
 - Erreur de CaringNanny lors de la consolidation
-- Erreur de WorrySentinel lors de l'évaluation
+- Erreur de WorrySentinel lors de l'Ã©valuation
 
 ### 12.2 Traitement des erreurs
 
-**Règle WS-CN-ERR-01 : Acquittement avec erreur**
+**RÃ¨gle WS-CN-ERR-01 : Acquittement avec erreur**
 
-En cas d'erreur, CaringNanny acquitte avec `ACK_ERROR` et description du problème.
+En cas d'erreur, CaringNanny acquitte avec `ACK_ERROR` et description du problÃ¨me.
 
-**Règle WS-CN-ERR-02 : Signal non classifiable**
+**RÃ¨gle WS-CN-ERR-02 : Signal non classifiable**
 
-Si un signal ne peut pas être classifié, CaringNanny le rapporte avec classification `unknown` et WorrySentinel décide de son traitement.
+Si un signal ne peut pas Ãªtre classifiÃ©, CaringNanny le rapporte avec classification `unknown` et WorrySentinel dÃ©cide de son traitement.
 
-**Règle WS-CN-ERR-03 : Journalisation des erreurs**
+**RÃ¨gle WS-CN-ERR-03 : Journalisation des erreurs**
 
-Toutes les erreurs sont journalisées pour audit et diagnostic.
+Toutes les erreurs sont journalisÃ©es pour audit et diagnostic.
 
-**Règle WS-CN-ERR-04 : Observation par défaut**
+**RÃ¨gle WS-CN-ERR-04 : Observation par dÃ©faut**
 
-En cas de perte de communication avec WorrySentinel, CaringNanny continue avec les dernières règles connues et le mode d'observation le plus restrictif applicable.
+En cas de perte de communication avec WorrySentinel, CaringNanny continue avec les derniÃ¨res rÃ¨gles connues et le mode d'observation le plus restrictif applicable.
 
 ---
 
 ## 13. Cas particuliers
 
-### 13.1 Proposition de transition rejetée
+### 13.1 Proposition de transition rejetÃ©e
 
 Lorsque WorrySentinel rejette une proposition de transition :
 
-**Règle WS-CN-CASE-01 : Rejet notifié**
+**RÃ¨gle WS-CN-CASE-01 : Rejet notifiÃ©**
 
-WorrySentinel notifie CaringNanny du rejet avec justification. CaringNanny continue l'observation avec les paramètres actuels.
+WorrySentinel notifie CaringNanny du rejet avec justification. CaringNanny continue l'observation avec les paramÃ¨tres actuels.
 
 ### 13.2 Transitions multiples rapides
 
 Lorsque plusieurs seuils sont atteints rapidement :
 
-**Règle WS-CN-CASE-02 : Proposition par transition**
+**RÃ¨gle WS-CN-CASE-02 : Proposition par transition**
 
-CaringNanny propose les transitions une par une (T0→T1, puis T1→T2). WorrySentinel peut accepter plusieurs transitions consécutives.
+CaringNanny propose les transitions une par une (T0â†’T1, puis T1â†’T2). WorrySentinel peut accepter plusieurs transitions consÃ©cutives.
 
-### 13.3 État T4 (Bloqué)
+### 13.3 Ã‰tat T4 (BloquÃ©)
 
-En état T4 :
+En Ã©tat T4 :
 
-**Règle WS-CN-CASE-03 : Observation minimale**
+**RÃ¨gle WS-CN-CASE-03 : Observation minimale**
 
-CaringNanny réduit son observation au minimum pour préserver les ressources. Seuls les signaux de récupération sont recherchés.
+CaringNanny rÃ©duit son observation au minimum pour prÃ©server les ressources. Seuls les signaux de rÃ©cupÃ©ration sont recherchÃ©s.
 
-### 13.4 Récupération (T2→T1, T1→T0)
+### 13.4 RÃ©cupÃ©ration (T2â†’T1, T1â†’T0)
 
-Lors d'une récupération :
+Lors d'une rÃ©cupÃ©ration :
 
-**Règle WS-CN-CASE-04 : Proposition de récupération**
+**RÃ¨gle WS-CN-CASE-04 : Proposition de rÃ©cupÃ©ration**
 
-CaringNanny peut proposer des transitions de récupération lorsque les conditions s'améliorent et que les seuils le permettent.
-
----
-
-## 14. Garanties de l'intégration
-
-### 14.1 Garantie de séparation
-
-**Engagement :** CaringNanny observe exclusivement, WorrySentinel gouverne exclusivement. Aucun chevauchement de responsabilités.
-
-### 14.2 Garantie de réactivité
-
-**Engagement :** CaringNanny réagit immédiatement aux directives de WorrySentinel. Aucun délai supérieur à une seconde.
-
-### 14.3 Garantie de conformité
-
-**Engagement :** CaringNanny applique toujours les règles de WorrySentinel. Aucune classification ou proposition ne contredit les règles.
-
-### 14.4 Garantie de traçabilité
-
-**Engagement :** Toute interaction est traçable de bout en bout. L'audit complet du cycle de gouvernance est possible.
-
-### 14.5 Garantie de continuité
-
-**Engagement :** En cas de défaillance partielle, les deux cores continuent de fonctionner avec les dernières règles/observations connues.
-
-### 14.6 Garantie de disponibilité
-
-**Engagement :** L'intégration ne bloque jamais CaringNanny. En cas de défaillance de WorrySentinel, CaringNanny continue avec le mode d'observation le plus restrictif.
+CaringNanny peut proposer des transitions de rÃ©cupÃ©ration lorsque les conditions s'amÃ©liorent et que les seuils le permettent.
 
 ---
 
-## 15. Invariants de l'intégration
+## 14. Garanties de l'intÃ©gration
+
+### 14.1 Garantie de sÃ©paration
+
+**Engagement :** CaringNanny observe exclusivement, WorrySentinel gouverne exclusivement. Aucun chevauchement de responsabilitÃ©s.
+
+### 14.2 Garantie de rÃ©activitÃ©
+
+**Engagement :** CaringNanny rÃ©agit immÃ©diatement aux directives de WorrySentinel. Aucun dÃ©lai supÃ©rieur Ã  une seconde.
+
+### 14.3 Garantie de conformitÃ©
+
+**Engagement :** CaringNanny applique toujours les rÃ¨gles de WorrySentinel. Aucune classification ou proposition ne contredit les rÃ¨gles.
+
+### 14.4 Garantie de traÃ§abilitÃ©
+
+**Engagement :** Toute interaction est traÃ§able de bout en bout. L'audit complet du cycle de gouvernance est possible.
+
+### 14.5 Garantie de continuitÃ©
+
+**Engagement :** En cas de dÃ©faillance partielle, les deux cores continuent de fonctionner avec les derniÃ¨res rÃ¨gles/observations connues.
+
+### 14.6 Garantie de disponibilitÃ©
+
+**Engagement :** L'intÃ©gration ne bloque jamais CaringNanny. En cas de dÃ©faillance de WorrySentinel, CaringNanny continue avec le mode d'observation le plus restrictif.
+
+---
+
+## 15. Invariants de l'intÃ©gration
 
 ### 15.1 Invariants de relation
 
 **INV-WS-CN-1 : Observation exclusive**
 
-L'observation appartient exclusivement à CaringNanny. WorrySentinel n'observe jamais directement.
+L'observation appartient exclusivement Ã  CaringNanny. WorrySentinel n'observe jamais directement.
 
 **INV-WS-CN-2 : Gouvernance exclusive**
 
-La gouvernance des états de confiance appartient exclusivement à WorrySentinel. CaringNanny ne gouverne jamais.
+La gouvernance des Ã©tats de confiance appartient exclusivement Ã  WorrySentinel. CaringNanny ne gouverne jamais.
 
-**INV-WS-CN-3 : Proposition vs décision**
+**INV-WS-CN-3 : Proposition vs dÃ©cision**
 
-CaringNanny propose des transitions. WorrySentinel décide des transitions. La distinction est fondamentale.
+CaringNanny propose des transitions. WorrySentinel dÃ©cide des transitions. La distinction est fondamentale.
 
-### 15.2 Invariants de données
+### 15.2 Invariants de donnÃ©es
 
 **INV-WS-CN-4 : Signaux factuels**
 
-Les signaux de CaringNanny sont factuels (observations classifiées). Aucune décision n'est incluse.
+Les signaux de CaringNanny sont factuels (observations classifiÃ©es). Aucune dÃ©cision n'est incluse.
 
-**INV-WS-CN-5 : Règles explicites**
+**INV-WS-CN-5 : RÃ¨gles explicites**
 
-Les règles de WorrySentinel sont explicites et déclaratives.
+Les rÃ¨gles de WorrySentinel sont explicites et dÃ©claratives.
 
 ### 15.3 Invariants de protocole
 
-**INV-WS-CN-6 : Format respecté**
+**INV-WS-CN-6 : Format respectÃ©**
 
-Toutes les communications respectent le format standardisé.
+Toutes les communications respectent le format standardisÃ©.
 
-**INV-WS-CN-7 : Traçabilité complète**
+**INV-WS-CN-7 : TraÃ§abilitÃ© complÃ¨te**
 
-Toute interaction est traçable avec son contexte complet.
+Toute interaction est traÃ§able avec son contexte complet.
 
 ---
 
-## 16. Conformité aux Lois d'Autonomie Système
+## 16. ConformitÃ© aux Lois d'Autonomie SystÃ¨me
 
-### LOI-1 : Aucune dépendance externe critique
+### LOI-1 : Aucune dÃ©pendance externe critique
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-L'intégration respecte LOI-1 :
+L'intÃ©gration respecte LOI-1 :
 - CaringNanny observe localement
 - WorrySentinel gouverne localement
-- Les règles et signaux sont stockés localement
+- Les rÃ¨gles et signaux sont stockÃ©s localement
 - L'absence de connexion ne bloque ni l'observation ni la gouvernance
 
-### LOI-2 : Le système accepte l'isolement comme état normal
+### LOI-2 : Le systÃ¨me accepte l'isolement comme Ã©tat normal
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-L'intégration respecte LOI-2 :
-- En isolement, CaringNanny continue avec les dernières règles connues
+L'intÃ©gration respecte LOI-2 :
+- En isolement, CaringNanny continue avec les derniÃ¨res rÃ¨gles connues
 - Les propositions de transition restent possibles localement
-- L'intégration fonctionne sans dégradation en mode isolé
+- L'intÃ©gration fonctionne sans dÃ©gradation en mode isolÃ©
 
 ### LOI-4 : Pas de temps global requis
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-L'intégration respecte LOI-4 :
+L'intÃ©gration respecte LOI-4 :
 - Les horodatages sont locaux
 - Aucune synchronisation temporelle n'est requise
-- Les états de confiance ne dépendent pas de timestamps synchronisés
+- Les Ã©tats de confiance ne dÃ©pendent pas de timestamps synchronisÃ©s
 
 ---
 
 ## 17. Exemples
 
-### 17.1 Signal d'intégrité
+### 17.1 Signal d'intÃ©gritÃ©
 
-**Signal CaringNanny → WorrySentinel :**
+**Signal CaringNanny â†’ WorrySentinel :**
 ```
 {
   "signal_id": "sig-cn-ws-001",
@@ -754,7 +754,7 @@ L'intégration respecte LOI-4 :
 
 ### 17.2 Proposition de transition
 
-**Proposition CaringNanny → WorrySentinel :**
+**Proposition CaringNanny â†’ WorrySentinel :**
 ```
 {
   "signal_id": "sig-cn-ws-002",
@@ -772,9 +772,9 @@ L'intégration respecte LOI-4 :
 }
 ```
 
-### 17.3 Déclaration d'état
+### 17.3 DÃ©claration d'Ã©tat
 
-**Déclaration WorrySentinel → CaringNanny :**
+**DÃ©claration WorrySentinel â†’ CaringNanny :**
 ```
 {
   "directive_id": "dir-ws-cn-001",
@@ -783,7 +783,7 @@ L'intégration respecte LOI-4 :
     "declaration_id": "decl-001",
     "previous_state": "T0",
     "new_state": "T1",
-    "justification": "Anomalies persistantes détectées sur frontières et composants",
+    "justification": "Anomalies persistantes dÃ©tectÃ©es sur frontiÃ¨res et composants",
     "accepted_proposal": "prop-001"
   },
   "requires_ack": true,
@@ -793,7 +793,7 @@ L'intégration respecte LOI-4 :
 
 ### 17.4 Mode d'observation
 
-**Directive WorrySentinel → CaringNanny :**
+**Directive WorrySentinel â†’ CaringNanny :**
 ```
 {
   "directive_id": "dir-ws-cn-002",
@@ -831,16 +831,16 @@ L'intégration respecte LOI-4 :
 
 ## 18. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit l'interface et le protocole que WorrySentinel et CaringNanny doivent respecter pour leur intégration.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit l'interface et le protocole que WorrySentinel et CaringNanny doivent respecter pour leur intÃ©gration.
 
-Toute implémentation de l'intégration doit respecter ce contrat. Toute violation entraîne un comportement non conforme.
+Toute implÃ©mentation de l'intÃ©gration doit respecter ce contrat. Toute violation entraÃ®ne un comportement non conforme.
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT — Normatif  
-**Dépendances :**
+**Statut :** CONTRAT â€” Normatif  
+**DÃ©pendances :**
 - WorrySentinel - Documentation Fondatrice v1.2 (Section 9)
 - CaringNanny - Documentation Fondatrice v1.6
 - Miyukini Conceptual References - Integrity Degradation System v1.0 (T0-T4)
@@ -849,49 +849,50 @@ Toute implémentation de l'intégration doit respecter ce contrat. Toute violati
 
 ---
 
-## 19. Mini log de génération
+## 19. Mini log de gÃ©nÃ©ration
 
-### Décision éditoriale E1 : Nature de la relation
+### DÃ©cision Ã©ditoriale E1 : Nature de la relation
 
-**Décision prise :** La relation est bidirectionnelle asymétrique : CaringNanny observe et propose, WorrySentinel gouverne et décide. Cette direction respecte la Documentation Fondatrice de WorrySentinel Section 9 qui définit "CaringNanny consolide les signaux d'intégrité qui influencent les états de confiance" et "WorrySentinel gouverne les règles selon lesquelles CaringNanny doit consolider les signaux".
+**DÃ©cision prise :** La relation est bidirectionnelle asymÃ©trique : CaringNanny observe et propose, WorrySentinel gouverne et dÃ©cide. Cette direction respecte la Documentation Fondatrice de WorrySentinel Section 9 qui dÃ©finit "CaringNanny consolide les signaux d'intÃ©gritÃ© qui influencent les Ã©tats de confiance" et "WorrySentinel gouverne les rÃ¨gles selon lesquelles CaringNanny doit consolider les signaux".
 
-**Application :** Tout le document est structuré autour de cette relation de collaboration asymétrique.
+**Application :** Tout le document est structurÃ© autour de cette relation de collaboration asymÃ©trique.
 
-### Décision éditoriale E2 : Cycle de gouvernance
+### DÃ©cision Ã©ditoriale E2 : Cycle de gouvernance
 
-**Décision prise :** Le cycle de gouvernance T0-T4 implique les deux cores de manière complémentaire : observation (CN) → rapportage (CN→WS) → gouvernance (WS) → propagation (WS→tous).
+**DÃ©cision prise :** Le cycle de gouvernance T0-T4 implique les deux cores de maniÃ¨re complÃ©mentaire : observation (CN) â†’ rapportage (CNâ†’WS) â†’ gouvernance (WS) â†’ propagation (WSâ†’tous).
 
-**Application :** Section 4.3 détaille ce cycle, Section 10 illustre les flux typiques.
+**Application :** Section 4.3 dÃ©taille ce cycle, Section 10 illustre les flux typiques.
 
-### Décision éditoriale E3 : Proposition vs décision
+### DÃ©cision Ã©ditoriale E3 : Proposition vs dÃ©cision
 
-**Décision prise :** La distinction entre proposition (CaringNanny) et décision (WorrySentinel) est fondamentale. CaringNanny peut calculer que les seuils sont atteints et proposer une transition, mais seul WorrySentinel décide de l'accepter.
+**DÃ©cision prise :** La distinction entre proposition (CaringNanny) et dÃ©cision (WorrySentinel) est fondamentale. CaringNanny peut calculer que les seuils sont atteints et proposer une transition, mais seul WorrySentinel dÃ©cide de l'accepter.
 
-**Application :** INV-WS-CN-3 et Règles WS-CN-01/02 établissent cette distinction.
+**Application :** INV-WS-CN-3 et RÃ¨gles WS-CN-01/02 Ã©tablissent cette distinction.
 
 ### Warning W1 : Risque de gouvernance implicite par CaringNanny
 
-**Warning rencontré :** Risque que CaringNanny, en proposant des transitions basées sur des seuils, exerce une forme de gouvernance implicite.
+**Warning rencontrÃ© :** Risque que CaringNanny, en proposant des transitions basÃ©es sur des seuils, exerce une forme de gouvernance implicite.
 
-**Décision prise :** Les interdictions absolues (Section 6) clarifient que CaringNanny ne décide jamais des transitions. Les seuils sont définis par WorrySentinel, CaringNanny les applique pour proposer, mais la décision reste à WorrySentinel qui peut rejeter la proposition.
+**DÃ©cision prise :** Les interdictions absolues (Section 6) clarifient que CaringNanny ne dÃ©cide jamais des transitions. Les seuils sont dÃ©finis par WorrySentinel, CaringNanny les applique pour proposer, mais la dÃ©cision reste Ã  WorrySentinel qui peut rejeter la proposition.
 
-**Correction effectuée :** INV-CN-WS-NEVER-2 et Règle WS-CN-CASE-01 explicitement établissent cette limite.
+**Correction effectuÃ©e :** INV-CN-WS-NEVER-2 et RÃ¨gle WS-CN-CASE-01 explicitement Ã©tablissent cette limite.
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-**Vérification effectuée :**
-- ✅ Cohérence avec WorrySentinel - Documentation Fondatrice : Confirmée (Section 9 respectée)
-- ✅ Cohérence avec CaringNanny - Documentation Fondatrice : Confirmée (INV-CN-1 à INV-CN-7 respectés)
-- ✅ Cohérence avec Integrity Degradation System : Confirmée (états T0-T4)
-- ✅ Cohérence avec Security Levels : Confirmée (niveaux 0-4)
-- ✅ Conformité LOI-1 : Confirmée (aucune dépendance externe)
-- ✅ Conformité LOI-2 : Confirmée (fonctionnement en mode isolé)
-- ✅ Conformité LOI-4 : Confirmée (pas de temps global requis)
-- ✅ Séparation observation/gouvernance : Confirmée (INV-WS-CN-1, INV-WS-CN-2)
-- ✅ Traçabilité complète : Confirmée (INV-WS-CN-7)
+**VÃ©rification effectuÃ©e :**
+- âœ… CohÃ©rence avec WorrySentinel - Documentation Fondatrice : ConfirmÃ©e (Section 9 respectÃ©e)
+- âœ… CohÃ©rence avec CaringNanny - Documentation Fondatrice : ConfirmÃ©e (INV-CN-1 Ã  INV-CN-7 respectÃ©s)
+- âœ… CohÃ©rence avec Integrity Degradation System : ConfirmÃ©e (Ã©tats T0-T4)
+- âœ… CohÃ©rence avec Security Levels : ConfirmÃ©e (niveaux 0-4)
+- âœ… ConformitÃ© LOI-1 : ConfirmÃ©e (aucune dÃ©pendance externe)
+- âœ… ConformitÃ© LOI-2 : ConfirmÃ©e (fonctionnement en mode isolÃ©)
+- âœ… ConformitÃ© LOI-4 : ConfirmÃ©e (pas de temps global requis)
+- âœ… SÃ©paration observation/gouvernance : ConfirmÃ©e (INV-WS-CN-1, INV-WS-CN-2)
+- âœ… TraÃ§abilitÃ© complÃ¨te : ConfirmÃ©e (INV-WS-CN-7)
 
-**Conclusion :** Aucune contradiction détectée. Le document est cohérent et non ambigu.
+**Conclusion :** Aucune contradiction dÃ©tectÃ©e. Le document est cohÃ©rent et non ambigu.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

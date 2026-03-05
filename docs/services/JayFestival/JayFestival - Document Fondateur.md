@@ -1,72 +1,72 @@
-# JayFestival — Document fondateur
+﻿# JayFestival â€” Document fondateur
 
 ## Contexte
 
-**JayFestival** est le service officiel Miyukini dédié à la **gestion d’événements et de festivals** au sein de l’écosystème COG. Il reprend et développe les spécificités issues de **Catakana Orga** pour les porter à l’échelle de la plateforme : organisation de la **macro** (catalogue, annuaires, gouvernance), **distribution du service** auprès des **organisateurs**, des **exposants** et des **visiteurs** (qui disposent chacun d’un espace dédié et d’un compte cross-événement).
+**JayFestival** est le service officiel Miyukini dÃ©diÃ© Ã  la **gestion dâ€™Ã©vÃ©nements et de festivals** au sein de lâ€™Ã©cosystÃ¨me COG. Il reprend et dÃ©veloppe les spÃ©cificitÃ©s issues de **Catakana Orga** pour les porter Ã  lâ€™Ã©chelle de la plateforme : organisation de la **macro** (catalogue, annuaires, gouvernance), **distribution du service** auprÃ¨s des **organisateurs**, des **exposants** et des **visiteurs** (qui disposent chacun dâ€™un espace dÃ©diÃ© et dâ€™un compte cross-Ã©vÃ©nement).
 
-**Tous les types de comptes sont cross-événements** : un organisateur peut gérer plusieurs festivals/événements ; un exposant peut participer à plusieurs festivals et dispose de son propre dashboard ; un visiteur peut suivre ses activités sur plusieurs événements. La plateforme propose une **gestion d’agenda** pour éviter les conflits de dates (ex. qu’un exposant ne s’inscrive pas à deux événements à la même date).
+**Tous les types de comptes sont cross-Ã©vÃ©nements** : un organisateur peut gÃ©rer plusieurs festivals/Ã©vÃ©nements ; un exposant peut participer Ã  plusieurs festivals et dispose de son propre dashboard ; un visiteur peut suivre ses activitÃ©s sur plusieurs Ã©vÃ©nements. La plateforme propose une **gestion dâ€™agenda** pour Ã©viter les conflits de dates (ex. quâ€™un exposant ne sâ€™inscrive pas Ã  deux Ã©vÃ©nements Ã  la mÃªme date).
 
-Ce document est le **document fondateur** du service : il en fixe la raison d’être, la vision, le modèle de distribution (organisateurs, exposants, visiteurs) et les principes directeurs. Il s’adresse aux parties prenantes internes et externes (équipes produit, technique, partenaires, organisateurs, exposants, visiteurs).
+Ce document est le **document fondateur** du service : il en fixe la raison dâ€™Ãªtre, la vision, le modÃ¨le de distribution (organisateurs, exposants, visiteurs) et les principes directeurs. Il sâ€™adresse aux parties prenantes internes et externes (Ã©quipes produit, technique, partenaires, organisateurs, exposants, visiteurs).
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Périmètre** : Service JayFestival — définition, positionnement, macro et distribution.
-- **Hors périmètre** : Spécifications techniques détaillées, contrats d’API, implémentation des crates (référencés dans d’autres documents).
-- **Références** : Glossaire Miyukini, Vision stratégique, Audit Catakana → Miyukini COG B2B2C.
+- **PÃ©rimÃ¨tre** : Service JayFestival â€” dÃ©finition, positionnement, macro et distribution.
+- **Hors pÃ©rimÃ¨tre** : SpÃ©cifications techniques dÃ©taillÃ©es, contrats dâ€™API, implÃ©mentation des crates (rÃ©fÃ©rencÃ©s dans dâ€™autres documents).
+- **RÃ©fÃ©rences** : Glossaire Miyukini, Vision stratÃ©gique, Audit Catakana â†’ Miyukini COG B2B2C.
 
 ---
 
-## 1. Raison d’être
+## 1. Raison dâ€™Ãªtre
 
 ### 1.1 Proposition de valeur
 
-**JayFestival** permet à des **organisateurs** (associations, collectivités, sociétés) d’utiliser une plateforme gouvernée pour :
+**JayFestival** permet Ã  des **organisateurs** (associations, collectivitÃ©s, sociÃ©tÃ©s) dâ€™utiliser une plateforme gouvernÃ©e pour :
 
-- **Créer et gérer plusieurs événements** (éditions) : un même organisateur peut organiser **plusieurs festivals/événements** ; paramètres, dates, lieu, programme, plan de salle, budget, documents par édition.
-- **Gérer leurs exposants** : annuaire, candidatures, validation, facturation, emplacements.
-- **Exposer leur offre** dans un **catalogue commun** : annuaire d’événements, répertoire d’organisateurs, répertoire d’exposants, accessible en B2B2C.
-- **Proposer des services aux visiteurs** : jeux, concours, inscriptions ateliers, etc. — chaque organisateur choisit ce qu’il met à disposition pour ses événements.
+- **CrÃ©er et gÃ©rer plusieurs Ã©vÃ©nements** (Ã©ditions) : un mÃªme organisateur peut organiser **plusieurs festivals/Ã©vÃ©nements** ; paramÃ¨tres, dates, lieu, programme, plan de salle, budget, documents par Ã©dition.
+- **GÃ©rer leurs exposants** : annuaire, candidatures, validation, facturation, emplacements.
+- **Exposer leur offre** dans un **catalogue commun** : annuaire dâ€™Ã©vÃ©nements, rÃ©pertoire dâ€™organisateurs, rÃ©pertoire dâ€™exposants, accessible en B2B2C.
+- **Proposer des services aux visiteurs** : jeux, concours, inscriptions ateliers, etc. â€” chaque organisateur choisit ce quâ€™il met Ã  disposition pour ses Ã©vÃ©nements.
 
-Les **exposants** disposent de leur **propre dashboard** : candidatures, participations à **plusieurs festivals**, documents, factures ; la plateforme propose une **gestion d’agenda** pour éviter qu’un exposant s’inscrive à deux événements à la même date (conflits de dates déjà rencontrés en pratique).
+Les **exposants** disposent de leur **propre dashboard** : candidatures, participations Ã  **plusieurs festivals**, documents, factures ; la plateforme propose une **gestion dâ€™agenda** pour Ã©viter quâ€™un exposant sâ€™inscrive Ã  deux Ã©vÃ©nements Ã  la mÃªme date (conflits de dates dÃ©jÃ  rencontrÃ©s en pratique).
 
-Les **visiteurs** disposent d’un **espace dédié** : onboarding par festival ou par groupe de festivals, compte cross-événement pour suivre leurs activités et organiser leur visite (agenda, compte à rebours, billet, réservation, pass VIP, etc.).
+Les **visiteurs** disposent dâ€™un **espace dÃ©diÃ©** : onboarding par festival ou par groupe de festivals, compte cross-Ã©vÃ©nement pour suivre leurs activitÃ©s et organiser leur visite (agenda, compte Ã  rebours, billet, rÃ©servation, pass VIP, etc.).
 
-La plateforme propose le **service** ; les organisateurs l’**adaptent** à leurs besoins (identité, règles, contenu) sans en détenir la gouvernance technique. **Tous les comptes sont cross-événements** (organisateur, exposant, visiteur). Le modèle s’apparente à un **Store** : un lieu unique où l’on découvre les événements, les organisateurs et les exposants, et où chaque type d’acteur gère son parcours sur plusieurs événements.
+La plateforme propose le **service** ; les organisateurs lâ€™**adaptent** Ã  leurs besoins (identitÃ©, rÃ¨gles, contenu) sans en dÃ©tenir la gouvernance technique. **Tous les comptes sont cross-Ã©vÃ©nements** (organisateur, exposant, visiteur). Le modÃ¨le sâ€™apparente Ã  un **Store** : un lieu unique oÃ¹ lâ€™on dÃ©couvre les Ã©vÃ©nements, les organisateurs et les exposants, et oÃ¹ chaque type dâ€™acteur gÃ¨re son parcours sur plusieurs Ã©vÃ©nements.
 
-### 1.2 Héritage Catakana Orga
+### 1.2 HÃ©ritage Catakana Orga
 
-Les spécificités fonctionnelles du service s’appuient sur l’expérience et le périmètre de **Catakana Orga** :
+Les spÃ©cificitÃ©s fonctionnelles du service sâ€™appuient sur lâ€™expÃ©rience et le pÃ©rimÃ¨tre de **Catakana Orga** :
 
-- Gestion des **éditions** (événements) avec tableau de bord par édition.
+- Gestion des **Ã©ditions** (Ã©vÃ©nements) avec tableau de bord par Ã©dition.
 - Gestion des **exposants** : fiche, statuts, candidatures, documents, devis et factures.
 - **Plan de salle** interactif (zones, stands, attribution).
-- **Programme** : animations, créneaux, salles/scènes, conflits horaires.
-- **Budget** par édition, documents et légal, notifications et communication.
-- **Rôles** : admin, manager, exposant, bénévole — avec permissions et Mandats.
-- **Auth** : JayFestival dispose d’**une Auth à lui**, dérivée de celle de Catakana, qui utilise l’Auth Supabase ; en alpha, l’Auth JayFestival s’appuie sur Supabase Auth (voir [Reference Base de Donnees et Migration](./reference/JayFestival%20-%20Reference%20Base%20de%20Donnees%20et%20Migration%20Supabase%20vers%20SQLite.md)).
+- **Programme** : animations, crÃ©neaux, salles/scÃ¨nes, conflits horaires.
+- **Budget** par Ã©dition, documents et lÃ©gal, notifications et communication.
+- **RÃ´les** : admin, manager, exposant, bÃ©nÃ©vole â€” avec permissions et Mandats.
+- **Auth** : JayFestival dispose dâ€™**une Auth Ã  lui**, dÃ©rivÃ©e de celle de Catakana, qui utilise lâ€™Auth Supabase ; en alpha, lâ€™Auth JayFestival sâ€™appuie sur Supabase Auth (voir [Reference Base de Donnees et Migration](./reference/JayFestival%20-%20Reference%20Base%20de%20Donnees%20et%20Migration%20Supabase%20vers%20SQLite.md)).
 
-Ces capacités sont **reprises, normalisées et distribuées** dans le cadre COG : Opérateurs, Kits d’outils, Contrats d’équipe, Mandats de Permission.
+Ces capacitÃ©s sont **reprises, normalisÃ©es et distribuÃ©es** dans le cadre COG : OpÃ©rateurs, Kits dâ€™outils, Contrats dâ€™Ã©quipe, Mandats de Permission.
 
 ---
 
 ## 2. Vision
 
-### 2.1 Énoncé de vision
+### 2.1 Ã‰noncÃ© de vision
 
-> **JayFestival** est le service de référence Miyukini pour la gestion d’événements et de festivals : une plateforme gouvernée, en B2B2C, où **tous les comptes sont cross-événements** — les organisateurs gèrent plusieurs festivals, les exposants participent à plusieurs événements avec leur dashboard, les visiteurs organisent leur visite sur plusieurs événements — et où le public découvre un annuaire d’événements, un répertoire d’organisateurs et un répertoire d’exposants.
+> **JayFestival** est le service de rÃ©fÃ©rence Miyukini pour la gestion dâ€™Ã©vÃ©nements et de festivals : une plateforme gouvernÃ©e, en B2B2C, oÃ¹ **tous les comptes sont cross-Ã©vÃ©nements** â€” les organisateurs gÃ¨rent plusieurs festivals, les exposants participent Ã  plusieurs Ã©vÃ©nements avec leur dashboard, les visiteurs organisent leur visite sur plusieurs Ã©vÃ©nements â€” et oÃ¹ le public dÃ©couvre un annuaire dâ€™Ã©vÃ©nements, un rÃ©pertoire dâ€™organisateurs et un rÃ©pertoire dâ€™exposants.
 
 ### 2.2 Principes directeurs
 
 | Principe | Description |
 |----------|-------------|
-| **Gouvernance** | Le service fonctionne sous gouvernance COG : StrongFather (décisions), KindMother (données), Master Butler (permissions), WorrySentinel (sécurité). Les organisateurs opèrent dans le cadre de Mandats de Permission. |
-| **B2B2C** | La plateforme livre le service aux **organisateurs** (B2B) ; les organisateurs exposent **événements et exposants** aux **utilisateurs finaux** (B2C). |
-| **Store** | Un catalogue commun : annuaire d’événements + répertoire d’organisateurs + répertoire d’exposants, avec recherche, filtres et Façade publique gouvernée. |
-| **Comptes cross-événements** | **Tous les types de comptes** (organisateur, exposant, visiteur) sont cross-événements : un organisateur peut organiser plusieurs festivals ; un exposant peut s’inscrire à plusieurs festivals et dispose de son dashboard ; un visiteur peut suivre ses activités sur plusieurs événements. |
-| **Gestion d’agenda** | Une fonctionnalité de **gestion d’agenda** (calendrier, conflits de dates) permet d’éviter qu’un exposant — ou un visiteur — ne s’inscrive à deux événements à la même date ; besoin déjà identifié en pratique. |
-| **Espace visiteur** | Les visiteurs disposent d’un espace dédié pour suivre leurs activités et organiser leur visite (agenda, billets, réservations, pass VIP, etc.), avec onboarding possible par festival ou par groupe de festivals. |
-| **Réutilisabilité** | Le service s’appuie sur les Kits d’outils Miyukini existants (Miyauth, Miyuinvoice, Miyucontacts, Miyusearch, Miyunotify, Miyubooking, etc.) et définit les Opérateurs et Kits spécifiques « événement » (Édition, Exposant, Plan de salle, Programme, Candidature, Visiteur, **Agenda cross-événements**). |
-| **Autonomie organisateur** | Chaque organisateur dispose d’un espace gouverné (**plusieurs éditions**, ses exposants, son équipe, les services visiteur qu’il active) sans empiéter sur la souveraineté des données ni sur les autres organisateurs. |
+| **Gouvernance** | Le service fonctionne sous gouvernance COG : StrongFather (dÃ©cisions), KindMother (donnÃ©es), Master Butler (permissions), WorrySentinel (sÃ©curitÃ©). Les organisateurs opÃ¨rent dans le cadre de Mandats de Permission. |
+| **B2B2C** | La plateforme livre le service aux **organisateurs** (B2B) ; les organisateurs exposent **Ã©vÃ©nements et exposants** aux **utilisateurs finaux** (B2C). |
+| **Store** | Un catalogue commun : annuaire dâ€™Ã©vÃ©nements + rÃ©pertoire dâ€™organisateurs + rÃ©pertoire dâ€™exposants, avec recherche, filtres et FaÃ§ade publique gouvernÃ©e. |
+| **Comptes cross-Ã©vÃ©nements** | **Tous les types de comptes** (organisateur, exposant, visiteur) sont cross-Ã©vÃ©nements : un organisateur peut organiser plusieurs festivals ; un exposant peut sâ€™inscrire Ã  plusieurs festivals et dispose de son dashboard ; un visiteur peut suivre ses activitÃ©s sur plusieurs Ã©vÃ©nements. |
+| **Gestion dâ€™agenda** | Une fonctionnalitÃ© de **gestion dâ€™agenda** (calendrier, conflits de dates) permet dâ€™Ã©viter quâ€™un exposant â€” ou un visiteur â€” ne sâ€™inscrive Ã  deux Ã©vÃ©nements Ã  la mÃªme date ; besoin dÃ©jÃ  identifiÃ© en pratique. |
+| **Espace visiteur** | Les visiteurs disposent dâ€™un espace dÃ©diÃ© pour suivre leurs activitÃ©s et organiser leur visite (agenda, billets, rÃ©servations, pass VIP, etc.), avec onboarding possible par festival ou par groupe de festivals. |
+| **RÃ©utilisabilitÃ©** | Le service sâ€™appuie sur les Kits dâ€™outils Miyukini existants (Miyauth, Miyuinvoice, Miyucontacts, Miyusearch, Miyunotify, Miyubooking, etc.) et dÃ©finit les OpÃ©rateurs et Kits spÃ©cifiques Â« Ã©vÃ©nement Â» (Ã‰dition, Exposant, Plan de salle, Programme, Candidature, Visiteur, **Agenda cross-Ã©vÃ©nements**). |
+| **Autonomie organisateur** | Chaque organisateur dispose dâ€™un espace gouvernÃ© (**plusieurs Ã©ditions**, ses exposants, son Ã©quipe, les services visiteur quâ€™il active) sans empiÃ©ter sur la souverainetÃ© des donnÃ©es ni sur les autres organisateurs. |
 
 ---
 
@@ -74,139 +74,139 @@ Ces capacités sont **reprises, normalisées et distribuées** dans le cadre COG
 
 ### 3.1 Trois piliers du catalogue (Store)
 
-| Pilier | Contenu | Rôle |
+| Pilier | Contenu | RÃ´le |
 |--------|---------|------|
-| **Annuaire des événements** | Liste/carte des éditions (événements) publiées ; filtres (date, lieu, organisateur, thème) ; fiche événement (présentation, dates, lieu, organisateur, exposants, programme public). | Découverte des événements par le public et les professionnels. |
-| **Répertoire des organisateurs** | Liste des structures organisatrices ; fiche organisateur (nom, événements, contact, charte). | Identification et confiance dans les organisateurs. |
-| **Répertoire des exposants** | Liste des exposants (global ou par événement) ; fiche exposant (entreprise, stands, éditions participées, contact). | Découverte des exposants et mise en relation. |
+| **Annuaire des Ã©vÃ©nements** | Liste/carte des Ã©ditions (Ã©vÃ©nements) publiÃ©es ; filtres (date, lieu, organisateur, thÃ¨me) ; fiche Ã©vÃ©nement (prÃ©sentation, dates, lieu, organisateur, exposants, programme public). | DÃ©couverte des Ã©vÃ©nements par le public et les professionnels. |
+| **RÃ©pertoire des organisateurs** | Liste des structures organisatrices ; fiche organisateur (nom, Ã©vÃ©nements, contact, charte). | Identification et confiance dans les organisateurs. |
+| **RÃ©pertoire des exposants** | Liste des exposants (global ou par Ã©vÃ©nement) ; fiche exposant (entreprise, stands, Ã©ditions participÃ©es, contact). | DÃ©couverte des exposants et mise en relation. |
 
-La **macro** désigne tout ce qui est géré au **niveau plateforme** : catalogue commun, gouvernance des accès, annuaires, recherche (Miyusearch), Façade publique gouvernée. Elle ne contient pas la logique métier détaillée de chaque édition (celle-ci relève de l’espace organisateur).
+La **macro** dÃ©signe tout ce qui est gÃ©rÃ© au **niveau plateforme** : catalogue commun, gouvernance des accÃ¨s, annuaires, recherche (Miyusearch), FaÃ§ade publique gouvernÃ©e. Elle ne contient pas la logique mÃ©tier dÃ©taillÃ©e de chaque Ã©dition (celle-ci relÃ¨ve de lâ€™espace organisateur).
 
 ### 3.2 Gouvernance macro
 
-- **StrongFather** : décision d’ouverture d’un nouvel organisateur, validation des contrats, révocation de Mandats.
-- **Master Butler** : permissions par rôle (plateforme, organisateur, exposant, visiteur, public) ; accès aux annuaires et aux espaces (organisateur, visiteur, exposant).
-- **KindMother** : persistance des entités catalogue (événements, organisateurs, exposants) et des données par édition.
-- **WorrySentinel** : niveaux de sécurité et états de confiance pour les données et les accès.
+- **StrongFather** : dÃ©cision dâ€™ouverture dâ€™un nouvel organisateur, validation des contrats, rÃ©vocation de Mandats.
+- **Master Butler** : permissions par rÃ´le (plateforme, organisateur, exposant, visiteur, public) ; accÃ¨s aux annuaires et aux espaces (organisateur, visiteur, exposant).
+- **KindMother** : persistance des entitÃ©s catalogue (Ã©vÃ©nements, organisateurs, exposants) et des donnÃ©es par Ã©dition.
+- **WorrySentinel** : niveaux de sÃ©curitÃ© et Ã©tats de confiance pour les donnÃ©es et les accÃ¨s.
 
-Les **Mandats de Permission** encadrent ce que chaque organisateur peut faire (créer des éditions, gérer des exposants, publier au catalogue, etc.).
+Les **Mandats de Permission** encadrent ce que chaque organisateur peut faire (crÃ©er des Ã©ditions, gÃ©rer des exposants, publier au catalogue, etc.).
 
-### 3.3 Politique de résidence des données sensibles (exposants)
+### 3.3 Politique de rÃ©sidence des donnÃ©es sensibles (exposants)
 
-Les données personnelles et métier des **exposants** (fiche, candidatures, documents, facturation) sont soumises à la **politique de résidence centralisée** (voir [Miyukini Conceptual References - Politique Residence Donnees Sensibles](../../reference/Miyukini%20Conceptual%20References%20-%20Politique%20Residence%20Donnees%20Sensibles.md)) :
+Les donnÃ©es personnelles et mÃ©tier des **exposants** (fiche, candidatures, documents, facturation) sont soumises Ã  la **politique de rÃ©sidence centralisÃ©e** (voir [Miyukini Conceptual References - Politique Residence Donnees Sensibles](..//..//miyukini-webway-system//reference//_index.md)) :
 
-- **COG de référence** pour ces données : **COG de l'organisateur** (ou COG du Service Festival, selon architecture retenue). La copie canonique réside sur ce COG (Instance Mère KindMother).
-- **Effet** : en cas de coupure du terminal de l'exposant (réseau, appareil), les données restent **disponibles pour les organisateurs** sur le COG de référence.
-- Le terminal exposant accède via Visite gouvernée ou synchronisation ; il ne détient pas la seule copie de ces données.
+- **COG de rÃ©fÃ©rence** pour ces donnÃ©es : **COG de l'organisateur** (ou COG du Service Festival, selon architecture retenue). La copie canonique rÃ©side sur ce COG (Instance MÃ¨re KindMother).
+- **Effet** : en cas de coupure du terminal de l'exposant (rÃ©seau, appareil), les donnÃ©es restent **disponibles pour les organisateurs** sur le COG de rÃ©fÃ©rence.
+- Le terminal exposant accÃ¨de via Visite gouvernÃ©e ou synchronisation ; il ne dÃ©tient pas la seule copie de ces donnÃ©es.
 
 ---
 
 ## 4. Distribution : le service au niveau des organisateurs
 
-### 4.1 Modèle de distribution
+### 4.1 ModÃ¨le de distribution
 
-La **distribution** désigne la manière dont le service est **livré aux organisateurs** et utilisé par eux :
+La **distribution** dÃ©signe la maniÃ¨re dont le service est **livrÃ© aux organisateurs** et utilisÃ© par eux :
 
-1. **Onboarding organisateur** : création du compte organisateur (Miyauth, Miyuprofile), attribution des permissions (Master Butler), émission du Mandat de Permission pour gérer **plusieurs éditions** et exposants. Le compte est **cross-événement** : un même organisateur peut organiser plusieurs festivals/événements.
-2. **Espace organisateur** : tableau de bord, **liste de toutes ses éditions** (multi-festivals), accès par édition (dashboard édition : plan, programme, exposants, candidatures, budget, documents).
-3. **Personnalisation** : l’organisateur configure chacune de ses éditions (nom, dates, lieu, thème, règles), ses équipes (rôles, bénévoles), sa communication (Miyunotify), sans modifier la gouvernance ni les Kits de la plateforme.
-4. **Publication au catalogue** : les éditions validées peuvent être exposées dans l’annuaire des événements ; l’organisateur apparaît dans le répertoire des organisateurs ; les exposants peuvent apparaître dans le répertoire des exposants (selon politique plateforme).
+1. **Onboarding organisateur** : crÃ©ation du compte organisateur (Miyauth, Miyuprofile), attribution des permissions (Master Butler), Ã©mission du Mandat de Permission pour gÃ©rer **plusieurs Ã©ditions** et exposants. Le compte est **cross-Ã©vÃ©nement** : un mÃªme organisateur peut organiser plusieurs festivals/Ã©vÃ©nements.
+2. **Espace organisateur** : tableau de bord, **liste de toutes ses Ã©ditions** (multi-festivals), accÃ¨s par Ã©dition (dashboard Ã©dition : plan, programme, exposants, candidatures, budget, documents).
+3. **Personnalisation** : lâ€™organisateur configure chacune de ses Ã©ditions (nom, dates, lieu, thÃ¨me, rÃ¨gles), ses Ã©quipes (rÃ´les, bÃ©nÃ©voles), sa communication (Miyunotify), sans modifier la gouvernance ni les Kits de la plateforme.
+4. **Publication au catalogue** : les Ã©ditions validÃ©es peuvent Ãªtre exposÃ©es dans lâ€™annuaire des Ã©vÃ©nements ; lâ€™organisateur apparaÃ®t dans le rÃ©pertoire des organisateurs ; les exposants peuvent apparaÃ®tre dans le rÃ©pertoire des exposants (selon politique plateforme).
 
-### 4.2 Rôles côté organisateur
+### 4.2 RÃ´les cÃ´tÃ© organisateur
 
-| Rôle | Périmètre |
+| RÃ´le | PÃ©rimÃ¨tre |
 |------|------------|
-| **Admin organisateur** | Gestion complète de la structure : **toutes ses éditions** (multi-festivals), équipe, paramètres, publication catalogue. |
-| **Manager** | Gestion opérationnelle d’une ou plusieurs éditions : exposants, plan, programme, budget, documents. |
-| **Exposant** | **Dashboard exposant dédié** : candidatures, **participations à plusieurs festivals**, documents, factures (Miyuinvoice), **agenda** pour éviter les conflits de dates (inscription à deux événements à la même date). |
-| **Bénévole** | Accès limité selon attribution (zones, créneaux, informations de terrain). |
+| **Admin organisateur** | Gestion complÃ¨te de la structure : **toutes ses Ã©ditions** (multi-festivals), Ã©quipe, paramÃ¨tres, publication catalogue. |
+| **Manager** | Gestion opÃ©rationnelle dâ€™une ou plusieurs Ã©ditions : exposants, plan, programme, budget, documents. |
+| **Exposant** | **Dashboard exposant dÃ©diÃ©** : candidatures, **participations Ã  plusieurs festivals**, documents, factures (Miyuinvoice), **agenda** pour Ã©viter les conflits de dates (inscription Ã  deux Ã©vÃ©nements Ã  la mÃªme date). |
+| **BÃ©nÃ©vole** | AccÃ¨s limitÃ© selon attribution (zones, crÃ©neaux, informations de terrain). |
 
-Les rôles sont gérés par **Master Butler** ; les Contrats d’équipe définissent les flux autorisés entre Opérateurs (Édition, Exposant, Programme, Plan de salle, etc.).
+Les rÃ´les sont gÃ©rÃ©s par **Master Butler** ; les Contrats dâ€™Ã©quipe dÃ©finissent les flux autorisÃ©s entre OpÃ©rateurs (Ã‰dition, Exposant, Programme, Plan de salle, etc.).
 
 ### 4.3 Livrables par organisateur
 
-Chaque organisateur, dans son espace gouverné, dispose de :
+Chaque organisateur, dans son espace gouvernÃ©, dispose de :
 
-- **Éditions (multi-festivals)** : création et gestion de **plusieurs éditions** ; paramétrage et tableau de bord par édition.
+- **Ã‰ditions (multi-festivals)** : crÃ©ation et gestion de **plusieurs Ã©ditions** ; paramÃ©trage et tableau de bord par Ã©dition.
 - **Exposants** : annuaire local, candidatures, validation, fiches, documents, devis/factures (Miyuinvoice).
-- **Plan de salle** : zones, stands, attribution (Opérateur Plan de salle).
-- **Programme** : animations, créneaux, salles (Opérateur Programme).
-- **Budget** : revenus/dépenses, ventilation (Miyucptaledger, Miyuexpense, Miyucomptareports).
-- **Documents** : contrats types, CGV, règlements (Miyucms, Miyumedia).
+- **Plan de salle** : zones, stands, attribution (OpÃ©rateur Plan de salle).
+- **Programme** : animations, crÃ©neaux, salles (OpÃ©rateur Programme).
+- **Budget** : revenus/dÃ©penses, ventilation (Miyucptaledger, Miyuexpense, Miyucomptareports).
+- **Documents** : contrats types, CGV, rÃ¨glements (Miyucms, Miyumedia).
 - **Notifications** : annonces, alertes (Miyunotify).
-- **Services visiteur** : activation et paramétrage par édition des services proposés aux visiteurs (jeux, concours, inscriptions ateliers, réservations, pass VIP, etc.) ; l’organisateur choisit ce qu’il met à disposition.
+- **Services visiteur** : activation et paramÃ©trage par Ã©dition des services proposÃ©s aux visiteurs (jeux, concours, inscriptions ateliers, rÃ©servations, pass VIP, etc.) ; lâ€™organisateur choisit ce quâ€™il met Ã  disposition.
 
-La **macro** (catalogue, annuaires, recherche) reste sous contrôle plateforme ; la **micro** (contenu et opérations de chaque édition, dont services visiteur) reste sous contrôle organisateur dans le cadre du Mandat.
+La **macro** (catalogue, annuaires, recherche) reste sous contrÃ´le plateforme ; la **micro** (contenu et opÃ©rations de chaque Ã©dition, dont services visiteur) reste sous contrÃ´le organisateur dans le cadre du Mandat.
 
 ---
 
 ## 5. Distribution : le service au niveau des exposants
 
-### 5.1 Compte cross-événement et dashboard exposant
+### 5.1 Compte cross-Ã©vÃ©nement et dashboard exposant
 
-Les **exposants** disposent d’un **compte cross-événement** et de leur **propre dashboard** pour leurs besoins :
+Les **exposants** disposent dâ€™un **compte cross-Ã©vÃ©nement** et de leur **propre dashboard** pour leurs besoins :
 
-- **Participation à plusieurs festivals** : un même exposant peut **s’inscrire et participer à plusieurs événements** ; son dashboard agrège candidatures, participations, documents et factures pour tous les festivals concernés.
-- **Dashboard dédié** : vue unifiée sur ses candidatures (en attente, validées, refusées), ses éditions en cours ou à venir, ses documents et factures (Miyuinvoice), et son **agenda** cross-événements.
+- **Participation Ã  plusieurs festivals** : un mÃªme exposant peut **sâ€™inscrire et participer Ã  plusieurs Ã©vÃ©nements** ; son dashboard agrÃ¨ge candidatures, participations, documents et factures pour tous les festivals concernÃ©s.
+- **Dashboard dÃ©diÃ©** : vue unifiÃ©e sur ses candidatures (en attente, validÃ©es, refusÃ©es), ses Ã©ditions en cours ou Ã  venir, ses documents et factures (Miyuinvoice), et son **agenda** cross-Ã©vÃ©nements.
 
-### 5.2 Gestion d’agenda et conflits de dates
+### 5.2 Gestion dâ€™agenda et conflits de dates
 
-Une **fonctionnalité de gestion d’agenda** est proposée pour éviter qu’un exposant (ou un visiteur) **ne s’inscrive à deux événements à la même date**. Besoin déjà rencontré en pratique (« déjà vu ») :
+Une **fonctionnalitÃ© de gestion dâ€™agenda** est proposÃ©e pour Ã©viter quâ€™un exposant (ou un visiteur) **ne sâ€™inscrive Ã  deux Ã©vÃ©nements Ã  la mÃªme date**. Besoin dÃ©jÃ  rencontrÃ© en pratique (Â« dÃ©jÃ  vu Â») :
 
-- **Calendrier cross-événements** : visualisation des dates des événements auxquels l’exposant est inscrit ou candidat ; alerte ou blocage en cas de chevauchement de dates.
-- **Cohérence** : la plateforme peut signaler un conflit de dates avant validation d’une nouvelle candidature ou inscription, et l’exposant peut organiser son planning sur plusieurs festivals sans double engagement.
+- **Calendrier cross-Ã©vÃ©nements** : visualisation des dates des Ã©vÃ©nements auxquels lâ€™exposant est inscrit ou candidat ; alerte ou blocage en cas de chevauchement de dates.
+- **CohÃ©rence** : la plateforme peut signaler un conflit de dates avant validation dâ€™une nouvelle candidature ou inscription, et lâ€™exposant peut organiser son planning sur plusieurs festivals sans double engagement.
 
-Cette capacité relève de l’Opérateur ou Kit **Agenda cross-événements** (MiyuClock, Miyubooking, données d’édition).
+Cette capacitÃ© relÃ¨ve de lâ€™OpÃ©rateur ou Kit **Agenda cross-Ã©vÃ©nements** (MiyuClock, Miyubooking, donnÃ©es dâ€™Ã©dition).
 
 ---
 
 ## 6. Distribution : le service au niveau des visiteurs
 
-### 6.1 Espace dédié visiteur
+### 6.1 Espace dÃ©diÃ© visiteur
 
-Les **visiteurs** disposent d’un **espace dédié** gouverné, distinct de la simple consultation du catalogue. Comme pour les organisateurs et les exposants, **tous les comptes sont cross-événements** : un même compte visiteur permet de :
+Les **visiteurs** disposent dâ€™un **espace dÃ©diÃ©** gouvernÃ©, distinct de la simple consultation du catalogue. Comme pour les organisateurs et les exposants, **tous les comptes sont cross-Ã©vÃ©nements** : un mÃªme compte visiteur permet de :
 
-- **S’onboarder** par festival ou par **groupe de festivals** : le visiteur peut rejoindre un événement isolé ou une famille d’événements (ex. une série de festivals partenaires), selon ce que l’organisateur ou la plateforme propose.
-- **Suivre ses activités et organiser sa visite** sur **plusieurs événements**, sans recréer d’identité à chaque fois.
+- **Sâ€™onboarder** par festival ou par **groupe de festivals** : le visiteur peut rejoindre un Ã©vÃ©nement isolÃ© ou une famille dâ€™Ã©vÃ©nements (ex. une sÃ©rie de festivals partenaires), selon ce que lâ€™organisateur ou la plateforme propose.
+- **Suivre ses activitÃ©s et organiser sa visite** sur **plusieurs Ã©vÃ©nements**, sans recrÃ©er dâ€™identitÃ© Ã  chaque fois.
 
-La **gestion d’agenda** (voir § 5.2) s’applique aussi aux visiteurs : éviter les inscriptions à deux événements ou créneaux à la même date.
+La **gestion dâ€™agenda** (voir Â§ 5.2) sâ€™applique aussi aux visiteurs : Ã©viter les inscriptions Ã  deux Ã©vÃ©nements ou crÃ©neaux Ã  la mÃªme date.
 
-### 6.2 Compte cross-événement (visiteur)
+### 6.2 Compte cross-Ã©vÃ©nement (visiteur)
 
-Le **compte cross-événement** offre au visiteur une vue unifiée pour :
+Le **compte cross-Ã©vÃ©nement** offre au visiteur une vue unifiÃ©e pour :
 
-| Capacité | Description |
+| CapacitÃ© | Description |
 |----------|-------------|
-| **Agenda** | Programme personnel : ateliers, animations, concours auxquels le visiteur est inscrit ou qu’il souhaite suivre, synchronisé entre événements. |
-| **Compte à rebours** | Jours/heures restants avant les événements ou créneaux réservés. |
-| **Billets / tickets** | Accès centralisé aux billets et tickets acquis (par événement ou groupe d’événements). |
-| **Réservations** | Ateliers, créneaux, places réservés ; annulation ou modification dans le cadre des règles de l’édition. |
-| **Pass VIP** | Pass et avantages associés (par événement ou multi-événements), selon ce que l’organisateur met en place. |
-| **Suivi d’activités** | Historique et suivi des participations : jeux joués, concours, ateliers suivis, récompenses, etc. |
+| **Agenda** | Programme personnel : ateliers, animations, concours auxquels le visiteur est inscrit ou quâ€™il souhaite suivre, synchronisÃ© entre Ã©vÃ©nements. |
+| **Compte Ã  rebours** | Jours/heures restants avant les Ã©vÃ©nements ou crÃ©neaux rÃ©servÃ©s. |
+| **Billets / tickets** | AccÃ¨s centralisÃ© aux billets et tickets acquis (par Ã©vÃ©nement ou groupe dâ€™Ã©vÃ©nements). |
+| **RÃ©servations** | Ateliers, crÃ©neaux, places rÃ©servÃ©s ; annulation ou modification dans le cadre des rÃ¨gles de lâ€™Ã©dition. |
+| **Pass VIP** | Pass et avantages associÃ©s (par Ã©vÃ©nement ou multi-Ã©vÃ©nements), selon ce que lâ€™organisateur met en place. |
+| **Suivi dâ€™activitÃ©s** | Historique et suivi des participations : jeux jouÃ©s, concours, ateliers suivis, rÃ©compenses, etc. |
 
-La gouvernance (StrongFather, Master Butler, KindMother) garantit que les données du visiteur restent souveraines et que l’accès cross-événement respecte les Mandats et les choix de chaque organisateur.
+La gouvernance (StrongFather, Master Butler, KindMother) garantit que les donnÃ©es du visiteur restent souveraines et que lâ€™accÃ¨s cross-Ã©vÃ©nement respecte les Mandats et les choix de chaque organisateur.
 
-### 6.3 Services proposés aux visiteurs (activables par l’organisateur)
+### 6.3 Services proposÃ©s aux visiteurs (activables par lâ€™organisateur)
 
-Chaque **organisateur** peut **mettre à disposition** pour ses événements tout ou partie des services suivants. La plateforme les fournit ; l’organisateur décide lesquels activer et avec quelles règles :
+Chaque **organisateur** peut **mettre Ã  disposition** pour ses Ã©vÃ©nements tout ou partie des services suivants. La plateforme les fournit ; lâ€™organisateur dÃ©cide lesquels activer et avec quelles rÃ¨gles :
 
 | Service | Description |
 |---------|-------------|
-| **Jeux** | Jeux liés au festival (quizz, chasses au trésor, défis) ; participation et suivi dans l’espace visiteur. |
-| **Concours** | Inscription et participation à des concours ; résultats, récompenses, historique. |
-| **Inscriptions ateliers** | Réservation de créneaux d’ateliers ; annulation, rappels, intégration à l’agenda visiteur. |
-| **Réservations** | Réservation de places, créneaux ou activités (Miyubooking) ; billets et pass. |
-| **Pass et avantages** | Pass VIP, pass journée, avantages fidélité ; liaison avec le compte cross-événement. |
-| **Notifications** | Rappels, changements de programme, alertes (Miyunotify), selon préférences visiteur et règles édition. |
+| **Jeux** | Jeux liÃ©s au festival (quizz, chasses au trÃ©sor, dÃ©fis) ; participation et suivi dans lâ€™espace visiteur. |
+| **Concours** | Inscription et participation Ã  des concours ; rÃ©sultats, rÃ©compenses, historique. |
+| **Inscriptions ateliers** | RÃ©servation de crÃ©neaux dâ€™ateliers ; annulation, rappels, intÃ©gration Ã  lâ€™agenda visiteur. |
+| **RÃ©servations** | RÃ©servation de places, crÃ©neaux ou activitÃ©s (Miyubooking) ; billets et pass. |
+| **Pass et avantages** | Pass VIP, pass journÃ©e, avantages fidÃ©litÃ© ; liaison avec le compte cross-Ã©vÃ©nement. |
+| **Notifications** | Rappels, changements de programme, alertes (Miyunotify), selon prÃ©fÃ©rences visiteur et rÃ¨gles Ã©dition. |
 
-L’organisateur configure, par édition ou par groupe d’éditions, quels services sont ouverts et selon quelles conditions (places limitées, dates, publics). La **distribution** visiteur est ainsi **paramétrable** par organisateur sans modifier la gouvernance plateforme.
+Lâ€™organisateur configure, par Ã©dition ou par groupe dâ€™Ã©ditions, quels services sont ouverts et selon quelles conditions (places limitÃ©es, dates, publics). La **distribution** visiteur est ainsi **paramÃ©trable** par organisateur sans modifier la gouvernance plateforme.
 
 ### 6.4 Onboarding visiteur : par festival ou par groupe de festivals
 
-- **Onboarding par festival** : le visiteur crée un compte ou se connecte dans le contexte d’un seul événement ; il peut ensuite étendre son compte à d’autres événements (compte cross-événement).
-- **Onboarding par groupe de festivals** : l’organisateur ou la plateforme propose une **famille d’événements** (ex. « Festivals partenaires 2026 ») ; le visiteur s’inscrit une fois et accède à tous les événements du groupe avec le même compte, agenda et billets unifiés.
+- **Onboarding par festival** : le visiteur crÃ©e un compte ou se connecte dans le contexte dâ€™un seul Ã©vÃ©nement ; il peut ensuite Ã©tendre son compte Ã  dâ€™autres Ã©vÃ©nements (compte cross-Ã©vÃ©nement).
+- **Onboarding par groupe de festivals** : lâ€™organisateur ou la plateforme propose une **famille dâ€™Ã©vÃ©nements** (ex. Â« Festivals partenaires 2026 Â») ; le visiteur sâ€™inscrit une fois et accÃ¨de Ã  tous les Ã©vÃ©nements du groupe avec le mÃªme compte, agenda et billets unifiÃ©s.
 
-Cela permet des partenariats entre organisateurs (groupes de festivals) et une expérience visiteur cohérente sur plusieurs événements.
+Cela permet des partenariats entre organisateurs (groupes de festivals) et une expÃ©rience visiteur cohÃ©rente sur plusieurs Ã©vÃ©nements.
 
 ---
 
@@ -214,60 +214,62 @@ Cela permet des partenariats entre organisateurs (groupes de festivals) et une e
 
 ### 7.1 Message central (elevator pitch)
 
-**JayFestival** est le service Miyukini pour organiser et promouvoir des événements et festivals. **Tous les comptes sont cross-événements** : les **organisateurs** peuvent gérer **plusieurs festivals** ; les **exposants** disposent de leur **dashboard** pour participer à **plusieurs festivals** et bénéficier d’une **gestion d’agenda** pour éviter les conflits de dates ; les **visiteurs** organisent leur visite sur plusieurs événements (agenda, billets, réservations, pass VIP, jeux, concours, ateliers). Le public découvre les événements, les organisateurs et les exposants dans un catalogue commun, fiable et sécurisé.
+**JayFestival** est le service Miyukini pour organiser et promouvoir des Ã©vÃ©nements et festivals. **Tous les comptes sont cross-Ã©vÃ©nements** : les **organisateurs** peuvent gÃ©rer **plusieurs festivals** ; les **exposants** disposent de leur **dashboard** pour participer Ã  **plusieurs festivals** et bÃ©nÃ©ficier dâ€™une **gestion dâ€™agenda** pour Ã©viter les conflits de dates ; les **visiteurs** organisent leur visite sur plusieurs Ã©vÃ©nements (agenda, billets, rÃ©servations, pass VIP, jeux, concours, ateliers). Le public dÃ©couvre les Ã©vÃ©nements, les organisateurs et les exposants dans un catalogue commun, fiable et sÃ©curisÃ©.
 
 ### 7.2 Publics cibles
 
 | Public | Message prioritaire |
 |-------|----------------------|
-| **Organisateurs** | Une plateforme complète pour gérer **plusieurs festivals/événements**, vos exposants et équipes, activer des services visiteurs (jeux, concours, ateliers), et publier dans un annuaire commun, dans le respect de la gouvernance et de la vie privée. Compte cross-événements. |
-| **Exposants** | Votre **dashboard exposant** : candidater et participer à **plusieurs festivals**, suivre vos participations, documents et factures, et **gérer votre agenda** pour éviter les inscriptions à deux événements à la même date. Compte cross-événements. Visible dans le répertoire des exposants. |
-| **Visiteurs** | Un espace dédié et un compte cross-événement : organisez votre visite (agenda, billets, réservations, pass VIP), participez aux jeux, concours et ateliers proposés par les festivals, et suivez vos activités sur un ou plusieurs événements. Onboarding par festival ou par groupe de festivals. |
-| **Public (non connecté)** | Découvrez les événements, les organisateurs et les exposants dans un annuaire clair et à jour. |
-| **Partenaires / intégrateurs** | Un service COG, modulaire, réutilisant les Kits Miyukini et extensible via Opérateurs et Mandats. |
+| **Organisateurs** | Une plateforme complÃ¨te pour gÃ©rer **plusieurs festivals/Ã©vÃ©nements**, vos exposants et Ã©quipes, activer des services visiteurs (jeux, concours, ateliers), et publier dans un annuaire commun, dans le respect de la gouvernance et de la vie privÃ©e. Compte cross-Ã©vÃ©nements. |
+| **Exposants** | Votre **dashboard exposant** : candidater et participer Ã  **plusieurs festivals**, suivre vos participations, documents et factures, et **gÃ©rer votre agenda** pour Ã©viter les inscriptions Ã  deux Ã©vÃ©nements Ã  la mÃªme date. Compte cross-Ã©vÃ©nements. Visible dans le rÃ©pertoire des exposants. |
+| **Visiteurs** | Un espace dÃ©diÃ© et un compte cross-Ã©vÃ©nement : organisez votre visite (agenda, billets, rÃ©servations, pass VIP), participez aux jeux, concours et ateliers proposÃ©s par les festivals, et suivez vos activitÃ©s sur un ou plusieurs Ã©vÃ©nements. Onboarding par festival ou par groupe de festivals. |
+| **Public (non connectÃ©)** | DÃ©couvrez les Ã©vÃ©nements, les organisateurs et les exposants dans un annuaire clair et Ã  jour. |
+| **Partenaires / intÃ©grateurs** | Un service COG, modulaire, rÃ©utilisant les Kits Miyukini et extensible via OpÃ©rateurs et Mandats. |
 
-### 7.3 Différenciation
+### 7.3 DiffÃ©renciation
 
-- **Gouvernance COG** : pas un simple SaaS événementiel, mais un service inscrit dans l’architecture Miyukini (Cores, Opérateurs, Mandats).
-- **Comptes cross-événements pour tous** : organisateur (plusieurs festivals), exposant (dashboard, plusieurs festivals, agenda), visiteur (plusieurs événements).
-- **Gestion d’agenda** : éviter qu’un exposant — ou un visiteur — s’inscrive à deux événements à la même date ; besoin déjà vu en pratique.
-- **B2B2C et Store** : catalogue commun (événements, organisateurs, exposants) + espaces dédiés organisateur, **exposant** (dashboard) et **visiteur**.
-- **Héritage éprouvé** : spécificités inspirées de Catakana Orga, portées à l’échelle et normalisées.
+- **Gouvernance COG** : pas un simple SaaS Ã©vÃ©nementiel, mais un service inscrit dans lâ€™architecture Miyukini (Cores, OpÃ©rateurs, Mandats).
+- **Comptes cross-Ã©vÃ©nements pour tous** : organisateur (plusieurs festivals), exposant (dashboard, plusieurs festivals, agenda), visiteur (plusieurs Ã©vÃ©nements).
+- **Gestion dâ€™agenda** : Ã©viter quâ€™un exposant â€” ou un visiteur â€” sâ€™inscrive Ã  deux Ã©vÃ©nements Ã  la mÃªme date ; besoin dÃ©jÃ  vu en pratique.
+- **B2B2C et Store** : catalogue commun (Ã©vÃ©nements, organisateurs, exposants) + espaces dÃ©diÃ©s organisateur, **exposant** (dashboard) et **visiteur**.
+- **HÃ©ritage Ã©prouvÃ©** : spÃ©cificitÃ©s inspirÃ©es de Catakana Orga, portÃ©es Ã  lâ€™Ã©chelle et normalisÃ©es.
 
 ---
 
-## 8. Prochaines étapes (orientation)
+## 8. Prochaines Ã©tapes (orientation)
 
 1. **Fonder** : valider ce document fondateur et le diffuser (interne / partenaires).
-2. **Spécifier** : documenter les Opérateurs et Kits (Édition, Organisateur, Exposant, Visiteur, Plan de salle, Programme, Candidature, **Agenda cross-événements**) et leurs Contrats d’équipe.
-3. **Macro** : définir et implémenter le catalogue (annuaires, recherche, Façade publique).
-4. **Distribution organisateur** : finaliser l’onboarding organisateur (compte cross-événement, **plusieurs festivals**), les Mandats et l’espace organisateur (dashboard multi-éditions, exposants, plan, programme, budget, **activation des services visiteur**).
-5. **Distribution exposant** : dashboard exposant, participation à **plusieurs festivals**, **gestion d’agenda** (conflits de dates), candidatures, documents, factures.
-6. **Distribution visiteur** : espace dédié visiteur, compte cross-événement, onboarding par festival / groupe de festivals, agenda, billets, réservations, pass VIP, jeux/concours/ateliers, **gestion d’agenda** (conflits de dates).
-7. **Migration** : planifier la reprise des spécificités Catakana Orga (voir audit B2B2C) et la convergence des écrans et flux.
+2. **SpÃ©cifier** : documenter les OpÃ©rateurs et Kits (Ã‰dition, Organisateur, Exposant, Visiteur, Plan de salle, Programme, Candidature, **Agenda cross-Ã©vÃ©nements**) et leurs Contrats dâ€™Ã©quipe.
+3. **Macro** : dÃ©finir et implÃ©menter le catalogue (annuaires, recherche, FaÃ§ade publique).
+4. **Distribution organisateur** : finaliser lâ€™onboarding organisateur (compte cross-Ã©vÃ©nement, **plusieurs festivals**), les Mandats et lâ€™espace organisateur (dashboard multi-Ã©ditions, exposants, plan, programme, budget, **activation des services visiteur**).
+5. **Distribution exposant** : dashboard exposant, participation Ã  **plusieurs festivals**, **gestion dâ€™agenda** (conflits de dates), candidatures, documents, factures.
+6. **Distribution visiteur** : espace dÃ©diÃ© visiteur, compte cross-Ã©vÃ©nement, onboarding par festival / groupe de festivals, agenda, billets, rÃ©servations, pass VIP, jeux/concours/ateliers, **gestion dâ€™agenda** (conflits de dates).
+7. **Migration** : planifier la reprise des spÃ©cificitÃ©s Catakana Orga (voir audit B2B2C) et la convergence des Ã©crans et flux.
 
 ---
 
-## 9. Interpolarité (services Jay)
+## 9. InterpolaritÃ© (services Jay)
 
-JayFestival s’intègre avec les **services Jay** suivants : **JayXpose** (fiche et répertoire exposants), **JayFaim** (restauration sur événement), **JayKoa** (agenda agrégé, conflits de dates), **JayKonta** (budget édition, devis et factures exposants). Les couplages sont explicites et gouvernés (Mandats de Permission, niveaux de sécurité).
+JayFestival sâ€™intÃ¨gre avec les **services Jay** suivants : **JayXpose** (fiche et rÃ©pertoire exposants), **JayFaim** (restauration sur Ã©vÃ©nement), **JayKoa** (agenda agrÃ©gÃ©, conflits de dates), **JayKonta** (budget Ã©dition, devis et factures exposants). Les couplages sont explicites et gouvernÃ©s (Mandats de Permission, niveaux de sÃ©curitÃ©).
 
-**Référence détaillée** : [JayFestival - Interpolarite Services Jay](./reference/JayFestival%20-%20Interpolarite%20Services%20Jay.md) ; [Miyukini Conceptual References - Interpolarite Services Jay](../../reference/Miyukini%20Conceptual%20References%20-%20Interpolarite%20Services%20Jay.md).
+**RÃ©fÃ©rence dÃ©taillÃ©e** : [JayFestival - Interpolarite Services Jay](./reference/JayFestival%20-%20Interpolarite%20Services%20Jay.md) ; [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyukini-webway-system//reference//_index.md).
 
 ---
 
-## 10. Références
+## 10. RÃ©fÃ©rences
 
-| Document | Rôle |
+| Document | RÃ´le |
 |----------|------|
-| [Miyukini Conceptual References — Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) | Terminologie officielle (Opérateur, Mandat, COG, etc.). |
-| [Miyukini Conceptual References — Vision stratégique](../../reference/Miyukini%20Conceptual%20References%20-%20Vision%20Strategique.md) | Objectifs stratégiques, B2B2C, modèles de livraison. |
+| [Miyukini Conceptual References â€” Glossaire](..//..//miyukini-webway-system//reference//_index.md) | Terminologie officielle (OpÃ©rateur, Mandat, COG, etc.). |
+| [Miyukini Conceptual References â€” Vision stratÃ©gique](..//..//miyukini-webway-system//reference//_index.md) | Objectifs stratÃ©giques, B2B2C, modÃ¨les de livraison. |
 | [JayFestival - Interpolarite Services Jay](./reference/JayFestival%20-%20Interpolarite%20Services%20Jay.md) | Couplages avec JayXpose, JayFaim, JayKoa, JayKonta. |
-| [Audit Catakana → Miyukini COG B2B2C](../../modules/Catakana%20-%20Audit%20Conversion%20Miyukini%20COG%20B2B2C.md) | Kits manquants, correspondance Opérateurs, besoins UI. |
+| [Audit Catakana â†’ Miyukini COG B2B2C](..//..//_index.md) | Kits manquants, correspondance OpÃ©rateurs, besoins UI. |
 
 ---
 
-**Document** : JayFestival — Document fondateur  
+**Document** : JayFestival â€” Document fondateur  
 **Version** : 1.2  
 **Date** : 2026-01-31  
-**Statut** : Document fondateur — référence pour le service (comptes cross-événements pour tous ; dashboard exposant ; gestion d’agenda)
+**Statut** : Document fondateur â€” rÃ©fÃ©rence pour le service (comptes cross-Ã©vÃ©nements pour tous ; dashboard exposant ; gestion dâ€™agenda)
+
+

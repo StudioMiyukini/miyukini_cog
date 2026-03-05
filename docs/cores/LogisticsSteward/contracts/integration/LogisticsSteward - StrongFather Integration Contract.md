@@ -1,4 +1,4 @@
-# LogisticsSteward - StrongFather Integration Contract
+﻿# LogisticsSteward - StrongFather Integration Contract
 
 ## 1. Contexte
 
@@ -10,7 +10,7 @@ Ce document complete la Section 8.2 de la [Documentation Fondatrice](../../found
 - [StrongFather - Documentation Fondatrice](../../../StrongFather/foundation/StrongFather%20-%20Documentation%20Fondatrice.md) pour la nature de StrongFather
 - [StrongFather - Integration Readiness Contract](../../../StrongFather/architecture/StrongFather%20-%20Integration%20Readiness%20Contract.md) pour les regles d'integration
 
-L'integration respecte les [Lois d'Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) : toutes les validations sont locales et ne requierent aucune dependance externe (**LOI-1**).
+L'integration respecte les [Lois d'Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) : toutes les validations sont locales et ne requierent aucune dependance externe (**LOI-1**).
 
 ## 2. Portee / Scope
 
@@ -43,7 +43,7 @@ Cette relation garantit que :
 
 ---
 
-## 4. Nature de la relation LogisticsSteward — StrongFather
+## 4. Nature de la relation LogisticsSteward â€” StrongFather
 
 ### 4.1 Relation de soumission-validation
 
@@ -70,13 +70,13 @@ LogisticsSteward ne contourne jamais StrongFather pour appliquer une decision di
 
 | Responsabilite | LogisticsSteward | StrongFather |
 |----------------|------------------|--------------|
-| **Evaluer les besoins en ressources** | ✅ Exclusif | ❌ Jamais |
-| **Proposer des arbitrages** | ✅ Exclusif | ❌ Jamais |
-| **Valider les arbitrages** | ❌ Jamais | ✅ Exclusif |
-| **Appliquer des politiques globales** | ❌ Jamais | ✅ Exclusif |
-| **Trancher les conflits de regles** | ❌ Jamais | ✅ Exclusif |
-| **Definir les regles de gouvernance** | ✅ Propose | ✅ Valide |
-| **Executer les decisions** | ❌ Jamais | ❌ Jamais (Kernel) |
+| **Evaluer les besoins en ressources** | âœ… Exclusif | âŒ Jamais |
+| **Proposer des arbitrages** | âœ… Exclusif | âŒ Jamais |
+| **Valider les arbitrages** | âŒ Jamais | âœ… Exclusif |
+| **Appliquer des politiques globales** | âŒ Jamais | âœ… Exclusif |
+| **Trancher les conflits de regles** | âŒ Jamais | âœ… Exclusif |
+| **Definir les regles de gouvernance** | âœ… Propose | âœ… Valide |
+| **Executer les decisions** | âŒ Jamais | âŒ Jamais (Kernel) |
 
 **Regle LS-SF-04 : Aucun chevauchement decisif**
 
@@ -85,24 +85,24 @@ LogisticsSteward propose des decisions basees sur l'etat des ressources. StrongF
 ### 4.3 Hierarchie des autorites
 
 ```
-┌─────────────────────────────────────────┐
-│ STRATE 4 — Autorite                      │
-│ StrongFather (validation)                │
-│    ▲                                     │
-│    │ valide/invalide                     │
-│    │                                     │
-└─────────────────────────────────────────┘
-┌─────────────────────────────────────────┐
-│ STRATE 3 — Gouvernance Ressources        │
-│ LogisticsSteward (proposition)           │
-│    ▲                                     │
-│    │ soumet                              │
-│    │                                     │
-└─────────────────────────────────────────┘
-┌─────────────────────────────────────────┐
-│ STRATE 1 — Execution                     │
-│ Kernel (execution)                       │
-└─────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 4 â€” Autorite                      â”‚
+â”‚ StrongFather (validation)                â”‚
+â”‚    â–²                                     â”‚
+â”‚    â”‚ valide/invalide                     â”‚
+â”‚    â”‚                                     â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 3 â€” Gouvernance Ressources        â”‚
+â”‚ LogisticsSteward (proposition)           â”‚
+â”‚    â–²                                     â”‚
+â”‚    â”‚ soumet                              â”‚
+â”‚    â”‚                                     â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 1 â€” Execution                     â”‚
+â”‚ Kernel (execution)                       â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 LogisticsSteward est subordonne a StrongFather dans la chaine de decision. Cette hierarchie est non negociable.
@@ -189,14 +189,14 @@ Les demandes de validation soumises a StrongFather suivent un format standardise
 
 | Element | Description | Obligatoire |
 |---------|-------------|-------------|
-| `demande_id` | Identifiant unique de la demande | ✅ Oui |
-| `type` | Type de decision (QUOTA_ALLOCATION, PRIORITY_MODIFICATION, etc.) | ✅ Oui |
-| `entite_concernee` | Identifiant de l'entite concernee par la decision | ✅ Oui |
-| `decision_proposee` | Details de la decision proposee | ✅ Oui |
-| `justification` | Justification basee sur l'etat systeme | ✅ Oui |
-| `etat_systeme_reference` | Reference a l'etat systeme utilise | ✅ Oui |
-| `regles_appliquees` | Regles de gouvernance appliquees | ✅ Oui |
-| `timestamp` | Horodatage de la demande | ✅ Oui |
+| `demande_id` | Identifiant unique de la demande | âœ… Oui |
+| `type` | Type de decision (QUOTA_ALLOCATION, PRIORITY_MODIFICATION, etc.) | âœ… Oui |
+| `entite_concernee` | Identifiant de l'entite concernee par la decision | âœ… Oui |
+| `decision_proposee` | Details de la decision proposee | âœ… Oui |
+| `justification` | Justification basee sur l'etat systeme | âœ… Oui |
+| `etat_systeme_reference` | Reference a l'etat systeme utilise | âœ… Oui |
+| `regles_appliquees` | Regles de gouvernance appliquees | âœ… Oui |
+| `timestamp` | Horodatage de la demande | âœ… Oui |
 
 **Regle LS-SF-PROT-01 : Format standardise**
 
@@ -214,13 +214,13 @@ Les reponses de StrongFather suivent un format standardise.
 
 | Element | Description | Obligatoire |
 |---------|-------------|-------------|
-| `reponse_id` | Identifiant unique de la reponse | ✅ Oui |
-| `demande_id` | Reference a la demande | ✅ Oui |
-| `statut` | Statut de la decision (VALIDATED, INVALIDATED, DEFERRED, MODIFIED) | ✅ Oui |
+| `reponse_id` | Identifiant unique de la reponse | âœ… Oui |
+| `demande_id` | Reference a la demande | âœ… Oui |
+| `statut` | Statut de la decision (VALIDATED, INVALIDATED, DEFERRED, MODIFIED) | âœ… Oui |
 | `decision_finale` | Decision validee (peut differer de la proposition) | Si VALIDATED ou MODIFIED |
-| `motif` | Motif de la decision de StrongFather | ✅ Oui |
-| `politiques_appliquees` | Politiques utilisees pour la decision | ✅ Oui |
-| `timestamp` | Horodatage de la reponse | ✅ Oui |
+| `motif` | Motif de la decision de StrongFather | âœ… Oui |
+| `politiques_appliquees` | Politiques utilisees pour la decision | âœ… Oui |
+| `timestamp` | Horodatage de la reponse | âœ… Oui |
 
 **Regle LS-SF-PROT-03 : Decision motivee**
 
@@ -373,53 +373,53 @@ LogisticsSteward applique fidelement les decisions validees ou modifiees par Str
 ### 9.2 Diagramme de sequence
 
 ```
-┌───────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌────────┐
-│  Entite   │    │ LogisticsSteward│    │   StrongFather  │    │ Kernel │
-└─────┬─────┘    └────────┬────────┘    └────────┬────────┘    └────┬───┘
-      │                   │                      │                  │
-      ├── Demande ───────►│                      │                  │
-      │                   │                      │                  │
-      │                   ├── Evaluation ────────┤                  │
-      │                   │   (interne)          │                  │
-      │                   │                      │                  │
-      │                   ├── Soumission ───────►│                  │
-      │                   │                      │                  │
-      │                   │                      ├── Evaluation     │
-      │                   │                      │   politique      │
-      │                   │                      │   (interne)      │
-      │                   │                      │                  │
-      │                   │◄── Validation ───────┤                  │
-      │                   │                      │                  │
-      │                   ├── Execution ─────────┼─────────────────►│
-      │                   │                      │                  │
-      │                   │◄── Confirmation ─────┼──────────────────┤
-      │                   │                      │                  │
-      │◄── Resultat ──────┤                      │                  │
-      │                   │                      │                  │
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Entite   â”‚    â”‚ LogisticsStewardâ”‚    â”‚   StrongFather  â”‚    â”‚ Kernel â”‚
+â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”¬â”€â”€â”€â”˜
+      â”‚                   â”‚                      â”‚                  â”‚
+      â”œâ”€â”€ Demande â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚                      â”‚                  â”‚
+      â”‚                   â”‚                      â”‚                  â”‚
+      â”‚                   â”œâ”€â”€ Evaluation â”€â”€â”€â”€â”€â”€â”€â”€â”¤                  â”‚
+      â”‚                   â”‚   (interne)          â”‚                  â”‚
+      â”‚                   â”‚                      â”‚                  â”‚
+      â”‚                   â”œâ”€â”€ Soumission â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚                  â”‚
+      â”‚                   â”‚                      â”‚                  â”‚
+      â”‚                   â”‚                      â”œâ”€â”€ Evaluation     â”‚
+      â”‚                   â”‚                      â”‚   politique      â”‚
+      â”‚                   â”‚                      â”‚   (interne)      â”‚
+      â”‚                   â”‚                      â”‚                  â”‚
+      â”‚                   â”‚â—„â”€â”€ Validation â”€â”€â”€â”€â”€â”€â”€â”¤                  â”‚
+      â”‚                   â”‚                      â”‚                  â”‚
+      â”‚                   â”œâ”€â”€ Execution â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
+      â”‚                   â”‚                      â”‚                  â”‚
+      â”‚                   â”‚â—„â”€â”€ Confirmation â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+      â”‚                   â”‚                      â”‚                  â”‚
+      â”‚â—„â”€â”€ Resultat â”€â”€â”€â”€â”€â”€â”¤                      â”‚                  â”‚
+      â”‚                   â”‚                      â”‚                  â”‚
 ```
 
 ### 9.3 Flux de resolution de conflit
 
 ```
-┌─────────────────┐    ┌─────────────────┐
-│ LogisticsSteward│    │   StrongFather  │
-└────────┬────────┘    └────────┬────────┘
-         │                      │
-         ├── Detection conflit ─┤
-         │   (interne)          │
-         │                      │
-         ├── CONFLICT_RESOLUTION►│
-         │   + options          │
-         │                      │
-         │                      ├── Evaluation
-         │                      │   (interne)
-         │                      │
-         │◄── Resolution ───────┤
-         │   + regle choisie    │
-         │                      │
-         ├── Application ───────┤
-         │   de la resolution   │
-         │                      │
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ LogisticsStewardâ”‚    â”‚   StrongFather  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚                      â”‚
+         â”œâ”€â”€ Detection conflit â”€â”¤
+         â”‚   (interne)          â”‚
+         â”‚                      â”‚
+         â”œâ”€â”€ CONFLICT_RESOLUTIONâ–ºâ”‚
+         â”‚   + options          â”‚
+         â”‚                      â”‚
+         â”‚                      â”œâ”€â”€ Evaluation
+         â”‚                      â”‚   (interne)
+         â”‚                      â”‚
+         â”‚â—„â”€â”€ Resolution â”€â”€â”€â”€â”€â”€â”€â”¤
+         â”‚   + regle choisie    â”‚
+         â”‚                      â”‚
+         â”œâ”€â”€ Application â”€â”€â”€â”€â”€â”€â”€â”¤
+         â”‚   de la resolution   â”‚
+         â”‚                      â”‚
 ```
 
 ---
@@ -436,7 +436,7 @@ LogisticsSteward applique fidelement les decisions validees ou modifiees par Str
 
 ### 10.3 Garantie de tracabilite
 
-**Engagement :** Toute interaction entre LogisticsSteward et StrongFather est traçable de bout en bout. Le journal contient toutes les informations necessaires pour reconstruire la sequence de decisions.
+**Engagement :** Toute interaction entre LogisticsSteward et StrongFather est traÃ§able de bout en bout. Le journal contient toutes les informations necessaires pour reconstruire la sequence de decisions.
 
 ### 10.4 Garantie de resolution
 
@@ -607,7 +607,7 @@ Toute implementation de l'integration avec StrongFather doit respecter ce contra
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT — Normatif  
+**Statut :** CONTRAT â€” Normatif  
 **Dependances :**
 - LogisticsSteward - Documentation Fondatrice v1.0.0 (Section 8.2, INV-LS-8)
 - LogisticsSteward - Resource Arbitration Contract
@@ -622,7 +622,7 @@ Toute implementation de l'integration avec StrongFather doit respecter ce contra
 
 ### Decision editoriale E1 : Direction de la relation
 
-**Decision prise :** La relation est de soumission-validation : LogisticsSteward soumet, StrongFather valide/invalide. Cette direction respecte la hierarchie des strates (Strate 3 → Strate 4).
+**Decision prise :** La relation est de soumission-validation : LogisticsSteward soumet, StrongFather valide/invalide. Cette direction respecte la hierarchie des strates (Strate 3 â†’ Strate 4).
 
 **Application :** Tout le document est structure autour de cette relation de subordination.
 
@@ -651,13 +651,14 @@ Toute implementation de l'integration avec StrongFather doit respecter ce contra
 ### Verification de coherence
 
 **Verification effectuee :**
-- ✅ Coherence avec LogisticsSteward - Documentation Fondatrice : Confirmee (INV-LS-8, Section 8.2)
-- ✅ Coherence avec StrongFather - Documentation Fondatrice : Confirmee (role de validation)
-- ✅ Conformite LOI-1 : Confirmee (aucune dependance externe)
-- ✅ Hierarchie des strates respectee : Confirmee (Strate 3 → Strate 4)
+- âœ… Coherence avec LogisticsSteward - Documentation Fondatrice : Confirmee (INV-LS-8, Section 8.2)
+- âœ… Coherence avec StrongFather - Documentation Fondatrice : Confirmee (role de validation)
+- âœ… Conformite LOI-1 : Confirmee (aucune dependance externe)
+- âœ… Hierarchie des strates respectee : Confirmee (Strate 3 â†’ Strate 4)
 
 **Conclusion :** Aucune contradiction detectee. Le document est coherent et non ambigu.
 
 ---
 
 *Aucune autre erreur, warning, ou ambiguite rencontree lors de la redaction de ce document.*
+

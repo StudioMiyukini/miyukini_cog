@@ -1,8 +1,8 @@
-# MiyuTreasury — Index de navigation
+﻿# MiyuTreasury â€” Index de navigation
 
 ## Contexte
 
-**MiyuTreasury** est le **kit d'outils (Toolkit)** de trésorerie et prévisionnel (tableau de bord, prévisionnel, alertes). Aligné sur [Équivalents Comptabilité Indépendants](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Comptabilite%20Independants.md).
+**MiyuTreasury** est le **kit d'outils (Toolkit)** de trÃ©sorerie et prÃ©visionnel (tableau de bord, prÃ©visionnel, alertes). AlignÃ© sur [Ã‰quivalents ComptabilitÃ© IndÃ©pendants](..//..//miyukini-webway-system//reference//_index.md).
 
 **Strate :** 6 (Tools & Toolkits)  
 **ToolkitId :** `toolkit.treasury.forecast`
@@ -13,5 +13,6 @@
 
 | Document | Description |
 |----------|-------------|
-| [Documentation Fondatrice](./MiyuTreasury%20-%20Documentation%20Fondatrice.md) | Identité, définition canonique, ToolkitId, liste des outils composants, gouvernance |
-| [Reference Outils](./MiyuTreasury%20-%20Reference%20Outils.md) | Liste exhaustive des Tools : ToolId, action, niveau de sécurité |
+| [Documentation Fondatrice](./MiyuTreasury%20-%20Documentation%20Fondatrice.md) | IdentitÃ©, dÃ©finition canonique, ToolkitId, liste des outils composants, gouvernance |
+| [Reference Outils](./MiyuTreasury%20-%20Reference%20Outils.md) | Liste exhaustive des Tools : ToolId, action, niveau de sÃ©curitÃ© |
+

@@ -6,10 +6,10 @@ Ce document définit la **conformité MSCM (Miyukini Semantic Code Markup)** et 
 
 **Références :**
 
-- [MIP v1 MSCM Index Protocol](../../contrats/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md)
+- [MIP v1 MSCM Index Protocol](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md)
 - [MWS - Flux de Vérification](../../miyukini-webway-system/verification/MWS%20-%20Flux%20de%20Verification.md)
 - [MSCM MIP Compliance Checklist](../../implementation/Miyukini%20COG%200.1%20-%20MSCM%20MIP%20Compliance%20Checklist.md)
-- [Skill miyukini-mscm-mip](.cursor/skills/miyukini-mscm-mip/SKILL.md)
+- [Skill miyukini-mscm-mip](_index.md)
 
 ---
 
@@ -273,7 +273,7 @@ Le Terminal n'a pas de Cores complets. La Phase A peut être adaptée :
 
 ### 7.3 Outil
 
-Utiliser `tools/mip-generator/` ou équivalent ; étendre le scan pour inclure `apps/terminal/`.
+Utiliser `tools/mscm-generator/` ou équivalent ; étendre le scan pour inclure `apps/terminal/`.
 
 ---
 
@@ -305,7 +305,9 @@ pub fn validate_token(token_b64: &str) -> Result<TokenPayload, ValidationError> 
 
 ## 9. Références
 
-- [MIP v1 Protocol](../../contrats/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md)
+- [MIP v1 Protocol](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md)
 - [MWS - Flux de Vérification](../../miyukini-webway-system/verification/MWS%20-%20Flux%20de%20Verification.md)
 - [MSCM MIP Compliance Checklist](../../implementation/Miyukini%20COG%200.1%20-%20MSCM%20MIP%20Compliance%20Checklist.md)
 - [Spec MWS Passeport Permis](./MiyukiniTerminal%20-%20Spec%20MWS%20Passeport%20Permis.md)
+
+

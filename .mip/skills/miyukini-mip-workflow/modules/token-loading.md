@@ -18,7 +18,7 @@
 | Jean | mip-performance-history, MEMORY.md (synthèse 1× en début P4/P6), \<sequence\>/metrics/ (résumé totaux si >200 lignes) |
 | Arianne | mip-decisions, patterns-and-lessons, mip-performance-history, team-skills-audit |
 
-Paths : `.mip/memory/`, `.mip/` (certifications, environment, agents). **MASS tâches simples** : `.mip/agents/bob.md` (~40 lignes, haiku). **MASS tâches complexes** : `.mip/agents/light/{francois,lise,victor}.md` (50-80 lignes).
+Paths : `.mip/memory/`, `.mip/` (certifications, environment, agents). **MASS taches simples** : `.mip/agents/bob/MASS_bob.md` (priorite, fallback `.mip/agents/bob/FULL_bob.md`). **MASS taches complexes** : `.mip/agents/light/{francois,lise,victor}.md` (50-80 lignes).
 
 ---
 

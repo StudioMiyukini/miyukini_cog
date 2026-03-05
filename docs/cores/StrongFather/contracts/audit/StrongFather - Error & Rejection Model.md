@@ -1,248 +1,248 @@
-# StrongFather — Error & Rejection Model
+﻿# StrongFather â€” Error & Rejection Model
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **StrongFather — Error & Rejection Model** : un contrat normatif, non négociable, et de statut FONDATION qui établit le modèle conceptuel des erreurs et des rejets dans StrongFather, définissant comment les erreurs sont représentées, comment les rejets sont communiqués, les catégories d'erreurs, et les règles de gestion des situations exceptionnelles dans le système Miyukini Core System v2.4.
+Ce document dÃ©finit le **StrongFather â€” Error & Rejection Model** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit le modÃ¨le conceptuel des erreurs et des rejets dans StrongFather, dÃ©finissant comment les erreurs sont reprÃ©sentÃ©es, comment les rejets sont communiquÃ©s, les catÃ©gories d'erreurs, et les rÃ¨gles de gestion des situations exceptionnelles dans le systÃ¨me Miyukini Core System v2.4.
 
-Ce contrat précise la nature des erreurs dans StrongFather, la distinction entre erreur et rejet, les catégories de rejet, et les garanties associées.
+Ce contrat prÃ©cise la nature des erreurs dans StrongFather, la distinction entre erreur et rejet, les catÃ©gories de rejet, et les garanties associÃ©es.
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **toutes les situations d'erreur et de rejet dans StrongFather** et définit de manière absolue :
-- la définition formelle d'une erreur StrongFather,
+Ce contrat s'applique Ã  **toutes les situations d'erreur et de rejet dans StrongFather** et dÃ©finit de maniÃ¨re absolue :
+- la dÃ©finition formelle d'une erreur StrongFather,
 - la distinction entre erreur et rejet,
-- les catégories d'erreurs et de rejets,
+- les catÃ©gories d'erreurs et de rejets,
 - la structure des messages d'erreur et de rejet,
-- les règles de propagation,
+- les rÃ¨gles de propagation,
 - les invariants de gestion d'erreur.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complète et respecte les documents contractuels existants :
-- **StrongFather — Documentation Fondatrice** : Définition philosophique de StrongFather
-- **StrongFather — Core Decision Contract** : Les décisions refusées sont formalisées ici
-- **StrongFather — Intent Model Contract** : Les intentions invalides produisent des rejets
-- **StrongFather — Policy Engine Contract** : Les politiques non satisfaites produisent des rejets
-- **[Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Conformité aux lois d'autonomie, notamment **LOI-2** (le système accepte l'isolement comme état normal) : les erreurs ne bloquent jamais le système en attente d'une ressource externe
+Ce contrat complÃ¨te et respecte les documents contractuels existants :
+- **StrongFather â€” Documentation Fondatrice** : DÃ©finition philosophique de StrongFather
+- **StrongFather â€” Core Decision Contract** : Les dÃ©cisions refusÃ©es sont formalisÃ©es ici
+- **StrongFather â€” Intent Model Contract** : Les intentions invalides produisent des rejets
+- **StrongFather â€” Policy Engine Contract** : Les politiques non satisfaites produisent des rejets
+- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : ConformitÃ© aux lois d'autonomie, notamment **LOI-2** (le systÃ¨me accepte l'isolement comme Ã©tat normal) : les erreurs ne bloquent jamais le systÃ¨me en attente d'une ressource externe
 
-Il n'introduit aucune contradiction, et constitue la définition formelle de la gestion des erreurs et rejets dans StrongFather.
+Il n'introduit aucune contradiction, et constitue la dÃ©finition formelle de la gestion des erreurs et rejets dans StrongFather.
 
 ---
 
 ## 2. Distinction erreur/rejet
 
-### 2.1. Définition d'une erreur
+### 2.1. DÃ©finition d'une erreur
 
-Une **erreur** dans StrongFather est une situation anormale qui empêche le fonctionnement correct du moteur de décision. Une erreur représente un dysfonctionnement interne, pas un résultat d'évaluation.
+Une **erreur** dans StrongFather est une situation anormale qui empÃªche le fonctionnement correct du moteur de dÃ©cision. Une erreur reprÃ©sente un dysfonctionnement interne, pas un rÃ©sultat d'Ã©valuation.
 
-**Caractéristiques d'une erreur :**
+**CaractÃ©ristiques d'une erreur :**
 
-- **Interne** : L'erreur provient du moteur de décision, pas de l'intention
-- **Inattendue** : L'erreur n'est pas un résultat d'évaluation prévisible
-- **Bloquante** : L'erreur empêche la production d'une décision
+- **Interne** : L'erreur provient du moteur de dÃ©cision, pas de l'intention
+- **Inattendue** : L'erreur n'est pas un rÃ©sultat d'Ã©valuation prÃ©visible
+- **Bloquante** : L'erreur empÃªche la production d'une dÃ©cision
 - **Technique** : L'erreur concerne le fonctionnement technique (conceptuel dans ce contrat)
 
-### 2.2. Définition d'un rejet
+### 2.2. DÃ©finition d'un rejet
 
-Un **rejet** dans StrongFather est le résultat d'une évaluation qui détermine qu'une intention ne peut pas être acceptée. Un rejet est un résultat normal de l'évaluation, pas un dysfonctionnement.
+Un **rejet** dans StrongFather est le rÃ©sultat d'une Ã©valuation qui dÃ©termine qu'une intention ne peut pas Ãªtre acceptÃ©e. Un rejet est un rÃ©sultat normal de l'Ã©valuation, pas un dysfonctionnement.
 
-**Caractéristiques d'un rejet :**
+**CaractÃ©ristiques d'un rejet :**
 
-- **Externe** : Le rejet est causé par l'intention ou son contexte
-- **Prévisible** : Le rejet est un résultat d'évaluation selon les politiques
-- **Non-bloquant** : Le rejet produit une décision (REFUSÉE, AMBIGUË, DIFFÉRÉE)
-- **Conceptuel** : Le rejet concerne la validité stratégique et politique
+- **Externe** : Le rejet est causÃ© par l'intention ou son contexte
+- **PrÃ©visible** : Le rejet est un rÃ©sultat d'Ã©valuation selon les politiques
+- **Non-bloquant** : Le rejet produit une dÃ©cision (REFUSÃ‰E, AMBIGUÃ‹, DIFFÃ‰RÃ‰E)
+- **Conceptuel** : Le rejet concerne la validitÃ© stratÃ©gique et politique
 
 ### 2.3. Distinction fondamentale
 
 | Aspect | Erreur | Rejet |
 |--------|--------|-------|
-| Source | Interne à StrongFather | Externe (intention, contexte) |
-| Nature | Dysfonctionnement | Résultat d'évaluation |
-| Résultat | Pas de décision produite | Décision produite (refusée, ambiguë, différée) |
-| Traitement | Correction technique requise | Information à l'appelant |
-| Traçabilité | Log d'erreur | Décision avec justification |
+| Source | Interne Ã  StrongFather | Externe (intention, contexte) |
+| Nature | Dysfonctionnement | RÃ©sultat d'Ã©valuation |
+| RÃ©sultat | Pas de dÃ©cision produite | DÃ©cision produite (refusÃ©e, ambiguÃ«, diffÃ©rÃ©e) |
+| Traitement | Correction technique requise | Information Ã  l'appelant |
+| TraÃ§abilitÃ© | Log d'erreur | DÃ©cision avec justification |
 
 ---
 
-## 3. Catégories d'erreurs
+## 3. CatÃ©gories d'erreurs
 
 ### 3.1. Erreurs de structure
 
-**Définition :**
+**DÃ©finition :**
 
-Les **erreurs de structure** sont des erreurs causées par une incohérence ou une malformation dans la structure des données internes de StrongFather.
+Les **erreurs de structure** sont des erreurs causÃ©es par une incohÃ©rence ou une malformation dans la structure des donnÃ©es internes de StrongFather.
 
 **Exemples conceptuels :**
 
-- Politique malformée dans le moteur
-- Règle de composition incohérente
-- Référence circulaire dans les politiques
+- Politique malformÃ©e dans le moteur
+- RÃ¨gle de composition incohÃ©rente
+- RÃ©fÃ©rence circulaire dans les politiques
 
-**Gravité :** Critique
+**GravitÃ© :** Critique
 
-**Conséquence :** Arrêt de l'évaluation, signalement d'erreur interne
+**ConsÃ©quence :** ArrÃªt de l'Ã©valuation, signalement d'erreur interne
 
-### 3.2. Erreurs de cohérence
+### 3.2. Erreurs de cohÃ©rence
 
-**Définition :**
+**DÃ©finition :**
 
-Les **erreurs de cohérence** sont des erreurs causées par une violation des invariants internes de StrongFather.
+Les **erreurs de cohÃ©rence** sont des erreurs causÃ©es par une violation des invariants internes de StrongFather.
 
 **Exemples conceptuels :**
 
 - Violation d'un invariant de politique
-- Incohérence dans l'état du moteur
-- Contradiction détectée dans les règles
+- IncohÃ©rence dans l'Ã©tat du moteur
+- Contradiction dÃ©tectÃ©e dans les rÃ¨gles
 
-**Gravité :** Critique
+**GravitÃ© :** Critique
 
-**Conséquence :** Arrêt de l'évaluation, signalement d'erreur de cohérence
+**ConsÃ©quence :** ArrÃªt de l'Ã©valuation, signalement d'erreur de cohÃ©rence
 
 ### 3.3. Erreurs de ressource
 
-**Définition :**
+**DÃ©finition :**
 
-Les **erreurs de ressource** sont des erreurs causées par l'indisponibilité de ressources nécessaires à l'évaluation.
+Les **erreurs de ressource** sont des erreurs causÃ©es par l'indisponibilitÃ© de ressources nÃ©cessaires Ã  l'Ã©valuation.
 
 **Exemples conceptuels :**
 
 - Politiques non disponibles
-- Contexte d'évaluation incomplet côté moteur
-- Capacité d'évaluation dépassée
+- Contexte d'Ã©valuation incomplet cÃ´tÃ© moteur
+- CapacitÃ© d'Ã©valuation dÃ©passÃ©e
 
-**Gravité :** Haute
+**GravitÃ© :** Haute
 
-**Conséquence :** Échec de l'évaluation, possibilité de réessai
+**ConsÃ©quence :** Ã‰chec de l'Ã©valuation, possibilitÃ© de rÃ©essai
 
 ---
 
-## 4. Catégories de rejets
+## 4. CatÃ©gories de rejets
 
 ### 4.1. Rejet structurel
 
-**Définition :**
+**DÃ©finition :**
 
-Un **rejet structurel** se produit lorsque l'intention soumise est structurellement invalide selon les règles de formation définies dans le Intent Model Contract.
+Un **rejet structurel** se produit lorsque l'intention soumise est structurellement invalide selon les rÃ¨gles de formation dÃ©finies dans le Intent Model Contract.
 
 **Causes :**
 
 - Absence d'un composant obligatoire
 - Type d'action non reconnu
-- Structure de l'intention incohérente
+- Structure de l'intention incohÃ©rente
 - Contexte d'appel incomplet
 
-**Décision produite :** REFUSÉE
+**DÃ©cision produite :** REFUSÃ‰E
 
 **Contenu du rejet :**
 
 - Type de rejet : STRUCTUREL
 - Composants manquants ou invalides
-- Règles de formation violées
-- Aucune politique n'est évaluée (rejet avant évaluation)
+- RÃ¨gles de formation violÃ©es
+- Aucune politique n'est Ã©valuÃ©e (rejet avant Ã©valuation)
 
 ### 4.2. Rejet de contenu
 
-**Définition :**
+**DÃ©finition :**
 
-Un **rejet de contenu** se produit lorsque l'intention contient des éléments interdits selon le Intent Model Contract.
+Un **rejet de contenu** se produit lorsque l'intention contient des Ã©lÃ©ments interdits selon le Intent Model Contract.
 
 **Causes :**
 
-- Présence de commandes d'exécution
-- Présence de logique temporelle technique
-- Présence d'appels système
+- PrÃ©sence de commandes d'exÃ©cution
+- PrÃ©sence de logique temporelle technique
+- PrÃ©sence d'appels systÃ¨me
 - Contenu ambigu ou contradictoire
 
-**Décision produite :** REFUSÉE
+**DÃ©cision produite :** REFUSÃ‰E
 
 **Contenu du rejet :**
 
 - Type de rejet : CONTENU
-- Éléments interdits identifiés
-- Règles de contenu violées
-- Aucune politique n'est évaluée (rejet avant évaluation)
+- Ã‰lÃ©ments interdits identifiÃ©s
+- RÃ¨gles de contenu violÃ©es
+- Aucune politique n'est Ã©valuÃ©e (rejet avant Ã©valuation)
 
 ### 4.3. Rejet de politique
 
-**Définition :**
+**DÃ©finition :**
 
 Un **rejet de politique** se produit lorsque l'intention est structurellement valide mais viole une ou plusieurs politiques.
 
 **Causes :**
 
 - Politique de permission non satisfaite
-- Politique de contrainte violée
-- Politique de validation échouée
-- Politique de dépendance non respectée
+- Politique de contrainte violÃ©e
+- Politique de validation Ã©chouÃ©e
+- Politique de dÃ©pendance non respectÃ©e
 
-**Décision produite :** REFUSÉE
+**DÃ©cision produite :** REFUSÃ‰E
 
 **Contenu du rejet :**
 
 - Type de rejet : POLITIQUE
-- Politiques violées (identifiants et descriptions)
-- Résultats d'évaluation par politique
-- Justification détaillée du rejet
+- Politiques violÃ©es (identifiants et descriptions)
+- RÃ©sultats d'Ã©valuation par politique
+- Justification dÃ©taillÃ©e du rejet
 
-### 4.4. Rejet pour ambiguïté
+### 4.4. Rejet pour ambiguÃ¯tÃ©
 
-**Définition :**
+**DÃ©finition :**
 
-Un **rejet pour ambiguïté** se produit lorsque l'intention ne peut pas être évaluée complètement car des informations sont manquantes ou insuffisamment définies.
+Un **rejet pour ambiguÃ¯tÃ©** se produit lorsque l'intention ne peut pas Ãªtre Ã©valuÃ©e complÃ¨tement car des informations sont manquantes ou insuffisamment dÃ©finies.
 
 **Causes :**
 
-- Éléments de l'intention insuffisamment définis
+- Ã‰lÃ©ments de l'intention insuffisamment dÃ©finis
 - Contexte insuffisant pour certaines politiques
-- Clarifications nécessaires pour l'évaluation
+- Clarifications nÃ©cessaires pour l'Ã©valuation
 
-**Décision produite :** AMBIGUË
+**DÃ©cision produite :** AMBIGUÃ‹
 
 **Contenu du rejet :**
 
-- Type de rejet : AMBIGUÏTÉ
-- Éléments manquants ou insuffisants
+- Type de rejet : AMBIGUÃTÃ‰
+- Ã‰lÃ©ments manquants ou insuffisants
 - Clarifications requises
-- Politiques nécessitant ces clarifications
+- Politiques nÃ©cessitant ces clarifications
 
-**Particularités :**
+**ParticularitÃ©s :**
 
-- **Suspension d'évaluation** : L'évaluation ultérieure de l'intention est suspendue jusqu'à clarification
-- **Pas de calcul de priorité** : Aucune priorité ne peut être calculée pour une intention ambiguë
-- **Non-définitif** : L'ambiguïté n'est pas un refus définitif ; l'intention peut être clarifiée et réévaluée
+- **Suspension d'Ã©valuation** : L'Ã©valuation ultÃ©rieure de l'intention est suspendue jusqu'Ã  clarification
+- **Pas de calcul de prioritÃ©** : Aucune prioritÃ© ne peut Ãªtre calculÃ©e pour une intention ambiguÃ«
+- **Non-dÃ©finitif** : L'ambiguÃ¯tÃ© n'est pas un refus dÃ©finitif ; l'intention peut Ãªtre clarifiÃ©e et rÃ©Ã©valuÃ©e
 
 ### 4.5. Rejet pour contexte futur
 
-**Définition :**
+**DÃ©finition :**
 
-Un **rejet pour contexte futur** se produit lorsque l'intention dépend d'un contexte qui n'est pas encore disponible.
+Un **rejet pour contexte futur** se produit lorsque l'intention dÃ©pend d'un contexte qui n'est pas encore disponible.
 
 **Causes :**
 
-- Dépendance à un événement futur
-- Dépendance à un état non encore atteint
+- DÃ©pendance Ã  un Ã©vÃ©nement futur
+- DÃ©pendance Ã  un Ã©tat non encore atteint
 - Contexte requis non disponible
 
-**Décision produite :** DIFFÉRÉE
+**DÃ©cision produite :** DIFFÃ‰RÃ‰E
 
 **Contenu du rejet :**
 
 - Type de rejet : CONTEXTE_FUTUR
 - Contexte futur requis
-- Raison de la différation
-- Politiques nécessitant ce contexte
+- Raison de la diffÃ©ration
+- Politiques nÃ©cessitant ce contexte
 
-**Particularités :**
+**ParticularitÃ©s :**
 
-- **Distinction avec ambiguïté** : L'ambiguïté concerne des informations manquantes dans l'intention ; le contexte futur concerne des informations qui n'existent pas encore dans le système
-- **Réévaluation possible** : Une fois le contexte disponible, l'intention peut être réévaluée
+- **Distinction avec ambiguÃ¯tÃ©** : L'ambiguÃ¯tÃ© concerne des informations manquantes dans l'intention ; le contexte futur concerne des informations qui n'existent pas encore dans le systÃ¨me
+- **RÃ©Ã©valuation possible** : Une fois le contexte disponible, l'intention peut Ãªtre rÃ©Ã©valuÃ©e
 
 ---
 
@@ -254,11 +254,11 @@ Tout message d'erreur DOIT contenir :
 
 **Identifiant d'erreur :**
 
-Un identifiant unique permettant de référencer l'erreur.
+Un identifiant unique permettant de rÃ©fÃ©rencer l'erreur.
 
-**Catégorie d'erreur :**
+**CatÃ©gorie d'erreur :**
 
-La catégorie de l'erreur (STRUCTURE, COHÉRENCE, RESSOURCE).
+La catÃ©gorie de l'erreur (STRUCTURE, COHÃ‰RENCE, RESSOURCE).
 
 **Description :**
 
@@ -274,15 +274,15 @@ Les composants suivants sont optionnels :
 
 **Cause racine :**
 
-La cause conceptuelle identifiée de l'erreur.
+La cause conceptuelle identifiÃ©e de l'erreur.
 
 **Recommandation :**
 
-Une recommandation conceptuelle pour résoudre l'erreur.
+Une recommandation conceptuelle pour rÃ©soudre l'erreur.
 
-**Références :**
+**RÃ©fÃ©rences :**
 
-Des références vers des documents ou des contrats pertinents.
+Des rÃ©fÃ©rences vers des documents ou des contrats pertinents.
 
 ---
 
@@ -294,92 +294,92 @@ Tout message de rejet DOIT contenir :
 
 **Identifiant de l'intention :**
 
-L'identifiant de l'intention rejetée.
+L'identifiant de l'intention rejetÃ©e.
 
-**Type de décision :**
+**Type de dÃ©cision :**
 
-Le type de décision (REFUSÉE, AMBIGUË, DIFFÉRÉE).
+Le type de dÃ©cision (REFUSÃ‰E, AMBIGUÃ‹, DIFFÃ‰RÃ‰E).
 
 **Type de rejet :**
 
-La catégorie de rejet (STRUCTUREL, CONTENU, POLITIQUE, AMBIGUÏTÉ, CONTEXTE_FUTUR).
+La catÃ©gorie de rejet (STRUCTUREL, CONTENU, POLITIQUE, AMBIGUÃTÃ‰, CONTEXTE_FUTUR).
 
 **Justification :**
 
-La justification détaillée du rejet.
+La justification dÃ©taillÃ©e du rejet.
 
-**Contexte d'évaluation :**
+**Contexte d'Ã©valuation :**
 
-Le contexte utilisé pour l'évaluation.
+Le contexte utilisÃ© pour l'Ã©valuation.
 
-### 6.2. Composants spécifiques par type
+### 6.2. Composants spÃ©cifiques par type
 
 **Pour rejet STRUCTUREL :**
 
 - Composants manquants
-- Règles de formation violées
+- RÃ¨gles de formation violÃ©es
 
 **Pour rejet CONTENU :**
 
-- Éléments interdits identifiés
-- Règles de contenu violées
+- Ã‰lÃ©ments interdits identifiÃ©s
+- RÃ¨gles de contenu violÃ©es
 
 **Pour rejet POLITIQUE :**
 
-- Politiques violées (identifiants, descriptions)
-- Résultats d'évaluation par politique
+- Politiques violÃ©es (identifiants, descriptions)
+- RÃ©sultats d'Ã©valuation par politique
 
-**Pour rejet AMBIGUÏTÉ :**
+**Pour rejet AMBIGUÃTÃ‰ :**
 
-- Éléments manquants ou insuffisants
+- Ã‰lÃ©ments manquants ou insuffisants
 - Clarifications requises
-- Politiques nécessitant ces clarifications
+- Politiques nÃ©cessitant ces clarifications
 
 **Pour rejet CONTEXTE_FUTUR :**
 
 - Contexte futur requis
-- Raison de la différation
-- Politiques nécessitant ce contexte
+- Raison de la diffÃ©ration
+- Politiques nÃ©cessitant ce contexte
 
 ---
 
-## 7. Règles de propagation
+## 7. RÃ¨gles de propagation
 
 ### 7.1. Propagation des erreurs
 
 **R-PROP-ERR-1 : Non-absorption**
 
-Les erreurs ne sont jamais absorbées silencieusement. Toute erreur doit être signalée.
+Les erreurs ne sont jamais absorbÃ©es silencieusement. Toute erreur doit Ãªtre signalÃ©e.
 
-**R-PROP-ERR-2 : Remontée**
+**R-PROP-ERR-2 : RemontÃ©e**
 
-Les erreurs sont remontées à l'appelant avec leur contexte complet.
+Les erreurs sont remontÃ©es Ã  l'appelant avec leur contexte complet.
 
 **R-PROP-ERR-3 : Pas de transformation en rejet**
 
-Une erreur ne peut jamais être transformée en rejet. Les erreurs et les rejets sont distincts.
+Une erreur ne peut jamais Ãªtre transformÃ©e en rejet. Les erreurs et les rejets sont distincts.
 
-**R-PROP-ERR-4 : Arrêt d'évaluation**
+**R-PROP-ERR-4 : ArrÃªt d'Ã©valuation**
 
-Une erreur arrête l'évaluation. Aucune décision n'est produite suite à une erreur.
+Une erreur arrÃªte l'Ã©valuation. Aucune dÃ©cision n'est produite suite Ã  une erreur.
 
 ### 7.2. Propagation des rejets
 
-**R-PROP-REJ-1 : Décision produite**
+**R-PROP-REJ-1 : DÃ©cision produite**
 
-Un rejet produit toujours une décision (REFUSÉE, AMBIGUË, ou DIFFÉRÉE).
+Un rejet produit toujours une dÃ©cision (REFUSÃ‰E, AMBIGUÃ‹, ou DIFFÃ‰RÃ‰E).
 
-**R-PROP-REJ-2 : Justification complète**
+**R-PROP-REJ-2 : Justification complÃ¨te**
 
-Un rejet est toujours accompagné d'une justification complète.
+Un rejet est toujours accompagnÃ© d'une justification complÃ¨te.
 
-**R-PROP-REJ-3 : Traçabilité**
+**R-PROP-REJ-3 : TraÃ§abilitÃ©**
 
-Un rejet est toujours traçable avec les politiques évaluées et les résultats.
+Un rejet est toujours traÃ§able avec les politiques Ã©valuÃ©es et les rÃ©sultats.
 
 **R-PROP-REJ-4 : Non-blocage**
 
-Un rejet ne bloque pas StrongFather. D'autres intentions peuvent être évaluées.
+Un rejet ne bloque pas StrongFather. D'autres intentions peuvent Ãªtre Ã©valuÃ©es.
 
 ---
 
@@ -391,66 +391,66 @@ Un rejet ne bloque pas StrongFather. D'autres intentions peuvent être évaluée
 
 Toute situation est soit une erreur, soit un rejet, jamais les deux. La distinction est absolue.
 
-**INV-ERR-2 : Erreur sans décision**
+**INV-ERR-2 : Erreur sans dÃ©cision**
 
-Une erreur ne produit jamais de décision. Les erreurs et les décisions sont mutuellement exclusives.
+Une erreur ne produit jamais de dÃ©cision. Les erreurs et les dÃ©cisions sont mutuellement exclusives.
 
-**INV-ERR-3 : Rejet avec décision**
+**INV-ERR-3 : Rejet avec dÃ©cision**
 
-Un rejet produit toujours une décision. Pas de rejet sans décision associée.
+Un rejet produit toujours une dÃ©cision. Pas de rejet sans dÃ©cision associÃ©e.
 
-### 8.2. Invariants de traçabilité
+### 8.2. Invariants de traÃ§abilitÃ©
 
-**INV-ERR-4 : Traçabilité des erreurs**
+**INV-ERR-4 : TraÃ§abilitÃ© des erreurs**
 
-Toute erreur est traçable avec son contexte et sa cause.
+Toute erreur est traÃ§able avec son contexte et sa cause.
 
-**INV-ERR-5 : Traçabilité des rejets**
+**INV-ERR-5 : TraÃ§abilitÃ© des rejets**
 
-Tout rejet est traçable avec les politiques évaluées et les résultats.
+Tout rejet est traÃ§able avec les politiques Ã©valuÃ©es et les rÃ©sultats.
 
 ### 8.3. Invariants de comportement
 
 **INV-ERR-6 : Pas d'effet de bord sur erreur**
 
-Une erreur ne produit jamais d'effet de bord sur le système.
+Une erreur ne produit jamais d'effet de bord sur le systÃ¨me.
 
 **INV-ERR-7 : Pas d'effet de bord sur rejet**
 
-Un rejet ne produit jamais d'effet de bord sur le système (conformément au Execution Prohibition Contract).
+Un rejet ne produit jamais d'effet de bord sur le systÃ¨me (conformÃ©ment au Execution Prohibition Contract).
 
 ---
 
-## 9. Règles de fermeture du contrat
+## 9. RÃ¨gles de fermeture du contrat
 
-### 9.1. Contrat fermé
+### 9.1. Contrat fermÃ©
 
-Ce contrat est **fermé**. Seules les catégories d'erreurs, les catégories de rejets, les structures, et les règles explicitement définies dans ce contrat sont autorisées.
+Ce contrat est **fermÃ©**. Seules les catÃ©gories d'erreurs, les catÃ©gories de rejets, les structures, et les rÃ¨gles explicitement dÃ©finies dans ce contrat sont autorisÃ©es.
 
 ### 9.2. Interdiction d'extension implicite
 
-Aucune extension implicite de ce contrat n'est autorisée :
+Aucune extension implicite de ce contrat n'est autorisÃ©e :
 
-- **INTERD-ERR-1** : Aucune catégorie d'erreur non définie n'est reconnue
-- **INTERD-ERR-2** : Aucune catégorie de rejet non définie n'est reconnue
-- **INTERD-ERR-3** : Aucune règle de propagation non définie n'est applicable
-- **INTERD-ERR-4** : Aucun invariant non défini n'est garanti
+- **INTERD-ERR-1** : Aucune catÃ©gorie d'erreur non dÃ©finie n'est reconnue
+- **INTERD-ERR-2** : Aucune catÃ©gorie de rejet non dÃ©finie n'est reconnue
+- **INTERD-ERR-3** : Aucune rÃ¨gle de propagation non dÃ©finie n'est applicable
+- **INTERD-ERR-4** : Aucun invariant non dÃ©fini n'est garanti
 
 ---
 
 ## 10. Conclusion contractuelle
 
-Ce contrat établit de manière définitive et non négociable le modèle d'erreurs et de rejets de StrongFather.
+Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable le modÃ¨le d'erreurs et de rejets de StrongFather.
 
 Il garantit que :
 - la distinction erreur/rejet est absolue,
-- les catégories d'erreurs et de rejets sont définies et fermées,
-- les structures de messages sont standardisées,
-- les règles de propagation sont explicites,
-- les invariants sont respectés,
-- le contrat est fermé et non extensible implicitement.
+- les catÃ©gories d'erreurs et de rejets sont dÃ©finies et fermÃ©es,
+- les structures de messages sont standardisÃ©es,
+- les rÃ¨gles de propagation sont explicites,
+- les invariants sont respectÃ©s,
+- le contrat est fermÃ© et non extensible implicitement.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
 
 ---
 
@@ -460,61 +460,62 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
 
 Les cas suivants sont **valides** selon ce contrat :
 
-1. **Rejet structurel** : Une intention sans identifiant produit une décision REFUSÉE de type STRUCTUREL.
+1. **Rejet structurel** : Une intention sans identifiant produit une dÃ©cision REFUSÃ‰E de type STRUCTUREL.
 
-2. **Rejet de politique** : Une intention valide mais violant une politique produit une décision REFUSÉE de type POLITIQUE.
+2. **Rejet de politique** : Une intention valide mais violant une politique produit une dÃ©cision REFUSÃ‰E de type POLITIQUE.
 
-3. **Rejet pour ambiguïté** : Une intention avec contexte insuffisant produit une décision AMBIGUË de type AMBIGUÏTÉ.
+3. **Rejet pour ambiguÃ¯tÃ©** : Une intention avec contexte insuffisant produit une dÃ©cision AMBIGUÃ‹ de type AMBIGUÃTÃ‰.
 
 ### 11.2. Cas de violation
 
 Les cas suivants **violent** ce contrat :
 
-1. **Erreur transformée en rejet** : Une erreur de structure transformée en décision REFUSÉE. Viole R-PROP-ERR-3.
+1. **Erreur transformÃ©e en rejet** : Une erreur de structure transformÃ©e en dÃ©cision REFUSÃ‰E. Viole R-PROP-ERR-3.
 
-2. **Rejet sans décision** : Un rejet qui ne produit pas de décision. Viole INV-ERR-3.
+2. **Rejet sans dÃ©cision** : Un rejet qui ne produit pas de dÃ©cision. Viole INV-ERR-3.
 
-3. **Erreur absorbée** : Une erreur qui n'est pas signalée. Viole R-PROP-ERR-1.
+3. **Erreur absorbÃ©e** : Une erreur qui n'est pas signalÃ©e. Viole R-PROP-ERR-1.
 
 ---
 
-**Document créé le :** 2026-01-25  
+**Document crÃ©Ã© le :** 2026-01-25  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
-**Type :** Contrat de modèle d'erreur et de rejet non négociable
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
+**Type :** Contrat de modÃ¨le d'erreur et de rejet non nÃ©gociable
 
 ---
 
-## 12. Mini log de génération
+## 12. Mini log de gÃ©nÃ©ration
 
 ### Warning W1 : Distinction erreur/rejet
 
-**Warning rencontré :** Risque de confusion entre erreur et rejet.
+**Warning rencontrÃ© :** Risque de confusion entre erreur et rejet.
 
-**Décision prise :** Section 2 entièrement dédiée à la distinction avec tableau comparatif et caractéristiques explicites.
+**DÃ©cision prise :** Section 2 entiÃ¨rement dÃ©diÃ©e Ã  la distinction avec tableau comparatif et caractÃ©ristiques explicites.
 
-**Correction effectuée :** Section 2 rédigée avec distinction claire et invariants INV-ERR-1, INV-ERR-2, INV-ERR-3.
+**Correction effectuÃ©e :** Section 2 rÃ©digÃ©e avec distinction claire et invariants INV-ERR-1, INV-ERR-2, INV-ERR-3.
 
-### Warning W2 : Ambiguïté et suspension
+### Warning W2 : AmbiguÃ¯tÃ© et suspension
 
-**Warning rencontré :** La Documentation Fondatrice mentionne que les détails de l'ambiguïté seront précisés dans ce document.
+**Warning rencontrÃ© :** La Documentation Fondatrice mentionne que les dÃ©tails de l'ambiguÃ¯tÃ© seront prÃ©cisÃ©s dans ce document.
 
-**Décision prise :** Section 4.4 détaille les particularités de l'ambiguïté : suspension d'évaluation, pas de calcul de priorité, non-définitif.
+**DÃ©cision prise :** Section 4.4 dÃ©taille les particularitÃ©s de l'ambiguÃ¯tÃ© : suspension d'Ã©valuation, pas de calcul de prioritÃ©, non-dÃ©finitif.
 
-**Correction effectuée :** Section 4.4 rédigée avec particularités de l'ambiguïté conformément à la Documentation Fondatrice.
+**Correction effectuÃ©e :** Section 4.4 rÃ©digÃ©e avec particularitÃ©s de l'ambiguÃ¯tÃ© conformÃ©ment Ã  la Documentation Fondatrice.
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-**Vérification effectuée :**
-- ✅ Cohérence avec Documentation Fondatrice : Confirmée (ambiguïté détaillée)
-- ✅ Cohérence avec Core Decision Contract : Confirmée (types de décisions)
-- ✅ Cohérence avec Intent Model Contract : Confirmée (rejets structurels et de contenu)
-- ✅ Cohérence avec Policy Engine Contract : Confirmée (rejets de politique)
-- ✅ Cohérence avec Execution Prohibition Contract : Confirmée (INV-ERR-6, INV-ERR-7)
+**VÃ©rification effectuÃ©e :**
+- âœ… CohÃ©rence avec Documentation Fondatrice : ConfirmÃ©e (ambiguÃ¯tÃ© dÃ©taillÃ©e)
+- âœ… CohÃ©rence avec Core Decision Contract : ConfirmÃ©e (types de dÃ©cisions)
+- âœ… CohÃ©rence avec Intent Model Contract : ConfirmÃ©e (rejets structurels et de contenu)
+- âœ… CohÃ©rence avec Policy Engine Contract : ConfirmÃ©e (rejets de politique)
+- âœ… CohÃ©rence avec Execution Prohibition Contract : ConfirmÃ©e (INV-ERR-6, INV-ERR-7)
 
-**Conclusion :** Aucune contradiction détectée.
+**Conclusion :** Aucune contradiction dÃ©tectÃ©e.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

@@ -143,7 +143,7 @@ La phase SETUP est dÃ©clenchÃ©e automatiquement si :
 Les profils permettent de changer d'outil (Claude Code, Cursor, Codex, Ollama, LM Studio, solution interne) sans modifier le protocole. Chaque profil dÃ©finit les capacitÃ©s et les adaptations.
 
 - **Profil actif** : `.mip/profiles/active` (1 ligne = slug)
-- **Profils disponibles** : `.mip/profiles/INDEX.md`
+- **Profils disponibles** : `.mip/profiles/core/INDEX.md`
 - **Commandes** : `/mip_profile` (afficher), `/mip_profile <slug>` (basculer), `/mip_profile list` (lister)
 
 Lors du SETUP-4, Maria propose de crÃ©er ou sÃ©lectionner un profil. Le profil par dÃ©faut est `anthropic-opus` (Claude Code + Opus/Sonnet).
@@ -207,7 +207,9 @@ Les agents sont configurÃ©s avec les commandes build/test/lint/format, la stru
 | `.mip/memory/mip-lessons.md` | LeÃ§ons apprises par sÃ©quence |
 | `.mip/memory/agent-tuning.md` | RÃ©glages prompts/modÃ¨les/outils par agent |
 | `.mip/protocol/conventions.md` | Conventions MIP (classification, Ã©quipe, artefacts) |
-| `.mip/agents/*.md` | Agents adaptÃ©s Ã  la stack |
+| `.mip/agents/INDEX.md` | Index des agents + regles de chargement phase-first |
+| `.mip/agents/<agent>/FULL_<agent>.md` | Version complete d'un agent |
+| `.mip/agents/<agent>/<PHASE>_<agent>.md` | Version bornee par phase d'un agent |
 | `.mip/profiles/active` | Profil MIP actif (outil + LLM) |
 | `.mip/profiles/{slug}.md` | DÃ©finition des profils (capacitÃ©s, adaptations) |
 
@@ -325,4 +327,3 @@ Le dossier `.mip/secrets/` contient les informations d'authentification pour les
 | CI/CD | Standard industriel |
 | Documentation | Maintenance long terme |
 | MÃ©triques et feedback | Kaizen / amÃ©lioration continue |
-

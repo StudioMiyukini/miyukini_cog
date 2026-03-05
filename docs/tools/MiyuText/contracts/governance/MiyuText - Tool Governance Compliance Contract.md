@@ -1,20 +1,21 @@
-# MiyuText — Tool Governance Compliance Contract
+﻿# MiyuText â€” Tool Governance Compliance Contract
 
 ## Contexte
 
-Conformité aux obligations communes : [Master Butler - Tool Governance Compliance Template](../../../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
+ConformitÃ© aux obligations communes : [Master Butler - Tool Governance Compliance Template](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
 
 **ToolkitId :** `toolkit.text.miyutext`
 
 ---
 
-## Obligations spécifiques MiyuText
+## Obligations spÃ©cifiques MiyuText
 
-- MiyuText **n'écrit pas** et **ne lit pas** la base : contenu et options fournis dans le flux.
-- Aucune décision métier sur le contenu : rendu, remplacement, substitution et sanitization sont exécution pure sur chaînes fournies.
+- MiyuText **n'Ã©crit pas** et **ne lit pas** la base : contenu et options fournis dans le flux.
+- Aucune dÃ©cision mÃ©tier sur le contenu : rendu, remplacement, substitution et sanitization sont exÃ©cution pure sur chaÃ®nes fournies.
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Contrat de conformité
+**Statut :** Contrat de conformitÃ©
+

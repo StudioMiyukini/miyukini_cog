@@ -1,6 +1,6 @@
----
+﻿---
 id: mip.profiles.management
-title: Profile Management Protocol (CRUD) — Restructure MIP Profiles
+title: Profile Management Protocol (CRUD) â€” Restructure MIP Profiles
 ---
 
 # Profile Management Protocol (CRUD)
@@ -13,37 +13,37 @@ title: Profile Management Protocol (CRUD) — Restructure MIP Profiles
 
 ```
 .mip/profiles/
-├── MANAGEMENT.md           ← You are here
-├── INDEX.md                (profile directory)
-├── CONSTRAINTS.md          (compliance matrix)
-├── TEMPLATES.md            (create custom profiles)
-├── active                  (current active profile slug)
-│
-├── builtin/                (pre-defined, version-controlled)
-│   ├── anthropic-opus.md
-│   ├── mistral-nemo.md
-│   ├── github-copilot-free.md
-│   ├── ollama.md
-│   └── lm-studio.md
-│
-├── constraints/            (constraint overlays, version-controlled)
-│   ├── legal-compliance.md (GDPR, SOC2, HIPAA, etc.)
-│   ├── confidential-data.md (PII, trade secrets, no logging)
-│   ├── tool-locked.md      (specific IDE/tool required)
-│   ├── regional.md         (EU, US, China regulations)
-│   └── custom-constraints.md
-│
-├── custom/                 (user-created profiles, .gitignore)
-│   ├── .gitignore         ("*" — never commit custom)
-│   ├── my-total-setup.md
-│   ├── client-a-gdpr.md
-│   └── offline-only.md
-│
-└── cache/                  (generated, not versioned)
-    ├── .gitignore
-    ├── capabilities.json   (merged capabilities per profile)
-    ├── active-profile.json (current selection + merged)
-    └── profile-history.json (switching log)
+â”œâ”€â”€ MANAGEMENT.md           â† You are here
+â”œâ”€â”€ INDEX.md                (profile directory)
+â”œâ”€â”€ CONSTRAINTS.md          (compliance matrix)
+â”œâ”€â”€ TEMPLATES.md            (create custom profiles)
+â”œâ”€â”€ active                  (current active profile slug)
+â”‚
+â”œâ”€â”€ builtin/                (pre-defined, version-controlled)
+â”‚   â”œâ”€â”€ anthropic-opus.md
+â”‚   â”œâ”€â”€ mistral-nemo.md
+â”‚   â”œâ”€â”€ github-copilot-free.md
+â”‚   â”œâ”€â”€ ollama.md
+â”‚   â””â”€â”€ lm-studio.md
+â”‚
+â”œâ”€â”€ constraints/            (constraint overlays, version-controlled)
+â”‚   â”œâ”€â”€ legal-compliance.md (GDPR, SOC2, HIPAA, etc.)
+â”‚   â”œâ”€â”€ confidential-data.md (PII, trade secrets, no logging)
+â”‚   â”œâ”€â”€ tool-locked.md      (specific IDE/tool required)
+â”‚   â”œâ”€â”€ regional.md         (EU, US, China regulations)
+â”‚   â””â”€â”€ custom-constraints.md
+â”‚
+â”œâ”€â”€ custom/                 (user-created profiles, .gitignore)
+â”‚   â”œâ”€â”€ .gitignore         ("*" â€” never commit custom)
+â”‚   â”œâ”€â”€ my-total-setup.md
+â”‚   â”œâ”€â”€ client-a-gdpr.md
+â”‚   â””â”€â”€ offline-only.md
+â”‚
+â””â”€â”€ cache/                  (generated, not versioned)
+    â”œâ”€â”€ .gitignore
+    â”œâ”€â”€ capabilities.json   (merged capabilities per profile)
+    â”œâ”€â”€ active-profile.json (current selection + merged)
+    â””â”€â”€ profile-history.json (switching log)
 ```
 
 ---
@@ -53,30 +53,30 @@ title: Profile Management Protocol (CRUD) — Restructure MIP Profiles
 ### Type 1: **Builtin Profiles** (Version-controlled)
 
 Pre-defined, part of MIP v2.0:
-- `anthropic-opus` — Claude Code, Mode 1
-- `mistral-nemo` — Mistral, Mode 2
-- `github-copilot-free` — Copilot, Mode 3
-- `ollama` — Local Llama, Mode 5
-- `lm-studio` — Local GGUF, Mode 5
+- `anthropic-opus` â€” Claude Code, Mode 1
+- `mistral-nemo` â€” Mistral, Mode 2
+- `github-copilot-free` â€” Copilot, Mode 3
+- `ollama` â€” Local Llama, Mode 5
+- `lm-studio` â€” Local GGUF, Mode 5
 
 Cannot delete. Can be used as base for custom.
 
 ### Type 2: **Constraint Overlays** (Version-controlled)
 
 Compliance/legal/confidentiality **layers** applied on top:
-- `legal-compliance` — GDPR, SOC2, HIPAA, CCPA
-- `confidential-data` — PII handling, no-logs
-- `tool-locked` — Locked to specific IDE/tool
-- `regional` — EU, US, Asia data residency
+- `legal-compliance` â€” GDPR, SOC2, HIPAA, CCPA
+- `confidential-data` â€” PII handling, no-logs
+- `tool-locked` â€” Locked to specific IDE/tool
+- `regional` â€” EU, US, Asia data residency
 
 Stack multiple (e.g., `mistral-nemo` + `legal-compliance` + `eu-region`).
 
 ### Type 3: **Custom Profiles** (User-created, NOT versioned)
 
 Users create at SETUP or runtime:
-- `my-total-setup.md` — Copilot + legal constraints + no web
-- `client-a-gdpr.md` — Mistral + GDPR + local inference
-- `offline-only.md` — Llama local + no internet
+- `my-total-setup.md` â€” Copilot + legal constraints + no web
+- `client-a-gdpr.md` â€” Mistral + GDPR + local inference
+- `offline-only.md` â€” Llama local + no internet
 
 Never committed to git. Can be shared manually.
 
@@ -97,7 +97,7 @@ Example:
 
 ## CRUD Operations (Management)
 
-### **CREATE** — New Profile
+### **CREATE** â€” New Profile
 
 #### At SETUP-5 (Interactive)
 
@@ -117,7 +117,7 @@ Maria : "Tool locked to Cursor?"
 User  : "No, VS Code"
 
 Maria : "Creating total-gdpr-compliant...
-        ✅ Done. Use `/mip_profile total-gdpr-compliant`"
+        âœ… Done. Use `/mip_profile total-gdpr-compliant`"
 ```
 
 #### Manual (YAML frontmatter)
@@ -132,13 +132,13 @@ nano .mip/profiles/custom/my-setup.md
 
 # Validate
 mip_profile validate my-setup.md
-# ✅ Valid
+# âœ… Valid
 
 # Activate
 mip_profile my-setup
 ```
 
-### **READ** — View Profile Details
+### **READ** â€” View Profile Details
 
 ```bash
 # List all available
@@ -161,24 +161,24 @@ mip_profile show my-setup
 
 # Show constraints applied
 mip_profile constraints mistral-nemo
-# Legal: GDPR ❌ (not applied)
-# Confidential: no logging ❌
-# Regional: EU ❌
+# Legal: GDPR âŒ (not applied)
+# Confidential: no logging âŒ
+# Regional: EU âŒ
 ```
 
-### **UPDATE** — Modify Profile
+### **UPDATE** â€” Modify Profile
 
 #### Builtin (Cannot edit, create custom base)
 
 ```bash
-# ❌ Cannot edit builtin
+# âŒ Cannot edit builtin
 mip_profile edit anthropic-opus
 # Error: Cannot modify builtin profile.
 # Solution: Create custom based on it.
 
-# ✅ Create custom from builtin
+# âœ… Create custom from builtin
 mip_profile copy anthropic-opus my-claude-setup
-# ✅ Created custom/my-claude-setup.md
+# âœ… Created custom/my-claude-setup.md
 # Now edit it
 nano .mip/profiles/custom/my-claude-setup.md
 ```
@@ -209,12 +209,12 @@ mip_profile update my-setup \
 ```bash
 # Apply constraint to custom profile
 mip_profile apply-constraint my-setup legal-compliance
-# ✅ Added legal-compliance overlay
+# âœ… Added legal-compliance overlay
 # Merged profile cached
 
 # Unapply constraint
 mip_profile remove-constraint my-setup legal-compliance
-# ✅ Removed, recalculated
+# âœ… Removed, recalculated
 
 # Stack multiple constraints
 mip_profile apply-constraint my-setup \
@@ -223,12 +223,12 @@ mip_profile apply-constraint my-setup \
   regional-eu
 ```
 
-### **DELETE** — Remove Profile
+### **DELETE** â€” Remove Profile
 
 #### Builtin (Protected)
 
 ```bash
-# ❌ Cannot delete builtin
+# âŒ Cannot delete builtin
 mip_profile delete anthropic-opus
 # Error: Cannot delete builtin profile.
 # Use `mip_profile reset` to restore defaults.
@@ -239,9 +239,9 @@ mip_profile delete anthropic-opus
 ```bash
 # Delete with confirmation
 mip_profile delete my-setup
-# ⚠️  Delete custom/my-setup.md? [y/N]
+# âš ï¸  Delete custom/my-setup.md? [y/N]
 # > y
-# ✅ Deleted
+# âœ… Deleted
 
 # Or force without confirmation
 mip_profile delete my-setup --force
@@ -256,7 +256,7 @@ mip_profile delete my-setup --force
 ```bash
 # Switch to another profile
 mip_profile mistral-nemo
-# ✅ Active profile: mistral-nemo
+# âœ… Active profile: mistral-nemo
 # Capabilities cached
 
 # Immediate effect: New tasks use new profile
@@ -312,11 +312,11 @@ mip_profile history-goto 2
 ID: mip.constraint.legal-compliance
 Applies to: All profiles
 When applied:
-  - Web search → asks for approval per query
-  - Logging → audit trail enabled
-  - Data residency → may limit to EU
-  - Consent → mandatory user confirmation
-  - Retention → auto-purge after 30 days
+  - Web search â†’ asks for approval per query
+  - Logging â†’ audit trail enabled
+  - Data residency â†’ may limit to EU
+  - Consent â†’ mandatory user confirmation
+  - Retention â†’ auto-purge after 30 days
 ```
 
 ### Conflict Detection
@@ -341,10 +341,10 @@ mip_profile apply-constraint my-setup \
 ```bash
 # Validate profile + constraints
 mip_profile validate my-setup
-# ✅ Profile valid
-# ✅ Capabilities merged
-# ✅ No conflicting constraints
-# ⚠️  Warning: Tool locked to Cursor, but using VS Code
+# âœ… Profile valid
+# âœ… Capabilities merged
+# âœ… No conflicting constraints
+# âš ï¸  Warning: Tool locked to Cursor, but using VS Code
 
 # Show warnings
 mip_profile validate my-setup --verbose
@@ -362,9 +362,9 @@ mip_profile validate my-setup --verbose
 New SETUP step (after SETUP-4 LLM detection):
 
 ```
-┌─────────────────────────────────────────┐
-│ SETUP-5: Profile Configuration          │
-└─────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ SETUP-5: Profile Configuration          â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
 Maria: "LLM detected: Claude Sonnet (Mode 1)
 
@@ -405,7 +405,7 @@ Maria: "Endpoint for Mistral? (https://api.mistral.ai or local:port)"
 User:  "local:8000"
 
 Maria: "Creating total-gdpr profile...
-        ✅ Done.
+        âœ… Done.
         
         Profile stack:
           Base: mistral-nemo
@@ -416,9 +416,9 @@ Maria: "Creating total-gdpr profile...
         Activated: total-gdpr
         
         Next steps:
-          → /mip_profile list (see all)
-          → /mip_profile total-gdpr (details)
-          → Start P0 with active profile"
+          â†’ /mip_profile list (see all)
+          â†’ /mip_profile total-gdpr (details)
+          â†’ Start P0 with active profile"
 ```
 
 ---
@@ -429,62 +429,62 @@ Maria: "Creating total-gdpr profile...
 
 ```
 .mip/profiles/
-├── INDEX.md
-├── SCHEMA.md
-├── ADAPTIVE-MODES.md
-├── CAPABILITY-NEGOTIATION.md
-├── anthropic-opus.md
-├── mistral-nemo.md
-├── mistral-small-api.md
-├── github-copilot-free.md
-├── ollama.md
-├── lm-studio.md
-├── cursor-composer.md
-├── codex.md
-├── active
-├── capabilities-matrix.md
-└── [8+ files mixed]
+â”œâ”€â”€ INDEX.md
+â”œâ”€â”€ SCHEMA.md
+â”œâ”€â”€ ADAPTIVE-MODES.md
+â”œâ”€â”€ CAPABILITY-NEGOTIATION.md
+â”œâ”€â”€ anthropic-opus.md
+â”œâ”€â”€ mistral-nemo.md
+â”œâ”€â”€ mistral-small-api.md
+â”œâ”€â”€ github-copilot-free.md
+â”œâ”€â”€ ollama.md
+â”œâ”€â”€ lm-studio.md
+â”œâ”€â”€ cursor-composer.md
+â”œâ”€â”€ codex.md
+â”œâ”€â”€ active
+â”œâ”€â”€ capabilities-matrix.md
+â””â”€â”€ [8+ files mixed]
 ```
 
 ### After (Organized)
 
 ```
 .mip/profiles/
-├── MANAGEMENT.md           ← Protocol (this file)
-├── CONSTRAINTS.md          ← Constraint matrix
-├── TEMPLATES.md            ← Create custom template
-├── INDEX.md                ← Profile directory (nav)
-├── active                  ← Current active profile
-│
-├── builtin/
-│   ├── anthropic-opus.md
-│   ├── mistral-nemo.md
-│   ├── github-copilot-free.md
-│   ├── mistral-small-api.md
-│   ├── ollama.md
-│   ├── lm-studio.md
-│   ├── cursor-composer.md
-│   └── codex.md
-│
-├── constraints/
-│   ├── legal-compliance.md  (GDPR, SOC2, HIPAA, CCPA)
-│   ├── confidential-data.md (PII, no logging, secrets)
-│   ├── tool-locked.md       (IDE / tool requirement)
-│   ├── regional.md          (EU, US, China, APAC)
-│   └── custom.md            (user-defined constraints)
-│
-├── custom/
-│   ├── .gitignore          ("*")
-│   ├── my-setup.md
-│   ├── client-gdpr.md
-│   └── ...
-│
-└── cache/
-    ├── .gitignore
-    ├── capabilities.json
-    ├── active-profile.json
-    ├── profile-history.json
-    └── constraints-cache.json
+â”œâ”€â”€ MANAGEMENT.md           â† Protocol (this file)
+â”œâ”€â”€ CONSTRAINTS.md          â† Constraint matrix
+â”œâ”€â”€ TEMPLATES.md            â† Create custom template
+â”œâ”€â”€ INDEX.md                â† Profile directory (nav)
+â”œâ”€â”€ active                  â† Current active profile
+â”‚
+â”œâ”€â”€ builtin/
+â”‚   â”œâ”€â”€ anthropic-opus.md
+â”‚   â”œâ”€â”€ mistral-nemo.md
+â”‚   â”œâ”€â”€ github-copilot-free.md
+â”‚   â”œâ”€â”€ mistral-small-api.md
+â”‚   â”œâ”€â”€ ollama.md
+â”‚   â”œâ”€â”€ lm-studio.md
+â”‚   â”œâ”€â”€ cursor-composer.md
+â”‚   â””â”€â”€ codex.md
+â”‚
+â”œâ”€â”€ constraints/
+â”‚   â”œâ”€â”€ legal-compliance.md  (GDPR, SOC2, HIPAA, CCPA)
+â”‚   â”œâ”€â”€ confidential-data.md (PII, no logging, secrets)
+â”‚   â”œâ”€â”€ tool-locked.md       (IDE / tool requirement)
+â”‚   â”œâ”€â”€ regional.md          (EU, US, China, APAC)
+â”‚   â””â”€â”€ custom.md            (user-defined constraints)
+â”‚
+â”œâ”€â”€ custom/
+â”‚   â”œâ”€â”€ .gitignore          ("*")
+â”‚   â”œâ”€â”€ my-setup.md
+â”‚   â”œâ”€â”€ client-gdpr.md
+â”‚   â””â”€â”€ ...
+â”‚
+â””â”€â”€ cache/
+    â”œâ”€â”€ .gitignore
+    â”œâ”€â”€ capabilities.json
+    â”œâ”€â”€ active-profile.json
+    â”œâ”€â”€ profile-history.json
+    â””â”€â”€ constraints-cache.json
 ```
 
 ---
@@ -616,7 +616,7 @@ mip_profile export total-gdpr > /tmp/total-gdpr.yaml
 
 # Colleague imports
 mip_profile import /tmp/total-gdpr.yaml
-# ✅ Imported as custom profile
+# âœ… Imported as custom profile
 ```
 
 ---
@@ -666,8 +666,9 @@ mip_profile import /tmp/total-gdpr.yaml
 
 ## References
 
-- [TEMPLATES.md](./TEMPLATES.md) — Create custom profiles
-- [CONSTRAINTS.md](./CONSTRAINTS.md) — Constraint details + matrix
-- [INDEX.md](./INDEX.md) — Profile directory
-- [SETUP.md](../modules/setup.md#setup-5) — Integration
-- [SCHEMA.md](./SCHEMA.md) — Profile YAML format
+- [TEMPLATES.md](./TEMPLATES.md) â€” Create custom profiles
+- [CONSTRAINTS.md](./CONSTRAINTS.md) â€” Constraint details + matrix
+- [INDEX.md](./INDEX.md) â€” Profile directory
+- [SETUP.md](..//..//README.md#setup-5) â€” Integration
+- [SCHEMA.md](./SCHEMA.md) â€” Profile YAML format
+

@@ -1,58 +1,58 @@
-# Miyukini Conceptual References - Miyukini Webway System
+﻿# Miyukini Conceptual References - Miyukini Webway System
 
-> **Racine documentaire MWS :** La documentation officielle du MWS a pour racine **`docs/miyukini-webway-system`**. Pour le document fondateur, l'architecture (subordination aux Cores) et la consommation par les strates, voir [docs/miyukini-webway-system](../miyukini-webway-system/README.md).
+> **Racine documentaire MWS :** La documentation officielle du MWS a pour racine **`docs/miyukini-webway-system`**. Pour le document fondateur, l'architecture (subordination aux Cores) et la consommation par les strates, voir [docs/miyukini-webway-system](..//README.md).
 
 ## Contexte
 
-Ce document définit le **Miyukini Webway System (MWS)** : la couche de **présence et de découverte** des environnements COG disposant d'un accès réseau. Le MWS permet aux COGs de se déclarer, de savoir qui est présent sur le maillage, et de faciliter l'initiation des visites gouvernées (Passeport, Permis de circulation, Visa de Connexion) sans transférer de données métier. Il inclut un système de sécurité fondé sur l'échange de listes de COGs avec statuts, et impose aux COGs Tracker un devoir de protection du réseau par des mécanismes passifs et actifs.
+Ce document dÃ©finit le **Miyukini Webway System (MWS)** : la couche de **prÃ©sence et de dÃ©couverte** des environnements COG disposant d'un accÃ¨s rÃ©seau. Le MWS permet aux COGs de se dÃ©clarer, de savoir qui est prÃ©sent sur le maillage, et de faciliter l'initiation des visites gouvernÃ©es (Passeport, Permis de circulation, Visa de Connexion) sans transfÃ©rer de donnÃ©es mÃ©tier. Il inclut un systÃ¨me de sÃ©curitÃ© fondÃ© sur l'Ã©change de listes de COGs avec statuts, et impose aux COGs Tracker un devoir de protection du rÃ©seau par des mÃ©canismes passifs et actifs.
 
 **Principe fondamental :**
 
-> **Le Webway normalise la présence et facilite l'échange entre environnements ; il ne transporte pas la gouvernance ni les données — il permet de savoir où et comment initier une visite gouvernée.**
+> **Le Webway normalise la prÃ©sence et facilite l'Ã©change entre environnements ; il ne transporte pas la gouvernance ni les donnÃ©es â€” il permet de savoir oÃ¹ et comment initier une visite gouvernÃ©e.**
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- Définition du Miyukini Webway System (MWS) et de son rôle
+- DÃ©finition du Miyukini Webway System (MWS) et de son rÃ´le
 - Acteurs : COG participant, COG Tracker
-- **Annonces de présence** : services exposés, adresses (IP et ports) associées, déclaration d'hébergement de session (Host)
-- **Norme de déclaration sécurisée** : schéma commun, signature et vérification pour les annonces de services, adresses et sessions hébergées (section 3.3)
-- Système de sécurité : listes de COGs avec statuts, échange et analyse pour rejet de COGs ou connexions malveillantes
-- Devoir des COGs Tracker : protection du réseau (systèmes passifs en 5.1 ; systèmes actifs en 5.2 — blocage, signalement, dégradation, alerte)
+- **Annonces de prÃ©sence** : services exposÃ©s, adresses (IP et ports) associÃ©es, dÃ©claration d'hÃ©bergement de session (Host)
+- **Norme de dÃ©claration sÃ©curisÃ©e** : schÃ©ma commun, signature et vÃ©rification pour les annonces de services, adresses et sessions hÃ©bergÃ©es (section 3.3)
+- SystÃ¨me de sÃ©curitÃ© : listes de COGs avec statuts, Ã©change et analyse pour rejet de COGs ou connexions malveillantes
+- Devoir des COGs Tracker : protection du rÃ©seau (systÃ¨mes passifs en 5.1 ; systÃ¨mes actifs en 5.2 â€” blocage, signalement, dÃ©gradation, alerte)
 - Relation avec la Connexion Inter-COG (Passeport, Permis de circulation, Visa de Connexion, Bridge)
-- Principes non négociables et compatibilité avec les Lois d'Autonomie
+- Principes non nÃ©gociables et compatibilitÃ© avec les Lois d'Autonomie
 
 Ce document **ne couvre pas** :
-- Le détail des **normes et standards** du MWS (formats, protocole, matrice des statuts, conformité Trackers) → voir [Miyukini Webway System - Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) (document conceptuel annexe)
-- Les **Outils et Opérateurs** nécessaires au MWS (Strate 6 et 7) → voir [Miyukini Webway System - Outils et Operateurs](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Outils%20et%20Operateurs.md) (document conceptuel annexe)
-- Le détail des protocoles de visite gouvernée → voir [Connexion Inter-COG](./Miyukini%20Conceptual%20References%20-%20Connexion%20Inter-COG.md)
-- Les spécifications techniques détaillées des systèmes passifs/actifs (préconditions, postconditions, invariants) figurent dans des contrats dédiés ; le cadre conceptuel des systèmes actifs est défini en section 5.2.
+- Le dÃ©tail des **normes et standards** du MWS (formats, protocole, matrice des statuts, conformitÃ© Trackers) â†’ voir [Miyukini Webway System - Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) (document conceptuel annexe)
+- Les **Outils et OpÃ©rateurs** nÃ©cessaires au MWS (Strate 6 et 7) â†’ voir [Miyukini Webway System - Outils et Operateurs](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Outils%20et%20Operateurs.md) (document conceptuel annexe)
+- Le dÃ©tail des protocoles de visite gouvernÃ©e â†’ voir [Connexion Inter-COG](_index.md)
+- Les spÃ©cifications techniques dÃ©taillÃ©es des systÃ¨mes passifs/actifs (prÃ©conditions, postconditions, invariants) figurent dans des contrats dÃ©diÃ©s ; le cadre conceptuel des systÃ¨mes actifs est dÃ©fini en section 5.2.
 
 ---
 
 ## 1. Vue d'ensemble du Miyukini Webway System
 
-### 1.1 Rôle du MWS
+### 1.1 RÃ´le du MWS
 
-Le **Miyukini Webway System (MWS)** est la couche qui permet aux environnements COG ayant accès au réseau de :
+Le **Miyukini Webway System (MWS)** est la couche qui permet aux environnements COG ayant accÃ¨s au rÃ©seau de :
 
-| Capacité | Description |
+| CapacitÃ© | Description |
 |----------|-------------|
-| **Se déclarer** | Annoncer sa présence (identité de COG, adresse de contact / Bridge) |
-| **Découvrir** | Savoir quels COGs sont présents et où les joindre |
-| **Faciliter l'échange** | Donner le point d'entrée pour initier une visite gouvernée (Passeport → Permis de circulation → Bridge → Visa de Connexion) |
+| **Se dÃ©clarer** | Annoncer sa prÃ©sence (identitÃ© de COG, adresse de contact / Bridge) |
+| **DÃ©couvrir** | Savoir quels COGs sont prÃ©sents et oÃ¹ les joindre |
+| **Faciliter l'Ã©change** | Donner le point d'entrÃ©e pour initier une visite gouvernÃ©e (Passeport â†’ Permis de circulation â†’ Bridge â†’ Visa de Connexion) |
 
-**Le MWS ne sert pas à transférer des données métier.** Il est la transcription concrète des concepts de présence autour des Passeports et des Permis de circulation : il normalise *qui est là* et *où se présenter* pour demander un Permis de circulation (relay) ou un accord d'hôte / Visa de Connexion (COG hôte).
+**Le MWS ne sert pas Ã  transfÃ©rer des donnÃ©es mÃ©tier.** Il est la transcription concrÃ¨te des concepts de prÃ©sence autour des Passeports et des Permis de circulation : il normalise *qui est lÃ * et *oÃ¹ se prÃ©senter* pour demander un Permis de circulation (relay) ou un accord d'hÃ´te / Visa de Connexion (COG hÃ´te).
 
-**Analogie (orientation)** : à la manière d'un réseau de type BitTorrent, les COGs peuvent s'annoncer et interroger des **Trackers** (COGs qui acceptent le rôle de point de rendez-vous pour la découverte) ; le transfert réel et la gouvernance restent dans le cadre de la visite gouvernée (Bridge, Visa de Connexion).
+**Analogie (orientation)** : Ã  la maniÃ¨re d'un rÃ©seau de type BitTorrent, les COGs peuvent s'annoncer et interroger des **Trackers** (COGs qui acceptent le rÃ´le de point de rendez-vous pour la dÃ©couverte) ; le transfert rÃ©el et la gouvernance restent dans le cadre de la visite gouvernÃ©e (Bridge, Visa de Connexion).
 
 ### 1.2 Principes cardinaux
 
-> **Le maillage ne fait pas confiance — il transporte et expose des informations de présence.**
+> **Le maillage ne fait pas confiance â€” il transporte et expose des informations de prÃ©sence.**
 > **La gouvernance (Passeport, Permis de circulation, Visa de Connexion) reste souveraine ; le Webway ne gouverne pas.**
 
-- **Optionnel** : les environnements sans réseau ou qui refusent la découverte restent souverains (LOI-2, LOI-6).
-- **Aucun core partagé** : la présence ne donne aucun accès aux Cores ; elle indique où aller pour initier une visite.
-- **Une seule gouvernance active** : c'est toujours le COG Hébergeur qui décide (Visa de Connexion / accord d'hôte, refus, révocation) ; Origin/relays décident du Permis de circulation.
+- **Optionnel** : les environnements sans rÃ©seau ou qui refusent la dÃ©couverte restent souverains (LOI-2, LOI-6).
+- **Aucun core partagÃ©** : la prÃ©sence ne donne aucun accÃ¨s aux Cores ; elle indique oÃ¹ aller pour initier une visite.
+- **Une seule gouvernance active** : c'est toujours le COG HÃ©bergeur qui dÃ©cide (Visa de Connexion / accord d'hÃ´te, refus, rÃ©vocation) ; Origin/relays dÃ©cident du Permis de circulation.
 
 ---
 
@@ -60,260 +60,262 @@ Le **Miyukini Webway System (MWS)** est la couche qui permet aux environnements 
 
 ### 2.1 COG participant (Webway Participant)
 
-**Définition :** tout COG qui choisit de participer au maillage MWS (accès réseau et déclaration activée).
+**DÃ©finition :** tout COG qui choisit de participer au maillage MWS (accÃ¨s rÃ©seau et dÃ©claration activÃ©e).
 
-**Rôle :**
-- Se déclarer auprès d'un ou plusieurs COGs Tracker (ou au maillage) selon le protocole MWS
-- Exposer les informations minimales de présence (identité COG, adresse du Bridge / point de contact)
-- Consulter la présence d'autres COGs pour initier des visites gouvernées
-- Participer au système de sécurité en échangeant et en tenant à jour une **liste de COGs avec statuts** (voir section 3)
+**RÃ´le :**
+- Se dÃ©clarer auprÃ¨s d'un ou plusieurs COGs Tracker (ou au maillage) selon le protocole MWS
+- Exposer les informations minimales de prÃ©sence (identitÃ© COG, adresse du Bridge / point de contact)
+- Consulter la prÃ©sence d'autres COGs pour initier des visites gouvernÃ©es
+- Participer au systÃ¨me de sÃ©curitÃ© en Ã©changeant et en tenant Ã  jour une **liste de COGs avec statuts** (voir section 3)
 
-**Responsabilités :**
-- Ne pas exposer de données métier ni de gouvernance via le Webway
-- Respecter les règles de sécurité du maillage (listes de statuts, rejet de connexions malveillantes)
+**ResponsabilitÃ©s :**
+- Ne pas exposer de donnÃ©es mÃ©tier ni de gouvernance via le Webway
+- Respecter les rÃ¨gles de sÃ©curitÃ© du maillage (listes de statuts, rejet de connexions malveillantes)
 
 ### 2.2 COG Tracker (Webway Tracker)
 
-**Définition :** COG dont l'administrateur a choisi d'endosser le rôle de **Tracker** : exposer volontairement une adresse (IP ou nom de domaine) pour participer au maillage et servir de point de rendez-vous pour la découverte.
+**DÃ©finition :** COG dont l'administrateur a choisi d'endosser le rÃ´le de **Tracker** : exposer volontairement une adresse (IP ou nom de domaine) pour participer au maillage et servir de point de rendez-vous pour la dÃ©couverte.
 
-**Port officiel :** les COGs Tracker MWS exposent leur endpoint sur le **port 21000**. Les COGs participants se connectent aux Trackers sur ce port par défaut. Voir [Miyukini Webway System - Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) (section 2.7.4).
+**Port officiel :** les COGs Tracker MWS exposent leur endpoint sur le **port 21000**. Les COGs participants se connectent aux Trackers sur ce port par dÃ©faut. Voir [Miyukini Webway System - Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) (section 2.7.4).
 
-**Rôle :**
-- Tenir un rôle de **point de rendez-vous** pour la découverte (enregistrement des annonces de présence, réponse aux requêtes de découverte)
-- **Protéger le réseau** par des mécanismes **passifs** et **actifs** (voir section 4)
-- Ne pas détenir de données métier ni gouverner les accès ; la délivrance des Visa de Connexion / accord d'hôte reste du ressort de chaque COG Hébergeur ; la délivrance du Permis de circulation reste du ressort d'Origin/relays
+**RÃ´le :**
+- Tenir un rÃ´le de **point de rendez-vous** pour la dÃ©couverte (enregistrement des annonces de prÃ©sence, rÃ©ponse aux requÃªtes de dÃ©couverte)
+- **ProtÃ©ger le rÃ©seau** par des mÃ©canismes **passifs** et **actifs** (voir section 4)
+- Ne pas dÃ©tenir de donnÃ©es mÃ©tier ni gouverner les accÃ¨s ; la dÃ©livrance des Visa de Connexion / accord d'hÃ´te reste du ressort de chaque COG HÃ©bergeur ; la dÃ©livrance du Permis de circulation reste du ressort d'Origin/relays
 
 **Devoir fondamental :**
 
-> **Les COGs Tracker ont le devoir de protéger le réseau par des systèmes passifs et actifs.**
+> **Les COGs Tracker ont le devoir de protÃ©ger le rÃ©seau par des systÃ¨mes passifs et actifs.**
 
-Ils ne sont pas de simples annuaires : ils contribuent à la santé et à la sûreté du maillage (détection, signalement, filtrage, selon les mécanismes définis).
+Ils ne sont pas de simples annuaires : ils contribuent Ã  la santÃ© et Ã  la sÃ»retÃ© du maillage (dÃ©tection, signalement, filtrage, selon les mÃ©canismes dÃ©finis).
 
 ---
 
-## 3. Annonces de présence : services, adresses et sessions hébergées
+## 3. Annonces de prÃ©sence : services, adresses et sessions hÃ©bergÃ©es
 
 ### 3.1 Communication des services et adresses (IP / ports)
 
-Les COGs participants peuvent **communiquer au réseau** les **services** qu'ils exposent et les **adresses** associées : **IP** (ou nom de domaine) et **ports**. Cela permet à d'autres COGs de savoir où et comment initier une visite gouvernée vers un service donné (Bridge, endpoint).
+Les COGs participants peuvent **communiquer au rÃ©seau** les **services** qu'ils exposent et les **adresses** associÃ©es : **IP** (ou nom de domaine) et **ports**. Cela permet Ã  d'autres COGs de savoir oÃ¹ et comment initier une visite gouvernÃ©e vers un service donnÃ© (Bridge, endpoint).
 
-**Règle :** ces informations relèvent de la **présence et de la découverte** ; elles ne contiennent pas de données métier ni de gouvernance. Le détail des champs (identifiant de service, protocole, port, etc.) sera défini dans le protocole MWS et la norme de déclaration sécurisée (voir 3.3).
+**RÃ¨gle :** ces informations relÃ¨vent de la **prÃ©sence et de la dÃ©couverte** ; elles ne contiennent pas de donnÃ©es mÃ©tier ni de gouvernance. Le dÃ©tail des champs (identifiant de service, protocole, port, etc.) sera dÃ©fini dans le protocole MWS et la norme de dÃ©claration sÃ©curisÃ©e (voir 3.3).
 
-### 3.2 Déclaration d'hébergement de session (Host)
+### 3.2 DÃ©claration d'hÃ©bergement de session (Host)
 
-Dans le cadre d'un **COG Hébergeur** qui propose une **session** (ex. partie de jeu, salle de collaboration, service temporaire), il est nécessaire qu'il **déclare au réseau** :
+Dans le cadre d'un **COG HÃ©bergeur** qui propose une **session** (ex. partie de jeu, salle de collaboration, service temporaire), il est nÃ©cessaire qu'il **dÃ©clare au rÃ©seau** :
 
-> **« J'héberge une session de tel service et j'attends qu'on se connecte à moi. »**
+> **Â« J'hÃ©berge une session de tel service et j'attends qu'on se connecte Ã  moi. Â»**
 
-Cette déclaration permet aux autres COGs (ou aux Utilisateurs Visiteurs via leur COG Origine) de **découvrir** qu'une session est ouverte et d'où s'y connecter (adresse et port du Host), puis d'initier la visite gouvernée (Passeport → Permis de circulation → Bridge → Visa de Connexion).
+Cette dÃ©claration permet aux autres COGs (ou aux Utilisateurs Visiteurs via leur COG Origine) de **dÃ©couvrir** qu'une session est ouverte et d'oÃ¹ s'y connecter (adresse et port du Host), puis d'initier la visite gouvernÃ©e (Passeport â†’ Permis de circulation â†’ Bridge â†’ Visa de Connexion).
 
 **Contenu minimal (orientation) :**
 - Identifiant du service (ou type de session)
-- Identifiant du COG Hébergeur
+- Identifiant du COG HÃ©bergeur
 - Adresse de connexion (IP ou nom de domaine, port)
-- Éventuellement : capacité restante, niveau de sécurité proposé, selon protocole
+- Ã‰ventuellement : capacitÃ© restante, niveau de sÃ©curitÃ© proposÃ©, selon protocole
 
-**Règle :** la déclaration d'hébergement de session **ne donne aucun droit d'accès** ; elle indique seulement où se présenter pour demander un Permis de circulation (relay) ou un Visa de Connexion / accord d'hôte (COG Hébergeur). L'accès reste gouverné par le COG Hébergeur (Douane, Visa de Connexion, révocation).
+**RÃ¨gle :** la dÃ©claration d'hÃ©bergement de session **ne donne aucun droit d'accÃ¨s** ; elle indique seulement oÃ¹ se prÃ©senter pour demander un Permis de circulation (relay) ou un Visa de Connexion / accord d'hÃ´te (COG HÃ©bergeur). L'accÃ¨s reste gouvernÃ© par le COG HÃ©bergeur (Douane, Visa de Connexion, rÃ©vocation).
 
-### 3.3 Norme de déclaration sécurisée
+### 3.3 Norme de dÃ©claration sÃ©curisÃ©e
 
-Pour les annonces de **services**, d'**adresses** (IP/ports) et de **sessions hébergées**, une **norme de déclaration sécurisée** est définie et doit être **appliquée** par tous les COGs participants qui annoncent sur le Webway. Elle vise à :
+Pour les annonces de **services**, d'**adresses** (IP/ports) et de **sessions hÃ©bergÃ©es**, une **norme de dÃ©claration sÃ©curisÃ©e** est dÃ©finie et doit Ãªtre **appliquÃ©e** par tous les COGs participants qui annoncent sur le Webway. Elle vise Ã  :
 
-- **Authentifier** l'origine des déclarations (COG attesté, non usurpation)
-- **Intégrité** : garantir que les déclarations n'ont pas été altérées en transit
-- **Format unifié** : permettre l'interopérabilité et la vérification par les Trackers et les participants
-- **Limiter les abus** : déclarations conformes, sans exposition de données sensibles ni de gouvernance
+- **Authentifier** l'origine des dÃ©clarations (COG attestÃ©, non usurpation)
+- **IntÃ©gritÃ©** : garantir que les dÃ©clarations n'ont pas Ã©tÃ© altÃ©rÃ©es en transit
+- **Format unifiÃ©** : permettre l'interopÃ©rabilitÃ© et la vÃ©rification par les Trackers et les participants
+- **Limiter les abus** : dÃ©clarations conformes, sans exposition de donnÃ©es sensibles ni de gouvernance
 
-Le détail des formats de messages (annonce de présence, services, session hébergée, requête de découverte, liste de statuts) est défini dans [Miyukini Webway System - Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) (sections 1 et 2). Ce qui suit en fixe le **cadre conceptuel** : schéma commun, signature et vérification.
+Le dÃ©tail des formats de messages (annonce de prÃ©sence, services, session hÃ©bergÃ©e, requÃªte de dÃ©couverte, liste de statuts) est dÃ©fini dans [Miyukini Webway System - Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) (sections 1 et 2). Ce qui suit en fixe le **cadre conceptuel** : schÃ©ma commun, signature et vÃ©rification.
 
-#### 3.3.1 Schéma commun des déclarations
+#### 3.3.1 SchÃ©ma commun des dÃ©clarations
 
-Toute déclaration MWS (présence, service, session hébergée) conforme à la norme respecte une **structure commune** :
+Toute dÃ©claration MWS (prÃ©sence, service, session hÃ©bergÃ©e) conforme Ã  la norme respecte une **structure commune** :
 
-| Élément | Règle |
+| Ã‰lÃ©ment | RÃ¨gle |
 |--------|--------|
-| **Version** | Champ obligatoire `version` (ex. `mws_declaration_v1`) indiquant la version de la norme utilisée. |
+| **Version** | Champ obligatoire `version` (ex. `mws_declaration_v1`) indiquant la version de la norme utilisÃ©e. |
 | **Type** | Champ obligatoire `type` identifiant le message (`presence_announcement`, `service_announcement`, `host_session_declaration`, etc.). |
-| **Identité** | Champ obligatoire identifiant le COG émetteur (`cog_id` ou équivalent attesté). |
-| **Horodatage** | Champ obligatoire `issued_at` (ISO 8601) pour la traçabilité et la limitation des rejeux. |
-| **Intégrité** | Champ obligatoire `integrity` contenant le mécanisme de vérification (signature ou MAC — voir 3.3.2). |
-| **Corps métier** | Champs spécifiques au type (adresses, services, `session_id`, etc.) selon le schéma défini dans Normes et Standards. |
+| **IdentitÃ©** | Champ obligatoire identifiant le COG Ã©metteur (`cog_id` ou Ã©quivalent attestÃ©). |
+| **Horodatage** | Champ obligatoire `issued_at` (ISO 8601) pour la traÃ§abilitÃ© et la limitation des rejeux. |
+| **IntÃ©gritÃ©** | Champ obligatoire `integrity` contenant le mÃ©canisme de vÃ©rification (signature ou MAC â€” voir 3.3.2). |
+| **Corps mÃ©tier** | Champs spÃ©cifiques au type (adresses, services, `session_id`, etc.) selon le schÃ©ma dÃ©fini dans Normes et Standards. |
 
-**Sérialisation canonique :** pour que la signature soit reproductible, la déclaration doit être **sérialisée de manière déterministe** (ordre des champs fixe, encodage unique, ex. JSON canonique ou CBOR) avant calcul de la signature. Seul le **contenu signé** (corps de la déclaration sans le champ `integrity`) est inclus dans l’entrée de la fonction de signature.
+**SÃ©rialisation canonique :** pour que la signature soit reproductible, la dÃ©claration doit Ãªtre **sÃ©rialisÃ©e de maniÃ¨re dÃ©terministe** (ordre des champs fixe, encodage unique, ex. JSON canonique ou CBOR) avant calcul de la signature. Seul le **contenu signÃ©** (corps de la dÃ©claration sans le champ `integrity`) est inclus dans lâ€™entrÃ©e de la fonction de signature.
 
-**Champs interdits :** données utilisateur, secrets, contenu métier, informations permettant d’usurper une gouvernance. La norme restreint les champs autorisés à la présence et à la découverte.
+**Champs interdits :** donnÃ©es utilisateur, secrets, contenu mÃ©tier, informations permettant dâ€™usurper une gouvernance. La norme restreint les champs autorisÃ©s Ã  la prÃ©sence et Ã  la dÃ©couverte.
 
-#### 3.3.2 Signature (authentification et intégrité)
+#### 3.3.2 Signature (authentification et intÃ©gritÃ©)
 
-- **Responsable de la signature :** le **COG émetteur** (participant ou Hébergeur) signe ses propres déclarations avec une clé ou un secret **associé à son identité** (ex. clé dérivée de l’identité COG, certificat, mécanisme attesté).
-- **Périmètre signé :** tout le contenu de la déclaration **à l’exclusion du champ `integrity`** (version, type, cog_id, champs métier, issued_at, etc.), après sérialisation canonique.
-- **Mécanisme :** la norme impose un **mécanisme d’intégrité** (signature numérique ou MAC) dont le résultat est placé dans `integrity.value` (ex. encodage base64). Le champ `integrity` peut inclure `method` (ex. `signature`, `mac`), `algorithm` et `key_id` pour permettre au récepteur de choisir la clé ou l’algorithme de vérification.
-- **Objectifs :** attester que l’émetteur est bien le COG annoncé et que le message n’a pas été modifié en transit.
+- **Responsable de la signature :** le **COG Ã©metteur** (participant ou HÃ©bergeur) signe ses propres dÃ©clarations avec une clÃ© ou un secret **associÃ© Ã  son identitÃ©** (ex. clÃ© dÃ©rivÃ©e de lâ€™identitÃ© COG, certificat, mÃ©canisme attestÃ©).
+- **PÃ©rimÃ¨tre signÃ© :** tout le contenu de la dÃ©claration **Ã  lâ€™exclusion du champ `integrity`** (version, type, cog_id, champs mÃ©tier, issued_at, etc.), aprÃ¨s sÃ©rialisation canonique.
+- **MÃ©canisme :** la norme impose un **mÃ©canisme dâ€™intÃ©gritÃ©** (signature numÃ©rique ou MAC) dont le rÃ©sultat est placÃ© dans `integrity.value` (ex. encodage base64). Le champ `integrity` peut inclure `method` (ex. `signature`, `mac`), `algorithm` et `key_id` pour permettre au rÃ©cepteur de choisir la clÃ© ou lâ€™algorithme de vÃ©rification.
+- **Objectifs :** attester que lâ€™Ã©metteur est bien le COG annoncÃ© et que le message nâ€™a pas Ã©tÃ© modifiÃ© en transit.
 
-#### 3.3.3 Vérification par le récepteur (Tracker ou participant)
+#### 3.3.3 VÃ©rification par le rÃ©cepteur (Tracker ou participant)
 
-Le récepteur (COG Tracker ou autre COG participant) **vérifie** chaque déclaration avant de l’accepter, de la relayer ou de l’exploiter :
+Le rÃ©cepteur (COG Tracker ou autre COG participant) **vÃ©rifie** chaque dÃ©claration avant de lâ€™accepter, de la relayer ou de lâ€™exploiter :
 
-1. **Conformité du schéma** : présence et format des champs obligatoires (version, type, cog_id, issued_at, integrity), types et contraintes (ports non exclus, plages de valeurs). Les schémas détaillés sont dans [Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) (section 2).
-2. **Vérification d’intégrité** : reconstruire le contenu signé en sérialisation canonique, puis vérifier la signature ou le MAC à l’aide de la clé ou du secret associé au `cog_id` (registre local, infrastructure à clés publiques, ou mécanisme attesté selon déploiement).
-3. **Cohérence identité–signature** : s’assurer que la clé utilisée pour la vérification est bien liée au COG annoncé dans la déclaration (non usurpation).
-4. **Optionnel — limitation des rejeux** : vérifier que `issued_at` est dans une fenêtre temporelle acceptée (ex. pas trop ancien) selon politique locale.
+1. **ConformitÃ© du schÃ©ma** : prÃ©sence et format des champs obligatoires (version, type, cog_id, issued_at, integrity), types et contraintes (ports non exclus, plages de valeurs). Les schÃ©mas dÃ©taillÃ©s sont dans [Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) (section 2).
+2. **VÃ©rification dâ€™intÃ©gritÃ©** : reconstruire le contenu signÃ© en sÃ©rialisation canonique, puis vÃ©rifier la signature ou le MAC Ã  lâ€™aide de la clÃ© ou du secret associÃ© au `cog_id` (registre local, infrastructure Ã  clÃ©s publiques, ou mÃ©canisme attestÃ© selon dÃ©ploiement).
+3. **CohÃ©rence identitÃ©â€“signature** : sâ€™assurer que la clÃ© utilisÃ©e pour la vÃ©rification est bien liÃ©e au COG annoncÃ© dans la dÃ©claration (non usurpation).
+4. **Optionnel â€” limitation des rejeux** : vÃ©rifier que `issued_at` est dans une fenÃªtre temporelle acceptÃ©e (ex. pas trop ancien) selon politique locale.
 
-En cas d’échec (schéma invalide, signature invalide, identité incohérente), le récepteur **rejette** la déclaration et peut, selon les contrats MWS (systèmes passifs et actifs), **signaler** ou **dégrader** l’émetteur (listes de statuts). Les COGs Tracker peuvent exiger la conformité à cette norme pour accepter ou relayer les annonces.
+En cas dâ€™Ã©chec (schÃ©ma invalide, signature invalide, identitÃ© incohÃ©rente), le rÃ©cepteur **rejette** la dÃ©claration et peut, selon les contrats MWS (systÃ¨mes passifs et actifs), **signaler** ou **dÃ©grader** lâ€™Ã©metteur (listes de statuts). Les COGs Tracker peuvent exiger la conformitÃ© Ã  cette norme pour accepter ou relayer les annonces.
 
 ---
 
-## 4. Système de sécurité du Webway
+## 4. SystÃ¨me de sÃ©curitÃ© du Webway
 
 ### 4.1 Liste de COGs avec statuts (Webway COG List)
 
-Chaque COG participant (et en particulier chaque COG Tracker) maintient une **liste de COGs** avec un **statut** associé à chaque entrée. Cette liste permet d'analyser et, le cas échéant, de rejeter un COG ou une connexion considérée comme malveillante ou non fiable.
+Chaque COG participant (et en particulier chaque COG Tracker) maintient une **liste de COGs** avec un **statut** associÃ© Ã  chaque entrÃ©e. Cette liste permet d'analyser et, le cas Ã©chÃ©ant, de rejeter un COG ou une connexion considÃ©rÃ©e comme malveillante ou non fiable.
 
-**Contenu minimal d'une entrée (orientation) :**
+**Contenu minimal d'une entrÃ©e (orientation) :**
 
 | Champ | Description |
 |-------|-------------|
-| `cog_id` | Identifiant du COG (ex. LSI ou équivalent attesté) |
+| `cog_id` | Identifiant du COG (ex. LSI ou Ã©quivalent attestÃ©) |
 | `status` | Statut (voir 4.2) |
-| `source` | Origine de l'information (quel COG / Tracker a fourni ou mis à jour le statut) |
-| `updated_at` | Dernière mise à jour du statut (trace only) |
-| Données optionnelles | Adresse de contact, version Core, selon politique locale |
+| `source` | Origine de l'information (quel COG / Tracker a fourni ou mis Ã  jour le statut) |
+| `updated_at` | DerniÃ¨re mise Ã  jour du statut (trace only) |
+| DonnÃ©es optionnelles | Adresse de contact, version Core, selon politique locale |
 
 ### 4.2 Statuts de COG (orientation)
 
-Les statuts permettent d'exprimer le niveau de confiance ou de défiance à l'égard d'un COG dans le cadre du Webway (présence et découverte), **sans préjuger** du Visa de Connexion ou accord d'hôte qui sera accordé ou refusé par un COG Hébergeur lors d'une visite.
+Les statuts permettent d'exprimer le niveau de confiance ou de dÃ©fiance Ã  l'Ã©gard d'un COG dans le cadre du Webway (prÃ©sence et dÃ©couverte), **sans prÃ©juger** du Visa de Connexion ou accord d'hÃ´te qui sera accordÃ© ou refusÃ© par un COG HÃ©bergeur lors d'une visite.
 
 | Statut | Signification | Usage typique |
 |--------|---------------|---------------|
-| **Trusted** | COG considéré comme fiable pour la présence / découverte | Annonces acceptées, relayées |
-| **Neutral** | Aucun signal positif ou négatif | Traité par défaut selon politique locale |
+| **Trusted** | COG considÃ©rÃ© comme fiable pour la prÃ©sence / dÃ©couverte | Annonces acceptÃ©es, relayÃ©es |
+| **Neutral** | Aucun signal positif ou nÃ©gatif | TraitÃ© par dÃ©faut selon politique locale |
 | **Under review** | En cours d'analyse (comportement suspect, signalement) | Limitation ou surveillance des annonces/connexions |
-| **Distrusted** | COG considéré comme non fiable (pas nécessairement malveillant) | Annonces ou connexions dégradées / filtrées |
-| **Rejected** | COG ou connexion rejetée (malveillant ou politique locale) | Refus d'annonce, blocage de connexion Webway |
+| **Distrusted** | COG considÃ©rÃ© comme non fiable (pas nÃ©cessairement malveillant) | Annonces ou connexions dÃ©gradÃ©es / filtrÃ©es |
+| **Rejected** | COG ou connexion rejetÃ©e (malveillant ou politique locale) | Refus d'annonce, blocage de connexion Webway |
 
-Les valeurs exactes et la sémantique opérationnelle peuvent être précisées dans un protocole ou un contrat MWS dédié.
+Les valeurs exactes et la sÃ©mantique opÃ©rationnelle peuvent Ãªtre prÃ©cisÃ©es dans un protocole ou un contrat MWS dÃ©diÃ©.
 
-### 4.3 Échange de listes entre COGs
+### 4.3 Ã‰change de listes entre COGs
 
-Les COGs participants **se transfèrent** (selon le protocole MWS) des **listes ou des mises à jour de statuts** de COGs, afin de :
+Les COGs participants **se transfÃ¨rent** (selon le protocole MWS) des **listes ou des mises Ã  jour de statuts** de COGs, afin de :
 
-- **Analyser** : agréger des signaux pour décider du statut à attribuer à un COG (comportement, cohérence, signalements)
-- **Rejeter** : refuser d'accepter ou de relayer les annonces d'un COG, ou de traiter des connexions provenant de celui-ci, lorsqu'il est marqué Rejected ou Distrusted
+- **Analyser** : agrÃ©ger des signaux pour dÃ©cider du statut Ã  attribuer Ã  un COG (comportement, cohÃ©rence, signalements)
+- **Rejeter** : refuser d'accepter ou de relayer les annonces d'un COG, ou de traiter des connexions provenant de celui-ci, lorsqu'il est marquÃ© Rejected ou Distrusted
 
-**Règles :**
-- L'échange de listes ne contient **pas de données métier** ni de secrets de gouvernance ; uniquement des identifiants COG et des statuts (et métadonnées de traçabilité).
+**RÃ¨gles :**
+- L'Ã©change de listes ne contient **pas de donnÃ©es mÃ©tier** ni de secrets de gouvernance ; uniquement des identifiants COG et des statuts (et mÃ©tadonnÃ©es de traÃ§abilitÃ©).
 - Chaque COG reste **souverain** : il peut ignorer un statut fourni par un autre et appliquer sa propre politique (analyser, rejeter, ou accepter).
-- Les COGs Tracker, du fait de leur devoir de protection du réseau, ont un rôle central dans l'agrégation et la diffusion de ces signaux (voir section 5).
+- Les COGs Tracker, du fait de leur devoir de protection du rÃ©seau, ont un rÃ´le central dans l'agrÃ©gation et la diffusion de ces signaux (voir section 5).
 
 ---
 
-## 5. Devoir des COGs Tracker : protection du réseau
+## 5. Devoir des COGs Tracker : protection du rÃ©seau
 
-Les COGs Tracker ont le **devoir de protéger le réseau** par des systèmes **passifs** et **actifs**. Les spécifications détaillées sont formalisées dans les contrats dédiés : [MiyuWebwayTracker - Passive Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md) et [MiyuWebwayTracker - Active Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md). Ce document en fixe le cadre conceptuel.
+Les COGs Tracker ont le **devoir de protÃ©ger le rÃ©seau** par des systÃ¨mes **passifs** et **actifs**. Les spÃ©cifications dÃ©taillÃ©es sont formalisÃ©es dans les contrats dÃ©diÃ©s : [MiyuWebwayTracker - Passive Systems Contract](..//..//tools//MiyuWebwayTracker//contracts//security//MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md) et [MiyuWebwayTracker - Active Systems Contract](..//..//tools//MiyuWebwayTracker//contracts//security//MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md). Ce document en fixe le cadre conceptuel.
 
-### 5.1 Systèmes passifs
+### 5.1 SystÃ¨mes passifs
 
-**Définition (orientation) :** mécanismes qui **observent, enregistrent et signalent** sans modifier le comportement des connexions ou des annonces de manière proactive.
+**DÃ©finition (orientation) :** mÃ©canismes qui **observent, enregistrent et signalent** sans modifier le comportement des connexions ou des annonces de maniÃ¨re proactive.
 
 **Exemples de directions (non exhaustifs) :**
-- Observation et journalisation des annonces et des requêtes de découverte (traçabilité, détection d'anomalies a posteriori)
-- Mise à jour et partage des listes de COGs avec statuts (Trusted, Neutral, Under review, Distrusted, Rejected)
-- Signalement vers d'autres Trackers ou COGs (réputation, alertes)
-- Vérification de cohérence des annonces (identité, adresse, format) sans bloquer a priori
+- Observation et journalisation des annonces et des requÃªtes de dÃ©couverte (traÃ§abilitÃ©, dÃ©tection d'anomalies a posteriori)
+- Mise Ã  jour et partage des listes de COGs avec statuts (Trusted, Neutral, Under review, Distrusted, Rejected)
+- Signalement vers d'autres Trackers ou COGs (rÃ©putation, alertes)
+- VÃ©rification de cohÃ©rence des annonces (identitÃ©, adresse, format) sans bloquer a priori
 
-**Principe :** le passif **informe** et **alimente** la décision ; il ne coupe pas ni ne modifie le flux par lui-même (la décision de rejet reste locale ou déléguée selon contrat).
+**Principe :** le passif **informe** et **alimente** la dÃ©cision ; il ne coupe pas ni ne modifie le flux par lui-mÃªme (la dÃ©cision de rejet reste locale ou dÃ©lÃ©guÃ©e selon contrat).
 
-### 5.2 Systèmes actifs
+### 5.2 SystÃ¨mes actifs
 
-**Définition (orientation) :** mécanismes qui **agissent sur les flux** du Webway (annonces, requêtes, connexions) pour **filtrer, dégrader ou bloquer** en fonction des listes de statuts et des politiques.
+**DÃ©finition (orientation) :** mÃ©canismes qui **agissent sur les flux** du Webway (annonces, requÃªtes, connexions) pour **filtrer, dÃ©grader ou bloquer** en fonction des listes de statuts et des politiques.
 
 **Exemples de directions (non exhaustifs) :**
 - Refus de relayer ou d'enregistrer les annonces des COGs en statut Rejected (ou Distrusted, selon politique)
-- Refus ou limitation des requêtes de découverte provenant de COGs ou d'adresses marquées comme malveillantes
-- Throttling ou dégradation des réponses pour les COGs Under review
-- Blacklist locale ou partagée (selon protocole) pour adresses ou COGs Rejected
+- Refus ou limitation des requÃªtes de dÃ©couverte provenant de COGs ou d'adresses marquÃ©es comme malveillantes
+- Throttling ou dÃ©gradation des rÃ©ponses pour les COGs Under review
+- Blacklist locale ou partagÃ©e (selon protocole) pour adresses ou COGs Rejected
 
-**Principe :** l'actif **protège** le maillage en appliquant des décisions (rejet, dégradation) conformes au devoir de protection des Trackers et aux contrats MWS.
+**Principe :** l'actif **protÃ¨ge** le maillage en appliquant des dÃ©cisions (rejet, dÃ©gradation) conformes au devoir de protection des Trackers et aux contrats MWS.
 
-### 5.3 Synthèse
+### 5.3 SynthÃ¨se
 
-| Type | Rôle | Statut |
+| Type | RÃ´le | Statut |
 |------|------|--------|
-| **Passif** | Validation, observation/filtrage, journalisation ; alimenter les listes de statuts et le signalement | Défini en 5.1 ; contrat dédié pour spécifications détaillées |
-| **Actif** | Filtrer, dégrader, rejeter (annonces/connexions) | Défini en 5.2 ; contrat dédié : [Active Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md) |
+| **Passif** | Validation, observation/filtrage, journalisation ; alimenter les listes de statuts et le signalement | DÃ©fini en 5.1 ; contrat dÃ©diÃ© pour spÃ©cifications dÃ©taillÃ©es |
+| **Actif** | Filtrer, dÃ©grader, rejeter (annonces/connexions) | DÃ©fini en 5.2 ; contrat dÃ©diÃ© : [Active Systems Contract](..//..//tools//MiyuWebwayTracker//contracts//security//MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md) |
 
-Les spécifications détaillées (protocoles, formats, responsabilités précises des Trackers) sont ou seront définies dans des documents de contrat ou de protocole MWS dédiés (voir références en 5.1 et 5.2).
+Les spÃ©cifications dÃ©taillÃ©es (protocoles, formats, responsabilitÃ©s prÃ©cises des Trackers) sont ou seront dÃ©finies dans des documents de contrat ou de protocole MWS dÃ©diÃ©s (voir rÃ©fÃ©rences en 5.1 et 5.2).
 
 ---
 
 ## 6. Relation avec la Connexion Inter-COG
 
-Le MWS **ne remplace pas** la visite gouvernée ; il la **précède** et la **rend possible** en environnement connecté.
+Le MWS **ne remplace pas** la visite gouvernÃ©e ; il la **prÃ©cÃ¨de** et la **rend possible** en environnement connectÃ©.
 
-| Étape | Couche | Rôle |
+| Ã‰tape | Couche | RÃ´le |
 |-------|--------|------|
-| 1 | **MWS** | Découverte : savoir quels COGs sont présents et où contacter le Bridge du COG Hébergeur |
-| 2 | **Connexion Inter-COG** | Pré-validation locale (COG Origine), émission du Passeport Utilisateur |
-| 3 | **Connexion Inter-COG** | Présentation au Bridge (Passeport + Demande de Visite) |
-| 4 | **Connexion Inter-COG** | Douane du Host COG, émission du Visa de Connexion / accord d'hôte, session gouvernée |
+| 1 | **MWS** | DÃ©couverte : savoir quels COGs sont prÃ©sents et oÃ¹ contacter le Bridge du COG HÃ©bergeur |
+| 2 | **Connexion Inter-COG** | PrÃ©-validation locale (COG Origine), Ã©mission du Passeport Utilisateur |
+| 3 | **Connexion Inter-COG** | PrÃ©sentation au Bridge (Passeport + Demande de Visite) |
+| 4 | **Connexion Inter-COG** | Douane du Host COG, Ã©mission du Visa de Connexion / accord d'hÃ´te, session gouvernÃ©e |
 
-Sans le Webway, un COG peut toujours recevoir une visite si son adresse est connue par d'autres moyens (config manuelle, autre mécanisme). Le MWS **normalise la présence** et **facilite** l'échange entre services d'environnements différents (ex. lobby de jeu en ligne pour rejoindre une partie).
+Sans le Webway, un COG peut toujours recevoir une visite si son adresse est connue par d'autres moyens (config manuelle, autre mÃ©canisme). Le MWS **normalise la prÃ©sence** et **facilite** l'Ã©change entre services d'environnements diffÃ©rents (ex. lobby de jeu en ligne pour rejoindre une partie).
 
-**Référence :** [Miyukini Conceptual References - Connexion Inter-COG](./Miyukini%20Conceptual%20References%20-%20Connexion%20Inter-COG.md)
+**RÃ©fÃ©rence :** [Miyukini Conceptual References - Connexion Inter-COG](_index.md)
 
 ---
 
-## 7. Principes non négociables
+## 7. Principes non nÃ©gociables
 
 | Principe | Application au MWS |
 |----------|---------------------|
-| **Le maillage ne fait pas confiance** | Il transporte/expose des informations de présence ; aucune décision d'accès (Permis de circulation, Visa de Connexion) n'est prise par le Webway pour le métier ; le Webway délivre le Permis de circulation (relay) et contrôle l'accès au maillage (contrôle tracker) |
-| **Aucun core partagé** | La présence ne donne aucun accès aux Cores ; elle indique où initier une visite |
-| **Une seule gouvernance active** | Le COG Hébergeur reste l'autorité pour Visa de Connexion / accord d'hôte, refus, révocation ; Origin/relays pour Permis de circulation |
-| **Optionnel** | Environnements offline ou refusant la découverte : pas de dépendance critique (LOI-1, LOI-2) |
-| **Fédération** | LOI-6 : l'autonomie n'empêche pas la fédération ; le MWS est un moyen de fédération sans transfert de données métier |
-| **Protection du réseau** | Les COGs Tracker ont le devoir de protéger le maillage par des mécanismes passifs (5.1) et actifs (5.2 : blocage, signalement, dégradation, alerte) |
+| **Le maillage ne fait pas confiance** | Il transporte/expose des informations de prÃ©sence ; aucune dÃ©cision d'accÃ¨s (Permis de circulation, Visa de Connexion) n'est prise par le Webway pour le mÃ©tier ; le Webway dÃ©livre le Permis de circulation (relay) et contrÃ´le l'accÃ¨s au maillage (contrÃ´le tracker) |
+| **Aucun core partagÃ©** | La prÃ©sence ne donne aucun accÃ¨s aux Cores ; elle indique oÃ¹ initier une visite |
+| **Une seule gouvernance active** | Le COG HÃ©bergeur reste l'autoritÃ© pour Visa de Connexion / accord d'hÃ´te, refus, rÃ©vocation ; Origin/relays pour Permis de circulation |
+| **Optionnel** | Environnements offline ou refusant la dÃ©couverte : pas de dÃ©pendance critique (LOI-1, LOI-2) |
+| **FÃ©dÃ©ration** | LOI-6 : l'autonomie n'empÃªche pas la fÃ©dÃ©ration ; le MWS est un moyen de fÃ©dÃ©ration sans transfert de donnÃ©es mÃ©tier |
+| **Protection du rÃ©seau** | Les COGs Tracker ont le devoir de protÃ©ger le maillage par des mÃ©canismes passifs (5.1) et actifs (5.2 : blocage, signalement, dÃ©gradation, alerte) |
 
 ---
 
 ## 8. Positionnement dans l'architecture
 
-- **Border Guard** : peut définir les règles de qui est autorisé à s'annoncer ou à interroger le maillage (politique locale) et d'utilisation des listes de statuts.
+- **Border Guard** : peut dÃ©finir les rÃ¨gles de qui est autorisÃ© Ã  s'annoncer ou Ã  interroger le maillage (politique locale) et d'utilisation des listes de statuts.
 - **Bridge inter-COG** : une fois l'adresse connue via le MWS, le Bridge reste le canal diplomatique ; le MWS ne remplace pas le Bridge.
-- **WorrySentinel** : peut être sollicité pour surveiller les signaux issus du Webway (statuts, alertes) dans le cadre de la gouvernance locale.
+- **WorrySentinel** : peut Ãªtre sollicitÃ© pour surveiller les signaux issus du Webway (statuts, alertes) dans le cadre de la gouvernance locale.
 
-Le MWS est une **couche de découverte et de présence** sous le contrôle des Cores existants ; il n'introduit pas de nouveau Core métier.
-
----
-
-## 9. Évolutions futures
-
-- [ ] Formaliser le **protocole MWS** (formats d'annonce, de requête, de liste de statuts)
-- [x] **Norme de déclaration sécurisée** formalisée (schéma, signature, vérification) pour les annonces de services, adresses (IP/ports) et sessions hébergées — section 3.3 ; cadre détaillé dans [MWS Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md)
-- [x] Définir le **cadre conceptuel des systèmes passifs** des COGs Tracker (section 5.1 ; contrat dédié : [Passive Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md))
-- [x] Définir les **contrats des systèmes actifs** des COGs Tracker — [Active Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md)
-- [ ] Spécifier la **matrice des statuts** et les règles d'échange entre COGs
-- [ ] Intégrer le MWS dans la section « Évolutions futures » de la Connexion Inter-COG comme couche de présence
+Le MWS est une **couche de dÃ©couverte et de prÃ©sence** sous le contrÃ´le des Cores existants ; il n'introduit pas de nouveau Core mÃ©tier.
 
 ---
 
-## Références croisées
+## 9. Ã‰volutions futures
 
-- [Miyukini Webway System - Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) — annexe conceptuelle (normes, formats, protocole, matrice des statuts)
-- [Miyukini Webway System - Outils et Operateurs](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Outils%20et%20Operateurs.md) — annexe conceptuelle (Outils, Kits d'Outils, Opérateurs MWS)
-- [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) — architecture du relay de transport (tunnel étendu multi-tenant)
-- [Miyukini Webway Relay Protocol](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md) — protocole relay (messages, handshake, TLS)
-- [Miyukini - Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md) — guide de déploiement du relay (VM, TLS, systemd, tests)
-- [MiyuWebwayTracker - Passive Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md) — contrat des systèmes passifs (validation, journalisation, signalement)
-- [MiyuWebwayTracker - Active Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md) — contrat des systèmes actifs (blocage, signalement, dégradation, alerte)
-- [Connexion Inter-COG](./Miyukini%20Conceptual%20References%20-%20Connexion%20Inter-COG.md)
-- [Definition COG](./Miyukini%20Conceptual%20References%20-%20Definition%20COG.md)
-- [Souverainete Environnement](./Miyukini%20Conceptual%20References%20-%20Souverainete%20Environnement.md)
-- [Lois Autonomie Systeme](./Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
-- [Doctrine Securite Fondamentale](./Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md)
-- [Glossaire](./Miyukini%20Conceptual%20References%20-%20Glossaire.md) (Passeport Utilisateur, Visa de Connexion, Bridge inter-COG, COG Hébergeur, COG Origine)
+- [ ] Formaliser le **protocole MWS** (formats d'annonce, de requÃªte, de liste de statuts)
+- [x] **Norme de dÃ©claration sÃ©curisÃ©e** formalisÃ©e (schÃ©ma, signature, vÃ©rification) pour les annonces de services, adresses (IP/ports) et sessions hÃ©bergÃ©es â€” section 3.3 ; cadre dÃ©taillÃ© dans [MWS Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md)
+- [x] DÃ©finir le **cadre conceptuel des systÃ¨mes passifs** des COGs Tracker (section 5.1 ; contrat dÃ©diÃ© : [Passive Systems Contract](..//..//tools//MiyuWebwayTracker//contracts//security//MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md))
+- [x] DÃ©finir les **contrats des systÃ¨mes actifs** des COGs Tracker â€” [Active Systems Contract](..//..//tools//MiyuWebwayTracker//contracts//security//MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md)
+- [ ] SpÃ©cifier la **matrice des statuts** et les rÃ¨gles d'Ã©change entre COGs
+- [ ] IntÃ©grer le MWS dans la section Â« Ã‰volutions futures Â» de la Connexion Inter-COG comme couche de prÃ©sence
 
 ---
 
-*Document créé le 30/01/2026*  
-*Classification : Reference conceptuelle — Miyukini Webway System (MWS)*
+## RÃ©fÃ©rences croisÃ©es
+
+- [Miyukini Webway System - Normes et Standards](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) â€” annexe conceptuelle (normes, formats, protocole, matrice des statuts)
+- [Miyukini Webway System - Outils et Operateurs](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Outils%20et%20Operateurs.md) â€” annexe conceptuelle (Outils, Kits d'Outils, OpÃ©rateurs MWS)
+- [Miyukini Webway Relay](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) â€” architecture du relay de transport (tunnel Ã©tendu multi-tenant)
+- [Miyukini Webway Relay Protocol](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md) â€” protocole relay (messages, handshake, TLS)
+- [Miyukini - Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md) â€” guide de dÃ©ploiement du relay (VM, TLS, systemd, tests)
+- [MiyuWebwayTracker - Passive Systems Contract](..//..//tools//MiyuWebwayTracker//contracts//security//MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md) â€” contrat des systÃ¨mes passifs (validation, journalisation, signalement)
+- [MiyuWebwayTracker - Active Systems Contract](..//..//tools//MiyuWebwayTracker//contracts//security//MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md) â€” contrat des systÃ¨mes actifs (blocage, signalement, dÃ©gradation, alerte)
+- [Connexion Inter-COG](_index.md)
+- [Definition COG](_index.md)
+- [Souverainete Environnement](_index.md)
+- [Lois Autonomie Systeme](_index.md)
+- [Doctrine Securite Fondamentale](_index.md)
+- [Glossaire](_index.md) (Passeport Utilisateur, Visa de Connexion, Bridge inter-COG, COG HÃ©bergeur, COG Origine)
+
+---
+
+*Document crÃ©Ã© le 30/01/2026*  
+*Classification : Reference conceptuelle â€” Miyukini Webway System (MWS)*
+
+

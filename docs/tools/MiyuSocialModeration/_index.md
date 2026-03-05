@@ -1,8 +1,8 @@
-# MiyuSocialModeration — Index de navigation
+﻿# MiyuSocialModeration â€” Index de navigation
 
 ## Contexte
 
-**MiyuSocialModeration** est le **kit d'outils (Toolkit)** de modération sociale (signalement, blocage, suppression post). Aligné sur [Équivalents Reseaux Sociaux](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Reseaux%20Sociaux.md).
+**MiyuSocialModeration** est le **kit d'outils (Toolkit)** de modÃ©ration sociale (signalement, blocage, suppression post). AlignÃ© sur [Ã‰quivalents Reseaux Sociaux](..//..//miyukini-webway-system//reference//_index.md).
 
 **Strate :** 6 (Tools & Toolkits)  
 **ToolkitId :** `toolkit.social.moderation`
@@ -13,10 +13,11 @@
 
 | Document | Description |
 |----------|-------------|
-| [Documentation Fondatrice](./MiyuSocialModeration%20-%20Documentation%20Fondatrice.md) | Identité, définition canonique, ToolkitId, liste des outils composants, gouvernance |
-| [Reference Outils](./MiyuSocialModeration%20-%20Reference%20Outils.md) | Liste exhaustive des Tools : ToolId, action, niveau de sécurité |
-| [Tool Governance Compliance Contract](./contracts/governance/MiyuSocialModeration%20-%20Tool%20Governance%20Compliance%20Contract.md) | Obligations de conformité |
+| [Documentation Fondatrice](./MiyuSocialModeration%20-%20Documentation%20Fondatrice.md) | IdentitÃ©, dÃ©finition canonique, ToolkitId, liste des outils composants, gouvernance |
+| [Reference Outils](./MiyuSocialModeration%20-%20Reference%20Outils.md) | Liste exhaustive des Tools : ToolId, action, niveau de sÃ©curitÃ© |
+| [Tool Governance Compliance Contract](./contracts/governance/MiyuSocialModeration%20-%20Tool%20Governance%20Compliance%20Contract.md) | Obligations de conformitÃ© |
 
 ---
 
-**Référence conceptuelle :** [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)
+**RÃ©fÃ©rence conceptuelle :** [Miyukini Conceptual References - Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)
+

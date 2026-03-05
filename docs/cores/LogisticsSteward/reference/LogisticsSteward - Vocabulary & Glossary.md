@@ -1,4 +1,4 @@
-# LogisticsSteward — Vocabulary & Glossary
+﻿# LogisticsSteward â€” Vocabulary & Glossary
 
 ## Contexte
 
@@ -10,8 +10,8 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 - **Applicable a :** Documentation LogisticsSteward, implementation, tests
 - **Audience :** Developpeurs, architectes, mainteneurs
-- **Statut :** Document de reference normatif — GLOSSAIRE LOGISTICSSTEWARD
-- **Relation :** Complete le [Glossaire General Miyukini](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+- **Statut :** Document de reference normatif â€” GLOSSAIRE LOGISTICSSTEWARD
+- **Relation :** Complete le [Glossaire General Miyukini](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -33,10 +33,10 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 **Ce que l'arbitrage N'EST PAS :**
 
-- ❌ Une execution technique
-- ❌ Une mesure de ressources
-- ❌ Un scheduling de threads
-- ❌ Une optimisation d'execution
+- âŒ Une execution technique
+- âŒ Une mesure de ressources
+- âŒ Un scheduling de threads
+- âŒ Une optimisation d'execution
 
 **Voir aussi :** Quota, Priorite, Etat systeme abstrait
 
@@ -94,7 +94,7 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 | Propriete | Description |
 |-----------|-------------|
 | **Controlee** | Decidee selon des regles explicites, jamais chaotique |
-| **Progressive** | Par paliers (D0 → D1 → D2 → D3 → D4) |
+| **Progressive** | Par paliers (D0 â†’ D1 â†’ D2 â†’ D3 â†’ D4) |
 | **Reversible** | Retour a la normale possible et explicite |
 | **Explicite** | Annoncee et justifiee, jamais silencieuse |
 | **Priorisee** | Services vitaux preserves en dernier |
@@ -102,9 +102,9 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 **Ce que la degradation N'EST PAS :**
 
-- ❌ Un accident ou une panne
-- ❌ Une defaillance technique
-- ❌ Un etat subi sans controle
+- âŒ Un accident ou une panne
+- âŒ Une defaillance technique
+- âŒ Un etat subi sans controle
 
 **Voir aussi :** Niveau de degradation, Recuperation, Transition
 
@@ -190,9 +190,9 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 **Ce que l'etat systeme abstrait N'EST PAS :**
 
-- ❌ Des metriques techniques brutes (CPU%, RAM%)
-- ❌ Un dump systeme
-- ❌ Un etat modifiable par LogisticsSteward
+- âŒ Des metriques techniques brutes (CPU%, RAM%)
+- âŒ Un dump systeme
+- âŒ Un etat modifiable par LogisticsSteward
 
 **Voir aussi :** Kernel, INV-LS-2, INV-LS-3
 
@@ -225,16 +225,16 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 | Invariant | Enonce |
 |-----------|--------|
-| **INV-LS-1** | Arbitrage sans execution — LogisticsSteward n'a aucun pouvoir d'execution technique |
-| **INV-LS-2** | Etat systeme abstrait — Opere uniquement sur un etat certifie fourni par le Kernel |
-| **INV-LS-3** | Lecture seule du systeme — Jamais de modification directe de l'etat systeme |
-| **INV-LS-4** | Decisions deterministes — Memes entrees = meme decision d'arbitrage |
-| **INV-LS-5** | Regles explicites — Toute regle est declaree, jamais implicite |
-| **INV-LS-6** | Tracabilite complete — Toute decision est journalisee et auditable |
-| **INV-LS-7** | Separation Kernel — Aucun chevauchement avec les responsabilites du Kernel |
-| **INV-LS-8** | Validation StrongFather — Decisions soumises a validation/invalidation par StrongFather |
-| **INV-LS-9** | Degradation controlee — La degradation est un choix explicite, jamais chaotique |
-| **INV-LS-10** | Resilience locale — Fonctionne meme en environnement degrade ou isole |
+| **INV-LS-1** | Arbitrage sans execution â€” LogisticsSteward n'a aucun pouvoir d'execution technique |
+| **INV-LS-2** | Etat systeme abstrait â€” Opere uniquement sur un etat certifie fourni par le Kernel |
+| **INV-LS-3** | Lecture seule du systeme â€” Jamais de modification directe de l'etat systeme |
+| **INV-LS-4** | Decisions deterministes â€” Memes entrees = meme decision d'arbitrage |
+| **INV-LS-5** | Regles explicites â€” Toute regle est declaree, jamais implicite |
+| **INV-LS-6** | Tracabilite complete â€” Toute decision est journalisee et auditable |
+| **INV-LS-7** | Separation Kernel â€” Aucun chevauchement avec les responsabilites du Kernel |
+| **INV-LS-8** | Validation StrongFather â€” Decisions soumises a validation/invalidation par StrongFather |
+| **INV-LS-9** | Degradation controlee â€” La degradation est un choix explicite, jamais chaotique |
+| **INV-LS-10** | Resilience locale â€” Fonctionne meme en environnement degrade ou isole |
 
 **Voir aussi :** Invariants de priorite, Invariants de degradation
 
@@ -246,11 +246,11 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 | Invariant | Enonce |
 |-----------|--------|
-| **INV-PRIO-1** | Priorite explicite — Toute entite possede une priorite explicitement declaree |
-| **INV-PRIO-2** | Ordre total — Les niveaux de priorite forment un ordre total |
-| **INV-PRIO-3** | Stabilite intra-arbitrage — La priorite ne change pas pendant un cycle d'arbitrage |
-| **INV-PRIO-4** | Determinisme — A entrees identiques, l'ordre de service est identique |
-| **INV-PRIO-5** | Tracabilite — Toute attribution ou modification de priorite est tracee |
+| **INV-PRIO-1** | Priorite explicite â€” Toute entite possede une priorite explicitement declaree |
+| **INV-PRIO-2** | Ordre total â€” Les niveaux de priorite forment un ordre total |
+| **INV-PRIO-3** | Stabilite intra-arbitrage â€” La priorite ne change pas pendant un cycle d'arbitrage |
+| **INV-PRIO-4** | Determinisme â€” A entrees identiques, l'ordre de service est identique |
+| **INV-PRIO-5** | Tracabilite â€” Toute attribution ou modification de priorite est tracee |
 
 **Voir aussi :** Priorite, INV-LS-1 a INV-LS-10
 
@@ -262,12 +262,12 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 | Invariant | Enonce |
 |-----------|--------|
-| **INV-DEG-1** | Degradation explicite — Tout niveau de degradation est explicitement declare et visible |
-| **INV-DEG-2** | Degradation tracee — Toute transition est tracee avec conditions, horodatage et source |
-| **INV-DEG-3** | Degradation progressive — La degradation suit les niveaux definis |
-| **INV-DEG-4** | Degradation reversible — Toute degradation est reversible selon les conditions de recuperation |
-| **INV-DEG-5** | Services vitaux preserves — Les services vitaux sont preserves jusqu'au dernier niveau (D4) |
-| **INV-DEG-6** | Determinisme — A conditions identiques, le niveau de degradation est identique |
+| **INV-DEG-1** | Degradation explicite â€” Tout niveau de degradation est explicitement declare et visible |
+| **INV-DEG-2** | Degradation tracee â€” Toute transition est tracee avec conditions, horodatage et source |
+| **INV-DEG-3** | Degradation progressive â€” La degradation suit les niveaux definis |
+| **INV-DEG-4** | Degradation reversible â€” Toute degradation est reversible selon les conditions de recuperation |
+| **INV-DEG-5** | Services vitaux preserves â€” Les services vitaux sont preserves jusqu'au dernier niveau (D4) |
+| **INV-DEG-6** | Determinisme â€” A conditions identiques, le niveau de degradation est identique |
 
 **Voir aussi :** Degradation, Niveau de degradation, Recuperation
 
@@ -324,7 +324,7 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 **Phrase fondatrice :**
 
-> **LogisticsSteward est le core qui empeche le chaos silencieux en garantissant que chaque entite a droit a ce qui lui est du — ni plus, ni moins — selon des regles explicites, deterministes et auditables, sans jamais executer ni controler techniquement.**
+> **LogisticsSteward est le core qui empeche le chaos silencieux en garantissant que chaque entite a droit a ce qui lui est du â€” ni plus, ni moins â€” selon des regles explicites, deterministes et auditables, sans jamais executer ni controler techniquement.**
 
 **Voir aussi :** Arbitrage, Quota, Priorite
 
@@ -493,7 +493,7 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 | P1 (EMERGENCY) | P0 uniquement |
 | P0 (CRITICAL) | **Non preemptable** |
 
-**Invariant associe :** INV-PREEMP-2 — Une entite de priorite P0 ne peut jamais etre preemptee.
+**Invariant associe :** INV-PREEMP-2 â€” Une entite de priorite P0 ne peut jamais etre preemptee.
 
 **Voir aussi :** Priorite, Contention, Famine
 
@@ -566,11 +566,11 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 **Ce qu'un quota N'EST PAS :**
 
-- ❌ Une mesure technique de ressource (CPU, RAM, IO)
-- ❌ Un compteur d'utilisation en temps reel
-- ❌ Un mecanisme de throttling technique
-- ❌ Une allocation memoire ou systeme
-- ❌ Un scheduler ou ordonnanceur
+- âŒ Une mesure technique de ressource (CPU, RAM, IO)
+- âŒ Un compteur d'utilisation en temps reel
+- âŒ Un mecanisme de throttling technique
+- âŒ Une allocation memoire ou systeme
+- âŒ Un scheduler ou ordonnanceur
 
 **Voir aussi :** Types de quotas, Attribution
 
@@ -709,10 +709,10 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 | Transition | Delai minimum |
 |------------|---------------|
-| D4 → D3 | ~5 min |
-| D3 → D2 | ~10 min |
-| D2 → D1 | ~15 min |
-| D1 → D0 | ~20 min |
+| D4 â†’ D3 | ~5 min |
+| D3 â†’ D2 | ~10 min |
+| D2 â†’ D1 | ~15 min |
+| D1 â†’ D0 | ~20 min |
 
 **Voir aussi :** Degradation, Hysteresis, Transition
 
@@ -722,7 +722,7 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 **Principe fondamental** de LogisticsSteward : toute regle est declaree, jamais implicite.
 
-**Invariant associe :** INV-LS-5 — Toute regle est declaree, jamais implicite.
+**Invariant associe :** INV-LS-5 â€” Toute regle est declaree, jamais implicite.
 
 **Implications :**
 
@@ -750,7 +750,7 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 | Regles declaratives | Actions techniques |
 | Aucun pouvoir d'execution | Aucune decision de gouvernance |
 
-**Invariant associe :** INV-LS-7 — Aucun chevauchement avec les responsabilites du Kernel.
+**Invariant associe :** INV-LS-7 â€” Aucun chevauchement avec les responsabilites du Kernel.
 
 **Voir aussi :** INV-LS-7, Kernel
 
@@ -769,7 +769,7 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 | **Persistence critique** | Jusqu'a D4 |
 | **Monitoring vital** | Jusqu'a D4 |
 
-**Invariant associe :** INV-DEG-5 — Les services vitaux sont preserves jusqu'au dernier niveau (D4).
+**Invariant associe :** INV-DEG-5 â€” Les services vitaux sont preserves jusqu'au dernier niveau (D4).
 
 **Voir aussi :** Degradation, Niveau de degradation
 
@@ -805,7 +805,7 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 **Principe fondamental** : toute decision est journalisee et auditable.
 
-**Invariant associe :** INV-LS-6 — Toute decision est journalisee et auditable.
+**Invariant associe :** INV-LS-6 â€” Toute decision est journalisee et auditable.
 
 **Ce qui est trace :**
 
@@ -828,8 +828,8 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 | Type | Direction | Description |
 |------|-----------|-------------|
-| **Ascendante** | Vers D4 | Degradation (D0→D1→D2→D3→D4) |
-| **Descendante** | Vers D0 | Recuperation (D4→D3→D2→D1→D0) |
+| **Ascendante** | Vers D4 | Degradation (D0â†’D1â†’D2â†’D3â†’D4) |
+| **Descendante** | Vers D0 | Recuperation (D4â†’D3â†’D2â†’D1â†’D0) |
 
 **Regles de transition :**
 
@@ -848,7 +848,7 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 **Soumission des decisions** de LogisticsSteward a l'autorite de StrongFather pour validation ou invalidation.
 
-**Invariant associe :** INV-LS-8 — Decisions soumises a validation/invalidation par StrongFather.
+**Invariant associe :** INV-LS-8 â€” Decisions soumises a validation/invalidation par StrongFather.
 
 **Ce qui requiert validation StrongFather :**
 
@@ -873,13 +873,13 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 | Terme incorrect | Terme correct |
 |-----------------|---------------|
 | Core de scheduling | **LogisticsSteward** (arbitre, pas scheduler) |
-| Gestionnaire memoire | ❌ Responsabilite du Kernel |
-| Optimiseur de ressources | ❌ LogisticsSteward gouverne, n'optimise pas |
-| Quota implicite | ❌ Interdit (INV-LS-5) |
-| Priorite auto-attribuee | ❌ Interdit (INTERD-ATTR-1) |
-| Degradation silencieuse | ❌ Interdit (INV-DEG-1) |
-| Mesure de CPU/RAM | ❌ Interdit (INTERD-LS-1) |
-| Decision auto-appliquee | ❌ Interdit (INTERD-LS-8) |
+| Gestionnaire memoire | âŒ Responsabilite du Kernel |
+| Optimiseur de ressources | âŒ LogisticsSteward gouverne, n'optimise pas |
+| Quota implicite | âŒ Interdit (INV-LS-5) |
+| Priorite auto-attribuee | âŒ Interdit (INTERD-ATTR-1) |
+| Degradation silencieuse | âŒ Interdit (INV-DEG-1) |
+| Mesure de CPU/RAM | âŒ Interdit (INTERD-LS-1) |
+| Decision auto-appliquee | âŒ Interdit (INTERD-LS-8) |
 
 ---
 
@@ -891,7 +891,7 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 ### Nature de LogisticsSteward
 
-> **"LogisticsSteward est le core qui empeche le chaos silencieux en garantissant que chaque entite a droit a ce qui lui est du — ni plus, ni moins — selon des regles explicites, deterministes et auditables, sans jamais executer ni controler techniquement."**
+> **"LogisticsSteward est le core qui empeche le chaos silencieux en garantissant que chaque entite a droit a ce qui lui est du â€” ni plus, ni moins â€” selon des regles explicites, deterministes et auditables, sans jamais executer ni controler techniquement."**
 
 ### Question fondamentale
 
@@ -905,7 +905,7 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
-**Statut :** Document de reference normatif — GLOSSAIRE LOGISTICSSTEWARD
+**Statut :** Document de reference normatif â€” GLOSSAIRE LOGISTICSSTEWARD
 
 **References croisees :**
 
@@ -913,4 +913,5 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 - [LogisticsSteward - Quota Definition Contract](../contracts/resources/LogisticsSteward%20-%20Quota%20Definition%20Contract.md) : Types de quotas
 - [LogisticsSteward - Priority Management Contract](../contracts/resources/LogisticsSteward%20-%20Priority%20Management%20Contract.md) : Niveaux de priorite
 - [LogisticsSteward - Degradation Strategy Contract](../contracts/degradation/LogisticsSteward%20-%20Degradation%20Strategy%20Contract.md) : Niveaux de degradation
-- [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) : Glossaire general
+- [Miyukini Conceptual References - Glossaire](..//..//..//miyukini-webway-system//reference//_index.md) : Glossaire general
+

@@ -1,12 +1,12 @@
-# LogisticsSteward - WorrySentinel Integration Contract
+﻿# LogisticsSteward - WorrySentinel Integration Contract
 
 ## 1. Contexte
 
 Ce document definit le **contrat d'integration entre LogisticsSteward et WorrySentinel**. Il specifie l'interface, le protocole, les regles de communication, et les garanties associees a l'integration avec WorrySentinel en tant que gouvernant de la securite et des etats de confiance.
 
 Ce document complete la Section 8.4 de la [Documentation Fondatrice](../../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
-- [WorrySentinel - Documentation Fondatrice](../../../WorrySentinel/WorrySentinel%20-%20Documentation%20Fondatrice.md) pour la nature de WorrySentinel
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) pour la conformite LOI-1 a LOI-6
+- [WorrySentinel - Documentation Fondatrice](..//..//..//WorrySentinel//foundation//WorrySentinel%20-%20Documentation%20Fondatrice.md) pour la nature de WorrySentinel
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) pour la conformite LOI-1 a LOI-6
 
 L'integration respecte les Lois d'Autonomie Systeme : toutes les adaptations de regles sont locales et ne requierent aucune dependance externe (**LOI-1**).
 
@@ -39,7 +39,7 @@ La relation est de **contrainte verticale** : WorrySentinel impose des contraint
 
 ---
 
-## 4. Nature de la relation LogisticsSteward — WorrySentinel
+## 4. Nature de la relation LogisticsSteward â€” WorrySentinel
 
 ### 4.1 Relation de contrainte verticale
 
@@ -71,14 +71,14 @@ WorrySentinel observe les comportements d'arbitrage de LogisticsSteward sans jam
 
 | Responsabilite | LogisticsSteward | WorrySentinel |
 |----------------|------------------|---------------|
-| **Arbitrer l'allocation des ressources** | ✅ Exclusif | ❌ Jamais |
-| **Definir les quotas et priorites** | ✅ Exclusif | ❌ Jamais |
-| **Gouverner les etats de confiance** | ❌ Consomme | ✅ Exclusif |
-| **Definir les niveaux de securite** | ❌ Consomme | ✅ Exclusif |
-| **Declencher le durcissement** | ❌ Subit | ✅ Exclusif |
-| **Invalider un etat systeme** | ❌ Reagit | ✅ Peut decider |
-| **Observer les comportements** | ❌ Source | ✅ Exclusif |
-| **Detecter les derives** | ✅ Source | ✅ Consomme |
+| **Arbitrer l'allocation des ressources** | âœ… Exclusif | âŒ Jamais |
+| **Definir les quotas et priorites** | âœ… Exclusif | âŒ Jamais |
+| **Gouverner les etats de confiance** | âŒ Consomme | âœ… Exclusif |
+| **Definir les niveaux de securite** | âŒ Consomme | âœ… Exclusif |
+| **Declencher le durcissement** | âŒ Subit | âœ… Exclusif |
+| **Invalider un etat systeme** | âŒ Reagit | âœ… Peut decider |
+| **Observer les comportements** | âŒ Source | âœ… Exclusif |
+| **Detecter les derives** | âœ… Source | âœ… Consomme |
 
 **Regle LS-WS-04 : Aucun chevauchement**
 
@@ -122,7 +122,7 @@ LogisticsSteward ne contourne **jamais** l'observation de WorrySentinel. Les com
 
 WorrySentinel gouverne les etats de confiance (T0-T4). LogisticsSteward adapte son arbitrage en consequence :
 
-**T0 — Normal**
+**T0 â€” Normal**
 
 | Aspect | Comportement |
 |--------|--------------|
@@ -132,7 +132,7 @@ WorrySentinel gouverne les etats de confiance (T0-T4). LogisticsSteward adapte s
 | **Restrictions** | Aucune restriction supplementaire |
 | **Tracabilite** | Journalisation standard |
 
-**T1 — Instable**
+**T1 â€” Instable**
 
 | Aspect | Comportement |
 |--------|--------------|
@@ -142,7 +142,7 @@ WorrySentinel gouverne les etats de confiance (T0-T4). LogisticsSteward adapte s
 | **Restrictions** | Aucune restriction, mais alertes actives |
 | **Tracabilite** | Journalisation detaillee de toutes les decisions |
 
-**T2 — Degrade**
+**T2 â€” Degrade**
 
 | Aspect | Comportement |
 |--------|--------------|
@@ -152,7 +152,7 @@ WorrySentinel gouverne les etats de confiance (T0-T4). LogisticsSteward adapte s
 | **Restrictions** | Desactivation de fonctionnalites non critiques |
 | **Tracabilite** | Journalisation complete avec contexte de securite |
 
-**T3 — Restreint**
+**T3 â€” Restreint**
 
 | Aspect | Comportement |
 |--------|--------------|
@@ -162,7 +162,7 @@ WorrySentinel gouverne les etats de confiance (T0-T4). LogisticsSteward adapte s
 | **Restrictions** | Services minimaux uniquement |
 | **Tracabilite** | Journalisation exhaustive avec justification |
 
-**T4 — Bloque**
+**T4 â€” Bloque**
 
 | Aspect | Comportement |
 |--------|--------------|
@@ -204,7 +204,7 @@ Les restrictions sont cumulatives : une entite de niveau 2 en etat T2 subit les 
 
 ## 7. Types d'informations echangees
 
-### 7.1 Flux descendant : WorrySentinel → LogisticsSteward
+### 7.1 Flux descendant : WorrySentinel â†’ LogisticsSteward
 
 **TRUST_STATE_CHANGE**
 - **Objectif :** Notifier un changement d'etat de confiance
@@ -215,12 +215,12 @@ Les restrictions sont cumulatives : une entite de niveau 2 en etat T2 subit les 
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `notification_id` | Identifiant unique de la notification | ✅ Oui |
-| `previous_state` | Etat de confiance precedent (T0-T4) | ✅ Oui |
-| `new_state` | Nouvel etat de confiance (T0-T4) | ✅ Oui |
-| `transition_reason` | Justification de la transition | ✅ Oui |
-| `timestamp` | Horodatage de la transition | ✅ Oui |
-| `constraints` | Contraintes supplementaires applicables | ❌ Optionnel |
+| `notification_id` | Identifiant unique de la notification | âœ… Oui |
+| `previous_state` | Etat de confiance precedent (T0-T4) | âœ… Oui |
+| `new_state` | Nouvel etat de confiance (T0-T4) | âœ… Oui |
+| `transition_reason` | Justification de la transition | âœ… Oui |
+| `timestamp` | Horodatage de la transition | âœ… Oui |
+| `constraints` | Contraintes supplementaires applicables | âŒ Optionnel |
 
 **SECURITY_LEVEL_ASSIGNMENT**
 - **Objectif :** Attribuer ou modifier le niveau de securite d'une entite
@@ -231,12 +231,12 @@ Les restrictions sont cumulatives : une entite de niveau 2 en etat T2 subit les 
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `assignment_id` | Identifiant unique de l'attribution | ✅ Oui |
-| `entity_id` | Identifiant de l'entite concernee | ✅ Oui |
-| `entity_type` | Type d'entite (operator, team, service, tool) | ✅ Oui |
-| `security_level` | Niveau de securite (0-4) | ✅ Oui |
-| `justification` | Raison de l'attribution | ✅ Oui |
-| `timestamp` | Horodatage de l'attribution | ✅ Oui |
+| `assignment_id` | Identifiant unique de l'attribution | âœ… Oui |
+| `entity_id` | Identifiant de l'entite concernee | âœ… Oui |
+| `entity_type` | Type d'entite (operator, team, service, tool) | âœ… Oui |
+| `security_level` | Niveau de securite (0-4) | âœ… Oui |
+| `justification` | Raison de l'attribution | âœ… Oui |
+| `timestamp` | Horodatage de l'attribution | âœ… Oui |
 
 **HARDENING_DIRECTIVE**
 - **Objectif :** Declencher un durcissement immediat des regles
@@ -247,13 +247,13 @@ Les restrictions sont cumulatives : une entite de niveau 2 en etat T2 subit les 
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `directive_id` | Identifiant unique de la directive | ✅ Oui |
-| `hardening_type` | Type de durcissement (quota_reduction, priority_freeze, allocation_block) | ✅ Oui |
-| `affected_entities` | Liste des entites concernees (vide = toutes) | ❌ Optionnel |
-| `severity` | Severite du durcissement (low, medium, high, critical) | ✅ Oui |
-| `duration` | Duree du durcissement (null = indefini) | ❌ Optionnel |
-| `justification` | Raison du durcissement | ✅ Oui |
-| `timestamp` | Horodatage de la directive | ✅ Oui |
+| `directive_id` | Identifiant unique de la directive | âœ… Oui |
+| `hardening_type` | Type de durcissement (quota_reduction, priority_freeze, allocation_block) | âœ… Oui |
+| `affected_entities` | Liste des entites concernees (vide = toutes) | âŒ Optionnel |
+| `severity` | Severite du durcissement (low, medium, high, critical) | âœ… Oui |
+| `duration` | Duree du durcissement (null = indefini) | âŒ Optionnel |
+| `justification` | Raison du durcissement | âœ… Oui |
+| `timestamp` | Horodatage de la directive | âœ… Oui |
 
 **STATE_INVALIDATION**
 - **Objectif :** Invalider l'etat systeme actuel
@@ -264,12 +264,12 @@ Les restrictions sont cumulatives : une entite de niveau 2 en etat T2 subit les 
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `invalidation_id` | Identifiant unique de l'invalidation | ✅ Oui |
-| `reason` | Raison de l'invalidation | ✅ Oui |
-| `required_action` | Action requise de LogisticsSteward | ✅ Oui |
-| `timestamp` | Horodatage de l'invalidation | ✅ Oui |
+| `invalidation_id` | Identifiant unique de l'invalidation | âœ… Oui |
+| `reason` | Raison de l'invalidation | âœ… Oui |
+| `required_action` | Action requise de LogisticsSteward | âœ… Oui |
+| `timestamp` | Horodatage de l'invalidation | âœ… Oui |
 
-### 7.2 Flux montant : LogisticsSteward → WorrySentinel
+### 7.2 Flux montant : LogisticsSteward â†’ WorrySentinel
 
 **ANOMALY_REPORT**
 - **Objectif :** Signaler un comportement d'arbitrage suspect
@@ -280,12 +280,12 @@ Les restrictions sont cumulatives : une entite de niveau 2 en etat T2 subit les 
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `report_id` | Identifiant unique du rapport | ✅ Oui |
-| `anomaly_type` | Type d'anomalie (excessive_requests, pattern_violation, quota_bypass_attempt) | ✅ Oui |
-| `affected_entity` | Entite concernee par l'anomalie | ✅ Oui |
-| `context` | Contexte de l'anomalie (decisions recentes, etat) | ✅ Oui |
-| `severity_assessment` | Evaluation de gravite par LogisticsSteward | ✅ Oui |
-| `timestamp` | Horodatage de l'anomalie | ✅ Oui |
+| `report_id` | Identifiant unique du rapport | âœ… Oui |
+| `anomaly_type` | Type d'anomalie (excessive_requests, pattern_violation, quota_bypass_attempt) | âœ… Oui |
+| `affected_entity` | Entite concernee par l'anomalie | âœ… Oui |
+| `context` | Contexte de l'anomalie (decisions recentes, etat) | âœ… Oui |
+| `severity_assessment` | Evaluation de gravite par LogisticsSteward | âœ… Oui |
+| `timestamp` | Horodatage de l'anomalie | âœ… Oui |
 
 **DRIFT_ALERT**
 - **Objectif :** Alerter sur une derive de consommation
@@ -296,13 +296,13 @@ Les restrictions sont cumulatives : une entite de niveau 2 en etat T2 subit les 
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `alert_id` | Identifiant unique de l'alerte | ✅ Oui |
-| `entity_id` | Entite concernee | ✅ Oui |
-| `resource_type` | Type de ressource concernee | ✅ Oui |
-| `current_usage` | Usage actuel (pourcentage du quota) | ✅ Oui |
-| `trend` | Tendance (increasing, decreasing, stable) | ✅ Oui |
-| `projection` | Projection de depassement (timestamp estime) | ❌ Optionnel |
-| `timestamp` | Horodatage de l'alerte | ✅ Oui |
+| `alert_id` | Identifiant unique de l'alerte | âœ… Oui |
+| `entity_id` | Entite concernee | âœ… Oui |
+| `resource_type` | Type de ressource concernee | âœ… Oui |
+| `current_usage` | Usage actuel (pourcentage du quota) | âœ… Oui |
+| `trend` | Tendance (increasing, decreasing, stable) | âœ… Oui |
+| `projection` | Projection de depassement (timestamp estime) | âŒ Optionnel |
+| `timestamp` | Horodatage de l'alerte | âœ… Oui |
 
 **GOVERNANCE_ISSUE**
 - **Objectif :** Signaler une anomalie de gouvernance
@@ -313,11 +313,11 @@ Les restrictions sont cumulatives : une entite de niveau 2 en etat T2 subit les 
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `issue_id` | Identifiant unique du probleme | ✅ Oui |
-| `issue_type` | Type de probleme (rule_conflict, inconsistent_state, policy_violation) | ✅ Oui |
-| `description` | Description detaillee | ✅ Oui |
-| `impact` | Impact sur le systeme | ✅ Oui |
-| `timestamp` | Horodatage du signalement | ✅ Oui |
+| `issue_id` | Identifiant unique du probleme | âœ… Oui |
+| `issue_type` | Type de probleme (rule_conflict, inconsistent_state, policy_violation) | âœ… Oui |
+| `description` | Description detaillee | âœ… Oui |
+| `impact` | Impact sur le systeme | âœ… Oui |
+| `timestamp` | Horodatage du signalement | âœ… Oui |
 
 ---
 
@@ -331,11 +331,11 @@ Les notifications de WorrySentinel suivent un format standardise.
 
 | Element | Description | Obligatoire |
 |---------|-------------|-------------|
-| `notification_id` | Identifiant unique de la notification | ✅ Oui |
-| `type` | Type de notification | ✅ Oui |
-| `payload` | Donnees specifiques a la notification | ✅ Oui |
-| `timestamp` | Horodatage de la notification | ✅ Oui |
-| `requires_ack` | Si une confirmation est requise | ✅ Oui |
+| `notification_id` | Identifiant unique de la notification | âœ… Oui |
+| `type` | Type de notification | âœ… Oui |
+| `payload` | Donnees specifiques a la notification | âœ… Oui |
+| `timestamp` | Horodatage de la notification | âœ… Oui |
+| `requires_ack` | Si une confirmation est requise | âœ… Oui |
 
 **Regle LS-WS-PROT-01 : Traitement immediat**
 
@@ -349,11 +349,11 @@ Les signalements de LogisticsSteward suivent un format standardise.
 
 | Element | Description | Obligatoire |
 |---------|-------------|-------------|
-| `signal_id` | Identifiant unique du signalement | ✅ Oui |
-| `type` | Type de signalement | ✅ Oui |
-| `payload` | Donnees specifiques au signalement | ✅ Oui |
-| `timestamp` | Horodatage du signalement | ✅ Oui |
-| `urgency` | Niveau d'urgence (low, medium, high, critical) | ✅ Oui |
+| `signal_id` | Identifiant unique du signalement | âœ… Oui |
+| `type` | Type de signalement | âœ… Oui |
+| `payload` | Donnees specifiques au signalement | âœ… Oui |
+| `timestamp` | Horodatage du signalement | âœ… Oui |
+| `urgency` | Niveau d'urgence (low, medium, high, critical) | âœ… Oui |
 
 **Regle LS-WS-PROT-02 : Signalement non bloquant**
 
@@ -369,11 +369,11 @@ LogisticsSteward acquitte toutes les notifications descendantes avec `requires_a
 
 | Element | Description | Obligatoire |
 |---------|-------------|-------------|
-| `ack_id` | Identifiant unique de l'acquittement | ✅ Oui |
-| `notification_id` | Reference a la notification | ✅ Oui |
-| `status` | Statut (ACK_OK, ACK_PARTIAL, ACK_ERROR) | ✅ Oui |
-| `adaptation_applied` | Confirmation de l'adaptation | ✅ Oui |
-| `timestamp` | Horodatage de l'acquittement | ✅ Oui |
+| `ack_id` | Identifiant unique de l'acquittement | âœ… Oui |
+| `notification_id` | Reference a la notification | âœ… Oui |
+| `status` | Statut (ACK_OK, ACK_PARTIAL, ACK_ERROR) | âœ… Oui |
+| `adaptation_applied` | Confirmation de l'adaptation | âœ… Oui |
+| `timestamp` | Horodatage de l'acquittement | âœ… Oui |
 
 ---
 
@@ -420,31 +420,31 @@ LogisticsSteward acquitte toutes les notifications descendantes avec `requires_a
 ### 9.4 Diagramme de sequence
 
 ```
-┌─────────────────┐    ┌─────────────────┐
-│  WorrySentinel  │    │LogisticsSteward │
-└────────┬────────┘    └────────┬────────┘
-         │                      │
-         ├── TRUST_STATE_CHANGE ─►│
-         │    (T0 → T1)         │
-         │                      │
-         │                      ├── Adaptation immediate
-         │                      │   (regles T1)
-         │                      │
-         │◄── ACK_OK ───────────┤
-         │                      │
-         │                      │
-         │                      ├── Detection derive
-         │                      │
-         │◄── DRIFT_ALERT ──────┤
-         │                      │
-         ├── Analyse ───────────┤
-         │                      │
-         ├── HARDENING_DIRECTIVE ─►│
-         │                      │
-         │                      ├── Application restrictions
-         │                      │
-         │◄── ACK_OK ───────────┤
-         │                      │
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  WorrySentinel  â”‚    â”‚LogisticsSteward â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚                      â”‚
+         â”œâ”€â”€ TRUST_STATE_CHANGE â”€â–ºâ”‚
+         â”‚    (T0 â†’ T1)         â”‚
+         â”‚                      â”‚
+         â”‚                      â”œâ”€â”€ Adaptation immediate
+         â”‚                      â”‚   (regles T1)
+         â”‚                      â”‚
+         â”‚â—„â”€â”€ ACK_OK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+         â”‚                      â”‚
+         â”‚                      â”‚
+         â”‚                      â”œâ”€â”€ Detection derive
+         â”‚                      â”‚
+         â”‚â—„â”€â”€ DRIFT_ALERT â”€â”€â”€â”€â”€â”€â”¤
+         â”‚                      â”‚
+         â”œâ”€â”€ Analyse â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+         â”‚                      â”‚
+         â”œâ”€â”€ HARDENING_DIRECTIVE â”€â–ºâ”‚
+         â”‚                      â”‚
+         â”‚                      â”œâ”€â”€ Application restrictions
+         â”‚                      â”‚
+         â”‚â—„â”€â”€ ACK_OK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+         â”‚                      â”‚
 ```
 
 ---
@@ -581,7 +581,7 @@ Les entites de niveau 4 conservent leurs protections maximales meme en etat degr
 
 ### 13.4 Garantie de tracabilite
 
-**Engagement :** Toute interaction est traçable de bout en bout. L'audit complet des notifications, adaptations et signalements est possible.
+**Engagement :** Toute interaction est traÃ§able de bout en bout. L'audit complet des notifications, adaptations et signalements est possible.
 
 ### 13.5 Garantie de disponibilite
 
@@ -627,7 +627,7 @@ Toutes les notifications et signalements respectent le format standardise.
 
 **INV-LS-WS-7 : Tracabilite complete**
 
-Toute interaction est traçable avec son contexte complet.
+Toute interaction est traÃ§able avec son contexte complet.
 
 ---
 
@@ -635,7 +635,7 @@ Toute interaction est traçable avec son contexte complet.
 
 ### LOI-1 : Aucune dependance externe critique
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 L'integration respecte LOI-1 :
 - LogisticsSteward adapte ses regles localement
@@ -644,7 +644,7 @@ L'integration respecte LOI-1 :
 
 ### LOI-2 : Le systeme accepte l'isolement comme etat normal
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 L'integration respecte LOI-2 :
 - En isolement, LogisticsSteward applique la securite par defaut
@@ -653,7 +653,7 @@ L'integration respecte LOI-2 :
 
 ### LOI-4 : Pas de temps global requis
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 L'integration respecte LOI-4 :
 - Les horodatages sont locaux
@@ -763,7 +763,7 @@ Toute implementation de l'integration avec WorrySentinel doit respecter ce contr
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT — Normatif  
+**Statut :** CONTRAT â€” Normatif  
 **Dependances :**
 - LogisticsSteward - Documentation Fondatrice v1.0.0 (Section 8.4)
 - WorrySentinel - Documentation Fondatrice v1.2
@@ -802,17 +802,19 @@ Toute implementation de l'integration avec WorrySentinel doit respecter ce contr
 ### Verification de coherence
 
 **Verification effectuee :**
-- ✅ Coherence avec LogisticsSteward - Documentation Fondatrice : Confirmee (Section 8.4 respectee)
-- ✅ Coherence avec WorrySentinel - Documentation Fondatrice : Confirmee (flux descendant et montant)
-- ✅ Conformite LOI-1 : Confirmee (aucune dependance externe)
-- ✅ Conformite LOI-2 : Confirmee (isolement gere avec securite par defaut)
-- ✅ Conformite LOI-4 : Confirmee (pas de temps global requis)
-- ✅ Aucune decision de securite par LogisticsSteward : Confirmee (INV-LS-WS-4)
-- ✅ Adaptation obligatoire : Confirmee (INV-LS-WS-3)
-- ✅ Tracabilite complete : Confirmee (INV-LS-WS-7)
+- âœ… Coherence avec LogisticsSteward - Documentation Fondatrice : Confirmee (Section 8.4 respectee)
+- âœ… Coherence avec WorrySentinel - Documentation Fondatrice : Confirmee (flux descendant et montant)
+- âœ… Conformite LOI-1 : Confirmee (aucune dependance externe)
+- âœ… Conformite LOI-2 : Confirmee (isolement gere avec securite par defaut)
+- âœ… Conformite LOI-4 : Confirmee (pas de temps global requis)
+- âœ… Aucune decision de securite par LogisticsSteward : Confirmee (INV-LS-WS-4)
+- âœ… Adaptation obligatoire : Confirmee (INV-LS-WS-3)
+- âœ… Tracabilite complete : Confirmee (INV-LS-WS-7)
 
 **Conclusion :** Aucune contradiction detectee. Le document est coherent et non ambigu.
 
 ---
 
 *Aucune autre erreur, warning, ou ambiguite rencontree lors de la redaction de ce document.*
+
+

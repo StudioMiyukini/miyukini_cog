@@ -1,4 +1,4 @@
-# MiyukiniAdmin — StrongFather Integration Contract
+﻿# MiyukiniAdmin â€” StrongFather Integration Contract
 
 ## 1. Contexte
 
@@ -127,41 +127,41 @@ Ce document **ne couvre pas** :
 
 ```
 MiyukiniAdmin           BondingBrother              StrongFather
-     │                        │                          │
-     │──ActionRequest─────────▶│                          │
-     │  (capability: critical) │                          │
-     │                        │                          │
-     │                        │──DecisionRequest─────────▶│
-     │                        │                          │
-     │                        │                          │  [Evaluation]
-     │                        │                          │  - Politique
-     │                        │                          │  - Contexte
-     │                        │                          │  - Historique
-     │                        │                          │
-     │                        │◀─DecisionResponse────────│
-     │                        │  (APPROVED)               │
-     │                        │                          │
-     │                        │  [Execute action]         │
-     │                        │                          │
-     │◀─ActionResponse────────│                          │
+     â”‚                        â”‚                          â”‚
+     â”‚â”€â”€ActionRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
+     â”‚  (capability: critical) â”‚                          â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚                        â”‚â”€â”€DecisionRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚                        â”‚                          â”‚  [Evaluation]
+     â”‚                        â”‚                          â”‚  - Politique
+     â”‚                        â”‚                          â”‚  - Contexte
+     â”‚                        â”‚                          â”‚  - Historique
+     â”‚                        â”‚                          â”‚
+     â”‚                        â”‚â—€â”€DecisionResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                        â”‚  (APPROVED)               â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚                        â”‚  [Execute action]         â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚â—€â”€ActionResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”‚                          â”‚
 ```
 
 ### 6.2 Flux avec Rejet
 
 ```
 MiyukiniAdmin           BondingBrother              StrongFather
-     │                        │                          │
-     │──ActionRequest─────────▶│                          │
-     │                        │                          │
-     │                        │──DecisionRequest─────────▶│
-     │                        │                          │
-     │                        │◀─DecisionResponse────────│
-     │                        │  (DENIED)                 │
-     │                        │  (reason: "...")          │
-     │                        │                          │
-     │◀─ActionResponse────────│                          │
-     │  (status: DENIED)       │                          │
-     │  (reason: "...")        │                          │
+     â”‚                        â”‚                          â”‚
+     â”‚â”€â”€ActionRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚                        â”‚â”€â”€DecisionRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚                        â”‚â—€â”€DecisionResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                        â”‚  (DENIED)                 â”‚
+     â”‚                        â”‚  (reason: "...")          â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚â—€â”€ActionResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”‚                          â”‚
+     â”‚  (status: DENIED)       â”‚                          â”‚
+     â”‚  (reason: "...")        â”‚                          â”‚
 ```
 
 ---
@@ -294,41 +294,41 @@ En situation d'urgence absolue, StrongFather peut :
 ### 11.1 Dialogue de Validation
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ Validation StrongFather Requise                             │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│ Action: Changement niveau securite                          │
-│ De: Niveau 2 (SENSITIVE)                                   │
-│ Vers: Niveau 3 (CRITICAL)                                  │
-│                                                             │
-│ Justification fournie:                                      │
-│ "Detection tentatives intrusion - Incident #INC-2026-0128" │
-│                                                             │
-│ Statut: [Spinner] En attente de decision...                │
-│                                                             │
-│ [Annuler]                                                   │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Validation StrongFather Requise                             â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                             â”‚
+â”‚ Action: Changement niveau securite                          â”‚
+â”‚ De: Niveau 2 (SENSITIVE)                                   â”‚
+â”‚ Vers: Niveau 3 (CRITICAL)                                  â”‚
+â”‚                                                             â”‚
+â”‚ Justification fournie:                                      â”‚
+â”‚ "Detection tentatives intrusion - Incident #INC-2026-0128" â”‚
+â”‚                                                             â”‚
+â”‚ Statut: [Spinner] En attente de decision...                â”‚
+â”‚                                                             â”‚
+â”‚ [Annuler]                                                   â”‚
+â”‚                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 11.2 Resultat Validation
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ Decision StrongFather                                       │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│ [✓] APPROUVE                                                │
-│                                                             │
-│ Raisonnement:                                               │
-│ "Justification valide, contexte coherent, role suffisant"  │
-│                                                             │
-│ Validite: 5 minutes                                        │
-│                                                             │
-│ [Executer]              [Annuler]                          │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Decision StrongFather                                       â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                             â”‚
+â”‚ [âœ“] APPROUVE                                                â”‚
+â”‚                                                             â”‚
+â”‚ Raisonnement:                                               â”‚
+â”‚ "Justification valide, contexte coherent, role suffisant"  â”‚
+â”‚                                                             â”‚
+â”‚ Validite: 5 minutes                                        â”‚
+â”‚                                                             â”‚
+â”‚ [Executer]              [Annuler]                          â”‚
+â”‚                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
@@ -337,10 +337,11 @@ En situation d'urgence absolue, StrongFather peut :
 
 - [MiyukiniAdmin - Core Interaction Contract](../../architecture/MiyukiniAdmin%20-%20Core%20Interaction%20Contract.md)
 - [MiyukiniAdmin - BondingBrother Integration Contract](./MiyukiniAdmin%20-%20BondingBrother%20Integration%20Contract.md)
-- [StrongFather - Documentation Fondatrice](../../../StrongFather/foundation/StrongFather%20-%20Documentation%20Fondatrice.md)
+- [StrongFather - Documentation Fondatrice](..//..//..//..//cores//StrongFather//foundation//StrongFather%20-%20Documentation%20Fondatrice.md)
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
 **Statut :** Contrat de reference
+

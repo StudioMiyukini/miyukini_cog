@@ -1,61 +1,62 @@
-# MiyuPosSales — Référence des outils
+﻿# MiyuPosSales â€” RÃ©fÃ©rence des outils
 
 ## 1. Contexte
 
-Ce document décrit **chaque outil (Tool)** composant le kit MiyuPosSales. Il constitue la référence technique des capacités atomiques de caisse et ventes PoS sans décision métier (remboursement, remise = StrongFather). Les Tools sont gouvernés par les Cores ; la persistance relève de KindMother (WriteIntent).
+Ce document dÃ©crit **chaque outil (Tool)** composant le kit MiyuPosSales. Il constitue la rÃ©fÃ©rence technique des capacitÃ©s atomiques de caisse et ventes PoS sans dÃ©cision mÃ©tier (remboursement, remise = StrongFather). Les Tools sont gouvernÃ©s par les Cores ; la persistance relÃ¨ve de KindMother (WriteIntent).
 
-**Référence du kit :** [MiyuPosSales - Documentation Fondatrice](./MiyuPosSales%20-%20Documentation%20Fondatrice.md)
+**RÃ©fÃ©rence du kit :** [MiyuPosSales - Documentation Fondatrice](./MiyuPosSales%20-%20Documentation%20Fondatrice.md)
 
 ---
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
-**Ce document fournit :** la liste exhaustive des Tools du kit MiyuPosSales avec ToolId, nom lisible, action, niveau de sécurité typique.
+**Ce document fournit :** la liste exhaustive des Tools du kit MiyuPosSales avec ToolId, nom lisible, action, niveau de sÃ©curitÃ© typique.
 
-**Hors scope :** l'implémentation ; la décision ALLOW/DENY (StrongFather).
+**Hors scope :** l'implÃ©mentation ; la dÃ©cision ALLOW/DENY (StrongFather).
 
 ---
 
 ## 3. Tableau des outils
 
-| ToolId | Nom lisible | Action | Niveau sécurité |
+| ToolId | Nom lisible | Action | Niveau sÃ©curitÃ© |
 |--------|-------------|--------|------------------|
-| `tool.pos.sale.create` | Création vente | Crée une vente (ticket) à partir du contexte fourni | 1–2 |
-| `tool.pos.sale.add_item` | Ajout ligne | Ajoute une ligne (article, variante, modificateurs, qté) à une vente | 1–2 |
-| `tool.pos.sale.remove_item` | Retrait ligne | Retire une ligne d'une vente | 1–2 |
-| `tool.pos.ticket.open` | Ouverture ticket | Ouvre un ticket (ordre) pour paiement différé | 1–2 |
-| `tool.pos.ticket.save` | Sauvegarde ticket | Sauvegarde un ticket sans le clôturer | 1–2 |
-| `tool.pos.ticket.close` | Clôture ticket | Clôture un ticket (après paiement ou annulation) | 1–2 |
-| `tool.pos.ticket.list` | Liste tickets | Liste les tickets ouverts (filtres fournis) | 0–1 |
-| `tool.pos.discount.apply` | Application remise | Applique une remise (article ou reçu) ; règles = StrongFather | 1–2 |
-| `tool.pos.refund.record` | Enregistrement remboursement | Enregistre un remboursement (item ou reçu) ; autorisation = StrongFather | 2 |
-| `tool.pos.receipt.render` | Rendu reçu | Produit le contenu du reçu à partir des données de vente | 0–1 |
-| `tool.pos.receipt.print` | Impression reçu | Envoie le reçu à l'imprimante (données fournies) | 1 |
-| `tool.pos.receipt.send` | Envoi reçu email | Envoie le reçu par email (données fournies) | 1–2 |
-| `tool.pos.receipt.list` | Liste reçus | Liste les reçus (filtres fournis) | 0–1 |
-| `tool.pos.item.variant.resolve` | Résolution variante | Résout une variante (taille, couleur, etc.) pour un article | 0–1 |
-| `tool.pos.item.modifier.apply` | Application modificateurs | Applique des modificateurs (add-ons) à une ligne | 0–1 |
+| `tool.pos.sale.create` | CrÃ©ation vente | CrÃ©e une vente (ticket) Ã  partir du contexte fourni | 1â€“2 |
+| `tool.pos.sale.add_item` | Ajout ligne | Ajoute une ligne (article, variante, modificateurs, qtÃ©) Ã  une vente | 1â€“2 |
+| `tool.pos.sale.remove_item` | Retrait ligne | Retire une ligne d'une vente | 1â€“2 |
+| `tool.pos.ticket.open` | Ouverture ticket | Ouvre un ticket (ordre) pour paiement diffÃ©rÃ© | 1â€“2 |
+| `tool.pos.ticket.save` | Sauvegarde ticket | Sauvegarde un ticket sans le clÃ´turer | 1â€“2 |
+| `tool.pos.ticket.close` | ClÃ´ture ticket | ClÃ´ture un ticket (aprÃ¨s paiement ou annulation) | 1â€“2 |
+| `tool.pos.ticket.list` | Liste tickets | Liste les tickets ouverts (filtres fournis) | 0â€“1 |
+| `tool.pos.discount.apply` | Application remise | Applique une remise (article ou reÃ§u) ; rÃ¨gles = StrongFather | 1â€“2 |
+| `tool.pos.refund.record` | Enregistrement remboursement | Enregistre un remboursement (item ou reÃ§u) ; autorisation = StrongFather | 2 |
+| `tool.pos.receipt.render` | Rendu reÃ§u | Produit le contenu du reÃ§u Ã  partir des donnÃ©es de vente | 0â€“1 |
+| `tool.pos.receipt.print` | Impression reÃ§u | Envoie le reÃ§u Ã  l'imprimante (donnÃ©es fournies) | 1 |
+| `tool.pos.receipt.send` | Envoi reÃ§u email | Envoie le reÃ§u par email (donnÃ©es fournies) | 1â€“2 |
+| `tool.pos.receipt.list` | Liste reÃ§us | Liste les reÃ§us (filtres fournis) | 0â€“1 |
+| `tool.pos.item.variant.resolve` | RÃ©solution variante | RÃ©sout une variante (taille, couleur, etc.) pour un article | 0â€“1 |
+| `tool.pos.item.modifier.apply` | Application modificateurs | Applique des modificateurs (add-ons) Ã  une ligne | 0â€“1 |
 | `tool.pos.cash.register.open` | Ouverture session caisse | Ouvre une session caisse (ouverture de tiroir) | 2 |
-| `tool.pos.cash.register.close` | Clôture session caisse | Clôture une session caisse (comptage, écart) | 2 |
-| `tool.pos.cash.movement.record` | Mouvement espèces | Enregistre un mouvement espèces (entrée/sortie) | 2 |
-| `tool.pos.barcode.parse` | Parse code-barres | Parse un code-barres (optionnel : poids) ; retourne item + quantité | 0–1 |
-| `tool.pos.context.store.resolve` | Résolution magasin | Résout le magasin/point de vente courant pour le contexte | 0–1 |
-| `tool.pos.display.push` | Affichage client | Envoie les données à afficher sur l'écran client | 0–1 |
-| `tool.pos.order.service_type.set` | Type de service | Définit le type de service (sur place / à emporter / livraison) | 1 |
+| `tool.pos.cash.register.close` | ClÃ´ture session caisse | ClÃ´ture une session caisse (comptage, Ã©cart) | 2 |
+| `tool.pos.cash.movement.record` | Mouvement espÃ¨ces | Enregistre un mouvement espÃ¨ces (entrÃ©e/sortie) | 2 |
+| `tool.pos.barcode.parse` | Parse code-barres | Parse un code-barres (optionnel : poids) ; retourne item + quantitÃ© | 0â€“1 |
+| `tool.pos.context.store.resolve` | RÃ©solution magasin | RÃ©sout le magasin/point de vente courant pour le contexte | 0â€“1 |
+| `tool.pos.display.push` | Affichage client | Envoie les donnÃ©es Ã  afficher sur l'Ã©cran client | 0â€“1 |
+| `tool.pos.order.service_type.set` | Type de service | DÃ©finit le type de service (sur place / Ã  emporter / livraison) | 1 |
 
-**Format ToolId :** `tool.pos.<sous-domaine>.<action>` — conforme au Master Butler - Tool Governance Contract.
+**Format ToolId :** `tool.pos.<sous-domaine>.<action>` â€” conforme au Master Butler - Tool Governance Contract.
 
 ---
 
-## 4. Références croisées
+## 4. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
 | Documentation Fondatrice MiyuPosSales | [MiyuPosSales - Documentation Fondatrice](./MiyuPosSales%20-%20Documentation%20Fondatrice.md) |
-| Équivalents PoS Logiciel Caisse | [Miyukini Conceptual References - Equivalents PoS Logiciel Caisse](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20PoS%20Logiciel%20Caisse.md) |
+| Ã‰quivalents PoS Logiciel Caisse | [Miyukini Conceptual References - Equivalents PoS Logiciel Caisse](..//..//miyukini-webway-system//reference//_index.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence
+**Statut :** Document de rÃ©fÃ©rence
+

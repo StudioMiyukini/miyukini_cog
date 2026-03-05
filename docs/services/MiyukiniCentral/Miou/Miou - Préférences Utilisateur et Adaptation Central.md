@@ -1,78 +1,78 @@
-# Miou — Préférences Utilisateur et Adaptation Central
+﻿# Miou â€” PrÃ©fÃ©rences Utilisateur et Adaptation Central
 
-Miou pose des questions sur les **goûts**, les **préférences** et l'**humeur** de l'utilisateur, et utilise ces informations pour **adapter Miyukini Central** : thème visuel, fréquence des bulles, orientation des actions.
+Miou pose des questions sur les **goÃ»ts**, les **prÃ©fÃ©rences** et l'**humeur** de l'utilisateur, et utilise ces informations pour **adapter Miyukini Central** : thÃ¨me visuel, frÃ©quence des bulles, orientation des actions.
 
 ---
 
 ## 1. Contexte
 
-L'adaptation de Central par Miou repose sur les données collectées via :
+L'adaptation de Central par Miou repose sur les donnÃ©es collectÃ©es via :
 - Les **bulles** (questions du Registre)
 - Le **chatbot** (discussion libre)
-- Les **Paramètres** Miou et Central
+- Les **ParamÃ¨tres** Miou et Central
 
-**Principe :** Miou ne modifie pas Central de façon arbitraire — elle propose des adaptations fondées sur ce que l'utilisateur a explicitement partagé.
+**Principe :** Miou ne modifie pas Central de faÃ§on arbitraire â€” elle propose des adaptations fondÃ©es sur ce que l'utilisateur a explicitement partagÃ©.
 
 ---
 
 ## 2. Dimensions d'adaptation
 
-| Dimension | Clés sources | Effet sur Central |
+| Dimension | ClÃ©s sources | Effet sur Central |
 |-----------|--------------|-------------------|
-| **Thème** | `theme_ambiance`, `theme_central`, `hobby` | Thème visuel, ambiance Gaming / Zen / Productif |
-| **Fréquence** | `preference_ton`, `frequence_bulles` | Discret / Normal / Bavard |
-| **Orientation** | `orientation_actions`, `style_accompagnement` | Pauses, rappels, curiosité, soutien |
+| **ThÃ¨me** | `theme_ambiance`, `theme_central`, `hobby` | ThÃ¨me visuel, ambiance Gaming / Zen / Productif |
+| **FrÃ©quence** | `preference_ton`, `frequence_bulles` | Discret / Normal / Bavard |
+| **Orientation** | `orientation_actions`, `style_accompagnement` | Pauses, rappels, curiositÃ©, soutien |
 
 ---
 
-## 3. Thème et ambiance
+## 3. ThÃ¨me et ambiance
 
-### 3.1 Clés impliquées
+### 3.1 ClÃ©s impliquÃ©es
 
-| Clé | Description | Valeurs possibles |
+| ClÃ© | Description | Valeurs possibles |
 |-----|-------------|-------------------|
-| `theme_ambiance` | Orientation générale déclarée | Gaming, Zen, Productif, Social |
-| `theme_central` | Thème visuel (Rite d'Entrée) | Minimal, Gaming, etc. |
-| `hobby` | Loisir principal | Texte libre — peut influencer le thème suggéré |
+| `theme_ambiance` | Orientation gÃ©nÃ©rale dÃ©clarÃ©e | Gaming, Zen, Productif, Social |
+| `theme_central` | ThÃ¨me visuel (Rite d'EntrÃ©e) | Minimal, Gaming, etc. |
+| `hobby` | Loisir principal | Texte libre â€” peut influencer le thÃ¨me suggÃ©rÃ© |
 
 ### 3.2 Comportement
 
-- Si l'utilisateur déclare `theme_ambiance = Gaming` → Miou propose ou confirme le thème Gaming pour Central.
-- Si `hobby` contient « jeux vidéo », « gaming » → orientation Gaming possible.
-- **Proposition, pas imposition :** Miou peut afficher une bulle « Tu préfères qu'on soit en mode Gaming ou Zen ? » — l'utilisateur choisit.
+- Si l'utilisateur dÃ©clare `theme_ambiance = Gaming` â†’ Miou propose ou confirme le thÃ¨me Gaming pour Central.
+- Si `hobby` contient Â« jeux vidÃ©o Â», Â« gaming Â» â†’ orientation Gaming possible.
+- **Proposition, pas imposition :** Miou peut afficher une bulle Â« Tu prÃ©fÃ¨res qu'on soit en mode Gaming ou Zen ? Â» â€” l'utilisateur choisit.
 
-### 3.3 Cohérence
+### 3.3 CohÃ©rence
 
-Le thème Central reste **modifiable par l'utilisateur** dans les Paramètres. Miou peut suggérer, mais la décision finale appartient à l'utilisateur.
+Le thÃ¨me Central reste **modifiable par l'utilisateur** dans les ParamÃ¨tres. Miou peut suggÃ©rer, mais la dÃ©cision finale appartient Ã  l'utilisateur.
 
 ---
 
-## 4. Fréquence des bulles
+## 4. FrÃ©quence des bulles
 
-### 4.1 Clés impliquées
+### 4.1 ClÃ©s impliquÃ©es
 
-| Clé | Description | Effet |
+| ClÃ© | Description | Effet |
 |-----|-------------|-------|
-| `preference_ton` | Discrète / Bavarde / Comme maintenant | Contrôle la fréquence des bulles |
-| `frequence_bulles` | Discret / Normal / Bavard | Override explicite si défini |
+| `preference_ton` | DiscrÃ¨te / Bavarde / Comme maintenant | ContrÃ´le la frÃ©quence des bulles |
+| `frequence_bulles` | Discret / Normal / Bavard | Override explicite si dÃ©fini |
 
 ### 4.2 Mapping
 
-| Valeur `preference_ton` | Fréquence appliquée |
+| Valeur `preference_ton` | FrÃ©quence appliquÃ©e |
 |-------------------------|----------------------|
-| Discrète | Bulles moins fréquentes, cooldown augmenté |
-| Bavarde | Bulles plus fréquentes, curiosité plus présente |
-| Comme maintenant | Aucun changement (défaut) |
+| DiscrÃ¨te | Bulles moins frÃ©quentes, cooldown augmentÃ© |
+| Bavarde | Bulles plus frÃ©quentes, curiositÃ© plus prÃ©sente |
+| Comme maintenant | Aucun changement (dÃ©faut) |
 
-### 4.3 Paramètres techniques
+### 4.3 ParamÃ¨tres techniques
 
-| Paramètre | Discret | Normal | Bavard |
+| ParamÃ¨tre | Discret | Normal | Bavard |
 |-----------|---------|--------|--------|
 | Cooldown bulle accueil | 24 h | 12 h | 6 h |
-| Cooldown bulle curiosité | 10 j | 7 j | 5 j |
+| Cooldown bulle curiositÃ© | 10 j | 7 j | 5 j |
 | Cooldown bulle pause | 4 h | 2 h | 1 h 30 |
 
-*(Valeurs indicatives — à caler avec le Moteur de Décision.)*
+*(Valeurs indicatives â€” Ã  caler avec le Moteur de DÃ©cision.)*
 
 ---
 
@@ -82,67 +82,68 @@ Le thème Central reste **modifiable par l'utilisateur** dans les Paramètres. M
 
 | Type | Description | Exemple |
 |------|-------------|---------|
-| **Pauses** | Rappels santé, déconnexion | « 2h — une pause ? » |
-| **Rappels** | Événements, tâches | « Ton meeting dans 30 min » |
-| **Curiosité** | Questions, taquinerie | « Tu préfères le matin ou le soir ? » |
-| **Soutien** | Présence, encouragement | « Ton projet déco avance ? » |
+| **Pauses** | Rappels santÃ©, dÃ©connexion | Â« 2h â€” une pause ? Â» |
+| **Rappels** | Ã‰vÃ©nements, tÃ¢ches | Â« Ton meeting dans 30 min Â» |
+| **CuriositÃ©** | Questions, taquinerie | Â« Tu prÃ©fÃ¨res le matin ou le soir ? Â» |
+| **Soutien** | PrÃ©sence, encouragement | Â« Ton projet dÃ©co avance ? Â» |
 
-### 5.2 Clés impliquées
+### 5.2 ClÃ©s impliquÃ©es
 
-| Clé | Description | Influence |
+| ClÃ© | Description | Influence |
 |-----|-------------|-----------|
-| `orientation_actions` | Pauses / Rappels / Curiosité / Soutien | Pondération des catégories |
+| `orientation_actions` | Pauses / Rappels / CuriositÃ© / Soutien | PondÃ©ration des catÃ©gories |
 | `style_accompagnement` | Pousser / Mon rythme / Les deux | Ton des rappels et encouragements |
-| `reconfort`, `activite_deconnexion` | Données de bien-être | Personnalisation des pauses |
-| `projet_coeur`, `bonheur_quotidien` | Données personnelles | Personnalisation du soutien |
+| `reconfort`, `activite_deconnexion` | DonnÃ©es de bien-Ãªtre | Personnalisation des pauses |
+| `projet_coeur`, `bonheur_quotidien` | DonnÃ©es personnelles | Personnalisation du soutien |
 
 ### 5.3 Comportement
 
-- Si `orientation_actions = Pauses` → Miou privilégie les bulles pause santé, rappels déconnexion.
-- Si `style_accompagnement = Mon rythme` → Moins de « pousse », plus de « je suis là quand tu veux ».
-- Les données `reconfort`, `activite_deconnexion` sont **injectées** dans les bulles pause (voir [Miou - Roadmap et Améliorations](./Miou%20-%20Roadmap%20et%20Améliorations.md)).
+- Si `orientation_actions = Pauses` â†’ Miou privilÃ©gie les bulles pause santÃ©, rappels dÃ©connexion.
+- Si `style_accompagnement = Mon rythme` â†’ Moins de Â« pousse Â», plus de Â« je suis lÃ  quand tu veux Â».
+- Les donnÃ©es `reconfort`, `activite_deconnexion` sont **injectÃ©es** dans les bulles pause (voir [Miou - Roadmap et AmÃ©liorations](_index.md)).
 
 ---
 
 ## 6. Humeur
 
-### 6.1 Clés impliquées
+### 6.1 ClÃ©s impliquÃ©es
 
-| Clé | Description | Usage |
+| ClÃ© | Description | Usage |
 |-----|-------------|-------|
-| `humeur_actuelle` | État déclaré (optionnel) | Adapter le ton de la prochaine bulle |
-| `humeur_preferee` | Humeur préférée | Référence pour les propositions |
+| `humeur_actuelle` | Ã‰tat dÃ©clarÃ© (optionnel) | Adapter le ton de la prochaine bulle |
+| `humeur_preferee` | Humeur prÃ©fÃ©rÃ©e | RÃ©fÃ©rence pour les propositions |
 
 ### 6.2 Comportement
 
-- Si l'utilisateur dit « Je suis fatigué » dans le chatbot → `humeur_actuelle` peut être mis à jour (avec confirmation).
-- Miou adapte : moins de curiosité, plus de douceur, évite les taquineries si humeur basse.
-- **Éphémère :** `humeur_actuelle` peut avoir une durée de vie courte (ex. 24 h) — à définir.
+- Si l'utilisateur dit Â« Je suis fatiguÃ© Â» dans le chatbot â†’ `humeur_actuelle` peut Ãªtre mis Ã  jour (avec confirmation).
+- Miou adapte : moins de curiositÃ©, plus de douceur, Ã©vite les taquineries si humeur basse.
+- **Ã‰phÃ©mÃ¨re :** `humeur_actuelle` peut avoir une durÃ©e de vie courte (ex. 24 h) â€” Ã  dÃ©finir.
 
 ---
 
 ## 7. Flux de proposition d'adaptation
 
 ```
-1. Miou détecte une opportunité (nouvelle donnée, changement de préférence)
-2. Miou affiche une bulle ou message dans le chatbot : « Tu préfères qu'on soit plus discrète ou plus bavarde ? »
-3. L'utilisateur répond
-4. Miou met à jour la clé (preference_ton, theme_ambiance, etc.)
-5. Le Moteur de Décision / Paramètres Central appliquent l'adaptation
+1. Miou dÃ©tecte une opportunitÃ© (nouvelle donnÃ©e, changement de prÃ©fÃ©rence)
+2. Miou affiche une bulle ou message dans le chatbot : Â« Tu prÃ©fÃ¨res qu'on soit plus discrÃ¨te ou plus bavarde ? Â»
+3. L'utilisateur rÃ©pond
+4. Miou met Ã  jour la clÃ© (preference_ton, theme_ambiance, etc.)
+5. Le Moteur de DÃ©cision / ParamÃ¨tres Central appliquent l'adaptation
 ```
 
-**Règle :** Pas d'adaptation automatique sans donnée explicite. Les valeurs par défaut restent tant que l'utilisateur n'a pas répondu.
+**RÃ¨gle :** Pas d'adaptation automatique sans donnÃ©e explicite. Les valeurs par dÃ©faut restent tant que l'utilisateur n'a pas rÃ©pondu.
 
 ---
 
-## 8. Références
+## 8. RÃ©fÃ©rences
 
 - [Miou - Catalogue Exhaustif des Connaissances](./Miou%20-%20Catalogue%20Exhaustif%20des%20Connaissances.md)
 - [Miou - Onglet Service Mode Chatbot](./Miou%20-%20Onglet%20Service%20Mode%20Chatbot.md)
 - [Bot - Registre Questions et Paliers d'Attachement](./Bot/Bot%20-%20Registre%20Questions%20et%20Paliers%20d'Attachement.md)
-- [Miou - Roadmap et Améliorations](./Miou%20-%20Roadmap%20et%20Améliorations.md)
+- [Miou - Roadmap et AmÃ©liorations](_index.md)
 
 ---
 
 **Version :** 1.0  
-**Statut :** Spécification adaptation Central
+**Statut :** SpÃ©cification adaptation Central
+

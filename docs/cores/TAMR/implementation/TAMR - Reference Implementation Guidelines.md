@@ -1,4 +1,4 @@
-# TAMR - Reference Implementation Guidelines
+﻿# TAMR - Reference Implementation Guidelines
 
 ## Statut du document
 
@@ -17,7 +17,7 @@ Ce document est **informatif, non normatif, et non contractuel**. Il guide un de
 - [TAMR - Intervention Points Contract](../contracts/intervention/TAMR%20-%20Intervention%20Points%20Contract.md)
 - [TAMR - Trace Contract](../contracts/audit/TAMR%20-%20Trace%20Contract.md)
 - [TAMR - Invariants & Guarantees](../contracts/governance/TAMR%20-%20Invariants%20&%20Guarantees.md)
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -109,7 +109,7 @@ Les points d'intervention doivent etre declares selon les categories definies da
 
 1. Un humain active une supervision (perimetre et duree definis).
 2. Le produit enregistre le debut de supervision et la trace (type SUPERVISION, supervisor_id, scope, started_at, duration_planned).
-3. Si le superviseur declenche une intervention, celle-ci est typée (APPROVAL, OVERRIDE, ESCALATION) et tracee separement.
+3. Si le superviseur declenche une intervention, celle-ci est typÃ©e (APPROVAL, OVERRIDE, ESCALATION) et tracee separement.
 4. A la fin (explicite ou timeout), la trace est completee (ended_at, end_reason).
 
 ---
@@ -135,3 +135,4 @@ Les implementations DOIVENT respecter les Lois d'Autonomie Systeme : interventio
 **Date :** 2026-01-28  
 **Statut :** INFORMATIF  
 **Reference :** TAMR Documentation Fondatrice, contrats FONDATION
+

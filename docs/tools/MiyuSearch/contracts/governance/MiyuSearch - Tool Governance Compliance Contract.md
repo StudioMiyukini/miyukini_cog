@@ -1,20 +1,21 @@
-# MiyuSearch — Tool Governance Compliance Contract
+﻿# MiyuSearch â€” Tool Governance Compliance Contract
 
 ## Contexte
 
-Conformité aux obligations communes : [Master Butler - Tool Governance Compliance Template](../../../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
+ConformitÃ© aux obligations communes : [Master Butler - Tool Governance Compliance Template](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
 
 **ToolkitId :** `toolkit.search.miyusearch`
 
 ---
 
-## Obligations spécifiques MiyuSearch
+## Obligations spÃ©cifiques MiyuSearch
 
-- L'index est une **dérivation** des données KindMother ; mise à jour d'index = flux gouverné (WriteIntent ou mécanisme documenté).
-- Aucune décision métier sur la pertinence : requêtes et suggestions exécutent sur critères fournis ; classement métier = Opérateurs / StrongFather.
+- L'index est une **dÃ©rivation** des donnÃ©es KindMother ; mise Ã  jour d'index = flux gouvernÃ© (WriteIntent ou mÃ©canisme documentÃ©).
+- Aucune dÃ©cision mÃ©tier sur la pertinence : requÃªtes et suggestions exÃ©cutent sur critÃ¨res fournis ; classement mÃ©tier = OpÃ©rateurs / StrongFather.
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Contrat de conformité
+**Statut :** Contrat de conformitÃ©
+

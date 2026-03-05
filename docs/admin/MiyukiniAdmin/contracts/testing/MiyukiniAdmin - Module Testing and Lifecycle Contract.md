@@ -1,27 +1,27 @@
-# MiyukiniAdmin — Module Testing and Lifecycle Contract
+﻿# MiyukiniAdmin â€” Module Testing and Lifecycle Contract
 
 ## 1. Contexte
 
-Ce document definit le contrat pour les **tests des modules** (Kits d'outils, Operateurs, Equipes d'operateurs, Services) et le **cycle de vie des modules** dans MiyukiniAdmin. Chaque module embarque ses propres protocoles de tests dans une **cellule Admin** exposee uniquement a MiyukiniAdmin. Seul MiyukiniAdmin peut executer ces tests, interpreter le manifeste de test embarqué, verifier l'integrite des modules en collaboration avec les cores (notamment TAMR), et effectuer les actions de cycle de vie : ajout, verrouillage/deverrouillage, suppression d'un module.
+Ce document definit le contrat pour les **tests des modules** (Kits d'outils, Operateurs, Equipes d'operateurs, Services) et le **cycle de vie des modules** dans MiyukiniAdmin. Chaque module embarque ses propres protocoles de tests dans une **cellule Admin** exposee uniquement a MiyukiniAdmin. Seul MiyukiniAdmin peut executer ces tests, interpreter le manifeste de test embarquÃ©, verifier l'integrite des modules en collaboration avec les cores (notamment TAMR), et effectuer les actions de cycle de vie : ajout, verrouillage/deverrouillage, suppression d'un module.
 
 **Principe fondamental :**
 
-> **Seul MiyukiniAdmin peut lire la cellule Admin, executer les tests embarqués et agir sur le cycle de vie des modules. Les autres Operateurs ne consomment pas la cellule Admin.**
+> **Seul MiyukiniAdmin peut lire la cellule Admin, executer les tests embarquÃ©s et agir sur le cycle de vie des modules. Les autres Operateurs ne consomment pas la cellule Admin.**
 
 ## 2. Portee / Scope
 
 Ce document definit :
 - La definition et le contenu de la **Cellule Admin** (cellule du module destinee a MiyukiniAdmin)
 - L'identification des modules presents via Master Butler (via BondingBrother)
-- Le **manifeste de test embarqué** : structure, protocole d'execution, criteres de succes/echec
+- Le **manifeste de test embarquÃ©** : structure, protocole d'execution, criteres de succes/echec
 - La **verification d'integrite** des modules en collaboration avec les cores (champ d'action TAMR)
-- Le **cycle de vie des modules** : ajout, verrouillage/deverrouillage, suppression — exclusivement via MiyukiniAdmin
+- Le **cycle de vie des modules** : ajout, verrouillage/deverrouillage, suppression â€” exclusivement via MiyukiniAdmin
 - Les invariants et interdictions associes
 
 Ce document **ne couvre pas** :
-- Les tests de cycle systeme (performance, charge) — voir [Cycle Tests Contract](./MiyukiniAdmin%20-%20Cycle%20Tests%20Contract.md)
-- Les tests unitaires DB et conformite contractuelle — voir [Unit Tests Contract](./MiyukiniAdmin%20-%20Unit%20Tests%20Contract.md)
-- L'implementation technique des tests embarqués dans chaque module
+- Les tests de cycle systeme (performance, charge) â€” voir [Cycle Tests Contract](./MiyukiniAdmin%20-%20Cycle%20Tests%20Contract.md)
+- Les tests unitaires DB et conformite contractuelle â€” voir [Unit Tests Contract](./MiyukiniAdmin%20-%20Unit%20Tests%20Contract.md)
+- L'implementation technique des tests embarquÃ©s dans chaque module
 - L'interface utilisateur (voir UI documentation)
 
 ---
@@ -30,19 +30,19 @@ Ce document **ne couvre pas** :
 
 ### 3.1 Exclusivite MiyukiniAdmin
 
-> **La cellule Admin est lue et utilisee uniquement par MiyukiniAdmin. Seul MiyukiniAdmin peut executer et interpreter les tests du manifeste embarqué et effectuer les actions de cycle de vie sur les modules.**
+> **La cellule Admin est lue et utilisee uniquement par MiyukiniAdmin. Seul MiyukiniAdmin peut executer et interpreter les tests du manifeste embarquÃ© et effectuer les actions de cycle de vie sur les modules.**
 
 ### 3.2 Invariants
 
 | Code | Invariant |
 |------|-----------|
 | **INV-MTL-1** | Seul MiyukiniAdmin peut lire et utiliser la cellule Admin |
-| **INV-MTL-2** | Seul MiyukiniAdmin peut executer les tests du manifeste embarqué |
+| **INV-MTL-2** | Seul MiyukiniAdmin peut executer les tests du manifeste embarquÃ© |
 | **INV-MTL-3** | Toute action de cycle de vie (add / lock / unlock / delete) passe par BondingBrother |
 | **INV-MTL-4** | Aucun bypass des cores ; validation StrongFather pour les actions lifecycle |
 | **INV-MTL-5** | Verification d'integrite en collaboration avec TAMR (champ d'action integrite) |
 | **INV-MTL-6** | Tracabilite complete de chaque test et de chaque action lifecycle |
-| **INV-MTL-7** | Les tests embarqués s'executent dans un environnement de diagnostic ; pas de modification des donnees metier |
+| **INV-MTL-7** | Les tests embarquÃ©s s'executent dans un environnement de diagnostic ; pas de modification des donnees metier |
 
 ---
 
@@ -50,7 +50,7 @@ Ce document **ne couvre pas** :
 
 ### 4.1 Definition
 
-La **Cellule Admin** est la surface qu'un module (Kit d'outils, Operateur, Equipe d'operateurs, Service) expose **uniquement** a MiyukiniAdmin. Elle n'est pas consommee par les autres Operateurs. Elle contient l'identification du module, le manifeste de test embarqué et les metadonnees d'integrite.
+La **Cellule Admin** est la surface qu'un module (Kit d'outils, Operateur, Equipe d'operateurs, Service) expose **uniquement** a MiyukiniAdmin. Elle n'est pas consommee par les autres Operateurs. Elle contient l'identification du module, le manifeste de test embarquÃ© et les metadonnees d'integrite.
 
 ### 4.2 Contenu obligatoire
 
@@ -58,7 +58,7 @@ La **Cellule Admin** est la surface qu'un module (Kit d'outils, Operateur, Equip
 |---------|-------------|-------------|
 | **Identification** | `id`, `version`, `type` (toolkit / operator / team / service), `module_origin` | Oui |
 | **Manifeste de test** | Liste des tests declares, protocole d'execution, format des resultats | Oui |
-| **Metadonnees d'integrite** | Empreinte, contrats references, versions — pour verification avec les cores (TAMR) | Oui |
+| **Metadonnees d'integrite** | Empreinte, contrats references, versions â€” pour verification avec les cores (TAMR) | Oui |
 
 ### 4.3 Format declaratif
 
@@ -103,14 +103,14 @@ admin_cell:
 
 ### 5.1 Source : Master Butler via BondingBrother
 
-MiyukiniAdmin identifie les modules presents en interrogeant **Master Butler** via **BondingBrother** (mediation obligatoire — voir [Core Interaction Contract](../../architecture/MiyukiniAdmin%20-%20Core%20Interaction%20Contract.md)). La decouverte s'appuie sur le [Master Butler - Discovery API Contract](../../../MasterButler/contracts/api/Master%20Butler%20-%20Discovery%20API%20Contract.md).
+MiyukiniAdmin identifie les modules presents en interrogeant **Master Butler** via **BondingBrother** (mediation obligatoire â€” voir [Core Interaction Contract](../../architecture/MiyukiniAdmin%20-%20Core%20Interaction%20Contract.md)). La decouverte s'appuie sur le [Master Butler - Discovery API Contract](..//..//..//..//cores//MasterButler//contracts//api//Master%20Butler%20-%20Discovery%20API%20Contract.md).
 
 | Type de module | Operation de decouverte | Remarque |
 |----------------|-------------------------|----------|
 | Kits d'outils | DiscoverByModule / discovery par type toolkit | Liste des toolkits enregistres |
 | Operateurs | DiscoverByModule (operator_id / module_origin) | Liste des capacites par operateur |
 | Equipes d'operateurs | Decouverte via registre StrongFather / Master Butler selon contrat | Equipes declarees |
-| Services | Agregation (Service = capacite perçue ; portee par Operateur ou Equipe) | Vue metier |
+| Services | Agregation (Service = capacite perÃ§ue ; portee par Operateur ou Equipe) | Vue metier |
 
 ### 5.2 Reference vers la cellule Admin
 
@@ -126,20 +126,20 @@ MiyukiniAdmin utilise cette reference pour **lire la cellule Admin** (identifica
 ```
 MiyukiniAdmin                BondingBrother              Master Butler
       |                             |                           |
-      |── DiscoveryRequest (modules) ─▶|                           |
+      |â”€â”€ DiscoveryRequest (modules) â”€â–¶|                           |
       |   (types: toolkit, operator, team, service)              |
-      |                             |── DiscoverByModule / API ─▶|
+      |                             |â”€â”€ DiscoverByModule / API â”€â–¶|
       |                             |                           |
-      |                             |◀── Liste modules + refs ───|
-      |◀── Liste modules + admin_cell_ref ──────────────────────|
+      |                             |â—€â”€â”€ Liste modules + refs â”€â”€â”€|
+      |â—€â”€â”€ Liste modules + admin_cell_ref â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€|
       |
-      |── ReadAdminCell(admin_cell_ref) ──▶ (module / cellule)
-      |◀── Identification + manifeste + integrity
+      |â”€â”€ ReadAdminCell(admin_cell_ref) â”€â”€â–¶ (module / cellule)
+      |â—€â”€â”€ Identification + manifeste + integrity
 ```
 
 ---
 
-## 6. Manifeste de test embarqué
+## 6. Manifeste de test embarquÃ©
 
 ### 6.1 Structure
 
@@ -155,7 +155,7 @@ MiyukiniAdmin                BondingBrother              Master Butler
 - MiyukiniAdmin **execute** les tests en suivant le protocole declare dans le manifeste.
 - MiyukiniAdmin **interprete** les resultats selon les criteres et produit un verdict (PASS / WARN / FAIL).
 - L'execution se fait dans un **environnement de diagnostic** : pas de modification des donnees metier ; tracabilite complete.
-- **Aucun autre composant** (Operateur, BondingBrother, cores) n'execute ni n'interprete les tests embarqués — seule MiyukiniAdmin le fait.
+- **Aucun autre composant** (Operateur, BondingBrother, cores) n'execute ni n'interprete les tests embarquÃ©s â€” seule MiyukiniAdmin le fait.
 
 ### 6.3 Verdicts et tracabilite
 
@@ -174,7 +174,7 @@ Chaque execution est journalisee (module_id, test_ids, verdict, timestamp, detai
 
 ### 7.1 Collaboration avec les cores (champ d'action TAMR)
 
-La verification d'integrite des modules releve du **champ d'action TAMR** (Trust & Authority Mediation Resolver) : integrite du systeme, limites infranchissables, interventions humaines si necessaire. Les invariants TAMR (integrite, limites INV-TAMR-3) sont respectes — voir [TAMR - Invariants & Guarantees](../../../TAMR/contracts/governance/TAMR%20-%20Invariants%20&%20Guarantees.md) et [TAMR - Inviolable Limits Contract](../../../TAMR/contracts/boundaries/TAMR%20-%20Inviolable%20Limits%20Contract.md).
+La verification d'integrite des modules releve du **champ d'action TAMR** (Trust & Authority Mediation Resolver) : integrite du systeme, limites infranchissables, interventions humaines si necessaire. Les invariants TAMR (integrite, limites INV-TAMR-3) sont respectes â€” voir [TAMR - Invariants & Guarantees](..//..//..//..//cores//TAMR//contracts//governance//TAMR%20-%20Invariants%20%26%20Guarantees.md) et [TAMR - Inviolable Limits Contract](..//..//..//..//cores//TAMR//contracts//boundaries//TAMR%20-%20Inviolable%20Limits%20Contract.md).
 
 ### 7.2 Flux de verification
 
@@ -202,19 +202,19 @@ Les actions **ajouter**, **verrouiller/deverrouiller** et **supprimer** un modul
 | Aspect | Description |
 |--------|-------------|
 | **Initiateur** | Admin via MiyukiniAdmin |
-| **Validation** | StrongFather valide l'ajout ; Ever Buddy peut valider la compatibilité (versions, contrats) selon environnement |
-| **Enregistrement** | Declaration a Master Butler (capacites, permissions) — voir [Master Butler - Operator Declaration Contract](../../../MasterButler/contracts/integration/Master%20Butler%20-%20Operator%20Declaration%20Contract.md) |
-| **Traçabilite** | Action journalisee (qui, quand, module_id, justification) |
+| **Validation** | StrongFather valide l'ajout ; Ever Buddy peut valider la compatibilitÃ© (versions, contrats) selon environnement |
+| **Enregistrement** | Declaration a Master Butler (capacites, permissions) â€” voir [Master Butler - Operator Declaration Contract](..//..//..//..//cores//MasterButler//contracts//integration//Master%20Butler%20-%20Operator%20Declaration%20Contract.md) |
+| **TraÃ§abilite** | Action journalisee (qui, quand, module_id, justification) |
 | **Cellule Admin** | Le module fournit sa cellule Admin ; MiyukiniAdmin peut ensuite lister et tester le module |
 
 ### 8.2 Verrouillage / Deverrouillage
 
 | Aspect | Description |
 |--------|-------------|
-| **Semantique** | **Verrouillage** : blocage d'usage du module sans suppression (le module reste declare mais n'est pas utilisable par les Operateurs). **Deverrouillage** : levée du blocage. |
+| **Semantique** | **Verrouillage** : blocage d'usage du module sans suppression (le module reste declare mais n'est pas utilisable par les Operateurs). **Deverrouillage** : levÃ©e du blocage. |
 | **Autorite** | StrongFather valide l'action (lock/unlock) |
 | **Notification** | CaringNanny et/ou WorrySentinel peuvent etre notifies pour etat systeme / degradation si pertinent |
-| **Traçabilite** | Chaque lock/unlock est trace (module_id, timestamp, operateur admin) |
+| **TraÃ§abilite** | Chaque lock/unlock est trace (module_id, timestamp, operateur admin) |
 
 ### 8.3 Suppression d'un module
 
@@ -222,17 +222,17 @@ Les actions **ajouter**, **verrouiller/deverrouiller** et **supprimer** un modul
 |--------|-------------|
 | **Conditions** | Validation StrongFather obligatoire ; TAMR peut etre sollicite si intervention humaine ou integrite est en jeu |
 | **Retrait** | Retrait du registre Master Butler (capacites, permissions associees) ; nettoyage controle selon contrats KindMother/Ever Buddy si donnees liees |
-| **Traçabilite** | Suppression journalisee ; historique conserve pour audit |
+| **TraÃ§abilite** | Suppression journalisee ; historique conserve pour audit |
 | **Irreversibilite** | La suppression est definitive ; re-ajout necessite un nouvel ajout (cycle de vie normal) |
 
 ### 8.4 Flux lifecycle (resume)
 
 ```
-MiyukiniAdmin ──▶ BondingBrother ──▶ StrongFather (validation)
-                        │
-                        ├──▶ Master Butler (enregistrement / retrait / statut lock)
-                        ├──▶ Ever Buddy (compatibilite si ajout)
-                        └──▶ TAMR (si verification integrite ou intervention requise)
+MiyukiniAdmin â”€â”€â–¶ BondingBrother â”€â”€â–¶ StrongFather (validation)
+                        â”‚
+                        â”œâ”€â”€â–¶ Master Butler (enregistrement / retrait / statut lock)
+                        â”œâ”€â”€â–¶ Ever Buddy (compatibilite si ajout)
+                        â””â”€â”€â–¶ TAMR (si verification integrite ou intervention requise)
 ```
 
 ---
@@ -244,12 +244,12 @@ MiyukiniAdmin ──▶ BondingBrother ──▶ StrongFather (validation)
 | Code | Invariant |
 |------|-----------|
 | **INV-MTL-1** | Seul MiyukiniAdmin peut lire et utiliser la cellule Admin |
-| **INV-MTL-2** | Seul MiyukiniAdmin peut executer les tests du manifeste embarqué |
+| **INV-MTL-2** | Seul MiyukiniAdmin peut executer les tests du manifeste embarquÃ© |
 | **INV-MTL-3** | Toute action de cycle de vie passe par BondingBrother |
 | **INV-MTL-4** | Aucun bypass des cores ; validation StrongFather pour les actions lifecycle |
 | **INV-MTL-5** | Verification d'integrite en collaboration avec TAMR |
 | **INV-MTL-6** | Tracabilite complete des tests et actions lifecycle |
-| **INV-MTL-7** | Tests embarqués en environnement de diagnostic ; pas de modification donnees metier |
+| **INV-MTL-7** | Tests embarquÃ©s en environnement de diagnostic ; pas de modification donnees metier |
 | **INV-MTL-INT-1** | Verification integrite ne modifie pas les donnees metier |
 | **INV-MTL-INT-2** | Demande verification integrite via BondingBrother |
 | **INV-MTL-INT-3** | Resultat verification integrite trace et auditable |
@@ -259,10 +259,10 @@ MiyukiniAdmin ──▶ BondingBrother ──▶ StrongFather (validation)
 | Code | Interdiction |
 |------|--------------|
 | **INTERD-MTL-1** | Un autre Operateur ne peut pas lire ou utiliser la cellule Admin |
-| **INTERD-MTL-2** | Un autre composant ne peut pas executer ou interpreter les tests du manifeste embarqué |
+| **INTERD-MTL-2** | Un autre composant ne peut pas executer ou interpreter les tests du manifeste embarquÃ© |
 | **INTERD-MTL-3** | MiyukiniAdmin ne peut pas effectuer d'action lifecycle sans passer par BondingBrother |
 | **INTERD-MTL-4** | MiyukiniAdmin ne peut pas contourner StrongFather pour add/lock/unlock/delete |
-| **INTERD-MTL-5** | Les tests embarqués ne doivent pas modifier les donnees metier en production |
+| **INTERD-MTL-5** | Les tests embarquÃ©s ne doivent pas modifier les donnees metier en production |
 
 ---
 
@@ -270,16 +270,16 @@ MiyukiniAdmin ──▶ BondingBrother ──▶ StrongFather (validation)
 
 | Document | Lien |
 |----------|------|
-| Master Butler - Discovery API Contract | [Discovery API Contract](../../../MasterButler/contracts/api/Master%20Butler%20-%20Discovery%20API%20Contract.md) |
-| Master Butler - Operator Declaration Contract | [Operator Declaration Contract](../../../MasterButler/contracts/integration/Master%20Butler%20-%20Operator%20Declaration%20Contract.md) |
-| TAMR - Intervention Types Contract | [Intervention Types Contract](../../../TAMR/contracts/intervention/TAMR%20-%20Intervention%20Types%20Contract.md) |
-| TAMR - Invariants & Guarantees | [Invariants & Guarantees](../../../TAMR/contracts/governance/TAMR%20-%20Invariants%20&%20Guarantees.md) |
-| TAMR - Inviolable Limits Contract | [Inviolable Limits Contract](../../../TAMR/contracts/boundaries/TAMR%20-%20Inviolable%20Limits%20Contract.md) |
+| Master Butler - Discovery API Contract | [Discovery API Contract](..//..//..//..//cores//MasterButler//contracts//api//Master%20Butler%20-%20Discovery%20API%20Contract.md) |
+| Master Butler - Operator Declaration Contract | [Operator Declaration Contract](..//..//..//..//cores//MasterButler//contracts//integration//Master%20Butler%20-%20Operator%20Declaration%20Contract.md) |
+| TAMR - Intervention Types Contract | [Intervention Types Contract](..//..//..//..//cores//TAMR//contracts//intervention//TAMR%20-%20Intervention%20Types%20Contract.md) |
+| TAMR - Invariants & Guarantees | [Invariants & Guarantees](..//..//..//..//cores//TAMR//contracts//governance//TAMR%20-%20Invariants%20%26%20Guarantees.md) |
+| TAMR - Inviolable Limits Contract | [Inviolable Limits Contract](..//..//..//..//cores//TAMR//contracts//boundaries//TAMR%20-%20Inviolable%20Limits%20Contract.md) |
 | MiyukiniAdmin - Cycle Tests Contract | [Cycle Tests Contract](./MiyukiniAdmin%20-%20Cycle%20Tests%20Contract.md) |
 | MiyukiniAdmin - Unit Tests Contract | [Unit Tests Contract](./MiyukiniAdmin%20-%20Unit%20Tests%20Contract.md) |
 | MiyukiniAdmin - Core Interaction Contract | [Core Interaction Contract](../../architecture/MiyukiniAdmin%20-%20Core%20Interaction%20Contract.md) |
 | MiyukiniAdmin - Documentation Fondatrice | [Documentation Fondatrice](../../foundation/MiyukiniAdmin%20-%20Documentation%20Fondatrice.md) |
-| Miyukini Conceptual References - Glossaire | [Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
+| Miyukini Conceptual References - Glossaire | [Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) |
 
 ---
 
@@ -301,7 +301,7 @@ sequenceDiagram
     MA->>Mod: Lecture cellule Admin
     Mod-->>MA: Identification + manifeste
 
-    MA->>MA: Execution tests embarqués
+    MA->>MA: Execution tests embarquÃ©s
     MA->>BB: Verification integrite
     BB->>TAMR: Demande verification
     TAMR-->>BB: Resultat
@@ -316,3 +316,5 @@ sequenceDiagram
 **Date de creation :** 2026-01-29  
 **Version :** 1.0.0  
 **Statut :** Contrat de reference
+
+

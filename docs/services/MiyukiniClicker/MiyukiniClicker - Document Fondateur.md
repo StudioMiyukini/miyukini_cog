@@ -1,105 +1,105 @@
-# MiyuClicker — Document Fondateur
+﻿# MiyuClicker â€” Document Fondateur
 
 ## Contexte
 
-**MiyuClicker** est le **premier jeu officiel Miyukini**. Il sert de **démo vivante** pour montrer qu’il est possible de faire coexister plusieurs services (Opérateurs, Toolkits) au sein d’un même environnement COG, tout en offrant une expérience de jeu complète : Idle / Clicker côté gestion, et grande stratégie (type Risk) côté conquête territoriale.
+**MiyuClicker** est le **premier jeu officiel Miyukini**. Il sert de **dÃ©mo vivante** pour montrer quâ€™il est possible de faire coexister plusieurs services (OpÃ©rateurs, Toolkits) au sein dâ€™un mÃªme environnement COG, tout en offrant une expÃ©rience de jeu complÃ¨te : Idle / Clicker cÃ´tÃ© gestion, et grande stratÃ©gie (type Risk) cÃ´tÃ© conquÃªte territoriale.
 
-Le jeu est développé en **Rust**, s’appuie sur la **stack UI officielle Miyukini (Dioxus)** et sur un **pack UI open-source à licence permissive**. Il consomme les Toolkits et Opérateurs nécessaires (gestion UI, animations, sprites, sauvegarde, etc.) en privilégiant au maximum les **solutions internes** à l’écosystème Miyukini.
+Le jeu est dÃ©veloppÃ© en **Rust**, sâ€™appuie sur la **stack UI officielle Miyukini (Dioxus)** et sur un **pack UI open-source Ã  licence permissive**. Il consomme les Toolkits et OpÃ©rateurs nÃ©cessaires (gestion UI, animations, sprites, sauvegarde, etc.) en privilÃ©giant au maximum les **solutions internes** Ã  lâ€™Ã©cosystÃ¨me Miyukini.
 
-Ce document est le **document fondateur** du jeu : il en fixe la raison d’être, l’analyse marché, les besoins métier et techniques (Toolkits), le gameplay, les versions prévues (0.1, beta v1.0) et les inspirations.
+Ce document est le **document fondateur** du jeu : il en fixe la raison dâ€™Ãªtre, lâ€™analyse marchÃ©, les besoins mÃ©tier et techniques (Toolkits), le gameplay, les versions prÃ©vues (0.1, beta v1.0) et les inspirations.
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Périmètre :** Définition du jeu MiyuClicker — positionnement, analyse marché Idle/RPG/gestion, besoins métier et Toolkits, gameplay (gestion + carte stratégique), roadmap versions, stack technique, intégration COG.
-- **Hors périmètre :** Spécifications détaillées d’implémentation (crates, API), assets graphiques, contenu narratif.
+- **PÃ©rimÃ¨tre :** DÃ©finition du jeu MiyuClicker â€” positionnement, analyse marchÃ© Idle/RPG/gestion, besoins mÃ©tier et Toolkits, gameplay (gestion + carte stratÃ©gique), roadmap versions, stack technique, intÃ©gration COG.
+- **Hors pÃ©rimÃ¨tre :** SpÃ©cifications dÃ©taillÃ©es dâ€™implÃ©mentation (crates, API), assets graphiques, contenu narratif.
 
 ---
 
-## 1. Analyse PR du marché — Idle / Clicker, RPG et Gestion
+## 1. Analyse PR du marchÃ© â€” Idle / Clicker, RPG et Gestion
 
-### 1.1 Tendances du genre (2024–2025)
+### 1.1 Tendances du genre (2024â€“2025)
 
 | Aspect | Constat |
 |--------|--------|
-| **Idle / RPG** | Forte croissance en 2024 (Q2), notamment en APAC ; titres comme *Legend of Mushroom* dominent en Corée du Sud et au Japon. Le genre mêle boucles idle et mécaniques RPG (progression, stats, équipement). |
-| **Idle / Gestion** | Fusion avec city-builder et simulation : gestion de ressources, de population, de bâtiments, avec boucles de production (primaire → secondaire → tertiaire). |
-| **Hybrides** | Les joueurs attendent à la fois du « clicker » simple (Cookie Clicker, AdVenture Capitalist, Clicker Heroes) et des couches plus profondes : arbres de compétences, recherche, commerce, diplomatie, conquête. |
-| **Références durables** | Cookie Clicker (2013), AdVenture Capitalist (2014), Clicker Heroes (2014) restent des piliers ; Melvor Idle, NGU Idle, Idle Champions of the Forgotten Realms illustrent l’évolution vers plus de profondeur. |
+| **Idle / RPG** | Forte croissance en 2024 (Q2), notamment en APAC ; titres comme *Legend of Mushroom* dominent en CorÃ©e du Sud et au Japon. Le genre mÃªle boucles idle et mÃ©caniques RPG (progression, stats, Ã©quipement). |
+| **Idle / Gestion** | Fusion avec city-builder et simulation : gestion de ressources, de population, de bÃ¢timents, avec boucles de production (primaire â†’ secondaire â†’ tertiaire). |
+| **Hybrides** | Les joueurs attendent Ã  la fois du Â« clicker Â» simple (Cookie Clicker, AdVenture Capitalist, Clicker Heroes) et des couches plus profondes : arbres de compÃ©tences, recherche, commerce, diplomatie, conquÃªte. |
+| **RÃ©fÃ©rences durables** | Cookie Clicker (2013), AdVenture Capitalist (2014), Clicker Heroes (2014) restent des piliers ; Melvor Idle, NGU Idle, Idle Champions of the Forgotten Realms illustrent lâ€™Ã©volution vers plus de profondeur. |
 
 ### 1.2 Positionnement MiyuClicker
 
-- **Idle / Gestion** : boucle de ressources (nourriture, matières premières, outils, recherche, armes), allocation de « gens » (population), moral et fécondité, soldats.
-- **Grande stratégie** : carte de cités-États, conquête type Risk, temps de déplacement des troupes, bonus de tribu par cité conquise.
-- **Démo COG** : le jeu prouve que plusieurs Opérateurs et Toolkits peuvent coexister dans un même environnement (simulation, UI, carte, sauvegarde, etc.).
+- **Idle / Gestion** : boucle de ressources (nourriture, matiÃ¨res premiÃ¨res, outils, recherche, armes), allocation de Â« gens Â» (population), moral et fÃ©conditÃ©, soldats.
+- **Grande stratÃ©gie** : carte de citÃ©s-Ã‰tats, conquÃªte type Risk, temps de dÃ©placement des troupes, bonus de tribu par citÃ© conquise.
+- **DÃ©mo COG** : le jeu prouve que plusieurs OpÃ©rateurs et Toolkits peuvent coexister dans un mÃªme environnement (simulation, UI, carte, sauvegarde, etc.).
 
 ---
 
-## 2. Besoins métier et Toolkits
+## 2. Besoins mÃ©tier et Toolkits
 
-### 2.1 Vue d’ensemble
+### 2.1 Vue dâ€™ensemble
 
-Le jeu nécessite des **capacités** couvrant : UI, rendu 2D (carte, sprites), animations par frame, gestion des spritesheets, entrées utilisateur, sauvegarde/chargement, simulation (tick), et éventuellement son. **Priorité : privilégier les solutions internes** (Toolkits Miyukini, Dioxus) avant d’intégrer des crates externes.
+Le jeu nÃ©cessite des **capacitÃ©s** couvrant : UI, rendu 2D (carte, sprites), animations par frame, gestion des spritesheets, entrÃ©es utilisateur, sauvegarde/chargement, simulation (tick), et Ã©ventuellement son. **PrioritÃ© : privilÃ©gier les solutions internes** (Toolkits Miyukini, Dioxus) avant dâ€™intÃ©grer des crates externes.
 
-### 2.2 Besoins détaillés et Toolkits associés
+### 2.2 Besoins dÃ©taillÃ©s et Toolkits associÃ©s
 
-| Besoin | Description | Solution privilégiée (interne) | Solution externe si nécessaire |
+| Besoin | Description | Solution privilÃ©giÃ©e (interne) | Solution externe si nÃ©cessaire |
 |--------|-------------|---------------------------------|----------------------------------|
-| **UI principale** | Menus, panels, boutons, indicateurs de ressources, listes (gens, soldats, cités). | **Dioxus** (stack UI officielle Miyukini). | — |
-| **Pack UI / thème** | Look cohérent, couleurs, typo, composants réutilisables. | Thème CSS Dioxus dérivé du style Miyukini (voir [Stack UI Dioxus](../../ux_ui/Miyukini%20-%20Stack%20UI%20Dioxus.md)) ; **packs UI jeux** présents dans `ui/game_ui_pack` (voir [MiyuClicker - Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md)) : Cute_Fantasy_UI (principal), Cute_Fantasy (sprites, tuiles, icônes), modernuserinterface-win (alternative, portraits). | Packs déjà présents en interne ; vérifier licences par pack (pas de redistribution des assets bruts). |
-| **Rendu 2D (carte)** | Carte stratégique : nœuds (cités), arêtes (routes), déplacements, sélection. | **Dioxus** : éléments SVG/canvas pour la carte avec primitives (cercles, lignes, polygones). Textures pour fond/tiles si besoin. | Si besoin moteur 2D dédié : crates Rust à licence permissive (ex. macroquad pour canvas jeu uniquement). |
-| **Sprites et spritesheets** | Personnages, unités, bâtiments, icônes ; animations par frame. | **Dioxus** : éléments `img` RSX / textures à partir d’images ; découpage spritesheet en sous-rectangles ; frame courante = index dans la sheet. **Assets** : `ui/game_ui_pack` — Cute_Fantasy (bâtiments, tuiles, NPCs, icônes ressources), Tiny RPG (unités, héros), ui-icn_fantasy-weapons_01 (icônes armes) — voir [Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md). Toolkit interne : chargement + cache de textures, définition d’animations (plage de frames, FPS). | Crate type `image`, `png` ; éventuellement macroquad/bevy si on décide d’un rendu jeu séparé de l’UI Dioxus. |
-| **Animations par frame** | Mise à jour du numéro de frame en fonction du temps (delta). | **Toolkit interne** : boucle de jeu avec signaux réactifs Dioxus ; état `(sprite_id, animation_id, t_accumulator)` ; avancement `t += delta`, sélection de la frame. | — |
-| **Gestion des sprites** | Chargement, cache, libération ; résolution des rectangles par (spritesheet, row, col) ou par ID. | **Toolkit interne** : registre de sprites (path ou bytes, dimensions, layout en grille) ; API du type `sprite_rect(sheet_id, frame_index) -> Rect`. | Crate `image` pour décodage. |
-| **Entrées** | Clics, survol, clavier (raccourcis, navigation). | **Dioxus** : événements RSX (`onclick`, `onmouseover`, `onkeydown`), zones interactives sur la carte. | — |
-| **Boucle de gameplay (tick)** | Simulation discrète ou continue (ressources, moral, population, déplacements des troupes). | **Logique métier interne** : état du monde (ECS ou structs selon complexité) ; `tick(delta)` appelé via `use_future` / tokio interval ; pas de logique dans l’UI. | — |
-| **Sauvegarde / chargement** | Persistance de la partie (ressources, cités, troupes, carte). | **Sauvegarde fichier JSON** (serde + I/O direct) ; sérialisation (serde) de l’état du jeu. Optionnel : KindMother si on veut centraliser les sauvegardes côté COG (hors scope v0.1). | `serde`, `serde_json` (déjà courants en Rust). |
-| **Temps réel / temps simulé** | Vitesse du jeu (pause, x1, x2), temps de déplacement des troupes. | **Horloge interne** : temps simulé séparé du temps réel ; `Clock` Kernel si alignement avec la trace (optionnel). | — |
-| **Son (optionnel v0.1)** | Sons d’interface, ambiances. | Toolkit interne ou crate audio permissive (MIT/Apache-2.0). | `rodio`, `kira` (licences permissives). |
+| **UI principale** | Menus, panels, boutons, indicateurs de ressources, listes (gens, soldats, citÃ©s). | **Dioxus** (stack UI officielle Miyukini). | â€” |
+| **Pack UI / thÃ¨me** | Look cohÃ©rent, couleurs, typo, composants rÃ©utilisables. | ThÃ¨me CSS Dioxus dÃ©rivÃ© du style Miyukini (voir [Stack UI Dioxus](..//..//_index.md)) ; **packs UI jeux** prÃ©sents dans `ui/game_ui_pack` (voir [MiyuClicker - Reference Packs UI Jeux](MiyukiniClicker%20-%20Reference%20Packs%20UI%20Jeux.md)) : Cute_Fantasy_UI (principal), Cute_Fantasy (sprites, tuiles, icÃ´nes), modernuserinterface-win (alternative, portraits). | Packs dÃ©jÃ  prÃ©sents en interne ; vÃ©rifier licences par pack (pas de redistribution des assets bruts). |
+| **Rendu 2D (carte)** | Carte stratÃ©gique : nÅ“uds (citÃ©s), arÃªtes (routes), dÃ©placements, sÃ©lection. | **Dioxus** : Ã©lÃ©ments SVG/canvas pour la carte avec primitives (cercles, lignes, polygones). Textures pour fond/tiles si besoin. | Si besoin moteur 2D dÃ©diÃ© : crates Rust Ã  licence permissive (ex. macroquad pour canvas jeu uniquement). |
+| **Sprites et spritesheets** | Personnages, unitÃ©s, bÃ¢timents, icÃ´nes ; animations par frame. | **Dioxus** : Ã©lÃ©ments `img` RSX / textures Ã  partir dâ€™images ; dÃ©coupage spritesheet en sous-rectangles ; frame courante = index dans la sheet. **Assets** : `ui/game_ui_pack` â€” Cute_Fantasy (bÃ¢timents, tuiles, NPCs, icÃ´nes ressources), Tiny RPG (unitÃ©s, hÃ©ros), ui-icn_fantasy-weapons_01 (icÃ´nes armes) â€” voir [Reference Packs UI Jeux](MiyukiniClicker%20-%20Reference%20Packs%20UI%20Jeux.md). Toolkit interne : chargement + cache de textures, dÃ©finition dâ€™animations (plage de frames, FPS). | Crate type `image`, `png` ; Ã©ventuellement macroquad/bevy si on dÃ©cide dâ€™un rendu jeu sÃ©parÃ© de lâ€™UI Dioxus. |
+| **Animations par frame** | Mise Ã  jour du numÃ©ro de frame en fonction du temps (delta). | **Toolkit interne** : boucle de jeu avec signaux rÃ©actifs Dioxus ; Ã©tat `(sprite_id, animation_id, t_accumulator)` ; avancement `t += delta`, sÃ©lection de la frame. | â€” |
+| **Gestion des sprites** | Chargement, cache, libÃ©ration ; rÃ©solution des rectangles par (spritesheet, row, col) ou par ID. | **Toolkit interne** : registre de sprites (path ou bytes, dimensions, layout en grille) ; API du type `sprite_rect(sheet_id, frame_index) -> Rect`. | Crate `image` pour dÃ©codage. |
+| **EntrÃ©es** | Clics, survol, clavier (raccourcis, navigation). | **Dioxus** : Ã©vÃ©nements RSX (`onclick`, `onmouseover`, `onkeydown`), zones interactives sur la carte. | â€” |
+| **Boucle de gameplay (tick)** | Simulation discrÃ¨te ou continue (ressources, moral, population, dÃ©placements des troupes). | **Logique mÃ©tier interne** : Ã©tat du monde (ECS ou structs selon complexitÃ©) ; `tick(delta)` appelÃ© via `use_future` / tokio interval ; pas de logique dans lâ€™UI. | â€” |
+| **Sauvegarde / chargement** | Persistance de la partie (ressources, citÃ©s, troupes, carte). | **Sauvegarde fichier JSON** (serde + I/O direct) ; sÃ©rialisation (serde) de lâ€™Ã©tat du jeu. Optionnel : KindMother si on veut centraliser les sauvegardes cÃ´tÃ© COG (hors scope v0.1). | `serde`, `serde_json` (dÃ©jÃ  courants en Rust). |
+| **Temps rÃ©el / temps simulÃ©** | Vitesse du jeu (pause, x1, x2), temps de dÃ©placement des troupes. | **Horloge interne** : temps simulÃ© sÃ©parÃ© du temps rÃ©el ; `Clock` Kernel si alignement avec la trace (optionnel). | â€” |
+| **Son (optionnel v0.1)** | Sons dâ€™interface, ambiances. | Toolkit interne ou crate audio permissive (MIT/Apache-2.0). | `rodio`, `kira` (licences permissives). |
 
-### 2.3 Synthèse Toolkits à prévoir (interne)
+### 2.3 SynthÃ¨se Toolkits Ã  prÃ©voir (interne)
 
-| Toolkit | Rôle |
+| Toolkit | RÃ´le |
 |---------|------|
-| **UI (Dioxus)** | Déjà stack officielle ; fenêtre principale, layout CSS flexbox/grid, composants RSX. |
-| **Sprites / Spritesheets** | Chargement images, cache textures, découpage en frames, registre (sheet_id, frame) → Rect. |
-| **Animation par frame** | Avancement temporel des animations (delta), sélection de la frame, boucle ou one-shot. |
-| **Carte stratégique** | Modèle (nœuds, arêtes, positions) ; rendu SVG/canvas Dioxus ; interaction (clic, survol). |
-| **Sauvegarde** | Sérialisation état jeu ; sauvegarde fichier JSON (serde + I/O). |
-| **Simulation (tick)** | Moteur de règles métier : ressources, gens, moral, soldats, conquêtes, déplacements. |
+| **UI (Dioxus)** | DÃ©jÃ  stack officielle ; fenÃªtre principale, layout CSS flexbox/grid, composants RSX. |
+| **Sprites / Spritesheets** | Chargement images, cache textures, dÃ©coupage en frames, registre (sheet_id, frame) â†’ Rect. |
+| **Animation par frame** | Avancement temporel des animations (delta), sÃ©lection de la frame, boucle ou one-shot. |
+| **Carte stratÃ©gique** | ModÃ¨le (nÅ“uds, arÃªtes, positions) ; rendu SVG/canvas Dioxus ; interaction (clic, survol). |
+| **Sauvegarde** | SÃ©rialisation Ã©tat jeu ; sauvegarde fichier JSON (serde + I/O). |
+| **Simulation (tick)** | Moteur de rÃ¨gles mÃ©tier : ressources, gens, moral, soldats, conquÃªtes, dÃ©placements. |
 
 ---
 
 ## 3. Gameplay
 
-### 3.1 Volée 1 — Gestion (fenêtre principale)
+### 3.1 VolÃ©e 1 â€” Gestion (fenÃªtre principale)
 
-- **Boucle type Idle** : le joueur gère des **ressources** en y allouant des **gens**.
-- **Ressources** : nourriture, bois, pierre, fer, outils, recherche, armes. Les **matières premières** (bois, pierre, fer) et les **produits manufacturés** (outils, armes) sont des **catégories** pour les caps de stockage, pas des ressources affichées en tant que telles — voir [MiyuClicker - Ressources et Categories](MiyuClicker%20-%20Ressources%20et%20Categories.md).
-- **Gens** : consomment de la nourriture et ont des **besoins**. Ils peuvent produire : nourriture, matières premières, outils, recherche, armes. Une partie des gens peut devenir **soldats** (comptés dans le total de gens).
-- **Dynamique** : la quantité de gens disponible est **dynamique** (moral, fécondité). Si la nourriture manque : moral baisse, fécondité baisse, la population peut diminuer. Le joueur doit **répartir** les gens pour maintenir croissance ou équilibre.
-- **Objectif gestion** : avoir assez de troupes pour **défendre** le territoire et, à terme, **conquérir** la carte.
+- **Boucle type Idle** : le joueur gÃ¨re des **ressources** en y allouant des **gens**.
+- **Ressources** : nourriture, bois, pierre, fer, outils, recherche, armes. Les **matiÃ¨res premiÃ¨res** (bois, pierre, fer) et les **produits manufacturÃ©s** (outils, armes) sont des **catÃ©gories** pour les caps de stockage, pas des ressources affichÃ©es en tant que telles â€” voir [MiyuClicker - Ressources et Categories](MiyukiniClicker%20-%20Ressources%20et%20Categories.md).
+- **Gens** : consomment de la nourriture et ont des **besoins**. Ils peuvent produire : nourriture, matiÃ¨res premiÃ¨res, outils, recherche, armes. Une partie des gens peut devenir **soldats** (comptÃ©s dans le total de gens).
+- **Dynamique** : la quantitÃ© de gens disponible est **dynamique** (moral, fÃ©conditÃ©). Si la nourriture manque : moral baisse, fÃ©conditÃ© baisse, la population peut diminuer. Le joueur doit **rÃ©partir** les gens pour maintenir croissance ou Ã©quilibre.
+- **Objectif gestion** : avoir assez de troupes pour **dÃ©fendre** le territoire et, Ã  terme, **conquÃ©rir** la carte.
 
-### 3.2 Volée 2 — Carte stratégique (grande stratégie)
+### 3.2 VolÃ©e 2 â€” Carte stratÃ©gique (grande stratÃ©gie)
 
-- **Carte** : maillage de **cités-États** reliées par des **routes**.
-- **Actions** : le joueur clique sur une cité et peut décider d’**envoyer X soldats** pour la conquérir. Un peu de **hasard** + les **stats des troupes** de chaque camp déterminent le vainqueur et les troupes restantes (style Risk).
-- **Déplacement** : chaque troupe envoyée met un **temps variable** pour atteindre la cité cible (dépendant de la route / distance).
+- **Carte** : maillage de **citÃ©s-Ã‰tats** reliÃ©es par des **routes**.
+- **Actions** : le joueur clique sur une citÃ© et peut dÃ©cider dâ€™**envoyer X soldats** pour la conquÃ©rir. Un peu de **hasard** + les **stats des troupes** de chaque camp dÃ©terminent le vainqueur et les troupes restantes (style Risk).
+- **DÃ©placement** : chaque troupe envoyÃ©e met un **temps variable** pour atteindre la citÃ© cible (dÃ©pendant de la route / distance).
 
-### 3.3 Version 0.1 — Comportement des cités adverses
+### 3.3 Version 0.1 â€” Comportement des citÃ©s adverses
 
-- Les cités adverses **n’ont pas de comportement** (pas d’IA offensive/diplomatique).
-- Elles possèdent un **nombre de troupes** qui **évolue jusqu’à un plafond**, selon une courbe calquée sur l’évolution du joueur pour garder un minimum de **challenge**.
-- Cités **proches** : plus faciles ; cités **lointaines** ou ayant eu le temps d’évoluer : plus difficiles.
-- **Cité conquise** : donne un **bonus en ressources** au joueur (type « tribu »).
+- Les citÃ©s adverses **nâ€™ont pas de comportement** (pas dâ€™IA offensive/diplomatique).
+- Elles possÃ¨dent un **nombre de troupes** qui **Ã©volue jusquâ€™Ã  un plafond**, selon une courbe calquÃ©e sur lâ€™Ã©volution du joueur pour garder un minimum de **challenge**.
+- CitÃ©s **proches** : plus faciles ; citÃ©s **lointaines** ou ayant eu le temps dâ€™Ã©voluer : plus difficiles.
+- **CitÃ© conquise** : donne un **bonus en ressources** au joueur (type Â« tribu Â»).
 
-### 3.4 Conception Beta v1.0 (évolution prévue)
+### 3.4 Conception Beta v1.0 (Ã©volution prÃ©vue)
 
-- **Diplomatie** : relations entre cités, alliances, traités.
-- **Économie de marché** : ressources et outils plus variés, **caravanes** qui circulent, cités **spécialisées** (ressources).
-- **Routes multiples** : plusieurs chemins vers une même destination, avec **checkpoints** (village, fort) ; routes plus longues mais plus sûres, raccourcis (ex. forêt) avec ralentissement.
-- **Résolution des combats** : en **RTS** ou **temps réel** (au lieu d’un simple jet déterministe/aléatoire).
-- **Héros** : impact sur les batailles et le gameplay. Ex. : **Général** (direction des combats en RTS/RPG action), **Artisan** (mini-jeux pour artefacts boost), **Érudit** (mini-jeux pour recherche).
-- **Arbre de technologie** et **3 arbres de compétences**.
+- **Diplomatie** : relations entre citÃ©s, alliances, traitÃ©s.
+- **Ã‰conomie de marchÃ©** : ressources et outils plus variÃ©s, **caravanes** qui circulent, citÃ©s **spÃ©cialisÃ©es** (ressources).
+- **Routes multiples** : plusieurs chemins vers une mÃªme destination, avec **checkpoints** (village, fort) ; routes plus longues mais plus sÃ»res, raccourcis (ex. forÃªt) avec ralentissement.
+- **RÃ©solution des combats** : en **RTS** ou **temps rÃ©el** (au lieu dâ€™un simple jet dÃ©terministe/alÃ©atoire).
+- **HÃ©ros** : impact sur les batailles et le gameplay. Ex. : **GÃ©nÃ©ral** (direction des combats en RTS/RPG action), **Artisan** (mini-jeux pour artefacts boost), **Ã‰rudit** (mini-jeux pour recherche).
+- **Arbre de technologie** et **3 arbres de compÃ©tences**.
 
 ---
 
@@ -107,42 +107,42 @@ Le jeu nécessite des **capacités** couvrant : UI, rendu 2D (carte, sprites), a
 
 ### 4.1 Langage et UI
 
-| Élément | Choix | Référence |
+| Ã‰lÃ©ment | Choix | RÃ©fÃ©rence |
 |--------|--------|------------|
-| **Langage** | Rust | Écosystème Miyukini, performance, sécurité. |
+| **Langage** | Rust | Ã‰cosystÃ¨me Miyukini, performance, sÃ©curitÃ©. |
 | **UI** | Dioxus 0.6 (desktop natif via Blitz/WGPU) | Stack UI officielle Miyukini ; licence MIT/Apache-2.0 ; desktop natif. |
-| **Pack UI / assets** | Pack open-source à licence permissive | Pour cohérence visuelle (thème, icônes, sprites génériques) ; pas de dépendance propriétaire. |
+| **Pack UI / assets** | Pack open-source Ã  licence permissive | Pour cohÃ©rence visuelle (thÃ¨me, icÃ´nes, sprites gÃ©nÃ©riques) ; pas de dÃ©pendance propriÃ©taire. |
 
 ### 4.2 Rendu jeu (carte, sprites)
 
-- **Option A (recommandée v0.1)** : tout dans **Dioxus** — carte via éléments SVG/canvas, sprites via éléments `img` RSX et textures (spritesheets découpées). Un seul point d'entrée (`dioxus::launch`), une seule boucle réactive.
-- **Option B** : si besoin de rendu 2D plus riche (effets, nombreux sprites animés), intégration d’un moteur 2D Rust (ex. macroquad) dans une fenêtre ou un viewport ; **Dioxus** reste pour les menus et HUD. À trancher en phase d’implémentation.
+- **Option A (recommandÃ©e v0.1)** : tout dans **Dioxus** â€” carte via Ã©lÃ©ments SVG/canvas, sprites via Ã©lÃ©ments `img` RSX et textures (spritesheets dÃ©coupÃ©es). Un seul point d'entrÃ©e (`dioxus::launch`), une seule boucle rÃ©active.
+- **Option B** : si besoin de rendu 2D plus riche (effets, nombreux sprites animÃ©s), intÃ©gration dâ€™un moteur 2D Rust (ex. macroquad) dans une fenÃªtre ou un viewport ; **Dioxus** reste pour les menus et HUD. Ã€ trancher en phase dâ€™implÃ©mentation.
 
 ### 4.3 Licences
 
 - **Dioxus** : MIT ou Apache-2.0.
-- **Pack UI / sprites** : choix d’un pack ou d’assets **MIT, Apache-2.0, CC0** (ou équivalent permissif) pour éviter toute contrainte commerciale ou d’attribution forte.
+- **Pack UI / sprites** : choix dâ€™un pack ou dâ€™assets **MIT, Apache-2.0, CC0** (ou Ã©quivalent permissif) pour Ã©viter toute contrainte commerciale ou dâ€™attribution forte.
 
 ---
 
-## 5. Intégration COG — Opérateurs et Services
+## 5. IntÃ©gration COG â€” OpÃ©rateurs et Services
 
-### 5.1 Rôle du jeu dans l’écosystème
+### 5.1 RÃ´le du jeu dans lâ€™Ã©cosystÃ¨me
 
-- MiyuClicker est un **Opérateur d’Interface** (ou un agrégat d’Opérateurs) qui **consomme** des Toolkits (UI, sprites, animation, sauvegarde, simulation) et prouve que **plusieurs services** peuvent vivre dans le même environnement Miyukini.
-- La **logique métier** (simulation, règles de combat, économie) peut être exposée sous forme de **Tools** ou de **Opérateurs de Service** réutilisables (ex. « Simulation Idle », « Résolution combat ») pour d’autres jeux ou démos.
+- MiyuClicker est un **OpÃ©rateur dâ€™Interface** (ou un agrÃ©gat dâ€™OpÃ©rateurs) qui **consomme** des Toolkits (UI, sprites, animation, sauvegarde, simulation) et prouve que **plusieurs services** peuvent vivre dans le mÃªme environnement Miyukini.
+- La **logique mÃ©tier** (simulation, rÃ¨gles de combat, Ã©conomie) peut Ãªtre exposÃ©e sous forme de **Tools** ou de **OpÃ©rateurs de Service** rÃ©utilisables (ex. Â« Simulation Idle Â», Â« RÃ©solution combat Â») pour dâ€™autres jeux ou dÃ©mos.
 
-### 5.2 Opérateurs identifiés (vision)
+### 5.2 OpÃ©rateurs identifiÃ©s (vision)
 
-| Opérateur | Rôle | Type |
+| OpÃ©rateur | RÃ´le | Type |
 |-----------|------|------|
-| **MiyuClickerUI** | Interface principale (gestion + carte), menus, HUD. | Opérateur d’Interface |
-| **MiyuClickerSim** | Simulation tick (ressources, gens, moral, troupes, déplacements). | Opérateur de Service |
-| **MiyuClickerCombat** | Résolution des combats (stats, hasard, troupes restantes). | Opérateur de Service / Tool |
-| **MiyuClickerSave** | Sauvegarde / chargement de partie (état monde). | Opérateur de Service ou sauvegarde fichier JSON + KindMother optionnel |
-| **MiyuClickerCarte** | Modèle carte (cités, routes), déplacements, combats. | Opérateur de Service |
+| **MiyuClickerUI** | Interface principale (gestion + carte), menus, HUD. | OpÃ©rateur dâ€™Interface |
+| **MiyuClickerSim** | Simulation tick (ressources, gens, moral, troupes, dÃ©placements). | OpÃ©rateur de Service |
+| **MiyuClickerCombat** | RÃ©solution des combats (stats, hasard, troupes restantes). | OpÃ©rateur de Service / Tool |
+| **MiyuClickerSave** | Sauvegarde / chargement de partie (Ã©tat monde). | OpÃ©rateur de Service ou sauvegarde fichier JSON + KindMother optionnel |
+| **MiyuClickerCarte** | ModÃ¨le carte (citÃ©s, routes), dÃ©placements, combats. | OpÃ©rateur de Service |
 
-Les **Toolkits** (Sprites, Animation, Carte, IdleSim, Save, Combat) sont des **Kits d’Outils** ou **Outils** (Strate 6) utilisés par ces Opérateurs, gouvernés par Master Butler et les Cores. **Détail MVP et mapping :** [MiyuClicker - MVP Ecrans et Mecaniques](MiyuClicker%20-%20MVP%20Ecrans%20et%20Mecaniques.md), [MiyuClicker - Operateurs et Toolkits](MiyuClicker%20-%20Operateurs%20et%20Toolkits.md).
+Les **Toolkits** (Sprites, Animation, Carte, IdleSim, Save, Combat) sont des **Kits dâ€™Outils** ou **Outils** (Strate 6) utilisÃ©s par ces OpÃ©rateurs, gouvernÃ©s par Master Butler et les Cores. **DÃ©tail MVP et mapping :** [MiyuClicker - MVP Ecrans et Mecaniques](MiyukiniClicker%20-%20MVP%20Ecrans%20et%20Mecaniques.md), [MiyuClicker - Operateurs et Toolkits](MiyukiniClicker%20-%20Operateurs%20et%20Toolkits.md).
 
 ---
 
@@ -150,54 +150,56 @@ Les **Toolkits** (Sprites, Animation, Carte, IdleSim, Save, Combat) sont des **K
 
 | Jeu / univers | Apport pour MiyuClicker |
 |---------------|--------------------------|
-| **Songs of Syx** | City-builder fantasy, simulation de population, chaînes de production (primaire → secondaire → tertiaire), gestion de bonheur/capacité, grande échelle. |
-| **Emperor : L’empire du milieu** | City-builder historique, gestion des ressources et des habitants, ambiance et progression. |
-| **Hearts of Iron 4** | Grande stratégie, carte, troupes, déplacements, conquête. |
-| **Risk** | Conquête par territoires, résolution de batailles par jets + troupes, objectif de contrôle de la carte. |
+| **Songs of Syx** | City-builder fantasy, simulation de population, chaÃ®nes de production (primaire â†’ secondaire â†’ tertiaire), gestion de bonheur/capacitÃ©, grande Ã©chelle. |
+| **Emperor : Lâ€™empire du milieu** | City-builder historique, gestion des ressources et des habitants, ambiance et progression. |
+| **Hearts of Iron 4** | Grande stratÃ©gie, carte, troupes, dÃ©placements, conquÃªte. |
+| **Risk** | ConquÃªte par territoires, rÃ©solution de batailles par jets + troupes, objectif de contrÃ´le de la carte. |
 
 ---
 
-## 7. Décisions structurantes
+## 7. DÃ©cisions structurantes
 
-| Id | Décision | Justification |
+| Id | DÃ©cision | Justification |
 |----|----------|---------------|
-| **DS-01** | Premier jeu officiel Miyukini = démo multi-services COG | Prouver la coexistence d’Opérateurs et Toolkits dans un même environnement. |
+| **DS-01** | Premier jeu officiel Miyukini = dÃ©mo multi-services COG | Prouver la coexistence dâ€™OpÃ©rateurs et Toolkits dans un mÃªme environnement. |
 | **DS-02** | Rust + Dioxus + pack UI permissif | Alignement stack Miyukini, licence sans contrainte commerciale. |
-| **DS-03** | Privilégier solutions internes (Toolkits UI, sprites, animation, sauvegarde) | Réutilisabilité, gouvernance, cohérence avec la pyramide Miyukini. |
-| **DS-04** | Deux volées : Gestion (Idle) + Carte (grande stratégie) | Boucle idle claire + objectif long terme (conquête). |
-| **DS-05** | Version 0.1 : cités sans IA, courbe de troupes adverses, bonus tribu | Scope maîtrisable ; beta v1.0 pour diplomatie, marché, routes, héros, RTS. |
-| **DS-06** | Inspirations : Songs of Syx, Emperor, HOI4, Risk | Ancrage dans des références reconnues Idle / gestion / stratégie. |
+| **DS-03** | PrivilÃ©gier solutions internes (Toolkits UI, sprites, animation, sauvegarde) | RÃ©utilisabilitÃ©, gouvernance, cohÃ©rence avec la pyramide Miyukini. |
+| **DS-04** | Deux volÃ©es : Gestion (Idle) + Carte (grande stratÃ©gie) | Boucle idle claire + objectif long terme (conquÃªte). |
+| **DS-05** | Version 0.1 : citÃ©s sans IA, courbe de troupes adverses, bonus tribu | Scope maÃ®trisable ; beta v1.0 pour diplomatie, marchÃ©, routes, hÃ©ros, RTS. |
+| **DS-06** | Inspirations : Songs of Syx, Emperor, HOI4, Risk | Ancrage dans des rÃ©fÃ©rences reconnues Idle / gestion / stratÃ©gie. |
 
 ---
 
 ## 8. Packs UI jeux (ui/game_ui_pack)
 
-Le répertoire **`ui/game_ui_pack`** contient des packs d’assets UI et graphiques pour jeux, analysés et inventoriés dans un document dédié :
+Le rÃ©pertoire **`ui/game_ui_pack`** contient des packs dâ€™assets UI et graphiques pour jeux, analysÃ©s et inventoriÃ©s dans un document dÃ©diÃ© :
 
-| Pack | Rôle pour MiyuClicker | Licence (résumé) |
+| Pack | RÃ´le pour MiyuClicker | Licence (rÃ©sumÃ©) |
 |------|------------------------|-------------------|
-| **Cute_Fantasy** | Bâtiments, tuiles carte, NPCs (« gens »), icônes ressources (nourriture, matières, outils), décors. | Commercial / non commercial, modifiable ; pas de redistribution. |
-| **Cute_Fantasy_UI** | Barres, boutons, cadres, sliders, icônes UI, polices — **pack UI principal**. | Idem Cute_Fantasy. |
-| **modernuserinterface-win** | UI alternative « moderne » ; Portrait Generator (héros, beta v1.0) ; ex. animations (GIF). | Commercial / non commercial (sauf NFT) ; crédits requis ; pas de redistribution. |
-| **Tiny RPG Character Asset Pack** | Unités (soldats, types), héros, projectiles. | À vérifier (non documentée dans le pack). |
-| **ui-icn_fantasy-weapons_01** | Icônes d’armes fantasy (équipement, type d’unité). | Contrat PDF (Misbug) — à consulter. |
-| **CatUIFree** | Contenu minimal (2 PNG). | À vérifier. |
+| **Cute_Fantasy** | BÃ¢timents, tuiles carte, NPCs (Â« gens Â»), icÃ´nes ressources (nourriture, matiÃ¨res, outils), dÃ©cors. | Commercial / non commercial, modifiable ; pas de redistribution. |
+| **Cute_Fantasy_UI** | Barres, boutons, cadres, sliders, icÃ´nes UI, polices â€” **pack UI principal**. | Idem Cute_Fantasy. |
+| **modernuserinterface-win** | UI alternative Â« moderne Â» ; Portrait Generator (hÃ©ros, beta v1.0) ; ex. animations (GIF). | Commercial / non commercial (sauf NFT) ; crÃ©dits requis ; pas de redistribution. |
+| **Tiny RPG Character Asset Pack** | UnitÃ©s (soldats, types), hÃ©ros, projectiles. | Ã€ vÃ©rifier (non documentÃ©e dans le pack). |
+| **ui-icn_fantasy-weapons_01** | IcÃ´nes dâ€™armes fantasy (Ã©quipement, type dâ€™unitÃ©). | Contrat PDF (Misbug) â€” Ã  consulter. |
+| **CatUIFree** | Contenu minimal (2 PNG). | Ã€ vÃ©rifier. |
 
-**Référence complète :** [MiyuClicker - Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md) — inventaire détaillé, licences, mapping besoin → pack, règles d’usage.
+**RÃ©fÃ©rence complÃ¨te :** [MiyuClicker - Reference Packs UI Jeux](MiyukiniClicker%20-%20Reference%20Packs%20UI%20Jeux.md) â€” inventaire dÃ©taillÃ©, licences, mapping besoin â†’ pack, rÃ¨gles dâ€™usage.
 
 ---
 
-## 9. Références
+## 9. RÃ©fÃ©rences
 
 | Document | Lien |
 |----------|------|
-| **Stack UI Dioxus** | [Miyukini - Stack UI Dioxus](../../ux_ui/Miyukini%20-%20Stack%20UI%20Dioxus.md) |
-| **Packs UI jeux** | [MiyuClicker - Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md) |
-| **Glossaire Miyukini** | Miyukini Conceptual References - Glossaire (Opérateur, Toolkit, COG) |
+| **Stack UI Dioxus** | [Miyukini - Stack UI Dioxus](..//..//_index.md) |
+| **Packs UI jeux** | [MiyuClicker - Reference Packs UI Jeux](MiyukiniClicker%20-%20Reference%20Packs%20UI%20Jeux.md) |
+| **Glossaire Miyukini** | Miyukini Conceptual References - Glossaire (OpÃ©rateur, Toolkit, COG) |
 | **Document Fondateur type** | [Miyukini Sales - Document Fondateur](../../services/MiyukiniSales/Miyukini%20Sales%20-%20Document%20Fondateur.md) |
 
 ---
 
-**Document créé le :** 2026-02-01  
-**Dernière mise à jour :** 2026-02-11  
-**Statut :** Document fondateur — premier jeu officiel Miyukini
+**Document crÃ©Ã© le :** 2026-02-01  
+**DerniÃ¨re mise Ã  jour :** 2026-02-11  
+**Statut :** Document fondateur â€” premier jeu officiel Miyukini
+
+

@@ -1,4 +1,4 @@
-# TAMR — Versioning & Evolution Contract
+﻿# TAMR â€” Versioning & Evolution Contract
 
 ## 1. Introduction
 
@@ -8,7 +8,7 @@ TAMR (The Authority Must Rest) est le **Human Interaction Core** du Miyukini Cor
 
 ### Objet du contrat
 
-Ce document definit le **TAMR — Versioning & Evolution Contract** : un contrat normatif, non negociable, et de statut FONDATION qui etablit les regles d'evolution et de versioning de TAMR, garantissant la stabilite des contrats, la compatibilite ascendante, les processus de depreciation, les migrations conceptuelles, et les regles de gel dans le systeme Miyukini Core System.
+Ce document definit le **TAMR â€” Versioning & Evolution Contract** : un contrat normatif, non negociable, et de statut FONDATION qui etablit les regles d'evolution et de versioning de TAMR, garantissant la stabilite des contrats, la compatibilite ascendante, les processus de depreciation, les migrations conceptuelles, et les regles de gel dans le systeme Miyukini Core System.
 
 Ce contrat precise comment TAMR evolue dans le temps tout en preservant la stabilite contractuelle, comment les versions sont gerees, comment les changements incompatibles sont geres, et comment les migrations sont effectuees.
 
@@ -31,15 +31,15 @@ Ce document est **contractuel, normatif, non discutable, et de statut FONDATION*
 
 Ce contrat complete et respecte les documents contractuels existants :
 
-- **[TAMR — Documentation Fondatrice](../foundation/TAMR%20-%20Documentation%20Fondatrice.md)** : Contrat fondateur versionne
-- **[TAMR — Invariants & Guarantees](../contracts/governance/TAMR%20-%20Invariants%20%26%20Guarantees.md)** : Invariants versionnes (INV-TAMR-1 a INV-TAMR-8)
-- **[TAMR — Intervention Types Contract](../contracts/intervention/TAMR%20-%20Intervention%20Types%20Contract.md)** : Types d'intervention versionnes
+- **[TAMR â€” Documentation Fondatrice](../foundation/TAMR%20-%20Documentation%20Fondatrice.md)** : Contrat fondateur versionne
+- **[TAMR â€” Invariants & Guarantees](../contracts/governance/TAMR%20-%20Invariants%20%26%20Guarantees.md)** : Invariants versionnes (INV-TAMR-1 a INV-TAMR-8)
+- **[TAMR â€” Intervention Types Contract](../contracts/intervention/TAMR%20-%20Intervention%20Types%20Contract.md)** : Types d'intervention versionnes
 - **Tous les autres contrats TAMR** : Tous les contrats sont soumis au versioning
-- **[Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)** : Terminologie TAMR
-- **[Miyukini Conceptual References - Doctrine Securite Fondamentale](../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md)** : Principes securite
-- **[Miyukini Conceptual References - Lois Autonomie Systeme](../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Conformite LOI-1 a LOI-6 lors des evolutions
-- **[Miyukini Conceptual References - Integrity Degradation System](../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md)** : Niveaux T0-T4
-- **[Miyukini Conceptual References - Security Levels](../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md)** : Niveaux 0-4
+- **[Miyukini Conceptual References - Glossaire](..//..//..//miyukini-webway-system//reference//_index.md)** : Terminologie TAMR
+- **[Miyukini Conceptual References - Doctrine Securite Fondamentale](..//..//..//miyukini-webway-system//reference//_index.md)** : Principes securite
+- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)** : Conformite LOI-1 a LOI-6 lors des evolutions
+- **[Miyukini Conceptual References - Integrity Degradation System](..//..//..//miyukini-webway-system//reference//_index.md)** : Niveaux T0-T4
+- **[Miyukini Conceptual References - Security Levels](..//..//..//miyukini-webway-system//reference//_index.md)** : Niveaux 0-4
 
 Il n'introduit aucune contradiction, et constitue la definition formelle de l'evolution et du versioning de TAMR.
 
@@ -56,16 +56,16 @@ Il n'introduit aucune contradiction, et constitue la definition formelle de l'ev
 - **MAJEUR** : Numero de version majeure (entier positif)
   - Incremente lors de changements incompatibles
   - Reinitialise MINEUR et PATCH a 0
-  - Exemple : 1.0.0 → 2.0.0
+  - Exemple : 1.0.0 â†’ 2.0.0
 
 - **MINEUR** : Numero de version mineure (entier positif)
   - Incremente lors d'ajouts compatibles
   - Reinitialise PATCH a 0
-  - Exemple : 1.0.0 → 1.1.0
+  - Exemple : 1.0.0 â†’ 1.1.0
 
 - **PATCH** : Numero de version de correctif (entier positif)
   - Incremente lors de corrections compatibles
-  - Exemple : 1.0.0 → 1.0.1
+  - Exemple : 1.0.0 â†’ 1.0.1
 
 ### 2.2. Regles de versioning
 
@@ -231,7 +231,7 @@ Tout element deprecie DOIT avoir une migration documentee et disponible avant sa
 
 **R-DEPR-5 : Notification dans le contrat**
 
-Tout contrat contenant des elements deprecies DOIT inclure une section « Elements deprecies » listant :
+Tout contrat contenant des elements deprecies DOIT inclure une section Â« Elements deprecies Â» listant :
 
 - Les elements deprecies
 - Les versions de depreciation et de suppression
@@ -280,7 +280,7 @@ La **migration conceptuelle** est le processus par lequel une implementation ou 
 **Caracteristiques :**
 
 - **Documentee** : Toute migration est documentee avec des instructions precises
-- **Guidée** : Des guides de migration sont fournis pour chaque changement incompatible
+- **GuidÃ©e** : Des guides de migration sont fournis pour chaque changement incompatible
 - **Testable** : La migration peut etre verifiee par des tests de conformite
 - **Retrocompatible** : Les migrations preservent autant que possible la compatibilite
 
@@ -317,7 +317,7 @@ Toute version MAJEUR DOIT inclure un guide de migration documentant :
 
 **R-MIG-2 : Migration progressive**
 
-Les migrations DOIVENT etre conçues pour permettre une migration progressive si possible.
+Les migrations DOIVENT etre conÃ§ues pour permettre une migration progressive si possible.
 
 **R-MIG-3 : Support de transition**
 
@@ -513,7 +513,7 @@ Tout invariant supprime doit avoir ete deprecie au prealable.
 
 **R-EVOL-TYPE-1 : Ajout de type d'intervention**
 
-Un nouveau type d'intervention ne peut etre introduit que dans une version MAJEUR, avec modification formelle du [TAMR — Intervention Types Contract](../contracts/intervention/TAMR%20-%20Intervention%20Types%20Contract.md) et justification (la liste des quatre types est fermee par conception ; un ajout est exceptionnel).
+Un nouveau type d'intervention ne peut etre introduit que dans une version MAJEUR, avec modification formelle du [TAMR â€” Intervention Types Contract](../contracts/intervention/TAMR%20-%20Intervention%20Types%20Contract.md) et justification (la liste des quatre types est fermee par conception ; un ajout est exceptionnel).
 
 **R-EVOL-TYPE-2 : Modification de type**
 
@@ -600,6 +600,7 @@ Les cas suivants **violent** ce contrat :
 
 **Document cree le :** 2026-01-28  
 **Version :** 1.0.0  
-**Statut :** FONDATION — Contrat normatif valide  
+**Statut :** FONDATION â€” Contrat normatif valide  
 **Reference :** Miyukini Core System, TAMR Documentation Fondatrice  
 **Type :** Regles de versioning et d'evolution non negociables
+

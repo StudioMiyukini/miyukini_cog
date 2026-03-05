@@ -1,4 +1,4 @@
-# TAMR - Testing & Validation Contract
+﻿# TAMR - Testing & Validation Contract
 
 ## 1. Introduction
 
@@ -24,19 +24,19 @@ Ce document est **contractuel et normatif** pour les exigences de test ; il rest
 - [TAMR - Intervention Types Contract](../contracts/intervention/TAMR%20-%20Intervention%20Types%20Contract.md)
 - [TAMR - Inviolable Limits Contract](../contracts/boundaries/TAMR%20-%20Inviolable%20Limits%20Contract.md)
 - [TAMR - Conformance & Certification Rules](../contracts/governance/TAMR%20-%20Conformance%20&%20Certification%20Rules.md)
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 ## 2. Principes de test
 
-**T-TAMR-1 : Tests conceptuels** — Les tests definis sont conceptuels : ils specifient ce qui doit etre valide, pas l'outil ou la methode.
+**T-TAMR-1 : Tests conceptuels** â€” Les tests definis sont conceptuels : ils specifient ce qui doit etre valide, pas l'outil ou la methode.
 
-**T-TAMR-2 : Validation contractuelle** — Les tests valident le respect des contrats TAMR (invariants, trace, limites), pas les details d'implementation.
+**T-TAMR-2 : Validation contractuelle** â€” Les tests valident le respect des contrats TAMR (invariants, trace, limites), pas les details d'implementation.
 
-**T-TAMR-3 : Completeness** — Chaque invariant INV-TAMR-* et chaque regle critique (justification override, escalade non bloquante) doit etre couvert par au moins un test.
+**T-TAMR-3 : Completeness** â€” Chaque invariant INV-TAMR-* et chaque regle critique (justification override, escalade non bloquante) doit etre couvert par au moins un test.
 
-**T-TAMR-4 : Reproductibilite** — Les tests doivent etre reproductibles : meme scenario, meme resultat attendu.
+**T-TAMR-4 : Reproductibilite** â€” Les tests doivent etre reproductibles : meme scenario, meme resultat attendu.
 
 ---
 
@@ -103,3 +103,4 @@ Les tests DOIVENT pouvoir s'executer en mode isole (sans dependance externe crit
 **Date :** 2026-01-28  
 **Statut :** CONTRAT  
 **Reference :** TAMR Invariants & Guarantees, Trace Contract, Conformance & Certification Rules
+

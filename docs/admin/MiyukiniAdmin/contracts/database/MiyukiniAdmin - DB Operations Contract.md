@@ -1,4 +1,4 @@
-# MiyukiniAdmin — DB Operations Contract
+﻿# MiyukiniAdmin â€” DB Operations Contract
 
 ## 1. Contexte
 
@@ -85,69 +85,69 @@ Ce document **ne couvre pas** :
 
 ```
 MiyukiniAdmin            BondingBrother              KindMother
-     │                         │                          │
-     │──ReadRequest────────────▶│                          │
-     │  (table: users)          │                          │
-     │  (filters: {...})        │                          │
-     │                         │                          │
-     │                         │──DataQuery───────────────▶│
-     │                         │                          │
-     │                         │◀─DataResult──────────────│
-     │                         │                          │
-     │◀─ReadResponse───────────│                          │
-     │  (data, metadata)        │                          │
-     │                         │                          │
+     â”‚                         â”‚                          â”‚
+     â”‚â”€â”€ReadRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
+     â”‚  (table: users)          â”‚                          â”‚
+     â”‚  (filters: {...})        â”‚                          â”‚
+     â”‚                         â”‚                          â”‚
+     â”‚                         â”‚â”€â”€DataQueryâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                         â”‚                          â”‚
+     â”‚                         â”‚â—€â”€DataResultâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                         â”‚                          â”‚
+     â”‚â—€â”€ReadResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                          â”‚
+     â”‚  (data, metadata)        â”‚                          â”‚
+     â”‚                         â”‚                          â”‚
 ```
 
 ### 5.2 Operation de Maintenance (MAINT)
 
 ```
 MiyukiniAdmin            BondingBrother         StrongFather      KindMother
-     │                         │                     │                │
-     │──MaintenanceRequest─────▶│                     │                │
-     │  (op: VACUUM)            │                     │                │
-     │  (table: orders)         │                     │                │
-     │                         │                     │                │
-     │                         │──ValidateOp─────────▶│                │
-     │                         │                     │                │
-     │                         │◀─Approved───────────│                │
-     │                         │                     │                │
-     │                         │──ExecuteMaintenance──────────────────▶│
-     │                         │                     │                │
-     │                         │◀─MaintenanceComplete─────────────────│
-     │                         │                     │                │
-     │◀─MaintenanceResponse────│                     │                │
-     │  (status, stats)         │                     │                │
-     │                         │                     │                │
+     â”‚                         â”‚                     â”‚                â”‚
+     â”‚â”€â”€MaintenanceRequestâ”€â”€â”€â”€â”€â–¶â”‚                     â”‚                â”‚
+     â”‚  (op: VACUUM)            â”‚                     â”‚                â”‚
+     â”‚  (table: orders)         â”‚                     â”‚                â”‚
+     â”‚                         â”‚                     â”‚                â”‚
+     â”‚                         â”‚â”€â”€ValidateOpâ”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                â”‚
+     â”‚                         â”‚                     â”‚                â”‚
+     â”‚                         â”‚â—€â”€Approvedâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                â”‚
+     â”‚                         â”‚                     â”‚                â”‚
+     â”‚                         â”‚â”€â”€ExecuteMaintenanceâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                         â”‚                     â”‚                â”‚
+     â”‚                         â”‚â—€â”€MaintenanceCompleteâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                         â”‚                     â”‚                â”‚
+     â”‚â—€â”€MaintenanceResponseâ”€â”€â”€â”€â”‚                     â”‚                â”‚
+     â”‚  (status, stats)         â”‚                     â”‚                â”‚
+     â”‚                         â”‚                     â”‚                â”‚
 ```
 
 ### 5.3 Operation de Migration (MIG)
 
 ```
 MiyukiniAdmin            BondingBrother         StrongFather      KindMother
-     │                         │                     │                │
-     │──MigrationRequest───────▶│                     │                │
-     │  (migration: v2.1)       │                     │                │
-     │                         │                     │                │
-     │                         │  [Pre-validation]    │                │
-     │                         │──RunPreTests─────────────────────────▶│
-     │                         │◀─PreTestsOK──────────────────────────│
-     │                         │                     │                │
-     │                         │──CreateBackup────────────────────────▶│
-     │                         │◀─BackupCreated───────────────────────│
-     │                         │                     │                │
-     │                         │──ValidateMigration──▶│                │
-     │                         │◀─Approved───────────│                │
-     │                         │                     │                │
-     │                         │──ExecuteMigration────────────────────▶│
-     │                         │                     │                │
-     │                         │◀─MigrationComplete───────────────────│
-     │                         │                     │                │
-     │                         │──RunPostTests────────────────────────▶│
-     │                         │◀─PostTestsOK─────────────────────────│
-     │                         │                     │                │
-     │◀─MigrationResponse──────│                     │                │
-     │  (status, report)        │                     │                │
+     â”‚                         â”‚                     â”‚                â”‚
+     â”‚â”€â”€MigrationRequestâ”€â”€â”€â”€â”€â”€â”€â–¶â”‚                     â”‚                â”‚
+     â”‚  (migration: v2.1)       â”‚                     â”‚                â”‚
+     â”‚                         â”‚                     â”‚                â”‚
+     â”‚                         â”‚  [Pre-validation]    â”‚                â”‚
+     â”‚                         â”‚â”€â”€RunPreTestsâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                         â”‚â—€â”€PreTestsOKâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                         â”‚                     â”‚                â”‚
+     â”‚                         â”‚â”€â”€CreateBackupâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                         â”‚â—€â”€BackupCreatedâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                         â”‚                     â”‚                â”‚
+     â”‚                         â”‚â”€â”€ValidateMigrationâ”€â”€â–¶â”‚                â”‚
+     â”‚                         â”‚â—€â”€Approvedâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                â”‚
+     â”‚                         â”‚                     â”‚                â”‚
+     â”‚                         â”‚â”€â”€ExecuteMigrationâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                         â”‚                     â”‚                â”‚
+     â”‚                         â”‚â—€â”€MigrationCompleteâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                         â”‚                     â”‚                â”‚
+     â”‚                         â”‚â”€â”€RunPostTestsâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                         â”‚â—€â”€PostTestsOKâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                         â”‚                     â”‚                â”‚
+     â”‚â—€â”€MigrationResponseâ”€â”€â”€â”€â”€â”€â”‚                     â”‚                â”‚
+     â”‚  (status, report)        â”‚                     â”‚                â”‚
 ```
 
 ---
@@ -297,49 +297,49 @@ MiyukiniAdmin            BondingBrother         StrongFather      KindMother
 ### 9.1 Workflow Migration
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ 1. Pre-validation                                            │
-├─────────────────────────────────────────────────────────────┤
-│ - Verification etat systeme (T0/T1 requis)                  │
-│ - Execution suite tests Pre-Migration                       │
-│ - Verification espace disque                                │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 2. Preparation                                               │
-├─────────────────────────────────────────────────────────────┤
-│ - Creation backup complet                                   │
-│ - Notification CaringNanny (mode migration)                 │
-│ - Blocage operations concurrentes                           │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 3. Execution                                                 │
-├─────────────────────────────────────────────────────────────┤
-│ - Application des scripts de migration                      │
-│ - Log detaille de chaque etape                              │
-│ - Arret si erreur                                           │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 4. Post-validation                                           │
-├─────────────────────────────────────────────────────────────┤
-│ - Execution suite tests Post-Migration                      │
-│ - Verification integrite                                    │
-│ - Si echec → Rollback automatique                           │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 5. Finalisation                                              │
-├─────────────────────────────────────────────────────────────┤
-│ - Notification succes/echec                                 │
-│ - Mise a jour version DB                                    │
-│ - Deblocage operations                                      │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 1. Pre-validation                                            â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - Verification etat systeme (T0/T1 requis)                  â”‚
+â”‚ - Execution suite tests Pre-Migration                       â”‚
+â”‚ - Verification espace disque                                â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â”‚
+                              â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 2. Preparation                                               â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - Creation backup complet                                   â”‚
+â”‚ - Notification CaringNanny (mode migration)                 â”‚
+â”‚ - Blocage operations concurrentes                           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â”‚
+                              â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 3. Execution                                                 â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - Application des scripts de migration                      â”‚
+â”‚ - Log detaille de chaque etape                              â”‚
+â”‚ - Arret si erreur                                           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â”‚
+                              â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 4. Post-validation                                           â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - Execution suite tests Post-Migration                      â”‚
+â”‚ - Verification integrite                                    â”‚
+â”‚ - Si echec â†’ Rollback automatique                           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â”‚
+                              â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 5. Finalisation                                              â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - Notification succes/echec                                 â”‚
+â”‚ - Mise a jour version DB                                    â”‚
+â”‚ - Deblocage operations                                      â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 9.2 Rollback
@@ -375,7 +375,7 @@ MiyukiniAdmin            BondingBrother         StrongFather      KindMother
 
 ### 9.3.3 Table d'historique
 
-Une table d'historique (gouvernée par KindMother) enregistre :
+Une table d'historique (gouvernÃ©e par KindMother) enregistre :
 
 | Colonne | Description |
 |---------|-------------|
@@ -396,7 +396,7 @@ Les scripts deja appliques ne sont pas re-executes (consultation de l'historique
 ### 9.3.5 Lien avec Ever Buddy
 
 - **Ever Buddy** (Core de cycle de vie) ne execute pas les migrations.
-- Consultation possible pour **compatibilité** et **etats de vie** (ACTIF, DEPRECIE) des schemas ou objets avant/apres migration.
+- Consultation possible pour **compatibilitÃ©** et **etats de vie** (ACTIF, DEPRECIE) des schemas ou objets avant/apres migration.
 - La version du schema ou de l'environnement peut etre mise a jour apres migration reussie ; coherence avec la strate Cores (evolution par environnement, voir Glossaire).
 
 ---
@@ -461,14 +461,15 @@ Les scripts deja appliques ne sont pas re-executes (consultation de l'historique
 
 ## 12. Documents Associes
 
-- [MiyukiniAdmin - Gestion DB type Supabase](../reference/MiyukiniAdmin%20-%20Gestion%20DB%20type%20Supabase.md)
+- [MiyukiniAdmin - Gestion DB type Supabase](..//..//reference//MiyukiniAdmin%20-%20Gestion%20DB%20type%20Supabase.md)
 - [MiyukiniAdmin - Emergency DB Access Contract](./MiyukiniAdmin%20-%20Emergency%20DB%20Access%20Contract.md)
 - [MiyukiniAdmin - DB Metrics Contract](../monitoring/MiyukiniAdmin%20-%20DB%20Metrics%20Contract.md)
 - [MiyukiniAdmin - Unit Tests Contract](../testing/MiyukiniAdmin%20-%20Unit%20Tests%20Contract.md)
-- [KindMother - Documentation Fondatrice](../../../KindMother/foundation/KindMother%20-%20Documentation%20Fondatrice.md)
+- [KindMother - Documentation Fondatrice](..//..//..//..//cores//KindMother//foundation//KindMother%20-%20Documentation%20Fondatrice.md)
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
 **Statut :** Contrat de reference
+

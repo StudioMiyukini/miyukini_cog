@@ -1,36 +1,36 @@
-# MiyuClicker — Ergonomie de l’écran de gestion (Cookie Clicker–like)
+﻿# MiyuClicker â€” Ergonomie de lâ€™Ã©cran de gestion (Cookie Clickerâ€“like)
 
 ## Contexte
 
-Ce document décrit l’**ergonomie de l’écran de gestion** de MiyuClicker : disposition en deux moitiés (gauche / droite), **quatre gros boutons** à gauche (Champs, Ateliers, Château, Village) pour les gains au clic, et **liste déroulante d’affectation des gens** à droite pour la génération automatique de ressources, à la manière d’un **Cookie Clicker**.
+Ce document dÃ©crit lâ€™**ergonomie de lâ€™Ã©cran de gestion** de MiyuClicker : disposition en deux moitiÃ©s (gauche / droite), **quatre gros boutons** Ã  gauche (Champs, Ateliers, ChÃ¢teau, Village) pour les gains au clic, et **liste dÃ©roulante dâ€™affectation des gens** Ã  droite pour la gÃ©nÃ©ration automatique de ressources, Ã  la maniÃ¨re dâ€™un **Cookie Clicker**.
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Périmètre :** Barre en haut (ressources + navigation écrans) ; layout de l’écran de gestion (partie gauche : 4 boutons ; partie droite : liste d’affectation) ; rôle de chaque zone ; clic manuel vs génération automatique par affectation de gens.
-- **Hors périmètre :** Formules de gain exactes ; implémentation technique détaillée.
+- **PÃ©rimÃ¨tre :** Barre en haut (ressources + navigation Ã©crans) ; layout de lâ€™Ã©cran de gestion (partie gauche : 4 boutons ; partie droite : liste dâ€™affectation) ; rÃ´le de chaque zone ; clic manuel vs gÃ©nÃ©ration automatique par affectation de gens.
+- **Hors pÃ©rimÃ¨tre :** Formules de gain exactes ; implÃ©mentation technique dÃ©taillÃ©e.
 
 ---
 
-## 1. Barre en haut de l’écran de jeu
+## 1. Barre en haut de lâ€™Ã©cran de jeu
 
-Une **barre horizontale** en **haut** de l’écran de jeu récapitule les **ressources disponibles** et donne accès aux **différents écrans** (gestion du village, grandes stratégies).
+Une **barre horizontale** en **haut** de lâ€™Ã©cran de jeu rÃ©capitule les **ressources disponibles** et donne accÃ¨s aux **diffÃ©rents Ã©crans** (gestion du village, grandes stratÃ©gies).
 
-### 1.1 Première ligne — Ressources principales
+### 1.1 PremiÃ¨re ligne â€” Ressources principales
 
-La **première ligne** affiche les ressources principales, **dans l’ordre suivant** (de gauche à droite) :
+La **premiÃ¨re ligne** affiche les ressources principales, **dans lâ€™ordre suivant** (de gauche Ã  droite) :
 
 | Ordre | Ressource | Description |
 |-------|-----------|-------------|
-| 1 | **Or** | Stock d’or. |
+| 1 | **Or** | Stock dâ€™or. |
 | 2 | **Gens** | Population civile disponible (ou total). |
 | 3 | **Soldats** | Nombre de soldats / troupes. |
-| 4 | **Recherche** | Points de recherche accumulés. |
+| 4 | **Recherche** | Points de recherche accumulÃ©s. |
 
-Chaque ressource est affichée sous forme **icône + valeur** (ou libellé court + valeur), mise à jour en temps réel.
+Chaque ressource est affichÃ©e sous forme **icÃ´ne + valeur** (ou libellÃ© court + valeur), mise Ã  jour en temps rÃ©el.
 
-### 1.2 Deuxième ligne — Ressources intermédiaires et secondaires
+### 1.2 DeuxiÃ¨me ligne â€” Ressources intermÃ©diaires et secondaires
 
-La **deuxième ligne** de la barre affiche les ressources dans l’**ordre suivant** (de gauche à droite) :
+La **deuxiÃ¨me ligne** de la barre affiche les ressources dans lâ€™**ordre suivant** (de gauche Ã  droite) :
 
 | Ordre | Ressource | Description |
 |-------|-----------|-------------|
@@ -38,218 +38,219 @@ La **deuxième ligne** de la barre affiche les ressources dans l’**ordre suiva
 | 2 | **Bois** | Stock de bois. |
 | 3 | **Pierre** | Stock de pierre. |
 | 4 | **Fer** | Stock de fer. |
-| 5 | **Outils** | Stock d’outils. |
-| 6 | **Armes** | Stock d’armes. |
+| 5 | **Outils** | Stock dâ€™outils. |
+| 6 | **Armes** | Stock dâ€™armes. |
 
-Ces ressources servent à **construire** ou **fabriquer** d’autres biens. Règles de conversion (logique de jeu) :
+Ces ressources servent Ã  **construire** ou **fabriquer** dâ€™autres biens. RÃ¨gles de conversion (logique de jeu) :
 
-| Utilisation | Ressources consommées | Effet |
+| Utilisation | Ressources consommÃ©es | Effet |
 |-------------|------------------------|--------|
-| **Habitations** | **Bois + Pierre** | Permet de construire plus d’**habitations** → **augmente le cap** (plafond) de **gens disponibles**. |
-| **Armes** | **Fer + Bois** | Permet de **fabriquer des armes** (augmente le stock d’armes). |
-| **Outils** | **Bois** OU **Pierre** OU **Fer** | Permet de **fabriquer des outils** ; au moins une de ces trois matières est consommée. |
+| **Habitations** | **Bois + Pierre** | Permet de construire plus dâ€™**habitations** â†’ **augmente le cap** (plafond) de **gens disponibles**. |
+| **Armes** | **Fer + Bois** | Permet de **fabriquer des armes** (augmente le stock dâ€™armes). |
+| **Outils** | **Bois** OU **Pierre** OU **Fer** | Permet de **fabriquer des outils** ; au moins une de ces trois matiÃ¨res est consommÃ©e. |
 
-En résumé :
-- **Bois et pierre** → plus d’habitations → **cap de gens** plus élevé.
-- **Fer et bois** → **armes**.
-- **Bois, ou pierre, ou fer** → **outils**.
+En rÃ©sumÃ© :
+- **Bois et pierre** â†’ plus dâ€™habitations â†’ **cap de gens** plus Ã©levÃ©.
+- **Fer et bois** â†’ **armes**.
+- **Bois, ou pierre, ou fer** â†’ **outils**.
 
-Les formules exactes (quantités par construction, caps, etc.) relèvent des spécifications de jeu ; l’ergonomie impose d’afficher sur la **deuxième ligne** : **nourriture, bois, pierre, fer, outils, armes** — distincte de la première ligne (or, gens, soldats, recherche).
+Les formules exactes (quantitÃ©s par construction, caps, etc.) relÃ¨vent des spÃ©cifications de jeu ; lâ€™ergonomie impose dâ€™afficher sur la **deuxiÃ¨me ligne** : **nourriture, bois, pierre, fer, outils, armes** â€” distincte de la premiÃ¨re ligne (or, gens, soldats, recherche).
 
-### 1.3 Navigation vers les écrans
+### 1.3 Navigation vers les Ã©crans
 
-La barre en haut inclut des **entrées de navigation** vers les **écrans principaux** :
+La barre en haut inclut des **entrÃ©es de navigation** vers les **Ã©crans principaux** :
 
-| Libellé affiché | Écran | Rôle |
+| LibellÃ© affichÃ© | Ã‰cran | RÃ´le |
 |-----------------|-------|------|
-| **Ma citée** | Gestion du village | Écran de gestion (4 boutons gauche + liste d’affectation droite) — celui décrit dans ce document. |
-| **Carte du monde** | Grandes stratégies | Carte stratégique (cités-États, routes, conquête, envoi de troupes). |
+| **Ma citÃ©e** | Gestion du village | Ã‰cran de gestion (4 boutons gauche + liste dâ€™affectation droite) â€” celui dÃ©crit dans ce document. |
+| **Carte du monde** | Grandes stratÃ©gies | Carte stratÃ©gique (citÃ©s-Ã‰tats, routes, conquÃªte, envoi de troupes). |
 
-L’ordre d’affichage dans la barre : **ressources** (ligne 1 puis ligne 2), puis **Ma citée**, **Carte du monde**, et la **roue de configuration** (engrenage) à droite. Le joueur clique sur « Ma citée » ou « Carte du monde » pour afficher l’écran correspondant.
+Lâ€™ordre dâ€™affichage dans la barre : **ressources** (ligne 1 puis ligne 2), puis **Ma citÃ©e**, **Carte du monde**, et la **roue de configuration** (engrenage) Ã  droite. Le joueur clique sur Â« Ma citÃ©e Â» ou Â« Carte du monde Â» pour afficher lâ€™Ã©cran correspondant.
 
 ### 1.4 Disposition type de la barre (deux lignes)
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  Or │ Gens │ Soldats │ Recherche │ Ma citée │ Carte du monde │ [⚙]         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  Nourriture │ Bois │ Pierre │ Fer │ Outils │ Armes │                        │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Or â”‚ Gens â”‚ Soldats â”‚ Recherche â”‚ Ma citÃ©e â”‚ Carte du monde â”‚ [âš™]         â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  Nourriture â”‚ Bois â”‚ Pierre â”‚ Fer â”‚ Outils â”‚ Armes â”‚                        â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-- **Ligne 1** : les 4 ressources principales (**or**, gens, soldats, recherche) ; à droite : **Ma citée**, **Carte du monde**, **roue de configuration** (engrenage).
+- **Ligne 1** : les 4 ressources principales (**or**, gens, soldats, recherche) ; Ã  droite : **Ma citÃ©e**, **Carte du monde**, **roue de configuration** (engrenage).
 - **Ligne 2** : **nourriture**, **bois**, **pierre**, **fer**, **outils**, **armes**.
 
 ---
 
-## 2. Vue d’ensemble du layout (écran de jeu)
+## 2. Vue dâ€™ensemble du layout (Ã©cran de jeu)
 
-Sous la barre en haut, l’écran affiché dépend du choix de navigation : **gestion du village** (layout ci-dessous) ou **grandes stratégies** (carte).
+Sous la barre en haut, lâ€™Ã©cran affichÃ© dÃ©pend du choix de navigation : **gestion du village** (layout ci-dessous) ou **grandes stratÃ©gies** (carte).
 
-### 2.1 Layout « Gestion du village »
+### 2.1 Layout Â« Gestion du village Â»
 
-L’écran **Gestion du village** est divisé en **deux moitiés** :
+Lâ€™Ã©cran **Gestion du village** est divisÃ© en **deux moitiÃ©s** :
 
-| Zone | Position | Rôle |
+| Zone | Position | RÃ´le |
 |------|-----------|------|
-| **Partie gauche** | Moitié gauche de l’écran | **Quatre gros boutons** : Champs, Ateliers, Château, Village. **Clic manuel** → gains immédiats (nourriture, outils, soldats, gens). |
-| **Partie droite** | Moitié droite de l’écran | **Liste déroulante** des **lieux d’affectation** : le joueur y place des **gens** pour que des **ressources soient générées automatiquement** (idle). |
+| **Partie gauche** | MoitiÃ© gauche de lâ€™Ã©cran | **Quatre gros boutons** : Champs, Ateliers, ChÃ¢teau, Village. **Clic manuel** â†’ gains immÃ©diats (nourriture, outils, soldats, gens). |
+| **Partie droite** | MoitiÃ© droite de lâ€™Ã©cran | **Liste dÃ©roulante** des **lieux dâ€™affectation** : le joueur y place des **gens** pour que des **ressources soient gÃ©nÃ©rÃ©es automatiquement** (idle). |
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  Or │ Gens │ Soldats │ Recherche │ Ma citée │ Carte du monde │ [⚙]         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  Nourriture │ Bois │ Pierre │ Fer │ Outils │ Armes │                        │
-├──────────────────────────────────────────────────────────────────────────────┤
-│                              │                                               │
-│   PARTIE GAUCHE              │   PARTIE DROITE                               │
-│   (4 gros boutons)           │   (liste déroulante)                          │
-│                              │                                               │
-│   ┌─────────────┐            │   Lieux où placer des gens :                  │
-│   │   CHAMPS    │  → Nourriture   ▼ [Liste déroulante]                       │
-│   └─────────────┘            │   • Champs (nourriture auto)                   │
-│                              │   • Ateliers (outils auto)                     │
-│   ┌─────────────┐            │   • …                                         │
-│   │  ATELIERS   │  → Outils   │   Affectation : X gens ici,                  │
-│   └─────────────┘            │   Y gens là → génération auto                  │
-│                              │                                               │
-│   ┌─────────────┐            │                                               │
-│   │   CHÂTEAU   │  → Soldats  │                                               │
-│   └─────────────┘            │                                               │
-│                              │                                               │
-│   ┌─────────────┐            │                                               │
-│   │   VILLAGE   │  → Gens     │                                               │
-│   └─────────────┘            │                                               │
-│                              │                                               │
-└──────────────────────────────┴───────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Or â”‚ Gens â”‚ Soldats â”‚ Recherche â”‚ Ma citÃ©e â”‚ Carte du monde â”‚ [âš™]         â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  Nourriture â”‚ Bois â”‚ Pierre â”‚ Fer â”‚ Outils â”‚ Armes â”‚                        â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                              â”‚                                               â”‚
+â”‚   PARTIE GAUCHE              â”‚   PARTIE DROITE                               â”‚
+â”‚   (4 gros boutons)           â”‚   (liste dÃ©roulante)                          â”‚
+â”‚                              â”‚                                               â”‚
+â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”‚   Lieux oÃ¹ placer des gens :                  â”‚
+â”‚   â”‚   CHAMPS    â”‚  â†’ Nourriture   â–¼ [Liste dÃ©roulante]                       â”‚
+â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â”‚   â€¢ Champs (nourriture auto)                   â”‚
+â”‚                              â”‚   â€¢ Ateliers (outils auto)                     â”‚
+â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”‚   â€¢ â€¦                                         â”‚
+â”‚   â”‚  ATELIERS   â”‚  â†’ Outils   â”‚   Affectation : X gens ici,                  â”‚
+â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â”‚   Y gens lÃ  â†’ gÃ©nÃ©ration auto                  â”‚
+â”‚                              â”‚                                               â”‚
+â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”‚                                               â”‚
+â”‚   â”‚   CHÃ‚TEAU   â”‚  â†’ Soldats  â”‚                                               â”‚
+â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â”‚                                               â”‚
+â”‚                              â”‚                                               â”‚
+â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”‚                                               â”‚
+â”‚   â”‚   VILLAGE   â”‚  â†’ Gens     â”‚                                               â”‚
+â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â”‚                                               â”‚
+â”‚                              â”‚                                               â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
 
-## 3. Partie gauche — Quatre gros boutons
+## 3. Partie gauche â€” Quatre gros boutons
 
-Les **quatre gros boutons** occupent la **moitié gauche** de l’écran. Chaque bouton est **grand, visible, cliquable** ; un clic déclenche un **gain immédiat** (ressource ou unité), à la manière du cookie dans Cookie Clicker.
+Les **quatre gros boutons** occupent la **moitiÃ© gauche** de lâ€™Ã©cran. Chaque bouton est **grand, visible, cliquable** ; un clic dÃ©clenche un **gain immÃ©diat** (ressource ou unitÃ©), Ã  la maniÃ¨re du cookie dans Cookie Clicker.
 
 ### 3.1 Les Champs
 
 | Attribut | Description |
 |----------|-------------|
-| **Label / sens** | **Champs** — représente les terres agricoles. |
-| **Action au clic** | Le joueur **gagne des points en nourriture** (gain immédiat à chaque clic). |
-| **Rôle** | Boucle **clicker** : cliquer pour accumuler de la nourriture manuellement. |
+| **Label / sens** | **Champs** â€” reprÃ©sente les terres agricoles. |
+| **Action au clic** | Le joueur **gagne des points en nourriture** (gain immÃ©diat Ã  chaque clic). |
+| **RÃ´le** | Boucle **clicker** : cliquer pour accumuler de la nourriture manuellement. |
 | **Feedback** | Retour visuel au clic (animation, +N nourriture, son optionnel). |
 
 ### 3.2 Les Ateliers
 
 | Attribut | Description |
 |----------|-------------|
-| **Label / sens** | **Ateliers** — représente les ateliers de production. |
-| **Action au clic** | Le joueur **gagne des points en outils** (gain immédiat à chaque clic). |
-| **Rôle** | Boucle **clicker** : cliquer pour accumuler des outils manuellement. |
+| **Label / sens** | **Ateliers** â€” reprÃ©sente les ateliers de production. |
+| **Action au clic** | Le joueur **gagne des points en outils** (gain immÃ©diat Ã  chaque clic). |
+| **RÃ´le** | Boucle **clicker** : cliquer pour accumuler des outils manuellement. |
 | **Feedback** | Retour visuel au clic (animation, +N outils, son optionnel). |
 
-### 3.3 Le Château
+### 3.3 Le ChÃ¢teau
 
 | Attribut | Description |
 |----------|-------------|
-| **Label / sens** | **Château** — représente le recrutement militaire. |
-| **Action au clic** | Le joueur **crée des soldats** (un ou plusieurs par clic, selon règles de coût à définir). |
-| **Rôle** | Boucle **clicker** : cliquer pour recruter des soldats (sous réserve de ressources / conditions). |
-| **Feedback** | Retour visuel au clic ; si coût insuffisant, message ou feedback négatif. |
+| **Label / sens** | **ChÃ¢teau** â€” reprÃ©sente le recrutement militaire. |
+| **Action au clic** | Le joueur **crÃ©e des soldats** (un ou plusieurs par clic, selon rÃ¨gles de coÃ»t Ã  dÃ©finir). |
+| **RÃ´le** | Boucle **clicker** : cliquer pour recruter des soldats (sous rÃ©serve de ressources / conditions). |
+| **Feedback** | Retour visuel au clic ; si coÃ»t insuffisant, message ou feedback nÃ©gatif. |
 
 ### 2.4 Le Village
 
 | Attribut | Description |
 |----------|-------------|
-| **Label / sens** | **Village** — représente la population civile. |
-| **Action au clic** | Le joueur **crée des gens** (population civile). |
-| **Rôle** | Boucle **clicker** : cliquer pour faire croître la population (sous réserve de nourriture / conditions). |
-| **Feedback** | Retour visuel au clic ; si conditions non remplies (ex. nourriture), message ou feedback négatif. |
+| **Label / sens** | **Village** â€” reprÃ©sente la population civile. |
+| **Action au clic** | Le joueur **crÃ©e des gens** (population civile). |
+| **RÃ´le** | Boucle **clicker** : cliquer pour faire croÃ®tre la population (sous rÃ©serve de nourriture / conditions). |
+| **Feedback** | Retour visuel au clic ; si conditions non remplies (ex. nourriture), message ou feedback nÃ©gatif. |
 
-### 3.5 Synthèse partie gauche
+### 3.5 SynthÃ¨se partie gauche
 
-| Bouton | Effet au clic (immédiat) |
+| Bouton | Effet au clic (immÃ©diat) |
 |--------|---------------------------|
 | **Champs** | + Nourriture |
 | **Ateliers** | + Outils |
-| **Château** | + Soldats (si conditions remplies) |
+| **ChÃ¢teau** | + Soldats (si conditions remplies) |
 | **Village** | + Gens (si conditions remplies) |
 
-Les **coûts** (nourriture pour créer des gens, ressources pour soldats, etc.) et les **montants par clic** relèvent des spécifications de jeu (formules, équilibrage) ; l’ergonomie impose seulement que chaque gros bouton ait un **effet clair et immédiat** au clic.
+Les **coÃ»ts** (nourriture pour crÃ©er des gens, ressources pour soldats, etc.) et les **montants par clic** relÃ¨vent des spÃ©cifications de jeu (formules, Ã©quilibrage) ; lâ€™ergonomie impose seulement que chaque gros bouton ait un **effet clair et immÃ©diat** au clic.
 
 ---
 
-## 4. Partie droite — Liste déroulante d’affectation des gens
+## 4. Partie droite â€” Liste dÃ©roulante dâ€™affectation des gens
 
-La **moitié droite** de l’écran affiche une **liste déroulante** (ou liste extensible) des **endroits où le joueur peut placer des gens** pour que des **ressources soient générées automatiquement**.
+La **moitiÃ© droite** de lâ€™Ã©cran affiche une **liste dÃ©roulante** (ou liste extensible) des **endroits oÃ¹ le joueur peut placer des gens** pour que des **ressources soient gÃ©nÃ©rÃ©es automatiquement**.
 
 ### 4.1 Principe (style Cookie Clicker)
 
-- Le joueur dispose d’un **stock de gens** (population disponible).
-- Il **affecte** une partie de ces gens à différents **lieux** (Champs, Ateliers, etc.).
-- Les gens affectés **produisent des ressources en continu** (génération passive / idle), sans avoir à cliquer.
-- La **liste déroulante** recense ces lieux et permet de **choisir combien de gens** envoyer dans chaque lieu.
+- Le joueur dispose dâ€™un **stock de gens** (population disponible).
+- Il **affecte** une partie de ces gens Ã  diffÃ©rents **lieux** (Champs, Ateliers, etc.).
+- Les gens affectÃ©s **produisent des ressources en continu** (gÃ©nÃ©ration passive / idle), sans avoir Ã  cliquer.
+- La **liste dÃ©roulante** recense ces lieux et permet de **choisir combien de gens** envoyer dans chaque lieu.
 
-### 3.2 Contenu de la liste déroulante
+### 3.2 Contenu de la liste dÃ©roulante
 
-La liste propose les **lieux d’affectation** possibles, par exemple :
+La liste propose les **lieux dâ€™affectation** possibles, par exemple :
 
-| Lieu d’affectation | Ressource générée automatiquement |
+| Lieu dâ€™affectation | Ressource gÃ©nÃ©rÃ©e automatiquement |
 |--------------------|-------------------------------------|
 | **Champs** | Nourriture (par tick / par seconde) |
 | **Ateliers** | Outils |
 | **Recherche** (optionnel) | Points de recherche |
-| **Matières premières** (optionnel) | Matières premières |
+| **MatiÃ¨res premiÃ¨res** (optionnel) | MatiÃ¨res premiÃ¨res |
 | **Armes** (optionnel) | Armes |
-| … | Selon règles de jeu (Document Fondateur) |
+| â€¦ | Selon rÃ¨gles de jeu (Document Fondateur) |
 
-Chaque ligne (ou entrée déroulante) permet typiquement :
-- d’**afficher le lieu** et la **ressource générée** ;
-- de **régler le nombre de gens affectés** (slider, champs +/- ou liste de choix).
+Chaque ligne (ou entrÃ©e dÃ©roulante) permet typiquement :
+- dâ€™**afficher le lieu** et la **ressource gÃ©nÃ©rÃ©e** ;
+- de **rÃ©gler le nombre de gens affectÃ©s** (slider, champs +/- ou liste de choix).
 
 ### 4.3 Comportement attendu
 
 | Action | Effet |
 |--------|--------|
-| **Ouvrir la liste** | Afficher tous les lieux où des gens peuvent être affectés. |
-| **Choisir un lieu** | Afficher le détail : nom, ressource générée, nombre de gens actuellement affectés, capacité ou limite éventuelle. |
-| **Affecter X gens à un lieu** | Réduire le nombre de **gens disponibles** de X et augmenter la **génération automatique** de la ressource correspondante. |
-| **Retirer des gens d’un lieu** | Les gens redeviennent **disponibles** ; la génération automatique de ce lieu diminue. |
+| **Ouvrir la liste** | Afficher tous les lieux oÃ¹ des gens peuvent Ãªtre affectÃ©s. |
+| **Choisir un lieu** | Afficher le dÃ©tail : nom, ressource gÃ©nÃ©rÃ©e, nombre de gens actuellement affectÃ©s, capacitÃ© ou limite Ã©ventuelle. |
+| **Affecter X gens Ã  un lieu** | RÃ©duire le nombre de **gens disponibles** de X et augmenter la **gÃ©nÃ©ration automatique** de la ressource correspondante. |
+| **Retirer des gens dâ€™un lieu** | Les gens redeviennent **disponibles** ; la gÃ©nÃ©ration automatique de ce lieu diminue. |
 
-### 4.4 Cohérence avec la partie gauche
+### 4.4 CohÃ©rence avec la partie gauche
 
-- **Partie gauche (clic)** : gains **immédiats** au clic (nourriture, outils, soldats, gens).
-- **Partie droite (liste)** : **affectation de gens** → génération **automatique** dans le temps (idle).
-- Les **Champs** et **Ateliers** apparaissent à la fois :
-  - comme **boutons à cliquer** (gauche) pour un gain manuel ;
-  - comme **lieux d’affectation** (droite) pour une production automatique par les gens.
-- Le **Château** (soldats) et le **Village** (gens) sont surtout des **boutons de création** à gauche ; l’affectation à droite concerne les **lieux de production** (Champs, Ateliers, Recherche, etc.).
+- **Partie gauche (clic)** : gains **immÃ©diats** au clic (nourriture, outils, soldats, gens).
+- **Partie droite (liste)** : **affectation de gens** â†’ gÃ©nÃ©ration **automatique** dans le temps (idle).
+- Les **Champs** et **Ateliers** apparaissent Ã  la fois :
+  - comme **boutons Ã  cliquer** (gauche) pour un gain manuel ;
+  - comme **lieux dâ€™affectation** (droite) pour une production automatique par les gens.
+- Le **ChÃ¢teau** (soldats) et le **Village** (gens) sont surtout des **boutons de crÃ©ation** Ã  gauche ; lâ€™affectation Ã  droite concerne les **lieux de production** (Champs, Ateliers, Recherche, etc.).
 
 ---
 
-## 5. Résumé ergonomique
+## 5. RÃ©sumÃ© ergonomique
 
-| Zone | Élément | Rôle |
+| Zone | Ã‰lÃ©ment | RÃ´le |
 |------|---------|------|
-| **Barre haut (ligne 1)** | **Ressources + navigation** | **Or**, Gens, Soldats, Recherche ; puis **Ma citée**, **Carte du monde**, roue de configuration. |
-| **Barre haut (ligne 2)** | **Ressources secondaires** | **Nourriture**, Bois, Pierre, Fer, Outils, Armes — matières premières (bois+pierre → habitations ; fer+bois → armes ; bois/pierre/fer → outils) + stocks nourriture, outils, armes. |
-| **Gauche** | **Champs** (gros bouton) | Clic → + Nourriture |
-| **Gauche** | **Ateliers** (gros bouton) | Clic → + Outils |
-| **Gauche** | **Château** (gros bouton) | Clic → + Soldats |
-| **Gauche** | **Village** (gros bouton) | Clic → + Gens |
-| **Droite** | **Liste déroulante** | Lieux où placer des gens → **génération automatique** de ressources (nourriture, outils, etc.) à la manière d’un Cookie Clicker. |
+| **Barre haut (ligne 1)** | **Ressources + navigation** | **Or**, Gens, Soldats, Recherche ; puis **Ma citÃ©e**, **Carte du monde**, roue de configuration. |
+| **Barre haut (ligne 2)** | **Ressources secondaires** | **Nourriture**, Bois, Pierre, Fer, Outils, Armes â€” matiÃ¨res premiÃ¨res (bois+pierre â†’ habitations ; fer+bois â†’ armes ; bois/pierre/fer â†’ outils) + stocks nourriture, outils, armes. |
+| **Gauche** | **Champs** (gros bouton) | Clic â†’ + Nourriture |
+| **Gauche** | **Ateliers** (gros bouton) | Clic â†’ + Outils |
+| **Gauche** | **ChÃ¢teau** (gros bouton) | Clic â†’ + Soldats |
+| **Gauche** | **Village** (gros bouton) | Clic â†’ + Gens |
+| **Droite** | **Liste dÃ©roulante** | Lieux oÃ¹ placer des gens â†’ **gÃ©nÃ©ration automatique** de ressources (nourriture, outils, etc.) Ã  la maniÃ¨re dâ€™un Cookie Clicker. |
 
-L’écran de jeu comporte donc **une barre en haut** (ressources + navigation) et, sur l’écran **Gestion du village**, **deux piliers** : **clic manuel** (quatre gros boutons) et **idle par affectation** (liste droite).
-
----
-
-## 6. Références
-
-- [MiyuClicker - Document Fondateur](MiyuClicker%20-%20Document%20Fondateur.md) — Gameplay gestion (ressources, gens, moral).
-- [MiyuClicker - Parcours Utilisateur](MiyuClicker%20-%20Parcours%20Utilisateur.md) — Fenêtre principale.
-- [MiyuClicker - Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md) — Assets UI (boutons, listes).
+Lâ€™Ã©cran de jeu comporte donc **une barre en haut** (ressources + navigation) et, sur lâ€™Ã©cran **Gestion du village**, **deux piliers** : **clic manuel** (quatre gros boutons) et **idle par affectation** (liste droite).
 
 ---
 
-**Document créé le :** 2026-02-01  
-**Statut :** Ergonomie écran de gestion — 4 boutons gauche, liste affectation droite (Cookie Clicker–like)
+## 6. RÃ©fÃ©rences
+
+- [MiyuClicker - Document Fondateur](MiyukiniClicker%20-%20Document%20Fondateur.md) â€” Gameplay gestion (ressources, gens, moral).
+- [MiyuClicker - Parcours Utilisateur](MiyukiniClicker%20-%20Parcours%20Utilisateur.md) â€” FenÃªtre principale.
+- [MiyuClicker - Reference Packs UI Jeux](MiyukiniClicker%20-%20Reference%20Packs%20UI%20Jeux.md) â€” Assets UI (boutons, listes).
+
+---
+
+**Document crÃ©Ã© le :** 2026-02-01  
+**Statut :** Ergonomie Ã©cran de gestion â€” 4 boutons gauche, liste affectation droite (Cookie Clickerâ€“like)
+

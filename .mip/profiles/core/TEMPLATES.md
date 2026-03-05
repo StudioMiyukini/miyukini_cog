@@ -1,6 +1,6 @@
----
+﻿---
 id: mip.profiles.templates
-title: Profile Templates — Create Custom Profiles
+title: Profile Templates â€” Create Custom Profiles
 ---
 
 # Profile Templates
@@ -18,7 +18,7 @@ During `mip_profile create` with guided Q&A:
 ```bash
 mip_profile create my-setup
 # Maria walks you through step-by-step
-# ✅ Fastest for beginners
+# âœ… Fastest for beginners
 ```
 
 ### Way 2: Pre-made Template (Fill-in-the-blanks)
@@ -27,7 +27,7 @@ Copy template, modify YAML:
 
 ```bash
 mip_profile create-from-template corporate --name total-gdpr
-# Copies templates/corporate.md → custom/total-gdpr.md
+# Copies templates/corporate.md â†’ custom/total-gdpr.md
 # Opens editor with placeholders
 # :REPLACE_ME: values to fill
 ```
@@ -128,10 +128,10 @@ workflows:
 
 ## Constraints Applied
 
-- ✅ legal-compliance (audit + consent)
-- ✅ confidential-data (no logging, no cache)
-- ✅ regional-:REGION: (:REGION: data residency)
-- ✅ tool-locked-:TOOL_IDE: (IDE locked)
+- âœ… legal-compliance (audit + consent)
+- âœ… confidential-data (no logging, no cache)
+- âœ… regional-:REGION: (:REGION: data residency)
+- âœ… tool-locked-:TOOL_IDE: (IDE locked)
 
 ## Next Steps
 
@@ -147,14 +147,14 @@ workflows:
 mip_profile create-from-template corporate --name total-setup
 
 # Opens editor:
-#   :COMPANY_NAME: → Total
-#   :TOOL_IDE: → VS Code
-#   :REGION: → EU
-#   :DATA_SENSITIVITY: → high
-#   :BUDGET_LIMIT: → $500
+#   :COMPANY_NAME: â†’ Total
+#   :TOOL_IDE: â†’ VS Code
+#   :REGION: â†’ EU
+#   :DATA_SENSITIVITY: â†’ high
+#   :BUDGET_LIMIT: â†’ $500
 
-# After editing → mip_profile validate total-setup
-# ✅ Valid, activate with: mip_profile total-setup
+# After editing â†’ mip_profile validate total-setup
+# âœ… Valid, activate with: mip_profile total-setup
 ```
 
 ---
@@ -237,10 +237,10 @@ client_notes:
 mip_profile create-from-template freelance --name client-acme-dev
 
 # Fill:
-#   :CLIENT_NAME: → Acme
-#   :PREFERRED_LLM: → mistral
-#   :BUDGET_CONSTRAINT: → medium
-#   :TOOL: → VS Code
+#   :CLIENT_NAME: â†’ Acme
+#   :PREFERRED_LLM: â†’ mistral
+#   :BUDGET_CONSTRAINT: â†’ medium
+#   :TOOL: â†’ VS Code
 
 # Activate:
 #   mip_profile client-acme-dev
@@ -495,7 +495,7 @@ Maria: "Creating profile from corporate template.
         User: "$1000"
 
 Creating profile total-standard...
-✅ Done
+âœ… Done
 ```
 
 ### Step 4: Review & edit (optional)
@@ -506,14 +506,14 @@ mip_profile edit total-standard
 
 # Or validate before activation
 mip_profile validate total-standard
-# ✅ Valid, no conflicts
+# âœ… Valid, no conflicts
 ```
 
 ### Step 5: Activate
 
 ```bash
 mip_profile total-standard
-# ✅ Active: total-standard
+# âœ… Active: total-standard
 # Constraints: legal-compliance, confidential-data, regional-eu, tool-locked-vscode
 ```
 
@@ -525,7 +525,7 @@ Once you perfect a profile, save it as reusable template:
 
 ```bash
 mip_profile save-as-template total-gdpr --name corporate-gdpr-template
-# ✅ Saved to templates/corporate-gdpr-template.md
+# âœ… Saved to templates/corporate-gdpr-template.md
 #    Can now be used by team members
 ```
 
@@ -533,7 +533,7 @@ mip_profile save-as-template total-gdpr --name corporate-gdpr-template
 
 ## Template Best Practices
 
-### Do ✅
+### Do âœ…
 
 - [ ] Use clear placeholder names (`:COMPANY_NAME:`, not `:X:`)
 - [ ] Provide good descriptions
@@ -541,7 +541,7 @@ mip_profile save-as-template total-gdpr --name corporate-gdpr-template
 - [ ] Include example values
 - [ ] Validate before sharing
 
-### Don't ❌
+### Don't âŒ
 
 - [ ] Hard-code sensitive values in template
 - [ ] Use too many placeholders (keep < 10)
@@ -678,7 +678,8 @@ mip_profile export-template corporate-template \
 
 ## References
 
-- [MANAGEMENT.md](./MANAGEMENT.md) — How to CRUD profiles
-- [CONSTRAINTS.md](./CONSTRAINTS.md) — What constraints available
-- [INDEX.md](./INDEX.md) — All profiles directory
-- [SETUP.md](../modules/setup.md#setup-5) — Integration with SETUP
+- [MANAGEMENT.md](./MANAGEMENT.md) â€” How to CRUD profiles
+- [CONSTRAINTS.md](./CONSTRAINTS.md) â€” What constraints available
+- [INDEX.md](./INDEX.md) â€” All profiles directory
+- [SETUP.md](..//..//README.md#setup-5) â€” Integration with SETUP
+

@@ -1,63 +1,63 @@
-# Ever Buddy - Documentation Fondatrice
+﻿# Ever Buddy - Documentation Fondatrice
 
 ## 1. Introduction
 
-### Rôle d'Ever Buddy
+### RÃ´le d'Ever Buddy
 
-Ever Buddy (EB) est le **core de cycle de vie et d'évolution** du Miyukini Core System. Il incarne la capacité conceptuelle du système à gouverner l'évolution des structures, des contrats, et des entités dans le temps, sans jamais exécuter de migration technique ou modifier directement les données.
+Ever Buddy (EB) est le **core de cycle de vie et d'Ã©volution** du Miyukini Core System. Il incarne la capacitÃ© conceptuelle du systÃ¨me Ã  gouverner l'Ã©volution des structures, des contrats, et des entitÃ©s dans le temps, sans jamais exÃ©cuter de migration technique ou modifier directement les donnÃ©es.
 
-Ever Buddy représente la **conscience temporelle** du système : il observe ce qui a été, ce qui est, et ce qui sera, garantissant que chaque évolution respecte les principes de continuité, de compatibilité, et de traçabilité. Il est le gardien de la mémoire structurelle et le guide des transitions.
+Ever Buddy reprÃ©sente la **conscience temporelle** du systÃ¨me : il observe ce qui a Ã©tÃ©, ce qui est, et ce qui sera, garantissant que chaque Ã©volution respecte les principes de continuitÃ©, de compatibilitÃ©, et de traÃ§abilitÃ©. Il est le gardien de la mÃ©moire structurelle et le guide des transitions.
 
 ### Question fondamentale
 
-Ever Buddy répond à une question essentielle : **"Comment le système évolue-t-il sans jamais se rompre ?"**
+Ever Buddy rÃ©pond Ã  une question essentielle : **"Comment le systÃ¨me Ã©volue-t-il sans jamais se rompre ?"**
 
 Cette question englobe :
-- Comment les structures passent-elles d'un état à un autre ?
-- Comment garantir que les évolutions ne brisent pas ce qui fonctionne ?
+- Comment les structures passent-elles d'un Ã©tat Ã  un autre ?
+- Comment garantir que les Ã©volutions ne brisent pas ce qui fonctionne ?
 - Comment tracer l'historique des changements structurels ?
-- Comment gérer la dette structurelle sans accumulation toxique ?
-- Comment planifier les transitions sans précipitation ni paralysie ?
+- Comment gÃ©rer la dette structurelle sans accumulation toxique ?
+- Comment planifier les transitions sans prÃ©cipitation ni paralysie ?
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ---
 
-## 2. Raison d'être
+## 2. Raison d'Ãªtre
 
-### Problème que Ever Buddy résout
+### ProblÃ¨me que Ever Buddy rÃ©sout
 
-Dans tout système logiciel qui perdure, l'évolution est inévitable. Les structures changent, les contrats évoluent, les besoins se transforment. Sans gouvernance de cette évolution, plusieurs problèmes émergent :
+Dans tout systÃ¨me logiciel qui perdure, l'Ã©volution est inÃ©vitable. Les structures changent, les contrats Ã©voluent, les besoins se transforment. Sans gouvernance de cette Ã©volution, plusieurs problÃ¨mes Ã©mergent :
 
-1. **Ruptures non contrôlées** : Les changements cassent ce qui fonctionne, créant des régressions et des incompatibilités inattendues.
+1. **Ruptures non contrÃ´lÃ©es** : Les changements cassent ce qui fonctionne, crÃ©ant des rÃ©gressions et des incompatibilitÃ©s inattendues.
 
-2. **Dette structurelle invisible** : Les éléments obsolètes s'accumulent sans visibilité, créant une dette technique qui s'alourdit silencieusement.
+2. **Dette structurelle invisible** : Les Ã©lÃ©ments obsolÃ¨tes s'accumulent sans visibilitÃ©, crÃ©ant une dette technique qui s'alourdit silencieusement.
 
-3. **Transitions brutales** : Les migrations sont imposées sans préparation, forçant des adaptations précipitées et des erreurs.
+3. **Transitions brutales** : Les migrations sont imposÃ©es sans prÃ©paration, forÃ§ant des adaptations prÃ©cipitÃ©es et des erreurs.
 
-4. **Perte de mémoire** : L'historique des évolutions se perd, rendant impossible la compréhension des décisions passées et des raisons des changements.
+4. **Perte de mÃ©moire** : L'historique des Ã©volutions se perd, rendant impossible la comprÃ©hension des dÃ©cisions passÃ©es et des raisons des changements.
 
-5. **Évolutions parallèles contradictoires** : Différentes parties du système évoluent de manière incohérente, créant des incompatibilités internes.
+5. **Ã‰volutions parallÃ¨les contradictoires** : DiffÃ©rentes parties du systÃ¨me Ã©voluent de maniÃ¨re incohÃ©rente, crÃ©ant des incompatibilitÃ©s internes.
 
-### Nécessité du core
+### NÃ©cessitÃ© du core
 
-Ever Buddy résout ces problèmes en fournissant :
+Ever Buddy rÃ©sout ces problÃ¨mes en fournissant :
 
-- **Une gouvernance centralisée** : Toute évolution structurelle est observée, enregistrée, et guidée par Ever Buddy.
-- **Des états de cycle de vie explicites** : Chaque élément du système possède un état de vie clair et documenté.
-- **Une compatibilité par conception** : Les évolutions sont conçues pour préserver la compatibilité, avec des périodes de transition explicites.
-- **Une traçabilité complète** : L'historique des évolutions est conservé et consultable.
-- **Une vision long terme** : Ever Buddy pense en générations, pas en sprints.
+- **Une gouvernance centralisÃ©e** : Toute Ã©volution structurelle est observÃ©e, enregistrÃ©e, et guidÃ©e par Ever Buddy.
+- **Des Ã©tats de cycle de vie explicites** : Chaque Ã©lÃ©ment du systÃ¨me possÃ¨de un Ã©tat de vie clair et documentÃ©.
+- **Une compatibilitÃ© par conception** : Les Ã©volutions sont conÃ§ues pour prÃ©server la compatibilitÃ©, avec des pÃ©riodes de transition explicites.
+- **Une traÃ§abilitÃ© complÃ¨te** : L'historique des Ã©volutions est conservÃ© et consultable.
+- **Une vision long terme** : Ever Buddy pense en gÃ©nÃ©rations, pas en sprints.
 
 ### Ce qui existerait sans Ever Buddy
 
-Sans Ever Buddy, l'écosystème Miyukini serait condamné à l'un de ces deux destins :
-- **Fossilisation** : Refus d'évoluer par peur de casser, conduisant à l'obsolescence.
-- **Chaos** : Évolutions non coordonnées qui fragmentent le système et le rendent incompréhensible.
+Sans Ever Buddy, l'Ã©cosystÃ¨me Miyukini serait condamnÃ© Ã  l'un de ces deux destins :
+- **Fossilisation** : Refus d'Ã©voluer par peur de casser, conduisant Ã  l'obsolescence.
+- **Chaos** : Ã‰volutions non coordonnÃ©es qui fragmentent le systÃ¨me et le rendent incomprÃ©hensible.
 
-Ever Buddy permet le **chemin du milieu** : une évolution continue, maîtrisée, traçable, et respectueuse de l'existant.
+Ever Buddy permet le **chemin du milieu** : une Ã©volution continue, maÃ®trisÃ©e, traÃ§able, et respectueuse de l'existant.
 
 ---
 
@@ -65,245 +65,245 @@ Ever Buddy permet le **chemin du milieu** : une évolution continue, maîtrisée
 
 ### Relation avec KindMother
 
-Ever Buddy observe l'évolution des structures dont KindMother est responsable. Quand KindMother gère les données, Ever Buddy gouverne la façon dont les schémas de ces données peuvent évoluer dans le temps.
+Ever Buddy observe l'Ã©volution des structures dont KindMother est responsable. Quand KindMother gÃ¨re les donnÃ©es, Ever Buddy gouverne la faÃ§on dont les schÃ©mas de ces donnÃ©es peuvent Ã©voluer dans le temps.
 
-La relation est complémentaire :
-- **KindMother** : Autorité sur les données à un instant T.
-- **Ever Buddy** : Autorité sur comment les structures de données évoluent de T à T+1.
+La relation est complÃ©mentaire :
+- **KindMother** : AutoritÃ© sur les donnÃ©es Ã  un instant T.
+- **Ever Buddy** : AutoritÃ© sur comment les structures de donnÃ©es Ã©voluent de T Ã  T+1.
 
-Ever Buddy ne modifie jamais les données de KindMother. Il définit les règles d'évolution, mais c'est KindMother qui applique (ou non) les changements selon sa propre autorité.
+Ever Buddy ne modifie jamais les donnÃ©es de KindMother. Il dÃ©finit les rÃ¨gles d'Ã©volution, mais c'est KindMother qui applique (ou non) les changements selon sa propre autoritÃ©.
 
 ### Relation avec StrongFather
 
-Ever Buddy informe les décisions de StrongFather concernant l'évolution. Quand StrongFather doit décider si une action est permise, Ever Buddy lui fournit le contexte de cycle de vie : est-ce que l'entité concernée est active, dépréciée, retirée ?
+Ever Buddy informe les dÃ©cisions de StrongFather concernant l'Ã©volution. Quand StrongFather doit dÃ©cider si une action est permise, Ever Buddy lui fournit le contexte de cycle de vie : est-ce que l'entitÃ© concernÃ©e est active, dÃ©prÃ©ciÃ©e, retirÃ©e ?
 
 La relation est consultative :
-- **StrongFather** : Décide si une action est autorisée.
-- **Ever Buddy** : Fournit le contexte de cycle de vie nécessaire à la décision.
+- **StrongFather** : DÃ©cide si une action est autorisÃ©e.
+- **Ever Buddy** : Fournit le contexte de cycle de vie nÃ©cessaire Ã  la dÃ©cision.
 
-StrongFather peut consulter Ever Buddy, mais Ever Buddy ne prend jamais de décision à la place de StrongFather.
+StrongFather peut consulter Ever Buddy, mais Ever Buddy ne prend jamais de dÃ©cision Ã  la place de StrongFather.
 
 ### Relation avec BondingBrother
 
-Ever Buddy influence les traductions de BondingBrother. Quand BondingBrother traduit des intentions entre produits et autorités, il peut consulter Ever Buddy pour connaître les règles de compatibilité et les adaptations nécessaires entre versions.
+Ever Buddy influence les traductions de BondingBrother. Quand BondingBrother traduit des intentions entre produits et autoritÃ©s, il peut consulter Ever Buddy pour connaÃ®tre les rÃ¨gles de compatibilitÃ© et les adaptations nÃ©cessaires entre versions.
 
 La relation est de guidance :
-- **BondingBrother** : Traduit les intentions et filtre les résultats.
-- **Ever Buddy** : Guide les traductions selon les règles de compatibilité et d'évolution.
+- **BondingBrother** : Traduit les intentions et filtre les rÃ©sultats.
+- **Ever Buddy** : Guide les traductions selon les rÃ¨gles de compatibilitÃ© et d'Ã©volution.
 
-BondingBrother peut adapter ses traductions selon les conseils d'Ever Buddy, mais Ever Buddy ne traduit jamais lui-même.
+BondingBrother peut adapter ses traductions selon les conseils d'Ever Buddy, mais Ever Buddy ne traduit jamais lui-mÃªme.
 
 ### Position dans la famille
 
-Dans la famille Miyukini, Ever Buddy est le **compagnon de toujours** — celui qui connaît l'histoire, qui anticipe le futur, et qui accompagne chaque transition. Il n'a pas d'autorité directe sur les actions présentes, mais son savoir sur le passé et sa vision du futur influencent toutes les décisions d'évolution.
+Dans la famille Miyukini, Ever Buddy est le **compagnon de toujours** â€” celui qui connaÃ®t l'histoire, qui anticipe le futur, et qui accompagne chaque transition. Il n'a pas d'autoritÃ© directe sur les actions prÃ©sentes, mais son savoir sur le passÃ© et sa vision du futur influencent toutes les dÃ©cisions d'Ã©volution.
 
 Ever Buddy est :
-- La mémoire vivante du système (passé)
-- L'observateur du présent (état actuel)
+- La mÃ©moire vivante du systÃ¨me (passÃ©)
+- L'observateur du prÃ©sent (Ã©tat actuel)
 - Le guide des transitions (futur proche)
-- Le gardien de la continuité (long terme)
+- Le gardien de la continuitÃ© (long terme)
 
 ### Relation avec Caring Nanny
 
-Ever Buddy informe Caring Nanny des changements d'état qui affectent la santé du système. Quand Caring Nanny observe l'état global du système, Ever Buddy lui fournit le contexte d'évolution : y a-t-il des transitions en cours ? des dépréciations imminentes ? de la dette structurelle excessive ?
+Ever Buddy informe Caring Nanny des changements d'Ã©tat qui affectent la santÃ© du systÃ¨me. Quand Caring Nanny observe l'Ã©tat global du systÃ¨me, Ever Buddy lui fournit le contexte d'Ã©volution : y a-t-il des transitions en cours ? des dÃ©prÃ©ciations imminentes ? de la dette structurelle excessive ?
 
 La relation est d'alimentation :
-- **Caring Nanny** : Observe et rapporte l'état de santé du système.
-- **Ever Buddy** : Fournit les indicateurs d'évolution qui affectent cette santé.
+- **Caring Nanny** : Observe et rapporte l'Ã©tat de santÃ© du systÃ¨me.
+- **Ever Buddy** : Fournit les indicateurs d'Ã©volution qui affectent cette santÃ©.
 
 ### Relation avec Border Guard
 
-Ever Buddy définit les règles de compatibilité que Border Guard applique aux frontières du système. Quand Border Guard vérifie si une intégration externe est acceptable, il peut consulter Ever Buddy pour connaître les versions supportées et les règles de compatibilité en vigueur.
+Ever Buddy dÃ©finit les rÃ¨gles de compatibilitÃ© que Border Guard applique aux frontiÃ¨res du systÃ¨me. Quand Border Guard vÃ©rifie si une intÃ©gration externe est acceptable, il peut consulter Ever Buddy pour connaÃ®tre les versions supportÃ©es et les rÃ¨gles de compatibilitÃ© en vigueur.
 
 La relation est normative :
-- **Border Guard** : Applique les règles aux frontières.
-- **Ever Buddy** : Définit les règles de compatibilité qui s'appliquent.
+- **Border Guard** : Applique les rÃ¨gles aux frontiÃ¨res.
+- **Ever Buddy** : DÃ©finit les rÃ¨gles de compatibilitÃ© qui s'appliquent.
 
 ### Relation avec Master Butler
 
-Ever Buddy informe Master Butler des capacités disponibles selon les versions. Quand Master Butler expose les capacités du système, Ever Buddy lui indique quelles capacités sont actives, lesquelles sont dépréciées, et lesquelles ont été retirées.
+Ever Buddy informe Master Butler des capacitÃ©s disponibles selon les versions. Quand Master Butler expose les capacitÃ©s du systÃ¨me, Ever Buddy lui indique quelles capacitÃ©s sont actives, lesquelles sont dÃ©prÃ©ciÃ©es, et lesquelles ont Ã©tÃ© retirÃ©es.
 
 La relation est descriptive :
-- **Master Butler** : Expose les capacités disponibles.
-- **Ever Buddy** : Fournit l'état de vie de chaque capacité.
+- **Master Butler** : Expose les capacitÃ©s disponibles.
+- **Ever Buddy** : Fournit l'Ã©tat de vie de chaque capacitÃ©.
 
-### Responsabilité spécifique : Cycle de vie des Tools et Toolkits
+### ResponsabilitÃ© spÃ©cifique : Cycle de vie des Tools et Toolkits
 
 Ever Buddy est responsable du **cycle de vie** des Tools et Toolkits :
 
-| Responsabilité | Description |
+| ResponsabilitÃ© | Description |
 |----------------|-------------|
-| **Versions** | Gère les versions de chaque Tool |
-| **Dépréciation** | Marque les Tools comme DEPRECATED |
-| **Compatibilité** | Vérifie Tool ↔ Environnement |
-| **Migration** | Gère la transition Tool → nouvelle version |
+| **Versions** | GÃ¨re les versions de chaque Tool |
+| **DÃ©prÃ©ciation** | Marque les Tools comme DEPRECATED |
+| **CompatibilitÃ©** | VÃ©rifie Tool â†” Environnement |
+| **Migration** | GÃ¨re la transition Tool â†’ nouvelle version |
 
-**Question à laquelle Ever Buddy répond pour les Tools :**
+**Question Ã  laquelle Ever Buddy rÃ©pond pour les Tools :**
 
-> *"Est-ce que cet outil existe encore, est compatible, ou doit être migré ?"*
+> *"Est-ce que cet outil existe encore, est compatible, ou doit Ãªtre migrÃ© ?"*
 
-**États de vie des Tools :**
+**Ã‰tats de vie des Tools :**
 
-| État | Description |
+| Ã‰tat | Description |
 |------|-------------|
-| **DRAFT** | Tool en développement, non disponible |
-| **ACTIVE** | Tool disponible et supporté |
-| **DEPRECATED** | Tool fonctionnel mais usage découragé |
-| **RETIRED** | Tool retiré, non disponible |
+| **DRAFT** | Tool en dÃ©veloppement, non disponible |
+| **ACTIVE** | Tool disponible et supportÃ© |
+| **DEPRECATED** | Tool fonctionnel mais usage dÃ©couragÃ© |
+| **RETIRED** | Tool retirÃ©, non disponible |
 
-**Règles de gouvernance :**
+**RÃ¨gles de gouvernance :**
 
-| Règle | Description |
+| RÃ¨gle | Description |
 |-------|-------------|
-| **RÈGLE-TOOL-EV-1** | Tout Tool a un état de vie explicite |
-| **RÈGLE-TOOL-EV-2** | Un Tool DEPRECATED a un successeur identifié |
-| **RÈGLE-TOOL-EV-3** | La transition vers RETIRED passe obligatoirement par DEPRECATED |
-| **RÈGLE-TOOL-EV-4** | La compatibilité Tool ↔ Environnement est vérifiée |
+| **RÃˆGLE-TOOL-EV-1** | Tout Tool a un Ã©tat de vie explicite |
+| **RÃˆGLE-TOOL-EV-2** | Un Tool DEPRECATED a un successeur identifiÃ© |
+| **RÃˆGLE-TOOL-EV-3** | La transition vers RETIRED passe obligatoirement par DEPRECATED |
+| **RÃˆGLE-TOOL-EV-4** | La compatibilitÃ© Tool â†” Environnement est vÃ©rifiÃ©e |
 
-**Documentation complète :** [Miyukini Conceptual References - Tools et Toolkits](../../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)
+**Documentation complÃ¨te :** [Miyukini Conceptual References - Tools et Toolkits](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ### Relation avec TAMR
 
-Ever Buddy peut recommander des interventions humaines lors de transitions critiques. Quand une évolution nécessite une validation humaine (migration majeure, rupture de compatibilité), Ever Buddy signale ce besoin à TAMR.
+Ever Buddy peut recommander des interventions humaines lors de transitions critiques. Quand une Ã©volution nÃ©cessite une validation humaine (migration majeure, rupture de compatibilitÃ©), Ever Buddy signale ce besoin Ã  TAMR.
 
 La relation est d'escalade :
-- **TAMR** : Définit où et comment l'humain intervient.
-- **Ever Buddy** : Signale les transitions qui nécessitent une intervention humaine.
+- **TAMR** : DÃ©finit oÃ¹ et comment l'humain intervient.
+- **Ever Buddy** : Signale les transitions qui nÃ©cessitent une intervention humaine.
 
 ---
 
 ## 4. Concepts fondamentaux
 
-### États du cycle de vie
+### Ã‰tats du cycle de vie
 
-Chaque élément du système possède un état de vie qui détermine son statut et les actions possibles le concernant.
+Chaque Ã©lÃ©ment du systÃ¨me possÃ¨de un Ã©tat de vie qui dÃ©termine son statut et les actions possibles le concernant.
 
-**DRAFT** : L'élément est en cours de définition. Il n'est pas encore utilisable en production, peut changer librement, et n'a aucun engagement de stabilité.
+**DRAFT** : L'Ã©lÃ©ment est en cours de dÃ©finition. Il n'est pas encore utilisable en production, peut changer librement, et n'a aucun engagement de stabilitÃ©.
 
-**ACTIVE** : L'élément est en usage normal. Il est stable, documenté, supporté, et utilisable par tous les consommateurs autorisés. Les changements sont soumis aux règles de compatibilité.
+**ACTIVE** : L'Ã©lÃ©ment est en usage normal. Il est stable, documentÃ©, supportÃ©, et utilisable par tous les consommateurs autorisÃ©s. Les changements sont soumis aux rÃ¨gles de compatibilitÃ©.
 
-**DEPRECATED** : L'élément est toujours fonctionnel mais son usage est découragé. Un successeur existe ou est en préparation. Les consommateurs sont avertis de migrer. La période de dépréciation est définie et communiquée.
+**DEPRECATED** : L'Ã©lÃ©ment est toujours fonctionnel mais son usage est dÃ©couragÃ©. Un successeur existe ou est en prÃ©paration. Les consommateurs sont avertis de migrer. La pÃ©riode de dÃ©prÃ©ciation est dÃ©finie et communiquÃ©e.
 
-**RETIRED** : L'élément n'est plus activement supporté mais reste fonctionnel pour les consommateurs existants. Aucune nouvelle fonctionnalité, uniquement des corrections critiques de sécurité.
+**RETIRED** : L'Ã©lÃ©ment n'est plus activement supportÃ© mais reste fonctionnel pour les consommateurs existants. Aucune nouvelle fonctionnalitÃ©, uniquement des corrections critiques de sÃ©curitÃ©.
 
-**ARCHIVED** : L'élément n'est plus fonctionnel. Il est conservé uniquement pour référence historique et traçabilité. Aucune garantie de fonctionnement.
+**ARCHIVED** : L'Ã©lÃ©ment n'est plus fonctionnel. Il est conservÃ© uniquement pour rÃ©fÃ©rence historique et traÃ§abilitÃ©. Aucune garantie de fonctionnement.
 
-### Évolution contrôlée
+### Ã‰volution contrÃ´lÃ©e
 
-Une **évolution contrôlée** est un changement structurel qui respecte les principes de continuité et de compatibilité. Elle comprend :
+Une **Ã©volution contrÃ´lÃ©e** est un changement structurel qui respecte les principes de continuitÃ© et de compatibilitÃ©. Elle comprend :
 
-- **Annonce préalable** : L'évolution est communiquée avant sa mise en œuvre.
-- **Période de transition** : Une durée pendant laquelle l'ancien et le nouveau coexistent.
-- **Documentation des différences** : Les changements sont explicitement documentés.
+- **Annonce prÃ©alable** : L'Ã©volution est communiquÃ©e avant sa mise en Å“uvre.
+- **PÃ©riode de transition** : Une durÃ©e pendant laquelle l'ancien et le nouveau coexistent.
+- **Documentation des diffÃ©rences** : Les changements sont explicitement documentÃ©s.
 - **Chemin de migration** : Un guide pour passer de l'ancien au nouveau est fourni.
-- **Critères de complétion** : Des conditions claires définissent quand la transition est terminée.
+- **CritÃ¨res de complÃ©tion** : Des conditions claires dÃ©finissent quand la transition est terminÃ©e.
 
-### Compatibilité
+### CompatibilitÃ©
 
-La **compatibilité** est la capacité d'un élément à fonctionner avec des éléments d'autres versions. Ever Buddy distingue plusieurs niveaux :
+La **compatibilitÃ©** est la capacitÃ© d'un Ã©lÃ©ment Ã  fonctionner avec des Ã©lÃ©ments d'autres versions. Ever Buddy distingue plusieurs niveaux :
 
-**Rétrocompatible** : Le nouveau fonctionne avec l'ancien. Les consommateurs existants continuent de fonctionner sans modification.
+**RÃ©trocompatible** : Le nouveau fonctionne avec l'ancien. Les consommateurs existants continuent de fonctionner sans modification.
 
-**Compatible en amont** : L'ancien fonctionne avec le nouveau. Les nouvelles fonctionnalités sont accessibles aux anciennes versions (rare, souvent impossible).
+**Compatible en amont** : L'ancien fonctionne avec le nouveau. Les nouvelles fonctionnalitÃ©s sont accessibles aux anciennes versions (rare, souvent impossible).
 
 **Incompatible** : Le nouveau ne fonctionne pas avec l'ancien. Une migration est obligatoire.
 
 ### Dette structurelle
 
-La **dette structurelle** est l'ensemble des éléments DEPRECATED ou RETIRED qui persistent dans le système. Cette dette n'est pas nécessairement négative — elle est le prix de la continuité. Cependant, Ever Buddy la surveille et alerte quand elle devient excessive.
+La **dette structurelle** est l'ensemble des Ã©lÃ©ments DEPRECATED ou RETIRED qui persistent dans le systÃ¨me. Cette dette n'est pas nÃ©cessairement nÃ©gative â€” elle est le prix de la continuitÃ©. Cependant, Ever Buddy la surveille et alerte quand elle devient excessive.
 
 ### Versionnement conceptuel
 
-Le **versionnement conceptuel** est la manière dont Ever Buddy identifie et distingue les différentes versions d'un élément. Ce versionnement est sémantique et significatif :
+Le **versionnement conceptuel** est la maniÃ¨re dont Ever Buddy identifie et distingue les diffÃ©rentes versions d'un Ã©lÃ©ment. Ce versionnement est sÃ©mantique et significatif :
 
 - **Majeur** : Changement incompatible, rupture de contrat.
-- **Mineur** : Ajout de fonctionnalité, rétrocompatible.
+- **Mineur** : Ajout de fonctionnalitÃ©, rÃ©trocompatible.
 - **Correctif** : Correction de bug, aucun changement fonctionnel.
 
 ### Matrice des transitions valides
 
-Les transitions entre états de cycle de vie sont strictement contrôlées. Seules certaines transitions sont valides :
+Les transitions entre Ã©tats de cycle de vie sont strictement contrÃ´lÃ©es. Seules certaines transitions sont valides :
 
 | Depuis \ Vers | DRAFT | ACTIVE | DEPRECATED | RETIRED | ARCHIVED |
 |---------------|-------|--------|------------|---------|----------|
-| DRAFT         | —     | ✓      | ✗          | ✗       | ✓        |
-| ACTIVE        | ✗     | —      | ✓          | ✗       | ✗        |
-| DEPRECATED    | ✗     | ✓*     | —          | ✓       | ✗        |
-| RETIRED       | ✗     | ✗      | ✗          | —       | ✓        |
-| ARCHIVED      | ✗     | ✗      | ✗          | ✗       | —        |
+| DRAFT         | â€”     | âœ“      | âœ—          | âœ—       | âœ“        |
+| ACTIVE        | âœ—     | â€”      | âœ“          | âœ—       | âœ—        |
+| DEPRECATED    | âœ—     | âœ“*     | â€”          | âœ“       | âœ—        |
+| RETIRED       | âœ—     | âœ—      | âœ—          | â€”       | âœ“        |
+| ARCHIVED      | âœ—     | âœ—      | âœ—          | âœ—       | â€”        |
 
-*La transition DEPRECATED → ACTIVE (réactivation) est possible uniquement si le successeur est annulé et que l'élément déprécié est toujours fonctionnel.
+*La transition DEPRECATED â†’ ACTIVE (rÃ©activation) est possible uniquement si le successeur est annulÃ© et que l'Ã©lÃ©ment dÃ©prÃ©ciÃ© est toujours fonctionnel.
 
-**Transitions invalides** : Toute transition non marquée ✓ est structurellement interdite. Un élément ACTIVE ne peut jamais passer directement à RETIRED ou ARCHIVED. Un élément ARCHIVED ne peut jamais être réactivé.
+**Transitions invalides** : Toute transition non marquÃ©e âœ“ est structurellement interdite. Un Ã©lÃ©ment ACTIVE ne peut jamais passer directement Ã  RETIRED ou ARCHIVED. Un Ã©lÃ©ment ARCHIVED ne peut jamais Ãªtre rÃ©activÃ©.
 
-### Périodes minimales de transition
+### PÃ©riodes minimales de transition
 
-Chaque type de transition possède une période minimale non négociable :
+Chaque type de transition possÃ¨de une pÃ©riode minimale non nÃ©gociable :
 
-- **DRAFT → ACTIVE** : Aucune période minimale (activation immédiate possible)
-- **ACTIVE → DEPRECATED** : Communication préalable obligatoire (minimum 1 cycle de release)
-- **DEPRECATED → RETIRED** : Période de dépréciation minimale définie par la catégorie de l'élément
-- **RETIRED → ARCHIVED** : Période de grâce minimale pour les consommateurs existants
+- **DRAFT â†’ ACTIVE** : Aucune pÃ©riode minimale (activation immÃ©diate possible)
+- **ACTIVE â†’ DEPRECATED** : Communication prÃ©alable obligatoire (minimum 1 cycle de release)
+- **DEPRECATED â†’ RETIRED** : PÃ©riode de dÃ©prÃ©ciation minimale dÃ©finie par la catÃ©gorie de l'Ã©lÃ©ment
+- **RETIRED â†’ ARCHIVED** : PÃ©riode de grÃ¢ce minimale pour les consommateurs existants
 
-Ces périodes sont des minimums. Ever Buddy peut recommander des périodes plus longues selon l'impact et l'adoption.
+Ces pÃ©riodes sont des minimums. Ever Buddy peut recommander des pÃ©riodes plus longues selon l'impact et l'adoption.
 
-### Catégories d'éléments
+### CatÃ©gories d'Ã©lÃ©ments
 
-Ever Buddy distingue les éléments par leur catégorie, chaque catégorie ayant des règles d'évolution spécifiques :
+Ever Buddy distingue les Ã©lÃ©ments par leur catÃ©gorie, chaque catÃ©gorie ayant des rÃ¨gles d'Ã©volution spÃ©cifiques :
 
-**Contrats fondateurs** (FONDATION) : Évolution extrêmement lente, périodes de transition très longues, ruptures quasiment interdites.
+**Contrats fondateurs** (FONDATION) : Ã‰volution extrÃªmement lente, pÃ©riodes de transition trÃ¨s longues, ruptures quasiment interdites.
 
-**Contrats opérationnels** : Évolution modérée, périodes de transition standards, ruptures possibles avec justification.
+**Contrats opÃ©rationnels** : Ã‰volution modÃ©rÃ©e, pÃ©riodes de transition standards, ruptures possibles avec justification.
 
-**Interfaces techniques** : Évolution plus rapide, périodes de transition courtes, ruptures possibles avec documentation.
+**Interfaces techniques** : Ã‰volution plus rapide, pÃ©riodes de transition courtes, ruptures possibles avec documentation.
 
-**Éléments internes** : Évolution libre, pas de garantie de stabilité externe, ruptures sans préavis autorisées.
+**Ã‰lÃ©ments internes** : Ã‰volution libre, pas de garantie de stabilitÃ© externe, ruptures sans prÃ©avis autorisÃ©es.
 
 ---
 
-## 5. Responsabilités exclusives
+## 5. ResponsabilitÃ©s exclusives
 
-### Gouvernance des états de vie
+### Gouvernance des Ã©tats de vie
 
-Ever Buddy est **exclusivement responsable** de la définition et de la gestion des états de cycle de vie pour tous les éléments du système. Aucun autre core ne peut déclarer qu'un élément est DRAFT, ACTIVE, DEPRECATED, RETIRED, ou ARCHIVED.
+Ever Buddy est **exclusivement responsable** de la dÃ©finition et de la gestion des Ã©tats de cycle de vie pour tous les Ã©lÃ©ments du systÃ¨me. Aucun autre core ne peut dÃ©clarer qu'un Ã©lÃ©ment est DRAFT, ACTIVE, DEPRECATED, RETIRED, ou ARCHIVED.
 
-Cette responsabilité inclut :
-- La définition des critères de transition entre états
-- La validation des transitions proposées
-- L'enregistrement de l'état actuel et de l'historique
-- La communication des états aux autres cores
+Cette responsabilitÃ© inclut :
+- La dÃ©finition des critÃ¨res de transition entre Ã©tats
+- La validation des transitions proposÃ©es
+- L'enregistrement de l'Ã©tat actuel et de l'historique
+- La communication des Ã©tats aux autres cores
 
-### Définition des règles de compatibilité
+### DÃ©finition des rÃ¨gles de compatibilitÃ©
 
-Ever Buddy est **exclusivement responsable** de la définition des règles de compatibilité entre versions. Il détermine :
-- Ce qui constitue un changement rétrocompatible
-- Ce qui constitue une rupture de compatibilité
-- Les périodes de transition minimales pour chaque type de changement
-- Les exceptions autorisées (et leurs conditions)
+Ever Buddy est **exclusivement responsable** de la dÃ©finition des rÃ¨gles de compatibilitÃ© entre versions. Il dÃ©termine :
+- Ce qui constitue un changement rÃ©trocompatible
+- Ce qui constitue une rupture de compatibilitÃ©
+- Les pÃ©riodes de transition minimales pour chaque type de changement
+- Les exceptions autorisÃ©es (et leurs conditions)
 
-### Traçabilité des évolutions
+### TraÃ§abilitÃ© des Ã©volutions
 
-Ever Buddy est **exclusivement responsable** de la conservation et de l'accessibilité de l'historique des évolutions. Cette traçabilité inclut :
-- L'enregistrement de chaque transition d'état
+Ever Buddy est **exclusivement responsable** de la conservation et de l'accessibilitÃ© de l'historique des Ã©volutions. Cette traÃ§abilitÃ© inclut :
+- L'enregistrement de chaque transition d'Ã©tat
 - La conservation des raisons des changements
-- L'archivage des versions passées
+- L'archivage des versions passÃ©es
 - La fourniture de l'historique sur demande
 
 ### Surveillance de la dette structurelle
 
 Ever Buddy est **exclusivement responsable** de la surveillance de la dette structurelle. Il :
-- Mesure la quantité d'éléments DEPRECATED et RETIRED
-- Alerte quand la dette dépasse des seuils définis
+- Mesure la quantitÃ© d'Ã©lÃ©ments DEPRECATED et RETIRED
+- Alerte quand la dette dÃ©passe des seuils dÃ©finis
 - Recommande des actions de nettoyage
-- Empêche l'accumulation non contrôlée
+- EmpÃªche l'accumulation non contrÃ´lÃ©e
 
 ### Planification des transitions
 
-Ever Buddy est **exclusivement responsable** de la planification des transitions entre versions. Il définit :
-- Les calendriers de dépréciation
-- Les périodes de coexistence
-- Les critères de fin de transition
-- Les chemins de migration recommandés
+Ever Buddy est **exclusivement responsable** de la planification des transitions entre versions. Il dÃ©finit :
+- Les calendriers de dÃ©prÃ©ciation
+- Les pÃ©riodes de coexistence
+- Les critÃ¨res de fin de transition
+- Les chemins de migration recommandÃ©s
 
 ---
 
@@ -311,73 +311,73 @@ Ever Buddy est **exclusivement responsable** de la planification des transitions
 
 ### Ne migre jamais directement
 
-Ever Buddy **ne migre jamais** directement les données ou les structures. Il définit les règles de migration, les communique, mais l'exécution de la migration est la responsabilité de KindMother (pour les données) ou des produits (pour leur code).
+Ever Buddy **ne migre jamais** directement les donnÃ©es ou les structures. Il dÃ©finit les rÃ¨gles de migration, les communique, mais l'exÃ©cution de la migration est la responsabilitÃ© de KindMother (pour les donnÃ©es) ou des produits (pour leur code).
 
-La migration est un acte d'exécution, pas un acte de gouvernance. Ever Buddy gouverne, il n'exécute pas.
+La migration est un acte d'exÃ©cution, pas un acte de gouvernance. Ever Buddy gouverne, il n'exÃ©cute pas.
 
-### Ne modifie jamais les données
+### Ne modifie jamais les donnÃ©es
 
-Ever Buddy **ne modifie jamais** les données gérées par KindMother. Il peut observer, enregistrer, recommander, mais jamais modifier. Toute modification est sous l'autorité exclusive de KindMother.
+Ever Buddy **ne modifie jamais** les donnÃ©es gÃ©rÃ©es par KindMother. Il peut observer, enregistrer, recommander, mais jamais modifier. Toute modification est sous l'autoritÃ© exclusive de KindMother.
 
-### Ne décide pas des permissions
+### Ne dÃ©cide pas des permissions
 
-Ever Buddy **ne décide jamais** si une action est permise. Cette décision appartient à StrongFather. Ever Buddy fournit le contexte (l'élément est-il DEPRECATED ?) mais la décision finale est prise par StrongFather.
+Ever Buddy **ne dÃ©cide jamais** si une action est permise. Cette dÃ©cision appartient Ã  StrongFather. Ever Buddy fournit le contexte (l'Ã©lÃ©ment est-il DEPRECATED ?) mais la dÃ©cision finale est prise par StrongFather.
 
-### Ne définit pas de schémas
+### Ne dÃ©finit pas de schÃ©mas
 
-Ever Buddy **ne définit jamais** les schémas de données ou les structures techniques. Il gouverne comment ces schémas évoluent, mais leur définition initiale et leur contenu sont hors de son périmètre.
+Ever Buddy **ne dÃ©finit jamais** les schÃ©mas de donnÃ©es ou les structures techniques. Il gouverne comment ces schÃ©mas Ã©voluent, mais leur dÃ©finition initiale et leur contenu sont hors de son pÃ©rimÃ¨tre.
 
-### Ne force jamais une évolution
+### Ne force jamais une Ã©volution
 
-Ever Buddy **ne force jamais** une évolution. Il peut recommander, alerter, planifier, mais jamais imposer. Les produits et les autres cores conservent leur autonomie. Ever Buddy influence par la guidance, pas par la contrainte.
+Ever Buddy **ne force jamais** une Ã©volution. Il peut recommander, alerter, planifier, mais jamais imposer. Les produits et les autres cores conservent leur autonomie. Ever Buddy influence par la guidance, pas par la contrainte.
 
-### Ne garantit pas la compatibilité technique
+### Ne garantit pas la compatibilitÃ© technique
 
-Ever Buddy **ne garantit jamais** la compatibilité technique au niveau du code ou des APIs. Il définit les règles conceptuelles de compatibilité, mais la garantie technique est la responsabilité des implémentations et des produits.
+Ever Buddy **ne garantit jamais** la compatibilitÃ© technique au niveau du code ou des APIs. Il dÃ©finit les rÃ¨gles conceptuelles de compatibilitÃ©, mais la garantie technique est la responsabilitÃ© des implÃ©mentations et des produits.
 
 ---
 
-## 7. Invariants non négociables
+## 7. Invariants non nÃ©gociables
 
-### INV-EB-1 : Aucune exécution de migration
+### INV-EB-1 : Aucune exÃ©cution de migration
 
-Ever Buddy ne possède **jamais** la capacité d'exécuter une migration, une transformation, ou une modification de données. Il définit les règles et observe les transitions, mais toute exécution est déléguée aux autorités compétentes.
+Ever Buddy ne possÃ¨de **jamais** la capacitÃ© d'exÃ©cuter une migration, une transformation, ou une modification de donnÃ©es. Il dÃ©finit les rÃ¨gles et observe les transitions, mais toute exÃ©cution est dÃ©lÃ©guÃ©e aux autoritÃ©s compÃ©tentes.
 
-Cet invariant est structurel : Ever Buddy n'a accès à aucun mécanisme d'écriture de données.
+Cet invariant est structurel : Ever Buddy n'a accÃ¨s Ã  aucun mÃ©canisme d'Ã©criture de donnÃ©es.
 
-### INV-EB-2 : Traçabilité complète et immuable
+### INV-EB-2 : TraÃ§abilitÃ© complÃ¨te et immuable
 
-Toute transition d'état de cycle de vie est **obligatoirement** enregistrée et cet enregistrement est **immuable**. L'historique ne peut être ni modifié, ni effacé, ni falsifié.
+Toute transition d'Ã©tat de cycle de vie est **obligatoirement** enregistrÃ©e et cet enregistrement est **immuable**. L'historique ne peut Ãªtre ni modifiÃ©, ni effacÃ©, ni falsifiÃ©.
 
-Cet invariant garantit l'auditabilité et la compréhension des évolutions passées.
+Cet invariant garantit l'auditabilitÃ© et la comprÃ©hension des Ã©volutions passÃ©es.
 
-### INV-EB-3 : Aucun état ambigu
+### INV-EB-3 : Aucun Ã©tat ambigu
 
-Chaque élément du système possède **exactement un** état de cycle de vie à tout moment. Il n'existe pas d'état intermédiaire, incertain, ou non défini. Les transitions sont atomiques : un élément passe de l'état A à l'état B sans état transitoire.
+Chaque Ã©lÃ©ment du systÃ¨me possÃ¨de **exactement un** Ã©tat de cycle de vie Ã  tout moment. Il n'existe pas d'Ã©tat intermÃ©diaire, incertain, ou non dÃ©fini. Les transitions sont atomiques : un Ã©lÃ©ment passe de l'Ã©tat A Ã  l'Ã©tat B sans Ã©tat transitoire.
 
-Cet invariant garantit la clarté et la prédictibilité du système.
+Cet invariant garantit la clartÃ© et la prÃ©dictibilitÃ© du systÃ¨me.
 
-### INV-EB-4 : Période de dépréciation obligatoire
+### INV-EB-4 : PÃ©riode de dÃ©prÃ©ciation obligatoire
 
-Aucun élément ACTIVE ne peut passer directement à RETIRED ou ARCHIVED. La transition par DEPRECATED est **obligatoire**. La période de dépréciation minimale est définie par les règles d'Ever Buddy et ne peut être contournée.
+Aucun Ã©lÃ©ment ACTIVE ne peut passer directement Ã  RETIRED ou ARCHIVED. La transition par DEPRECATED est **obligatoire**. La pÃ©riode de dÃ©prÃ©ciation minimale est dÃ©finie par les rÃ¨gles d'Ever Buddy et ne peut Ãªtre contournÃ©e.
 
-Cet invariant protège les consommateurs contre les ruptures brutales.
+Cet invariant protÃ¨ge les consommateurs contre les ruptures brutales.
 
-### INV-EB-5 : Rétrocompatibilité par défaut
+### INV-EB-5 : RÃ©trocompatibilitÃ© par dÃ©faut
 
-Toute évolution est **présumée rétrocompatible** sauf déclaration explicite contraire. Si une évolution est incompatible, elle doit être explicitement déclarée comme telle, avec justification et plan de transition.
+Toute Ã©volution est **prÃ©sumÃ©e rÃ©trocompatible** sauf dÃ©claration explicite contraire. Si une Ã©volution est incompatible, elle doit Ãªtre explicitement dÃ©clarÃ©e comme telle, avec justification et plan de transition.
 
-Cet invariant favorise la stabilité et la continuité.
+Cet invariant favorise la stabilitÃ© et la continuitÃ©.
 
 ### INV-EB-6 : Vision long terme obligatoire
 
-Toute décision d'évolution doit considérer l'impact sur **au moins deux générations** de versions. Une évolution qui résout un problème immédiat mais crée un problème futur plus grave est invalide.
+Toute dÃ©cision d'Ã©volution doit considÃ©rer l'impact sur **au moins deux gÃ©nÃ©rations** de versions. Une Ã©volution qui rÃ©sout un problÃ¨me immÃ©diat mais crÃ©e un problÃ¨me futur plus grave est invalide.
 
-Cet invariant empêche les solutions court-termistes qui accumulent la dette.
+Cet invariant empÃªche les solutions court-termistes qui accumulent la dette.
 
 ### INV-EB-7 : Documentation obligatoire
 
-Toute transition d'état doit être **documentée** avec :
+Toute transition d'Ã©tat doit Ãªtre **documentÃ©e** avec :
 - La raison de la transition
 - L'impact sur les consommateurs
 - Le chemin de migration (si applicable)
@@ -385,139 +385,139 @@ Toute transition d'état doit être **documentée** avec :
 
 Une transition sans documentation est invalide.
 
-### INV-EB-8 : Indépendance des décisions
+### INV-EB-8 : IndÃ©pendance des dÃ©cisions
 
-Ever Buddy ne peut être contraint par un produit, un adaptateur, ou un utilisateur à modifier ses règles de cycle de vie pour un cas particulier. Les règles sont universelles et s'appliquent à tous.
+Ever Buddy ne peut Ãªtre contraint par un produit, un adaptateur, ou un utilisateur Ã  modifier ses rÃ¨gles de cycle de vie pour un cas particulier. Les rÃ¨gles sont universelles et s'appliquent Ã  tous.
 
-Cet invariant garantit l'équité et la cohérence du système.
+Cet invariant garantit l'Ã©quitÃ© et la cohÃ©rence du systÃ¨me.
 
-### INV-EB-9 : Prédictibilité des transitions
+### INV-EB-9 : PrÃ©dictibilitÃ© des transitions
 
-Les règles de transition sont **publiques et stables**. Tout consommateur peut connaître à l'avance les conditions et les conséquences d'une transition. Aucune règle de transition ne peut être modifiée rétroactivement.
+Les rÃ¨gles de transition sont **publiques et stables**. Tout consommateur peut connaÃ®tre Ã  l'avance les conditions et les consÃ©quences d'une transition. Aucune rÃ¨gle de transition ne peut Ãªtre modifiÃ©e rÃ©troactivement.
 
-Cet invariant permet aux consommateurs de planifier leurs propres évolutions.
+Cet invariant permet aux consommateurs de planifier leurs propres Ã©volutions.
 
-### INV-EB-10 : Unicité du successeur déclaré
+### INV-EB-10 : UnicitÃ© du successeur dÃ©clarÃ©
 
-Un élément déprécié possède **au plus un** successeur déclaré à tout moment. Si plusieurs successeurs potentiels existent, l'un d'eux doit être désigné comme successeur principal, les autres étant des alternatives documentées.
+Un Ã©lÃ©ment dÃ©prÃ©ciÃ© possÃ¨de **au plus un** successeur dÃ©clarÃ© Ã  tout moment. Si plusieurs successeurs potentiels existent, l'un d'eux doit Ãªtre dÃ©signÃ© comme successeur principal, les autres Ã©tant des alternatives documentÃ©es.
 
-Cet invariant évite la confusion sur le chemin de migration recommandé.
+Cet invariant Ã©vite la confusion sur le chemin de migration recommandÃ©.
 
-### INV-EB-11 : Non-rétroactivité des changements de règles
+### INV-EB-11 : Non-rÃ©troactivitÃ© des changements de rÃ¨gles
 
-Les règles d'évolution s'appliquent aux transitions **futures**. Un changement de règle ne peut pas modifier le statut d'éléments déjà en transition selon les anciennes règles.
+Les rÃ¨gles d'Ã©volution s'appliquent aux transitions **futures**. Un changement de rÃ¨gle ne peut pas modifier le statut d'Ã©lÃ©ments dÃ©jÃ  en transition selon les anciennes rÃ¨gles.
 
-Cet invariant protège les transitions en cours.
+Cet invariant protÃ¨ge les transitions en cours.
 
-### INV-EB-12 : Responsabilité de l'annonce
+### INV-EB-12 : ResponsabilitÃ© de l'annonce
 
-Ever Buddy est **responsable** de l'annonce des transitions, mais les cores et produits sont **responsables** de réagir à ces annonces. Ever Buddy ne peut être tenu responsable d'un échec de migration si l'annonce a été correctement effectuée.
+Ever Buddy est **responsable** de l'annonce des transitions, mais les cores et produits sont **responsables** de rÃ©agir Ã  ces annonces. Ever Buddy ne peut Ãªtre tenu responsable d'un Ã©chec de migration si l'annonce a Ã©tÃ© correctement effectuÃ©e.
 
-Cet invariant clarifie les responsabilités entre Ever Buddy et les consommateurs.
+Cet invariant clarifie les responsabilitÃ©s entre Ever Buddy et les consommateurs.
 
 ---
 
-## 8. Interactions avec l'écosystème
+## 8. Interactions avec l'Ã©cosystÃ¨me
 
 ### Flux d'observation
 
-Ever Buddy observe continuellement l'état du système pour maintenir sa connaissance des cycles de vie :
+Ever Buddy observe continuellement l'Ã©tat du systÃ¨me pour maintenir sa connaissance des cycles de vie :
 
-1. **Réception des déclarations** : Les cores et produits déclarent leurs éléments et leurs versions à Ever Buddy.
-2. **Enregistrement de l'état** : Ever Buddy enregistre l'état de cycle de vie de chaque élément.
-3. **Surveillance des transitions** : Ever Buddy détecte les demandes de transition d'état.
-4. **Validation des transitions** : Ever Buddy vérifie que la transition respecte les règles.
-5. **Enregistrement de la transition** : Si valide, la transition est enregistrée dans l'historique.
+1. **RÃ©ception des dÃ©clarations** : Les cores et produits dÃ©clarent leurs Ã©lÃ©ments et leurs versions Ã  Ever Buddy.
+2. **Enregistrement de l'Ã©tat** : Ever Buddy enregistre l'Ã©tat de cycle de vie de chaque Ã©lÃ©ment.
+3. **Surveillance des transitions** : Ever Buddy dÃ©tecte les demandes de transition d'Ã©tat.
+4. **Validation des transitions** : Ever Buddy vÃ©rifie que la transition respecte les rÃ¨gles.
+5. **Enregistrement de la transition** : Si valide, la transition est enregistrÃ©e dans l'historique.
 
 ### Flux de consultation
 
 Les autres cores consultent Ever Buddy pour obtenir des informations de cycle de vie :
 
-1. **Demande de contexte** : Un core (StrongFather, BondingBrother) demande le contexte de cycle de vie d'un élément.
-2. **Recherche de l'état** : Ever Buddy recherche l'état actuel et l'historique de l'élément.
-3. **Fourniture du contexte** : Ever Buddy retourne l'état, l'historique, et les recommandations associées.
-4. **Utilisation par le demandeur** : Le core demandeur utilise ce contexte pour sa propre décision.
+1. **Demande de contexte** : Un core (StrongFather, BondingBrother) demande le contexte de cycle de vie d'un Ã©lÃ©ment.
+2. **Recherche de l'Ã©tat** : Ever Buddy recherche l'Ã©tat actuel et l'historique de l'Ã©lÃ©ment.
+3. **Fourniture du contexte** : Ever Buddy retourne l'Ã©tat, l'historique, et les recommandations associÃ©es.
+4. **Utilisation par le demandeur** : Le core demandeur utilise ce contexte pour sa propre dÃ©cision.
 
 ### Flux de planification
 
-Ever Buddy communique les planifications d'évolution aux consommateurs :
+Ever Buddy communique les planifications d'Ã©volution aux consommateurs :
 
-1. **Définition du plan** : Ever Buddy définit un plan de transition (dépréciation, retirement, archivage).
-2. **Communication** : Le plan est communiqué à tous les consommateurs concernés.
-3. **Période de transition** : La période de transition commence, l'ancien et le nouveau coexistent.
+1. **DÃ©finition du plan** : Ever Buddy dÃ©finit un plan de transition (dÃ©prÃ©ciation, retirement, archivage).
+2. **Communication** : Le plan est communiquÃ© Ã  tous les consommateurs concernÃ©s.
+3. **PÃ©riode de transition** : La pÃ©riode de transition commence, l'ancien et le nouveau coexistent.
 4. **Suivi de l'adoption** : Ever Buddy observe l'adoption du nouveau par les consommateurs.
-5. **Complétion** : À la fin de la période, la transition est complétée et l'ancien état est terminé.
+5. **ComplÃ©tion** : Ã€ la fin de la pÃ©riode, la transition est complÃ©tÃ©e et l'ancien Ã©tat est terminÃ©.
 
 ### Flux d'alerte
 
-Ever Buddy alerte quand des conditions anormales sont détectées :
+Ever Buddy alerte quand des conditions anormales sont dÃ©tectÃ©es :
 
-1. **Détection** : Ever Buddy détecte une condition anormale (dette excessive, transition bloquée, incompatibilité).
-2. **Évaluation** : Ever Buddy évalue la gravité et l'urgence.
-3. **Alerte** : Ever Buddy émet une alerte vers les consommateurs concernés.
-4. **Recommandation** : Ever Buddy fournit des recommandations pour résoudre la situation.
-5. **Suivi** : Ever Buddy suit la résolution et clôture l'alerte une fois résolue.
+1. **DÃ©tection** : Ever Buddy dÃ©tecte une condition anormale (dette excessive, transition bloquÃ©e, incompatibilitÃ©).
+2. **Ã‰valuation** : Ever Buddy Ã©value la gravitÃ© et l'urgence.
+3. **Alerte** : Ever Buddy Ã©met une alerte vers les consommateurs concernÃ©s.
+4. **Recommandation** : Ever Buddy fournit des recommandations pour rÃ©soudre la situation.
+5. **Suivi** : Ever Buddy suit la rÃ©solution et clÃ´ture l'alerte une fois rÃ©solue.
 
 ### Relation avec les produits
 
 Les produits interagissent avec Ever Buddy via BondingBrother :
 
-- Les produits ne parlent **jamais** directement à Ever Buddy.
+- Les produits ne parlent **jamais** directement Ã  Ever Buddy.
 - BondingBrother traduit les demandes de contexte de cycle de vie.
-- Les produits reçoivent les informations de cycle de vie filtrées par BondingBrother.
+- Les produits reÃ§oivent les informations de cycle de vie filtrÃ©es par BondingBrother.
 - Les alertes d'Ever Buddy sont transmises aux produits via BondingBrother.
 
-### Diagramme des flux d'évolution
+### Diagramme des flux d'Ã©volution
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        EVER BUDDY                                    │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
-│  │  Registre   │  │   Règles    │  │  Historique │  │   Alertes   │ │
-│  │  des états  │  │ d'évolution │  │    immuable │  │  et plans   │ │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘ │
-│         │                │                │                │        │
-│         └────────────────┼────────────────┼────────────────┘        │
-│                          │                │                         │
-└──────────────────────────┼────────────────┼─────────────────────────┘
-                           │                │
-            ┌──────────────┴────────────────┴──────────────┐
-            │                                              │
-            ▼                                              ▼
-   ┌─────────────────┐                           ┌─────────────────┐
-   │  StrongFather   │                           │  BondingBrother │
-   │  (décisions)    │                           │  (médiation)    │
-   └─────────────────┘                           └─────────────────┘
-            │                                              │
-            └──────────────────┬───────────────────────────┘
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │     PRODUITS        │
-                    │ (via BondingBrother)│
-                    └─────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                        EVER BUDDY                                    â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  Registre   â”‚  â”‚   RÃ¨gles    â”‚  â”‚  Historique â”‚  â”‚   Alertes   â”‚ â”‚
+â”‚  â”‚  des Ã©tats  â”‚  â”‚ d'Ã©volution â”‚  â”‚    immuable â”‚  â”‚  et plans   â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚         â”‚                â”‚                â”‚                â”‚        â”‚
+â”‚         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜        â”‚
+â”‚                          â”‚                â”‚                         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                           â”‚                â”‚
+            â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+            â”‚                                              â”‚
+            â–¼                                              â–¼
+   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                           â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+   â”‚  StrongFather   â”‚                           â”‚  BondingBrother â”‚
+   â”‚  (dÃ©cisions)    â”‚                           â”‚  (mÃ©diation)    â”‚
+   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                           â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+            â”‚                                              â”‚
+            â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                               â”‚
+                               â–¼
+                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                    â”‚     PRODUITS        â”‚
+                    â”‚ (via BondingBrother)â”‚
+                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### Métriques surveillées par Ever Buddy
+### MÃ©triques surveillÃ©es par Ever Buddy
 
-Ever Buddy surveille en permanence plusieurs métriques pour assurer la santé de l'évolution :
+Ever Buddy surveille en permanence plusieurs mÃ©triques pour assurer la santÃ© de l'Ã©volution :
 
-**Métriques d'état :**
-- Nombre d'éléments par état (DRAFT, ACTIVE, DEPRECATED, RETIRED, ARCHIVED)
+**MÃ©triques d'Ã©tat :**
+- Nombre d'Ã©lÃ©ments par Ã©tat (DRAFT, ACTIVE, DEPRECATED, RETIRED, ARCHIVED)
 - Debt ratio (DEPRECATED + RETIRED) / ACTIVE
-- Âge moyen des éléments par état
+- Ã‚ge moyen des Ã©lÃ©ments par Ã©tat
 
-**Métriques de transition :**
+**MÃ©triques de transition :**
 - Nombre de transitions en cours
-- Durée moyenne des périodes de dépréciation
+- DurÃ©e moyenne des pÃ©riodes de dÃ©prÃ©ciation
 - Taux d'adoption des successeurs
-- Nombre de réactivations
+- Nombre de rÃ©activations
 
-**Métriques d'alerte :**
-- Transitions bloquées (au-delà de la période prévue)
-- Consommateurs non migrés à l'approche du retirement
+**MÃ©triques d'alerte :**
+- Transitions bloquÃ©es (au-delÃ  de la pÃ©riode prÃ©vue)
+- Consommateurs non migrÃ©s Ã  l'approche du retirement
 - Dette structurelle excessive
-- Violations de règles d'évolution
+- Violations de rÃ¨gles d'Ã©volution
 
 ---
 
@@ -525,322 +525,323 @@ Ever Buddy surveille en permanence plusieurs métriques pour assurer la santé d
 
 ### Cycle de vie
 
-Le **cycle de vie** est l'ensemble des états qu'un élément traverse depuis sa création jusqu'à son archivage. Chaque élément du système possède un cycle de vie gouverné par Ever Buddy.
+Le **cycle de vie** est l'ensemble des Ã©tats qu'un Ã©lÃ©ment traverse depuis sa crÃ©ation jusqu'Ã  son archivage. Chaque Ã©lÃ©ment du systÃ¨me possÃ¨de un cycle de vie gouvernÃ© par Ever Buddy.
 
 ### Transition
 
-Une **transition** est le passage d'un état de cycle de vie à un autre. Les transitions sont atomiques, documentées, et validées par Ever Buddy.
+Une **transition** est le passage d'un Ã©tat de cycle de vie Ã  un autre. Les transitions sont atomiques, documentÃ©es, et validÃ©es par Ever Buddy.
 
-### Génération
+### GÃ©nÃ©ration
 
-Une **génération** est une version majeure d'un élément ou d'un ensemble d'éléments qui partagent une base conceptuelle commune. Les générations sont numérotées et traçables.
+Une **gÃ©nÃ©ration** est une version majeure d'un Ã©lÃ©ment ou d'un ensemble d'Ã©lÃ©ments qui partagent une base conceptuelle commune. Les gÃ©nÃ©rations sont numÃ©rotÃ©es et traÃ§ables.
 
 ### Coexistence
 
-La **coexistence** est la période pendant laquelle deux versions (ou plus) d'un élément sont simultanément disponibles. Cette période permet aux consommateurs de migrer progressivement.
+La **coexistence** est la pÃ©riode pendant laquelle deux versions (ou plus) d'un Ã©lÃ©ment sont simultanÃ©ment disponibles. Cette pÃ©riode permet aux consommateurs de migrer progressivement.
 
 ### Sunset
 
-Le **sunset** est le processus planifié de fin de vie d'un élément. Il comprend la dépréciation, la période de transition, le retirement, et finalement l'archivage.
+Le **sunset** est le processus planifiÃ© de fin de vie d'un Ã©lÃ©ment. Il comprend la dÃ©prÃ©ciation, la pÃ©riode de transition, le retirement, et finalement l'archivage.
 
 ### Successeur
 
-Un **successeur** est l'élément qui remplace un élément déprécié ou retiré. Le successeur peut être une nouvelle version du même élément ou un élément entièrement différent.
+Un **successeur** est l'Ã©lÃ©ment qui remplace un Ã©lÃ©ment dÃ©prÃ©ciÃ© ou retirÃ©. Le successeur peut Ãªtre une nouvelle version du mÃªme Ã©lÃ©ment ou un Ã©lÃ©ment entiÃ¨rement diffÃ©rent.
 
-### Prédécesseur
+### PrÃ©dÃ©cesseur
 
-Un **prédécesseur** est l'élément qui a été remplacé par l'élément actuel. La chaîne des prédécesseurs forme l'historique d'évolution.
+Un **prÃ©dÃ©cesseur** est l'Ã©lÃ©ment qui a Ã©tÃ© remplacÃ© par l'Ã©lÃ©ment actuel. La chaÃ®ne des prÃ©dÃ©cesseurs forme l'historique d'Ã©volution.
 
 ### Breaking change
 
-Un **breaking change** est un changement qui rompt la compatibilité avec les versions précédentes. Les breaking changes nécessitent une transition de version majeure et une période de dépréciation de l'ancienne version.
+Un **breaking change** est un changement qui rompt la compatibilitÃ© avec les versions prÃ©cÃ©dentes. Les breaking changes nÃ©cessitent une transition de version majeure et une pÃ©riode de dÃ©prÃ©ciation de l'ancienne version.
 
 ### Migration
 
-Une **migration** est l'ensemble des actions nécessaires pour passer d'une version à une autre. Ever Buddy définit les migrations conceptuellement mais ne les exécute jamais.
+Une **migration** est l'ensemble des actions nÃ©cessaires pour passer d'une version Ã  une autre. Ever Buddy dÃ©finit les migrations conceptuellement mais ne les exÃ©cute jamais.
 
 ### Freeze
 
-Un **freeze** est le gel d'un élément à un état donné. Un élément gelé ne peut plus évoluer (sauf corrections critiques de sécurité). Le freeze est utilisé pour stabiliser les versions en production.
+Un **freeze** est le gel d'un Ã©lÃ©ment Ã  un Ã©tat donnÃ©. Un Ã©lÃ©ment gelÃ© ne peut plus Ã©voluer (sauf corrections critiques de sÃ©curitÃ©). Le freeze est utilisÃ© pour stabiliser les versions en production.
 
 ### Debt ratio
 
-Le **debt ratio** est le rapport entre les éléments DEPRECATED/RETIRED et les éléments ACTIVE. Ever Buddy surveille ce ratio et alerte quand il dépasse des seuils définis.
+Le **debt ratio** est le rapport entre les Ã©lÃ©ments DEPRECATED/RETIRED et les Ã©lÃ©ments ACTIVE. Ever Buddy surveille ce ratio et alerte quand il dÃ©passe des seuils dÃ©finis.
 
 ### Adoption rate
 
-Le **taux d'adoption** est le pourcentage de consommateurs qui ont migré vers le successeur d'un élément déprécié. Ever Buddy surveille ce taux pour déterminer quand une transition peut être complétée.
+Le **taux d'adoption** est le pourcentage de consommateurs qui ont migrÃ© vers le successeur d'un Ã©lÃ©ment dÃ©prÃ©ciÃ©. Ever Buddy surveille ce taux pour dÃ©terminer quand une transition peut Ãªtre complÃ©tÃ©e.
 
 ### Grace period
 
-La **période de grâce** est le temps supplémentaire accordé après la date prévue de retirement, pour permettre aux consommateurs retardataires de migrer. Cette période est accordée au cas par cas.
+La **pÃ©riode de grÃ¢ce** est le temps supplÃ©mentaire accordÃ© aprÃ¨s la date prÃ©vue de retirement, pour permettre aux consommateurs retardataires de migrer. Cette pÃ©riode est accordÃ©e au cas par cas.
 
 ### Compatibility window
 
-La **fenêtre de compatibilité** est la plage de versions avec lesquelles un élément garantit la compatibilité. Par exemple, "compatible avec v2.0 à v2.4" définit une fenêtre de compatibilité.
+La **fenÃªtre de compatibilitÃ©** est la plage de versions avec lesquelles un Ã©lÃ©ment garantit la compatibilitÃ©. Par exemple, "compatible avec v2.0 Ã  v2.4" dÃ©finit une fenÃªtre de compatibilitÃ©.
 
 ### Evolution chain
 
-La **chaîne d'évolution** est la séquence complète des versions d'un élément, de sa création à son état actuel. Elle inclut tous les prédécesseurs et successeurs.
+La **chaÃ®ne d'Ã©volution** est la sÃ©quence complÃ¨te des versions d'un Ã©lÃ©ment, de sa crÃ©ation Ã  son Ã©tat actuel. Elle inclut tous les prÃ©dÃ©cesseurs et successeurs.
 
 ### Tombstone
 
-Un **tombstone** est l'enregistrement minimal conservé pour un élément archivé. Il contient uniquement les métadonnées nécessaires à la traçabilité historique, pas les données fonctionnelles.
+Un **tombstone** est l'enregistrement minimal conservÃ© pour un Ã©lÃ©ment archivÃ©. Il contient uniquement les mÃ©tadonnÃ©es nÃ©cessaires Ã  la traÃ§abilitÃ© historique, pas les donnÃ©es fonctionnelles.
 
 ---
 
-## 10. Scénarios d'évolution types
+## 10. ScÃ©narios d'Ã©volution types
 
-### Scénario 1 : Évolution mineure rétrocompatible
+### ScÃ©nario 1 : Ã‰volution mineure rÃ©trocompatible
 
-Un élément ACTIVE reçoit une amélioration qui ne rompt pas la compatibilité.
+Un Ã©lÃ©ment ACTIVE reÃ§oit une amÃ©lioration qui ne rompt pas la compatibilitÃ©.
 
-1. L'amélioration est développée et testée
-2. Ever Buddy valide que le changement est rétrocompatible (version mineure)
-3. La nouvelle version est publiée avec l'ancienne toujours disponible
-4. Les consommateurs migrent à leur rythme
-5. Aucune dépréciation nécessaire, les deux versions coexistent
+1. L'amÃ©lioration est dÃ©veloppÃ©e et testÃ©e
+2. Ever Buddy valide que le changement est rÃ©trocompatible (version mineure)
+3. La nouvelle version est publiÃ©e avec l'ancienne toujours disponible
+4. Les consommateurs migrent Ã  leur rythme
+5. Aucune dÃ©prÃ©ciation nÃ©cessaire, les deux versions coexistent
 
-### Scénario 2 : Évolution majeure avec rupture
+### ScÃ©nario 2 : Ã‰volution majeure avec rupture
 
-Un élément ACTIVE nécessite un changement incompatible.
+Un Ã©lÃ©ment ACTIVE nÃ©cessite un changement incompatible.
 
-1. Le successeur est développé (état DRAFT)
+1. Le successeur est dÃ©veloppÃ© (Ã©tat DRAFT)
 2. Ever Buddy enregistre le plan de transition
-3. L'ancienne version passe à DEPRECATED avec annonce
-4. La période de dépréciation commence (coexistence)
+3. L'ancienne version passe Ã  DEPRECATED avec annonce
+4. La pÃ©riode de dÃ©prÃ©ciation commence (coexistence)
 5. Ever Buddy surveille le taux d'adoption
-6. À la fin de la période, l'ancienne version passe à RETIRED
-7. Après la période de grâce, passage à ARCHIVED
+6. Ã€ la fin de la pÃ©riode, l'ancienne version passe Ã  RETIRED
+7. AprÃ¨s la pÃ©riode de grÃ¢ce, passage Ã  ARCHIVED
 
-### Scénario 3 : Abandon sans successeur
+### ScÃ©nario 3 : Abandon sans successeur
 
-Un élément ACTIVE n'est plus utile et n'a pas de successeur.
+Un Ã©lÃ©ment ACTIVE n'est plus utile et n'a pas de successeur.
 
-1. Ever Buddy enregistre la décision d'abandon
-2. L'élément passe à DEPRECATED avec annonce explicite "pas de successeur"
-3. Les consommateurs sont avertis de retirer leur dépendance
-4. La période de dépréciation s'écoule
-5. Passage à RETIRED puis ARCHIVED
+1. Ever Buddy enregistre la dÃ©cision d'abandon
+2. L'Ã©lÃ©ment passe Ã  DEPRECATED avec annonce explicite "pas de successeur"
+3. Les consommateurs sont avertis de retirer leur dÃ©pendance
+4. La pÃ©riode de dÃ©prÃ©ciation s'Ã©coule
+5. Passage Ã  RETIRED puis ARCHIVED
 
-### Scénario 4 : Réactivation d'un élément déprécié
+### ScÃ©nario 4 : RÃ©activation d'un Ã©lÃ©ment dÃ©prÃ©ciÃ©
 
-Le successeur prévu est annulé, l'élément déprécié doit être réactivé.
+Le successeur prÃ©vu est annulÃ©, l'Ã©lÃ©ment dÃ©prÃ©ciÃ© doit Ãªtre rÃ©activÃ©.
 
-1. Ever Buddy vérifie que l'élément est encore fonctionnel
-2. La décision de réactivation est documentée avec justification
-3. L'élément passe de DEPRECATED à ACTIVE
-4. Les consommateurs sont informés de la réactivation
-5. L'historique conserve la trace de la dépréciation temporaire
+1. Ever Buddy vÃ©rifie que l'Ã©lÃ©ment est encore fonctionnel
+2. La dÃ©cision de rÃ©activation est documentÃ©e avec justification
+3. L'Ã©lÃ©ment passe de DEPRECATED Ã  ACTIVE
+4. Les consommateurs sont informÃ©s de la rÃ©activation
+5. L'historique conserve la trace de la dÃ©prÃ©ciation temporaire
 
-### Scénario 5 : Dette structurelle excessive
+### ScÃ©nario 5 : Dette structurelle excessive
 
-Le debt ratio dépasse le seuil acceptable.
+Le debt ratio dÃ©passe le seuil acceptable.
 
-1. Ever Buddy détecte le dépassement de seuil
-2. Une alerte est émise vers les consommateurs concernés
+1. Ever Buddy dÃ©tecte le dÃ©passement de seuil
+2. Une alerte est Ã©mise vers les consommateurs concernÃ©s
 3. Ever Buddy recommande un plan de nettoyage
-4. Les éléments RETIRED les plus anciens sont candidats à l'archivage
-5. Le plan est exécuté progressivement
+4. Les Ã©lÃ©ments RETIRED les plus anciens sont candidats Ã  l'archivage
+5. Le plan est exÃ©cutÃ© progressivement
 6. Le debt ratio revient sous le seuil
 
 ---
 
 ## 11. Conclusion et statut contractuel
 
-### Synthèse
+### SynthÃ¨se
 
-Ever Buddy est le gardien de l'évolution du Miyukini Core System. Il gouverne les cycles de vie, garantit la continuité, trace les évolutions, et guide les transitions. Sans Ever Buddy, le système serait condamné soit à la fossilisation (refus d'évoluer) soit au chaos (évolutions non coordonnées).
+Ever Buddy est le gardien de l'Ã©volution du Miyukini Core System. Il gouverne les cycles de vie, garantit la continuitÃ©, trace les Ã©volutions, et guide les transitions. Sans Ever Buddy, le systÃ¨me serait condamnÃ© soit Ã  la fossilisation (refus d'Ã©voluer) soit au chaos (Ã©volutions non coordonnÃ©es).
 
 ### Garanties
 
 Ever Buddy garantit que :
-- Chaque élément possède un état de cycle de vie clair et non ambigu
-- Chaque transition est validée, documentée, et traçable
-- La rétrocompatibilité est le comportement par défaut
-- Les ruptures sont explicites, justifiées, et accompagnées de périodes de transition
-- La dette structurelle est visible et maîtrisée
-- L'historique des évolutions est conservé et accessible
+- Chaque Ã©lÃ©ment possÃ¨de un Ã©tat de cycle de vie clair et non ambigu
+- Chaque transition est validÃ©e, documentÃ©e, et traÃ§able
+- La rÃ©trocompatibilitÃ© est le comportement par dÃ©faut
+- Les ruptures sont explicites, justifiÃ©es, et accompagnÃ©es de pÃ©riodes de transition
+- La dette structurelle est visible et maÃ®trisÃ©e
+- L'historique des Ã©volutions est conservÃ© et accessible
 
 ### Phrase fondatrice
 
-**Ever Buddy est le compagnon de toujours qui observe, enregistre, et guide l'évolution du système, garantissant que chaque changement respecte la continuité, que chaque transition est traçable, et que l'avenir est préparé sans sacrifier le présent.**
+**Ever Buddy est le compagnon de toujours qui observe, enregistre, et guide l'Ã©volution du systÃ¨me, garantissant que chaque changement respecte la continuitÃ©, que chaque transition est traÃ§able, et que l'avenir est prÃ©parÃ© sans sacrifier le prÃ©sent.**
 
-Cette phrase résume l'essence d'Ever Buddy : compagnon (présent mais non autoritaire), observateur (pas exécuteur), guide (influence sans contrainte), gardien de la continuité (vision long terme).
+Cette phrase rÃ©sume l'essence d'Ever Buddy : compagnon (prÃ©sent mais non autoritaire), observateur (pas exÃ©cuteur), guide (influence sans contrainte), gardien de la continuitÃ© (vision long terme).
 
 ### Statut
 
-Ce document est de statut **FONDATION**. Il établit les principes non négociables d'Ever Buddy. Toute implémentation doit respecter intégralement ces principes. Toute évolution d'Ever Buddy doit préserver ces invariants.
+Ce document est de statut **FONDATION**. Il Ã©tablit les principes non nÃ©gociables d'Ever Buddy. Toute implÃ©mentation doit respecter intÃ©gralement ces principes. Toute Ã©volution d'Ever Buddy doit prÃ©server ces invariants.
 
-Les règles définies ici ne sont pas des recommandations — ce sont des contrats. Les violer, c'est violer l'architecture fondamentale du Miyukini Core System.
+Les rÃ¨gles dÃ©finies ici ne sont pas des recommandations â€” ce sont des contrats. Les violer, c'est violer l'architecture fondamentale du Miyukini Core System.
 
 ### Ce que ce document ne couvre pas
 
-Ce document fondateur établit les principes et invariants d'Ever Buddy. Il ne couvre pas :
+Ce document fondateur Ã©tablit les principes et invariants d'Ever Buddy. Il ne couvre pas :
 
-- **Les détails d'implémentation technique** : Comment Ever Buddy est codé, quels langages, quelles bases de données.
-- **Les APIs spécifiques** : Les interfaces techniques seront définies dans des documents contractuels séparés.
-- **Les intégrations produit** : Comment chaque produit utilise Ever Buddy sera documenté par produit.
-- **Les outils d'administration** : Les interfaces de gestion des cycles de vie seront spécifiées séparément.
+- **Les dÃ©tails d'implÃ©mentation technique** : Comment Ever Buddy est codÃ©, quels langages, quelles bases de donnÃ©es.
+- **Les APIs spÃ©cifiques** : Les interfaces techniques seront dÃ©finies dans des documents contractuels sÃ©parÃ©s.
+- **Les intÃ©grations produit** : Comment chaque produit utilise Ever Buddy sera documentÃ© par produit.
+- **Les outils d'administration** : Les interfaces de gestion des cycles de vie seront spÃ©cifiÃ©es sÃ©parÃ©ment.
 
 ---
 
-## 12. Conformité aux Lois d'Autonomie Système
+## 12. ConformitÃ© aux Lois d'Autonomie SystÃ¨me
 
-Ce core respecte les **Lois d'Autonomie Système** définies dans [Miyukini Framework - Lois Autonomie Systeme.md](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md). Ever Buddy est **pleinement compatible** avec ces lois grâce à sa nature d'observateur et de gouverneur conceptuel qui n'exécute jamais.
+Ce core respecte les **Lois d'Autonomie SystÃ¨me** dÃ©finies dans [Miyukini Framework - Lois Autonomie Systeme.md](..//..//..//miyukini-webway-system//reference//_index.md). Ever Buddy est **pleinement compatible** avec ces lois grÃ¢ce Ã  sa nature d'observateur et de gouverneur conceptuel qui n'exÃ©cute jamais.
 
-### LOI-1 : Aucune dépendance externe critique à l'exécution
+### LOI-1 : Aucune dÃ©pendance externe critique Ã  l'exÃ©cution
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-Ever Buddy respecte intégralement LOI-1 :
-- Le **registre des états de cycle de vie est local** et ne dépend d'aucun service externe
-- L'**historique des transitions est stocké localement** et accessible sans connexion réseau
-- Les règles d'évolution et de compatibilité sont **définies statiquement**, pas récupérées dynamiquement
-- Ever Buddy peut observer, enregistrer et guider les évolutions sans aucun appel externe obligatoire
+Ever Buddy respecte intÃ©gralement LOI-1 :
+- Le **registre des Ã©tats de cycle de vie est local** et ne dÃ©pend d'aucun service externe
+- L'**historique des transitions est stockÃ© localement** et accessible sans connexion rÃ©seau
+- Les rÃ¨gles d'Ã©volution et de compatibilitÃ© sont **dÃ©finies statiquement**, pas rÃ©cupÃ©rÃ©es dynamiquement
+- Ever Buddy peut observer, enregistrer et guider les Ã©volutions sans aucun appel externe obligatoire
 
-**Architecture :** Ever Buddy fonctionne comme un moteur d'observation pur. Ses responsabilités (gouvernance des états, traçabilité, règles de compatibilité) ne nécessitent aucune dépendance externe.
+**Architecture :** Ever Buddy fonctionne comme un moteur d'observation pur. Ses responsabilitÃ©s (gouvernance des Ã©tats, traÃ§abilitÃ©, rÃ¨gles de compatibilitÃ©) ne nÃ©cessitent aucune dÃ©pendance externe.
 
-### LOI-2 : Le système accepte l'isolement comme état normal
+### LOI-2 : Le systÃ¨me accepte l'isolement comme Ã©tat normal
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-Ever Buddy respecte intégralement LOI-2 :
-- Les **transitions d'état sont validées localement** sans attendre de validation externe
-- Le registre des états fonctionne **indépendamment** de la connectivité réseau
-- Les décisions de cycle de vie sont prises **avec le contexte local disponible**
-- L'isolement ne bloque pas l'enregistrement des états ni la traçabilité
+Ever Buddy respecte intÃ©gralement LOI-2 :
+- Les **transitions d'Ã©tat sont validÃ©es localement** sans attendre de validation externe
+- Le registre des Ã©tats fonctionne **indÃ©pendamment** de la connectivitÃ© rÃ©seau
+- Les dÃ©cisions de cycle de vie sont prises **avec le contexte local disponible**
+- L'isolement ne bloque pas l'enregistrement des Ã©tats ni la traÃ§abilitÃ©
 
-**Architecture :** En mode isolé, Ever Buddy continue de gouverner les cycles de vie locaux. La synchronisation des états entre nœuds (via BondingBrother) est optionnelle et non bloquante.
+**Architecture :** En mode isolÃ©, Ever Buddy continue de gouverner les cycles de vie locaux. La synchronisation des Ã©tats entre nÅ“uds (via BondingBrother) est optionnelle et non bloquante.
 
-### LOI-3 : L'état local est souverain
+### LOI-3 : L'Ã©tat local est souverain
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-Ever Buddy respecte intégralement LOI-3 :
-- Les **états de cycle de vie locaux sont la vérité locale** jusqu'à réconciliation explicite
-- L'historique local constitue une **trace d'audit complète** (INV-EB-2)
-- Les transitions enregistrées localement ne sont **jamais invalidées a posteriori**
-- À la reconnexion : réconciliation explicite des états, pas de correction silencieuse
+Ever Buddy respecte intÃ©gralement LOI-3 :
+- Les **Ã©tats de cycle de vie locaux sont la vÃ©ritÃ© locale** jusqu'Ã  rÃ©conciliation explicite
+- L'historique local constitue une **trace d'audit complÃ¨te** (INV-EB-2)
+- Les transitions enregistrÃ©es localement ne sont **jamais invalidÃ©es a posteriori**
+- Ã€ la reconnexion : rÃ©conciliation explicite des Ã©tats, pas de correction silencieuse
 
-**Architecture :** Chaque nœud maintient son propre registre d'états. L'invariant INV-EB-2 (traçabilité complète et immuable) garantit que l'historique local est souverain.
+**Architecture :** Chaque nÅ“ud maintient son propre registre d'Ã©tats. L'invariant INV-EB-2 (traÃ§abilitÃ© complÃ¨te et immuable) garantit que l'historique local est souverain.
 
 ### LOI-4 : Pas de temps global requis
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-Ever Buddy respecte intégralement LOI-4 :
-- Les transitions d'état sont **basées sur des états discrets**, pas sur des timestamps absolus
-- Les périodes de dépréciation sont des **durées conceptuelles** (nombre de cycles de release, pas de dates absolues)
-- Le **versionnement sémantique** (majeur.mineur.correctif) ne dépend pas d'horloges synchronisées
-- Les comparaisons de versions entre nœuds utilisent des **numéros de version**, pas des timestamps
-- La matrice des transitions (DRAFT → ACTIVE → DEPRECATED → RETIRED → ARCHIVED) est **purement logique**
+Ever Buddy respecte intÃ©gralement LOI-4 :
+- Les transitions d'Ã©tat sont **basÃ©es sur des Ã©tats discrets**, pas sur des timestamps absolus
+- Les pÃ©riodes de dÃ©prÃ©ciation sont des **durÃ©es conceptuelles** (nombre de cycles de release, pas de dates absolues)
+- Le **versionnement sÃ©mantique** (majeur.mineur.correctif) ne dÃ©pend pas d'horloges synchronisÃ©es
+- Les comparaisons de versions entre nÅ“uds utilisent des **numÃ©ros de version**, pas des timestamps
+- La matrice des transitions (DRAFT â†’ ACTIVE â†’ DEPRECATED â†’ RETIRED â†’ ARCHIVED) est **purement logique**
 
-**Architecture :** Ever Buddy gouverne les évolutions par états et transitions, pas par temps. Les périodes minimales de transition sont définies en cycles ou en critères d'adoption, pas en temps absolu.
+**Architecture :** Ever Buddy gouverne les Ã©volutions par Ã©tats et transitions, pas par temps. Les pÃ©riodes minimales de transition sont dÃ©finies en cycles ou en critÃ¨res d'adoption, pas en temps absolu.
 
-### LOI-5 : Le coût doit être proportionnel au hardware
+### LOI-5 : Le coÃ»t doit Ãªtre proportionnel au hardware
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-Ever Buddy respecte intégralement LOI-5 :
-- **Moteur d'observation léger** : Ever Buddy observe et enregistre, il n'exécute pas de migrations
-- **Pas de workers permanents** : Les évaluations de cycle de vie sont ponctuelles, pas continues
-- **Registre d'états compact** : Stockage minimal (état actuel + historique de transitions)
-- **Pas de services fantômes** : Ever Buddy est activé à la demande, pas en arrière-plan
+Ever Buddy respecte intÃ©gralement LOI-5 :
+- **Moteur d'observation lÃ©ger** : Ever Buddy observe et enregistre, il n'exÃ©cute pas de migrations
+- **Pas de workers permanents** : Les Ã©valuations de cycle de vie sont ponctuelles, pas continues
+- **Registre d'Ã©tats compact** : Stockage minimal (Ã©tat actuel + historique de transitions)
+- **Pas de services fantÃ´mes** : Ever Buddy est activÃ© Ã  la demande, pas en arriÃ¨re-plan
 
-**Architecture :** La séparation stricte entre gouvernance (Ever Buddy) et exécution (KindMother, produits) garantit que Ever Buddy reste léger et prévisible en consommation de ressources.
+**Architecture :** La sÃ©paration stricte entre gouvernance (Ever Buddy) et exÃ©cution (KindMother, produits) garantit que Ever Buddy reste lÃ©ger et prÃ©visible en consommation de ressources.
 
-### LOI-6 : L'autonomie n'empêche pas la fédération
+### LOI-6 : L'autonomie n'empÃªche pas la fÃ©dÃ©ration
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-Ever Buddy respecte intégralement LOI-6 :
-- Les informations de cycle de vie peuvent être **partagées entre nœuds via BondingBrother**
-- Un nœud peut refuser de partager ses états de cycle de vie (fédération optionnelle)
-- La fédération des états est **explicite et traçable**
-- Un nœud peut quitter la fédération sans perdre son historique local
+Ever Buddy respecte intÃ©gralement LOI-6 :
+- Les informations de cycle de vie peuvent Ãªtre **partagÃ©es entre nÅ“uds via BondingBrother**
+- Un nÅ“ud peut refuser de partager ses Ã©tats de cycle de vie (fÃ©dÃ©ration optionnelle)
+- La fÃ©dÃ©ration des Ã©tats est **explicite et traÃ§able**
+- Un nÅ“ud peut quitter la fÃ©dÃ©ration sans perdre son historique local
 
-**Architecture :** Ever Buddy fournit le contexte de cycle de vie à BondingBrother pour la médiation entre nœuds. Les échanges fédérés d'informations d'évolution sont contrôlés et jamais obligatoires.
+**Architecture :** Ever Buddy fournit le contexte de cycle de vie Ã  BondingBrother pour la mÃ©diation entre nÅ“uds. Les Ã©changes fÃ©dÃ©rÃ©s d'informations d'Ã©volution sont contrÃ´lÃ©s et jamais obligatoires.
 
-### Synthèse de conformité
+### SynthÃ¨se de conformitÃ©
 
-| Loi | Conformité | Mécanisme principal |
+| Loi | ConformitÃ© | MÃ©canisme principal |
 |-----|------------|---------------------|
-| LOI-1 | ✅ Conforme | Registre d'états local, règles statiques |
-| LOI-2 | ✅ Conforme | Transitions validées localement |
-| LOI-3 | ✅ Conforme | Historique immuable local (INV-EB-2) |
-| LOI-4 | ✅ Conforme | États discrets et versionnement sémantique |
-| LOI-5 | ✅ Conforme | Observation pure, pas d'exécution |
-| LOI-6 | ✅ Conforme | Fédération via BondingBrother optionnelle |
+| LOI-1 | âœ… Conforme | Registre d'Ã©tats local, rÃ¨gles statiques |
+| LOI-2 | âœ… Conforme | Transitions validÃ©es localement |
+| LOI-3 | âœ… Conforme | Historique immuable local (INV-EB-2) |
+| LOI-4 | âœ… Conforme | Ã‰tats discrets et versionnement sÃ©mantique |
+| LOI-5 | âœ… Conforme | Observation pure, pas d'exÃ©cution |
+| LOI-6 | âœ… Conforme | FÃ©dÃ©ration via BondingBrother optionnelle |
 
-**Question de validation :** *"Est-ce que Ever Buddy fonctionne encore si le système est seul, lent, et isolé ?"* — **Oui**, Ever Buddy continue d'observer, d'enregistrer et de guider les évolutions locales sans aucune dépendance externe.
+**Question de validation :** *"Est-ce que Ever Buddy fonctionne encore si le systÃ¨me est seul, lent, et isolÃ© ?"* â€” **Oui**, Ever Buddy continue d'observer, d'enregistrer et de guider les Ã©volutions locales sans aucune dÃ©pendance externe.
 
 ---
 
-## 13. Mini log de génération
+## 13. Mini log de gÃ©nÃ©ration
 
-### Décision D1 : Séparation gouvernance / exécution
+### DÃ©cision D1 : SÃ©paration gouvernance / exÃ©cution
 
-**Contexte :** Risque de confusion entre la gouvernance de l'évolution (Ever Buddy) et l'exécution des migrations (KindMother, produits).
+**Contexte :** Risque de confusion entre la gouvernance de l'Ã©volution (Ever Buddy) et l'exÃ©cution des migrations (KindMother, produits).
 
-**Décision :** Ever Buddy gouverne, observe, et guide, mais n'exécute jamais. L'invariant INV-EB-1 établit cette séparation de manière non négociable.
+**DÃ©cision :** Ever Buddy gouverne, observe, et guide, mais n'exÃ©cute jamais. L'invariant INV-EB-1 Ã©tablit cette sÃ©paration de maniÃ¨re non nÃ©gociable.
 
-**Justification :** La séparation des responsabilités est un principe fondamental de l'architecture Miyukini. Mélanger gouvernance et exécution créerait des couplages dangereux.
+**Justification :** La sÃ©paration des responsabilitÃ©s est un principe fondamental de l'architecture Miyukini. MÃ©langer gouvernance et exÃ©cution crÃ©erait des couplages dangereux.
 
-### Décision D2 : Passage obligatoire par DEPRECATED
+### DÃ©cision D2 : Passage obligatoire par DEPRECATED
 
-**Contexte :** Tentation de permettre des raccourcis (ACTIVE → RETIRED) pour les cas "urgents".
+**Contexte :** Tentation de permettre des raccourcis (ACTIVE â†’ RETIRED) pour les cas "urgents".
 
-**Décision :** L'invariant INV-EB-4 interdit tout raccourci. DEPRECATED est obligatoire.
+**DÃ©cision :** L'invariant INV-EB-4 interdit tout raccourci. DEPRECATED est obligatoire.
 
-**Justification :** Les "cas urgents" sont souvent des excuses pour éviter la discipline. La protection des consommateurs prime sur la commodité.
+**Justification :** Les "cas urgents" sont souvent des excuses pour Ã©viter la discipline. La protection des consommateurs prime sur la commoditÃ©.
 
-### Décision D3 : Rétrocompatibilité par défaut
+### DÃ©cision D3 : RÃ©trocompatibilitÃ© par dÃ©faut
 
-**Contexte :** Choix entre "rupture par défaut" (plus flexible) et "rétrocompatibilité par défaut" (plus stable).
+**Contexte :** Choix entre "rupture par dÃ©faut" (plus flexible) et "rÃ©trocompatibilitÃ© par dÃ©faut" (plus stable).
 
-**Décision :** L'invariant INV-EB-5 établit la rétrocompatibilité comme comportement par défaut.
+**DÃ©cision :** L'invariant INV-EB-5 Ã©tablit la rÃ©trocompatibilitÃ© comme comportement par dÃ©faut.
 
-**Justification :** La stabilité et la prévisibilité sont des valeurs fondamentales du Miyukini Core System. Les ruptures doivent être l'exception, pas la règle.
+**Justification :** La stabilitÃ© et la prÃ©visibilitÃ© sont des valeurs fondamentales du Miyukini Core System. Les ruptures doivent Ãªtre l'exception, pas la rÃ¨gle.
 
-### Décision D4 : Relations avec les autres cores
+### DÃ©cision D4 : Relations avec les autres cores
 
-**Contexte :** Définir précisément comment Ever Buddy interagit avec chaque core sans créer de dépendances circulaires.
+**Contexte :** DÃ©finir prÃ©cisÃ©ment comment Ever Buddy interagit avec chaque core sans crÃ©er de dÃ©pendances circulaires.
 
-**Décision :** Relations consultatives et d'alimentation, jamais d'autorité mutuelle.
+**DÃ©cision :** Relations consultatives et d'alimentation, jamais d'autoritÃ© mutuelle.
 
 **Justification :** Chaque core conserve son autonomie. Ever Buddy influence par l'information, pas par la contrainte.
 
-### Ambiguïté A1 : Gestion des éléments sans consommateurs
+### AmbiguÃ¯tÃ© A1 : Gestion des Ã©lÃ©ments sans consommateurs
 
-**Ambiguïté :** Que faire d'un élément DEPRECATED qui n'a aucun consommateur connu ?
+**AmbiguÃ¯tÃ© :** Que faire d'un Ã©lÃ©ment DEPRECATED qui n'a aucun consommateur connu ?
 
-**Résolution :** L'élément peut être accéléré vers RETIRED si l'absence de consommateurs est vérifiée. La période de dépréciation minimale reste obligatoire, mais peut être réduite au minimum.
+**RÃ©solution :** L'Ã©lÃ©ment peut Ãªtre accÃ©lÃ©rÃ© vers RETIRED si l'absence de consommateurs est vÃ©rifiÃ©e. La pÃ©riode de dÃ©prÃ©ciation minimale reste obligatoire, mais peut Ãªtre rÃ©duite au minimum.
 
-### Ambiguïté A2 : Conflits entre règles d'évolution
+### AmbiguÃ¯tÃ© A2 : Conflits entre rÃ¨gles d'Ã©volution
 
-**Ambiguïté :** Que faire si deux règles d'évolution semblent contradictoires ?
+**AmbiguÃ¯tÃ© :** Que faire si deux rÃ¨gles d'Ã©volution semblent contradictoires ?
 
-**Résolution :** Les invariants priment sur les recommandations. En cas de conflit entre invariants (théoriquement impossible), l'invariant avec le numéro le plus bas prévaut.
+**RÃ©solution :** Les invariants priment sur les recommandations. En cas de conflit entre invariants (thÃ©oriquement impossible), l'invariant avec le numÃ©ro le plus bas prÃ©vaut.
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-**Vérifications effectuées :**
-- ✅ Cohérence avec KindMother : Confirmée (complémentarité, pas de remplacement)
-- ✅ Cohérence avec StrongFather : Confirmée (consultation, pas de décision)
-- ✅ Cohérence avec BondingBrother : Confirmée (guidance, pas de traduction directe)
-- ✅ Aucune exécution : Confirmée (INV-EB-1)
-- ✅ Traçabilité complète : Confirmée (INV-EB-2)
-- ✅ États non ambigus : Confirmée (INV-EB-3)
-- ✅ Dépréciation obligatoire : Confirmée (INV-EB-4)
-- ✅ Rétrocompatibilité par défaut : Confirmée (INV-EB-5)
+**VÃ©rifications effectuÃ©es :**
+- âœ… CohÃ©rence avec KindMother : ConfirmÃ©e (complÃ©mentaritÃ©, pas de remplacement)
+- âœ… CohÃ©rence avec StrongFather : ConfirmÃ©e (consultation, pas de dÃ©cision)
+- âœ… CohÃ©rence avec BondingBrother : ConfirmÃ©e (guidance, pas de traduction directe)
+- âœ… Aucune exÃ©cution : ConfirmÃ©e (INV-EB-1)
+- âœ… TraÃ§abilitÃ© complÃ¨te : ConfirmÃ©e (INV-EB-2)
+- âœ… Ã‰tats non ambigus : ConfirmÃ©e (INV-EB-3)
+- âœ… DÃ©prÃ©ciation obligatoire : ConfirmÃ©e (INV-EB-4)
+- âœ… RÃ©trocompatibilitÃ© par dÃ©faut : ConfirmÃ©e (INV-EB-5)
 
-**Conclusion :** Aucune contradiction détectée. Le document est cohérent avec l'écosystème Miyukini.
+**Conclusion :** Aucune contradiction dÃ©tectÃ©e. Le document est cohÃ©rent avec l'Ã©cosystÃ¨me Miyukini.
 
 ---
 
 **Version :** 1.3  
 **Date :** 2026-01-27  
-**Statut :** FONDATION — Non négociable  
-**Référence :** Miyukini Core System v2.4, [Miyukini Conceptual References - Tools et Toolkits](../../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) (cycle de vie des Tools), [Miyukini Framework - External Signal & Trust Reinforcement Contract](../../../reference/Miyukini%20Framework%20-%20External%20Signal%20Trust%20Reinforcement%20Contract.md) (vérification compatibilité mises à jour), [Miyukini Framework - Security Protocols](../../../reference/Miyukini%20Framework%20-%20Security%20Protocols.md) (revalidation version AS-SEC-3, handshake conformité NET-SEC-1, mise à jour sécurisée NET-SEC-2)  
-**Type :** Documentation fondatrice non négociable
+**Statut :** FONDATION â€” Non nÃ©gociable  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, [Miyukini Conceptual References - Tools et Toolkits](..//..//..//miyukini-webway-system//reference//_index.md) (cycle de vie des Tools), [Miyukini Framework - External Signal & Trust Reinforcement Contract](..//..//..//miyukini-webway-system//reference//_index.md) (vÃ©rification compatibilitÃ© mises Ã  jour), [Miyukini Framework - Security Protocols](..//..//..//miyukini-webway-system//reference//_index.md) (revalidation version AS-SEC-3, handshake conformitÃ© NET-SEC-1, mise Ã  jour sÃ©curisÃ©e NET-SEC-2)  
+**Type :** Documentation fondatrice non nÃ©gociable
+

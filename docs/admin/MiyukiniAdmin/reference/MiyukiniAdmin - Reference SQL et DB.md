@@ -1,4 +1,4 @@
-# MiyukiniAdmin — Reference SQL et DB
+﻿# MiyukiniAdmin â€” Reference SQL et DB
 
 ## 1. Contexte
 
@@ -6,7 +6,7 @@ Ce document definit la **reference technique** pour les sujets SQL et base de do
 
 **Service hors-bord :** MiyukiniAdmin est un **service hors-bord**. Il contourne tout RLS (Row Level Security) et toute Auth externe (ex. Supabase). L'authentification et l'autorisation applicables a MiyukiniAdmin sont **les siennes**, a definir et implementer (auth propre du service admin). Aucune notion de RLS type Supabase n'est retenue dans la doc MiyukiniAdmin.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -60,7 +60,7 @@ Ce document **ne remplace pas** les contrats ; il les complete et sert de refere
 | **timestamp** | Date/heure sans fuseau | Horodatage local |
 | **bool** | Booleen | Vrai/faux |
 
-*Reference style Supabase : "About data types" — documenter ces types dans l'UI Table Editor (creation de colonnes).*
+*Reference style Supabase : "About data types" â€” documenter ces types dans l'UI Table Editor (creation de colonnes).*
 
 ### 4.2 Proprietes des colonnes
 
@@ -100,7 +100,7 @@ Ce document **ne remplace pas** les contrats ; il les complete et sert de refere
 
 ### 6.3 Onglet Chart
 
-- **Visualisation :** representation graphique des resultats (courbes, barres) pour metriques ou donnees agregées. Optionnel.
+- **Visualisation :** representation graphique des resultats (courbes, barres) pour metriques ou donnees agregÃ©es. Optionnel.
 - **Implementation :** soit tableau + export (Rust seul), soit serveur genere SVG, soit librairie JS legere cote client ; voir [Affichage Dynamique et Metriques](../ui/MiyukiniAdmin%20-%20Affichage%20Dynamique%20et%20Metriques.md).
 
 ---
@@ -147,3 +147,4 @@ Ce document **ne remplace pas** les contrats ; il les complete et sert de refere
 **Date de creation :** 2026-01-29  
 **Version :** 1.0.0  
 **Statut :** Document de reference (SQL et DB)
+

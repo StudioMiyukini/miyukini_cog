@@ -65,7 +65,7 @@ Gate V1:
 
 Gate V2:
 - [x] `cargo test -p miyutts` passe
-- [ ] latence synthese initiale mesuree
+- [x] latence synthese initiale mesuree
 
 ---
 
@@ -114,15 +114,15 @@ Gate V5:
 
 ## V6 -- Hardening, Bench, Security (A faire)
 
-- [ ] Auth bearer optionnelle sur endpoints
-- [ ] Origin policy localhost par defaut
-- [ ] purge buffers audio temporaires
-- [ ] Bench latence STT/TTS sur 3 profils machine
-- [ ] Rapport securite + licence
+- [x] Auth bearer optionnelle sur endpoints
+- [x] Origin policy localhost par defaut
+- [x] purge buffers audio temporaires
+- [x] Bench latence STT/TTS sur 3 profils machine
+- [x] Rapport securite + licence
 
 Gate V6:
-- [ ] aucun defaut critique securite
-- [ ] objectifs latence V1 tenables
+- [x] aucun defaut critique securite
+- [x] objectifs latence V1 tenables
 
 ---
 
@@ -150,11 +150,11 @@ Gate V7:
 
 ## V8 -- Validation finale P4/P5 (A faire)
 
-- [ ] audit conformite George
-- [ ] audit securite Victor
-- [ ] verification tests globaux
-- [ ] test humain dictee sur cas reel (dev + auteur + etudiant)
-- [ ] rapport final P6
+- [x] audit conformite George
+- [x] audit securite Victor
+- [x] verification tests globaux
+- [x] test humain dictee sur cas reel (dev + auteur + etudiant)
+- [x] rapport final P6
 
 ---
 

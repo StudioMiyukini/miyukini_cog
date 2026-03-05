@@ -1,4 +1,4 @@
-# MiyukiniAdmin — Auth and First-Boot Contract
+﻿# MiyukiniAdmin â€” Auth and First-Boot Contract
 
 ## 1. Contexte
 
@@ -11,7 +11,7 @@ Ce document definit le **contrat d'authentification, d'autorisation et de premie
 **References :**
 - [MiyukiniAdmin - Documentation Fondatrice](../../foundation/MiyukiniAdmin%20-%20Documentation%20Fondatrice.md)
 - [MiyukiniAdmin - Threat Model Contract](./MiyukiniAdmin%20-%20Threat%20Model%20Contract.md)
-- [Miyukini Conceptual References - Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+- [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -27,7 +27,7 @@ Ce document definit :
 - L'articulation avec le protocole d'identite d'environnement (EIP)
 
 Ce document **ne couvre pas** :
-- L'implementation cryptographique detaillee de l'EIP (voir [Environment Identity Protocol (EIP)](../../../../protocols/MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md))
+- L'implementation cryptographique detaillee de l'EIP (voir [Environment Identity Protocol (..//..//..//..//contrats//MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md))
 - Les Mandats de Permission des Operateurs metier (hors MiyukiniAdmin)
 - La visite inter-COG (Utilisateur Visiteur, Visa)
 
@@ -44,9 +44,9 @@ MiyukiniAdmin determine l'etat de l'environnement en verifiant l'**existence** e
 | **Blob identite environnement** | Identite souveraine du COG (EIP) | KindMother / stockage protege | Oui |
 | **Registre premier admin** | Existence d'au moins un compte admin MiyukiniAdmin | Stockage MiyukiniAdmin | Oui |
 | **Schema bootstrap** | Tables noyau (kernel_config, core_registry, etc.) | KindMother / DB | Oui |
-| **Politique StrongFather bootstrap** | Verrou « seul MiyukiniAdmin + Cores » actif ou desactive | StrongFather | Desactive = environnement opere normalement |
+| **Politique StrongFather bootstrap** | Verrou Â« seul MiyukiniAdmin + Cores Â» actif ou desactive | StrongFather | Desactive = environnement opere normalement |
 
-**Regle :** L'etat depend de la **presence** et de l'**integrite** de ces donnees. Absence totale → **vierge**. Presence avec integrite invalide → **compromis** (attaque, troncature, alteration), pas vierge.
+**Regle :** L'etat depend de la **presence** et de l'**integrite** de ces donnees. Absence totale â†’ **vierge**. Presence avec integrite invalide â†’ **compromis** (attaque, troncature, alteration), pas vierge.
 
 ---
 
@@ -56,7 +56,7 @@ MiyukiniAdmin determine l'etat de l'environnement en verifiant l'**existence** e
 |------|------------|---------|
 | **VIERGE** | Environnement **jamais initialise** : les donnees critiques n'ont **jamais ete creees** ou le stockage est vide (premier deploiement). Aucune trace d'un boot precedent reussi. | Pas de blob EIP ; pas de compte admin ; pas de schema bootstrap ou schema vide. |
 | **INITIALISE** | Environnement **deja initialise** et **intact** : toutes les donnees critiques sont **presentes** et **integres** (hash EIP valide, registre admin coherent, schema complet). | Blob EIP present, tag/hash valides ; au moins un compte admin ; schema et tables noyau complets et coherents. |
-| **COMPROMIS** | Environnement **attaque, tronque ou altere** : des donnees critiques sont **presentes mais invalides** (corruption, troncature, incohérence) ou **incoherentes** entre elles. Indique une intrusion, une panne grave ou une alteration malveillante. | Blob EIP present mais tag/hash invalides ; registre admin present mais corrompu ou incohérent ; schema present mais tronque ; incohérence entre EIP et etat reel (ex. EIP dit « initialise » mais aucun compte admin). |
+| **COMPROMIS** | Environnement **attaque, tronque ou altere** : des donnees critiques sont **presentes mais invalides** (corruption, troncature, incohÃ©rence) ou **incoherentes** entre elles. Indique une intrusion, une panne grave ou une alteration malveillante. | Blob EIP present mais tag/hash invalides ; registre admin present mais corrompu ou incohÃ©rent ; schema present mais tronque ; incohÃ©rence entre EIP et etat reel (ex. EIP dit Â« initialise Â» mais aucun compte admin). |
 
 **Regle fondamentale :** Un environnement **compromis** n'est **pas** un environnement vierge. Il ne doit **jamais** declencher le parcours d'installation (Futur Admin). Il releve d'une **reponse securitaire** (voir 3.5).
 
@@ -69,9 +69,9 @@ La distinction repose sur l'**absence totale** vs la **presence defectueuse** de
 | Criteres | VIERGE | COMPROMIS |
 |----------|--------|-----------|
 | **Blob EIP** | Absent (jamais cree). | Present mais **invalide** : tag AEAD invalide, hash d'integrite incoherent avec l'etat courant, ou format corrompu. |
-| **Registre admin** | Absent ou vide (aucun compte). | Present mais **incoherent** : structure corrompue, hash de mot de passe invalide, ou incohérence (ex. flag « environnement initialise » present alors qu'aucun compte admin valide). |
+| **Registre admin** | Absent ou vide (aucun compte). | Present mais **incoherent** : structure corrompue, hash de mot de passe invalide, ou incohÃ©rence (ex. flag Â« environnement initialise Â» present alors qu'aucun compte admin valide). |
 | **Schema bootstrap** | Absent ou tables vides (jamais migre). | Present mais **tronque** : tables manquantes, colonnes manquantes, contraintes rompues, ou checksum schema invalide. |
-| **Cohérence globale** | N/A (rien a croiser). | **Incoherence** : EIP indique une iteration / version alors que le registre admin est vide ; ou schema present sans blob EIP ; ou blob EIP present sans schema complet. |
+| **CohÃ©rence globale** | N/A (rien a croiser). | **Incoherence** : EIP indique une iteration / version alors que le registre admin est vide ; ou schema present sans blob EIP ; ou blob EIP present sans schema complet. |
 
 **Indicateurs de compromission (exemples) :**
 
@@ -81,7 +81,7 @@ La distinction repose sur l'**absence totale** vs la **presence defectueuse** de
 - Schema : checksum des tables noyau different de la valeur attendue (migration partielle ou troncature).
 - Fichier ou slot de stockage : taille nulle ou anormale alors qu'un blob EIP est attendu (troncature).
 
-**Regle :** Dès qu'une **presence** est detectee avec **integrite invalide** ou **incoherence** entre artefacts, l'environnement est classe **COMPROMIS**. L'absence totale et coherente (rien n'a jamais ete cree) reste **VIERGE**.
+**Regle :** DÃ¨s qu'une **presence** est detectee avec **integrite invalide** ou **incoherence** entre artefacts, l'environnement est classe **COMPROMIS**. L'absence totale et coherente (rien n'a jamais ete cree) reste **VIERGE**.
 
 ---
 
@@ -89,33 +89,33 @@ La distinction repose sur l'**absence totale** vs la **presence defectueuse** de
 
 ```
 1. Demarrer Kernel (Id, Logger, Clock, Config, Lifecycle).
-2. MiyukiniAdmin demarre en mode « detection ».
+2. MiyukiniAdmin demarre en mode Â« detection Â».
 3. Verifier presence des artefacts :
    - Blob EIP (existe ?)
    - Registre admin (existe ? au moins un compte ?)
    - Schema bootstrap (existe ? tables noyau presentes ?)
-4. Si aucun artefact present (stockage vide, jamais initialise) → VIERGE.
-   → Activer verrou StrongFather + flux Futur Admin (parcours installation).
+4. Si aucun artefact present (stockage vide, jamais initialise) â†’ VIERGE.
+   â†’ Activer verrou StrongFather + flux Futur Admin (parcours installation).
 5. Si artefacts presents : verifier integrite et coherence :
    - EIP : dechiffrement + verification tag ; verification integrity_hash vs etat courant.
    - Registre admin : structure valide ; au moins un compte non revoque et coherent.
    - Schema : checksum / structure complete ; coherence avec EIP (iteration, version).
-6. Si tout present et valide → INITIALISE.
-   → Pas de verrou bootstrap ; flux auth classique (login admin).
-7. Si presence mais integrite invalide ou incoherence → COMPROMIS.
-   → Reponse securitaire (voir 3.5) : pas de parcours installation, pas de login normal.
+6. Si tout present et valide â†’ INITIALISE.
+   â†’ Pas de verrou bootstrap ; flux auth classique (login admin).
+7. Si presence mais integrite invalide ou incoherence â†’ COMPROMIS.
+   â†’ Reponse securitaire (voir 3.5) : pas de parcours installation, pas de login normal.
 ```
 
 ---
 
 ### 3.5 Reponse securitaire (environnement attaque, tronque, altere)
 
-Lorsque l'environnement est classe **COMPROMIS** (attaque, troncature, alteration), MiyukiniAdmin applique une **reponse securitaire** — et **non** le parcours d'installation (Futur Admin).
+Lorsque l'environnement est classe **COMPROMIS** (attaque, troncature, alteration), MiyukiniAdmin applique une **reponse securitaire** â€” et **non** le parcours d'installation (Futur Admin).
 
 #### 3.5.1 Principes
 
 - **Ne jamais traiter un environnement compromis comme vierge.** Pas d'acces au parcours d'installation (Futur Admin) sans controle supplementaire.
-- **Ne pas autoriser le login classique** tant que l'integrite n'est pas retablie ou qu'une procedure de recovery gouvernée n'a pas ete menee.
+- **Ne pas autoriser le login classique** tant que l'integrite n'est pas retablie ou qu'une procedure de recovery gouvernÃ©e n'a pas ete menee.
 - **Proteger le systeme** : limiter la surface d'attaque, alerter, tracer, exiger une intervention humaine et une decision de gouvernance pour toute reprise.
 
 #### 3.5.2 Mesures immediates
@@ -123,24 +123,24 @@ Lorsque l'environnement est classe **COMPROMIS** (attaque, troncature, alteratio
 | Mesure | Description |
 |--------|-------------|
 | **Mode degrade / lockdown** | WorrySentinel passe en etat **T3 (Restreint)** ou **T4 (Bloque)** selon politique. Gel des Operateurs metier ; seuls MiyukiniAdmin et les Cores peuvent agir (verrou type bootstrap ou equivalent). |
-| **Blocage acces normal** | Page dediee « Environnement compromis » affichee a tout acces a l'UI. Pas de formulaire de login classique. Pas de parcours installation (Futur Admin) propose. |
-| **Alerte et audit** | Evenement « ENVIRONMENT_COMPROMISED » enregistre (timestamp, indicateurs detectes : EIP invalide, registre incoherent, schema tronque, etc.). Notification interne selon politique (log, alerte equipe). |
-| **Pas de reinitialisation automatique (cas standard)** | Lorsque l'humain peut intervenir, aucune suppression ou reinitialisation automatique des donnees. Toute reprise passe par une **procedure de recovery** gouvernée (voir 3.5.3). |
+| **Blocage acces normal** | Page dediee Â« Environnement compromis Â» affichee a tout acces a l'UI. Pas de formulaire de login classique. Pas de parcours installation (Futur Admin) propose. |
+| **Alerte et audit** | Evenement Â« ENVIRONMENT_COMPROMISED Â» enregistre (timestamp, indicateurs detectes : EIP invalide, registre incoherent, schema tronque, etc.). Notification interne selon politique (log, alerte equipe). |
+| **Pas de reinitialisation automatique (cas standard)** | Lorsque l'humain peut intervenir, aucune suppression ou reinitialisation automatique des donnees. Toute reprise passe par une **procedure de recovery** gouvernÃ©e (voir 3.5.3). |
 | **Recovery automatique (interface compromise)** | Lorsque l'**interface humaine est compromise** (auth, donnees admin, MiyukiniAdmin) et que l'**humain ne peut pas intervenir**, une **recovery/rollback automatique** est lancee (voir 3.5.5). |
 
-#### 3.5.3 Procedure de recovery (gouvernée)
+#### 3.5.3 Procedure de recovery (gouvernÃ©e)
 
-La reprise après compromission releve d'une **procedure de recovery** explicite, **pas** du parcours d'installation :
+La reprise aprÃ¨s compromission releve d'une **procedure de recovery** explicite, **pas** du parcours d'installation :
 
 | Etape | Description |
 |-------|-------------|
 | **1. Diagnostic** | MiyukiniAdmin (mode recovery ou protocole dedie) permet une lecture limitee des indicateurs (quel artefact est invalide, sans exposer de donnees sensibles). Option : export de rapports d'audit pour analyse hors ligne. |
 | **2. Decision humaine** | Un responsable (humain) decide : reparation in-place (si possible), restauration depuis backup sain, ou reinitialisation complete (destruction des donnees et nouveau premier boot). La decision est tracee et justifiee. |
 | **3. Authentification forte** | Toute action de recovery (reparation, restauration, reinitialisation) exige une authentification forte (MFA, voire protocole recovery dedie) et une **decision StrongFather** (justification, contexte). |
-| **4. Execution gouvernée** | Les actions de recovery sont executees sous controle MiyukiniAdmin + Cores ; StrongFather valide chaque etape critique. Toute action est auditee. |
-| **5. Retour a l'etat initialise** | Une fois l'integrite retablie (reparation ou nouveau premier boot après reinitialisation), l'environnement est re-marque INITIALISE. Le verrou / mode degrade est leve. Le login classique redevient possible. |
+| **4. Execution gouvernÃ©e** | Les actions de recovery sont executees sous controle MiyukiniAdmin + Cores ; StrongFather valide chaque etape critique. Toute action est auditee. |
+| **5. Retour a l'etat initialise** | Une fois l'integrite retablie (reparation ou nouveau premier boot aprÃ¨s reinitialisation), l'environnement est re-marque INITIALISE. Le verrou / mode degrade est leve. Le login classique redevient possible. |
 
-**Regle :** La reinitialisation complete (destruction des donnees + nouveau premier boot) n'est **pas** proposee automatiquement lorsque l'humain peut intervenir. Elle n'est disponible que dans le cadre de la procedure de recovery, après decision humaine et validation StrongFather. Lorsque l'interface humaine est compromise et l'humain ne peut pas intervenir, la recovery automatique puis, en cas d'echec, la destruction et la reinitialisation en environnement vierge avec memoire de corruption s'appliquent (voir 3.5.5).
+**Regle :** La reinitialisation complete (destruction des donnees + nouveau premier boot) n'est **pas** proposee automatiquement lorsque l'humain peut intervenir. Elle n'est disponible que dans le cadre de la procedure de recovery, aprÃ¨s decision humaine et validation StrongFather. Lorsque l'interface humaine est compromise et l'humain ne peut pas intervenir, la recovery automatique puis, en cas d'echec, la destruction et la reinitialisation en environnement vierge avec memoire de corruption s'appliquent (voir 3.5.5).
 
 #### 3.5.4 Recovery automatique (interface humaine compromise, humain ne peut pas intervenir)
 
@@ -151,13 +151,13 @@ Lorsque la **compromission concerne l'interface humaine** (auth, donnees admin, 
 | Condition | Description |
 |-----------|-------------|
 | **Interface compromise** | Auth compromise (ex. registre admin corrompu, plus de login possible), donnees admin compromisees, ou MiyukiniAdmin lui-meme compromis (ex. code ou config alteres). |
-| **Humain ne peut pas intervenir** | Aucun acces au parcours de recovery gouvernée (pas de login, pas de compte admin valide, pas d'acces physique ou protocole recovery utilisable). Le delai ou les indicateurs (ex. detection repetee de compromission) declenchent le passage en mode recovery automatique. |
+| **Humain ne peut pas intervenir** | Aucun acces au parcours de recovery gouvernÃ©e (pas de login, pas de compte admin valide, pas d'acces physique ou protocole recovery utilisable). Le delai ou les indicateurs (ex. detection repetee de compromission) declenchent le passage en mode recovery automatique. |
 
 **Regle :** Le passage en recovery automatique est declenche selon la politique (ex. apres un delai sans acces humain valide, ou des que l'impossibilite d'intervention humaine est constatee).
 
 ##### 3.5.4.2 Recovery/rollback automatique
 
-1. **Lancement** : Une **recovery/rollback automatique** est lancee (ex. restauration depuis un point de coherence connu — backup, snapshot — ou tentative de reparation des artefacts critiques).
+1. **Lancement** : Une **recovery/rollback automatique** est lancee (ex. restauration depuis un point de coherence connu â€” backup, snapshot â€” ou tentative de reparation des artefacts critiques).
 2. **Criteres de succes** : Integrite EIP retablie, au moins un compte admin valide ou parcours Futur Admin de nouveau accessible, schema bootstrap coherent.
 3. **Si succes** : L'environnement repasse en etat **INITIALISE** (ou **VIERGE** si rollback revient a un etat pre-initialisation). Le verrou / mode degrade est leve. L'humain peut a nouveau intervenir (login ou parcours installation).
 4. **Si echec** : La recovery automatique a echoue (ex. backup absent ou corrompu, reparation impossible). Le systeme applique alors la **destruction des donnees DB** et la **reinitialisation en environnement vierge avec memoire de corruption** (voir 3.5.4.3).
@@ -168,30 +168,30 @@ Lorsque la recovery/rollback automatique **echoue** :
 
 | Etape | Description |
 |-------|-------------|
-| **0. Sauvegarde pre-destruction (si aucune sauvegarde locale antérieure)** | **Si il n'existe pas de sauvegarde locale antérieure** des donnees de la DB : une **sauvegarde** des donnees DB est effectuee **avant** la destruction, puis **compressee** (ex. archive au format defini par politique — zip, tar.gz, etc.) et stockee dans un emplacement dedie (ex. repertoire local ou slot protege hors DB). Cette sauvegarde « dernier recours » permet un examen forensique ou une tentative de recuperation ultérieure par un humain. **Si une sauvegarde locale antérieure existe deja** : la destruction peut etre effectuee sans nouvelle sauvegarde (les donnees sont neanmoins jugees perdues pour l'environnement courant). |
+| **0. Sauvegarde pre-destruction (si aucune sauvegarde locale antÃ©rieure)** | **Si il n'existe pas de sauvegarde locale antÃ©rieure** des donnees de la DB : une **sauvegarde** des donnees DB est effectuee **avant** la destruction, puis **compressee** (ex. archive au format defini par politique â€” zip, tar.gz, etc.) et stockee dans un emplacement dedie (ex. repertoire local ou slot protege hors DB). Cette sauvegarde Â« dernier recours Â» permet un examen forensique ou une tentative de recuperation ultÃ©rieure par un humain. **Si une sauvegarde locale antÃ©rieure existe deja** : la destruction peut etre effectuee sans nouvelle sauvegarde (les donnees sont neanmoins jugees perdues pour l'environnement courant). |
 | **1. Donnees DB jugees perdues** | Les donnees de la base (KindMother, donnees metier, registre admin, etc.) sont **totalement detruites** et **jugees perdues** pour l'environnement. Apres destruction, l'environnement considere que ces donnees ne sont plus recuperables depuis la DB. |
 | **2. Destruction** | Suppression ou purge complete des donnees DB (et des artefacts critiques associes) selon un protocole defini (ex. wipe des tables, suppression des fichiers de stockage). |
 | **3. Reinitialisation** | L'environnement **se reinitialise** pour redevenir **vierge** : plus de blob EIP (ou EIP invalide efface), plus de registre admin, schema bootstrap vide ou recree vide. L'etat cible est **VIERGE**. |
 | **4. Memoire de la corruption passee** | L'environnement reste **vierge** (parcours Futur Admin, premier boot) mais conserve une **memoire de sa corruption passee** : une trace persistante (ex. flag, audit immuable, ou champ dedie hors DB detruite) indique que cet environnement a deja ete compromis et reinitialise apres echec de recovery automatique. Cette memoire n'expose pas de donnees sensibles ; elle sert a l'audit, au diagnostic et eventuellement a des politiques renforcees (ex. alerte, niveau de vigilance). |
 
-**Regle :** En cas de reponse securitaire (corruption MiyukiniAdmin / interface compromise) conduisant a la destruction des donnees DB, une **sauvegarde compressee** est effectuee **avant** destruction **si et seulement si** il n'existe pas de sauvegarde locale antérieure des donnees de la DB. La memoire de corruption passee **survit** a la destruction des donnees DB (stockage dedie, ex. fichier ou slot protege non efface lors du wipe, ou re-ecrit avant le passage en vierge). Elle ne contient que des metadonnees d'audit (ex. timestamp de la reinitialisation, raison « recovery automatique echouee », pas de donnees utilisateur ni de secrets).
+**Regle :** En cas de reponse securitaire (corruption MiyukiniAdmin / interface compromise) conduisant a la destruction des donnees DB, une **sauvegarde compressee** est effectuee **avant** destruction **si et seulement si** il n'existe pas de sauvegarde locale antÃ©rieure des donnees de la DB. La memoire de corruption passee **survit** a la destruction des donnees DB (stockage dedie, ex. fichier ou slot protege non efface lors du wipe, ou re-ecrit avant le passage en vierge). Elle ne contient que des metadonnees d'audit (ex. timestamp de la reinitialisation, raison Â« recovery automatique echouee Â», pas de donnees utilisateur ni de secrets).
 
 ##### 3.5.4.4 Etat resultant : vierge avec memoire de corruption
 
 | Propriete | Description |
 |-----------|-------------|
 | **Etat** | **VIERGE** : parcours d'installation (Futur Admin) s'applique ; pas de login existant ; EIP et compte admin a recreer. |
-| **Mémoire** | Une **memoire de corruption passee** est presente : l'environnement « sait » qu'il a ete compromis et reinitialise apres echec de recovery automatique. Cette memoire peut etre consultee (ex. par un futur admin après installation) pour audit ou vigilance. |
+| **MÃ©moire** | Une **memoire de corruption passee** est presente : l'environnement Â« sait Â» qu'il a ete compromis et reinitialise apres echec de recovery automatique. Cette memoire peut etre consultee (ex. par un futur admin aprÃ¨s installation) pour audit ou vigilance. |
 | **Donnees DB** | **Perdues** : toutes les donnees DB ont ete detruites et sont jugees perdues. Aucune restauration possible depuis cet environnement. |
 
-**Regle :** Un environnement **vierge avec memoire de corruption** est traite comme **vierge** pour le flux (parcours installation, Futur Admin). La memoire de corruption n'empêche pas le parcours ; elle l'accompagne (ex. message informatif ou alerte pour le Futur Admin).
+**Regle :** Un environnement **vierge avec memoire de corruption** est traite comme **vierge** pour le flux (parcours installation, Futur Admin). La memoire de corruption n'empÃªche pas le parcours ; elle l'accompagne (ex. message informatif ou alerte pour le Futur Admin).
 
 #### 3.5.5 Invariants (reponse securitaire et recovery automatique)
 
 | Code | Invariant |
 |------|-----------|
-| **INV-AUTH-6** | Un environnement detecte comme **compromis** (attaque, troncature, alteration) declenche une **reponse securitaire** (mode degrade, blocage login normal, alerte, audit). Il ne declenche **jamais** le parcours d'installation (Futur Admin) sans procedure de recovery gouvernée, sauf après recovery automatique ayant conduit a un etat vierge avec memoire de corruption (voir INV-AUTH-7). |
-| **INV-AUTH-7** | Lorsque l'interface humaine est compromise (auth, donnees admin, MiyukiniAdmin) et que l'humain ne peut pas intervenir, une **recovery/rollback automatique** est lancee. Si elle echoue : **si aucune sauvegarde locale antérieure** des donnees DB n'existe, une **sauvegarde compressee** est effectuee avant destruction ; puis les **donnees DB sont totalement detruites** et **jugees perdues** ; l'environnement **se reinitialise en vierge** mais conserve une **memoire de sa corruption passee** (audit, pas de donnees sensibles). |
+| **INV-AUTH-6** | Un environnement detecte comme **compromis** (attaque, troncature, alteration) declenche une **reponse securitaire** (mode degrade, blocage login normal, alerte, audit). Il ne declenche **jamais** le parcours d'installation (Futur Admin) sans procedure de recovery gouvernÃ©e, sauf aprÃ¨s recovery automatique ayant conduit a un etat vierge avec memoire de corruption (voir INV-AUTH-7). |
+| **INV-AUTH-7** | Lorsque l'interface humaine est compromise (auth, donnees admin, MiyukiniAdmin) et que l'humain ne peut pas intervenir, une **recovery/rollback automatique** est lancee. Si elle echoue : **si aucune sauvegarde locale antÃ©rieure** des donnees DB n'existe, une **sauvegarde compressee** est effectuee avant destruction ; puis les **donnees DB sont totalement detruites** et **jugees perdues** ; l'environnement **se reinitialise en vierge** mais conserve une **memoire de sa corruption passee** (audit, pas de donnees sensibles). |
 
 ### 4.1 Principe
 
@@ -203,25 +203,25 @@ Lorsque l'environnement est **vierge**, StrongFather applique un **verrou bootst
 
 ### 4.2 Actions autorisees sous verrou
 
-| Acteur | Autorisé sous verrou |
+| Acteur | AutorisÃ© sous verrou |
 |--------|------------------------|
-| **MiyukiniAdmin** | Oui — processus d'installation, creation compte admin, appels aux Cores |
-| **StrongFather** | Oui — decisions, verrou, politique bootstrap |
-| **KindMother** | Oui — persistance EIP, schema, registre admin |
-| **CaringNanny** | Oui — observation etat |
-| **WorrySentinel** | Oui — niveau securite bootstrap |
-| **Kernel** | Oui — Id, Config, Lifecycle, etc. |
-| **Autres Cores** | Oui — selon besoins bootstrap |
+| **MiyukiniAdmin** | Oui â€” processus d'installation, creation compte admin, appels aux Cores |
+| **StrongFather** | Oui â€” decisions, verrou, politique bootstrap |
+| **KindMother** | Oui â€” persistance EIP, schema, registre admin |
+| **CaringNanny** | Oui â€” observation etat |
+| **WorrySentinel** | Oui â€” niveau securite bootstrap |
+| **Kernel** | Oui â€” Id, Config, Lifecycle, etc. |
+| **Autres Cores** | Oui â€” selon besoins bootstrap |
 | **Operateurs (Strate 7)** | Non |
 | **Outils / Kits (Strate 6) hors MiyukiniAdmin** | Non (MiyukiniAdmin ne consomme pas d'Outils ; ses capacites sont internes) |
 
-### 4.3 Levée du verrou
+### 4.3 LevÃ©e du verrou
 
 Le verrou bootstrap est leve **uniquement** lorsque :
 
 1. Le processus d'installation a ete mene a son terme (EIP genere, compte admin cree, configuration minimale validee).
-2. MiyukiniAdmin enregistre explicitement la fin du premier boot (flag « environnement initialise »).
-3. StrongFather desactive la politique « bootstrap lock » et applique les politiques normales (Mandats, Operateurs, etc.).
+2. MiyukiniAdmin enregistre explicitement la fin du premier boot (flag Â« environnement initialise Â»).
+3. StrongFather desactive la politique Â« bootstrap lock Â» et applique les politiques normales (Mandats, Operateurs, etc.).
 
 ---
 
@@ -278,7 +278,7 @@ MiyukiniAdmin dispose de son **propre systeme d'authentification et d'autorisati
 
 **Documentation detaillee :**
 - **Authentification** (login, MFA, session, mot de passe, rate limiting, stockage secrets, audit) : [MiyukiniAdmin - Authentication Contract](./MiyukiniAdmin%20-%20Authentication%20Contract.md).
-- **Autorisation** (roles, capacites, matrice role → capacites) : [MiyukiniAdmin - Permission Contract](./MiyukiniAdmin%20-%20Permission%20Contract.md).
+- **Autorisation** (roles, capacites, matrice role â†’ capacites) : [MiyukiniAdmin - Permission Contract](./MiyukiniAdmin%20-%20Permission%20Contract.md).
 
 ### 6.2 Composants
 
@@ -292,10 +292,10 @@ MiyukiniAdmin dispose de son **propre systeme d'authentification et d'autorisati
 ### 6.3 Flux d'authentification (environnement initialise)
 
 1. Utilisateur accede a l'UI MiyukiniAdmin.
-2. Si pas de session valide → page de login.
-3. Saisie identifiant + mot de passe → verification hash.
-4. Si MFA requis → challenge TOTP ou cle.
-5. Si succes → creation session (binding IP + User-Agent, expiration).
+2. Si pas de session valide â†’ page de login.
+3. Saisie identifiant + mot de passe â†’ verification hash.
+4. Si MFA requis â†’ challenge TOTP ou cle.
+5. Si succes â†’ creation session (binding IP + User-Agent, expiration).
 6. Acces au dashboard et aux capacites selon role (Admin, Recovery, Audit).
 
 *Detail complet :* [Authentication Contract](./MiyukiniAdmin%20-%20Authentication%20Contract.md).
@@ -328,7 +328,7 @@ La **generation des donnees d'identite de l'environnement** pendant le premier b
 
 - Les **Cores** produisent ces donnees (pas MiyukiniAdmin seul).
 - Les donnees sont **chiffrees** et stockees via KindMother.
-- Le contenu, le format et la cryptographie sont definis dans le document [MiyukiniAdmin - Environment Identity Protocol EIP](../../../../protocols/MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md).
+- Le contenu, le format et la cryptographie sont definis dans le document [MiyukiniAdmin - Environment Identity Protocol EIP](..//..//..//..//contrats//MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md).
 
 MiyukiniAdmin orchestre le flux (affichage du parcours installation, appels a BondingBrother) mais ne genere pas lui-meme les cles ni le blob EIP ; il delegue aux Cores selon le protocole EIP.
 
@@ -338,60 +338,60 @@ MiyukiniAdmin orchestre le flux (affichage du parcours installation, appels a Bo
 
 | Code | Invariant |
 |------|-----------|
-| **INV-AUTH-1** | En environnement vierge, seuls MiyukiniAdmin et les Cores peuvent effectuer des actions gouvernées. |
+| **INV-AUTH-1** | En environnement vierge, seuls MiyukiniAdmin et les Cores peuvent effectuer des actions gouvernÃ©es. |
 | **INV-AUTH-2** | Le verrou StrongFather bootstrap est actif tant que l'environnement n'est pas marque initialise. |
 | **INV-AUTH-3** | Le premier compte admin est cree uniquement pendant le processus d'installation, sous verrou. |
 | **INV-AUTH-4** | MiyukiniAdmin utilise son propre systeme d'auth (registre admin, MFA, session) independant des Operateurs. |
 | **INV-AUTH-5** | Les donnees d'identite d'environnement (EIP) sont produites par les Cores et stockees chiffrees. |
-| **INV-AUTH-6** | Un environnement compromis declenche une reponse securitaire (mode degrade, blocage login normal, alerte, audit). Il ne declenche jamais le parcours d'installation (Futur Admin) sans procedure de recovery gouvernée, sauf après recovery automatique ayant conduit a un etat vierge avec memoire de corruption (INV-AUTH-7). |
+| **INV-AUTH-6** | Un environnement compromis declenche une reponse securitaire (mode degrade, blocage login normal, alerte, audit). Il ne declenche jamais le parcours d'installation (Futur Admin) sans procedure de recovery gouvernÃ©e, sauf aprÃ¨s recovery automatique ayant conduit a un etat vierge avec memoire de corruption (INV-AUTH-7). |
 | **INV-AUTH-7** | Lorsque l'interface humaine est compromise (auth, donnees admin, MiyukiniAdmin) et l'humain ne peut pas intervenir : recovery/rollback automatique lancee ; si echec, donnees DB totalement detruites (jugees perdues), environnement reinitialise en vierge avec memoire de sa corruption passee. |
 
 ---
 
-## 9. Résumé des flux
+## 9. RÃ©sumÃ© des flux
 
 ### 9.1 Premier demarrage (environnement vierge)
 
 ```
-Demarrage → Detection (aucun artefact present) → Environnement VIERGE
-→ Verrou StrongFather (MiyukiniAdmin + Cores uniquement)
-→ Utilisateur = Futur Admin → Parcours installation
-→ EIP genere (Cores) → Config minimale → Creation compte admin
-→ Environnement marque initialise → Levée verrou → Admin connecte → Dashboard
+Demarrage â†’ Detection (aucun artefact present) â†’ Environnement VIERGE
+â†’ Verrou StrongFather (MiyukiniAdmin + Cores uniquement)
+â†’ Utilisateur = Futur Admin â†’ Parcours installation
+â†’ EIP genere (Cores) â†’ Config minimale â†’ Creation compte admin
+â†’ Environnement marque initialise â†’ LevÃ©e verrou â†’ Admin connecte â†’ Dashboard
 ```
 
 ### 9.2 Demarrage suivant (environnement deja initialise)
 
 ```
-Demarrage → Detection (artefacts presents et integres) → Environnement INITIALISE
-→ Pas de verrou bootstrap → Flux auth classique
-→ Utilisateur doit se connecter (login + MFA) → Session → Dashboard selon role
+Demarrage â†’ Detection (artefacts presents et integres) â†’ Environnement INITIALISE
+â†’ Pas de verrou bootstrap â†’ Flux auth classique
+â†’ Utilisateur doit se connecter (login + MFA) â†’ Session â†’ Dashboard selon role
 ```
 
 ### 9.3 Demarrage avec environnement compromis (attaque, troncature, alteration)
 
 ```
-Demarrage → Detection (artefacts presents mais invalides ou incoherents) → Environnement COMPROMIS
-→ Reponse securitaire :
+Demarrage â†’ Detection (artefacts presents mais invalides ou incoherents) â†’ Environnement COMPROMIS
+â†’ Reponse securitaire :
    - WorrySentinel T3/T4 (mode degrade / lockdown)
-   - Page « Environnement compromis » (pas de login, pas de parcours installation)
+   - Page Â« Environnement compromis Â» (pas de login, pas de parcours installation)
    - Alerte + audit (ENVIRONMENT_COMPROMISED)
-   - Si humain peut intervenir : procedure de recovery gouvernée (decision humaine, auth forte, StrongFather, audit)
+   - Si humain peut intervenir : procedure de recovery gouvernÃ©e (decision humaine, auth forte, StrongFather, audit)
    - Si interface humaine compromise et humain ne peut pas intervenir : recovery/rollback automatique (voir 9.4)
-→ Apres recovery gouvernée : environnement re-marque INITIALISE → login classique de nouveau possible
+â†’ Apres recovery gouvernÃ©e : environnement re-marque INITIALISE â†’ login classique de nouveau possible
 ```
 
 ### 9.4 Recovery automatique (interface compromise, humain ne peut pas intervenir)
 
 ```
 Interface compromise (auth, donnees admin, MiyukiniAdmin) + humain ne peut pas intervenir
-→ Lancement recovery/rollback automatique (restauration backup, reparation artefacts, etc.)
-→ Si succes : environnement repasse INITIALISE ou VIERGE → humain peut a nouveau intervenir
-→ Si echec : si aucune sauvegarde locale antérieure des donnees DB → sauvegarde compressee effectuee avant destruction
-           → Donnees DB totalement detruites (jugees perdues)
-           → Environnement se reinitialise en VIERGE
-           → Memoire de la corruption passee conservee (audit, pas de donnees sensibles)
-           → Parcours Futur Admin s'applique ; nouvel EIP et compte admin a recreer
+â†’ Lancement recovery/rollback automatique (restauration backup, reparation artefacts, etc.)
+â†’ Si succes : environnement repasse INITIALISE ou VIERGE â†’ humain peut a nouveau intervenir
+â†’ Si echec : si aucune sauvegarde locale antÃ©rieure des donnees DB â†’ sauvegarde compressee effectuee avant destruction
+           â†’ Donnees DB totalement detruites (jugees perdues)
+           â†’ Environnement se reinitialise en VIERGE
+           â†’ Memoire de la corruption passee conservee (audit, pas de donnees sensibles)
+           â†’ Parcours Futur Admin s'applique ; nouvel EIP et compte admin a recreer
 ```
 
 ---
@@ -404,11 +404,13 @@ Interface compromise (auth, donnees admin, MiyukiniAdmin) + humain ne peut pas i
 - [MiyukiniAdmin - Permission Contract](./MiyukiniAdmin%20-%20Permission%20Contract.md)
 - [MiyukiniAdmin - Threat Model Contract](./MiyukiniAdmin%20-%20Threat%20Model%20Contract.md)
 - [MiyukiniAdmin - StrongFather Integration Contract](../integration/MiyukiniAdmin%20-%20StrongFather%20Integration%20Contract.md)
-- [MiyukiniAdmin - Environment Identity Protocol EIP](../../../../protocols/MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md)
-- [Miyukini Conceptual References - Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+- [MiyukiniAdmin - Environment Identity Protocol EIP](..//..//..//..//contrats//MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md)
+- [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 **Date de creation :** 2026-01-29  
 **Version :** 1.0.0  
-**Statut :** Contrat normatif — Auth et First-Boot
+**Statut :** Contrat normatif â€” Auth et First-Boot
+
+

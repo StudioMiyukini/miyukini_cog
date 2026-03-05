@@ -1,10 +1,10 @@
-# JayManga - Lecture et vente de manga en ligne
+﻿# JayManga - Lecture et vente de manga en ligne
 
 ## Contexte
 
 JayManga est le service Miyukini dedie a la **lecture et la vente de manga en ligne** :
 - publication et mise en lecture de collections manga (Manga, Webtoon, 16:9, Comics, format libre)
-- aucune limite de stockage — le seul plafond est le hardware du COG
+- aucune limite de stockage â€” le seul plafond est le hardware du COG
 - outil integre de redimensionnement et compression pour optimiser la vitesse d'affichage
 - lecture en ligne avec pages de demonstration gratuites
 - achat d'oeuvres avec module de paiement integre
@@ -48,10 +48,11 @@ JayManga est le service Miyukini dedie a la **lecture et la vente de manga en li
 
 ## Liaisons ecosysteme
 
-- [JayShop - Document Fondateur](../JayShop/JayShop%20-%20Document%20Fondateur.md) — Reference pour les patterns de vente
-- [JayXpose - Document Fondateur](../JayXpose/JayXpose%20-%20Document%20Fondateur.md) — Reference pour la gestion de catalogue
-- [Miyukini Web Portal](../MiyukiniWebPortal/) — Surface web du Portail
-- [MWS - Document Fondateur](../../miyukini-webway-system/MWS%20-%20Document%20Fondateur.md) — Presence et decouverte
-- [MWS - Trackers](../../miyukini-webway-system/acteurs/MWS%20-%20Trackers.md) — Tracker, manifestes de services
-- [MWS - Manifestes de Services](../../miyukini-webway-system/protocole/MWS%20-%20Manifestes%20de%20Services.md) — Protocole de distribution des manifestes (schema JayManga)
-- [Miyukini Conceptual References - Interpolarite Services Jay](../../reference/Miyukini%20Conceptual%20References%20-%20Interpolarite%20Services%20Jay.md)
+- [JayShop - Document Fondateur](../JayShop/JayShop%20-%20Document%20Fondateur.md) â€” Reference pour les patterns de vente
+- [JayXpose - Document Fondateur](../JayXpose/JayXpose%20-%20Document%20Fondateur.md) â€” Reference pour la gestion de catalogue
+- [Miyukini Web Portal](../MiyukiniWebPortal/) â€” Surface web du Portail
+- [MWS - Document Fondateur](../../miyukini-webway-system/MWS%20-%20Document%20Fondateur.md) â€” Presence et decouverte
+- [MWS - Trackers](../../miyukini-webway-system/acteurs/MWS%20-%20Trackers.md) â€” Tracker, manifestes de services
+- [MWS - Manifestes de Services](../../miyukini-webway-system/protocole/MWS%20-%20Manifestes%20de%20Services.md) â€” Protocole de distribution des manifestes (schema JayManga)
+- [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyukini-webway-system//reference//_index.md)
+

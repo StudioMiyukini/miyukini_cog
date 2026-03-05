@@ -1,51 +1,51 @@
-# Miyukini COG — Étude App Android Terminal
+﻿# Miyukini COG â€” Ã‰tude App Android Terminal
 
 ## Contexte
 
-L’écosystème Miyukini COG prévoit, pour les **COGs TERMINAL** (type `TERMINAL`, `os_type` `ANDROID`), un client mobile embarqué **enfant d’un COG STABLE** du même utilisateur. Cette étude pose les bases d’une **app Android** permettant aux utilisateurs en mobilité d’interagir avec leur environnement COG via un terminal léger.
+Lâ€™Ã©cosystÃ¨me Miyukini COG prÃ©voit, pour les **COGs TERMINAL** (type `TERMINAL`, `os_type` `ANDROID`), un client mobile embarquÃ© **enfant dâ€™un COG STABLE** du mÃªme utilisateur. Cette Ã©tude pose les bases dâ€™une **app Android** permettant aux utilisateurs en mobilitÃ© dâ€™interagir avec leur environnement COG via un terminal lÃ©ger.
 
-**Références :**
+**RÃ©fÃ©rences :**
 
 - [MWS - Passeport et Visa](../miyukini-webway-system/verification/MWS%20-%20Passeport%20et%20Visa.md)
-- [Glossaire](../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-- [Comportement COG Environnements](../reference/Miyukini%20Conceptual%20References%20-%20Comportement%20COG%20Environnements.md)
+- [Glossaire](..//miyukini-webway-system//reference//_index.md)
+- [Comportement COG Environnements](..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- Définition architecturale du COG TERMINAL Android
+- DÃ©finition architecturale du COG TERMINAL Android
 - Contraintes MWS (relation parent-enfant, Passeport, Permis)
 - Options techniques (stack UI, binaires, IPC)
-- Fonctionnalités cibles pour utilisateurs nomades
-- Scénarios de synchronisation et offline
+- FonctionnalitÃ©s cibles pour utilisateurs nomades
+- ScÃ©narios de synchronisation et offline
 - Pistes de roadmap MVP
 
-**Public :** Architectes, développeurs, décisions produit.
+**Public :** Architectes, dÃ©veloppeurs, dÃ©cisions produit.
 
 ---
 
-## 1. Définition du COG Terminal Android
+## 1. DÃ©finition du COG Terminal Android
 
-### 1.1 Rôle
+### 1.1 RÃ´le
 
 | Aspect | Description |
 |--------|-------------|
 | **Type** | `TERMINAL` (cog_type = 0x05) |
 | **OS** | `ANDROID` (os_type) |
-| **Rôle** | Extension mobile du COG Stable ; capacités réduites |
+| **RÃ´le** | Extension mobile du COG Stable ; capacitÃ©s rÃ©duites |
 | **Parent** | Obligatoire : `parent_cog_id` = cog_id du STABLE |
 | **Limite** | 5 terminaux max par COG Stable (MWS) |
 
 ### 1.2 Contraintes MWS
 
-| Règle | Description |
+| RÃ¨gle | Description |
 |-------|-------------|
-| `parent_cog_id` | Toujours présent dans le Passeport |
-| Même utilisateur | Parent et enfant = même identité utilisateur |
-| Connexion | Via parent ou directe avec dépendance au parent |
-| Blacklist | Si parent blacklisté → terminaux blacklistés |
-| Passeport | STANDARD (émission automatique, comme STABLE) |
+| `parent_cog_id` | Toujours prÃ©sent dans le Passeport |
+| MÃªme utilisateur | Parent et enfant = mÃªme identitÃ© utilisateur |
+| Connexion | Via parent ou directe avec dÃ©pendance au parent |
+| Blacklist | Si parent blacklistÃ© â†’ terminaux blacklistÃ©s |
+| Passeport | STANDARD (Ã©mission automatique, comme STABLE) |
 
 ### 1.3 Flux de provisionnement (depuis le STABLE)
 
@@ -56,179 +56,179 @@ sequenceDiagram
     participant T as App Android (TERMINAL)
     participant R as Relay MWS
 
-    U->>C: "Créer un Terminal mobile"
-    C->>C: Vérifier limite 5 terminaux
-    C->>C: Générer cog_id pour TERMINAL
-    C->>C: Créer liaison parent_cog_id
+    U->>C: "CrÃ©er un Terminal mobile"
+    C->>C: VÃ©rifier limite 5 terminaux
+    C->>C: GÃ©nÃ©rer cog_id pour TERMINAL
+    C->>C: CrÃ©er liaison parent_cog_id
     C->>T: QR / lien de liaison (token temporaire)
     T->>T: Premier lancement : saisie token
     T->>T: Charger parent_cog_id, cog_id
     T->>R: Passeport (cog_type=TERMINAL, parent_cog_id)
-    R->>R: Vérifier parent valide
+    R->>R: VÃ©rifier parent valide
     R->>T: Permis de circulation
-    T->>C: Synchronisation initiale (services, préférences)
+    T->>C: Synchronisation initiale (services, prÃ©fÃ©rences)
 ```
 
 ---
 
 ## 2. Options techniques
 
-### 2.1 Stack UI — Dioxus (retenue)
+### 2.1 Stack UI â€” Dioxus (retenue)
 
-**Décision :** Stack **Dioxus** retenue pour compatibilité maximale avec Miyukini Central (Rust partagé, patterns UI, réutilisation du thème).
+**DÃ©cision :** Stack **Dioxus** retenue pour compatibilitÃ© maximale avec Miyukini Central (Rust partagÃ©, patterns UI, rÃ©utilisation du thÃ¨me).
 
-| Option | Avantages | Inconvénients |
+| Option | Avantages | InconvÃ©nients |
 |--------|-----------|---------------|
-| **Dioxus Mobile** ✓ | Code Rust partagé avec Central ; patterns connus ; hot-reload ; compatibilité maximale | Expérimental Android ; WebView ou WGPU ; config NDK/SDK lourde |
-| ~~Kotlin + Compose~~ | — | Pas de partage avec Central ; deux codebases UI |
+| **Dioxus Mobile** âœ“ | Code Rust partagÃ© avec Central ; patterns connus ; hot-reload ; compatibilitÃ© maximale | ExpÃ©rimental Android ; WebView ou WGPU ; config NDK/SDK lourde |
+| ~~Kotlin + Compose~~ | â€” | Pas de partage avec Central ; deux codebases UI |
 
-**Référence :** [Dioxus Mobile](https://dioxus.dev/learn/0.6/guides/mobile/) — rendu WebView ou WGPU, `dx serve` pour émulateurs.
+**RÃ©fÃ©rence :** [Dioxus Mobile](https://dioxus.dev/learn/0.6/guides/mobile/) â€” rendu WebView ou WGPU, `dx serve` pour Ã©mulateurs.
 
-### 2.2 Binaires et dépendances
+### 2.2 Binaires et dÃ©pendances
 
 | Composant | Option 1 | Option 2 |
 |-----------|----------|----------|
-| **Logique MWS** | Réutiliser `miyuwebway_participant` (Rust) via JNI | Port Kotlin des protocoles MWS |
+| **Logique MWS** | RÃ©utiliser `miyuwebway_participant` (Rust) via JNI | Port Kotlin des protocoles MWS |
 | **Base locale** | SQLite / libSQL (KindMother) via FFI | Room (Kotlin) |
-| **Réseau** | TCP/TLS via Rust (relay port 7000) | OkHttp / Ktor |
+| **RÃ©seau** | TCP/TLS via Rust (relay port 7000) | OkHttp / Ktor |
 | **Authentification** | Token fourni par Central via lien/QR | Idem |
 
-### 2.3 Architecture proposée (Dioxus)
+### 2.3 Architecture proposÃ©e (Dioxus)
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  App Android (COG TERMINAL)                          │
-├─────────────────────────────────────────────────────┤
-│  UI Dioxus Mobile                                    │
-│  - Écrans : liaison, salon, services, paramètres    │
-├─────────────────────────────────────────────────────┤
-│  Couche Services                                     │
-│  - Provisionnement (parent_cog_id, Passeport)        │
-│  - Synchronisation avec parent                      │
-│  - Consommation services (JayKonta, JayKoa, etc.)   │
-├─────────────────────────────────────────────────────┤
-│  MWS Client (Rust, miyuwebway_participant)           │
-│  - MiyuWebwayParticipant (allégé)                    │
-│  - Relay connect (port 7000)                        │
-│  - Tracker discovery (port 21000)                   │
-├─────────────────────────────────────────────────────┤
-│  Stockage local (SQLite / KindMother)                │
-└─────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  App Android (COG TERMINAL)                          â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  UI Dioxus Mobile                                    â”‚
+â”‚  - Ã‰crans : liaison, salon, services, paramÃ¨tres    â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  Couche Services                                     â”‚
+â”‚  - Provisionnement (parent_cog_id, Passeport)        â”‚
+â”‚  - Synchronisation avec parent                      â”‚
+â”‚  - Consommation services (JayKonta, JayKoa, etc.)   â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  MWS Client (Rust, miyuwebway_participant)           â”‚
+â”‚  - MiyuWebwayParticipant (allÃ©gÃ©)                    â”‚
+â”‚  - Relay connect (port 7000)                        â”‚
+â”‚  - Tracker discovery (port 21000)                   â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  Stockage local (SQLite / KindMother)                â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
 
-## 3. Fonctionnalités cibles (utilisateurs nomades)
+## 3. FonctionnalitÃ©s cibles (utilisateurs nomades)
 
-### 3.1 Priorité haute (MVP)
+### 3.1 PrioritÃ© haute (MVP)
 
-| Fonctionnalité | Description |
+| FonctionnalitÃ© | Description |
 |----------------|-------------|
-| **Liaison au parent** | Scanner QR / saisir token depuis Central ; stockage sécurisé `parent_cog_id` |
-| **Connexion MWS** | Présentation Passeport → obtention Permis ; heartbeats |
-| **Vue services limitée** | Accès consultatif aux services du parent (JayKonta, JayKoa) |
-| **Mode offline** | Cache local ; queue des actions différées ; sync à la reconnexion |
+| **Liaison au parent** | Scanner QR / saisir token depuis Central ; stockage sÃ©curisÃ© `parent_cog_id` |
+| **Connexion MWS** | PrÃ©sentation Passeport â†’ obtention Permis ; heartbeats |
+| **Vue services limitÃ©e** | AccÃ¨s consultatif aux services du parent (JayKonta, JayKoa) |
+| **Mode offline** | Cache local ; queue des actions diffÃ©rÃ©es ; sync Ã  la reconnexion |
 | **Notifications** | Alertes importantes (ex. rappels JayKoa, seuils JayKonta) |
 
-### 3.2 Priorité moyenne
+### 3.2 PrioritÃ© moyenne
 
-| Fonctionnalité | Description |
+| FonctionnalitÃ© | Description |
 |----------------|-------------|
-| **Actions simples** | Saisie dépense, création événement (délégué au parent) |
-| **Découverte réseau** | Voir COGs accessibles (Lobbys, amis) via Tracker |
-| **Sécurité** | Verrouillage app ; biométrie optionnelle |
+| **Actions simples** | Saisie dÃ©pense, crÃ©ation Ã©vÃ©nement (dÃ©lÃ©guÃ© au parent) |
+| **DÃ©couverte rÃ©seau** | Voir COGs accessibles (Lobbys, amis) via Tracker |
+| **SÃ©curitÃ©** | Verrouillage app ; biomÃ©trie optionnelle |
 
-### 3.3 Priorité basse
+### 3.3 PrioritÃ© basse
 
-| Fonctionnalité | Description |
+| FonctionnalitÃ© | Description |
 |----------------|-------------|
-| **Multi-compte** | Plusieurs COG Stable liés (changement de contexte) |
-| **Jeux mobiles** | Intégration Miyukini Survivor / Clicker (léger) |
+| **Multi-compte** | Plusieurs COG Stable liÃ©s (changement de contexte) |
+| **Jeux mobiles** | IntÃ©gration Miyukini Survivor / Clicker (lÃ©ger) |
 
 ---
 
-## 4. Scénarios de synchronisation
+## 4. ScÃ©narios de synchronisation
 
 ### 4.1 Connexion directe au Relay
 
-Le TERMINAL peut se connecter directement au Relay (comme un STABLE), en présentant un Passeport avec `parent_cog_id`. Le Relay vérifie que le parent est valide et délivre le Permis.
+Le TERMINAL peut se connecter directement au Relay (comme un STABLE), en prÃ©sentant un Passeport avec `parent_cog_id`. Le Relay vÃ©rifie que le parent est valide et dÃ©livre le Permis.
 
 ### 4.2 Connexion via parent (tunnel)
 
-Alternative : le TERMINAL se connecte au parent STABLE (même réseau local ou tunnel), et le parent transmet les requêtes MWS. Moins de surface d’attaque, mais dépendance forte à la disponibilité du parent.
+Alternative : le TERMINAL se connecte au parent STABLE (mÃªme rÃ©seau local ou tunnel), et le parent transmet les requÃªtes MWS. Moins de surface dâ€™attaque, mais dÃ©pendance forte Ã  la disponibilitÃ© du parent.
 
 ### 4.3 Mode offline
 
-| État | Comportement |
+| Ã‰tat | Comportement |
 |------|--------------|
-| **Données en cache** | Lecture seule sur cache local (dernière sync) |
-| **Actions différées** | Écrire en local ; queue sync ; rejouer à la reconnexion |
-| **Conflict** | Politique : dernier écrit gagnant ou merge manuel (TAMR) |
+| **DonnÃ©es en cache** | Lecture seule sur cache local (derniÃ¨re sync) |
+| **Actions diffÃ©rÃ©es** | Ã‰crire en local ; queue sync ; rejouer Ã  la reconnexion |
+| **Conflict** | Politique : dernier Ã©crit gagnant ou merge manuel (TAMR) |
 
 ---
 
-## 5. Respect des Lois d’Autonomie
+## 5. Respect des Lois dâ€™Autonomie
 
 | Loi | Application au Terminal |
 |-----|-------------------------|
-| **LOI-1** | Pas de dépendance externe critique : fonctionne en offline limité |
-| **LOI-2** | Isolement accepté : sync différée, pas de blocage |
-| **LOI-3** | État local souverain : cache et queue locaux |
+| **LOI-1** | Pas de dÃ©pendance externe critique : fonctionne en offline limitÃ© |
+| **LOI-2** | Isolement acceptÃ© : sync diffÃ©rÃ©e, pas de blocage |
+| **LOI-3** | Ã‰tat local souverain : cache et queue locaux |
 | **LOI-4** | Pas de temps global : horodatage local, sync asynchrone |
-| **LOI-5** | Coût proportionnel : app légère, pas de services cloud obligatoires |
-| **LOI-6** | Fédération : connexion MWS via Relay/Tracker |
-| **LOI-7** | Cores immuables : Terminal = client d’un environnement versionné |
+| **LOI-5** | CoÃ»t proportionnel : app lÃ©gÃ¨re, pas de services cloud obligatoires |
+| **LOI-6** | FÃ©dÃ©ration : connexion MWS via Relay/Tracker |
+| **LOI-7** | Cores immuables : Terminal = client dâ€™un environnement versionnÃ© |
 | **LOI-8** | Migration : via le parent ; pas de migration directe Terminal |
 
 ---
 
-## 6. Dépendances projet existant
+## 6. DÃ©pendances projet existant
 
-### 6.1 Crates à réutiliser ou adapter
+### 6.1 Crates Ã  rÃ©utiliser ou adapter
 
 | Crate | Usage |
 |-------|-------|
-| `miyuwebway_participant` | Transport, déclaration, discovery (port Android/JNI si Rust) |
+| `miyuwebway_participant` | Transport, dÃ©claration, discovery (port Android/JNI si Rust) |
 | `apps/origin` (protocol) | Types `CogType`, `OsType`, messages Relay |
 | `kindmother`, `kindmother-client` | Persistance optionnelle (si Rust backend) |
 
-### 6.2 Modifications à prévoir
+### 6.2 Modifications Ã  prÃ©voir
 
 | Composant | Modification |
 |-----------|--------------|
-| **Relay (Origin)** | Déjà supporte `parent_cog_id` ; vérification parent valide à confirmer |
-| **Central** | Nouvel écran "Gérer mes Terminaux" ; génération token/QR liaison |
-| **Passeport** | Génération côté STABLE pour le TERMINAL ; transmission sécurisée |
+| **Relay (Origin)** | DÃ©jÃ  supporte `parent_cog_id` ; vÃ©rification parent valide Ã  confirmer |
+| **Central** | Nouvel Ã©cran "GÃ©rer mes Terminaux" ; gÃ©nÃ©ration token/QR liaison |
+| **Passeport** | GÃ©nÃ©ration cÃ´tÃ© STABLE pour le TERMINAL ; transmission sÃ©curisÃ©e |
 
 ---
 
 ## 7. Pistes de roadmap
 
-### Phase 0 — Préparation (étude actuelle)
+### Phase 0 â€” PrÃ©paration (Ã©tude actuelle)
 
-- [x] Document d’étude
+- [x] Document dâ€™Ã©tude
 - [x] Stack Dioxus retenue
-- [ ] Documentation exhaustive (voir Plan de développement Phase 1)
-- [ ] Spécification flux liaison Central → Terminal
+- [ ] Documentation exhaustive (voir Plan de dÃ©veloppement Phase 1)
+- [ ] SpÃ©cification flux liaison Central â†’ Terminal
 
-### Phase 1 — Proof of concept
+### Phase 1 â€” Proof of concept
 
-- [ ] App Android minimale (écran liaison + affichage statut)
+- [ ] App Android minimale (Ã©cran liaison + affichage statut)
 - [ ] Connexion Relay avec Passeport TERMINAL
 - [ ] Obtention Permis de circulation
 - [ ] Stockage local `parent_cog_id`, `cog_id`
 
-### Phase 2 — MVP
+### Phase 2 â€” MVP
 
-- [ ] Écran "Salon" avec liste services du parent
+- [ ] Ã‰cran "Salon" avec liste services du parent
 - [ ] Vue consultative (ex. JayKonta, JayKoa)
 - [ ] Mode offline basique (cache)
-- [ ] Intégration Central : création Terminal, QR/lien
+- [ ] IntÃ©gration Central : crÃ©ation Terminal, QR/lien
 
-### Phase 3 — Production
+### Phase 3 â€” Production
 
 - [ ] Notifications push
-- [ ] Actions simples (dépenses, événements)
+- [ ] Actions simples (dÃ©penses, Ã©vÃ©nements)
 - [ ] Tests E2E, signature release
 - [ ] Documentation utilisateur
 
@@ -238,17 +238,18 @@ Alternative : le TERMINAL se connecte au parent STABLE (même réseau local ou t
 
 | Risque | Mitigation |
 |--------|------------|
-| Dioxus Android instable | POC rapide (Phase 3) ; documentation Env Dev pour dépannage |
+| Dioxus Android instable | POC rapide (Phase 3) ; documentation Env Dev pour dÃ©pannage |
 | Fatigue batterie (sync continue) | Sync par batch ; intervalles adaptatifs |
-| Sécurité token liaison | Token à usage unique ; expiration courte ; chiffrement stockage |
-| Fragmentation Android | Cibler API 24+ (Android 7) ; tests sur émulateurs multiples |
+| SÃ©curitÃ© token liaison | Token Ã  usage unique ; expiration courte ; chiffrement stockage |
+| Fragmentation Android | Cibler API 24+ (Android 7) ; tests sur Ã©mulateurs multiples |
 
 ---
 
-## 9. Références
+## 9. RÃ©fÃ©rences
 
 - **MWS Passeport/Visa** : `docs/miyukini-webway-system/verification/MWS - Passeport et Visa.md`
 - **Protocole Relay** : `docs/miyukini-webway-system/protocole/MWS - Protocole Relay.md`
 - **Architecture** : `.cursor/skills/miyukini-architecture/SKILL.md`
 - **Glossaire** : `.cursor/skills/miyukini-glossary/SKILL.md`
 - **Dioxus Mobile** : [dioxus.dev/learn/0.6/guides/mobile](https://dioxus.dev/learn/0.6/guides/mobile/)
+

@@ -1,6 +1,6 @@
----
+﻿---
 id: mip.profiles.constraints
-title: Constraint Library — Legal, Compliance, Confidentiality
+title: Constraint Library â€” Legal, Compliance, Confidentiality
 ---
 
 # Constraint Library
@@ -12,15 +12,15 @@ title: Constraint Library — Legal, Compliance, Confidentiality
 ## Overview : Constraint Types
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│ Constraint Categories                                   │
-├─────────────────────────────────────────────────────────┤
-│ 1. Legal & Compliance     (GDPR, SOC2, HIPAA, CCPA)    │
-│ 2. Confidentiality & Data (PII, secrets, no-logs)      │
-│ 3. Tool & Environment     (IDE, OS, network)           │
-│ 4. Regional & Data Residency (EU, US, China, APAC)     │
-│ 5. Custom Constraints     (user-defined)               │
-└─────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Constraint Categories                                   â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ 1. Legal & Compliance     (GDPR, SOC2, HIPAA, CCPA)    â”‚
+â”‚ 2. Confidentiality & Data (PII, secrets, no-logs)      â”‚
+â”‚ 3. Tool & Environment     (IDE, OS, network)           â”‚
+â”‚ 4. Regional & Data Residency (EU, US, China, APAC)     â”‚
+â”‚ 5. Custom Constraints     (user-defined)               â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
@@ -84,11 +84,11 @@ Task starts:
           Continue? [y/N]"
 
 During P3:
-  "⚠️  P3 checkpoint: Approve implementation? [y/N]"
+  "âš ï¸  P3 checkpoint: Approve implementation? [y/N]"
 
 During P4:
   "Generating audit report...
-   ✅ Done (saved to .mip/audits/)"
+   âœ… Done (saved to .mip/audits/)"
 
 End:
   "Task archived. Auto-delete in 30 days."
@@ -404,10 +404,10 @@ User activates profile:
   mip_profile total-gdpr
 
 Check: Current IDE = Cursor?
-  ✗ NO (User has VS Code)
+  âœ— NO (User has VS Code)
   
 Warning:
-  "⚠️  Profile total-gdpr locked to Cursor.
+  "âš ï¸  Profile total-gdpr locked to Cursor.
    You're using VS Code.
    Some features may not work.
    
@@ -664,18 +664,18 @@ overrides:
 
 | Constraint | Legal | Audit | Confidential | Offline | API |
 |-----------|-------|-------|-------------|---------|-----|
-| **legal-compliance** | ✅ | ✅ | ⚠️ | ❌ | ✅ |
-| **gdpr-strict** | ✅ | ✅ | ✅ | ⚠️ | ✅ (EU only) |
-| **hipaa-compliant** | ✅ | ✅ | ✅ | ❌ | ✅ (audit) |
-| **sox-financials** | ✅ | ✅ | ⚠️ | ❌ | ✅ (locked) |
-| **confidential-data** | ❌ | ✅ | ✅ | ✅ | ❌ |
-| **pii-strict** | ✅ | ✅ | ✅ | ✅ | ❌ |
-| **secrets-vault** | ❌ | ✅ | ✅ | ✅ | ❌ |
-| **tool-locked** | ❌ | ❌ | ❌ | ❌ | IDE-dep |
-| **offline-only** | ❌ | ❌ | ✅ | ✅ | ❌ |
-| **regional-eu** | ✅ | ✅ | ✅ | ⚠️ | ✅ (EU) |
-| **regional-us** | ✅ | ✅ | ⚠️ | ⚠️ | ✅ (US) |
-| **regional-china** | ✅ | ✅ | ✅ | ⚠️ | ⚠️ |
+| **legal-compliance** | âœ… | âœ… | âš ï¸ | âŒ | âœ… |
+| **gdpr-strict** | âœ… | âœ… | âœ… | âš ï¸ | âœ… (EU only) |
+| **hipaa-compliant** | âœ… | âœ… | âœ… | âŒ | âœ… (audit) |
+| **sox-financials** | âœ… | âœ… | âš ï¸ | âŒ | âœ… (locked) |
+| **confidential-data** | âŒ | âœ… | âœ… | âœ… | âŒ |
+| **pii-strict** | âœ… | âœ… | âœ… | âœ… | âŒ |
+| **secrets-vault** | âŒ | âœ… | âœ… | âœ… | âŒ |
+| **tool-locked** | âŒ | âŒ | âŒ | âŒ | IDE-dep |
+| **offline-only** | âŒ | âŒ | âœ… | âœ… | âŒ |
+| **regional-eu** | âœ… | âœ… | âœ… | âš ï¸ | âœ… (EU) |
+| **regional-us** | âœ… | âœ… | âš ï¸ | âš ï¸ | âœ… (US) |
+| **regional-china** | âœ… | âœ… | âœ… | âš ï¸ | âš ï¸ |
 | **custom** | ? | ? | ? | ? | ? |
 
 ---
@@ -707,21 +707,21 @@ mip_profile apply-constraint temp-profile \
 ```
 Base profile (no constraints)
   Task T3: 1 hour
-  Cost: €5
+  Cost: â‚¬5
   
 + legal-compliance
   Task T3: 1h 15min (+15%)
-  Cost: €5.50
+  Cost: â‚¬5.50
   (Audit logging + consent checks)
   
 + confidential-data
   Task T3: 1h 20min (+25%)
-  Cost: €5
+  Cost: â‚¬5
   (No caching, manual edits)
   
 + legal + confidential + gdpr-strict
   Task T3: 2 hours (+100% !)
-  Cost: €6
+  Cost: â‚¬6
   (Audit + consent + EU-only + manual)
 ```
 
@@ -778,13 +778,13 @@ mip_profile validate my-setup
 
 # Show conflicts
 mip_profile check-conflicts my-setup
-# No conflicts ✅
+# No conflicts âœ…
 
 # Simulate applying constraint
 mip_profile apply-constraint --dry-run my-setup gdpr-strict
 # Would apply gdpr-strict
 # Conflicts: None
-# Impact: +20% time, €1 cost
+# Impact: +20% time, â‚¬1 cost
 # OK to apply? [y/N]
 ```
 
@@ -792,8 +792,10 @@ mip_profile apply-constraint --dry-run my-setup gdpr-strict
 
 ## References
 
-- [MANAGEMENT.md](./MANAGEMENT.md) — How to use constraints
-- [TEMPLATES.md](./TEMPLATES.md) — Create custom profiles
-- [INDEX.md](./INDEX.md) — Profile directory
-- [builtin/](./builtin/) — Base profiles
-- [custom/](./custom/) — User profiles (not versioned)
+- [MANAGEMENT.md](./MANAGEMENT.md) â€” How to use constraints
+- [TEMPLATES.md](./TEMPLATES.md) â€” Create custom profiles
+- [INDEX.md](./INDEX.md) â€” Profile directory
+- [builtin/](README.md) â€” Base profiles
+- [custom/](README.md) â€” User profiles (not versioned)
+
+

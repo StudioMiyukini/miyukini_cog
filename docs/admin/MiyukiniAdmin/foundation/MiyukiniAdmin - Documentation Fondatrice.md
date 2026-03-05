@@ -1,4 +1,4 @@
-# MiyukiniAdmin — Documentation Fondatrice
+﻿# MiyukiniAdmin â€” Documentation Fondatrice
 
 ## 1. Contexte
 
@@ -117,7 +117,7 @@ Il est out-of-band, comme un BIOS / hyperviseur / console root.
 
 **Fonctions :**
 - **Premier demarrage** : detection environnement vierge vs initialise ; verrou StrongFather (seuls MiyukiniAdmin et les Cores peuvent agir) ; parcours Futur Admin et creation du premier compte admin (voir [Auth and First-Boot Contract](../contracts/security/MiyukiniAdmin%20-%20Auth%20and%20First-Boot%20Contract.md)).
-- **Identite environnement** : generation des donnees d'identite du COG de facon chiffree par les Cores (protocole [EIP](../../../protocols/MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md)).
+- **Identite environnement** : generation des donnees d'identite du COG de facon chiffree par les Cores (protocole [EIP](..//..//..//contrats//MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md)).
 - Installation complete de l'environnement Miyukini
 - Verification hardware / OS / permissions
 - Initialisation du kernel
@@ -203,14 +203,14 @@ Comparable a un mode recovery.
 ### 6.7 Tests des modules et cycle de vie
 
 **Fonctions :**
-- **Tests des modules** : Tests des Kits d'outils, Operateurs, Equipes d'operateurs et Services via le manifeste de test embarqué dans chaque module. Seul MiyukiniAdmin peut executer et interpreter ces tests (voir [Module Testing and Lifecycle Contract](../contracts/testing/MiyukiniAdmin%20-%20Module%20Testing%20and%20Lifecycle%20Contract.md)).
+- **Tests des modules** : Tests des Kits d'outils, Operateurs, Equipes d'operateurs et Services via le manifeste de test embarquÃ© dans chaque module. Seul MiyukiniAdmin peut executer et interpreter ces tests (voir [Module Testing and Lifecycle Contract](../contracts/testing/MiyukiniAdmin%20-%20Module%20Testing%20and%20Lifecycle%20Contract.md)).
 - **Cellule Admin** : Chaque module expose une cellule destinee uniquement a MiyukiniAdmin (identification, manifeste de test, metadonnees d'integrite). Seul MiyukiniAdmin peut la lire et l'utiliser.
 - **Identification des modules** : Liste des modules presents obtenue via Master Butler (via BondingBrother), avec reference vers la cellule Admin de chaque module.
 - **Verification d'integrite** : Collaboration avec les cores, notamment **TAMR** (champ d'action integrite et interventions humaines), pour verifier l'integrite des modules.
-- **Cycle de vie des modules** : Ajout, verrouillage/deverrouillage et suppression d'un module — exclusivement via MiyukiniAdmin, sous validation StrongFather et enregistrement Master Butler / Ever Buddy selon le cas.
+- **Cycle de vie des modules** : Ajout, verrouillage/deverrouillage et suppression d'un module â€” exclusivement via MiyukiniAdmin, sous validation StrongFather et enregistrement Master Butler / Ever Buddy selon le cas.
 
 **Caracteristiques :**
-- Exclusivite MiyukiniAdmin pour la cellule Admin et l'execution des tests embarqués
+- Exclusivite MiyukiniAdmin pour la cellule Admin et l'execution des tests embarquÃ©s
 - Toute action lifecycle passe par BondingBrother ; aucun bypass des cores
 - Tracabilite complete des tests et des actions de cycle de vie
 
@@ -282,11 +282,11 @@ Meme s'il ressemble a PHPMyAdmin :
 
 ```
 [MiyukiniAdmin]
- ├── UI propre
- ├── Logique metier admin
- ├── Securite maximale
- └── BondingBrother
-        ↓
+ â”œâ”€â”€ UI propre
+ â”œâ”€â”€ Logique metier admin
+ â”œâ”€â”€ Securite maximale
+ â””â”€â”€ BondingBrother
+        â†“
      Miyukini Core
 ```
 
@@ -368,29 +368,31 @@ MiyukiniAdmin sollicite TAMR via BondingBrother pour la verification d'integrite
 ### 9.1 Positionnement
 
 ```
-┌──────────────────────────────────────────┐
-│ STRATE 9 — MiyukiniAdmin (EXCEPTION)     │
-│ Operateur Souverain d'administration     │
-└──────────────────────────────────────────┘
-          ▲
-          │ (hors pyramide)
-          │
-┌──────────────────────────────────────────┐
-│ STRATE 7 — Operateurs                    │
-└──────────────────────────────────────────┘
-          ▲
-┌──────────────────────────────────────────┐
-│ STRATE 6 — Outils & Kits d'Outils        │
-└──────────────────────────────────────────┘
-          ▲
-┌──────────────────────────────────────────┐
-│ STRATE 5 — BondingBrother (Adaptateur)   │
-└──────────────────────────────────────────┘
-          ▲
-┌──────────────────────────────────────────┐
-│ STRATE 4 — Cores Systeme                 │
-└──────────────────────────────────────────┘
-```
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 9 â€” MiyukiniAdmin (EXCEPTION)     â”‚
+â”‚ Operateur Souverain d'administration     â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+          â”‚ (hors pyramide)
+          â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 7 â€” Operateurs                    â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 6 â€” Outils & Kits d'Outils        â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 5 â€” Interfaces & Adaptation       â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 4 â€” Cores Systeme                 â”‚
+â”‚         (incluant BondingBrother*)       â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+
+> **Note :** *BondingBrother est classÃ© avec les Cores (strate 4) en raison de son importance critique, mais conserve sa fonction de passerelle (strate 5). Tous les Cores dÃ©pendent de lui.
 
 **MiyukiniAdmin est au-dessus de la pyramide, pas dedans.**
 
@@ -409,7 +411,7 @@ Il observe, installe, arbitre, mais ne vit pas dans le flux normal.
 
 **MiyukiniAdmin est au Miyukini Core ce que le BIOS/UEFI est a un OS moderne :**
 
-**Autonome, puissant, dangereux s'il est mal utilise — et absolument necessaire.**
+**Autonome, puissant, dangereux s'il est mal utilise â€” et absolument necessaire.**
 
 ---
 
@@ -447,14 +449,17 @@ Il observe, installe, arbitre, mais ne vit pas dans le flux normal.
 - [MiyukiniAdmin - Index de Navigation](../_index.md)
 - [MiyukiniAdmin - Module Testing and Lifecycle Contract](../contracts/testing/MiyukiniAdmin%20-%20Module%20Testing%20and%20Lifecycle%20Contract.md)
 - [MiyukiniAdmin - Architecture & Flows](../architecture/MiyukiniAdmin%20-%20Architecture%20&%20Flows.md)
-- [Miyukini Conceptual References - MiyukiniAdmin Status](../../../reference/Miyukini%20Conceptual%20References%20-%20MiyukiniAdmin%20Status.md)
-- [Miyukini Conceptual References - Security Levels](../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md)
-- [Miyukini Conceptual References - Pyramide Architecture Complete](../../../reference/Miyukini%20Conceptual%20References%20-%20Pyramide%20Architecture%20Complete.md)
-- [BondingBrother - Documentation Fondatrice](../../BondingBrother/foundation/BondingBrother%20-%20Documentation%20Fondatrice.md)
-- [StrongFather - Documentation Fondatrice](../../StrongFather/foundation/StrongFather%20-%20Documentation%20Fondatrice.md)
+- [Miyukini Conceptual References - MiyukiniAdmin Status](..//..//..//miyukini-webway-system//reference//_index.md)
+- [Miyukini Conceptual References - Security Levels](..//..//..//miyukini-webway-system//reference//_index.md)
+- [Miyukini Conceptual References - Pyramide Architecture Complete](..//..//..//miyukini-webway-system//reference//_index.md)
+- [BondingBrother - Documentation Fondatrice](..//..//..//cores//BondingBrother//foundation//BondingBrother%20-%20Documentation%20Fondatrice.md)
+- [StrongFather - Documentation Fondatrice](..//..//..//cores//StrongFather//foundation//StrongFather%20-%20Documentation%20Fondatrice.md)
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
 **Statut :** Document fondateur de reference
+
+
+

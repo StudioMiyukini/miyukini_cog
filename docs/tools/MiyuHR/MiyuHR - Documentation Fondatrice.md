@@ -1,54 +1,54 @@
-# MiyuHR — Documentation Fondatrice
+﻿# MiyuHR â€” Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuHR** est le **kit d'outils (Toolkit)** RH (pointeuse, plannings) de l'écosystème Miyukini. Il intègre les outils d'enregistrement entrée/sortie (time clock) et de lecture du planning (shifts) pour un employé/période, alignés sur le document [Équivalents PoS Logiciel Caisse](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20PoS%20Logiciel%20Caisse.md).
+**MiyuHR** est le **kit d'outils (Toolkit)** RH (pointeuse, plannings) de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils d'enregistrement entrÃ©e/sortie (time clock) et de lecture du planning (shifts) pour un employÃ©/pÃ©riode, alignÃ©s sur le document [Ã‰quivalents PoS Logiciel Caisse](..//..//miyukini-webway-system//reference//_index.md).
 
-L'autorité sur les données (heures, plannings) appartient à **KindMother** (Core de données, Strate 4). Les permissions (qui peut pointeuse, qui peut lire les plannings) relèvent de **Master Butler** et **StrongFather**. MiyuHR expose des capacités d'exécution gouvernée ; les Opérateurs (ex. Opérateur RH) passent par la gouvernance pour utiliser ces outils.
+L'autoritÃ© sur les donnÃ©es (heures, plannings) appartient Ã  **KindMother** (Core de donnÃ©es, Strate 4). Les permissions (qui peut pointeuse, qui peut lire les plannings) relÃ¨vent de **Master Butler** et **StrongFather**. MiyuHR expose des capacitÃ©s d'exÃ©cution gouvernÃ©e ; les OpÃ©rateurs (ex. OpÃ©rateur RH) passent par la gouvernance pour utiliser ces outils.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-
----
-
-## 2. Portée / Scope
-
-**Ce document définit :** l'identité et la définition canonique de MiyuHR, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother, l'alignement MIP.
-
-**Hors scope :** l'implémentation détaillée ; la gestion des droits employés (Master Butler, StrongFather).
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 3. Définition canonique
+## 2. PortÃ©e / Scope
 
-> **MiyuHR est une composition officielle d'outils RH (pointeuse entrée/sortie, lecture planning), déclarée et gouvernée par l'environnement.**
+**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de MiyuHR, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother, l'alignement MIP.
 
-- MiyuHR **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
-- MiyuHR **n'ajoute aucune logique métier** : il orchestre des capacités atomiques (enregistrement entrée/sortie, lecture planning) ; les permissions = Master Butler + StrongFather.
+**Hors scope :** l'implÃ©mentation dÃ©taillÃ©e ; la gestion des droits employÃ©s (Master Butler, StrongFather).
 
-**Règle fondamentale :** Toute écriture (time_clock.in, time_clock.out) = WriteIntent vers KindMother.
+---
+
+## 3. DÃ©finition canonique
+
+> **MiyuHR est une composition officielle d'outils RH (pointeuse entrÃ©e/sortie, lecture planning), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+
+- MiyuHR **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
+- MiyuHR **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques (enregistrement entrÃ©e/sortie, lecture planning) ; les permissions = Master Butler + StrongFather.
+
+**RÃ¨gle fondamentale :** Toute Ã©criture (time_clock.in, time_clock.out) = WriteIntent vers KindMother.
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.hr.miyuhr` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `hr` |
-| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le détail de chaque outil est décrit dans [MiyuHR - Reference Outils](./MiyuHR%20-%20Reference%20Outils.md).
+Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuHR - Reference Outils](./MiyuHR%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
-| `tool.hr.time_clock.in` | Enregistre une entrée (début de shift) |
+| `tool.hr.time_clock.in` | Enregistre une entrÃ©e (dÃ©but de shift) |
 | `tool.hr.time_clock.out` | Enregistre une sortie (fin de shift) |
-| `tool.hr.schedule.get` | Retourne le planning (shifts) pour un employé/période |
+| `tool.hr.schedule.get` | Retourne le planning (shifts) pour un employÃ©/pÃ©riode |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuHR en contient trois.
 
@@ -56,44 +56,46 @@ Le détail de chaque outil est décrit dans [MiyuHR - Reference Outils](./MiyuHR
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : permissions employé = Master Butler + StrongFather ; toute écriture = WriteIntent KindMother.
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : permissions employÃ© = Master Butler + StrongFather ; toute Ã©criture = WriteIntent KindMother.
 
 ---
 
-## 7. Niveau de sécurité et états
+## 7. Niveau de sÃ©curitÃ© et Ã©tats
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
-| **Niveau de sécurité du kit** | **1 à 2** (détail par outil dans Reference Outils) |
-| **États autorisés** | `HEALTHY`, `DEGRADED` |
-| **États interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
+| **Niveau de sÃ©curitÃ© du kit** | **1 Ã  2** (dÃ©tail par outil dans Reference Outils) |
+| **Ã‰tats autorisÃ©s** | `HEALTHY`, `DEGRADED` |
+| **Ã‰tats interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autorité sur les données : heures (entrées/sorties), plannings. Toute écriture (time_clock.in, time_clock.out) passe par **WriteIntent** sous autorité KindMother. MiyuHR exécute des capacités atomiques ; les permissions (qui peut pointeuse) = Master Butler + StrongFather.
+**KindMother** est l'autoritÃ© sur les donnÃ©es : heures (entrÃ©es/sorties), plannings. Toute Ã©criture (time_clock.in, time_clock.out) passe par **WriteIntent** sous autoritÃ© KindMother. MiyuHR exÃ©cute des capacitÃ©s atomiques ; les permissions (qui peut pointeuse) = Master Butler + StrongFather.
 
-Les obligations de conformité détaillées sont dans [MiyuHR - Tool Governance Compliance Contract](./contracts/governance/MiyuHR%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuHR - Tool Governance Compliance Contract](./contracts/governance/MiyuHR%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuHR sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). À l'implémentation, le code fournissant les Tools MiyuHR devra être balisé MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit généré selon le [Protocole MIP v1](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+La documentation et la future implÃ©mentation de MiyuHR sont conÃ§ues pour Ãªtre **compatibles MIP v1** (Miyukini Index Protocol). Ã€ l'implÃ©mentation, le code fournissant les Tools MiyuHR devra Ãªtre balisÃ© MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit gÃ©nÃ©rÃ© selon le [Protocole MIP v1](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
 ---
 
-## 10. Références croisées
+## 10. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Équivalents PoS Logiciel Caisse | [Miyukini Conceptual References - Equivalents PoS Logiciel Caisse](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20PoS%20Logiciel%20Caisse.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
+| Ã‰quivalents PoS Logiciel Caisse | [Miyukini Conceptual References - Equivalents PoS Logiciel Caisse](..//..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence fondateur
+**Statut :** Document de rÃ©fÃ©rence fondateur
+
+

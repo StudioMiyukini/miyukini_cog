@@ -17,7 +17,7 @@
 
 ## Format JSON du DAG
 
-Stocké dans `<sequence>/phases/dag.json`. Généré par Maria en P0 Temps 10 ou début de P3.
+Stocké dans `<sequence>/phases/dag.json`. Généré par Maria en P0 Temps 11 ou début de P3.
 
 ### Schéma
 
@@ -93,7 +93,7 @@ git worktree remove ../wt-lise
 1. **Tâche isolée** : extrait du plan (1 tâche : id, label, files[], code attendu, test) — pas le plan complet
 2. **Fichiers** : Read uniquement des fichiers assignés (<500 lignes ou extrait pertinent)
 3. **Cert** : 0 ou 1 REFERENCE.md selon load-map pour le type de tâche
-4. **Instructions** : Bob (`.mip/agents/bob.md`, ~40 lignes) pour tâches simples ; sinon agent light (`.mip/agents/light/{nom}.md`)
+4. **Instructions** : Bob (`.mip/agents/bob/MASS_bob.md` en priorite, fallback `.mip/agents/bob/FULL_bob.md`) pour taches simples ; sinon agent light (`.mip/agents/light/{nom}.md`)
 
 **INTERDIT** : plan complet, brief, spec, MEMORY.md, patterns-and-lessons complet, agent complet >80 lignes.
 
@@ -164,8 +164,8 @@ Jean analyse l'efficience swarm en complément des métriques d'Arianne :
 
 | Phase | Action MASS |
 |-------|-------------|
-| **P0 T7** | Denis inclut `deps[]` dans le plan |
-| **P0 T10** | Maria génère le DAG, classe les vagues, sélectionne le dispatch |
+| **P0 T8** | Denis inclut `deps[]` dans le plan |
+| **P0 T11** | Maria génère le DAG, classe les vagues, sélectionne le dispatch |
 | **Début P3** | Denis valide le DAG (pas de cycles, fichiers disjoints) |
 | **Vagues P3** | Denis lance les agents, fusionne, checkpoints, met à jour les métriques |
 | **Checkpoints P3** | Inchangés, cumulatifs sur toutes les vagues. Spot-check Victor |

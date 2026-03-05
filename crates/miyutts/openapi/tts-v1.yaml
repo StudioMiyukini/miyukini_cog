@@ -2,6 +2,12 @@ openapi: 3.1.0
 info:
   title: MiyuTTS API
   version: 0.1.0
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Token
 paths:
   /api/health:
     get:
@@ -12,12 +18,16 @@ paths:
   /api/tts/voices:
     get:
       summary: List available voices
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Voices payload
   /api/tts:
     post:
       summary: Text-to-speech synthesis
+      security:
+        - bearerAuth: []
       parameters:
         - in: header
           name: X-Request-ID
@@ -43,6 +53,8 @@ paths:
   /api/tts/wav:
     post:
       summary: Text-to-speech synthesis (binary WAV)
+      security:
+        - bearerAuth: []
       parameters:
         - in: header
           name: X-Request-ID

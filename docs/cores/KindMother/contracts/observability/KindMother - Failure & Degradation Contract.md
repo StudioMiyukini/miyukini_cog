@@ -1,521 +1,521 @@
-# KindMother — Failure & Degradation Contract
+﻿# KindMother â€” Failure & Degradation Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **KindMother — Failure & Degradation Contract** : un contrat normatif, non négociable, et de statut FONDATION qui établit le comportement formel de KindMother en situation d'échec, définit les types d'échecs reconnus, les règles de dégradation contrôlée, et les invariants de survie du système.
+Ce document dÃ©finit le **KindMother â€” Failure & Degradation Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit le comportement formel de KindMother en situation d'Ã©chec, dÃ©finit les types d'Ã©checs reconnus, les rÃ¨gles de dÃ©gradation contrÃ´lÃ©e, et les invariants de survie du systÃ¨me.
 
-Ce contrat précise comment KindMother réagit conceptuellement aux différentes situations d'échec, garantissant la préservation de l'intégrité même dans des conditions dégradées.
+Ce contrat prÃ©cise comment KindMother rÃ©agit conceptuellement aux diffÃ©rentes situations d'Ã©chec, garantissant la prÃ©servation de l'intÃ©gritÃ© mÃªme dans des conditions dÃ©gradÃ©es.
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **toutes les situations d'échec** de KindMother et définit de manière absolue :
-- la définition formelle d'un échec dans KindMother,
-- les types d'échecs reconnus (crash, perte partielle, surcharge, panne de synchronisation),
-- la dégradation contrôlée,
-- les invariants de survie du système,
-- les garanties en situation d'échec,
-- les règles de récupération conceptuelle.
+Ce contrat s'applique Ã  **toutes les situations d'Ã©chec** de KindMother et dÃ©finit de maniÃ¨re absolue :
+- la dÃ©finition formelle d'un Ã©chec dans KindMother,
+- les types d'Ã©checs reconnus (crash, perte partielle, surcharge, panne de synchronisation),
+- la dÃ©gradation contrÃ´lÃ©e,
+- les invariants de survie du systÃ¨me,
+- les garanties en situation d'Ã©chec,
+- les rÃ¨gles de rÃ©cupÃ©ration conceptuelle.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complète et respecte les documents contractuels existants :
-- **KindMother — Runtime Boundary & Enforcement Contract** : Définit les réponses systémiques (R4 : dégradation contrôlée)
-- **KindMother — Instance Model Contract** : Définit les instances et leur protection (INST-8)
-- **KindMother — Persistence & Storage Contract** : Définit la corruption et la réparation
-- **KindMother — Sync & Conflict Resolution Contract** : Définit les pannes de synchronisation
-- **[Miyukini Conceptual References — Lois Autonomie Système](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Ce contrat respecte **LOI-2** (le système accepte l'isolement comme état normal) en garantissant que les pannes de synchronisation n'empêchent pas le fonctionnement local.
+Ce contrat complÃ¨te et respecte les documents contractuels existants :
+- **KindMother â€” Runtime Boundary & Enforcement Contract** : DÃ©finit les rÃ©ponses systÃ©miques (R4 : dÃ©gradation contrÃ´lÃ©e)
+- **KindMother â€” Instance Model Contract** : DÃ©finit les instances et leur protection (INST-8)
+- **KindMother â€” Persistence & Storage Contract** : DÃ©finit la corruption et la rÃ©paration
+- **KindMother â€” Sync & Conflict Resolution Contract** : DÃ©finit les pannes de synchronisation
+- **[Miyukini Conceptual References â€” Lois Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Ce contrat respecte **LOI-2** (le systÃ¨me accepte l'isolement comme Ã©tat normal) en garantissant que les pannes de synchronisation n'empÃªchent pas le fonctionnement local.
 
-Il n'introduit aucune contradiction et constitue le contrat formel de comportement en situation d'échec.
-
----
-
-## 2. Définition formelle d'un échec
-
-### Définition formelle
-
-Un **échec** dans KindMother est toute situation où le système ne peut pas fonctionner normalement, temporairement ou définitivement, en raison de conditions internes ou externes anormales.
-
-### Caractéristiques d'un échec
-
-**Anormalité :** Un échec représente une déviation du fonctionnement normal du système.
-
-**Impact sur les opérations :** Un échec affecte la capacité du système à traiter les opérations normalement.
-
-**Détectabilité :** Un échec est détectable par KindMother ou les adaptateurs.
-
-**Temporalité :** Un échec peut être temporaire (récupérable) ou permanent (non récupérable).
-
-### Ce qu'un échec N'EST PAS
-
-**Rejet normal :** Un rejet d'intention due à une validation échouée n'est pas un échec du système ; c'est un fonctionnement normal.
-
-**Conflit de synchronisation :** Un conflit résolu selon les règles du Sync Contract n'est pas un échec.
-
-**Charge normale :** Une charge élevée mais gérable n'est pas un échec.
-
-**Maintenance planifiée :** Un arrêt planifié pour maintenance n'est pas un échec.
+Il n'introduit aucune contradiction et constitue le contrat formel de comportement en situation d'Ã©chec.
 
 ---
 
-## 3. Types d'échecs reconnus
+## 2. DÃ©finition formelle d'un Ã©chec
 
-### 3.1. Crash (Arrêt inattendu)
+### DÃ©finition formelle
 
-**Définition :** Un crash est l'arrêt brutal et non planifié d'une instance KindMother.
+Un **Ã©chec** dans KindMother est toute situation oÃ¹ le systÃ¨me ne peut pas fonctionner normalement, temporairement ou dÃ©finitivement, en raison de conditions internes ou externes anormales.
 
-**Caractéristiques :**
-- Arrêt immédiat et non contrôlé
-- Opérations en cours interrompues
-- État potentiellement incohérent temporairement
-- Redémarrage nécessaire
+### CaractÃ©ristiques d'un Ã©chec
+
+**AnormalitÃ© :** Un Ã©chec reprÃ©sente une dÃ©viation du fonctionnement normal du systÃ¨me.
+
+**Impact sur les opÃ©rations :** Un Ã©chec affecte la capacitÃ© du systÃ¨me Ã  traiter les opÃ©rations normalement.
+
+**DÃ©tectabilitÃ© :** Un Ã©chec est dÃ©tectable par KindMother ou les adaptateurs.
+
+**TemporalitÃ© :** Un Ã©chec peut Ãªtre temporaire (rÃ©cupÃ©rable) ou permanent (non rÃ©cupÃ©rable).
+
+### Ce qu'un Ã©chec N'EST PAS
+
+**Rejet normal :** Un rejet d'intention due Ã  une validation Ã©chouÃ©e n'est pas un Ã©chec du systÃ¨me ; c'est un fonctionnement normal.
+
+**Conflit de synchronisation :** Un conflit rÃ©solu selon les rÃ¨gles du Sync Contract n'est pas un Ã©chec.
+
+**Charge normale :** Une charge Ã©levÃ©e mais gÃ©rable n'est pas un Ã©chec.
+
+**Maintenance planifiÃ©e :** Un arrÃªt planifiÃ© pour maintenance n'est pas un Ã©chec.
+
+---
+
+## 3. Types d'Ã©checs reconnus
+
+### 3.1. Crash (ArrÃªt inattendu)
+
+**DÃ©finition :** Un crash est l'arrÃªt brutal et non planifiÃ© d'une instance KindMother.
+
+**CaractÃ©ristiques :**
+- ArrÃªt immÃ©diat et non contrÃ´lÃ©
+- OpÃ©rations en cours interrompues
+- Ã‰tat potentiellement incohÃ©rent temporairement
+- RedÃ©marrage nÃ©cessaire
 
 **Causes conceptuelles :**
-- Défaillance interne du système
-- Conditions exceptionnelles non gérées
+- DÃ©faillance interne du systÃ¨me
+- Conditions exceptionnelles non gÃ©rÃ©es
 - Ressources critiques indisponibles
 - Violation d'un invariant de survie
 
 **Impact :**
-- Opérations en cours perdues (non appliquées)
-- Services indisponibles jusqu'au redémarrage
-- Potentielle incohérence temporaire
+- OpÃ©rations en cours perdues (non appliquÃ©es)
+- Services indisponibles jusqu'au redÃ©marrage
+- Potentielle incohÃ©rence temporaire
 
 **Comportement attendu :**
-- CRASH-1 : Les opérations non appliquées avant le crash sont perdues
-- CRASH-2 : L'état persisté reste cohérent (atomicité de persistance)
-- CRASH-3 : Le redémarrage restaure un état cohérent
-- CRASH-4 : Les intentions en cours sont invalidées (nouveau cycle de vie)
+- CRASH-1 : Les opÃ©rations non appliquÃ©es avant le crash sont perdues
+- CRASH-2 : L'Ã©tat persistÃ© reste cohÃ©rent (atomicitÃ© de persistance)
+- CRASH-3 : Le redÃ©marrage restaure un Ã©tat cohÃ©rent
+- CRASH-4 : Les intentions en cours sont invalidÃ©es (nouveau cycle de vie)
 
 ### 3.2. Perte partielle (Corruption)
 
-**Définition :** Une perte partielle est la corruption ou l'indisponibilité d'une partie des données ou de l'état du système.
+**DÃ©finition :** Une perte partielle est la corruption ou l'indisponibilitÃ© d'une partie des donnÃ©es ou de l'Ã©tat du systÃ¨me.
 
-**Caractéristiques :**
-- Une partie du système est affectée
-- Le reste du système peut fonctionner
-- L'intégrité de certaines données est compromise
-- Détection et isolation nécessaires
+**CaractÃ©ristiques :**
+- Une partie du systÃ¨me est affectÃ©e
+- Le reste du systÃ¨me peut fonctionner
+- L'intÃ©gritÃ© de certaines donnÃ©es est compromise
+- DÃ©tection et isolation nÃ©cessaires
 
 **Causes conceptuelles :**
 - Corruption de stockage
-- Défaillance affectant une partie des données
-- Incohérence détectée dans une partie du système
+- DÃ©faillance affectant une partie des donnÃ©es
+- IncohÃ©rence dÃ©tectÃ©e dans une partie du systÃ¨me
 
 **Impact :**
-- Données affectées indisponibles
-- Opérations sur données affectées bloquées
+- DonnÃ©es affectÃ©es indisponibles
+- OpÃ©rations sur donnÃ©es affectÃ©es bloquÃ©es
 - Fonctionnement partiel possible
 
 **Comportement attendu :**
-- LOSS-1 : La corruption est détectée et signalée
-- LOSS-2 : Les opérations sur données corrompues sont bloquées
-- LOSS-3 : Les parties non affectées restent opérationnelles
-- LOSS-4 : La réparation est nécessaire avant accès aux données affectées
+- LOSS-1 : La corruption est dÃ©tectÃ©e et signalÃ©e
+- LOSS-2 : Les opÃ©rations sur donnÃ©es corrompues sont bloquÃ©es
+- LOSS-3 : Les parties non affectÃ©es restent opÃ©rationnelles
+- LOSS-4 : La rÃ©paration est nÃ©cessaire avant accÃ¨s aux donnÃ©es affectÃ©es
 
 ### 3.3. Surcharge (Ressources insuffisantes)
 
-**Définition :** Une surcharge est une situation où les ressources disponibles sont insuffisantes pour traiter la charge demandée.
+**DÃ©finition :** Une surcharge est une situation oÃ¹ les ressources disponibles sont insuffisantes pour traiter la charge demandÃ©e.
 
-**Caractéristiques :**
-- Volume d'opérations excessif
-- Ressources saturées
-- Temps de réponse dégradés
-- Rejets potentiels pour préserver le système
+**CaractÃ©ristiques :**
+- Volume d'opÃ©rations excessif
+- Ressources saturÃ©es
+- Temps de rÃ©ponse dÃ©gradÃ©s
+- Rejets potentiels pour prÃ©server le systÃ¨me
 
 **Causes conceptuelles :**
 - Charge d'utilisation exceptionnelle
 - Attaque de saturation
-- Ressources réduites
-- Opérations coûteuses en masse
+- Ressources rÃ©duites
+- OpÃ©rations coÃ»teuses en masse
 
 **Impact :**
-- Performances dégradées
-- Temps de réponse augmentés
-- Certaines opérations rejetées
-- Fonctionnement en mode dégradé
+- Performances dÃ©gradÃ©es
+- Temps de rÃ©ponse augmentÃ©s
+- Certaines opÃ©rations rejetÃ©es
+- Fonctionnement en mode dÃ©gradÃ©
 
 **Comportement attendu :**
-- OVERLOAD-1 : La surcharge est détectée (Boundary de charge V7)
-- OVERLOAD-2 : La dégradation contrôlée est activée
-- OVERLOAD-3 : Les opérations non critiques peuvent être rejetées
-- OVERLOAD-4 : L'intégrité est préservée malgré la surcharge
+- OVERLOAD-1 : La surcharge est dÃ©tectÃ©e (Boundary de charge V7)
+- OVERLOAD-2 : La dÃ©gradation contrÃ´lÃ©e est activÃ©e
+- OVERLOAD-3 : Les opÃ©rations non critiques peuvent Ãªtre rejetÃ©es
+- OVERLOAD-4 : L'intÃ©gritÃ© est prÃ©servÃ©e malgrÃ© la surcharge
 
 ### 3.4. Panne de synchronisation
 
-**Définition :** Une panne de synchronisation est l'impossibilité de synchroniser une Instance Fille avec son Instance Mère.
+**DÃ©finition :** Une panne de synchronisation est l'impossibilitÃ© de synchroniser une Instance Fille avec son Instance MÃ¨re.
 
-**Caractéristiques :**
+**CaractÃ©ristiques :**
 - Communication impossible entre instances
 - Fille continue en mode autonome
 - Divergence potentielle croissante
-- Synchronisation différée
+- Synchronisation diffÃ©rÃ©e
 
 **Causes conceptuelles :**
-- Instance Mère indisponible
+- Instance MÃ¨re indisponible
 - Communication interrompue
-- Conflit non résolvable
-- Échec répété de synchronisation
+- Conflit non rÃ©solvable
+- Ã‰chec rÃ©pÃ©tÃ© de synchronisation
 
 **Impact :**
 - Instance Fille fonctionne en autonomie
 - Intentions locales en attente de validation
-- Risque de conflits à la resynchronisation
-- Données locales potentiellement obsolètes
+- Risque de conflits Ã  la resynchronisation
+- DonnÃ©es locales potentiellement obsolÃ¨tes
 
 **Comportement attendu :**
-- SYNC-FAIL-1 : La panne est détectée et signalée
+- SYNC-FAIL-1 : La panne est dÃ©tectÃ©e et signalÃ©e
 - SYNC-FAIL-2 : L'Instance Fille continue en mode autonome
-  - Cette garantie respecte **LOI-2** (le système accepte l'isolement comme état normal) : l'Instance Fille fonctionne localement même sans connexion à l'Instance Mère, l'isolement n'est pas traité comme une erreur mais comme un état valide du système.
-- SYNC-FAIL-3 : Les intentions locales sont conservées pour soumission ultérieure
-- SYNC-FAIL-4 : La resynchronisation est tentée périodiquement
-- SYNC-FAIL-5 : Les opérations locales sont traçables
+  - Cette garantie respecte **LOI-2** (le systÃ¨me accepte l'isolement comme Ã©tat normal) : l'Instance Fille fonctionne localement mÃªme sans connexion Ã  l'Instance MÃ¨re, l'isolement n'est pas traitÃ© comme une erreur mais comme un Ã©tat valide du systÃ¨me.
+- SYNC-FAIL-3 : Les intentions locales sont conservÃ©es pour soumission ultÃ©rieure
+- SYNC-FAIL-4 : La resynchronisation est tentÃ©e pÃ©riodiquement
+- SYNC-FAIL-5 : Les opÃ©rations locales sont traÃ§ables
 
 ---
 
-## 4. Dégradation contrôlée
+## 4. DÃ©gradation contrÃ´lÃ©e
 
-### 4.1. Définition
+### 4.1. DÃ©finition
 
-**Définition formelle :** La dégradation contrôlée est la réponse systémique de KindMother face à une situation d'échec, permettant de maintenir un fonctionnement minimal tout en préservant l'intégrité et la sécurité du système.
+**DÃ©finition formelle :** La dÃ©gradation contrÃ´lÃ©e est la rÃ©ponse systÃ©mique de KindMother face Ã  une situation d'Ã©chec, permettant de maintenir un fonctionnement minimal tout en prÃ©servant l'intÃ©gritÃ© et la sÃ©curitÃ© du systÃ¨me.
 
-### 4.2. Principes de la dégradation contrôlée
+### 4.2. Principes de la dÃ©gradation contrÃ´lÃ©e
 
-**DEGRAD-PRINCIP-1 : Intégrité avant disponibilité**
+**DEGRAD-PRINCIP-1 : IntÃ©gritÃ© avant disponibilitÃ©**
 
-En situation de dégradation, l'intégrité des données prime toujours sur la disponibilité des services. Une opération qui pourrait compromettre l'intégrité est rejetée.
+En situation de dÃ©gradation, l'intÃ©gritÃ© des donnÃ©es prime toujours sur la disponibilitÃ© des services. Une opÃ©ration qui pourrait compromettre l'intÃ©gritÃ© est rejetÃ©e.
 
 **DEGRAD-PRINCIP-2 : Transparence**
 
-L'état de dégradation est visible et communiqué aux adaptateurs. Les limitations sont explicites.
+L'Ã©tat de dÃ©gradation est visible et communiquÃ© aux adaptateurs. Les limitations sont explicites.
 
-**DEGRAD-PRINCIP-3 : Réversibilité**
+**DEGRAD-PRINCIP-3 : RÃ©versibilitÃ©**
 
-La dégradation est réversible. Lorsque les conditions normales sont rétablies, le fonctionnement normal reprend.
+La dÃ©gradation est rÃ©versible. Lorsque les conditions normales sont rÃ©tablies, le fonctionnement normal reprend.
 
-**DEGRAD-PRINCIP-4 : Préservation des invariants**
+**DEGRAD-PRINCIP-4 : PrÃ©servation des invariants**
 
-Les invariants de survie du système sont préservés même en dégradation. Aucun invariant critique n'est violé.
+Les invariants de survie du systÃ¨me sont prÃ©servÃ©s mÃªme en dÃ©gradation. Aucun invariant critique n'est violÃ©.
 
-### 4.3. Niveaux de dégradation
+### 4.3. Niveaux de dÃ©gradation
 
 **NIVEAU 0 : Fonctionnement normal**
 
-Aucune dégradation. Toutes les opérations sont traitées normalement.
+Aucune dÃ©gradation. Toutes les opÃ©rations sont traitÃ©es normalement.
 
-**NIVEAU 1 : Dégradation légère**
+**NIVEAU 1 : DÃ©gradation lÃ©gÃ¨re**
 
-Caractéristiques :
-- Performances réduites
-- Temps de réponse augmentés
-- Toutes les opérations restent possibles
+CaractÃ©ristiques :
+- Performances rÃ©duites
+- Temps de rÃ©ponse augmentÃ©s
+- Toutes les opÃ©rations restent possibles
 - Surveillance accrue
 
-Causes typiques : Charge élevée, ressources limitées
+Causes typiques : Charge Ã©levÃ©e, ressources limitÃ©es
 
-**NIVEAU 2 : Dégradation modérée**
+**NIVEAU 2 : DÃ©gradation modÃ©rÃ©e**
 
-Caractéristiques :
-- Certaines opérations non critiques rejetées
-- Fonctionnalités secondaires désactivées
-- Priorisation des opérations critiques
-- Mode économie de ressources
+CaractÃ©ristiques :
+- Certaines opÃ©rations non critiques rejetÃ©es
+- FonctionnalitÃ©s secondaires dÃ©sactivÃ©es
+- Priorisation des opÃ©rations critiques
+- Mode Ã©conomie de ressources
 
 Causes typiques : Surcharge, perte partielle mineure
 
-**NIVEAU 3 : Dégradation sévère**
+**NIVEAU 3 : DÃ©gradation sÃ©vÃ¨re**
 
-Caractéristiques :
-- Seules les opérations critiques acceptées
+CaractÃ©ristiques :
+- Seules les opÃ©rations critiques acceptÃ©es
 - Fonctionnement minimal
-- Protection maximale de l'intégrité
-- Intervention recommandée
+- Protection maximale de l'intÃ©gritÃ©
+- Intervention recommandÃ©e
 
 Causes typiques : Perte partielle importante, surcharge critique
 
-**NIVEAU 4 : Arrêt contrôlé**
+**NIVEAU 4 : ArrÃªt contrÃ´lÃ©**
 
-Caractéristiques :
-- Arrêt ordonné des opérations
-- Sauvegarde de l'état actuel
-- Aucune nouvelle opération acceptée
-- Préparation à la récupération
+CaractÃ©ristiques :
+- ArrÃªt ordonnÃ© des opÃ©rations
+- Sauvegarde de l'Ã©tat actuel
+- Aucune nouvelle opÃ©ration acceptÃ©e
+- PrÃ©paration Ã  la rÃ©cupÃ©ration
 
-Causes typiques : Situation critique non récupérable en fonctionnement
+Causes typiques : Situation critique non rÃ©cupÃ©rable en fonctionnement
 
-### 4.4. Règles de dégradation
+### 4.4. RÃ¨gles de dÃ©gradation
 
-**DEGRAD-1 :** La dégradation est automatique et déclenchée par KindMother.
+**DEGRAD-1 :** La dÃ©gradation est automatique et dÃ©clenchÃ©e par KindMother.
 
-**DEGRAD-2 :** Le niveau de dégradation est adapté à la gravité de la situation.
+**DEGRAD-2 :** Le niveau de dÃ©gradation est adaptÃ© Ã  la gravitÃ© de la situation.
 
-**DEGRAD-3 :** Les opérations en cours au moment de la dégradation sont traitées si possible, sinon rejetées proprement.
+**DEGRAD-3 :** Les opÃ©rations en cours au moment de la dÃ©gradation sont traitÃ©es si possible, sinon rejetÃ©es proprement.
 
-**DEGRAD-4 :** Les adaptateurs sont informés du niveau de dégradation.
+**DEGRAD-4 :** Les adaptateurs sont informÃ©s du niveau de dÃ©gradation.
 
-**DEGRAD-5 :** La sortie de dégradation est progressive et contrôlée.
+**DEGRAD-5 :** La sortie de dÃ©gradation est progressive et contrÃ´lÃ©e.
 
-**DEGRAD-6 :** Aucune dégradation ne peut violer les invariants de survie.
+**DEGRAD-6 :** Aucune dÃ©gradation ne peut violer les invariants de survie.
 
 ---
 
-## 5. Invariants de survie du système
+## 5. Invariants de survie du systÃ¨me
 
-### 5.1. Invariants critiques (non négociables)
+### 5.1. Invariants critiques (non nÃ©gociables)
 
-**INV-SURV-1 : Intégrité des données persistées**
+**INV-SURV-1 : IntÃ©gritÃ© des donnÃ©es persistÃ©es**
 
-Les données correctement persistées restent intègres même en cas d'échec. Aucun échec ne peut corrompre silencieusement des données déjà persistées.
+Les donnÃ©es correctement persistÃ©es restent intÃ¨gres mÃªme en cas d'Ã©chec. Aucun Ã©chec ne peut corrompre silencieusement des donnÃ©es dÃ©jÃ  persistÃ©es.
 
-**INV-SURV-2 : Atomicité préservée**
+**INV-SURV-2 : AtomicitÃ© prÃ©servÃ©e**
 
-L'atomicité des opérations est préservée même en cas d'échec. Une opération est entièrement appliquée ou pas du tout, jamais partiellement.
+L'atomicitÃ© des opÃ©rations est prÃ©servÃ©e mÃªme en cas d'Ã©chec. Une opÃ©ration est entiÃ¨rement appliquÃ©e ou pas du tout, jamais partiellement.
 
 **INV-SURV-3 : Isolation maintenue**
 
-L'isolation entre instances et entre domaines est maintenue même en cas d'échec. Un échec sur une instance ne compromet pas les autres instances.
+L'isolation entre instances et entre domaines est maintenue mÃªme en cas d'Ã©chec. Un Ã©chec sur une instance ne compromet pas les autres instances.
 
-**INV-SURV-4 : Traçabilité préservée**
+**INV-SURV-4 : TraÃ§abilitÃ© prÃ©servÃ©e**
 
-La traçabilité des opérations est préservée. Les informations de traçabilité ne sont pas perdues silencieusement.
+La traÃ§abilitÃ© des opÃ©rations est prÃ©servÃ©e. Les informations de traÃ§abilitÃ© ne sont pas perdues silencieusement.
 
-**INV-SURV-5 : Cohérence après récupération**
+**INV-SURV-5 : CohÃ©rence aprÃ¨s rÃ©cupÃ©ration**
 
-Après récupération d'un échec, le système est dans un état cohérent. Il n'existe pas d'état intermédiaire incohérent persistant.
+AprÃ¨s rÃ©cupÃ©ration d'un Ã©chec, le systÃ¨me est dans un Ã©tat cohÃ©rent. Il n'existe pas d'Ã©tat intermÃ©diaire incohÃ©rent persistant.
 
-**INV-SURV-6 : Pas de création d'autorité implicite**
+**INV-SURV-6 : Pas de crÃ©ation d'autoritÃ© implicite**
 
-Aucun échec ne peut créer une autorité implicite ou contourner les validations. Même en dégradation, KindMother reste l'unique autorité.
+Aucun Ã©chec ne peut crÃ©er une autoritÃ© implicite ou contourner les validations. MÃªme en dÃ©gradation, KindMother reste l'unique autoritÃ©.
 
-### 5.2. Invariants opérationnels
+### 5.2. Invariants opÃ©rationnels
 
-**INV-SURV-7 : Détection des échecs**
+**INV-SURV-7 : DÃ©tection des Ã©checs**
 
-Tout échec affectant les opérations est détecté. Aucun échec ne passe silencieusement.
+Tout Ã©chec affectant les opÃ©rations est dÃ©tectÃ©. Aucun Ã©chec ne passe silencieusement.
 
-**INV-SURV-8 : Signalement des échecs**
+**INV-SURV-8 : Signalement des Ã©checs**
 
-Tout échec détecté est signalé de manière appropriée (adaptateurs, observabilité).
+Tout Ã©chec dÃ©tectÃ© est signalÃ© de maniÃ¨re appropriÃ©e (adaptateurs, observabilitÃ©).
 
-**INV-SURV-9 : État récupérable**
+**INV-SURV-9 : Ã‰tat rÃ©cupÃ©rable**
 
-Le système tend vers un état récupérable après un échec. Les informations nécessaires à la récupération sont préservées.
+Le systÃ¨me tend vers un Ã©tat rÃ©cupÃ©rable aprÃ¨s un Ã©chec. Les informations nÃ©cessaires Ã  la rÃ©cupÃ©ration sont prÃ©servÃ©es.
 
-**INV-SURV-10 : Pas d'escalade d'échec**
+**INV-SURV-10 : Pas d'escalade d'Ã©chec**
 
-Un échec local ne provoque pas un échec global en cascade. L'isolation limite la propagation des échecs.
+Un Ã©chec local ne provoque pas un Ã©chec global en cascade. L'isolation limite la propagation des Ã©checs.
 
 ---
 
-## 6. Garanties en situation d'échec
+## 6. Garanties en situation d'Ã©chec
 
 ### 6.1. Garanties absolues
 
-**G-FAIL-1 : Intégrité garantie**
+**G-FAIL-1 : IntÃ©gritÃ© garantie**
 
-En situation d'échec, l'intégrité des données déjà persistées est garantie. Les données validées et persistées ne peuvent pas être corrompues par un échec.
+En situation d'Ã©chec, l'intÃ©gritÃ© des donnÃ©es dÃ©jÃ  persistÃ©es est garantie. Les donnÃ©es validÃ©es et persistÃ©es ne peuvent pas Ãªtre corrompues par un Ã©chec.
 
-**G-FAIL-2 : Atomicité garantie**
+**G-FAIL-2 : AtomicitÃ© garantie**
 
-En situation d'échec, l'atomicité est garantie. Les opérations en cours sont soit complètement appliquées (si persistées), soit complètement annulées.
+En situation d'Ã©chec, l'atomicitÃ© est garantie. Les opÃ©rations en cours sont soit complÃ¨tement appliquÃ©es (si persistÃ©es), soit complÃ¨tement annulÃ©es.
 
-**G-FAIL-3 : Pas de régression d'état**
+**G-FAIL-3 : Pas de rÃ©gression d'Ã©tat**
 
-Un échec ne peut pas faire régresser l'état vers un état antérieur non autorisé. La progression de l'état est monotone.
+Un Ã©chec ne peut pas faire rÃ©gresser l'Ã©tat vers un Ã©tat antÃ©rieur non autorisÃ©. La progression de l'Ã©tat est monotone.
 
 **G-FAIL-4 : Signalement garanti**
 
-Un échec affectant les opérations est toujours signalé aux parties concernées.
+Un Ã©chec affectant les opÃ©rations est toujours signalÃ© aux parties concernÃ©es.
 
 ### 6.2. Garanties conditionnelles
 
-**G-FAIL-5 : Récupération possible (sous conditions)**
+**G-FAIL-5 : RÃ©cupÃ©ration possible (sous conditions)**
 
-Si l'échec est récupérable et que les invariants de survie sont préservés, la récupération vers un état fonctionnel est possible.
+Si l'Ã©chec est rÃ©cupÃ©rable et que les invariants de survie sont prÃ©servÃ©s, la rÃ©cupÃ©ration vers un Ã©tat fonctionnel est possible.
 
-**G-FAIL-6 : Continuité partielle (sous conditions)**
+**G-FAIL-6 : ContinuitÃ© partielle (sous conditions)**
 
-Si l'échec est partiel et n'affecte pas tout le système, les parties non affectées peuvent continuer à fonctionner.
+Si l'Ã©chec est partiel et n'affecte pas tout le systÃ¨me, les parties non affectÃ©es peuvent continuer Ã  fonctionner.
 
 **G-FAIL-7 : Resynchronisation (sous conditions)**
 
-Si la panne de synchronisation est temporaire, la resynchronisation rétablit la cohérence entre instances.
+Si la panne de synchronisation est temporaire, la resynchronisation rÃ©tablit la cohÃ©rence entre instances.
 
-Cette garantie respecte **LOI-2** (le système accepte l'isolement comme état normal) : pendant la panne de synchronisation, l'Instance Fille continue à fonctionner en mode autonome sans bloquer les opérations locales, et la resynchronisation est tentée périodiquement sans être bloquante.
+Cette garantie respecte **LOI-2** (le systÃ¨me accepte l'isolement comme Ã©tat normal) : pendant la panne de synchronisation, l'Instance Fille continue Ã  fonctionner en mode autonome sans bloquer les opÃ©rations locales, et la resynchronisation est tentÃ©e pÃ©riodiquement sans Ãªtre bloquante.
 
 ---
 
-## 7. Comportement détaillé par type d'échec
+## 7. Comportement dÃ©taillÃ© par type d'Ã©chec
 
 ### 7.1. Comportement en cas de crash
 
 ```
 AVANT CRASH
-├── Opérations en cours (non persistées)
-├── Opérations persistées (confirmées)
-└── État du système
+â”œâ”€â”€ OpÃ©rations en cours (non persistÃ©es)
+â”œâ”€â”€ OpÃ©rations persistÃ©es (confirmÃ©es)
+â””â”€â”€ Ã‰tat du systÃ¨me
 
 PENDANT CRASH
-├── Arrêt brutal
-├── Opérations en cours PERDUES
-└── Opérations persistées PRÉSERVÉES
+â”œâ”€â”€ ArrÃªt brutal
+â”œâ”€â”€ OpÃ©rations en cours PERDUES
+â””â”€â”€ OpÃ©rations persistÃ©es PRÃ‰SERVÃ‰ES
 
-APRÈS REDÉMARRAGE
-├── Restauration de l'état persisté
-├── Vérification de cohérence
-├── État cohérent rétabli
-└── Reprise des services
+APRÃˆS REDÃ‰MARRAGE
+â”œâ”€â”€ Restauration de l'Ã©tat persistÃ©
+â”œâ”€â”€ VÃ©rification de cohÃ©rence
+â”œâ”€â”€ Ã‰tat cohÃ©rent rÃ©tabli
+â””â”€â”€ Reprise des services
 
 GARANTIES :
-✓ Données persistées intègres
-✓ Atomicité respectée
-✓ État cohérent après redémarrage
-✗ Opérations en cours perdues
+âœ“ DonnÃ©es persistÃ©es intÃ¨gres
+âœ“ AtomicitÃ© respectÃ©e
+âœ“ Ã‰tat cohÃ©rent aprÃ¨s redÃ©marrage
+âœ— OpÃ©rations en cours perdues
 ```
 
 ### 7.2. Comportement en cas de perte partielle
 
 ```
-DÉTECTION
-├── Corruption détectée
-├── Zone affectée identifiée
-└── Signalement immédiat
+DÃ‰TECTION
+â”œâ”€â”€ Corruption dÃ©tectÃ©e
+â”œâ”€â”€ Zone affectÃ©e identifiÃ©e
+â””â”€â”€ Signalement immÃ©diat
 
 ISOLATION
-├── Zone affectée isolée
-├── Opérations sur zone affectée BLOQUÉES
-└── Zones non affectées OPÉRATIONNELLES
+â”œâ”€â”€ Zone affectÃ©e isolÃ©e
+â”œâ”€â”€ OpÃ©rations sur zone affectÃ©e BLOQUÃ‰ES
+â””â”€â”€ Zones non affectÃ©es OPÃ‰RATIONNELLES
 
-ÉTAT DÉGRADÉ
-├── Niveau de dégradation déterminé
-├── Adaptateurs informés
-└── Mode partiel activé
+Ã‰TAT DÃ‰GRADÃ‰
+â”œâ”€â”€ Niveau de dÃ©gradation dÃ©terminÃ©
+â”œâ”€â”€ Adaptateurs informÃ©s
+â””â”€â”€ Mode partiel activÃ©
 
-RÉPARATION
-├── Source de vérité (Mère) consultée si applicable
-├── Restauration si possible
-└── Retour à l'état normal
+RÃ‰PARATION
+â”œâ”€â”€ Source de vÃ©ritÃ© (MÃ¨re) consultÃ©e si applicable
+â”œâ”€â”€ Restauration si possible
+â””â”€â”€ Retour Ã  l'Ã©tat normal
 
 GARANTIES :
-✓ Corruption détectée (INV-CORR-1)
-✓ Pas d'opération sur données corrompues
-✓ Zones saines opérationnelles
+âœ“ Corruption dÃ©tectÃ©e (INV-CORR-1)
+âœ“ Pas d'opÃ©ration sur donnÃ©es corrompues
+âœ“ Zones saines opÃ©rationnelles
 ```
 
 ### 7.3. Comportement en cas de surcharge
 
 ```
-DÉTECTION
-├── Boundary de charge (V7) activée
-├── Métriques de charge élevées
-└── Seuils dépassés
+DÃ‰TECTION
+â”œâ”€â”€ Boundary de charge (V7) activÃ©e
+â”œâ”€â”€ MÃ©triques de charge Ã©levÃ©es
+â””â”€â”€ Seuils dÃ©passÃ©s
 
-DÉGRADATION
-├── Niveau de dégradation appliqué
-├── Opérations non critiques potentiellement rejetées
-└── Priorisation des opérations critiques
+DÃ‰GRADATION
+â”œâ”€â”€ Niveau de dÃ©gradation appliquÃ©
+â”œâ”€â”€ OpÃ©rations non critiques potentiellement rejetÃ©es
+â””â”€â”€ Priorisation des opÃ©rations critiques
 
 SIGNALEMENT
-├── Adaptateurs informés de la dégradation
-├── Rejets explicites (charge excessive)
-└── Temps de réponse communiqués
+â”œâ”€â”€ Adaptateurs informÃ©s de la dÃ©gradation
+â”œâ”€â”€ Rejets explicites (charge excessive)
+â””â”€â”€ Temps de rÃ©ponse communiquÃ©s
 
-RÉCUPÉRATION
-├── Charge revient à la normale
-├── Sortie progressive de dégradation
-└── Fonctionnement normal rétabli
+RÃ‰CUPÃ‰RATION
+â”œâ”€â”€ Charge revient Ã  la normale
+â”œâ”€â”€ Sortie progressive de dÃ©gradation
+â””â”€â”€ Fonctionnement normal rÃ©tabli
 
 GARANTIES :
-✓ Intégrité préservée
-✓ Rejets explicites
-✓ Pas de corruption due à la surcharge
+âœ“ IntÃ©gritÃ© prÃ©servÃ©e
+âœ“ Rejets explicites
+âœ“ Pas de corruption due Ã  la surcharge
 ```
 
 ### 7.4. Comportement en cas de panne de synchronisation
 
 ```
-DÉTECTION
-├── Communication avec Mère impossible
-├── Synchronisation échouée
-└── Panne signalée
+DÃ‰TECTION
+â”œâ”€â”€ Communication avec MÃ¨re impossible
+â”œâ”€â”€ Synchronisation Ã©chouÃ©e
+â””â”€â”€ Panne signalÃ©e
 
 MODE AUTONOME
-├── Instance Fille continue localement
-├── Intentions locales appliquées localement
-├── En attente de confirmation Mère
-└── Divergence possible
+â”œâ”€â”€ Instance Fille continue localement
+â”œâ”€â”€ Intentions locales appliquÃ©es localement
+â”œâ”€â”€ En attente de confirmation MÃ¨re
+â””â”€â”€ Divergence possible
 
 TENTATIVES DE RESYNCHRONISATION
-├── Resynchronisation périodique tentée
-├── État de la connexion surveillé
-└── Reprise dès que possible
+â”œâ”€â”€ Resynchronisation pÃ©riodique tentÃ©e
+â”œâ”€â”€ Ã‰tat de la connexion surveillÃ©
+â””â”€â”€ Reprise dÃ¨s que possible
 
-RESYNCHRONISATION RÉUSSIE
-├── Intentions locales soumises
-├── Conflits résolus (Mère gagne)
-├── État cohérent rétabli
-└── Mode normal repris
+RESYNCHRONISATION RÃ‰USSIE
+â”œâ”€â”€ Intentions locales soumises
+â”œâ”€â”€ Conflits rÃ©solus (MÃ¨re gagne)
+â”œâ”€â”€ Ã‰tat cohÃ©rent rÃ©tabli
+â””â”€â”€ Mode normal repris
 
 GARANTIES :
-✓ Instance Fille opérationnelle en autonomie (respecte **LOI-2** : isolement comme état normal)
-✓ Intentions locales conservées
-✓ Cohérence rétablie à la resynchronisation
-✗ Certaines intentions locales peuvent être rejetées
+âœ“ Instance Fille opÃ©rationnelle en autonomie (respecte **LOI-2** : isolement comme Ã©tat normal)
+âœ“ Intentions locales conservÃ©es
+âœ“ CohÃ©rence rÃ©tablie Ã  la resynchronisation
+âœ— Certaines intentions locales peuvent Ãªtre rejetÃ©es
 ```
 
 ---
 
-## 8. Récupération conceptuelle
+## 8. RÃ©cupÃ©ration conceptuelle
 
-### 8.1. Principes de récupération
+### 8.1. Principes de rÃ©cupÃ©ration
 
-**RECOV-1 : Récupération vers un état cohérent**
+**RECOV-1 : RÃ©cupÃ©ration vers un Ã©tat cohÃ©rent**
 
-Toute récupération aboutit à un état cohérent. Il n'existe pas de récupération partielle laissant le système incohérent.
+Toute rÃ©cupÃ©ration aboutit Ã  un Ã©tat cohÃ©rent. Il n'existe pas de rÃ©cupÃ©ration partielle laissant le systÃ¨me incohÃ©rent.
 
-**RECOV-2 : Préservation des données valides**
+**RECOV-2 : PrÃ©servation des donnÃ©es valides**
 
-Les données correctement persistées avant l'échec sont préservées lors de la récupération.
+Les donnÃ©es correctement persistÃ©es avant l'Ã©chec sont prÃ©servÃ©es lors de la rÃ©cupÃ©ration.
 
-**RECOV-3 : Perte des opérations non persistées**
+**RECOV-3 : Perte des opÃ©rations non persistÃ©es**
 
-Les opérations en cours au moment de l'échec et non encore persistées sont perdues.
+Les opÃ©rations en cours au moment de l'Ã©chec et non encore persistÃ©es sont perdues.
 
 **RECOV-4 : Restauration des invariants**
 
-La récupération restaure tous les invariants de survie.
+La rÃ©cupÃ©ration restaure tous les invariants de survie.
 
-### 8.2. Types de récupération
+### 8.2. Types de rÃ©cupÃ©ration
 
-**Récupération automatique :**
-- Le système se récupère sans intervention externe
-- Applicable aux échecs mineurs et temporaires
-- Redémarrage, resynchronisation automatique
+**RÃ©cupÃ©ration automatique :**
+- Le systÃ¨me se rÃ©cupÃ¨re sans intervention externe
+- Applicable aux Ã©checs mineurs et temporaires
+- RedÃ©marrage, resynchronisation automatique
 
-**Récupération assistée :**
-- Nécessite une intervention pour guider la récupération
-- Applicable aux échecs modérés
-- Sélection d'état de récupération, configuration
+**RÃ©cupÃ©ration assistÃ©e :**
+- NÃ©cessite une intervention pour guider la rÃ©cupÃ©ration
+- Applicable aux Ã©checs modÃ©rÃ©s
+- SÃ©lection d'Ã©tat de rÃ©cupÃ©ration, configuration
 
-**Récupération manuelle :**
-- Nécessite une intervention humaine significative
-- Applicable aux échecs graves
-- Restauration de données, réparation de corruption
+**RÃ©cupÃ©ration manuelle :**
+- NÃ©cessite une intervention humaine significative
+- Applicable aux Ã©checs graves
+- Restauration de donnÃ©es, rÃ©paration de corruption
 
-### 8.3. Garanties de récupération
+### 8.3. Garanties de rÃ©cupÃ©ration
 
-**G-RECOV-1 :** La récupération produit un état cohérent ou échoue explicitement.
+**G-RECOV-1 :** La rÃ©cupÃ©ration produit un Ã©tat cohÃ©rent ou Ã©choue explicitement.
 
-**G-RECOV-2 :** Les données persistées valides sont récupérables.
+**G-RECOV-2 :** Les donnÃ©es persistÃ©es valides sont rÃ©cupÃ©rables.
 
-**G-RECOV-3 :** L'historique de traçabilité est récupérable si possible.
+**G-RECOV-3 :** L'historique de traÃ§abilitÃ© est rÃ©cupÃ©rable si possible.
 
-**G-RECOV-4 :** Les invariants de survie sont restaurés après récupération.
+**G-RECOV-4 :** Les invariants de survie sont restaurÃ©s aprÃ¨s rÃ©cupÃ©ration.
 
 ---
 
@@ -523,305 +523,306 @@ La récupération restaure tous les invariants de survie.
 
 ### 9.1. Interaction avec Runtime Boundary Contract
 
-**Cohérence avec R4 (Dégradation contrôlée) :**
+**CohÃ©rence avec R4 (DÃ©gradation contrÃ´lÃ©e) :**
 
-Ce contrat formalise la dégradation contrôlée mentionnée dans le Runtime Boundary Contract. La réponse systémique R4 est détaillée avec les niveaux de dégradation et les règles associées.
+Ce contrat formalise la dÃ©gradation contrÃ´lÃ©e mentionnÃ©e dans le Runtime Boundary Contract. La rÃ©ponse systÃ©mique R4 est dÃ©taillÃ©e avec les niveaux de dÃ©gradation et les rÃ¨gles associÃ©es.
 
-**Cohérence avec V7 (Boundary de charge) :**
+**CohÃ©rence avec V7 (Boundary de charge) :**
 
-La détection de surcharge utilise la Boundary de charge définie dans le Runtime Boundary Contract.
+La dÃ©tection de surcharge utilise la Boundary de charge dÃ©finie dans le Runtime Boundary Contract.
 
 ### 9.2. Interaction avec Instance Model Contract
 
-**Cohérence avec INST-8 (Protection contre corruptions) :**
+**CohÃ©rence avec INST-8 (Protection contre corruptions) :**
 
-Ce contrat détaille le comportement lors de la détection de corruption, aligné avec l'invariant INST-8.
+Ce contrat dÃ©taille le comportement lors de la dÃ©tection de corruption, alignÃ© avec l'invariant INST-8.
 
 **Isolation des instances :**
 
-L'invariant INV-SURV-3 (Isolation maintenue) est cohérent avec l'isolation des instances définie dans le Instance Model Contract.
+L'invariant INV-SURV-3 (Isolation maintenue) est cohÃ©rent avec l'isolation des instances dÃ©finie dans le Instance Model Contract.
 
 ### 9.3. Interaction avec Persistence & Storage Contract
 
-**Cohérence avec la corruption :**
+**CohÃ©rence avec la corruption :**
 
-Le comportement en cas de perte partielle est aligné avec la section corruption du Persistence & Storage Contract.
+Le comportement en cas de perte partielle est alignÃ© avec la section corruption du Persistence & Storage Contract.
 
-**Cohérence avec l'atomicité :**
+**CohÃ©rence avec l'atomicitÃ© :**
 
-L'invariant INV-SURV-2 (Atomicité préservée) est cohérent avec l'atomicité de persistance.
+L'invariant INV-SURV-2 (AtomicitÃ© prÃ©servÃ©e) est cohÃ©rent avec l'atomicitÃ© de persistance.
 
 ### 9.4. Interaction avec Sync & Conflict Resolution Contract
 
-**Cohérence avec les pannes de synchronisation :**
+**CohÃ©rence avec les pannes de synchronisation :**
 
-Le comportement en cas de panne de synchronisation est aligné avec le Sync Contract. Le mode autonome et la resynchronisation respectent les règles établies.
+Le comportement en cas de panne de synchronisation est alignÃ© avec le Sync Contract. Le mode autonome et la resynchronisation respectent les rÃ¨gles Ã©tablies.
 
 ---
 
-## 10. Schémas ASCII conceptuels
+## 10. SchÃ©mas ASCII conceptuels
 
-### 10.1. Types d'échecs et impact
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                 TYPES D'ÉCHECS ET IMPACT                         │
-│                                                                   │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  CRASH (Arrêt inattendu)                                   │ │
-│  │  ───────────────────────                                   │ │
-│  │  Impact : Arrêt total de l'instance                       │ │
-│  │  Opérations en cours : PERDUES                            │ │
-│  │  Données persistées : PRÉSERVÉES                          │ │
-│  │  Récupération : Redémarrage + restauration                │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                                                                   │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  PERTE PARTIELLE (Corruption)                              │ │
-│  │  ───────────────────────────                               │ │
-│  │  Impact : Zone affectée indisponible                      │ │
-│  │  Opérations sur zone affectée : BLOQUÉES                  │ │
-│  │  Zones saines : OPÉRATIONNELLES                           │ │
-│  │  Récupération : Réparation + resynchronisation            │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                                                                   │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  SURCHARGE (Ressources insuffisantes)                      │ │
-│  │  ─────────────────────────────────                         │ │
-│  │  Impact : Performances dégradées                          │ │
-│  │  Certaines opérations : REJETÉES                          │ │
-│  │  Opérations critiques : MAINTENUES                        │ │
-│  │  Récupération : Retour charge normale                     │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                                                                   │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  PANNE SYNCHRONISATION                                     │ │
-│  │  ─────────────────────                                     │ │
-│  │  Impact : Fille en mode autonome                          │ │
-│  │  Intentions locales : CONSERVÉES (en attente)             │ │
-│  │  Données locales : Potentiellement divergentes            │ │
-│  │  Récupération : Resynchronisation                         │ │
-│  └───────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### 10.2. Niveaux de dégradation
+### 10.1. Types d'Ã©checs et impact
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                 NIVEAUX DE DÉGRADATION                           │
-│                                                                   │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  NIVEAU 0 : NORMAL                                         │ │
-│  │  ═══════════════════                                       │ │
-│  │  • Toutes opérations traitées                             │ │
-│  │  • Performances nominales                                  │ │
-│  │  • Aucune restriction                                      │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                            │                                     │
-│                            │ Détérioration                       │
-│                            ▼                                     │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  NIVEAU 1 : DÉGRADATION LÉGÈRE                             │ │
-│  │  ═════════════════════════════                             │ │
-│  │  • Performances réduites                                   │ │
-│  │  • Temps de réponse augmentés                             │ │
-│  │  • Toutes opérations possibles                            │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                            │                                     │
-│                            │ Détérioration                       │
-│                            ▼                                     │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  NIVEAU 2 : DÉGRADATION MODÉRÉE                            │ │
-│  │  ══════════════════════════════                            │ │
-│  │  • Opérations non critiques rejetées                      │ │
-│  │  • Fonctionnalités secondaires désactivées                │ │
-│  │  • Priorisation des opérations critiques                  │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                            │                                     │
-│                            │ Détérioration                       │
-│                            ▼                                     │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  NIVEAU 3 : DÉGRADATION SÉVÈRE                             │ │
-│  │  ═════════════════════════════                             │ │
-│  │  • Seules opérations critiques acceptées                  │ │
-│  │  • Fonctionnement minimal                                  │ │
-│  │  • Protection maximale de l'intégrité                     │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                            │                                     │
-│                            │ Situation critique                  │
-│                            ▼                                     │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  NIVEAU 4 : ARRÊT CONTRÔLÉ                                 │ │
-│  │  ═════════════════════════                                 │ │
-│  │  • Arrêt ordonné des opérations                           │ │
-│  │  • Sauvegarde de l'état                                   │ │
-│  │  • Aucune nouvelle opération                              │ │
-│  │  • Préparation récupération                               │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                                                                   │
-│  INVARIANT : Intégrité préservée à tous les niveaux             │
-└─────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                 TYPES D'Ã‰CHECS ET IMPACT                         â”‚
+â”‚                                                                   â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  CRASH (ArrÃªt inattendu)                                   â”‚ â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                                   â”‚ â”‚
+â”‚  â”‚  Impact : ArrÃªt total de l'instance                       â”‚ â”‚
+â”‚  â”‚  OpÃ©rations en cours : PERDUES                            â”‚ â”‚
+â”‚  â”‚  DonnÃ©es persistÃ©es : PRÃ‰SERVÃ‰ES                          â”‚ â”‚
+â”‚  â”‚  RÃ©cupÃ©ration : RedÃ©marrage + restauration                â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                   â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  PERTE PARTIELLE (Corruption)                              â”‚ â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                               â”‚ â”‚
+â”‚  â”‚  Impact : Zone affectÃ©e indisponible                      â”‚ â”‚
+â”‚  â”‚  OpÃ©rations sur zone affectÃ©e : BLOQUÃ‰ES                  â”‚ â”‚
+â”‚  â”‚  Zones saines : OPÃ‰RATIONNELLES                           â”‚ â”‚
+â”‚  â”‚  RÃ©cupÃ©ration : RÃ©paration + resynchronisation            â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                   â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  SURCHARGE (Ressources insuffisantes)                      â”‚ â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                         â”‚ â”‚
+â”‚  â”‚  Impact : Performances dÃ©gradÃ©es                          â”‚ â”‚
+â”‚  â”‚  Certaines opÃ©rations : REJETÃ‰ES                          â”‚ â”‚
+â”‚  â”‚  OpÃ©rations critiques : MAINTENUES                        â”‚ â”‚
+â”‚  â”‚  RÃ©cupÃ©ration : Retour charge normale                     â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                   â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  PANNE SYNCHRONISATION                                     â”‚ â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                                     â”‚ â”‚
+â”‚  â”‚  Impact : Fille en mode autonome                          â”‚ â”‚
+â”‚  â”‚  Intentions locales : CONSERVÃ‰ES (en attente)             â”‚ â”‚
+â”‚  â”‚  DonnÃ©es locales : Potentiellement divergentes            â”‚ â”‚
+â”‚  â”‚  RÃ©cupÃ©ration : Resynchronisation                         â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### 10.3. Flux de récupération
+### 10.2. Niveaux de dÃ©gradation
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                 FLUX DE RÉCUPÉRATION                             │
-│                                                                   │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  ÉTAT D'ÉCHEC                                              │ │
-│  │  • Système en situation anormale                          │ │
-│  │  • Échec détecté et signalé                               │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                            │                                     │
-│                            │ Diagnostic                          │
-│                            ▼                                     │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  ANALYSE DE L'ÉCHEC                                        │ │
-│  │  • Type d'échec identifié                                 │ │
-│  │  • Gravité évaluée                                        │ │
-│  │  • Options de récupération déterminées                    │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                            │                                     │
-│     ┌──────────────────────┼──────────────────────┐             │
-│     │                      │                      │             │
-│     ▼                      ▼                      ▼             │
-│  ┌────────┐          ┌──────────┐          ┌──────────┐        │
-│  │AUTO-   │          │ ASSISTÉE │          │ MANUELLE │        │
-│  │MATIQUE │          │          │          │          │        │
-│  │        │          │          │          │          │        │
-│  │Redémar-│          │Interven- │          │Restaura- │        │
-│  │rage,   │          │tion pour │          │tion,     │        │
-│  │resync  │          │guider    │          │réparation│        │
-│  └────┬───┘          └────┬─────┘          └────┬─────┘        │
-│       │                   │                     │               │
-│       └───────────────────┼─────────────────────┘               │
-│                           │                                      │
-│                           ▼                                      │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  ÉTAT RÉCUPÉRÉ                                             │ │
-│  │  • État cohérent rétabli                                  │ │
-│  │  • Invariants de survie respectés                         │ │
-│  │  • Fonctionnement normal possible                         │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                                                                   │
-│  GARANTIE : Récupération vers état cohérent ou échec explicite  │
-└─────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                 NIVEAUX DE DÃ‰GRADATION                           â”‚
+â”‚                                                                   â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  NIVEAU 0 : NORMAL                                         â”‚ â”‚
+â”‚  â”‚  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•                                       â”‚ â”‚
+â”‚  â”‚  â€¢ Toutes opÃ©rations traitÃ©es                             â”‚ â”‚
+â”‚  â”‚  â€¢ Performances nominales                                  â”‚ â”‚
+â”‚  â”‚  â€¢ Aucune restriction                                      â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                            â”‚                                     â”‚
+â”‚                            â”‚ DÃ©tÃ©rioration                       â”‚
+â”‚                            â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  NIVEAU 1 : DÃ‰GRADATION LÃ‰GÃˆRE                             â”‚ â”‚
+â”‚  â”‚  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•                             â”‚ â”‚
+â”‚  â”‚  â€¢ Performances rÃ©duites                                   â”‚ â”‚
+â”‚  â”‚  â€¢ Temps de rÃ©ponse augmentÃ©s                             â”‚ â”‚
+â”‚  â”‚  â€¢ Toutes opÃ©rations possibles                            â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                            â”‚                                     â”‚
+â”‚                            â”‚ DÃ©tÃ©rioration                       â”‚
+â”‚                            â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  NIVEAU 2 : DÃ‰GRADATION MODÃ‰RÃ‰E                            â”‚ â”‚
+â”‚  â”‚  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•                            â”‚ â”‚
+â”‚  â”‚  â€¢ OpÃ©rations non critiques rejetÃ©es                      â”‚ â”‚
+â”‚  â”‚  â€¢ FonctionnalitÃ©s secondaires dÃ©sactivÃ©es                â”‚ â”‚
+â”‚  â”‚  â€¢ Priorisation des opÃ©rations critiques                  â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                            â”‚                                     â”‚
+â”‚                            â”‚ DÃ©tÃ©rioration                       â”‚
+â”‚                            â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  NIVEAU 3 : DÃ‰GRADATION SÃ‰VÃˆRE                             â”‚ â”‚
+â”‚  â”‚  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•                             â”‚ â”‚
+â”‚  â”‚  â€¢ Seules opÃ©rations critiques acceptÃ©es                  â”‚ â”‚
+â”‚  â”‚  â€¢ Fonctionnement minimal                                  â”‚ â”‚
+â”‚  â”‚  â€¢ Protection maximale de l'intÃ©gritÃ©                     â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                            â”‚                                     â”‚
+â”‚                            â”‚ Situation critique                  â”‚
+â”‚                            â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  NIVEAU 4 : ARRÃŠT CONTRÃ”LÃ‰                                 â”‚ â”‚
+â”‚  â”‚  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•                                 â”‚ â”‚
+â”‚  â”‚  â€¢ ArrÃªt ordonnÃ© des opÃ©rations                           â”‚ â”‚
+â”‚  â”‚  â€¢ Sauvegarde de l'Ã©tat                                   â”‚ â”‚
+â”‚  â”‚  â€¢ Aucune nouvelle opÃ©ration                              â”‚ â”‚
+â”‚  â”‚  â€¢ PrÃ©paration rÃ©cupÃ©ration                               â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                   â”‚
+â”‚  INVARIANT : IntÃ©gritÃ© prÃ©servÃ©e Ã  tous les niveaux             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```
+
+### 10.3. Flux de rÃ©cupÃ©ration
+
+```
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                 FLUX DE RÃ‰CUPÃ‰RATION                             â”‚
+â”‚                                                                   â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  Ã‰TAT D'Ã‰CHEC                                              â”‚ â”‚
+â”‚  â”‚  â€¢ SystÃ¨me en situation anormale                          â”‚ â”‚
+â”‚  â”‚  â€¢ Ã‰chec dÃ©tectÃ© et signalÃ©                               â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                            â”‚                                     â”‚
+â”‚                            â”‚ Diagnostic                          â”‚
+â”‚                            â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  ANALYSE DE L'Ã‰CHEC                                        â”‚ â”‚
+â”‚  â”‚  â€¢ Type d'Ã©chec identifiÃ©                                 â”‚ â”‚
+â”‚  â”‚  â€¢ GravitÃ© Ã©valuÃ©e                                        â”‚ â”‚
+â”‚  â”‚  â€¢ Options de rÃ©cupÃ©ration dÃ©terminÃ©es                    â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                            â”‚                                     â”‚
+â”‚     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”             â”‚
+â”‚     â”‚                      â”‚                      â”‚             â”‚
+â”‚     â–¼                      â–¼                      â–¼             â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”        â”‚
+â”‚  â”‚AUTO-   â”‚          â”‚ ASSISTÃ‰E â”‚          â”‚ MANUELLE â”‚        â”‚
+â”‚  â”‚MATIQUE â”‚          â”‚          â”‚          â”‚          â”‚        â”‚
+â”‚  â”‚        â”‚          â”‚          â”‚          â”‚          â”‚        â”‚
+â”‚  â”‚RedÃ©mar-â”‚          â”‚Interven- â”‚          â”‚Restaura- â”‚        â”‚
+â”‚  â”‚rage,   â”‚          â”‚tion pour â”‚          â”‚tion,     â”‚        â”‚
+â”‚  â”‚resync  â”‚          â”‚guider    â”‚          â”‚rÃ©parationâ”‚        â”‚
+â”‚  â””â”€â”€â”€â”€â”¬â”€â”€â”€â”˜          â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜          â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜        â”‚
+â”‚       â”‚                   â”‚                     â”‚               â”‚
+â”‚       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜               â”‚
+â”‚                           â”‚                                      â”‚
+â”‚                           â–¼                                      â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  Ã‰TAT RÃ‰CUPÃ‰RÃ‰                                             â”‚ â”‚
+â”‚  â”‚  â€¢ Ã‰tat cohÃ©rent rÃ©tabli                                  â”‚ â”‚
+â”‚  â”‚  â€¢ Invariants de survie respectÃ©s                         â”‚ â”‚
+â”‚  â”‚  â€¢ Fonctionnement normal possible                         â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                   â”‚
+â”‚  GARANTIE : RÃ©cupÃ©ration vers Ã©tat cohÃ©rent ou Ã©chec explicite  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 10.4. Invariants de survie
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                 INVARIANTS DE SURVIE                             │
-│                                                                   │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │  INVARIANTS CRITIQUES (non négociables)                    │ │
-│  │  ══════════════════════════════════════                    │ │
-│  │                                                            │ │
-│  │  INV-SURV-1 : Intégrité des données persistées            │ │
-│  │  ─────────────────────────────────────────                │ │
-│  │  Les données persistées restent intègres                  │ │
-│  │                                                            │ │
-│  │  INV-SURV-2 : Atomicité préservée                         │ │
-│  │  ────────────────────────────────                         │ │
-│  │  Opérations tout-ou-rien, jamais partielles               │ │
-│  │                                                            │ │
-│  │  INV-SURV-3 : Isolation maintenue                         │ │
-│  │  ────────────────────────────                             │ │
-│  │  Instances et domaines restent isolés                     │ │
-│  │                                                            │ │
-│  │  INV-SURV-4 : Traçabilité préservée                       │ │
-│  │  ──────────────────────────────                           │ │
-│  │  Historique conservé                                       │ │
-│  │                                                            │ │
-│  │  INV-SURV-5 : Cohérence après récupération                │ │
-│  │  ─────────────────────────────────────                    │ │
-│  │  État cohérent garanti après récupération                 │ │
-│  │                                                            │ │
-│  │  INV-SURV-6 : Pas d'autorité implicite                    │ │
-│  │  ─────────────────────────────────                        │ │
-│  │  KindMother reste l'unique autorité                       │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                                                                   │
-│  ⚠️ Ces invariants sont TOUJOURS préservés, même en échec       │
-└─────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                 INVARIANTS DE SURVIE                             â”‚
+â”‚                                                                   â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  INVARIANTS CRITIQUES (non nÃ©gociables)                    â”‚ â”‚
+â”‚  â”‚  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•                    â”‚ â”‚
+â”‚  â”‚                                                            â”‚ â”‚
+â”‚  â”‚  INV-SURV-1 : IntÃ©gritÃ© des donnÃ©es persistÃ©es            â”‚ â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                â”‚ â”‚
+â”‚  â”‚  Les donnÃ©es persistÃ©es restent intÃ¨gres                  â”‚ â”‚
+â”‚  â”‚                                                            â”‚ â”‚
+â”‚  â”‚  INV-SURV-2 : AtomicitÃ© prÃ©servÃ©e                         â”‚ â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                         â”‚ â”‚
+â”‚  â”‚  OpÃ©rations tout-ou-rien, jamais partielles               â”‚ â”‚
+â”‚  â”‚                                                            â”‚ â”‚
+â”‚  â”‚  INV-SURV-3 : Isolation maintenue                         â”‚ â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                             â”‚ â”‚
+â”‚  â”‚  Instances et domaines restent isolÃ©s                     â”‚ â”‚
+â”‚  â”‚                                                            â”‚ â”‚
+â”‚  â”‚  INV-SURV-4 : TraÃ§abilitÃ© prÃ©servÃ©e                       â”‚ â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                           â”‚ â”‚
+â”‚  â”‚  Historique conservÃ©                                       â”‚ â”‚
+â”‚  â”‚                                                            â”‚ â”‚
+â”‚  â”‚  INV-SURV-5 : CohÃ©rence aprÃ¨s rÃ©cupÃ©ration                â”‚ â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                    â”‚ â”‚
+â”‚  â”‚  Ã‰tat cohÃ©rent garanti aprÃ¨s rÃ©cupÃ©ration                 â”‚ â”‚
+â”‚  â”‚                                                            â”‚ â”‚
+â”‚  â”‚  INV-SURV-6 : Pas d'autoritÃ© implicite                    â”‚ â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                        â”‚ â”‚
+â”‚  â”‚  KindMother reste l'unique autoritÃ©                       â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                   â”‚
+â”‚  âš ï¸ Ces invariants sont TOUJOURS prÃ©servÃ©s, mÃªme en Ã©chec       â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
 
 ## 11. Conclusion contractuelle
 
-Ce contrat établit de manière définitive et non négociable le comportement de KindMother en situation d'échec.
+Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable le comportement de KindMother en situation d'Ã©chec.
 
 Il garantit que :
-- les échecs sont détectés et signalés,
-- la dégradation contrôlée préserve l'intégrité,
-- les invariants de survie ne sont jamais violés,
-- la récupération produit un état cohérent,
-- l'intégrité prime toujours sur la disponibilité.
+- les Ã©checs sont dÃ©tectÃ©s et signalÃ©s,
+- la dÃ©gradation contrÃ´lÃ©e prÃ©serve l'intÃ©gritÃ©,
+- les invariants de survie ne sont jamais violÃ©s,
+- la rÃ©cupÃ©ration produit un Ã©tat cohÃ©rent,
+- l'intÃ©gritÃ© prime toujours sur la disponibilitÃ©.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
 
 ---
 
-**Document créé le :** 2026-01-25  
+**Document crÃ©Ã© le :** 2026-01-25  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, KindMother Documentation, KindMother Runtime Boundary Contract, KindMother Instance Model Contract, KindMother Persistence Contract, KindMother Sync Contract  
-**Type :** Contrat de comportement en échec non négociable
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, KindMother Documentation, KindMother Runtime Boundary Contract, KindMother Instance Model Contract, KindMother Persistence Contract, KindMother Sync Contract  
+**Type :** Contrat de comportement en Ã©chec non nÃ©gociable
 
 ---
 
-## 12. Mini log — erreurs / warnings / ambiguïtés rencontrées et corrigées
+## 12. Mini log â€” erreurs / warnings / ambiguÃ¯tÃ©s rencontrÃ©es et corrigÃ©es
 
-### Ambiguïté A1 : Échec vs rejet normal
+### AmbiguÃ¯tÃ© A1 : Ã‰chec vs rejet normal
 
-**Ambiguïté rencontrée :** Risque de confondre un échec du système avec un rejet normal d'intention.
+**AmbiguÃ¯tÃ© rencontrÃ©e :** Risque de confondre un Ã©chec du systÃ¨me avec un rejet normal d'intention.
 
-**Décision prise :** Clarification explicite que le rejet d'une intention due à une validation échouée n'est pas un échec du système, mais un fonctionnement normal.
+**DÃ©cision prise :** Clarification explicite que le rejet d'une intention due Ã  une validation Ã©chouÃ©e n'est pas un Ã©chec du systÃ¨me, mais un fonctionnement normal.
 
-**Correction effectuée :** Section 2 inclut une définition de ce qu'un échec N'EST PAS.
+**Correction effectuÃ©e :** Section 2 inclut une dÃ©finition de ce qu'un Ã©chec N'EST PAS.
 
-### Ambiguïté A2 : Niveaux de dégradation et critères
+### AmbiguÃ¯tÃ© A2 : Niveaux de dÃ©gradation et critÃ¨res
 
-**Ambiguïté rencontrée :** Comment définir les niveaux de dégradation sans introduire de métriques techniques ?
+**AmbiguÃ¯tÃ© rencontrÃ©e :** Comment dÃ©finir les niveaux de dÃ©gradation sans introduire de mÃ©triques techniques ?
 
-**Décision prise :** Les niveaux de dégradation sont définis conceptuellement par leur impact sur les opérations, sans métriques techniques (pas de %, pas de seuils numériques).
+**DÃ©cision prise :** Les niveaux de dÃ©gradation sont dÃ©finis conceptuellement par leur impact sur les opÃ©rations, sans mÃ©triques techniques (pas de %, pas de seuils numÃ©riques).
 
-**Correction effectuée :** Section 4.3 définit les niveaux par leurs caractéristiques opérationnelles.
+**Correction effectuÃ©e :** Section 4.3 dÃ©finit les niveaux par leurs caractÃ©ristiques opÃ©rationnelles.
 
-### Ambiguïté A3 : Récupération automatique vs manuelle
+### AmbiguÃ¯tÃ© A3 : RÃ©cupÃ©ration automatique vs manuelle
 
-**Ambiguïté rencontrée :** Comment distinguer les types de récupération sans présupposer de mécanismes techniques ?
+**AmbiguÃ¯tÃ© rencontrÃ©e :** Comment distinguer les types de rÃ©cupÃ©ration sans prÃ©supposer de mÃ©canismes techniques ?
 
-**Décision prise :** Les types de récupération sont distingués par le niveau d'intervention nécessaire (automatique, assistée, manuelle), sans détails techniques.
+**DÃ©cision prise :** Les types de rÃ©cupÃ©ration sont distinguÃ©s par le niveau d'intervention nÃ©cessaire (automatique, assistÃ©e, manuelle), sans dÃ©tails techniques.
 
-**Correction effectuée :** Section 8.2 définit les types de récupération conceptuellement.
+**Correction effectuÃ©e :** Section 8.2 dÃ©finit les types de rÃ©cupÃ©ration conceptuellement.
 
-### Ambiguïté A4 : Panne de synchronisation vs conflit
+### AmbiguÃ¯tÃ© A4 : Panne de synchronisation vs conflit
 
-**Ambiguïté rencontrée :** La panne de synchronisation peut mener à des conflits lors de la resynchronisation. Comment articuler avec le Sync Contract ?
+**AmbiguÃ¯tÃ© rencontrÃ©e :** La panne de synchronisation peut mener Ã  des conflits lors de la resynchronisation. Comment articuler avec le Sync Contract ?
 
-**Décision prise :** Ce contrat définit le comportement pendant la panne. La résolution des conflits lors de la resynchronisation est régie par le Sync Contract.
+**DÃ©cision prise :** Ce contrat dÃ©finit le comportement pendant la panne. La rÃ©solution des conflits lors de la resynchronisation est rÃ©gie par le Sync Contract.
 
-**Correction effectuée :** SYNC-FAIL-1 à SYNC-FAIL-5 définissent le comportement pendant la panne, avec référence au Sync Contract pour la resynchronisation.
+**Correction effectuÃ©e :** SYNC-FAIL-1 Ã  SYNC-FAIL-5 dÃ©finissent le comportement pendant la panne, avec rÃ©fÃ©rence au Sync Contract pour la resynchronisation.
 
-### Vérification de compatibilité
+### VÃ©rification de compatibilitÃ©
 
-**Vérification effectuée :**
-- ✅ Cohérence avec R4 Runtime Boundary (dégradation contrôlée) : Confirmée
-- ✅ Cohérence avec INST-8 (protection corruptions) : Confirmée
-- ✅ Cohérence avec Persistence Contract (corruption) : Confirmée
-- ✅ Cohérence avec Sync Contract (panne sync) : Confirmée
-- ✅ Aucune autorité implicite créée : Confirmée
-- ✅ Zero-trust respecté : Confirmée
-- ✅ Aucune dépendance technique : Confirmée
+**VÃ©rification effectuÃ©e :**
+- âœ… CohÃ©rence avec R4 Runtime Boundary (dÃ©gradation contrÃ´lÃ©e) : ConfirmÃ©e
+- âœ… CohÃ©rence avec INST-8 (protection corruptions) : ConfirmÃ©e
+- âœ… CohÃ©rence avec Persistence Contract (corruption) : ConfirmÃ©e
+- âœ… CohÃ©rence avec Sync Contract (panne sync) : ConfirmÃ©e
+- âœ… Aucune autoritÃ© implicite crÃ©Ã©e : ConfirmÃ©e
+- âœ… Zero-trust respectÃ© : ConfirmÃ©e
+- âœ… Aucune dÃ©pendance technique : ConfirmÃ©e
 
-**Conclusion :** Aucune contradiction détectée avec les contrats existants.
+**Conclusion :** Aucune contradiction dÃ©tectÃ©e avec les contrats existants.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

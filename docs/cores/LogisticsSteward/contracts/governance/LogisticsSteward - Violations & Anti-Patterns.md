@@ -1,4 +1,4 @@
-# LogisticsSteward — Violations & Anti-Patterns
+﻿# LogisticsSteward â€” Violations & Anti-Patterns
 
 ## 1. Contexte
 
@@ -10,7 +10,7 @@ Ce document sert de reference pour :
 - Les revues de design
 - Les tests de non-regression
 
-Les violations incluent egalement celles des [Lois d'Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) : dependances externes critiques (**LOI-1**), blocage en attente de ressources externes (**LOI-2**), remise en question de l'etat local (**LOI-3**), dependance au temps global (**LOI-4**), consommation excessive de ressources (**LOI-5**).
+Les violations incluent egalement celles des [Lois d'Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) : dependances externes critiques (**LOI-1**), blocage en attente de ressources externes (**LOI-2**), remise en question de l'etat local (**LOI-3**), dependance au temps global (**LOI-4**), consommation excessive de ressources (**LOI-5**).
 
 ## 2. Portee / Scope
 
@@ -976,13 +976,14 @@ Toute violation detectee est un defaut critique qui doit etre corrige immediatem
 - [LogisticsSteward - Kernel Integration Contract](../integration/LogisticsSteward%20-%20Kernel%20Integration%20Contract.md)
 - [LogisticsSteward - StrongFather Integration Contract](../integration/LogisticsSteward%20-%20StrongFather%20Integration%20Contract.md)
 - [LogisticsSteward - Degradation Strategy Contract](../degradation/LogisticsSteward%20-%20Degradation%20Strategy%20Contract.md)
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
-**Statut :** INTERDICTION — Non negociable  
+**Statut :** INTERDICTION â€” Non negociable  
 **Dependencies :**
 - [Documentation Fondatrice v1.0](../../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md) (Sections 4, 5)
-- [Lois d'Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+- [Lois d'Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)
+

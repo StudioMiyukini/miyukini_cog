@@ -1,22 +1,23 @@
-# MiyuJobs — Tool Governance Compliance Contract
+﻿# MiyuJobs â€” Tool Governance Compliance Contract
 
 ## Contexte
 
-Conformité aux obligations communes : [Master Butler - Tool Governance Compliance Template](../../../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
+ConformitÃ© aux obligations communes : [Master Butler - Tool Governance Compliance Template](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
 
 **ToolkitId :** `toolkit.jobs.miyujobs`
 
 ---
 
-## Obligations spécifiques MiyuJobs
+## Obligations spÃ©cifiques MiyuJobs
 
-- **Décision de planifier** (schedule.at, schedule.cron) = **StrongFather** ; les Tools exécutent la planification après autorisation.
-- **Décision d'enfiler** (queue.enqueue) = **StrongFather** ; contenu de la tâche fourni dans le flux gouverné.
-- Persistance des jobs (queue, historique) = **WriteIntent** vers KindMother ou stockage gouverné selon implémentation.
-- MiyuJobs n'exécute pas la logique métier des tâches : il planifie, enfile et déclenche le traitement ; handler fourni dans le flux.
+- **DÃ©cision de planifier** (schedule.at, schedule.cron) = **StrongFather** ; les Tools exÃ©cutent la planification aprÃ¨s autorisation.
+- **DÃ©cision d'enfiler** (queue.enqueue) = **StrongFather** ; contenu de la tÃ¢che fourni dans le flux gouvernÃ©.
+- Persistance des jobs (queue, historique) = **WriteIntent** vers KindMother ou stockage gouvernÃ© selon implÃ©mentation.
+- MiyuJobs n'exÃ©cute pas la logique mÃ©tier des tÃ¢ches : il planifie, enfile et dÃ©clenche le traitement ; handler fourni dans le flux.
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Contrat de conformité
+**Statut :** Contrat de conformitÃ©
+

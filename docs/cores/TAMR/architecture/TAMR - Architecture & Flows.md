@@ -1,60 +1,60 @@
-# TAMR — Architecture & Flows
+﻿# TAMR â€” Architecture & Flows
 
 ## 1. Introduction
 
 ### Objet du document
 
-Ce document définit le **TAMR — Architecture & Flows** : un contrat normatif, non négociable, et de statut FONDATION qui établit l'architecture conceptuelle des flux d'intervention humaine dans le Miyukini Core System v2.4. Il précise comment les quatre flux (Approval, Override, Escalation, Supervision) s'articulent, quels acteurs ils impliquent, et comment ils s'intègrent à l'écosystème.
+Ce document dÃ©finit le **TAMR â€” Architecture & Flows** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit l'architecture conceptuelle des flux d'intervention humaine dans le Miyukini Core System v2.4. Il prÃ©cise comment les quatre flux (Approval, Override, Escalation, Supervision) s'articulent, quels acteurs ils impliquent, et comment ils s'intÃ¨grent Ã  l'Ã©cosystÃ¨me.
 
-TAMR ne possède pas de composants internes exécutables : il définit un **cadre conceptuel**. Ce document décrit l'architecture de ce cadre et les flux d'intervention que les produits et les cores doivent respecter.
+TAMR ne possÃ¨de pas de composants internes exÃ©cutables : il dÃ©finit un **cadre conceptuel**. Ce document dÃ©crit l'architecture de ce cadre et les flux d'intervention que les produits et les cores doivent respecter.
 
-### Portée
+### PortÃ©e
 
-Ce document s'applique à **toute l'architecture des interventions humaines** et définit de manière absolue :
-- la position de TAMR dans l'écosystème,
+Ce document s'applique Ã  **toute l'architecture des interventions humaines** et dÃ©finit de maniÃ¨re absolue :
+- la position de TAMR dans l'Ã©cosystÃ¨me,
 - les quatre flux d'intervention (Approval, Override, Escalation, Supervision),
-- les acteurs et les responsabilités par flux,
+- les acteurs et les responsabilitÃ©s par flux,
 - les points de convergence (BondingBrother, StrongFather, KindMother),
 - les invariants architecturaux des flux.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce document **synthétise et illustre** l'architecture des flux définie dans :
-- **[TAMR — Documentation Fondatrice](../foundation/TAMR%20-%20Documentation%20Fondatrice.md)** : Types et principes des interventions
-- **[TAMR — Intervention Types Contract](../contracts/intervention/TAMR%20-%20Intervention%20Types%20Contract.md)** : Définition formelle des quatre types
-- **[TAMR — Intervention Points Contract](../contracts/intervention/TAMR%20-%20Intervention%20Points%20Contract.md)** : Points où les interventions sont possibles
-- **[TAMR — StrongFather Integration Contract](../contracts/integration/TAMR%20-%20StrongFather%20Integration%20Contract.md)** : Relation TAMR / StrongFather
-- **[TAMR — KindMother Integration Contract](../contracts/integration/TAMR%20-%20KindMother%20Integration%20Contract.md)** : Persistance des traces
-- **[TAMR — BondingBrother Integration Contract](../contracts/integration/TAMR%20-%20BondingBrother%20Integration%20Contract.md)** : Médiation des intentions
+Ce document **synthÃ©tise et illustre** l'architecture des flux dÃ©finie dans :
+- **[TAMR â€” Documentation Fondatrice](../foundation/TAMR%20-%20Documentation%20Fondatrice.md)** : Types et principes des interventions
+- **[TAMR â€” Intervention Types Contract](../contracts/intervention/TAMR%20-%20Intervention%20Types%20Contract.md)** : DÃ©finition formelle des quatre types
+- **[TAMR â€” Intervention Points Contract](../contracts/intervention/TAMR%20-%20Intervention%20Points%20Contract.md)** : Points oÃ¹ les interventions sont possibles
+- **[TAMR â€” StrongFather Integration Contract](../contracts/integration/TAMR%20-%20StrongFather%20Integration%20Contract.md)** : Relation TAMR / StrongFather
+- **[TAMR â€” KindMother Integration Contract](../contracts/integration/TAMR%20-%20KindMother%20Integration%20Contract.md)** : Persistance des traces
+- **[TAMR â€” BondingBrother Integration Contract](../contracts/integration/TAMR%20-%20BondingBrother%20Integration%20Contract.md)** : MÃ©diation des intentions
 
-Il ne contredit aucun autre contrat et constitue une vue architecturale consolidée des flux.
+Il ne contredit aucun autre contrat et constitue une vue architecturale consolidÃ©e des flux.
 
 ---
 
 ## 2. Contexte
 
-TAMR (The Authority Must Rest) est le **Human Interaction Core** du Miyukini Core System. Il définit où, quand et comment l'humain intervient, sans prendre de décision ni persister de donnée. Les quatre types d'intervention — Approval, Override, Escalation, Supervision — traversent tous l'écosystème via des flux explicites : intention → médiation (BondingBrother) → évaluation (StrongFather) → exécution et trace (produit + KindMother). Ce document décrit ces flux et leur architecture commune.
+TAMR (The Authority Must Rest) est le **Human Interaction Core** du Miyukini Core System. Il dÃ©finit oÃ¹, quand et comment l'humain intervient, sans prendre de dÃ©cision ni persister de donnÃ©e. Les quatre types d'intervention â€” Approval, Override, Escalation, Supervision â€” traversent tous l'Ã©cosystÃ¨me via des flux explicites : intention â†’ mÃ©diation (BondingBrother) â†’ Ã©valuation (StrongFather) â†’ exÃ©cution et trace (produit + KindMother). Ce document dÃ©crit ces flux et leur architecture commune.
 
 ---
 
-## 3. Portée / Scope
+## 3. PortÃ©e / Scope
 
 **Ce document couvre :**
 - L'architecture conceptuelle des flux d'intervention humaine
-- Le détail des quatre flux : Approval, Override, Escalation, Supervision
+- Le dÃ©tail des quatre flux : Approval, Override, Escalation, Supervision
 - Les acteurs (Processus, Produit, BondingBrother, StrongFather, KindMother, Humain)
 - Les points de convergence et les invariants des flux
-- La conformité aux Lois d'Autonomie et aux références (Glossaire, Doctrine Sécurité, Integrity Degradation, Security Levels)
+- La conformitÃ© aux Lois d'Autonomie et aux rÃ©fÃ©rences (Glossaire, Doctrine SÃ©curitÃ©, Integrity Degradation, Security Levels)
 
 **Ce document ne couvre pas :**
-- Les détails des types d'intervention (voir Intervention Types Contract)
-- Les points d'intervention et déclencheurs (voir Intervention Points Contract)
-- Les limites d'autorité et limites inviolables (voir contrats boundaries)
-- L'implémentation technique (responsabilité produit)
+- Les dÃ©tails des types d'intervention (voir Intervention Types Contract)
+- Les points d'intervention et dÃ©clencheurs (voir Intervention Points Contract)
+- Les limites d'autoritÃ© et limites inviolables (voir contrats boundaries)
+- L'implÃ©mentation technique (responsabilitÃ© produit)
 
 ---
 
@@ -63,51 +63,51 @@ TAMR (The Authority Must Rest) est le **Human Interaction Core** du Miyukini Cor
 ### 4.1. Vue d'ensemble de la place de TAMR
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        ÉCOSYSTÈME MIYUKINI                               │
-│                                                                         │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │  TAMR (cadre conceptuel)                                           │  │
-│  │  • Types : APPROVAL, OVERRIDE, ESCALATION, SUPERVISION             │  │
-│  │  • Points d'intervention, limites d'autorité                       │  │
-│  │  • Exigences de traçabilité                                        │  │
-│  │  • Ne décide pas, ne persiste pas, ne médie pas                    │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│                                    │                                    │
-│                    cadre utilisé par les flux ci-dessous                 │
-│                                    ▼                                    │
-│  ┌─────────────┐    ┌──────────────────┐    ┌─────────────────────┐   │
-│  │ Processus   │───▶│ BondingBrother   │───▶│ StrongFather        │   │
-│  │ / Produit   │    │ (médiation        │    │ (autorise / refuse   │   │
-│  │             │    │  des intentions)  │    │  selon politiques)   │   │
-│  └─────────────┘    └──────────────────┘    └──────────┬──────────┘   │
-│                                                          │              │
-│                                                          ▼              │
-│  ┌─────────────┐    ┌──────────────────┐    ┌─────────────────────┐   │
-│  │ Humain      │◀───│ Produit (UI,      │◀───│ Décision            │   │
-│  │ (intervient)│    │  notification)     │    │ (autorisé/refusé)    │   │
-│  └─────────────┘    └─────────┬─────────┘    └─────────────────────┘   │
-│                               │                                         │
-│                               ▼                                         │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │  KindMother (persistance des traces d'intervention)                 │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                        Ã‰COSYSTÃˆME MIYUKINI                               â”‚
+â”‚                                                                         â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  TAMR (cadre conceptuel)                                           â”‚  â”‚
+â”‚  â”‚  â€¢ Types : APPROVAL, OVERRIDE, ESCALATION, SUPERVISION             â”‚  â”‚
+â”‚  â”‚  â€¢ Points d'intervention, limites d'autoritÃ©                       â”‚  â”‚
+â”‚  â”‚  â€¢ Exigences de traÃ§abilitÃ©                                        â”‚  â”‚
+â”‚  â”‚  â€¢ Ne dÃ©cide pas, ne persiste pas, ne mÃ©die pas                    â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                    â”‚                                    â”‚
+â”‚                    cadre utilisÃ© par les flux ci-dessous                 â”‚
+â”‚                                    â–¼                                    â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚ Processus   â”‚â”€â”€â”€â–¶â”‚ BondingBrother   â”‚â”€â”€â”€â–¶â”‚ StrongFather        â”‚   â”‚
+â”‚  â”‚ / Produit   â”‚    â”‚ (mÃ©diation        â”‚    â”‚ (autorise / refuse   â”‚   â”‚
+â”‚  â”‚             â”‚    â”‚  des intentions)  â”‚    â”‚  selon politiques)   â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚                                                          â”‚              â”‚
+â”‚                                                          â–¼              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚ Humain      â”‚â—€â”€â”€â”€â”‚ Produit (UI,      â”‚â—€â”€â”€â”€â”‚ DÃ©cision            â”‚   â”‚
+â”‚  â”‚ (intervient)â”‚    â”‚  notification)     â”‚    â”‚ (autorisÃ©/refusÃ©)    â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚                               â”‚                                         â”‚
+â”‚                               â–¼                                         â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  KindMother (persistance des traces d'intervention)                 â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### 4.2. Principe commun à tous les flux
+### 4.2. Principe commun Ã  tous les flux
 
-Chaque flux d'intervention humaine respecte la séquence conceptuelle suivante :
+Chaque flux d'intervention humaine respecte la sÃ©quence conceptuelle suivante :
 
-1. **Déclenchement** : Un point d'intervention est atteint ou une intention est émise.
-2. **Intention** : Une intention d'intervention (type TAMR + point + acteur + contexte) est créée.
-3. **Médiation** : L'intention transite par BondingBrother.
-4. **Évaluation** : StrongFather évalue si l'intervention est autorisée (selon le cadre TAMR et les politiques).
-5. **Exécution** : Si autorisée, l'humain effectue l'intervention via le produit.
-6. **Trace** : L'intervention est tracée selon les exigences TAMR et persistée par KindMother.
+1. **DÃ©clenchement** : Un point d'intervention est atteint ou une intention est Ã©mise.
+2. **Intention** : Une intention d'intervention (type TAMR + point + acteur + contexte) est crÃ©Ã©e.
+3. **MÃ©diation** : L'intention transite par BondingBrother.
+4. **Ã‰valuation** : StrongFather Ã©value si l'intervention est autorisÃ©e (selon le cadre TAMR et les politiques).
+5. **ExÃ©cution** : Si autorisÃ©e, l'humain effectue l'intervention via le produit.
+6. **Trace** : L'intervention est tracÃ©e selon les exigences TAMR et persistÃ©e par KindMother.
 
-TAMR définit le **cadre** (types, points, limites, traçabilité). Il ne participe pas à l'exécution des étapes 2 à 6.
+TAMR dÃ©finit le **cadre** (types, points, limites, traÃ§abilitÃ©). Il ne participe pas Ã  l'exÃ©cution des Ã©tapes 2 Ã  6.
 
 ---
 
@@ -115,133 +115,133 @@ TAMR définit le **cadre** (types, points, limites, traçabilité). Il ne partic
 
 ### 5.1. Objectif
 
-Valider ou refuser une action **avant** son exécution. Le système propose, l'humain décide.
+Valider ou refuser une action **avant** son exÃ©cution. Le systÃ¨me propose, l'humain dÃ©cide.
 
 ### 5.2. Acteurs
 
-| Acteur | Rôle |
+| Acteur | RÃ´le |
 |--------|------|
-| Processus automatisé | Atteint un point d'approbation, crée la demande |
-| Produit | Notifie l'approbateur, présente l'interface de décision |
-| BondingBrother | Médie l'intention d'approbation |
-| StrongFather | Évalue si l'approbation est requise et si l'acteur peut approuver |
+| Processus automatisÃ© | Atteint un point d'approbation, crÃ©e la demande |
+| Produit | Notifie l'approbateur, prÃ©sente l'interface de dÃ©cision |
+| BondingBrother | MÃ©die l'intention d'approbation |
+| StrongFather | Ã‰value si l'approbation est requise et si l'acteur peut approuver |
 | Approbateur (humain) | Approuve ou refuse |
 | KindMother | Persiste la trace de l'approbation |
 
-### 5.3. Flux détaillé
+### 5.3. Flux dÃ©taillÃ©
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         FLUX APPROVAL (APPROBATION)                       │
-│                                                                         │
-│  1. Processus atteint un point d'approbation (point déclaré TAMR)       │
-│        │                                                                │
-│        ▼                                                                │
-│  2. Système crée une demande d'approbation (intention type APPROVAL)    │
-│        │                                                                │
-│        ▼                                                                │
-│  3. Intention transite par BondingBrother                               │
-│        │                                                                │
-│        ▼                                                                │
-│  4. StrongFather évalue :                                               │
-│        • L'approbation est-elle requise pour ce contexte ?               │
-│        • Qui est l'approbateur désigné ?                                │
-│        • Cet acteur est-il autorisé à approuver ?                       │
-│        │                                                                │
-│        ├── Refusé / Ambigü / Différé ──▶ Fin (pas d'approbation)        │
-│        │                                                                │
-│        ▼ Autorisé                                                       │
-│  5. Produit notifie l'approbateur désigné                               │
-│        │                                                                │
-│        ▼                                                                │
-│  6. Approbateur approuve ou refuse (ou expiration → comportement défaut) │
-│        │                                                                │
-│        ▼                                                                │
-│  7. Intervention tracée (identité, décision, moment, contexte)          │
-│        │                                                                │
-│        ▼                                                                │
-│  8. KindMother persiste la trace                                        │
-│        │                                                                │
-│        ▼                                                                │
-│  9. Processus reprend selon la décision (exécution si APPROUVÉ,         │
-│     abandon ou alternative si REFUSÉ / EXPIRÉ)                           │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                         FLUX APPROVAL (APPROBATION)                       â”‚
+â”‚                                                                         â”‚
+â”‚  1. Processus atteint un point d'approbation (point dÃ©clarÃ© TAMR)       â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  2. SystÃ¨me crÃ©e une demande d'approbation (intention type APPROVAL)    â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  3. Intention transite par BondingBrother                               â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  4. StrongFather Ã©value :                                               â”‚
+â”‚        â€¢ L'approbation est-elle requise pour ce contexte ?               â”‚
+â”‚        â€¢ Qui est l'approbateur dÃ©signÃ© ?                                â”‚
+â”‚        â€¢ Cet acteur est-il autorisÃ© Ã  approuver ?                       â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â”œâ”€â”€ RefusÃ© / AmbigÃ¼ / DiffÃ©rÃ© â”€â”€â–¶ Fin (pas d'approbation)        â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼ AutorisÃ©                                                       â”‚
+â”‚  5. Produit notifie l'approbateur dÃ©signÃ©                               â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  6. Approbateur approuve ou refuse (ou expiration â†’ comportement dÃ©faut) â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  7. Intervention tracÃ©e (identitÃ©, dÃ©cision, moment, contexte)          â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  8. KindMother persiste la trace                                        â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  9. Processus reprend selon la dÃ©cision (exÃ©cution si APPROUVÃ‰,         â”‚
+â”‚     abandon ou alternative si REFUSÃ‰ / EXPIRÃ‰)                           â”‚
+â”‚                                                                         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### 5.4. États et résultats
+### 5.4. Ã‰tats et rÃ©sultats
 
-- **États** : DEMANDÉE → EN_ATTENTE → RÉSOLUE (ou EXPIRÉ).
-- **Résultats** : APPROUVÉ, REFUSÉ, EXPIRÉ (comportement par défaut explicite requis, voir Intervention Types Contract).
+- **Ã‰tats** : DEMANDÃ‰E â†’ EN_ATTENTE â†’ RÃ‰SOLUE (ou EXPIRÃ‰).
+- **RÃ©sultats** : APPROUVÃ‰, REFUSÃ‰, EXPIRÃ‰ (comportement par dÃ©faut explicite requis, voir Intervention Types Contract).
 
-### 5.5. Invariants rappelés
+### 5.5. Invariants rappelÃ©s
 
-- **INV-TAMR-1** : Toute approbation est tracée.
-- **INV-TYPE-1** : Liste fermée des types ; APPROVAL est l'un des quatre.
-- **R-APPR-1** : Identité de l'approbateur obligatoire.
+- **INV-TAMR-1** : Toute approbation est tracÃ©e.
+- **INV-TYPE-1** : Liste fermÃ©e des types ; APPROVAL est l'un des quatre.
+- **R-APPR-1** : IdentitÃ© de l'approbateur obligatoire.
 
 ---
 
-## 6. Flux Override (Dérogation)
+## 6. Flux Override (DÃ©rogation)
 
 ### 6.1. Objectif
 
-Contredire une décision automatique : forcer une action refusée (FORCE) ou bloquer une action approuvée (BLOCK). Exceptionnel, justifié, audité.
+Contredire une dÃ©cision automatique : forcer une action refusÃ©e (FORCE) ou bloquer une action approuvÃ©e (BLOCK). Exceptionnel, justifiÃ©, auditÃ©.
 
 ### 6.2. Acteurs
 
-| Acteur | Rôle |
+| Acteur | RÃ´le |
 |--------|------|
-| Décision automatique | Préalable (acceptée ou refusée) |
-| Humain autorisé | Demande l'override, fournit la justification |
-| BondingBrother | Médie l'intention d'override |
-| StrongFather | Évalue si l'override est autorisé ; vérifie les limites inviolables TAMR |
+| DÃ©cision automatique | PrÃ©alable (acceptÃ©e ou refusÃ©e) |
+| Humain autorisÃ© | Demande l'override, fournit la justification |
+| BondingBrother | MÃ©die l'intention d'override |
+| StrongFather | Ã‰value si l'override est autorisÃ© ; vÃ©rifie les limites inviolables TAMR |
 | KindMother | Persiste la trace (avec justification) |
 
-### 6.3. Flux détaillé
+### 6.3. Flux dÃ©taillÃ©
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         FLUX OVERRIDE (DÉROGATION)                       │
-│                                                                         │
-│  1. Décision automatique émise (acceptée ou refusée)                   │
-│        │                                                                │
-│        ▼                                                                │
-│  2. Un humain autorisé demande un override (intention type OVERRIDE)    │
-│        │                                                                │
-│        ▼                                                                │
-│  3. Intention transite par BondingBrother                               │
-│        │                                                                │
-│        ▼                                                                │
-│  4. StrongFather évalue :                                               │
-│        • L'override franchirait-il une limite inviolable TAMR ?         │
-│          → OUI : REFUS obligatoire (aucune exception)                   │
-│        • L'acteur est-il autorisé à déroger selon les politiques ?       │
-│        │                                                                │
-│        ├── Refusé (limite inviolable ou politique) ──▶ Fin             │
-│        │                                                                │
-│        ▼ Autorisé                                                       │
-│  5. L'humain fournit une justification explicite (obligatoire)          │
-│        │                                                                │
-│        ▼                                                                │
-│  6. Override appliqué (FORCE ou BLOCK)                                   │
-│        │                                                                │
-│        ▼                                                                │
-│  7. Intervention tracée (identité, justification, décision originale,  │
-│     moment, contexte, confirmation limites vérifiées)                    │
-│        │                                                                │
-│        ▼                                                                │
-│  8. KindMother persiste la trace                                        │
-│        │                                                                │
-│        ▼                                                                │
-│  9. Processus reprend avec la décision overridée                        │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                         FLUX OVERRIDE (DÃ‰ROGATION)                       â”‚
+â”‚                                                                         â”‚
+â”‚  1. DÃ©cision automatique Ã©mise (acceptÃ©e ou refusÃ©e)                   â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  2. Un humain autorisÃ© demande un override (intention type OVERRIDE)    â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  3. Intention transite par BondingBrother                               â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  4. StrongFather Ã©value :                                               â”‚
+â”‚        â€¢ L'override franchirait-il une limite inviolable TAMR ?         â”‚
+â”‚          â†’ OUI : REFUS obligatoire (aucune exception)                   â”‚
+â”‚        â€¢ L'acteur est-il autorisÃ© Ã  dÃ©roger selon les politiques ?       â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â”œâ”€â”€ RefusÃ© (limite inviolable ou politique) â”€â”€â–¶ Fin             â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼ AutorisÃ©                                                       â”‚
+â”‚  5. L'humain fournit une justification explicite (obligatoire)          â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  6. Override appliquÃ© (FORCE ou BLOCK)                                   â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  7. Intervention tracÃ©e (identitÃ©, justification, dÃ©cision originale,  â”‚
+â”‚     moment, contexte, confirmation limites vÃ©rifiÃ©es)                    â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  8. KindMother persiste la trace                                        â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  9. Processus reprend avec la dÃ©cision overridÃ©e                        â”‚
+â”‚                                                                         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### 6.4. Règles rappelées
+### 6.4. RÃ¨gles rappelÃ©es
 
-- **INV-TAMR-7** : Tout override nécessite une justification explicite enregistrée.
+- **INV-TAMR-7** : Tout override nÃ©cessite une justification explicite enregistrÃ©e.
 - **R-OVER-2** : Aucun override ne peut franchir une limite inviolable (voir Inviolable Limits Contract).
 - **INV-OVER-1** : Non-franchissement des limites infranchissables.
 
@@ -251,65 +251,65 @@ Contredire une décision automatique : forcer une action refusée (FORCE) ou blo
 
 ### 7.1. Objectif
 
-Élever une décision vers un niveau d'autorité supérieur humain. Hiérarchique, collaborative, tracée ; ne doit jamais bloquer indéfiniment le système.
+Ã‰lever une dÃ©cision vers un niveau d'autoritÃ© supÃ©rieur humain. HiÃ©rarchique, collaborative, tracÃ©e ; ne doit jamais bloquer indÃ©finiment le systÃ¨me.
 
 ### 7.2. Acteurs
 
-| Acteur | Rôle |
+| Acteur | RÃ´le |
 |--------|------|
-| Initiateur (humain) | Déclenche l'escalade, fournit le motif |
-| BondingBrother | Médie l'intention d'escalade |
-| StrongFather | Identifie le niveau d'escalade approprié, autorise ou refuse |
-| Produit | Notifie le(s) responsable(s) du niveau supérieur |
-| Responsable(s) niveau supérieur | Prend(ent) la décision |
-| KindMother | Persiste la trace (chemin d'escalade, résolution) |
+| Initiateur (humain) | DÃ©clenche l'escalade, fournit le motif |
+| BondingBrother | MÃ©die l'intention d'escalade |
+| StrongFather | Identifie le niveau d'escalade appropriÃ©, autorise ou refuse |
+| Produit | Notifie le(s) responsable(s) du niveau supÃ©rieur |
+| Responsable(s) niveau supÃ©rieur | Prend(ent) la dÃ©cision |
+| KindMother | Persiste la trace (chemin d'escalade, rÃ©solution) |
 
-### 7.3. Flux détaillé
+### 7.3. Flux dÃ©taillÃ©
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         FLUX ESCALATION (ESCALADE)                       │
-│                                                                         │
-│  1. Situation nécessitant une escalade identifiée                        │
-│        │                                                                │
-│        ▼                                                                │
-│  2. Demande d'escalade créée (intention type ESCALATION, motif explicite)│
-│        │                                                                │
-│        ▼                                                                │
-│  3. Intention transite par BondingBrother                                │
-│        │                                                                │
-│        ▼                                                                │
-│  4. StrongFather identifie le niveau d'escalade et autorise ou refuse   │
-│        │                                                                │
-│        ├── Refusé ──▶ Fin                                               │
-│        │                                                                │
-│        ▼ Autorisé                                                       │
-│  5. Produit notifie le(s) responsable(s) du niveau supérieur            │
-│        │                                                                │
-│        ▼                                                                │
-│  6. État : INITIÉE → EN_COURS → RÉSOLUE (ou ANNULÉE / timeout)         │
-│        │                                                                │
-│        ▼                                                                │
-│  7. Le(s) responsable(s) prennent une décision                           │
-│        │                                                                │
-│        ▼                                                                │
-│  8. Escalade et résolution tracées (chemin, niveaux, moments, résolution)│
-│        │                                                                │
-│        ▼                                                                │
-│  9. KindMother persiste la trace                                        │
-│        │                                                                │
-│        ▼                                                                │
-│ 10. Processus reprend selon la décision escaladée                       │
-│     Si non résolu dans le délai : comportement par défaut (timeout,      │
-│     délégation automatique, rejet par défaut) — INV-TAMR-8               │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                         FLUX ESCALATION (ESCALADE)                       â”‚
+â”‚                                                                         â”‚
+â”‚  1. Situation nÃ©cessitant une escalade identifiÃ©e                        â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  2. Demande d'escalade crÃ©Ã©e (intention type ESCALATION, motif explicite)â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  3. Intention transite par BondingBrother                                â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  4. StrongFather identifie le niveau d'escalade et autorise ou refuse   â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â”œâ”€â”€ RefusÃ© â”€â”€â–¶ Fin                                               â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼ AutorisÃ©                                                       â”‚
+â”‚  5. Produit notifie le(s) responsable(s) du niveau supÃ©rieur            â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  6. Ã‰tat : INITIÃ‰E â†’ EN_COURS â†’ RÃ‰SOLUE (ou ANNULÃ‰E / timeout)         â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  7. Le(s) responsable(s) prennent une dÃ©cision                           â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  8. Escalade et rÃ©solution tracÃ©es (chemin, niveaux, moments, rÃ©solution)â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  9. KindMother persiste la trace                                        â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚ 10. Processus reprend selon la dÃ©cision escaladÃ©e                       â”‚
+â”‚     Si non rÃ©solu dans le dÃ©lai : comportement par dÃ©faut (timeout,      â”‚
+â”‚     dÃ©lÃ©gation automatique, rejet par dÃ©faut) â€” INV-TAMR-8               â”‚
+â”‚                                                                         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### 7.4. Invariants rappelés
+### 7.4. Invariants rappelÃ©s
 
-- **INV-TAMR-8** : Une escalade ne bloque pas indéfiniment le système (mécanismes de timeout / comportement par défaut obligatoires).
-- **R-ESC-2** : Chaîne de responsabilité définie ; **R-ESC-5** : Comportement par défaut en cas de non-résolution explicite.
+- **INV-TAMR-8** : Une escalade ne bloque pas indÃ©finiment le systÃ¨me (mÃ©canismes de timeout / comportement par dÃ©faut obligatoires).
+- **R-ESC-2** : ChaÃ®ne de responsabilitÃ© dÃ©finie ; **R-ESC-5** : Comportement par dÃ©faut en cas de non-rÃ©solution explicite.
 
 ---
 
@@ -317,79 +317,79 @@ Contredire une décision automatique : forcer une action refusée (FORCE) ou blo
 
 ### 8.1. Objectif
 
-Observer le système de manière continue, avec capacité d'intervenir si nécessaire. Passive par défaut, activable (approval, override ou escalade), non intrusive, de durée limitée.
+Observer le systÃ¨me de maniÃ¨re continue, avec capacitÃ© d'intervenir si nÃ©cessaire. Passive par dÃ©faut, activable (approval, override ou escalade), non intrusive, de durÃ©e limitÃ©e.
 
 ### 8.2. Acteurs
 
-| Acteur | Rôle |
+| Acteur | RÃ´le |
 |--------|------|
-| Processus / Produit | Active la supervision, expose l'état supervisé |
-| Superviseur (humain) | Observe, peut déclencher une intervention |
-| BondingBrother / StrongFather | Utilisés si le superviseur déclenche une intervention (APPROVAL, OVERRIDE, ESCALATION) |
-| KindMother | Persiste les traces (début/fin supervision, interventions déclenchées) |
+| Processus / Produit | Active la supervision, expose l'Ã©tat supervisÃ© |
+| Superviseur (humain) | Observe, peut dÃ©clencher une intervention |
+| BondingBrother / StrongFather | UtilisÃ©s si le superviseur dÃ©clenche une intervention (APPROVAL, OVERRIDE, ESCALATION) |
+| KindMother | Persiste les traces (dÃ©but/fin supervision, interventions dÃ©clenchÃ©es) |
 
-### 8.3. Flux détaillé
+### 8.3. Flux dÃ©taillÃ©
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         FLUX SUPERVISION                                 │
-│                                                                         │
-│  1. Processus activé pour supervision humaine (périmètre et durée définis)│
-│        │                                                                │
-│        ▼                                                                │
-│  2. Système enregistre l'état supervisé (sans modifier le comportement) │
-│        │                                                                │
-│        ▼                                                                │
-│  3. État : ACTIVÉE                                                       │
-│        │                                                                │
-│        ▼                                                                │
-│  4. L'humain superviseur observe via les interfaces produit            │
-│        │                                                                │
-│        ├── Si nécessaire : déclenche une intervention                   │
-│        │   (APPROVAL / OVERRIDE / ESCALATION)                            │
-│        │   → Les flux correspondants s'exécutent (sections 5, 6, 7)      │
-│        │   → Chaque intervention a sa propre trace                      │
-│        │                                                                │
-│        ├── Fin explicite ou timeout ──▶ État TERMINÉE                   │
-│        │                                                                │
-│        ▼                                                                │
-│  5. Supervision tracée (superviseur, périmètre, début, fin, raison,     │
-│     interventions déclenchées éventuelles)                              │
-│        │                                                                │
-│        ▼                                                                │
-│  6. KindMother persiste la trace                                        │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                         FLUX SUPERVISION                                 â”‚
+â”‚                                                                         â”‚
+â”‚  1. Processus activÃ© pour supervision humaine (pÃ©rimÃ¨tre et durÃ©e dÃ©finis)â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  2. SystÃ¨me enregistre l'Ã©tat supervisÃ© (sans modifier le comportement) â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  3. Ã‰tat : ACTIVÃ‰E                                                       â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  4. L'humain superviseur observe via les interfaces produit            â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â”œâ”€â”€ Si nÃ©cessaire : dÃ©clenche une intervention                   â”‚
+â”‚        â”‚   (APPROVAL / OVERRIDE / ESCALATION)                            â”‚
+â”‚        â”‚   â†’ Les flux correspondants s'exÃ©cutent (sections 5, 6, 7)      â”‚
+â”‚        â”‚   â†’ Chaque intervention a sa propre trace                      â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â”œâ”€â”€ Fin explicite ou timeout â”€â”€â–¶ Ã‰tat TERMINÃ‰E                   â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  5. Supervision tracÃ©e (superviseur, pÃ©rimÃ¨tre, dÃ©but, fin, raison,     â”‚
+â”‚     interventions dÃ©clenchÃ©es Ã©ventuelles)                              â”‚
+â”‚        â”‚                                                                â”‚
+â”‚        â–¼                                                                â”‚
+â”‚  6. KindMother persiste la trace                                        â”‚
+â”‚                                                                         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### 8.4. Règles rappelées
+### 8.4. RÃ¨gles rappelÃ©es
 
-- **R-SUP-4** : La supervision en état passif ne modifie jamais le comportement du système.
-- **R-SUP-5** : Toute intervention déclenchée par le superviseur est typée (APPROVAL, OVERRIDE ou ESCALATION) et tracée séparément.
+- **R-SUP-4** : La supervision en Ã©tat passif ne modifie jamais le comportement du systÃ¨me.
+- **R-SUP-5** : Toute intervention dÃ©clenchÃ©e par le superviseur est typÃ©e (APPROVAL, OVERRIDE ou ESCALATION) et tracÃ©e sÃ©parÃ©ment.
 
 ---
 
-## 9. Synthèse des flux et points de convergence
+## 9. SynthÃ¨se des flux et points de convergence
 
-### 9.1. Tableau récapitulatif
+### 9.1. Tableau rÃ©capitulatif
 
-| Flux        | Déclencheur principal        | Passage StrongFather | Justification obligatoire | Trace KindMother |
+| Flux        | DÃ©clencheur principal        | Passage StrongFather | Justification obligatoire | Trace KindMother |
 |------------|------------------------------|------------------------|---------------------------|------------------|
 | **Approval**   | Point d'approbation atteint   | Oui                    | Non                       | Oui              |
-| **Override**  | Demande humain post-décision | Oui (+ limites inviol.) | Oui                       | Oui              |
+| **Override**  | Demande humain post-dÃ©cision | Oui (+ limites inviol.) | Oui                       | Oui              |
 | **Escalation**| Demande humain / situation   | Oui                    | Motif explicite           | Oui              |
-| **Supervision**| Activation processus         | Si intervention déclenchée | Non (pour la supervision seule) | Oui        |
+| **Supervision**| Activation processus         | Si intervention dÃ©clenchÃ©e | Non (pour la supervision seule) | Oui        |
 
 ### 9.2. Points de convergence communs
 
-- **BondingBrother** : Toute intention d'intervention (sauf pure observation en supervision) transite par BondingBrother avant évaluation.
-- **StrongFather** : Toute intervention exécutée doit avoir été autorisée par StrongFather (sauf supervision passive ; dès qu'une intervention est déclenchée, StrongFather est sollicité).
-- **KindMother** : Toute intervention (et toute résolution d'escalade, toute supervision) est tracée selon TAMR et persistée par KindMother.
-- **TAMR** : Fournit le cadre (types, points, limites, exigences de trace) ; ne décide pas, ne persiste pas, ne médie pas.
+- **BondingBrother** : Toute intention d'intervention (sauf pure observation en supervision) transite par BondingBrother avant Ã©valuation.
+- **StrongFather** : Toute intervention exÃ©cutÃ©e doit avoir Ã©tÃ© autorisÃ©e par StrongFather (sauf supervision passive ; dÃ¨s qu'une intervention est dÃ©clenchÃ©e, StrongFather est sollicitÃ©).
+- **KindMother** : Toute intervention (et toute rÃ©solution d'escalade, toute supervision) est tracÃ©e selon TAMR et persistÃ©e par KindMother.
+- **TAMR** : Fournit le cadre (types, points, limites, exigences de trace) ; ne dÃ©cide pas, ne persiste pas, ne mÃ©die pas.
 
 ### 9.3. Relations entre flux
 
-Une supervision peut déclencher une approbation, un override ou une escalade. Une approbation peut mener à une escalade (délégation). Un override peut mener à une escalade. Chaque intervention conserve son type et sa trace propre ; les liens sont tracés (voir Intervention Types Contract, section 7).
+Une supervision peut dÃ©clencher une approbation, un override ou une escalade. Une approbation peut mener Ã  une escalade (dÃ©lÃ©gation). Un override peut mener Ã  une escalade. Chaque intervention conserve son type et sa trace propre ; les liens sont tracÃ©s (voir Intervention Types Contract, section 7).
 
 ---
 
@@ -397,66 +397,67 @@ Une supervision peut déclencher une approbation, un override ou une escalade. U
 
 ### 10.1. Invariants de structure
 
-**INV-ARCH-TAMR-1 : Médiation obligatoire**
+**INV-ARCH-TAMR-1 : MÃ©diation obligatoire**
 
-Toute intention d'intervention (hors pure observation en supervision) transite par BondingBrother avant évaluation par StrongFather.
+Toute intention d'intervention (hors pure observation en supervision) transite par BondingBrother avant Ã©valuation par StrongFather.
 
-**INV-ARCH-TAMR-2 : Évaluation StrongFather**
+**INV-ARCH-TAMR-2 : Ã‰valuation StrongFather**
 
-Aucune intervention (approval, override, escalade, ou intervention déclenchée depuis une supervision) ne peut être exécutée sans évaluation StrongFather et décision d'autorisation (sauf comportement par défaut en cas de timeout / expiration).
+Aucune intervention (approval, override, escalade, ou intervention dÃ©clenchÃ©e depuis une supervision) ne peut Ãªtre exÃ©cutÃ©e sans Ã©valuation StrongFather et dÃ©cision d'autorisation (sauf comportement par dÃ©faut en cas de timeout / expiration).
 
-**INV-ARCH-TAMR-3 : Traçabilité persistée**
+**INV-ARCH-TAMR-3 : TraÃ§abilitÃ© persistÃ©e**
 
-Toute intervention exécutée est tracée selon les exigences TAMR et persistée par KindMother.
+Toute intervention exÃ©cutÃ©e est tracÃ©e selon les exigences TAMR et persistÃ©e par KindMother.
 
 ### 10.2. Invariants de comportement
 
-**INV-ARCH-TAMR-4 : TAMR ne décide pas**
+**INV-ARCH-TAMR-4 : TAMR ne dÃ©cide pas**
 
-TAMR ne prend aucune décision d'autorisation ou de refus. Les flux décrivent l'usage du cadre TAMR par les cores et le produit, pas une exécution par TAMR.
+TAMR ne prend aucune dÃ©cision d'autorisation ou de refus. Les flux dÃ©crivent l'usage du cadre TAMR par les cores et le produit, pas une exÃ©cution par TAMR.
 
 **INV-ARCH-TAMR-5 : Limites inviolables**
 
-Aucun flux (en particulier Override) ne peut contourner les limites inviolables définies par TAMR. StrongFather refuse toute intention qui les franchirait.
+Aucun flux (en particulier Override) ne peut contourner les limites inviolables dÃ©finies par TAMR. StrongFather refuse toute intention qui les franchirait.
 
 **INV-ARCH-TAMR-6 : Escalade non bloquante**
 
-Le flux Escalation prévoit toujours un comportement par défaut en cas de non-résolution (timeout, délégation, rejet par défaut). Aucun blocage indéfini.
+Le flux Escalation prÃ©voit toujours un comportement par dÃ©faut en cas de non-rÃ©solution (timeout, dÃ©lÃ©gation, rejet par dÃ©faut). Aucun blocage indÃ©fini.
 
 ---
 
-## 11. Références
+## 11. RÃ©fÃ©rences
 
-Ce document s'appuie sur les références suivantes :
+Ce document s'appuie sur les rÃ©fÃ©rences suivantes :
 
 | Document | Usage |
 |----------|--------|
-| [Miyukini Conceptual References — Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) | Terminologie TAMR (intervention, approbation, override, escalade, supervision, point d'intervention, trace, etc.) |
-| [Miyukini Conceptual References — Doctrine Securite Fondamentale](../../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md) | Principes de sécurité applicables aux flux d'intervention |
-| [Miyukini Conceptual References — Lois Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) | Conformité LOI-1 à LOI-6 (flux locaux, pas de dépendance externe critique, isolement accepté) |
-| [Miyukini Conceptual References — Integrity Degradation System](../../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md) | Adaptation des points et flux selon niveaux T0–T4 |
-| [Miyukini Conceptual References — Security Levels](../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) | Niveaux de sécurité 0–4 et impact sur les interventions |
+| [Miyukini Conceptual References â€” Glossaire](..//..//..//miyukini-webway-system//reference//_index.md) | Terminologie TAMR (intervention, approbation, override, escalade, supervision, point d'intervention, trace, etc.) |
+| [Miyukini Conceptual References â€” Doctrine Securite Fondamentale](..//..//..//miyukini-webway-system//reference//_index.md) | Principes de sÃ©curitÃ© applicables aux flux d'intervention |
+| [Miyukini Conceptual References â€” Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md) | ConformitÃ© LOI-1 Ã  LOI-6 (flux locaux, pas de dÃ©pendance externe critique, isolement acceptÃ©) |
+| [Miyukini Conceptual References â€” Integrity Degradation System](..//..//..//miyukini-webway-system//reference//_index.md) | Adaptation des points et flux selon niveaux T0â€“T4 |
+| [Miyukini Conceptual References â€” Security Levels](..//..//..//miyukini-webway-system//reference//_index.md) | Niveaux de sÃ©curitÃ© 0â€“4 et impact sur les interventions |
 
-Les flux décrits fonctionnent en conformité avec ces références (évaluation locale, traçabilité, pas de dépendance externe bloquante).
+Les flux dÃ©crits fonctionnent en conformitÃ© avec ces rÃ©fÃ©rences (Ã©valuation locale, traÃ§abilitÃ©, pas de dÃ©pendance externe bloquante).
 
 ---
 
 ## 12. Conclusion contractuelle
 
-Ce document établit de manière définitive et non négociable l'architecture des flux d'intervention humaine TAMR.
+Ce document Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable l'architecture des flux d'intervention humaine TAMR.
 
 Il garantit que :
-- les quatre flux (Approval, Override, Escalation, Supervision) sont décrits de façon explicite et cohérente avec les contrats TAMR ;
-- les acteurs et les points de convergence (BondingBrother, StrongFather, KindMother) sont identifiés ;
+- les quatre flux (Approval, Override, Escalation, Supervision) sont dÃ©crits de faÃ§on explicite et cohÃ©rente avec les contrats TAMR ;
+- les acteurs et les points de convergence (BondingBrother, StrongFather, KindMother) sont identifiÃ©s ;
 - les invariants architecturaux des flux sont maintenus ;
-- les références (Glossaire, Doctrine Sécurité, Lois Autonomie, Integrity Degradation, Security Levels) sont intégrées.
+- les rÃ©fÃ©rences (Glossaire, Doctrine SÃ©curitÃ©, Lois Autonomie, Integrity Degradation, Security Levels) sont intÃ©grÃ©es.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
 
 ---
 
-**Document créé le :** 2026-01-28  
+**Document crÃ©Ã© le :** 2026-01-28  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, TAMR Documentation Fondatrice v1.4, TAMR Intervention Types Contract, TAMR Intervention Points Contract, TAMR StrongFather / KindMother / BondingBrother Integration Contracts  
-**Type :** Architecture et flux d'intervention humaine non négociables
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, TAMR Documentation Fondatrice v1.4, TAMR Intervention Types Contract, TAMR Intervention Points Contract, TAMR StrongFather / KindMother / BondingBrother Integration Contracts  
+**Type :** Architecture et flux d'intervention humaine non nÃ©gociables
+

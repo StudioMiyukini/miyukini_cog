@@ -1,4 +1,4 @@
-# Master Butler - LogisticsSteward Integration Contract
+﻿# Master Butler - LogisticsSteward Integration Contract
 
 ## 1. Contexte
 
@@ -9,7 +9,7 @@ Ce document complete la Section 3 de la [Documentation Fondatrice](../../foundat
 - [Master Butler - Discovery API Contract](../api/Master%20Butler%20-%20Discovery%20API%20Contract.md) pour l'API de decouverte
 - [LogisticsSteward - Documentation Fondatrice](../../../LogisticsSteward/foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md) pour la nature de LogisticsSteward
 
-L'integration respecte les [Lois d'Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) : toutes les interrogations sont locales et ne requierent aucune dependance externe (**LOI-1**).
+L'integration respecte les [Lois d'Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) : toutes les interrogations sont locales et ne requierent aucune dependance externe (**LOI-1**).
 
 ## 2. Portee / Scope
 
@@ -37,7 +37,7 @@ La relation est de consultation : LogisticsSteward interroge Master Butler pour 
 
 ---
 
-## 4. Nature de la relation Master Butler — LogisticsSteward
+## 4. Nature de la relation Master Butler â€” LogisticsSteward
 
 ### 4.1 Relation de consultation
 
@@ -63,13 +63,13 @@ Master Butler fournit les metadonnees de ressources associees aux capacites (cou
 
 | Responsabilite | Master Butler | LogisticsSteward |
 |----------------|---------------|------------------|
-| **Connaitre les capacites** | ✅ Exclusif | ❌ Interroge |
-| **Exposer les metadonnees** | ✅ Exclusif | ❌ Consomme |
-| **Decider de l'allocation** | ❌ Jamais | ✅ Exclusif |
-| **Definir les priorites** | ❌ Jamais | ✅ Exclusif |
-| **Appliquer les quotas** | ❌ Jamais | ✅ Exclusif |
-| **Cataloguer les Tools** | ✅ Exclusif | ❌ Consulte |
-| **Limiter l'usage des Tools** | ❌ Jamais | ✅ Exclusif |
+| **Connaitre les capacites** | âœ… Exclusif | âŒ Interroge |
+| **Exposer les metadonnees** | âœ… Exclusif | âŒ Consomme |
+| **Decider de l'allocation** | âŒ Jamais | âœ… Exclusif |
+| **Definir les priorites** | âŒ Jamais | âœ… Exclusif |
+| **Appliquer les quotas** | âŒ Jamais | âœ… Exclusif |
+| **Cataloguer les Tools** | âœ… Exclusif | âŒ Consulte |
+| **Limiter l'usage des Tools** | âŒ Jamais | âœ… Exclusif |
 
 **Regle MB-LS-04 : Aucun chevauchement**
 
@@ -179,12 +179,12 @@ Les interrogations de LogisticsSteward suivent un format standardise.
 
 | Element | Description | Obligatoire |
 |---------|-------------|-------------|
-| `interrogation_id` | Identifiant unique de l'interrogation | ✅ Oui |
-| `arbitrage_id` | Reference a l'arbitrage en cours | ✅ Oui |
-| `type` | Type d'interrogation | ✅ Oui |
-| `payload` | Donnees specifiques a l'interrogation | ✅ Oui |
-| `contexte_appelant` | Contexte de LogisticsSteward | ✅ Oui |
-| `timestamp` | Horodatage de l'interrogation | ✅ Oui |
+| `interrogation_id` | Identifiant unique de l'interrogation | âœ… Oui |
+| `arbitrage_id` | Reference a l'arbitrage en cours | âœ… Oui |
+| `type` | Type d'interrogation | âœ… Oui |
+| `payload` | Donnees specifiques a l'interrogation | âœ… Oui |
+| `contexte_appelant` | Contexte de LogisticsSteward | âœ… Oui |
+| `timestamp` | Horodatage de l'interrogation | âœ… Oui |
 
 **Regle MB-LS-PROT-01 : Format standardise**
 
@@ -202,12 +202,12 @@ Les reponses de Master Butler suivent un format standardise.
 
 | Element | Description | Obligatoire |
 |---------|-------------|-------------|
-| `reponse_id` | Identifiant unique de la reponse | ✅ Oui |
-| `interrogation_id` | Reference a l'interrogation | ✅ Oui |
-| `statut` | Statut de la reponse (SUCCESS, NOT_FOUND, ERROR) | ✅ Oui |
+| `reponse_id` | Identifiant unique de la reponse | âœ… Oui |
+| `interrogation_id` | Reference a l'interrogation | âœ… Oui |
+| `statut` | Statut de la reponse (SUCCESS, NOT_FOUND, ERROR) | âœ… Oui |
 | `donnees` | Donnees de la reponse | Si SUCCESS |
 | `erreur` | Details de l'erreur | Si ERROR |
-| `timestamp` | Horodatage de la reponse | ✅ Oui |
+| `timestamp` | Horodatage de la reponse | âœ… Oui |
 
 **Regle MB-LS-PROT-03 : Reponse toujours structuree**
 
@@ -269,28 +269,28 @@ LogisticsSteward peut effectuer plusieurs interrogations pour un meme arbitrage.
 ### 7.3 Diagramme de sequence
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│     Entite      │    │ LogisticsSteward │    │  Master Butler  │
-└────────┬────────┘    └────────┬─────────┘    └────────┬────────┘
-         │                      │                       │
-         ├── Demande acces ────►│                       │
-         │                      │                       │
-         │                      ├── CAPABILITY_EXISTS ─►│
-         │                      │                       │
-         │                      │◄── Existence + Meta ──┤
-         │                      │                       │
-         │                      ├── RESOURCE_METADATA ─►│
-         │                      │                       │
-         │                      │◄── Metadonnees ───────┤
-         │                      │                       │
-         │                      ├── Evaluation regles ──┤
-         │                      │   (interne)           │
-         │                      │                       │
-         │                      ├── Decision ──────────►│
-         │                      │   (vers StrongFather) │
-         │                      │                       │
-         │◄── Resultat ─────────┤                       │
-         │                      │                       │
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚     Entite      â”‚    â”‚ LogisticsSteward â”‚    â”‚  Master Butler  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚                      â”‚                       â”‚
+         â”œâ”€â”€ Demande acces â”€â”€â”€â”€â–ºâ”‚                       â”‚
+         â”‚                      â”‚                       â”‚
+         â”‚                      â”œâ”€â”€ CAPABILITY_EXISTS â”€â–ºâ”‚
+         â”‚                      â”‚                       â”‚
+         â”‚                      â”‚â—„â”€â”€ Existence + Meta â”€â”€â”¤
+         â”‚                      â”‚                       â”‚
+         â”‚                      â”œâ”€â”€ RESOURCE_METADATA â”€â–ºâ”‚
+         â”‚                      â”‚                       â”‚
+         â”‚                      â”‚â—„â”€â”€ Metadonnees â”€â”€â”€â”€â”€â”€â”€â”¤
+         â”‚                      â”‚                       â”‚
+         â”‚                      â”œâ”€â”€ Evaluation regles â”€â”€â”¤
+         â”‚                      â”‚   (interne)           â”‚
+         â”‚                      â”‚                       â”‚
+         â”‚                      â”œâ”€â”€ Decision â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
+         â”‚                      â”‚   (vers StrongFather) â”‚
+         â”‚                      â”‚                       â”‚
+         â”‚â—„â”€â”€ Resultat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤                       â”‚
+         â”‚                      â”‚                       â”‚
 ```
 
 ---
@@ -663,7 +663,7 @@ Toute implementation de l'integration avec LogisticsSteward doit respecter ce co
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT — Normatif  
+**Statut :** CONTRAT â€” Normatif  
 **Dependances :**
 - Master Butler - Documentation Fondatrice v1.4 (Section 3)
 - Master Butler - Capability API Contract v1.0
@@ -676,7 +676,7 @@ Toute implementation de l'integration avec LogisticsSteward doit respecter ce co
 
 ### Decision editoriale E1 : Direction de la relation
 
-**Decision prise :** La relation est de consultation : LogisticsSteward interroge, Master Butler repond. Cette direction est similaire a la relation StrongFather → Master Butler.
+**Decision prise :** La relation est de consultation : LogisticsSteward interroge, Master Butler repond. Cette direction est similaire a la relation StrongFather â†’ Master Butler.
 
 **Application :** Tout le document est structure autour de cette direction unidirectionnelle.
 
@@ -711,13 +711,14 @@ Toute implementation de l'integration avec LogisticsSteward doit respecter ce co
 ### Verification de coherence
 
 **Verification effectuee :**
-- ✅ Coherence avec Master Butler - Documentation Fondatrice : Confirmee (role de registre, pas de decision)
-- ✅ Coherence avec LogisticsSteward - Documentation Fondatrice : Confirmee (separation Kernel, arbitrage sans execution)
-- ✅ Coherence avec StrongFather Integration Contract : Confirmee (format similaire, protocole coherent)
-- ✅ Conformite LOI-1 : Confirmee (aucune dependance externe pour les interrogations)
+- âœ… Coherence avec Master Butler - Documentation Fondatrice : Confirmee (role de registre, pas de decision)
+- âœ… Coherence avec LogisticsSteward - Documentation Fondatrice : Confirmee (separation Kernel, arbitrage sans execution)
+- âœ… Coherence avec StrongFather Integration Contract : Confirmee (format similaire, protocole coherent)
+- âœ… Conformite LOI-1 : Confirmee (aucune dependance externe pour les interrogations)
 
 **Conclusion :** Aucune contradiction detectee. Le document est coherent et non ambigu.
 
 ---
 
 *Aucune autre erreur, warning, ou ambiguite rencontree lors de la redaction de ce document.*
+

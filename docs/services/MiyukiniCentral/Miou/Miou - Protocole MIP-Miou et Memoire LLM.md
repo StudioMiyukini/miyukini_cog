@@ -1,6 +1,6 @@
-# Miou — Protocole MIP-Miou et Mémoire LLM
+﻿# Miou â€” Protocole MIP-Miou et MÃ©moire LLM
 
-Pour le **mode LLM du chatbot**, les données stockées sont **archivées** et **indexées** par un protocole inspiré du MIP (MSCM Index Protocol), mais spécifique à Miou : **MIP-Miou**. La table **« Miou LLM Memory »** possède des **tags** et des **catégories** pour que le LLM trouve plus facilement l'information dont il a besoin et identifie celle qu'il peut ignorer pour répondre.
+Pour le **mode LLM du chatbot**, les donnÃ©es stockÃ©es sont **archivÃ©es** et **indexÃ©es** par un protocole inspirÃ© du MIP (MSCM Index Protocol), mais spÃ©cifique Ã  Miou : **MIP-Miou**. La table **Â« Miou LLM Memory Â»** possÃ¨de des **tags** et des **catÃ©gories** pour que le LLM trouve plus facilement l'information dont il a besoin et identifie celle qu'il peut ignorer pour rÃ©pondre.
 
 ---
 
@@ -8,41 +8,41 @@ Pour le **mode LLM du chatbot**, les données stockées sont **archivées** et *
 
 | Aspect | Description |
 |--------|-------------|
-| **Analogie** | Comme MIP pour le code (sémantique → index → gouvernance), MIP-Miou pour les connaissances utilisateur (donnée → index → pertinence) |
-| **Objectif** | Permettre au LLM de **retrieval ciblé** : charger uniquement les entrées pertinentes pour le contexte de conversation |
-| **Source** | Données du [Catalogue Exhaustif des Connaissances](./Miou%20-%20Catalogue%20Exhaustif%20des%20Connaissances.md), extraites des bulles, du chatbot, des Paramètres |
+| **Analogie** | Comme MIP pour le code (sÃ©mantique â†’ index â†’ gouvernance), MIP-Miou pour les connaissances utilisateur (donnÃ©e â†’ index â†’ pertinence) |
+| **Objectif** | Permettre au LLM de **retrieval ciblÃ©** : charger uniquement les entrÃ©es pertinentes pour le contexte de conversation |
+| **Source** | DonnÃ©es du [Catalogue Exhaustif des Connaissances](./Miou%20-%20Catalogue%20Exhaustif%20des%20Connaissances.md), extraites des bulles, du chatbot, des ParamÃ¨tres |
 
 **Principe fondateur :**
 
-> La donnée est dans la base.  
+> La donnÃ©e est dans la base.  
 > La structure est dans l'index.  
-> La pertinence est dans les tags et catégories.
+> La pertinence est dans les tags et catÃ©gories.
 
 ---
 
 ## 2. Architecture MIP-Miou
 
 ```
-miou_data/                    # Données brutes (chiffrées)
-├── user_responses.db         # Réponses stockées (Catalogue connaissances)
-└── conversation_archive/    # Historique conversations (optionnel)
+miou_data/                    # DonnÃ©es brutes (chiffrÃ©es)
+â”œâ”€â”€ user_responses.db         # RÃ©ponses stockÃ©es (Catalogue connaissances)
+â””â”€â”€ conversation_archive/    # Historique conversations (optionnel)
 
-miou_memory_index/            # Index MIP-Miou (généré)
-├── registry.json             # Version, intégrité
-├── memory_blocks.json        # Entrées indexées (équivalent blocks.json)
-├── categories.json           # Projection par catégorie
-├── tags_index.json           # Index inverse tags → blocks
-├── relevance_rules.json      # Règles de pertinence par type de requête
-└── stats.json                # Métriques
+miou_memory_index/            # Index MIP-Miou (gÃ©nÃ©rÃ©)
+â”œâ”€â”€ registry.json             # Version, intÃ©gritÃ©
+â”œâ”€â”€ memory_blocks.json        # EntrÃ©es indexÃ©es (Ã©quivalent blocks.json)
+â”œâ”€â”€ categories.json           # Projection par catÃ©gorie
+â”œâ”€â”€ tags_index.json           # Index inverse tags â†’ blocks
+â”œâ”€â”€ relevance_rules.json      # RÃ¨gles de pertinence par type de requÃªte
+â””â”€â”€ stats.json                # MÃ©triques
 ```
 
 ---
 
-## 3. Table « Miou LLM Memory »
+## 3. Table Â« Miou LLM Memory Â»
 
-### 3.1 Schéma d'une entrée (memory block)
+### 3.1 SchÃ©ma d'une entrÃ©e (memory block)
 
-Chaque donnée stockée est indexée sous forme de **block** :
+Chaque donnÃ©e stockÃ©e est indexÃ©e sous forme de **block** :
 
 ```json
 {
@@ -53,7 +53,7 @@ Chaque donnée stockée est indexée sous forme de **block** :
   "value_hash": "sha256_xxx",
   "source": "bulle",
   "question_id": "q3_1",
-  "tags": ["pause", "bien-être", "reconfort", "personnel"],
+  "tags": ["pause", "bien-Ãªtre", "reconfort", "personnel"],
   "ignore_for": ["technique", "specs", "culture_generale"],
   "created_at": "2026-02-15T10:30:00Z",
   "updated_at": "2026-02-15T10:30:00Z",
@@ -66,59 +66,59 @@ Chaque donnée stockée est indexée sous forme de **block** :
 | Champ | Type | Description |
 |-------|------|-------------|
 | `id` | UUID | Identifiant unique du block |
-| `key` | string | Clé de la donnée (ex. `reconfort`, `hobby`) |
-| `category` | string | Catégorie d'affichage (identite, emotions, projets...) |
-| `value_preview` | string | Aperçu court (max 50 car.) — pour affichage index, pas la valeur complète |
+| `key` | string | ClÃ© de la donnÃ©e (ex. `reconfort`, `hobby`) |
+| `category` | string | CatÃ©gorie d'affichage (identite, emotions, projets...) |
+| `value_preview` | string | AperÃ§u court (max 50 car.) â€” pour affichage index, pas la valeur complÃ¨te |
 | `source` | enum | `bulle`, `chatbot`, `parametres`, `rite_entree` |
-| `tags` | string[] | Tags pour retrieval — ce pour quoi l'entrée est pertinente |
-| `ignore_for` | string[] | Contextes où le LLM doit ignorer cette entrée |
+| `tags` | string[] | Tags pour retrieval â€” ce pour quoi l'entrÃ©e est pertinente |
+| `ignore_for` | string[] | Contextes oÃ¹ le LLM doit ignorer cette entrÃ©e |
 
 ### 3.3 Champs optionnels
 
 | Champ | Type | Description |
 |-------|------|-------------|
 | `question_id` | string | Ex. `q3_1` si source bulle |
-| `value_hash` | string | Hash pour intégrité |
-| `relation_palier_min` | int | Palier minimal pour utiliser cette donnée |
+| `value_hash` | string | Hash pour intÃ©gritÃ© |
+| `relation_palier_min` | int | Palier minimal pour utiliser cette donnÃ©e |
 | `created_at`, `updated_at` | DateTime | Horodatage |
 
 ---
 
-## 4. Tags et catégories — Rôle
+## 4. Tags et catÃ©gories â€” RÃ´le
 
-### 4.1 Tags : « Trouver l'info »
+### 4.1 Tags : Â« Trouver l'info Â»
 
-Les **tags** indiquent **quand** une entrée est pertinente. Le LLM (ou un module de retrieval) les utilise pour :
+Les **tags** indiquent **quand** une entrÃ©e est pertinente. Le LLM (ou un module de retrieval) les utilise pour :
 
-- **Inclure** : Si la requête ou le contexte de conversation matche un tag → charger l'entrée
-- **Exemple** : Tag `pause` → entrées `reconfort`, `activite_deconnexion` utiles pour une bulle pause
+- **Inclure** : Si la requÃªte ou le contexte de conversation matche un tag â†’ charger l'entrÃ©e
+- **Exemple** : Tag `pause` â†’ entrÃ©es `reconfort`, `activite_deconnexion` utiles pour une bulle pause
 
 | Type de tag | Exemples | Usage |
 |-------------|----------|-------|
-| **Contexte conversation** | `pause`, `accueil`, `retour`, `curiosite` | Quelle bulle / quel échange |
-| **Thème** | `bien-être`, `projet`, `loisir` | Sujet abordé |
-| **Personnalisation** | `personnel`, `reconfort`, `soutien` | Ton, réutilisation |
-| **Dérivé de la clé** | Même nom que la clé | `reconfort`, `hobby` |
+| **Contexte conversation** | `pause`, `accueil`, `retour`, `curiosite` | Quelle bulle / quel Ã©change |
+| **ThÃ¨me** | `bien-Ãªtre`, `projet`, `loisir` | Sujet abordÃ© |
+| **Personnalisation** | `personnel`, `reconfort`, `soutien` | Ton, rÃ©utilisation |
+| **DÃ©rivÃ© de la clÃ©** | MÃªme nom que la clÃ© | `reconfort`, `hobby` |
 
-### 4.2 Ignore_for : « Ignorer l'info »
+### 4.2 Ignore_for : Â« Ignorer l'info Â»
 
-Le champ **`ignore_for`** indique **quand** une entrée ne doit **pas** être chargée :
+Le champ **`ignore_for`** indique **quand** une entrÃ©e ne doit **pas** Ãªtre chargÃ©e :
 
-- **Exclure** : Si la requête matche un contexte `ignore_for` → ne pas inclure
-- **Exemple** : `reconfort` peut avoir `ignore_for: ["technique", "culture_generale"]` — inutile pour une question sur les specs machine ou une blague pop culture
+- **Exclure** : Si la requÃªte matche un contexte `ignore_for` â†’ ne pas inclure
+- **Exemple** : `reconfort` peut avoir `ignore_for: ["technique", "culture_generale"]` â€” inutile pour une question sur les specs machine ou une blague pop culture
 
 | Contexte ignore_for | Description |
 |---------------------|-------------|
-| `technique` | Questions specs, bugs, paramètres système |
-| `culture_generale` | Blagues, références pop — pas besoin de données personnelles |
-| `accueil_froid` | Première interaction, ton neutre |
-| `autre_utilisateur` | (si multi-utilisateur futur) Données d'un autre profil |
+| `technique` | Questions specs, bugs, paramÃ¨tres systÃ¨me |
+| `culture_generale` | Blagues, rÃ©fÃ©rences pop â€” pas besoin de donnÃ©es personnelles |
+| `accueil_froid` | PremiÃ¨re interaction, ton neutre |
+| `autre_utilisateur` | (si multi-utilisateur futur) DonnÃ©es d'un autre profil |
 
-### 4.3 Catégories : Regroupement et filtrage
+### 4.3 CatÃ©gories : Regroupement et filtrage
 
-Les **catégories** correspondent au [Catalogue Exhaustif](./Miou%20-%20Catalogue%20Exhaustif%20des%20Connaissances.md) :
+Les **catÃ©gories** correspondent au [Catalogue Exhaustif](./Miou%20-%20Catalogue%20Exhaustif%20des%20Connaissances.md) :
 
-| Catégorie | Clé | Entrées typiques |
+| CatÃ©gorie | ClÃ© | EntrÃ©es typiques |
 |-----------|-----|------------------|
 | `identite` | identite | pseudo, date_naissance, contexte_activite |
 | `preferences_pratiques` | preferences_pratiques | preference_rappel, preference_ton, moment_prefere |
@@ -129,39 +129,39 @@ Les **catégories** correspondent au [Catalogue Exhaustif](./Miou%20-%20Catalogu
 | `accompagnement` | accompagnement | style_accompagnement, style_conseil |
 | `humeur` | humeur | humeur_actuelle, theme_ambiance |
 
-**Usage :** Le LLM peut demander « charge tout sauf `identite` » ou « charge uniquement `emotions` et `soutien` » selon le type de réponse à générer.
+**Usage :** Le LLM peut demander Â« charge tout sauf `identite` Â» ou Â« charge uniquement `emotions` et `soutien` Â» selon le type de rÃ©ponse Ã  gÃ©nÃ©rer.
 
 ---
 
 ## 5. Pipeline d'indexation
 
 ```
-1. Utilisateur répond (bulle) ou partage (chatbot) → stockage dans user_responses.db
+1. Utilisateur rÃ©pond (bulle) ou partage (chatbot) â†’ stockage dans user_responses.db
 2. Trigger indexation : nouvel enregistrement ou modification
 3. Extraction : key, category, value_preview, source, question_id
-4. Génération tags : mapping key→tags, dérivation contexte
-5. Génération ignore_for : règles par catégorie
-6. Création memory block
-7. Mise à jour memory_blocks.json, tags_index.json, categories.json
+4. GÃ©nÃ©ration tags : mapping keyâ†’tags, dÃ©rivation contexte
+5. GÃ©nÃ©ration ignore_for : rÃ¨gles par catÃ©gorie
+6. CrÃ©ation memory block
+7. Mise Ã  jour memory_blocks.json, tags_index.json, categories.json
 ```
 
-### 5.1 Mapping key → tags (exemples)
+### 5.1 Mapping key â†’ tags (exemples)
 
-| key | tags par défaut |
+| key | tags par dÃ©faut |
 |-----|-----------------|
-| `reconfort` | pause, bien-être, reconfort, personnel |
+| `reconfort` | pause, bien-Ãªtre, reconfort, personnel |
 | `hobby` | curiosite, loisir, personnalisation |
 | `projet_coeur` | retour, projet, soutien |
 | `preference_ton` | accueil, frequence, parametres |
-| `activite_deconnexion` | pause, bien-être, déconnexion |
+| `activite_deconnexion` | pause, bien-Ãªtre, dÃ©connexion |
 
-### 5.2 Mapping category → ignore_for (exemples)
+### 5.2 Mapping category â†’ ignore_for (exemples)
 
-| category | ignore_for par défaut |
+| category | ignore_for par dÃ©faut |
 |----------|----------------------|
 | `emotions` | technique, culture_generale |
 | `projets` | technique, accueil_froid |
-| `identite` | (aucun — toujours pertinent pour personnalisation) |
+| `identite` | (aucun â€” toujours pertinent pour personnalisation) |
 | `preferences_pratiques` | culture_generale |
 
 ---
@@ -179,7 +179,7 @@ Les **catégories** correspondent au [Catalogue Exhaustif](./Miou%20-%20Catalogu
     "value_preview": "une tisane",
     "source": "bulle",
     "question_id": "q3_1",
-    "tags": ["pause", "bien-être", "reconfort", "personnel"],
+    "tags": ["pause", "bien-Ãªtre", "reconfort", "personnel"],
     "ignore_for": ["technique", "culture_generale"],
     "relation_palier_min": 3,
     "created_at": "2026-02-15T10:30:00Z"
@@ -193,7 +193,7 @@ Les **catégories** correspondent au [Catalogue Exhaustif](./Miou%20-%20Catalogu
 {
   "pause": ["mem_abc123", "mem_def456"],
   "reconfort": ["mem_abc123"],
-  "bien-être": ["mem_abc123", "mem_def456"],
+  "bien-Ãªtre": ["mem_abc123", "mem_def456"],
   "curiosite": ["mem_ghi789"]
 }
 ```
@@ -208,12 +208,12 @@ Les **catégories** correspondent au [Catalogue Exhaustif](./Miou%20-%20Catalogu
 }
 ```
 
-### 6.4 relevance_rules.json (règles de retrieval)
+### 6.4 relevance_rules.json (rÃ¨gles de retrieval)
 
 ```json
 {
   "bulle_pause": {
-    "include_tags": ["pause", "bien-être", "reconfort", "activite_deconnexion"],
+    "include_tags": ["pause", "bien-Ãªtre", "reconfort", "activite_deconnexion"],
     "include_categories": ["emotions", "loisirs"],
     "exclude_contexts": ["technique"]
   },
@@ -232,51 +232,52 @@ Les **catégories** correspondent au [Catalogue Exhaustif](./Miou%20-%20Catalogu
 
 ## 7. Usage par le LLM
 
-### 7.1 Avant chaque réponse
+### 7.1 Avant chaque rÃ©ponse
 
-1. **Contexte détecté** : type de requête (bulle pause, accueil, chatbot libre, etc.)
-2. **Règles appliquées** : `relevance_rules.json` pour ce contexte
+1. **Contexte dÃ©tectÃ©** : type de requÃªte (bulle pause, accueil, chatbot libre, etc.)
+2. **RÃ¨gles appliquÃ©es** : `relevance_rules.json` pour ce contexte
 3. **Retrieval** : charger les blocks dont les tags/categories matchent, et dont `ignore_for` ne matche pas
-4. **Injection** : Les valeurs (déchiffrées) sont injectées dans le prompt du LLM
+4. **Injection** : Les valeurs (dÃ©chiffrÃ©es) sont injectÃ©es dans le prompt du LLM
 
 ### 7.2 Exemple de prompt enrichi
 
 ```
-[CONTEXTE] Bulle pause santé — l'utilisateur est connecté depuis 2h.
+[CONTEXTE] Bulle pause santÃ© â€” l'utilisateur est connectÃ© depuis 2h.
 
-[DONNÉES PERTINENTES - MIOU LLM MEMORY]
+[DONNÃ‰ES PERTINENTES - MIOU LLM MEMORY]
 - reconfort: "une tisane"
 - activite_deconnexion: "courir"
 
-[INSTRUCTIONS] Génère une bulle de pause en réutilisant ces données si pertinent. Ton chaleureux, palier Amie.
+[INSTRUCTIONS] GÃ©nÃ¨re une bulle de pause en rÃ©utilisant ces donnÃ©es si pertinent. Ton chaleureux, palier Amie.
 ```
 
 ### 7.3 Ce que le LLM peut ignorer
 
-- Données dont le contexte actuel est dans `ignore_for`
-- Données dont `relation_palier_min` > palier actuel
-- Données supprimées par l'utilisateur (absence dans l'index)
+- DonnÃ©es dont le contexte actuel est dans `ignore_for`
+- DonnÃ©es dont `relation_palier_min` > palier actuel
+- DonnÃ©es supprimÃ©es par l'utilisateur (absence dans l'index)
 
 ---
 
 ## 8. Archivage
 
-Les données sont **archivées** avant indexation :
+Les donnÃ©es sont **archivÃ©es** avant indexation :
 
-- **Snapshot** : copie de l'état des réponses au moment de l'indexation
-- **Versioning** : chaque modification crée une nouvelle entrée ou met à jour le block
-- **Traçabilité** : `created_at`, `updated_at` sur chaque block
+- **Snapshot** : copie de l'Ã©tat des rÃ©ponses au moment de l'indexation
+- **Versioning** : chaque modification crÃ©e une nouvelle entrÃ©e ou met Ã  jour le block
+- **TraÃ§abilitÃ©** : `created_at`, `updated_at` sur chaque block
 
 ---
 
-## 9. Références
+## 9. RÃ©fÃ©rences
 
 - [Miou - Catalogue Exhaustif des Connaissances](./Miou%20-%20Catalogue%20Exhaustif%20des%20Connaissances.md)
 - [Miou - Onglet Service Mode Chatbot](./Miou%20-%20Onglet%20Service%20Mode%20Chatbot.md)
 - [Miou - Base Culture Populaire](./Miou%20-%20Base%20Culture%20Populaire.md)
-- [docs/contrats/Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../../contrats/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md)
+- [docs/contrats/Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md)
 
 ---
 
 **Version :** 1.0  
-**Statut :** Spécification protocole MIP-Miou et Miou LLM Memory
+**Statut :** SpÃ©cification protocole MIP-Miou et Miou LLM Memory
+

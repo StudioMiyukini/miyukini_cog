@@ -1,118 +1,120 @@
-# MiyuAuth — Audit de la documentation
+﻿# MiyuAuth â€” Audit de la documentation
 
 ## Contexte
 
-Ce document constitue l'**audit de la documentation MiyuAuth** au regard des références [docs/reference](../../reference) et du modèle [docs/tools/MiyuSQL](../../MiyuSQL). Il identifie les points conformes et les améliorations possibles.
+Ce document constitue l'**audit de la documentation MiyuAuth** au regard des rÃ©fÃ©rences [docs/reference](..//..//_index.md) et du modÃ¨le [docs/tools/MiyuSQL](..//..//_index.md). Il identifie les points conformes et les amÃ©liorations possibles.
 
 **Date d'audit :** 2026-01-30  
-**Références utilisées :** Glossaire, Tools et Toolkits, Connexion Inter-COG, Security Levels, Standardisation Numération Invariants, MiyuSQL (structure et contrats).
+**RÃ©fÃ©rences utilisÃ©es :** Glossaire, Tools et Toolkits, Connexion Inter-COG, Security Levels, Standardisation NumÃ©ration Invariants, MiyuSQL (structure et contrats).
 
 ---
 
-## 1. Conformité déjà acquise
+## 1. ConformitÃ© dÃ©jÃ  acquise
 
-| Domaine | État | Détail |
+| Domaine | Ã‰tat | DÃ©tail |
 |--------|------|--------|
-| **Structure** | ✅ | Arborescence alignée sur MiyuSQL : Fondatrice, Reference Outils, _index, contracts (governance, boundaries, security, integration, testing), dependencies, implementation. |
-| **Terminologie** | ✅ | Glossaire respecté : Passeport Utilisateur, Visa de Connexion, COG Hébergeur, COG Origine, Utilisateur Visiteur, Utilisateur Externe, citoyen. |
-| **Flux de gouvernance** | ✅ | BondingBrother → Master Butler → WorrySentinel → Caring Nanny → StrongFather → Exécution ; cohérent avec Tools et Toolkits (MiyuAuth explicite StrongFather, la référence schématise sans le détailler). |
-| **Relation KindMother** | ✅ | KindMother = validateur unique de la confiance ; MiyuAuth exécute sans décider ; invariants INV-KM-* clairs. |
-| **Relation MiyuSQL** | ✅ | Section 8bis Documentation Fondatrice + 6bis KindMother Integration : persistance = KindMother + MiyuSQL ; MiyuAuth opère sur données fournies. |
-| **ToolkitId / ToolIds** | ✅ | Format `toolkit.identity.miyauth`, `tool.identity.<action>` conforme Master Butler. |
-| **Sécurité et états** | ✅ | Niveau 2 ou 3, HEALTHY/DEGRADED autorisés, SECURITY_LOCKDOWN/MAINTENANCE interdits ; alignement WorrySentinel et Caring Nanny. |
-| **MIP** | ✅ | Domaine `identity`, layer Strate 6, blocs futurs (id, do, role, layer). |
+| **Structure** | âœ… | Arborescence alignÃ©e sur MiyuSQL : Fondatrice, Reference Outils, _index, contracts (governance, boundaries, security, integration, testing), dependencies, implementation. |
+| **Terminologie** | âœ… | Glossaire respectÃ© : Passeport Utilisateur, Visa de Connexion, COG HÃ©bergeur, COG Origine, Utilisateur Visiteur, Utilisateur Externe, citoyen. |
+| **Flux de gouvernance** | âœ… | BondingBrother â†’ Master Butler â†’ WorrySentinel â†’ Caring Nanny â†’ StrongFather â†’ ExÃ©cution ; cohÃ©rent avec Tools et Toolkits (MiyuAuth explicite StrongFather, la rÃ©fÃ©rence schÃ©matise sans le dÃ©tailler). |
+| **Relation KindMother** | âœ… | KindMother = validateur unique de la confiance ; MiyuAuth exÃ©cute sans dÃ©cider ; invariants INV-KM-* clairs. |
+| **Relation MiyuSQL** | âœ… | Section 8bis Documentation Fondatrice + 6bis KindMother Integration : persistance = KindMother + MiyuSQL ; MiyuAuth opÃ¨re sur donnÃ©es fournies. |
+| **ToolkitId / ToolIds** | âœ… | Format `toolkit.identity.miyauth`, `tool.identity.<action>` conforme Master Butler. |
+| **SÃ©curitÃ© et Ã©tats** | âœ… | Niveau 2 ou 3, HEALTHY/DEGRADED autorisÃ©s, SECURITY_LOCKDOWN/MAINTENANCE interdits ; alignement WorrySentinel et Caring Nanny. |
+| **MIP** | âœ… | Domaine `identity`, layer Strate 6, blocs futurs (id, do, role, layer). |
 
 ---
 
-## 2. Améliorations possibles
+## 2. AmÃ©liorations possibles
 
-### 2.1 Références documentaires manquantes ou à renforcer
+### 2.1 RÃ©fÃ©rences documentaires manquantes ou Ã  renforcer
 
-| Référence | Où l’ajouter | Raison |
+| RÃ©fÃ©rence | OÃ¹ lâ€™ajouter | Raison |
 |-----------|--------------|--------|
-| **Security Levels** ([Miyukini Conceptual References - Security Levels](../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md)) | Security and States Contract, section Références croisées | Référence conceptuelle des niveaux 0–4 ; justification explicite du niveau 2 ou 3 (Niveau 2 = Sensitive Data, Niveau 3 = Critical System / Auth). |
-| **Ever Buddy** (Tools et Toolkits § 5.2, § 6) | Documentation Fondatrice § 6 ou Dependencies Contract | Ever Buddy gère cycle de vie, versions et compatibilité des Outils ; MiyuAuth est déclaré et compatibilisé par l’environnement (Toolkit Composition). |
-| **Standardisation Numération Invariants** | _index ou Implementation Guidelines | Documenter les préfixes d’invariants MiyuAuth (INV-BOUND-*, INV-DEP-*, INV-KM-*, INV-SEC-*, etc.) et leur lien éventuel au standard (format INV-&lt;PREFIX&gt;-&lt;NUMERO&gt;). Les contrats MiyuAuth utilisent des préfixes catégoriels (BOUND, DEP, SEC) ; le standard couvre les Cores ; option : ajouter une note dans _index ou Dependencies. |
-| **Souveraineté Environnement / Pyramide** | Références croisées Documentation Fondatrice ou _index | Contexte Strate 6 et souveraineté applicative (bibliothèque d’outils gouvernée). |
-| **Connexion Inter-COG — champs Passeport / Visa** | Reference Outils (§ 4.3, 4.4) | Rappeler que les champs des artefacts (ex. Passeport § 3.1, Visa § 3.3 et niveaux S1–S5) sont ceux sur lesquels `verify` / `role` opèrent, sans décider de l’autorisation. |
+| **Security Levels** ([Miyukini Conceptual References - Security Levels](..//..//miyukini-webway-system//reference//_index.md)) | Security and States Contract, section RÃ©fÃ©rences croisÃ©es | RÃ©fÃ©rence conceptuelle des niveaux 0â€“4 ; justification explicite du niveau 2 ou 3 (Niveau 2 = Sensitive Data, Niveau 3 = Critical System / Auth). |
+| **Ever Buddy** (Tools et Toolkits Â§ 5.2, Â§ 6) | Documentation Fondatrice Â§ 6 ou Dependencies Contract | Ever Buddy gÃ¨re cycle de vie, versions et compatibilitÃ© des Outils ; MiyuAuth est dÃ©clarÃ© et compatibilisÃ© par lâ€™environnement (Toolkit Composition). |
+| **Standardisation NumÃ©ration Invariants** | _index ou Implementation Guidelines | Documenter les prÃ©fixes dâ€™invariants MiyuAuth (INV-BOUND-*, INV-DEP-*, INV-KM-*, INV-SEC-*, etc.) et leur lien Ã©ventuel au standard (format INV-&lt;PREFIX&gt;-&lt;NUMERO&gt;). Les contrats MiyuAuth utilisent des prÃ©fixes catÃ©goriels (BOUND, DEP, SEC) ; le standard couvre les Cores ; option : ajouter une note dans _index ou Dependencies. |
+| **SouverainetÃ© Environnement / Pyramide** | RÃ©fÃ©rences croisÃ©es Documentation Fondatrice ou _index | Contexte Strate 6 et souverainetÃ© applicative (bibliothÃ¨que dâ€™outils gouvernÃ©e). |
+| **Connexion Inter-COG â€” champs Passeport / Visa** | Reference Outils (Â§ 4.3, 4.4) | Rappeler que les champs des artefacts (ex. Passeport Â§ 3.1, Visa Â§ 3.3 et niveaux S1â€“S5) sont ceux sur lesquels `verify` / `role` opÃ¨rent, sans dÃ©cider de lâ€™autorisation. |
 
-### 2.2 Contenu à préciser
+### 2.2 Contenu Ã  prÃ©ciser
 
 | Sujet | Suggestion |
 |-------|------------|
-| **Niveaux Visa (S1–S5)** | Dans Reference Outils (tool.identity.verify) ou Security Contract : préciser que la vérification peut porter sur le `security_level` (S1–S5) du Visa (Connexion Inter-COG § 4) sans que MiyuAuth décide de l’autorisation. |
-| **Rôle « externe »** | Dans Reference Outils § 4.4 (tool.identity.role) : ajouter une phrase reliant « externe » à Utilisateur Externe et Mandat Public d’Accès (Connexion Inter-COG § 11), pour cohérence avec la référence. |
-| **_index — description Fondation** | Dans _index, ligne « Documentation Fondatrice » : ajouter « relation MiyuSQL (données identité, Passeport, Visa) » pour refléter la section 8bis. |
-| **Flux schématique** | Documentation Fondatrice § 6 : le flux liste bien StrongFather ; la référence Tools et Toolkits ne le montre pas dans le schéma ASCII. Conserver la formulation MiyuAuth (complète) ; pas de changement requis. |
+| **Niveaux Visa (S1â€“S5)** | Dans Reference Outils (tool.identity.verify) ou Security Contract : prÃ©ciser que la vÃ©rification peut porter sur le `security_level` (S1â€“S5) du Visa (Connexion Inter-COG Â§ 4) sans que MiyuAuth dÃ©cide de lâ€™autorisation. |
+| **RÃ´le Â« externe Â»** | Dans Reference Outils Â§ 4.4 (tool.identity.role) : ajouter une phrase reliant Â« externe Â» Ã  Utilisateur Externe et Mandat Public dâ€™AccÃ¨s (Connexion Inter-COG Â§ 11), pour cohÃ©rence avec la rÃ©fÃ©rence. |
+| **_index â€” description Fondation** | Dans _index, ligne Â« Documentation Fondatrice Â» : ajouter Â« relation MiyuSQL (donnÃ©es identitÃ©, Passeport, Visa) Â» pour reflÃ©ter la section 8bis. |
+| **Flux schÃ©matique** | Documentation Fondatrice Â§ 6 : le flux liste bien StrongFather ; la rÃ©fÃ©rence Tools et Toolkits ne le montre pas dans le schÃ©ma ASCII. Conserver la formulation MiyuAuth (complÃ¨te) ; pas de changement requis. |
 
-### 2.3 Invariants et numérotation
+### 2.3 Invariants et numÃ©rotation
 
-| Élément | État | Recommandation |
+| Ã‰lÃ©ment | Ã‰tat | Recommandation |
 |--------|------|----------------|
-| **INV-KM-*** | Utilisé dans KindMother Integration | KM = KindMother dans le standard ; ici ce sont des invariants du *contrat* d’intégration. Pas d’ambiguïté si le contrat est lu en entier ; option : préfixe INV-MAUTH-KM-* pour distinguer « contrat MiyuAuth–KindMother » du core KindMother. |
-| **INV-BOUND-*, INV-DEP-*, INV-SEC-*** | Préfixes catégoriels | Cohérents en interne ; le standard cible les Cores. Ajouter une courte note dans Runtime Boundary ou dans _index : « Invariants de bornage (BOUND), dépendances (DEP), sécurité (SEC) ; voir Standardisation Numération Invariants pour le format canonique des Cores. » |
+| **INV-KM-*** | UtilisÃ© dans KindMother Integration | KM = KindMother dans le standard ; ici ce sont des invariants du *contrat* dâ€™intÃ©gration. Pas dâ€™ambiguÃ¯tÃ© si le contrat est lu en entier ; option : prÃ©fixe INV-MAUTH-KM-* pour distinguer Â« contrat MiyuAuthâ€“KindMother Â» du core KindMother. |
+| **INV-BOUND-*, INV-DEP-*, INV-SEC-*** | PrÃ©fixes catÃ©goriels | CohÃ©rents en interne ; le standard cible les Cores. Ajouter une courte note dans Runtime Boundary ou dans _index : Â« Invariants de bornage (BOUND), dÃ©pendances (DEP), sÃ©curitÃ© (SEC) ; voir Standardisation NumÃ©ration Invariants pour le format canonique des Cores. Â» |
 | **INV-UT-MAUTH-*, INV-CT-MAUTH-*** | Tests | Clairs ; pas de changement requis. |
 
-### 2.4 Alignement MiyuSQL (modèle)
+### 2.4 Alignement MiyuSQL (modÃ¨le)
 
 | Aspect | MiyuSQL | MiyuAuth | Action |
 |--------|---------|----------|--------|
-| Référence « Acces DB et Droits Agents IA » | Oui (Fondatrice) | N/A (MiyuAuth ne touche pas à la DB) | — |
-| Référence MiyukiniAdmin Cycle Tests | Oui (_index) | Mention « exécutable par MiyukiniAdmin » dans contrats | Option : ajouter dans _index un lien vers MiyukiniAdmin - Cycle Tests Contract si un test MiyuAuth y est défini. |
-| Référence Security Levels | Non explicite dans MiyuSQL | Idem | Ajouter dans MiyuAuth Security and States Contract. |
+| RÃ©fÃ©rence Â« Acces DB et Droits Agents IA Â» | Oui (Fondatrice) | N/A (MiyuAuth ne touche pas Ã  la DB) | â€” |
+| RÃ©fÃ©rence MiyukiniAdmin Cycle Tests | Oui (_index) | Mention Â« exÃ©cutable par MiyukiniAdmin Â» dans contrats | Option : ajouter dans _index un lien vers MiyukiniAdmin - Cycle Tests Contract si un test MiyuAuth y est dÃ©fini. |
+| RÃ©fÃ©rence Security Levels | Non explicite dans MiyuSQL | Idem | Ajouter dans MiyuAuth Security and States Contract. |
 
 ---
 
-## 3. Plan d’actions recommandé
+## 3. Plan dâ€™actions recommandÃ©
 
-### Priorité haute (références et cohérence)
+### PrioritÃ© haute (rÃ©fÃ©rences et cohÃ©rence)
 
-1. **Security and States Contract** : ajouter en références croisées [Miyukini Conceptual References - Security Levels](../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md).
-2. **_index** : compléter la description de la Documentation Fondatrice par « relation MiyuSQL (données identité, Passeport, Visa) ».
-3. **Reference Outils** : dans § 4.4 (role), ajouter une phrase sur le rôle « externe » (Utilisateur Externe / Mandat Public d’Accès).
+1. **Security and States Contract** : ajouter en rÃ©fÃ©rences croisÃ©es [Miyukini Conceptual References - Security Levels](..//..//miyukini-webway-system//reference//_index.md).
+2. **_index** : complÃ©ter la description de la Documentation Fondatrice par Â« relation MiyuSQL (donnÃ©es identitÃ©, Passeport, Visa) Â».
+3. **Reference Outils** : dans Â§ 4.4 (role), ajouter une phrase sur le rÃ´le Â« externe Â» (Utilisateur Externe / Mandat Public dâ€™AccÃ¨s).
 
-### Priorité moyenne (enrichissement)
+### PrioritÃ© moyenne (enrichissement)
 
-4. **Documentation Fondatrice ou Dependencies Contract** : mentionner Ever Buddy (cycle de vie / compatibilité des Outils, conformément à Tools et Toolkits).
-5. **Reference Outils** § 4.3 (verify) : préciser que la vérification peut porter sur les champs Passeport/Visa (dont `security_level` S1–S5) sans décider de l’autorisation.
-6. **KindMother Integration Contract** : ajouter en référence [Miyukini Conceptual References - Security Levels](../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) si le contrat mentionne le niveau de sécurité.
+4. **Documentation Fondatrice ou Dependencies Contract** : mentionner Ever Buddy (cycle de vie / compatibilitÃ© des Outils, conformÃ©ment Ã  Tools et Toolkits).
+5. **Reference Outils** Â§ 4.3 (verify) : prÃ©ciser que la vÃ©rification peut porter sur les champs Passeport/Visa (dont `security_level` S1â€“S5) sans dÃ©cider de lâ€™autorisation.
+6. **KindMother Integration Contract** : ajouter en rÃ©fÃ©rence [Miyukini Conceptual References - Security Levels](..//..//miyukini-webway-system//reference//_index.md) si le contrat mentionne le niveau de sÃ©curitÃ©.
 
-### Priorité basse (optionnel)
+### PrioritÃ© basse (optionnel)
 
-7. **Standardisation Numération Invariants** : courte note dans _index ou Implementation Guidelines sur les préfixes d’invariants MiyuAuth.
-8. **Références Souveraineté / Pyramide** : lien depuis Documentation Fondatrice ou _index pour ancrage architecture.
-9. **MiyukiniAdmin - Cycle Tests Contract** : lien depuis _index MiyuAuth si un test MiyuAuth y est décrit.
+7. **Standardisation NumÃ©ration Invariants** : courte note dans _index ou Implementation Guidelines sur les prÃ©fixes dâ€™invariants MiyuAuth.
+8. **RÃ©fÃ©rences SouverainetÃ© / Pyramide** : lien depuis Documentation Fondatrice ou _index pour ancrage architecture.
+9. **MiyukiniAdmin - Cycle Tests Contract** : lien depuis _index MiyuAuth si un test MiyuAuth y est dÃ©crit.
 
 ---
 
-## 3bis. État d'application des recommandations
+## 3bis. Ã‰tat d'application des recommandations
 
 | # | Recommandation | Statut |
 |---|----------------|--------|
-| 1 | Security and States Contract — référence Security Levels | ✅ Appliqué |
-| 2 | _index — description Documentation Fondatrice (relation MiyuSQL) | ✅ Appliqué |
-| 3 | Reference Outils § 4.4 — rôle « externe » (Utilisateur Externe / Mandat Public) | ✅ Appliqué |
-| 4 | Documentation Fondatrice / Dependencies — Ever Buddy | ✅ Appliqué (Documentation Fondatrice § 6) |
-| 5 | Reference Outils § 4.3 — verify, champs Passeport/Visa S1–S5 | ✅ Appliqué |
-| 6 | KindMother Integration Contract — référence Security Levels | ✅ Appliqué |
-| 7 | Standardisation Numération Invariants — note _index + Implementation Guidelines | ✅ Appliqué (_index Contexte ; Implementation Guidelines § 5.3 ; Runtime Boundary § 5) |
-| 8 | Souveraineté / Pyramide — références Documentation Fondatrice et _index | ✅ Appliqué |
-| 9 | MiyukiniAdmin - Cycle Tests Contract — lien _index | ✅ Appliqué |
+| 1 | Security and States Contract â€” rÃ©fÃ©rence Security Levels | âœ… AppliquÃ© |
+| 2 | _index â€” description Documentation Fondatrice (relation MiyuSQL) | âœ… AppliquÃ© |
+| 3 | Reference Outils Â§ 4.4 â€” rÃ´le Â« externe Â» (Utilisateur Externe / Mandat Public) | âœ… AppliquÃ© |
+| 4 | Documentation Fondatrice / Dependencies â€” Ever Buddy | âœ… AppliquÃ© (Documentation Fondatrice Â§ 6) |
+| 5 | Reference Outils Â§ 4.3 â€” verify, champs Passeport/Visa S1â€“S5 | âœ… AppliquÃ© |
+| 6 | KindMother Integration Contract â€” rÃ©fÃ©rence Security Levels | âœ… AppliquÃ© |
+| 7 | Standardisation NumÃ©ration Invariants â€” note _index + Implementation Guidelines | âœ… AppliquÃ© (_index Contexte ; Implementation Guidelines Â§ 5.3 ; Runtime Boundary Â§ 5) |
+| 8 | SouverainetÃ© / Pyramide â€” rÃ©fÃ©rences Documentation Fondatrice et _index | âœ… AppliquÃ© |
+| 9 | MiyukiniAdmin - Cycle Tests Contract â€” lien _index | âœ… AppliquÃ© |
 
 ---
 
-## 4. Synthèse
+## 4. SynthÃ¨se
 
-La documentation MiyuAuth est **déjà alignée** avec les références (Glossaire, Tools et Toolkits, Connexion Inter-COG) et avec le modèle MiyuSQL (structure, contrats, relation KindMother, relation MiyuSQL). Les améliorations proposées portent sur :
+La documentation MiyuAuth est **dÃ©jÃ  alignÃ©e** avec les rÃ©fÃ©rences (Glossaire, Tools et Toolkits, Connexion Inter-COG) et avec le modÃ¨le MiyuSQL (structure, contrats, relation KindMother, relation MiyuSQL). Les amÃ©liorations proposÃ©es portent sur :
 
-- **Références explicites** : Security Levels, Ever Buddy, éventuellement Souveraineté / Pyramide.
-- **Précisions de contenu** : rôle « externe », champs Passeport/Visa et niveaux S1–S5, description _index.
-- **Numérotation des invariants** : note optionnelle pour lien avec le standard.
+- **RÃ©fÃ©rences explicites** : Security Levels, Ever Buddy, Ã©ventuellement SouverainetÃ© / Pyramide.
+- **PrÃ©cisions de contenu** : rÃ´le Â« externe Â», champs Passeport/Visa et niveaux S1â€“S5, description _index.
+- **NumÃ©rotation des invariants** : note optionnelle pour lien avec le standard.
 
-Les modifications de priorité haute peuvent être appliquées immédiatement ; les autres au fil des mises à jour.
+Les modifications de prioritÃ© haute peuvent Ãªtre appliquÃ©es immÃ©diatement ; les autres au fil des mises Ã  jour.
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document d’audit
+**Statut :** Document dâ€™audit
+
+

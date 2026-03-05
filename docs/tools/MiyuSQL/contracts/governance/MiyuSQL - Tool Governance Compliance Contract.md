@@ -1,20 +1,20 @@
-# MiyuSQL — Tool Governance Compliance Contract
+﻿# MiyuSQL â€” Tool Governance Compliance Contract
 
 ## 1. Contexte
 
-Conformité aux obligations communes : [Master Butler - Tool Governance Compliance Template](../../../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
+ConformitÃ© aux obligations communes : [Master Butler - Tool Governance Compliance Template](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
 
 Ce document definit la **conformite de MiyuSQL** aux contrats de gouvernance des Outils et Kits d'Outils de Master Butler. MiyuSQL est un **Kit d'Outils (Toolkit)** declare et gouverne par l'environnement ; ce contrat etablit la declaration formelle du ToolkitId, des ToolIds composants, et des capabilities associees.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 ## 2. Portee / Scope
 
 Ce document definit :
-- La conformite au [Master Butler - Tool Governance Contract](../../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md)
-- La conformite au [Master Butler - Toolkit Composition Contract](../../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Toolkit%20Composition%20Contract.md)
+- La conformite au [Master Butler - Tool Governance Contract](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md)
+- La conformite au [Master Butler - Toolkit Composition Contract](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Toolkit%20Composition%20Contract.md)
 - La declaration formelle du ToolkitId et des ToolIds MiyuSQL
 - Le catalogue des capabilities exposees
 
@@ -33,7 +33,7 @@ Ce document **ne couvre pas** :
 | Tout Tool possede un ToolId unique et immuable | Chaque outil MiyuSQL a un ToolId au format `tool.<domain>.<action>` |
 | Tout Tool est lie a exactement une Capability | Chaque ToolId est associe a un capability_id (voir section 5) |
 | Un Tool ne prend jamais de decision metier | Les Tools MiyuSQL executent uniquement ; pas de logique metier |
-| Un Tool ne connait jamais l'Operateur appelant | MiyuSQL reçoit un contexte gouverné ; pas d'identite Operateur dans la logique Tool |
+| Un Tool ne connait jamais l'Operateur appelant | MiyuSQL reÃ§oit un contexte gouvernÃ© ; pas d'identite Operateur dans la logique Tool |
 
 ### 3.2 Format ToolId
 
@@ -51,7 +51,7 @@ Format canonique : `tool.<domain>.<action>[.<qualifier>]`
 
 | Principe Toolkit | Application MiyuSQL |
 |------------------|---------------------|
-| Un Toolkit agrège des Tools existants | MiyuSQL regroupe neuf Tools declares individuellement dans le catalogue |
+| Un Toolkit agrÃ¨ge des Tools existants | MiyuSQL regroupe neuf Tools declares individuellement dans le catalogue |
 | Un Toolkit n'ajoute aucune capacite nouvelle | MiyuSQL n'expose que les capacites de ses Tools composants |
 | Un Toolkit est declare et valide par l'environnement | MiyuSQL est declare dans Master Butler avec ToolkitId `toolkit.data.miyusql` |
 | Tout Toolkit contient au moins deux Tools | MiyuSQL contient neuf Tools |
@@ -101,7 +101,7 @@ Format canonique : `tool.<domain>.<action>[.<qualifier>]`
 | Code | Invariant |
 |------|-----------|
 | **INV-DECL-1** | Le ToolkitId `toolkit.data.miyusql` est unique dans le catalogue Master Butler |
-| **INV-DECL-2** | Chaque ToolId listé est declare individuellement dans le catalogue avant d'etre associe au Toolkit |
+| **INV-DECL-2** | Chaque ToolId listÃ© est declare individuellement dans le catalogue avant d'etre associe au Toolkit |
 | **INV-DECL-3** | Le niveau de securite du Toolkit est au moins egal au maximum des niveaux de ses Tools (ici : 2) |
 | **INV-DECL-4** | Aucun Tool hors domaine data/cache n'est ajoute au Toolkit MiyuSQL sans revision contractuelle |
 
@@ -128,12 +128,15 @@ Format canonique : `tool.<domain>.<action>[.<qualifier>]`
 |----------|------|
 | MiyuSQL - Documentation Fondatrice | [MiyuSQL - Documentation Fondatrice](../../MiyuSQL%20-%20Documentation%20Fondatrice.md) |
 | MiyuSQL - Reference Outils | [MiyuSQL - Reference Outils](../../MiyuSQL%20-%20Reference%20Outils.md) |
-| Master Butler - Tool Governance Contract | [Master Butler - Tool Governance Contract](../../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
-| Master Butler - Toolkit Composition Contract | [Master Butler - Toolkit Composition Contract](../../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Toolkit%20Composition%20Contract.md) |
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
+| Master Butler - Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Master Butler - Toolkit Composition Contract | [Master Butler - Toolkit Composition Contract](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Toolkit%20Composition%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) |
 
 ---
 
 **Date de creation :** 2026-01-29  
 **Version :** 1.0  
 **Statut :** Contrat de reference
+
+
+

@@ -1,4 +1,4 @@
-# MiyukiniAdmin — Invariants & Guarantees
+﻿# MiyukiniAdmin â€” Invariants & Guarantees
 
 ## 1. Contexte
 
@@ -366,10 +366,11 @@ POUR CHAQUE action A:
 
 - [MiyukiniAdmin - Violations & Anti-Patterns](./MiyukiniAdmin%20-%20Violations%20&%20Anti-Patterns.md)
 - [MiyukiniAdmin - Documentation Fondatrice](../../foundation/MiyukiniAdmin%20-%20Documentation%20Fondatrice.md)
-- [Miyukini Conceptual References - MiyukiniAdmin Status](../../../../reference/Miyukini%20Conceptual%20References%20-%20MiyukiniAdmin%20Status.md)
+- [Miyukini Conceptual References - MiyukiniAdmin Status](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
 **Statut :** Document de reference NORMATIF
+

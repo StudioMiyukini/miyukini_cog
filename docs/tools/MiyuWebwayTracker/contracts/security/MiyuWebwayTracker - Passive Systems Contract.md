@@ -1,12 +1,12 @@
-# MiyuWebwayTracker -- Contrat des systemes passifs
+﻿# MiyuWebwayTracker -- Contrat des systemes passifs
 
 ## Contexte
 
 Les **systemes passifs** du COG Tracker MWS (MiyuWebwayTracker) sont des mecanismes qui **observent, enregistrent et signalent** sans modifier de maniere proactive le comportement des connexions ou des annonces. Ils informent et alimentent la decision ; ils ne coupent ni ne modifient le flux par eux-memes. Ce contrat formalise les **preconditions, postconditions et invariants** applicables aux systemes passifs du Tracker.
 
-> **Role du Tracker :** Le Tracker est le **douanier du reseau**. Il controle l'**identite** et le **Permis de circulation** des COGs avant de les laisser se connecter au maillage (contrôle tracker). Il dirige des **pools par version des Cores** pour ne jamais connecter des COGs avec des versions differentes. Il **ne fait pas** de verification lourde de conformite de l'environnement (Passeport, cle Cores, blocs de code Services) -- cette responsabilite incombe aux **relays** qui delivrent les Permis de circulation (accord relay) (voir [Miyukini Webway Relay](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 2). Le Tracker gere les **whitelists, blacklists et quarantaines** et peut **fermer des connexions** pour circonscrire les attaques sur annonce des relays.
+> **Role du Tracker :** Le Tracker est le **douanier du reseau**. Il controle l'**identite** et le **Permis de circulation** des COGs avant de les laisser se connecter au maillage (contrÃ´le tracker). Il dirige des **pools par version des Cores** pour ne jamais connecter des COGs avec des versions differentes. Il **ne fait pas** de verification lourde de conformite de l'environnement (Passeport, cle Cores, blocs de code Services) -- cette responsabilite incombe aux **relays** qui delivrent les Permis de circulation (accord relay) (voir [Miyukini Webway Relay](..//..//..//..//miyukini-webway-system//reference//_index.md) section 2). Le Tracker gere les **whitelists, blacklists et quarantaines** et peut **fermer des connexions** pour circonscrire les attaques sur annonce des relays.
 
-**Reference conceptuelle :** [Miyukini Conceptual References - Miyukini Webway System](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) (section 5.1).
+**Reference conceptuelle :** [Miyukini Conceptual References - Miyukini Webway System](..//..//..//..//miyukini-webway-system//reference//_index.md) (section 5.1).
 
 ## Portee / Scope
 
@@ -29,15 +29,15 @@ Avant d'appliquer un mecanisme passif (validation, journalisation, mise a jour d
 |----|--------------|---------------|
 | P1 | Le message ou l'evenement entrant est un **flux MWS** (annonce de presence, requete de decouverte, mise a jour de liste de statuts, ou message de protocole MWS reconnu). | Tous les traitements passifs |
 | P2 | Le Tracker dispose d'un **contexte de verification** (acces aux cles ou secrets necessaires pour verifier les signatures, selon la norme de declaration securisee). | Verification de signature |
-| P3 | Les **schemas et versions** de messages supportes sont definis (reference aux [Normes et Standards](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md)). | Validation syntaxique |
+| P3 | Les **schemas et versions** de messages supportes sont definis (reference aux [Normes et Standards](..//..//..//..//miyukini-webway-system//reference//_index.md)). | Validation syntaxique |
 | P4 | La **liste locale de COGs avec statuts** (Webway COG List) est initialisee ou chargee ; les politiques de mise a jour (qui peut fournir un statut, agregation) sont connues. | Filtrage par statut, journalisation, signalement |
 | P5 | Les **canaux de signalement** (autres Trackers, COGs, ou composants internes tels que WorrySentinel) sont configures si le passif doit emettre des alertes ou partager des signaux. | Signalement |
 | P6 | L'**empreinte de version** (core_version, service_manifest, protocol_version) est presente dans l'annonce ou la requete MWS et le Tracker connait les versions supportees / minimales (politique locale). | Verification de version |
 | P7 | Le Tracker a acces au **Registre de Services** du Relay Origin (directement ou via un cache local synchronise periodiquement). La liste des services officiels et tiers repertories est disponible pour verification. | Verification du Registre de Services |
 | P8 | Les **canaux de notification utilisateur** sont configures pour informer le proprietaire du COG en cas de service non repertorie ou de mise a jour critique disponible. | Notification utilisateur |
-| P9 | Le Tracker possede les **listes de whitelists, blacklists et quarantaines** synchronisees avec Origin et les relays. | Controle d'identite et contrôle tracker |
+| P9 | Le Tracker possede les **listes de whitelists, blacklists et quarantaines** synchronisees avec Origin et les relays. | Controle d'identite et contrÃ´le tracker |
 | P10 | Les **pools par version des Cores** sont configures : le Tracker connait les versions actives et peut diriger chaque COG vers le pool correspondant a sa `core_version.MAJOR`. | Pools de version |
-| P11 | Le COG qui se presente au Tracker possede un **Permis de circulation valide** delivre par un relay ou Origin (accord relay). | Contrôle tracker |
+| P11 | Le COG qui se presente au Tracker possede un **Permis de circulation valide** delivre par un relay ou Origin (accord relay). | ContrÃ´le tracker |
 | P12 | Le Tracker expose un **service web de catalogue** (port 80) presentant les **services WEB publics** des COGs connectes (URLs, type moteur de recherche) ; les **Lobbys des autres services ne sont pas visibles** depuis ce portail. Le Tracker gere le **catalogue de Lobbys** (surfaces, attentes, desirs) ; ce catalogue est **visible depuis les services COG** concernes, pas depuis le portail web. Lobbys mis a jour et diffuses automatiquement, global. | Catalogue web ; catalogue de Lobbys |
 
 ---
@@ -56,10 +56,10 @@ Apres l'execution d'un mecanisme passif, les postconditions suivantes doivent et
 | Q6 | **Verification de version** : l'empreinte de version du COG est validee (format core_version correct, protocol_version supportee). Le resultat (compatible / obsolete / incompatible) est enregistre. Si la core_version est obsolete, un signalement peut etre emis (Q5) sans blocage dans le cadre du passif. La liste locale de COGs est enrichie avec l'empreinte de version pour le filtrage ulterieur. | Verification de version |
 | Q7 | **Verification du Registre de Services** : chaque `service_id` present dans le `service_manifest` du COG annonceur est verifie contre le Registre de Services du Relay Origin. Le resultat pour chaque service (repertorie / non repertorie / suspendu) est enregistre dans la liste locale de COGs. Si un service non repertorie est detecte, l'evenement est journalise (Q3) et un signalement est emis (Q5). | Verification Registre |
 | Q8 | **Suivi des mises a jour** : le Tracker compare les versions des services du COG avec le Registre. Si une mise a jour est disponible (en particulier `critical`), l'information est enregistree et un signalement peut etre emis. Le Tracker ne force pas la mise a jour ; il alimente les systemes actifs et les notifications. | Suivi mises a jour |
-| Q9 | **Contrôle tracker** : le Tracker verifie la validite du Permis de circulation (non expire, emis par un relay ou Origin reconnu, scope coherent avec la requete). Le resultat est journalise. | Contrôle tracker |
+| Q9 | **ContrÃ´le tracker** : le Tracker verifie la validite du Permis de circulation (non expire, emis par un relay ou Origin reconnu, scope coherent avec la requete). Le resultat est journalise. | ContrÃ´le tracker |
 | Q10 | **Assignation au pool de version** : le COG est dirige vers le pool correspondant a sa `core_version.MAJOR`. Le Tracker journalise l'assignation et n'autorise aucune connexion inter-COG entre pools de versions differentes. | Pools de version |
 | Q11 | **Monitoring de congestion** : le Tracker enregistre le nombre de connexions par COG et detecte les points de congestion. Si un COG accumule un nombre anormalement eleve de connexions, un signalement est emis. | Monitoring reseau |
-| Q12 | **Catalogue web (port 80)** : catalogue des services WEB publics (URLs, recherche) ; les Lobbys ne sont pas affiches sur ce portail. **Catalogue de Lobbys** : les COGs declarent leurs surfaces (services, ports, acceptation de connexions) ; les Lobbys sont repertories et **visibles/joignables depuis les services COG** concernes (ex. client jeu, client SaaS). Le tracker indique les chemins aux clients pour joindre les hôtes. Lobbys prives : mot de passe, 5 echecs puis ban, notification au hôte, de-ban manuel (voir [Miyukini Webway Relay](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 9.1–9.2). | Catalogue web ; catalogue de Lobbys |
+| Q12 | **Catalogue web (port 80)** : catalogue des services WEB publics (URLs, recherche) ; les Lobbys ne sont pas affiches sur ce portail. **Catalogue de Lobbys** : les COGs declarent leurs surfaces (services, ports, acceptation de connexions) ; les Lobbys sont repertories et **visibles/joignables depuis les services COG** concernes (ex. client jeu, client SaaS). Le tracker indique les chemins aux clients pour joindre les hÃ´tes. Lobbys prives : mot de passe, 5 echecs puis ban, notification au hÃ´te, de-ban manuel (voir [Miyukini Webway Relay](..//..//..//..//miyukini-webway-system//reference//_index.md) section 9.1â€“9.2). | Catalogue web ; catalogue de Lobbys |
 
 ---
 
@@ -154,12 +154,13 @@ Le Tracker passif effectue une **verification du Registre de Services** pour cha
 
 ## References
 
-- [Miyukini Conceptual References - Miyukini Webway System](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) -- section 5.1 (systemes passifs)
-- [Miyukini Webway System - Normes et Standards](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) -- schemas, norme de declaration securisee
-- [Miyukini Conceptual References - Miyukini Webway Relay](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) -- section 5 : Relay Origin et Registre de Services
+- [Miyukini Conceptual References - Miyukini Webway System](..//..//..//..//miyukini-webway-system//reference//_index.md) -- section 5.1 (systemes passifs)
+- [Miyukini Webway System - Normes et Standards](..//..//..//..//miyukini-webway-system//reference//_index.md) -- schemas, norme de declaration securisee
+- [Miyukini Conceptual References - Miyukini Webway Relay](..//..//..//..//miyukini-webway-system//reference//_index.md) -- section 5 : Relay Origin et Registre de Services
 - [MiyuWebwayTracker - Active Systems Contract](MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md) -- systemes actifs (blocage, degradation, isolation)
 - [MiyuWebwayTracker - Tool Governance Compliance Contract](../governance/MiyuWebwayTracker%20-%20Tool%20Governance%20Compliance%20Contract.md)
 
 ---
 
 *Document cree pour le contrat des systemes passifs du MiyuWebwayTracker. Classification : Contrat de securite.*
+

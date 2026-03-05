@@ -1,27 +1,27 @@
-# MiyuClicker — Layout Lord of Click (blocs organiques et molécules)
+﻿# MiyuClicker â€” Layout Lord of Click (blocs organiques et molÃ©cules)
 
 ## Contexte
 
-Ce document décrit le **layout cible** de l’écran de gestion **Lord of Click** (MiyuClicker) selon une hiérarchie visuelle claire :
+Ce document dÃ©crit le **layout cible** de lâ€™Ã©cran de gestion **Lord of Click** (MiyuClicker) selon une hiÃ©rarchie visuelle claire :
 
-- **Rectangles marron** = **blocs organiques** : zones structurelles, conteneurs de haut niveau (en-têtes, zones de vision, bandes de notification).
-- **Contours noirs** = **molécules ou atomes** : composants interactifs et fonctionnels (panneaux de ressources, liste de bâtiments, champs, boutons, barres de progression).
+- **Rectangles marron** = **blocs organiques** : zones structurelles, conteneurs de haut niveau (en-tÃªtes, zones de vision, bandes de notification).
+- **Contours noirs** = **molÃ©cules ou atomes** : composants interactifs et fonctionnels (panneaux de ressources, liste de bÃ¢timents, champs, boutons, barres de progression).
 
-Les textes sur le wireframe servent de **guide** pour nommer et placer les éléments.
+Les textes sur le wireframe servent de **guide** pour nommer et placer les Ã©lÃ©ments.
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Périmètre :** Structure du layout écran « Ma citée » ; mapping blocs organiques / molécules ; correspondance avec le code existant (`crates/miyuclicker`, `MiyuClickerService`).
-- **Hors périmètre :** Spécifications de jeu (coûts, formules), autres écrans (Loading, Landing, Slots, Carte du monde).
+- **PÃ©rimÃ¨tre :** Structure du layout Ã©cran Â« Ma citÃ©e Â» ; mapping blocs organiques / molÃ©cules ; correspondance avec le code existant (`crates/miyuclicker`, `MiyuClickerService`).
+- **Hors pÃ©rimÃ¨tre :** SpÃ©cifications de jeu (coÃ»ts, formules), autres Ã©crans (Loading, Landing, Slots, Carte du monde).
 
 ---
 
 ## 1. Convention de nommage
 
-| Représentation | Terme | Rôle |
+| ReprÃ©sentation | Terme | RÃ´le |
 |----------------|--------|------|
-| **Rectangle marron** (contour épais) | **Bloc organique** | Zone structurelle, conteneur ; définit la hiérarchie et l’emplacement des zones majeures. |
-| **Contour noir** (fins ou épais) | **Molécule ou atome** | Composant interactif ou fonctionnel : panneau, liste, champ, bouton, barre de progression, scrollbar. |
+| **Rectangle marron** (contour Ã©pais) | **Bloc organique** | Zone structurelle, conteneur ; dÃ©finit la hiÃ©rarchie et lâ€™emplacement des zones majeures. |
+| **Contour noir** (fins ou Ã©pais) | **MolÃ©cule ou atome** | Composant interactif ou fonctionnel : panneau, liste, champ, bouton, barre de progression, scrollbar. |
 
 ---
 
@@ -32,115 +32,116 @@ De **haut en bas** :
 ### 2.1 Header Central
 
 - **Bloc organique** en haut, pleine largeur.
-- Rôle : barre supérieure globale (ressources principales, horloge, vitesses, navigation, configuration).
-- **Correspondance code :** `ui_bar` (ligne 1 : Or, Gens, Soldats, Maçons, Recherche, Bonheur ; ligne 2 : Nourriture, Bois, Pierre, Fer, Outils, Armes ; à droite : Ma citée, Carte du monde, ⚙).
+- RÃ´le : barre supÃ©rieure globale (ressources principales, horloge, vitesses, navigation, configuration).
+- **Correspondance code :** `ui_bar` (ligne 1 : Or, Gens, Soldats, MaÃ§ons, Recherche, Bonheur ; ligne 2 : Nourriture, Bois, Pierre, Fer, Outils, Armes ; Ã  droite : Ma citÃ©e, Carte du monde, âš™).
 
 ### 2.2 Header Lord of Click
 
 - **Bloc organique** juste sous le Header Central.
-- Rôle : en-tête spécifique au jeu (titre « Lord of Click », éventuellement sous-navigation ou onglets).
-- **Correspondance code :** Peut être fusionné avec le Header Central ou dédié (à préciser selon maquette).
+- RÃ´le : en-tÃªte spÃ©cifique au jeu (titre Â« Lord of Click Â», Ã©ventuellement sous-navigation ou onglets).
+- **Correspondance code :** Peut Ãªtre fusionnÃ© avec le Header Central ou dÃ©diÃ© (Ã  prÃ©ciser selon maquette).
 
-### 2.3 Zone de vision de la cité
+### 2.3 Zone de vision de la citÃ©
 
 - **Bloc organique** central, grande surface.
-- Rôle : affichage de la représentation visuelle de la ville (ciel / sol, sprites, boutons de clic type Champs, Bois, etc.).
-- **Correspondance code :** Zone allouée dans `ui_ma_citee_central_content` (rectangle ciel/terre + boutons de clic à gauche).
+- RÃ´le : affichage de la reprÃ©sentation visuelle de la ville (ciel / sol, sprites, boutons de clic type Champs, Bois, etc.).
+- **Correspondance code :** Zone allouÃ©e dans `ui_ma_citee_central_content` (rectangle ciel/terre + boutons de clic Ã  gauche).
 
-### 2.4 Notification In Game en défilement
+### 2.4 Notification In Game en dÃ©filement
 
 - **Bloc organique** en bande horizontale sous la zone de vision.
-- Rôle : messages ou événements du jeu qui défilent (annonces, gains, alertes).
-- **Correspondance code :** À ajouter si souhaité (ex. bande dédiée alimentée par `dev_log` ou un flux « événements joueur »).
+- RÃ´le : messages ou Ã©vÃ©nements du jeu qui dÃ©filent (annonces, gains, alertes).
+- **Correspondance code :** Ã€ ajouter si souhaitÃ© (ex. bande dÃ©diÃ©e alimentÃ©e par `dev_log` ou un flux Â« Ã©vÃ©nements joueur Â»).
 
 ---
 
-## 3. Molécules ou atomes (composants)
+## 3. MolÃ©cules ou atomes (composants)
 
 ### 3.1 Panneau de ressources (colonne gauche)
 
 - **Contour noir** : panneau vertical contenant les **blocs de ressources**.
-- Chaque ressource = **atome** avec contour noir et libellé type « +1 Or », « +1 Food », « +1 pop », « +1 Tech » (guide ; en jeu : Or, Nourriture, Gens/Pop, Recherche, etc.).
-- **Correspondance code :** Les ressources sont actuellement dans `ui_bar` (en haut). Le wireframe suggère une **colonne gauche** dédiée aux indicateurs de gain (+1 / sec ou par clic) ; à aligner avec l’ergonomie cible (soit déplacer une partie des ressources en colonne, soit dupliquer les indicateurs).
+- Chaque ressource = **atome** avec contour noir et libellÃ© type Â« +1 Or Â», Â« +1 Food Â», Â« +1 pop Â», Â« +1 Tech Â» (guide ; en jeu : Or, Nourriture, Gens/Pop, Recherche, etc.).
+- **Correspondance code :** Les ressources sont actuellement dans `ui_bar` (en haut). Le wireframe suggÃ¨re une **colonne gauche** dÃ©diÃ©e aux indicateurs de gain (+1 / sec ou par clic) ; Ã  aligner avec lâ€™ergonomie cible (soit dÃ©placer une partie des ressources en colonne, soit dupliquer les indicateurs).
 
-### 3.2 Panneau de gestion des bâtiments (colonne droite)
+### 3.2 Panneau de gestion des bÃ¢timents (colonne droite)
 
-- **Contour noir** : panneau englobant la liste des bâtiments et la recherche.
+- **Contour noir** : panneau englobant la liste des bÃ¢timents et la recherche.
 
-#### 3.2.1 Recherche et filtrage des bâtiments
+#### 3.2.1 Recherche et filtrage des bÃ¢timents
 
-- **Atome** : champ de saisie (contour noir), libellé guide « Recherche et filtrage des batiments ».
-- **Correspondance code :** À ajouter (filtre texte sur la liste des bâtiments).
+- **Atome** : champ de saisie (contour noir), libellÃ© guide Â« Recherche et filtrage des batiments Â».
+- **Correspondance code :** Ã€ ajouter (filtre texte sur la liste des bÃ¢timents).
 
-#### 3.2.2 Liste des bâtiments (éléments individuels)
+#### 3.2.2 Liste des bÃ¢timents (Ã©lÃ©ments individuels)
 
-- Chaque **ligne** = **molécule** avec contour noir, contenant :
-  - **icône** (carré contour noir),
+- Chaque **ligne** = **molÃ©cule** avec contour noir, contenant :
+  - **icÃ´ne** (carrÃ© contour noir),
   - **Lvl** (niveau),
   - **Nom du batiment**,
   - **Description**,
-  - **nombre de maçon** (ou « maçons »),
-  - **Coût de construction / Coût en travail**,
+  - **nombre de maÃ§on** (ou Â« maÃ§ons Â»),
+  - **CoÃ»t de construction / CoÃ»t en travail**,
   - **barre de pts de construction** (atome),
   - **Button Construire** (atome).
-- **Correspondance code :** `ui_building_cards` (cartes Maison, Ferme, Scierie, Carrière, Mine, Atelier, Forge) ; à faire évoluer vers une liste scrollable avec recherche/filtre et mise en forme type ligne (icône, Lvl, nom, description, maçons, coût, barre, bouton).
+- **Correspondance code :** `ui_building_cards` (cartes Maison, Ferme, Scierie, CarriÃ¨re, Mine, Atelier, Forge) ; Ã  faire Ã©voluer vers une liste scrollable avec recherche/filtre et mise en forme type ligne (icÃ´ne, Lvl, nom, description, maÃ§ons, coÃ»t, barre, bouton).
 
-#### 3.2.3 Barre de défilement
+#### 3.2.3 Barre de dÃ©filement
 
-- **Atome** : scrollbar verticale à droite de la liste.
-- **Correspondance code :** Déjà présent dans `CSS overflow-y: auto` sur le conteneur des cartes bâtiments.
+- **Atome** : scrollbar verticale Ã  droite de la liste.
+- **Correspondance code :** DÃ©jÃ  prÃ©sent dans `CSS overflow-y: auto` sur le conteneur des cartes bÃ¢timents.
 
 ---
 
-## 4. Schéma récapitulatif (ordre vertical)
+## 4. SchÃ©ma rÃ©capitulatif (ordre vertical)
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  BLOC ORGANIQUE : Header Central                                │
-├─────────────────────────────────────────────────────────────────┤
-│  BLOC ORGANIQUE : header Lord of Click                           │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  BLOC ORGANIQUE : zone de vision de la cité                      │
-│                                                                  │
-├─────────────────────────────────────────────────────────────────┤
-│  BLOC ORGANIQUE : notification In Game en défilement            │
-├──────────────┬──────────────────────────────────────────────────┤
-│  MOLÉCULES  │  MOLÉCULES : Panneau bâtiments                    │
-│  Ressources │  ├─ Recherche et filtrage (atome)                  │
-│  +1 Or      │  ├─ Ligne bâtiment 1 (icône, Lvl, nom, desc,      │
-│  +1 Food    │  │    maçons, coût, barre, Button Construire)     │
-│  +1 pop     │  ├─ Ligne bâtiment 2 …                             │
-│  +1 Tech    │  └─ Scrollbar (atome)                              │
-└──────────────┴──────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  BLOC ORGANIQUE : Header Central                                â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  BLOC ORGANIQUE : header Lord of Click                           â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                  â”‚
+â”‚  BLOC ORGANIQUE : zone de vision de la citÃ©                      â”‚
+â”‚                                                                  â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  BLOC ORGANIQUE : notification In Game en dÃ©filement            â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  MOLÃ‰CULES  â”‚  MOLÃ‰CULES : Panneau bÃ¢timents                    â”‚
+â”‚  Ressources â”‚  â”œâ”€ Recherche et filtrage (atome)                  â”‚
+â”‚  +1 Or      â”‚  â”œâ”€ Ligne bÃ¢timent 1 (icÃ´ne, Lvl, nom, desc,      â”‚
+â”‚  +1 Food    â”‚  â”‚    maÃ§ons, coÃ»t, barre, Button Construire)     â”‚
+â”‚  +1 pop     â”‚  â”œâ”€ Ligne bÃ¢timent 2 â€¦                             â”‚
+â”‚  +1 Tech    â”‚  â””â”€ Scrollbar (atome)                              â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
 
 ## 5. Correspondance avec le code actuel
 
-| Élément layout | Fichier / fonction | Statut |
+| Ã‰lÃ©ment layout | Fichier / fonction | Statut |
 |----------------|--------------------|--------|
-| Header Central | `app.rs` → `ui_bar` | Présent (2 lignes ressources + nav + config) |
-| Header Lord of Click | — | Optionnel ou fusionné |
-| Zone de vision cité | `ui_ma_citee_central_content` (rectangle ciel/sol + boutons clic) | Présent |
-| Notification défilement | — | À ajouter si requis |
-| Panneau ressources (colonne) | Ressources dans `ui_bar` | À déplacer ou dupliquer en colonne gauche selon maquette |
-| Panneau bâtiments | `ui_building_cards` | Présent (cartes verticales) ; à faire évoluer en liste + recherche |
-| Recherche / filtrage | — | À ajouter |
-| Ligne bâtiment (icône, Lvl, nom, desc, maçons, coût, barre, bouton) | `ui_card_maison`, `ui_card_zone` | Partiel ; formaliser en ligne unique |
-| Scrollbar liste bâtiments | `CSS overflow-y: auto` | Présent |
+| Header Central | `app.rs` â†’ `ui_bar` | PrÃ©sent (2 lignes ressources + nav + config) |
+| Header Lord of Click | â€” | Optionnel ou fusionnÃ© |
+| Zone de vision citÃ© | `ui_ma_citee_central_content` (rectangle ciel/sol + boutons clic) | PrÃ©sent |
+| Notification dÃ©filement | â€” | Ã€ ajouter si requis |
+| Panneau ressources (colonne) | Ressources dans `ui_bar` | Ã€ dÃ©placer ou dupliquer en colonne gauche selon maquette |
+| Panneau bÃ¢timents | `ui_building_cards` | PrÃ©sent (cartes verticales) ; Ã  faire Ã©voluer en liste + recherche |
+| Recherche / filtrage | â€” | Ã€ ajouter |
+| Ligne bÃ¢timent (icÃ´ne, Lvl, nom, desc, maÃ§ons, coÃ»t, barre, bouton) | `ui_card_maison`, `ui_card_zone` | Partiel ; formaliser en ligne unique |
+| Scrollbar liste bÃ¢timents | `CSS overflow-y: auto` | PrÃ©sent |
 
 ---
 
-## 6. Références
+## 6. RÃ©fÃ©rences
 
-- **Wireframe :** `images/references/Lord of click layout.jpg` (rectangles marron = blocs organiques, contours noirs = molécules/atomes).
-- **Code :** `crates/miyuclicker/src/app.rs` (écran Ma citée, `ui_ma_citee`, `ui_bar`, `ui_building_cards`).
-- **Ergonomie :** [MiyuClicker - Ergonomie Ecran Gestion](MiyuClicker%20-%20Ergonomie%20Ecran%20Gestion.md).
-- **Bâtiments et maçons :** [MiyuClicker - Batiments Macons et Construction](MiyuClicker%20-%20Batiments%20Macons%20et%20Construction.md).
+- **Wireframe :** `images/references/Lord of click layout.jpg` (rectangles marron = blocs organiques, contours noirs = molÃ©cules/atomes).
+- **Code :** `crates/miyuclicker/src/app.rs` (Ã©cran Ma citÃ©e, `ui_ma_citee`, `ui_bar`, `ui_building_cards`).
+- **Ergonomie :** [MiyuClicker - Ergonomie Ecran Gestion](MiyukiniClicker%20-%20Ergonomie%20Ecran%20Gestion.md).
+- **BÃ¢timents et maÃ§ons :** [MiyuClicker - Batiments Macons et Construction](MiyukiniClicker%20-%20Batiments%20Macons%20et%20Construction.md).
 
 ---
 
-**Document :** MiyuClicker — Layout Lord of Click (blocs organiques et molécules)  
-**Statut :** Spécification de layout (référence pour implémentation).
+**Document :** MiyuClicker â€” Layout Lord of Click (blocs organiques et molÃ©cules)  
+**Statut :** SpÃ©cification de layout (rÃ©fÃ©rence pour implÃ©mentation).
+

@@ -1,642 +1,642 @@
-# Ever Buddy - Violations & Anti-Patterns
+﻿# Ever Buddy - Violations & Anti-Patterns
 
 ## 1. Contexte
 
-Ce document définit les **violations des invariants** et les **anti-patterns** liés à la gouvernance du cycle de vie par Ever Buddy. Il constitue le guide de référence pour identifier, comprendre, et éviter les pratiques qui compromettent l'intégrité de l'évolution du système Miyukini.
+Ce document dÃ©finit les **violations des invariants** et les **anti-patterns** liÃ©s Ã  la gouvernance du cycle de vie par Ever Buddy. Il constitue le guide de rÃ©fÃ©rence pour identifier, comprendre, et Ã©viter les pratiques qui compromettent l'intÃ©gritÃ© de l'Ã©volution du systÃ¨me Miyukini.
 
-Chaque invariant de la Documentation Fondatrice d'Ever Buddy (INV-EB-1 à INV-EB-12) implique des violations spécifiques. Ce document catégorise ces violations, décrit leurs conséquences, et fournit des anti-patterns concrets à éviter.
+Chaque invariant de la Documentation Fondatrice d'Ever Buddy (INV-EB-1 Ã  INV-EB-12) implique des violations spÃ©cifiques. Ce document catÃ©gorise ces violations, dÃ©crit leurs consÃ©quences, et fournit des anti-patterns concrets Ã  Ã©viter.
 
 **Document source :** [Ever Buddy - Documentation Fondatrice](../../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md)
 
 ---
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
-- **Applicable à :** Tous les acteurs interagissant avec Ever Buddy (cores, adaptateurs, produits, Opérateurs)
-- **Audience :** Architectes, développeurs, auditeurs, équipes de conformité
-- **Statut :** Contrat normatif — Non négociable
-- **Dépendances :** Documentation Fondatrice Ever Buddy, Invariants & Guarantees, Glossaire Miyukini
+- **Applicable Ã  :** Tous les acteurs interagissant avec Ever Buddy (cores, adaptateurs, produits, OpÃ©rateurs)
+- **Audience :** Architectes, dÃ©veloppeurs, auditeurs, Ã©quipes de conformitÃ©
+- **Statut :** Contrat normatif â€” Non nÃ©gociable
+- **DÃ©pendances :** Documentation Fondatrice Ever Buddy, Invariants & Guarantees, Glossaire Miyukini
 
 ---
 
 ## 3. Classification des violations
 
-Les violations sont classées en trois niveaux de gravité :
+Les violations sont classÃ©es en trois niveaux de gravitÃ© :
 
-| Niveau | Nom | Description | Conséquence |
+| Niveau | Nom | Description | ConsÃ©quence |
 |--------|-----|-------------|-------------|
-| **V1** | Critique | Violation d'un invariant fondamental | Rejet immédiat, système potentiellement corrompu |
-| **V2** | Grave | Violation d'une règle structurelle | Rejet de l'opération, alerte émise |
-| **V3** | Mineure | Violation d'une recommandation | Avertissement, correction recommandée |
+| **V1** | Critique | Violation d'un invariant fondamental | Rejet immÃ©diat, systÃ¨me potentiellement corrompu |
+| **V2** | Grave | Violation d'une rÃ¨gle structurelle | Rejet de l'opÃ©ration, alerte Ã©mise |
+| **V3** | Mineure | Violation d'une recommandation | Avertissement, correction recommandÃ©e |
 
-**Principe :** Les invariants INV-EB-* génèrent des violations de niveau **V1** ou **V2**. Les violations **V3** concernent les bonnes pratiques non normatives.
+**Principe :** Les invariants INV-EB-* gÃ©nÃ¨rent des violations de niveau **V1** ou **V2**. Les violations **V3** concernent les bonnes pratiques non normatives.
 
 ---
 
 ## 4. Violations par invariant
 
-### 4.1 Violations de INV-EB-1 : Aucune exécution de migration
+### 4.1 Violations de INV-EB-1 : Aucune exÃ©cution de migration
 
 **Invariant :**
-> Ever Buddy ne possède **jamais** la capacité d'exécuter une migration, une transformation, ou une modification de données.
+> Ever Buddy ne possÃ¨de **jamais** la capacitÃ© d'exÃ©cuter une migration, une transformation, ou une modification de donnÃ©es.
 
 **Violations (V1 - Critique) :**
 
 | ID | Violation | Description |
 |----|-----------|-------------|
-| **VIO-EB-1a** | Exécution directe de migration | Ever Buddy tente d'exécuter une migration de données |
-| **VIO-EB-1b** | Modification de données | Ever Buddy modifie directement des données gérées par KindMother |
+| **VIO-EB-1a** | ExÃ©cution directe de migration | Ever Buddy tente d'exÃ©cuter une migration de donnÃ©es |
+| **VIO-EB-1b** | Modification de donnÃ©es | Ever Buddy modifie directement des donnÃ©es gÃ©rÃ©es par KindMother |
 | **VIO-EB-1c** | Transformation de structure | Ever Buddy applique une transformation structurelle |
-| **VIO-EB-1d** | Accès en écriture | Ever Buddy possède un mécanisme d'écriture de données |
+| **VIO-EB-1d** | AccÃ¨s en Ã©criture | Ever Buddy possÃ¨de un mÃ©canisme d'Ã©criture de donnÃ©es |
 
-**Conséquences :**
-- Corruption potentielle des données
-- Violation de la séparation gouvernance/exécution
-- Perte de traçabilité des modifications
-- Conflit d'autorité avec KindMother
+**ConsÃ©quences :**
+- Corruption potentielle des donnÃ©es
+- Violation de la sÃ©paration gouvernance/exÃ©cution
+- Perte de traÃ§abilitÃ© des modifications
+- Conflit d'autoritÃ© avec KindMother
 
-**Anti-patterns associés :** [AP-01](#ap-01-gouverneur-executant), [AP-02](#ap-02-migration-directe)
+**Anti-patterns associÃ©s :** [AP-01](#ap-01-gouverneur-executant), [AP-02](#ap-02-migration-directe)
 
 ---
 
-### 4.2 Violations de INV-EB-2 : Traçabilité complète et immuable
+### 4.2 Violations de INV-EB-2 : TraÃ§abilitÃ© complÃ¨te et immuable
 
 **Invariant :**
-> Toute transition d'état de cycle de vie est **obligatoirement** enregistrée et cet enregistrement est **immuable**.
+> Toute transition d'Ã©tat de cycle de vie est **obligatoirement** enregistrÃ©e et cet enregistrement est **immuable**.
 
 **Violations (V1 - Critique) :**
 
 | ID | Violation | Description |
 |----|-----------|-------------|
-| **VIO-EB-2a** | Transition non enregistrée | Une transition d'état est effectuée sans enregistrement |
-| **VIO-EB-2b** | Modification d'historique | L'historique des transitions est modifié |
-| **VIO-EB-2c** | Suppression d'enregistrement | Un enregistrement de transition est supprimé |
-| **VIO-EB-2d** | Falsification de trace | Les métadonnées d'une transition sont falsifiées |
+| **VIO-EB-2a** | Transition non enregistrÃ©e | Une transition d'Ã©tat est effectuÃ©e sans enregistrement |
+| **VIO-EB-2b** | Modification d'historique | L'historique des transitions est modifiÃ© |
+| **VIO-EB-2c** | Suppression d'enregistrement | Un enregistrement de transition est supprimÃ© |
+| **VIO-EB-2d** | Falsification de trace | Les mÃ©tadonnÃ©es d'une transition sont falsifiÃ©es |
 
-**Conséquences :**
-- Perte d'auditabilité
-- Impossibilité de comprendre l'évolution passée
-- Violation de la confiance système
-- Compromission de la conformité
+**ConsÃ©quences :**
+- Perte d'auditabilitÃ©
+- ImpossibilitÃ© de comprendre l'Ã©volution passÃ©e
+- Violation de la confiance systÃ¨me
+- Compromission de la conformitÃ©
 
-**Anti-patterns associés :** [AP-03](#ap-03-historique-muable), [AP-04](#ap-04-transition-fantome)
+**Anti-patterns associÃ©s :** [AP-03](#ap-03-historique-muable), [AP-04](#ap-04-transition-fantome)
 
 ---
 
-### 4.3 Violations de INV-EB-3 : Aucun état ambigu
+### 4.3 Violations de INV-EB-3 : Aucun Ã©tat ambigu
 
 **Invariant :**
-> Chaque élément du système possède **exactement un** état de cycle de vie à tout moment.
+> Chaque Ã©lÃ©ment du systÃ¨me possÃ¨de **exactement un** Ã©tat de cycle de vie Ã  tout moment.
 
 **Violations (V1 - Critique) :**
 
 | ID | Violation | Description |
 |----|-----------|-------------|
-| **VIO-EB-3a** | État non défini | Un élément n'a aucun état de cycle de vie déclaré |
-| **VIO-EB-3b** | États multiples | Un élément possède plusieurs états simultanés |
-| **VIO-EB-3c** | État intermédiaire | Un élément est dans un état "en transition" persistant |
-| **VIO-EB-3d** | État invalide | Un élément est dans un état non reconnu |
+| **VIO-EB-3a** | Ã‰tat non dÃ©fini | Un Ã©lÃ©ment n'a aucun Ã©tat de cycle de vie dÃ©clarÃ© |
+| **VIO-EB-3b** | Ã‰tats multiples | Un Ã©lÃ©ment possÃ¨de plusieurs Ã©tats simultanÃ©s |
+| **VIO-EB-3c** | Ã‰tat intermÃ©diaire | Un Ã©lÃ©ment est dans un Ã©tat "en transition" persistant |
+| **VIO-EB-3d** | Ã‰tat invalide | Un Ã©lÃ©ment est dans un Ã©tat non reconnu |
 
-**Conséquences :**
-- Incertitude sur le statut de l'élément
-- Décisions incorrectes des consommateurs
-- Comportement imprévisible du système
-- Corruption de la gouvernance d'évolution
+**ConsÃ©quences :**
+- Incertitude sur le statut de l'Ã©lÃ©ment
+- DÃ©cisions incorrectes des consommateurs
+- Comportement imprÃ©visible du systÃ¨me
+- Corruption de la gouvernance d'Ã©volution
 
-**Anti-patterns associés :** [AP-05](#ap-05-etat-schrodinger), [AP-06](#ap-06-etats-paralleles)
+**Anti-patterns associÃ©s :** [AP-05](#ap-05-etat-schrodinger), [AP-06](#ap-06-etats-paralleles)
 
 ---
 
-### 4.4 Violations de INV-EB-4 : Période de dépréciation obligatoire
+### 4.4 Violations de INV-EB-4 : PÃ©riode de dÃ©prÃ©ciation obligatoire
 
 **Invariant :**
-> Aucun élément ACTIVE ne peut passer directement à RETIRED ou ARCHIVED. La transition par DEPRECATED est **obligatoire**.
+> Aucun Ã©lÃ©ment ACTIVE ne peut passer directement Ã  RETIRED ou ARCHIVED. La transition par DEPRECATED est **obligatoire**.
 
 **Violations (V1 - Critique) :**
 
 | ID | Violation | Description |
 |----|-----------|-------------|
-| **VIO-EB-4a** | Fast-track ACTIVE → RETIRED | Transition directe sans passer par DEPRECATED |
-| **VIO-EB-4b** | Fast-track ACTIVE → ARCHIVED | Archivage direct d'un élément actif |
-| **VIO-EB-4c** | Période de dépréciation nulle | DEPRECATED avec durée zéro |
-| **VIO-EB-4d** | Contournement d'urgence | Justification "urgente" pour éviter la dépréciation |
+| **VIO-EB-4a** | Fast-track ACTIVE â†’ RETIRED | Transition directe sans passer par DEPRECATED |
+| **VIO-EB-4b** | Fast-track ACTIVE â†’ ARCHIVED | Archivage direct d'un Ã©lÃ©ment actif |
+| **VIO-EB-4c** | PÃ©riode de dÃ©prÃ©ciation nulle | DEPRECATED avec durÃ©e zÃ©ro |
+| **VIO-EB-4d** | Contournement d'urgence | Justification "urgente" pour Ã©viter la dÃ©prÃ©ciation |
 
-**Conséquences :**
+**ConsÃ©quences :**
 - Rupture brutale pour les consommateurs
 - Pas de temps de migration
 - Violation de la confiance contractuelle
-- Pertes potentielles de données ou de service
+- Pertes potentielles de donnÃ©es ou de service
 
-**Anti-patterns associés :** [AP-07](#ap-07-retirement-brutal), [AP-08](#ap-08-urgence-permanente)
+**Anti-patterns associÃ©s :** [AP-07](#ap-07-retirement-brutal), [AP-08](#ap-08-urgence-permanente)
 
 ---
 
-### 4.5 Violations de INV-EB-5 : Rétrocompatibilité par défaut
+### 4.5 Violations de INV-EB-5 : RÃ©trocompatibilitÃ© par dÃ©faut
 
 **Invariant :**
-> Toute évolution est **présumée rétrocompatible** sauf déclaration explicite contraire.
+> Toute Ã©volution est **prÃ©sumÃ©e rÃ©trocompatible** sauf dÃ©claration explicite contraire.
 
 **Violations (V2 - Grave) :**
 
 | ID | Violation | Description |
 |----|-----------|-------------|
-| **VIO-EB-5a** | Breaking change non déclaré | Évolution incompatible présentée comme compatible |
+| **VIO-EB-5a** | Breaking change non dÃ©clarÃ© | Ã‰volution incompatible prÃ©sentÃ©e comme compatible |
 | **VIO-EB-5b** | Rupture silencieuse | Changement de comportement sans annonce |
 | **VIO-EB-5c** | Version mineure incompatible | Version x.Y.z avec breaking change |
 | **VIO-EB-5d** | Absence de plan de transition | Breaking change sans chemin de migration |
 
-**Conséquences :**
-- Consommateurs cassés sans préavis
+**ConsÃ©quences :**
+- Consommateurs cassÃ©s sans prÃ©avis
 - Perte de confiance
-- Régressions en cascade
-- Effort de migration non planifié
+- RÃ©gressions en cascade
+- Effort de migration non planifiÃ©
 
-**Anti-patterns associés :** [AP-09](#ap-09-breaking-change-cache), [AP-10](#ap-10-semver-menteur)
+**Anti-patterns associÃ©s :** [AP-09](#ap-09-breaking-change-cache), [AP-10](#ap-10-semver-menteur)
 
 ---
 
 ### 4.6 Violations de INV-EB-6 : Vision long terme obligatoire
 
 **Invariant :**
-> Toute décision d'évolution doit considérer l'impact sur **au moins deux générations** de versions.
+> Toute dÃ©cision d'Ã©volution doit considÃ©rer l'impact sur **au moins deux gÃ©nÃ©rations** de versions.
 
 **Violations (V2 - Grave) :**
 
 | ID | Violation | Description |
 |----|-----------|-------------|
-| **VIO-EB-6a** | Évolution myope | Décision sans considération des impacts futurs |
-| **VIO-EB-6b** | Dette transférée | Solution immédiate créant un problème futur plus grave |
-| **VIO-EB-6c** | Absence d'analyse d'impact | Évolution sans évaluation des conséquences |
-| **VIO-EB-6d** | Incompatibilité prévisible | Évolution qui bloquera forcément des évolutions futures |
+| **VIO-EB-6a** | Ã‰volution myope | DÃ©cision sans considÃ©ration des impacts futurs |
+| **VIO-EB-6b** | Dette transfÃ©rÃ©e | Solution immÃ©diate crÃ©ant un problÃ¨me futur plus grave |
+| **VIO-EB-6c** | Absence d'analyse d'impact | Ã‰volution sans Ã©valuation des consÃ©quences |
+| **VIO-EB-6d** | IncompatibilitÃ© prÃ©visible | Ã‰volution qui bloquera forcÃ©ment des Ã©volutions futures |
 
-**Conséquences :**
+**ConsÃ©quences :**
 - Accumulation de dette structurelle
-- Évolutions futures bloquées
-- Coût de maintenance croissant
-- Fossilisation progressive du système
+- Ã‰volutions futures bloquÃ©es
+- CoÃ»t de maintenance croissant
+- Fossilisation progressive du systÃ¨me
 
-**Anti-patterns associés :** [AP-11](#ap-11-solution-court-termiste), [AP-12](#ap-12-dette-differee)
+**Anti-patterns associÃ©s :** [AP-11](#ap-11-solution-court-termiste), [AP-12](#ap-12-dette-differee)
 
 ---
 
 ### 4.7 Violations de INV-EB-7 : Documentation obligatoire
 
 **Invariant :**
-> Toute transition d'état doit être **documentée** avec : raison, impact, chemin de migration, date effective.
+> Toute transition d'Ã©tat doit Ãªtre **documentÃ©e** avec : raison, impact, chemin de migration, date effective.
 
 **Violations (V2 - Grave) :**
 
 | ID | Violation | Description |
 |----|-----------|-------------|
-| **VIO-EB-7a** | Transition non documentée | Transition sans aucune documentation |
-| **VIO-EB-7b** | Documentation incomplète | Transition avec documentation partielle |
+| **VIO-EB-7a** | Transition non documentÃ©e | Transition sans aucune documentation |
+| **VIO-EB-7b** | Documentation incomplÃ¨te | Transition avec documentation partielle |
 | **VIO-EB-7c** | Raison absente | Transition sans justification |
 | **VIO-EB-7d** | Guide de migration manquant | DEPRECATED sans chemin de migration |
 
-**Conséquences :**
-- Consommateurs désorientés
-- Impossibilité de comprendre les décisions
+**ConsÃ©quences :**
+- Consommateurs dÃ©sorientÃ©s
+- ImpossibilitÃ© de comprendre les dÃ©cisions
 - Migration difficile ou impossible
 - Perte de connaissance institutionnelle
 
-**Anti-patterns associés :** [AP-13](#ap-13-documentation-posteriori), [AP-14](#ap-14-transition-muette)
+**Anti-patterns associÃ©s :** [AP-13](#ap-13-documentation-posteriori), [AP-14](#ap-14-transition-muette)
 
 ---
 
-### 4.8 Violations de INV-EB-8 : Indépendance des décisions
+### 4.8 Violations de INV-EB-8 : IndÃ©pendance des dÃ©cisions
 
 **Invariant :**
-> Ever Buddy ne peut être contraint par un produit, un adaptateur, ou un utilisateur à modifier ses règles de cycle de vie pour un cas particulier.
+> Ever Buddy ne peut Ãªtre contraint par un produit, un adaptateur, ou un utilisateur Ã  modifier ses rÃ¨gles de cycle de vie pour un cas particulier.
 
 **Violations (V1 - Critique) :**
 
 | ID | Violation | Description |
 |----|-----------|-------------|
-| **VIO-EB-8a** | Exception produit | Règle modifiée pour un produit spécifique |
-| **VIO-EB-8b** | Pression externe | Modification de règle sous pression |
-| **VIO-EB-8c** | Favoritisme | Traitement différencié selon le demandeur |
-| **VIO-EB-8d** | Override utilisateur | Utilisateur contournant les règles d'évolution |
+| **VIO-EB-8a** | Exception produit | RÃ¨gle modifiÃ©e pour un produit spÃ©cifique |
+| **VIO-EB-8b** | Pression externe | Modification de rÃ¨gle sous pression |
+| **VIO-EB-8c** | Favoritisme | Traitement diffÃ©renciÃ© selon le demandeur |
+| **VIO-EB-8d** | Override utilisateur | Utilisateur contournant les rÃ¨gles d'Ã©volution |
 
-**Conséquences :**
-- Perte d'équité du système
-- Précédents dangereux
-- Érosion des règles universelles
+**ConsÃ©quences :**
+- Perte d'Ã©quitÃ© du systÃ¨me
+- PrÃ©cÃ©dents dangereux
+- Ã‰rosion des rÃ¨gles universelles
 - Chaos de la gouvernance
 
-**Anti-patterns associés :** [AP-15](#ap-15-exception-speciale), [AP-16](#ap-16-client-roi)
+**Anti-patterns associÃ©s :** [AP-15](#ap-15-exception-speciale), [AP-16](#ap-16-client-roi)
 
 ---
 
-### 4.9 Violations de INV-EB-9 : Prédictibilité des transitions
+### 4.9 Violations de INV-EB-9 : PrÃ©dictibilitÃ© des transitions
 
 **Invariant :**
-> Les règles de transition sont **publiques et stables**. Aucune règle ne peut être modifiée rétroactivement.
+> Les rÃ¨gles de transition sont **publiques et stables**. Aucune rÃ¨gle ne peut Ãªtre modifiÃ©e rÃ©troactivement.
 
 **Violations (V1 - Critique) :**
 
 | ID | Violation | Description |
 |----|-----------|-------------|
-| **VIO-EB-9a** | Règle secrète | Règle de transition non publiée |
-| **VIO-EB-9b** | Modification rétroactive | Changement de règle affectant des transitions passées |
-| **VIO-EB-9c** | Règle instable | Règle modifiée fréquemment |
-| **VIO-EB-9d** | Application incohérente | Règle appliquée différemment selon les cas |
+| **VIO-EB-9a** | RÃ¨gle secrÃ¨te | RÃ¨gle de transition non publiÃ©e |
+| **VIO-EB-9b** | Modification rÃ©troactive | Changement de rÃ¨gle affectant des transitions passÃ©es |
+| **VIO-EB-9c** | RÃ¨gle instable | RÃ¨gle modifiÃ©e frÃ©quemment |
+| **VIO-EB-9d** | Application incohÃ©rente | RÃ¨gle appliquÃ©e diffÃ©remment selon les cas |
 
-**Conséquences :**
-- Impossibilité de planifier les évolutions
+**ConsÃ©quences :**
+- ImpossibilitÃ© de planifier les Ã©volutions
 - Perte de confiance des consommateurs
-- Imprévisibilité du système
-- Décisions arbitraires
+- ImprÃ©visibilitÃ© du systÃ¨me
+- DÃ©cisions arbitraires
 
-**Anti-patterns associés :** [AP-17](#ap-17-regles-mouvantes), [AP-18](#ap-18-retroactivite)
+**Anti-patterns associÃ©s :** [AP-17](#ap-17-regles-mouvantes), [AP-18](#ap-18-retroactivite)
 
 ---
 
-### 4.10 Violations de INV-EB-10 : Unicité du successeur déclaré
+### 4.10 Violations de INV-EB-10 : UnicitÃ© du successeur dÃ©clarÃ©
 
 **Invariant :**
-> Un élément déprécié possède **au plus un** successeur déclaré à tout moment.
+> Un Ã©lÃ©ment dÃ©prÃ©ciÃ© possÃ¨de **au plus un** successeur dÃ©clarÃ© Ã  tout moment.
 
 **Violations (V2 - Grave) :**
 
 | ID | Violation | Description |
 |----|-----------|-------------|
-| **VIO-EB-10a** | Successeurs multiples | Plusieurs successeurs officiels déclarés |
-| **VIO-EB-10b** | Successeur non désigné | Aucun successeur malgré des alternatives |
-| **VIO-EB-10c** | Successeur ambigu | Successeur mal défini ou confus |
-| **VIO-EB-10d** | Changement de successeur non documenté | Le successeur change sans annonce |
+| **VIO-EB-10a** | Successeurs multiples | Plusieurs successeurs officiels dÃ©clarÃ©s |
+| **VIO-EB-10b** | Successeur non dÃ©signÃ© | Aucun successeur malgrÃ© des alternatives |
+| **VIO-EB-10c** | Successeur ambigu | Successeur mal dÃ©fini ou confus |
+| **VIO-EB-10d** | Changement de successeur non documentÃ© | Le successeur change sans annonce |
 
-**Conséquences :**
+**ConsÃ©quences :**
 - Confusion sur le chemin de migration
-- Effort de migration gaspillé
+- Effort de migration gaspillÃ©
 - Fragmentation des consommateurs
-- Incertitude prolongée
+- Incertitude prolongÃ©e
 
-**Anti-patterns associés :** [AP-19](#ap-19-successeurs-concurrents), [AP-20](#ap-20-successeur-fantome)
+**Anti-patterns associÃ©s :** [AP-19](#ap-19-successeurs-concurrents), [AP-20](#ap-20-successeur-fantome)
 
 ---
 
-### 4.11 Violations de INV-EB-11 : Non-rétroactivité des changements de règles
+### 4.11 Violations de INV-EB-11 : Non-rÃ©troactivitÃ© des changements de rÃ¨gles
 
 **Invariant :**
-> Les règles d'évolution s'appliquent aux transitions **futures**. Un changement de règle ne peut pas modifier le statut d'éléments déjà en transition.
+> Les rÃ¨gles d'Ã©volution s'appliquent aux transitions **futures**. Un changement de rÃ¨gle ne peut pas modifier le statut d'Ã©lÃ©ments dÃ©jÃ  en transition.
 
 **Violations (V1 - Critique) :**
 
 | ID | Violation | Description |
 |----|-----------|-------------|
-| **VIO-EB-11a** | Application rétroactive | Nouvelle règle appliquée à une transition en cours |
-| **VIO-EB-11b** | Annulation de transition | Transition valide annulée par nouvelle règle |
-| **VIO-EB-11c** | Modification de période en cours | Période de dépréciation modifiée après début |
-| **VIO-EB-11d** | Changement de successeur forcé | Successeur changé pour une dépréciation en cours |
+| **VIO-EB-11a** | Application rÃ©troactive | Nouvelle rÃ¨gle appliquÃ©e Ã  une transition en cours |
+| **VIO-EB-11b** | Annulation de transition | Transition valide annulÃ©e par nouvelle rÃ¨gle |
+| **VIO-EB-11c** | Modification de pÃ©riode en cours | PÃ©riode de dÃ©prÃ©ciation modifiÃ©e aprÃ¨s dÃ©but |
+| **VIO-EB-11d** | Changement de successeur forcÃ© | Successeur changÃ© pour une dÃ©prÃ©ciation en cours |
 
-**Conséquences :**
+**ConsÃ©quences :**
 - Violation de la confiance contractuelle
-- Transitions perturbées
+- Transitions perturbÃ©es
 - Planification impossible
-- Chaos pour les consommateurs engagés dans une migration
+- Chaos pour les consommateurs engagÃ©s dans une migration
 
-**Anti-patterns associés :** [AP-18](#ap-18-retroactivite), [AP-21](#ap-21-regles-a-geometrie-variable)
+**Anti-patterns associÃ©s :** [AP-18](#ap-18-retroactivite), [AP-21](#ap-21-regles-a-geometrie-variable)
 
 ---
 
-### 4.12 Violations de INV-EB-12 : Responsabilité de l'annonce
+### 4.12 Violations de INV-EB-12 : ResponsabilitÃ© de l'annonce
 
 **Invariant :**
-> Ever Buddy est **responsable** de l'annonce des transitions, mais les cores et produits sont **responsables** de réagir à ces annonces.
+> Ever Buddy est **responsable** de l'annonce des transitions, mais les cores et produits sont **responsables** de rÃ©agir Ã  ces annonces.
 
 **Violations (V2 - Grave) :**
 
 | ID | Violation | Description |
 |----|-----------|-------------|
-| **VIO-EB-12a** | Annonce manquante | Transition sans annonce préalable |
-| **VIO-EB-12b** | Annonce tardive | Annonce effectuée après le début de transition |
-| **VIO-EB-12c** | Annonce incomplète | Annonce sans toutes les informations requises |
-| **VIO-EB-12d** | Canal d'annonce inadéquat | Annonce par un canal non surveillé |
+| **VIO-EB-12a** | Annonce manquante | Transition sans annonce prÃ©alable |
+| **VIO-EB-12b** | Annonce tardive | Annonce effectuÃ©e aprÃ¨s le dÃ©but de transition |
+| **VIO-EB-12c** | Annonce incomplÃ¨te | Annonce sans toutes les informations requises |
+| **VIO-EB-12d** | Canal d'annonce inadÃ©quat | Annonce par un canal non surveillÃ© |
 
-**Conséquences :**
-- Consommateurs non préparés
-- Migrations d'urgence forcées
-- Responsabilités floues
-- Échecs de transition évitables
+**ConsÃ©quences :**
+- Consommateurs non prÃ©parÃ©s
+- Migrations d'urgence forcÃ©es
+- ResponsabilitÃ©s floues
+- Ã‰checs de transition Ã©vitables
 
-**Anti-patterns associés :** [AP-22](#ap-22-annonce-invisible), [AP-23](#ap-23-derniere-minute)
+**Anti-patterns associÃ©s :** [AP-22](#ap-22-annonce-invisible), [AP-23](#ap-23-derniere-minute)
 
 ---
 
-## 5. Anti-patterns détaillés
+## 5. Anti-patterns dÃ©taillÃ©s
 
-### AP-01 : Gouverneur-Exécutant
+### AP-01 : Gouverneur-ExÃ©cutant
 
-**Description :** Ever Buddy tente d'exécuter directement les migrations au lieu de simplement les gouverner.
+**Description :** Ever Buddy tente d'exÃ©cuter directement les migrations au lieu de simplement les gouverner.
 
-**Symptômes :**
-- Code d'exécution de migration dans Ever Buddy
-- Appels directs aux APIs de données
-- Transformations de données effectuées par Ever Buddy
+**SymptÃ´mes :**
+- Code d'exÃ©cution de migration dans Ever Buddy
+- Appels directs aux APIs de donnÃ©es
+- Transformations de donnÃ©es effectuÃ©es par Ever Buddy
 
-**Correction :** Ever Buddy définit les règles de migration, KindMother ou les produits exécutent.
+**Correction :** Ever Buddy dÃ©finit les rÃ¨gles de migration, KindMother ou les produits exÃ©cutent.
 
-**Violations associées :** VIO-EB-1a, VIO-EB-1b, VIO-EB-1c
+**Violations associÃ©es :** VIO-EB-1a, VIO-EB-1b, VIO-EB-1c
 
 ---
 
 ### AP-02 : Migration Directe
 
-**Description :** Les migrations sont déclenchées directement sans passer par le cycle de gouvernance.
+**Description :** Les migrations sont dÃ©clenchÃ©es directement sans passer par le cycle de gouvernance.
 
-**Symptômes :**
-- Migrations non tracées
+**SymptÃ´mes :**
+- Migrations non tracÃ©es
 - Absence de validation Ever Buddy
 - Changements structurels "sauvages"
 
-**Correction :** Toute migration doit être déclarée à Ever Buddy et suivre le cycle de vie.
+**Correction :** Toute migration doit Ãªtre dÃ©clarÃ©e Ã  Ever Buddy et suivre le cycle de vie.
 
-**Violations associées :** VIO-EB-1a, VIO-EB-2a
+**Violations associÃ©es :** VIO-EB-1a, VIO-EB-2a
 
 ---
 
 ### AP-03 : Historique Muable
 
-**Description :** L'historique des transitions peut être modifié après coup.
+**Description :** L'historique des transitions peut Ãªtre modifiÃ© aprÃ¨s coup.
 
-**Symptômes :**
+**SymptÃ´mes :**
 - Corrections d'historique
-- Suppressions d'entrées anciennes
+- Suppressions d'entrÃ©es anciennes
 - "Nettoyage" de l'historique
 
 **Correction :** L'historique est append-only, immuable, jamais modifiable.
 
-**Violations associées :** VIO-EB-2b, VIO-EB-2c, VIO-EB-2d
+**Violations associÃ©es :** VIO-EB-2b, VIO-EB-2c, VIO-EB-2d
 
 ---
 
-### AP-04 : Transition Fantôme
+### AP-04 : Transition FantÃ´me
 
-**Description :** Des transitions d'état se produisent sans être enregistrées.
+**Description :** Des transitions d'Ã©tat se produisent sans Ãªtre enregistrÃ©es.
 
-**Symptômes :**
-- État actuel ne correspondant pas à l'historique
-- Gaps dans la chaîne de transitions
-- États "magiquement" changés
+**SymptÃ´mes :**
+- Ã‰tat actuel ne correspondant pas Ã  l'historique
+- Gaps dans la chaÃ®ne de transitions
+- Ã‰tats "magiquement" changÃ©s
 
-**Correction :** Toute transition passe par Ever Buddy et est atomiquement enregistrée.
+**Correction :** Toute transition passe par Ever Buddy et est atomiquement enregistrÃ©e.
 
-**Violations associées :** VIO-EB-2a
+**Violations associÃ©es :** VIO-EB-2a
 
 ---
 
-### AP-05 : État Schrödinger
+### AP-05 : Ã‰tat SchrÃ¶dinger
 
-**Description :** Un élément n'a pas d'état défini ou son état est incertain.
+**Description :** Un Ã©lÃ©ment n'a pas d'Ã©tat dÃ©fini ou son Ã©tat est incertain.
 
-**Symptômes :**
-- Élément sans champ d'état
-- État null ou undefined
+**SymptÃ´mes :**
+- Ã‰lÃ©ment sans champ d'Ã©tat
+- Ã‰tat null ou undefined
 - "Nous ne savons pas si c'est actif ou non"
 
-**Correction :** Tout élément gouverné a un état explicite dès sa création (DRAFT par défaut).
+**Correction :** Tout Ã©lÃ©ment gouvernÃ© a un Ã©tat explicite dÃ¨s sa crÃ©ation (DRAFT par dÃ©faut).
 
-**Violations associées :** VIO-EB-3a, VIO-EB-3d
+**Violations associÃ©es :** VIO-EB-3a, VIO-EB-3d
 
 ---
 
-### AP-06 : États Parallèles
+### AP-06 : Ã‰tats ParallÃ¨les
 
-**Description :** Un élément est considéré dans plusieurs états simultanément.
+**Description :** Un Ã©lÃ©ment est considÃ©rÃ© dans plusieurs Ã©tats simultanÃ©ment.
 
-**Symptômes :**
-- "C'est déprécié mais aussi actif"
-- États conditionnels selon le contexte
-- "Pour certains consommateurs c'est actif, pour d'autres déprécié"
+**SymptÃ´mes :**
+- "C'est dÃ©prÃ©ciÃ© mais aussi actif"
+- Ã‰tats conditionnels selon le contexte
+- "Pour certains consommateurs c'est actif, pour d'autres dÃ©prÃ©ciÃ©"
 
-**Correction :** Un élément = un état, universel et non contextuel.
+**Correction :** Un Ã©lÃ©ment = un Ã©tat, universel et non contextuel.
 
-**Violations associées :** VIO-EB-3b, VIO-EB-3c
+**Violations associÃ©es :** VIO-EB-3b, VIO-EB-3c
 
 ---
 
 ### AP-07 : Retirement Brutal
 
-**Description :** Un élément est retiré sans période de dépréciation.
+**Description :** Un Ã©lÃ©ment est retirÃ© sans pÃ©riode de dÃ©prÃ©ciation.
 
-**Symptômes :**
-- ACTIVE → RETIRED direct
-- "On n'a pas le temps de déprécier"
-- Éléments qui disparaissent sans préavis
+**SymptÃ´mes :**
+- ACTIVE â†’ RETIRED direct
+- "On n'a pas le temps de dÃ©prÃ©cier"
+- Ã‰lÃ©ments qui disparaissent sans prÃ©avis
 
-**Correction :** Période de dépréciation obligatoire, minimum 1 cycle de release.
+**Correction :** PÃ©riode de dÃ©prÃ©ciation obligatoire, minimum 1 cycle de release.
 
-**Violations associées :** VIO-EB-4a, VIO-EB-4b
+**Violations associÃ©es :** VIO-EB-4a, VIO-EB-4b
 
 ---
 
 ### AP-08 : Urgence Permanente
 
-**Description :** Invocation constante de l'urgence pour contourner les règles de dépréciation.
+**Description :** Invocation constante de l'urgence pour contourner les rÃ¨gles de dÃ©prÃ©ciation.
 
-**Symptômes :**
-- "C'est urgent" comme justification systématique
-- Dérogations fréquentes aux périodes minimales
+**SymptÃ´mes :**
+- "C'est urgent" comme justification systÃ©matique
+- DÃ©rogations frÃ©quentes aux pÃ©riodes minimales
 - Culture du fast-track
 
 **Correction :** L'urgence ne justifie pas la violation des invariants. Planifier mieux.
 
-**Violations associées :** VIO-EB-4c, VIO-EB-4d
+**Violations associÃ©es :** VIO-EB-4c, VIO-EB-4d
 
 ---
 
-### AP-09 : Breaking Change Caché
+### AP-09 : Breaking Change CachÃ©
 
-**Description :** Un changement incompatible est présenté comme rétrocompatible.
+**Description :** Un changement incompatible est prÃ©sentÃ© comme rÃ©trocompatible.
 
-**Symptômes :**
+**SymptÃ´mes :**
 - "C'est juste une petite modification"
-- Consommateurs cassés par surprise
-- Pas de déclaration d'incompatibilité
+- Consommateurs cassÃ©s par surprise
+- Pas de dÃ©claration d'incompatibilitÃ©
 
-**Correction :** Tout breaking change doit être explicitement déclaré et géré par dépréciation.
+**Correction :** Tout breaking change doit Ãªtre explicitement dÃ©clarÃ© et gÃ©rÃ© par dÃ©prÃ©ciation.
 
-**Violations associées :** VIO-EB-5a, VIO-EB-5b
+**Violations associÃ©es :** VIO-EB-5a, VIO-EB-5b
 
 ---
 
 ### AP-10 : SemVer Menteur
 
-**Description :** Le versionnement sémantique est utilisé de manière trompeuse.
+**Description :** Le versionnement sÃ©mantique est utilisÃ© de maniÃ¨re trompeuse.
 
-**Symptômes :**
+**SymptÃ´mes :**
 - Breaking changes en version mineure (x.Y.z)
 - Version majeure pour des corrections mineures
-- Versionnement marketing plutôt que technique
+- Versionnement marketing plutÃ´t que technique
 
-**Correction :** Respecter strictement le versionnement sémantique (majeur = incompatible).
+**Correction :** Respecter strictement le versionnement sÃ©mantique (majeur = incompatible).
 
-**Violations associées :** VIO-EB-5c
+**Violations associÃ©es :** VIO-EB-5c
 
 ---
 
 ### AP-11 : Solution Court-Termiste
 
-**Description :** Adopter une solution rapide qui crée des problèmes futurs plus graves.
+**Description :** Adopter une solution rapide qui crÃ©e des problÃ¨mes futurs plus graves.
 
-**Symptômes :**
+**SymptÃ´mes :**
 - "On verra plus tard"
-- Solutions qui bloquent des évolutions futures
-- Absence d'analyse d'impact à long terme
+- Solutions qui bloquent des Ã©volutions futures
+- Absence d'analyse d'impact Ã  long terme
 
-**Correction :** Évaluer l'impact sur au moins deux générations avant toute décision.
+**Correction :** Ã‰valuer l'impact sur au moins deux gÃ©nÃ©rations avant toute dÃ©cision.
 
-**Violations associées :** VIO-EB-6a, VIO-EB-6b
+**Violations associÃ©es :** VIO-EB-6a, VIO-EB-6b
 
 ---
 
-### AP-12 : Dette Différée
+### AP-12 : Dette DiffÃ©rÃ©e
 
-**Description :** Transférer systématiquement la dette structurelle vers le futur.
+**Description :** TransfÃ©rer systÃ©matiquement la dette structurelle vers le futur.
 
-**Symptômes :**
-- Accumulation d'éléments DEPRECATED non résolus
+**SymptÃ´mes :**
+- Accumulation d'Ã©lÃ©ments DEPRECATED non rÃ©solus
 - "On nettoiera plus tard"
-- Dette croissante sans plan de réduction
+- Dette croissante sans plan de rÃ©duction
 
-**Correction :** Traiter la dette structurelle de manière continue, pas différée.
+**Correction :** Traiter la dette structurelle de maniÃ¨re continue, pas diffÃ©rÃ©e.
 
-**Violations associées :** VIO-EB-6b, VIO-EB-6c
+**Violations associÃ©es :** VIO-EB-6b, VIO-EB-6c
 
 ---
 
-### AP-13 : Documentation À Posteriori
+### AP-13 : Documentation Ã€ Posteriori
 
-**Description :** Documenter les transitions après leur exécution plutôt qu'avant.
+**Description :** Documenter les transitions aprÃ¨s leur exÃ©cution plutÃ´t qu'avant.
 
-**Symptômes :**
-- Documentation rédigée après la transition
+**SymptÃ´mes :**
+- Documentation rÃ©digÃ©e aprÃ¨s la transition
 - "On documentera quand on aura le temps"
-- Informations incomplètes ou oubliées
+- Informations incomplÃ¨tes ou oubliÃ©es
 
-**Correction :** La documentation fait partie de la transition, pas un ajout ultérieur.
+**Correction :** La documentation fait partie de la transition, pas un ajout ultÃ©rieur.
 
-**Violations associées :** VIO-EB-7a, VIO-EB-7b
+**Violations associÃ©es :** VIO-EB-7a, VIO-EB-7b
 
 ---
 
 ### AP-14 : Transition Muette
 
-**Description :** Transitions effectuées sans communication aux parties prenantes.
+**Description :** Transitions effectuÃ©es sans communication aux parties prenantes.
 
-**Symptômes :**
-- "On ne savait pas que c'était déprécié"
-- Consommateurs découvrant les changements par accident
+**SymptÃ´mes :**
+- "On ne savait pas que c'Ã©tait dÃ©prÃ©ciÃ©"
+- Consommateurs dÃ©couvrant les changements par accident
 - Absence de canal de communication
 
-**Correction :** Annonce proactive via les canaux appropriés avant toute transition.
+**Correction :** Annonce proactive via les canaux appropriÃ©s avant toute transition.
 
-**Violations associées :** VIO-EB-7c, VIO-EB-12a
+**Violations associÃ©es :** VIO-EB-7c, VIO-EB-12a
 
 ---
 
-### AP-15 : Exception Spéciale
+### AP-15 : Exception SpÃ©ciale
 
-**Description :** Créer des exceptions aux règles pour des cas particuliers.
+**Description :** CrÃ©er des exceptions aux rÃ¨gles pour des cas particuliers.
 
-**Symptômes :**
+**SymptÃ´mes :**
 - "Pour ce produit, on fait une exception"
-- Règles à géométrie variable
+- RÃ¨gles Ã  gÃ©omÃ©trie variable
 - Accumulation d'exceptions
 
-**Correction :** Les règles sont universelles. Pas d'exception, pas de favoritisme.
+**Correction :** Les rÃ¨gles sont universelles. Pas d'exception, pas de favoritisme.
 
-**Violations associées :** VIO-EB-8a, VIO-EB-8c
+**Violations associÃ©es :** VIO-EB-8a, VIO-EB-8c
 
 ---
 
 ### AP-16 : Client Roi
 
-**Description :** Modifier les règles sous la pression d'un client ou d'un utilisateur.
+**Description :** Modifier les rÃ¨gles sous la pression d'un client ou d'un utilisateur.
 
-**Symptômes :**
+**SymptÃ´mes :**
 - "Le client X exige que..."
-- Règles assouplies pour des clients importants
-- Gouvernance soumise aux intérêts commerciaux
+- RÃ¨gles assouplies pour des clients importants
+- Gouvernance soumise aux intÃ©rÃªts commerciaux
 
-**Correction :** Ever Buddy est indépendant. Les règles ne se négocient pas.
+**Correction :** Ever Buddy est indÃ©pendant. Les rÃ¨gles ne se nÃ©gocient pas.
 
-**Violations associées :** VIO-EB-8b, VIO-EB-8d
+**Violations associÃ©es :** VIO-EB-8b, VIO-EB-8d
 
 ---
 
-### AP-17 : Règles Mouvantes
+### AP-17 : RÃ¨gles Mouvantes
 
-**Description :** Les règles de transition changent fréquemment sans stabilité.
+**Description :** Les rÃ¨gles de transition changent frÃ©quemment sans stabilitÃ©.
 
-**Symptômes :**
-- Règles différentes d'un mois à l'autre
-- "Maintenant on fait comme ça"
+**SymptÃ´mes :**
+- RÃ¨gles diffÃ©rentes d'un mois Ã  l'autre
+- "Maintenant on fait comme Ã§a"
 - Consommateurs perdus face aux changements
 
-**Correction :** Les règles sont stables. Toute modification est exceptionnelle et annoncée.
+**Correction :** Les rÃ¨gles sont stables. Toute modification est exceptionnelle et annoncÃ©e.
 
-**Violations associées :** VIO-EB-9c, VIO-EB-9d
+**Violations associÃ©es :** VIO-EB-9c, VIO-EB-9d
 
 ---
 
-### AP-18 : Rétroactivité
+### AP-18 : RÃ©troactivitÃ©
 
-**Description :** Appliquer de nouvelles règles à des situations passées ou en cours.
+**Description :** Appliquer de nouvelles rÃ¨gles Ã  des situations passÃ©es ou en cours.
 
-**Symptômes :**
-- "Avec les nouvelles règles, cette transition est invalide"
-- Annulation de décisions passées
-- Modifications de périodes en cours
+**SymptÃ´mes :**
+- "Avec les nouvelles rÃ¨gles, cette transition est invalide"
+- Annulation de dÃ©cisions passÃ©es
+- Modifications de pÃ©riodes en cours
 
-**Correction :** Les nouvelles règles s'appliquent aux futures transitions uniquement.
+**Correction :** Les nouvelles rÃ¨gles s'appliquent aux futures transitions uniquement.
 
-**Violations associées :** VIO-EB-9b, VIO-EB-11a, VIO-EB-11b
+**Violations associÃ©es :** VIO-EB-9b, VIO-EB-11a, VIO-EB-11b
 
 ---
 
 ### AP-19 : Successeurs Concurrents
 
-**Description :** Plusieurs successeurs officiels sont déclarés pour un même élément déprécié.
+**Description :** Plusieurs successeurs officiels sont dÃ©clarÃ©s pour un mÃªme Ã©lÃ©ment dÃ©prÃ©ciÃ©.
 
-**Symptômes :**
+**SymptÃ´mes :**
 - "Vous pouvez migrer vers A ou B"
-- Compétition entre successeurs
-- Consommateurs divisés
+- CompÃ©tition entre successeurs
+- Consommateurs divisÃ©s
 
-**Correction :** Un seul successeur principal. Les alternatives sont documentées mais non officielles.
+**Correction :** Un seul successeur principal. Les alternatives sont documentÃ©es mais non officielles.
 
-**Violations associées :** VIO-EB-10a
+**Violations associÃ©es :** VIO-EB-10a
 
 ---
 
-### AP-20 : Successeur Fantôme
+### AP-20 : Successeur FantÃ´me
 
-**Description :** Aucun successeur n'est désigné malgré l'existence d'alternatives.
+**Description :** Aucun successeur n'est dÃ©signÃ© malgrÃ© l'existence d'alternatives.
 
-**Symptômes :**
-- "C'est déprécié mais on ne sait pas par quoi le remplacer"
+**SymptÃ´mes :**
+- "C'est dÃ©prÃ©ciÃ© mais on ne sait pas par quoi le remplacer"
 - Migration impossible par manque d'information
-- Consommateurs bloqués
+- Consommateurs bloquÃ©s
 
-**Correction :** Déclarer explicitement le successeur (ou "aucun" si abandon volontaire).
+**Correction :** DÃ©clarer explicitement le successeur (ou "aucun" si abandon volontaire).
 
-**Violations associées :** VIO-EB-10b, VIO-EB-10c
+**Violations associÃ©es :** VIO-EB-10b, VIO-EB-10c
 
 ---
 
-### AP-21 : Règles à Géométrie Variable
+### AP-21 : RÃ¨gles Ã  GÃ©omÃ©trie Variable
 
-**Description :** Les règles sont appliquées différemment selon les circonstances.
+**Description :** Les rÃ¨gles sont appliquÃ©es diffÃ©remment selon les circonstances.
 
-**Symptômes :**
-- Deux éléments similaires traités différemment
-- Interprétations variables des règles
-- "Ça dépend du contexte"
+**SymptÃ´mes :**
+- Deux Ã©lÃ©ments similaires traitÃ©s diffÃ©remment
+- InterprÃ©tations variables des rÃ¨gles
+- "Ã‡a dÃ©pend du contexte"
 
-**Correction :** Application uniforme et prévisible des règles, sans exception.
+**Correction :** Application uniforme et prÃ©visible des rÃ¨gles, sans exception.
 
-**Violations associées :** VIO-EB-9d, VIO-EB-11c, VIO-EB-11d
+**Violations associÃ©es :** VIO-EB-9d, VIO-EB-11c, VIO-EB-11d
 
 ---
 
@@ -644,35 +644,35 @@ Les violations sont classées en trois niveaux de gravité :
 
 **Description :** L'annonce de transition existe mais n'est pas visible par les consommateurs.
 
-**Symptômes :**
-- Annonce dans un canal non surveillé
+**SymptÃ´mes :**
+- Annonce dans un canal non surveillÃ©
 - Documentation technique obscure
-- "C'était écrit quelque part"
+- "C'Ã©tait Ã©crit quelque part"
 
-**Correction :** Utiliser des canaux de communication actifs et vérifier la réception.
+**Correction :** Utiliser des canaux de communication actifs et vÃ©rifier la rÃ©ception.
 
-**Violations associées :** VIO-EB-12c, VIO-EB-12d
+**Violations associÃ©es :** VIO-EB-12c, VIO-EB-12d
 
 ---
 
-### AP-23 : Dernière Minute
+### AP-23 : DerniÃ¨re Minute
 
 **Description :** Annoncer les transitions au dernier moment.
 
-**Symptômes :**
+**SymptÃ´mes :**
 - Annonce quelques jours avant la transition
-- Pas de temps de préparation
-- Migrations d'urgence forcées
+- Pas de temps de prÃ©paration
+- Migrations d'urgence forcÃ©es
 
-**Correction :** Respecter les périodes minimales d'annonce définies par catégorie d'élément.
+**Correction :** Respecter les pÃ©riodes minimales d'annonce dÃ©finies par catÃ©gorie d'Ã©lÃ©ment.
 
-**Violations associées :** VIO-EB-12a, VIO-EB-12b
+**Violations associÃ©es :** VIO-EB-12a, VIO-EB-12b
 
 ---
 
-## 6. Tableau récapitulatif des violations
+## 6. Tableau rÃ©capitulatif des violations
 
-| Invariant | Violations | Gravité | Anti-patterns |
+| Invariant | Violations | GravitÃ© | Anti-patterns |
 |-----------|------------|---------|---------------|
 | INV-EB-1 | VIO-EB-1a, 1b, 1c, 1d | V1 | AP-01, AP-02 |
 | INV-EB-2 | VIO-EB-2a, 2b, 2c, 2d | V1 | AP-03, AP-04 |
@@ -689,68 +689,69 @@ Les violations sont classées en trois niveaux de gravité :
 
 ---
 
-## 7. Détection et prévention
+## 7. DÃ©tection et prÃ©vention
 
-### 7.1 Mécanismes de détection
+### 7.1 MÃ©canismes de dÃ©tection
 
-| Mécanisme | Violations détectées | Moment |
+| MÃ©canisme | Violations dÃ©tectÃ©es | Moment |
 |-----------|---------------------|--------|
-| **Validation pré-transition** | VIO-EB-3*, VIO-EB-4*, VIO-EB-10* | Avant transition |
+| **Validation prÃ©-transition** | VIO-EB-3*, VIO-EB-4*, VIO-EB-10* | Avant transition |
 | **Audit d'historique** | VIO-EB-2* | Continu |
-| **Vérification de documentation** | VIO-EB-7* | Avant transition |
-| **Contrôle de compatibilité** | VIO-EB-5* | À chaque évolution |
-| **Monitoring de règles** | VIO-EB-8*, VIO-EB-9* | Continu |
-| **Vérification d'annonce** | VIO-EB-12* | Avant transition |
+| **VÃ©rification de documentation** | VIO-EB-7* | Avant transition |
+| **ContrÃ´le de compatibilitÃ©** | VIO-EB-5* | Ã€ chaque Ã©volution |
+| **Monitoring de rÃ¨gles** | VIO-EB-8*, VIO-EB-9* | Continu |
+| **VÃ©rification d'annonce** | VIO-EB-12* | Avant transition |
 
-### 7.2 Prévention par conception
+### 7.2 PrÃ©vention par conception
 
-| Principe | Description | Violations prévenues |
+| Principe | Description | Violations prÃ©venues |
 |----------|-------------|---------------------|
-| **Séparation stricte** | Ever Buddy n'a aucun accès en écriture aux données | VIO-EB-1* |
+| **SÃ©paration stricte** | Ever Buddy n'a aucun accÃ¨s en Ã©criture aux donnÃ©es | VIO-EB-1* |
 | **Historique append-only** | Aucune API de modification d'historique | VIO-EB-2* |
-| **État obligatoire** | Champ d'état requis, non nullable | VIO-EB-3* |
-| **Matrice de transitions** | Transitions invalides bloquées structurellement | VIO-EB-4* |
-| **Validation de version** | Contrôle automatique du versionnement sémantique | VIO-EB-5* |
-| **Règles immuables** | Règles versionnées et non modifiables rétroactivement | VIO-EB-9*, VIO-EB-11* |
+| **Ã‰tat obligatoire** | Champ d'Ã©tat requis, non nullable | VIO-EB-3* |
+| **Matrice de transitions** | Transitions invalides bloquÃ©es structurellement | VIO-EB-4* |
+| **Validation de version** | ContrÃ´le automatique du versionnement sÃ©mantique | VIO-EB-5* |
+| **RÃ¨gles immuables** | RÃ¨gles versionnÃ©es et non modifiables rÃ©troactivement | VIO-EB-9*, VIO-EB-11* |
 
 ### 7.3 Alertes et escalade
 
 | Niveau de violation | Action | Escalade |
 |---------------------|--------|----------|
-| **V1 - Critique** | Rejet immédiat, alerte système | TAMR (intervention humaine) |
+| **V1 - Critique** | Rejet immÃ©diat, alerte systÃ¨me | TAMR (intervention humaine) |
 | **V2 - Grave** | Rejet, alerte | Caring Nanny (observation) |
 | **V3 - Mineure** | Avertissement | Log uniquement |
 
 ---
 
-## 8. Conformité aux Lois d'Autonomie
+## 8. ConformitÃ© aux Lois d'Autonomie
 
-Ce contrat respecte les Lois d'Autonomie Système :
+Ce contrat respecte les Lois d'Autonomie SystÃ¨me :
 
-| Loi | Conformité | Application |
+| Loi | ConformitÃ© | Application |
 |-----|------------|-------------|
-| **LOI-1** | ✅ | Détection de violations locale, pas de dépendance externe |
-| **LOI-2** | ✅ | Violations détectables en mode isolé |
-| **LOI-3** | ✅ | État de violation souverain localement |
-| **LOI-4** | ✅ | Détection basée sur états, pas sur temps global |
+| **LOI-1** | âœ… | DÃ©tection de violations locale, pas de dÃ©pendance externe |
+| **LOI-2** | âœ… | Violations dÃ©tectables en mode isolÃ© |
+| **LOI-3** | âœ… | Ã‰tat de violation souverain localement |
+| **LOI-4** | âœ… | DÃ©tection basÃ©e sur Ã©tats, pas sur temps global |
 
-**Référence :** [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+**RÃ©fÃ©rence :** [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 9. Références croisées
+## 9. RÃ©fÃ©rences croisÃ©es
 
 - **Document source :** [Ever Buddy - Documentation Fondatrice](../../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md)
-- **Contrat complémentaire :** [Ever Buddy - Invariants & Guarantees](./Ever%20Buddy%20-%20Invariants%20%26%20Guarantees.md) (définitions des invariants)
-- **États de cycle de vie :** [Ever Buddy - Lifecycle States Contract](../lifecycle/Ever%20Buddy%20-%20Lifecycle%20States%20Contract.md)
-- **Règles de transition :** [Ever Buddy - Transition Rules Contract](../lifecycle/Ever%20Buddy%20-%20Transition%20Rules%20Contract.md)
-- **Glossaire :** [Miyukini Conceptual References - Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-- **Lois d'Autonomie :** [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+- **Contrat complÃ©mentaire :** [Ever Buddy - Invariants & Guarantees](./Ever%20Buddy%20-%20Invariants%20%26%20Guarantees.md) (dÃ©finitions des invariants)
+- **Ã‰tats de cycle de vie :** [Ever Buddy - Lifecycle States Contract](../lifecycle/Ever%20Buddy%20-%20Lifecycle%20States%20Contract.md)
+- **RÃ¨gles de transition :** [Ever Buddy - Transition Rules Contract](../lifecycle/Ever%20Buddy%20-%20Transition%20Rules%20Contract.md)
+- **Glossaire :** [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
+- **Lois d'Autonomie :** [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-27  
-**Statut :** Contrat normatif — Non négociable  
-**Dérivé de :** Ever Buddy - Documentation Fondatrice v1.3, Section 7 (Invariants)  
+**Statut :** Contrat normatif â€” Non nÃ©gociable  
+**DÃ©rivÃ© de :** Ever Buddy - Documentation Fondatrice v1.3, Section 7 (Invariants)  
 **Type :** Contrat de gouvernance - Violations et Anti-Patterns
+

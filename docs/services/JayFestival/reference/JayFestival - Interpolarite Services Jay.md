@@ -1,106 +1,107 @@
-# JayFestival — Interpolarité avec les services Jay
+﻿# JayFestival â€” InterpolaritÃ© avec les services Jay
 
 ## Contexte
 
-**JayFestival** s’intègre avec plusieurs **services Jay** au sein de l’écosystème COG. L’**interpolarité** désigne cette capacité des services à se coupler : JayFestival consomme ou s’appuie sur JayKonta, JayKoa, JayXpose et JayFaim ; il expose des données vers des intégrateurs communs (ex. JayKoa pour les dates).
+**JayFestival** sâ€™intÃ¨gre avec plusieurs **services Jay** au sein de lâ€™Ã©cosystÃ¨me COG. Lâ€™**interpolaritÃ©** dÃ©signe cette capacitÃ© des services Ã  se coupler : JayFestival consomme ou sâ€™appuie sur JayKonta, JayKoa, JayXpose et JayFaim ; il expose des donnÃ©es vers des intÃ©grateurs communs (ex. JayKoa pour les dates).
 
-Ce document décrit les **couplages côté JayFestival** et pointe vers les documents fondateurs des services partenaires et vers le document de référence global. Il s’adresse aux équipes produit et technique.
+Ce document dÃ©crit les **couplages cÃ´tÃ© JayFestival** et pointe vers les documents fondateurs des services partenaires et vers le document de rÃ©fÃ©rence global. Il sâ€™adresse aux Ã©quipes produit et technique.
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Périmètre** : Couplages JayFestival ↔ JayXpose, JayFaim, JayKoa, JayKonta ; rôle de JayFestival dans chaque couplage.
-- **Hors périmètre** : Spécifications techniques détaillées des API et contrats d’Opérateurs (référencés dans les documents de chaque service).
-- **Référence globale** : [Miyukini Conceptual References - Interpolarite Services Jay](../../../reference/Miyukini%20Conceptual%20References%20-%20Interpolarite%20Services%20Jay.md).
+- **PÃ©rimÃ¨tre** : Couplages JayFestival â†” JayXpose, JayFaim, JayKoa, JayKonta ; rÃ´le de JayFestival dans chaque couplage.
+- **Hors pÃ©rimÃ¨tre** : SpÃ©cifications techniques dÃ©taillÃ©es des API et contrats dâ€™OpÃ©rateurs (rÃ©fÃ©rencÃ©s dans les documents de chaque service).
+- **RÃ©fÃ©rence globale** : [Miyukini Conceptual References - Interpolarite Services Jay](..//..//..//miyukini-webway-system//reference//_index.md).
 
 ---
 
-## 1. JayFestival ↔ JayXpose
+## 1. JayFestival â†” JayXpose
 
-**JayXpose** (profil exposant / site vitrine) **s’intègre dans JayFestival**.
+**JayXpose** (profil exposant / site vitrine) **sâ€™intÃ¨gre dans JayFestival**.
 
-| Aspect | Côté JayFestival |
+| Aspect | CÃ´tÃ© JayFestival |
 |--------|-------------------|
-| **Fiche exposant** | La fiche exposant et le répertoire des exposants de JayFestival peuvent s’appuyer sur le profil JayXpose (données vitrine, catalogue, contact). |
-| **Répertoire** | L’annuaire ou le répertoire des exposants (global ou par événement) peut afficher les vitrines JayXpose. |
-| **Identité unique** | Un exposant peut avoir une vitrine JayXpose et participer à des éditions JayFestival avec le même profil ; pas de duplication. |
+| **Fiche exposant** | La fiche exposant et le rÃ©pertoire des exposants de JayFestival peuvent sâ€™appuyer sur le profil JayXpose (donnÃ©es vitrine, catalogue, contact). |
+| **RÃ©pertoire** | Lâ€™annuaire ou le rÃ©pertoire des exposants (global ou par Ã©vÃ©nement) peut afficher les vitrines JayXpose. |
+| **IdentitÃ© unique** | Un exposant peut avoir une vitrine JayXpose et participer Ã  des Ã©ditions JayFestival avec le mÃªme profil ; pas de duplication. |
 
-**Référence** : [JayXpose - Document Fondateur](../../JayXpose/JayXpose%20-%20Document%20Fondateur.md).
+**RÃ©fÃ©rence** : [JayXpose - Document Fondateur](../../JayXpose/JayXpose%20-%20Document%20Fondateur.md).
 
 ---
 
-## 2. JayFestival ↔ JayFaim
+## 2. JayFestival â†” JayFaim
 
-**JayFaim** (restauration, food trucks, commande en ligne) **se couple avec JayFestival** sur les événements.
+**JayFaim** (restauration, food trucks, commande en ligne) **se couple avec JayFestival** sur les Ã©vÃ©nements.
 
-| Aspect | Côté JayFestival |
+| Aspect | CÃ´tÃ© JayFestival |
 |--------|-------------------|
-| **Restauration sur événement** | Sur une édition festival, la restauration (stands, food trucks, points de vente) peut être gérée via JayFaim : créneaux, commandes, paiement selon Mandats. |
-| **Orchestration** | Les flux **commande / créneaux / paiement** sont orchestrés entre JayFaim, JayFestival et JayKonta (encaissement si applicable). |
-| **Données** | JayFestival détient les données événement (éditions, stands, exposants) ; JayFaim détient les données métier restauration (menus, commandes, créneaux). |
+| **Restauration sur Ã©vÃ©nement** | Sur une Ã©dition festival, la restauration (stands, food trucks, points de vente) peut Ãªtre gÃ©rÃ©e via JayFaim : crÃ©neaux, commandes, paiement selon Mandats. |
+| **Orchestration** | Les flux **commande / crÃ©neaux / paiement** sont orchestrÃ©s entre JayFaim, JayFestival et JayKonta (encaissement si applicable). |
+| **DonnÃ©es** | JayFestival dÃ©tient les donnÃ©es Ã©vÃ©nement (Ã©ditions, stands, exposants) ; JayFaim dÃ©tient les donnÃ©es mÃ©tier restauration (menus, commandes, crÃ©neaux). |
 
-**Référence** : [JayFaim - Document Fondateur](../../JayFaim/JayFaim%20-%20Document%20Fondateur.md).
+**RÃ©fÃ©rence** : [JayFaim - Document Fondateur](../../JayFaim/JayFaim%20-%20Document%20Fondateur.md).
 
 ---
 
-## 3. JayFestival ↔ JayKoa
+## 3. JayFestival â†” JayKoa
 
-**JayKoa** intègre tout ce qui manipule des **dates** ; JayFestival publie des entrées agenda vers JayKoa.
+**JayKoa** intÃ¨gre tout ce qui manipule des **dates** ; JayFestival publie des entrÃ©es agenda vers JayKoa.
 
-| Aspect | Côté JayFestival |
+| Aspect | CÃ´tÃ© JayFestival |
 |--------|-------------------|
-| **Entrées agenda** | JayFestival publie les **éditions**, **participations** et **ateliers / créneaux** vers JayKoa pour agrégation calendrier et détection de conflits. |
-| **Vue agrégée** | Un exposant ou un visiteur peut disposer d’une **vue calendrier unifiée** (JayKoa) incluant les éditions et participations JayFestival. |
-| **Conflits de dates** | La gestion d’agenda cross-événements (exposant/visiteur) s’appuie sur les capacités JayKoa (conflits, fuseaux, export). |
+| **EntrÃ©es agenda** | JayFestival publie les **Ã©ditions**, **participations** et **ateliers / crÃ©neaux** vers JayKoa pour agrÃ©gation calendrier et dÃ©tection de conflits. |
+| **Vue agrÃ©gÃ©e** | Un exposant ou un visiteur peut disposer dâ€™une **vue calendrier unifiÃ©e** (JayKoa) incluant les Ã©ditions et participations JayFestival. |
+| **Conflits de dates** | La gestion dâ€™agenda cross-Ã©vÃ©nements (exposant/visiteur) sâ€™appuie sur les capacitÃ©s JayKoa (conflits, fuseaux, export). |
 
-**Référence** : [JayKoa - Document Fondateur](../../JayKoa/JayKoa%20-%20Document%20Fondateur.md), [JayKoa - Integration Services Consommateurs](../../JayKoa/reference/JayKoa%20-%20Integration%20Services%20Consommateurs.md).
+**RÃ©fÃ©rence** : [JayKoa - Document Fondateur](../../JayKoa/JayKoa%20-%20Document%20Fondateur.md), [JayKoa - Integration Services Consommateurs](../../JayKoa/reference/JayKoa%20-%20Integration%20Services%20Consommateurs.md).
 
 ---
 
-## 4. JayFestival ↔ JayKonta
+## 4. JayFestival â†” JayKonta
 
-**JayKonta** (budget, devis, facturation) est **consommé par JayFestival** pour la comptabilité par édition et la facturation des exposants.
+**JayKonta** (budget, devis, facturation) est **consommÃ© par JayFestival** pour la comptabilitÃ© par Ã©dition et la facturation des exposants.
 
-| Aspect | Côté JayFestival |
+| Aspect | CÃ´tÃ© JayFestival |
 |--------|-------------------|
-| **Budget par édition** | JayFestival enregistre les revenus et dépenses par édition via les Opérateurs JayKonta (`budget.movements.record`). |
-| **Devis et factures exposants** | Création de devis et émission de factures pour les exposants via JayKonta (`quote.create`, `invoice.emit`). |
-| **Données** | JayFestival détient les données métier (exposant, édition) ; JayKonta détient les données comptables. |
+| **Budget par Ã©dition** | JayFestival enregistre les revenus et dÃ©penses par Ã©dition via les OpÃ©rateurs JayKonta (`budget.movements.record`). |
+| **Devis et factures exposants** | CrÃ©ation de devis et Ã©mission de factures pour les exposants via JayKonta (`quote.create`, `invoice.emit`). |
+| **DonnÃ©es** | JayFestival dÃ©tient les donnÃ©es mÃ©tier (exposant, Ã©dition) ; JayKonta dÃ©tient les donnÃ©es comptables. |
 
-**Référence** : [JayKonta - Document Fondateur](../../JayKonta/JayKonta%20-%20Document%20Fondateur.md), [JayKonta - Integration Services](../../JayKonta/reference/JayKonta%20-%20Integration%20Services.md).
+**RÃ©fÃ©rence** : [JayKonta - Document Fondateur](../../JayKonta/JayKonta%20-%20Document%20Fondateur.md), [JayKonta - Integration Services](../../JayKonta/reference/JayKonta%20-%20Integration%20Services.md).
 
 ---
 
-## 5. Synthèse des couplages
+## 5. SynthÃ¨se des couplages
 
-| Service | Rôle du couplage avec JayFestival |
+| Service | RÃ´le du couplage avec JayFestival |
 |---------|-----------------------------------|
-| **JayXpose** | Profil exposant et vitrine ; fiche et répertoire exposants. |
-| **JayFaim** | Restauration sur événement ; créneaux, commandes, paiement. |
-| **JayKoa** | Agenda agrégé ; éditions, participations, conflits de dates. |
-| **JayKonta** | Budget édition, devis et factures exposants, encaissements. |
+| **JayXpose** | Profil exposant et vitrine ; fiche et rÃ©pertoire exposants. |
+| **JayFaim** | Restauration sur Ã©vÃ©nement ; crÃ©neaux, commandes, paiement. |
+| **JayKoa** | Agenda agrÃ©gÃ© ; Ã©ditions, participations, conflits de dates. |
+| **JayKonta** | Budget Ã©dition, devis et factures exposants, encaissements. |
 
 ---
 
-## 6. État de la documentation et décisions à trancher
+## 6. Ã‰tat de la documentation et dÃ©cisions Ã  trancher
 
-Pour une **implémentation complète incluant l’UI**, l’état de la documentation de chaque service interfacé (Jay, Miyu*, Cores), les **manques** et les **ambiguïtés ou choix humains** à trancher sont détaillés dans :
+Pour une **implÃ©mentation complÃ¨te incluant lâ€™UI**, lâ€™Ã©tat de la documentation de chaque service interfacÃ© (Jay, Miyu*, Cores), les **manques** et les **ambiguÃ¯tÃ©s ou choix humains** Ã  trancher sont dÃ©taillÃ©s dans :
 
 - [JayFestival - Etat Documentation Services Interfaces](./JayFestival%20-%20Etat%20Documentation%20Services%20Interfaces.md).
 
-**Décisions P0 (tranchées)** : **Miyuinvoice + JayKonta** — facturation exposants = Miyuinvoice en façade avec JayKonta en backend (devis, factures, encaissements). **JayXpose est dans l’alpha** — le parcours demande de stands et l’annuaire exposants en dépendent (fiche exposant, répertoire). JayFaim = hors scope alpha (phase 2). **P1 (tranchées)** : **Miyuprofile** = Supabase uniquement pour le moment (source de vérité profil = tables Supabase). **JayKoa** organise les données et fait l’interface avec l’utilisateur ; **MiyuClock** atteste l’horaire et la date IRL (référentiel temps réel). Voir [Bornage Implementation](../JayFestival%20-%20Bornage%20Implementation.md) et [État Documentation Services Interfaces](./JayFestival%20-%20Etat%20Documentation%20Services%20Interfaces.md).
+**DÃ©cisions P0 (tranchÃ©es)** : **Miyuinvoice + JayKonta** â€” facturation exposants = Miyuinvoice en faÃ§ade avec JayKonta en backend (devis, factures, encaissements). **JayXpose est dans lâ€™alpha** â€” le parcours demande de stands et lâ€™annuaire exposants en dÃ©pendent (fiche exposant, rÃ©pertoire). JayFaim = hors scope alpha (phase 2). **P1 (tranchÃ©es)** : **Miyuprofile** = Supabase uniquement pour le moment (source de vÃ©ritÃ© profil = tables Supabase). **JayKoa** organise les donnÃ©es et fait lâ€™interface avec lâ€™utilisateur ; **MiyuClock** atteste lâ€™horaire et la date IRL (rÃ©fÃ©rentiel temps rÃ©el). Voir [Bornage Implementation](../JayFestival%20-%20Bornage%20Implementation.md) et [Ã‰tat Documentation Services Interfaces](./JayFestival%20-%20Etat%20Documentation%20Services%20Interfaces.md).
 
 ---
 
 ## 7. Voir aussi
 
-- [JayFestival - Connexions Synchronisation Services Jay](./JayFestival%20-%20Connexions%20Synchronisation%20Services%20Jay.md) — **dépendances Cargo, liaisons métier, bornes, implémentation sync JayKoa, sync JayXpose et annuaire exposants**.
-- [Miyukini Conceptual References - Interpolarite Services Jay](../../../reference/Miyukini%20Conceptual%20References%20-%20Interpolarite%20Services%20Jay.md) — principe global et tableau des documents fondateurs.
-- [JayFestival - Document Fondateur](../JayFestival%20-%20Document%20Fondateur.md) — raison d'être, vision, macro, distribution.
-- [JayXpose - Synchronisation JayFestival](../../JayXpose/JayXpose%20-%20Synchronisation%20JayFestival.md) — contrat d'intégration JayXpose ↔ JayFestival (données partagées, flux candidature, annuaire).
+- [JayFestival - Connexions Synchronisation Services Jay](./JayFestival%20-%20Connexions%20Synchronisation%20Services%20Jay.md) â€” **dÃ©pendances Cargo, liaisons mÃ©tier, bornes, implÃ©mentation sync JayKoa, sync JayXpose et annuaire exposants**.
+- [Miyukini Conceptual References - Interpolarite Services Jay](..//..//..//miyukini-webway-system//reference//_index.md) â€” principe global et tableau des documents fondateurs.
+- [JayFestival - Document Fondateur](../JayFestival%20-%20Document%20Fondateur.md) â€” raison d'Ãªtre, vision, macro, distribution.
+- [JayXpose - Synchronisation JayFestival](../../JayXpose/JayXpose%20-%20Synchronisation%20JayFestival.md) â€” contrat d'intÃ©gration JayXpose â†” JayFestival (donnÃ©es partagÃ©es, flux candidature, annuaire).
 
 ---
 
-**Document** : JayFestival — Interpolarité avec les services Jay  
+**Document** : JayFestival â€” InterpolaritÃ© avec les services Jay  
 **Version** : 1.0  
 **Date** : 2026-02-02  
-**Statut** : Document de référence — interpolarité côté JayFestival.
+**Statut** : Document de rÃ©fÃ©rence â€” interpolaritÃ© cÃ´tÃ© JayFestival.
+

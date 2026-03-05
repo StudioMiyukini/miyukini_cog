@@ -160,7 +160,7 @@ Champs optionnels : `role`, `layer`, `human`
 
 ## Outil MIP Generator
 
-Situe dans `tools/mip-generator/`. Utilise pour regenerer l'index complet.
+Situe dans `tools/mscm-generator/`. Utilise pour regenerer l'index complet.
 
 ## Compatibilite agents IA
 

@@ -1,4 +1,4 @@
-# LogisticsSteward - Kernel Integration Contract
+﻿# LogisticsSteward - Kernel Integration Contract
 
 ## 1. Contexte
 
@@ -7,7 +7,7 @@ Ce document definit le **contrat d'integration entre LogisticsSteward et le Kern
 Ce document complete la Section 8.1 de la [Documentation Fondatrice](../../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
 - [Kernel - Index de Navigation](../../../../kernel/_index.md) pour la definition du Kernel
 - [Kernel - Invariants & Guarantees](../../../../kernel/contracts/Kernel%20-%20Invariants%20&%20Guarantees.md) pour les garanties du Kernel
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) pour la conformite LOI-1 a LOI-6
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) pour la conformite LOI-1 a LOI-6
 
 L'integration respecte les Lois d'Autonomie Systeme : l'etat systeme est local et ne requiert aucune dependance externe (**LOI-1**).
 
@@ -37,7 +37,7 @@ La relation est de **dependance consommateur** : LogisticsSteward depend du Kern
 
 ---
 
-## 4. Nature de la relation LogisticsSteward — Kernel
+## 4. Nature de la relation LogisticsSteward â€” Kernel
 
 ### 4.1 Relation de fourniture d'etat et d'execution
 
@@ -70,14 +70,14 @@ L'execution des decisions d'arbitrage par le Kernel passe **toujours** par la va
 
 | Responsabilite | LogisticsSteward | Kernel |
 |----------------|------------------|--------|
-| **Fournir l'etat systeme** | ❌ Consomme | ✅ Exclusif |
-| **Mesurer les ressources** | ❌ Jamais | ✅ Exclusif |
-| **Controler le hardware** | ❌ Jamais | ✅ Exclusif |
-| **Arbitrer l'usage** | ✅ Exclusif | ❌ Jamais |
-| **Definir les quotas** | ✅ Exclusif | ❌ Jamais |
-| **Gerer les priorites** | ✅ Exclusif | ❌ Jamais |
-| **Executer les arbitrages** | ❌ Jamais | ✅ Via validation |
-| **Abstraire l'etat** | ❌ Consomme | ✅ Exclusif |
+| **Fournir l'etat systeme** | âŒ Consomme | âœ… Exclusif |
+| **Mesurer les ressources** | âŒ Jamais | âœ… Exclusif |
+| **Controler le hardware** | âŒ Jamais | âœ… Exclusif |
+| **Arbitrer l'usage** | âœ… Exclusif | âŒ Jamais |
+| **Definir les quotas** | âœ… Exclusif | âŒ Jamais |
+| **Gerer les priorites** | âœ… Exclusif | âŒ Jamais |
+| **Executer les arbitrages** | âŒ Jamais | âœ… Via validation |
+| **Abstraire l'etat** | âŒ Consomme | âœ… Exclusif |
 
 **Regle LS-K-05 : Aucun chevauchement**
 
@@ -128,13 +128,13 @@ LogisticsSteward n'accede **jamais** aux metriques brutes du systeme (pourcentag
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `state_id` | Identifiant unique de l'etat | ✅ Oui |
-| `load_level` | Niveau de charge global (low, normal, high, critical) | ✅ Oui |
-| `availability` | Disponibilite relative des ressources (0.0 a 1.0) | ✅ Oui |
-| `security_thresholds` | Seuils de securite atteints ou proches | ✅ Oui |
-| `degradation_level` | Niveau de degradation actuel (D0 a D4) | ✅ Oui |
-| `hardware_profile` | Profil materiel declare (minimal, standard, high, server) | ✅ Oui |
-| `timestamp` | Horodatage de l'etat | ✅ Oui |
+| `state_id` | Identifiant unique de l'etat | âœ… Oui |
+| `load_level` | Niveau de charge global (low, normal, high, critical) | âœ… Oui |
+| `availability` | Disponibilite relative des ressources (0.0 a 1.0) | âœ… Oui |
+| `security_thresholds` | Seuils de securite atteints ou proches | âœ… Oui |
+| `degradation_level` | Niveau de degradation actuel (D0 a D4) | âœ… Oui |
+| `hardware_profile` | Profil materiel declare (minimal, standard, high, server) | âœ… Oui |
+| `timestamp` | Horodatage de l'etat | âœ… Oui |
 
 ### 6.2 Niveau de charge
 
@@ -277,11 +277,11 @@ Les consultations de LogisticsSteward suivent un format standardise.
 
 | Element | Description | Obligatoire |
 |---------|-------------|-------------|
-| `query_id` | Identifiant unique de la consultation | ✅ Oui |
-| `type` | Type de consultation | ✅ Oui |
-| `payload` | Donnees specifiques (optionnel) | ❌ Selon type |
-| `contexte_appelant` | Contexte de LogisticsSteward | ✅ Oui |
-| `timestamp` | Horodatage de la consultation | ✅ Oui |
+| `query_id` | Identifiant unique de la consultation | âœ… Oui |
+| `type` | Type de consultation | âœ… Oui |
+| `payload` | Donnees specifiques (optionnel) | âŒ Selon type |
+| `contexte_appelant` | Contexte de LogisticsSteward | âœ… Oui |
+| `timestamp` | Horodatage de la consultation | âœ… Oui |
 
 **Regle LS-K-PROT-01 : Format standardise**
 
@@ -295,12 +295,12 @@ Les reponses du Kernel suivent un format standardise.
 
 | Element | Description | Obligatoire |
 |---------|-------------|-------------|
-| `response_id` | Identifiant unique de la reponse | ✅ Oui |
-| `query_id` | Reference a la consultation | ✅ Oui |
-| `status` | Statut de la reponse (SUCCESS, ERROR) | ✅ Oui |
+| `response_id` | Identifiant unique de la reponse | âœ… Oui |
+| `query_id` | Reference a la consultation | âœ… Oui |
+| `status` | Statut de la reponse (SUCCESS, ERROR) | âœ… Oui |
 | `data` | Donnees de la reponse | Si SUCCESS |
 | `error` | Details de l'erreur | Si ERROR |
-| `timestamp` | Horodatage de la reponse | ✅ Oui |
+| `timestamp` | Horodatage de la reponse | âœ… Oui |
 
 **Regle LS-K-PROT-02 : Reponse toujours structuree**
 
@@ -354,24 +354,24 @@ Contrairement a d'autres integrations, il n'y a pas de statut NOT_FOUND. L'etat 
 ### 9.3 Diagramme de sequence
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ LogisticsSteward│    │     Kernel      │    │  StrongFather   │
-└────────┬────────┘    └────────┬────────┘    └────────┬────────┘
-         │                      │                      │
-         ├── GET_SYSTEM_STATE ─►│                      │
-         │                      │                      │
-         │◄── Etat systeme ─────┤                      │
-         │    (load, avail,     │                      │
-         │     thresholds)      │                      │
-         │                      │                      │
-         ├── Evaluation ────────┤                      │
-         │   (regles + etat)    │                      │
-         │                      │                      │
-         ├── Decision ──────────┼─────────────────────►│
-         │   (arbitrage)        │                      │
-         │                      │                      │
-         │                      │◄── Execution ────────┤
-         │                      │    (si valide)       │
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ LogisticsStewardâ”‚    â”‚     Kernel      â”‚    â”‚  StrongFather   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚                      â”‚                      â”‚
+         â”œâ”€â”€ GET_SYSTEM_STATE â”€â–ºâ”‚                      â”‚
+         â”‚                      â”‚                      â”‚
+         â”‚â—„â”€â”€ Etat systeme â”€â”€â”€â”€â”€â”¤                      â”‚
+         â”‚    (load, avail,     â”‚                      â”‚
+         â”‚     thresholds)      â”‚                      â”‚
+         â”‚                      â”‚                      â”‚
+         â”œâ”€â”€ Evaluation â”€â”€â”€â”€â”€â”€â”€â”€â”¤                      â”‚
+         â”‚   (regles + etat)    â”‚                      â”‚
+         â”‚                      â”‚                      â”‚
+         â”œâ”€â”€ Decision â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
+         â”‚   (arbitrage)        â”‚                      â”‚
+         â”‚                      â”‚                      â”‚
+         â”‚                      â”‚â—„â”€â”€ Execution â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+         â”‚                      â”‚    (si valide)       â”‚
 ```
 
 ---
@@ -557,7 +557,7 @@ Toute interaction est tracable avec son contexte complet.
 
 ### LOI-1 : Aucune dependance externe critique
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 L'integration respecte LOI-1 :
 - L'etat systeme est local, fourni par le Kernel local
@@ -566,7 +566,7 @@ L'integration respecte LOI-1 :
 
 ### LOI-2 : Le systeme accepte l'isolement comme etat normal
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 L'integration respecte LOI-2 :
 - L'isolement ne modifie pas l'acces a l'etat systeme
@@ -575,7 +575,7 @@ L'integration respecte LOI-2 :
 
 ### LOI-4 : Pas de temps global requis
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 L'integration respecte LOI-4 :
 - Les horodatages sont locaux
@@ -584,7 +584,7 @@ L'integration respecte LOI-4 :
 
 ### LOI-5 : Le cout doit etre proportionnel au hardware
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 L'integration respecte LOI-5 :
 - Le profil materiel adapte les quotas au hardware
@@ -706,7 +706,7 @@ Toute implementation de l'integration avec le Kernel doit respecter ce contrat. 
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT — Normatif  
+**Statut :** CONTRAT â€” Normatif  
 **Dependances :**
 - LogisticsSteward - Documentation Fondatrice v1.0 (Section 8.1)
 - Kernel - Index de Navigation v0.1
@@ -746,17 +746,18 @@ Toute implementation de l'integration avec le Kernel doit respecter ce contrat. 
 ### Verification de coherence
 
 **Verification effectuee :**
-- ✅ Coherence avec LogisticsSteward - Documentation Fondatrice : Confirmee (Section 8.1 respectee)
-- ✅ Coherence avec Kernel - Index de Navigation : Confirmee (INV-K-1 a INV-K-8 respectes)
-- ✅ Conformite LOI-1 : Confirmee (etat local, pas de dependance reseau)
-- ✅ Conformite LOI-2 : Confirmee (isolement n'affecte pas l'integration)
-- ✅ Conformite LOI-4 : Confirmee (pas de temps global requis)
-- ✅ Conformite LOI-5 : Confirmee (quotas adaptes au hardware)
-- ✅ Separation technique/gouvernance : Confirmee (INV-LS-K-3)
-- ✅ Tracabilite complete : Confirmee (INV-LS-K-7)
+- âœ… Coherence avec LogisticsSteward - Documentation Fondatrice : Confirmee (Section 8.1 respectee)
+- âœ… Coherence avec Kernel - Index de Navigation : Confirmee (INV-K-1 a INV-K-8 respectes)
+- âœ… Conformite LOI-1 : Confirmee (etat local, pas de dependance reseau)
+- âœ… Conformite LOI-2 : Confirmee (isolement n'affecte pas l'integration)
+- âœ… Conformite LOI-4 : Confirmee (pas de temps global requis)
+- âœ… Conformite LOI-5 : Confirmee (quotas adaptes au hardware)
+- âœ… Separation technique/gouvernance : Confirmee (INV-LS-K-3)
+- âœ… Tracabilite complete : Confirmee (INV-LS-K-7)
 
 **Conclusion :** Aucune contradiction detectee. Le document est coherent et non ambigu.
 
 ---
 
 *Aucune autre erreur, warning, ou ambiguite rencontree lors de la redaction de ce document.*
+

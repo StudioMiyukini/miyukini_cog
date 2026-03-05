@@ -105,7 +105,7 @@ title: "Phase 4 Completion Checklist — Profile CRUD & Constraints"
 ### Updated (This Session)
 
 ```
-✅ .mip/profiles/INDEX.md                (40 lines → 400 lines)
+✅ .mip/profiles/core/INDEX.md           (40 lines → 400 lines)
 ✅ .mip/profiles/README.md               (brief → comprehensive)
 ```
 

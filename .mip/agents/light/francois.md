@@ -2,7 +2,7 @@
 name: francois-light
 description: >
   Version light de François pour workers MASS et subagents P3.
-  Référence complète : .mip/agents/francois.md
+  Référence complète : .mip/agents/francois/FULL_francois.md
 ---
 
 ## Rôle

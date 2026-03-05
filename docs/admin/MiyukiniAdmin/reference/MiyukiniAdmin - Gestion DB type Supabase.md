@@ -1,10 +1,10 @@
-# MiyukiniAdmin — Gestion DB type Supabase
+﻿# MiyukiniAdmin â€” Gestion DB type Supabase
 
 ## 1. Contexte
 
 Ce document definit comment MiyukiniAdmin couvre des **capacites de gestion de base de donnees** comparables a celles de Supabase (migrations, scripts SQL, backups, editeur SQL, etc.), en les transposant dans le langage et l'architecture Miyukini COG. Il sert de reference pour l'implementation et complete les contrats existants (DB Operations, Emergency DB Access, KindMother).
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ## 2. Portee / Scope
 
@@ -40,11 +40,11 @@ Ce document **ne remplace pas** les contrats ; il les complete et les relie a un
 | Domaine Supabase | Transposition Miyukini | Cores impliques | Contrat(s) MiyukiniAdmin |
 |------------------|------------------------|-----------------|---------------------------|
 | **Database** | **KindMother** = autorite persistance. Exposition des donnees uniquement via **BondingBrother**. MiyukiniAdmin est un **Operateur Souverain** ; aucune API auto publique (PostgREST/GraphQL) exposee par l'admin. | KindMother, BondingBrother | [DB Operations Contract](../contracts/database/MiyukiniAdmin%20-%20DB%20Operations%20Contract.md) |
-| **Migrations** | **Scripts de migration** = intentions d'evolution de schema. Execution via **KindMother** sous validation **StrongFather**. **Ever Buddy** pour compatibilité et versions (etats de vie, evolution). | KindMother, StrongFather, Ever Buddy | [DB Operations Contract](../contracts/database/MiyukiniAdmin%20-%20DB%20Operations%20Contract.md) (MIG-001 a MIG-003) |
-| **Backups** | **Sauvegarde / Restauration** = operations MAINT ou dediees. Validation **StrongFather** obligatoire. Traçabilite complete. Niveau de confiance (**Etats de confiance T0-T4**) et **Niveaux de securite (0-4)** pris en compte. | KindMother, StrongFather, WorrySentinel | DB Operations Contract ; optionnel [Backup Restore Contract](../contracts/database/MiyukiniAdmin%20-%20Backup%20Restore%20Contract.md) |
+| **Migrations** | **Scripts de migration** = intentions d'evolution de schema. Execution via **KindMother** sous validation **StrongFather**. **Ever Buddy** pour compatibilitÃ© et versions (etats de vie, evolution). | KindMother, StrongFather, Ever Buddy | [DB Operations Contract](../contracts/database/MiyukiniAdmin%20-%20DB%20Operations%20Contract.md) (MIG-001 a MIG-003) |
+| **Backups** | **Sauvegarde / Restauration** = operations MAINT ou dediees. Validation **StrongFather** obligatoire. TraÃ§abilite complete. Niveau de confiance (**Etats de confiance T0-T4**) et **Niveaux de securite (0-4)** pris en compte. | KindMother, StrongFather, WorrySentinel | DB Operations Contract ; optionnel [Backup Restore Contract](../contracts/database/MiyukiniAdmin%20-%20Backup%20Restore%20Contract.md) |
 | **SQL Editor** | **Console Query** = lecture seule (SELECT) en mode normal. **Recovery** = ecriture exceptionnelle sous conditions cumulatives (voir Emergency DB Access). Validation **StrongFather** pour toute ecriture. | KindMother, StrongFather | [DB Management Interface](../ui/MiyukiniAdmin%20-%20DB%20Management%20Interface.md), [Emergency DB Access Contract](../contracts/database/MiyukiniAdmin%20-%20Emergency%20DB%20Access%20Contract.md) |
 | **Storage** | Si dans le perimetre admin : gestion des **buckets** ou assets sous autorite **KindMother**. A borner : administration de la persistance uniquement, pas de logique metier (CDN, transformations = hors scope admin ou delegue a un Operateur). | KindMother | A definir selon perimetre |
-| **Dashboard / Studio** | **MiyukiniAdmin** = Opérateur Souverain (Strate 9). Pas de notion "projet" Supabase ; equivalent = **Environnement** (COG). Gestion des tables, logs, parametres = vue sur l'environnement courant. | Tous (lecture via BondingBrother) | [Documentation Fondatrice](../foundation/MiyukiniAdmin%20-%20Documentation%20Fondatrice.md), [Dashboard & Metrics Display](../ui/MiyukiniAdmin%20-%20Dashboard%20&%20Metrics%20Display.md) |
+| **Dashboard / Studio** | **MiyukiniAdmin** = OpÃ©rateur Souverain (Strate 9). Pas de notion "projet" Supabase ; equivalent = **Environnement** (COG). Gestion des tables, logs, parametres = vue sur l'environnement courant. | Tous (lecture via BondingBrother) | [Documentation Fondatrice](../foundation/MiyukiniAdmin%20-%20Documentation%20Fondatrice.md), [Dashboard & Metrics Display](../ui/MiyukiniAdmin%20-%20Dashboard%20&%20Metrics%20Display.md) |
 
 ### 4.2 Termes du Glossaire a utiliser
 
@@ -58,7 +58,7 @@ Ce document **ne remplace pas** les contrats ; il les complete et les relie a un
 - **Environnement** : COG ; equivalent conceptuel au "projet" Supabase
 - **Migration** : processus d'evolution du schema (ou entre environnements, voir Glossaire)
 - **Etats de confiance (T0-T4)** : gouvernes par WorrySentinel ; impactent disponibilite Recovery, backups
-- **Niveaux de securite (0-4)** : gouvernes par WorrySentinel ; impactent permissions et traçabilite
+- **Niveaux de securite (0-4)** : gouvernes par WorrySentinel ; impactent permissions et traÃ§abilite
 
 ---
 
@@ -66,10 +66,10 @@ Ce document **ne remplace pas** les contrats ; il les complete et les relie a un
 
 ### 5.1 DB Operations Contract
 
-- **Lecture** : READ-001 a READ-005 (exploration tables, schema, donnees, export, stats) — pas de validation StrongFather.
-- **Maintenance** : MAINT-001 a MAINT-005 (analyse, vacuum, reindex, stats, nettoyage logs) — validation StrongFather.
-- **Reparation** : REPAIR-001 a REPAIR-003 — validation StrongFather + conditions.
-- **Migration** : MIG-001 (schema), MIG-002 (donnees), MIG-003 (rollback) — validation StrongFather, backup obligatoire, pre/post tests.
+- **Lecture** : READ-001 a READ-005 (exploration tables, schema, donnees, export, stats) â€” pas de validation StrongFather.
+- **Maintenance** : MAINT-001 a MAINT-005 (analyse, vacuum, reindex, stats, nettoyage logs) â€” validation StrongFather.
+- **Reparation** : REPAIR-001 a REPAIR-003 â€” validation StrongFather + conditions.
+- **Migration** : MIG-001 (schema), MIG-002 (donnees), MIG-003 (rollback) â€” validation StrongFather, backup obligatoire, pre/post tests.
 
 Voir [MiyukiniAdmin - DB Operations Contract](../contracts/database/MiyukiniAdmin%20-%20DB%20Operations%20Contract.md) pour les flux et formats.
 
@@ -94,19 +94,19 @@ Voir [MiyukiniAdmin - KindMother Integration Contract](../contracts/integration/
 - **Format** : un fichier par migration, nommage stable (ex. `YYYYMMDDHHMMSS_description_courte.sql` ou version semver). Table d'historique en DB (appliquees, ordre, checksum).
 - **Ordre** : application stricte par ordre chronologique ou version ; pas de saut.
 - **Idempotence** : recommandee (IF NOT EXISTS, etc.) pour limiter les echecs en cas de rejeu.
-- **Ever Buddy** : coherence des versions et compatibilité (etats de vie ACTIF / DEPRECIE) ; pas d'execution par Ever Buddy, mais consultation pour validation pre-migration.
-- **Workflow** : Pre-validation → Backup → Validation StrongFather → Execution via KindMother → Post-validation / Rollback (deja decrit DB Operations Contract §9). Extension detaillee dans le meme contrat (section Scripts de migration).
+- **Ever Buddy** : coherence des versions et compatibilitÃ© (etats de vie ACTIF / DEPRECIE) ; pas d'execution par Ever Buddy, mais consultation pour validation pre-migration.
+- **Workflow** : Pre-validation â†’ Backup â†’ Validation StrongFather â†’ Execution via KindMother â†’ Post-validation / Rollback (deja decrit DB Operations Contract Â§9). Extension detaillee dans le meme contrat (section Scripts de migration).
 
 ### 6.2 Backups et restauration
 
-- **Declenchement** : manuel (depuis MiyukiniAdmin) ou planifie (cron / job) ; dans les deux cas, traçabilite et validation StrongFather si ecriture ou impact systeme.
+- **Declenchement** : manuel (depuis MiyukiniAdmin) ou planifie (cron / job) ; dans les deux cas, traÃ§abilite et validation StrongFather si ecriture ou impact systeme.
 - **Stockage** : hors DB (fichier, objet) ; pas de stockage des backups dans la meme instance que la DB cible.
 - **Restauration** : conditions StrongFather + WorrySentinel (niveau confiance, niveau securite) ; procedure documentee ; rollback possible si echec.
-- **PITR** : si implémente, traite comme une capacite avancee ; memes principes gouvernance.
+- **PITR** : si implÃ©mente, traite comme une capacite avancee ; memes principes gouvernance.
 
 ### 6.3 SQL Editor (Console Query / Recovery)
 
-- **Mode normal** : SELECT uniquement ; parsing AST, whitelist, timeout, LIMIT force (voir [DB Management Interface](../ui/MiyukiniAdmin%20-%20DB%20Management%20Interface.md) §11). Validation StrongFather pour l'intention de lecture si politique l'exige.
+- **Mode normal** : SELECT uniquement ; parsing AST, whitelist, timeout, LIMIT force (voir [DB Management Interface](../ui/MiyukiniAdmin%20-%20DB%20Management%20Interface.md) Â§11). Validation StrongFather pour l'intention de lecture si politique l'exige.
 - **Mode Recovery** : ecriture autorisee temporairement ; voir Emergency DB Access Contract. Aucune reutilisation du code "SQL Editor" public ; interface dediee Recovery.
 - **Fonctionnalites inspirees Supabase (documentation externe) :** historique des requetes executees, auto-completion (noms de tables, colonnes, fonctions), syntax highlighting pour la lisibilite, onglets de sortie **Results** (affichage tabulaire), **Explain** (plan d'execution), **Chart** (visualisation optionnelle). References : [Supabase SQL Editor](https://supabase.com/features/sql-editor), [Reference SQL et DB](./MiyukiniAdmin%20-%20Reference%20SQL%20et%20DB.md).
 
@@ -125,10 +125,10 @@ Voir [MiyukiniAdmin - KindMother Integration Contract](../contracts/integration/
 
 ## 7. Documentation Supabase utilisee
 
-Pour traçabilite et enrichissement des sujets SQL/DB, les documents Supabase suivants sont utilises comme reference (sans dependance technique) :
+Pour traÃ§abilite et enrichissement des sujets SQL/DB, les documents Supabase suivants sont utilises comme reference (sans dependance technique) :
 
-- [Supabase SQL Editor](https://supabase.com/features/sql-editor) — fonctionnalites editeur SQL (syntax highlighting, auto-completion, execution history, onglets Results/Explain/Chart).
-- [Tables and Data](https://supabase.com/docs/guides/database/tables) — Table Editor, creation de tables, types de donnees, Realtime.
+- [Supabase SQL Editor](https://supabase.com/features/sql-editor) â€” fonctionnalites editeur SQL (syntax highlighting, auto-completion, execution history, onglets Results/Explain/Chart).
+- [Tables and Data](https://supabase.com/docs/guides/database/tables) â€” Table Editor, creation de tables, types de donnees, Realtime.
 
 Voir egalement [MiyukiniAdmin - Reference SQL et DB](./MiyukiniAdmin%20-%20Reference%20SQL%20et%20DB.md) et [Pages et Outils Reference Supabase](./MiyukiniAdmin%20-%20Pages%20et%20Outils%20Reference%20Supabase.md).
 
@@ -136,7 +136,7 @@ Voir egalement [MiyukiniAdmin - Reference SQL et DB](./MiyukiniAdmin%20-%20Refer
 
 ## 8. Documents associes
 
-- [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+- [Miyukini Conceptual References - Glossaire](..//..//..//miyukini-webway-system//reference//_index.md)
 - [MiyukiniAdmin - Pages et Outils Reference Supabase](./MiyukiniAdmin%20-%20Pages%20et%20Outils%20Reference%20Supabase.md)
 - [MiyukiniAdmin - Reference SQL et DB](./MiyukiniAdmin%20-%20Reference%20SQL%20et%20DB.md)
 - [MiyukiniAdmin - DB Operations Contract](../contracts/database/MiyukiniAdmin%20-%20DB%20Operations%20Contract.md)
@@ -150,3 +150,4 @@ Voir egalement [MiyukiniAdmin - Reference SQL et DB](./MiyukiniAdmin%20-%20Refer
 **Date de creation :** 2026-01-29  
 **Version :** 1.0.0  
 **Statut :** Document de reference (implementation)
+

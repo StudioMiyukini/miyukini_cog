@@ -1,4 +1,4 @@
-# TAMR — Invariants & Guarantees
+﻿# TAMR â€” Invariants & Guarantees
 
 ## 1. Introduction
 
@@ -8,7 +8,7 @@ TAMR (The Authority Must Rest) est le **Human Interaction Core** du Miyukini Cor
 
 ### Objet du contrat
 
-Ce document definit le **TAMR — Invariants & Guarantees** : un contrat normatif, non negociable, et de statut FONDATION qui consolide et formalise l'ensemble des invariants TAMR (INV-TAMR-1 a INV-TAMR-8), etablissant les proprietes absolues qui doivent toujours etre vraies pour toute intervention humaine dans le systeme Miyukini.
+Ce document definit le **TAMR â€” Invariants & Guarantees** : un contrat normatif, non negociable, et de statut FONDATION qui consolide et formalise l'ensemble des invariants TAMR (INV-TAMR-1 a INV-TAMR-8), etablissant les proprietes absolues qui doivent toujours etre vraies pour toute intervention humaine dans le systeme Miyukini.
 
 Ce contrat constitue la reference unique et consolidee de tous les invariants TAMR.
 
@@ -29,11 +29,11 @@ Ce document est **contractuel, normatif, non discutable, et de statut FONDATION*
 
 Ce contrat **consolide** les invariants definis dans :
 
-- **[TAMR — Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md)** : INV-TAMR-1 a INV-TAMR-8 (source fondatrice)
-- **[TAMR — Intervention Types Contract](../intervention/TAMR%20-%20Intervention%20Types%20Contract.md)** : Invariants des types d'intervention (INV-TYPE-*, INV-APPR-*, INV-OVER-*, reference a INV-TAMR-7, INV-TAMR-8)
-- **[TAMR — Intervention Points Contract](../intervention/TAMR%20-%20Intervention%20Points%20Contract.md)** : Invariants des points d'intervention (INV-IP-*)
-- **[TAMR — Authority Limits Contract](../boundaries/TAMR%20-%20Authority%20Limits%20Contract.md)** : Invariants des limites d'autorite (INV-AL-*, reference a INV-TAMR-5)
-- **[TAMR — Inviolable Limits Contract](../boundaries/TAMR%20-%20Inviolable%20Limits%20Contract.md)** : Limites infranchissables (LIM-INV-*, reference a INV-TAMR-3)
+- **[TAMR â€” Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md)** : INV-TAMR-1 a INV-TAMR-8 (source fondatrice)
+- **[TAMR â€” Intervention Types Contract](../intervention/TAMR%20-%20Intervention%20Types%20Contract.md)** : Invariants des types d'intervention (INV-TYPE-*, INV-APPR-*, INV-OVER-*, reference a INV-TAMR-7, INV-TAMR-8)
+- **[TAMR â€” Intervention Points Contract](../intervention/TAMR%20-%20Intervention%20Points%20Contract.md)** : Invariants des points d'intervention (INV-IP-*)
+- **[TAMR â€” Authority Limits Contract](../boundaries/TAMR%20-%20Authority%20Limits%20Contract.md)** : Invariants des limites d'autorite (INV-AL-*, reference a INV-TAMR-5)
+- **[TAMR â€” Inviolable Limits Contract](../boundaries/TAMR%20-%20Inviolable%20Limits%20Contract.md)** : Limites infranchissables (LIM-INV-*, reference a INV-TAMR-3)
 
 Ce contrat est la **reference unique** (document maitre) pour le catalogue des invariants fondamentaux TAMR (INV-TAMR-1 a INV-TAMR-8).
 
@@ -68,7 +68,7 @@ Aucune intervention humaine ne peut se produire sans etre enregistree. Cette tra
 
 Cet invariant est non contournable, meme pour les interventions d'urgence ou les situations exceptionnelles.
 
-*Source : [TAMR — Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7*
+*Source : [TAMR â€” Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7*
 
 ### 3.2. INV-TAMR-2 : Responsabilite explicite
 
@@ -76,15 +76,15 @@ Cet invariant est non contournable, meme pour les interventions d'urgence ou les
 
 Toute intervention engage la responsabilite de l'humain intervenant. Cette responsabilite est tracee et peut etre auditee. L'humain ne peut pas intervenir anonymement ou sans assumer les consequences de son intervention.
 
-*Source : [TAMR — Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7*
+*Source : [TAMR â€” Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7*
 
 ### 3.3. INV-TAMR-3 : Limites infranchissables
 
 **Certaines limites d'autorite sont absolues et ne peuvent etre depassees par aucune intervention humaine.**
 
-Il existe des limites que meme un override ne peut franchir. Ces limites protegent : l'integrite du systeme, les donnees critiques, les regles de securite fondamentales, les contraintes legales ou reglementaires. Le contrat [TAMR — Inviolable Limits Contract](../boundaries/TAMR%20-%20Inviolable%20Limits%20Contract.md) en donne le catalogue (LIM-INV-1 a LIM-INV-7).
+Il existe des limites que meme un override ne peut franchir. Ces limites protegent : l'integrite du systeme, les donnees critiques, les regles de securite fondamentales, les contraintes legales ou reglementaires. Le contrat [TAMR â€” Inviolable Limits Contract](../boundaries/TAMR%20-%20Inviolable%20Limits%20Contract.md) en donne le catalogue (LIM-INV-1 a LIM-INV-7).
 
-*Source : [TAMR — Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7 ; [TAMR — Inviolable Limits Contract](../boundaries/TAMR%20-%20Inviolable%20Limits%20Contract.md)*
+*Source : [TAMR â€” Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7 ; [TAMR â€” Inviolable Limits Contract](../boundaries/TAMR%20-%20Inviolable%20Limits%20Contract.md)*
 
 ### 3.4. INV-TAMR-4 : Separation conceptuel / technique
 
@@ -92,7 +92,7 @@ Il existe des limites que meme un override ne peut franchir. Ces limites protege
 
 TAMR ne definit pas d'interface, de protocole, d'API, ou de mecanisme technique. Il definit uniquement les concepts, types, limites, et regles de l'intervention humaine.
 
-*Source : [TAMR — Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7*
+*Source : [TAMR â€” Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7*
 
 ### 3.5. INV-TAMR-5 : Non-decision
 
@@ -100,7 +100,7 @@ TAMR ne definit pas d'interface, de protocole, d'API, ou de mecanisme technique.
 
 TAMR definit les regles, mais la decision d'autoriser ou refuser une intervention appartient a StrongFather. TAMR est un cadre conceptuel, pas un moteur de decision.
 
-*Source : [TAMR — Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7 ; [TAMR — Authority Limits Contract](../boundaries/TAMR%20-%20Authority%20Limits%20Contract.md) (INV-AL-5)*
+*Source : [TAMR â€” Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7 ; [TAMR â€” Authority Limits Contract](../boundaries/TAMR%20-%20Authority%20Limits%20Contract.md) (INV-AL-5)*
 
 ### 3.6. INV-TAMR-6 : Automatisation par defaut
 
@@ -108,7 +108,7 @@ TAMR definit les regles, mais la decision d'autoriser ou refuser une interventio
 
 TAMR ne vise pas a remplacer l'automatisation par l'intervention humaine. L'intervention humaine est definie pour les cas ou elle est necessaire, pas pour eviter l'automatisation.
 
-*Source : [TAMR — Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7*
+*Source : [TAMR â€” Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7*
 
 ### 3.7. INV-TAMR-7 : Justification obligatoire pour override
 
@@ -116,7 +116,7 @@ TAMR ne vise pas a remplacer l'automatisation par l'intervention humaine. L'inte
 
 Un override contredit une decision automatique. Cette derogation exceptionnelle necessite une justification qui sera tracee et auditable.
 
-*Source : [TAMR — Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7 ; [TAMR — Intervention Types Contract](../intervention/TAMR%20-%20Intervention%20Types%20Contract.md)*
+*Source : [TAMR â€” Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7 ; [TAMR â€” Intervention Types Contract](../intervention/TAMR%20-%20Intervention%20Types%20Contract.md)*
 
 ### 3.8. INV-TAMR-8 : Escalade non bloquante
 
@@ -124,7 +124,7 @@ Un override contredit une decision automatique. Cette derogation exceptionnelle 
 
 Une escalade eleve une decision vers un niveau superieur, mais le systeme doit prevoir des mecanismes pour gerer le cas ou l'escalade n'est pas resolue dans un delai raisonnable (timeout, delegation automatique, rejet par defaut).
 
-*Source : [TAMR — Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7 ; [TAMR — Intervention Types Contract](../intervention/TAMR%20-%20Intervention%20Types%20Contract.md)*
+*Source : [TAMR â€” Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md), section 7 ; [TAMR â€” Intervention Types Contract](../intervention/TAMR%20-%20Intervention%20Types%20Contract.md)*
 
 ---
 
@@ -169,9 +169,9 @@ Toute violation d'invariant TAMR DOIT etre detectee des que possible (au moment 
 
 Toute violation detectee DOIT etre signalee comme non-conformite critique.
 
-**R-DETECT-3 : Traçabilite des tentatives**
+**R-DETECT-3 : TraÃ§abilite des tentatives**
 
-Toute tentative d'intervention qui violerait un invariant DOIT etre tracee (voir INV-TAMR-1, [TAMR — Inviolable Limits Contract](../boundaries/TAMR%20-%20Inviolable%20Limits%20Contract.md) R-INV-3).
+Toute tentative d'intervention qui violerait un invariant DOIT etre tracee (voir INV-TAMR-1, [TAMR â€” Inviolable Limits Contract](../boundaries/TAMR%20-%20Inviolable%20Limits%20Contract.md) R-INV-3).
 
 ### 5.3. Consequences de violation
 
@@ -225,15 +225,15 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisee.
 
 Ce document consolide les invariants de :
 
-- ✅ Documentation Fondatrice : INV-TAMR-1 a INV-TAMR-8
-- ✅ Intervention Types Contract : coherence avec INV-TAMR-5, INV-TAMR-7, INV-TAMR-8
-- ✅ Inviolable Limits Contract : coherence avec INV-TAMR-3
-- ✅ Authority Limits Contract : coherence avec INV-TAMR-5
+- âœ… Documentation Fondatrice : INV-TAMR-1 a INV-TAMR-8
+- âœ… Intervention Types Contract : coherence avec INV-TAMR-5, INV-TAMR-7, INV-TAMR-8
+- âœ… Inviolable Limits Contract : coherence avec INV-TAMR-3
+- âœ… Authority Limits Contract : coherence avec INV-TAMR-5
 
 ### 8.2. Verification de coherence
 
-- ✅ Aucune contradiction entre INV-TAMR-1 et INV-TAMR-8
-- ✅ Cohérence avec les sous-contrats (INV-TYPE-*, INV-IP-*, INV-AL-*, LIM-INV-*)
+- âœ… Aucune contradiction entre INV-TAMR-1 et INV-TAMR-8
+- âœ… CohÃ©rence avec les sous-contrats (INV-TYPE-*, INV-IP-*, INV-AL-*, LIM-INV-*)
 
 ---
 
@@ -241,16 +241,17 @@ Ce document consolide les invariants de :
 
 | Reference | Description |
 |-----------|-------------|
-| [Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) | Terminologie TAMR (intervention, point d'intervention, limite d'autorite, etc.) |
-| [Doctrine Securite Fondamentale](../../../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md) | Principes de securite |
-| [Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) | Conformite LOI-1 a LOI-6 |
-| [Integrity Degradation System](../../../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md) | Niveaux T0-T4 (contexte de confiance) |
-| [Security Levels](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) | Niveaux 0-4 (contexte de securite) |
+| [Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) | Terminologie TAMR (intervention, point d'intervention, limite d'autorite, etc.) |
+| [Doctrine Securite Fondamentale](..//..//..//..//miyukini-webway-system//reference//_index.md) | Principes de securite |
+| [Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) | Conformite LOI-1 a LOI-6 |
+| [Integrity Degradation System](..//..//..//..//miyukini-webway-system//reference//_index.md) | Niveaux T0-T4 (contexte de confiance) |
+| [Security Levels](..//..//..//..//miyukini-webway-system//reference//_index.md) | Niveaux 0-4 (contexte de securite) |
 
 ---
 
 **Document cree le :** 2026-01-28  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif  
+**Statut :** FONDATION â€” Contrat normatif  
 **Reference :** Miyukini Core System, TAMR Documentation Fondatrice  
 **Type :** Catalogue consolide des invariants fondamentaux TAMR (INV-TAMR-1 a INV-TAMR-8)
+

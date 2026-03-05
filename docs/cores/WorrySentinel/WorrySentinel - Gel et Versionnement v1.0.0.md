@@ -1,180 +1,180 @@
-# WorrySentinel — Gel et Versionnement v1.0.0
+﻿# WorrySentinel â€” Gel et Versionnement v1.0.0
 
 ## 1. Acte de gel officiel
 
-### 1.1 Déclaration
+### 1.1 DÃ©claration
 
-Par le présent document, la documentation **WorrySentinel** est officiellement **gelée** en version **1.0.0**.
+Par le prÃ©sent document, la documentation **WorrySentinel** est officiellement **gelÃ©e** en version **1.0.0**.
 
 **Date de gel :** 2026-01-28  
 **Version :** 1.0.0  
-**Statut :** GELÉ — Documentation de référence
+**Statut :** GELÃ‰ â€” Documentation de rÃ©fÃ©rence
 
 ### 1.2 Signification du gel
 
 Le gel de la documentation signifie que :
 
-1. **Aucune modification** de la documentation n'est autorisée sans processus formel de dégel
-2. **Toute implémentation** doit se conformer à cette version de la documentation
+1. **Aucune modification** de la documentation n'est autorisÃ©e sans processus formel de dÃ©gel
+2. **Toute implÃ©mentation** doit se conformer Ã  cette version de la documentation
 3. **Les contrats sont contraignants** pour tous les cores et produits
-4. **Les invariants sont absolus** et ne peuvent être violés
+4. **Les invariants sont absolus** et ne peuvent Ãªtre violÃ©s
 
 ---
 
-## 2. Inventaire des éléments gelés
+## 2. Inventaire des Ã©lÃ©ments gelÃ©s
 
-### 2.1 Documents gelés
+### 2.1 Documents gelÃ©s
 
-| Catégorie | Document | Version | Statut |
+| CatÃ©gorie | Document | Version | Statut |
 |-----------|----------|---------|--------|
-| **Foundation** | WorrySentinel - Documentation Fondatrice.md | 1.2 | GELÉ |
-| **Index** | _index.md | 1.0.0 | GELÉ |
-| **Architecture** | WorrySentinel - Architecture & Flows.md | 1.0.0 | GELÉ |
-| **Architecture** | WorrySentinel - Core Interaction Contract.md | 1.0 | GELÉ |
-| **Governance** | WorrySentinel - Invariants & Guarantees.md | 1.0 | GELÉ |
-| **Governance** | WorrySentinel - Violations & Anti-Patterns.md | 1.0 | GELÉ |
-| **Levels** | WorrySentinel - Security Levels Governance Contract.md | 1.0 | GELÉ |
-| **Levels** | WorrySentinel - Trust States Governance Contract.md | 1.0 | GELÉ |
-| **Degradation** | WorrySentinel - Progressive Degradation Contract.md | 1.0 | GELÉ |
-| **Integration** | WorrySentinel - StrongFather Integration Contract.md | 1.0 | GELÉ |
-| **Integration** | WorrySentinel - CaringNanny Integration Contract.md | 1.0 | GELÉ |
-| **Integration** | WorrySentinel - BorderGuard Integration Contract.md | 1.0 | GELÉ |
-| **Integration** | WorrySentinel - LogisticsSteward Integration Contract.md | 1.0 | GELÉ |
-| **Integration** | WorrySentinel - TAMR Integration Contract.md | 1.0 | GELÉ |
-| **Integration** | WorrySentinel - MiyukiniAdmin Integration Contract.md | 1.0 | GELÉ |
-| **Security** | WorrySentinel - Threat Model Contract.md | 1.0 | GELÉ |
-| **Implementation** | WorrySentinel - Reference Implementation Guidelines.md | 1.0 | GELÉ |
-| **Reference** | WorrySentinel - Vocabulary & Glossary.md | 1.0 | GELÉ |
-| **Reference** | WorrySentinel - FAQ & Common Questions.md | 1.0 | GELÉ |
-| **Reference** | WorrySentinel - Examples & Use Cases.md | 1.0 | GELÉ |
-| **Audit** | WorrySentinel - Audit Phase 3 Verification.md | 1.0 | GELÉ |
+| **Foundation** | WorrySentinel - Documentation Fondatrice.md | 1.2 | GELÃ‰ |
+| **Index** | _index.md | 1.0.0 | GELÃ‰ |
+| **Architecture** | WorrySentinel - Architecture & Flows.md | 1.0.0 | GELÃ‰ |
+| **Architecture** | WorrySentinel - Core Interaction Contract.md | 1.0 | GELÃ‰ |
+| **Governance** | WorrySentinel - Invariants & Guarantees.md | 1.0 | GELÃ‰ |
+| **Governance** | WorrySentinel - Violations & Anti-Patterns.md | 1.0 | GELÃ‰ |
+| **Levels** | WorrySentinel - Security Levels Governance Contract.md | 1.0 | GELÃ‰ |
+| **Levels** | WorrySentinel - Trust States Governance Contract.md | 1.0 | GELÃ‰ |
+| **Degradation** | WorrySentinel - Progressive Degradation Contract.md | 1.0 | GELÃ‰ |
+| **Integration** | WorrySentinel - StrongFather Integration Contract.md | 1.0 | GELÃ‰ |
+| **Integration** | WorrySentinel - CaringNanny Integration Contract.md | 1.0 | GELÃ‰ |
+| **Integration** | WorrySentinel - BorderGuard Integration Contract.md | 1.0 | GELÃ‰ |
+| **Integration** | WorrySentinel - LogisticsSteward Integration Contract.md | 1.0 | GELÃ‰ |
+| **Integration** | WorrySentinel - TAMR Integration Contract.md | 1.0 | GELÃ‰ |
+| **Integration** | WorrySentinel - MiyukiniAdmin Integration Contract.md | 1.0 | GELÃ‰ |
+| **Security** | WorrySentinel - Threat Model Contract.md | 1.0 | GELÃ‰ |
+| **Implementation** | WorrySentinel - Reference Implementation Guidelines.md | 1.0 | GELÃ‰ |
+| **Reference** | WorrySentinel - Vocabulary & Glossary.md | 1.0 | GELÃ‰ |
+| **Reference** | WorrySentinel - FAQ & Common Questions.md | 1.0 | GELÃ‰ |
+| **Reference** | WorrySentinel - Examples & Use Cases.md | 1.0 | GELÃ‰ |
+| **Audit** | WorrySentinel - Audit Phase 3 Verification.md | 1.0 | GELÃ‰ |
 
-**Total :** 21 documents gelés
+**Total :** 21 documents gelÃ©s
 
-### 2.2 Invariants gelés
+### 2.2 Invariants gelÃ©s
 
 #### Invariants WorrySentinel (INV-WS)
 
-| Code | Énoncé | Statut |
+| Code | Ã‰noncÃ© | Statut |
 |------|--------|--------|
-| **INV-WS-1** | Aucune autorité sur l'implémentation | GELÉ |
-| **INV-WS-2** | Aucune autorité sur l'exécution | GELÉ |
-| **INV-WS-3** | Aucune autorité sur la persistance | GELÉ |
-| **INV-WS-4** | Aucune modification d'état | GELÉ |
-| **INV-WS-5** | Aucune logique temporelle technique | GELÉ |
-| **INV-WS-6** | Zero-trust | GELÉ |
-| **INV-WS-7** | Gouvernance explicite | GELÉ |
-| **INV-WS-8** | Traçabilité complète | GELÉ |
+| **INV-WS-1** | Aucune autoritÃ© sur l'implÃ©mentation | GELÃ‰ |
+| **INV-WS-2** | Aucune autoritÃ© sur l'exÃ©cution | GELÃ‰ |
+| **INV-WS-3** | Aucune autoritÃ© sur la persistance | GELÃ‰ |
+| **INV-WS-4** | Aucune modification d'Ã©tat | GELÃ‰ |
+| **INV-WS-5** | Aucune logique temporelle technique | GELÃ‰ |
+| **INV-WS-6** | Zero-trust | GELÃ‰ |
+| **INV-WS-7** | Gouvernance explicite | GELÃ‰ |
+| **INV-WS-8** | TraÃ§abilitÃ© complÃ¨te | GELÃ‰ |
 
 #### Invariants de gouvernance (INV-GOV)
 
-| Code | Énoncé | Statut |
+| Code | Ã‰noncÃ© | Statut |
 |------|--------|--------|
-| **INV-GOV-1** | Niveaux de sécurité explicites | GELÉ |
-| **INV-GOV-2** | États de confiance uniques | GELÉ |
-| **INV-GOV-3** | Transitions justifiées | GELÉ |
-| **INV-GOV-4** | Dégradation progressive uniquement | GELÉ |
-| **INV-GOV-5** | Préservation des invariants | GELÉ |
-| **INV-GOV-6** | Cohérence inter-composants | GELÉ |
-| **INV-GOV-7** | Séparation gouvernance/implémentation | GELÉ |
-| **INV-GOV-8** | Traçabilité complète de gouvernance | GELÉ |
+| **INV-GOV-1** | Niveaux de sÃ©curitÃ© explicites | GELÃ‰ |
+| **INV-GOV-2** | Ã‰tats de confiance uniques | GELÃ‰ |
+| **INV-GOV-3** | Transitions justifiÃ©es | GELÃ‰ |
+| **INV-GOV-4** | DÃ©gradation progressive uniquement | GELÃ‰ |
+| **INV-GOV-5** | PrÃ©servation des invariants | GELÃ‰ |
+| **INV-GOV-6** | CohÃ©rence inter-composants | GELÃ‰ |
+| **INV-GOV-7** | SÃ©paration gouvernance/implÃ©mentation | GELÃ‰ |
+| **INV-GOV-8** | TraÃ§abilitÃ© complÃ¨te de gouvernance | GELÃ‰ |
 
-**Total :** 16 invariants gelés
+**Total :** 16 invariants gelÃ©s
 
-### 2.3 Niveaux de sécurité gelés
+### 2.3 Niveaux de sÃ©curitÃ© gelÃ©s
 
-| Niveau | Désignation | Statut |
+| Niveau | DÃ©signation | Statut |
 |--------|-------------|--------|
-| **0** | Public / Display | GELÉ |
-| **1** | Standard / CMS | GELÉ |
-| **2** | Sensitive Data | GELÉ |
-| **3** | Critical System | GELÉ |
-| **4** | Hardened / Isolated | GELÉ |
+| **0** | Public / Display | GELÃ‰ |
+| **1** | Standard / CMS | GELÃ‰ |
+| **2** | Sensitive Data | GELÃ‰ |
+| **3** | Critical System | GELÃ‰ |
+| **4** | Hardened / Isolated | GELÃ‰ |
 
-**Total :** 5 niveaux gelés
+**Total :** 5 niveaux gelÃ©s
 
-### 2.4 États de confiance gelés
+### 2.4 Ã‰tats de confiance gelÃ©s
 
-| État | Désignation | Statut |
+| Ã‰tat | DÃ©signation | Statut |
 |------|-------------|--------|
-| **T0** | Normal (Nominal) | GELÉ |
-| **T1** | Instable (Doute) | GELÉ |
-| **T2** | Dégradé (Suspect) | GELÉ |
-| **T3** | Restreint (Critique) | GELÉ |
-| **T4** | Bloqué (Compromis) | GELÉ |
+| **T0** | Normal (Nominal) | GELÃ‰ |
+| **T1** | Instable (Doute) | GELÃ‰ |
+| **T2** | DÃ©gradÃ© (Suspect) | GELÃ‰ |
+| **T3** | Restreint (Critique) | GELÃ‰ |
+| **T4** | BloquÃ© (Compromis) | GELÃ‰ |
 
-**Total :** 5 états gelés
+**Total :** 5 Ã©tats gelÃ©s
 
-### 2.5 Relations inter-cores gelées
+### 2.5 Relations inter-cores gelÃ©es
 
 | Relation | Type | Statut |
 |----------|------|--------|
-| WorrySentinel ↔ StrongFather | Complémentaire | GELÉ |
-| WorrySentinel ↔ KindMother | Indépendante | GELÉ |
-| WorrySentinel ↔ CaringNanny | Flux montant | GELÉ |
-| WorrySentinel ↔ BorderGuard | Contrainte | GELÉ |
-| WorrySentinel ↔ LogisticsSteward | Supervision | GELÉ |
-| WorrySentinel ↔ TAMR | Complémentaire | GELÉ |
-| WorrySentinel ↔ MiyukiniAdmin | Configuration | GELÉ |
+| WorrySentinel â†” StrongFather | ComplÃ©mentaire | GELÃ‰ |
+| WorrySentinel â†” KindMother | IndÃ©pendante | GELÃ‰ |
+| WorrySentinel â†” CaringNanny | Flux montant | GELÃ‰ |
+| WorrySentinel â†” BorderGuard | Contrainte | GELÃ‰ |
+| WorrySentinel â†” LogisticsSteward | Supervision | GELÃ‰ |
+| WorrySentinel â†” TAMR | ComplÃ©mentaire | GELÃ‰ |
+| WorrySentinel â†” MiyukiniAdmin | Configuration | GELÃ‰ |
 
-**Total :** 7 relations gelées
+**Total :** 7 relations gelÃ©es
 
 ---
 
 ## 3. Interdiction de modification
 
-### 3.1 Éléments figés
+### 3.1 Ã‰lÃ©ments figÃ©s
 
-Les éléments suivants sont **figés** et ne peuvent pas être modifiés, étendus, ou réduits :
+Les Ã©lÃ©ments suivants sont **figÃ©s** et ne peuvent pas Ãªtre modifiÃ©s, Ã©tendus, ou rÃ©duits :
 
-| Élément | Justification |
+| Ã‰lÃ©ment | Justification |
 |---------|---------------|
-| Échelle des niveaux de sécurité (0-4) | Conception architecturale fondamentale |
-| Échelle des états de confiance (T0-T4) | Conception architecturale fondamentale |
+| Ã‰chelle des niveaux de sÃ©curitÃ© (0-4) | Conception architecturale fondamentale |
+| Ã‰chelle des Ã©tats de confiance (T0-T4) | Conception architecturale fondamentale |
 | Nature transversale de WorrySentinel | Positionnement Strate 4 |
-| Séparation gouvernance/implémentation | Invariant fondateur |
+| SÃ©paration gouvernance/implÃ©mentation | Invariant fondateur |
 | Flux descendant (pression) | Principe architectural |
 | Flux montant (observation) | Principe architectural |
 | 16 invariants (INV-WS + INV-GOV) | Contrats FONDATION |
 
 ### 3.2 Modifications interdites
 
-| Modification | Interdiction | Référence |
+| Modification | Interdiction | RÃ©fÃ©rence |
 |--------------|--------------|-----------|
-| Ajout de niveau de sécurité | ❌ Interdit | Architecture gelée |
-| Suppression d'état de confiance | ❌ Interdit | Architecture gelée |
-| Modification d'invariant | ❌ Interdit | Contrat FONDATION |
-| Ajout de capacité d'implémentation | ❌ Interdit | INV-WS-1 |
-| Ajout de capacité d'exécution | ❌ Interdit | INV-WS-2 |
-| Ajout de capacité de persistance | ❌ Interdit | INV-WS-3 |
+| Ajout de niveau de sÃ©curitÃ© | âŒ Interdit | Architecture gelÃ©e |
+| Suppression d'Ã©tat de confiance | âŒ Interdit | Architecture gelÃ©e |
+| Modification d'invariant | âŒ Interdit | Contrat FONDATION |
+| Ajout de capacitÃ© d'implÃ©mentation | âŒ Interdit | INV-WS-1 |
+| Ajout de capacitÃ© d'exÃ©cution | âŒ Interdit | INV-WS-2 |
+| Ajout de capacitÃ© de persistance | âŒ Interdit | INV-WS-3 |
 
 ---
 
-## 4. Règles d'évolution
+## 4. RÃ¨gles d'Ã©volution
 
-### 4.1 Conditions de dégel
+### 4.1 Conditions de dÃ©gel
 
-Pour modifier un élément gelé, les conditions suivantes DOIVENT être remplies :
+Pour modifier un Ã©lÃ©ment gelÃ©, les conditions suivantes DOIVENT Ãªtre remplies :
 
-1. **Justification formelle** de la nécessité de modification
+1. **Justification formelle** de la nÃ©cessitÃ© de modification
 2. **Analyse d'impact** sur tous les documents et invariants
 3. **Validation** par revue technique
 4. **Nouveau cycle complet** de documentation (Phases 1-4)
-5. **Nouvelle version** avec numéro de version incrémenté
+5. **Nouvelle version** avec numÃ©ro de version incrÃ©mentÃ©
 
 ### 4.2 Versionnement
 
-| Type de modification | Incrément de version |
+| Type de modification | IncrÃ©ment de version |
 |----------------------|---------------------|
 | Correction typographique | Patch (x.x.Z) |
 | Clarification sans changement de sens | Patch (x.x.Z) |
-| Ajout de contrat d'intégration | Minor (x.Y.0) |
+| Ajout de contrat d'intÃ©gration | Minor (x.Y.0) |
 | Modification d'invariant | Major (X.0.0) |
-| Modification de niveau ou état | Major (X.0.0) |
+| Modification de niveau ou Ã©tat | Major (X.0.0) |
 
-### 4.3 Compatibilité
+### 4.3 CompatibilitÃ©
 
-| Version | Compatibilité avec v1.0.0 |
+| Version | CompatibilitÃ© avec v1.0.0 |
 |---------|---------------------------|
 | 1.0.x | Totalement compatible |
 | 1.x.0 | Compatible avec extensions |
@@ -184,57 +184,57 @@ Pour modifier un élément gelé, les conditions suivantes DOIVENT être remplie
 
 ## 5. Validation du gel
 
-### 5.1 Vérification pré-gel
+### 5.1 VÃ©rification prÃ©-gel
 
-| Critère | Statut | Référence |
+| CritÃ¨re | Statut | RÃ©fÃ©rence |
 |---------|--------|-----------|
-| Audit Phase 3 complété | ✅ | WorrySentinel - Audit Phase 3 Verification.md |
-| Aucune erreur bloquante | ✅ | Audit Section 5 |
-| Cohérence inter-documents | ✅ | Audit Section 3 |
-| Conformité aux invariants | ✅ | Audit Section 4 |
-| Structure complète | ✅ | 21 documents créés |
+| Audit Phase 3 complÃ©tÃ© | âœ… | WorrySentinel - Audit Phase 3 Verification.md |
+| Aucune erreur bloquante | âœ… | Audit Section 5 |
+| CohÃ©rence inter-documents | âœ… | Audit Section 3 |
+| ConformitÃ© aux invariants | âœ… | Audit Section 4 |
+| Structure complÃ¨te | âœ… | 21 documents crÃ©Ã©s |
 
 ### 5.2 Approbation
 
-| Rôle | Approbation |
+| RÃ´le | Approbation |
 |------|-------------|
-| Agent IA (rédaction) | ✅ Validé |
-| Protocole de documentation | ✅ Conforme |
-| Vérification automatique | ✅ Passée |
+| Agent IA (rÃ©daction) | âœ… ValidÃ© |
+| Protocole de documentation | âœ… Conforme |
+| VÃ©rification automatique | âœ… PassÃ©e |
 
 ---
 
 ## 6. Impact du gel
 
-### 6.1 Pour l'implémentation
+### 6.1 Pour l'implÃ©mentation
 
-À partir de ce gel :
+Ã€ partir de ce gel :
 
-- Toute implémentation de WorrySentinel DOIT respecter les invariants
-- Les niveaux de sécurité (0-4) sont figés
-- Les états de confiance (T0-T4) sont figés
-- Les relations inter-cores sont contractuellement définies
-- Les guidelines d'implémentation sont la référence
+- Toute implÃ©mentation de WorrySentinel DOIT respecter les invariants
+- Les niveaux de sÃ©curitÃ© (0-4) sont figÃ©s
+- Les Ã©tats de confiance (T0-T4) sont figÃ©s
+- Les relations inter-cores sont contractuellement dÃ©finies
+- Les guidelines d'implÃ©mentation sont la rÃ©fÃ©rence
 
 ### 6.2 Pour les autres cores
 
 | Core | Impact |
 |------|--------|
-| StrongFather | Doit adapter ses décisions selon gouvernance WorrySentinel |
-| CaringNanny | Doit signaler les anomalies selon protocole défini |
-| BorderGuard | Doit adapter ses frontières selon niveaux de sécurité |
-| LogisticsSteward | Doit adapter ses quotas selon état de confiance |
-| TAMR | Doit respecter les règles d'intervention par état |
-| MiyukiniAdmin | Doit afficher et configurer selon contrat d'intégration |
+| StrongFather | Doit adapter ses dÃ©cisions selon gouvernance WorrySentinel |
+| CaringNanny | Doit signaler les anomalies selon protocole dÃ©fini |
+| BorderGuard | Doit adapter ses frontiÃ¨res selon niveaux de sÃ©curitÃ© |
+| LogisticsSteward | Doit adapter ses quotas selon Ã©tat de confiance |
+| TAMR | Doit respecter les rÃ¨gles d'intervention par Ã©tat |
+| MiyukiniAdmin | Doit afficher et configurer selon contrat d'intÃ©gration |
 
 ### 6.3 Pour les produits
 
 | Aspect | Obligation |
 |--------|------------|
-| Niveau de sécurité | Doit être déclaré explicitement |
-| État de confiance | Doit être respecté (non-ignorable) |
-| Adaptation comportementale | Obligatoire selon niveau et état |
-| Traçabilité | Obligatoire pour toute interaction |
+| Niveau de sÃ©curitÃ© | Doit Ãªtre dÃ©clarÃ© explicitement |
+| Ã‰tat de confiance | Doit Ãªtre respectÃ© (non-ignorable) |
+| Adaptation comportementale | Obligatoire selon niveau et Ã©tat |
+| TraÃ§abilitÃ© | Obligatoire pour toute interaction |
 
 ---
 
@@ -244,31 +244,32 @@ Pour modifier un élément gelé, les conditions suivantes DOIVENT être remplie
 
 | Version | Date | Description |
 |---------|------|-------------|
-| 1.0.0 | 2026-01-28 | Version initiale gelée |
+| 1.0.0 | 2026-01-28 | Version initiale gelÃ©e |
 
 ### 7.2 Documents d'audit
 
-| Document | Date | Résultat |
+| Document | Date | RÃ©sultat |
 |----------|------|----------|
-| WorrySentinel - Audit Phase 3 Verification.md | 2026-01-28 | ✅ VALIDÉ |
+| WorrySentinel - Audit Phase 3 Verification.md | 2026-01-28 | âœ… VALIDÃ‰ |
 
 ---
 
-## 8. Déclaration finale
+## 8. DÃ©claration finale
 
-Par le présent acte de gel, la documentation WorrySentinel v1.0.0 est déclarée :
+Par le prÃ©sent acte de gel, la documentation WorrySentinel v1.0.0 est dÃ©clarÃ©e :
 
-- **COMPLÈTE** : 21 documents couvrant tous les aspects de la gouvernance de sécurité
-- **COHÉRENTE** : Vérification inter-documents validée
+- **COMPLÃˆTE** : 21 documents couvrant tous les aspects de la gouvernance de sÃ©curitÃ©
+- **COHÃ‰RENTE** : VÃ©rification inter-documents validÃ©e
 - **CONFORME** : Respect des protocoles et invariants
-- **GELÉE** : Aucune modification sans processus formel
+- **GELÃ‰E** : Aucune modification sans processus formel
 
-Cette documentation constitue désormais la **référence officielle** pour toute implémentation, utilisation, ou évolution de WorrySentinel dans l'écosystème Miyukini Core System.
+Cette documentation constitue dÃ©sormais la **rÃ©fÃ©rence officielle** pour toute implÃ©mentation, utilisation, ou Ã©volution de WorrySentinel dans l'Ã©cosystÃ¨me Miyukini Core System.
 
 ---
 
 **Date de gel :** 2026-01-28  
 **Version :** 1.0.0  
-**Statut :** GELÉ — Documentation de référence officielle  
-**Protocole suivi :** [Miyukini Prompt Protocol - Écriture Documentation Conceptuelle](../../protocols/Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md)  
-**Référence :** Miyukini Core System v2.4
+**Statut :** GELÃ‰ â€” Documentation de rÃ©fÃ©rence officielle  
+**Protocole suivi :** [Miyukini Prompt Protocol - Ã‰criture Documentation Conceptuelle](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md)  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4
+

@@ -1,10 +1,10 @@
-# MiyuSQL — Cycle Tests Contract
+﻿# MiyuSQL â€” Cycle Tests Contract
 
 ## 1. Contexte
 
 Ce document definit le contrat pour les **tests de cycle** du kit MiyuSQL. Les tests de cycle verifient le chemin complet des donnees (WriteIntent, validations Cores, execution MiyuSQL) et peuvent etre executes par MiyukiniAdmin pour valider MiyuSQL de facon precise.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -12,7 +12,7 @@ Ce document definit le contrat pour les **tests de cycle** du kit MiyuSQL. Les t
 
 Ce document definit :
 - Les types de tests de cycle applicables a MiyuSQL (performance, latence, chemin complet)
-- Le **test chemin complet MiyuSQL (MiyukiniSQLtest)** : scenario E2E (WriteIntent → validations Cores → creation table → colonne → donnee → lecture → affichage → suppression)
+- Le **test chemin complet MiyuSQL (MiyukiniSQLtest)** : scenario E2E (WriteIntent â†’ validations Cores â†’ creation table â†’ colonne â†’ donnee â†’ lecture â†’ affichage â†’ suppression)
 - Le lien avec MiyukiniAdmin comme executant du test
 - Les metriques et criteres de succes
 
@@ -48,7 +48,7 @@ Ce document **ne couvre pas** :
 |------|-------------|-------|
 | **MSQL-LAT-001** | Latence tool.query.execute (SELECT) | < seuil configure (ex. 50ms) |
 | **MSQL-LAT-002** | Latence tool.schema.read | < seuil configure |
-| **MSQL-LAT-003** | Latence chemin complet (BondingBrother → KindMother → MiyuSQL) | < 100ms |
+| **MSQL-LAT-003** | Latence chemin complet (BondingBrother â†’ KindMother â†’ MiyuSQL) | < 100ms |
 
 ### 4.2 Tests de Performance
 
@@ -63,13 +63,13 @@ Voir section 5.
 
 ---
 
-## 5. Test Chemin Complet MiyuSQL — MiyukiniSQLtest
+## 5. Test Chemin Complet MiyuSQL â€” MiyukiniSQLtest
 
 ### 5.1 Objectif
 
 Ce test verifie le **chemin complet d'une donnee DB** : de l'emission d'une WriteIntent jusqu'a la suppression de la donnee, en passant par toutes les validations Cores, la creation de la table dediee `MiyukiniSQLtest`, la creation d'une colonne, l'insertion d'une donnee aleatoire, la lecture, l'affichage et la suppression. MiyukiniAdmin peut executer ce test pour valider MiyuSQL de facon precise.
 
-### 5.2 Table Dédiée
+### 5.2 Table DÃ©diÃ©e
 
 | Element | Valeur |
 |---------|--------|
@@ -83,22 +83,22 @@ Les etapes suivantes sont executees dans l'ordre. Chaque etape doit reussir pour
 
 | Etape | Description | Acteurs / Tools |
 |-------|-------------|-----------------|
-| **1. WriteIntent** | Emission d'une intention d'ecriture (creation de structure + donnee). L'Operateur (ou MiyukiniAdmin) emet une WriteIntent pour creer la table, la colonne, inserer une donnee, puis supprimer la donnee (ou plusieurs WriteIntent selon le modele). | Operateur / MiyukiniAdmin → BondingBrother |
-| **2. Validations Cores** | Parcours explicite : BondingBrother → Master Butler → WorrySentinel → Caring Nanny → StrongFather. La decision doit etre ALLOW pour chaque operation d'ecriture. | BondingBrother, Master Butler, WorrySentinel, Caring Nanny, StrongFather |
+| **1. WriteIntent** | Emission d'une intention d'ecriture (creation de structure + donnee). L'Operateur (ou MiyukiniAdmin) emet une WriteIntent pour creer la table, la colonne, inserer une donnee, puis supprimer la donnee (ou plusieurs WriteIntent selon le modele). | Operateur / MiyukiniAdmin â†’ BondingBrother |
+| **2. Validations Cores** | Parcours explicite : BondingBrother â†’ Master Butler â†’ WorrySentinel â†’ Caring Nanny â†’ StrongFather. La decision doit etre ALLOW pour chaque operation d'ecriture. | BondingBrother, Master Butler, WorrySentinel, Caring Nanny, StrongFather |
 | **3. Creation table** | Creation de la table dediee `MiyukiniSQLtest` via la gouvernance, sous autorite KindMother. Utilisation de tool.query.execute (ou equivalent) avec DDL mandate. | KindMother, MiyuSQL (tool.query.execute) |
 | **4. Creation colonne** | Ajout d'une colonne dans `MiyukiniSQLtest`. Nom et type sont definis dans le contrat (ex. colonne `test_value` de type `text` ou `uuid`). | KindMother, MiyuSQL |
-| **5. Creation donnee** | Insertion d'une donnee aleatoire dans la colonne. La donnee est generee de facon deterministe (seed documentee) ou aleatoire ; la valeur est enregistree pour verification en etape 6. | WriteIntent acceptee → KindMother, MiyuSQL |
+| **5. Creation donnee** | Insertion d'une donnee aleatoire dans la colonne. La donnee est generee de facon deterministe (seed documentee) ou aleatoire ; la valeur est enregistree pour verification en etape 6. | WriteIntent acceptee â†’ KindMother, MiyuSQL |
 | **6. Lecture** | Lecture de la donnee inseree via le flux gouverne (SELECT via MiyuSQL sous autorite KindMother). | KindMother, MiyuSQL (tool.query.execute SELECT) |
 | **7. Affichage** | Verification que la donnee peut etre exposee (ex. pour l'UI MiyukiniAdmin DB Management). La valeur lue doit correspondre a la valeur inseree. | MiyukiniAdmin (affichage) / assertion dans le test |
-| **8. Suppression** | Suppression de la donnee (DELETE). Nettoyage optionnel : suppression de la table ou tear-down documente. | WriteIntent acceptee → KindMother, MiyuSQL |
+| **8. Suppression** | Suppression de la donnee (DELETE). Nettoyage optionnel : suppression de la table ou tear-down documente. | WriteIntent acceptee â†’ KindMother, MiyuSQL |
 
 ### 5.4 Specification de la Table et de la Colonne (Contrat)
 
 | Element | Valeur |
 |---------|--------|
 | **Table** | `MiyukiniSQLtest` |
-| **Colonne (ex.)** | `test_value` (type `text`) ou `id` (type `uuid`), `payload` (type `text`) — a fixer selon implementation |
-| **Donnee aleatoire** | Genération deterministe (seed documentee) ou aleatoire ; valeur enregistree pour assertion (lecture = valeur inseree) |
+| **Colonne (ex.)** | `test_value` (type `text`) ou `id` (type `uuid`), `payload` (type `text`) â€” a fixer selon implementation |
+| **Donnee aleatoire** | GenÃ©ration deterministe (seed documentee) ou aleatoire ; valeur enregistree pour assertion (lecture = valeur inseree) |
 
 ### 5.5 Criteres de Succes du Test MiyukiniSQLtest
 
@@ -117,13 +117,13 @@ Les etapes suivantes sont executees dans l'ordre. Chaque etape doit reussir pour
 
 | Verdict | Description |
 |---------|-------------|
-| **PASS** | Toutes les etapes 1 à 8 reussies et tous les criteres C1–C8 remplis |
+| **PASS** | Toutes les etapes 1 Ã  8 reussies et tous les criteres C1â€“C8 remplis |
 | **FAIL** | Une etape echoue ou un critere n'est pas rempli |
 | **ERROR** | Erreur technique (environnement, configuration, gouvernance indisponible) |
 
 ### 5.7 Executant : MiyukiniAdmin
 
-MiyukiniAdmin peut executer ce test pour verifier le chemin complet MiyuSQL. La reference croisee est etablie dans [MiyukiniAdmin - Cycle Tests Contract](../../../core/MiyukiniAdmin/contracts/testing/MiyukiniAdmin%20-%20Cycle%20Tests%20Contract.md) (section MiyuSQL Full Path Test / MiyukiniSQLtest), qui pointe vers ce contrat pour la specification du scenario et des criteres.
+MiyukiniAdmin peut executer ce test pour verifier le chemin complet MiyuSQL. La reference croisee est etablie dans [MiyukiniAdmin - Cycle Tests Contract](..//..//..//..//admin//MiyukiniAdmin//contracts//testing//MiyukiniAdmin%20-%20Cycle%20Tests%20Contract.md) (section MiyuSQL Full Path Test / MiyukiniSQLtest), qui pointe vers ce contrat pour la specification du scenario et des criteres.
 
 ---
 
@@ -132,47 +132,47 @@ MiyukiniAdmin peut executer ce test pour verifier le chemin complet MiyuSQL. La 
 ### 6.1 Phases
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ Phase 1: Preparation                                         │
-├─────────────────────────────────────────────────────────────┤
-│ - Verification pre-conditions (gouvernance, etat systeme)   │
-│ - Verification absence de table MiyukiniSQLtest ou decision │
-│   de reutilisation / nettoyage                               │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Phase 2: Execution (Etapes 1 à 8)                            │
-├─────────────────────────────────────────────────────────────┤
-│ - WriteIntent → Validations Cores → Creation table           │
-│ - Creation colonne → Insertion donnee → Lecture             │
-│ - Affichage / assertion → Suppression → Nettoyage            │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Phase 3: Rapport                                             │
-├─────────────────────────────────────────────────────────────┤
-│ - Verdict (PASS/FAIL/ERROR)                                  │
-│ - Details par etape                                          │
-│ - Stockage pour audit                                        │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Phase 1: Preparation                                         â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - Verification pre-conditions (gouvernance, etat systeme)   â”‚
+â”‚ - Verification absence de table MiyukiniSQLtest ou decision â”‚
+â”‚   de reutilisation / nettoyage                               â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â”‚
+                              â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Phase 2: Execution (Etapes 1 Ã  8)                            â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - WriteIntent â†’ Validations Cores â†’ Creation table           â”‚
+â”‚ - Creation colonne â†’ Insertion donnee â†’ Lecture             â”‚
+â”‚ - Affichage / assertion â†’ Suppression â†’ Nettoyage            â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â”‚
+                              â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Phase 3: Rapport                                             â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - Verdict (PASS/FAIL/ERROR)                                  â”‚
+â”‚ - Details par etape                                          â”‚
+â”‚ - Stockage pour audit                                        â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 6.2 Flux Simplifie
 
 ```
 MiyukiniAdmin            BondingBrother         StrongFather      KindMother      MiyuSQL
-     │                         │                     │                │                │
-     │──MiyukiniSQLtestTest────▶│                     │                │                │
-     │                         │──Validate───────────▶│                │                │
-     │                         │◀─ALLOW──────────────│                │                │
-     │                         │──WriteIntent (create table)──────────▶│                │
-     │                         │                     │                │──Execute──────▶│
-     │                         │                     │                │◀─Done──────────│
-     │                         │  ... (colonne, insert, read, delete)  │                │
-     │◀─TestResult─────────────│                     │                │                │
-     │  (verdict, details)      │                     │                │                │
+     â”‚                         â”‚                     â”‚                â”‚                â”‚
+     â”‚â”€â”€MiyukiniSQLtestTestâ”€â”€â”€â”€â–¶â”‚                     â”‚                â”‚                â”‚
+     â”‚                         â”‚â”€â”€Validateâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                â”‚                â”‚
+     â”‚                         â”‚â—€â”€ALLOWâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                â”‚                â”‚
+     â”‚                         â”‚â”€â”€WriteIntent (create table)â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                â”‚
+     â”‚                         â”‚                     â”‚                â”‚â”€â”€Executeâ”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                         â”‚                     â”‚                â”‚â—€â”€Doneâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                         â”‚  ... (colonne, insert, read, delete)  â”‚                â”‚
+     â”‚â—€â”€TestResultâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                     â”‚                â”‚                â”‚
+     â”‚  (verdict, details)      â”‚                     â”‚                â”‚                â”‚
 ```
 
 ---
@@ -183,7 +183,7 @@ MiyukiniAdmin            BondingBrother         StrongFather      KindMother    
 
 | Metrique | Description |
 |----------|-------------|
-| `step_duration_ms` | Duree par etape (1 à 8) |
+| `step_duration_ms` | Duree par etape (1 Ã  8) |
 | `total_duration_ms` | Duree totale du test |
 | `validation_latency_ms` | Latence cumulee des validations Cores |
 
@@ -218,11 +218,13 @@ MiyukiniAdmin            BondingBrother         StrongFather      KindMother    
 | MiyuSQL - Documentation Fondatrice | [MiyuSQL - Documentation Fondatrice](../../MiyuSQL%20-%20Documentation%20Fondatrice.md) |
 | MiyuSQL - Unit Tests Contract | [MiyuSQL - Unit Tests Contract](./MiyuSQL%20-%20Unit%20Tests%20Contract.md) |
 | MiyuSQL - KindMother Integration Contract | [MiyuSQL - KindMother Integration Contract](../integration/MiyuSQL%20-%20KindMother%20Integration%20Contract.md) |
-| MiyukiniAdmin - Cycle Tests Contract | [MiyukiniAdmin - Cycle Tests Contract](../../../core/MiyukiniAdmin/contracts/testing/MiyukiniAdmin%20-%20Cycle%20Tests%20Contract.md) |
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
+| MiyukiniAdmin - Cycle Tests Contract | [MiyukiniAdmin - Cycle Tests Contract](..//..//..//..//admin//MiyukiniAdmin//contracts//testing//MiyukiniAdmin%20-%20Cycle%20Tests%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) |
 
 ---
 
 **Date de creation :** 2026-01-29  
 **Version :** 1.0  
 **Statut :** Contrat de reference
+
+

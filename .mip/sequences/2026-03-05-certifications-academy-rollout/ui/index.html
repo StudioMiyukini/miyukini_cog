@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MIP Sequence UI</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #111a30;
+        --line: #26324f;
+        --text: #e6edf7;
+        --muted: #9fb0d0;
+        --ok: #4ade80;
+      }
+      body { margin: 0; font-family: "Segoe UI", Tahoma, sans-serif; background: radial-gradient(circle at top, #1a2a4a, var(--bg)); color: var(--text); }
+      .app { max-width: 1200px; margin: 20px auto; padding: 16px; }
+      .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+      .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+      button, a {
+        background: #1a2743;
+        color: var(--text);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 12px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      button.active { background: #234276; border-color: #2f5ea7; }
+      .layout { display: grid; grid-template-columns: 340px 1fr; gap: 12px; }
+      .group { border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+      .group h4 { margin: 0 0 8px 0; color: var(--muted); font-size: 13px; }
+      .file { width: 100%; text-align: left; margin-bottom: 6px; }
+      .viewer { min-height: 560px; overflow: auto; }
+      .viewer pre { background: #0a1328; border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow: auto; }
+      .muted { color: var(--muted); }
+      .ok { color: var(--ok); }
+      @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script type="text/babel">
+      const MANIFEST_PATH = "manifest.json";
+
+      const normalizeSequencePath = (rawPath) => {
+        if (!rawPath || typeof rawPath !== "string") throw new Error("Chemin vide");
+        const path = rawPath.replace(/\\/g, "/").trim();
+        if (!path) throw new Error("Chemin vide");
+        if (/^[a-z]+:/i.test(path) || path.startsWith("//") || path.startsWith("/")) {
+          throw new Error("Chemin absolu interdit");
+        }
+
+        const out = [];
+        for (const seg of path.split("/")) {
+          if (!seg || seg === ".") continue;
+          if (seg === "..") throw new Error("Sortie de sequence interdite");
+          out.push(seg);
+        }
+        if (out.length === 0) throw new Error("Chemin invalide");
+        return out.join("/");
+      };
+
+      const cacheBust = (path) => `${path}${path.includes("?") ? "&" : "?"}_ts=${Date.now()}`;
+
+      const readText = async (relativePath, fromUiDir = false) => {
+        const safePath = normalizeSequencePath(relativePath);
+        const prefix = fromUiDir ? "./" : "../";
+        const response = await fetch(cacheBust(`${prefix}${safePath}`));
+        if (!response.ok) {
+          throw new Error(`Lecture impossible (${response.status}) pour ${relativePath}`);
+        }
+        return response.text();
+      };
+
+      const collectAllowedPaths = (manifest) => {
+        const set = new Set();
+        for (const tab of manifest.tabs || []) {
+          for (const group of tab.groups || []) {
+            for (const file of group.files || []) {
+              if (!file.path) continue;
+              try {
+                set.add(normalizeSequencePath(file.path));
+              } catch {
+                // Ignore invalid paths from manifest.
+              }
+            }
+          }
+        }
+        return set;
+      };
+
+      const App = () => {
+        const [manifest, setManifest] = React.useState(null);
+        const [allowed, setAllowed] = React.useState(new Set());
+        const [status, setStatus] = React.useState("Chargement automatique de la sequence...");
+        const [activeTab, setActiveTab] = React.useState("");
+        const [activeFile, setActiveFile] = React.useState("");
+        const [content, setContent] = React.useState("");
+
+        const safeNormalize = (path) => {
+          try {
+            return normalizeSequencePath(path);
+          } catch {
+            return "";
+          }
+        };
+
+        const openFile = async (path, allowedSet = allowed) => {
+          let safePath = "";
+          try {
+            safePath = normalizeSequencePath(path);
+          } catch (e) {
+            setStatus(`Erreur: ${e.message}`);
+            return;
+          }
+
+          if (!allowedSet.has(safePath)) {
+            setStatus("Lecture refusee: fichier hors manifest");
+            return;
+          }
+
+          try {
+            const txt = await readText(safePath);
+            setActiveFile(safePath);
+            setContent(txt || "_Fichier vide ou introuvable._");
+          } catch (e) {
+            setActiveFile(safePath);
+            setContent("_Fichier vide ou introuvable._");
+            setStatus(`Erreur: ${e.message}`);
+          }
+        };
+
+        const loadSequence = async () => {
+          try {
+            const mRaw = await readText(MANIFEST_PATH, true);
+            if (!mRaw) throw new Error("manifest.json introuvable");
+            const m = JSON.parse(mRaw);
+            const allow = collectAllowedPaths(m);
+            setManifest(m);
+            setAllowed(allow);
+
+            const firstTab = (m.tabs || [])[0];
+            const firstGroup = firstTab && (firstTab.groups || [])[0];
+            const firstFile = firstGroup && (firstGroup.files || [])[0];
+            const firstPath = firstFile?.path ? normalizeSequencePath(firstFile.path) : "";
+
+            setActiveTab(firstTab ? firstTab.id : "");
+            setStatus(`Sequence chargee: ${m.identity.sequence}`);
+
+            if (firstPath) {
+              await openFile(firstPath, allow);
+            } else {
+              setActiveFile("");
+              setContent("");
+            }
+          } catch (e) {
+            setStatus(
+              `Erreur: ${e.message}. Si ouvert en file://, lancer un serveur local dans .mip (ex: python -m http.server).`
+            );
+          }
+        };
+
+        React.useEffect(() => {
+          loadSequence();
+        }, []);
+
+        const currentTab = manifest ? (manifest.tabs || []).find((t) => t.id === activeTab) : null;
+        const html = activeFile.endsWith(".json")
+          ? ""
+          : marked.parse(content || "", { breaks: true, gfm: true });
+
+        return (
+          <div className="app">
+            <div className="card">
+              <h2>Mini site Sequence MIP</h2>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button onClick={loadSequence}>Rafraichir manifest</button>
+                {activeFile && <button onClick={() => openFile(activeFile)}>Rafraichir fichier actif</button>}
+                <a href="../../../index.html">Portail MIP</a>
+              </div>
+              <p className={status.startsWith("Erreur") ? "muted" : "ok"}>{status}</p>
+              {manifest && (
+                <p className="muted">
+                  Sequence: <strong>{manifest.identity.sequence}</strong> | Date: {manifest.identity.date} | Slug: {manifest.identity.slug}
+                </p>
+              )}
+              <div className="tabs">
+                {(manifest?.tabs || []).map((tab) => (
+                  <button
+                    key={tab.id}
+                    className={tab.id === activeTab ? "active" : ""}
+                    onClick={() => {
+                      setActiveTab(tab.id);
+                      const first = tab.groups?.[0]?.files?.[0]?.path || "";
+                      if (first) openFile(first);
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="layout">
+              <div className="card">
+                <h3>Navigation</h3>
+                {!currentTab && <p className="muted">Selectionner un onglet.</p>}
+                {(currentTab?.groups || []).map((group) => (
+                  <div key={group.label} className="group">
+                    <h4>{group.label}</h4>
+                    {(group.files || []).map((f) => (
+                      <button
+                        key={f.path}
+                        className={"file" + (activeFile === safeNormalize(f.path) ? " active" : "")}
+                        onClick={() => openFile(f.path)}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+
+              <div className="card viewer">
+                <h3>{activeFile || "Aucun fichier selectionne"}</h3>
+                {activeFile.endsWith(".json") ? (
+                  <pre>{content}</pre>
+                ) : (
+                  <div dangerouslySetInnerHTML={{ __html: html }} />
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+  </body>
+</html>

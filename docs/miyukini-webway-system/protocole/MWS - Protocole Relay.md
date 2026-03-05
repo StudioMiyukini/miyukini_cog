@@ -1,38 +1,38 @@
-# MWS — Protocole Relay
+﻿# MWS â€” Protocole Relay
 
 ## Contexte
 
-Le **protocole relay** définit le format des messages et les séquences d'échange entre un COG et le relay. Il est **minimal**, orienté **contrôle de tunnel** et **routage par `cog_id`**. Ce document est un condensé de la spécification complète.
+Le **protocole relay** dÃ©finit le format des messages et les sÃ©quences d'Ã©change entre un COG et le relay. Il est **minimal**, orientÃ© **contrÃ´le de tunnel** et **routage par `cog_id`**. Ce document est un condensÃ© de la spÃ©cification complÃ¨te.
 
-**Référence fondatrice :** [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
+**RÃ©fÃ©rence fondatrice :** [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 
-## Portée / Scope
+## PortÃ©e / Scope
 
 - Version du protocole
 - Format binaire des trames
 - Types de messages
-- Séquences principales (enregistrement, vérification, données)
+- SÃ©quences principales (enregistrement, vÃ©rification, donnÃ©es)
 - Codes d'erreur
 
-Pour la spécification complète, voir [Miyukini Webway Relay Protocol](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md).
+Pour la spÃ©cification complÃ¨te, voir [Miyukini Webway Relay Protocol](..//reference//_index.md).
 
 ---
 
 ## 1. Version du protocole
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
 | **Nom** | Miyukini Webway Relay Protocol |
 | **Version actuelle** | **1** |
 | **Identifiant** | `protocol_version = 1` (1 octet) |
 
-Les évolutions **compatibles** (champs optionnels) conservent la même version ; les changements **incompatibles** incrémentent la version majeure.
+Les Ã©volutions **compatibles** (champs optionnels) conservent la mÃªme version ; les changements **incompatibles** incrÃ©mentent la version majeure.
 
 ---
 
 ## 2. Format binaire des trames
 
-### 2.1 Structure générale
+### 2.1 Structure gÃ©nÃ©rale
 
 ```
 +--------+--------+--------+------------------+
@@ -44,7 +44,7 @@ Les évolutions **compatibles** (champs optionnels) conservent la même version 
 
 | Champ | Taille | Description |
 |-------|--------|-------------|
-| **Version** | 1 octet | Numéro de version du protocole |
+| **Version** | 1 octet | NumÃ©ro de version du protocole |
 | **Type** | 1 octet | Type de message (voir section 3) |
 | **Flags** | 1 octet | Bits optionnels (direction, fin de flux) |
 | **Payload length** | 2 ou 4 octets | Longueur du payload (big-endian) |
@@ -60,15 +60,15 @@ Les nombres multi-octets sont en **big-endian** (network byte order).
 
 | Code | Nom | Direction | Description |
 |------|-----|-----------|-------------|
-| 0x01 | **REGISTER** | COG → Relay | Enregistrement du tunnel |
-| 0x02 | **REGISTER_OK** | Relay → COG | Enregistrement réussi |
-| 0x03 | **REGISTER_ERR** | Relay → COG | Refus d'enregistrement |
-| 0x04 | **CONNECT** | Client → Relay | Demande de connexion vers un cog_id |
-| 0x05 | **CONNECT_OK** | Relay → Client | Tunnel établi |
-| 0x06 | **CONNECT_ERR** | Relay → Client | Refus de connexion |
-| 0x07 | **DATA** | Bidirectionnel | Données opaques |
+| 0x01 | **REGISTER** | COG â†’ Relay | Enregistrement du tunnel |
+| 0x02 | **REGISTER_OK** | Relay â†’ COG | Enregistrement rÃ©ussi |
+| 0x03 | **REGISTER_ERR** | Relay â†’ COG | Refus d'enregistrement |
+| 0x04 | **CONNECT** | Client â†’ Relay | Demande de connexion vers un cog_id |
+| 0x05 | **CONNECT_OK** | Relay â†’ Client | Tunnel Ã©tabli |
+| 0x06 | **CONNECT_ERR** | Relay â†’ Client | Refus de connexion |
+| 0x07 | **DATA** | Bidirectionnel | DonnÃ©es opaques |
 | 0x08 | **HEARTBEAT** | Bidirectionnel | Garde la connexion vivante |
-| 0x09 | **HEARTBEAT_ACK** | Réponse | Accusé de HEARTBEAT |
+| 0x09 | **HEARTBEAT_ACK** | RÃ©ponse | AccusÃ© de HEARTBEAT |
 | 0x0A | **CLOSE** | Bidirectionnel | Fermeture propre |
 | 0x0B | **ERROR** | Bidirectionnel | Erreur protocolaire |
 
@@ -76,23 +76,23 @@ Les nombres multi-octets sont en **big-endian** (network byte order).
 
 | Code | Nom | Direction | Description |
 |------|-----|-----------|-------------|
-| 0x0C | **REGISTRY_QUERY** | COG → Relay | Interrogation du Registre de Services |
-| 0x0D | **REGISTRY_RESPONSE** | Relay → COG | Réponse du Registre |
-| 0x0E | **UPDATE_AVAILABLE** | Relay → COG | Notification de mise à jour |
+| 0x0C | **REGISTRY_QUERY** | COG â†’ Relay | Interrogation du Registre de Services |
+| 0x0D | **REGISTRY_RESPONSE** | Relay â†’ COG | RÃ©ponse du Registre |
+| 0x0E | **UPDATE_AVAILABLE** | Relay â†’ COG | Notification de mise Ã  jour |
 
-### 3.3 Messages de vérification
+### 3.3 Messages de vÃ©rification
 
 | Code | Nom | Direction | Description |
 |------|-----|-----------|-------------|
-| 0x10 | **CORE_KEY** | COG → Relay | Clé de conformité des Cores (Phase A) |
-| 0x11 | **SERVICE_BLOCK** | COG → Relay | Bloc de code MIP d'un Service (Phase B) |
-| 0x12 | **VERIFY_RESULT** | Relay → COG | Résultat d'une phase de vérification |
-| 0x13 | **REDIRECT** | Relay/Origin → COG | Redirection vers un autre relay |
-| 0x30 | **PERMIT_REVOKE** | Relay/Origin → Tracker | Révocation d'un Permis de circulation (contremesure R-009). Propagation en < 1 min ; le COG révoqué reçoit CLOSE avec raison `permit_revoked`. |
+| 0x10 | **CORE_KEY** | COG â†’ Relay | ClÃ© de conformitÃ© des Cores (Phase A) |
+| 0x11 | **SERVICE_BLOCK** | COG â†’ Relay | Bloc de code MIP d'un Service (Phase B) |
+| 0x12 | **VERIFY_RESULT** | Relay â†’ COG | RÃ©sultat d'une phase de vÃ©rification |
+| 0x13 | **REDIRECT** | Relay/Origin â†’ COG | Redirection vers un autre relay |
+| 0x30 | **PERMIT_REVOKE** | Relay/Origin â†’ Tracker | RÃ©vocation d'un Permis de circulation (contremesure R-009). Propagation en < 1 min ; le COG rÃ©voquÃ© reÃ§oit CLOSE avec raison `permit_revoked`. |
 
 ---
 
-## 4. Séquence d'enregistrement
+## 4. SÃ©quence d'enregistrement
 
 ### 4.1 Flow complet
 
@@ -105,26 +105,26 @@ sequenceDiagram
     O->>COG: TLS handshake OK
 
     COG->>O: REGISTER (token, cog_id, Passeport)
-    Note over O: Évaluer capacité
-    alt Origin saturé
+    Note over O: Ã‰valuer capacitÃ©
+    alt Origin saturÃ©
         O->>COG: REDIRECT (relay_host:port)
         COG->>O: (reconnexion au relay)
     end
 
-    Note over O: Phase A : Clé Cores
+    Note over O: Phase A : ClÃ© Cores
     O->>COG: Demande CORE_KEY
-    COG->>O: CORE_KEY (clé)
+    COG->>O: CORE_KEY (clÃ©)
     O->>COG: VERIFY_RESULT (phase_a, OK/FAIL)
 
     Note over O: Phase B : Blocs Services
     loop Pour chaque Service
         O->>COG: Demande SERVICE_BLOCK (service_id, block_index)
-        COG->>O: SERVICE_BLOCK (paquet chiffré)
+        COG->>O: SERVICE_BLOCK (paquet chiffrÃ©)
         O->>COG: VERIFY_RESULT (phase_b, service_id, OK/FAIL)
     end
 
-    Note over O: Phase C : Santé
-    O->>O: Vérifier environment_health
+    Note over O: Phase C : SantÃ©
+    O->>O: VÃ©rifier environment_health
 
     alt Tout conforme
         O->>COG: REGISTER_OK (permis_id, session_id)
@@ -147,13 +147,13 @@ sequenceDiagram
 | `core_version` | Variable | Version des Cores |
 | `svc_manifest_len` | 2 octets | Longueur du manifest |
 | `svc_manifest` | Variable | Liste des Services (JSON) |
-| `env_health_len` | 2 octets | Longueur du rapport de santé |
-| `environment_health` | Variable | Rapport de santé |
+| `env_health_len` | 2 octets | Longueur du rapport de santÃ© |
+| `environment_health` | Variable | Rapport de santÃ© |
 | `permis_history_len` | 2 octets | Longueur de l'historique |
-| `previous_permis` | Variable | Permis de circulation précédents (JSON) |
+| `previous_permis` | Variable | Permis de circulation prÃ©cÃ©dents (JSON) |
 | `passport_type` | 1 octet | 0 = STANDARD, 1 = SPECIAL |
-| `special_key_len` | 2 octets | Longueur de la clé spéciale |
-| `special_key` | Variable | Clé spéciale (si SPECIAL) |
+| `special_key_len` | 2 octets | Longueur de la clÃ© spÃ©ciale |
+| `special_key` | Variable | ClÃ© spÃ©ciale (si SPECIAL) |
 | `parent_cog_id_len` | 2 octets | Longueur du parent_cog_id (0 si non applicable) |
 | `parent_cog_id` | Variable | cog_id du parent (TERMINAL uniquement) |
 | `nonce` | 16 octets | Protection anti-rejeu |
@@ -163,13 +163,13 @@ sequenceDiagram
 
 | Code | Valeur | Description |
 |------|--------|-------------|
-| 0x00 | `ORIGIN` | Point central de vérité (un seul par réseau) |
-| 0x01 | `RELAY` | COG de contrôle d'intégrité |
-| 0x02 | `TRACKER` | Mapping et contrôle |
+| 0x00 | `ORIGIN` | Point central de vÃ©ritÃ© (un seul par rÃ©seau) |
+| 0x01 | `RELAY` | COG de contrÃ´le d'intÃ©gritÃ© |
+| 0x02 | `TRACKER` | Mapping et contrÃ´le |
 | 0x03 | `STABLE` | COG d'utilisateur commun |
-| 0x04 | `SPECIAL` | COG professionnel à forte utilisation |
+| 0x04 | `SPECIAL` | COG professionnel Ã  forte utilisation |
 | 0x05 | `TERMINAL` | COG mobile enfant d'un STABLE |
-| 0x06 | `LONE` | COG isolé volontairement (ne devrait pas envoyer REGISTER) |
+| 0x06 | `LONE` | COG isolÃ© volontairement (ne devrait pas envoyer REGISTER) |
 
 #### Valeurs de `os_type`
 
@@ -187,50 +187,50 @@ sequenceDiagram
 |-------|--------|-------------|
 | `session_id` | 16 octets | Identifiant de session |
 | `permis_id_len` | 2 octets | Longueur du permis_id |
-| `permis_id` | Variable | Identifiant du Permis de circulation délivré (accord relay) |
+| `permis_id` | Variable | Identifiant du Permis de circulation dÃ©livrÃ© (accord relay) |
 | `permis_expires_at` | 8 octets | Date d'expiration du Permis |
 | `permis_scope_len` | 2 octets | Longueur du scope |
-| `permis_scope` | Variable | Portée du Permis (JSON) |
+| `permis_scope` | Variable | PortÃ©e du Permis (JSON) |
 | `tracker_addresses_len` | 2 octets | Longueur de la liste des adresses de trackers officiels |
-| `tracker_addresses` | Variable | Liste des adresses des trackers officiels/sûrs (connus d'Origin) ; le COG ne doit se connecter qu'à ces trackers. |
-| `tracker_signature` | 64 octets | **Signature Ed25519** par Origin de la liste des trackers (contremesure R-004 — protection Eclipse). Le COG doit vérifier cette signature avant d'utiliser les trackers. |
+| `tracker_addresses` | Variable | Liste des adresses des trackers officiels/sÃ»rs (connus d'Origin) ; le COG ne doit se connecter qu'Ã  ces trackers. |
+| `tracker_signature` | 64 octets | **Signature Ed25519** par Origin de la liste des trackers (contremesure R-004 â€” protection Eclipse). Le COG doit vÃ©rifier cette signature avant d'utiliser les trackers. |
 | `status` | 1 octet | 0 = OK, 1 = UPDATE_RECOMMENDED |
 | `min_core_version_len` | 1 octet | Longueur (optionnel) |
-| `min_core_version` | Variable | Version minimale recommandée |
+| `min_core_version` | Variable | Version minimale recommandÃ©e |
 
 ### 4.4 Codes d'erreur REGISTER_ERR
 
 | Code | Nom | Description |
 |------|-----|-------------|
 | 1 | `invalid_token` | Token invalide |
-| 2 | `cog_id_conflict` | cog_id déjà enregistré |
-| 3 | `unsupported_protocol_version` | Version de protocole non supportée |
-| 4 | `auth_failed` | Échec d'authentification |
+| 2 | `cog_id_conflict` | cog_id dÃ©jÃ  enregistrÃ© |
+| 3 | `unsupported_protocol_version` | Version de protocole non supportÃ©e |
+| 4 | `auth_failed` | Ã‰chec d'authentification |
 | 5 | `rate_limited` | Rate limiting |
 | 6 | `internal_error` | Erreur interne |
 | 7 | `incompatible_core_version` | Version des Cores incompatible |
-| 8 | `unregistered_service` | Service non répertorié |
-| 9 | `core_key_mismatch` | Clé de conformité Cores incorrecte |
+| 8 | `unregistered_service` | Service non rÃ©pertoriÃ© |
+| 9 | `core_key_mismatch` | ClÃ© de conformitÃ© Cores incorrecte |
 | 10 | `service_block_mismatch` | Bloc de code Service incorrect |
-| 11 | `environment_health_failed` | Santé de l'environnement non conforme |
+| 11 | `environment_health_failed` | SantÃ© de l'environnement non conforme |
 | 12 | `quarantine` | COG mis en quarantaine |
-| 13 | `blacklisted` | COG blacklisté |
+| 13 | `blacklisted` | COG blacklistÃ© |
 | 14 | `redirect` | Redirection vers un autre relay |
-| 15 | `special_key_invalid` | Clé spéciale invalide |
+| 15 | `special_key_invalid` | ClÃ© spÃ©ciale invalide |
 
 ---
 
-## 5. Messages de données
+## 5. Messages de donnÃ©es
 
 ### 5.1 Format DATA
 
 | Champ | Taille | Description |
 |-------|--------|-------------|
 | `session_id` | 16 octets | Identifiant de session |
-| `sequence` | 4 octets | Numéro de séquence |
-| `payload_len` | 4 octets | Longueur des données |
-| `payload` | Variable | Données opaques |
-| `mac` | 32 octets | **HMAC-SHA256** du message (session_key, header \|\| payload) — obligatoire même en mode temps réel non chiffré (contremesure R-003). Voir [MWS - Chiffrement et TLS](../securite/MWS%20-%20Chiffrement%20et%20TLS.md). |
+| `sequence` | 4 octets | NumÃ©ro de sÃ©quence |
+| `payload_len` | 4 octets | Longueur des donnÃ©es |
+| `payload` | Variable | DonnÃ©es opaques |
+| `mac` | 32 octets | **HMAC-SHA256** du message (session_key, header \|\| payload) â€” obligatoire mÃªme en mode temps rÃ©el non chiffrÃ© (contremesure R-003). Voir [MWS - Chiffrement et TLS](../securite/MWS%20-%20Chiffrement%20et%20TLS.md). |
 
 ### 5.2 Format HEARTBEAT
 
@@ -256,7 +256,7 @@ sequenceDiagram
 
 | Champ | Taille | Description |
 |-------|--------|-------------|
-| `query_type` | 1 octet | 1 = vérifier service, 2 = lister mises à jour |
+| `query_type` | 1 octet | 1 = vÃ©rifier service, 2 = lister mises Ã  jour |
 | `service_id_len` | 2 octets | Longueur du service_id |
 | `service_id` | Variable | Identifiant du service (ou liste) |
 
@@ -266,11 +266,11 @@ sequenceDiagram
 |-------|--------|-------------|
 | `status` | 1 octet | 0 = FOUND, 1 = NOT_FOUND, 2 = SUSPENDED |
 | `service_id_len` | 2 octets | Longueur |
-| `service_id` | Variable | Service concerné |
+| `service_id` | Variable | Service concernÃ© |
 | `current_version_len` | 1 octet | Longueur |
 | `current_version` | Variable | Version courante |
 | `download_url_len` | 2 octets | Longueur |
-| `download_url` | Variable | URL de téléchargement |
+| `download_url` | Variable | URL de tÃ©lÃ©chargement |
 | `checksum` | 32 octets | SHA-256 |
 
 ### 6.3 Format UPDATE_AVAILABLE
@@ -278,8 +278,8 @@ sequenceDiagram
 | Champ | Taille | Description |
 |-------|--------|-------------|
 | `service_id_len` | 2 octets | Longueur |
-| `service_id` | Variable | Service concerné |
-| `current_version_len` | 1 octet | Version installée |
+| `service_id` | Variable | Service concernÃ© |
+| `current_version_len` | 1 octet | Version installÃ©e |
 | `current_version` | Variable | |
 | `available_version_len` | 1 octet | Version disponible |
 | `available_version` | Variable | |
@@ -290,15 +290,15 @@ sequenceDiagram
 
 ---
 
-## 7. Messages de vérification
+## 7. Messages de vÃ©rification
 
 ### 7.1 Format CORE_KEY
 
 | Champ | Taille | Description |
 |-------|--------|-------------|
 | `session_id` | 16 octets | Identifiant de session |
-| `key_len` | 2 octets | Longueur de la clé |
-| `key` | Variable | Clé de conformité des Cores |
+| `key_len` | 2 octets | Longueur de la clÃ© |
+| `key` | Variable | ClÃ© de conformitÃ© des Cores |
 
 ### 7.2 Format SERVICE_BLOCK
 
@@ -306,10 +306,10 @@ sequenceDiagram
 |-------|--------|-------------|
 | `session_id` | 16 octets | Identifiant de session |
 | `service_id_len` | 2 octets | Longueur |
-| `service_id` | Variable | Service concerné |
+| `service_id` | Variable | Service concernÃ© |
 | `block_index` | 4 octets | Index du bloc MIP |
 | `encrypted_block_len` | 4 octets | Longueur |
-| `encrypted_block` | Variable | Bloc de code chiffré |
+| `encrypted_block` | Variable | Bloc de code chiffrÃ© |
 
 ### 7.3 Format VERIFY_RESULT
 
@@ -344,54 +344,55 @@ sequenceDiagram
 | `token` | 512 octets |
 | `svc_manifest` | 4096 octets |
 | `payload` (DATA) | 64 Ko (configurable) |
-| Trame de contrôle | 64 Ko |
+| Trame de contrÃ´le | 64 Ko |
 
 ### 8.2 Validation
 
-| Règle | Description |
+| RÃ¨gle | Description |
 |-------|-------------|
-| Longueur cohérente | Payload length doit correspondre aux champs |
+| Longueur cohÃ©rente | Payload length doit correspondre aux champs |
 | Encodage UTF-8 | Champs texte en UTF-8 valide |
-| Version supportée | Rejet si version non supportée |
-| Trames malformées | Fermeture + ERROR (`invalid_format`) |
+| Version supportÃ©e | Rejet si version non supportÃ©e |
+| Trames malformÃ©es | Fermeture + ERROR (`invalid_format`) |
 
 ### 8.3 Validation des payloads JSON (contremesure R-010)
 
-Les payloads JSON (`svc_manifest`, `previous_permis`, `permis_scope`, etc.) doivent être validés avant traitement :
+Les payloads JSON (`svc_manifest`, `previous_permis`, `permis_scope`, etc.) doivent Ãªtre validÃ©s avant traitement :
 
 | Exigence | Description |
 |----------|-------------|
-| **Schéma** | Chaque type de payload possède un **JSON Schema** publié ; validation obligatoire côté relay/origin |
-| **Profondeur max** | Imbrication limitée à **5 niveaux** ; rejet si dépassement |
-| **Taille** | Respect des limites (ex. `svc_manifest` ≤ 4096 octets) |
-| **Champs inconnus** | Politique définie (rejet ou `additionalProperties: false`) |
+| **SchÃ©ma** | Chaque type de payload possÃ¨de un **JSON Schema** publiÃ© ; validation obligatoire cÃ´tÃ© relay/origin |
+| **Profondeur max** | Imbrication limitÃ©e Ã  **5 niveaux** ; rejet si dÃ©passement |
+| **Taille** | Respect des limites (ex. `svc_manifest` â‰¤ 4096 octets) |
+| **Champs inconnus** | Politique dÃ©finie (rejet ou `additionalProperties: false`) |
 
-Les schémas sont disponibles dans la documentation MWS et dans le dépôt des spécifications.
+Les schÃ©mas sont disponibles dans la documentation MWS et dans le dÃ©pÃ´t des spÃ©cifications.
 
 ---
 
-## 9. Résumé des flux
+## 9. RÃ©sumÃ© des flux
 
 | Flux | Messages | Description |
 |------|----------|-------------|
-| **Enregistrement** | REGISTER → (REDIRECT) → CORE_KEY → SERVICE_BLOCK → REGISTER_OK/ERR | Vérification et tunnel |
-| **Données** | DATA (bidirectionnel) | Échange de données |
-| **Maintien** | HEARTBEAT ↔ HEARTBEAT_ACK | Garder le tunnel actif |
+| **Enregistrement** | REGISTER â†’ (REDIRECT) â†’ CORE_KEY â†’ SERVICE_BLOCK â†’ REGISTER_OK/ERR | VÃ©rification et tunnel |
+| **DonnÃ©es** | DATA (bidirectionnel) | Ã‰change de donnÃ©es |
+| **Maintien** | HEARTBEAT â†” HEARTBEAT_ACK | Garder le tunnel actif |
 | **Fermeture** | CLOSE | Fermeture propre |
-| **Registre** | REGISTRY_QUERY → REGISTRY_RESPONSE | Consultation |
-| **Mise à jour** | UPDATE_AVAILABLE (push) | Notification |
+| **Registre** | REGISTRY_QUERY â†’ REGISTRY_RESPONSE | Consultation |
+| **Mise Ã  jour** | UPDATE_AVAILABLE (push) | Notification |
 
 ---
 
-## Références
+## RÃ©fÃ©rences
 
 - [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
-- [MWS - Contre-Mesures de Sécurité](../securite/MWS%20-%20Contre-Mesures%20de%20Securite.md) — R-003, R-004, R-009, R-010
-- [Miyukini Webway Relay Protocol](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md) — Spécification complète
+- [MWS - Contre-Mesures de SÃ©curitÃ©](../securite/MWS%20-%20Contre-Mesures%20de%20Securite.md) â€” R-003, R-004, R-009, R-010
+- [Miyukini Webway Relay Protocol](..//reference//_index.md) â€” SpÃ©cification complÃ¨te
 - [MWS - Relays](../acteurs/MWS%20-%20Relays.md)
 
 ---
 
 **Version :** 2.0  
-**Mise à jour :** MAC DATA (R-003), tracker_signature (R-004), PERMIT_REVOKE (R-009), validation JSON (R-010)  
-**Classification :** Documentation MWS — Protocole
+**Mise Ã  jour :** MAC DATA (R-003), tracker_signature (R-004), PERMIT_REVOKE (R-009), validation JSON (R-010)  
+**Classification :** Documentation MWS â€” Protocole
+

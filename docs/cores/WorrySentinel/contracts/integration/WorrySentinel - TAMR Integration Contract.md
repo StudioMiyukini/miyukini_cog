@@ -1,4 +1,4 @@
-# WorrySentinel - TAMR Integration Contract
+﻿# WorrySentinel - TAMR Integration Contract
 
 ## 1. Contexte
 
@@ -6,7 +6,7 @@ Ce document definit le **contrat d'integration entre WorrySentinel et TAMR**. Il
 
 Ce document complete la Section 9 de la [WorrySentinel - Documentation Fondatrice](../../foundation/WorrySentinel%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
 - [TAMR - Documentation Fondatrice](../../../TAMR/foundation/TAMR%20-%20Documentation%20Fondatrice.md) pour la nature de TAMR
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) pour la conformite LOI-1 a LOI-6
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) pour la conformite LOI-1 a LOI-6
 
 L'integration respecte les Lois d'Autonomie Systeme : toutes les adaptations sont locales et ne requierent aucune dependance externe (**LOI-1**).
 
@@ -38,7 +38,7 @@ La relation est de **contrainte verticale** : WorrySentinel impose des contraint
 
 ---
 
-## 4. Nature de la relation WorrySentinel — TAMR
+## 4. Nature de la relation WorrySentinel â€” TAMR
 
 ### 4.1 Relation de contrainte verticale
 
@@ -70,14 +70,14 @@ WorrySentinel observe les patterns d'intervention humaine sans jamais modifier l
 
 | Responsabilite | WorrySentinel | TAMR |
 |----------------|---------------|------|
-| **Gouverner les etats de confiance** | ✅ Exclusif | ❌ Consomme |
-| **Gouverner les niveaux de securite** | ✅ Exclusif | ❌ Consomme |
-| **Definir les types d'intervention** | ❌ Contraint | ✅ Exclusif |
-| **Definir les limites d'autorite** | ❌ Contraint | ✅ Exclusif |
-| **Definir les points d'intervention** | ❌ Contraint | ✅ Exclusif |
-| **Decider si une intervention est autorisee** | ❌ Jamais | ❌ Jamais (StrongFather) |
-| **Observer les patterns d'intervention** | ✅ Source | ❌ Source |
-| **Detecter les anomalies d'intervention** | ✅ Consomme | ❌ Source |
+| **Gouverner les etats de confiance** | âœ… Exclusif | âŒ Consomme |
+| **Gouverner les niveaux de securite** | âœ… Exclusif | âŒ Consomme |
+| **Definir les types d'intervention** | âŒ Contraint | âœ… Exclusif |
+| **Definir les limites d'autorite** | âŒ Contraint | âœ… Exclusif |
+| **Definir les points d'intervention** | âŒ Contraint | âœ… Exclusif |
+| **Decider si une intervention est autorisee** | âŒ Jamais | âŒ Jamais (StrongFather) |
+| **Observer les patterns d'intervention** | âœ… Source | âŒ Source |
+| **Detecter les anomalies d'intervention** | âœ… Consomme | âŒ Source |
 
 **Regle WS-TAMR-04 : Aucun chevauchement**
 
@@ -121,14 +121,14 @@ WorrySentinel ne contourne **jamais** les mecanismes de tracabilite de TAMR. Les
 
 WorrySentinel gouverne les etats de confiance (T0-T4). TAMR adapte les regles d'intervention humaine en consequence :
 
-**T0 — Normal**
+**T0 â€” Normal**
 
 | Type d'intervention | Disponibilite | Contraintes |
 |---------------------|---------------|-------------|
-| **Approval** | ✅ Disponible | Conditions normales |
-| **Override** | ✅ Disponible | Justification requise (INV-TAMR-7) |
-| **Escalation** | ✅ Disponible | Chemin standard |
-| **Supervision** | ✅ Disponible | Passive par defaut |
+| **Approval** | âœ… Disponible | Conditions normales |
+| **Override** | âœ… Disponible | Justification requise (INV-TAMR-7) |
+| **Escalation** | âœ… Disponible | Chemin standard |
+| **Supervision** | âœ… Disponible | Passive par defaut |
 
 | Aspect | Comportement |
 |--------|--------------|
@@ -137,14 +137,14 @@ WorrySentinel gouverne les etats de confiance (T0-T4). TAMR adapte les regles d'
 | **Exigences** | Exigences de justification normales |
 | **Delais** | Delais standards pour escalade |
 
-**T1 — Instable**
+**T1 â€” Instable**
 
 | Type d'intervention | Disponibilite | Contraintes |
 |---------------------|---------------|-------------|
-| **Approval** | ✅ Disponible | Tracabilite etendue |
-| **Override** | ✅ Disponible | Justification detaillee requise |
-| **Escalation** | ✅ Disponible | Chemin standard avec notification |
-| **Supervision** | ✅ Disponible | Surveillance renforcee |
+| **Approval** | âœ… Disponible | Tracabilite etendue |
+| **Override** | âœ… Disponible | Justification detaillee requise |
+| **Escalation** | âœ… Disponible | Chemin standard avec notification |
+| **Supervision** | âœ… Disponible | Surveillance renforcee |
 
 | Aspect | Comportement |
 |--------|--------------|
@@ -153,14 +153,14 @@ WorrySentinel gouverne les etats de confiance (T0-T4). TAMR adapte les regles d'
 | **Exigences** | Justification plus detaillee pour override |
 | **Delais** | Delais standards |
 
-**T2 — Degrade**
+**T2 â€” Degrade**
 
 | Type d'intervention | Disponibilite | Contraintes |
 |---------------------|---------------|-------------|
-| **Approval** | ✅ Disponible | Approbations sensibles suspendues |
-| **Override** | ⚠️ Restreint | Override limite aux cas critiques |
-| **Escalation** | ✅ Disponible | Escalade acceleree |
-| **Supervision** | ✅ Obligatoire | Supervision active requise |
+| **Approval** | âœ… Disponible | Approbations sensibles suspendues |
+| **Override** | âš ï¸ Restreint | Override limite aux cas critiques |
+| **Escalation** | âœ… Disponible | Escalade acceleree |
+| **Supervision** | âœ… Obligatoire | Supervision active requise |
 
 | Aspect | Comportement |
 |--------|--------------|
@@ -169,14 +169,14 @@ WorrySentinel gouverne les etats de confiance (T0-T4). TAMR adapte les regles d'
 | **Exigences** | Justification substantielle obligatoire |
 | **Delais** | Delais reduits pour escalade |
 
-**T3 — Restreint**
+**T3 â€” Restreint**
 
 | Type d'intervention | Disponibilite | Contraintes |
 |---------------------|---------------|-------------|
-| **Approval** | ⚠️ Restreint | Seules approbations critiques |
-| **Override** | ⚠️ Validation requise | **Override necessite validation TAMR explicite** |
-| **Escalation** | ✅ Prioritaire | Escalade prioritaire vers niveau superieur |
-| **Supervision** | ✅ Obligatoire | Supervision permanente |
+| **Approval** | âš ï¸ Restreint | Seules approbations critiques |
+| **Override** | âš ï¸ Validation requise | **Override necessite validation TAMR explicite** |
+| **Escalation** | âœ… Prioritaire | Escalade prioritaire vers niveau superieur |
+| **Supervision** | âœ… Obligatoire | Supervision permanente |
 
 | Aspect | Comportement |
 |--------|--------------|
@@ -189,14 +189,14 @@ WorrySentinel gouverne les etats de confiance (T0-T4). TAMR adapte les regles d'
 
 En etat T3 (Restreint), tout override necessite une **validation TAMR explicite**. Cette validation confirme que l'override est bien une intervention humaine deliberee et non une manipulation automatisee.
 
-**T4 — Bloque**
+**T4 â€” Bloque**
 
 | Type d'intervention | Disponibilite | Contraintes |
 |---------------------|---------------|-------------|
-| **Approval** | ⛔ Suspendu | Aucune approbation operationnelle |
-| **Override** | ⛔ Bloque | Aucun override autorise |
-| **Escalation** | ⚠️ Urgence | Escalade d'urgence uniquement |
-| **Supervision** | ✅ Lecture seule | Observation sans intervention |
+| **Approval** | â›” Suspendu | Aucune approbation operationnelle |
+| **Override** | â›” Bloque | Aucun override autorise |
+| **Escalation** | âš ï¸ Urgence | Escalade d'urgence uniquement |
+| **Supervision** | âœ… Lecture seule | Observation sans intervention |
 
 | Aspect | Comportement |
 |--------|--------------|
@@ -237,7 +237,7 @@ Les restrictions sont cumulatives : une intervention sur un produit de niveau 3 
 
 ## 7. Types d'informations echangees
 
-### 7.1 Flux descendant : WorrySentinel → TAMR
+### 7.1 Flux descendant : WorrySentinel â†’ TAMR
 
 **TRUST_STATE_CHANGE**
 - **Objectif :** Notifier un changement d'etat de confiance
@@ -248,12 +248,12 @@ Les restrictions sont cumulatives : une intervention sur un produit de niveau 3 
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `notification_id` | Identifiant unique de la notification | ✅ Oui |
-| `previous_state` | Etat de confiance precedent (T0-T4) | ✅ Oui |
-| `new_state` | Nouvel etat de confiance (T0-T4) | ✅ Oui |
-| `transition_reason` | Justification de la transition | ✅ Oui |
-| `timestamp` | Horodatage de la transition | ✅ Oui |
-| `intervention_constraints` | Contraintes sur les types d'intervention | ❌ Optionnel |
+| `notification_id` | Identifiant unique de la notification | âœ… Oui |
+| `previous_state` | Etat de confiance precedent (T0-T4) | âœ… Oui |
+| `new_state` | Nouvel etat de confiance (T0-T4) | âœ… Oui |
+| `transition_reason` | Justification de la transition | âœ… Oui |
+| `timestamp` | Horodatage de la transition | âœ… Oui |
+| `intervention_constraints` | Contraintes sur les types d'intervention | âŒ Optionnel |
 
 **INTERVENTION_CONSTRAINT**
 - **Objectif :** Imposer des contraintes specifiques sur les interventions
@@ -264,13 +264,13 @@ Les restrictions sont cumulatives : une intervention sur un produit de niveau 3 
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `constraint_id` | Identifiant unique de la contrainte | ✅ Oui |
-| `intervention_type` | Type d'intervention concerne (approval, override, escalation, supervision) | ✅ Oui |
-| `constraint_nature` | Nature (block, restrict, require_validation, enhance_tracing) | ✅ Oui |
-| `scope` | Portee (all, security_level, product, context) | ✅ Oui |
-| `duration` | Duree (null = indefini) | ❌ Optionnel |
-| `justification` | Raison de la contrainte | ✅ Oui |
-| `timestamp` | Horodatage de la contrainte | ✅ Oui |
+| `constraint_id` | Identifiant unique de la contrainte | âœ… Oui |
+| `intervention_type` | Type d'intervention concerne (approval, override, escalation, supervision) | âœ… Oui |
+| `constraint_nature` | Nature (block, restrict, require_validation, enhance_tracing) | âœ… Oui |
+| `scope` | Portee (all, security_level, product, context) | âœ… Oui |
+| `duration` | Duree (null = indefini) | âŒ Optionnel |
+| `justification` | Raison de la contrainte | âœ… Oui |
+| `timestamp` | Horodatage de la contrainte | âœ… Oui |
 
 **TRACING_DIRECTIVE**
 - **Objectif :** Modifier le niveau de tracabilite requis
@@ -281,12 +281,12 @@ Les restrictions sont cumulatives : une intervention sur un produit de niveau 3 
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `directive_id` | Identifiant unique de la directive | ✅ Oui |
-| `tracing_level` | Niveau (standard, extended, reinforced, exhaustive) | ✅ Oui |
-| `additional_elements` | Elements supplementaires a tracer | ❌ Optionnel |
-| `duration` | Duree (null = indefini) | ❌ Optionnel |
-| `justification` | Raison de la directive | ✅ Oui |
-| `timestamp` | Horodatage de la directive | ✅ Oui |
+| `directive_id` | Identifiant unique de la directive | âœ… Oui |
+| `tracing_level` | Niveau (standard, extended, reinforced, exhaustive) | âœ… Oui |
+| `additional_elements` | Elements supplementaires a tracer | âŒ Optionnel |
+| `duration` | Duree (null = indefini) | âŒ Optionnel |
+| `justification` | Raison de la directive | âœ… Oui |
+| `timestamp` | Horodatage de la directive | âœ… Oui |
 
 **OVERRIDE_VALIDATION_REQUIRED**
 - **Objectif :** Signaler que les overrides necessitent une validation TAMR explicite (etat T3)
@@ -297,13 +297,13 @@ Les restrictions sont cumulatives : une intervention sur un produit de niveau 3 
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `requirement_id` | Identifiant unique de l'exigence | ✅ Oui |
-| `active` | Si l'exigence est active | ✅ Oui |
-| `validation_type` | Type de validation requise (identity_confirm, challenge, dual_approval) | ✅ Oui |
-| `justification` | Raison de l'exigence | ✅ Oui |
-| `timestamp` | Horodatage de l'exigence | ✅ Oui |
+| `requirement_id` | Identifiant unique de l'exigence | âœ… Oui |
+| `active` | Si l'exigence est active | âœ… Oui |
+| `validation_type` | Type de validation requise (identity_confirm, challenge, dual_approval) | âœ… Oui |
+| `justification` | Raison de l'exigence | âœ… Oui |
+| `timestamp` | Horodatage de l'exigence | âœ… Oui |
 
-### 7.2 Flux montant : TAMR → WorrySentinel
+### 7.2 Flux montant : TAMR â†’ WorrySentinel
 
 **INTERVENTION_PATTERN_ALERT**
 - **Objectif :** Alerter sur un pattern d'intervention suspect
@@ -314,13 +314,13 @@ Les restrictions sont cumulatives : une intervention sur un produit de niveau 3 
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `alert_id` | Identifiant unique de l'alerte | ✅ Oui |
-| `pattern_type` | Type de pattern (excessive_override, insufficient_justification, rapid_succession, protected_zone_attempt) | ✅ Oui |
-| `involved_interventions` | Liste des interventions concernees | ✅ Oui |
-| `involved_intervenants` | Intervenants concernes (identites) | ✅ Oui |
-| `context` | Contexte du pattern | ✅ Oui |
-| `severity_assessment` | Evaluation de gravite par TAMR | ✅ Oui |
-| `timestamp` | Horodatage de l'alerte | ✅ Oui |
+| `alert_id` | Identifiant unique de l'alerte | âœ… Oui |
+| `pattern_type` | Type de pattern (excessive_override, insufficient_justification, rapid_succession, protected_zone_attempt) | âœ… Oui |
+| `involved_interventions` | Liste des interventions concernees | âœ… Oui |
+| `involved_intervenants` | Intervenants concernes (identites) | âœ… Oui |
+| `context` | Contexte du pattern | âœ… Oui |
+| `severity_assessment` | Evaluation de gravite par TAMR | âœ… Oui |
+| `timestamp` | Horodatage de l'alerte | âœ… Oui |
 
 **ESCALATION_STALL_ALERT**
 - **Objectif :** Alerter sur une escalade non resolue
@@ -331,12 +331,12 @@ Les restrictions sont cumulatives : une intervention sur un produit de niveau 3 
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `alert_id` | Identifiant unique de l'alerte | ✅ Oui |
-| `escalation_id` | Reference a l'escalade concernee | ✅ Oui |
-| `stall_duration` | Duree de blocage | ✅ Oui |
-| `escalation_level` | Niveau d'escalade atteint | ✅ Oui |
-| `impact_assessment` | Evaluation de l'impact | ✅ Oui |
-| `timestamp` | Horodatage de l'alerte | ✅ Oui |
+| `alert_id` | Identifiant unique de l'alerte | âœ… Oui |
+| `escalation_id` | Reference a l'escalade concernee | âœ… Oui |
+| `stall_duration` | Duree de blocage | âœ… Oui |
+| `escalation_level` | Niveau d'escalade atteint | âœ… Oui |
+| `impact_assessment` | Evaluation de l'impact | âœ… Oui |
+| `timestamp` | Horodatage de l'alerte | âœ… Oui |
 
 **PROTECTED_ZONE_ATTEMPT**
 - **Objectif :** Signaler une tentative d'intervention sur une zone protegee
@@ -347,12 +347,12 @@ Les restrictions sont cumulatives : une intervention sur un produit de niveau 3 
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `attempt_id` | Identifiant unique de la tentative | ✅ Oui |
-| `protected_zone` | Zone protegee concernee | ✅ Oui |
-| `attempted_intervention` | Type d'intervention tentee | ✅ Oui |
-| `intervenant_id` | Identite de l'intervenant | ✅ Oui |
-| `outcome` | Resultat (blocked, rejected) | ✅ Oui |
-| `timestamp` | Horodatage de la tentative | ✅ Oui |
+| `attempt_id` | Identifiant unique de la tentative | âœ… Oui |
+| `protected_zone` | Zone protegee concernee | âœ… Oui |
+| `attempted_intervention` | Type d'intervention tentee | âœ… Oui |
+| `intervenant_id` | Identite de l'intervenant | âœ… Oui |
+| `outcome` | Resultat (blocked, rejected) | âœ… Oui |
+| `timestamp` | Horodatage de la tentative | âœ… Oui |
 
 ---
 
@@ -366,11 +366,11 @@ Les notifications de WorrySentinel suivent un format standardise.
 
 | Element | Description | Obligatoire |
 |---------|-------------|-------------|
-| `notification_id` | Identifiant unique de la notification | ✅ Oui |
-| `type` | Type de notification | ✅ Oui |
-| `payload` | Donnees specifiques a la notification | ✅ Oui |
-| `timestamp` | Horodatage de la notification | ✅ Oui |
-| `requires_ack` | Si une confirmation est requise | ✅ Oui |
+| `notification_id` | Identifiant unique de la notification | âœ… Oui |
+| `type` | Type de notification | âœ… Oui |
+| `payload` | Donnees specifiques a la notification | âœ… Oui |
+| `timestamp` | Horodatage de la notification | âœ… Oui |
+| `requires_ack` | Si une confirmation est requise | âœ… Oui |
 
 **Regle WS-TAMR-PROT-01 : Traitement immediat**
 
@@ -384,11 +384,11 @@ Les signalements de TAMR suivent un format standardise.
 
 | Element | Description | Obligatoire |
 |---------|-------------|-------------|
-| `signal_id` | Identifiant unique du signalement | ✅ Oui |
-| `type` | Type de signalement | ✅ Oui |
-| `payload` | Donnees specifiques au signalement | ✅ Oui |
-| `timestamp` | Horodatage du signalement | ✅ Oui |
-| `urgency` | Niveau d'urgence (low, medium, high, critical) | ✅ Oui |
+| `signal_id` | Identifiant unique du signalement | âœ… Oui |
+| `type` | Type de signalement | âœ… Oui |
+| `payload` | Donnees specifiques au signalement | âœ… Oui |
+| `timestamp` | Horodatage du signalement | âœ… Oui |
+| `urgency` | Niveau d'urgence (low, medium, high, critical) | âœ… Oui |
 
 **Regle WS-TAMR-PROT-02 : Signalement non bloquant**
 
@@ -404,11 +404,11 @@ TAMR acquitte toutes les notifications descendantes avec `requires_ack: true`.
 
 | Element | Description | Obligatoire |
 |---------|-------------|-------------|
-| `ack_id` | Identifiant unique de l'acquittement | ✅ Oui |
-| `notification_id` | Reference a la notification | ✅ Oui |
-| `status` | Statut (ACK_OK, ACK_PARTIAL, ACK_ERROR) | ✅ Oui |
-| `adaptation_applied` | Confirmation de l'adaptation | ✅ Oui |
-| `timestamp` | Horodatage de l'acquittement | ✅ Oui |
+| `ack_id` | Identifiant unique de l'acquittement | âœ… Oui |
+| `notification_id` | Reference a la notification | âœ… Oui |
+| `status` | Statut (ACK_OK, ACK_PARTIAL, ACK_ERROR) | âœ… Oui |
+| `adaptation_applied` | Confirmation de l'adaptation | âœ… Oui |
+| `timestamp` | Horodatage de l'acquittement | âœ… Oui |
 
 ---
 
@@ -457,33 +457,33 @@ TAMR acquitte toutes les notifications descendantes avec `requires_ack: true`.
 ### 9.4 Diagramme de sequence
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌────────────────┐
-│  WorrySentinel  │    │      TAMR       │    │  Intervenant   │
-└────────┬────────┘    └────────┬────────┘    └───────┬────────┘
-         │                      │                     │
-         ├── TRUST_STATE_CHANGE ─►│                     │
-         │    (T0 → T3)         │                     │
-         │                      │                     │
-         │                      ├── Adaptation        │
-         │                      │   (mode T3)         │
-         │                      │                     │
-         ├── OVERRIDE_VALIDATION │                     │
-         │    _REQUIRED ────────►│                     │
-         │                      │                     │
-         │◄── ACK_OK ───────────┤                     │
-         │                      │                     │
-         │                      │◄── Demande override ┤
-         │                      │                     │
-         │                      ├── Challenge ────────►│
-         │                      │                     │
-         │                      │◄── Reponse ─────────┤
-         │                      │                     │
-         │                      ├── Validation OK     │
-         │                      │   → StrongFather    │
-         │                      │                     │
-         │◄── Pattern alert ────┤                     │
-         │    (si suspect)      │                     │
-         │                      │                     │
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  WorrySentinel  â”‚    â”‚      TAMR       â”‚    â”‚  Intervenant   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚                      â”‚                     â”‚
+         â”œâ”€â”€ TRUST_STATE_CHANGE â”€â–ºâ”‚                     â”‚
+         â”‚    (T0 â†’ T3)         â”‚                     â”‚
+         â”‚                      â”‚                     â”‚
+         â”‚                      â”œâ”€â”€ Adaptation        â”‚
+         â”‚                      â”‚   (mode T3)         â”‚
+         â”‚                      â”‚                     â”‚
+         â”œâ”€â”€ OVERRIDE_VALIDATION â”‚                     â”‚
+         â”‚    _REQUIRED â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚                     â”‚
+         â”‚                      â”‚                     â”‚
+         â”‚â—„â”€â”€ ACK_OK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤                     â”‚
+         â”‚                      â”‚                     â”‚
+         â”‚                      â”‚â—„â”€â”€ Demande override â”¤
+         â”‚                      â”‚                     â”‚
+         â”‚                      â”œâ”€â”€ Challenge â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
+         â”‚                      â”‚                     â”‚
+         â”‚                      â”‚â—„â”€â”€ Reponse â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+         â”‚                      â”‚                     â”‚
+         â”‚                      â”œâ”€â”€ Validation OK     â”‚
+         â”‚                      â”‚   â†’ StrongFather    â”‚
+         â”‚                      â”‚                     â”‚
+         â”‚â—„â”€â”€ Pattern alert â”€â”€â”€â”€â”¤                     â”‚
+         â”‚    (si suspect)      â”‚                     â”‚
+         â”‚                      â”‚                     â”‚
 ```
 
 ---
@@ -632,7 +632,7 @@ L'intervention en cours est reevaluee selon le nouvel etat. Si les nouvelles con
 
 ### 13.4 Garantie de tracabilite
 
-**Engagement :** Toute interaction est traçable de bout en bout. L'audit complet des notifications, adaptations et signalements est possible.
+**Engagement :** Toute interaction est traÃ§able de bout en bout. L'audit complet des notifications, adaptations et signalements est possible.
 
 ### 13.5 Garantie de disponibilite
 
@@ -682,7 +682,7 @@ Toutes les notifications et signalements respectent le format standardise.
 
 **INV-WS-TAMR-8 : Tracabilite complete**
 
-Toute interaction est traçable avec son contexte complet.
+Toute interaction est traÃ§able avec son contexte complet.
 
 **INV-WS-TAMR-9 : Renforcement tracabilite uniquement**
 
@@ -694,7 +694,7 @@ WorrySentinel peut uniquement renforcer la tracabilite, jamais la reduire.
 
 ### LOI-1 : Aucune dependance externe critique
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 L'integration respecte LOI-1 :
 - TAMR adapte ses regles localement
@@ -703,7 +703,7 @@ L'integration respecte LOI-1 :
 
 ### LOI-2 : Le systeme accepte l'isolement comme etat normal
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 L'integration respecte LOI-2 :
 - En isolement, TAMR applique la securite par defaut
@@ -712,7 +712,7 @@ L'integration respecte LOI-2 :
 
 ### LOI-4 : Pas de temps global requis
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 L'integration respecte LOI-4 :
 - Les horodatages sont locaux
@@ -826,7 +826,7 @@ Toute implementation de l'integration entre WorrySentinel et TAMR doit respecter
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT — Normatif  
+**Statut :** CONTRAT â€” Normatif  
 **Dependances :**
 - WorrySentinel - Documentation Fondatrice v1.2 (Section 9)
 - TAMR - Documentation Fondatrice v1.4
@@ -844,7 +844,7 @@ Toute implementation de l'integration entre WorrySentinel et TAMR doit respecter
 
 ### Decision editoriale E2 : Validation TAMR en T3
 
-**Decision prise :** En etat T3, tout override necessite une validation TAMR explicite. Cette regle specifique est mentionnee dans la Documentation Fondatrice de WorrySentinel ("T3 — TAMR requis pour override").
+**Decision prise :** En etat T3, tout override necessite une validation TAMR explicite. Cette regle specifique est mentionnee dans la Documentation Fondatrice de WorrySentinel ("T3 â€” TAMR requis pour override").
 
 **Application :** Section 6.1 (T3), Regle WS-TAMR-CASE-02, et Flux 9.2 etablissent cette exigence.
 
@@ -873,17 +873,18 @@ Toute implementation de l'integration entre WorrySentinel et TAMR doit respecter
 ### Verification de coherence
 
 **Verification effectuee :**
-- ✅ Coherence avec WorrySentinel - Documentation Fondatrice : Confirmee (flux descendant TAMR, T3 override)
-- ✅ Coherence avec TAMR - Documentation Fondatrice : Confirmee (types d'intervention, invariants)
-- ✅ Conformite LOI-1 : Confirmee (aucune dependance externe)
-- ✅ Conformite LOI-2 : Confirmee (isolement gere avec securite par defaut)
-- ✅ Conformite LOI-4 : Confirmee (pas de temps global requis)
-- ✅ Aucune decision d'autorisation par WorrySentinel : Confirmee (INV-WS-TAMR-NEVER-2)
-- ✅ Preservation des invariants TAMR : Confirmee (INV-WS-TAMR-6)
-- ✅ Tracabilite complete : Confirmee (INV-WS-TAMR-8)
+- âœ… Coherence avec WorrySentinel - Documentation Fondatrice : Confirmee (flux descendant TAMR, T3 override)
+- âœ… Coherence avec TAMR - Documentation Fondatrice : Confirmee (types d'intervention, invariants)
+- âœ… Conformite LOI-1 : Confirmee (aucune dependance externe)
+- âœ… Conformite LOI-2 : Confirmee (isolement gere avec securite par defaut)
+- âœ… Conformite LOI-4 : Confirmee (pas de temps global requis)
+- âœ… Aucune decision d'autorisation par WorrySentinel : Confirmee (INV-WS-TAMR-NEVER-2)
+- âœ… Preservation des invariants TAMR : Confirmee (INV-WS-TAMR-6)
+- âœ… Tracabilite complete : Confirmee (INV-WS-TAMR-8)
 
 **Conclusion :** Aucune contradiction detectee. Le document est coherent et non ambigu.
 
 ---
 
 *Aucune autre erreur, warning, ou ambiguite rencontree lors de la redaction de ce document.*
+

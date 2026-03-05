@@ -10,6 +10,7 @@ use axum::{
         ws::{Message, WebSocket, WebSocketUpgrade},
         State,
     },
+    http::{header, HeaderMap, StatusCode},
     response::Response,
     routing::{get, post},
     Json, Router,
@@ -53,10 +54,9 @@ impl SttEngine {
 
     fn default_model(self, preset: SttPreset) -> &'static str {
         match (self, preset) {
-            (Self::FasterWhisper, SttPreset::Compact) => "base-int8",
             (Self::FasterWhisper, SttPreset::Balanced) => "small-int8",
             (Self::FasterWhisper, SttPreset::Precision) => "medium-fp16",
-            (Self::FasterWhisper, SttPreset::SafeFallback) => "base-int8",
+            (Self::FasterWhisper, SttPreset::Compact | SttPreset::SafeFallback) => "base-int8",
             (Self::WhisperCpp, _) => "base",
             (Self::SherpaOnnx, _) => "streaming-small",
         }
@@ -144,6 +144,17 @@ pub struct SttState {
     pub primary_engine: SttEngine,
     /// Chaine fallback locale.
     pub fallback_engines: Vec<SttEngine>,
+    /// Configuration de securite endpoint.
+    pub security: SttSecurity,
+}
+
+/// Configuration securite de MiyuSTT.
+#[derive(Debug, Clone, Default)]
+pub struct SttSecurity {
+    /// Token bearer attendu si auth active.
+    pub bearer_token: Option<String>,
+    /// Restreint les requetes avec `Origin` non-local.
+    pub enforce_local_origin: bool,
 }
 
 impl Default for SttState {
@@ -151,14 +162,21 @@ impl Default for SttState {
         Self {
             primary_engine: SttEngine::FasterWhisper,
             fallback_engines: vec![SttEngine::WhisperCpp, SttEngine::SherpaOnnx],
+            security: SttSecurity {
+                bearer_token: None,
+                enforce_local_origin: true,
+            },
         }
     }
 }
 
 /// Construit un routeur HTTP MiyuSTT v1.
-#[must_use]
 pub fn router() -> Router {
-    let state = SttState::default();
+    router_with_state(SttState::default())
+}
+
+/// Construit un routeur HTTP MiyuSTT v1 avec etat personnalise.
+pub fn router_with_state(state: SttState) -> Router {
     Router::new()
         .route("/api/health", get(health_handler))
         .route("/api/stt", post(stt_handler))
@@ -176,22 +194,36 @@ async fn health_handler() -> Json<serde_json::Value> {
 
 async fn stt_handler(
     State(state): State<SttState>,
-    Json(req): Json<SttRequest>,
-) -> Result<Json<SttResponse>, axum::http::StatusCode> {
+    headers: HeaderMap,
+    Json(mut req): Json<SttRequest>,
+) -> Result<Json<SttResponse>, StatusCode> {
+    enforce_security(&headers, &state.security)?;
+
     if req.samples.is_empty() || req.sample_rate < 8_000 {
-        return Err(axum::http::StatusCode::BAD_REQUEST);
+        return Err(StatusCode::BAD_REQUEST);
     }
     if !matches!(req.language.as_str(), "auto" | "fr" | "en") {
-        return Err(axum::http::StatusCode::BAD_REQUEST);
+        return Err(StatusCode::BAD_REQUEST);
     }
 
-    transcribe_with_fallback(&req, &state)
+    let response = transcribe_with_fallback(&req, &state);
+
+    // Purge best-effort des buffers audio apres traitement.
+    req.samples.fill(0.0);
+
+    response
         .map(Json)
-        .map_err(|_| axum::http::StatusCode::SERVICE_UNAVAILABLE)
+        .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)
 }
 
-async fn stt_stream_handler(ws: WebSocketUpgrade, State(state): State<SttState>) -> Response {
-    ws.on_upgrade(move |socket| stream_session(socket, state))
+async fn stt_stream_handler(
+    ws: WebSocketUpgrade,
+    State(state): State<SttState>,
+    headers: HeaderMap,
+) -> Result<Response, StatusCode> {
+    enforce_security(&headers, &state.security)?;
+
+    Ok(ws.on_upgrade(move |socket| stream_session(socket, state)))
 }
 
 async fn stream_session(mut socket: WebSocket, state: SttState) {
@@ -279,10 +311,58 @@ fn detect_language(req: &SttRequest) -> String {
     }
 }
 
+fn enforce_security(headers: &HeaderMap, security: &SttSecurity) -> Result<(), StatusCode> {
+    enforce_origin_policy(headers, security)?;
+    enforce_bearer_auth(headers, security)?;
+    Ok(())
+}
+
+fn enforce_bearer_auth(headers: &HeaderMap, security: &SttSecurity) -> Result<(), StatusCode> {
+    let Some(expected_token) = &security.bearer_token else {
+        return Ok(());
+    };
+
+    let provided = headers
+        .get(header::AUTHORIZATION)
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.strip_prefix("Bearer "));
+
+    match provided {
+        Some(token) if token == expected_token => Ok(()),
+        _ => Err(StatusCode::UNAUTHORIZED),
+    }
+}
+
+fn enforce_origin_policy(headers: &HeaderMap, security: &SttSecurity) -> Result<(), StatusCode> {
+    if !security.enforce_local_origin {
+        return Ok(());
+    }
+
+    let Some(origin) = headers.get(header::ORIGIN) else {
+        return Ok(());
+    };
+    let origin = origin.to_str().map_err(|_| StatusCode::FORBIDDEN)?;
+    if is_local_origin(origin) {
+        Ok(())
+    } else {
+        Err(StatusCode::FORBIDDEN)
+    }
+}
+
+fn is_local_origin(origin: &str) -> bool {
+    origin.starts_with("http://localhost")
+        || origin.starts_with("https://localhost")
+        || origin.starts_with("http://127.0.0.1")
+        || origin.starts_with("https://127.0.0.1")
+        || origin.starts_with("http://[::1]")
+        || origin.starts_with("https://[::1]")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use axum::{body::Body, http::Request};
+    use serde_json::json;
     use tower::util::ServiceExt;
 
     #[test]
@@ -338,5 +418,132 @@ mod tests {
         };
         let response = transcribe_with_fallback(&req, &state).expect("fallback should succeed");
         assert_eq!(response.engine, "whisper.cpp");
+    }
+
+    #[tokio::test]
+    async fn stt_requires_bearer_when_configured() {
+        let app = router_with_state(SttState {
+            security: SttSecurity {
+                bearer_token: Some("secret".to_string()),
+                enforce_local_origin: false,
+            },
+            ..SttState::default()
+        });
+        let body = serde_json::json!({
+            "samples": [0.1, -0.1],
+            "sample_rate": 16000,
+            "language": "fr",
+            "languages_hint": ["fr", "en"]
+        })
+        .to_string();
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri("/api/stt")
+                    .header("content-type", "application/json")
+                    .body(Body::from(body))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn stt_rejects_non_local_origin_by_default() {
+        let app = router();
+        let body = serde_json::json!({
+            "samples": [0.1, -0.1],
+            "sample_rate": 16000,
+            "language": "fr",
+            "languages_hint": ["fr", "en"]
+        })
+        .to_string();
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri("/api/stt")
+                    .header("content-type", "application/json")
+                    .header("origin", "https://evil.example")
+                    .body(Body::from(body))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::FORBIDDEN);
+    }
+
+    #[tokio::test]
+    async fn stt_accepts_valid_bearer_with_local_origin() {
+        let app = router_with_state(SttState {
+            security: SttSecurity {
+                bearer_token: Some("secret".to_string()),
+                enforce_local_origin: true,
+            },
+            ..SttState::default()
+        });
+        let body = serde_json::json!({
+            "samples": [0.1, -0.1],
+            "sample_rate": 16000,
+            "language": "fr",
+            "languages_hint": ["fr", "en"]
+        })
+        .to_string();
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri("/api/stt")
+                    .header("content-type", "application/json")
+                    .header("origin", "http://localhost:8080")
+                    .header("authorization", "Bearer secret")
+                    .body(Body::from(body))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn latency_snapshot_three_presets() {
+        let app = router_with_state(SttState {
+            security: SttSecurity {
+                bearer_token: None,
+                enforce_local_origin: false,
+            },
+            ..SttState::default()
+        });
+
+        for preset in ["compact", "balanced", "precision"] {
+            let body = json!({
+                "samples": [0.1, -0.1, 0.05, -0.02],
+                "sample_rate": 16000,
+                "language": "fr",
+                "preset": preset,
+                "languages_hint": ["fr", "en"]
+            })
+            .to_string();
+
+            let start = std::time::Instant::now();
+            let response = app
+                .clone()
+                .oneshot(
+                    Request::builder()
+                        .method("POST")
+                        .uri("/api/stt")
+                        .header("content-type", "application/json")
+                        .body(Body::from(body))
+                        .unwrap(),
+                )
+                .await
+                .unwrap();
+            let elapsed_ms = start.elapsed().as_millis();
+            println!("stt_latency_ms preset={preset}: {elapsed_ms}");
+            assert_eq!(response.status(), StatusCode::OK);
+            assert!(elapsed_ms < 200);
+        }
     }
 }

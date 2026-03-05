@@ -1,11 +1,11 @@
----
+﻿---
 id: mip.profiles.adaptive-modes
-title: MIP Adaptive Modes — 5 modes d'exécution selon LLM
+title: MIP Adaptive Modes â€” 5 modes d'exÃ©cution selon LLM
 ---
 
-# MIP Adaptive Modes (Exécution adaptée au LLM)
+# MIP Adaptive Modes (ExÃ©cution adaptÃ©e au LLM)
 
-> Selon le profil LLM actif, MIP bascule automatiquement entre 5 **modes d'exécution** réduisant progressivement les capacités tout en restant productif.
+> Selon le profil LLM actif, MIP bascule automatiquement entre 5 **modes d'exÃ©cution** rÃ©duisant progressivement les capacitÃ©s tout en restant productif.
 
 ---
 
@@ -15,19 +15,19 @@ title: MIP Adaptive Modes — 5 modes d'exécution selon LLM
 
 ```yaml
 Profils : anthropic-opus, cursor-composer 1.5, codex
-Capacités actives : 100 %
+CapacitÃ©s actives : 100 %
   - Parallel agents (MASS)
   - TodoWrite orchestration
   - Terminal + Background jobs
   - Multi-file edits
   - MCP + web search
   - Doc verification (auto resolution)
-Workflow : P0 → P3 (auto) → P4-5-6 (auto)
-Durée T3 : ~15-30 min
-Coûts : Élevés (~$1-3)
+Workflow : P0 â†’ P3 (auto) â†’ P4-5-6 (auto)
+DurÃ©e T3 : ~15-30 min
+CoÃ»ts : Ã‰levÃ©s (~$1-3)
 ```
 
-**Quand utilisé** : R&D de pointe, critical path, multi-service orchestration.
+**Quand utilisÃ©** : R&D de pointe, critical path, multi-service orchestration.
 
 ---
 
@@ -35,22 +35,22 @@ Coûts : Élevés (~$1-3)
 
 ```yaml
 Profils : mistral-nemo, mistral-api, ollama+bridge, lm-studio+bridge
-Capacités actives : ~85 %
-  - Parallel agents ✅
-  - TodoWrite ✅
-  - Terminal ✅ (mais fallback manuel)
-  - Multi-file edits ✅
-  - MCP ❌ → SearchAPI fallback
-  - Doc verification ⚠️ → Manual pattern
-Workflow : P0 → P3 (auto) → P4 (manual tests) → P5-6 (human)
-Durée T3 : ~45 min (local) / ~1h (API)
-Coûts : Économiques (~$0.1-0.3)
-Délégation : Agent peut tourner en arrière-plan (local free)
+CapacitÃ©s actives : ~85 %
+  - Parallel agents âœ…
+  - TodoWrite âœ…
+  - Terminal âœ… (mais fallback manuel)
+  - Multi-file edits âœ…
+  - MCP âŒ â†’ SearchAPI fallback
+  - Doc verification âš ï¸ â†’ Manual pattern
+Workflow : P0 â†’ P3 (auto) â†’ P4 (manual tests) â†’ P5-6 (human)
+DurÃ©e T3 : ~45 min (local) / ~1h (API)
+CoÃ»ts : Ã‰conomiques (~$0.1-0.3)
+DÃ©lÃ©gation : Agent peut tourner en arriÃ¨re-plan (local free)
 ```
 
-**Quand utilisé** : PME, startups, budget constraints, on-premises requis.
+**Quand utilisÃ©** : PME, startups, budget constraints, on-premises requis.
 
-**Excellent tradeoff** : 90 % des capacités, 10 % des coûts.
+**Excellent tradeoff** : 90 % des capacitÃ©s, 10 % des coÃ»ts.
 
 ---
 
@@ -58,22 +58,22 @@ Délégation : Agent peut tourner en arrière-plan (local free)
 
 ```yaml
 Profils : github-copilot-free, llama7b-cli, aider
-Capacités actives : ~40-50 %
-  - Parallel agents ❌ → Sequential (Loi 9)
-  - TodoWrite ❌ → Text announcements
-  - Terminal ❌ → Manual (user runs, pastes)
-  - Multi-file ❌ → Max 2/iteration
-  - MCP ❌ → Offline docs
-  - Doc verification ❌ → Memory patterns
-Workflow : P0 → P3 (semi-auto) → P4 (manual) → P5 (human) → P6 (human)
-Durée T3 : ~2-3 hours (très itératif)
-Coûts : Gratuit
-Délégation : Non (utilisateur central)
+CapacitÃ©s actives : ~40-50 %
+  - Parallel agents âŒ â†’ Sequential (Loi 9)
+  - TodoWrite âŒ â†’ Text announcements
+  - Terminal âŒ â†’ Manual (user runs, pastes)
+  - Multi-file âŒ â†’ Max 2/iteration
+  - MCP âŒ â†’ Offline docs
+  - Doc verification âŒ â†’ Memory patterns
+Workflow : P0 â†’ P3 (semi-auto) â†’ P4 (manual) â†’ P5 (human) â†’ P6 (human)
+DurÃ©e T3 : ~2-3 hours (trÃ¨s itÃ©ratif)
+CoÃ»ts : Gratuit
+DÃ©lÃ©gation : Non (utilisateur central)
 ```
 
-**Quand utilisé** : Freelancers, étudiants, free tier, learning mode.
+**Quand utilisÃ©** : Freelancers, Ã©tudiants, free tier, learning mode.
 
-**Key principle** : "Vous = Copilot du Copilot". L'agent guide, vous exécutez.
+**Key principle** : "Vous = Copilot du Copilot". L'agent guide, vous exÃ©cutez.
 
 ---
 
@@ -81,20 +81,20 @@ Délégation : Non (utilisateur central)
 
 ```yaml
 Profils : gpt-4o-mini, gemini-flash, deepseek-fast
-Capacités actives : ~30 %
-  - Parallel agents ❌
-  - TodoWrite ❌
-  - Terminal ❌
-  - Multi-file ❌ → 1/iteration
-  - MCP ❌
-  - Doc verification ❌
-Workflow : Code → Human writes → LLM reviews → Suggest fix → Iterate
-Durée T3 : ~4-6 hours (vous coder, IA check)
-Coûts : Très bas (~$0.01-0.05)
-Délégation : Non (human-centric)
+CapacitÃ©s actives : ~30 %
+  - Parallel agents âŒ
+  - TodoWrite âŒ
+  - Terminal âŒ
+  - Multi-file âŒ â†’ 1/iteration
+  - MCP âŒ
+  - Doc verification âŒ
+Workflow : Code â†’ Human writes â†’ LLM reviews â†’ Suggest fix â†’ Iterate
+DurÃ©e T3 : ~4-6 hours (vous coder, IA check)
+CoÃ»ts : TrÃ¨s bas (~$0.01-0.05)
+DÃ©lÃ©gation : Non (human-centric)
 ```
 
-**Quand utilisé** : Code review, junior dev pairing, validation point.
+**Quand utilisÃ©** : Code review, junior dev pairing, validation point.
 
 ---
 
@@ -102,20 +102,20 @@ Délégation : Non (human-centric)
 
 ```yaml
 Profils : ollama-llama3.1, lm-studio offline
-Capacités actives : ~50 % (dépend modèle)
-  - Parallel agents ⚠️ (CPU-bound)
-  - TodoWrite ⚠️
-  - Terminal ✅ (via shell pipe)
-  - Multi-file ⚠️ (lent)
-  - MCP ❌ (fully local)
-  - Doc verification ❌
-Workflow : P0 → P3 (slow) → P4-5-6 (manual)
-Durée T3 : ~3-4 hours (CPU bottleneck)
-Coûts : $0 (après modèle)
-Délégation : ✅ (24/7 background, autonomy LOI-1)
+CapacitÃ©s actives : ~50 % (dÃ©pend modÃ¨le)
+  - Parallel agents âš ï¸ (CPU-bound)
+  - TodoWrite âš ï¸
+  - Terminal âœ… (via shell pipe)
+  - Multi-file âš ï¸ (lent)
+  - MCP âŒ (fully local)
+  - Doc verification âŒ
+Workflow : P0 â†’ P3 (slow) â†’ P4-5-6 (manual)
+DurÃ©e T3 : ~3-4 hours (CPU bottleneck)
+CoÃ»ts : $0 (aprÃ¨s modÃ¨le)
+DÃ©lÃ©gation : âœ… (24/7 background, autonomy LOI-1)
 ```
 
-**Quand utilisé** : 
+**Quand utilisÃ©** : 
 - Autonomy-first (offline required)
 - Production infra (no internet)
 - Continuous background inference
@@ -139,7 +139,7 @@ Chaque SKILL.md contient directives adaptativas :
 ### Mode 2 (Mistral / Local LLM)
 - Utilisez Function Calling (JSON Schema)
 - Groupez edits via `multi_replace_string_in_file`
-- Agents en parallèle possible
+- Agents en parallÃ¨le possible
 
 ### Mode 3 (Copilot Free)
 - Pas de TodoWrite
@@ -147,47 +147,47 @@ Chaque SKILL.md contient directives adaptativas :
 - Fichier par fichier (max 2)
 
 ### Mode 4 (GPT-mini)
-- Générez changements en code block
-- Utilisateur exécute manuellement
+- GÃ©nÃ©rez changements en code block
+- Utilisateur exÃ©cute manuellement
 - Focus sur review
 
 ### Mode 5 (Offline Llama)
 - Changements seulement sur contexte local
-- MIP Index consulté hors-ligne
+- MIP Index consultÃ© hors-ligne
 - Shell commands via pipe
 ```
 
 ---
 
-## Workflow de Négociation (Capability Negotiation)
+## Workflow de NÃ©gociation (Capability Negotiation)
 
-À l'initialisation, MIP demande au LLM :
+Ã€ l'initialisation, MIP demande au LLM :
 
 ```
 Maria (orchestrator) :
   "Quel est votre profil IA ?
-   1. Claude Code / Opus (∞ capacités)?
-   2. Mistral / Open-Source (90 % capacités)?
-   3. Copilot Free / Mini (40 % capacités)?
-   4. Code Reviewer (30 % capacités)?
+   1. Claude Code / Opus (âˆž capacitÃ©s)?
+   2. Mistral / Open-Source (90 % capacitÃ©s)?
+   3. Copilot Free / Mini (40 % capacitÃ©s)?
+   4. Code Reviewer (30 % capacitÃ©s)?
    5. Offline Local (50 %, autonome)?
    
    [Utilisateur ou auto-detect]
    
-  ✅ Profil détecté : Mistral Nemo
+  âœ… Profil dÃ©tectÃ© : Mistral Nemo
   Adaptation active : Mode 2 (Guided Autonomy)
   
-  ⚠️ Limitations :
-   - Web search → SearchAPI fallback
-   - MCP ❌ → Offline docs
+  âš ï¸ Limitations :
+   - Web search â†’ SearchAPI fallback
+   - MCP âŒ â†’ Offline docs
    - Suggestion : Gardez docs Miyukini locale
    
-  Prêt? Commençons P0."
+  PrÃªt? CommenÃ§ons P0."
 ```
 
 ---
 
-## Sélection automatique du Mode
+## SÃ©lection automatique du Mode
 
 ```python
 def detect_llm_mode(profile):
@@ -217,65 +217,65 @@ def detect_llm_mode(profile):
 
 | Task Class | Mode 1 | Mode 2 | Mode 3 | Mode 4 | Mode 5 |
 |-----------|--------|--------|--------|--------|--------|
-| **T1** (< 20 lines) | ✅ 2min | ✅ 5min | ✅ 15min | ✅ 30min | ✅ 10min |
-| **T2** (1-3 files) | ✅ 5min | ✅ 15min | ⚠️ 1h | ⚠️ 2h | ⚠️ 1h30 |
-| **T3** (3-10 files) | ✅ 15min | ✅ 45min | ❌ 3-4h | ❌ 6h | ⚠️ 4h |
-| **T4** (10-30 files) | ✅ 30min | ⚠️ 2h | ❌ 10h+ | ❌ 20h+ | ❌ 12h+ |
-| **T5** (Strategic) | ✅ 1-2h | ⚠️ 4-8h | ❌ Days | ❌ N/A | ❌ N/A |
+| **T1** (< 20 lines) | âœ… 2min | âœ… 5min | âœ… 15min | âœ… 30min | âœ… 10min |
+| **T2** (1-3 files) | âœ… 5min | âœ… 15min | âš ï¸ 1h | âš ï¸ 2h | âš ï¸ 1h30 |
+| **T3** (3-10 files) | âœ… 15min | âœ… 45min | âŒ 3-4h | âŒ 6h | âš ï¸ 4h |
+| **T4** (10-30 files) | âœ… 30min | âš ï¸ 2h | âŒ 10h+ | âŒ 20h+ | âŒ 12h+ |
+| **T5** (Strategic) | âœ… 1-2h | âš ï¸ 4-8h | âŒ Days | âŒ N/A | âŒ N/A |
 
 **Legend** :
-- ✅ Excellent fit (productif)
-- ⚠️ Possible mais friction (très itératif)
-- ❌ Not recommended (trop lent ou pas de sens)
+- âœ… Excellent fit (productif)
+- âš ï¸ Possible mais friction (trÃ¨s itÃ©ratif)
+- âŒ Not recommended (trop lent ou pas de sens)
 
 ---
 
-## Cas réalistes
+## Cas rÃ©alistes
 
 ### Case 1 : Total Engineer (Copilot gratuit)
 
 ```
-Profil : github-copilot-free → Mode 3
+Profil : github-copilot-free â†’ Mode 3
 Task : T2 (fix bug dans service)
-Stratégie :
-  1. Décrire bug (chat Copilot)
-  2. Copilot suggère changements (1-2 fichiers)
-  3. Vous exécutez : `cargo test -p service`
-  4. Copilot lit errors, itère
-Durée : ~1h (pas grave, vous pair-program)
-Coûts : $0
+StratÃ©gie :
+  1. DÃ©crire bug (chat Copilot)
+  2. Copilot suggÃ¨re changements (1-2 fichiers)
+  3. Vous exÃ©cutez : `cargo test -p service`
+  4. Copilot lit errors, itÃ¨re
+DurÃ©e : ~1h (pas grave, vous pair-program)
+CoÃ»ts : $0
 ```
 
 ### Case 2 : Admin freelance (Mistral Local)
 
 ```
-Profil : mistral-nemo + LM Studio local → Mode 2
+Profil : mistral-nemo + LM Studio local â†’ Mode 2
 Task : T3 (nouvelle API endpoint)
-Stratégie :
-  1. Décrire feature (MIP P0)
-  2. Mistral lance agents parallèles
+StratÃ©gie :
+  1. DÃ©crire feature (MIP P0)
+  2. Mistral lance agents parallÃ¨les
         - Backend : API lib
         - Frontend : client wrapper
   3. Mistral run tests (terminal)
   4. Report & merge
-Durée : ~45min (8GB RAM, local GPU)
-Coûts : $0 (amortissement HW)
+DurÃ©e : ~45min (8GB RAM, local GPU)
+CoÃ»ts : $0 (amortissement HW)
 ```
 
 ### Case 3 : Startup lead (Claude Code)
 
 ```
-Profil : anthropic-opus → Mode 1
+Profil : anthropic-opus â†’ Mode 1
 Task : T4 (multi-service refactor)
-Stratégie :
+StratÃ©gie :
   1. Framing (MIP P0)
-  2. Agents parallèles :
+  2. Agents parallÃ¨les :
         - Lise : UI refactor
-        - François : Backend schema change
+        - FranÃ§ois : Backend schema change
         - Victor : Security audit
   3. Auto-integration P4-5-6
-Durée : ~1h autorisée, human review 30min
-Coûts : ~$2
+DurÃ©e : ~1h autorisÃ©e, human review 30min
+CoÃ»ts : ~$2
 ```
 
 ---
@@ -291,9 +291,10 @@ Coûts : ~$2
 
 ---
 
-## Docs de référence
+## Docs de rÃ©fÃ©rence
 
-- [Capacities Matrix](./capabilities-matrix.md) — Par outil
-- [Profiles INDEX](./INDEX.md) — Basculer profils
-- [Subscriptions](../config/subscriptions.md) — Budget token
-- [MIP Workflow](../protocol/conventions.md) — P0-P6 phases
+- [Capacities Matrix](..//README.md) â€” Par outil
+- [Profiles INDEX](..//README.md) â€” Basculer profils
+- [Subscriptions](../config/subscriptions.md) â€” Budget token
+- [MIP Workflow](../protocol/conventions.md) â€” P0-P6 phases
+

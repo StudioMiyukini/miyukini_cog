@@ -1,525 +1,525 @@
-# WorrySentinel — Trust States Governance Contract
+﻿# WorrySentinel â€” Trust States Governance Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **WorrySentinel — Trust States Governance Contract** : un contrat normatif, non négociable, et de statut FONDATION qui établit les règles absolues de gouvernance des états de confiance système (T0-T4), leurs définitions, leurs transitions, et leur impact sur l'écosystème Miyukini Core System v2.4.
+Ce document dÃ©finit le **WorrySentinel â€” Trust States Governance Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit les rÃ¨gles absolues de gouvernance des Ã©tats de confiance systÃ¨me (T0-T4), leurs dÃ©finitions, leurs transitions, et leur impact sur l'Ã©cosystÃ¨me Miyukini Core System v2.4.
 
-Ce contrat précise la nature conceptuelle des états de confiance, les règles de transition, les capacités associées à chaque état, et les garanties de gouvernance, sans jamais introduire de détail d'implémentation technique, de mécanisme de détection concret, ou de contrôle algorithmique.
+Ce contrat prÃ©cise la nature conceptuelle des Ã©tats de confiance, les rÃ¨gles de transition, les capacitÃ©s associÃ©es Ã  chaque Ã©tat, et les garanties de gouvernance, sans jamais introduire de dÃ©tail d'implÃ©mentation technique, de mÃ©canisme de dÃ©tection concret, ou de contrÃ´le algorithmique.
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **toutes les opérations impliquant des états de confiance** dans WorrySentinel et définit de manière absolue :
-- la définition formelle de chaque état de confiance (T0-T4),
-- les règles de transition entre états,
-- les capacités et restrictions associées à chaque état,
-- les invariants de gouvernance des états de confiance,
+Ce contrat s'applique Ã  **toutes les opÃ©rations impliquant des Ã©tats de confiance** dans WorrySentinel et dÃ©finit de maniÃ¨re absolue :
+- la dÃ©finition formelle de chaque Ã©tat de confiance (T0-T4),
+- les rÃ¨gles de transition entre Ã©tats,
+- les capacitÃ©s et restrictions associÃ©es Ã  chaque Ã©tat,
+- les invariants de gouvernance des Ã©tats de confiance,
 - les garanties offertes aux composants et produits,
-- la distinction entre états de confiance et niveaux de sécurité.
+- la distinction entre Ã©tats de confiance et niveaux de sÃ©curitÃ©.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complète et respecte les documents contractuels existants :
-- **WorrySentinel — Documentation Fondatrice** : Source des définitions conceptuelles des états T0-T4
-- **WorrySentinel — Security Levels Governance Contract** : Contrat jumeau pour les niveaux de sécurité (0-4)
-- **WorrySentinel — Invariants & Guarantees** : Catalogue consolidé des invariants WorrySentinel
-- **[Miyukini Conceptual References - Integrity Degradation System](../../../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md)** : Référence conceptuelle du système de dégradation
-- **CaringNanny — Documentation Fondatrice** : Core responsable de la consolidation des signaux d'intégrité
-- **StrongFather — Documentation Fondatrice** : Core responsable des décisions selon les états de confiance
-- **TAMR — Documentation Fondatrice** : Mécanisme d'intervention humaine en états dégradés
+Ce contrat complÃ¨te et respecte les documents contractuels existants :
+- **WorrySentinel â€” Documentation Fondatrice** : Source des dÃ©finitions conceptuelles des Ã©tats T0-T4
+- **WorrySentinel â€” Security Levels Governance Contract** : Contrat jumeau pour les niveaux de sÃ©curitÃ© (0-4)
+- **WorrySentinel â€” Invariants & Guarantees** : Catalogue consolidÃ© des invariants WorrySentinel
+- **[Miyukini Conceptual References - Integrity Degradation System](..//..//..//..//miyukini-webway-system//reference//_index.md)** : RÃ©fÃ©rence conceptuelle du systÃ¨me de dÃ©gradation
+- **CaringNanny â€” Documentation Fondatrice** : Core responsable de la consolidation des signaux d'intÃ©gritÃ©
+- **StrongFather â€” Documentation Fondatrice** : Core responsable des dÃ©cisions selon les Ã©tats de confiance
+- **TAMR â€” Documentation Fondatrice** : MÃ©canisme d'intervention humaine en Ã©tats dÃ©gradÃ©s
 
-Il n'introduit aucune contradiction et constitue la définition formelle de la gouvernance des états de confiance dans WorrySentinel.
+Il n'introduit aucune contradiction et constitue la dÃ©finition formelle de la gouvernance des Ã©tats de confiance dans WorrySentinel.
 
 ---
 
-## 2. Distinction états de confiance et niveaux de sécurité
+## 2. Distinction Ã©tats de confiance et niveaux de sÃ©curitÃ©
 
-### 2.1. Deux dimensions indépendantes
+### 2.1. Deux dimensions indÃ©pendantes
 
-WorrySentinel gouverne deux dimensions indépendantes mais complémentaires :
+WorrySentinel gouverne deux dimensions indÃ©pendantes mais complÃ©mentaires :
 
-| Dimension | Objet | Valeurs | Portée |
+| Dimension | Objet | Valeurs | PortÃ©e |
 |-----------|-------|---------|--------|
-| **États de confiance** | Intégrité du système | T0-T4 | Globale (écosystème) |
-| **Niveaux de sécurité** | Profil de risque | 0-4 | Locale (produit/composant) |
+| **Ã‰tats de confiance** | IntÃ©gritÃ© du systÃ¨me | T0-T4 | Globale (Ã©cosystÃ¨me) |
+| **Niveaux de sÃ©curitÃ©** | Profil de risque | 0-4 | Locale (produit/composant) |
 
-**RÈGLE-DIST-1 : Indépendance conceptuelle**
+**RÃˆGLE-DIST-1 : IndÃ©pendance conceptuelle**
 
-Les états de confiance et les niveaux de sécurité sont **conceptuellement indépendants**. Un système peut être en état T0 (normal) tout en gérant des données de niveau 4 (sécurité maximale).
+Les Ã©tats de confiance et les niveaux de sÃ©curitÃ© sont **conceptuellement indÃ©pendants**. Un systÃ¨me peut Ãªtre en Ã©tat T0 (normal) tout en gÃ©rant des donnÃ©es de niveau 4 (sÃ©curitÃ© maximale).
 
-**RÈGLE-DIST-2 : Cumul des restrictions**
+**RÃˆGLE-DIST-2 : Cumul des restrictions**
 
-Les restrictions sont **cumulatives** : un produit de niveau de sécurité élevé en état de confiance dégradé cumule les restrictions des deux dimensions.
+Les restrictions sont **cumulatives** : un produit de niveau de sÃ©curitÃ© Ã©levÃ© en Ã©tat de confiance dÃ©gradÃ© cumule les restrictions des deux dimensions.
 
-### 2.2. Questions auxquelles chaque dimension répond
+### 2.2. Questions auxquelles chaque dimension rÃ©pond
 
-**États de confiance (ce contrat) :**
-> *"Quel est l'état d'intégrité du système ? Le système est-il sain ?"*
+**Ã‰tats de confiance (ce contrat) :**
+> *"Quel est l'Ã©tat d'intÃ©gritÃ© du systÃ¨me ? Le systÃ¨me est-il sain ?"*
 
-**Niveaux de sécurité (Security Levels Governance Contract) :**
-> *"Quel est le profil de risque de ce produit/composant ? Quelle sensibilité des données ?"*
+**Niveaux de sÃ©curitÃ© (Security Levels Governance Contract) :**
+> *"Quel est le profil de risque de ce produit/composant ? Quelle sensibilitÃ© des donnÃ©es ?"*
 
 ---
 
-## 3. Définition des états de confiance
+## 3. DÃ©finition des Ã©tats de confiance
 
 ### 3.1. Principe fondamental
 
-Les états de confiance (System Trust Levels) caractérisent l'**intégrité globale du système**. Ils sont :
-- **Globaux** : Applicables à tout l'écosystème, pas à un composant isolé
-- **Exclusifs** : Le système est dans un et un seul état à tout instant
-- **Progressifs** : La dégradation est progressive, jamais brutale
-- **Gouvernés** : WorrySentinel définit les règles, mais n'évalue pas directement
+Les Ã©tats de confiance (System Trust Levels) caractÃ©risent l'**intÃ©gritÃ© globale du systÃ¨me**. Ils sont :
+- **Globaux** : Applicables Ã  tout l'Ã©cosystÃ¨me, pas Ã  un composant isolÃ©
+- **Exclusifs** : Le systÃ¨me est dans un et un seul Ã©tat Ã  tout instant
+- **Progressifs** : La dÃ©gradation est progressive, jamais brutale
+- **GouvernÃ©s** : WorrySentinel dÃ©finit les rÃ¨gles, mais n'Ã©value pas directement
 
-### 3.2. Échelle des états de confiance
+### 3.2. Ã‰chelle des Ã©tats de confiance
 
-| État | Nom | Signification | Correspondance globale |
+| Ã‰tat | Nom | Signification | Correspondance globale |
 |------|-----|---------------|------------------------|
-| **T0** | Normal | Système sain, aucune anomalie | 🟢 Nominal |
-| **T1** | Instable | Anomalie détectée, non confirmée | 🟡 Doute |
-| **T2** | Dégradé | Incohérence persistante | 🟠 Suspect |
-| **T3** | Restreint | Suspicion forte, intégrité menacée | 🔴 Critique |
-| **T4** | Bloqué | Intégrité rompue, système compromis | ⛔ Compromis |
+| **T0** | Normal | SystÃ¨me sain, aucune anomalie | ðŸŸ¢ Nominal |
+| **T1** | Instable | Anomalie dÃ©tectÃ©e, non confirmÃ©e | ðŸŸ¡ Doute |
+| **T2** | DÃ©gradÃ© | IncohÃ©rence persistante | ðŸŸ  Suspect |
+| **T3** | Restreint | Suspicion forte, intÃ©gritÃ© menacÃ©e | ðŸ”´ Critique |
+| **T4** | BloquÃ© | IntÃ©gritÃ© rompue, systÃ¨me compromis | â›” Compromis |
 
-### 3.3. Définition détaillée de T0 — Normal
+### 3.3. DÃ©finition dÃ©taillÃ©e de T0 â€” Normal
 
-**État conceptuel :** Système sain, aucune anomalie détectée.
+**Ã‰tat conceptuel :** SystÃ¨me sain, aucune anomalie dÃ©tectÃ©e.
 
-**Caractéristiques :**
-- ✅ Toutes les capacités disponibles
-- ✅ Décisions normales
-- ✅ Extensions dynamiques autorisées
-- ✅ Monitoring standard
+**CaractÃ©ristiques :**
+- âœ… Toutes les capacitÃ©s disponibles
+- âœ… DÃ©cisions normales
+- âœ… Extensions dynamiques autorisÃ©es
+- âœ… Monitoring standard
 
-**Capacités autorisées :**
-| Capacité | Statut |
+**CapacitÃ©s autorisÃ©es :**
+| CapacitÃ© | Statut |
 |----------|--------|
-| Opérations normales | ✅ Autorisées |
-| Extensions dynamiques | ✅ Autorisées |
-| Nouveaux modules | ✅ Autorisés |
-| Décisions critiques | ✅ Normales |
-| Fonctions sensibles | ✅ Disponibles |
+| OpÃ©rations normales | âœ… AutorisÃ©es |
+| Extensions dynamiques | âœ… AutorisÃ©es |
+| Nouveaux modules | âœ… AutorisÃ©s |
+| DÃ©cisions critiques | âœ… Normales |
+| Fonctions sensibles | âœ… Disponibles |
 
 **Contraintes :**
 - Aucune contrainte additionnelle
 
 **Indicateur de sortie :**
-- Détection d'une anomalie → Transition vers T1
+- DÃ©tection d'une anomalie â†’ Transition vers T1
 
-### 3.4. Définition détaillée de T1 — Instable
+### 3.4. DÃ©finition dÃ©taillÃ©e de T1 â€” Instable
 
-**État conceptuel :** Anomalie détectée, mais pas encore confirmée.
+**Ã‰tat conceptuel :** Anomalie dÃ©tectÃ©e, mais pas encore confirmÃ©e.
 
-**Caractéristiques :**
-- ✅ Log renforcé
-- ✅ Traçabilité étendue
-- ✅ Aucun blocage opérationnel
-- ✅ Surveillance accrue
+**CaractÃ©ristiques :**
+- âœ… Log renforcÃ©
+- âœ… TraÃ§abilitÃ© Ã©tendue
+- âœ… Aucun blocage opÃ©rationnel
+- âœ… Surveillance accrue
 
-**Capacités autorisées :**
-| Capacité | Statut |
+**CapacitÃ©s autorisÃ©es :**
+| CapacitÃ© | Statut |
 |----------|--------|
-| Opérations normales | ✅ Autorisées |
-| Extensions dynamiques | ✅ Autorisées avec traçabilité |
-| Nouveaux modules | ✅ Autorisés avec traçabilité |
-| Décisions critiques | ✅ Normales avec log renforcé |
-| Fonctions sensibles | ✅ Disponibles avec surveillance |
+| OpÃ©rations normales | âœ… AutorisÃ©es |
+| Extensions dynamiques | âœ… AutorisÃ©es avec traÃ§abilitÃ© |
+| Nouveaux modules | âœ… AutorisÃ©s avec traÃ§abilitÃ© |
+| DÃ©cisions critiques | âœ… Normales avec log renforcÃ© |
+| Fonctions sensibles | âœ… Disponibles avec surveillance |
 
 **Contraintes :**
-- **C-T1-1** : Toutes les opérations sont tracées de manière étendue
-- **C-T1-2** : Les logs sont renforcés (niveau de détail accru)
+- **C-T1-1** : Toutes les opÃ©rations sont tracÃ©es de maniÃ¨re Ã©tendue
+- **C-T1-2** : Les logs sont renforcÃ©s (niveau de dÃ©tail accru)
 - **C-T1-3** : Surveillance accrue des patterns comportementaux
 
 **Indicateurs de sortie :**
-- Anomalie résolue → Transition vers T0
-- Anomalie persistante → Transition vers T2
+- Anomalie rÃ©solue â†’ Transition vers T0
+- Anomalie persistante â†’ Transition vers T2
 
-### 3.5. Définition détaillée de T2 — Dégradé
+### 3.5. DÃ©finition dÃ©taillÃ©e de T2 â€” DÃ©gradÃ©
 
-**État conceptuel :** Incohérence persistante, suspicion modérée.
+**Ã‰tat conceptuel :** IncohÃ©rence persistante, suspicion modÃ©rÃ©e.
 
-**Caractéristiques :**
-- ✅ Certaines capacités désactivées
-- ✅ Décisions plus strictes
-- ❌ Refus des extensions dynamiques
-- ✅ Monitoring visible (MiyukiniAdmin)
+**CaractÃ©ristiques :**
+- âœ… Certaines capacitÃ©s dÃ©sactivÃ©es
+- âœ… DÃ©cisions plus strictes
+- âŒ Refus des extensions dynamiques
+- âœ… Monitoring visible (MiyukiniAdmin)
 
-**Capacités autorisées :**
-| Capacité | Statut |
+**CapacitÃ©s autorisÃ©es :**
+| CapacitÃ© | Statut |
 |----------|--------|
-| Opérations normales | ✅ Autorisées (fonctions non essentielles) |
-| Extensions dynamiques | ❌ Refusées |
-| Nouveaux modules | ❌ Refusés |
-| Décisions critiques | ⚠️ Strictes (seuils abaissés) |
-| Fonctions sensibles | ⚠️ Bridées |
+| OpÃ©rations normales | âœ… AutorisÃ©es (fonctions non essentielles) |
+| Extensions dynamiques | âŒ RefusÃ©es |
+| Nouveaux modules | âŒ RefusÃ©s |
+| DÃ©cisions critiques | âš ï¸ Strictes (seuils abaissÃ©s) |
+| Fonctions sensibles | âš ï¸ BridÃ©es |
 
 **Contraintes :**
-- **C-T2-1** : Extensions dynamiques bloquées
-- **C-T2-2** : Nouveaux modules refusés
-- **C-T2-3** : Seuils de décision abaissés (plus de refus)
+- **C-T2-1** : Extensions dynamiques bloquÃ©es
+- **C-T2-2** : Nouveaux modules refusÃ©s
+- **C-T2-3** : Seuils de dÃ©cision abaissÃ©s (plus de refus)
 - **C-T2-4** : Monitoring visible dans MiyukiniAdmin
-- **C-T2-5** : Fonctions non essentielles potentiellement désactivées
+- **C-T2-5** : Fonctions non essentielles potentiellement dÃ©sactivÃ©es
 
 **Indicateurs de sortie :**
-- Amélioration de l'état → Transition vers T1
-- Aggravation de l'état → Transition vers T3
+- AmÃ©lioration de l'Ã©tat â†’ Transition vers T1
+- Aggravation de l'Ã©tat â†’ Transition vers T3
 
-### 3.6. Définition détaillée de T3 — Restreint
+### 3.6. DÃ©finition dÃ©taillÃ©e de T3 â€” Restreint
 
-**État conceptuel :** Suspicion forte, intégrité potentiellement compromise.
+**Ã‰tat conceptuel :** Suspicion forte, intÃ©gritÃ© potentiellement compromise.
 
-**Caractéristiques :**
-- ✅ Gel des produits non essentiels
-- ❌ Refus de nouveaux modules
-- ⚠️ Décisions critiques → AMBIGUË / DIFFÉRÉE
-- ✅ TAMR requis pour override
+**CaractÃ©ristiques :**
+- âœ… Gel des produits non essentiels
+- âŒ Refus de nouveaux modules
+- âš ï¸ DÃ©cisions critiques â†’ AMBIGUÃ‹ / DIFFÃ‰RÃ‰E
+- âœ… TAMR requis pour override
 
-**Capacités autorisées :**
-| Capacité | Statut |
+**CapacitÃ©s autorisÃ©es :**
+| CapacitÃ© | Statut |
 |----------|--------|
-| Opérations normales | ⚠️ Mode minimal uniquement |
-| Extensions dynamiques | ❌ Refusées |
-| Nouveaux modules | ❌ Refusés |
-| Décisions critiques | ⚠️ AMBIGUË ou DIFFÉRÉE (TAMR requis) |
-| Fonctions sensibles | ❌ Bloquées |
-| Produits non essentiels | ❌ Gelés |
+| OpÃ©rations normales | âš ï¸ Mode minimal uniquement |
+| Extensions dynamiques | âŒ RefusÃ©es |
+| Nouveaux modules | âŒ RefusÃ©s |
+| DÃ©cisions critiques | âš ï¸ AMBIGUÃ‹ ou DIFFÃ‰RÃ‰E (TAMR requis) |
+| Fonctions sensibles | âŒ BloquÃ©es |
+| Produits non essentiels | âŒ GelÃ©s |
 
 **Contraintes :**
 - **C-T3-1** : Gel des produits non essentiels
 - **C-T3-2** : Mode minimal uniquement pour les produits essentiels
-- **C-T3-3** : Décisions critiques nécessitent validation TAMR
-- **C-T3-4** : Fonctions sensibles bloquées
-- **C-T3-5** : Aucune nouvelle intégration
+- **C-T3-3** : DÃ©cisions critiques nÃ©cessitent validation TAMR
+- **C-T3-4** : Fonctions sensibles bloquÃ©es
+- **C-T3-5** : Aucune nouvelle intÃ©gration
 - **C-T3-6** : Audit continu obligatoire
 
 **Indicateurs de sortie :**
-- Confirmation de sécurité (via TAMR) → Transition vers T2
-- Confirmation de compromission → Transition vers T4
+- Confirmation de sÃ©curitÃ© (via TAMR) â†’ Transition vers T2
+- Confirmation de compromission â†’ Transition vers T4
 
-### 3.7. Définition détaillée de T4 — Bloqué
+### 3.7. DÃ©finition dÃ©taillÃ©e de T4 â€” BloquÃ©
 
-**État conceptuel :** Intégrité rompue, système compromis.
+**Ã‰tat conceptuel :** IntÃ©gritÃ© rompue, systÃ¨me compromis.
 
-**Caractéristiques :**
-- ❌ Plus aucune décision opérationnelle
-- ✅ Uniquement diagnostics
-- ✅ État lisible
-- ✅ Sortie propre possible
+**CaractÃ©ristiques :**
+- âŒ Plus aucune dÃ©cision opÃ©rationnelle
+- âœ… Uniquement diagnostics
+- âœ… Ã‰tat lisible
+- âœ… Sortie propre possible
 
-**Capacités autorisées :**
-| Capacité | Statut |
+**CapacitÃ©s autorisÃ©es :**
+| CapacitÃ© | Statut |
 |----------|--------|
-| Opérations normales | ❌ Bloquées |
-| Extensions dynamiques | ❌ Bloquées |
-| Nouveaux modules | ❌ Bloqués |
-| Décisions critiques | ❌ Bloquées |
-| Fonctions sensibles | ❌ Bloquées |
-| Diagnostics | ✅ Autorisés |
-| Lecture d'état | ✅ Autorisée |
-| Sortie propre | ✅ Autorisée |
+| OpÃ©rations normales | âŒ BloquÃ©es |
+| Extensions dynamiques | âŒ BloquÃ©es |
+| Nouveaux modules | âŒ BloquÃ©s |
+| DÃ©cisions critiques | âŒ BloquÃ©es |
+| Fonctions sensibles | âŒ BloquÃ©es |
+| Diagnostics | âœ… AutorisÃ©s |
+| Lecture d'Ã©tat | âœ… AutorisÃ©e |
+| Sortie propre | âœ… AutorisÃ©e |
 
 **Contraintes :**
-- **C-T4-1** : Aucune opération métier autorisée
-- **C-T4-2** : Uniquement diagnostics et lecture d'état
-- **C-T4-3** : Sortie propre (shutdown graceful) autorisée
-- **C-T4-4** : Aucune corruption autorisée (invariant préservé)
-- **C-T4-5** : Aucune exécution sauvage (invariant préservé)
+- **C-T4-1** : Aucune opÃ©ration mÃ©tier autorisÃ©e
+- **C-T4-2** : Uniquement diagnostics et lecture d'Ã©tat
+- **C-T4-3** : Sortie propre (shutdown graceful) autorisÃ©e
+- **C-T4-4** : Aucune corruption autorisÃ©e (invariant prÃ©servÃ©)
+- **C-T4-5** : Aucune exÃ©cution sauvage (invariant prÃ©servÃ©)
 
 **Indicateurs de sortie :**
-- **État terminal** : Aucune transition sortante automatique
-- Intervention humaine requise pour résolution
+- **Ã‰tat terminal** : Aucune transition sortante automatique
+- Intervention humaine requise pour rÃ©solution
 
-**📌 Garantie absolue :** Jamais de corruption. Jamais d'exécution sauvage.
+**ðŸ“Œ Garantie absolue :** Jamais de corruption. Jamais d'exÃ©cution sauvage.
 
 ---
 
-## 4. Règles de transition entre états
+## 4. RÃ¨gles de transition entre Ã©tats
 
-### 4.1. Matrice des transitions autorisées
+### 4.1. Matrice des transitions autorisÃ©es
 
-| De → Vers | T0 | T1 | T2 | T3 | T4 |
+| De â†’ Vers | T0 | T1 | T2 | T3 | T4 |
 |-----------|----|----|----|----|----| 
-| **T0** | — | ✅ | ❌ | ❌ | ❌ |
-| **T1** | ✅ | — | ✅ | ❌ | ❌ |
-| **T2** | ❌ | ✅ | — | ✅ | ❌ |
-| **T3** | ❌ | ❌ | ✅ | — | ✅ |
-| **T4** | ❌ | ❌ | ❌ | ❌ | — |
+| **T0** | â€” | âœ… | âŒ | âŒ | âŒ |
+| **T1** | âœ… | â€” | âœ… | âŒ | âŒ |
+| **T2** | âŒ | âœ… | â€” | âœ… | âŒ |
+| **T3** | âŒ | âŒ | âœ… | â€” | âœ… |
+| **T4** | âŒ | âŒ | âŒ | âŒ | â€” |
 
-### 4.2. Règles de transition
+### 4.2. RÃ¨gles de transition
 
-**RÈGLE-TRANS-1 : Progression séquentielle**
+**RÃˆGLE-TRANS-1 : Progression sÃ©quentielle**
 
-Les transitions vers un état plus dégradé sont **séquentielles**. Le système ne peut jamais sauter d'états :
-- T0 → T1 → T2 → T3 → T4 (dégradation)
-- T4 → T3 → T2 → T1 → T0 (amélioration, avec intervention)
+Les transitions vers un Ã©tat plus dÃ©gradÃ© sont **sÃ©quentielles**. Le systÃ¨me ne peut jamais sauter d'Ã©tats :
+- T0 â†’ T1 â†’ T2 â†’ T3 â†’ T4 (dÃ©gradation)
+- T4 â†’ T3 â†’ T2 â†’ T1 â†’ T0 (amÃ©lioration, avec intervention)
 
-**RÈGLE-TRANS-2 : Irréversibilité relative**
+**RÃˆGLE-TRANS-2 : IrrÃ©versibilitÃ© relative**
 
-Les transitions vers un état plus dégradé sont **irréversibles sans intervention explicite**. Une fois en T2, le système ne peut pas revenir directement en T0.
+Les transitions vers un Ã©tat plus dÃ©gradÃ© sont **irrÃ©versibles sans intervention explicite**. Une fois en T2, le systÃ¨me ne peut pas revenir directement en T0.
 
-**RÈGLE-TRANS-3 : Justification obligatoire**
+**RÃˆGLE-TRANS-3 : Justification obligatoire**
 
-Toute transition entre états DOIT être justifiée avec :
+Toute transition entre Ã©tats DOIT Ãªtre justifiÃ©e avec :
 - La raison de la transition
-- Les signaux ayant déclenché la transition
-- Le contexte de la décision
+- Les signaux ayant dÃ©clenchÃ© la transition
+- Le contexte de la dÃ©cision
 - L'horodatage de la transition
 
-**RÈGLE-TRANS-4 : Traçabilité complète**
+**RÃˆGLE-TRANS-4 : TraÃ§abilitÃ© complÃ¨te**
 
-Toute transition DOIT être tracée de manière complète et immutable.
+Toute transition DOIT Ãªtre tracÃ©e de maniÃ¨re complÃ¨te et immutable.
 
-**RÈGLE-TRANS-5 : T4 terminal**
+**RÃˆGLE-TRANS-5 : T4 terminal**
 
-L'état T4 est **terminal**. Aucune transition sortante n'est autorisée sans intervention humaine explicite hors du système.
+L'Ã©tat T4 est **terminal**. Aucune transition sortante n'est autorisÃ©e sans intervention humaine explicite hors du systÃ¨me.
 
 ### 4.3. Conditions de transition
 
-**TRANS-T0-T1 : Détection d'anomalie**
+**TRANS-T0-T1 : DÃ©tection d'anomalie**
 
 | Condition | Description |
 |-----------|-------------|
-| Déclencheur | Anomalie détectée par les sondes d'intégrité |
+| DÃ©clencheur | Anomalie dÃ©tectÃ©e par les sondes d'intÃ©gritÃ© |
 | Confirmation | Aucune confirmation requise (observation directe) |
-| Réversibilité | Immédiate si anomalie résolue |
+| RÃ©versibilitÃ© | ImmÃ©diate si anomalie rÃ©solue |
 
-**TRANS-T1-T0 : Résolution d'anomalie**
+**TRANS-T1-T0 : RÃ©solution d'anomalie**
 
 | Condition | Description |
 |-----------|-------------|
-| Déclencheur | Anomalie résolue, signaux revenus à la normale |
-| Confirmation | Période d'observation sans nouvelle anomalie |
-| Réversibilité | Directe |
+| DÃ©clencheur | Anomalie rÃ©solue, signaux revenus Ã  la normale |
+| Confirmation | PÃ©riode d'observation sans nouvelle anomalie |
+| RÃ©versibilitÃ© | Directe |
 
 **TRANS-T1-T2 : Persistance d'anomalie**
 
 | Condition | Description |
 |-----------|-------------|
-| Déclencheur | Anomalie persistante, incohérence confirmée |
+| DÃ©clencheur | Anomalie persistante, incohÃ©rence confirmÃ©e |
 | Confirmation | Consolidation par CaringNanny |
-| Réversibilité | Via amélioration vers T1 |
+| RÃ©versibilitÃ© | Via amÃ©lioration vers T1 |
 
-**TRANS-T2-T1 : Amélioration de l'état**
+**TRANS-T2-T1 : AmÃ©lioration de l'Ã©tat**
 
 | Condition | Description |
 |-----------|-------------|
-| Déclencheur | Amélioration des indicateurs, incohérences réduites |
+| DÃ©clencheur | AmÃ©lioration des indicateurs, incohÃ©rences rÃ©duites |
 | Confirmation | Consolidation par CaringNanny |
-| Réversibilité | Directe |
+| RÃ©versibilitÃ© | Directe |
 
-**TRANS-T2-T3 : Aggravation de l'état**
-
-| Condition | Description |
-|-----------|-------------|
-| Déclencheur | Aggravation significative, suspicion forte |
-| Confirmation | Consolidation par CaringNanny, évaluation StrongFather |
-| Réversibilité | Via amélioration vers T2 avec validation TAMR |
-
-**TRANS-T3-T2 : Confirmation de sécurité**
+**TRANS-T2-T3 : Aggravation de l'Ã©tat**
 
 | Condition | Description |
 |-----------|-------------|
-| Déclencheur | Suspicion infirmée, confirmation de sécurité |
+| DÃ©clencheur | Aggravation significative, suspicion forte |
+| Confirmation | Consolidation par CaringNanny, Ã©valuation StrongFather |
+| RÃ©versibilitÃ© | Via amÃ©lioration vers T2 avec validation TAMR |
+
+**TRANS-T3-T2 : Confirmation de sÃ©curitÃ©**
+
+| Condition | Description |
+|-----------|-------------|
+| DÃ©clencheur | Suspicion infirmÃ©e, confirmation de sÃ©curitÃ© |
 | Confirmation | Validation explicite via TAMR |
-| Réversibilité | Directe (après validation TAMR) |
+| RÃ©versibilitÃ© | Directe (aprÃ¨s validation TAMR) |
 
 **TRANS-T3-T4 : Confirmation de compromission**
 
 | Condition | Description |
 |-----------|-------------|
-| Déclencheur | Compromission confirmée, intégrité rompue |
-| Confirmation | Évaluation StrongFather avec preuves consolidées |
-| Réversibilité | Intervention humaine hors système uniquement |
+| DÃ©clencheur | Compromission confirmÃ©e, intÃ©gritÃ© rompue |
+| Confirmation | Ã‰valuation StrongFather avec preuves consolidÃ©es |
+| RÃ©versibilitÃ© | Intervention humaine hors systÃ¨me uniquement |
 
 ---
 
-## 5. Gouvernance des états par WorrySentinel
+## 5. Gouvernance des Ã©tats par WorrySentinel
 
-### 5.1. Rôle de WorrySentinel
+### 5.1. RÃ´le de WorrySentinel
 
-WorrySentinel **gouverne** les états de confiance mais ne les **évalue** pas directement :
+WorrySentinel **gouverne** les Ã©tats de confiance mais ne les **Ã©value** pas directement :
 
-| Responsabilité | WorrySentinel | Autres cores |
+| ResponsabilitÃ© | WorrySentinel | Autres cores |
 |----------------|---------------|--------------|
-| Définition des états | ✅ | ❌ |
-| Règles de transition | ✅ | ❌ |
-| Capacités par état | ✅ | ❌ |
-| Détection d'anomalies | ❌ | CaringNanny (consolidation) |
-| Décision de transition | ❌ | StrongFather (évaluation) |
-| Intervention humaine | ❌ | TAMR (override) |
+| DÃ©finition des Ã©tats | âœ… | âŒ |
+| RÃ¨gles de transition | âœ… | âŒ |
+| CapacitÃ©s par Ã©tat | âœ… | âŒ |
+| DÃ©tection d'anomalies | âŒ | CaringNanny (consolidation) |
+| DÃ©cision de transition | âŒ | StrongFather (Ã©valuation) |
+| Intervention humaine | âŒ | TAMR (override) |
 
-### 5.2. Flux de gouvernance des états
+### 5.2. Flux de gouvernance des Ã©tats
 
 ```
-Sondes d'intégrité (Kernel)
-         │
-         ▼
+Sondes d'intÃ©gritÃ© (Kernel)
+         â”‚
+         â–¼
 CaringNanny (consolidation des signaux)
-         │
-         ▼
-StrongFather (évaluation, décision de transition)
-         │
-         ▼
-WorrySentinel (gouvernance : règles, capacités, restrictions)
-         │
-         ▼
+         â”‚
+         â–¼
+StrongFather (Ã©valuation, dÃ©cision de transition)
+         â”‚
+         â–¼
+WorrySentinel (gouvernance : rÃ¨gles, capacitÃ©s, restrictions)
+         â”‚
+         â–¼
 Tous les cores et produits (application des restrictions)
 ```
 
-**Principe :** WorrySentinel définit les règles. Les autres cores les appliquent.
+**Principe :** WorrySentinel dÃ©finit les rÃ¨gles. Les autres cores les appliquent.
 
-### 5.3. Règles de gouvernance
+### 5.3. RÃ¨gles de gouvernance
 
-**GOV-TS-1 : État unique global**
+**GOV-TS-1 : Ã‰tat unique global**
 
-Le système possède un et un seul état de confiance à tout moment. L'état est **global** à l'écosystème.
+Le systÃ¨me possÃ¨de un et un seul Ã©tat de confiance Ã  tout moment. L'Ã©tat est **global** Ã  l'Ã©cosystÃ¨me.
 
-**GOV-TS-2 : Obligation de conformité**
+**GOV-TS-2 : Obligation de conformitÃ©**
 
-Tous les cores fonctionnels et produits DOIVENT respecter les capacités et restrictions définies pour l'état courant.
+Tous les cores fonctionnels et produits DOIVENT respecter les capacitÃ©s et restrictions dÃ©finies pour l'Ã©tat courant.
 
-**GOV-TS-3 : Propagation immédiate**
+**GOV-TS-3 : Propagation immÃ©diate**
 
-Tout changement d'état DOIT être propagé immédiatement à tous les composants concernés.
+Tout changement d'Ã©tat DOIT Ãªtre propagÃ© immÃ©diatement Ã  tous les composants concernÃ©s.
 
-**GOV-TS-4 : Non-ignorabilité**
+**GOV-TS-4 : Non-ignorabilitÃ©**
 
-Aucun produit, aucun core ne peut ignorer l'état de confiance courant. L'adaptation au comportement selon l'état est **obligatoire**.
+Aucun produit, aucun core ne peut ignorer l'Ã©tat de confiance courant. L'adaptation au comportement selon l'Ã©tat est **obligatoire**.
 
-**GOV-TS-5 : Préservation des invariants**
+**GOV-TS-5 : PrÃ©servation des invariants**
 
-Même en état T4 (Bloqué), les invariants FONDATION DOIVENT être préservés.
+MÃªme en Ã©tat T4 (BloquÃ©), les invariants FONDATION DOIVENT Ãªtre prÃ©servÃ©s.
 
 ---
 
 ## 6. Interaction avec les autres cores
 
-### 6.1. CaringNanny — Consolidation des signaux
+### 6.1. CaringNanny â€” Consolidation des signaux
 
-**Rôle :** Consolider les signaux d'intégrité pour proposer des transitions d'état.
-
-**Interactions :**
-| Direction | Description |
-|-----------|-------------|
-| CaringNanny → WorrySentinel | Propose des transitions basées sur les signaux consolidés |
-| WorrySentinel → CaringNanny | Fournit les règles de seuils et de consolidation |
-
-**Règle d'interaction :**
-- CaringNanny consolide, WorrySentinel gouverne les règles de seuils
-- CaringNanny propose, StrongFather décide
-
-### 6.2. StrongFather — Décision de transition
-
-**Rôle :** Décider des transitions d'état selon les signaux consolidés et les politiques.
+**RÃ´le :** Consolider les signaux d'intÃ©gritÃ© pour proposer des transitions d'Ã©tat.
 
 **Interactions :**
 | Direction | Description |
 |-----------|-------------|
-| StrongFather ← CaringNanny | Reçoit les signaux consolidés |
-| StrongFather → Système | Décide de la transition d'état |
-| WorrySentinel → StrongFather | Fournit les règles de transition |
+| CaringNanny â†’ WorrySentinel | Propose des transitions basÃ©es sur les signaux consolidÃ©s |
+| WorrySentinel â†’ CaringNanny | Fournit les rÃ¨gles de seuils et de consolidation |
 
-**Règle d'interaction :**
-- StrongFather décide selon les règles définies par WorrySentinel
-- StrongFather ne peut pas créer de nouvelles règles de transition
+**RÃ¨gle d'interaction :**
+- CaringNanny consolide, WorrySentinel gouverne les rÃ¨gles de seuils
+- CaringNanny propose, StrongFather dÃ©cide
 
-### 6.3. TAMR — Intervention humaine
+### 6.2. StrongFather â€” DÃ©cision de transition
 
-**Rôle :** Permettre l'intervention humaine pour les transitions sensibles (T3 → T2, sortie de T4).
+**RÃ´le :** DÃ©cider des transitions d'Ã©tat selon les signaux consolidÃ©s et les politiques.
 
 **Interactions :**
 | Direction | Description |
 |-----------|-------------|
-| TAMR → StrongFather | Autorise les overrides validés |
-| WorrySentinel → TAMR | Définit les conditions d'intervention |
+| StrongFather â† CaringNanny | ReÃ§oit les signaux consolidÃ©s |
+| StrongFather â†’ SystÃ¨me | DÃ©cide de la transition d'Ã©tat |
+| WorrySentinel â†’ StrongFather | Fournit les rÃ¨gles de transition |
 
-**Règle d'interaction :**
-- En T3+, TAMR est requis pour certaines décisions critiques
+**RÃ¨gle d'interaction :**
+- StrongFather dÃ©cide selon les rÃ¨gles dÃ©finies par WorrySentinel
+- StrongFather ne peut pas crÃ©er de nouvelles rÃ¨gles de transition
+
+### 6.3. TAMR â€” Intervention humaine
+
+**RÃ´le :** Permettre l'intervention humaine pour les transitions sensibles (T3 â†’ T2, sortie de T4).
+
+**Interactions :**
+| Direction | Description |
+|-----------|-------------|
+| TAMR â†’ StrongFather | Autorise les overrides validÃ©s |
+| WorrySentinel â†’ TAMR | DÃ©finit les conditions d'intervention |
+
+**RÃ¨gle d'interaction :**
+- En T3+, TAMR est requis pour certaines dÃ©cisions critiques
 - TAMR trace toutes les interventions
 
-### 6.4. BondingBrother — Médiateur observable
+### 6.4. BondingBrother â€” MÃ©diateur observable
 
-**Rôle :** Transporter les informations d'état vers les produits sans interpréter.
+**RÃ´le :** Transporter les informations d'Ã©tat vers les produits sans interprÃ©ter.
 
 **Interactions :**
 | Direction | Description |
 |-----------|-------------|
-| WorrySentinel → BondingBrother | Communique l'état courant |
-| BondingBrother → Produits | Rend l'état visible aux produits |
+| WorrySentinel â†’ BondingBrother | Communique l'Ã©tat courant |
+| BondingBrother â†’ Produits | Rend l'Ã©tat visible aux produits |
 
-**Règle d'interaction :**
-- BondingBrother ne décide jamais
+**RÃ¨gle d'interaction :**
+- BondingBrother ne dÃ©cide jamais
 - BondingBrother transporte et rend visible
 
-### 6.5. LogisticsSteward — Durcissement des quotas
+### 6.5. LogisticsSteward â€” Durcissement des quotas
 
-**Rôle :** Adapter les règles d'arbitrage de ressources selon l'état de confiance.
+**RÃ´le :** Adapter les rÃ¨gles d'arbitrage de ressources selon l'Ã©tat de confiance.
 
 **Interactions :**
-| État | Impact sur LogisticsSteward |
+| Ã‰tat | Impact sur LogisticsSteward |
 |------|----------------------------|
 | T0 | Quotas normaux |
 | T1 | Quotas normaux avec monitoring |
 | T2+ | Quotas restrictifs selon directives WorrySentinel |
 
-**Règle d'interaction :**
-- WorrySentinel impose des contraintes sécuritaires sur les décisions d'arbitrage
-- LogisticsSteward adapte ses quotas selon l'état de confiance
+**RÃ¨gle d'interaction :**
+- WorrySentinel impose des contraintes sÃ©curitaires sur les dÃ©cisions d'arbitrage
+- LogisticsSteward adapte ses quotas selon l'Ã©tat de confiance
 
 ---
 
-## 7. Invariants de gouvernance des états de confiance
+## 7. Invariants de gouvernance des Ã©tats de confiance
 
-### 7.1. Invariants d'état
+### 7.1. Invariants d'Ã©tat
 
-**INV-TS-1 : Unicité d'état**
+**INV-TS-1 : UnicitÃ© d'Ã©tat**
 
-Le système possède exactement un état de confiance à tout moment. Aucune superposition d'états n'est autorisée.
+Le systÃ¨me possÃ¨de exactement un Ã©tat de confiance Ã  tout moment. Aucune superposition d'Ã©tats n'est autorisÃ©e.
 
-**INV-TS-2 : Complétude de l'échelle**
+**INV-TS-2 : ComplÃ©tude de l'Ã©chelle**
 
-L'échelle T0-T4 est exhaustive. Aucun état intermédiaire ou additionnel n'existe.
+L'Ã©chelle T0-T4 est exhaustive. Aucun Ã©tat intermÃ©diaire ou additionnel n'existe.
 
-**INV-TS-3 : Exclusivité des états**
+**INV-TS-3 : ExclusivitÃ© des Ã©tats**
 
-Les cinq états sont mutuellement exclusifs. Le système ne peut pas être simultanément dans deux états différents.
+Les cinq Ã©tats sont mutuellement exclusifs. Le systÃ¨me ne peut pas Ãªtre simultanÃ©ment dans deux Ã©tats diffÃ©rents.
 
 ### 7.2. Invariants de transition
 
-**INV-TS-4 : Séquentialité des transitions**
+**INV-TS-4 : SÃ©quentialitÃ© des transitions**
 
-Les transitions sont séquentielles. Aucun saut d'état n'est autorisé (T0 → T3 interdit).
+Les transitions sont sÃ©quentielles. Aucun saut d'Ã©tat n'est autorisÃ© (T0 â†’ T3 interdit).
 
 **INV-TS-5 : Justification obligatoire**
 
-Toute transition est justifiée et tracée. Aucune transition silencieuse n'est autorisée.
+Toute transition est justifiÃ©e et tracÃ©e. Aucune transition silencieuse n'est autorisÃ©e.
 
 **INV-TS-6 : T4 terminal**
 
-L'état T4 est terminal. Aucune transition sortante automatique n'est possible.
+L'Ã©tat T4 est terminal. Aucune transition sortante automatique n'est possible.
 
 ### 7.3. Invariants de gouvernance
 
-**INV-TS-7 : Non-ignorabilité**
+**INV-TS-7 : Non-ignorabilitÃ©**
 
-Aucun composant ne peut ignorer l'état de confiance courant.
+Aucun composant ne peut ignorer l'Ã©tat de confiance courant.
 
-**INV-TS-8 : Préservation des invariants FONDATION**
+**INV-TS-8 : PrÃ©servation des invariants FONDATION**
 
-Même en T4, les invariants FONDATION sont préservés. Le système ne corrompt jamais.
+MÃªme en T4, les invariants FONDATION sont prÃ©servÃ©s. Le systÃ¨me ne corrompt jamais.
 
-**INV-TS-9 : WorrySentinel ne détecte pas**
+**INV-TS-9 : WorrySentinel ne dÃ©tecte pas**
 
-WorrySentinel gouverne les règles mais ne détecte jamais directement. La détection est du ressort de CaringNanny et des sondes.
+WorrySentinel gouverne les rÃ¨gles mais ne dÃ©tecte jamais directement. La dÃ©tection est du ressort de CaringNanny et des sondes.
 
-**INV-TS-10 : WorrySentinel ne décide pas des transitions**
+**INV-TS-10 : WorrySentinel ne dÃ©cide pas des transitions**
 
-WorrySentinel définit les règles de transition mais ne décide jamais des transitions. La décision appartient à StrongFather.
+WorrySentinel dÃ©finit les rÃ¨gles de transition mais ne dÃ©cide jamais des transitions. La dÃ©cision appartient Ã  StrongFather.
 
 ---
 
@@ -527,205 +527,206 @@ WorrySentinel définit les règles de transition mais ne décide jamais des tran
 
 ### 8.1. Garanties de gouvernance
 
-**G-TS-1 : Cohérence d'état**
+**G-TS-1 : CohÃ©rence d'Ã©tat**
 
-WorrySentinel garantit que l'état de confiance est cohérent à travers tout l'écosystème.
+WorrySentinel garantit que l'Ã©tat de confiance est cohÃ©rent Ã  travers tout l'Ã©cosystÃ¨me.
 
-**G-TS-2 : Propagation immédiate**
+**G-TS-2 : Propagation immÃ©diate**
 
-WorrySentinel garantit que tout changement d'état est propagé immédiatement.
+WorrySentinel garantit que tout changement d'Ã©tat est propagÃ© immÃ©diatement.
 
-**G-TS-3 : Traçabilité complète**
+**G-TS-3 : TraÃ§abilitÃ© complÃ¨te**
 
-WorrySentinel garantit que toute transition est tracée avec justification.
+WorrySentinel garantit que toute transition est tracÃ©e avec justification.
 
-### 8.2. Garanties de dégradation
+### 8.2. Garanties de dÃ©gradation
 
-**G-TS-4 : Dégradation progressive**
+**G-TS-4 : DÃ©gradation progressive**
 
-WorrySentinel garantit que la dégradation est toujours progressive, jamais brutale.
+WorrySentinel garantit que la dÃ©gradation est toujours progressive, jamais brutale.
 
-**G-TS-5 : Capacités préservées en T0-T1**
+**G-TS-5 : CapacitÃ©s prÃ©servÃ©es en T0-T1**
 
-En états T0 et T1, toutes les capacités opérationnelles sont préservées.
+En Ã©tats T0 et T1, toutes les capacitÃ©s opÃ©rationnelles sont prÃ©servÃ©es.
 
 **G-TS-6 : Diagnostics toujours disponibles**
 
-Même en T4, les capacités de diagnostic et de lecture d'état restent disponibles.
+MÃªme en T4, les capacitÃ©s de diagnostic et de lecture d'Ã©tat restent disponibles.
 
 ### 8.3. Garanties de protection
 
 **G-TS-7 : Pas de corruption en T4**
 
-En état T4, le système ne corrompt jamais les données.
+En Ã©tat T4, le systÃ¨me ne corrompt jamais les donnÃ©es.
 
-**G-TS-8 : Pas d'exécution sauvage**
+**G-TS-8 : Pas d'exÃ©cution sauvage**
 
-En état T4, aucune exécution non contrôlée ne se produit.
+En Ã©tat T4, aucune exÃ©cution non contrÃ´lÃ©e ne se produit.
 
 **G-TS-9 : Sortie propre toujours possible**
 
-En tout état, une sortie propre (shutdown graceful) reste possible.
+En tout Ã©tat, une sortie propre (shutdown graceful) reste possible.
 
 ---
 
 ## 9. Violations et comportements interdits
 
-### 9.1. Violations d'état
+### 9.1. Violations d'Ã©tat
 
-**VIOL-TS-1 : États multiples**
+**VIOL-TS-1 : Ã‰tats multiples**
 
-Un composant déclare ou gère plusieurs états simultanément.
+Un composant dÃ©clare ou gÃ¨re plusieurs Ã©tats simultanÃ©ment.
 
 *Violation :* INV-TS-1, INV-TS-3
 
-**VIOL-TS-2 : Saut d'état**
+**VIOL-TS-2 : Saut d'Ã©tat**
 
-Une transition saute un état intermédiaire (ex: T0 → T3).
+Une transition saute un Ã©tat intermÃ©diaire (ex: T0 â†’ T3).
 
 *Violation :* INV-TS-4
 
 **VIOL-TS-3 : Transition silencieuse**
 
-Une transition se produit sans justification ni traçabilité.
+Une transition se produit sans justification ni traÃ§abilitÃ©.
 
 *Violation :* INV-TS-5
 
 ### 9.2. Violations de gouvernance
 
-**VIOL-TS-4 : Ignorance d'état**
+**VIOL-TS-4 : Ignorance d'Ã©tat**
 
-Un composant ignore l'état de confiance courant et maintient un comportement nominal.
+Un composant ignore l'Ã©tat de confiance courant et maintient un comportement nominal.
 
 *Violation :* INV-TS-7
 
-**VIOL-TS-5 : Détection par WorrySentinel**
+**VIOL-TS-5 : DÃ©tection par WorrySentinel**
 
-WorrySentinel détecte directement une anomalie au lieu de gouverner les règles.
+WorrySentinel dÃ©tecte directement une anomalie au lieu de gouverner les rÃ¨gles.
 
 *Violation :* INV-TS-9
 
-**VIOL-TS-6 : Décision de transition par WorrySentinel**
+**VIOL-TS-6 : DÃ©cision de transition par WorrySentinel**
 
-WorrySentinel décide directement d'une transition au lieu de définir les règles.
+WorrySentinel dÃ©cide directement d'une transition au lieu de dÃ©finir les rÃ¨gles.
 
 *Violation :* INV-TS-10
 
 ### 9.3. Comportements interdits
 
-**INTERD-TS-1 : Création d'états**
+**INTERD-TS-1 : CrÃ©ation d'Ã©tats**
 
-Aucun composant ne peut créer de nouveaux états de confiance.
+Aucun composant ne peut crÃ©er de nouveaux Ã©tats de confiance.
 
-**INTERD-TS-2 : Modification de l'échelle**
+**INTERD-TS-2 : Modification de l'Ã©chelle**
 
-L'échelle T0-T4 ne peut pas être modifiée, étendue, ou réduite.
+L'Ã©chelle T0-T4 ne peut pas Ãªtre modifiÃ©e, Ã©tendue, ou rÃ©duite.
 
 **INTERD-TS-3 : Sortie automatique de T4**
 
-Aucune sortie automatique de l'état T4 n'est autorisée.
+Aucune sortie automatique de l'Ã©tat T4 n'est autorisÃ©e.
 
-**INTERD-TS-4 : Contournement des capacités**
+**INTERD-TS-4 : Contournement des capacitÃ©s**
 
-Aucun composant ne peut contourner les restrictions de capacités liées à un état.
+Aucun composant ne peut contourner les restrictions de capacitÃ©s liÃ©es Ã  un Ã©tat.
 
 ---
 
-## 10. Règles de fermeture du contrat
+## 10. RÃ¨gles de fermeture du contrat
 
-### 10.1. Contrat fermé
+### 10.1. Contrat fermÃ©
 
-Ce contrat est **fermé**. Seules les définitions d'états, règles de transition, capacités, invariants, et garanties explicitement définis dans ce contrat sont autorisés.
+Ce contrat est **fermÃ©**. Seules les dÃ©finitions d'Ã©tats, rÃ¨gles de transition, capacitÃ©s, invariants, et garanties explicitement dÃ©finis dans ce contrat sont autorisÃ©s.
 
 ### 10.2. Interdiction d'extension implicite
 
-Aucune extension implicite de ce contrat n'est autorisée. Les règles suivantes s'appliquent :
+Aucune extension implicite de ce contrat n'est autorisÃ©e. Les rÃ¨gles suivantes s'appliquent :
 
-- **INTERD-EXT-1** : Aucun état non défini dans ce contrat n'est reconnu
-- **INTERD-EXT-2** : Aucune transition non définie dans ce contrat n'est autorisée
-- **INTERD-EXT-3** : Aucune capacité non définie dans ce contrat n'est offerte
+- **INTERD-EXT-1** : Aucun Ã©tat non dÃ©fini dans ce contrat n'est reconnu
+- **INTERD-EXT-2** : Aucune transition non dÃ©finie dans ce contrat n'est autorisÃ©e
+- **INTERD-EXT-3** : Aucune capacitÃ© non dÃ©finie dans ce contrat n'est offerte
 
-### 10.3. Primauté des invariants
+### 10.3. PrimautÃ© des invariants
 
-**Règle absolue :**
+**RÃ¨gle absolue :**
 
-Les invariants FONDATION priment toujours sur les considérations d'état. Aucune dégradation ne peut violer un invariant, même en état T4.
+Les invariants FONDATION priment toujours sur les considÃ©rations d'Ã©tat. Aucune dÃ©gradation ne peut violer un invariant, mÃªme en Ã©tat T4.
 
 ---
 
 ## 11. Conclusion contractuelle
 
-Ce contrat établit de manière définitive et non négociable la gouvernance des états de confiance dans WorrySentinel.
+Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable la gouvernance des Ã©tats de confiance dans WorrySentinel.
 
 Il garantit que :
-- les cinq états de confiance (T0-T4) sont exhaustivement définis,
-- les règles de transition sont explicites et séquentielles,
-- les capacités par état sont clairement définies,
-- la distinction avec les niveaux de sécurité est établie,
-- WorrySentinel gouverne mais ne détecte ni ne décide,
-- les invariants FONDATION sont préservés en tout état.
+- les cinq Ã©tats de confiance (T0-T4) sont exhaustivement dÃ©finis,
+- les rÃ¨gles de transition sont explicites et sÃ©quentielles,
+- les capacitÃ©s par Ã©tat sont clairement dÃ©finies,
+- la distinction avec les niveaux de sÃ©curitÃ© est Ã©tablie,
+- WorrySentinel gouverne mais ne dÃ©tecte ni ne dÃ©cide,
+- les invariants FONDATION sont prÃ©servÃ©s en tout Ã©tat.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
 
 ---
 
-**Document créé le :** 2026-01-28  
+**Document crÃ©Ã© le :** 2026-01-28  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, WorrySentinel Documentation Fondatrice, Miyukini Conceptual References - Integrity Degradation System  
-**Type :** Contrat de gouvernance des états de confiance
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, WorrySentinel Documentation Fondatrice, Miyukini Conceptual References - Integrity Degradation System  
+**Type :** Contrat de gouvernance des Ã©tats de confiance
 
 ---
 
-## 12. Mini log de génération
+## 12. Mini log de gÃ©nÃ©ration
 
-### Décision éditoriale E1 : Distinction états/niveaux
+### DÃ©cision Ã©ditoriale E1 : Distinction Ã©tats/niveaux
 
-**Décision prise :** Ajout d'une section dédiée (Section 2) pour clarifier explicitement la distinction entre états de confiance (T0-T4, intégrité système) et niveaux de sécurité (0-4, profil de risque).
+**DÃ©cision prise :** Ajout d'une section dÃ©diÃ©e (Section 2) pour clarifier explicitement la distinction entre Ã©tats de confiance (T0-T4, intÃ©gritÃ© systÃ¨me) et niveaux de sÃ©curitÃ© (0-4, profil de risque).
 
-**Application :** Section 2 rédigée avec tableau comparatif et questions distinctives.
+**Application :** Section 2 rÃ©digÃ©e avec tableau comparatif et questions distinctives.
 
-### Décision éditoriale E2 : Structure par état
+### DÃ©cision Ã©ditoriale E2 : Structure par Ã©tat
 
-**Décision prise :** Chaque état (T0-T4) est décrit de manière uniforme avec : état conceptuel, caractéristiques, capacités autorisées (tableau), contraintes, indicateurs de sortie.
+**DÃ©cision prise :** Chaque Ã©tat (T0-T4) est dÃ©crit de maniÃ¨re uniforme avec : Ã©tat conceptuel, caractÃ©ristiques, capacitÃ©s autorisÃ©es (tableau), contraintes, indicateurs de sortie.
 
-**Application :** Section 3 rédigée avec format standardisé pour les 5 états.
+**Application :** Section 3 rÃ©digÃ©e avec format standardisÃ© pour les 5 Ã©tats.
 
-### Décision éditoriale E3 : Matrice de transition
+### DÃ©cision Ã©ditoriale E3 : Matrice de transition
 
-**Décision prise :** Inclusion d'une matrice visuelle des transitions autorisées (Section 4.1) pour clarifier les transitions permises et interdites.
+**DÃ©cision prise :** Inclusion d'une matrice visuelle des transitions autorisÃ©es (Section 4.1) pour clarifier les transitions permises et interdites.
 
-**Application :** Matrice ajoutée avec transitions clairement identifiées.
+**Application :** Matrice ajoutÃ©e avec transitions clairement identifiÃ©es.
 
-### Ambiguïté A1 : Gouvernance vs détection
+### AmbiguÃ¯tÃ© A1 : Gouvernance vs dÃ©tection
 
-**Ambiguïté rencontrée :** Risque de confusion entre le rôle de gouvernance de WorrySentinel et le rôle de détection des anomalies.
+**AmbiguÃ¯tÃ© rencontrÃ©e :** Risque de confusion entre le rÃ´le de gouvernance de WorrySentinel et le rÃ´le de dÃ©tection des anomalies.
 
-**Décision prise :** Ajout des invariants INV-TS-9 et INV-TS-10 pour clarifier que WorrySentinel gouverne les règles mais ne détecte pas et ne décide pas des transitions.
+**DÃ©cision prise :** Ajout des invariants INV-TS-9 et INV-TS-10 pour clarifier que WorrySentinel gouverne les rÃ¨gles mais ne dÃ©tecte pas et ne dÃ©cide pas des transitions.
 
-**Correction effectuée :** Section 5.1 et Section 7 rédigées avec cette distinction explicite.
+**Correction effectuÃ©e :** Section 5.1 et Section 7 rÃ©digÃ©es avec cette distinction explicite.
 
-### Ambiguïté A2 : État T4 et sortie
+### AmbiguÃ¯tÃ© A2 : Ã‰tat T4 et sortie
 
-**Ambiguïté rencontrée :** Comment sortir de l'état T4 si aucune transition sortante n'est autorisée ?
+**AmbiguÃ¯tÃ© rencontrÃ©e :** Comment sortir de l'Ã©tat T4 si aucune transition sortante n'est autorisÃ©e ?
 
-**Décision prise :** Clarification que T4 est terminal pour le système automatique. Seule une intervention humaine hors du système peut résoudre la situation. Ce n'est pas une transition automatique.
+**DÃ©cision prise :** Clarification que T4 est terminal pour le systÃ¨me automatique. Seule une intervention humaine hors du systÃ¨me peut rÃ©soudre la situation. Ce n'est pas une transition automatique.
 
-**Correction effectuée :** Section 3.7 et RÈGLE-TRANS-5 rédigées avec cette clarification.
+**Correction effectuÃ©e :** Section 3.7 et RÃˆGLE-TRANS-5 rÃ©digÃ©es avec cette clarification.
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-**Vérification effectuée :**
-- ✅ Cohérence avec Documentation Fondatrice WorrySentinel
-- ✅ Cohérence avec Integrity Degradation System
-- ✅ Cohérence avec les invariants INV-WS-1 à INV-WS-8
-- ✅ Distinction états de confiance / niveaux de sécurité respectée
-- ✅ Séparation gouvernance / détection / décision respectée
-- ✅ Progressivité de la dégradation garantie
-- ✅ Préservation des invariants FONDATION en T4 garantie
+**VÃ©rification effectuÃ©e :**
+- âœ… CohÃ©rence avec Documentation Fondatrice WorrySentinel
+- âœ… CohÃ©rence avec Integrity Degradation System
+- âœ… CohÃ©rence avec les invariants INV-WS-1 Ã  INV-WS-8
+- âœ… Distinction Ã©tats de confiance / niveaux de sÃ©curitÃ© respectÃ©e
+- âœ… SÃ©paration gouvernance / dÃ©tection / dÃ©cision respectÃ©e
+- âœ… ProgressivitÃ© de la dÃ©gradation garantie
+- âœ… PrÃ©servation des invariants FONDATION en T4 garantie
 
-**Conclusion :** Contrat cohérent et complet, sans contradiction avec les documents existants.
+**Conclusion :** Contrat cohÃ©rent et complet, sans contradiction avec les documents existants.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce contrat.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce contrat.*
+

@@ -1,8 +1,8 @@
-# MiyuHR — Index de navigation
+﻿# MiyuHR â€” Index de navigation
 
 ## Contexte
 
-**MiyuHR** est le **kit d'outils (Toolkit)** RH (pointeuse entrée/sortie, lecture planning). Aligné sur [Équivalents PoS Logiciel Caisse](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20PoS%20Logiciel%20Caisse.md).
+**MiyuHR** est le **kit d'outils (Toolkit)** RH (pointeuse entrÃ©e/sortie, lecture planning). AlignÃ© sur [Ã‰quivalents PoS Logiciel Caisse](..//..//miyukini-webway-system//reference//_index.md).
 
 **Strate :** 6 (Tools & Toolkits)  
 **ToolkitId :** `toolkit.hr.miyuhr`
@@ -13,5 +13,6 @@
 
 | Document | Description |
 |----------|-------------|
-| [Documentation Fondatrice](./MiyuHR%20-%20Documentation%20Fondatrice.md) | Identité, définition canonique, ToolkitId, liste des outils composants, gouvernance |
-| [Reference Outils](./MiyuHR%20-%20Reference%20Outils.md) | Liste exhaustive des Tools : ToolId, action, niveau de sécurité |
+| [Documentation Fondatrice](./MiyuHR%20-%20Documentation%20Fondatrice.md) | IdentitÃ©, dÃ©finition canonique, ToolkitId, liste des outils composants, gouvernance |
+| [Reference Outils](./MiyuHR%20-%20Reference%20Outils.md) | Liste exhaustive des Tools : ToolId, action, niveau de sÃ©curitÃ© |
+

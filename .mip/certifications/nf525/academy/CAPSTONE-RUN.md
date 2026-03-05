@@ -17,4 +17,5 @@
 
 - [Parcours academy](./INDEX.md)
 - [Assessment](./ASSESSMENT.md)
-- [Capstone evidence](../../../../sequences/2026-03-05-certifications-academy-rollout/capstones/victor/nf525.md)
+- [Capstone evidence](..//..//..//..//README.md)
+

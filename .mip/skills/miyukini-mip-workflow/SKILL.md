@@ -15,7 +15,7 @@ La hierarchie suivante est **stricte**. Chaque terme designe un seul niveau. Ne 
 ```
 Sequence MIP
   └─ Phase (P0, Git, P3, P4, P5, P6)
-       └─ Temps (P0 uniquement : Temps 1 a 10, invariants)
+       └─ Temps (P0 uniquement : Temps 1 a 11, invariants)
        │    └─ Tache (1 tache = 1 agent traitant)
        └─ Etape (P3 uniquement : groupes du plan Denis)
        │    └─ Tache (1 tache = 1 agent, MASS ou sequentiel selon l'etape)
@@ -27,7 +27,7 @@ Sequence MIP
 |-------|--------|-------|-----------|
 | **Sequence** | 0 | Cycle entier | Un cycle MIP complet (P0 → P6). `mip_sequence_number` dans les metriques. |
 | **Phase** | 1 | Grandes divisions | P0, Git, P3, P4, P5, P6. Invariantes (I-2). |
-| **Temps** | 2 | P0 uniquement | Temps 1 a 10. Invariants, non reordonnables. Carte de synchronisation R-P0-4. |
+| **Temps** | 2 | P0 uniquement | Temps 1 a 11. Invariants, non reordonnables. Carte de synchronisation R-P0-4. |
 | **Etape** | 3 | P3 uniquement | Groupes de taches du plan Denis. Chaque etape a : prerequis, agents, livrables, critere de completion. Mode GUIDED = gate par etape. |
 | **Volet** | 3 | P4, P5, P6 | Blocs proceduraux internes a une phase. Ex : P5 Volet 1 "Presentation livrable". |
 | **Tache** | 4 | Partout | Unite atomique. 1 tache = 1 agent traitant. `[CODE-01]`, `[TEST-U-01]`. MASS ou sequentiel selon le contexte de l'etape/volet parent. |
@@ -91,7 +91,7 @@ Les elements suivants sont **invariants** — ils s'appliquent quel que soit le 
 | I-9 | **9 Lois d'Autonomie** | Non negociables, applicables a tout le code produit |
 | I-10 | **Roles agents fixes** | Chaque agent a un role, des competences et un perimetre definis |
 | I-11 | **Feature branch workflow** | `feat/<slug>`, merge --no-ff vers main apres P5 |
-| I-12 | **Artefacts structures par sequence** | `<sequence>/` contient briefs/, specs/, gpi/, phases/, plans_p3/, audits/, metrics/, rapports_finaux/, ressources/ |
+| I-12 | **Artefacts structures par sequence** | `<sequence>/` contient briefs/, specs/, gpi/, phases/, plans_p3/, audits/, metrics/, rapports_finaux/, ressources/, agents/ |
 | I-13 | **Frein d'urgence** | Arret automatique si bug bloquant apres 2 tentatives ou delta majeur |
 | I-14 | **Documents modulaires, 400 lignes max** | Tout artefact decoupe si depassement ; volet optimisation P4/P6 si depassement |
 | I-15 | **Boucle MIP bornee** | Comptage `mip_loops` ; apres 10 iterations, suggerer de reduire le scope |
@@ -116,7 +116,7 @@ Les elements suivants sont **invariants** — ils s'appliquent quel que soit le 
 
 ---
 
-## P0 — Cadrage complet en 10 temps (T3+, SEULE phase humaine)
+## P0 — Cadrage complet en 11 temps (T3+, SEULE phase humaine)
 
 > Detail de chaque Temps : `.mip/modules/p0-details.md`
 
@@ -139,10 +139,11 @@ P0 est **LA phase humaine** : elle determine la direction. Aucun code avant la f
 | 4 | Inventaire prerequis + Infra + Modeles | Denis (lead) + Hugo (T4-T5) + Jean + Francois + Lise | p0-details.md |
 | 5 | Analyse de securite | Victor (T3+) | p0-details.md |
 | 6 | Specification technique + Context7 | Francois | p0-details.md |
-| 7 | Plan exhaustif + Guide implementation | Denis | p0-details.md |
-| 8 | Audit de faisabilite + Efficience | Arianne + Jean | p0-details.md |
-| 9 | Verification pipeline CI/CD | Hugo (si CI/CD en place) | p0-details.md |
-| 10 | Synthese & Brief | Maria | p0-details.md |
+| 7 | Generation agents fine-tuned de sequence | Maria (validation rapide Denis + Jean) | p0-details.md |
+| 8 | Plan exhaustif + Guide implementation | Denis | p0-details.md |
+| 9 | Audit de faisabilite + Efficience | Arianne + Jean | p0-details.md |
+| 10 | Verification pipeline CI/CD | Hugo (si CI/CD en place) | p0-details.md |
+| 11 | Synthese & Brief | Maria | p0-details.md |
 
 **Gate P0** (deroulement strict) :
 1. Maria presente le brief complet a l'utilisateur
@@ -288,7 +289,7 @@ Chaque agent charge **uniquement ses fichiers pertinents** en debut de tache :
 | **Audit Expert** (George) | `project-file-map.md`, `code-annotations-templates.md`, `patterns-and-lessons.md` |
 | **Expert Cybersecurite** (Victor) | `security-patterns.md`, `patterns-and-lessons.md`, `stack-patterns.md`, `project-file-map.md` |
 | **DevOps & Infra** (Hugo) | `project-file-map.md`, `.mip/environment.md` (section Infrastructure), `mip-decisions.md` |
-| **Responsable Efficience IA** (Jean) | `mip-performance-history.md`, `MEMORY.md`, `<sequence>/metrics/`, `.mip/agents/*.md` |
+| **Responsable Efficience IA** (Jean) | `mip-performance-history.md`, `MEMORY.md`, `<sequence>/metrics/`, `.mip/agents/INDEX.md` |
 | **Team Manager** (Arianne) | `mip-decisions.md`, `patterns-and-lessons.md`, `mip-performance-history.md`, `team-skills-audit.md` |
 
 > Note : Tous les fichiers ci-dessus sont dans `.mip/memory/` (ou `.mip/` pour environment, metrics, agents). Miyukini COG : `rust-patterns.md`, `dioxus-cheatsheet.md`, `mscm-templates.md`.
@@ -337,9 +338,9 @@ DAG dans `<sequence>/phases/dag.json`. Metriques swarm dans `<sequence>/metrics/
 
 | Phase MIP | Skill SuperClaude | Usage |
 |-----------|-------------------|-------|
-| P0 (T1-2) | `brainstorming` | Maria structure le brief (10 temps) |
+| P0 (T1-2) | `brainstorming` | Maria structure le brief (11 temps) |
 | P0 (T8) | `verification-before-completion` | Arianne verifie conformite |
-| P0 (T7) | `writing-plans` | Denis cree taches atomiques + guide |
+| P0 (T8) | `writing-plans` | Denis cree taches atomiques + guide |
 | P3 | `subagent-driven-development` | Execution par subagent frais |
 | P3 | `test-driven-development` | Cycle RED-GREEN-REFACTOR |
 | P3 | `systematic-debugging` | Root cause + auto-correction |

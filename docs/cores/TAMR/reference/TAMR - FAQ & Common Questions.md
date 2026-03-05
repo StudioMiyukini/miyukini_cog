@@ -1,10 +1,10 @@
-# TAMR - FAQ & Common Questions
+﻿# TAMR - FAQ & Common Questions
 
 ## Contexte
 
 Ce document repond aux **questions frequentes** sur TAMR (The Authority Must Rest) et les interventions humaines dans le Miyukini Core System. Il est **informatif** et ne modifie aucun contrat FONDATION.
 
-**Terminologie :** [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie :** [Miyukini Conceptual References - Glossaire](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -109,3 +109,4 @@ Selon le [TAMR - Versioning & Evolution Contract](../lifecycle/TAMR%20-%20Versio
 **Date :** 2026-01-28  
 **Statut :** INFORMATIF  
 **Reference :** TAMR Documentation Fondatrice, contrats FONDATION
+

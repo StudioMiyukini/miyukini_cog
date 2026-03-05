@@ -1,4 +1,4 @@
-# Kernel - Invariants & Guarantees
+﻿# Kernel - Invariants & Guarantees
 
 ## 1. Contexte
 
@@ -7,7 +7,7 @@ Ce document definit les **invariants non negociables** et les **garanties** offe
 **Documents fondateurs :**
 
 - [Miyukini Core System - Definition Kernel](../Miyukini%20Core%20System%20-%20Definition%20Kernel.md)
-- [Miyukini Conceptual References - Kernel Maintenance Observability Contract](../../reference/Miyukini%20Conceptual%20References%20-%20Kernel%20Maintenance%20Observability%20Contract.md)
+- [Miyukini Conceptual References - Kernel Maintenance Observability Contract](..//..//miyukini-webway-system//reference//_index.md)
 
 **Statut contractuel :** Ce document est **contractuel, normatif, et non negociable**. Il derive directement des documents fondateurs et etablit les limites absolues du Kernel.
 
@@ -28,10 +28,10 @@ Ce document definit les **invariants non negociables** et les **garanties** offe
 
 Un **invariant** est une regle absolue qui :
 
-- **Ne peut jamais etre violee** — Aucune exception, aucune derogation, aucun contournement
-- **Est verifiable** — On peut toujours determiner si l'invariant est respecte ou non
-- **Est independante du contexte** — L'invariant s'applique quelle que soit la situation
-- **Est non negociable** — Aucune consideration pratique ne peut justifier sa violation
+- **Ne peut jamais etre violee** â€” Aucune exception, aucune derogation, aucun contournement
+- **Est verifiable** â€” On peut toujours determiner si l'invariant est respecte ou non
+- **Est independante du contexte** â€” L'invariant s'applique quelle que soit la situation
+- **Est non negociable** â€” Aucune consideration pratique ne peut justifier sa violation
 
 **Consequence d'une violation :** Toute violation d'un invariant constitue une **faute architecturale** qui compromet la fondation meme du systeme. Un Kernel qui viole un invariant rend tout l'ecosysteme instable.
 
@@ -68,10 +68,10 @@ Ces invariants definissent la nature fondamentale du Kernel : ce qu'il est et ce
 
 | Autorise | Interdit |
 |----------|----------|
-| ✅ Generer un identifiant unique | ❌ Generer un "user_id" avec format specifique |
-| ✅ Fournir l'heure courante | ❌ Calculer une date de peremption produit |
-| ✅ Logger un message structure | ❌ Logger un evenement metier type "commande validee" |
-| ✅ Charger une configuration | ❌ Definir des politiques de tarification |
+| âœ… Generer un identifiant unique | âŒ Generer un "user_id" avec format specifique |
+| âœ… Fournir l'heure courante | âŒ Calculer une date de peremption produit |
+| âœ… Logger un message structure | âŒ Logger un evenement metier type "commande validee" |
+| âœ… Charger une configuration | âŒ Definir des politiques de tarification |
 
 **Source :** Definition Kernel - Section 1 "Ce que le kernel EST" et Section 3 "Exclusions explicites"
 
@@ -92,10 +92,10 @@ Ces invariants definissent la nature fondamentale du Kernel : ce qu'il est et ce
 
 | Autorise | Interdit |
 |----------|----------|
-| ✅ Charger la configuration depuis un fichier local | ❌ Charger la configuration depuis un service distant obligatoire |
-| ✅ Generer des IDs localement (UUID, ULID) | ❌ Appeler un service de generation d'IDs distribues |
-| ✅ Utiliser l'horloge systeme locale | ❌ Synchroniser obligatoirement avec un serveur NTP |
-| ✅ Logger vers stdout/fichier | ❌ Exiger un backend de logging distant |
+| âœ… Charger la configuration depuis un fichier local | âŒ Charger la configuration depuis un service distant obligatoire |
+| âœ… Generer des IDs localement (UUID, ULID) | âŒ Appeler un service de generation d'IDs distribues |
+| âœ… Utiliser l'horloge systeme locale | âŒ Synchroniser obligatoirement avec un serveur NTP |
+| âœ… Logger vers stdout/fichier | âŒ Exiger un backend de logging distant |
 
 **Lien avec les Lois d'Autonomie :** Cet invariant est une application directe de **LOI-1** (Aucune dependance externe critique a l'execution).
 
@@ -118,10 +118,10 @@ Ces invariants definissent la nature fondamentale du Kernel : ce qu'il est et ce
 
 | Autorise | Interdit |
 |----------|----------|
-| ✅ Fonctions pures | ❌ Fonctions avec effets de bord caches |
-| ✅ Etat immutable ou controle | ❌ Variables globales mutables partagees |
-| ✅ Operations deterministes | ❌ Random non injectable pour les tests |
-| ✅ Erreurs explicites (Result<T, E>) | ❌ Panics silencieux ou exceptions non gerees |
+| âœ… Fonctions pures | âŒ Fonctions avec effets de bord caches |
+| âœ… Etat immutable ou controle | âŒ Variables globales mutables partagees |
+| âœ… Operations deterministes | âŒ Random non injectable pour les tests |
+| âœ… Erreurs explicites (Result<T, E>) | âŒ Panics silencieux ou exceptions non gerees |
 
 **Implication Rust :** Le Kernel privilegie les types `Result<T, E>`, les structures immutables, et les traits bien definis.
 
@@ -144,10 +144,10 @@ Ces invariants definissent la nature fondamentale du Kernel : ce qu'il est et ce
 
 | Autorise | Interdit |
 |----------|----------|
-| ✅ Definir des traits abstraits | ❌ Implanter un serveur HTTP |
-| ✅ Fournir des primitives de configuration | ❌ Gerer des routes REST |
-| ✅ Logger vers une interface abstraite | ❌ Envoyer des metriques vers un backend specifique |
-| ✅ Fournir un lifecycle generique | ❌ Integrer un middleware web |
+| âœ… Definir des traits abstraits | âŒ Implanter un serveur HTTP |
+| âœ… Fournir des primitives de configuration | âŒ Gerer des routes REST |
+| âœ… Logger vers une interface abstraite | âŒ Envoyer des metriques vers un backend specifique |
+| âœ… Fournir un lifecycle generique | âŒ Integrer un middleware web |
 
 **Frameworks exclus :** Axum, Actix, Rocket, Tonic, etc. restent des choix de produit.
 
@@ -163,7 +163,7 @@ Ces invariants definissent les capacites et les limites du Kernel pour assister 
 
 **Enonce canonique :**
 
-> Le Kernel ne modifie **jamais** le code, les configurations, ou les donnees pour "reparer" une situation. Il observe, atteste, compare, signale — mais ne corrige pas.
+> Le Kernel ne modifie **jamais** le code, les configurations, ou les donnees pour "reparer" une situation. Il observe, atteste, compare, signale â€” mais ne corrige pas.
 
 | Aspect | Specification |
 |--------|---------------|
@@ -176,10 +176,10 @@ Ces invariants definissent les capacites et les limites du Kernel pour assister 
 
 | Autorise | Interdit |
 |----------|----------|
-| ✅ Observer l'etat du systeme | ❌ Modifier l'etat pour corriger |
-| ✅ Attester la conformite | ❌ Auto-reparer les violations |
-| ✅ Comparer deux versions | ❌ Appliquer un patch automatique |
-| ✅ Signaler une anomalie | ❌ Corriger l'anomalie |
+| âœ… Observer l'etat du systeme | âŒ Modifier l'etat pour corriger |
+| âœ… Attester la conformite | âŒ Auto-reparer les violations |
+| âœ… Comparer deux versions | âŒ Appliquer un patch automatique |
+| âœ… Signaler une anomalie | âŒ Corriger l'anomalie |
 
 **Formulation cle :**
 
@@ -204,9 +204,9 @@ Ces invariants definissent les capacites et les limites du Kernel pour assister 
 
 | Autorise | Interdit |
 |----------|----------|
-| ✅ Empreinte comportementale stable | ❌ Empreinte variant selon le contexte |
-| ✅ Comparaison deterministe | ❌ Resultats differents pour meme entree |
-| ✅ Signature rejouable | ❌ Hash dependant de l'heure ou du random |
+| âœ… Empreinte comportementale stable | âŒ Empreinte variant selon le contexte |
+| âœ… Comparaison deterministe | âŒ Resultats differents pour meme entree |
+| âœ… Signature rejouable | âŒ Hash dependant de l'heure ou du random |
 
 **Utilite :**
 
@@ -233,10 +233,10 @@ Ces invariants definissent les capacites et les limites du Kernel pour assister 
 
 | Autorise | Interdit |
 |----------|----------|
-| ✅ Messages d'erreur explicites | ❌ Codes d'erreur cryptiques |
-| ✅ Tracabilite gouvernee | ❌ Stacktrace technique brut |
-| ✅ Chemin de decision lisible | ❌ Dump memoire incomprehensible |
-| ✅ Diagnostic comprehensible | ❌ Logs pour experts uniquement |
+| âœ… Messages d'erreur explicites | âŒ Codes d'erreur cryptiques |
+| âœ… Tracabilite gouvernee | âŒ Stacktrace technique brut |
+| âœ… Chemin de decision lisible | âŒ Dump memoire incomprehensible |
+| âœ… Diagnostic comprehensible | âŒ Logs pour experts uniquement |
 
 **Mode "maintenance explicable" :**
 
@@ -265,20 +265,20 @@ Lorsqu'un incident survient, le Kernel peut fournir :
 
 | Caracteristique | Statut |
 |-----------------|--------|
-| Fonctionnent offline | ✅ |
-| Ne necessitent aucun SaaS | ✅ |
-| Ne demandent aucun agent externe | ✅ |
-| Sont deterministes | ✅ |
-| Sont rejouables | ✅ |
+| Fonctionnent offline | âœ… |
+| Ne necessitent aucun SaaS | âœ… |
+| Ne demandent aucun agent externe | âœ… |
+| Sont deterministes | âœ… |
+| Sont rejouables | âœ… |
 
 **Consequences pratiques :**
 
 | Contexte | Compatible |
 |----------|:----------:|
-| Hardware faible (Raspberry Pi, mini PC) | ✅ |
-| Environnement isole (air-gapped) | ✅ |
-| Long cycle de version (LTS) | ✅ |
-| Audit post-mortem | ✅ |
+| Hardware faible (Raspberry Pi, mini PC) | âœ… |
+| Environnement isole (air-gapped) | âœ… |
+| Long cycle de version (LTS) | âœ… |
+| Audit post-mortem | âœ… |
 
 **Lien avec les Lois d'Autonomie :** Cet invariant est une application directe de **LOI-3** (L'etat local est souverain).
 
@@ -307,10 +307,10 @@ Ces invariants garantissent que le Kernel respecte les contraintes d'autonomie d
 
 | Autorise | Interdit |
 |----------|----------|
-| ✅ Memoire maitrisee et previsible | ❌ Allocation memoire non bornee |
-| ✅ CPU previsible, sans pics | ❌ Operations gourmandes non controlees |
-| ✅ Pas de services fantomes | ❌ Workers dormants consommant des ressources |
-| ✅ Demarrage rapide | ❌ Initialisation lourde bloquante |
+| âœ… Memoire maitrisee et previsible | âŒ Allocation memoire non bornee |
+| âœ… CPU previsible, sans pics | âŒ Operations gourmandes non controlees |
+| âœ… Pas de services fantomes | âŒ Workers dormants consommant des ressources |
+| âœ… Demarrage rapide | âŒ Initialisation lourde bloquante |
 
 **Question de verification :**
 
@@ -337,10 +337,10 @@ Ces invariants garantissent que le Kernel respecte les contraintes d'autonomie d
 
 | Autorise | Interdit |
 |----------|----------|
-| ✅ Fournir des informations pour la decision | ❌ Prendre une decision strategique |
-| ✅ Executer les ordres de StrongFather | ❌ Contourner une decision de gouvernance |
-| ✅ Signaler une violation | ❌ Appliquer une sanction autonome |
-| ✅ Observer l'etat du systeme | ❌ Modifier l'etat sans autorisation |
+| âœ… Fournir des informations pour la decision | âŒ Prendre une decision strategique |
+| âœ… Executer les ordres de StrongFather | âŒ Contourner une decision de gouvernance |
+| âœ… Signaler une violation | âŒ Appliquer une sanction autonome |
+| âœ… Observer l'etat du systeme | âŒ Modifier l'etat sans autorisation |
 
 **Relation avec les Cores :**
 
@@ -456,43 +456,43 @@ Toutes doivent etre vraies :
 ### 8.2 Interdependances
 
 ```
-INV-K-1 ─────────────────────────────────────┐
-(Aucune logique metier)                      │
-         │                                    │
-         └──────────► INV-K-4 ◄──────────────┘
+INV-K-1 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+(Aucune logique metier)                      â”‚
+         â”‚                                    â”‚
+         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º INV-K-4 â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
                       (Pas de protocole)
-                             │
-                             ▼
+                             â”‚
+                             â–¼
                       Reutilisabilite
                       (Garantie 7.2)
 
-INV-K-2 ─────────────────────────────────────┐
-(Aucune dependance externe)                  │
-         │                                    │
-         └──────────► INV-K-8 ◄──────────────┘
+INV-K-2 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+(Aucune dependance externe)                  â”‚
+         â”‚                                    â”‚
+         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º INV-K-8 â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
                       (Souverainete locale)
-                             │
-                             ▼
+                             â”‚
+                             â–¼
                       Autonomie operationnelle
                       (Garantie 7.6)
 
-INV-K-5 ─────────────────────────────────────┐
-(Non-mutation)                               │
-         │                                    │
-         └──────────► INV-K-6 ──────► INV-K-7
+INV-K-5 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+(Non-mutation)                               â”‚
+         â”‚                                    â”‚
+         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º INV-K-6 â”€â”€â”€â”€â”€â”€â–º INV-K-7
                       (Determinisme)   (Explicabilite)
-                             │
-                             ▼
+                             â”‚
+                             â–¼
                       Transparence
                       (Garantie 7.5)
 
-INV-K-9 ─────────────────────────────────────┐
-(Cout proportionnel)                         │
-         │                                    │
-         └──────────► INV-K-10
+INV-K-9 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+(Cout proportionnel)                         â”‚
+         â”‚                                    â”‚
+         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º INV-K-10
                       (Gouvernance preservee)
-                             │
-                             ▼
+                             â”‚
+                             â–¼
                       Minimalisme
                       (Garantie 7.4)
 ```
@@ -524,8 +524,8 @@ Chaque module du Kernel doit respecter **tous** les invariants. Le tableau ci-de
 | Document | Relation |
 |----------|----------|
 | [Miyukini Core System - Definition Kernel](../Miyukini%20Core%20System%20-%20Definition%20Kernel.md) | Document source (invariants d'identite) |
-| [Miyukini Conceptual References - Kernel Maintenance Observability Contract](../../reference/Miyukini%20Conceptual%20References%20-%20Kernel%20Maintenance%20Observability%20Contract.md) | Document source (invariants d'observabilite) |
-| [Miyukini Conceptual References - Lois Autonomie Systeme](../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) | Contraintes d'autonomie (LOI-1 a LOI-6) |
+| [Miyukini Conceptual References - Kernel Maintenance Observability Contract](..//..//miyukini-webway-system//reference//_index.md) | Document source (invariants d'observabilite) |
+| [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//miyukini-webway-system//reference//_index.md) | Contraintes d'autonomie (LOI-1 a LOI-6) |
 | [Miyukini Core System - Structure du Kernel](../Miyukini%20Core%20System%20-%20Structure%20du%20Kernel.md) | Architecture des crates |
 | [Miyukini Core System - Revue Traits API v0.1](../Miyukini%20Core%20System%20-%20Revue%20Traits%20API%20v0.1.md) | Gel des traits publics |
 
@@ -547,11 +547,11 @@ Chaque module du Kernel doit respecter **tous** les invariants. Le tableau ci-de
 
 Ce contrat etablit que :
 
-1. **Les invariants sont absolus** — 10 invariants non negociables definissent les limites du Kernel
-2. **Les categories sont claires** — Identite, Observabilite, Autonomie organisent les invariants
-3. **Les garanties sont formelles** — 5 garanties de service envers l'ecosysteme
-4. **Les interdependances sont explicites** — Les invariants se renforcent mutuellement
-5. **Les violations sont identifiables** — Chaque invariant est verifiable
+1. **Les invariants sont absolus** â€” 10 invariants non negociables definissent les limites du Kernel
+2. **Les categories sont claires** â€” Identite, Observabilite, Autonomie organisent les invariants
+3. **Les garanties sont formelles** â€” 5 garanties de service envers l'ecosysteme
+4. **Les interdependances sont explicites** â€” Les invariants se renforcent mutuellement
+5. **Les violations sont identifiables** â€” Chaque invariant est verifiable
 
 ### Phrase de synthese
 
@@ -561,6 +561,7 @@ Ce contrat etablit que :
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** Contrat — Normatif  
+**Statut :** Contrat â€” Normatif  
 **Reference :** Definition Kernel v0.1, Kernel Maintenance Observability Contract v1.0  
-**Type :** Contrat de gouvernance — Invariants et Garanties
+**Type :** Contrat de gouvernance â€” Invariants et Garanties
+

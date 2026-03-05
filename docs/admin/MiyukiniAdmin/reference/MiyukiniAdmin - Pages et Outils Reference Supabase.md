@@ -1,14 +1,14 @@
-# MiyukiniAdmin — Pages et Outils Reference Supabase
+﻿# MiyukiniAdmin â€” Pages et Outils Reference Supabase
 
 ## 1. Contexte
 
 Ce document etablit la **correspondance** entre les pages et outils du Dashboard Supabase (Studio) et les pages / outils MiyukiniAdmin. Il sert de reference unique pour savoir quelle page MiyukiniAdmin couvre quelle capacite Supabase et quels sujets SQL/DB documenter.
 
 **Sources Supabase utilisees :**
-- [Supabase SQL Editor](https://supabase.com/features/sql-editor) — fonctionnalites editeur SQL (syntax highlighting, auto-completion, execution history, onglets Results/Explain/Chart).
-- [Tables and Data](https://supabase.com/docs/guides/database/tables) — Table Editor, creation de tables, types de donnees, Realtime. MiyukiniAdmin est un service hors-bord : il ne retient pas RLS ni Auth Supabase ; auth propre a definir.
+- [Supabase SQL Editor](https://supabase.com/features/sql-editor) â€” fonctionnalites editeur SQL (syntax highlighting, auto-completion, execution history, onglets Results/Explain/Chart).
+- [Tables and Data](https://supabase.com/docs/guides/database/tables) â€” Table Editor, creation de tables, types de donnees, Realtime. MiyukiniAdmin est un service hors-bord : il ne retient pas RLS ni Auth Supabase ; auth propre a definir.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -35,15 +35,15 @@ Ce document **ne remplace pas** les contrats ni les specifications d'interface ;
 | | New table, Search tables | | Bouton creation table, recherche tables |
 | | Liste tables / vues, Recent items | | Liste tables avec nom, lignes, taille, index ; elements recents |
 | | Create a new table (formulaire) | `/database/tables/new` ou modal | Name, Description, Realtime, Columns (nom, type, default, primary), Foreign keys |
-| | Vue donnees table (Filter, Sort, Insert, Import CSV) | `/database/tables/:tableId` | Onglets Data, Structure, Indexes, Stats, Export ; voir DB Management Interface §4–§5 |
-| **SQL Editor** | Database > Query | `/database/query` | [DB Management Interface](../ui/MiyukiniAdmin%20-%20DB%20Management%20Interface.md) §7, [Emergency DB Access Contract](../contracts/database/MiyukiniAdmin%20-%20Emergency%20DB%20Access%20Contract.md) |
+| | Vue donnees table (Filter, Sort, Insert, Import CSV) | `/database/tables/:tableId` | Onglets Data, Structure, Indexes, Stats, Export ; voir DB Management Interface Â§4â€“Â§5 |
+| **SQL Editor** | Database > Query | `/database/query` | [DB Management Interface](../ui/MiyukiniAdmin%20-%20DB%20Management%20Interface.md) Â§7, [Emergency DB Access Contract](../contracts/database/MiyukiniAdmin%20-%20Emergency%20DB%20Access%20Contract.md) |
 | | Zone saisie, Run, historique | | Console SQL ; execution SELECT uniquement en mode normal |
 | | Onglets Results, Explain, Chart | | Resultats tabulaires ; plan d'execution ; visualisation (optionnel) |
 | | Role, Source, Primary Database | | Equivalent = role/connexion via BondingBrother, environnement COG |
 | | Search queries, Private / Favorites / Shared | | Historique et requetes sauvegardees (si dans le perimetre) |
 | **Database** | Database (vue generale) | `/database` | [DB Operations Contract](../contracts/database/MiyukiniAdmin%20-%20DB%20Operations%20Contract.md), [Gestion DB type Supabase](./MiyukiniAdmin%20-%20Gestion%20DB%20type%20Supabase.md) |
 | | Schemas, roles, connexion | | Vue d'ensemble ; acces via KindMother/BondingBrother |
-| **Migrations** | Database > Migrations | `/database/migrations` | [DB Operations Contract](../contracts/database/MiyukiniAdmin%20-%20DB%20Operations%20Contract.md) §9, [Gestion DB type Supabase](./MiyukiniAdmin%20-%20Gestion%20DB%20type%20Supabase.md) |
+| **Migrations** | Database > Migrations | `/database/migrations` | [DB Operations Contract](../contracts/database/MiyukiniAdmin%20-%20DB%20Operations%20Contract.md) Â§9, [Gestion DB type Supabase](./MiyukiniAdmin%20-%20Gestion%20DB%20type%20Supabase.md) |
 | **Backups** | Database > Backups | `/database/backups` | [Backup Restore Contract](../contracts/database/MiyukiniAdmin%20-%20Backup%20Restore%20Contract.md) |
 | **Observability** | Metriques / Observability | `/metriques` | [DB Metrics Contract](../contracts/monitoring/MiyukiniAdmin%20-%20DB%20Metrics%20Contract.md), [Consumption Metrics Contract](../contracts/monitoring/MiyukiniAdmin%20-%20Consumption%20Metrics%20Contract.md), [Affichage Dynamique et Metriques](../ui/MiyukiniAdmin%20-%20Affichage%20Dynamique%20et%20Metriques.md) |
 | **Logs** | Logs | `/logs` | Affichage dynamique (SSE ou polling) ; logs audit et operationnels |
@@ -82,3 +82,4 @@ Les sujets suivants sont couverts par Supabase et doivent etre documentes ou enr
 **Date de creation :** 2026-01-29  
 **Version :** 1.0.0  
 **Statut :** Document de reference (mapping Supabase / MiyukiniAdmin)
+

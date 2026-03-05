@@ -1,54 +1,54 @@
-# MiyuSearch — Documentation Fondatrice
+﻿# MiyuSearch â€” Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuSearch** est le **kit d'outils (Toolkit)** de recherche de l'écosystème Miyukini. Il intègre les outils d'indexation de contenu (full-text), d'exécution de requêtes de recherche, et de suggestions (autocomplete), sans logique métier — les données à indexer et les critères de recherche sont fournis dans le flux gouverné ; les décisions sur ce qui est « pertinent » ou affiché relèvent des Opérateurs.
+**MiyuSearch** est le **kit d'outils (Toolkit)** de recherche de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils d'indexation de contenu (full-text), d'exÃ©cution de requÃªtes de recherche, et de suggestions (autocomplete), sans logique mÃ©tier â€” les donnÃ©es Ã  indexer et les critÃ¨res de recherche sont fournis dans le flux gouvernÃ© ; les dÃ©cisions sur ce qui est Â« pertinent Â» ou affichÃ© relÃ¨vent des OpÃ©rateurs.
 
-L'autorité sur les données indexées appartient à **KindMother**. MiyuSearch expose des capacités d'exécution gouvernée (indexer, requêter, suggérer) ; les données indexées proviennent de KindMother (via MiyuSQL ou flux) ; MiyuSearch ne décide pas du périmètre ni du classement métier.
+L'autoritÃ© sur les donnÃ©es indexÃ©es appartient Ã  **KindMother**. MiyuSearch expose des capacitÃ©s d'exÃ©cution gouvernÃ©e (indexer, requÃªter, suggÃ©rer) ; les donnÃ©es indexÃ©es proviennent de KindMother (via MiyuSQL ou flux) ; MiyuSearch ne dÃ©cide pas du pÃ©rimÃ¨tre ni du classement mÃ©tier.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-
----
-
-## 2. Portée / Scope
-
-**Ce document définit :** l'identité et la définition canonique de MiyuSearch, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother.
-
-**Hors scope :** l'implémentation détaillée (moteur full-text, stockage index) ; le classement métier et les règles de pertinence (Opérateurs / StrongFather).
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 3. Définition canonique
+## 2. PortÃ©e / Scope
 
-> **MiyuSearch est une composition officielle d'outils de recherche (indexation, requête full-text, suggestions), déclarée et gouvernée par l'environnement.**
+**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de MiyuSearch, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother.
 
-- MiyuSearch **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
-- MiyuSearch **n'ajoute aucune logique métier** : il orchestre des capacités atomiques (indexer du contenu, exécuter une requête, produire des suggestions) ; périmètre et critères fournis dans le flux ; pas de décision sur la pertinence métier.
+**Hors scope :** l'implÃ©mentation dÃ©taillÃ©e (moteur full-text, stockage index) ; le classement mÃ©tier et les rÃ¨gles de pertinence (OpÃ©rateurs / StrongFather).
 
-**Règle fondamentale :** Un Tool MiyuSearch exécute sur des **données et critères fournis** ; l'index est alimenté sous autorité KindMother ; le classement métier reste du ressort des Opérateurs.
+---
+
+## 3. DÃ©finition canonique
+
+> **MiyuSearch est une composition officielle d'outils de recherche (indexation, requÃªte full-text, suggestions), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+
+- MiyuSearch **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
+- MiyuSearch **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques (indexer du contenu, exÃ©cuter une requÃªte, produire des suggestions) ; pÃ©rimÃ¨tre et critÃ¨res fournis dans le flux ; pas de dÃ©cision sur la pertinence mÃ©tier.
+
+**RÃ¨gle fondamentale :** Un Tool MiyuSearch exÃ©cute sur des **donnÃ©es et critÃ¨res fournis** ; l'index est alimentÃ© sous autoritÃ© KindMother ; le classement mÃ©tier reste du ressort des OpÃ©rateurs.
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.search.miyusearch` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `search` |
-| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le détail de chaque outil est décrit dans [MiyuSearch - Reference Outils](./MiyuSearch%20-%20Reference%20Outils.md).
+Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuSearch - Reference Outils](./MiyuSearch%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
-| `tool.search.index.update` | Met à jour l'index (document/champ fournis) ; WriteIntent ou flux gouverné vers stockage index |
-| `tool.search.query.execute` | Exécute une requête full-text (critères fournis) ; retourne des identifiants / scores |
-| `tool.search.suggest` | Produit des suggestions (autocomplete) à partir d'un préfixe fourni |
+| `tool.search.index.update` | Met Ã  jour l'index (document/champ fournis) ; WriteIntent ou flux gouvernÃ© vers stockage index |
+| `tool.search.query.execute` | ExÃ©cute une requÃªte full-text (critÃ¨res fournis) ; retourne des identifiants / scores |
+| `tool.search.suggest` | Produit des suggestions (autocomplete) Ã  partir d'un prÃ©fixe fourni |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuSearch en contient trois.
 
@@ -56,44 +56,46 @@ Le détail de chaque outil est décrit dans [MiyuSearch - Reference Outils](./Mi
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : index alimenté sous autorité KindMother ; requêtes et suggestions sur critères fournis ; pas de décision métier sur pertinence.
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : index alimentÃ© sous autoritÃ© KindMother ; requÃªtes et suggestions sur critÃ¨res fournis ; pas de dÃ©cision mÃ©tier sur pertinence.
 
 ---
 
-## 7. Niveau de sécurité et états
+## 7. Niveau de sÃ©curitÃ© et Ã©tats
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
-| **Niveau de sécurité du kit** | **0 à 2** (contenu indexé peut être sensible) |
-| **États autorisés** | Tous sauf restriction WorrySentinel |
-| **États interdits** | Selon politique (ex. index en lecture seule en maintenance) |
+| **Niveau de sÃ©curitÃ© du kit** | **0 Ã  2** (contenu indexÃ© peut Ãªtre sensible) |
+| **Ã‰tats autorisÃ©s** | Tous sauf restriction WorrySentinel |
+| **Ã‰tats interdits** | Selon politique (ex. index en lecture seule en maintenance) |
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autorité sur les données sources. L'index MiyuSearch est une **dérivation** des données KindMother ; mise à jour d'index = flux gouverné (WriteIntent ou mécanisme documenté). Les Tools lisent l'index pour requêter et suggérer ; pas d'écriture métier directe sur les données sources.
+**KindMother** est l'autoritÃ© sur les donnÃ©es sources. L'index MiyuSearch est une **dÃ©rivation** des donnÃ©es KindMother ; mise Ã  jour d'index = flux gouvernÃ© (WriteIntent ou mÃ©canisme documentÃ©). Les Tools lisent l'index pour requÃªter et suggÃ©rer ; pas d'Ã©criture mÃ©tier directe sur les donnÃ©es sources.
 
-Les obligations de conformité détaillées sont dans [MiyuSearch - Tool Governance Compliance Contract](./contracts/governance/MiyuSearch%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuSearch - Tool Governance Compliance Contract](./contracts/governance/MiyuSearch%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-À l'implémentation : chaque Tool MiyuSearch est une unité logique pouvant devenir un **bloc MSCM** : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
+Ã€ l'implÃ©mentation : chaque Tool MiyuSearch est une unitÃ© logique pouvant devenir un **bloc MSCM** : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
 
 ---
 
-## 10. Références croisées
+## 10. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
+| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence fondateur
+**Statut :** Document de rÃ©fÃ©rence fondateur
+
+

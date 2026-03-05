@@ -1,21 +1,22 @@
-# MiyuSocialProfile — Tool Governance Compliance Contract
+﻿# MiyuSocialProfile â€” Tool Governance Compliance Contract
 
 ## Contexte
 
-Conformité aux obligations communes : [Master Butler - Tool Governance Compliance Template](../../../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
+ConformitÃ© aux obligations communes : [Master Butler - Tool Governance Compliance Template](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
 
 **ToolkitId :** `toolkit.social.profile`
 
 ---
 
-## Obligations spécifiques MiyuSocialProfile
+## Obligations spÃ©cifiques MiyuSocialProfile
 
-- **Décision** (modification profil autorisée, follow autorisé) = **StrongFather**.
-- Toute écriture (profil, follow add/remove) = **WriteIntent** vers KindMother.
-- Distinction avec **MiyuProfile** (toolkit.identity.profile) : MiyuSocialProfile = profil social (bio, liens, abonnés) ; MiyuProfile = profil étendu forum (signature, avatar, rangs).
+- **DÃ©cision** (modification profil autorisÃ©e, follow autorisÃ©) = **StrongFather**.
+- Toute Ã©criture (profil, follow add/remove) = **WriteIntent** vers KindMother.
+- Distinction avec **MiyuProfile** (toolkit.identity.profile) : MiyuSocialProfile = profil social (bio, liens, abonnÃ©s) ; MiyuProfile = profil Ã©tendu forum (signature, avatar, rangs).
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Contrat de conformité
+**Statut :** Contrat de conformitÃ©
+

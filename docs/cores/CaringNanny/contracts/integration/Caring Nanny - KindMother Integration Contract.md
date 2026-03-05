@@ -1,246 +1,246 @@
-# Caring Nanny - KindMother Integration Contract
+﻿# Caring Nanny - KindMother Integration Contract
 
 ## 1. Contexte
 
-Ce document définit le **contrat d'intégration entre Caring Nanny et KindMother**. Il spécifie l'interface d'observation, le protocole, les types de données observées, et les garanties associées à l'observation de KindMother en tant qu'autorité des données.
+Ce document dÃ©finit le **contrat d'intÃ©gration entre Caring Nanny et KindMother**. Il spÃ©cifie l'interface d'observation, le protocole, les types de donnÃ©es observÃ©es, et les garanties associÃ©es Ã  l'observation de KindMother en tant qu'autoritÃ© des donnÃ©es.
 
-Ce document complète la Section 3 de la [Documentation Fondatrice](../../foundation/Caring%20Nanny%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
+Ce document complÃ¨te la Section 3 de la [Documentation Fondatrice](../../foundation/Caring%20Nanny%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
 - [Caring Nanny - Architecture et Composants](../../architecture/Caring%20Nanny%20-%20Architecture%20et%20Composants.md) pour l'architecture d'observation
 - [Caring Nanny - Invariants et Garanties](../governance/Caring%20Nanny%20-%20Invariants%20et%20Garanties.md) pour les invariants d'observation
 - [KindMother - Documentation Fondatrice](../../../KindMother/foundation/KindMother%20-%20Documentation%20Fondatrice.md) pour la nature de KindMother
-- [Connexion Inter-COG](../../../../reference/Miyukini%20Conceptual%20References%20-%20Connexion%20Inter-COG.md) pour le contexte inter-composants
+- [Connexion Inter-COG](..//..//..//..//miyukini-webway-system//reference//_index.md) pour le contexte inter-composants
 
-L'intégration respecte les [Lois d'Autonomie Système](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) : l'observation fonctionne localement sans dépendance externe (**LOI-1**), et l'état offline est reconnu comme normal (**LOI-2**).
+L'intÃ©gration respecte les [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md) : l'observation fonctionne localement sans dÃ©pendance externe (**LOI-1**), et l'Ã©tat offline est reconnu comme normal (**LOI-2**).
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
 Ce document couvre :
 - L'interface d'observation entre Caring Nanny et KindMother
 - Le protocole d'observation (unidirectionnel, passif)
-- Les types de données observées depuis KindMother
-- Les états dérivés de l'observation de KindMother
-- Les règles d'intégration spécifiques
-- La gestion des états et transitions
-- Les garanties de l'intégration
+- Les types de donnÃ©es observÃ©es depuis KindMother
+- Les Ã©tats dÃ©rivÃ©s de l'observation de KindMother
+- Les rÃ¨gles d'intÃ©gration spÃ©cifiques
+- La gestion des Ã©tats et transitions
+- Les garanties de l'intÃ©gration
 
 Ce document **ne couvre pas** :
-- Les détails internes de KindMother (voir documentation KindMother)
+- Les dÃ©tails internes de KindMother (voir documentation KindMother)
 - Les flux de propagation vers BondingBrother (voir BondingBrother Integration Contract)
-- Les décisions basées sur l'état observé (voir StrongFather Integration Contract)
-- Le modèle d'état global (voir State Model Contract)
+- Les dÃ©cisions basÃ©es sur l'Ã©tat observÃ© (voir StrongFather Integration Contract)
+- Le modÃ¨le d'Ã©tat global (voir State Model Contract)
 
 ---
 
 ## 3. Principe fondamental
 
-**Caring Nanny observe KindMother sans jamais interagir avec elle. La relation est strictement unidirectionnelle : KindMother produit des faits sur les données, Caring Nanny observe l'état de ces données. Caring Nanny ne modifie jamais, ne déclenche jamais, ne valide jamais.**
+**Caring Nanny observe KindMother sans jamais interagir avec elle. La relation est strictement unidirectionnelle : KindMother produit des faits sur les donnÃ©es, Caring Nanny observe l'Ã©tat de ces donnÃ©es. Caring Nanny ne modifie jamais, ne dÃ©clenche jamais, ne valide jamais.**
 
-La relation est asymétrique : KindMother gère les données et leur persistance, Caring Nanny observe passivement les signaux d'état émis par KindMother sans jamais influencer son fonctionnement.
+La relation est asymÃ©trique : KindMother gÃ¨re les donnÃ©es et leur persistance, Caring Nanny observe passivement les signaux d'Ã©tat Ã©mis par KindMother sans jamais influencer son fonctionnement.
 
 ---
 
-## 4. Nature de la relation Caring Nanny — KindMother
+## 4. Nature de la relation Caring Nanny â€” KindMother
 
 ### 4.1 Relation d'observation pure
 
 **Caring Nanny est un observateur passif de KindMother :**
-- Elle observe les signaux d'état émis par KindMother
-- Elle détecte les transitions d'état de la persistance
-- Elle agrège les informations en état cohérent
-- Elle ne sollicite jamais KindMother pour des opérations
+- Elle observe les signaux d'Ã©tat Ã©mis par KindMother
+- Elle dÃ©tecte les transitions d'Ã©tat de la persistance
+- Elle agrÃ¨ge les informations en Ã©tat cohÃ©rent
+- Elle ne sollicite jamais KindMother pour des opÃ©rations
 
-**Règle CN-KM-01 : Observation sans interaction**
+**RÃ¨gle CN-KM-01 : Observation sans interaction**
 
-Caring Nanny ne produit jamais de demande vers KindMother. Elle observe les signaux émis, elle ne provoque pas d'émission.
+Caring Nanny ne produit jamais de demande vers KindMother. Elle observe les signaux Ã©mis, elle ne provoque pas d'Ã©mission.
 
-**Règle CN-KM-02 : Aucune capacité d'écriture**
+**RÃ¨gle CN-KM-02 : Aucune capacitÃ© d'Ã©criture**
 
-Caring Nanny ne peut jamais modifier les données gérées par KindMother. Aucun WriteIntent, aucune modification, aucun delta ne peut être émis par Caring Nanny.
+Caring Nanny ne peut jamais modifier les donnÃ©es gÃ©rÃ©es par KindMother. Aucun WriteIntent, aucune modification, aucun delta ne peut Ãªtre Ã©mis par Caring Nanny.
 
-**Règle CN-KM-03 : Aucune influence sur la synchronisation**
+**RÃ¨gle CN-KM-03 : Aucune influence sur la synchronisation**
 
-Caring Nanny ne peut jamais déclencher, suspendre, ou modifier une synchronisation entre DB Mère et DB Filles. Elle observe l'état de synchronisation, elle n'agit jamais sur lui.
+Caring Nanny ne peut jamais dÃ©clencher, suspendre, ou modifier une synchronisation entre DB MÃ¨re et DB Filles. Elle observe l'Ã©tat de synchronisation, elle n'agit jamais sur lui.
 
-### 4.2 Séparation des responsabilités
+### 4.2 SÃ©paration des responsabilitÃ©s
 
-| Responsabilité | Caring Nanny | KindMother |
+| ResponsabilitÃ© | Caring Nanny | KindMother |
 |----------------|--------------|------------|
-| **Gérer les données** | ❌ Jamais | ✅ Exclusif |
-| **Observer l'état des données** | ✅ Exclusif | ❌ |
-| **Déclencher la synchronisation** | ❌ Jamais | ✅ Exclusif |
-| **Observer l'état de synchronisation** | ✅ Exclusif | ❌ |
-| **Valider les WriteIntent** | ❌ Jamais | ✅ Exclusif |
-| **Détecter les anomalies de persistance** | ✅ Exclusif | ❌ |
-| **Propager l'état observé** | ✅ Exclusif | ❌ |
+| **GÃ©rer les donnÃ©es** | âŒ Jamais | âœ… Exclusif |
+| **Observer l'Ã©tat des donnÃ©es** | âœ… Exclusif | âŒ |
+| **DÃ©clencher la synchronisation** | âŒ Jamais | âœ… Exclusif |
+| **Observer l'Ã©tat de synchronisation** | âœ… Exclusif | âŒ |
+| **Valider les WriteIntent** | âŒ Jamais | âœ… Exclusif |
+| **DÃ©tecter les anomalies de persistance** | âœ… Exclusif | âŒ |
+| **Propager l'Ã©tat observÃ©** | âœ… Exclusif | âŒ |
 
-**Règle CN-KM-04 : Aucun chevauchement d'autorité**
+**RÃ¨gle CN-KM-04 : Aucun chevauchement d'autoritÃ©**
 
-Caring Nanny n'a aucune autorité sur les données. KindMother n'a aucune responsabilité de propagation d'état. Les domaines sont strictement séparés.
+Caring Nanny n'a aucune autoritÃ© sur les donnÃ©es. KindMother n'a aucune responsabilitÃ© de propagation d'Ã©tat. Les domaines sont strictement sÃ©parÃ©s.
 
 ---
 
-## 5. Données observées depuis KindMother
+## 5. DonnÃ©es observÃ©es depuis KindMother
 
-### 5.1 État de santé de la persistance
+### 5.1 Ã‰tat de santÃ© de la persistance
 
 **PERSISTENCE_HEALTH**
-- **Objet d'observation :** Disponibilité et fonctionnement de la couche de persistance
+- **Objet d'observation :** DisponibilitÃ© et fonctionnement de la couche de persistance
 - **Valeurs possibles :** `available`, `degraded`, `unavailable`
-- **Signaux observés :** Temps de réponse, erreurs de lecture/écriture, intégrité des fichiers
+- **Signaux observÃ©s :** Temps de rÃ©ponse, erreurs de lecture/Ã©criture, intÃ©gritÃ© des fichiers
 
-**Règle CN-KM-OBS-01 : Observation non intrusive**
+**RÃ¨gle CN-KM-OBS-01 : Observation non intrusive**
 
-L'observation de la santé de la persistance n'interfère pas avec les opérations de KindMother. Caring Nanny observe les métriques exposées, elle ne provoque pas de requête de diagnostic.
+L'observation de la santÃ© de la persistance n'interfÃ¨re pas avec les opÃ©rations de KindMother. Caring Nanny observe les mÃ©triques exposÃ©es, elle ne provoque pas de requÃªte de diagnostic.
 
-### 5.2 État de synchronisation
+### 5.2 Ã‰tat de synchronisation
 
 **SYNC_STATUS**
-- **Objet d'observation :** État de la synchronisation entre DB Mère et DB Filles
+- **Objet d'observation :** Ã‰tat de la synchronisation entre DB MÃ¨re et DB Filles
 - **Valeurs possibles :** `synchronized`, `syncing`, `desynchronized`, `conflict`
-- **Signaux observés :** Deltas en attente, état de connexion, conflits détectés
+- **Signaux observÃ©s :** Deltas en attente, Ã©tat de connexion, conflits dÃ©tectÃ©s
 
-**Règle CN-KM-OBS-02 : État de synchronisation, pas action de synchronisation**
+**RÃ¨gle CN-KM-OBS-02 : Ã‰tat de synchronisation, pas action de synchronisation**
 
-Caring Nanny observe si la synchronisation est en cours, réussie, ou en échec. Elle ne peut jamais initier, annuler, ou modifier une synchronisation.
+Caring Nanny observe si la synchronisation est en cours, rÃ©ussie, ou en Ã©chec. Elle ne peut jamais initier, annuler, ou modifier une synchronisation.
 
-### 5.3 État des instances
+### 5.3 Ã‰tat des instances
 
 **INSTANCE_STATUS**
-- **Objet d'observation :** Disponibilité et connectivité des instances DB
-- **Données observées :**
-  - DB Mère : accessible, inaccessible
-  - DB Filles : connectées, déconnectées, nombre de filles actives
+- **Objet d'observation :** DisponibilitÃ© et connectivitÃ© des instances DB
+- **DonnÃ©es observÃ©es :**
+  - DB MÃ¨re : accessible, inaccessible
+  - DB Filles : connectÃ©es, dÃ©connectÃ©es, nombre de filles actives
   - Latence de communication entre instances
 
-**Règle CN-KM-OBS-03 : Observation globale des instances**
+**RÃ¨gle CN-KM-OBS-03 : Observation globale des instances**
 
-Caring Nanny observe l'état de toutes les instances connues. Elle agrège cette information en vue d'ensemble cohérente.
+Caring Nanny observe l'Ã©tat de toutes les instances connues. Elle agrÃ¨ge cette information en vue d'ensemble cohÃ©rente.
 
-### 5.4 État des opérations en cours
+### 5.4 Ã‰tat des opÃ©rations en cours
 
 **OPERATION_STATUS**
-- **Objet d'observation :** WriteIntent en attente, deltas non propagés
-- **Données observées :**
+- **Objet d'observation :** WriteIntent en attente, deltas non propagÃ©s
+- **DonnÃ©es observÃ©es :**
   - Nombre de WriteIntent en attente de validation
-  - Nombre de deltas non propagés
-  - Âge des opérations en attente
-  - Opérations en échec ou en retry
+  - Nombre de deltas non propagÃ©s
+  - Ã‚ge des opÃ©rations en attente
+  - OpÃ©rations en Ã©chec ou en retry
 
-**Règle CN-KM-OBS-04 : Observation quantitative, pas qualitative**
+**RÃ¨gle CN-KM-OBS-04 : Observation quantitative, pas qualitative**
 
-Caring Nanny observe le volume et l'état des opérations en cours. Elle ne connaît pas le contenu des WriteIntent ni des deltas.
+Caring Nanny observe le volume et l'Ã©tat des opÃ©rations en cours. Elle ne connaÃ®t pas le contenu des WriteIntent ni des deltas.
 
-### 5.5 Tableau récapitulatif des observations
+### 5.5 Tableau rÃ©capitulatif des observations
 
-| Catégorie | Données observées | Fréquence | Impact sur état système |
+| CatÃ©gorie | DonnÃ©es observÃ©es | FrÃ©quence | Impact sur Ã©tat systÃ¨me |
 |-----------|-------------------|-----------|------------------------|
-| **PERSISTENCE_HEALTH** | Disponibilité, temps de réponse, erreurs | Continue | `healthy` → `degraded` → `error` |
-| **SYNC_STATUS** | État sync, deltas, conflits | Continue | `syncing`, `conflict` |
-| **INSTANCE_STATUS** | DB Mère, DB Filles, latence | Continue | `offline` si DB Mère inaccessible |
-| **OPERATION_STATUS** | WriteIntent, deltas, âge | Continue | `degraded` si accumulation |
+| **PERSISTENCE_HEALTH** | DisponibilitÃ©, temps de rÃ©ponse, erreurs | Continue | `healthy` â†’ `degraded` â†’ `error` |
+| **SYNC_STATUS** | Ã‰tat sync, deltas, conflits | Continue | `syncing`, `conflict` |
+| **INSTANCE_STATUS** | DB MÃ¨re, DB Filles, latence | Continue | `offline` si DB MÃ¨re inaccessible |
+| **OPERATION_STATUS** | WriteIntent, deltas, Ã¢ge | Continue | `degraded` si accumulation |
 
 ---
 
-## 6. États dérivés de l'observation de KindMother
+## 6. Ã‰tats dÃ©rivÃ©s de l'observation de KindMother
 
-### 6.1 Contribution aux catégories d'état système
+### 6.1 Contribution aux catÃ©gories d'Ã©tat systÃ¨me
 
-L'observation de KindMother contribue directement aux catégories d'état système définies dans la Documentation Fondatrice :
+L'observation de KindMother contribue directement aux catÃ©gories d'Ã©tat systÃ¨me dÃ©finies dans la Documentation Fondatrice :
 
 **healthy**
 - Persistance disponible et fonctionnelle
-- Synchronisation à jour (si applicable)
-- Toutes les instances connectées
-- Aucune opération en échec
+- Synchronisation Ã  jour (si applicable)
+- Toutes les instances connectÃ©es
+- Aucune opÃ©ration en Ã©chec
 
 **degraded**
-- Temps de réponse de la persistance élevé
+- Temps de rÃ©ponse de la persistance Ã©levÃ©
 - Deltas en attente depuis longtemps
-- Certaines DB Filles déconnectées
+- Certaines DB Filles dÃ©connectÃ©es
 - WriteIntent en retry
 
 **offline**
-- DB Mère inaccessible
+- DB MÃ¨re inaccessible
 - Mode offline actif sur la DB Fille locale
 - Synchronisation impossible
 
 **syncing**
 - Synchronisation en cours entre instances
 - Deltas en transfert
-- État temporaire pendant la réconciliation
+- Ã‰tat temporaire pendant la rÃ©conciliation
 
 **error**
 - Persistance indisponible
-- Conflits de synchronisation non résolus
+- Conflits de synchronisation non rÃ©solus
 - Erreurs critiques sur la couche de stockage
 
-### 6.2 Règles de dérivation d'état
+### 6.2 RÃ¨gles de dÃ©rivation d'Ã©tat
 
-**Règle CN-KM-STATE-01 : Priorité des états**
+**RÃ¨gle CN-KM-STATE-01 : PrioritÃ© des Ã©tats**
 
-En cas de conditions multiples, l'état le plus critique prime :
+En cas de conditions multiples, l'Ã©tat le plus critique prime :
 `error` > `offline` > `syncing` > `degraded` > `healthy`
 
-**Règle CN-KM-STATE-02 : État offline reconnu comme normal**
+**RÃ¨gle CN-KM-STATE-02 : Ã‰tat offline reconnu comme normal**
 
-Conformément à LOI-2, l'état `offline` est un état normal, pas une erreur. La DB Fille fonctionne de manière autonome.
+ConformÃ©ment Ã  LOI-2, l'Ã©tat `offline` est un Ã©tat normal, pas une erreur. La DB Fille fonctionne de maniÃ¨re autonome.
 
-**Règle CN-KM-STATE-03 : Transition traçable**
+**RÃ¨gle CN-KM-STATE-03 : Transition traÃ§able**
 
-Chaque transition d'état dérivée de l'observation de KindMother est traçable : cause, timestamp, état précédent, état nouveau.
+Chaque transition d'Ã©tat dÃ©rivÃ©e de l'observation de KindMother est traÃ§able : cause, timestamp, Ã©tat prÃ©cÃ©dent, Ã©tat nouveau.
 
 ---
 
 ## 7. Protocole d'observation
 
-### 7.1 Modèle d'observation
+### 7.1 ModÃ¨le d'observation
 
-L'observation suit un modèle **push passif** : KindMother émet des signaux d'état, Caring Nanny les reçoit et les traite.
+L'observation suit un modÃ¨le **push passif** : KindMother Ã©met des signaux d'Ã©tat, Caring Nanny les reÃ§oit et les traite.
 
-**Caractéristiques :**
-- Unidirectionnel : KindMother → Caring Nanny
-- Passif : Caring Nanny reçoit, elle ne demande pas
-- Non bloquant : L'observation n'interfère pas avec KindMother
+**CaractÃ©ristiques :**
+- Unidirectionnel : KindMother â†’ Caring Nanny
+- Passif : Caring Nanny reÃ§oit, elle ne demande pas
+- Non bloquant : L'observation n'interfÃ¨re pas avec KindMother
 - Continue : Observation permanente, pas ponctuelle
 
-### 7.2 Format des signaux observés
+### 7.2 Format des signaux observÃ©s
 
 **Structure conceptuelle d'un signal :**
 
-| Élément | Description | Obligatoire |
+| Ã‰lÃ©ment | Description | Obligatoire |
 |---------|-------------|-------------|
-| `signal_id` | Identifiant unique du signal | ✅ Oui |
-| `source` | Origine du signal (kindmother) | ✅ Oui |
-| `type` | Type de signal (health, sync, instance, operation) | ✅ Oui |
-| `données` | Données spécifiques au type | ✅ Oui |
-| `timestamp` | Horodatage du signal | ✅ Oui |
-| `instance_id` | Instance concernée (si applicable) | ❌ Optionnel |
+| `signal_id` | Identifiant unique du signal | âœ… Oui |
+| `source` | Origine du signal (kindmother) | âœ… Oui |
+| `type` | Type de signal (health, sync, instance, operation) | âœ… Oui |
+| `donnÃ©es` | DonnÃ©es spÃ©cifiques au type | âœ… Oui |
+| `timestamp` | Horodatage du signal | âœ… Oui |
+| `instance_id` | Instance concernÃ©e (si applicable) | âŒ Optionnel |
 
-**Règle CN-KM-PROT-01 : Réception fidèle**
+**RÃ¨gle CN-KM-PROT-01 : RÃ©ception fidÃ¨le**
 
-Le signal est reçu intégralement, sans modification ni interprétation initiale.
+Le signal est reÃ§u intÃ©gralement, sans modification ni interprÃ©tation initiale.
 
-**Règle CN-KM-PROT-02 : Pas de filtrage à la source**
+**RÃ¨gle CN-KM-PROT-02 : Pas de filtrage Ã  la source**
 
-Caring Nanny reçoit tous les signaux de KindMother. Le filtrage éventuel est fait côté Caring Nanny, jamais côté KindMother.
+Caring Nanny reÃ§oit tous les signaux de KindMother. Le filtrage Ã©ventuel est fait cÃ´tÃ© Caring Nanny, jamais cÃ´tÃ© KindMother.
 
 ### 7.3 Traitement des signaux
 
-**Séquence de traitement :**
+**SÃ©quence de traitement :**
 
-1. **Réception** — Le signal est reçu depuis KindMother
-2. **Validation** — Le signal est validé (format, cohérence)
-3. **Classification** — Le signal est classé par type
-4. **Évaluation** — La condition observée est évaluée
-5. **Agrégation** — L'état partiel est agrégé à l'état global
-6. **Transition** — Si l'état global change, une transition est enregistrée
-7. **Propagation** — Le changement d'état est propagé (via BondingBrother)
+1. **RÃ©ception** â€” Le signal est reÃ§u depuis KindMother
+2. **Validation** â€” Le signal est validÃ© (format, cohÃ©rence)
+3. **Classification** â€” Le signal est classÃ© par type
+4. **Ã‰valuation** â€” La condition observÃ©e est Ã©valuÃ©e
+5. **AgrÃ©gation** â€” L'Ã©tat partiel est agrÃ©gÃ© Ã  l'Ã©tat global
+6. **Transition** â€” Si l'Ã©tat global change, une transition est enregistrÃ©e
+7. **Propagation** â€” Le changement d'Ã©tat est propagÃ© (via BondingBrother)
 
-**Règle CN-KM-PROT-03 : Traitement séquentiel**
+**RÃ¨gle CN-KM-PROT-03 : Traitement sÃ©quentiel**
 
-Les signaux sont traités dans l'ordre de réception. Aucun signal n'est sauté ou traité hors séquence.
+Les signaux sont traitÃ©s dans l'ordre de rÃ©ception. Aucun signal n'est sautÃ© ou traitÃ© hors sÃ©quence.
 
-**Règle CN-KM-PROT-04 : Pas d'effet de bord**
+**RÃ¨gle CN-KM-PROT-04 : Pas d'effet de bord**
 
 Le traitement d'un signal ne produit jamais d'effet de bord sur KindMother.
 
@@ -248,229 +248,229 @@ Le traitement d'un signal ne produit jamais d'effet de bord sur KindMother.
 
 ## 8. Flux d'observation
 
-### 8.1 Flux d'observation de santé de persistance
+### 8.1 Flux d'observation de santÃ© de persistance
 
-**Déclencheur :** Signal de santé émis par KindMother
+**DÃ©clencheur :** Signal de santÃ© Ã©mis par KindMother
 
-**Séquence :**
-1. KindMother détecte un changement de santé (disponibilité, latence)
-2. KindMother émet un signal `PERSISTENCE_HEALTH`
-3. Caring Nanny reçoit le signal
-4. Caring Nanny évalue la condition (healthy, degraded, unavailable)
-5. Caring Nanny met à jour l'état partiel de la persistance
-6. Si l'état global change, Caring Nanny enregistre la transition
-7. Caring Nanny propage le changement d'état
+**SÃ©quence :**
+1. KindMother dÃ©tecte un changement de santÃ© (disponibilitÃ©, latence)
+2. KindMother Ã©met un signal `PERSISTENCE_HEALTH`
+3. Caring Nanny reÃ§oit le signal
+4. Caring Nanny Ã©value la condition (healthy, degraded, unavailable)
+5. Caring Nanny met Ã  jour l'Ã©tat partiel de la persistance
+6. Si l'Ã©tat global change, Caring Nanny enregistre la transition
+7. Caring Nanny propage le changement d'Ã©tat
 
 ### 8.2 Flux d'observation de synchronisation
 
-**Déclencheur :** Changement d'état de synchronisation
+**DÃ©clencheur :** Changement d'Ã©tat de synchronisation
 
-**Séquence :**
-1. KindMother démarre, progresse, ou termine une synchronisation
-2. KindMother émet un signal `SYNC_STATUS`
-3. Caring Nanny reçoit le signal
-4. Caring Nanny évalue l'état (synchronized, syncing, desynchronized, conflict)
-5. Caring Nanny met à jour l'état partiel de la synchronisation
-6. Si l'état global change, Caring Nanny enregistre la transition
-7. Caring Nanny propage le changement d'état
+**SÃ©quence :**
+1. KindMother dÃ©marre, progresse, ou termine une synchronisation
+2. KindMother Ã©met un signal `SYNC_STATUS`
+3. Caring Nanny reÃ§oit le signal
+4. Caring Nanny Ã©value l'Ã©tat (synchronized, syncing, desynchronized, conflict)
+5. Caring Nanny met Ã  jour l'Ã©tat partiel de la synchronisation
+6. Si l'Ã©tat global change, Caring Nanny enregistre la transition
+7. Caring Nanny propage le changement d'Ã©tat
 
 ### 8.3 Flux d'observation d'instances
 
-**Déclencheur :** Changement de connectivité d'une instance
+**DÃ©clencheur :** Changement de connectivitÃ© d'une instance
 
-**Séquence :**
-1. Une instance DB (Mère ou Fille) change d'état de connexion
-2. KindMother émet un signal `INSTANCE_STATUS`
-3. Caring Nanny reçoit le signal
-4. Caring Nanny met à jour la cartographie des instances
-5. Caring Nanny évalue l'impact sur l'état global (notamment offline)
-6. Si l'état global change, Caring Nanny enregistre la transition
-7. Caring Nanny propage le changement d'état
+**SÃ©quence :**
+1. Une instance DB (MÃ¨re ou Fille) change d'Ã©tat de connexion
+2. KindMother Ã©met un signal `INSTANCE_STATUS`
+3. Caring Nanny reÃ§oit le signal
+4. Caring Nanny met Ã  jour la cartographie des instances
+5. Caring Nanny Ã©value l'impact sur l'Ã©tat global (notamment offline)
+6. Si l'Ã©tat global change, Caring Nanny enregistre la transition
+7. Caring Nanny propage le changement d'Ã©tat
 
-### 8.4 Diagramme de séquence
+### 8.4 Diagramme de sÃ©quence
 
 ```
-┌─────────────────┐                      ┌─────────────────┐
-│   KindMother    │                      │  Caring Nanny   │
-└────────┬────────┘                      └────────┬────────┘
-         │                                        │
-         │                                        │
-         ├── Signal (health/sync/instance) ─────►│
-         │                                        │
-         │                                        ├── Réception
-         │                                        │
-         │                                        ├── Validation
-         │                                        │
-         │                                        ├── Classification
-         │                                        │
-         │                                        ├── Évaluation
-         │                                        │
-         │                                        ├── Agrégation
-         │                                        │
-         │                                        ├── Transition?
-         │                                        │
-         │                                        ├── Propagation
-         │                                        │   (vers BondingBrother)
-         │                                        │
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚   KindMother    â”‚                      â”‚  Caring Nanny   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚                                        â”‚
+         â”‚                                        â”‚
+         â”œâ”€â”€ Signal (health/sync/instance) â”€â”€â”€â”€â”€â–ºâ”‚
+         â”‚                                        â”‚
+         â”‚                                        â”œâ”€â”€ RÃ©ception
+         â”‚                                        â”‚
+         â”‚                                        â”œâ”€â”€ Validation
+         â”‚                                        â”‚
+         â”‚                                        â”œâ”€â”€ Classification
+         â”‚                                        â”‚
+         â”‚                                        â”œâ”€â”€ Ã‰valuation
+         â”‚                                        â”‚
+         â”‚                                        â”œâ”€â”€ AgrÃ©gation
+         â”‚                                        â”‚
+         â”‚                                        â”œâ”€â”€ Transition?
+         â”‚                                        â”‚
+         â”‚                                        â”œâ”€â”€ Propagation
+         â”‚                                        â”‚   (vers BondingBrother)
+         â”‚                                        â”‚
 ```
 
 ---
 
-## 9. Règles d'intégration
+## 9. RÃ¨gles d'intÃ©gration
 
-### 9.1 Règles de communication
+### 9.1 RÃ¨gles de communication
 
-**Règle CN-KM-INT-01 : KindMother émet, Caring Nanny reçoit**
+**RÃ¨gle CN-KM-INT-01 : KindMother Ã©met, Caring Nanny reÃ§oit**
 
-La direction de communication est toujours KindMother → Caring Nanny. Caring Nanny ne sollicite jamais KindMother.
+La direction de communication est toujours KindMother â†’ Caring Nanny. Caring Nanny ne sollicite jamais KindMother.
 
-**Règle CN-KM-INT-02 : Pas de callback vers KindMother**
+**RÃ¨gle CN-KM-INT-02 : Pas de callback vers KindMother**
 
-Caring Nanny ne fournit jamais de callback ou de point d'entrée pour que KindMother l'interroge.
+Caring Nanny ne fournit jamais de callback ou de point d'entrÃ©e pour que KindMother l'interroge.
 
-**Règle CN-KM-INT-03 : Observation continue**
+**RÃ¨gle CN-KM-INT-03 : Observation continue**
 
-L'observation est continue et permanente. Il n'y a pas de mode "observation désactivée".
+L'observation est continue et permanente. Il n'y a pas de mode "observation dÃ©sactivÃ©e".
 
-### 9.2 Règles de données
+### 9.2 RÃ¨gles de donnÃ©es
 
-**Règle CN-KM-INT-04 : Données d'état uniquement**
+**RÃ¨gle CN-KM-INT-04 : DonnÃ©es d'Ã©tat uniquement**
 
-Caring Nanny observe uniquement les données d'état de KindMother, jamais les données métier (contenu, hiérarchie, etc.).
+Caring Nanny observe uniquement les donnÃ©es d'Ã©tat de KindMother, jamais les donnÃ©es mÃ©tier (contenu, hiÃ©rarchie, etc.).
 
-**Règle CN-KM-INT-05 : Pas d'accès à SQLite**
+**RÃ¨gle CN-KM-INT-05 : Pas d'accÃ¨s Ã  SQLite**
 
-Caring Nanny n'a jamais accès à la couche SQLite interne de KindMother. L'abstraction de KindMother est respectée.
+Caring Nanny n'a jamais accÃ¨s Ã  la couche SQLite interne de KindMother. L'abstraction de KindMother est respectÃ©e.
 
-**Règle CN-KM-INT-06 : Pas de connaissance des WriteIntent**
+**RÃ¨gle CN-KM-INT-06 : Pas de connaissance des WriteIntent**
 
-Caring Nanny connaît le nombre et l'âge des WriteIntent en attente, mais jamais leur contenu.
+Caring Nanny connaÃ®t le nombre et l'Ã¢ge des WriteIntent en attente, mais jamais leur contenu.
 
-### 9.3 Règles de traçabilité
+### 9.3 RÃ¨gles de traÃ§abilitÃ©
 
-**Règle CN-KM-INT-07 : Traçabilité des signaux**
+**RÃ¨gle CN-KM-INT-07 : TraÃ§abilitÃ© des signaux**
 
-Tous les signaux reçus de KindMother sont enregistrés dans l'historique de Caring Nanny.
+Tous les signaux reÃ§us de KindMother sont enregistrÃ©s dans l'historique de Caring Nanny.
 
-**Règle CN-KM-INT-08 : Corrélation signal-transition**
+**RÃ¨gle CN-KM-INT-08 : CorrÃ©lation signal-transition**
 
-Chaque transition d'état est corrélée au(x) signal(aux) qui l'a(ont) provoquée.
+Chaque transition d'Ã©tat est corrÃ©lÃ©e au(x) signal(aux) qui l'a(ont) provoquÃ©e.
 
 ---
 
-## 10. Gestion des états spéciaux
+## 10. Gestion des Ã©tats spÃ©ciaux
 
-### 10.1 État offline
+### 10.1 Ã‰tat offline
 
 **Comportement :**
-- Caring Nanny détecte l'inaccessibilité de la DB Mère
-- L'état global passe à `offline`
+- Caring Nanny dÃ©tecte l'inaccessibilitÃ© de la DB MÃ¨re
+- L'Ã©tat global passe Ã  `offline`
 - L'observation continue sur les signaux locaux (DB Fille)
-- La transition est enregistrée avec la cause
+- La transition est enregistrÃ©e avec la cause
 
-**Règle CN-KM-OFFLINE-01 : Offline est un état normal**
+**RÃ¨gle CN-KM-OFFLINE-01 : Offline est un Ã©tat normal**
 
-Conformément à LOI-2, l'état `offline` n'est pas une erreur. C'est un état normal de fonctionnement autonome.
+ConformÃ©ment Ã  LOI-2, l'Ã©tat `offline` n'est pas une erreur. C'est un Ã©tat normal de fonctionnement autonome.
 
-**Règle CN-KM-OFFLINE-02 : Observation locale maintenue**
+**RÃ¨gle CN-KM-OFFLINE-02 : Observation locale maintenue**
 
 En mode offline, Caring Nanny continue d'observer les signaux de la DB Fille locale.
 
-### 10.2 État de conflit
+### 10.2 Ã‰tat de conflit
 
 **Comportement :**
-- KindMother détecte un conflit de synchronisation
-- Caring Nanny reçoit un signal `SYNC_STATUS` avec `conflict`
-- L'état global inclut `conflict` dans son évaluation
-- Caring Nanny propage l'information, mais ne résout pas le conflit
+- KindMother dÃ©tecte un conflit de synchronisation
+- Caring Nanny reÃ§oit un signal `SYNC_STATUS` avec `conflict`
+- L'Ã©tat global inclut `conflict` dans son Ã©valuation
+- Caring Nanny propage l'information, mais ne rÃ©sout pas le conflit
 
-**Règle CN-KM-CONFLICT-01 : Observation du conflit, pas résolution**
+**RÃ¨gle CN-KM-CONFLICT-01 : Observation du conflit, pas rÃ©solution**
 
-Caring Nanny observe l'existence d'un conflit. La résolution appartient à KindMother ou au produit.
+Caring Nanny observe l'existence d'un conflit. La rÃ©solution appartient Ã  KindMother ou au produit.
 
-### 10.3 État d'erreur de persistance
+### 10.3 Ã‰tat d'erreur de persistance
 
 **Comportement :**
-- KindMother détecte une erreur critique de persistance
-- Caring Nanny reçoit un signal `PERSISTENCE_HEALTH` avec `unavailable`
-- L'état global passe à `error`
-- Caring Nanny propage l'information immédiatement
+- KindMother dÃ©tecte une erreur critique de persistance
+- Caring Nanny reÃ§oit un signal `PERSISTENCE_HEALTH` avec `unavailable`
+- L'Ã©tat global passe Ã  `error`
+- Caring Nanny propage l'information immÃ©diatement
 
-**Règle CN-KM-ERROR-01 : Propagation immédiate des erreurs critiques**
+**RÃ¨gle CN-KM-ERROR-01 : Propagation immÃ©diate des erreurs critiques**
 
-Les erreurs critiques de persistance sont propagées immédiatement, sans délai d'agrégation.
+Les erreurs critiques de persistance sont propagÃ©es immÃ©diatement, sans dÃ©lai d'agrÃ©gation.
 
 ---
 
-## 11. Garanties de l'intégration
+## 11. Garanties de l'intÃ©gration
 
-### 11.1 Garantie de passivité
+### 11.1 Garantie de passivitÃ©
 
 **Engagement :** Caring Nanny n'a jamais d'effet sur KindMother. L'observation est strictement passive et unidirectionnelle.
 
-### 11.2 Garantie de fidélité
+### 11.2 Garantie de fidÃ©litÃ©
 
-**Engagement :** Les signaux observés sont traités fidèlement. Caring Nanny ne modifie pas, n'interprète pas subjectivement, ne filtre pas arbitrairement les signaux.
+**Engagement :** Les signaux observÃ©s sont traitÃ©s fidÃ¨lement. Caring Nanny ne modifie pas, n'interprÃ¨te pas subjectivement, ne filtre pas arbitrairement les signaux.
 
-### 11.3 Garantie de complétude
+### 11.3 Garantie de complÃ©tude
 
-**Engagement :** Tous les signaux émis par KindMother sont observés. Aucun signal n'est ignoré ou perdu.
+**Engagement :** Tous les signaux Ã©mis par KindMother sont observÃ©s. Aucun signal n'est ignorÃ© ou perdu.
 
-### 11.4 Garantie de traçabilité
+### 11.4 Garantie de traÃ§abilitÃ©
 
-**Engagement :** Toute observation de KindMother est traçable de bout en bout. L'historique permet de reconstituer l'évolution de l'état observé.
+**Engagement :** Toute observation de KindMother est traÃ§able de bout en bout. L'historique permet de reconstituer l'Ã©volution de l'Ã©tat observÃ©.
 
-### 11.5 Garantie de cohérence
+### 11.5 Garantie de cohÃ©rence
 
-**Engagement :** L'état dérivé de l'observation de KindMother est cohérent avec les autres sources d'observation. Pas de contradiction dans l'état global.
+**Engagement :** L'Ã©tat dÃ©rivÃ© de l'observation de KindMother est cohÃ©rent avec les autres sources d'observation. Pas de contradiction dans l'Ã©tat global.
 
 ### 11.6 Garantie de non-blocage
 
-**Engagement :** L'observation de KindMother ne bloque jamais le fonctionnement de KindMother ou du système. Conformité à INV-CN-6.
+**Engagement :** L'observation de KindMother ne bloque jamais le fonctionnement de KindMother ou du systÃ¨me. ConformitÃ© Ã  INV-CN-6.
 
 ---
 
-## 12. Invariants de l'intégration
+## 12. Invariants de l'intÃ©gration
 
 ### 12.1 Invariants de relation
 
 **INV-CN-KM-1 : Observation unidirectionnelle**
 
-KindMother émet des signaux. Caring Nanny reçoit et observe. La direction est toujours KindMother → Caring Nanny.
+KindMother Ã©met des signaux. Caring Nanny reÃ§oit et observe. La direction est toujours KindMother â†’ Caring Nanny.
 
-**INV-CN-KM-2 : Aucune capacité de modification**
+**INV-CN-KM-2 : Aucune capacitÃ© de modification**
 
-Caring Nanny ne peut jamais modifier l'état ou les données de KindMother. Aucune exception.
+Caring Nanny ne peut jamais modifier l'Ã©tat ou les donnÃ©es de KindMother. Aucune exception.
 
 **INV-CN-KM-3 : Respect de l'abstraction KindMother**
 
-Caring Nanny n'accède jamais aux détails internes de KindMother (SQLite, schémas, etc.). Elle observe uniquement les signaux d'état exposés.
+Caring Nanny n'accÃ¨de jamais aux dÃ©tails internes de KindMother (SQLite, schÃ©mas, etc.). Elle observe uniquement les signaux d'Ã©tat exposÃ©s.
 
-### 12.2 Invariants de données
+### 12.2 Invariants de donnÃ©es
 
-**INV-CN-KM-4 : Observation d'état, pas de contenu**
+**INV-CN-KM-4 : Observation d'Ã©tat, pas de contenu**
 
-Caring Nanny observe l'état des données (santé, synchronisation, disponibilité), jamais le contenu des données.
+Caring Nanny observe l'Ã©tat des donnÃ©es (santÃ©, synchronisation, disponibilitÃ©), jamais le contenu des donnÃ©es.
 
 **INV-CN-KM-5 : Signaux complets**
 
-Tous les signaux de KindMother sont reçus et traités. Aucun signal n'est filtré à la source.
+Tous les signaux de KindMother sont reÃ§us et traitÃ©s. Aucun signal n'est filtrÃ© Ã  la source.
 
 ### 12.3 Invariants de protocole
 
-**INV-CN-KM-6 : Traitement séquentiel**
+**INV-CN-KM-6 : Traitement sÃ©quentiel**
 
-Les signaux sont traités dans l'ordre de réception. La séquence est préservée.
+Les signaux sont traitÃ©s dans l'ordre de rÃ©ception. La sÃ©quence est prÃ©servÃ©e.
 
-**INV-CN-KM-7 : Traçabilité complète**
+**INV-CN-KM-7 : TraÃ§abilitÃ© complÃ¨te**
 
-Chaque signal reçu est enregistré dans l'historique avec son contexte complet.
+Chaque signal reÃ§u est enregistrÃ© dans l'historique avec son contexte complet.
 
 ---
 
 ## 13. Exemples
 
-### 13.1 Observation de santé normale
+### 13.1 Observation de santÃ© normale
 
 **Signal KindMother :**
 ```
@@ -478,7 +478,7 @@ Chaque signal reçu est enregistré dans l'historique avec son contexte complet.
   "signal_id": "sig-km-001",
   "source": "kindmother",
   "type": "PERSISTENCE_HEALTH",
-  "données": {
+  "donnÃ©es": {
     "status": "available",
     "latency_ms": 5,
     "error_count": 0
@@ -489,13 +489,13 @@ Chaque signal reçu est enregistré dans l'historique avec son contexte complet.
 ```
 
 **Traitement Caring Nanny :**
-- Réception du signal
-- Évaluation : persistance saine (latency < 50ms, error_count = 0)
-- État partiel : `healthy`
-- Pas de transition (état stable)
+- RÃ©ception du signal
+- Ã‰valuation : persistance saine (latency < 50ms, error_count = 0)
+- Ã‰tat partiel : `healthy`
+- Pas de transition (Ã©tat stable)
 - Enregistrement dans l'historique
 
-### 13.2 Détection de dégradation
+### 13.2 DÃ©tection de dÃ©gradation
 
 **Signal KindMother :**
 ```
@@ -503,7 +503,7 @@ Chaque signal reçu est enregistré dans l'historique avec son contexte complet.
   "signal_id": "sig-km-002",
   "source": "kindmother",
   "type": "PERSISTENCE_HEALTH",
-  "données": {
+  "donnÃ©es": {
     "status": "available",
     "latency_ms": 250,
     "error_count": 3
@@ -514,12 +514,12 @@ Chaque signal reçu est enregistré dans l'historique avec son contexte complet.
 ```
 
 **Traitement Caring Nanny :**
-- Réception du signal
-- Évaluation : latence élevée (> 100ms), erreurs présentes
-- État partiel : `degraded`
-- Transition : `healthy` → `degraded`
-- Cause : "latence élevée (250ms), erreurs (3)"
-- Propagation du changement d'état
+- RÃ©ception du signal
+- Ã‰valuation : latence Ã©levÃ©e (> 100ms), erreurs prÃ©sentes
+- Ã‰tat partiel : `degraded`
+- Transition : `healthy` â†’ `degraded`
+- Cause : "latence Ã©levÃ©e (250ms), erreurs (3)"
+- Propagation du changement d'Ã©tat
 
 ### 13.3 Passage en mode offline
 
@@ -529,7 +529,7 @@ Chaque signal reçu est enregistré dans l'historique avec son contexte complet.
   "signal_id": "sig-km-003",
   "source": "kindmother",
   "type": "INSTANCE_STATUS",
-  "données": {
+  "donnÃ©es": {
     "db_mere": {
       "status": "unreachable",
       "last_seen": "2026-01-27T13:55:00Z"
@@ -545,13 +545,13 @@ Chaque signal reçu est enregistré dans l'historique avec son contexte complet.
 ```
 
 **Traitement Caring Nanny :**
-- Réception du signal
-- Évaluation : DB Mère inaccessible, DB Fille en mode offline
-- État partiel : `offline`
-- Transition : `degraded` → `offline`
-- Cause : "DB Mère inaccessible depuis 15 minutes"
-- État `offline` reconnu comme normal (LOI-2)
-- Propagation du changement d'état
+- RÃ©ception du signal
+- Ã‰valuation : DB MÃ¨re inaccessible, DB Fille en mode offline
+- Ã‰tat partiel : `offline`
+- Transition : `degraded` â†’ `offline`
+- Cause : "DB MÃ¨re inaccessible depuis 15 minutes"
+- Ã‰tat `offline` reconnu comme normal (LOI-2)
+- Propagation du changement d'Ã©tat
 
 ### 13.4 Synchronisation en cours
 
@@ -561,7 +561,7 @@ Chaque signal reçu est enregistré dans l'historique avec son contexte complet.
   "signal_id": "sig-km-004",
   "source": "kindmother",
   "type": "SYNC_STATUS",
-  "données": {
+  "donnÃ©es": {
     "status": "syncing",
     "deltas_pending": 42,
     "progress_percent": 65,
@@ -573,14 +573,14 @@ Chaque signal reçu est enregistré dans l'historique avec son contexte complet.
 ```
 
 **Traitement Caring Nanny :**
-- Réception du signal
-- Évaluation : synchronisation en cours
-- État partiel : `syncing`
-- Transition : `offline` → `syncing`
-- Cause : "Reconnexion DB Mère, synchronisation démarrée"
-- Propagation du changement d'état
+- RÃ©ception du signal
+- Ã‰valuation : synchronisation en cours
+- Ã‰tat partiel : `syncing`
+- Transition : `offline` â†’ `syncing`
+- Cause : "Reconnexion DB MÃ¨re, synchronisation dÃ©marrÃ©e"
+- Propagation du changement d'Ã©tat
 
-### 13.5 Détection de conflit
+### 13.5 DÃ©tection de conflit
 
 **Signal KindMother :**
 ```
@@ -588,7 +588,7 @@ Chaque signal reçu est enregistré dans l'historique avec son contexte complet.
   "signal_id": "sig-km-005",
   "source": "kindmother",
   "type": "SYNC_STATUS",
-  "données": {
+  "donnÃ©es": {
     "status": "conflict",
     "conflict_count": 3,
     "conflict_types": ["write_intent_collision", "version_mismatch"],
@@ -600,27 +600,27 @@ Chaque signal reçu est enregistré dans l'historique avec son contexte complet.
 ```
 
 **Traitement Caring Nanny :**
-- Réception du signal
-- Évaluation : conflits de synchronisation détectés
-- État partiel : `syncing` avec `conflict`
-- Information propagée : conflits à résoudre
-- Caring Nanny n'intervient pas dans la résolution
-- Propagation de l'état incluant les informations de conflit
+- RÃ©ception du signal
+- Ã‰valuation : conflits de synchronisation dÃ©tectÃ©s
+- Ã‰tat partiel : `syncing` avec `conflict`
+- Information propagÃ©e : conflits Ã  rÃ©soudre
+- Caring Nanny n'intervient pas dans la rÃ©solution
+- Propagation de l'Ã©tat incluant les informations de conflit
 
 ---
 
 ## 14. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit l'interface et le protocole que Caring Nanny doit respecter pour observer KindMother.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit l'interface et le protocole que Caring Nanny doit respecter pour observer KindMother.
 
-Toute implémentation de l'intégration avec KindMother doit respecter ce contrat. Toute violation (tentative de modification, d'interaction bidirectionnelle, d'accès aux données) constitue une rupture de contrat grave.
+Toute implÃ©mentation de l'intÃ©gration avec KindMother doit respecter ce contrat. Toute violation (tentative de modification, d'interaction bidirectionnelle, d'accÃ¨s aux donnÃ©es) constitue une rupture de contrat grave.
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-27  
-**Statut :** CONTRAT — Normatif  
-**Dépendances :**
+**Statut :** CONTRAT â€” Normatif  
+**DÃ©pendances :**
 - Caring Nanny - Documentation Fondatrice v1.6 (Section 3)
 - Caring Nanny - Architecture et Composants v1.0
 - Caring Nanny - Invariants et Garanties v1.0
@@ -628,47 +628,48 @@ Toute implémentation de l'intégration avec KindMother doit respecter ce contra
 
 ---
 
-## 15. Mini log de génération
+## 15. Mini log de gÃ©nÃ©ration
 
-### Décision éditoriale E1 : Nature de la relation
+### DÃ©cision Ã©ditoriale E1 : Nature de la relation
 
-**Décision prise :** La relation est strictement unidirectionnelle d'observation : KindMother émet des signaux d'état, Caring Nanny les observe passivement. Cette approche diffère des contrats d'intégration BondingBrother (délégation bidirectionnelle) ou Master Butler (consultation).
+**DÃ©cision prise :** La relation est strictement unidirectionnelle d'observation : KindMother Ã©met des signaux d'Ã©tat, Caring Nanny les observe passivement. Cette approche diffÃ¨re des contrats d'intÃ©gration BondingBrother (dÃ©lÃ©gation bidirectionnelle) ou Master Butler (consultation).
 
-**Application :** Tout le document est structuré autour de l'observation passive sans interaction.
+**Application :** Tout le document est structurÃ© autour de l'observation passive sans interaction.
 
-### Décision éditoriale E2 : Types de données observées
+### DÃ©cision Ã©ditoriale E2 : Types de donnÃ©es observÃ©es
 
-**Décision prise :** Les données observées sont catégorisées en 4 types : santé de la persistance, état de synchronisation, état des instances, état des opérations. Ces catégories correspondent aux informations mentionnées dans la Documentation Fondatrice.
+**DÃ©cision prise :** Les donnÃ©es observÃ©es sont catÃ©gorisÃ©es en 4 types : santÃ© de la persistance, Ã©tat de synchronisation, Ã©tat des instances, Ã©tat des opÃ©rations. Ces catÃ©gories correspondent aux informations mentionnÃ©es dans la Documentation Fondatrice.
 
-**Application :** Section 5 définit exhaustivement chaque type d'observation.
+**Application :** Section 5 dÃ©finit exhaustivement chaque type d'observation.
 
 ### Warning W1 : Risque de confusion observation/action
 
-**Warning rencontré :** Risque que l'observation soit interprétée comme permettant une action corrective.
+**Warning rencontrÃ© :** Risque que l'observation soit interprÃ©tÃ©e comme permettant une action corrective.
 
-**Décision prise :** Renforcement explicite dans toutes les sections que Caring Nanny ne peut jamais agir sur KindMother. Règles CN-KM-01, CN-KM-02, CN-KM-03 établissent l'impossibilité d'action.
+**DÃ©cision prise :** Renforcement explicite dans toutes les sections que Caring Nanny ne peut jamais agir sur KindMother. RÃ¨gles CN-KM-01, CN-KM-02, CN-KM-03 Ã©tablissent l'impossibilitÃ© d'action.
 
-**Correction effectuée :** Ajout d'invariants INV-CN-KM-1, INV-CN-KM-2, INV-CN-KM-3 pour formaliser cette impossibilité.
+**Correction effectuÃ©e :** Ajout d'invariants INV-CN-KM-1, INV-CN-KM-2, INV-CN-KM-3 pour formaliser cette impossibilitÃ©.
 
-### Warning W2 : État offline
+### Warning W2 : Ã‰tat offline
 
-**Warning rencontré :** Risque que l'état offline soit traité comme une erreur.
+**Warning rencontrÃ© :** Risque que l'Ã©tat offline soit traitÃ© comme une erreur.
 
-**Décision prise :** Conformément à LOI-2, l'état offline est explicitement reconnu comme un état normal. Règles CN-KM-OFFLINE-01 et CN-KM-STATE-02 clarifient ce point.
+**DÃ©cision prise :** ConformÃ©ment Ã  LOI-2, l'Ã©tat offline est explicitement reconnu comme un Ã©tat normal. RÃ¨gles CN-KM-OFFLINE-01 et CN-KM-STATE-02 clarifient ce point.
 
-**Correction effectuée :** Section 10.1 dédiée à l'état offline.
+**Correction effectuÃ©e :** Section 10.1 dÃ©diÃ©e Ã  l'Ã©tat offline.
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-**Vérification effectuée :**
-- ✅ Cohérence avec Caring Nanny - Documentation Fondatrice : Confirmée (Section 3, relation avec KindMother)
-- ✅ Cohérence avec KindMother - Documentation Fondatrice : Confirmée (relation d'observation mentionnée Section 7)
-- ✅ Conformité LOI-1 : Confirmée (observation locale, aucune dépendance externe)
-- ✅ Conformité LOI-2 : Confirmée (offline reconnu comme état normal)
-- ✅ Conformité INV-CN-1 à INV-CN-7 : Confirmée (observateur pur, aucune modification, non-bloquant)
+**VÃ©rification effectuÃ©e :**
+- âœ… CohÃ©rence avec Caring Nanny - Documentation Fondatrice : ConfirmÃ©e (Section 3, relation avec KindMother)
+- âœ… CohÃ©rence avec KindMother - Documentation Fondatrice : ConfirmÃ©e (relation d'observation mentionnÃ©e Section 7)
+- âœ… ConformitÃ© LOI-1 : ConfirmÃ©e (observation locale, aucune dÃ©pendance externe)
+- âœ… ConformitÃ© LOI-2 : ConfirmÃ©e (offline reconnu comme Ã©tat normal)
+- âœ… ConformitÃ© INV-CN-1 Ã  INV-CN-7 : ConfirmÃ©e (observateur pur, aucune modification, non-bloquant)
 
-**Conclusion :** Aucune contradiction détectée. Le document est cohérent avec l'écosystème documentaire existant.
+**Conclusion :** Aucune contradiction dÃ©tectÃ©e. Le document est cohÃ©rent avec l'Ã©cosystÃ¨me documentaire existant.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

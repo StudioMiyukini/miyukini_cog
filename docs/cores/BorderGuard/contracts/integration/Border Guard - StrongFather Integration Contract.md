@@ -1,240 +1,240 @@
-# Border Guard - StrongFather Integration Contract
+﻿# Border Guard - StrongFather Integration Contract
 
 ## 1. Contexte
 
-Ce document définit le **contrat d'intégration entre Border Guard et StrongFather**. Il spécifie l'interface, le protocole, les règles de communication, et les garanties associées à l'intégration avec StrongFather en tant qu'autorité des décisions stratégiques et politiques.
+Ce document dÃ©finit le **contrat d'intÃ©gration entre Border Guard et StrongFather**. Il spÃ©cifie l'interface, le protocole, les rÃ¨gles de communication, et les garanties associÃ©es Ã  l'intÃ©gration avec StrongFather en tant qu'autoritÃ© des dÃ©cisions stratÃ©giques et politiques.
 
-Ce document complète la Section 8 de la [Documentation Fondatrice](../../foundation/Border%20Guard%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
+Ce document complÃ¨te la Section 8 de la [Documentation Fondatrice](../../foundation/Border%20Guard%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
 - [StrongFather - Documentation Fondatrice](../../../StrongFather/foundation/StrongFather%20-%20Documentation%20Fondatrice.md) pour la nature de StrongFather
-- [Miyukini Conceptual References - Security Protocols](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Protocols.md) pour les protocoles de sécurité temps réel et asynchrone
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) pour la conformité LOI-1 à LOI-6
+- [Miyukini Conceptual References - Security Protocols](..//..//..//..//miyukini-webway-system//reference//_index.md) pour les protocoles de sÃ©curitÃ© temps rÃ©el et asynchrone
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) pour la conformitÃ© LOI-1 Ã  LOI-6
 
-L'intégration respecte les Lois d'Autonomie Système : toutes les définitions de frontières sont locales et ne requièrent aucune dépendance externe (**LOI-1**).
+L'intÃ©gration respecte les Lois d'Autonomie SystÃ¨me : toutes les dÃ©finitions de frontiÃ¨res sont locales et ne requiÃ¨rent aucune dÃ©pendance externe (**LOI-1**).
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
 Ce document couvre :
 - L'interface contractuelle entre Border Guard et StrongFather
-- Le protocole de communication (consultation de contexte de frontière)
-- Les types d'informations échangées
-- Les règles d'intégration spécifiques
-- La gestion des erreurs et des réponses
-- Les garanties de l'intégration
+- Le protocole de communication (consultation de contexte de frontiÃ¨re)
+- Les types d'informations Ã©changÃ©es
+- Les rÃ¨gles d'intÃ©gration spÃ©cifiques
+- La gestion des erreurs et des rÃ©ponses
+- Les garanties de l'intÃ©gration
 
 Ce document **ne couvre pas** :
-- Les détails internes de StrongFather (voir documentation StrongFather)
-- Les détails internes du moteur de définition de frontières (voir Architecture)
-- L'intégration avec BondingBrother (voir BondingBrother Integration Contract)
-- L'intégration avec Caring Nanny (voir CaringNanny Integration Contract)
+- Les dÃ©tails internes de StrongFather (voir documentation StrongFather)
+- Les dÃ©tails internes du moteur de dÃ©finition de frontiÃ¨res (voir Architecture)
+- L'intÃ©gration avec BondingBrother (voir BondingBrother Integration Contract)
+- L'intÃ©gration avec Caring Nanny (voir CaringNanny Integration Contract)
 
 ---
 
 ## 3. Principe fondamental
 
-**Border Guard fournit à StrongFather le contexte de confiance et de frontière pour enrichir l'évaluation des intentions. StrongFather consulte Border Guard pour connaître le niveau de confiance d'une source et les règles de franchissement applicables. Border Guard ne participe jamais à la décision elle-même.**
+**Border Guard fournit Ã  StrongFather le contexte de confiance et de frontiÃ¨re pour enrichir l'Ã©valuation des intentions. StrongFather consulte Border Guard pour connaÃ®tre le niveau de confiance d'une source et les rÃ¨gles de franchissement applicables. Border Guard ne participe jamais Ã  la dÃ©cision elle-mÃªme.**
 
-La relation est de **conseil** : Border Guard informe StrongFather sur le contexte de frontière ; StrongFather décide en tenant compte de cette information. Cette relation est unidirectionnelle en termes de flux décisionnel : Border Guard informe, StrongFather décide.
+La relation est de **conseil** : Border Guard informe StrongFather sur le contexte de frontiÃ¨re ; StrongFather dÃ©cide en tenant compte de cette information. Cette relation est unidirectionnelle en termes de flux dÃ©cisionnel : Border Guard informe, StrongFather dÃ©cide.
 
 ---
 
-## 4. Nature de la relation Border Guard — StrongFather
+## 4. Nature de la relation Border Guard â€” StrongFather
 
 ### 4.1 Relation de conseil
 
 **Border Guard informe StrongFather de :**
 - Le niveau de confiance de la source d'une intention (trusted, verified, unknown, hostile)
-- La nature de la frontière traversée par l'intention (externe, interne, intégration)
-- Les règles de franchissement applicables à cette frontière
-- L'état de l'intégration concernée (si applicable)
+- La nature de la frontiÃ¨re traversÃ©e par l'intention (externe, interne, intÃ©gration)
+- Les rÃ¨gles de franchissement applicables Ã  cette frontiÃ¨re
+- L'Ã©tat de l'intÃ©gration concernÃ©e (si applicable)
 
 **StrongFather consulte Border Guard pour :**
 - Contextualiser une intention avec son niveau de confiance
-- Connaître les règles de franchissement avant évaluation
-- Intégrer la classification de source dans la décision
+- ConnaÃ®tre les rÃ¨gles de franchissement avant Ã©valuation
+- IntÃ©grer la classification de source dans la dÃ©cision
 
-**Règle BG-SF-01 : Conseil sans décision**
+**RÃ¨gle BG-SF-01 : Conseil sans dÃ©cision**
 
-Border Guard ne participe jamais aux décisions de StrongFather. Il fournit des informations de classification et de règles, sans recommandation, sans interprétation décisionnelle, sans jugement sur la validité de l'intention.
+Border Guard ne participe jamais aux dÃ©cisions de StrongFather. Il fournit des informations de classification et de rÃ¨gles, sans recommandation, sans interprÃ©tation dÃ©cisionnelle, sans jugement sur la validitÃ© de l'intention.
 
-**Règle BG-SF-02 : Consultation facultative**
+**RÃ¨gle BG-SF-02 : Consultation facultative**
 
-StrongFather peut consulter Border Guard, mais n'est pas obligé de le faire. La décision d'intégrer le contexte de frontière dans une évaluation appartient à StrongFather.
+StrongFather peut consulter Border Guard, mais n'est pas obligÃ© de le faire. La dÃ©cision d'intÃ©grer le contexte de frontiÃ¨re dans une Ã©valuation appartient Ã  StrongFather.
 
-**Règle BG-SF-03 : Aucune influence sur le résultat**
+**RÃ¨gle BG-SF-03 : Aucune influence sur le rÃ©sultat**
 
-Le contexte de frontière fourni par Border Guard n'influence jamais directement le résultat d'une évaluation. StrongFather utilise ce contexte comme information, mais la décision reste entièrement sous son autorité selon ses politiques.
+Le contexte de frontiÃ¨re fourni par Border Guard n'influence jamais directement le rÃ©sultat d'une Ã©valuation. StrongFather utilise ce contexte comme information, mais la dÃ©cision reste entiÃ¨rement sous son autoritÃ© selon ses politiques.
 
-### 4.2 Séparation des responsabilités
+### 4.2 SÃ©paration des responsabilitÃ©s
 
-| Responsabilité | Border Guard | StrongFather |
+| ResponsabilitÃ© | Border Guard | StrongFather |
 |----------------|--------------|--------------|
-| **Définir les frontières** | ✅ Exclusif | ❌ Jamais |
-| **Classifier les niveaux de confiance** | ✅ Exclusif | ❌ Consomme |
-| **Établir les règles de franchissement** | ✅ Exclusif | ❌ Consomme |
-| **Décider si autorisé** | ❌ Jamais | ✅ Exclusif |
-| **Appliquer des politiques** | ❌ Jamais | ✅ Exclusif |
-| **Évaluer des intentions** | ❌ Jamais | ✅ Exclusif |
-| **Modifier l'état** | ❌ Jamais | ❌ Jamais |
-| **Fournir le contexte frontière** | ✅ Exclusif | ❌ Consomme |
+| **DÃ©finir les frontiÃ¨res** | âœ… Exclusif | âŒ Jamais |
+| **Classifier les niveaux de confiance** | âœ… Exclusif | âŒ Consomme |
+| **Ã‰tablir les rÃ¨gles de franchissement** | âœ… Exclusif | âŒ Consomme |
+| **DÃ©cider si autorisÃ©** | âŒ Jamais | âœ… Exclusif |
+| **Appliquer des politiques** | âŒ Jamais | âœ… Exclusif |
+| **Ã‰valuer des intentions** | âŒ Jamais | âœ… Exclusif |
+| **Modifier l'Ã©tat** | âŒ Jamais | âŒ Jamais |
+| **Fournir le contexte frontiÃ¨re** | âœ… Exclusif | âŒ Consomme |
 
-**Règle BG-SF-04 : Aucun chevauchement**
+**RÃ¨gle BG-SF-04 : Aucun chevauchement**
 
-Aucun chevauchement de responsabilités n'est autorisé. Border Guard ne prend jamais de décision, StrongFather ne définit jamais de frontière ou de niveau de confiance.
+Aucun chevauchement de responsabilitÃ©s n'est autorisÃ©. Border Guard ne prend jamais de dÃ©cision, StrongFather ne dÃ©finit jamais de frontiÃ¨re ou de niveau de confiance.
 
 ---
 
-## 5. Ce que Border Guard ne fait JAMAIS vis-à-vis de StrongFather
+## 5. Ce que Border Guard ne fait JAMAIS vis-Ã -vis de StrongFather
 
 ### 5.1 Interdictions absolues
 
-**INV-BG-SF-NEVER-1 : Ne prend jamais de décision**
+**INV-BG-SF-NEVER-1 : Ne prend jamais de dÃ©cision**
 
-Border Guard ne prend **jamais** de décision basée sur les classifications effectuées. Si une source est classifiée `hostile`, Border Guard informe, mais ne décide pas de bloquer ou d'autoriser quoi que ce soit.
+Border Guard ne prend **jamais** de dÃ©cision basÃ©e sur les classifications effectuÃ©es. Si une source est classifiÃ©e `hostile`, Border Guard informe, mais ne dÃ©cide pas de bloquer ou d'autoriser quoi que ce soit.
 
 **INV-BG-SF-NEVER-2 : Ne modifie jamais une politique**
 
-Border Guard ne modifie **jamais** une politique ou une contrainte de StrongFather. Les politiques appartiennent exclusivement à StrongFather.
+Border Guard ne modifie **jamais** une politique ou une contrainte de StrongFather. Les politiques appartiennent exclusivement Ã  StrongFather.
 
 **INV-BG-SF-NEVER-3 : Ne refuse jamais une intention**
 
-Border Guard ne refuse **jamais** et n'accepte **jamais** une intention. L'acceptation ou le refus est la prérogative exclusive de StrongFather.
+Border Guard ne refuse **jamais** et n'accepte **jamais** une intention. L'acceptation ou le refus est la prÃ©rogative exclusive de StrongFather.
 
-**INV-BG-SF-NEVER-4 : N'influence jamais le résultat**
+**INV-BG-SF-NEVER-4 : N'influence jamais le rÃ©sultat**
 
-Border Guard n'influence **jamais** le résultat d'une évaluation de StrongFather. Il fournit un contexte de classification, mais le résultat est déterminé uniquement par StrongFather selon ses politiques.
+Border Guard n'influence **jamais** le rÃ©sultat d'une Ã©valuation de StrongFather. Il fournit un contexte de classification, mais le rÃ©sultat est dÃ©terminÃ© uniquement par StrongFather selon ses politiques.
 
 **INV-BG-SF-NEVER-5 : Ne recommande jamais**
 
-Border Guard ne fournit **jamais** de recommandation à StrongFather. Il rapporte des classifications (niveaux de confiance, règles de franchissement), pas des conseils ou des suggestions de décision.
+Border Guard ne fournit **jamais** de recommandation Ã  StrongFather. Il rapporte des classifications (niveaux de confiance, rÃ¨gles de franchissement), pas des conseils ou des suggestions de dÃ©cision.
 
-**INV-BG-SF-NEVER-6 : N'exécute jamais**
+**INV-BG-SF-NEVER-6 : N'exÃ©cute jamais**
 
-Border Guard n'exécute **jamais** d'action. Il définit les règles de franchissement, mais l'application de ces règles appartient à BondingBrother ou aux autres cores opérationnels, jamais à Border Guard.
+Border Guard n'exÃ©cute **jamais** d'action. Il dÃ©finit les rÃ¨gles de franchissement, mais l'application de ces rÃ¨gles appartient Ã  BondingBrother ou aux autres cores opÃ©rationnels, jamais Ã  Border Guard.
 
 ---
 
-## 6. Types d'informations échangées
+## 6. Types d'informations Ã©changÃ©es
 
-### 6.1 Information de contexte de frontière
+### 6.1 Information de contexte de frontiÃ¨re
 
 **BOUNDARY_CONTEXT**
-- **Objectif :** Fournir le contexte de frontière pour une intention
-- **Contenu :** Frontière(s) traversée(s), niveau de confiance de la source, règles applicables
-- **Fréquence :** Sur demande de StrongFather
+- **Objectif :** Fournir le contexte de frontiÃ¨re pour une intention
+- **Contenu :** FrontiÃ¨re(s) traversÃ©e(s), niveau de confiance de la source, rÃ¨gles applicables
+- **FrÃ©quence :** Sur demande de StrongFather
 
-**Structure du contexte de frontière :**
+**Structure du contexte de frontiÃ¨re :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `context_id` | Identifiant unique du contexte | ✅ Oui |
-| `source_trust_level` | Niveau de confiance de la source (trusted, verified, unknown, hostile) | ✅ Oui |
-| `boundaries_crossed` | Liste des frontières traversées | ✅ Oui |
-| `crossing_rules` | Règles de franchissement applicables | ✅ Oui |
-| `integration_state` | État de l'intégration concernée (si applicable) | ❌ Optionnel |
-| `timestamp` | Horodatage de la classification | ✅ Oui |
+| `context_id` | Identifiant unique du contexte | âœ… Oui |
+| `source_trust_level` | Niveau de confiance de la source (trusted, verified, unknown, hostile) | âœ… Oui |
+| `boundaries_crossed` | Liste des frontiÃ¨res traversÃ©es | âœ… Oui |
+| `crossing_rules` | RÃ¨gles de franchissement applicables | âœ… Oui |
+| `integration_state` | Ã‰tat de l'intÃ©gration concernÃ©e (si applicable) | âŒ Optionnel |
+| `timestamp` | Horodatage de la classification | âœ… Oui |
 
 ### 6.2 Information de niveau de confiance
 
 **TRUST_LEVEL_INFO**
-- **Objectif :** Fournir le niveau de confiance d'une source spécifique
-- **Contenu :** Niveau de confiance, critères appliqués, historique de classification
-- **Usage :** Enrichissement du contexte décisionnel
+- **Objectif :** Fournir le niveau de confiance d'une source spÃ©cifique
+- **Contenu :** Niveau de confiance, critÃ¨res appliquÃ©s, historique de classification
+- **Usage :** Enrichissement du contexte dÃ©cisionnel
 
 **Structure du niveau de confiance :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `trust_level` | Niveau (trusted, verified, unknown, hostile) | ✅ Oui |
-| `criteria_applied` | Critères ayant déterminé la classification | ✅ Oui |
-| `source_identifier` | Identifiant de la source classifiée | ✅ Oui |
-| `classification_date` | Date de la classification | ✅ Oui |
-| `previous_level` | Niveau précédent (si transition) | ❌ Optionnel |
+| `trust_level` | Niveau (trusted, verified, unknown, hostile) | âœ… Oui |
+| `criteria_applied` | CritÃ¨res ayant dÃ©terminÃ© la classification | âœ… Oui |
+| `source_identifier` | Identifiant de la source classifiÃ©e | âœ… Oui |
+| `classification_date` | Date de la classification | âœ… Oui |
+| `previous_level` | Niveau prÃ©cÃ©dent (si transition) | âŒ Optionnel |
 
-### 6.3 Information de règles de franchissement
+### 6.3 Information de rÃ¨gles de franchissement
 
 **CROSSING_RULES_INFO**
-- **Objectif :** Fournir les règles de franchissement pour une frontière
-- **Contenu :** Conditions déclaratives, niveau de confiance requis, restrictions
-- **Usage :** Contextualisation de l'évaluation d'intention
+- **Objectif :** Fournir les rÃ¨gles de franchissement pour une frontiÃ¨re
+- **Contenu :** Conditions dÃ©claratives, niveau de confiance requis, restrictions
+- **Usage :** Contextualisation de l'Ã©valuation d'intention
 
-**Structure des règles de franchissement :**
+**Structure des rÃ¨gles de franchissement :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `rule_id` | Identifiant unique de la règle | ✅ Oui |
-| `boundary_id` | Identifiant de la frontière concernée | ✅ Oui |
-| `required_trust_level` | Niveau de confiance minimum requis | ✅ Oui |
-| `conditions` | Conditions déclaratives à satisfaire | ✅ Oui |
-| `restrictions` | Restrictions applicables | ❌ Optionnel |
+| `rule_id` | Identifiant unique de la rÃ¨gle | âœ… Oui |
+| `boundary_id` | Identifiant de la frontiÃ¨re concernÃ©e | âœ… Oui |
+| `required_trust_level` | Niveau de confiance minimum requis | âœ… Oui |
+| `conditions` | Conditions dÃ©claratives Ã  satisfaire | âœ… Oui |
+| `restrictions` | Restrictions applicables | âŒ Optionnel |
 
-### 6.4 Information d'état d'intégration
+### 6.4 Information d'Ã©tat d'intÃ©gration
 
 **INTEGRATION_STATE_INFO**
-- **Objectif :** Fournir l'état d'une intégration avec un système externe
-- **Contenu :** État (active, suspendue, révoquée), niveau de confiance, frontières associées
-- **Usage :** Contextualisation des intentions provenant d'intégrations
+- **Objectif :** Fournir l'Ã©tat d'une intÃ©gration avec un systÃ¨me externe
+- **Contenu :** Ã‰tat (active, suspendue, rÃ©voquÃ©e), niveau de confiance, frontiÃ¨res associÃ©es
+- **Usage :** Contextualisation des intentions provenant d'intÃ©grations
 
-**Structure de l'état d'intégration :**
+**Structure de l'Ã©tat d'intÃ©gration :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `integration_id` | Identifiant unique de l'intégration | ✅ Oui |
-| `state` | État (active, suspended, revoked) | ✅ Oui |
-| `trust_level` | Niveau de confiance de l'intégration | ✅ Oui |
-| `boundaries` | Frontières associées à cette intégration | ✅ Oui |
-| `last_state_change` | Dernière modification d'état | ❌ Optionnel |
+| `integration_id` | Identifiant unique de l'intÃ©gration | âœ… Oui |
+| `state` | Ã‰tat (active, suspended, revoked) | âœ… Oui |
+| `trust_level` | Niveau de confiance de l'intÃ©gration | âœ… Oui |
+| `boundaries` | FrontiÃ¨res associÃ©es Ã  cette intÃ©gration | âœ… Oui |
+| `last_state_change` | DerniÃ¨re modification d'Ã©tat | âŒ Optionnel |
 
 ---
 
 ## 7. Types de consultations
 
-### 7.1 Consultation de contexte de frontière
+### 7.1 Consultation de contexte de frontiÃ¨re
 
 **GET_BOUNDARY_CONTEXT**
 - **Initiateur :** StrongFather
-- **Objectif :** Obtenir le contexte de frontière pour une intention
+- **Objectif :** Obtenir le contexte de frontiÃ¨re pour une intention
 - **Payload :** Identifiant de l'intention, source de l'intention
-- **Réponse :** Contexte de frontière complet
+- **RÃ©ponse :** Contexte de frontiÃ¨re complet
 
-**Règle BG-SF-QUERY-01 : Réponse instantanée**
+**RÃ¨gle BG-SF-QUERY-01 : RÃ©ponse instantanÃ©e**
 
-La réponse à une consultation de contexte est instantanée. Border Guard retourne le contexte connu au moment de la demande, sans délai.
+La rÃ©ponse Ã  une consultation de contexte est instantanÃ©e. Border Guard retourne le contexte connu au moment de la demande, sans dÃ©lai.
 
 ### 7.2 Consultation de niveau de confiance
 
 **GET_TRUST_LEVEL**
 - **Initiateur :** StrongFather
-- **Objectif :** Obtenir le niveau de confiance d'une source spécifique
+- **Objectif :** Obtenir le niveau de confiance d'une source spÃ©cifique
 - **Payload :** Identifiant de la source
-- **Réponse :** Niveau de confiance avec critères
+- **RÃ©ponse :** Niveau de confiance avec critÃ¨res
 
-**Règle BG-SF-QUERY-02 : Source non classifiée**
+**RÃ¨gle BG-SF-QUERY-02 : Source non classifiÃ©e**
 
-Si la source n'a pas été explicitement classifiée, Border Guard retourne `unknown` conformément à l'invariant INV-BG-4 (classification exhaustive).
+Si la source n'a pas Ã©tÃ© explicitement classifiÃ©e, Border Guard retourne `unknown` conformÃ©ment Ã  l'invariant INV-BG-4 (classification exhaustive).
 
-### 7.3 Consultation de règles de franchissement
+### 7.3 Consultation de rÃ¨gles de franchissement
 
 **GET_CROSSING_RULES**
 - **Initiateur :** StrongFather
-- **Objectif :** Obtenir les règles de franchissement pour une frontière
-- **Payload :** Identifiant de la frontière, direction (entrée, sortie)
-- **Réponse :** Règles de franchissement déclaratives
+- **Objectif :** Obtenir les rÃ¨gles de franchissement pour une frontiÃ¨re
+- **Payload :** Identifiant de la frontiÃ¨re, direction (entrÃ©e, sortie)
+- **RÃ©ponse :** RÃ¨gles de franchissement dÃ©claratives
 
-**Règle BG-SF-QUERY-03 : Règles complètes**
+**RÃ¨gle BG-SF-QUERY-03 : RÃ¨gles complÃ¨tes**
 
-Border Guard retourne toutes les règles applicables à la frontière demandée. Les règles sont déclaratives et expriment ce qui est requis, pas comment le vérifier.
+Border Guard retourne toutes les rÃ¨gles applicables Ã  la frontiÃ¨re demandÃ©e. Les rÃ¨gles sont dÃ©claratives et expriment ce qui est requis, pas comment le vÃ©rifier.
 
-### 7.4 Consultation d'état d'intégration
+### 7.4 Consultation d'Ã©tat d'intÃ©gration
 
 **GET_INTEGRATION_STATE**
 - **Initiateur :** StrongFather
-- **Objectif :** Obtenir l'état d'une intégration avec un système externe
-- **Payload :** Identifiant de l'intégration
-- **Réponse :** État complet de l'intégration
+- **Objectif :** Obtenir l'Ã©tat d'une intÃ©gration avec un systÃ¨me externe
+- **Payload :** Identifiant de l'intÃ©gration
+- **RÃ©ponse :** Ã‰tat complet de l'intÃ©gration
 
-**Règle BG-SF-QUERY-04 : Intégration inconnue**
+**RÃ¨gle BG-SF-QUERY-04 : IntÃ©gration inconnue**
 
-Si l'intégration demandée n'est pas gouvernée par Border Guard, la réponse est `NOT_FOUND` avec indication que l'intégration n'est pas dans le registre.
+Si l'intÃ©gration demandÃ©e n'est pas gouvernÃ©e par Border Guard, la rÃ©ponse est `NOT_FOUND` avec indication que l'intÃ©gration n'est pas dans le registre.
 
 ---
 
@@ -242,157 +242,157 @@ Si l'intégration demandée n'est pas gouvernée par Border Guard, la réponse e
 
 ### 8.1 Format des consultations
 
-Les consultations de StrongFather suivent un format standardisé.
+Les consultations de StrongFather suivent un format standardisÃ©.
 
 **Structure de base :**
 
-| Élément | Description | Obligatoire |
+| Ã‰lÃ©ment | Description | Obligatoire |
 |---------|-------------|-------------|
-| `query_id` | Identifiant unique de la consultation | ✅ Oui |
-| `intention_id` | Référence à l'intention en cours d'évaluation | ❌ Optionnel |
-| `type` | Type de consultation | ✅ Oui |
-| `payload` | Données spécifiques à la consultation | ❌ Selon type |
-| `contexte_appelant` | Contexte de StrongFather | ✅ Oui |
-| `timestamp` | Horodatage de la consultation | ✅ Oui |
+| `query_id` | Identifiant unique de la consultation | âœ… Oui |
+| `intention_id` | RÃ©fÃ©rence Ã  l'intention en cours d'Ã©valuation | âŒ Optionnel |
+| `type` | Type de consultation | âœ… Oui |
+| `payload` | DonnÃ©es spÃ©cifiques Ã  la consultation | âŒ Selon type |
+| `contexte_appelant` | Contexte de StrongFather | âœ… Oui |
+| `timestamp` | Horodatage de la consultation | âœ… Oui |
 
-**Règle BG-SF-PROT-01 : Format standardisé**
+**RÃ¨gle BG-SF-PROT-01 : Format standardisÃ©**
 
-Toutes les consultations respectent le format standardisé. Aucune consultation ad-hoc n'est acceptée.
+Toutes les consultations respectent le format standardisÃ©. Aucune consultation ad-hoc n'est acceptÃ©e.
 
-### 8.2 Format des réponses
+### 8.2 Format des rÃ©ponses
 
-Les réponses de Border Guard suivent un format standardisé.
+Les rÃ©ponses de Border Guard suivent un format standardisÃ©.
 
 **Structure de base :**
 
-| Élément | Description | Obligatoire |
+| Ã‰lÃ©ment | Description | Obligatoire |
 |---------|-------------|-------------|
-| `response_id` | Identifiant unique de la réponse | ✅ Oui |
-| `query_id` | Référence à la consultation | ✅ Oui |
-| `status` | Statut de la réponse (SUCCESS, NOT_FOUND, UNKNOWN_SOURCE, ERROR) | ✅ Oui |
-| `data` | Données de la réponse | Si SUCCESS |
-| `error` | Détails de l'erreur | Si ERROR |
-| `timestamp` | Horodatage de la réponse | ✅ Oui |
+| `response_id` | Identifiant unique de la rÃ©ponse | âœ… Oui |
+| `query_id` | RÃ©fÃ©rence Ã  la consultation | âœ… Oui |
+| `status` | Statut de la rÃ©ponse (SUCCESS, NOT_FOUND, UNKNOWN_SOURCE, ERROR) | âœ… Oui |
+| `data` | DonnÃ©es de la rÃ©ponse | Si SUCCESS |
+| `error` | DÃ©tails de l'erreur | Si ERROR |
+| `timestamp` | Horodatage de la rÃ©ponse | âœ… Oui |
 
-**Règle BG-SF-PROT-02 : Réponse toujours structurée**
+**RÃ¨gle BG-SF-PROT-02 : RÃ©ponse toujours structurÃ©e**
 
-Border Guard retourne toujours une réponse structurée, même en cas d'erreur ou de source non classifiée.
+Border Guard retourne toujours une rÃ©ponse structurÃ©e, mÃªme en cas d'erreur ou de source non classifiÃ©e.
 
-**Règle BG-SF-PROT-03 : Pas d'interprétation décisionnelle**
+**RÃ¨gle BG-SF-PROT-03 : Pas d'interprÃ©tation dÃ©cisionnelle**
 
-Les réponses sont des informations de classification brutes. Border Guard n'interprète pas les données pour StrongFather et ne suggère jamais de décision.
+Les rÃ©ponses sont des informations de classification brutes. Border Guard n'interprÃ¨te pas les donnÃ©es pour StrongFather et ne suggÃ¨re jamais de dÃ©cision.
 
-### 8.3 Statuts de réponse
+### 8.3 Statuts de rÃ©ponse
 
 | Statut | Signification |
 |--------|---------------|
-| `SUCCESS` | La consultation a abouti, les données sont fournies |
-| `NOT_FOUND` | L'élément recherché (frontière, intégration) n'existe pas |
-| `UNKNOWN_SOURCE` | La source n'est pas explicitement classifiée (niveau `unknown` retourné) |
+| `SUCCESS` | La consultation a abouti, les donnÃ©es sont fournies |
+| `NOT_FOUND` | L'Ã©lÃ©ment recherchÃ© (frontiÃ¨re, intÃ©gration) n'existe pas |
+| `UNKNOWN_SOURCE` | La source n'est pas explicitement classifiÃ©e (niveau `unknown` retournÃ©) |
 | `ERROR` | Une erreur interne s'est produite |
 
-**Règle BG-SF-PROT-04 : UNKNOWN_SOURCE n'est pas une erreur**
+**RÃ¨gle BG-SF-PROT-04 : UNKNOWN_SOURCE n'est pas une erreur**
 
-Le statut `UNKNOWN_SOURCE` est une réponse valide, pas une erreur. Il indique que la source sera traitée avec le niveau de confiance `unknown` par défaut.
+Le statut `UNKNOWN_SOURCE` est une rÃ©ponse valide, pas une erreur. Il indique que la source sera traitÃ©e avec le niveau de confiance `unknown` par dÃ©faut.
 
 ---
 
-## 9. Flux d'intégration typique
+## 9. Flux d'intÃ©gration typique
 
-### 9.1 Flux de consultation avant évaluation
+### 9.1 Flux de consultation avant Ã©valuation
 
 **Acteurs :** BondingBrother, StrongFather, Border Guard
 
-**Séquence :**
+**SÃ©quence :**
 
-1. BondingBrother soumet une intention à StrongFather pour évaluation
-2. StrongFather identifie que l'intention vient de l'extérieur ou traverse une frontière
+1. BondingBrother soumet une intention Ã  StrongFather pour Ã©valuation
+2. StrongFather identifie que l'intention vient de l'extÃ©rieur ou traverse une frontiÃ¨re
 3. StrongFather interroge Border Guard : `GET_BOUNDARY_CONTEXT`
-4. Border Guard retourne le contexte de frontière (niveau de confiance, règles)
-5. StrongFather intègre le contexte dans l'évaluation de l'intention
-6. StrongFather évalue l'intention selon les politiques (en tenant compte du contexte)
-7. StrongFather produit une décision (acceptée, refusée, ambiguë)
+4. Border Guard retourne le contexte de frontiÃ¨re (niveau de confiance, rÃ¨gles)
+5. StrongFather intÃ¨gre le contexte dans l'Ã©valuation de l'intention
+6. StrongFather Ã©value l'intention selon les politiques (en tenant compte du contexte)
+7. StrongFather produit une dÃ©cision (acceptÃ©e, refusÃ©e, ambiguÃ«)
 
-**Règle BG-SF-FLOW-01 : Consultation optionnelle**
+**RÃ¨gle BG-SF-FLOW-01 : Consultation optionnelle**
 
-La consultation de Border Guard par StrongFather est toujours optionnelle. StrongFather peut évaluer une intention sans consulter le contexte de frontière.
+La consultation de Border Guard par StrongFather est toujours optionnelle. StrongFather peut Ã©valuer une intention sans consulter le contexte de frontiÃ¨re.
 
 ### 9.2 Flux de classification pour authentification en couches
 
 **Acteurs :** Border Guard, StrongFather (selon RT-SEC-2)
 
-**Séquence :**
+**SÃ©quence :**
 
-1. Une requête arrive avec une source identifiée
-2. Border Guard classifie la source selon ses critères
+1. Une requÃªte arrive avec une source identifiÃ©e
+2. Border Guard classifie la source selon ses critÃ¨res
 3. StrongFather consulte Border Guard pour le niveau de confiance
 4. StrongFather utilise ce niveau dans l'authentification en couches
-5. Master Butler vérifie les capacités selon le niveau de confiance
-6. StrongFather produit la décision finale
+5. Master Butler vÃ©rifie les capacitÃ©s selon le niveau de confiance
+6. StrongFather produit la dÃ©cision finale
 
-### 9.3 Diagramme de séquence
+### 9.3 Diagramme de sÃ©quence
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  BondingBrother │    │   StrongFather  │    │  Border Guard   │
-└────────┬────────┘    └────────┬────────┘    └────────┬────────┘
-         │                      │                      │
-         ├── Intention ────────►│                      │
-         │                      │                      │
-         │                      ├── GET_BOUNDARY_CTX ─►│
-         │                      │                      │
-         │                      │◄── Contexte ─────────┤
-         │                      │    (trust level,     │
-         │                      │     rules, etc.)     │
-         │                      │                      │
-         │                      ├── Évaluation ────────┤
-         │                      │   (avec contexte)    │
-         │                      │                      │
-         │◄── Décision ─────────┤                      │
-         │                      │                      │
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  BondingBrother â”‚    â”‚   StrongFather  â”‚    â”‚  Border Guard   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚                      â”‚                      â”‚
+         â”œâ”€â”€ Intention â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚                      â”‚
+         â”‚                      â”‚                      â”‚
+         â”‚                      â”œâ”€â”€ GET_BOUNDARY_CTX â”€â–ºâ”‚
+         â”‚                      â”‚                      â”‚
+         â”‚                      â”‚â—„â”€â”€ Contexte â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+         â”‚                      â”‚    (trust level,     â”‚
+         â”‚                      â”‚     rules, etc.)     â”‚
+         â”‚                      â”‚                      â”‚
+         â”‚                      â”œâ”€â”€ Ã‰valuation â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+         â”‚                      â”‚   (avec contexte)    â”‚
+         â”‚                      â”‚                      â”‚
+         â”‚â—„â”€â”€ DÃ©cision â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤                      â”‚
+         â”‚                      â”‚                      â”‚
 ```
 
 ---
 
-## 10. Règles d'intégration
+## 10. RÃ¨gles d'intÃ©gration
 
-### 10.1 Règles de communication
+### 10.1 RÃ¨gles de communication
 
-**Règle BG-SF-INT-01 : Initiative StrongFather**
+**RÃ¨gle BG-SF-INT-01 : Initiative StrongFather**
 
-StrongFather initie les consultations. Border Guard répond aux consultations. Border Guard ne pousse jamais d'information vers StrongFather de manière non sollicitée.
+StrongFather initie les consultations. Border Guard rÃ©pond aux consultations. Border Guard ne pousse jamais d'information vers StrongFather de maniÃ¨re non sollicitÃ©e.
 
-**Règle BG-SF-INT-02 : Pas de dépendance obligatoire**
+**RÃ¨gle BG-SF-INT-02 : Pas de dÃ©pendance obligatoire**
 
-StrongFather peut fonctionner sans consulter Border Guard. L'intégration enrichit le contexte mais n'est pas obligatoire.
+StrongFather peut fonctionner sans consulter Border Guard. L'intÃ©gration enrichit le contexte mais n'est pas obligatoire.
 
-**Règle BG-SF-INT-03 : Réponses synchrones**
+**RÃ¨gle BG-SF-INT-03 : RÃ©ponses synchrones**
 
-Les réponses aux consultations sont synchrones et instantanées. Aucune consultation n'est différée.
+Les rÃ©ponses aux consultations sont synchrones et instantanÃ©es. Aucune consultation n'est diffÃ©rÃ©e.
 
-### 10.2 Règles de données
+### 10.2 RÃ¨gles de donnÃ©es
 
-**Règle BG-SF-INT-04 : Données actuelles**
+**RÃ¨gle BG-SF-INT-04 : DonnÃ©es actuelles**
 
-Les données retournées par Border Guard reflètent les classifications actuelles au moment de la consultation.
+Les donnÃ©es retournÃ©es par Border Guard reflÃ¨tent les classifications actuelles au moment de la consultation.
 
-**Règle BG-SF-INT-05 : Classifications stables**
+**RÃ¨gle BG-SF-INT-05 : Classifications stables**
 
-Les classifications de Border Guard sont stables. Un même élément consulté deux fois retourne le même niveau de confiance (sauf modification explicite de la classification).
+Les classifications de Border Guard sont stables. Un mÃªme Ã©lÃ©ment consultÃ© deux fois retourne le mÃªme niveau de confiance (sauf modification explicite de la classification).
 
-**Règle BG-SF-INT-06 : Cohérence interne garantie**
+**RÃ¨gle BG-SF-INT-06 : CohÃ©rence interne garantie**
 
-Border Guard garantit la cohérence interne des données retournées. Un contexte de frontière et ses règles sont mutuellement cohérents.
+Border Guard garantit la cohÃ©rence interne des donnÃ©es retournÃ©es. Un contexte de frontiÃ¨re et ses rÃ¨gles sont mutuellement cohÃ©rents.
 
-### 10.3 Règles de traçabilité
+### 10.3 RÃ¨gles de traÃ§abilitÃ©
 
-**Règle BG-SF-INT-07 : Traçabilité des consultations**
+**RÃ¨gle BG-SF-INT-07 : TraÃ§abilitÃ© des consultations**
 
-Toutes les consultations de StrongFather sont tracées par Border Guard avec le contexte complet.
+Toutes les consultations de StrongFather sont tracÃ©es par Border Guard avec le contexte complet.
 
-**Règle BG-SF-INT-08 : Corrélation intention-consultation**
+**RÃ¨gle BG-SF-INT-08 : CorrÃ©lation intention-consultation**
 
-Chaque consultation peut être corrélée à une intention en cours d'évaluation (si `intention_id` fourni) pour l'audit bout-en-bout.
+Chaque consultation peut Ãªtre corrÃ©lÃ©e Ã  une intention en cours d'Ã©valuation (si `intention_id` fourni) pour l'audit bout-en-bout.
 
 ---
 
@@ -401,36 +401,36 @@ Chaque consultation peut être corrélée à une intention en cours d'évaluatio
 ### 11.1 Types d'erreurs
 
 **Erreurs de format :**
-- Consultation mal formée
+- Consultation mal formÃ©e
 - Champ obligatoire manquant
 - Type de consultation inconnu
 
-**Erreurs de données :**
-- Frontière non définie (NOT_FOUND)
-- Intégration non gouvernée (NOT_FOUND)
-- Source non classifiée (UNKNOWN_SOURCE, pas une erreur)
+**Erreurs de donnÃ©es :**
+- FrontiÃ¨re non dÃ©finie (NOT_FOUND)
+- IntÃ©gration non gouvernÃ©e (NOT_FOUND)
+- Source non classifiÃ©e (UNKNOWN_SOURCE, pas une erreur)
 
 **Erreurs internes :**
-- Erreur du moteur de définition de frontières
-- Erreur de calcul de règles
+- Erreur du moteur de dÃ©finition de frontiÃ¨res
+- Erreur de calcul de rÃ¨gles
 
 ### 11.2 Traitement des erreurs
 
-**Règle BG-SF-ERR-01 : Réponse structurée toujours**
+**RÃ¨gle BG-SF-ERR-01 : RÃ©ponse structurÃ©e toujours**
 
-Border Guard retourne toujours une réponse structurée, même en cas d'erreur. StrongFather peut toujours interpréter la réponse.
+Border Guard retourne toujours une rÃ©ponse structurÃ©e, mÃªme en cas d'erreur. StrongFather peut toujours interprÃ©ter la rÃ©ponse.
 
-**Règle BG-SF-ERR-02 : UNKNOWN_SOURCE est informatif**
+**RÃ¨gle BG-SF-ERR-02 : UNKNOWN_SOURCE est informatif**
 
-Le statut `UNKNOWN_SOURCE` est une information, pas une erreur. StrongFather peut utiliser cette information (source non classifiée = niveau `unknown`).
+Le statut `UNKNOWN_SOURCE` est une information, pas une erreur. StrongFather peut utiliser cette information (source non classifiÃ©e = niveau `unknown`).
 
-**Règle BG-SF-ERR-03 : Journalisation des erreurs**
+**RÃ¨gle BG-SF-ERR-03 : Journalisation des erreurs**
 
-Toutes les erreurs sont journalisées par Border Guard pour audit et diagnostic.
+Toutes les erreurs sont journalisÃ©es par Border Guard pour audit et diagnostic.
 
-**Règle BG-SF-ERR-04 : Pas de retry automatique**
+**RÃ¨gle BG-SF-ERR-04 : Pas de retry automatique**
 
-En cas d'erreur, StrongFather décide de la stratégie (retry, continuer sans contexte). Border Guard ne retry jamais automatiquement.
+En cas d'erreur, StrongFather dÃ©cide de la stratÃ©gie (retry, continuer sans contexte). Border Guard ne retry jamais automatiquement.
 
 ---
 
@@ -438,130 +438,130 @@ En cas d'erreur, StrongFather décide de la stratégie (retry, continuer sans co
 
 ### 12.1 Source hostile
 
-Lorsqu'une source est classifiée `hostile`, Border Guard retourne cette classification sans bloquer.
+Lorsqu'une source est classifiÃ©e `hostile`, Border Guard retourne cette classification sans bloquer.
 
-**Règle BG-SF-CASE-01 : Hostile est une classification, pas un blocage**
+**RÃ¨gle BG-SF-CASE-01 : Hostile est une classification, pas un blocage**
 
-La classification `hostile` est une information factuelle. C'est StrongFather qui décide, selon ses politiques, si une intention d'une source `hostile` doit être refusée.
+La classification `hostile` est une information factuelle. C'est StrongFather qui dÃ©cide, selon ses politiques, si une intention d'une source `hostile` doit Ãªtre refusÃ©e.
 
-### 12.2 Intégration suspendue
+### 12.2 IntÃ©gration suspendue
 
-Lorsqu'une intégration est suspendue, Border Guard retourne l'état `suspended`.
+Lorsqu'une intÃ©gration est suspendue, Border Guard retourne l'Ã©tat `suspended`.
 
-**Règle BG-SF-CASE-02 : Suspended est un état, pas un blocage**
+**RÃ¨gle BG-SF-CASE-02 : Suspended est un Ã©tat, pas un blocage**
 
-L'état `suspended` est une information factuelle. C'est StrongFather qui décide, selon ses politiques, comment traiter les intentions venant d'une intégration suspendue.
+L'Ã©tat `suspended` est une information factuelle. C'est StrongFather qui dÃ©cide, selon ses politiques, comment traiter les intentions venant d'une intÃ©gration suspendue.
 
-### 12.3 Frontière non définie
+### 12.3 FrontiÃ¨re non dÃ©finie
 
-Si une frontière demandée n'est pas définie par Border Guard :
+Si une frontiÃ¨re demandÃ©e n'est pas dÃ©finie par Border Guard :
 
-**Règle BG-SF-CASE-03 : Frontière non définie = NOT_FOUND**
+**RÃ¨gle BG-SF-CASE-03 : FrontiÃ¨re non dÃ©finie = NOT_FOUND**
 
-Border Guard retourne `NOT_FOUND`. StrongFather peut décider de traiter l'intention sans contexte de frontière ou de la refuser selon ses politiques.
+Border Guard retourne `NOT_FOUND`. StrongFather peut dÃ©cider de traiter l'intention sans contexte de frontiÃ¨re ou de la refuser selon ses politiques.
 
 ---
 
-## 13. Garanties de l'intégration
+## 13. Garanties de l'intÃ©gration
 
-### 13.1 Garantie d'exhaustivité
+### 13.1 Garantie d'exhaustivitÃ©
 
-**Engagement :** Les réponses de Border Guard sont exhaustives pour le périmètre de définition. Toutes les informations connues sur une frontière ou une classification sont fournies.
+**Engagement :** Les rÃ©ponses de Border Guard sont exhaustives pour le pÃ©rimÃ¨tre de dÃ©finition. Toutes les informations connues sur une frontiÃ¨re ou une classification sont fournies.
 
 ### 13.2 Garantie d'exactitude
 
-**Engagement :** Les informations fournies par Border Guard sont exactes et reflètent les définitions actuelles au moment de la consultation.
+**Engagement :** Les informations fournies par Border Guard sont exactes et reflÃ¨tent les dÃ©finitions actuelles au moment de la consultation.
 
-### 13.3 Garantie de neutralité
+### 13.3 Garantie de neutralitÃ©
 
-**Engagement :** Border Guard fournit des informations de classification sans interprétation décisionnelle, sans recommandation, sans jugement. La décision appartient exclusivement à StrongFather.
+**Engagement :** Border Guard fournit des informations de classification sans interprÃ©tation dÃ©cisionnelle, sans recommandation, sans jugement. La dÃ©cision appartient exclusivement Ã  StrongFather.
 
-### 13.4 Garantie de traçabilité
+### 13.4 Garantie de traÃ§abilitÃ©
 
-**Engagement :** Toute interaction entre StrongFather et Border Guard est traçable de bout en bout. L'audit complet des consultations et réponses est possible.
+**Engagement :** Toute interaction entre StrongFather et Border Guard est traÃ§able de bout en bout. L'audit complet des consultations et rÃ©ponses est possible.
 
-### 13.5 Garantie de disponibilité
+### 13.5 Garantie de disponibilitÃ©
 
-**Engagement :** Border Guard est disponible pour répondre aux consultations de StrongFather sans dépendance externe (conformité LOI-1).
+**Engagement :** Border Guard est disponible pour rÃ©pondre aux consultations de StrongFather sans dÃ©pendance externe (conformitÃ© LOI-1).
 
 ### 13.6 Garantie de non-blocage
 
-**Engagement :** Border Guard ne bloque jamais les opérations de StrongFather. Les consultations sont répondues immédiatement.
+**Engagement :** Border Guard ne bloque jamais les opÃ©rations de StrongFather. Les consultations sont rÃ©pondues immÃ©diatement.
 
 ---
 
-## 14. Invariants de l'intégration
+## 14. Invariants de l'intÃ©gration
 
 ### 14.1 Invariants de relation
 
 **INV-BG-SF-1 : Conseil unidirectionnel**
 
-Border Guard conseille StrongFather. Border Guard ne décide jamais pour StrongFather.
+Border Guard conseille StrongFather. Border Guard ne dÃ©cide jamais pour StrongFather.
 
 **INV-BG-SF-2 : Consultation facultative**
 
-StrongFather consulte Border Guard de manière facultative. Aucune consultation n'est obligatoire.
+StrongFather consulte Border Guard de maniÃ¨re facultative. Aucune consultation n'est obligatoire.
 
-**INV-BG-SF-3 : Aucune autorité partagée**
+**INV-BG-SF-3 : Aucune autoritÃ© partagÃ©e**
 
-Border Guard n'a aucune autorité sur les décisions. StrongFather n'a aucune autorité sur les définitions de frontières.
+Border Guard n'a aucune autoritÃ© sur les dÃ©cisions. StrongFather n'a aucune autoritÃ© sur les dÃ©finitions de frontiÃ¨res.
 
-### 14.2 Invariants de données
+### 14.2 Invariants de donnÃ©es
 
 **INV-BG-SF-4 : Lecture pure**
 
-Les consultations sont des lectures pures. Aucune modification des définitions n'est causée par une consultation.
+Les consultations sont des lectures pures. Aucune modification des dÃ©finitions n'est causÃ©e par une consultation.
 
-**INV-BG-SF-5 : Données de classification**
+**INV-BG-SF-5 : DonnÃ©es de classification**
 
-Les données retournées sont des classifications (niveaux de confiance, règles). Aucune donnée interprétée décisionnellement n'est retournée.
+Les donnÃ©es retournÃ©es sont des classifications (niveaux de confiance, rÃ¨gles). Aucune donnÃ©e interprÃ©tÃ©e dÃ©cisionnellement n'est retournÃ©e.
 
 ### 14.3 Invariants de protocole
 
-**INV-BG-SF-6 : Format respecté**
+**INV-BG-SF-6 : Format respectÃ©**
 
-Toutes les consultations et réponses respectent le format standardisé.
+Toutes les consultations et rÃ©ponses respectent le format standardisÃ©.
 
-**INV-BG-SF-7 : Traçabilité complète**
+**INV-BG-SF-7 : TraÃ§abilitÃ© complÃ¨te**
 
-Toute interaction est traçable avec son contexte complet.
+Toute interaction est traÃ§able avec son contexte complet.
 
 ---
 
-## 15. Conformité aux Lois d'Autonomie Système
+## 15. ConformitÃ© aux Lois d'Autonomie SystÃ¨me
 
-### LOI-1 : Aucune dépendance externe critique
+### LOI-1 : Aucune dÃ©pendance externe critique
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-L'intégration respecte LOI-1 :
-- Border Guard définit les frontières localement, sans dépendance externe
-- StrongFather consulte localement, sans dépendance externe
-- L'absence de connexion ne bloque ni la définition ni la consultation
+L'intÃ©gration respecte LOI-1 :
+- Border Guard dÃ©finit les frontiÃ¨res localement, sans dÃ©pendance externe
+- StrongFather consulte localement, sans dÃ©pendance externe
+- L'absence de connexion ne bloque ni la dÃ©finition ni la consultation
 
-### LOI-2 : Le système accepte l'isolement comme état normal
+### LOI-2 : Le systÃ¨me accepte l'isolement comme Ã©tat normal
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-L'intégration respecte LOI-2 :
+L'intÃ©gration respecte LOI-2 :
 - L'isolement ne modifie pas les classifications de Border Guard
-- StrongFather peut prendre des décisions même en état isolé
-- Aucune dégradation de l'intégration en mode isolé
+- StrongFather peut prendre des dÃ©cisions mÃªme en Ã©tat isolÃ©
+- Aucune dÃ©gradation de l'intÃ©gration en mode isolÃ©
 
 ### LOI-4 : Pas de temps global requis
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-L'intégration respecte LOI-4 :
+L'intÃ©gration respecte LOI-4 :
 - Les horodatages sont locaux
 - Aucune synchronisation temporelle n'est requise
-- Les classifications ne dépendent pas de timestamps synchronisés
+- Les classifications ne dÃ©pendent pas de timestamps synchronisÃ©s
 
 ---
 
 ## 16. Exemples
 
-### 16.1 Consultation de contexte de frontière
+### 16.1 Consultation de contexte de frontiÃ¨re
 
 **Consultation StrongFather :**
 ```
@@ -581,7 +581,7 @@ L'intégration respecte LOI-4 :
 }
 ```
 
-**Réponse Border Guard :**
+**RÃ©ponse Border Guard :**
 ```
 {
   "response_id": "r-bg-001",
@@ -615,7 +615,7 @@ L'intégration respecte LOI-4 :
 }
 ```
 
-### 16.2 Source non classifiée
+### 16.2 Source non classifiÃ©e
 
 **Consultation StrongFather :**
 ```
@@ -632,7 +632,7 @@ L'intégration respecte LOI-4 :
 }
 ```
 
-**Réponse Border Guard :**
+**RÃ©ponse Border Guard :**
 ```
 {
   "response_id": "r-bg-002",
@@ -654,16 +654,16 @@ L'intégration respecte LOI-4 :
 
 ## 17. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit l'interface et le protocole que Border Guard doit respecter pour s'intégrer avec StrongFather.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit l'interface et le protocole que Border Guard doit respecter pour s'intÃ©grer avec StrongFather.
 
-Toute implémentation de l'intégration avec StrongFather doit respecter ce contrat. Toute violation entraîne un comportement non conforme.
+Toute implÃ©mentation de l'intÃ©gration avec StrongFather doit respecter ce contrat. Toute violation entraÃ®ne un comportement non conforme.
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT — Normatif  
-**Dépendances :**
+**Statut :** CONTRAT â€” Normatif  
+**DÃ©pendances :**
 - Border Guard - Documentation Fondatrice v1.5 (Section 8)
 - StrongFather - Documentation Fondatrice v1.5
 - Miyukini Conceptual References - Security Protocols v1.0 (RT-SEC-2)
@@ -671,41 +671,42 @@ Toute implémentation de l'intégration avec StrongFather doit respecter ce cont
 
 ---
 
-## 18. Mini log de génération
+## 18. Mini log de gÃ©nÃ©ration
 
-### Décision éditoriale E1 : Direction de la relation
+### DÃ©cision Ã©ditoriale E1 : Direction de la relation
 
-**Décision prise :** La relation est de conseil : Border Guard informe, StrongFather décide. Cette direction respecte la Documentation Fondatrice de Border Guard Section 8 qui définit "Border Guard informe Strong Father sur le contexte de frontière ; Strong Father décide".
+**DÃ©cision prise :** La relation est de conseil : Border Guard informe, StrongFather dÃ©cide. Cette direction respecte la Documentation Fondatrice de Border Guard Section 8 qui dÃ©finit "Border Guard informe Strong Father sur le contexte de frontiÃ¨re ; Strong Father dÃ©cide".
 
-**Application :** Tout le document est structuré autour de cette relation de conseil unidirectionnel.
+**Application :** Tout le document est structurÃ© autour de cette relation de conseil unidirectionnel.
 
-### Décision éditoriale E2 : Consultation facultative
+### DÃ©cision Ã©ditoriale E2 : Consultation facultative
 
-**Décision prise :** La consultation de Border Guard par StrongFather est explicitement facultative. StrongFather peut évaluer des intentions sans consulter le contexte de frontière.
+**DÃ©cision prise :** La consultation de Border Guard par StrongFather est explicitement facultative. StrongFather peut Ã©valuer des intentions sans consulter le contexte de frontiÃ¨re.
 
-**Application :** Règle BG-SF-02 et INV-BG-SF-2 établissent cette facultativité.
+**Application :** RÃ¨gle BG-SF-02 et INV-BG-SF-2 Ã©tablissent cette facultativitÃ©.
 
-### Warning W1 : Risque de confusion définition/décision
+### Warning W1 : Risque de confusion dÃ©finition/dÃ©cision
 
-**Warning rencontré :** Risque que les définitions de frontières de Border Guard soient confondues avec des décisions.
+**Warning rencontrÃ© :** Risque que les dÃ©finitions de frontiÃ¨res de Border Guard soient confondues avec des dÃ©cisions.
 
-**Décision prise :** Les interdictions absolues (Section 5) clarifient que Border Guard ne décide jamais. Les définitions sont des classifications, pas des décisions.
+**DÃ©cision prise :** Les interdictions absolues (Section 5) clarifient que Border Guard ne dÃ©cide jamais. Les dÃ©finitions sont des classifications, pas des dÃ©cisions.
 
-**Correction effectuée :** Section 5 explicite les interdictions, Section 13.3 garantit la neutralité.
+**Correction effectuÃ©e :** Section 5 explicite les interdictions, Section 13.3 garantit la neutralitÃ©.
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-**Vérification effectuée :**
-- ✅ Cohérence avec Border Guard - Documentation Fondatrice : Confirmée (relation de conseil, pas de décision)
-- ✅ Cohérence avec StrongFather - Documentation Fondatrice : Confirmée (StrongFather décide, consulte le contexte)
-- ✅ Conformité LOI-1 : Confirmée (aucune dépendance externe)
-- ✅ Conformité LOI-2 : Confirmée (isolement n'affecte pas l'intégration)
-- ✅ Conformité LOI-4 : Confirmée (pas de temps global requis)
-- ✅ Aucune autorité de Border Guard sur les décisions : Confirmée (INV-BG-SF-1, Section 5)
-- ✅ Traçabilité complète : Confirmée (INV-BG-SF-7)
+**VÃ©rification effectuÃ©e :**
+- âœ… CohÃ©rence avec Border Guard - Documentation Fondatrice : ConfirmÃ©e (relation de conseil, pas de dÃ©cision)
+- âœ… CohÃ©rence avec StrongFather - Documentation Fondatrice : ConfirmÃ©e (StrongFather dÃ©cide, consulte le contexte)
+- âœ… ConformitÃ© LOI-1 : ConfirmÃ©e (aucune dÃ©pendance externe)
+- âœ… ConformitÃ© LOI-2 : ConfirmÃ©e (isolement n'affecte pas l'intÃ©gration)
+- âœ… ConformitÃ© LOI-4 : ConfirmÃ©e (pas de temps global requis)
+- âœ… Aucune autoritÃ© de Border Guard sur les dÃ©cisions : ConfirmÃ©e (INV-BG-SF-1, Section 5)
+- âœ… TraÃ§abilitÃ© complÃ¨te : ConfirmÃ©e (INV-BG-SF-7)
 
-**Conclusion :** Aucune contradiction détectée. Le document est cohérent et non ambigu.
+**Conclusion :** Aucune contradiction dÃ©tectÃ©e. Le document est cohÃ©rent et non ambigu.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

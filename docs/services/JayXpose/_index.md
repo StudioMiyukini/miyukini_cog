@@ -1,4 +1,4 @@
-# JayXpose - Identite professionnelle exposant, vitrine et coffre-fort
+﻿# JayXpose - Identite professionnelle exposant, vitrine et coffre-fort
 
 ## Contexte
 
@@ -50,7 +50,7 @@ JayXpose est le service Miyukini dedie a l'identite professionnelle exposant:
 |----------|------|
 | [JayXpose - API Reference](./JayXpose%20-%20API%20Reference.md) | Reference des API metier/data. |
 | [JayXpose - Guide Maintenance](./JayXpose%20-%20Guide%20Maintenance.md) | Exploitation et maintenance. |
-| [JayXpose - Architecture Finale](./JayXpose%20-%20Architecture%20Finale.md) | Etat cible consolidé. |
+| [JayXpose - Architecture Finale](./JayXpose%20-%20Architecture%20Finale.md) | Etat cible consolidÃ©. |
 | [JayXpose - Rapport Qualite](./JayXpose%20-%20Rapport%20Qualite.md) | Synthese checks et risques. |
 | [JayXpose - Rapport Accessibilite](./JayXpose%20-%20Rapport%20Accessibilite.md) | Etat accessibilite et plan. |
 
@@ -78,4 +78,5 @@ JayXpose est le service Miyukini dedie a l'identite professionnelle exposant:
 - [JayFestival - Document Fondateur](../JayFestival/JayFestival%20-%20Document%20Fondateur.md)
 - [JayKonta - Document Fondateur](../JayKonta/JayKonta%20-%20Document%20Fondateur.md)
 - [JayRDV - Document Fondateur](../JayRDV/JayRDV%20-%20Document%20Fondateur.md)
-- [Miyukini Conceptual References - Interpolarite Services Jay](../../reference/Miyukini%20Conceptual%20References%20-%20Interpolarite%20Services%20Jay.md)
+- [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyukini-webway-system//reference//_index.md)
+

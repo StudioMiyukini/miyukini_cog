@@ -1,288 +1,288 @@
-# Master Butler — Permission Registry Contract
+﻿# Master Butler â€” Permission Registry Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **Master Butler Permission Registry Contract** : un contrat normatif, non négociable, et de statut FONDATION qui établit le modèle conceptuel, la structure, et les règles de gouvernance du registre des permissions dans le système Miyukini Core System v2.4.
+Ce document dÃ©finit le **Master Butler Permission Registry Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit le modÃ¨le conceptuel, la structure, et les rÃ¨gles de gouvernance du registre des permissions dans le systÃ¨me Miyukini Core System v2.4.
 
-Ce contrat établit les fondations nécessaires pour comprendre comment les permissions sont définies, organisées, associées aux capacités, et gérées dans l'écosystème Miyukini.
+Ce contrat Ã©tablit les fondations nÃ©cessaires pour comprendre comment les permissions sont dÃ©finies, organisÃ©es, associÃ©es aux capacitÃ©s, et gÃ©rÃ©es dans l'Ã©cosystÃ¨me Miyukini.
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **toutes les permissions** du système et définit de manière absolue :
+Ce contrat s'applique Ã  **toutes les permissions** du systÃ¨me et dÃ©finit de maniÃ¨re absolue :
 
-- La définition formelle d'une permission
+- La dÃ©finition formelle d'une permission
 - La structure du registre des permissions
-- Le modèle d'association permission-capacité
-- Les règles de définition, modification et révocation
-- Les métadonnées obligatoires et optionnelles
-- Les invariants non négociables du registre
+- Le modÃ¨le d'association permission-capacitÃ©
+- Les rÃ¨gles de dÃ©finition, modification et rÃ©vocation
+- Les mÃ©tadonnÃ©es obligatoires et optionnelles
+- Les invariants non nÃ©gociables du registre
 - Les interactions avec les autres composants
 
-Ce contrat se concentre exclusivement sur les concepts du registre des permissions, sans entrer dans les détails d'implémentation technique ou les mécanismes de vérification runtime.
+Ce contrat se concentre exclusivement sur les concepts du registre des permissions, sans entrer dans les dÃ©tails d'implÃ©mentation technique ou les mÃ©canismes de vÃ©rification runtime.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des définitions absolues et stables qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des dÃ©finitions absolues et stables qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complète les documents contractuels existants :
+Ce contrat complÃ¨te les documents contractuels existants :
 
-- **Master Butler — Documentation Fondatrice** : Définit la raison d'être et les responsabilités de Master Butler
-- **Master Butler — Capability Registry Contract** : Définit le registre des capacités (complémentaire)
-- **Master Butler — Association Model Contract** : Définit les associations entre permissions, rôles et capacités
-- **[Miyukini Conceptual References — Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)** : Définitions canoniques des termes
-- **[Miyukini Conceptual References — Tools et Toolkits](../../../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)** : Gouvernance des Outils et Kits d'Outils
-- **[Miyukini Conceptual References — Lois Autonomie Système](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Ce contrat respecte **LOI-1** (aucune dépendance externe critique) et **LOI-5** (coût proportionnel au hardware) en garantissant un registre local et léger
+- **Master Butler â€” Documentation Fondatrice** : DÃ©finit la raison d'Ãªtre et les responsabilitÃ©s de Master Butler
+- **Master Butler â€” Capability Registry Contract** : DÃ©finit le registre des capacitÃ©s (complÃ©mentaire)
+- **Master Butler â€” Association Model Contract** : DÃ©finit les associations entre permissions, rÃ´les et capacitÃ©s
+- **[Miyukini Conceptual References â€” Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)** : DÃ©finitions canoniques des termes
+- **[Miyukini Conceptual References â€” Tools et Toolkits](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Gouvernance des Outils et Kits d'Outils
+- **[Miyukini Conceptual References â€” Lois Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Ce contrat respecte **LOI-1** (aucune dÃ©pendance externe critique) et **LOI-5** (coÃ»t proportionnel au hardware) en garantissant un registre local et lÃ©ger
 
-**Complémentarité :**
+**ComplÃ©mentaritÃ© :**
 
 - Capability Registry Contract = ce qui est techniquement possible
-- Permission Registry Contract = les droits définis pour accéder aux capacités
-- Association Model Contract = liens entre permissions, capacités et rôles
+- Permission Registry Contract = les droits dÃ©finis pour accÃ©der aux capacitÃ©s
+- Association Model Contract = liens entre permissions, capacitÃ©s et rÃ´les
 
-Ces contrats forment ensemble le système complet de gestion des capacités et permissions du système Miyukini Core System v2.4.
+Ces contrats forment ensemble le systÃ¨me complet de gestion des capacitÃ©s et permissions du systÃ¨me Miyukini Core System v2.4.
 
 ---
 
-## 2. Définition formelle d'une permission
+## 2. DÃ©finition formelle d'une permission
 
-### Définition canonique
+### DÃ©finition canonique
 
-Une **permission** est un droit formellement défini dans le système pour accéder à une ou plusieurs capacités. Elle représente l'autorisation conceptuelle d'utiliser des capacités, mais ne garantit pas l'autorisation finale (qui dépend de StrongFather).
+Une **permission** est un droit formellement dÃ©fini dans le systÃ¨me pour accÃ©der Ã  une ou plusieurs capacitÃ©s. Elle reprÃ©sente l'autorisation conceptuelle d'utiliser des capacitÃ©s, mais ne garantit pas l'autorisation finale (qui dÃ©pend de StrongFather).
 
 **Phrase fondatrice :**
 
-> **Une permission définit ce que le système reconnaît comme un droit possible, pas ce qui est effectivement autorisé.**
+> **Une permission dÃ©finit ce que le systÃ¨me reconnaÃ®t comme un droit possible, pas ce qui est effectivement autorisÃ©.**
 
-### Caractéristiques fondamentales d'une permission
+### CaractÃ©ristiques fondamentales d'une permission
 
-| Caractéristique | Description | Obligatoire |
+| CaractÃ©ristique | Description | Obligatoire |
 |-----------------|-------------|-------------|
-| **Identifiée** | Possède un identifiant unique et stable | ✅ Oui |
-| **Nommée** | Possède un nom lisible et descriptif | ✅ Oui |
-| **Définie** | Est créée explicitement, jamais implicite | ✅ Oui |
-| **Associée** | Référence au moins une capacité existante | ✅ Oui |
-| **Documentée** | Possède des métadonnées descriptives | ✅ Oui |
-| **Attribuable** | Peut être accordée à des rôles ou contextes | ✅ Oui |
-| **Révocable** | Peut être retirée | ✅ Oui |
-| **Traçable** | Son historique est enregistré | ✅ Oui |
+| **IdentifiÃ©e** | PossÃ¨de un identifiant unique et stable | âœ… Oui |
+| **NommÃ©e** | PossÃ¨de un nom lisible et descriptif | âœ… Oui |
+| **DÃ©finie** | Est crÃ©Ã©e explicitement, jamais implicite | âœ… Oui |
+| **AssociÃ©e** | RÃ©fÃ©rence au moins une capacitÃ© existante | âœ… Oui |
+| **DocumentÃ©e** | PossÃ¨de des mÃ©tadonnÃ©es descriptives | âœ… Oui |
+| **Attribuable** | Peut Ãªtre accordÃ©e Ã  des rÃ´les ou contextes | âœ… Oui |
+| **RÃ©vocable** | Peut Ãªtre retirÃ©e | âœ… Oui |
+| **TraÃ§able** | Son historique est enregistrÃ© | âœ… Oui |
 
 ### Nature conceptuelle
 
-Une permission est un **concept de droit**, pas un mécanisme de vérification. Elle définit ce qui peut être accordé, pas ce qui est effectivement vérifié à l'exécution.
+Une permission est un **concept de droit**, pas un mÃ©canisme de vÃ©rification. Elle dÃ©finit ce qui peut Ãªtre accordÃ©, pas ce qui est effectivement vÃ©rifiÃ© Ã  l'exÃ©cution.
 
-**Important :** La vérification effective d'une permission appartient à StrongFather lors de l'évaluation des intentions. Master Butler ne vérifie jamais si une permission est accordée à un contexte donné — il fournit les définitions, pas les vérifications.
+**Important :** La vÃ©rification effective d'une permission appartient Ã  StrongFather lors de l'Ã©valuation des intentions. Master Butler ne vÃ©rifie jamais si une permission est accordÃ©e Ã  un contexte donnÃ© â€” il fournit les dÃ©finitions, pas les vÃ©rifications.
 
 ### Distinction permission vs autorisation
 
 | Aspect | Permission | Autorisation |
 |--------|------------|--------------|
-| **Définition** | Droit défini dans le système | Décision d'accorder ce droit |
+| **DÃ©finition** | Droit dÃ©fini dans le systÃ¨me | DÃ©cision d'accorder ce droit |
 | **Responsable** | Master Butler | StrongFather |
-| **Nature** | Statique (existe ou n'existe pas) | Dynamique (accordée ou refusée selon contexte) |
-| **Question** | "Ce droit existe-t-il ?" | "Ce droit est-il accordé ici et maintenant ?" |
+| **Nature** | Statique (existe ou n'existe pas) | Dynamique (accordÃ©e ou refusÃ©e selon contexte) |
+| **Question** | "Ce droit existe-t-il ?" | "Ce droit est-il accordÃ© ici et maintenant ?" |
 
 ---
 
 ## 3. Structure du registre des permissions
 
-### Définition du registre
+### DÃ©finition du registre
 
-Le **registre des permissions** est la structure centrale de Master Butler qui contient l'inventaire exhaustif de toutes les permissions définies dans le système.
+Le **registre des permissions** est la structure centrale de Master Butler qui contient l'inventaire exhaustif de toutes les permissions dÃ©finies dans le systÃ¨me.
 
-**Caractéristiques du registre :**
+**CaractÃ©ristiques du registre :**
 
-| Propriété | Description |
+| PropriÃ©tÃ© | Description |
 |-----------|-------------|
-| **Central** | Source unique de vérité pour les permissions |
+| **Central** | Source unique de vÃ©ritÃ© pour les permissions |
 | **Exhaustif** | Contient toutes les permissions, sans exception |
-| **Dynamique** | Évolue avec les définitions de permissions |
-| **Traçable** | Historise toutes les modifications |
-| **Cohérent** | Maintient l'intégrité référentielle |
+| **Dynamique** | Ã‰volue avec les dÃ©finitions de permissions |
+| **TraÃ§able** | Historise toutes les modifications |
+| **CohÃ©rent** | Maintient l'intÃ©gritÃ© rÃ©fÃ©rentielle |
 
 ### Organisation du registre
 
-Le registre est organisé selon une structure hiérarchique logique :
+Le registre est organisÃ© selon une structure hiÃ©rarchique logique :
 
 ```
 Registre des Permissions
-├── Domaine (domain)
-│   ├── Sous-domaine (subdomain)
-│   │   ├── Permission 1
-│   │   ├── Permission 2
-│   │   └── ...
-│   └── ...
-└── ...
+â”œâ”€â”€ Domaine (domain)
+â”‚   â”œâ”€â”€ Sous-domaine (subdomain)
+â”‚   â”‚   â”œâ”€â”€ Permission 1
+â”‚   â”‚   â”œâ”€â”€ Permission 2
+â”‚   â”‚   â””â”€â”€ ...
+â”‚   â””â”€â”€ ...
+â””â”€â”€ ...
 ```
 
 **Convention de nommage des identifiants :**
 
 ```
-<domaine>.<sous-domaine>.<action>.<portée>
+<domaine>.<sous-domaine>.<action>.<portÃ©e>
 ```
 
 **Exemples :**
 
-| Identifiant | Domaine | Sous-domaine | Action | Portée |
+| Identifiant | Domaine | Sous-domaine | Action | PortÃ©e |
 |-------------|---------|--------------|--------|--------|
 | `content.article.create.any` | content | article | create | any |
 | `content.article.edit.own` | content | article | edit | own |
 | `media.image.delete.all` | media | image | delete | all |
 | `hierarchy.tree.reorder.scope` | hierarchy | tree | reorder | scope |
 
-### Entrée du registre
+### EntrÃ©e du registre
 
-Chaque entrée du registre représente une permission et contient :
+Chaque entrÃ©e du registre reprÃ©sente une permission et contient :
 
 ```
 Permission Entry
-├── Identification
-│   ├── id: <identifiant unique>
-│   ├── name: <nom lisible>
-│   └── version: <version de la définition>
-├── Définition
-│   ├── description: <description détaillée>
-│   ├── domain: <domaine fonctionnel>
-│   ├── level: <niveau de criticité>
-│   └── scope_type: <type de portée>
-├── Associations
-│   ├── capabilities: [<liste des capacités couvertes>]
-│   └── implied_permissions: [<permissions impliquées>]
-├── Métadonnées
-│   ├── created_at: <timestamp création>
-│   ├── created_by: <identité créateur>
-│   ├── modified_at: <timestamp dernière modification>
-│   └── modified_by: <identité modificateur>
-└── État
-    ├── status: <DRAFT | ACTIVE | DEPRECATED | RETIRED>
-    └── deprecation_info: <informations de dépréciation si applicable>
+â”œâ”€â”€ Identification
+â”‚   â”œâ”€â”€ id: <identifiant unique>
+â”‚   â”œâ”€â”€ name: <nom lisible>
+â”‚   â””â”€â”€ version: <version de la dÃ©finition>
+â”œâ”€â”€ DÃ©finition
+â”‚   â”œâ”€â”€ description: <description dÃ©taillÃ©e>
+â”‚   â”œâ”€â”€ domain: <domaine fonctionnel>
+â”‚   â”œâ”€â”€ level: <niveau de criticitÃ©>
+â”‚   â””â”€â”€ scope_type: <type de portÃ©e>
+â”œâ”€â”€ Associations
+â”‚   â”œâ”€â”€ capabilities: [<liste des capacitÃ©s couvertes>]
+â”‚   â””â”€â”€ implied_permissions: [<permissions impliquÃ©es>]
+â”œâ”€â”€ MÃ©tadonnÃ©es
+â”‚   â”œâ”€â”€ created_at: <timestamp crÃ©ation>
+â”‚   â”œâ”€â”€ created_by: <identitÃ© crÃ©ateur>
+â”‚   â”œâ”€â”€ modified_at: <timestamp derniÃ¨re modification>
+â”‚   â””â”€â”€ modified_by: <identitÃ© modificateur>
+â””â”€â”€ Ã‰tat
+    â”œâ”€â”€ status: <DRAFT | ACTIVE | DEPRECATED | RETIRED>
+    â””â”€â”€ deprecation_info: <informations de dÃ©prÃ©ciation si applicable>
 ```
 
 ---
 
-## 4. Modèle de données d'une permission
+## 4. ModÃ¨le de donnÃ©es d'une permission
 
 ### Champs d'identification (obligatoires)
 
 | Champ | Type | Description | Contraintes |
 |-------|------|-------------|-------------|
-| `id` | String | Identifiant unique et immuable | Format : `domain.subdomain.action.scope`, non modifiable après création |
-| `name` | String | Nom lisible et descriptif | Non vide, max 128 caractères |
-| `version` | String | Version sémantique de la définition | Format : `major.minor.patch` |
+| `id` | String | Identifiant unique et immuable | Format : `domain.subdomain.action.scope`, non modifiable aprÃ¨s crÃ©ation |
+| `name` | String | Nom lisible et descriptif | Non vide, max 128 caractÃ¨res |
+| `version` | String | Version sÃ©mantique de la dÃ©finition | Format : `major.minor.patch` |
 
-### Champs de définition (obligatoires)
+### Champs de dÃ©finition (obligatoires)
 
 | Champ | Type | Description | Contraintes |
 |-------|------|-------------|-------------|
-| `description` | String | Description détaillée du droit accordé | Non vide, min 20 caractères |
+| `description` | String | Description dÃ©taillÃ©e du droit accordÃ© | Non vide, min 20 caractÃ¨res |
 | `domain` | String | Domaine fonctionnel | Valeur du catalogue de domaines |
-| `level` | Enum | Niveau de criticité | `STANDARD`, `ELEVATED`, `CRITICAL`, `SYSTEM` |
-| `scope_type` | Enum | Type de portée | `GLOBAL`, `SCOPED`, `OWNED`, `CONTEXTUAL` |
+| `level` | Enum | Niveau de criticitÃ© | `STANDARD`, `ELEVATED`, `CRITICAL`, `SYSTEM` |
+| `scope_type` | Enum | Type de portÃ©e | `GLOBAL`, `SCOPED`, `OWNED`, `CONTEXTUAL` |
 
 ### Champs d'association (obligatoires)
 
 | Champ | Type | Description | Contraintes |
 |-------|------|-------------|-------------|
-| `capabilities` | Array[String] | Capacités couvertes par cette permission | Au moins une capacité, toutes doivent exister dans le Capability Registry |
+| `capabilities` | Array[String] | CapacitÃ©s couvertes par cette permission | Au moins une capacitÃ©, toutes doivent exister dans le Capability Registry |
 
 ### Champs d'association (optionnels)
 
 | Champ | Type | Description | Contraintes |
 |-------|------|-------------|-------------|
-| `implied_permissions` | Array[String] | Permissions impliquées (hiérarchie) | Toutes doivent exister, pas de cycle |
-| `required_permissions` | Array[String] | Permissions prérequises | Toutes doivent exister |
+| `implied_permissions` | Array[String] | Permissions impliquÃ©es (hiÃ©rarchie) | Toutes doivent exister, pas de cycle |
+| `required_permissions` | Array[String] | Permissions prÃ©requises | Toutes doivent exister |
 | `conflicting_permissions` | Array[String] | Permissions incompatibles | Toutes doivent exister |
 
-### Champs de métadonnées (automatiques)
+### Champs de mÃ©tadonnÃ©es (automatiques)
 
 | Champ | Type | Description | Contraintes |
 |-------|------|-------------|-------------|
-| `created_at` | Timestamp | Date de création | Généré automatiquement, immuable |
-| `created_by` | String | Identité du créateur | Tracé automatiquement |
-| `modified_at` | Timestamp | Date de dernière modification | Mis à jour automatiquement |
-| `modified_by` | String | Identité du modificateur | Tracé automatiquement |
+| `created_at` | Timestamp | Date de crÃ©ation | GÃ©nÃ©rÃ© automatiquement, immuable |
+| `created_by` | String | IdentitÃ© du crÃ©ateur | TracÃ© automatiquement |
+| `modified_at` | Timestamp | Date de derniÃ¨re modification | Mis Ã  jour automatiquement |
+| `modified_by` | String | IdentitÃ© du modificateur | TracÃ© automatiquement |
 
-### Champs d'état
+### Champs d'Ã©tat
 
 | Champ | Type | Description | Contraintes |
 |-------|------|-------------|-------------|
-| `status` | Enum | État du cycle de vie | `DRAFT`, `ACTIVE`, `DEPRECATED`, `RETIRED` |
-| `deprecation_date` | Timestamp | Date de dépréciation | Requis si status = DEPRECATED |
-| `deprecation_reason` | String | Raison de dépréciation | Requis si status = DEPRECATED |
-| `successor_id` | String | Permission de remplacement | Recommandé si status = DEPRECATED |
+| `status` | Enum | Ã‰tat du cycle de vie | `DRAFT`, `ACTIVE`, `DEPRECATED`, `RETIRED` |
+| `deprecation_date` | Timestamp | Date de dÃ©prÃ©ciation | Requis si status = DEPRECATED |
+| `deprecation_reason` | String | Raison de dÃ©prÃ©ciation | Requis si status = DEPRECATED |
+| `successor_id` | String | Permission de remplacement | RecommandÃ© si status = DEPRECATED |
 
 ---
 
-## 5. Niveaux de criticité des permissions
+## 5. Niveaux de criticitÃ© des permissions
 
-### Définition des niveaux
+### DÃ©finition des niveaux
 
-Les permissions sont classées selon leur niveau de criticité, qui détermine les contrôles et validations applicables.
+Les permissions sont classÃ©es selon leur niveau de criticitÃ©, qui dÃ©termine les contrÃ´les et validations applicables.
 
 | Niveau | Nom | Description | Validation requise |
 |--------|-----|-------------|-------------------|
 | `STANDARD` | Standard | Permissions courantes, risque faible | Validation normale |
-| `ELEVATED` | Élevé | Permissions sensibles, risque modéré | Validation renforcée |
-| `CRITICAL` | Critique | Permissions critiques, risque élevé | Validation stricte + audit |
-| `SYSTEM` | Système | Permissions système, usage exceptionnel | Validation système + MiyukiniAdmin |
+| `ELEVATED` | Ã‰levÃ© | Permissions sensibles, risque modÃ©rÃ© | Validation renforcÃ©e |
+| `CRITICAL` | Critique | Permissions critiques, risque Ã©levÃ© | Validation stricte + audit |
+| `SYSTEM` | SystÃ¨me | Permissions systÃ¨me, usage exceptionnel | Validation systÃ¨me + MiyukiniAdmin |
 
-### Caractéristiques par niveau
+### CaractÃ©ristiques par niveau
 
 #### STANDARD
 
-| Aspect | Règle |
+| Aspect | RÃ¨gle |
 |--------|-------|
-| **Attribution** | Par les rôles standards |
+| **Attribution** | Par les rÃ´les standards |
 | **Audit** | Trace standard |
-| **Révocation** | Procédure normale |
+| **RÃ©vocation** | ProcÃ©dure normale |
 | **Exemples** | `content.read.own`, `media.view.public` |
 
 #### ELEVATED
 
-| Aspect | Règle |
+| Aspect | RÃ¨gle |
 |--------|-------|
-| **Attribution** | Par les rôles avec autorité élevée |
-| **Audit** | Trace détaillée |
-| **Révocation** | Procédure avec justification |
+| **Attribution** | Par les rÃ´les avec autoritÃ© Ã©levÃ©e |
+| **Audit** | Trace dÃ©taillÃ©e |
+| **RÃ©vocation** | ProcÃ©dure avec justification |
 | **Exemples** | `content.delete.scope`, `user.invite.team` |
 
 #### CRITICAL
 
-| Aspect | Règle |
+| Aspect | RÃ¨gle |
 |--------|-------|
 | **Attribution** | Par StrongFather avec validation explicite |
-| **Audit** | Trace complète + alerte WorrySentinel |
-| **Révocation** | Procédure formelle avec approbation |
+| **Audit** | Trace complÃ¨te + alerte WorrySentinel |
+| **RÃ©vocation** | ProcÃ©dure formelle avec approbation |
 | **Exemples** | `data.export.all`, `hierarchy.restructure.global` |
 
 #### SYSTEM
 
-| Aspect | Règle |
+| Aspect | RÃ¨gle |
 |--------|-------|
 | **Attribution** | Uniquement par MiyukiniAdmin |
-| **Audit** | Trace système inviolable |
-| **Révocation** | Procédure d'urgence uniquement |
+| **Audit** | Trace systÃ¨me inviolable |
+| **RÃ©vocation** | ProcÃ©dure d'urgence uniquement |
 | **Exemples** | `system.core.access`, `admin.override.security` |
 
 ---
 
-## 6. Types de portée des permissions
+## 6. Types de portÃ©e des permissions
 
-### Définition des types de portée
+### DÃ©finition des types de portÃ©e
 
-La portée d'une permission définit l'étendue sur laquelle le droit s'applique.
+La portÃ©e d'une permission dÃ©finit l'Ã©tendue sur laquelle le droit s'applique.
 
 | Type | Nom | Description |
 |------|-----|-------------|
-| `GLOBAL` | Globale | S'applique à toutes les entités du domaine |
-| `SCOPED` | Délimitée | S'applique à un périmètre défini (équipe, projet, etc.) |
-| `OWNED` | Propriétaire | S'applique uniquement aux entités possédées par le contexte |
+| `GLOBAL` | Globale | S'applique Ã  toutes les entitÃ©s du domaine |
+| `SCOPED` | DÃ©limitÃ©e | S'applique Ã  un pÃ©rimÃ¨tre dÃ©fini (Ã©quipe, projet, etc.) |
+| `OWNED` | PropriÃ©taire | S'applique uniquement aux entitÃ©s possÃ©dÃ©es par le contexte |
 | `CONTEXTUAL` | Contextuelle | S'applique selon des conditions contextuelles dynamiques |
 
-### Exemples par type de portée
+### Exemples par type de portÃ©e
 
 #### GLOBAL
 
@@ -290,8 +290,8 @@ La portée d'une permission définit l'étendue sur laquelle le droit s'applique
 permission:
   id: "admin.user.manage.global"
   scope_type: GLOBAL
-  description: "Gestion de tous les utilisateurs du système"
-  # S'applique à TOUS les utilisateurs, sans restriction
+  description: "Gestion de tous les utilisateurs du systÃ¨me"
+  # S'applique Ã  TOUS les utilisateurs, sans restriction
 ```
 
 #### SCOPED
@@ -300,8 +300,8 @@ permission:
 permission:
   id: "content.article.edit.team"
   scope_type: SCOPED
-  description: "Modification des articles de l'équipe"
-  # S'applique aux articles dans le périmètre de l'équipe du contexte
+  description: "Modification des articles de l'Ã©quipe"
+  # S'applique aux articles dans le pÃ©rimÃ¨tre de l'Ã©quipe du contexte
 ```
 
 #### OWNED
@@ -311,7 +311,7 @@ permission:
   id: "content.draft.delete.own"
   scope_type: OWNED
   description: "Suppression de ses propres brouillons"
-  # S'applique uniquement aux brouillons créés par le contexte
+  # S'applique uniquement aux brouillons crÃ©Ã©s par le contexte
 ```
 
 #### CONTEXTUAL
@@ -320,80 +320,80 @@ permission:
 permission:
   id: "workflow.task.approve.assigned"
   scope_type: CONTEXTUAL
-  description: "Approbation des tâches assignées"
-  # S'applique selon des conditions évaluées dynamiquement
+  description: "Approbation des tÃ¢ches assignÃ©es"
+  # S'applique selon des conditions Ã©valuÃ©es dynamiquement
 ```
 
 ---
 
-## 7. Associations permission-capacité
+## 7. Associations permission-capacitÃ©
 
 ### Principe fondamental
 
-Une permission est **toujours associée** à une ou plusieurs capacités. Cette association définit quelles capacités sont "couvertes" par la permission.
+Une permission est **toujours associÃ©e** Ã  une ou plusieurs capacitÃ©s. Cette association dÃ©finit quelles capacitÃ©s sont "couvertes" par la permission.
 
-**Règle absolue :**
+**RÃ¨gle absolue :**
 
-> **Une permission sans capacité associée est invalide. Une permission doit référencer au moins une capacité existante.**
+> **Une permission sans capacitÃ© associÃ©e est invalide. Une permission doit rÃ©fÃ©rencer au moins une capacitÃ© existante.**
 
 ### Types d'association
 
 | Type | Description | Exemple |
 |------|-------------|---------|
-| **Directe** | Une permission couvre exactement une capacité | `content.create.any` → `content.create` |
-| **Multiple** | Une permission couvre plusieurs capacités | `content.manage.all` → `content.create`, `content.edit`, `content.delete` |
-| **Hiérarchique** | Une permission implique d'autres permissions | `admin.content.full` implique `content.manage.all` |
+| **Directe** | Une permission couvre exactement une capacitÃ© | `content.create.any` â†’ `content.create` |
+| **Multiple** | Une permission couvre plusieurs capacitÃ©s | `content.manage.all` â†’ `content.create`, `content.edit`, `content.delete` |
+| **HiÃ©rarchique** | Une permission implique d'autres permissions | `admin.content.full` implique `content.manage.all` |
 
-### Modèle d'association
+### ModÃ¨le d'association
 
 ```
 Permission
-    │
-    ├── capabilities (association directe)
-    │   ├── capability_id_1
-    │   ├── capability_id_2
-    │   └── ...
-    │
-    └── implied_permissions (association hiérarchique)
-        ├── permission_id_1 (qui a ses propres capabilities)
-        └── permission_id_2 (qui a ses propres capabilities)
+    â”‚
+    â”œâ”€â”€ capabilities (association directe)
+    â”‚   â”œâ”€â”€ capability_id_1
+    â”‚   â”œâ”€â”€ capability_id_2
+    â”‚   â””â”€â”€ ...
+    â”‚
+    â””â”€â”€ implied_permissions (association hiÃ©rarchique)
+        â”œâ”€â”€ permission_id_1 (qui a ses propres capabilities)
+        â””â”€â”€ permission_id_2 (qui a ses propres capabilities)
 ```
 
-### Règles d'association
+### RÃ¨gles d'association
 
-| Règle | Description | Statut |
+| RÃ¨gle | Description | Statut |
 |-------|-------------|--------|
-| **REG-PERM-ASSOC-1** | Toute permission doit référencer au moins une capacité | NON NÉGOCIABLE |
-| **REG-PERM-ASSOC-2** | Toute capacité référencée doit exister dans le Capability Registry | NON NÉGOCIABLE |
-| **REG-PERM-ASSOC-3** | Les associations impliquées ne doivent pas créer de cycle | NON NÉGOCIABLE |
-| **REG-PERM-ASSOC-4** | La suppression d'une capacité invalide les permissions associées | NON NÉGOCIABLE |
-| **REG-PERM-ASSOC-5** | L'ajout d'une association est une modification tracée | NON NÉGOCIABLE |
+| **REG-PERM-ASSOC-1** | Toute permission doit rÃ©fÃ©rencer au moins une capacitÃ© | NON NÃ‰GOCIABLE |
+| **REG-PERM-ASSOC-2** | Toute capacitÃ© rÃ©fÃ©rencÃ©e doit exister dans le Capability Registry | NON NÃ‰GOCIABLE |
+| **REG-PERM-ASSOC-3** | Les associations impliquÃ©es ne doivent pas crÃ©er de cycle | NON NÃ‰GOCIABLE |
+| **REG-PERM-ASSOC-4** | La suppression d'une capacitÃ© invalide les permissions associÃ©es | NON NÃ‰GOCIABLE |
+| **REG-PERM-ASSOC-5** | L'ajout d'une association est une modification tracÃ©e | NON NÃ‰GOCIABLE |
 
-### Résolution des capacités effectives
+### RÃ©solution des capacitÃ©s effectives
 
-Lorsqu'une permission est interrogée, les capacités effectives incluent :
+Lorsqu'une permission est interrogÃ©e, les capacitÃ©s effectives incluent :
 
-1. Les capacités directement associées (`capabilities`)
-2. Les capacités des permissions impliquées (`implied_permissions`), récursivement
-3. L'union de toutes ces capacités, sans duplication
+1. Les capacitÃ©s directement associÃ©es (`capabilities`)
+2. Les capacitÃ©s des permissions impliquÃ©es (`implied_permissions`), rÃ©cursivement
+3. L'union de toutes ces capacitÃ©s, sans duplication
 
 **Exemple :**
 
 ```
 Permission: admin.content.full
-├── capabilities: []
-└── implied_permissions:
-    └── content.manage.all
-        ├── capabilities: []
-        └── implied_permissions:
-            ├── content.create.any
-            │   └── capabilities: [content.create]
-            ├── content.edit.any
-            │   └── capabilities: [content.edit]
-            └── content.delete.any
-                └── capabilities: [content.delete]
+â”œâ”€â”€ capabilities: []
+â””â”€â”€ implied_permissions:
+    â””â”€â”€ content.manage.all
+        â”œâ”€â”€ capabilities: []
+        â””â”€â”€ implied_permissions:
+            â”œâ”€â”€ content.create.any
+            â”‚   â””â”€â”€ capabilities: [content.create]
+            â”œâ”€â”€ content.edit.any
+            â”‚   â””â”€â”€ capabilities: [content.edit]
+            â””â”€â”€ content.delete.any
+                â””â”€â”€ capabilities: [content.delete]
 
-Capacités effectives de admin.content.full:
+CapacitÃ©s effectives de admin.content.full:
 [content.create, content.edit, content.delete]
 ```
 
@@ -401,129 +401,129 @@ Capacités effectives de admin.content.full:
 
 ## 8. Cycle de vie d'une permission
 
-### États du cycle de vie
+### Ã‰tats du cycle de vie
 
-Une permission passe par des états de cycle de vie définis, gérés en cohérence avec Ever Buddy.
+Une permission passe par des Ã©tats de cycle de vie dÃ©finis, gÃ©rÃ©s en cohÃ©rence avec Ever Buddy.
 
-| État | Description | Utilisation |
+| Ã‰tat | Description | Utilisation |
 |------|-------------|-------------|
-| `DRAFT` | En cours de définition | Non utilisable en production |
+| `DRAFT` | En cours de dÃ©finition | Non utilisable en production |
 | `ACTIVE` | Active et utilisable | Utilisation normale |
-| `DEPRECATED` | Dépréciée, usage découragé | Période de transition |
-| `RETIRED` | Retirée du système | Non disponible |
+| `DEPRECATED` | DÃ©prÃ©ciÃ©e, usage dÃ©couragÃ© | PÃ©riode de transition |
+| `RETIRED` | RetirÃ©e du systÃ¨me | Non disponible |
 
-### Transitions autorisées
+### Transitions autorisÃ©es
 
 ```
-DRAFT ──────────────────────────────────────────────────────────► RETIRED
-  │                                                                  ▲
-  │ activation                                                       │
-  ▼                                                                  │
-ACTIVE ──────────────────► DEPRECATED ───────────────────────────────┘
-           dépréciation           retrait
+DRAFT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º RETIRED
+  â”‚                                                                  â–²
+  â”‚ activation                                                       â”‚
+  â–¼                                                                  â”‚
+ACTIVE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º DEPRECATED â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+           dÃ©prÃ©ciation           retrait
 ```
 
 | Transition | Conditions | Actions |
 |------------|------------|---------|
-| DRAFT → ACTIVE | Validation complète, associations valides | Enregistrement, notification |
-| DRAFT → RETIRED | Abandon de la définition | Suppression du draft |
-| ACTIVE → DEPRECATED | Justification obligatoire, successeur recommandé | Notification des consommateurs |
-| DEPRECATED → RETIRED | Période de dépréciation écoulée | Invalidation, archivage |
+| DRAFT â†’ ACTIVE | Validation complÃ¨te, associations valides | Enregistrement, notification |
+| DRAFT â†’ RETIRED | Abandon de la dÃ©finition | Suppression du draft |
+| ACTIVE â†’ DEPRECATED | Justification obligatoire, successeur recommandÃ© | Notification des consommateurs |
+| DEPRECATED â†’ RETIRED | PÃ©riode de dÃ©prÃ©ciation Ã©coulÃ©e | Invalidation, archivage |
 
-### Règles de cycle de vie
+### RÃ¨gles de cycle de vie
 
-| Règle | Description | Statut |
+| RÃ¨gle | Description | Statut |
 |-------|-------------|--------|
-| **REG-PERM-LIFE-1** | Une permission ne peut être retirée sans passer par DEPRECATED (sauf DRAFT) | NON NÉGOCIABLE |
-| **REG-PERM-LIFE-2** | La période de dépréciation minimale est définie par politique | NON NÉGOCIABLE |
-| **REG-PERM-LIFE-3** | Toute transition est tracée avec contexte complet | NON NÉGOCIABLE |
-| **REG-PERM-LIFE-4** | Les permissions RETIRED restent dans l'historique | NON NÉGOCIABLE |
+| **REG-PERM-LIFE-1** | Une permission ne peut Ãªtre retirÃ©e sans passer par DEPRECATED (sauf DRAFT) | NON NÃ‰GOCIABLE |
+| **REG-PERM-LIFE-2** | La pÃ©riode de dÃ©prÃ©ciation minimale est dÃ©finie par politique | NON NÃ‰GOCIABLE |
+| **REG-PERM-LIFE-3** | Toute transition est tracÃ©e avec contexte complet | NON NÃ‰GOCIABLE |
+| **REG-PERM-LIFE-4** | Les permissions RETIRED restent dans l'historique | NON NÃ‰GOCIABLE |
 
 ---
 
-## 9. Opérations sur le registre
+## 9. OpÃ©rations sur le registre
 
-### 9.1. Définition d'une permission
+### 9.1. DÃ©finition d'une permission
 
-**Acteurs :** Opérateur, BondingBrother, Master Butler
+**Acteurs :** OpÃ©rateur, BondingBrother, Master Butler
 
-**Séquence :**
+**SÃ©quence :**
 
-1. L'Opérateur soumet une définition de permission
-2. BondingBrother traduit et transmet à Master Butler
-3. Master Butler valide la structure de la définition
-4. Master Butler vérifie l'existence des capacités référencées
-5. Master Butler vérifie l'absence de cycle dans les implications
-6. Master Butler enregistre la permission en état DRAFT
+1. L'OpÃ©rateur soumet une dÃ©finition de permission
+2. BondingBrother traduit et transmet Ã  Master Butler
+3. Master Butler valide la structure de la dÃ©finition
+4. Master Butler vÃ©rifie l'existence des capacitÃ©s rÃ©fÃ©rencÃ©es
+5. Master Butler vÃ©rifie l'absence de cycle dans les implications
+6. Master Butler enregistre la permission en Ã©tat DRAFT
 7. Master Butler confirme l'enregistrement
 
 **Validations obligatoires :**
 
-| Validation | Description | Erreur si échoue |
+| Validation | Description | Erreur si Ã©choue |
 |------------|-------------|------------------|
-| Structure valide | Tous les champs obligatoires présents | `INVALID_PERMISSION_STRUCTURE` |
-| Identifiant unique | L'identifiant n'existe pas déjà | `DUPLICATE_PERMISSION_ID` |
-| Capacités existantes | Toutes les capacités référencées existent | `UNKNOWN_CAPABILITY` |
-| Pas de cycle | Les implications ne créent pas de cycle | `CYCLIC_IMPLICATION` |
-| Niveau autorisé | Le créateur peut créer ce niveau | `UNAUTHORIZED_LEVEL` |
+| Structure valide | Tous les champs obligatoires prÃ©sents | `INVALID_PERMISSION_STRUCTURE` |
+| Identifiant unique | L'identifiant n'existe pas dÃ©jÃ  | `DUPLICATE_PERMISSION_ID` |
+| CapacitÃ©s existantes | Toutes les capacitÃ©s rÃ©fÃ©rencÃ©es existent | `UNKNOWN_CAPABILITY` |
+| Pas de cycle | Les implications ne crÃ©ent pas de cycle | `CYCLIC_IMPLICATION` |
+| Niveau autorisÃ© | Le crÃ©ateur peut crÃ©er ce niveau | `UNAUTHORIZED_LEVEL` |
 
 ### 9.2. Activation d'une permission
 
-**Acteurs :** Opérateur autorisé, Master Butler
+**Acteurs :** OpÃ©rateur autorisÃ©, Master Butler
 
-**Séquence :**
+**SÃ©quence :**
 
-1. L'Opérateur demande l'activation d'une permission DRAFT
-2. Master Butler vérifie que la permission est en état DRAFT
-3. Master Butler vérifie que toutes les validations sont satisfaites
-4. Master Butler change l'état à ACTIVE
-5. Master Butler notifie les composants concernés
+1. L'OpÃ©rateur demande l'activation d'une permission DRAFT
+2. Master Butler vÃ©rifie que la permission est en Ã©tat DRAFT
+3. Master Butler vÃ©rifie que toutes les validations sont satisfaites
+4. Master Butler change l'Ã©tat Ã  ACTIVE
+5. Master Butler notifie les composants concernÃ©s
 6. Master Butler confirme l'activation
 
 **Conditions d'activation :**
 
-- État actuel = DRAFT
-- Toutes les capacités référencées sont ACTIVE
-- Toutes les permissions impliquées sont ACTIVE
-- L'Opérateur a l'autorité d'activer ce niveau de permission
+- Ã‰tat actuel = DRAFT
+- Toutes les capacitÃ©s rÃ©fÃ©rencÃ©es sont ACTIVE
+- Toutes les permissions impliquÃ©es sont ACTIVE
+- L'OpÃ©rateur a l'autoritÃ© d'activer ce niveau de permission
 
 ### 9.3. Modification d'une permission
 
-**Règles de modification :**
+**RÃ¨gles de modification :**
 
 | Champ | Modifiable en DRAFT | Modifiable en ACTIVE | Modifiable en DEPRECATED |
 |-------|---------------------|----------------------|--------------------------|
-| `id` | ❌ Non | ❌ Non | ❌ Non |
-| `name` | ✅ Oui | ⚠️ Avec version | ❌ Non |
-| `description` | ✅ Oui | ⚠️ Avec version | ❌ Non |
-| `capabilities` | ✅ Oui | ⚠️ Avec version | ❌ Non |
-| `implied_permissions` | ✅ Oui | ⚠️ Avec version | ❌ Non |
-| `level` | ✅ Oui | ❌ Non | ❌ Non |
-| `scope_type` | ✅ Oui | ❌ Non | ❌ Non |
+| `id` | âŒ Non | âŒ Non | âŒ Non |
+| `name` | âœ… Oui | âš ï¸ Avec version | âŒ Non |
+| `description` | âœ… Oui | âš ï¸ Avec version | âŒ Non |
+| `capabilities` | âœ… Oui | âš ï¸ Avec version | âŒ Non |
+| `implied_permissions` | âœ… Oui | âš ï¸ Avec version | âŒ Non |
+| `level` | âœ… Oui | âŒ Non | âŒ Non |
+| `scope_type` | âœ… Oui | âŒ Non | âŒ Non |
 
-**⚠️ Avec version** : La modification incrémente la version mineure et est tracée.
+**âš ï¸ Avec version** : La modification incrÃ©mente la version mineure et est tracÃ©e.
 
-### 9.4. Dépréciation d'une permission
+### 9.4. DÃ©prÃ©ciation d'une permission
 
-**Acteurs :** Opérateur autorisé, Master Butler
+**Acteurs :** OpÃ©rateur autorisÃ©, Master Butler
 
-**Séquence :**
+**SÃ©quence :**
 
-1. L'Opérateur demande la dépréciation avec justification
-2. Master Butler vérifie que la permission est ACTIVE
-3. Master Butler enregistre la raison et la date de dépréciation
-4. Master Butler change l'état à DEPRECATED
+1. L'OpÃ©rateur demande la dÃ©prÃ©ciation avec justification
+2. Master Butler vÃ©rifie que la permission est ACTIVE
+3. Master Butler enregistre la raison et la date de dÃ©prÃ©ciation
+4. Master Butler change l'Ã©tat Ã  DEPRECATED
 5. Master Butler notifie les consommateurs de la permission
-6. Master Butler confirme la dépréciation
+6. Master Butler confirme la dÃ©prÃ©ciation
 
 **Informations requises :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `deprecation_reason` | Raison de la dépréciation | ✅ Oui |
-| `deprecation_date` | Date effective de dépréciation | ✅ Oui (auto si non fourni) |
-| `successor_id` | Permission de remplacement | Recommandé |
-| `migration_guide` | Guide de migration | Recommandé |
+| `deprecation_reason` | Raison de la dÃ©prÃ©ciation | âœ… Oui |
+| `deprecation_date` | Date effective de dÃ©prÃ©ciation | âœ… Oui (auto si non fourni) |
+| `successor_id` | Permission de remplacement | RecommandÃ© |
+| `migration_guide` | Guide de migration | RecommandÃ© |
 
 ### 9.5. Retrait d'une permission
 
@@ -531,113 +531,113 @@ ACTIVE ──────────────────► DEPRECATED ─�
 
 **Conditions de retrait :**
 
-- État actuel = DEPRECATED
-- Période de dépréciation minimale écoulée
-- Aucune attribution active (ou migration forcée)
+- Ã‰tat actuel = DEPRECATED
+- PÃ©riode de dÃ©prÃ©ciation minimale Ã©coulÃ©e
+- Aucune attribution active (ou migration forcÃ©e)
 
-**Conséquences du retrait :**
+**ConsÃ©quences du retrait :**
 
 - La permission devient inutilisable
-- Les références existantes deviennent invalides
-- L'historique est conservé
-- Les attributions sont révoquées
+- Les rÃ©fÃ©rences existantes deviennent invalides
+- L'historique est conservÃ©
+- Les attributions sont rÃ©voquÃ©es
 
 ---
 
 ## 10. Interrogation du registre
 
-### Types de requêtes
+### Types de requÃªtes
 
-Master Butler expose les requêtes suivantes sur le registre des permissions :
+Master Butler expose les requÃªtes suivantes sur le registre des permissions :
 
-| Requête | Description | Paramètres |
+| RequÃªte | Description | ParamÃ¨tres |
 |---------|-------------|------------|
-| `getPermission` | Récupère une permission par identifiant | `permission_id` |
-| `listPermissions` | Liste les permissions selon critères | `domain`, `level`, `status`, `scope_type` |
-| `getPermissionCapabilities` | Récupère les capacités d'une permission | `permission_id`, `include_implied` |
+| `getPermission` | RÃ©cupÃ¨re une permission par identifiant | `permission_id` |
+| `listPermissions` | Liste les permissions selon critÃ¨res | `domain`, `level`, `status`, `scope_type` |
+| `getPermissionCapabilities` | RÃ©cupÃ¨re les capacitÃ©s d'une permission | `permission_id`, `include_implied` |
 | `searchPermissions` | Recherche par nom ou description | `query`, `filters` |
-| `getPermissionHierarchy` | Récupère la hiérarchie d'implications | `permission_id` |
-| `validatePermission` | Valide une définition de permission | `permission_definition` |
+| `getPermissionHierarchy` | RÃ©cupÃ¨re la hiÃ©rarchie d'implications | `permission_id` |
+| `validatePermission` | Valide une dÃ©finition de permission | `permission_definition` |
 
-### Réponses standardisées
+### RÃ©ponses standardisÃ©es
 
-Toutes les réponses incluent :
+Toutes les rÃ©ponses incluent :
 
 ```yaml
 response:
   success: <boolean>
-  data: <données demandées>
+  data: <donnÃ©es demandÃ©es>
   metadata:
-    request_id: <identifiant de requête>
-    timestamp: <timestamp de réponse>
+    request_id: <identifiant de requÃªte>
+    timestamp: <timestamp de rÃ©ponse>
     source: "MasterButler.PermissionRegistry"
   errors: [<liste d'erreurs si success = false>]
 ```
 
 ### Filtrage et pagination
 
-Les requêtes de liste supportent :
+Les requÃªtes de liste supportent :
 
-| Paramètre | Type | Description |
+| ParamÃ¨tre | Type | Description |
 |-----------|------|-------------|
 | `domain` | String | Filtrer par domaine |
 | `level` | Enum[] | Filtrer par niveaux |
-| `status` | Enum[] | Filtrer par états |
-| `scope_type` | Enum[] | Filtrer par types de portée |
-| `offset` | Integer | Décalage pour pagination |
-| `limit` | Integer | Nombre maximum de résultats |
+| `status` | Enum[] | Filtrer par Ã©tats |
+| `scope_type` | Enum[] | Filtrer par types de portÃ©e |
+| `offset` | Integer | DÃ©calage pour pagination |
+| `limit` | Integer | Nombre maximum de rÃ©sultats |
 | `sort_by` | String | Champ de tri |
 | `sort_order` | Enum | `ASC` ou `DESC` |
 
 ---
 
-## 11. Invariants non négociables
+## 11. Invariants non nÃ©gociables
 
-### INV-PERM-REG-1 : Exhaustivité
+### INV-PERM-REG-1 : ExhaustivitÃ©
 
-Le registre des permissions est **exhaustif**. Toute permission existant dans le système est recensée dans le registre. Si une permission n'est pas dans le registre, elle n'existe pas officiellement dans le système.
+Le registre des permissions est **exhaustif**. Toute permission existant dans le systÃ¨me est recensÃ©e dans le registre. Si une permission n'est pas dans le registre, elle n'existe pas officiellement dans le systÃ¨me.
 
-**Implication :** Aucun composant ne peut reconnaître une permission non enregistrée. Aucune attribution ne peut référencer une permission inexistante.
+**Implication :** Aucun composant ne peut reconnaÃ®tre une permission non enregistrÃ©e. Aucune attribution ne peut rÃ©fÃ©rencer une permission inexistante.
 
-### INV-PERM-REG-2 : Unicité des identifiants
+### INV-PERM-REG-2 : UnicitÃ© des identifiants
 
-Chaque permission possède un **identifiant unique et immuable**. Aucun doublon n'est autorisé. L'identifiant ne peut jamais être modifié après création.
+Chaque permission possÃ¨de un **identifiant unique et immuable**. Aucun doublon n'est autorisÃ©. L'identifiant ne peut jamais Ãªtre modifiÃ© aprÃ¨s crÃ©ation.
 
-**Implication :** Les références aux permissions restent valides dans le temps. Les logs et audits peuvent toujours identifier une permission de manière non ambiguë.
+**Implication :** Les rÃ©fÃ©rences aux permissions restent valides dans le temps. Les logs et audits peuvent toujours identifier une permission de maniÃ¨re non ambiguÃ«.
 
 ### INV-PERM-REG-3 : Association obligatoire
 
-Toute permission doit être **associée à au moins une capacité existante**. Une permission sans capacité est invalide et ne peut être activée.
+Toute permission doit Ãªtre **associÃ©e Ã  au moins une capacitÃ© existante**. Une permission sans capacitÃ© est invalide et ne peut Ãªtre activÃ©e.
 
-**Implication :** La suppression d'une capacité rend invalides les permissions qui ne référencent que cette capacité. Ces permissions doivent être mises à jour ou dépréciées.
+**Implication :** La suppression d'une capacitÃ© rend invalides les permissions qui ne rÃ©fÃ©rencent que cette capacitÃ©. Ces permissions doivent Ãªtre mises Ã  jour ou dÃ©prÃ©ciÃ©es.
 
-### INV-PERM-REG-4 : Intégrité référentielle
+### INV-PERM-REG-4 : IntÃ©gritÃ© rÃ©fÃ©rentielle
 
-Toutes les références dans le registre sont **valides et vérifiées**. Les capacités référencées existent. Les permissions impliquées existent. Les successeurs référencés existent.
+Toutes les rÃ©fÃ©rences dans le registre sont **valides et vÃ©rifiÃ©es**. Les capacitÃ©s rÃ©fÃ©rencÃ©es existent. Les permissions impliquÃ©es existent. Les successeurs rÃ©fÃ©rencÃ©s existent.
 
-**Implication :** Le registre ne contient jamais de référence vers un élément inexistant. Toute opération qui créerait une référence invalide est rejetée.
+**Implication :** Le registre ne contient jamais de rÃ©fÃ©rence vers un Ã©lÃ©ment inexistant. Toute opÃ©ration qui crÃ©erait une rÃ©fÃ©rence invalide est rejetÃ©e.
 
 ### INV-PERM-REG-5 : Absence de cycle
 
-Les **implications de permissions ne créent jamais de cycle**. Une permission ne peut pas s'impliquer elle-même, directement ou indirectement.
+Les **implications de permissions ne crÃ©ent jamais de cycle**. Une permission ne peut pas s'impliquer elle-mÃªme, directement ou indirectement.
 
-**Implication :** La résolution des capacités effectives termine toujours. Aucune boucle infinie n'est possible.
+**Implication :** La rÃ©solution des capacitÃ©s effectives termine toujours. Aucune boucle infinie n'est possible.
 
-### INV-PERM-REG-6 : Traçabilité complète
+### INV-PERM-REG-6 : TraÃ§abilitÃ© complÃ¨te
 
-Toute modification du registre est **tracée avec contexte complet**. Créations, modifications, dépréciations, retraits : tout est enregistré avec qui, quand, pourquoi.
+Toute modification du registre est **tracÃ©e avec contexte complet**. CrÃ©ations, modifications, dÃ©prÃ©ciations, retraits : tout est enregistrÃ© avec qui, quand, pourquoi.
 
-**Implication :** L'historique des permissions est auditable. Aucune modification silencieuse n'est possible. La conformité peut être vérifiée.
+**Implication :** L'historique des permissions est auditable. Aucune modification silencieuse n'est possible. La conformitÃ© peut Ãªtre vÃ©rifiÃ©e.
 
-### INV-PERM-REG-7 : Non-vérification
+### INV-PERM-REG-7 : Non-vÃ©rification
 
-Master Butler **ne vérifie jamais** si une permission est effectivement accordée à un contexte. Il définit ce qui existe, pas ce qui est autorisé.
+Master Butler **ne vÃ©rifie jamais** si une permission est effectivement accordÃ©e Ã  un contexte. Il dÃ©finit ce qui existe, pas ce qui est autorisÃ©.
 
-**Implication :** Aucune méthode du registre ne retourne "accordé" ou "refusé". Ces décisions appartiennent à StrongFather.
+**Implication :** Aucune mÃ©thode du registre ne retourne "accordÃ©" ou "refusÃ©". Ces dÃ©cisions appartiennent Ã  StrongFather.
 
-### INV-PERM-REG-8 : Cohérence des états
+### INV-PERM-REG-8 : CohÃ©rence des Ã©tats
 
-Les **transitions d'état suivent un chemin défini**. Aucune transition arbitraire n'est autorisée. Les règles de cycle de vie sont strictement appliquées.
+Les **transitions d'Ã©tat suivent un chemin dÃ©fini**. Aucune transition arbitraire n'est autorisÃ©e. Les rÃ¨gles de cycle de vie sont strictement appliquÃ©es.
 
 **Implication :** Une permission RETIRED ne peut pas redevenir ACTIVE. Une permission ACTIVE ne peut pas redevenir DRAFT.
 
@@ -650,25 +650,25 @@ Les **transitions d'état suivent un chemin défini**. Aucune transition arbitra
 **Flux typique :**
 
 ```
-StrongFather évalue une intention
-    │
-    ├── Interroge Master Butler : "Quelles permissions couvrent cette capacité ?"
-    │       │
-    │       └── Master Butler répond : Liste des permissions
-    │
-    ├── Interroge Master Butler : "Quelle est la définition de cette permission ?"
-    │       │
-    │       └── Master Butler répond : Définition complète
-    │
-    └── StrongFather décide selon les politiques
+StrongFather Ã©value une intention
+    â”‚
+    â”œâ”€â”€ Interroge Master Butler : "Quelles permissions couvrent cette capacitÃ© ?"
+    â”‚       â”‚
+    â”‚       â””â”€â”€ Master Butler rÃ©pond : Liste des permissions
+    â”‚
+    â”œâ”€â”€ Interroge Master Butler : "Quelle est la dÃ©finition de cette permission ?"
+    â”‚       â”‚
+    â”‚       â””â”€â”€ Master Butler rÃ©pond : DÃ©finition complÃ¨te
+    â”‚
+    â””â”€â”€ StrongFather dÃ©cide selon les politiques
 ```
 
-**Règles d'interaction :**
+**RÃ¨gles d'interaction :**
 
-- StrongFather est toujours autorisé à interroger le registre
-- Master Butler ne suggère jamais de décision
-- Les réponses sont exhaustives et exactes
-- Aucun cache de décision dans Master Butler
+- StrongFather est toujours autorisÃ© Ã  interroger le registre
+- Master Butler ne suggÃ¨re jamais de dÃ©cision
+- Les rÃ©ponses sont exhaustives et exactes
+- Aucun cache de dÃ©cision dans Master Butler
 
 ### 12.2. Interaction avec BondingBrother
 
@@ -676,44 +676,44 @@ StrongFather évalue une intention
 
 ```
 BondingBrother traduit une intention
-    │
-    ├── Interroge Master Butler : "Quelles permissions sont requises pour cette action ?"
-    │       │
-    │       └── Master Butler répond : Permissions requises
-    │
-    └── BondingBrother enrichit le contexte de l'intention
+    â”‚
+    â”œâ”€â”€ Interroge Master Butler : "Quelles permissions sont requises pour cette action ?"
+    â”‚       â”‚
+    â”‚       â””â”€â”€ Master Butler rÃ©pond : Permissions requises
+    â”‚
+    â””â”€â”€ BondingBrother enrichit le contexte de l'intention
 ```
 
-**Règles d'interaction :**
+**RÃ¨gles d'interaction :**
 
-- BondingBrother interroge pour la traduction, pas pour la décision
-- Les réponses aident à construire le contexte
-- Aucune interprétation par Master Butler
+- BondingBrother interroge pour la traduction, pas pour la dÃ©cision
+- Les rÃ©ponses aident Ã  construire le contexte
+- Aucune interprÃ©tation par Master Butler
 
-### 12.3. Interaction avec les Opérateurs
+### 12.3. Interaction avec les OpÃ©rateurs
 
-**Flux de définition :**
-
-```
-Opérateur définit une nouvelle permission
-    │
-    ├── Soumet la définition via BondingBrother
-    │       │
-    │       └── Master Butler valide et enregistre
-    │
-    └── Confirmation de l'enregistrement
-```
-
-**Flux de découverte :**
+**Flux de dÃ©finition :**
 
 ```
-Opérateur découvre les permissions disponibles
-    │
-    ├── Interroge Master Butler : "Quelles permissions existent pour ce domaine ?"
-    │       │
-    │       └── Master Butler répond : Liste des permissions (selon contexte)
-    │
-    └── Opérateur utilise ces informations
+OpÃ©rateur dÃ©finit une nouvelle permission
+    â”‚
+    â”œâ”€â”€ Soumet la dÃ©finition via BondingBrother
+    â”‚       â”‚
+    â”‚       â””â”€â”€ Master Butler valide et enregistre
+    â”‚
+    â””â”€â”€ Confirmation de l'enregistrement
+```
+
+**Flux de dÃ©couverte :**
+
+```
+OpÃ©rateur dÃ©couvre les permissions disponibles
+    â”‚
+    â”œâ”€â”€ Interroge Master Butler : "Quelles permissions existent pour ce domaine ?"
+    â”‚       â”‚
+    â”‚       â””â”€â”€ Master Butler rÃ©pond : Liste des permissions (selon contexte)
+    â”‚
+    â””â”€â”€ OpÃ©rateur utilise ces informations
 ```
 
 ### 12.4. Interaction avec Ever Buddy
@@ -721,58 +721,58 @@ Opérateur découvre les permissions disponibles
 **Coordination du cycle de vie :**
 
 ```
-Ever Buddy gère l'évolution des permissions
-    │
-    ├── Vérifie la compatibilité des versions
-    │       │
-    │       └── Master Butler fournit les versions
-    │
-    ├── Gère les dépréciations programmées
-    │       │
-    │       └── Master Butler exécute les transitions
-    │
-    └── Orchestre les migrations
-            │
-            └── Master Butler applique les changements
+Ever Buddy gÃ¨re l'Ã©volution des permissions
+    â”‚
+    â”œâ”€â”€ VÃ©rifie la compatibilitÃ© des versions
+    â”‚       â”‚
+    â”‚       â””â”€â”€ Master Butler fournit les versions
+    â”‚
+    â”œâ”€â”€ GÃ¨re les dÃ©prÃ©ciations programmÃ©es
+    â”‚       â”‚
+    â”‚       â””â”€â”€ Master Butler exÃ©cute les transitions
+    â”‚
+    â””â”€â”€ Orchestre les migrations
+            â”‚
+            â””â”€â”€ Master Butler applique les changements
 ```
 
 ---
 
-## 13. Conformité aux Lois d'Autonomie Système
+## 13. ConformitÃ© aux Lois d'Autonomie SystÃ¨me
 
-Ce contrat respecte les Lois d'Autonomie Système définies dans [Miyukini Framework - Lois Autonomie Systeme.md](../../../../reference/Miyukini%20Framework%20-%20Lois%20Autonomie%20Systeme.md).
+Ce contrat respecte les Lois d'Autonomie SystÃ¨me dÃ©finies dans [Miyukini Framework - Lois Autonomie Systeme.md](..//..//..//..//miyukini-webway-system//reference//_index.md).
 
-### LOI-1 : Aucune dépendance externe critique à l'exécution
+### LOI-1 : Aucune dÃ©pendance externe critique Ã  l'exÃ©cution
 
-**Conformité :** Conforme
+**ConformitÃ© :** Conforme
 
-Le registre des permissions est entièrement local :
+Le registre des permissions est entiÃ¨rement local :
 
-- **Stockage local** : Les permissions sont définies et stockées localement
-- **Interrogation locale** : Toutes les requêtes s'exécutent localement
+- **Stockage local** : Les permissions sont dÃ©finies et stockÃ©es localement
+- **Interrogation locale** : Toutes les requÃªtes s'exÃ©cutent localement
 - **Aucune API externe** : Aucun service distant n'est requis
 
-**Vérification LOI-1** : *"Le registre des permissions fonctionne-t-il si le réseau est indisponible ?"* → **Oui.**
+**VÃ©rification LOI-1** : *"Le registre des permissions fonctionne-t-il si le rÃ©seau est indisponible ?"* â†’ **Oui.**
 
-### LOI-5 : Le coût doit être proportionnel au hardware
+### LOI-5 : Le coÃ»t doit Ãªtre proportionnel au hardware
 
-**Conformité :** Conforme
+**ConformitÃ© :** Conforme
 
 Le registre des permissions a une empreinte minimale :
 
-- **Données légères** : Les permissions sont des métadonnées textuelles
-- **Pas de workers** : Aucun processus en arrière-plan
-- **Lookups simples** : Opérations de consultation directe
-- **Mémoire prévisible** : Proportionnelle au nombre de permissions
+- **DonnÃ©es lÃ©gÃ¨res** : Les permissions sont des mÃ©tadonnÃ©es textuelles
+- **Pas de workers** : Aucun processus en arriÃ¨re-plan
+- **Lookups simples** : OpÃ©rations de consultation directe
+- **MÃ©moire prÃ©visible** : Proportionnelle au nombre de permissions
 
-**Vérification LOI-5** : *"Le registre fonctionne-t-il sur un Raspberry Pi 4 ?"* → **Oui.** Un registre typique (quelques centaines de permissions) représente quelques kilo-octets.
+**VÃ©rification LOI-5** : *"Le registre fonctionne-t-il sur un Raspberry Pi 4 ?"* â†’ **Oui.** Un registre typique (quelques centaines de permissions) reprÃ©sente quelques kilo-octets.
 
-### Synthèse de conformité
+### SynthÃ¨se de conformitÃ©
 
 | Loi | Statut | Raison |
 |-----|--------|--------|
-| LOI-1 | ✅ Conforme | Registre local, aucune dépendance externe |
-| LOI-5 | ✅ Conforme | Métadonnées légères, consommation minimale |
+| LOI-1 | âœ… Conforme | Registre local, aucune dÃ©pendance externe |
+| LOI-5 | âœ… Conforme | MÃ©tadonnÃ©es lÃ©gÃ¨res, consommation minimale |
 
 ---
 
@@ -838,7 +838,7 @@ permission:
   created_by: "admin:setup"
 ```
 
-### Exemple 4 : Permission dépréciée
+### Exemple 4 : Permission dÃ©prÃ©ciÃ©e
 
 ```yaml
 permission:
@@ -865,33 +865,35 @@ permission:
 
 ### Essence du Permission Registry Contract
 
-Le registre des permissions de Master Butler est la **source de vérité** pour tous les droits définis dans le système Miyukini. Il définit ce qui peut être accordé, sans jamais décider ce qui est effectivement autorisé.
+Le registre des permissions de Master Butler est la **source de vÃ©ritÃ©** pour tous les droits dÃ©finis dans le systÃ¨me Miyukini. Il dÃ©finit ce qui peut Ãªtre accordÃ©, sans jamais dÃ©cider ce qui est effectivement autorisÃ©.
 
-Ce registre incarne la séparation entre :
-- **La définition des droits** (Master Butler)
-- **L'attribution des droits** (mécanismes d'attribution)
-- **La vérification des droits** (StrongFather)
+Ce registre incarne la sÃ©paration entre :
+- **La dÃ©finition des droits** (Master Butler)
+- **L'attribution des droits** (mÃ©canismes d'attribution)
+- **La vÃ©rification des droits** (StrongFather)
 
 ### Phrase fondatrice
 
-> **Le registre des permissions définit les droits possibles du système Miyukini, en association avec les capacités, sans jamais participer à la décision d'autorisation.**
+> **Le registre des permissions dÃ©finit les droits possibles du systÃ¨me Miyukini, en association avec les capacitÃ©s, sans jamais participer Ã  la dÃ©cision d'autorisation.**
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
-Toute implémentation du registre des permissions doit respecter intégralement ce document. Toute évolution doit préserver les invariants définis ici.
+Toute implÃ©mentation du registre des permissions doit respecter intÃ©gralement ce document. Toute Ã©volution doit prÃ©server les invariants dÃ©finis ici.
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-27  
-**Statut :** FONDATION — Non négociable  
-**Référence :** Miyukini Core System v2.4
+**Statut :** FONDATION â€” Non nÃ©gociable  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4
 
-**Références croisées :**
+**RÃ©fÃ©rences croisÃ©es :**
 
-- [Master Butler - Documentation Fondatrice](../../Master%20Butler%20-%20Documentation%20Fondatrice.md) : Définition et responsabilités de Master Butler
-- [Miyukini Conceptual References - Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) : Définitions canoniques
-- [Miyukini Conceptual References - Tools et Toolkits](../../../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) : Gouvernance des Outils
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) : Lois d'autonomie
+- [Master Butler - Documentation Fondatrice](..//..//foundation//Master%20Butler%20-%20Documentation%20Fondatrice.md) : DÃ©finition et responsabilitÃ©s de Master Butler
+- [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) : DÃ©finitions canoniques
+- [Miyukini Conceptual References - Tools et Toolkits](..//..//..//..//miyukini-webway-system//reference//_index.md) : Gouvernance des Outils
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) : Lois d'autonomie
+
+

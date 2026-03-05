@@ -1,4 +1,4 @@
-# JayShop - Commerce, vente en ligne et point de vente
+﻿# JayShop - Commerce, vente en ligne et point de vente
 
 ## Contexte
 
@@ -37,8 +37,9 @@ JayShop est le service Miyukini dedie au **commerce et a la vente** :
 
 ## Liaisons ecosysteme
 
-- [JayXpose - Document Fondateur](../JayXpose/JayXpose%20-%20Document%20Fondateur.md) — Catalogue produits, stocks
-- [JayKonta - Document Fondateur](../JayKonta/JayKonta%20-%20Document%20Fondateur.md) — Suivi comptable
-- [JayFestival - Document Fondateur](../JayFestival/JayFestival%20-%20Document%20Fondateur.md) — **Gestion evenements, synchronisation participations**
-- [Miyukini Sales - Document Fondateur](../MiyukiniSales/Miyukini%20Sales%20-%20Document%20Fondateur.md) — Socle Operateurs partages
-- [Miyukini Conceptual References - Interpolarite Services Jay](../../reference/Miyukini%20Conceptual%20References%20-%20Interpolarite%20Services%20Jay.md)
+- [JayXpose - Document Fondateur](../JayXpose/JayXpose%20-%20Document%20Fondateur.md) â€” Catalogue produits, stocks
+- [JayKonta - Document Fondateur](../JayKonta/JayKonta%20-%20Document%20Fondateur.md) â€” Suivi comptable
+- [JayFestival - Document Fondateur](../JayFestival/JayFestival%20-%20Document%20Fondateur.md) â€” **Gestion evenements, synchronisation participations**
+- [Miyukini Sales - Document Fondateur](../MiyukiniSales/Miyukini%20Sales%20-%20Document%20Fondateur.md) â€” Socle Operateurs partages
+- [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyukini-webway-system//reference//_index.md)
+

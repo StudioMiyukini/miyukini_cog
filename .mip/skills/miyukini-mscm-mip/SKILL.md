@@ -70,7 +70,7 @@ Scan codebase → Parse MSCM → Extraction BLOCKS → Construction hierarchie
 
 ### Outil de generation
 
-Le generateur MSCM Index se trouve dans `tools/mip-generator/`.
+Le generateur MSCM Index se trouve dans `tools/mscm-generator/`.
 
 ### Format `blocks.json`
 

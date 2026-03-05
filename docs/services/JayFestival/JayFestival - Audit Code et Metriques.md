@@ -76,7 +76,7 @@ Cet audit vérifie :
 | `mscm_index/dependencies.json` | Oui | Présent |
 | `mscm_index/stats.json` | Oui | Présent |
 
-**Règles MIP :** Index généré uniquement par le pipeline (`tools/mip-generator`) ; pas de modification manuelle. Dernière régénération : Phase 11 [204].
+**Règles MIP :** Index généré uniquement par le pipeline (`tools/mscm-generator`) ; pas de modification manuelle. Dernière régénération : Phase 11 [204].
 
 **Score MIP :** 100 %  
 - Index à jour, intégrité OK, jayfestival inclus, pas de modification manuelle.
@@ -154,7 +154,7 @@ Pondération proposée : Bornage 40 %, MIP 30 %, Tests 30 %.
 - [JayFestival - Plan Implementation](./JayFestival%20-%20Plan%20Implementation.md)
 - [JayFestival - Specification UI Conforme Catakana](./JayFestival%20-%20Specification%20UI%20Conforme%20Catakana.md)
 - [JayFestival - Verification Phase 11 Rapport](./JayFestival%20-%20Verification%20Phase%2011%20Rapport.md)
-- [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md)
+- [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md)
 
 ---
 
@@ -162,3 +162,4 @@ Pondération proposée : Bornage 40 %, MIP 30 %, Tests 30 %.
 **Version :** 1.0  
 **Date :** 2026-02-03  
 **Statut :** Rapport d’audit (métrique globale 95 %)
+

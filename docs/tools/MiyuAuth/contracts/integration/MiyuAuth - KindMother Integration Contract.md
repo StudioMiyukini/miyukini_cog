@@ -1,24 +1,24 @@
-# MiyuAuth — KindMother Integration Contract
+﻿# MiyuAuth â€” KindMother Integration Contract
 
 ## 1. Contexte
 
-Ce document définit le contrat d'intégration entre **MiyuAuth** (kit d'outils d'identité utilisateur) et **KindMother** (Core de données, Strate 4). KindMother est l'unique validateur de la confiance inter-domaines ([KindMother - Identity & Cross-Domain Trust Contract](../../../core/KindMother/contracts/authority/KindMother%20-%20Identity%20%26%20Cross-Domain%20Trust%20Contract.md)). MiyuAuth exécute des capacités (resolve, attest, verify, role) sans décider de la confiance ; toute confiance utilisée pour l'identité est validée par KindMother.
+Ce document dÃ©finit le contrat d'intÃ©gration entre **MiyuAuth** (kit d'outils d'identitÃ© utilisateur) et **KindMother** (Core de donnÃ©es, Strate 4). KindMother est l'unique validateur de la confiance inter-domaines ([KindMother - Identity & Cross-Domain Trust Contract](..//..//..//..//cores//KindMother//contracts//authority//KindMother%20-%20Identity%20%26%20Cross-Domain%20Trust%20Contract.md)). MiyuAuth exÃ©cute des capacitÃ©s (resolve, attest, verify, role) sans dÃ©cider de la confiance ; toute confiance utilisÃ©e pour l'identitÃ© est validÃ©e par KindMother.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
-Ce document définit :
-- Le rôle unique de KindMother comme validateur de la confiance inter-domaines
-- L'exécution des capacités MiyuAuth (resolve, attest, verify, role) sans décision de confiance
-- L'invariant : aucune confiance sans validation KindMother, pas de délégation de validation
+Ce document dÃ©finit :
+- Le rÃ´le unique de KindMother comme validateur de la confiance inter-domaines
+- L'exÃ©cution des capacitÃ©s MiyuAuth (resolve, attest, verify, role) sans dÃ©cision de confiance
+- L'invariant : aucune confiance sans validation KindMother, pas de dÃ©lÃ©gation de validation
 
 Ce document **ne couvre pas** :
-- L'implémentation interne de KindMother
-- Les contrats MiyuAuth hors intégration (gouvernance, sécurité, bornage)
-- Le détail du modèle Identity & Cross-Domain Trust (voir KindMother - Identity & Cross-Domain Trust Contract)
+- L'implÃ©mentation interne de KindMother
+- Les contrats MiyuAuth hors intÃ©gration (gouvernance, sÃ©curitÃ©, bornage)
+- Le dÃ©tail du modÃ¨le Identity & Cross-Domain Trust (voir KindMother - Identity & Cross-Domain Trust Contract)
 
 ---
 
@@ -26,58 +26,58 @@ Ce document **ne couvre pas** :
 
 ### 3.1 KindMother = validateur unique de la confiance
 
-> **KindMother est l'unique validateur de toute confiance inter-domaines. MiyuAuth exécute des capacités (resolve, attest, verify, role) sans décider de la confiance ; toute confiance utilisée pour l'identité est validée par KindMother.**
+> **KindMother est l'unique validateur de toute confiance inter-domaines. MiyuAuth exÃ©cute des capacitÃ©s (resolve, attest, verify, role) sans dÃ©cider de la confiance ; toute confiance utilisÃ©e pour l'identitÃ© est validÃ©e par KindMother.**
 
 ### 3.2 Invariants
 
 | Code | Invariant |
 |------|-----------|
-| **INV-KM-1** | Aucune confiance inter-domaines n'est utilisée pour l'identité sans validation explicite par KindMother |
-| **INV-KM-2** | MiyuAuth ne valide pas la confiance ; il exécute les capacités mandatees après validation KindMother |
-| **INV-KM-3** | La validation de la confiance n'est pas déléguable ; KindMother ne délègue pas à MiyuAuth ni à un adaptateur |
-| **INV-KM-4** | MiyuAuth n'exécute que ce qui a été autorisé par la gouvernance (StrongFather, KindMother) |
-| **INV-KM-5** | MiyuAuth n'ajoute aucune logique métier ; il orchestre des capacités atomiques d'identité |
+| **INV-KM-1** | Aucune confiance inter-domaines n'est utilisÃ©e pour l'identitÃ© sans validation explicite par KindMother |
+| **INV-KM-2** | MiyuAuth ne valide pas la confiance ; il exÃ©cute les capacitÃ©s mandatees aprÃ¨s validation KindMother |
+| **INV-KM-3** | La validation de la confiance n'est pas dÃ©lÃ©guable ; KindMother ne dÃ©lÃ¨gue pas Ã  MiyuAuth ni Ã  un adaptateur |
+| **INV-KM-4** | MiyuAuth n'exÃ©cute que ce qui a Ã©tÃ© autorisÃ© par la gouvernance (StrongFather, KindMother) |
+| **INV-KM-5** | MiyuAuth n'ajoute aucune logique mÃ©tier ; il orchestre des capacitÃ©s atomiques d'identitÃ© |
 
 ---
 
-## 4. Rôle des Tools MiyuAuth
+## 4. RÃ´le des Tools MiyuAuth
 
-### 4.1 Capacités exécutées, pas de décision de confiance
+### 4.1 CapacitÃ©s exÃ©cutÃ©es, pas de dÃ©cision de confiance
 
-| ToolId | Rôle | Autorité / Validation |
+| ToolId | RÃ´le | AutoritÃ© / Validation |
 |--------|------|------------------------|
-| `tool.identity.resolve` | Résout un contexte d'identité (citoyen, visiteur, externe) à partir des données fournies | Toute confiance utilisée pour la résolution est validée par KindMother ; MiyuAuth exécute, ne décide pas |
-| `tool.identity.attest` | Produit une attestation d'identité pour un contexte validé | Le contexte doit avoir été validé par KindMother ; MiyuAuth exécute l'attestation |
-| `tool.identity.verify` | Vérifie un Passeport Utilisateur ou un Visa de Connexion (structure, signature) | Vérification technique ; la validation de la confiance reste à KindMother |
-| `tool.identity.role` | Retourne le rôle résolu (citoyen, visiteur, externe) | Contexte gouverné ; MiyuAuth exécute, ne confère pas d'autorisation |
+| `tool.identity.resolve` | RÃ©sout un contexte d'identitÃ© (citoyen, visiteur, externe) Ã  partir des donnÃ©es fournies | Toute confiance utilisÃ©e pour la rÃ©solution est validÃ©e par KindMother ; MiyuAuth exÃ©cute, ne dÃ©cide pas |
+| `tool.identity.attest` | Produit une attestation d'identitÃ© pour un contexte validÃ© | Le contexte doit avoir Ã©tÃ© validÃ© par KindMother ; MiyuAuth exÃ©cute l'attestation |
+| `tool.identity.verify` | VÃ©rifie un Passeport Utilisateur ou un Visa de Connexion (structure, signature) | VÃ©rification technique ; la validation de la confiance reste Ã  KindMother |
+| `tool.identity.role` | Retourne le rÃ´le rÃ©solu (citoyen, visiteur, externe) | Contexte gouvernÃ© ; MiyuAuth exÃ©cute, ne confÃ¨re pas d'autorisation |
 
 ### 4.2 Ce que MiyuAuth ne fait jamais
 
 | Interdiction | Description |
 |-------------|-------------|
-| **INTERDIT-1** | Décider de la confiance inter-domaines (validation = KindMother uniquement) |
-| **INTERDIT-2** | Utiliser une confiance non validée par KindMother pour l'identité |
-| **INTERDIT-3** | Déléguer ou recevoir une délégation de validation de confiance |
-| **INTERDIT-4** | Traiter la reconnaissance d'identité comme une autorisation (identité ≠ autorisation) |
+| **INTERDIT-1** | DÃ©cider de la confiance inter-domaines (validation = KindMother uniquement) |
+| **INTERDIT-2** | Utiliser une confiance non validÃ©e par KindMother pour l'identitÃ© |
+| **INTERDIT-3** | DÃ©lÃ©guer ou recevoir une dÃ©lÃ©gation de validation de confiance |
+| **INTERDIT-4** | Traiter la reconnaissance d'identitÃ© comme une autorisation (identitÃ© â‰  autorisation) |
 
 ---
 
 ## 5. Flux de confiance
 
 ```
-Opérateur / Adaptateur
-        │
-        │ 1. Demande d'utilisation d'un Tool MiyuAuth (resolve, attest, verify, role)
-        ▼
-BondingBrother ──► Master Butler ──► WorrySentinel ──► Caring Nanny ──► StrongFather
-        │                                                                      │
-        │ 2. ALLOW                                                             │
-        ▼                                                                      │
-KindMother : validation de la confiance (si nécessaire pour l'identité)       │
-        │                                                                      │
-        │ 3. Mandat d'exécution (tool.identity.*)                             │
-        ▼                                                                      │
-MiyuAuth Tools : exécution gouvernée (sans décision de confiance)
+OpÃ©rateur / Adaptateur
+        â”‚
+        â”‚ 1. Demande d'utilisation d'un Tool MiyuAuth (resolve, attest, verify, role)
+        â–¼
+BondingBrother â”€â”€â–º Master Butler â”€â”€â–º WorrySentinel â”€â”€â–º Caring Nanny â”€â”€â–º StrongFather
+        â”‚                                                                      â”‚
+        â”‚ 2. ALLOW                                                             â”‚
+        â–¼                                                                      â”‚
+KindMother : validation de la confiance (si nÃ©cessaire pour l'identitÃ©)       â”‚
+        â”‚                                                                      â”‚
+        â”‚ 3. Mandat d'exÃ©cution (tool.identity.*)                             â”‚
+        â–¼                                                                      â”‚
+MiyuAuth Tools : exÃ©cution gouvernÃ©e (sans dÃ©cision de confiance)
 ```
 
 ---
@@ -85,51 +85,54 @@ MiyuAuth Tools : exécution gouvernée (sans décision de confiance)
 ## 6. Absence de contournement
 
 Aucun chemin ne peut contourner :
-1. La médiation BondingBrother (intention, contexte)
+1. La mÃ©diation BondingBrother (intention, contexte)
 2. Le catalogue Master Butler (Tool/Toolkit, permissions)
-3. Les Cores WorrySentinel et Caring Nanny (sécurité, état système)
-4. La décision StrongFather (ALLOW/DENY)
-5. La validation KindMother (confiance inter-domaines pour l'identité)
+3. Les Cores WorrySentinel et Caring Nanny (sÃ©curitÃ©, Ã©tat systÃ¨me)
+4. La dÃ©cision StrongFather (ALLOW/DENY)
+5. La validation KindMother (confiance inter-domaines pour l'identitÃ©)
 
-MiyuAuth n'exécute que dans le cadre de ce flux ; il ne valide jamais la confiance lui-même.
+MiyuAuth n'exÃ©cute que dans le cadre de ce flux ; il ne valide jamais la confiance lui-mÃªme.
 
 ---
 
-## 6bis. Relation avec MiyuSQL — Données d'identification, Passeport, Visa
+## 6bis. Relation avec MiyuSQL â€” DonnÃ©es d'identification, Passeport, Visa
 
-### 6bis.1 Persistance des données d'identification
+### 6bis.1 Persistance des donnÃ©es d'identification
 
-La **persistance** (lecture / écriture en base) des données d'identification, des Passeports Utilisateurs et des Visas de Connexion relève de **KindMother** et est **exécutée via MiyuSQL** lorsque KindMother mandate les opérations (WriteIntent pour les écritures, mandat d'exécution pour les lectures). MiyuAuth **ne persiste pas** et **ne lit pas** en base ; il ne dépend pas de MiyuSQL et n'accède pas à la persistance.
+La **persistance** (lecture / Ã©criture en base) des donnÃ©es d'identification, des Passeports Utilisateurs et des Visas de Connexion relÃ¨ve de **KindMother** et est **exÃ©cutÃ©e via MiyuSQL** lorsque KindMother mandate les opÃ©rations (WriteIntent pour les Ã©critures, mandat d'exÃ©cution pour les lectures). MiyuAuth **ne persiste pas** et **ne lit pas** en base ; il ne dÃ©pend pas de MiyuSQL et n'accÃ¨de pas Ã  la persistance.
 
-| Opération | Autorité | Exécution technique | MiyuAuth |
+| OpÃ©ration | AutoritÃ© | ExÃ©cution technique | MiyuAuth |
 |-----------|----------|----------------------|----------|
-| Stockage (création, mise à jour) Passeport / Visa | KindMother | MiyuSQL (sous WriteIntent) | N'intervient pas |
-| Lecture Passeport / Visa depuis la base | KindMother | MiyuSQL (mandat d'exécution) | N'intervient pas |
-| Vérification (structure, signature) d'un artefact fourni | — | MiyuAuth (`tool.identity.verify`) | Exécute sur l'artefact reçu |
-| Résolution rôle / contexte à partir de données fournies | — | MiyuAuth (`tool.identity.resolve`, `tool.identity.role`) | Exécute sur le contexte reçu |
+| Stockage (crÃ©ation, mise Ã  jour) Passeport / Visa | KindMother | MiyuSQL (sous WriteIntent) | N'intervient pas |
+| Lecture Passeport / Visa depuis la base | KindMother | MiyuSQL (mandat d'exÃ©cution) | N'intervient pas |
+| VÃ©rification (structure, signature) d'un artefact fourni | â€” | MiyuAuth (`tool.identity.verify`) | ExÃ©cute sur l'artefact reÃ§u |
+| RÃ©solution rÃ´le / contexte Ã  partir de donnÃ©es fournies | â€” | MiyuAuth (`tool.identity.resolve`, `tool.identity.role`) | ExÃ©cute sur le contexte reÃ§u |
 
-### 6bis.2 Flux gouverné typique
+### 6bis.2 Flux gouvernÃ© typique
 
-Les données (Passeport, Visa, enregistrements d'identité) sont d'abord **lues ou produites** sous autorité KindMother (avec MiyuSQL pour la persistance). Elles sont ensuite **fournies au flux** (contexte, session, paramètres). MiyuAuth est invoqué sur ces données **déjà présentes dans le flux** pour vérification, résolution ou attestation — sans accéder lui-même à la base.
+Les donnÃ©es (Passeport, Visa, enregistrements d'identitÃ©) sont d'abord **lues ou produites** sous autoritÃ© KindMother (avec MiyuSQL pour la persistance). Elles sont ensuite **fournies au flux** (contexte, session, paramÃ¨tres). MiyuAuth est invoquÃ© sur ces donnÃ©es **dÃ©jÃ  prÃ©sentes dans le flux** pour vÃ©rification, rÃ©solution ou attestation â€” sans accÃ©der lui-mÃªme Ã  la base.
 
-**Référence :** [MiyuAuth - Documentation Fondatrice](../../MiyuAuth%20-%20Documentation%20Fondatrice.md) (section 8bis Relation avec MiyuSQL), [MiyuSQL - KindMother Integration Contract](../../MiyuSQL/contracts/integration/MiyuSQL%20-%20KindMother%20Integration%20Contract.md).
+**RÃ©fÃ©rence :** [MiyuAuth - Documentation Fondatrice](../../MiyuAuth%20-%20Documentation%20Fondatrice.md) (section 8bis Relation avec MiyuSQL), [MiyuSQL - KindMother Integration Contract](..//..//..//MiyuSQL//contracts//integration//MiyuSQL%20-%20KindMother%20Integration%20Contract.md).
 
 ---
 
-## 7. Références croisées
+## 7. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
 | MiyuAuth - Documentation Fondatrice | [MiyuAuth - Documentation Fondatrice](../../MiyuAuth%20-%20Documentation%20Fondatrice.md) |
-| KindMother - Identity & Cross-Domain Trust Contract | [KindMother - Identity & Cross-Domain Trust Contract](../../../core/KindMother/contracts/authority/KindMother%20-%20Identity%20%26%20Cross-Domain%20Trust%20Contract.md) |
-| KindMother - Index | [KindMother - Index](../../../core/KindMother/_index.md) |
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Connexion Inter-COG | [Miyukini Conceptual References - Connexion Inter-COG](../../../reference/Miyukini%20Conceptual%20References%20-%20Connexion%20Inter-COG.md) |
-| MiyuSQL - KindMother Integration Contract | [MiyuSQL - KindMother Integration Contract](../../MiyuSQL/contracts/integration/MiyuSQL%20-%20KindMother%20Integration%20Contract.md) |
-| Security Levels (référence conceptuelle) | [Miyukini Conceptual References - Security Levels](../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) |
+| KindMother - Identity & Cross-Domain Trust Contract | [KindMother - Identity & Cross-Domain Trust Contract](..//..//..//..//cores//KindMother//contracts//authority//KindMother%20-%20Identity%20%26%20Cross-Domain%20Trust%20Contract.md) |
+| KindMother - Index | [KindMother - Index](..//..//..//_index.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) |
+| Connexion Inter-COG | [Miyukini Conceptual References - Connexion Inter-COG](..//..//..//..//miyukini-webway-system//reference//_index.md) |
+| MiyuSQL - KindMother Integration Contract | [MiyuSQL - KindMother Integration Contract](..//..//..//MiyuSQL//contracts//integration//MiyuSQL%20-%20KindMother%20Integration%20Contract.md) |
+| Security Levels (rÃ©fÃ©rence conceptuelle) | [Miyukini Conceptual References - Security Levels](..//..//..//..//miyukini-webway-system//reference//_index.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Contrat de référence
+**Statut :** Contrat de rÃ©fÃ©rence
+
+
+

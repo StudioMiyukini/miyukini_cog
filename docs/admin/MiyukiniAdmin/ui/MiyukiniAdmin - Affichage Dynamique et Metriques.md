@@ -1,4 +1,4 @@
-# MiyukiniAdmin — Affichage Dynamique et Metriques
+﻿# MiyukiniAdmin â€” Affichage Dynamique et Metriques
 
 ## 1. Contexte
 
@@ -55,7 +55,7 @@ Ce document **ne remplace pas** les contrats de metriques ; il complete la strat
 ### 5.1 WebSockets
 
 - **Principe :** canal bidirectionnel pour un "Realtime" type Supabase (push instantane des changements).
-- **Backend :** Axum 0.7 peut gerer les WebSockets avec la feature **`ws`** (a activer dans [Cargo.toml](../../crates/miyukini-admin/Cargo.toml) : `axum = { version = "0.7", features = ["json", "ws"] }`). Pas de nouveau crate obligatoire.
+- **Backend :** Axum 0.7 peut gerer les WebSockets avec la feature **`ws`** (a activer dans [Cargo.toml](..//..//..//_index.md) : `axum = { version = "0.7", features = ["json", "ws"] }`). Pas de nouveau crate obligatoire.
 - **Frontend :** `new WebSocket(...)` en vanilla JavaScript ; pas de framework.
 - **Conclusion :** pas de nouvelle dependance npm ; eventuellement feature Cargo `ws` pour Axum.
 
@@ -85,7 +85,7 @@ Ce document **ne remplace pas** les contrats de metriques ; il complete la strat
 | Metriques / Observability | Metriques DB, systeme | SSE ou polling (Rust) |
 | Logs | Flux logs audit / operationnels | SSE pour flux continu (Rust) |
 | Table Editor | Liste tables, recent items | Polling ou bouton "Refresh" |
-| Table Editor — Donnees table | Lignes, pagination | Polling ou refresh a la demande |
+| Table Editor â€” Donnees table | Lignes, pagination | Polling ou refresh a la demande |
 | SQL Editor | Resultats, Explain | Un appel API par execution ; pas de push |
 
 ---
@@ -103,3 +103,4 @@ Ce document **ne remplace pas** les contrats de metriques ; il complete la strat
 **Date de creation :** 2026-01-29  
 **Version :** 1.0.0  
 **Statut :** Document de reference (strategie technique affichage dynamique)
+

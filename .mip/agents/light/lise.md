@@ -2,7 +2,7 @@
 name: lise-light
 description: >
   Version light de Lise pour workers MASS et subagents P3.
-  Référence complète : .mip/agents/lise.md
+  Référence complète : .mip/agents/lise/FULL_lise.md
 ---
 
 ## Rôle

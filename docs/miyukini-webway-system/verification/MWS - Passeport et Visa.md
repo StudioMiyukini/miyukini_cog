@@ -1,29 +1,29 @@
-# MWS — Passeport COG et Permis de Circulation
+﻿# MWS â€” Passeport COG et Permis de Circulation
 
 ## Contexte
 
-Le **Passeport COG** et le **Permis de circulation** sont les deux documents fondamentaux qui permettent à un COG de participer au réseau Miyukini Webway. Le Passeport est l'identité complète du COG ; le Permis de circulation (accord relay) est l'autorisation de circuler sur le réseau, délivrée par un relay après vérification de conformité, et contrôlée par les trackers (contrôle tracker).
+Le **Passeport COG** et le **Permis de circulation** sont les deux documents fondamentaux qui permettent Ã  un COG de participer au rÃ©seau Miyukini Webway. Le Passeport est l'identitÃ© complÃ¨te du COG ; le Permis de circulation (accord relay) est l'autorisation de circuler sur le rÃ©seau, dÃ©livrÃ©e par un relay aprÃ¨s vÃ©rification de conformitÃ©, et contrÃ´lÃ©e par les trackers (contrÃ´le tracker).
 
-**Référence fondatrice :** [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
+**RÃ©fÃ©rence fondatrice :** [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 
-## Portée / Scope
+## PortÃ©e / Scope
 
 - Structure et contenu du Passeport COG
 - Types de COG (Origin, Relay, Tracker, Stable, Special, Terminal, Lone)
 - Types d'OS (Windows, Linux, macOS, Android, iOS)
-- Types de Passeport (Standard, Spécial)
+- Types de Passeport (Standard, SpÃ©cial)
 - Relation parent-enfant (Terminal)
-- Permis de circulation : émission (accord relay), contenu, durée
-- Accord d'hôte (distinct du Permis de circulation)
+- Permis de circulation : Ã©mission (accord relay), contenu, durÃ©e
+- Accord d'hÃ´te (distinct du Permis de circulation)
 - Cycle de vie des documents
 
 ---
 
 ## 1. Passeport COG
 
-### 1.1 Définition
+### 1.1 DÃ©finition
 
-Le **Passeport COG** est le document d'identité complet d'un COG. Il contient toutes les informations nécessaires pour que les relays puissent vérifier la conformité du COG.
+Le **Passeport COG** est le document d'identitÃ© complet d'un COG. Il contient toutes les informations nÃ©cessaires pour que les relays puissent vÃ©rifier la conformitÃ© du COG.
 
 ### 1.2 Structure du Passeport
 
@@ -31,54 +31,54 @@ Le **Passeport COG** est le document d'identité complet d'un COG. Il contient t
 |-------|------|-------------|
 | `cog_id` | string | Identifiant unique du COG (UUID ou LSI) |
 | `cog_type` | enum | Type de COG : `ORIGIN`, `RELAY`, `TRACKER`, `STABLE`, `SPECIAL`, `TERMINAL`, `LONE` |
-| `os_type` | enum | Système d'exploitation : `WINDOWS`, `LINUX`, `MACOS`, `ANDROID`, `IOS` |
+| `os_type` | enum | SystÃ¨me d'exploitation : `WINDOWS`, `LINUX`, `MACOS`, `ANDROID`, `IOS` |
 | `core_version` | string | Version des Cores (`MAJOR.MINOR`, ex. `1.0`) |
-| `service_list` | array | Liste des Services installés |
-| `environment_health` | object | Rapport de santé de l'environnement |
-| `previous_permis` | array | Historique des Permis de circulation précédents |
+| `service_list` | array | Liste des Services installÃ©s |
+| `environment_health` | object | Rapport de santÃ© de l'environnement |
+| `previous_permis` | array | Historique des Permis de circulation prÃ©cÃ©dents |
 | `passport_type` | enum | `STANDARD` ou `SPECIAL` |
-| `special_key` | string | (Passeports spéciaux uniquement) Clé délivrée par Origin |
+| `special_key` | string | (Passeports spÃ©ciaux uniquement) ClÃ© dÃ©livrÃ©e par Origin |
 | `parent_cog_id` | string | (Terminaux uniquement) `cog_id` du COG Stable parent |
 
-### 1.3 Détail des champs
+### 1.3 DÃ©tail des champs
 
 #### cog_id
 
-| Propriété | Description |
+| PropriÃ©tÃ© | Description |
 |-----------|-------------|
 | **Format** | UUID v4 ou LSI (Local Sovereignty Identifier) |
-| **Unicité** | Unique dans tout le réseau MWS |
-| **Immuabilité** | Ne change jamais pour un COG donné |
+| **UnicitÃ©** | Unique dans tout le rÃ©seau MWS |
+| **ImmuabilitÃ©** | Ne change jamais pour un COG donnÃ© |
 
 #### cog_type
 
-Le **type de COG** définit le rôle et les capacités du COG dans l'écosystème MWS :
+Le **type de COG** dÃ©finit le rÃ´le et les capacitÃ©s du COG dans l'Ã©cosystÃ¨me MWS :
 
-| Valeur | Description | Caractéristiques |
+| Valeur | Description | CaractÃ©ristiques |
 |--------|-------------|------------------|
-| `ORIGIN` | Point central de vérité du MWS | Unique ; une seule adresse IP et/ou URL ; source de vérité pour tout le réseau |
-| `RELAY` | COG de contrôle d'intégrité | Vérification de conformité en 3 phases ; distribution des versions ; subordination à Origin |
-| `TRACKER` | Mapping et contrôle | Douanier du réseau ; pools par version ; catalogue ; connexions inter-COG |
+| `ORIGIN` | Point central de vÃ©ritÃ© du MWS | Unique ; une seule adresse IP et/ou URL ; source de vÃ©ritÃ© pour tout le rÃ©seau |
+| `RELAY` | COG de contrÃ´le d'intÃ©gritÃ© | VÃ©rification de conformitÃ© en 3 phases ; distribution des versions ; subordination Ã  Origin |
+| `TRACKER` | Mapping et contrÃ´le | Douanier du rÃ©seau ; pools par version ; catalogue ; connexions inter-COG |
 | `STABLE` | COG d'utilisateur commun | Usage courant ; environnement personnel ou professionnel standard |
-| `SPECIAL` | COG professionnel à forte utilisation | Fort trafic réseau et/ou services larges ; contrôles allégés ; audit renforcé |
-| `TERMINAL` | COG embarqué mobile | Enfant d'un COG Stable ; même utilisateur ; capacités réduites ; dépendance au parent |
-| `LONE` | COG isolé volontairement | Structurellement et volontairement isolé du réseau ; souveraineté totale |
+| `SPECIAL` | COG professionnel Ã  forte utilisation | Fort trafic rÃ©seau et/ou services larges ; contrÃ´les allÃ©gÃ©s ; audit renforcÃ© |
+| `TERMINAL` | COG embarquÃ© mobile | Enfant d'un COG Stable ; mÃªme utilisateur ; capacitÃ©s rÃ©duites ; dÃ©pendance au parent |
+| `LONE` | COG isolÃ© volontairement | Structurellement et volontairement isolÃ© du rÃ©seau ; souverainetÃ© totale |
 
-**Règles par type :**
+**RÃ¨gles par type :**
 
-| Type | Connexion réseau | Passeport | Particularités |
+| Type | Connexion rÃ©seau | Passeport | ParticularitÃ©s |
 |------|------------------|-----------|----------------|
-| `ORIGIN` | Obligatoire (IP/URL fixe) | N/A (source) | Un seul Origin par réseau MWS |
-| `RELAY` | Obligatoire | SPECIAL | Doit être enregistré auprès d'Origin |
-| `TRACKER` | Obligatoire | SPECIAL | Doit être listé par Origin |
-| `STABLE` | Optionnelle | STANDARD | Type par défaut pour utilisateurs |
-| `SPECIAL` | Obligatoire | SPECIAL | Audit préalable par Origin |
+| `ORIGIN` | Obligatoire (IP/URL fixe) | N/A (source) | Un seul Origin par rÃ©seau MWS |
+| `RELAY` | Obligatoire | SPECIAL | Doit Ãªtre enregistrÃ© auprÃ¨s d'Origin |
+| `TRACKER` | Obligatoire | SPECIAL | Doit Ãªtre listÃ© par Origin |
+| `STABLE` | Optionnelle | STANDARD | Type par dÃ©faut pour utilisateurs |
+| `SPECIAL` | Obligatoire | SPECIAL | Audit prÃ©alable par Origin |
 | `TERMINAL` | Via parent | STANDARD | `parent_cog_id` obligatoire |
 | `LONE` | Aucune | N/A | Pas de participation au MWS |
 
 #### os_type
 
-Le **type de système d'exploitation** sur lequel le COG s'exécute :
+Le **type de systÃ¨me d'exploitation** sur lequel le COG s'exÃ©cute :
 
 | Valeur | Description |
 |--------|-------------|
@@ -88,28 +88,28 @@ Le **type de système d'exploitation** sur lequel le COG s'exécute :
 | `ANDROID` | Google Android (pour COGs TERMINAL) |
 | `IOS` | Apple iOS (pour COGs TERMINAL) |
 
-**Règles par OS :**
+**RÃ¨gles par OS :**
 
-| OS | Types de COG autorisés | Notes |
+| OS | Types de COG autorisÃ©s | Notes |
 |----|------------------------|-------|
 | `WINDOWS` | STABLE, SPECIAL, LONE | Environnement desktop/serveur |
-| `LINUX` | Tous types | Environnement serveur privilégié pour ORIGIN, RELAY, TRACKER |
+| `LINUX` | Tous types | Environnement serveur privilÃ©giÃ© pour ORIGIN, RELAY, TRACKER |
 | `MACOS` | STABLE, SPECIAL, LONE | Environnement desktop |
 | `ANDROID` | TERMINAL, LONE | Mobile uniquement ; doit avoir un parent STABLE |
 | `IOS` | TERMINAL, LONE | Mobile uniquement ; doit avoir un parent STABLE |
 
 #### core_version
 
-| Propriété | Description |
+| PropriÃ©tÃ© | Description |
 |-----------|-------------|
 | **Format** | `MAJOR.MINOR` (ex. `1.0`, `2.3`) |
-| **Signification MAJOR** | Version majeure des Cores ; détermine la compatibilité inter-COG |
+| **Signification MAJOR** | Version majeure des Cores ; dÃ©termine la compatibilitÃ© inter-COG |
 | **Signification MINOR** | Ajustements internes compatibles |
-| **Immuabilité** | Les Cores sont immuables à version donnée |
+| **ImmuabilitÃ©** | Les Cores sont immuables Ã  version donnÃ©e |
 
 #### service_list
 
-Liste des Services installés sur le COG :
+Liste des Services installÃ©s sur le COG :
 
 | Champ | Description |
 |-------|-------------|
@@ -127,34 +127,34 @@ Exemple :
 
 #### environment_health
 
-Rapport de santé généré par les Cores (WorrySentinel, KindMother) :
+Rapport de santÃ© gÃ©nÃ©rÃ© par les Cores (WorrySentinel, KindMother) :
 
 | Champ | Description |
 |-------|-------------|
-| `storage_integrity` | Intégrité du stockage (OK / DEGRADED / CORRUPTED) |
+| `storage_integrity` | IntÃ©gritÃ© du stockage (OK / DEGRADED / CORRUPTED) |
 | `config_valid` | Configuration valide (true / false) |
 | `strata_intact` | Strates intactes (true / false) |
 | `attestation_signature` | Signature du rapport par WorrySentinel |
-| `generated_at` | Date de génération |
+| `generated_at` | Date de gÃ©nÃ©ration |
 
 #### previous_permis
 
-Historique des Permis de circulation précédents :
+Historique des Permis de circulation prÃ©cÃ©dents :
 
 | Champ | Description |
 |-------|-------------|
 | `permis_id` | Identifiant du Permis de circulation |
-| `issued_by` | Relay ou Origin émetteur |
-| `issued_at` | Date d'émission |
+| `issued_by` | Relay ou Origin Ã©metteur |
+| `issued_at` | Date d'Ã©mission |
 | `expired_at` | Date d'expiration |
-| `scope` | Portée du Permis |
+| `scope` | PortÃ©e du Permis |
 
 #### passport_type
 
 | Valeur | Description |
 |--------|-------------|
-| `STANDARD` | Passeport standard, contrôles normaux |
-| `SPECIAL` | Passeport spécial (professionnel/fort trafic), contrôles allégés au quotidien |
+| `STANDARD` | Passeport standard, contrÃ´les normaux |
+| `SPECIAL` | Passeport spÃ©cial (professionnel/fort trafic), contrÃ´les allÃ©gÃ©s au quotidien |
 
 ---
 
@@ -165,16 +165,16 @@ Historique des Permis de circulation précédents :
 ```mermaid
 flowchart TB
     subgraph Infrastructure["Infrastructure MWS"]
-        ORIGIN[ORIGIN<br>Source de vérité]
-        RELAY[RELAY<br>Contrôle d'intégrité]
-        TRACKER[TRACKER<br>Mapping et contrôle]
+        ORIGIN[ORIGIN<br>Source de vÃ©ritÃ©]
+        RELAY[RELAY<br>ContrÃ´le d'intÃ©gritÃ©]
+        TRACKER[TRACKER<br>Mapping et contrÃ´le]
     end
 
     subgraph Utilisateurs["COGs Utilisateurs"]
         STABLE[STABLE<br>Utilisateur commun]
         SPECIAL[SPECIAL<br>Professionnel]
         TERMINAL[TERMINAL<br>Mobile]
-        LONE[LONE<br>Isolé]
+        LONE[LONE<br>IsolÃ©]
     end
 
     ORIGIN --> RELAY
@@ -182,73 +182,73 @@ flowchart TB
     TRACKER --> STABLE
     TRACKER --> SPECIAL
     STABLE --> TERMINAL
-    LONE -.->|Isolé| LONE
+    LONE -.->|IsolÃ©| LONE
 ```
 
 ### 2.2 COG Origin
 
-| Caractéristique | Description |
+| CaractÃ©ristique | Description |
 |-----------------|-------------|
-| **Rôle** | Point central de vérité unique du MWS |
-| **Unicité** | Un seul Origin par réseau MWS |
+| **RÃ´le** | Point central de vÃ©ritÃ© unique du MWS |
+| **UnicitÃ©** | Un seul Origin par rÃ©seau MWS |
 | **Adressage** | Une seule adresse IP fixe et/ou une URL unique |
 | **Fonctions** | Relay + Tracker + Registre de Services + Politiques |
-| **OS recommandé** | `LINUX` (serveur) |
-| **Passeport** | N/A — Origin est la source, pas un participant |
+| **OS recommandÃ©** | `LINUX` (serveur) |
+| **Passeport** | N/A â€” Origin est la source, pas un participant |
 
 ### 2.3 COG Relay
 
-| Caractéristique | Description |
+| CaractÃ©ristique | Description |
 |-----------------|-------------|
-| **Rôle** | Duplication d'Origin pour contrôle d'intégrité |
-| **Fonctions** | Vérification 3 phases, distribution des versions |
-| **Subordination** | À Origin uniquement |
-| **Enregistrement** | Doit être enregistré et approuvé par Origin |
-| **OS recommandé** | `LINUX` (serveur) |
-| **Passeport** | SPECIAL (délivré par Origin) |
+| **RÃ´le** | Duplication d'Origin pour contrÃ´le d'intÃ©gritÃ© |
+| **Fonctions** | VÃ©rification 3 phases, distribution des versions |
+| **Subordination** | Ã€ Origin uniquement |
+| **Enregistrement** | Doit Ãªtre enregistrÃ© et approuvÃ© par Origin |
+| **OS recommandÃ©** | `LINUX` (serveur) |
+| **Passeport** | SPECIAL (dÃ©livrÃ© par Origin) |
 
 ### 2.4 COG Tracker
 
-| Caractéristique | Description |
+| CaractÃ©ristique | Description |
 |-----------------|-------------|
-| **Rôle** | Douanier du réseau — mapping et contrôle |
+| **RÃ´le** | Douanier du rÃ©seau â€” mapping et contrÃ´le |
 | **Fonctions** | Pools par version, catalogue, connexions inter-COG |
-| **Subordination** | À Origin et Relays |
-| **Enregistrement** | Doit être listé par Origin dans la liste des trackers officiels |
-| **OS recommandé** | `LINUX` (serveur) |
-| **Passeport** | SPECIAL (délivré par Origin) |
+| **Subordination** | Ã€ Origin et Relays |
+| **Enregistrement** | Doit Ãªtre listÃ© par Origin dans la liste des trackers officiels |
+| **OS recommandÃ©** | `LINUX` (serveur) |
+| **Passeport** | SPECIAL (dÃ©livrÃ© par Origin) |
 
 ### 2.5 COG Stable
 
-| Caractéristique | Description |
+| CaractÃ©ristique | Description |
 |-----------------|-------------|
-| **Rôle** | COG d'utilisateur commun |
+| **RÃ´le** | COG d'utilisateur commun |
 | **Fonctions** | Usage personnel ou professionnel standard |
-| **Connexion** | Optionnelle (peut fonctionner hors réseau) |
+| **Connexion** | Optionnelle (peut fonctionner hors rÃ©seau) |
 | **Terminaux** | Peut avoir des COGs TERMINAL enfants |
-| **OS supportés** | `WINDOWS`, `LINUX`, `MACOS` |
+| **OS supportÃ©s** | `WINDOWS`, `LINUX`, `MACOS` |
 | **Passeport** | STANDARD (automatique) |
 
 ### 2.6 COG Special
 
-| Caractéristique | Description |
+| CaractÃ©ristique | Description |
 |-----------------|-------------|
-| **Rôle** | COG professionnel à forte utilisation réseau |
-| **Fonctions** | Services larges, fort trafic, haute disponibilité |
+| **RÃ´le** | COG professionnel Ã  forte utilisation rÃ©seau |
+| **Fonctions** | Services larges, fort trafic, haute disponibilitÃ© |
 | **Connexion** | Obligatoire |
-| **Contrôles** | Allégés au quotidien, audits renforcés périodiques |
-| **OS supportés** | `WINDOWS`, `LINUX`, `MACOS` |
-| **Passeport** | SPECIAL (après audit Origin) |
+| **ContrÃ´les** | AllÃ©gÃ©s au quotidien, audits renforcÃ©s pÃ©riodiques |
+| **OS supportÃ©s** | `WINDOWS`, `LINUX`, `MACOS` |
+| **Passeport** | SPECIAL (aprÃ¨s audit Origin) |
 
 ### 2.7 COG Terminal
 
-| Caractéristique | Description |
+| CaractÃ©ristique | Description |
 |-----------------|-------------|
-| **Rôle** | COG embarqué sur mobile, extension d'un COG Stable |
-| **Parenté** | Enfant obligatoire d'un COG Stable du même utilisateur |
-| **Fonctions** | Capacités réduites, synchronisation avec le parent |
-| **Connexion** | Via le parent ou directe avec dépendance |
-| **OS supportés** | `ANDROID`, `IOS` |
+| **RÃ´le** | COG embarquÃ© sur mobile, extension d'un COG Stable |
+| **ParentÃ©** | Enfant obligatoire d'un COG Stable du mÃªme utilisateur |
+| **Fonctions** | CapacitÃ©s rÃ©duites, synchronisation avec le parent |
+| **Connexion** | Via le parent ou directe avec dÃ©pendance |
+| **OS supportÃ©s** | `ANDROID`, `IOS` |
 | **Passeport** | STANDARD (avec `parent_cog_id` obligatoire) |
 
 #### Relation Parent-Enfant (Terminal)
@@ -261,40 +261,40 @@ sequenceDiagram
 
     Note over T,S: Premier enregistrement
     T->>S: Demande de liaison (user_credentials)
-    S->>S: Vérifier identité utilisateur
+    S->>S: VÃ©rifier identitÃ© utilisateur
     S->>T: Acceptation + parent_cog_id
     T->>T: Stocker parent_cog_id dans Passeport
 
-    Note over T,R: Vérification réseau
+    Note over T,R: VÃ©rification rÃ©seau
     T->>R: Passeport (avec parent_cog_id)
-    R->>R: Vérifier que parent_cog_id est un STABLE valide
-    R->>R: Vérifier même utilisateur
+    R->>R: VÃ©rifier que parent_cog_id est un STABLE valide
+    R->>R: VÃ©rifier mÃªme utilisateur
     alt Parent valide
         R->>T: Permis de circulation
-    else Parent invalide/blacklisté
+    else Parent invalide/blacklistÃ©
         R->>T: Refus (parent_invalid)
     end
 ```
 
-| Règle | Description |
+| RÃ¨gle | Description |
 |-------|-------------|
-| `parent_cog_id` obligatoire | Un TERMINAL doit toujours déclarer son parent |
-| Même utilisateur | Parent et enfant doivent appartenir au même utilisateur |
-| Propagation blacklist | Si le parent est blacklisté, tous ses terminaux le sont |
+| `parent_cog_id` obligatoire | Un TERMINAL doit toujours dÃ©clarer son parent |
+| MÃªme utilisateur | Parent et enfant doivent appartenir au mÃªme utilisateur |
+| Propagation blacklist | Si le parent est blacklistÃ©, tous ses terminaux le sont |
 | Limite de terminaux | Un STABLE peut avoir au maximum 5 terminaux |
 
 ### 2.8 COG Lone
 
-| Caractéristique | Description |
+| CaractÃ©ristique | Description |
 |-----------------|-------------|
-| **Rôle** | COG structurellement et volontairement isolé |
-| **Fonctions** | Souveraineté totale, aucune dépendance réseau |
-| **Connexion** | Aucune — refus explicite du MWS |
-| **Cas d'usage** | Environnements air-gapped, données sensibles, souveraineté absolue |
-| **OS supportés** | Tous |
-| **Passeport** | N/A — pas de participation au MWS |
+| **RÃ´le** | COG structurellement et volontairement isolÃ© |
+| **Fonctions** | SouverainetÃ© totale, aucune dÃ©pendance rÃ©seau |
+| **Connexion** | Aucune â€” refus explicite du MWS |
+| **Cas d'usage** | Environnements air-gapped, donnÃ©es sensibles, souverainetÃ© absolue |
+| **OS supportÃ©s** | Tous |
+| **Passeport** | N/A â€” pas de participation au MWS |
 
-> **Note :** Un COG Lone peut décider de rejoindre le réseau ultérieurement en changeant son `cog_type` vers `STABLE` et en passant la vérification initiale.
+> **Note :** Un COG Lone peut dÃ©cider de rejoindre le rÃ©seau ultÃ©rieurement en changeant son `cog_type` vers `STABLE` et en passant la vÃ©rification initiale.
 
 ---
 
@@ -302,40 +302,40 @@ sequenceDiagram
 
 ### 3.1 Passeport Standard
 
-| Caractéristique | Description |
+| CaractÃ©ristique | Description |
 |-----------------|-------------|
-| **Émission** | Automatique lors de la création du COG |
-| **Contrôles** | Vérification complète à chaque présentation |
-| **Limite de connexions** | 100 connexions simultanées (hors ports 80/8080) |
+| **Ã‰mission** | Automatique lors de la crÃ©ation du COG |
+| **ContrÃ´les** | VÃ©rification complÃ¨te Ã  chaque prÃ©sentation |
+| **Limite de connexions** | 100 connexions simultanÃ©es (hors ports 80/8080) |
 | **Cas d'usage** | COGs personnels, petits services, usage courant |
 
-### 3.2 Passeport Spécial
+### 3.2 Passeport SpÃ©cial
 
-| Caractéristique | Description |
+| CaractÃ©ristique | Description |
 |-----------------|-------------|
-| **Émission** | Uniquement par Origin, après audit préalable |
-| **ID spéciale** | Identifiant renforcé unique |
-| **Clé spéciale** | Clé cryptographique attestant le statut |
-| **Contrôles quotidiens** | Allégés pour optimiser les performances |
-| **Contrôles périodiques** | Audits renforcés planifiés |
-| **Limite de connexions** | Supérieure (configurable) |
-| **Cas d'usage** | Sites de grandes entreprises, serveurs MMO, services à fort trafic |
+| **Ã‰mission** | Uniquement par Origin, aprÃ¨s audit prÃ©alable |
+| **ID spÃ©ciale** | Identifiant renforcÃ© unique |
+| **ClÃ© spÃ©ciale** | ClÃ© cryptographique attestant le statut |
+| **ContrÃ´les quotidiens** | AllÃ©gÃ©s pour optimiser les performances |
+| **ContrÃ´les pÃ©riodiques** | Audits renforcÃ©s planifiÃ©s |
+| **Limite de connexions** | SupÃ©rieure (configurable) |
+| **Cas d'usage** | Sites de grandes entreprises, serveurs MMO, services Ã  fort trafic |
 
-### 3.3 Protocole de délivrance du Passeport Spécial
+### 3.3 Protocole de dÃ©livrance du Passeport SpÃ©cial
 
 ```mermaid
 sequenceDiagram
     participant COG as COG
     participant O as Origin
 
-    COG->>O: Demande de Passeport spécial
-    O->>O: Audit du COG (historique, conformité, cas d'usage)
-    alt Audit réussi
-        O->>O: Génération de l'ID et clé spéciales
-        O->>COG: Passeport spécial délivré
-        Note over COG,O: Audits périodiques pour maintien du statut
-    else Audit échoué
-        O->>COG: Demande refusée (raison)
+    COG->>O: Demande de Passeport spÃ©cial
+    O->>O: Audit du COG (historique, conformitÃ©, cas d'usage)
+    alt Audit rÃ©ussi
+        O->>O: GÃ©nÃ©ration de l'ID et clÃ© spÃ©ciales
+        O->>COG: Passeport spÃ©cial dÃ©livrÃ©
+        Note over COG,O: Audits pÃ©riodiques pour maintien du statut
+    else Audit Ã©chouÃ©
+        O->>COG: Demande refusÃ©e (raison)
     end
 ```
 
@@ -343,48 +343,48 @@ sequenceDiagram
 
 ## 4. Permis de Circulation (accord relay)
 
-### 4.1 Définition
+### 4.1 DÃ©finition
 
-Le **Permis de circulation** est l'autorisation officielle de circuler sur le réseau MWS. Il est délivré par un **relay** (ou Origin) après vérification de conformité du COG (accord relay) et vérifié par les trackers (contrôle tracker).
+Le **Permis de circulation** est l'autorisation officielle de circuler sur le rÃ©seau MWS. Il est dÃ©livrÃ© par un **relay** (ou Origin) aprÃ¨s vÃ©rification de conformitÃ© du COG (accord relay) et vÃ©rifiÃ© par les trackers (contrÃ´le tracker).
 
-**Validité et trackers officiels :**
+**ValiditÃ© et trackers officiels :**
 
-- Le Permis de circulation délivré par un relay est **valable sur tout le réseau** accessible au COG qui le présente (maillage MWS couvert par Origin et les relays).
-- Lors de la délivrance du Permis, le relay remet au COG les **adresses des trackers sûrs/officiels** (trackers connus et reconnus par Origin). Le COG ne peut et **ne doit pas** se connecter à un tracker inconnu d'Origin : seuls les trackers figurant sur cette liste sont autorisés pour la connexion au maillage.
+- Le Permis de circulation dÃ©livrÃ© par un relay est **valable sur tout le rÃ©seau** accessible au COG qui le prÃ©sente (maillage MWS couvert par Origin et les relays).
+- Lors de la dÃ©livrance du Permis, le relay remet au COG les **adresses des trackers sÃ»rs/officiels** (trackers connus et reconnus par Origin). Le COG ne peut et **ne doit pas** se connecter Ã  un tracker inconnu d'Origin : seuls les trackers figurant sur cette liste sont autorisÃ©s pour la connexion au maillage.
 
 ### 4.2 Structure du Permis de circulation
 
 | Champ | Type | Description |
 |-------|------|-------------|
 | `permis_id` | string | Identifiant unique du Permis de circulation |
-| `cog_id` | string | COG concerné |
-| `issued_by` | string | Relay ou Origin émetteur |
-| `issued_at` | datetime | Date et heure d'émission |
+| `cog_id` | string | COG concernÃ© |
+| `issued_by` | string | Relay ou Origin Ã©metteur |
+| `issued_at` | datetime | Date et heure d'Ã©mission |
 | `expires_at` | datetime | Date et heure d'expiration |
-| `scope` | object | Portée du Permis |
-| `core_version` | string | Version des Cores validée |
+| `scope` | object | PortÃ©e du Permis |
+| `core_version` | string | Version des Cores validÃ©e |
 | `passport_type` | enum | `STANDARD` ou `SPECIAL` |
-| `tracker_addresses` | array | Adresses des trackers officiels/sûrs (remises par le relay avec le Permis ; le COG ne doit se connecter qu'à ces trackers). |
+| `tracker_addresses` | array | Adresses des trackers officiels/sÃ»rs (remises par le relay avec le Permis ; le COG ne doit se connecter qu'Ã  ces trackers). |
 
-### 4.3 Portée (scope) du Permis de circulation
+### 4.3 PortÃ©e (scope) du Permis de circulation
 
-Le champ `scope` définit les **intentions** déclarées par le COG :
+Le champ `scope` dÃ©finit les **intentions** dÃ©clarÃ©es par le COG :
 
 | Champ | Description |
 |-------|-------------|
 | `services_to_use` | Services que le COG souhaite consommer |
 | `cogs_to_contact` | COGs que le COG souhaite joindre (optionnel) |
-| `expose_services` | Services que le COG expose (si hôte) |
+| `expose_services` | Services que le COG expose (si hÃ´te) |
 | `accept_connections` | Accepte des connexions entrantes (true/false) |
 
-### 4.4 Durée de validité
+### 4.4 DurÃ©e de validitÃ©
 
-| Type de Passeport | Durée typique | Renouvellement |
+| Type de Passeport | DurÃ©e typique | Renouvellement |
 |-------------------|---------------|----------------|
-| Standard | 1 à 24 heures | Automatique à expiration si toujours conforme |
-| Spécial | Jusqu'à 7 jours | Renouvellement simplifié |
+| Standard | 1 Ã  24 heures | Automatique Ã  expiration si toujours conforme |
+| SpÃ©cial | Jusqu'Ã  7 jours | Renouvellement simplifiÃ© |
 
-### 4.5 Émission du Permis de circulation (accord relay)
+### 4.5 Ã‰mission du Permis de circulation (accord relay)
 
 ```mermaid
 sequenceDiagram
@@ -392,60 +392,60 @@ sequenceDiagram
     participant R as Relay
 
     COG->>R: Passeport COG complet
-    R->>R: Phase A : Vérification clé Cores
-    R->>R: Phase B : Vérification blocs de code Services
-    R->>R: Phase C : Vérification santé environnement
+    R->>R: Phase A : VÃ©rification clÃ© Cores
+    R->>R: Phase B : VÃ©rification blocs de code Services
+    R->>R: Phase C : VÃ©rification santÃ© environnement
     alt Conforme
         R->>COG: Permis de circulation (permis_id, expires_at, scope)
     else Non-conforme
-        R->>COG: Quarantaine (durée, raison)
+        R->>COG: Quarantaine (durÃ©e, raison)
     end
 ```
 
 ---
 
-## 5. Accord d'hôte
+## 5. Accord d'hÃ´te
 
-### 5.1 Définition
+### 5.1 DÃ©finition
 
-Distinct du Permis de circulation, l'**accord d'hôte** est délivré par un **COG hôte** à un COG client pour autoriser la consommation de services spécifiques.
+Distinct du Permis de circulation, l'**accord d'hÃ´te** est dÃ©livrÃ© par un **COG hÃ´te** Ã  un COG client pour autoriser la consommation de services spÃ©cifiques.
 
 ### 5.2 Structure
 
 | Champ | Type | Description |
 |-------|------|-------------|
-| `accord_id` | string | Identifiant unique (accord d'hôte) |
-| `client_cog_id` | string | COG client autorisé |
-| `host_cog_id` | string | COG hôte |
+| `accord_id` | string | Identifiant unique (accord d'hÃ´te) |
+| `client_cog_id` | string | COG client autorisÃ© |
+| `host_cog_id` | string | COG hÃ´te |
 | `services_authorized` | array | Services accessibles |
-| `issued_at` | datetime | Date d'émission |
+| `issued_at` | datetime | Date d'Ã©mission |
 | `expires_at` | datetime | Date d'expiration |
-| `lobby_id` | string | Lobby concerné (optionnel) |
+| `lobby_id` | string | Lobby concernÃ© (optionnel) |
 
 ### 5.3 Distinction avec le Permis de circulation
 
-| Aspect | Permis de circulation (accord relay) | Accord d'hôte |
+| Aspect | Permis de circulation (accord relay) | Accord d'hÃ´te |
 |--------|--------------------------------------|---------------|
-| **Émetteur** | Relay / Origin | COG hôte |
-| **Autorisation** | Circuler sur le réseau MWS | Consommer les services du hôte |
-| **Vérification** | Conformité du COG (relay) ; contrôle tracker | Autorisation du hôte |
-| **Durée** | Heures à jours | Session ou définie par le hôte |
+| **Ã‰metteur** | Relay / Origin | COG hÃ´te |
+| **Autorisation** | Circuler sur le rÃ©seau MWS | Consommer les services du hÃ´te |
+| **VÃ©rification** | ConformitÃ© du COG (relay) ; contrÃ´le tracker | Autorisation du hÃ´te |
+| **DurÃ©e** | Heures Ã  jours | Session ou dÃ©finie par le hÃ´te |
 
-### 5.4 Flow de délivrance
+### 5.4 Flow de dÃ©livrance
 
 ```mermaid
 sequenceDiagram
     participant Client as COG Client
-    participant Host as COG Hôte
+    participant Host as COG HÃ´te
 
-    Note over Client: Possède un Permis de circulation valide
-    Client->>Host: Demande d'accès (Permis circulation, services souhaités)
-    Host->>Host: Vérifier Permis de circulation
-    Host->>Host: Vérifier autorisation (Lobby, politique)
-    alt Autorisé
-        Host->>Client: Accord d'hôte (services_authorized)
+    Note over Client: PossÃ¨de un Permis de circulation valide
+    Client->>Host: Demande d'accÃ¨s (Permis circulation, services souhaitÃ©s)
+    Host->>Host: VÃ©rifier Permis de circulation
+    Host->>Host: VÃ©rifier autorisation (Lobby, politique)
+    alt AutorisÃ©
+        Host->>Client: Accord d'hÃ´te (services_authorized)
         Client->>Host: Consommation des services
-    else Non autorisé
+    else Non autorisÃ©
         Host->>Client: Refus (raison)
     end
 ```
@@ -458,56 +458,56 @@ sequenceDiagram
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Créé: Création du COG
-    Créé --> Actif: Première vérification OK
-    Actif --> Quarantaine: Non-conformité
-    Quarantaine --> Actif: Conformité restaurée
-    Quarantaine --> Blacklisté: 3 échecs
-    Blacklisté --> Destruction: Auto-destruction
+    [*] --> CrÃ©Ã©: CrÃ©ation du COG
+    CrÃ©Ã© --> Actif: PremiÃ¨re vÃ©rification OK
+    Actif --> Quarantaine: Non-conformitÃ©
+    Quarantaine --> Actif: ConformitÃ© restaurÃ©e
+    Quarantaine --> BlacklistÃ©: 3 Ã©checs
+    BlacklistÃ© --> Destruction: Auto-destruction
     Destruction --> [*]
-    Actif --> Spécial: Demande approuvée par Origin
-    Spécial --> Actif: Statut révoqué
+    Actif --> SpÃ©cial: Demande approuvÃ©e par Origin
+    SpÃ©cial --> Actif: Statut rÃ©voquÃ©
 ```
 
 ### 6.2 Cycle du Permis de circulation
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Demande: Présentation au relay
-    Demande --> Émis: Vérification OK
-    Demande --> Refusé: Non-conformité
-    Émis --> Valide: Dans la période de validité
-    Valide --> Expiré: Fin de validité
-    Expiré --> Renouvelé: Re-vérification OK
-    Valide --> Révoqué: Alerte sécurité
-    Révoqué --> [*]
-    Renouvelé --> Valide
+    [*] --> Demande: PrÃ©sentation au relay
+    Demande --> Ã‰mis: VÃ©rification OK
+    Demande --> RefusÃ©: Non-conformitÃ©
+    Ã‰mis --> Valide: Dans la pÃ©riode de validitÃ©
+    Valide --> ExpirÃ©: Fin de validitÃ©
+    ExpirÃ© --> RenouvelÃ©: Re-vÃ©rification OK
+    Valide --> RÃ©voquÃ©: Alerte sÃ©curitÃ©
+    RÃ©voquÃ© --> [*]
+    RenouvelÃ© --> Valide
 ```
 
 ---
 
-## 7. Contrôle tracker : vérification des Permis de circulation
+## 7. ContrÃ´le tracker : vÃ©rification des Permis de circulation
 
-### 7.1 Points de vérification (contrôle tracker)
+### 7.1 Points de vÃ©rification (contrÃ´le tracker)
 
-Quand un COG se présente à un Tracker :
+Quand un COG se prÃ©sente Ã  un Tracker :
 
-| Vérification | Description |
+| VÃ©rification | Description |
 |--------------|-------------|
 | **Existence** | Le Permis de circulation existe-t-il ? |
-| **Expiration** | Le Permis n'est-il pas expiré ? |
-| **Émetteur** | Le relay émetteur est-il reconnu ? |
-| **Cohérence** | Le scope est-il cohérent avec la requête ? |
-| **Blacklist** | Le `cog_id` n'est-il pas blacklisté ? |
+| **Expiration** | Le Permis n'est-il pas expirÃ© ? |
+| **Ã‰metteur** | Le relay Ã©metteur est-il reconnu ? |
+| **CohÃ©rence** | Le scope est-il cohÃ©rent avec la requÃªte ? |
+| **Blacklist** | Le `cog_id` n'est-il pas blacklistÃ© ? |
 
-### 7.2 Actions selon le résultat
+### 7.2 Actions selon le rÃ©sultat
 
-| Résultat | Action |
+| RÃ©sultat | Action |
 |----------|--------|
 | Permis valide | Accepter la connexion, assigner au pool |
-| Permis expiré | Rediriger vers relay pour renouvellement |
+| Permis expirÃ© | Rediriger vers relay pour renouvellement |
 | Permis invalide | Refuser, journaliser, potentiel signalement |
-| COG blacklisté | Refuser, ignorer le Permis |
+| COG blacklistÃ© | Refuser, ignorer le Permis |
 
 ---
 
@@ -566,7 +566,7 @@ Quand un COG se présente à un Tracker :
 }
 ```
 
-### 8.3 Exemple de Passeport Spécial (COG serveur professionnel)
+### 8.3 Exemple de Passeport SpÃ©cial (COG serveur professionnel)
 
 ```json
 {
@@ -623,15 +623,16 @@ Quand un COG se présente à un Tracker :
 
 ---
 
-## Références
+## RÃ©fÃ©rences
 
 - [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
-- [MWS - Flux de Vérification](./MWS%20-%20Flux%20de%20Verification.md)
+- [MWS - Flux de VÃ©rification](./MWS%20-%20Flux%20de%20Verification.md)
 - [MWS - Relays](../acteurs/MWS%20-%20Relays.md)
-- [Miyukini Webway Relay](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) — sections 2.2 à 2.7
+- [Miyukini Webway Relay](..//reference//_index.md) â€” sections 2.2 Ã  2.7
 
 ---
 
 **Version :** 2.0  
-**Mise à jour :** Ajout cog_type, os_type, relation Terminal-Stable  
-**Classification :** Documentation MWS — Vérification
+**Mise Ã  jour :** Ajout cog_type, os_type, relation Terminal-Stable  
+**Classification :** Documentation MWS â€” VÃ©rification
+

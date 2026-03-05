@@ -1,549 +1,549 @@
-# KindMother — Instance & Authority Domain Model Contract
+﻿# KindMother â€” Instance & Authority Domain Model Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **KindMother Instance & Authority Domain Model Contract** : un contrat normatif, non négociable, et de statut FONDATION qui établit le modèle de domaine des instances KindMother et des autorités métier dans le système Miyukini Core System v2.4.
+Ce document dÃ©finit le **KindMother Instance & Authority Domain Model Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit le modÃ¨le de domaine des instances KindMother et des autoritÃ©s mÃ©tier dans le systÃ¨me Miyukini Core System v2.4.
 
-Ce contrat étend le modèle fondateur (DB Mère / DB Fille) pour supporter :
-- Plusieurs domaines d'autorité métier par instance
-- Plusieurs instances mères par domaine d'autorité
-- Une autorité centrale Identity/Auth unique
-- Des relations mère/fille par domaine d'autorité
+Ce contrat Ã©tend le modÃ¨le fondateur (DB MÃ¨re / DB Fille) pour supporter :
+- Plusieurs domaines d'autoritÃ© mÃ©tier par instance
+- Plusieurs instances mÃ¨res par domaine d'autoritÃ©
+- Une autoritÃ© centrale Identity/Auth unique
+- Des relations mÃ¨re/fille par domaine d'autoritÃ©
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **toutes les instances KindMother** et définit de manière absolue :
-- La définition formelle d'une Instance KindMother
-- La définition formelle d'un AuthorityDomain
-- La définition formelle d'une AuthorityInstance
-- La définition formelle d'un AuthorityGraph
-- Les règles de relations entre instances et domaines
-- Les invariants du modèle de domaine
-- La compatibilité avec les contrats existants
+Ce contrat s'applique Ã  **toutes les instances KindMother** et dÃ©finit de maniÃ¨re absolue :
+- La dÃ©finition formelle d'une Instance KindMother
+- La dÃ©finition formelle d'un AuthorityDomain
+- La dÃ©finition formelle d'une AuthorityInstance
+- La dÃ©finition formelle d'un AuthorityGraph
+- Les rÃ¨gles de relations entre instances et domaines
+- Les invariants du modÃ¨le de domaine
+- La compatibilitÃ© avec les contrats existants
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues que KindMother applique sans exception. Ces règles ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues que KindMother applique sans exception. Ces rÃ¨gles ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complète et étend les documents contractuels existants :
+Ce contrat complÃ¨te et Ã©tend les documents contractuels existants :
 
-- **KM Adapter Compliance Contract** : Définit les obligations statiques des adaptateurs (conformité binaire, invariants, violations structurelles)
-- **KindMother Runtime Boundary & Enforcement Contract** : Définit les frontières runtime et les mécanismes d'enforcement dynamiques
-- **KindMother — Instance & Authority Domain Model Contract** : Définit le modèle de domaine des instances et autorités
-- **[Miyukini Conceptual References — Lois Autonomie Système](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Ce contrat respecte **LOI-1** (aucune dépendance externe critique), **LOI-3** (l'état local est souverain), et **LOI-6** (l'autonomie n'empêche pas la fédération) en garantissant que chaque instance gère sa persistance de manière autonome, que les données sont isolées par domaine, et que la communication inter-domaines est explicite et contrôlée.
+- **KM Adapter Compliance Contract** : DÃ©finit les obligations statiques des adaptateurs (conformitÃ© binaire, invariants, violations structurelles)
+- **KindMother Runtime Boundary & Enforcement Contract** : DÃ©finit les frontiÃ¨res runtime et les mÃ©canismes d'enforcement dynamiques
+- **KindMother â€” Instance & Authority Domain Model Contract** : DÃ©finit le modÃ¨le de domaine des instances et autoritÃ©s
+- **[Miyukini Conceptual References â€” Lois Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Ce contrat respecte **LOI-1** (aucune dÃ©pendance externe critique), **LOI-3** (l'Ã©tat local est souverain), et **LOI-6** (l'autonomie n'empÃªche pas la fÃ©dÃ©ration) en garantissant que chaque instance gÃ¨re sa persistance de maniÃ¨re autonome, que les donnÃ©es sont isolÃ©es par domaine, et que la communication inter-domaines est explicite et contrÃ´lÃ©e.
 
-**Complémentarité :**
+**ComplÃ©mentaritÃ© :**
 - KM Adapter Compliance Contract = obligations statiques des adaptateurs
-- KindMother Runtime Boundary & Enforcement Contract = enforcement dynamique à l'exécution
-- KindMother Instance & Authority Domain Model Contract = modèle de domaine des instances et autorités
+- KindMother Runtime Boundary & Enforcement Contract = enforcement dynamique Ã  l'exÃ©cution
+- KindMother Instance & Authority Domain Model Contract = modÃ¨le de domaine des instances et autoritÃ©s
 
-Ces contrats forment ensemble le système complet de frontières, protections, enforcement, et modèle de domaine du système Miyukini Core System v2.4.
+Ces contrats forment ensemble le systÃ¨me complet de frontiÃ¨res, protections, enforcement, et modÃ¨le de domaine du systÃ¨me Miyukini Core System v2.4.
 
-**Extension rétro-compatible :**
-Ce contrat étend le modèle fondateur (une DB Mère, plusieurs DB Filles) en introduisant le concept de domaine d'autorité. Le modèle mono-domaine (une seule autorité) reste un cas valide et conforme. Aucun invariant des contrats existants n'est violé.
+**Extension rÃ©tro-compatible :**
+Ce contrat Ã©tend le modÃ¨le fondateur (une DB MÃ¨re, plusieurs DB Filles) en introduisant le concept de domaine d'autoritÃ©. Le modÃ¨le mono-domaine (une seule autoritÃ©) reste un cas valide et conforme. Aucun invariant des contrats existants n'est violÃ©.
 
 ---
 
-## 2. Définitions formelles
+## 2. DÃ©finitions formelles
 
 ### 2.1. Instance KindMother
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
-Une **Instance KindMother** est une instance de base de données gérée par KindMother, identifiée de manière unique par une Instance Identity, et pouvant être associée à un ou plusieurs domaines d'autorité.
+Une **Instance KindMother** est une instance de base de donnÃ©es gÃ©rÃ©e par KindMother, identifiÃ©e de maniÃ¨re unique par une Instance Identity, et pouvant Ãªtre associÃ©e Ã  un ou plusieurs domaines d'autoritÃ©.
 
-**Caractéristiques formelles :**
+**CaractÃ©ristiques formelles :**
 
-- **Identité unique :** Chaque instance possède une Instance Identity unique et immuable (générée par le kernel Id)
-- **Type d'instance :** Une instance peut être de type Mère ou Fille
-- **Multi-domaines :** Une instance peut être associée à plusieurs AuthorityDomains simultanément
-- **Isolation :** Les données d'une instance sont isolées par domaine d'autorité (pas de partage direct entre domaines)
-  - Cette garantie respecte **LOI-6** (l'autonomie n'empêche pas la fédération) : l'isolation par domaine garantit que chaque domaine conserve son autonomie même lorsqu'une instance participe à plusieurs domaines simultanément.
-- **Persistance :** Chaque instance gère sa propre persistance (SQLite interne, jamais exposé)
-  - Cette garantie respecte **LOI-1** (aucune dépendance externe critique) et **LOI-5** (le coût doit être proportionnel au hardware) : la persistance SQLite interne garantit que chaque instance est auto-suffisante et optimisée pour fonctionner sur des ressources limitées.
+- **IdentitÃ© unique :** Chaque instance possÃ¨de une Instance Identity unique et immuable (gÃ©nÃ©rÃ©e par le kernel Id)
+- **Type d'instance :** Une instance peut Ãªtre de type MÃ¨re ou Fille
+- **Multi-domaines :** Une instance peut Ãªtre associÃ©e Ã  plusieurs AuthorityDomains simultanÃ©ment
+- **Isolation :** Les donnÃ©es d'une instance sont isolÃ©es par domaine d'autoritÃ© (pas de partage direct entre domaines)
+  - Cette garantie respecte **LOI-6** (l'autonomie n'empÃªche pas la fÃ©dÃ©ration) : l'isolation par domaine garantit que chaque domaine conserve son autonomie mÃªme lorsqu'une instance participe Ã  plusieurs domaines simultanÃ©ment.
+- **Persistance :** Chaque instance gÃ¨re sa propre persistance (SQLite interne, jamais exposÃ©)
+  - Cette garantie respecte **LOI-1** (aucune dÃ©pendance externe critique) et **LOI-5** (le coÃ»t doit Ãªtre proportionnel au hardware) : la persistance SQLite interne garantit que chaque instance est auto-suffisante et optimisÃ©e pour fonctionner sur des ressources limitÃ©es.
 
 **Invariants :**
-- INV-INST-1 : Toute instance possède une Instance Identity unique et immuable
-- INV-INST-2 : Toute instance est de type Mère ou Fille (exclusif)
-- INV-INST-3 : Toute instance est associée à au moins un AuthorityDomain
-- INV-INST-4 : Les données d'une instance sont isolées par AuthorityDomain
+- INV-INST-1 : Toute instance possÃ¨de une Instance Identity unique et immuable
+- INV-INST-2 : Toute instance est de type MÃ¨re ou Fille (exclusif)
+- INV-INST-3 : Toute instance est associÃ©e Ã  au moins un AuthorityDomain
+- INV-INST-4 : Les donnÃ©es d'une instance sont isolÃ©es par AuthorityDomain
 
 ### 2.2. AuthorityDomain
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
-Un **AuthorityDomain** est un domaine d'autorité métier qui définit un périmètre de responsabilité et de validation pour les données. Chaque domaine possède ses propres règles de validation, ses propres contraintes de cohérence, et sa propre autorité de décision.
+Un **AuthorityDomain** est un domaine d'autoritÃ© mÃ©tier qui dÃ©finit un pÃ©rimÃ¨tre de responsabilitÃ© et de validation pour les donnÃ©es. Chaque domaine possÃ¨de ses propres rÃ¨gles de validation, ses propres contraintes de cohÃ©rence, et sa propre autoritÃ© de dÃ©cision.
 
-**Caractéristiques formelles :**
+**CaractÃ©ristiques formelles :**
 
-- **Identité unique :** Chaque domaine possède une identité unique et immuable
-- **Périmètre métier :** Chaque domaine couvre un périmètre métier spécifique (Identity, RPG, Commerce, CMS, etc.)
-- **Autorité exclusive :** Chaque domaine possède une autorité exclusive sur la validation des données de son périmètre
-- **Isolation :** Les données d'un domaine sont isolées des données des autres domaines (pas de partage direct)
-  - Cette garantie respecte **LOI-6** (l'autonomie n'empêche pas la fédération) : l'isolation garantit que chaque domaine conserve son autonomie même lorsqu'il participe à une fédération.
-- **Communication :** Les domaines communiquent uniquement par intentions certifiées (WriteIntent validés)
-  - Cette garantie respecte **LOI-6** (l'autonomie n'empêche pas la fédération) : la communication inter-domaines est explicite, contrôlée, observable, et réversible, préservant l'autonomie de chaque domaine.
+- **IdentitÃ© unique :** Chaque domaine possÃ¨de une identitÃ© unique et immuable
+- **PÃ©rimÃ¨tre mÃ©tier :** Chaque domaine couvre un pÃ©rimÃ¨tre mÃ©tier spÃ©cifique (Identity, RPG, Commerce, CMS, etc.)
+- **AutoritÃ© exclusive :** Chaque domaine possÃ¨de une autoritÃ© exclusive sur la validation des donnÃ©es de son pÃ©rimÃ¨tre
+- **Isolation :** Les donnÃ©es d'un domaine sont isolÃ©es des donnÃ©es des autres domaines (pas de partage direct)
+  - Cette garantie respecte **LOI-6** (l'autonomie n'empÃªche pas la fÃ©dÃ©ration) : l'isolation garantit que chaque domaine conserve son autonomie mÃªme lorsqu'il participe Ã  une fÃ©dÃ©ration.
+- **Communication :** Les domaines communiquent uniquement par intentions certifiÃ©es (WriteIntent validÃ©s)
+  - Cette garantie respecte **LOI-6** (l'autonomie n'empÃªche pas la fÃ©dÃ©ration) : la communication inter-domaines est explicite, contrÃ´lÃ©e, observable, et rÃ©versible, prÃ©servant l'autonomie de chaque domaine.
 
 **Domaines standard :**
 
-- **Identity :** Domaine d'autorité pour l'identité et l'authentification (unique, centralisé, obligatoire)
-- **RPG :** Domaine d'autorité pour les données de jeu de rôle
-- **Commerce :** Domaine d'autorité pour les données commerciales
-- **CMS :** Domaine d'autorité pour les données de contenu
-- **Autres :** Domaines métier spécifiques au produit
+- **Identity :** Domaine d'autoritÃ© pour l'identitÃ© et l'authentification (unique, centralisÃ©, obligatoire)
+- **RPG :** Domaine d'autoritÃ© pour les donnÃ©es de jeu de rÃ´le
+- **Commerce :** Domaine d'autoritÃ© pour les donnÃ©es commerciales
+- **CMS :** Domaine d'autoritÃ© pour les donnÃ©es de contenu
+- **Autres :** Domaines mÃ©tier spÃ©cifiques au produit
 
 **Invariants :**
-- INV-DOM-1 : Le domaine Identity est unique, centralisé, et obligatoire pour toute instance
-- INV-DOM-2 : Chaque domaine possède une identité unique et immuable
-- INV-DOM-3 : Les données d'un domaine sont isolées des données des autres domaines
-- INV-DOM-4 : Les domaines communiquent uniquement par intentions certifiées
+- INV-DOM-1 : Le domaine Identity est unique, centralisÃ©, et obligatoire pour toute instance
+- INV-DOM-2 : Chaque domaine possÃ¨de une identitÃ© unique et immuable
+- INV-DOM-3 : Les donnÃ©es d'un domaine sont isolÃ©es des donnÃ©es des autres domaines
+- INV-DOM-4 : Les domaines communiquent uniquement par intentions certifiÃ©es
 
 ### 2.3. AuthorityInstance
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
-Une **AuthorityInstance** est la projection d'une Instance KindMother dans un AuthorityDomain spécifique. Elle représente la relation entre une instance et un domaine d'autorité, et définit le rôle de l'instance dans ce domaine (Mère ou Fille).
+Une **AuthorityInstance** est la projection d'une Instance KindMother dans un AuthorityDomain spÃ©cifique. Elle reprÃ©sente la relation entre une instance et un domaine d'autoritÃ©, et dÃ©finit le rÃ´le de l'instance dans ce domaine (MÃ¨re ou Fille).
 
-**Caractéristiques formelles :**
+**CaractÃ©ristiques formelles :**
 
 - **Relation instance-domaine :** Une AuthorityInstance est la relation entre une Instance KindMother et un AuthorityDomain
-- **Rôle dans le domaine :** Une AuthorityInstance a un rôle dans son domaine (Mère ou Fille)
-- **Autorité par domaine :** L'autorité d'une instance est définie par domaine (une instance peut être Mère pour un domaine et Fille pour un autre)
-- **Relation mère/fille :** Une AuthorityInstance Fille est liée à une AuthorityInstance Mère dans le même domaine
+- **RÃ´le dans le domaine :** Une AuthorityInstance a un rÃ´le dans son domaine (MÃ¨re ou Fille)
+- **AutoritÃ© par domaine :** L'autoritÃ© d'une instance est dÃ©finie par domaine (une instance peut Ãªtre MÃ¨re pour un domaine et Fille pour un autre)
+- **Relation mÃ¨re/fille :** Une AuthorityInstance Fille est liÃ©e Ã  une AuthorityInstance MÃ¨re dans le mÃªme domaine
 
 **Invariants :**
-- INV-AUTH-1 : Toute AuthorityInstance est associée à exactement une Instance KindMother et un AuthorityDomain
-- INV-AUTH-2 : Toute AuthorityInstance a un rôle Mère ou Fille dans son domaine (exclusif)
-- INV-AUTH-3 : Toute AuthorityInstance Fille est liée à exactement une AuthorityInstance Mère dans le même domaine
+- INV-AUTH-1 : Toute AuthorityInstance est associÃ©e Ã  exactement une Instance KindMother et un AuthorityDomain
+- INV-AUTH-2 : Toute AuthorityInstance a un rÃ´le MÃ¨re ou Fille dans son domaine (exclusif)
+- INV-AUTH-3 : Toute AuthorityInstance Fille est liÃ©e Ã  exactement une AuthorityInstance MÃ¨re dans le mÃªme domaine
 - INV-AUTH-4 : Une Instance KindMother peut avoir plusieurs AuthorityInstances (une par domaine)
 
 ### 2.4. AuthorityGraph
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
-Un **AuthorityGraph** est le graphe des relations mère/fille entre AuthorityInstances dans un AuthorityDomain spécifique. Il définit la topologie des instances pour un domaine donné.
+Un **AuthorityGraph** est le graphe des relations mÃ¨re/fille entre AuthorityInstances dans un AuthorityDomain spÃ©cifique. Il dÃ©finit la topologie des instances pour un domaine donnÃ©.
 
-**Caractéristiques formelles :**
+**CaractÃ©ristiques formelles :**
 
-- **Par domaine :** Un AuthorityGraph est défini pour un AuthorityDomain spécifique
-- **Topologie :** Un AuthorityGraph définit la topologie des relations mère/fille dans le domaine
-- **Racine unique :** Dans chaque domaine, il existe exactement une AuthorityInstance Mère racine (sans mère)
-- **Arborescence :** Un AuthorityGraph forme une arborescence (un seul parent par nœud, pas de cycles)
-- **Isolation :** Les AuthorityGraphs de domaines différents sont indépendants
+- **Par domaine :** Un AuthorityGraph est dÃ©fini pour un AuthorityDomain spÃ©cifique
+- **Topologie :** Un AuthorityGraph dÃ©finit la topologie des relations mÃ¨re/fille dans le domaine
+- **Racine unique :** Dans chaque domaine, il existe exactement une AuthorityInstance MÃ¨re racine (sans mÃ¨re)
+- **Arborescence :** Un AuthorityGraph forme une arborescence (un seul parent par nÅ“ud, pas de cycles)
+- **Isolation :** Les AuthorityGraphs de domaines diffÃ©rents sont indÃ©pendants
 
 **Invariants :**
-- INV-GRAPH-1 : Dans chaque AuthorityDomain, il existe exactement une AuthorityInstance Mère racine
-- INV-GRAPH-2 : Un AuthorityGraph forme une arborescence (pas de cycles, un seul parent par nœud)
-- INV-GRAPH-3 : Les AuthorityGraphs de domaines différents sont indépendants
-- INV-GRAPH-4 : Toute AuthorityInstance Fille a exactement une mère dans son domaine
+- INV-GRAPH-1 : Dans chaque AuthorityDomain, il existe exactement une AuthorityInstance MÃ¨re racine
+- INV-GRAPH-2 : Un AuthorityGraph forme une arborescence (pas de cycles, un seul parent par nÅ“ud)
+- INV-GRAPH-3 : Les AuthorityGraphs de domaines diffÃ©rents sont indÃ©pendants
+- INV-GRAPH-4 : Toute AuthorityInstance Fille a exactement une mÃ¨re dans son domaine
 
 ---
 
-## 3. Modèle de relations
+## 3. ModÃ¨le de relations
 
-### 3.1. Relation Instance ↔ AuthorityDomain
+### 3.1. Relation Instance â†” AuthorityDomain
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Une Instance KindMother peut être associée à plusieurs AuthorityDomains simultanément. Chaque association crée une AuthorityInstance distincte.
+Une Instance KindMother peut Ãªtre associÃ©e Ã  plusieurs AuthorityDomains simultanÃ©ment. Chaque association crÃ©e une AuthorityInstance distincte.
 
-**Règles :**
-- R-REL-1 : Une Instance KindMother peut être associée à plusieurs AuthorityDomains
-- R-REL-2 : Chaque association Instance ↔ AuthorityDomain crée une AuthorityInstance distincte
+**RÃ¨gles :**
+- R-REL-1 : Une Instance KindMother peut Ãªtre associÃ©e Ã  plusieurs AuthorityDomains
+- R-REL-2 : Chaque association Instance â†” AuthorityDomain crÃ©e une AuthorityInstance distincte
 - R-REL-3 : Le domaine Identity est obligatoire pour toute Instance KindMother
-- R-REL-4 : Les données d'une instance sont isolées par AuthorityDomain (pas de partage direct)
+- R-REL-4 : Les donnÃ©es d'une instance sont isolÃ©es par AuthorityDomain (pas de partage direct)
 
 **Exemple :**
-- Instance "App Mobile" associée aux domaines : Identity, RPG, Commerce
-- Instance "Site Web" associée aux domaines : Identity, CMS, Commerce
-- Instance "Backend Admin" associée aux domaines : Identity, CMS, RPG, Commerce
+- Instance "App Mobile" associÃ©e aux domaines : Identity, RPG, Commerce
+- Instance "Site Web" associÃ©e aux domaines : Identity, CMS, Commerce
+- Instance "Backend Admin" associÃ©e aux domaines : Identity, CMS, RPG, Commerce
 
-### 3.2. Relation mère/fille par domaine
+### 3.2. Relation mÃ¨re/fille par domaine
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-La relation mère/fille est définie **par domaine d'autorité**. Une Instance KindMother peut être Mère pour un domaine et Fille pour un autre domaine.
+La relation mÃ¨re/fille est dÃ©finie **par domaine d'autoritÃ©**. Une Instance KindMother peut Ãªtre MÃ¨re pour un domaine et Fille pour un autre domaine.
 
-**Règles :**
-- R-MF-1 : La relation mère/fille est définie par AuthorityDomain (pas globalement)
-- R-MF-2 : Une Instance KindMother peut être Mère pour un domaine et Fille pour un autre
-- R-MF-3 : Dans chaque domaine, il existe exactement une AuthorityInstance Mère racine
-- R-MF-4 : Une AuthorityInstance Fille est liée à exactement une AuthorityInstance Mère dans le même domaine
-
-**Exemple :**
-- Instance "App Mobile" : Mère pour Identity, Fille pour RPG (mère = "Backend RPG")
-- Instance "Site Web" : Mère pour CMS, Fille pour Commerce (mère = "Backend Commerce")
-- Instance "Backend Admin" : Mère pour RPG, Commerce, CMS
-
-### 3.3. Modèle mono-domaine (cas valide)
-
-**Énoncé :**
-
-Le modèle mono-domaine (une seule autorité, une seule mère) reste un cas valide et conforme. Il correspond au modèle fondateur étendu avec le concept de domaine.
-
-**Règles :**
-- R-MONO-1 : Le modèle mono-domaine est un cas valide et conforme
-- R-MONO-2 : Dans un modèle mono-domaine, une instance est associée à un seul AuthorityDomain (en plus d'Identity)
-- R-MONO-3 : Le modèle mono-domaine est rétro-compatible avec le modèle fondateur
+**RÃ¨gles :**
+- R-MF-1 : La relation mÃ¨re/fille est dÃ©finie par AuthorityDomain (pas globalement)
+- R-MF-2 : Une Instance KindMother peut Ãªtre MÃ¨re pour un domaine et Fille pour un autre
+- R-MF-3 : Dans chaque domaine, il existe exactement une AuthorityInstance MÃ¨re racine
+- R-MF-4 : Une AuthorityInstance Fille est liÃ©e Ã  exactement une AuthorityInstance MÃ¨re dans le mÃªme domaine
 
 **Exemple :**
-- Instance "App Simple" : Domaines Identity + CMS (mono-domaine métier)
-- Instance "App Simple" : Mère pour Identity, Fille pour CMS (mère = "Backend CMS")
+- Instance "App Mobile" : MÃ¨re pour Identity, Fille pour RPG (mÃ¨re = "Backend RPG")
+- Instance "Site Web" : MÃ¨re pour CMS, Fille pour Commerce (mÃ¨re = "Backend Commerce")
+- Instance "Backend Admin" : MÃ¨re pour RPG, Commerce, CMS
+
+### 3.3. ModÃ¨le mono-domaine (cas valide)
+
+**Ã‰noncÃ© :**
+
+Le modÃ¨le mono-domaine (une seule autoritÃ©, une seule mÃ¨re) reste un cas valide et conforme. Il correspond au modÃ¨le fondateur Ã©tendu avec le concept de domaine.
+
+**RÃ¨gles :**
+- R-MONO-1 : Le modÃ¨le mono-domaine est un cas valide et conforme
+- R-MONO-2 : Dans un modÃ¨le mono-domaine, une instance est associÃ©e Ã  un seul AuthorityDomain (en plus d'Identity)
+- R-MONO-3 : Le modÃ¨le mono-domaine est rÃ©tro-compatible avec le modÃ¨le fondateur
+
+**Exemple :**
+- Instance "App Simple" : Domaines Identity + CMS (mono-domaine mÃ©tier)
+- Instance "App Simple" : MÃ¨re pour Identity, Fille pour CMS (mÃ¨re = "Backend CMS")
 
 ---
 
-## 4. Autorité Identity centrale
+## 4. AutoritÃ© Identity centrale
 
-### 4.1. Autorité Identity unique
+### 4.1. AutoritÃ© Identity unique
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Le domaine Identity possède une autorité centrale, unique, et obligatoire pour toute Instance KindMother. Toute création d'identité doit passer par l'autorité Identity.
+Le domaine Identity possÃ¨de une autoritÃ© centrale, unique, et obligatoire pour toute Instance KindMother. Toute crÃ©ation d'identitÃ© doit passer par l'autoritÃ© Identity.
 
-**Règles :**
-- R-ID-1 : Le domaine Identity est unique, centralisé, et obligatoire pour toute instance
-- R-ID-2 : Toute création d'identité doit passer par l'autorité Identity
-- R-ID-3 : Il existe exactement une AuthorityInstance Mère racine pour le domaine Identity
-- R-ID-4 : Toutes les autres instances sont filles de l'autorité Identity centrale
+**RÃ¨gles :**
+- R-ID-1 : Le domaine Identity est unique, centralisÃ©, et obligatoire pour toute instance
+- R-ID-2 : Toute crÃ©ation d'identitÃ© doit passer par l'autoritÃ© Identity
+- R-ID-3 : Il existe exactement une AuthorityInstance MÃ¨re racine pour le domaine Identity
+- R-ID-4 : Toutes les autres instances sont filles de l'autoritÃ© Identity centrale
 
 **Invariants :**
-- INV-ID-1 : Toute Instance KindMother est associée au domaine Identity
-- INV-ID-2 : Il existe exactement une AuthorityInstance Mère racine pour Identity
-- INV-ID-3 : Toute création d'identité est validée par l'autorité Identity centrale
+- INV-ID-1 : Toute Instance KindMother est associÃ©e au domaine Identity
+- INV-ID-2 : Il existe exactement une AuthorityInstance MÃ¨re racine pour Identity
+- INV-ID-3 : Toute crÃ©ation d'identitÃ© est validÃ©e par l'autoritÃ© Identity centrale
 
-### 4.2. Isolation des autorités métier
+### 4.2. Isolation des autoritÃ©s mÃ©tier
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Les autorités métier (RPG, Commerce, CMS, etc.) sont isolées les unes des autres. Elles ne partagent pas de données directement et communiquent uniquement par intentions certifiées.
+Les autoritÃ©s mÃ©tier (RPG, Commerce, CMS, etc.) sont isolÃ©es les unes des autres. Elles ne partagent pas de donnÃ©es directement et communiquent uniquement par intentions certifiÃ©es.
 
-**Règles :**
-- R-ISO-1 : Les autorités métier ne partagent pas de données directement
-- R-ISO-2 : Les autorités métier communiquent uniquement par intentions certifiées (WriteIntent validés)
-- R-ISO-3 : Chaque autorité métier possède sa propre AuthorityInstance Mère racine
-- R-ISO-4 : Les AuthorityGraphs des autorités métier sont indépendants
+**RÃ¨gles :**
+- R-ISO-1 : Les autoritÃ©s mÃ©tier ne partagent pas de donnÃ©es directement
+- R-ISO-2 : Les autoritÃ©s mÃ©tier communiquent uniquement par intentions certifiÃ©es (WriteIntent validÃ©s)
+- R-ISO-3 : Chaque autoritÃ© mÃ©tier possÃ¨de sa propre AuthorityInstance MÃ¨re racine
+- R-ISO-4 : Les AuthorityGraphs des autoritÃ©s mÃ©tier sont indÃ©pendants
 
 ---
 
-## 5. Compatibilité avec les contrats existants
+## 5. CompatibilitÃ© avec les contrats existants
 
-### 5.1. Compatibilité avec le KM Adapter Compliance Contract
+### 5.1. CompatibilitÃ© avec le KM Adapter Compliance Contract
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Aucun invariant du KM Adapter Compliance Contract n'est violé par ce modèle étendu.
+Aucun invariant du KM Adapter Compliance Contract n'est violÃ© par ce modÃ¨le Ã©tendu.
 
-**Vérification des invariants :**
+**VÃ©rification des invariants :**
 
-- **I1 (Traduction bidirectionnelle) :** Non affecté. L'adaptateur traduit toujours les opérations SPM vers CoreDataAPI, indépendamment du modèle de domaine.
-- **I2 (Contexte complet) :** Non affecté. Le contexte d'instance inclut maintenant l'AuthorityDomain, mais reste complet et cohérent.
-- **I3 (Isolation SPM) :** Non affecté. Les modules SPM ne connaissent toujours pas KindMother, ni les domaines d'autorité.
-- **I4 (Aucune persistance directe) :** Non affecté. L'adaptateur n'accède toujours pas directement à la persistance.
-- **I5 (Aucune modification des permissions) :** Non affecté. Les règles de permissions restent définies par le produit.
-- **I6 (Aucun bypass) :** Non affecté. Les validations restent exclusives à KindMother.
-- **I7 (Aucune dépendance aux détails) :** Non affecté. L'adaptateur dépend toujours uniquement du contrat CoreDataAPI.
-- **I8 (Aucune décision temporelle) :** Non affecté. Les décisions temporelles restent exclusives à KindMother.
-- **I9 (Traduction d'erreurs) :** Non affecté. Les erreurs restent traduites selon le contrat SPM.
-- **I10 (Implémentation complète) :** Non affecté. Les traits SPM restent implémentés intégralement.
+- **I1 (Traduction bidirectionnelle) :** Non affectÃ©. L'adaptateur traduit toujours les opÃ©rations SPM vers CoreDataAPI, indÃ©pendamment du modÃ¨le de domaine.
+- **I2 (Contexte complet) :** Non affectÃ©. Le contexte d'instance inclut maintenant l'AuthorityDomain, mais reste complet et cohÃ©rent.
+- **I3 (Isolation SPM) :** Non affectÃ©. Les modules SPM ne connaissent toujours pas KindMother, ni les domaines d'autoritÃ©.
+- **I4 (Aucune persistance directe) :** Non affectÃ©. L'adaptateur n'accÃ¨de toujours pas directement Ã  la persistance.
+- **I5 (Aucune modification des permissions) :** Non affectÃ©. Les rÃ¨gles de permissions restent dÃ©finies par le produit.
+- **I6 (Aucun bypass) :** Non affectÃ©. Les validations restent exclusives Ã  KindMother.
+- **I7 (Aucune dÃ©pendance aux dÃ©tails) :** Non affectÃ©. L'adaptateur dÃ©pend toujours uniquement du contrat CoreDataAPI.
+- **I8 (Aucune dÃ©cision temporelle) :** Non affectÃ©. Les dÃ©cisions temporelles restent exclusives Ã  KindMother.
+- **I9 (Traduction d'erreurs) :** Non affectÃ©. Les erreurs restent traduites selon le contrat SPM.
+- **I10 (ImplÃ©mentation complÃ¨te) :** Non affectÃ©. Les traits SPM restent implÃ©mentÃ©s intÃ©gralement.
 
-**Conclusion :** Aucun invariant n'est violé. Le modèle étendu est compatible avec le KM Adapter Compliance Contract.
+**Conclusion :** Aucun invariant n'est violÃ©. Le modÃ¨le Ã©tendu est compatible avec le KM Adapter Compliance Contract.
 
-### 5.2. Compatibilité avec le Runtime Boundary & Enforcement Contract
+### 5.2. CompatibilitÃ© avec le Runtime Boundary & Enforcement Contract
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Aucun invariant runtime n'est violé par ce modèle étendu.
+Aucun invariant runtime n'est violÃ© par ce modÃ¨le Ã©tendu.
 
-**Vérification des invariants runtime :**
+**VÃ©rification des invariants runtime :**
 
-- **IR1 (Contexte valide) :** Non affecté. Le contexte inclut maintenant l'AuthorityDomain, mais reste valide et complet.
-- **IR2 (Permissions cohérentes) :** Non affecté. Les permissions restent cohérentes avec l'opération demandée.
-- **IR3 (Appels légaux) :** Non affecté. Les appels restent légaux et conformes au contrat CoreDataAPI.
-- **IR4 (Instance valide) :** Non affecté. L'instance reste valide, avec une vérification supplémentaire de l'AuthorityDomain.
-- **IR5 (Cohérence préservée) :** Non affecté. La cohérence est préservée, avec une vérification par domaine.
-- **IR6 (Aucun contournement) :** Non affecté. Aucune tentative de contournement n'est autorisée.
-- **IR7 (Charge raisonnable) :** Non affecté. La charge reste raisonnable, avec une gestion par domaine.
+- **IR1 (Contexte valide) :** Non affectÃ©. Le contexte inclut maintenant l'AuthorityDomain, mais reste valide et complet.
+- **IR2 (Permissions cohÃ©rentes) :** Non affectÃ©. Les permissions restent cohÃ©rentes avec l'opÃ©ration demandÃ©e.
+- **IR3 (Appels lÃ©gaux) :** Non affectÃ©. Les appels restent lÃ©gaux et conformes au contrat CoreDataAPI.
+- **IR4 (Instance valide) :** Non affectÃ©. L'instance reste valide, avec une vÃ©rification supplÃ©mentaire de l'AuthorityDomain.
+- **IR5 (CohÃ©rence prÃ©servÃ©e) :** Non affectÃ©. La cohÃ©rence est prÃ©servÃ©e, avec une vÃ©rification par domaine.
+- **IR6 (Aucun contournement) :** Non affectÃ©. Aucune tentative de contournement n'est autorisÃ©e.
+- **IR7 (Charge raisonnable) :** Non affectÃ©. La charge reste raisonnable, avec une gestion par domaine.
 
-**Conclusion :** Aucun invariant runtime n'est violé. Le modèle étendu est compatible avec le Runtime Boundary & Enforcement Contract.
+**Conclusion :** Aucun invariant runtime n'est violÃ©. Le modÃ¨le Ã©tendu est compatible avec le Runtime Boundary & Enforcement Contract.
 
-### 5.3. Compatibilité avec les obligations des adaptateurs
+### 5.3. CompatibilitÃ© avec les obligations des adaptateurs
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Aucune obligation des adaptateurs n'est modifiée par ce modèle étendu.
+Aucune obligation des adaptateurs n'est modifiÃ©e par ce modÃ¨le Ã©tendu.
 
-**Vérification des obligations :**
+**VÃ©rification des obligations :**
 
-- **O1 (Traduction bidirectionnelle) :** Non affectée. L'adaptateur traduit toujours les opérations SPM vers CoreDataAPI.
-- **O2 (Contexte complet) :** Étendue conceptuellement. Le contexte d'instance inclut maintenant l'AuthorityDomain, mais reste complet et cohérent. Aucun changement d'obligation.
-- **O3 (Isolation SPM) :** Non affectée. Les modules SPM restent isolés de KindMother.
-- **O4 (Utilisation exclusive CoreDataAPI) :** Non affectée. L'adaptateur utilise toujours exclusivement la CoreDataAPI.
-- **O5 (Fourniture des permissions) :** Non affectée. Les règles de permissions restent fournies par le produit.
-- **O6 (Pas de bypass) :** Non affectée. Aucun bypass n'est autorisé.
-- **O7 (Pas de dépendance aux détails) :** Non affectée. Aucune dépendance aux détails d'implémentation.
-- **O8 (Pas de décision temporelle) :** Non affectée. Aucune décision temporelle par l'adaptateur.
+- **O1 (Traduction bidirectionnelle) :** Non affectÃ©e. L'adaptateur traduit toujours les opÃ©rations SPM vers CoreDataAPI.
+- **O2 (Contexte complet) :** Ã‰tendue conceptuellement. Le contexte d'instance inclut maintenant l'AuthorityDomain, mais reste complet et cohÃ©rent. Aucun changement d'obligation.
+- **O3 (Isolation SPM) :** Non affectÃ©e. Les modules SPM restent isolÃ©s de KindMother.
+- **O4 (Utilisation exclusive CoreDataAPI) :** Non affectÃ©e. L'adaptateur utilise toujours exclusivement la CoreDataAPI.
+- **O5 (Fourniture des permissions) :** Non affectÃ©e. Les rÃ¨gles de permissions restent fournies par le produit.
+- **O6 (Pas de bypass) :** Non affectÃ©e. Aucun bypass n'est autorisÃ©.
+- **O7 (Pas de dÃ©pendance aux dÃ©tails) :** Non affectÃ©e. Aucune dÃ©pendance aux dÃ©tails d'implÃ©mentation.
+- **O8 (Pas de dÃ©cision temporelle) :** Non affectÃ©e. Aucune dÃ©cision temporelle par l'adaptateur.
 
-**Conclusion :** Aucune obligation n'est modifiée. Le modèle étendu est compatible avec les obligations des adaptateurs.
+**Conclusion :** Aucune obligation n'est modifiÃ©e. Le modÃ¨le Ã©tendu est compatible avec les obligations des adaptateurs.
 
-### 5.4. Compatibilité avec les runtime boundaries
+### 5.4. CompatibilitÃ© avec les runtime boundaries
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Aucune runtime boundary n'est modifiée par ce modèle étendu. Les boundaries restent identiques, avec une vérification supplémentaire de l'AuthorityDomain.
+Aucune runtime boundary n'est modifiÃ©e par ce modÃ¨le Ã©tendu. Les boundaries restent identiques, avec une vÃ©rification supplÃ©mentaire de l'AuthorityDomain.
 
-**Vérification des boundaries :**
+**VÃ©rification des boundaries :**
 
-- **Boundary d'appel :** Non affectée. Les appels restent légaux et bien formés.
-- **Boundary de contexte :** Étendue conceptuellement. Le contexte inclut maintenant l'AuthorityDomain, mais reste complet et cohérent.
-- **Boundary d'instance :** Étendue conceptuellement. La vérification inclut maintenant l'AuthorityDomain, mais reste valide.
-- **Boundary de permissions :** Non affectée. Les permissions restent suffisantes et cohérentes.
-- **Boundary de cohérence :** Étendue conceptuellement. La cohérence est vérifiée par domaine, mais reste préservée.
-- **Boundary de contournement :** Non affectée. Aucun contournement n'est autorisé.
-- **Boundary de charge :** Non affectée. La charge reste raisonnable.
+- **Boundary d'appel :** Non affectÃ©e. Les appels restent lÃ©gaux et bien formÃ©s.
+- **Boundary de contexte :** Ã‰tendue conceptuellement. Le contexte inclut maintenant l'AuthorityDomain, mais reste complet et cohÃ©rent.
+- **Boundary d'instance :** Ã‰tendue conceptuellement. La vÃ©rification inclut maintenant l'AuthorityDomain, mais reste valide.
+- **Boundary de permissions :** Non affectÃ©e. Les permissions restent suffisantes et cohÃ©rentes.
+- **Boundary de cohÃ©rence :** Ã‰tendue conceptuellement. La cohÃ©rence est vÃ©rifiÃ©e par domaine, mais reste prÃ©servÃ©e.
+- **Boundary de contournement :** Non affectÃ©e. Aucun contournement n'est autorisÃ©.
+- **Boundary de charge :** Non affectÃ©e. La charge reste raisonnable.
 
-**Conclusion :** Aucune runtime boundary n'est modifiée. Le modèle étendu est compatible avec les runtime boundaries.
+**Conclusion :** Aucune runtime boundary n'est modifiÃ©e. Le modÃ¨le Ã©tendu est compatible avec les runtime boundaries.
 
-### 5.5. Rétro-compatibilité conceptuelle
+### 5.5. RÃ©tro-compatibilitÃ© conceptuelle
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Le modèle mono-domaine (une seule autorité métier, en plus d'Identity) est rétro-compatible avec le modèle fondateur (DB Mère / DB Fille).
+Le modÃ¨le mono-domaine (une seule autoritÃ© mÃ©tier, en plus d'Identity) est rÃ©tro-compatible avec le modÃ¨le fondateur (DB MÃ¨re / DB Fille).
 
-**Démonstration :**
+**DÃ©monstration :**
 
-Dans le modèle fondateur :
-- Une DB Mère unique
+Dans le modÃ¨le fondateur :
+- Une DB MÃ¨re unique
 - Plusieurs DB Filles
-- Relation mère/fille globale
+- Relation mÃ¨re/fille globale
 
-Dans le modèle étendu mono-domaine :
-- Une Instance KindMother Mère pour le domaine métier
-- Plusieurs Instances KindMother Filles pour le domaine métier
-- Relation mère/fille par domaine (identique au modèle fondateur pour un seul domaine)
-- Le domaine Identity est ajouté (obligatoire, mais transparent pour le modèle métier)
+Dans le modÃ¨le Ã©tendu mono-domaine :
+- Une Instance KindMother MÃ¨re pour le domaine mÃ©tier
+- Plusieurs Instances KindMother Filles pour le domaine mÃ©tier
+- Relation mÃ¨re/fille par domaine (identique au modÃ¨le fondateur pour un seul domaine)
+- Le domaine Identity est ajoutÃ© (obligatoire, mais transparent pour le modÃ¨le mÃ©tier)
 
-**Conclusion :** Le modèle mono-domaine est rétro-compatible conceptuellement avec le modèle fondateur.
+**Conclusion :** Le modÃ¨le mono-domaine est rÃ©tro-compatible conceptuellement avec le modÃ¨le fondateur.
 
 ---
 
-## 6. Règles non négociables
+## 6. RÃ¨gles non nÃ©gociables
 
-### 6.1. Interdiction du partage direct de données entre autorités
+### 6.1. Interdiction du partage direct de donnÃ©es entre autoritÃ©s
 
-**Règle :**
+**RÃ¨gle :**
 
-Les autorités métier ne partagent jamais de données directement. Toute communication entre autorités passe par des intentions certifiées (WriteIntent validés par KindMother).
+Les autoritÃ©s mÃ©tier ne partagent jamais de donnÃ©es directement. Toute communication entre autoritÃ©s passe par des intentions certifiÃ©es (WriteIntent validÃ©s par KindMother).
 
 **Justification :**
 
-Le partage direct de données compromettrait l'isolation des domaines, la cohérence du système, et l'autorité exclusive de chaque domaine sur ses données.
+Le partage direct de donnÃ©es compromettrait l'isolation des domaines, la cohÃ©rence du systÃ¨me, et l'autoritÃ© exclusive de chaque domaine sur ses donnÃ©es.
 
-**Non-négociabilités :**
-- R-NN-1 : Aucune autorité métier ne peut accéder directement aux données d'une autre autorité
-- R-NN-2 : Toute communication entre autorités passe par des intentions certifiées
+**Non-nÃ©gociabilitÃ©s :**
+- R-NN-1 : Aucune autoritÃ© mÃ©tier ne peut accÃ©der directement aux donnÃ©es d'une autre autoritÃ©
+- R-NN-2 : Toute communication entre autoritÃ©s passe par des intentions certifiÃ©es
 - R-NN-3 : KindMother valide toutes les intentions avant application
-- R-NN-4 : Aucune exception n'est autorisée, même pour des cas d'usage légitimes
+- R-NN-4 : Aucune exception n'est autorisÃ©e, mÃªme pour des cas d'usage lÃ©gitimes
 
-### 6.2. Communication uniquement par intentions certifiées
+### 6.2. Communication uniquement par intentions certifiÃ©es
 
-**Règle :**
+**RÃ¨gle :**
 
-Les autorités métier communiquent uniquement par intentions certifiées (WriteIntent validés par KindMother). Aucune autre forme de communication n'est autorisée.
-
-**Justification :**
-
-Les intentions certifiées garantissent la validation, la cohérence, et la traçabilité de toutes les communications entre autorités.
-
-**Non-négociabilités :**
-- R-NN-5 : Toute communication entre autorités passe par des WriteIntent
-- R-NN-6 : Tous les WriteIntent sont validés par KindMother avant application
-- R-NN-7 : Aucune communication directe n'est autorisée
-- R-NN-8 : Aucune exception n'est autorisée
-
-### 6.3. Autorité Identity unique pour la création d'identité
-
-**Règle :**
-
-Toute création d'identité doit passer par l'autorité Identity centrale. Aucune autre autorité ne peut créer d'identité.
+Les autoritÃ©s mÃ©tier communiquent uniquement par intentions certifiÃ©es (WriteIntent validÃ©s par KindMother). Aucune autre forme de communication n'est autorisÃ©e.
 
 **Justification :**
 
-L'autorité Identity centrale garantit l'unicité, la cohérence, et la sécurité de toutes les identités dans le système.
+Les intentions certifiÃ©es garantissent la validation, la cohÃ©rence, et la traÃ§abilitÃ© de toutes les communications entre autoritÃ©s.
 
-**Non-négociabilités :**
-- R-NN-9 : Toute création d'identité passe par l'autorité Identity centrale
-- R-NN-10 : Aucune autre autorité ne peut créer d'identité
-- R-NN-11 : L'autorité Identity est unique et centralisée
-- R-NN-12 : Aucune exception n'est autorisée
+**Non-nÃ©gociabilitÃ©s :**
+- R-NN-5 : Toute communication entre autoritÃ©s passe par des WriteIntent
+- R-NN-6 : Tous les WriteIntent sont validÃ©s par KindMother avant application
+- R-NN-7 : Aucune communication directe n'est autorisÃ©e
+- R-NN-8 : Aucune exception n'est autorisÃ©e
 
-### 6.4. Autorité exclusive de KindMother sur la validation
+### 6.3. AutoritÃ© Identity unique pour la crÃ©ation d'identitÃ©
 
-**Règle :**
+**RÃ¨gle :**
 
-KindMother conserve une autorité exclusive sur la validation de toutes les opérations, indépendamment du domaine d'autorité.
-
-**Justification :**
-
-L'autorité exclusive de KindMother garantit la cohérence, l'intégrité, et la sécurité de toutes les opérations dans le système.
-
-**Non-négociabilités :**
-- R-NN-13 : KindMother valide toutes les opérations, indépendamment du domaine
-- R-NN-14 : Aucune validation n'est déléguée à un adaptateur ou à une autorité externe
-- R-NN-15 : L'autorité de validation est exclusive à KindMother
-- R-NN-16 : Aucune exception n'est autorisée
-
-### 6.5. Isolation des données par domaine
-
-**Règle :**
-
-Les données d'une instance sont isolées par AuthorityDomain. Aucun partage direct de données n'est autorisé entre domaines.
+Toute crÃ©ation d'identitÃ© doit passer par l'autoritÃ© Identity centrale. Aucune autre autoritÃ© ne peut crÃ©er d'identitÃ©.
 
 **Justification :**
 
-L'isolation des données garantit la cohérence, la sécurité, et l'autorité exclusive de chaque domaine sur ses données.
+L'autoritÃ© Identity centrale garantit l'unicitÃ©, la cohÃ©rence, et la sÃ©curitÃ© de toutes les identitÃ©s dans le systÃ¨me.
 
-**Non-négociabilités :**
-- R-NN-17 : Les données d'une instance sont isolées par AuthorityDomain
-- R-NN-18 : Aucun partage direct de données n'est autorisé entre domaines
-- R-NN-19 : Toute communication entre domaines passe par des intentions certifiées
-- R-NN-20 : Aucune exception n'est autorisée
+**Non-nÃ©gociabilitÃ©s :**
+- R-NN-9 : Toute crÃ©ation d'identitÃ© passe par l'autoritÃ© Identity centrale
+- R-NN-10 : Aucune autre autoritÃ© ne peut crÃ©er d'identitÃ©
+- R-NN-11 : L'autoritÃ© Identity est unique et centralisÃ©e
+- R-NN-12 : Aucune exception n'est autorisÃ©e
+
+### 6.4. AutoritÃ© exclusive de KindMother sur la validation
+
+**RÃ¨gle :**
+
+KindMother conserve une autoritÃ© exclusive sur la validation de toutes les opÃ©rations, indÃ©pendamment du domaine d'autoritÃ©.
+
+**Justification :**
+
+L'autoritÃ© exclusive de KindMother garantit la cohÃ©rence, l'intÃ©gritÃ©, et la sÃ©curitÃ© de toutes les opÃ©rations dans le systÃ¨me.
+
+**Non-nÃ©gociabilitÃ©s :**
+- R-NN-13 : KindMother valide toutes les opÃ©rations, indÃ©pendamment du domaine
+- R-NN-14 : Aucune validation n'est dÃ©lÃ©guÃ©e Ã  un adaptateur ou Ã  une autoritÃ© externe
+- R-NN-15 : L'autoritÃ© de validation est exclusive Ã  KindMother
+- R-NN-16 : Aucune exception n'est autorisÃ©e
+
+### 6.5. Isolation des donnÃ©es par domaine
+
+**RÃ¨gle :**
+
+Les donnÃ©es d'une instance sont isolÃ©es par AuthorityDomain. Aucun partage direct de donnÃ©es n'est autorisÃ© entre domaines.
+
+**Justification :**
+
+L'isolation des donnÃ©es garantit la cohÃ©rence, la sÃ©curitÃ©, et l'autoritÃ© exclusive de chaque domaine sur ses donnÃ©es.
+
+**Non-nÃ©gociabilitÃ©s :**
+- R-NN-17 : Les donnÃ©es d'une instance sont isolÃ©es par AuthorityDomain
+- R-NN-18 : Aucun partage direct de donnÃ©es n'est autorisÃ© entre domaines
+- R-NN-19 : Toute communication entre domaines passe par des intentions certifiÃ©es
+- R-NN-20 : Aucune exception n'est autorisÃ©e
 
 ---
 
-## 7. Schémas ASCII
+## 7. SchÃ©mas ASCII
 
-### 7.1. Schéma mono-domaine (cas simple)
+### 7.1. SchÃ©ma mono-domaine (cas simple)
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    DOMAINE IDENTITY                          │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  AUTHORITY INSTANCE MÈRE (Identity Central)          │  │
-│  │  Instance: "Backend Identity"                        │  │
-│  │  Rôle: Mère racine                                    │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                        │                                     │
-│                        │ Relation mère/fille                │
-│                        ▼                                     │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  AUTHORITY INSTANCE FILLE                             │  │
-│  │  Instance: "App Mobile"                               │  │
-│  │  Rôle: Fille                                          │  │
-│  │  Mère: "Backend Identity"                            │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  AUTHORITY INSTANCE FILLE                             │  │
-│  │  Instance: "Site Web"                                 │  │
-│  │  Rôle: Fille                                          │  │
-│  │  Mère: "Backend Identity"                             │  │
-│  └──────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    DOMAINE IDENTITY                          â”‚
+â”‚                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  AUTHORITY INSTANCE MÃˆRE (Identity Central)          â”‚  â”‚
+â”‚  â”‚  Instance: "Backend Identity"                        â”‚  â”‚
+â”‚  â”‚  RÃ´le: MÃ¨re racine                                    â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                        â”‚                                     â”‚
+â”‚                        â”‚ Relation mÃ¨re/fille                â”‚
+â”‚                        â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  AUTHORITY INSTANCE FILLE                             â”‚  â”‚
+â”‚  â”‚  Instance: "App Mobile"                               â”‚  â”‚
+â”‚  â”‚  RÃ´le: Fille                                          â”‚  â”‚
+â”‚  â”‚  MÃ¨re: "Backend Identity"                            â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  AUTHORITY INSTANCE FILLE                             â”‚  â”‚
+â”‚  â”‚  Instance: "Site Web"                                 â”‚  â”‚
+â”‚  â”‚  RÃ´le: Fille                                          â”‚  â”‚
+â”‚  â”‚  MÃ¨re: "Backend Identity"                             â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
-┌─────────────────────────────────────────────────────────────┐
-│                    DOMAINE CMS                               │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  AUTHORITY INSTANCE MÈRE (CMS Central)                │  │
-│  │  Instance: "Backend CMS"                              │  │
-│  │  Rôle: Mère racine                                    │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                        │                                     │
-│                        │ Relation mère/fille                │
-│                        ▼                                     │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  AUTHORITY INSTANCE FILLE                             │  │
-│  │  Instance: "Site Web"                                 │  │
-│  │  Rôle: Fille                                          │  │
-│  │  Mère: "Backend CMS"                                  │  │
-│  └──────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    DOMAINE CMS                               â”‚
+â”‚                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  AUTHORITY INSTANCE MÃˆRE (CMS Central)                â”‚  â”‚
+â”‚  â”‚  Instance: "Backend CMS"                              â”‚  â”‚
+â”‚  â”‚  RÃ´le: MÃ¨re racine                                    â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                        â”‚                                     â”‚
+â”‚                        â”‚ Relation mÃ¨re/fille                â”‚
+â”‚                        â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  AUTHORITY INSTANCE FILLE                             â”‚  â”‚
+â”‚  â”‚  Instance: "Site Web"                                 â”‚  â”‚
+â”‚  â”‚  RÃ´le: Fille                                          â”‚  â”‚
+â”‚  â”‚  MÃ¨re: "Backend CMS"                                  â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
 INSTANCE "Site Web" :
   - AuthorityInstance dans Identity (Fille de "Backend Identity")
   - AuthorityInstance dans CMS (Fille de "Backend CMS")
 ```
 
-### 7.2. Schéma multi-domaines (cas complexe)
+### 7.2. SchÃ©ma multi-domaines (cas complexe)
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    DOMAINE IDENTITY                          │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  AUTHORITY INSTANCE MÈRE (Identity Central)          │  │
-│  │  Instance: "Backend Identity"                        │  │
-│  │  Rôle: Mère racine                                    │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                        │                                     │
-│                        │ Relations mère/fille               │
-│        ┌───────────────┼───────────────┐                   │
-│        ▼               ▼               ▼                   │
-│  ┌──────────┐    ┌──────────┐    ┌──────────┐            │
-│  │ App A    │    │ App B    │    │ App C    │            │
-│  │ (Fille)  │    │ (Fille)  │    │ (Fille)  │            │
-│  └──────────┘    └──────────┘    └──────────┘            │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    DOMAINE IDENTITY                          â”‚
+â”‚                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  AUTHORITY INSTANCE MÃˆRE (Identity Central)          â”‚  â”‚
+â”‚  â”‚  Instance: "Backend Identity"                        â”‚  â”‚
+â”‚  â”‚  RÃ´le: MÃ¨re racine                                    â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                        â”‚                                     â”‚
+â”‚                        â”‚ Relations mÃ¨re/fille               â”‚
+â”‚        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                   â”‚
+â”‚        â–¼               â–¼               â–¼                   â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”‚
+â”‚  â”‚ App A    â”‚    â”‚ App B    â”‚    â”‚ App C    â”‚            â”‚
+â”‚  â”‚ (Fille)  â”‚    â”‚ (Fille)  â”‚    â”‚ (Fille)  â”‚            â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
-┌─────────────────────────────────────────────────────────────┐
-│                    DOMAINE RPG                               │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  AUTHORITY INSTANCE MÈRE (RPG Central)                │  │
-│  │  Instance: "Backend RPG"                              │  │
-│  │  Rôle: Mère racine                                    │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                        │                                     │
-│                        │ Relations mère/fille               │
-│        ┌───────────────┼───────────────┐                   │
-│        ▼               ▼               ▼                   │
-│  ┌──────────┐    ┌──────────┐    ┌──────────┐            │
-│  │ App A    │    │ App B    │    │ App C    │            │
-│  │ (Fille)  │    │ (Fille)  │    │ (Fille)  │            │
-│  └──────────┘    └──────────┘    └──────────┘            │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    DOMAINE RPG                               â”‚
+â”‚                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  AUTHORITY INSTANCE MÃˆRE (RPG Central)                â”‚  â”‚
+â”‚  â”‚  Instance: "Backend RPG"                              â”‚  â”‚
+â”‚  â”‚  RÃ´le: MÃ¨re racine                                    â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                        â”‚                                     â”‚
+â”‚                        â”‚ Relations mÃ¨re/fille               â”‚
+â”‚        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                   â”‚
+â”‚        â–¼               â–¼               â–¼                   â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”‚
+â”‚  â”‚ App A    â”‚    â”‚ App B    â”‚    â”‚ App C    â”‚            â”‚
+â”‚  â”‚ (Fille)  â”‚    â”‚ (Fille)  â”‚    â”‚ (Fille)  â”‚            â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
-┌─────────────────────────────────────────────────────────────┐
-│                    DOMAINE COMMERCE                           │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  AUTHORITY INSTANCE MÈRE (Commerce Central)          │  │
-│  │  Instance: "Backend Commerce"                         │  │
-│  │  Rôle: Mère racine                                    │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                        │                                     │
-│                        │ Relations mère/fille               │
-│        ┌───────────────┼───────────────┐                   │
-│        ▼               ▼               ▼                   │
-│  ┌──────────┐    ┌──────────┐    ┌──────────┐            │
-│  │ App A    │    │ App B    │    │ App C    │            │
-│  │ (Fille)  │    │ (Fille)  │    │ (Fille)  │            │
-│  └──────────┘    └──────────┘    └──────────┘            │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    DOMAINE COMMERCE                           â”‚
+â”‚                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  AUTHORITY INSTANCE MÃˆRE (Commerce Central)          â”‚  â”‚
+â”‚  â”‚  Instance: "Backend Commerce"                         â”‚  â”‚
+â”‚  â”‚  RÃ´le: MÃ¨re racine                                    â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                        â”‚                                     â”‚
+â”‚                        â”‚ Relations mÃ¨re/fille               â”‚
+â”‚        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                   â”‚
+â”‚        â–¼               â–¼               â–¼                   â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”‚
+â”‚  â”‚ App A    â”‚    â”‚ App B    â”‚    â”‚ App C    â”‚            â”‚
+â”‚  â”‚ (Fille)  â”‚    â”‚ (Fille)  â”‚    â”‚ (Fille)  â”‚            â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
-┌─────────────────────────────────────────────────────────────┐
-│                    DOMAINE CMS                               │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  AUTHORITY INSTANCE MÈRE (CMS Central)                │  │
-│  │  Instance: "Backend CMS"                              │  │
-│  │  Rôle: Mère racine                                    │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                        │                                     │
-│                        │ Relations mère/fille               │
-│                        ▼                                     │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  AUTHORITY INSTANCE FILLE                             │  │
-│  │  Instance: "App B"                                    │  │
-│  │  Rôle: Fille                                          │  │
-│  │  Mère: "Backend CMS"                                  │  │
-│  └──────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    DOMAINE CMS                               â”‚
+â”‚                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  AUTHORITY INSTANCE MÃˆRE (CMS Central)                â”‚  â”‚
+â”‚  â”‚  Instance: "Backend CMS"                              â”‚  â”‚
+â”‚  â”‚  RÃ´le: MÃ¨re racine                                    â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                        â”‚                                     â”‚
+â”‚                        â”‚ Relations mÃ¨re/fille               â”‚
+â”‚                        â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  AUTHORITY INSTANCE FILLE                             â”‚  â”‚
+â”‚  â”‚  Instance: "App B"                                    â”‚  â”‚
+â”‚  â”‚  RÃ´le: Fille                                          â”‚  â”‚
+â”‚  â”‚  MÃ¨re: "Backend CMS"                                  â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
 INSTANCE "App A" :
   - AuthorityInstance dans Identity (Fille de "Backend Identity")
@@ -562,44 +562,44 @@ INSTANCE "App C" :
   - AuthorityInstance dans Commerce (Fille de "Backend Commerce")
 ```
 
-### 7.3. Schéma de communication entre autorités
+### 7.3. SchÃ©ma de communication entre autoritÃ©s
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    DOMAINE RPG                                │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  Instance: "App A"                                    │  │
-│  │  Données RPG isolées                                  │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                        │                                     │
-│                        │ WriteIntent certifié               │
-│                        │ (validé par KindMother)           │
-│                        ▼                                     │
-│              ┌─────────────────────┐                        │
-│              │   KINDMOTHER        │                        │
-│              │   (Validation)      │                        │
-│              └─────────────────────┘                        │
-│                        │                                     │
-│                        │ WriteIntent certifié               │
-│                        │ (validé, prêt pour application)    │
-│                        ▼                                     │
-└─────────────────────────────────────────────────────────────┘
-                        │
-                        │ Communication par intentions
-                        │ (pas de partage direct de données)
-                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    DOMAINE COMMERCE                          │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  Instance: "App B"                                    │  │
-│  │  Données Commerce isolées                            │  │
-│  └──────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    DOMAINE RPG                                â”‚
+â”‚                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  Instance: "App A"                                    â”‚  â”‚
+â”‚  â”‚  DonnÃ©es RPG isolÃ©es                                  â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                        â”‚                                     â”‚
+â”‚                        â”‚ WriteIntent certifiÃ©               â”‚
+â”‚                        â”‚ (validÃ© par KindMother)           â”‚
+â”‚                        â–¼                                     â”‚
+â”‚              â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                        â”‚
+â”‚              â”‚   KINDMOTHER        â”‚                        â”‚
+â”‚              â”‚   (Validation)      â”‚                        â”‚
+â”‚              â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                        â”‚
+â”‚                        â”‚                                     â”‚
+â”‚                        â”‚ WriteIntent certifiÃ©               â”‚
+â”‚                        â”‚ (validÃ©, prÃªt pour application)    â”‚
+â”‚                        â–¼                                     â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                        â”‚
+                        â”‚ Communication par intentions
+                        â”‚ (pas de partage direct de donnÃ©es)
+                        â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    DOMAINE COMMERCE                          â”‚
+â”‚                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  Instance: "App B"                                    â”‚  â”‚
+â”‚  â”‚  DonnÃ©es Commerce isolÃ©es                            â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
-⚠️ INTERDICTION : Aucun partage direct de données entre domaines
-✅ AUTORISATION : Communication uniquement par WriteIntent certifiés
+âš ï¸ INTERDICTION : Aucun partage direct de donnÃ©es entre domaines
+âœ… AUTORISATION : Communication uniquement par WriteIntent certifiÃ©s
 ```
 
 ---
@@ -609,17 +609,17 @@ INSTANCE "App C" :
 ### 8.1. Exemple 1 : Jeu A (RPG + Commerce)
 
 **Contexte :**
-- Jeu de rôle avec système de commerce intégré
+- Jeu de rÃ´le avec systÃ¨me de commerce intÃ©grÃ©
 - Application mobile (App Mobile)
-- Backend centralisé (Backend Central)
+- Backend centralisÃ© (Backend Central)
 
 **Configuration :**
 
 ```
 INSTANCE "Backend Central" :
-  - AuthorityInstance dans Identity (Mère racine)
-  - AuthorityInstance dans RPG (Mère racine)
-  - AuthorityInstance dans Commerce (Mère racine)
+  - AuthorityInstance dans Identity (MÃ¨re racine)
+  - AuthorityInstance dans RPG (MÃ¨re racine)
+  - AuthorityInstance dans Commerce (MÃ¨re racine)
 
 INSTANCE "App Mobile" :
   - AuthorityInstance dans Identity (Fille de "Backend Central")
@@ -629,9 +629,9 @@ INSTANCE "App Mobile" :
 
 **Fonctionnement :**
 - L'App Mobile fonctionne en mode offline-first
-- Les données RPG et Commerce sont isolées par domaine
+- Les donnÃ©es RPG et Commerce sont isolÃ©es par domaine
 - La synchronisation se fait par domaine (RPG avec Backend RPG, Commerce avec Backend Commerce)
-- Les communications entre RPG et Commerce passent par des WriteIntent certifiés
+- Les communications entre RPG et Commerce passent par des WriteIntent certifiÃ©s
 
 ### 8.2. Exemple 2 : App B (CMS + Commerce)
 
@@ -645,15 +645,15 @@ INSTANCE "App Mobile" :
 
 ```
 INSTANCE "Backend Identity" :
-  - AuthorityInstance dans Identity (Mère racine)
+  - AuthorityInstance dans Identity (MÃ¨re racine)
 
 INSTANCE "Backend CMS" :
   - AuthorityInstance dans Identity (Fille de "Backend Identity")
-  - AuthorityInstance dans CMS (Mère racine)
+  - AuthorityInstance dans CMS (MÃ¨re racine)
 
 INSTANCE "Backend Commerce" :
   - AuthorityInstance dans Identity (Fille de "Backend Identity")
-  - AuthorityInstance dans Commerce (Mère racine)
+  - AuthorityInstance dans Commerce (MÃ¨re racine)
 
 INSTANCE "Site Web" :
   - AuthorityInstance dans Identity (Fille de "Backend Identity")
@@ -662,10 +662,10 @@ INSTANCE "Site Web" :
 ```
 
 **Fonctionnement :**
-- Le Site Web synchronise avec Backend CMS pour les données CMS
-- Le Site Web synchronise avec Backend Commerce pour les données Commerce
-- Les données CMS et Commerce sont isolées par domaine
-- Les communications entre CMS et Commerce passent par des WriteIntent certifiés
+- Le Site Web synchronise avec Backend CMS pour les donnÃ©es CMS
+- Le Site Web synchronise avec Backend Commerce pour les donnÃ©es Commerce
+- Les donnÃ©es CMS et Commerce sont isolÃ©es par domaine
+- Les communications entre CMS et Commerce passent par des WriteIntent certifiÃ©s
 
 ### 8.3. Exemple 3 : Site C (CMS uniquement, mono-domaine)
 
@@ -678,11 +678,11 @@ INSTANCE "Site Web" :
 
 ```
 INSTANCE "Backend Identity" :
-  - AuthorityInstance dans Identity (Mère racine)
+  - AuthorityInstance dans Identity (MÃ¨re racine)
 
 INSTANCE "Backend CMS" :
   - AuthorityInstance dans Identity (Fille de "Backend Identity")
-  - AuthorityInstance dans CMS (Mère racine)
+  - AuthorityInstance dans CMS (MÃ¨re racine)
 
 INSTANCE "Site Web" :
   - AuthorityInstance dans Identity (Fille de "Backend Identity")
@@ -690,113 +690,114 @@ INSTANCE "Site Web" :
 ```
 
 **Fonctionnement :**
-- Le Site Web synchronise uniquement avec Backend CMS pour les données CMS
-- Modèle mono-domaine (CMS uniquement, en plus d'Identity)
-- Rétro-compatible avec le modèle fondateur
+- Le Site Web synchronise uniquement avec Backend CMS pour les donnÃ©es CMS
+- ModÃ¨le mono-domaine (CMS uniquement, en plus d'Identity)
+- RÃ©tro-compatible avec le modÃ¨le fondateur
 
 ---
 
 ## 9. Conclusion
 
-Ce contrat établit le modèle de domaine des instances KindMother et des autorités métier, étendant le modèle fondateur pour supporter plusieurs domaines d'autorité par instance et plusieurs instances mères par domaine.
+Ce contrat Ã©tablit le modÃ¨le de domaine des instances KindMother et des autoritÃ©s mÃ©tier, Ã©tendant le modÃ¨le fondateur pour supporter plusieurs domaines d'autoritÃ© par instance et plusieurs instances mÃ¨res par domaine.
 
-**Points clés :**
-- **Instance KindMother :** Instance de base de données gérée par KindMother, associée à un ou plusieurs domaines
-- **AuthorityDomain :** Domaine d'autorité métier avec périmètre de responsabilité et validation
-- **AuthorityInstance :** Relation entre une instance et un domaine, définissant le rôle (Mère ou Fille)
-- **AuthorityGraph :** Graphe des relations mère/fille dans un domaine spécifique
-- **Relation mère/fille par domaine :** La relation mère/fille est définie par domaine, pas globalement
-- **Autorité Identity centrale :** Domaine Identity unique, centralisé, et obligatoire
-- **Isolation des autorités :** Les autorités métier sont isolées et communiquent uniquement par intentions certifiées
-- **Compatibilité stricte :** Aucun invariant des contrats existants n'est violé
-- **Rétro-compatibilité :** Le modèle mono-domaine reste valide et conforme
+**Points clÃ©s :**
+- **Instance KindMother :** Instance de base de donnÃ©es gÃ©rÃ©e par KindMother, associÃ©e Ã  un ou plusieurs domaines
+- **AuthorityDomain :** Domaine d'autoritÃ© mÃ©tier avec pÃ©rimÃ¨tre de responsabilitÃ© et validation
+- **AuthorityInstance :** Relation entre une instance et un domaine, dÃ©finissant le rÃ´le (MÃ¨re ou Fille)
+- **AuthorityGraph :** Graphe des relations mÃ¨re/fille dans un domaine spÃ©cifique
+- **Relation mÃ¨re/fille par domaine :** La relation mÃ¨re/fille est dÃ©finie par domaine, pas globalement
+- **AutoritÃ© Identity centrale :** Domaine Identity unique, centralisÃ©, et obligatoire
+- **Isolation des autoritÃ©s :** Les autoritÃ©s mÃ©tier sont isolÃ©es et communiquent uniquement par intentions certifiÃ©es
+- **CompatibilitÃ© stricte :** Aucun invariant des contrats existants n'est violÃ©
+- **RÃ©tro-compatibilitÃ© :** Le modÃ¨le mono-domaine reste valide et conforme
 
-Ce contrat complète les documents contractuels existants en définissant le modèle de domaine des instances et autorités. Ensemble, ces contrats forment le système complet de frontières, protections, enforcement, et modèle de domaine du système Miyukini Core System v2.4.
+Ce contrat complÃ¨te les documents contractuels existants en dÃ©finissant le modÃ¨le de domaine des instances et autoritÃ©s. Ensemble, ces contrats forment le systÃ¨me complet de frontiÃ¨res, protections, enforcement, et modÃ¨le de domaine du systÃ¨me Miyukini Core System v2.4.
 
-**Non-négociabilité :** Ce contrat est absolu et non négociable. Le contrat prime sur toute considération pratique.
+**Non-nÃ©gociabilitÃ© :** Ce contrat est absolu et non nÃ©gociable. Le contrat prime sur toute considÃ©ration pratique.
 
 ---
 
-**Document créé le :** 2026-01-25  
+**Document crÃ©Ã© le :** 2026-01-25  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, KindMother Documentation, KM Adapter Compliance Contract, KindMother Runtime Boundary & Enforcement Contract  
-**Type :** Contrat de modèle de domaine non négociable
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, KindMother Documentation, KM Adapter Compliance Contract, KindMother Runtime Boundary & Enforcement Contract  
+**Type :** Contrat de modÃ¨le de domaine non nÃ©gociable
 
 ---
 
-## 10. Mini log — erreurs / warnings / ambiguïtés rencontrées et corrigées
+## 10. Mini log â€” erreurs / warnings / ambiguÃ¯tÃ©s rencontrÃ©es et corrigÃ©es
 
-### Ambiguïté A1 : Relation mère/fille globale vs par domaine
+### AmbiguÃ¯tÃ© A1 : Relation mÃ¨re/fille globale vs par domaine
 
-**Ambiguïté rencontrée :**
-Le modèle fondateur définit une relation mère/fille globale (une DB Mère, plusieurs DB Filles). L'extension pour supporter plusieurs domaines d'autorité nécessite de clarifier si la relation mère/fille est globale ou par domaine.
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
+Le modÃ¨le fondateur dÃ©finit une relation mÃ¨re/fille globale (une DB MÃ¨re, plusieurs DB Filles). L'extension pour supporter plusieurs domaines d'autoritÃ© nÃ©cessite de clarifier si la relation mÃ¨re/fille est globale ou par domaine.
 
-**Décision prise :**
-La relation mère/fille est définie **par domaine d'autorité**, pas globalement. Une Instance KindMother peut être Mère pour un domaine et Fille pour un autre domaine.
-
-**Justification :**
-Cette décision permet de supporter plusieurs autorités métier indépendantes tout en conservant la cohérence du modèle. Le modèle mono-domaine reste valide (une seule relation mère/fille par domaine).
-
-**Correction effectuée :**
-Section 3.2 "Relation mère/fille par domaine" ajoutée avec règles explicites (R-MF-1 à R-MF-4).
-
-### Ambiguïté A2 : Autorité Identity obligatoire
-
-**Ambiguïté rencontrée :**
-Le domaine Identity doit-il être obligatoire pour toute instance, ou peut-il être optionnel ?
-
-**Décision prise :**
-Le domaine Identity est **obligatoire** pour toute Instance KindMother. Il existe exactement une AuthorityInstance Mère racine pour Identity, et toutes les autres instances sont filles de cette autorité Identity centrale.
+**DÃ©cision prise :**
+La relation mÃ¨re/fille est dÃ©finie **par domaine d'autoritÃ©**, pas globalement. Une Instance KindMother peut Ãªtre MÃ¨re pour un domaine et Fille pour un autre domaine.
 
 **Justification :**
-L'autorité Identity centrale garantit l'unicité, la cohérence, et la sécurité de toutes les identités dans le système. Toute création d'identité doit passer par cette autorité.
+Cette dÃ©cision permet de supporter plusieurs autoritÃ©s mÃ©tier indÃ©pendantes tout en conservant la cohÃ©rence du modÃ¨le. Le modÃ¨le mono-domaine reste valide (une seule relation mÃ¨re/fille par domaine).
 
-**Correction effectuée :**
-Section 4.1 "Autorité Identity unique" ajoutée avec règles explicites (R-ID-1 à R-ID-4) et invariants (INV-ID-1 à INV-ID-3).
+**Correction effectuÃ©e :**
+Section 3.2 "Relation mÃ¨re/fille par domaine" ajoutÃ©e avec rÃ¨gles explicites (R-MF-1 Ã  R-MF-4).
 
-### Ambiguïté A3 : Compatibilité avec les contrats existants
+### AmbiguÃ¯tÃ© A2 : AutoritÃ© Identity obligatoire
 
-**Ambiguïté rencontrée :**
-Comment garantir que l'extension du modèle ne viole aucun invariant des contrats existants ?
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
+Le domaine Identity doit-il Ãªtre obligatoire pour toute instance, ou peut-il Ãªtre optionnel ?
 
-**Décision prise :**
-Vérification systématique de chaque invariant des contrats existants (KM Adapter Compliance Contract, Runtime Boundary & Enforcement Contract) pour démontrer qu'aucun n'est violé.
-
-**Justification :**
-La compatibilité stricte avec les contrats existants est une exigence absolue. Toute violation compromettrait l'intégrité du système.
-
-**Correction effectuée :**
-Section 5 "Compatibilité avec les contrats existants" ajoutée avec vérification détaillée de chaque invariant et obligation.
-
-### Ambiguïté A4 : Modèle mono-domaine comme cas valide
-
-**Ambiguïté rencontrée :**
-Le modèle mono-domaine (une seule autorité métier, en plus d'Identity) doit-il être explicitement reconnu comme cas valide et conforme ?
-
-**Décision prise :**
-Le modèle mono-domaine est explicitement reconnu comme **cas valide et conforme**, rétro-compatible avec le modèle fondateur.
+**DÃ©cision prise :**
+Le domaine Identity est **obligatoire** pour toute Instance KindMother. Il existe exactement une AuthorityInstance MÃ¨re racine pour Identity, et toutes les autres instances sont filles de cette autoritÃ© Identity centrale.
 
 **Justification :**
-Le modèle mono-domaine correspond au modèle fondateur étendu avec le concept de domaine. Il doit rester valide pour garantir la rétro-compatibilité.
+L'autoritÃ© Identity centrale garantit l'unicitÃ©, la cohÃ©rence, et la sÃ©curitÃ© de toutes les identitÃ©s dans le systÃ¨me. Toute crÃ©ation d'identitÃ© doit passer par cette autoritÃ©.
 
-**Correction effectuée :**
-Section 3.3 "Modèle mono-domaine (cas valide)" ajoutée avec règles explicites (R-MONO-1 à R-MONO-3) et exemple concret.
+**Correction effectuÃ©e :**
+Section 4.1 "AutoritÃ© Identity unique" ajoutÃ©e avec rÃ¨gles explicites (R-ID-1 Ã  R-ID-4) et invariants (INV-ID-1 Ã  INV-ID-3).
 
-### Ambiguïté A5 : Isolation des autorités vs communication
+### AmbiguÃ¯tÃ© A3 : CompatibilitÃ© avec les contrats existants
 
-**Ambiguïté rencontrée :**
-Comment les autorités métier communiquent-elles si elles sont isolées ?
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
+Comment garantir que l'extension du modÃ¨le ne viole aucun invariant des contrats existants ?
 
-**Décision prise :**
-Les autorités métier communiquent **uniquement par intentions certifiées** (WriteIntent validés par KindMother). Aucun partage direct de données n'est autorisé.
+**DÃ©cision prise :**
+VÃ©rification systÃ©matique de chaque invariant des contrats existants (KM Adapter Compliance Contract, Runtime Boundary & Enforcement Contract) pour dÃ©montrer qu'aucun n'est violÃ©.
 
 **Justification :**
-Les intentions certifiées garantissent la validation, la cohérence, et la traçabilité de toutes les communications entre autorités, tout en préservant l'isolation des données.
+La compatibilitÃ© stricte avec les contrats existants est une exigence absolue. Toute violation compromettrait l'intÃ©gritÃ© du systÃ¨me.
 
-**Correction effectuée :**
-Section 6.1 "Interdiction du partage direct de données entre autorités" et section 6.2 "Communication uniquement par intentions certifiées" ajoutées avec règles non négociables explicites.
+**Correction effectuÃ©e :**
+Section 5 "CompatibilitÃ© avec les contrats existants" ajoutÃ©e avec vÃ©rification dÃ©taillÃ©e de chaque invariant et obligation.
+
+### AmbiguÃ¯tÃ© A4 : ModÃ¨le mono-domaine comme cas valide
+
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
+Le modÃ¨le mono-domaine (une seule autoritÃ© mÃ©tier, en plus d'Identity) doit-il Ãªtre explicitement reconnu comme cas valide et conforme ?
+
+**DÃ©cision prise :**
+Le modÃ¨le mono-domaine est explicitement reconnu comme **cas valide et conforme**, rÃ©tro-compatible avec le modÃ¨le fondateur.
+
+**Justification :**
+Le modÃ¨le mono-domaine correspond au modÃ¨le fondateur Ã©tendu avec le concept de domaine. Il doit rester valide pour garantir la rÃ©tro-compatibilitÃ©.
+
+**Correction effectuÃ©e :**
+Section 3.3 "ModÃ¨le mono-domaine (cas valide)" ajoutÃ©e avec rÃ¨gles explicites (R-MONO-1 Ã  R-MONO-3) et exemple concret.
+
+### AmbiguÃ¯tÃ© A5 : Isolation des autoritÃ©s vs communication
+
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
+Comment les autoritÃ©s mÃ©tier communiquent-elles si elles sont isolÃ©es ?
+
+**DÃ©cision prise :**
+Les autoritÃ©s mÃ©tier communiquent **uniquement par intentions certifiÃ©es** (WriteIntent validÃ©s par KindMother). Aucun partage direct de donnÃ©es n'est autorisÃ©.
+
+**Justification :**
+Les intentions certifiÃ©es garantissent la validation, la cohÃ©rence, et la traÃ§abilitÃ© de toutes les communications entre autoritÃ©s, tout en prÃ©servant l'isolation des donnÃ©es.
+
+**Correction effectuÃ©e :**
+Section 6.1 "Interdiction du partage direct de donnÃ©es entre autoritÃ©s" et section 6.2 "Communication uniquement par intentions certifiÃ©es" ajoutÃ©es avec rÃ¨gles non nÃ©gociables explicites.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

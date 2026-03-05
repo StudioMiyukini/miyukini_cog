@@ -1,58 +1,58 @@
-# MiyuSocialMessaging — Documentation Fondatrice
+﻿# MiyuSocialMessaging â€” Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuSocialMessaging** est le **kit d'outils (Toolkit)** de messagerie sociale (DMs, conversations, réactions, marques de lecture) de l'écosystème Miyukini. Il intègre les outils d'envoi de DM, de liste des conversations, de réactions et de marques de lecture, alignés sur [Équivalents Reseaux Sociaux](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Reseaux%20Sociaux.md).
+**MiyuSocialMessaging** est le **kit d'outils (Toolkit)** de messagerie sociale (DMs, conversations, rÃ©actions, marques de lecture) de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils d'envoi de DM, de liste des conversations, de rÃ©actions et de marques de lecture, alignÃ©s sur [Ã‰quivalents Reseaux Sociaux](..//..//miyukini-webway-system//reference//_index.md).
 
-L'autorité sur les données (messages, conversations, réactions, readmarks) appartient à **KindMother**. MiyuSocialMessaging expose des capacités d'exécution gouvernée ; les décisions (envoi autorisé, destinataires) relèvent de **StrongFather**.
+L'autoritÃ© sur les donnÃ©es (messages, conversations, rÃ©actions, readmarks) appartient Ã  **KindMother**. MiyuSocialMessaging expose des capacitÃ©s d'exÃ©cution gouvernÃ©e ; les dÃ©cisions (envoi autorisÃ©, destinataires) relÃ¨vent de **StrongFather**.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-
----
-
-## 2. Portée / Scope
-
-**Ce document définit :** l'identité et la définition canonique de MiyuSocialMessaging, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother.
-
-**Hors scope :** l'affichage (MiyuWeb) ; l'implémentation détaillée (stockage, temps réel).
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 3. Définition canonique
+## 2. PortÃ©e / Scope
 
-> **MiyuSocialMessaging est une composition officielle d'outils de messagerie sociale (DMs, conversations, réactions, marques de lecture), déclarée et gouvernée par l'environnement.**
+**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de MiyuSocialMessaging, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother.
 
-- MiyuSocialMessaging **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
-- MiyuSocialMessaging **n'ajoute aucune logique métier** : il orchestre des capacités atomiques ; décision d'envoi = StrongFather.
+**Hors scope :** l'affichage (MiyuWeb) ; l'implÃ©mentation dÃ©taillÃ©e (stockage, temps rÃ©el).
 
-**Règle fondamentale :** Toute écriture (message, réaction, readmark) = **WriteIntent** vers KindMother.
+---
+
+## 3. DÃ©finition canonique
+
+> **MiyuSocialMessaging est une composition officielle d'outils de messagerie sociale (DMs, conversations, rÃ©actions, marques de lecture), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+
+- MiyuSocialMessaging **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
+- MiyuSocialMessaging **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques ; dÃ©cision d'envoi = StrongFather.
+
+**RÃ¨gle fondamentale :** Toute Ã©criture (message, rÃ©action, readmark) = **WriteIntent** vers KindMother.
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.social.messaging` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `social` |
-| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le détail de chaque outil est décrit dans [MiyuSocialMessaging - Reference Outils](./MiyuSocialMessaging%20-%20Reference%20Outils.md).
+Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuSocialMessaging - Reference Outils](./MiyuSocialMessaging%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
 | `tool.social.dm.send` | Envoie un message direct ; autorisation = StrongFather |
 | `tool.social.dm.list` | Liste les messages d'une conversation |
-| `tool.social.dm.get` | Récupère un message |
+| `tool.social.dm.get` | RÃ©cupÃ¨re un message |
 | `tool.social.conversation.list` | Liste les conversations |
-| `tool.social.conversation.get` | Récupère une conversation (fil de messages) |
-| `tool.social.dm.reaction.add` | Ajoute une réaction à un DM |
-| `tool.social.dm.reaction.remove` | Supprime une réaction |
+| `tool.social.conversation.get` | RÃ©cupÃ¨re une conversation (fil de messages) |
+| `tool.social.dm.reaction.add` | Ajoute une rÃ©action Ã  un DM |
+| `tool.social.dm.reaction.remove` | Supprime une rÃ©action |
 | `tool.social.dm.readmark.set` | Marque comme lu ; WriteIntent KindMother |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuSocialMessaging en contient huit.
@@ -61,44 +61,46 @@ Le détail de chaque outil est décrit dans [MiyuSocialMessaging - Reference Out
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : **décision d'envoi = StrongFather** ; toute écriture = WriteIntent KindMother.
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : **dÃ©cision d'envoi = StrongFather** ; toute Ã©criture = WriteIntent KindMother.
 
 ---
 
-## 7. Niveau de sécurité et états
+## 7. Niveau de sÃ©curitÃ© et Ã©tats
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
-| **Niveau de sécurité du kit** | **2** (données personnelles, messagerie) |
-| **États autorisés** | `HEALTHY`, `DEGRADED` |
-| **États interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
+| **Niveau de sÃ©curitÃ© du kit** | **2** (donnÃ©es personnelles, messagerie) |
+| **Ã‰tats autorisÃ©s** | `HEALTHY`, `DEGRADED` |
+| **Ã‰tats interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autorité sur les données : messages, conversations, réactions, readmarks. Toute création ou mise à jour passe par **WriteIntent** vers KindMother.
+**KindMother** est l'autoritÃ© sur les donnÃ©es : messages, conversations, rÃ©actions, readmarks. Toute crÃ©ation ou mise Ã  jour passe par **WriteIntent** vers KindMother.
 
-Les obligations de conformité détaillées sont dans [MiyuSocialMessaging - Tool Governance Compliance Contract](./contracts/governance/MiyuSocialMessaging%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuSocialMessaging - Tool Governance Compliance Contract](./contracts/governance/MiyuSocialMessaging%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuSocialMessaging sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). À l'implémentation, le code fournissant les Tools MiyuSocialMessaging devra être balisé MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit généré selon le [Protocole MIP v1](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+La documentation et la future implÃ©mentation de MiyuSocialMessaging sont conÃ§ues pour Ãªtre **compatibles MIP v1** (Miyukini Index Protocol). Ã€ l'implÃ©mentation, le code fournissant les Tools MiyuSocialMessaging devra Ãªtre balisÃ© MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit gÃ©nÃ©rÃ© selon le [Protocole MIP v1](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
 ---
 
-## 10. Références croisées
+## 10. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Équivalents Reseaux Sociaux | [Miyukini Conceptual References - Equivalents Reseaux Sociaux](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Reseaux%20Sociaux.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
+| Ã‰quivalents Reseaux Sociaux | [Miyukini Conceptual References - Equivalents Reseaux Sociaux](..//..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence fondateur
+**Statut :** Document de rÃ©fÃ©rence fondateur
+
+

@@ -1,282 +1,282 @@
-# Miyukini Central — Écrans et UI
+﻿# Miyukini Central â€” Ã‰crans et UI
 
 ## Contexte
 
-Ce document décrit en détail tous les **écrans** (vues) du Hub Miyukini Central, leur structure, leur contenu et leurs interactions. Il complète les documents de parcours utilisateurs et de UI/UX Header en fournissant une vue exhaustive de l'interface.
+Ce document dÃ©crit en dÃ©tail tous les **Ã©crans** (vues) du Hub Miyukini Central, leur structure, leur contenu et leurs interactions. Il complÃ¨te les documents de parcours utilisateurs et de UI/UX Header en fournissant une vue exhaustive de l'interface.
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Périmètre :** Description détaillée de tous les écrans du Hub ; structure, composants, interactions.
-- **Hors périmètre :** Implémentation technique détaillée (voir Stack UI egui/eframe) ; contenu des Services eux-mêmes.
+- **PÃ©rimÃ¨tre :** Description dÃ©taillÃ©e de tous les Ã©crans du Hub ; structure, composants, interactions.
+- **Hors pÃ©rimÃ¨tre :** ImplÃ©mentation technique dÃ©taillÃ©e (voir Stack UI egui/eframe) ; contenu des Services eux-mÃªmes.
 
 ---
 
-## 1. Structure générale de l'interface
+## 1. Structure gÃ©nÃ©rale de l'interface
 
 ### 1.1 Layout principal
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ HEADER (toujours visible sauf plein écran)                                  │
-│ [Logo] [Menu Services] [Onglets] [Profil] [Config]                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  CONTENU PRINCIPAL (selon onglet actif)                                    │
-│                                                                             │
-│  - Onglet HUB : Accueil, Catalogue, Mes Services, Paramètres               │
-│  - Onglet Service : Interface du Service ouvert                            │
-│  - Onglet Profile : Profil utilisateur, paramètres                         │
-│                                                                             │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ HEADER (toujours visible sauf plein Ã©cran)                                  â”‚
+â”‚ [Logo] [Menu Services] [Onglets] [Profil] [Config]                         â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                             â”‚
+â”‚  CONTENU PRINCIPAL (selon onglet actif)                                    â”‚
+â”‚                                                                             â”‚
+â”‚  - Onglet HUB : Accueil, Catalogue, Mes Services, ParamÃ¨tres               â”‚
+â”‚  - Onglet Service : Interface du Service ouvert                            â”‚
+â”‚  - Onglet Profile : Profil utilisateur, paramÃ¨tres                         â”‚
+â”‚                                                                             â”‚
+â”‚                                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 1.2 Zones de l'interface
 
-| Zone | Description | Visibilité |
+| Zone | Description | VisibilitÃ© |
 |------|-------------|------------|
-| **Header** | Navigation principale, onglets, profil | Toujours visible (sauf plein écran) |
+| **Header** | Navigation principale, onglets, profil | Toujours visible (sauf plein Ã©cran) |
 | **Contenu principal** | Contenu de l'onglet actif | Variable selon onglet |
-| **Fenêtres modales** | Dialogs, confirmations, erreurs | Sur demande |
+| **FenÃªtres modales** | Dialogs, confirmations, erreurs | Sur demande |
 
 ---
 
 ## 2. Onglet HUB
 
-L'onglet **HUB** est l'onglet système toujours présent. Il contient plusieurs vues internes.
+L'onglet **HUB** est l'onglet systÃ¨me toujours prÃ©sent. Il contient plusieurs vues internes.
 
 ### 2.1 Vue Accueil
 
-**Objectif :** Point d'entrée principal, vue d'ensemble.
+**Objectif :** Point d'entrÃ©e principal, vue d'ensemble.
 
 **Structure :**
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ CONTENU PRINCIPAL (Onglet HUB - Vue Accueil)                                │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │ Bienvenue sur Miyukini Central                                      │  │
-│  │ Hub de gestion des Services — découvrez, activez et lancez vos     │  │
-│  │ Services.                                                            │  │
-│  │                                                                      │  │
-│  │ [📦 Voir le catalogue]  [📌 Mes Services]                           │  │
-│  └─────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-│  Services récents                                                          │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐                    │
-│  │ 🔢 Calc  │ │ 🎮 Jeu   │ │ 📝 Texte │ │ 📋 Notes│                    │
-│  │          │ │          │ │          │ │          │                    │
-│  │ [Ouvrir] │ │ [Ouvrir] │ │ [Ouvrir] │ │ [Ouvrir] │                    │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘                    │
-│                                                                             │
-│  État de l'environnement                                                   │
-│  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │ 🟢 Environnement normal (T0)                                        │  │
-│  │ Environnement connecté : COG-Local v1.2.3                          │  │
-│  └─────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ CONTENU PRINCIPAL (Onglet HUB - Vue Accueil)                                â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                             â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚ Bienvenue sur Miyukini Central                                      â”‚  â”‚
+â”‚  â”‚ Hub de gestion des Services â€” dÃ©couvrez, activez et lancez vos     â”‚  â”‚
+â”‚  â”‚ Services.                                                            â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚ [ðŸ“¦ Voir le catalogue]  [ðŸ“Œ Mes Services]                           â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                             â”‚
+â”‚  Services rÃ©cents                                                          â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                    â”‚
+â”‚  â”‚ ðŸ”¢ Calc  â”‚ â”‚ ðŸŽ® Jeu   â”‚ â”‚ ðŸ“ Texte â”‚ â”‚ ðŸ“‹ Notesâ”‚                    â”‚
+â”‚  â”‚          â”‚ â”‚          â”‚ â”‚          â”‚ â”‚          â”‚                    â”‚
+â”‚  â”‚ [Ouvrir] â”‚ â”‚ [Ouvrir] â”‚ â”‚ [Ouvrir] â”‚ â”‚ [Ouvrir] â”‚                    â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                    â”‚
+â”‚                                                                             â”‚
+â”‚  Ã‰tat de l'environnement                                                   â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚ ðŸŸ¢ Environnement normal (T0)                                        â”‚  â”‚
+â”‚  â”‚ Environnement connectÃ© : COG-Local v1.2.3                          â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Composants :**
-- **Bannière d'accueil** : Message de bienvenue, boutons d'action rapide
-- **Services récents** : Grille de cartes Services (6 max) avec bouton "Ouvrir"
-- **État environnement** : Badge état de confiance (T0-T4), identité COG
+- **BanniÃ¨re d'accueil** : Message de bienvenue, boutons d'action rapide
+- **Services rÃ©cents** : Grille de cartes Services (6 max) avec bouton "Ouvrir"
+- **Ã‰tat environnement** : Badge Ã©tat de confiance (T0-T4), identitÃ© COG
 
 **Actions :**
-- Clic "Voir le catalogue" → Navigation vers Vue Catalogue
-- Clic "Mes Services" → Navigation vers Vue Mes Services
-- Clic "Ouvrir" sur un Service → Lancement du Service (nouvel onglet)
+- Clic "Voir le catalogue" â†’ Navigation vers Vue Catalogue
+- Clic "Mes Services" â†’ Navigation vers Vue Mes Services
+- Clic "Ouvrir" sur un Service â†’ Lancement du Service (nouvel onglet)
 
 ---
 
 ### 2.2 Vue Catalogue
 
-**Objectif :** Découvrir tous les Services disponibles.
+**Objectif :** DÃ©couvrir tous les Services disponibles.
 
 **Structure :**
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ CONTENU PRINCIPAL (Onglet HUB - Vue Catalogue)                               │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  Catalogue des Services                                                     │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │ 🔍 [Rechercher un Service...]                                       │  │
-│  └─────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-│  Catégorie : [Toutes] [🛠️ Utilitaires] [🎯 Loisirs] [⚡ Productivité]    │
-│                                                                             │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐     │
-│  │ 🔢           │ │ 🎮           │ │ 📝           │ │ 📋           │     │
-│  │              │ │              │ │              │ │              │     │
-│  │ Calculatrice │ │ Jeu          │ │ Traitement   │ │ Notes        │     │
-│  │              │ │              │ │ de texte     │ │              │     │
-│  │ Calculs      │ │ Jeu de       │ │ Éditeur de   │ │ Notes        │     │
-│  │ basiques :   │ │ démonstration│ │ texte simple │ │ rapides :    │     │
-│  │ +, −, ×, /   │ │ : clics      │ │ pour rédiger │ │ listez vos   │     │
-│  │              │ │ rapides      │ │ des documents │ │ idées        │     │
-│  │              │ │              │ │              │ │              │     │
-│  │ 🟢 Standard  │ │ 🟢 Standard  │ │ 🟢 Standard  │ │ 🟢 Standard  │     │
-│  │              │ │              │ │              │ │              │     │
-│  │ [Détails]    │ │ [Détails]    │ │ [Détails]    │ │ [Détails]    │     │
-│  │ [Ouvrir]     │ │ [Ouvrir]     │ │ [Ouvrir]     │ │ [Ouvrir]     │     │
-│  └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘     │
-│                                                                             │
-│  [Scroll si plus de Services...]                                           │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ CONTENU PRINCIPAL (Onglet HUB - Vue Catalogue)                               â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                             â”‚
+â”‚  Catalogue des Services                                                     â”‚
+â”‚                                                                             â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚ ðŸ” [Rechercher un Service...]                                       â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                             â”‚
+â”‚  CatÃ©gorie : [Toutes] [ðŸ› ï¸ Utilitaires] [ðŸŽ¯ Loisirs] [âš¡ ProductivitÃ©]    â”‚
+â”‚                                                                             â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”‚
+â”‚  â”‚ ðŸ”¢           â”‚ â”‚ ðŸŽ®           â”‚ â”‚ ðŸ“           â”‚ â”‚ ðŸ“‹           â”‚     â”‚
+â”‚  â”‚              â”‚ â”‚              â”‚ â”‚              â”‚ â”‚              â”‚     â”‚
+â”‚  â”‚ Calculatrice â”‚ â”‚ Jeu          â”‚ â”‚ Traitement   â”‚ â”‚ Notes        â”‚     â”‚
+â”‚  â”‚              â”‚ â”‚              â”‚ â”‚ de texte     â”‚ â”‚              â”‚     â”‚
+â”‚  â”‚ Calculs      â”‚ â”‚ Jeu de       â”‚ â”‚ Ã‰diteur de   â”‚ â”‚ Notes        â”‚     â”‚
+â”‚  â”‚ basiques :   â”‚ â”‚ dÃ©monstrationâ”‚ â”‚ texte simple â”‚ â”‚ rapides :    â”‚     â”‚
+â”‚  â”‚ +, âˆ’, Ã—, /   â”‚ â”‚ : clics      â”‚ â”‚ pour rÃ©diger â”‚ â”‚ listez vos   â”‚     â”‚
+â”‚  â”‚              â”‚ â”‚ rapides      â”‚ â”‚ des documents â”‚ â”‚ idÃ©es        â”‚     â”‚
+â”‚  â”‚              â”‚ â”‚              â”‚ â”‚              â”‚ â”‚              â”‚     â”‚
+â”‚  â”‚ ðŸŸ¢ Standard  â”‚ â”‚ ðŸŸ¢ Standard  â”‚ â”‚ ðŸŸ¢ Standard  â”‚ â”‚ ðŸŸ¢ Standard  â”‚     â”‚
+â”‚  â”‚              â”‚ â”‚              â”‚ â”‚              â”‚ â”‚              â”‚     â”‚
+â”‚  â”‚ [DÃ©tails]    â”‚ â”‚ [DÃ©tails]    â”‚ â”‚ [DÃ©tails]    â”‚ â”‚ [DÃ©tails]    â”‚     â”‚
+â”‚  â”‚ [Ouvrir]     â”‚ â”‚ [Ouvrir]     â”‚ â”‚ [Ouvrir]     â”‚ â”‚ [Ouvrir]     â”‚     â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â”‚
+â”‚                                                                             â”‚
+â”‚  [Scroll si plus de Services...]                                           â”‚
+â”‚                                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Composants :**
-- **Barre de recherche** : Champ de recherche texte (filtre côté client)
-- **Filtres catégories** : Pills de catégories (Toutes, Utilitaires, Loisirs, Productivité)
-- **Grille de Services** : Cartes Services avec icône, nom, description, badge niveau sécurité, boutons
+- **Barre de recherche** : Champ de recherche texte (filtre cÃ´tÃ© client)
+- **Filtres catÃ©gories** : Pills de catÃ©gories (Toutes, Utilitaires, Loisirs, ProductivitÃ©)
+- **Grille de Services** : Cartes Services avec icÃ´ne, nom, description, badge niveau sÃ©curitÃ©, boutons
 
 **Actions :**
-- Recherche : Filtre la liste en temps réel
-- Clic catégorie : Filtre par catégorie
-- Clic "Détails" : Affiche Vue Fiche Service
+- Recherche : Filtre la liste en temps rÃ©el
+- Clic catÃ©gorie : Filtre par catÃ©gorie
+- Clic "DÃ©tails" : Affiche Vue Fiche Service
 - Clic "Ouvrir" : Lance le Service (nouvel onglet)
 
 ---
 
 ### 2.3 Vue Fiche Service
 
-**Objectif :** Détails complets d'un Service.
+**Objectif :** DÃ©tails complets d'un Service.
 
 **Structure :**
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ CONTENU PRINCIPAL (Onglet HUB - Vue Fiche Service)                          │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │ 🔢                                                                   │  │
-│  │                                                                      │  │
-│  │ Calculatrice                                                        │  │
-│  │                                                                      │  │
-│  │ Calculs basiques : addition, soustraction, multiplication, division.│  │
-│  │                                                                      │  │
-│  │ 🛠️ Utilitaires · v1.0.0                                             │  │
-│  │ 🟢 Niveau de sécurité : Standard                                    │  │
-│  │ ✅ État : ACTIF                                                     │  │
-│  │                                                                      │  │
-│  │ Opérateur(s) : Opérateur Calculatrice                               │  │
-│  │                                                                      │  │
-│  │ Prérequis :                                                          │  │
-│  │ - Environnement COG vers. 1.2.0+                                         │  │
-│  │ - Niveau de sécurité : Standard (1)                                 │  │
-│  │                                                                      │  │
-│  │ [Ouvrir ce Service]  [← Catalogue]  [← Mes Services]                │  │
-│  └─────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ CONTENU PRINCIPAL (Onglet HUB - Vue Fiche Service)                          â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                             â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚ ðŸ”¢                                                                   â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚ Calculatrice                                                        â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚ Calculs basiques : addition, soustraction, multiplication, division.â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚ ðŸ› ï¸ Utilitaires Â· v1.0.0                                             â”‚  â”‚
+â”‚  â”‚ ðŸŸ¢ Niveau de sÃ©curitÃ© : Standard                                    â”‚  â”‚
+â”‚  â”‚ âœ… Ã‰tat : ACTIF                                                     â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚ OpÃ©rateur(s) : OpÃ©rateur Calculatrice                               â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚ PrÃ©requis :                                                          â”‚  â”‚
+â”‚  â”‚ - Environnement COG vers. 1.2.0+                                         â”‚  â”‚
+â”‚  â”‚ - Niveau de sÃ©curitÃ© : Standard (1)                                 â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚ [Ouvrir ce Service]  [â† Catalogue]  [â† Mes Services]                â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Composants :**
-- **Icône grande** : Icône du Service (taille ~48x48px)
-- **Nom et description** : Titre et description complète
-- **Métadonnées** : Catégorie, version, niveau de sécurité, état de vie
-- **Opérateur(s)** : Liste des Opérateurs qui portent le Service
-- **Prérequis** : Conditions d'utilisation (environnement, sécurité)
+- **IcÃ´ne grande** : IcÃ´ne du Service (taille ~48x48px)
+- **Nom et description** : Titre et description complÃ¨te
+- **MÃ©tadonnÃ©es** : CatÃ©gorie, version, niveau de sÃ©curitÃ©, Ã©tat de vie
+- **OpÃ©rateur(s)** : Liste des OpÃ©rateurs qui portent le Service
+- **PrÃ©requis** : Conditions d'utilisation (environnement, sÃ©curitÃ©)
 - **Boutons d'action** : Ouvrir, retour Catalogue ou Mes Services
 
 **Actions :**
 - Clic "Ouvrir ce Service" : Lance le Service (nouvel onglet)
-- Clic "← Catalogue" : Retour à Vue Catalogue
-- Clic "← Mes Services" : Retour à Vue Mes Services
+- Clic "â† Catalogue" : Retour Ã  Vue Catalogue
+- Clic "â† Mes Services" : Retour Ã  Vue Mes Services
 
 ---
 
 ### 2.4 Vue Mes Services
 
-**Objectif :** Liste des Services auxquels l'utilisateur a accès.
+**Objectif :** Liste des Services auxquels l'utilisateur a accÃ¨s.
 
 **Structure :**
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ CONTENU PRINCIPAL (Onglet HUB - Vue Mes Services)                           │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  Mes Services                                                               │
-│                                                                             │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐     │
-│  │ 🔢           │ │ 🎮           │ │ 📝           │ │ 📋           │     │
-│  │              │ │              │ │              │ │              │     │
-│  │ Calculatrice │ │ Jeu          │ │ Traitement   │ │ Notes        │     │
-│  │              │ │              │ │ de texte     │ │              │     │
-│  │              │ │              │ │              │ │              │     │
-│  │ 🟢 Ouvert    │ │ 🟢 À jour    │ │ 🟢 À jour    │ │ 🟢 À jour    │     │
-│  │              │ │              │ │              │ │              │     │
-│  │ [Ouvrir]     │ │ [Ouvrir]     │ │ [Ouvrir]     │ │ [Ouvrir]     │     │
-│  │ [Détails]    │ │ [Détails]    │ │ [Détails]    │ │ [Détails]    │     │
-│  └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘     │
-│                                                                             │
-│  Si aucun Service activé :                                                 │
-│  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │ Aucun Service activé                                                │  │
-│  │                                                                      │  │
-│  │ Parcourez le Catalogue et cliquez sur « Ouvrir » pour en ajouter. │  │
-│  │                                                                      │  │
-│  │ [📦 Voir le catalogue]                                              │  │
-│  └─────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ CONTENU PRINCIPAL (Onglet HUB - Vue Mes Services)                           â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                             â”‚
+â”‚  Mes Services                                                               â”‚
+â”‚                                                                             â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”‚
+â”‚  â”‚ ðŸ”¢           â”‚ â”‚ ðŸŽ®           â”‚ â”‚ ðŸ“           â”‚ â”‚ ðŸ“‹           â”‚     â”‚
+â”‚  â”‚              â”‚ â”‚              â”‚ â”‚              â”‚ â”‚              â”‚     â”‚
+â”‚  â”‚ Calculatrice â”‚ â”‚ Jeu          â”‚ â”‚ Traitement   â”‚ â”‚ Notes        â”‚     â”‚
+â”‚  â”‚              â”‚ â”‚              â”‚ â”‚ de texte     â”‚ â”‚              â”‚     â”‚
+â”‚  â”‚              â”‚ â”‚              â”‚ â”‚              â”‚ â”‚              â”‚     â”‚
+â”‚  â”‚ ðŸŸ¢ Ouvert    â”‚ â”‚ ðŸŸ¢ Ã€ jour    â”‚ â”‚ ðŸŸ¢ Ã€ jour    â”‚ â”‚ ðŸŸ¢ Ã€ jour    â”‚     â”‚
+â”‚  â”‚              â”‚ â”‚              â”‚ â”‚              â”‚ â”‚              â”‚     â”‚
+â”‚  â”‚ [Ouvrir]     â”‚ â”‚ [Ouvrir]     â”‚ â”‚ [Ouvrir]     â”‚ â”‚ [Ouvrir]     â”‚     â”‚
+â”‚  â”‚ [DÃ©tails]    â”‚ â”‚ [DÃ©tails]    â”‚ â”‚ [DÃ©tails]    â”‚ â”‚ [DÃ©tails]    â”‚     â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â”‚
+â”‚                                                                             â”‚
+â”‚  Si aucun Service activÃ© :                                                 â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚ Aucun Service activÃ©                                                â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚ Parcourez le Catalogue et cliquez sur Â« Ouvrir Â» pour en ajouter. â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚ [ðŸ“¦ Voir le catalogue]                                              â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Composants :**
-- **Grille de Services** : Cartes Services avec état (Ouvert, À jour, Déprécié)
-- **Message vide** : Si aucun Service activé, message avec lien vers Catalogue
+- **Grille de Services** : Cartes Services avec Ã©tat (Ouvert, Ã€ jour, DÃ©prÃ©ciÃ©)
+- **Message vide** : Si aucun Service activÃ©, message avec lien vers Catalogue
 
 **Actions :**
 - Clic "Ouvrir" : Active l'onglet existant ou lance le Service
-- Clic "Détails" : Affiche Vue Fiche Service
+- Clic "DÃ©tails" : Affiche Vue Fiche Service
 
 ---
 
-### 2.5 Vue Paramètres
+### 2.5 Vue ParamÃ¨tres
 
-**Objectif :** Préférences UI du Hub.
+**Objectif :** PrÃ©fÃ©rences UI du Hub.
 
 **Structure :**
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ CONTENU PRINCIPAL (Onglet HUB - Vue Paramètres)                             │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  Paramètres                                                                 │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │ Apparence                                                            │  │
-│  │                                                                      │  │
-│  │ ☑ Thème sombre                                                      │  │
-│  │                                                                      │  │
-│  │ Langue : [Français ▼]                                               │  │
-│  │                                                                      │  │
-│  │ Taille de fenêtre : [Restauration automatique]                      │  │
-│  └─────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │ À propos                                                            │  │
-│  │                                                                      │  │
-│  │ Miyukini Central — MVP Hub                                          │  │
-│  │ Version démo — Services factices                                    │  │
-│  │                                                                      │  │
-│  │ Licence : Miyukini COG                                              │  │
-│  └─────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ CONTENU PRINCIPAL (Onglet HUB - Vue ParamÃ¨tres)                             â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                             â”‚
+â”‚  ParamÃ¨tres                                                                 â”‚
+â”‚                                                                             â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚ Apparence                                                            â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚ â˜‘ ThÃ¨me sombre                                                      â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚ Langue : [FranÃ§ais â–¼]                                               â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚ Taille de fenÃªtre : [Restauration automatique]                      â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                             â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚ Ã€ propos                                                            â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚ Miyukini Central â€” MVP Hub                                          â”‚  â”‚
+â”‚  â”‚ Version dÃ©mo â€” Services factices                                    â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚ Licence : Miyukini COG                                              â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Composants :**
-- **Préférences UI** : Thème, langue, taille fenêtre
-- **À propos** : Version, crédits, licence
+- **PrÃ©fÃ©rences UI** : ThÃ¨me, langue, taille fenÃªtre
+- **Ã€ propos** : Version, crÃ©dits, licence
 
 **Actions :**
-- Modification préférences : Sauvegarde automatique (eframe persistence)
+- Modification prÃ©fÃ©rences : Sauvegarde automatique (eframe persistence)
 
 ---
 
@@ -286,154 +286,155 @@ L'onglet **HUB** est l'onglet système toujours présent. Il contient plusieurs 
 
 **Structure :**
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ CONTENU PRINCIPAL (Onglet Service - ex. Calculatrice)                       │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  [Contenu du Service - interface spécifique au Service]                    │
-│                                                                             │
-│  Exemple Calculatrice :                                                     │
-│  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │                                                                      │  │
-│  │                          [Affichage]                                │  │
-│  │                                                                      │  │
-│  │  [7] [8] [9] [/]                                                    │  │
-│  │  [4] [5] [6] [×]                                                    │  │
-│  │  [1] [2] [3] [-]                                                    │  │
-│  │  [C] [0] [=] [+]                                                   │  │
-│  │                                                                      │  │
-│  └─────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ CONTENU PRINCIPAL (Onglet Service - ex. Calculatrice)                       â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                             â”‚
+â”‚  [Contenu du Service - interface spÃ©cifique au Service]                    â”‚
+â”‚                                                                             â”‚
+â”‚  Exemple Calculatrice :                                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚                          [Affichage]                                â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚  [7] [8] [9] [/]                                                    â”‚  â”‚
+â”‚  â”‚  [4] [5] [6] [Ã—]                                                    â”‚  â”‚
+â”‚  â”‚  [1] [2] [3] [-]                                                    â”‚  â”‚
+â”‚  â”‚  [C] [0] [=] [+]                                                   â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Comportement :**
 - Le Service s'affiche dans le contenu principal
 - Le Header reste visible avec l'onglet du Service actif
-- Fermeture de l'onglet → kill le Service
+- Fermeture de l'onglet â†’ kill le Service
 
 ---
 
 ## 4. Onglet Profile
 
-**Objectif :** Profil utilisateur et paramètres personnels.
+**Objectif :** Profil utilisateur et paramÃ¨tres personnels.
 
 **Structure :**
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ CONTENU PRINCIPAL (Onglet Profile)                                          │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │                                                                      │  │
-│  │                    [👤 Photo de profil]                             │  │
-│  │                                                                      │  │
-│  │                    Jean Dupont                                     │  │
-│  │                    jean.dupont@example.com                          │  │
-│  │                                                                      │  │
-│  │  Environnement connecté : COG-Local v1.2.3                         │  │
-│  │  Identité : LSI-ABC123...                                           │  │
-│  │                                                                      │  │
-│  └─────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-│  Préférences                                                                │
-│  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │ [Paramètres du Hub]  [Notifications]  [Sécurité]                   │  │
-│  └─────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ CONTENU PRINCIPAL (Onglet Profile)                                          â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                             â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚                    [ðŸ‘¤ Photo de profil]                             â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚                    Jean Dupont                                     â”‚  â”‚
+â”‚  â”‚                    jean.dupont@example.com                          â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚  Environnement connectÃ© : COG-Local v1.2.3                         â”‚  â”‚
+â”‚  â”‚  IdentitÃ© : LSI-ABC123...                                           â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                             â”‚
+â”‚  PrÃ©fÃ©rences                                                                â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚ [ParamÃ¨tres du Hub]  [Notifications]  [SÃ©curitÃ©]                   â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Composants :**
 - **Photo et informations** : Photo de profil, nom, email
-- **Environnement** : COG connecté, identité (LSI/VID/WID)
-- **Préférences** : Onglets pour paramètres, notifications, sécurité
+- **Environnement** : COG connectÃ©, identitÃ© (LSI/VID/WID)
+- **PrÃ©fÃ©rences** : Onglets pour paramÃ¨tres, notifications, sÃ©curitÃ©
 
 **Actions :**
-- Modification préférences : Sauvegarde automatique
-- Déconnexion : Option dans menu déroulant photo de profil
+- Modification prÃ©fÃ©rences : Sauvegarde automatique
+- DÃ©connexion : Option dans menu dÃ©roulant photo de profil
 
 ---
 
-## 5. Fenêtres modales
+## 5. FenÃªtres modales
 
 ### 5.1 Confirmation de lancement
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ FENÊTRE MODALE (Confirmation)                                               │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │                                                                      │  │
-│  │                    Ouvrir ce Service ?                             │  │
-│  │                                                                      │  │
-│  │                    🔢 Calculatrice                                 │  │
-│  │                                                                      │  │
-│  │                    [Annuler]  [Ouvrir]                             │  │
-│  │                                                                      │  │
-│  └─────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ FENÃŠTRE MODALE (Confirmation)                                               â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                             â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚                    Ouvrir ce Service ?                             â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚                    ðŸ”¢ Calculatrice                                 â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚                    [Annuler]  [Ouvrir]                             â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### 5.2 Message d'erreur gouverné
+### 5.2 Message d'erreur gouvernÃ©
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ FENÊTRE MODALE (Erreur)                                                     │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐  │
-│  │                                                                      │  │
-│  │                    ⚠️ Accès refusé                                 │  │
-│  │                                                                      │  │
-│  │                    Ce Service n'est pas disponible dans votre      │  │
-│  │                    environnement.                                   │  │
-│  │                                                                      │  │
-│  │                    [Retour]  [Réessayer]                           │  │
-│  │                                                                      │  │
-│  └─────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ FENÃŠTRE MODALE (Erreur)                                                     â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                             â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚                    âš ï¸ AccÃ¨s refusÃ©                                 â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚                    Ce Service n'est pas disponible dans votre      â”‚  â”‚
+â”‚  â”‚                    environnement.                                   â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â”‚                    [Retour]  [RÃ©essayer]                           â”‚  â”‚
+â”‚  â”‚                                                                      â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
 
-## 6. États et indicateurs visuels
+## 6. Ã‰tats et indicateurs visuels
 
-### 6.1 États des Services
+### 6.1 Ã‰tats des Services
 
-| État | Badge/Indicateur | Description |
+| Ã‰tat | Badge/Indicateur | Description |
 |------|------------------|-------------|
-| **ACTIF** | 🟢 "À jour" | Service utilisable normalement |
-| **DÉPRÉCIÉ** | 🟡 "Déprécié" | Service utilisable mais migration recommandée |
-| **BROUILLON** | ⚪ "Brouillon" | Service non disponible en production |
-| **RETIRÉ** | 🔴 "Retiré" | Service non disponible |
-| **Ouvert** | 🟢 "Ouvert" | Service actuellement ouvert (onglet actif) |
+| **ACTIF** | ðŸŸ¢ "Ã€ jour" | Service utilisable normalement |
+| **DÃ‰PRÃ‰CIÃ‰** | ðŸŸ¡ "DÃ©prÃ©ciÃ©" | Service utilisable mais migration recommandÃ©e |
+| **BROUILLON** | âšª "Brouillon" | Service non disponible en production |
+| **RETIRÃ‰** | ðŸ”´ "RetirÃ©" | Service non disponible |
+| **Ouvert** | ðŸŸ¢ "Ouvert" | Service actuellement ouvert (onglet actif) |
 
-### 6.2 États de l'environnement
+### 6.2 Ã‰tats de l'environnement
 
-| État | Badge | Description |
+| Ã‰tat | Badge | Description |
 |------|-------|-------------|
-| **T0 (Normal)** | 🟢 "Normal" | Tous les Services accessibles |
-| **T1 (Instable)** | 🟡 "Instable" | Surveillance accrue |
-| **T2 (Dégradé)** | 🟠 "Dégradé" | Capacités réduites |
-| **T3 (Restreint)** | 🔴 "Restreint" | Mode restreint |
-| **T4 (Bloqué)** | 🔴 "Bloqué" | Uniquement diagnostics |
+| **T0 (Normal)** | ðŸŸ¢ "Normal" | Tous les Services accessibles |
+| **T1 (Instable)** | ðŸŸ¡ "Instable" | Surveillance accrue |
+| **T2 (DÃ©gradÃ©)** | ðŸŸ  "DÃ©gradÃ©" | CapacitÃ©s rÃ©duites |
+| **T3 (Restreint)** | ðŸ”´ "Restreint" | Mode restreint |
+| **T4 (BloquÃ©)** | ðŸ”´ "BloquÃ©" | Uniquement diagnostics |
 
 ---
 
-## 7. Références
+## 7. RÃ©fÃ©rences
 
 | Document | Lien |
 |----------|------|
-| **UI/UX Header et Navigation** | [Miyukini Central - UI/UX Header et Navigation](./Miyukini%20Central%20-%20UI%20UX%20Header%20et%20Navigation.md) |
-| **Parcours Utilisateurs** | [Miyukini Central - Parcours Utilisateurs](./Miyukini%20Central%20-%20Parcours%20Utilisateurs.md) |
-| **Maquette Conceptuelle** | [Miyukini Central - Maquette Conceptuelle Header](./reference/Miyukini%20Central%20-%20Maquette%20Conceptuelle%20Header.md) |
+| **UI/UX Header et Navigation** | [Miyukini Central - UI/UX Header et Navigation](..//..//_index.md) |
+| **Parcours Utilisateurs** | [Miyukini Central - Parcours Utilisateurs](..//..//_index.md) |
+| **Maquette Conceptuelle** | [Miyukini Central - Maquette Conceptuelle Header](..//..//_index.md) |
 
 ---
 
-**Date de création :** 2026-02-01  
+**Date de crÃ©ation :** 2026-02-01  
 **Version :** 1.0  
-**Statut :** Document de référence — Écrans et UI Miyukini Central
+**Statut :** Document de rÃ©fÃ©rence â€” Ã‰crans et UI Miyukini Central
+

@@ -1,53 +1,53 @@
-# MiyuValidate — Documentation Fondatrice
+﻿# MiyuValidate â€” Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuValidate** est le **kit d'outils (Toolkit)** de validation et sanitization de données de l'écosystème Miyukini. Il intègre les outils de validation selon schéma (ex. JSON Schema), de sanitization de champs (string, nombre, liste), et de cohérence de types, sans logique métier — le schéma et les données sont fournis dans le flux gouverné ; les règles métier de validation (qui valide quoi, quand) relèvent de **StrongFather** et des Opérateurs.
+**MiyuValidate** est le **kit d'outils (Toolkit)** de validation et sanitization de donnÃ©es de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils de validation selon schÃ©ma (ex. JSON Schema), de sanitization de champs (string, nombre, liste), et de cohÃ©rence de types, sans logique mÃ©tier â€” le schÃ©ma et les donnÃ©es sont fournis dans le flux gouvernÃ© ; les rÃ¨gles mÃ©tier de validation (qui valide quoi, quand) relÃ¨vent de **StrongFather** et des OpÃ©rateurs.
 
-L'autorité sur les schémas et règles métier appartient à **KindMother** et **StrongFather**. MiyuValidate expose des capacités d'exécution gouvernée (valider schéma, sanitiser) ; les décisions sur les règles métier à appliquer relèvent de **StrongFather** et des Opérateurs.
+L'autoritÃ© sur les schÃ©mas et rÃ¨gles mÃ©tier appartient Ã  **KindMother** et **StrongFather**. MiyuValidate expose des capacitÃ©s d'exÃ©cution gouvernÃ©e (valider schÃ©ma, sanitiser) ; les dÃ©cisions sur les rÃ¨gles mÃ©tier Ã  appliquer relÃ¨vent de **StrongFather** et des OpÃ©rateurs.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-
----
-
-## 2. Portée / Scope
-
-**Ce document définit :** l'identité et la définition canonique de MiyuValidate, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother.
-
-**Hors scope :** l'implémentation détaillée (moteur JSON Schema, sanitizers) ; les règles métier de validation (StrongFather / Opérateurs). MiyuWeb couvre la validation de **formulaires** (structure, champs) ; MiyuValidate couvre la validation **générique** (schéma, sanitization) réutilisable par plusieurs Opérateurs.
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 3. Définition canonique
+## 2. PortÃ©e / Scope
 
-> **MiyuValidate est une composition officielle d'outils de validation et sanitization de données (schéma, sanitize), déclarée et gouvernée par l'environnement.**
+**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de MiyuValidate, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother.
 
-- MiyuValidate **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
-- MiyuValidate **n'ajoute aucune logique métier** : il orchestre des capacités atomiques (valider selon schéma fourni, sanitiser selon politique fournie) ; schéma et données fournis dans le flux ; pas de décision sur les règles métier.
+**Hors scope :** l'implÃ©mentation dÃ©taillÃ©e (moteur JSON Schema, sanitizers) ; les rÃ¨gles mÃ©tier de validation (StrongFather / OpÃ©rateurs). MiyuWeb couvre la validation de **formulaires** (structure, champs) ; MiyuValidate couvre la validation **gÃ©nÃ©rique** (schÃ©ma, sanitization) rÃ©utilisable par plusieurs OpÃ©rateurs.
 
-**Règle fondamentale :** Un Tool MiyuValidate exécute sur des **données et schéma/politique fournis** ; il ne décide pas des règles métier à appliquer — cela relève de StrongFather et des Opérateurs.
+---
+
+## 3. DÃ©finition canonique
+
+> **MiyuValidate est une composition officielle d'outils de validation et sanitization de donnÃ©es (schÃ©ma, sanitize), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+
+- MiyuValidate **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
+- MiyuValidate **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques (valider selon schÃ©ma fourni, sanitiser selon politique fournie) ; schÃ©ma et donnÃ©es fournis dans le flux ; pas de dÃ©cision sur les rÃ¨gles mÃ©tier.
+
+**RÃ¨gle fondamentale :** Un Tool MiyuValidate exÃ©cute sur des **donnÃ©es et schÃ©ma/politique fournis** ; il ne dÃ©cide pas des rÃ¨gles mÃ©tier Ã  appliquer â€” cela relÃ¨ve de StrongFather et des OpÃ©rateurs.
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.validate.miyuvalidate` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `validate` |
-| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le détail de chaque outil est décrit dans [MiyuValidate - Reference Outils](./MiyuValidate%20-%20Reference%20Outils.md).
+Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuValidate - Reference Outils](./MiyuValidate%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
-| `tool.validate.schema.check` | Valide des données selon un schéma fourni (ex. JSON Schema) ; retourne succès/erreurs |
-| `tool.validate.sanitize` | Sanitise une valeur selon type et politique fournis (string, nombre, liste, échappement) |
+| `tool.validate.schema.check` | Valide des donnÃ©es selon un schÃ©ma fourni (ex. JSON Schema) ; retourne succÃ¨s/erreurs |
+| `tool.validate.sanitize` | Sanitise une valeur selon type et politique fournis (string, nombre, liste, Ã©chappement) |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuValidate en contient deux.
 
@@ -55,44 +55,46 @@ Le détail de chaque outil est décrit dans [MiyuValidate - Reference Outils](./
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : schéma et politique fournis dans le flux ; MiyuValidate ne lit pas la base directement ; pas de décision métier sur les règles de validation.
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : schÃ©ma et politique fournis dans le flux ; MiyuValidate ne lit pas la base directement ; pas de dÃ©cision mÃ©tier sur les rÃ¨gles de validation.
 
 ---
 
-## 7. Niveau de sécurité et états
+## 7. Niveau de sÃ©curitÃ© et Ã©tats
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
-| **Niveau de sécurité du kit** | **0 à 2** (sanitization peut être sensible selon données) |
-| **États autorisés** | Tous sauf restriction explicite |
-| **États interdits** | Aucun par défaut |
+| **Niveau de sÃ©curitÃ© du kit** | **0 Ã  2** (sanitization peut Ãªtre sensible selon donnÃ©es) |
+| **Ã‰tats autorisÃ©s** | Tous sauf restriction explicite |
+| **Ã‰tats interdits** | Aucun par dÃ©faut |
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autorité sur les schémas et règles métier. MiyuValidate **ne lit pas** la base directement : schéma et politique sont **fournis dans le flux** (après lecture via MiyuSQL sous autorité KindMother si besoin). MiyuValidate n'écrit pas la base ; il retourne un résultat de validation ou une valeur sanitisée.
+**KindMother** est l'autoritÃ© sur les schÃ©mas et rÃ¨gles mÃ©tier. MiyuValidate **ne lit pas** la base directement : schÃ©ma et politique sont **fournis dans le flux** (aprÃ¨s lecture via MiyuSQL sous autoritÃ© KindMother si besoin). MiyuValidate n'Ã©crit pas la base ; il retourne un rÃ©sultat de validation ou une valeur sanitisÃ©e.
 
-Les obligations de conformité détaillées sont dans [MiyuValidate - Tool Governance Compliance Contract](./contracts/governance/MiyuValidate%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuValidate - Tool Governance Compliance Contract](./contracts/governance/MiyuValidate%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-À l'implémentation : chaque Tool MiyuValidate est une unité logique pouvant devenir un **bloc MSCM** : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
+Ã€ l'implÃ©mentation : chaque Tool MiyuValidate est une unitÃ© logique pouvant devenir un **bloc MSCM** : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
 
 ---
 
-## 10. Références croisées
+## 10. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
+| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence fondateur
+**Statut :** Document de rÃ©fÃ©rence fondateur
+
+

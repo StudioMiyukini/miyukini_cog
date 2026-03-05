@@ -1,150 +1,150 @@
-# Border Guard - KindMother Integration Contract
+﻿# Border Guard - KindMother Integration Contract
 
 ## 1. Contexte
 
-Ce document définit le **contrat d'intégration entre Border Guard et KindMother**. Il spécifie l'interface, le protocole, les règles de communication, et les garanties associées à l'intégration avec KindMother en tant qu'autorité des données.
+Ce document dÃ©finit le **contrat d'intÃ©gration entre Border Guard et KindMother**. Il spÃ©cifie l'interface, le protocole, les rÃ¨gles de communication, et les garanties associÃ©es Ã  l'intÃ©gration avec KindMother en tant qu'autoritÃ© des donnÃ©es.
 
-Ce document complète la Section 3.1 de la [Documentation Fondatrice](../../foundation/Border%20Guard%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
+Ce document complÃ¨te la Section 3.1 de la [Documentation Fondatrice](../../foundation/Border%20Guard%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
 - [KindMother - Documentation Fondatrice](../../../KindMother/foundation/KindMother%20-%20Documentation%20Fondatrice.md) pour la nature de KindMother
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) pour la conformité LOI-1 à LOI-6
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) pour la conformitÃ© LOI-1 Ã  LOI-6
 
-L'intégration respecte les Lois d'Autonomie Système : toutes les définitions de frontières sont locales et ne requièrent aucune dépendance externe (**LOI-1**).
+L'intÃ©gration respecte les Lois d'Autonomie SystÃ¨me : toutes les dÃ©finitions de frontiÃ¨res sont locales et ne requiÃ¨rent aucune dÃ©pendance externe (**LOI-1**).
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
 Ce document couvre :
 - L'interface contractuelle entre Border Guard et KindMother
-- Le protocole de communication (délégation de persistance)
-- La distinction entre définition et persistance
-- Les règles d'intégration spécifiques
-- Les garanties de l'intégration
+- Le protocole de communication (dÃ©lÃ©gation de persistance)
+- La distinction entre dÃ©finition et persistance
+- Les rÃ¨gles d'intÃ©gration spÃ©cifiques
+- Les garanties de l'intÃ©gration
 
 Ce document **ne couvre pas** :
-- Les détails internes de KindMother (voir documentation KindMother)
-- Les détails internes du moteur de définition de frontières (voir Architecture)
-- L'intégration avec StrongFather (voir StrongFather Integration Contract)
-- L'intégration avec BondingBrother (voir BondingBrother Integration Contract)
+- Les dÃ©tails internes de KindMother (voir documentation KindMother)
+- Les dÃ©tails internes du moteur de dÃ©finition de frontiÃ¨res (voir Architecture)
+- L'intÃ©gration avec StrongFather (voir StrongFather Integration Contract)
+- L'intÃ©gration avec BondingBrother (voir BondingBrother Integration Contract)
 
 ---
 
 ## 3. Principe fondamental
 
-**Border Guard définit les frontières et les règles. Si ces définitions doivent être persistées, elles sont transmises à KindMother via les canaux appropriés. Border Guard ne persiste jamais directement, KindMother ne définit jamais de frontière.**
+**Border Guard dÃ©finit les frontiÃ¨res et les rÃ¨gles. Si ces dÃ©finitions doivent Ãªtre persistÃ©es, elles sont transmises Ã  KindMother via les canaux appropriÃ©s. Border Guard ne persiste jamais directement, KindMother ne dÃ©finit jamais de frontiÃ¨re.**
 
-La relation est de **complémentarité** : Border Guard gouverne les frontières et les niveaux de confiance, KindMother gouverne les données et leur persistance. Ces domaines sont distincts et non chevauchants.
+La relation est de **complÃ©mentaritÃ©** : Border Guard gouverne les frontiÃ¨res et les niveaux de confiance, KindMother gouverne les donnÃ©es et leur persistance. Ces domaines sont distincts et non chevauchants.
 
 ---
 
-## 4. Nature de la relation Border Guard — KindMother
+## 4. Nature de la relation Border Guard â€” KindMother
 
-### 4.1 Relation de complémentarité
+### 4.1 Relation de complÃ©mentaritÃ©
 
 **Border Guard est responsable de :**
-- La définition des frontières du système
+- La dÃ©finition des frontiÃ¨res du systÃ¨me
 - La classification des niveaux de confiance
-- L'établissement des règles de franchissement
-- La gouvernance conceptuelle des intégrations
+- L'Ã©tablissement des rÃ¨gles de franchissement
+- La gouvernance conceptuelle des intÃ©grations
 
 **KindMother est responsable de :**
-- La persistance des données
-- La cohérence des données
+- La persistance des donnÃ©es
+- La cohÃ©rence des donnÃ©es
 - La synchronisation entre instances
-- L'autorité sur les écritures
+- L'autoritÃ© sur les Ã©critures
 
-**Règle BG-KM-01 : Domaines distincts**
+**RÃ¨gle BG-KM-01 : Domaines distincts**
 
-Border Guard et KindMother gouvernent des domaines distincts. Border Guard définit les frontières, KindMother gère les données. Ces domaines ne se chevauchent jamais.
+Border Guard et KindMother gouvernent des domaines distincts. Border Guard dÃ©finit les frontiÃ¨res, KindMother gÃ¨re les donnÃ©es. Ces domaines ne se chevauchent jamais.
 
-**Règle BG-KM-02 : Complémentarité sans dépendance**
+**RÃ¨gle BG-KM-02 : ComplÃ©mentaritÃ© sans dÃ©pendance**
 
-Border Guard et KindMother sont complémentaires mais indépendants. Border Guard ne dépend pas de KindMother pour ses définitions. KindMother ne dépend pas de Border Guard pour sa persistance.
+Border Guard et KindMother sont complÃ©mentaires mais indÃ©pendants. Border Guard ne dÃ©pend pas de KindMother pour ses dÃ©finitions. KindMother ne dÃ©pend pas de Border Guard pour sa persistance.
 
-**Règle BG-KM-03 : Pas de connaissance croisée**
+**RÃ¨gle BG-KM-03 : Pas de connaissance croisÃ©e**
 
-Border Guard ne connaît pas les détails de persistance de KindMother. KindMother ne connaît pas les détails de classification de Border Guard. Chacun reste souverain dans son domaine.
+Border Guard ne connaÃ®t pas les dÃ©tails de persistance de KindMother. KindMother ne connaÃ®t pas les dÃ©tails de classification de Border Guard. Chacun reste souverain dans son domaine.
 
-### 4.2 Séparation des responsabilités
+### 4.2 SÃ©paration des responsabilitÃ©s
 
-| Responsabilité | Border Guard | KindMother |
+| ResponsabilitÃ© | Border Guard | KindMother |
 |----------------|--------------|------------|
-| **Définir les frontières** | ✅ Exclusif | ❌ Jamais |
-| **Classifier les niveaux de confiance** | ✅ Exclusif | ❌ Jamais |
-| **Établir les règles de franchissement** | ✅ Exclusif | ❌ Jamais |
-| **Persister des données** | ❌ Jamais | ✅ Exclusif |
-| **Gérer la cohérence des données** | ❌ Jamais | ✅ Exclusif |
-| **Synchroniser les instances** | ❌ Jamais | ✅ Exclusif |
-| **Valider les WriteIntent** | ❌ Jamais | ✅ Exclusif |
-| **Définir les conditions d'entrée des données** | ✅ Exclusif | ❌ Jamais |
+| **DÃ©finir les frontiÃ¨res** | âœ… Exclusif | âŒ Jamais |
+| **Classifier les niveaux de confiance** | âœ… Exclusif | âŒ Jamais |
+| **Ã‰tablir les rÃ¨gles de franchissement** | âœ… Exclusif | âŒ Jamais |
+| **Persister des donnÃ©es** | âŒ Jamais | âœ… Exclusif |
+| **GÃ©rer la cohÃ©rence des donnÃ©es** | âŒ Jamais | âœ… Exclusif |
+| **Synchroniser les instances** | âŒ Jamais | âœ… Exclusif |
+| **Valider les WriteIntent** | âŒ Jamais | âœ… Exclusif |
+| **DÃ©finir les conditions d'entrÃ©e des donnÃ©es** | âœ… Exclusif | âŒ Jamais |
 
-**Règle BG-KM-04 : Aucun chevauchement**
+**RÃ¨gle BG-KM-04 : Aucun chevauchement**
 
-Aucun chevauchement de responsabilités n'est autorisé. Border Guard ne persiste jamais, KindMother ne définit jamais de frontière.
+Aucun chevauchement de responsabilitÃ©s n'est autorisÃ©. Border Guard ne persiste jamais, KindMother ne dÃ©finit jamais de frontiÃ¨re.
 
-### 4.3 Point de contact : données venant de l'extérieur
+### 4.3 Point de contact : donnÃ©es venant de l'extÃ©rieur
 
-Le point de contact entre Border Guard et KindMother concerne les **données venant de l'extérieur** :
+Le point de contact entre Border Guard et KindMother concerne les **donnÃ©es venant de l'extÃ©rieur** :
 
-**Border Guard définit :**
-- Si une donnée venant de l'extérieur peut entrer
+**Border Guard dÃ©finit :**
+- Si une donnÃ©e venant de l'extÃ©rieur peut entrer
 - Avec quel niveau de confiance
-- Selon quelles règles de franchissement
+- Selon quelles rÃ¨gles de franchissement
 
-**KindMother gère :**
-- La persistance de la donnée une fois qu'elle est "à l'intérieur"
-- La cohérence avec les données existantes
-- La synchronisation si nécessaire
+**KindMother gÃ¨re :**
+- La persistance de la donnÃ©e une fois qu'elle est "Ã  l'intÃ©rieur"
+- La cohÃ©rence avec les donnÃ©es existantes
+- La synchronisation si nÃ©cessaire
 
-**Règle BG-KM-05 : Frontière puis persistance**
+**RÃ¨gle BG-KM-05 : FrontiÃ¨re puis persistance**
 
-Une donnée externe doit d'abord satisfaire les règles de frontière (définies par Border Guard) avant d'être persistée (par KindMother). Cette séquence est non négociable.
+Une donnÃ©e externe doit d'abord satisfaire les rÃ¨gles de frontiÃ¨re (dÃ©finies par Border Guard) avant d'Ãªtre persistÃ©e (par KindMother). Cette sÃ©quence est non nÃ©gociable.
 
 ---
 
-## 5. Ce que Border Guard ne fait JAMAIS vis-à-vis de KindMother
+## 5. Ce que Border Guard ne fait JAMAIS vis-Ã -vis de KindMother
 
 ### 5.1 Interdictions absolues
 
 **INV-BG-KM-NEVER-1 : Ne persiste jamais directement**
 
-Border Guard ne persiste **jamais** de données directement. Toute définition de frontière ou de règle qui doit être persistée est transmise à KindMother via les canaux appropriés (WriteIntent via BondingBrother).
+Border Guard ne persiste **jamais** de donnÃ©es directement. Toute dÃ©finition de frontiÃ¨re ou de rÃ¨gle qui doit Ãªtre persistÃ©e est transmise Ã  KindMother via les canaux appropriÃ©s (WriteIntent via BondingBrother).
 
-**INV-BG-KM-NEVER-2 : N'accède jamais à la persistance**
+**INV-BG-KM-NEVER-2 : N'accÃ¨de jamais Ã  la persistance**
 
-Border Guard n'accède **jamais** directement à la couche de persistance de KindMother. Aucun accès SQLite, aucune lecture directe, aucune modification directe.
+Border Guard n'accÃ¨de **jamais** directement Ã  la couche de persistance de KindMother. Aucun accÃ¨s SQLite, aucune lecture directe, aucune modification directe.
 
 **INV-BG-KM-NEVER-3 : Ne valide jamais les WriteIntent**
 
-Border Guard ne valide **jamais** les WriteIntent pour leur persistance. La validation de la cohérence et des permissions de persistance appartient exclusivement à KindMother.
+Border Guard ne valide **jamais** les WriteIntent pour leur persistance. La validation de la cohÃ©rence et des permissions de persistance appartient exclusivement Ã  KindMother.
 
 **INV-BG-KM-NEVER-4 : Ne synchronise jamais**
 
-Border Guard ne participe **jamais** à la synchronisation des données entre instances. La synchronisation est du ressort exclusif de KindMother.
+Border Guard ne participe **jamais** Ã  la synchronisation des donnÃ©es entre instances. La synchronisation est du ressort exclusif de KindMother.
 
-**INV-BG-KM-NEVER-5 : Ne connaît pas les schémas**
+**INV-BG-KM-NEVER-5 : Ne connaÃ®t pas les schÃ©mas**
 
-Border Guard ne connaît **jamais** les schémas de données de KindMother. Les définitions de frontières sont conceptuelles et indépendantes des schémas de persistance.
+Border Guard ne connaÃ®t **jamais** les schÃ©mas de donnÃ©es de KindMother. Les dÃ©finitions de frontiÃ¨res sont conceptuelles et indÃ©pendantes des schÃ©mas de persistance.
 
 ---
 
-## 6. Ce que KindMother ne fait JAMAIS vis-à-vis de Border Guard
+## 6. Ce que KindMother ne fait JAMAIS vis-Ã -vis de Border Guard
 
 ### 6.1 Interdictions absolues (perspective KindMother)
 
-**INV-KM-BG-NEVER-1 : Ne définit jamais de frontière**
+**INV-KM-BG-NEVER-1 : Ne dÃ©finit jamais de frontiÃ¨re**
 
-KindMother ne définit **jamais** de frontière. Toute définition de frontière provient exclusivement de Border Guard.
+KindMother ne dÃ©finit **jamais** de frontiÃ¨re. Toute dÃ©finition de frontiÃ¨re provient exclusivement de Border Guard.
 
 **INV-KM-BG-NEVER-2 : Ne classifie jamais les niveaux de confiance**
 
 KindMother ne classifie **jamais** les niveaux de confiance des sources ou destinations. La classification est du ressort exclusif de Border Guard.
 
-**INV-KM-BG-NEVER-3 : N'établit jamais de règle de franchissement**
+**INV-KM-BG-NEVER-3 : N'Ã©tablit jamais de rÃ¨gle de franchissement**
 
-KindMother n'établit **jamais** de règle de franchissement. Les règles de franchissement proviennent exclusivement de Border Guard.
+KindMother n'Ã©tablit **jamais** de rÃ¨gle de franchissement. Les rÃ¨gles de franchissement proviennent exclusivement de Border Guard.
 
-**INV-KM-BG-NEVER-4 : Ne connaît pas les frontières**
+**INV-KM-BG-NEVER-4 : Ne connaÃ®t pas les frontiÃ¨res**
 
-KindMother ne connaît pas les frontières définies par Border Guard. KindMother traite les données une fois qu'elles sont "à l'intérieur", sans savoir comment elles y sont entrées.
+KindMother ne connaÃ®t pas les frontiÃ¨res dÃ©finies par Border Guard. KindMother traite les donnÃ©es une fois qu'elles sont "Ã  l'intÃ©rieur", sans savoir comment elles y sont entrÃ©es.
 
 ---
 
@@ -154,38 +154,38 @@ KindMother ne connaît pas les frontières définies par Border Guard. KindMothe
 
 Border Guard et KindMother n'interagissent pas directement. Toute interaction passe par BondingBrother.
 
-**Flux de donnée externe :**
+**Flux de donnÃ©e externe :**
 
-1. Une donnée externe arrive
-2. BondingBrother consulte Border Guard pour les règles de franchissement
-3. Border Guard fournit les règles et le niveau de confiance requis
-4. BondingBrother vérifie si les conditions sont satisfaites
+1. Une donnÃ©e externe arrive
+2. BondingBrother consulte Border Guard pour les rÃ¨gles de franchissement
+3. Border Guard fournit les rÃ¨gles et le niveau de confiance requis
+4. BondingBrother vÃ©rifie si les conditions sont satisfaites
 5. Si oui, BondingBrother traduit en WriteIntent pour KindMother
-6. KindMother valide et persiste la donnée
+6. KindMother valide et persiste la donnÃ©e
 
-**Règle BG-KM-INT-01 : Pas d'interaction directe**
+**RÃ¨gle BG-KM-INT-01 : Pas d'interaction directe**
 
 Border Guard et KindMother ne communiquent jamais directement. Toute interaction passe par BondingBrother.
 
-### 7.2 Persistance des définitions de frontières
+### 7.2 Persistance des dÃ©finitions de frontiÃ¨res
 
-Si les définitions de frontières doivent être persistées pour garantir leur survie au redémarrage :
+Si les dÃ©finitions de frontiÃ¨res doivent Ãªtre persistÃ©es pour garantir leur survie au redÃ©marrage :
 
-**Flux de persistance des définitions :**
+**Flux de persistance des dÃ©finitions :**
 
-1. Border Guard crée ou modifie une définition de frontière
+1. Border Guard crÃ©e ou modifie une dÃ©finition de frontiÃ¨re
 2. Border Guard exprime une intention de persistance via BondingBrother
-3. BondingBrother traduit en WriteIntent approprié
-4. KindMother persiste la définition comme une donnée du système
-5. Au redémarrage, Border Guard charge les définitions depuis KindMother (via BondingBrother)
+3. BondingBrother traduit en WriteIntent appropriÃ©
+4. KindMother persiste la dÃ©finition comme une donnÃ©e du systÃ¨me
+5. Au redÃ©marrage, Border Guard charge les dÃ©finitions depuis KindMother (via BondingBrother)
 
-**Règle BG-KM-INT-02 : Définitions comme données**
+**RÃ¨gle BG-KM-INT-02 : DÃ©finitions comme donnÃ©es**
 
-Les définitions de frontières peuvent être persistées comme des données système. Leur persistance suit le flux standard via BondingBrother et KindMother.
+Les dÃ©finitions de frontiÃ¨res peuvent Ãªtre persistÃ©es comme des donnÃ©es systÃ¨me. Leur persistance suit le flux standard via BondingBrother et KindMother.
 
-**Règle BG-KM-INT-03 : Chargement au démarrage**
+**RÃ¨gle BG-KM-INT-03 : Chargement au dÃ©marrage**
 
-Au démarrage, Border Guard peut charger ses définitions persistées depuis KindMother (via BondingBrother). Ce chargement est optionnel si les définitions sont statiques ou définies par configuration.
+Au dÃ©marrage, Border Guard peut charger ses dÃ©finitions persistÃ©es depuis KindMother (via BondingBrother). Ce chargement est optionnel si les dÃ©finitions sont statiques ou dÃ©finies par configuration.
 
 ---
 
@@ -193,97 +193,97 @@ Au démarrage, Border Guard peut charger ses définitions persistées depuis Kin
 
 ### 8.1 Absence de communication directe
 
-**Règle BG-KM-PROT-01 : Aucune API directe**
+**RÃ¨gle BG-KM-PROT-01 : Aucune API directe**
 
 Border Guard n'expose aucune API vers KindMother. KindMother n'expose aucune API vers Border Guard.
 
-**Règle BG-KM-PROT-02 : Aucune consultation directe**
+**RÃ¨gle BG-KM-PROT-02 : Aucune consultation directe**
 
 Border Guard ne consulte jamais KindMother directement. KindMother ne consulte jamais Border Guard directement.
 
-**Règle BG-KM-PROT-03 : BondingBrother obligatoire**
+**RÃ¨gle BG-KM-PROT-03 : BondingBrother obligatoire**
 
 Toute interaction entre les domaines de Border Guard et KindMother passe obligatoirement par BondingBrother.
 
 ### 8.2 Isolation des domaines
 
-**Règle BG-KM-PROT-04 : Isolation des schémas**
+**RÃ¨gle BG-KM-PROT-04 : Isolation des schÃ©mas**
 
-Les schémas de données de KindMother sont isolés des définitions de frontières de Border Guard. Aucune dépendance structurelle.
+Les schÃ©mas de donnÃ©es de KindMother sont isolÃ©s des dÃ©finitions de frontiÃ¨res de Border Guard. Aucune dÃ©pendance structurelle.
 
-**Règle BG-KM-PROT-05 : Isolation des états**
+**RÃ¨gle BG-KM-PROT-05 : Isolation des Ã©tats**
 
-L'état des frontières (géré par Border Guard) est isolé de l'état des données (géré par KindMother).
+L'Ã©tat des frontiÃ¨res (gÃ©rÃ© par Border Guard) est isolÃ© de l'Ã©tat des donnÃ©es (gÃ©rÃ© par KindMother).
 
 ---
 
-## 9. Flux d'intégration typique
+## 9. Flux d'intÃ©gration typique
 
-### 9.1 Flux de donnée externe
+### 9.1 Flux de donnÃ©e externe
 
 **Acteurs :** Source externe, BondingBrother, Border Guard, StrongFather, KindMother
 
-**Séquence :**
+**SÃ©quence :**
 
 ```
-┌──────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
-│   Source     │  │  BondingBrother │  │   Border Guard  │  │   StrongFather  │  │   KindMother    │
-│  Externe     │  │                 │  │                 │  │                 │  │                 │
-└──────┬───────┘  └────────┬────────┘  └────────┬────────┘  └────────┬────────┘  └────────┬────────┘
-       │                   │                    │                    │                    │
-       ├── Donnée ────────►│                    │                    │                    │
-       │                   │                    │                    │                    │
-       │                   ├── Règles ? ───────►│                    │                    │
-       │                   │                    │                    │                    │
-       │                   │◄── Règles ─────────┤                    │                    │
-       │                   │                    │                    │                    │
-       │                   ├── Vérifie ─────────┼────────────────────┤                    │
-       │                   │   conditions       │                    │                    │
-       │                   │                    │                    │                    │
-       │                   ├── Décision ? ──────┼───────────────────►│                    │
-       │                   │                    │                    │                    │
-       │                   │◄── Acceptée ───────┼────────────────────┤                    │
-       │                   │                    │                    │                    │
-       │                   ├── WriteIntent ─────┼────────────────────┼───────────────────►│
-       │                   │                    │                    │                    │
-       │                   │◄── Succès ─────────┼────────────────────┼────────────────────┤
-       │                   │                    │                    │                    │
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚   Source     â”‚  â”‚  BondingBrother â”‚  â”‚   Border Guard  â”‚  â”‚   StrongFather  â”‚  â”‚   KindMother    â”‚
+â”‚  Externe     â”‚  â”‚                 â”‚  â”‚                 â”‚  â”‚                 â”‚  â”‚                 â”‚
+â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+       â”‚                   â”‚                    â”‚                    â”‚                    â”‚
+       â”œâ”€â”€ DonnÃ©e â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚                    â”‚                    â”‚                    â”‚
+       â”‚                   â”‚                    â”‚                    â”‚                    â”‚
+       â”‚                   â”œâ”€â”€ RÃ¨gles ? â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚                    â”‚                    â”‚
+       â”‚                   â”‚                    â”‚                    â”‚                    â”‚
+       â”‚                   â”‚â—„â”€â”€ RÃ¨gles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤                    â”‚                    â”‚
+       â”‚                   â”‚                    â”‚                    â”‚                    â”‚
+       â”‚                   â”œâ”€â”€ VÃ©rifie â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤                    â”‚
+       â”‚                   â”‚   conditions       â”‚                    â”‚                    â”‚
+       â”‚                   â”‚                    â”‚                    â”‚                    â”‚
+       â”‚                   â”œâ”€â”€ DÃ©cision ? â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚                    â”‚
+       â”‚                   â”‚                    â”‚                    â”‚                    â”‚
+       â”‚                   â”‚â—„â”€â”€ AcceptÃ©e â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤                    â”‚
+       â”‚                   â”‚                    â”‚                    â”‚                    â”‚
+       â”‚                   â”œâ”€â”€ WriteIntent â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
+       â”‚                   â”‚                    â”‚                    â”‚                    â”‚
+       â”‚                   â”‚â—„â”€â”€ SuccÃ¨s â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+       â”‚                   â”‚                    â”‚                    â”‚                    â”‚
 ```
 
-### 9.2 Points clés du flux
+### 9.2 Points clÃ©s du flux
 
-1. **Border Guard** fournit les règles de franchissement (niveau de confiance requis, conditions)
-2. **BondingBrother** vérifie les conditions et prépare le contexte
-3. **StrongFather** décide si l'intention est acceptée selon les politiques
-4. **KindMother** persiste la donnée une fois toutes les validations passées
+1. **Border Guard** fournit les rÃ¨gles de franchissement (niveau de confiance requis, conditions)
+2. **BondingBrother** vÃ©rifie les conditions et prÃ©pare le contexte
+3. **StrongFather** dÃ©cide si l'intention est acceptÃ©e selon les politiques
+4. **KindMother** persiste la donnÃ©e une fois toutes les validations passÃ©es
 
-**Règle BG-KM-FLOW-01 : Séquence obligatoire**
+**RÃ¨gle BG-KM-FLOW-01 : SÃ©quence obligatoire**
 
-La séquence frontière → décision → persistance est obligatoire pour les données externes. Aucune étape ne peut être sautée.
+La sÃ©quence frontiÃ¨re â†’ dÃ©cision â†’ persistance est obligatoire pour les donnÃ©es externes. Aucune Ã©tape ne peut Ãªtre sautÃ©e.
 
 ---
 
-## 10. Règles d'intégration
+## 10. RÃ¨gles d'intÃ©gration
 
-### 10.1 Règles de domaine
+### 10.1 RÃ¨gles de domaine
 
-**Règle BG-KM-INT-04 : Souveraineté des domaines**
+**RÃ¨gle BG-KM-INT-04 : SouverainetÃ© des domaines**
 
-Border Guard est souverain sur les frontières. KindMother est souverain sur les données. Aucun ne peut intervenir dans le domaine de l'autre.
+Border Guard est souverain sur les frontiÃ¨res. KindMother est souverain sur les donnÃ©es. Aucun ne peut intervenir dans le domaine de l'autre.
 
-**Règle BG-KM-INT-05 : Indépendance opérationnelle**
+**RÃ¨gle BG-KM-INT-05 : IndÃ©pendance opÃ©rationnelle**
 
-Border Guard peut fonctionner sans KindMother (définitions en mémoire ou configuration). KindMother peut fonctionner sans Border Guard (données internes uniquement).
+Border Guard peut fonctionner sans KindMother (dÃ©finitions en mÃ©moire ou configuration). KindMother peut fonctionner sans Border Guard (donnÃ©es internes uniquement).
 
-### 10.2 Règles de cohérence
+### 10.2 RÃ¨gles de cohÃ©rence
 
-**Règle BG-KM-INT-06 : Pas de référence croisée**
+**RÃ¨gle BG-KM-INT-06 : Pas de rÃ©fÃ©rence croisÃ©e**
 
-Les définitions de Border Guard ne référencent pas les schémas de KindMother. Les schémas de KindMother ne référencent pas les frontières de Border Guard.
+Les dÃ©finitions de Border Guard ne rÃ©fÃ©rencent pas les schÃ©mas de KindMother. Les schÃ©mas de KindMother ne rÃ©fÃ©rencent pas les frontiÃ¨res de Border Guard.
 
-**Règle BG-KM-INT-07 : Cohérence indépendante**
+**RÃ¨gle BG-KM-INT-07 : CohÃ©rence indÃ©pendante**
 
-La cohérence des définitions de frontières est gérée par Border Guard. La cohérence des données est gérée par KindMother. Chacun gère sa propre cohérence.
+La cohÃ©rence des dÃ©finitions de frontiÃ¨res est gÃ©rÃ©e par Border Guard. La cohÃ©rence des donnÃ©es est gÃ©rÃ©e par KindMother. Chacun gÃ¨re sa propre cohÃ©rence.
 
 ---
 
@@ -292,80 +292,80 @@ La cohérence des définitions de frontières est gérée par Border Guard. La c
 ### 11.1 Types d'erreurs
 
 **Erreurs de domaine Border Guard :**
-- Frontière non définie
-- Règle de franchissement non satisfaite
+- FrontiÃ¨re non dÃ©finie
+- RÃ¨gle de franchissement non satisfaite
 - Niveau de confiance insuffisant
 
 **Erreurs de domaine KindMother :**
-- WriteIntent rejeté
-- Incohérence de données
+- WriteIntent rejetÃ©
+- IncohÃ©rence de donnÃ©es
 - Erreur de persistance
 
 ### 11.2 Traitement des erreurs
 
-**Règle BG-KM-ERR-01 : Erreurs isolées**
+**RÃ¨gle BG-KM-ERR-01 : Erreurs isolÃ©es**
 
 Une erreur de Border Guard n'affecte pas KindMother. Une erreur de KindMother n'affecte pas Border Guard.
 
-**Règle BG-KM-ERR-02 : Propagation via BondingBrother**
+**RÃ¨gle BG-KM-ERR-02 : Propagation via BondingBrother**
 
-Les erreurs sont propagées via BondingBrother. Si Border Guard refuse un franchissement, BondingBrother ne soumet pas de WriteIntent à KindMother.
+Les erreurs sont propagÃ©es via BondingBrother. Si Border Guard refuse un franchissement, BondingBrother ne soumet pas de WriteIntent Ã  KindMother.
 
 ---
 
 ## 12. Cas particuliers
 
-### 12.1 Données internes
+### 12.1 DonnÃ©es internes
 
-Les données créées et consommées entièrement à l'intérieur du système :
+Les donnÃ©es crÃ©Ã©es et consommÃ©es entiÃ¨rement Ã  l'intÃ©rieur du systÃ¨me :
 
-**Règle BG-KM-CASE-01 : Pas de frontière pour l'interne**
+**RÃ¨gle BG-KM-CASE-01 : Pas de frontiÃ¨re pour l'interne**
 
-Les données purement internes ne traversent pas de frontière définie par Border Guard. Elles sont gérées directement par KindMother via BondingBrother.
+Les donnÃ©es purement internes ne traversent pas de frontiÃ¨re dÃ©finie par Border Guard. Elles sont gÃ©rÃ©es directement par KindMother via BondingBrother.
 
 ### 12.2 Mode offline
 
-Lorsque le système est en mode offline :
+Lorsque le systÃ¨me est en mode offline :
 
-**Règle BG-KM-CASE-02 : Indépendance en offline**
+**RÃ¨gle BG-KM-CASE-02 : IndÃ©pendance en offline**
 
-Border Guard et KindMother fonctionnent indépendamment en mode offline. Border Guard maintient ses définitions localement, KindMother maintient ses données localement.
+Border Guard et KindMother fonctionnent indÃ©pendamment en mode offline. Border Guard maintient ses dÃ©finitions localement, KindMother maintient ses donnÃ©es localement.
 
-### 12.3 Synchronisation et frontières
+### 12.3 Synchronisation et frontiÃ¨res
 
 Lors de la synchronisation entre instances :
 
-**Règle BG-KM-CASE-03 : Données synchronisées = données internes**
+**RÃ¨gle BG-KM-CASE-03 : DonnÃ©es synchronisÃ©es = donnÃ©es internes**
 
-Les données synchronisées entre instances KindMother sont traitées comme des données internes. Les règles de fédération (Border Guard) s'appliquent à la communication inter-nœuds, pas à la synchronisation KindMother interne.
+Les donnÃ©es synchronisÃ©es entre instances KindMother sont traitÃ©es comme des donnÃ©es internes. Les rÃ¨gles de fÃ©dÃ©ration (Border Guard) s'appliquent Ã  la communication inter-nÅ“uds, pas Ã  la synchronisation KindMother interne.
 
 ---
 
-## 13. Garanties de l'intégration
+## 13. Garanties de l'intÃ©gration
 
-### 13.1 Garantie de séparation
+### 13.1 Garantie de sÃ©paration
 
-**Engagement :** La séparation entre les domaines de Border Guard et KindMother est absolue. Aucune exception n'est possible.
+**Engagement :** La sÃ©paration entre les domaines de Border Guard et KindMother est absolue. Aucune exception n'est possible.
 
-### 13.2 Garantie d'indépendance
+### 13.2 Garantie d'indÃ©pendance
 
-**Engagement :** Border Guard et KindMother peuvent fonctionner indépendamment l'un de l'autre.
+**Engagement :** Border Guard et KindMother peuvent fonctionner indÃ©pendamment l'un de l'autre.
 
 ### 13.3 Garantie de non-persistance directe
 
 **Engagement :** Border Guard ne persiste jamais directement. Toute persistance passe par KindMother via BondingBrother.
 
-### 13.4 Garantie de non-définition par KindMother
+### 13.4 Garantie de non-dÃ©finition par KindMother
 
-**Engagement :** KindMother ne définit jamais de frontière ou de règle de franchissement.
+**Engagement :** KindMother ne dÃ©finit jamais de frontiÃ¨re ou de rÃ¨gle de franchissement.
 
-### 13.5 Garantie de cohérence isolée
+### 13.5 Garantie de cohÃ©rence isolÃ©e
 
-**Engagement :** La cohérence de chaque domaine est gérée par son propriétaire. Aucune dépendance de cohérence croisée.
+**Engagement :** La cohÃ©rence de chaque domaine est gÃ©rÃ©e par son propriÃ©taire. Aucune dÃ©pendance de cohÃ©rence croisÃ©e.
 
 ---
 
-## 14. Invariants de l'intégration
+## 14. Invariants de l'intÃ©gration
 
 ### 14.1 Invariants de domaine
 
@@ -373,9 +373,9 @@ Les données synchronisées entre instances KindMother sont traitées comme des 
 
 Border Guard et KindMother gouvernent des domaines distincts et non chevauchants.
 
-**INV-BG-KM-2 : Souveraineté**
+**INV-BG-KM-2 : SouverainetÃ©**
 
-Chaque core est souverain dans son domaine. Aucune intrusion n'est autorisée.
+Chaque core est souverain dans son domaine. Aucune intrusion n'est autorisÃ©e.
 
 **INV-BG-KM-3 : Pas d'interaction directe**
 
@@ -385,131 +385,132 @@ Border Guard et KindMother ne communiquent jamais directement.
 
 **INV-BG-KM-4 : Pas de persistance par Border Guard**
 
-Border Guard ne persiste jamais directement. Conformément à INV-BG-2 de la Documentation Fondatrice.
+Border Guard ne persiste jamais directement. ConformÃ©ment Ã  INV-BG-2 de la Documentation Fondatrice.
 
-**INV-BG-KM-5 : Définitions comme données optionnelles**
+**INV-BG-KM-5 : DÃ©finitions comme donnÃ©es optionnelles**
 
-Les définitions de frontières peuvent être persistées comme données système, mais ce n'est pas obligatoire.
+Les dÃ©finitions de frontiÃ¨res peuvent Ãªtre persistÃ©es comme donnÃ©es systÃ¨me, mais ce n'est pas obligatoire.
 
-### 14.3 Invariants de définition
+### 14.3 Invariants de dÃ©finition
 
-**INV-BG-KM-6 : Pas de définition par KindMother**
+**INV-BG-KM-6 : Pas de dÃ©finition par KindMother**
 
-KindMother ne définit jamais de frontière, de niveau de confiance, ou de règle de franchissement.
+KindMother ne dÃ©finit jamais de frontiÃ¨re, de niveau de confiance, ou de rÃ¨gle de franchissement.
 
 ---
 
-## 15. Conformité aux Lois d'Autonomie Système
+## 15. ConformitÃ© aux Lois d'Autonomie SystÃ¨me
 
-### LOI-1 : Aucune dépendance externe critique
+### LOI-1 : Aucune dÃ©pendance externe critique
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-L'intégration respecte LOI-1 :
-- Border Guard définit les frontières localement
-- KindMother persiste les données localement
-- Aucune dépendance externe pour les définitions ou la persistance
+L'intÃ©gration respecte LOI-1 :
+- Border Guard dÃ©finit les frontiÃ¨res localement
+- KindMother persiste les donnÃ©es localement
+- Aucune dÃ©pendance externe pour les dÃ©finitions ou la persistance
 
-### LOI-2 : Le système accepte l'isolement comme état normal
+### LOI-2 : Le systÃ¨me accepte l'isolement comme Ã©tat normal
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-L'intégration respecte LOI-2 :
-- Border Guard et KindMother fonctionnent indépendamment en mode offline
-- L'isolement ne dégrade pas l'intégration
+L'intÃ©gration respecte LOI-2 :
+- Border Guard et KindMother fonctionnent indÃ©pendamment en mode offline
+- L'isolement ne dÃ©grade pas l'intÃ©gration
 
-### LOI-3 : L'état local est souverain
+### LOI-3 : L'Ã©tat local est souverain
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-L'intégration respecte LOI-3 :
-- Les définitions de frontières locales sont souveraines
-- Les données locales sont souveraines
+L'intÃ©gration respecte LOI-3 :
+- Les dÃ©finitions de frontiÃ¨res locales sont souveraines
+- Les donnÃ©es locales sont souveraines
 - Chaque domaine est souverain localement
 
 ---
 
 ## 16. Exemples
 
-### 16.1 Flux de donnée externe (conceptuel)
+### 16.1 Flux de donnÃ©e externe (conceptuel)
 
-**Scénario :** Une donnée arrive d'une API partenaire
+**ScÃ©nario :** Une donnÃ©e arrive d'une API partenaire
 
-1. **BondingBrother** reçoit la donnée et identifie qu'elle vient de l'extérieur
-2. **BondingBrother** consulte **Border Guard** : "Quelles sont les règles pour cette frontière ?"
+1. **BondingBrother** reÃ§oit la donnÃ©e et identifie qu'elle vient de l'extÃ©rieur
+2. **BondingBrother** consulte **Border Guard** : "Quelles sont les rÃ¨gles pour cette frontiÃ¨re ?"
 3. **Border Guard** retourne : "Niveau verified requis, conditions : api_key_valid, rate_limit_ok"
-4. **BondingBrother** vérifie les conditions et prépare le contexte
-5. **StrongFather** évalue et décide : "Acceptée"
+4. **BondingBrother** vÃ©rifie les conditions et prÃ©pare le contexte
+5. **StrongFather** Ã©value et dÃ©cide : "AcceptÃ©e"
 6. **BondingBrother** traduit en WriteIntent pour **KindMother**
-7. **KindMother** valide la cohérence et persiste la donnée
+7. **KindMother** valide la cohÃ©rence et persiste la donnÃ©e
 
-**Note :** Border Guard et KindMother n'ont jamais communiqué directement.
+**Note :** Border Guard et KindMother n'ont jamais communiquÃ© directement.
 
-### 16.2 Définitions persistées (optionnel)
+### 16.2 DÃ©finitions persistÃ©es (optionnel)
 
-**Scénario :** Border Guard souhaite persister ses définitions
+**ScÃ©nario :** Border Guard souhaite persister ses dÃ©finitions
 
-1. **Border Guard** crée une nouvelle définition de frontière
-2. **Border Guard** exprime via **BondingBrother** : "Je souhaite persister cette définition"
+1. **Border Guard** crÃ©e une nouvelle dÃ©finition de frontiÃ¨re
+2. **Border Guard** exprime via **BondingBrother** : "Je souhaite persister cette dÃ©finition"
 3. **BondingBrother** traduit en WriteIntent de type "system_configuration"
-4. **KindMother** persiste la définition comme donnée système
-5. Au redémarrage, **Border Guard** charge les définitions via **BondingBrother**
+4. **KindMother** persiste la dÃ©finition comme donnÃ©e systÃ¨me
+5. Au redÃ©marrage, **Border Guard** charge les dÃ©finitions via **BondingBrother**
 
 ---
 
 ## 17. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit les règles de non-interaction et de complémentarité que Border Guard et KindMother doivent respecter.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit les rÃ¨gles de non-interaction et de complÃ©mentaritÃ© que Border Guard et KindMother doivent respecter.
 
-Toute implémentation doit respecter ce contrat. Toute violation entraîne un comportement non conforme.
+Toute implÃ©mentation doit respecter ce contrat. Toute violation entraÃ®ne un comportement non conforme.
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT — Normatif  
-**Dépendances :**
+**Statut :** CONTRAT â€” Normatif  
+**DÃ©pendances :**
 - Border Guard - Documentation Fondatrice v1.5 (Section 3.1)
 - KindMother - Documentation Fondatrice v1.2
 - Miyukini Conceptual References - Lois Autonomie Systeme v1.1
 
 ---
 
-## 18. Mini log de génération
+## 18. Mini log de gÃ©nÃ©ration
 
-### Décision éditoriale E1 : Relation de complémentarité
+### DÃ©cision Ã©ditoriale E1 : Relation de complÃ©mentaritÃ©
 
-**Décision prise :** La relation est de complémentarité : Border Guard gouverne les frontières, KindMother gouverne les données. Cette direction respecte la Documentation Fondatrice de Border Guard Section 3.1 qui définit "KindMother traite les données une fois qu'elles sont 'à l'intérieur' ; Border Guard définit les conditions pour qu'elles y entrent."
+**DÃ©cision prise :** La relation est de complÃ©mentaritÃ© : Border Guard gouverne les frontiÃ¨res, KindMother gouverne les donnÃ©es. Cette direction respecte la Documentation Fondatrice de Border Guard Section 3.1 qui dÃ©finit "KindMother traite les donnÃ©es une fois qu'elles sont 'Ã  l'intÃ©rieur' ; Border Guard dÃ©finit les conditions pour qu'elles y entrent."
 
-**Application :** Tout le document est structuré autour de cette complémentarité sans chevauchement.
+**Application :** Tout le document est structurÃ© autour de cette complÃ©mentaritÃ© sans chevauchement.
 
-### Décision éditoriale E2 : Pas d'interaction directe
+### DÃ©cision Ã©ditoriale E2 : Pas d'interaction directe
 
-**Décision prise :** Border Guard et KindMother n'interagissent pas directement. Toute interaction passe par BondingBrother.
+**DÃ©cision prise :** Border Guard et KindMother n'interagissent pas directement. Toute interaction passe par BondingBrother.
 
-**Application :** Section 7 et Section 8 établissent ce protocole de non-interaction directe.
+**Application :** Section 7 et Section 8 Ã©tablissent ce protocole de non-interaction directe.
 
 ### Warning W1 : Risque de persistance directe
 
-**Warning rencontré :** Risque que Border Guard soit tenté de persister directement ses définitions.
+**Warning rencontrÃ© :** Risque que Border Guard soit tentÃ© de persister directement ses dÃ©finitions.
 
-**Décision prise :** Les interdictions absolues (Section 5) clarifient que Border Guard ne persiste jamais directement (conformément à INV-BG-2).
+**DÃ©cision prise :** Les interdictions absolues (Section 5) clarifient que Border Guard ne persiste jamais directement (conformÃ©ment Ã  INV-BG-2).
 
-**Correction effectuée :** INV-BG-KM-NEVER-1 et INV-BG-KM-4 confirment cette interdiction.
+**Correction effectuÃ©e :** INV-BG-KM-NEVER-1 et INV-BG-KM-4 confirment cette interdiction.
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-**Vérification effectuée :**
-- ✅ Cohérence avec Border Guard - Documentation Fondatrice : Confirmée (complémentarité, pas de persistance directe)
-- ✅ Cohérence avec KindMother - Documentation Fondatrice : Confirmée (souveraineté des données, pas de définition de frontière)
-- ✅ Cohérence avec INV-BG-2 : Confirmée (aucune persistance directe)
-- ✅ Conformité LOI-1 : Confirmée (aucune dépendance externe)
-- ✅ Conformité LOI-2 : Confirmée (fonctionnement indépendant en offline)
-- ✅ Conformité LOI-3 : Confirmée (souveraineté locale des deux domaines)
-- ✅ Séparation des domaines : Confirmée (INV-BG-KM-1, INV-BG-KM-2)
+**VÃ©rification effectuÃ©e :**
+- âœ… CohÃ©rence avec Border Guard - Documentation Fondatrice : ConfirmÃ©e (complÃ©mentaritÃ©, pas de persistance directe)
+- âœ… CohÃ©rence avec KindMother - Documentation Fondatrice : ConfirmÃ©e (souverainetÃ© des donnÃ©es, pas de dÃ©finition de frontiÃ¨re)
+- âœ… CohÃ©rence avec INV-BG-2 : ConfirmÃ©e (aucune persistance directe)
+- âœ… ConformitÃ© LOI-1 : ConfirmÃ©e (aucune dÃ©pendance externe)
+- âœ… ConformitÃ© LOI-2 : ConfirmÃ©e (fonctionnement indÃ©pendant en offline)
+- âœ… ConformitÃ© LOI-3 : ConfirmÃ©e (souverainetÃ© locale des deux domaines)
+- âœ… SÃ©paration des domaines : ConfirmÃ©e (INV-BG-KM-1, INV-BG-KM-2)
 
-**Conclusion :** Aucune contradiction détectée. Le document est cohérent et non ambigu.
+**Conclusion :** Aucune contradiction dÃ©tectÃ©e. Le document est cohÃ©rent et non ambigu.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

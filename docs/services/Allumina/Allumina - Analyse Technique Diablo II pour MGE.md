@@ -1,16 +1,16 @@
-# Allumina — Analyse Technique des Systèmes Diablo II — Transposition MGE
+﻿# Allumina â€” Analyse Technique des SystÃ¨mes Diablo II â€” Transposition MGE
 
 ## Contexte
 
-Ce document est une **analyse technique exhaustive** des systèmes mécaniques de Diablo II (2000, Blizzard North), destinée à servir de référence pour l'implémentation d'Allumina sur le moteur MGE (Miyukini Game Engine). L'analyse est fondée sur le reverse-engineering communautaire (D2MOO, Phrozen Keep, données moddées), la documentation des fichiers .txt de configuration, et des hypothèses argumentées lorsque l'information est incertaine.
+Ce document est une **analyse technique exhaustive** des systÃ¨mes mÃ©caniques de Diablo II (2000, Blizzard North), destinÃ©e Ã  servir de rÃ©fÃ©rence pour l'implÃ©mentation d'Allumina sur le moteur MGE (Miyukini Game Engine). L'analyse est fondÃ©e sur le reverse-engineering communautaire (D2MOO, Phrozen Keep, donnÃ©es moddÃ©es), la documentation des fichiers .txt de configuration, et des hypothÃ¨ses argumentÃ©es lorsque l'information est incertaine.
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Applicable à :** Implémentation moteur, plugins MGE, game design technique Allumina.
-- **Audience :** Développement, architecture MGE, game design.
-- **Statut :** Document de référence technique.
+- **Applicable Ã  :** ImplÃ©mentation moteur, plugins MGE, game design technique Allumina.
+- **Audience :** DÃ©veloppement, architecture MGE, game design.
+- **Statut :** Document de rÃ©fÃ©rence technique.
 
-### Hors périmètre
+### Hors pÃ©rimÃ¨tre
 
 - Lore, narration, historique du jeu.
 - Comparaison subjective entre ARPG.
@@ -18,24 +18,24 @@ Ce document est une **analyse technique exhaustive** des systèmes mécaniques d
 
 ---
 
-# 1. SYSTÈME DE DÉPLACEMENT
+# 1. SYSTÃˆME DE DÃ‰PLACEMENT
 
 ## 1.1 Structure fondamentale
 
-### Grille isométrique diagonale
+### Grille isomÃ©trique diagonale
 
-Diablo II utilise une **grille de tuiles orientée en diagonale** pour créer sa vue isométrique. Ce n'est pas de la navigation libre : tout positionnement est ancré sur une grille de **subtiles**.
+Diablo II utilise une **grille de tuiles orientÃ©e en diagonale** pour crÃ©er sa vue isomÃ©trique. Ce n'est pas de la navigation libre : tout positionnement est ancrÃ© sur une grille de **subtiles**.
 
-| Paramètre | Valeur |
+| ParamÃ¨tre | Valeur |
 |-----------|--------|
-| **Type de grille** | Isométrique losange, tuiles diamant |
-| **Taille d'une tuile** | 160×80 px (affichage) |
-| **Subtile** | 32×16 px (affichage), 5 subtiles par tuile en X et Y |
-| **Coordonnées** | Entières en subtiles, position serveur en subtiles |
-| **Unité de distance** | 1 yard = 1.5 subtiles (24px vertical × 48px horizontal) |
-| **Interpolation visuelle** | Oui — le client interpole entre les positions serveur à 25 FPS |
+| **Type de grille** | IsomÃ©trique losange, tuiles diamant |
+| **Taille d'une tuile** | 160Ã—80 px (affichage) |
+| **Subtile** | 32Ã—16 px (affichage), 5 subtiles par tuile en X et Y |
+| **CoordonnÃ©es** | EntiÃ¨res en subtiles, position serveur en subtiles |
+| **UnitÃ© de distance** | 1 yard = 1.5 subtiles (24px vertical Ã— 48px horizontal) |
+| **Interpolation visuelle** | Oui â€” le client interpole entre les positions serveur Ã  25 FPS |
 
-### Footprint des unités
+### Footprint des unitÃ©s
 
 Chaque personnage et la plupart des monstres occupent un **footprint en X** couvrant 5 subtiles :
 
@@ -47,18 +47,18 @@ Chaque personnage et la plupart des monstres occupent un **footprint en X** couv
 C = centre (bloquant), W = wings (non bloquant, peuvent chevaucher)
 ```
 
-Le centre ne peut **jamais** chevaucher celui d'une autre unité (sauf Teleport sur unités alliées). Les ailes peuvent se superposer, permettant un placement serré.
+Le centre ne peut **jamais** chevaucher celui d'une autre unitÃ© (sauf Teleport sur unitÃ©s alliÃ©es). Les ailes peuvent se superposer, permettant un placement serrÃ©.
 
 ### Transposition MGE
 
-| Concept D2 | Équivalent MGE |
+| Concept D2 | Ã‰quivalent MGE |
 |------------|----------------|
-| Position subtile (entière) | `Position2D` (Vec2, px) — coordonnées flottantes MGE |
+| Position subtile (entiÃ¨re) | `Position2D` (Vec2, px) â€” coordonnÃ©es flottantes MGE |
 | Footprint en X | `Hitbox` composant (cercle ou AABB configurable) |
 | Interpolation client | Interpolation native via `Velocity2D` et `LocomotionParams` |
-| Grille subtile | Optionnel — MGE peut utiliser une grille logique superposée ou du positionnement libre |
+| Grille subtile | Optionnel â€” MGE peut utiliser une grille logique superposÃ©e ou du positionnement libre |
 
-**Recommandation MGE :** utiliser des coordonnées flottantes (Vec2) avec une grille logique optionnelle pour le pathfinding. Le footprint en X est modélisable par un cercle de rayon configurable dans le composant hitbox.
+**Recommandation MGE :** utiliser des coordonnÃ©es flottantes (Vec2) avec une grille logique optionnelle pour le pathfinding. Le footprint en X est modÃ©lisable par un cercle de rayon configurable dans le composant hitbox.
 
 ---
 
@@ -66,29 +66,29 @@ Le centre ne peut **jamais** chevaucher celui d'une autre unité (sauf Teleport 
 
 ### Algorithme
 
-Diablo II utilise un **pathfinding basé sur les SubTilesFlags** extraits des fichiers DT1 (textures de tuiles). Chaque subtile possède un champ de bits indiquant la passabilité.
+Diablo II utilise un **pathfinding basÃ© sur les SubTilesFlags** extraits des fichiers DT1 (textures de tuiles). Chaque subtile possÃ¨de un champ de bits indiquant la passabilitÃ©.
 
-| Aspect | Détail |
+| Aspect | DÃ©tail |
 |--------|--------|
-| **Algorithme** | A* limité (portée courte ~35 subtiles), recalcul fréquent |
-| **Données de passabilité** | Bit fields par subtile, combinés sur toutes les couches de la carte |
+| **Algorithme** | A* limitÃ© (portÃ©e courte ~35 subtiles), recalcul frÃ©quent |
+| **DonnÃ©es de passabilitÃ©** | Bit fields par subtile, combinÃ©s sur toutes les couches de la carte |
 | **Flags distincts** | Joueur-walkable vs mercenaire-walkable vs missile-passable |
-| **PNJ statiques** | Chemins précalculés dans les fichiers DS1 (paths prédéfinis) |
+| **PNJ statiques** | Chemins prÃ©calculÃ©s dans les fichiers DS1 (paths prÃ©dÃ©finis) |
 
 ### Gestion des collisions dynamiques
 
-Les monstres ont une portée de pathfinding **limitée**. Quand un monstre ne peut pas atteindre sa cible :
+Les monstres ont une portÃ©e de pathfinding **limitÃ©e**. Quand un monstre ne peut pas atteindre sa cible :
 1. Il tente un A* sur ~35 subtiles
-2. Si le chemin échoue, il se déplace en ligne droite vers la cible
-3. S'il est bloqué, il entre en état d'attente puis réessaie
+2. Si le chemin Ã©choue, il se dÃ©place en ligne droite vers la cible
+3. S'il est bloquÃ©, il entre en Ã©tat d'attente puis rÃ©essaie
 
 ### Gestion des obstacles destructibles
 
-Les obstacles destructibles (barils, murs fissurés) sont traités comme des tuiles bloquantes jusqu'à destruction, puis le flag de passabilité est mis à jour.
+Les obstacles destructibles (barils, murs fissurÃ©s) sont traitÃ©s comme des tuiles bloquantes jusqu'Ã  destruction, puis le flag de passabilitÃ© est mis Ã  jour.
 
 ### Recalcul
 
-Le pathfinding est recalculé à chaque **AI tick** du monstre (contrôlé par `aidel` dans MonStats.txt). Le joueur recalcule à chaque clic ou changement de direction.
+Le pathfinding est recalculÃ© Ã  chaque **AI tick** du monstre (contrÃ´lÃ© par `aidel` dans MonStats.txt). Le joueur recalcule Ã  chaque clic ou changement de direction.
 
 ### Pseudo-algorithme de pathfinding D2
 
@@ -113,14 +113,14 @@ fn pathfind(unit, target_pos):
 
 ### Transposition MGE
 
-Le skill `miyukini-deplacement-orientation` définit déjà le pathfinding par waypoints avec A*. La chaîne de locomotion MGE (input → accel/friction → clamp → displacement → rotation) est directement applicable.
+Le skill `miyukini-deplacement-orientation` dÃ©finit dÃ©jÃ  le pathfinding par waypoints avec A*. La chaÃ®ne de locomotion MGE (input â†’ accel/friction â†’ clamp â†’ displacement â†’ rotation) est directement applicable.
 
 | Concept D2 | Plugin MGE |
 |------------|------------|
-| SubTilesFlags | Grille de passabilité `NavigationGrid` (composant) |
-| A* limité | `mge-plugin-pathfinding` avec max_nodes configurable |
-| Waypoints DS1 | `waypoints` + `waypoint_index` (déjà dans MGE) |
-| Walk types distincts | `collision_layers` (layer, mask) — déjà dans MGE |
+| SubTilesFlags | Grille de passabilitÃ© `NavigationGrid` (composant) |
+| A* limitÃ© | `mge-plugin-pathfinding` avec max_nodes configurable |
+| Waypoints DS1 | `waypoints` + `waypoint_index` (dÃ©jÃ  dans MGE) |
+| Walk types distincts | `collision_layers` (layer, mask) â€” dÃ©jÃ  dans MGE |
 
 ---
 
@@ -128,48 +128,48 @@ Le skill `miyukini-deplacement-orientation` définit déjà le pathfinding par w
 
 ### Formes de hitbox
 
-Diablo II utilise **deux systèmes de hitbox** distincts (définis dans MonStats2.txt) :
+Diablo II utilise **deux systÃ¨mes de hitbox** distincts (dÃ©finis dans MonStats2.txt) :
 
-| Système | Usage | Paramètres |
+| SystÃ¨me | Usage | ParamÃ¨tres |
 |---------|-------|------------|
-| **SizeX/SizeY** | Collision physique (déplacement, blocage) | Diamètre en subtiles (1-3), joueur = 2 |
-| **htTop/htLeft/htWidth/htHeight** | Hitbox d'attaque / sélection (graphique) | Rectangle superposé, pivot = animation pivot |
+| **SizeX/SizeY** | Collision physique (dÃ©placement, blocage) | DiamÃ¨tre en subtiles (1-3), joueur = 2 |
+| **htTop/htLeft/htWidth/htHeight** | Hitbox d'attaque / sÃ©lection (graphique) | Rectangle superposÃ©, pivot = animation pivot |
 
-Le champ `NoGfxHitTest` contrôle quel système est utilisé pour la détection de collision :
+Le champ `NoGfxHitTest` contrÃ´le quel systÃ¨me est utilisÃ© pour la dÃ©tection de collision :
 - `0` : utilise SizeX/SizeY (standard)
-- `1` : utilise le rectangle superposé (htTop/htLeft/htWidth/htHeight)
+- `1` : utilise le rectangle superposÃ© (htTop/htLeft/htWidth/htHeight)
 
-### Séparation physique vs attaque
+### SÃ©paration physique vs attaque
 
 ```
-┌───────────────────────────────┐
-│  htWidth × htHeight           │ ← Hitbox de sélection/attaque
-│  ┌─────────────┐              │
-│  │ SizeX×SizeY │              │ ← Hitbox physique (collision)
-│  └─────────────┘              │
-└───────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  htWidth Ã— htHeight           â”‚ â† Hitbox de sÃ©lection/attaque
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”              â”‚
+â”‚  â”‚ SizeXÃ—SizeY â”‚              â”‚ â† Hitbox physique (collision)
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜              â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### Priorité de collision
+### PrioritÃ© de collision
 
 1. **Mur / terrain** : toujours bloquant (subtile flags)
-2. **Unités vivantes** : bloquent par SizeX/SizeY (centre du footprint X)
+2. **UnitÃ©s vivantes** : bloquent par SizeX/SizeY (centre du footprint X)
 3. **Cadavres** : non bloquants
-4. **Missiles** : passent à travers les unités (sauf CollideType spécifique)
-5. **Pets entre eux** : peuvent se bloquer mutuellement (problème connu des nécromanciens)
+4. **Missiles** : passent Ã  travers les unitÃ©s (sauf CollideType spÃ©cifique)
+5. **Pets entre eux** : peuvent se bloquer mutuellement (problÃ¨me connu des nÃ©cromanciens)
 
 ### Transposition MGE
 
 ```rust
-// Composant MGE pour hitbox à la D2
+// Composant MGE pour hitbox Ã  la D2
 pub struct HitboxD2 {
-    pub physical_radius: f32,     // équivalent SizeX/SizeY
-    pub selection_rect: Rect,     // équivalent htTop/htLeft/htWidth/htHeight
-    pub use_gfx_hitbox: bool,     // équivalent NoGfxHitTest
+    pub physical_radius: f32,     // Ã©quivalent SizeX/SizeY
+    pub selection_rect: Rect,     // Ã©quivalent htTop/htLeft/htWidth/htHeight
+    pub use_gfx_hitbox: bool,     // Ã©quivalent NoGfxHitTest
 }
 ```
 
-Le skill `miyukini-deplacement-orientation` prévoit déjà `collision_layers (layer, mask)` pour séparer les couches physiques.
+Le skill `miyukini-deplacement-orientation` prÃ©voit dÃ©jÃ  `collision_layers (layer, mask)` pour sÃ©parer les couches physiques.
 
 ---
 
@@ -177,113 +177,113 @@ Le skill `miyukini-deplacement-orientation` prévoit déjà `collision_layers (l
 
 ### Tick rate
 
-| Paramètre | Valeur |
+| ParamÃ¨tre | Valeur |
 |-----------|--------|
-| **Tick rate interne** | **25 FPS** fixe — toute la logique de jeu |
-| **Plus petite unité de temps** | 1/256 de seconde (pour les calculs de précision) |
+| **Tick rate interne** | **25 FPS** fixe â€” toute la logique de jeu |
+| **Plus petite unitÃ© de temps** | 1/256 de seconde (pour les calculs de prÃ©cision) |
 | **dt par frame** | 40 ms (1/25) |
-| **Animations** | Liées au tick rate — les breakpoints existent car les animations sont des frames discrètes à 25 FPS |
+| **Animations** | LiÃ©es au tick rate â€” les breakpoints existent car les animations sont des frames discrÃ¨tes Ã  25 FPS |
 
-### Breakpoints (phénomène D2 spécifique)
+### Breakpoints (phÃ©nomÃ¨ne D2 spÃ©cifique)
 
-Les améliorations de vitesse (FCR, IAS, FHR, FBR) ne deviennent effectives que quand elles **retirent une frame d'animation**. Les réductions partielles sont arrondies vers le haut → aucun effet.
+Les amÃ©liorations de vitesse (FCR, IAS, FHR, FBR) ne deviennent effectives que quand elles **retirent une frame d'animation**. Les rÃ©ductions partielles sont arrondies vers le haut â†’ aucun effet.
 
 ```
-Exemple Sorcière — Faster Cast Rate :
-  Base : 13 frames (13 × 40ms = 520ms)
-  9% FCR  → 12 frames (480ms) ← premier breakpoint
-  20% FCR → 11 frames (440ms)
+Exemple SorciÃ¨re â€” Faster Cast Rate :
+  Base : 13 frames (13 Ã— 40ms = 520ms)
+  9% FCR  â†’ 12 frames (480ms) â† premier breakpoint
+  20% FCR â†’ 11 frames (440ms)
   ...
-  200% FCR → 7 frames (280ms) ← dernier breakpoint
+  200% FCR â†’ 7 frames (280ms) â† dernier breakpoint
 ```
 
-**Implication MGE :** le moteur MGE utilisant des coordonnées flottantes et un dt variable, les breakpoints ne sont **pas nécessaires**. La vitesse d'animation peut être interpolée de manière continue. Cependant, si Allumina veut reproduire le *feel* D2, un système de breakpoints optionnel peut être implémenté comme un plugin.
+**Implication MGE :** le moteur MGE utilisant des coordonnÃ©es flottantes et un dt variable, les breakpoints ne sont **pas nÃ©cessaires**. La vitesse d'animation peut Ãªtre interpolÃ©e de maniÃ¨re continue. Cependant, si Allumina veut reproduire le *feel* D2, un systÃ¨me de breakpoints optionnel peut Ãªtre implÃ©mentÃ© comme un plugin.
 
-### Désynchronisation réseau
+### DÃ©synchronisation rÃ©seau
 
 | Aspect | D2 Original |
 |--------|-------------|
 | **Architecture** | Client-serveur (Battle.net) ou peer-to-peer (TCP/IP) |
-| **Prédiction client** | Limitée — le client prédit le mouvement mais le serveur fait autorité |
-| **Rubber-banding** | Fréquent — le joueur « snap » à sa position serveur en cas de désync |
-| **NHAM bug** | Next Hit Always Misses — désync entre animation client et état serveur lors d'interruptions |
+| **PrÃ©diction client** | LimitÃ©e â€” le client prÃ©dit le mouvement mais le serveur fait autoritÃ© |
+| **Rubber-banding** | FrÃ©quent â€” le joueur Â« snap Â» Ã  sa position serveur en cas de dÃ©sync |
+| **NHAM bug** | Next Hit Always Misses â€” dÃ©sync entre animation client et Ã©tat serveur lors d'interruptions |
 
-### Transposition MGE (réseau)
+### Transposition MGE (rÃ©seau)
 
-Allumina utilise le MWS (Miyukini Webway System) avec un modèle Lobby (hôte = serveur). Le modèle recommandé :
+Allumina utilise le MWS (Miyukini Webway System) avec un modÃ¨le Lobby (hÃ´te = serveur). Le modÃ¨le recommandÃ© :
 
 | Aspect | Recommandation |
 |--------|----------------|
-| **Autorité** | Hôte du Lobby = serveur autoritaire |
-| **Prédiction** | Client prediction avec réconciliation serveur |
-| **Tick rate** | 30 FPS logique (plus fluide que D2, coût CPU acceptable) |
-| **Interpolation** | Client interpole entre états serveur reçus |
+| **AutoritÃ©** | HÃ´te du Lobby = serveur autoritaire |
+| **PrÃ©diction** | Client prediction avec rÃ©conciliation serveur |
+| **Tick rate** | 30 FPS logique (plus fluide que D2, coÃ»t CPU acceptable) |
+| **Interpolation** | Client interpole entre Ã©tats serveur reÃ§us |
 
 ---
 
-# 2. COMPORTEMENT DES ENTITÉS (IA)
+# 2. COMPORTEMENT DES ENTITÃ‰S (IA)
 
 ## 2.1 Architecture IA
 
-### Modèle : Table-Driven FSM (Machine à États Finis piloté par données)
+### ModÃ¨le : Table-Driven FSM (Machine Ã  Ã‰tats Finis pilotÃ© par donnÃ©es)
 
-Diablo II utilise un système hybride :
-- **FSM hardcodée** : états prédéfinis dans le code C++ (AiThink.cpp dans D2MOO)
-- **Configuration par tables** : MonStats.txt fournit les paramètres qui pilotent les transitions et le comportement
+Diablo II utilise un systÃ¨me hybride :
+- **FSM hardcodÃ©e** : Ã©tats prÃ©dÃ©finis dans le code C++ (AiThink.cpp dans D2MOO)
+- **Configuration par tables** : MonStats.txt fournit les paramÃ¨tres qui pilotent les transitions et le comportement
 
-Ce n'est **ni** un behavior tree, **ni** un script pur. C'est une FSM dont les transitions sont paramétrées par des fichiers .txt.
+Ce n'est **ni** un behavior tree, **ni** un script pur. C'est une FSM dont les transitions sont paramÃ©trÃ©es par des fichiers .txt.
 
-### États typiques (reconstitués depuis D2MOO et MonStats.txt)
+### Ã‰tats typiques (reconstituÃ©s depuis D2MOO et MonStats.txt)
 
 ```
-┌─────────┐    aggro      ┌─────────┐
-│  IDLE   │──────────────→│  CHASE  │
-└─────────┘               └────┬────┘
-     ↑                         │
-     │ no target          in range
-     │                         ↓
-┌─────────┐               ┌─────────┐
-│  WANDER │←──leash────── │ ATTACK  │
-└─────────┘               └────┬────┘
-     ↑                         │
-     │                    hit / stun
-     │                         ↓
-     │                    ┌─────────┐
-     └──recover────────── │  STUN   │
-                          └─────────┘
-                               │
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”    aggro      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  IDLE   â”‚â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â†’â”‚  CHASE  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜               â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜
+     â†‘                         â”‚
+     â”‚ no target          in range
+     â”‚                         â†“
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”               â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  WANDER â”‚â†â”€â”€leashâ”€â”€â”€â”€â”€â”€ â”‚ ATTACK  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜               â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜
+     â†‘                         â”‚
+     â”‚                    hit / stun
+     â”‚                         â†“
+     â”‚                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+     â””â”€â”€recoverâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚  STUN   â”‚
+                          â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                               â”‚
                           hp < threshold
-                               ↓
-                          ┌─────────┐
-                          │  FLEE   │
-                          └─────────┘
-                               │
+                               â†“
+                          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                          â”‚  FLEE   â”‚
+                          â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                               â”‚
                           hp = 0
-                               ↓
-                          ┌─────────┐
-                          │  DEAD   │
-                          └─────────┘
+                               â†“
+                          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                          â”‚  DEAD   â”‚
+                          â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### Hardcoded States (identifiés dans le code)
+### Hardcoded States (identifiÃ©s dans le code)
 
-| ID | État | Effet |
+| ID | Ã‰tat | Effet |
 |----|------|-------|
-| 1 | Freeze | Arrêt total animations + IA |
-| 11 | Cold | Vélocité et attack rate ÷ 2 |
-| 13 | Blaze | Émet des missiles en se déplaçant |
+| 1 | Freeze | ArrÃªt total animations + IA |
+| 11 | Cold | VÃ©locitÃ© et attack rate Ã· 2 |
+| 13 | Blaze | Ã‰met des missiles en se dÃ©plaÃ§ant |
 | 15 | Concentrate | Interrompt les actions sauf si interrupt=1 |
-| 22 | Spiderlay | Produit missile #143 en se déplaçant |
+| 22 | Spiderlay | Produit missile #143 en se dÃ©plaÃ§ant |
 
-### Paramètres IA clés (MonStats.txt)
+### ParamÃ¨tres IA clÃ©s (MonStats.txt)
 
-| Colonne | Rôle |
+| Colonne | RÃ´le |
 |---------|------|
-| `AI` | Identifiant de l'IA utilisée (chaque IA = code C++ spécifique) |
-| `aidel` / `aidel(N)` / `aidel(H)` | Délai entre les AI ticks (plus bas = plus agressif) |
-| `aidist` / `aidist(N)` / `aidist(H)` | Distance d'activation en cells (défaut : 35 ≈ 1 écran) |
-| `aip1` à `aip8` | Paramètres passés à l'IA (en %, usage dépend du type d'IA) |
-| `threat` | Priorité de ciblage (plus haut = ciblé en premier par les ennemis) |
+| `AI` | Identifiant de l'IA utilisÃ©e (chaque IA = code C++ spÃ©cifique) |
+| `aidel` / `aidel(N)` / `aidel(H)` | DÃ©lai entre les AI ticks (plus bas = plus agressif) |
+| `aidist` / `aidist(N)` / `aidist(H)` | Distance d'activation en cells (dÃ©faut : 35 â‰ˆ 1 Ã©cran) |
+| `aip1` Ã  `aip8` | ParamÃ¨tres passÃ©s Ã  l'IA (en %, usage dÃ©pend du type d'IA) |
+| `threat` | PrioritÃ© de ciblage (plus haut = ciblÃ© en premier par les ennemis) |
 
 ### Transposition MGE
 
@@ -291,7 +291,7 @@ Ce n'est **ni** un behavior tree, **ni** un script pur. C'est une FSM dont les t
 // Plugin MGE : mge-plugin-ai-monster.v1
 pub struct MonsterAiState {
     pub current: AiStateId,      // Idle, Chase, Attack, Stun, Flee, Dead
-    pub ai_type: AiTypeId,       // Référence vers la table d'IA
+    pub ai_type: AiTypeId,       // RÃ©fÃ©rence vers la table d'IA
     pub ai_delay: u32,           // Frames entre chaque AI tick
     pub ai_dist: f32,            // Distance d'activation (px)
     pub ai_params: [f32; 8],     // aip1-8 equivalent
@@ -303,32 +303,32 @@ pub struct MonsterAiState {
 
 ---
 
-## 2.2 Système d'aggro
+## 2.2 SystÃ¨me d'aggro
 
 ### Distance d'activation
 
-| Paramètre | Valeur par défaut | Source |
+| ParamÃ¨tre | Valeur par dÃ©faut | Source |
 |-----------|-------------------|--------|
-| **Rayon d'activation** | 35 cells ≈ ~1 écran complet | `aidist` dans MonStats.txt |
-| **Ligne de vue** | Requise pour la plupart des IA (pas de détection à travers les murs) |
+| **Rayon d'activation** | 35 cells â‰ˆ ~1 Ã©cran complet | `aidist` dans MonStats.txt |
+| **Ligne de vue** | Requise pour la plupart des IA (pas de dÃ©tection Ã  travers les murs) |
 | **Ligne de vue (vol)** | Monstres volants (`flying=1`) ignorent certains obstacles sol |
 
-### Mémoire de cible
+### MÃ©moire de cible
 
-- Les monstres conservent leur cible tant qu'elle est **à portée de poursuite** (pas de timer de mémoire explicite dans les fichiers de config)
-- Le **leashing** se produit quand la cible sort de la portée de pathfinding (~35 cells)
-- Hypothèse : la mémoire de cible dure ~3-5 secondes après perte de ligne de vue (basé sur comportement observé)
+- Les monstres conservent leur cible tant qu'elle est **Ã  portÃ©e de poursuite** (pas de timer de mÃ©moire explicite dans les fichiers de config)
+- Le **leashing** se produit quand la cible sort de la portÃ©e de pathfinding (~35 cells)
+- HypothÃ¨se : la mÃ©moire de cible dure ~3-5 secondes aprÃ¨s perte de ligne de vue (basÃ© sur comportement observÃ©)
 
-### Priorité des cibles
+### PrioritÃ© des cibles
 
-Contrôlée par la colonne `threat` de MonStats.txt + paramètre `petIgnore` :
+ContrÃ´lÃ©e par la colonne `threat` de MonStats.txt + paramÃ¨tre `petIgnore` :
 
-| Règle | Détail |
+| RÃ¨gle | DÃ©tail |
 |-------|--------|
-| `threat` élevé | Ciblé en priorité (ex : Maggot Eggs à threat=25 → merc les cible d'abord) |
-| `petIgnore=1` | Le monstre ignore totalement les invocations et mercenaires → va directement au joueur |
-| `primeevil=1` | +300% dégâts contre mercenaires et invocations (Diablo, Baal) |
-| Fallback | Cible la plus proche si pas de priorité |
+| `threat` Ã©levÃ© | CiblÃ© en prioritÃ© (ex : Maggot Eggs Ã  threat=25 â†’ merc les cible d'abord) |
+| `petIgnore=1` | Le monstre ignore totalement les invocations et mercenaires â†’ va directement au joueur |
+| `primeevil=1` | +300% dÃ©gÃ¢ts contre mercenaires et invocations (Diablo, Baal) |
+| Fallback | Cible la plus proche si pas de prioritÃ© |
 
 ### Pseudo-algorithme d'aggro
 
@@ -361,7 +361,7 @@ fn ai_think(monster, world, dt):
         
         Attack =>
             execute_attack(monster, monster.target)
-            monster.state = Chase  // retour à poursuite
+            monster.state = Chase  // retour Ã  poursuite
         
         Flee =>
             move_away_from(monster, monster.target.pos)
@@ -375,31 +375,31 @@ fn ai_think(monster, world, dt):
 
 ### Table des comportements par type
 
-| Type | Comportement | Particularités |
+| Type | Comportement | ParticularitÃ©s |
 |------|-------------|----------------|
-| **Mob standard** | Chase → Attack → Chase, fuite rare | aidel moyen (~8-12), distance standard |
-| **Champion** | Plus agressif, même IA que standard | aidel réduit, +2 niveaux, HP ×3/2.5/2 |
-| **Unique** | IA standard + affixes | +3 niveaux, HP ×4/3/2, 1-3 affixes selon difficulté |
-| **Super Unique** | IA spécifique ou standard | Niveaux fixés (boss=1), hcIdx spécial, skills dédiés |
-| **Boss (Act)** | IA hardcodée spécifique | primeevil=1 (+300% dmg vs pets), immunités, phases |
-| **Ranged** | Maintient distance, fuit si approché | `rangedtype=1`, IA différente (kite) |
-| **Melee** | Charge directe | Pas de multishot, priorité rapprochement |
-| **Spawner** | Reste en arrière, produit des monstres | `placespawn=1`, utilise skill Nest/Minion Spawner |
-| **Resurrecting** | Relève les morts de son type | Shamans (Fallen), Defilers — lié à BaseId |
+| **Mob standard** | Chase â†’ Attack â†’ Chase, fuite rare | aidel moyen (~8-12), distance standard |
+| **Champion** | Plus agressif, mÃªme IA que standard | aidel rÃ©duit, +2 niveaux, HP Ã—3/2.5/2 |
+| **Unique** | IA standard + affixes | +3 niveaux, HP Ã—4/3/2, 1-3 affixes selon difficultÃ© |
+| **Super Unique** | IA spÃ©cifique ou standard | Niveaux fixÃ©s (boss=1), hcIdx spÃ©cial, skills dÃ©diÃ©s |
+| **Boss (Act)** | IA hardcodÃ©e spÃ©cifique | primeevil=1 (+300% dmg vs pets), immunitÃ©s, phases |
+| **Ranged** | Maintient distance, fuit si approchÃ© | `rangedtype=1`, IA diffÃ©rente (kite) |
+| **Melee** | Charge directe | Pas de multishot, prioritÃ© rapprochement |
+| **Spawner** | Reste en arriÃ¨re, produit des monstres | `placespawn=1`, utilise skill Nest/Minion Spawner |
+| **Resurrecting** | RelÃ¨ve les morts de son type | Shamans (Fallen), Defilers â€” liÃ© Ã  BaseId |
 | **Critter** | Fuit le joueur, non agressif | `critter=1`, `inert=1` |
 
 ### IA des Shamans (exemple complexe)
 
 ```
-État: GUARD (près du camp)
-  → Joueur détecté dans aidist
-  → Transition: FLEE (s'éloigne du joueur)
-  → Si allié mort détecté dans le rayon:
-    → Transition: RESURRECT (caste S1 sur le cadavre)
-  → Si menacé directement:
-    → Transition: ATTACK (attaque à distance)
-  → Si plus d'alliés morts:
-    → Transition: FLEE
+Ã‰tat: GUARD (prÃ¨s du camp)
+  â†’ Joueur dÃ©tectÃ© dans aidist
+  â†’ Transition: FLEE (s'Ã©loigne du joueur)
+  â†’ Si alliÃ© mort dÃ©tectÃ© dans le rayon:
+    â†’ Transition: RESURRECT (caste S1 sur le cadavre)
+  â†’ Si menacÃ© directement:
+    â†’ Transition: ATTACK (attaque Ã  distance)
+  â†’ Si plus d'alliÃ©s morts:
+    â†’ Transition: FLEE
 ```
 
 ---
@@ -408,33 +408,33 @@ fn ai_think(monster, world, dt):
 
 ### Coordination
 
-| Mécanisme | Détail |
+| MÃ©canisme | DÃ©tail |
 |-----------|--------|
-| **Packs** | MinGrp/MaxGrp définit la taille du groupe à la génération |
+| **Packs** | MinGrp/MaxGrp dÃ©finit la taille du groupe Ã  la gÃ©nÃ©ration |
 | **Boss + Minions** | SetBoss=1 permet au "chef" de coordonner (ex : ordre de raid pour Scarabs) |
-| **BossXfer** | Si le chef meurt, le leadership passe à un de ses minions |
-| **Pas de coordination active** | Les mobs d'un même pack ne communiquent pas leur cible — chacun a sa propre boucle IA |
+| **BossXfer** | Si le chef meurt, le leadership passe Ã  un de ses minions |
+| **Pas de coordination active** | Les mobs d'un mÃªme pack ne communiquent pas leur cible â€” chacun a sa propre boucle IA |
 
 ### Leashing
 
 - Distance de leash : ~35 cells (distance d'activation IA)
-- Pas de leash hard-reset : le monstre retourne à sa position de spawn en mode Wander
-- Le monstre ne se soigne **pas** en retournant (contrairement à des ARPG modernes comme D3)
+- Pas de leash hard-reset : le monstre retourne Ã  sa position de spawn en mode Wander
+- Le monstre ne se soigne **pas** en retournant (contrairement Ã  des ARPG modernes comme D3)
 
 ### Limite de poursuite
 
-- Limitée par le pathfinding (portée A* ~35 subtiles)
-- Les monstres volants (`flying=1`) ont une portée de poursuite plus grande (pas bloqués par obstacles sol)
-- `opendoors=1/0` : contrôle si le monstre peut ouvrir les portes (lobotomisation si 0)
+- LimitÃ©e par le pathfinding (portÃ©e A* ~35 subtiles)
+- Les monstres volants (`flying=1`) ont une portÃ©e de poursuite plus grande (pas bloquÃ©s par obstacles sol)
+- `opendoors=1/0` : contrÃ´le si le monstre peut ouvrir les portes (lobotomisation si 0)
 
 ### Transposition MGE (groupes)
 
-Voir `docs/Miyukini_Game_Engine/MGE - Pathfinding Collisions - Guide Entites Groupes.md` pour la gestion des groupes MGE (déjà documenté pour les scénarios musou/RTS).
+Voir `docs/Miyukini_Game_Engine/MGE - Pathfinding Collisions - Guide Entites Groupes.md` pour la gestion des groupes MGE (dÃ©jÃ  documentÃ© pour les scÃ©narios musou/RTS).
 
 ```rust
 pub struct PackLeader {
     pub minion_ids: Vec<EntityId>,
-    pub boss_xfer: bool,       // leadership transférable
+    pub boss_xfer: bool,       // leadership transfÃ©rable
     pub raid_chance: f32,      // % chance d'ordonner un raid (aip5)
 }
 
@@ -446,32 +446,32 @@ pub struct PackMember {
 
 ---
 
-# 3. SYSTÈME DE SPAWN
+# 3. SYSTÃˆME DE SPAWN
 
-## 3.1 Génération des monstres
+## 3.1 GÃ©nÃ©ration des monstres
 
-### Architecture de la génération
+### Architecture de la gÃ©nÃ©ration
 
-Le spawn dans D2 est entièrement **table-driven** via plusieurs fichiers interconnectés :
-
-```
-Levels.txt          → Définit quels monstres peuvent spawner dans une zone
-  ↓
-MonStats.txt        → Définit les propriétés de chaque monstre
-  ↓
-MonType.txt         → Catégorie (super-groupe : skeleton, demon, etc.)
-  ↓
-ActInfo.txt         → Contrôle les monstres errants (wandering)
-  ↓
-TreasureClass.txt   → Contrôle le loot (séparé du spawn)
-```
-
-### Pondération probabiliste
-
-Le champ `Rarity` de MonStats.txt contrôle la probabilité relative de spawn :
+Le spawn dans D2 est entiÃ¨rement **table-driven** via plusieurs fichiers interconnectÃ©s :
 
 ```
-Exemple : 2 monstres éligibles pour une zone
+Levels.txt          â†’ DÃ©finit quels monstres peuvent spawner dans une zone
+  â†“
+MonStats.txt        â†’ DÃ©finit les propriÃ©tÃ©s de chaque monstre
+  â†“
+MonType.txt         â†’ CatÃ©gorie (super-groupe : skeleton, demon, etc.)
+  â†“
+ActInfo.txt         â†’ ContrÃ´le les monstres errants (wandering)
+  â†“
+TreasureClass.txt   â†’ ContrÃ´le le loot (sÃ©parÃ© du spawn)
+```
+
+### PondÃ©ration probabiliste
+
+Le champ `Rarity` de MonStats.txt contrÃ´le la probabilitÃ© relative de spawn :
+
+```
+Exemple : 2 monstres Ã©ligibles pour une zone
   Monster A : Rarity = 10
   Monster B : Rarity = 1
   Total = 11
@@ -479,36 +479,36 @@ Exemple : 2 monstres éligibles pour une zone
   Chance Monster A = 10/11 = 91%
   Chance Monster B = 1/11 = 9%
   
-  Rarity = 0 → jamais sélectionné par Levels.txt
+  Rarity = 0 â†’ jamais sÃ©lectionnÃ© par Levels.txt
 ```
 
-### Seed et génération procédurale
+### Seed et gÃ©nÃ©ration procÃ©durale
 
-| Aspect | Détail |
+| Aspect | DÃ©tail |
 |--------|--------|
-| **Carte** | Générée procéduralement à partir d'un seed (stocké dans la save) |
-| **Seed** | Détermine le layout des tuiles (DS1 presets combinés aléatoirement) |
-| **Monstres** | Placés APRÈS la génération de carte, selon les tables |
-| **Sparse populate** | `sparsePopulate` (0-100%) = chance qu'un monstre choisi soit effectivement placé |
+| **Carte** | GÃ©nÃ©rÃ©e procÃ©duralement Ã  partir d'un seed (stockÃ© dans la save) |
+| **Seed** | DÃ©termine le layout des tuiles (DS1 presets combinÃ©s alÃ©atoirement) |
+| **Monstres** | PlacÃ©s APRÃˆS la gÃ©nÃ©ration de carte, selon les tables |
+| **Sparse populate** | `sparsePopulate` (0-100%) = chance qu'un monstre choisi soit effectivement placÃ© |
 
 ### Influence du niveau de zone
 
-| Difficulté | Niveau monstre | Source |
+| DifficultÃ© | Niveau monstre | Source |
 |------------|---------------|--------|
 | **Normal** | Fixe (colonne Level de MonStats.txt) | MonStats.txt |
 | **Nightmare** | = Area Level de Levels.txt | Levels.txt |
 | **Hell** | = Area Level de Levels.txt | Levels.txt |
-| **Boss (boss=1)** | Toujours depuis MonStats.txt | MonStats.txt (indépendant de la zone) |
+| **Boss (boss=1)** | Toujours depuis MonStats.txt | MonStats.txt (indÃ©pendant de la zone) |
 
 ### Monstres errants (Wandering)
 
-Contrôlés par ActInfo.txt :
+ContrÃ´lÃ©s par ActInfo.txt :
 
-| Paramètre | Rôle |
+| ParamÃ¨tre | RÃ´le |
 |-----------|------|
 | `wanderingMonsterPopulateChance` | % chance (0-100) de spawner un monstre errant |
-| `wanderingMonsterRegionTotal` | Max de monstres errants simultanés |
-| `wanderingNpcStart/Range` | Sélection aléatoire de la classe de monstre errant |
+| `wanderingMonsterRegionTotal` | Max de monstres errants simultanÃ©s |
+| `wanderingNpcStart/Range` | SÃ©lection alÃ©atoire de la classe de monstre errant |
 
 ---
 
@@ -516,25 +516,25 @@ Contrôlés par ActInfo.txt :
 
 ### Taille des groupes
 
-Contrôlée par 4 colonnes dans MonStats.txt :
+ContrÃ´lÃ©e par 4 colonnes dans MonStats.txt :
 
-| Colonne | Rôle |
+| Colonne | RÃ´le |
 |---------|------|
-| `MinGrp` / `MaxGrp` | Nombre d'unités de base spawned ensemble |
-| `PartyMin` / `PartyMax` | Nombre de minions (Minion1/Minion2) accompagnant l'unité |
+| `MinGrp` / `MaxGrp` | Nombre d'unitÃ©s de base spawned ensemble |
+| `PartyMin` / `PartyMax` | Nombre de minions (Minion1/Minion2) accompagnant l'unitÃ© |
 
 ### Composition
 
 | Type | Composition |
 |------|-------------|
-| **Pack standard** | Homogène : MinGrp-MaxGrp du même BaseId |
-| **Pack avec minions** | Chef (unité principale) + PartyMin-PartyMax minions (type Minion1/Minion2) |
-| **Champion pack** | 2-4 du même type, tous Champions (pas de chef) |
-| **Unique pack** | 1 Unique + minions de son propre type (ou Minion1/2 si défini) |
+| **Pack standard** | HomogÃ¨ne : MinGrp-MaxGrp du mÃªme BaseId |
+| **Pack avec minions** | Chef (unitÃ© principale) + PartyMin-PartyMax minions (type Minion1/Minion2) |
+| **Champion pack** | 2-4 du mÃªme type, tous Champions (pas de chef) |
+| **Unique pack** | 1 Unique + minions de son propre type (ou Minion1/2 si dÃ©fini) |
 
 ### Placement
 
-Les monstres sont placés aux positions disponibles (subtiles passables) autour d'un point de spawn, avec offset `spawnx`/`spawny` pour éviter l'empilement. Le système de collision empêche la superposition.
+Les monstres sont placÃ©s aux positions disponibles (subtiles passables) autour d'un point de spawn, avec offset `spawnx`/`spawny` pour Ã©viter l'empilement. Le systÃ¨me de collision empÃªche la superposition.
 
 ```
 fn spawn_pack(zone, monster_id, count):
@@ -551,14 +551,14 @@ fn spawn_pack(zone, monster_id, count):
 
 | Aspect | D2 comportement |
 |--------|-----------------|
-| **Respawn en jeu** | NON — les monstres tués restent morts pour la session |
-| **Spawners** | Certaines unités (nids, etc.) produisent continuellement de nouveaux monstres — ce n'est pas du respawn mais du spawn dynamique |
-| **Reset** | En quittant et recréant la partie, la carte est régénérée (nouveau seed) et les monstres réapparaissent |
-| **Exception** | Certains monstres sont re-spawnable si un Shaman les ressuscite (morts-vivants bas → relèvement par morts-vivants hauts) |
+| **Respawn en jeu** | NON â€” les monstres tuÃ©s restent morts pour la session |
+| **Spawners** | Certaines unitÃ©s (nids, etc.) produisent continuellement de nouveaux monstres â€” ce n'est pas du respawn mais du spawn dynamique |
+| **Reset** | En quittant et recrÃ©ant la partie, la carte est rÃ©gÃ©nÃ©rÃ©e (nouveau seed) et les monstres rÃ©apparaissent |
+| **Exception** | Certains monstres sont re-spawnable si un Shaman les ressuscite (morts-vivants bas â†’ relÃ¨vement par morts-vivants hauts) |
 
 ### Transposition MGE
 
-Pour Allumina (monde persistant type UO) : le respawn est nécessaire, contrairement à D2. Implémenter un timer de respawn par zone avec pondération :
+Pour Allumina (monde persistant type UO) : le respawn est nÃ©cessaire, contrairement Ã  D2. ImplÃ©menter un timer de respawn par zone avec pondÃ©ration :
 
 ```rust
 pub struct SpawnZone {
@@ -580,34 +580,34 @@ pub struct SpawnEntry {
 
 ---
 
-## 3.4 Spawn des élites
+## 3.4 Spawn des Ã©lites
 
-### Hiérarchie
+### HiÃ©rarchie
 
 ```
-┌─────────────────────────────────────────────────┐
-│                 Super Unique                     │
-│  (Noms fixes : Lord De Seis, Rakanishu, etc.)   │
-│  Boss=1, niveau fixe, skills dédiés             │
-├─────────────────────────────────────────────────┤
-│              Unique (boss doré)                  │
-│  +3 niveaux, HP ×4/3/2, 1-3 affixes            │
-│  Entouré de minions de son type                 │
-├─────────────────────────────────────────────────┤
-│            Champion (bleu)                       │
-│  +2 niveaux, HP ×3/2.5/2, variantes            │
-│  Pack de 2-4 du même type                       │
-├─────────────────────────────────────────────────┤
-│           Monstre standard (blanc)               │
-│  Stats de base, MinGrp-MaxGrp                   │
-└─────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                 Super Unique                     â”‚
+â”‚  (Noms fixes : Lord De Seis, Rakanishu, etc.)   â”‚
+â”‚  Boss=1, niveau fixe, skills dÃ©diÃ©s             â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚              Unique (boss dorÃ©)                  â”‚
+â”‚  +3 niveaux, HP Ã—4/3/2, 1-3 affixes            â”‚
+â”‚  EntourÃ© de minions de son type                 â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚            Champion (bleu)                       â”‚
+â”‚  +2 niveaux, HP Ã—3/2.5/2, variantes            â”‚
+â”‚  Pack de 2-4 du mÃªme type                       â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚           Monstre standard (blanc)               â”‚
+â”‚  Stats de base, MinGrp-MaxGrp                   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### Affixes des Uniques
 
-En génération, un Unique reçoit des affixes aléatoires :
+En gÃ©nÃ©ration, un Unique reÃ§oit des affixes alÃ©atoires :
 
-| Difficulté | Nombre d'affixes |
+| DifficultÃ© | Nombre d'affixes |
 |------------|-----------------|
 | Normal | 1 |
 | Nightmare | 2 |
@@ -617,38 +617,38 @@ En génération, un Unique reçoit des affixes aléatoires :
 
 | Affix | Effet |
 |-------|-------|
-| **Extra Strong** | +90/75/66% dégâts (N/NM/H) |
-| **Extra Fast** | Vitesse de déplacement et d'attaque augmentée |
-| **Cursed** | Applique Amplify Damage aux joueurs touchés |
-| **Fire Enchanted** | Dégâts feu ajoutés, explosion à la mort |
-| **Cold Enchanted** | Dégâts froid ajoutés, nova de froid à la mort |
-| **Lightning Enchanted** | Charged Bolts émis quand frappé et à la mort |
-| **Spectral Hit** | Dégâts aléatoires (feu/froid/foudre/poison) |
-| **Stone Skin** | +80% résistance physique, -50% vitesse |
+| **Extra Strong** | +90/75/66% dÃ©gÃ¢ts (N/NM/H) |
+| **Extra Fast** | Vitesse de dÃ©placement et d'attaque augmentÃ©e |
+| **Cursed** | Applique Amplify Damage aux joueurs touchÃ©s |
+| **Fire Enchanted** | DÃ©gÃ¢ts feu ajoutÃ©s, explosion Ã  la mort |
+| **Cold Enchanted** | DÃ©gÃ¢ts froid ajoutÃ©s, nova de froid Ã  la mort |
+| **Lightning Enchanted** | Charged Bolts Ã©mis quand frappÃ© et Ã  la mort |
+| **Spectral Hit** | DÃ©gÃ¢ts alÃ©atoires (feu/froid/foudre/poison) |
+| **Stone Skin** | +80% rÃ©sistance physique, -50% vitesse |
 | **Multishot** | Tire plusieurs projectiles (ranged seulement) |
-| **Aura Enchanted** | Aura aléatoire (Might, Holy Fire, Conviction, Fanaticism) |
+| **Aura Enchanted** | Aura alÃ©atoire (Might, Holy Fire, Conviction, Fanaticism) |
 | **Mana Burn** | Drain de mana massif |
-| **Teleportation** | Se téléporte aléatoirement |
-| **Magic Resistant** | +20/40/60% toutes résistances (N/NM/H) |
-| **Conviction** | Aura réduisant les résistances des joueurs |
+| **Teleportation** | Se tÃ©lÃ©porte alÃ©atoirement |
+| **Magic Resistant** | +20/40/60% toutes rÃ©sistances (N/NM/H) |
+| **Conviction** | Aura rÃ©duisant les rÃ©sistances des joueurs |
 
-### Règles de combinaison
+### RÃ¨gles de combinaison
 
-- Les affixes de résistance ne peuvent pas créer une **3e immunité** ni augmenter une immunité existante
-- Certaines combinaisons sont interdites implicitement (pas de Fire Enchanted + Cold Enchanted — vérifié expérimentalement)
+- Les affixes de rÃ©sistance ne peuvent pas crÃ©er une **3e immunitÃ©** ni augmenter une immunitÃ© existante
+- Certaines combinaisons sont interdites implicitement (pas de Fire Enchanted + Cold Enchanted â€” vÃ©rifiÃ© expÃ©rimentalement)
 - L'aura est choisie parmi : Might, Holy Fire, Blessed Aim, Holy Freeze, Holy Shock, Conviction, Fanaticism
 
 ### Champions : variantes
 
-| Variante | HP | Dégâts | Spécial |
+| Variante | HP | DÃ©gÃ¢ts | SpÃ©cial |
 |----------|-----|--------|---------|
-| **Standard** | ×3/2.5/2 | +90/75/66% | — |
-| **Berserker** | ×0.75 (du champion) | +270/225/198% | Glass cannon |
-| **Fanatic** | ×3/2.5/2 | +90/75/66% | Similaire standard |
-| **Ghostly** | ×3/2.5/2 | — | 80% résistance physique, +33-50% cold dmg |
-| **Possessed** | ×6 (du champion) | Standard | Immune aux malédictions |
+| **Standard** | Ã—3/2.5/2 | +90/75/66% | â€” |
+| **Berserker** | Ã—0.75 (du champion) | +270/225/198% | Glass cannon |
+| **Fanatic** | Ã—3/2.5/2 | +90/75/66% | Similaire standard |
+| **Ghostly** | Ã—3/2.5/2 | â€” | 80% rÃ©sistance physique, +33-50% cold dmg |
+| **Possessed** | Ã—6 (du champion) | Standard | Immune aux malÃ©dictions |
 
-### Pseudo-algorithme de génération d'élite
+### Pseudo-algorithme de gÃ©nÃ©ration d'Ã©lite
 
 ```
 fn generate_elite(zone, difficulty):
@@ -695,35 +695,35 @@ fn pick_affixes(count, monster_flags):
 
 ---
 
-# 4. SYSTÈME DE PROJECTILES
+# 4. SYSTÃˆME DE PROJECTILES
 
-## 4.1 Modèle de projectile
+## 4.1 ModÃ¨le de projectile
 
-### Architecture : Entités physiques (pas de hitscan)
+### Architecture : EntitÃ©s physiques (pas de hitscan)
 
-Diablo II n'utilise **pas** de hitscan. Tous les projectiles sont des **entités discrètes** qui se déplacent sur la carte frame par frame.
+Diablo II n'utilise **pas** de hitscan. Tous les projectiles sont des **entitÃ©s discrÃ¨tes** qui se dÃ©placent sur la carte frame par frame.
 
-| Paramètre | Source | Détail |
+| ParamÃ¨tre | Source | DÃ©tail |
 |-----------|--------|--------|
-| **Vel** | Missiles.txt | Vitesse initiale (pixels/frame à 25 FPS) |
+| **Vel** | Missiles.txt | Vitesse initiale (pixels/frame Ã  25 FPS) |
 | **MaxVel** | Missiles.txt | Vitesse maximale |
-| **Accel** | Missiles.txt | Accélération par frame |
-| **Range** | Missiles.txt | Durée de vie en frames |
+| **Accel** | Missiles.txt | AccÃ©lÃ©ration par frame |
+| **Range** | Missiles.txt | DurÃ©e de vie en frames |
 | **LevRange** | Missiles.txt | Bonus de range par niveau |
 | **VelLev** | Missiles.txt | Bonus de vitesse par niveau |
 | **Size** | Missiles.txt | Rayon de collision en subtiles |
 
-### Fonctions serveur/client séparées
+### Fonctions serveur/client sÃ©parÃ©es
 
-Le système de missiles sépare **strictement** le client et le serveur :
+Le systÃ¨me de missiles sÃ©pare **strictement** le client et le serveur :
 
 | Fonction | Client | Serveur |
 |----------|--------|---------|
-| **DoFunc** (mouvement) | `pCltDoFunc` — graphisme, effets visuels | `pSrvDoFunc` — logique, collision |
-| **HitFunc** (impact) | `pCltHitFunc` — particules, son | `pSrvHitFunc` — dégâts, effets |
-| **DmgFunc** | — | `pSrvDmgFunc` — modifie les dégâts avant calcul |
+| **DoFunc** (mouvement) | `pCltDoFunc` â€” graphisme, effets visuels | `pSrvDoFunc` â€” logique, collision |
+| **HitFunc** (impact) | `pCltHitFunc` â€” particules, son | `pSrvHitFunc` â€” dÃ©gÃ¢ts, effets |
+| **DmgFunc** | â€” | `pSrvDmgFunc` â€” modifie les dÃ©gÃ¢ts avant calcul |
 
-Les fonctions client et serveur **doivent** être synchronisées pour éviter les désync.
+Les fonctions client et serveur **doivent** Ãªtre synchronisÃ©es pour Ã©viter les dÃ©sync.
 
 ### Move Function standard (type 1)
 
@@ -745,36 +745,36 @@ fn missile_move_basic(missile, dt):
 
 | ID | Comportement |
 |----|-------------|
-| 0 | Pas de collision — traverse tout jusqu'à expiration |
-| 1 | Collide joueurs uniquement (bug : ne collide pas les monstres malgré l'intention) |
+| 0 | Pas de collision â€” traverse tout jusqu'Ã  expiration |
+| 1 | Collide joueurs uniquement (bug : ne collide pas les monstres malgrÃ© l'intention) |
 | 2 | Collide monstres ennemis uniquement |
 | 3 | Collide monstres + joueurs |
-| 4 | Expire toujours (missile fantôme) |
+| 4 | Expire toujours (missile fantÃ´me) |
 | 5 | Copie du type 2 |
 | 6 | Collide murs uniquement (impacts verticaux) |
-| 7 | Collide missiles destructibles (déprécié) |
-| 8 | Collide monstres/joueurs + bloqué par terrain |
+| 7 | Collide missiles destructibles (dÃ©prÃ©ciÃ©) |
+| 8 | Collide monstres/joueurs + bloquÃ© par terrain |
 
-### Détection : par tick (pas continue)
+### DÃ©tection : par tick (pas continue)
 
-La collision est vérifiée **à chaque frame** (25 FPS), pas en continu. Un projectile très rapide peut donc **traverser** une cible fine (problème de tunneling).
+La collision est vÃ©rifiÃ©e **Ã  chaque frame** (25 FPS), pas en continu. Un projectile trÃ¨s rapide peut donc **traverser** une cible fine (problÃ¨me de tunneling).
 
 ### Collision murale
 
-Un missile est détruit s'il finit sa frame sur une subtile ayant des **wall bits** activés. La vérification est sur la position finale, pas sur le trajet.
+Un missile est dÃ©truit s'il finit sa frame sur une subtile ayant des **wall bits** activÃ©s. La vÃ©rification est sur la position finale, pas sur le trajet.
 
 ### Piercing
 
-| Paramètre | Effet |
+| ParamÃ¨tre | Effet |
 |-----------|-------|
-| `Pierce=1` | Le missile continue après collision (traverse les ennemis) |
-| `CollideKill=1` | Le missile est détruit après collision |
-| `LastCollide=1` | Le missile s'arrête après collision |
-| `NextHit/NextDelay` | Multi-hit avec délai entre chaque impact |
+| `Pierce=1` | Le missile continue aprÃ¨s collision (traverse les ennemis) |
+| `CollideKill=1` | Le missile est dÃ©truit aprÃ¨s collision |
+| `LastCollide=1` | Le missile s'arrÃªte aprÃ¨s collision |
+| `NextHit/NextDelay` | Multi-hit avec dÃ©lai entre chaque impact |
 
-### Mémoire anti-spam
+### MÃ©moire anti-spam
 
-Les missiles se souviennent de leur **dernière cible** et ne la refrappent pas immédiatement. Cela permet à Fissure de multi-hit quand plusieurs monstres sont sur la même tile.
+Les missiles se souviennent de leur **derniÃ¨re cible** et ne la refrappent pas immÃ©diatement. Cela permet Ã  Fissure de multi-hit quand plusieurs monstres sont sur la mÃªme tile.
 
 ```rust
 pub struct MissileState {
@@ -787,11 +787,11 @@ pub struct MissileState {
 
 ---
 
-## 4.3 Sorts spéciaux
+## 4.3 Sorts spÃ©ciaux
 
-### Projectiles guidés (homing)
+### Projectiles guidÃ©s (homing)
 
-Les missiles guidés utilisent une **Move Function spéciale** qui ajuste la direction vers la cible à chaque frame :
+Les missiles guidÃ©s utilisent une **Move Function spÃ©ciale** qui ajuste la direction vers la cible Ã  chaque frame :
 
 ```
 fn missile_move_guided(missile, dt):
@@ -804,9 +804,9 @@ fn missile_move_guided(missile, dt):
 
 Exemples : Guided Arrow, Bone Spirit.
 
-### AoE à l'impact
+### AoE Ã  l'impact
 
-Quand `pSrvHitFunc` est déclenché, certains missiles spawn un **sous-missile** AoE :
+Quand `pSrvHitFunc` est dÃ©clenchÃ©, certains missiles spawn un **sous-missile** AoE :
 
 ```
 fn on_hit_aoe(missile, hit_pos):
@@ -814,7 +814,7 @@ fn on_hit_aoe(missile, hit_pos):
         type = missile.sub_missile,
         pos = hit_pos,
         collide_type = 3,  // touche tout
-        range = 1,         // instantané
+        range = 1,         // instantanÃ©
         size = aoe_radius
     )
 ```
@@ -823,27 +823,27 @@ Exemples : Fireball (explosion), Frozen Orb (nova de froid).
 
 ### Effets persistants
 
-| Sort | Mécanisme |
+| Sort | MÃ©canisme |
 |------|-----------|
-| **Firewall** | Série de missiles statiques alignés sur la grille, chacun applique des dégâts par tick |
-| **Blizzard** | Missiles tombant à des positions aléatoires dans une zone |
+| **Firewall** | SÃ©rie de missiles statiques alignÃ©s sur la grille, chacun applique des dÃ©gÃ¢ts par tick |
+| **Blizzard** | Missiles tombant Ã  des positions alÃ©atoires dans une zone |
 | **Poison Nova** | Ring de missiles partant dans toutes les directions |
 | **Meteor** | Missile invisible descendant + AoE persistant au sol (Molten Boulder) |
 
-### Fissure (cas d'étude technique intéressant)
+### Fissure (cas d'Ã©tude technique intÃ©ressant)
 
-Fissure émet des missiles le long de la grille. Quand plusieurs monstres chevauchent la même subtile, chaque missile peut frapper un monstre différent grâce à la mémoire anti-spam, causant des dégâts massifs.
+Fissure Ã©met des missiles le long de la grille. Quand plusieurs monstres chevauchent la mÃªme subtile, chaque missile peut frapper un monstre diffÃ©rent grÃ¢ce Ã  la mÃ©moire anti-spam, causant des dÃ©gÃ¢ts massifs.
 
 ---
 
-## 4.4 Synchronisation réseau
+## 4.4 Synchronisation rÃ©seau
 
-| Aspect | Implémentation D2 |
+| Aspect | ImplÃ©mentation D2 |
 |--------|-------------------|
-| **Autorité** | Serveur autoritaire pour les dégâts et les collisions |
+| **AutoritÃ©** | Serveur autoritaire pour les dÃ©gÃ¢ts et les collisions |
 | **Client** | Affiche les missiles localement (interpolation graphique) |
-| **Désync possible** | Si le client et le serveur divergent sur la position d'une cible, le missile client peut « rater » visuellement alors que le serveur a enregistré un hit (ou l'inverse) |
-| **pCltDoFunc vs pSrvDoFunc** | Les deux doivent être cohérents sinon désync visuelle |
+| **DÃ©sync possible** | Si le client et le serveur divergent sur la position d'une cible, le missile client peut Â« rater Â» visuellement alors que le serveur a enregistrÃ© un hit (ou l'inverse) |
+| **pCltDoFunc vs pSrvDoFunc** | Les deux doivent Ãªtre cohÃ©rents sinon dÃ©sync visuelle |
 
 ### Transposition MGE
 
@@ -862,7 +862,7 @@ pub struct Projectile {
     pub next_hit_delay: u32,
     pub guided: bool,
     pub guide_target: Option<EntityId>,
-    pub turn_rate: f32,            // pour missiles guidés
+    pub turn_rate: f32,            // pour missiles guidÃ©s
 }
 
 pub enum CollideType {
@@ -874,16 +874,16 @@ pub enum CollideType {
 }
 ```
 
-### Coût CPU estimé (projectiles)
+### CoÃ»t CPU estimÃ© (projectiles)
 
-| Opération | Coût par frame |
+| OpÃ©ration | CoÃ»t par frame |
 |-----------|---------------|
-| Déplacement (par missile) | O(1) — simple addition vectorielle |
-| Collision broadphase | O(n×m) naïf, O(n log n) avec spatial hash |
-| Collision narrowphase | O(1) — test cercle/subtile |
+| DÃ©placement (par missile) | O(1) â€” simple addition vectorielle |
+| Collision broadphase | O(nÃ—m) naÃ¯f, O(n log n) avec spatial hash |
+| Collision narrowphase | O(1) â€” test cercle/subtile |
 | Total (100 missiles, 200 monstres) | ~0.5ms avec spatial hash |
 
-**Recommandation MGE :** utiliser un spatial hash (grille de cellules) pour la broadphase. La grille de passabilité MGE peut servir de base.
+**Recommandation MGE :** utiliser un spatial hash (grille de cellules) pour la broadphase. La grille de passabilitÃ© MGE peut servir de base.
 
 ---
 
@@ -891,42 +891,42 @@ pub enum CollideType {
 
 ## 5.1 Architecture comportementale
 
-### IA simplifiée
+### IA simplifiÃ©e
 
-Les mercenaires et invocations utilisent des **IA similaires aux monstres** mais avec des priorités différentes :
+Les mercenaires et invocations utilisent des **IA similaires aux monstres** mais avec des prioritÃ©s diffÃ©rentes :
 
-| Entité | IA | Particularités |
+| EntitÃ© | IA | ParticularitÃ©s |
 |--------|-----|----------------|
 | **Mercenaire** | Propre IA (melee ou ranged selon acte) | Suit le joueur, engage les ennemis proches |
-| **Squelettes** | IA similaire mercenaire | Poursuivent ennemis visibles, restent près du joueur |
-| **Golems** | IA spéciale par type | 1 seul actif à la fois |
-| **Revives** | IA originale du monstre | Conservent leurs attaques spéciales, comportement moins prévisible |
+| **Squelettes** | IA similaire mercenaire | Poursuivent ennemis visibles, restent prÃ¨s du joueur |
+| **Golems** | IA spÃ©ciale par type | 1 seul actif Ã  la fois |
+| **Revives** | IA originale du monstre | Conservent leurs attaques spÃ©ciales, comportement moins prÃ©visible |
 
-### Priorité joueur
+### PrioritÃ© joueur
 
 ```
 fn follower_ai_think(follower, owner, world):
     distance_to_owner = distance(follower.pos, owner.pos)
     
-    // Priorité 1 : rester près du joueur
+    // PrioritÃ© 1 : rester prÃ¨s du joueur
     if distance_to_owner > MAX_FOLLOW_DIST:
         pathfind_towards(follower, owner.pos)
         return
     
-    // Priorité 2 : même cible que le joueur (si visible)
+    // PrioritÃ© 2 : mÃªme cible que le joueur (si visible)
     if owner.target.is_some() and can_see(follower, owner.target):
         follower.target = owner.target
         engage(follower)
         return
     
-    // Priorité 3 : ennemi le plus proche
+    // PrioritÃ© 3 : ennemi le plus proche
     nearest = find_nearest_enemy(follower.pos, FOLLOWER_AGGRO_RANGE)
     if nearest.is_some():
         follower.target = nearest
         engage(follower)
         return
     
-    // Priorité 4 : suivre le joueur
+    // PrioritÃ© 4 : suivre le joueur
     if distance_to_owner > FOLLOW_THRESHOLD:
         pathfind_towards(follower, owner.pos)
     else:
@@ -935,81 +935,81 @@ fn follower_ai_think(follower, owner, world):
 
 ---
 
-## 5.2 Téléportation automatique
+## 5.2 TÃ©lÃ©portation automatique
 
-### Conditions de téléportation
+### Conditions de tÃ©lÃ©portation
 
 | Condition | Comportement |
 |-----------|-------------|
-| **Distance excessive** | Si le follower est trop loin du joueur (hors écran + marge), téléportation invisible vers un point proche du joueur |
-| **Changement de zone** | Le follower est instantanément repositionné dans la nouvelle zone |
-| **Joueur utilise Teleport** | Le mercenaire et les invocations sont téléportés au point d'arrivée |
-| **Stuck** | Pas de téléportation automatique de déblocage — le joueur doit se déplacer ou utiliser Teleport |
+| **Distance excessive** | Si le follower est trop loin du joueur (hors Ã©cran + marge), tÃ©lÃ©portation invisible vers un point proche du joueur |
+| **Changement de zone** | Le follower est instantanÃ©ment repositionnÃ© dans la nouvelle zone |
+| **Joueur utilise Teleport** | Le mercenaire et les invocations sont tÃ©lÃ©portÃ©s au point d'arrivÃ©e |
+| **Stuck** | Pas de tÃ©lÃ©portation automatique de dÃ©blocage â€” le joueur doit se dÃ©placer ou utiliser Teleport |
 
-### Distance de téléport estimée
+### Distance de tÃ©lÃ©port estimÃ©e
 
-| Seuil | Valeur estimée |
+| Seuil | Valeur estimÃ©e |
 |-------|---------------|
 | **Distance de suivi normal** | ~10-15 subtiles |
-| **Distance de téléportation** | >40-50 subtiles (environ 1.5 écran) |
+| **Distance de tÃ©lÃ©portation** | >40-50 subtiles (environ 1.5 Ã©cran) |
 
-### Problèmes connus
+### ProblÃ¨mes connus
 
-- **Arcane Sanctuary** : terrain complexe → followers se bloquent fréquemment
-- **Pathfinding limité** : les mercenaires melee souffrent plus que les ranged dans les couloirs étroits
-- Pas de commande "rappel" — les workarounds sont : fuir pour les faire suivre, ou utiliser Teleport
+- **Arcane Sanctuary** : terrain complexe â†’ followers se bloquent frÃ©quemment
+- **Pathfinding limitÃ©** : les mercenaires melee souffrent plus que les ranged dans les couloirs Ã©troits
+- Pas de commande "rappel" â€” les workarounds sont : fuir pour les faire suivre, ou utiliser Teleport
 
 ---
 
-## 5.3 Sélection de cible
+## 5.3 SÃ©lection de cible
 
-### Priorité de ciblage des followers
+### PrioritÃ© de ciblage des followers
 
-| Priorité | Critère |
+| PrioritÃ© | CritÃ¨re |
 |----------|---------|
-| 1 | Cible actuellement attaquée par le joueur (si visible) |
+| 1 | Cible actuellement attaquÃ©e par le joueur (si visible) |
 | 2 | Ennemi le plus proche du follower |
 | 3 | Ennemi le plus proche du joueur |
 | 4 | Comportement propre (Revives conservent l'IA du monstre original) |
 
-### Cas spéciaux
+### Cas spÃ©ciaux
 
-- **Revives** : utilisent l'IA originale du monstre → peuvent s'éloigner, utiliser des attaques spéciales, et sont moins obéissants
+- **Revives** : utilisent l'IA originale du monstre â†’ peuvent s'Ã©loigner, utiliser des attaques spÃ©ciales, et sont moins obÃ©issants
 - **Golems** : IA agressive (Clay = lent mais tanky, Iron = thorns, Fire = charge)
-- **Mercenaire Act 2 avec aura** : reste en formation → l'aura bénéficie au joueur et aux autres suivants
+- **Mercenaire Act 2 avec aura** : reste en formation â†’ l'aura bÃ©nÃ©ficie au joueur et aux autres suivants
 
 ---
 
-## 5.4 Pathfinding spécifique
+## 5.4 Pathfinding spÃ©cifique
 
-### Différences avec le pathfinding monstre
+### DiffÃ©rences avec le pathfinding monstre
 
 | Aspect | Monstres | Followers |
 |--------|----------|-----------|
 | **Walk flags** | Player-walkable OU monster-walkable | Mercenary-walkable (flags distincts dans les subtiles) |
-| **Collision pets** | — | Les pets se bloquent entre eux (SizeX/SizeY) |
-| **Collision avec autres monstres** | Oui | Oui (pas d'immunité) |
+| **Collision pets** | â€” | Les pets se bloquent entre eux (SizeX/SizeY) |
+| **Collision avec autres monstres** | Oui | Oui (pas d'immunitÃ©) |
 | **Passage portes** | Configurable (`opendoors`) | Suivent le joueur (passent les portes ouvertes) |
 
 ### InTown et collision
 
-D'après MonStats.txt : `InTown` contrôle si les pets ont une collision en ville :
-- **Singleplayer** : collision activable/désactivable
-- **Multiplayer** : collision toujours désactivée pour les pets en ville
+D'aprÃ¨s MonStats.txt : `InTown` contrÃ´le si les pets ont une collision en ville :
+- **Singleplayer** : collision activable/dÃ©sactivable
+- **Multiplayer** : collision toujours dÃ©sactivÃ©e pour les pets en ville
 
 ### Transposition MGE
 
 ```rust
 pub struct Follower {
     pub owner: EntityId,
-    pub follow_distance: f32,        // distance idéale au joueur
-    pub teleport_threshold: f32,     // distance de téléportation auto
+    pub follow_distance: f32,        // distance idÃ©ale au joueur
+    pub teleport_threshold: f32,     // distance de tÃ©lÃ©portation auto
     pub targeting_mode: TargetingMode,
     pub retain_original_ai: bool,    // pour les Revives
 }
 
 pub enum TargetingMode {
-    FollowOwnerTarget,   // priorité cible du joueur
+    FollowOwnerTarget,   // prioritÃ© cible du joueur
     NearestEnemy,        // cible la plus proche
     OriginalAi,          // IA du monstre original (Revives)
 }
@@ -1023,79 +1023,79 @@ pub enum TargetingMode {
 
 | Couche | Technologie |
 |--------|-------------|
-| **Langage** | C/C++ (confirmé par D2MOO) |
-| **Rendering** | DirectDraw (2D sprites), résolution 640×480 (800×600 en LoD) |
-| **Game loop** | Fixed timestep à 25 FPS |
-| **Données** | Fichiers .txt (TSV) chargés en RAM → tables indexées par hcIdx |
-| **Assets** | Formats propriétaires : DCC/DC6 (sprites), DT1 (tuiles), DS1 (presets carte), COF (animations) |
-| **Réseau** | TCP/IP, architecture client-serveur pour Battle.net, peer-to-peer pour LAN |
+| **Langage** | C/C++ (confirmÃ© par D2MOO) |
+| **Rendering** | DirectDraw (2D sprites), rÃ©solution 640Ã—480 (800Ã—600 en LoD) |
+| **Game loop** | Fixed timestep Ã  25 FPS |
+| **DonnÃ©es** | Fichiers .txt (TSV) chargÃ©s en RAM â†’ tables indexÃ©es par hcIdx |
+| **Assets** | Formats propriÃ©taires : DCC/DC6 (sprites), DT1 (tuiles), DS1 (presets carte), COF (animations) |
+| **RÃ©seau** | TCP/IP, architecture client-serveur pour Battle.net, peer-to-peer pour LAN |
 | **Audio** | DirectSound |
 
 ## 6.2 Limites hardware 2000
 
 | Contrainte | Impact |
 |------------|--------|
-| **CPU** | Pentium II/III ~500MHz → tick rate limité à 25 FPS |
-| **RAM** | 64-256 MB → cartes générées procéduralement, pas pré-chargées |
-| **GPU** | 2D uniquement (pas de GPU computing) → tout sur CPU |
-| **Réseau** | Modems 56k → minimum de données réseau, pas de streaming |
-| **Stockage** | CD-ROM → assets compressés, streaming minimal |
+| **CPU** | Pentium II/III ~500MHz â†’ tick rate limitÃ© Ã  25 FPS |
+| **RAM** | 64-256 MB â†’ cartes gÃ©nÃ©rÃ©es procÃ©duralement, pas prÃ©-chargÃ©es |
+| **GPU** | 2D uniquement (pas de GPU computing) â†’ tout sur CPU |
+| **RÃ©seau** | Modems 56k â†’ minimum de donnÃ©es rÃ©seau, pas de streaming |
+| **Stockage** | CD-ROM â†’ assets compressÃ©s, streaming minimal |
 
 ## 6.3 Pourquoi certains comportements existent (limitations techniques)
 
 | Comportement | Raison technique |
 |-------------|-----------------|
-| **Breakpoints** | Tick fixe 25 FPS → animations en frames discrètes |
-| **Pathfinding limité (35 cells)** | CPU trop faible pour A* longue distance sur 200+ monstres |
-| **Monstres bloqués** | Pas de système de déblocage automatique (coût CPU) |
+| **Breakpoints** | Tick fixe 25 FPS â†’ animations en frames discrÃ¨tes |
+| **Pathfinding limitÃ© (35 cells)** | CPU trop faible pour A* longue distance sur 200+ monstres |
+| **Monstres bloquÃ©s** | Pas de systÃ¨me de dÃ©blocage automatique (coÃ»t CPU) |
 | **Pas de respawn** | RAM insuffisante pour tracker les respawn timers de centaines de monstres |
-| **Téléportation followers** | Solution bon marché au pathfinding défaillant |
-| **IA table-driven** | Pas assez de CPU pour du behavior tree complexe par entité |
+| **TÃ©lÃ©portation followers** | Solution bon marchÃ© au pathfinding dÃ©faillant |
+| **IA table-driven** | Pas assez de CPU pour du behavior tree complexe par entitÃ© |
 | **Collision par subtile** | Plus rapide que du calcul flottant point par point |
-| **CollideType #1 bug** | Code jamais corrigé car le jeu fonctionne malgré tout |
+| **CollideType #1 bug** | Code jamais corrigÃ© car le jeu fonctionne malgrÃ© tout |
 
-## 6.4 Estimation coût CPU par système
+## 6.4 Estimation coÃ»t CPU par systÃ¨me
 
-| Système | Coût estimé (par frame, 2000) | Coût estimé (2026, MGE) |
+| SystÃ¨me | CoÃ»t estimÃ© (par frame, 2000) | CoÃ»t estimÃ© (2026, MGE) |
 |---------|-------------------------------|-------------------------|
-| **Pathfinding** (200 mobs) | ~8ms (A* limité) | ~0.5ms (A* optimisé + spatial hash) |
+| **Pathfinding** (200 mobs) | ~8ms (A* limitÃ©) | ~0.5ms (A* optimisÃ© + spatial hash) |
 | **IA** (200 mobs) | ~3ms (FSM simple) | ~0.2ms |
 | **Projectiles** (50 actifs) | ~1ms | ~0.05ms |
 | **Collision** (globale) | ~4ms | ~0.3ms (broadphase spatial hash) |
 | **Rendering** (sprites) | ~15ms | ~2ms (GPU batched) |
-| **Réseau** (sync) | ~2ms | ~1ms |
-| **Total** | ~33ms (budgeable sur 40ms) | ~4ms (largement sous les 33ms à 30 FPS) |
+| **RÃ©seau** (sync) | ~2ms | ~1ms |
+| **Total** | ~33ms (budgeable sur 40ms) | ~4ms (largement sous les 33ms Ã  30 FPS) |
 
-## 6.5 Vulnérabilités potentielles du moteur
+## 6.5 VulnÃ©rabilitÃ©s potentielles du moteur
 
-| Vulnérabilité | Description | Exploitation connue |
+| VulnÃ©rabilitÃ© | Description | Exploitation connue |
 |---------------|-------------|---------------------|
-| **Desync client** | Le client prédit localement → position manipulable | Maphack, teleport hack |
-| **Tables .txt modifiables** | Fichiers de configuration en clair → moddable | Modification de stats, résistances |
-| **Collision par tick** | Projectiles rapides traversent les hitbox | Trivial à reproduire en jeu |
-| **Memory editing** | Pas de protection mémoire côté client | Duplication d'items, modification de gold |
+| **Desync client** | Le client prÃ©dit localement â†’ position manipulable | Maphack, teleport hack |
+| **Tables .txt modifiables** | Fichiers de configuration en clair â†’ moddable | Modification de stats, rÃ©sistances |
+| **Collision par tick** | Projectiles rapides traversent les hitbox | Trivial Ã  reproduire en jeu |
+| **Memory editing** | Pas de protection mÃ©moire cÃ´tÃ© client | Duplication d'items, modification de gold |
 | **TCP/IP peer-to-peer** | Pas de serveur autoritaire en LAN | Triche libre en LAN |
-| **Seed prédictible** | Le seed de carte est partagé | Cartes prévisibles avec le même seed |
+| **Seed prÃ©dictible** | Le seed de carte est partagÃ© | Cartes prÃ©visibles avec le mÃªme seed |
 
 ---
 
-# 7. RÉINTERPRÉTATION MODERNE — TRANSPOSITION MGE/ALLUMINA
+# 7. RÃ‰INTERPRÃ‰TATION MODERNE â€” TRANSPOSITION MGE/ALLUMINA
 
-## 7.1 Architecture recommandée pour Allumina
+## 7.1 Architecture recommandÃ©e pour Allumina
 
 | Couche | Choix MGE | Justification |
 |--------|-----------|---------------|
-| **Game loop** | Fixed timestep 30 FPS logique + rendering découplé | Plus fluide que D2 (25 FPS), budget CPU confortable |
-| **Positionnement** | Vec2 flottant avec grille logique optionnelle | Flexibilité + compatibilité pathfinding |
-| **IA** | Table-driven FSM avec composants ECS | Même approche que D2 mais via composants MGE au lieu de fichiers .txt |
-| **Projectiles** | Entités physiques (pas de hitscan) + spatial hash | Reproduit le feel D2 avec meilleure performance |
+| **Game loop** | Fixed timestep 30 FPS logique + rendering dÃ©couplÃ© | Plus fluide que D2 (25 FPS), budget CPU confortable |
+| **Positionnement** | Vec2 flottant avec grille logique optionnelle | FlexibilitÃ© + compatibilitÃ© pathfinding |
+| **IA** | Table-driven FSM avec composants ECS | MÃªme approche que D2 mais via composants MGE au lieu de fichiers .txt |
+| **Projectiles** | EntitÃ©s physiques (pas de hitscan) + spatial hash | Reproduit le feel D2 avec meilleure performance |
 | **Collision** | Broadphase spatial hash + narrowphase cercle/AABB | Standard moderne, O(n log n) |
-| **Réseau** | Lobby hôte autoritaire + client prediction + réconciliation | MWS comme transport, LOI-1 respectée (solo jouable) |
-| **Données** | Composants ECS + tables de configuration (RON/JSON) | Équivalent des .txt D2 mais sérialisable et typé |
+| **RÃ©seau** | Lobby hÃ´te autoritaire + client prediction + rÃ©conciliation | MWS comme transport, LOI-1 respectÃ©e (solo jouable) |
+| **DonnÃ©es** | Composants ECS + tables de configuration (RON/JSON) | Ã‰quivalent des .txt D2 mais sÃ©rialisable et typÃ© |
 
-## 7.2 Mapping D2 → Plugins MGE
+## 7.2 Mapping D2 â†’ Plugins MGE
 
-| Système D2 | Plugin MGE | Composants |
+| SystÃ¨me D2 | Plugin MGE | Composants |
 |------------|------------|------------|
 | MonStats.txt | `mge-plugin-monster-stats.v1` | `MonsterDef`, `MonsterInstance` |
 | MonStats2.txt | `mge-plugin-monster-collision.v1` | `MonsterHitbox`, `MonsterSize` |
@@ -1106,46 +1106,46 @@ pub enum TargetingMode {
 | SuperUniques.txt | `mge-plugin-elite-gen.v1` | `EliteDef`, `AffixPool` |
 | TreasureClass.txt | `mge-plugin-loot.v1` | `LootTable`, `TreasureClass` |
 
-## 7.3 Difficultés principales
+## 7.3 DifficultÃ©s principales
 
-| Difficulté | Détail |
+| DifficultÃ© | DÃ©tail |
 |------------|--------|
-| **Reproduire le "feel" D2** | Le tick à 25 FPS crée une sensation spécifique ; un tick plus rapide sera plus fluide mais différent |
-| **Breakpoints optionnels** | Si on veut les breakpoints, il faut un système de quantification des vitesses d'animation |
-| **IA table-driven fidèle** | Nécessite un système de configuration robuste avec 8+ paramètres par IA |
-| **Collision subtile vs flottante** | Le passage de coordonnées entières à flottantes change les edge cases de collision |
-| **Followers décents** | D2 avait un pathfinding médiocre pour les followers — il faut faire mieux sans perdre le feel |
+| **Reproduire le "feel" D2** | Le tick Ã  25 FPS crÃ©e une sensation spÃ©cifique ; un tick plus rapide sera plus fluide mais diffÃ©rent |
+| **Breakpoints optionnels** | Si on veut les breakpoints, il faut un systÃ¨me de quantification des vitesses d'animation |
+| **IA table-driven fidÃ¨le** | NÃ©cessite un systÃ¨me de configuration robuste avec 8+ paramÃ¨tres par IA |
+| **Collision subtile vs flottante** | Le passage de coordonnÃ©es entiÃ¨res Ã  flottantes change les edge cases de collision |
+| **Followers dÃ©cents** | D2 avait un pathfinding mÃ©diocre pour les followers â€” il faut faire mieux sans perdre le feel |
 | **Multijoueur souverain** | D2 repose sur Battle.net ; Allumina doit fonctionner via MWS (Lobby P2P) sans serveur central |
 
-## 7.4 Pièges à éviter
+## 7.4 PiÃ¨ges Ã  Ã©viter
 
-| Piège | Explication |
+| PiÃ¨ge | Explication |
 |-------|-------------|
-| **Copier les bugs de D2** | Les CollideType bugs, le NHAM, les followers bloqués → ne pas reproduire |
-| **Tick rate trop élevé** | 60 FPS logique serait overkill pour un ARPG isométrique et coûteux en réseau |
-| **Pathfinding global** | A* sur toute la carte est inutile et coûteux — garder la portée limitée de D2 |
+| **Copier les bugs de D2** | Les CollideType bugs, le NHAM, les followers bloquÃ©s â†’ ne pas reproduire |
+| **Tick rate trop Ã©levÃ©** | 60 FPS logique serait overkill pour un ARPG isomÃ©trique et coÃ»teux en rÃ©seau |
+| **Pathfinding global** | A* sur toute la carte est inutile et coÃ»teux â€” garder la portÃ©e limitÃ©e de D2 |
 | **IA trop complexe** | Behavior trees par mob = overkill. La FSM table-driven de D2 est suffisante et performante |
-| **Oublier le leashing** | Sans leashing, les mobs suivent indéfiniment → train de monstres exploit |
-| **Collision trop réaliste** | D2 autorise le chevauchement des "ailes" → ne pas bloquer trop strictement ou les combats deviennent impossibles |
-| **Négliger le spatial hash** | Sans broadphase, la collision de 200+ mobs + 50 projectiles est O(n²) |
+| **Oublier le leashing** | Sans leashing, les mobs suivent indÃ©finiment â†’ train de monstres exploit |
+| **Collision trop rÃ©aliste** | D2 autorise le chevauchement des "ailes" â†’ ne pas bloquer trop strictement ou les combats deviennent impossibles |
+| **NÃ©gliger le spatial hash** | Sans broadphase, la collision de 200+ mobs + 50 projectiles est O(nÂ²) |
 
 ## 7.5 Comparaison implicite avec PoE et D3
 
 | Aspect | D2 (2000) | Path of Exile | Diablo 3 | Allumina (cible) |
 |--------|-----------|---------------|----------|-------------------|
 | **Tick rate** | 25 FPS | 30 FPS serveur | 60 FPS | 30 FPS |
-| **Pathfinding** | A* limité | NavMesh + A* | NavMesh | A* sur grille logique |
+| **Pathfinding** | A* limitÃ© | NavMesh + A* | NavMesh | A* sur grille logique |
 | **IA** | FSM table-driven | FSM + scripts | Behavior tree | FSM table-driven (MGE) |
-| **Projectiles** | Entités physiques | Entités physiques | Entités + hitscan | Entités physiques |
+| **Projectiles** | EntitÃ©s physiques | EntitÃ©s physiques | EntitÃ©s + hitscan | EntitÃ©s physiques |
 | **Collision** | Subtile grid | Continuous | Capsule + spatial hash | Cercle/AABB + spatial hash |
-| **Réseau** | Client-serveur/P2P | Serveur autoritaire | Serveur autoritaire | Lobby autoritaire (MWS) |
-| **Élites** | Affixes simples | Affixes + mods carte | Affixes + Nephalem | Affixes (pool configurable) |
-| **Followers** | IA basique, teleport | IA basique | IA basique | IA améliorée (chaîne locomotion MGE) |
-| **Troupes** | Mercenaire + summons | Spectres/zombies | 1 follower | Multi-échelles (Charisme cap) |
+| **RÃ©seau** | Client-serveur/P2P | Serveur autoritaire | Serveur autoritaire | Lobby autoritaire (MWS) |
+| **Ã‰lites** | Affixes simples | Affixes + mods carte | Affixes + Nephalem | Affixes (pool configurable) |
+| **Followers** | IA basique, teleport | IA basique | IA basique | IA amÃ©liorÃ©e (chaÃ®ne locomotion MGE) |
+| **Troupes** | Mercenaire + summons | Spectres/zombies | 1 follower | Multi-Ã©chelles (Charisme cap) |
 
 ---
 
-# 8. TABLES RÉCAPITULATIVES
+# 8. TABLES RÃ‰CAPITULATIVES
 
 ## 8.1 Constantes fondamentales D2
 
@@ -1153,33 +1153,33 @@ pub enum TargetingMode {
 |-----------|--------|
 | Tick rate | 25 FPS |
 | Frame duration | 40 ms |
-| Subtile size (affichage) | 32×16 px |
-| Tile size (affichage) | 160×80 px |
-| Subtiles par tile | 5×5 |
-| 1 yard | 1.5 subtiles = 48×24 px |
-| Distance d'activation IA (défaut) | 35 cells ≈ 1 écran |
-| Portée pathfinding | ~35 subtiles |
+| Subtile size (affichage) | 32Ã—16 px |
+| Tile size (affichage) | 160Ã—80 px |
+| Subtiles par tile | 5Ã—5 |
+| 1 yard | 1.5 subtiles = 48Ã—24 px |
+| Distance d'activation IA (dÃ©faut) | 35 cells â‰ˆ 1 Ã©cran |
+| PortÃ©e pathfinding | ~35 subtiles |
 | Player SizeX/SizeY | 2 subtiles |
-| Knockback range | 7×7 subtiles (centré) |
-| Regen formule | (REGEN × HP) / 4096 par frame |
+| Knockback range | 7Ã—7 subtiles (centrÃ©) |
+| Regen formule | (REGEN Ã— HP) / 4096 par frame |
 | Block cap | 75% |
-| Resistance immunité | ≥100% |
-| Break immunité | 5 pts résistance réduite = 1% brisé |
+| Resistance immunitÃ© | â‰¥100% |
+| Break immunitÃ© | 5 pts rÃ©sistance rÃ©duite = 1% brisÃ© |
 
-## 8.2 Multiplicateurs d'élite par difficulté
+## 8.2 Multiplicateurs d'Ã©lite par difficultÃ©
 
 | Type | HP (N/NM/H) | Niveau bonus | XP bonus |
 |------|-------------|-------------|----------|
-| Minion | ×2 / ×1.75 / ×1.5 | +3 | ×5 |
-| Champion | ×3 / ×2.5 / ×2 | +2 | ×3 |
-| Berserker | ×0.75 champion | +2 | ×5 |
-| Possessed | ×6 champion | +2 | ×3 |
-| Unique | ×4 / ×3 / ×2 | +3 | ×5 |
+| Minion | Ã—2 / Ã—1.75 / Ã—1.5 | +3 | Ã—5 |
+| Champion | Ã—3 / Ã—2.5 / Ã—2 | +2 | Ã—3 |
+| Berserker | Ã—0.75 champion | +2 | Ã—5 |
+| Possessed | Ã—6 champion | +2 | Ã—3 |
+| Unique | Ã—4 / Ã—3 / Ã—2 | +3 | Ã—5 |
 
-## 8.3 Structure de données recommandée (MGE)
+## 8.3 Structure de donnÃ©es recommandÃ©e (MGE)
 
 ```rust
-// Table de spawn — équivalent Levels.txt + MonStats.txt
+// Table de spawn â€” Ã©quivalent Levels.txt + MonStats.txt
 pub struct ZoneSpawnConfig {
     pub zone_id: u32,
     pub area_level: [u32; 3],          // Normal, Nightmare, Hell
@@ -1202,12 +1202,12 @@ pub struct MonsterSpawnEntry {
     pub is_ranged: bool,
 }
 
-// Définition monstre — équivalent MonStats.txt complet
+// DÃ©finition monstre â€” Ã©quivalent MonStats.txt complet
 pub struct MonsterDef {
     pub id: u32,
     pub base_id: u32,
     pub ai_type: AiTypeId,
-    pub ai_delay: [u32; 3],            // par difficulté
+    pub ai_delay: [u32; 3],            // par difficultÃ©
     pub ai_dist: [f32; 3],
     pub ai_params: [[f32; 8]; 3],
     pub threat: f32,
@@ -1215,7 +1215,7 @@ pub struct MonsterDef {
     pub run_velocity: f32,
     pub skills: [Option<SkillRef>; 8],
     pub resistances: ResistanceSet,
-    pub hp_range: [(u32, u32); 3],      // (min, max) par difficulté
+    pub hp_range: [(u32, u32); 3],      // (min, max) par difficultÃ©
     pub damage_a1: [(u32, u32); 3],
     pub damage_a2: [(u32, u32); 3],
     pub flags: MonsterFlags,
@@ -1239,74 +1239,74 @@ pub struct MonsterFlags {
 
 ---
 
-# 9. GÉNÉRATION PROCÉDURALE DE CARTES
+# 9. GÃ‰NÃ‰RATION PROCÃ‰DURALE DE CARTES
 
-## 9.1 Système de seed
+## 9.1 SystÃ¨me de seed
 
 ### Seed global
 
-Diablo II utilise un **seed 32 bits** (entier non signé) comme source de toute la génération procédurale. Le RNG (Random Number Generator) est un générateur séquentiel déterministe : chaque nombre aléatoire est calculé à partir du précédent, de sorte qu'un même seed produit toujours le même flux de valeurs "aléatoires".
+Diablo II utilise un **seed 32 bits** (entier non signÃ©) comme source de toute la gÃ©nÃ©ration procÃ©durale. Le RNG (Random Number Generator) est un gÃ©nÃ©rateur sÃ©quentiel dÃ©terministe : chaque nombre alÃ©atoire est calculÃ© Ã  partir du prÃ©cÃ©dent, de sorte qu'un mÃªme seed produit toujours le mÃªme flux de valeurs "alÃ©atoires".
 
-| Paramètre | Détail |
+| ParamÃ¨tre | DÃ©tail |
 |-----------|--------|
 | **Taille** | 32 bits (uint32), Little Endian |
 | **Stockage** | Offset `0xAB` (171 octets) dans le fichier `.d2s` (save du personnage) |
-| **Génération** | Automatique à la création d'une partie (basé sur l'horloge système) |
-| **Override** | Paramètre CLI `-seed <valeur>` pour forcer un seed spécifique |
-| **Plage** | 0 à 4 294 967 295 |
+| **GÃ©nÃ©ration** | Automatique Ã  la crÃ©ation d'une partie (basÃ© sur l'horloge systÃ¨me) |
+| **Override** | ParamÃ¨tre CLI `-seed <valeur>` pour forcer un seed spÃ©cifique |
+| **Plage** | 0 Ã  4 294 967 295 |
 
-### Ce que le seed contrôle
+### Ce que le seed contrÃ´le
 
-| Élément | Contrôlé par le seed |
+| Ã‰lÃ©ment | ContrÃ´lÃ© par le seed |
 |---------|---------------------|
-| **Layout des tuiles** | Oui — positions des DS1 dans le monde, choix des variantes |
-| **Sélection des presets** | Oui — quel DS1 parmi File1-File6 est choisi |
-| **Positions des sorties** | Oui — emplacements des warps entre zones |
-| **Densité de monstres** | Partiellement — le seed affecte les positions de spawn, des seeds très petits peuvent produire une densité anormalement élevée |
-| **Types de monstres** | Indirectement — la sélection aléatoire parmi M1-M25 dépend du flux RNG |
-| **Drops d'items** | Non — les drops sont calculés indépendamment au moment du kill |
-| **Waypoints** | Oui — position dans la zone (sauf certains waypoints fixes) |
-| **Objets de quête** | Oui — position dans le preset DS1 désigné |
+| **Layout des tuiles** | Oui â€” positions des DS1 dans le monde, choix des variantes |
+| **SÃ©lection des presets** | Oui â€” quel DS1 parmi File1-File6 est choisi |
+| **Positions des sorties** | Oui â€” emplacements des warps entre zones |
+| **DensitÃ© de monstres** | Partiellement â€” le seed affecte les positions de spawn, des seeds trÃ¨s petits peuvent produire une densitÃ© anormalement Ã©levÃ©e |
+| **Types de monstres** | Indirectement â€” la sÃ©lection alÃ©atoire parmi M1-M25 dÃ©pend du flux RNG |
+| **Drops d'items** | Non â€” les drops sont calculÃ©s indÃ©pendamment au moment du kill |
+| **Waypoints** | Oui â€” position dans la zone (sauf certains waypoints fixes) |
+| **Objets de quÃªte** | Oui â€” position dans le preset DS1 dÃ©signÃ© |
 
 ### Multijoueur et partage de seed
 
 | Aspect | Comportement |
 |--------|-------------|
-| **Création de partie** | Le créateur de la partie génère le seed ; tous les joueurs utilisent le même seed |
-| **Persistance** | Le seed est écrit dans le `.d2s` de chaque joueur qui rejoint la partie |
+| **CrÃ©ation de partie** | Le crÃ©ateur de la partie gÃ©nÃ¨re le seed ; tous les joueurs utilisent le mÃªme seed |
+| **Persistance** | Le seed est Ã©crit dans le `.d2s` de chaque joueur qui rejoint la partie |
 | **Partie permanente** | Le seed reste identique tant que la partie existe sur le serveur (realm) |
-| **Rejointure** | Un joueur qui rejoint retrouve la même carte (même seed) |
-| **Nouvelle partie** | Un nouveau seed est généré à chaque création de partie |
+| **Rejointure** | Un joueur qui rejoint retrouve la mÃªme carte (mÃªme seed) |
+| **Nouvelle partie** | Un nouveau seed est gÃ©nÃ©rÃ© Ã  chaque crÃ©ation de partie |
 
-### Structure de la chaîne DRLG
+### Structure de la chaÃ®ne DRLG
 
 ```
 Game Seed (32-bit)
-  └─→ Act Seed (dérivé)
-       └─→ Level Seed (dérivé par level ID)
-            └─→ Room Seeds (dérivés séquentiellement)
-                 └─→ Sub-element placement (monstres, objets, etc.)
+  â””â”€â†’ Act Seed (dÃ©rivÃ©)
+       â””â”€â†’ Level Seed (dÃ©rivÃ© par level ID)
+            â””â”€â†’ Room Seeds (dÃ©rivÃ©s sÃ©quentiellement)
+                 â””â”€â†’ Sub-element placement (monstres, objets, etc.)
 ```
 
-Chaque niveau dans un acte reçoit un seed dérivé du seed de l'acte. Cela garantit que la modification d'un niveau n'affecte pas la génération des autres niveaux du même acte.
+Chaque niveau dans un acte reÃ§oit un seed dÃ©rivÃ© du seed de l'acte. Cela garantit que la modification d'un niveau n'affecte pas la gÃ©nÃ©ration des autres niveaux du mÃªme acte.
 
 ### Structures DRLG internes (reverse-engineered)
 
 ```c
-// D2DrlgActStrc — représente un acte complet
+// D2DrlgActStrc â€” reprÃ©sente un acte complet
 struct D2DrlgActStrc {
-    D2RoomStrc* pRoom;           // liste chaînée de rooms
+    D2RoomStrc* pRoom;           // liste chaÃ®nÃ©e de rooms
     uint32_t    dwSeed;          // seed de l'acte
-    D2DrlgDataStrc* pDrlgData;   // données de génération
+    D2DrlgDataStrc* pDrlgData;   // donnÃ©es de gÃ©nÃ©ration
 };
 
-// D2DrlgDataStrc — données de génération aléatoire
+// D2DrlgDataStrc â€” donnÃ©es de gÃ©nÃ©ration alÃ©atoire
 struct D2DrlgDataStrc {
-    uint32_t dwSeed;             // seed courant (état RNG)
-    uint32_t dwRoomCount;        // nombre de rooms générées
+    uint32_t dwSeed;             // seed courant (Ã©tat RNG)
+    uint32_t dwRoomCount;        // nombre de rooms gÃ©nÃ©rÃ©es
 };
 
-// D2DrlgLevelStrc — un niveau individuel
+// D2DrlgLevelStrc â€” un niveau individuel
 struct D2DrlgLevelStrc {
     uint32_t dwLevelType;        // type de niveau
     uint32_t dwSeed;             // seed du niveau
@@ -1316,29 +1316,29 @@ struct D2DrlgLevelStrc {
 
 ---
 
-## 9.2 Types de génération (DrlgType)
+## 9.2 Types de gÃ©nÃ©ration (DrlgType)
 
-Diablo II utilise **trois algorithmes de génération distincts**, sélectionnés par la colonne `DrlgType` dans `Levels.txt` :
+Diablo II utilise **trois algorithmes de gÃ©nÃ©ration distincts**, sÃ©lectionnÃ©s par la colonne `DrlgType` dans `Levels.txt` :
 
 | DrlgType | Nom | Usage | Exemples |
 |----------|-----|-------|----------|
-| **1** | Random Maze | Donjons composés de rooms assemblées | Caves, Cryptes, Arcane Sanctuary, Maggot Lair |
+| **1** | Random Maze | Donjons composÃ©s de rooms assemblÃ©es | Caves, Cryptes, Arcane Sanctuary, Maggot Lair |
 | **2** | Preset | Carte fixe (un seul DS1) | Catacombes Niv. 4, Pandemonium Fortress, Villes |
-| **3** | Random Wilderness | Zones extérieures de taille fixe | Blood Moor, Stony Field, déserts Acte 2 |
+| **3** | Random Wilderness | Zones extÃ©rieures de taille fixe | Blood Moor, Stony Field, dÃ©serts Acte 2 |
 
-### DrlgType 1 — Random Maze (Donjons)
+### DrlgType 1 â€” Random Maze (Donjons)
 
-Le système de labyrinthe assemble des **rooms individuelles** (chacune étant un fichier DS1) en un réseau connecté.
+Le systÃ¨me de labyrinthe assemble des **rooms individuelles** (chacune Ã©tant un fichier DS1) en un rÃ©seau connectÃ©.
 
-**Fichier de contrôle : `LvlMaze.txt`**
+**Fichier de contrÃ´le : `LvlMaze.txt`**
 
-| Colonne | Rôle |
+| Colonne | RÃ´le |
 |---------|------|
 | `Rooms` | Nombre **minimum** de DS1 composant le labyrinthe |
-| `SizeX` / `SizeY` | Coordonnées du coin inférieur-droit de chaque room (en tiles, base 0) |
-| `Merge` | Contrôle la fusion de certaines rooms |
+| `SizeX` / `SizeY` | CoordonnÃ©es du coin infÃ©rieur-droit de chaque room (en tiles, base 0) |
+| `Merge` | ContrÃ´le la fusion de certaines rooms |
 
-**Algorithme de génération des labyrinthes :**
+**Algorithme de gÃ©nÃ©ration des labyrinthes :**
 
 ```
 fn generate_maze(level, seed):
@@ -1346,14 +1346,14 @@ fn generate_maze(level, seed):
     grid = empty_grid(level.max_size)
     room_count = 0
     
-    // 1. Placer la room d'entrée
+    // 1. Placer la room d'entrÃ©e
     start_pos = get_start_position(level)  // centre ou bord selon LevelType
     grid[start_pos] = ENTRY_ROOM
     room_count += 1
     
     // 2. Expansion par croissance
     while room_count < level.min_rooms:
-        // Sélectionner une room existante avec un côté libre
+        // SÃ©lectionner une room existante avec un cÃ´tÃ© libre
         source = pick_room_with_free_edge(grid, rng)
         direction = pick_free_direction(source, rng)  // N, S, E, W
         new_pos = source.pos + direction
@@ -1363,11 +1363,11 @@ fn generate_maze(level, seed):
             add_connection(source, new_pos, direction)
             room_count += 1
     
-    // 3. Placer la room spéciale (boss, quête) à l'extrémité
+    // 3. Placer la room spÃ©ciale (boss, quÃªte) Ã  l'extrÃ©mitÃ©
     endpoint = find_deepest_leaf(grid)
     grid[endpoint] = SPECIAL_ROOM
     
-    // 4. Résoudre les types de DS1 par ouvertures
+    // 4. RÃ©soudre les types de DS1 par ouvertures
     for each cell in grid:
         openings = compute_openings(cell)  // bitmask NSEW
         cell.ds1_type = openings           // index 1-15 dans LvlPrest.txt
@@ -1376,7 +1376,7 @@ fn generate_maze(level, seed):
 
 **Convention de nommage des DS1 de labyrinthe :**
 
-Les DS1 sont nommés selon leurs ouvertures, encodées sur 4 bits (N=8, S=4, E=2, W=1) :
+Les DS1 sont nommÃ©s selon leurs ouvertures, encodÃ©es sur 4 bits (N=8, S=4, E=2, W=1) :
 
 ```
 Bitmask  Valeur  Nom DS1          Ouvertures
@@ -1398,48 +1398,48 @@ Bitmask  Valeur  Nom DS1          Ouvertures
 00001111 = 15    caveNSEW.ds1     Toutes directions
 ```
 
-Chaque type de DS1 dans LvlPrest.txt peut avoir jusqu'à **6 variantes** (colonnes File1-File6), sélectionnées aléatoirement pour apporter de la variété visuelle.
+Chaque type de DS1 dans LvlPrest.txt peut avoir jusqu'Ã  **6 variantes** (colonnes File1-File6), sÃ©lectionnÃ©es alÃ©atoirement pour apporter de la variÃ©tÃ© visuelle.
 
 **Contraintes de connexion entre rooms :**
 
-- Les sorties de deux rooms adjacentes **doivent** être aux mêmes coordonnées relatives pour assurer la continuité du passage
+- Les sorties de deux rooms adjacentes **doivent** Ãªtre aux mÃªmes coordonnÃ©es relatives pour assurer la continuitÃ© du passage
 - La largeur de passage est de 1+ tuile (minimum 4-5 subtiles pour le joueur)
-- Le labyrinthe doit tenir dans les limites `SizeX × SizeY` de `Levels.txt`
-- Certains LevelTypes imposent le placement de l'entrée (centre pour Arcane Sanctuary, bord pour la plupart des caves)
+- Le labyrinthe doit tenir dans les limites `SizeX Ã— SizeY` de `Levels.txt`
+- Certains LevelTypes imposent le placement de l'entrÃ©e (centre pour Arcane Sanctuary, bord pour la plupart des caves)
 
-**Exemple concret — Den of Evil avec Rooms=6 :**
+**Exemple concret â€” Den of Evil avec Rooms=6 :**
 
 ```
-caveSpre2.ds1     ← Room d'entrée (depuis la surface)
+caveSpre2.ds1     â† Room d'entrÃ©e (depuis la surface)
   (DEF 85)
      |
-caveNE2.ds1 ─── caveSW.ds1
+caveNE2.ds1 â”€â”€â”€ caveSW.ds1
   (DEF 62)       (DEF 57)
                     |
-caveSE2.ds1 ─── caveNW2.ds1
+caveSE2.ds1 â”€â”€â”€ caveNW2.ds1
   (DEF 58)       (DEF 61)
      |
-caveNE.ds1  ─── caveWspec.ds1    ← Corpsefire (room spéciale)
+caveNE.ds1  â”€â”€â”€ caveWspec.ds1    â† Corpsefire (room spÃ©ciale)
   (DEF 62)       (DEF 95)
 ```
 
-7 DS1 (25×25 tuiles chacun) pour un Rooms=6, car le DRLG peut ajouter des rooms supplémentaires pour satisfaire les contraintes de connexion.
+7 DS1 (25Ã—25 tuiles chacun) pour un Rooms=6, car le DRLG peut ajouter des rooms supplÃ©mentaires pour satisfaire les contraintes de connexion.
 
-### DrlgType 2 — Preset (Carte fixe)
+### DrlgType 2 â€” Preset (Carte fixe)
 
-Les niveaux preset sont des **DS1 uniques non randomisés** (le layout est toujours identique). Cependant, `LvlPrest.txt` offre une randomisation limitée :
+Les niveaux preset sont des **DS1 uniques non randomisÃ©s** (le layout est toujours identique). Cependant, `LvlPrest.txt` offre une randomisation limitÃ©e :
 
-- **File1 à File6** : jusqu'à 6 variantes DS1 d'un même preset, sélectionnées aléatoirement par le seed
-- **Populate** : contrôle si les monstres sont placés aléatoirement dans la zone
-- La taille du DS1 correspond exactement à `SizeX × SizeY` de `Levels.txt`
+- **File1 Ã  File6** : jusqu'Ã  6 variantes DS1 d'un mÃªme preset, sÃ©lectionnÃ©es alÃ©atoirement par le seed
+- **Populate** : contrÃ´le si les monstres sont placÃ©s alÃ©atoirement dans la zone
+- La taille du DS1 correspond exactement Ã  `SizeX Ã— SizeY` de `Levels.txt`
 
 Exemples : Catacombes Niveau 4 (Andariel), Pandemonium Fortress, les villes.
 
-### DrlgType 3 — Random Wilderness (Zones extérieures)
+### DrlgType 3 â€” Random Wilderness (Zones extÃ©rieures)
 
-La génération des zones extérieures (Acte 1 wilderness, Acte 2 déserts) est la plus complexe, composée de **4 étapes séquentielles** :
+La gÃ©nÃ©ration des zones extÃ©rieures (Acte 1 wilderness, Acte 2 dÃ©serts) est la plus complexe, composÃ©e de **4 Ã©tapes sÃ©quentielles** :
 
-**Étape 1 — Bordures et sorties**
+**Ã‰tape 1 â€” Bordures et sorties**
 
 ```
 fn generate_wilderness_borders(level, seed):
@@ -1455,41 +1455,41 @@ fn generate_wilderness_borders(level, seed):
         place_exit_warp(level.grid, exit_pos, vis_index)
 ```
 
-Les bordures sont composées de DS1 simples :
+Les bordures sont composÃ©es de DS1 simples :
 - `BordX.ds1` : bordures normales (arbres + mur de pierre)
 - `StnClfX.ds1` : falaises (Stony Field, Dark Woods)
-- `XRiverX.ds1` : rivières en bordure
+- `XRiverX.ds1` : riviÃ¨res en bordure
 
-**Étape 2 — Chemins, waypoints et warps internes**
+**Ã‰tape 2 â€” Chemins, waypoints et warps internes**
 
-- Les **waypoints** sont placés aléatoirement dans la zone (sauf exceptions comme Cold Plains)
-- Les **chemins** sont générés dynamiquement (pas de DS1 pour les éléments de chemin) — l'algorithme relie les entrées, caves, ponts entre eux
-- Les **warps internes** (entrées de caves, Tour de la Comtesse) sont positionnés
+- Les **waypoints** sont placÃ©s alÃ©atoirement dans la zone (sauf exceptions comme Cold Plains)
+- Les **chemins** sont gÃ©nÃ©rÃ©s dynamiquement (pas de DS1 pour les Ã©lÃ©ments de chemin) â€” l'algorithme relie les entrÃ©es, caves, ponts entre eux
+- Les **warps internes** (entrÃ©es de caves, Tour de la Comtesse) sont positionnÃ©s
 
-**Étape 3 — Placement des DS1 thématiques**
+**Ã‰tape 3 â€” Placement des DS1 thÃ©matiques**
 
 ```
 fn place_themed_presets(level, rng):
-    // DS1 thématiques placés aléatoirement dans les espaces vides
+    // DS1 thÃ©matiques placÃ©s alÃ©atoirement dans les espaces vides
     for preset in level.themed_presets:
         pos = find_empty_area(level.grid, preset.size, rng)
         place_ds1(level.grid, preset, pos)
 ```
 
-Exemples de DS1 thématiques :
+Exemples de DS1 thÃ©matiques :
 - `circle.ds1` : cercle de petites pierres
-- `arrow.ds1` : flèche en pierres
-- `pond1.ds1` : étang
+- `arrow.ds1` : flÃ¨che en pierres
+- `pond1.ds1` : Ã©tang
 - Camps de monstres (Bishibosh dans Cold Plains)
-- Objets de quête (Cairn Stones dans Stony Field, Inifuss Tree dans Dark Woods)
+- Objets de quÃªte (Cairn Stones dans Stony Field, Inifuss Tree dans Dark Woods)
 
-Le nombre de presets thématiques est **fixe par zone** (probablement hardcodé ou dans une table DLL). Chaque zone contient toujours : quelques blocs bordés, 1-2 maisons, parfois une maison en feu, 5 shrines.
+Le nombre de presets thÃ©matiques est **fixe par zone** (probablement hardcodÃ© ou dans une table DLL). Chaque zone contient toujours : quelques blocs bordÃ©s, 1-2 maisons, parfois une maison en feu, 5 shrines.
 
-**Étape 4 — Remplissage par objets aléatoires (LvlSub.txt)**
+**Ã‰tape 4 â€” Remplissage par objets alÃ©atoires (LvlSub.txt)**
 
 ```
 fn fill_with_random_objects(level, rng):
-    // Le jeu extrait des éléments INDIVIDUELS depuis les DS1 "filler"
+    // Le jeu extrait des Ã©lÃ©ments INDIVIDUELS depuis les DS1 "filler"
     for filler_ds1 in level.sub_theme_fillers:
         elements = extract_individual_elements(filler_ds1)
         for element in elements:
@@ -1501,43 +1501,43 @@ fn fill_with_random_objects(level, rng):
     fill_remaining_with_base_floor(level.grid)
 ```
 
-Les DS1 "filler" sont des fichiers étranges qui ressemblent à des planches de conception :
+Les DS1 "filler" sont des fichiers Ã©tranges qui ressemblent Ã  des planches de conception :
 - `stone.ds1` : collection de formations rocheuses individuelles
 - `trees.ds1` : collection d'arbres individuels
-- `swamp.ds1` / `swamp2.ds1` : éléments marécageux
+- `swamp.ds1` / `swamp2.ds1` : Ã©lÃ©ments marÃ©cageux
 - `pud.ds1` : flaques et mares
 
-Le jeu **extrait des éléments individuels** de ces DS1 et les place séparément sur la carte. La colonne `SubTheme` de `Levels.txt` contrôle quels fillers sont utilisés (le Dark Wood utilise plus d'arbres, le Blood Moor pas de marécages).
+Le jeu **extrait des Ã©lÃ©ments individuels** de ces DS1 et les place sÃ©parÃ©ment sur la carte. La colonne `SubTheme` de `Levels.txt` contrÃ´le quels fillers sont utilisÃ©s (le Dark Wood utilise plus d'arbres, le Blood Moor pas de marÃ©cages).
 
-Ces DS1 sont référencés dans `LvlSub.txt` (pas `LvlPrest.txt`), qui fonctionne de manière similaire à `TCex.txt` avec des colonnes `Prob` (probabilité), `Trials` (picks) et un maximum.
+Ces DS1 sont rÃ©fÃ©rencÃ©s dans `LvlSub.txt` (pas `LvlPrest.txt`), qui fonctionne de maniÃ¨re similaire Ã  `TCex.txt` avec des colonnes `Prob` (probabilitÃ©), `Trials` (picks) et un maximum.
 
 ---
 
-## 9.3 Système de tuiles — Format DT1
+## 9.3 SystÃ¨me de tuiles â€” Format DT1
 
 ### Vue d'ensemble
 
-Les fichiers DT1 (Diablo Tile 1) contiennent toutes les **tuiles graphiques** utilisées pour les sols, murs, ombres et toits des cartes. Il y a 256 fichiers DT1 dans le jeu (~157 MB total), organisés par acte et thème dans `Data\Global\Tiles\Act{N}\`.
+Les fichiers DT1 (Diablo Tile 1) contiennent toutes les **tuiles graphiques** utilisÃ©es pour les sols, murs, ombres et toits des cartes. Il y a 256 fichiers DT1 dans le jeu (~157 MB total), organisÃ©s par acte et thÃ¨me dans `Data\Global\Tiles\Act{N}\`.
 
-Un même DT1 est partagé par **plusieurs cartes** (les murs de pierre du Rogue Encampment apparaissent aussi dans Cold Plains, Stony Field, Tristram).
+Un mÃªme DT1 est partagÃ© par **plusieurs cartes** (les murs de pierre du Rogue Encampment apparaissent aussi dans Cold Plains, Stony Field, Tristram).
 
 ### Structure du fichier DT1
 
 ```
-┌─────────────────────────────────┐
-│ File Header (276 octets)        │
-├─────────────────────────────────┤
-│ Tile Header #0 (96 octets)     │
-│ Tile Header #1 (96 octets)     │
-│ ...                             │
-│ Tile Header #N (96 octets)     │
-├─────────────────────────────────┤
-│ Tile Data #0                    │
-│   ├─ Block Headers (20 oct/blk)│
-│   └─ Block Data (pixels)       │
-│ Tile Data #1                    │
-│ ...                             │
-└─────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ File Header (276 octets)        â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Tile Header #0 (96 octets)     â”‚
+â”‚ Tile Header #1 (96 octets)     â”‚
+â”‚ ...                             â”‚
+â”‚ Tile Header #N (96 octets)     â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Tile Data #0                    â”‚
+â”‚   â”œâ”€ Block Headers (20 oct/blk)â”‚
+â”‚   â””â”€ Block Data (pixels)       â”‚
+â”‚ Tile Data #1                    â”‚
+â”‚ ...                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **File Header (276 octets) :**
@@ -1546,7 +1546,7 @@ Un même DT1 est partagé par **plusieurs cartes** (les murs de pierre du Rogue 
 |--------|--------|-------------|
 | 0x00 | 4 | Version 1 (= 7) |
 | 0x04 | 4 | Version 2 (= 6) |
-| 0x08 | 260 | Réservé (tout à zéro) |
+| 0x08 | 260 | RÃ©servÃ© (tout Ã  zÃ©ro) |
 | 0x10C | 4 | Nombre de tuiles |
 | 0x110 | 4 | Pointeur vers les Tile Headers (= 0x114) |
 
@@ -1554,59 +1554,59 @@ Un même DT1 est partagé par **plusieurs cartes** (les murs de pierre du Rogue 
 
 | Offset | Taille | Description |
 |--------|--------|-------------|
-| 0x00 | 4 | Direction (orientation générale, 1-5) |
+| 0x00 | 4 | Direction (orientation gÃ©nÃ©rale, 1-5) |
 | 0x04 | 2 | Hauteur de toit (pixels au-dessus du sol) |
 | 0x06 | 1 | Index sonore (bois, pierre, boue, etc.) |
-| 0x07 | 1 | Flag animé (bit 0 = tuile animée) |
-| 0x08 | 4 | Hauteur (pixels, toujours négatif, puissance de 32) |
+| 0x07 | 1 | Flag animÃ© (bit 0 = tuile animÃ©e) |
+| 0x08 | 4 | Hauteur (pixels, toujours nÃ©gatif, puissance de 32) |
 | 0x0C | 4 | Largeur (pixels, max 160, puissance de 32) |
-| 0x10 | 4 | Zéros |
+| 0x10 | 4 | ZÃ©ros |
 | 0x14 | 4 | **Orientation** (type de tuile, 0-19) |
 | 0x18 | 4 | **Main Index** (0-63) |
 | 0x1C | 4 | **Sub Index** (0-63) |
 | 0x20 | 4 | Rarity / Frame index |
-| 0x24 | 4 | Unknown 1-4 (même valeur pour toutes les tuiles d'un DT1) |
-| 0x28 | 25 | **Sub-tile flags** (passabilité, 5×5 = 25 subtiles) |
-| 0x41 | 7 | Zéros |
+| 0x24 | 4 | Unknown 1-4 (mÃªme valeur pour toutes les tuiles d'un DT1) |
+| 0x28 | 25 | **Sub-tile flags** (passabilitÃ©, 5Ã—5 = 25 subtiles) |
+| 0x41 | 7 | ZÃ©ros |
 | 0x48 | 4 | Pointeur vers les Block Headers |
 | 0x4C | 4 | Taille totale des Block Headers + Block Data |
 | 0x50 | 4 | Nombre de blocs |
-| 0x54 | 12 | Zéros |
+| 0x54 | 12 | ZÃ©ros |
 
 ### Identification des tuiles : 3 index
 
-Chaque tuile est identifiée de manière unique par la combinaison **(Orientation, Main Index, Sub Index)** :
+Chaque tuile est identifiÃ©e de maniÃ¨re unique par la combinaison **(Orientation, Main Index, Sub Index)** :
 
-- **Orientation** (0-19) : détermine le type de tuile
+- **Orientation** (0-19) : dÃ©termine le type de tuile
 - **Main Index** (0-63) : identifiant principal dans le tileset
 - **Sub Index** (0-63) : sous-variante
 
-Soit jusqu'à 64 × 64 = **4096 tuiles distinctes** par orientation.
+Soit jusqu'Ã  64 Ã— 64 = **4096 tuiles distinctes** par orientation.
 
 ### Types de tuiles (Orientation)
 
 | Orientation | Type | Rendu |
 |-------------|------|-------|
-| 0 | **Sol** (statique ou animé) | Dessiné en premier |
+| 0 | **Sol** (statique ou animÃ©) | DessinÃ© en premier |
 | 1 | Mur gauche | |
-| 2 | Mur droit (supérieur) | |
+| 2 | Mur droit (supÃ©rieur) | |
 | 3 | Partie droite du coin nord | |
 | 4 | Partie gauche du coin nord | |
-| 5 | Coin supérieur-droit | |
-| 6 | Coin inférieur-gauche | |
-| 7 | Coin inférieur-droit | |
+| 5 | Coin supÃ©rieur-droit | |
+| 6 | Coin infÃ©rieur-gauche | |
+| 7 | Coin infÃ©rieur-droit | |
 | 8 | Mur gauche avec porte | |
 | 9 | Mur droit avec porte | |
-| 10-11 | **Tuiles spéciales** (warps, TP, entrées) | |
+| 10-11 | **Tuiles spÃ©ciales** (warps, TP, entrÃ©es) | |
 | 12 | Piliers, colonnes, objets autonomes | |
 | 13 | **Ombres** | |
-| 14 | **Arbres** (objets avec ombre précédente) | |
+| 14 | **Arbres** (objets avec ombre prÃ©cÃ©dente) | |
 | 15 | **Toits** | Au-dessus du sol (roof_y dans le .ini) |
-| 16-19 | **Murs bas** (équivalents de 1, 2, 3/4, 7) | Dessinés sous les sols |
+| 16-19 | **Murs bas** (Ã©quivalents de 1, 2, 3/4, 7) | DessinÃ©s sous les sols |
 
-### Direction et éclairage
+### Direction et Ã©clairage
 
-La **Direction** (1-9) contrôle comment la lumière affecte la tuile. Chaque Direction doit être associée aux bonnes Orientations :
+La **Direction** (1-9) contrÃ´le comment la lumiÃ¨re affecte la tuile. Chaque Direction doit Ãªtre associÃ©e aux bonnes Orientations :
 
 | Direction | Orientations compatibles |
 |-----------|------------------------|
@@ -1617,54 +1617,54 @@ La **Direction** (1-9) contrôle comment la lumière affecte la tuile. Chaque Di
 | 5 | 15 (toits) |
 | 6-9 | 16-19 (murs bas) |
 
-### Sub-tile flags (passabilité)
+### Sub-tile flags (passabilitÃ©)
 
-Chaque tuile possède **25 flags** (grille 5×5) définissant la passabilité subtile par subtile. L'ordre est gauche→droite, bas→haut :
+Chaque tuile possÃ¨de **25 flags** (grille 5Ã—5) dÃ©finissant la passabilitÃ© subtile par subtile. L'ordre est gaucheâ†’droite, basâ†’haut :
 
 | Bit | Effet |
 |-----|-------|
-| 0 | **Block walk** (bloque le déplacement piéton) |
-| 1 | **Block light + LOS** (bloque lumière et ligne de vue) |
-| 2 | **Block jump** (bloque saut et téléportation) |
-| 3 | **Block player walk only** (pas le mercenaire — usage étrange) |
+| 0 | **Block walk** (bloque le dÃ©placement piÃ©ton) |
+| 1 | **Block light + LOS** (bloque lumiÃ¨re et ligne de vue) |
+| 2 | **Block jump** (bloque saut et tÃ©lÃ©portation) |
+| 3 | **Block player walk only** (pas le mercenaire â€” usage Ã©trange) |
 | 4 | Inconnu |
 | 5 | **Block light only** (pas la LOS) |
 | 6-7 | Inconnus |
 
 ### Rarity / Random Sets
 
-Quand plusieurs tuiles dans un DT1 partagent le même triplet (Orientation, Main Index, Sub Index), elles forment un **random set**. Le jeu choisit aléatoirement parmi elles selon leur **Rarity** :
+Quand plusieurs tuiles dans un DT1 partagent le mÃªme triplet (Orientation, Main Index, Sub Index), elles forment un **random set**. Le jeu choisit alÃ©atoirement parmi elles selon leur **Rarity** :
 
 ```
-Exemple : 4 tuiles de sol "terre brûlée" avec même identifiant
-  Tuile A : Rarity = 1  → 1/37 chance (beaucoup de sang)
-  Tuile B : Rarity = 2  → 2/37 chance (un peu de sang)
-  Tuile C : Rarity = 10 → 10/37 chance (pas de sang)
-  Tuile D : Rarity = 0  → jamais affichée (si total > 0)
+Exemple : 4 tuiles de sol "terre brÃ»lÃ©e" avec mÃªme identifiant
+  Tuile A : Rarity = 1  â†’ 1/37 chance (beaucoup de sang)
+  Tuile B : Rarity = 2  â†’ 2/37 chance (un peu de sang)
+  Tuile C : Rarity = 10 â†’ 10/37 chance (pas de sang)
+  Tuile D : Rarity = 0  â†’ jamais affichÃ©e (si total > 0)
 ```
 
-Si toutes les Rarity sont à 0, seule la **dernière tuile** du premier DT1 est utilisée.
+Si toutes les Rarity sont Ã  0, seule la **derniÃ¨re tuile** du premier DT1 est utilisÃ©e.
 
 ### Encodage graphique des blocs
 
 Deux formats de compression :
 
-**Format 1 — Sol isométrique (RAW, 256 octets fixe) :**
+**Format 1 â€” Sol isomÃ©trique (RAW, 256 octets fixe) :**
 
 ```c
-// Dessin d'un bloc isométrique 3D (losange de 32×15 pixels)
+// Dessin d'un bloc isomÃ©trique 3D (losange de 32Ã—15 pixels)
 int xjump[15] = {14, 12, 10, 8, 6, 4, 2, 0, 2, 4, 6, 8, 10, 12, 14};
 int nbpix[15] = {4,  8,  12, 16, 20, 24, 28, 32, 28, 24, 20, 16, 12, 8,  4};
 // Chaque ligne : sauter xjump pixels, dessiner nbpix pixels RAW
 ```
 
-**Format 0 — Murs (RLE, taille variable) :**
+**Format 0 â€” Murs (RLE, taille variable) :**
 
 ```c
-// Blocs 32×32 en Run Length Encoding
+// Blocs 32Ã—32 en Run Length Encoding
 // Lecture par paires : (skip, count)
 // skip = pixels transparents, count = pixels opaques qui suivent
-// (0, 0) = saut à la ligne suivante
+// (0, 0) = saut Ã  la ligne suivante
 ```
 
 ### Block Header (20 octets)
@@ -1673,161 +1673,161 @@ int nbpix[15] = {4,  8,  12, 16, 20, 24, 28, 32, 28, 24, 20, 16, 12, 8,  4};
 |--------|--------|-------------|
 | 0x00 | 2 | Position X dans le bitmap |
 | 0x02 | 2 | Position Y dans le bitmap |
-| 0x04 | 2 | Zéros |
+| 0x04 | 2 | ZÃ©ros |
 | 0x06 | 1 | Grid X (0-4, position dans la grille subtile) |
 | 0x07 | 1 | Grid Y (0-4) |
-| 0x08 | 2 | Format (1 = isométrique RAW, 0 = RLE 32×32) |
-| 0x0A | 4 | Longueur des données encodées (octets) |
-| 0x0E | 2 | Zéros |
-| 0x10 | 4 | Offset fichier des données encodées |
+| 0x08 | 2 | Format (1 = isomÃ©trique RAW, 0 = RLE 32Ã—32) |
+| 0x0A | 4 | Longueur des donnÃ©es encodÃ©es (octets) |
+| 0x0E | 2 | ZÃ©ros |
+| 0x10 | 4 | Offset fichier des donnÃ©es encodÃ©es |
 
 ---
 
-## 9.4 Système de presets — Format DS1
+## 9.4 SystÃ¨me de presets â€” Format DS1
 
 ### Vue d'ensemble
 
-Les fichiers DS1 (Diablo Scene 1) sont des **configurations prédéfinies de cartes isométriques multi-couches**. Chaque DS1 définit l'arrangement des tuiles DT1, les objets, les PNJ et leurs chemins. C'est le format de base pour tous les niveaux, qu'ils soient fixes ou assemblés en labyrinthe.
+Les fichiers DS1 (Diablo Scene 1) sont des **configurations prÃ©dÃ©finies de cartes isomÃ©triques multi-couches**. Chaque DS1 dÃ©finit l'arrangement des tuiles DT1, les objets, les PNJ et leurs chemins. C'est le format de base pour tous les niveaux, qu'ils soient fixes ou assemblÃ©s en labyrinthe.
 
 ### Structure multi-couches
 
 | Composant | Nombre max | Ordre de rendu |
 |-----------|-----------|----------------|
 | **Couches de sol** | 4 | Rendues en premier |
-| **Couches de mur** | 4 | Rendues après le sol |
-| **PNJ / Monstres** | Variable | Placés après le terrain |
-| **Objets** (feu, drapeaux, etc.) | Variable | Placés selon le type |
-| **Chemins de PNJ** | Variable | Paths prédéfinis dans le DS1 |
+| **Couches de mur** | 4 | Rendues aprÃ¨s le sol |
+| **PNJ / Monstres** | Variable | PlacÃ©s aprÃ¨s le terrain |
+| **Objets** (feu, drapeaux, etc.) | Variable | PlacÃ©s selon le type |
+| **Chemins de PNJ** | Variable | Paths prÃ©dÃ©finis dans le DS1 |
 
-### Référencement des tuiles
+### RÃ©fÃ©rencement des tuiles
 
-Chaque cellule du DS1 référence des tuiles DT1 via leurs 3 index :
+Chaque cellule du DS1 rÃ©fÃ©rence des tuiles DT1 via leurs 3 index :
 - **Main Index** (6 bits dans le DS1, soit 0-63)
 - **Sub Index** (6 bits, soit 0-63)
-- **Orientation** (détermine le type : sol, mur, ombre, etc.)
+- **Orientation** (dÃ©termine le type : sol, mur, ombre, etc.)
 
-### Tuiles spéciales dans les DS1
+### Tuiles spÃ©ciales dans les DS1
 
-Les tuiles spéciales (Orientation 10-11) contrôlent des fonctionnalités gameplay :
+Les tuiles spÃ©ciales (Orientation 10-11) contrÃ´lent des fonctionnalitÃ©s gameplay :
 
 | Index | Fonction |
 |-------|----------|
-| #00-46 | **Vis** (warps entre zones — passage d'une zone à une autre) |
-| #47-74 | **Area** (suppression de murs et toits pour révéler l'intérieur) |
+| #00-46 | **Vis** (warps entre zones â€” passage d'une zone Ã  une autre) |
+| #47-74 | **Area** (suppression de murs et toits pour rÃ©vÃ©ler l'intÃ©rieur) |
 | #75 | Town Entry |
 | #76 | Map Entry |
 | #77 | Town Entry 2 |
 | #78 | Corpse Location |
 | #79 | Teleport Location |
 | #80 | Unknown |
-| #82-83 | Vis supplémentaires |
+| #82-83 | Vis supplÃ©mentaires |
 
 ### PopPads et suppression de toits
 
-Les tuiles spéciales #47-74 contrôlent la **suppression dynamique de murs/toits** quand le joueur approche d'un bâtiment. Deux tuiles spéciales identiques sont placées pour former un rectangle définissant la zone de suppression.
+Les tuiles spÃ©ciales #47-74 contrÃ´lent la **suppression dynamique de murs/toits** quand le joueur approche d'un bÃ¢timent. Deux tuiles spÃ©ciales identiques sont placÃ©es pour former un rectangle dÃ©finissant la zone de suppression.
 
 ```
-LvlPrest.txt colonnes associées :
+LvlPrest.txt colonnes associÃ©es :
   Pops    = nombre de zones de suppression dans le DS1
-  PopPad  = offset en subtiles du trigger par rapport à la zone définie
-            (0 = exact, +N = zone trigger agrandie, -N = rétrécie)
+  PopPad  = offset en subtiles du trigger par rapport Ã  la zone dÃ©finie
+            (0 = exact, +N = zone trigger agrandie, -N = rÃ©trÃ©cie)
 ```
 
-Le mécanisme est piloté par le **Sub Index** de la tuile spéciale : il correspond au **Main Index** des tuiles qui seront supprimées. Un groupe de tuiles spéciales (même Group) supprime ensemble ; des tuiles de groupes différents supprimées indépendamment, permettant jusqu'à **4 zones de suppression séparées simultanément**.
+Le mÃ©canisme est pilotÃ© par le **Sub Index** de la tuile spÃ©ciale : il correspond au **Main Index** des tuiles qui seront supprimÃ©es. Un groupe de tuiles spÃ©ciales (mÃªme Group) supprime ensemble ; des tuiles de groupes diffÃ©rents supprimÃ©es indÃ©pendamment, permettant jusqu'Ã  **4 zones de suppression sÃ©parÃ©es simultanÃ©ment**.
 
-| Groupe | Main Index des spéciales | Peuvent supprimer indépendamment |
+| Groupe | Main Index des spÃ©ciales | Peuvent supprimer indÃ©pendamment |
 |--------|-------------------------|--------------------------------|
-| 1 | 8, 9, 10 | Oui (entre eux, même cibles) |
+| 1 | 8, 9, 10 | Oui (entre eux, mÃªme cibles) |
 | 2 | 12, 13 | Oui |
 | 3 | 16 | Oui |
 | 4 | 20 | Oui |
 
 ### Transparence des murs
 
-La transparence (fading) des murs se produit quand les murs forment une **chaîne fermée** (box) :
+La transparence (fading) des murs se produit quand les murs forment une **chaÃ®ne fermÃ©e** (box) :
 
-- Tous les murs doivent être connectés sans interruption
-- La colonne `Logicals` dans `LvlPrest.txt` active/désactive la transparence
-- Le paramètre `Tile Sound = 0` dans le fichier `.ini` du tileset est requis
-- Les coins nord doivent être séparés en deux frames (Orientation 3 + Orientation 4)
+- Tous les murs doivent Ãªtre connectÃ©s sans interruption
+- La colonne `Logicals` dans `LvlPrest.txt` active/dÃ©sactive la transparence
+- Le paramÃ¨tre `Tile Sound = 0` dans le fichier `.ini` du tileset est requis
+- Les coins nord doivent Ãªtre sÃ©parÃ©s en deux frames (Orientation 3 + Orientation 4)
 
 ---
 
-## 9.5 Fichiers de configuration — LvlPrest.txt
+## 9.5 Fichiers de configuration â€” LvlPrest.txt
 
 ### Colonnes principales
 
 | Colonne | Type | Description |
 |---------|------|-------------|
 | `Def` | int | Identifiant unique du preset |
-| `LevelId` | int | Référence vers `Levels.txt` |
-| `Populate` | bool | Placement aléatoire de monstres dans le preset |
+| `LevelId` | int | RÃ©fÃ©rence vers `Levels.txt` |
+| `Populate` | bool | Placement alÃ©atoire de monstres dans le preset |
 | `Logicals` | bool | Active la transparence des murs |
-| `Outdoors` | bool | Zone extérieure |
+| `Outdoors` | bool | Zone extÃ©rieure |
 | `Animate` | bool | Active les animations de tuiles |
 | `KillEdge` | bool | Supprime les tuiles en bordure |
-| `FillBlanks` | bool | Remplit les espaces vides avec le sol par défaut |
+| `FillBlanks` | bool | Remplit les espaces vides avec le sol par dÃ©faut |
 | `Expansion` | bool | Extension Lord of Destruction |
-| `SizeX` / `SizeY` | int | Dimensions en cells (coordonnées, base 0) |
-| `AutoMap` | bool | Génère l'automap pour ce preset |
+| `SizeX` / `SizeY` | int | Dimensions en cells (coordonnÃ©es, base 0) |
+| `AutoMap` | bool | GÃ©nÃ¨re l'automap pour ce preset |
 | `Scan` | bool | Scan des tuiles VIS |
 | `Pops` | int | Nombre de PopPads (zones de suppression de toits) |
 | `PopPad` | int | Offset du trigger PopPad (en subtiles) |
-| `Files` | int | Nombre de variantes DS1 utilisées (1-6) |
-| `File1`-`File6` | string | Chemins vers les fichiers DS1 (jusqu'à 6 variantes) |
-| `Dt1Mask` | uint32 | Bitmask des fichiers DT1 à charger |
+| `Files` | int | Nombre de variantes DS1 utilisÃ©es (1-6) |
+| `File1`-`File6` | string | Chemins vers les fichiers DS1 (jusqu'Ã  6 variantes) |
+| `Dt1Mask` | uint32 | Bitmask des fichiers DT1 Ã  charger |
 
-### Dt1Mask — Calcul
+### Dt1Mask â€” Calcul
 
-Le `Dt1Mask` est un **bitmask 32 bits** qui détermine quels fichiers DT1 de `LvlTypes.txt` sont chargés pour ce preset.
+Le `Dt1Mask` est un **bitmask 32 bits** qui dÃ©termine quels fichiers DT1 de `LvlTypes.txt` sont chargÃ©s pour ce preset.
 
 ```
-Formule : Dt1Mask = 2^(nombre de DT1 à charger) - 1
+Formule : Dt1Mask = 2^(nombre de DT1 Ã  charger) - 1
 
 Exemple :
   LvlTypes.txt pour LevelType 5 liste 16 fichiers DT1
   Dt1Mask = 2^16 - 1 = 65535 (0xFFFF)
-  → Charge les 16 DT1
+  â†’ Charge les 16 DT1
 
 Pour charger seulement les DT1 #0, #2, #5 :
   Dt1Mask = (1 << 0) | (1 << 2) | (1 << 5) = 0b00100101 = 37
 ```
 
-Chaque bit correspond à une colonne File dans `LvlTypes.txt`. Bit 0 = File1, bit 1 = File2, etc.
+Chaque bit correspond Ã  une colonne File dans `LvlTypes.txt`. Bit 0 = File1, bit 1 = File2, etc.
 
 ---
 
-## 9.6 Fichiers de configuration — LvlTypes.txt
+## 9.6 Fichiers de configuration â€” LvlTypes.txt
 
-`LvlTypes.txt` associe un **identifiant de type de niveau** à une liste de fichiers DT1. Chaque ligne définit un ensemble visuel complet (tileset).
+`LvlTypes.txt` associe un **identifiant de type de niveau** Ã  une liste de fichiers DT1. Chaque ligne dÃ©finit un ensemble visuel complet (tileset).
 
 | Colonne | Description |
 |---------|-------------|
-| `Id` | Identifiant du LevelType (référencé par Levels.txt) |
+| `Id` | Identifiant du LevelType (rÃ©fÃ©rencÃ© par Levels.txt) |
 | `File1`-`File32` | Chemins vers les fichiers DT1 composant le tileset |
 | `Act` | Acte auquel le type appartient |
 
-Le `LevelType` de `Levels.txt` pointe vers une ligne de `LvlTypes.txt`, et le `Dt1Mask` de `LvlPrest.txt` sélectionne quels DT1 de cette ligne sont effectivement chargés.
+Le `LevelType` de `Levels.txt` pointe vers une ligne de `LvlTypes.txt`, et le `Dt1Mask` de `LvlPrest.txt` sÃ©lectionne quels DT1 de cette ligne sont effectivement chargÃ©s.
 
 ```
 Pipeline :
-  Levels.txt[LevelType] → LvlTypes.txt[Id] → Liste de DT1
-  LvlPrest.txt[Dt1Mask] → Filtre les DT1 à charger
-  DS1 → Référence les tuiles par (Orientation, MainIndex, SubIndex) dans les DT1 chargés
+  Levels.txt[LevelType] â†’ LvlTypes.txt[Id] â†’ Liste de DT1
+  LvlPrest.txt[Dt1Mask] â†’ Filtre les DT1 Ã  charger
+  DS1 â†’ RÃ©fÃ©rence les tuiles par (Orientation, MainIndex, SubIndex) dans les DT1 chargÃ©s
 ```
 
 ---
 
-## 9.7 Composition des niveaux — Levels.txt
+## 9.7 Composition des niveaux â€” Levels.txt
 
-### Colonnes complètes
+### Colonnes complÃ¨tes
 
 **Identification :**
 
 | Colonne | Description |
 |---------|-------------|
 | `Name` | Nom interne du niveau |
-| `Id` | Identifiant unique (référencé partout) |
+| `Id` | Identifiant unique (rÃ©fÃ©rencÃ© partout) |
 | `Pal` | Palette de couleurs (une par acte) |
 | `Act` | Acte d'appartenance (0-4) |
 
@@ -1836,185 +1836,185 @@ Pipeline :
 | Colonne | Description |
 |---------|-------------|
 | `SizeX` / `SizeY` | Dimensions horizontale/verticale en subtiles |
-| `OffsetX` / `OffsetY` | Position dans le worldspace (-1/-1 = position hardcodée) |
-| `Depend` | ID du niveau dont le warp dépend pour l'alignement |
+| `OffsetX` / `OffsetY` | Position dans le worldspace (-1/-1 = position hardcodÃ©e) |
+| `Depend` | ID du niveau dont le warp dÃ©pend pour l'alignement |
 
-**Génération :**
+**GÃ©nÃ©ration :**
 
 | Colonne | Description |
 |---------|-------------|
-| `DrlgType` | Type de génération : 1=maze, 2=preset, 3=wilderness |
-| `LevelType` | Référence vers LvlTypes.txt (tileset) |
-| `SubType` | Sous-type de niveau (influence la variété) |
-| `SubTheme` | Thème de remplissage (arbres, marécages...) |
+| `DrlgType` | Type de gÃ©nÃ©ration : 1=maze, 2=preset, 3=wilderness |
+| `LevelType` | RÃ©fÃ©rence vers LvlTypes.txt (tileset) |
+| `SubType` | Sous-type de niveau (influence la variÃ©tÃ©) |
+| `SubTheme` | ThÃ¨me de remplissage (arbres, marÃ©cages...) |
 
 **Connexions :**
 
 | Colonne | Description |
 |---------|-------------|
-| `Vis0`-`Vis7` | IDs des niveaux connectés visuellement |
-| `Warp0`-`Warp7` | IDs des warps dans LvlWarp.txt (affichage des entrées) |
-| `WarpDist` | Taille de la zone de sécurité autour des entrées (en subtiles, défaut ~2025) |
+| `Vis0`-`Vis7` | IDs des niveaux connectÃ©s visuellement |
+| `Warp0`-`Warp7` | IDs des warps dans LvlWarp.txt (affichage des entrÃ©es) |
+| `WarpDist` | Taille de la zone de sÃ©curitÃ© autour des entrÃ©es (en subtiles, dÃ©faut ~2025) |
 
-**Éclairage et atmosphère :**
+**Ã‰clairage et atmosphÃ¨re :**
 
 | Colonne | Description |
 |---------|-------------|
-| `LOSDraw` | 0 = pas de Line Of Sight (extérieur), 1 = LoS active (grottes) |
+| `LOSDraw` | 0 = pas de Line Of Sight (extÃ©rieur), 1 = LoS active (grottes) |
 | `IsInside` | 0 = cycle jour/nuit, 1 = toujours jour |
 | `Rain` | Peut-il pleuvoir (0/1) |
-| `NoPer` | 0 = perspective autorisée, 1 = perspective interdite |
-| `Intensity` / `Red` / `Green` / `Blue` | Contrôle RGB de l'éclairage (0-255) |
+| `NoPer` | 0 = perspective autorisÃ©e, 1 = perspective interdite |
+| `Intensity` / `Red` / `Green` / `Blue` | ContrÃ´le RGB de l'Ã©clairage (0-255) |
 
-**Densité de monstres :**
+**DensitÃ© de monstres :**
 
 | Colonne | Description |
 |---------|-------------|
-| `MonDen` | Densité de monstres (Normal) — valeur relative, pas un compte absolu |
-| `MonDen(N)` | Densité Nightmare |
-| `MonDen(H)` | Densité Hell |
+| `MonDen` | DensitÃ© de monstres (Normal) â€” valeur relative, pas un compte absolu |
+| `MonDen(N)` | DensitÃ© Nightmare |
+| `MonDen(H)` | DensitÃ© Hell |
 | `MonUMin` / `MonUMax` | Min/Max de boss et champions dans la zone |
 | `MonWndr` | 0 = monstres immobiles avant activation, 1 = IA active (errance) |
-| `MonSpcWalk` | Comportement spécial de déplacement (1 = grilles métalliques, 5 = tuiles liquides) |
+| `MonSpcWalk` | Comportement spÃ©cial de dÃ©placement (1 = grilles mÃ©talliques, 5 = tuiles liquides) |
 
-**Sélection des monstres :**
+**SÃ©lection des monstres :**
 
 | Colonne | Description |
 |---------|-------------|
-| `Mtot` | Nombre total de types de monstres différents (max 4 simultanés par jeu) |
-| `M1`-`M25` | IDs des monstres éligibles au spawn aléatoire |
+| `Mtot` | Nombre total de types de monstres diffÃ©rents (max 4 simultanÃ©s par jeu) |
+| `M1`-`M25` | IDs des monstres Ã©ligibles au spawn alÃ©atoire |
 | `S1`-`S25` | Monstres "satellites" : quand M1 spawn, S1 spawn aussi automatiquement |
-| `Utot` | Nombre total de types de monstres éligibles comme boss/champions |
-| `U1`-`U25` | IDs des monstres pouvant apparaître comme boss |
+| `Utot` | Nombre total de types de monstres Ã©ligibles comme boss/champions |
+| `U1`-`U25` | IDs des monstres pouvant apparaÃ®tre comme boss |
 
-**Algorithme de sélection :**
+**Algorithme de sÃ©lection :**
 
 ```
 fn select_monsters_for_zone(level, difficulty):
-    // 1. Sélectionner Mtot types parmi M1-M25 (aléatoire seed-dépendant)
+    // 1. SÃ©lectionner Mtot types parmi M1-M25 (alÃ©atoire seed-dÃ©pendant)
     pool = level.M1_to_M25.filter(|m| m != 0)
     selected = random_pick(pool, level.Mtot, rng)
     
-    // 2. Vérifier que chaque monstre peut spawner
+    // 2. VÃ©rifier que chaque monstre peut spawner
     for monster_id in selected:
         mon = MonStats[monster_id]
         if mon.spawn != 1:
-            continue  // MonStats.txt "spawn" doit être 1
+            continue  // MonStats.txt "spawn" doit Ãªtre 1
         
-        // 3. Niveau de zone (difficulté)
+        // 3. Niveau de zone (difficultÃ©)
         monster_level = match difficulty:
             Normal    => mon.Level           // niveau fixe depuis MonStats.txt
             Nightmare => level.MonLvl2       // niveau de zone
             Hell      => level.MonLvl3       // niveau de zone
 ```
 
-Le jeu ne peut pas spawner plus de **4 types de monstres différents simultanément** dans une zone. Si `Mtot` > 4, les types sont sélectionnés aléatoirement à chaque génération, apportant de la variété entre les parties.
+Le jeu ne peut pas spawner plus de **4 types de monstres diffÃ©rents simultanÃ©ment** dans une zone. Si `Mtot` > 4, les types sont sÃ©lectionnÃ©s alÃ©atoirement Ã  chaque gÃ©nÃ©ration, apportant de la variÃ©tÃ© entre les parties.
 
-**Critters et objets de décor :**
+**Critters et objets de dÃ©cor :**
 
 | Colonne | Description |
 |---------|-------------|
 | `C1`-`C5` | Types de critters (serpents, poulets, chameaux...) |
 | `CA1`-`CA5` | % chance de spawn de chaque critter (typiquement 30) |
-| `objGrp0`-`objGrp7` | Groupes d'objets décoratifs/shrines (réf. Objgroup.txt) |
+| `objGrp0`-`objGrp7` | Groupes d'objets dÃ©coratifs/shrines (rÃ©f. Objgroup.txt) |
 | `objPct0`-`objPct7` | % chance de spawn pour chaque groupe (max 100) |
 
-**Waypoints et quêtes :**
+**Waypoints et quÃªtes :**
 
 | Colonne | Description |
 |---------|-------------|
 | `Waypoint` | Index du waypoint dans la zone (255 = aucun) |
 | `SubWaypoint` | Gestion du waypoint dans les niveaux non-preset |
-| `SubShrine` | Influence le spawn aléatoire de shrines en wilderness |
-| `Quest` | ID de la quête liée à cette zone |
-| `SaveMonster` | 1 = les monstres tués restent morts en revenant dans la zone |
-| `Portal` / `Position` | Contrôle du repositionnement de portails |
+| `SubShrine` | Influence le spawn alÃ©atoire de shrines en wilderness |
+| `Quest` | ID de la quÃªte liÃ©e Ã  cette zone |
+| `SaveMonster` | 1 = les monstres tuÃ©s restent morts en revenant dans la zone |
+| `Portal` / `Position` | ContrÃ´le du repositionnement de portails |
 
 ---
 
-## 9.8 Waypoints et objets de quête
+## 9.8 Waypoints et objets de quÃªte
 
 ### Placement des waypoints
 
-| Contexte | Mécanisme de placement |
+| Contexte | MÃ©canisme de placement |
 |----------|----------------------|
-| **Preset (DrlgType 2)** | Position fixe dans le DS1 — toujours au même endroit |
-| **Maze (DrlgType 1)** | Placé dans une room spécifique du labyrinthe (room désignée par `SubWaypoint`) |
-| **Wilderness (DrlgType 3)** | Placé aléatoirement dans un espace vide de la zone |
+| **Preset (DrlgType 2)** | Position fixe dans le DS1 â€” toujours au mÃªme endroit |
+| **Maze (DrlgType 1)** | PlacÃ© dans une room spÃ©cifique du labyrinthe (room dÃ©signÃ©e par `SubWaypoint`) |
+| **Wilderness (DrlgType 3)** | PlacÃ© alÃ©atoirement dans un espace vide de la zone |
 
-La colonne `Waypoint` de `Levels.txt` détermine l'**index** du waypoint. La valeur 255 signifie qu'il n'y a pas de waypoint dans la zone.
+La colonne `Waypoint` de `Levels.txt` dÃ©termine l'**index** du waypoint. La valeur 255 signifie qu'il n'y a pas de waypoint dans la zone.
 
-### Zone de sécurité
+### Zone de sÃ©curitÃ©
 
-La colonne `WarpDist` définit une zone tampon (en subtiles) autour des entrées de niveau et des waypoints pour **empêcher les stair-traps** (monstres campant directement sur les entrées). La valeur par défaut est ~2025 subtiles.
+La colonne `WarpDist` dÃ©finit une zone tampon (en subtiles) autour des entrÃ©es de niveau et des waypoints pour **empÃªcher les stair-traps** (monstres campant directement sur les entrÃ©es). La valeur par dÃ©faut est ~2025 subtiles.
 
-### Objets de quête
+### Objets de quÃªte
 
-Les objets de quête sont placés via trois fichiers interconnectés :
+Les objets de quÃªte sont placÃ©s via trois fichiers interconnectÃ©s :
 
-| Fichier | Rôle |
+| Fichier | RÃ´le |
 |---------|------|
-| `Objects.txt` | Définition de tous les objets plaçables (propriétés, animations) |
-| `Objgroup.txt` | Groupes d'objets associés à des zones (shrines, coffres, etc.) |
-| `Objpreset.txt` | Placement fixe d'objets dans des DS1 spécifiques |
+| `Objects.txt` | DÃ©finition de tous les objets plaÃ§ables (propriÃ©tÃ©s, animations) |
+| `Objgroup.txt` | Groupes d'objets associÃ©s Ã  des zones (shrines, coffres, etc.) |
+| `Objpreset.txt` | Placement fixe d'objets dans des DS1 spÃ©cifiques |
 
 **Types de placement :**
 
-| Type | Mécanisme |
+| Type | MÃ©canisme |
 |------|-----------|
-| **Type 1 (DS1 direct)** | Objets placés manuellement dans le DS1 via le DS1 Editor |
-| **Type 2 (Objpreset)** | Objets référencés par ID et placés dans les DS1 selon l'acte |
-| **Aléatoire (Objgroup)** | Objets sélectionnés depuis Objgroup.txt et placés par le DRLG |
+| **Type 1 (DS1 direct)** | Objets placÃ©s manuellement dans le DS1 via le DS1 Editor |
+| **Type 2 (Objpreset)** | Objets rÃ©fÃ©rencÃ©s par ID et placÃ©s dans les DS1 selon l'acte |
+| **AlÃ©atoire (Objgroup)** | Objets sÃ©lectionnÃ©s depuis Objgroup.txt et placÃ©s par le DRLG |
 
 **Spawn garanti :**
 
-Certains objets de quête ont un **spawn garanti** car ils sont encodés directement dans le DS1 du preset :
+Certains objets de quÃªte ont un **spawn garanti** car ils sont encodÃ©s directement dans le DS1 du preset :
 
-| Objet | Zone | Mécanisme |
+| Objet | Zone | MÃ©canisme |
 |-------|------|-----------|
-| Cairn Stones | Stony Field | DS1 thématique dédié (toujours présent) |
-| Inifuss Tree | Dark Woods | DS1 thématique dédié |
+| Cairn Stones | Stony Field | DS1 thÃ©matique dÃ©diÃ© (toujours prÃ©sent) |
+| Inifuss Tree | Dark Woods | DS1 thÃ©matique dÃ©diÃ© |
 | Horadric Cube pedestal | Halls of the Dead Niv. 3 | DS1 preset (DrlgType 2) |
-| Altars de quête | Zones preset | Encodé dans le DS1 |
-| Super Uniques (Corpsefire, etc.) | Room spéciale du labyrinthe | DS1 "spec" (caveWspec.ds1) |
+| Altars de quÃªte | Zones preset | EncodÃ© dans le DS1 |
+| Super Uniques (Corpsefire, etc.) | Room spÃ©ciale du labyrinthe | DS1 "spec" (caveWspec.ds1) |
 
-Les DS1 "spec" (comme `caveWspec.ds1` pour Corpsefire) ne peuvent spawn qu'**une seule fois** dans un labyrinthe et sont toujours placés à l'extrémité la plus profonde.
+Les DS1 "spec" (comme `caveWspec.ds1` pour Corpsefire) ne peuvent spawn qu'**une seule fois** dans un labyrinthe et sont toujours placÃ©s Ã  l'extrÃ©mitÃ© la plus profonde.
 
 ---
 
-## 9.9 Zones spéciales
+## 9.9 Zones spÃ©ciales
 
 ### Arcane Sanctuary (Acte 2)
 
-| Aspect | Détail |
+| Aspect | DÃ©tail |
 |--------|--------|
 | **DrlgType** | 1 (Maze) |
-| **Particularité** | L'entrée est toujours au **centre** du labyrinthe (hardcodé) |
-| **Layout** | 4 branches partant du centre, chacune menant à un portail |
-| **Pathfinding** | Extrêmement étroit — les followers se bloquent fréquemment |
+| **ParticularitÃ©** | L'entrÃ©e est toujours au **centre** du labyrinthe (hardcodÃ©) |
+| **Layout** | 4 branches partant du centre, chacune menant Ã  un portail |
+| **Pathfinding** | ExtrÃªmement Ã©troit â€” les followers se bloquent frÃ©quemment |
 
 ### Maggot Lair (Acte 2)
 
-| Aspect | Détail |
+| Aspect | DÃ©tail |
 |--------|--------|
 | **DrlgType** | 1 (Maze) |
-| **Particularité** | Couloirs très étroits (2-3 subtiles de passage) |
+| **ParticularitÃ©** | Couloirs trÃ¨s Ã©troits (2-3 subtiles de passage) |
 | **Impact gameplay** | Les invocations et mercenaires bloquent le joueur |
 | **Rooms** | Petites, avec des connexions sinueuses |
 
 ### Jungle Acte 3
 
-| Aspect | Détail |
+| Aspect | DÃ©tail |
 |--------|--------|
 | **DrlgType** | 3 (Wilderness) |
-| **Particularité** | Malgré DrlgType 3, la génération ressemble davantage aux caves (DrlgType 1) |
-| **Complexité** | Zones denses avec beaucoup d'obstacles visuels et de passages étroits |
+| **ParticularitÃ©** | MalgrÃ© DrlgType 3, la gÃ©nÃ©ration ressemble davantage aux caves (DrlgType 1) |
+| **ComplexitÃ©** | Zones denses avec beaucoup d'obstacles visuels et de passages Ã©troits |
 
 ---
 
-## 9.10 Transposition MGE — Génération procédurale
+## 9.10 Transposition MGE â€” GÃ©nÃ©ration procÃ©durale
 
-### Architecture recommandée
+### Architecture recommandÃ©e
 
 ```rust
 // Plugin MGE : mge-plugin-mapgen.v1
@@ -2035,7 +2035,7 @@ pub struct LevelDef {
     pub id: u32,
     pub gen_type: MapGenType,
     pub size: (u32, u32),
-    pub level_type: u32,        // référence tileset
+    pub level_type: u32,        // rÃ©fÃ©rence tileset
     pub connections: Vec<LevelConnection>,
     pub monster_density: f32,
     pub monster_pool: Vec<u32>,
@@ -2046,7 +2046,7 @@ pub struct MazeRoom {
     pub position: (i32, i32),   // position dans la grille de rooms
     pub openings: u8,           // bitmask NSEW (4 bits)
     pub preset_variant: u32,    // index de variante DS1
-    pub is_special: bool,       // room de boss/quête
+    pub is_special: bool,       // room de boss/quÃªte
     pub tiles: TileGrid,
 }
 
@@ -2060,9 +2060,9 @@ pub struct WildernessZone {
 }
 ```
 
-### Mapping D2 → MGE
+### Mapping D2 â†’ MGE
 
-| Fichier D2 | Équivalent MGE |
+| Fichier D2 | Ã‰quivalent MGE |
 |-----------|----------------|
 | `Levels.txt` | `LevelDef` composant (table RON/JSON) |
 | `LvlPrest.txt` | `PresetDef` composant |
@@ -2070,139 +2070,139 @@ pub struct WildernessZone {
 | `LvlMaze.txt` | `MazeDef` composant |
 | `LvlSub.txt` | `FillerDef` composant |
 | `LvlWarp.txt` | `WarpDef` composant |
-| Fichiers DT1 | `TileAtlas` asset (conversion à l'import) |
-| Fichiers DS1 | `RoomPreset` asset (conversion à l'import) |
+| Fichiers DT1 | `TileAtlas` asset (conversion Ã  l'import) |
+| Fichiers DS1 | `RoomPreset` asset (conversion Ã  l'import) |
 
-### Différences clés avec D2
+### DiffÃ©rences clÃ©s avec D2
 
 | Aspect | D2 Original | Allumina (MGE) |
 |--------|-------------|----------------|
-| **Seed** | 32-bit, stocké dans le .d2s | 64-bit recommandé (plus d'entropie) |
-| **Taille de grille** | Subtiles entières | Grille logique + coordonnées flottantes |
-| **Rooms max** | Limité par RAM (~200×200 tiles par niveau) | Beaucoup plus large (streaming possible) |
-| **Persistance** | Régénéré à chaque partie | Persistant si monde ouvert (sérialisé) |
-| **Variantes** | 6 max par preset | Illimité (chargement dynamique) |
-| **Tuiles** | Palette 8-bit, 160×80px | Sprites modernes, résolution libre |
+| **Seed** | 32-bit, stockÃ© dans le .d2s | 64-bit recommandÃ© (plus d'entropie) |
+| **Taille de grille** | Subtiles entiÃ¨res | Grille logique + coordonnÃ©es flottantes |
+| **Rooms max** | LimitÃ© par RAM (~200Ã—200 tiles par niveau) | Beaucoup plus large (streaming possible) |
+| **Persistance** | RÃ©gÃ©nÃ©rÃ© Ã  chaque partie | Persistant si monde ouvert (sÃ©rialisÃ©) |
+| **Variantes** | 6 max par preset | IllimitÃ© (chargement dynamique) |
+| **Tuiles** | Palette 8-bit, 160Ã—80px | Sprites modernes, rÃ©solution libre |
 
 ---
 
-## 10. Références
+## 10. RÃ©fÃ©rences
 
-| Document | Rôle |
+| Document | RÃ´le |
 |----------|------|
-| [D2MOO (GitHub)](https://github.com/ThePhrozenKeep/D2MOO) | Reverse-engineering et réimplémentation de Diablo II |
-| [Phrozen Keep — MonStats.txt](https://d2mods.info/forum/kb/viewarticle?a=360) | Documentation exhaustive de MonStats.txt |
-| [Phrozen Keep — MonStats2.txt](https://d2mods.info/forum/kb/viewarticle?a=359) | Collision, taille, paramètres graphiques |
-| [Phrozen Keep — Missiles.txt](https://d2mods.info/forum/kb/viewarticle?a=364) | Système de projectiles complet |
-| [Phrozen Keep — Levels.txt](https://d2mods.info/forum/kb/viewarticle?a=384) | Référence complète Levels.txt (par Nefarius) |
-| [Phrozen Keep — Advanced DT1](https://d2mods.info/forum/kb/viewarticle?a=468) | Orientations, directions, transparence murs, PopPads |
-| [Paul Siramy — DT1 Format](http://paul.siramy.free.fr/_divers/dt1_doc/) | Spécification complète du format DT1 |
-| [Paul Siramy — MAZE and DS1 Mechanisms](https://d2mods.info/forum/viewtopic.php?t=13427) | Algorithme de génération de labyrinthes |
-| [Phrozen Keep — Randomizing Levels](https://d2mods.info/forum/kb/viewarticle?a=29) | Randomisation de niveaux preset (par Kingpin) |
-| [OpenDiablo2/ds1 (GitHub)](https://github.com/OpenDiablo2/ds1) | Décodeur DS1 en Go (reverse-engineering) |
-| [d2-map-investigation (GitHub)](https://github.com/squeek502/d2-map-investigation) | Corrélations de génération de cartes |
-| [diablo-mapgen (GitHub)](https://github.com/Matthew-petroff/diablo-mapgen) | Outil de génération de cartes D2 |
-| [D2 Tile Grid Guide](http://www.dos486.com/diablo/grid/) | Grille isométrique et footprints |
+| [D2MOO (GitHub)](https://github.com/ThePhrozenKeep/D2MOO) | Reverse-engineering et rÃ©implÃ©mentation de Diablo II |
+| [Phrozen Keep â€” MonStats.txt](https://d2mods.info/forum/kb/viewarticle?a=360) | Documentation exhaustive de MonStats.txt |
+| [Phrozen Keep â€” MonStats2.txt](https://d2mods.info/forum/kb/viewarticle?a=359) | Collision, taille, paramÃ¨tres graphiques |
+| [Phrozen Keep â€” Missiles.txt](https://d2mods.info/forum/kb/viewarticle?a=364) | SystÃ¨me de projectiles complet |
+| [Phrozen Keep â€” Levels.txt](https://d2mods.info/forum/kb/viewarticle?a=384) | RÃ©fÃ©rence complÃ¨te Levels.txt (par Nefarius) |
+| [Phrozen Keep â€” Advanced DT1](https://d2mods.info/forum/kb/viewarticle?a=468) | Orientations, directions, transparence murs, PopPads |
+| [Paul Siramy â€” DT1 Format](http://paul.siramy.free.fr/_divers/dt1_doc/) | SpÃ©cification complÃ¨te du format DT1 |
+| [Paul Siramy â€” MAZE and DS1 Mechanisms](https://d2mods.info/forum/viewtopic.php?t=13427) | Algorithme de gÃ©nÃ©ration de labyrinthes |
+| [Phrozen Keep â€” Randomizing Levels](https://d2mods.info/forum/kb/viewarticle?a=29) | Randomisation de niveaux preset (par Kingpin) |
+| [OpenDiablo2/ds1 (GitHub)](https://github.com/OpenDiablo2/ds1) | DÃ©codeur DS1 en Go (reverse-engineering) |
+| [d2-map-investigation (GitHub)](https://github.com/squeek502/d2-map-investigation) | CorrÃ©lations de gÃ©nÃ©ration de cartes |
+| [diablo-mapgen (GitHub)](https://github.com/Matthew-petroff/diablo-mapgen) | Outil de gÃ©nÃ©ration de cartes D2 |
+| [D2 Tile Grid Guide](http://www.dos486.com/diablo/grid/) | Grille isomÃ©trique et footprints |
 | [Frames and Animations](https://mannm.org/d2library/faqtoids/frames_eng.html) | Tick rate, breakpoints, animations |
 | [D2R Map Seed Extraction](https://noobient.com/2025/11/21/finding-the-map-seed-in-diablo-ii-resurrected/) | Extraction du seed dans les .d2s |
-| [Allumina — Document Fondateur](../Allumina%20-%20Document%20Fondateur.md) | Vision service Allumina |
-| [Allumina — Combat et Troupes](./Allumina%20-%20Combat%20et%20Troupes.md) | Troupes et échelles de combat |
-| [MGE — Skill Déplacement](../../../Miyukini_Game_Engine/deplacement-orientation/_index.md) | Chaîne locomotion MGE |
-| [MGE — Hitbox et Collisions](../../../Miyukini_Game_Engine/MGE%20-%20Hitbox%20et%20Collisions%20-%20Reference.md) | Référence collision MGE |
-| [MGE — Guide Groupes](../../../Miyukini_Game_Engine/MGE%20-%20Pathfinding%20Collisions%20-%20Guide%20Entites%20Groupes.md) | Pathfinding groupes MGE |
+| [Allumina â€” Document Fondateur](Allumina%20-%20Document%20Fondateur.md) | Vision service Allumina |
+| [Allumina â€” Combat et Troupes](Concept//Allumina%20-%20Combat%20et%20Troupes.md) | Troupes et Ã©chelles de combat |
+| [MGE â€” Skill DÃ©placement](..//..//..//README.md) | ChaÃ®ne locomotion MGE |
+| [MGE â€” Hitbox et Collisions](..//..//..//README.md) | RÃ©fÃ©rence collision MGE |
+| [MGE â€” Guide Groupes](..//..//..//README.md) | Pathfinding groupes MGE |
 
 ---
 
-# 10. SYSTÈME DE GÉNÉRATION D'ITEMS — TREASURE CLASS
+# 10. SYSTÃˆME DE GÃ‰NÃ‰RATION D'ITEMS â€” TREASURE CLASS
 
-## 10.1 Vue d'ensemble du pipeline de génération
+## 10.1 Vue d'ensemble du pipeline de gÃ©nÃ©ration
 
-Quand un monstre meurt, le jeu exécute le pipeline suivant dans cet ordre exact :
+Quand un monstre meurt, le jeu exÃ©cute le pipeline suivant dans cet ordre exact :
 
 ```
 Monster Kill
-  ↓
-[1] Déterminer le TC du monstre (monstats.txt → TreasureClassEx.txt)
-  ↓
+  â†“
+[1] DÃ©terminer le TC du monstre (monstats.txt â†’ TreasureClassEx.txt)
+  â†“
 [2] TC Upgrade (NM/Hell : monter le TC si mlvl > TC level)
-  ↓
+  â†“
 [3] Pour chaque Pick (nombre = colonne Picks du TC) :
-  │   ↓
-  │   [3a] Roll NoDrop vs Prob1..Prob10
-  │   ↓
-  │   [3b] Si NoDrop → rien, passer au pick suivant
-  │   [3c] Si TC enfant sélectionné → descendre récursivement dans le TC enfant
-  │   [3d] Si item atomique sélectionné → continuer vers [4]
-  ↓
-[4] Détermination de la qualité (Unique → Set → Rare → Magic → Superior → Normal → Low)
-  ↓
-[5] Sélection Unique/Set spécifique (si qualité Unique ou Set)
-  ↓
-[6] Génération des affixes (si Magic, Rare ou Crafted)
-  ↓
-[7] Roll Éthéré (5% pour items éligibles)
-  ↓
+  â”‚   â†“
+  â”‚   [3a] Roll NoDrop vs Prob1..Prob10
+  â”‚   â†“
+  â”‚   [3b] Si NoDrop â†’ rien, passer au pick suivant
+  â”‚   [3c] Si TC enfant sÃ©lectionnÃ© â†’ descendre rÃ©cursivement dans le TC enfant
+  â”‚   [3d] Si item atomique sÃ©lectionnÃ© â†’ continuer vers [4]
+  â†“
+[4] DÃ©termination de la qualitÃ© (Unique â†’ Set â†’ Rare â†’ Magic â†’ Superior â†’ Normal â†’ Low)
+  â†“
+[5] SÃ©lection Unique/Set spÃ©cifique (si qualitÃ© Unique ou Set)
+  â†“
+[6] GÃ©nÃ©ration des affixes (si Magic, Rare ou Crafted)
+  â†“
+[7] Roll Ã‰thÃ©rÃ© (5% pour items Ã©ligibles)
+  â†“
 [8] Roll Sockets (si applicable)
-  ↓
-[9] Roll des valeurs de propriétés (ranges des mods)
-  ↓
-Item final généré
+  â†“
+[9] Roll des valeurs de propriÃ©tÃ©s (ranges des mods)
+  â†“
+Item final gÃ©nÃ©rÃ©
 ```
 
 ## 10.2 Structure des Treasure Classes
 
 ### Fichier TreasureClassEx.txt
 
-Chaque ligne définit un TC avec :
+Chaque ligne dÃ©finit un TC avec :
 
-| Colonne | Rôle |
+| Colonne | RÃ´le |
 |---------|------|
 | `Treasure Class` | Nom du TC |
 | `Picks` | Nombre de tentatives de drop |
 | `group` | Groupe pour TC upgrade (NM/Hell) |
 | `level` | Niveau du TC (pour TC upgrade) |
-| `Unique` | Bonus qualité Unique (QualityFactor, 0-1024) |
-| `Set` | Bonus qualité Set (QualityFactor, 0-1024) |
-| `Rare` | Bonus qualité Rare (QualityFactor, 0-1024) |
-| `Magic` | Bonus qualité Magic (QualityFactor, 0-1024) |
+| `Unique` | Bonus qualitÃ© Unique (QualityFactor, 0-1024) |
+| `Set` | Bonus qualitÃ© Set (QualityFactor, 0-1024) |
+| `Rare` | Bonus qualitÃ© Rare (QualityFactor, 0-1024) |
+| `Magic` | Bonus qualitÃ© Magic (QualityFactor, 0-1024) |
 | `NoDrop` | Poids de NoDrop |
-| `Item1..Item10` | Entrées (items ou sous-TCs) |
-| `Prob1..Prob10` | Poids de probabilité de chaque entrée |
+| `Item1..Item10` | EntrÃ©es (items ou sous-TCs) |
+| `Prob1..Prob10` | Poids de probabilitÃ© de chaque entrÃ©e |
 
-### Hiérarchie récursive
+### HiÃ©rarchie rÃ©cursive
 
-Les TCs forment un **arbre récursif**. Chaque entrée dans un TC peut être :
-- Un **item atomique** (ex : `gld`, `amu`, un code d'item spécifique)
+Les TCs forment un **arbre rÃ©cursif**. Chaque entrÃ©e dans un TC peut Ãªtre :
+- Un **item atomique** (ex : `gld`, `amu`, un code d'item spÃ©cifique)
 - Un **TC enfant** (ex : `Act 5 (H) Equip C`)
-- Un **TC auto-généré** (ex : `weap87`, `armo84` — créés au runtime depuis weapons.txt/armor.txt)
+- Un **TC auto-gÃ©nÃ©rÃ©** (ex : `weap87`, `armo84` â€” crÃ©Ã©s au runtime depuis weapons.txt/armor.txt)
 
-### TCs auto-générés (Atomic TCs)
+### TCs auto-gÃ©nÃ©rÃ©s (Atomic TCs)
 
-Le jeu génère au runtime des TCs `WeapXX` et `ArmoXX` (XX = 03 à 87) en regroupant les items par qlvl :
+Le jeu gÃ©nÃ¨re au runtime des TCs `WeapXX` et `ArmoXX` (XX = 03 Ã  87) en regroupant les items par qlvl :
 
 ```
 Armo03 = tous les items d'armure avec qlvl 1-3
-  → Cap (qlvl 1), Quilted Armor (qlvl 1), Buckler (qlvl 1), etc.
+  â†’ Cap (qlvl 1), Quilted Armor (qlvl 1), Buckler (qlvl 1), etc.
 
 Armo87 = tous les items d'armure avec qlvl 85-87
-  → Diadem (qlvl 85), Corona (qlvl 85), Sacred Armor (qlvl 85), etc.
+  â†’ Diadem (qlvl 85), Corona (qlvl 85), Sacred Armor (qlvl 85), etc.
 
 Weap87 = tous les items d'arme avec qlvl 85-87
-  → Phase Blade (qlvl 73 → NON, pas dans weap87), etc.
+  â†’ Phase Blade (qlvl 73 â†’ NON, pas dans weap87), etc.
 ```
 
-### Pondération dans les TCs atomiques
+### PondÃ©ration dans les TCs atomiques
 
-Dans les TCs atomiques, chaque item a un poids `Rarity` (défini dans ItemTypes.txt) :
+Dans les TCs atomiques, chaque item a un poids `Rarity` (dÃ©fini dans ItemTypes.txt) :
 
 | Type d'item | Rarity |
 |-------------|--------|
-| Items normaux (épées, armures...) | 3 |
+| Items normaux (Ã©pÃ©es, armures...) | 3 |
 | Assassin claws | 2 |
 | Wands / Staves / Scepters | 1 |
 | Autres class-specific | 1 |
 
-**Probabilité d'un item** = `ItemRarity / TotalRarity`
+**ProbabilitÃ© d'un item** = `ItemRarity / TotalRarity`
 
 Exemple `armo87` (13 de total rarity) :
 - Diadem : 3/22
@@ -2210,24 +2210,24 @@ Exemple `armo87` (13 de total rarity) :
 - Sacred Armor : 3/22
 - Class-specific items : 1/22 chacun
 
-## 10.3 Picks et sélection
+## 10.3 Picks et sÃ©lection
 
 ### Picks positifs
 
-Si `Picks > 0`, le jeu effectue `Picks` tentatives indépendantes. Chaque tentative :
+Si `Picks > 0`, le jeu effectue `Picks` tentatives indÃ©pendantes. Chaque tentative :
 1. Calcule la somme totale : `Total = NoDrop + Prob1 + Prob2 + ... + Prob10`
-2. Tire un nombre aléatoire `R` dans `[0, Total)`
-3. Sélectionne l'entrée correspondante au poids cumulé
+2. Tire un nombre alÃ©atoire `R` dans `[0, Total)`
+3. SÃ©lectionne l'entrÃ©e correspondante au poids cumulÃ©
 
-### Picks négatifs
+### Picks nÃ©gatifs
 
-Si `Picks < 0`, le jeu garantit exactement `|Picks|` items, en **ignorant NoDrop**. Les items sont distribués proportionnellement aux poids Prob.
+Si `Picks < 0`, le jeu garantit exactement `|Picks|` items, en **ignorant NoDrop**. Les items sont distribuÃ©s proportionnellement aux poids Prob.
 
-Exemple : `Picks = -3`, `Prob1=2`, `Prob2=1` → toujours 2 de Item1 + 1 de Item2.
+Exemple : `Picks = -3`, `Prob1=2`, `Prob2=1` â†’ toujours 2 de Item1 + 1 de Item2.
 
 ### Limite physique
 
-Un monstre ne peut pas drop plus de **6 items** au sol (limitation du moteur). Si un boss a `Picks=7` (comme Mephisto), un des rolls est gaspillé si tous réussissent.
+Un monstre ne peut pas drop plus de **6 items** au sol (limitation du moteur). Si un boss a `Picks=7` (comme Mephisto), un des rolls est gaspillÃ© si tous rÃ©ussissent.
 
 ### Exemple complet : Mephisto Hell
 
@@ -2235,40 +2235,40 @@ Un monstre ne peut pas drop plus de **6 items** au sol (limitation du moteur). S
 Mephisto (H) :
   Picks = 7
   NoDrop = 15
-  gld,mul=2048     → Prob = 5
-  Act 4 (H) Equip A → Prob = 52
-  Act 4 (H) Junk    → Prob = 5
-  Act 4 (H) Good    → Prob = 3
+  gld,mul=2048     â†’ Prob = 5
+  Act 4 (H) Equip A â†’ Prob = 52
+  Act 4 (H) Junk    â†’ Prob = 5
+  Act 4 (H) Good    â†’ Prob = 3
   
-  Bonus qualité : Unique=983, Set=983, Rare=983, Magic=1024
+  Bonus qualitÃ© : Unique=983, Set=983, Rare=983, Magic=1024
   Total = 15 + 5 + 52 + 5 + 3 = 80
 
 Pour CHAQUE pick (7 fois) :
-  15/80 = 18.75% → NoDrop
-  5/80  = 6.25%  → Gold
-  52/80 = 65%    → Equipment
-  5/80  = 6.25%  → Junk (potions, flèches)
-  3/80  = 3.75%  → Good (gemmes, runes, jewels, charmes, anneaux, amulettes)
+  15/80 = 18.75% â†’ NoDrop
+  5/80  = 6.25%  â†’ Gold
+  52/80 = 65%    â†’ Equipment
+  5/80  = 6.25%  â†’ Junk (potions, flÃ¨ches)
+  3/80  = 3.75%  â†’ Good (gemmes, runes, jewels, charmes, anneaux, amulettes)
 ```
 
 ## 10.4 TC Upgrade (Nightmare / Hell)
 
-En Normal, le TC du monstre est utilisé directement. En NM/Hell, le TC peut être **upgradé** :
+En Normal, le TC du monstre est utilisÃ© directement. En NM/Hell, le TC peut Ãªtre **upgradÃ©** :
 
 ```
 Algorithme TC Upgrade :
   1. Trouver le TC de base du monstre (monstats.txt)
-  2. Vérifier si le TC a un "group" défini
-  3. Si oui : trouver le TC le plus élevé dans le même group
-     dont level ≤ mlvl du monstre
-  4. Utiliser ce TC upgradé
-  5. Les TCs enfants (inclus dans le TC sélectionné) ne sont PAS upgradés
+  2. VÃ©rifier si le TC a un "group" dÃ©fini
+  3. Si oui : trouver le TC le plus Ã©levÃ© dans le mÃªme group
+     dont level â‰¤ mlvl du monstre
+  4. Utiliser ce TC upgradÃ©
+  5. Les TCs enfants (inclus dans le TC sÃ©lectionnÃ©) ne sont PAS upgradÃ©s
 ```
 
 Exemple :
 - Devilkin dans The Pit (Hell) : mlvl = 85
 - TC de base : "Act 1 (H) H2H B" (group=7, level=66)
-- TC upgradé : "Act 5 (H) H2H C" (group=7, level=85 ≤ mlvl)
+- TC upgradÃ© : "Act 5 (H) H2H C" (group=7, level=85 â‰¤ mlvl)
 
 ## 10.5 Formule NoDrop et scaling multijoueur
 
@@ -2278,7 +2278,7 @@ Exemple :
 P(NoDrop) = NoDrop / (NoDrop + ProbSum)
 ```
 
-Où `ProbSum = Prob1 + Prob2 + ... + Prob10`
+OÃ¹ `ProbSum = Prob1 + Prob2 + ... + Prob10`
 
 ### Formule NoDrop multijoueur
 
@@ -2286,12 +2286,12 @@ Où `ProbSum = Prob1 + Prob2 + ... + Prob10`
 NewNoDrop = int( ProbSum / ( 1/( (NoDrop/(NoDrop+ProbSum))^N ) - 1 ) )
 ```
 
-Où :
+OÃ¹ :
 ```
 N = int(1 + AdditionalPlayers/2 + ClosePartiedPlayers/2)
 
 - AdditionalPlayers : tous les autres joueurs dans la partie
-- ClosePartiedPlayers : joueurs dans votre party ET à moins de 2 écrans
+- ClosePartiedPlayers : joueurs dans votre party ET Ã  moins de 2 Ã©crans
 - int() : troncature (pas d'arrondi)
 ```
 
@@ -2313,35 +2313,35 @@ NoDrop = 15, ProbSum = 65, Total = 80
 
 Solo (N=1) :
   NoDrop rate = (15/80)^1 = 0.1875
-  NewNoDrop = 15 → 15/80 = 18.75% NoDrop par pick
+  NewNoDrop = 15 â†’ 15/80 = 18.75% NoDrop par pick
 
 N=2 :
   NoDrop rate = (15/80)^2 = 0.03516
-  NewNoDrop = int(65 × 0.03516 / (1 - 0.03516)) = int(2.366) = 2
-  → 2/67 = 2.99% NoDrop par pick
+  NewNoDrop = int(65 Ã— 0.03516 / (1 - 0.03516)) = int(2.366) = 2
+  â†’ 2/67 = 2.99% NoDrop par pick
 
 N=3 :
   NoDrop rate = (15/80)^3 = 0.00659
-  NewNoDrop = int(65 × 0.00659 / (1 - 0.00659)) = int(0.431) = 0
-  → 0% NoDrop (full drops garantis)
+  NewNoDrop = int(65 Ã— 0.00659 / (1 - 0.00659)) = int(0.431) = 0
+  â†’ 0% NoDrop (full drops garantis)
 ```
 
-## 10.6 Boss d'acte — Règles spéciales
+## 10.6 Boss d'acte â€” RÃ¨gles spÃ©ciales
 
-### Bonus de niveau des élites
+### Bonus de niveau des Ã©lites
 
 | Type de monstre | Bonus mlvl |
 |----------------|-----------|
 | Champion | +2 |
 | Boss / Unique / Minion | +3 |
 
-### Règles spécifiques aux boss d'acte
+### RÃ¨gles spÃ©cifiques aux boss d'acte
 
-| Règle | Effet |
+| RÃ¨gle | Effet |
 |-------|-------|
-| **Force Magic** | Les boss d'acte et les boss aléatoires forcent un drop minimum de qualité Magic (ne s'applique pas aux items non-magiques : runes, potions, etc.) |
-| **QualityFactor élevé** | Mephisto/Diablo/Baal (H) ont `Unique=983, Set=983, Rare=983, Magic=1024` → énorme bonus qualité |
-| **Quest Drop** | Premier kill d'un boss d'acte = drops améliorés (pas de white items, pas de potions dans le drop principal) |
+| **Force Magic** | Les boss d'acte et les boss alÃ©atoires forcent un drop minimum de qualitÃ© Magic (ne s'applique pas aux items non-magiques : runes, potions, etc.) |
+| **QualityFactor Ã©levÃ©** | Mephisto/Diablo/Baal (H) ont `Unique=983, Set=983, Rare=983, Magic=1024` â†’ Ã©norme bonus qualitÃ© |
+| **Quest Drop** | Premier kill d'un boss d'acte = drops amÃ©liorÃ©s (pas de white items, pas de potions dans le drop principal) |
 
 ### Boss levels (monstats.txt)
 
@@ -2353,35 +2353,35 @@ N=3 :
 | Diablo | 40 | 62 | 94 |
 | Baal | 60 | 75 | 99 |
 | Nihlathak | 65 | 70 | 92 |
-| Uber Bosses | — | — | 110 |
+| Uber Bosses | â€” | â€” | 110 |
 
 ### Quest Drop Bug (Andariel)
 
-Andariel peut être **permanentement buguée** en quest drop :
-1. Tuer Andariel pour la première fois
-2. Aller directement à l'Acte 2 (via le portail de Warriv)
+Andariel peut Ãªtre **permanentement buguÃ©e** en quest drop :
+1. Tuer Andariel pour la premiÃ¨re fois
+2. Aller directement Ã  l'Acte 2 (via le portail de Warriv)
 3. Sauvegarder et quitter dans l'Acte 2
 
-Si cela est fait correctement, **toutes les exécutions futures** d'Andariel en cette difficulté utiliseront la table de quest drop (pas de white items/potions).
+Si cela est fait correctement, **toutes les exÃ©cutions futures** d'Andariel en cette difficultÃ© utiliseront la table de quest drop (pas de white items/potions).
 
-Pour les autres boss (Duriel, Mephisto, Diablo, Baal), le quest drop bug nécessite un personnage secondaire n'ayant pas complété la quête pour porter le coup final.
+Pour les autres boss (Duriel, Mephisto, Diablo, Baal), le quest drop bug nÃ©cessite un personnage secondaire n'ayant pas complÃ©tÃ© la quÃªte pour porter le coup final.
 
 ---
 
-# 11. DÉTERMINATION DE LA QUALITÉ D'ITEM
+# 11. DÃ‰TERMINATION DE LA QUALITÃ‰ D'ITEM
 
 ## 11.1 Niveaux fondamentaux
 
-| Niveau | Abréviation | Source | Description |
+| Niveau | AbrÃ©viation | Source | Description |
 |--------|-------------|--------|-------------|
-| **Item Level** | ilvl | = mlvl du monstre | Niveau caché de l'item, déterminé à la création |
+| **Item Level** | ilvl | = mlvl du monstre | Niveau cachÃ© de l'item, dÃ©terminÃ© Ã  la crÃ©ation |
 | **Monster Level** | mlvl | monstats.txt / area level | Niveau du monstre qui drop |
-| **Quality Level** | qlvl | weapons.txt / armor.txt | Niveau intrinsèque du type d'item de base |
+| **Quality Level** | qlvl | weapons.txt / armor.txt | Niveau intrinsÃ¨que du type d'item de base |
 | **Area Level** | alvl (zone) | levels.txt | Niveau de la zone (= mlvl des monstres normaux en NM/Hell) |
-| **Affix Level** | alvl (affix) | Calculé | Niveau déterminant quels affixes peuvent apparaître |
-| **Character Level** | clvl | Joueur | Niveau du personnage (utilisé pour gambling) |
+| **Affix Level** | alvl (affix) | CalculÃ© | Niveau dÃ©terminant quels affixes peuvent apparaÃ®tre |
+| **Character Level** | clvl | Joueur | Niveau du personnage (utilisÃ© pour gambling) |
 
-### Relation ilvl ↔ mlvl
+### Relation ilvl â†” mlvl
 
 ```
 ilvl = mlvl (pour drops de monstres)
@@ -2389,124 +2389,124 @@ ilvl = area level (pour drops de coffres/conteneurs)
 
 Champions : mlvl = area_level + 2
 Uniques/Boss random : mlvl = area_level + 3
-Boss d'acte : mlvl fixe (voir table §10.6)
+Boss d'acte : mlvl fixe (voir table Â§10.6)
 ```
 
-## 11.2 Algorithme de détermination de qualité
+## 11.2 Algorithme de dÃ©termination de qualitÃ©
 
-Le jeu teste les qualités **dans cet ordre exact** et s'arrête au premier succès :
-
-```
-1. Test UNIQUE    → Si succès → générer Unique (ou downgrade)
-2. Test SET       → Si succès → générer Set (ou downgrade)
-3. Test RARE      → Si succès → générer Rare
-4. Test MAGIC     → Si succès → générer Magic
-5. Test SUPERIOR  → Si succès → générer Superior
-6. Test NORMAL    → Si succès → générer Normal
-7. Fallback       → Low Quality (cracked, crude, etc.)
-```
-
-### Formule complète de chaque test
+Le jeu teste les qualitÃ©s **dans cet ordre exact** et s'arrÃªte au premier succÃ¨s :
 
 ```
-ÉTAPE 1 : Sélectionner la ligne correcte dans ItemRatio.txt
-  → Version (0=Classic, 1=LoD)
-  → Uber (0=Normal tier, 1=Exceptional/Elite tier)
-  → Class Specific (0=non, 1=oui)
+1. Test UNIQUE    â†’ Si succÃ¨s â†’ gÃ©nÃ©rer Unique (ou downgrade)
+2. Test SET       â†’ Si succÃ¨s â†’ gÃ©nÃ©rer Set (ou downgrade)
+3. Test RARE      â†’ Si succÃ¨s â†’ gÃ©nÃ©rer Rare
+4. Test MAGIC     â†’ Si succÃ¨s â†’ gÃ©nÃ©rer Magic
+5. Test SUPERIOR  â†’ Si succÃ¨s â†’ gÃ©nÃ©rer Superior
+6. Test NORMAL    â†’ Si succÃ¨s â†’ gÃ©nÃ©rer Normal
+7. Fallback       â†’ Low Quality (cracked, crude, etc.)
+```
 
-ÉTAPE 2 : Calculer Chance
-  Chance = (BaseChance - ((ilvl - qlvl) / Divisor)) × 128
+### Formule complÃ¨te de chaque test
 
-ÉTAPE 3 : Appliquer Magic Find (seulement pour Unique, Set, Rare)
-  EffectiveMF = MF × Factor / (MF + Factor)
+```
+Ã‰TAPE 1 : SÃ©lectionner la ligne correcte dans ItemRatio.txt
+  â†’ Version (0=Classic, 1=LoD)
+  â†’ Uber (0=Normal tier, 1=Exceptional/Elite tier)
+  â†’ Class Specific (0=non, 1=oui)
+
+Ã‰TAPE 2 : Calculer Chance
+  Chance = (BaseChance - ((ilvl - qlvl) / Divisor)) Ã— 128
+
+Ã‰TAPE 3 : Appliquer Magic Find (seulement pour Unique, Set, Rare)
+  EffectiveMF = MF Ã— Factor / (MF + Factor)
   
-  Factors (rendements décroissants) :
+  Factors (rendements dÃ©croissants) :
     Unique : Factor = 250
     Set    : Factor = 500
     Rare   : Factor = 600
-    Magic  : Pas de diminishing returns → EffectiveMF = MF
+    Magic  : Pas de diminishing returns â†’ EffectiveMF = MF
   
-  Chance = Chance × 100 / (100 + EffectiveMF)
+  Chance = Chance Ã— 100 / (100 + EffectiveMF)
 
-ÉTAPE 4 : Appliquer le minimum
+Ã‰TAPE 4 : Appliquer le minimum
   if (Chance < MinChance) then Chance = MinChance
 
-ÉTAPE 5 : Appliquer le QualityFactor du TC
-  FinalChance = Chance - (Chance × QualityFactor / 1024)
+Ã‰TAPE 5 : Appliquer le QualityFactor du TC
+  FinalChance = Chance - (Chance Ã— QualityFactor / 1024)
   
   QualityFactor = valeur Unique/Set/Rare/Magic du TC dans TreasureClassEx.txt
-  (valeur maximale rencontrée dans toute la chaîne de TCs traversée)
+  (valeur maximale rencontrÃ©e dans toute la chaÃ®ne de TCs traversÃ©e)
 
-ÉTAPE 6 : Roll final
-  Générer un nombre aléatoire R dans [0, FinalChance)
-  if (R < 128) → SUCCÈS (item de cette qualité)
-  else         → ÉCHEC (passer au test suivant)
+Ã‰TAPE 6 : Roll final
+  GÃ©nÃ©rer un nombre alÃ©atoire R dans [0, FinalChance)
+  if (R < 128) â†’ SUCCÃˆS (item de cette qualitÃ©)
+  else         â†’ Ã‰CHEC (passer au test suivant)
 
-Probabilité finale = 128 / FinalChance
+ProbabilitÃ© finale = 128 / FinalChance
 ```
 
 ## 11.3 Valeurs de ItemRatio.txt (v1.13 LoD)
 
 ### Items NON class-specific, tier Normal (Version=1, Uber=0, ClassSpecific=0)
 
-| Qualité | BaseChance | Divisor | MinChance |
+| QualitÃ© | BaseChance | Divisor | MinChance |
 |---------|-----------|---------|-----------|
 | **Unique** | 400 | 1 | 6400 |
 | **Set** | 160 | 2 | 5600 |
 | **Rare** | 100 | 2 | 3200 |
 | **Magic** | 34 | 3 | 192 |
-| **HiQuality** | 12 | 8 | — |
-| **Normal** | 2 | 2 | — |
+| **HiQuality** | 12 | 8 | â€” |
+| **Normal** | 2 | 2 | â€” |
 
 ### Items NON class-specific, tier Exceptional/Elite (Version=1, Uber=1, ClassSpecific=0)
 
-| Qualité | BaseChance | Divisor | MinChance |
+| QualitÃ© | BaseChance | Divisor | MinChance |
 |---------|-----------|---------|-----------|
 | **Unique** | 400 | 1 | 6400 |
 | **Set** | 160 | 2 | 5600 |
 | **Rare** | 100 | 2 | 3200 |
 | **Magic** | 34 | 3 | 192 |
-| **HiQuality** | 12 | 8 | — |
-| **Normal** | 1 | 1 | — |
+| **HiQuality** | 12 | 8 | â€” |
+| **Normal** | 1 | 1 | â€” |
 
 ### Items CLASS-SPECIFIC, tier Normal (Version=1, Uber=0, ClassSpecific=1)
 
-| Qualité | BaseChance | Divisor | MinChance |
+| QualitÃ© | BaseChance | Divisor | MinChance |
 |---------|-----------|---------|-----------|
 | **Unique** | 240 | 3 | 6400 |
 | **Set** | 120 | 3 | 5600 |
 | **Rare** | 80 | 3 | 3200 |
 | **Magic** | 17 | 6 | 192 |
-| **HiQuality** | 9 | 8 | — |
-| **Normal** | 2 | 2 | — |
+| **HiQuality** | 9 | 8 | â€” |
+| **Normal** | 2 | 2 | â€” |
 
 ### Items CLASS-SPECIFIC, tier Exceptional/Elite (Version=1, Uber=1, ClassSpecific=1)
 
-| Qualité | BaseChance | Divisor | MinChance |
+| QualitÃ© | BaseChance | Divisor | MinChance |
 |---------|-----------|---------|-----------|
 | **Unique** | 240 | 3 | 6400 |
 | **Set** | 120 | 3 | 5600 |
 | **Rare** | 80 | 3 | 3200 |
 | **Magic** | 17 | 6 | 192 |
-| **HiQuality** | 9 | 8 | — |
-| **Normal** | 1 | 1 | — |
+| **HiQuality** | 9 | 8 | â€” |
+| **Normal** | 1 | 1 | â€” |
 
-## 11.4 Formules Magic Find — Rendements décroissants
+## 11.4 Formules Magic Find â€” Rendements dÃ©croissants
 
 ### Formule Effective Magic Find (EMF)
 
 ```
-Pour Unique : EMF = MF × 250 / (MF + 250)
-Pour Set    : EMF = MF × 500 / (MF + 500)
-Pour Rare   : EMF = MF × 600 / (MF + 600)
+Pour Unique : EMF = MF Ã— 250 / (MF + 250)
+Pour Set    : EMF = MF Ã— 500 / (MF + 500)
+Pour Rare   : EMF = MF Ã— 600 / (MF + 600)
 Pour Magic  : EMF = MF (pas de diminishing returns)
 
-Exception : si MF ≤ 10, alors EMF = MF (pas de DR appliqué)
+Exception : si MF â‰¤ 10, alors EMF = MF (pas de DR appliquÃ©)
 ```
 
-### Table de référence EMF
+### Table de rÃ©fÃ©rence EMF
 
-| MF réel | EMF Unique | EMF Set | EMF Rare | EMF Magic |
+| MF rÃ©el | EMF Unique | EMF Set | EMF Rare | EMF Magic |
 |---------|-----------|---------|----------|-----------|
 | 0 | 0 | 0 | 0 | 0 |
 | 50 | 42 | 45 | 46 | 50 |
@@ -2520,9 +2520,9 @@ Exception : si MF ≤ 10, alors EMF = MF (pas de DR appliqué)
 
 ### Caps effectifs
 
-- EMF Unique ne peut jamais dépasser 250 (atteint à MF → ∞)
-- EMF Set ne peut jamais dépasser 500
-- EMF Rare ne peut jamais dépasser 600
+- EMF Unique ne peut jamais dÃ©passer 250 (atteint Ã  MF â†’ âˆž)
+- EMF Set ne peut jamais dÃ©passer 500
+- EMF Rare ne peut jamais dÃ©passer 600
 - EMF Magic n'a pas de cap
 
 ## 11.5 Exemple complet : Baal Hell drop Unearthed Wand (200% MF)
@@ -2538,57 +2538,57 @@ MF = 200%
 Ligne ItemRatio.txt : Version=1, Uber=1, ClassSpecific=0
 BaseChance = 400, Divisor = 1, MinChance = 6400
 
-Étape 2 : Chance = (400 - ((99-86)/1)) × 128 = (400-13) × 128 = 387 × 128 = 49536
-Étape 3 : Factor = 250 (unique)
-  EMF = 200 × 250 / (200+250) = 50000/450 = 111
-  Chance = 49536 × 100 / (100+111) = 49536 × 100/211 = 23476
-Étape 4 : 23476 > MinChance(6400) → pas de clamp
-Étape 5 : QualityFactor = 983 (Baal Hell TC)
-  FinalChance = 23476 - (23476 × 983/1024) = 23476 - 22530 = 946 ≈ 939*
+Ã‰tape 2 : Chance = (400 - ((99-86)/1)) Ã— 128 = (400-13) Ã— 128 = 387 Ã— 128 = 49536
+Ã‰tape 3 : Factor = 250 (unique)
+  EMF = 200 Ã— 250 / (200+250) = 50000/450 = 111
+  Chance = 49536 Ã— 100 / (100+111) = 49536 Ã— 100/211 = 23476
+Ã‰tape 4 : 23476 > MinChance(6400) â†’ pas de clamp
+Ã‰tape 5 : QualityFactor = 983 (Baal Hell TC)
+  FinalChance = 23476 - (23476 Ã— 983/1024) = 23476 - 22530 = 946 â‰ˆ 939*
 
-Probabilité Unique = 128/939 = 13.6%
+ProbabilitÃ© Unique = 128/939 = 13.6%
 
-* La légère différence vient de l'arithmétique entière (int truncation à chaque étape)
+* La lÃ©gÃ¨re diffÃ©rence vient de l'arithmÃ©tique entiÃ¨re (int truncation Ã  chaque Ã©tape)
 ```
 
 ---
 
-# 12. GÉNÉRATION DES ITEMS UNIQUES ET SET
+# 12. GÃ‰NÃ‰RATION DES ITEMS UNIQUES ET SET
 
-## 12.1 Sélection d'un Unique spécifique
+## 12.1 SÃ©lection d'un Unique spÃ©cifique
 
-Après que le test de qualité a déterminé "Unique", le jeu :
+AprÃ¨s que le test de qualitÃ© a dÃ©terminÃ© "Unique", le jeu :
 
 ```
-1. Construire la liste de tous les Uniques du même type de base
-   dont qlvl_unique ≤ ilvl de l'item
+1. Construire la liste de tous les Uniques du mÃªme type de base
+   dont qlvl_unique â‰¤ ilvl de l'item
 
 2. Si la liste est VIDE :
-   → Downgrade en RARE avec durabilité × 3
-   → (Si le type ne peut pas être Rare → Magic avec durabilité × 3)
+   â†’ Downgrade en RARE avec durabilitÃ© Ã— 3
+   â†’ (Si le type ne peut pas Ãªtre Rare â†’ Magic avec durabilitÃ© Ã— 3)
 
 3. Si la liste contient UN seul item :
-   → Cet Unique est sélectionné
+   â†’ Cet Unique est sÃ©lectionnÃ©
 
 4. Si la liste contient PLUSIEURS items :
-   → Sélection pondérée par le champ "rarity" de UniqueItems.txt
-   → P(item) = item.rarity / Σ(all_rarities)
+   â†’ SÃ©lection pondÃ©rÃ©e par le champ "rarity" de UniqueItems.txt
+   â†’ P(item) = item.rarity / Î£(all_rarities)
 ```
 
 ### Champ Rarity des Uniques
 
 | Item | Rarity | Commentaire |
 |------|--------|-------------|
-| Manald Heal (anneau unique) | 15 | Très commun |
-| Nagelring (anneau unique) | 15 | Très commun |
-| Stone of Jordan | 1 | 15× plus rare que Manald |
+| Manald Heal (anneau unique) | 15 | TrÃ¨s commun |
+| Nagelring (anneau unique) | 15 | TrÃ¨s commun |
+| Stone of Jordan | 1 | 15Ã— plus rare que Manald |
 | Bul-Kathos' Wedding Band | 1 | Rare |
 
-Exemple : 9 anneaux uniques éligibles, total rarity = 59
-- SoJ = 1/59 ≈ 1.7%
-- Manald = 15/59 ≈ 25.4%
+Exemple : 9 anneaux uniques Ã©ligibles, total rarity = 59
+- SoJ = 1/59 â‰ˆ 1.7%
+- Manald = 15/59 â‰ˆ 25.4%
 
-## 12.2 Prévention des doublons Uniques
+## 12.2 PrÃ©vention des doublons Uniques
 
 ### Champ "nolimit" de UniqueItems.txt
 
@@ -2597,35 +2597,35 @@ Exemple : 9 anneaux uniques éligibles, total rarity = 59
 | 0 (ou vide) | L'Unique ne peut drop qu'**une seule fois** par partie |
 | 1 | Pas de limite (peut drop plusieurs fois) |
 
-### Mécanisme de prévention
+### MÃ©canisme de prÃ©vention
 
-Quand un Unique avec `nolimit=0` est sélectionné :
+Quand un Unique avec `nolimit=0` est sÃ©lectionnÃ© :
 
 ```
-1. Vérifier si cet Unique a déjà été :
-   a. Droppé comme Unique dans cette partie
-   b. Droppé comme failed unique (rare 3× durabilité) dans cette partie
-   c. Généré dans l'écran de gambling dans cette partie
+1. VÃ©rifier si cet Unique a dÃ©jÃ  Ã©tÃ© :
+   a. DroppÃ© comme Unique dans cette partie
+   b. DroppÃ© comme failed unique (rare 3Ã— durabilitÃ©) dans cette partie
+   c. GÃ©nÃ©rÃ© dans l'Ã©cran de gambling dans cette partie
 
-2. Si déjà généré → Downgrade en Rare avec durabilité × 3
+2. Si dÃ©jÃ  gÃ©nÃ©rÃ© â†’ Downgrade en Rare avec durabilitÃ© Ã— 3
 
-3. Si non → Drop l'Unique et marquer comme "généré" pour cette partie
+3. Si non â†’ Drop l'Unique et marquer comme "gÃ©nÃ©rÃ©" pour cette partie
 ```
 
-C'est pourquoi les uniques communs (Manald, Nagelring) "bloquent" le drop de SoJ : une fois Manald généré, la prochaine tentative de Manald downgrade en rare, mais le flag empêche aussi sa re-sélection.
+C'est pourquoi les uniques communs (Manald, Nagelring) "bloquent" le drop de SoJ : une fois Manald gÃ©nÃ©rÃ©, la prochaine tentative de Manald downgrade en rare, mais le flag empÃªche aussi sa re-sÃ©lection.
 
 ## 12.3 Conditions de downgrade
 
-### Downgrade Unique → Rare
+### Downgrade Unique â†’ Rare
 
-Un Unique est downgrade en **Rare avec durabilité × 3** si :
+Un Unique est downgrade en **Rare avec durabilitÃ© Ã— 3** si :
 1. Le qlvl de l'Unique > ilvl (monstre pas assez haut niveau)
 2. Aucun Unique n'existe pour ce type de base
-3. L'Unique a déjà été généré dans cette partie (`nolimit=0`)
+3. L'Unique a dÃ©jÃ  Ã©tÃ© gÃ©nÃ©rÃ© dans cette partie (`nolimit=0`)
 
-### Downgrade Set → Magic
+### Downgrade Set â†’ Magic
 
-Un Set est downgrade en **Magic avec durabilité × 2** si :
+Un Set est downgrade en **Magic avec durabilitÃ© Ã— 2** si :
 1. Le qlvl du Set > ilvl
 2. Aucun Set n'existe pour ce type de base
 
@@ -2635,8 +2635,8 @@ Un Set est downgrade en **Magic avec durabilité × 2** si :
 Pindleskin (Hell) : mlvl = 86
 Arachnid Mesh (unique Spiderweb Sash) : qlvl = 87
 
-86 < 87 → qlvl > mlvl → IMPOSSIBLE pour Pindleskin de drop Arachnid Mesh
-→ Toute tentative de Unique Spiderweb Sash = Rare 3× durabilité
+86 < 87 â†’ qlvl > mlvl â†’ IMPOSSIBLE pour Pindleskin de drop Arachnid Mesh
+â†’ Toute tentative de Unique Spiderweb Sash = Rare 3Ã— durabilitÃ©
 ```
 
 ### Cas notable : Tyrael's Might et Templar's Might
@@ -2647,39 +2647,39 @@ Sacred Armor uniques :
   Tyrael's Might  : qlvl = 87
 
 Pindleskin (mlvl=86) :
-  → Peut drop Templar's Might (85 ≤ 86)
-  → Ne peut PAS drop Tyrael's Might (87 > 86)
+  â†’ Peut drop Templar's Might (85 â‰¤ 86)
+  â†’ Ne peut PAS drop Tyrael's Might (87 > 86)
   
 Baal Hell (mlvl=99) :
-  → Peut drop les deux
+  â†’ Peut drop les deux
 ```
 
-## 12.4 Sélection d'un Set spécifique
+## 12.4 SÃ©lection d'un Set spÃ©cifique
 
-Même algorithme que pour les Uniques :
+MÃªme algorithme que pour les Uniques :
 
 ```
-1. Construire la liste de tous les items Set du même type de base
-   dont qlvl_set ≤ ilvl
-2. Si vide → Magic avec durabilité × 2
-3. Si un seul → sélectionné
-4. Si plusieurs → pondération par rarity
+1. Construire la liste de tous les items Set du mÃªme type de base
+   dont qlvl_set â‰¤ ilvl
+2. Si vide â†’ Magic avec durabilitÃ© Ã— 2
+3. Si un seul â†’ sÃ©lectionnÃ©
+4. Si plusieurs â†’ pondÃ©ration par rarity
 ```
 
 ---
 
-# 13. SYSTÈME DE GÉNÉRATION DES AFFIXES
+# 13. SYSTÃˆME DE GÃ‰NÃ‰RATION DES AFFIXES
 
 ## 13.1 Calcul du Affix Level (alvl)
 
-Le alvl détermine quels affixes (prefixes/suffixes) sont disponibles pour un item :
+Le alvl dÃ©termine quels affixes (prefixes/suffixes) sont disponibles pour un item :
 
 ```
-Algorithme (arithmétique entière, pas de fractions) :
+Algorithme (arithmÃ©tique entiÃ¨re, pas de fractions) :
 
-1. if (ilvl > 99) then ilvl = 99    // Cap à 99
+1. if (ilvl > 99) then ilvl = 99    // Cap Ã  99
 2. if (qlvl > ilvl) then ilvl = qlvl // qlvl minimum
-   // (Note : ce ilvl modifié est temporaire, ne change pas l'item)
+   // (Note : ce ilvl modifiÃ© est temporaire, ne change pas l'item)
 
 3. if (magic_lvl > 0) then
      alvl = ilvl + magic_lvl
@@ -2687,9 +2687,9 @@ Algorithme (arithmétique entière, pas de fractions) :
      if (ilvl < (99 - qlvl/2)) then
        alvl = ilvl - qlvl/2          // int division
      else
-       alvl = 2 × ilvl - 99
+       alvl = 2 Ã— ilvl - 99
 
-4. if (alvl > 99) then alvl = 99    // Cap à 99
+4. if (alvl > 99) then alvl = 99    // Cap Ã  99
 ```
 
 ### Magic Level (maglvl)
@@ -2704,59 +2704,59 @@ Le `magic_lvl` est un attribut de certains types d'items dans weapons.txt/armor.
 | Circlets | Variable (3-8) |
 | Autres items | 0 |
 
-### Exemple : Small Charm droppé par Pindleskin Normal
+### Exemple : Small Charm droppÃ© par Pindleskin Normal
 
 ```
 ilvl = 45 (Pindleskin Normal mlvl)
 qlvl = 28 (Small Charm qlvl)
 magic_lvl = 0
 
-qlvl(28) < ilvl(45) → pas de clamp
-magic_lvl = 0 → branche else
-ilvl(45) < 99 - qlvl/2 = 99 - 14 = 85 → oui
+qlvl(28) < ilvl(45) â†’ pas de clamp
+magic_lvl = 0 â†’ branche else
+ilvl(45) < 99 - qlvl/2 = 99 - 14 = 85 â†’ oui
 alvl = 45 - 28/2 = 45 - 14 = 31
 ```
 
-## 13.2 Sélection des affixes pour items Magic
+## 13.2 SÃ©lection des affixes pour items Magic
 
 ### Nombre d'affixes (items Magic)
 
 ```
-Roll aléatoire :
-  50% → Suffix seulement
-  25% → Prefix seulement
-  25% → Prefix ET Suffix
+Roll alÃ©atoire :
+  50% â†’ Suffix seulement
+  25% â†’ Prefix seulement
+  25% â†’ Prefix ET Suffix
 
 Maximum : 1 Prefix + 1 Suffix
 ```
 
-### Sélection d'un affix
+### SÃ©lection d'un affix
 
 Pour chaque slot (prefix/suffix) :
 
 ```
-1. Construire la liste des affixes éligibles :
+1. Construire la liste des affixes Ã©ligibles :
    - spawnable = 1
    - itype correspond au type de l'item
    - etype ne contient PAS le type de l'item
-   - level ≤ alvl (affix level min)
-   - maxlevel ≥ alvl OU maxlevel = 0 (pas de cap)
+   - level â‰¤ alvl (affix level min)
+   - maxlevel â‰¥ alvl OU maxlevel = 0 (pas de cap)
    - version correcte (Classic/LoD)
 
-2. Sélection pondérée par "frequency" :
-   P(affix) = affix.frequency / Σ(frequencies de tous les affixes éligibles)
+2. SÃ©lection pondÃ©rÃ©e par "frequency" :
+   P(affix) = affix.frequency / Î£(frequencies de tous les affixes Ã©ligibles)
    
-   frequency = 0 → ne peut JAMAIS apparaître en drop
+   frequency = 0 â†’ ne peut JAMAIS apparaÃ®tre en drop
    (seulement via cube recipes)
 ```
 
-## 13.3 Sélection des affixes pour items Rare
+## 13.3 SÃ©lection des affixes pour items Rare
 
 ### Nombre d'affixes (items Rare)
 
 ```
 Les Rare Items ont entre 3 et 6 affixes.
-Probabilité 1/4 (25%) pour chaque nombre : 3, 4, 5, ou 6.
+ProbabilitÃ© 1/4 (25%) pour chaque nombre : 3, 4, 5, ou 6.
 
 Maximum : 3 Prefixes + 3 Suffixes
 
@@ -2766,13 +2766,13 @@ Restriction Jewels Rare : maximum 4 affixes total
 ### Note sur ilvl et nombre d'affixes des Crafted items
 
 ```
-ilvl 1-30  : 40% → 1 affix, 20% → 2, 20% → 3, 20% → 4
-ilvl 31-50 : 60% → 2 affixes, 20% → 3, 20% → 4
-ilvl 51-70 : 80% → 3 affixes, 20% → 4
-ilvl 71+   : 100% → 4 affixes
+ilvl 1-30  : 40% â†’ 1 affix, 20% â†’ 2, 20% â†’ 3, 20% â†’ 4
+ilvl 31-50 : 60% â†’ 2 affixes, 20% â†’ 3, 20% â†’ 4
+ilvl 51-70 : 80% â†’ 3 affixes, 20% â†’ 4
+ilvl 71+   : 100% â†’ 4 affixes
 ```
 
-### Algorithme de sélection (Rare)
+### Algorithme de sÃ©lection (Rare)
 
 ```
 fn generate_rare_affixes(item, alvl):
@@ -2786,13 +2786,13 @@ fn generate_rare_affixes(item, alvl):
     // 50/50 prefix ou suffix
     is_prefix = random_bool()
     
-    // Vérifier les caps
+    // VÃ©rifier les caps
     if is_prefix and prefix_count >= 3:
       is_prefix = false  // forcer suffix
     if !is_prefix and suffix_count >= 3:
       is_prefix = true   // forcer prefix
     
-    // Construire la liste des affixes éligibles
+    // Construire la liste des affixes Ã©ligibles
     pool = get_eligible_affixes(
       item.type,
       alvl,
@@ -2804,7 +2804,7 @@ fn generate_rare_affixes(item, alvl):
     if pool.is_empty():
       break
     
-    // Sélection pondérée par frequency
+    // SÃ©lection pondÃ©rÃ©e par frequency
     affix = weighted_random(pool, |a| a.frequency)
     
     affixes.push(affix)
@@ -2818,52 +2818,52 @@ fn generate_rare_affixes(item, alvl):
 ### Contraintes de groupes
 
 ```
-- Un item ne peut pas avoir 2 affixes du même "group" (MagicPrefix.txt / MagicSuffix.txt)
+- Un item ne peut pas avoir 2 affixes du mÃªme "group" (MagicPrefix.txt / MagicSuffix.txt)
 - Exemple : "Wyrm" (+41-60 Mana, group 55) et "Dragon's" (+31-40 Mana, group 55) 
   sont mutuellement exclusifs
-- Des affixes du même TYPE mais de GROUPS différents peuvent coexister
+- Des affixes du mÃªme TYPE mais de GROUPS diffÃ©rents peuvent coexister
   (ex : +life prefix et +life suffix)
 ```
 
 ### Affixes "magic only"
 
 Certains affixes ont `rare=0` dans MagicPrefix.txt/MagicSuffix.txt :
-- Ces affixes ne peuvent apparaître **que** sur des items Magic
-- Ils ne peuvent **pas** apparaître sur des Rare ou Crafted
+- Ces affixes ne peuvent apparaÃ®tre **que** sur des items Magic
+- Ils ne peuvent **pas** apparaÃ®tre sur des Rare ou Crafted
 - Exemple : Jeweler's (4 sockets), certains +3 skill tree prefixes
 
 ## 13.4 Staffmods et Automods
 
 ### Staffmods
 
-Les staffmods sont des bonus de compétences **intrinsèques** à certains types d'items, générés comme des propriétés de base (comme la durabilité) et non comme des affixes :
+Les staffmods sont des bonus de compÃ©tences **intrinsÃ¨ques** Ã  certains types d'items, gÃ©nÃ©rÃ©s comme des propriÃ©tÃ©s de base (comme la durabilitÃ©) et non comme des affixes :
 
 | Type d'item | Skills possibles |
 |-------------|-----------------|
-| Wands | Skills Nécromancien |
-| Staves | Skills Sorcière |
+| Wands | Skills NÃ©cromancien |
+| Staves | Skills SorciÃ¨re |
 | Scepters | Skills Paladin |
 | Claws (assassin) | Skills Assassin |
-| Orbs | Skills Sorcière |
+| Orbs | Skills SorciÃ¨re |
 | Druid helms | Skills Druide |
 | Barbarian helms | Skills Barbare |
 
-Les staffmods **ne sont pas supprimés** par les runewords — un item base avec de bons staffmods les conserve.
+Les staffmods **ne sont pas supprimÃ©s** par les runewords â€” un item base avec de bons staffmods les conserve.
 
 ### Automods
 
-Les automods sont des propriétés automatiques définies par `auto prefix` dans weapons.txt/armor.txt :
-- Orbs → bonus mana
-- Nécromancien heads → poison damage
-- Paladin shields → résistances
+Les automods sont des propriÃ©tÃ©s automatiques dÃ©finies par `auto prefix` dans weapons.txt/armor.txt :
+- Orbs â†’ bonus mana
+- NÃ©cromancien heads â†’ poison damage
+- Paladin shields â†’ rÃ©sistances
 
 ---
 
-# 14. SYSTÈME DE SOCKETS
+# 14. SYSTÃˆME DE SOCKETS
 
-## 14.1 Détermination du nombre de sockets (items normaux/supérieurs)
+## 14.1 DÃ©termination du nombre de sockets (items normaux/supÃ©rieurs)
 
-### Items éligibles aux sockets
+### Items Ã©ligibles aux sockets
 
 Seuls ces types peuvent avoir des sockets :
 - Casques
@@ -2871,32 +2871,32 @@ Seuls ces types peuvent avoir des sockets :
 - Armures corporelles
 - Armes (sauf armes de jet)
 
-### Probabilité d'avoir des sockets (normal/superior)
+### ProbabilitÃ© d'avoir des sockets (normal/superior)
 
 ```
-1/3 de tous les items normaux et supérieurs sont générés socketed.
+1/3 de tous les items normaux et supÃ©rieurs sont gÃ©nÃ©rÃ©s socketed.
 Les items low quality ne peuvent PAS avoir de sockets.
 ```
 
 ### Nombre de sockets : ItemTypes.txt
 
-Le fichier ItemTypes.txt définit 3 caps par type d'item :
+Le fichier ItemTypes.txt dÃ©finit 3 caps par type d'item :
 
 | Colonne | Applicable si |
 |---------|---------------|
-| `MaxSock1` | ilvl ≤ 25 |
+| `MaxSock1` | ilvl â‰¤ 25 |
 | `MaxSock25` | ilvl 26-40 |
-| `MaxSock40` | ilvl ≥ 41 |
+| `MaxSock40` | ilvl â‰¥ 41 |
 
 Le nombre de sockets est un random dans `[1, min(MaxSockX, gemsockets)]` :
 - `MaxSockX` = cap par ilvl du type (ItemTypes.txt)
-- `gemsockets` = cap absolu de l'item spécifique (weapons.txt / armor.txt)
+- `gemsockets` = cap absolu de l'item spÃ©cifique (weapons.txt / armor.txt)
 
 ### Exemple : Crystal Sword
 
 ```
 gemsockets (weapons.txt) = 6
-Type = "swor" → MaxSock1=3, MaxSock25=4, MaxSock40=6
+Type = "swor" â†’ MaxSock1=3, MaxSock25=4, MaxSock40=6
 
 ilvl 1-25  : random [1, min(3, 6)] = [1, 3] sockets
 ilvl 26-40 : random [1, min(4, 6)] = [1, 4] sockets
@@ -2907,28 +2907,28 @@ ilvl 41+   : random [1, min(6, 6)] = [1, 6] sockets
 
 ```
 gemsockets (armor.txt) = 4
-Type = "shie" → MaxSock1=3, MaxSock25=3, MaxSock40=4
+Type = "shie" â†’ MaxSock1=3, MaxSock25=3, MaxSock40=4
 
 ilvl 1-25  : random [1, min(3, 4)] = [1, 3] sockets
 ilvl 26-40 : random [1, min(3, 4)] = [1, 3] sockets
 ilvl 41+   : random [1, min(4, 4)] = [1, 4] sockets
 ```
 
-## 14.2 Larzuk (quête Siege on Harrogath)
+## 14.2 Larzuk (quÃªte Siege on Harrogath)
 
-### Règles de Larzuk
+### RÃ¨gles de Larzuk
 
-| Qualité de l'item | Sockets ajoutés |
+| QualitÃ© de l'item | Sockets ajoutÃ©s |
 |-------------------|----------------|
 | **Normal (white/grey)** | Maximum possible = `min(MaxSockX_pour_ilvl, gemsockets)` |
-| **Superior** | Maximum possible (même formule que normal) |
+| **Superior** | Maximum possible (mÃªme formule que normal) |
 | **Magic** | 1 ou 2 sockets (50/50) |
 | **Rare** | 1 socket (toujours) |
 | **Set** | 1 socket (toujours) |
 | **Unique** | 1 socket (toujours) |
 | **Crafted** | 1 socket (toujours) |
 
-Larzuk est **déterministe** pour les items normaux : toujours le maximum.
+Larzuk est **dÃ©terministe** pour les items normaux : toujours le maximum.
 
 ### Utilisations
 
@@ -2940,158 +2940,158 @@ Larzuk est **déterministe** pour les items normaux : toujours le maximum.
 
 | Type | Recette | Range de sockets |
 |------|---------|-----------------|
-| **Arme** | Ral + Amn + Perfect Amethyst + arme | 1-6 (aléatoire) |
-| **Armure corporelle** | Tal + Thul + Perfect Topaz + armure | 1-4 (aléatoire) |
-| **Casque** | Ral + Thul + Perfect Sapphire + casque | 1-3 (aléatoire) |
-| **Bouclier** | Tal + Amn + Perfect Ruby + bouclier | 1-4 (aléatoire) |
+| **Arme** | Ral + Amn + Perfect Amethyst + arme | 1-6 (alÃ©atoire) |
+| **Armure corporelle** | Tal + Thul + Perfect Topaz + armure | 1-4 (alÃ©atoire) |
+| **Casque** | Ral + Thul + Perfect Sapphire + casque | 1-3 (alÃ©atoire) |
+| **Bouclier** | Tal + Amn + Perfect Ruby + bouclier | 1-4 (alÃ©atoire) |
 
 ### Algorithme cube socket
 
 ```
 Le cube roll un nombre entre 1 et 6 (distribution uniforme).
-Si le résultat dépasse le maximum de l'item → clamp au maximum.
+Si le rÃ©sultat dÃ©passe le maximum de l'item â†’ clamp au maximum.
 
 Exemple : Claws (max 3 sockets)
-  Roll 1 → 1 socket  (1/6)
-  Roll 2 → 2 sockets (1/6)
-  Roll 3 → 3 sockets (1/6)
-  Roll 4 → 3 sockets (1/6)  // clamp
-  Roll 5 → 3 sockets (1/6)  // clamp
-  Roll 6 → 3 sockets (1/6)  // clamp
+  Roll 1 â†’ 1 socket  (1/6)
+  Roll 2 â†’ 2 sockets (1/6)
+  Roll 3 â†’ 3 sockets (1/6)
+  Roll 4 â†’ 3 sockets (1/6)  // clamp
+  Roll 5 â†’ 3 sockets (1/6)  // clamp
+  Roll 6 â†’ 3 sockets (1/6)  // clamp
   
-  Résultat : 1/6 → 1os, 1/6 → 2os, 4/6 → 3os
+  RÃ©sultat : 1/6 â†’ 1os, 1/6 â†’ 2os, 4/6 â†’ 3os
 ```
 
 ### Recette socket pour items Rare
 
 ```
-3× Perfect Skulls + Stone of Jordan + item Rare → item Rare avec 1 socket
-(Détruit les stats existantes et re-roll le Rare, puis ajoute 1 socket)
+3Ã— Perfect Skulls + Stone of Jordan + item Rare â†’ item Rare avec 1 socket
+(DÃ©truit les stats existantes et re-roll le Rare, puis ajoute 1 socket)
 ```
 
 ## 14.4 Sockets sur items Rare (natifs)
 
-Les items Rare peuvent avoir des sockets naturels si l'affix **Mechanist's** (prefix) est sélectionné :
+Les items Rare peuvent avoir des sockets naturels si l'affix **Mechanist's** (prefix) est sÃ©lectionnÃ© :
 - 1 ou 2 sockets (50/50)
-- Clampé au maximum du type de base
-- Exemple : Rare Buckler avec Mechanist's → toujours 1 socket (max sockets buckler = 1)
+- ClampÃ© au maximum du type de base
+- Exemple : Rare Buckler avec Mechanist's â†’ toujours 1 socket (max sockets buckler = 1)
 
-## 14.5 Astuce Low Quality → Normal → Socket
+## 14.5 Astuce Low Quality â†’ Normal â†’ Socket
 
 ```
 1. Trouver un item Low Quality elite (ex : Crude Phase Blade)
-2. Cube : El + Chipped Gem + item Low Quality → item Normal de ilvl 1
-3. Larzuk : socket l'item → min(MaxSock1, gemsockets) sockets
-   Pour Phase Blade : min(3, 6) = 3 sockets (au lieu de 6 avec un ilvl élevé)
-4. Utile pour les runewords à 3 sockets dans un Phase Blade
+2. Cube : El + Chipped Gem + item Low Quality â†’ item Normal de ilvl 1
+3. Larzuk : socket l'item â†’ min(MaxSock1, gemsockets) sockets
+   Pour Phase Blade : min(3, 6) = 3 sockets (au lieu de 6 avec un ilvl Ã©levÃ©)
+4. Utile pour les runewords Ã  3 sockets dans un Phase Blade
 ```
 
 ---
 
-# 15. ITEMS ÉTHÉRÉS
+# 15. ITEMS Ã‰THÃ‰RÃ‰S
 
-## 15.1 Probabilité et éligibilité
+## 15.1 ProbabilitÃ© et Ã©ligibilitÃ©
 
 ### Chance de base
 
 ```
-P(Éthéré) = 5% (1/20) pour tous les items éligibles
-Indépendant du Magic Find et de tout autre modificateur.
-Le roll est effectué APRÈS la détermination de la qualité.
+P(Ã‰thÃ©rÃ©) = 5% (1/20) pour tous les items Ã©ligibles
+IndÃ©pendant du Magic Find et de tout autre modificateur.
+Le roll est effectuÃ© APRÃˆS la dÃ©termination de la qualitÃ©.
 ```
 
-### Items qui NE PEUVENT PAS être éthérés
+### Items qui NE PEUVENT PAS Ãªtre Ã©thÃ©rÃ©s
 
-| Catégorie | Raison |
+| CatÃ©gorie | Raison |
 |-----------|--------|
-| **Items Set** | Flag éthéré désactivé dans le code |
-| **Anneaux** | Pas de flag éthéré |
-| **Amulettes** | Pas de flag éthéré |
-| **Charmes** | Pas de flag éthéré (sauf exceptions : SoJ, Annihilus, Hellfire Torch, Gheed's → toujours éthérés) |
-| **Arcs (Bows)** | Flag éthéré désactivé |
-| **Arbalètes (Crossbows)** | Flag éthéré désactivé |
-| **Items Crafted** | Flag éthéré désactivé |
-| **Phase Blade** | Indestructible par nature → pas d'éthéré |
-| **Items Low Quality** | Flag éthéré impossible |
+| **Items Set** | Flag Ã©thÃ©rÃ© dÃ©sactivÃ© dans le code |
+| **Anneaux** | Pas de flag Ã©thÃ©rÃ© |
+| **Amulettes** | Pas de flag Ã©thÃ©rÃ© |
+| **Charmes** | Pas de flag Ã©thÃ©rÃ© (sauf exceptions : SoJ, Annihilus, Hellfire Torch, Gheed's â†’ toujours Ã©thÃ©rÃ©s) |
+| **Arcs (Bows)** | Flag Ã©thÃ©rÃ© dÃ©sactivÃ© |
+| **ArbalÃ¨tes (Crossbows)** | Flag Ã©thÃ©rÃ© dÃ©sactivÃ© |
+| **Items Crafted** | Flag Ã©thÃ©rÃ© dÃ©sactivÃ© |
+| **Phase Blade** | Indestructible par nature â†’ pas d'Ã©thÃ©rÃ© |
+| **Items Low Quality** | Flag Ã©thÃ©rÃ© impossible |
 
-### Items toujours éthérés
+### Items toujours Ã©thÃ©rÃ©s
 
-Certains uniques sont **toujours** éthérés :
+Certains uniques sont **toujours** Ã©thÃ©rÃ©s :
 - Stone of Jordan
 - Annihilus
 - Hellfire Torch
 - Gheed's Fortune
-- Ghostflame (unique War Sword) — éthéré ET indestructible
+- Ghostflame (unique War Sword) â€” Ã©thÃ©rÃ© ET indestructible
 
-## 15.2 Bonus éthéré
+## 15.2 Bonus Ã©thÃ©rÃ©
 
 | Bonus | Valeur |
 |-------|--------|
-| **Dégâts de base** | +50% (multiplicateur sur min/max damage) |
-| **Défense de base** | +50% (multiplicateur sur min/max defense) |
-| **Durabilité** | -50% (arrondi inférieur) puis -1 supplémentaire |
+| **DÃ©gÃ¢ts de base** | +50% (multiplicateur sur min/max damage) |
+| **DÃ©fense de base** | +50% (multiplicateur sur min/max defense) |
+| **DurabilitÃ©** | -50% (arrondi infÃ©rieur) puis -1 supplÃ©mentaire |
 | **Requirements STR/DEX** | -10 chacun |
-| **Réparation** | Impossible (aucun PNJ ne peut réparer un item éthéré) |
+| **RÃ©paration** | Impossible (aucun PNJ ne peut rÃ©parer un item Ã©thÃ©rÃ©) |
 | **Valeur marchande** | -75% ou plus |
 
-### Formule durabilité éthérée
+### Formule durabilitÃ© Ã©thÃ©rÃ©e
 
 ```
 eth_durability = floor(base_durability / 2) - 1
-Si eth_durability < 1 → eth_durability = 1
+Si eth_durability < 1 â†’ eth_durability = 1
 ```
 
-### Interactions spéciales
+### Interactions spÃ©ciales
 
 | Situation | Comportement |
 |-----------|-------------|
-| **Éthéré sur Mercenaire** | La durabilité ne diminue PAS quand équipé sur un mercenaire |
-| **Éthéré + Zod Rune** | L'item devient indestructible (durabilité ne diminue plus jamais) |
-| **Éthéré + Self-repair mod** | L'item se répare automatiquement (mod "Repairs 1 durability in X seconds") |
-| **Éthéré + "Indestructible" mod** | L'item ne perd pas de durabilité |
-| **Éthéré vendu à un PNJ** | Item détruit immédiatement, ne peut PAS être racheté |
+| **Ã‰thÃ©rÃ© sur Mercenaire** | La durabilitÃ© ne diminue PAS quand Ã©quipÃ© sur un mercenaire |
+| **Ã‰thÃ©rÃ© + Zod Rune** | L'item devient indestructible (durabilitÃ© ne diminue plus jamais) |
+| **Ã‰thÃ©rÃ© + Self-repair mod** | L'item se rÃ©pare automatiquement (mod "Repairs 1 durability in X seconds") |
+| **Ã‰thÃ©rÃ© + "Indestructible" mod** | L'item ne perd pas de durabilitÃ© |
+| **Ã‰thÃ©rÃ© vendu Ã  un PNJ** | Item dÃ©truit immÃ©diatement, ne peut PAS Ãªtre rachetÃ© |
 
 ## 15.3 Rune Zod
 
-| Propriété | Valeur |
+| PropriÃ©tÃ© | Valeur |
 |-----------|--------|
-| **Effet** | "Indestructible" — annule toute perte de durabilité |
-| **Level requirement** | 69 (ou le level req de l'item si supérieur) |
-| **Rareté** | 2ème item le plus rare du jeu |
-| **Usage principal** | Socketer dans un item éthéré pour le rendre permanent |
+| **Effet** | "Indestructible" â€” annule toute perte de durabilitÃ© |
+| **Level requirement** | 69 (ou le level req de l'item si supÃ©rieur) |
+| **RaretÃ©** | 2Ã¨me item le plus rare du jeu |
+| **Usage principal** | Socketer dans un item Ã©thÃ©rÃ© pour le rendre permanent |
 
 ---
 
-# 16. RÉCAPITULATIF DES FORMULES — RÉFÉRENCE RAPIDE
+# 16. RÃ‰CAPITULATIF DES FORMULES â€” RÃ‰FÃ‰RENCE RAPIDE
 
 ## 16.1 Quality Roll
 
 ```
-Chance = (BaseChance - (ilvl - qlvl) / Divisor) × 128
-Chance = Chance × 100 / (100 + EMF)
-if Chance < MinChance → Chance = MinChance
-FinalChance = Chance - (Chance × QualityFactor / 1024)
-P(qualité) = 128 / FinalChance
+Chance = (BaseChance - (ilvl - qlvl) / Divisor) Ã— 128
+Chance = Chance Ã— 100 / (100 + EMF)
+if Chance < MinChance â†’ Chance = MinChance
+FinalChance = Chance - (Chance Ã— QualityFactor / 1024)
+P(qualitÃ©) = 128 / FinalChance
 ```
 
 ## 16.2 Effective Magic Find
 
 ```
-EMF_unique = MF × 250 / (MF + 250)
-EMF_set    = MF × 500 / (MF + 500)
-EMF_rare   = MF × 600 / (MF + 600)
+EMF_unique = MF Ã— 250 / (MF + 250)
+EMF_set    = MF Ã— 500 / (MF + 500)
+EMF_rare   = MF Ã— 600 / (MF + 600)
 EMF_magic  = MF
 ```
 
 ## 16.3 Affix Level
 
 ```
-if ilvl > 99 → ilvl = 99
-if qlvl > ilvl → ilvl = qlvl
-if magic_lvl > 0 → alvl = ilvl + magic_lvl
-else if ilvl < (99 - qlvl/2) → alvl = ilvl - qlvl/2
-else → alvl = 2×ilvl - 99
-if alvl > 99 → alvl = 99
+if ilvl > 99 â†’ ilvl = 99
+if qlvl > ilvl â†’ ilvl = qlvl
+if magic_lvl > 0 â†’ alvl = ilvl + magic_lvl
+else if ilvl < (99 - qlvl/2) â†’ alvl = ilvl - qlvl/2
+else â†’ alvl = 2Ã—ilvl - 99
+if alvl > 99 â†’ alvl = 99
 ```
 
 ## 16.4 NoDrop Multijoueur
@@ -3105,44 +3105,44 @@ NewNoDrop = int(ProbSum / (1/((NoDrop/(NoDrop+ProbSum))^N) - 1))
 
 ```
 max_sockets = min(MaxSockX[ilvl_bracket], gemsockets)
-  où X = 1 si ilvl≤25, 25 si ilvl≤40, 40 si ilvl≥41
+  oÃ¹ X = 1 si ilvlâ‰¤25, 25 si ilvlâ‰¤40, 40 si ilvlâ‰¥41
 
 Larzuk (Normal/Superior) : toujours max_sockets
 Larzuk (Magic) : random(1, 2)
 Larzuk (Rare/Set/Unique/Crafted) : toujours 1
-Cube (Normal) : random(1, 6) clampé à max_sockets
+Cube (Normal) : random(1, 6) clampÃ© Ã  max_sockets
 ```
 
-## 16.6 Éthéré
+## 16.6 Ã‰thÃ©rÃ©
 
 ```
 P(ethereal) = 5% (flat, non-modifiable)
-Dégâts/Défense éthéré = base × 1.5
-Durabilité éthérée = floor(base/2) - 1
-STR/DEX req éthéré = base - 10
+DÃ©gÃ¢ts/DÃ©fense Ã©thÃ©rÃ© = base Ã— 1.5
+DurabilitÃ© Ã©thÃ©rÃ©e = floor(base/2) - 1
+STR/DEX req Ã©thÃ©rÃ© = base - 10
 ```
 
 ## 16.7 Downgrade
 
 ```
-Unique fail → Rare × 3 durabilité
-Set fail    → Magic × 2 durabilité
-Duplicate unique (nolimit=0) → Rare × 3 durabilité
+Unique fail â†’ Rare Ã— 3 durabilitÃ©
+Set fail    â†’ Magic Ã— 2 durabilitÃ©
+Duplicate unique (nolimit=0) â†’ Rare Ã— 3 durabilitÃ©
 ```
 
 ---
 
-## 17. Transposition MGE — Système de loot Allumina
+## 17. Transposition MGE â€” SystÃ¨me de loot Allumina
 
-### Architecture recommandée
+### Architecture recommandÃ©e
 
 ```rust
 // Plugin MGE : mge-plugin-loot-engine.v1
-// Équivalent de TreasureClassEx.txt + ItemRatio.txt + affixation
+// Ã‰quivalent de TreasureClassEx.txt + ItemRatio.txt + affixation
 
 pub struct TreasureClass {
     pub name: String,
-    pub picks: i32,                    // négatif = garanti
+    pub picks: i32,                    // nÃ©gatif = garanti
     pub group: Option<u32>,
     pub level: u32,
     pub quality_bonus: QualityBonus,
@@ -3215,7 +3215,7 @@ pub fn generate_item_quality(
     ratio: &ItemRatioRow,
     tc_quality: &QualityBonus,
 ) -> ItemQuality {
-    // Test dans l'ordre : Unique → Set → Rare → Magic → Superior → Normal → Low
+    // Test dans l'ordre : Unique â†’ Set â†’ Rare â†’ Magic â†’ Superior â†’ Normal â†’ Low
     for quality in [Unique, Set, Rare, Magic, Superior, Normal] {
         let params = ratio.get_params(quality);
         let factor = get_mf_factor(quality);
@@ -3248,24 +3248,26 @@ pub fn generate_item_quality(
 
 ---
 
-## 18. Références (complémentaires au §9)
+## 18. RÃ©fÃ©rences (complÃ©mentaires au Â§9)
 
-| Document | Rôle |
+| Document | RÃ´le |
 |----------|------|
-| [PureDiablo — Item Generation](https://www.purediablo.com/diablo-2/item-generation) | Guide complet de génération d'items (base de ce chapitre) |
-| [The Amazon Basin — Item Drop Procedure](https://theamazonbasin.com/wiki/index.php?title=Diablo_II_Item_Drop_Procedure) | Procédure de drop complète avec ordre des vérifications |
-| [Phrozen Keep — TreasureClassEx.txt](https://d2mods.info/forum/viewtopic.php?t=67310) | Documentation NoDrop et Picks |
-| [Phrozen Keep — ItemRatio.txt](https://d2mods.info/forum/kb/viewarticle?a=320) | Guide du fichier ItemRatio.txt |
-| [GitHub fabd/diablo2 — ItemRatio.txt](https://github.com/fabd/diablo2/blob/master/code/d2_113_data/ItemRatio.txt) | Données brutes ItemRatio.txt v1.13 |
-| [Phrozen Keep — UniqueItems.txt](https://d2mods.info/forum/viewtopic.php?t=38595) | Guide Rarity et nolimit des Uniques |
-| [PureDiablo — Magic Find Diminishing Returns](https://www.purediablo.com/diablo-2/magic-find-diminishing-returns) | Formules EMF |
-| [Arreat Summit — Items Basics](https://classic.battle.net/diablo2exp/items/basics.shtml) | Référence officielle Blizzard |
-| [diablo2.io — Larzuk Calculator](https://diablo2.io/larzuksockets.php) | Calculateur de sockets Larzuk |
+| [PureDiablo â€” Item Generation](https://www.purediablo.com/diablo-2/item-generation) | Guide complet de gÃ©nÃ©ration d'items (base de ce chapitre) |
+| [The Amazon Basin â€” Item Drop Procedure](https://theamazonbasin.com/wiki/index.php?title=Diablo_II_Item_Drop_Procedure) | ProcÃ©dure de drop complÃ¨te avec ordre des vÃ©rifications |
+| [Phrozen Keep â€” TreasureClassEx.txt](https://d2mods.info/forum/viewtopic.php?t=67310) | Documentation NoDrop et Picks |
+| [Phrozen Keep â€” ItemRatio.txt](https://d2mods.info/forum/kb/viewarticle?a=320) | Guide du fichier ItemRatio.txt |
+| [GitHub fabd/diablo2 â€” ItemRatio.txt](https://github.com/fabd/diablo2/blob/master/code/d2_113_data/ItemRatio.txt) | DonnÃ©es brutes ItemRatio.txt v1.13 |
+| [Phrozen Keep â€” UniqueItems.txt](https://d2mods.info/forum/viewtopic.php?t=38595) | Guide Rarity et nolimit des Uniques |
+| [PureDiablo â€” Magic Find Diminishing Returns](https://www.purediablo.com/diablo-2/magic-find-diminishing-returns) | Formules EMF |
+| [Arreat Summit â€” Items Basics](https://classic.battle.net/diablo2exp/items/basics.shtml) | RÃ©fÃ©rence officielle Blizzard |
+| [diablo2.io â€” Larzuk Calculator](https://diablo2.io/larzuksockets.php) | Calculateur de sockets Larzuk |
 
 ---
 
-**Document** : Allumina — Analyse Technique Diablo II pour MGE  
+**Document** : Allumina â€” Analyse Technique Diablo II pour MGE  
 **Version** : 2.1  
 **Date** : 2026-02-22  
-**Statut** : Document de référence technique  
-**Changelog** : v2.1 — Ajout section 9 (Génération procédurale de cartes : seed, DT1/DS1, DRLG, Levels.txt, waypoints) | v2.0 — Ajout sections 10-18 (système complet de génération d'items)
+**Statut** : Document de rÃ©fÃ©rence technique  
+**Changelog** : v2.1 â€” Ajout section 9 (GÃ©nÃ©ration procÃ©durale de cartes : seed, DT1/DS1, DRLG, Levels.txt, waypoints) | v2.0 â€” Ajout sections 10-18 (systÃ¨me complet de gÃ©nÃ©ration d'items)
+
+

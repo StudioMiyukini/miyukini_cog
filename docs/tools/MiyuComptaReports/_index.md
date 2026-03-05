@@ -1,8 +1,8 @@
-# MiyuComptaReports — Index de navigation
+﻿# MiyuComptaReports â€” Index de navigation
 
 ## Contexte
 
-**MiyuComptaReports** est le **kit d'outils (Toolkit)** de rapports comptables (livre des recettes, bilan, liasse, flux de trésorerie, export écritures). Aligné sur [Équivalents Comptabilité Indépendants](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Comptabilite%20Independants.md).
+**MiyuComptaReports** est le **kit d'outils (Toolkit)** de rapports comptables (livre des recettes, bilan, liasse, flux de trÃ©sorerie, export Ã©critures). AlignÃ© sur [Ã‰quivalents ComptabilitÃ© IndÃ©pendants](..//..//miyukini-webway-system//reference//_index.md).
 
 **Strate :** 6 (Tools & Toolkits)  
 **ToolkitId :** `toolkit.compta.reports`
@@ -13,5 +13,6 @@
 
 | Document | Description |
 |----------|-------------|
-| [Documentation Fondatrice](./MiyuComptaReports%20-%20Documentation%20Fondatrice.md) | Identité, définition canonique, ToolkitId, liste des outils composants, gouvernance |
-| [Reference Outils](./MiyuComptaReports%20-%20Reference%20Outils.md) | Liste exhaustive des Tools : ToolId, action, niveau de sécurité |
+| [Documentation Fondatrice](./MiyuComptaReports%20-%20Documentation%20Fondatrice.md) | IdentitÃ©, dÃ©finition canonique, ToolkitId, liste des outils composants, gouvernance |
+| [Reference Outils](./MiyuComptaReports%20-%20Reference%20Outils.md) | Liste exhaustive des Tools : ToolId, action, niveau de sÃ©curitÃ© |
+

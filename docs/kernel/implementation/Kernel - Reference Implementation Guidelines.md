@@ -1,16 +1,16 @@
-# Kernel - Reference Implementation Guidelines
+﻿# Kernel - Reference Implementation Guidelines
 
 ## Statut du document
 
 **POST-FONDATION / NON NORMATIF / INFORMATIF**
 
-Ce document est **informatif, non normatif, et non contractuel**. Il guide un développeur pour implémenter le Kernel correctement, sans violer les contrats FONDATION.
+Ce document est **informatif, non normatif, et non contractuel**. Il guide un dÃ©veloppeur pour implÃ©menter le Kernel correctement, sans violer les contrats FONDATION.
 
-**Objectif pédagogique :** Ce document vise à aider les développeurs à comprendre comment traduire les contrats FONDATION en implémentation Rust, en respectant strictement les invariants, garanties, et interdictions du Kernel.
+**Objectif pÃ©dagogique :** Ce document vise Ã  aider les dÃ©veloppeurs Ã  comprendre comment traduire les contrats FONDATION en implÃ©mentation Rust, en respectant strictement les invariants, garanties, et interdictions du Kernel.
 
-**Avertissement :** Ce document ne doit pas être interprété abusivement. Il ne crée aucune nouvelle règle contractuelle et ne modifie aucun contrat existant. Les contrats FONDATION priment toujours sur ce guide.
+**Avertissement :** Ce document ne doit pas Ãªtre interprÃ©tÃ© abusivement. Il ne crÃ©e aucune nouvelle rÃ¨gle contractuelle et ne modifie aucun contrat existant. Les contrats FONDATION priment toujours sur ce guide.
 
-**Relation avec les contrats FONDATION :** Ce document fait référence aux contrats FONDATION existants mais ne les étend pas, ne les modifie pas, et ne crée aucune nouvelle obligation contractuelle.
+**Relation avec les contrats FONDATION :** Ce document fait rÃ©fÃ©rence aux contrats FONDATION existants mais ne les Ã©tend pas, ne les modifie pas, et ne crÃ©e aucune nouvelle obligation contractuelle.
 
 ---
 
@@ -18,86 +18,86 @@ Ce document est **informatif, non normatif, et non contractuel**. Il guide un d�
 
 ### 1.1 Objectif
 
-Ce document fournit des lignes directrices pour implémenter le Kernel de manière conforme aux contrats FONDATION. Il explique comment traduire les concepts contractuels en logique d'implémentation Rust sans interprétation abusive.
+Ce document fournit des lignes directrices pour implÃ©menter le Kernel de maniÃ¨re conforme aux contrats FONDATION. Il explique comment traduire les concepts contractuels en logique d'implÃ©mentation Rust sans interprÃ©tation abusive.
 
-**Rappel :** Le Kernel est le **noyau technique minimal** de la fondation Miyukini, et non un kernel système au sens OS.
+**Rappel :** Le Kernel est le **noyau technique minimal** de la fondation Miyukini, et non un kernel systÃ¨me au sens OS.
 
 ### 1.2 Nature informative
 
-Ce document est **purement informatif**. Il ne définit pas de nouvelles règles, n'impose pas de technologies, et ne prescrit pas de solutions techniques. Il guide la compréhension et l'application des contrats FONDATION.
+Ce document est **purement informatif**. Il ne dÃ©finit pas de nouvelles rÃ¨gles, n'impose pas de technologies, et ne prescrit pas de solutions techniques. Il guide la comprÃ©hension et l'application des contrats FONDATION.
 
 ### 1.3 Sources contractuelles
 
 Ce document se base sur tous les contrats FONDATION du Kernel :
 
-- **[Definition Kernel](../Miyukini%20Core%20System%20-%20Definition%20Kernel.md)** : Périmètre, responsabilités, exclusions, frontières
-- **[Structure du Kernel](../Miyukini%20Core%20System%20-%20Structure%20du%20Kernel.md)** : Crates, dépendances, visibilité, conventions
+- **[Definition Kernel](../Miyukini%20Core%20System%20-%20Definition%20Kernel.md)** : PÃ©rimÃ¨tre, responsabilitÃ©s, exclusions, frontiÃ¨res
+- **[Structure du Kernel](../Miyukini%20Core%20System%20-%20Structure%20du%20Kernel.md)** : Crates, dÃ©pendances, visibilitÃ©, conventions
 - **[Revue Traits API v0.1](../Miyukini%20Core%20System%20-%20Revue%20Traits%20API%20v0.1.md)** : Gel des traits publics
 - **[Invariants & Guarantees](../contracts/Kernel%20-%20Invariants%20&%20Guarantees.md)** : Catalogue des invariants INV-K-*
-- **[Kernel Maintenance Observability Contract](../../reference/Miyukini%20Conceptual%20References%20-%20Kernel%20Maintenance%20Observability%20Contract.md)** : Capacités d'observation
-- **[Lois Autonomie Système](../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Contraintes d'autonomie LOI-1 à LOI-6
+- **[Kernel Maintenance Observability Contract](..//..//miyukini-webway-system//reference//_index.md)** : CapacitÃ©s d'observation
+- **[Lois Autonomie SystÃ¨me](..//..//miyukini-webway-system//reference//_index.md)** : Contraintes d'autonomie LOI-1 Ã  LOI-6
 
-**Terminologie :** Voir [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie :** Voir [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 2. Principes généraux d'implémentation
+## 2. Principes gÃ©nÃ©raux d'implÃ©mentation
 
-### 2.1 Pureté et déterminisme (INV-K-3, INV-K-6)
+### 2.1 PuretÃ© et dÃ©terminisme (INV-K-3, INV-K-6)
 
 **Principe contractuel :**
 
-Les invariants INV-K-3 (Primitives locales sûres uniquement) et INV-K-6 (Déterminisme) établissent que le Kernel utilise uniquement des opérations déterministes et sans effets de bord cachés.
+Les invariants INV-K-3 (Primitives locales sÃ»res uniquement) et INV-K-6 (DÃ©terminisme) Ã©tablissent que le Kernel utilise uniquement des opÃ©rations dÃ©terministes et sans effets de bord cachÃ©s.
 
-**Traduction en logique d'implémentation Rust :**
+**Traduction en logique d'implÃ©mentation Rust :**
 
 ```rust
-// ✅ CORRECT : Fonction pure, déterministe
+// âœ… CORRECT : Fonction pure, dÃ©terministe
 pub fn generate_id(&self) -> Id {
-    // Même entrée → même sortie
-    // Pas d'effet de bord caché
+    // MÃªme entrÃ©e â†’ mÃªme sortie
+    // Pas d'effet de bord cachÃ©
     Id::from(Uuid::new_v4())
 }
 
-// ✅ CORRECT : Résultat explicite pour les erreurs
+// âœ… CORRECT : RÃ©sultat explicite pour les erreurs
 pub fn load_config(&self) -> Result<Config, ConfigError> {
     // Pas de panic silencieux
-    // Erreur explicite si échec
+    // Erreur explicite si Ã©chec
 }
 
-// ❌ INCORRECT : Effet de bord caché
+// âŒ INCORRECT : Effet de bord cachÃ©
 pub fn generate_id(&mut self) -> Id {
-    self.counter += 1; // ❌ État mutable caché
+    self.counter += 1; // âŒ Ã‰tat mutable cachÃ©
     Id::from(self.counter)
 }
 
-// ❌ INCORRECT : Panic implicite
+// âŒ INCORRECT : Panic implicite
 pub fn load_config(&self) -> Config {
-    std::fs::read_to_string("config.toml").unwrap() // ❌ Panic possible
+    std::fs::read_to_string("config.toml").unwrap() // âŒ Panic possible
 }
 ```
 
-**Règles clés :**
+**RÃ¨gles clÃ©s :**
 
-- Privilégier `Result<T, E>` plutôt que panic
-- Éviter les effets de bord cachés
-- Structures immutables ou contrôlées
-- Opérations déterministes (même entrée → même sortie)
+- PrivilÃ©gier `Result<T, E>` plutÃ´t que panic
+- Ã‰viter les effets de bord cachÃ©s
+- Structures immutables ou contrÃ´lÃ©es
+- OpÃ©rations dÃ©terministes (mÃªme entrÃ©e â†’ mÃªme sortie)
 
-**Référence contrat :** Invariants & Guarantees (INV-K-3, INV-K-6)
+**RÃ©fÃ©rence contrat :** Invariants & Guarantees (INV-K-3, INV-K-6)
 
 ---
 
-### 2.2 Zéro logique métier (INV-K-1)
+### 2.2 ZÃ©ro logique mÃ©tier (INV-K-1)
 
 **Principe contractuel :**
 
-L'invariant INV-K-1 établit que le Kernel ne contient jamais de logique métier. Il ne connaît ni les entités domaine, ni les règles de gestion.
+L'invariant INV-K-1 Ã©tablit que le Kernel ne contient jamais de logique mÃ©tier. Il ne connaÃ®t ni les entitÃ©s domaine, ni les rÃ¨gles de gestion.
 
-**Traduction en logique d'implémentation Rust :**
+**Traduction en logique d'implÃ©mentation Rust :**
 
 ```rust
-// ✅ CORRECT : Identifiant générique
+// âœ… CORRECT : Identifiant gÃ©nÃ©rique
 pub struct Id(Uuid);
 
 impl IdGenerator for UuidIdGenerator {
@@ -106,70 +106,70 @@ impl IdGenerator for UuidIdGenerator {
     }
 }
 
-// ❌ INCORRECT : Identifiant avec sémantique métier
-pub struct UserId(Uuid);  // ❌ "User" = concept métier
-pub struct OrderId(Uuid); // ❌ "Order" = concept métier
+// âŒ INCORRECT : Identifiant avec sÃ©mantique mÃ©tier
+pub struct UserId(Uuid);  // âŒ "User" = concept mÃ©tier
+pub struct OrderId(Uuid); // âŒ "Order" = concept mÃ©tier
 
-// ✅ CORRECT : Configuration générique
+// âœ… CORRECT : Configuration gÃ©nÃ©rique
 pub trait Config {
     fn get(&self, key: &str) -> Option<&str>;
 }
 
-// ❌ INCORRECT : Configuration avec clés métier prédéfinies
+// âŒ INCORRECT : Configuration avec clÃ©s mÃ©tier prÃ©dÃ©finies
 pub trait Config {
-    fn get_stripe_key(&self) -> Option<&str>;  // ❌ "stripe" = service métier
-    fn get_user_ttl(&self) -> Duration;        // ❌ "user" = concept métier
+    fn get_stripe_key(&self) -> Option<&str>;  // âŒ "stripe" = service mÃ©tier
+    fn get_user_ttl(&self) -> Duration;        // âŒ "user" = concept mÃ©tier
 }
 ```
 
-**Ce que cela signifie concrètement :**
+**Ce que cela signifie concrÃ¨tement :**
 
-| Autorisé | Interdit |
+| AutorisÃ© | Interdit |
 |----------|----------|
-| ✅ Générer un identifiant unique | ❌ Générer un "user_id" formaté |
-| ✅ Fournir l'heure courante | ❌ Calculer une date d'expiration produit |
-| ✅ Logger un message structuré | ❌ Logger "commande validée" |
-| ✅ Charger une configuration | ❌ Définir des politiques de tarification |
+| âœ… GÃ©nÃ©rer un identifiant unique | âŒ GÃ©nÃ©rer un "user_id" formatÃ© |
+| âœ… Fournir l'heure courante | âŒ Calculer une date d'expiration produit |
+| âœ… Logger un message structurÃ© | âŒ Logger "commande validÃ©e" |
+| âœ… Charger une configuration | âŒ DÃ©finir des politiques de tarification |
 
-**Référence contrat :** Definition Kernel (Section 1, 3), Invariants & Guarantees (INV-K-1)
+**RÃ©fÃ©rence contrat :** Definition Kernel (Section 1, 3), Invariants & Guarantees (INV-K-1)
 
 ---
 
-### 2.3 Zéro dépendance externe critique (INV-K-2)
+### 2.3 ZÃ©ro dÃ©pendance externe critique (INV-K-2)
 
 **Principe contractuel :**
 
-L'invariant INV-K-2 établit que le Kernel ne dépend jamais d'un service externe pour fonctionner. Il doit pouvoir démarrer, tourner, et s'arrêter sans appel réseau obligatoire.
+L'invariant INV-K-2 Ã©tablit que le Kernel ne dÃ©pend jamais d'un service externe pour fonctionner. Il doit pouvoir dÃ©marrer, tourner, et s'arrÃªter sans appel rÃ©seau obligatoire.
 
-**Traduction en logique d'implémentation Rust :**
+**Traduction en logique d'implÃ©mentation Rust :**
 
 ```rust
-// ✅ CORRECT : Configuration depuis sources locales
+// âœ… CORRECT : Configuration depuis sources locales
 pub struct EnvConfig {
     values: HashMap<String, String>,
 }
 
 impl EnvConfig {
     pub fn from_env() -> Self {
-        // Utilise std::env::vars() — source locale
+        // Utilise std::env::vars() â€” source locale
         Self {
             values: std::env::vars().collect(),
         }
     }
 }
 
-// ❌ INCORRECT : Configuration obligatoirement distante
+// âŒ INCORRECT : Configuration obligatoirement distante
 pub struct RemoteConfig;
 
 impl RemoteConfig {
     pub async fn from_server(url: &str) -> Result<Self, Error> {
-        // ❌ Appel réseau obligatoire au démarrage
+        // âŒ Appel rÃ©seau obligatoire au dÃ©marrage
         let response = reqwest::get(url).await?;
         // ...
     }
 }
 
-// ✅ CORRECT : Horloge locale
+// âœ… CORRECT : Horloge locale
 pub struct DefaultClock;
 
 impl Clock for DefaultClock {
@@ -178,36 +178,36 @@ impl Clock for DefaultClock {
     }
 }
 
-// ❌ INCORRECT : Synchronisation NTP obligatoire
+// âŒ INCORRECT : Synchronisation NTP obligatoire
 pub struct NtpClock;
 
 impl NtpClock {
     pub async fn new() -> Result<Self, Error> {
-        // ❌ Dépendance réseau obligatoire
+        // âŒ DÃ©pendance rÃ©seau obligatoire
         sync_with_ntp_server().await?;
     }
 }
 ```
 
-**Dépendances autorisées (v0.1) :**
+**DÃ©pendances autorisÃ©es (v0.1) :**
 
 | Crate | Usage | Justification |
 |-------|-------|---------------|
-| **std** | Base du langage | Toujours autorisé |
-| **log** | Façade de logging | Interface standard, pas un backend |
-| **uuid** | Génération d'identifiants | Minimal, infra, local |
+| **std** | Base du langage | Toujours autorisÃ© |
+| **log** | FaÃ§ade de logging | Interface standard, pas un backend |
+| **uuid** | GÃ©nÃ©ration d'identifiants | Minimal, infra, local |
 | **ulid** | Identifiants ULID (optionnel) | Ajout quand 2+ produits en ont besoin |
 
-**Dépendances interdites :**
+**DÃ©pendances interdites :**
 
 | Famille | Exemples | Raison |
 |---------|----------|--------|
 | Runtime async | tokio, async-std | Le produit choisit le runtime |
-| Serveurs HTTP | axum, actix, rocket | Hors périmètre (INV-K-4) |
-| Base de données | sqlx, diesel | Couche données = produit |
-| Sérialisation | serde, serde_json | Le produit choisit ses formats |
+| Serveurs HTTP | axum, actix, rocket | Hors pÃ©rimÃ¨tre (INV-K-4) |
+| Base de donnÃ©es | sqlx, diesel | Couche donnÃ©es = produit |
+| SÃ©rialisation | serde, serde_json | Le produit choisit ses formats |
 
-**Référence contrat :** Structure du Kernel (Section 2), Invariants & Guarantees (INV-K-2), LOI-1
+**RÃ©fÃ©rence contrat :** Structure du Kernel (Section 2), Invariants & Guarantees (INV-K-2), LOI-1
 
 ---
 
@@ -215,52 +215,52 @@ impl NtpClock {
 
 **Principe contractuel :**
 
-L'invariant INV-K-4 établit que le Kernel n'implémente jamais de protocole applicatif. HTTP, WebSocket, gRPC restent du ressort des produits.
+L'invariant INV-K-4 Ã©tablit que le Kernel n'implÃ©mente jamais de protocole applicatif. HTTP, WebSocket, gRPC restent du ressort des produits.
 
-**Traduction en logique d'implémentation Rust :**
+**Traduction en logique d'implÃ©mentation Rust :**
 
 ```rust
-// ✅ CORRECT : Trait abstrait sans protocole
+// âœ… CORRECT : Trait abstrait sans protocole
 pub trait Logger {
     fn log(&self, level: Level, message: &str);
 }
 
-// Le produit implémente la sortie vers son choix de backend
+// Le produit implÃ©mente la sortie vers son choix de backend
 pub struct ProductLogger;
 
 impl Logger for ProductLogger {
     fn log(&self, level: Level, message: &str) {
-        // Le produit décide : stdout, fichier, service distant, etc.
+        // Le produit dÃ©cide : stdout, fichier, service distant, etc.
     }
 }
 
-// ❌ INCORRECT : Le Kernel intègre un protocole
+// âŒ INCORRECT : Le Kernel intÃ¨gre un protocole
 pub struct HttpLogger {
     endpoint: String,
 }
 
 impl Logger for HttpLogger {
     fn log(&self, level: Level, message: &str) {
-        // ❌ Le Kernel ne doit pas connaître HTTP
+        // âŒ Le Kernel ne doit pas connaÃ®tre HTTP
         reqwest::blocking::post(&self.endpoint).json(&message);
     }
 }
 ```
 
-**Ce que cela signifie concrètement :**
+**Ce que cela signifie concrÃ¨tement :**
 
-| Autorisé | Interdit |
+| AutorisÃ© | Interdit |
 |----------|----------|
-| ✅ Définir des traits abstraits | ❌ Implémenter un serveur HTTP |
-| ✅ Fournir des primitives de config | ❌ Gérer des routes REST |
-| ✅ Logger vers une interface abstraite | ❌ Envoyer des métriques vers Prometheus |
-| ✅ Fournir un lifecycle générique | ❌ Intégrer un middleware web |
+| âœ… DÃ©finir des traits abstraits | âŒ ImplÃ©menter un serveur HTTP |
+| âœ… Fournir des primitives de config | âŒ GÃ©rer des routes REST |
+| âœ… Logger vers une interface abstraite | âŒ Envoyer des mÃ©triques vers Prometheus |
+| âœ… Fournir un lifecycle gÃ©nÃ©rique | âŒ IntÃ©grer un middleware web |
 
-**Référence contrat :** Definition Kernel (Section 1), Invariants & Guarantees (INV-K-4)
+**RÃ©fÃ©rence contrat :** Definition Kernel (Section 1), Invariants & Guarantees (INV-K-4)
 
 ---
 
-## 3. Implémentation des modules du Kernel
+## 3. ImplÃ©mentation des modules du Kernel
 
 ### 3.1 Module config
 
@@ -272,11 +272,11 @@ trait Config {
 }
 ```
 
-**Implémentation recommandée :**
+**ImplÃ©mentation recommandÃ©e :**
 
 ```rust
-/// Configuration chargée depuis les variables d'environnement.
-/// Le produit choisit ses clés et ses valeurs.
+/// Configuration chargÃ©e depuis les variables d'environnement.
+/// Le produit choisit ses clÃ©s et ses valeurs.
 pub struct EnvConfig {
     values: HashMap<String, String>,
 }
@@ -298,23 +298,23 @@ impl Config for EnvConfig {
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
-| Règle | Justification |
+| RÃ¨gle | Justification |
 |-------|---------------|
 | Pas de typage (int, bool) | Le produit parse (INV-K-1) |
-| Pas de validation de clés | Le produit définit ses clés (INV-K-1) |
-| Source locale uniquement | Pas de dépendance réseau (INV-K-2) |
-| Pas de format imposé | Le produit choisit (JSON, TOML, etc.) |
+| Pas de validation de clÃ©s | Le produit dÃ©finit ses clÃ©s (INV-K-1) |
+| Source locale uniquement | Pas de dÃ©pendance rÃ©seau (INV-K-2) |
+| Pas de format imposÃ© | Le produit choisit (JSON, TOML, etc.) |
 
 **Ce que le module config NE fait PAS :**
 
 - Valider les valeurs de configuration
-- Définir des clés obligatoires
+- DÃ©finir des clÃ©s obligatoires
 - Parser en types complexes
 - Charger depuis un service distant
 
-**Invariants concernés :** INV-K-1, INV-K-2, INV-K-3
+**Invariants concernÃ©s :** INV-K-1, INV-K-2, INV-K-3
 
 ---
 
@@ -335,7 +335,7 @@ impl Id {
 // Display, Debug, Clone, Copy, Eq, Hash, PartialEq pour Id
 ```
 
-**Implémentation recommandée :**
+**ImplÃ©mentation recommandÃ©e :**
 
 ```rust
 /// Identifiant opaque. Le format interne n'est pas garanti.
@@ -343,8 +343,8 @@ impl Id {
 pub struct Id(Uuid);
 
 impl Id {
-    /// Parse un identifiant depuis sa représentation textuelle.
-    /// Le format supporté peut changer ; utiliser Display pour la sérialisation.
+    /// Parse un identifiant depuis sa reprÃ©sentation textuelle.
+    /// Le format supportÃ© peut changer ; utiliser Display pour la sÃ©rialisation.
     pub fn parse(s: &str) -> Result<Id, IdParseError> {
         Uuid::parse_str(s)
             .map(Id)
@@ -358,7 +358,7 @@ impl std::fmt::Display for Id {
     }
 }
 
-/// Générateur d'identifiants basé sur UUID v4.
+/// GÃ©nÃ©rateur d'identifiants basÃ© sur UUID v4.
 pub struct UuidIdGenerator;
 
 impl IdGenerator for UuidIdGenerator {
@@ -368,22 +368,22 @@ impl IdGenerator for UuidIdGenerator {
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
-| Règle | Justification |
+| RÃ¨gle | Justification |
 |-------|---------------|
 | Type `Id` opaque | Format interne non garanti (Revue API) |
-| Pas de ré-export `Uuid` | Le kernel ne ré-exporte pas les dépendances |
+| Pas de rÃ©-export `Uuid` | Le kernel ne rÃ©-exporte pas les dÃ©pendances |
 | `Debug` = usage dev | Ne pas utiliser pour persistance |
-| `Display` = sérialisation | Round-trip avec `Id::parse` |
+| `Display` = sÃ©rialisation | Round-trip avec `Id::parse` |
 
 **Ce que le module id NE fait PAS :**
 
-- Générer des identifiants avec sémantique métier (user_id, order_id)
-- Fournir des générateurs déterministes (pour le jeu : le produit implémente)
+- GÃ©nÃ©rer des identifiants avec sÃ©mantique mÃ©tier (user_id, order_id)
+- Fournir des gÃ©nÃ©rateurs dÃ©terministes (pour le jeu : le produit implÃ©mente)
 - Exposer le type sous-jacent (`Uuid`)
 
-**Invariants concernés :** INV-K-1, INV-K-3, INV-K-6
+**Invariants concernÃ©s :** INV-K-1, INV-K-3, INV-K-6
 
 ---
 
@@ -397,10 +397,10 @@ trait Clock {
 }
 ```
 
-**Implémentation recommandée :**
+**ImplÃ©mentation recommandÃ©e :**
 
 ```rust
-/// Horloge système par défaut.
+/// Horloge systÃ¨me par dÃ©faut.
 pub struct DefaultClock;
 
 impl Clock for DefaultClock {
@@ -409,7 +409,7 @@ impl Clock for DefaultClock {
     }
 }
 
-// Le produit peut implémenter un FakeClock pour les tests
+// Le produit peut implÃ©menter un FakeClock pour les tests
 #[cfg(test)]
 pub struct FakeClock {
     fixed_time: SystemTime,
@@ -430,23 +430,23 @@ impl Clock for FakeClock {
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
-| Règle | Justification |
+| RÃ¨gle | Justification |
 |-------|---------------|
-| Retourne `SystemTime` (std) | Pas de dépendance à chrono |
+| Retourne `SystemTime` (std) | Pas de dÃ©pendance Ã  chrono |
 | Timezone = produit | Le produit convertit si besoin |
 | Injectable pour tests | `&dyn Clock` permet le mock |
-| Pas de méthode `timestamp` | Le produit fait la conversion |
+| Pas de mÃ©thode `timestamp` | Le produit fait la conversion |
 
 **Ce que le module time NE fait PAS :**
 
-- Gérer les fuseaux horaires
-- Fournir des méthodes de formatage
+- GÃ©rer les fuseaux horaires
+- Fournir des mÃ©thodes de formatage
 - Synchroniser avec un serveur NTP
-- Calculer des dates métier (expiration, échéance)
+- Calculer des dates mÃ©tier (expiration, Ã©chÃ©ance)
 
-**Invariants concernés :** INV-K-3, INV-K-6, INV-K-8
+**Invariants concernÃ©s :** INV-K-3, INV-K-6, INV-K-8
 
 ---
 
@@ -462,10 +462,10 @@ trait Logger {
 }
 ```
 
-**Implémentation recommandée :**
+**ImplÃ©mentation recommandÃ©e :**
 
 ```rust
-/// Niveaux de log alignés sur la façade standard.
+/// Niveaux de log alignÃ©s sur la faÃ§ade standard.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Level {
     Error,
@@ -480,8 +480,8 @@ pub trait Logger {
     fn log(&self, level: Level, message: &str);
 }
 
-/// Logger par défaut : écrit sur stdout.
-/// Minimal et remplaçable.
+/// Logger par dÃ©faut : Ã©crit sur stdout.
+/// Minimal et remplaÃ§able.
 pub struct DefaultLogger;
 
 impl Logger for DefaultLogger {
@@ -492,23 +492,23 @@ impl Logger for DefaultLogger {
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
-| Règle | Justification |
+| RÃ¨gle | Justification |
 |-------|---------------|
-| Une seule méthode `log` | Minimal, évite `info()`, `warn()`, etc. |
+| Une seule mÃ©thode `log` | Minimal, Ã©vite `info()`, `warn()`, etc. |
 | `message: &str` | Le produit formate avant l'appel |
-| Pas de `log_with_fields` | Format structuré = choix du produit |
-| `Level` propre au kernel | Pas de ré-export de `log::Level` |
+| Pas de `log_with_fields` | Format structurÃ© = choix du produit |
+| `Level` propre au kernel | Pas de rÃ©-export de `log::Level` |
 
 **Ce que le module log NE fait PAS :**
 
 - Imposer un format (JSON, key-value)
 - Configurer les niveaux actifs
-- Router vers des backends spécifiques
+- Router vers des backends spÃ©cifiques
 - Fournir des macros `info!`, `warn!`, etc.
 
-**Invariants concernés :** INV-K-3, INV-K-7
+**Invariants concernÃ©s :** INV-K-3, INV-K-7
 
 ---
 
@@ -526,7 +526,7 @@ trait Lifecycle {
 }
 ```
 
-**Implémentation recommandée :**
+**ImplÃ©mentation recommandÃ©e :**
 
 ```rust
 /// Gestion du cycle de vie : shutdown hooks uniquement.
@@ -550,7 +550,7 @@ impl Lifecycle for DefaultLifecycle {
     }
 
     fn shutdown(&mut self) {
-        // Exécution LIFO (dernier enregistré = premier exécuté)
+        // ExÃ©cution LIFO (dernier enregistrÃ© = premier exÃ©cutÃ©)
         while let Some(mut hook) = self.hooks.pop() {
             hook();
         }
@@ -558,41 +558,41 @@ impl Lifecycle for DefaultLifecycle {
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
-| Règle | Justification |
+| RÃ¨gle | Justification |
 |-------|---------------|
 | Shutdown uniquement | L'init reste au produit (pas d'orchestration) |
 | `FnMut() + 'static` | Contrainte Rust pour `Box<dyn FnMut>` |
-| Exécution LIFO | Dernier enregistré = premier fermé |
+| ExÃ©cution LIFO | Dernier enregistrÃ© = premier fermÃ© |
 | Pas de `Result` | Panic dans un hook se propage |
 
 **Ce que le module lifecycle NE fait PAS :**
 
-- Gérer l'ordre d'initialisation (le produit enchaîne config, log, etc.)
-- Orchestrer des workflows métier
+- GÃ©rer l'ordre d'initialisation (le produit enchaÃ®ne config, log, etc.)
+- Orchestrer des workflows mÃ©tier
 - Fournir des hooks d'init
-- Planifier des jobs ou des tâches
+- Planifier des jobs ou des tÃ¢ches
 
 **Documentation importante :**
 
-- Un second appel à `shutdown()` est implémentation-dépendant (no-op pour `DefaultLifecycle`)
-- Les hooks sont appelés une seule fois
+- Un second appel Ã  `shutdown()` est implÃ©mentation-dÃ©pendant (no-op pour `DefaultLifecycle`)
+- Les hooks sont appelÃ©s une seule fois
 
-**Invariants concernés :** INV-K-1, INV-K-2, INV-K-10
+**Invariants concernÃ©s :** INV-K-1, INV-K-2, INV-K-10
 
 ---
 
-## 4. Patterns d'implémentation
+## 4. Patterns d'implÃ©mentation
 
-### 4.1 Pattern : Injection de dépendances via traits
+### 4.1 Pattern : Injection de dÃ©pendances via traits
 
-**Problème :** Comment rendre le Kernel testable et extensible ?
+**ProblÃ¨me :** Comment rendre le Kernel testable et extensible ?
 
-**Solution :** Utiliser des traits pour permettre l'injection de dépendances.
+**Solution :** Utiliser des traits pour permettre l'injection de dÃ©pendances.
 
 ```rust
-/// Contexte d'exécution injectable
+/// Contexte d'exÃ©cution injectable
 pub struct KernelContext<C: Config, L: Logger, I: IdGenerator, T: Clock> {
     pub config: C,
     pub logger: L,
@@ -619,28 +619,28 @@ let ctx = KernelContext {
 
 **Avantages :**
 
-- Testabilité complète
+- TestabilitÃ© complÃ¨te
 - Pas de singleton mutable
-- Le produit choisit les implémentations
+- Le produit choisit les implÃ©mentations
 
 ---
 
 ### 4.2 Pattern : Types opaques pour l'encapsulation
 
-**Problème :** Comment exposer un type sans révéler son implémentation ?
+**ProblÃ¨me :** Comment exposer un type sans rÃ©vÃ©ler son implÃ©mentation ?
 
-**Solution :** Utiliser un newtype pattern avec champ privé.
+**Solution :** Utiliser un newtype pattern avec champ privÃ©.
 
 ```rust
-/// Type opaque — l'implémentation peut changer
+/// Type opaque â€” l'implÃ©mentation peut changer
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Id(Uuid);  // Champ privé
+pub struct Id(Uuid);  // Champ privÃ©
 
-// Le consommateur ne peut pas accéder au Uuid interne
-// Il utilise Display/parse pour la sérialisation
+// Le consommateur ne peut pas accÃ©der au Uuid interne
+// Il utilise Display/parse pour la sÃ©rialisation
 
 impl Id {
-    // Méthodes publiques limitées
+    // MÃ©thodes publiques limitÃ©es
     pub fn parse(s: &str) -> Result<Id, IdParseError> { ... }
 }
 
@@ -653,14 +653,14 @@ impl Display for Id {
 
 **Avantages :**
 
-- L'implémentation peut changer (UUID → ULID) sans casser les consommateurs
-- Le kernel ne ré-exporte pas `Uuid`
+- L'implÃ©mentation peut changer (UUID â†’ ULID) sans casser les consommateurs
+- Le kernel ne rÃ©-exporte pas `Uuid`
 
 ---
 
 ### 4.3 Pattern : Erreurs explicites sans panic
 
-**Problème :** Comment gérer les erreurs sans crash silencieux ?
+**ProblÃ¨me :** Comment gÃ©rer les erreurs sans crash silencieux ?
 
 **Solution :** Utiliser `Result<T, E>` avec des types d'erreur explicites.
 
@@ -687,58 +687,58 @@ pub fn parse(s: &str) -> Result<Id, IdParseError> {
 }
 ```
 
-**Règles :**
+**RÃ¨gles :**
 
-- Implémenter `Debug`, `Display`, `Error` pour les types d'erreur
-- Pas de panic pour les erreurs récupérables
+- ImplÃ©menter `Debug`, `Display`, `Error` pour les types d'erreur
+- Pas de panic pour les erreurs rÃ©cupÃ©rables
 - Messages d'erreur explicables (INV-K-7)
 
 ---
 
-## 5. Ce qu'un développeur ne doit jamais faire
+## 5. Ce qu'un dÃ©veloppeur ne doit jamais faire
 
-### 5.1 Ajouter de la logique métier
+### 5.1 Ajouter de la logique mÃ©tier
 
 **Interdit :**
 
 ```rust
-// ❌ INCORRECT : Le kernel connaît le métier
+// âŒ INCORRECT : Le kernel connaÃ®t le mÃ©tier
 impl IdGenerator for UserIdGenerator {
     fn generate(&self) -> UserId {
         UserId::new(format!("USR-{}", Uuid::new_v4()))
     }
 }
 
-// ❌ INCORRECT : Configuration avec clés métier
+// âŒ INCORRECT : Configuration avec clÃ©s mÃ©tier
 impl Config for ProductConfig {
     fn get_stripe_api_key(&self) -> Option<&str> { ... }
 }
 ```
 
-**Conséquence :** Violation de INV-K-1, couplage avec les produits.
+**ConsÃ©quence :** Violation de INV-K-1, couplage avec les produits.
 
-### 5.2 Dépendre d'un service externe obligatoire
+### 5.2 DÃ©pendre d'un service externe obligatoire
 
 **Interdit :**
 
 ```rust
-// ❌ INCORRECT : Le kernel exige un service distant
+// âŒ INCORRECT : Le kernel exige un service distant
 impl Config for VaultConfig {
     fn new() -> Result<Self, Error> {
-        // Appel réseau obligatoire
+        // Appel rÃ©seau obligatoire
         let secrets = fetch_from_vault(VAULT_URL)?;
     }
 }
 ```
 
-**Conséquence :** Violation de INV-K-2, perte d'autonomie.
+**ConsÃ©quence :** Violation de INV-K-2, perte d'autonomie.
 
-### 5.3 Intégrer un protocole applicatif
+### 5.3 IntÃ©grer un protocole applicatif
 
 **Interdit :**
 
 ```rust
-// ❌ INCORRECT : Le kernel connaît HTTP
+// âŒ INCORRECT : Le kernel connaÃ®t HTTP
 use axum::Router;
 
 impl KernelServer {
@@ -748,45 +748,45 @@ impl KernelServer {
 }
 ```
 
-**Conséquence :** Violation de INV-K-4, couplage technologique.
+**ConsÃ©quence :** Violation de INV-K-4, couplage technologique.
 
-### 5.4 Muter l'état global
+### 5.4 Muter l'Ã©tat global
 
 **Interdit :**
 
 ```rust
-// ❌ INCORRECT : État global mutable
+// âŒ INCORRECT : Ã‰tat global mutable
 static mut COUNTER: u64 = 0;
 
 impl IdGenerator for GlobalIdGenerator {
     fn generate(&self) -> Id {
-        unsafe { COUNTER += 1 };  // ❌ Mutation globale
+        unsafe { COUNTER += 1 };  // âŒ Mutation globale
         Id::from(unsafe { COUNTER })
     }
 }
 ```
 
-**Conséquence :** Violation de INV-K-3, comportement non déterministe.
+**ConsÃ©quence :** Violation de INV-K-3, comportement non dÃ©terministe.
 
-### 5.5 Ré-exporter les types de dépendances
+### 5.5 RÃ©-exporter les types de dÃ©pendances
 
 **Interdit :**
 
 ```rust
-// ❌ INCORRECT : Fuite des types internes
-pub use uuid::Uuid;  // Le consommateur ne doit pas dépendre de uuid
-pub use log::Level;  // Le kernel définit son propre Level
+// âŒ INCORRECT : Fuite des types internes
+pub use uuid::Uuid;  // Le consommateur ne doit pas dÃ©pendre de uuid
+pub use log::Level;  // Le kernel dÃ©finit son propre Level
 ```
 
-**Conséquence :** Couplage aux dépendances, impossibilité de changer l'implémentation.
+**ConsÃ©quence :** Couplage aux dÃ©pendances, impossibilitÃ© de changer l'implÃ©mentation.
 
 ---
 
-## 6. Règles de tests
+## 6. RÃ¨gles de tests
 
-### 6.1 Testabilité des modules
+### 6.1 TestabilitÃ© des modules
 
-Chaque module du Kernel DOIT être testable de manière isolée grâce à l'injection de dépendances.
+Chaque module du Kernel DOIT Ãªtre testable de maniÃ¨re isolÃ©e grÃ¢ce Ã  l'injection de dÃ©pendances.
 
 ```rust
 #[cfg(test)]
@@ -830,22 +830,22 @@ mod tests {
 }
 ```
 
-### 6.2 Propriétés à vérifier
+### 6.2 PropriÃ©tÃ©s Ã  vÃ©rifier
 
-| Module | Propriété | Comment vérifier |
+| Module | PropriÃ©tÃ© | Comment vÃ©rifier |
 |--------|-----------|------------------|
-| **config** | Retourne `None` pour clé absente | Test avec clé inexistante |
-| **id** | Round-trip `generate` → `to_string` → `parse` | Test d'aller-retour |
-| **id** | Unicité des IDs générés | Générer N IDs, vérifier absence de doublons |
-| **time** | Injectabilité | Utiliser `FakeClock` |
+| **config** | Retourne `None` pour clÃ© absente | Test avec clÃ© inexistante |
+| **id** | Round-trip `generate` â†’ `to_string` â†’ `parse` | Test d'aller-retour |
+| **id** | UnicitÃ© des IDs gÃ©nÃ©rÃ©s | GÃ©nÃ©rer N IDs, vÃ©rifier absence de doublons |
+| **time** | InjectabilitÃ© | Utiliser `FakeClock` |
 | **log** | Accepte tous les niveaux | Logger avec chaque `Level` |
-| **lifecycle** | Exécution LIFO | Vérifier l'ordre des hooks |
+| **lifecycle** | ExÃ©cution LIFO | VÃ©rifier l'ordre des hooks |
 
-### 6.3 Ce qui NE doit PAS être testé
+### 6.3 Ce qui NE doit PAS Ãªtre testÃ©
 
-- **Tests d'intégration avec services externes** — Le kernel n'en a pas
-- **Tests de performance HTTP** — Le kernel ne fait pas de HTTP
-- **Tests de base de données** — Hors périmètre
+- **Tests d'intÃ©gration avec services externes** â€” Le kernel n'en a pas
+- **Tests de performance HTTP** â€” Le kernel ne fait pas de HTTP
+- **Tests de base de donnÃ©es** â€” Hors pÃ©rimÃ¨tre
 
 ---
 
@@ -853,7 +853,7 @@ mod tests {
 
 ### 7.1 Features flags
 
-Le Kernel peut utiliser des feature flags pour les modules expérimentaux (Phase 2) :
+Le Kernel peut utiliser des feature flags pour les modules expÃ©rimentaux (Phase 2) :
 
 ```toml
 [features]
@@ -863,13 +863,13 @@ connection = []
 error = []
 ```
 
-**Règle :** Les modules stables (config, id, time, log, lifecycle) sont toujours disponibles. Les modules expérimentaux sont derrière un feature flag.
+**RÃ¨gle :** Les modules stables (config, id, time, log, lifecycle) sont toujours disponibles. Les modules expÃ©rimentaux sont derriÃ¨re un feature flag.
 
-### 7.2 Compatibilité Rust
+### 7.2 CompatibilitÃ© Rust
 
-- **MSRV (Minimum Supported Rust Version)** : À définir par le projet
-- **Edition** : Rust 2021 recommandé
-- **Target** : Toutes les plateformes supportées par `std`
+- **MSRV (Minimum Supported Rust Version)** : Ã€ dÃ©finir par le projet
+- **Edition** : Rust 2021 recommandÃ©
+- **Target** : Toutes les plateformes supportÃ©es par `std`
 
 ### 7.3 Linting
 
@@ -886,94 +886,95 @@ pedantic = "warn"
 
 ---
 
-## 8. Conformité MSCM/MIP
+## 8. ConformitÃ© MSCM/MIP
 
 ### 8.1 Obligation de balisage MSCM
 
-Tout code implémenté pour le Kernel DOIT être balisé selon le protocole MSCM v1.
+Tout code implÃ©mentÃ© pour le Kernel DOIT Ãªtre balisÃ© selon le protocole MSCM v1.
 
-**Référence :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md)
+**RÃ©fÃ©rence :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md)
 
 **Obligations minimales :**
 
 - Chaque bloc fonctionnel DOIT avoir un identifiant unique (`@id`)
-- Le rôle sémantique DOIT être explicite (`@role`)
-- La couche architecturale DOIT être déclarée (`@layer`)
+- Le rÃ´le sÃ©mantique DOIT Ãªtre explicite (`@role`)
+- La couche architecturale DOIT Ãªtre dÃ©clarÃ©e (`@layer`)
 - Une description humaine DOIT accompagner chaque bloc (`@human`)
 
-### 8.2 Intégration MIP
+### 8.2 IntÃ©gration MIP
 
-Après implémentation, l'index MIP DOIT être régénéré pour :
+AprÃ¨s implÃ©mentation, l'index MIP DOIT Ãªtre rÃ©gÃ©nÃ©rÃ© pour :
 
-- Valider l'intégrité des blocs MSCM
-- Mettre à jour le graphe de dépendances
-- Vérifier la cohérence hiérarchique
+- Valider l'intÃ©gritÃ© des blocs MSCM
+- Mettre Ã  jour le graphe de dÃ©pendances
+- VÃ©rifier la cohÃ©rence hiÃ©rarchique
 
 ### 8.3 Check-list MSCM
 
-Avant toute livraison, vérifier :
+Avant toute livraison, vÃ©rifier :
 
-- [ ] Tous les blocs critiques sont balisés MSCM
+- [ ] Tous les blocs critiques sont balisÃ©s MSCM
 - [ ] Les identifiants sont uniques globalement
-- [ ] Les couches (layer) sont cohérentes avec l'architecture
-- [ ] L'index MIP peut être régénéré sans erreur
+- [ ] Les couches (layer) sont cohÃ©rentes avec l'architecture
+- [ ] L'index MIP peut Ãªtre rÃ©gÃ©nÃ©rÃ© sans erreur
 
 ---
 
-## 9. Check-list avant implémentation
+## 9. Check-list avant implÃ©mentation
 
-Avant d'implémenter ou de modifier un module du Kernel, vérifier :
+Avant d'implÃ©menter ou de modifier un module du Kernel, vÃ©rifier :
 
 ### 9.1 Invariants
 
-- [ ] **INV-K-1** : Pas de logique métier ?
-- [ ] **INV-K-2** : Pas de dépendance externe obligatoire ?
-- [ ] **INV-K-3** : Primitives locales et sûres uniquement ?
+- [ ] **INV-K-1** : Pas de logique mÃ©tier ?
+- [ ] **INV-K-2** : Pas de dÃ©pendance externe obligatoire ?
+- [ ] **INV-K-3** : Primitives locales et sÃ»res uniquement ?
 - [ ] **INV-K-4** : Pas de protocole applicatif ?
 - [ ] **INV-K-5** : Observation sans mutation ?
-- [ ] **INV-K-6** : Comportement déterministe ?
+- [ ] **INV-K-6** : Comportement dÃ©terministe ?
 - [ ] **INV-K-7** : Messages explicables ?
 - [ ] **INV-K-8** : Fonctionne offline ?
-- [ ] **INV-K-9** : Ressources maîtrisées (Raspberry Pi compatible) ?
-- [ ] **INV-K-10** : Gouvernance respectée (pas de décision autonome) ?
+- [ ] **INV-K-9** : Ressources maÃ®trisÃ©es (Raspberry Pi compatible) ?
+- [ ] **INV-K-10** : Gouvernance respectÃ©e (pas de dÃ©cision autonome) ?
 
 ### 9.2 API
 
-- [ ] Les traits gelés sont-ils respectés ?
-- [ ] Les types exposés sont-ils opaques quand nécessaire ?
+- [ ] Les traits gelÃ©s sont-ils respectÃ©s ?
+- [ ] Les types exposÃ©s sont-ils opaques quand nÃ©cessaire ?
 - [ ] Les erreurs sont-elles explicites (`Result<T, E>`) ?
-- [ ] Pas de ré-export de types de dépendances ?
+- [ ] Pas de rÃ©-export de types de dÃ©pendances ?
 
 ### 9.3 Tests
 
-- [ ] Module testable de manière isolée ?
-- [ ] Injection de dépendances fonctionnelle ?
-- [ ] Propriétés clés vérifiées ?
+- [ ] Module testable de maniÃ¨re isolÃ©e ?
+- [ ] Injection de dÃ©pendances fonctionnelle ?
+- [ ] PropriÃ©tÃ©s clÃ©s vÃ©rifiÃ©es ?
 
 ---
 
 ## 10. Conclusion
 
-Ce document fournit des lignes directrices pour implémenter le Kernel de manière conforme aux contrats FONDATION.
+Ce document fournit des lignes directrices pour implÃ©menter le Kernel de maniÃ¨re conforme aux contrats FONDATION.
 
-**Points clés :**
+**Points clÃ©s :**
 
 - Le Kernel est **minimal** : 5 modules (config, id, time, log, lifecycle)
-- Les **invariants INV-K-*** sont absolus et non négociables
-- Les **traits sont gelés** (Revue API v0.1) et ne doivent pas être modifiés sans versioning
-- L'implémentation privilégie la **pureté**, le **déterminisme**, et l'**explicabilité**
-- Aucune **logique métier**, aucune **dépendance externe critique**, aucun **protocole applicatif**
+- Les **invariants INV-K-*** sont absolus et non nÃ©gociables
+- Les **traits sont gelÃ©s** (Revue API v0.1) et ne doivent pas Ãªtre modifiÃ©s sans versioning
+- L'implÃ©mentation privilÃ©gie la **puretÃ©**, le **dÃ©terminisme**, et l'**explicabilitÃ©**
+- Aucune **logique mÃ©tier**, aucune **dÃ©pendance externe critique**, aucun **protocole applicatif**
 
 **Nature informative :**
 
-Ce document est purement informatif et ne crée aucune nouvelle obligation contractuelle. Il sert uniquement à guider la compréhension et l'application des contrats FONDATION.
+Ce document est purement informatif et ne crÃ©e aucune nouvelle obligation contractuelle. Il sert uniquement Ã  guider la comprÃ©hension et l'application des contrats FONDATION.
 
-**Rappel :** Les contrats FONDATION priment toujours sur ce guide. En cas de doute, se référer aux contrats FONDATION.
+**Rappel :** Les contrats FONDATION priment toujours sur ce guide. En cas de doute, se rÃ©fÃ©rer aux contrats FONDATION.
 
 ---
 
-**Document créé le :** 2026-01-28  
+**Document crÃ©Ã© le :** 2026-01-28  
 **Version :** 1.0  
 **Statut :** POST-FONDATION / NON NORMATIF / INFORMATIF  
-**Référence :** Definition Kernel v0.1, Structure du Kernel v0.1, Revue Traits API v0.1, Invariants & Guarantees v1.0  
-**Type :** Guide d'implémentation non contractuel
+**RÃ©fÃ©rence :** Definition Kernel v0.1, Structure du Kernel v0.1, Revue Traits API v0.1, Invariants & Guarantees v1.0  
+**Type :** Guide d'implÃ©mentation non contractuel
+

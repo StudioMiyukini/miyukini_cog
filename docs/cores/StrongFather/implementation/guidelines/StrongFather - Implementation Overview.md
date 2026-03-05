@@ -1,16 +1,16 @@
-# StrongFather — Implementation Overview
+﻿# StrongFather â€” Implementation Overview
 
 ## Statut du document
 
 **POST-FONDATION / NON NORMATIF / INFORMATIF**
 
-Ce document est **informatif, non normatif, et non contractuel**. Il guide un développeur pour implémenter StrongFather correctement, sans violer les contrats FONDATION.
+Ce document est **informatif, non normatif, et non contractuel**. Il guide un dÃ©veloppeur pour implÃ©menter StrongFather correctement, sans violer les contrats FONDATION.
 
-**Objectif pédagogique :** Ce document vise à aider les développeurs à comprendre comment traduire les contrats FONDATION en implémentation Rust, en respectant strictement les invariants, garanties, et interdictions.
+**Objectif pÃ©dagogique :** Ce document vise Ã  aider les dÃ©veloppeurs Ã  comprendre comment traduire les contrats FONDATION en implÃ©mentation Rust, en respectant strictement les invariants, garanties, et interdictions.
 
-**Avertissement :** Ce document ne doit pas être interprété abusivement. Il ne crée aucune nouvelle règle contractuelle et ne modifie aucun contrat existant. Les contrats FONDATION priment toujours sur ce guide.
+**Avertissement :** Ce document ne doit pas Ãªtre interprÃ©tÃ© abusivement. Il ne crÃ©e aucune nouvelle rÃ¨gle contractuelle et ne modifie aucun contrat existant. Les contrats FONDATION priment toujours sur ce guide.
 
-**Relation avec les contrats FONDATION :** Ce document fait référence aux contrats FONDATION existants mais ne les étend pas, ne les modifie pas, et ne crée aucune nouvelle obligation contractuelle.
+**Relation avec les contrats FONDATION :** Ce document fait rÃ©fÃ©rence aux contrats FONDATION existants mais ne les Ã©tend pas, ne les modifie pas, et ne crÃ©e aucune nouvelle obligation contractuelle.
 
 **Documents connexes :**
 - [StrongFather - Implementation Patterns](./StrongFather%20-%20Implementation%20Patterns.md)
@@ -22,103 +22,103 @@ Ce document est **informatif, non normatif, et non contractuel**. Il guide un d�
 
 ### 1.1. Objectif
 
-Ce document fournit des lignes directrices pour implémenter StrongFather de manière conforme aux contrats FONDATION. Il explique comment traduire les concepts contractuels en logique d'implémentation Rust sans interprétation abusive.
+Ce document fournit des lignes directrices pour implÃ©menter StrongFather de maniÃ¨re conforme aux contrats FONDATION. Il explique comment traduire les concepts contractuels en logique d'implÃ©mentation Rust sans interprÃ©tation abusive.
 
 ### 1.2. Nature informative
 
-Ce document est **purement informatif**. Il ne définit pas de nouvelles règles, n'impose pas de technologies, et ne prescrit pas de solutions techniques. Il guide la compréhension et l'application des contrats FONDATION.
+Ce document est **purement informatif**. Il ne dÃ©finit pas de nouvelles rÃ¨gles, n'impose pas de technologies, et ne prescrit pas de solutions techniques. Il guide la comprÃ©hension et l'application des contrats FONDATION.
 
 ### 1.3. Sources contractuelles
 
 Ce document se base sur tous les contrats FONDATION StrongFather v1.1, avec un focus particulier sur :
 
-- **Documentation Fondatrice** : Invariants INV-SF-*, rôle et positionnement
-- **Core Decision Contract** : Types de décisions (ACCEPTÉE, REFUSÉE, AMBIGUË, DIFFÉRÉE), garanties G-DEC-*
+- **Documentation Fondatrice** : Invariants INV-SF-*, rÃ´le et positionnement
+- **Core Decision Contract** : Types de dÃ©cisions (ACCEPTÃ‰E, REFUSÃ‰E, AMBIGUÃ‹, DIFFÃ‰RÃ‰E), garanties G-DEC-*
 - **Intent Model Contract** : Structure des intentions, invariants INV-INT-*
-- **Policy Engine Contract** : Types de politiques, application, résolution de conflits
+- **Policy Engine Contract** : Types de politiques, application, rÃ©solution de conflits
 - **Policy Source Contract** : Source unique, cycle de vie, invariants INV-SRC-*
 - **Execution Prohibition Contract** : Interdictions absolues INTERD-EXEC-*, invariants INV-EXEC-*
-- **Boundary & Isolation Contract** : Frontières, Kernel Trace Access Contract (KERN-AUTH-*)
-- **Error & Rejection Model** : Distinction erreur/rejet, catégories
-- **Audit & Trace Contract** : Traçabilité, niveaux de trace
-- **Invariants & Guarantees** : Catalogue consolidé de tous les invariants
+- **Boundary & Isolation Contract** : FrontiÃ¨res, Kernel Trace Access Contract (KERN-AUTH-*)
+- **Error & Rejection Model** : Distinction erreur/rejet, catÃ©gories
+- **Audit & Trace Contract** : TraÃ§abilitÃ©, niveaux de trace
+- **Invariants & Guarantees** : Catalogue consolidÃ© de tous les invariants
 
-**Terminologie :** Voir [Miyukini Conceptual References - Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie :** Voir [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 2. Principes d'implémentation généraux
+## 2. Principes d'implÃ©mentation gÃ©nÃ©raux
 
-### 2.1. Pureté fonctionnelle (INV-EXEC-5, INV-BEHAV-3)
+### 2.1. PuretÃ© fonctionnelle (INV-EXEC-5, INV-BEHAV-3)
 
 **Principe contractuel :**
 
-L'invariant INV-EXEC-5 et INV-BEHAV-3 établissent que StrongFather se comporte comme une fonction pure : pour une entrée donnée, il produit une sortie sans effet de bord.
+L'invariant INV-EXEC-5 et INV-BEHAV-3 Ã©tablissent que StrongFather se comporte comme une fonction pure : pour une entrÃ©e donnÃ©e, il produit une sortie sans effet de bord.
 
-**Traduction en logique d'implémentation Rust :**
+**Traduction en logique d'implÃ©mentation Rust :**
 
-- **Fonction pure en Rust :** Implémenter StrongFather comme une fonction ou une structure avec des méthodes qui ne modifient jamais l'état externe.
+- **Fonction pure en Rust :** ImplÃ©menter StrongFather comme une fonction ou une structure avec des mÃ©thodes qui ne modifient jamais l'Ã©tat externe.
 
 ```rust
-// ✅ CORRECT : Fonction pure
+// âœ… CORRECT : Fonction pure
 pub fn evaluate_intent(
     intent: &Intent,
     policies: &PolicySet,
     context: &EvaluationContext,
 ) -> Result<Decision, SFError> {
-    // Évaluation sans effet de bord
-    // Aucune mutation d'état externe
-    // Aucun appel réseau, DB, ou système de fichiers
+    // Ã‰valuation sans effet de bord
+    // Aucune mutation d'Ã©tat externe
+    // Aucun appel rÃ©seau, DB, ou systÃ¨me de fichiers
 }
 
-// ❌ INCORRECT : Mutation d'état externe
+// âŒ INCORRECT : Mutation d'Ã©tat externe
 pub fn evaluate_intent(&mut self, intent: &Intent) -> Decision {
-    self.cache.insert(intent.id(), intent.clone()); // ❌ Cache = effet de bord
-    self.counter += 1; // ❌ Mutation d'état = effet de bord
+    self.cache.insert(intent.id(), intent.clone()); // âŒ Cache = effet de bord
+    self.counter += 1; // âŒ Mutation d'Ã©tat = effet de bord
 }
 ```
 
-- **Pas de mutation d'état externe :** Aucune variable globale, aucun singleton mutable, aucun état partagé modifiable.
+- **Pas de mutation d'Ã©tat externe :** Aucune variable globale, aucun singleton mutable, aucun Ã©tat partagÃ© modifiable.
 
-- **Pas d'I/O :** Aucun appel réseau, aucune écriture fichier, aucune base de données, sauf pour la traçabilité (kernel autorisé selon KERN-AUTH-*).
+- **Pas d'I/O :** Aucun appel rÃ©seau, aucune Ã©criture fichier, aucune base de donnÃ©es, sauf pour la traÃ§abilitÃ© (kernel autorisÃ© selon KERN-AUTH-*).
 
-**Référence contrat :** Execution Prohibition Contract (INTERD-EXEC-*, INTERD-STATE-*), Invariants & Guarantees (INV-EXEC-5, INV-BEHAV-3)
+**RÃ©fÃ©rence contrat :** Execution Prohibition Contract (INTERD-EXEC-*, INTERD-STATE-*), Invariants & Guarantees (INV-EXEC-5, INV-BEHAV-3)
 
 ---
 
-### 2.2. Séparation stricte décision/exécution (INV-AUTH-1)
+### 2.2. SÃ©paration stricte dÃ©cision/exÃ©cution (INV-AUTH-1)
 
 **Principe contractuel :**
 
-L'invariant INV-AUTH-1 établit que StrongFather ne possède jamais d'autorité sur l'exécution. Une décision produite n'entraîne jamais d'exécution automatique.
+L'invariant INV-AUTH-1 Ã©tablit que StrongFather ne possÃ¨de jamais d'autoritÃ© sur l'exÃ©cution. Une dÃ©cision produite n'entraÃ®ne jamais d'exÃ©cution automatique.
 
-**Traduction en logique d'implémentation Rust :**
+**Traduction en logique d'implÃ©mentation Rust :**
 
-- **Décision = structure de données :** Une décision est une structure de données immuable, jamais une closure ou un callback exécutable.
+- **DÃ©cision = structure de donnÃ©es :** Une dÃ©cision est une structure de donnÃ©es immuable, jamais une closure ou un callback exÃ©cutable.
 
 ```rust
-// ✅ CORRECT : Décision = structure immuable
+// âœ… CORRECT : DÃ©cision = structure immuable
 #[derive(Debug, Clone)]
 pub struct Decision {
     pub intent_id: String,
     pub result: DecisionType,
     pub justification: Justification,
     pub policies_applied: Vec<PolicyId>,
-    // Aucun champ exécutable
+    // Aucun champ exÃ©cutable
 }
 
-// ❌ INCORRECT : Décision avec callback exécutable
+// âŒ INCORRECT : DÃ©cision avec callback exÃ©cutable
 pub struct Decision {
     pub intent_id: String,
-    pub execute: Box<dyn Fn() -> ()>, // ❌ Callback = exécution interdite
+    pub execute: Box<dyn Fn() -> ()>, // âŒ Callback = exÃ©cution interdite
 }
 ```
 
-- **Pas de callback :** Aucun callback, aucune closure exécutable, aucun mécanisme d'exécution dans la décision.
+- **Pas de callback :** Aucun callback, aucune closure exÃ©cutable, aucun mÃ©canisme d'exÃ©cution dans la dÃ©cision.
 
-- **Pas de side-effect :** La production d'une décision ne déclenche jamais d'action automatique.
+- **Pas de side-effect :** La production d'une dÃ©cision ne dÃ©clenche jamais d'action automatique.
 
-**Référence contrat :** Execution Prohibition Contract (INTERD-EXEC-4), Documentation Fondatrice (INV-SF-1), Invariants & Guarantees (INV-AUTH-1)
+**RÃ©fÃ©rence contrat :** Execution Prohibition Contract (INTERD-EXEC-4), Documentation Fondatrice (INV-SF-1), Invariants & Guarantees (INV-AUTH-1)
 
 ---
 
@@ -126,14 +126,14 @@ pub struct Decision {
 
 **Principe contractuel :**
 
-L'invariant INV-BEHAV-2 établit que StrongFather ne fait confiance à aucun appelant. Toute intention est évaluée selon les politiques, sans présupposer la validité, l'authenticité, ou la légitimité de l'appelant.
+L'invariant INV-BEHAV-2 Ã©tablit que StrongFather ne fait confiance Ã  aucun appelant. Toute intention est Ã©valuÃ©e selon les politiques, sans prÃ©supposer la validitÃ©, l'authenticitÃ©, ou la lÃ©gitimitÃ© de l'appelant.
 
-**Traduction en logique d'implémentation Rust :**
+**Traduction en logique d'implÃ©mentation Rust :**
 
-- **Validation systématique :** Toute intention DOIT être validée structurellement avant évaluation, même si elle provient d'un adaptateur "de confiance".
+- **Validation systÃ©matique :** Toute intention DOIT Ãªtre validÃ©e structurellement avant Ã©valuation, mÃªme si elle provient d'un adaptateur "de confiance".
 
 ```rust
-// ✅ CORRECT : Validation systématique
+// âœ… CORRECT : Validation systÃ©matique
 pub fn evaluate_intent(&self, intent: Intent) -> Result<Decision, SFError> {
     // Validation structurelle obligatoire (zero-trust)
     self.validate_intent_structure(&intent)?;
@@ -141,56 +141,56 @@ pub fn evaluate_intent(&self, intent: Intent) -> Result<Decision, SFError> {
     // Validation du contexte (zero-trust)
     self.validate_context(&intent.context)?;
     
-    // Évaluation selon politiques (zero-trust)
+    // Ã‰valuation selon politiques (zero-trust)
     self.apply_policies(&intent)
 }
 
-// ❌ INCORRECT : Présupposition de validité
+// âŒ INCORRECT : PrÃ©supposition de validitÃ©
 pub fn evaluate_intent(&self, intent: Intent) -> Decision {
-    // ❌ Pas de validation = violation zero-trust
+    // âŒ Pas de validation = violation zero-trust
     if intent.from_trusted_adapter {
-        return Decision::accepted(); // ❌ Présupposition interdite
+        return Decision::accepted(); // âŒ PrÃ©supposition interdite
     }
 }
 ```
 
 - **Pas de whitelist :** Aucune liste blanche d'appelants "de confiance" qui bypasserait la validation.
 
-- **Validation du contexte :** Le contexte d'appel DOIT être validé, jamais présupposé valide.
+- **Validation du contexte :** Le contexte d'appel DOIT Ãªtre validÃ©, jamais prÃ©supposÃ© valide.
 
-**Référence contrat :** Documentation Fondatrice (INV-SF-5), Invariants & Guarantees (INV-BEHAV-2), Core Decision Contract (G-ZT-*)
+**RÃ©fÃ©rence contrat :** Documentation Fondatrice (INV-SF-5), Invariants & Guarantees (INV-BEHAV-2), Core Decision Contract (G-ZT-*)
 
 ---
 
-### 2.4. Zéro effet de bord (G-EXEC-1, INV-EXEC-5)
+### 2.4. ZÃ©ro effet de bord (G-EXEC-1, INV-EXEC-5)
 
 **Principe contractuel :**
 
-La garantie G-EXEC-1 et l'invariant INV-EXEC-5 établissent qu'aucune opération d'évaluation ne produit d'effet de bord sur le système.
+La garantie G-EXEC-1 et l'invariant INV-EXEC-5 Ã©tablissent qu'aucune opÃ©ration d'Ã©valuation ne produit d'effet de bord sur le systÃ¨me.
 
-**Traduction en logique d'implémentation Rust :**
+**Traduction en logique d'implÃ©mentation Rust :**
 
-- **Pas de mutation :** Aucune mutation d'état système, utilisateur, session, ou configuration.
+- **Pas de mutation :** Aucune mutation d'Ã©tat systÃ¨me, utilisateur, session, ou configuration.
 
 ```rust
-// ✅ CORRECT : Pas de mutation
+// âœ… CORRECT : Pas de mutation
 pub fn evaluate_intent(&self, intent: &Intent) -> Decision {
-    // self est &self (référence immuable)
+    // self est &self (rÃ©fÃ©rence immuable)
     // Aucune mutation possible
 }
 
-// ❌ INCORRECT : Mutation d'état
+// âŒ INCORRECT : Mutation d'Ã©tat
 pub fn evaluate_intent(&mut self, intent: &Intent) -> Decision {
-    self.evaluation_count += 1; // ❌ Mutation d'état système
-    self.last_intent = intent.clone(); // ❌ Mutation d'état
+    self.evaluation_count += 1; // âŒ Mutation d'Ã©tat systÃ¨me
+    self.last_intent = intent.clone(); // âŒ Mutation d'Ã©tat
 }
 ```
 
-- **Pas de persistance :** Aucune écriture en base, fichier, cache, ou queue (sauf traçabilité selon Audit & Trace Contract).
+- **Pas de persistance :** Aucune Ã©criture en base, fichier, cache, ou queue (sauf traÃ§abilitÃ© selon Audit & Trace Contract).
 
-- **Pas de communication externe :** Aucun appel réseau, aucune notification, aucun appel à KindMother.
+- **Pas de communication externe :** Aucun appel rÃ©seau, aucune notification, aucun appel Ã  KindMother.
 
-**Référence contrat :** Execution Prohibition Contract (INTERD-PERS-*, INTERD-COM-*), Invariants & Guarantees (INV-EXEC-2, INV-EXEC-3, INV-EXEC-4)
+**RÃ©fÃ©rence contrat :** Execution Prohibition Contract (INTERD-PERS-*, INTERD-COM-*), Invariants & Guarantees (INV-EXEC-2, INV-EXEC-3, INV-EXEC-4)
 
 ---
 
@@ -200,17 +200,17 @@ pub fn evaluate_intent(&mut self, intent: &Intent) -> Decision {
 
 **Concept contractuel :**
 
-Une intention est une demande conceptuelle d'évaluation avec des composants obligatoires (identifiant, type d'action, sujet, contexte) et optionnels (priorité, contraintes, métadonnées).
+Une intention est une demande conceptuelle d'Ã©valuation avec des composants obligatoires (identifiant, type d'action, sujet, contexte) et optionnels (prioritÃ©, contraintes, mÃ©tadonnÃ©es).
 
-**Traduction Rust recommandée :**
+**Traduction Rust recommandÃ©e :**
 
 ```rust
 // Structure d'intention conforme au Intent Model Contract
 #[derive(Debug, Clone)]
 pub struct Intent {
     // Composants obligatoires (R-ID-1, R-TYPE-1, R-SUBJ-1)
-    pub intent_id: String, // INV-ID-GLOBAL : Unicité globale
-    pub action_type: ActionType, // CRÉATION, MODIFICATION, SUPPRESSION, LECTURE, ÉVALUATION
+    pub intent_id: String, // INV-ID-GLOBAL : UnicitÃ© globale
+    pub action_type: ActionType, // CRÃ‰ATION, MODIFICATION, SUPPRESSION, LECTURE, Ã‰VALUATION
     pub subject: String, // Sujet de l'intention
     pub call_context: CallContext, // Contexte d'appel obligatoire
     
@@ -218,7 +218,7 @@ pub struct Intent {
     pub requested_priority: Option<Priority>,
     pub constraints: Vec<Constraint>,
     pub metadata: HashMap<String, String>,
-    pub data: Option<IntentData>, // Données de l'intention
+    pub data: Option<IntentData>, // DonnÃ©es de l'intention
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -241,59 +241,59 @@ pub struct CallContext {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IntentState {
     Submitted,      // SOUMISE
-    InEvaluation,   // EN_ÉVALUATION
-    Decided,        // DÉCIDÉE
+    InEvaluation,   // EN_Ã‰VALUATION
+    Decided,        // DÃ‰CIDÃ‰E
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
-- **Immutabilité après soumission :** Une fois soumise, l'intention ne DOIT jamais être modifiée (INV-INT-1, R-ID-2).
+- **ImmutabilitÃ© aprÃ¨s soumission :** Une fois soumise, l'intention ne DOIT jamais Ãªtre modifiÃ©e (INV-INT-1, R-ID-2).
 
-- **Validation structurelle :** Valider tous les composants obligatoires avant évaluation (Intent Model Contract section 6).
+- **Validation structurelle :** Valider tous les composants obligatoires avant Ã©valuation (Intent Model Contract section 6).
 
-- **Pas de logique métier :** L'intention ne contient jamais de logique métier spécifique (Execution Prohibition Contract).
+- **Pas de logique mÃ©tier :** L'intention ne contient jamais de logique mÃ©tier spÃ©cifique (Execution Prohibition Contract).
 
-**Référence contrat :** Intent Model Contract (sections 2, 3, 4, 6), Invariants & Guarantees (INV-INT-1, INV-ID-GLOBAL)
+**RÃ©fÃ©rence contrat :** Intent Model Contract (sections 2, 3, 4, 6), Invariants & Guarantees (INV-INT-1, INV-ID-GLOBAL)
 
 ---
 
-### 3.2. Décision (Core Decision Contract)
+### 3.2. DÃ©cision (Core Decision Contract)
 
 **Concept contractuel :**
 
-Une décision est le résultat produit après évaluation, avec 4 types autorisés : ACCEPTÉE, REFUSÉE, AMBIGUË, DIFFÉRÉE.
+Une dÃ©cision est le rÃ©sultat produit aprÃ¨s Ã©valuation, avec 4 types autorisÃ©s : ACCEPTÃ‰E, REFUSÃ‰E, AMBIGUÃ‹, DIFFÃ‰RÃ‰E.
 
-**Traduction Rust recommandée :**
+**Traduction Rust recommandÃ©e :**
 
 ```rust
-// Structure de décision conforme au Core Decision Contract
+// Structure de dÃ©cision conforme au Core Decision Contract
 #[derive(Debug, Clone)]
 pub struct Decision {
     // Composants obligatoires (Core Decision Contract section 4)
-    pub intent_id: String, // Identifiant de l'intention évaluée
-    pub decision_type: DecisionType, // Type de décision
+    pub intent_id: String, // Identifiant de l'intention Ã©valuÃ©e
+    pub decision_type: DecisionType, // Type de dÃ©cision
     pub justification: Justification, // Justification obligatoire (G-JUST-1)
-    pub policies_applied: Vec<PolicyId>, // Politiques appliquées (INV-TRACE-3)
-    pub evaluation_context: EvaluationContext, // Contexte d'évaluation
-    pub metadata: DecisionMetadata, // Métadonnées de traçabilité
+    pub policies_applied: Vec<PolicyId>, // Politiques appliquÃ©es (INV-TRACE-3)
+    pub evaluation_context: EvaluationContext, // Contexte d'Ã©valuation
+    pub metadata: DecisionMetadata, // MÃ©tadonnÃ©es de traÃ§abilitÃ©
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DecisionType {
     Accepted {
-        priority: Priority, // Priorité établie
+        priority: Priority, // PrioritÃ© Ã©tablie
     },
     Refused {
         reason: RefusalReason, // Raison explicite du refus
-        violated_policies: Vec<PolicyId>, // Politiques violées
+        violated_policies: Vec<PolicyId>, // Politiques violÃ©es
     },
     Ambiguous {
         missing_information: Vec<String>, // Informations manquantes
         clarifications_required: Vec<Clarification>, // Clarifications requises
     },
     Deferred {
-        reason: DeferralReason, // Raison du différé
+        reason: DeferralReason, // Raison du diffÃ©rÃ©
         context_required: Vec<String>, // Contexte futur requis
     },
 }
@@ -301,22 +301,22 @@ pub enum DecisionType {
 #[derive(Debug, Clone)]
 pub struct Justification {
     pub explanation: String, // Explication conceptuelle
-    pub policy_references: Vec<PolicyId>, // Références aux politiques
-    pub reasoning_steps: Vec<ReasoningStep>, // Étapes de raisonnement
+    pub policy_references: Vec<PolicyId>, // RÃ©fÃ©rences aux politiques
+    pub reasoning_steps: Vec<ReasoningStep>, // Ã‰tapes de raisonnement
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
-- **Unicité :** Pour chaque intention, exactement une décision est produite (INV-DEC-3).
+- **UnicitÃ© :** Pour chaque intention, exactement une dÃ©cision est produite (INV-DEC-3).
 
-- **Justification obligatoire :** Toute décision DOIT contenir une justification (G-JUST-1).
+- **Justification obligatoire :** Toute dÃ©cision DOIT contenir une justification (G-JUST-1).
 
-- **Non-exécutable :** Une décision n'est jamais exécutable directement (G-NOEXEC-1, INV-EXEC-1).
+- **Non-exÃ©cutable :** Une dÃ©cision n'est jamais exÃ©cutable directement (G-NOEXEC-1, INV-EXEC-1).
 
-- **Pas de logique temporelle :** Une décision DIFFÉRÉE n'implique aucune planification (INV-DIFF-NOPLAN).
+- **Pas de logique temporelle :** Une dÃ©cision DIFFÃ‰RÃ‰E n'implique aucune planification (INV-DIFF-NOPLAN).
 
-**Référence contrat :** Core Decision Contract (sections 2, 3, 4), Invariants & Guarantees (INV-DEC-1, INV-DEC-2, INV-DEC-3, INV-DIFF-NOPLAN)
+**RÃ©fÃ©rence contrat :** Core Decision Contract (sections 2, 3, 4), Invariants & Guarantees (INV-DEC-1, INV-DEC-2, INV-DEC-3, INV-DIFF-NOPLAN)
 
 ---
 
@@ -324,9 +324,9 @@ pub struct Justification {
 
 **Concept contractuel :**
 
-Une erreur est un dysfonctionnement interne qui empêche l'évaluation. Un rejet est un résultat normal d'évaluation (intention invalide).
+Une erreur est un dysfonctionnement interne qui empÃªche l'Ã©valuation. Un rejet est un rÃ©sultat normal d'Ã©valuation (intention invalide).
 
-**Traduction Rust recommandée :**
+**Traduction Rust recommandÃ©e :**
 
 ```rust
 // Distinction erreur/rejet conforme au Error & Rejection Model
@@ -346,42 +346,42 @@ pub enum SFError {
         reason: String,
     },
     
-    // Note : Les rejets sont des Décisions (DecisionType::Refused, etc.)
+    // Note : Les rejets sont des DÃ©cisions (DecisionType::Refused, etc.)
     // Pas des erreurs
 }
 
-// ❌ INCORRECT : Mélanger erreur et rejet
+// âŒ INCORRECT : MÃ©langer erreur et rejet
 pub enum SFError {
-    Rejection { reason: String }, // ❌ Rejet ≠ Erreur
+    Rejection { reason: String }, // âŒ Rejet â‰  Erreur
 }
 
-// ✅ CORRECT : Rejet = Décision
+// âœ… CORRECT : Rejet = DÃ©cision
 pub fn evaluate_intent(&self, intent: &Intent) -> Result<Decision, SFError> {
-    // Erreur = dysfonctionnement → Err(SFError)
-    // Rejet = résultat normal → Ok(Decision { decision_type: DecisionType::Refused })
+    // Erreur = dysfonctionnement â†’ Err(SFError)
+    // Rejet = rÃ©sultat normal â†’ Ok(Decision { decision_type: DecisionType::Refused })
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
 - **Distinction stricte :** Une erreur retourne `Err(SFError)`, un rejet retourne `Ok(Decision)` avec `DecisionType::Refused` (INV-ERR-1).
 
-- **Pas de mélange :** Ne jamais retourner une erreur pour un rejet, ni un rejet pour une erreur.
+- **Pas de mÃ©lange :** Ne jamais retourner une erreur pour un rejet, ni un rejet pour une erreur.
 
-- **Traçabilité différente :** Les erreurs sont tracées dans les logs d'erreur, les rejets dans les décisions (Audit & Trace Contract).
+- **TraÃ§abilitÃ© diffÃ©rente :** Les erreurs sont tracÃ©es dans les logs d'erreur, les rejets dans les dÃ©cisions (Audit & Trace Contract).
 
-**Référence contrat :** Error & Rejection Model (sections 2, 3, 4), Invariants & Guarantees (INV-ERR-1)
+**RÃ©fÃ©rence contrat :** Error & Rejection Model (sections 2, 3, 4), Invariants & Guarantees (INV-ERR-1)
 
 ---
 
-## 4. Structure générale recommandée
+## 4. Structure gÃ©nÃ©rale recommandÃ©e
 
 ### 4.1. Architecture du moteur
 
-**Architecture recommandée :**
+**Architecture recommandÃ©e :**
 
 ```rust
-// Structure conforme à Architecture & Flows
+// Structure conforme Ã  Architecture & Flows
 pub struct StrongFather {
     // Composants internes (Architecture & Flows section 3)
     intent_validator: IntentValidator,
@@ -413,51 +413,52 @@ impl StrongFather {
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
-- **Pas de logique métier :** Aucune logique métier spécifique dans le moteur (Execution Prohibition Contract).
+- **Pas de logique mÃ©tier :** Aucune logique mÃ©tier spÃ©cifique dans le moteur (Execution Prohibition Contract).
 
-- **Séparation des composants :** Chaque composant a une responsabilité unique (Architecture & Flows).
+- **SÃ©paration des composants :** Chaque composant a une responsabilitÃ© unique (Architecture & Flows).
 
-- **Source de politiques :** Les politiques proviennent d'une source unique configurée (Policy Source Contract, INV-POL-SOURCE).
+- **Source de politiques :** Les politiques proviennent d'une source unique configurÃ©e (Policy Source Contract, INV-POL-SOURCE).
 
-**Référence contrat :** Architecture & Flows (section 3), Policy Source Contract (INV-POL-SOURCE)
+**RÃ©fÃ©rence contrat :** Architecture & Flows (section 3), Policy Source Contract (INV-POL-SOURCE)
 
 ---
 
-## 5. Conformité MSCM/MIP
+## 5. ConformitÃ© MSCM/MIP
 
 ### 5.1 Obligation de balisage MSCM
 
-Tout code implémenté pour StrongFather DOIT être balisé selon le protocole MSCM v1.
+Tout code implÃ©mentÃ© pour StrongFather DOIT Ãªtre balisÃ© selon le protocole MSCM v1.
 
-**Référence :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md)
+**RÃ©fÃ©rence :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](..//..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md)
 
 **Obligations minimales :**
 - Chaque bloc fonctionnel DOIT avoir un identifiant unique (`@id`)
-- Le rôle sémantique DOIT être explicite (`@role`)
-- La couche architecturale DOIT être déclarée (`@layer`)
+- Le rÃ´le sÃ©mantique DOIT Ãªtre explicite (`@role`)
+- La couche architecturale DOIT Ãªtre dÃ©clarÃ©e (`@layer`)
 - Une description humaine DOIT accompagner chaque bloc (`@human`)
 
-### 5.2 Intégration MIP
+### 5.2 IntÃ©gration MIP
 
-Après implémentation, l'index MIP DOIT être régénéré pour :
-- Valider l'intégrité des blocs MSCM
-- Mettre à jour le graphe de dépendances
-- Vérifier la cohérence hiérarchique
+AprÃ¨s implÃ©mentation, l'index MIP DOIT Ãªtre rÃ©gÃ©nÃ©rÃ© pour :
+- Valider l'intÃ©gritÃ© des blocs MSCM
+- Mettre Ã  jour le graphe de dÃ©pendances
+- VÃ©rifier la cohÃ©rence hiÃ©rarchique
 
 ### 5.3 Check-list MSCM
 
-Avant toute livraison, vérifier :
-- [ ] Tous les blocs critiques sont balisés MSCM
+Avant toute livraison, vÃ©rifier :
+- [ ] Tous les blocs critiques sont balisÃ©s MSCM
 - [ ] Les identifiants sont uniques globalement
-- [ ] Les couches (layer) sont cohérentes avec l'architecture
-- [ ] L'index MIP peut être régénéré sans erreur
+- [ ] Les couches (layer) sont cohÃ©rentes avec l'architecture
+- [ ] L'index MIP peut Ãªtre rÃ©gÃ©nÃ©rÃ© sans erreur
 
 ---
 
-**Document créé le :** 2026-01-27  
-**Version :** 1.1 (réorganisation)  
+**Document crÃ©Ã© le :** 2026-01-27  
+**Version :** 1.1 (rÃ©organisation)  
 **Statut :** POST-FONDATION / NON NORMATIF / INFORMATIF  
-**Référence :** StrongFather Contrats FONDATION v1.1 (gelés, non modifiables)  
-**Type :** Guide d'implémentation non contractuel
+**RÃ©fÃ©rence :** StrongFather Contrats FONDATION v1.1 (gelÃ©s, non modifiables)  
+**Type :** Guide d'implÃ©mentation non contractuel
+

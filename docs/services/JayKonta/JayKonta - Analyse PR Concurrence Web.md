@@ -1,4 +1,4 @@
-# JayKonta — Analyse PR Concurrence Web
+﻿# JayKonta â€” Analyse PR Concurrence Web
 
 ## Contexte
 
@@ -37,7 +37,7 @@ Chaque concurrent est analyse selon :
 |-----------|-------------|
 | **Segment** | Positionnement marche (SMB, Enterprise, Personal) |
 | **Fonctionnalites** | Liste exhaustive des capacites |
-| **Parcours utilisateur** | Flux types (devis → facture → paiement, etc.) |
+| **Parcours utilisateur** | Flux types (devis â†’ facture â†’ paiement, etc.) |
 | **Elements UI/UX** | Patterns d'interface remarquables |
 | **Avantages** | Positionnement differentiel |
 | **Passerelles COG** | Adaptation dans le modele Miyukini |
@@ -57,11 +57,11 @@ Chaque concurrent est analyse selon :
 
 ---
 
-## 2. Concurrents Segment Entreprise — ERP et Comptabilite
+## 2. Concurrents Segment Entreprise â€” ERP et Comptabilite
 
 ### 2.1 Odoo Accounting + Invoicing
 
-**Segment :** ERP modulaire SMB/Mid-market — Open source avec edition Enterprise
+**Segment :** ERP modulaire SMB/Mid-market â€” Open source avec edition Enterprise
 
 #### Fonctionnalites extraites
 
@@ -70,7 +70,7 @@ Chaque concurrent est analyse selon :
 | **Comptabilite** | Grand livre, ecritures journalieres, plan comptable personnalisable, exercices fiscaux |
 | **Banque** | Synchronisation bancaire automatique (Open Banking, Yodlee, Ponto), import releves, rapprochement intelligent avec suggestions IA |
 | **Facturation** | Creation factures, avoirs, factures fournisseurs, factures recurrentes, modeles personnalisables, facturation electronique |
-| **Devis** | Devis → commande → facture brouillon, validation workflow |
+| **Devis** | Devis â†’ commande â†’ facture brouillon, validation workflow |
 | **Paiements** | Multi-passerelles (Stripe, PayPal, Mollie, etc.), portail client pour paiement en ligne |
 | **Rapports** | Bilan, compte de resultat, flux de tresorerie, balance agee, analytique par axes |
 | **Budget** | Gestion budgetaire avec comptabilite analytique, suivi ecarts |
@@ -81,10 +81,10 @@ Chaque concurrent est analyse selon :
 
 #### Parcours utilisateurs types
 
-1. **Cycle devis → facture** : Devis → acceptation client → commande vente → facture brouillon auto → validation → envoi email → paiement en ligne via portail client → rapprochement automatique
-2. **Rapprochement bancaire** : Connexion banque → import automatique quotidien → suggestions de rapprochement → validation manuelle ou auto → ecritures comptables
-3. **Facturation fournisseur** : Reception facture → saisie/OCR → validation workflow → lot de paiement → virement → rapprochement
-4. **Relances** : Facture echue → detection automatique → email de relance niveau 1 → escalade niveau 2 → mise en contentieux
+1. **Cycle devis â†’ facture** : Devis â†’ acceptation client â†’ commande vente â†’ facture brouillon auto â†’ validation â†’ envoi email â†’ paiement en ligne via portail client â†’ rapprochement automatique
+2. **Rapprochement bancaire** : Connexion banque â†’ import automatique quotidien â†’ suggestions de rapprochement â†’ validation manuelle ou auto â†’ ecritures comptables
+3. **Facturation fournisseur** : Reception facture â†’ saisie/OCR â†’ validation workflow â†’ lot de paiement â†’ virement â†’ rapprochement
+4. **Relances** : Facture echue â†’ detection automatique â†’ email de relance niveau 1 â†’ escalade niveau 2 â†’ mise en contentieux
 
 #### Elements UI/UX remarquables
 
@@ -110,7 +110,7 @@ Chaque concurrent est analyse selon :
 | Portail client paiement | Acces visiteur via Visa (BorderGuard) avec scope lecture factures + paiement |
 | Synchronisation bancaire | `tool.compta.bank.sync` sous WorrySentinel niveau 2+, audit KindMother |
 | Multi-societe | Multi-COG avec contrats inter-COG explicites, pas de partage implicite |
-| Rapprochement IA | `tool.compta.reconciliation.suggest` — suggestion sans decision, validation StrongFather |
+| Rapprochement IA | `tool.compta.reconciliation.suggest` â€” suggestion sans decision, validation StrongFather |
 | Workflow approbation | Mandats de Permission emis par StrongFather, roles via MasterButler |
 | Factures recurrentes | `tool.billing.invoice.generate` recurrence avec Mandat permanent controle |
 
@@ -124,7 +124,7 @@ Chaque concurrent est analyse selon :
 
 ### 2.2 QuickBooks Online
 
-**Segment :** Comptabilite SMB grand public — SaaS leader en Amerique du Nord
+**Segment :** Comptabilite SMB grand public â€” SaaS leader en Amerique du Nord
 
 #### Fonctionnalites extraites
 
@@ -143,16 +143,16 @@ Chaque concurrent est analyse selon :
 
 #### Parcours utilisateurs types
 
-1. **Expense tracking** : Connexion banque → import automatique transactions → categorisation IA → revision → rapport mensuel
-2. **Invoice-to-cash** : Facture → envoi → client paie par carte/ACH → statut « paye » auto → ecriture comptable auto
-3. **Receipt capture** : Photo justificatif mobile → OCR → association transaction → categorie depense → rapport
-4. **Project billing** : Creer projet → imputer temps/depenses → generer facture depuis projet → envoi
+1. **Expense tracking** : Connexion banque â†’ import automatique transactions â†’ categorisation IA â†’ revision â†’ rapport mensuel
+2. **Invoice-to-cash** : Facture â†’ envoi â†’ client paie par carte/ACH â†’ statut Â« paye Â» auto â†’ ecriture comptable auto
+3. **Receipt capture** : Photo justificatif mobile â†’ OCR â†’ association transaction â†’ categorie depense â†’ rapport
+4. **Project billing** : Creer projet â†’ imputer temps/depenses â†’ generer facture depuis projet â†’ envoi
 
 #### Elements UI/UX remarquables
 
 - **Dashboard simplifie** : graphiques depenses/revenus, solde bancaire, factures impayees en un coup d'oeil
-- **Capture mobile** : snap justificatif → extraction IA → association automatique
-- **Suivi statut factures** : timeline visuelle (creee → envoyee → vue → payee)
+- **Capture mobile** : snap justificatif â†’ extraction IA â†’ association automatique
+- **Suivi statut factures** : timeline visuelle (creee â†’ envoyee â†’ vue â†’ payee)
 - **Categorisation intelligente** : regles qui apprennent du comportement utilisateur
 - **Bill Pay** : paiement fournisseurs directement depuis l'application
 
@@ -171,20 +171,20 @@ Chaque concurrent est analyse selon :
 | Connexion bancaire auto | `tool.compta.bank.sync` avec audit trail KindMother |
 | Receipt capture mobile | `tool.expense.receipt.capture` + `tool.expense.receipt.extract` (OCR) |
 | Statut paiement auto | Evenement `payment.status` dans lifecycle facture JayKonta |
-| Categorisation IA | `tool.compta.transaction.categorize` — regles fournies, pas d'IA autonome non gouvernee |
+| Categorisation IA | `tool.compta.transaction.categorize` â€” regles fournies, pas d'IA autonome non gouvernee |
 | Bill Pay | `tool.compta.payment.batch` sous Mandat StrongFather |
 
 #### Ecarts vs JayKonta
 
 - Modele **100% cloud** sans option offline-first ni souverainete locale
-- Categorisation IA **non transparente** — pas de separation suggestion/decision comme StrongFather
+- Categorisation IA **non transparente** â€” pas de separation suggestion/decision comme StrongFather
 - Pas de modele de **gouvernance** des permissions (admin/utilisateur basique seulement)
 
 ---
 
 ### 2.3 Xero
 
-**Segment :** Comptabilite SMB — Leader en Australie/NZ, fort au UK et USA
+**Segment :** Comptabilite SMB â€” Leader en Australie/NZ, fort au UK et USA
 
 #### Fonctionnalites extraites
 
@@ -192,7 +192,7 @@ Chaque concurrent est analyse selon :
 |---------|-----------------|
 | **Banque** | Bank feeds automatiques, rapprochement avec suggestions, import releves |
 | **Facturation** | Creation mobile, modeles, envoi, paiements en ligne, statut temps reel |
-| **Devis** | Devis → acceptation → conversion facture sans ressaisie |
+| **Devis** | Devis â†’ acceptation â†’ conversion facture sans ressaisie |
 | **Paiements** | Suivi payables et receivables, lots de paiement, integration GoCardless/Stripe |
 | **Rapports** | Bilan, P&L, balance agee, rapports personnalisables |
 | **Achats** | Bons de commande, factures fournisseurs, approbation |
@@ -201,15 +201,15 @@ Chaque concurrent est analyse selon :
 
 #### Parcours utilisateurs types
 
-1. **Quote-to-cash** : Devis → acceptation client en ligne → conversion facture auto → envoi → paiement en ligne → rapprochement
-2. **Bank reconciliation** : Feed bancaire → suggestion matching → validation en un clic → ecriture finalisee
-3. **Mobile invoicing** : App mobile → creer facture → envoyer → suivre statut → notification paiement
+1. **Quote-to-cash** : Devis â†’ acceptation client en ligne â†’ conversion facture auto â†’ envoi â†’ paiement en ligne â†’ rapprochement
+2. **Bank reconciliation** : Feed bancaire â†’ suggestion matching â†’ validation en un clic â†’ ecriture finalisee
+3. **Mobile invoicing** : App mobile â†’ creer facture â†’ envoyer â†’ suivre statut â†’ notification paiement
 
 #### Elements UI/UX remarquables
 
 - **Application mobile** complete pour facturation : creation, envoi, suivi en mobilite
 - **Vue rapprochement** claire : transaction bancaire a gauche, suggestion a droite, validation centre
-- **Flow devis → facture** : conversion en un clic avec reprise complete des donnees
+- **Flow devis â†’ facture** : conversion en un clic avec reprise complete des donnees
 - **Dashboard epure** : indicateurs essentiels sans surcharge visuelle
 
 #### Avantages concurrentiels
@@ -223,7 +223,7 @@ Chaque concurrent est analyse selon :
 
 | Fonctionnalite Xero | Adaptation JayKonta COG |
 |---------------------|------------------------|
-| Devis → facture conversion | `quote.create` → `quote.to_invoice` via CK-OP-12 |
+| Devis â†’ facture conversion | `quote.create` â†’ `quote.to_invoice` via CK-OP-12 |
 | Rapprochement suggestions | `tool.compta.reconciliation.suggest` + validation StrongFather |
 | Mobile invoicing | JayKonta mobile via Miyukini Central (egui/eframe) ou PWA |
 | Multi-org HQ | Multi-COG avec Webway et contrats inter-COG explicites |
@@ -231,7 +231,7 @@ Chaque concurrent est analyse selon :
 #### Ecarts vs JayKonta
 
 - Pas de **modele de souverainete** des donnees
-- Multi-organisation ≠ multi-environnement souverain
+- Multi-organisation â‰  multi-environnement souverain
 - Pas de separation **decision (Core) / execution (Tool)**
 
 ---
@@ -240,18 +240,18 @@ Chaque concurrent est analyse selon :
 
 **Segment :** SMB (Sage Accounting) a Mid-market (Sage Intacct)
 
-#### Sage Accounting — Fonctionnalites
+#### Sage Accounting â€” Fonctionnalites
 
 | Domaine | Fonctionnalites |
 |---------|-----------------|
 | **Facturation** | Creation, envoi, modeles, relances automatiques |
-| **Devis** | Devis → conversion facture |
+| **Devis** | Devis â†’ conversion facture |
 | **Banque** | Rapprochement transactions, multi-devise |
 | **Rapports** | Bilan, P&L, budget, previsionnel tresorerie |
 | **Fournisseurs** | Factures fournisseurs, suivi paiements |
 | **TVA** | Soumission TVA directe (UK Making Tax Digital) |
 
-#### Sage Intacct — Fonctionnalites
+#### Sage Intacct â€” Fonctionnalites
 
 | Domaine | Fonctionnalites |
 |---------|-----------------|
@@ -264,8 +264,8 @@ Chaque concurrent est analyse selon :
 
 #### Parcours utilisateurs types (consolide)
 
-1. **Sage Accounting** : Devis → facture → relance auto → paiement → rapprochement
-2. **Sage Intacct** : Facture AP → workflow approbation → lot paiement → rapprochement → consolidation multi-entite
+1. **Sage Accounting** : Devis â†’ facture â†’ relance auto â†’ paiement â†’ rapprochement
+2. **Sage Intacct** : Facture AP â†’ workflow approbation â†’ lot paiement â†’ rapprochement â†’ consolidation multi-entite
 
 #### Elements UI/UX remarquables
 
@@ -278,7 +278,7 @@ Chaque concurrent est analyse selon :
 - **Sage Intacct** : reference mid-market pour multi-entite et audit
 - **Sage Accounting** : simplicite SMB avec TVA integree (UK)
 - **Conformite** : SOC 1/2, SOX readiness (Intacct)
-- **Scalabilite** : migration Sage Accounting → Intacct pour croissance
+- **Scalabilite** : migration Sage Accounting â†’ Intacct pour croissance
 
 #### Passerelles et adaptations COG
 
@@ -305,25 +305,25 @@ Chaque concurrent est analyse selon :
 | **Depenses** | Connexion bancaire, import depenses, scan justificatifs |
 | **Banque** | Rapprochement bancaire |
 | **Rapports** | P&L, bilan, ecritures journalieres, rapports fiscaux |
-| **Projet** | Suivi temps → facturation, rentabilite projet |
+| **Projet** | Suivi temps â†’ facturation, rentabilite projet |
 | **Paiements** | Paiements en ligne (carte, ACH, Apple Pay), lien de paiement |
 
 #### Parcours utilisateurs types
 
-1. **Proposal-to-cash** : Proposition/devis → e-signature client → conversion facture auto → paiement en ligne → reconciliation
-2. **Time-to-invoice** : Suivi temps par projet → generer facture depuis temps → envoi → paiement
-3. **Expense-to-billing** : Scan justificatif → categorie → marquer « refacturable » → inclure dans facture client
+1. **Proposal-to-cash** : Proposition/devis â†’ e-signature client â†’ conversion facture auto â†’ paiement en ligne â†’ reconciliation
+2. **Time-to-invoice** : Suivi temps par projet â†’ generer facture depuis temps â†’ envoi â†’ paiement
+3. **Expense-to-billing** : Scan justificatif â†’ categorie â†’ marquer Â« refacturable Â» â†’ inclure dans facture client
 
 #### Elements UI/UX remarquables
 
 - **Constructeur de propositions** : mise en page soignee, e-signature integree
-- **Interface scan justificatifs** : photo → extraction → association transaction
+- **Interface scan justificatifs** : photo â†’ extraction â†’ association transaction
 - **Suivi temps** integre avec conversion directe en lignes de facture
 - **Notifications paiement** : alerte temps reel quand le client consulte ou paie
 
 #### Avantages concurrentiels
 
-- **Flow proposition → facture** tres soigne et differenciant
+- **Flow proposition â†’ facture** tres soigne et differenciant
 - **E-signature** integree sans outil tiers
 - **Suivi temps** natif avec facturation directe
 - **Mobile complet** pour freelances en deplacement
@@ -333,15 +333,15 @@ Chaque concurrent est analyse selon :
 | Fonctionnalite FreshBooks | Adaptation JayKonta COG |
 |--------------------------|------------------------|
 | E-signature propositions | Futur : outil signature gouverne, validation StrongFather |
-| Temps → facture | Integration JayRDV (prestations) → `invoice.emit` via contrat CK-INT |
-| Depense refacturable | `tool.expense.claim.create` avec flag refacturable → `invoice.emit` |
+| Temps â†’ facture | Integration JayRDV (prestations) â†’ `invoice.emit` via contrat CK-INT |
+| Depense refacturable | `tool.expense.claim.create` avec flag refacturable â†’ `invoice.emit` |
 | Notifications paiement | Evenement lifecycle facture via CaringNanny observation |
 
 ---
 
 ### 2.6 Zoho Books
 
-**Segment :** Comptabilite SMB — Partie de la suite Zoho
+**Segment :** Comptabilite SMB â€” Partie de la suite Zoho
 
 #### Fonctionnalites extraites
 
@@ -356,9 +356,9 @@ Chaque concurrent est analyse selon :
 
 #### Parcours utilisateurs types
 
-1. **Bank reconciliation** : Feed bancaire → auto-categorisation par regles → rapprochement → validation
-2. **Expense sync** : Zoho Expense → approbation → synchronisation vers Zoho Books → ecriture comptable
-3. **Billable expenses** : Depense → marquer refacturable → inclure dans facture client
+1. **Bank reconciliation** : Feed bancaire â†’ auto-categorisation par regles â†’ rapprochement â†’ validation
+2. **Expense sync** : Zoho Expense â†’ approbation â†’ synchronisation vers Zoho Books â†’ ecriture comptable
+3. **Billable expenses** : Depense â†’ marquer refacturable â†’ inclure dans facture client
 
 #### Elements UI/UX remarquables
 
@@ -380,7 +380,7 @@ Chaque concurrent est analyse selon :
 |--------------------|------------------------|
 | Expense approval workflow | StrongFather Mandat pour validation depenses |
 | Sync inter-modules | Integration Services JayKonta (CK-INT) entre Operateurs |
-| Inventory → compta | Futur : JayXpose (stock) → JayKonta via Bridge |
+| Inventory â†’ compta | Futur : JayXpose (stock) â†’ JayKonta via Bridge |
 | Regles categorisation | `tool.compta.transaction.categorize` avec regles KindMother |
 
 ---
@@ -401,8 +401,8 @@ Chaque concurrent est analyse selon :
 
 #### Parcours utilisateurs types
 
-1. **Invoice-to-accounting** : Facture → envoi → paiement en ligne → ecriture comptable auto → rapport
-2. **Recurring billing** : Configurer facture recurrente → envoi auto periodique → suivi statut → relances
+1. **Invoice-to-accounting** : Facture â†’ envoi â†’ paiement en ligne â†’ ecriture comptable auto â†’ rapport
+2. **Recurring billing** : Configurer facture recurrente â†’ envoi auto periodique â†’ suivi statut â†’ relances
 
 #### Elements UI/UX remarquables
 
@@ -420,16 +420,16 @@ Chaque concurrent est analyse selon :
 
 | Fonctionnalite Wave | Adaptation JayKonta COG |
 |--------------------|------------------------|
-| Sync facture → compta | Operateur Facturation → MiyuComptaLedger via BondingBrother |
+| Sync facture â†’ compta | Operateur Facturation â†’ MiyuComptaLedger via BondingBrother |
 | Factures recurrentes | `tool.billing.invoice.generate` avec Mandat recurrence |
 
 ---
 
-## 3. Concurrents Segment France — Independants et TPE
+## 3. Concurrents Segment France â€” Independants et TPE
 
 ### 3.1 Pennylane
 
-**Segment :** Tout-en-un comptabilite + expert-comptable — France, cible independants et TPE/PME
+**Segment :** Tout-en-un comptabilite + expert-comptable â€” France, cible independants et TPE/PME
 
 #### Fonctionnalites extraites
 
@@ -442,14 +442,14 @@ Chaque concurrent est analyse selon :
 | **Depenses** | Notes de frais, scan OCR, approbation workflow |
 | **Tresorerie** | Dashboard tresorerie, previsionnel, alertes |
 | **Collaboration** | Espace expert-comptable partage, droits granulaires, cloture assistee |
-| **Multi-structures** | Micro, EURL, SASU, SAS — gestion multi-societes |
+| **Multi-structures** | Micro, EURL, SASU, SAS â€” gestion multi-societes |
 
 #### Parcours utilisateurs types
 
-1. **Collaboration expert** : Comptabilite → partage securise avec cabinet → revision → cloture → liasse fiscale
-2. **Facturation complete** : Devis → acceptation → facture → relance → encaissement → ecriture auto
-3. **Declaration URSSAF** : CA saisi → calcul cotisations → preparation declaration → soumission teledeclaration
-4. **Notes de frais** : Photo justificatif → OCR → categorisation → validation manager → export compta
+1. **Collaboration expert** : Comptabilite â†’ partage securise avec cabinet â†’ revision â†’ cloture â†’ liasse fiscale
+2. **Facturation complete** : Devis â†’ acceptation â†’ facture â†’ relance â†’ encaissement â†’ ecriture auto
+3. **Declaration URSSAF** : CA saisi â†’ calcul cotisations â†’ preparation declaration â†’ soumission teledeclaration
+4. **Notes de frais** : Photo justificatif â†’ OCR â†’ categorisation â†’ validation manager â†’ export compta
 
 #### Elements UI/UX remarquables
 
@@ -469,17 +469,17 @@ Chaque concurrent est analyse selon :
 
 | Fonctionnalite Pennylane | Adaptation JayKonta COG |
 |--------------------------|------------------------|
-| Espace expert-comptable | Mandat « Expert » StrongFather + Bridge inter-COG / Facade Publique Gouvernee |
+| Espace expert-comptable | Mandat Â« Expert Â» StrongFather + Bridge inter-COG / Facade Publique Gouvernee |
 | URSSAF teledeclaration | `tool.compta.declaration.urssaf.submit` sous Mandat |
 | Facturation electronique 2026 | `tool.invoice.electronic.submit` via BorderGuard conformite |
 | Multi-structures | Multi-COG avec Mandats par structure |
-| OCR justificatifs | `tool.expense.receipt.extract` — extraction sans decision |
+| OCR justificatifs | `tool.expense.receipt.extract` â€” extraction sans decision |
 
 ---
 
 ### 3.2 Indy (ex-Georges)
 
-**Segment :** Comptabilite autonome pour independants — France
+**Segment :** Comptabilite autonome pour independants â€” France
 
 #### Fonctionnalites extraites
 
@@ -493,8 +493,8 @@ Chaque concurrent est analyse selon :
 
 #### Parcours utilisateurs types
 
-1. **Compta autonome** : Synchro banque → categorisation assistee → livre des recettes auto → declaration URSSAF
-2. **Facturation simple** : Creer facture → envoyer → relance auto → encaissement → compta
+1. **Compta autonome** : Synchro banque â†’ categorisation assistee â†’ livre des recettes auto â†’ declaration URSSAF
+2. **Facturation simple** : Creer facture â†’ envoyer â†’ relance auto â†’ encaissement â†’ compta
 
 #### Elements UI/UX remarquables
 
@@ -513,7 +513,7 @@ Chaque concurrent est analyse selon :
 
 | Fonctionnalite Indy | Adaptation JayKonta COG |
 |---------------------|------------------------|
-| Compta autonome | Service « Compta seule » : Equipe Operateurs sans expert |
+| Compta autonome | Service Â« Compta seule Â» : Equipe Operateurs sans expert |
 | Estimateur cotisations | `tool.compta.declaration.estimate.cotisations` |
 | Multi-regimes | `tool.company.structure.resolve` pour contexte regime |
 
@@ -521,7 +521,7 @@ Chaque concurrent est analyse selon :
 
 ### 3.3 Henrri
 
-**Segment :** Facturation gratuite pour TPE/PME — France
+**Segment :** Facturation gratuite pour TPE/PME â€” France
 
 #### Fonctionnalites extraites
 
@@ -535,8 +535,8 @@ Chaque concurrent est analyse selon :
 
 #### Parcours utilisateurs types
 
-1. **Devis → facture** : Creer devis conforme → envoi → acceptation → facture auto → envoi → relance
-2. **Export expert** : Facturation du mois → export FEC → envoi expert-comptable
+1. **Devis â†’ facture** : Creer devis conforme â†’ envoi â†’ acceptation â†’ facture auto â†’ envoi â†’ relance
+2. **Export expert** : Facturation du mois â†’ export FEC â†’ envoi expert-comptable
 
 #### Elements UI/UX remarquables
 
@@ -555,7 +555,7 @@ Chaque concurrent est analyse selon :
 
 ### 4.1 Dolibarr
 
-**Segment :** ERP/CRM open source — Communaute active, auto-hebergeable
+**Segment :** ERP/CRM open source â€” Communaute active, auto-hebergeable
 
 #### Fonctionnalites extraites
 
@@ -572,9 +572,9 @@ Chaque concurrent est analyse selon :
 
 #### Parcours utilisateurs types
 
-1. **Proposition → facture → paiement** : Proposition commerciale → acceptation → facture → paiement → comptabilite
-2. **Notes de frais** : Saisie → validation → ecriture comptable
-3. **Agenda + facturation** : Rendez-vous → prestation → facturation
+1. **Proposition â†’ facture â†’ paiement** : Proposition commerciale â†’ acceptation â†’ facture â†’ paiement â†’ comptabilite
+2. **Notes de frais** : Saisie â†’ validation â†’ ecriture comptable
+3. **Agenda + facturation** : Rendez-vous â†’ prestation â†’ facturation
 
 #### Elements UI/UX remarquables
 
@@ -595,14 +595,14 @@ Chaque concurrent est analyse selon :
 |-------------------------|------------------------|
 | Modulaire a la carte | Kits d'Outils activables par Mandat dans COG |
 | Export calendrier | JayKoa integration pour rappels echeances |
-| Auto-hebergement | Souverainete COG locale — modele naturellement aligne |
+| Auto-hebergement | Souverainete COG locale â€” modele naturellement aligne |
 | Paiements en ligne | Passerelle paiement via BorderGuard + WorrySentinel |
 
 ---
 
 ### 4.2 ERPNext
 
-**Segment :** ERP open source moderne — Python/Frappe
+**Segment :** ERP open source moderne â€” Python/Frappe
 
 #### Fonctionnalites extraites
 
@@ -616,12 +616,12 @@ Chaque concurrent est analyse selon :
 
 #### Parcours utilisateurs types
 
-1. **Sales Invoice → Payment** : Facture vente → posting → Payment Entry → statut paye → rapprochement
-2. **Journal Entry** : Ecriture manuelle → impact grand livre → reporting
+1. **Sales Invoice â†’ Payment** : Facture vente â†’ posting â†’ Payment Entry â†’ statut paye â†’ rapprochement
+2. **Journal Entry** : Ecriture manuelle â†’ impact grand livre â†’ reporting
 
 #### Elements UI/UX remarquables
 
-- **Separation claire** facture vs paiement (Payment Entry dedié)
+- **Separation claire** facture vs paiement (Payment Entry dediÃ©)
 - **Formulaires structures** avec champs obligatoires et validation
 - **Open source moderne** : interface web responsive
 
@@ -635,7 +635,7 @@ Chaque concurrent est analyse selon :
 
 | Fonctionnalite ERPNext | Adaptation JayKonta COG |
 |-----------------------|------------------------|
-| Payment Entry distinct | `payment.record` separe de `invoice.emit` — modele naturellement aligne |
+| Payment Entry distinct | `payment.record` separe de `invoice.emit` â€” modele naturellement aligne |
 | Journal Entry | `budget.movements.record` pour ecritures manuelles |
 | Posting workflow | KindMother WriteIntent pour persistance gouvernee |
 
@@ -643,7 +643,7 @@ Chaque concurrent est analyse selon :
 
 ### 4.3 Akaunting
 
-**Segment :** Comptabilite open source SMB — Auto-hebergeable
+**Segment :** Comptabilite open source SMB â€” Auto-hebergeable
 
 #### Fonctionnalites extraites
 
@@ -682,7 +682,7 @@ Chaque concurrent est analyse selon :
 
 ### 4.4 Tryton
 
-**Segment :** ERP open source — Architecture stricte et modulaire
+**Segment :** ERP open source â€” Architecture stricte et modulaire
 
 #### Fonctionnalites extraites
 
@@ -700,7 +700,7 @@ Chaque concurrent est analyse selon :
 
 #### Avantages concurrentiels
 
-- **Integrite comptable** maximale — pas de compromis
+- **Integrite comptable** maximale â€” pas de compromis
 - **Architecture modulaire** stricte et propre
 - **Open source** pur
 
@@ -708,7 +708,7 @@ Chaque concurrent est analyse selon :
 
 | Fonctionnalite Tryton | Adaptation JayKonta COG |
 |----------------------|------------------------|
-| Ecritures equilibrees | KindMother integrity rules — WriteIntent refuse si desequilibre |
+| Ecritures equilibrees | KindMother integrity rules â€” WriteIntent refuse si desequilibre |
 | Architecture modulaire | Pyramide Miyukini naturellement modulaire par strates |
 
 ---
@@ -717,7 +717,7 @@ Chaque concurrent est analyse selon :
 
 ### 5.1 SAP Business One
 
-**Segment :** ERP SMB — Branche SMB de SAP
+**Segment :** ERP SMB â€” Branche SMB de SAP
 
 #### Fonctionnalites extraites
 
@@ -728,11 +728,11 @@ Chaque concurrent est analyse selon :
 | **Actifs** | Immobilisations |
 | **Banque** | Rapprochement bancaire |
 | **Rapports** | Reporting financier et analytique |
-| **Integration** | Ventes → comptabilite, achats → comptabilite |
+| **Integration** | Ventes â†’ comptabilite, achats â†’ comptabilite |
 
 #### Passerelles COG
 
-- Integration ventes → finance aligne sur JayFestival/JayRDV → JayKonta (CK-INT)
+- Integration ventes â†’ finance aligne sur JayFestival/JayRDV â†’ JayKonta (CK-INT)
 - ERP-wide workflows traduisibles en Equipes d'Operateurs sous Contrat
 
 ---
@@ -754,13 +754,13 @@ Chaque concurrent est analyse selon :
 
 #### Parcours utilisateurs types
 
-1. **Finance** : Budget planning → previsionnel → close financier → reporting consolidation
-2. **Business Central** : Devis vente → facture vente → posting → grand livre → rapprochement bancaire
+1. **Finance** : Budget planning â†’ previsionnel â†’ close financier â†’ reporting consolidation
+2. **Business Central** : Devis vente â†’ facture vente â†’ posting â†’ grand livre â†’ rapprochement bancaire
 
 #### Elements UI/UX remarquables
 
 - **Dynamics 365 Finance** : dashboards analytiques, previsionnel IA
-- **Business Central** : formulaires structures devis → facture → posting
+- **Business Central** : formulaires structures devis â†’ facture â†’ posting
 
 #### Avantages concurrentiels
 
@@ -772,7 +772,7 @@ Chaque concurrent est analyse selon :
 
 | Fonctionnalite Dynamics | Adaptation JayKonta COG |
 |------------------------|------------------------|
-| Quote-to-cash | `quote.create` → `invoice.emit` → `payment.record` |
+| Quote-to-cash | `quote.create` â†’ `invoice.emit` â†’ `payment.record` |
 | Close process | Politique freeze KindMother + audit trail |
 | Posting | WriteIntent KindMother pour toute persistance |
 
@@ -782,7 +782,7 @@ Chaque concurrent est analyse selon :
 
 ### 6.1 YNAB (You Need A Budget)
 
-**Segment :** Budget personnel par methode enveloppes — Reference mondiale
+**Segment :** Budget personnel par methode enveloppes â€” Reference mondiale
 
 #### Fonctionnalites extraites
 
@@ -798,13 +798,13 @@ Chaque concurrent est analyse selon :
 
 #### Parcours utilisateurs types
 
-1. **Setup** : Creer categories → definir targets → assigner revenus → suivre
-2. **Quotidien** : Transaction → categoriser → verifier budget restant → ajuster si depassement
-3. **Partage** : Inviter partenaire → budget commun → visibilite partagee
+1. **Setup** : Creer categories â†’ definir targets â†’ assigner revenus â†’ suivre
+2. **Quotidien** : Transaction â†’ categoriser â†’ verifier budget restant â†’ ajuster si depassement
+3. **Partage** : Inviter partenaire â†’ budget commun â†’ visibilite partagee
 
 #### Elements UI/UX remarquables
 
-- **Barres de progression** par categorie/objectif — feedback visuel immediat
+- **Barres de progression** par categorie/objectif â€” feedback visuel immediat
 - **Assignation** : chaque euro recu doit etre assigne a une categorie (methode Zero-Based)
 - **Templates categories** : configurations pre-faites par profil de vie
 - **Mobile** : application complete avec saisie rapide
@@ -830,7 +830,7 @@ Chaque concurrent est analyse selon :
 
 ### 6.2 Monarch Money
 
-**Segment :** Finance personnelle tout-en-un — Agregation + budget
+**Segment :** Finance personnelle tout-en-un â€” Agregation + budget
 
 #### Fonctionnalites extraites
 
@@ -845,9 +845,9 @@ Chaque concurrent est analyse selon :
 
 #### Parcours utilisateurs types
 
-1. **Setup** : Connecter comptes → vue patrimoine net instantanee → configurer budget
-2. **Quotidien** : Transactions auto-categorisees → progression budget → alertes depassement
-3. **Abonnements** : Detection automatique → revue → annulation/ajustement
+1. **Setup** : Connecter comptes â†’ vue patrimoine net instantanee â†’ configurer budget
+2. **Quotidien** : Transactions auto-categorisees â†’ progression budget â†’ alertes depassement
+3. **Abonnements** : Detection automatique â†’ revue â†’ annulation/ajustement
 
 #### Elements UI/UX remarquables
 
@@ -875,7 +875,7 @@ Chaque concurrent est analyse selon :
 
 ### 6.3 PocketGuard
 
-**Segment :** Budget personnel simplifie — « Combien puis-je depenser ? »
+**Segment :** Budget personnel simplifie â€” Â« Combien puis-je depenser ? Â»
 
 #### Fonctionnalites extraites
 
@@ -889,7 +889,7 @@ Chaque concurrent est analyse selon :
 
 #### Elements UI/UX remarquables
 
-- **« In My Pocket »** : indicateur central de combien il reste a depenser
+- **Â« In My Pocket Â»** : indicateur central de combien il reste a depenser
 - **Categories visuelles** avec codes couleur
 - **Notifications** proactives en cas de depassement
 
@@ -903,7 +903,7 @@ Chaque concurrent est analyse selon :
 
 ### 6.4 Quicken Simplifi
 
-**Segment :** Finance personnelle — Heritage Quicken, version cloud moderne
+**Segment :** Finance personnelle â€” Heritage Quicken, version cloud moderne
 
 #### Fonctionnalites extraites
 
@@ -944,7 +944,7 @@ Chaque concurrent est analyse selon :
 | **Tryton** | Oui | Oui (strict) | Oui | Oui | Oui |
 | **JayKonta** | Oui (MAC-04/06) | Oui (MiyuComptaLedger) | Futur | Multi-COG | MAC-05 (ventilation) |
 
-### 7.2 Cycle Devis → Facture → Paiement
+### 7.2 Cycle Devis â†’ Facture â†’ Paiement
 
 | Concurrent | Devis | Conversion auto | Facture | Recurrence | Relances | Paiement ligne | Portail client |
 |-----------|-------|----------------|---------|-----------|----------|---------------|---------------|
@@ -974,7 +974,7 @@ Chaque concurrent est analyse selon :
 | **Zoho Books** | Oui | Oui | Oui | Oui (rules) |
 | **FreshBooks** | Oui | Oui | Oui | Partiel |
 | **Pennylane** | Oui | Oui | Oui | Oui (IA) |
-| **Indy** | Oui | Non | Oui (assisté) | Oui |
+| **Indy** | Oui | Non | Oui (assistÃ©) | Oui |
 | **ERPNext** | Non natif | Oui | Oui | Non |
 | **Dolibarr** | Non natif | Oui | Non | Non |
 | **Akaunting** | Oui | Oui | Partiel | Non |
@@ -1021,7 +1021,7 @@ Chaque concurrent est analyse selon :
 
 ---
 
-## 8. Parcours Utilisateurs Compares — Best Practices
+## 8. Parcours Utilisateurs Compares â€” Best Practices
 
 ### 8.1 Parcours Onboarding
 
@@ -1039,8 +1039,8 @@ Chaque concurrent est analyse selon :
 |-------|---------------------|---------------------|
 | **1. Creer devis** | Modeles avec auto-completion client (Odoo, Xero) | `quote.create` avec references client KindMother |
 | **2. Envoyer** | Email direct avec preview integre (FreshBooks) | Envoi gouverne avec log BondingBrother |
-| **3. Suivi** | Timeline statut : cree → vu → accepte (QuickBooks) | Evenements lifecycle JayKonta |
-| **4. Convertir** | 1 clic devis → facture (Xero) | `quote.to_invoice` via CK-OP-12 |
+| **3. Suivi** | Timeline statut : cree â†’ vu â†’ accepte (QuickBooks) | Evenements lifecycle JayKonta |
+| **4. Convertir** | 1 clic devis â†’ facture (Xero) | `quote.to_invoice` via CK-OP-12 |
 | **5. Encaisser** | Paiement en ligne + reconciliation auto (Odoo) | `payment.record` + rapprochement gouverne |
 | **6. Relancer** | Niveaux de relance configurables (Odoo, Sage) | Notifications MiyuNotify sous Mandat |
 
@@ -1056,20 +1056,20 @@ Chaque concurrent est analyse selon :
 
 ---
 
-## 9. Elements UI/UX — Best Practices du Marche
+## 9. Elements UI/UX â€” Best Practices du Marche
 
 ### 9.1 Patterns d'Interface Recurrents
 
 | Pattern | Utilise par | Description | Priorite JayKonta |
 |---------|-----------|-------------|-------------------|
-| **Dashboard synthetique** | Tous | Indicateurs cles (CA, depenses, solde, factures impayees) en une vue | P0 — MAC-15 |
-| **Timeline facture** | QuickBooks, FreshBooks | Statut visuel de bout en bout du cycle de vie facture | P1 — lifecycle visuel |
-| **Barres progression** | YNAB, Monarch, PocketGuard | Progression categorie/objectif avec couleur intuitive | P0 — PUR-12 |
-| **Rapprochement split-view** | Xero, Odoo | Transaction a gauche, suggestion a droite, validation centre | P2 — rapprochement |
-| **Scan justificatif** | QuickBooks, Pennylane | Photo → OCR → association en < 10s | P1 — MiyuExpense |
-| **Portail client** | Odoo, Akaunting | Vue externe read-only des factures avec paiement en ligne | P2 — acces Visa |
-| **Kanban factures** | Odoo | Colonnes par statut (brouillon, envoyee, payee, retard) | P1 — vue Account |
-| **Toggle rapide** | Akaunting, QuickBooks | Switch entreprise/contexte en 1 clic | P1 — switch Purse/Account |
+| **Dashboard synthetique** | Tous | Indicateurs cles (CA, depenses, solde, factures impayees) en une vue | P0 â€” MAC-15 |
+| **Timeline facture** | QuickBooks, FreshBooks | Statut visuel de bout en bout du cycle de vie facture | P1 â€” lifecycle visuel |
+| **Barres progression** | YNAB, Monarch, PocketGuard | Progression categorie/objectif avec couleur intuitive | P0 â€” PUR-12 |
+| **Rapprochement split-view** | Xero, Odoo | Transaction a gauche, suggestion a droite, validation centre | P2 â€” rapprochement |
+| **Scan justificatif** | QuickBooks, Pennylane | Photo â†’ OCR â†’ association en < 10s | P1 â€” MiyuExpense |
+| **Portail client** | Odoo, Akaunting | Vue externe read-only des factures avec paiement en ligne | P2 â€” acces Visa |
+| **Kanban factures** | Odoo | Colonnes par statut (brouillon, envoyee, payee, retard) | P1 â€” vue Account |
+| **Toggle rapide** | Akaunting, QuickBooks | Switch entreprise/contexte en 1 clic | P1 â€” switch Purse/Account |
 
 ### 9.2 Principes UX Extraits
 
@@ -1091,11 +1091,11 @@ Chaque concurrent est analyse selon :
 | Avantage JayKonta/COG | Description | Aucun concurrent ne propose |
 |-----------------------|-------------|---------------------------|
 | **Souverainete des donnees** | Donnees financieres residant dans un COG souverain, pas sur un cloud tiers | Seuls les open-source auto-heberges s'en approchent, sans gouvernance |
-| **Separation decision/execution** | StrongFather decide, les Outils executent — jamais l'inverse | Aucun concurrent n'a de Core decideur distinct |
+| **Separation decision/execution** | StrongFather decide, les Outils executent â€” jamais l'inverse | Aucun concurrent n'a de Core decideur distinct |
 | **Gouvernance multi-niveau** | WorrySentinel (securite) + MasterButler (permissions) + StrongFather (decisions) | Les concurrents ont des roles basiques (admin/user) |
 | **Audit structurel** | KindMother WriteIntent = tout est trace par design, pas par option | Les concurrents ajoutent l'audit en surcouche |
 | **Multi-echelle unifie** | Budget perso (Purse) et comptabilite entreprise (Account) dans le meme service | Aucun concurrent ne couvre les deux segments |
-| **Integration gouvernee** | JayFestival, JayRDV consomment JayKonta via contrats — pas d'API sauvage | Les ERP ont des modules couples, pas des contrats gouvernes |
+| **Integration gouvernee** | JayFestival, JayRDV consomment JayKonta via contrats â€” pas d'API sauvage | Les ERP ont des modules couples, pas des contrats gouvernes |
 | **Offline-first** | Fonctionne sans connexion internet | Quasi aucun concurrent web ne le propose |
 | **Federation inter-COG** | Collaboration expert-comptable via Bridge, pas via partage cloud | Pennylane s'en approche mais reste centralise |
 
@@ -1103,11 +1103,11 @@ Chaque concurrent est analyse selon :
 
 | Avantage | Description |
 |----------|-------------|
-| **Deux marques, un service** | JayBudget pour le perso, JayKonta pour l'entreprise — meme base, UX adaptee |
+| **Deux marques, un service** | JayBudget pour le perso, JayKonta pour l'entreprise â€” meme base, UX adaptee |
 | **7 Toolkits specialises** | MiyuComptaLedger, MiyuComptaReports, MiyuDeclarations, MiyuBilling, MiyuInvoice, MiyuExpense, MiyuTreasury |
-| **Integration native** | JayFestival (evenements), JayRDV (rendez-vous), JayKoa (calendrier) — ecosysteme coherent |
+| **Integration native** | JayFestival (evenements), JayRDV (rendez-vous), JayKoa (calendrier) â€” ecosysteme coherent |
 | **Mandats granulaires** | Permissions au niveau de chaque action, pas des roles globaux |
-| **Residence configurable** | Purse : local ou COG ; Account : centralise obligatoire — choix explicite |
+| **Residence configurable** | Purse : local ou COG ; Account : centralise obligatoire â€” choix explicite |
 
 ### 10.3 Risques et faiblesses identifiees
 
@@ -1118,24 +1118,24 @@ Chaque concurrent est analyse selon :
 | **Sync bancaire** | Open Banking complexe, les concurrents ont des annees d'experience | Prioriser import CSV/FEC avant sync temps reel |
 | **Mobile** | Pas d'app mobile native au lancement | PWA via MiyuWeb ou Miyukini Central mobile |
 | **IA/OCR** | Les concurrents investissent massivement dans l'IA | OCR via outil gouverne, pas d'IA autonome non gouvernee |
-| **Complexite perçue** | Le modele COG (Cores, Mandats, Strates) peut intimider | UX Purse ultra-simplifiee, complexite cachee pour l'utilisateur |
+| **Complexite perÃ§ue** | Le modele COG (Cores, Mandats, Strates) peut intimider | UX Purse ultra-simplifiee, complexite cachee pour l'utilisateur |
 
 ---
 
-## 11. Passerelles et Adaptations COG — Synthese
+## 11. Passerelles et Adaptations COG â€” Synthese
 
-### 11.1 Matrice Fonctionnalite → Adaptation COG
+### 11.1 Matrice Fonctionnalite â†’ Adaptation COG
 
 | Fonctionnalite Marche | Operateur/Kit JayKonta | Core(s) implique(s) | Adaptation COG |
 |----------------------|----------------------|--------------------|-----------------------|
 | Portail client / paiement en ligne | MiyuInvoice + BorderGuard | WorrySentinel, StrongFather | Acces visiteur via Visa, scope lecture facture + paiement |
 | Synchronisation bancaire | MiyuComptaLedger | WorrySentinel (niveau 2+), KindMother | Audit complet, consentement explicite, residence donnees |
-| Rapprochement IA/suggestions | MiyuComptaLedger | StrongFather (validation) | Suggestion sans decision auto — humain valide via TAMR si necessaire |
+| Rapprochement IA/suggestions | MiyuComptaLedger | StrongFather (validation) | Suggestion sans decision auto â€” humain valide via TAMR si necessaire |
 | Multi-societe / multi-entite | Multi-COG | BorderGuard, StrongFather | Chaque entite = COG souverain, liaison par contrats inter-COG |
 | Collaboration expert-comptable | Bridge inter-COG | StrongFather (Mandat Expert), BorderGuard | Facade Publique Gouvernee, export securise, pas d'execution dans le COG |
-| Notes de frais OCR | MiyuExpense | KindMother (persistance), StrongFather (validation) | OCR extraction seule, pas de decision — validation humaine |
+| Notes de frais OCR | MiyuExpense | KindMother (persistance), StrongFather (validation) | OCR extraction seule, pas de decision â€” validation humaine |
 | Facturation electronique 2026 | MiyuInvoice | BorderGuard (conformite), EverBuddy (versions) | Soumission plateforme agreee via outil gouverne |
-| Declarations URSSAF/TVA | MiyuDeclarations | StrongFather (autorisation soumission) | Preparation → validation explicite → soumission gouvernee |
+| Declarations URSSAF/TVA | MiyuDeclarations | StrongFather (autorisation soumission) | Preparation â†’ validation explicite â†’ soumission gouvernee |
 | Budget categories et objectifs | Purse (MiyuComptaLedger) | KindMother (donnees), StrongFather (seuils) | Categories et objectifs persistes dans COG souverain |
 | Previsionnel tresorerie | MiyuTreasury | KindMother (donnees source) | Calcul projection sans decision, affichage informatif |
 | Factures recurrentes | MiyuBilling | StrongFather (Mandat recurrence) | Mandat permanent avec scope et duree controles |
@@ -1145,26 +1145,26 @@ Chaque concurrent est analyse selon :
 
 | Regle | Description |
 |-------|-------------|
-| **COG-ADAPT-01** | Tout acces externe (portail client, expert, API) passe par Visa et BorderGuard — jamais d'acces direct |
+| **COG-ADAPT-01** | Tout acces externe (portail client, expert, API) passe par Visa et BorderGuard â€” jamais d'acces direct |
 | **COG-ADAPT-02** | Tout write intent (ecriture facture, mouvement, declaration) passe par KindMother avec audit |
 | **COG-ADAPT-03** | Toute decision (validation, envoi, export sensible) est autorisee par StrongFather via Mandat |
 | **COG-ADAPT-04** | Les donnees financieres (niveau 2+) respectent la residence definie par le contrat de service |
-| **COG-ADAPT-05** | Aucune IA autonome ne prend de decision — suggestion uniquement, validation humaine (TAMR) |
-| **COG-ADAPT-06** | La complexite COG est cachee a l'utilisateur final — l'UX reste simple |
+| **COG-ADAPT-05** | Aucune IA autonome ne prend de decision â€” suggestion uniquement, validation humaine (TAMR) |
+| **COG-ADAPT-06** | La complexite COG est cachee a l'utilisateur final â€” l'UX reste simple |
 | **COG-ADAPT-07** | Le multi-entite est multi-COG avec contrats explicites, pas de partage implicite de donnees |
 
 ---
 
 ## 12. Recommandations pour la Roadmap JayKonta
 
-### 12.1 Quick Wins — Fonctionnalites communes a tous les concurrents
+### 12.1 Quick Wins â€” Fonctionnalites communes a tous les concurrents
 
 | Priorite | Fonctionnalite | Justification |
 |----------|---------------|---------------|
-| **P0** | Dashboard financier synthetique | Present chez 100% des concurrents — attendu minimum |
-| **P0** | Cycle devis → facture → paiement | Coeur de toute solution comptable |
+| **P0** | Dashboard financier synthetique | Present chez 100% des concurrents â€” attendu minimum |
+| **P0** | Cycle devis â†’ facture â†’ paiement | Coeur de toute solution comptable |
 | **P0** | Export PDF/CSV | Basique, universel, requis pour expert-comptable |
-| **P0** | Saisie mouvements rapide (Purse) | < 2s, 3 actions max — standard YNAB/PocketGuard |
+| **P0** | Saisie mouvements rapide (Purse) | < 2s, 3 actions max â€” standard YNAB/PocketGuard |
 | **P1** | Relances impayes automatiques | Fort differenciateur chez Odoo, Sage, FreshBooks |
 | **P1** | Scan justificatifs OCR | Mobile-first, QuickBooks et Pennylane en reference |
 | **P1** | Templates factures brandees | Standard industriel, FreshBooks et Wave en reference |
@@ -1173,7 +1173,7 @@ Chaque concurrent est analyse selon :
 
 | Priorite | Differenciateur | Valeur ajoutee |
 |----------|----------------|----------------|
-| **P0** | Double entree Purse/Account | Unique sur le marche — perso et pro unifies |
+| **P0** | Double entree Purse/Account | Unique sur le marche â€” perso et pro unifies |
 | **P1** | Integration JayFestival/JayRDV | Ecosysteme interne coherent |
 | **P1** | Offline-first avec sync | Souverainete locale impossible chez les SaaS |
 | **P2** | Portail client Visa | Acces gouverne sans compte COG |
@@ -1208,7 +1208,7 @@ L'analyse de **19 concurrents** couvrant les segments ERP (Odoo, Sage Intacct, S
 - Le modele **offline-first** avec sync
 - La **federation inter-COG** pour collaboration expert et multi-entite
 
-La priorite est de livrer un **MVP solide** (P0 : dashboard, cycle devis→facture→paiement, export, saisie Purse) avant de construire les differenciateurs (P1-P3).
+La priorite est de livrer un **MVP solide** (P0 : dashboard, cycle devisâ†’factureâ†’paiement, export, saisie Purse) avant de construire les differenciateurs (P1-P3).
 
 ---
 
@@ -1221,13 +1221,16 @@ La priorite est de livrer un **MVP solide** (P0 : dashboard, cycle devis→factu
 | [Purse - Analyse des besoins](./publics/Purse/Purse%20-%20Analyse%20des%20besoins.md) | Besoins PUR-01 a PUR-16 |
 | [JayKonta - Integration Services](./reference/JayKonta%20-%20Integration%20Services.md) | Integration JayFestival, JayRDV |
 | [JayKonta - Niveaux Securite](./reference/JayKonta%20-%20Niveaux%20Securite%20et%20Protection%20Donnees.md) | Classification donnees et mesures |
-| [Equivalents Comptabilite Independants](../../reference/equivalents/Miyukini%20Conceptual%20References%20-%20Equivalents%20Comptabilite%20Independants.md) | Cartographie detaillee Toolkits/Tools compta |
-| [Miyukini Architecture Skill](.claude/skills/miyukini-architecture/) | Architecture pyramidale et Cores |
-| [Miyukini Glossary Skill](.claude/skills/miyukini-glossary/) | Terminologie officielle |
+| [Equivalents Comptabilite Independants](..//..//miyukini-webway-system//reference//_index.md) | Cartographie detaillee Toolkits/Tools compta |
+| [Miyukini Architecture Skill](_index.md) | Architecture pyramidale et Cores |
+| [Miyukini Glossary Skill](_index.md) | Terminologie officielle |
 
 ---
 
-**Document** : JayKonta — Analyse PR Concurrence Web
+**Document** : JayKonta â€” Analyse PR Concurrence Web
 **Version** : 2.0
 **Date** : 2026-02-07
-**Statut** : Document d'analyse PR — reference concurrentielle pour le service JayKonta
+**Statut** : Document d'analyse PR â€” reference concurrentielle pour le service JayKonta
+
+
+

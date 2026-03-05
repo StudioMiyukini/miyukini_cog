@@ -1,4 +1,4 @@
----
+﻿---
 id: offline-only
 name: "Offline-Only Constraint"
 category: tool
@@ -110,17 +110,17 @@ offline_only:
 ## Compatibility Matrix
 
 ```
-✅ Compatible with:
+âœ… Compatible with:
   - confidential-data (offline + confidential = maximum security)
   - legal-compliance (local audit trail only)
   - tool-locked-* (locked IDE + offline)
   - All offline profiles (ollama, llama, lm-studio)
 
-⚠️  Partial compatibility:
+âš ï¸  Partial compatibility:
   - Mode 4 Code Reviewer (works, but no web search)
   - Skills (only local-capable skills)
 
-❌ Incompatible with:
+âŒ Incompatible with:
   - Web search (explicitly blocked)
   - External API operations
   - Cloud storage
@@ -131,22 +131,22 @@ offline_only:
 ## Mode Support
 
 ```
-✅ Mode 5 (Offline Llama) — FULL support
+âœ… Mode 5 (Offline Llama) â€” FULL support
    - Built for offline
    - Local inference
    - Complete constraint match
 
-⚠️  Mode 3 (Copilot) — LIMITED
+âš ï¸  Mode 3 (Copilot) â€” LIMITED
    - Copilot requires internet
    - Profile will force local fallback
    - Performance degraded
 
-⚠️  Mode 2 (Mistral) — LIMITED
+âš ï¸  Mode 2 (Mistral) â€” LIMITED
    - Mistral API requires internet
    - Will use local Mistral instead
    - Cost stays $0
 
-❌ Mode 1 (Claude) — NOT SUPPORTED
+âŒ Mode 1 (Claude) â€” NOT SUPPORTED
    - Claude requires internet
    - Constraint blocks all internet
    - Will fail explicitly
@@ -160,17 +160,17 @@ offline_only:
 MIP starts with offline-only constraint:
 
 1. Check: "Is internet available?"
-   → Yes: ❌ FAIL ("offline-only requires no internet")
-   → No: ✅ PASS ("Network isolation verified")
+   â†’ Yes: âŒ FAIL ("offline-only requires no internet")
+   â†’ No: âœ… PASS ("Network isolation verified")
    
 2. Check: "Are network interfaces disabled?"
-   → WiFi: ❌ ALERT ("WiFi enabled, should disable")
-   → Ethernet: ❌ ALERT ("Ethernet connected, should unplug")
-   → None: ✅ PASS ("All networks disabled")
+   â†’ WiFi: âŒ ALERT ("WiFi enabled, should disable")
+   â†’ Ethernet: âŒ ALERT ("Ethernet connected, should unplug")
+   â†’ None: âœ… PASS ("All networks disabled")
    
 3. Check: "Is Ollama running locally?"
-   → Yes: ✅ PASS ("Local LLM available")
-   → No: ❌ FAIL ("Cannot start without local LLM")
+   â†’ Yes: âœ… PASS ("Local LLM available")
+   â†’ No: âŒ FAIL ("Cannot start without local LLM")
 ```
 
 ### Model Loading
@@ -182,16 +182,16 @@ Option 1: Ollama (recommended)
 $ ollama pull mistral
 $ ollama pull llama2
 $ ollama serve
-→ Runs on localhost:11434
+â†’ Runs on localhost:11434
 
 Option 2: LM Studio (GUI)
-→ Download model from HuggingFace
-→ Load in LM Studio
-→ Runs on localhost:1234
+â†’ Download model from HuggingFace
+â†’ Load in LM Studio
+â†’ Runs on localhost:1234
 
 Option 3: llama.cpp (CLI)
 $ ./main -m model.gguf --listen
-→ Runs on localhost:8000
+â†’ Runs on localhost:8000
 ```
 
 ### Offline Operation
@@ -204,7 +204,7 @@ Task workflow (offline):
 3. Processing: All local (no network)
 4. Result: Generated locally
 5. Output: Saved to disk only
-6. ✅ Complete (zero internet used)
+6. âœ… Complete (zero internet used)
 ```
 
 ## Use Cases
@@ -292,18 +292,18 @@ mip_profile create secret-vault \
 # Maria: "Offline-only constraint detected.
 #         Checking prerequisites:
 #         
-#         ❓ Internet connectivity?"
+#         â“ Internet connectivity?"
 # System: "Checking..."
-#   ✅ No internet detected
+#   âœ… No internet detected
 #   
-# ❓ Ollama running?"
+# â“ Ollama running?"
 # System: "Checking localhost:11434..."
-#   ✅ Ollama found (Mistral 7B loaded)
+#   âœ… Ollama found (Mistral 7B loaded)
 #   
-# ❓ Network interfaces disabled?"
+# â“ Network interfaces disabled?"
 # System: "Checking..."
-#   ⚠️  WiFi enabled
-#   ⚠️  Ethernet connected
+#   âš ï¸  WiFi enabled
+#   âš ï¸  Ethernet connected
 #   
 #   Recommendation: Unplug ethernet + disable WiFi
 #   Proceed anyway? (y/n)"
@@ -354,7 +354,7 @@ At vault (no internet):
 Setup:
 - Load models: ollama pull /local/model.gguf
 - Start MIP: mip_profile vault-secured
-- Maria: "✅ Offline mode active"
+- Maria: "âœ… Offline mode active"
 
 Work:
 - User: "Refactor payment.rs"
@@ -398,14 +398,14 @@ inference:
   n_batch: 512        # Large batches
   model: mistral-7b-quantized  # Smaller = faster
   quantization: q4    # 4-bit quantization
-  → Speed: 10 tokens/sec
+  â†’ Speed: 10 tokens/sec
 
 # For fast GPU inference  
 inference:
   backend: ollama
   gpu_layers: all     # All layers on GPU
   model: mistral-7b   # Higher quality
-  → Speed: 200 tokens/sec
+  â†’ Speed: 200 tokens/sec
 
 # Balance quality/speed
 inference:
@@ -413,7 +413,7 @@ inference:
   n_gpu_layers: 35    # Half GPU, half CPU
   model: mistral-13b-quantized
   quantization: q5    # Higher quality
-  → Speed: 50 tokens/sec
+  â†’ Speed: 50 tokens/sec
 ```
 
 ### Cost-Performance Trade-off
@@ -431,36 +431,36 @@ inference:
 ### For Coding (Task class T2-T3)
 
 ```
-✅ Best (offline):
+âœ… Best (offline):
   - Mistral 7B (fastest, decent quality)
   - Llama 2 13B (if GPU available)
 
-⚠️  Possible (slower):
+âš ï¸  Possible (slower):
   - Llama 2 7B (works, somewhat literal)
 
-❌ Not recommended:
+âŒ Not recommended:
   - TinyLlama 1B (too small for code)
 ```
 
 ### For Analysis & Planning (Task class T1)
 
 ```
-✅ Best:
+âœ… Best:
   - Mistral 7B (sufficient)
   - Llama 2 7B (acceptable)
   
-⚠️  Possible:
+âš ï¸  Possible:
   - TinyLlama 1B (simple tasks only)
 ```
 
 ### For Complex Code (Task class T4-T5)
 
 ```
-⚠️  Possible (need GPU):
+âš ï¸  Possible (need GPU):
   - Mistral 13B (if RTX 3080+)
   - Llama 2 13B (if RTX 4090)
   
-❌ Not viable (too complex):
+âŒ Not viable (too complex):
   - Smaller models (7B or less)
   - CPU-only (too slow)
 ```
@@ -556,14 +556,15 @@ Back at home:
 ```
 
 This enables:
-- ✅ Completely air-gapped development
-- ❌ But manual update process
-- ✅ Maximum security
-- ❌ Weekly update lag
+- âœ… Completely air-gapped development
+- âŒ But manual update process
+- âœ… Maximum security
+- âŒ Weekly update lag
 
 ## References
 
-- [MANAGEMENT.md](./MANAGEMENT.md) — Apply this constraint
-- [CONSTRAINTS.md](./CONSTRAINTS.md) — Other constraints
-- [Mode 5 Profile](../profiles/ollama.md) — Designed for offline
-- [Local Inference Guide](../../docs/LOCAL_INFERENCE.md) — Setup LLM
+- [MANAGEMENT.md](..//..//README.md) â€” Apply this constraint
+- [CONSTRAINTS.md](..//..//README.md) â€” Other constraints
+- [Mode 5 Profile](..//..//README.md) â€” Designed for offline
+- [Local Inference Guide](..//..//README.md) â€” Setup LLM
+

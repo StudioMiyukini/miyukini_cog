@@ -1,4 +1,4 @@
-# TAMR — Error & Rejection Model
+﻿# TAMR â€” Error & Rejection Model
 
 ## 1. Introduction
 
@@ -8,7 +8,7 @@ TAMR (The Authority Must Rest) est le **Human Interaction Core** du Miyukini Cor
 
 ### Objet du contrat
 
-Ce document definit le **TAMR — Error & Rejection Model** : un contrat normatif, non negociable, et de statut FONDATION qui etablit le modele conceptuel des erreurs et des rejets dans le cadre des interventions humaines, definissant comment les erreurs sont representees, comment les rejets d'intervention sont communiques, les categories d'erreurs et de rejets, et les regles de gestion des situations exceptionnelles.
+Ce document definit le **TAMR â€” Error & Rejection Model** : un contrat normatif, non negociable, et de statut FONDATION qui etablit le modele conceptuel des erreurs et des rejets dans le cadre des interventions humaines, definissant comment les erreurs sont representees, comment les rejets d'intervention sont communiques, les categories d'erreurs et de rejets, et les regles de gestion des situations exceptionnelles.
 
 Ce contrat precise la nature des erreurs dans le cadre TAMR, la distinction entre erreur et rejet d'intervention, les categories de rejet, et les garanties associees.
 
@@ -31,14 +31,14 @@ Ce document est **contractuel, normatif, non discutable, et de statut FONDATION*
 
 Ce contrat complete et respecte les documents contractuels existants :
 
-- **[TAMR — Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md)** : Definition philosophique de TAMR, tracabilite et responsabilite
-- **[TAMR — Intervention Types Contract](../intervention/TAMR%20-%20Intervention%20Types%20Contract.md)** : Types d'intervention (Approval, Override, Escalation, Supervision)
-- **[TAMR — Intervention Points Contract](../intervention/TAMR%20-%20Intervention%20Points%20Contract.md)** : Points d'intervention, conditions, declencheurs
-- **[TAMR — Authority Limits Contract](../boundaries/TAMR%20-%20Authority%20Limits%20Contract.md)** : Limites d'autorite humaine
-- **[TAMR — Inviolable Limits Contract](../boundaries/TAMR%20-%20Inviolable%20Limits%20Contract.md)** : Limites infranchissables
-- **[TAMR — Invariants & Guarantees](../governance/TAMR%20-%20Invariants%20%26%20Guarantees.md)** : INV-TAMR-1 a INV-TAMR-8
-- **TAMR — Trace Contract** (audit) : Structure des traces d'intervention
-- **[Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Conformite LOI-1 a LOI-6 — les erreurs ne bloquent jamais le systeme en attente d'une ressource externe
+- **[TAMR â€” Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md)** : Definition philosophique de TAMR, tracabilite et responsabilite
+- **[TAMR â€” Intervention Types Contract](../intervention/TAMR%20-%20Intervention%20Types%20Contract.md)** : Types d'intervention (Approval, Override, Escalation, Supervision)
+- **[TAMR â€” Intervention Points Contract](../intervention/TAMR%20-%20Intervention%20Points%20Contract.md)** : Points d'intervention, conditions, declencheurs
+- **[TAMR â€” Authority Limits Contract](../boundaries/TAMR%20-%20Authority%20Limits%20Contract.md)** : Limites d'autorite humaine
+- **[TAMR â€” Inviolable Limits Contract](../boundaries/TAMR%20-%20Inviolable%20Limits%20Contract.md)** : Limites infranchissables
+- **[TAMR â€” Invariants & Guarantees](../governance/TAMR%20-%20Invariants%20%26%20Guarantees.md)** : INV-TAMR-1 a INV-TAMR-8
+- **TAMR â€” Trace Contract** (audit) : Structure des traces d'intervention
+- **[Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Conformite LOI-1 a LOI-6 â€” les erreurs ne bloquent jamais le systeme en attente d'une ressource externe
 
 Il n'introduit aucune contradiction, et constitue la definition formelle de la gestion des erreurs et rejets d'intervention dans TAMR.
 
@@ -76,7 +76,7 @@ Un **rejet d'intervention** dans TAMR est le resultat d'une evaluation qui deter
 | Nature | Dysfonctionnement | Resultat d'evaluation |
 | Resultat | Pas de resultat d'intervention produit | Resultat produit (refusee, hors limites, invalide) |
 | Traitement | Correction technique requise | Information a l'appelant, trace de la tentative |
-| Tracabilite | Log d'erreur | Trace d'intervention (tentative refusee) — conforme INV-TAMR-1 |
+| Tracabilite | Log d'erreur | Trace d'intervention (tentative refusee) â€” conforme INV-TAMR-1 |
 
 ---
 
@@ -480,16 +480,17 @@ Les cas suivants **violent** ce contrat :
 
 | Reference | Description |
 |-----------|-------------|
-| [Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) | Terminologie TAMR (intervention, point d'intervention, limite d'autorite, etc.) |
-| [Doctrine Securite Fondamentale](../../../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md) | Principes de securite |
-| [Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) | Conformite LOI-1 a LOI-6 |
-| [Integrity Degradation System](../../../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md) | Niveaux T0-T4 (contexte de confiance) |
-| [Security Levels](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) | Niveaux 0-4 (contexte de securite) |
+| [Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) | Terminologie TAMR (intervention, point d'intervention, limite d'autorite, etc.) |
+| [Doctrine Securite Fondamentale](..//..//..//..//miyukini-webway-system//reference//_index.md) | Principes de securite |
+| [Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) | Conformite LOI-1 a LOI-6 |
+| [Integrity Degradation System](..//..//..//..//miyukini-webway-system//reference//_index.md) | Niveaux T0-T4 (contexte de confiance) |
+| [Security Levels](..//..//..//..//miyukini-webway-system//reference//_index.md) | Niveaux 0-4 (contexte de securite) |
 
 ---
 
 **Document cree le :** 2026-01-28  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif  
+**Statut :** FONDATION â€” Contrat normatif  
 **Reference :** Miyukini Core System, TAMR Documentation Fondatrice  
 **Type :** Contrat de modele d'erreur et de rejet d'intervention non negociable
+

@@ -1,344 +1,344 @@
-# WorrySentinel - LogisticsSteward Integration Contract
+﻿# WorrySentinel - LogisticsSteward Integration Contract
 
 ## 1. Contexte
 
-Ce document définit le **contrat d'intégration entre WorrySentinel et LogisticsSteward**. Il spécifie l'interface, le protocole, les règles de communication, et les garanties associées à l'intégration avec LogisticsSteward en tant que core responsable de la gouvernance de l'allocation, de la priorisation et de la limitation des ressources.
+Ce document dÃ©finit le **contrat d'intÃ©gration entre WorrySentinel et LogisticsSteward**. Il spÃ©cifie l'interface, le protocole, les rÃ¨gles de communication, et les garanties associÃ©es Ã  l'intÃ©gration avec LogisticsSteward en tant que core responsable de la gouvernance de l'allocation, de la priorisation et de la limitation des ressources.
 
-Ce document complète la Section 9 "Relation avec LogisticsSteward" de la [Documentation Fondatrice](../../foundation/WorrySentinel%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
+Ce document complÃ¨te la Section 9 "Relation avec LogisticsSteward" de la [Documentation Fondatrice](../../foundation/WorrySentinel%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
 - [LogisticsSteward - Documentation Fondatrice](../../../LogisticsSteward/foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md) pour la nature de LogisticsSteward
-- [LogisticsSteward - WorrySentinel Integration Contract](../../../LogisticsSteward/contracts/integration/LogisticsSteward%20-%20WorrySentinel%20Integration%20Contract.md) pour le contrat symétrique
-- [Miyukini Conceptual References - Lois Autonomie Système](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) pour la conformité LOI-1 à LOI-6
+- [LogisticsSteward - WorrySentinel Integration Contract](../../../LogisticsSteward/contracts/integration/LogisticsSteward%20-%20WorrySentinel%20Integration%20Contract.md) pour le contrat symÃ©trique
+- [Miyukini Conceptual References - Lois Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md) pour la conformitÃ© LOI-1 Ã  LOI-6
 
-L'intégration respecte les Lois d'Autonomie Système : toutes les contraintes de sécurité sont locales et ne requièrent aucune dépendance externe (**LOI-1**).
+L'intÃ©gration respecte les Lois d'Autonomie SystÃ¨me : toutes les contraintes de sÃ©curitÃ© sont locales et ne requiÃ¨rent aucune dÃ©pendance externe (**LOI-1**).
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
 Ce document couvre :
 - L'interface contractuelle entre WorrySentinel et LogisticsSteward
 - Le protocole de communication (contraintes descendantes et observations montantes)
-- Les types d'informations échangées
-- La supervision des dérives d'allocation
-- Le déclenchement de durcissement des règles d'arbitrage
-- Les règles d'intégration spécifiques
-- Les garanties de l'intégration
+- Les types d'informations Ã©changÃ©es
+- La supervision des dÃ©rives d'allocation
+- Le dÃ©clenchement de durcissement des rÃ¨gles d'arbitrage
+- Les rÃ¨gles d'intÃ©gration spÃ©cifiques
+- Les garanties de l'intÃ©gration
 
 Ce document **ne couvre pas** :
-- Les détails internes de LogisticsSteward (voir documentation LogisticsSteward)
-- Les détails internes du moteur de gouvernance de WorrySentinel
-- L'intégration avec StrongFather (voir StrongFather Integration Contract)
-- L'intégration avec CaringNanny (voir CaringNanny Integration Contract)
-- L'intégration avec BorderGuard (voir BorderGuard Integration Contract)
-- L'intégration avec TAMR (voir TAMR Integration Contract)
-- L'intégration avec MiyukiniAdmin (voir MiyukiniAdmin Integration Contract)
+- Les dÃ©tails internes de LogisticsSteward (voir documentation LogisticsSteward)
+- Les dÃ©tails internes du moteur de gouvernance de WorrySentinel
+- L'intÃ©gration avec StrongFather (voir StrongFather Integration Contract)
+- L'intÃ©gration avec CaringNanny (voir CaringNanny Integration Contract)
+- L'intÃ©gration avec BorderGuard (voir BorderGuard Integration Contract)
+- L'intÃ©gration avec TAMR (voir TAMR Integration Contract)
+- L'intÃ©gration avec MiyukiniAdmin (voir MiyukiniAdmin Integration Contract)
 
 ---
 
 ## 3. Principe fondamental
 
-**WorrySentinel gouverne les niveaux de sécurité et les états de confiance. LogisticsSteward adapte ses règles d'arbitrage en conséquence. WorrySentinel supervise les dérives d'allocation sans jamais décider des allocations. LogisticsSteward ne peut jamais définir des niveaux de sécurité ni des états de confiance.**
+**WorrySentinel gouverne les niveaux de sÃ©curitÃ© et les Ã©tats de confiance. LogisticsSteward adapte ses rÃ¨gles d'arbitrage en consÃ©quence. WorrySentinel supervise les dÃ©rives d'allocation sans jamais dÃ©cider des allocations. LogisticsSteward ne peut jamais dÃ©finir des niveaux de sÃ©curitÃ© ni des Ã©tats de confiance.**
 
-La relation est de **supervision verticale** : WorrySentinel observe les comportements d'arbitrage, impose des contraintes de sécurité, et peut déclencher des durcissements. LogisticsSteward reste souverain sur l'arbitrage des ressources mais doit adapter ses décisions selon les contraintes sécuritaires.
+La relation est de **supervision verticale** : WorrySentinel observe les comportements d'arbitrage, impose des contraintes de sÃ©curitÃ©, et peut dÃ©clencher des durcissements. LogisticsSteward reste souverain sur l'arbitrage des ressources mais doit adapter ses dÃ©cisions selon les contraintes sÃ©curitaires.
 
 ---
 
-## 4. Nature de la relation WorrySentinel — LogisticsSteward
+## 4. Nature de la relation WorrySentinel â€” LogisticsSteward
 
 ### 4.1 Relation de supervision verticale
 
 **WorrySentinel supervise LogisticsSteward par :**
-- L'observation des signaux d'allocation et des dérives potentielles
-- L'imposition de contraintes sécuritaires selon l'état de confiance (T0-T4)
-- Le déclenchement de durcissement des règles d'arbitrage
-- L'invalidation d'état système jugé incohérent
+- L'observation des signaux d'allocation et des dÃ©rives potentielles
+- L'imposition de contraintes sÃ©curitaires selon l'Ã©tat de confiance (T0-T4)
+- Le dÃ©clenchement de durcissement des rÃ¨gles d'arbitrage
+- L'invalidation d'Ã©tat systÃ¨me jugÃ© incohÃ©rent
 
 **LogisticsSteward informe WorrySentinel par :**
 - Les signaux d'allocation et de consommation
-- Les alertes de dérive de ressources
+- Les alertes de dÃ©rive de ressources
 - Les comportements suspects d'arbitrage
-- Les anomalies de gouvernance détectées
+- Les anomalies de gouvernance dÃ©tectÃ©es
 
-**Règle WS-LS-01 : Supervision sans substitution**
+**RÃ¨gle WS-LS-01 : Supervision sans substitution**
 
-WorrySentinel supervise LogisticsSteward sans se substituer à lui. LogisticsSteward reste souverain sur l'arbitrage des ressources. WorrySentinel ne décide jamais de l'allocation, de la priorité, ou de la limitation des ressources.
+WorrySentinel supervise LogisticsSteward sans se substituer Ã  lui. LogisticsSteward reste souverain sur l'arbitrage des ressources. WorrySentinel ne dÃ©cide jamais de l'allocation, de la prioritÃ©, ou de la limitation des ressources.
 
-**Règle WS-LS-02 : Contrainte verticale obligatoire**
+**RÃ¨gle WS-LS-02 : Contrainte verticale obligatoire**
 
-LogisticsSteward doit adapter ses règles d'arbitrage selon les états de confiance et les niveaux de sécurité gouvernés par WorrySentinel. L'adaptation n'est pas facultative.
+LogisticsSteward doit adapter ses rÃ¨gles d'arbitrage selon les Ã©tats de confiance et les niveaux de sÃ©curitÃ© gouvernÃ©s par WorrySentinel. L'adaptation n'est pas facultative.
 
-**Règle WS-LS-03 : Observation continue**
+**RÃ¨gle WS-LS-03 : Observation continue**
 
-WorrySentinel observe en continu les comportements d'arbitrage de LogisticsSteward pour détecter les dérives sécuritaires. L'observation est passive et non intrusive.
+WorrySentinel observe en continu les comportements d'arbitrage de LogisticsSteward pour dÃ©tecter les dÃ©rives sÃ©curitaires. L'observation est passive et non intrusive.
 
-**Règle WS-LS-04 : Durcissement proportionnel**
+**RÃ¨gle WS-LS-04 : Durcissement proportionnel**
 
-Le durcissement des règles d'arbitrage est proportionnel à l'état de confiance. Un état T1 implique une vigilance accrue, un état T3 implique des restrictions sévères.
+Le durcissement des rÃ¨gles d'arbitrage est proportionnel Ã  l'Ã©tat de confiance. Un Ã©tat T1 implique une vigilance accrue, un Ã©tat T3 implique des restrictions sÃ©vÃ¨res.
 
-### 4.2 Séparation des responsabilités
+### 4.2 SÃ©paration des responsabilitÃ©s
 
-| Responsabilité | WorrySentinel | LogisticsSteward |
+| ResponsabilitÃ© | WorrySentinel | LogisticsSteward |
 |----------------|---------------|------------------|
-| **Gouverner les états de confiance (T0-T4)** | ✅ Exclusif | ❌ Consomme |
-| **Définir les niveaux de sécurité (0-4)** | ✅ Exclusif | ❌ Consomme |
-| **Arbitrer l'allocation des ressources** | ❌ Jamais | ✅ Exclusif |
-| **Définir les quotas et priorités** | ❌ Jamais | ✅ Exclusif |
-| **Déclencher le durcissement** | ✅ Exclusif | ❌ Subit |
-| **Invalider un état système** | ✅ Peut décider | ❌ Réagit |
-| **Détecter les dérives de sécurité** | ✅ Consomme | ✅ Source |
-| **Observer les comportements d'arbitrage** | ✅ Exclusif | ❌ Source |
+| **Gouverner les Ã©tats de confiance (T0-T4)** | âœ… Exclusif | âŒ Consomme |
+| **DÃ©finir les niveaux de sÃ©curitÃ© (0-4)** | âœ… Exclusif | âŒ Consomme |
+| **Arbitrer l'allocation des ressources** | âŒ Jamais | âœ… Exclusif |
+| **DÃ©finir les quotas et prioritÃ©s** | âŒ Jamais | âœ… Exclusif |
+| **DÃ©clencher le durcissement** | âœ… Exclusif | âŒ Subit |
+| **Invalider un Ã©tat systÃ¨me** | âœ… Peut dÃ©cider | âŒ RÃ©agit |
+| **DÃ©tecter les dÃ©rives de sÃ©curitÃ©** | âœ… Consomme | âœ… Source |
+| **Observer les comportements d'arbitrage** | âœ… Exclusif | âŒ Source |
 
-**Règle WS-LS-05 : Aucun chevauchement**
+**RÃ¨gle WS-LS-05 : Aucun chevauchement**
 
-Aucun chevauchement de responsabilités n'est autorisé. WorrySentinel ne décide jamais des allocations, LogisticsSteward n'évalue jamais les menaces de sécurité.
+Aucun chevauchement de responsabilitÃ©s n'est autorisÃ©. WorrySentinel ne dÃ©cide jamais des allocations, LogisticsSteward n'Ã©value jamais les menaces de sÃ©curitÃ©.
 
 ---
 
-## 5. Ce que WorrySentinel ne fait JAMAIS vis-à-vis de LogisticsSteward
+## 5. Ce que WorrySentinel ne fait JAMAIS vis-Ã -vis de LogisticsSteward
 
 ### 5.1 Interdictions absolues
 
-**INV-WS-LS-NEVER-1 : Ne décide jamais de l'allocation**
+**INV-WS-LS-NEVER-1 : Ne dÃ©cide jamais de l'allocation**
 
-WorrySentinel ne décide **jamais** de l'allocation des ressources. Il peut imposer des contraintes de sécurité, mais la décision d'allocation appartient exclusivement à LogisticsSteward.
+WorrySentinel ne dÃ©cide **jamais** de l'allocation des ressources. Il peut imposer des contraintes de sÃ©curitÃ©, mais la dÃ©cision d'allocation appartient exclusivement Ã  LogisticsSteward.
 
-**INV-WS-LS-NEVER-2 : Ne définit jamais les quotas**
+**INV-WS-LS-NEVER-2 : Ne dÃ©finit jamais les quotas**
 
-WorrySentinel ne définit **jamais** les quotas ou les priorités. Il peut exiger des restrictions, mais c'est LogisticsSteward qui traduit ces exigences en règles d'arbitrage.
+WorrySentinel ne dÃ©finit **jamais** les quotas ou les prioritÃ©s. Il peut exiger des restrictions, mais c'est LogisticsSteward qui traduit ces exigences en rÃ¨gles d'arbitrage.
 
-**INV-WS-LS-NEVER-3 : N'exécute jamais d'arbitrage**
+**INV-WS-LS-NEVER-3 : N'exÃ©cute jamais d'arbitrage**
 
-WorrySentinel n'exécute **jamais** d'arbitrage de ressources. Il gouverne et contraint, mais ne participe pas à l'arbitrage.
+WorrySentinel n'exÃ©cute **jamais** d'arbitrage de ressources. Il gouverne et contraint, mais ne participe pas Ã  l'arbitrage.
 
 **INV-WS-LS-NEVER-4 : Ne contourne jamais LogisticsSteward**
 
-WorrySentinel ne contourne **jamais** LogisticsSteward pour imposer directement des allocations ou des restrictions de ressources aux entités.
+WorrySentinel ne contourne **jamais** LogisticsSteward pour imposer directement des allocations ou des restrictions de ressources aux entitÃ©s.
 
-**INV-WS-LS-NEVER-5 : Ne modifie jamais les règles d'arbitrage**
+**INV-WS-LS-NEVER-5 : Ne modifie jamais les rÃ¨gles d'arbitrage**
 
-WorrySentinel ne modifie **jamais** directement les règles d'arbitrage de LogisticsSteward. Il impose des contraintes que LogisticsSteward traduit en règles.
+WorrySentinel ne modifie **jamais** directement les rÃ¨gles d'arbitrage de LogisticsSteward. Il impose des contraintes que LogisticsSteward traduit en rÃ¨gles.
 
 **INV-WS-LS-NEVER-6 : Ne bloque jamais les signaux montants**
 
-WorrySentinel ne bloque **jamais** les signaux montants de LogisticsSteward. Toute information de dérive doit pouvoir remonter.
+WorrySentinel ne bloque **jamais** les signaux montants de LogisticsSteward. Toute information de dÃ©rive doit pouvoir remonter.
 
 ---
 
-## 6. Supervision des dérives d'allocation
+## 6. Supervision des dÃ©rives d'allocation
 
 ### 6.1 Objectif de la supervision
 
-WorrySentinel supervise LogisticsSteward pour détecter les dérives potentielles dans l'allocation des ressources qui pourraient compromettre la sécurité du système.
+WorrySentinel supervise LogisticsSteward pour dÃ©tecter les dÃ©rives potentielles dans l'allocation des ressources qui pourraient compromettre la sÃ©curitÃ© du systÃ¨me.
 
-**Types de dérives surveillées :**
+**Types de dÃ©rives surveillÃ©es :**
 
-| Type de dérive | Description | Impact sécuritaire |
+| Type de dÃ©rive | Description | Impact sÃ©curitaire |
 |----------------|-------------|-------------------|
-| **Monopolisation** | Une entité accapare une part disproportionnée | Risque de déni de service |
-| **Escalade progressive** | Augmentation graduelle de consommation | Épuisement silencieux |
+| **Monopolisation** | Une entitÃ© accapare une part disproportionnÃ©e | Risque de dÃ©ni de service |
+| **Escalade progressive** | Augmentation graduelle de consommation | Ã‰puisement silencieux |
 | **Pattern anormal** | Comportement atypique d'allocation | Indicateur d'intrusion |
 | **Contournement** | Tentatives de bypass des quotas | Violation de gouvernance |
-| **Saturation ciblée** | Épuisement délibéré de ressources | Attaque par ressources |
+| **Saturation ciblÃ©e** | Ã‰puisement dÃ©libÃ©rÃ© de ressources | Attaque par ressources |
 
-### 6.2 Règles de détection
+### 6.2 RÃ¨gles de dÃ©tection
 
-**Règle WS-LS-DET-01 : Observation des tendances**
+**RÃ¨gle WS-LS-DET-01 : Observation des tendances**
 
-WorrySentinel observe les tendances de consommation signalées par LogisticsSteward. Une tendance croissante persistante peut déclencher une alerte.
+WorrySentinel observe les tendances de consommation signalÃ©es par LogisticsSteward. Une tendance croissante persistante peut dÃ©clencher une alerte.
 
-**Règle WS-LS-DET-02 : Corrélation multi-signaux**
+**RÃ¨gle WS-LS-DET-02 : CorrÃ©lation multi-signaux**
 
-WorrySentinel corrèle les signaux de LogisticsSteward avec les autres sources (BorderGuard, StrongFather, CaringNanny) pour identifier les patterns de menace.
+WorrySentinel corrÃ¨le les signaux de LogisticsSteward avec les autres sources (BorderGuard, StrongFather, CaringNanny) pour identifier les patterns de menace.
 
-**Règle WS-LS-DET-03 : Seuils d'alerte**
+**RÃ¨gle WS-LS-DET-03 : Seuils d'alerte**
 
 | Seuil | Niveau | Action |
 |-------|--------|--------|
 | **Usage > 70%** | Info | Surveillance accrue |
-| **Usage > 85%** | Warning | Préparation durcissement |
-| **Usage > 95%** | Critique | Durcissement immédiat possible |
-| **Dépassement quota** | Alerte | Évaluation de la menace |
+| **Usage > 85%** | Warning | PrÃ©paration durcissement |
+| **Usage > 95%** | Critique | Durcissement immÃ©diat possible |
+| **DÃ©passement quota** | Alerte | Ã‰valuation de la menace |
 
-**Règle WS-LS-DET-04 : Contexte de sécurité**
+**RÃ¨gle WS-LS-DET-04 : Contexte de sÃ©curitÃ©**
 
-La détection tient compte du niveau de sécurité de l'entité concernée. Une dérive sur une entité de niveau 4 est plus critique qu'une dérive sur une entité de niveau 0.
+La dÃ©tection tient compte du niveau de sÃ©curitÃ© de l'entitÃ© concernÃ©e. Une dÃ©rive sur une entitÃ© de niveau 4 est plus critique qu'une dÃ©rive sur une entitÃ© de niveau 0.
 
-### 6.3 Corrélation avec l'état de confiance
+### 6.3 CorrÃ©lation avec l'Ã©tat de confiance
 
-| État de confiance | Sensibilité de détection | Seuils |
+| Ã‰tat de confiance | SensibilitÃ© de dÃ©tection | Seuils |
 |-------------------|--------------------------|--------|
-| **T0 — Normal** | Standard | Seuils normaux |
-| **T1 — Instable** | Élevée | Seuils abaissés de 10% |
-| **T2 — Dégradé** | Très élevée | Seuils abaissés de 20% |
-| **T3 — Restreint** | Maximale | Seuils abaissés de 30% |
-| **T4 — Bloqué** | Critique | Toute dérive est bloquante |
+| **T0 â€” Normal** | Standard | Seuils normaux |
+| **T1 â€” Instable** | Ã‰levÃ©e | Seuils abaissÃ©s de 10% |
+| **T2 â€” DÃ©gradÃ©** | TrÃ¨s Ã©levÃ©e | Seuils abaissÃ©s de 20% |
+| **T3 â€” Restreint** | Maximale | Seuils abaissÃ©s de 30% |
+| **T4 â€” BloquÃ©** | Critique | Toute dÃ©rive est bloquante |
 
 ---
 
-## 7. Durcissement des règles d'arbitrage
+## 7. Durcissement des rÃ¨gles d'arbitrage
 
 ### 7.1 Principes de durcissement
 
-WorrySentinel peut déclencher un durcissement des règles d'arbitrage de LogisticsSteward selon l'état de confiance ou en réponse à une menace détectée.
+WorrySentinel peut dÃ©clencher un durcissement des rÃ¨gles d'arbitrage de LogisticsSteward selon l'Ã©tat de confiance ou en rÃ©ponse Ã  une menace dÃ©tectÃ©e.
 
 **Principe WS-LS-HARD-01 : Durcissement progressif**
 
-Le durcissement est progressif et proportionnel à la menace. Pas de durcissement brutal sans justification.
+Le durcissement est progressif et proportionnel Ã  la menace. Pas de durcissement brutal sans justification.
 
-**Principe WS-LS-HARD-02 : Durcissement réversible**
+**Principe WS-LS-HARD-02 : Durcissement rÃ©versible**
 
-Tout durcissement est réversible par une directive explicite de levée. Le retour à la normale est possible.
+Tout durcissement est rÃ©versible par une directive explicite de levÃ©e. Le retour Ã  la normale est possible.
 
-**Principe WS-LS-HARD-03 : Durcissement ciblé**
+**Principe WS-LS-HARD-03 : Durcissement ciblÃ©**
 
-Le durcissement peut être ciblé sur des entités spécifiques ou global. Le ciblage précis minimise l'impact.
+Le durcissement peut Ãªtre ciblÃ© sur des entitÃ©s spÃ©cifiques ou global. Le ciblage prÃ©cis minimise l'impact.
 
 ### 7.2 Types de durcissement
 
-| Type | Description | Déclencheur |
+| Type | Description | DÃ©clencheur |
 |------|-------------|-------------|
-| **QUOTA_REDUCTION** | Réduction des quotas autorisés | Dérive de consommation |
-| **PRIORITY_FREEZE** | Gel des priorités au niveau actuel | Tentatives d'escalade |
-| **ALLOCATION_BLOCK** | Blocage des nouvelles allocations | Menace confirmée |
-| **PREEMPTION_ENABLE** | Activation de la préemption | Urgence ressources |
-| **DEGRADATION_FORCE** | Forçage d'un niveau de dégradation | État T2+ |
+| **QUOTA_REDUCTION** | RÃ©duction des quotas autorisÃ©s | DÃ©rive de consommation |
+| **PRIORITY_FREEZE** | Gel des prioritÃ©s au niveau actuel | Tentatives d'escalade |
+| **ALLOCATION_BLOCK** | Blocage des nouvelles allocations | Menace confirmÃ©e |
+| **PREEMPTION_ENABLE** | Activation de la prÃ©emption | Urgence ressources |
+| **DEGRADATION_FORCE** | ForÃ§age d'un niveau de dÃ©gradation | Ã‰tat T2+ |
 
-### 7.3 Directives de durcissement par état de confiance
+### 7.3 Directives de durcissement par Ã©tat de confiance
 
-**T0 — Normal**
+**T0 â€” Normal**
 
 | Aspect | Directive |
 |--------|-----------|
 | **Quotas** | Aucune modification |
-| **Priorités** | Aucune modification |
+| **PrioritÃ©s** | Aucune modification |
 | **Allocations** | Normales |
 | **Durcissement** | Aucun |
 
-**T1 — Instable**
+**T1 â€” Instable**
 
 | Aspect | Directive |
 |--------|-----------|
-| **Quotas** | Surveillance renforcée, alertes actives |
-| **Priorités** | Aucune modification |
-| **Allocations** | Normales avec traçabilité étendue |
-| **Durcissement** | Préparation possible |
+| **Quotas** | Surveillance renforcÃ©e, alertes actives |
+| **PrioritÃ©s** | Aucune modification |
+| **Allocations** | Normales avec traÃ§abilitÃ© Ã©tendue |
+| **Durcissement** | PrÃ©paration possible |
 
-**T2 — Dégradé**
+**T2 â€” DÃ©gradÃ©**
 
 | Aspect | Directive |
 |--------|-----------|
-| **Quotas** | Réduction de 20% pour entités non essentielles |
-| **Priorités** | Priorité maximale réservée aux services critiques |
+| **Quotas** | RÃ©duction de 20% pour entitÃ©s non essentielles |
+| **PrioritÃ©s** | PrioritÃ© maximale rÃ©servÃ©e aux services critiques |
 | **Allocations** | Nouvelles allocations sous conditions |
-| **Durcissement** | Actif, niveau modéré |
+| **Durcissement** | Actif, niveau modÃ©rÃ© |
 
-**T3 — Restreint**
+**T3 â€” Restreint**
 
 | Aspect | Directive |
 |--------|-----------|
 | **Quotas** | Quotas minimaux, gel des nouvelles allocations |
-| **Priorités** | Seules priorités critiques honorées |
-| **Allocations** | Bloquées sauf services vitaux |
-| **Durcissement** | Actif, niveau sévère |
+| **PrioritÃ©s** | Seules prioritÃ©s critiques honorÃ©es |
+| **Allocations** | BloquÃ©es sauf services vitaux |
+| **Durcissement** | Actif, niveau sÃ©vÃ¨re |
 
-**T4 — Bloqué**
+**T4 â€” BloquÃ©**
 
 | Aspect | Directive |
 |--------|-----------|
 | **Quotas** | Aucune allocation |
-| **Priorités** | Préservation du cœur système uniquement |
-| **Allocations** | Totalement bloquées |
+| **PrioritÃ©s** | PrÃ©servation du cÅ“ur systÃ¨me uniquement |
+| **Allocations** | Totalement bloquÃ©es |
 | **Durcissement** | Maximum, mode survie |
 
-### 7.4 Règles de durcissement (RÈGLE-WS-LS-1 à RÈGLE-WS-LS-4)
+### 7.4 RÃ¨gles de durcissement (RÃˆGLE-WS-LS-1 Ã  RÃˆGLE-WS-LS-4)
 
-Ces règles sont définies dans la [Documentation Fondatrice](../../foundation/WorrySentinel%20-%20Documentation%20Fondatrice.md) Section 9 :
+Ces rÃ¨gles sont dÃ©finies dans la [Documentation Fondatrice](../../foundation/WorrySentinel%20-%20Documentation%20Fondatrice.md) Section 9 :
 
-**RÈGLE-WS-LS-1 : Contraintes sécuritaires**
+**RÃˆGLE-WS-LS-1 : Contraintes sÃ©curitaires**
 
-WorrySentinel peut imposer des contraintes sécuritaires sur les décisions d'arbitrage de LogisticsSteward. Ces contraintes sont obligatoires.
+WorrySentinel peut imposer des contraintes sÃ©curitaires sur les dÃ©cisions d'arbitrage de LogisticsSteward. Ces contraintes sont obligatoires.
 
-**RÈGLE-WS-LS-2 : Quotas restrictifs en état T2+**
+**RÃˆGLE-WS-LS-2 : Quotas restrictifs en Ã©tat T2+**
 
-En état T2+, LogisticsSteward doit appliquer des quotas plus restrictifs selon les directives de WorrySentinel.
+En Ã©tat T2+, LogisticsSteward doit appliquer des quotas plus restrictifs selon les directives de WorrySentinel.
 
-**RÈGLE-WS-LS-3 : Observation des patterns**
+**RÃˆGLE-WS-LS-3 : Observation des patterns**
 
-WorrySentinel observe les patterns d'allocation de ressources pour détecter des anomalies sécuritaires.
+WorrySentinel observe les patterns d'allocation de ressources pour dÃ©tecter des anomalies sÃ©curitaires.
 
-**RÈGLE-WS-LS-4 : Traitement des dérives**
+**RÃˆGLE-WS-LS-4 : Traitement des dÃ©rives**
 
-Toute dérive d'allocation signalée par WorrySentinel doit être traitée par LogisticsSteward.
+Toute dÃ©rive d'allocation signalÃ©e par WorrySentinel doit Ãªtre traitÃ©e par LogisticsSteward.
 
 ---
 
-## 8. Types d'informations échangées
+## 8. Types d'informations Ã©changÃ©es
 
-### 8.1 Flux descendant : WorrySentinel → LogisticsSteward
+### 8.1 Flux descendant : WorrySentinel â†’ LogisticsSteward
 
 **TRUST_STATE_CHANGE**
-- **Objectif :** Notifier un changement d'état de confiance
-- **Contenu :** Nouvel état (T0-T4), justification, timestamp
-- **Impact :** LogisticsSteward adapte ses règles d'arbitrage
+- **Objectif :** Notifier un changement d'Ã©tat de confiance
+- **Contenu :** Nouvel Ã©tat (T0-T4), justification, timestamp
+- **Impact :** LogisticsSteward adapte ses rÃ¨gles d'arbitrage
 
-**Structure du changement d'état :**
+**Structure du changement d'Ã©tat :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `notification_id` | Identifiant unique de la notification | ✅ Oui |
-| `previous_state` | État de confiance précédent (T0-T4) | ✅ Oui |
-| `new_state` | Nouvel état de confiance (T0-T4) | ✅ Oui |
-| `transition_reason` | Justification de la transition | ✅ Oui |
-| `timestamp` | Horodatage de la transition | ✅ Oui |
-| `constraints` | Contraintes supplémentaires applicables | ❌ Optionnel |
+| `notification_id` | Identifiant unique de la notification | âœ… Oui |
+| `previous_state` | Ã‰tat de confiance prÃ©cÃ©dent (T0-T4) | âœ… Oui |
+| `new_state` | Nouvel Ã©tat de confiance (T0-T4) | âœ… Oui |
+| `transition_reason` | Justification de la transition | âœ… Oui |
+| `timestamp` | Horodatage de la transition | âœ… Oui |
+| `constraints` | Contraintes supplÃ©mentaires applicables | âŒ Optionnel |
 
 **SECURITY_LEVEL_ASSIGNMENT**
-- **Objectif :** Attribuer ou modifier le niveau de sécurité d'une entité
-- **Contenu :** Entité concernée, niveau (0-4), justification
-- **Impact :** LogisticsSteward adapte l'arbitrage pour cette entité
+- **Objectif :** Attribuer ou modifier le niveau de sÃ©curitÃ© d'une entitÃ©
+- **Contenu :** EntitÃ© concernÃ©e, niveau (0-4), justification
+- **Impact :** LogisticsSteward adapte l'arbitrage pour cette entitÃ©
 
 **Structure de l'attribution de niveau :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `assignment_id` | Identifiant unique de l'attribution | ✅ Oui |
-| `entity_id` | Identifiant de l'entité concernée | ✅ Oui |
-| `entity_type` | Type d'entité (operator, team, service, tool) | ✅ Oui |
-| `security_level` | Niveau de sécurité (0-4) | ✅ Oui |
-| `justification` | Raison de l'attribution | ✅ Oui |
-| `timestamp` | Horodatage de l'attribution | ✅ Oui |
+| `assignment_id` | Identifiant unique de l'attribution | âœ… Oui |
+| `entity_id` | Identifiant de l'entitÃ© concernÃ©e | âœ… Oui |
+| `entity_type` | Type d'entitÃ© (operator, team, service, tool) | âœ… Oui |
+| `security_level` | Niveau de sÃ©curitÃ© (0-4) | âœ… Oui |
+| `justification` | Raison de l'attribution | âœ… Oui |
+| `timestamp` | Horodatage de l'attribution | âœ… Oui |
 
 **HARDENING_DIRECTIVE**
-- **Objectif :** Déclencher un durcissement immédiat des règles
-- **Contenu :** Type de durcissement, entités concernées, durée
-- **Impact :** Restrictions supplémentaires appliquées immédiatement
+- **Objectif :** DÃ©clencher un durcissement immÃ©diat des rÃ¨gles
+- **Contenu :** Type de durcissement, entitÃ©s concernÃ©es, durÃ©e
+- **Impact :** Restrictions supplÃ©mentaires appliquÃ©es immÃ©diatement
 
 **Structure de la directive de durcissement :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `directive_id` | Identifiant unique de la directive | ✅ Oui |
-| `hardening_type` | Type de durcissement (quota_reduction, priority_freeze, allocation_block) | ✅ Oui |
-| `affected_entities` | Liste des entités concernées (vide = toutes) | ❌ Optionnel |
-| `severity` | Sévérité du durcissement (low, medium, high, critical) | ✅ Oui |
-| `duration` | Durée du durcissement (null = indéfini) | ❌ Optionnel |
-| `justification` | Raison du durcissement | ✅ Oui |
-| `timestamp` | Horodatage de la directive | ✅ Oui |
+| `directive_id` | Identifiant unique de la directive | âœ… Oui |
+| `hardening_type` | Type de durcissement (quota_reduction, priority_freeze, allocation_block) | âœ… Oui |
+| `affected_entities` | Liste des entitÃ©s concernÃ©es (vide = toutes) | âŒ Optionnel |
+| `severity` | SÃ©vÃ©ritÃ© du durcissement (low, medium, high, critical) | âœ… Oui |
+| `duration` | DurÃ©e du durcissement (null = indÃ©fini) | âŒ Optionnel |
+| `justification` | Raison du durcissement | âœ… Oui |
+| `timestamp` | Horodatage de la directive | âœ… Oui |
 
 **HARDENING_LIFT**
-- **Objectif :** Lever un durcissement précédemment imposé
-- **Contenu :** Référence à la directive originale, justification
-- **Impact :** Retour aux règles d'arbitrage normales
+- **Objectif :** Lever un durcissement prÃ©cÃ©demment imposÃ©
+- **Contenu :** RÃ©fÃ©rence Ã  la directive originale, justification
+- **Impact :** Retour aux rÃ¨gles d'arbitrage normales
 
-**Structure de la levée de durcissement :**
+**Structure de la levÃ©e de durcissement :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `lift_id` | Identifiant unique de la levée | ✅ Oui |
-| `directive_id` | Référence à la directive originale | ✅ Oui |
-| `justification` | Raison de la levée | ✅ Oui |
-| `timestamp` | Horodatage de la levée | ✅ Oui |
+| `lift_id` | Identifiant unique de la levÃ©e | âœ… Oui |
+| `directive_id` | RÃ©fÃ©rence Ã  la directive originale | âœ… Oui |
+| `justification` | Raison de la levÃ©e | âœ… Oui |
+| `timestamp` | Horodatage de la levÃ©e | âœ… Oui |
 
 **STATE_INVALIDATION**
-- **Objectif :** Invalider l'état système actuel
+- **Objectif :** Invalider l'Ã©tat systÃ¨me actuel
 - **Contenu :** Raison de l'invalidation, action requise
 - **Impact :** LogisticsSteward doit suspendre les nouveaux arbitrages
 
@@ -346,32 +346,32 @@ Toute dérive d'allocation signalée par WorrySentinel doit être traitée par L
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `invalidation_id` | Identifiant unique de l'invalidation | ✅ Oui |
-| `reason` | Raison de l'invalidation | ✅ Oui |
-| `required_action` | Action requise de LogisticsSteward | ✅ Oui |
-| `timestamp` | Horodatage de l'invalidation | ✅ Oui |
+| `invalidation_id` | Identifiant unique de l'invalidation | âœ… Oui |
+| `reason` | Raison de l'invalidation | âœ… Oui |
+| `required_action` | Action requise de LogisticsSteward | âœ… Oui |
+| `timestamp` | Horodatage de l'invalidation | âœ… Oui |
 
-### 8.2 Flux montant : LogisticsSteward → WorrySentinel
+### 8.2 Flux montant : LogisticsSteward â†’ WorrySentinel
 
 **ANOMALY_REPORT**
 - **Objectif :** Signaler un comportement d'arbitrage suspect
-- **Contenu :** Nature de l'anomalie, entité concernée, contexte
-- **Usage :** WorrySentinel évalue si une action de sécurité est nécessaire
+- **Contenu :** Nature de l'anomalie, entitÃ© concernÃ©e, contexte
+- **Usage :** WorrySentinel Ã©value si une action de sÃ©curitÃ© est nÃ©cessaire
 
 **DRIFT_ALERT**
-- **Objectif :** Alerter sur une dérive de consommation
-- **Contenu :** Entité, ressource, tendance, projection
+- **Objectif :** Alerter sur une dÃ©rive de consommation
+- **Contenu :** EntitÃ©, ressource, tendance, projection
 - **Usage :** WorrySentinel peut anticiper une menace
 
 **GOVERNANCE_ISSUE**
 - **Objectif :** Signaler une anomalie de gouvernance
-- **Contenu :** Nature du problème, impact, recommandations
-- **Usage :** WorrySentinel peut décider d'une action de sécurité
+- **Contenu :** Nature du problÃ¨me, impact, recommandations
+- **Usage :** WorrySentinel peut dÃ©cider d'une action de sÃ©curitÃ©
 
 **ALLOCATION_PATTERN**
 - **Objectif :** Signaler un pattern d'allocation atypique
-- **Contenu :** Description du pattern, entités impliquées, fréquence
-- **Usage :** WorrySentinel corrèle avec d'autres signaux
+- **Contenu :** Description du pattern, entitÃ©s impliquÃ©es, frÃ©quence
+- **Usage :** WorrySentinel corrÃ¨le avec d'autres signaux
 
 ---
 
@@ -379,180 +379,180 @@ Toute dérive d'allocation signalée par WorrySentinel doit être traitée par L
 
 ### 9.1 Format des notifications descendantes
 
-Les notifications de WorrySentinel suivent un format standardisé.
+Les notifications de WorrySentinel suivent un format standardisÃ©.
 
 **Structure de base :**
 
-| Élément | Description | Obligatoire |
+| Ã‰lÃ©ment | Description | Obligatoire |
 |---------|-------------|-------------|
-| `notification_id` | Identifiant unique de la notification | ✅ Oui |
-| `type` | Type de notification | ✅ Oui |
-| `payload` | Données spécifiques à la notification | ✅ Oui |
-| `timestamp` | Horodatage de la notification | ✅ Oui |
-| `requires_ack` | Si une confirmation est requise | ✅ Oui |
+| `notification_id` | Identifiant unique de la notification | âœ… Oui |
+| `type` | Type de notification | âœ… Oui |
+| `payload` | DonnÃ©es spÃ©cifiques Ã  la notification | âœ… Oui |
+| `timestamp` | Horodatage de la notification | âœ… Oui |
+| `requires_ack` | Si une confirmation est requise | âœ… Oui |
 
-**Règle WS-LS-PROT-01 : Notification obligatoire**
+**RÃ¨gle WS-LS-PROT-01 : Notification obligatoire**
 
-Toutes les notifications de WorrySentinel doivent être transmises à LogisticsSteward sans filtrage ni délai.
+Toutes les notifications de WorrySentinel doivent Ãªtre transmises Ã  LogisticsSteward sans filtrage ni dÃ©lai.
 
 ### 9.2 Format des signalements montants
 
-Les signalements de LogisticsSteward suivent un format standardisé.
+Les signalements de LogisticsSteward suivent un format standardisÃ©.
 
 **Structure de base :**
 
-| Élément | Description | Obligatoire |
+| Ã‰lÃ©ment | Description | Obligatoire |
 |---------|-------------|-------------|
-| `signal_id` | Identifiant unique du signalement | ✅ Oui |
-| `type` | Type de signalement | ✅ Oui |
-| `payload` | Données spécifiques au signalement | ✅ Oui |
-| `timestamp` | Horodatage du signalement | ✅ Oui |
-| `urgency` | Niveau d'urgence (low, medium, high, critical) | ✅ Oui |
+| `signal_id` | Identifiant unique du signalement | âœ… Oui |
+| `type` | Type de signalement | âœ… Oui |
+| `payload` | DonnÃ©es spÃ©cifiques au signalement | âœ… Oui |
+| `timestamp` | Horodatage du signalement | âœ… Oui |
+| `urgency` | Niveau d'urgence (low, medium, high, critical) | âœ… Oui |
 
-**Règle WS-LS-PROT-02 : Réception obligatoire**
+**RÃ¨gle WS-LS-PROT-02 : RÃ©ception obligatoire**
 
-WorrySentinel doit recevoir tous les signalements de LogisticsSteward sans exception. Aucun filtrage n'est autorisé.
+WorrySentinel doit recevoir tous les signalements de LogisticsSteward sans exception. Aucun filtrage n'est autorisÃ©.
 
 ### 9.3 Confirmations et acquittements
 
-**Règle WS-LS-PROT-03 : Acquittement par LogisticsSteward**
+**RÃ¨gle WS-LS-PROT-03 : Acquittement par LogisticsSteward**
 
 LogisticsSteward acquitte toutes les notifications descendantes avec `requires_ack: true`.
 
-**Règle WS-LS-PROT-04 : Pas d'acquittement montant**
+**RÃ¨gle WS-LS-PROT-04 : Pas d'acquittement montant**
 
-WorrySentinel n'acquitte pas les signalements montants. Le traitement est interne à WorrySentinel.
+WorrySentinel n'acquitte pas les signalements montants. Le traitement est interne Ã  WorrySentinel.
 
 ---
 
-## 10. Flux d'intégration typiques
+## 10. Flux d'intÃ©gration typiques
 
 ### 10.1 Flux de supervision normale
 
 **Acteurs :** WorrySentinel, LogisticsSteward
 
-**Séquence :**
+**SÃ©quence :**
 
-1. LogisticsSteward procède à des arbitrages normaux
-2. LogisticsSteward génère des signaux d'allocation périodiques
-3. LogisticsSteward envoie `ALLOCATION_PATTERN` à WorrySentinel
-4. WorrySentinel observe et corrèle les patterns
+1. LogisticsSteward procÃ¨de Ã  des arbitrages normaux
+2. LogisticsSteward gÃ©nÃ¨re des signaux d'allocation pÃ©riodiques
+3. LogisticsSteward envoie `ALLOCATION_PATTERN` Ã  WorrySentinel
+4. WorrySentinel observe et corrÃ¨le les patterns
 5. Si pas d'anomalie, aucune action
-6. Les signaux sont tracés pour audit
+6. Les signaux sont tracÃ©s pour audit
 
-### 10.2 Flux de détection de dérive
+### 10.2 Flux de dÃ©tection de dÃ©rive
 
 **Acteurs :** LogisticsSteward, WorrySentinel
 
-**Séquence :**
+**SÃ©quence :**
 
-1. LogisticsSteward détecte une dérive de consommation sur une entité
-2. LogisticsSteward génère un `DRIFT_ALERT`
-3. LogisticsSteward envoie l'alerte à WorrySentinel
-4. WorrySentinel reçoit et analyse l'alerte
-5. WorrySentinel corrèle avec d'autres signaux
-6. WorrySentinel décide de l'action (surveillance, durcissement, ou escalade)
+1. LogisticsSteward dÃ©tecte une dÃ©rive de consommation sur une entitÃ©
+2. LogisticsSteward gÃ©nÃ¨re un `DRIFT_ALERT`
+3. LogisticsSteward envoie l'alerte Ã  WorrySentinel
+4. WorrySentinel reÃ§oit et analyse l'alerte
+5. WorrySentinel corrÃ¨le avec d'autres signaux
+6. WorrySentinel dÃ©cide de l'action (surveillance, durcissement, ou escalade)
 
 ### 10.3 Flux de durcissement
 
 **Acteurs :** WorrySentinel, LogisticsSteward
 
-**Séquence :**
+**SÃ©quence :**
 
-1. WorrySentinel détecte une menace confirmée (corrélation de signaux)
-2. WorrySentinel génère une `HARDENING_DIRECTIVE`
-3. WorrySentinel envoie la directive à LogisticsSteward
-4. LogisticsSteward reçoit la directive
-5. LogisticsSteward applique immédiatement les restrictions
+1. WorrySentinel dÃ©tecte une menace confirmÃ©e (corrÃ©lation de signaux)
+2. WorrySentinel gÃ©nÃ¨re une `HARDENING_DIRECTIVE`
+3. WorrySentinel envoie la directive Ã  LogisticsSteward
+4. LogisticsSteward reÃ§oit la directive
+5. LogisticsSteward applique immÃ©diatement les restrictions
 6. LogisticsSteward acquitte avec `ACK_OK`
-7. Les entités concernées subissent les restrictions
+7. Les entitÃ©s concernÃ©es subissent les restrictions
 
-### 10.4 Flux de levée de durcissement
+### 10.4 Flux de levÃ©e de durcissement
 
 **Acteurs :** WorrySentinel, LogisticsSteward
 
-**Séquence :**
+**SÃ©quence :**
 
-1. WorrySentinel constate que la menace est résolue
-2. WorrySentinel génère une `HARDENING_LIFT`
-3. WorrySentinel envoie la levée à LogisticsSteward
-4. LogisticsSteward reçoit la levée
-5. LogisticsSteward rétablit les règles d'arbitrage normales
+1. WorrySentinel constate que la menace est rÃ©solue
+2. WorrySentinel gÃ©nÃ¨re une `HARDENING_LIFT`
+3. WorrySentinel envoie la levÃ©e Ã  LogisticsSteward
+4. LogisticsSteward reÃ§oit la levÃ©e
+5. LogisticsSteward rÃ©tablit les rÃ¨gles d'arbitrage normales
 6. LogisticsSteward acquitte avec `ACK_OK`
 
-### 10.5 Diagramme de séquence
+### 10.5 Diagramme de sÃ©quence
 
 ```
-┌─────────────────┐    ┌─────────────────┐
-│  WorrySentinel  │    │LogisticsSteward │
-└────────┬────────┘    └────────┬────────┘
-         │                      │
-         │◄── ALLOCATION_PATTERN ─┤
-         │                      │
-         ├── Corrélation ───────┤
-         │                      │
-         │◄── DRIFT_ALERT ──────┤
-         │                      │
-         ├── Analyse ───────────┤
-         │                      │
-         ├── HARDENING_DIRECTIVE ─►│
-         │    (quota_reduction)  │
-         │                      │
-         │                      ├── Application restrictions
-         │                      │
-         │◄── ACK_OK ───────────┤
-         │                      │
-         │   ... temps ...      │
-         │                      │
-         ├── HARDENING_LIFT ────►│
-         │                      │
-         │                      ├── Rétablissement
-         │                      │
-         │◄── ACK_OK ───────────┤
-         │                      │
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  WorrySentinel  â”‚    â”‚LogisticsSteward â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚                      â”‚
+         â”‚â—„â”€â”€ ALLOCATION_PATTERN â”€â”¤
+         â”‚                      â”‚
+         â”œâ”€â”€ CorrÃ©lation â”€â”€â”€â”€â”€â”€â”€â”¤
+         â”‚                      â”‚
+         â”‚â—„â”€â”€ DRIFT_ALERT â”€â”€â”€â”€â”€â”€â”¤
+         â”‚                      â”‚
+         â”œâ”€â”€ Analyse â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+         â”‚                      â”‚
+         â”œâ”€â”€ HARDENING_DIRECTIVE â”€â–ºâ”‚
+         â”‚    (quota_reduction)  â”‚
+         â”‚                      â”‚
+         â”‚                      â”œâ”€â”€ Application restrictions
+         â”‚                      â”‚
+         â”‚â—„â”€â”€ ACK_OK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+         â”‚                      â”‚
+         â”‚   ... temps ...      â”‚
+         â”‚                      â”‚
+         â”œâ”€â”€ HARDENING_LIFT â”€â”€â”€â”€â–ºâ”‚
+         â”‚                      â”‚
+         â”‚                      â”œâ”€â”€ RÃ©tablissement
+         â”‚                      â”‚
+         â”‚â—„â”€â”€ ACK_OK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+         â”‚                      â”‚
 ```
 
 ---
 
-## 11. Règles d'intégration
+## 11. RÃ¨gles d'intÃ©gration
 
-### 11.1 Règles de communication
+### 11.1 RÃ¨gles de communication
 
-**Règle WS-LS-INT-01 : Bidirectionnel asymétrique**
+**RÃ¨gle WS-LS-INT-01 : Bidirectionnel asymÃ©trique**
 
-La communication est bidirectionnelle mais asymétrique. WorrySentinel impose des contraintes, LogisticsSteward signale des observations. Les rôles ne sont pas interchangeables.
+La communication est bidirectionnelle mais asymÃ©trique. WorrySentinel impose des contraintes, LogisticsSteward signale des observations. Les rÃ´les ne sont pas interchangeables.
 
-**Règle WS-LS-INT-02 : Priorité des contraintes sécuritaires**
+**RÃ¨gle WS-LS-INT-02 : PrioritÃ© des contraintes sÃ©curitaires**
 
-Les contraintes de WorrySentinel sont prioritaires sur toutes les règles d'arbitrage de LogisticsSteward. Aucune règle locale ne peut contredire une contrainte de sécurité.
+Les contraintes de WorrySentinel sont prioritaires sur toutes les rÃ¨gles d'arbitrage de LogisticsSteward. Aucune rÃ¨gle locale ne peut contredire une contrainte de sÃ©curitÃ©.
 
-**Règle WS-LS-INT-03 : Non-blocage des signaux**
+**RÃ¨gle WS-LS-INT-03 : Non-blocage des signaux**
 
-Les signalements de LogisticsSteward sont toujours non bloquants. L'envoi n'attend jamais de réponse.
+Les signalements de LogisticsSteward sont toujours non bloquants. L'envoi n'attend jamais de rÃ©ponse.
 
-### 11.2 Règles de données
+### 11.2 RÃ¨gles de donnÃ©es
 
-**Règle WS-LS-INT-04 : Données de classification**
+**RÃ¨gle WS-LS-INT-04 : DonnÃ©es de classification**
 
-Les données échangées sont des informations de classification (états, niveaux, alertes, patterns), jamais des données métier.
+Les donnÃ©es Ã©changÃ©es sont des informations de classification (Ã©tats, niveaux, alertes, patterns), jamais des donnÃ©es mÃ©tier.
 
-**Règle WS-LS-INT-05 : Pas de données personnelles**
+**RÃ¨gle WS-LS-INT-05 : Pas de donnÃ©es personnelles**
 
-Aucune donnée personnelle n'est échangée. Les signalements concernent des entités (opérateurs, services), pas des utilisateurs.
+Aucune donnÃ©e personnelle n'est Ã©changÃ©e. Les signalements concernent des entitÃ©s (opÃ©rateurs, services), pas des utilisateurs.
 
-**Règle WS-LS-INT-06 : Cohérence garantie**
+**RÃ¨gle WS-LS-INT-06 : CohÃ©rence garantie**
 
-WorrySentinel garantit la cohérence de ses notifications. LogisticsSteward peut se fier aux états et niveaux communiqués.
+WorrySentinel garantit la cohÃ©rence de ses notifications. LogisticsSteward peut se fier aux Ã©tats et niveaux communiquÃ©s.
 
-### 11.3 Règles de traçabilité
+### 11.3 RÃ¨gles de traÃ§abilitÃ©
 
-**Règle WS-LS-INT-07 : Traçabilité complète**
+**RÃ¨gle WS-LS-INT-07 : TraÃ§abilitÃ© complÃ¨te**
 
-Toutes les interactions sont tracées avec contexte complet par les deux parties.
+Toutes les interactions sont tracÃ©es avec contexte complet par les deux parties.
 
-**Règle WS-LS-INT-08 : Corrélation possible**
+**RÃ¨gle WS-LS-INT-08 : CorrÃ©lation possible**
 
-Chaque notification peut être corrélée aux adaptations d'arbitrage qui en découlent.
+Chaque notification peut Ãªtre corrÃ©lÃ©e aux adaptations d'arbitrage qui en dÃ©coulent.
 
 ---
 
@@ -561,175 +561,175 @@ Chaque notification peut être corrélée aux adaptations d'arbitrage qui en dé
 ### 12.1 Types d'erreurs
 
 **Erreurs de format :**
-- Signalement mal formé
+- Signalement mal formÃ©
 - Champ obligatoire manquant
 - Type de signalement inconnu
 
-**Erreurs de corrélation :**
-- Signal non corrélable avec d'autres sources
+**Erreurs de corrÃ©lation :**
+- Signal non corrÃ©lable avec d'autres sources
 - Pattern non reconnu
-- Entité inconnue
+- EntitÃ© inconnue
 
 **Erreurs internes :**
-- Erreur du moteur de corrélation
+- Erreur du moteur de corrÃ©lation
 - Erreur de journalisation
 
 ### 12.2 Traitement des erreurs
 
-**Règle WS-LS-ERR-01 : Journalisation des erreurs**
+**RÃ¨gle WS-LS-ERR-01 : Journalisation des erreurs**
 
-Toutes les erreurs sont journalisées pour audit et diagnostic.
+Toutes les erreurs sont journalisÃ©es pour audit et diagnostic.
 
-**Règle WS-LS-ERR-02 : Pas de blocage sur erreur**
+**RÃ¨gle WS-LS-ERR-02 : Pas de blocage sur erreur**
 
-Une erreur de traitement ne bloque pas la supervision. WorrySentinel continue à recevoir et traiter les autres signaux.
+Une erreur de traitement ne bloque pas la supervision. WorrySentinel continue Ã  recevoir et traiter les autres signaux.
 
-**Règle WS-LS-ERR-03 : Sécurité par défaut**
+**RÃ¨gle WS-LS-ERR-03 : SÃ©curitÃ© par dÃ©faut**
 
-En cas d'erreur de communication avec LogisticsSteward, WorrySentinel applique le comportement le plus restrictif (principe de sécurité par défaut).
+En cas d'erreur de communication avec LogisticsSteward, WorrySentinel applique le comportement le plus restrictif (principe de sÃ©curitÃ© par dÃ©faut).
 
-**Règle WS-LS-ERR-04 : Alerte sur erreurs répétées**
+**RÃ¨gle WS-LS-ERR-04 : Alerte sur erreurs rÃ©pÃ©tÃ©es**
 
-Des erreurs répétées déclenchent une alerte interne et peuvent influencer l'état de confiance.
+Des erreurs rÃ©pÃ©tÃ©es dÃ©clenchent une alerte interne et peuvent influencer l'Ã©tat de confiance.
 
 ---
 
 ## 13. Cas particuliers
 
-### 13.1 État de confiance T4 (Bloqué)
+### 13.1 Ã‰tat de confiance T4 (BloquÃ©)
 
-En état T4, WorrySentinel impose un mode survie :
+En Ã©tat T4, WorrySentinel impose un mode survie :
 
-**Règle WS-LS-CASE-01 : Blocage maximal**
+**RÃ¨gle WS-LS-CASE-01 : Blocage maximal**
 
-En T4, WorrySentinel envoie une directive `ALLOCATION_BLOCK` globale. Seuls les services vitaux reçoivent des ressources.
+En T4, WorrySentinel envoie une directive `ALLOCATION_BLOCK` globale. Seuls les services vitaux reÃ§oivent des ressources.
 
 ### 13.2 LogisticsSteward indisponible
 
-Si LogisticsSteward ne répond pas aux notifications :
+Si LogisticsSteward ne rÃ©pond pas aux notifications :
 
-**Règle WS-LS-CASE-02 : Escalade d'alerte**
+**RÃ¨gle WS-LS-CASE-02 : Escalade d'alerte**
 
-L'indisponibilité de LogisticsSteward est une alerte de sécurité. WorrySentinel peut décider de dégrader l'état de confiance.
+L'indisponibilitÃ© de LogisticsSteward est une alerte de sÃ©curitÃ©. WorrySentinel peut dÃ©cider de dÃ©grader l'Ã©tat de confiance.
 
 ### 13.3 Signaux contradictoires
 
 Si les signaux de LogisticsSteward contredisent d'autres sources :
 
-**Règle WS-LS-CASE-03 : Priorité à la sécurité**
+**RÃ¨gle WS-LS-CASE-03 : PrioritÃ© Ã  la sÃ©curitÃ©**
 
-En cas de contradiction, WorrySentinel applique le scénario le plus restrictif. La sécurité prime sur la disponibilité.
+En cas de contradiction, WorrySentinel applique le scÃ©nario le plus restrictif. La sÃ©curitÃ© prime sur la disponibilitÃ©.
 
-### 13.4 Dérive sur entité de niveau 4
+### 13.4 DÃ©rive sur entitÃ© de niveau 4
 
-Si une dérive est détectée sur une entité de niveau de sécurité 4 :
+Si une dÃ©rive est dÃ©tectÃ©e sur une entitÃ© de niveau de sÃ©curitÃ© 4 :
 
-**Règle WS-LS-CASE-04 : Escalade immédiate**
+**RÃ¨gle WS-LS-CASE-04 : Escalade immÃ©diate**
 
-Toute dérive sur une entité de niveau 4 déclenche une escalade immédiate. L'état de confiance peut être dégradé.
+Toute dÃ©rive sur une entitÃ© de niveau 4 dÃ©clenche une escalade immÃ©diate. L'Ã©tat de confiance peut Ãªtre dÃ©gradÃ©.
 
 ---
 
-## 14. Garanties de l'intégration
+## 14. Garanties de l'intÃ©gration
 
 ### 14.1 Garantie de supervision continue
 
 **Engagement :** WorrySentinel supervise en continu les signaux de LogisticsSteward. Aucune interruption de supervision n'est acceptable.
 
-### 14.2 Garantie de réactivité
+### 14.2 Garantie de rÃ©activitÃ©
 
-**Engagement :** WorrySentinel réagit immédiatement aux alertes de dérive critique. Aucun délai supérieur à une seconde n'est acceptable pour les alertes critiques.
+**Engagement :** WorrySentinel rÃ©agit immÃ©diatement aux alertes de dÃ©rive critique. Aucun dÃ©lai supÃ©rieur Ã  une seconde n'est acceptable pour les alertes critiques.
 
-### 14.3 Garantie de proportionnalité
+### 14.3 Garantie de proportionnalitÃ©
 
-**Engagement :** Le durcissement est toujours proportionnel à la menace détectée. Pas de durcissement excessif sans justification.
+**Engagement :** Le durcissement est toujours proportionnel Ã  la menace dÃ©tectÃ©e. Pas de durcissement excessif sans justification.
 
-### 14.4 Garantie de réversibilité
+### 14.4 Garantie de rÃ©versibilitÃ©
 
-**Engagement :** Tout durcissement peut être levé par une directive explicite. Le retour à la normale est toujours possible.
+**Engagement :** Tout durcissement peut Ãªtre levÃ© par une directive explicite. Le retour Ã  la normale est toujours possible.
 
-### 14.5 Garantie de traçabilité
+### 14.5 Garantie de traÃ§abilitÃ©
 
-**Engagement :** Toute interaction est traçable de bout en bout. L'audit complet des notifications, directives et signalements est possible.
+**Engagement :** Toute interaction est traÃ§able de bout en bout. L'audit complet des notifications, directives et signalements est possible.
 
 ### 14.6 Garantie de non-substitution
 
-**Engagement :** WorrySentinel ne se substitue jamais à LogisticsSteward. L'arbitrage reste la responsabilité exclusive de LogisticsSteward.
+**Engagement :** WorrySentinel ne se substitue jamais Ã  LogisticsSteward. L'arbitrage reste la responsabilitÃ© exclusive de LogisticsSteward.
 
 ---
 
-## 15. Invariants de l'intégration
+## 15. Invariants de l'intÃ©gration
 
 ### 15.1 Invariants de relation
 
-**INV-WS-LS-1 : Supervision sans exécution**
+**INV-WS-LS-1 : Supervision sans exÃ©cution**
 
-WorrySentinel supervise LogisticsSteward. WorrySentinel n'exécute jamais d'arbitrage.
+WorrySentinel supervise LogisticsSteward. WorrySentinel n'exÃ©cute jamais d'arbitrage.
 
 **INV-WS-LS-2 : Contrainte unidirectionnelle**
 
-WorrySentinel impose des contraintes à LogisticsSteward. LogisticsSteward n'impose jamais de contraintes à WorrySentinel.
+WorrySentinel impose des contraintes Ã  LogisticsSteward. LogisticsSteward n'impose jamais de contraintes Ã  WorrySentinel.
 
-**INV-WS-LS-3 : Souveraineté d'arbitrage**
+**INV-WS-LS-3 : SouverainetÃ© d'arbitrage**
 
-LogisticsSteward reste souverain sur l'arbitrage. WorrySentinel contraint, mais ne décide pas.
+LogisticsSteward reste souverain sur l'arbitrage. WorrySentinel contraint, mais ne dÃ©cide pas.
 
-### 15.2 Invariants de données
+### 15.2 Invariants de donnÃ©es
 
-**INV-WS-LS-4 : Pas de décision d'allocation**
+**INV-WS-LS-4 : Pas de dÃ©cision d'allocation**
 
-WorrySentinel ne prend aucune décision d'allocation. Il impose des contraintes que LogisticsSteward traduit.
+WorrySentinel ne prend aucune dÃ©cision d'allocation. Il impose des contraintes que LogisticsSteward traduit.
 
 **INV-WS-LS-5 : Signaux informatifs**
 
-Les signaux de LogisticsSteward sont informatifs. Ils alimentent la corrélation mais n'imposent aucune action.
+Les signaux de LogisticsSteward sont informatifs. Ils alimentent la corrÃ©lation mais n'imposent aucune action.
 
 ### 15.3 Invariants de protocole
 
-**INV-WS-LS-6 : Format respecté**
+**INV-WS-LS-6 : Format respectÃ©**
 
-Toutes les notifications et signalements respectent le format standardisé.
+Toutes les notifications et signalements respectent le format standardisÃ©.
 
-**INV-WS-LS-7 : Traçabilité complète**
+**INV-WS-LS-7 : TraÃ§abilitÃ© complÃ¨te**
 
-Toute interaction est traçable avec son contexte complet.
+Toute interaction est traÃ§able avec son contexte complet.
 
 ---
 
-## 16. Conformité aux Lois d'Autonomie Système
+## 16. ConformitÃ© aux Lois d'Autonomie SystÃ¨me
 
-### LOI-1 : Aucune dépendance externe critique
+### LOI-1 : Aucune dÃ©pendance externe critique
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-L'intégration respecte LOI-1 :
+L'intÃ©gration respecte LOI-1 :
 - WorrySentinel supervise localement
-- LogisticsSteward adapte ses règles localement
+- LogisticsSteward adapte ses rÃ¨gles localement
 - L'absence de connexion ne bloque ni la supervision ni l'arbitrage
 
-### LOI-2 : Le système accepte l'isolement comme état normal
+### LOI-2 : Le systÃ¨me accepte l'isolement comme Ã©tat normal
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-L'intégration respecte LOI-2 :
+L'intÃ©gration respecte LOI-2 :
 - En isolement, la supervision continue avec les signaux locaux
 - Les contraintes locales restent actives
-- Aucune dégradation de l'intégration en mode isolé
+- Aucune dÃ©gradation de l'intÃ©gration en mode isolÃ©
 
 ### LOI-4 : Pas de temps global requis
 
-**Conformité :** ✅ **Conforme**
+**ConformitÃ© :** âœ… **Conforme**
 
-L'intégration respecte LOI-4 :
+L'intÃ©gration respecte LOI-4 :
 - Les horodatages sont locaux
 - Aucune synchronisation temporelle n'est requise
-- La corrélation ne dépend pas de timestamps synchronisés
+- La corrÃ©lation ne dÃ©pend pas de timestamps synchronisÃ©s
 
 ---
 
 ## 17. Exemples
 
-### 17.1 Notification de changement d'état de confiance
+### 17.1 Notification de changement d'Ã©tat de confiance
 
 **Notification WorrySentinel :**
 ```
@@ -739,7 +739,7 @@ L'intégration respecte LOI-4 :
   "payload": {
     "previous_state": "T0",
     "new_state": "T2",
-    "transition_reason": "Dérives multiples détectées, corrélation confirmée",
+    "transition_reason": "DÃ©rives multiples dÃ©tectÃ©es, corrÃ©lation confirmÃ©e",
     "constraints": {
       "quota_reduction_percent": 20,
       "priority_freeze": false
@@ -770,7 +770,7 @@ L'intégration respecte LOI-4 :
 }
 ```
 
-### 17.3 Signalement de dérive (reçu par WorrySentinel)
+### 17.3 Signalement de dÃ©rive (reÃ§u par WorrySentinel)
 
 **Signalement LogisticsSteward :**
 ```
@@ -790,7 +790,7 @@ L'intégration respecte LOI-4 :
 }
 ```
 
-### 17.4 Levée de durcissement
+### 17.4 LevÃ©e de durcissement
 
 **Directive WorrySentinel :**
 ```
@@ -800,7 +800,7 @@ L'intégration respecte LOI-4 :
   "payload": {
     "lift_id": "lift-001",
     "directive_id": "hard-001",
-    "justification": "Menace résolue, consommation normalisée"
+    "justification": "Menace rÃ©solue, consommation normalisÃ©e"
   },
   "timestamp": "2026-01-28T18:00:00Z",
   "requires_ack": true
@@ -811,67 +811,68 @@ L'intégration respecte LOI-4 :
 
 ## 18. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit l'interface et le protocole que WorrySentinel doit respecter pour superviser LogisticsSteward.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit l'interface et le protocole que WorrySentinel doit respecter pour superviser LogisticsSteward.
 
-Toute implémentation de l'intégration avec LogisticsSteward doit respecter ce contrat. Toute violation entraîne un comportement non conforme.
+Toute implÃ©mentation de l'intÃ©gration avec LogisticsSteward doit respecter ce contrat. Toute violation entraÃ®ne un comportement non conforme.
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT — Normatif  
-**Dépendances :**
+**Statut :** CONTRAT â€” Normatif  
+**DÃ©pendances :**
 - WorrySentinel - Documentation Fondatrice v1.2 (Section 9)
 - LogisticsSteward - Documentation Fondatrice v1.0.0 (Section 8.4)
 - LogisticsSteward - WorrySentinel Integration Contract v1.0
-- Miyukini Conceptual References - Lois Autonomie Système v1.1
+- Miyukini Conceptual References - Lois Autonomie SystÃ¨me v1.1
 
 ---
 
-## 19. Mini log de génération
+## 19. Mini log de gÃ©nÃ©ration
 
-### Décision éditoriale E1 : Point de vue WorrySentinel
+### DÃ©cision Ã©ditoriale E1 : Point de vue WorrySentinel
 
-**Décision prise :** Ce document est rédigé du point de vue de WorrySentinel (superviseur), contrairement au document symétrique qui est du point de vue de LogisticsSteward (supervisé). Cette approche assure une documentation complète et cohérente des deux côtés.
+**DÃ©cision prise :** Ce document est rÃ©digÃ© du point de vue de WorrySentinel (superviseur), contrairement au document symÃ©trique qui est du point de vue de LogisticsSteward (supervisÃ©). Cette approche assure une documentation complÃ¨te et cohÃ©rente des deux cÃ´tÃ©s.
 
-**Application :** Tout le document est structuré autour du rôle de supervision de WorrySentinel.
+**Application :** Tout le document est structurÃ© autour du rÃ´le de supervision de WorrySentinel.
 
-### Décision éditoriale E2 : Cohérence avec le document symétrique
+### DÃ©cision Ã©ditoriale E2 : CohÃ©rence avec le document symÃ©trique
 
-**Décision prise :** Ce document doit être cohérent avec [LogisticsSteward - WorrySentinel Integration Contract](../../../LogisticsSteward/contracts/integration/LogisticsSteward%20-%20WorrySentinel%20Integration%20Contract.md). Les mêmes structures de données, les mêmes règles, et les mêmes invariants sont utilisés.
+**DÃ©cision prise :** Ce document doit Ãªtre cohÃ©rent avec [LogisticsSteward - WorrySentinel Integration Contract](../../../LogisticsSteward/contracts/integration/LogisticsSteward%20-%20WorrySentinel%20Integration%20Contract.md). Les mÃªmes structures de donnÃ©es, les mÃªmes rÃ¨gles, et les mÃªmes invariants sont utilisÃ©s.
 
-**Application :** Les structures de données et les règles sont alignées avec le document symétrique.
+**Application :** Les structures de donnÃ©es et les rÃ¨gles sont alignÃ©es avec le document symÃ©trique.
 
-### Décision éditoriale E3 : Supervision vs Substitution
+### DÃ©cision Ã©ditoriale E3 : Supervision vs Substitution
 
-**Décision prise :** Le document insiste sur le fait que WorrySentinel supervise sans se substituer à LogisticsSteward. Cette distinction est critique pour préserver la séparation des responsabilités.
+**DÃ©cision prise :** Le document insiste sur le fait que WorrySentinel supervise sans se substituer Ã  LogisticsSteward. Cette distinction est critique pour prÃ©server la sÃ©paration des responsabilitÃ©s.
 
-**Application :** Section 4.1 et Section 5 établissent clairement cette distinction.
+**Application :** Section 4.1 et Section 5 Ã©tablissent clairement cette distinction.
 
 ### Warning W1 : Risque de confusion supervision/arbitrage
 
-**Warning rencontré :** Risque que WorrySentinel prenne des décisions d'allocation déguisées en contraintes de sécurité.
+**Warning rencontrÃ© :** Risque que WorrySentinel prenne des dÃ©cisions d'allocation dÃ©guisÃ©es en contraintes de sÃ©curitÃ©.
 
-**Décision prise :** Les interdictions absolues (Section 5) clarifient que WorrySentinel ne décide jamais de l'allocation et ne définit jamais les quotas.
+**DÃ©cision prise :** Les interdictions absolues (Section 5) clarifient que WorrySentinel ne dÃ©cide jamais de l'allocation et ne dÃ©finit jamais les quotas.
 
-**Correction effectuée :** Section 5 explicite les interdictions, INV-WS-LS-4 établit que WorrySentinel ne prend aucune décision d'allocation.
+**Correction effectuÃ©e :** Section 5 explicite les interdictions, INV-WS-LS-4 Ã©tablit que WorrySentinel ne prend aucune dÃ©cision d'allocation.
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-**Vérification effectuée :**
-- ✅ Cohérence avec WorrySentinel - Documentation Fondatrice : Confirmée (Section 9 respectée)
-- ✅ Cohérence avec LogisticsSteward - Documentation Fondatrice : Confirmée (Section 8.4)
-- ✅ Cohérence avec LogisticsSteward - WorrySentinel Integration Contract : Confirmée (symétrie)
-- ✅ Conformité LOI-1 : Confirmée (aucune dépendance externe)
-- ✅ Conformité LOI-2 : Confirmée (isolement géré)
-- ✅ Conformité LOI-4 : Confirmée (pas de temps global requis)
-- ✅ Pas de décision d'allocation par WorrySentinel : Confirmée (INV-WS-LS-4)
-- ✅ Supervision sans substitution : Confirmée (INV-WS-LS-3)
-- ✅ Traçabilité complète : Confirmée (INV-WS-LS-7)
-- ✅ Règles RÈGLE-WS-LS-1 à RÈGLE-WS-LS-4 respectées : Confirmée
+**VÃ©rification effectuÃ©e :**
+- âœ… CohÃ©rence avec WorrySentinel - Documentation Fondatrice : ConfirmÃ©e (Section 9 respectÃ©e)
+- âœ… CohÃ©rence avec LogisticsSteward - Documentation Fondatrice : ConfirmÃ©e (Section 8.4)
+- âœ… CohÃ©rence avec LogisticsSteward - WorrySentinel Integration Contract : ConfirmÃ©e (symÃ©trie)
+- âœ… ConformitÃ© LOI-1 : ConfirmÃ©e (aucune dÃ©pendance externe)
+- âœ… ConformitÃ© LOI-2 : ConfirmÃ©e (isolement gÃ©rÃ©)
+- âœ… ConformitÃ© LOI-4 : ConfirmÃ©e (pas de temps global requis)
+- âœ… Pas de dÃ©cision d'allocation par WorrySentinel : ConfirmÃ©e (INV-WS-LS-4)
+- âœ… Supervision sans substitution : ConfirmÃ©e (INV-WS-LS-3)
+- âœ… TraÃ§abilitÃ© complÃ¨te : ConfirmÃ©e (INV-WS-LS-7)
+- âœ… RÃ¨gles RÃˆGLE-WS-LS-1 Ã  RÃˆGLE-WS-LS-4 respectÃ©es : ConfirmÃ©e
 
-**Conclusion :** Aucune contradiction détectée. Le document est cohérent et non ambigu.
+**Conclusion :** Aucune contradiction dÃ©tectÃ©e. Le document est cohÃ©rent et non ambigu.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

@@ -1,4 +1,4 @@
-# MiyuSQL — Index de navigation
+﻿# MiyuSQL â€” Index de navigation
 
 ## Contexte
 
@@ -8,7 +8,7 @@ Ce dossier contient la documentation dediee au kit MiyuSQL et a ses outils indiv
 
 **Strate :** 6 (Tools & Toolkits)  
 **ToolkitId :** `toolkit.data.miyusql`  
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -45,8 +45,11 @@ Ce dossier contient la documentation dediee au kit MiyuSQL et a ses outils indiv
 
 | Document | Lien |
 |----------|------|
-| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
-| Toolkit Composition Contract | [Master Butler - Toolkit Composition Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Toolkit%20Composition%20Contract.md) |
-| KindMother | [KindMother - Index](../../core/KindMother/_index.md) |
-| MiyukiniAdmin - Cycle Tests Contract | [MiyukiniAdmin - Cycle Tests Contract](../../core/MiyukiniAdmin/contracts/testing/MiyukiniAdmin%20-%20Cycle%20Tests%20Contract.md) (test MiyuSQL Full Path / MiyukiniSQLtest) |
+| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Toolkit Composition Contract | [Master Butler - Toolkit Composition Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Toolkit%20Composition%20Contract.md) |
+| KindMother | [KindMother - Index](..//..//cores//KindMother//_index.md) |
+| MiyukiniAdmin - Cycle Tests Contract | [MiyukiniAdmin - Cycle Tests Contract](..//..//admin//MiyukiniAdmin//contracts//testing//MiyukiniAdmin%20-%20Cycle%20Tests%20Contract.md) (test MiyuSQL Full Path / MiyukiniSQLtest) |
+
+
+

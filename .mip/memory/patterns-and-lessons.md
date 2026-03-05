@@ -75,3 +75,7 @@
 - **AP-09 : References LOI-N non propagees apres ajout de loi** (Mar 2026, MASS)
   6 occurrences de "LOI-1 a LOI-8" restees non mises a jour apres ajout de Loi 9.
   **Fix** : Apres ajout/suppression d'une Loi, grep `LOI-.*LOI-[0-9]` dans tout le workspace.
+
+- **AP-10 : Gate P5 implicite non tracee** (Mar 2026, MIP sequence close)
+  La demande utilisateur de cloture doit etre traduite explicitement en verdict P5.
+  **Fix** : Ecrire dans `p5-trace.md` la phrase source utilisateur + verdict + reserves.

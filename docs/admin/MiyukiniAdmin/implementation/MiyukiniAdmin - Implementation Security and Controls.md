@@ -1,4 +1,4 @@
-# MiyukiniAdmin — Implementation Security and Controls
+﻿# MiyukiniAdmin â€” Implementation Security and Controls
 
 ## 1. Contexte
 
@@ -8,7 +8,7 @@ Ce document definit l'**implementation** des fonctionnalites de **controles et d
 - [Auth and First-Boot Contract](../contracts/security/MiyukiniAdmin%20-%20Auth%20and%20First-Boot%20Contract.md)
 - [Authentication Contract](../contracts/security/MiyukiniAdmin%20-%20Authentication%20Contract.md)
 - [Permission Contract](../contracts/security/MiyukiniAdmin%20-%20Permission%20Contract.md)
-- [Environment Identity Protocol EIP](../../../protocols/MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md)
+- [Environment Identity Protocol EIP](..//..//..//contrats//MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md)
 
 ---
 
@@ -33,12 +33,12 @@ Ce document **ne couvre pas** :
 
 | Module / Service | Role | Contrat de reference |
 |------------------|------|------------------------|
-| **EnvironmentStateService** | Detection etat (VIERGE, INITIALISE, COMPROMIS), verification integrite EIP/registre/schema | Auth and First-Boot 3.1 à 3.5 |
-| **BootstrapLockService** | Application / levée du verrou StrongFather (bootstrap lock) | Auth and First-Boot 4 |
+| **EnvironmentStateService** | Detection etat (VIERGE, INITIALISE, COMPROMIS), verification integrite EIP/registre/schema | Auth and First-Boot 3.1 Ã  3.5 |
+| **BootstrapLockService** | Application / levÃ©e du verrou StrongFather (bootstrap lock) | Auth and First-Boot 4 |
 | **InstallationFlowService** | Parcours Futur Admin, creation premier compte, EIP | Auth and First-Boot 5 |
-| **SecurityResponseService** | Reponse securitaire (mode degrade, page « Environnement compromis ») | Auth and First-Boot 3.5 |
+| **SecurityResponseService** | Reponse securitaire (mode degrade, page Â« Environnement compromis Â») | Auth and First-Boot 3.5 |
 | **AutoRecoveryService** | Recovery/rollback automatique, declenchement, succes/echec | Auth and First-Boot 3.5.4 |
-| **PreDestructionBackupService** | Sauvegarde compressee avant destruction (si pas de sauvegarde locale antérieure) | Auth and First-Boot 3.5.4.3 |
+| **PreDestructionBackupService** | Sauvegarde compressee avant destruction (si pas de sauvegarde locale antÃ©rieure) | Auth and First-Boot 3.5.4.3 |
 | **DestructionAndReinitService** | Destruction DB, reinitialisation vierge, memoire de corruption | Auth and First-Boot 3.5.4.3, 3.5.4.4 |
 | **AuthService** | Login, MFA, session, rate limiting, registre comptes admin | Authentication Contract |
 | **PermissionService** | RBAC, roles (Admin, Recovery, Audit), verification capacites | Permission Contract |
@@ -47,34 +47,34 @@ Ce document **ne couvre pas** :
 
 ```
 miyukini_admin/
-├── src/
-│   ├── main.rs                    # Demarrage + detection etat + routage (login / installation / compromis / dashboard)
-│   ├── config.rs
-│   ├── api_routes.rs
-│   ├── api_handlers.rs
-│   ├── services/
-│   │   ├── environment_state.rs   # EnvironmentStateService
-│   │   ├── bootstrap_lock.rs      # BootstrapLockService (ou integre StrongFather via bridge)
-│   │   ├── installation_flow.rs   # InstallationFlowService
-│   │   ├── security_response.rs   # SecurityResponseService
-│   │   ├── auto_recovery.rs       # AutoRecoveryService
-│   │   ├── pre_destruction_backup.rs # PreDestructionBackupService
-│   │   ├── destruction_reinit.rs  # DestructionAndReinitService
-│   │   ├── auth.rs                # AuthService (login, MFA, session, rate limit)
-│   │   ├── permission.rs           # PermissionService (RBAC, check capability)
-│   │   ├── backup_service.rs      # Deja existant ; etendre pour backup pre-destruction
-│   │   ├── security_service.rs    # Deja existant ; etendre pour niveaux + reponse securitaire
-│   │   └── ...
-│   ├── models/
-│   │   ├── environment_state.rs   # Enum VIERGE | INITIALISE | COMPROMIS
-│   │   ├── admin_account.rs       # Compte admin (account_id, username, password_hash, role, mfa_*)
-│   │   ├── session.rs             # Session (session_id, account_id, role, expires_at, ip, user_agent)
-│   │   └── corruption_memory.rs   # Memoire de corruption passee (timestamp, reason)
-│   ├── middleware/
-│   │   ├── auth_middleware.rs     # Verification session, redirection login si invalide
-│   │   ├── permission_middleware.rs # Verification capacite avant action
-│   │   └── rate_limit_middleware.rs  # Rate limiting login / IP
-│   └── audit_logger.rs
+â”œâ”€â”€ src/
+â”‚   â”œâ”€â”€ main.rs                    # Demarrage + detection etat + routage (login / installation / compromis / dashboard)
+â”‚   â”œâ”€â”€ config.rs
+â”‚   â”œâ”€â”€ api_routes.rs
+â”‚   â”œâ”€â”€ api_handlers.rs
+â”‚   â”œâ”€â”€ services/
+â”‚   â”‚   â”œâ”€â”€ environment_state.rs   # EnvironmentStateService
+â”‚   â”‚   â”œâ”€â”€ bootstrap_lock.rs      # BootstrapLockService (ou integre StrongFather via bridge)
+â”‚   â”‚   â”œâ”€â”€ installation_flow.rs   # InstallationFlowService
+â”‚   â”‚   â”œâ”€â”€ security_response.rs   # SecurityResponseService
+â”‚   â”‚   â”œâ”€â”€ auto_recovery.rs       # AutoRecoveryService
+â”‚   â”‚   â”œâ”€â”€ pre_destruction_backup.rs # PreDestructionBackupService
+â”‚   â”‚   â”œâ”€â”€ destruction_reinit.rs  # DestructionAndReinitService
+â”‚   â”‚   â”œâ”€â”€ auth.rs                # AuthService (login, MFA, session, rate limit)
+â”‚   â”‚   â”œâ”€â”€ permission.rs           # PermissionService (RBAC, check capability)
+â”‚   â”‚   â”œâ”€â”€ backup_service.rs      # Deja existant ; etendre pour backup pre-destruction
+â”‚   â”‚   â”œâ”€â”€ security_service.rs    # Deja existant ; etendre pour niveaux + reponse securitaire
+â”‚   â”‚   â””â”€â”€ ...
+â”‚   â”œâ”€â”€ models/
+â”‚   â”‚   â”œâ”€â”€ environment_state.rs   # Enum VIERGE | INITIALISE | COMPROMIS
+â”‚   â”‚   â”œâ”€â”€ admin_account.rs       # Compte admin (account_id, username, password_hash, role, mfa_*)
+â”‚   â”‚   â”œâ”€â”€ session.rs             # Session (session_id, account_id, role, expires_at, ip, user_agent)
+â”‚   â”‚   â””â”€â”€ corruption_memory.rs   # Memoire de corruption passee (timestamp, reason)
+â”‚   â”œâ”€â”€ middleware/
+â”‚   â”‚   â”œâ”€â”€ auth_middleware.rs     # Verification session, redirection login si invalide
+â”‚   â”‚   â”œâ”€â”€ permission_middleware.rs # Verification capacite avant action
+â”‚   â”‚   â””â”€â”€ rate_limit_middleware.rs  # Rate limiting login / IP
+â”‚   â””â”€â”€ audit_logger.rs
 ```
 
 ---
@@ -94,17 +94,17 @@ miyukini_admin/
    - Verifier existence registre admin (au moins une entree ou fichier/table presente).
    - Verifier existence schema bootstrap (tables noyau presentes).
 
-2. **Si aucun artefact present** (tout absent ou vide coherent) → **VIERGE**.
+2. **Si aucun artefact present** (tout absent ou vide coherent) â†’ **VIERGE**.
 
 3. **Si au moins un artefact present** : verification **integrite** et **coherence**.
-   - **EIP** : recuperer blob ; avec cle derivee (secret bootstrap), dechiffrer ; verifier tag AEAD ; verifier `integrity_hash` vs etat courant (ordre chargement, contrats) ; verifier `protocol_version` supporte. Si tag invalide ou hash incoherent → **COMPROMIS**.
-   - **Registre admin** : structure valide ; au moins un compte non revoque et coherent (hash lisible). Si structure corrompue ou aucun compte valide alors que flag « environnement initialise » present → **COMPROMIS**.
-   - **Schema** : checksum ou structure complete (tables attendues, colonnes). Si tronque ou incoherent → **COMPROMIS**.
-   - **Coherence globale** : EIP indique iteration/version alors que registre vide ; ou schema present sans blob EIP ; etc. → **COMPROMIS**.
+   - **EIP** : recuperer blob ; avec cle derivee (secret bootstrap), dechiffrer ; verifier tag AEAD ; verifier `integrity_hash` vs etat courant (ordre chargement, contrats) ; verifier `protocol_version` supporte. Si tag invalide ou hash incoherent â†’ **COMPROMIS**.
+   - **Registre admin** : structure valide ; au moins un compte non revoque et coherent (hash lisible). Si structure corrompue ou aucun compte valide alors que flag Â« environnement initialise Â» present â†’ **COMPROMIS**.
+   - **Schema** : checksum ou structure complete (tables attendues, colonnes). Si tronque ou incoherent â†’ **COMPROMIS**.
+   - **Coherence globale** : EIP indique iteration/version alors que registre vide ; ou schema present sans blob EIP ; etc. â†’ **COMPROMIS**.
 
-4. **Si tout present et valide** → **INITIALISE**.
+4. **Si tout present et valide** â†’ **INITIALISE**.
 
-5. **Si presence mais invalide ou incoherent** → **COMPROMIS**.
+5. **Si presence mais invalide ou incoherent** â†’ **COMPROMIS**.
 
 **Implementation (pseudo-code) :**
 
@@ -159,9 +159,9 @@ Lorsque l'etat est **VIERGE**, StrongFather applique un **verrou bootstrap** : s
 **Implementation :**
 
 - **Cote MiyukiniAdmin** : ne pas exposer d'actions metier (dashboard metier, liste Operateurs metier) tant que l'etat est VIERGE ; exposer uniquement le **parcours d'installation** (routes `/setup`, `/setup/eip`, `/setup/config`, `/setup/create-admin`, etc.).
-- **Cote StrongFather (via BondingBrother)** : la politique « bootstrap lock » est activee lorsque l'environnement est vierge ; toute requete dont la source n'est pas MiyukiniAdmin ou un Core est refusee. L'implementation peut etre un flag dans la config StrongFather ou une decision conditionnelle (si `environment_state == Vierge` alors refuser les requetes Operateurs).
+- **Cote StrongFather (via BondingBrother)** : la politique Â« bootstrap lock Â» est activee lorsque l'environnement est vierge ; toute requete dont la source n'est pas MiyukiniAdmin ou un Core est refusee. L'implementation peut etre un flag dans la config StrongFather ou une decision conditionnelle (si `environment_state == Vierge` alors refuser les requetes Operateurs).
 
-**Levée du verrou :** Lors de la finalisation du parcours d'installation (compte admin cree, EIP genere, config minimale validee), MiyukiniAdmin enregistre « environnement initialise » et demande a StrongFather (via BondingBrother) de desactiver la politique bootstrap lock.
+**LevÃ©e du verrou :** Lors de la finalisation du parcours d'installation (compte admin cree, EIP genere, config minimale validee), MiyukiniAdmin enregistre Â« environnement initialise Â» et demande a StrongFather (via BondingBrother) de desactiver la politique bootstrap lock.
 
 ---
 
@@ -171,19 +171,19 @@ Lorsque l'etat est **VIERGE**, StrongFather applique un **verrou bootstrap** : s
 
 - **Route** : `/setup` (ou `/installation`) lorsque `environment_state == Vierge`.
 - **Redirection** : Si l'utilisateur accede a `/` ou `/dashboard` et que l'etat est VIERGE, rediriger vers `/setup`.
-- **Etapes UI** : Accueil installation → Generation EIP (appel BondingBrother/Cores) → Configuration minimale → Creation compte admin (formulaire username, mot de passe, MFA) → Finalisation (enregistrement « environnement initialise », levée verrou) → Redirection vers `/dashboard`.
+- **Etapes UI** : Accueil installation â†’ Generation EIP (appel BondingBrother/Cores) â†’ Configuration minimale â†’ Creation compte admin (formulaire username, mot de passe, MFA) â†’ Finalisation (enregistrement Â« environnement initialise Â», levÃ©e verrou) â†’ Redirection vers `/dashboard`.
 
 ### 6.2 Creation compte admin
 
-- **Formulaire** : username (unique), mot de passe (politique : longueur ≥ 12, complexite), MFA (TOTP ou WebAuthn).
+- **Formulaire** : username (unique), mot de passe (politique : longueur â‰¥ 12, complexite), MFA (TOTP ou WebAuthn).
 - **Stockage** : hash mot de passe (Argon2id), role = Admin par defaut, secret MFA chiffre (AES-256-GCM) si TOTP.
 - **Audit** : evenement `FIRST_ADMIN_CREATED` avec timestamp, account_id (pas de mot de passe ni secret).
 
 ### 6.3 Generation EIP
 
-- MiyukiniAdmin envoie une requete « generer identite environnement » via BondingBrother.
+- MiyukiniAdmin envoie une requete Â« generer identite environnement Â» via BondingBrother.
 - Les Cores (Kernel + Cores) produisent le payload EIP ; chiffrement (AEAD) ; KindMother persiste le blob.
-- Succes → etape suivante du parcours. Echec → message explicite, pas de destruction.
+- Succes â†’ etape suivante du parcours. Echec â†’ message explicite, pas de destruction.
 
 ---
 
@@ -192,13 +192,13 @@ Lorsque l'etat est **VIERGE**, StrongFather applique un **verrou bootstrap** : s
 ### 7.1 Mesures immediates
 
 - **WorrySentinel** : demander (via BondingBrother) le passage en etat **T3** ou **T4** (mode degrade / lockdown).
-- **Page dediee** : pour toute requete UI lorsque `environment_state == Compromis`, servir une page « Environnement compromis » (pas de formulaire login, pas de lien vers parcours installation). Message : environnement en etat de securite, procedure de recovery requise (ou recovery automatique en cours selon politique).
+- **Page dediee** : pour toute requete UI lorsque `environment_state == Compromis`, servir une page Â« Environnement compromis Â» (pas de formulaire login, pas de lien vers parcours installation). Message : environnement en etat de securite, procedure de recovery requise (ou recovery automatique en cours selon politique).
 - **Audit** : enregistrer `ENVIRONMENT_COMPROMISED` avec timestamp et indicateurs (EIP invalide, registre incoherent, etc.).
 - **Alerte** : selon politique (log, notification).
 
 ### 7.2 Routage
 
-- Si `environment_state == Compromis` : toutes les routes (sauf peut-etre `/health`) renvoient la page « Environnement compromis » ou un JSON `{ "status": "compromised" }` pour l'API.
+- Si `environment_state == Compromis` : toutes les routes (sauf peut-etre `/health`) renvoient la page Â« Environnement compromis Â» ou un JSON `{ "status": "compromised" }` pour l'API.
 
 ---
 
@@ -206,7 +206,7 @@ Lorsque l'etat est **VIERGE**, StrongFather applique un **verrou bootstrap** : s
 
 ### 8.1 Declenchement
 
-- **Condition** : `environment_state == Compromis` **et** (option politique) impossibilite d'intervention humaine : ex. delai sans login reussi, ou detection explicite « interface compromise » (auth/registre admin/MiyukiniAdmin alteres).
+- **Condition** : `environment_state == Compromis` **et** (option politique) impossibilite d'intervention humaine : ex. delai sans login reussi, ou detection explicite Â« interface compromise Â» (auth/registre admin/MiyukiniAdmin alteres).
 - **Implementation** : au demarrage, apres avoir detecte COMPROMIS, verifier si une intervention humaine est possible (ex. au moins un compte admin valide et login possible). Si non (ou apres timeout), lancer **AutoRecoveryService::run()**.
 
 ### 8.2 Algorithme AutoRecoveryService
@@ -217,20 +217,20 @@ Lorsque l'etat est **VIERGE**, StrongFather applique un **verrou bootstrap** : s
 
 ### 8.3 Point d'appel
 
-- Dans `main` ou un task dedie : apres `detect()` si `Compromis`, evaluer « humain peut intervenir » ; si non, lancer `AutoRecoveryService::run().await`.
+- Dans `main` ou un task dedie : apres `detect()` si `Compromis`, evaluer Â« humain peut intervenir Â» ; si non, lancer `AutoRecoveryService::run().await`.
 
 ---
 
-## 9. Sauvegarde pre-destruction (si pas de sauvegarde locale antérieure)
+## 9. Sauvegarde pre-destruction (si pas de sauvegarde locale antÃ©rieure)
 
 ### 9.1 Principe
 
-Avant de detruire les donnees DB (echec de la recovery automatique), **si aucune sauvegarde locale antérieure** des donnees DB n'existe : effectuer une **sauvegarde** des donnees DB, la **compresser** (zip, tar.gz, etc.), la stocker dans un emplacement dedie (ex. `data/backups/pre_destruction_<timestamp>.tar.gz`).
+Avant de detruire les donnees DB (echec de la recovery automatique), **si aucune sauvegarde locale antÃ©rieure** des donnees DB n'existe : effectuer une **sauvegarde** des donnees DB, la **compresser** (zip, tar.gz, etc.), la stocker dans un emplacement dedie (ex. `data/backups/pre_destruction_<timestamp>.tar.gz`).
 
 ### 9.2 Algorithme PreDestructionBackupService
 
-1. **Verifier** : lister les sauvegardes locales existantes (ex. repertoire `data/backups/` ou table des backups). Si au moins une sauvegarde locale **anterieure** (avant ce cycle de recovery) existe → **ne pas** creer de nouvelle sauvegarde ; passer a la destruction.
-2. **Si aucune sauvegarde locale antérieure** :
+1. **Verifier** : lister les sauvegardes locales existantes (ex. repertoire `data/backups/` ou table des backups). Si au moins une sauvegarde locale **anterieure** (avant ce cycle de recovery) existe â†’ **ne pas** creer de nouvelle sauvegarde ; passer a la destruction.
+2. **Si aucune sauvegarde locale antÃ©rieure** :
    - Exporter les donnees DB (dump SQL ou export KindMother selon protocole).
    - Compresser (ex. `flate2` + tar, ou `zip`).
    - Stocker dans un fichier dedie (ex. `data/backups/pre_destruction_<timestamp>.tar.gz`).
@@ -301,7 +301,7 @@ impl DestructionAndReinitService {
 
 - **Route** : `POST /api/auth/login` (body : username, password).
 - **Verification** : rate limit (par IP et par compte) ; recherche compte par username ; verification hash mot de passe ; si MFA actif, reponse `{ "require_mfa": true }` et enregistrement d'un token temporaire ; sinon creation session, retour token/session_id.
-- **Reponses generiques** : en cas d'echec, toujours « Identifiants invalides » (pas de fuite d'information).
+- **Reponses generiques** : en cas d'echec, toujours Â« Identifiants invalides Â» (pas de fuite d'information).
 
 ### 11.3 MFA
 
@@ -318,7 +318,7 @@ impl DestructionAndReinitService {
 ### 11.5 Rate limiting
 
 - **Par compte** : apres N echecs (ex. 5) en fenetre (ex. 5 min), verrouiller le compte (`locked_until = now + 15 min`).
-- **Par IP** : apres N echecs (ex. 10) en fenetre, bloquer l'IP (retourner 429 ou page « Trop de tentatives »).
+- **Par IP** : apres N echecs (ex. 10) en fenetre, bloquer l'IP (retourner 429 ou page Â« Trop de tentatives Â»).
 - **Implementation** : middleware ou compteur en memoire/fichier par IP et par account_id.
 
 ---
@@ -333,12 +333,12 @@ impl DestructionAndReinitService {
 
 ### 12.2 Verification avant action
 
-- **Middleware** : pour chaque route protegee, associer une **capacite requise** (ex. `GET /api/security/level` → `admin.security.level.read`). Dans le middleware, recuperer le role de la session ; appeler `PermissionService::has_capability(role, capability)` ; si non, retourner 403.
-- **Cote handler** : pour les actions a validation StrongFather, apres verification permission, envoyer une demande de decision a StrongFather via BondingBrother ; si DENIED, retourner 403 ou message « Action refusee par la gouvernance ».
+- **Middleware** : pour chaque route protegee, associer une **capacite requise** (ex. `GET /api/security/level` â†’ `admin.security.level.read`). Dans le middleware, recuperer le role de la session ; appeler `PermissionService::has_capability(role, capability)` ; si non, retourner 403.
+- **Cote handler** : pour les actions a validation StrongFather, apres verification permission, envoyer une demande de decision a StrongFather via BondingBrother ; si DENIED, retourner 403 ou message Â« Action refusee par la gouvernance Â».
 
 ### 12.3 UI
 
-- **Navigation** : filtrer les liens du menu selon les capacites du role (ex. masquer « Recovery » pour Admin, masquer « Changement niveau securite » pour Audit).
+- **Navigation** : filtrer les liens du menu selon les capacites du role (ex. masquer Â« Recovery Â» pour Admin, masquer Â« Changement niveau securite Â» pour Audit).
 - **Routes** : les routes cote serveur doivent refuser (403) si la capacite est absente, meme en cas d'acces direct par URL.
 
 ---
@@ -349,11 +349,11 @@ impl DestructionAndReinitService {
 
 1. Charger la configuration.
 2. Initialiser le Kernel (Id, Logger, Clock, Config, Lifecycle).
-3. **Detecter l'etat** : `EnvironmentStateService::detect()` → `state`.
+3. **Detecter l'etat** : `EnvironmentStateService::detect()` â†’ `state`.
 4. Si **VIERGE** : configurer les routes pour `/setup` uniquement (et health) ; activer le verrou StrongFather (via bridge ou config).
 5. Si **INITIALISE** : configurer les routes normales (dashboard, API) ; middleware auth sur les routes protegees ; pas de verrou.
-6. Si **COMPROMIS** : configurer la page « Environnement compromis » ; demander a WorrySentinel T3/T4 ; evaluer « humain peut intervenir » ; si non, lancer en arriere-plan `AutoRecoveryService::run()` (ou apres un delai selon politique).
-7. Démarrer le serveur HTTP.
+6. Si **COMPROMIS** : configurer la page Â« Environnement compromis Â» ; demander a WorrySentinel T3/T4 ; evaluer Â« humain peut intervenir Â» ; si non, lancer en arriere-plan `AutoRecoveryService::run()` (ou apres un delai selon politique).
+7. DÃ©marrer le serveur HTTP.
 
 ### 13.2 Routes selon etat
 
@@ -361,13 +361,13 @@ impl DestructionAndReinitService {
 |------|---------------------|
 | **VIERGE** | `/setup`, `/setup/*`, `/health` |
 | **INITIALISE** | `/`, `/dashboard`, `/database`, `/tests`, `/api/*` (avec auth + permission selon role), `/login` |
-| **COMPROMIS** | `/` → page « Environnement compromis », `/health` (optionnel) |
+| **COMPROMIS** | `/` â†’ page Â« Environnement compromis Â», `/health` (optionnel) |
 
 ### 13.3 Middleware chain
 
 - **Rate limit** : sur `POST /api/auth/login` (et eventuellement autres endpoints sensibles).
-- **Auth** : sur toutes les routes `/api/*` sauf `/api/auth/login` et `/api/status` (si public). Si session invalide ou absente → 401 ou redirection vers `/login`.
-- **Permission** : sur chaque route protegee, verification de la capacite requise ; si absente → 403.
+- **Auth** : sur toutes les routes `/api/*` sauf `/api/auth/login` et `/api/status` (si public). Si session invalide ou absente â†’ 401 ou redirection vers `/login`.
+- **Permission** : sur chaque route protegee, verification de la capacite requise ; si absente â†’ 403.
 
 ---
 
@@ -386,7 +386,7 @@ impl DestructionAndReinitService {
 | **recovery.auto_recovery_delay_secs** | 300 | Delai avant recovery automatique (optionnel) |
 | **backup.pre_destruction_compression** | "tar.gz" | Format compression |
 
-### 14.2 Politique « humain ne peut pas intervenir »
+### 14.2 Politique Â« humain ne peut pas intervenir Â»
 
 - **Option A** : des que l'etat est COMPROMIS, considerer que l'humain ne peut pas intervenir (recovery automatique immediate).
 - **Option B** : attendre un delai (ex. 5 min) sans aucun login reussi ; si aucun login, lancer la recovery automatique.
@@ -400,18 +400,18 @@ L'implementation doit documenter la politique choisie et la rendre configurable 
 
 ### 15.1 Conformite aux contrats
 
-- **Auth and First-Boot** : detection VIERGE/INITIALISE/COMPROMIS conforme aux criteres ; verrou bootstrap applique en VIERGE ; parcours installation uniquement en VIERGE ; reponse securitaire en COMPROMIS ; recovery automatique lorsque interface compromise et humain ne peut pas intervenir ; sauvegarde pre-destruction si pas de sauvegarde locale antérieure ; destruction et reinit avec memoire de corruption.
+- **Auth and First-Boot** : detection VIERGE/INITIALISE/COMPROMIS conforme aux criteres ; verrou bootstrap applique en VIERGE ; parcours installation uniquement en VIERGE ; reponse securitaire en COMPROMIS ; recovery automatique lorsque interface compromise et humain ne peut pas intervenir ; sauvegarde pre-destruction si pas de sauvegarde locale antÃ©rieure ; destruction et reinit avec memoire de corruption.
 - **Authentication** : registre admin, login, MFA, session, rate limiting, audit des evenements auth conformes au contrat.
 - **Permission** : roles Admin/Recovery/Audit, matrice capacites, verification avant action, pas d'escalade conformes au contrat.
 
 ### 15.2 Tests recommandes
 
 - **Unitaire** : `EnvironmentStateService::detect()` avec mocks (EIP absent/present valide/present invalide, registre vide/present valide/corrompu, schema vide/present tronque).
-- **Unitaire** : `PreDestructionBackupService::run_if_needed()` avec et sans sauvegarde locale antérieure.
+- **Unitaire** : `PreDestructionBackupService::run_if_needed()` avec et sans sauvegarde locale antÃ©rieure.
 - **Unitaire** : `PermissionService::has_capability(role, capability)` pour toutes les paires (role, capacite) de la matrice.
-- **Integration** : demarrage avec DB vide → etat VIERGE, route `/setup` accessible.
-- **Integration** : demarrage avec EIP invalide (tag corrompu) → etat COMPROMIS, page « Environnement compromis » servie.
-- **Integration** : login avec rate limit → verrouillage compte apres N echecs.
+- **Integration** : demarrage avec DB vide â†’ etat VIERGE, route `/setup` accessible.
+- **Integration** : demarrage avec EIP invalide (tag corrompu) â†’ etat COMPROMIS, page Â« Environnement compromis Â» servie.
+- **Integration** : login avec rate limit â†’ verrouillage compte apres N echecs.
 
 ---
 
@@ -421,10 +421,11 @@ L'implementation doit documenter la politique choisie et la rendre configurable 
 - [Authentication Contract](../contracts/security/MiyukiniAdmin%20-%20Authentication%20Contract.md)
 - [Permission Contract](../contracts/security/MiyukiniAdmin%20-%20Permission%20Contract.md)
 - [Reference Implementation Guidelines](./MiyukiniAdmin%20-%20Reference%20Implementation%20Guidelines.md)
-- [Environment Identity Protocol EIP](../../../protocols/MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md)
+- [Environment Identity Protocol EIP](..//..//..//contrats//MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md)
 
 ---
 
 **Date de creation :** 2026-01-29  
 **Version :** 1.0.0  
-**Statut :** Document d'implementation — Controles et securite
+**Statut :** Document d'implementation â€” Controles et securite
+

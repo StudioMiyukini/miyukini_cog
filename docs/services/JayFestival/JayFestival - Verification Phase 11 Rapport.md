@@ -2,7 +2,7 @@
 
 **Date :** 2026-02-03  
 **Périmètre :** Tâches [201] à [204] — Vérification globale, tests, conformité MSCM, régénération MIP.  
-**Référence :** [Plan d'implémentation JayFestival — Conformité protocoles](.cursor/plans/jayfestival_implementation_protocol_3008723b.plan.md), [Specification UI Conforme Catakana](./JayFestival%20-%20Specification%20UI%20Conforme%20Catakana.md).
+**Référence :** [Plan d'implémentation JayFestival — Conformité protocoles](_index.md), [Specification UI Conforme Catakana](./JayFestival%20-%20Specification%20UI%20Conforme%20Catakana.md).
 
 ---
 
@@ -105,15 +105,15 @@ Les entrées/sorties entre écrans passent par `AppState` et les docs « Écrans
 
 ## [204] Régénération MIP
 
-- **Action :** Exécution du pipeline MIP (outil `tools/mip-generator`) depuis la racine du workspace.
-- **Commande :** `cargo run --manifest-path tools/mip-generator/Cargo.toml` (ou script équivalent).
+- **Action :** Exécution du pipeline MIP (outil `tools/mscm-generator`) depuis la racine du workspace.
+- **Commande :** `cargo run --manifest-path tools/mscm-generator/Cargo.toml` (ou script équivalent).
 - **Vérifications attendues après génération :**
   - Répertoire `mscm_index/` contient : `registry.json`, `blocks.json`, `hierarchy.json`, `graph.json`, `flows.json`, `domains.json`, `layers.json`, `dependencies.json`, `files.json`, `stats.json`.
   - `registry.json` : `integrity: "ok"`, `version: "mip_v1"`, `mscm_version: "v1"`.
   - Aucun bloc orphelin, aucun cycle invalide (règles d’intégrité MIP § 8).
   - La crate `crates/jayfestival/` est incluse dans le scan (découverte dynamique des crates sous `crates/` et `tools/`).
 
-**Exécution :** Commande `cargo run --manifest-path tools/mip-generator/Cargo.toml` exécutée depuis la racine du workspace. Sortie : « Index MIP généré avec succès dans mscm_index — Total: 1520 blocs dans 590 fichiers ».
+**Exécution :** Commande `cargo run --manifest-path tools/mscm-generator/Cargo.toml` exécutée depuis la racine du workspace. Sortie : « Index MIP généré avec succès dans mscm_index — Total: 1520 blocs dans 590 fichiers ».
 
 **Vérifications post-régénération :**
 - `mscm_index/registry.json` : `version: "mip_v1"`, `mscm_version: "v1"`, `integrity: "ok"`, `files_count: 590`, `blocks_count: 1520`.
@@ -137,6 +137,8 @@ Les entrées/sorties entre écrans passent par `AppState` et les docs « Écrans
 
 ## Références
 
-- [Miyukini Prompt Protocol - Implémentation générale](../../protocols/Miyukini%20Prompt%20Protocol%20-%20Implémentation%20générale.md)
-- [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md)
+- [Miyukini Prompt Protocol - Implémentation générale](..//..//_index.md)
+- [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md)
 - [Miyukini COG vers. 0.1.0 - MSCM MIP Compliance Checklist](../../implementation/Miyukini%20COG%200.1%20-%20MSCM%20MIP%20Compliance%20Checklist.md)
+
+

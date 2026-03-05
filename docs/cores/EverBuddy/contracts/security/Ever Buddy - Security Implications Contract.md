@@ -1,12 +1,12 @@
-# Ever Buddy — Security Implications Contract
+﻿# Ever Buddy â€” Security Implications Contract
 
 ## 1. Contexte
 
 Ce document definit les **implications de securite** du Core Ever Buddy dans l'ecosysteme Miyukini. Il etablit le lien contractuel entre les responsabilites de securite definies dans la documentation Security et les fonctionnalites specifiques d'Ever Buddy.
 
-**Reference principale :** [Security - Core Integration Map](../../../../security/architecture/Security%20-%20Core%20Integration%20Map.md)
+**Reference principale :** [Security - Core Integration Map](..//..//..//WorrySentinel//_index.md)
 
-**Reference doctrinale :** [Doctrine Securite Fondamentale](../../../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md)
+**Reference doctrinale :** [Doctrine Securite Fondamentale](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -68,14 +68,14 @@ Ever Buddy est implique dans les protocoles de securite suivants :
 
 | Protocole | Role d'Ever Buddy | Description |
 |-----------|-------------------|-------------|
-| **AS-SEC-3** | **Responsable** | Revalidation complete a la reconnexion — Ever Buddy verifie que la version locale est compatible avec la version serveur |
+| **AS-SEC-3** | **Responsable** | Revalidation complete a la reconnexion â€” Ever Buddy verifie que la version locale est compatible avec la version serveur |
 
 ### 4.2 Protocoles Retour Internet
 
 | Protocole | Role d'Ever Buddy | Description |
 |-----------|-------------------|-------------|
-| **NET-SEC-1** | **Responsable** | Handshake de conformite — Ever Buddy verifie la compatibilite des versions lors de la reconnexion |
-| **NET-SEC-2** | **Responsable** | Mise a jour securisee — Ever Buddy gouverne le processus de mise a jour avec validation complete |
+| **NET-SEC-1** | **Responsable** | Handshake de conformite â€” Ever Buddy verifie la compatibilite des versions lors de la reconnexion |
+| **NET-SEC-2** | **Responsable** | Mise a jour securisee â€” Ever Buddy gouverne le processus de mise a jour avec validation complete |
 
 ### 4.3 Matrice RACI pour les Protocoles
 
@@ -95,62 +95,62 @@ Le comportement d'Ever Buddy s'adapte au niveau de confiance du systeme :
 
 | Niveau | Etat Systeme | Comportement Ever Buddy |
 |--------|--------------|-------------------------|
-| **T0** | Normal | Operations normales — migrations, mises a jour, transitions autorisees |
-| **T1** | Instable | Inchange — surveillance accrue mais operations normales |
-| **T2** | Degrade | **Pas de migration** — seules les operations de lecture et validation sont autorisees |
-| **T3** | Restreint | **Gel des versions** — aucune transition de version autorisee, uniquement consultation |
-| **T4** | Bloque | **Lecture seule** — uniquement diagnostics et consultation historique |
+| **T0** | Normal | Operations normales â€” migrations, mises a jour, transitions autorisees |
+| **T1** | Instable | Inchange â€” surveillance accrue mais operations normales |
+| **T2** | Degrade | **Pas de migration** â€” seules les operations de lecture et validation sont autorisees |
+| **T3** | Restreint | **Gel des versions** â€” aucune transition de version autorisee, uniquement consultation |
+| **T4** | Bloque | **Lecture seule** â€” uniquement diagnostics et consultation historique |
 
 ### 5.1 Regles de Transition
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  T0 : Operations normales                                        │
-│       • Migrations autorisees                                    │
-│       • Mises a jour autorisees                                  │
-│       • Transitions de version normales                          │
-└─────────────────────────────────────────────────────────────────┘
-                                │
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  T0 : Operations normales                                        â”‚
+â”‚       â€¢ Migrations autorisees                                    â”‚
+â”‚       â€¢ Mises a jour autorisees                                  â”‚
+â”‚       â€¢ Transitions de version normales                          â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
                        [Anomalie detectee]
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  T1 : Surveillance accrue                                        │
-│       • Operations normales maintenues                           │
-│       • Logging renforce sur les transitions                     │
-└─────────────────────────────────────────────────────────────────┘
-                                │
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  T1 : Surveillance accrue                                        â”‚
+â”‚       â€¢ Operations normales maintenues                           â”‚
+â”‚       â€¢ Logging renforce sur les transitions                     â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
                        [Degradation confirmee]
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  T2 : Mode degrade                                               │
-│       • BLOCAGE des migrations                                   │
-│       • Mises a jour de securite uniquement (avec validation)    │
-│       • Lecture et validation autorisees                         │
-└─────────────────────────────────────────────────────────────────┘
-                                │
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  T2 : Mode degrade                                               â”‚
+â”‚       â€¢ BLOCAGE des migrations                                   â”‚
+â”‚       â€¢ Mises a jour de securite uniquement (avec validation)    â”‚
+â”‚       â€¢ Lecture et validation autorisees                         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
                        [Restriction requise]
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  T3 : Mode restreint                                             │
-│       • GEL complet des versions                                 │
-│       • Aucune transition autorisee                              │
-│       • Consultation uniquement                                  │
-│       • Override TAMR possible pour operations critiques         │
-└─────────────────────────────────────────────────────────────────┘
-                                │
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  T3 : Mode restreint                                             â”‚
+â”‚       â€¢ GEL complet des versions                                 â”‚
+â”‚       â€¢ Aucune transition autorisee                              â”‚
+â”‚       â€¢ Consultation uniquement                                  â”‚
+â”‚       â€¢ Override TAMR possible pour operations critiques         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
                        [Blocage total]
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  T4 : Mode bloque                                                │
-│       • LECTURE SEULE stricte                                    │
-│       • Diagnostics uniquement                                   │
-│       • Consultation historique pour debug                       │
-│       • Intervention humaine requise pour toute action           │
-└─────────────────────────────────────────────────────────────────┘
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  T4 : Mode bloque                                                â”‚
+â”‚       â€¢ LECTURE SEULE stricte                                    â”‚
+â”‚       â€¢ Diagnostics uniquement                                   â”‚
+â”‚       â€¢ Consultation historique pour debug                       â”‚
+â”‚       â€¢ Intervention humaine requise pour toute action           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 5.2 Garanties par Niveau
@@ -170,11 +170,11 @@ Le comportement d'Ever Buddy s'adapte au niveau de securite declare par l'Operat
 
 | Niveau | Profil Risque | Comportement Ever Buddy |
 |--------|---------------|-------------------------|
-| **0** | Public / Demo | Simplifie — verifications basiques, mises a jour automatiques |
-| **1** | Standard | Normal — verifications standard, mises a jour avec validation |
-| **2** | Sensible | Renforce — verifications approfondies, validation explicite requise |
-| **3** | Critique | Strict — double validation, periode de test obligatoire |
-| **4** | Ultra-securise | Maximum — validation multi-parties, audit complet, periode de quarantaine |
+| **0** | Public / Demo | Simplifie â€” verifications basiques, mises a jour automatiques |
+| **1** | Standard | Normal â€” verifications standard, mises a jour avec validation |
+| **2** | Sensible | Renforce â€” verifications approfondies, validation explicite requise |
+| **3** | Critique | Strict â€” double validation, periode de test obligatoire |
+| **4** | Ultra-securise | Maximum â€” validation multi-parties, audit complet, periode de quarantaine |
 
 ### 6.1 Impact sur les Operations
 
@@ -189,8 +189,8 @@ Le comportement d'Ever Buddy s'adapte au niveau de securite declare par l'Operat
 
 | Transition | Niveau 0-1 | Niveau 2 | Niveau 3 | Niveau 4 |
 |------------|------------|----------|----------|----------|
-| ACTIVE → DEPRECATED | 30 jours | 60 jours | 90 jours | 180 jours |
-| DEPRECATED → RETIRED | 60 jours | 90 jours | 180 jours | 365 jours |
+| ACTIVE â†’ DEPRECATED | 30 jours | 60 jours | 90 jours | 180 jours |
+| DEPRECATED â†’ RETIRED | 60 jours | 90 jours | 180 jours | 365 jours |
 | Periode test MAJ | 0 jour | 7 jours | 30 jours | 90 jours |
 
 ---
@@ -204,44 +204,44 @@ Le comportement d'Ever Buddy s'adapte au niveau de securite declare par l'Operat
 Ever Buddy intervient a chaque transition de version dans le systeme :
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    REQUETE DE TRANSITION                         │
-│            (Migration, Mise a jour, Depreciation)                │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  EVER BUDDY — Point de Controle                                  │
-│                                                                  │
-│  [1] Verification de compatibilite                               │
-│      • Version source compatible avec version cible ?            │
-│      • Breaking changes identifies ?                             │
-│      • Dependances satisfaites ?                                 │
-│                                                                  │
-│  [2] Verification du niveau de confiance (T0-T4)                 │
-│      • Operation autorisee au niveau actuel ?                    │
-│      • Restrictions applicables ?                                │
-│                                                                  │
-│  [3] Verification du niveau de securite (0-4)                    │
-│      • Validations requises effectuees ?                         │
-│      • Periodes minimales respectees ?                           │
-│                                                                  │
-│  [4] Verification de la chaine de confiance                      │
-│      • Version source ancree (STA → OSV) ?                       │
-│      • Version cible certifiee ?                                 │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                    ┌───────────┴───────────┐
-                    │                       │
-                    ▼                       ▼
-            ┌──────────────┐       ┌──────────────┐
-            │   AUTORISE   │       │    REFUSE    │
-            │              │       │              │
-            │ → Execution  │       │ → Erreur     │
-            │ → Journalise │       │ → Journalise │
-            └──────────────┘       │ → Alerte si  │
-                                   │   critique   │
-                                   └──────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    REQUETE DE TRANSITION                         â”‚
+â”‚            (Migration, Mise a jour, Depreciation)                â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
+                                â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  EVER BUDDY â€” Point de Controle                                  â”‚
+â”‚                                                                  â”‚
+â”‚  [1] Verification de compatibilite                               â”‚
+â”‚      â€¢ Version source compatible avec version cible ?            â”‚
+â”‚      â€¢ Breaking changes identifies ?                             â”‚
+â”‚      â€¢ Dependances satisfaites ?                                 â”‚
+â”‚                                                                  â”‚
+â”‚  [2] Verification du niveau de confiance (T0-T4)                 â”‚
+â”‚      â€¢ Operation autorisee au niveau actuel ?                    â”‚
+â”‚      â€¢ Restrictions applicables ?                                â”‚
+â”‚                                                                  â”‚
+â”‚  [3] Verification du niveau de securite (0-4)                    â”‚
+â”‚      â€¢ Validations requises effectuees ?                         â”‚
+â”‚      â€¢ Periodes minimales respectees ?                           â”‚
+â”‚                                                                  â”‚
+â”‚  [4] Verification de la chaine de confiance                      â”‚
+â”‚      â€¢ Version source ancree (STA â†’ OSV) ?                       â”‚
+â”‚      â€¢ Version cible certifiee ?                                 â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
+                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                    â”‚                       â”‚
+                    â–¼                       â–¼
+            â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+            â”‚   AUTORISE   â”‚       â”‚    REFUSE    â”‚
+            â”‚              â”‚       â”‚              â”‚
+            â”‚ â†’ Execution  â”‚       â”‚ â†’ Erreur     â”‚
+            â”‚ â†’ Journalise â”‚       â”‚ â†’ Journalise â”‚
+            â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜       â”‚ â†’ Alerte si  â”‚
+                                   â”‚   critique   â”‚
+                                   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 7.2 Points de Controle Secondaires
@@ -251,7 +251,7 @@ Ever Buddy intervient a chaque transition de version dans le systeme :
 | **Handshake reconnexion** | NET-SEC-1 | Compatibilite version locale/serveur |
 | **Mise a jour securisee** | NET-SEC-2 | Integrite et authenticite de la mise a jour |
 | **Revalidation async** | AS-SEC-3 | Coherence version apres periode offline |
-| **Certification OSV** | Chaine confiance | Ancrage de la version dans STA → OSV |
+| **Certification OSV** | Chaine confiance | Ancrage de la version dans STA â†’ OSV |
 
 ---
 
@@ -259,19 +259,19 @@ Ever Buddy intervient a chaque transition de version dans le systeme :
 
 ### 8.1 Position dans la Chaine
 
-Ever Buddy est responsable du maillon **STA → OSV** dans la chaine de confiance :
+Ever Buddy est responsable du maillon **STA â†’ OSV** dans la chaine de confiance :
 
 ```
-CODE → MSCM → MIP → GRAPH → STA → [OSV]
-                              │
-                              ▼
-                    ┌──────────────────────┐
-                    │   EVER BUDDY         │
-                    │                      │
-                    │   Certification      │
-                    │   de la version      │
-                    │   comme OSV          │
-                    └──────────────────────┘
+CODE â†’ MSCM â†’ MIP â†’ GRAPH â†’ STA â†’ [OSV]
+                              â”‚
+                              â–¼
+                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                    â”‚   EVER BUDDY         â”‚
+                    â”‚                      â”‚
+                    â”‚   Certification      â”‚
+                    â”‚   de la version      â”‚
+                    â”‚   comme OSV          â”‚
+                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 8.2 Responsabilites dans la Chaine
@@ -285,7 +285,7 @@ CODE → MSCM → MIP → GRAPH → STA → [OSV]
 
 ### 8.3 Rupture de la Chaine
 
-En cas de rupture detectee dans le maillon STA → OSV :
+En cas de rupture detectee dans le maillon STA â†’ OSV :
 
 1. **Detection** : Ever Buddy detecte l'incoherence version
 2. **Alerte** : Notification immediate a Caring Nanny
@@ -311,17 +311,17 @@ En cas de rupture detectee dans le maillon STA → OSV :
 ### 9.2 Flux d'Information Securitaire
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         EVER BUDDY                               │
-└─────────────────────────────────────────────────────────────────┘
-          │                    │                    │
-          │ Version context    │ Alertes evolution  │ Regles compat
-          │                    │                    │
-          ▼                    ▼                    ▼
-   ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
-   │ StrongFather│      │ Caring Nanny│      │ Border Guard│
-   │ (decisions) │      │ (monitoring)│      │ (frontieres)│
-   └─────────────┘      └─────────────┘      └─────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                         EVER BUDDY                               â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚                    â”‚                    â”‚
+          â”‚ Version context    â”‚ Alertes evolution  â”‚ Regles compat
+          â”‚                    â”‚                    â”‚
+          â–¼                    â–¼                    â–¼
+   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+   â”‚ StrongFatherâ”‚      â”‚ Caring Nannyâ”‚      â”‚ Border Guardâ”‚
+   â”‚ (decisions) â”‚      â”‚ (monitoring)â”‚      â”‚ (frontieres)â”‚
+   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
@@ -332,7 +332,7 @@ En cas de rupture detectee dans le maillon STA → OSV :
 
 | Code | Interdiction | Raison Securitaire |
 |------|--------------|-------------------|
-| **INTERD-EB-SEC-1** | Ever Buddy ne peut pas executer de migrations | Separation des responsabilites — execution = KindMother |
+| **INTERD-EB-SEC-1** | Ever Buddy ne peut pas executer de migrations | Separation des responsabilites â€” execution = KindMother |
 | **INTERD-EB-SEC-2** | Ever Buddy ne peut pas modifier les donnees | Pas d'acces ecriture aux donnees persistees |
 | **INTERD-EB-SEC-3** | Ever Buddy ne peut pas contourner les niveaux T | Les restrictions T2-T4 sont absolues |
 | **INTERD-EB-SEC-4** | Ever Buddy ne peut pas certifier une version non validee | Chaine de confiance obligatoire |
@@ -355,19 +355,19 @@ En cas de rupture detectee dans le maillon STA → OSV :
 
 | Document | Description |
 |----------|-------------|
-| [Security - Documentation Fondatrice](../../../../security/foundation/Security%20-%20Documentation%20Fondatrice.md) | Vision operationnelle de la securite |
-| [Security - Core Integration Map](../../../../security/architecture/Security%20-%20Core%20Integration%20Map.md) | Cartographie des responsabilites par Core |
-| [Security - Invariants & Guarantees](../../../../security/contracts/governance/Security%20-%20Invariants%20&%20Guarantees.md) | Lois L1-L6 et contraintes |
-| [Security - Architecture & Components](../../../../security/architecture/Security%20-%20Architecture%20&%20Components.md) | Vue des Security Engines |
+| [Security - Documentation Fondatrice](..//..//..//WorrySentinel//_index.md) | Vision operationnelle de la securite |
+| [Security - Core Integration Map](..//..//..//WorrySentinel//_index.md) | Cartographie des responsabilites par Core |
+| [Security - Invariants & Guarantees](..//..//..//WorrySentinel//_index.md) | Lois L1-L6 et contraintes |
+| [Security - Architecture & Components](..//..//..//WorrySentinel//_index.md) | Vue des Security Engines |
 
 ### 11.2 Documentation Conceptuelle (docs/reference)
 
 | Document | Description |
 |----------|-------------|
-| [Doctrine Securite Fondamentale](../../../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md) | Principes fondateurs |
-| [Security Protocols](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Protocols.md) | Protocoles temps reel et asynchrone |
-| [Integrity Degradation System](../../../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md) | Niveaux de confiance (T0-T4) |
-| [Security Levels](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) | Niveaux de securite (0-4) |
+| [Doctrine Securite Fondamentale](..//..//..//..//miyukini-webway-system//reference//_index.md) | Principes fondateurs |
+| [Security Protocols](..//..//..//..//miyukini-webway-system//reference//_index.md) | Protocoles temps reel et asynchrone |
+| [Integrity Degradation System](..//..//..//..//miyukini-webway-system//reference//_index.md) | Niveaux de confiance (T0-T4) |
+| [Security Levels](..//..//..//..//miyukini-webway-system//reference//_index.md) | Niveaux de securite (0-4) |
 
 ### 11.3 Documentation Ever Buddy
 
@@ -383,25 +383,25 @@ En cas de rupture detectee dans le maillon STA → OSV :
 
 ### Ce que les developpeurs doivent savoir
 
-1. **Ever Buddy gouverne, il n'execute pas** — Les migrations sont executees par d'autres Cores
-2. **Toute transition est validee** — Pas de changement de version sans verification
-3. **Les niveaux T bloquent les operations** — En T2+, les migrations sont bloquees
-4. **Le rollback est garanti** — Toute version ACTIVE peut etre restauree
-5. **L'historique est immuable** — Aucune modification de la tracabilite
+1. **Ever Buddy gouverne, il n'execute pas** â€” Les migrations sont executees par d'autres Cores
+2. **Toute transition est validee** â€” Pas de changement de version sans verification
+3. **Les niveaux T bloquent les operations** â€” En T2+, les migrations sont bloquees
+4. **Le rollback est garanti** â€” Toute version ACTIVE peut etre restauree
+5. **L'historique est immuable** â€” Aucune modification de la tracabilite
 
 ### Ce que les operateurs doivent surveiller
 
-1. **Niveau de confiance actuel** — Impact direct sur les operations d'evolution
-2. **Alertes de compatibilite** — Signaux avant echec de migration
-3. **Debt ratio** — Ratio (DEPRECATED + RETIRED) / ACTIVE
-4. **Coherence STA → OSV** — Chaine de confiance intacte
+1. **Niveau de confiance actuel** â€” Impact direct sur les operations d'evolution
+2. **Alertes de compatibilite** â€” Signaux avant echec de migration
+3. **Debt ratio** â€” Ratio (DEPRECATED + RETIRED) / ACTIVE
+4. **Coherence STA â†’ OSV** â€” Chaine de confiance intacte
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0  
 **Statut :** Document operationnel contractuel  
-**Reference :** Miyukini Core System v2.4, [Security - Core Integration Map](../../../../security/architecture/Security%20-%20Core%20Integration%20Map.md)
+**Reference :** Miyukini Core System v2.4, [Security - Core Integration Map](..//..//..//WorrySentinel//_index.md)
 
 ---
 
@@ -412,22 +412,23 @@ En cas de rupture detectee dans le maillon STA → OSV :
 - Ce document definit les implications de securite d'Ever Buddy selon le Core Integration Map
 - Les protocoles AS-SEC-3, NET-SEC-1, NET-SEC-2 sont documentes en detail
 - L'adaptation par niveau de confiance (T0-T4) et niveau de securite (0-4) est complete
-- Le role dans la chaine de confiance (STA → OSV) est explicite
+- Le role dans la chaine de confiance (STA â†’ OSV) est explicite
 
 ### Avertissements traites
 
-**W1 : Separation responsabilites** — Ever Buddy gouverne mais n'execute pas. Les interdictions sont explicites.
+**W1 : Separation responsabilites** â€” Ever Buddy gouverne mais n'execute pas. Les interdictions sont explicites.
 
-**W2 : Integration protocoles** — Tous les protocoles du Core Integration Map sont mappes.
+**W2 : Integration protocoles** â€” Tous les protocoles du Core Integration Map sont mappes.
 
-**W3 : Adaptation niveaux** — Les comportements T0-T4 et 0-4 sont documentes avec les consequences.
+**W3 : Adaptation niveaux** â€” Les comportements T0-T4 et 0-4 sont documentes avec les consequences.
 
 ### Verification de coherence
 
-- ✅ Coherence avec Security - Core Integration Map
-- ✅ Coherence avec Security - Documentation Fondatrice
-- ✅ Coherence avec Ever Buddy - Documentation Fondatrice
-- ✅ Coherence avec les invariants INV-EB-*
-- ✅ References correctes vers tous les documents
+- âœ… Coherence avec Security - Core Integration Map
+- âœ… Coherence avec Security - Documentation Fondatrice
+- âœ… Coherence avec Ever Buddy - Documentation Fondatrice
+- âœ… Coherence avec les invariants INV-EB-*
+- âœ… References correctes vers tous les documents
 
 **Aucune contradiction detectee.**
+

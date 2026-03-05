@@ -1,4 +1,4 @@
-# TAMR - Integration Readiness Contract
+﻿# TAMR - Integration Readiness Contract
 
 ## 1. Contexte
 
@@ -15,11 +15,11 @@ Ce document complete la section Architecture de l'[Index de Navigation TAMR](../
 - [TAMR - Conformance & Certification Rules](../contracts/governance/TAMR%20-%20Conformance%20%26%20Certification%20Rules.md) pour les criteres de conformite
 - [TAMR - StrongFather Integration Contract](../contracts/integration/TAMR%20-%20StrongFather%20Integration%20Contract.md), [TAMR - KindMother Integration Contract](../contracts/integration/TAMR%20-%20KindMother%20Integration%20Contract.md), [TAMR - BondingBrother Integration Contract](../contracts/integration/TAMR%20-%20BondingBrother%20Integration%20Contract.md) pour les relations avec les cores
 - [TAMR - Security Contract](../contracts/security/TAMR%20-%20Security%20Contract.md) pour les exigences de securite
-- [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) pour la terminologie TAMR
-- [Miyukini Conceptual References - Doctrine Securite Fondamentale](../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md) pour les principes securite
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) pour la conformite LOI-1 a LOI-6
-- [Miyukini Conceptual References - Integrity Degradation System](../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md) pour les niveaux T0-T4
-- [Miyukini Conceptual References - Security Levels](../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) pour les niveaux 0-4
+- [Miyukini Conceptual References - Glossaire](..//..//..//miyukini-webway-system//reference//_index.md) pour la terminologie TAMR
+- [Miyukini Conceptual References - Doctrine Securite Fondamentale](..//..//..//miyukini-webway-system//reference//_index.md) pour les principes securite
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md) pour la conformite LOI-1 a LOI-6
+- [Miyukini Conceptual References - Integrity Degradation System](..//..//..//miyukini-webway-system//reference//_index.md) pour les niveaux T0-T4
+- [Miyukini Conceptual References - Security Levels](..//..//..//miyukini-webway-system//reference//_index.md) pour les niveaux 0-4
 
 ---
 
@@ -30,7 +30,7 @@ Ce document couvre :
 - Les prerequis conceptuels et contractuels avant toute integration
 - Les conditions liees aux autres cores (StrongFather, KindMother, BondingBrother) lorsque l'integration les concerne
 - Les criteres de conformite prealables et les exigences de tracabilite et de securite
-- L'ordre et les dependances recommandés pour une integration coherente
+- L'ordre et les dependances recommandÃ©s pour une integration coherente
 - Une checklist de readiness exploitable pour validation
 
 Ce document **ne couvre pas** :
@@ -42,15 +42,15 @@ Ce document **ne couvre pas** :
 
 ## 3. Definition de l'Integration Readiness
 
-### 3.1 Etat « pret a integrer TAMR »
+### 3.1 Etat Â« pret a integrer TAMR Â»
 
 Un composant, module ou systeme est en etat **Integration Readiness** vis-a-vis de TAMR lorsque :
 
 1. **Prerequis conceptuels** : Le cadre TAMR (types d'intervention, points, limites, trace, securite) est compris et accepte ; les invariants INV-TAMR-1 a INV-TAMR-8 et les interdictions INTERD-TAMR-* sont reconnus.
 2. **Prerequis contractuels** : Les contrats TAMR applicables ont ete lus et les obligations qu'ils imposent sont acceptees (Trace Contract, Authority Limits, Inviolable Limits, Security Contract, contrats d'integration avec les cores concernes).
 3. **Conformite prealable** : Les criteres de conformite definis dans le contrat Conformance & Certification Rules sont satisfaits ou en voie de l'etre (aucune violation critique, respect des invariants et des garanties).
-4. **Conditions par core** : Pour chaque core avec lequel l'integration TAMR interagit (StrongFather, KindMother, BondingBrother), les conditions d'integration decrites dans les contrats TAMR–Core correspondants sont remplies ou planifiees.
-5. **Tracabilite et securite** : Les exigences du Trace Contract et du Security Contract sont prises en compte dans la conception (structure des traces, niveaux T0–T4 et 0–4).
+4. **Conditions par core** : Pour chaque core avec lequel l'integration TAMR interagit (StrongFather, KindMother, BondingBrother), les conditions d'integration decrites dans les contrats TAMRâ€“Core correspondants sont remplies ou planifiees.
+5. **Tracabilite et securite** : Les exigences du Trace Contract et du Security Contract sont prises en compte dans la conception (structure des traces, niveaux T0â€“T4 et 0â€“4).
 
 **Regle IR-01 : Readiness avant integration**
 
@@ -85,8 +85,8 @@ L'integration ne peut pas proceder si le porteur du projet n'a pas formalise l'a
 Les references conceptuelles suivantes doivent etre prises en compte selon le peirmetre :
 
 - **Lois d'Autonomie Systeme** : Conformite LOI-1 a LOI-6 (localite, pas de dependance externe non maitrisee).
-- **Integrity Degradation (T0–T4)** : Comportement TAMR selon l'etat du systeme (intervention optionnelle, recommandee, requise, obligatoire).
-- **Security Levels (0–4)** : Exigences d'intervention et de tracabilite selon le niveau de securite.
+- **Integrity Degradation (T0â€“T4)** : Comportement TAMR selon l'etat du systeme (intervention optionnelle, recommandee, requise, obligatoire).
+- **Security Levels (0â€“4)** : Exigences d'intervention et de tracabilite selon le niveau de securite.
 
 ---
 
@@ -103,7 +103,7 @@ Les contrats suivants sont **obligatoirement** pris en compte pour toute integra
 | **Authority Limits** | Limites d'autorite humaines respectees dans la conception. |
 | **Inviolable Limits** | Aucun point d'intervention ni override ne franchit les limites inviolables. |
 | **Trace Contract** | Structure des traces et elements obligatoires integres dans le modele. |
-| **Security Contract** | Exigences de securite (niveaux T0–T4 et 0–4) integrees. |
+| **Security Contract** | Exigences de securite (niveaux T0â€“T4 et 0â€“4) integrees. |
 | **Invariants & Guarantees** | INV-TAMR-1 a INV-TAMR-8 et garanties associees respectes. |
 | **Violations & Anti-Patterns** | Aucune violation critique ni anti-pattern catalogue. |
 
@@ -119,7 +119,7 @@ Selon les flux d'intervention impliques :
 
 **Regle IR-03 : Contrats cores**
 
-Pour chaque core concerne par l'integration TAMR, les conditions du contrat TAMR–Core correspondant doivent etre satisfaites ou explicitement planifiees avant mise en production.
+Pour chaque core concerne par l'integration TAMR, les conditions du contrat TAMRâ€“Core correspondant doivent etre satisfaites ou explicitement planifiees avant mise en production.
 
 ---
 
@@ -131,8 +131,8 @@ Les criteres definis dans [TAMR - Conformance & Certification Rules](../contract
 
 - **CF-1** : Respect des invariants fondamentaux (INV-TAMR-1 a INV-TAMR-8).
 - **CF-2** : Absence de violations critiques (Violations & Anti-Patterns).
-- **CF-3** : Respect des garanties (traçabilite, responsabilite, limites).
-- **CI-1 a CI-5** : Critères d'intervention (traçabilite, responsabilite, limites infranchissables, justification override, escalade non bloquante).
+- **CF-3** : Respect des garanties (traÃ§abilite, responsabilite, limites).
+- **CI-1 a CI-5** : CritÃ¨res d'intervention (traÃ§abilite, responsabilite, limites infranchissables, justification override, escalade non bloquante).
 
 La certification formelle peut etre posterieure a la premiere integration ; en revanche, la **satisfaction des criteres** (verifiable par checklist ou audit interne) est une condition de readiness.
 
@@ -155,11 +155,11 @@ Si une violation critique ou un anti-pattern catalogue est identifie, l'integrat
 
 ### 7.2 Security Contract
 
-- Les **niveaux d'integrite** (T0–T4) et les **niveaux de securite** (0–4) doivent etre identifies pour le peirmetre integre ; les exigences TAMR associees (intervention optionnelle, recommandee, requise, obligatoire) doivent etre respectees.
+- Les **niveaux d'integrite** (T0â€“T4) et les **niveaux de securite** (0â€“4) doivent etre identifies pour le peirmetre integre ; les exigences TAMR associees (intervention optionnelle, recommandee, requise, obligatoire) doivent etre respectees.
 
 ---
 
-## 8. Ordre et dependances recommandés
+## 8. Ordre et dependances recommandÃ©s
 
 ### 8.1 Sequence logique
 
@@ -178,7 +178,7 @@ Les contrats fondateurs et les contrats d'intervention/limites/trace/securite do
 ### 8.2 Cas particuliers
 
 - **Integration partielle** : Un composant qui n'expose qu'un sous-ensemble (ex. uniquement exposition de points d'intervention sans StrongFather) doit tout de meme satisfaire les conditions de readiness pour ce sous-ensemble (types, points, limites, trace si applicable).
-- **Evolution** : Toute evolution d'un contrat TAMR ou d'un contrat TAMR–Core peut remettre en cause la readiness ; une re-validation est recommandee.
+- **Evolution** : Toute evolution d'un contrat TAMR ou d'un contrat TAMRâ€“Core peut remettre en cause la readiness ; une re-validation est recommandee.
 
 ---
 
@@ -195,7 +195,7 @@ La checklist suivante peut etre utilisee pour valider l'etat Integration Readine
 
 - [ ] Contrats Intervention (Types, Points), Boundaries (Authority, Inviolable), Trace, Security lus et obligations acceptees.
 - [ ] Contrats Governance (Invariants & Guarantees, Violations & Anti-Patterns, Conformance & Certification) pris en compte.
-- [ ] Pour chaque core concerne : contrat TAMR–Core (StrongFather, KindMother, BondingBrother) respecte ou planifie.
+- [ ] Pour chaque core concerne : contrat TAMRâ€“Core (StrongFather, KindMother, BondingBrother) respecte ou planifie.
 
 ### 9.3 Conformite
 
@@ -206,7 +206,7 @@ La checklist suivante peut etre utilisee pour valider l'etat Integration Readine
 ### 9.4 Tracabilite et securite
 
 - [ ] Structure des traces (Trace Contract) supportee ; elements obligatoires par type d'intervention prevus.
-- [ ] Exigences Security Contract (niveaux T0–T4 et 0–4) integrees pour le peirmetre.
+- [ ] Exigences Security Contract (niveaux T0â€“T4 et 0â€“4) integrees pour le peirmetre.
 
 ### 9.5 Cores
 
@@ -216,13 +216,13 @@ La checklist suivante peut etre utilisee pour valider l'etat Integration Readine
 
 ---
 
-## 10. Résumé des regles du contrat
+## 10. RÃ©sumÃ© des regles du contrat
 
 | Regle | Description |
 |-------|-------------|
 | **IR-01** | Aucune integration TAMR engagee sans atteinte de l'etat Integration Readiness. |
 | **IR-02** | Acceptation du cadre TAMR formalisee avant integration. |
-| **IR-03** | Pour chaque core concerne, conditions du contrat TAMR–Core satisfaites ou planifiees. |
+| **IR-03** | Pour chaque core concerne, conditions du contrat TAMRâ€“Core satisfaites ou planifiees. |
 | **IR-04** | Criteres de conformite TAMR satisfaits (ou en remediation) avant mise en production. |
 | **IR-05** | Contrats fondateurs et tracabilite/securite stabilises avant contrats cores et declaration ready. |
 
@@ -231,3 +231,4 @@ La checklist suivante peut etre utilisee pour valider l'etat Integration Readine
 **Date de creation :** 2026-01-28  
 **Version :** 1.0  
 **Statut :** Contractuel, normatif
+

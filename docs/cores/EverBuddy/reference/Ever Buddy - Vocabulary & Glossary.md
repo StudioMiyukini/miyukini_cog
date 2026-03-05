@@ -1,97 +1,97 @@
-# Ever Buddy - Vocabulary & Glossary
+﻿# Ever Buddy - Vocabulary & Glossary
 
 ## Contexte
 
-Ce document constitue le **vocabulaire canonique** d'Ever Buddy, le core de cycle de vie et d'évolution du Miyukini Core System (Strate 4). Il regroupe toutes les définitions officielles des termes utilisés dans le domaine d'Ever Buddy.
+Ce document constitue le **vocabulaire canonique** d'Ever Buddy, le core de cycle de vie et d'Ã©volution du Miyukini Core System (Strate 4). Il regroupe toutes les dÃ©finitions officielles des termes utilisÃ©s dans le domaine d'Ever Buddy.
 
-**Document de référence :** [Ever Buddy - Documentation Fondatrice](../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md)
+**Document de rÃ©fÃ©rence :** [Ever Buddy - Documentation Fondatrice](../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md)
 
-**Glossaire général :** [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Glossaire gÃ©nÃ©ral :** [Miyukini Conceptual References - Glossaire](..//..//..//miyukini-webway-system//reference//_index.md)
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Applicable à :** Toute documentation Ever Buddy, communications, implémentations
-- **Audience :** Architectes, développeurs, intégrateurs, équipes documentation
-- **Statut :** Document de référence normatif — Vocabulaire canonique Ever Buddy
+- **Applicable Ã  :** Toute documentation Ever Buddy, communications, implÃ©mentations
+- **Audience :** Architectes, dÃ©veloppeurs, intÃ©grateurs, Ã©quipes documentation
+- **Statut :** Document de rÃ©fÃ©rence normatif â€” Vocabulaire canonique Ever Buddy
 
 ---
 
-## États de cycle de vie
+## Ã‰tats de cycle de vie
 
 ### DRAFT (BROUILLON)
 
-État d'un élément en cours de définition. Il n'est pas encore utilisable en production, peut changer librement, et n'a aucun engagement de stabilité.
+Ã‰tat d'un Ã©lÃ©ment en cours de dÃ©finition. Il n'est pas encore utilisable en production, peut changer librement, et n'a aucun engagement de stabilitÃ©.
 
-**Caractéristiques :**
+**CaractÃ©ristiques :**
 - Non utilisable en production
-- Changements libres autorisés
-- Aucune garantie de stabilité
+- Changements libres autorisÃ©s
+- Aucune garantie de stabilitÃ©
 
-**Transitions possibles :** DRAFT → ACTIVE, DRAFT → ARCHIVED
+**Transitions possibles :** DRAFT â†’ ACTIVE, DRAFT â†’ ARCHIVED
 
-**Référence glossaire :** [BROUILLON (DRAFT)](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md#brouillon-draft--état-de-vie)
+**RÃ©fÃ©rence glossaire :** [BROUILLON (..//..//..//miyukini-webway-system//reference//_index.md#brouillon-draft--Ã©tat-de-vie)
 
 ---
 
 ### ACTIVE (ACTIF)
 
-État d'un élément en usage normal. Il est stable, documenté, supporté, et utilisable par tous les consommateurs autorisés. Les changements sont soumis aux règles de compatibilité.
+Ã‰tat d'un Ã©lÃ©ment en usage normal. Il est stable, documentÃ©, supportÃ©, et utilisable par tous les consommateurs autorisÃ©s. Les changements sont soumis aux rÃ¨gles de compatibilitÃ©.
 
-**Caractéristiques :**
-- Stable et documenté
-- Supporté activement
-- Changements soumis aux règles de compatibilité
-- Utilisable par tous les consommateurs autorisés
+**CaractÃ©ristiques :**
+- Stable et documentÃ©
+- SupportÃ© activement
+- Changements soumis aux rÃ¨gles de compatibilitÃ©
+- Utilisable par tous les consommateurs autorisÃ©s
 
-**Transitions possibles :** ACTIVE → DEPRECATED
+**Transitions possibles :** ACTIVE â†’ DEPRECATED
 
-**Référence glossaire :** [ACTIF (ACTIVE)](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md#actif-active--état-de-vie)
+**RÃ©fÃ©rence glossaire :** [ACTIF (..//..//..//miyukini-webway-system//reference//_index.md#actif-active--Ã©tat-de-vie)
 
 ---
 
-### DEPRECATED (DÉPRÉCIÉ)
+### DEPRECATED (DÃ‰PRÃ‰CIÃ‰)
 
-État d'un élément toujours fonctionnel mais dont l'usage est découragé. Un successeur existe ou est en préparation. Les consommateurs sont avertis de migrer. La période de dépréciation est définie et communiquée.
+Ã‰tat d'un Ã©lÃ©ment toujours fonctionnel mais dont l'usage est dÃ©couragÃ©. Un successeur existe ou est en prÃ©paration. Les consommateurs sont avertis de migrer. La pÃ©riode de dÃ©prÃ©ciation est dÃ©finie et communiquÃ©e.
 
-**Caractéristiques :**
+**CaractÃ©ristiques :**
 - Toujours fonctionnel
-- Usage découragé
-- Successeur identifié (ou annoncé comme "sans successeur")
-- Période de dépréciation définie
+- Usage dÃ©couragÃ©
+- Successeur identifiÃ© (ou annoncÃ© comme "sans successeur")
+- PÃ©riode de dÃ©prÃ©ciation dÃ©finie
 
-**Transitions possibles :** DEPRECATED → RETIRED, DEPRECATED → ACTIVE (réactivation exceptionnelle)
+**Transitions possibles :** DEPRECATED â†’ RETIRED, DEPRECATED â†’ ACTIVE (rÃ©activation exceptionnelle)
 
-**Référence glossaire :** [DÉPRÉCIÉ (DEPRECATED)](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md#déprécié-deprecated--état-de-vie)
+**RÃ©fÃ©rence glossaire :** [DÃ‰PRÃ‰CIÃ‰ (..//..//..//miyukini-webway-system//reference//_index.md#dÃ©prÃ©ciÃ©-deprecated--Ã©tat-de-vie)
 
 ---
 
-### RETIRED (RETIRÉ)
+### RETIRED (RETIRÃ‰)
 
-État d'un élément qui n'est plus activement supporté mais reste fonctionnel pour les consommateurs existants. Aucune nouvelle fonctionnalité n'est ajoutée, uniquement des corrections critiques de sécurité.
+Ã‰tat d'un Ã©lÃ©ment qui n'est plus activement supportÃ© mais reste fonctionnel pour les consommateurs existants. Aucune nouvelle fonctionnalitÃ© n'est ajoutÃ©e, uniquement des corrections critiques de sÃ©curitÃ©.
 
-**Caractéristiques :**
-- Plus activement supporté
+**CaractÃ©ristiques :**
+- Plus activement supportÃ©
 - Fonctionnel pour consommateurs existants
-- Uniquement corrections critiques de sécurité
-- Aucune nouvelle fonctionnalité
+- Uniquement corrections critiques de sÃ©curitÃ©
+- Aucune nouvelle fonctionnalitÃ©
 
-**Transitions possibles :** RETIRED → ARCHIVED
+**Transitions possibles :** RETIRED â†’ ARCHIVED
 
-**Référence glossaire :** [RETIRÉ (RETIRED)](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md#retiré-retired--état-de-vie)
+**RÃ©fÃ©rence glossaire :** [RETIRÃ‰ (..//..//..//miyukini-webway-system//reference//_index.md#retirÃ©-retired--Ã©tat-de-vie)
 
 ---
 
-### ARCHIVED (ARCHIVÉ)
+### ARCHIVED (ARCHIVÃ‰)
 
-État d'un élément qui n'est plus fonctionnel. Il est conservé uniquement pour référence historique et traçabilité. Aucune garantie de fonctionnement.
+Ã‰tat d'un Ã©lÃ©ment qui n'est plus fonctionnel. Il est conservÃ© uniquement pour rÃ©fÃ©rence historique et traÃ§abilitÃ©. Aucune garantie de fonctionnement.
 
-**Caractéristiques :**
+**CaractÃ©ristiques :**
 - Non fonctionnel
-- Conservation pour référence historique uniquement
+- Conservation pour rÃ©fÃ©rence historique uniquement
 - Aucune garantie de fonctionnement
-- Traçabilité préservée
+- TraÃ§abilitÃ© prÃ©servÃ©e
 
-**Transitions possibles :** Aucune (état terminal)
+**Transitions possibles :** Aucune (Ã©tat terminal)
 
 ---
 
@@ -99,159 +99,159 @@ Ce document constitue le **vocabulaire canonique** d'Ever Buddy, le core de cycl
 
 ### Transition
 
-Une **transition** est le passage d'un état de cycle de vie à un autre. Les transitions sont atomiques, documentées, et validées par Ever Buddy.
+Une **transition** est le passage d'un Ã©tat de cycle de vie Ã  un autre. Les transitions sont atomiques, documentÃ©es, et validÃ©es par Ever Buddy.
 
-**Caractéristiques :**
-- Atomique (pas d'état intermédiaire)
-- Documentée obligatoirement
-- Validée par Ever Buddy
-- Enregistrée dans l'historique immuable
+**CaractÃ©ristiques :**
+- Atomique (pas d'Ã©tat intermÃ©diaire)
+- DocumentÃ©e obligatoirement
+- ValidÃ©e par Ever Buddy
+- EnregistrÃ©e dans l'historique immuable
 
-**Invariant associé :** INV-EB-3 (Aucun état ambigu)
+**Invariant associÃ© :** INV-EB-3 (Aucun Ã©tat ambigu)
 
 ---
 
-### Évolution contrôlée
+### Ã‰volution contrÃ´lÃ©e
 
-Une **évolution contrôlée** est un changement structurel qui respecte les principes de continuité et de compatibilité.
+Une **Ã©volution contrÃ´lÃ©e** est un changement structurel qui respecte les principes de continuitÃ© et de compatibilitÃ©.
 
 **Composantes obligatoires :**
 
 | Composante | Description |
 |------------|-------------|
-| **Annonce préalable** | L'évolution est communiquée avant sa mise en œuvre |
-| **Période de transition** | Durée pendant laquelle l'ancien et le nouveau coexistent |
-| **Documentation des différences** | Les changements sont explicitement documentés |
+| **Annonce prÃ©alable** | L'Ã©volution est communiquÃ©e avant sa mise en Å“uvre |
+| **PÃ©riode de transition** | DurÃ©e pendant laquelle l'ancien et le nouveau coexistent |
+| **Documentation des diffÃ©rences** | Les changements sont explicitement documentÃ©s |
 | **Chemin de migration** | Guide pour passer de l'ancien au nouveau |
-| **Critères de complétion** | Conditions claires définissant la fin de transition |
+| **CritÃ¨res de complÃ©tion** | Conditions claires dÃ©finissant la fin de transition |
 
 ---
 
 ### Coexistence
 
-La **coexistence** est la période pendant laquelle deux versions (ou plus) d'un élément sont simultanément disponibles. Cette période permet aux consommateurs de migrer progressivement.
+La **coexistence** est la pÃ©riode pendant laquelle deux versions (ou plus) d'un Ã©lÃ©ment sont simultanÃ©ment disponibles. Cette pÃ©riode permet aux consommateurs de migrer progressivement.
 
-**Règles :**
+**RÃ¨gles :**
 - L'ancienne et la nouvelle version sont toutes deux fonctionnelles
 - Les consommateurs choisissent leur rythme de migration
-- La période a une durée définie et communiquée
+- La pÃ©riode a une durÃ©e dÃ©finie et communiquÃ©e
 
 ---
 
 ### Sunset
 
-Le **sunset** est le processus planifié de fin de vie d'un élément. Il comprend la séquence complète de retrait.
+Le **sunset** est le processus planifiÃ© de fin de vie d'un Ã©lÃ©ment. Il comprend la sÃ©quence complÃ¨te de retrait.
 
-**Séquence du sunset :**
-1. Dépréciation (ACTIVE → DEPRECATED)
-2. Période de transition (coexistence)
-3. Retirement (DEPRECATED → RETIRED)
-4. Période de grâce (optionnelle)
-5. Archivage (RETIRED → ARCHIVED)
+**SÃ©quence du sunset :**
+1. DÃ©prÃ©ciation (ACTIVE â†’ DEPRECATED)
+2. PÃ©riode de transition (coexistence)
+3. Retirement (DEPRECATED â†’ RETIRED)
+4. PÃ©riode de grÃ¢ce (optionnelle)
+5. Archivage (RETIRED â†’ ARCHIVED)
 
 ---
 
-### Période de grâce (Grace period)
+### PÃ©riode de grÃ¢ce (Grace period)
 
-La **période de grâce** est le temps supplémentaire accordé après la date prévue de retirement, pour permettre aux consommateurs retardataires de migrer. Cette période est accordée au cas par cas.
+La **pÃ©riode de grÃ¢ce** est le temps supplÃ©mentaire accordÃ© aprÃ¨s la date prÃ©vue de retirement, pour permettre aux consommateurs retardataires de migrer. Cette pÃ©riode est accordÃ©e au cas par cas.
 
-**Caractéristiques :**
-- Accordée exceptionnellement
-- Durée variable selon l'impact
+**CaractÃ©ristiques :**
+- AccordÃ©e exceptionnellement
+- DurÃ©e variable selon l'impact
 - Ne suspend pas le statut RETIRED
 
 ---
 
-## Concepts de compatibilité
+## Concepts de compatibilitÃ©
 
-### Rétrocompatibilité
+### RÃ©trocompatibilitÃ©
 
-Un élément est **rétrocompatible** quand le nouveau fonctionne avec l'ancien. Les consommateurs existants continuent de fonctionner sans modification.
+Un Ã©lÃ©ment est **rÃ©trocompatible** quand le nouveau fonctionne avec l'ancien. Les consommateurs existants continuent de fonctionner sans modification.
 
-**Invariant associé :** INV-EB-5 (Rétrocompatibilité par défaut)
+**Invariant associÃ© :** INV-EB-5 (RÃ©trocompatibilitÃ© par dÃ©faut)
 
-**Règle :** Toute évolution est présumée rétrocompatible sauf déclaration explicite contraire.
-
----
-
-### Compatibilité en amont
-
-Un élément est **compatible en amont** quand l'ancien fonctionne avec le nouveau. Les nouvelles fonctionnalités sont accessibles aux anciennes versions.
-
-**Note :** La compatibilité en amont est rare et souvent impossible à garantir.
+**RÃ¨gle :** Toute Ã©volution est prÃ©sumÃ©e rÃ©trocompatible sauf dÃ©claration explicite contraire.
 
 ---
 
-### Incompatibilité
+### CompatibilitÃ© en amont
 
-Un élément est **incompatible** quand le nouveau ne fonctionne pas avec l'ancien. Une migration est obligatoire.
+Un Ã©lÃ©ment est **compatible en amont** quand l'ancien fonctionne avec le nouveau. Les nouvelles fonctionnalitÃ©s sont accessibles aux anciennes versions.
 
-**Conséquences :**
+**Note :** La compatibilitÃ© en amont est rare et souvent impossible Ã  garantir.
+
+---
+
+### IncompatibilitÃ©
+
+Un Ã©lÃ©ment est **incompatible** quand le nouveau ne fonctionne pas avec l'ancien. Une migration est obligatoire.
+
+**ConsÃ©quences :**
 - Transition de version majeure requise
-- Période de dépréciation obligatoire (INV-EB-4)
+- PÃ©riode de dÃ©prÃ©ciation obligatoire (INV-EB-4)
 - Documentation explicite du breaking change
 
 ---
 
 ### Breaking change
 
-Un **breaking change** est un changement qui rompt la compatibilité avec les versions précédentes.
+Un **breaking change** est un changement qui rompt la compatibilitÃ© avec les versions prÃ©cÃ©dentes.
 
 **Exigences :**
 - Transition de version majeure
-- Période de dépréciation de l'ancienne version
-- Justification documentée
+- PÃ©riode de dÃ©prÃ©ciation de l'ancienne version
+- Justification documentÃ©e
 - Plan de transition fourni
 
 ---
 
-### Fenêtre de compatibilité (Compatibility window)
+### FenÃªtre de compatibilitÃ© (Compatibility window)
 
-La **fenêtre de compatibilité** est la plage de versions avec lesquelles un élément garantit la compatibilité.
+La **fenÃªtre de compatibilitÃ©** est la plage de versions avec lesquelles un Ã©lÃ©ment garantit la compatibilitÃ©.
 
-**Exemple :** "Compatible avec v2.0 à v2.4" définit une fenêtre de compatibilité de 5 versions mineures.
+**Exemple :** "Compatible avec v2.0 Ã  v2.4" dÃ©finit une fenÃªtre de compatibilitÃ© de 5 versions mineures.
 
-**Usage :** Permet aux consommateurs de planifier leurs propres évolutions.
+**Usage :** Permet aux consommateurs de planifier leurs propres Ã©volutions.
 
 ---
 
 ## Concepts de versionnement
 
-### Versionnement sémantique
+### Versionnement sÃ©mantique
 
-Le **versionnement sémantique** est la manière dont Ever Buddy identifie et distingue les différentes versions d'un élément.
+Le **versionnement sÃ©mantique** est la maniÃ¨re dont Ever Buddy identifie et distingue les diffÃ©rentes versions d'un Ã©lÃ©ment.
 
 **Structure : MAJEUR.MINEUR.CORRECTIF**
 
-| Niveau | Signification | Impact compatibilité |
+| Niveau | Signification | Impact compatibilitÃ© |
 |--------|---------------|---------------------|
 | **Majeur** | Changement incompatible, rupture de contrat | Breaking change |
-| **Mineur** | Ajout de fonctionnalité | Rétrocompatible |
+| **Mineur** | Ajout de fonctionnalitÃ© | RÃ©trocompatible |
 | **Correctif** | Correction de bug | Aucun changement fonctionnel |
 
 ---
 
-### Génération
+### GÃ©nÃ©ration
 
-Une **génération** est une version majeure d'un élément ou d'un ensemble d'éléments qui partagent une base conceptuelle commune.
+Une **gÃ©nÃ©ration** est une version majeure d'un Ã©lÃ©ment ou d'un ensemble d'Ã©lÃ©ments qui partagent une base conceptuelle commune.
 
-**Caractéristiques :**
-- Numérotée (1.x, 2.x, 3.x...)
-- Traçable dans l'historique
-- Base conceptuelle distincte de la génération précédente
+**CaractÃ©ristiques :**
+- NumÃ©rotÃ©e (1.x, 2.x, 3.x...)
+- TraÃ§able dans l'historique
+- Base conceptuelle distincte de la gÃ©nÃ©ration prÃ©cÃ©dente
 
-**Invariant associé :** INV-EB-6 (Vision long terme obligatoire — considérer au moins deux générations)
+**Invariant associÃ© :** INV-EB-6 (Vision long terme obligatoire â€” considÃ©rer au moins deux gÃ©nÃ©rations)
 
 ---
 
-### Chaîne d'évolution (Evolution chain)
+### ChaÃ®ne d'Ã©volution (Evolution chain)
 
-La **chaîne d'évolution** est la séquence complète des versions d'un élément, de sa création à son état actuel. Elle inclut tous les prédécesseurs et successeurs.
+La **chaÃ®ne d'Ã©volution** est la sÃ©quence complÃ¨te des versions d'un Ã©lÃ©ment, de sa crÃ©ation Ã  son Ã©tat actuel. Elle inclut tous les prÃ©dÃ©cesseurs et successeurs.
 
 **Contenu :**
-- Toutes les versions depuis la création
-- Toutes les transitions enregistrées
-- Tous les successeurs et prédécesseurs
+- Toutes les versions depuis la crÃ©ation
+- Toutes les transitions enregistrÃ©es
+- Tous les successeurs et prÃ©dÃ©cesseurs
 
 ---
 
@@ -259,17 +259,17 @@ La **chaîne d'évolution** est la séquence complète des versions d'un éléme
 
 ### Successeur
 
-Un **successeur** est l'élément qui remplace un élément déprécié ou retiré. Le successeur peut être une nouvelle version du même élément ou un élément entièrement différent.
+Un **successeur** est l'Ã©lÃ©ment qui remplace un Ã©lÃ©ment dÃ©prÃ©ciÃ© ou retirÃ©. Le successeur peut Ãªtre une nouvelle version du mÃªme Ã©lÃ©ment ou un Ã©lÃ©ment entiÃ¨rement diffÃ©rent.
 
-**Invariant associé :** INV-EB-10 (Unicité du successeur déclaré)
+**Invariant associÃ© :** INV-EB-10 (UnicitÃ© du successeur dÃ©clarÃ©)
 
-**Règle :** Un élément déprécié possède au plus un successeur déclaré à tout moment.
+**RÃ¨gle :** Un Ã©lÃ©ment dÃ©prÃ©ciÃ© possÃ¨de au plus un successeur dÃ©clarÃ© Ã  tout moment.
 
 ---
 
-### Prédécesseur
+### PrÃ©dÃ©cesseur
 
-Un **prédécesseur** est l'élément qui a été remplacé par l'élément actuel. La chaîne des prédécesseurs forme l'historique d'évolution.
+Un **prÃ©dÃ©cesseur** est l'Ã©lÃ©ment qui a Ã©tÃ© remplacÃ© par l'Ã©lÃ©ment actuel. La chaÃ®ne des prÃ©dÃ©cesseurs forme l'historique d'Ã©volution.
 
 ---
 
@@ -277,7 +277,7 @@ Un **prédécesseur** est l'élément qui a été remplacé par l'élément actu
 
 ### Dette structurelle
 
-La **dette structurelle** est l'ensemble des éléments DEPRECATED ou RETIRED qui persistent dans le système. Cette dette n'est pas nécessairement négative — elle est le prix de la continuité.
+La **dette structurelle** est l'ensemble des Ã©lÃ©ments DEPRECATED ou RETIRED qui persistent dans le systÃ¨me. Cette dette n'est pas nÃ©cessairement nÃ©gative â€” elle est le prix de la continuitÃ©.
 
 **Surveillance :** Ever Buddy mesure et alerte quand la dette devient excessive.
 
@@ -287,21 +287,21 @@ La **dette structurelle** est l'ensemble des éléments DEPRECATED ou RETIRED qu
 
 ### Debt ratio
 
-Le **debt ratio** est le rapport entre les éléments DEPRECATED/RETIRED et les éléments ACTIVE.
+Le **debt ratio** est le rapport entre les Ã©lÃ©ments DEPRECATED/RETIRED et les Ã©lÃ©ments ACTIVE.
 
 **Formule :** `Debt ratio = (DEPRECATED + RETIRED) / ACTIVE`
 
-**Usage :** Ever Buddy surveille ce ratio et alerte quand il dépasse des seuils définis.
+**Usage :** Ever Buddy surveille ce ratio et alerte quand il dÃ©passe des seuils dÃ©finis.
 
 ---
 
 ### Taux d'adoption (Adoption rate)
 
-Le **taux d'adoption** est le pourcentage de consommateurs qui ont migré vers le successeur d'un élément déprécié.
+Le **taux d'adoption** est le pourcentage de consommateurs qui ont migrÃ© vers le successeur d'un Ã©lÃ©ment dÃ©prÃ©ciÃ©.
 
-**Usage :** Ever Buddy surveille ce taux pour déterminer quand une transition peut être complétée.
+**Usage :** Ever Buddy surveille ce taux pour dÃ©terminer quand une transition peut Ãªtre complÃ©tÃ©e.
 
-**Critère de complétion :** Un taux d'adoption suffisant permet le passage de DEPRECATED à RETIRED.
+**CritÃ¨re de complÃ©tion :** Un taux d'adoption suffisant permet le passage de DEPRECATED Ã  RETIRED.
 
 ---
 
@@ -309,143 +309,144 @@ Le **taux d'adoption** est le pourcentage de consommateurs qui ont migré vers l
 
 ### Migration
 
-Une **migration** est l'ensemble des actions nécessaires pour passer d'une version à une autre.
+Une **migration** est l'ensemble des actions nÃ©cessaires pour passer d'une version Ã  une autre.
 
-**Règle fondamentale :** Ever Buddy définit les migrations conceptuellement mais **ne les exécute jamais** (INV-EB-1).
+**RÃ¨gle fondamentale :** Ever Buddy dÃ©finit les migrations conceptuellement mais **ne les exÃ©cute jamais** (INV-EB-1).
 
-**Responsabilité d'exécution :**
-- KindMother pour les données
+**ResponsabilitÃ© d'exÃ©cution :**
+- KindMother pour les donnÃ©es
 - Produits pour leur code
 
 ---
 
 ### Freeze (Gel)
 
-Un **freeze** est le gel d'un élément à un état donné. Un élément gelé ne peut plus évoluer (sauf corrections critiques de sécurité).
+Un **freeze** est le gel d'un Ã©lÃ©ment Ã  un Ã©tat donnÃ©. Un Ã©lÃ©ment gelÃ© ne peut plus Ã©voluer (sauf corrections critiques de sÃ©curitÃ©).
 
 **Usage :** Stabiliser les versions en production.
 
-**Référence glossaire :** [Gel local (Local Freeze)](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md#gel-local-local-freeze)
+**RÃ©fÃ©rence glossaire :** [Gel local (..//..//..//miyukini-webway-system//reference//_index.md#gel-local-local-freeze)
 
 ---
 
 ### Tombstone
 
-Un **tombstone** est l'enregistrement minimal conservé pour un élément archivé. Il contient uniquement les métadonnées nécessaires à la traçabilité historique, pas les données fonctionnelles.
+Un **tombstone** est l'enregistrement minimal conservÃ© pour un Ã©lÃ©ment archivÃ©. Il contient uniquement les mÃ©tadonnÃ©es nÃ©cessaires Ã  la traÃ§abilitÃ© historique, pas les donnÃ©es fonctionnelles.
 
 **Contenu d'un tombstone :**
-- Identifiant de l'élément
-- Dates de création et d'archivage
-- Chaîne d'évolution (successeur, prédécesseur)
+- Identifiant de l'Ã©lÃ©ment
+- Dates de crÃ©ation et d'archivage
+- ChaÃ®ne d'Ã©volution (successeur, prÃ©dÃ©cesseur)
 - Raison de l'archivage
 
 ---
 
-## Catégories d'éléments
+## CatÃ©gories d'Ã©lÃ©ments
 
-Ever Buddy distingue les éléments par leur catégorie, chaque catégorie ayant des règles d'évolution spécifiques.
+Ever Buddy distingue les Ã©lÃ©ments par leur catÃ©gorie, chaque catÃ©gorie ayant des rÃ¨gles d'Ã©volution spÃ©cifiques.
 
 ### Contrats fondateurs (FONDATION)
 
-**Caractéristiques :**
-- Évolution extrêmement lente
-- Périodes de transition très longues
+**CaractÃ©ristiques :**
+- Ã‰volution extrÃªmement lente
+- PÃ©riodes de transition trÃ¨s longues
 - Ruptures quasiment interdites
 
-**Exemples :** Documentations fondatrices des cores, invariants système
+**Exemples :** Documentations fondatrices des cores, invariants systÃ¨me
 
 ---
 
-### Contrats opérationnels
+### Contrats opÃ©rationnels
 
-**Caractéristiques :**
-- Évolution modérée
-- Périodes de transition standards
+**CaractÃ©ristiques :**
+- Ã‰volution modÃ©rÃ©e
+- PÃ©riodes de transition standards
 - Ruptures possibles avec justification
 
-**Exemples :** Contrats d'API, spécifications d'interfaces
+**Exemples :** Contrats d'API, spÃ©cifications d'interfaces
 
 ---
 
 ### Interfaces techniques
 
-**Caractéristiques :**
-- Évolution plus rapide
-- Périodes de transition courtes
+**CaractÃ©ristiques :**
+- Ã‰volution plus rapide
+- PÃ©riodes de transition courtes
 - Ruptures possibles avec documentation
 
 **Exemples :** Interfaces de modules, adaptateurs
 
 ---
 
-### Éléments internes
+### Ã‰lÃ©ments internes
 
-**Caractéristiques :**
-- Évolution libre
-- Pas de garantie de stabilité externe
-- Ruptures sans préavis autorisées
+**CaractÃ©ristiques :**
+- Ã‰volution libre
+- Pas de garantie de stabilitÃ© externe
+- Ruptures sans prÃ©avis autorisÃ©es
 
-**Exemples :** Implémentations internes, utilitaires privés
+**Exemples :** ImplÃ©mentations internes, utilitaires privÃ©s
 
 ---
 
-## Matrice récapitulative des transitions
+## Matrice rÃ©capitulative des transitions
 
 | Depuis \ Vers | DRAFT | ACTIVE | DEPRECATED | RETIRED | ARCHIVED |
 |---------------|-------|--------|------------|---------|----------|
-| **DRAFT**     | —     | ✓      | ✗          | ✗       | ✓        |
-| **ACTIVE**    | ✗     | —      | ✓          | ✗       | ✗        |
-| **DEPRECATED**| ✗     | ✓*     | —          | ✓       | ✗        |
-| **RETIRED**   | ✗     | ✗      | ✗          | —       | ✓        |
-| **ARCHIVED**  | ✗     | ✗      | ✗          | ✗       | —        |
+| **DRAFT**     | â€”     | âœ“      | âœ—          | âœ—       | âœ“        |
+| **ACTIVE**    | âœ—     | â€”      | âœ“          | âœ—       | âœ—        |
+| **DEPRECATED**| âœ—     | âœ“*     | â€”          | âœ“       | âœ—        |
+| **RETIRED**   | âœ—     | âœ—      | âœ—          | â€”       | âœ“        |
+| **ARCHIVED**  | âœ—     | âœ—      | âœ—          | âœ—       | â€”        |
 
-*La réactivation DEPRECATED → ACTIVE est possible uniquement si le successeur est annulé et que l'élément déprécié est toujours fonctionnel.
+*La rÃ©activation DEPRECATED â†’ ACTIVE est possible uniquement si le successeur est annulÃ© et que l'Ã©lÃ©ment dÃ©prÃ©ciÃ© est toujours fonctionnel.
 
 ---
 
 ## Tableau de correspondance terminologique
 
-| Terme anglais | Terme français | Définition courte |
+| Terme anglais | Terme franÃ§ais | DÃ©finition courte |
 |---------------|----------------|-------------------|
-| Lifecycle | Cycle de vie | Ensemble des états d'un élément |
-| Transition | Transition | Passage d'un état à un autre |
-| Generation | Génération | Version majeure conceptuelle |
-| Coexistence | Coexistence | Période de double disponibilité |
-| Sunset | Sunset | Processus planifié de fin de vie |
-| Successor | Successeur | Élément de remplacement |
-| Predecessor | Prédécesseur | Élément remplacé |
-| Breaking change | Rupture de compatibilité | Changement incompatible |
+| Lifecycle | Cycle de vie | Ensemble des Ã©tats d'un Ã©lÃ©ment |
+| Transition | Transition | Passage d'un Ã©tat Ã  un autre |
+| Generation | GÃ©nÃ©ration | Version majeure conceptuelle |
+| Coexistence | Coexistence | PÃ©riode de double disponibilitÃ© |
+| Sunset | Sunset | Processus planifiÃ© de fin de vie |
+| Successor | Successeur | Ã‰lÃ©ment de remplacement |
+| Predecessor | PrÃ©dÃ©cesseur | Ã‰lÃ©ment remplacÃ© |
+| Breaking change | Rupture de compatibilitÃ© | Changement incompatible |
 | Migration | Migration | Actions pour changer de version |
-| Freeze | Gel | Blocage d'évolution |
+| Freeze | Gel | Blocage d'Ã©volution |
 | Debt ratio | Ratio de dette | Mesure de dette structurelle |
 | Adoption rate | Taux d'adoption | Pourcentage de migration |
-| Grace period | Période de grâce | Temps supplémentaire accordé |
-| Compatibility window | Fenêtre de compatibilité | Plage de versions compatibles |
-| Evolution chain | Chaîne d'évolution | Historique complet des versions |
-| Tombstone | Tombstone | Enregistrement minimal archivé |
+| Grace period | PÃ©riode de grÃ¢ce | Temps supplÃ©mentaire accordÃ© |
+| Compatibility window | FenÃªtre de compatibilitÃ© | Plage de versions compatibles |
+| Evolution chain | ChaÃ®ne d'Ã©volution | Historique complet des versions |
+| Tombstone | Tombstone | Enregistrement minimal archivÃ© |
 
 ---
 
-## Références croisées
+## RÃ©fÃ©rences croisÃ©es
 
 ### Documents Ever Buddy
 
-- [Ever Buddy - Documentation Fondatrice](../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md) — Section 9 : Vocabulaire canonique
-- [Ever Buddy - Lifecycle States Contract](../contracts/lifecycle/Ever%20Buddy%20-%20Lifecycle%20States%20Contract.md) — États détaillés
-- [Ever Buddy - Transition Rules Contract](../contracts/lifecycle/Ever%20Buddy%20-%20Transition%20Rules%20Contract.md) — Règles de transition
-- [Ever Buddy - Compatibility Rules Contract](../contracts/compatibility/Ever%20Buddy%20-%20Compatibility%20Rules%20Contract.md) — Règles de compatibilité
-- [Ever Buddy - Version Semantics Contract](../contracts/compatibility/Ever%20Buddy%20-%20Version%20Semantics%20Contract.md) — Versionnement sémantique
-- [Ever Buddy - Debt Tracking Contract](../contracts/observability/Ever%20Buddy%20-%20Debt%20Tracking%20Contract.md) — Surveillance dette
-- [Ever Buddy - Invariants & Guarantees](../contracts/governance/Ever%20Buddy%20-%20Invariants%20%26%20Guarantees.md) — INV-EB-1 à INV-EB-12
+- [Ever Buddy - Documentation Fondatrice](../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md) â€” Section 9 : Vocabulaire canonique
+- [Ever Buddy - Lifecycle States Contract](../contracts/lifecycle/Ever%20Buddy%20-%20Lifecycle%20States%20Contract.md) â€” Ã‰tats dÃ©taillÃ©s
+- [Ever Buddy - Transition Rules Contract](../contracts/lifecycle/Ever%20Buddy%20-%20Transition%20Rules%20Contract.md) â€” RÃ¨gles de transition
+- [Ever Buddy - Compatibility Rules Contract](../contracts/compatibility/Ever%20Buddy%20-%20Compatibility%20Rules%20Contract.md) â€” RÃ¨gles de compatibilitÃ©
+- [Ever Buddy - Version Semantics Contract](../contracts/compatibility/Ever%20Buddy%20-%20Version%20Semantics%20Contract.md) â€” Versionnement sÃ©mantique
+- [Ever Buddy - Debt Tracking Contract](../contracts/observability/Ever%20Buddy%20-%20Debt%20Tracking%20Contract.md) â€” Surveillance dette
+- [Ever Buddy - Invariants & Guarantees](../contracts/governance/Ever%20Buddy%20-%20Invariants%20%26%20Guarantees.md) â€” INV-EB-1 Ã  INV-EB-12
 
-### Documents de référence Miyukini
+### Documents de rÃ©fÃ©rence Miyukini
 
-- [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) — Glossaire général
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) — Conformité LOI-1 à LOI-6
+- [Miyukini Conceptual References - Glossaire](..//..//..//miyukini-webway-system//reference//_index.md) â€” Glossaire gÃ©nÃ©ral
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md) â€” ConformitÃ© LOI-1 Ã  LOI-6
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-27  
-**Statut :** Document de référence normatif — Vocabulaire canonique Ever Buddy  
+**Statut :** Document de rÃ©fÃ©rence normatif â€” Vocabulaire canonique Ever Buddy  
 **Source :** Documentation Fondatrice Ever Buddy v1.3, Section 9
+

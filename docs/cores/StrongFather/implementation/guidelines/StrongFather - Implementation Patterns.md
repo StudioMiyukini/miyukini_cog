@@ -1,16 +1,16 @@
-# StrongFather — Implementation Patterns
+﻿# StrongFather â€” Implementation Patterns
 
 ## Statut du document
 
 **POST-FONDATION / NON NORMATIF / INFORMATIF**
 
-Ce document présente les patterns d'implémentation recommandés pour StrongFather. Il complète le document [Implementation Overview](./StrongFather%20-%20Implementation%20Overview.md).
+Ce document prÃ©sente les patterns d'implÃ©mentation recommandÃ©s pour StrongFather. Il complÃ¨te le document [Implementation Overview](./StrongFather%20-%20Implementation%20Overview.md).
 
 **Documents connexes :**
 - [StrongFather - Implementation Overview](./StrongFather%20-%20Implementation%20Overview.md)
 - [StrongFather - Implementation Prohibitions](./StrongFather%20-%20Implementation%20Prohibitions.md)
 
-**Terminologie :** Voir [Miyukini Conceptual References - Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie :** Voir [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -18,12 +18,12 @@ Ce document présente les patterns d'implémentation recommandés pour StrongFat
 
 **Concept contractuel :**
 
-La surface d'évaluation est le point d'entrée unique de StrongFather (Architecture & Flows section 3.1).
+La surface d'Ã©valuation est le point d'entrÃ©e unique de StrongFather (Architecture & Flows section 3.1).
 
-**Pattern Rust recommandé :**
+**Pattern Rust recommandÃ© :**
 
 ```rust
-// Surface d'évaluation unique conforme à Architecture & Flows
+// Surface d'Ã©valuation unique conforme Ã  Architecture & Flows
 pub struct StrongFather {
     // Composants internes (Architecture & Flows section 3)
     intent_validator: IntentValidator,
@@ -35,7 +35,7 @@ pub struct StrongFather {
 }
 
 impl StrongFather {
-    // Point d'entrée unique (Core Decision Contract section 2)
+    // Point d'entrÃ©e unique (Core Decision Contract section 2)
     pub fn evaluate_intent(
         &self,
         intent: Intent,
@@ -47,20 +47,20 @@ impl StrongFather {
         // 2. Application des politiques (Policy Engine Contract)
         let policy_results = self.policy_engine.apply(&intent, &context)?;
         
-        // 3. Composition des résultats (Policy Engine Contract section 6)
+        // 3. Composition des rÃ©sultats (Policy Engine Contract section 6)
         let composed_result = self.result_composer.compose(policy_results)?;
         
-        // 4. Calcul de priorité (si applicable)
+        // 4. Calcul de prioritÃ© (si applicable)
         let priority = self.priority_calculator.calculate(&intent, &composed_result)?;
         
-        // 5. Production de décision (Core Decision Contract)
+        // 5. Production de dÃ©cision (Core Decision Contract)
         let decision = self.decision_producer.produce(
             &intent,
             &composed_result,
             priority,
         )?;
         
-        // 6. Traçabilité (Audit & Trace Contract)
+        // 6. TraÃ§abilitÃ© (Audit & Trace Contract)
         self.tracer.trace_evaluation(&intent, &decision)?;
         
         Ok(decision)
@@ -68,15 +68,15 @@ impl StrongFather {
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
-- **Point d'entrée unique :** Une seule méthode publique pour l'évaluation (Core Decision Contract section 2).
+- **Point d'entrÃ©e unique :** Une seule mÃ©thode publique pour l'Ã©valuation (Core Decision Contract section 2).
 
-- **Pas d'entrées multiples :** Aucun autre point d'entrée pour l'évaluation.
+- **Pas d'entrÃ©es multiples :** Aucun autre point d'entrÃ©e pour l'Ã©valuation.
 
-- **Séparation des responsabilités :** Chaque composant interne a une responsabilité unique (Architecture & Flows).
+- **SÃ©paration des responsabilitÃ©s :** Chaque composant interne a une responsabilitÃ© unique (Architecture & Flows).
 
-**Référence contrat :** Architecture & Flows (section 3), Core Decision Contract (section 2)
+**RÃ©fÃ©rence contrat :** Architecture & Flows (section 3), Core Decision Contract (section 2)
 
 ---
 
@@ -84,14 +84,14 @@ impl StrongFather {
 
 **Concept contractuel :**
 
-Le Policy Engine applique les politiques de manière déterministe, complète, ordonnée, et traçable (Policy Engine Contract section 7).
+Le Policy Engine applique les politiques de maniÃ¨re dÃ©terministe, complÃ¨te, ordonnÃ©e, et traÃ§able (Policy Engine Contract section 7).
 
-**Pattern Rust recommandé :**
+**Pattern Rust recommandÃ© :**
 
 ```rust
 // Policy Engine conforme au Policy Engine Contract
 pub struct PolicyEngine {
-    policies: PolicySet, // Politiques chargées depuis source (Policy Source Contract)
+    policies: PolicySet, // Politiques chargÃ©es depuis source (Policy Source Contract)
 }
 
 impl PolicyEngine {
@@ -100,19 +100,19 @@ impl PolicyEngine {
         intent: &Intent,
         context: &EvaluationContext,
     ) -> Result<Vec<PolicyResult>, SFError> {
-        // 1. Sélection des politiques applicables (Policy Engine Contract section 5.1)
+        // 1. SÃ©lection des politiques applicables (Policy Engine Contract section 5.1)
         let applicable_policies = self.select_applicable_policies(intent, context)?;
         
-        // 2. Tri par priorité (Policy Engine Contract section 5.2)
+        // 2. Tri par prioritÃ© (Policy Engine Contract section 5.2)
         let ordered_policies = self.order_by_priority(applicable_policies);
         
-        // 3. Évaluation de chaque politique (Policy Engine Contract section 5.3)
+        // 3. Ã‰valuation de chaque politique (Policy Engine Contract section 5.3)
         let mut results = Vec::new();
         for policy in ordered_policies {
             let result = self.evaluate_policy(policy, intent, context)?;
             results.push(result);
             
-            // Résolution de conflits si nécessaire (Policy Engine Contract section 5.4)
+            // RÃ©solution de conflits si nÃ©cessaire (Policy Engine Contract section 5.4)
             if self.has_conflict(&results) {
                 return self.resolve_conflict(&results)?;
             }
@@ -126,8 +126,8 @@ impl PolicyEngine {
         intent: &Intent,
         context: &EvaluationContext,
     ) -> Result<Vec<&Policy>, SFError> {
-        // Sélection selon les conditions des politiques
-        // INV-POL-3 : Déterminisme
+        // SÃ©lection selon les conditions des politiques
+        // INV-POL-3 : DÃ©terminisme
         self.policies
             .iter()
             .filter(|policy| policy.condition.matches(intent, context))
@@ -140,8 +140,8 @@ impl PolicyEngine {
         intent: &Intent,
         context: &EvaluationContext,
     ) -> Result<PolicyResult, SFError> {
-        // Évaluation déterministe (INV-POL-3)
-        // Pas de logique d'exécution (Policy Engine Contract section 2.3)
+        // Ã‰valuation dÃ©terministe (INV-POL-3)
+        // Pas de logique d'exÃ©cution (Policy Engine Contract section 2.3)
         match policy.policy_type {
             PolicyType::Permission => self.evaluate_permission(policy, intent, context),
             PolicyType::Constraint => self.evaluate_constraint(policy, intent, context),
@@ -153,17 +153,17 @@ impl PolicyEngine {
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
-- **Déterminisme :** Pour une intention et des politiques données, toujours le même résultat (INV-POL-3).
+- **DÃ©terminisme :** Pour une intention et des politiques donnÃ©es, toujours le mÃªme rÃ©sultat (INV-POL-3).
 
-- **Lecture seule :** Les politiques sont lues depuis la source, jamais modifiées (Policy Source Contract, INV-SRC-4).
+- **Lecture seule :** Les politiques sont lues depuis la source, jamais modifiÃ©es (Policy Source Contract, INV-SRC-4).
 
-- **Pas de logique d'exécution :** L'évaluation ne déclenche jamais d'action (Policy Engine Contract section 2.3).
+- **Pas de logique d'exÃ©cution :** L'Ã©valuation ne dÃ©clenche jamais d'action (Policy Engine Contract section 2.3).
 
-- **Résolution de conflits :** Appliquer les règles de résolution définies (Policy Engine Contract section 5.4).
+- **RÃ©solution de conflits :** Appliquer les rÃ¨gles de rÃ©solution dÃ©finies (Policy Engine Contract section 5.4).
 
-**Référence contrat :** Policy Engine Contract (sections 5, 7), Policy Source Contract (INV-SRC-4), Invariants & Guarantees (INV-POL-3)
+**RÃ©fÃ©rence contrat :** Policy Engine Contract (sections 5, 7), Policy Source Contract (INV-SRC-4), Invariants & Guarantees (INV-POL-3)
 
 ---
 
@@ -171,9 +171,9 @@ impl PolicyEngine {
 
 **Concept contractuel :**
 
-Le Decision Graph est un graphe orienté acyclique (DAG) modélisant le processus d'évaluation (Decision Graph Specification section 3).
+Le Decision Graph est un graphe orientÃ© acyclique (DAG) modÃ©lisant le processus d'Ã©valuation (Decision Graph Specification section 3).
 
-**Pattern Rust recommandé :**
+**Pattern Rust recommandÃ© :**
 
 ```rust
 // Decision Graph conforme au Decision Graph Specification
@@ -184,31 +184,31 @@ pub struct DecisionGraph {
 
 #[derive(Debug, Clone)]
 pub enum DecisionNode {
-    Entry,              // Nœud d'entrée (Decision Graph Specification section 4.1)
-    Validation {        // Nœud de validation
+    Entry,              // NÅ“ud d'entrÃ©e (Decision Graph Specification section 4.1)
+    Validation {        // NÅ“ud de validation
         validator: Box<dyn IntentValidator>,
     },
-    Policy {            // Nœud de politique
+    Policy {            // NÅ“ud de politique
         policy_id: String,
     },
-    Composition {       // Nœud de composition
+    Composition {       // NÅ“ud de composition
         operator: CompositionOperator,
     },
-    Priority {          // Nœud de priorité
+    Priority {          // NÅ“ud de prioritÃ©
         calculator: Box<dyn PriorityCalculator>,
     },
-    Decision {          // Nœud de décision
+    Decision {          // NÅ“ud de dÃ©cision
         decision_type: DecisionType,
     },
 }
 
 #[derive(Debug, Clone)]
 pub enum DecisionEdge {
-    Sequence,           // Arête séquentielle (Decision Graph Specification section 5.1)
-    Conditional {       // Arête conditionnelle
+    Sequence,           // ArÃªte sÃ©quentielle (Decision Graph Specification section 5.1)
+    Conditional {       // ArÃªte conditionnelle
         condition: Box<dyn Fn(&EvaluationState) -> bool>,
     },
-    Aggregation,        // Arête d'agrégation
+    Aggregation,        // ArÃªte d'agrÃ©gation
 }
 
 impl DecisionGraph {
@@ -217,7 +217,7 @@ impl DecisionGraph {
         intent: &Intent,
         context: &EvaluationContext,
     ) -> Result<Decision, SFError> {
-        // Parcours du graphe depuis le nœud d'entrée
+        // Parcours du graphe depuis le nÅ“ud d'entrÃ©e
         let mut state = EvaluationState::new(intent, context);
         let mut current_node = self.find_entry_node()?;
         
@@ -249,11 +249,11 @@ impl DecisionGraph {
                 }
             }
             
-            // Vérification d'acyclicité (Decision Graph Specification section 3.3)
+            // VÃ©rification d'acyclicitÃ© (Decision Graph Specification section 3.3)
             if state.visited_nodes.contains(&current_node) {
                 return Err(SFError::ConsistencyError {
                     violated_invariant: "INV-GRAPH-1".to_string(),
-                    reason: "Cycle détecté dans le graphe de décision".to_string(),
+                    reason: "Cycle dÃ©tectÃ© dans le graphe de dÃ©cision".to_string(),
                 });
             }
             state.visited_nodes.insert(current_node);
@@ -262,28 +262,28 @@ impl DecisionGraph {
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
-- **DAG :** Le graphe DOIT être acyclique (Decision Graph Specification section 3.3).
+- **DAG :** Le graphe DOIT Ãªtre acyclique (Decision Graph Specification section 3.3).
 
 - **Terminaison garantie :** Le graphe DOIT toujours terminer (Decision Graph Specification section 3.4).
 
-- **Déterminisme :** Pour une intention donnée, le parcours est toujours le même (INV-POL-3).
+- **DÃ©terminisme :** Pour une intention donnÃ©e, le parcours est toujours le mÃªme (INV-POL-3).
 
-**Référence contrat :** Decision Graph Specification (sections 3, 4, 5), Invariants & Guarantees (INV-POL-3)
+**RÃ©fÃ©rence contrat :** Decision Graph Specification (sections 3, 4, 5), Invariants & Guarantees (INV-POL-3)
 
 ---
 
-## 4. Pattern : Gestion des décisions (Core Decision Contract)
+## 4. Pattern : Gestion des dÃ©cisions (Core Decision Contract)
 
 **Concept contractuel :**
 
-Les 4 types de décisions (ACCEPTÉE, REFUSÉE, AMBIGUË, DIFFÉRÉE) doivent être gérés distinctement (Core Decision Contract section 3).
+Les 4 types de dÃ©cisions (ACCEPTÃ‰E, REFUSÃ‰E, AMBIGUÃ‹, DIFFÃ‰RÃ‰E) doivent Ãªtre gÃ©rÃ©s distinctement (Core Decision Contract section 3).
 
-**Pattern Rust recommandé :**
+**Pattern Rust recommandÃ© :**
 
 ```rust
-// Gestion des décisions conforme au Core Decision Contract
+// Gestion des dÃ©cisions conforme au Core Decision Contract
 impl DecisionProducer {
     pub fn produce(
         &self,
@@ -293,7 +293,7 @@ impl DecisionProducer {
     ) -> Result<Decision, SFError> {
         match policy_results {
             ComposedResult::AllSatisfied => {
-                // Décision ACCEPTÉE (Core Decision Contract section 3.1)
+                // DÃ©cision ACCEPTÃ‰E (Core Decision Contract section 3.1)
                 Ok(Decision {
                     intent_id: intent.intent_id.clone(),
                     decision_type: DecisionType::Accepted {
@@ -306,7 +306,7 @@ impl DecisionProducer {
                 })
             }
             ComposedResult::Violated { policies } => {
-                // Décision REFUSÉE (Core Decision Contract section 3.2)
+                // DÃ©cision REFUSÃ‰E (Core Decision Contract section 3.2)
                 Ok(Decision {
                     intent_id: intent.intent_id.clone(),
                     decision_type: DecisionType::Refused {
@@ -320,7 +320,7 @@ impl DecisionProducer {
                 })
             }
             ComposedResult::Ambiguous { missing } => {
-                // Décision AMBIGUË (Core Decision Contract section 3.3)
+                // DÃ©cision AMBIGUÃ‹ (Core Decision Contract section 3.3)
                 Ok(Decision {
                     intent_id: intent.intent_id.clone(),
                     decision_type: DecisionType::Ambiguous {
@@ -334,7 +334,7 @@ impl DecisionProducer {
                 })
             }
             ComposedResult::Deferred { reason, context_required } => {
-                // Décision DIFFÉRÉE (Core Decision Contract section 3.4)
+                // DÃ©cision DIFFÃ‰RÃ‰E (Core Decision Contract section 3.4)
                 // INV-DIFF-NOPLAN : Pas de planification
                 Ok(Decision {
                     intent_id: intent.intent_id.clone(),
@@ -354,28 +354,28 @@ impl DecisionProducer {
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
-- **4 types distincts :** Gérer explicitement les 4 types, jamais de type générique "résultat".
+- **4 types distincts :** GÃ©rer explicitement les 4 types, jamais de type gÃ©nÃ©rique "rÃ©sultat".
 
-- **Justification obligatoire :** Toute décision DOIT contenir une justification (G-JUST-1).
+- **Justification obligatoire :** Toute dÃ©cision DOIT contenir une justification (G-JUST-1).
 
-- **Pas de planification :** Une décision DIFFÉRÉE n'implique aucune planification (INV-DIFF-NOPLAN).
+- **Pas de planification :** Une dÃ©cision DIFFÃ‰RÃ‰E n'implique aucune planification (INV-DIFF-NOPLAN).
 
-**Référence contrat :** Core Decision Contract (sections 3, 4), Invariants & Guarantees (INV-DEC-1, INV-DEC-2, INV-DIFF-NOPLAN)
+**RÃ©fÃ©rence contrat :** Core Decision Contract (sections 3, 4), Invariants & Guarantees (INV-DEC-1, INV-DEC-2, INV-DIFF-NOPLAN)
 
 ---
 
-## 5. Pattern : Traçabilité avec kernel (Boundary & Isolation Contract)
+## 5. Pattern : TraÃ§abilitÃ© avec kernel (Boundary & Isolation Contract)
 
 **Concept contractuel :**
 
-La traçabilité est autorisée via le kernel (Id, Logger, Clock) uniquement pour la traçabilité passive (KERN-AUTH-1, KERN-AUTH-2, KERN-AUTH-3).
+La traÃ§abilitÃ© est autorisÃ©e via le kernel (Id, Logger, Clock) uniquement pour la traÃ§abilitÃ© passive (KERN-AUTH-1, KERN-AUTH-2, KERN-AUTH-3).
 
-**Pattern Rust recommandé :**
+**Pattern Rust recommandÃ© :**
 
 ```rust
-// Traçabilité conforme au Kernel Trace Access Contract
+// TraÃ§abilitÃ© conforme au Kernel Trace Access Contract
 pub struct Tracer {
     id_generator: IdGenerator, // KERN-AUTH-1 : Id pour identification
     logger: Logger,             // KERN-AUTH-2 : Logger pour enregistrement
@@ -391,8 +391,8 @@ impl Tracer {
         // KERN-AUTH-1 : Id pour identification de trace
         let trace_id = self.id_generator.generate();
         
-        // KERN-AUTH-3 : Clock pour horodatage (après production de décision)
-        let timestamp = self.clock.now(); // ✅ Autorisé uniquement pour horodatage
+        // KERN-AUTH-3 : Clock pour horodatage (aprÃ¨s production de dÃ©cision)
+        let timestamp = self.clock.now(); // âœ… AutorisÃ© uniquement pour horodatage
         
         // KERN-AUTH-2 : Logger pour enregistrement passif
         let trace = Trace {
@@ -404,46 +404,46 @@ impl Tracer {
             justification: decision.justification.clone(),
         };
         
-        // Enregistrement passif (pas d'influence sur la décision)
+        // Enregistrement passif (pas d'influence sur la dÃ©cision)
         if let Err(e) = self.logger.log(&trace) {
-            // R-TRACE-FAIL-1 : Échec de trace = décision continue
-            // La décision a déjà été produite, on ne bloque pas
-            eprintln!("Échec de traçabilité: {}", e);
-            // La décision continue, pas d'erreur retournée
+            // R-TRACE-FAIL-1 : Ã‰chec de trace = dÃ©cision continue
+            // La dÃ©cision a dÃ©jÃ  Ã©tÃ© produite, on ne bloque pas
+            eprintln!("Ã‰chec de traÃ§abilitÃ©: {}", e);
+            // La dÃ©cision continue, pas d'erreur retournÃ©e
         }
         
         Ok(())
     }
 }
 
-// ❌ INCORRECT : Utilisation de Clock pour logique décisionnelle
+// âŒ INCORRECT : Utilisation de Clock pour logique dÃ©cisionnelle
 impl PolicyEngine {
     pub fn evaluate(&self, intent: &Intent) -> Decision {
-        let now = self.clock.now(); // ❌ KERN-INTERD-1 : Clock pour logique décisionnelle
+        let now = self.clock.now(); // âŒ KERN-INTERD-1 : Clock pour logique dÃ©cisionnelle
         if now.hour() > 18 {
-            return Decision::refused("Trop tard"); // ❌ Logique temporelle interdite
+            return Decision::refused("Trop tard"); // âŒ Logique temporelle interdite
         }
     }
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
-- **Id uniquement pour traces :** Id génère des identifiants de trace, jamais utilisés dans la logique décisionnelle (KERN-AUTH-1).
+- **Id uniquement pour traces :** Id gÃ©nÃ¨re des identifiants de trace, jamais utilisÃ©s dans la logique dÃ©cisionnelle (KERN-AUTH-1).
 
-- **Logger uniquement pour enregistrement :** Logger enregistre passivement, jamais pour influencer la décision (KERN-AUTH-2).
+- **Logger uniquement pour enregistrement :** Logger enregistre passivement, jamais pour influencer la dÃ©cision (KERN-AUTH-2).
 
-- **Clock uniquement pour horodatage :** Clock horodate les traces après production de décision, jamais pour logique temporelle (KERN-AUTH-3, KERN-INTERD-1).
+- **Clock uniquement pour horodatage :** Clock horodate les traces aprÃ¨s production de dÃ©cision, jamais pour logique temporelle (KERN-AUTH-3, KERN-INTERD-1).
 
-- **Résilience :** Si la trace échoue, la décision continue (R-TRACE-FAIL-1).
+- **RÃ©silience :** Si la trace Ã©choue, la dÃ©cision continue (R-TRACE-FAIL-1).
 
-**Référence contrat :** Boundary & Isolation Contract (section 4.2.1 — Kernel Trace Access Contract), Audit & Trace Contract (sections 2, 3)
+**RÃ©fÃ©rence contrat :** Boundary & Isolation Contract (section 4.2.1 â€” Kernel Trace Access Contract), Audit & Trace Contract (sections 2, 3)
 
 ---
 
 ## 6. Pattern : Chargement des politiques (Policy Source Contract)
 
-**Pattern recommandé :**
+**Pattern recommandÃ© :**
 
 ```rust
 // Chargement conforme au Policy Source Contract
@@ -453,19 +453,19 @@ pub struct PolicySource {
 
 impl PolicySource {
     pub fn load(&self) -> Result<PolicySet, SFError> {
-        // R-INIT-1 : Chargement obligatoire avant évaluation
-        // R-INIT-2 : Échec bloquant
+        // R-INIT-1 : Chargement obligatoire avant Ã©valuation
+        // R-INIT-2 : Ã‰chec bloquant
         match self.source_config.load_policies() {
             Ok(policies) => {
-                // R-VAL-1 : Validation préalable (Policy Source Contract section 4.3)
+                // R-VAL-1 : Validation prÃ©alable (Policy Source Contract section 4.3)
                 self.validate_policies(&policies)?;
                 Ok(policies)
             }
             Err(e) => {
-                // R-INIT-2 : Échec bloquant
+                // R-INIT-2 : Ã‰chec bloquant
                 Err(SFError::ResourceError {
                     resource: "policy_source".to_string(),
-                    reason: format!("Chargement des politiques échoué: {}", e),
+                    reason: format!("Chargement des politiques Ã©chouÃ©: {}", e),
                 })
             }
         }
@@ -476,15 +476,15 @@ impl PolicySource {
         // VALID-STRUCT-2 : Type valide
         // VALID-STRUCT-3 : Composants obligatoires
         // VALID-COHER-1 : Pas de contradiction directe
-        // VALID-COHER-2 : Références valides
-        // VALID-CONT-1 : Pas de logique d'exécution
+        // VALID-COHER-2 : RÃ©fÃ©rences valides
+        // VALID-CONT-1 : Pas de logique d'exÃ©cution
         
         // Validation structurelle
         for policy in policies.iter() {
             self.validate_policy_structure(policy)?;
         }
         
-        // Validation de cohérence
+        // Validation de cohÃ©rence
         self.validate_coherence(policies)?;
         
         // Validation de contenu
@@ -495,21 +495,21 @@ impl PolicySource {
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
 - **Chargement atomique :** Le chargement est atomique (tout ou rien) (R-LOAD-2, INV-SRC-5).
 
-- **Validation préalable :** Les politiques DOIVENT être validées avant utilisation (R-VAL-1, INV-SRC-3).
+- **Validation prÃ©alable :** Les politiques DOIVENT Ãªtre validÃ©es avant utilisation (R-VAL-1, INV-SRC-3).
 
 - **Source unique :** Une seule source de politiques (INV-SRC-1, INV-POL-SOURCE).
 
-**Référence contrat :** Policy Source Contract (sections 4, 5), Invariants & Guarantees (INV-SRC-*, INV-POL-SOURCE)
+**RÃ©fÃ©rence contrat :** Policy Source Contract (sections 4, 5), Invariants & Guarantees (INV-SRC-*, INV-POL-SOURCE)
 
 ---
 
-## 7. Pattern : Flux d'évaluation
+## 7. Pattern : Flux d'Ã©valuation
 
-**Flux recommandé :**
+**Flux recommandÃ© :**
 
 ```rust
 impl StrongFather {
@@ -521,39 +521,39 @@ impl StrongFather {
         // 1. Validation structurelle (Intent Model Contract section 6)
         self.intent_validator.validate_structure(&intent)?;
         
-        // 2. Transition d'état : SOUMISE → EN_ÉVALUATION (Intent Model Contract section 4)
+        // 2. Transition d'Ã©tat : SOUMISE â†’ EN_Ã‰VALUATION (Intent Model Contract section 4)
         let intent_state = IntentState::InEvaluation;
         
         // 3. Application des politiques (Policy Engine Contract)
         let policy_results = self.policy_engine.apply(&intent, &context)?;
         
-        // 4. Composition des résultats (Policy Engine Contract section 6)
+        // 4. Composition des rÃ©sultats (Policy Engine Contract section 6)
         let composed_result = self.result_composer.compose(policy_results)?;
         
-        // 5. Détection d'ambiguïté (Core Decision Contract section 3.3)
+        // 5. DÃ©tection d'ambiguÃ¯tÃ© (Core Decision Contract section 3.3)
         if let Some(ambiguity) = self.detect_ambiguity(&intent, &composed_result) {
             return Ok(self.decision_producer.produce_ambiguous(&intent, ambiguity));
         }
         
-        // 6. Calcul de priorité (si applicable)
+        // 6. Calcul de prioritÃ© (si applicable)
         let priority = if composed_result.all_satisfied() {
             Some(self.priority_calculator.calculate(&intent, &composed_result)?)
         } else {
             None
         };
         
-        // 7. Production de décision (Core Decision Contract)
+        // 7. Production de dÃ©cision (Core Decision Contract)
         let decision = self.decision_producer.produce(
             &intent,
             &composed_result,
             priority,
         )?;
         
-        // 8. Transition d'état : EN_ÉVALUATION → DÉCIDÉE (Intent Model Contract section 4)
-        // Note : L'état est conceptuel, pas stocké dans StrongFather
+        // 8. Transition d'Ã©tat : EN_Ã‰VALUATION â†’ DÃ‰CIDÃ‰E (Intent Model Contract section 4)
+        // Note : L'Ã©tat est conceptuel, pas stockÃ© dans StrongFather
         
-        // 9. Traçabilité (Audit & Trace Contract)
-        // R-TRACE-FAIL-1 : Échec de trace = décision continue
+        // 9. TraÃ§abilitÃ© (Audit & Trace Contract)
+        // R-TRACE-FAIL-1 : Ã‰chec de trace = dÃ©cision continue
         let _ = self.tracer.trace_evaluation(&intent, &decision);
         
         Ok(decision)
@@ -561,21 +561,21 @@ impl StrongFather {
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
-- **Ordre strict :** Respecter l'ordre des étapes (Architecture & Flows section 4).
+- **Ordre strict :** Respecter l'ordre des Ã©tapes (Architecture & Flows section 4).
 
-- **Pas de court-circuit :** Chaque étape DOIT être effectuée (sauf si erreur).
+- **Pas de court-circuit :** Chaque Ã©tape DOIT Ãªtre effectuÃ©e (sauf si erreur).
 
-- **Traçabilité résiliente :** L'échec de traçabilité ne bloque pas la décision (R-TRACE-FAIL-1).
+- **TraÃ§abilitÃ© rÃ©siliente :** L'Ã©chec de traÃ§abilitÃ© ne bloque pas la dÃ©cision (R-TRACE-FAIL-1).
 
-**Référence contrat :** Architecture & Flows (section 4), Audit & Trace Contract (R-TRACE-FAIL-1)
+**RÃ©fÃ©rence contrat :** Architecture & Flows (section 4), Audit & Trace Contract (R-TRACE-FAIL-1)
 
 ---
 
 ## 8. Pattern : Gestion des erreurs vs rejets
 
-**Pattern recommandé :**
+**Pattern recommandÃ© :**
 
 ```rust
 // Distinction erreur/rejet conforme au Error & Rejection Model
@@ -585,14 +585,14 @@ impl StrongFather {
         intent: Intent,
         context: EvaluationContext,
     ) -> Result<Decision, SFError> {
-        // Erreur = dysfonctionnement interne → Err(SFError)
-        // Rejet = résultat normal → Ok(Decision { decision_type: Refused })
+        // Erreur = dysfonctionnement interne â†’ Err(SFError)
+        // Rejet = rÃ©sultat normal â†’ Ok(Decision { decision_type: Refused })
         
         // 1. Validation structurelle
         match self.intent_validator.validate_structure(&intent) {
             Ok(()) => {}
             Err(e) => {
-                // ✅ CORRECT : Rejet structurel = Décision REFUSÉE
+                // âœ… CORRECT : Rejet structurel = DÃ©cision REFUSÃ‰E
                 return Ok(Decision {
                     intent_id: intent.intent_id,
                     decision_type: DecisionType::Refused {
@@ -600,7 +600,7 @@ impl StrongFather {
                             missing_components: e.missing_components,
                             violated_rules: e.violated_rules,
                         },
-                        violated_policies: Vec::new(), // Aucune politique évaluée
+                        violated_policies: Vec::new(), // Aucune politique Ã©valuÃ©e
                     },
                     justification: Justification::structural_rejection(&e),
                     policies_applied: Vec::new(),
@@ -622,30 +622,30 @@ impl StrongFather {
             }
         };
         
-        // 3. Production de décision
-        // Les rejets sont des décisions normales (REFUSÉE, AMBIGUË, DIFFÉRÉE)
+        // 3. Production de dÃ©cision
+        // Les rejets sont des dÃ©cisions normales (REFUSÃ‰E, AMBIGUÃ‹, DIFFÃ‰RÃ‰E)
         self.decision_producer.produce(&intent, &policy_results, None)
     }
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
 - **Erreur = Err(SFError) :** Un dysfonctionnement interne retourne une erreur.
 
-- **Rejet = Ok(Decision) :** Un rejet est une décision normale avec `DecisionType::Refused`.
+- **Rejet = Ok(Decision) :** Un rejet est une dÃ©cision normale avec `DecisionType::Refused`.
 
-- **Jamais de mélange :** Ne jamais retourner une erreur pour un rejet, ni un rejet pour une erreur (INV-ERR-1).
+- **Jamais de mÃ©lange :** Ne jamais retourner une erreur pour un rejet, ni un rejet pour une erreur (INV-ERR-1).
 
-**Référence contrat :** Error & Rejection Model (sections 2, 3, 4), Invariants & Guarantees (INV-ERR-1)
+**RÃ©fÃ©rence contrat :** Error & Rejection Model (sections 2, 3, 4), Invariants & Guarantees (INV-ERR-1)
 
 ---
 
-## 9. Stratégies de test recommandées
+## 9. StratÃ©gies de test recommandÃ©es
 
-### 9.1. Tests de conformité aux contrats
+### 9.1. Tests de conformitÃ© aux contrats
 
-**Pattern recommandé :**
+**Pattern recommandÃ© :**
 
 ```rust
 #[cfg(test)]
@@ -654,17 +654,17 @@ mod tests {
     
     #[test]
     fn test_purity_functional() {
-        // Test de pureté fonctionnelle (INV-EXEC-5, INV-BEHAV-3)
+        // Test de puretÃ© fonctionnelle (INV-EXEC-5, INV-BEHAV-3)
         let sf = StrongFather::new(policy_source).unwrap();
         let intent = create_test_intent();
         
-        // Première évaluation
+        // PremiÃ¨re Ã©valuation
         let decision1 = sf.evaluate_intent(intent.clone(), context.clone()).unwrap();
         
-        // Deuxième évaluation (même entrée)
+        // DeuxiÃ¨me Ã©valuation (mÃªme entrÃ©e)
         let decision2 = sf.evaluate_intent(intent.clone(), context.clone()).unwrap();
         
-        // INV-EXEC-5 : Même entrée = même sortie
+        // INV-EXEC-5 : MÃªme entrÃ©e = mÃªme sortie
         assert_eq!(decision1, decision2);
     }
     
@@ -682,25 +682,25 @@ mod tests {
             // ...
         };
         
-        // INV-BEHAV-2 : Zero-trust = validation systématique
+        // INV-BEHAV-2 : Zero-trust = validation systÃ©matique
         let decision = sf.evaluate_intent(intent, context).unwrap();
         
-        // La décision doit être basée sur les politiques, pas sur la "confiance"
+        // La dÃ©cision doit Ãªtre basÃ©e sur les politiques, pas sur la "confiance"
         assert!(decision.justification.policy_references.len() > 0);
     }
     
     #[test]
     fn test_determinism() {
-        // Test de déterminisme (INV-POL-3)
+        // Test de dÃ©terminisme (INV-POL-3)
         let sf = StrongFather::new(policy_source).unwrap();
         let intent = create_test_intent();
         
-        // Évaluations multiples
+        // Ã‰valuations multiples
         let decisions: Vec<Decision> = (0..10)
             .map(|_| sf.evaluate_intent(intent.clone(), context.clone()).unwrap())
             .collect();
         
-        // INV-POL-3 : Toutes les décisions doivent être identiques
+        // INV-POL-3 : Toutes les dÃ©cisions doivent Ãªtre identiques
         assert!(decisions.iter().all(|d| d == &decisions[0]));
     }
     
@@ -709,15 +709,15 @@ mod tests {
         // Test de distinction erreur/rejet (INV-ERR-1)
         let sf = StrongFather::new(policy_source).unwrap();
         
-        // Rejet structurel = Décision REFUSÉE (pas d'erreur)
+        // Rejet structurel = DÃ©cision REFUSÃ‰E (pas d'erreur)
         let invalid_intent = Intent {
-            intent_id: "".to_string(), // ❌ Identifiant vide = invalide
+            intent_id: "".to_string(), // âŒ Identifiant vide = invalide
             // ...
         };
         
         let result = sf.evaluate_intent(invalid_intent, context);
         
-        // INV-ERR-1 : Rejet ≠ Erreur
+        // INV-ERR-1 : Rejet â‰  Erreur
         assert!(result.is_ok()); // Rejet = Ok(Decision)
         let decision = result.unwrap();
         assert!(matches!(decision.decision_type, DecisionType::Refused { .. }));
@@ -725,51 +725,52 @@ mod tests {
 }
 ```
 
-**Règles d'implémentation :**
+**RÃ¨gles d'implÃ©mentation :**
 
 - **Tests d'invariants :** Tester tous les invariants pertinents (Invariants & Guarantees).
 
 - **Tests de garanties :** Tester toutes les garanties offertes (Invariants & Guarantees section 4).
 
-- **Tests de violations :** Tester que les patterns interdits sont bien rejetés (Violations & Anti-Patterns).
+- **Tests de violations :** Tester que les patterns interdits sont bien rejetÃ©s (Violations & Anti-Patterns).
 
-**Référence contrat :** Invariants & Guarantees (sections 3, 4), Violations & Anti-Patterns
+**RÃ©fÃ©rence contrat :** Invariants & Guarantees (sections 3, 4), Violations & Anti-Patterns
 
 ---
 
-## 10. Conformité MSCM/MIP
+## 10. ConformitÃ© MSCM/MIP
 
 ### 10.1 Obligation de balisage MSCM
 
-Tout code implémenté pour StrongFather DOIT être balisé selon le protocole MSCM v1.
+Tout code implÃ©mentÃ© pour StrongFather DOIT Ãªtre balisÃ© selon le protocole MSCM v1.
 
-**Référence :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md)
+**RÃ©fÃ©rence :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](..//..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md)
 
 **Obligations minimales :**
 - Chaque bloc fonctionnel DOIT avoir un identifiant unique (`@id`)
-- Le rôle sémantique DOIT être explicite (`@role`)
-- La couche architecturale DOIT être déclarée (`@layer`)
+- Le rÃ´le sÃ©mantique DOIT Ãªtre explicite (`@role`)
+- La couche architecturale DOIT Ãªtre dÃ©clarÃ©e (`@layer`)
 - Une description humaine DOIT accompagner chaque bloc (`@human`)
 
-### 10.2 Intégration MIP
+### 10.2 IntÃ©gration MIP
 
-Après implémentation, l'index MIP DOIT être régénéré pour :
-- Valider l'intégrité des blocs MSCM
-- Mettre à jour le graphe de dépendances
-- Vérifier la cohérence hiérarchique
+AprÃ¨s implÃ©mentation, l'index MIP DOIT Ãªtre rÃ©gÃ©nÃ©rÃ© pour :
+- Valider l'intÃ©gritÃ© des blocs MSCM
+- Mettre Ã  jour le graphe de dÃ©pendances
+- VÃ©rifier la cohÃ©rence hiÃ©rarchique
 
 ### 10.3 Check-list MSCM
 
-Avant toute livraison, vérifier :
-- [ ] Tous les blocs critiques sont balisés MSCM
+Avant toute livraison, vÃ©rifier :
+- [ ] Tous les blocs critiques sont balisÃ©s MSCM
 - [ ] Les identifiants sont uniques globalement
-- [ ] Les couches (layer) sont cohérentes avec l'architecture
-- [ ] L'index MIP peut être régénéré sans erreur
+- [ ] Les couches (layer) sont cohÃ©rentes avec l'architecture
+- [ ] L'index MIP peut Ãªtre rÃ©gÃ©nÃ©rÃ© sans erreur
 
 ---
 
-**Document créé le :** 2026-01-27  
-**Version :** 1.1 (réorganisation)  
+**Document crÃ©Ã© le :** 2026-01-27  
+**Version :** 1.1 (rÃ©organisation)  
 **Statut :** POST-FONDATION / NON NORMATIF / INFORMATIF  
-**Référence :** StrongFather Contrats FONDATION v1.1 (gelés, non modifiables)  
-**Type :** Guide d'implémentation non contractuel
+**RÃ©fÃ©rence :** StrongFather Contrats FONDATION v1.1 (gelÃ©s, non modifiables)  
+**Type :** Guide d'implÃ©mentation non contractuel
+

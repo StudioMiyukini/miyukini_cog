@@ -1,4 +1,4 @@
-# MiyuSQL — Reference Implementation Guidelines
+﻿# MiyuSQL â€” Reference Implementation Guidelines
 
 ## Statut du document
 
@@ -42,7 +42,7 @@ Ce document est **purement informatif**. Il ne definit pas de nouvelles regles, 
 
 **Traduction en implementation :**
 
-- Les Tools reçoivent une requete (ou parametres) deja formee ; ils n'interpretent pas le contenu metier.
+- Les Tools reÃ§oivent une requete (ou parametres) deja formee ; ils n'interpretent pas le contenu metier.
 - Aucune regle applicative (validation metier, choix de table, regle de calcul) ne doit etre codee dans MiyuSQL.
 - Les requetes sont executees telles que mandatees par KindMother ; pas de transformation metier.
 
@@ -61,9 +61,9 @@ Ce document est **purement informatif**. Il ne definit pas de nouvelles regles, 
 
 **Traduction en implementation :**
 
-- Toute connexion ou execution SQL doit etre declenchee par un flux venant de KindMother (ou du canal gouverné), pas par un appel direct externe.
-- Pas de connexion « sauvage » ; pool ou connexion dediee sous controle du flux gouverné.
-- Les drivers SQL (PostgreSQL, etc.) sont des dependances techniques ; l'acces reste toujours via le canal gouverné.
+- Toute connexion ou execution SQL doit etre declenchee par un flux venant de KindMother (ou du canal gouvernÃ©), pas par un appel direct externe.
+- Pas de connexion Â« sauvage Â» ; pool ou connexion dediee sous controle du flux gouvernÃ©.
+- Les drivers SQL (PostgreSQL, etc.) sont des dependances techniques ; l'acces reste toujours via le canal gouvernÃ©.
 
 ### 2.4 WriteIntent obligatoire pour ecritures (INV-KM-2)
 
@@ -71,7 +71,7 @@ Ce document est **purement informatif**. Il ne definit pas de nouvelles regles, 
 
 **Traduction en implementation :**
 
-- L'implementation des Tools d'ecriture (tool.query.execute pour INSERT/UPDATE/DELETE/DDL) ne doit pas executer sans avoir reçu un mandat d'execution lie a une WriteIntent acceptee.
+- L'implementation des Tools d'ecriture (tool.query.execute pour INSERT/UPDATE/DELETE/DDL) ne doit pas executer sans avoir reÃ§u un mandat d'execution lie a une WriteIntent acceptee.
 - L'interface entre KindMother et MiyuSQL doit garantir que l'appel a MiyuSQL n'a lieu qu'apres validation de la WriteIntent (etat ACCEPTEE puis mandat d'execution).
 
 ### 2.5 Liste fermee des dependances (INV-DEP-*)
@@ -82,7 +82,7 @@ Ce document est **purement informatif**. Il ne definit pas de nouvelles regles, 
 
 - Aucune dependance vers un Operateur, un produit, ou une regle metier.
 - Les appels entrants passent par BondingBrother et la chaine de gouvernance ; MiyuSQL n'expose pas d'API publique directe aux Operateurs.
-- Usage du Kernel (Id, Logger, Clock, Config, Lifecycle) pour identifiants, logs, horodatage, configuration locale, cycle de vie — sans logique metier.
+- Usage du Kernel (Id, Logger, Clock, Config, Lifecycle) pour identifiants, logs, horodatage, configuration locale, cycle de vie â€” sans logique metier.
 
 ---
 
@@ -92,7 +92,7 @@ Ce document est **purement informatif**. Il ne definit pas de nouvelles regles, 
 |------|--------------|----------------|
 | **BOUND-1** | Pas de logique metier | Pas de code qui interprete le contenu des requetes ou des donnees |
 | **BOUND-2** | Pas de decision | Pas de code qui evalue ALLOW/DENY ; execution uniquement sur mandat |
-| **BOUND-3** | Pas d'acces DB hors gouvernance | Connexion/execution uniquement depuis le canal gouverné (KindMother) |
+| **BOUND-3** | Pas d'acces DB hors gouvernance | Connexion/execution uniquement depuis le canal gouvernÃ© (KindMother) |
 | **BOUND-4** | Pas de modification du contexte d'autorisation | Lecture seule du contexte ; pas de revocation, pas de creation de mandat |
 | **BOUND-5** | Pas de connaissance de l'Operateur appelant | Pas d'identite Operateur dans la logique Tool ; contexte anonymise (permissions, niveau) |
 | **BOUND-6** | Pas de capacite nouvelle | Chaque Tool correspond exactement a un ToolId declare ; pas d'extension non declaree |
@@ -103,8 +103,8 @@ Ce document est **purement informatif**. Il ne definit pas de nouvelles regles, 
 
 ### 4.1 Structure des Tools
 
-- Chaque ToolId est implemente comme une unite d'execution atomique : entree (contexte gouverné, parametres), sortie (resultat ou erreur contractuelle).
-- Pas d'etat metier partage entre appels ; etat technique (pool, cache) sous controle du flux gouverné.
+- Chaque ToolId est implemente comme une unite d'execution atomique : entree (contexte gouvernÃ©, parametres), sortie (resultat ou erreur contractuelle).
+- Pas d'etat metier partage entre appels ; etat technique (pool, cache) sous controle du flux gouvernÃ©.
 
 ### 4.2 Interface avec KindMother
 
@@ -116,7 +116,7 @@ Ce document est **purement informatif**. Il ne definit pas de nouvelles regles, 
 - Les erreurs techniques (timeout, connexion, syntaxe SQL) sont remontees de maniere explicite sans exposer de donnees metier.
 - En cas de violation de bornage (ex. appel sans mandat), refus d'execution et signal (observability) ; pas d'execution partielle.
 
-### 4.4 Traçabilite
+### 4.4 TraÃ§abilite
 
 - Utiliser le Logger du Kernel pour tracer les executions (sans contenu metier sensible). Conformite aux contrats KindMother Observability et MiyuSQL Runtime Boundary.
 
@@ -126,7 +126,7 @@ Ce document est **purement informatif**. Il ne definit pas de nouvelles regles, 
 
 ### 5.1 MIP v1
 
-A l'implementation, le code fournissant les Tools MiyuSQL doit etre balise MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit genere selon le [Protocole MIP v1](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+A l'implementation, le code fournissant les Tools MiyuSQL doit etre balise MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit genere selon le [Protocole MIP v1](..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
 - **Domaine** : `data` (coherent avec domains.json).
 - **Layer** : Strate 6 (outil / toolkit) dans layers.json.
@@ -140,8 +140,8 @@ Les blocs de code correspondant aux Tools doivent etre balises selon le standard
 
 ## 6. Tests (rappel)
 
-- **Tests unitaires** : Conformement au [MiyuSQL - Unit Tests Contract](../contracts/testing/MiyuSQL%20-%20Unit%20Tests%20Contract.md) — pas de modification de donnees metier ; sandbox ou table MiyukiniSQLtest avec nettoyage.
-- **Test de cycle MiyukiniSQLtest** : Conformement au [MiyuSQL - Cycle Tests Contract](../contracts/testing/MiyuSQL%20-%20Cycle%20Tests%20Contract.md) — scenario E2E (WriteIntent → validations Cores → table → colonne → donnee → lecture → affichage → suppression). Executable par MiyukiniAdmin.
+- **Tests unitaires** : Conformement au [MiyuSQL - Unit Tests Contract](../contracts/testing/MiyuSQL%20-%20Unit%20Tests%20Contract.md) â€” pas de modification de donnees metier ; sandbox ou table MiyukiniSQLtest avec nettoyage.
+- **Test de cycle MiyukiniSQLtest** : Conformement au [MiyuSQL - Cycle Tests Contract](../contracts/testing/MiyuSQL%20-%20Cycle%20Tests%20Contract.md) â€” scenario E2E (WriteIntent â†’ validations Cores â†’ table â†’ colonne â†’ donnee â†’ lecture â†’ affichage â†’ suppression). Executable par MiyukiniAdmin.
 
 ---
 
@@ -155,10 +155,11 @@ Les blocs de code correspondant aux Tools doivent etre balises selon le standard
 | MiyuSQL - Dependencies Contract | [MiyuSQL - Dependencies Contract](../dependencies/MiyuSQL%20-%20Dependencies%20Contract.md) |
 | MiyuSQL - Unit Tests Contract | [MiyuSQL - Unit Tests Contract](../contracts/testing/MiyuSQL%20-%20Unit%20Tests%20Contract.md) |
 | MiyuSQL - Cycle Tests Contract | [MiyuSQL - Cycle Tests Contract](../contracts/testing/MiyuSQL%20-%20Cycle%20Tests%20Contract.md) |
-| MIP v1 | [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md) |
+| MIP v1 | [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md) |
 
 ---
 
 **Date de creation :** 2026-01-29  
 **Version :** 1.0  
 **Statut :** Document informatif, non normatif
+

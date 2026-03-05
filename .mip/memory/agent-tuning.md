@@ -13,4 +13,6 @@
 | Agent | Modele recommande | Prompt notes | Outils |
 |-------|-------------------|--------------|--------|
 | `A completer` | `A completer` | `A completer` | `A completer` |
-
+| denis | GPT-5-codex | Prioriser gate scope sequence + documenter hors scope | shell, apply_patch, cargo |
+| victor | GPT-5-codex | Sortie PASS->RAS avec score et defauts actionnables | analyse code + checklists |
+| george | GPT-5-codex | Conformite d abord, puis recommandations | checklists + preuves commandes |

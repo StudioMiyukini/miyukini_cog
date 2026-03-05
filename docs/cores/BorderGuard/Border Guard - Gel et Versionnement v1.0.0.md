@@ -1,73 +1,73 @@
-# Border Guard - Gel et Versionnement v1.0.0
+﻿# Border Guard - Gel et Versionnement v1.0.0
 
 ## 1. Contexte
 
-Ce document constitue l'**acte de gel officiel** de la documentation conceptuelle de Border Guard, conformément au [Protocole d'écriture de documentation conceptuelle](../../protocols/Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
+Ce document constitue l'**acte de gel officiel** de la documentation conceptuelle de Border Guard, conformÃ©ment au [Protocole d'Ã©criture de documentation conceptuelle](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
 **Date de gel :** 28 janvier 2026  
 **Version :** 1.0.0  
-**Statut :** GELÉ — Documentation de référence
+**Statut :** GELÃ‰ â€” Documentation de rÃ©fÃ©rence
 
 ---
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
-Ce gel s'applique à l'ensemble de la documentation conceptuelle de Border Guard, comprenant 19 documents organisés selon la structure suivante :
+Ce gel s'applique Ã  l'ensemble de la documentation conceptuelle de Border Guard, comprenant 19 documents organisÃ©s selon la structure suivante :
 
 ```
 docs/core/BorderGuard/
-├── _index.md
-├── Border Guard - Audit Phase 3 Verification.md
-├── Border Guard - Gel et Versionnement v1.0.0.md  ← Ce document
-├── foundation/
-│   └── Border Guard - Documentation Fondatrice.md
-├── architecture/
-│   ├── Border Guard - Architecture & Flows.md
-│   └── Border Guard - Core Interaction Contract.md
-├── contracts/
-│   ├── boundaries/
-│   │   ├── Border Guard - Boundary Definition Contract.md
-│   │   ├── Border Guard - Trust Level Classification Contract.md
-│   │   └── Border Guard - Crossing Rules Contract.md
-│   ├── governance/
-│   │   ├── Border Guard - Invariants & Guarantees.md
-│   │   └── Border Guard - Violations & Anti-Patterns.md
-│   ├── integration/
-│   │   ├── Border Guard - StrongFather Integration Contract.md
-│   │   ├── Border Guard - BondingBrother Integration Contract.md
-│   │   ├── Border Guard - CaringNanny Integration Contract.md
-│   │   └── Border Guard - KindMother Integration Contract.md
-│   └── security/
-│       ├── Border Guard - Security Levels Adaptation Contract.md
-│       └── Border Guard - Threat Model Contract.md
-├── implementation/
-│   └── Border Guard - Reference Implementation Guidelines.md
-└── reference/
-    ├── Border Guard - Vocabulary & Glossary.md
-    ├── Border Guard - FAQ & Common Questions.md
-    └── Border Guard - Examples & Use Cases.md
+â”œâ”€â”€ _index.md
+â”œâ”€â”€ Border Guard - Audit Phase 3 Verification.md
+â”œâ”€â”€ Border Guard - Gel et Versionnement v1.0.0.md  â† Ce document
+â”œâ”€â”€ foundation/
+â”‚   â””â”€â”€ Border Guard - Documentation Fondatrice.md
+â”œâ”€â”€ architecture/
+â”‚   â”œâ”€â”€ Border Guard - Architecture & Flows.md
+â”‚   â””â”€â”€ Border Guard - Core Interaction Contract.md
+â”œâ”€â”€ contracts/
+â”‚   â”œâ”€â”€ boundaries/
+â”‚   â”‚   â”œâ”€â”€ Border Guard - Boundary Definition Contract.md
+â”‚   â”‚   â”œâ”€â”€ Border Guard - Trust Level Classification Contract.md
+â”‚   â”‚   â””â”€â”€ Border Guard - Crossing Rules Contract.md
+â”‚   â”œâ”€â”€ governance/
+â”‚   â”‚   â”œâ”€â”€ Border Guard - Invariants & Guarantees.md
+â”‚   â”‚   â””â”€â”€ Border Guard - Violations & Anti-Patterns.md
+â”‚   â”œâ”€â”€ integration/
+â”‚   â”‚   â”œâ”€â”€ Border Guard - StrongFather Integration Contract.md
+â”‚   â”‚   â”œâ”€â”€ Border Guard - BondingBrother Integration Contract.md
+â”‚   â”‚   â”œâ”€â”€ Border Guard - CaringNanny Integration Contract.md
+â”‚   â”‚   â””â”€â”€ Border Guard - KindMother Integration Contract.md
+â”‚   â””â”€â”€ security/
+â”‚       â”œâ”€â”€ Border Guard - Security Levels Adaptation Contract.md
+â”‚       â””â”€â”€ Border Guard - Threat Model Contract.md
+â”œâ”€â”€ implementation/
+â”‚   â””â”€â”€ Border Guard - Reference Implementation Guidelines.md
+â””â”€â”€ reference/
+    â”œâ”€â”€ Border Guard - Vocabulary & Glossary.md
+    â”œâ”€â”€ Border Guard - FAQ & Common Questions.md
+    â””â”€â”€ Border Guard - Examples & Use Cases.md
 ```
 
 ---
 
-## 3. Liste exhaustive des éléments gelés
+## 3. Liste exhaustive des Ã©lÃ©ments gelÃ©s
 
-### 3.1 Documents FONDATION (normatifs, non négociables)
+### 3.1 Documents FONDATION (normatifs, non nÃ©gociables)
 
 | Document | Version | Statut | Checksum |
 |----------|---------|--------|----------|
-| `foundation/Border Guard - Documentation Fondatrice.md` | 1.5 | FONDATION | — |
-| `contracts/boundaries/Border Guard - Boundary Definition Contract.md` | 1.0 | CONTRAT | — |
-| `contracts/boundaries/Border Guard - Trust Level Classification Contract.md` | 1.0 | CONTRAT | — |
-| `contracts/boundaries/Border Guard - Crossing Rules Contract.md` | 1.0 | CONTRAT | — |
-| `contracts/governance/Border Guard - Invariants & Guarantees.md` | 1.0 | CONTRAT | — |
-| `contracts/governance/Border Guard - Violations & Anti-Patterns.md` | 1.0 | CONTRAT | — |
-| `contracts/integration/Border Guard - StrongFather Integration Contract.md` | 1.0 | CONTRAT | — |
-| `contracts/integration/Border Guard - BondingBrother Integration Contract.md` | 1.0 | CONTRAT | — |
-| `contracts/integration/Border Guard - CaringNanny Integration Contract.md` | 1.0 | CONTRAT | — |
-| `contracts/integration/Border Guard - KindMother Integration Contract.md` | 1.0 | CONTRAT | — |
-| `contracts/security/Border Guard - Security Levels Adaptation Contract.md` | 1.0 | CONTRAT | — |
-| `contracts/security/Border Guard - Threat Model Contract.md` | 1.0 | CONTRAT | — |
+| `foundation/Border Guard - Documentation Fondatrice.md` | 1.5 | FONDATION | â€” |
+| `contracts/boundaries/Border Guard - Boundary Definition Contract.md` | 1.0 | CONTRAT | â€” |
+| `contracts/boundaries/Border Guard - Trust Level Classification Contract.md` | 1.0 | CONTRAT | â€” |
+| `contracts/boundaries/Border Guard - Crossing Rules Contract.md` | 1.0 | CONTRAT | â€” |
+| `contracts/governance/Border Guard - Invariants & Guarantees.md` | 1.0 | CONTRAT | â€” |
+| `contracts/governance/Border Guard - Violations & Anti-Patterns.md` | 1.0 | CONTRAT | â€” |
+| `contracts/integration/Border Guard - StrongFather Integration Contract.md` | 1.0 | CONTRAT | â€” |
+| `contracts/integration/Border Guard - BondingBrother Integration Contract.md` | 1.0 | CONTRAT | â€” |
+| `contracts/integration/Border Guard - CaringNanny Integration Contract.md` | 1.0 | CONTRAT | â€” |
+| `contracts/integration/Border Guard - KindMother Integration Contract.md` | 1.0 | CONTRAT | â€” |
+| `contracts/security/Border Guard - Security Levels Adaptation Contract.md` | 1.0 | CONTRAT | â€” |
+| `contracts/security/Border Guard - Threat Model Contract.md` | 1.0 | CONTRAT | â€” |
 
 ### 3.2 Documents ARCHITECTURE (normatifs)
 
@@ -76,7 +76,7 @@ docs/core/BorderGuard/
 | `architecture/Border Guard - Architecture & Flows.md` | 1.0 | ARCHITECTURE |
 | `architecture/Border Guard - Core Interaction Contract.md` | 1.0 | ARCHITECTURE |
 
-### 3.3 Documents RÉFÉRENCE (informatifs)
+### 3.3 Documents RÃ‰FÃ‰RENCE (informatifs)
 
 | Document | Version | Statut |
 |----------|---------|--------|
@@ -99,22 +99,22 @@ docs/core/BorderGuard/
 
 ---
 
-## 4. Invariants gelés
+## 4. Invariants gelÃ©s
 
-Les 10 invariants suivants sont **définitivement gelés** et ne peuvent être modifiés sans nouveau cycle complet :
+Les 10 invariants suivants sont **dÃ©finitivement gelÃ©s** et ne peuvent Ãªtre modifiÃ©s sans nouveau cycle complet :
 
-| Invariant | Catégorie | Description |
+| Invariant | CatÃ©gorie | Description |
 |-----------|-----------|-------------|
-| **INV-BG-1** | Identité | Aucune capacité d'exécution |
+| **INV-BG-1** | IdentitÃ© | Aucune capacitÃ© d'exÃ©cution |
 | **INV-BG-2** | Comportement | Aucune persistance directe |
-| **INV-BG-3** | Identité | Aucune décision autonome |
+| **INV-BG-3** | IdentitÃ© | Aucune dÃ©cision autonome |
 | **INV-BG-4** | Comportement | Classification exhaustive |
-| **INV-BG-5** | Comportement | Frontières explicites |
-| **INV-BG-6** | Comportement | Règles déclaratives |
-| **INV-BG-7** | Qualité | Séparation définition/application |
-| **INV-BG-8** | Qualité | Traçabilité complète |
-| **INV-BG-9** | Qualité | Cohérence globale |
-| **INV-BG-10** | Qualité | Neutralité conceptuelle |
+| **INV-BG-5** | Comportement | FrontiÃ¨res explicites |
+| **INV-BG-6** | Comportement | RÃ¨gles dÃ©claratives |
+| **INV-BG-7** | QualitÃ© | SÃ©paration dÃ©finition/application |
+| **INV-BG-8** | QualitÃ© | TraÃ§abilitÃ© complÃ¨te |
+| **INV-BG-9** | QualitÃ© | CohÃ©rence globale |
+| **INV-BG-10** | QualitÃ© | NeutralitÃ© conceptuelle |
 
 ---
 
@@ -126,106 +126,106 @@ Les 10 invariants suivants sont **définitivement gelés** et ne peuvent être m
 Border Guard Documentation v1.0.0
 ```
 
-### 5.2 Sémantique de version
+### 5.2 SÃ©mantique de version
 
 | Composant | Signification | Exemple de changement |
 |-----------|---------------|----------------------|
 | **MAJEUR** (1.x.x) | Changement incompatible des invariants ou contrats | Modification d'un invariant |
-| **MINEUR** (x.1.x) | Ajout de fonctionnalité rétrocompatible | Nouveau contrat d'intégration |
+| **MINEUR** (x.1.x) | Ajout de fonctionnalitÃ© rÃ©trocompatible | Nouveau contrat d'intÃ©gration |
 | **CORRECTIF** (x.x.1) | Correction de documentation sans impact fonctionnel | Correction typo, clarification |
 
 ### 5.3 Historique des versions
 
 | Version | Date | Description |
 |---------|------|-------------|
-| **1.0.0** | 2026-01-28 | Version initiale gelée — Documentation complète |
+| **1.0.0** | 2026-01-28 | Version initiale gelÃ©e â€” Documentation complÃ¨te |
 
 ---
 
-## 6. Règles de modification
+## 6. RÃ¨gles de modification
 
 ### 6.1 Interdictions
 
 **Il est INTERDIT de :**
 
-1. Modifier un document gelé sans créer une nouvelle version
-2. Contourner les invariants définis
+1. Modifier un document gelÃ© sans crÃ©er une nouvelle version
+2. Contourner les invariants dÃ©finis
 3. Fusionner plusieurs documents en un seul
 4. Supprimer un document sans justification et approbation
-5. Modifier le statut contractuel d'un document à la baisse
+5. Modifier le statut contractuel d'un document Ã  la baisse
 
-### 6.2 Procédure de modification
+### 6.2 ProcÃ©dure de modification
 
-Toute modification d'un document gelé **impose un nouveau cycle complet** selon le protocole :
+Toute modification d'un document gelÃ© **impose un nouveau cycle complet** selon le protocole :
 
-1. **Phase 1** — Planification de la modification
-2. **Phase 2** — Distribution des tâches aux agents
-3. **Phase 3** — Vérification, corrections et tests
-4. **Phase 4** — Nouveau gel et incrémentation de version
+1. **Phase 1** â€” Planification de la modification
+2. **Phase 2** â€” Distribution des tÃ¢ches aux agents
+3. **Phase 3** â€” VÃ©rification, corrections et tests
+4. **Phase 4** â€” Nouveau gel et incrÃ©mentation de version
 
-### 6.3 Types de modifications autorisées
+### 6.3 Types de modifications autorisÃ©es
 
-| Type | Impact version | Procédure |
+| Type | Impact version | ProcÃ©dure |
 |------|----------------|-----------|
-| **Correction mineure** (typo, clarification) | CORRECTIF (+0.0.1) | Cycle simplifié |
+| **Correction mineure** (typo, clarification) | CORRECTIF (+0.0.1) | Cycle simplifiÃ© |
 | **Extension** (nouveau document) | MINEUR (+0.1.0) | Cycle standard |
 | **Modification de contrat** | MINEUR (+0.1.0) | Cycle complet |
 | **Modification d'invariant** | MAJEUR (+1.0.0) | Cycle complet + revue |
 
 ---
 
-## 7. Conditions de dégel
+## 7. Conditions de dÃ©gel
 
-### 7.1 Conditions autorisant le dégel
+### 7.1 Conditions autorisant le dÃ©gel
 
-Le dégel est autorisé uniquement si :
+Le dÃ©gel est autorisÃ© uniquement si :
 
-1. **Erreur factuelle** — Une erreur factuelle bloquante est identifiée
-2. **Incohérence critique** — Une incohérence avec un autre core est détectée
-3. **Évolution architecturale** — L'architecture Miyukini évolue de manière incompatible
-4. **Demande explicite** — Une demande explicite et justifiée est formulée
+1. **Erreur factuelle** â€” Une erreur factuelle bloquante est identifiÃ©e
+2. **IncohÃ©rence critique** â€” Une incohÃ©rence avec un autre core est dÃ©tectÃ©e
+3. **Ã‰volution architecturale** â€” L'architecture Miyukini Ã©volue de maniÃ¨re incompatible
+4. **Demande explicite** â€” Une demande explicite et justifiÃ©e est formulÃ©e
 
-### 7.2 Procédure de dégel
+### 7.2 ProcÃ©dure de dÃ©gel
 
-1. **Identification** — Documenter la raison du dégel
-2. **Validation** — Valider la nécessité du dégel
-3. **Scope** — Définir le périmètre minimal de modification
-4. **Cycle** — Exécuter un nouveau cycle de documentation
-5. **Règel** — Geler à nouveau avec nouvelle version
+1. **Identification** â€” Documenter la raison du dÃ©gel
+2. **Validation** â€” Valider la nÃ©cessitÃ© du dÃ©gel
+3. **Scope** â€” DÃ©finir le pÃ©rimÃ¨tre minimal de modification
+4. **Cycle** â€” ExÃ©cuter un nouveau cycle de documentation
+5. **RÃ¨gel** â€” Geler Ã  nouveau avec nouvelle version
 
-### 7.3 Responsable du dégel
+### 7.3 Responsable du dÃ©gel
 
-Le dégel doit être initié par l'agent planificateur ou l'humain responsable du projet.
+Le dÃ©gel doit Ãªtre initiÃ© par l'agent planificateur ou l'humain responsable du projet.
 
 ---
 
-## 8. Conformité aux références
+## 8. ConformitÃ© aux rÃ©fÃ©rences
 
-### 8.1 Documents de référence respectés
+### 8.1 Documents de rÃ©fÃ©rence respectÃ©s
 
-Cette documentation est conforme aux documents de référence suivants :
+Cette documentation est conforme aux documents de rÃ©fÃ©rence suivants :
 
-| Document | Version | Conformité |
+| Document | Version | ConformitÃ© |
 |----------|---------|------------|
-| Miyukini Conceptual References - Security Levels | 1.0 | ✅ |
-| Miyukini Conceptual References - Security Protocols | 1.0 | ✅ |
-| Miyukini Conceptual References - Integrity Degradation System | 1.0 | ✅ |
-| Miyukini Conceptual References - External Signal Trust Reinforcement | 1.0 | ✅ |
-| Miyukini Conceptual References - Lois Autonomie Systeme | 1.1 | ✅ |
-| Miyukini Conceptual References - Definition COG | 1.3 | ✅ |
-| Miyukini Conceptual References - Glossaire | — | ✅ |
+| Miyukini Conceptual References - Security Levels | 1.0 | âœ… |
+| Miyukini Conceptual References - Security Protocols | 1.0 | âœ… |
+| Miyukini Conceptual References - Integrity Degradation System | 1.0 | âœ… |
+| Miyukini Conceptual References - External Signal Trust Reinforcement | 1.0 | âœ… |
+| Miyukini Conceptual References - Lois Autonomie Systeme | 1.1 | âœ… |
+| Miyukini Conceptual References - Definition COG | 1.3 | âœ… |
+| Miyukini Conceptual References - Glossaire | â€” | âœ… |
 
-### 8.2 Contrats inter-cores respectés
+### 8.2 Contrats inter-cores respectÃ©s
 
-| Core | Contrat d'intégration | Conformité |
+| Core | Contrat d'intÃ©gration | ConformitÃ© |
 |------|----------------------|------------|
-| StrongFather | Border Guard - StrongFather Integration Contract | ✅ |
-| BondingBrother | Border Guard - BondingBrother Integration Contract | ✅ |
-| CaringNanny | Border Guard - CaringNanny Integration Contract | ✅ |
-| KindMother | Border Guard - KindMother Integration Contract | ✅ |
-| Ever Buddy | Border Guard - Core Interaction Contract | ✅ |
-| Master Butler | Border Guard - Core Interaction Contract | ✅ |
-| TAMR | Border Guard - Core Interaction Contract | ✅ |
+| StrongFather | Border Guard - StrongFather Integration Contract | âœ… |
+| BondingBrother | Border Guard - BondingBrother Integration Contract | âœ… |
+| CaringNanny | Border Guard - CaringNanny Integration Contract | âœ… |
+| KindMother | Border Guard - KindMother Integration Contract | âœ… |
+| Ever Buddy | Border Guard - Core Interaction Contract | âœ… |
+| Master Butler | Border Guard - Core Interaction Contract | âœ… |
+| TAMR | Border Guard - Core Interaction Contract | âœ… |
 
 ---
 
@@ -233,52 +233,53 @@ Cette documentation est conforme aux documents de référence suivants :
 
 ### 9.1 Checklist de gel
 
-| Critère | Statut |
+| CritÃ¨re | Statut |
 |---------|--------|
-| Tous les documents sont présents | ✅ |
-| Tous les documents sont versionnés | ✅ |
-| Tous les invariants sont documentés | ✅ |
-| Audit Phase 3 complété | ✅ |
-| Aucun problème bloquant | ✅ |
-| Références croisées valides | ✅ |
-| Conformité aux Lois d'Autonomie | ✅ |
+| Tous les documents sont prÃ©sents | âœ… |
+| Tous les documents sont versionnÃ©s | âœ… |
+| Tous les invariants sont documentÃ©s | âœ… |
+| Audit Phase 3 complÃ©tÃ© | âœ… |
+| Aucun problÃ¨me bloquant | âœ… |
+| RÃ©fÃ©rences croisÃ©es valides | âœ… |
+| ConformitÃ© aux Lois d'Autonomie | âœ… |
 
-### 9.2 Déclaration de gel
+### 9.2 DÃ©claration de gel
 
 ```
-╔══════════════════════════════════════════════════════════════════════════╗
-║                                                                          ║
-║   DÉCLARATION OFFICIELLE DE GEL                                         ║
-║                                                                          ║
-║   La documentation conceptuelle de Border Guard est officiellement       ║
-║   GELÉE en version 1.0.0 à compter du 28 janvier 2026.                  ║
-║                                                                          ║
-║   Cette documentation constitue la référence contractuelle pour          ║
-║   toute implémentation, intégration, ou utilisation de Border Guard     ║
-║   dans l'écosystème Miyukini.                                           ║
-║                                                                          ║
-║   Toute modification impose un nouveau cycle complet de documentation.   ║
-║                                                                          ║
-╚══════════════════════════════════════════════════════════════════════════╝
+â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—
+â•‘                                                                          â•‘
+â•‘   DÃ‰CLARATION OFFICIELLE DE GEL                                         â•‘
+â•‘                                                                          â•‘
+â•‘   La documentation conceptuelle de Border Guard est officiellement       â•‘
+â•‘   GELÃ‰E en version 1.0.0 Ã  compter du 28 janvier 2026.                  â•‘
+â•‘                                                                          â•‘
+â•‘   Cette documentation constitue la rÃ©fÃ©rence contractuelle pour          â•‘
+â•‘   toute implÃ©mentation, intÃ©gration, ou utilisation de Border Guard     â•‘
+â•‘   dans l'Ã©cosystÃ¨me Miyukini.                                           â•‘
+â•‘                                                                          â•‘
+â•‘   Toute modification impose un nouveau cycle complet de documentation.   â•‘
+â•‘                                                                          â•‘
+â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 ```
 
 ---
 
-## 10. Métadonnées
+## 10. MÃ©tadonnÃ©es
 
 | Champ | Valeur |
 |-------|--------|
 | **Version** | 1.0.0 |
-| **Date de création** | 2026-01-28 |
+| **Date de crÃ©ation** | 2026-01-28 |
 | **Date de gel** | 2026-01-28 |
-| **Statut** | GELÉ |
-| **Prochain audit prévu** | Sur demande |
-| **Documents gelés** | 19 |
-| **Invariants gelés** | 10 |
-| **Contrats d'intégration** | 4 (+ Core Interaction) |
+| **Statut** | GELÃ‰ |
+| **Prochain audit prÃ©vu** | Sur demande |
+| **Documents gelÃ©s** | 19 |
+| **Invariants gelÃ©s** | 10 |
+| **Contrats d'intÃ©gration** | 4 (+ Core Interaction) |
 
 ---
 
 **Document de gel officiel**  
 **Border Guard Documentation v1.0.0**  
 **Miyukini Core System**
+

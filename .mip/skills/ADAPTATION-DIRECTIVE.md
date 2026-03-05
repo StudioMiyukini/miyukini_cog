@@ -1,23 +1,23 @@
----
+﻿---
 id: mip.skills.adaptation-directive
-title: Skills Adaptation Directive — Rendre skills LLM-agnostic
+title: Skills Adaptation Directive â€” Rendre skills LLM-agnostic
 ---
 
 # Skills Adaptation Directive
 
-> Les **Skills IA** (fichiers SKILL.md) doivent être **adaptables** à tous les LLMs. Ce guide montre comment ajouter directives conditionnelles dans chaque Skill pour supporter Modes 1-5.
+> Les **Skills IA** (fichiers SKILL.md) doivent Ãªtre **adaptables** Ã  tous les LLMs. Ce guide montre comment ajouter directives conditionnelles dans chaque Skill pour supporter Modes 1-5.
 
 ---
 
 ## Problem Statement
 
 Actuellement :
-- Skill miyukini-mip-workflow.md assume clausodes entièrement en français
+- Skill miyukini-mip-workflow.md assume clausodes entiÃ¨rement en franÃ§ais
 - Dirige directement vers `manage_todo_list` (Mode 1 only)
 - Suppose access terminaux natif (Mode 1-2 only)
 - Suppose MCP web search (Mode 1-2 only)
 
-**Résultat** : Utilisateur Mode 3 (Copilot) → Frustration ("Tool not found!")
+**RÃ©sultat** : Utilisateur Mode 3 (Copilot) â†’ Frustration ("Tool not found!")
 
 **Solution** : Ajouter sections **"Selon votre Mode MIP"** dans chaque Skill.
 
@@ -30,13 +30,13 @@ Voici le template pour adapter n'importe quel SKILL.md existant :
 ```markdown
 # Skill Title
 
-> Description générale du skill
+> Description gÃ©nÃ©rale du skill
 
 ---
 
 ## Capacity Requirements
 
-Ce skill nécessite :
+Ce skill nÃ©cessite :
 - [ ] Terminal access (build, run, shell)
 - [ ] Multi-file edits (3+ fichiers)
 - [ ] Parallel agents (optional, speedup)
@@ -49,15 +49,15 @@ Ce skill nécessite :
 
 | Mode | Support | Notes |
 |------|---------|-------|
-| **Mode 1** (Claude Code) | ✅ Plein | Optimal, tous les outils |
-| **Mode 2** (Mistral) | ✅ Plein | Fallback SearchAPI si MCP absent |
-| **Mode 3** (Copilot free) | ⚠️ Partiellement | Sans tests auto, terminal manuel |
-| **Mode 4** (GPT-mini) | ⚠️ Minimal | Code review only, sans exécution |
-| **Mode 5** (Offline local) | ⚠️ Partial | Sans web, shells locaux seulement |
+| **Mode 1** (Claude Code) | âœ… Plein | Optimal, tous les outils |
+| **Mode 2** (Mistral) | âœ… Plein | Fallback SearchAPI si MCP absent |
+| **Mode 3** (Copilot free) | âš ï¸ Partiellement | Sans tests auto, terminal manuel |
+| **Mode 4** (GPT-mini) | âš ï¸ Minimal | Code review only, sans exÃ©cution |
+| **Mode 5** (Offline local) | âš ï¸ Partial | Sans web, shells locaux seulement |
 
 ---
 
-## Procédure par Mode
+## ProcÃ©dure par Mode
 
 ### **Mode 1-2 : Full Execution** (Claude Code, Mistral)
 
@@ -77,7 +77,7 @@ Ce skill nécessite :
 
 #### Changements requis
 
-1. **TodoWrite → Announcements**
+1. **TodoWrite â†’ Announcements**
 
 ```markdown
 Instead of:
@@ -87,30 +87,30 @@ manage_todo_list([
 ])
 
 Use:
-📌 **Étapes à faire** :
-1️⃣  Analyser X  ← En cours
-2️⃣  Coder Y
-3️⃣  Tests
-4️⃣  Merge
+ðŸ“Œ **Ã‰tapes Ã  faire** :
+1ï¸âƒ£  Analyser X  â† En cours
+2ï¸âƒ£  Coder Y
+3ï¸âƒ£  Tests
+4ï¸âƒ£  Merge
 
 Avancer ? [Y/N]
 ```
 
-2. **Terminal → Manual**
+2. **Terminal â†’ Manual**
 
 ```markdown
 Instead of:
 run_in_terminal("cargo build -p X")
 
 Use:
-▶ MANUEL : Exécutez en terminal :
+â–¶ MANUEL : ExÃ©cutez en terminal :
   cargo build -p X
   
-Collez le résultat ci-dessous.
+Collez le rÃ©sultat ci-dessous.
 [Utilisateur tape]
 ```
 
-3. **Multi-file → File-by-file**
+3. **Multi-file â†’ File-by-file**
 
 ```markdown
 Instead of:
@@ -130,7 +130,7 @@ Iteration 2:
   replace_string_in_file(B, x, y)
 ```
 
-4. **Context window → Pre-fetch**
+4. **Context window â†’ Pre-fetch**
 
 ```markdown
 Instead of:
@@ -138,7 +138,7 @@ read_file(path, 1, 100)  # Last-minute read
 
 Pre-fetch before conversation:
 read_file(path, 1, 50)   # Aggressively shorten
-# Résumé : "File A has 400 lines, 
+# RÃ©sumÃ© : "File A has 400 lines, 
 #  but only lines 10-40 relevant"
 
 read_file(path, 10, 40)  # Only needed range
@@ -148,7 +148,7 @@ read_file(path, 10, 40)  # Only needed range
 
 ```
 P0 Framing (Maria)
-  "Décrire le bug"
+  "DÃ©crire le bug"
   
 P3 Implementation
   Iteration 1:
@@ -170,7 +170,7 @@ P4 Integration (MANUAL)
   Copilot: [Analyze errors, suggest fix]
 
 P5 Delivery
-  You: "Prêt ?"
+  You: "PrÃªt ?"
   
 P6 Archive
   Copilot: [Short report text]
@@ -209,10 +209,10 @@ fn my_function() { ... }
 
 Copilot reviews:
 "Analysis:
-  ✅ Clean structure
-  ⚠️  Missing null check at line 42
-  🔒 Security: OK
-  💬 Suggestion: Add debug! log"
+  âœ… Clean structure
+  âš ï¸  Missing null check at line 42
+  ðŸ”’ Security: OK
+  ðŸ’¬ Suggestion: Add debug! log"
 
 You update, repeat.
 ```
@@ -255,9 +255,9 @@ Example:
 
 Pour chaque `.mip/skills/*/SKILL.md` existant :
 
-- [ ] **Section "Capacity Requirements"** ajoutée (début du doc)
-- [ ] **"Supported Modes"** table ajoutée
-- [ ] **Mode 1-2 section** : Garder procédure existante
+- [ ] **Section "Capacity Requirements"** ajoutÃ©e (dÃ©but du doc)
+- [ ] **"Supported Modes"** table ajoutÃ©e
+- [ ] **Mode 1-2 section** : Garder procÃ©dure existante
 - [ ] **Mode 3 section** : Copilot adaptations (TodoWrite, terminal, context)
 - [ ] **Mode 4 section** : Code review workflow (humain central)
 - [ ] **Mode 5 section** : Offline + local shell (si applicable)
@@ -297,10 +297,10 @@ When task classification says T2 :
 
 | Mode | Notes |
 |------|-------|
-| M1-M2 | ✅ Full workflow |
-| M3 | ⚠️ Text annonce + manual terminal |
-| M4 | ✅ P0 framing only (no exec) |
-| M5 | ✅ P0-P6 offline |
+| M1-M2 | âœ… Full workflow |
+| M3 | âš ï¸ Text annonce + manual terminal |
+| M4 | âœ… P0 framing only (no exec) |
+| M5 | âœ… P0-P6 offline |
 
 ## Phases P0-P6 by Mode
 
@@ -314,8 +314,8 @@ When task classification says T2 :
 
 **P3** : Implementation
   - Max 2 files/iteration
-  - TodoWrite → Text announcements
-  - Example: "📌 P3-1 ✅ | P3-2 en cours..."
+  - TodoWrite â†’ Text announcements
+  - Example: "ðŸ“Œ P3-1 âœ… | P3-2 en cours..."
 
 **P4** : Tests
   - You run : cargo test -p X
@@ -370,7 +370,7 @@ When task classification says T2 :
 
 ## Certification d'Agents
 
-Quand adapter skills pour Mode X, l'agent doit être "certifié" :
+Quand adapter skills pour Mode X, l'agent doit Ãªtre "certifiÃ©" :
 
 ```yaml
 Certification Mode 3 (Copilot Gratuit):
@@ -379,23 +379,23 @@ Certification Mode 3 (Copilot Gratuit):
   
   Checklist:
     - Tested with Copilot (8k context)
-    - TodoWrite → Annonces verified
-    - Terminal → Manual workflow verified
+    - TodoWrite â†’ Annonces verified
+    - Terminal â†’ Manual workflow verified
     - Time estimate < 40 min (Mode 3 pace)
     
   Certification Date: 2026-03-05
-  Certified: ✅
+  Certified: âœ…
   Next review: 2026-06-05 (quarterly)
 ```
 
 Un agent peut avoir **plusieurs certifications** :
 ```
 Maria Certifications:
-  ✅ Mode 1 (Claude Code)
-  ✅ Mode 2 (Mistral)
-  ✅ Mode 3 (Copilot)
-  ❌ Mode 4 (GPT-mini) - not applicable for orchestration
-  ✅ Mode 5 (Offline) - testing phase
+  âœ… Mode 1 (Claude Code)
+  âœ… Mode 2 (Mistral)
+  âœ… Mode 3 (Copilot)
+  âŒ Mode 4 (GPT-mini) - not applicable for orchestration
+  âœ… Mode 5 (Offline) - testing phase
 ```
 
 ---
@@ -404,15 +404,15 @@ Maria Certifications:
 
 | Tool | M1 | M2 | M3 | M4 | M5 |
 |------|----|----|----|----|-----|
-| `manage_todo_list` | ✅ | ✅ | ❌→annonce | ❌ | ✅ |
-| `run_in_terminal` | ✅ | ✅ | ❌→manual | ❌ | ✅ |
-| `replace_string_in_file` | ✅ | ✅ | ✅ (1/iter) | ❌→code block | ✅ |
-| `multi_replace_string_in_file` | ✅ | ✅ | ❌→seq | ❌ | ✅ |
-| `read_file` | ✅ | ✅ | ✅ (short) | ✅ | ✅ |
-| `grep_search` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `semantic_search` | ✅ | ✅ | ⚠️ (limit) | ⚠️ (limit) | ⚠️ |
-| `vscode_askQuestions` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetch_webpage` | ✅ | ✅ (fallback) | ❌ | ❌ | ❌ |
+| `manage_todo_list` | âœ… | âœ… | âŒâ†’annonce | âŒ | âœ… |
+| `run_in_terminal` | âœ… | âœ… | âŒâ†’manual | âŒ | âœ… |
+| `replace_string_in_file` | âœ… | âœ… | âœ… (1/iter) | âŒâ†’code block | âœ… |
+| `multi_replace_string_in_file` | âœ… | âœ… | âŒâ†’seq | âŒ | âœ… |
+| `read_file` | âœ… | âœ… | âœ… (short) | âœ… | âœ… |
+| `grep_search` | âœ… | âœ… | âœ… | âœ… | âœ… |
+| `semantic_search` | âœ… | âœ… | âš ï¸ (limit) | âš ï¸ (limit) | âš ï¸ |
+| `vscode_askQuestions` | âœ… | âœ… | âœ… | âœ… | âœ… |
+| `fetch_webpage` | âœ… | âœ… (fallback) | âŒ | âŒ | âŒ |
 
 ---
 
@@ -422,10 +422,10 @@ Create `.mip/certifications/` directory :
 
 ```
 .mip/certifications/
-├── maria-certifications.md
-├── lise-certifications.md
-├── francois-certifications.md
-└── ...md
+â”œâ”€â”€ maria-certifications.md
+â”œâ”€â”€ lise-certifications.md
+â”œâ”€â”€ francois-certifications.md
+â””â”€â”€ ...md
 ```
 
 **Content** :
@@ -444,16 +444,16 @@ next_review: 2026-06-05
 notes: "Maria orchestrates 100% via text, works across all modes."
 ---
 
-# Maria — Agent Certification
+# Maria â€” Agent Certification
 
 ### Mode 1 (Claude Code)
 
-Status: ✅ **Certified**
+Status: âœ… **Certified**
 
 **Tested Skills**:
-  - mip-workflow.md ✅
-  - architecture.md ✅
-  - cargo-workspace.md ✅
+  - mip-workflow.md âœ…
+  - architecture.md âœ…
+  - cargo-workspace.md âœ…
   - (15+ skills)
 
 Usage:
@@ -465,13 +465,13 @@ Known limitations: None
 
 ### Mode 2 (Mistral Nemo)
 
-Status: ✅ **Certified**
+Status: âœ… **Certified**
 
 ...
 
 ### Mode 3 (Copilot Gratuit)
 
-Status: ⚠️ **In testing**
+Status: âš ï¸ **In testing**
 
 Tested: mip-workflow (20% features)
 Issue: Context 8k too small for multi-crate framing
@@ -480,7 +480,7 @@ Target: Certified Q2 2026
 
 ### Mode 5 (Offline Llama)
 
-Status: ⚠️ **In testing**
+Status: âš ï¸ **In testing**
 
 Bottleneck: CPU inference speed
 Scenario: Long-running P3 (20 min vs 2 min Mode 1)
@@ -490,9 +490,10 @@ Target: Certified Q2 2026
 
 ---
 
-## Documentation de Référence
+## Documentation de RÃ©fÃ©rence
 
-- [ADAPTIVE-MODES.md](./ADAPTIVE-MODES.md) — 5 modes detail
-- [CAPABILITY-NEGOTIATION.md](./CAPABILITY-NEGOTIATION.md) — LLM announcement
-- [Profiles](./INDEX.md) — Choisir profil
-- [Industrial Scenarios](../usecases/INDUSTRIAL-SCENARIOS.md) — Cas réels
+- [ADAPTIVE-MODES.md](..//README.md) â€” 5 modes detail
+- [CAPABILITY-NEGOTIATION.md](..//README.md) â€” LLM announcement
+- [Profiles](..//README.md) â€” Choisir profil
+- [Industrial Scenarios](../usecases/INDUSTRIAL-SCENARIOS.md) â€” Cas rÃ©els
+

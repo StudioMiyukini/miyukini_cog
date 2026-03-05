@@ -1,4 +1,4 @@
----
+﻿---
 id: regional-eu
 name: "Regional EU Constraint"
 category: regional
@@ -12,7 +12,7 @@ description: |
   
 applies_to: all profiles
 risk_level: medium
-performance_impact: "±0% (option: slower EU servers)"
+performance_impact: "Â±0% (option: slower EU servers)"
 cost_impact: "+5-10% (EU infrastructure premium)"
 
 ---
@@ -92,7 +92,7 @@ When `:regional-eu` is applied:
 
 ## Allowed Providers
 
-### ✅ Approved (EU-based)
+### âœ… Approved (EU-based)
 
 ```
 Mistral:
@@ -117,27 +117,27 @@ Aleph Alpha (Germany):
   Location: Heidelberg, Germany
 ```
 
-### ❌ Blocked (US-based)
+### âŒ Blocked (US-based)
 
 ```
 OpenAI:
-  ✗ ChatGPT
-  ✗ GPT-4
-  ✗ GPT-3.5
+  âœ— ChatGPT
+  âœ— GPT-4
+  âœ— GPT-3.5
   Reason: Servers in US (subject to Cloud Act)
   
 Anthropic:
-  ✗ Claude
-  ✗ Claude Opus
+  âœ— Claude
+  âœ— Claude Opus
   Reason: US-based, data may transfer to US
   
 Google:
-  ✗ Gemini
-  ✗ PaLM
+  âœ— Gemini
+  âœ— PaLM
   Reason: US-based with broad data sharing
   
 AWS Bedrock:
-  ✗ Any model via Bedrock
+  âœ— Any model via Bedrock
   Reason: US-based (Virginia, Oregon)
 ```
 
@@ -147,11 +147,11 @@ AWS Bedrock:
 
 ```
 Mistral GDPR compliance:
-✅ DPA signed with EU clients
-✅ GDPR Article 28 compliant (data processor)
-✅ SCCs (Standard Contractual Clauses) in place
-✅ Schrems II compliant (no US data transfer)
-✅ Data residency in EU
+âœ… DPA signed with EU clients
+âœ… GDPR Article 28 compliant (data processor)
+âœ… SCCs (Standard Contractual Clauses) in place
+âœ… Schrems II compliant (no US data transfer)
+âœ… Data residency in EU
 ```
 
 ### Right to be Forgotten (Article 17)
@@ -165,7 +165,7 @@ User requests deletion:
    - Mistral's servers
    - MIP local cache
    - Backups
-   ✅ Complete deletion
+   âœ… Complete deletion
 ```
 
 ### Data Portability (Article 20)
@@ -180,23 +180,23 @@ User requests export:
    - Settings
 3. Output: Standard JSON format
 4. User: Gets download link
-   ✅ Transferable to another service
+   âœ… Transferable to another service
 ```
 
 ## Compatibility Matrix
 
 ```
-✅ Compatible with:
+âœ… Compatible with:
   - legal-compliance (GDPR + audit = perfect pair)
   - confidential-data (GDPR + confidential = fortress)
   - gdpr-strict (EU + GDPR = mandatory)
   - mistral-nemo (EU provider)
 
-⚠️  Partial compatibility:
+âš ï¸  Partial compatibility:
   - claude profile (Claude is US, constraint forces Mistral)
   - openai profile (OpenAI is US, constraint blocks)
   
-❌ Incompatible with:
+âŒ Incompatible with:
   - regional-us (EU + US = conflict)
   - regional-china (EU + China = conflict)
   - us-only profiles
@@ -208,8 +208,8 @@ User requests export:
 
 ```yaml
 locations:
-  - Ireland (Dublin) — AWS EU Ireland
-  - UK (London) — Post-Brexit still EU data
+  - Ireland (Dublin) â€” AWS EU Ireland
+  - UK (London) â€” Post-Brexit still EU data
   
 compliance:
   - GDPR (EU/Ireland law)
@@ -225,9 +225,9 @@ providers:
 
 ```yaml
 locations:
-  - Germany (Frankfurt) — Stricter than most EU
-  - Austria (Vienna) — GDPR leader
-  - Switzerland — Strong privacy laws
+  - Germany (Frankfurt) â€” Stricter than most EU
+  - Austria (Vienna) â€” GDPR leader
+  - Switzerland â€” Strong privacy laws
   
 compliance:
   - GDPR (strictest in EU)
@@ -244,7 +244,7 @@ providers:
 
 ```yaml
 locations:
-  - France (Paris) — Mistral HQ
+  - France (Paris) â€” Mistral HQ
   - Spain (Madrid)
   - Italy (Rome)
   
@@ -260,15 +260,15 @@ providers:
 ## Data Flow Diagram
 
 ```
-Blocked (❌):
-[User] ---> [US API] ✗ Cloud Act can force access
-[User] ---> [Google] ✗ Broad data sharing
-[User] ---> [AWS Bedrock] ✗ US jurisdiction
+Blocked (âŒ):
+[User] ---> [US API] âœ— Cloud Act can force access
+[User] ---> [Google] âœ— Broad data sharing
+[User] ---> [AWS Bedrock] âœ— US jurisdiction
 
-Allowed (✅):
-[User] ---> [Mistral FR] ✓ EU data residency
-[User] ---> [Local Ollama] ✓ No network, no transfer
-[User] ---> [German Provider] ✓ GDPR leader
+Allowed (âœ…):
+[User] ---> [Mistral FR] âœ“ EU data residency
+[User] ---> [Local Ollama] âœ“ No network, no transfer
+[User] ---> [German Provider] âœ“ GDPR leader
 ```
 
 ## Activation
@@ -282,10 +282,10 @@ mip_profile create eu-safe \
   
 # Maria: "Applying regional-eu constraint.
 #         Configuration:
-#         ✅ Provider: Mistral (EU - France)
-#         ✅ Storage: EU datacenters (Ireland/Germany)
-#         ✅ Legal: GDPR compliant
-#         ✅ Deletion: 30 days auto-purge
+#         âœ… Provider: Mistral (EU - France)
+#         âœ… Storage: EU datacenters (Ireland/Germany)
+#         âœ… Legal: GDPR compliant
+#         âœ… Deletion: 30 days auto-purge
 #         
 #         Ready for EU-compliant work."
 ```
@@ -296,7 +296,7 @@ mip_profile create eu-safe \
 mip_profile apply-constraint myprofile regional-eu
 
 # If using non-EU provider:
-# ⚠️  Warning: Claude detected (US-based)
+# âš ï¸  Warning: Claude detected (US-based)
 #     Switching to Mistral (EU-based)
 #     Performance: Similar (both high-quality)
 ```
@@ -322,7 +322,7 @@ Setup:
 2. Data stored: Ireland (EU-West)
 3. Backups: Germany (EU-Central)
 4. Legal: GDPR DPA signed
-5. Maria: "✅ Ready for EU healthcare"
+5. Maria: "âœ… Ready for EU healthcare"
 
 Operations:
 1. Code for patient management system
@@ -349,9 +349,9 @@ Mistral models vs Claude/GPT-4:
 | **Coding** | 85% as good | 100% | Minor loss |
 | **Math** | 70% as good | 100% | Noticeable |
 | **Reasoning** | 75% as good | 100% | Moderate |
-| **Speed** | Faster | Slower | ✅ Win for Mistral |
-| **Cost** | 10x cheaper | More expensive | ✅ Win for Mistral |
-| **EU Compliance** | ✅ Yes | ❌ No | ✅ Win for legal |
+| **Speed** | Faster | Slower | âœ… Win for Mistral |
+| **Cost** | 10x cheaper | More expensive | âœ… Win for Mistral |
+| **EU Compliance** | âœ… Yes | âŒ No | âœ… Win for legal |
 
 **Recommendation**: Mistral is good enough for 90% of tasks + saves money + guarantees EU compliance.
 
@@ -366,18 +366,18 @@ EU-Only (Mistral):
 - Mistral: ~3 sec per request (EU servers)
 - Local Ollama: ~10 sec per request (your hardware)
 
-→ EU APIs are 50% as fast as Claude, but fully compliant
-→ Local is 3x slower but 100% isolated
+â†’ EU APIs are 50% as fast as Claude, but fully compliant
+â†’ Local is 3x slower but 100% isolated
 ```
 
 ## Cost Comparison
 
 | Provider | Location | Cost | EU Compliant |
 |----------|----------|------|--------------|
-| OpenAI | US | $0.003/1k | ❌ No |
-| Claude | US | $0.003/1k input | ❌ No |
-| Mistral API | France | $0.0014/1k | ✅ Yes |
-| Ollama (free) | Local | $0 | ✅ Yes |
+| OpenAI | US | $0.003/1k | âŒ No |
+| Claude | US | $0.003/1k input | âŒ No |
+| Mistral API | France | $0.0014/1k | âœ… Yes |
+| Ollama (free) | Local | $0 | âœ… Yes |
 
 **Insight**: Mistral is 50% cheaper than OpenAI AND EU-compliant!
 
@@ -395,8 +395,8 @@ regional_eu:
   audit_logging: maximum
   
 result:
-  ✅ Strictest EU interpretation
-  ❌ But: Slower, more expensive
+  âœ… Strictest EU interpretation
+  âŒ But: Slower, more expensive
 ```
 
 ### Example 2: Pragmatic EU
@@ -413,9 +413,9 @@ regional_eu:
   tls_version: 1.2   # Good enough
   
 result:
-  ✅ GDPR compliant
-  ✅ Good performance
-  ✅ Reasonable cost
+  âœ… GDPR compliant
+  âœ… Good performance
+  âœ… Reasonable cost
 ```
 
 ### Example 3: EU with Fallback
@@ -427,9 +427,9 @@ regional_eu:
   fallback: ollama-local  # If API fails
   
 result:
-  ✅ EU-first approach
-  ✅ Redundancy (doesn't leave EU)
-  ✅ No cost for fallback
+  âœ… EU-first approach
+  âœ… Redundancy (doesn't leave EU)
+  âœ… No cost for fallback
 ```
 
 ## Troubleshooting
@@ -441,7 +441,7 @@ Problem: Can't reach mistral API
 
 Solution 1: Check region config
   $ mip_profile show regional-eu
-  → Verify: provider: mistral
+  â†’ Verify: provider: mistral
   
 Solution 2: Check internet (must be EU)
   If using VPN from outside EU, disconnect
@@ -460,7 +460,7 @@ Solution: Switch to Mistral
   $ mip_profile apply-constraint my-profile regional-eu
   
   System auto-switches:
-    claude-sonnet → mistral-medium
+    claude-sonnet â†’ mistral-medium
     (Similar performance, EU-compliant)
 ```
 
@@ -471,7 +471,7 @@ Problem: Waiting 30 days for GDPR deletion
 
 Solution 1: Check status
   $ mip_profile show-deletion-status
-  → Shows: "Feb 15 scheduled"
+  â†’ Shows: "Feb 15 scheduled"
   
 Solution 2: Manual purge (local only)
   $ mip_profile purge-local myprofile
@@ -483,8 +483,9 @@ Solution 3: Contact Mistral support
 
 ## References
 
-- [MANAGEMENT.md](./MANAGEMENT.md) — How to apply regional constraints
-- [CONSTRAINTS.md](./CONSTRAINTS.md) — Overview of all constraint types
-- [Legal-Compliance Constraint](./legal-compliance.md) — When you need GDPR + audit
-- [Mistral EU Documentation](https://docs.mistral.ai/) — Provider details
-- [GDPR Official Text](https://gdpr-info.eu/) — Full regulation
+- [MANAGEMENT.md](..//..//README.md) â€” How to apply regional constraints
+- [CONSTRAINTS.md](..//..//README.md) â€” Overview of all constraint types
+- [Legal-Compliance Constraint](./legal-compliance.md) â€” When you need GDPR + audit
+- [Mistral EU Documentation](https://docs.mistral.ai/) â€” Provider details
+- [GDPR Official Text](https://gdpr-info.eu/) â€” Full regulation
+

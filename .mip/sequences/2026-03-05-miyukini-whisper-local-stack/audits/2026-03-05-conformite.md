@@ -15,7 +15,7 @@ Points de vigilance majeurs: independance STT/TTS vis-a-vis du LLM texte et clar
 |---|---|---|
 | Local-first | OK | alignement fort avec architecture existante |
 | Independance STT/TTS | OK | STT/TTS fonctionnent en local sans LLM requis |
-| Degradation gracieuse | PARTIEL | fallback local/host/cloud a formaliser |
+| Degradation gracieuse | OK | fallback local/host/cloud formalise en V5/V6 |
 | API inter-services | PARTIEL | contrat STT/TTS en place, examples usage cross-COG restants |
 | Reuse Alicia | OK | Alicia alignee sur STT `/api/stt` + client TTS feature-flag |
 | Isolation composants | OK | design en toolkits separes coherent |
@@ -51,7 +51,7 @@ Points de vigilance majeurs: independance STT/TTS vis-a-vis du LLM texte et clar
 | Risque | Niveau | Mitigation |
 |---|---|---|
 | fuite audio locale | Moyen | purge buffers + pas de persistance brute |
-| endpoint local expose reseau | Moyen | bind localhost + auth optionnelle |
+| endpoint local expose reseau | Faible a Moyen | policy origin locale + auth bearer optionnelle |
 | prompt injection mode rewrite | Moyen | separation stricte verbatim/clean/rewrite |
 | logs contenant donnees sensibles | Moyen | redaction logs + niveaux debug limites |
 | fallback cloud active par erreur | Moyen | opt-in explicite + indicateur UI |

@@ -1,98 +1,98 @@
-# Master Butler — Capability Registry Contract
+﻿# Master Butler â€” Capability Registry Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **Master Butler Capability Registry Contract** : un contrat normatif, non négociable, et de statut FONDATION qui établit le modèle du registre des capacités dans le système Miyukini Core System v2.4.
+Ce document dÃ©finit le **Master Butler Capability Registry Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit le modÃ¨le du registre des capacitÃ©s dans le systÃ¨me Miyukini Core System v2.4.
 
-Ce contrat définit :
-- La structure formelle du registre des capacités
-- Les règles de déclaration et d'enregistrement
-- Les métadonnées obligatoires et optionnelles
+Ce contrat dÃ©finit :
+- La structure formelle du registre des capacitÃ©s
+- Les rÃ¨gles de dÃ©claration et d'enregistrement
+- Les mÃ©tadonnÃ©es obligatoires et optionnelles
 - Les invariants du registre
-- Les opérations autorisées sur le registre
-- Les relations entre capacités
+- Les opÃ©rations autorisÃ©es sur le registre
+- Les relations entre capacitÃ©s
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **toute instance de Master Butler** et définit de manière absolue :
-- La définition formelle d'une Capacité (Capability)
-- La structure du Registre des Capacités (Capability Registry)
-- Les règles de déclaration (Declaration Rules)
-- Les métadonnées des capacités (Capability Metadata)
-- Les relations entre capacités (Capability Relations)
+Ce contrat s'applique Ã  **toute instance de Master Butler** et dÃ©finit de maniÃ¨re absolue :
+- La dÃ©finition formelle d'une CapacitÃ© (Capability)
+- La structure du Registre des CapacitÃ©s (Capability Registry)
+- Les rÃ¨gles de dÃ©claration (Declaration Rules)
+- Les mÃ©tadonnÃ©es des capacitÃ©s (Capability Metadata)
+- Les relations entre capacitÃ©s (Capability Relations)
 - Les invariants du registre
-- Les opérations autorisées et interdites
+- Les opÃ©rations autorisÃ©es et interdites
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues que Master Butler applique sans exception. Ces règles ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues que Master Butler applique sans exception. Ces rÃ¨gles ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complète et s'articule avec les documents contractuels existants :
+Ce contrat complÃ¨te et s'articule avec les documents contractuels existants :
 
-- **[Master Butler - Documentation Fondatrice](../../foundation/Master%20Butler%20-%20Documentation%20Fondatrice.md)** : Définit la nature, le rôle, et les responsabilités de Master Butler
-- **Master Butler - Permission Registry Contract** : Définit le registre des permissions (contrat complémentaire)
-- **[Miyukini Conceptual References - Tools et Toolkits](../../../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)** : Définit les concepts de Tool et Toolkit
-- **[Miyukini Framework - Lois Autonomie Systeme](../../../../reference/Miyukini%20Framework%20-%20Lois%20Autonomie%20Systeme.md)** : Ce contrat respecte **LOI-1** (aucune dépendance externe critique) et **LOI-5** (coût proportionnel au hardware) en garantissant que le registre est local, léger, et autonome.
+- **[Master Butler - Documentation Fondatrice](../../foundation/Master%20Butler%20-%20Documentation%20Fondatrice.md)** : DÃ©finit la nature, le rÃ´le, et les responsabilitÃ©s de Master Butler
+- **Master Butler - Permission Registry Contract** : DÃ©finit le registre des permissions (contrat complÃ©mentaire)
+- **[Miyukini Conceptual References - Tools et Toolkits](..//..//..//..//miyukini-webway-system//reference//_index.md)** : DÃ©finit les concepts de Tool et Toolkit
+- **[Miyukini Framework - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Ce contrat respecte **LOI-1** (aucune dÃ©pendance externe critique) et **LOI-5** (coÃ»t proportionnel au hardware) en garantissant que le registre est local, lÃ©ger, et autonome.
 
-**Complémentarité :**
-- Master Butler Documentation Fondatrice = définition conceptuelle et philosophique
-- Master Butler Capability Registry Contract = modèle technique du registre des capacités
-- Master Butler Permission Registry Contract = modèle technique du registre des permissions
+**ComplÃ©mentaritÃ© :**
+- Master Butler Documentation Fondatrice = dÃ©finition conceptuelle et philosophique
+- Master Butler Capability Registry Contract = modÃ¨le technique du registre des capacitÃ©s
+- Master Butler Permission Registry Contract = modÃ¨le technique du registre des permissions
 
-Ces contrats forment ensemble le système complet de catalogage des capacités et permissions du système Miyukini Core System v2.4.
+Ces contrats forment ensemble le systÃ¨me complet de catalogage des capacitÃ©s et permissions du systÃ¨me Miyukini Core System v2.4.
 
 ---
 
-## 2. Définitions formelles
+## 2. DÃ©finitions formelles
 
-### 2.1. Capacité (Capability)
+### 2.1. CapacitÃ© (Capability)
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
-Une **Capacité** est un pouvoir technique intrinsèque à un composant du système Miyukini. Elle représente ce qu'un composant peut faire fonctionnellement, indépendamment de toute permission ou décision.
+Une **CapacitÃ©** est un pouvoir technique intrinsÃ¨que Ã  un composant du systÃ¨me Miyukini. Elle reprÃ©sente ce qu'un composant peut faire fonctionnellement, indÃ©pendamment de toute permission ou dÃ©cision.
 
-**Caractéristiques formelles :**
+**CaractÃ©ristiques formelles :**
 
-- **Identité unique :** Chaque capacité possède un identifiant unique et immuable (CapabilityId)
-- **Intrinsèque :** La capacité est intrinsèque au composant qui la possède
-- **Technique :** La capacité décrit un pouvoir fonctionnel (pas métier)
-- **Déclarative :** La capacité est déclarée par le composant qui la possède
-- **Documentée :** La capacité possède des métadonnées descriptives
-- **Gouvernée :** La capacité est soumise à la gouvernance des Cores
+- **IdentitÃ© unique :** Chaque capacitÃ© possÃ¨de un identifiant unique et immuable (CapabilityId)
+- **IntrinsÃ¨que :** La capacitÃ© est intrinsÃ¨que au composant qui la possÃ¨de
+- **Technique :** La capacitÃ© dÃ©crit un pouvoir fonctionnel (pas mÃ©tier)
+- **DÃ©clarative :** La capacitÃ© est dÃ©clarÃ©e par le composant qui la possÃ¨de
+- **DocumentÃ©e :** La capacitÃ© possÃ¨de des mÃ©tadonnÃ©es descriptives
+- **GouvernÃ©e :** La capacitÃ© est soumise Ã  la gouvernance des Cores
 
-**Structure formelle d'une Capacité :**
+**Structure formelle d'une CapacitÃ© :**
 
 ```
 Capability {
   id: CapabilityId,           // Identifiant unique et immuable
   name: String,               // Nom lisible humain
-  description: String,        // Description de la capacité
-  source: SourceIdentity,     // Module/composant qui déclare la capacité
-  category: CapabilityCategory, // Catégorie de la capacité
-  metadata: CapabilityMetadata, // Métadonnées additionnelles
-  relations: CapabilityRelations, // Relations avec d'autres capacités
-  created_at: Timestamp,      // Date de création
-  version: Version,           // Version de la capacité
+  description: String,        // Description de la capacitÃ©
+  source: SourceIdentity,     // Module/composant qui dÃ©clare la capacitÃ©
+  category: CapabilityCategory, // CatÃ©gorie de la capacitÃ©
+  metadata: CapabilityMetadata, // MÃ©tadonnÃ©es additionnelles
+  relations: CapabilityRelations, // Relations avec d'autres capacitÃ©s
+  created_at: Timestamp,      // Date de crÃ©ation
+  version: Version,           // Version de la capacitÃ©
   status: CapabilityStatus    // Statut (Active, Deprecated, Removed)
 }
 ```
 
 **Invariants :**
-- INV-CAP-1 : Toute capacité possède un CapabilityId unique et immuable
-- INV-CAP-2 : Toute capacité est déclarée par exactement un composant source
-- INV-CAP-3 : Toute capacité possède un nom, une description, et une catégorie
-- INV-CAP-4 : L'identifiant d'une capacité ne peut jamais être modifié
-- INV-CAP-5 : Une capacité supprimée ne peut jamais être recréée avec le même identifiant
+- INV-CAP-1 : Toute capacitÃ© possÃ¨de un CapabilityId unique et immuable
+- INV-CAP-2 : Toute capacitÃ© est dÃ©clarÃ©e par exactement un composant source
+- INV-CAP-3 : Toute capacitÃ© possÃ¨de un nom, une description, et une catÃ©gorie
+- INV-CAP-4 : L'identifiant d'une capacitÃ© ne peut jamais Ãªtre modifiÃ©
+- INV-CAP-5 : Une capacitÃ© supprimÃ©e ne peut jamais Ãªtre recrÃ©Ã©e avec le mÃªme identifiant
 
-### 2.2. Identifiant de Capacité (CapabilityId)
+### 2.2. Identifiant de CapacitÃ© (CapabilityId)
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
-Un **CapabilityId** est l'identifiant unique et immuable d'une capacité dans le registre. Il suit un format canonique qui encode le domaine, le module, et l'action.
+Un **CapabilityId** est l'identifiant unique et immuable d'une capacitÃ© dans le registre. Il suit un format canonique qui encode le domaine, le module, et l'action.
 
 **Format canonique :**
 
@@ -101,32 +101,32 @@ Un **CapabilityId** est l'identifiant unique et immuable d'une capacité dans le
 ```
 
 **Exemples :**
-- `content.create` : Capacité de créer du contenu
-- `content.edit.own` : Capacité de modifier son propre contenu
-- `hierarchy.reorder` : Capacité de réorganiser une hiérarchie
-- `media.upload` : Capacité de téléverser des médias
-- `search.index` : Capacité d'indexer pour la recherche
-- `auth.login` : Capacité de s'authentifier
+- `content.create` : CapacitÃ© de crÃ©er du contenu
+- `content.edit.own` : CapacitÃ© de modifier son propre contenu
+- `hierarchy.reorder` : CapacitÃ© de rÃ©organiser une hiÃ©rarchie
+- `media.upload` : CapacitÃ© de tÃ©lÃ©verser des mÃ©dias
+- `search.index` : CapacitÃ© d'indexer pour la recherche
+- `auth.login` : CapacitÃ© de s'authentifier
 
-**Règles de nommage :**
+**RÃ¨gles de nommage :**
 - R-ID-1 : Le format est strictement `<domain>.<module>.<action>[.<qualifier>]`
 - R-ID-2 : Tous les segments sont en minuscules, sans accents
-- R-ID-3 : Les segments sont séparés par des points (.)
+- R-ID-3 : Les segments sont sÃ©parÃ©s par des points (.)
 - R-ID-4 : Chaque segment contient uniquement des lettres, chiffres, et underscores
-- R-ID-5 : Le qualifieur est optionnel et ajoute une précision sémantique
-- R-ID-6 : L'identifiant est unique dans l'ensemble du système
+- R-ID-5 : Le qualifieur est optionnel et ajoute une prÃ©cision sÃ©mantique
+- R-ID-6 : L'identifiant est unique dans l'ensemble du systÃ¨me
 
 **Invariants :**
 - INV-ID-1 : Tout CapabilityId respecte le format canonique
 - INV-ID-2 : Tout CapabilityId est unique dans le registre
-- INV-ID-3 : Un CapabilityId ne peut jamais être modifié après création
-- INV-ID-4 : Deux capacités différentes ne peuvent jamais avoir le même CapabilityId
+- INV-ID-3 : Un CapabilityId ne peut jamais Ãªtre modifiÃ© aprÃ¨s crÃ©ation
+- INV-ID-4 : Deux capacitÃ©s diffÃ©rentes ne peuvent jamais avoir le mÃªme CapabilityId
 
-### 2.3. Source de Capacité (SourceIdentity)
+### 2.3. Source de CapacitÃ© (SourceIdentity)
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
-Une **SourceIdentity** identifie le composant qui déclare une capacité. Elle permet de tracer l'origine de chaque capacité dans le registre.
+Une **SourceIdentity** identifie le composant qui dÃ©clare une capacitÃ©. Elle permet de tracer l'origine de chaque capacitÃ© dans le registre.
 
 **Types de sources :**
 
@@ -134,8 +134,8 @@ Une **SourceIdentity** identifie le composant qui déclare une capacité. Elle p
 |------|-------------|---------|
 | **Module SPM** | Module du Standard Product Model | `spm.cms.content` |
 | **Core** | Core du Miyukini Core System | `core.kindmother` |
-| **Operator** | Opérateur (application) | `operator.my_app` |
-| **Tool** | Outil du système | `tool.layout.render` |
+| **Operator** | OpÃ©rateur (application) | `operator.my_app` |
+| **Tool** | Outil du systÃ¨me | `tool.layout.render` |
 
 **Structure formelle :**
 
@@ -144,60 +144,60 @@ SourceIdentity {
   type: SourceType,           // Module, Core, Operator, Tool
   identifier: String,         // Identifiant unique de la source
   version: Version,           // Version de la source
-  environment: EnvironmentId  // Environnement de déclaration
+  environment: EnvironmentId  // Environnement de dÃ©claration
 }
 ```
 
 **Invariants :**
-- INV-SRC-1 : Toute capacité possède une SourceIdentity valide
-- INV-SRC-2 : Une SourceIdentity identifie de manière unique le composant source
-- INV-SRC-3 : La version de la source est incluse pour traçabilité
+- INV-SRC-1 : Toute capacitÃ© possÃ¨de une SourceIdentity valide
+- INV-SRC-2 : Une SourceIdentity identifie de maniÃ¨re unique le composant source
+- INV-SRC-3 : La version de la source est incluse pour traÃ§abilitÃ©
 
-### 2.4. Catégorie de Capacité (CapabilityCategory)
+### 2.4. CatÃ©gorie de CapacitÃ© (CapabilityCategory)
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
-Une **CapabilityCategory** classifie les capacités par domaine fonctionnel pour faciliter la découverte et l'organisation.
+Une **CapabilityCategory** classifie les capacitÃ©s par domaine fonctionnel pour faciliter la dÃ©couverte et l'organisation.
 
-**Catégories standard :**
+**CatÃ©gories standard :**
 
-| Catégorie | Description | Exemples |
+| CatÃ©gorie | Description | Exemples |
 |-----------|-------------|----------|
-| **Data** | Capacités liées aux données | `content.create`, `content.read` |
-| **Hierarchy** | Capacités liées aux hiérarchies | `hierarchy.reorder`, `hierarchy.create` |
-| **Media** | Capacités liées aux médias | `media.upload`, `media.delete` |
-| **Search** | Capacités liées à la recherche | `search.index`, `search.query` |
-| **Auth** | Capacités liées à l'authentification | `auth.login`, `auth.logout` |
-| **Admin** | Capacités d'administration | `admin.config`, `admin.audit` |
-| **UI** | Capacités d'interface utilisateur | `ui.render`, `ui.theme` |
-| **IO** | Capacités d'entrée/sortie | `io.file.read`, `io.file.write` |
-| **System** | Capacités système | `system.health`, `system.metrics` |
+| **Data** | CapacitÃ©s liÃ©es aux donnÃ©es | `content.create`, `content.read` |
+| **Hierarchy** | CapacitÃ©s liÃ©es aux hiÃ©rarchies | `hierarchy.reorder`, `hierarchy.create` |
+| **Media** | CapacitÃ©s liÃ©es aux mÃ©dias | `media.upload`, `media.delete` |
+| **Search** | CapacitÃ©s liÃ©es Ã  la recherche | `search.index`, `search.query` |
+| **Auth** | CapacitÃ©s liÃ©es Ã  l'authentification | `auth.login`, `auth.logout` |
+| **Admin** | CapacitÃ©s d'administration | `admin.config`, `admin.audit` |
+| **UI** | CapacitÃ©s d'interface utilisateur | `ui.render`, `ui.theme` |
+| **IO** | CapacitÃ©s d'entrÃ©e/sortie | `io.file.read`, `io.file.write` |
+| **System** | CapacitÃ©s systÃ¨me | `system.health`, `system.metrics` |
 
 **Invariants :**
-- INV-CAT-1 : Toute capacité appartient à exactement une catégorie
-- INV-CAT-2 : Les catégories sont prédéfinies et extensibles par l'environnement
-- INV-CAT-3 : Une catégorie peut contenir plusieurs capacités
+- INV-CAT-1 : Toute capacitÃ© appartient Ã  exactement une catÃ©gorie
+- INV-CAT-2 : Les catÃ©gories sont prÃ©dÃ©finies et extensibles par l'environnement
+- INV-CAT-3 : Une catÃ©gorie peut contenir plusieurs capacitÃ©s
 
-### 2.5. Registre des Capacités (Capability Registry)
+### 2.5. Registre des CapacitÃ©s (Capability Registry)
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
-Le **Registre des Capacités** est la structure centrale de Master Butler qui contient l'inventaire exhaustif de toutes les capacités du système.
+Le **Registre des CapacitÃ©s** est la structure centrale de Master Butler qui contient l'inventaire exhaustif de toutes les capacitÃ©s du systÃ¨me.
 
-**Caractéristiques formelles :**
+**CaractÃ©ristiques formelles :**
 
-- **Exhaustif :** Contient toutes les capacités du système
-- **Cohérent :** Aucune duplication, aucune incohérence
-- **Traçable :** Historique complet de toutes les modifications
-- **Indexé :** Recherche efficace par identifiant, catégorie, source
-- **Dynamique :** Évolue avec le système (ajouts, dépréciations)
+- **Exhaustif :** Contient toutes les capacitÃ©s du systÃ¨me
+- **CohÃ©rent :** Aucune duplication, aucune incohÃ©rence
+- **TraÃ§able :** Historique complet de toutes les modifications
+- **IndexÃ© :** Recherche efficace par identifiant, catÃ©gorie, source
+- **Dynamique :** Ã‰volue avec le systÃ¨me (ajouts, dÃ©prÃ©ciations)
 
 **Structure formelle :**
 
 ```
 CapabilityRegistry {
   capabilities: Map<CapabilityId, Capability>,  // Index principal
-  by_category: Map<CapabilityCategory, Set<CapabilityId>>,  // Index par catégorie
+  by_category: Map<CapabilityCategory, Set<CapabilityId>>,  // Index par catÃ©gorie
   by_source: Map<SourceIdentity, Set<CapabilityId>>,  // Index par source
   relations: CapabilityRelationGraph,  // Graphe des relations
   history: CapabilityHistory,  // Historique des modifications
@@ -206,102 +206,102 @@ CapabilityRegistry {
 ```
 
 **Invariants :**
-- INV-REG-1 : Le registre contient toutes les capacités déclarées du système
-- INV-REG-2 : Aucune capacité n'existe en dehors du registre
-- INV-REG-3 : Le registre est cohérent à tout instant (pas d'état intermédiaire)
-- INV-REG-4 : Toute modification du registre est historisée
-- INV-REG-5 : Le registre est indexé pour une recherche efficace
+- INV-REG-1 : Le registre contient toutes les capacitÃ©s dÃ©clarÃ©es du systÃ¨me
+- INV-REG-2 : Aucune capacitÃ© n'existe en dehors du registre
+- INV-REG-3 : Le registre est cohÃ©rent Ã  tout instant (pas d'Ã©tat intermÃ©diaire)
+- INV-REG-4 : Toute modification du registre est historisÃ©e
+- INV-REG-5 : Le registre est indexÃ© pour une recherche efficace
 
 ---
 
-## 3. Métadonnées des Capacités
+## 3. MÃ©tadonnÃ©es des CapacitÃ©s
 
-### 3.1. Métadonnées obligatoires
+### 3.1. MÃ©tadonnÃ©es obligatoires
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Toute capacité déclarée doit fournir un ensemble minimal de métadonnées obligatoires.
+Toute capacitÃ© dÃ©clarÃ©e doit fournir un ensemble minimal de mÃ©tadonnÃ©es obligatoires.
 
-**Métadonnées obligatoires :**
+**MÃ©tadonnÃ©es obligatoires :**
 
-| Métadonnée | Type | Description |
+| MÃ©tadonnÃ©e | Type | Description |
 |------------|------|-------------|
 | `id` | CapabilityId | Identifiant unique et immuable |
-| `name` | String | Nom lisible humain (max 100 caractères) |
-| `description` | String | Description de la capacité (max 1000 caractères) |
-| `source` | SourceIdentity | Composant qui déclare la capacité |
-| `category` | CapabilityCategory | Catégorie de la capacité |
-| `created_at` | Timestamp | Date et heure de création |
-| `version` | Version | Version de la capacité |
+| `name` | String | Nom lisible humain (max 100 caractÃ¨res) |
+| `description` | String | Description de la capacitÃ© (max 1000 caractÃ¨res) |
+| `source` | SourceIdentity | Composant qui dÃ©clare la capacitÃ© |
+| `category` | CapabilityCategory | CatÃ©gorie de la capacitÃ© |
+| `created_at` | Timestamp | Date et heure de crÃ©ation |
+| `version` | Version | Version de la capacitÃ© |
 
 **Invariants :**
-- INV-META-1 : Toute capacité fournit toutes les métadonnées obligatoires
-- INV-META-2 : Les métadonnées obligatoires ne peuvent pas être nulles ou vides
-- INV-META-3 : Le nom respecte la limite de 100 caractères
-- INV-META-4 : La description respecte la limite de 1000 caractères
+- INV-META-1 : Toute capacitÃ© fournit toutes les mÃ©tadonnÃ©es obligatoires
+- INV-META-2 : Les mÃ©tadonnÃ©es obligatoires ne peuvent pas Ãªtre nulles ou vides
+- INV-META-3 : Le nom respecte la limite de 100 caractÃ¨res
+- INV-META-4 : La description respecte la limite de 1000 caractÃ¨res
 
-### 3.2. Métadonnées optionnelles
+### 3.2. MÃ©tadonnÃ©es optionnelles
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Les capacités peuvent fournir des métadonnées additionnelles pour enrichir la documentation et la découverte.
+Les capacitÃ©s peuvent fournir des mÃ©tadonnÃ©es additionnelles pour enrichir la documentation et la dÃ©couverte.
 
-**Métadonnées optionnelles :**
+**MÃ©tadonnÃ©es optionnelles :**
 
-| Métadonnée | Type | Description |
+| MÃ©tadonnÃ©e | Type | Description |
 |------------|------|-------------|
 | `tags` | Set<String> | Tags de classification |
 | `documentation_url` | URL | Lien vers la documentation |
 | `examples` | List<String> | Exemples d'utilisation |
-| `related_permissions` | Set<PermissionId> | Permissions souvent associées |
-| `minimum_security_level` | SecurityLevel | Niveau de sécurité minimum |
-| `deprecated_at` | Timestamp | Date de dépréciation (si applicable) |
-| `deprecation_reason` | String | Raison de la dépréciation |
-| `successor` | CapabilityId | Capacité de remplacement (si dépréciée) |
-| `custom` | Map<String, Any> | Métadonnées personnalisées |
+| `related_permissions` | Set<PermissionId> | Permissions souvent associÃ©es |
+| `minimum_security_level` | SecurityLevel | Niveau de sÃ©curitÃ© minimum |
+| `deprecated_at` | Timestamp | Date de dÃ©prÃ©ciation (si applicable) |
+| `deprecation_reason` | String | Raison de la dÃ©prÃ©ciation |
+| `successor` | CapabilityId | CapacitÃ© de remplacement (si dÃ©prÃ©ciÃ©e) |
+| `custom` | Map<String, Any> | MÃ©tadonnÃ©es personnalisÃ©es |
 
-**Règles :**
-- R-META-1 : Les métadonnées optionnelles peuvent être nulles ou absentes
-- R-META-2 : Les tags sont normalisés (minuscules, sans accents)
-- R-META-3 : L'URL de documentation doit être valide si fournie
-- R-META-4 : Les métadonnées personnalisées sont libres mais doivent être sérialisables
+**RÃ¨gles :**
+- R-META-1 : Les mÃ©tadonnÃ©es optionnelles peuvent Ãªtre nulles ou absentes
+- R-META-2 : Les tags sont normalisÃ©s (minuscules, sans accents)
+- R-META-3 : L'URL de documentation doit Ãªtre valide si fournie
+- R-META-4 : Les mÃ©tadonnÃ©es personnalisÃ©es sont libres mais doivent Ãªtre sÃ©rialisables
 
-### 3.3. Statut de Capacité
+### 3.3. Statut de CapacitÃ©
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Toute capacité possède un statut qui reflète son état dans le cycle de vie.
+Toute capacitÃ© possÃ¨de un statut qui reflÃ¨te son Ã©tat dans le cycle de vie.
 
 **Statuts possibles :**
 
 | Statut | Description | Transitions possibles |
 |--------|-------------|----------------------|
-| **Active** | Capacité disponible et utilisable | → Deprecated, → Removed |
-| **Deprecated** | Capacité obsolète, utilisation déconseillée | → Removed |
-| **Removed** | Capacité supprimée, non utilisable | (terminal) |
+| **Active** | CapacitÃ© disponible et utilisable | â†’ Deprecated, â†’ Removed |
+| **Deprecated** | CapacitÃ© obsolÃ¨te, utilisation dÃ©conseillÃ©e | â†’ Removed |
+| **Removed** | CapacitÃ© supprimÃ©e, non utilisable | (terminal) |
 
-**Règles de transition :**
-- R-ST-1 : Une capacité nouvellement créée est toujours Active
-- R-ST-2 : Une capacité Active peut être dépréciée (→ Deprecated)
-- R-ST-3 : Une capacité Deprecated peut être supprimée (→ Removed)
-- R-ST-4 : Une capacité Active peut être supprimée directement (→ Removed)
-- R-ST-5 : Une capacité Removed ne peut pas être réactivée
-- R-ST-6 : Une transition de statut est irréversible
+**RÃ¨gles de transition :**
+- R-ST-1 : Une capacitÃ© nouvellement crÃ©Ã©e est toujours Active
+- R-ST-2 : Une capacitÃ© Active peut Ãªtre dÃ©prÃ©ciÃ©e (â†’ Deprecated)
+- R-ST-3 : Une capacitÃ© Deprecated peut Ãªtre supprimÃ©e (â†’ Removed)
+- R-ST-4 : Une capacitÃ© Active peut Ãªtre supprimÃ©e directement (â†’ Removed)
+- R-ST-5 : Une capacitÃ© Removed ne peut pas Ãªtre rÃ©activÃ©e
+- R-ST-6 : Une transition de statut est irrÃ©versible
 
 **Invariants :**
-- INV-ST-1 : Toute capacité possède exactement un statut
-- INV-ST-2 : Les transitions de statut respectent les règles définies
-- INV-ST-3 : Une capacité Removed ne peut jamais être réutilisée
+- INV-ST-1 : Toute capacitÃ© possÃ¨de exactement un statut
+- INV-ST-2 : Les transitions de statut respectent les rÃ¨gles dÃ©finies
+- INV-ST-3 : Une capacitÃ© Removed ne peut jamais Ãªtre rÃ©utilisÃ©e
 
 ---
 
-## 4. Opérations sur le Registre
+## 4. OpÃ©rations sur le Registre
 
-### 4.1. Déclaration de Capacité (DeclareCapability)
+### 4.1. DÃ©claration de CapacitÃ© (DeclareCapability)
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-L'opération **DeclareCapability** permet à un composant de déclarer une nouvelle capacité dans le registre.
+L'opÃ©ration **DeclareCapability** permet Ã  un composant de dÃ©clarer une nouvelle capacitÃ© dans le registre.
 
 **Signature conceptuelle :**
 
@@ -313,51 +313,51 @@ DeclareCapability(
   source: SourceIdentity,
   category: CapabilityCategory,
   metadata: CapabilityMetadata?
-) → Result<Capability, DeclarationError>
+) â†’ Result<Capability, DeclarationError>
 ```
 
-**Préconditions :**
-- PRE-1 : L'identifiant n'existe pas déjà dans le registre
+**PrÃ©conditions :**
+- PRE-1 : L'identifiant n'existe pas dÃ©jÃ  dans le registre
 - PRE-2 : L'identifiant respecte le format canonique
-- PRE-3 : Les métadonnées obligatoires sont fournies et valides
-- PRE-4 : La source est autorisée à déclarer cette capacité
+- PRE-3 : Les mÃ©tadonnÃ©es obligatoires sont fournies et valides
+- PRE-4 : La source est autorisÃ©e Ã  dÃ©clarer cette capacitÃ©
 
 **Postconditions :**
-- POST-1 : La capacité est ajoutée au registre avec statut Active
-- POST-2 : Les index sont mis à jour (par catégorie, par source)
-- POST-3 : L'historique est mis à jour avec l'événement de création
-- POST-4 : La version du registre est incrémentée
+- POST-1 : La capacitÃ© est ajoutÃ©e au registre avec statut Active
+- POST-2 : Les index sont mis Ã  jour (par catÃ©gorie, par source)
+- POST-3 : L'historique est mis Ã  jour avec l'Ã©vÃ©nement de crÃ©ation
+- POST-4 : La version du registre est incrÃ©mentÃ©e
 
-**Règles d'idempotence :**
-- R-IDEMP-1 : Déclarer deux fois la même capacité (même id, même contenu) est idempotent
-- R-IDEMP-2 : Déclarer une capacité avec un id existant mais contenu différent est une erreur
+**RÃ¨gles d'idempotence :**
+- R-IDEMP-1 : DÃ©clarer deux fois la mÃªme capacitÃ© (mÃªme id, mÃªme contenu) est idempotent
+- R-IDEMP-2 : DÃ©clarer une capacitÃ© avec un id existant mais contenu diffÃ©rent est une erreur
 
-**Invariants préservés :**
+**Invariants prÃ©servÃ©s :**
 - INV-REG-1, INV-REG-3, INV-REG-4, INV-REG-5
 
-### 4.2. Interrogation de Capacité (QueryCapability)
+### 4.2. Interrogation de CapacitÃ© (QueryCapability)
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-L'opération **QueryCapability** permet d'interroger le registre pour obtenir les informations sur une ou plusieurs capacités.
+L'opÃ©ration **QueryCapability** permet d'interroger le registre pour obtenir les informations sur une ou plusieurs capacitÃ©s.
 
 **Modes d'interrogation :**
 
 | Mode | Description | Exemple |
 |------|-------------|---------|
 | **ById** | Recherche par identifiant exact | `content.create` |
-| **ByCategory** | Recherche par catégorie | `Data` |
+| **ByCategory** | Recherche par catÃ©gorie | `Data` |
 | **BySource** | Recherche par source | `spm.cms.content` |
 | **ByStatus** | Recherche par statut | `Active` |
 | **ByTags** | Recherche par tags | `["write", "content"]` |
-| **All** | Toutes les capacités | - |
+| **All** | Toutes les capacitÃ©s | - |
 
 **Signature conceptuelle :**
 
 ```
 QueryCapability(
   filter: CapabilityFilter
-) → Result<List<Capability>, QueryError>
+) â†’ Result<List<Capability>, QueryError>
 
 CapabilityFilter {
   id: CapabilityId?,
@@ -368,23 +368,23 @@ CapabilityFilter {
 }
 ```
 
-**Préconditions :**
-- PRE-1 : Le filtre est valide (au moins un critère ou All)
+**PrÃ©conditions :**
+- PRE-1 : Le filtre est valide (au moins un critÃ¨re ou All)
 
 **Postconditions :**
-- POST-1 : Les capacités correspondant au filtre sont retournées
-- POST-2 : Le registre n'est pas modifié
+- POST-1 : Les capacitÃ©s correspondant au filtre sont retournÃ©es
+- POST-2 : Le registre n'est pas modifiÃ©
 
-**Règles :**
+**RÃ¨gles :**
 - R-QUERY-1 : L'interrogation est toujours en lecture seule
-- R-QUERY-2 : Les filtres peuvent être combinés (AND logique)
-- R-QUERY-3 : Une interrogation sans résultat retourne une liste vide
+- R-QUERY-2 : Les filtres peuvent Ãªtre combinÃ©s (AND logique)
+- R-QUERY-3 : Une interrogation sans rÃ©sultat retourne une liste vide
 
-### 4.3. Dépréciation de Capacité (DeprecateCapability)
+### 4.3. DÃ©prÃ©ciation de CapacitÃ© (DeprecateCapability)
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-L'opération **DeprecateCapability** permet de marquer une capacité comme obsolète.
+L'opÃ©ration **DeprecateCapability** permet de marquer une capacitÃ© comme obsolÃ¨te.
 
 **Signature conceptuelle :**
 
@@ -393,31 +393,31 @@ DeprecateCapability(
   id: CapabilityId,
   reason: String,
   successor: CapabilityId?
-) → Result<Capability, DeprecationError>
+) â†’ Result<Capability, DeprecationError>
 ```
 
-**Préconditions :**
-- PRE-1 : La capacité existe dans le registre
-- PRE-2 : La capacité a le statut Active
-- PRE-3 : La raison de dépréciation est fournie
-- PRE-4 : Si un successeur est indiqué, il existe et est Active
+**PrÃ©conditions :**
+- PRE-1 : La capacitÃ© existe dans le registre
+- PRE-2 : La capacitÃ© a le statut Active
+- PRE-3 : La raison de dÃ©prÃ©ciation est fournie
+- PRE-4 : Si un successeur est indiquÃ©, il existe et est Active
 
 **Postconditions :**
-- POST-1 : La capacité passe au statut Deprecated
-- POST-2 : La date de dépréciation est enregistrée
-- POST-3 : La raison et le successeur sont enregistrés
-- POST-4 : L'historique est mis à jour
+- POST-1 : La capacitÃ© passe au statut Deprecated
+- POST-2 : La date de dÃ©prÃ©ciation est enregistrÃ©e
+- POST-3 : La raison et le successeur sont enregistrÃ©s
+- POST-4 : L'historique est mis Ã  jour
 
-**Règles :**
-- R-DEP-1 : Une capacité dépréciée reste interrogeable
-- R-DEP-2 : Une capacité dépréciée ne peut pas être redéclarée
-- R-DEP-3 : La dépréciation est irréversible
+**RÃ¨gles :**
+- R-DEP-1 : Une capacitÃ© dÃ©prÃ©ciÃ©e reste interrogeable
+- R-DEP-2 : Une capacitÃ© dÃ©prÃ©ciÃ©e ne peut pas Ãªtre redÃ©clarÃ©e
+- R-DEP-3 : La dÃ©prÃ©ciation est irrÃ©versible
 
-### 4.4. Suppression de Capacité (RemoveCapability)
+### 4.4. Suppression de CapacitÃ© (RemoveCapability)
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-L'opération **RemoveCapability** permet de supprimer définitivement une capacité du registre actif.
+L'opÃ©ration **RemoveCapability** permet de supprimer dÃ©finitivement une capacitÃ© du registre actif.
 
 **Signature conceptuelle :**
 
@@ -425,43 +425,43 @@ L'opération **RemoveCapability** permet de supprimer définitivement une capaci
 RemoveCapability(
   id: CapabilityId,
   reason: String
-) → Result<(), RemovalError>
+) â†’ Result<(), RemovalError>
 ```
 
-**Préconditions :**
-- PRE-1 : La capacité existe dans le registre
-- PRE-2 : La capacité a le statut Active ou Deprecated
-- PRE-3 : Aucune permission active ne référence cette capacité
+**PrÃ©conditions :**
+- PRE-1 : La capacitÃ© existe dans le registre
+- PRE-2 : La capacitÃ© a le statut Active ou Deprecated
+- PRE-3 : Aucune permission active ne rÃ©fÃ©rence cette capacitÃ©
 
 **Postconditions :**
-- POST-1 : La capacité passe au statut Removed
-- POST-2 : La capacité n'apparaît plus dans les interrogations standard
-- POST-3 : L'historique conserve la trace de la capacité
-- POST-4 : L'identifiant est réservé (non réutilisable)
+- POST-1 : La capacitÃ© passe au statut Removed
+- POST-2 : La capacitÃ© n'apparaÃ®t plus dans les interrogations standard
+- POST-3 : L'historique conserve la trace de la capacitÃ©
+- POST-4 : L'identifiant est rÃ©servÃ© (non rÃ©utilisable)
 
-**Règles :**
-- R-REM-1 : Une capacité supprimée n'est plus utilisable
-- R-REM-2 : L'identifiant reste réservé pour éviter les conflits
-- R-REM-3 : L'historique complet est conservé
+**RÃ¨gles :**
+- R-REM-1 : Une capacitÃ© supprimÃ©e n'est plus utilisable
+- R-REM-2 : L'identifiant reste rÃ©servÃ© pour Ã©viter les conflits
+- R-REM-3 : L'historique complet est conservÃ©
 
 ---
 
-## 5. Relations entre Capacités
+## 5. Relations entre CapacitÃ©s
 
 ### 5.1. Types de Relations
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Les capacités peuvent être liées par des relations sémantiques qui définissent leurs interactions et dépendances.
+Les capacitÃ©s peuvent Ãªtre liÃ©es par des relations sÃ©mantiques qui dÃ©finissent leurs interactions et dÃ©pendances.
 
 **Types de relations :**
 
 | Type | Description | Exemple |
 |------|-------------|---------|
-| **Requires** | A nécessite B pour fonctionner | `content.publish` requires `content.read` |
+| **Requires** | A nÃ©cessite B pour fonctionner | `content.publish` requires `content.read` |
 | **Implies** | A implique B (B est automatique si A) | `admin.full` implies `content.manage` |
 | **Conflicts** | A et B sont mutuellement exclusives | `content.lock` conflicts `content.edit` |
-| **Supersedes** | A remplace B (pour dépréciation) | `content.create.v2` supersedes `content.create` |
+| **Supersedes** | A remplace B (pour dÃ©prÃ©ciation) | `content.create.v2` supersedes `content.create` |
 | **Groups** | A regroupe B, C, D (composition) | `content.manage` groups `content.create`, `content.edit`, `content.delete` |
 
 **Structure formelle :**
@@ -476,128 +476,128 @@ CapabilityRelation {
 ```
 
 **Invariants :**
-- INV-REL-1 : Les deux capacités d'une relation existent dans le registre
-- INV-REL-2 : Une relation Requires ne peut pas créer de cycle
-- INV-REL-3 : Une relation Conflicts est symétrique
-- INV-REL-4 : Une relation Supersedes implique la dépréciation de la capacité remplacée
+- INV-REL-1 : Les deux capacitÃ©s d'une relation existent dans le registre
+- INV-REL-2 : Une relation Requires ne peut pas crÃ©er de cycle
+- INV-REL-3 : Une relation Conflicts est symÃ©trique
+- INV-REL-4 : Une relation Supersedes implique la dÃ©prÃ©ciation de la capacitÃ© remplacÃ©e
 
 ### 5.2. Graphe des Relations
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Le **Graphe des Relations** est la structure qui modélise toutes les relations entre capacités dans le registre.
+Le **Graphe des Relations** est la structure qui modÃ©lise toutes les relations entre capacitÃ©s dans le registre.
 
-**Caractéristiques :**
-- Orienté : Les relations ont une direction (from → to)
+**CaractÃ©ristiques :**
+- OrientÃ© : Les relations ont une direction (from â†’ to)
 - Acyclique : Pas de cycles dans les relations Requires
-- Complet : Toutes les relations déclarées sont présentes
-- Cohérent : Pas de relation vers une capacité inexistante
+- Complet : Toutes les relations dÃ©clarÃ©es sont prÃ©sentes
+- CohÃ©rent : Pas de relation vers une capacitÃ© inexistante
 
-**Opérations sur le graphe :**
+**OpÃ©rations sur le graphe :**
 
-| Opération | Description |
+| OpÃ©ration | Description |
 |-----------|-------------|
-| `GetDependencies(cap)` | Capacités requises par cap |
-| `GetDependents(cap)` | Capacités qui requièrent cap |
-| `GetImplied(cap)` | Capacités impliquées par cap |
-| `GetConflicts(cap)` | Capacités en conflit avec cap |
-| `GetGroup(cap)` | Capacités regroupées par cap |
+| `GetDependencies(cap)` | CapacitÃ©s requises par cap |
+| `GetDependents(cap)` | CapacitÃ©s qui requiÃ¨rent cap |
+| `GetImplied(cap)` | CapacitÃ©s impliquÃ©es par cap |
+| `GetConflicts(cap)` | CapacitÃ©s en conflit avec cap |
+| `GetGroup(cap)` | CapacitÃ©s regroupÃ©es par cap |
 
 **Invariants :**
 - INV-GRAPH-1 : Le graphe des relations Requires est acyclique
-- INV-GRAPH-2 : Toute capacité référencée existe dans le registre
-- INV-GRAPH-3 : Le graphe est cohérent avec le statut des capacités
+- INV-GRAPH-2 : Toute capacitÃ© rÃ©fÃ©rencÃ©e existe dans le registre
+- INV-GRAPH-3 : Le graphe est cohÃ©rent avec le statut des capacitÃ©s
 
 ---
 
-## 6. Règles de Déclaration
+## 6. RÃ¨gles de DÃ©claration
 
-### 6.1. Qui peut déclarer des Capacités
+### 6.1. Qui peut dÃ©clarer des CapacitÃ©s
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Seuls certains types de composants sont autorisés à déclarer des capacités dans le registre.
+Seuls certains types de composants sont autorisÃ©s Ã  dÃ©clarer des capacitÃ©s dans le registre.
 
-**Sources autorisées :**
+**Sources autorisÃ©es :**
 
-| Source | Peut déclarer | Exemples |
+| Source | Peut dÃ©clarer | Exemples |
 |--------|---------------|----------|
-| **Module SPM** | Ses propres capacités | `spm.cms.content.create` |
-| **Core** | Ses capacités de gouvernance | `core.strongfather.evaluate` |
-| **Operator** | Ses capacités spécifiques | `operator.myapp.custom_action` |
-| **Tool** | Ses capacités atomiques | `tool.layout.render` |
+| **Module SPM** | Ses propres capacitÃ©s | `spm.cms.content.create` |
+| **Core** | Ses capacitÃ©s de gouvernance | `core.strongfather.evaluate` |
+| **Operator** | Ses capacitÃ©s spÃ©cifiques | `operator.myapp.custom_action` |
+| **Tool** | Ses capacitÃ©s atomiques | `tool.layout.render` |
 | **Toolkit** | Aucune (composition uniquement) | - |
 
-**Règles :**
-- R-DECL-1 : Un composant ne peut déclarer que ses propres capacités
-- R-DECL-2 : Un composant ne peut pas déclarer de capacités au nom d'un autre
-- R-DECL-3 : La déclaration est vérifiée par Master Butler
-- R-DECL-4 : Un Toolkit ne déclare pas de capacité (il référence des capacités existantes)
+**RÃ¨gles :**
+- R-DECL-1 : Un composant ne peut dÃ©clarer que ses propres capacitÃ©s
+- R-DECL-2 : Un composant ne peut pas dÃ©clarer de capacitÃ©s au nom d'un autre
+- R-DECL-3 : La dÃ©claration est vÃ©rifiÃ©e par Master Butler
+- R-DECL-4 : Un Toolkit ne dÃ©clare pas de capacitÃ© (il rÃ©fÃ©rence des capacitÃ©s existantes)
 
-### 6.2. Quand déclarer les Capacités
+### 6.2. Quand dÃ©clarer les CapacitÃ©s
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Les capacités doivent être déclarées à des moments spécifiques du cycle de vie du système.
+Les capacitÃ©s doivent Ãªtre dÃ©clarÃ©es Ã  des moments spÃ©cifiques du cycle de vie du systÃ¨me.
 
-**Moments de déclaration :**
+**Moments de dÃ©claration :**
 
 | Moment | Description |
 |--------|-------------|
-| **Initialisation** | Au démarrage du composant |
-| **Mise à jour** | Lors de l'ajout de nouvelles fonctionnalités |
-| **Migration** | Lors du remplacement d'une capacité |
+| **Initialisation** | Au dÃ©marrage du composant |
+| **Mise Ã  jour** | Lors de l'ajout de nouvelles fonctionnalitÃ©s |
+| **Migration** | Lors du remplacement d'une capacitÃ© |
 
-**Règles :**
-- R-WHEN-1 : Les capacités sont déclarées avant toute utilisation
-- R-WHEN-2 : Une capacité non déclarée ne peut pas être utilisée
-- R-WHEN-3 : La déclaration peut être répétée (idempotente)
-- R-WHEN-4 : La mise à jour des métadonnées est autorisée
+**RÃ¨gles :**
+- R-WHEN-1 : Les capacitÃ©s sont dÃ©clarÃ©es avant toute utilisation
+- R-WHEN-2 : Une capacitÃ© non dÃ©clarÃ©e ne peut pas Ãªtre utilisÃ©e
+- R-WHEN-3 : La dÃ©claration peut Ãªtre rÃ©pÃ©tÃ©e (idempotente)
+- R-WHEN-4 : La mise Ã  jour des mÃ©tadonnÃ©es est autorisÃ©e
 
-### 6.3. Validation des Déclarations
+### 6.3. Validation des DÃ©clarations
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Master Butler valide toutes les déclarations avant de les enregistrer dans le registre.
+Master Butler valide toutes les dÃ©clarations avant de les enregistrer dans le registre.
 
-**Validations effectuées :**
+**Validations effectuÃ©es :**
 
-| Validation | Description | Erreur si échec |
+| Validation | Description | Erreur si Ã©chec |
 |------------|-------------|-----------------|
 | Format de l'identifiant | Respect du format canonique | `InvalidCapabilityId` |
-| Unicité de l'identifiant | Pas de duplication | `DuplicateCapabilityId` |
-| Métadonnées obligatoires | Présence et validité | `MissingMetadata` |
-| Autorisation de la source | Source autorisée à déclarer | `UnauthorizedSource` |
-| Cohérence des relations | Relations vers capacités existantes | `InvalidRelation` |
-| Pas de cycle | Pas de cycle dans les dépendances | `CyclicDependency` |
+| UnicitÃ© de l'identifiant | Pas de duplication | `DuplicateCapabilityId` |
+| MÃ©tadonnÃ©es obligatoires | PrÃ©sence et validitÃ© | `MissingMetadata` |
+| Autorisation de la source | Source autorisÃ©e Ã  dÃ©clarer | `UnauthorizedSource` |
+| CohÃ©rence des relations | Relations vers capacitÃ©s existantes | `InvalidRelation` |
+| Pas de cycle | Pas de cycle dans les dÃ©pendances | `CyclicDependency` |
 
 **Invariants :**
-- INV-VAL-1 : Aucune capacité invalide n'est enregistrée
-- INV-VAL-2 : Toutes les validations sont effectuées atomiquement
-- INV-VAL-3 : Un échec de validation ne modifie pas le registre
+- INV-VAL-1 : Aucune capacitÃ© invalide n'est enregistrÃ©e
+- INV-VAL-2 : Toutes les validations sont effectuÃ©es atomiquement
+- INV-VAL-3 : Un Ã©chec de validation ne modifie pas le registre
 
 ---
 
-## 7. Traçabilité et Historique
+## 7. TraÃ§abilitÃ© et Historique
 
-### 7.1. Historique des Capacités
+### 7.1. Historique des CapacitÃ©s
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Toute modification du registre des capacités est enregistrée dans un historique immuable.
+Toute modification du registre des capacitÃ©s est enregistrÃ©e dans un historique immuable.
 
-**Événements historisés :**
+**Ã‰vÃ©nements historisÃ©s :**
 
-| Événement | Description | Données enregistrées |
+| Ã‰vÃ©nement | Description | DonnÃ©es enregistrÃ©es |
 |-----------|-------------|---------------------|
-| `CapabilityCreated` | Nouvelle capacité déclarée | Capacité complète, source, timestamp |
-| `CapabilityUpdated` | Métadonnées modifiées | Champs modifiés, ancienne/nouvelle valeur |
-| `CapabilityDeprecated` | Capacité dépréciée | Raison, successeur, timestamp |
-| `CapabilityRemoved` | Capacité supprimée | Raison, timestamp |
-| `RelationAdded` | Nouvelle relation | Relation complète |
-| `RelationRemoved` | Relation supprimée | Relation, raison |
+| `CapabilityCreated` | Nouvelle capacitÃ© dÃ©clarÃ©e | CapacitÃ© complÃ¨te, source, timestamp |
+| `CapabilityUpdated` | MÃ©tadonnÃ©es modifiÃ©es | Champs modifiÃ©s, ancienne/nouvelle valeur |
+| `CapabilityDeprecated` | CapacitÃ© dÃ©prÃ©ciÃ©e | Raison, successeur, timestamp |
+| `CapabilityRemoved` | CapacitÃ© supprimÃ©e | Raison, timestamp |
+| `RelationAdded` | Nouvelle relation | Relation complÃ¨te |
+| `RelationRemoved` | Relation supprimÃ©e | Relation, raison |
 
-**Structure d'un événement :**
+**Structure d'un Ã©vÃ©nement :**
 
 ```
 CapabilityHistoryEvent {
@@ -613,256 +613,256 @@ CapabilityHistoryEvent {
 
 **Invariants :**
 - INV-HIST-1 : L'historique est immuable (append-only)
-- INV-HIST-2 : Chaque événement possède un identifiant unique
-- INV-HIST-3 : L'ordre des événements est préservé
-- INV-HIST-4 : Chaque événement est signé (checksum)
+- INV-HIST-2 : Chaque Ã©vÃ©nement possÃ¨de un identifiant unique
+- INV-HIST-3 : L'ordre des Ã©vÃ©nements est prÃ©servÃ©
+- INV-HIST-4 : Chaque Ã©vÃ©nement est signÃ© (checksum)
 
 ### 7.2. Audit du Registre
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Le registre peut être audité à tout moment pour vérifier sa cohérence et retracer l'évolution des capacités.
+Le registre peut Ãªtre auditÃ© Ã  tout moment pour vÃ©rifier sa cohÃ©rence et retracer l'Ã©volution des capacitÃ©s.
 
-**Opérations d'audit :**
+**OpÃ©rations d'audit :**
 
-| Opération | Description |
+| OpÃ©ration | Description |
 |-----------|-------------|
-| `GetHistory(cap)` | Historique complet d'une capacité |
-| `GetStateAt(timestamp)` | État du registre à un instant donné |
-| `VerifyIntegrity()` | Vérification de la cohérence |
+| `GetHistory(cap)` | Historique complet d'une capacitÃ© |
+| `GetStateAt(timestamp)` | Ã‰tat du registre Ã  un instant donnÃ© |
+| `VerifyIntegrity()` | VÃ©rification de la cohÃ©rence |
 | `GetStatistics()` | Statistiques du registre |
 
 **Informations d'audit disponibles :**
-- Nombre total de capacités (par statut)
-- Historique de chaque capacité
+- Nombre total de capacitÃ©s (par statut)
+- Historique de chaque capacitÃ©
 - Sources les plus actives
-- Relations les plus utilisées
-- Dépréciations récentes
+- Relations les plus utilisÃ©es
+- DÃ©prÃ©ciations rÃ©centes
 
 ---
 
-## 8. Invariants Non Négociables
+## 8. Invariants Non NÃ©gociables
 
-### 8.1. Exhaustivité
+### 8.1. ExhaustivitÃ©
 
 **Invariant INV-NN-1 :**
 
-> **Toute capacité existant dans le système est recensée dans le registre de Master Butler.**
+> **Toute capacitÃ© existant dans le systÃ¨me est recensÃ©e dans le registre de Master Butler.**
 
 **Implications :**
-- Aucune capacité "cachée" ou non déclarée
+- Aucune capacitÃ© "cachÃ©e" ou non dÃ©clarÃ©e
 - Aucun contournement du registre
-- Master Butler est la source de vérité unique
+- Master Butler est la source de vÃ©ritÃ© unique
 
-### 8.2. Unicité des Identifiants
+### 8.2. UnicitÃ© des Identifiants
 
 **Invariant INV-NN-2 :**
 
-> **Chaque capacité possède un identifiant unique et immuable, jamais réutilisable.**
+> **Chaque capacitÃ© possÃ¨de un identifiant unique et immuable, jamais rÃ©utilisable.**
 
 **Implications :**
 - Pas de collision d'identifiants
-- Pas de réutilisation après suppression
-- Traçabilité parfaite
+- Pas de rÃ©utilisation aprÃ¨s suppression
+- TraÃ§abilitÃ© parfaite
 
-### 8.3. Idempotence des Déclarations
+### 8.3. Idempotence des DÃ©clarations
 
 **Invariant INV-NN-3 :**
 
-> **Les déclarations de capacités sont idempotentes. Déclarer deux fois la même capacité n'a pas d'effet supplémentaire.**
+> **Les dÃ©clarations de capacitÃ©s sont idempotentes. DÃ©clarer deux fois la mÃªme capacitÃ© n'a pas d'effet supplÃ©mentaire.**
 
 **Implications :**
-- Redéclaration au démarrage autorisée
-- Pas d'effet de bord sur les redéclarations
-- Cohérence garantie
+- RedÃ©claration au dÃ©marrage autorisÃ©e
+- Pas d'effet de bord sur les redÃ©clarations
+- CohÃ©rence garantie
 
-### 8.4. Traçabilité Complète
+### 8.4. TraÃ§abilitÃ© ComplÃ¨te
 
 **Invariant INV-NN-4 :**
 
-> **Toute modification du registre est tracée avec contexte complet (qui, quand, quoi).**
+> **Toute modification du registre est tracÃ©e avec contexte complet (qui, quand, quoi).**
 
 **Implications :**
-- Audit possible à tout moment
+- Audit possible Ã  tout moment
 - Historique immuable
-- Responsabilité identifiable
+- ResponsabilitÃ© identifiable
 
-### 8.5. Non-Décision
+### 8.5. Non-DÃ©cision
 
 **Invariant INV-NN-5 :**
 
-> **Le registre recense les capacités mais ne décide jamais de leur utilisation.**
+> **Le registre recense les capacitÃ©s mais ne dÃ©cide jamais de leur utilisation.**
 
 **Implications :**
-- Master Butler informe, ne décide pas
-- La décision appartient à StrongFather
-- Séparation stricte connaissance/décision
+- Master Butler informe, ne dÃ©cide pas
+- La dÃ©cision appartient Ã  StrongFather
+- SÃ©paration stricte connaissance/dÃ©cision
 
 ---
 
-## 9. Schémas ASCII
+## 9. SchÃ©mas ASCII
 
 ### 9.1. Structure du Registre
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        CAPABILITY REGISTRY                                   │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  INDEX PRINCIPAL (Map<CapabilityId, Capability>)                      │  │
-│  ├──────────────────────────────────────────────────────────────────────┤  │
-│  │  content.create      → Capability { name: "Créer contenu", ... }     │  │
-│  │  content.edit        → Capability { name: "Modifier contenu", ... }  │  │
-│  │  content.delete      → Capability { name: "Supprimer contenu", ... } │  │
-│  │  media.upload        → Capability { name: "Téléverser média", ... }  │  │
-│  │  hierarchy.reorder   → Capability { name: "Réordonner", ... }        │  │
-│  │  search.index        → Capability { name: "Indexer", ... }           │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                              │
-│  ┌────────────────────────┐    ┌────────────────────────────────────────┐  │
-│  │  INDEX PAR CATÉGORIE   │    │  INDEX PAR SOURCE                       │  │
-│  ├────────────────────────┤    ├────────────────────────────────────────┤  │
-│  │  Data:                 │    │  spm.cms.content:                       │  │
-│  │    - content.create    │    │    - content.create                     │  │
-│  │    - content.edit      │    │    - content.edit                       │  │
-│  │    - content.delete    │    │    - content.delete                     │  │
-│  │                        │    │                                          │  │
-│  │  Media:                │    │  spm.cms.media:                          │  │
-│  │    - media.upload      │    │    - media.upload                        │  │
-│  │                        │    │                                          │  │
-│  │  Hierarchy:            │    │  spm.cms.hierarchy:                      │  │
-│  │    - hierarchy.reorder │    │    - hierarchy.reorder                   │  │
-│  └────────────────────────┘    └────────────────────────────────────────┘  │
-│                                                                              │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  GRAPHE DES RELATIONS                                                 │  │
-│  ├──────────────────────────────────────────────────────────────────────┤  │
-│  │                                                                        │  │
-│  │  content.publish ──[Requires]──► content.read                         │  │
-│  │  content.manage  ──[Groups]────► content.create                       │  │
-│  │                  ──[Groups]────► content.edit                         │  │
-│  │                  ──[Groups]────► content.delete                       │  │
-│  │  content.lock    ──[Conflicts]─► content.edit                         │  │
-│  │                                                                        │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                        CAPABILITY REGISTRY                                   â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  INDEX PRINCIPAL (Map<CapabilityId, Capability>)                      â”‚  â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤  â”‚
+â”‚  â”‚  content.create      â†’ Capability { name: "CrÃ©er contenu", ... }     â”‚  â”‚
+â”‚  â”‚  content.edit        â†’ Capability { name: "Modifier contenu", ... }  â”‚  â”‚
+â”‚  â”‚  content.delete      â†’ Capability { name: "Supprimer contenu", ... } â”‚  â”‚
+â”‚  â”‚  media.upload        â†’ Capability { name: "TÃ©lÃ©verser mÃ©dia", ... }  â”‚  â”‚
+â”‚  â”‚  hierarchy.reorder   â†’ Capability { name: "RÃ©ordonner", ... }        â”‚  â”‚
+â”‚  â”‚  search.index        â†’ Capability { name: "Indexer", ... }           â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  INDEX PAR CATÃ‰GORIE   â”‚    â”‚  INDEX PAR SOURCE                       â”‚  â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤    â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤  â”‚
+â”‚  â”‚  Data:                 â”‚    â”‚  spm.cms.content:                       â”‚  â”‚
+â”‚  â”‚    - content.create    â”‚    â”‚    - content.create                     â”‚  â”‚
+â”‚  â”‚    - content.edit      â”‚    â”‚    - content.edit                       â”‚  â”‚
+â”‚  â”‚    - content.delete    â”‚    â”‚    - content.delete                     â”‚  â”‚
+â”‚  â”‚                        â”‚    â”‚                                          â”‚  â”‚
+â”‚  â”‚  Media:                â”‚    â”‚  spm.cms.media:                          â”‚  â”‚
+â”‚  â”‚    - media.upload      â”‚    â”‚    - media.upload                        â”‚  â”‚
+â”‚  â”‚                        â”‚    â”‚                                          â”‚  â”‚
+â”‚  â”‚  Hierarchy:            â”‚    â”‚  spm.cms.hierarchy:                      â”‚  â”‚
+â”‚  â”‚    - hierarchy.reorder â”‚    â”‚    - hierarchy.reorder                   â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  GRAPHE DES RELATIONS                                                 â”‚  â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤  â”‚
+â”‚  â”‚                                                                        â”‚  â”‚
+â”‚  â”‚  content.publish â”€â”€[Requires]â”€â”€â–º content.read                         â”‚  â”‚
+â”‚  â”‚  content.manage  â”€â”€[Groups]â”€â”€â”€â”€â–º content.create                       â”‚  â”‚
+â”‚  â”‚                  â”€â”€[Groups]â”€â”€â”€â”€â–º content.edit                         â”‚  â”‚
+â”‚  â”‚                  â”€â”€[Groups]â”€â”€â”€â”€â–º content.delete                       â”‚  â”‚
+â”‚  â”‚  content.lock    â”€â”€[Conflicts]â”€â–º content.edit                         â”‚  â”‚
+â”‚  â”‚                                                                        â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                              â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### 9.2. Flux de Déclaration
+### 9.2. Flux de DÃ©claration
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                     FLUX DE DÉCLARATION DE CAPACITÉ                          │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                     FLUX DE DÃ‰CLARATION DE CAPACITÃ‰                          â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
    MODULE SPM                    MASTER BUTLER                    REGISTRE
-       │                              │                              │
-       │  DeclareCapability(          │                              │
-       │    id: "content.create",     │                              │
-       │    name: "Créer contenu",    │                              │
-       │    source: "spm.cms",        │                              │
-       │    category: Data            │                              │
-       │  )                           │                              │
-       ├─────────────────────────────►│                              │
-       │                              │                              │
-       │                              │  1. Valider format id        │
-       │                              │  2. Vérifier unicité         │
-       │                              │  3. Valider métadonnées      │
-       │                              │  4. Vérifier autorisation    │
-       │                              │                              │
-       │                              │  [Validations OK]            │
-       │                              │                              │
-       │                              │  5. Créer Capability         │
-       │                              ├─────────────────────────────►│
-       │                              │                              │
-       │                              │  6. Mettre à jour index      │
-       │                              ├─────────────────────────────►│
-       │                              │                              │
-       │                              │  7. Historiser événement     │
-       │                              ├─────────────────────────────►│
-       │                              │                              │
-       │                              │◄─────────────────────────────┤
-       │                              │      [Capability créée]      │
-       │◄─────────────────────────────┤                              │
-       │    Result::Ok(Capability)    │                              │
-       │                              │                              │
-       ▼                              ▼                              ▼
+       â”‚                              â”‚                              â”‚
+       â”‚  DeclareCapability(          â”‚                              â”‚
+       â”‚    id: "content.create",     â”‚                              â”‚
+       â”‚    name: "CrÃ©er contenu",    â”‚                              â”‚
+       â”‚    source: "spm.cms",        â”‚                              â”‚
+       â”‚    category: Data            â”‚                              â”‚
+       â”‚  )                           â”‚                              â”‚
+       â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚                              â”‚
+       â”‚                              â”‚                              â”‚
+       â”‚                              â”‚  1. Valider format id        â”‚
+       â”‚                              â”‚  2. VÃ©rifier unicitÃ©         â”‚
+       â”‚                              â”‚  3. Valider mÃ©tadonnÃ©es      â”‚
+       â”‚                              â”‚  4. VÃ©rifier autorisation    â”‚
+       â”‚                              â”‚                              â”‚
+       â”‚                              â”‚  [Validations OK]            â”‚
+       â”‚                              â”‚                              â”‚
+       â”‚                              â”‚  5. CrÃ©er Capability         â”‚
+       â”‚                              â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
+       â”‚                              â”‚                              â”‚
+       â”‚                              â”‚  6. Mettre Ã  jour index      â”‚
+       â”‚                              â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
+       â”‚                              â”‚                              â”‚
+       â”‚                              â”‚  7. Historiser Ã©vÃ©nement     â”‚
+       â”‚                              â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
+       â”‚                              â”‚                              â”‚
+       â”‚                              â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+       â”‚                              â”‚      [Capability crÃ©Ã©e]      â”‚
+       â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤                              â”‚
+       â”‚    Result::Ok(Capability)    â”‚                              â”‚
+       â”‚                              â”‚                              â”‚
+       â–¼                              â–¼                              â–¼
 ```
 
-### 9.3. Cycle de Vie d'une Capacité
+### 9.3. Cycle de Vie d'une CapacitÃ©
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                     CYCLE DE VIE D'UNE CAPACITÉ                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                     CYCLE DE VIE D'UNE CAPACITÃ‰                              â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
                               DeclareCapability()
-                                     │
-                                     ▼
-                        ┌────────────────────────┐
-                        │                        │
-                        │       ACTIVE           │
-                        │                        │
-                        │   ✓ Utilisable         │
-                        │   ✓ Interrogeable      │
-                        │   ✓ Référençable       │
-                        │                        │
-                        └────────────────────────┘
-                                │          │
-                                │          │
-          DeprecateCapability() │          │ RemoveCapability()
-                                │          │
-                                ▼          │
-                        ┌────────────────────────┐
-                        │                        │
-                        │      DEPRECATED        │
-                        │                        │
-                        │   ✓ Interrogeable      │
-                        │   ⚠ Utilisation        │
-                        │     déconseillée       │
-                        │   ✓ Successeur indiqué │
-                        │                        │
-                        └────────────────────────┘
-                                     │
-                                     │ RemoveCapability()
-                                     │
-                                     ▼
-                        ┌────────────────────────┐
-                        │                        │
-                        │       REMOVED          │
-                        │                        │
-                        │   ✗ Non utilisable     │
-                        │   ✗ Non interrogeable  │
-                        │   ✓ Historique conservé│
-                        │   ✗ Id non réutilisable│
-                        │                        │
-                        └────────────────────────┘
-                                     │
-                                     │ (TERMINAL)
-                                     ▼
+                                     â”‚
+                                     â–¼
+                        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                        â”‚                        â”‚
+                        â”‚       ACTIVE           â”‚
+                        â”‚                        â”‚
+                        â”‚   âœ“ Utilisable         â”‚
+                        â”‚   âœ“ Interrogeable      â”‚
+                        â”‚   âœ“ RÃ©fÃ©renÃ§able       â”‚
+                        â”‚                        â”‚
+                        â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚          â”‚
+                                â”‚          â”‚
+          DeprecateCapability() â”‚          â”‚ RemoveCapability()
+                                â”‚          â”‚
+                                â–¼          â”‚
+                        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                        â”‚                        â”‚
+                        â”‚      DEPRECATED        â”‚
+                        â”‚                        â”‚
+                        â”‚   âœ“ Interrogeable      â”‚
+                        â”‚   âš  Utilisation        â”‚
+                        â”‚     dÃ©conseillÃ©e       â”‚
+                        â”‚   âœ“ Successeur indiquÃ© â”‚
+                        â”‚                        â”‚
+                        â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                     â”‚
+                                     â”‚ RemoveCapability()
+                                     â”‚
+                                     â–¼
+                        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                        â”‚                        â”‚
+                        â”‚       REMOVED          â”‚
+                        â”‚                        â”‚
+                        â”‚   âœ— Non utilisable     â”‚
+                        â”‚   âœ— Non interrogeable  â”‚
+                        â”‚   âœ“ Historique conservÃ©â”‚
+                        â”‚   âœ— Id non rÃ©utilisableâ”‚
+                        â”‚                        â”‚
+                        â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                     â”‚
+                                     â”‚ (TERMINAL)
+                                     â–¼
 
-                    ⚠️ TRANSITIONS IRRÉVERSIBLES ⚠️
+                    âš ï¸ TRANSITIONS IRRÃ‰VERSIBLES âš ï¸
 ```
 
 ---
 
 ## 10. Exemples Concrets
 
-### 10.1. Exemple : Déclaration de Capacités CMS
+### 10.1. Exemple : DÃ©claration de CapacitÃ©s CMS
 
 **Contexte :**
-Le module SPM CMS Content déclare ses capacités au démarrage.
+Le module SPM CMS Content dÃ©clare ses capacitÃ©s au dÃ©marrage.
 
-**Déclarations :**
+**DÃ©clarations :**
 
 ```
-// Capacité de création de contenu
+// CapacitÃ© de crÃ©ation de contenu
 DeclareCapability(
   id: "content.create",
-  name: "Créer du contenu",
-  description: "Capacité de créer un nouveau contenu dans le système CMS",
+  name: "CrÃ©er du contenu",
+  description: "CapacitÃ© de crÃ©er un nouveau contenu dans le systÃ¨me CMS",
   source: SourceIdentity {
     type: Module,
     identifier: "spm.cms.content",
@@ -875,11 +875,11 @@ DeclareCapability(
   }
 )
 
-// Capacité de lecture de contenu
+// CapacitÃ© de lecture de contenu
 DeclareCapability(
   id: "content.read",
   name: "Lire du contenu",
-  description: "Capacité de lire le contenu existant",
+  description: "CapacitÃ© de lire le contenu existant",
   source: SourceIdentity {
     type: Module,
     identifier: "spm.cms.content",
@@ -891,11 +891,11 @@ DeclareCapability(
   }
 )
 
-// Capacité de publication avec dépendance
+// CapacitÃ© de publication avec dÃ©pendance
 DeclareCapability(
   id: "content.publish",
   name: "Publier du contenu",
-  description: "Capacité de publier un contenu existant",
+  description: "CapacitÃ© de publier un contenu existant",
   source: SourceIdentity {
     type: Module,
     identifier: "spm.cms.content",
@@ -914,7 +914,7 @@ DeclareCapability(
 ### 10.2. Exemple : Interrogation du Registre
 
 **Contexte :**
-StrongFather interroge Master Butler pour évaluer une intention.
+StrongFather interroge Master Butler pour Ã©valuer une intention.
 
 **Interrogation par identifiant :**
 
@@ -922,23 +922,23 @@ StrongFather interroge Master Butler pour évaluer une intention.
 QueryCapability(
   filter: { id: "content.create" }
 )
-→ Result::Ok([
+â†’ Result::Ok([
     Capability {
       id: "content.create",
-      name: "Créer du contenu",
+      name: "CrÃ©er du contenu",
       status: Active,
       ...
     }
   ])
 ```
 
-**Interrogation par catégorie :**
+**Interrogation par catÃ©gorie :**
 
 ```
 QueryCapability(
   filter: { category: Data, status: Active }
 )
-→ Result::Ok([
+â†’ Result::Ok([
     Capability { id: "content.create", ... },
     Capability { id: "content.read", ... },
     Capability { id: "content.edit", ... },
@@ -947,38 +947,38 @@ QueryCapability(
   ])
 ```
 
-### 10.3. Exemple : Dépréciation et Migration
+### 10.3. Exemple : DÃ©prÃ©ciation et Migration
 
 **Contexte :**
-Une capacité est remplacée par une nouvelle version.
+Une capacitÃ© est remplacÃ©e par une nouvelle version.
 
-**Dépréciation :**
+**DÃ©prÃ©ciation :**
 
 ```
-// Créer la nouvelle version
+// CrÃ©er la nouvelle version
 DeclareCapability(
   id: "content.create.v2",
-  name: "Créer du contenu (v2)",
+  name: "CrÃ©er du contenu (v2)",
   description: "Nouvelle version avec support multi-langue",
   ...
 )
 
-// Déprécier l'ancienne version
+// DÃ©prÃ©cier l'ancienne version
 DeprecateCapability(
   id: "content.create",
-  reason: "Remplacée par content.create.v2 avec support multi-langue",
+  reason: "RemplacÃ©e par content.create.v2 avec support multi-langue",
   successor: "content.create.v2"
 )
 ```
 
-**État après dépréciation :**
+**Ã‰tat aprÃ¨s dÃ©prÃ©ciation :**
 
 ```
 Capability {
   id: "content.create",
   status: Deprecated,
   deprecated_at: "2026-01-27T15:30:00Z",
-  deprecation_reason: "Remplacée par content.create.v2",
+  deprecation_reason: "RemplacÃ©e par content.create.v2",
   successor: "content.create.v2"
 }
 ```
@@ -987,97 +987,98 @@ Capability {
 
 ## 11. Conclusion
 
-Ce contrat établit le modèle technique du registre des capacités de Master Butler, définissant de manière absolue :
+Ce contrat Ã©tablit le modÃ¨le technique du registre des capacitÃ©s de Master Butler, dÃ©finissant de maniÃ¨re absolue :
 
-**Points clés :**
-- **Capacité :** Pouvoir technique intrinsèque, identifié de manière unique et immuable
+**Points clÃ©s :**
+- **CapacitÃ© :** Pouvoir technique intrinsÃ¨que, identifiÃ© de maniÃ¨re unique et immuable
 - **CapabilityId :** Format canonique `<domain>.<module>.<action>[.<qualifier>]`
-- **Registre :** Structure exhaustive, cohérente, tracée, et indexée
-- **Métadonnées :** Obligatoires (id, name, description, source, category) et optionnelles
-- **Statuts :** Active → Deprecated → Removed (transitions irréversibles)
+- **Registre :** Structure exhaustive, cohÃ©rente, tracÃ©e, et indexÃ©e
+- **MÃ©tadonnÃ©es :** Obligatoires (id, name, description, source, category) et optionnelles
+- **Statuts :** Active â†’ Deprecated â†’ Removed (transitions irrÃ©versibles)
 - **Relations :** Requires, Implies, Conflicts, Supersedes, Groups
-- **Opérations :** Declare, Query, Deprecate, Remove (toutes validées)
-- **Traçabilité :** Historique immuable de toutes les modifications
+- **OpÃ©rations :** Declare, Query, Deprecate, Remove (toutes validÃ©es)
+- **TraÃ§abilitÃ© :** Historique immuable de toutes les modifications
 
-**Invariants non négociables :**
-- Exhaustivité du registre
-- Unicité et immutabilité des identifiants
-- Idempotence des déclarations
-- Traçabilité complète
-- Non-décision (Master Butler informe, ne décide pas)
+**Invariants non nÃ©gociables :**
+- ExhaustivitÃ© du registre
+- UnicitÃ© et immutabilitÃ© des identifiants
+- Idempotence des dÃ©clarations
+- TraÃ§abilitÃ© complÃ¨te
+- Non-dÃ©cision (Master Butler informe, ne dÃ©cide pas)
 
-Ce contrat complète la Documentation Fondatrice de Master Butler en définissant le modèle technique du registre des capacités. Il s'articule avec le Permission Registry Contract pour former le système complet de catalogage des capacités et permissions.
+Ce contrat complÃ¨te la Documentation Fondatrice de Master Butler en dÃ©finissant le modÃ¨le technique du registre des capacitÃ©s. Il s'articule avec le Permission Registry Contract pour former le systÃ¨me complet de catalogage des capacitÃ©s et permissions.
 
-**Non-négociabilité :** Ce contrat est absolu et non négociable. Le contrat prime sur toute considération pratique.
+**Non-nÃ©gociabilitÃ© :** Ce contrat est absolu et non nÃ©gociable. Le contrat prime sur toute considÃ©ration pratique.
 
 ---
 
-**Document créé le :** 2026-01-27  
+**Document crÃ©Ã© le :** 2026-01-27  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, Master Butler Documentation Fondatrice  
-**Type :** Contrat de registre non négociable
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, Master Butler Documentation Fondatrice  
+**Type :** Contrat de registre non nÃ©gociable
 
 ---
 
-## 12. Mini log — erreurs / warnings / ambiguïtés rencontrées et corrigées
+## 12. Mini log â€” erreurs / warnings / ambiguÃ¯tÃ©s rencontrÃ©es et corrigÃ©es
 
-### Ambiguïté A1 : Format de l'identifiant de capacité
+### AmbiguÃ¯tÃ© A1 : Format de l'identifiant de capacitÃ©
 
-**Ambiguïté rencontrée :**
-La documentation fondatrice donne des exemples d'identifiants (`content.create`, `hierarchy.reorder`) sans définir un format canonique strict.
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
+La documentation fondatrice donne des exemples d'identifiants (`content.create`, `hierarchy.reorder`) sans dÃ©finir un format canonique strict.
 
-**Décision prise :**
-Format canonique défini : `<domain>.<module>.<action>[.<qualifier>]` avec règles de nommage strictes (minuscules, sans accents, segments séparés par points).
-
-**Justification :**
-Un format strict garantit la cohérence, évite les collisions, et facilite l'indexation et la recherche.
-
-**Correction effectuée :**
-Section 2.2 "Identifiant de Capacité" ajoutée avec format canonique et règles de nommage (R-ID-1 à R-ID-6).
-
-### Ambiguïté A2 : Cycle de vie des capacités
-
-**Ambiguïté rencontrée :**
-La documentation fondatrice mentionne l'historique des capacités (ajouts, suppressions, modifications) sans définir un cycle de vie formel.
-
-**Décision prise :**
-Cycle de vie à trois états (Active, Deprecated, Removed) avec transitions irréversibles et règles explicites.
+**DÃ©cision prise :**
+Format canonique dÃ©fini : `<domain>.<module>.<action>[.<qualifier>]` avec rÃ¨gles de nommage strictes (minuscules, sans accents, segments sÃ©parÃ©s par points).
 
 **Justification :**
-Un cycle de vie formel garantit la cohérence temporelle et permet une gestion propre des migrations et dépréciations.
+Un format strict garantit la cohÃ©rence, Ã©vite les collisions, et facilite l'indexation et la recherche.
 
-**Correction effectuée :**
-Section 3.3 "Statut de Capacité" ajoutée avec états, transitions, et règles (R-ST-1 à R-ST-6).
+**Correction effectuÃ©e :**
+Section 2.2 "Identifiant de CapacitÃ©" ajoutÃ©e avec format canonique et rÃ¨gles de nommage (R-ID-1 Ã  R-ID-6).
 
-### Ambiguïté A3 : Relations entre capacités
+### AmbiguÃ¯tÃ© A2 : Cycle de vie des capacitÃ©s
 
-**Ambiguïté rencontrée :**
-La documentation fondatrice mentionne des "relations entre capacités (dépendances, hiérarchies)" sans les définir formellement.
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
+La documentation fondatrice mentionne l'historique des capacitÃ©s (ajouts, suppressions, modifications) sans dÃ©finir un cycle de vie formel.
 
-**Décision prise :**
-Cinq types de relations définis (Requires, Implies, Conflicts, Supersedes, Groups) avec sémantique et invariants.
-
-**Justification :**
-Des types de relations formels permettent de modéliser toutes les interactions entre capacités de manière cohérente.
-
-**Correction effectuée :**
-Section 5 "Relations entre Capacités" ajoutée avec types, graphe, et invariants (INV-REL-1 à INV-REL-4, INV-GRAPH-1 à INV-GRAPH-3).
-
-### Ambiguïté A4 : Idempotence des déclarations
-
-**Ambiguïté rencontrée :**
-La documentation fondatrice mentionne que les déclarations sont idempotentes sans préciser le comportement exact en cas de redéclaration avec contenu différent.
-
-**Décision prise :**
-Idempotence stricte : même id + même contenu = ok, même id + contenu différent = erreur.
+**DÃ©cision prise :**
+Cycle de vie Ã  trois Ã©tats (Active, Deprecated, Removed) avec transitions irrÃ©versibles et rÃ¨gles explicites.
 
 **Justification :**
-Cette règle évite les incohérences tout en permettant la redéclaration au démarrage.
+Un cycle de vie formel garantit la cohÃ©rence temporelle et permet une gestion propre des migrations et dÃ©prÃ©ciations.
 
-**Correction effectuée :**
-Section 4.1 "Déclaration de Capacité" avec règles d'idempotence (R-IDEMP-1 à R-IDEMP-2).
+**Correction effectuÃ©e :**
+Section 3.3 "Statut de CapacitÃ©" ajoutÃ©e avec Ã©tats, transitions, et rÃ¨gles (R-ST-1 Ã  R-ST-6).
+
+### AmbiguÃ¯tÃ© A3 : Relations entre capacitÃ©s
+
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
+La documentation fondatrice mentionne des "relations entre capacitÃ©s (dÃ©pendances, hiÃ©rarchies)" sans les dÃ©finir formellement.
+
+**DÃ©cision prise :**
+Cinq types de relations dÃ©finis (Requires, Implies, Conflicts, Supersedes, Groups) avec sÃ©mantique et invariants.
+
+**Justification :**
+Des types de relations formels permettent de modÃ©liser toutes les interactions entre capacitÃ©s de maniÃ¨re cohÃ©rente.
+
+**Correction effectuÃ©e :**
+Section 5 "Relations entre CapacitÃ©s" ajoutÃ©e avec types, graphe, et invariants (INV-REL-1 Ã  INV-REL-4, INV-GRAPH-1 Ã  INV-GRAPH-3).
+
+### AmbiguÃ¯tÃ© A4 : Idempotence des dÃ©clarations
+
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
+La documentation fondatrice mentionne que les dÃ©clarations sont idempotentes sans prÃ©ciser le comportement exact en cas de redÃ©claration avec contenu diffÃ©rent.
+
+**DÃ©cision prise :**
+Idempotence stricte : mÃªme id + mÃªme contenu = ok, mÃªme id + contenu diffÃ©rent = erreur.
+
+**Justification :**
+Cette rÃ¨gle Ã©vite les incohÃ©rences tout en permettant la redÃ©claration au dÃ©marrage.
+
+**Correction effectuÃ©e :**
+Section 4.1 "DÃ©claration de CapacitÃ©" avec rÃ¨gles d'idempotence (R-IDEMP-1 Ã  R-IDEMP-2).
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

@@ -1,4 +1,4 @@
-# TAMR - Examples Interventions
+﻿# TAMR - Examples Interventions
 
 ## Contexte
 
@@ -9,7 +9,7 @@ Ce document illustre TAMR par des **exemples d'interventions** (approbation, ove
 - [TAMR - Trace Contract](../contracts/audit/TAMR%20-%20Trace%20Contract.md)
 - [TAMR - Architecture & Flows](../architecture/TAMR%20-%20Architecture%20&%20Flows.md)
 
-**Terminologie :** [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie :** [Miyukini Conceptual References - Glossaire](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -35,17 +35,17 @@ Publication d'un article : le systeme atteint un point d'approbation ; un editeu
 | `approver_id` | editor-alice |
 | `requested_at` | 2026-01-28T10:00:00Z (local) |
 | `resolved_at` | 2026-01-28T10:05:00Z (local) |
-| `result` | APPROUVÉ |
+| `result` | APPROUVÃ‰ |
 | `subject` | Publication article article-12345 |
 | `context` | process_id=CONTENT-LIFECYCLE, point_id=IP-CONTENT-PUBLISH-001 |
 
 ### Cas refus
 
-Si `editor-alice` refuse : `result` = REFUSÉ ; le processus n'execute pas la publication.
+Si `editor-alice` refuse : `result` = REFUSÃ‰ ; le processus n'execute pas la publication.
 
 ### Cas expiration
 
-Si aucun retour avant timeout (ex. 24h) : `result` = EXPIRÉ ; le comportement par defaut (ex. refus par defaut) est applique et trace.
+Si aucun retour avant timeout (ex. 24h) : `result` = EXPIRÃ‰ ; le comportement par defaut (ex. refus par defaut) est applique et trace.
 
 ---
 
@@ -155,7 +155,7 @@ L'intervention OVERRIDE declenchee pendant la supervision a sa propre trace (int
 
 | Type | Moment | Acteur typique | Resultat trace |
 |------|--------|----------------|----------------|
-| APPROVAL | Avant action | Approbateur designe | APPROUVÉ / REFUSÉ / EXPIRÉ |
+| APPROVAL | Avant action | Approbateur designe | APPROUVÃ‰ / REFUSÃ‰ / EXPIRÃ‰ |
 | OVERRIDE | Apres decision auto | Humain autorise | FORCE / BLOCK + justification |
 | ESCALATION | En cours | Initiateur + niveau superieur | resolution + timeout_behavior |
 | SUPERVISION | Continu | Superviseur | started_at, ended_at, interventions_triggered |
@@ -168,3 +168,4 @@ Tous les exemples supposent une implementation conforme aux contrats TAMR (Trace
 **Date :** 2026-01-28  
 **Statut :** INFORMATIF  
 **Reference :** TAMR Intervention Types Contract, Trace Contract
+

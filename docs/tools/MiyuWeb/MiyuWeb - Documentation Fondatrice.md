@@ -1,71 +1,71 @@
-# MiyuWeb — Documentation Fondatrice
+﻿# MiyuWeb â€” Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuWeb** est le **kit d'outils (Toolkit)** d'affichage de contenu web de l'écosystème Miyukini. Il intègre les outils de rendu HTML, d'exécution et de compilation de scripts (JS/TypeScript), de service d'assets, de résolution de thème et de layout, de validation de formulaires et de gestion d'événements, alignés sur KindMother pour la persistance des templates et assets (via MiyuSQL).
+**MiyuWeb** est le **kit d'outils (Toolkit)** d'affichage de contenu web de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils de rendu HTML, d'exÃ©cution et de compilation de scripts (JS/TypeScript), de service d'assets, de rÃ©solution de thÃ¨me et de layout, de validation de formulaires et de gestion d'Ã©vÃ©nements, alignÃ©s sur KindMother pour la persistance des templates et assets (via MiyuSQL).
 
-L'autorité sur les données (dont templates et assets) appartient à **KindMother** (Core de données, Strate 4). MiyuWeb expose des capacités d'exécution gouvernée (rendu, résolution thème/layout, script, asset, formulaire, événement) sans remplacer KindMother ; les Opérateurs passent par la gouvernance (BondingBrother, Master Butler, StrongFather, WorrySentinel, Caring Nanny) pour utiliser ces outils. MiyuWeb opère sur des **données fournies dans le flux** — il ne lit pas la base directement.
+L'autoritÃ© sur les donnÃ©es (dont templates et assets) appartient Ã  **KindMother** (Core de donnÃ©es, Strate 4). MiyuWeb expose des capacitÃ©s d'exÃ©cution gouvernÃ©e (rendu, rÃ©solution thÃ¨me/layout, script, asset, formulaire, Ã©vÃ©nement) sans remplacer KindMother ; les OpÃ©rateurs passent par la gouvernance (BondingBrother, Master Butler, StrongFather, WorrySentinel, Caring Nanny) pour utiliser ces outils. MiyuWeb opÃ¨re sur des **donnÃ©es fournies dans le flux** â€” il ne lit pas la base directement.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
-**Ce document définit :**
+**Ce document dÃ©finit :**
 
-- L'identité et la définition canonique de MiyuWeb
+- L'identitÃ© et la dÃ©finition canonique de MiyuWeb
 - Le **ToolkitId** et le catalogue (Master Butler)
 - La liste des **outils composants** (ToolIds)
-- La gouvernance (flux d'appel, Cores impliqués)
-- Le niveau de sécurité et les états système autorisés ou interdits
-- La relation avec KindMother et MiyuSQL (templates/assets en base ; MiyuWeb reçoit les données dans le flux)
-- L'alignement avec le protocole MIP v1 pour une future implémentation indexable
+- La gouvernance (flux d'appel, Cores impliquÃ©s)
+- Le niveau de sÃ©curitÃ© et les Ã©tats systÃ¨me autorisÃ©s ou interdits
+- La relation avec KindMother et MiyuSQL (templates/assets en base ; MiyuWeb reÃ§oit les donnÃ©es dans le flux)
+- L'alignement avec le protocole MIP v1 pour une future implÃ©mentation indexable
 
 **Hors scope :**
 
-- L'implémentation détaillée (moteur de rendu, sandbox JS, CSP)
-- Toute décision de contenu ou de logique métier — celle-ci reste du ressort des Opérateurs et des Cores
+- L'implÃ©mentation dÃ©taillÃ©e (moteur de rendu, sandbox JS, CSP)
+- Toute dÃ©cision de contenu ou de logique mÃ©tier â€” celle-ci reste du ressort des OpÃ©rateurs et des Cores
 
 ---
 
-## 3. Définition canonique
+## 3. DÃ©finition canonique
 
-> **MiyuWeb est une composition officielle d'outils d'affichage de contenu web (rendu HTML, scripts, assets, thème, layout, formulaires, événements), déclarée et gouvernée par l'environnement.**
+> **MiyuWeb est une composition officielle d'outils d'affichage de contenu web (rendu HTML, scripts, assets, thÃ¨me, layout, formulaires, Ã©vÃ©nements), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
 
-- MiyuWeb **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
-- MiyuWeb **n'ajoute aucune logique métier** : il orchestre des capacités atomiques (rendre du HTML, résoudre un thème, exécuter/compiler un script, servir un asset, valider un formulaire, dispatcher/capturer des événements) sans décider du contenu ni accéder à la base.
+- MiyuWeb **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
+- MiyuWeb **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques (rendre du HTML, rÃ©soudre un thÃ¨me, exÃ©cuter/compiler un script, servir un asset, valider un formulaire, dispatcher/capturer des Ã©vÃ©nements) sans dÃ©cider du contenu ni accÃ©der Ã  la base.
 
-**Règle fondamentale :** Un Kit d'Outils orchestre, mais n'ajoute pas de capacité. Les capacités viennent exclusivement des Tools composants. Les données (templates, assets) sont fournies dans le flux ; la persistance relève de KindMother et MiyuSQL.
+**RÃ¨gle fondamentale :** Un Kit d'Outils orchestre, mais n'ajoute pas de capacitÃ©. Les capacitÃ©s viennent exclusivement des Tools composants. Les donnÃ©es (templates, assets) sont fournies dans le flux ; la persistance relÃ¨ve de KindMother et MiyuSQL.
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.web.miyuweb` |
-| **Format** | `toolkit.<domain>.<name>` (conforme au [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md)) |
+| **Format** | `toolkit.<domain>.<name>` (conforme au [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md)) |
 | **Domaine** | `web` |
-| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants ; toute utilisation passe par le catalogue et la gouvernance. |
+| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants ; toute utilisation passe par le catalogue et la gouvernance. |
 
 ---
 
 ## 5. Liste des outils composants
 
-MiyuWeb est composé des Tools suivants (format canonique `tool.web.<action>` ou `tool.web.<sous-domaine>.<action>`). Le détail de chaque outil (action, niveau de sécurité, capability_id) est décrit dans [MiyuWeb - Reference Outils](./MiyuWeb%20-%20Reference%20Outils.md).
+MiyuWeb est composÃ© des Tools suivants (format canonique `tool.web.<action>` ou `tool.web.<sous-domaine>.<action>`). Le dÃ©tail de chaque outil (action, niveau de sÃ©curitÃ©, capability_id) est dÃ©crit dans [MiyuWeb - Reference Outils](./MiyuWeb%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
-| `tool.web.html.render` | Rend du HTML à partir de données et de template fournis ; ne décide pas du contenu |
-| `tool.web.layout.render` | Rend un layout (structure de page) à partir de données fournies |
-| `tool.web.theme.resolve` | Résout le thème applicable (couleurs, styles) pour un contexte donné |
-| `tool.web.script.execute` | Exécute un script (JS/TS) dans un contexte gouverné et sandboxé |
-| `tool.web.script.compile` | Compile ou valide un script sans l'exécuter |
-| `tool.web.asset.serve` | Sert un asset (image, CSS, etc.) à partir de données fournies dans le flux |
-| `tool.web.form.validate` | Valide un formulaire (structure, champs) sans décider des règles métier |
-| `tool.web.event.dispatch` | Dispatche un événement dans le flux gouverné |
-| `tool.web.input.capture` | Capture une entrée utilisateur (clic, saisie) pour le flux gouverné |
+| `tool.web.html.render` | Rend du HTML Ã  partir de donnÃ©es et de template fournis ; ne dÃ©cide pas du contenu |
+| `tool.web.layout.render` | Rend un layout (structure de page) Ã  partir de donnÃ©es fournies |
+| `tool.web.theme.resolve` | RÃ©sout le thÃ¨me applicable (couleurs, styles) pour un contexte donnÃ© |
+| `tool.web.script.execute` | ExÃ©cute un script (JS/TS) dans un contexte gouvernÃ© et sandboxÃ© |
+| `tool.web.script.compile` | Compile ou valide un script sans l'exÃ©cuter |
+| `tool.web.asset.serve` | Sert un asset (image, CSS, etc.) Ã  partir de donnÃ©es fournies dans le flux |
+| `tool.web.form.validate` | Valide un formulaire (structure, champs) sans dÃ©cider des rÃ¨gles mÃ©tier |
+| `tool.web.event.dispatch` | Dispatche un Ã©vÃ©nement dans le flux gouvernÃ© |
+| `tool.web.input.capture` | Capture une entrÃ©e utilisateur (clic, saisie) pour le flux gouvernÃ© |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuWeb en contient neuf.
 
@@ -73,87 +73,89 @@ MiyuWeb est composé des Tools suivants (format canonique `tool.web.<action>` ou
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : les templates et assets utilisés sont **fournis dans le flux** (MiyuWeb ne lit pas la base directement) ; persistance = KindMother. Le Toolkit est déclaré dans Master Butler et compatibilisé par Ever Buddy ([Toolkit Composition Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Toolkit%20Composition%20Contract.md)).
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : les templates et assets utilisÃ©s sont **fournis dans le flux** (MiyuWeb ne lit pas la base directement) ; persistance = KindMother. Le Toolkit est dÃ©clarÃ© dans Master Butler et compatibilisÃ© par Ever Buddy ([Toolkit Composition Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Toolkit%20Composition%20Contract.md)).
 
 ---
 
-## 7. Niveau de sécurité et états
+## 7. Niveau de sÃ©curitÃ© et Ã©tats
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
-| **Niveau de sécurité du kit** | **0, 1 ou 2** selon politique d'exposition (détail dans [MiyuWeb - Security and States Contract](./contracts/security/MiyuWeb%20-%20Security%20and%20States%20Contract.md)) ; cohérent avec WorrySentinel. Le niveau du Toolkit est au moins égal au maximum des niveaux de ses Tools composants. |
-| **États autorisés** | `HEALTHY`, `DEGRADED` (selon politique Caring Nanny) |
-| **États interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` (et autres selon [Toolkit Composition Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Toolkit%20Composition%20Contract.md)) |
+| **Niveau de sÃ©curitÃ© du kit** | **0, 1 ou 2** selon politique d'exposition (dÃ©tail dans [MiyuWeb - Security and States Contract](./contracts/security/MiyuWeb%20-%20Security%20and%20States%20Contract.md)) ; cohÃ©rent avec WorrySentinel. Le niveau du Toolkit est au moins Ã©gal au maximum des niveaux de ses Tools composants. |
+| **Ã‰tats autorisÃ©s** | `HEALTHY`, `DEGRADED` (selon politique Caring Nanny) |
+| **Ã‰tats interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` (et autres selon [Toolkit Composition Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Toolkit%20Composition%20Contract.md)) |
 
 ---
 
 ## 8. Relation avec KindMother (templates et assets)
 
-- **KindMother** est l'autorité sur toutes les données, y compris les **templates** et **assets** utilisés pour l'affichage web. Toute lecture ou écriture en base (templates, binaires assets) est **sous autorité KindMother** et **exécutée via MiyuSQL** lorsque KindMother mandate l'opération.
-- **MiyuWeb** ne lit pas la base. Il reçoit les données (contenu de template, contenu ou métadonnées d'assets) **dans le flux gouverné** — par exemple après qu'elles aient été lues via MiyuSQL sous autorité KindMother, ou construites par un Opérateur. MiyuWeb exécute uniquement : rendu, résolution thème/layout, exécution/compilation de script, service d'asset, validation de formulaire, dispatch et capture d'événements.
+- **KindMother** est l'autoritÃ© sur toutes les donnÃ©es, y compris les **templates** et **assets** utilisÃ©s pour l'affichage web. Toute lecture ou Ã©criture en base (templates, binaires assets) est **sous autoritÃ© KindMother** et **exÃ©cutÃ©e via MiyuSQL** lorsque KindMother mandate l'opÃ©ration.
+- **MiyuWeb** ne lit pas la base. Il reÃ§oit les donnÃ©es (contenu de template, contenu ou mÃ©tadonnÃ©es d'assets) **dans le flux gouvernÃ©** â€” par exemple aprÃ¨s qu'elles aient Ã©tÃ© lues via MiyuSQL sous autoritÃ© KindMother, ou construites par un OpÃ©rateur. MiyuWeb exÃ©cute uniquement : rendu, rÃ©solution thÃ¨me/layout, exÃ©cution/compilation de script, service d'asset, validation de formulaire, dispatch et capture d'Ã©vÃ©nements.
 
-**Référence :** [KindMother - Index](../../core/KindMother/_index.md) ou Documentation Fondatrice.
+**RÃ©fÃ©rence :** [KindMother - Index](..//..//cores//KindMother//_index.md) ou Documentation Fondatrice.
 
 ---
 
-## 8bis. Relation avec MiyuSQL — Templates, assets
+## 8bis. Relation avec MiyuSQL â€” Templates, assets
 
-MiyuWeb et **MiyuSQL** sont deux Toolkits distincts (Strate 6) ; leurs rôles sont complémentaires et ne se recouvrent pas.
+MiyuWeb et **MiyuSQL** sont deux Toolkits distincts (Strate 6) ; leurs rÃ´les sont complÃ©mentaires et ne se recouvrent pas.
 
 ### 8bis.1 Qui manipule les templates et assets ?
 
-| Responsabilité | Acteur | Toolkit / Core |
+| ResponsabilitÃ© | Acteur | Toolkit / Core |
 |----------------|--------|-----------------|
-| **Autorité sur les données** (dont templates, assets) | KindMother | Core Strate 4 |
-| **Persistance : lecture / écriture** (requêtes, transactions, cache) | KindMother mandate, **MiyuSQL** exécute | MiyuSQL (`tool.query.execute`, `tool.transaction.*`, `tool.cache.*`, `tool.schema.read`) |
-| **Rendu, résolution thème/layout, script, asset.serve, formulaire, événements** (sans lire la base) | **MiyuWeb** exécute sur des données fournies | MiyuWeb (`tool.web.html.render`, `tool.web.layout.render`, `tool.web.theme.resolve`, etc.) |
+| **AutoritÃ© sur les donnÃ©es** (dont templates, assets) | KindMother | Core Strate 4 |
+| **Persistance : lecture / Ã©criture** (requÃªtes, transactions, cache) | KindMother mandate, **MiyuSQL** exÃ©cute | MiyuSQL (`tool.query.execute`, `tool.transaction.*`, `tool.cache.*`, `tool.schema.read`) |
+| **Rendu, rÃ©solution thÃ¨me/layout, script, asset.serve, formulaire, Ã©vÃ©nements** (sans lire la base) | **MiyuWeb** exÃ©cute sur des donnÃ©es fournies | MiyuWeb (`tool.web.html.render`, `tool.web.layout.render`, `tool.web.theme.resolve`, etc.) |
 
-- **KindMother** est l'autorité sur toutes les données, y compris les templates et assets. Toute lecture ou écriture en base est **sous autorité KindMother** et **exécutée via MiyuSQL** lorsque KindMother mandate l'opération.
-- **MiyuWeb** ne persiste pas et ne lit pas les templates ni les assets en base. Il opère sur des **données (contenu de template, contenu ou métadonnées d'assets) qui lui sont fournies** dans le flux gouverné — par exemple après qu'elles aient été lues via MiyuSQL sous autorité KindMother, ou transmises dans la requête par un Opérateur.
+- **KindMother** est l'autoritÃ© sur toutes les donnÃ©es, y compris les templates et assets. Toute lecture ou Ã©criture en base est **sous autoritÃ© KindMother** et **exÃ©cutÃ©e via MiyuSQL** lorsque KindMother mandate l'opÃ©ration.
+- **MiyuWeb** ne persiste pas et ne lit pas les templates ni les assets en base. Il opÃ¨re sur des **donnÃ©es (contenu de template, contenu ou mÃ©tadonnÃ©es d'assets) qui lui sont fournies** dans le flux gouvernÃ© â€” par exemple aprÃ¨s qu'elles aient Ã©tÃ© lues via MiyuSQL sous autoritÃ© KindMother, ou transmises dans la requÃªte par un OpÃ©rateur.
 
 ### 8bis.2 Flux typique (lecture puis rendu)
 
-1. Un Opérateur a besoin d'afficher une page web (ex. dashboard, formulaire).
-2. **KindMother** (sous gouvernance) mandate une **lecture** en base (ex. récupérer un template par identifiant, ou des assets).
-3. **MiyuSQL** exécute la requête (ex. `tool.query.execute` SELECT) sous autorité KindMother et retourne les données au flux.
-4. Le flux fournit le template et les données à **MiyuWeb** pour **rendu** (`tool.web.html.render`, `tool.web.layout.render`), **résolution de thème** (`tool.web.theme.resolve`), ou **service d'asset** (`tool.web.asset.serve`).
-5. MiyuWeb retourne le résultat (HTML, asset servi, etc.) sans accéder lui-même à la base.
+1. Un OpÃ©rateur a besoin d'afficher une page web (ex. dashboard, formulaire).
+2. **KindMother** (sous gouvernance) mandate une **lecture** en base (ex. rÃ©cupÃ©rer un template par identifiant, ou des assets).
+3. **MiyuSQL** exÃ©cute la requÃªte (ex. `tool.query.execute` SELECT) sous autoritÃ© KindMother et retourne les donnÃ©es au flux.
+4. Le flux fournit le template et les donnÃ©es Ã  **MiyuWeb** pour **rendu** (`tool.web.html.render`, `tool.web.layout.render`), **rÃ©solution de thÃ¨me** (`tool.web.theme.resolve`), ou **service d'asset** (`tool.web.asset.serve`).
+5. MiyuWeb retourne le rÃ©sultat (HTML, asset servi, etc.) sans accÃ©der lui-mÃªme Ã  la base.
 
-MiyuWeb **ne dépend pas** de MiyuSQL (pas d'appel direct) ; la relation est **indirecte** via KindMother et le flux gouverné : les données persistées ou lues par MiyuSQL (sous KindMother) sont celles sur lesquelles MiyuWeb peut être invoqué ensuite quand elles sont fournies en entrée.
+MiyuWeb **ne dÃ©pend pas** de MiyuSQL (pas d'appel direct) ; la relation est **indirecte** via KindMother et le flux gouvernÃ© : les donnÃ©es persistÃ©es ou lues par MiyuSQL (sous KindMother) sont celles sur lesquelles MiyuWeb peut Ãªtre invoquÃ© ensuite quand elles sont fournies en entrÃ©e.
 
-**Référence :** [MiyuSQL - Documentation Fondatrice](../MiyuSQL/MiyuSQL%20-%20Documentation%20Fondatrice.md), [MiyuSQL - KindMother Integration Contract](../MiyuSQL/contracts/integration/MiyuSQL%20-%20KindMother%20Integration%20Contract.md).
+**RÃ©fÃ©rence :** [MiyuSQL - Documentation Fondatrice](../MiyuSQL/MiyuSQL%20-%20Documentation%20Fondatrice.md), [MiyuSQL - KindMother Integration Contract](../MiyuSQL/contracts/integration/MiyuSQL%20-%20KindMother%20Integration%20Contract.md).
 
-Les obligations de conformité détaillées sont dans [MiyuWeb - Tool Governance Compliance Contract](./contracts/governance/MiyuWeb%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuWeb - Tool Governance Compliance Contract](./contracts/governance/MiyuWeb%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuWeb sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol) :
+La documentation et la future implÃ©mentation de MiyuWeb sont conÃ§ues pour Ãªtre **compatibles MIP v1** (Miyukini Index Protocol) :
 
-- **Domaine** : `web` — cohérent avec la projection domains.json (blocs du domaine « web »).
-- **Layer** : outil / toolkit (Strate 6) — à refléter dans layers.json lorsque le code existera.
-- **Blocs** : chaque Tool MiyuWeb est une unité logique pouvant devenir un **bloc MSCM** à l'implémentation : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
+- **Domaine** : `web` â€” cohÃ©rent avec la projection domains.json (blocs du domaine Â« web Â»).
+- **Layer** : outil / toolkit (Strate 6) â€” Ã  reflÃ©ter dans layers.json lorsque le code existera.
+- **Blocs** : chaque Tool MiyuWeb est une unitÃ© logique pouvant devenir un **bloc MSCM** Ã  l'implÃ©mentation : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
 
-À l'implémentation, le code fournissant les Tools MiyuWeb devra être balisé MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit généré selon le [Protocole MIP v1](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md). La documentation ne génère pas les fichiers `mscm_index/*` ; elle définit les concepts pour une indexation future.
+Ã€ l'implÃ©mentation, le code fournissant les Tools MiyuWeb devra Ãªtre balisÃ© MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit gÃ©nÃ©rÃ© selon le [Protocole MIP v1](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md). La documentation ne gÃ©nÃ¨re pas les fichiers `mscm_index/*` ; elle dÃ©finit les concepts pour une indexation future.
 
 ---
 
-## 10. Références croisées
+## 10. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
-| Toolkit Composition Contract | [Master Butler - Toolkit Composition Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Toolkit%20Composition%20Contract.md) |
-| KindMother | [KindMother - Index](../../core/KindMother/_index.md) ou Documentation Fondatrice |
-| MIP v1 | [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
+| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Toolkit Composition Contract | [Master Butler - Toolkit Composition Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Toolkit%20Composition%20Contract.md) |
+| KindMother | [KindMother - Index](..//..//cores//KindMother//_index.md) ou Documentation Fondatrice |
+| MIP v1 | [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md) |
 | MiyuSQL - Documentation Fondatrice | [MiyuSQL - Documentation Fondatrice](../MiyuSQL/MiyuSQL%20-%20Documentation%20Fondatrice.md) |
-| Pyramide Architecture | [Miyukini Conceptual References - Pyramide Architecture Complete](../../reference/Miyukini%20Conceptual%20References%20-%20Pyramide%20Architecture%20Complete.md) |
+| Pyramide Architecture | [Miyukini Conceptual References - Pyramide Architecture Complete](..//..//miyukini-webway-system//reference//_index.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence fondateur
+**Statut :** Document de rÃ©fÃ©rence fondateur
+
+

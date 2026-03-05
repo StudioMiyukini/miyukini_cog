@@ -452,8 +452,8 @@ Last updated: 2026-03-05
 - âŒ Not certified (skip or fallback)
 
 ## Details (click agent)
-- [Maria](./agents/maria.md)
-- [Lise](./agents/lise.md)
+- [Maria](README.md)
+- [Lise](README.md)
 - ... (etc)
 
 ## By Mode
@@ -538,4 +538,5 @@ Ready?"
 - [Industrial Scenarios](../usecases/INDUSTRIAL-SCENARIOS.md) â€” Real cases
 - [Skills Adaptation](../skills/ADAPTATION-DIRECTIVE.md) â€” Skill-specific tests
 - Each agent: `.mip/certifications/agents/{name}.md`
+
 

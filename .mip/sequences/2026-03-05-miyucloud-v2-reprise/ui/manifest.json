@@ -1,0 +1,112 @@
+﻿{
+    "identity":  {
+                     "sequence":  "2026-03-05-miyucloud-v2-reprise",
+                     "date":  "2026-03-05",
+                     "slug":  "miyucloud-v2-reprise",
+                     "generated_at":  "2026-03-05T15:17:17",
+                     "source":  "retrofit-existing-sequence"
+                 },
+    "tabs":  [
+                 {
+                     "id":  "p0",
+                     "label":  "P0",
+                     "groups":  [
+                                    {
+                                        "label":  "Documents P0",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Brief 2026-03-05-miyucloud-v2-reprise.md",
+                                                          "path":  "briefs/2026-03-05-miyucloud-v2-reprise.md"
+                                                      },
+                                                      {
+                                                          "label":  "Brief 2026-03-05-miyucloud-v2-reprise-P0-travail.md",
+                                                          "path":  "briefs/2026-03-05-miyucloud-v2-reprise-P0-travail.md"
+                                                      },
+                                                      {
+                                                          "label":  "Spec 2026-03-05-miyucloud-v2-reprise-spec.md",
+                                                          "path":  "specs/2026-03-05-miyucloud-v2-reprise-spec.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace p0-trace.md",
+                                                          "path":  "phases/p0-trace.md"
+                                                      }
+                                                  ]
+                                    },
+                                    {
+                                        "label":  "Liste des documents par temps",
+                                        "files":  [
+
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "p3",
+                     "label":  "P3",
+                     "groups":  [
+                                    {
+                                        "label":  "GPI",
+                                        "files":  [
+
+                                                  ]
+                                    },
+                                    {
+                                        "label":  "Taches par etapes",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Plan 2026-03-05-miyucloud-v2-reprise-plan.md",
+                                                          "path":  "plans_p3/2026-03-05-miyucloud-v2-reprise-plan.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace p3-trace.md",
+                                                          "path":  "phases/p3-trace.md"
+                                                      }
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "p4",
+                     "label":  "P4",
+                     "groups":  [
+                                    {
+                                        "label":  "Documents P4",
+                                        "files":  [
+
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "p5",
+                     "label":  "P5",
+                     "groups":  [
+                                    {
+                                        "label":  "Documents P5",
+                                        "files":  [
+
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "rapport-final",
+                     "label":  "Rapport final",
+                     "groups":  [
+                                    {
+                                        "label":  "Rapport final",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Trace p6-trace.md",
+                                                          "path":  "phases/p6-trace.md"
+                                                      },
+                                                      {
+                                                          "label":  "Metrics 2026-03-05-miyucloud-v2-reprise.json",
+                                                          "path":  "metrics/2026-03-05-miyucloud-v2-reprise.json"
+                                                      }
+                                                  ]
+                                    }
+                                ]
+                 }
+             ]
+}

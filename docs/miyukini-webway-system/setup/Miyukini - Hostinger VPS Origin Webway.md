@@ -1,38 +1,38 @@
-# Miyukini — VPS Hostinger pour Origin Webway
+﻿# Miyukini â€” VPS Hostinger pour Origin Webway
 
 ## Contexte
 
-Ce guide documente le **VPS Hostinger** qui héberge **Origin** (relay + tracker + source de vérité MWS). Migration depuis Oracle Cloud vers Hostinger (février 2026).
+Ce guide documente le **VPS Hostinger** qui hÃ©berge **Origin** (relay + tracker + source de vÃ©ritÃ© MWS). Migration depuis Oracle Cloud vers Hostinger (fÃ©vrier 2026).
 
-**Hébergeur :** Hostinger  
+**HÃ©bergeur :** Hostinger  
 **OS :** Debian 13  
-**Rôle :** Origin MWS (relay, tracker, catalogue, MiyukiniAdmin)
+**RÃ´le :** Origin MWS (relay, tracker, catalogue, MiyukiniAdmin)
 
-Pour le guide complet d'implémentation logicielle (compilation, configuration, démarrage), voir :  
-**[MWS - Implémentation Origin Hostinger](../miyukini-webway-system/deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md)**
+Pour le guide complet d'implÃ©mentation logicielle (compilation, configuration, dÃ©marrage), voir :  
+**[MWS - ImplÃ©mentation Origin Hostinger](..//deploiement//MWS%20-%20Implementation%20Origin%20Hostinger.md)**
 
 ---
 
 ## 1. VPS Origin (Hostinger)
 
-### 1.1 Informations générales
+### 1.1 Informations gÃ©nÃ©rales
 
-| Paramètre | Valeur |
+| ParamÃ¨tre | Valeur |
 |-----------|--------|
 | **Provider** | Hostinger |
 | **Type** | VPS |
-| **Système d'exploitation** | **Debian 13** |
-| **Région** | Selon offre Hostinger (à documenter) |
-| **Accès** | SSH (clé publique) |
+| **SystÃ¨me d'exploitation** | **Debian 13** |
+| **RÃ©gion** | Selon offre Hostinger (Ã  documenter) |
+| **AccÃ¨s** | SSH (clÃ© publique) |
 
-### 1.2 Réseau
+### 1.2 RÃ©seau
 
-| Paramètre | Valeur |
+| ParamÃ¨tre | Valeur |
 |-----------|--------|
 | **Adresse IPv4 publique** | `46.202.129.65` |
-| **Nom d'hôte** | À configurer (ex. `origin-miyukini`) |
+| **Nom d'hÃ´te** | Ã€ configurer (ex. `origin-miyukini`) |
 
-### 1.3 Pare-feu (côté Hostinger)
+### 1.3 Pare-feu (cÃ´tÃ© Hostinger)
 
 Ouvrir les ports suivants dans le panneau Hostinger (ou via `ufw` sur le VPS) :
 
@@ -46,22 +46,22 @@ Ouvrir les ports suivants dans le panneau Hostinger (ou via `ufw` sur le VPS) :
 
 ---
 
-## 2. Accès SSH
+## 2. AccÃ¨s SSH
 
-### 2.1 Clé SSH
+### 2.1 ClÃ© SSH
 
 | Fichier | Chemin dans le workspace | Usage |
 |---------|--------------------------|-------|
-| **Clé privée** | `ssh-key-2026-02-12.key` | Connexion SSH |
-| **Clé publique** | `ssh-key-2026-02-12.key.pub` | Enregistrée sur le VPS |
+| **ClÃ© privÃ©e** | `ssh-key-2026-02-12.key` | Connexion SSH |
+| **ClÃ© publique** | `ssh-key-2026-02-12.key.pub` | EnregistrÃ©e sur le VPS |
 
-**Clé publique de référence (miyukini@gmail.com) — à conserver pour tout hébergeur :**
+**ClÃ© publique de rÃ©fÃ©rence (miyukini@gmail.com) â€” Ã  conserver pour tout hÃ©bergeur :**
 
 ```
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIVTDqC5yyNd6Ir9/NLjzUTT1IhugyRyRCo6+O5LZC4Z miyukini@gmail.com
 ```
 
-À ajouter dans `~/.ssh/authorized_keys` sur le VPS (lors de la création du VPS Hostinger, fournir cette clé publique).
+Ã€ ajouter dans `~/.ssh/authorized_keys` sur le VPS (lors de la crÃ©ation du VPS Hostinger, fournir cette clÃ© publique).
 
 **Utilisateur SSH :** `root`
 
@@ -72,7 +72,7 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIVTDqC5yyNd6Ir9/NLjzUTT1IhugyRyRCo6+O5LZC4Z
 ssh -i ssh-key-2026-02-12.key root@46.202.129.65
 ```
 
-Ou sans fichier de clé (si la clé est dans l'agent SSH) :
+Ou sans fichier de clÃ© (si la clÃ© est dans l'agent SSH) :
 
 ```powershell
 ssh root@46.202.129.65
@@ -90,65 +90,67 @@ chmod 600 ssh-key-2026-02-12.key
 ssh -i ssh-key-2026-02-12.key root@46.202.129.65
 ```
 
-Ou si la clé est dans l'agent : `ssh root@46.202.129.65`
+Ou si la clÃ© est dans l'agent : `ssh root@46.202.129.65`
 
-### 2.4 Vérification après connexion
+### 2.4 VÃ©rification aprÃ¨s connexion
 
 ```bash
-cat /etc/os-release     # → Debian 13 (Trixie)
-hostname                 # → nom du VPS
-ip -4 addr show         # → IP publique
+cat /etc/os-release     # â†’ Debian 13 (Trixie)
+hostname                 # â†’ nom du VPS
+ip -4 addr show         # â†’ IP publique
 ```
 
 ---
 
-## 3. Spécificités Debian 13
+## 3. SpÃ©cificitÃ©s Debian 13
 
 | Aspect | Commande / outil |
 |--------|------------------|
 | **Package manager** | `apt` |
 | **Installer un paquet** | `sudo apt update && sudo apt install -y <paquet>` |
-| **Mettre à jour** | `sudo apt update && sudo apt upgrade -y` |
+| **Mettre Ã  jour** | `sudo apt update && sudo apt upgrade -y` |
 | **Firewall** | `ufw` (pas firewalld) |
 | **Ouvrir un port** | `sudo ufw allow <port>/tcp && sudo ufw reload` |
-| **NTP** | `systemd-timesyncd` (actif par défaut) ou `chrony` |
-| **SELinux** | Non utilisé par défaut sur Debian |
+| **NTP** | `systemd-timesyncd` (actif par dÃ©faut) ou `chrony` |
+| **SELinux** | Non utilisÃ© par dÃ©faut sur Debian |
 | **Nginx** | Config dans `/etc/nginx/sites-available` / `sites-enabled` |
 | **Services** | `systemctl enable/start/stop/status <service>` |
-| **Dépendances build** | `build-essential pkg-config libssl-dev` |
+| **DÃ©pendances build** | `build-essential pkg-config libssl-dev` |
 
 ---
 
-## 4. Domaine DNS (à configurer)
+## 4. Domaine DNS (Ã  configurer)
 
-| Entrée | Type | Valeur | Rôle |
+| EntrÃ©e | Type | Valeur | RÃ´le |
 |--------|------|--------|------|
 | `origin.miyukini.com` | A | `46.202.129.65` | Adresse canonique d'Origin |
 | `webway.miyukini.com` | CNAME | `origin.miyukini.com` | Alias |
 
 ---
 
-## 5. Résumé des ports
+## 5. RÃ©sumÃ© des ports
 
-| Port | Rôle | Référence MWS |
+| Port | RÃ´le | RÃ©fÃ©rence MWS |
 |------|------|---------------|
-| 22 | SSH (administration) | — |
-| 80 | HTTP (redirect → HTTPS) | Catalogue web MWS |
+| 22 | SSH (administration) | â€” |
+| 80 | HTTP (redirect â†’ HTTPS) | Catalogue web MWS |
 | 443 | HTTPS (catalogue + MiyukiniAdmin) | Portail Origin |
 | 7000 | Origin Relay (transport) | Protocole relay MWS |
-| 21000 | Origin Tracker (découverte) | Port officiel MWS |
+| 21000 | Origin Tracker (dÃ©couverte) | Port officiel MWS |
 
 ---
 
-## Références
+## RÃ©fÃ©rences
 
-- [MWS - Implémentation Origin Hostinger](../miyukini-webway-system/deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md) — **guide complet d'implémentation**
-- [MWS - Origin](../miyukini-webway-system/acteurs/MWS%20-%20Origin.md)
+- [MWS - ImplÃ©mentation Origin Hostinger](..//deploiement//MWS%20-%20Implementation%20Origin%20Hostinger.md) â€” **guide complet d'implÃ©mentation**
+- [MWS - Origin](..//README.md)
 - [Miyukini Webway System](../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md)
-- [MWS - Guide de Déploiement](../miyukini-webway-system/deploiement/MWS%20-%20Guide%20de%20Deploiement.md)
+- [MWS - Guide de DÃ©ploiement](..//deploiement//MWS%20-%20Guide%20de%20Deploiement.md)
 
 ---
 
 **Version :** 1.0  
-**Mise à jour :** Migration Oracle Cloud → Hostinger VPS (Debian 13)  
-**Classification :** Documentation MWS — Setup
+**Mise Ã  jour :** Migration Oracle Cloud â†’ Hostinger VPS (Debian 13)  
+**Classification :** Documentation MWS â€” Setup
+
+

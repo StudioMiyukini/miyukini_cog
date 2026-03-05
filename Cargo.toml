@@ -124,7 +124,8 @@ members = [
 
     # === Outils internes ===
     "crates/miyukini-admin",
-    "tools/mip-generator",
+    "tools/mscm-generator",
+    "tools/mip-configurator",
     "tools/toolkit-skeleton",
     "tools/toolkit-registry-export",
 ]

@@ -1,4 +1,4 @@
-# TAMR - Performance & Scalability Contract
+﻿# TAMR - Performance & Scalability Contract
 
 ## 1. Introduction
 
@@ -22,8 +22,8 @@ Ce document est **contractuel et normatif** pour les aspects concernant les inva
 - [TAMR - Documentation Fondatrice](../foundation/TAMR%20-%20Documentation%20Fondatrice.md)
 - [TAMR - Trace Contract](../contracts/audit/TAMR%20-%20Trace%20Contract.md)
 - [TAMR - Invariants & Guarantees](../contracts/governance/TAMR%20-%20Invariants%20&%20Guarantees.md)
-- [Miyukini Conceptual References - Security Protocols](../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Protocols.md) (ex. RT-SEC-5 : tracabilite dans les 500 ms)
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+- [Miyukini Conceptual References - Security Protocols](..//..//..//miyukini-webway-system//reference//_index.md) (ex. RT-SEC-5 : tracabilite dans les 500 ms)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -65,7 +65,7 @@ Ce document est **contractuel et normatif** pour les aspects concernant les inva
 
 ### 3.3. Volume et charge
 
-**Principe :** Le volume d'interventions (nombre d'approbations, overrides, escalades, supervisions) et la charge associee (emission et persistance des traces) relevent des produits et des cores. TAMR exige que chaque intervention soit tracée et conforme aux types et limites ; il n'impose pas de plafond ni de strategie de lot (batching) pour les traces. Les implementations peuvent optimiser sous reserve de respecter INV-TAMR-1 (tracabilite absolue) et les delais contractuels (ex. RT-SEC-5 si applicable).
+**Principe :** Le volume d'interventions (nombre d'approbations, overrides, escalades, supervisions) et la charge associee (emission et persistance des traces) relevent des produits et des cores. TAMR exige que chaque intervention soit tracÃ©e et conforme aux types et limites ; il n'impose pas de plafond ni de strategie de lot (batching) pour les traces. Les implementations peuvent optimiser sous reserve de respecter INV-TAMR-1 (tracabilite absolue) et les delais contractuels (ex. RT-SEC-5 si applicable).
 
 ---
 
@@ -101,3 +101,4 @@ Les Lois d'Autonomie Systeme (LOI-5 : cout proportionnel au hardware) s'applique
 **Date :** 2026-01-28  
 **Statut :** CONTRAT (aspects invariants) / INFORMATIF (choix techniques)  
 **Reference :** TAMR Documentation Fondatrice, Trace Contract, Lois Autonomie Systeme
+

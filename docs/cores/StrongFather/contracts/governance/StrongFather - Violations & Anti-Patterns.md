@@ -1,174 +1,174 @@
-# StrongFather — Violations & Anti-Patterns
+﻿# StrongFather â€” Violations & Anti-Patterns
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **StrongFather — Violations & Anti-Patterns** : un contrat normatif, non négociable, et de statut FONDATION qui établit le catalogue des violations contractuelles et des anti-patterns à éviter lors de l'implémentation ou de l'utilisation de StrongFather dans le système Miyukini Core System v2.4.
+Ce document dÃ©finit le **StrongFather â€” Violations & Anti-Patterns** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit le catalogue des violations contractuelles et des anti-patterns Ã  Ã©viter lors de l'implÃ©mentation ou de l'utilisation de StrongFather dans le systÃ¨me Miyukini Core System v2.4.
 
-Ce contrat précise ce qui constitue une violation, les catégories de violations, les anti-patterns identifiés, et les conséquences associées.
+Ce contrat prÃ©cise ce qui constitue une violation, les catÃ©gories de violations, les anti-patterns identifiÃ©s, et les consÃ©quences associÃ©es.
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **toutes les implémentations et utilisations de StrongFather** et définit de manière absolue :
-- la définition formelle d'une violation,
-- les catégories de violations,
+Ce contrat s'applique Ã  **toutes les implÃ©mentations et utilisations de StrongFather** et dÃ©finit de maniÃ¨re absolue :
+- la dÃ©finition formelle d'une violation,
+- les catÃ©gories de violations,
 - le catalogue des violations explicites,
-- les anti-patterns à éviter,
-- les conséquences des violations.
+- les anti-patterns Ã  Ã©viter,
+- les consÃ©quences des violations.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat **référence et consolide** les violations définies dans :
-- **StrongFather — Documentation Fondatrice**
-- **StrongFather — Core Decision Contract**
-- **StrongFather — Intent Model Contract**
-- **StrongFather — Policy Engine Contract**
-- **StrongFather — Execution Prohibition Contract**
-- **StrongFather — Boundary & Isolation Contract**
-- **StrongFather — Audit & Trace Contract**
-- **[Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Violations des lois d'autonomie système
+Ce contrat **rÃ©fÃ©rence et consolide** les violations dÃ©finies dans :
+- **StrongFather â€” Documentation Fondatrice**
+- **StrongFather â€” Core Decision Contract**
+- **StrongFather â€” Intent Model Contract**
+- **StrongFather â€” Policy Engine Contract**
+- **StrongFather â€” Execution Prohibition Contract**
+- **StrongFather â€” Boundary & Isolation Contract**
+- **StrongFather â€” Audit & Trace Contract**
+- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Violations des lois d'autonomie systÃ¨me
 
-Ce contrat est le **catalogue de référence** pour toutes les violations StrongFather.
+Ce contrat est le **catalogue de rÃ©fÃ©rence** pour toutes les violations StrongFather.
 
 ---
 
-## 2. Définition d'une violation
+## 2. DÃ©finition d'une violation
 
 ### 2.1. Nature d'une violation
 
-Une **violation** est un non-respect d'une règle, d'un invariant, ou d'une garantie définie dans les contrats StrongFather.
+Une **violation** est un non-respect d'une rÃ¨gle, d'un invariant, ou d'une garantie dÃ©finie dans les contrats StrongFather.
 
-**Caractéristiques d'une violation :**
+**CaractÃ©ristiques d'une violation :**
 
-- **Contractuelle** : Une violation concerne toujours un contrat spécifique
-- **Identifiable** : Une violation peut être identifiée et référencée
-- **Conséquentielle** : Une violation a des conséquences définies
-- **Non-tolérable** : Une violation ne peut pas être ignorée ou tolérée
+- **Contractuelle** : Une violation concerne toujours un contrat spÃ©cifique
+- **Identifiable** : Une violation peut Ãªtre identifiÃ©e et rÃ©fÃ©rencÃ©e
+- **ConsÃ©quentielle** : Une violation a des consÃ©quences dÃ©finies
+- **Non-tolÃ©rable** : Une violation ne peut pas Ãªtre ignorÃ©e ou tolÃ©rÃ©e
 
-### 2.2. Gravité des violations
+### 2.2. GravitÃ© des violations
 
-Les violations sont classées selon leur gravité :
+Les violations sont classÃ©es selon leur gravitÃ© :
 
 **CRITIQUE :**
 
-Violation d'un invariant fondamental ou d'une interdiction absolue. La violation compromet l'intégrité de StrongFather.
+Violation d'un invariant fondamental ou d'une interdiction absolue. La violation compromet l'intÃ©gritÃ© de StrongFather.
 
 **MAJEURE :**
 
-Violation d'une règle importante qui affecte le comportement de StrongFather mais ne compromet pas ses propriétés fondamentales.
+Violation d'une rÃ¨gle importante qui affecte le comportement de StrongFather mais ne compromet pas ses propriÃ©tÃ©s fondamentales.
 
 **MINEURE :**
 
-Violation d'une règle secondaire qui n'affecte pas le comportement principal de StrongFather.
+Violation d'une rÃ¨gle secondaire qui n'affecte pas le comportement principal de StrongFather.
 
 ---
 
-## 3. Catégories de violations
+## 3. CatÃ©gories de violations
 
-### 3.1. Violations d'exécution
+### 3.1. Violations d'exÃ©cution
 
-**Catégorie :** CRITIQUE
+**CatÃ©gorie :** CRITIQUE
 
 **Source :** Execution Prohibition Contract
 
 **Violations :**
 
-**VIOL-EXEC-1 : Exécution d'action**
+**VIOL-EXEC-1 : ExÃ©cution d'action**
 
-StrongFather exécute une action (création, modification, suppression).
+StrongFather exÃ©cute une action (crÃ©ation, modification, suppression).
 
-*Invariant violé : INV-EXEC-1*
+*Invariant violÃ© : INV-EXEC-1*
 
-**VIOL-EXEC-2 : Modification d'état**
+**VIOL-EXEC-2 : Modification d'Ã©tat**
 
-StrongFather modifie un état du système.
+StrongFather modifie un Ã©tat du systÃ¨me.
 
-*Invariant violé : INV-EXEC-2*
+*Invariant violÃ© : INV-EXEC-2*
 
-**VIOL-EXEC-3 : Persistance opérationnelle**
+**VIOL-EXEC-3 : Persistance opÃ©rationnelle**
 
-StrongFather persiste des données opérationnelles.
+StrongFather persiste des donnÃ©es opÃ©rationnelles.
 
-*Invariant violé : INV-EXEC-3*
+*Invariant violÃ© : INV-EXEC-3*
 
 **VIOL-EXEC-4 : Communication externe**
 
 StrongFather initie une communication externe.
 
-*Invariant violé : INV-EXEC-4*
+*Invariant violÃ© : INV-EXEC-4*
 
-### 3.2. Violations de frontière
+### 3.2. Violations de frontiÃ¨re
 
-**Catégorie :** CRITIQUE
+**CatÃ©gorie :** CRITIQUE
 
 **Source :** Boundary & Isolation Contract
 
 **Violations :**
 
-**VIOL-BOUND-1 : Appel à KindMother**
+**VIOL-BOUND-1 : Appel Ã  KindMother**
 
 StrongFather appelle KindMother directement ou indirectement.
 
-*Interdiction violée : INTERD-KM-1*
+*Interdiction violÃ©e : INTERD-KM-1*
 
-**VIOL-BOUND-2 : Appel à un module SPM**
+**VIOL-BOUND-2 : Appel Ã  un module SPM**
 
 StrongFather appelle un module SPM directement.
 
-*Interdiction violée : INTERD-SPM-1*
+*Interdiction violÃ©e : INTERD-SPM-1*
 
-**VIOL-BOUND-3 : Appel réseau**
+**VIOL-BOUND-3 : Appel rÃ©seau**
 
-StrongFather effectue un appel réseau externe.
+StrongFather effectue un appel rÃ©seau externe.
 
-*Interdiction violée : INTERD-EXT-1*
+*Interdiction violÃ©e : INTERD-EXT-1*
 
 **VIOL-BOUND-4 : Communication directe produit**
 
 Un produit communique directement avec StrongFather sans passer par un adaptateur.
 
-*Interdiction violée : INTERD-PROD-1*
+*Interdiction violÃ©e : INTERD-PROD-1*
 
-### 3.3. Violations de décision
+### 3.3. Violations de dÃ©cision
 
-**Catégorie :** MAJEURE
+**CatÃ©gorie :** MAJEURE
 
 **Source :** Core Decision Contract
 
 **Violations :**
 
-**VIOL-DEC-1 : Décision sans justification**
+**VIOL-DEC-1 : DÃ©cision sans justification**
 
-Une décision est produite sans justification explicite.
+Une dÃ©cision est produite sans justification explicite.
 
-*Garantie violée : G-JUST-1*
+*Garantie violÃ©e : G-JUST-1*
 
-**VIOL-DEC-2 : Décision ambiguë**
+**VIOL-DEC-2 : DÃ©cision ambiguÃ«**
 
-Une décision produite est ambiguë (ni acceptée, ni refusée, ni ambiguë, ni différée clairement).
+Une dÃ©cision produite est ambiguÃ« (ni acceptÃ©e, ni refusÃ©e, ni ambiguÃ«, ni diffÃ©rÃ©e clairement).
 
-*Invariant violé : INV-SF-6*
+*Invariant violÃ© : INV-SF-6*
 
-**VIOL-DEC-3 : Décisions multiples**
+**VIOL-DEC-3 : DÃ©cisions multiples**
 
-Plusieurs décisions sont produites pour une même intention.
+Plusieurs dÃ©cisions sont produites pour une mÃªme intention.
 
-*Invariant violé : INV-CYCLE-2*
+*Invariant violÃ© : INV-CYCLE-2*
 
-**VIOL-DEC-4 : Décision avec commande d'exécution**
+**VIOL-DEC-4 : DÃ©cision avec commande d'exÃ©cution**
 
-Une décision contient une commande d'exécution.
+Une dÃ©cision contient une commande d'exÃ©cution.
 
 *Champ interdit : Core Decision Contract section 5.3*
 
 ### 3.4. Violations d'intention
 
-**Catégorie :** MAJEURE
+**CatÃ©gorie :** MAJEURE
 
 **Source :** Intent Model Contract
 
@@ -176,25 +176,25 @@ Une décision contient une commande d'exécution.
 
 **VIOL-INT-1 : Intention sans identifiant**
 
-Une intention est évaluée sans identifiant unique.
+Une intention est Ã©valuÃ©e sans identifiant unique.
 
-*Invariant violé : INV-INT-1*
+*Invariant violÃ© : INV-INT-1*
 
-**VIOL-INT-2 : Intention exécutée**
+**VIOL-INT-2 : Intention exÃ©cutÃ©e**
 
-Une intention est exécutée par StrongFather.
+Une intention est exÃ©cutÃ©e par StrongFather.
 
-*Invariant violé : INV-INT-4*
+*Invariant violÃ© : INV-INT-4*
 
-**VIOL-INT-3 : Intention modifiée post-soumission**
+**VIOL-INT-3 : Intention modifiÃ©e post-soumission**
 
-Une intention est modifiée après sa soumission.
+Une intention est modifiÃ©e aprÃ¨s sa soumission.
 
-*Règle violée : R-SOUM-3*
+*RÃ¨gle violÃ©e : R-SOUM-3*
 
 ### 3.5. Violations de politique
 
-**Catégorie :** MAJEURE
+**CatÃ©gorie :** MAJEURE
 
 **Source :** Policy Engine Contract
 
@@ -202,47 +202,47 @@ Une intention est modifiée après sa soumission.
 
 **VIOL-POL-1 : Politique implicite**
 
-Une politique implicite est appliquée.
+Une politique implicite est appliquÃ©e.
 
-*Invariant violé : INV-POL-1*
+*Invariant violÃ© : INV-POL-1*
 
-**VIOL-POL-2 : Politique modifiée pendant évaluation**
+**VIOL-POL-2 : Politique modifiÃ©e pendant Ã©valuation**
 
-Une politique est modifiée pendant l'évaluation d'une intention.
+Une politique est modifiÃ©e pendant l'Ã©valuation d'une intention.
 
-*Invariant violé : INV-POL-2*
+*Invariant violÃ© : INV-POL-2*
 
-**VIOL-POL-3 : Non-déterminisme**
+**VIOL-POL-3 : Non-dÃ©terminisme**
 
-Une même évaluation produit des résultats différents.
+Une mÃªme Ã©valuation produit des rÃ©sultats diffÃ©rents.
 
-*Invariant violé : INV-POL-6*
+*Invariant violÃ© : INV-POL-6*
 
-### 3.6. Violations de traçabilité
+### 3.6. Violations de traÃ§abilitÃ©
 
-**Catégorie :** MINEURE à MAJEURE
+**CatÃ©gorie :** MINEURE Ã  MAJEURE
 
 **Source :** Audit & Trace Contract
 
 **Violations :**
 
-**VIOL-TRACE-1 : Évaluation sans trace**
+**VIOL-TRACE-1 : Ã‰valuation sans trace**
 
-Une évaluation ne produit pas de trace.
+Une Ã©valuation ne produit pas de trace.
 
-*Invariant violé : INV-TRACE-1*
+*Invariant violÃ© : INV-TRACE-1*
 
-**VIOL-TRACE-2 : Trace modifiée**
+**VIOL-TRACE-2 : Trace modifiÃ©e**
 
-Une trace est modifiée après production.
+Une trace est modifiÃ©e aprÃ¨s production.
 
-*Invariant violé : INV-TRACE-4*
+*Invariant violÃ© : INV-TRACE-4*
 
-**VIOL-TRACE-3 : Trace incomplète**
+**VIOL-TRACE-3 : Trace incomplÃ¨te**
 
-Une trace ne contient pas tous les éléments obligatoires.
+Une trace ne contient pas tous les Ã©lÃ©ments obligatoires.
 
-*Invariant violé : INV-TRACE-5*
+*Invariant violÃ© : INV-TRACE-5*
 
 ---
 
@@ -252,250 +252,251 @@ Une trace ne contient pas tous les éléments obligatoires.
 
 **Description :**
 
-Utiliser StrongFather pour orchestrer des actions, des workflows, ou des processus au lieu de simplement évaluer des intentions.
+Utiliser StrongFather pour orchestrer des actions, des workflows, ou des processus au lieu de simplement Ã©valuer des intentions.
 
 **Pourquoi c'est un anti-pattern :**
 
-StrongFather est un moteur de décision, pas un orchestrateur. L'orchestration implique l'exécution et le contrôle de flux, ce qui viole l'interdiction d'exécution.
+StrongFather est un moteur de dÃ©cision, pas un orchestrateur. L'orchestration implique l'exÃ©cution et le contrÃ´le de flux, ce qui viole l'interdiction d'exÃ©cution.
 
-**Symptômes :**
+**SymptÃ´mes :**
 
-- StrongFather déclenche des actions suite à des décisions
-- StrongFather maintient un état de workflow
-- StrongFather attend des événements pour progresser
+- StrongFather dÃ©clenche des actions suite Ã  des dÃ©cisions
+- StrongFather maintient un Ã©tat de workflow
+- StrongFather attend des Ã©vÃ©nements pour progresser
 
 **Solution :**
 
-L'orchestration doit être effectuée par les adaptateurs produits, pas par StrongFather.
+L'orchestration doit Ãªtre effectuÃ©e par les adaptateurs produits, pas par StrongFather.
 
 ### 4.2. Anti-pattern : StrongFather comme cache
 
 **Description :**
 
-Utiliser StrongFather pour stocker des données ou des résultats pour accès ultérieur.
+Utiliser StrongFather pour stocker des donnÃ©es ou des rÃ©sultats pour accÃ¨s ultÃ©rieur.
 
 **Pourquoi c'est un anti-pattern :**
 
-StrongFather ne persiste pas de données opérationnelles. Utiliser StrongFather comme cache viole l'interdiction de persistance.
+StrongFather ne persiste pas de donnÃ©es opÃ©rationnelles. Utiliser StrongFather comme cache viole l'interdiction de persistance.
 
-**Symptômes :**
+**SymptÃ´mes :**
 
-- StrongFather mémorise des décisions pour réutilisation
-- StrongFather maintient un état entre évaluations
-- StrongFather optimise via la mise en cache de résultats
+- StrongFather mÃ©morise des dÃ©cisions pour rÃ©utilisation
+- StrongFather maintient un Ã©tat entre Ã©valuations
+- StrongFather optimise via la mise en cache de rÃ©sultats
 
 **Solution :**
 
-Le cache doit être géré par les composants appelants, pas par StrongFather.
+Le cache doit Ãªtre gÃ©rÃ© par les composants appelants, pas par StrongFather.
 
 ### 4.3. Anti-pattern : Contournement par adaptateur
 
 **Description :**
 
-Utiliser un adaptateur pour contourner les règles de StrongFather en effectuant des actions interdites au nom de StrongFather.
+Utiliser un adaptateur pour contourner les rÃ¨gles de StrongFather en effectuant des actions interdites au nom de StrongFather.
 
 **Pourquoi c'est un anti-pattern :**
 
-Le contournement via adaptateur viole l'esprit des contrats et peut introduire des incohérences systémiques.
+Le contournement via adaptateur viole l'esprit des contrats et peut introduire des incohÃ©rences systÃ©miques.
 
-**Symptômes :**
+**SymptÃ´mes :**
 
-- L'adaptateur exécute des actions "pour" StrongFather
+- L'adaptateur exÃ©cute des actions "pour" StrongFather
 - L'adaptateur communique avec KindMother "au nom de" StrongFather
-- L'adaptateur modifie des résultats de StrongFather avant de les utiliser
+- L'adaptateur modifie des rÃ©sultats de StrongFather avant de les utiliser
 
 **Solution :**
 
-Les adaptateurs doivent respecter les frontières de StrongFather et ne jamais agir en son nom.
+Les adaptateurs doivent respecter les frontiÃ¨res de StrongFather et ne jamais agir en son nom.
 
 ### 4.4. Anti-pattern : Politiques techniques
 
 **Description :**
 
-Définir des politiques qui portent sur des aspects techniques (schémas, formats, protocoles) au lieu d'aspects stratégiques et politiques.
+DÃ©finir des politiques qui portent sur des aspects techniques (schÃ©mas, formats, protocoles) au lieu d'aspects stratÃ©giques et politiques.
 
 **Pourquoi c'est un anti-pattern :**
 
-StrongFather évalue des intentions selon des politiques stratégiques, pas selon des règles techniques. Les validations techniques sont hors-scope.
+StrongFather Ã©value des intentions selon des politiques stratÃ©giques, pas selon des rÃ¨gles techniques. Les validations techniques sont hors-scope.
 
-**Symptômes :**
+**SymptÃ´mes :**
 
-- Politiques qui vérifient des formats de données
-- Politiques qui valident des schémas
-- Politiques qui contrôlent des protocoles
+- Politiques qui vÃ©rifient des formats de donnÃ©es
+- Politiques qui valident des schÃ©mas
+- Politiques qui contrÃ´lent des protocoles
 
 **Solution :**
 
-La validation technique doit être effectuée par les composants appropriés (adaptateurs, modules SPM).
+La validation technique doit Ãªtre effectuÃ©e par les composants appropriÃ©s (adaptateurs, modules SPM).
 
-### 4.5. Anti-pattern : Logique métier dans les politiques
+### 4.5. Anti-pattern : Logique mÃ©tier dans les politiques
 
 **Description :**
 
-Inclure de la logique métier spécifique à un domaine dans les politiques de StrongFather.
+Inclure de la logique mÃ©tier spÃ©cifique Ã  un domaine dans les politiques de StrongFather.
 
 **Pourquoi c'est un anti-pattern :**
 
-StrongFather applique des politiques générales, pas des règles métier spécifiques. L'inclusion de logique métier crée un couplage inapproprié.
+StrongFather applique des politiques gÃ©nÃ©rales, pas des rÃ¨gles mÃ©tier spÃ©cifiques. L'inclusion de logique mÃ©tier crÃ©e un couplage inappropriÃ©.
 
-**Symptômes :**
+**SymptÃ´mes :**
 
-- Politiques qui contiennent des calculs métier
-- Politiques qui référencent des concepts spécifiques à un domaine
+- Politiques qui contiennent des calculs mÃ©tier
+- Politiques qui rÃ©fÃ©rencent des concepts spÃ©cifiques Ã  un domaine
 - Politiques qui changent selon le produit
 
 **Solution :**
 
-La logique métier doit rester dans les produits. StrongFather applique uniquement des politiques générales.
+La logique mÃ©tier doit rester dans les produits. StrongFather applique uniquement des politiques gÃ©nÃ©rales.
 
-### 4.6. Anti-pattern : Dépendance temporelle technique
-
-**Description :**
-
-Faire dépendre les décisions de StrongFather du temps technique (horodatages, timestamps, délais).
-
-**Pourquoi c'est un anti-pattern :**
-
-StrongFather ne possède pas de logique temporelle technique. Les décisions ne doivent pas dépendre du temps technique.
-
-**Symptômes :**
-
-- Décisions qui changent selon l'heure
-- Politiques basées sur des timestamps
-- Évaluations qui attendent des délais
-
-**Solution :**
-
-Le temps conceptuel (période, cycle, saison) peut être utilisé via le contexte, mais pas le temps technique.
-
-### 4.7. Anti-pattern : StrongFather comme point d'entrée unique
+### 4.6. Anti-pattern : DÃ©pendance temporelle technique
 
 **Description :**
 
-Faire de StrongFather le point d'entrée unique de toutes les opérations du système, même celles qui ne nécessitent pas d'évaluation.
+Faire dÃ©pendre les dÃ©cisions de StrongFather du temps technique (horodatages, timestamps, dÃ©lais).
 
 **Pourquoi c'est un anti-pattern :**
 
-StrongFather est un moteur de décision, pas une gateway. Toutes les opérations ne nécessitent pas une évaluation de politiques.
+StrongFather ne possÃ¨de pas de logique temporelle technique. Les dÃ©cisions ne doivent pas dÃ©pendre du temps technique.
 
-**Symptômes :**
+**SymptÃ´mes :**
 
-- Toutes les requêtes passent par StrongFather
-- StrongFather est appelé pour des opérations triviales
-- StrongFather devient un goulot d'étranglement
+- DÃ©cisions qui changent selon l'heure
+- Politiques basÃ©es sur des timestamps
+- Ã‰valuations qui attendent des dÃ©lais
 
 **Solution :**
 
-StrongFather doit être utilisé uniquement pour les intentions nécessitant une évaluation de politiques.
+Le temps conceptuel (pÃ©riode, cycle, saison) peut Ãªtre utilisÃ© via le contexte, mais pas le temps technique.
+
+### 4.7. Anti-pattern : StrongFather comme point d'entrÃ©e unique
+
+**Description :**
+
+Faire de StrongFather le point d'entrÃ©e unique de toutes les opÃ©rations du systÃ¨me, mÃªme celles qui ne nÃ©cessitent pas d'Ã©valuation.
+
+**Pourquoi c'est un anti-pattern :**
+
+StrongFather est un moteur de dÃ©cision, pas une gateway. Toutes les opÃ©rations ne nÃ©cessitent pas une Ã©valuation de politiques.
+
+**SymptÃ´mes :**
+
+- Toutes les requÃªtes passent par StrongFather
+- StrongFather est appelÃ© pour des opÃ©rations triviales
+- StrongFather devient un goulot d'Ã©tranglement
+
+**Solution :**
+
+StrongFather doit Ãªtre utilisÃ© uniquement pour les intentions nÃ©cessitant une Ã©valuation de politiques.
 
 ---
 
-## 5. Conséquences des violations
+## 5. ConsÃ©quences des violations
 
 ### 5.1. Violations critiques
 
-**Conséquences :**
+**ConsÃ©quences :**
 
-1. **Non-conformité immédiate** : L'implémentation est considérée non conforme
-2. **Arrêt requis** : L'évaluation en cours doit être arrêtée
-3. **Audit obligatoire** : Un audit doit être effectué
-4. **Correction impérative** : La correction est obligatoire avant toute utilisation
+1. **Non-conformitÃ© immÃ©diate** : L'implÃ©mentation est considÃ©rÃ©e non conforme
+2. **ArrÃªt requis** : L'Ã©valuation en cours doit Ãªtre arrÃªtÃ©e
+3. **Audit obligatoire** : Un audit doit Ãªtre effectuÃ©
+4. **Correction impÃ©rative** : La correction est obligatoire avant toute utilisation
 
 ### 5.2. Violations majeures
 
-**Conséquences :**
+**ConsÃ©quences :**
 
-1. **Warning de non-conformité** : L'implémentation est signalée comme non conforme
-2. **Décision invalide** : La décision associée est invalide
-3. **Correction requise** : La correction doit être planifiée
+1. **Warning de non-conformitÃ©** : L'implÃ©mentation est signalÃ©e comme non conforme
+2. **DÃ©cision invalide** : La dÃ©cision associÃ©e est invalide
+3. **Correction requise** : La correction doit Ãªtre planifiÃ©e
 
 ### 5.3. Violations mineures
 
-**Conséquences :**
+**ConsÃ©quences :**
 
-1. **Signalement** : La violation est signalée
-2. **Correction recommandée** : La correction est recommandée
-3. **Traçabilité** : La violation est tracée pour suivi
+1. **Signalement** : La violation est signalÃ©e
+2. **Correction recommandÃ©e** : La correction est recommandÃ©e
+3. **TraÃ§abilitÃ©** : La violation est tracÃ©e pour suivi
 
 ---
 
-## 6. Règles de fermeture du contrat
+## 6. RÃ¨gles de fermeture du contrat
 
-### 6.1. Contrat fermé
+### 6.1. Contrat fermÃ©
 
-Ce contrat est **fermé**. Seules les violations et les anti-patterns explicitement définis sont reconnus.
+Ce contrat est **fermÃ©**. Seules les violations et les anti-patterns explicitement dÃ©finis sont reconnus.
 
-### 6.2. Catalogue de référence
+### 6.2. Catalogue de rÃ©fÃ©rence
 
-Ce contrat est le **catalogue de référence** pour toutes les violations StrongFather. Toute nouvelle violation doit être ajoutée à ce catalogue.
+Ce contrat est le **catalogue de rÃ©fÃ©rence** pour toutes les violations StrongFather. Toute nouvelle violation doit Ãªtre ajoutÃ©e Ã  ce catalogue.
 
 ---
 
 ## 7. Conclusion contractuelle
 
-Ce contrat établit de manière définitive et non négociable le catalogue des violations et anti-patterns de StrongFather.
+Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable le catalogue des violations et anti-patterns de StrongFather.
 
 Il garantit que :
-- les violations sont exhaustivement cataloguées,
-- les anti-patterns sont identifiés et documentés,
-- les conséquences sont explicites,
-- le contrat est fermé et constitue la référence unique.
+- les violations sont exhaustivement cataloguÃ©es,
+- les anti-patterns sont identifiÃ©s et documentÃ©s,
+- les consÃ©quences sont explicites,
+- le contrat est fermÃ© et constitue la rÃ©fÃ©rence unique.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
 
 ---
 
 ## 8. Validation conceptuelle
 
-### 8.1. Vérification de complétude
+### 8.1. VÃ©rification de complÃ©tude
 
 Ce document catalogue les violations de :
-- ✅ Execution Prohibition Contract : VIOL-EXEC-*
-- ✅ Boundary & Isolation Contract : VIOL-BOUND-*
-- ✅ Core Decision Contract : VIOL-DEC-*
-- ✅ Intent Model Contract : VIOL-INT-*
-- ✅ Policy Engine Contract : VIOL-POL-*
-- ✅ Audit & Trace Contract : VIOL-TRACE-*
+- âœ… Execution Prohibition Contract : VIOL-EXEC-*
+- âœ… Boundary & Isolation Contract : VIOL-BOUND-*
+- âœ… Core Decision Contract : VIOL-DEC-*
+- âœ… Intent Model Contract : VIOL-INT-*
+- âœ… Policy Engine Contract : VIOL-POL-*
+- âœ… Audit & Trace Contract : VIOL-TRACE-*
 
-### 8.2. Vérification de cohérence
+### 8.2. VÃ©rification de cohÃ©rence
 
-- ✅ Toutes les violations référencent un contrat source
-- ✅ Toutes les violations référencent un invariant ou une règle
-- ✅ Les gravités sont cohérentes avec l'importance des règles
+- âœ… Toutes les violations rÃ©fÃ©rencent un contrat source
+- âœ… Toutes les violations rÃ©fÃ©rencent un invariant ou une rÃ¨gle
+- âœ… Les gravitÃ©s sont cohÃ©rentes avec l'importance des rÃ¨gles
 
 ---
 
-**Document créé le :** 2026-01-25  
+**Document crÃ©Ã© le :** 2026-01-25  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
-**Type :** Catalogue des violations et anti-patterns non négociable
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
+**Type :** Catalogue des violations et anti-patterns non nÃ©gociable
 
 ---
 
-## 9. Mini log de génération
+## 9. Mini log de gÃ©nÃ©ration
 
-### Décision éditoriale E1 : Consolidation des violations
+### DÃ©cision Ã©ditoriale E1 : Consolidation des violations
 
-**Décision prise :** Consolidation de toutes les violations dispersées dans les contrats en un catalogue unique.
+**DÃ©cision prise :** Consolidation de toutes les violations dispersÃ©es dans les contrats en un catalogue unique.
 
-**Application :** Chaque violation référence son contrat et invariant source.
+**Application :** Chaque violation rÃ©fÃ©rence son contrat et invariant source.
 
-### Décision éditoriale E2 : Anti-patterns
+### DÃ©cision Ã©ditoriale E2 : Anti-patterns
 
-**Décision prise :** Inclusion d'anti-patterns avec description, symptômes et solutions.
+**DÃ©cision prise :** Inclusion d'anti-patterns avec description, symptÃ´mes et solutions.
 
-**Application :** 7 anti-patterns identifiés et documentés.
+**Application :** 7 anti-patterns identifiÃ©s et documentÃ©s.
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-**Vérification effectuée :**
-- ✅ Toutes les violations des contrats sont incluses
-- ✅ Les références aux invariants sont correctes
-- ✅ Les gravités sont cohérentes
+**VÃ©rification effectuÃ©e :**
+- âœ… Toutes les violations des contrats sont incluses
+- âœ… Les rÃ©fÃ©rences aux invariants sont correctes
+- âœ… Les gravitÃ©s sont cohÃ©rentes
 
-**Conclusion :** Catalogue complet et cohérent.
+**Conclusion :** Catalogue complet et cohÃ©rent.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

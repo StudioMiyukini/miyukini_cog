@@ -1,4 +1,4 @@
-# TAMR - StrongFather Integration Contract
+﻿# TAMR - StrongFather Integration Contract
 
 ## 1. Contexte
 
@@ -8,13 +8,13 @@ Ce document complete la section "Relations avec les autres Cores" de l'[Index de
 - [TAMR - Documentation Fondatrice](../../foundation/TAMR%20-%20Documentation%20Fondatrice.md) pour la nature de TAMR
 - [TAMR - Intervention Types Contract](../intervention/TAMR%20-%20Intervention%20Types%20Contract.md) pour les types d'intervention
 - [StrongFather - Documentation Fondatrice](../../../StrongFather/foundation/StrongFather%20-%20Documentation%20Fondatrice.md) pour la nature de StrongFather
-- [Miyukini Conceptual References - Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) pour la terminologie TAMR
-- [Miyukini Conceptual References - Doctrine Securite Fondamentale](../../../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md) pour les principes securite
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) pour la conformite LOI-1 a LOI-6
-- [Miyukini Conceptual References - Integrity Degradation System](../../../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md) pour les etats T0-T4
-- [Miyukini Conceptual References - Security Levels](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) pour les niveaux 0-4
+- [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) pour la terminologie TAMR
+- [Miyukini Conceptual References - Doctrine Securite Fondamentale](..//..//..//..//miyukini-webway-system//reference//_index.md) pour les principes securite
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) pour la conformite LOI-1 a LOI-6
+- [Miyukini Conceptual References - Integrity Degradation System](..//..//..//..//miyukini-webway-system//reference//_index.md) pour les etats T0-T4
+- [Miyukini Conceptual References - Security Levels](..//..//..//..//miyukini-webway-system//reference//_index.md) pour les niveaux 0-4
 
-L'integration respecte les [Lois d'Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) : toutes les interactions sont locales et ne requierent aucune dependance externe (**LOI-1**).
+L'integration respecte les [Lois d'Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) : toutes les interactions sont locales et ne requierent aucune dependance externe (**LOI-1**).
 
 ---
 
@@ -24,7 +24,7 @@ Ce document couvre :
 - La relation conceptuelle entre TAMR (regles) et StrongFather (decisions)
 - La separation des responsabilites : TAMR definit le cadre, StrongFather autorise ou refuse
 - Les donnees conceptuelles echangees (types d'intervention, contexte d'autorisation)
-- Le flux : intention d'intervention humaine → evaluation StrongFather → decision
+- Le flux : intention d'intervention humaine â†’ evaluation StrongFather â†’ decision
 - Les garanties de l'integration
 
 Ce document **ne couvre pas** :
@@ -53,7 +53,7 @@ Cette relation garantit que :
 
 ---
 
-## 4. Nature de la relation TAMR — StrongFather
+## 4. Nature de la relation TAMR â€” StrongFather
 
 ### 4.1 Relation regles vs decisions
 
@@ -86,14 +86,14 @@ StrongFather n'introduit jamais de nouveau type d'intervention. Il utilise exclu
 
 | Responsabilite | TAMR | StrongFather |
 |----------------|------|--------------|
-| **Definir les types d'intervention** | ✅ Autorite | ❌ Consommateur |
-| **Definir les points d'intervention** | ✅ Autorite | ❌ Consommateur |
-| **Definir les limites d'autorite humaine** | ✅ Autorite | ❌ Consommateur |
-| **Definir les limites inviolables** | ✅ Autorite | ❌ Consommateur |
-| **Evaluer si une intervention est autorisee** | ❌ Jamais | ✅ Autorite |
-| **Produire une decision (autorise/refuse/ambigu/differe)** | ❌ Jamais | ✅ Autorite |
-| **Appliquer les politiques d'autorisation** | ❌ Jamais | ✅ Autorite |
-| **Respecter le cadre TAMR dans l'evaluation** | N/A | ✅ Obligatoire |
+| **Definir les types d'intervention** | âœ… Autorite | âŒ Consommateur |
+| **Definir les points d'intervention** | âœ… Autorite | âŒ Consommateur |
+| **Definir les limites d'autorite humaine** | âœ… Autorite | âŒ Consommateur |
+| **Definir les limites inviolables** | âœ… Autorite | âŒ Consommateur |
+| **Evaluer si une intervention est autorisee** | âŒ Jamais | âœ… Autorite |
+| **Produire une decision (autorise/refuse/ambigu/differe)** | âŒ Jamais | âœ… Autorite |
+| **Appliquer les politiques d'autorisation** | âŒ Jamais | âœ… Autorite |
+| **Respecter le cadre TAMR dans l'evaluation** | N/A | âœ… Obligatoire |
 
 **Regle TAMR-SF-04 : Aucun chevauchement decisif**
 
@@ -102,31 +102,31 @@ TAMR ne decide jamais si une intervention est acceptee ou refusee. StrongFather 
 ### 4.3 Hierarchie des strates
 
 ```
-┌─────────────────────────────────────────┐
-│ STRATE 5 — Cores fonctionnels            │
-│                                          │
-│  ┌────────────────────────────────────┐ │
-│  │  StrongFather                      │ │
-│  │  (moteur de decision)               │ │
-│  │  Decide si une intention           │ │
-│  │  d'intervention est autorisee       │ │
-│  │  ou refusee selon les politiques   │ │
-│  └────────────────────────────────────┘ │
-└─────────────────────────────────────────┘
-                    ▲
-                    │ utilise le cadre
-                    │ (types, points, limites)
-                    │
-┌─────────────────────────────────────────┐
-│ STRATE 4 — Human Interaction Core        │
-│                                          │
-│  ┌────────────────────────────────────┐ │
-│  │  TAMR                              │ │
-│  │  (cadre conceptuel)                │ │
-│  │  Definit types, points, limites    │ │
-│  │  de l'intervention humaine         │ │
-│  └────────────────────────────────────┘ │
-└─────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 5 â€” Cores fonctionnels            â”‚
+â”‚                                          â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  StrongFather                      â”‚ â”‚
+â”‚  â”‚  (moteur de decision)               â”‚ â”‚
+â”‚  â”‚  Decide si une intention           â”‚ â”‚
+â”‚  â”‚  d'intervention est autorisee       â”‚ â”‚
+â”‚  â”‚  ou refusee selon les politiques   â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                    â–²
+                    â”‚ utilise le cadre
+                    â”‚ (types, points, limites)
+                    â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 4 â€” Human Interaction Core        â”‚
+â”‚                                          â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  TAMR                              â”‚ â”‚
+â”‚  â”‚  (cadre conceptuel)                â”‚ â”‚
+â”‚  â”‚  Definit types, points, limites    â”‚ â”‚
+â”‚  â”‚  de l'intervention humaine         â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Principe :** TAMR fournit le cadre conceptuel (Strate 4). StrongFather applique les politiques d'autorisation dans la Strate 5 en s'appuyant sur ce cadre.
@@ -135,7 +135,7 @@ TAMR ne decide jamais si une intervention est acceptee ou refusee. StrongFather 
 
 ## 5. Flux d'interaction
 
-### 5.1 Flux conceptuel : Cadre TAMR → Evaluation StrongFather
+### 5.1 Flux conceptuel : Cadre TAMR â†’ Evaluation StrongFather
 
 Une demande d'intervention humaine suit le flux suivant :
 
@@ -146,21 +146,21 @@ Une demande d'intervention humaine suit le flux suivant :
 5. **Decision** : StrongFather produit une decision : autorise, refuse, ambigu, differe.
 
 ```
-┌─────────────────┐
-│  TAMR           │
-│  (cadre)        │  Types, points, limites
-│                 │  definis une fois
-└────────┬────────┘
-         │
-         │  cadre utilise par
-         ▼
-┌─────────────────┐     intention      ┌─────────────────┐
-│  Acteur /       │ ─────────────────► │  StrongFather   │
-│  Produit        │   (via BondingBrother)  (evalue)     │
-└─────────────────┘                    └────────┬────────┘
-                                               │
-                                               │  decision
-                                               ▼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  TAMR           â”‚
+â”‚  (cadre)        â”‚  Types, points, limites
+â”‚                 â”‚  definis une fois
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚
+         â”‚  cadre utilise par
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     intention      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Acteur /       â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚  StrongFather   â”‚
+â”‚  Produit        â”‚   (via BondingBrother)  (evalue)     â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                               â”‚
+                                               â”‚  decision
+                                               â–¼
                                         autorise / refuse /
                                         ambigu / differe
 ```
@@ -181,12 +181,12 @@ Une demande d'intervention humaine suit le flux suivant :
 
 | Element | Type | Description | Obligatoire |
 |---------|------|-------------|-------------|
-| `intent_id` | `UUID` | Identifiant de l'intention | ✅ Oui |
-| `intervention_type` | `InterventionType` | Type TAMR (doit etre valide) | ✅ Oui |
-| `intervention_point_id` | `PointId` | Point d'intervention (doit etre valide) | ✅ Oui |
-| `actor_id` | `ActorId` | Identifiant de l'acteur humain | ✅ Oui |
-| `context` | `Context` | Contexte (ressource, action, etc.) | ✅ Oui |
-| `timestamp` | `LogicalClock` | Horodatage logique | ✅ Oui |
+| `intent_id` | `UUID` | Identifiant de l'intention | âœ… Oui |
+| `intervention_type` | `InterventionType` | Type TAMR (doit etre valide) | âœ… Oui |
+| `intervention_point_id` | `PointId` | Point d'intervention (doit etre valide) | âœ… Oui |
+| `actor_id` | `ActorId` | Identifiant de l'acteur humain | âœ… Oui |
+| `context` | `Context` | Contexte (ressource, action, etc.) | âœ… Oui |
+| `timestamp` | `LogicalClock` | Horodatage logique | âœ… Oui |
 
 **Regle TAMR-SF-05 : Conformite au cadre**
 
@@ -422,7 +422,7 @@ Toute decision StrongFather relative a une intention d'intervention est tracable
    }
 3. StrongFather recoit l'intention
 4. StrongFather verifie : l'override ne franchit pas une limite inviolable TAMR
-5. Si une limite serait franchisee → REFUS obligatoire
+5. Si une limite serait franchisee â†’ REFUS obligatoire
 6. Sinon, StrongFather evalue les politiques d'override pour user-admin
 7. StrongFather produit : autorise ou refuse
 ```
@@ -449,27 +449,27 @@ Toute decision StrongFather relative a une intention d'intervention est tracable
 
 | Invariant | Statut | Justification |
 |-----------|--------|---------------|
-| **INV-TAMR-1** | ✅ Conforme | Tracabilite : la trace est definie par TAMR, appliquee apres decision StrongFather |
-| **INV-TAMR-2** | ✅ Conforme | Responsabilite explicite : encadree par TAMR, acteur identifie dans l'intention |
-| **INV-TAMR-3** | ✅ Conforme | Limites inviolables : TAMR les definit, StrongFather les respecte |
-| **INV-TAMR-4** | ✅ Conforme | TAMR reste conceptuel, pas d'implementation dans ce contrat |
-| **INV-TAMR-5** | ✅ Conforme | TAMR ne prend aucune decision ; StrongFather decide |
-| **INV-TAMR-6** | ✅ Conforme | Pas de contournement : toute intervention passe par l'evaluation StrongFather |
-| **INV-TAMR-7** | ✅ Conforme | Cadre explicite (types, points, limites) |
-| **INV-TAMR-8** | ✅ Conforme | Tracabilite complete des decisions et interventions |
+| **INV-TAMR-1** | âœ… Conforme | Tracabilite : la trace est definie par TAMR, appliquee apres decision StrongFather |
+| **INV-TAMR-2** | âœ… Conforme | Responsabilite explicite : encadree par TAMR, acteur identifie dans l'intention |
+| **INV-TAMR-3** | âœ… Conforme | Limites inviolables : TAMR les definit, StrongFather les respecte |
+| **INV-TAMR-4** | âœ… Conforme | TAMR reste conceptuel, pas d'implementation dans ce contrat |
+| **INV-TAMR-5** | âœ… Conforme | TAMR ne prend aucune decision ; StrongFather decide |
+| **INV-TAMR-6** | âœ… Conforme | Pas de contournement : toute intervention passe par l'evaluation StrongFather |
+| **INV-TAMR-7** | âœ… Conforme | Cadre explicite (types, points, limites) |
+| **INV-TAMR-8** | âœ… Conforme | Tracabilite complete des decisions et interventions |
 
 ### 13.2 Respect des invariants StrongFather
 
 | Invariant | Statut | Justification |
 |-----------|--------|---------------|
-| **INV-SF-1** | ✅ Conforme | StrongFather n'execute aucune action |
-| **INV-SF-2** | ✅ Conforme | StrongFather n'accede a aucune donnee persistee (hors politiques) |
-| **INV-SF-3** | ✅ Conforme | StrongFather ne modifie pas le cadre TAMR |
-| **INV-SF-4** | ✅ Conforme | Aucune logique temporelle technique imposee par TAMR |
-| **INV-SF-5** | ✅ Conforme | Zero-trust respecte |
-| **INV-SF-6** | ✅ Conforme | Decisions non ambigues (autorise/refuse/ambigu/differe) |
-| **INV-SF-7** | ✅ Conforme | Politiques explicites |
-| **INV-SF-8** | ✅ Conforme | Tracabilite complete |
+| **INV-SF-1** | âœ… Conforme | StrongFather n'execute aucune action |
+| **INV-SF-2** | âœ… Conforme | StrongFather n'accede a aucune donnee persistee (hors politiques) |
+| **INV-SF-3** | âœ… Conforme | StrongFather ne modifie pas le cadre TAMR |
+| **INV-SF-4** | âœ… Conforme | Aucune logique temporelle technique imposee par TAMR |
+| **INV-SF-5** | âœ… Conforme | Zero-trust respecte |
+| **INV-SF-6** | âœ… Conforme | Decisions non ambigues (autorise/refuse/ambigu/differe) |
+| **INV-SF-7** | âœ… Conforme | Politiques explicites |
+| **INV-SF-8** | âœ… Conforme | Tracabilite complete |
 
 ---
 
@@ -483,7 +483,7 @@ Toute implementation de l'integration entre TAMR et StrongFather doit respecter 
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT — Normatif  
+**Statut :** CONTRAT â€” Normatif  
 **Dependances :**
 - TAMR - Documentation Fondatrice
 - TAMR - Intervention Types Contract
@@ -497,3 +497,4 @@ Toute implementation de l'integration entre TAMR et StrongFather doit respecter 
 - Miyukini Conceptual References - Lois Autonomie Systeme (LOI-1)
 - Miyukini Conceptual References - Integrity Degradation System
 - Miyukini Conceptual References - Security Levels
+

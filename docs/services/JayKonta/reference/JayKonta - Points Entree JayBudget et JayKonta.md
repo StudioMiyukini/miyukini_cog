@@ -1,132 +1,135 @@
-# JayKonta — Points d’entrée JayBudget et JayKonta
+﻿# JayKonta â€” Points dâ€™entrÃ©e JayBudget et JayKonta
 
 ## Contexte
 
-Le **service COG JayKonta** couvre la comptabilité multi-échelle (budget perso → budgets occasionnels → comptabilité d’entreprise). Pour des raisons de **positionnement marché**, deux **points d’entrée** distincts sont proposés sous des noms commerciaux différents : **JayBudget** (perso/individuel) et **JayKonta** (entreprise). Il s’agit du **même service COG** ; seuls le périmètre fonctionnel, les Mandats et les niveaux de sécurité diffèrent.
+Le **service COG JayKonta** couvre la comptabilitÃ© multi-Ã©chelle (budget perso â†’ budgets occasionnels â†’ comptabilitÃ© dâ€™entreprise). Pour des raisons de **positionnement marchÃ©**, deux **points dâ€™entrÃ©e** distincts sont proposÃ©s sous des noms commerciaux diffÃ©rents : **JayBudget** (perso/individuel) et **JayKonta** (entreprise). Il sâ€™agit du **mÃªme service COG** ; seuls le pÃ©rimÃ¨tre fonctionnel, les Mandats et les niveaux de sÃ©curitÃ© diffÃ¨rent.
 
-Ce document détaille la différenciation des points d’entrée, les périmètres fonctionnels et les règles de gouvernance associées.
+Ce document dÃ©taille la diffÃ©renciation des points dâ€™entrÃ©e, les pÃ©rimÃ¨tres fonctionnels et les rÃ¨gles de gouvernance associÃ©es.
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Périmètre** : Définition des points d’entrée JayBudget et JayKonta — périmètres, publics, données, résidence, Mandats.
-- **Hors périmètre** : Spécifications techniques des Opérateurs et Kits (référencés dans d’autres documents).
+- **PÃ©rimÃ¨tre** : DÃ©finition des points dâ€™entrÃ©e JayBudget et JayKonta â€” pÃ©rimÃ¨tres, publics, donnÃ©es, rÃ©sidence, Mandats.
+- **Hors pÃ©rimÃ¨tre** : SpÃ©cifications techniques des OpÃ©rateurs et Kits (rÃ©fÃ©rencÃ©s dans dâ€™autres documents).
 
 ### Cadre de travail (protocole documentation conceptuelle)
 
-Conformément au [Protocole d’écriture de la documentation conceptuelle](../../../protocols/Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md) : **documentation autorisée** — Document fondateur JayKonta, Niveaux sécurité et protection, Integration Services, Glossaire Miyukini, Politique de résidence. **Contraintes** : ne pas fusionner avec le Document fondateur ni avec les analyses des besoins Purse/Account ; ne pas anticiper les spécifications d’Opérateurs/Kits.
+ConformÃ©ment au [Protocole dâ€™Ã©criture de la documentation conceptuelle](..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md) : **documentation autorisÃ©e** â€” Document fondateur JayKonta, Niveaux sÃ©curitÃ© et protection, Integration Services, Glossaire Miyukini, Politique de rÃ©sidence. **Contraintes** : ne pas fusionner avec le Document fondateur ni avec les analyses des besoins Purse/Account ; ne pas anticiper les spÃ©cifications dâ€™OpÃ©rateurs/Kits.
 
 ---
 
-## 1. Un service COG, deux points d’entrée
+## 1. Un service COG, deux points dâ€™entrÃ©e
 
 ### 1.1 Principe
 
 | Aspect | Description |
 |--------|-------------|
-| **Service COG** | JayKonta (COG) : un seul service, une seule gouvernance (Cores), des Opérateurs et Kits communs. |
-| **Points d’entrée** | **JayBudget** et **JayKonta** : deux **marques / points d’entrée** qui exposent un sous-ensemble des capacités du service COG, avec des périmètres et des Mandats distincts. |
-| **Règle** | L’utilisateur (particulier ou professionnel) accède au service COG via **un** point d’entrée selon son contexte ; les données et les permissions sont gouvernées selon ce point d’entrée. |
+| **Service COG** | JayKonta (COG) : un seul service, une seule gouvernance (Cores), des OpÃ©rateurs et Kits communs. |
+| **Points dâ€™entrÃ©e** | **JayBudget** et **JayKonta** : deux **marques / points dâ€™entrÃ©e** qui exposent un sous-ensemble des capacitÃ©s du service COG, avec des pÃ©rimÃ¨tres et des Mandats distincts. |
+| **RÃ¨gle** | Lâ€™utilisateur (particulier ou professionnel) accÃ¨de au service COG via **un** point dâ€™entrÃ©e selon son contexte ; les donnÃ©es et les permissions sont gouvernÃ©es selon ce point dâ€™entrÃ©e. |
 
 ### 1.2 Tableau comparatif
 
-| Critère | JayBudget | JayKonta |
+| CritÃ¨re | JayBudget | JayKonta |
 |---------|----------------|------------------|
 | **Nom commercial** | JayBudget | JayKonta |
 | **Public** | Particuliers, foyers | Professionnels, associations, TPE/PME, organisateurs |
-| **Périmètre fonctionnel** | Budgets personnels, budgets occasionnels (vacances, Noël, projets courts) | Comptabilité d’entreprise, devis, facturation, rapports légaux |
-| **Données typiques** | Mouvements perso, catégories, objectifs, budgets par projet/occasion | Devis, factures, clients/fournisseurs, rapports, pièces comptables |
-| **Niveau de sécurité minimal** | 2 (Sensitive) | 2–3 (Sensitive à Critical) |
-| **Résidence** | COG de référence ou environnement utilisateur selon politique | Résidence centralisée recommandée ou obligatoire |
-| **Intégration** | Autonome ou articulé avec d’autres services (ex. agenda pour rappels) | Consommée par JayFestival, JayRDV, etc. pour facturation et budget |
-| **Conformité légale** | Pas d’exigence de facturation légale ni de comptabilité d’entreprise | Conformité facturation, TVA, rapports selon juridiction |
+| **PÃ©rimÃ¨tre fonctionnel** | Budgets personnels, budgets occasionnels (vacances, NoÃ«l, projets courts) | ComptabilitÃ© dâ€™entreprise, devis, facturation, rapports lÃ©gaux |
+| **DonnÃ©es typiques** | Mouvements perso, catÃ©gories, objectifs, budgets par projet/occasion | Devis, factures, clients/fournisseurs, rapports, piÃ¨ces comptables |
+| **Niveau de sÃ©curitÃ© minimal** | 2 (Sensitive) | 2â€“3 (Sensitive Ã  Critical) |
+| **RÃ©sidence** | COG de rÃ©fÃ©rence ou environnement utilisateur selon politique | RÃ©sidence centralisÃ©e recommandÃ©e ou obligatoire |
+| **IntÃ©gration** | Autonome ou articulÃ© avec dâ€™autres services (ex. agenda pour rappels) | ConsommÃ©e par JayFestival, JayRDV, etc. pour facturation et budget |
+| **ConformitÃ© lÃ©gale** | Pas dâ€™exigence de facturation lÃ©gale ni de comptabilitÃ© dâ€™entreprise | ConformitÃ© facturation, TVA, rapports selon juridiction |
 
 ---
 
-## 2. JayBudget (point d’entrée perso/individuel)
+## 2. JayBudget (point dâ€™entrÃ©e perso/individuel)
 
 ### 2.1 Proposition de valeur
 
-**JayBudget** permet à un **particulier** ou un **foyer** de :
+**JayBudget** permet Ã  un **particulier** ou un **foyer** de :
 
-- **Tenir un budget personnel** : revenus, dépenses, catégories, objectifs, alertes.
-- **Gérer des budgets occasionnels** : vacances, cadeaux de Noël, mariage, travaux, etc. — un budget dédié par projet ou occasion, avec suivi des dépenses et du solde.
-- **Consulter des rapports et tableaux de bord** : synthèses, évolution, export (PDF, CSV) pour usage personnel.
+- **Tenir un budget personnel** : revenus, dÃ©penses, catÃ©gories, objectifs, alertes.
+- **GÃ©rer des budgets occasionnels** : vacances, cadeaux de NoÃ«l, mariage, travaux, etc. â€” un budget dÃ©diÃ© par projet ou occasion, avec suivi des dÃ©penses et du solde.
+- **Consulter des rapports et tableaux de bord** : synthÃ¨ses, Ã©volution, export (PDF, CSV) pour usage personnel.
 
-Aucune exigence de facturation légale ni de comptabilité d’entreprise ; le périmètre reste **budget et suivi personnel**.
+Aucune exigence de facturation lÃ©gale ni de comptabilitÃ© dâ€™entreprise ; le pÃ©rimÃ¨tre reste **budget et suivi personnel**.
 
-### 2.2 Capacités exposées (sous-ensemble du service COG)
+### 2.2 CapacitÃ©s exposÃ©es (sous-ensemble du service COG)
 
-| Capacité | Description |
+| CapacitÃ© | Description |
 |----------|-------------|
-| **Mouvements** | Enregistrement des revenus et dépenses, catégories, date, libellé. |
-| **Budgets occasionnels** | Création d’un budget par projet/occasion (vacances, Noël, etc.), suivi des dépenses et du solde. |
-| **Objectifs** | Objectifs d’épargne ou de dépense par catégorie ou projet. |
-| **Rapports** | Synthèses, soldes, évolution, export (PDF, CSV) pour usage personnel. |
+| **Mouvements** | Enregistrement des revenus et dÃ©penses, catÃ©gories, date, libellÃ©. |
+| **Budgets occasionnels** | CrÃ©ation dâ€™un budget par projet/occasion (vacances, NoÃ«l, etc.), suivi des dÃ©penses et du solde. |
+| **Objectifs** | Objectifs dâ€™Ã©pargne ou de dÃ©pense par catÃ©gorie ou projet. |
+| **Rapports** | SynthÃ¨ses, soldes, Ã©volution, export (PDF, CSV) pour usage personnel. |
 
-Les capacités **devis** et **facturation légale** ne sont **pas** exposées dans le point d’entrée Purse (réservées à JayKonta).
+Les capacitÃ©s **devis** et **facturation lÃ©gale** ne sont **pas** exposÃ©es dans le point dâ€™entrÃ©e Purse (rÃ©servÃ©es Ã  JayKonta).
 
-### 2.3 Données et résidence
+### 2.3 DonnÃ©es et rÃ©sidence
 
-- **Niveau de sécurité** : au minimum 2 (Sensitive).
-- **Résidence** : selon politique — COG de référence ou environnement utilisateur avec synchronisation sécurisée ; la copie canonique peut résider sur le COG de référence pour garantir la disponibilité et la cohérence.
-- **Audit** : traçabilité des accès et des écritures (Mandat, Master Butler).
+- **Niveau de sÃ©curitÃ©** : au minimum 2 (Sensitive).
+- **RÃ©sidence** : selon politique â€” COG de rÃ©fÃ©rence ou environnement utilisateur avec synchronisation sÃ©curisÃ©e ; la copie canonique peut rÃ©sider sur le COG de rÃ©fÃ©rence pour garantir la disponibilitÃ© et la cohÃ©rence.
+- **Audit** : traÃ§abilitÃ© des accÃ¨s et des Ã©critures (Mandat, Master Butler).
 
 ---
 
-## 3. JayKonta (point d’entrée entreprise)
+## 3. JayKonta (point dâ€™entrÃ©e entreprise)
 
 ### 3.1 Proposition de valeur
 
-**JayKonta** (marque) permet à un **professionnel**, une **association** ou une **entreprise** de :
+**JayKonta** (marque) permet Ã  un **professionnel**, une **association** ou une **entreprise** de :
 
-- **Tenir une comptabilité** au sens large : grand livre, journal, ventilation par catégorie ou projet.
-- **Émettre des devis** : création, envoi, suivi des devis (clients, prestataires, exposants).
-- **Facturer** : émission de factures, relances, suivi des encaissements, conformité légale (TVA, numérotation, etc.).
-- **Produire des rapports** : tableaux de bord, rapports légaux, export (PDF, CSV) pour comptabilité et contrôle.
+- **Tenir une comptabilitÃ©** au sens large : grand livre, journal, ventilation par catÃ©gorie ou projet.
+- **Ã‰mettre des devis** : crÃ©ation, envoi, suivi des devis (clients, prestataires, exposants).
+- **Facturer** : Ã©mission de factures, relances, suivi des encaissements, conformitÃ© lÃ©gale (TVA, numÃ©rotation, etc.).
+- **Produire des rapports** : tableaux de bord, rapports lÃ©gaux, export (PDF, CSV) pour comptabilitÃ© et contrÃ´le.
 
-Ce point d’entrée est **consommé** par les services métier (JayFestival, JayRDV) pour la facturation des exposants, des professionnels, etc.
+Ce point dâ€™entrÃ©e est **consommÃ©** par les services mÃ©tier (JayFestival, JayRDV) pour la facturation des exposants, des professionnels, etc.
 
-### 3.2 Capacités exposées (sous-ensemble du service COG)
+### 3.2 CapacitÃ©s exposÃ©es (sous-ensemble du service COG)
 
-| Capacité | Description |
+| CapacitÃ© | Description |
 |----------|-------------|
-| **Mouvements** | Enregistrement des revenus et dépenses, ventilation par catégorie, projet, client/fournisseur. |
-| **Devis** | Création, envoi, suivi des devis (statut, conversion en facture). |
-| **Facturation** | Émission de factures, relances, suivi des encaissements, conformité (TVA, numérotation). |
-| **Rapports** | Synthèses, soldes, rapports légaux, export (PDF, CSV) pour comptabilité et contrôle. |
+| **Mouvements** | Enregistrement des revenus et dÃ©penses, ventilation par catÃ©gorie, projet, client/fournisseur. |
+| **Devis** | CrÃ©ation, envoi, suivi des devis (statut, conversion en facture). |
+| **Facturation** | Ã‰mission de factures, relances, suivi des encaissements, conformitÃ© (TVA, numÃ©rotation). |
+| **Rapports** | SynthÃ¨ses, soldes, rapports lÃ©gaux, export (PDF, CSV) pour comptabilitÃ© et contrÃ´le. |
 
-Les capacités **budgets occasionnels** (type Purse) peuvent être réutilisées en contexte entreprise (ex. budget par projet ou par édition) selon les besoins du service consommateur (ex. JayFestival).
+Les capacitÃ©s **budgets occasionnels** (type Purse) peuvent Ãªtre rÃ©utilisÃ©es en contexte entreprise (ex. budget par projet ou par Ã©dition) selon les besoins du service consommateur (ex. JayFestival).
 
-### 3.3 Données et résidence
+### 3.3 DonnÃ©es et rÃ©sidence
 
-- **Niveau de sécurité** : 2–3 (Sensitive à Critical) selon les données (factures, moyens de paiement, pièces comptables).
-- **Résidence** : résidence centralisée sur COG de référence **recommandée ou obligatoire** (voir [Politique de résidence](../../reference/Miyukini%20Conceptual%20References%20-%20Politique%20Residence%20Donnees%20Sensibles.md)) ; les données sensibles ne doivent pas avoir pour seule copie un terminal ou un COG tiers.
-- **Audit** : audit complet des lectures et écritures ; conformité PCI-DSS / réglementation pour les données de paiement.
+- **Niveau de sÃ©curitÃ©** : 2â€“3 (Sensitive Ã  Critical) selon les donnÃ©es (factures, moyens de paiement, piÃ¨ces comptables).
+- **RÃ©sidence** : rÃ©sidence centralisÃ©e sur COG de rÃ©fÃ©rence **recommandÃ©e ou obligatoire** (voir [Politique de rÃ©sidence](..//..//..//miyukini-webway-system//reference//_index.md)) ; les donnÃ©es sensibles ne doivent pas avoir pour seule copie un terminal ou un COG tiers.
+- **Audit** : audit complet des lectures et Ã©critures ; conformitÃ© PCI-DSS / rÃ©glementation pour les donnÃ©es de paiement.
 
 ---
 
-## 4. Règles de gouvernance communes
+## 4. RÃ¨gles de gouvernance communes
 
-| Règle | Description |
+| RÃ¨gle | Description |
 |-------|-------------|
-| **Un utilisateur, un contexte** | Un utilisateur accède au service COG via **un** point d’entrée (Purse ou Account) selon son contexte (particulier vs professionnel) ; les Mandats et les permissions sont émis en fonction de ce point d’entrée. |
-| **Pas de mélange non gouverné** | Les données Purse et Account sont séparées par contexte (identité, Mandat) ; un même utilisateur peut avoir un accès Purse (perso) et un accès Account (pro) sous des Mandats distincts, sans mélange des données sans gouvernance. |
-| **Cores communs** | StrongFather, KindMother, Master Butler, WorrySentinel gouvernent les deux points d’entrée ; les décisions (Mandats, résidence, niveaux de sécurité) sont cohérentes. |
+| **Un utilisateur, un contexte** | Un utilisateur accÃ¨de au service COG via **un** point dâ€™entrÃ©e (Purse ou Account) selon son contexte (particulier vs professionnel) ; les Mandats et les permissions sont Ã©mis en fonction de ce point dâ€™entrÃ©e. |
+| **Pas de mÃ©lange non gouvernÃ©** | Les donnÃ©es Purse et Account sont sÃ©parÃ©es par contexte (identitÃ©, Mandat) ; un mÃªme utilisateur peut avoir un accÃ¨s Purse (perso) et un accÃ¨s Account (pro) sous des Mandats distincts, sans mÃ©lange des donnÃ©es sans gouvernance. |
+| **Cores communs** | StrongFather, KindMother, Master Butler, WorrySentinel gouvernent les deux points dâ€™entrÃ©e ; les dÃ©cisions (Mandats, rÃ©sidence, niveaux de sÃ©curitÃ©) sont cohÃ©rentes. |
 
 ---
 
-## 5. Références
+## 5. RÃ©fÃ©rences
 
-| Document | Rôle |
+| Document | RÃ´le |
 |----------|------|
-| [JayKonta - Document Fondateur](../Miyukini%20Account%20-%20Document%20Fondateur.md) | Contexte, besoins, positionnement, sécurité synthétique. |
-| [JayKonta - Niveaux Securite et Protection Donnees](./Miyukini%20Account%20-%20Niveaux%20Securite%20et%20Protection%20Donnees.md) | Détail des niveaux et mesures de protection. |
-| [JayKonta - Integration Services](./Miyukini%20Account%20-%20Integration%20Services.md) | Intégration JayFestival, JayRDV, futurs services. |
-| [Miyukini Prompt Protocol — Écriture documentation conceptuelle](../../../protocols/Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md) | Protocole d’écriture de la documentation conceptuelle (cadre de travail, contraintes). |
+| [JayKonta - Document Fondateur](..//_index.md) | Contexte, besoins, positionnement, sÃ©curitÃ© synthÃ©tique. |
+| [JayKonta - Niveaux Securite et Protection Donnees](_index.md) | DÃ©tail des niveaux et mesures de protection. |
+| [JayKonta - Integration Services](_index.md) | IntÃ©gration JayFestival, JayRDV, futurs services. |
+| [Miyukini Prompt Protocol â€” Ã‰criture documentation conceptuelle](..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md) | Protocole dâ€™Ã©criture de la documentation conceptuelle (cadre de travail, contraintes). |
 
 ---
 
-**Document** : JayKonta — Points d’entrée Purse et Account  
+**Document** : JayKonta â€” Points dâ€™entrÃ©e Purse et Account  
 **Version** : 1.1  
 **Date** : 2026-01-31  
-**Statut** : Document de référence (points d’entrée). Enrichi selon [Protocole d’écriture documentation conceptuelle](../../../protocols/Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
+**Statut** : Document de rÃ©fÃ©rence (points dâ€™entrÃ©e). Enrichi selon [Protocole dâ€™Ã©criture documentation conceptuelle](..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
+
+
+

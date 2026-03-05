@@ -1,54 +1,54 @@
-# MiyuFeeds — Documentation Fondatrice
+﻿# MiyuFeeds â€” Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuFeeds** est le **kit d'outils (Toolkit)** de flux ATOM (board, forum, topic) de l'écosystème Miyukini. Il intègre les outils de génération de flux ATOM pour board, forum et topic, alignés sur [Équivalents Moteur Forum](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Moteur%20Forum.md).
+**MiyuFeeds** est le **kit d'outils (Toolkit)** de flux ATOM (board, forum, topic) de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils de gÃ©nÃ©ration de flux ATOM pour board, forum et topic, alignÃ©s sur [Ã‰quivalents Moteur Forum](..//..//miyukini-webway-system//reference//_index.md).
 
-Les données sous-jacentes (contenus board, forum, topic) appartiennent à **KindMother**. MiyuFeeds expose des capacités de **lecture** et de **génération de flux** ; les décisions (qui peut accéder à quel flux) relèvent de **StrongFather**.
+Les donnÃ©es sous-jacentes (contenus board, forum, topic) appartiennent Ã  **KindMother**. MiyuFeeds expose des capacitÃ©s de **lecture** et de **gÃ©nÃ©ration de flux** ; les dÃ©cisions (qui peut accÃ©der Ã  quel flux) relÃ¨vent de **StrongFather**.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-
----
-
-## 2. Portée / Scope
-
-**Ce document définit :** l'identité et la définition canonique de MiyuFeeds, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother.
-
-**Hors scope :** les abonnements (MiyuNotify) ; l'implémentation détaillée (format ATOM, cache).
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 3. Définition canonique
+## 2. PortÃ©e / Scope
 
-> **MiyuFeeds est une composition officielle d'outils de flux ATOM (board, forum, topic), déclarée et gouvernée par l'environnement.**
+**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de MiyuFeeds, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother.
 
-- MiyuFeeds **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
-- MiyuFeeds **n'ajoute aucune logique métier** : il orchestre des capacités atomiques de génération de flux ; contenu fourni dans le flux ; décision d'accès = StrongFather.
+**Hors scope :** les abonnements (MiyuNotify) ; l'implÃ©mentation dÃ©taillÃ©e (format ATOM, cache).
 
-**Règle fondamentale :** Les Tools **lisent** les données KindMother et **produisent** un flux ATOM ; pas d'écriture métier.
+---
+
+## 3. DÃ©finition canonique
+
+> **MiyuFeeds est une composition officielle d'outils de flux ATOM (board, forum, topic), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+
+- MiyuFeeds **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
+- MiyuFeeds **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques de gÃ©nÃ©ration de flux ; contenu fourni dans le flux ; dÃ©cision d'accÃ¨s = StrongFather.
+
+**RÃ¨gle fondamentale :** Les Tools **lisent** les donnÃ©es KindMother et **produisent** un flux ATOM ; pas d'Ã©criture mÃ©tier.
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.content.feeds` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `content` |
-| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le détail de chaque outil est décrit dans [MiyuFeeds - Reference Outils](./MiyuFeeds%20-%20Reference%20Outils.md).
+Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuFeeds - Reference Outils](./MiyuFeeds%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
-| `tool.feed.atom.board` | Génère un flux ATOM pour l'ensemble du board |
-| `tool.feed.atom.forum` | Génère un flux ATOM pour un forum donné |
-| `tool.feed.atom.topic` | Génère un flux ATOM pour un topic donné |
+| `tool.feed.atom.board` | GÃ©nÃ¨re un flux ATOM pour l'ensemble du board |
+| `tool.feed.atom.forum` | GÃ©nÃ¨re un flux ATOM pour un forum donnÃ© |
+| `tool.feed.atom.topic` | GÃ©nÃ¨re un flux ATOM pour un topic donnÃ© |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuFeeds en contient trois.
 
@@ -56,44 +56,46 @@ Le détail de chaque outil est décrit dans [MiyuFeeds - Reference Outils](./Miy
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : **décision d'accès au flux = StrongFather** ; lecture des données = KindMother ; pas d'écriture métier.
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : **dÃ©cision d'accÃ¨s au flux = StrongFather** ; lecture des donnÃ©es = KindMother ; pas d'Ã©criture mÃ©tier.
 
 ---
 
-## 7. Niveau de sécurité et états
+## 7. Niveau de sÃ©curitÃ© et Ã©tats
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
-| **Niveau de sécurité du kit** | **0 à 2** (flux public à restreint selon politique) |
-| **États autorisés** | `HEALTHY`, `DEGRADED` |
-| **États interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
+| **Niveau de sÃ©curitÃ© du kit** | **0 Ã  2** (flux public Ã  restreint selon politique) |
+| **Ã‰tats autorisÃ©s** | `HEALTHY`, `DEGRADED` |
+| **Ã‰tats interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autorité sur les données sources (board, forum, topic). Les Tools MiyuFeeds **lisent** ces données pour produire le flux ATOM ; ils n'écrivent pas.
+**KindMother** est l'autoritÃ© sur les donnÃ©es sources (board, forum, topic). Les Tools MiyuFeeds **lisent** ces donnÃ©es pour produire le flux ATOM ; ils n'Ã©crivent pas.
 
-Les obligations de conformité détaillées sont dans [MiyuFeeds - Tool Governance Compliance Contract](./contracts/governance/MiyuFeeds%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuFeeds - Tool Governance Compliance Contract](./contracts/governance/MiyuFeeds%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuFeeds sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). À l'implémentation, le code fournissant les Tools MiyuFeeds devra être balisé MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit généré selon le [Protocole MIP v1](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+La documentation et la future implÃ©mentation de MiyuFeeds sont conÃ§ues pour Ãªtre **compatibles MIP v1** (Miyukini Index Protocol). Ã€ l'implÃ©mentation, le code fournissant les Tools MiyuFeeds devra Ãªtre balisÃ© MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit gÃ©nÃ©rÃ© selon le [Protocole MIP v1](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
 ---
 
-## 10. Références croisées
+## 10. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Équivalents Moteur Forum | [Miyukini Conceptual References - Equivalents Moteur Forum](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Moteur%20Forum.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
+| Ã‰quivalents Moteur Forum | [Miyukini Conceptual References - Equivalents Moteur Forum](..//..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence fondateur
+**Statut :** Document de rÃ©fÃ©rence fondateur
+
+

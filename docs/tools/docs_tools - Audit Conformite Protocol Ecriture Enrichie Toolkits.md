@@ -1,50 +1,50 @@
-# docs/tools — Audit conformité au protocole Écriture enrichie Toolkits
+﻿# docs/tools â€” Audit conformitÃ© au protocole Ã‰criture enrichie Toolkits
 
 ## Contexte
 
-Vérification de la conformité des **Toolkits existants** sous `docs/tools/` au [Miyukini Protocol - Ecriture Enrichie Toolkits](../protocols/Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md).
+VÃ©rification de la conformitÃ© des **Toolkits existants** sous `docs/tools/` au [Miyukini Protocol - Ecriture Enrichie Toolkits](..//contrats//Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md).
 
 **Date de l'audit :** 2026-01-30  
-**Référence :** [Miyukini Protocol - Ecriture Enrichie Toolkits](../protocols/Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md)
+**RÃ©fÃ©rence :** [Miyukini Protocol - Ecriture Enrichie Toolkits](..//contrats//Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md)
 
 ---
 
-## 1. Critères de conformité (extraits du protocole)
+## 1. CritÃ¨res de conformitÃ© (extraits du protocole)
 
 ### 1.1 Livrables obligatoires
 
-| Critère | Exigence |
+| CritÃ¨re | Exigence |
 |---------|----------|
-| **Documentation Fondatrice** | Présente dans `<MiyuXXX>/<MiyuXXX> - Documentation Fondatrice.md` |
-| **Reference Outils** | Présente dans `<MiyuXXX>/<MiyuXXX> - Reference Outils.md` |
-| **Tool Governance Compliance Contract** | Présent dans `<MiyuXXX>/contracts/governance/<MiyuXXX> - Tool Governance Compliance Contract.md` |
+| **Documentation Fondatrice** | PrÃ©sente dans `<MiyuXXX>/<MiyuXXX> - Documentation Fondatrice.md` |
+| **Reference Outils** | PrÃ©sente dans `<MiyuXXX>/<MiyuXXX> - Reference Outils.md` |
+| **Tool Governance Compliance Contract** | PrÃ©sent dans `<MiyuXXX>/contracts/governance/<MiyuXXX> - Tool Governance Compliance Contract.md` |
 
-> **Protocole :** « Aucune publication officielle d'un Toolkit sans **au minimum** : Documentation Fondatrice, Reference Outils, Tool Governance Compliance Contract. »
+> **Protocole :** Â« Aucune publication officielle d'un Toolkit sans **au minimum** : Documentation Fondatrice, Reference Outils, Tool Governance Compliance Contract. Â»
 
 ### 1.2 Contenu Doc Fondatrice (section 5.1 et 6 du protocole)
 
-| Vérification | Critère |
+| VÃ©rification | CritÃ¨re |
 |--------------|---------|
-| **Terminologie** | Glossaire respecté (Outil, Kit d'Outils, WriteIntent, KindMother, etc.) |
+| **Terminologie** | Glossaire respectÃ© (Outil, Kit d'Outils, WriteIntent, KindMother, etc.) |
 | **ToolkitId** | Format `toolkit.<domain>.<name>` |
 | **Composition** | Au moins deux Tools par Toolkit (Toolkit Composition Contract) |
-| **Contrat Governance** | Présent et **référencé** depuis la Doc Fondatrice (phrase explicite « Les obligations de conformité détaillées sont dans [MiyuXXX - Tool Governance Compliance Contract](…). ») |
+| **Contrat Governance** | PrÃ©sent et **rÃ©fÃ©rencÃ©** depuis la Doc Fondatrice (phrase explicite Â« Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuXXX - Tool Governance Compliance Contract](_index.md). Â») |
 | **Alignement MIP** | Section ou phrase explicite avec lien vers MIP v1 |
-| **Numérotation** | Sections cohérentes (ex. § 9 Alignement MIP, § 10 Références) |
-| **Liens** | Liens relatifs valides (Doc Fondatrice → contrats, → référence) |
+| **NumÃ©rotation** | Sections cohÃ©rentes (ex. Â§ 9 Alignement MIP, Â§ 10 RÃ©fÃ©rences) |
+| **Liens** | Liens relatifs valides (Doc Fondatrice â†’ contrats, â†’ rÃ©fÃ©rence) |
 
 ---
 
-## 2. Synthèse exécutive
+## 2. SynthÃ¨se exÃ©cutive
 
-| Indicateur | Résultat |
+| Indicateur | RÃ©sultat |
 |------------|----------|
 | **Kits avec Doc Fondatrice** | 49 / 49 |
 | **Kits conformes au protocole (3 livrables obligatoires)** | **42** |
 | **Kits non conformes (manque Reference Outils et/ou Contrat)** | **7** |
 | **Doc Fondatrices avec Alignement MIP** | 49 / 49 |
 | **Doc Fondatrices avec ToolkitId `toolkit.<domain>.<name>`** | 49 / 49 |
-| **Doc Fondatrices avec § 9 et § 10** | 49 / 49 |
+| **Doc Fondatrices avec Â§ 9 et Â§ 10** | 49 / 49 |
 | **Kits avec contrat et lien explicite vers contrat dans Doc Fondatrice** | 42 / 42 |
 
 ---
@@ -53,7 +53,7 @@ Vérification de la conformité des **Toolkits existants** sous `docs/tools/` au
 
 Les kits suivants **ne respectent pas** le protocole car ils n'ont **ni Reference Outils ni Tool Governance Compliance Contract** (livrables obligatoires).
 
-| Kit | Doc Fondatrice | Reference Outils | Contrat Governance | Conformité |
+| Kit | Doc Fondatrice | Reference Outils | Contrat Governance | ConformitÃ© |
 |-----|----------------|------------------|--------------------|------------|
 | **MiyuCMS** | Oui | **Non** | **Non** | Non |
 | **MiyuMedia** | Oui | **Non** | **Non** | Non |
@@ -63,16 +63,16 @@ Les kits suivants **ne respectent pas** le protocole car ils n'ont **ni Referenc
 | **MiyuBooking** | Oui | **Non** | **Non** | Non |
 | **MiyuBilling** | Oui | **Non** | **Non** | Non |
 
-**Action requise pour conformité :** Pour chaque kit ci‑dessus, créer :
-1. `<MiyuXXX> - Reference Outils.md` (liste des ToolIds avec action, niveau sécurité, note).
-2. `contracts/governance/<MiyuXXX> - Tool Governance Compliance Contract.md` (référence au [Master Butler - Tool Governance Compliance Template](../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md) + obligations spécifiques).
-3. Dans la Doc Fondatrice : ajouter la phrase « Les obligations de conformité détaillées sont dans [MiyuXXX - Tool Governance Compliance Contract](./contracts/governance/…). » (dans la section Relation avec KindMother ou équivalent).
+**Action requise pour conformitÃ© :** Pour chaque kit ciâ€‘dessus, crÃ©er :
+1. `<MiyuXXX> - Reference Outils.md` (liste des ToolIds avec action, niveau sÃ©curitÃ©, note).
+2. `contracts/governance/<MiyuXXX> - Tool Governance Compliance Contract.md` (rÃ©fÃ©rence au [Master Butler - Tool Governance Compliance Template](..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md) + obligations spÃ©cifiques).
+3. Dans la Doc Fondatrice : ajouter la phrase Â« Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuXXX - Tool Governance Compliance Contract](_index.md). Â» (dans la section Relation avec KindMother ou Ã©quivalent).
 
 ---
 
-## 4. Tableau de conformité détaillé (49 kits)
+## 4. Tableau de conformitÃ© dÃ©taillÃ© (49 kits)
 
-| Kit | Doc Fondatrice | Reference Outils | Contrat Governance | Lien contrat (Doc) | Alignement MIP | ToolkitId | §9 / §10 |
+| Kit | Doc Fondatrice | Reference Outils | Contrat Governance | Lien contrat (Doc) | Alignement MIP | ToolkitId | Â§9 / Â§10 |
 |-----|----------------|------------------|--------------------|--------------------|----------------|-----------|----------|
 | MiyuAntiSpam | Oui | Oui | Oui | Oui | Oui | Oui | Oui |
 | MiyuAuth | Oui | Oui | Oui | Oui | Oui | Oui | Oui |
@@ -130,43 +130,45 @@ Les kits suivants **ne respectent pas** le protocole car ils n'ont **ni Referenc
 
 Pour les **42 kits conformes** :
 
-- Les **trois livrables obligatoires** sont présents (Doc Fondatrice, Reference Outils, Tool Governance Compliance Contract).
-- La Doc Fondatrice contient une **phrase explicite** renvoyant au contrat de conformité.
-- **Alignement MIP** : section ou référence MIP v1 présente dans toutes les Doc Fondatrices (49/49).
-- **ToolkitId** : format `toolkit.<domain>.<name>` respecté dans toutes les Doc Fondatrices (49/49).
-- **Numérotation** : section § 9 (Alignement MIP) et § 10 (Références croisées) présentes et cohérentes (49/49).
+- Les **trois livrables obligatoires** sont prÃ©sents (Doc Fondatrice, Reference Outils, Tool Governance Compliance Contract).
+- La Doc Fondatrice contient une **phrase explicite** renvoyant au contrat de conformitÃ©.
+- **Alignement MIP** : section ou rÃ©fÃ©rence MIP v1 prÃ©sente dans toutes les Doc Fondatrices (49/49).
+- **ToolkitId** : format `toolkit.<domain>.<name>` respectÃ© dans toutes les Doc Fondatrices (49/49).
+- **NumÃ©rotation** : section Â§ 9 (Alignement MIP) et Â§ 10 (RÃ©fÃ©rences croisÃ©es) prÃ©sentes et cohÃ©rentes (49/49).
 
 ---
 
 ## 6. Recommandations
 
-### Priorité haute
+### PrioritÃ© haute
 
-1. **Compléter les 7 kits non conformes** (MiyuCMS, MiyuMedia, MiyuWidgets, MiyuStore, MiyuShipping, MiyuBooking, MiyuBilling) en créant Reference Outils et Tool Governance Compliance Contract, et en ajoutant le lien vers le contrat dans la Doc Fondatrice (voir [Template - Ecriture Enrichie Toolkits](../protocols/Template%20-%20Ecriture%20Enrichie%20Toolkits.md)).
+1. **ComplÃ©ter les 7 kits non conformes** (MiyuCMS, MiyuMedia, MiyuWidgets, MiyuStore, MiyuShipping, MiyuBooking, MiyuBilling) en crÃ©ant Reference Outils et Tool Governance Compliance Contract, et en ajoutant le lien vers le contrat dans la Doc Fondatrice (voir [Template - Ecriture Enrichie Toolkits](..//contrats//Template%20-%20Ecriture%20Enrichie%20Toolkits.md)).
 
-### Priorité moyenne
+### PrioritÃ© moyenne
 
-2. **Section Dépendances et relations** : Le protocole et le template prévoient une section dédiée « Dépendances et relations » dans la Doc Fondatrice (Cores, Kernel, autres Toolkits). Les kits existants n’ont pas systématiquement cette section ; l’ajouter progressivement améliore la traçabilité.
-3. **Reference Implementation Guidelines** : Recommandé pour tout kit prioritaire ; actuellement 9 kits en disposent. Étendre selon priorité métier.
+2. **Section DÃ©pendances et relations** : Le protocole et le template prÃ©voient une section dÃ©diÃ©e Â« DÃ©pendances et relations Â» dans la Doc Fondatrice (Cores, Kernel, autres Toolkits). Les kits existants nâ€™ont pas systÃ©matiquement cette section ; lâ€™ajouter progressivement amÃ©liore la traÃ§abilitÃ©.
+3. **Reference Implementation Guidelines** : RecommandÃ© pour tout kit prioritaire ; actuellement 9 kits en disposent. Ã‰tendre selon prioritÃ© mÃ©tier.
 
-### Priorité basse
+### PrioritÃ© basse
 
-4. **Liens MIP** : Vérifier que tous les liens vers le protocole MIP v1 pointent vers le chemin canonique `../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md` (ou équivalent depuis docs/tools).
+4. **Liens MIP** : VÃ©rifier que tous les liens vers le protocole MIP v1 pointent vers le chemin canonique `../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md` (ou Ã©quivalent depuis docs/tools).
 
 ---
 
-## 7. Références
+## 7. RÃ©fÃ©rences
 
 | Document | Lien |
 |----------|------|
-| Protocole Ecriture Enrichie Toolkits | [Miyukini Protocol - Ecriture Enrichie Toolkits](../protocols/Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md) |
-| Template Ecriture Enrichie Toolkits | [Template - Ecriture Enrichie Toolkits](../protocols/Template%20-%20Ecriture%20Enrichie%20Toolkits.md) |
-| Master Butler - Tool Governance Compliance Template | [Master Butler - Tool Governance Compliance Template](../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md) |
-| docs/tools - Audit Qualité Conformité Sécurité | [docs_tools - Audit Qualite Conformite Securite Implementation](./docs_tools%20-%20Audit%20Qualite%20Conformite%20Securite%20Implementation.md) |
+| Protocole Ecriture Enrichie Toolkits | [Miyukini Protocol - Ecriture Enrichie Toolkits](..//contrats//Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md) |
+| Template Ecriture Enrichie Toolkits | [Template - Ecriture Enrichie Toolkits](..//contrats//Template%20-%20Ecriture%20Enrichie%20Toolkits.md) |
+| Master Butler - Tool Governance Compliance Template | [Master Butler - Tool Governance Compliance Template](..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md) |
+| docs/tools - Audit QualitÃ© ConformitÃ© SÃ©curitÃ© | [docs_tools - Audit Qualite Conformite Securite Implementation](./docs_tools%20-%20Audit%20Qualite%20Conformite%20Securite%20Implementation.md) |
 | Index docs/tools | [docs/tools/_index.md](./_index.md) |
 
 ---
 
 **Date du rapport :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Audit conformité — Protocole Écriture enrichie Toolkits
+**Statut :** Audit conformitÃ© â€” Protocole Ã‰criture enrichie Toolkits
+
+

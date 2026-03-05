@@ -1,44 +1,44 @@
-# StrongFather — Implementation Prohibitions
+﻿# StrongFather â€” Implementation Prohibitions
 
 ## Statut du document
 
 **POST-FONDATION / NON NORMATIF / INFORMATIF**
 
-Ce document présente les patterns **strictement interdits** pour StrongFather. Il complète le document [Implementation Overview](./StrongFather%20-%20Implementation%20Overview.md).
+Ce document prÃ©sente les patterns **strictement interdits** pour StrongFather. Il complÃ¨te le document [Implementation Overview](./StrongFather%20-%20Implementation%20Overview.md).
 
 **Documents connexes :**
 - [StrongFather - Implementation Overview](./StrongFather%20-%20Implementation%20Overview.md)
 - [StrongFather - Implementation Patterns](./StrongFather%20-%20Implementation%20Patterns.md)
 
-**Terminologie :** Voir [Miyukini Conceptual References - Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie :** Voir [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 ## 1. Patterns strictement interdits
 
-### 1.1. Cache décisionnel (INTERD-PERS-3, INV-EXEC-3)
+### 1.1. Cache dÃ©cisionnel (INTERD-PERS-3, INV-EXEC-3)
 
 **Violation contractuelle :**
 
-Un cache décisionnel viole INTERD-PERS-3 (écriture en cache) et INV-EXEC-3 (aucune persistance).
+Un cache dÃ©cisionnel viole INTERD-PERS-3 (Ã©criture en cache) et INV-EXEC-3 (aucune persistance).
 
-**Exemple d'implémentation invalide :**
+**Exemple d'implÃ©mentation invalide :**
 
 ```rust
-// ❌ INCORRECT : Cache décisionnel
+// âŒ INCORRECT : Cache dÃ©cisionnel
 pub struct StrongFather {
-    decision_cache: HashMap<String, Decision>, // ❌ Cache = persistance interdite
+    decision_cache: HashMap<String, Decision>, // âŒ Cache = persistance interdite
 }
 
 impl StrongFather {
     pub fn evaluate_intent(&mut self, intent: &Intent) -> Decision {
-        // ❌ Vérification de cache = persistance opérationnelle
+        // âŒ VÃ©rification de cache = persistance opÃ©rationnelle
         if let Some(cached) = self.decision_cache.get(&intent.intent_id) {
-            return cached.clone(); // ❌ Réutilisation de décision = effet de bord
+            return cached.clone(); // âŒ RÃ©utilisation de dÃ©cision = effet de bord
         }
         
         let decision = self.evaluate(intent);
-        self.decision_cache.insert(intent.intent_id.clone(), decision.clone()); // ❌ Écriture en cache
+        self.decision_cache.insert(intent.intent_id.clone(), decision.clone()); // âŒ Ã‰criture en cache
         decision
     }
 }
@@ -46,13 +46,13 @@ impl StrongFather {
 
 **Pourquoi c'est interdit :**
 
-- **Persistance opérationnelle :** Un cache est une forme de persistance qui affecte le comportement (INTERD-PERS-3).
+- **Persistance opÃ©rationnelle :** Un cache est une forme de persistance qui affecte le comportement (INTERD-PERS-3).
 
-- **Effet de bord :** Le cache modifie l'état entre les évaluations (INV-EXEC-2, INV-EXEC-3).
+- **Effet de bord :** Le cache modifie l'Ã©tat entre les Ã©valuations (INV-EXEC-2, INV-EXEC-3).
 
-- **Non-déterminisme :** Un cache peut produire des résultats différents selon l'historique (INV-POL-3).
+- **Non-dÃ©terminisme :** Un cache peut produire des rÃ©sultats diffÃ©rents selon l'historique (INV-POL-3).
 
-**Référence contrat :** Execution Prohibition Contract (INTERD-PERS-3), Invariants & Guarantees (INV-EXEC-2, INV-EXEC-3, INV-POL-3)
+**RÃ©fÃ©rence contrat :** Execution Prohibition Contract (INTERD-PERS-3), Invariants & Guarantees (INV-EXEC-2, INV-EXEC-3, INV-POL-3)
 
 ---
 
@@ -60,71 +60,71 @@ impl StrongFather {
 
 **Violation contractuelle :**
 
-L'ordonnancement viole INTERD-TIME-1, la planification viole INTERD-TIME-2, et une décision DIFFÉRÉE ne doit pas impliquer de planification (INV-DIFF-NOPLAN).
+L'ordonnancement viole INTERD-TIME-1, la planification viole INTERD-TIME-2, et une dÃ©cision DIFFÃ‰RÃ‰E ne doit pas impliquer de planification (INV-DIFF-NOPLAN).
 
-**Exemple d'implémentation invalide :**
+**Exemple d'implÃ©mentation invalide :**
 
 ```rust
-// ❌ INCORRECT : Ordonnancement
+// âŒ INCORRECT : Ordonnancement
 impl StrongFather {
     pub fn evaluate_intent(&self, intent: &Intent) -> Decision {
-        let now = self.clock.now(); // ❌ KERN-INTERD-1 : Clock pour logique décisionnelle
+        let now = self.clock.now(); // âŒ KERN-INTERD-1 : Clock pour logique dÃ©cisionnelle
         
-        // ❌ INTERD-TIME-1 : Ordonnancement
+        // âŒ INTERD-TIME-1 : Ordonnancement
         if now.hour() < 9 {
-            return Decision::deferred("Trop tôt, réessayer à 9h");
+            return Decision::deferred("Trop tÃ´t, rÃ©essayer Ã  9h");
         }
         
-        // ❌ INTERD-TIME-2 : Planification
+        // âŒ INTERD-TIME-2 : Planification
         if intent.requires_future_context {
-            self.schedule_revaluation(intent, now + Duration::hours(1)); // ❌ Planification interdite
+            self.schedule_revaluation(intent, now + Duration::hours(1)); // âŒ Planification interdite
             return Decision::deferred("Contexte futur requis");
         }
     }
     
-    // ❌ INCORRECT : Planification pour décision différée
+    // âŒ INCORRECT : Planification pour dÃ©cision diffÃ©rÃ©e
     fn schedule_revaluation(&self, intent: &Intent, when: DateTime) {
-        // ❌ INV-DIFF-NOPLAN : Pas de planification
-        self.scheduler.schedule(intent, when); // ❌ Ordonnancement interdit
+        // âŒ INV-DIFF-NOPLAN : Pas de planification
+        self.scheduler.schedule(intent, when); // âŒ Ordonnancement interdit
     }
 }
 ```
 
 **Pourquoi c'est interdit :**
 
-- **Logique temporelle technique :** L'ordonnancement utilise le temps technique pour influencer les décisions (INTERD-TIME-1, KERN-INTERD-1).
+- **Logique temporelle technique :** L'ordonnancement utilise le temps technique pour influencer les dÃ©cisions (INTERD-TIME-1, KERN-INTERD-1).
 
-- **Planification interdite :** StrongFather ne planifie jamais d'exécutions futures (INTERD-TIME-2, INV-DIFF-NOPLAN).
+- **Planification interdite :** StrongFather ne planifie jamais d'exÃ©cutions futures (INTERD-TIME-2, INV-DIFF-NOPLAN).
 
-- **Responsabilité adaptateur :** Seul l'adaptateur décide quand re-soumettre une intention différée (INV-DIFF-NOPLAN).
+- **ResponsabilitÃ© adaptateur :** Seul l'adaptateur dÃ©cide quand re-soumettre une intention diffÃ©rÃ©e (INV-DIFF-NOPLAN).
 
-**Référence contrat :** Execution Prohibition Contract (INTERD-TIME-1, INTERD-TIME-2), Boundary & Isolation Contract (KERN-INTERD-1), Invariants & Guarantees (INV-DIFF-NOPLAN)
+**RÃ©fÃ©rence contrat :** Execution Prohibition Contract (INTERD-TIME-1, INTERD-TIME-2), Boundary & Isolation Contract (KERN-INTERD-1), Invariants & Guarantees (INV-DIFF-NOPLAN)
 
 ---
 
-### 1.3. Appel à KindMother (INTERD-KM-1, INTERD-KM-2, INTERD-KM-3)
+### 1.3. Appel Ã  KindMother (INTERD-KM-1, INTERD-KM-2, INTERD-KM-3)
 
 **Violation contractuelle :**
 
-Tout appel à KindMother viole INTERD-KM-1, INTERD-KM-2, INTERD-KM-3.
+Tout appel Ã  KindMother viole INTERD-KM-1, INTERD-KM-2, INTERD-KM-3.
 
-**Exemple d'implémentation invalide :**
+**Exemple d'implÃ©mentation invalide :**
 
 ```rust
-// ❌ INCORRECT : Appel à KindMother
+// âŒ INCORRECT : Appel Ã  KindMother
 impl StrongFather {
     pub fn evaluate_intent(&self, intent: &Intent) -> Decision {
-        // ❌ INTERD-KM-2 : Lecture de données gérées par KindMother
+        // âŒ INTERD-KM-2 : Lecture de donnÃ©es gÃ©rÃ©es par KindMother
         let existing_entity = self.kindmother.read_entity(&intent.subject)?;
         
-        // ❌ INTERD-KM-1 : Appel à KindMother
+        // âŒ INTERD-KM-1 : Appel Ã  KindMother
         if existing_entity.is_some() {
-            return Decision::refused("Entité existe déjà");
+            return Decision::refused("EntitÃ© existe dÃ©jÃ ");
         }
         
-        // ❌ INTERD-KM-3 : Demande de persistance
+        // âŒ INTERD-KM-3 : Demande de persistance
         if intent.action_type == ActionType::Creation {
-            self.kindmother.persist(intent)?; // ❌ Persistance interdite
+            self.kindmother.persist(intent)?; // âŒ Persistance interdite
         }
     }
 }
@@ -132,38 +132,38 @@ impl StrongFather {
 
 **Pourquoi c'est interdit :**
 
-- **Indépendance absolue :** StrongFather et KindMother sont totalement indépendants (INTERD-KM-4).
+- **IndÃ©pendance absolue :** StrongFather et KindMother sont totalement indÃ©pendants (INTERD-KM-4).
 
-- **Séparation des responsabilités :** StrongFather décide, KindMother persiste. Aucune communication directe (Boundary & Isolation Contract section 4.1).
+- **SÃ©paration des responsabilitÃ©s :** StrongFather dÃ©cide, KindMother persiste. Aucune communication directe (Boundary & Isolation Contract section 4.1).
 
-- **Isolation garantie :** L'isolation garantit la pureté fonctionnelle de StrongFather (INV-BOUND-5).
+- **Isolation garantie :** L'isolation garantit la puretÃ© fonctionnelle de StrongFather (INV-BOUND-5).
 
-**Référence contrat :** Boundary & Isolation Contract (section 4.1, INTERD-KM-*), Invariants & Guarantees (INV-BOUND-2, INV-BOUND-5)
+**RÃ©fÃ©rence contrat :** Boundary & Isolation Contract (section 4.1, INTERD-KM-*), Invariants & Guarantees (INV-BOUND-2, INV-BOUND-5)
 
 ---
 
-### 1.4. Logique métier spécifique (Execution Prohibition Contract)
+### 1.4. Logique mÃ©tier spÃ©cifique (Execution Prohibition Contract)
 
 **Violation contractuelle :**
 
-La logique métier spécifique viole l'interdiction d'exécution et la séparation des responsabilités.
+La logique mÃ©tier spÃ©cifique viole l'interdiction d'exÃ©cution et la sÃ©paration des responsabilitÃ©s.
 
-**Exemple d'implémentation invalide :**
+**Exemple d'implÃ©mentation invalide :**
 
 ```rust
-// ❌ INCORRECT : Logique métier spécifique
+// âŒ INCORRECT : Logique mÃ©tier spÃ©cifique
 impl PolicyEngine {
     pub fn evaluate_permission(&self, policy: &Policy, intent: &Intent) -> PolicyResult {
-        // ❌ Logique métier spécifique (exemple : e-commerce)
+        // âŒ Logique mÃ©tier spÃ©cifique (exemple : e-commerce)
         if intent.subject.starts_with("order_") {
-            let order = self.parse_order(&intent.data)?; // ❌ Parsing métier
+            let order = self.parse_order(&intent.data)?; // âŒ Parsing mÃ©tier
             if order.total > 1000.0 {
-                return PolicyResult::denied("Montant trop élevé"); // ❌ Règle métier
+                return PolicyResult::denied("Montant trop Ã©levÃ©"); // âŒ RÃ¨gle mÃ©tier
             }
         }
         
-        // ❌ Validation technique
-        if !self.validate_email(&intent.data.email) { // ❌ Validation technique interdite
+        // âŒ Validation technique
+        if !self.validate_email(&intent.data.email) { // âŒ Validation technique interdite
             return PolicyResult::denied("Email invalide");
         }
     }
@@ -172,38 +172,38 @@ impl PolicyEngine {
 
 **Pourquoi c'est interdit :**
 
-- **Séparation des responsabilités :** StrongFather évalue selon des politiques générales, pas des règles métier spécifiques (Execution Prohibition Contract section 3.5).
+- **SÃ©paration des responsabilitÃ©s :** StrongFather Ã©value selon des politiques gÃ©nÃ©rales, pas des rÃ¨gles mÃ©tier spÃ©cifiques (Execution Prohibition Contract section 3.5).
 
-- **Réutilisabilité :** Les politiques doivent être générales et réutilisables (Policy Engine Contract section 2.3).
+- **RÃ©utilisabilitÃ© :** Les politiques doivent Ãªtre gÃ©nÃ©rales et rÃ©utilisables (Policy Engine Contract section 2.3).
 
-- **Pas de validation technique :** StrongFather ne valide jamais la structure technique des données (Core Decision Contract section 2.3).
+- **Pas de validation technique :** StrongFather ne valide jamais la structure technique des donnÃ©es (Core Decision Contract section 2.3).
 
-**Référence contrat :** Execution Prohibition Contract (section 3.5), Policy Engine Contract (section 2.3), Core Decision Contract (section 2.3)
+**RÃ©fÃ©rence contrat :** Execution Prohibition Contract (section 3.5), Policy Engine Contract (section 2.3), Core Decision Contract (section 2.3)
 
 ---
 
-### 1.5. Mutation d'état système (INTERD-STATE-*, INV-EXEC-2)
+### 1.5. Mutation d'Ã©tat systÃ¨me (INTERD-STATE-*, INV-EXEC-2)
 
 **Violation contractuelle :**
 
-Toute mutation d'état système viole INTERD-STATE-* et INV-EXEC-2.
+Toute mutation d'Ã©tat systÃ¨me viole INTERD-STATE-* et INV-EXEC-2.
 
-**Exemple d'implémentation invalide :**
+**Exemple d'implÃ©mentation invalide :**
 
 ```rust
-// ❌ INCORRECT : Mutation d'état
+// âŒ INCORRECT : Mutation d'Ã©tat
 pub struct StrongFather {
-    evaluation_count: usize,        // ❌ État système
-    last_evaluated_intent: Option<Intent>, // ❌ État système
-    user_preferences: HashMap<String, String>, // ❌ État utilisateur
+    evaluation_count: usize,        // âŒ Ã‰tat systÃ¨me
+    last_evaluated_intent: Option<Intent>, // âŒ Ã‰tat systÃ¨me
+    user_preferences: HashMap<String, String>, // âŒ Ã‰tat utilisateur
 }
 
 impl StrongFather {
     pub fn evaluate_intent(&mut self, intent: &Intent) -> Decision {
-        self.evaluation_count += 1; // ❌ INTERD-STATE-1 : État système
-        self.last_evaluated_intent = Some(intent.clone()); // ❌ INTERD-STATE-1
+        self.evaluation_count += 1; // âŒ INTERD-STATE-1 : Ã‰tat systÃ¨me
+        self.last_evaluated_intent = Some(intent.clone()); // âŒ INTERD-STATE-1
         
-        // ❌ INTERD-STATE-2 : État utilisateur
+        // âŒ INTERD-STATE-2 : Ã‰tat utilisateur
         self.user_preferences.insert("last_action".to_string(), intent.action_type.to_string());
         
         self.evaluate(intent)
@@ -213,66 +213,66 @@ impl StrongFather {
 
 **Pourquoi c'est interdit :**
 
-- **Pureté fonctionnelle :** StrongFather ne modifie jamais d'état (INV-EXEC-2, INV-BEHAV-1).
+- **PuretÃ© fonctionnelle :** StrongFather ne modifie jamais d'Ã©tat (INV-EXEC-2, INV-BEHAV-1).
 
-- **Isolation :** L'isolation garantit qu'aucun état externe n'est modifié (INV-BOUND-5).
+- **Isolation :** L'isolation garantit qu'aucun Ã©tat externe n'est modifiÃ© (INV-BOUND-5).
 
-- **Réversibilité :** Les évaluations doivent être réversibles conceptuellement (G-EXEC-3).
+- **RÃ©versibilitÃ© :** Les Ã©valuations doivent Ãªtre rÃ©versibles conceptuellement (G-EXEC-3).
 
-**Référence contrat :** Execution Prohibition Contract (INTERD-STATE-*, INV-EXEC-2), Invariants & Guarantees (INV-BEHAV-1, INV-BOUND-5)
+**RÃ©fÃ©rence contrat :** Execution Prohibition Contract (INTERD-STATE-*, INV-EXEC-2), Invariants & Guarantees (INV-BEHAV-1, INV-BOUND-5)
 
 ---
 
-## 2. Implémentations INVALIDES (exemples complets)
+## 2. ImplÃ©mentations INVALIDES (exemples complets)
 
 ### 2.1. StrongFather avec cache
 
 ```rust
-// ❌ IMPLÉMENTATION INVALIDE : Cache décisionnel
+// âŒ IMPLÃ‰MENTATION INVALIDE : Cache dÃ©cisionnel
 pub struct StrongFather {
-    cache: HashMap<String, Decision>, // ❌ INTERD-PERS-3, INV-EXEC-3
+    cache: HashMap<String, Decision>, // âŒ INTERD-PERS-3, INV-EXEC-3
 }
 
 impl StrongFather {
     pub fn evaluate_intent(&mut self, intent: &Intent) -> Decision {
         if let Some(cached) = self.cache.get(&intent.intent_id) {
-            return cached.clone(); // ❌ Réutilisation = effet de bord
+            return cached.clone(); // âŒ RÃ©utilisation = effet de bord
         }
         let decision = self.evaluate(intent);
-        self.cache.insert(intent.intent_id.clone(), decision.clone()); // ❌ Écriture en cache
+        self.cache.insert(intent.intent_id.clone(), decision.clone()); // âŒ Ã‰criture en cache
         decision
     }
 }
 ```
 
 **Violations :**
-- INTERD-PERS-3 : Écriture en cache
+- INTERD-PERS-3 : Ã‰criture en cache
 - INV-EXEC-3 : Aucune persistance
-- INV-EXEC-2 : Modification d'état
-- INV-POL-3 : Non-déterminisme potentiel
+- INV-EXEC-2 : Modification d'Ã©tat
+- INV-POL-3 : Non-dÃ©terminisme potentiel
 
 ---
 
-### 2.2. StrongFather avec appel à KindMother
+### 2.2. StrongFather avec appel Ã  KindMother
 
 ```rust
-// ❌ IMPLÉMENTATION INVALIDE : Appel à KindMother
+// âŒ IMPLÃ‰MENTATION INVALIDE : Appel Ã  KindMother
 pub struct StrongFather {
-    kindmother: KindMotherClient, // ❌ INTERD-KM-1, INTERD-KM-4
+    kindmother: KindMotherClient, // âŒ INTERD-KM-1, INTERD-KM-4
 }
 
 impl StrongFather {
     pub fn evaluate_intent(&self, intent: &Intent) -> Decision {
-        // ❌ INTERD-KM-2 : Lecture de données gérées par KindMother
+        // âŒ INTERD-KM-2 : Lecture de donnÃ©es gÃ©rÃ©es par KindMother
         let existing = self.kindmother.read_entity(&intent.subject)?;
         
         if existing.is_some() {
-            return Decision::refused("Existe déjà"); // ❌ Dépendance à KindMother
+            return Decision::refused("Existe dÃ©jÃ "); // âŒ DÃ©pendance Ã  KindMother
         }
         
-        // ❌ INTERD-KM-3 : Demande de persistance
+        // âŒ INTERD-KM-3 : Demande de persistance
         if intent.action_type == ActionType::Creation {
-            self.kindmother.persist(intent)?; // ❌ Persistance interdite
+            self.kindmother.persist(intent)?; // âŒ Persistance interdite
         }
         
         Decision::accepted()
@@ -281,35 +281,35 @@ impl StrongFather {
 ```
 
 **Violations :**
-- INTERD-KM-1 : Appel à KindMother
-- INTERD-KM-2 : Lecture de données KindMother
+- INTERD-KM-1 : Appel Ã  KindMother
+- INTERD-KM-2 : Lecture de donnÃ©es KindMother
 - INTERD-KM-3 : Demande de persistance
 - INTERD-KM-4 : Connaissance de KindMother
-- INV-BOUND-2 : Indépendance KindMother
+- INV-BOUND-2 : IndÃ©pendance KindMother
 
 ---
 
 ### 2.3. StrongFather avec ordonnancement
 
 ```rust
-// ❌ IMPLÉMENTATION INVALIDE : Ordonnancement
+// âŒ IMPLÃ‰MENTATION INVALIDE : Ordonnancement
 pub struct StrongFather {
-    scheduler: Scheduler, // ❌ INTERD-TIME-1, INTERD-TIME-2
+    scheduler: Scheduler, // âŒ INTERD-TIME-1, INTERD-TIME-2
     clock: Clock,
 }
 
 impl StrongFather {
     pub fn evaluate_intent(&self, intent: &Intent) -> Decision {
-        let now = self.clock.now(); // ❌ KERN-INTERD-1 : Clock pour logique décisionnelle
+        let now = self.clock.now(); // âŒ KERN-INTERD-1 : Clock pour logique dÃ©cisionnelle
         
-        // ❌ INTERD-TIME-1 : Ordonnancement
+        // âŒ INTERD-TIME-1 : Ordonnancement
         if now.hour() < 9 {
-            return Decision::deferred("Trop tôt");
+            return Decision::deferred("Trop tÃ´t");
         }
         
-        // ❌ INTERD-TIME-2 : Planification
+        // âŒ INTERD-TIME-2 : Planification
         if intent.requires_future_context {
-            self.scheduler.schedule(intent, now + Duration::hours(1)); // ❌ Planification
+            self.scheduler.schedule(intent, now + Duration::hours(1)); // âŒ Planification
             return Decision::deferred("Contexte futur requis");
         }
         
@@ -321,55 +321,55 @@ impl StrongFather {
 **Violations :**
 - INTERD-TIME-1 : Ordonnancement
 - INTERD-TIME-2 : Planification
-- KERN-INTERD-1 : Clock pour logique décisionnelle
-- INV-DIFF-NOPLAN : Décision différée sans planification
+- KERN-INTERD-1 : Clock pour logique dÃ©cisionnelle
+- INV-DIFF-NOPLAN : DÃ©cision diffÃ©rÃ©e sans planification
 
 ---
 
-### 2.4. StrongFather avec callback exécutable
+### 2.4. StrongFather avec callback exÃ©cutable
 
 ```rust
-// ❌ IMPLÉMENTATION INVALIDE : Callback exécutable
+// âŒ IMPLÃ‰MENTATION INVALIDE : Callback exÃ©cutable
 #[derive(Debug, Clone)]
 pub struct Decision {
     pub intent_id: String,
     pub decision_type: DecisionType,
-    pub execute: Box<dyn Fn() -> ()>, // ❌ Callback exécutable
+    pub execute: Box<dyn Fn() -> ()>, // âŒ Callback exÃ©cutable
 }
 
 impl Decision {
     pub fn call(&self) {
-        (self.execute)(); // ❌ Exécution interdite
+        (self.execute)(); // âŒ ExÃ©cution interdite
     }
 }
 ```
 
 **Violations :**
-- INV-EXEC-1 : Aucune exécution
-- G-NOEXEC-1 : Aucune exécution
-- Core Decision Contract section 2.3 : Décision non-exécutable
+- INV-EXEC-1 : Aucune exÃ©cution
+- G-NOEXEC-1 : Aucune exÃ©cution
+- Core Decision Contract section 2.3 : DÃ©cision non-exÃ©cutable
 
 ---
 
-### 2.5. StrongFather avec mélange erreur/rejet
+### 2.5. StrongFather avec mÃ©lange erreur/rejet
 
 ```rust
-// ❌ IMPLÉMENTATION INVALIDE : Mélange erreur/rejet
+// âŒ IMPLÃ‰MENTATION INVALIDE : MÃ©lange erreur/rejet
 impl StrongFather {
     pub fn evaluate_intent(&self, intent: &Intent) -> Result<Decision, SFError> {
-        // ❌ INCORRECT : Retourner une erreur pour un rejet structurel
+        // âŒ INCORRECT : Retourner une erreur pour un rejet structurel
         if intent.intent_id.is_empty() {
             return Err(SFError::StructuralError {
                 reason: "Identifiant vide".to_string(),
                 location: "IntentValidator".to_string(),
-            }); // ❌ Rejet structurel ≠ Erreur
+            }); // âŒ Rejet structurel â‰  Erreur
         }
         
-        // ❌ INCORRECT : Retourner un rejet pour une erreur
+        // âŒ INCORRECT : Retourner un rejet pour une erreur
         if self.policy_engine.is_corrupted() {
             return Ok(Decision {
                 decision_type: DecisionType::Refused {
-                    reason: RefusalReason::InternalError, // ❌ Erreur ≠ Rejet
+                    reason: RefusalReason::InternalError, // âŒ Erreur â‰  Rejet
                 },
                 // ...
             });
@@ -384,61 +384,61 @@ impl StrongFather {
 
 ---
 
-## 3. Pièges classiques et erreurs fréquentes
+## 3. PiÃ¨ges classiques et erreurs frÃ©quentes
 
-### 3.1. Piège : Cache "pour performance"
+### 3.1. PiÃ¨ge : Cache "pour performance"
 
-**Erreur fréquente :**
+**Erreur frÃ©quente :**
 
-Implémenter un cache pour améliorer les performances, violant ainsi INTERD-PERS-3 et INV-EXEC-3.
+ImplÃ©menter un cache pour amÃ©liorer les performances, violant ainsi INTERD-PERS-3 et INV-EXEC-3.
 
-**Pourquoi c'est un piège :**
+**Pourquoi c'est un piÃ¨ge :**
 
-- **Violation contractuelle :** Un cache est une forme de persistance opérationnelle (INTERD-PERS-3).
+- **Violation contractuelle :** Un cache est une forme de persistance opÃ©rationnelle (INTERD-PERS-3).
 
-- **Non-déterminisme :** Un cache peut produire des résultats différents selon l'historique (INV-POL-3).
+- **Non-dÃ©terminisme :** Un cache peut produire des rÃ©sultats diffÃ©rents selon l'historique (INV-POL-3).
 
-- **Effet de bord :** Un cache modifie l'état entre les évaluations (INV-EXEC-2).
-
-**Solution :**
-
-- **Pas de cache :** Accepter que chaque évaluation soit indépendante.
-
-- **Optimisation autorisée :** Optimiser l'algorithme d'évaluation, pas ajouter un cache.
-
----
-
-### 3.2. Piège : Utilisation de Clock pour logique décisionnelle
-
-**Erreur fréquente :**
-
-Utiliser `Clock` pour déterminer si une intention est valide selon l'heure, violant KERN-INTERD-1.
-
-**Pourquoi c'est un piège :**
-
-- **Violation contractuelle :** Clock est autorisé uniquement pour l'horodatage de traces (KERN-AUTH-3, KERN-INTERD-1).
-
-- **Logique temporelle interdite :** StrongFather ne gère jamais le temps technique (INTERD-TIME-*).
+- **Effet de bord :** Un cache modifie l'Ã©tat entre les Ã©valuations (INV-EXEC-2).
 
 **Solution :**
 
-- **Clock uniquement pour traces :** Utiliser Clock uniquement après production de décision pour horodater la trace.
+- **Pas de cache :** Accepter que chaque Ã©valuation soit indÃ©pendante.
 
-- **Pas de logique temporelle :** Ne jamais utiliser Clock pour influencer une évaluation.
+- **Optimisation autorisÃ©e :** Optimiser l'algorithme d'Ã©valuation, pas ajouter un cache.
 
 ---
 
-### 3.3. Piège : Mélanger erreur et rejet
+### 3.2. PiÃ¨ge : Utilisation de Clock pour logique dÃ©cisionnelle
 
-**Erreur fréquente :**
+**Erreur frÃ©quente :**
+
+Utiliser `Clock` pour dÃ©terminer si une intention est valide selon l'heure, violant KERN-INTERD-1.
+
+**Pourquoi c'est un piÃ¨ge :**
+
+- **Violation contractuelle :** Clock est autorisÃ© uniquement pour l'horodatage de traces (KERN-AUTH-3, KERN-INTERD-1).
+
+- **Logique temporelle interdite :** StrongFather ne gÃ¨re jamais le temps technique (INTERD-TIME-*).
+
+**Solution :**
+
+- **Clock uniquement pour traces :** Utiliser Clock uniquement aprÃ¨s production de dÃ©cision pour horodater la trace.
+
+- **Pas de logique temporelle :** Ne jamais utiliser Clock pour influencer une Ã©valuation.
+
+---
+
+### 3.3. PiÃ¨ge : MÃ©langer erreur et rejet
+
+**Erreur frÃ©quente :**
 
 Retourner une erreur (`Err(SFError)`) pour un rejet structurel, violant INV-ERR-1.
 
-**Pourquoi c'est un piège :**
+**Pourquoi c'est un piÃ¨ge :**
 
-- **Violation contractuelle :** Un rejet est un résultat normal, pas un dysfonctionnement (INV-ERR-1).
+- **Violation contractuelle :** Un rejet est un rÃ©sultat normal, pas un dysfonctionnement (INV-ERR-1).
 
-- **Confusion sémantique :** Erreur = interne, Rejet = externe (Error & Rejection Model section 2).
+- **Confusion sÃ©mantique :** Erreur = interne, Rejet = externe (Error & Rejection Model section 2).
 
 **Solution :**
 
@@ -448,149 +448,150 @@ Retourner une erreur (`Err(SFError)`) pour un rejet structurel, violant INV-ERR-
 
 ---
 
-### 3.4. Piège : Planification pour décision DIFFÉRÉE
+### 3.4. PiÃ¨ge : Planification pour dÃ©cision DIFFÃ‰RÃ‰E
 
-**Erreur fréquente :**
+**Erreur frÃ©quente :**
 
-Implémenter un scheduler pour les décisions DIFFÉRÉES, violant INV-DIFF-NOPLAN et INTERD-TIME-2.
+ImplÃ©menter un scheduler pour les dÃ©cisions DIFFÃ‰RÃ‰ES, violant INV-DIFF-NOPLAN et INTERD-TIME-2.
 
-**Pourquoi c'est un piège :**
+**Pourquoi c'est un piÃ¨ge :**
 
-- **Violation contractuelle :** Une décision DIFFÉRÉE n'implique aucune planification (INV-DIFF-NOPLAN).
+- **Violation contractuelle :** Une dÃ©cision DIFFÃ‰RÃ‰E n'implique aucune planification (INV-DIFF-NOPLAN).
 
-- **Ordonnancement interdit :** StrongFather ne planifie jamais d'exécutions futures (INTERD-TIME-2).
-
-**Solution :**
-
-- **Pas de scheduler :** Ne jamais implémenter de scheduler ou de planification.
-
-- **Décision pure :** Une décision DIFFÉRÉE indique uniquement que le contexte futur est requis.
-
----
-
-### 3.5. Piège : Logique métier dans les politiques
-
-**Erreur fréquente :**
-
-Implémenter de la logique métier spécifique dans les politiques, violant Policy Engine Contract section 2.3.
-
-**Pourquoi c'est un piège :**
-
-- **Violation contractuelle :** Les politiques ne contiennent jamais de logique métier spécifique (Policy Engine Contract section 2.3).
-
-- **Réutilisabilité :** Les politiques doivent être générales et réutilisables.
+- **Ordonnancement interdit :** StrongFather ne planifie jamais d'exÃ©cutions futures (INTERD-TIME-2).
 
 **Solution :**
 
-- **Politiques générales :** Les politiques expriment des règles générales (permission, contrainte, priorité).
+- **Pas de scheduler :** Ne jamais implÃ©menter de scheduler ou de planification.
 
-- **Pas de parsing métier :** Ne jamais parser des structures métier spécifiques dans les politiques.
+- **DÃ©cision pure :** Une dÃ©cision DIFFÃ‰RÃ‰E indique uniquement que le contexte futur est requis.
 
 ---
 
-## 4. Erreurs d'interprétation corrigées
+### 3.5. PiÃ¨ge : Logique mÃ©tier dans les politiques
+
+**Erreur frÃ©quente :**
+
+ImplÃ©menter de la logique mÃ©tier spÃ©cifique dans les politiques, violant Policy Engine Contract section 2.3.
+
+**Pourquoi c'est un piÃ¨ge :**
+
+- **Violation contractuelle :** Les politiques ne contiennent jamais de logique mÃ©tier spÃ©cifique (Policy Engine Contract section 2.3).
+
+- **RÃ©utilisabilitÃ© :** Les politiques doivent Ãªtre gÃ©nÃ©rales et rÃ©utilisables.
+
+**Solution :**
+
+- **Politiques gÃ©nÃ©rales :** Les politiques expriment des rÃ¨gles gÃ©nÃ©rales (permission, contrainte, prioritÃ©).
+
+- **Pas de parsing mÃ©tier :** Ne jamais parser des structures mÃ©tier spÃ©cifiques dans les politiques.
+
+---
+
+## 4. Erreurs d'interprÃ©tation corrigÃ©es
 
 ### E1 : Cache "pour performance"
 
-**Erreur d'interprétation :** Un développeur pourrait penser qu'un cache en mémoire est acceptable car "ce n'est pas de la persistance sur disque".
+**Erreur d'interprÃ©tation :** Un dÃ©veloppeur pourrait penser qu'un cache en mÃ©moire est acceptable car "ce n'est pas de la persistance sur disque".
 
-**Correction :** Clarification que toute forme de persistance opérationnelle (cache, état mutable) est interdite, même en mémoire. Référence : INTERD-PERS-3, INV-EXEC-3.
+**Correction :** Clarification que toute forme de persistance opÃ©rationnelle (cache, Ã©tat mutable) est interdite, mÃªme en mÃ©moire. RÃ©fÃ©rence : INTERD-PERS-3, INV-EXEC-3.
 
 ---
 
 ### E2 : Clock pour "validation temporelle"
 
-**Erreur d'interprétation :** Un développeur pourrait penser qu'utiliser Clock pour valider si une intention est "trop ancienne" est acceptable.
+**Erreur d'interprÃ©tation :** Un dÃ©veloppeur pourrait penser qu'utiliser Clock pour valider si une intention est "trop ancienne" est acceptable.
 
-**Correction :** Clarification que Clock est autorisé uniquement pour l'horodatage de traces après production de décision, jamais pour la logique décisionnelle. Référence : KERN-AUTH-3, KERN-INTERD-1.
+**Correction :** Clarification que Clock est autorisÃ© uniquement pour l'horodatage de traces aprÃ¨s production de dÃ©cision, jamais pour la logique dÃ©cisionnelle. RÃ©fÃ©rence : KERN-AUTH-3, KERN-INTERD-1.
 
 ---
 
 ### E3 : Rejet = Erreur
 
-**Erreur d'interprétation :** Un développeur pourrait penser qu'un rejet structurel doit retourner une erreur (`Err(SFError)`).
+**Erreur d'interprÃ©tation :** Un dÃ©veloppeur pourrait penser qu'un rejet structurel doit retourner une erreur (`Err(SFError)`).
 
-**Correction :** Clarification que les rejets sont des résultats normaux d'évaluation (décisions REFUSÉES), pas des dysfonctionnements. Référence : Error & Rejection Model section 2, INV-ERR-1.
-
----
-
-### E4 : Planification pour DIFFÉRÉE
-
-**Erreur d'interprétation :** Un développeur pourrait penser qu'une décision DIFFÉRÉE doit être "planifiée" pour réévaluation automatique.
-
-**Correction :** Clarification que INV-DIFF-NOPLAN interdit toute planification. Seul l'adaptateur décide quand re-soumettre. Référence : INV-DIFF-NOPLAN, INTERD-TIME-2.
+**Correction :** Clarification que les rejets sont des rÃ©sultats normaux d'Ã©valuation (dÃ©cisions REFUSÃ‰ES), pas des dysfonctionnements. RÃ©fÃ©rence : Error & Rejection Model section 2, INV-ERR-1.
 
 ---
 
-## 5. Ambiguïtés clarifiées
+### E4 : Planification pour DIFFÃ‰RÃ‰E
 
-### A1 : "Pureté fonctionnelle" vs "État interne"
+**Erreur d'interprÃ©tation :** Un dÃ©veloppeur pourrait penser qu'une dÃ©cision DIFFÃ‰RÃ‰E doit Ãªtre "planifiÃ©e" pour rÃ©Ã©valuation automatique.
 
-**Ambiguïté :** Un développeur pourrait se demander si un état interne (comme le Policy Engine avec ses politiques chargées) viole la pureté fonctionnelle.
-
-**Clarification :** La pureté fonctionnelle concerne l'absence d'effet de bord sur le système externe. Un état interne immuable (politiques chargées) est acceptable. Ce qui est interdit : mutation d'état entre évaluations, cache, compteurs, etc.
-
-**Référence :** INV-EXEC-5, INV-BEHAV-3, G-EXEC-1
+**Correction :** Clarification que INV-DIFF-NOPLAN interdit toute planification. Seul l'adaptateur dÃ©cide quand re-soumettre. RÃ©fÃ©rence : INV-DIFF-NOPLAN, INTERD-TIME-2.
 
 ---
 
-### A2 : "Traçabilité" vs "Persistance opérationnelle"
+## 5. AmbiguÃ¯tÃ©s clarifiÃ©es
 
-**Ambiguïté :** Un développeur pourrait se demander si la traçabilité (via Logger) viole l'interdiction de persistance.
+### A1 : "PuretÃ© fonctionnelle" vs "Ã‰tat interne"
 
-**Clarification :** La traçabilité est autorisée via le kernel (KERN-AUTH-2) car elle est passive et n'affecte pas le comportement. La persistance opérationnelle (cache, état mutable) est interdite car elle affecte le comportement.
+**AmbiguÃ¯tÃ© :** Un dÃ©veloppeur pourrait se demander si un Ã©tat interne (comme le Policy Engine avec ses politiques chargÃ©es) viole la puretÃ© fonctionnelle.
 
-**Référence :** Audit & Trace Contract, Boundary & Isolation Contract (KERN-AUTH-2), Execution Prohibition Contract (INTERD-PERS-*)
+**Clarification :** La puretÃ© fonctionnelle concerne l'absence d'effet de bord sur le systÃ¨me externe. Un Ã©tat interne immuable (politiques chargÃ©es) est acceptable. Ce qui est interdit : mutation d'Ã©tat entre Ã©valuations, cache, compteurs, etc.
 
----
-
-### A3 : "Déterminisme" vs "Performance"
-
-**Ambiguïté :** Un développeur pourrait se demander si le déterminisme empêche toute optimisation.
-
-**Clarification :** Le déterminisme (INV-POL-3) garantit que pour une entrée donnée, la sortie est toujours la même. Les optimisations d'algorithme sont autorisées tant qu'elles préservent le déterminisme. Ce qui est interdit : cache, état mutable entre évaluations, sources de non-déterminisme.
-
-**Référence :** INV-POL-3, Policy Engine Contract section 7
+**RÃ©fÃ©rence :** INV-EXEC-5, INV-BEHAV-3, G-EXEC-1
 
 ---
 
-## 6. Conformité MSCM/MIP
+### A2 : "TraÃ§abilitÃ©" vs "Persistance opÃ©rationnelle"
+
+**AmbiguÃ¯tÃ© :** Un dÃ©veloppeur pourrait se demander si la traÃ§abilitÃ© (via Logger) viole l'interdiction de persistance.
+
+**Clarification :** La traÃ§abilitÃ© est autorisÃ©e via le kernel (KERN-AUTH-2) car elle est passive et n'affecte pas le comportement. La persistance opÃ©rationnelle (cache, Ã©tat mutable) est interdite car elle affecte le comportement.
+
+**RÃ©fÃ©rence :** Audit & Trace Contract, Boundary & Isolation Contract (KERN-AUTH-2), Execution Prohibition Contract (INTERD-PERS-*)
+
+---
+
+### A3 : "DÃ©terminisme" vs "Performance"
+
+**AmbiguÃ¯tÃ© :** Un dÃ©veloppeur pourrait se demander si le dÃ©terminisme empÃªche toute optimisation.
+
+**Clarification :** Le dÃ©terminisme (INV-POL-3) garantit que pour une entrÃ©e donnÃ©e, la sortie est toujours la mÃªme. Les optimisations d'algorithme sont autorisÃ©es tant qu'elles prÃ©servent le dÃ©terminisme. Ce qui est interdit : cache, Ã©tat mutable entre Ã©valuations, sources de non-dÃ©terminisme.
+
+**RÃ©fÃ©rence :** INV-POL-3, Policy Engine Contract section 7
+
+---
+
+## 6. ConformitÃ© MSCM/MIP
 
 ### 6.1 Obligation de balisage MSCM
 
-Tout code implémenté pour StrongFather DOIT être balisé selon le protocole MSCM v1.
+Tout code implÃ©mentÃ© pour StrongFather DOIT Ãªtre balisÃ© selon le protocole MSCM v1.
 
-**Référence :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md)
+**RÃ©fÃ©rence :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](..//..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md)
 
 **Obligations minimales :**
 - Chaque bloc fonctionnel DOIT avoir un identifiant unique (`@id`)
-- Le rôle sémantique DOIT être explicite (`@role`)
-- La couche architecturale DOIT être déclarée (`@layer`)
+- Le rÃ´le sÃ©mantique DOIT Ãªtre explicite (`@role`)
+- La couche architecturale DOIT Ãªtre dÃ©clarÃ©e (`@layer`)
 - Une description humaine DOIT accompagner chaque bloc (`@human`)
 
-### 6.2 Intégration MIP
+### 6.2 IntÃ©gration MIP
 
-Après implémentation, l'index MIP DOIT être régénéré pour :
-- Valider l'intégrité des blocs MSCM
-- Mettre à jour le graphe de dépendances
-- Vérifier la cohérence hiérarchique
+AprÃ¨s implÃ©mentation, l'index MIP DOIT Ãªtre rÃ©gÃ©nÃ©rÃ© pour :
+- Valider l'intÃ©gritÃ© des blocs MSCM
+- Mettre Ã  jour le graphe de dÃ©pendances
+- VÃ©rifier la cohÃ©rence hiÃ©rarchique
 
 ### 6.3 Check-list MSCM
 
-Avant toute livraison, vérifier :
-- [ ] Tous les blocs critiques sont balisés MSCM
+Avant toute livraison, vÃ©rifier :
+- [ ] Tous les blocs critiques sont balisÃ©s MSCM
 - [ ] Les identifiants sont uniques globalement
-- [ ] Les couches (layer) sont cohérentes avec l'architecture
-- [ ] L'index MIP peut être régénéré sans erreur
+- [ ] Les couches (layer) sont cohÃ©rentes avec l'architecture
+- [ ] L'index MIP peut Ãªtre rÃ©gÃ©nÃ©rÃ© sans erreur
 
 ---
 
-**Conclusion :** Ce document guide l'implémentation de StrongFather en respectant strictement tous les contrats FONDATION v1.1. Toute interprétation qui contredit un contrat FONDATION est invalide. Les contrats FONDATION priment toujours sur ce guide.
+**Conclusion :** Ce document guide l'implÃ©mentation de StrongFather en respectant strictement tous les contrats FONDATION v1.1. Toute interprÃ©tation qui contredit un contrat FONDATION est invalide. Les contrats FONDATION priment toujours sur ce guide.
 
 ---
 
-**Document créé le :** 2026-01-27  
-**Version :** 1.1 (réorganisation)  
+**Document crÃ©Ã© le :** 2026-01-27  
+**Version :** 1.1 (rÃ©organisation)  
 **Statut :** POST-FONDATION / NON NORMATIF / INFORMATIF  
-**Référence :** StrongFather Contrats FONDATION v1.1 (gelés, non modifiables)  
-**Type :** Guide d'implémentation non contractuel
+**RÃ©fÃ©rence :** StrongFather Contrats FONDATION v1.1 (gelÃ©s, non modifiables)  
+**Type :** Guide d'implÃ©mentation non contractuel
+

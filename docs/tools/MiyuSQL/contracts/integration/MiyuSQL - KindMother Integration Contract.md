@@ -1,10 +1,10 @@
-# MiyuSQL — KindMother Integration Contract
+﻿# MiyuSQL â€” KindMother Integration Contract
 
 ## 1. Contexte
 
-Ce document definit le contrat d'integration entre **MiyuSQL** (kit d'outils de manipulation de donnees en base) et **KindMother** (Core de donnees, Strate 4). KindMother est l'autorite absolue sur les donnees et la persistance ; MiyuSQL expose des capacites d'execution gouvernée (requete, transaction, cache) sans remplacer KindMother.
+Ce document definit le contrat d'integration entre **MiyuSQL** (kit d'outils de manipulation de donnees en base) et **KindMother** (Core de donnees, Strate 4). KindMother est l'autorite absolue sur les donnees et la persistance ; MiyuSQL expose des capacites d'execution gouvernÃ©e (requete, transaction, cache) sans remplacer KindMother.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -13,7 +13,7 @@ Ce document definit le contrat d'integration entre **MiyuSQL** (kit d'outils de 
 Ce document definit :
 - L'autorite exclusive de KindMother sur les donnees
 - Le passage obligatoire par WriteIntent pour toute ecriture
-- L'execution des Tools MiyuSQL « sous autorite » KindMother
+- L'execution des Tools MiyuSQL Â« sous autorite Â» KindMother
 - L'interdiction de tout contournement
 
 Ce document **ne couvre pas** :
@@ -27,7 +27,7 @@ Ce document **ne couvre pas** :
 
 ### 3.1 Autorite Exclusive de KindMother
 
-> **KindMother est l'autorite absolue sur les donnees. Les Tools MiyuSQL executent des capacites gouvernées sous autorite KindMother ; ils ne decident jamais des donnees a modifier.**
+> **KindMother est l'autorite absolue sur les donnees. Les Tools MiyuSQL executent des capacites gouvernÃ©es sous autorite KindMother ; ils ne decident jamais des donnees a modifier.**
 
 ### 3.2 Invariants
 
@@ -36,7 +36,7 @@ Ce document **ne couvre pas** :
 | **INV-KM-1** | Toute operation de donnees (lecture/ecriture/transaction) est sous autorite KindMother |
 | **INV-KM-2** | Toute ecriture passe par une WriteIntent validee par KindMother |
 | **INV-KM-3** | Les Tools MiyuSQL n'executent que ce qui a ete autorise par la gouvernance (StrongFather, KindMother) |
-| **INV-KM-4** | Aucun acces direct a la base en dehors du flux gouverné (BondingBrother → Cores → KindMother) |
+| **INV-KM-4** | Aucun acces direct a la base en dehors du flux gouvernÃ© (BondingBrother â†’ Cores â†’ KindMother) |
 | **INV-KM-5** | MiyuSQL n'ajoute aucune logique metier ; il orchestre des capacites atomiques |
 
 ---
@@ -45,7 +45,7 @@ Ce document **ne couvre pas** :
 
 ### 4.1 Definition
 
-Une **WriteIntent** (intention d'ecriture) est une demande formelle de modification des donnees, soumise a KindMother pour validation et application. Voir [KindMother - Write Intent Lifecycle Contract](../../../core/KindMother/contracts/lifecycle/KindMother%20-%20Write%20Intent%20Lifecycle%20Contract.md).
+Une **WriteIntent** (intention d'ecriture) est une demande formelle de modification des donnees, soumise a KindMother pour validation et application. Voir [KindMother - Write Intent Lifecycle Contract](..//..//..//..//cores//KindMother//contracts//lifecycle//KindMother%20-%20Write%20Intent%20Lifecycle%20Contract.md).
 
 ### 4.2 Regle Absolue
 
@@ -53,32 +53,32 @@ Une **WriteIntent** (intention d'ecriture) est une demande formelle de modificat
 |-------|-------------|
 | **WRITE-1** | Toute modification de donnees (INSERT, UPDATE, DELETE, DDL ciblee) DOIT etre precedee d'une WriteIntent emise par l'Operateur (ou l'adaptateur) et validee par KindMother |
 | **WRITE-2** | Les Tools MiyuSQL (`tool.query.execute`, `tool.transaction.*`) n'appliquent une ecriture que si une WriteIntent a ete acceptee et que l'execution est mandatee par KindMother |
-| **WRITE-3** | Aucune ecriture « directe » (bypass WriteIntent) n'est autorisee |
+| **WRITE-3** | Aucune ecriture Â« directe Â» (bypass WriteIntent) n'est autorisee |
 
 ### 4.3 Flux Ecriture
 
 ```
 Operateur / Adaptateur
-        │
-        │ 1. Emission WriteIntent (cible, contenu, contexte)
-        ▼
-BondingBrother ──► Master Butler ──► WorrySentinel ──► Caring Nanny ──► StrongFather
-        │                                                                      │
-        │ 2. ALLOW                                                             │
-        ▼                                                                      │
-KindMother : validation WriteIntent, etat ACCEPTEE                             │
-        │                                                                      │
-        │ 3. Mandat d'execution (tool.query.execute / transaction)            │
-        ▼                                                                      │
-MiyuSQL Tools : execution gouvernée (sous autorite KindMother)
-        │
-        ▼
+        â”‚
+        â”‚ 1. Emission WriteIntent (cible, contenu, contexte)
+        â–¼
+BondingBrother â”€â”€â–º Master Butler â”€â”€â–º WorrySentinel â”€â”€â–º Caring Nanny â”€â”€â–º StrongFather
+        â”‚                                                                      â”‚
+        â”‚ 2. ALLOW                                                             â”‚
+        â–¼                                                                      â”‚
+KindMother : validation WriteIntent, etat ACCEPTEE                             â”‚
+        â”‚                                                                      â”‚
+        â”‚ 3. Mandat d'execution (tool.query.execute / transaction)            â”‚
+        â–¼                                                                      â”‚
+MiyuSQL Tools : execution gouvernÃ©e (sous autorite KindMother)
+        â”‚
+        â–¼
 KindMother : application effective, etat APPLIQUEE
 ```
 
 ---
 
-## 5. Execution des Tools MiyuSQL « Sous Autorite » KindMother
+## 5. Execution des Tools MiyuSQL Â« Sous Autorite Â» KindMother
 
 ### 5.1 Role des Tools MiyuSQL
 
@@ -87,7 +87,7 @@ KindMother : application effective, etat APPLIQUEE
 | `tool.query.execute` | Execute la requete mandatee | KindMother mandate ; MiyuSQL execute |
 | `tool.transaction.begin` / `commit` / `rollback` | Gere la transaction mandatee | KindMother valide le contexte ; MiyuSQL execute |
 | `tool.schema.read` | Lit les metadonnees schema | Lecture seule ; pas de WriteIntent requise |
-| `tool.cache.get` / `set` / `invalidate` | Cache gouverné | Politique definie par l'environnement ; execution sous autorite |
+| `tool.cache.get` / `set` / `invalidate` | Cache gouvernÃ© | Politique definie par l'environnement ; execution sous autorite |
 
 ### 5.2 Ce que MiyuSQL ne fait jamais
 
@@ -122,13 +122,16 @@ Les operations de **lecture seule** (SELECT, `tool.schema.read`) passent par le 
 | Document | Lien |
 |----------|------|
 | MiyuSQL - Documentation Fondatrice | [MiyuSQL - Documentation Fondatrice](../../MiyuSQL%20-%20Documentation%20Fondatrice.md) |
-| KindMother - Write Intent Lifecycle Contract | [KindMother - Write Intent Lifecycle Contract](../../../core/KindMother/contracts/lifecycle/KindMother%20-%20Write%20Intent%20Lifecycle%20Contract.md) |
-| KindMother - Index | [KindMother - Index](../../../core/KindMother/_index.md) |
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Intention d'Ecriture (WriteIntent) | Glossaire — WriteIntent |
+| KindMother - Write Intent Lifecycle Contract | [KindMother - Write Intent Lifecycle Contract](..//..//..//..//cores//KindMother//contracts//lifecycle//KindMother%20-%20Write%20Intent%20Lifecycle%20Contract.md) |
+| KindMother - Index | [KindMother - Index](..//..//..//_index.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) |
+| Intention d'Ecriture (WriteIntent) | Glossaire â€” WriteIntent |
 
 ---
 
 **Date de creation :** 2026-01-29  
 **Version :** 1.0  
 **Statut :** Contrat de reference
+
+
+

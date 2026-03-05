@@ -1,4 +1,4 @@
-# MiyukiniAdmin — CaringNanny Integration Contract
+﻿# MiyukiniAdmin â€” CaringNanny Integration Contract
 
 ## 1. Contexte
 
@@ -143,49 +143,49 @@ Ce document **ne couvre pas** :
 
 ```
 MiyukiniAdmin           BondingBrother              CaringNanny
-     │                        │                          │
-     │──MetricsRequest────────▶│                          │
-     │  (type: realtime)       │                          │
-     │  (interval: 1s)         │                          │
-     │                        │                          │
-     │                        │──ObserveMetrics──────────▶│
-     │                        │                          │
-     │                        │◀─MetricsStream───────────│
-     │                        │  (continuous)             │
-     │◀─MetricsResponse───────│                          │
-     │  (stream)               │                          │
-     │                        │                          │
-     │  [... updates every 1s ...]                       │
+     â”‚                        â”‚                          â”‚
+     â”‚â”€â”€MetricsRequestâ”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
+     â”‚  (type: realtime)       â”‚                          â”‚
+     â”‚  (interval: 1s)         â”‚                          â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚                        â”‚â”€â”€ObserveMetricsâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚                        â”‚â—€â”€MetricsStreamâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                        â”‚  (continuous)             â”‚
+     â”‚â—€â”€MetricsResponseâ”€â”€â”€â”€â”€â”€â”€â”‚                          â”‚
+     â”‚  (stream)               â”‚                          â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚  [... updates every 1s ...]                       â”‚
 ```
 
 ### 6.2 Flux Sante Globale
 
 ```
 MiyukiniAdmin           BondingBrother              CaringNanny
-     │                        │                          │
-     │──HealthRequest─────────▶│                          │
-     │                        │                          │
-     │                        │──GetSystemHealth─────────▶│
-     │                        │                          │
-     │                        │◀─HealthReport────────────│
-     │                        │                          │
-     │◀─HealthResponse────────│                          │
-     │  (score, level, alerts) │                          │
+     â”‚                        â”‚                          â”‚
+     â”‚â”€â”€HealthRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚                        â”‚â”€â”€GetSystemHealthâ”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚                        â”‚â—€â”€HealthReportâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚â—€â”€HealthResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”‚                          â”‚
+     â”‚  (score, level, alerts) â”‚                          â”‚
 ```
 
 ### 6.3 Flux Etat Operateurs
 
 ```
 MiyukiniAdmin           BondingBrother              CaringNanny
-     │                        │                          │
-     │──OperatorsRequest──────▶│                          │
-     │                        │                          │
-     │                        │──GetOperatorsState───────▶│
-     │                        │                          │
-     │                        │◀─OperatorsState──────────│
-     │                        │                          │
-     │◀─OperatorsResponse─────│                          │
-     │  (list with states)     │                          │
+     â”‚                        â”‚                          â”‚
+     â”‚â”€â”€OperatorsRequestâ”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚                        â”‚â”€â”€GetOperatorsStateâ”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚                        â”‚â—€â”€OperatorsStateâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚â—€â”€OperatorsResponseâ”€â”€â”€â”€â”€â”‚                          â”‚
+     â”‚  (list with states)     â”‚                          â”‚
 ```
 
 ---
@@ -262,14 +262,14 @@ MiyukiniAdmin           BondingBrother              CaringNanny
 
 ```
 CaringNanny                  BondingBrother           MiyukiniAdmin
-     │                             │                        │
-     │  [Anomalie detectee]        │                        │
-     │                             │                        │
-     │──AlertNotification─────────▶│                        │
-     │                             │                        │
-     │                             │──ForwardAlert──────────▶│
-     │                             │                        │
-     │                             │                        │  [Afficher alerte]
+     â”‚                             â”‚                        â”‚
+     â”‚  [Anomalie detectee]        â”‚                        â”‚
+     â”‚                             â”‚                        â”‚
+     â”‚â”€â”€AlertNotificationâ”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                        â”‚
+     â”‚                             â”‚                        â”‚
+     â”‚                             â”‚â”€â”€ForwardAlertâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                             â”‚                        â”‚
+     â”‚                             â”‚                        â”‚  [Afficher alerte]
 ```
 
 ---
@@ -390,10 +390,11 @@ Si CaringNanny est partiellement indisponible :
 - [MiyukiniAdmin - Core Interaction Contract](../../architecture/MiyukiniAdmin%20-%20Core%20Interaction%20Contract.md)
 - [MiyukiniAdmin - Consumption Metrics Contract](../monitoring/MiyukiniAdmin%20-%20Consumption%20Metrics%20Contract.md)
 - [MiyukiniAdmin - Dashboard & Metrics Display](../../ui/MiyukiniAdmin%20-%20Dashboard%20&%20Metrics%20Display.md)
-- [CaringNanny - Documentation Fondatrice](../../../CaringNanny/foundation/Caring%20Nanny%20-%20Documentation%20Fondatrice.md)
+- [CaringNanny - Documentation Fondatrice](..//..//..//..//cores//CaringNanny//foundation//Caring%20Nanny%20-%20Documentation%20Fondatrice.md)
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
 **Statut :** Contrat de reference
+

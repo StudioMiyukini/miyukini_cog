@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MIP - Portail Sequences</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #121b31;
+        --line: #2a3a5f;
+        --text: #e8eef8;
+        --muted: #9fb1d4;
+        --accent: #1d4ed8;
+        --ok: #4ade80;
+      }
+      body {
+        margin: 0;
+        color: var(--text);
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background: radial-gradient(circle at top, #1c2d50, var(--bg));
+      }
+      .app {
+        max-width: 1280px;
+        margin: 18px auto;
+        padding: 14px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 12px;
+      }
+      .setup-corner {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 5;
+        display: flex;
+        gap: 8px;
+      }
+      a, button {
+        color: var(--text);
+        text-decoration: none;
+        background: #1b2b4a;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 10px;
+        cursor: pointer;
+      }
+      a:hover, button:hover {
+        border-color: #3f5f9d;
+      }
+      .primary {
+        background: #1d4ed8;
+        border-color: #2563eb;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(120px, 1fr));
+        gap: 10px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      label {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      select, input {
+        background: #0b152b;
+        color: var(--text);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 8px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th, td {
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        padding: 8px 6px;
+        font-size: 13px;
+      }
+      th {
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .tag {
+        display: inline-block;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 12px;
+        background: #0d1933;
+      }
+      .ok { color: var(--ok); }
+      .muted { color: var(--muted); }
+      .portal-title {
+        margin: 0 0 8px 0;
+      }
+      .mip-intro {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 12px;
+      }
+      .subcard {
+        background: #0d1933;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px;
+      }
+      .subcard h3 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+      }
+      .subcard p {
+        margin: 0 0 8px 0;
+        font-size: 13px;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .flow {
+        margin: 0;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        background: #0a1328;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+      @media (max-width: 980px) {
+        .row { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+        .mip-intro { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="setup-corner">
+      <a href="./tools/mip-ui/index.html" title="Setup et configuration MIP">Setup / Config</a>
+      <a href="./modules/workflow.md" title="Workflow MIP">Workflow</a>
+    </div>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+      const SEQUENCES_INDEX_PATH = "sequences/index.json";
+
+      const normalizeRelativePath = (rawPath) => {
+        if (!rawPath || typeof rawPath !== "string") throw new Error("Chemin vide");
+        const path = rawPath.replace(/\\/g, "/").trim();
+        if (!path) throw new Error("Chemin vide");
+        if (/^[a-z]+:/i.test(path) || path.startsWith("//") || path.startsWith("/")) {
+          throw new Error("Chemin absolu interdit");
+        }
+
+        const out = [];
+        for (const seg of path.split("/")) {
+          if (!seg || seg === ".") continue;
+          if (seg === "..") throw new Error("Sortie de .mip interdite");
+          out.push(seg);
+        }
+        if (out.length === 0) throw new Error("Chemin invalide");
+        return out.join("/");
+      };
+
+      const toAppPath = (rawPath) => `./${normalizeRelativePath(rawPath)}`;
+      const cacheBust = (path) => `${path}${path.includes("?") ? "&" : "?"}_ts=${Date.now()}`;
+
+      const fetchText = async (rawPath) => {
+        const response = await fetch(cacheBust(toAppPath(rawPath)));
+        if (!response.ok) {
+          throw new Error(`Lecture impossible (${response.status}) pour ${rawPath}`);
+        }
+        return response.text();
+      };
+
+      const tryReadJson = async (rawPath) => {
+        try {
+          const raw = await fetchText(rawPath);
+          return raw ? JSON.parse(raw) : null;
+        } catch {
+          return null;
+        }
+      };
+
+      const parseTypeFromBrief = (briefRaw) => {
+        if (!briefRaw) return "UNKNOWN";
+        const m = briefRaw.match(/(?:Classe|Classification MIP)\s*[:\-]\s*(T[1-5])/i);
+        return m && m[1] ? m[1].toUpperCase() : "UNKNOWN";
+      };
+
+      const parseNumber = (obj, path, fallback = 0) => {
+        const parts = path.split(".");
+        let current = obj;
+        for (const p of parts) {
+          if (current == null || !(p in current)) return fallback;
+          current = current[p];
+        }
+        const n = Number(current);
+        return Number.isFinite(n) ? n : fallback;
+      };
+
+      const parseString = (obj, path, fallback = "") => {
+        const parts = path.split(".");
+        let current = obj;
+        for (const p of parts) {
+          if (current == null || !(p in current)) return fallback;
+          current = current[p];
+        }
+        return typeof current === "string" ? current : fallback;
+      };
+
+      const findManifestFile = (manifest, predicate) => {
+        for (const tab of manifest?.tabs || []) {
+          for (const group of tab.groups || []) {
+            for (const file of group.files || []) {
+              if (file?.path && predicate(file.path)) return file.path;
+            }
+          }
+        }
+        return "";
+      };
+
+      const withPrefix = (prefix, relativePath) => {
+        const safePrefix = normalizeRelativePath(prefix);
+        const safeRelative = normalizeRelativePath(relativePath);
+        return `${safePrefix}/${safeRelative}`;
+      };
+
+      const readSequenceMeta = async (entry) => {
+        const name = entry?.name || "";
+        if (!name) throw new Error("Sequence sans nom dans sequences/index.json");
+
+        const dateMatch = name.match(/^(\d{4}-\d{2}-\d{2})-(.+)$/);
+        const dateFromName = dateMatch ? dateMatch[1] : "";
+        const slugFromName = dateMatch ? dateMatch[2] : name;
+
+        const manifestPath = entry?.manifest_path
+          ? normalizeRelativePath(entry.manifest_path)
+          : `sequences/${name}/ui/manifest.json`;
+        const sequenceBase = manifestPath.replace(/\/ui\/manifest\.json$/i, "") || `sequences/${name}`;
+        const sequenceUiPath = entry?.ui_path
+          ? normalizeRelativePath(entry.ui_path)
+          : `${sequenceBase}/ui/index.html`;
+
+        const manifest = await tryReadJson(manifestPath);
+
+        let metricsPath = entry?.metrics_path ? normalizeRelativePath(entry.metrics_path) : "";
+        if (!metricsPath && manifest) {
+          const candidate = findManifestFile(manifest, (p) => /(^|\/)metrics\/.+\.json$/i.test(p));
+          if (candidate) metricsPath = withPrefix(sequenceBase, candidate);
+        }
+
+        let briefPath = entry?.brief_path ? normalizeRelativePath(entry.brief_path) : "";
+        if (!briefPath && manifest) {
+          const candidate = findManifestFile(
+            manifest,
+            (p) => /(^|\/)briefs\/.+\.md$/i.test(p) && !/-P0-travail/i.test(p)
+          ) || findManifestFile(manifest, (p) => /(^|\/)briefs\/.+\.md$/i.test(p));
+          if (candidate) briefPath = withPrefix(sequenceBase, candidate);
+        }
+
+        const metrics = metricsPath ? await tryReadJson(metricsPath) : null;
+        let type = (entry?.type || parseString(metrics, "project.class", "UNKNOWN")).toUpperCase();
+        if (!/^T[1-5]$/.test(type)) type = "UNKNOWN";
+
+        if (type === "UNKNOWN" && briefPath) {
+          const briefRaw = await fetchText(briefPath).catch(() => "");
+          type = parseTypeFromBrief(briefRaw);
+        }
+
+        const mscmBlocks =
+          Number(entry?.mscm_blocks ?? entry?.mscmBlocks) ||
+          parseNumber(metrics, "mscm.blocks", 0) ||
+          parseNumber(metrics, "counters.lines_written", 0);
+        const mscmFiles =
+          Number(entry?.mscm_files ?? entry?.mscmFiles) ||
+          parseNumber(metrics, "mscm.files", 0) ||
+          (
+            parseNumber(metrics, "counters.files_created", 0) +
+            parseNumber(metrics, "counters.files_modified", 0)
+          );
+        const securityScore =
+          Number(entry?.security_score ?? entry?.securityScore) ||
+          parseNumber(metrics, "counters.security_score", 0);
+        const sequenceStart =
+          entry?.sequence_start ||
+          parseString(metrics, "timestamps.sequence_start", dateFromName);
+        const updated =
+          entry?.updated ||
+          parseString(metrics, "timestamps.total_end", "") ||
+          parseString(metrics, "timestamps.p6_end", "") ||
+          parseString(metrics, "timestamps.p5_end", "") ||
+          sequenceStart;
+
+        return {
+          id: name,
+          name,
+          date: entry?.date || dateFromName,
+          slug: entry?.slug || parseString(metrics, "project.slug", slugFromName) || slugFromName,
+          type,
+          sequenceStart,
+          updated,
+          mscmBlocks,
+          mscmFiles,
+          securityScore,
+          metricsPath,
+          briefPath,
+          sequenceUiPath,
+        };
+      };
+
+      const sortSequences = (list, sortBy, order) => {
+        const dir = order === "asc" ? 1 : -1;
+        const cmp = (a, b) => {
+          if (sortBy === "date") return a.date.localeCompare(b.date) * dir;
+          if (sortBy === "name") return a.name.localeCompare(b.name) * dir;
+          if (sortBy === "type") return a.type.localeCompare(b.type) * dir;
+          if (sortBy === "mscm_blocks") return (a.mscmBlocks - b.mscmBlocks) * dir;
+          if (sortBy === "mscm_files") return (a.mscmFiles - b.mscmFiles) * dir;
+          if (sortBy === "security_score") return (a.securityScore - b.securityScore) * dir;
+          return a.name.localeCompare(b.name) * dir;
+        };
+        return [...list].sort(cmp);
+      };
+
+      const App = () => {
+        const [status, setStatus] = React.useState("Chargement du portail...");
+        const [sequences, setSequences] = React.useState([]);
+        const [sortBy, setSortBy] = React.useState("date");
+        const [order, setOrder] = React.useState("desc");
+        const [typeFilter, setTypeFilter] = React.useState("ALL");
+        const [search, setSearch] = React.useState("");
+
+        const loadSequences = async () => {
+          try {
+            setStatus("Lecture automatique de sequences/index.json...");
+            const indexRaw = await fetchText(SEQUENCES_INDEX_PATH);
+            const index = indexRaw ? JSON.parse(indexRaw) : {};
+            const entries = Array.isArray(index?.sequences) ? index.sequences : [];
+            const rows = [];
+            for (const entry of entries) {
+              try {
+                rows.push(await readSequenceMeta(entry));
+              } catch (e) {
+                console.error(e);
+              }
+            }
+            setSequences(rows);
+            setStatus(`Sequences chargees: ${rows.length}`);
+          } catch (e) {
+            setStatus(
+              `Erreur: ${e.message}. Si ouvert en file://, lancer un serveur local dans .mip (ex: python -m http.server).`
+            );
+          }
+        };
+
+        React.useEffect(() => {
+          loadSequences();
+        }, []);
+
+        const filtered = sequences.filter((s) => {
+          if (typeFilter !== "ALL" && s.type !== typeFilter) return false;
+          if (!search.trim()) return true;
+          const q = search.toLowerCase().trim();
+          return (
+            s.name.toLowerCase().includes(q) ||
+            s.slug.toLowerCase().includes(q) ||
+            s.type.toLowerCase().includes(q)
+          );
+        });
+
+        const sorted = sortSequences(filtered, sortBy, order);
+
+        return (
+          <div className="app">
+            <div className="card">
+              <h2 className="portal-title">MIP v2 - Miyukini Implementation Protocol</h2>
+              <p className="muted">
+                Protocole de sequences assistees IA: classification T1-T5, phases standardisees,
+                quality gates, traces et metriques.
+              </p>
+              <div className="mip-intro">
+                <div className="subcard">
+                  <h3>Objectif et avantages</h3>
+                  <p>
+                    MIP transforme une demande en execution gouvernee: moins de rework, meilleure
+                    qualite, auditabilite et pilotage des couts IA.
+                  </p>
+                  <div className="chips">
+                    <span className="tag">Predictibilite</span>
+                    <span className="tag">Qualite</span>
+                    <span className="tag">Securite</span>
+                    <span className="tag">Tracabilite</span>
+                    <span className="tag">Capitalisation</span>
+                  </div>
+                  <h3 style={{ marginTop: 10 }}>Flux standard</h3>
+                  <pre className="flow">{`SETUP (une fois)
+  -> Classification (T1-T5)
+  -> T1/T2: P3 -> P5
+  -> T3/T4/T5: P0 -> Git -> P3 -> P4 -> P5 -> P6`}</pre>
+                </div>
+                <div className="subcard">
+                  <h3>Classes et phases</h3>
+                  <p><span className="tag">T1</span> micro-fix | <span className="tag">T2</span> fix cible</p>
+                  <p><span className="tag">T3</span> feature moderee | <span className="tag">T4</span> feature majeure | <span className="tag">T5</span> chantier strategique</p>
+                  <p className="muted">
+                    Phases: P0 (cadrage), Git, P3 (implementation), P4 (audit), P5 (validation
+                    utilisateur), P6 (rapport et memoire).
+                  </p>
+                  <h3>References</h3>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    <a href="./README.md" target="_blank" rel="noreferrer">README MIP</a>
+                    <a href="./modules/workflow.md" target="_blank" rel="noreferrer">Workflow</a>
+                    <a href="./protocol/conventions.md" target="_blank" rel="noreferrer">Conventions</a>
+                    <a href="./profiles/core/INDEX.md" target="_blank" rel="noreferrer">Profils</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="card">
+              <h2>Portail MIP - Sequences</h2>
+              <p className={status.startsWith("Erreur") ? "muted" : "ok"}>{status}</p>
+              <button className="primary" onClick={loadSequences}>
+                Rafraichir
+              </button>
+            </div>
+
+            <div className="card">
+              <div className="row">
+                <div className="field">
+                  <label>Trier par</label>
+                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                    <option value="date">Date</option>
+                    <option value="name">Nom</option>
+                    <option value="type">Type (T1-T5)</option>
+                    <option value="mscm_blocks">MSCM blocks</option>
+                    <option value="mscm_files">MSCM files</option>
+                    <option value="security_score">Security score</option>
+                  </select>
+                </div>
+                <div className="field">
+                  <label>Ordre</label>
+                  <select value={order} onChange={(e) => setOrder(e.target.value)}>
+                    <option value="desc">Descendant</option>
+                    <option value="asc">Ascendant</option>
+                  </select>
+                </div>
+                <div className="field">
+                  <label>Filtre Type</label>
+                  <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+                    <option value="ALL">Tous</option>
+                    <option value="T1">T1</option>
+                    <option value="T2">T2</option>
+                    <option value="T3">T3</option>
+                    <option value="T4">T4</option>
+                    <option value="T5">T5</option>
+                    <option value="UNKNOWN">UNKNOWN</option>
+                  </select>
+                </div>
+                <div className="field" style={{ gridColumn: "span 3" }}>
+                  <label>Recherche</label>
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="nom, slug, type..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="card">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Sequence</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>MSCM blocks</th>
+                    <th>MSCM files</th>
+                    <th>Sec.</th>
+                    <th>Maj</th>
+                    <th>Navigation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sorted.length === 0 && (
+                    <tr>
+                      <td colSpan="8" className="muted">Aucune sequence a afficher.</td>
+                    </tr>
+                  )}
+                  {sorted.map((s) => (
+                    <tr key={s.id}>
+                      <td>
+                        <strong>{s.name}</strong>
+                        <div className="muted">{s.slug}</div>
+                      </td>
+                      <td>{s.date || "-"}</td>
+                      <td><span className="tag">{s.type}</span></td>
+                      <td>{s.mscmBlocks}</td>
+                      <td>{s.mscmFiles}</td>
+                      <td>{s.securityScore || "-"}</td>
+                      <td>{(s.updated || "").slice(0, 19) || "-"}</td>
+                      <td>
+                        <a href={toAppPath(s.sequenceUiPath)} target="_blank" rel="noreferrer">UI sequence</a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      };
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+  </body>
+</html>

@@ -1,13 +1,13 @@
-# WorrySentinel — MiyukiniAdmin Integration Contract
+﻿# WorrySentinel â€” MiyukiniAdmin Integration Contract
 
 ## 1. Contexte
 
 Ce document definit le **contrat d'integration entre WorrySentinel et MiyukiniAdmin**. Il specifie l'interface, le protocole, les regles de communication, et les garanties associees a l'integration avec MiyukiniAdmin en tant que console root d'administration (Operateur Souverain, Strate 9).
 
 Ce document complete la Section 11 de la [Documentation Fondatrice](../../foundation/WorrySentinel%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
-- [MiyukiniAdmin - Documentation Fondatrice](../../../MiyukiniAdmin/foundation/MiyukiniAdmin%20-%20Documentation%20Fondatrice.md) pour la nature de MiyukiniAdmin
-- [Miyukini Conceptual References - Security Levels](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) pour les niveaux de securite
-- [Miyukini Framework - Integrity Degradation System](../../../../reference/Miyukini%20Framework%20-%20Integrity%20Degradation%20System.md) pour les etats de confiance
+- [MiyukiniAdmin - Documentation Fondatrice](..//..//..//..//admin//MiyukiniAdmin//foundation//MiyukiniAdmin%20-%20Documentation%20Fondatrice.md) pour la nature de MiyukiniAdmin
+- [Miyukini Conceptual References - Security Levels](..//..//..//..//miyukini-webway-system//reference//_index.md) pour les niveaux de securite
+- [Miyukini Framework - Integrity Degradation System](..//..//..//..//miyukini-webway-system//reference//_index.md) pour les etats de confiance
 
 L'integration respecte les Lois d'Autonomie Systeme : MiyukiniAdmin peut fonctionner offline pour monitoring local (**LOI-1**).
 
@@ -38,7 +38,7 @@ La relation est **d'interface administrative** : MiyukiniAdmin expose les capaci
 
 ---
 
-## 4. Nature de la relation WorrySentinel — MiyukiniAdmin
+## 4. Nature de la relation WorrySentinel â€” MiyukiniAdmin
 
 ### 4.1 Relation d'interface administrative
 
@@ -73,13 +73,13 @@ Toute interaction entre MiyukiniAdmin et WorrySentinel passe par BondingBrother.
 
 | Responsabilite | WorrySentinel | MiyukiniAdmin |
 |----------------|---------------|---------------|
-| **Gouverner les etats de confiance** | ✅ Exclusif | ❌ Consulte |
-| **Definir les niveaux de securite** | ✅ Exclusif | ❌ Configure (via validation) |
-| **Orchestrer la degradation** | ✅ Exclusif | ❌ Declenche (via validation) |
-| **Exposer l'interface admin** | ❌ Expose API | ✅ Exclusif |
-| **Visualiser l'etat de gouvernance** | ❌ Source | ✅ Affiche |
-| **Valider les changements** | ❌ Jamais | ❌ Soumet a StrongFather |
-| **Tracer les actions** | ✅ Enregistre | ✅ Journalise |
+| **Gouverner les etats de confiance** | âœ… Exclusif | âŒ Consulte |
+| **Definir les niveaux de securite** | âœ… Exclusif | âŒ Configure (via validation) |
+| **Orchestrer la degradation** | âœ… Exclusif | âŒ Declenche (via validation) |
+| **Exposer l'interface admin** | âŒ Expose API | âœ… Exclusif |
+| **Visualiser l'etat de gouvernance** | âŒ Source | âœ… Affiche |
+| **Valider les changements** | âŒ Jamais | âŒ Soumet a StrongFather |
+| **Tracer les actions** | âœ… Enregistre | âœ… Journalise |
 
 **Regle WS-MA-04 : Aucun chevauchement d'autorite**
 
@@ -165,22 +165,22 @@ MiyukiniAdmin ne cache **jamais** l'etat reel de gouvernance. L'interface affich
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `consultation_id` | Identifiant unique de la consultation | ✅ Oui |
-| `scope` | Portee (all, product, component) | ✅ Oui |
-| `entity_id` | Identifiant de l'entite (si scope != all) | ❌ Optionnel |
-| `include_history` | Inclure l'historique | ❌ Optionnel |
-| `timestamp` | Horodatage de la consultation | ✅ Oui |
+| `consultation_id` | Identifiant unique de la consultation | âœ… Oui |
+| `scope` | Portee (all, product, component) | âœ… Oui |
+| `entity_id` | Identifiant de l'entite (si scope != all) | âŒ Optionnel |
+| `include_history` | Inclure l'historique | âŒ Optionnel |
+| `timestamp` | Horodatage de la consultation | âœ… Oui |
 
 **Format de reponse :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `response_id` | Identifiant de la reponse | ✅ Oui |
-| `consultation_id` | Reference a la consultation | ✅ Oui |
-| `security_levels` | Liste des niveaux par entite | ✅ Oui |
-| `governance_rules` | Regles applicables | ✅ Oui |
-| `history` | Historique (si demande) | ❌ Optionnel |
-| `timestamp` | Horodatage de la reponse | ✅ Oui |
+| `response_id` | Identifiant de la reponse | âœ… Oui |
+| `consultation_id` | Reference a la consultation | âœ… Oui |
+| `security_levels` | Liste des niveaux par entite | âœ… Oui |
+| `governance_rules` | Regles applicables | âœ… Oui |
+| `history` | Historique (si demande) | âŒ Optionnel |
+| `timestamp` | Horodatage de la reponse | âœ… Oui |
 
 ### 7.2 INTERACTION-ADMIN-2 : Consultation des etats de confiance
 
@@ -196,22 +196,22 @@ MiyukiniAdmin ne cache **jamais** l'etat reel de gouvernance. L'interface affich
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `consultation_id` | Identifiant unique | ✅ Oui |
-| `include_implications` | Inclure les implications | ❌ Optionnel |
-| `include_history` | Inclure l'historique | ❌ Optionnel |
-| `history_limit` | Nombre de transitions max | ❌ Optionnel |
-| `timestamp` | Horodatage | ✅ Oui |
+| `consultation_id` | Identifiant unique | âœ… Oui |
+| `include_implications` | Inclure les implications | âŒ Optionnel |
+| `include_history` | Inclure l'historique | âŒ Optionnel |
+| `history_limit` | Nombre de transitions max | âŒ Optionnel |
+| `timestamp` | Horodatage | âœ… Oui |
 
 **Format de reponse :**
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `response_id` | Identifiant de la reponse | ✅ Oui |
-| `current_state` | Etat de confiance actuel (T0-T4) | ✅ Oui |
-| `state_description` | Description de l'etat | ✅ Oui |
-| `implications` | Implications (capacites, restrictions) | ❌ Optionnel |
-| `transitions_history` | Historique des transitions | ❌ Optionnel |
-| `timestamp` | Horodatage de la reponse | ✅ Oui |
+| `response_id` | Identifiant de la reponse | âœ… Oui |
+| `current_state` | Etat de confiance actuel (T0-T4) | âœ… Oui |
+| `state_description` | Description de l'etat | âœ… Oui |
+| `implications` | Implications (capacites, restrictions) | âŒ Optionnel |
+| `transitions_history` | Historique des transitions | âŒ Optionnel |
+| `timestamp` | Horodatage de la reponse | âœ… Oui |
 
 ### 7.3 INTERACTION-ADMIN-3 : Configuration de la gouvernance
 
@@ -231,12 +231,12 @@ MiyukiniAdmin ne cache **jamais** l'etat reel de gouvernance. L'interface affich
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `config_request_id` | Identifiant unique de la demande | ✅ Oui |
-| `operator_id` | Identifiant de l'operateur | ✅ Oui |
-| `config_type` | Type de configuration | ✅ Oui |
-| `config_payload` | Donnees de configuration | ✅ Oui |
-| `justification` | Justification detaillee | ✅ Oui |
-| `timestamp` | Horodatage de la demande | ✅ Oui |
+| `config_request_id` | Identifiant unique de la demande | âœ… Oui |
+| `operator_id` | Identifiant de l'operateur | âœ… Oui |
+| `config_type` | Type de configuration | âœ… Oui |
+| `config_payload` | Donnees de configuration | âœ… Oui |
+| `justification` | Justification detaillee | âœ… Oui |
+| `timestamp` | Horodatage de la demande | âœ… Oui |
 
 **Types de configuration :**
 
@@ -269,19 +269,19 @@ MiyukiniAdmin ne cache **jamais** l'etat reel de gouvernance. L'interface affich
 
 ```
 MiyukiniAdmin           BondingBrother              WorrySentinel
-     │                        │                          │
-     │──ConsultationRequest───▶│                          │
-     │  (ws.state.trust.read)  │                          │
-     │                        │                          │
-     │                        │──ForwardRequest──────────▶│
-     │                        │                          │
-     │                        │                          │  [Generate response]
-     │                        │                          │
-     │                        │◀─TrustStateResponse──────│
-     │                        │                          │
-     │◀─ConsultationResponse──│                          │
-     │                        │                          │
-     │  [Display in UI]       │                          │
+     â”‚                        â”‚                          â”‚
+     â”‚â”€â”€ConsultationRequestâ”€â”€â”€â–¶â”‚                          â”‚
+     â”‚  (ws.state.trust.read)  â”‚                          â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚                        â”‚â”€â”€ForwardRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚                        â”‚                          â”‚  [Generate response]
+     â”‚                        â”‚                          â”‚
+     â”‚                        â”‚â—€â”€TrustStateResponseâ”€â”€â”€â”€â”€â”€â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚â—€â”€ConsultationResponseâ”€â”€â”‚                          â”‚
+     â”‚                        â”‚                          â”‚
+     â”‚  [Display in UI]       â”‚                          â”‚
 ```
 
 ### 8.2 Flux de configuration (avec validation SF)
@@ -304,23 +304,23 @@ MiyukiniAdmin           BondingBrother              WorrySentinel
 
 ```
 MiyukiniAdmin    BondingBrother    StrongFather    WorrySentinel
-     │                │                 │                │
-     │──ConfigRequest─▶│                 │                │
-     │  (level=3)      │                 │                │
-     │                │──DecisionReq────▶│                │
-     │                │                 │                │
-     │                │                 │  [Evaluate]    │
-     │                │                 │                │
-     │                │◀─APPROVED───────│                │
-     │                │                 │                │
-     │                │──ApplyConfig────────────────────▶│
-     │                │                 │                │
-     │                │                 │  [Apply]       │
-     │                │                 │                │
-     │                │◀─ConfigApplied──────────────────│
-     │                │                 │                │
-     │◀─ConfigResult──│                 │                │
-     │  (SUCCESS)      │                 │                │
+     â”‚                â”‚                 â”‚                â”‚
+     â”‚â”€â”€ConfigRequestâ”€â–¶â”‚                 â”‚                â”‚
+     â”‚  (level=3)      â”‚                 â”‚                â”‚
+     â”‚                â”‚â”€â”€DecisionReqâ”€â”€â”€â”€â–¶â”‚                â”‚
+     â”‚                â”‚                 â”‚                â”‚
+     â”‚                â”‚                 â”‚  [Evaluate]    â”‚
+     â”‚                â”‚                 â”‚                â”‚
+     â”‚                â”‚â—€â”€APPROVEDâ”€â”€â”€â”€â”€â”€â”€â”‚                â”‚
+     â”‚                â”‚                 â”‚                â”‚
+     â”‚                â”‚â”€â”€ApplyConfigâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                â”‚                 â”‚                â”‚
+     â”‚                â”‚                 â”‚  [Apply]       â”‚
+     â”‚                â”‚                 â”‚                â”‚
+     â”‚                â”‚â—€â”€ConfigAppliedâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                â”‚                 â”‚                â”‚
+     â”‚â—€â”€ConfigResultâ”€â”€â”‚                 â”‚                â”‚
+     â”‚  (SUCCESS)      â”‚                 â”‚                â”‚
 ```
 
 ### 8.3 Flux de configuration refusee
@@ -339,18 +339,18 @@ MiyukiniAdmin    BondingBrother    StrongFather    WorrySentinel
 
 ```
 MiyukiniAdmin    BondingBrother    StrongFather    WorrySentinel
-     │                │                 │                │
-     │──ConfigRequest─▶│                 │                │
-     │                │──DecisionReq────▶│                │
-     │                │                 │                │
-     │                │                 │  [Evaluate]    │
-     │                │                 │                │
-     │                │◀─DENIED─────────│                │
-     │                │  (reason: ...)   │                │
-     │                │                 │                │
-     │◀─ConfigResult──│                 │                │
-     │  (DENIED)       │                 │                │
-     │  (reason: ...)  │                 │                │
+     â”‚                â”‚                 â”‚                â”‚
+     â”‚â”€â”€ConfigRequestâ”€â–¶â”‚                 â”‚                â”‚
+     â”‚                â”‚â”€â”€DecisionReqâ”€â”€â”€â”€â–¶â”‚                â”‚
+     â”‚                â”‚                 â”‚                â”‚
+     â”‚                â”‚                 â”‚  [Evaluate]    â”‚
+     â”‚                â”‚                 â”‚                â”‚
+     â”‚                â”‚â—€â”€DENIEDâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                â”‚
+     â”‚                â”‚  (reason: ...)   â”‚                â”‚
+     â”‚                â”‚                 â”‚                â”‚
+     â”‚â—€â”€ConfigResultâ”€â”€â”‚                 â”‚                â”‚
+     â”‚  (DENIED)       â”‚                 â”‚                â”‚
+     â”‚  (reason: ...)  â”‚                 â”‚                â”‚
 ```
 
 ---
@@ -416,91 +416,91 @@ Les traces sont conservees selon la politique de retention :
 MiyukiniAdmin affiche l'etat de confiance de maniere visible et permanente :
 
 ```
-┌───────────────────────────────────────────────────────────────┐
-│ Etat de confiance systeme                                      │
-├───────────────────────────────────────────────────────────────┤
-│                                                               │
-│   🟢 T0 — NOMINAL                                             │
-│   Fonctionnement normal, toutes capacites disponibles         │
-│                                                               │
-│   Depuis: 2026-01-28 08:00:00                                │
-│   Derniere transition: T1 → T0 (resolution anomalie)          │
-│                                                               │
-└───────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Etat de confiance systeme                                      â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                               â”‚
+â”‚   ðŸŸ¢ T0 â€” NOMINAL                                             â”‚
+â”‚   Fonctionnement normal, toutes capacites disponibles         â”‚
+â”‚                                                               â”‚
+â”‚   Depuis: 2026-01-28 08:00:00                                â”‚
+â”‚   Derniere transition: T1 â†’ T0 (resolution anomalie)          â”‚
+â”‚                                                               â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 10.2 Indicateurs par etat
 
 | Etat | Indicateur | Couleur | Message |
 |------|------------|---------|---------|
-| **T0 — Normal** | 🟢 | Vert | Fonctionnement normal |
-| **T1 — Instable** | 🟡 | Jaune | Anomalie detectee, surveillance renforcee |
-| **T2 — Degrade** | 🟠 | Orange | Capacites reduites, restrictions actives |
-| **T3 — Restreint** | 🔴 | Rouge | Mode restreint, intervention requise |
-| **T4 — Bloque** | ⛔ | Rouge fonce | Systeme bloque, recovery requis |
+| **T0 â€” Normal** | ðŸŸ¢ | Vert | Fonctionnement normal |
+| **T1 â€” Instable** | ðŸŸ¡ | Jaune | Anomalie detectee, surveillance renforcee |
+| **T2 â€” Degrade** | ðŸŸ  | Orange | Capacites reduites, restrictions actives |
+| **T3 â€” Restreint** | ðŸ”´ | Rouge | Mode restreint, intervention requise |
+| **T4 â€” Bloque** | â›” | Rouge fonce | Systeme bloque, recovery requis |
 
 ### 10.3 Dashboard de securite
 
 ```
-┌───────────────────────────────────────────────────────────────┐
-│ Dashboard Securite - WorrySentinel                             │
-├───────────────────────────────────────────────────────────────┤
-│                                                               │
-│ ETAT GLOBAL: 🟢 T0 — NOMINAL                                  │
-│                                                               │
-│ ┌─────────────────────────────────────────────────────────┐  │
-│ │ Niveaux de securite par produit                          │  │
-│ ├───────────────────────┬─────────────────────────────────┤  │
-│ │ Produit               │ Niveau                          │  │
-│ ├───────────────────────┼─────────────────────────────────┤  │
-│ │ MediaService          │ 2 — SENSITIVE                   │  │
-│ │ AuthService           │ 3 — CRITICAL                    │  │
-│ │ PublicAPI             │ 1 — STANDARD                    │  │
-│ │ InternalTools         │ 0 — PUBLIC                      │  │
-│ └───────────────────────┴─────────────────────────────────┘  │
-│                                                               │
-│ ┌─────────────────────────────────────────────────────────┐  │
-│ │ Historique recent                                        │  │
-│ ├─────────────────────────────────────────────────────────┤  │
-│ │ 2026-01-28 10:00 - Transition T1 → T0 (resolution)      │  │
-│ │ 2026-01-28 08:30 - Transition T0 → T1 (anomalie)        │  │
-│ │ 2026-01-27 15:00 - Niveau AuthService: 2 → 3            │  │
-│ └─────────────────────────────────────────────────────────┘  │
-│                                                               │
-│ [Modifier niveau securite]  [Activer degradation]             │
-│                                                               │
-└───────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Dashboard Securite - WorrySentinel                             â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                               â”‚
+â”‚ ETAT GLOBAL: ðŸŸ¢ T0 â€” NOMINAL                                  â”‚
+â”‚                                                               â”‚
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚ â”‚ Niveaux de securite par produit                          â”‚  â”‚
+â”‚ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤  â”‚
+â”‚ â”‚ Produit               â”‚ Niveau                          â”‚  â”‚
+â”‚ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤  â”‚
+â”‚ â”‚ MediaService          â”‚ 2 â€” SENSITIVE                   â”‚  â”‚
+â”‚ â”‚ AuthService           â”‚ 3 â€” CRITICAL                    â”‚  â”‚
+â”‚ â”‚ PublicAPI             â”‚ 1 â€” STANDARD                    â”‚  â”‚
+â”‚ â”‚ InternalTools         â”‚ 0 â€” PUBLIC                      â”‚  â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                               â”‚
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚ â”‚ Historique recent                                        â”‚  â”‚
+â”‚ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤  â”‚
+â”‚ â”‚ 2026-01-28 10:00 - Transition T1 â†’ T0 (resolution)      â”‚  â”‚
+â”‚ â”‚ 2026-01-28 08:30 - Transition T0 â†’ T1 (anomalie)        â”‚  â”‚
+â”‚ â”‚ 2026-01-27 15:00 - Niveau AuthService: 2 â†’ 3            â”‚  â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                               â”‚
+â”‚ [Modifier niveau securite]  [Activer degradation]             â”‚
+â”‚                                                               â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 10.4 Formulaire de changement de niveau
 
 ```
-┌───────────────────────────────────────────────────────────────┐
-│ Changement de niveau de securite                               │
-├───────────────────────────────────────────────────────────────┤
-│                                                               │
-│ Produit: AuthService                                          │
-│                                                               │
-│ Niveau actuel: 2 — SENSITIVE                                  │
-│                                                               │
-│ Nouveau niveau:                                               │
-│ ○ 0 — PUBLIC                                                  │
-│ ○ 1 — STANDARD                                                │
-│ ○ 2 — SENSITIVE (actuel)                                      │
-│ ● 3 — CRITICAL                                                │
-│ ○ 4 — HIGHEST SECURITY                                        │
-│                                                               │
-│ Justification (obligatoire):                                  │
-│ ┌───────────────────────────────────────────────────────────┐│
-│ │Augmentation suite a audit de securite. Le service gere    ││
-│ │des donnees de paiement et necessite protection renforcee. ││
-│ └───────────────────────────────────────────────────────────┘│
-│                                                               │
-│ ⚠️ Cette action sera soumise a validation StrongFather       │
-│                                                               │
-│ [Annuler]                              [Soumettre pour validation]│
-│                                                               │
-└───────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Changement de niveau de securite                               â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                               â”‚
+â”‚ Produit: AuthService                                          â”‚
+â”‚                                                               â”‚
+â”‚ Niveau actuel: 2 â€” SENSITIVE                                  â”‚
+â”‚                                                               â”‚
+â”‚ Nouveau niveau:                                               â”‚
+â”‚ â—‹ 0 â€” PUBLIC                                                  â”‚
+â”‚ â—‹ 1 â€” STANDARD                                                â”‚
+â”‚ â—‹ 2 â€” SENSITIVE (actuel)                                      â”‚
+â”‚ â— 3 â€” CRITICAL                                                â”‚
+â”‚ â—‹ 4 â€” HIGHEST SECURITY                                        â”‚
+â”‚                                                               â”‚
+â”‚ Justification (obligatoire):                                  â”‚
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”â”‚
+â”‚ â”‚Augmentation suite a audit de securite. Le service gere    â”‚â”‚
+â”‚ â”‚des donnees de paiement et necessite protection renforcee. â”‚â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜â”‚
+â”‚                                                               â”‚
+â”‚ âš ï¸ Cette action sera soumise a validation StrongFather       â”‚
+â”‚                                                               â”‚
+â”‚ [Annuler]                              [Soumettre pour validation]â”‚
+â”‚                                                               â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
@@ -674,7 +674,7 @@ Toute action est explicite. Jamais implicite, jamais silencieuse.
 
 ### LOI-1 : Aucune dependance externe critique
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 L'integration respecte LOI-1 :
 - MiyukiniAdmin peut fonctionner offline pour consultation locale
@@ -683,7 +683,7 @@ L'integration respecte LOI-1 :
 
 ### LOI-2 : Le systeme accepte l'isolement comme etat normal
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 L'integration respecte LOI-2 :
 - En isolement, MiyukiniAdmin consulte le cache local
@@ -692,7 +692,7 @@ L'integration respecte LOI-2 :
 
 ### LOI-3 : Auto-suffisance fonctionnelle
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 L'integration respecte LOI-3 :
 - MiyukiniAdmin embarque toute sa logique UI
@@ -859,7 +859,7 @@ Toute implementation de l'integration avec WorrySentinel doit respecter ce contr
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT — Normatif  
+**Statut :** CONTRAT â€” Normatif  
 **Dependances :**
 - WorrySentinel - Documentation Fondatrice v1.2 (Section 11)
 - MiyukiniAdmin - Documentation Fondatrice v1.0.0
@@ -905,17 +905,19 @@ Toute implementation de l'integration avec WorrySentinel doit respecter ce contr
 ### Verification de coherence
 
 **Verification effectuee :**
-- ✅ Coherence avec WorrySentinel - Documentation Fondatrice : Confirmee (Section 11 respectee)
-- ✅ Coherence avec MiyukiniAdmin - Documentation Fondatrice : Confirmee (INV-MA-4, INV-MA-10)
-- ✅ Conformite LOI-1 : Confirmee (consultation locale possible)
-- ✅ Conformite LOI-2 : Confirmee (isolement gere)
-- ✅ Conformite LOI-3 : Confirmee (auto-suffisance)
-- ✅ Validation StrongFather obligatoire : Confirmee (WS-MA-02, INV-WS-MA-2)
-- ✅ Mediation BondingBrother : Confirmee (WS-MA-03, INV-WS-MA-3)
-- ✅ Tracabilite complete : Confirmee (INV-WS-MA-5)
+- âœ… Coherence avec WorrySentinel - Documentation Fondatrice : Confirmee (Section 11 respectee)
+- âœ… Coherence avec MiyukiniAdmin - Documentation Fondatrice : Confirmee (INV-MA-4, INV-MA-10)
+- âœ… Conformite LOI-1 : Confirmee (consultation locale possible)
+- âœ… Conformite LOI-2 : Confirmee (isolement gere)
+- âœ… Conformite LOI-3 : Confirmee (auto-suffisance)
+- âœ… Validation StrongFather obligatoire : Confirmee (WS-MA-02, INV-WS-MA-2)
+- âœ… Mediation BondingBrother : Confirmee (WS-MA-03, INV-WS-MA-3)
+- âœ… Tracabilite complete : Confirmee (INV-WS-MA-5)
 
 **Conclusion :** Aucune contradiction detectee. Le document est coherent et non ambigu.
 
 ---
 
 *Aucune autre erreur, warning, ou ambiguite rencontree lors de la redaction de ce document.*
+
+

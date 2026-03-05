@@ -1,16 +1,16 @@
-# Kernel — FAQ & Common Questions
+﻿# Kernel â€” FAQ & Common Questions
 
 ## Contexte
 
 Ce document repond aux questions frequemment posees sur le **Kernel Miyukini**. Il clarifie le role, les responsabilites, les limites et l'utilisation du kernel pour les developpeurs, architectes et nouveaux contributeurs.
 
-Le Kernel est le **substrat technique neutre** de l'ecosysteme Miyukini — une fondation minimale, sans logique metier, sur laquelle s'appuient tous les produits.
+Le Kernel est le **substrat technique neutre** de l'ecosysteme Miyukini â€” une fondation minimale, sans logique metier, sur laquelle s'appuient tous les produits.
 
 ## Portee / Scope
 
 - **Applicable a :** Kernel (miyukini-kernel)
 - **Audience :** Developpeurs, architectes, nouveaux contributeurs, integrateurs
-- **Statut :** Document de reference — FAQ
+- **Statut :** Document de reference â€” FAQ
 
 ---
 
@@ -36,7 +36,7 @@ Le Kernel Miyukini est la **fondation technique reutilisable** sur laquelle s'ap
 
 ### Q1.2 : Le Kernel est-il un kernel systeme (OS) ?
 
-**Non.** Dans le cadre de Miyukini Core System, le terme « kernel » designe le **noyau technique minimal de la fondation**, et non un kernel systeme au sens OS.
+**Non.** Dans le cadre de Miyukini Core System, le terme Â« kernel Â» designe le **noyau technique minimal de la fondation**, et non un kernel systeme au sens OS.
 
 Le Kernel Miyukini ne gere pas :
 
@@ -192,17 +192,17 @@ fn main() {
 
 Le Kernel peut :
 
-- ✅ Observer
-- ✅ Attester
-- ✅ Comparer
-- ✅ Signaler
-- ✅ Expliquer
+- âœ… Observer
+- âœ… Attester
+- âœ… Comparer
+- âœ… Signaler
+- âœ… Expliquer
 
 Le Kernel ne peut **jamais** :
 
-- ❌ Corriger
-- ❌ Muter
-- ❌ Auto-reparer
+- âŒ Corriger
+- âŒ Muter
+- âŒ Auto-reparer
 
 **Miyukini ne maintient pas le code a la place de l'humain. Il rend le code maintenable sans ambiguite.**
 
@@ -257,7 +257,7 @@ Le **gel local** est la capacite du Kernel a marquer un composant comme gele str
 | EverBuddy | Valide la compatibilite du gel |
 | Kernel | Execute le gel et l'applique |
 
-Le gel est **decide par la gouvernance**, **execute par le Kernel**, jamais inversé.
+Le gel est **decide par la gouvernance**, **execute par le Kernel**, jamais inversÃ©.
 
 ### Q4.5 : Le Kernel peut-il fonctionner offline ?
 
@@ -408,23 +408,24 @@ Lors d'un changement :
 
 ### Q8.3 : Le Kernel peut-il servir pour du mobile ?
 
-**Potentiellement.** Si du Rust partage (logique offline, etc.) tourne cote mobile, les memes contrats (config, id, time, log) s'appliquent. Pas de contrat specifique « mobile » dans le kernel.
+**Potentiellement.** Si du Rust partage (logique offline, etc.) tourne cote mobile, les memes contrats (config, id, time, log) s'appliquent. Pas de contrat specifique Â« mobile Â» dans le kernel.
 
 ---
 
 ## References croisees
 
-- [Miyukini Core System - Definition Kernel](../Miyukini%20Core%20System%20-%20Definition%20Kernel.md) — Document fondateur
-- [Miyukini Core System - Structure du Kernel](../Miyukini%20Core%20System%20-%20Structure%20du%20Kernel.md) — Crates, dependances, visibilite
-- [Miyukini Core System - Revue Traits API v0.1](../Miyukini%20Core%20System%20-%20Revue%20Traits%20API%20v0.1.md) — Gel des traits publics
-- [Kernel - Invariants & Guarantees](../contracts/Kernel%20-%20Invariants%20%26%20Guarantees.md) — Catalogue des invariants
-- [Kernel - Architecture & Components](../architecture/Kernel%20-%20Architecture%20%26%20Components.md) — Composants et relations
-- [Kernel - Reference Implementation Guidelines](../implementation/Kernel%20-%20Reference%20Implementation%20Guidelines.md) — Patterns d'implementation
-- [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) — Terminologie officielle
-- [Miyukini Conceptual References - Kernel Maintenance Observability Contract](../../reference/Miyukini%20Conceptual%20References%20-%20Kernel%20Maintenance%20Observability%20Contract.md) — Capacites de maintenance
+- [Miyukini Core System - Definition Kernel](../Miyukini%20Core%20System%20-%20Definition%20Kernel.md) â€” Document fondateur
+- [Miyukini Core System - Structure du Kernel](../Miyukini%20Core%20System%20-%20Structure%20du%20Kernel.md) â€” Crates, dependances, visibilite
+- [Miyukini Core System - Revue Traits API v0.1](../Miyukini%20Core%20System%20-%20Revue%20Traits%20API%20v0.1.md) â€” Gel des traits publics
+- [Kernel - Invariants & Guarantees](../contracts/Kernel%20-%20Invariants%20%26%20Guarantees.md) â€” Catalogue des invariants
+- [Kernel - Architecture & Components](../architecture/Kernel%20-%20Architecture%20%26%20Components.md) â€” Composants et relations
+- [Kernel - Reference Implementation Guidelines](../implementation/Kernel%20-%20Reference%20Implementation%20Guidelines.md) â€” Patterns d'implementation
+- [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) â€” Terminologie officielle
+- [Miyukini Conceptual References - Kernel Maintenance Observability Contract](..//..//miyukini-webway-system//reference//_index.md) â€” Capacites de maintenance
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** REFERENCE — FAQ
+**Statut :** REFERENCE â€” FAQ
+

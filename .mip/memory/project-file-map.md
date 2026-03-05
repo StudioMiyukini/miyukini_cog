@@ -18,7 +18,7 @@
 | Apps | apps/central, apps/origin, apps/miou-llm-bridge... | Denis | ui_builder 2204L, pages 3575L |
 | Docs | docs/ (hors Allumina/Sodomight MGE) | Maria | Nombreux >400 lignes |
 | MIP | .mip/ (memory, skills, modules, config, certifications) | Maria | Conventions |
-| Tools | tools/mip-generator | Hugo | — |
+| Tools | tools/mscm-generator | Hugo | — |
 
 **Exclusions** : mge/, sodomight, Allumina, mge-* (workspace MGE).
 

@@ -1,12 +1,12 @@
-# MWS — Implémentation Origin sur Hostinger VPS (Debian 13)
+﻿# MWS â€” ImplÃ©mentation Origin sur Hostinger VPS (Debian 13)
 
 ## Contexte
 
-Ce document est le **guide d'implémentation complet et exécutable** d'Origin sur le VPS Hostinger (Debian 13). Un agent IA ou un opérateur humain doit pouvoir suivre ce guide **de A à Z** et obtenir un Origin fonctionnel.
+Ce document est le **guide d'implÃ©mentation complet et exÃ©cutable** d'Origin sur le VPS Hostinger (Debian 13). Un agent IA ou un opÃ©rateur humain doit pouvoir suivre ce guide **de A Ã  Z** et obtenir un Origin fonctionnel.
 
-Origin est le point central de vérité du MWS : il cumule les fonctions **relay** (vérification de conformité), **tracker** (pools, catalogue, connexions) et **source de vérité** (Registre de Services, versions, politiques).
+Origin est le point central de vÃ©ritÃ© du MWS : il cumule les fonctions **relay** (vÃ©rification de conformitÃ©), **tracker** (pools, catalogue, connexions) et **source de vÃ©ritÃ©** (Registre de Services, versions, politiques).
 
-**Références :**
+**RÃ©fÃ©rences :**
 - [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 - [MWS - Origin](../acteurs/MWS%20-%20Origin.md)
 - [MWS - MiyukiniAdmin Origin](../administration/MWS%20-%20MiyukiniAdmin.md)
@@ -14,9 +14,9 @@ Origin est le point central de vérité du MWS : il cumule les fonctions **relay
 
 ---
 
-## 0. Fiche d'identité de l'instance
+## 0. Fiche d'identitÃ© de l'instance
 
-| Paramètre | Valeur |
+| ParamÃ¨tre | Valeur |
 |-----------|--------|
 | **Provider** | Hostinger |
 | **Type** | VPS |
@@ -24,24 +24,24 @@ Origin est le point central de vérité du MWS : il cumule les fonctions **relay
 | **IP publique** | `46.202.129.65` |
 | **Utilisateur SSH** | `root` |
 
-### Clé SSH
+### ClÃ© SSH
 
 | Fichier | Chemin dans le workspace |
 |---------|--------------------------|
-| **Clé privée** | `ssh-key-2026-02-12.key` |
-| **Clé publique** | `ssh-key-2026-02-12.key.pub` |
+| **ClÃ© privÃ©e** | `ssh-key-2026-02-12.key` |
+| **ClÃ© publique** | `ssh-key-2026-02-12.key.pub` |
 
-**Clé publique de référence (à conserver sur tout hébergeur) :**
+**ClÃ© publique de rÃ©fÃ©rence (Ã  conserver sur tout hÃ©bergeur) :**
 
 ```
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIVTDqC5yyNd6Ir9/NLjzUTT1IhugyRyRCo6+O5LZC4Z miyukini@gmail.com
 ```
 
-À placer dans `~/.ssh/authorized_keys` du compte admin sur le VPS (lors de la création du VPS Hostinger, fournir cette clé).
+Ã€ placer dans `~/.ssh/authorized_keys` du compte admin sur le VPS (lors de la crÃ©ation du VPS Hostinger, fournir cette clÃ©).
 
-> **CONFIDENTIEL :** La clé privée SSH ne doit **jamais** être commitée dans un dépôt public.
+> **CONFIDENTIEL :** La clÃ© privÃ©e SSH ne doit **jamais** Ãªtre commitÃ©e dans un dÃ©pÃ´t public.
 
-### Ports MWS (à ouvrir dans le pare-feu Hostinger et/ou ufw)
+### Ports MWS (Ã  ouvrir dans le pare-feu Hostinger et/ou ufw)
 
 | Port | Protocole | Usage |
 |------|-----------|-------|
@@ -56,25 +56,25 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIVTDqC5yyNd6Ir9/NLjzUTT1IhugyRyRCo6+O5LZC4Z
 ## 1. Architecture cible
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│  Hostinger VPS — Debian 13                               │
-│  IP publique : 46.202.129.65                             │
-│                                                          │
-│  ┌────────────────────────────────────────────────────┐  │
-│  │               ORIGIN (MWS uniquement)              │  │
-│  │────────────────────────────────────────────────────│  │
-│  │  :7000   ── miyukini-origin (relay)                │  │
-│  │  :21000  ── miyukini-origin (tracker)              │  │
-│  │  :443    ── nginx (HTTPS → catalogue + admin)      │  │
-│  │  :80     ── nginx (HTTP → redirect HTTPS)          │  │
-│  │  :8080   ── catalogue web MWS (interne)            │  │
-│  │  :8081   ── MiyukiniAdmin Origin (interne)         │  │
-│  │                                                    │  │
-│  │  Config  : /etc/miyukini/                          │  │
-│  │  Données : /var/lib/miyukini/                      │  │
-│  │  Logs    : /var/log/miyukini/                      │  │
-│  └────────────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Hostinger VPS â€” Debian 13                               â”‚
+â”‚  IP publique : 46.202.129.65                             â”‚
+â”‚                                                          â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚               ORIGIN (MWS uniquement)              â”‚  â”‚
+â”‚  â”‚â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚  â”‚
+â”‚  â”‚  :7000   â”€â”€ miyukini-origin (relay)                â”‚  â”‚
+â”‚  â”‚  :21000  â”€â”€ miyukini-origin (tracker)              â”‚  â”‚
+â”‚  â”‚  :443    â”€â”€ nginx (HTTPS â†’ catalogue + admin)      â”‚  â”‚
+â”‚  â”‚  :80     â”€â”€ nginx (HTTP â†’ redirect HTTPS)          â”‚  â”‚
+â”‚  â”‚  :8080   â”€â”€ catalogue web MWS (interne)            â”‚  â”‚
+â”‚  â”‚  :8081   â”€â”€ MiyukiniAdmin Origin (interne)         â”‚  â”‚
+â”‚  â”‚                                                    â”‚  â”‚
+â”‚  â”‚  Config  : /etc/miyukini/                          â”‚  â”‚
+â”‚  â”‚  DonnÃ©es : /var/lib/miyukini/                      â”‚  â”‚
+â”‚  â”‚  Logs    : /var/log/miyukini/                      â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 | Service | Port | Protocole | Processus |
@@ -87,7 +87,7 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIVTDqC5yyNd6Ir9/NLjzUTT1IhugyRyRCo6+O5LZC4Z
 | **HTTP** | 80 | HTTP | `nginx` (redirect) |
 | **SSH** | 22 | TCP | `sshd` |
 
-> **Règle :** Origin n'exécute **aucun** service hors périmètre MWS.
+> **RÃ¨gle :** Origin n'exÃ©cute **aucun** service hors pÃ©rimÃ¨tre MWS.
 
 ---
 
@@ -99,9 +99,9 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIVTDqC5yyNd6Ir9/NLjzUTT1IhugyRyRCo6+O5LZC4Z
 ssh -i ssh-key-2026-02-12.key root@46.202.129.65
 ```
 
-Ou : `ssh root@46.202.129.65` (si la clé est dans l'agent).
+Ou : `ssh root@46.202.129.65` (si la clÃ© est dans l'agent).
 
-> Si SSH refuse la clé avec "permissions too open" :
+> Si SSH refuse la clÃ© avec "permissions too open" :
 > ```powershell
 > icacls ssh-key-2026-02-12.key /inheritance:r /grant:r "%USERNAME%:R"
 > ```
@@ -113,27 +113,27 @@ chmod 600 ssh-key-2026-02-12.key
 ssh -i ssh-key-2026-02-12.key root@46.202.129.65
 ```
 
-### Vérification
+### VÃ©rification
 
 ```bash
-# Une fois connecté :
-cat /etc/os-release   # → Debian 13 (Trixie)
+# Une fois connectÃ© :
+cat /etc/os-release   # â†’ Debian 13 (Trixie)
 uname -a
 ```
 
 ---
 
-## 3. Préparation du système (Debian 13)
+## 3. PrÃ©paration du systÃ¨me (Debian 13)
 
-> **Important :** Debian 13 utilise `apt` (pas `dnf`) et `ufw` (pas `firewalld`). Pas de SELinux par défaut.
+> **Important :** Debian 13 utilise `apt` (pas `dnf`) et `ufw` (pas `firewalld`). Pas de SELinux par dÃ©faut.
 
-### 3.1 Mise à jour du système
+### 3.1 Mise Ã  jour du systÃ¨me
 
 ```bash
 sudo apt update && sudo apt upgrade -y
 ```
 
-### 3.2 Installation des dépendances
+### 3.2 Installation des dÃ©pendances
 
 ```bash
 # Outils de compilation (Rust a besoin de gcc, libssl-dev, etc.)
@@ -159,13 +159,13 @@ sudo apt install -y argon2 || {
 }
 ```
 
-### 3.3 Création de l'utilisateur dédié
+### 3.3 CrÃ©ation de l'utilisateur dÃ©diÃ©
 
 ```bash
 sudo useradd -r -s /sbin/nologin -m -d /var/lib/miyukini miyukini
 ```
 
-### 3.4 Création de l'arborescence
+### 3.4 CrÃ©ation de l'arborescence
 
 ```bash
 sudo mkdir -p /etc/miyukini
@@ -188,7 +188,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 # Charger l'environnement
 source "$HOME/.cargo/env"
 
-# Vérifier
+# VÃ©rifier
 rustc --version    # >= 1.70
 cargo --version
 ```
@@ -197,7 +197,7 @@ cargo --version
 
 ## 5. Compilation et installation du binaire Origin
 
-### 5.1 Cloner le dépôt
+### 5.1 Cloner le dÃ©pÃ´t
 
 ```bash
 cd ~
@@ -215,7 +215,7 @@ cargo build --release
 > ```bash
 > sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
 > sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile
-> # Après compilation : sudo swapoff /swapfile && sudo rm /swapfile
+> # AprÃ¨s compilation : sudo swapoff /swapfile && sudo rm /swapfile
 > ```
 
 ### 5.3 Installer le binaire
@@ -224,8 +224,8 @@ cargo build --release
 sudo cp target/release/miyukini-origin /usr/local/bin/
 sudo chmod +x /usr/local/bin/miyukini-origin
 
-# Vérifier
-miyukini-origin --version 2>/dev/null || echo "Binaire installé"
+# VÃ©rifier
+miyukini-origin --version 2>/dev/null || echo "Binaire installÃ©"
 ls -la /usr/local/bin/miyukini-origin
 ```
 
@@ -237,12 +237,12 @@ ls -la /usr/local/bin/miyukini-origin
 
 ```bash
 sudo tee /etc/miyukini/origin.toml > /dev/null << ORIGIN_TOML
-# ═══════════════════════════════════════════════════════════
-#  MWS Origin — Configuration
-#  VPS  : Hostinger — Debian 13
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+#  MWS Origin â€” Configuration
+#  VPS  : Hostinger â€” Debian 13
 #  IP   : 46.202.129.65
-#  Rôle : Origin (relay + tracker + source de vérité)
-# ═══════════════════════════════════════════════════════════
+#  RÃ´le : Origin (relay + tracker + source de vÃ©ritÃ©)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 [identity]
 role = "origin"
@@ -334,11 +334,11 @@ sudo tee /etc/miyukini/tokens.json > /dev/null << TOKENS_JSON
 }
 TOKENS_JSON
 
-echo "Token généré : $ORIGIN_TOKEN"
-echo "CONSERVER CE TOKEN — nécessaire pour les premiers COGs."
+echo "Token gÃ©nÃ©rÃ© : $ORIGIN_TOKEN"
+echo "CONSERVER CE TOKEN â€” nÃ©cessaire pour les premiers COGs."
 ```
 
-### 6.3 Certificat TLS auto-signé (mode initial)
+### 6.3 Certificat TLS auto-signÃ© (mode initial)
 
 ```bash
 sudo mkdir -p /etc/miyukini/tls
@@ -353,52 +353,52 @@ sudo chown miyukini:miyukini /etc/miyukini/tls/*
 sudo chmod 600 /etc/miyukini/tls/origin.key
 ```
 
-> Migrer vers Let's Encrypt dès que le domaine `origin.miyukini.com` est actif (certbot).
+> Migrer vers Let's Encrypt dÃ¨s que le domaine `origin.miyukini.com` est actif (certbot).
 
 ### 6.4 Certificat SSL wildcard Let's Encrypt (sous-domaines COG)
 
 Pour activer les sous-domaines COG (`xxx.miyukini.com`), un certificat wildcard est requis. Let's Encrypt exige le **challenge DNS-01** (HTTP-01 ne fonctionne pas pour les wildcards).
 
-**Prérequis :** Le DNS wildcard `*.miyukini.com` doit pointer vers l'IP du VPS (46.202.129.65).
+**PrÃ©requis :** Le DNS wildcard `*.miyukini.com` doit pointer vers l'IP du VPS (46.202.129.65).
 
-**Étape 1 — Lancer certbot (sur le VPS ou en local) :**
+**Ã‰tape 1 â€” Lancer certbot (sur le VPS ou en local) :**
 
 ```bash
 sudo certbot certonly --manual --preferred-challenges dns \
   -d "miyukini.com" -d "*.miyukini.com"
 ```
 
-**Étape 2 — Enregistrement TXT temporaire :**
+**Ã‰tape 2 â€” Enregistrement TXT temporaire :**
 
-Certbot affiche un enregistrement TXT à ajouter dans le DNS Hostinger :
+Certbot affiche un enregistrement TXT Ã  ajouter dans le DNS Hostinger :
 
 - Type : `TXT`
 - Nom : `_acme-challenge` ou `_acme-challenge.miyukini.com` (selon l'instruction certbot)
-- Valeur : (chaîne fournie par certbot)
+- Valeur : (chaÃ®ne fournie par certbot)
 - TTL : 300 ou 3600
 
-**Étape 3 — Propagation DNS :**
+**Ã‰tape 3 â€” Propagation DNS :**
 
-Attendre 2 à 10 minutes, vérifier la propagation :
+Attendre 2 Ã  10 minutes, vÃ©rifier la propagation :
 
 ```bash
 dig TXT _acme-challenge.miyukini.com +short
 ```
 
-**Étape 4 — Validation :**
+**Ã‰tape 4 â€” Validation :**
 
-Appuyer sur Entrée dans le terminal certbot pour lancer la vérification.
+Appuyer sur EntrÃ©e dans le terminal certbot pour lancer la vÃ©rification.
 
-**Étape 5 — Chemins des certificats :**
+**Ã‰tape 5 â€” Chemins des certificats :**
 
-Les certificats sont installés dans :
+Les certificats sont installÃ©s dans :
 
 - `/etc/letsencrypt/live/miyukini.com/fullchain.pem`
 - `/etc/letsencrypt/live/miyukini.com/privkey.pem`
 
-**Étape 6 — Nginx :**
+**Ã‰tape 6 â€” Nginx :**
 
-Mettre à jour la configuration nginx (voir section 8) pour utiliser ces chemins. La config de référence `origin-miyukini.conf` utilise déjà `/etc/letsencrypt/live/miyukini.com/`.
+Mettre Ã  jour la configuration nginx (voir section 8) pour utiliser ces chemins. La config de rÃ©fÃ©rence `origin-miyukini.conf` utilise dÃ©jÃ  `/etc/letsencrypt/live/miyukini.com/`.
 
 **Renouvellement (tous les 90 jours) :**
 
@@ -408,24 +408,24 @@ Sans plugin DNS Hostinger, le renouvellement est manuel :
 sudo certbot renew --manual --preferred-challenges dns
 ```
 
-Répéter l'ajout de l'enregistrement TXT dans Hostinger à chaque renouvellement. Pour automatiser, envisager un plugin DNS (ex. `certbot-dns-cloudflare`) ou un hook personnalisé.
+RÃ©pÃ©ter l'ajout de l'enregistrement TXT dans Hostinger Ã  chaque renouvellement. Pour automatiser, envisager un plugin DNS (ex. `certbot-dns-cloudflare`) ou un hook personnalisÃ©.
 
 ---
 
 ## 7. Configuration MiyukiniAdmin Origin
 
-### 7.1 Générer le hash du mot de passe
+### 7.1 GÃ©nÃ©rer le hash du mot de passe
 
 ```bash
 ADMIN_HASH=$(echo -n '!!REDACTED_PASSWORD!!' | argon2 $(openssl rand -base64 16) -id -m 16 -t 3 -p 4 -l 32 -e)
 echo "Hash Argon2id : $ADMIN_HASH"
 ```
 
-### 7.2 Créer admin.toml
+### 7.2 CrÃ©er admin.toml
 
 ```bash
 sudo tee /etc/miyukini/admin.toml > /dev/null << ADMIN_TOML
-# MiyukiniAdmin Origin — Configuration (CONFIDENTIEL)
+# MiyukiniAdmin Origin â€” Configuration (CONFIDENTIEL)
 
 [admin]
 email = "miyukini@gmail.com"
@@ -445,13 +445,13 @@ force_https = true
 ADMIN_TOML
 ```
 
-### 7.3 Générer la clé JWT
+### 7.3 GÃ©nÃ©rer la clÃ© JWT
 
 ```bash
 openssl rand -base64 64 | sudo tee /etc/miyukini/admin_jwt.key > /dev/null
 ```
 
-### 7.4 Sécuriser les fichiers
+### 7.4 SÃ©curiser les fichiers
 
 ```bash
 sudo chown -R miyukini:miyukini /etc/miyukini/
@@ -467,13 +467,13 @@ sudo chmod 600 /etc/miyukini/admin_jwt.key
 
 **Debian utilise `sites-available` / `sites-enabled`.**
 
-Pour la config complète incluant les sous-domaines COG (`*.miyukini.com`), voir `docs/doc_for_website/origin-miyukini.conf` à la racine du dépôt.
+Pour la config complÃ¨te incluant les sous-domaines COG (`*.miyukini.com`), voir `docs/doc_for_website/origin-miyukini.conf` Ã  la racine du dÃ©pÃ´t.
 
-> **Après le certificat wildcard (section 6.4)** : remplacer les chemins `ssl_certificate` par `/etc/letsencrypt/live/miyukini.com/fullchain.pem` et `privkey.pem`, puis `sudo nginx -t && sudo systemctl reload nginx`.
+> **AprÃ¨s le certificat wildcard (section 6.4)** : remplacer les chemins `ssl_certificate` par `/etc/letsencrypt/live/miyukini.com/fullchain.pem` et `privkey.pem`, puis `sudo nginx -t && sudo systemctl reload nginx`.
 
 ```bash
 sudo tee /etc/nginx/sites-available/origin-miyukini.conf > /dev/null << NGINX_CONF
-# Nginx — Origin Miyukini MWS (Hostinger VPS — 46.202.129.65)
+# Nginx â€” Origin Miyukini MWS (Hostinger VPS â€” 46.202.129.65)
 
 limit_req_zone \$binary_remote_addr zone=admin_login:10m rate=5r/m;
 
@@ -541,7 +541,7 @@ sudo systemctl start nginx
 ```bash
 sudo tee /etc/systemd/system/miyukini-origin.service > /dev/null << 'SYSTEMD_UNIT'
 [Unit]
-Description=Miyukini Webway Origin (relay + tracker + source de vérité + admin)
+Description=Miyukini Webway Origin (relay + tracker + source de vÃ©ritÃ© + admin)
 After=network-online.target
 Wants=network-online.target
 
@@ -578,10 +578,10 @@ sudo systemctl status miyukini-origin
 
 ## 10. Pare-feu (ufw)
 
-Debian 13 utilise **ufw** (pas firewalld). Si ufw n'est pas installé, l'installer d'abord : `apt-get update && apt-get install -y ufw`.
+Debian 13 utilise **ufw** (pas firewalld). Si ufw n'est pas installÃ©, l'installer d'abord : `apt-get update && apt-get install -y ufw`.
 
 ```bash
-# Autoriser SSH d'abord pour ne pas se déconnecter
+# Autoriser SSH d'abord pour ne pas se dÃ©connecter
 ufw allow 22/tcp
 ufw allow 80/tcp
 ufw allow 443/tcp
@@ -595,13 +595,13 @@ ufw status numbered
 **Depuis ta machine (Windows)** : tu peux aussi lancer le script fourni (installe ufw si besoin, puis ouvre les ports) :
 
 ```powershell
-# À la racine du repo (avec clé dans l'agent ou -i si besoin)
+# Ã€ la racine du repo (avec clÃ© dans l'agent ou -i si besoin)
 Get-Content .\scripts\vps-ufw-open-ports.sh -Raw | ssh root@46.202.129.65 "bash -s"
 ```
 
 ---
 
-## 11. Hardening système
+## 11. Hardening systÃ¨me
 
 ### 11.1 SYN cookies et limites TCP
 
@@ -617,12 +617,12 @@ sudo sysctl --system
 
 ### 11.2 NTP (contremesure R-006)
 
-Debian 13 utilise **systemd-timesyncd** par défaut.
+Debian 13 utilise **systemd-timesyncd** par dÃ©faut.
 
 ```bash
 sudo systemctl enable systemd-timesyncd
 sudo systemctl start systemd-timesyncd
-timedatectl status   # → "System clock synchronized: yes"
+timedatectl status   # â†’ "System clock synchronized: yes"
 ```
 
 ---
@@ -661,20 +661,20 @@ sudo tar czf "$BACKUP_DIR/miyukini-data.tar.gz" \
     /etc/miyukini/ \
     --exclude='*.log'
 
-echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] Sauvegarde terminée : $BACKUP_DIR"
+echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] Sauvegarde terminÃ©e : $BACKUP_DIR"
 BACKUP_SCRIPT
 
 sudo chmod +x /opt/scripts/backup-origin.sh
 
-# Cron quotidien à 3h
+# Cron quotidien Ã  3h
 (sudo crontab -l 2>/dev/null; echo "0 3 * * * /opt/scripts/backup-origin.sh >> /var/log/miyukini/backup.log 2>&1") | sudo crontab -
 ```
 
 ---
 
-## 14. Manifeste Origin signé
+## 14. Manifeste Origin signÃ©
 
-Voir [MWS - Manifeste Origin et Adresse Canonique](../securite/MWS%20-%20Manifeste%20Origin%20et%20Adresse%20Canonique.md). Générer les clés de l'autorité MWS sur une machine sécurisée, calculer le pin TLS depuis le certificat du VPS, puis signer le manifeste avec l'IP/URL canonique du VPS Hostinger.
+Voir [MWS - Manifeste Origin et Adresse Canonique](../securite/MWS%20-%20Manifeste%20Origin%20et%20Adresse%20Canonique.md). GÃ©nÃ©rer les clÃ©s de l'autoritÃ© MWS sur une machine sÃ©curisÃ©e, calculer le pin TLS depuis le certificat du VPS, puis signer le manifeste avec l'IP/URL canonique du VPS Hostinger.
 
 ---
 
@@ -707,24 +707,24 @@ openssl s_client -connect 46.202.129.65:7000 -tls1_2
 
 ---
 
-## 16. Récapitulatif
+## 16. RÃ©capitulatif
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
 | **OS** | Debian 13 (Trixie) |
 | **IP publique** | `46.202.129.65` |
-| **Utilisateur SSH** | `root` ou compte dédié |
-| **Clé SSH** | `ssh-key-2026-02-12.key` |
+| **Utilisateur SSH** | `root` ou compte dÃ©diÃ© |
+| **ClÃ© SSH** | `ssh-key-2026-02-12.key` |
 | **Port relay** | 7000 |
 | **Port tracker** | 21000 |
-| **Port web** | 80 → redirect / 443 HTTPS |
+| **Port web** | 80 â†’ redirect / 443 HTTPS |
 | **MiyukiniAdmin** | `https://46.202.129.65/admin` (port interne 8081) |
 | **Binaire** | `/usr/local/bin/miyukini-origin` |
 | **Config** | `/etc/miyukini/origin.toml`, `admin.toml`, `tokens.json` |
-| **TLS** | `/etc/miyukini/tls/` (auto-signé → Let's Encrypt si DNS) |
-| **Données** | `/var/lib/miyukini/` |
+| **TLS** | `/etc/miyukini/tls/` (auto-signÃ© â†’ Let's Encrypt si DNS) |
+| **DonnÃ©es** | `/var/lib/miyukini/` |
 | **Logs** | `/var/log/miyukini/` |
-| **Utilisateur système** | `miyukini` (nologin) |
+| **Utilisateur systÃ¨me** | `miyukini` (nologin) |
 | **Package manager** | `apt` |
 | **Firewall** | `ufw` |
 | **NTP** | `systemd-timesyncd` |
@@ -732,17 +732,18 @@ openssl s_client -connect 46.202.129.65:7000 -tls1_2
 
 ---
 
-## Références
+## RÃ©fÃ©rences
 
 - [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 - [MWS - Origin](../acteurs/MWS%20-%20Origin.md)
 - [MWS - MiyukiniAdmin Origin](../administration/MWS%20-%20MiyukiniAdmin.md)
 - [MWS - Manifeste Origin et Adresse Canonique](../securite/MWS%20-%20Manifeste%20Origin%20et%20Adresse%20Canonique.md)
-- [MWS - Guide de Déploiement](./MWS%20-%20Guide%20de%20Deploiement.md)
-- [Miyukini - Hostinger VPS Origin Webway](../../setup/Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md)
+- [MWS - Guide de DÃ©ploiement](./MWS%20-%20Guide%20de%20Deploiement.md)
+- [Miyukini - Hostinger VPS Origin Webway](..//setup//Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md)
 
 ---
 
 **Version :** 1.0  
-**Mise à jour :** Implémentation Origin sur Hostinger VPS (Debian 13), migration depuis Oracle Cloud  
-**Classification :** Documentation MWS — Déploiement
+**Mise Ã  jour :** ImplÃ©mentation Origin sur Hostinger VPS (Debian 13), migration depuis Oracle Cloud  
+**Classification :** Documentation MWS â€” DÃ©ploiement
+

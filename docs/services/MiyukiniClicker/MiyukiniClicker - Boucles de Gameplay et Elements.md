@@ -1,14 +1,14 @@
-# MiyuClicker — Boucles de gameplay, elements et assets UI
+﻿# MiyuClicker â€” Boucles de gameplay, elements et assets UI
 
 ## Contexte
 
-Ce document decrit les **boucles de gameplay** de MiyuClicker, les **elements necessaires** a l'ecran de gestion (« Mon domaine »), la **hierarchie de population** (ouvriers, batisseurs, soldats), les **couts de conversion**, et l'utilisation des **packs UI** (Fantasy UI Borders, curseurs Toon) issus du Miyukini UI Builder.
+Ce document decrit les **boucles de gameplay** de MiyuClicker, les **elements necessaires** a l'ecran de gestion (Â« Mon domaine Â»), la **hierarchie de population** (ouvriers, batisseurs, soldats), les **couts de conversion**, et l'utilisation des **packs UI** (Fantasy UI Borders, curseurs Toon) issus du Miyukini UI Builder.
 
 Il est base sur le **mockup GUI de reference** (`references/MiyukiniClicker_GUI.jpg`) qui represente la maquette cible de l'ecran principal.
 
 ## Portee / Scope
 
-- **Perimetre :** Boucles de gameplay (production, construction, conversion de population, combat), layout GUI de reference, couts de conversion ouvrier → batisseur / soldat, utilisation des assets Fantasy UI Borders et curseurs Toon.
+- **Perimetre :** Boucles de gameplay (production, construction, conversion de population, combat), layout GUI de reference, couts de conversion ouvrier â†’ batisseur / soldat, utilisation des assets Fantasy UI Borders et curseurs Toon.
 - **Hors perimetre :** Carte du monde (grande strategie), equilibrage numerique fin, ecrans secondaires (Loading, Landing, Slots).
 - **Reference code :** `crates/miyuclicker/` (a implementer), `apps/central/src/services/ui_assets.rs` (packs UI).
 
@@ -20,9 +20,9 @@ La population du joueur se divise en **trois types**, tous issus d'une meme pool
 
 ```
 Population totale (Pop)
-├── Ouvriers    (population de base, unite fondamentale)
-├── Batisseurs  (ouvriers transformes, construisent les batiments)
-└── Soldats     (ouvriers transformes, defendent et conquerent)
+â”œâ”€â”€ Ouvriers    (population de base, unite fondamentale)
+â”œâ”€â”€ Batisseurs  (ouvriers transformes, construisent les batiments)
+â””â”€â”€ Soldats     (ouvriers transformes, defendent et conquerent)
 ```
 
 ### 1.1 Ouvriers (pop de base)
@@ -33,7 +33,7 @@ Population totale (Pop)
 | **Origine** | Naissent naturellement (fecondite) ou via actions du joueur. |
 | **Transformation** | Peuvent etre **convertis** en batisseurs ou en soldats (conversion unidirectionnelle). |
 | **Affichage** | Barre du haut : `Ouvriers xxx` |
-| **Sprite** | 3×1 px — tete blanche, corps **vert** |
+| **Sprite** | 3Ã—1 px â€” tete blanche, corps **vert** |
 
 ### 1.2 Batisseurs
 
@@ -42,7 +42,7 @@ Population totale (Pop)
 | **Role** | Ouvriers specialises dans la **construction**. Alloues aux chantiers (Maisons, Casernes, Guilde des Macons), ils apportent **1 pt de construction / jour** chacun. |
 | **Origine** | Transformation d'un ouvrier (voir section 3.1). |
 | **Affichage** | Barre du haut : `Batisseurs xxx` |
-| **Sprite** | 3×1 px — tete blanche, corps **marron fonce** |
+| **Sprite** | 3Ã—1 px â€” tete blanche, corps **marron fonce** |
 
 ### 1.3 Soldats
 
@@ -51,7 +51,7 @@ Population totale (Pop)
 | **Role** | Ouvriers specialises dans le **combat**. Utilises pour defendre le territoire et conquetes sur la Carte du monde. |
 | **Origine** | Transformation d'un ouvrier (voir section 3.2). |
 | **Affichage** | Barre du haut : `Soldats xxx` |
-| **Sprite** | 3×1 px — tete blanche, corps **rouge** |
+| **Sprite** | 3Ã—1 px â€” tete blanche, corps **rouge** |
 
 ---
 
@@ -60,26 +60,26 @@ Population totale (Pop)
 Le jeu repose sur **trois boucles interconnectees** qui se renforcent mutuellement :
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  BOUCLE 1 : PRODUCTION          BOUCLE 2 : CONSTRUCTION        │
-│  (idle/automatique)             (investissement long terme)     │
-│                                                                 │
-│  Ouvriers → Ressources          Batisseurs → Batiments          │
-│  (food, bois, pierre,           (Maisons → +pop cap,            │
-│   metal, outils, armes)          Casernes → +soldat cap,        │
-│                                  Guilde → +batisseur cap)       │
-│                                                                 │
-│          └─────── alimentent ────────┘                          │
-│                        │                                        │
-│                        ▼                                        │
-│              BOUCLE 3 : CONQUETE                                │
-│              (grande strategie)                                  │
-│              Soldats → Carte du monde                            │
-│              → bonus de tribu (ressources)                       │
-└─────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  BOUCLE 1 : PRODUCTION          BOUCLE 2 : CONSTRUCTION        â”‚
+â”‚  (idle/automatique)             (investissement long terme)     â”‚
+â”‚                                                                 â”‚
+â”‚  Ouvriers â†’ Ressources          Batisseurs â†’ Batiments          â”‚
+â”‚  (food, bois, pierre,           (Maisons â†’ +pop cap,            â”‚
+â”‚   metal, outils, armes)          Casernes â†’ +soldat cap,        â”‚
+â”‚                                  Guilde â†’ +batisseur cap)       â”‚
+â”‚                                                                 â”‚
+â”‚          â””â”€â”€â”€â”€â”€â”€â”€ alimentent â”€â”€â”€â”€â”€â”€â”€â”€â”˜                          â”‚
+â”‚                        â”‚                                        â”‚
+â”‚                        â–¼                                        â”‚
+â”‚              BOUCLE 3 : CONQUETE                                â”‚
+â”‚              (grande strategie)                                  â”‚
+â”‚              Soldats â†’ Carte du monde                            â”‚
+â”‚              â†’ bonus de tribu (ressources)                       â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### 2.1 Boucle 1 — Production (idle)
+### 2.1 Boucle 1 â€” Production (idle)
 
 La boucle **primaire** du jeu. Les ouvriers sont affectes a des postes de production qui generent des ressources en continu (par tick/seconde).
 
@@ -95,14 +95,14 @@ La boucle **primaire** du jeu. Les ouvriers sont affectes a des postes de produc
 **Mecanisme :**
 - Le joueur utilise les boutons **[+]** et **[-]** pour affecter/retirer des ouvriers a chaque poste.
 - Le nombre d'ouvriers affectes determine le debit de production (xxx/sec).
-- Les ouvriers non affectes restent dans la pool « Ouvriers » disponibles.
+- Les ouvriers non affectes restent dans la pool Â« Ouvriers Â» disponibles.
 
 **Formule de production (par tick) :**
 ```
-ressource += nb_ouvriers_affectes × taux_de_base × delta_temps
+ressource += nb_ouvriers_affectes Ã— taux_de_base Ã— delta_temps
 ```
 
-### 2.2 Boucle 2 — Construction (long terme)
+### 2.2 Boucle 2 â€” Construction (long terme)
 
 La boucle de **croissance** du royaume. Les batisseurs construisent des batiments qui augmentent les plafonds de population.
 
@@ -116,15 +116,15 @@ La boucle de **croissance** du royaume. Les batisseurs construisent des batiment
 1. Le joueur clique sur **[Construire]** si les ressources sont suffisantes (bouton vert) ou non (bouton blanc/inactif).
 2. Le cout (B:xx P:xx M:xx = Bois, Pierre, Metal) est **preleve immediatement**.
 3. Les **batisseurs alloues** font progresser la barre (1 pt/jour chacun).
-4. Quand la barre atteint 100% → le batiment monte de niveau (ou +1 maison).
+4. Quand la barre atteint 100% â†’ le batiment monte de niveau (ou +1 maison).
 
 **Allocation des batisseurs :**
 - Chaque carte batiment a ses propres boutons **[+] xxx [-]** pour affecter des batisseurs.
 - Les batisseurs sont pris de la pool globale de batisseurs.
 
-### 2.3 Boucle 3 — Conquete (grande strategie)
+### 2.3 Boucle 3 â€” Conquete (grande strategie)
 
-La boucle d'**objectif a long terme**. Les soldats sont envoyes sur la Carte du monde pour conquérir des cites-Etats.
+La boucle d'**objectif a long terme**. Les soldats sont envoyes sur la Carte du monde pour conquÃ©rir des cites-Etats.
 
 | Action | Mecanisme |
 |--------|-----------|
@@ -133,7 +133,7 @@ La boucle d'**objectif a long terme**. Les soldats sont envoyes sur la Carte du 
 | **Combat** | Resolution simplifiee (hasard + stats). |
 | **Victoire** | La cite donne un **bonus de tribu** (ressources continues). |
 
-*(Detail : voir [MiyuClicker - Document Fondateur](MiyuClicker%20-%20Document%20Fondateur.md), sections 3.2 et 3.3.)*
+*(Detail : voir [MiyuClicker - Document Fondateur](MiyukiniClicker%20-%20Document%20Fondateur.md), sections 3.2 et 3.3.)*
 
 ---
 
@@ -141,7 +141,7 @@ La boucle d'**objectif a long terme**. Les soldats sont envoyes sur la Carte du 
 
 Les ouvriers sont la **ressource humaine fondamentale**. Ils peuvent etre transformes de maniere **unidirectionnelle** en batisseurs ou soldats. Les couts augmentent avec le nombre deja converti, creant une **courbe de cout croissant** qui force le joueur a equilibrer ses investissements.
 
-### 3.1 Ouvrier → Batisseur
+### 3.1 Ouvrier â†’ Batisseur
 
 | Propriete | Valeur |
 |-----------|--------|
@@ -166,7 +166,7 @@ Les ouvriers sont la **ressource humaine fondamentale**. Ils peuvent etre transf
 
 **Justification du scaling :** Les outils deviennent de plus en plus demandes au fur et a mesure que le joueur specialise sa main d'oeuvre. Cela force un equilibre entre production (ouvriers a l'Atelier) et construction (batisseurs).
 
-### 3.2 Ouvrier → Soldat
+### 3.2 Ouvrier â†’ Soldat
 
 | Propriete | Valeur |
 |-----------|--------|
@@ -193,7 +193,7 @@ Les ouvriers sont la **ressource humaine fondamentale**. Ils peuvent etre transf
 
 ### 3.3 Pas de conversion inverse
 
-Les conversions sont **unidirectionnelles** : un batisseur ou un soldat ne peut pas redevenir ouvrier. Cela rend chaque conversion **strategique** et irreversible — le joueur doit planifier ses besoins.
+Les conversions sont **unidirectionnelles** : un batisseur ou un soldat ne peut pas redevenir ouvrier. Cela rend chaque conversion **strategique** et irreversible â€” le joueur doit planifier ses besoins.
 
 ### 3.4 Representation dans la GUI
 
@@ -201,32 +201,32 @@ D'apres le mockup de reference, les fleches entre la zone de production (gauche)
 
 ```
 Production (ouvriers)              Construction (batiments)
-┌─────────────────┐                ┌──────────────────────┐
-│ Ferme           │  ── +1 Ouvrier ──►  Maisons          │
-│ Scierie         │                │                      │
-│ Carriere        │  ── +1 Batisseur ►  Casernes         │
-│ Mine            │                │                      │
-│ Atelier         │  ── +1 Soldat ───►  Guilde Macons    │
-│ Forge           │                │                      │
-└─────────────────┘                └──────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Ferme           â”‚  â”€â”€ +1 Ouvrier â”€â”€â–º  Maisons          â”‚
+â”‚ Scierie         â”‚                â”‚                      â”‚
+â”‚ Carriere        â”‚  â”€â”€ +1 Batisseur â–º  Casernes         â”‚
+â”‚ Mine            â”‚                â”‚                      â”‚
+â”‚ Atelier         â”‚  â”€â”€ +1 Soldat â”€â”€â”€â–º  Guilde Macons    â”‚
+â”‚ Forge           â”‚                â”‚                      â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
 
-## 4. Boucle d'equilibre — Le dilemme du joueur
+## 4. Boucle d'equilibre â€” Le dilemme du joueur
 
 Le gameplay cree un **triangle d'equilibre** permanent :
 
 ```
         Nourriture
         (survie)
-           ▲
+           â–²
           / \
          /   \
         /     \
        /  POP  \
       /         \
-     ▼           ▼
+     â–¼           â–¼
   Outils       Armes
 (croissance)  (conquete)
 ```
@@ -238,12 +238,12 @@ Le gameplay cree un **triangle d'equilibre** permanent :
 | **Maximiser les soldats** | Armee forte, conquetes rapides | Economie affaiblie, constructions lentes |
 
 **Boucle de feedback :**
-1. Plus d'ouvriers → plus de ressources → possibilite de convertir → plus de batisseurs/soldats.
-2. Plus de batisseurs → batiments plus rapides → cap population plus eleve → plus d'ouvriers potentiels.
-3. Plus de soldats → conquetes → bonus de tribu → plus de ressources passives.
-4. Trop de conversions → moins d'ouvriers → production en chute → famine possible.
+1. Plus d'ouvriers â†’ plus de ressources â†’ possibilite de convertir â†’ plus de batisseurs/soldats.
+2. Plus de batisseurs â†’ batiments plus rapides â†’ cap population plus eleve â†’ plus d'ouvriers potentiels.
+3. Plus de soldats â†’ conquetes â†’ bonus de tribu â†’ plus de ressources passives.
+4. Trop de conversions â†’ moins d'ouvriers â†’ production en chute â†’ famine possible.
 
-**Contrainte critique :** Le systeme de **bonheur** (voir [MiyuClicker - Systeme Bonheur](MiyuClicker%20-%20Systeme%20Bonheur.md)) agit comme regulateur. Si la nourriture tombe en dessous de la population, le moral baisse, la fecondite chute, et apres 7 jours a 0 nourriture → **Game Over**.
+**Contrainte critique :** Le systeme de **bonheur** (voir [MiyuClicker - Systeme Bonheur](MiyukiniClicker%20-%20Systeme%20Bonheur.md)) agit comme regulateur. Si la nourriture tombe en dessous de la population, le moral baisse, la fecondite chute, et apres 7 jours a 0 nourriture â†’ **Game Over**.
 
 ---
 
@@ -254,46 +254,46 @@ Base sur le mockup `references/MiyukiniClicker_GUI.jpg` :
 ### 5.1 Structure globale
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│ HEADER (2 lignes)                                                   │
-│ L1: [pseudo] Food xx/max │ Bois xx/max │ Pierre xx/max │ Metal     │
-│     xx/max │ Outils xx/max │ Armes xx/max           [⚙ config]    │
-│ L2: Pop xxx/max │ Ouvriers xxx │ Batisseurs xxx │ Soldats xxx      │
-│                                    │ Carte du monde │ Mon domaine │ │
-├─────────────────────────────────────────────────────────────────────┤
-│ ZONE CITE (20% hauteur, min 200px)                                  │
-│ ┌───────────────────── ciel (60%) ─────────────────────┐            │
-│ │                    [chateau]                          │ [notif]   │
-│ ├───────────────────── sol (40%) ──────────────────────┤            │
-│ │  ▐ ▐ ▐    ▐▐▐▐▐▐▐    ▐▐      ▐▐▐                   │            │
-│ │ vert=ouvr  rouge=sold  violet=bat                     │            │
-│ └──────────────────────────────────────────────────────┘            │
-├─────────────────────────────────────────────────────────────────────┤
-│ PANNEAU BAS (production + construction)                              │
-│ ┌──────────────┐  conversions  ┌─────────────────────────┐          │
-│ │ La production│               │ Maisons        [LVL]    │          │
-│ │              │  +1 Ouvrier   │ ▓▓▓▓░░░░░░░░░░░ 0%      │          │
-│ │ Ferme    [+]│  ──────────►  │ Batisseurs [+]xxx[-]     │          │
-│ │ Scierie  [+]│               │ B:xx P:xx M:xx [Const]   │          │
-│ │ Carriere [+]│  +1 Batisseur ├─────────────────────────┤          │
-│ │ Mine     [+]│  ──────────►  │ Casernes       [LVL]    │          │
-│ │ Atelier  [+]│               │ ▓▓▓▓░░░░░░░░░░░ 0%      │          │
-│ │ Forge    [+]│  +1 Soldat    │ Batisseurs [+]xxx[-]     │          │
-│ │              │  ──────────►  │ B:xx P:xx M:xx [Const]   │          │
-│ └──────────────┘               ├─────────────────────────┤          │
-│                                │ Guilde Macons  [LVL]    │          │
-│                                │ ▓▓▓▓░░░░░░░░░░░ 0%      │          │
-│                                │ Batisseurs [+]xxx[-]     │          │
-│                                │ B:xx P:xx M:xx [Const]   │          │
-│                                └─────────────────────────┘          │
-├─────────────────────────────────────────────────────────────────────┤
-│ BARRE GLOBALE (progression ?)                                        │
-└─────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ HEADER (2 lignes)                                                   â”‚
+â”‚ L1: [pseudo] Food xx/max â”‚ Bois xx/max â”‚ Pierre xx/max â”‚ Metal     â”‚
+â”‚     xx/max â”‚ Outils xx/max â”‚ Armes xx/max           [âš™ config]    â”‚
+â”‚ L2: Pop xxx/max â”‚ Ouvriers xxx â”‚ Batisseurs xxx â”‚ Soldats xxx      â”‚
+â”‚                                    â”‚ Carte du monde â”‚ Mon domaine â”‚ â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ ZONE CITE (20% hauteur, min 200px)                                  â”‚
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ciel (60%) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”‚
+â”‚ â”‚                    [chateau]                          â”‚ [notif]   â”‚
+â”‚ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ sol (40%) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤            â”‚
+â”‚ â”‚  â– â– â–    â–â–â–â–â–â–â–    â–â–      â–â–â–                   â”‚            â”‚
+â”‚ â”‚ vert=ouvr  rouge=sold  violet=bat                     â”‚            â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ PANNEAU BAS (production + construction)                              â”‚
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  conversions  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”          â”‚
+â”‚ â”‚ La productionâ”‚               â”‚ Maisons        [LVL]    â”‚          â”‚
+â”‚ â”‚              â”‚  +1 Ouvrier   â”‚ â–“â–“â–“â–“â–‘â–‘â–‘â–‘â–‘â–‘â–‘â–‘â–‘â–‘â–‘ 0%      â”‚          â”‚
+â”‚ â”‚ Ferme    [+]â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º  â”‚ Batisseurs [+]xxx[-]     â”‚          â”‚
+â”‚ â”‚ Scierie  [+]â”‚               â”‚ B:xx P:xx M:xx [Const]   â”‚          â”‚
+â”‚ â”‚ Carriere [+]â”‚  +1 Batisseur â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤          â”‚
+â”‚ â”‚ Mine     [+]â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º  â”‚ Casernes       [LVL]    â”‚          â”‚
+â”‚ â”‚ Atelier  [+]â”‚               â”‚ â–“â–“â–“â–“â–‘â–‘â–‘â–‘â–‘â–‘â–‘â–‘â–‘â–‘â–‘ 0%      â”‚          â”‚
+â”‚ â”‚ Forge    [+]â”‚  +1 Soldat    â”‚ Batisseurs [+]xxx[-]     â”‚          â”‚
+â”‚ â”‚              â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º  â”‚ B:xx P:xx M:xx [Const]   â”‚          â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜               â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤          â”‚
+â”‚                                â”‚ Guilde Macons  [LVL]    â”‚          â”‚
+â”‚                                â”‚ â–“â–“â–“â–“â–‘â–‘â–‘â–‘â–‘â–‘â–‘â–‘â–‘â–‘â–‘ 0%      â”‚          â”‚
+â”‚                                â”‚ Batisseurs [+]xxx[-]     â”‚          â”‚
+â”‚                                â”‚ B:xx P:xx M:xx [Const]   â”‚          â”‚
+â”‚                                â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜          â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ BARRE GLOBALE (progression ?)                                        â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 5.2 Elements du header
 
-**Ligne 1 — Ressources materielles :**
+**Ligne 1 â€” Ressources materielles :**
 
 | Element | Format | Description |
 |---------|--------|-------------|
@@ -304,9 +304,9 @@ Base sur le mockup `references/MiyukiniClicker_GUI.jpg` :
 | Metal | `xx/max` | Metal courant / cap (Depot) |
 | Outils | `xx/max` | Outils courants / cap (Entrepot) |
 | Armes | `xx/max` | Armes courantes / cap (Entrepot) |
-| Config | `[⚙]` | Roue de configuration (sauvegarde, options) |
+| Config | `[âš™]` | Roue de configuration (sauvegarde, options) |
 
-**Ligne 2 — Population et navigation :**
+**Ligne 2 â€” Population et navigation :**
 
 | Element | Format | Description |
 |---------|--------|-------------|
@@ -324,11 +324,11 @@ Zone d'**ambiance** entre le header et les panneaux de gestion :
 - Ciel (60% du haut) : fond bleu clair / decoratif
 - Sol (40% du bas) : fond vert, sprites de population en mouvement aleatoire
 - Chateau au centre (batiment principal)
-- **Notifications** : glissent depuis la droite (ex. « Tu es monte de niveau »)
+- **Notifications** : glissent depuis la droite (ex. Â« Tu es monte de niveau Â»)
 
 ### 5.4 Panneau de production (gauche)
 
-Panneau **« La production »** avec 6 postes, chacun representant un lieu ou les ouvriers produisent des ressources :
+Panneau **Â« La production Â»** avec 6 postes, chacun representant un lieu ou les ouvriers produisent des ressources :
 
 | Poste | Format affichage |
 |-------|------------------|
@@ -356,7 +356,7 @@ Chaque batiment est represente par une **carte** avec :
 
 ---
 
-## 6. Assets UI — Fantasy UI Borders
+## 6. Assets UI â€” Fantasy UI Borders
 
 L'interface de MiyuClicker utilise le pack **Fantasy UI Borders** (Kenney) disponible dans le Miyukini UI Builder pour un look RPG/medieval coherent.
 
@@ -364,13 +364,13 @@ L'interface de MiyuClicker utilise le pack **Fantasy UI Borders** (Kenney) dispo
 
 | Element GUI | Asset Fantasy UI Borders | Justification |
 |-------------|--------------------------|---------------|
-| **Header** (barre ressources) | Panel (fond + bordure) — ex. PANEL_000 ou PANEL_003 | Cadre solide pour les informations permanentes |
-| **Cartes batiment** | Panel avec bordure coloree — PANEL_001, PANEL_002 | Chaque type de batiment a une couleur de bordure (vert=Maisons, rouge=Casernes, violet=Guilde) |
-| **Panneau production** | Border (centre transparent) — BORDER_000 ou BORDER_003 | Cadre sans fond pour laisser voir le background |
+| **Header** (barre ressources) | Panel (fond + bordure) â€” ex. PANEL_000 ou PANEL_003 | Cadre solide pour les informations permanentes |
+| **Cartes batiment** | Panel avec bordure coloree â€” PANEL_001, PANEL_002 | Chaque type de batiment a une couleur de bordure (vert=Maisons, rouge=Casernes, violet=Guilde) |
+| **Panneau production** | Border (centre transparent) â€” BORDER_000 ou BORDER_003 | Cadre sans fond pour laisser voir le background |
 | **Bouton [Construire]** | Panel compact ou bouton stylise | Vert (conditions OK) / blanc-gris (inactif) |
 | **Barres de progression** | Barres SVG parametriques (bar_track + bar_fill) | Coherence avec le systeme de barres du UI Builder |
-| **Separateurs** | Dividers — DIVIDER_000 a DIVIDER_005 | Separation entre sections |
-| **Zone cite** | Transparent Borders — TBORDER_000 | Cadre leger autour de la zone visuelle |
+| **Separateurs** | Dividers â€” DIVIDER_000 a DIVIDER_005 | Separation entre sections |
+| **Zone cite** | Transparent Borders â€” TBORDER_000 | Cadre leger autour de la zone visuelle |
 
 ### 6.2 Couleurs de bordure des cartes batiment
 
@@ -388,12 +388,12 @@ D'apres le mockup GUI :
 ### 6.3 Reference assets
 
 Les assets sont disponibles via :
-- `apps/central/src/services/ui_assets.rs` — module `fantasy_borders`
-- Miyukini UI Builder → onglet **Fenetres** → section **Fantasy UI Borders (Kenney)**
+- `apps/central/src/services/ui_assets.rs` â€” module `fantasy_borders`
+- Miyukini UI Builder â†’ onglet **Fenetres** â†’ section **Fantasy UI Borders (Kenney)**
 
 ---
 
-## 7. Assets UI — Curseurs Toon
+## 7. Assets UI â€” Curseurs Toon
 
 MiyuClicker utilise les curseurs **Toon** du Cursor Pack (Basic) pour renforcer l'ambiance cartoon/RPG du jeu.
 
@@ -432,8 +432,8 @@ Chaque zone de l'interface applique son curseur via la propriete CSS `cursor:url
 ### 7.3 Reference assets
 
 Les curseurs sont disponibles via :
-- `apps/central/src/services/ui_assets.rs` — module `cursors`
-- Miyukini UI Builder → onglet **Curseurs** → section **Cursor Pack (Basic)** → categorie **Pointers** (Toon A, Toon B)
+- `apps/central/src/services/ui_assets.rs` â€” module `cursors`
+- Miyukini UI Builder â†’ onglet **Curseurs** â†’ section **Cursor Pack (Basic)** â†’ categorie **Pointers** (Toon A, Toon B)
 
 ---
 
@@ -445,24 +445,24 @@ Les curseurs sont disponibles via :
 2. Il affecte des ouvriers a la **Ferme** pour produire de la nourriture (survie).
 3. Il repartit les ouvriers restants entre **Scierie**, **Carriere**, **Mine** (matieres premieres).
 
-### 8.2 Premiere phase — Stabilisation (premières minutes)
+### 8.2 Premiere phase â€” Stabilisation (premiÃ¨res minutes)
 
 1. Accumuler de la nourriture pour nourrir la population croissante.
 2. Produire du bois et de la pierre pour construire des **Maisons** (+4 pop cap chacune).
-3. Lancer la construction de maisons → affecter des batisseurs (apres conversion).
+3. Lancer la construction de maisons â†’ affecter des batisseurs (apres conversion).
 
-### 8.3 Deuxieme phase — Specialisation (milieu de partie)
+### 8.3 Deuxieme phase â€” Specialisation (milieu de partie)
 
 1. Convertir des ouvriers en **batisseurs** (cout : 20 + A outils) pour accelerer la construction.
 2. Monter les **Casernes** de niveau pour debloquer le cap de soldats.
 3. Lancer la production a l'**Atelier** (outils) et a la **Forge** (armes).
 
-### 8.4 Troisieme phase — Expansion (fin de partie)
+### 8.4 Troisieme phase â€” Expansion (fin de partie)
 
 1. Convertir des ouvriers en **soldats** (cout : 10 + S armes) pour constituer une armee.
-2. Envoyer des soldats sur la **Carte du monde** pour conquérir des cites adverses.
+2. Envoyer des soldats sur la **Carte du monde** pour conquÃ©rir des cites adverses.
 3. Les **bonus de tribu** des cites conquises alimentent la boucle de production.
-4. Objectif : conquérir toute la carte.
+4. Objectif : conquÃ©rir toute la carte.
 
 ---
 
@@ -473,7 +473,7 @@ Les curseurs sont disponibles via :
 | **Etat du jeu** | Ressources (food, bois, pierre, metal, outils, armes), population (ouvriers, batisseurs, soldats), batiments (niveaux, progression construction), bonheur | Critique |
 | **Systeme production** | 6 postes, affectation ouvriers [+][-], calcul debit/sec, tick de production | Critique |
 | **Systeme construction** | Cartes batiment, bouton [Construire], barre progression, allocation batisseurs | Critique |
-| **Conversion pop** | Ouvrier → Batisseur (20+A outils), Ouvrier → Soldat (10+S armes) | Critique |
+| **Conversion pop** | Ouvrier â†’ Batisseur (20+A outils), Ouvrier â†’ Soldat (10+S armes) | Critique |
 | **Systeme bonheur** | Moral, fecondite, Game Over 7j sans nourriture | Important |
 | **Zone cite** | Ciel/sol, sprites, mouvement aleatoire, chateau, notifications | Important |
 | **Header** | 2 lignes ressources, navigation, config | Critique |
@@ -484,17 +484,18 @@ Les curseurs sont disponibles via :
 
 ## 10. References
 
-- [MiyuClicker - Document Fondateur](MiyuClicker%20-%20Document%20Fondateur.md) — Vision, gameplay, inspirations.
-- [MiyuClicker - Ressources et Categories](MiyuClicker%20-%20Ressources%20et%20Categories.md) — Terminologie ressources.
-- [MiyuClicker - Batiments Macons et Construction](MiyuClicker%20-%20Batiments%20Macons%20et%20Construction.md) — Couts, pts construction.
-- [MiyuClicker - Systeme Bonheur](MiyuClicker%20-%20Systeme%20Bonheur.md) — Moral, fecondite, Game Over.
-- [MiyuClicker - Zone Cite et Bouton Construction](MiyuClicker%20-%20Zone%20Cite%20et%20Bouton%20Construction.md) — Zone visuelle, sprites.
-- [MiyuClicker - MVP Ecrans et Mecaniques](MiyuClicker%20-%20MVP%20Ecrans%20et%20Mecaniques.md) — Ecrans et mecaniques MVP.
-- [MiyuClicker - Ergonomie Ecran Gestion](MiyuClicker%20-%20Ergonomie%20Ecran%20Gestion.md) — Layout ecran gestion.
+- [MiyuClicker - Document Fondateur](MiyukiniClicker%20-%20Document%20Fondateur.md) â€” Vision, gameplay, inspirations.
+- [MiyuClicker - Ressources et Categories](MiyukiniClicker%20-%20Ressources%20et%20Categories.md) â€” Terminologie ressources.
+- [MiyuClicker - Batiments Macons et Construction](MiyukiniClicker%20-%20Batiments%20Macons%20et%20Construction.md) â€” Couts, pts construction.
+- [MiyuClicker - Systeme Bonheur](MiyukiniClicker%20-%20Systeme%20Bonheur.md) â€” Moral, fecondite, Game Over.
+- [MiyuClicker - Zone Cite et Bouton Construction](MiyukiniClicker%20-%20Zone%20Cite%20et%20Bouton%20Construction.md) â€” Zone visuelle, sprites.
+- [MiyuClicker - MVP Ecrans et Mecaniques](MiyukiniClicker%20-%20MVP%20Ecrans%20et%20Mecaniques.md) â€” Ecrans et mecaniques MVP.
+- [MiyuClicker - Ergonomie Ecran Gestion](MiyukiniClicker%20-%20Ergonomie%20Ecran%20Gestion.md) â€” Layout ecran gestion.
 - **Mockup GUI** : `references/MiyukiniClicker_GUI.jpg`
 
 ---
 
 **Document cree le :** 2026-02-11
 **Derniere mise a jour :** 2026-02-11
-**Statut :** Document de reference — boucles de gameplay, elements GUI, assets UI, conversions de population
+**Statut :** Document de reference â€” boucles de gameplay, elements GUI, assets UI, conversions de population
+

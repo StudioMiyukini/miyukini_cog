@@ -1,54 +1,54 @@
-# MiyuLocale — Documentation Fondatrice
+﻿# MiyuLocale â€” Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuLocale** est le **kit d'outils (Toolkit)** de locale et internationalisation (i18n) de l'écosystème Miyukini. Il intègre les outils de formatage des dates/heures selon locale, de formatage des nombres selon locale, et de résolution de clés de traduction (translate), sans logique métier — la locale et le catalogue de traductions sont fournis dans le flux gouverné ; la décision sur la langue ou la politique de locale relève de **StrongFather** et des Opérateurs.
+**MiyuLocale** est le **kit d'outils (Toolkit)** de locale et internationalisation (i18n) de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils de formatage des dates/heures selon locale, de formatage des nombres selon locale, et de rÃ©solution de clÃ©s de traduction (translate), sans logique mÃ©tier â€” la locale et le catalogue de traductions sont fournis dans le flux gouvernÃ© ; la dÃ©cision sur la langue ou la politique de locale relÃ¨ve de **StrongFather** et des OpÃ©rateurs.
 
-L'autorité sur les catalogues de traduction et les préférences de locale appartient à **KindMother**. MiyuLocale expose des capacités d'exécution gouvernée (formater date, formater nombre, traduire) ; les décisions sur la locale active ou le contenu des traductions relèvent de **StrongFather** et des Opérateurs.
+L'autoritÃ© sur les catalogues de traduction et les prÃ©fÃ©rences de locale appartient Ã  **KindMother**. MiyuLocale expose des capacitÃ©s d'exÃ©cution gouvernÃ©e (formater date, formater nombre, traduire) ; les dÃ©cisions sur la locale active ou le contenu des traductions relÃ¨vent de **StrongFather** et des OpÃ©rateurs.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-
----
-
-## 2. Portée / Scope
-
-**Ce document définit :** l'identité et la définition canonique de MiyuLocale, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother.
-
-**Hors scope :** l'implémentation détaillée (ICU, catalogues i18n) ; la politique de langue et la gestion des traductions métier (StrongFather / Opérateurs).
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 3. Définition canonique
+## 2. PortÃ©e / Scope
 
-> **MiyuLocale est une composition officielle d'outils de locale et internationalisation (format date, format nombre, traduction), déclarée et gouvernée par l'environnement.**
+**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de MiyuLocale, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother.
 
-- MiyuLocale **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
-- MiyuLocale **n'ajoute aucune logique métier** : il orchestre des capacités atomiques (formater date, formater nombre, résoudre une clé de traduction) ; locale et catalogue fournis dans le flux ; pas de décision sur la politique de langue.
+**Hors scope :** l'implÃ©mentation dÃ©taillÃ©e (ICU, catalogues i18n) ; la politique de langue et la gestion des traductions mÃ©tier (StrongFather / OpÃ©rateurs).
 
-**Règle fondamentale :** Un Tool MiyuLocale exécute sur des **données et options fournies** (date, nombre, clé, locale, catalogue) ; il ne décide pas de la locale active ni du contenu des traductions.
+---
+
+## 3. DÃ©finition canonique
+
+> **MiyuLocale est une composition officielle d'outils de locale et internationalisation (format date, format nombre, traduction), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+
+- MiyuLocale **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
+- MiyuLocale **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques (formater date, formater nombre, rÃ©soudre une clÃ© de traduction) ; locale et catalogue fournis dans le flux ; pas de dÃ©cision sur la politique de langue.
+
+**RÃ¨gle fondamentale :** Un Tool MiyuLocale exÃ©cute sur des **donnÃ©es et options fournies** (date, nombre, clÃ©, locale, catalogue) ; il ne dÃ©cide pas de la locale active ni du contenu des traductions.
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.locale.miyulocale` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `locale` |
-| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le détail de chaque outil est décrit dans [MiyuLocale - Reference Outils](./MiyuLocale%20-%20Reference%20Outils.md).
+Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuLocale - Reference Outils](./MiyuLocale%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
 | `tool.locale.date.format` | Formate une date/heure selon locale et options fournis |
-| `tool.locale.number.format` | Formate un nombre selon locale et options fournis (devise, décimales) |
-| `tool.locale.translate` | Résout une clé de traduction (catalogue fourni) ; retourne la chaîne ou clé si absent |
+| `tool.locale.number.format` | Formate un nombre selon locale et options fournis (devise, dÃ©cimales) |
+| `tool.locale.translate` | RÃ©sout une clÃ© de traduction (catalogue fourni) ; retourne la chaÃ®ne ou clÃ© si absent |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuLocale en contient trois.
 
@@ -56,44 +56,46 @@ Le détail de chaque outil est décrit dans [MiyuLocale - Reference Outils](./Mi
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : locale et catalogue fournis dans le flux ; MiyuLocale ne lit pas la base directement (catalogue peut provenir de KindMother via MiyuSQL sous autorité KindMother).
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : locale et catalogue fournis dans le flux ; MiyuLocale ne lit pas la base directement (catalogue peut provenir de KindMother via MiyuSQL sous autoritÃ© KindMother).
 
 ---
 
-## 7. Niveau de sécurité et états
+## 7. Niveau de sÃ©curitÃ© et Ã©tats
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
-| **Niveau de sécurité du kit** | **0 à 1** (formatage et traduction ; pas de données sensibles par défaut) |
-| **États autorisés** | Tous sauf restriction explicite |
-| **États interdits** | Aucun par défaut |
+| **Niveau de sÃ©curitÃ© du kit** | **0 Ã  1** (formatage et traduction ; pas de donnÃ©es sensibles par dÃ©faut) |
+| **Ã‰tats autorisÃ©s** | Tous sauf restriction explicite |
+| **Ã‰tats interdits** | Aucun par dÃ©faut |
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autorité sur les catalogues de traduction et les préférences de locale. MiyuLocale **ne lit pas** la base directement : locale et catalogue sont **fournis dans le flux** (après lecture via MiyuSQL sous autorité KindMother si besoin). MiyuLocale n'écrit pas la base.
+**KindMother** est l'autoritÃ© sur les catalogues de traduction et les prÃ©fÃ©rences de locale. MiyuLocale **ne lit pas** la base directement : locale et catalogue sont **fournis dans le flux** (aprÃ¨s lecture via MiyuSQL sous autoritÃ© KindMother si besoin). MiyuLocale n'Ã©crit pas la base.
 
-Les obligations de conformité détaillées sont dans [MiyuLocale - Tool Governance Compliance Contract](./contracts/governance/MiyuLocale%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuLocale - Tool Governance Compliance Contract](./contracts/governance/MiyuLocale%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-À l'implémentation : chaque Tool MiyuLocale est une unité logique pouvant devenir un **bloc MSCM** : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
+Ã€ l'implÃ©mentation : chaque Tool MiyuLocale est une unitÃ© logique pouvant devenir un **bloc MSCM** : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
 
 ---
 
-## 10. Références croisées
+## 10. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
+| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence fondateur
+**Statut :** Document de rÃ©fÃ©rence fondateur
+
+

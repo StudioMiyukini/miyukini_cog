@@ -59,7 +59,7 @@
 | Priorité | Élément | Détail |
 |----------|---------|--------|
 | Moyenne | **Persistance** | Pas de feature `legacy-sqlite` / `kindmother-only` ; tout est en mémoire. |
-| Moyenne | **Index MIP** | Balisage présent mais index MIP non régénéré (outil `mip-generator`). |
+| Moyenne | **Index MIP** | Balisage présent mais index MIP non régénéré (outil `mscm-generator`). |
 | Basse | **Intégrations toolkits** | MiyuBooking (créneaux), MiyuNotify (rappels) non branchés. |
 | Basse | **Opérateurs / API outil** | Pas d'API « outil » (ex. `slot.list`, `booking.create`) ni d'opérateurs JayRDV Pro / JayRDV Exposition. |
 | Basse | **Gouvernance Cores** | Pas de mandat StrongFather, pas de délégation KindMother ni Master Butler. |
@@ -116,7 +116,7 @@
   - `jayrdv_data_types` (data/types.rs) — `@do: define_jayrdv_domain_model`, `@role: data`, `@layer: domain`
   - `jayrdv_memory_store` (data/memory_store.rs) — `@do: provide_in_memory_persistence_for_jayrdv`, `@role: data`, `@layer: infra`
   - `jayrdv_domain` (domain/mod.rs) — `@do: implement_jayrdv_business_logic`, `@role: domain`, `@layer: domain`
-- **Index MIP** : à régénérer via `mip-generator` pour intégrer les blocs dans la gouvernance.
+- **Index MIP** : à régénérer via `mscm-generator` pour intégrer les blocs dans la gouvernance.
 
 ---
 
@@ -166,7 +166,7 @@
    - ~~Gardes d'id dupliqué~~ ✅
 
 2. **Moyen terme**
-   - Régénérer l'index MIP (outil `mip-generator`).
+   - Régénérer l'index MIP (outil `mscm-generator`).
    - Ajouter les entités `Schedule` et `Exception` pour les plannings hebdomadaires.
    - Proposer un feature `legacy-sqlite` ou `kindmother-only` pour la persistance.
    - Ajouter `slot_release_expired()` (nettoyage des holds).

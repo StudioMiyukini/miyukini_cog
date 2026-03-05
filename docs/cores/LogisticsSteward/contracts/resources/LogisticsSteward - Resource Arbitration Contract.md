@@ -1,4 +1,4 @@
-# LogisticsSteward - Resource Arbitration Contract
+﻿# LogisticsSteward - Resource Arbitration Contract
 
 ## 1. Contexte
 
@@ -6,7 +6,7 @@ Ce document definit le contrat du processus d'**arbitrage des ressources** dans 
 
 Ce document complete la Section 6.4 de la [Documentation Fondatrice](../../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md) et s'appuie sur le [Quota Definition Contract](./LogisticsSteward%20-%20Quota%20Definition%20Contract.md) et le [Priority Management Contract](./LogisticsSteward%20-%20Priority%20Management%20Contract.md) pour les definitions de quotas et priorites.
 
-L'arbitrage respecte les [Lois d'Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md), notamment **LOI-1** (aucune dependance externe critique) et **LOI-3** (etat local souverain) : l'arbitrage fonctionne avec l'etat local certifie, et les decisions sont souveraines localement.
+L'arbitrage respecte les [Lois d'Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md), notamment **LOI-1** (aucune dependance externe critique) et **LOI-3** (etat local souverain) : l'arbitrage fonctionne avec l'etat local certifie, et les decisions sont souveraines localement.
 
 ## 2. Portee / Scope
 
@@ -180,43 +180,43 @@ Chaque arbitrage produit une trace complete pour audit.
 
 ```
 [Demande de ressource]
-       │
-       ▼
-┌─────────────────────┐
-│ 1. Reception        │ ← Validation structurelle
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ 2. Contextualisation│ ← Lecture etat systeme
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ 3. Identification   │ ← Regles applicables
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ 4. Evaluation       │ ← Calcul priorite/quota
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ 5. Decision         │ ← Verdict et conditions
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ 6. Validation       │ ← StrongFather
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ 7. Emission         │ ← Decision finale
-└──────────┬──────────┘
-           │
-           ▼
+       â”‚
+       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 1. Reception        â”‚ â† Validation structurelle
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+           â”‚
+           â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 2. Contextualisationâ”‚ â† Lecture etat systeme
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+           â”‚
+           â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 3. Identification   â”‚ â† Regles applicables
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+           â”‚
+           â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 4. Evaluation       â”‚ â† Calcul priorite/quota
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+           â”‚
+           â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 5. Decision         â”‚ â† Verdict et conditions
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+           â”‚
+           â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 6. Validation       â”‚ â† StrongFather
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+           â”‚
+           â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 7. Emission         â”‚ â† Decision finale
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+           â”‚
+           â–¼
 [Decision d'arbitrage]
 ```
 
@@ -439,31 +439,31 @@ La preemption permet a une demande de haute priorite d'interrompre une allocatio
 
 ```
 [Demande haute priorite]
-       │
-       ▼
-┌─────────────────────┐
-│ Evaluation normale  │
-└──────────┬──────────┘
-       │ ressources insuffisantes
-       ▼
-┌─────────────────────┐
-│ Recherche cibles    │ ← Allocations preemptibles
-└──────────┬──────────┘
-       │ cibles trouvees
-       ▼
-┌─────────────────────┐
-│ Validation preemption│ ← StrongFather
-└──────────┬──────────┘
-       │ approuvee
-       ▼
-┌─────────────────────┐
-│ Notification cibles │ ← Avertissement
-└──────────┬──────────┘
-       │
-       ▼
-┌─────────────────────┐
-│ Reallocation        │ ← Execution Kernel
-└──────────┬──────────┘
+       â”‚
+       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Evaluation normale  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+       â”‚ ressources insuffisantes
+       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Recherche cibles    â”‚ â† Allocations preemptibles
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+       â”‚ cibles trouvees
+       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Validation preemptionâ”‚ â† StrongFather
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+       â”‚ approuvee
+       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Notification cibles â”‚ â† Avertissement
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+       â”‚
+       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Reallocation        â”‚ â† Execution Kernel
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 7.3 Regles de preemption
@@ -494,7 +494,7 @@ La preemption permet a une demande de haute priorite d'interrompre une allocatio
 
 **Verification :**
 - Trace complete pour chaque arbitrage
-- Lien demande → decision verifiable
+- Lien demande â†’ decision verifiable
 - Audit possible a posteriori
 
 ### 8.3 Garantie de non-execution (GAR-ARB-03)
@@ -701,13 +701,14 @@ Tout arbitrage effectue par LogisticsSteward doit respecter ce contrat. Toute vi
 - [StrongFather Integration Contract](../integration/LogisticsSteward%20-%20StrongFather%20Integration%20Contract.md)
 - [Kernel Integration Contract](../integration/LogisticsSteward%20-%20Kernel%20Integration%20Contract.md)
 - [Invariants & Guarantees](../governance/LogisticsSteward%20-%20Invariants%20&%20Guarantees.md)
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 **Version :** 1.0.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT — Normatif  
+**Statut :** CONTRAT â€” Normatif  
 **Dependencies :**
 - [Documentation Fondatrice](../../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md) v1.0.0 (Section 6.4)
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)
+

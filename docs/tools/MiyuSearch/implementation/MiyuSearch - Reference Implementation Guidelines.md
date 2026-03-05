@@ -1,14 +1,14 @@
-# MiyuSearch — Reference Implementation Guidelines
+﻿# MiyuSearch â€” Reference Implementation Guidelines
 
 ## Statut du document
 
 **POST-FONDATION / NON NORMATIF / INFORMATIF**
 
-Ce document est **informatif, non normatif, et non contractuel**. Il guide un développeur pour implémenter MiyuSearch conformément aux contrats fondateurs, sans violer les invariants, interdictions et bornages.
+Ce document est **informatif, non normatif, et non contractuel**. Il guide un dÃ©veloppeur pour implÃ©menter MiyuSearch conformÃ©ment aux contrats fondateurs, sans violer les invariants, interdictions et bornages.
 
-**Objectif pédagogique :** Aider à traduire les contrats MiyuSearch en logique d'implémentation (Tools indexation, requête full-text, suggestions ; pas de décision métier sur pertinence).
+**Objectif pÃ©dagogique :** Aider Ã  traduire les contrats MiyuSearch en logique d'implÃ©mentation (Tools indexation, requÃªte full-text, suggestions ; pas de dÃ©cision mÃ©tier sur pertinence).
 
-**Avertissement :** Ce document ne crée aucune nouvelle règle contractuelle et ne modifie aucun contrat existant. Les contrats fondateurs priment toujours sur ce guide.
+**Avertissement :** Ce document ne crÃ©e aucune nouvelle rÃ¨gle contractuelle et ne modifie aucun contrat existant. Les contrats fondateurs priment toujours sur ce guide.
 
 ---
 
@@ -16,77 +16,77 @@ Ce document est **informatif, non normatif, et non contractuel**. Il guide un d�
 
 ### 1.1 Objectif
 
-Fournir des lignes directrices pour implémenter le kit MiyuSearch (index.update, query.execute, suggest) de manière conforme aux contrats : Documentation Fondatrice, Reference Outils, Tool Governance Compliance Contract.
+Fournir des lignes directrices pour implÃ©menter le kit MiyuSearch (index.update, query.execute, suggest) de maniÃ¨re conforme aux contrats : Documentation Fondatrice, Reference Outils, Tool Governance Compliance Contract.
 
 ### 1.2 Nature informative
 
-Ce document est **purement informatif**. Il ne définit pas de nouvelles règles, n'impose pas de technologies, et ne prescrit pas de solutions techniques. Il guide la compréhension et l'application des contrats.
+Ce document est **purement informatif**. Il ne dÃ©finit pas de nouvelles rÃ¨gles, n'impose pas de technologies, et ne prescrit pas de solutions techniques. Il guide la comprÃ©hension et l'application des contrats.
 
 ### 1.3 Sources contractuelles
 
-- **MiyuSearch - Documentation Fondatrice** : ToolkitId `toolkit.search.miyusearch`, liste des Tools (index.update, query.execute, suggest), gouvernance, relation KindMother (index = dérivation des données sources).
-- **MiyuSearch - Reference Outils** : Détail de chaque ToolId.
-- **MiyuSearch - Tool Governance Compliance Contract** : ToolkitId, ToolIds, capabilities, obligations spécifiques.
+- **MiyuSearch - Documentation Fondatrice** : ToolkitId `toolkit.search.miyusearch`, liste des Tools (index.update, query.execute, suggest), gouvernance, relation KindMother (index = dÃ©rivation des donnÃ©es sources).
+- **MiyuSearch - Reference Outils** : DÃ©tail de chaque ToolId.
+- **MiyuSearch - Tool Governance Compliance Contract** : ToolkitId, ToolIds, capabilities, obligations spÃ©cifiques.
 - **Master Butler - Tool Governance Compliance Template** : Format ToolId, structure Toolkit.
 
 ---
 
-## 2. Principes à respecter absolument
+## 2. Principes Ã  respecter absolument
 
-### 2.1 Pas de décision ALLOW/DENY (BOUND-1)
+### 2.1 Pas de dÃ©cision ALLOW/DENY (BOUND-1)
 
-MiyuSearch est invoqué après décision de la gouvernance. L'implémentation ne ré-évalue pas les permissions. En cas d'appel hors gouvernance, refuser l'exécution et signaler.
+MiyuSearch est invoquÃ© aprÃ¨s dÃ©cision de la gouvernance. L'implÃ©mentation ne rÃ©-Ã©value pas les permissions. En cas d'appel hors gouvernance, refuser l'exÃ©cution et signaler.
 
-### 2.2 Pas de choix métier (BOUND-2)
+### 2.2 Pas de choix mÃ©tier (BOUND-2)
 
-**Règle fondamentale :** MiyuSearch **ne décide pas** du périmètre ni du classement métier. Les données à indexer et les critères de recherche sont fournis dans le flux gouverné ; les décisions sur ce qui est « pertinent » ou affiché relèvent des Opérateurs. Les Tools exécutent sur **données et critères fournis** ; pas de décision sur la pertinence métier.
+**RÃ¨gle fondamentale :** MiyuSearch **ne dÃ©cide pas** du pÃ©rimÃ¨tre ni du classement mÃ©tier. Les donnÃ©es Ã  indexer et les critÃ¨res de recherche sont fournis dans le flux gouvernÃ© ; les dÃ©cisions sur ce qui est Â« pertinent Â» ou affichÃ© relÃ¨vent des OpÃ©rateurs. Les Tools exÃ©cutent sur **donnÃ©es et critÃ¨res fournis** ; pas de dÃ©cision sur la pertinence mÃ©tier.
 
-### 2.3 Index sous autorité KindMother ; pas d'écriture métier directe (BOUND-3)
+### 2.3 Index sous autoritÃ© KindMother ; pas d'Ã©criture mÃ©tier directe (BOUND-3)
 
-- **tool.search.index.update** : Met à jour l'index (document/champ fournis) ; WriteIntent ou flux gouverné vers stockage index. L'index est une **dérivation** des données KindMother ; pas d'écriture métier directe sur les données sources.
-- **tool.search.query.execute** et **tool.search.suggest** : Lisent l'index pour requêter et suggérer ; critères fournis dans le flux ; retour (identifiants, scores, suggestions) sans décision métier sur le classement final.
+- **tool.search.index.update** : Met Ã  jour l'index (document/champ fournis) ; WriteIntent ou flux gouvernÃ© vers stockage index. L'index est une **dÃ©rivation** des donnÃ©es KindMother ; pas d'Ã©criture mÃ©tier directe sur les donnÃ©es sources.
+- **tool.search.query.execute** et **tool.search.suggest** : Lisent l'index pour requÃªter et suggÃ©rer ; critÃ¨res fournis dans le flux ; retour (identifiants, scores, suggestions) sans dÃ©cision mÃ©tier sur le classement final.
 
-### 2.4 à 2.6 (BOUND-4, BOUND-5, BOUND-6)
+### 2.4 Ã  2.6 (BOUND-4, BOUND-5, BOUND-6)
 
-Pas de modification du contexte d'autorisation ; pas de connaissance de l'Opérateur appelant ; uniquement les ToolIds déclarés (index.update, query.execute, suggest).
+Pas de modification du contexte d'autorisation ; pas de connaissance de l'OpÃ©rateur appelant ; uniquement les ToolIds dÃ©clarÃ©s (index.update, query.execute, suggest).
 
-### 2.7 Niveau de sécurité et états
+### 2.7 Niveau de sÃ©curitÃ© et Ã©tats
 
-Niveau **0 à 2** (contenu indexé peut être sensible). États autorisés : tous sauf restriction WorrySentinel. États interdits : selon politique (ex. index en lecture seule en maintenance). Vérifier l'état avant exécution.
+Niveau **0 Ã  2** (contenu indexÃ© peut Ãªtre sensible). Ã‰tats autorisÃ©s : tous sauf restriction WorrySentinel. Ã‰tats interdits : selon politique (ex. index en lecture seule en maintenance). VÃ©rifier l'Ã©tat avant exÃ©cution.
 
 ### 2.8 Alignement MIP/MSCM
 
-Domaine `search`, layer Strate 6. À l'implémentation, baliser le code MSCM pour alimenter blocks.json, domains.json, layers.json selon le [Protocole MIP v1](../../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+Domaine `search`, layer Strate 6. Ã€ l'implÃ©mentation, baliser le code MSCM pour alimenter blocks.json, domains.json, layers.json selon le [Protocole MIP v1](..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
 ---
 
 ## 3. Interdictions (rappel contractuel)
 
-| Code | Interdiction | Implémentation |
+| Code | Interdiction | ImplÃ©mentation |
 |------|--------------|----------------|
-| **BOUND-1** | Pas de décision ALLOW/DENY | Exécution sur mandat uniquement |
-| **BOUND-2** | Pas de choix métier | Pas de décision périmètre, pertinence, classement métier |
-| **BOUND-3** | Pas d'écriture métier directe sur sources | Index = dérivation ; mise à jour index = flux gouverné / WriteIntent ; pas d'écriture sur données sources |
+| **BOUND-1** | Pas de dÃ©cision ALLOW/DENY | ExÃ©cution sur mandat uniquement |
+| **BOUND-2** | Pas de choix mÃ©tier | Pas de dÃ©cision pÃ©rimÃ¨tre, pertinence, classement mÃ©tier |
+| **BOUND-3** | Pas d'Ã©criture mÃ©tier directe sur sources | Index = dÃ©rivation ; mise Ã  jour index = flux gouvernÃ© / WriteIntent ; pas d'Ã©criture sur donnÃ©es sources |
 | **BOUND-4** | Pas de modification du contexte d'autorisation | Lecture seule du contexte |
-| **BOUND-5** | Pas de connaissance de l'Opérateur appelant | Contexte anonymisé |
-| **BOUND-6** | Pas de capacité nouvelle | Uniquement index.update, query.execute, suggest |
+| **BOUND-5** | Pas de connaissance de l'OpÃ©rateur appelant | Contexte anonymisÃ© |
+| **BOUND-6** | Pas de capacitÃ© nouvelle | Uniquement index.update, query.execute, suggest |
 
 ---
 
-## 4. Patterns recommandés
+## 4. Patterns recommandÃ©s
 
 ### 4.1 Structure des Tools
 
-Chaque ToolId = unité atomique : entrée (contexte gouverné, paramètres : document/champ pour index.update ; critères pour query.execute ; préfixe pour suggest), sortie (résultat ou erreur). Pas d'état métier partagé. Format : `tool.search.index.update`, `tool.search.query.execute`, `tool.search.suggest`.
+Chaque ToolId = unitÃ© atomique : entrÃ©e (contexte gouvernÃ©, paramÃ¨tres : document/champ pour index.update ; critÃ¨res pour query.execute ; prÃ©fixe pour suggest), sortie (rÃ©sultat ou erreur). Pas d'Ã©tat mÃ©tier partagÃ©. Format : `tool.search.index.update`, `tool.search.query.execute`, `tool.search.suggest`.
 
 ### 4.2 Interface avec KindMother et l'index
 
-- **index.update** : Données fournies dans le flux (ou provenant de KindMother en amont) → mise à jour de l'index via WriteIntent ou mécanisme documenté ; pas d'écriture directe sur les tables métier sources.
-- **query.execute / suggest** : Critères fournis dans le flux ; lecture de l'index ; retour d'identifiants/scores/suggestions. Le classement métier et le choix de ce qui est affiché restent du ressort des Opérateurs.
+- **index.update** : DonnÃ©es fournies dans le flux (ou provenant de KindMother en amont) â†’ mise Ã  jour de l'index via WriteIntent ou mÃ©canisme documentÃ© ; pas d'Ã©criture directe sur les tables mÃ©tier sources.
+- **query.execute / suggest** : CritÃ¨res fournis dans le flux ; lecture de l'index ; retour d'identifiants/scores/suggestions. Le classement mÃ©tier et le choix de ce qui est affichÃ© restent du ressort des OpÃ©rateurs.
 
-### 4.3 Gestion des erreurs et traçabilité
+### 4.3 Gestion des erreurs et traÃ§abilitÃ©
 
-Erreurs techniques (index indisponible, critères invalides) remontées sans exposer de contenu indexé sensible. Logger du Kernel pour traçabilité (sans contenu des requêtes si sensible).
+Erreurs techniques (index indisponible, critÃ¨res invalides) remontÃ©es sans exposer de contenu indexÃ© sensible. Logger du Kernel pour traÃ§abilitÃ© (sans contenu des requÃªtes si sensible).
 
 ---
 
@@ -94,28 +94,29 @@ Erreurs techniques (index indisponible, critères invalides) remontées sans exp
 
 - **Domaine** : `search` (toolkit.search.miyusearch).
 - **Layer** : Strate 6 dans layers.json.
-- **Blocs** : Chaque Tool MiyuSearch = unité logique avec `id`, `do`, `role`, `layer`. Balisage MSCM selon le [Protocole MIP v1](../../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+- **Blocs** : Chaque Tool MiyuSearch = unitÃ© logique avec `id`, `do`, `role`, `layer`. Balisage MSCM selon le [Protocole MIP v1](..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
 ---
 
 ## 6. Tests
 
-Les tests relèvent des bonnes pratiques projet et du Tool Governance Compliance Contract. Scénarios recommandés : index.update avec données en flux, query.execute et suggest avec critères fournis, vérification qu'aucune décision métier sur pertinence n'est prise dans le kit.
+Les tests relÃ¨vent des bonnes pratiques projet et du Tool Governance Compliance Contract. ScÃ©narios recommandÃ©s : index.update avec donnÃ©es en flux, query.execute et suggest avec critÃ¨res fournis, vÃ©rification qu'aucune dÃ©cision mÃ©tier sur pertinence n'est prise dans le kit.
 
 ---
 
-## 7. Références croisées
+## 7. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
 | MiyuSearch - Documentation Fondatrice | [MiyuSearch - Documentation Fondatrice](../MiyuSearch%20-%20Documentation%20Fondatrice.md) |
 | MiyuSearch - Reference Outils | [MiyuSearch - Reference Outils](../MiyuSearch%20-%20Reference%20Outils.md) |
 | MiyuSearch - Tool Governance Compliance Contract | [MiyuSearch - Tool Governance Compliance Contract](../contracts/governance/MiyuSearch%20-%20Tool%20Governance%20Compliance%20Contract.md) |
-| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](../../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
-| MIP v1 | [MIP v1 MSCM Index Protocol](../../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md) |
+| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](..//..//..//miyukini-webway-system//reference//_index.md) |
+| MIP v1 | [MIP v1 MSCM Index Protocol](..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
 **Statut :** Document informatif, non normatif
+

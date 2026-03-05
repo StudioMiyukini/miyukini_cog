@@ -2,8 +2,9 @@
 
 ## Documentation
 
-- [ADAPTIVE-MODES.md](../profiles/ADAPTIVE-MODES.md) â€” 5 modes overview
-- [Industrial Scenarios](../usecases/INDUSTRIAL-SCENARIOS.md) â€” Real cases
-- [Skills Adaptation](../skills/ADAPTATION-DIRECTIVE.md) â€” Skill-specific tests
+- [ADAPTIVE-MODES.md](..//..//README.md) â€” 5 modes overview
+- [Industrial Scenarios](..//..//README.md) â€” Real cases
+- [Skills Adaptation](..//..//README.md) â€” Skill-specific tests
 - Each agent: `.mip/certifications/agents/{name}.md`
+
 

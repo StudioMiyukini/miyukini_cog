@@ -1,85 +1,85 @@
-# Tools — Index de navigation
+﻿# Tools â€” Index de navigation
 
 ## Contexte
 
-Le dossier **docs/tools/** regroupe la documentation des **Kits d'Outils (Toolkits)** et des **outils individuels (Tools)** de l'écosystème Miyukini — Strate 6 de la pyramide architecturale.
+Le dossier **docs/tools/** regroupe la documentation des **Kits d'Outils (Toolkits)** et des **outils individuels (Tools)** de l'Ã©cosystÃ¨me Miyukini â€” Strate 6 de la pyramide architecturale.
 
-Les Tools sont des capacités exécutables gouvernées ; les Toolkits sont des compositions officielles d'outils, optimisées pour l'efficience mais jamais pour l'autorité. Tout Tool et Toolkit est déclaré dans **Master Butler** et soumis à la gouvernance (BondingBrother, WorrySentinel, Caring Nanny, StrongFather).
+Les Tools sont des capacitÃ©s exÃ©cutables gouvernÃ©es ; les Toolkits sont des compositions officielles d'outils, optimisÃ©es pour l'efficience mais jamais pour l'autoritÃ©. Tout Tool et Toolkit est dÃ©clarÃ© dans **Master Butler** et soumis Ã  la gouvernance (BondingBrother, WorrySentinel, Caring Nanny, StrongFather).
 
 **Strate :** 6 (Tools & Toolkits)  
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## Portée
+## PortÃ©e
 
 Ce dossier documente les Kits d'Outils disponibles (ou en cours de documentation). Structure des kits et liens ci-dessous.
 
 ---
 
-## Structure — Kits documentés
+## Structure â€” Kits documentÃ©s
 
 | Kit | Description | Lien |
 |-----|-------------|------|
-| **MiyuSQL** | Kit d'outils de manipulation de données DB (query, transaction, cache) ; ToolkitId `toolkit.data.miyusql` | [MiyuSQL — Index de navigation](./MiyuSQL/_index.md) |
-| **MiyuAuth** | Kit d'outils d'identité utilisateur (résolution rôle, attestation, vérification Passeport/Visa) ; ToolkitId `toolkit.identity.miyauth` | [MiyuAuth — Index de navigation](./MiyuAuth/_index.md) |
-| **MiyuWeb** | Kit d'outils d'affichage de contenu web (rendu HTML, layout, thème, scripts, assets, formulaires, événements) ; ToolkitId `toolkit.web.miyuweb` | [MiyuWeb — Index de navigation](./MiyuWeb/_index.md) |
-| **MiyuClock** | Kit d'outils horloge locale (trace only) ; ToolkitId `toolkit.kernel.miyuclock` | [MiyuClock — Index de navigation](./MiyuClock/_index.md) |
-| **MiyuCMS** | Kit d'outils de contenu éditorial (posts, pages, médias, révisions, commentaires) ; ToolkitId `toolkit.content.cms` | [MiyuCMS — Index de navigation](./MiyuCMS/_index.md) |
-| **MiyuMedia** | Kit d'outils de gestion des médias (upload, service, transformation) ; ToolkitId `toolkit.content.media` | [MiyuMedia — Index de navigation](./MiyuMedia/_index.md) |
-| **MiyuWidgets** | Kit d'outils de rendu de blocs et page builder (layout.apply, widgets, template.resolve) ; ToolkitId `toolkit.web.widgets` | [MiyuWidgets — Index de navigation](./MiyuWidgets/_index.md) |
-| **MiyuStore** | Kit d'outils de boutique en ligne (catalogue, panier, checkout, paiement, livraison, commandes) ; ToolkitId `toolkit.commerce.store` | [MiyuStore — Index de navigation](./MiyuStore/_index.md) |
-| **MiyuShipping** | Kit d'outils de livraison et expédition (tarifs, zones, étiquettes, suivi, expéditions) ; ToolkitId `toolkit.commerce.shipping` | [MiyuShipping — Index de navigation](./MiyuShipping/_index.md) |
-| **MiyuBooking** | Kit d'outils de réservation en ligne (créneaux, réservations, ressources, tarification) ; ToolkitId `toolkit.booking.reservations` | [MiyuBooking — Index de navigation](./MiyuBooking/_index.md) |
-| **MiyuBilling** | Kit d'outils de facturation et abonnements SaaS (souscriptions, factures, tenant) ; ToolkitId `toolkit.billing.saas` | [MiyuBilling — Index de navigation](./MiyuBilling/_index.md) |
-| **MiyuPosSales** | Kit d'outils caisse et ventes PoS ; ToolkitId `toolkit.pos.miyupossales` | [MiyuPosSales — Index de navigation](./MiyuPosSales/_index.md) |
-| **MiyuPosInventory** | Kit d'outils inventaire multi-magasin ; ToolkitId `toolkit.pos.miyuposinventory` | [MiyuPosInventory — Index de navigation](./MiyuPosInventory/_index.md) |
-| **MiyuPosAnalytics** | Kit d'outils analytics ventes PoS ; ToolkitId `toolkit.pos.miyuposanalytics` | [MiyuPosAnalytics — Index de navigation](./MiyuPosAnalytics/_index.md) |
-| **MiyuPosLoyalty** | Kit d'outils CRM et fidélité PoS ; ToolkitId `toolkit.pos.miyuposloyalty` | [MiyuPosLoyalty — Index de navigation](./MiyuPosLoyalty/_index.md) |
-| **MiyuPosKitchen** | Kit d'outils restaurant / bar (cuisine) ; ToolkitId `toolkit.pos.miyuposkitchen` | [MiyuPosKitchen — Index de navigation](./MiyuPosKitchen/_index.md) |
-| **MiyuPosPayment** | Kit d'outils paiements PoS ; ToolkitId `toolkit.pos.miyupospayment` | [MiyuPosPayment — Index de navigation](./MiyuPosPayment/_index.md) |
-| **MiyuHR** | Kit d'outils RH (pointeuse, planning) ; ToolkitId `toolkit.hr.miyuhr` | [MiyuHR — Index de navigation](./MiyuHR/_index.md) |
-| **MiyuInvoice** | Kit d'outils facturation métier indépendants (devis, factures, relances, facturation électronique B2B) ; ToolkitId `toolkit.invoice.standalone` | [MiyuInvoice — Index de navigation](./MiyuInvoice/_index.md) |
-| **MiyuComptaLedger** | Kit d'outils tenue des livres (banque, écritures, rapprochement, TVA, structure) ; ToolkitId `toolkit.compta.ledger` | [MiyuComptaLedger — Index de navigation](./MiyuComptaLedger/_index.md) |
-| **MiyuComptaReports** | Kit d'outils rapports comptables (livre des recettes, bilan, liasse, flux de trésorerie, export) ; ToolkitId `toolkit.compta.reports` | [MiyuComptaReports — Index de navigation](./MiyuComptaReports/_index.md) |
-| **MiyuDeclarations** | Kit d'outils déclarations fiscales et sociales (URSSAF, TVA, échéances, historique) ; ToolkitId `toolkit.compta.declarations` | [MiyuDeclarations — Index de navigation](./MiyuDeclarations/_index.md) |
-| **MiyuExpense** | Kit d'outils notes de frais et indemnités (justificatifs, OCR, indemnités kilométriques) ; ToolkitId `toolkit.expense.claims` | [MiyuExpense — Index de navigation](./MiyuExpense/_index.md) |
-| **MiyuTreasury** | Kit d'outils trésorerie et prévisionnel (tableau de bord, prévisionnel, alertes) ; ToolkitId `toolkit.treasury.forecast` | [MiyuTreasury — Index de navigation](./MiyuTreasury/_index.md) |
-| **MiyuCalc** | Kit d'outils calcul et formatage numérique (expressions, formatage nombres, conversion unités) ; ToolkitId `toolkit.calc.miyucalc` | [MiyuCalc — Index de navigation](./MiyuCalc/_index.md) |
-| **MiyuText** | Kit d'outils traitement de texte (markdown, recherche/remplacement, templates, sanitization) ; ToolkitId `toolkit.text.miyutext` | [MiyuText — Index de navigation](./MiyuText/_index.md) |
-| **MiyuNotify** | Kit d'outils notification (email, push, inbox) ; ToolkitId `toolkit.notify.miyunotify` | [MiyuNotify — Index de navigation](./MiyuNotify/_index.md) |
-| **MiyuSearch** | Kit d'outils recherche (indexation full-text, requête, suggestions) ; ToolkitId `toolkit.search.miyusearch` | [MiyuSearch — Index de navigation](./MiyuSearch/_index.md) |
-| **MiyuExport** | Kit d'outils export et génération de documents (CSV, XLSX, PDF) ; ToolkitId `toolkit.export.miyuexport` | [MiyuExport — Index de navigation](./MiyuExport/_index.md) |
-| **MiyuJobs** | Kit d'outils planification et file d'attente (schedule at, cron, enqueue, process) ; ToolkitId `toolkit.jobs.miyujobs` | [MiyuJobs — Index de navigation](./MiyuJobs/_index.md) |
-| **MiyuLocale** | Kit d'outils locale et internationalisation (format date, format nombre, traduction) ; ToolkitId `toolkit.locale.miyulocale` | [MiyuLocale — Index de navigation](./MiyuLocale/_index.md) |
-| **MiyuValidate** | Kit d'outils validation et sanitization de données (schéma, sanitize) ; ToolkitId `toolkit.validate.miyuvalidate` | [MiyuValidate — Index de navigation](./MiyuValidate/_index.md) |
-| **MiyuForum** | Kit d'outils structure forum (catégories, forums, topics, posts, suivi lu) ; ToolkitId `toolkit.community.forum` | [MiyuForum — Index de navigation](./MiyuForum/_index.md) |
-| **MiyuPM** | Kit d'outils messagerie privée (envoi, dossiers, brouillons, conversation, export) ; ToolkitId `toolkit.communication.pm` | [MiyuPM — Index de navigation](./MiyuPM/_index.md) |
-| **MiyuPolls** | Kit d'outils sondages (création, vote, résultats) ; ToolkitId `toolkit.content.polls` | [MiyuPolls — Index de navigation](./MiyuPolls/_index.md) |
-| **MiyuFeeds** | Kit d'outils flux ATOM (board, forum, topic) ; ToolkitId `toolkit.content.feeds` | [MiyuFeeds — Index de navigation](./MiyuFeeds/_index.md) |
-| **MiyuBookmarks** | Kit d'outils signets (topics ou entités) ; ToolkitId `toolkit.content.bookmarks` | [MiyuBookmarks — Index de navigation](./MiyuBookmarks/_index.md) |
-| **MiyuProfile** | Kit d'outils profil étendu (champs, signature, avatar, rangs, préférences) ; ToolkitId `toolkit.identity.profile` | [MiyuProfile — Index de navigation](./MiyuProfile/_index.md) |
-| **MiyuContacts** | Kit d'outils contacts (amis/ennemis, carnet d'adresses) ; ToolkitId `toolkit.communication.contacts` | [MiyuContacts — Index de navigation](./MiyuContacts/_index.md) |
-| **MiyuModerationForum** | Kit d'outils modération forum (file, reports, lock/move/merge/split, avertissements, bannissements) ; ToolkitId `toolkit.moderation.forum` | [MiyuModerationForum — Index de navigation](./MiyuModerationForum/_index.md) |
-| **MiyuAntiSpam** | Kit d'outils anti-spam (CAPTCHA, flood control, limite tentatives) ; ToolkitId `toolkit.security.antispam` | [MiyuAntiSpam — Index de navigation](./MiyuAntiSpam/_index.md) |
-| **MiyuSocialFeed** | Kit d'outils fil d'actualité social (publication, flux, réactions, partages, commentaires) ; ToolkitId `toolkit.social.feed` | [MiyuSocialFeed — Index de navigation](./MiyuSocialFeed/_index.md) |
-| **MiyuStory** | Kit d'outils contenu éphémère (stories 24h) ; ToolkitId `toolkit.social.story` | [MiyuStory — Index de navigation](./MiyuStory/_index.md) |
-| **MiyuSocialMessaging** | Kit d'outils messagerie sociale (DMs, conversations, réactions, marques de lecture) ; ToolkitId `toolkit.social.messaging` | [MiyuSocialMessaging — Index de navigation](./MiyuSocialMessaging/_index.md) |
-| **MiyuSocialProfile** | Kit d'outils profil social (profil, abonnés, abonnements) ; ToolkitId `toolkit.social.profile` | [MiyuSocialProfile — Index de navigation](./MiyuSocialProfile/_index.md) |
-| **MiyuDiscovery** | Kit d'outils découverte sociale (hashtags, tendances, explore, recherche) ; ToolkitId `toolkit.social.discovery` | [MiyuDiscovery — Index de navigation](./MiyuDiscovery/_index.md) |
-| **MiyuSocialModeration** | Kit d'outils modération sociale (signalement, blocage, suppression post) ; ToolkitId `toolkit.social.moderation` | [MiyuSocialModeration — Index de navigation](./MiyuSocialModeration/_index.md) |
-| **MiyuWebwayParticipant** | Kit d'outils Participant Webway MWS (annoncer, découvrir, maintenir liste statuts) ; ToolkitId `toolkit.webway.participant` | [MiyuWebwayParticipant — Index de navigation](./MiyuWebwayParticipant/_index.md) |
-| **MiyuWebwayTracker** | Kit d'outils Tracker Webway MWS (recevoir, valider, répondre découverte, listes statuts) ; ToolkitId `toolkit.webway.tracker` | [MiyuWebwayTracker — Index de navigation](./MiyuWebwayTracker/_index.md) |
+| **MiyuSQL** | Kit d'outils de manipulation de donnÃ©es DB (query, transaction, cache) ; ToolkitId `toolkit.data.miyusql` | [MiyuSQL â€” Index de navigation](./MiyuSQL/_index.md) |
+| **MiyuAuth** | Kit d'outils d'identitÃ© utilisateur (rÃ©solution rÃ´le, attestation, vÃ©rification Passeport/Visa) ; ToolkitId `toolkit.identity.miyauth` | [MiyuAuth â€” Index de navigation](./MiyuAuth/_index.md) |
+| **MiyuWeb** | Kit d'outils d'affichage de contenu web (rendu HTML, layout, thÃ¨me, scripts, assets, formulaires, Ã©vÃ©nements) ; ToolkitId `toolkit.web.miyuweb` | [MiyuWeb â€” Index de navigation](./MiyuWeb/_index.md) |
+| **MiyuClock** | Kit d'outils horloge locale (trace only) ; ToolkitId `toolkit.kernel.miyuclock` | [MiyuClock â€” Index de navigation](./MiyuClock/_index.md) |
+| **MiyuCMS** | Kit d'outils de contenu Ã©ditorial (posts, pages, mÃ©dias, rÃ©visions, commentaires) ; ToolkitId `toolkit.content.cms` | [MiyuCMS â€” Index de navigation](./MiyuCMS/_index.md) |
+| **MiyuMedia** | Kit d'outils de gestion des mÃ©dias (upload, service, transformation) ; ToolkitId `toolkit.content.media` | [MiyuMedia â€” Index de navigation](./MiyuMedia/_index.md) |
+| **MiyuWidgets** | Kit d'outils de rendu de blocs et page builder (layout.apply, widgets, template.resolve) ; ToolkitId `toolkit.web.widgets` | [MiyuWidgets â€” Index de navigation](./MiyuWidgets/_index.md) |
+| **MiyuStore** | Kit d'outils de boutique en ligne (catalogue, panier, checkout, paiement, livraison, commandes) ; ToolkitId `toolkit.commerce.store` | [MiyuStore â€” Index de navigation](./MiyuStore/_index.md) |
+| **MiyuShipping** | Kit d'outils de livraison et expÃ©dition (tarifs, zones, Ã©tiquettes, suivi, expÃ©ditions) ; ToolkitId `toolkit.commerce.shipping` | [MiyuShipping â€” Index de navigation](./MiyuShipping/_index.md) |
+| **MiyuBooking** | Kit d'outils de rÃ©servation en ligne (crÃ©neaux, rÃ©servations, ressources, tarification) ; ToolkitId `toolkit.booking.reservations` | [MiyuBooking â€” Index de navigation](./MiyuBooking/_index.md) |
+| **MiyuBilling** | Kit d'outils de facturation et abonnements SaaS (souscriptions, factures, tenant) ; ToolkitId `toolkit.billing.saas` | [MiyuBilling â€” Index de navigation](./MiyuBilling/_index.md) |
+| **MiyuPosSales** | Kit d'outils caisse et ventes PoS ; ToolkitId `toolkit.pos.miyupossales` | [MiyuPosSales â€” Index de navigation](./MiyuPosSales/_index.md) |
+| **MiyuPosInventory** | Kit d'outils inventaire multi-magasin ; ToolkitId `toolkit.pos.miyuposinventory` | [MiyuPosInventory â€” Index de navigation](./MiyuPosInventory/_index.md) |
+| **MiyuPosAnalytics** | Kit d'outils analytics ventes PoS ; ToolkitId `toolkit.pos.miyuposanalytics` | [MiyuPosAnalytics â€” Index de navigation](./MiyuPosAnalytics/_index.md) |
+| **MiyuPosLoyalty** | Kit d'outils CRM et fidÃ©litÃ© PoS ; ToolkitId `toolkit.pos.miyuposloyalty` | [MiyuPosLoyalty â€” Index de navigation](./MiyuPosLoyalty/_index.md) |
+| **MiyuPosKitchen** | Kit d'outils restaurant / bar (cuisine) ; ToolkitId `toolkit.pos.miyuposkitchen` | [MiyuPosKitchen â€” Index de navigation](./MiyuPosKitchen/_index.md) |
+| **MiyuPosPayment** | Kit d'outils paiements PoS ; ToolkitId `toolkit.pos.miyupospayment` | [MiyuPosPayment â€” Index de navigation](./MiyuPosPayment/_index.md) |
+| **MiyuHR** | Kit d'outils RH (pointeuse, planning) ; ToolkitId `toolkit.hr.miyuhr` | [MiyuHR â€” Index de navigation](./MiyuHR/_index.md) |
+| **MiyuInvoice** | Kit d'outils facturation mÃ©tier indÃ©pendants (devis, factures, relances, facturation Ã©lectronique B2B) ; ToolkitId `toolkit.invoice.standalone` | [MiyuInvoice â€” Index de navigation](./MiyuInvoice/_index.md) |
+| **MiyuComptaLedger** | Kit d'outils tenue des livres (banque, Ã©critures, rapprochement, TVA, structure) ; ToolkitId `toolkit.compta.ledger` | [MiyuComptaLedger â€” Index de navigation](./MiyuComptaLedger/_index.md) |
+| **MiyuComptaReports** | Kit d'outils rapports comptables (livre des recettes, bilan, liasse, flux de trÃ©sorerie, export) ; ToolkitId `toolkit.compta.reports` | [MiyuComptaReports â€” Index de navigation](./MiyuComptaReports/_index.md) |
+| **MiyuDeclarations** | Kit d'outils dÃ©clarations fiscales et sociales (URSSAF, TVA, Ã©chÃ©ances, historique) ; ToolkitId `toolkit.compta.declarations` | [MiyuDeclarations â€” Index de navigation](./MiyuDeclarations/_index.md) |
+| **MiyuExpense** | Kit d'outils notes de frais et indemnitÃ©s (justificatifs, OCR, indemnitÃ©s kilomÃ©triques) ; ToolkitId `toolkit.expense.claims` | [MiyuExpense â€” Index de navigation](./MiyuExpense/_index.md) |
+| **MiyuTreasury** | Kit d'outils trÃ©sorerie et prÃ©visionnel (tableau de bord, prÃ©visionnel, alertes) ; ToolkitId `toolkit.treasury.forecast` | [MiyuTreasury â€” Index de navigation](./MiyuTreasury/_index.md) |
+| **MiyuCalc** | Kit d'outils calcul et formatage numÃ©rique (expressions, formatage nombres, conversion unitÃ©s) ; ToolkitId `toolkit.calc.miyucalc` | [MiyuCalc â€” Index de navigation](./MiyuCalc/_index.md) |
+| **MiyuText** | Kit d'outils traitement de texte (markdown, recherche/remplacement, templates, sanitization) ; ToolkitId `toolkit.text.miyutext` | [MiyuText â€” Index de navigation](./MiyuText/_index.md) |
+| **MiyuNotify** | Kit d'outils notification (email, push, inbox) ; ToolkitId `toolkit.notify.miyunotify` | [MiyuNotify â€” Index de navigation](./MiyuNotify/_index.md) |
+| **MiyuSearch** | Kit d'outils recherche (indexation full-text, requÃªte, suggestions) ; ToolkitId `toolkit.search.miyusearch` | [MiyuSearch â€” Index de navigation](./MiyuSearch/_index.md) |
+| **MiyuExport** | Kit d'outils export et gÃ©nÃ©ration de documents (CSV, XLSX, PDF) ; ToolkitId `toolkit.export.miyuexport` | [MiyuExport â€” Index de navigation](./MiyuExport/_index.md) |
+| **MiyuJobs** | Kit d'outils planification et file d'attente (schedule at, cron, enqueue, process) ; ToolkitId `toolkit.jobs.miyujobs` | [MiyuJobs â€” Index de navigation](./MiyuJobs/_index.md) |
+| **MiyuLocale** | Kit d'outils locale et internationalisation (format date, format nombre, traduction) ; ToolkitId `toolkit.locale.miyulocale` | [MiyuLocale â€” Index de navigation](./MiyuLocale/_index.md) |
+| **MiyuValidate** | Kit d'outils validation et sanitization de donnÃ©es (schÃ©ma, sanitize) ; ToolkitId `toolkit.validate.miyuvalidate` | [MiyuValidate â€” Index de navigation](./MiyuValidate/_index.md) |
+| **MiyuForum** | Kit d'outils structure forum (catÃ©gories, forums, topics, posts, suivi lu) ; ToolkitId `toolkit.community.forum` | [MiyuForum â€” Index de navigation](./MiyuForum/_index.md) |
+| **MiyuPM** | Kit d'outils messagerie privÃ©e (envoi, dossiers, brouillons, conversation, export) ; ToolkitId `toolkit.communication.pm` | [MiyuPM â€” Index de navigation](./MiyuPM/_index.md) |
+| **MiyuPolls** | Kit d'outils sondages (crÃ©ation, vote, rÃ©sultats) ; ToolkitId `toolkit.content.polls` | [MiyuPolls â€” Index de navigation](./MiyuPolls/_index.md) |
+| **MiyuFeeds** | Kit d'outils flux ATOM (board, forum, topic) ; ToolkitId `toolkit.content.feeds` | [MiyuFeeds â€” Index de navigation](./MiyuFeeds/_index.md) |
+| **MiyuBookmarks** | Kit d'outils signets (topics ou entitÃ©s) ; ToolkitId `toolkit.content.bookmarks` | [MiyuBookmarks â€” Index de navigation](./MiyuBookmarks/_index.md) |
+| **MiyuProfile** | Kit d'outils profil Ã©tendu (champs, signature, avatar, rangs, prÃ©fÃ©rences) ; ToolkitId `toolkit.identity.profile` | [MiyuProfile â€” Index de navigation](./MiyuProfile/_index.md) |
+| **MiyuContacts** | Kit d'outils contacts (amis/ennemis, carnet d'adresses) ; ToolkitId `toolkit.communication.contacts` | [MiyuContacts â€” Index de navigation](./MiyuContacts/_index.md) |
+| **MiyuModerationForum** | Kit d'outils modÃ©ration forum (file, reports, lock/move/merge/split, avertissements, bannissements) ; ToolkitId `toolkit.moderation.forum` | [MiyuModerationForum â€” Index de navigation](./MiyuModerationForum/_index.md) |
+| **MiyuAntiSpam** | Kit d'outils anti-spam (CAPTCHA, flood control, limite tentatives) ; ToolkitId `toolkit.security.antispam` | [MiyuAntiSpam â€” Index de navigation](./MiyuAntiSpam/_index.md) |
+| **MiyuSocialFeed** | Kit d'outils fil d'actualitÃ© social (publication, flux, rÃ©actions, partages, commentaires) ; ToolkitId `toolkit.social.feed` | [MiyuSocialFeed â€” Index de navigation](./MiyuSocialFeed/_index.md) |
+| **MiyuStory** | Kit d'outils contenu Ã©phÃ©mÃ¨re (stories 24h) ; ToolkitId `toolkit.social.story` | [MiyuStory â€” Index de navigation](./MiyuStory/_index.md) |
+| **MiyuSocialMessaging** | Kit d'outils messagerie sociale (DMs, conversations, rÃ©actions, marques de lecture) ; ToolkitId `toolkit.social.messaging` | [MiyuSocialMessaging â€” Index de navigation](./MiyuSocialMessaging/_index.md) |
+| **MiyuSocialProfile** | Kit d'outils profil social (profil, abonnÃ©s, abonnements) ; ToolkitId `toolkit.social.profile` | [MiyuSocialProfile â€” Index de navigation](./MiyuSocialProfile/_index.md) |
+| **MiyuDiscovery** | Kit d'outils dÃ©couverte sociale (hashtags, tendances, explore, recherche) ; ToolkitId `toolkit.social.discovery` | [MiyuDiscovery â€” Index de navigation](./MiyuDiscovery/_index.md) |
+| **MiyuSocialModeration** | Kit d'outils modÃ©ration sociale (signalement, blocage, suppression post) ; ToolkitId `toolkit.social.moderation` | [MiyuSocialModeration â€” Index de navigation](./MiyuSocialModeration/_index.md) |
+| **MiyuWebwayParticipant** | Kit d'outils Participant Webway MWS (annoncer, dÃ©couvrir, maintenir liste statuts) ; ToolkitId `toolkit.webway.participant` | [MiyuWebwayParticipant â€” Index de navigation](./MiyuWebwayParticipant/_index.md) |
+| **MiyuWebwayTracker** | Kit d'outils Tracker Webway MWS (recevoir, valider, rÃ©pondre dÃ©couverte, listes statuts) ; ToolkitId `toolkit.webway.tracker` | [MiyuWebwayTracker â€” Index de navigation](./MiyuWebwayTracker/_index.md) |
 
 ---
 
-## Template et guides d'implémentation
+## Template et guides d'implÃ©mentation
 
-Un **template commun** permet de rédiger des guides d'implémentation par kit :
+Un **template commun** permet de rÃ©diger des guides d'implÃ©mentation par kit :
 
 - **Template :** [docs_tools - Reference Implementation Guidelines Template](./docs_tools%20-%20Reference%20Implementation%20Guidelines%20Template.md)
 
-Kits disposant d'un guide adapté (Reference Implementation Guidelines) :
+Kits disposant d'un guide adaptÃ© (Reference Implementation Guidelines) :
 
 | Kit | Guide |
 |-----|-------|
@@ -108,38 +108,38 @@ Pour les autres kits (28 restants), s'appuyer sur le template, la Documentation 
 
 ---
 
-## Références
+## RÃ©fÃ©rences
 
 | Document | Lien |
 |----------|------|
-| Tools et Toolkits (référence conceptuelle) | [Miyukini Conceptual References - Tools et Toolkits](../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
-| Équivalents Comptabilité Indépendants | [Miyukini Conceptual References - Equivalents Comptabilite Independants](../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Comptabilite%20Independants.md) |
-| Équivalents Moteur Forum (phpBB et similaires) | [Miyukini Conceptual References - Equivalents Moteur Forum](../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Moteur%20Forum.md) |
-| Équivalents Réseaux Sociaux | [Miyukini Conceptual References - Equivalents Reseaux Sociaux](../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Reseaux%20Sociaux.md) |
-| Webway System - Outils et Opérateurs | [Miyukini Webway System - Outils et Operateurs](../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Outils%20et%20Operateurs.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
-| Toolkit Composition Contract | [Master Butler - Toolkit Composition Contract](../core/MasterButler/contracts/tools/Master%20Butler%20-%20Toolkit%20Composition%20Contract.md) |
-| Tool Governance Compliance Template | [Master Butler - Tool Governance Compliance Template](../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md) |
+| Tools et Toolkits (rÃ©fÃ©rence conceptuelle) | [Miyukini Conceptual References - Tools et Toolkits](..//miyukini-webway-system//reference//_index.md) |
+| Ã‰quivalents ComptabilitÃ© IndÃ©pendants | [Miyukini Conceptual References - Equivalents Comptabilite Independants](..//miyukini-webway-system//reference//_index.md) |
+| Ã‰quivalents Moteur Forum (phpBB et similaires) | [Miyukini Conceptual References - Equivalents Moteur Forum](..//miyukini-webway-system//reference//_index.md) |
+| Ã‰quivalents RÃ©seaux Sociaux | [Miyukini Conceptual References - Equivalents Reseaux Sociaux](..//miyukini-webway-system//reference//_index.md) |
+| Webway System - Outils et OpÃ©rateurs | [Miyukini Webway System - Outils et Operateurs](..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Toolkit Composition Contract | [Master Butler - Toolkit Composition Contract](..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Toolkit%20Composition%20Contract.md) |
+| Tool Governance Compliance Template | [Master Butler - Tool Governance Compliance Template](..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md) |
 
 ---
 
-## Écarts à la documentation enrichie (protocole)
+## Ã‰carts Ã  la documentation enrichie (protocole)
 
-Les Toolkits **sans documentation enrichie complète** (manque Reference Outils et/ou Tool Governance Compliance Contract) sont listés dans :
+Les Toolkits **sans documentation enrichie complÃ¨te** (manque Reference Outils et/ou Tool Governance Compliance Contract) sont listÃ©s dans :
 
-- **[docs_tools - Ecarts Documentation Enrichie Protocol](./docs_tools%20-%20Ecarts%20Documentation%20Enrichie%20Protocol.md)** — 7 kits à compléter : MiyuBilling, MiyuBooking, MiyuCMS, MiyuMedia, MiyuShipping, MiyuStore, MiyuWidgets.
+- **[docs_tools - Ecarts Documentation Enrichie Protocol](./docs_tools%20-%20Ecarts%20Documentation%20Enrichie%20Protocol.md)** â€” 7 kits Ã  complÃ©ter : MiyuBilling, MiyuBooking, MiyuCMS, MiyuMedia, MiyuShipping, MiyuStore, MiyuWidgets.
 
-Référence : [Miyukini Protocol - Ecriture Enrichie Toolkits](../protocols/Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md).
+RÃ©fÃ©rence : [Miyukini Protocol - Ecriture Enrichie Toolkits](..//contrats//Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md).
 
-## Prêt à l'implémentation (guides et bornes)
+## PrÃªt Ã  l'implÃ©mentation (guides et bornes)
 
-Vérification que les Toolkits sont implémentables **sans risque de déviation** (bornes BOUND-* explicites, guides d'implémentation) :
+VÃ©rification que les Toolkits sont implÃ©mentables **sans risque de dÃ©viation** (bornes BOUND-* explicites, guides d'implÃ©mentation) :
 
-- **[docs_tools - Verification Pret Implementation Bornes](./docs_tools%20-%20Verification%20Pret%20Implementation%20Bornes.md)** — 21 kits « prêts » (guide et/ou contrat Boundary) ; 28 kits « avec précautions » (s'appuyer sur le template Reference Implementation Guidelines et le contrat Governance avant de coder).
+- **[docs_tools - Verification Pret Implementation Bornes](./docs_tools%20-%20Verification%20Pret%20Implementation%20Bornes.md)** â€” 21 kits Â« prÃªts Â» (guide et/ou contrat Boundary) ; 28 kits Â« avec prÃ©cautions Â» (s'appuyer sur le template Reference Implementation Guidelines et le contrat Governance avant de coder).
 
 ---
 
-## Complétude par kit
+## ComplÃ©tude par kit
 
 | Kit | Doc Fondatrice | _index | Reference Outils | Contrat Governance |
 |-----|----------------|--------|------------------|---------------------|
@@ -192,3 +192,4 @@ Vérification que les Toolkits sont implémentables **sans risque de déviation*
 | MiyuSocialModeration | Oui | Oui | Oui | Oui |
 | MiyuWebwayParticipant | Oui | Oui | Oui | Oui |
 | MiyuWebwayTracker | Oui | Oui | Oui | Oui |
+

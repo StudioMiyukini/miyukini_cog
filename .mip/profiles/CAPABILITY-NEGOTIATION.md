@@ -1,40 +1,40 @@
----
+﻿---
 id: mip.workflow.capability-negotiation
-title: Capability Negotiation Protocol — AI s'annonce ses limites
+title: Capability Negotiation Protocol â€” AI s'annonce ses limites
 ---
 
 # Capability Negotiation Protocol (CNP)
 
-> **Principe** : Au lieu de MIP forçant des capacités non-existantes, le LLM s'annonce ("Je suis Mistral, voici mes limites") et proposent des workarounds proactifs.
+> **Principe** : Au lieu de MIP forÃ§ant des capacitÃ©s non-existantes, le LLM s'annonce ("Je suis Mistral, voici mes limites") et proposent des workarounds proactifs.
 
 ---
 
-## Quand se déclenche CNP?
+## Quand se dÃ©clenche CNP?
 
-### Contexte 1 : Démarrage du SETUP
+### Contexte 1 : DÃ©marrage du SETUP
 ```
 User lance MIP / SETUP pour la 1re fois
-→ Maria détecte l'environnement (IDE, outils)
-→ Propose 5 profils pré-définis
-→ Utilisateur sélectionne (ou auto-detect)
-→ CNP commence
+â†’ Maria dÃ©tecte l'environnement (IDE, outils)
+â†’ Propose 5 profils prÃ©-dÃ©finis
+â†’ Utilisateur sÃ©lectionne (ou auto-detect)
+â†’ CNP commence
 ```
 
 ### Contexte 2 : Changement de profil
 ```
 /mip_profile mistral-nemo  [switch from copilot-free]
-→ MIP reload capabilities
-→ Display transition warnings + new abilities
-→ Annonces de vécus
+â†’ MIP reload capabilities
+â†’ Display transition warnings + new abilities
+â†’ Annonces de vÃ©cus
 ```
 
-### Contexte 3 : Tâche très difficile vs capacités
+### Contexte 3 : TÃ¢che trÃ¨s difficile vs capacitÃ©s
 ```
 User : "T4 refactor 30 crates"
 MIP (Mode 3 / Copilot Free) : 
-  "❌ T4 impossible en Mode 3 (capabilities = 40%)
-   💡 Suggestions :
-      1. Découper T4 → 6 T2 (faisable)
+  "âŒ T4 impossible en Mode 3 (capabilities = 40%)
+   ðŸ’¡ Suggestions :
+      1. DÃ©couper T4 â†’ 6 T2 (faisable)
       2. Upgrade vers Mistral (Mode 2)
       3. CLI pair = vous code, je review
    Votre choix ?"
@@ -42,57 +42,57 @@ MIP (Mode 3 / Copilot Free) :
 
 ---
 
-## Protocole CNP détaillé (7 étapes)
+## Protocole CNP dÃ©taillÃ© (7 Ã©tapes)
 
-### Étape 1 : Auto-announce des capacités
+### Ã‰tape 1 : Auto-announce des capacitÃ©s
 
 **Format standard** (chaque LLM commence par) :
 
 ```markdown
-🤖 **[LLM Self-Announcement]**
+ðŸ¤– **[LLM Self-Announcement]**
 
 Je suis **[Nom Profil]** (Mode [N])
 
-**Capacités :**
-  ✅ Code generation (native)
-  ✅ Terminal execution (Sandbox)
-  ✅ Parallel agents (via subagents)
-  ✅ Fichier édition (multi_replace_string_in_file)
-  ✅ TodoWrite (manage_todo_list)
+**CapacitÃ©s :**
+  âœ… Code generation (native)
+  âœ… Terminal execution (Sandbox)
+  âœ… Parallel agents (via subagents)
+  âœ… Fichier Ã©dition (multi_replace_string_in_file)
+  âœ… TodoWrite (manage_todo_list)
   
 **Limitations :**
-  ❌ Web search (no MCP)
-     → Fallback: Offline docs + SearchAPI
-  ⚠️ Context window 128k
-     → Read < 5 files / task
+  âŒ Web search (no MCP)
+     â†’ Fallback: Offline docs + SearchAPI
+  âš ï¸ Context window 128k
+     â†’ Read < 5 files / task
   
 **Fallback strategy :**
-  • PDF search → Local MIP Index JSON
-  • Web query → DuckDuckGo shell script
-  • Real-time → Log + retry
+  â€¢ PDF search â†’ Local MIP Index JSON
+  â€¢ Web query â†’ DuckDuckGo shell script
+  â€¢ Real-time â†’ Log + retry
 
-Je suis prêt pour T1-T3, T4 possible avec découpage.
+Je suis prÃªt pour T1-T3, T4 possible avec dÃ©coupage.
 ```
 
-**Ce que cela évite** :
-- LLM tente terminal → fail silently
-- LLM appelle MCP → crashes
-- LLM promet parallélisme impossible → slow serialization
-- LLM assume web access → reads stale docs
+**Ce que cela Ã©vite** :
+- LLM tente terminal â†’ fail silently
+- LLM appelle MCP â†’ crashes
+- LLM promet parallÃ©lisme impossible â†’ slow serialization
+- LLM assume web access â†’ reads stale docs
 
 Instead: **Proactif transparency**.
 
 ---
 
-### Étape 2 : Utilisateur accepte ou contredit
+### Ã‰tape 2 : Utilisateur accepte ou contredit
 
 ```
-User : "Je préfère Copilot, pas d'autre option"
+User : "Je prÃ©fÃ¨re Copilot, pas d'autre option"
 
 MIP :
-  ✅ Profil accepté : github-copilot-free (Mode 3)
+  âœ… Profil acceptÃ© : github-copilot-free (Mode 3)
   
-  Workflow adapté :
+  Workflow adaptÃ© :
     P0 Framing        (Maria, text)
     P3 per-file       (Copilot 2 fichiers/iter)
     P4 vous run tests (Terminal manuel)
@@ -100,8 +100,8 @@ MIP :
     P6 Rapport texte (Copilot + Arianne memo)
     
   Budget :
-    T2 : ~1h, gratuit ✅
-    T3 : ~4-5h, gratuit ✅
+    T2 : ~1h, gratuit âœ…
+    T3 : ~4-5h, gratuit âœ…
     T4+ : Not recommended
     
   Ok? Let's go. [User hits Enter]
@@ -109,22 +109,22 @@ MIP :
 
 ---
 
-### Étape 3 : Assignation des rôles par capacité
+### Ã‰tape 3 : Assignation des rÃ´les par capacitÃ©
 
-**Base** : 10 roles (Maria orchestration, Lise, François, etc.)
+**Base** : 10 roles (Maria orchestration, Lise, FranÃ§ois, etc.)
 
-**Constraint** : Assigner un role que si LLM peut l'exécuter.
+**Constraint** : Assigner un role que si LLM peut l'exÃ©cuter.
 
 Exemple Mode 3 (Copilot Free):
 ```yaml
-Maria (Orchestration)     : ✅ Text-based P0, simple decisions
-Francois (Backend spec)   : ✅ Code analysis, spec writing
-Lise (Frontend)           : ✅ UI code, dioxus patterns
-Victor (Security)         : ⚠️ Review only (pas terminal => can't test)
-George (Compliance)       : ⚠️ Document-based only
-Hugo (DevOps)             : ❌ Not possible (no terminal batch)
-Jean (Efficiency)         : ✅ Token counting, estimation
-Arianne (QA/Memory)       : ✅ Test-case writing, memo update
+Maria (Orchestration)     : âœ… Text-based P0, simple decisions
+Francois (Backend spec)   : âœ… Code analysis, spec writing
+Lise (Frontend)           : âœ… UI code, dioxus patterns
+Victor (Security)         : âš ï¸ Review only (pas terminal => can't test)
+George (Compliance)       : âš ï¸ Document-based only
+Hugo (DevOps)             : âŒ Not possible (no terminal batch)
+Jean (Efficiency)         : âœ… Token counting, estimation
+Arianne (QA/Memory)       : âœ… Test-case writing, memo update
 
 Unassignable : Hugo
 Workaround    : "Hugo = Human DevOps person" or "Skip P4 auto-test"
@@ -132,11 +132,11 @@ Workaround    : "Hugo = Human DevOps person" or "Skip P4 auto-test"
 
 ---
 
-### Étape 4 : Define fallback chains
+### Ã‰tape 4 : Define fallback chains
 
-Pour chaque capacité manquante, défenir :
+Pour chaque capacitÃ© manquante, dÃ©fenir :
 ```
-1. Primary method (préféré)
+1. Primary method (prÃ©fÃ©rÃ©)
 2. Fallback 1 (workable)
 3. Fallback 2 (degraded but ok)
 4. Manual workaround (humain fait)
@@ -146,12 +146,12 @@ Pour chaque capacité manquante, défenir :
 **Exemple : Web search (Mode 2, pas MCP)**
 
 ```
-Primary   : Mistral a pas MCP → skip web
+Primary   : Mistral a pas MCP â†’ skip web
 Fallback1 : Use local markdown docs (Miyukini README)
 Fallback2 : Shell DuckDuckGo query (curl)
            curl -s "https://duckduckgo.com/?q=dioxus+events" | grep ...
-Fallback3 : Utilisateur tape la réponse manuellement
-Skip      : Not critical, doc peut être stale
+Fallback3 : Utilisateur tape la rÃ©ponse manuellement
+Skip      : Not critical, doc peut Ãªtre stale
 ```
 
 **Exemple : Terminal execution (Mode 3, pas terminal)**
@@ -166,51 +166,51 @@ Skip      : Tests must be manual
 
 ---
 
-### Étape 5 : Offer mode upgrades
+### Ã‰tape 5 : Offer mode upgrades
 
-Si tâche trop dure pour mode actuel :
+Si tÃ¢che trop dure pour mode actuel :
 
 ```
 User : "T4 refactor, please"
 MIP (Mode 3) :
   
-  ⚠️ Mode 3 (Copilot gratuit) limité pour T4
-  Estimé : 1 semaine de travail itératif
+  âš ï¸ Mode 3 (Copilot gratuit) limitÃ© pour T4
+  EstimÃ© : 1 semaine de travail itÃ©ratif
   
-  💡 Mode upgrades suggérés :
-    1. Mistral Nemo (local) → Mode 2
-       Temps : 2h (auto, parallèle)
-       Coût : $0 (amortissement HW)
+  ðŸ’¡ Mode upgrades suggÃ©rÃ©s :
+    1. Mistral Nemo (local) â†’ Mode 2
+       Temps : 2h (auto, parallÃ¨le)
+       CoÃ»t : $0 (amortissement HW)
        
-    2. Claude Code (API) → Mode 1
+    2. Claude Code (API) â†’ Mode 1
        Temps : 1h (parallel agents)
-       Coût : ~$2
+       CoÃ»t : ~$2
        
-    3. Rester Mode 3, découper en 6 T2
-       Temps : 1-2 semaines (itératif)
-       Coût : $0
+    3. Rester Mode 3, dÃ©couper en 6 T2
+       Temps : 1-2 semaines (itÃ©ratif)
+       CoÃ»t : $0
        
   Votre choix ?
   - "1" (Mistral)
   - "2" (Claude)
-  - "3" (Découpage)
+  - "3" (DÃ©coupage)
   - "Cancel"
 ```
 
 ---
 
-### Étape 6 : Lock et announce
+### Ã‰tape 6 : Lock et announce
 
-Après choix utilisateur :
+AprÃ¨s choix utilisateur :
 
 ```
-✅ Confirmé : Mode 2 (Mistral Nemo)
+âœ… ConfirmÃ© : Mode 2 (Mistral Nemo)
 
  Profil actif : mistral-nemo
  Context window : 128k
- Parallelism : Agents simultanés ✅
- Terminal : Sandbox ✅
- MCP : ❌ (SearchAPI fallback)
+ Parallelism : Agents simultanÃ©s âœ…
+ Terminal : Sandbox âœ…
+ MCP : âŒ (SearchAPI fallback)
  
  Workflow :
    P0 Framing (Maria, fast)
@@ -220,73 +220,73 @@ Après choix utilisateur :
    P6 Archive
    
  Estimated :
-   - Durée : 1-2h (CPU bound)
+   - DurÃ©e : 1-2h (CPU bound)
    - Tokens : ~120k
-   - Coûts : $0 (local)
+   - CoÃ»ts : $0 (local)
    
- Let's go ⚡
+ Let's go âš¡
 ```
 
 ---
 
-### Étape 7 : Runtime renegotiation
+### Ã‰tape 7 : Runtime renegotiation
 
-Si pendant exec, capacité needed :
+Si pendant exec, capacitÃ© needed :
 
 ```
 During P3 :
 
 Mistral:  "Je dois consulter Tauri API docs"
-         → Vers MCP? Non (pas dispo)
-         → Fallback: Lire local README
-         → Pas trouvé sur disque
-         → Fallback2: Web search via SearchAPI?
-         → (Too slow for this)
+         â†’ Vers MCP? Non (pas dispo)
+         â†’ Fallback: Lire local README
+         â†’ Pas trouvÃ© sur disque
+         â†’ Fallback2: Web search via SearchAPI?
+         â†’ (Too slow for this)
          
-         💡 Renegotiate : "Jean, peut-on skipper
+         ðŸ’¡ Renegotiate : "Jean, peut-on skipper
             cette recherche et assumer pattern?"
             
 User/Jean : "Oui, use default Tauri pattern"
 
-Mistral:  "Ok, procédant avec pattern"
+Mistral:  "Ok, procÃ©dant avec pattern"
 ```
 
 ---
 
-## Formats de réponse
+## Formats de rÃ©ponse
 
 ### Format A : Acceptation directe
 
 ```markdown
-✅ **Capacités acceptées**
+âœ… **CapacitÃ©s acceptÃ©es**
 
-Je suis Mode 2 (Mistral), prêt pour T2-T3.
-Commençons P0.
+Je suis Mode 2 (Mistral), prÃªt pour T2-T3.
+CommenÃ§ons P0.
 ```
 
 ### Format B : Acceptation avec warnings
 
 ```markdown
-⚠️ **Profil accepté avec limitations**
+âš ï¸ **Profil acceptÃ© avec limitations**
 
 Mode 3 (Copilot gratuit)
-- T2 idéal (1-2h)
-- T3 possible (3-5h itératif)
+- T2 idÃ©al (1-2h)
+- T3 possible (3-5h itÃ©ratif)
 - T4+ not recommended
 
-Vous êtes ok pour T2-T3 max ?
+Vous Ãªtes ok pour T2-T3 max ?
 ```
 
 ### Format C : Refus et contre-proposition
 
 ```markdown
-❌ **T4 impossible en Mode 3**
+âŒ **T4 impossible en Mode 3**
 
-Capacités insuffisantes (40% / 100%)
+CapacitÃ©s insuffisantes (40% / 100%)
 
-💡 Recommandation :
-  Option 1: Upgrade Mistral (Mode 2) → 2h
-  Option 2: Découper → 6 T2 (1 semaine)
+ðŸ’¡ Recommandation :
+  Option 1: Upgrade Mistral (Mode 2) â†’ 2h
+  Option 2: DÃ©couper â†’ 6 T2 (1 semaine)
   
 Votre choix ?
 [1/2/cancel]
@@ -296,35 +296,35 @@ Votre choix ?
 
 ## Integration avec Skills IA
 
-Chaque SKILL.md débute par :
+Chaque SKILL.md dÃ©bute par :
 
 ```markdown
 ## Capacity negotiation
 
-**Ce skill nécessite :**
+**Ce skill nÃ©cessite :**
 - [ ] Terminal access (build, test)
 - [ ] Multi-file edits (3+ files)
 - [ ] Parallel agents (optionnel)
 - [ ] Web search (optionnel)
 
-**Modes supportés :**
-- Mode 1 (Claude Code) : ✅ Plein support
-- Mode 2 (Mistral) : ✅ Plein support
-- Mode 3 (Copilot) : ⚠️ Sans tests auto
-- Mode 4 (GPT-mini) : ⚠️ Code review only
-- Mode 5 (Offline) : ⚠️ Sans web search
+**Modes supportÃ©s :**
+- Mode 1 (Claude Code) : âœ… Plein support
+- Mode 2 (Mistral) : âœ… Plein support
+- Mode 3 (Copilot) : âš ï¸ Sans tests auto
+- Mode 4 (GPT-mini) : âš ï¸ Code review only
+- Mode 5 (Offline) : âš ï¸ Sans web search
 
 **Fallbacks :**
-- No web search? → Use offline Markdown docs
-- No parallel? → Sequential approach
-- No terminal? → Manual user execution
+- No web search? â†’ Use offline Markdown docs
+- No parallel? â†’ Sequential approach
+- No terminal? â†’ Manual user execution
 ```
 
 ---
 
-## Métriques de succès
+## MÃ©triques de succÃ¨s
 
-| Métrique | Baseline | Target |
+| MÃ©trique | Baseline | Target |
 |----------|----------|--------|
 | **User clarity** | 30% understand limitations | 90%+ |
 | **Agent transparency** | 60% announce once | 95%+ proactive |
@@ -334,9 +334,10 @@ Chaque SKILL.md débute par :
 
 ---
 
-## Références
+## RÃ©fÃ©rences
 
-- [ADAPTIVE-MODES.md](./ADAPTIVE-MODES.md) — 5 modes détail
-- [Capabilities Matrix](./capabilities-matrix.md) — Par outil
-- [Profiles INDEX](./INDEX.md) — Basculer profils
-- [MCP Fallback](../modules/search-fallback.md) — Miou bridge
+- [ADAPTIVE-MODES.md](./ADAPTIVE-MODES.md) â€” 5 modes dÃ©tail
+- [Capabilities Matrix](..//README.md) â€” Par outil
+- [Profiles INDEX](..//README.md) â€” Basculer profils
+- [MCP Fallback](..//README.md) â€” Miou bridge
+

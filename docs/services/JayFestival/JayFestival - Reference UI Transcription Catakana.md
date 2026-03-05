@@ -1,51 +1,51 @@
-# JayFestival — Référence UI : transcription Catakana → stack actuelle
+﻿# JayFestival â€” RÃ©fÃ©rence UI : transcription Catakana â†’ stack actuelle
 
 ## Contexte
 
-Ce document **retranscrit l’UI complète de Catakana** (Atomic Design, thème, ui-kit, écrans) dans la **stack actuelle** Miyukini : **Dioxus** (Rust), avec référence au thème existant (miyukini-central `theme.rs`, `pixel_theme.rs`) et à la Miyukini UI Library. Il sert de **référence pour l’implémentation** de JayFestival et complète l’[Audit documentation Catakana](./JayFestival%20-%20Audit%20Documentation%20Catakana.md) et le [Bornage Implementation](./JayFestival%20-%20Bornage%20Implementation.md).
+Ce document **retranscrit lâ€™UI complÃ¨te de Catakana** (Atomic Design, thÃ¨me, ui-kit, Ã©crans) dans la **stack actuelle** Miyukini : **Dioxus** (Rust), avec rÃ©fÃ©rence au thÃ¨me existant (miyukini-central `theme.rs`, `pixel_theme.rs`) et Ã  la Miyukini UI Library. Il sert de **rÃ©fÃ©rence pour lâ€™implÃ©mentation** de JayFestival et complÃ¨te lâ€™[Audit documentation Catakana](./JayFestival%20-%20Audit%20Documentation%20Catakana.md) et le [Bornage Implementation](./JayFestival%20-%20Bornage%20Implementation.md).
 
 **Sources Catakana** : `.Catakana/docs/ATOMIC_THEME_GUIDE.md`, `.Catakana/docs/reference/UI_ARCHITECTURE.md`, `.Catakana/src/components/` (atoms, molecules, organisms, theme, ui shadcn), `sectionsConfig.ts`, `adminCategoriesConfig.tsx`.
 
-**Conformité** : L'implémentation doit respecter la [Spécification UI conforme Catakana](./JayFestival%20-%20Specification%20UI%20Conforme%20Catakana.md) : protocoles obligatoires, spécifications détaillées de chaque atome/molécule/organisme, parcours par écran avec composants ordonnés. Ce document (Reference UI) fournit le mapping global ; la spec fournit les bornes et les règles de conformité.
+**ConformitÃ©** : L'implÃ©mentation doit respecter la [SpÃ©cification UI conforme Catakana](./JayFestival%20-%20Specification%20UI%20Conforme%20Catakana.md) : protocoles obligatoires, spÃ©cifications dÃ©taillÃ©es de chaque atome/molÃ©cule/organisme, parcours par Ã©cran avec composants ordonnÃ©s. Ce document (Reference UI) fournit le mapping global ; la spec fournit les bornes et les rÃ¨gles de conformitÃ©.
 
-**Stack cible** : [Miyukini - Stack UI Dioxus](../../ux_ui/Miyukini%20-%20Stack%20UI%20Dioxus%20Dioxus.md) ; `crates/miyukini-central/src/theme.rs`, `pixel_theme.rs`, `services/ui_library.rs`.
+**Stack cible** : [Miyukini - Stack UI Dioxus](..//..//_index.md) ; `crates/miyukini-central/src/theme.rs`, `pixel_theme.rs`, `services/ui_library.rs`.
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Périmètre** : Transcription Atomic UI, tokens de thème, ui-kit (composants), mapping écrans Catakana → écrans JayFestival (Dioxus), checklist d’implémentation.
-- **Hors périmètre** : Code source React/TypeScript Catakana ; implémentation détaillée des widgets Dioxus (référence docs Dioxus et miyukini-central).
+- **PÃ©rimÃ¨tre** : Transcription Atomic UI, tokens de thÃ¨me, ui-kit (composants), mapping Ã©crans Catakana â†’ Ã©crans JayFestival (Dioxus), checklist dâ€™implÃ©mentation.
+- **Hors pÃ©rimÃ¨tre** : Code source React/TypeScript Catakana ; implÃ©mentation dÃ©taillÃ©e des widgets Dioxus (rÃ©fÃ©rence docs Dioxus et miyukini-central).
 
 ---
 
 ## 1. Principes et stack
 
-### 1.1 Principes Catakana à conserver
+### 1.1 Principes Catakana Ã  conserver
 
 | Principe | Catakana | JayFestival / Dioxus |
 |----------|----------|---------------------|
-| **Source unique des styles** | `useActiveTheme()` → tokens (couleurs, rayons, ombres, spacing, opacités) | Struct `JayFestivalTheme` (ou extension `theme.rs`) ; appliquer via `ctx.set_style()` et helpers. |
-| **Opacité des fonds** | Fonds principaux ~40 % opacité | `Dioxus::Color32::from_rgba_unmultiplied(r, g, b, 102)` (255*0.4≈102) pour fonds section/carte. |
-| **Atomic design** | Atoms → Molecules → Organisms → Templates → Pages | Équivalent Dioxus : **widgets de base** (bouton, label, champ) → **composants composés** (Frame + label + bouton) → **panels/sections** (SidePanel + liste + cartes) → **layout page** (TopBottomPanel + SidePanel + CentralPanel) → **écran** (état + layout + sections). |
-| **Tokens UI** | Jamais de couleurs/tailles en dur | Toutes les couleurs, rayons, espacements, polices viennent du thème (struct ou `Dioxus::Style`). |
+| **Source unique des styles** | `useActiveTheme()` â†’ tokens (couleurs, rayons, ombres, spacing, opacitÃ©s) | Struct `JayFestivalTheme` (ou extension `theme.rs`) ; appliquer via `ctx.set_style()` et helpers. |
+| **OpacitÃ© des fonds** | Fonds principaux ~40 % opacitÃ© | `Dioxus::Color32::from_rgba_unmultiplied(r, g, b, 102)` (255*0.4â‰ˆ102) pour fonds section/carte. |
+| **Atomic design** | Atoms â†’ Molecules â†’ Organisms â†’ Templates â†’ Pages | Ã‰quivalent Dioxus : **widgets de base** (bouton, label, champ) â†’ **composants composÃ©s** (Frame + label + bouton) â†’ **panels/sections** (SidePanel + liste + cartes) â†’ **layout page** (TopBottomPanel + SidePanel + CentralPanel) â†’ **Ã©cran** (Ã©tat + layout + sections). |
+| **Tokens UI** | Jamais de couleurs/tailles en dur | Toutes les couleurs, rayons, espacements, polices viennent du thÃ¨me (struct ou `Dioxus::Style`). |
 
 ### 1.2 Stack actuelle (rappel)
 
 - **UI** : Dioxus 0.33, Dioxus 0.33 (Rust).
 - **Layout** : `CentralPanel`, `SidePanel`, `TopBottomPanel`, `Window`, `Area`.
 - **Widgets** : `ui.button()`, `ui.label()`, `ui.heading()`, `TextEdit`, `checkbox`, `selectable_value`, `collapsing`, `horizontal` / `vertical`, etc.
-- **Style** : `ctx.set_style()`, `ctx.set_visuals()` ; `Dioxus::Style`, `Dioxus::Visuals`, `Dioxus::WidgetVisuals` (corner_radius, bg_fill, …).
-- **Thème existant** : `theme.rs` (store : accent, card radius, spacing), `pixel_theme.rs` (Chrome tabs).
+- **Style** : `ctx.set_style()`, `ctx.set_visuals()` ; `Dioxus::Style`, `Dioxus::Visuals`, `Dioxus::WidgetVisuals` (corner_radius, bg_fill, â€¦).
+- **ThÃ¨me existant** : `theme.rs` (store : accent, card radius, spacing), `pixel_theme.rs` (Chrome tabs).
 
 ---
 
-## 2. Thème — tokens Catakana → Dioxus / JayFestival
+## 2. ThÃ¨me â€” tokens Catakana â†’ Dioxus / JayFestival
 
-### 2.1 Noms de tokens (Catakana) → champs Dioxus / struct
+### 2.1 Noms de tokens (Catakana) â†’ champs Dioxus / struct
 
 | Catakana (theme) | Type / usage | Dioxus / JayFestival |
 |------------------|--------------|---------------------|
-| `colors.background.primary` | Fond général | `Visuals::window_fill()` ou couleur fond CentralPanel ; avec opacité 0.4 si overlay. |
-| `colors.section.background` | Fond section | `Frame::fill(card_bg_color(dark))` ; opacité 0.4 recommandée. |
+| `colors.background.primary` | Fond gÃ©nÃ©ral | `Visuals::window_fill()` ou couleur fond CentralPanel ; avec opacitÃ© 0.4 si overlay. |
+| `colors.section.background` | Fond section | `Frame::fill(card_bg_color(dark))` ; opacitÃ© 0.4 recommandÃ©e. |
 | `colors.section.card.background` | Fond carte | Idem `theme.rs` `card_bg_color(dark)`. |
 | `colors.section.border` | Bordure section/carte | `Frame::stroke(Stroke::new(1., section_border_color()))`. |
 | `colors.section.title` | Titre section | `ui.heading()` ou `RichText::new().color(section_title_color())`. |
@@ -55,233 +55,234 @@ Ce document **retranscrit l’UI complète de Catakana** (Atomic Design, thème,
 | `colors.header.*` | Logo, titre header | `TopBottomPanel` fill + texte avec `header_title_color()`. |
 | `colors.sidebar.*` | Sidebar, menuItem | `SidePanel` fill, stroke ; `selectable_value` avec bg_fill actif. |
 | `fonts.sizes.*` | Tailles texte | `Dioxus::FontId::new(size, FontFamily::Proportional)`. |
-| `fonts.weights.*` | Graisse | Non utilisé tel quel en Dioxus (pas de font-weight) ; différencier par `FontId::new(size_large, …)` si besoin. |
+| `fonts.weights.*` | Graisse | Non utilisÃ© tel quel en Dioxus (pas de font-weight) ; diffÃ©rencier par `FontId::new(size_large, â€¦)` si besoin. |
 | `borders.radius.small/medium/large` | Rayon coins | `CornerRadius::same(4)` small, `8` medium, `12` large (u8). |
 | `spacing.*` | Marges, padding | `style.spacing.item_spacing`, `button_padding`, `window_margin` ; `Margin::same(n)`. |
-| `shadows.small/medium/large` | Ombres | Dioxus n’a pas de box-shadow ; simuler par `Frame::stroke` légère ou accepter l’absence. |
-| `opacity.overlay/cardBackground` | Opacités | Alpha dans `Color32::from_rgba_unmultiplied(r,g,b,alpha)`. |
+| `shadows.small/medium/large` | Ombres | Dioxus nâ€™a pas de box-shadow ; simuler par `Frame::stroke` lÃ©gÃ¨re ou accepter lâ€™absence. |
+| `opacity.overlay/cardBackground` | OpacitÃ©s | Alpha dans `Color32::from_rgba_unmultiplied(r,g,b,alpha)`. |
 
-### 2.2 Palette Catakana → couleurs JayFestival (Dioxus)
+### 2.2 Palette Catakana â†’ couleurs JayFestival (Dioxus)
 
 | Usage Catakana | Couleur / valeur | Dioxus Color32 (exemple) |
 |----------------|------------------|-------------------------|
 | **Catakana Purple** (primaire) | `#8B5CF6` | `Color32::from_rgb(139, 92, 246)` |
 | **Catakana Blue** (secondaire) | `#3B82F6` | `Color32::from_rgb(59, 130, 246)` |
-| **Amber** (bénévoles) | `#F59E0B` | `Color32::from_rgb(245, 158, 11)` |
+| **Amber** (bÃ©nÃ©voles) | `#F59E0B` | `Color32::from_rgb(245, 158, 11)` |
 | **Green** (exposants) | `#10B981` | `Color32::from_rgb(16, 185, 129)` |
 | **Fond section (dark)** | rgba + 0.4 | `from_rgba_unmultiplied(30, 30, 35, 102)` |
-| **Fond carte (dark)** | rgba + 0.05–0.1 | `from_rgba_unmultiplied(50, 50, 55, 25)` |
+| **Fond carte (dark)** | rgba + 0.05â€“0.1 | `from_rgba_unmultiplied(50, 50, 55, 25)` |
 
-Recommandation : définir un module `jay_festival_theme.rs` (ou étendre `theme.rs`) avec des fonctions du type `section_bg(dark: bool)`, `card_bg(dark: bool)`, `accent_primary()`, `accent_organisateur()`, `accent_exposant()`, `accent_visiteur()`, et appliquer dans les écrans JayFestival.
+Recommandation : dÃ©finir un module `jay_festival_theme.rs` (ou Ã©tendre `theme.rs`) avec des fonctions du type `section_bg(dark: bool)`, `card_bg(dark: bool)`, `accent_primary()`, `accent_organisateur()`, `accent_exposant()`, `accent_visiteur()`, et appliquer dans les Ã©crans JayFestival.
 
 ### 2.3 Responsive / breakpoints
 
-Catakana : breakpoint 800px, 14px mobile / 16px+ desktop. En Dioxus : utiliser `ctx.screen_rect().width()` pour choisir layout (sidebar large vs icônes seules), et `FontId::new(14., …)` vs `16.` selon largeur.
+Catakana : breakpoint 800px, 14px mobile / 16px+ desktop. En Dioxus : utiliser `ctx.screen_rect().width()` pour choisir layout (sidebar large vs icÃ´nes seules), et `FontId::new(14., â€¦)` vs `16.` selon largeur.
 
 ---
 
-## 3. Atomic UI — Catakana → Dioxus
+## 3. Atomic UI â€” Catakana â†’ Dioxus
 
-### 3.1 Atoms (éléments de base)
+### 3.1 Atoms (Ã©lÃ©ments de base)
 
-| Catakana | Fichier / usage | Équivalent Dioxus |
+| Catakana | Fichier / usage | Ã‰quivalent Dioxus |
 |----------|------------------|------------------|
-| **IconWrapper** | `atoms/IconWrapper.tsx` (Lucide, variantes couleur, taille sm/md/lg) | Pas d’icônes Lucide en Dioxus ; utiliser `ui.label("📅")` (emoji) ou intégrer une font d’icônes (Dioxus_extras) ; taille = `FontId::new(14.|16.|20., …)`. |
+| **IconWrapper** | `atoms/IconWrapper.tsx` (Lucide, variantes couleur, taille sm/md/lg) | Pas dâ€™icÃ´nes Lucide en Dioxus ; utiliser `ui.label("ðŸ“…")` (emoji) ou intÃ©grer une font dâ€™icÃ´nes (Dioxus_extras) ; taille = `FontId::new(14.|16.|20., â€¦)`. |
 | **Button** | shadcn `button.tsx` | `ui.button(RichText::new("Label").color(text_color()))` ; style via `ctx.style().visuals.widgets`. |
 | **Input** | shadcn `input.tsx` | `ui.add(Dioxus::TextEdit::singleline(&mut string))`. |
 | **Label** | shadcn `label.tsx` | `ui.label()` ou `ui.heading()`. |
-| **Badge** | shadcn `badge.tsx`, `ExhibitorStatusBadge` | `Frame::group(ui).fill(badge_bg).show(ui, \|ui\| ui.label("Validé"))`. |
+| **Badge** | shadcn `badge.tsx`, `ExhibitorStatusBadge` | `Frame::group(ui).fill(badge_bg).show(ui, \|ui\| ui.label("ValidÃ©"))`. |
 | **Checkbox** | shadcn `checkbox.tsx` | `ui.checkbox(&mut bool, "Label")`. |
 | **Select** | shadcn `select.tsx` | `Dioxus::ComboBox::from_id_salt("id").selected_text(...).show_ui(ui, \|ui\| { ui.selectable_value(...) })`. |
 
 ### 3.2 Molecules (combinaisons)
 
-| Catakana | Fichier / usage | Équivalent Dioxus |
+| Catakana | Fichier / usage | Ã‰quivalent Dioxus |
 |----------|------------------|------------------|
-| **FeatureCard** | `molecules/FeatureCard.tsx` (titre, description, icône, variante) | `Frame::card(ui).show(ui, \|ui\| { ui.heading("Titre"); ui.label("Description"); })` avec fill/stroke du thème. |
-| **DirectoryCard** | `molecules/DirectoryCard.tsx` (gradient, CTA) | Idem + bouton en bas ; gradient en Dioxus = dégradé manuel ou fill uniforme. |
-| **RoleCard** | `molecules/RoleCard.tsx` (pastille colorée) | Frame + petit cercle/rect coloré + label. |
+| **FeatureCard** | `molecules/FeatureCard.tsx` (titre, description, icÃ´ne, variante) | `Frame::card(ui).show(ui, \|ui\| { ui.heading("Titre"); ui.label("Description"); })` avec fill/stroke du thÃ¨me. |
+| **DirectoryCard** | `molecules/DirectoryCard.tsx` (gradient, CTA) | Idem + bouton en bas ; gradient en Dioxus = dÃ©gradÃ© manuel ou fill uniforme. |
+| **RoleCard** | `molecules/RoleCard.tsx` (pastille colorÃ©e) | Frame + petit cercle/rect colorÃ© + label. |
 | **CTACard** | `molecules/CTACard.tsx` | Frame + titre + description + `ui.button()`. |
 | **Card** (shadcn) | `ui/card.tsx` | `Frame::default().fill(card_bg).stroke(...).rounding(...).show(ui, ...)`. |
 
-### 3.3 Organisms (sections complètes)
+### 3.3 Organisms (sections complÃ¨tes)
 
-| Catakana | Fichier / usage | Équivalent Dioxus |
+| Catakana | Fichier / usage | Ã‰quivalent Dioxus |
 |----------|------------------|------------------|
 | **Header** | `organisms/Header.tsx` (nav responsive, auth) | `TopBottomPanel::top("header").show(ctx, \|ui\| { ui.horizontal(\|ui\| { ui.label("JayFestival"); ui.button("Catalogue"); ... }) })`. |
-| **HeaderWithEdition** | Avec sélecteur d’édition | Idem + `ComboBox` édition. |
+| **HeaderWithEdition** | Avec sÃ©lecteur dâ€™Ã©dition | Idem + `ComboBox` Ã©dition. |
 | **HeroSection** | `organisms/HeroSection.tsx` | `CentralPanel` ou zone avec titre grand + sous-texte. |
 | **FeaturesGrid** | `organisms/FeaturesGrid.tsx` (onglets + grille FeatureCard) | `ui.horizontal` pour onglets (selectable_value) ; `ui.grid()` ou boucle vertical/horizontal pour cartes. |
-| **DirectoryBanner** | `organisms/DirectoryBanner.tsx` | Deux `Frame::card` côte à côte. |
-| **RolesGrid** | `organisms/RolesGrid.tsx` | Grille de RoleCard (4 rôles). |
+| **DirectoryBanner** | `organisms/DirectoryBanner.tsx` | Deux `Frame::card` cÃ´te Ã  cÃ´te. |
+| **RolesGrid** | `organisms/RolesGrid.tsx` | Grille de RoleCard (4 rÃ´les). |
 | **CTASection** | `organisms/CTASection.tsx` | Grille de CTACard + bouton principal. |
 | **Layout** | `Layout.tsx` (structure page) | `SidePanel::left` + `CentralPanel::default()` ; contenu central = scroll ou panels. |
-| **GestionLayout** | `layouts/GestionLayout.tsx` | Idem avec menu admin (catégories/sections). |
+| **GestionLayout** | `layouts/GestionLayout.tsx` | Idem avec menu admin (catÃ©gories/sections). |
 
 ### 3.4 Templates / Pages
 
-- **Catakana** : templates = layout (header, sidebar, body, footer) ; pages = assemblage + données.
-- **Dioxus** : même idée — une fonction `fn ui_organisateur_dashboard(ctx, app_state)` qui appelle `ui_sidebar()`, puis dans `CentralPanel` `ui_edition_list()` ou `ui_edition_dashboard(edition_id)` ; chaque « page » = une branche de `match current_view { ... }`.
+- **Catakana** : templates = layout (header, sidebar, body, footer) ; pages = assemblage + donnÃ©es.
+- **Dioxus** : mÃªme idÃ©e â€” une fonction `fn ui_organisateur_dashboard(ctx, app_state)` qui appelle `ui_sidebar()`, puis dans `CentralPanel` `ui_edition_list()` ou `ui_edition_dashboard(edition_id)` ; chaque Â« page Â» = une branche de `match current_view { ... }`.
 
 ---
 
-## 4. UI-kit — composants Catakana (shadcn + custom) → spec implémentation
+## 4. UI-kit â€” composants Catakana (shadcn + custom) â†’ spec implÃ©mentation
 
-Liste non exhaustive ; chaque entrée donne le **nom**, l’**usage** et la **cible Dioxus**.
+Liste non exhaustive ; chaque entrÃ©e donne le **nom**, lâ€™**usage** et la **cible Dioxus**.
 
-| Composant Catakana | Usage | Implémentation Dioxus / référence |
+| Composant Catakana | Usage | ImplÃ©mentation Dioxus / rÃ©fÃ©rence |
 |--------------------|--------|----------------------------------|
 | **button** | Primaire, secondaire, outline, ghost | `ui.button()` + `ctx.style().visuals.widgets` (inactive/hovered/active). |
 | **input** | Texte une ligne | `TextEdit::singleline()`. |
 | **textarea** | Texte multiligne | `TextEdit::multiline()`. |
-| **label** | Libellé champ | `ui.label()`. |
+| **label** | LibellÃ© champ | `ui.label()`. |
 | **card** | Conteneur avec titre/corps/footer | `Frame::card().inner_margin(...).show(ui, ...)`. |
-| **badge** | Statut (ex. exposant validé/refusé) | Frame petit + texte ; couleur selon statut. |
-| **table** | Listes tabulaires (exposants, budget) | `Dioxus::Grid` ou `ui.horizontal` répété ; en-têtes en `ui.heading()` ou première ligne en gras. |
-| **tabs** | Onglets (dashboard édition) | `ui.horizontal` + `selectable_value` ou `Dioxus::TopBottomPanel` avec boutons. |
+| **badge** | Statut (ex. exposant validÃ©/refusÃ©) | Frame petit + texte ; couleur selon statut. |
+| **table** | Listes tabulaires (exposants, budget) | `Dioxus::Grid` ou `ui.horizontal` rÃ©pÃ©tÃ© ; en-tÃªtes en `ui.heading()` ou premiÃ¨re ligne en gras. |
+| **tabs** | Onglets (dashboard Ã©dition) | `ui.horizontal` + `selectable_value` ou `Dioxus::TopBottomPanel` avec boutons. |
 | **dialog** | Modale | `Window::new("Titre").anchor(Align2::CENTER_CENTER, [0.,0.]).show(ctx, \|ui\| ...)`. |
 | **dropdown-menu** | Actions | `ui.menu_button("Actions", \|ui\| { if ui.button("Exporter").clicked() { ... } })`. |
-| **select** | Liste déroulante | `ComboBox::from_id_salt(...).selected_text(...).show_ui(...)`. |
-| **checkbox** | Booléen | `ui.checkbox()`. |
+| **select** | Liste dÃ©roulante | `ComboBox::from_id_salt(...).selected_text(...).show_ui(...)`. |
+| **checkbox** | BoolÃ©en | `ui.checkbox()`. |
 | **calendar** | Date (programme, filtres) | Dioxus_extras `DatePicker` ou champ texte + parsing. |
-| **breadcrumb** | Fil d’Ariane (Mes éditions > Nom édition) | `ui.horizontal` avec `ui.link("Mes éditions")` + `ui.label(" > ")` + `ui.label(nom_edition)`. |
-| **pagination** | Liste paginée | `ui.horizontal` avec boutons « Précédent » / « Suivant » + label « Page n / N ». |
-| **ExhibitorStatusBadge** | Badge statut exposant | Frame coloré (vert/jaune/rouge) + texte (Validé / En attente / Refusé). |
-| **DocumentViewer** | Affichage document (PDF/texte) | Lien téléchargement ou iframe non disponible en Dioxus ; afficher métadonnées + bouton « Télécharger ». |
-| **FloorPlanCanvas** | Plan de salle interactif (Fabric.js) | Dioxus : dessin personnalisé avec `Painter` (rectangles, texte) ou intégration widget 2D ; drag & drop = `Response::dragged()` + mise à jour positions. |
-| **ScheduleGrid** | Grille programme (créneaux × salles) | `ui.grid()` ou tableau avec `ui.label()` par cellule ; clic = ouvrir fenêtre édition animation. |
+| **breadcrumb** | Fil dâ€™Ariane (Mes Ã©ditions > Nom Ã©dition) | `ui.horizontal` avec `ui.link("Mes Ã©ditions")` + `ui.label(" > ")` + `ui.label(nom_edition)`. |
+| **pagination** | Liste paginÃ©e | `ui.horizontal` avec boutons Â« PrÃ©cÃ©dent Â» / Â« Suivant Â» + label Â« Page n / N Â». |
+| **ExhibitorStatusBadge** | Badge statut exposant | Frame colorÃ© (vert/jaune/rouge) + texte (ValidÃ© / En attente / RefusÃ©). |
+| **DocumentViewer** | Affichage document (PDF/texte) | Lien tÃ©lÃ©chargement ou iframe non disponible en Dioxus ; afficher mÃ©tadonnÃ©es + bouton Â« TÃ©lÃ©charger Â». |
+| **FloorPlanCanvas** | Plan de salle interactif (Fabric.js) | Dioxus : dessin personnalisÃ© avec `Painter` (rectangles, texte) ou intÃ©gration widget 2D ; drag & drop = `Response::dragged()` + mise Ã  jour positions. |
+| **ScheduleGrid** | Grille programme (crÃ©neaux Ã— salles) | `ui.grid()` ou tableau avec `ui.label()` par cellule ; clic = ouvrir fenÃªtre Ã©dition animation. |
 
-Référence complémentaire : **Miyukini UI Library** (`crates/miyukini-central/src/services/ui_library.rs`) pour boutons, cartes, champs, barres — réutiliser ou aligner les styles (padding, corner_radius, couleurs) sur le thème JayFestival.
+RÃ©fÃ©rence complÃ©mentaire : **Miyukini UI Library** (`crates/miyukini-central/src/services/ui_library.rs`) pour boutons, cartes, champs, barres â€” rÃ©utiliser ou aligner les styles (padding, corner_radius, couleurs) sur le thÃ¨me JayFestival.
 
 ---
 
-## 5. Mapping écrans Catakana → écrans JayFestival (Dioxus)
+## 5. Mapping Ã©crans Catakana â†’ Ã©crans JayFestival (Dioxus)
 
 ### 5.1 Par public
 
-Les écrans JayFestival sont décrits dans les documents « Écrans et cycle » (Organisateurs, Exposants, Visiteurs, UNC). Le tableau ci-dessous fait le lien avec les **composants / sections Catakana** pour la transcription.
+Les Ã©crans JayFestival sont dÃ©crits dans les documents Â« Ã‰crans et cycle Â» (Organisateurs, Exposants, Visiteurs, UNC). Le tableau ci-dessous fait le lien avec les **composants / sections Catakana** pour la transcription.
 
-#### 5.1.1 Utilisateur non connecté (catalogue)
+#### 5.1.1 Utilisateur non connectÃ© (catalogue)
 
-| Écran JayFestival | Id | Composants / sections Catakana |
+| Ã‰cran JayFestival | Id | Composants / sections Catakana |
 |-------------------|-----|-------------------------------|
 | Landing / Accueil catalogue | UNC-E01 | `HomePage`, `HeroSection`, `FeaturesGrid`, `DirectoryBanner`, `CTASection`, navigation publique. |
-| Liste des événements | UNC-E04–E06 | Liste + filtres (category2 Informations, Programme, Plan, Exposants). |
-| Fiche événement | UNC-E07 | Section Informations + Programme + Plan + Exposants + Règlements (category2). |
-| Répertoire organisateurs / exposants | UNC-E10–E14 | Annuaire exposants (category7 section2), fiches. |
+| Liste des Ã©vÃ©nements | UNC-E04â€“E06 | Liste + filtres (category2 Informations, Programme, Plan, Exposants). |
+| Fiche Ã©vÃ©nement | UNC-E07 | Section Informations + Programme + Plan + Exposants + RÃ¨glements (category2). |
+| RÃ©pertoire organisateurs / exposants | UNC-E10â€“E14 | Annuaire exposants (category7 section2), fiches. |
 
 #### 5.1.2 Organisateurs
 
-| Écran JayFestival | Id | Composants / sections Catakana |
+| Ã‰cran JayFestival | Id | Composants / sections Catakana |
 |-------------------|-----|-------------------------------|
 | Connexion / Inscription organisateur | ORG-E02, ORG-E03 | `LoginModal`, `SignupModal` (auth) ; formulaire structure. |
-| Tableau de bord organisateur | ORG-E04 | `Layout` + sidebar admin ; vue synthèse éditions (cartes ou liste). |
-| Liste des éditions | ORG-E05 | Grille/liste type `EditionArchive` ou liste avec filtres. |
-| Dashboard édition | ORG-E07 | Onglets type `GestionLayout` : Exposants, Plan, Programme, Budget, Documents, etc. |
+| Tableau de bord organisateur | ORG-E04 | `Layout` + sidebar admin ; vue synthÃ¨se Ã©ditions (cartes ou liste). |
+| Liste des Ã©ditions | ORG-E05 | Grille/liste type `EditionArchive` ou liste avec filtres. |
+| Dashboard Ã©dition | ORG-E07 | Onglets type `GestionLayout` : Exposants, Plan, Programme, Budget, Documents, etc. |
 | Liste exposants / Candidatures | ORG-E09, ORG-E10 | `EditionExhibitors`, `EditionCandidaturesList` ; table + badges statut. |
-| Fiche exposant / Devis / Factures | ORG-E11–E13 | `ExhibitorModal`, formulaires devis/facture (Miyuinvoice). |
-| Plan de salle / Attribution | ORG-E14–E16 | `FloorPlanCanvas`, `ExhibitorBoothAssignment`, `FloorPlanItemsList`, `FloorPlanToolbar`. |
-| Programme | ORG-E17a–E17b | `EditionAgenda`, `ProgramSection`, `ScheduleGrid`, `EventCreatorModal`, `SlotEditorModal`. |
+| Fiche exposant / Devis / Factures | ORG-E11â€“E13 | `ExhibitorModal`, formulaires devis/facture (Miyuinvoice). |
+| Plan de salle / Attribution | ORG-E14â€“E16 | `FloorPlanCanvas`, `ExhibitorBoothAssignment`, `FloorPlanItemsList`, `FloorPlanToolbar`. |
+| Programme | ORG-E17aâ€“E17b | `EditionAgenda`, `ProgramSection`, `ScheduleGrid`, `EventCreatorModal`, `SlotEditorModal`. |
 | Budget | ORG-E19 | `EditionBudget`, `BudgetTable`, `BudgetCharts`, `BudgetEntryForm`. |
-| Documents et légal | ORG-E22 | `EditionDocuments`, `DocumentViewer`. |
+| Documents et lÃ©gal | ORG-E22 | `EditionDocuments`, `DocumentViewer`. |
 | Annonces et notifications | ORG-E23 | Section communication (config + liste envois). |
 | Services visiteur | ORG-E24 | Formulaire activation (jeux, concours, ateliers, pass). |
-| Publication / Clôture | ORG-E25 | Boutons + confirmation. |
-| Équipe | ORG-E21 | Liste membres + invitations (rôles Admin, Manager, Bénévole). |
+| Publication / ClÃ´ture | ORG-E25 | Boutons + confirmation. |
+| Ã‰quipe | ORG-E21 | Liste membres + invitations (rÃ´les Admin, Manager, BÃ©nÃ©vole). |
 
 #### 5.1.3 Exposants
 
-| Écran JayFestival | Id | Composants / sections Catakana |
+| Ã‰cran JayFestival | Id | Composants / sections Catakana |
 |-------------------|-----|-------------------------------|
-| Dashboard exposant | EXP-E01–E04 | Layout type « espace exposant » : onglets Candidatures, Participations, Agenda, Documents, Factures. |
-| Candidatures / Dépôt | EXP-E05–E06 | Formulaire candidature (champs dynamiques) + upload (Dioxus : chemin fichier ou base64 si limité). |
-| Participations / Fiche édition | EXP-E07–E08 | Liste éditions validées + fiche détail (plan, programme, documents). |
-| Agenda / Conflits | EXP-E09 | Vue calendrier (données JayKoa) + alerte conflit. |
-| Documents / Factures | EXP-E10–E12 | Liste + téléchargement (lien ou métadonnées). |
+| Dashboard exposant | EXP-E01â€“E04 | Layout type Â« espace exposant Â» : onglets Candidatures, Participations, Agenda, Documents, Factures. |
+| Candidatures / DÃ©pÃ´t | EXP-E05â€“E06 | Formulaire candidature (champs dynamiques) + upload (Dioxus : chemin fichier ou base64 si limitÃ©). |
+| Participations / Fiche Ã©dition | EXP-E07â€“E08 | Liste Ã©ditions validÃ©es + fiche dÃ©tail (plan, programme, documents). |
+| Agenda / Conflits | EXP-E09 | Vue calendrier (donnÃ©es JayKoa) + alerte conflit. |
+| Documents / Factures | EXP-E10â€“E12 | Liste + tÃ©lÃ©chargement (lien ou mÃ©tadonnÃ©es). |
 
 #### 5.1.4 Visiteurs
 
-| Écran JayFestival | Id | Composants / sections Catakana |
+| Ã‰cran JayFestival | Id | Composants / sections Catakana |
 |-------------------|-----|-------------------------------|
-| Espace visiteur | VIS-E04–E14 | Layout : Agenda, Billets, Réservations, Pass VIP, Activités (jeux, concours). |
-| Réservation (atelier, créneau, pass) | VIS-E09 | Formulaire choix créneau + vérification conflit (JayKoa) + confirmation. |
-| Fiche événement (connecté) | VIS-E10 | Même contenu que UNC fiche événement + CTAs (Réserver, S’inscrire). |
+| Espace visiteur | VIS-E04â€“E14 | Layout : Agenda, Billets, RÃ©servations, Pass VIP, ActivitÃ©s (jeux, concours). |
+| RÃ©servation (atelier, crÃ©neau, pass) | VIS-E09 | Formulaire choix crÃ©neau + vÃ©rification conflit (JayKoa) + confirmation. |
+| Fiche Ã©vÃ©nement (connectÃ©) | VIS-E10 | MÃªme contenu que UNC fiche Ã©vÃ©nement + CTAs (RÃ©server, Sâ€™inscrire). |
 
-### 5.2 Catégories / sections Catakana (config) → usage JayFestival
+### 5.2 CatÃ©gories / sections Catakana (config) â†’ usage JayFestival
 
-- **category1** (News) → Annonces organisateur + optionnel phase 2 Actualités public.
-- **category2** (Informations, Programme, Plan, Exposants, Règlements) → Catalogue public + dashboard édition (Programme, Plan, Exposants, Documents).
-- **category3** (Invités, Ateliers, Animations, Concours, Jeux) → Services visiteur (phase 2 complet) ; MVP = réservations ateliers/créneaux.
-- **category4** (Plans) → Plan de salle (organisateur + exposant + public).
-- **category5** (RPG, Inventaire, Récompenses, Leaderboard) → Hors scope JayFestival v1.
-- **category6** (Galeries) → Phase 2 ou Miyumedia.
-- **category7** (Organisation : Annuaire, Emplacements, Réservation stands, Présentation) → Exposants (annuaire, réservation) + catalogue.
-- **category8** (Gestion : appli, compte, candidatures, éditions, utilisateurs, factures, événements, matériel) → Organisateurs (Équipe, Éditions, Exposants, Programme, Budget, Documents, etc.).
+- **category1** (News) â†’ Annonces organisateur + optionnel phase 2 ActualitÃ©s public.
+- **category2** (Informations, Programme, Plan, Exposants, RÃ¨glements) â†’ Catalogue public + dashboard Ã©dition (Programme, Plan, Exposants, Documents).
+- **category3** (InvitÃ©s, Ateliers, Animations, Concours, Jeux) â†’ Services visiteur (phase 2 complet) ; MVP = rÃ©servations ateliers/crÃ©neaux.
+- **category4** (Plans) â†’ Plan de salle (organisateur + exposant + public).
+- **category5** (RPG, Inventaire, RÃ©compenses, Leaderboard) â†’ Hors scope JayFestival v1.
+- **category6** (Galeries) â†’ Phase 2 ou Miyumedia.
+- **category7** (Organisation : Annuaire, Emplacements, RÃ©servation stands, PrÃ©sentation) â†’ Exposants (annuaire, rÃ©servation) + catalogue.
+- **category8** (Gestion : appli, compte, candidatures, Ã©ditions, utilisateurs, factures, Ã©vÃ©nements, matÃ©riel) â†’ Organisateurs (Ã‰quipe, Ã‰ditions, Exposants, Programme, Budget, Documents, etc.).
 
 ---
 
-## 6. Checklist d’implémentation UI
+## 6. Checklist dâ€™implÃ©mentation UI
 
-À utiliser en complément du [Bornage Implementation](./JayFestival%20-%20Bornage%20Implementation.md).
+Ã€ utiliser en complÃ©ment du [Bornage Implementation](./JayFestival%20-%20Bornage%20Implementation.md).
 
-### 6.1 Thème
+### 6.1 ThÃ¨me
 
-- [ ] Définir struct ou module **JayFestivalTheme** (couleurs section, carte, navigation, header, sidebar, accents organisateur/exposant/visiteur).
-- [ ] Appliquer **opacité 0.4** sur fonds principaux (section/corps).
+- [ ] DÃ©finir struct ou module **JayFestivalTheme** (couleurs section, carte, navigation, header, sidebar, accents organisateur/exposant/visiteur).
+- [ ] Appliquer **opacitÃ© 0.4** sur fonds principaux (section/corps).
 - [ ] Exposer **rayons** (small 4, medium 8, large 12), **spacing** (item_spacing, button_padding, window_margin).
-- [ ] Appliquer le thème au démarrage (`ctx.set_style()`) ou par écran.
+- [ ] Appliquer le thÃ¨me au dÃ©marrage (`ctx.set_style()`) ou par Ã©cran.
 
 ### 6.2 Atoms / base
 
-- [ ] Bouton : style cohérent (inactive/hovered/active) depuis thème.
+- [ ] Bouton : style cohÃ©rent (inactive/hovered/active) depuis thÃ¨me.
 - [ ] Champ texte : `TextEdit::singleline` / `multiline` avec marge.
-- [ ] Label / heading : couleurs titre vs description depuis thème.
-- [ ] Badge : Frame + couleur par statut (validé / en attente / refusé).
+- [ ] Label / heading : couleurs titre vs description depuis thÃ¨me.
+- [ ] Badge : Frame + couleur par statut (validÃ© / en attente / refusÃ©).
 
 ### 6.3 Molecules
 
-- [ ] **Carte** (Frame avec titre, corps, optionnel footer) réutilisable.
-- [ ] **Ligne de liste** (icône + titre + sous-texte + action) pour listes éditions, exposants, candidatures.
+- [ ] **Carte** (Frame avec titre, corps, optionnel footer) rÃ©utilisable.
+- [ ] **Ligne de liste** (icÃ´ne + titre + sous-texte + action) pour listes Ã©ditions, exposants, candidatures.
 
 ### 6.4 Organisms / layout
 
-- [ ] **Header** (TopBottomPanel) : logo/titre + liens (Catalogue, Connexion, Inscription) ou selon rôle.
-- [ ] **Sidebar** (SidePanel) : menu par public (organisateur : Éditions, Équipe ; édition : Exposants, Plan, Programme, Budget, Documents, …).
+- [ ] **Header** (TopBottomPanel) : logo/titre + liens (Catalogue, Connexion, Inscription) ou selon rÃ´le.
+- [ ] **Sidebar** (SidePanel) : menu par public (organisateur : Ã‰ditions, Ã‰quipe ; Ã©dition : Exposants, Plan, Programme, Budget, Documents, â€¦).
 - [ ] **CentralPanel** : contenu selon vue (liste, dashboard, formulaire).
 
-### 6.5 Écrans prioritaires (MVP)
+### 6.5 Ã‰crans prioritaires (MVP)
 
-- [ ] Catalogue : landing + liste événements + fiche événement (lecture seule).
-- [ ] Organisateur : connexion/inscription, tableau de bord, liste éditions, dashboard édition (onglets), liste exposants + candidatures, fiche exposant, plan de salle (vue + attribution), programme (liste + édition animation), budget (saisie + ventilation), documents, annonces.
-- [ ] Exposant : dashboard (candidatures, participations, agenda, documents, factures), dépôt candidature.
-- [ ] Visiteur : espace (agenda, billets, réservations, pass), réservation (flux).
+- [ ] Catalogue : landing + liste Ã©vÃ©nements + fiche Ã©vÃ©nement (lecture seule).
+- [ ] Organisateur : connexion/inscription, tableau de bord, liste Ã©ditions, dashboard Ã©dition (onglets), liste exposants + candidatures, fiche exposant, plan de salle (vue + attribution), programme (liste + Ã©dition animation), budget (saisie + ventilation), documents, annonces.
+- [ ] Exposant : dashboard (candidatures, participations, agenda, documents, factures), dÃ©pÃ´t candidature.
+- [ ] Visiteur : espace (agenda, billets, rÃ©servations, pass), rÃ©servation (flux).
 
-### 6.6 Accessibilité et responsive
+### 6.6 AccessibilitÃ© et responsive
 
-- [ ] Focus visible (Dioxus par défaut).
-- [ ] Tailles touch minimales (boutons hauteur ≥ 40 px si possible).
-- [ ] Détection largeur écran pour sidebar réduite (icônes seules) vs complète.
+- [ ] Focus visible (Dioxus par dÃ©faut).
+- [ ] Tailles touch minimales (boutons hauteur â‰¥ 40 px si possible).
+- [ ] DÃ©tection largeur Ã©cran pour sidebar rÃ©duite (icÃ´nes seules) vs complÃ¨te.
 
 ---
 
-## 7. Références
+## 7. RÃ©fÃ©rences
 
-| Document | Rôle |
+| Document | RÃ´le |
 |----------|------|
-| [JayFestival - Specification UI Conforme Catakana](./JayFestival%20-%20Specification%20UI%20Conforme%20Catakana.md) | **Normatif** : protocoles, specs détaillées atoms/molecules/organisms, parcours par écran, checklist conformité. |
+| [JayFestival - Specification UI Conforme Catakana](./JayFestival%20-%20Specification%20UI%20Conforme%20Catakana.md) | **Normatif** : protocoles, specs dÃ©taillÃ©es atoms/molecules/organisms, parcours par Ã©cran, checklist conformitÃ©. |
 | [JayFestival - Document Fondateur](./JayFestival%20-%20Document%20Fondateur.md) | Vision, macro, distribution. |
-| [JayFestival - Audit Documentation Catakana](./JayFestival%20-%20Audit%20Documentation%20Catakana.md) | Métriques, manques fonctionnels. |
-| [JayFestival - Bornage Implementation](./JayFestival%20-%20Bornage%20Implementation.md) | Périmètre MVP/phase 2, critères de livraison. |
-| [Miyukini - Stack UI Dioxus](../../ux_ui/Miyukini%20-%20Stack%20UI%20Dioxus%20Dioxus.md) | Stack UI officielle. |
-| Catakana `.Catakana/docs/ATOMIC_THEME_GUIDE.md` | Guide thème et Atomic (source). |
+| [JayFestival - Audit Documentation Catakana](./JayFestival%20-%20Audit%20Documentation%20Catakana.md) | MÃ©triques, manques fonctionnels. |
+| [JayFestival - Bornage Implementation](./JayFestival%20-%20Bornage%20Implementation.md) | PÃ©rimÃ¨tre MVP/phase 2, critÃ¨res de livraison. |
+| [Miyukini - Stack UI Dioxus](..//..//_index.md) | Stack UI officielle. |
+| Catakana `.Catakana/docs/ATOMIC_THEME_GUIDE.md` | Guide thÃ¨me et Atomic (source). |
 | Catakana `.Catakana/docs/reference/UI_ARCHITECTURE.md` | Architecture UI Catakana (source). |
-| Organisateurs / Exposants / Visiteurs / UNC — Écrans et cycle | Liste officielle des écrans JayFestival. |
-| `crates/miyukini-central/src/theme.rs` | Thème store existant. |
-| `crates/miyukini-central/src/services/ui_library.rs` | Éléments UI Miyukini. |
+| Organisateurs / Exposants / Visiteurs / UNC â€” Ã‰crans et cycle | Liste officielle des Ã©crans JayFestival. |
+| `crates/miyukini-central/src/theme.rs` | ThÃ¨me store existant. |
+| `crates/miyukini-central/src/services/ui_library.rs` | Ã‰lÃ©ments UI Miyukini. |
 
 ---
 
-**Document** : JayFestival — Référence UI : transcription Catakana → stack actuelle  
+**Document** : JayFestival â€” RÃ©fÃ©rence UI : transcription Catakana â†’ stack actuelle  
 **Version** : 1.0  
 **Date** : 2026-02-03  
-**Statut** : Document de référence (implémentation UI)
+**Statut** : Document de rÃ©fÃ©rence (implÃ©mentation UI)
+

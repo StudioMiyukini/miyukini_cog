@@ -1,75 +1,75 @@
-# MiyukiniTerminal — Spécification Conformité Cores
+﻿# MiyukiniTerminal â€” SpÃ©cification ConformitÃ© Cores
 
 ## Contexte
 
-Ce document décrit le **mapping des Cores** Miyukini sur le Terminal : StrongFather (autorisation actions), KindMother (persistance), MasterButler (capacités), BorderGuard (frontières), WorrySentinel (niveaux sécurité), TAMR (conflits). Contrats respectés.
+Ce document dÃ©crit le **mapping des Cores** Miyukini sur le Terminal : StrongFather (autorisation actions), KindMother (persistance), MasterButler (capacitÃ©s), BorderGuard (frontiÃ¨res), WorrySentinel (niveaux sÃ©curitÃ©), TAMR (conflits). Contrats respectÃ©s.
 
-**Références :**
+**RÃ©fÃ©rences :**
 
 - [Document Fondateur](./MiyukiniTerminal%20-%20Document%20Fondateur.md)
-- [Architecture Miyukini](.cursor/skills/miyukini-architecture/SKILL.md)
+- [Architecture Miyukini](_index.md)
 
 ---
 
-## Portée / Scope
+## PortÃ©e / Scope
 
 - Mapping Cores sur Terminal
-- Contrats respectés
-- Délégation au parent
+- Contrats respectÃ©s
+- DÃ©lÃ©gation au parent
 
 ---
 
 ## 1. StrongFather
 
-| Rôle | Application Terminal |
+| RÃ´le | Application Terminal |
 |------|----------------------|
-| Décision stratégique | Les actions (dépense, événement) sont **déléguées** au parent. StrongFather du parent autorise ou refuse. |
-| Terminal | Ne décide pas ; transmet l'intention. |
+| DÃ©cision stratÃ©gique | Les actions (dÃ©pense, Ã©vÃ©nement) sont **dÃ©lÃ©guÃ©es** au parent. StrongFather du parent autorise ou refuse. |
+| Terminal | Ne dÃ©cide pas ; transmet l'intention. |
 
 ---
 
 ## 2. KindMother
 
-| Rôle | Application Terminal |
+| RÃ´le | Application Terminal |
 |------|----------------------|
 | Persistance | Cache local, queue, identity via SQLite/rusqlite ou KindMother. |
-| Intégrité | Vérifier checksums si applicable ; pas de corruption silencieuse. |
+| IntÃ©gritÃ© | VÃ©rifier checksums si applicable ; pas de corruption silencieuse. |
 
 ---
 
 ## 3. MasterButler
 
-| Rôle | Application Terminal |
+| RÃ´le | Application Terminal |
 |------|----------------------|
-| Capacités | Le parent expose les capacités (jaykonta.expense, jaykoa.event). Terminal consomme selon la liste fournie. |
-| Terminal | Ne possède pas de registry complet ; hérite du parent. |
+| CapacitÃ©s | Le parent expose les capacitÃ©s (jaykonta.expense, jaykoa.event). Terminal consomme selon la liste fournie. |
+| Terminal | Ne possÃ¨de pas de registry complet ; hÃ©rite du parent. |
 
 ---
 
 ## 4. BorderGuard
 
-| Rôle | Application Terminal |
+| RÃ´le | Application Terminal |
 |------|----------------------|
-| Frontières | parent_cog_id définit la frontière. Terminal reste dans le périmètre du parent. |
-| Confiance | Vérifier identité parent au Relay. |
+| FrontiÃ¨res | parent_cog_id dÃ©finit la frontiÃ¨re. Terminal reste dans le pÃ©rimÃ¨tre du parent. |
+| Confiance | VÃ©rifier identitÃ© parent au Relay. |
 
 ---
 
 ## 5. WorrySentinel
 
-| Rôle | Application Terminal |
+| RÃ´le | Application Terminal |
 |------|----------------------|
-| Sécurité | Niveaux de sécurité (stockage chiffré, TLS). |
-| environment_health | Rapport simplifié (storage_integrity, config_valid). |
+| SÃ©curitÃ© | Niveaux de sÃ©curitÃ© (stockage chiffrÃ©, TLS). |
+| environment_health | Rapport simplifiÃ© (storage_integrity, config_valid). |
 
 ---
 
 ## 6. TAMR
 
-| Rôle | Application Terminal |
+| RÃ´le | Application Terminal |
 |------|----------------------|
-| Intervention humaine | En cas de conflit (queue vs parent) : proposer résolution manuelle (merge, choix). |
-| Terminal | Déléguer la décision à l'utilisateur si conflit détecté. |
+| Intervention humaine | En cas de conflit (queue vs parent) : proposer rÃ©solution manuelle (merge, choix). |
+| Terminal | DÃ©lÃ©guer la dÃ©cision Ã  l'utilisateur si conflit dÃ©tectÃ©. |
 
 ---
 
@@ -77,20 +77,21 @@ Ce document décrit le **mapping des Cores** Miyukini sur le Terminal : StrongFa
 
 | Core | Application |
 |------|-------------|
-| CaringNanny | Observation d'état (connection_state, sync status). |
-| EverBuddy | Cycle de vie : pas de migration directe ; évolution via parent. |
+| CaringNanny | Observation d'Ã©tat (connection_state, sync status). |
+| EverBuddy | Cycle de vie : pas de migration directe ; Ã©volution via parent. |
 
 ---
 
-## 8. Récapitulatif
+## 8. RÃ©capitulatif
 
 | Core | Terminal |
 |------|----------|
-| StrongFather | Délégation au parent |
+| StrongFather | DÃ©lÃ©gation au parent |
 | KindMother | Persistance locale |
-| MasterButler | Capacités héritées |
-| BorderGuard | parent_cog_id = frontière |
-| WorrySentinel | Sécurité, health |
-| TAMR | Conflits → utilisateur |
-| CaringNanny | État observable |
+| MasterButler | CapacitÃ©s hÃ©ritÃ©es |
+| BorderGuard | parent_cog_id = frontiÃ¨re |
+| WorrySentinel | SÃ©curitÃ©, health |
+| TAMR | Conflits â†’ utilisateur |
+| CaringNanny | Ã‰tat observable |
 | EverBuddy | Pas de migration directe |
+

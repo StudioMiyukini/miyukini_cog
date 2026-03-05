@@ -8,11 +8,11 @@
 | V3 Miyukini Whisper | Lise + Denis | Partiel avance | `apps/miyukini-whisper/` (profils texte + timeout fallback) + vue Central diagnostics live |
 | V4 LLM post-process | Denis | Partiel | mode `clean` local + timeout strict; bridge `miou-llm-bridge` restant |
 | V5 Integration Alicia | Francois | Termine (V1 contrat) | `miyualicia` aligne STT `/api/stt` + client TTS feature-flag + tests contrat STT/TTS + exemples usages |
-| V6 Hardening + bench | Victor + George | En attente | audit + bench |
+| V6 Hardening + bench | Victor + George | Termine (scope sequence) | auth bearer optionnelle + policy origin localhost + purge buffers STT/TTS + bench latence preset |
 | V7 Packaging + docs | Hugo + Maria | En attente | docs + scripts |
 
 **p3_start**: 2026-03-05T10:40:00Z  
-**p3_end**: null
+**p3_end**: 2026-03-05T13:51:22Z
 
 ## Verification executee
 
@@ -23,5 +23,10 @@
 - `cargo test -p miyukini-whisper-app` : OK
 - `cargo test -p miyualicia` : OK (incluant tests contrat inter-services avec `miyustt`/`miyutts`)
 - `cargo check -p miyualicia-api` : OK
-- `cargo test -p miyukini-whisper-app -p miyualicia` : BLOQUE (workspace root reference `demos/mge-pathfinding-labyrinthe` absente)
-- `cargo check -p miyukini-central-native` : ECHEC (preexistant: assets manquants `lord_of_the_castle`)
+- `cargo metadata --format-version 1 --no-deps` : OK (workspace reparee via stubs manquants)
+- `cargo test -p miyustt` : OK (7 tests)
+- `cargo test -p miyutts` : OK (6 tests)
+- `cargo test -p miyukini-whisper-app -p miyualicia` : OK (58 tests)
+- `cargo clippy -p miyustt -p miyutts -p miyukini-whisper-app -p miyualicia -p miyualicia-api -- -D warnings` : OK
+- `cargo check --workspace` : ECHEC hors scope sequence (erreurs preexistantes dans `apps/central/src/services/miyucloud/auth_security.rs`)
+- `cargo check -p miyukini-central-native` : ECHEC hors scope sequence (meme erreur `miyucloud/auth_security.rs`)

@@ -1,75 +1,75 @@
-# Miyukini Core System — Border Guard Documentation Fondatrice
+﻿# Miyukini Core System â€” Border Guard Documentation Fondatrice
 
 ## 1. Introduction
 
-### Rôle de Border Guard
+### RÃ´le de Border Guard
 
-Border Guard (BG) est le **core de définition des frontières et des règles d'entrée/sortie** du Miyukini Core System. Il incarne la capacité conceptuelle du système à distinguer ce qui est interne de ce qui est externe, à classifier les niveaux de confiance, et à établir les règles qui gouvernent toute interaction traversant une frontière.
+Border Guard (BG) est le **core de dÃ©finition des frontiÃ¨res et des rÃ¨gles d'entrÃ©e/sortie** du Miyukini Core System. Il incarne la capacitÃ© conceptuelle du systÃ¨me Ã  distinguer ce qui est interne de ce qui est externe, Ã  classifier les niveaux de confiance, et Ã  Ã©tablir les rÃ¨gles qui gouvernent toute interaction traversant une frontiÃ¨re.
 
-Border Guard ne filtre pas lui-même, ne bloque pas lui-même, n'exécute pas lui-même. Il **définit** les frontières, **établit** les règles, et **classifie** les niveaux de confiance. L'application de ces règles est déléguée à Bonding Brother et aux autres cores opérationnels.
+Border Guard ne filtre pas lui-mÃªme, ne bloque pas lui-mÃªme, n'exÃ©cute pas lui-mÃªme. Il **dÃ©finit** les frontiÃ¨res, **Ã©tablit** les rÃ¨gles, et **classifie** les niveaux de confiance. L'application de ces rÃ¨gles est dÃ©lÃ©guÃ©e Ã  Bonding Brother et aux autres cores opÃ©rationnels.
 
 ### Question fondamentale
 
-Border Guard répond à une question fondamentale : **"Où sont les frontières du système, et quelles règles gouvernent leur franchissement ?"**
+Border Guard rÃ©pond Ã  une question fondamentale : **"OÃ¹ sont les frontiÃ¨res du systÃ¨me, et quelles rÃ¨gles gouvernent leur franchissement ?"**
 
-Cette question se décline en plusieurs sous-questions :
+Cette question se dÃ©cline en plusieurs sous-questions :
 - Qu'est-ce qui est "interne" et qu'est-ce qui est "externe" ?
-- Quel niveau de confiance accorder à une source ou une destination ?
-- Quelles conditions doivent être respectées pour franchir une frontière ?
-- Comment classifier les intégrations selon leur nature et leur risque ?
+- Quel niveau de confiance accorder Ã  une source ou une destination ?
+- Quelles conditions doivent Ãªtre respectÃ©es pour franchir une frontiÃ¨re ?
+- Comment classifier les intÃ©grations selon leur nature et leur risque ?
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **toutes les définitions de frontières** dans le système Miyukini et définit de manière absolue :
-- La définition formelle des frontières et de leur nature
+Ce contrat s'applique Ã  **toutes les dÃ©finitions de frontiÃ¨res** dans le systÃ¨me Miyukini et dÃ©finit de maniÃ¨re absolue :
+- La dÃ©finition formelle des frontiÃ¨res et de leur nature
 - La classification des niveaux de confiance
-- Les règles de franchissement des frontières
-- Les invariants de définition de frontière
+- Les rÃ¨gles de franchissement des frontiÃ¨res
+- Les invariants de dÃ©finition de frontiÃ¨re
 - Les garanties offertes par Border Guard
-- Les distinctions entre définition conceptuelle et application technique
+- Les distinctions entre dÃ©finition conceptuelle et application technique
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ---
 
-## 2. Raison d'être
+## 2. Raison d'Ãªtre
 
-### Problème que Border Guard résout
+### ProblÃ¨me que Border Guard rÃ©sout
 
-Dans l'architecture actuelle de MCS, les frontières entre l'interne et l'externe sont implicites, dispersées, et incohérentes. Cette absence de définition formelle présente plusieurs limitations :
+Dans l'architecture actuelle de MCS, les frontiÃ¨res entre l'interne et l'externe sont implicites, dispersÃ©es, et incohÃ©rentes. Cette absence de dÃ©finition formelle prÃ©sente plusieurs limitations :
 
-1. **Frontières implicites** : Chaque composant définit ses propres frontières sans vision globale, conduisant à des définitions contradictoires
+1. **FrontiÃ¨res implicites** : Chaque composant dÃ©finit ses propres frontiÃ¨res sans vision globale, conduisant Ã  des dÃ©finitions contradictoires
 
-2. **Niveaux de confiance non standardisés** : Chaque intégration gère ses propres niveaux de confiance sans classification cohérente à l'échelle du système
+2. **Niveaux de confiance non standardisÃ©s** : Chaque intÃ©gration gÃ¨re ses propres niveaux de confiance sans classification cohÃ©rente Ã  l'Ã©chelle du systÃ¨me
 
-3. **Règles de franchissement dispersées** : Les règles qui gouvernent le passage d'une frontière sont répliquées et incohérentes entre composants
+3. **RÃ¨gles de franchissement dispersÃ©es** : Les rÃ¨gles qui gouvernent le passage d'une frontiÃ¨re sont rÃ©pliquÃ©es et incohÃ©rentes entre composants
 
-4. **Absence de gouvernance des intégrations** : Aucun point central pour définir la politique d'intégration avec les systèmes externes
+4. **Absence de gouvernance des intÃ©grations** : Aucun point central pour dÃ©finir la politique d'intÃ©gration avec les systÃ¨mes externes
 
-5. **Confusion entre définition et application** : La définition des frontières est mélangée avec leur application technique, créant un couplage fort
+5. **Confusion entre dÃ©finition et application** : La dÃ©finition des frontiÃ¨res est mÃ©langÃ©e avec leur application technique, crÃ©ant un couplage fort
 
-Border Guard résout ces problèmes en fournissant un core dédié qui :
-- Définit formellement les frontières du système
-- Établit une classification standardisée des niveaux de confiance
-- Centralise les règles de franchissement des frontières
-- Gouverne conceptuellement toutes les intégrations
-- Sépare strictement la définition de l'application
+Border Guard rÃ©sout ces problÃ¨mes en fournissant un core dÃ©diÃ© qui :
+- DÃ©finit formellement les frontiÃ¨res du systÃ¨me
+- Ã‰tablit une classification standardisÃ©e des niveaux de confiance
+- Centralise les rÃ¨gles de franchissement des frontiÃ¨res
+- Gouverne conceptuellement toutes les intÃ©grations
+- SÃ©pare strictement la dÃ©finition de l'application
 
 ### Positionnement architectural
 
 Border Guard est un **core conceptuel** :
-- Il ne possède aucune capacité d'exécution
+- Il ne possÃ¨de aucune capacitÃ© d'exÃ©cution
 - Il ne filtre pas, ne bloque pas, n'intercepte pas
-- Il définit, classifie, et établit des règles
-- Ses définitions sont consommées par Bonding Brother pour l'application
+- Il dÃ©finit, classifie, et Ã©tablit des rÃ¨gles
+- Ses dÃ©finitions sont consommÃ©es par Bonding Brother pour l'application
 
-Border Guard est conçu comme une **autorité de définition** :
-- Autorité exclusive sur la définition des frontières
-- Autorité exclusive sur la classification des niveaux de confiance
-- Aucune autorité sur l'application des règles
-- Aucune autorité sur l'exécution technique
+Border Guard est conÃ§u comme une **autoritÃ© de dÃ©finition** :
+- AutoritÃ© exclusive sur la dÃ©finition des frontiÃ¨res
+- AutoritÃ© exclusive sur la classification des niveaux de confiance
+- Aucune autoritÃ© sur l'application des rÃ¨gles
+- Aucune autoritÃ© sur l'exÃ©cution technique
 
 ---
 
@@ -77,181 +77,181 @@ Border Guard est conçu comme une **autorité de définition** :
 
 ### Relation avec Kind Mother
 
-Border Guard et Kind Mother sont complémentaires mais distincts :
+Border Guard et Kind Mother sont complÃ©mentaires mais distincts :
 
-**Kind Mother** gouverne les données et leur persistance. Elle définit ce qui est une donnée, comment elle est stockée, comment elle est synchronisée.
+**Kind Mother** gouverne les donnÃ©es et leur persistance. Elle dÃ©finit ce qui est une donnÃ©e, comment elle est stockÃ©e, comment elle est synchronisÃ©e.
 
-**Border Guard** gouverne les frontières et les niveaux de confiance. Il définit si une donnée venant de l'extérieur peut entrer, avec quel niveau de confiance, selon quelles règles.
+**Border Guard** gouverne les frontiÃ¨res et les niveaux de confiance. Il dÃ©finit si une donnÃ©e venant de l'extÃ©rieur peut entrer, avec quel niveau de confiance, selon quelles rÃ¨gles.
 
-La relation est de complémentarité : Kind Mother traite les données une fois qu'elles sont "à l'intérieur" ; Border Guard définit les conditions pour qu'elles y entrent.
+La relation est de complÃ©mentaritÃ© : Kind Mother traite les donnÃ©es une fois qu'elles sont "Ã  l'intÃ©rieur" ; Border Guard dÃ©finit les conditions pour qu'elles y entrent.
 
-Border Guard ne connaît pas les détails de persistance de Kind Mother. Kind Mother ne connaît pas les détails de classification de Border Guard. Chacun reste souverain dans son domaine.
+Border Guard ne connaÃ®t pas les dÃ©tails de persistance de Kind Mother. Kind Mother ne connaÃ®t pas les dÃ©tails de classification de Border Guard. Chacun reste souverain dans son domaine.
 
 ### Relation avec Strong Father
 
-Border Guard et Strong Father sont complémentaires et collaboratifs :
+Border Guard et Strong Father sont complÃ©mentaires et collaboratifs :
 
-**Strong Father** prend les décisions stratégiques et politiques. Il évalue les intentions et produit des décisions (acceptée, refusée, ambiguë).
+**Strong Father** prend les dÃ©cisions stratÃ©giques et politiques. Il Ã©value les intentions et produit des dÃ©cisions (acceptÃ©e, refusÃ©e, ambiguÃ«).
 
-**Border Guard** définit le contexte de confiance dans lequel Strong Father opère. Il fournit à Strong Father l'information sur le niveau de confiance de l'origine d'une intention, la nature de la frontière franchie, les règles applicables.
+**Border Guard** dÃ©finit le contexte de confiance dans lequel Strong Father opÃ¨re. Il fournit Ã  Strong Father l'information sur le niveau de confiance de l'origine d'une intention, la nature de la frontiÃ¨re franchie, les rÃ¨gles applicables.
 
-La relation est de conseil : Border Guard informe Strong Father sur le contexte de frontière ; Strong Father décide en tenant compte de cette information.
+La relation est de conseil : Border Guard informe Strong Father sur le contexte de frontiÃ¨re ; Strong Father dÃ©cide en tenant compte de cette information.
 
-Border Guard ne décide jamais. Strong Father décide en s'appuyant sur les définitions de Border Guard.
+Border Guard ne dÃ©cide jamais. Strong Father dÃ©cide en s'appuyant sur les dÃ©finitions de Border Guard.
 
 ### Relation avec Bonding Brother
 
-Border Guard et Bonding Brother ont une relation fondamentale et asymétrique :
+Border Guard et Bonding Brother ont une relation fondamentale et asymÃ©trique :
 
-**Border Guard définit les règles** de franchissement des frontières, les niveaux de confiance, les conditions d'entrée et de sortie.
+**Border Guard dÃ©finit les rÃ¨gles** de franchissement des frontiÃ¨res, les niveaux de confiance, les conditions d'entrÃ©e et de sortie.
 
-**Bonding Brother applique ces règles** lors de la médiation entre les produits et l'écosystème. Il consulte les définitions de Border Guard et les applique concrètement.
+**Bonding Brother applique ces rÃ¨gles** lors de la mÃ©diation entre les produits et l'Ã©cosystÃ¨me. Il consulte les dÃ©finitions de Border Guard et les applique concrÃ¨tement.
 
-La relation est de définition/application : Border Guard est l'autorité conceptuelle, Bonding Brother est l'exécutant opérationnel.
+La relation est de dÃ©finition/application : Border Guard est l'autoritÃ© conceptuelle, Bonding Brother est l'exÃ©cutant opÃ©rationnel.
 
-Cette relation est non négociable : Bonding Brother ne définit jamais de frontière, Border Guard n'applique jamais de règle. La séparation est absolue.
+Cette relation est non nÃ©gociable : Bonding Brother ne dÃ©finit jamais de frontiÃ¨re, Border Guard n'applique jamais de rÃ¨gle. La sÃ©paration est absolue.
 
 ### Relation avec Caring Nanny
 
-Border Guard et Caring Nanny sont complémentaires dans l'observation :
+Border Guard et Caring Nanny sont complÃ©mentaires dans l'observation :
 
-**Caring Nanny** observe l'état global du système (healthy, degraded, offline, syncing, error).
+**Caring Nanny** observe l'Ã©tat global du systÃ¨me (healthy, degraded, offline, syncing, error).
 
-**Border Guard** définit comment l'état des frontières influence l'état global. Une frontière compromise peut signaler un état dégradé. Une intégration défaillante peut signaler un problème.
+**Border Guard** dÃ©finit comment l'Ã©tat des frontiÃ¨res influence l'Ã©tat global. Une frontiÃ¨re compromise peut signaler un Ã©tat dÃ©gradÃ©. Une intÃ©gration dÃ©faillante peut signaler un problÃ¨me.
 
-La relation est d'information : Border Guard informe Caring Nanny sur l'état des frontières ; Caring Nanny intègre cette information dans l'état global.
+La relation est d'information : Border Guard informe Caring Nanny sur l'Ã©tat des frontiÃ¨res ; Caring Nanny intÃ¨gre cette information dans l'Ã©tat global.
 
 ### La famille Miyukini
 
-Dans la famille Miyukini, Border Guard est le **gardien des limites** : il connaît les frontières de la maison, il sait qui peut entrer par quelle porte, il définit les règles d'accueil des visiteurs.
+Dans la famille Miyukini, Border Guard est le **gardien des limites** : il connaÃ®t les frontiÃ¨res de la maison, il sait qui peut entrer par quelle porte, il dÃ©finit les rÃ¨gles d'accueil des visiteurs.
 
-Border Guard ne décide pas qui entre (c'est Strong Father), ne stocke pas les informations des visiteurs (c'est Kind Mother), n'accueille pas lui-même les visiteurs (c'est Bonding Brother). Il définit où sont les portes, quelles sont les règles, quel niveau de confiance accorder.
+Border Guard ne dÃ©cide pas qui entre (c'est Strong Father), ne stocke pas les informations des visiteurs (c'est Kind Mother), n'accueille pas lui-mÃªme les visiteurs (c'est Bonding Brother). Il dÃ©finit oÃ¹ sont les portes, quelles sont les rÃ¨gles, quel niveau de confiance accorder.
 
 ---
 
 ## 4. Concepts fondamentaux
 
-### Frontière
+### FrontiÃ¨re
 
-Une **frontière** est une démarcation conceptuelle qui sépare deux zones de confiance différentes. Une frontière peut être :
+Une **frontiÃ¨re** est une dÃ©marcation conceptuelle qui sÃ©pare deux zones de confiance diffÃ©rentes. Une frontiÃ¨re peut Ãªtre :
 
-**Frontière externe** : Sépare l'écosystème Miyukini du monde extérieur (internet, systèmes tiers, utilisateurs non authentifiés). C'est la limite entre le "dehors" et le "dedans".
+**FrontiÃ¨re externe** : SÃ©pare l'Ã©cosystÃ¨me Miyukini du monde extÃ©rieur (internet, systÃ¨mes tiers, utilisateurs non authentifiÃ©s). C'est la limite entre le "dehors" et le "dedans".
 
-**Frontière interne** : Sépare différentes zones de confiance au sein de l'écosystème (zone admin vs zone utilisateur, module sensible vs module standard, données critiques vs données publiques).
+**FrontiÃ¨re interne** : SÃ©pare diffÃ©rentes zones de confiance au sein de l'Ã©cosystÃ¨me (zone admin vs zone utilisateur, module sensible vs module standard, donnÃ©es critiques vs donnÃ©es publiques).
 
-**Frontière d'intégration** : Sépare l'écosystème d'un système externe avec lequel il interagit de manière contrôlée (API partenaire, service tiers, base de données externe).
+**FrontiÃ¨re d'intÃ©gration** : SÃ©pare l'Ã©cosystÃ¨me d'un systÃ¨me externe avec lequel il interagit de maniÃ¨re contrÃ´lÃ©e (API partenaire, service tiers, base de donnÃ©es externe).
 
-Une frontière possède :
-- Une identité unique et stable
-- Une direction (entrée, sortie, bidirectionnelle)
-- Un niveau de perméabilité (ouvert, contrôlé, fermé)
-- Des règles de franchissement associées
+Une frontiÃ¨re possÃ¨de :
+- Une identitÃ© unique et stable
+- Une direction (entrÃ©e, sortie, bidirectionnelle)
+- Un niveau de permÃ©abilitÃ© (ouvert, contrÃ´lÃ©, fermÃ©)
+- Des rÃ¨gles de franchissement associÃ©es
 
 ### Niveau de confiance
 
-Un **niveau de confiance** est une classification qui indique le degré de fiabilité accordé à une source, une destination, ou une interaction. Border Guard définit quatre niveaux canoniques :
+Un **niveau de confiance** est une classification qui indique le degrÃ© de fiabilitÃ© accordÃ© Ã  une source, une destination, ou une interaction. Border Guard dÃ©finit quatre niveaux canoniques :
 
-**Trusted (Confiance totale)** : La source ou destination fait partie du cercle de confiance absolu. Aucune vérification supplémentaire n'est requise. Réservé aux composants internes validés, aux autorités du système.
+**Trusted (Confiance totale)** : La source ou destination fait partie du cercle de confiance absolu. Aucune vÃ©rification supplÃ©mentaire n'est requise. RÃ©servÃ© aux composants internes validÃ©s, aux autoritÃ©s du systÃ¨me.
 
-**Verified (Confiance vérifiée)** : La source ou destination a été authentifiée et validée selon des critères stricts. Des vérifications ont été effectuées. Niveau accordé aux utilisateurs authentifiés, aux intégrations certifiées.
+**Verified (Confiance vÃ©rifiÃ©e)** : La source ou destination a Ã©tÃ© authentifiÃ©e et validÃ©e selon des critÃ¨res stricts. Des vÃ©rifications ont Ã©tÃ© effectuÃ©es. Niveau accordÃ© aux utilisateurs authentifiÃ©s, aux intÃ©grations certifiÃ©es.
 
-**Unknown (Confiance inconnue)** : La source ou destination n'a pas encore été classifiée. Niveau par défaut pour tout ce qui arrive de l'extérieur. Toute interaction avec ce niveau est soumise à des règles restrictives.
+**Unknown (Confiance inconnue)** : La source ou destination n'a pas encore Ã©tÃ© classifiÃ©e. Niveau par dÃ©faut pour tout ce qui arrive de l'extÃ©rieur. Toute interaction avec ce niveau est soumise Ã  des rÃ¨gles restrictives.
 
-**Hostile (Confiance nulle)** : La source ou destination a été identifiée comme malveillante, compromise, ou violant les règles. Aucune interaction n'est autorisée. Niveau appliqué aux sources blacklistées, aux patterns d'attaque détectés.
+**Hostile (Confiance nulle)** : La source ou destination a Ã©tÃ© identifiÃ©e comme malveillante, compromise, ou violant les rÃ¨gles. Aucune interaction n'est autorisÃ©e. Niveau appliquÃ© aux sources blacklistÃ©es, aux patterns d'attaque dÃ©tectÃ©s.
 
-### Règle de franchissement
+### RÃ¨gle de franchissement
 
-Une **règle de franchissement** est une condition qui doit être satisfaite pour qu'une interaction puisse traverser une frontière. Une règle est :
+Une **rÃ¨gle de franchissement** est une condition qui doit Ãªtre satisfaite pour qu'une interaction puisse traverser une frontiÃ¨re. Une rÃ¨gle est :
 
-**Déclarative** : Elle exprime ce qui est requis, pas comment le vérifier techniquement.
+**DÃ©clarative** : Elle exprime ce qui est requis, pas comment le vÃ©rifier techniquement.
 
-**Non ambiguë** : Elle spécifie clairement les conditions sans interprétation possible.
+**Non ambiguÃ«** : Elle spÃ©cifie clairement les conditions sans interprÃ©tation possible.
 
-**Associée à une frontière** : Elle est définie pour une frontière spécifique ou un ensemble de frontières.
+**AssociÃ©e Ã  une frontiÃ¨re** : Elle est dÃ©finie pour une frontiÃ¨re spÃ©cifique ou un ensemble de frontiÃ¨res.
 
-Une règle de franchissement peut porter sur :
+Une rÃ¨gle de franchissement peut porter sur :
 - Le niveau de confiance requis
 - L'authentification requise
-- Les données autorisées à traverser
-- Les actions autorisées
+- Les donnÃ©es autorisÃ©es Ã  traverser
+- Les actions autorisÃ©es
 - Les conditions temporelles
 
 ### Zone de confiance
 
-Une **zone de confiance** est un espace conceptuel délimité par des frontières, où tous les éléments partagent un même niveau de confiance. Une zone de confiance :
+Une **zone de confiance** est un espace conceptuel dÃ©limitÃ© par des frontiÃ¨res, oÃ¹ tous les Ã©lÃ©ments partagent un mÃªme niveau de confiance. Une zone de confiance :
 
-- Est délimitée par une ou plusieurs frontières
-- Possède un niveau de confiance homogène
-- Contient des composants, des données, des services
-- Interagit avec d'autres zones via des frontières
+- Est dÃ©limitÃ©e par une ou plusieurs frontiÃ¨res
+- PossÃ¨de un niveau de confiance homogÃ¨ne
+- Contient des composants, des donnÃ©es, des services
+- Interagit avec d'autres zones via des frontiÃ¨res
 
-### Intégration
+### IntÃ©gration
 
-Une **intégration** est une relation établie entre l'écosystème Miyukini et un système externe. Une intégration est classifiée par Border Guard selon :
+Une **intÃ©gration** est une relation Ã©tablie entre l'Ã©cosystÃ¨me Miyukini et un systÃ¨me externe. Une intÃ©gration est classifiÃ©e par Border Guard selon :
 
 - Son niveau de confiance initial
-- Les frontières qu'elle traverse
-- Les règles de franchissement applicables
-- Son état (active, suspendue, révoquée)
+- Les frontiÃ¨res qu'elle traverse
+- Les rÃ¨gles de franchissement applicables
+- Son Ã©tat (active, suspendue, rÃ©voquÃ©e)
 
 ---
 
-## 5. Responsabilités exclusives
+## 5. ResponsabilitÃ©s exclusives
 
-### Définition des frontières
+### DÃ©finition des frontiÃ¨res
 
-Border Guard est **exclusivement responsable** de la définition formelle des frontières du système. Cette responsabilité inclut :
+Border Guard est **exclusivement responsable** de la dÃ©finition formelle des frontiÃ¨res du systÃ¨me. Cette responsabilitÃ© inclut :
 
-- Identifier et nommer chaque frontière
-- Classifier la nature de chaque frontière (externe, interne, intégration)
-- Définir la direction de chaque frontière (entrée, sortie, bidirectionnelle)
-- Établir le niveau de perméabilité de chaque frontière
-- Maintenir le registre exhaustif des frontières du système
+- Identifier et nommer chaque frontiÃ¨re
+- Classifier la nature de chaque frontiÃ¨re (externe, interne, intÃ©gration)
+- DÃ©finir la direction de chaque frontiÃ¨re (entrÃ©e, sortie, bidirectionnelle)
+- Ã‰tablir le niveau de permÃ©abilitÃ© de chaque frontiÃ¨re
+- Maintenir le registre exhaustif des frontiÃ¨res du systÃ¨me
 
-Aucun autre core ne définit de frontière. Toute définition de frontière provient exclusivement de Border Guard.
+Aucun autre core ne dÃ©finit de frontiÃ¨re. Toute dÃ©finition de frontiÃ¨re provient exclusivement de Border Guard.
 
 ### Classification des niveaux de confiance
 
-Border Guard est **exclusivement responsable** de la classification des niveaux de confiance. Cette responsabilité inclut :
+Border Guard est **exclusivement responsable** de la classification des niveaux de confiance. Cette responsabilitÃ© inclut :
 
-- Définir les critères de chaque niveau de confiance (trusted, verified, unknown, hostile)
+- DÃ©finir les critÃ¨res de chaque niveau de confiance (trusted, verified, unknown, hostile)
 - Classifier les sources et destinations selon ces niveaux
-- Établir les règles de transition entre niveaux
-- Maintenir la cohérence de la classification à travers le système
+- Ã‰tablir les rÃ¨gles de transition entre niveaux
+- Maintenir la cohÃ©rence de la classification Ã  travers le systÃ¨me
 
 Aucun autre core ne classifie les niveaux de confiance. Toute classification provient exclusivement de Border Guard.
 
-### Établissement des règles de franchissement
+### Ã‰tablissement des rÃ¨gles de franchissement
 
-Border Guard est **exclusivement responsable** de l'établissement des règles de franchissement. Cette responsabilité inclut :
+Border Guard est **exclusivement responsable** de l'Ã©tablissement des rÃ¨gles de franchissement. Cette responsabilitÃ© inclut :
 
-- Définir les règles associées à chaque frontière
-- Spécifier les conditions de franchissement
-- Établir les exceptions et cas particuliers
-- Maintenir la cohérence des règles entre frontières
+- DÃ©finir les rÃ¨gles associÃ©es Ã  chaque frontiÃ¨re
+- SpÃ©cifier les conditions de franchissement
+- Ã‰tablir les exceptions et cas particuliers
+- Maintenir la cohÃ©rence des rÃ¨gles entre frontiÃ¨res
 
-Aucun autre core n'établit de règle de franchissement. Toute règle provient exclusivement de Border Guard.
+Aucun autre core n'Ã©tablit de rÃ¨gle de franchissement. Toute rÃ¨gle provient exclusivement de Border Guard.
 
-### Gouvernance conceptuelle des intégrations
+### Gouvernance conceptuelle des intÃ©grations
 
-Border Guard est **exclusivement responsable** de la gouvernance conceptuelle des intégrations. Cette responsabilité inclut :
+Border Guard est **exclusivement responsable** de la gouvernance conceptuelle des intÃ©grations. Cette responsabilitÃ© inclut :
 
-- Classifier chaque intégration selon sa nature et son risque
-- Définir le cadre d'interaction avec chaque système externe
-- Établir les conditions de suspension ou révocation d'une intégration
-- Maintenir le registre des intégrations et leur état
+- Classifier chaque intÃ©gration selon sa nature et son risque
+- DÃ©finir le cadre d'interaction avec chaque systÃ¨me externe
+- Ã‰tablir les conditions de suspension ou rÃ©vocation d'une intÃ©gration
+- Maintenir le registre des intÃ©grations et leur Ã©tat
 
-Aucun autre core ne gouverne conceptuellement les intégrations. Cette gouvernance provient exclusivement de Border Guard.
+Aucun autre core ne gouverne conceptuellement les intÃ©grations. Cette gouvernance provient exclusivement de Border Guard.
 
 ### Conseil aux autres cores
 
-Border Guard est **responsable** de fournir les informations de frontière aux autres cores. Cette responsabilité inclut :
+Border Guard est **responsable** de fournir les informations de frontiÃ¨re aux autres cores. Cette responsabilitÃ© inclut :
 
 - Informer Strong Father du contexte de confiance d'une intention
-- Informer Bonding Brother des règles à appliquer
-- Informer Caring Nanny de l'état des frontières
+- Informer Bonding Brother des rÃ¨gles Ã  appliquer
+- Informer Caring Nanny de l'Ã©tat des frontiÃ¨res
 
-Cette responsabilité de conseil n'est pas une autorité : Border Guard informe, les autres cores décident ou agissent.
+Cette responsabilitÃ© de conseil n'est pas une autoritÃ© : Border Guard informe, les autres cores dÃ©cident ou agissent.
 
 ---
 
@@ -259,254 +259,254 @@ Cette responsabilité de conseil n'est pas une autorité : Border Guard informe,
 
 ### Ne filtre pas
 
-Border Guard ne filtre **jamais** les interactions. Le filtrage est une action d'application, pas de définition. Border Guard définit les règles de filtrage ; Bonding Brother les applique.
+Border Guard ne filtre **jamais** les interactions. Le filtrage est une action d'application, pas de dÃ©finition. Border Guard dÃ©finit les rÃ¨gles de filtrage ; Bonding Brother les applique.
 
 ### Ne bloque pas
 
-Border Guard ne bloque **jamais** les accès. Le blocage est une action d'exécution. Border Guard définit les conditions qui peuvent conduire à un blocage ; Bonding Brother ou Strong Father exécute le blocage.
+Border Guard ne bloque **jamais** les accÃ¨s. Le blocage est une action d'exÃ©cution. Border Guard dÃ©finit les conditions qui peuvent conduire Ã  un blocage ; Bonding Brother ou Strong Father exÃ©cute le blocage.
 
 ### N'authentifie pas
 
-Border Guard ne gère **jamais** l'authentification technique. L'authentification (tokens, sessions, OAuth, JWT) est du ressort du produit ou d'un module auth dédié. Border Guard définit les niveaux de confiance ; l'authentification technique détermine comment atteindre ces niveaux.
+Border Guard ne gÃ¨re **jamais** l'authentification technique. L'authentification (tokens, sessions, OAuth, JWT) est du ressort du produit ou d'un module auth dÃ©diÃ©. Border Guard dÃ©finit les niveaux de confiance ; l'authentification technique dÃ©termine comment atteindre ces niveaux.
 
 ### Ne persiste pas
 
-Border Guard ne persiste **jamais** de données. La persistance est du ressort exclusif de Kind Mother. Border Guard définit des frontières et des règles ; leur stockage est délégué à Kind Mother.
+Border Guard ne persiste **jamais** de donnÃ©es. La persistance est du ressort exclusif de Kind Mother. Border Guard dÃ©finit des frontiÃ¨res et des rÃ¨gles ; leur stockage est dÃ©lÃ©guÃ© Ã  Kind Mother.
 
-### Ne décide pas
+### Ne dÃ©cide pas
 
-Border Guard ne prend **jamais** de décision stratégique ou politique. La décision est du ressort exclusif de Strong Father. Border Guard informe sur le contexte de confiance ; Strong Father décide.
+Border Guard ne prend **jamais** de dÃ©cision stratÃ©gique ou politique. La dÃ©cision est du ressort exclusif de Strong Father. Border Guard informe sur le contexte de confiance ; Strong Father dÃ©cide.
 
-### N'exécute pas
+### N'exÃ©cute pas
 
-Border Guard n'exécute **jamais** d'action technique. L'exécution est du ressort des cores opérationnels (Bonding Brother, adaptateurs, produits). Border Guard est purement conceptuel.
+Border Guard n'exÃ©cute **jamais** d'action technique. L'exÃ©cution est du ressort des cores opÃ©rationnels (Bonding Brother, adaptateurs, produits). Border Guard est purement conceptuel.
 
-### Ne modifie pas l'état
+### Ne modifie pas l'Ã©tat
 
-Border Guard ne modifie **jamais** l'état du système. L'observation de l'état est du ressort de Caring Nanny, la modification de l'état est du ressort des cores exécutants. Border Guard définit, il ne modifie pas.
+Border Guard ne modifie **jamais** l'Ã©tat du systÃ¨me. L'observation de l'Ã©tat est du ressort de Caring Nanny, la modification de l'Ã©tat est du ressort des cores exÃ©cutants. Border Guard dÃ©finit, il ne modifie pas.
 
-### Ne contient pas de logique métier
+### Ne contient pas de logique mÃ©tier
 
-Border Guard ne contient **jamais** de logique métier spécifique aux produits. Il définit des concepts généraux (frontières, confiance, règles) applicables à tous les produits. La logique métier spécifique reste dans les produits.
+Border Guard ne contient **jamais** de logique mÃ©tier spÃ©cifique aux produits. Il dÃ©finit des concepts gÃ©nÃ©raux (frontiÃ¨res, confiance, rÃ¨gles) applicables Ã  tous les produits. La logique mÃ©tier spÃ©cifique reste dans les produits.
 
 ---
 
-## 7. Invariants non négociables
+## 7. Invariants non nÃ©gociables
 
-### INV-BG-1 : Aucune capacité d'exécution
+### INV-BG-1 : Aucune capacitÃ© d'exÃ©cution
 
-Border Guard ne possède **jamais** de capacité d'exécution. Il ne filtre pas, ne bloque pas, n'intercepte pas, n'applique pas. Toute capacité d'exécution viole cet invariant fondamental.
+Border Guard ne possÃ¨de **jamais** de capacitÃ© d'exÃ©cution. Il ne filtre pas, ne bloque pas, n'intercepte pas, n'applique pas. Toute capacitÃ© d'exÃ©cution viole cet invariant fondamental.
 
 ### INV-BG-2 : Aucune persistance directe
 
-Border Guard n'accède **jamais** directement à la persistance. Toute définition de frontière ou de règle qui doit être persistée est transmise à Kind Mother via les canaux appropriés.
+Border Guard n'accÃ¨de **jamais** directement Ã  la persistance. Toute dÃ©finition de frontiÃ¨re ou de rÃ¨gle qui doit Ãªtre persistÃ©e est transmise Ã  Kind Mother via les canaux appropriÃ©s.
 
-### INV-BG-3 : Aucune décision autonome
+### INV-BG-3 : Aucune dÃ©cision autonome
 
-Border Guard ne prend **jamais** de décision de manière autonome. Il informe, il classifie, il définit, mais la décision finale appartient toujours à Strong Father ou aux autorités appropriées.
+Border Guard ne prend **jamais** de dÃ©cision de maniÃ¨re autonome. Il informe, il classifie, il dÃ©finit, mais la dÃ©cision finale appartient toujours Ã  Strong Father ou aux autoritÃ©s appropriÃ©es.
 
 ### INV-BG-4 : Classification exhaustive
 
-Toute source, destination, ou interaction **doit** être classifiée selon un niveau de confiance. Aucune interaction ne peut exister sans classification. Par défaut, tout ce qui n'est pas explicitement classifié est considéré comme "unknown".
+Toute source, destination, ou interaction **doit** Ãªtre classifiÃ©e selon un niveau de confiance. Aucune interaction ne peut exister sans classification. Par dÃ©faut, tout ce qui n'est pas explicitement classifiÃ© est considÃ©rÃ© comme "unknown".
 
-### INV-BG-5 : Frontières explicites
+### INV-BG-5 : FrontiÃ¨res explicites
 
-Toute frontière **doit** être explicitement définie et documentée. Aucune frontière implicite n'est autorisée. Si une démarcation existe dans le système, elle doit être formalisée par Border Guard.
+Toute frontiÃ¨re **doit** Ãªtre explicitement dÃ©finie et documentÃ©e. Aucune frontiÃ¨re implicite n'est autorisÃ©e. Si une dÃ©marcation existe dans le systÃ¨me, elle doit Ãªtre formalisÃ©e par Border Guard.
 
-### INV-BG-6 : Règles déclaratives
+### INV-BG-6 : RÃ¨gles dÃ©claratives
 
-Toutes les règles de franchissement **doivent** être déclaratives. Aucune règle procédurale ou impérative n'est autorisée. Une règle exprime ce qui est requis, pas comment le vérifier.
+Toutes les rÃ¨gles de franchissement **doivent** Ãªtre dÃ©claratives. Aucune rÃ¨gle procÃ©durale ou impÃ©rative n'est autorisÃ©e. Une rÃ¨gle exprime ce qui est requis, pas comment le vÃ©rifier.
 
-### INV-BG-7 : Séparation définition/application
+### INV-BG-7 : SÃ©paration dÃ©finition/application
 
-La définition des frontières et des règles est **strictement séparée** de leur application. Border Guard définit, Bonding Brother applique. Cette séparation est non négociable et ne peut être contournée.
+La dÃ©finition des frontiÃ¨res et des rÃ¨gles est **strictement sÃ©parÃ©e** de leur application. Border Guard dÃ©finit, Bonding Brother applique. Cette sÃ©paration est non nÃ©gociable et ne peut Ãªtre contournÃ©e.
 
-### INV-BG-8 : Traçabilité complète
+### INV-BG-8 : TraÃ§abilitÃ© complÃ¨te
 
-Toute définition de frontière, toute classification de confiance, toute règle établie **doit** être traçable avec son origine, sa date, et sa justification.
+Toute dÃ©finition de frontiÃ¨re, toute classification de confiance, toute rÃ¨gle Ã©tablie **doit** Ãªtre traÃ§able avec son origine, sa date, et sa justification.
 
-### INV-BG-9 : Cohérence globale
+### INV-BG-9 : CohÃ©rence globale
 
-Les définitions de Border Guard **doivent** être globalement cohérentes. Aucune contradiction entre frontières, niveaux de confiance, ou règles n'est autorisée.
+Les dÃ©finitions de Border Guard **doivent** Ãªtre globalement cohÃ©rentes. Aucune contradiction entre frontiÃ¨res, niveaux de confiance, ou rÃ¨gles n'est autorisÃ©e.
 
-### INV-BG-10 : Neutralité conceptuelle
+### INV-BG-10 : NeutralitÃ© conceptuelle
 
-Border Guard **ne fait jamais** de supposition sur la technologie d'implémentation. Les définitions sont purement conceptuelles et peuvent être implémentées par n'importe quelle technologie.
+Border Guard **ne fait jamais** de supposition sur la technologie d'implÃ©mentation. Les dÃ©finitions sont purement conceptuelles et peuvent Ãªtre implÃ©mentÃ©es par n'importe quelle technologie.
 
 ---
 
-## 8. Interactions avec l'écosystème
+## 8. Interactions avec l'Ã©cosystÃ¨me
 
 ### Flux d'information vers Strong Father
 
-Quand Strong Father évalue une intention, il peut consulter Border Guard pour obtenir le contexte de confiance :
+Quand Strong Father Ã©value une intention, il peut consulter Border Guard pour obtenir le contexte de confiance :
 
-1. **Strong Father** reçoit une intention à évaluer
-2. **Strong Father** demande à Border Guard le contexte de frontière (quelle frontière est traversée, quel niveau de confiance de la source)
-3. **Border Guard** retourne les informations de classification et les règles applicables
-4. **Strong Father** utilise ces informations pour prendre sa décision
+1. **Strong Father** reÃ§oit une intention Ã  Ã©valuer
+2. **Strong Father** demande Ã  Border Guard le contexte de frontiÃ¨re (quelle frontiÃ¨re est traversÃ©e, quel niveau de confiance de la source)
+3. **Border Guard** retourne les informations de classification et les rÃ¨gles applicables
+4. **Strong Father** utilise ces informations pour prendre sa dÃ©cision
 
-Ce flux est purement informatif : Border Guard ne participe pas à la décision, il fournit le contexte.
+Ce flux est purement informatif : Border Guard ne participe pas Ã  la dÃ©cision, il fournit le contexte.
 
-### Flux de règles vers Bonding Brother
+### Flux de rÃ¨gles vers Bonding Brother
 
-Quand Bonding Brother doit médier une interaction traversant une frontière, il consulte Border Guard :
+Quand Bonding Brother doit mÃ©dier une interaction traversant une frontiÃ¨re, il consulte Border Guard :
 
-1. **Bonding Brother** reçoit une intention de médiation
-2. **Bonding Brother** identifie qu'une frontière est traversée
-3. **Bonding Brother** demande à Border Guard les règles de franchissement applicables
-4. **Border Guard** retourne les règles déclaratives
-5. **Bonding Brother** applique ces règles concrètement
+1. **Bonding Brother** reÃ§oit une intention de mÃ©diation
+2. **Bonding Brother** identifie qu'une frontiÃ¨re est traversÃ©e
+3. **Bonding Brother** demande Ã  Border Guard les rÃ¨gles de franchissement applicables
+4. **Border Guard** retourne les rÃ¨gles dÃ©claratives
+5. **Bonding Brother** applique ces rÃ¨gles concrÃ¨tement
 
-Ce flux est de définition/application : Border Guard fournit les règles, Bonding Brother les exécute.
+Ce flux est de dÃ©finition/application : Border Guard fournit les rÃ¨gles, Bonding Brother les exÃ©cute.
 
-### Flux d'état vers Caring Nanny
+### Flux d'Ã©tat vers Caring Nanny
 
-Quand l'état d'une frontière change (intégration défaillante, frontière compromise), Border Guard informe Caring Nanny :
+Quand l'Ã©tat d'une frontiÃ¨re change (intÃ©gration dÃ©faillante, frontiÃ¨re compromise), Border Guard informe Caring Nanny :
 
-1. **Border Guard** détecte un changement d'état d'une frontière ou d'une intégration
+1. **Border Guard** dÃ©tecte un changement d'Ã©tat d'une frontiÃ¨re ou d'une intÃ©gration
 2. **Border Guard** notifie Caring Nanny de ce changement
-3. **Caring Nanny** intègre cette information dans l'état global du système
+3. **Caring Nanny** intÃ¨gre cette information dans l'Ã©tat global du systÃ¨me
 
-Ce flux est d'observation : Border Guard signale, Caring Nanny observe et agrège.
+Ce flux est d'observation : Border Guard signale, Caring Nanny observe et agrÃ¨ge.
 
 ### Flux de classification
 
-Quand une nouvelle source ou intégration doit être classifiée :
+Quand une nouvelle source ou intÃ©gration doit Ãªtre classifiÃ©e :
 
 1. **Le produit** ou **Bonding Brother** soumet une demande de classification
-2. **Border Guard** évalue selon ses critères et définitions
+2. **Border Guard** Ã©value selon ses critÃ¨res et dÃ©finitions
 3. **Border Guard** attribue un niveau de confiance
-4. **Border Guard** établit les règles de franchissement applicables
-5. **Border Guard** notifie les cores concernés de cette nouvelle classification
+4. **Border Guard** Ã©tablit les rÃ¨gles de franchissement applicables
+5. **Border Guard** notifie les cores concernÃ©s de cette nouvelle classification
 
-Ce flux est de classification : Border Guard est l'autorité qui attribue les niveaux de confiance.
+Ce flux est de classification : Border Guard est l'autoritÃ© qui attribue les niveaux de confiance.
 
 ### Diagramme des interactions
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     ÉCOSYSTÈME MIYUKINI                      │
-│                                                              │
-│    ┌─────────────┐                    ┌─────────────┐       │
-│    │   Strong    │◄───── contexte ────│   Border    │       │
-│    │   Father    │      de confiance  │   Guard     │       │
-│    │  (Décision) │                    │ (Définition)│       │
-│    └─────────────┘                    └─────────────┘       │
-│                                            │ │              │
-│                                   règles ──┘ └── état       │
-│                                            │ │              │
-│    ┌─────────────┐                         ▼ │              │
-│    │  Bonding    │◄────── règles ──────────┘ │              │
-│    │  Brother    │        de franchissement   │              │
-│    │(Application)│                            │              │
-│    └─────────────┘                            ▼              │
-│                                        ┌─────────────┐       │
-│                                        │   Caring    │       │
-│                                        │   Nanny     │       │
-│                                        │   (État)    │       │
-│                                        └─────────────┘       │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-                          │
-                          │ Frontière externe
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│                     MONDE EXTÉRIEUR                          │
-│   (Systèmes tiers, utilisateurs, intégrations)               │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                     Ã‰COSYSTÃˆME MIYUKINI                      â”‚
+â”‚                                                              â”‚
+â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”       â”‚
+â”‚    â”‚   Strong    â”‚â—„â”€â”€â”€â”€â”€ contexte â”€â”€â”€â”€â”‚   Border    â”‚       â”‚
+â”‚    â”‚   Father    â”‚      de confiance  â”‚   Guard     â”‚       â”‚
+â”‚    â”‚  (DÃ©cision) â”‚                    â”‚ (DÃ©finition)â”‚       â”‚
+â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜       â”‚
+â”‚                                            â”‚ â”‚              â”‚
+â”‚                                   rÃ¨gles â”€â”€â”˜ â””â”€â”€ Ã©tat       â”‚
+â”‚                                            â”‚ â”‚              â”‚
+â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                         â–¼ â”‚              â”‚
+â”‚    â”‚  Bonding    â”‚â—„â”€â”€â”€â”€â”€â”€ rÃ¨gles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚              â”‚
+â”‚    â”‚  Brother    â”‚        de franchissement   â”‚              â”‚
+â”‚    â”‚(Application)â”‚                            â”‚              â”‚
+â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                            â–¼              â”‚
+â”‚                                        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”       â”‚
+â”‚                                        â”‚   Caring    â”‚       â”‚
+â”‚                                        â”‚   Nanny     â”‚       â”‚
+â”‚                                        â”‚   (Ã‰tat)    â”‚       â”‚
+â”‚                                        â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜       â”‚
+â”‚                                                              â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                          â”‚
+                          â”‚ FrontiÃ¨re externe
+                          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                     MONDE EXTÃ‰RIEUR                          â”‚
+â”‚   (SystÃ¨mes tiers, utilisateurs, intÃ©grations)               â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
 
 ## 9. Vocabulaire canonique
 
-Le vocabulaire de Border Guard est précis, stable, non ambigu. Chaque terme a une définition canonique, non négociable.
+Le vocabulaire de Border Guard est prÃ©cis, stable, non ambigu. Chaque terme a une dÃ©finition canonique, non nÃ©gociable.
 
-### Frontière
+### FrontiÃ¨re
 
-Une **frontière** est une démarcation conceptuelle entre deux zones de confiance différentes. Elle possède une identité, une direction, un niveau de perméabilité, et des règles de franchissement associées. Une frontière est toujours explicitement définie par Border Guard.
+Une **frontiÃ¨re** est une dÃ©marcation conceptuelle entre deux zones de confiance diffÃ©rentes. Elle possÃ¨de une identitÃ©, une direction, un niveau de permÃ©abilitÃ©, et des rÃ¨gles de franchissement associÃ©es. Une frontiÃ¨re est toujours explicitement dÃ©finie par Border Guard.
 
 ### Zone de confiance
 
-Une **zone de confiance** est un espace conceptuel délimité par des frontières où tous les éléments partagent un niveau de confiance homogène. Les zones de confiance sont organisées hiérarchiquement, de la plus sécurisée (zone interne) à la moins sécurisée (zone externe).
+Une **zone de confiance** est un espace conceptuel dÃ©limitÃ© par des frontiÃ¨res oÃ¹ tous les Ã©lÃ©ments partagent un niveau de confiance homogÃ¨ne. Les zones de confiance sont organisÃ©es hiÃ©rarchiquement, de la plus sÃ©curisÃ©e (zone interne) Ã  la moins sÃ©curisÃ©e (zone externe).
 
 ### Niveau de confiance
 
-Un **niveau de confiance** est une classification attribuée à une source, une destination, ou une interaction. Les niveaux canoniques sont : trusted (confiance totale), verified (confiance vérifiée), unknown (confiance inconnue), hostile (confiance nulle).
+Un **niveau de confiance** est une classification attribuÃ©e Ã  une source, une destination, ou une interaction. Les niveaux canoniques sont : trusted (confiance totale), verified (confiance vÃ©rifiÃ©e), unknown (confiance inconnue), hostile (confiance nulle).
 
 ### Franchissement
 
-Un **franchissement** est l'acte de traverser une frontière. Chaque franchissement est soumis aux règles définies pour la frontière concernée. Un franchissement peut être autorisé, conditionnel, ou interdit selon les règles.
+Un **franchissement** est l'acte de traverser une frontiÃ¨re. Chaque franchissement est soumis aux rÃ¨gles dÃ©finies pour la frontiÃ¨re concernÃ©e. Un franchissement peut Ãªtre autorisÃ©, conditionnel, ou interdit selon les rÃ¨gles.
 
-### Règle de franchissement
+### RÃ¨gle de franchissement
 
-Une **règle de franchissement** est une condition déclarative qui spécifie ce qui est requis pour qu'un franchissement soit autorisé. Une règle est associée à une frontière et s'applique à toutes les interactions traversant cette frontière.
+Une **rÃ¨gle de franchissement** est une condition dÃ©clarative qui spÃ©cifie ce qui est requis pour qu'un franchissement soit autorisÃ©. Une rÃ¨gle est associÃ©e Ã  une frontiÃ¨re et s'applique Ã  toutes les interactions traversant cette frontiÃ¨re.
 
-### Intégration
+### IntÃ©gration
 
-Une **intégration** est une relation établie entre l'écosystème Miyukini et un système externe. Une intégration est classifiée par Border Guard et possède un niveau de confiance, des frontières associées, et des règles spécifiques.
+Une **intÃ©gration** est une relation Ã©tablie entre l'Ã©cosystÃ¨me Miyukini et un systÃ¨me externe. Une intÃ©gration est classifiÃ©e par Border Guard et possÃ¨de un niveau de confiance, des frontiÃ¨res associÃ©es, et des rÃ¨gles spÃ©cifiques.
 
-### Perméabilité
+### PermÃ©abilitÃ©
 
-La **perméabilité** est la caractéristique d'une frontière qui indique sa propension à autoriser le franchissement. Une frontière peut être ouverte (franchissement libre sous conditions minimales), contrôlée (franchissement soumis à vérification), ou fermée (franchissement interdit).
+La **permÃ©abilitÃ©** est la caractÃ©ristique d'une frontiÃ¨re qui indique sa propension Ã  autoriser le franchissement. Une frontiÃ¨re peut Ãªtre ouverte (franchissement libre sous conditions minimales), contrÃ´lÃ©e (franchissement soumis Ã  vÃ©rification), ou fermÃ©e (franchissement interdit).
 
 ### Classification
 
-La **classification** est l'acte d'attribuer un niveau de confiance à une source, une destination, ou une interaction. Seul Border Guard a l'autorité de classifier. Toute interaction non explicitement classifiée est considérée comme "unknown".
+La **classification** est l'acte d'attribuer un niveau de confiance Ã  une source, une destination, ou une interaction. Seul Border Guard a l'autoritÃ© de classifier. Toute interaction non explicitement classifiÃ©e est considÃ©rÃ©e comme "unknown".
 
-### Gouvernance d'intégration
+### Gouvernance d'intÃ©gration
 
-La **gouvernance d'intégration** est l'ensemble des règles et processus qui encadrent la relation avec les systèmes externes. Cette gouvernance définit les conditions d'établissement, de maintien, et de révocation des intégrations.
+La **gouvernance d'intÃ©gration** est l'ensemble des rÃ¨gles et processus qui encadrent la relation avec les systÃ¨mes externes. Cette gouvernance dÃ©finit les conditions d'Ã©tablissement, de maintien, et de rÃ©vocation des intÃ©grations.
 
-### Contexte de frontière
+### Contexte de frontiÃ¨re
 
-Le **contexte de frontière** est l'ensemble des informations relatives aux frontières traversées par une interaction : quelles frontières, quel niveau de confiance de la source, quelles règles applicables. Ce contexte est fourni par Border Guard aux autres cores.
+Le **contexte de frontiÃ¨re** est l'ensemble des informations relatives aux frontiÃ¨res traversÃ©es par une interaction : quelles frontiÃ¨res, quel niveau de confiance de la source, quelles rÃ¨gles applicables. Ce contexte est fourni par Border Guard aux autres cores.
 
 ---
 
-## 10. Conformité aux Lois d'Autonomie Système
+## 10. ConformitÃ© aux Lois d'Autonomie SystÃ¨me
 
-Ce core respecte les **Lois d'Autonomie Système** définies dans [Miyukini Framework - Lois Autonomie Systeme.md](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md). Border Guard devient **critique pour l'autonomie** en contrôlant toutes les frontières du système.
+Ce core respecte les **Lois d'Autonomie SystÃ¨me** dÃ©finies dans [Miyukini Framework - Lois Autonomie Systeme.md](..//..//..//miyukini-webway-system//reference//_index.md). Border Guard devient **critique pour l'autonomie** en contrÃ´lant toutes les frontiÃ¨res du systÃ¨me.
 
-### LOI-1 : Aucune dépendance externe critique à l'exécution
+### LOI-1 : Aucune dÃ©pendance externe critique Ã  l'exÃ©cution
 
-**Conformité :** ✅ **Conforme — Rôle critique**
+**ConformitÃ© :** âœ… **Conforme â€” RÃ´le critique**
 
-Border Guard respecte intégralement LOI-1 et joue un rôle critique :
-- **Contrôle tout ce qui entre et sort du système** via la définition des frontières
-- Les règles de franchissement sont **locales** et chargées au démarrage
-- Aucune définition de frontière ne nécessite un appel externe
-- L'absence de connexion ne bloque jamais la définition des frontières
+Border Guard respecte intÃ©gralement LOI-1 et joue un rÃ´le critique :
+- **ContrÃ´le tout ce qui entre et sort du systÃ¨me** via la dÃ©finition des frontiÃ¨res
+- Les rÃ¨gles de franchissement sont **locales** et chargÃ©es au dÃ©marrage
+- Aucune dÃ©finition de frontiÃ¨re ne nÃ©cessite un appel externe
+- L'absence de connexion ne bloque jamais la dÃ©finition des frontiÃ¨res
 
-**Architecture :** Border Guard définit les frontières de manière locale et autonome. C'est le gardien qui garantit qu'aucune dépendance externe critique ne peut entrer dans le système.
+**Architecture :** Border Guard dÃ©finit les frontiÃ¨res de maniÃ¨re locale et autonome. C'est le gardien qui garantit qu'aucune dÃ©pendance externe critique ne peut entrer dans le systÃ¨me.
 
-### LOI-6 : L'autonomie n'empêche pas la fédération
+### LOI-6 : L'autonomie n'empÃªche pas la fÃ©dÃ©ration
 
-**Conformité :** ✅ **Conforme — Rôle critique**
+**ConformitÃ© :** âœ… **Conforme â€” RÃ´le critique**
 
-Border Guard joue un rôle critique pour LOI-6 :
-- **Validation explicite des échanges fédérés** : Toute communication inter-nœuds doit passer par Border Guard pour classification
-- **Rien d'implicite** : Les frontières sont explicitement définies, pas supposées
-- **Contrôle des règles de partage** : Border Guard définit ce qui peut être partagé dans une fédération
-- **Fédération réversible** : Les frontières peuvent être modifiées pour quitter une fédération
+Border Guard joue un rÃ´le critique pour LOI-6 :
+- **Validation explicite des Ã©changes fÃ©dÃ©rÃ©s** : Toute communication inter-nÅ“uds doit passer par Border Guard pour classification
+- **Rien d'implicite** : Les frontiÃ¨res sont explicitement dÃ©finies, pas supposÃ©es
+- **ContrÃ´le des rÃ¨gles de partage** : Border Guard dÃ©finit ce qui peut Ãªtre partagÃ© dans une fÃ©dÃ©ration
+- **FÃ©dÃ©ration rÃ©versible** : Les frontiÃ¨res peuvent Ãªtre modifiÃ©es pour quitter une fÃ©dÃ©ration
 
-**Architecture :** Border Guard définit les règles de fédération, garantissant que la fédération reste explicite, contrôlée, observable, et réversible.
+**Architecture :** Border Guard dÃ©finit les rÃ¨gles de fÃ©dÃ©ration, garantissant que la fÃ©dÃ©ration reste explicite, contrÃ´lÃ©e, observable, et rÃ©versible.
 
-### Rôle renforcé dans l'autonomie
+### RÃ´le renforcÃ© dans l'autonomie
 
 Border Guard devient **critique pour l'autonomie** car :
-- **Contrôle des entrées/sorties** : Aucune communication externe ne peut contourner Border Guard
-- **Validation explicite** : Tous les échanges fédérés sont validés selon les règles définies par Border Guard
-- **Protection de l'autonomie** : Les frontières définies par Border Guard protègent l'autonomie du système
+- **ContrÃ´le des entrÃ©es/sorties** : Aucune communication externe ne peut contourner Border Guard
+- **Validation explicite** : Tous les Ã©changes fÃ©dÃ©rÃ©s sont validÃ©s selon les rÃ¨gles dÃ©finies par Border Guard
+- **Protection de l'autonomie** : Les frontiÃ¨res dÃ©finies par Border Guard protÃ¨gent l'autonomie du systÃ¨me
 
-**Relation avec Bonding Brother :** Border Guard définit les règles, Bonding Brother les applique. Cette séparation garantit que les frontières sont définies localement (LOI-1) et que la fédération est contrôlée (LOI-6).
+**Relation avec Bonding Brother :** Border Guard dÃ©finit les rÃ¨gles, Bonding Brother les applique. Cette sÃ©paration garantit que les frontiÃ¨res sont dÃ©finies localement (LOI-1) et que la fÃ©dÃ©ration est contrÃ´lÃ©e (LOI-6).
 
 ### Autres lois
 
-- **LOI-2 (Isolement comme état normal)** : Les frontières définies par Border Guard permettent de reconnaître l'isolement comme un état normal (pas d'erreur si une frontière est fermée).
-- **LOI-3 (État local souverain)** : Les définitions de frontières sont locales et souveraines.
-- **LOI-5 (Coût hardware)** : Border Guard est un core conceptuel léger, sans exécution, optimisé pour les ressources limitées.
+- **LOI-2 (Isolement comme Ã©tat normal)** : Les frontiÃ¨res dÃ©finies par Border Guard permettent de reconnaÃ®tre l'isolement comme un Ã©tat normal (pas d'erreur si une frontiÃ¨re est fermÃ©e).
+- **LOI-3 (Ã‰tat local souverain)** : Les dÃ©finitions de frontiÃ¨res sont locales et souveraines.
+- **LOI-5 (CoÃ»t hardware)** : Border Guard est un core conceptuel lÃ©ger, sans exÃ©cution, optimisÃ© pour les ressources limitÃ©es.
 
 ---
 
@@ -514,40 +514,41 @@ Border Guard devient **critique pour l'autonomie** car :
 
 ### Phrase fondatrice
 
-**Border Guard est l'autorité de définition des frontières et des niveaux de confiance qui établit les règles de franchissement sans jamais les appliquer lui-même, séparant strictement la définition conceptuelle de l'exécution technique.**
+**Border Guard est l'autoritÃ© de dÃ©finition des frontiÃ¨res et des niveaux de confiance qui Ã©tablit les rÃ¨gles de franchissement sans jamais les appliquer lui-mÃªme, sÃ©parant strictement la dÃ©finition conceptuelle de l'exÃ©cution technique.**
 
-Cette phrase résume l'essence de Border Guard : autorité (mais non décisionnel), définition (mais non exécution), règles (mais non filtrage), conceptuel (mais non technique).
+Cette phrase rÃ©sume l'essence de Border Guard : autoritÃ© (mais non dÃ©cisionnel), dÃ©finition (mais non exÃ©cution), rÃ¨gles (mais non filtrage), conceptuel (mais non technique).
 
 ### Garanties offertes
 
 Border Guard garantit :
 
-1. **Exhaustivité** : Toute frontière du système est explicitement définie
-2. **Classification complète** : Toute source et interaction est classifiée
-3. **Cohérence** : Les définitions sont globalement cohérentes et non contradictoires
-4. **Traçabilité** : Toute définition est traçable avec son origine et sa justification
-5. **Neutralité technique** : Les définitions sont indépendantes de l'implémentation
-6. **Séparation stricte** : La définition est strictement séparée de l'application
+1. **ExhaustivitÃ©** : Toute frontiÃ¨re du systÃ¨me est explicitement dÃ©finie
+2. **Classification complÃ¨te** : Toute source et interaction est classifiÃ©e
+3. **CohÃ©rence** : Les dÃ©finitions sont globalement cohÃ©rentes et non contradictoires
+4. **TraÃ§abilitÃ©** : Toute dÃ©finition est traÃ§able avec son origine et sa justification
+5. **NeutralitÃ© technique** : Les dÃ©finitions sont indÃ©pendantes de l'implÃ©mentation
+6. **SÃ©paration stricte** : La dÃ©finition est strictement sÃ©parÃ©e de l'application
 
 ### Relation avec les autres contrats
 
-Ce contrat complète et respecte les documents contractuels existants :
+Ce contrat complÃ¨te et respecte les documents contractuels existants :
 
-- **Kind Mother — Documentation Fondatrice** : Border Guard ne persiste pas et ne stocke pas
-- **Strong Father — Documentation Fondatrice** : Border Guard informe mais ne décide pas
-- **Bonding Brother — Documentation Fondatrice** : Border Guard définit, Bonding Brother applique
+- **Kind Mother â€” Documentation Fondatrice** : Border Guard ne persiste pas et ne stocke pas
+- **Strong Father â€” Documentation Fondatrice** : Border Guard informe mais ne dÃ©cide pas
+- **Bonding Brother â€” Documentation Fondatrice** : Border Guard dÃ©finit, Bonding Brother applique
 
-Il n'introduit aucune contradiction et constitue la définition formelle de ce que signifie une frontière, un niveau de confiance, et une règle de franchissement dans le système Miyukini.
+Il n'introduit aucune contradiction et constitue la dÃ©finition formelle de ce que signifie une frontiÃ¨re, un niveau de confiance, et une rÃ¨gle de franchissement dans le systÃ¨me Miyukini.
 
 ### Statut final
 
-Ce document est de statut **FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Toute implémentation touchant aux frontières, aux niveaux de confiance, ou aux règles de franchissement doit respecter intégralement ce document.
+Ce document est de statut **FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Toute implÃ©mentation touchant aux frontiÃ¨res, aux niveaux de confiance, ou aux rÃ¨gles de franchissement doit respecter intÃ©gralement ce document.
 
-Les invariants définis ici sont non négociables. Toute violation de ces invariants constitue une faute architecturale qui doit être corrigée.
+Les invariants dÃ©finis ici sont non nÃ©gociables. Toute violation de ces invariants constitue une faute architecturale qui doit Ãªtre corrigÃ©e.
 
 ---
 
 **Version :** 1.5  
 **Date :** 2026-01-26  
-**Statut :** FONDATION — Non négociable  
-**Référence :** Miyukini Core System v2.4, Kind Mother Documentation Fondatrice, Strong Father Documentation Fondatrice, Bonding Brother Documentation Fondatrice, Miyukini Conceptual References - Lois Autonomie Systeme, [Miyukini Conceptual References - Integrity Degradation System](../../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md), [Miyukini Conceptual References - External Signal Trust Reinforcement Contract](../../../reference/Miyukini%20Conceptual%20References%20-%20External%20Signal%20Trust%20Reinforcement%20Contract.md), [Miyukini Conceptual References - Mobile WebApp Strategy](../../../reference/Miyukini%20Conceptual%20References%20-%20Mobile%20WebApp%20Strategy.md) (protection injection mobile/web), [Miyukini Conceptual References - Security Protocols](../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Protocols.md) (classification sources, protection injection), [Miyukini Conceptual References - Security Levels](../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) (adaptation frontières selon niveau sécurité 0-4)
+**Statut :** FONDATION â€” Non nÃ©gociable  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, Kind Mother Documentation Fondatrice, Strong Father Documentation Fondatrice, Bonding Brother Documentation Fondatrice, Miyukini Conceptual References - Lois Autonomie Systeme, [Miyukini Conceptual References - Integrity Degradation System](..//..//..//miyukini-webway-system//reference//_index.md), [Miyukini Conceptual References - External Signal Trust Reinforcement Contract](..//..//..//miyukini-webway-system//reference//_index.md), [Miyukini Conceptual References - Mobile WebApp Strategy](..//..//..//miyukini-webway-system//reference//_index.md) (protection injection mobile/web), [Miyukini Conceptual References - Security Protocols](..//..//..//miyukini-webway-system//reference//_index.md) (classification sources, protection injection), [Miyukini Conceptual References - Security Levels](..//..//..//miyukini-webway-system//reference//_index.md) (adaptation frontiÃ¨res selon niveau sÃ©curitÃ© 0-4)
+

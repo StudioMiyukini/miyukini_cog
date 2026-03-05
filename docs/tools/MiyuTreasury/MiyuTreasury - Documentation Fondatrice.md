@@ -1,54 +1,54 @@
-# MiyuTreasury — Documentation Fondatrice
+﻿# MiyuTreasury â€” Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuTreasury** est le **kit d'outils (Toolkit)** de trésorerie et prévisionnel (tableau de bord, prévisionnel, alertes) de l'écosystème Miyukini. Il intègre les outils d'agrégation des indicateurs pour le tableau de bord, de calcul du prévisionnel et de vérification des seuils et échéances, alignés sur [Équivalents Comptabilité Indépendants](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Comptabilite%20Independants.md).
+**MiyuTreasury** est le **kit d'outils (Toolkit)** de trÃ©sorerie et prÃ©visionnel (tableau de bord, prÃ©visionnel, alertes) de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils d'agrÃ©gation des indicateurs pour le tableau de bord, de calcul du prÃ©visionnel et de vÃ©rification des seuils et Ã©chÃ©ances, alignÃ©s sur [Ã‰quivalents ComptabilitÃ© IndÃ©pendants](..//..//miyukini-webway-system//reference//_index.md).
 
-Les données sous-jacentes (écritures, factures, échéances) appartiennent à **KindMother**. MiyuTreasury expose des capacités de **lecture agrégée** et de **vérification** (alertes) ; les règles d'alerte relèvent de **StrongFather**.
+Les donnÃ©es sous-jacentes (Ã©critures, factures, Ã©chÃ©ances) appartiennent Ã  **KindMother**. MiyuTreasury expose des capacitÃ©s de **lecture agrÃ©gÃ©e** et de **vÃ©rification** (alertes) ; les rÃ¨gles d'alerte relÃ¨vent de **StrongFather**.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-
----
-
-## 2. Portée / Scope
-
-**Ce document définit :** l'identité et la définition canonique de MiyuTreasury, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother.
-
-**Hors scope :** l'implémentation détaillée (modèles prévisionnels) ; la tenue des livres (voir MiyuComptaLedger).
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 3. Définition canonique
+## 2. PortÃ©e / Scope
 
-> **MiyuTreasury est une composition officielle d'outils de trésorerie et prévisionnel (tableau de bord, prévisionnel, alertes), déclarée et gouvernée par l'environnement.**
+**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de MiyuTreasury, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother.
 
-- MiyuTreasury **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
-- MiyuTreasury **n'ajoute aucune logique métier** : il orchestre des capacités atomiques d'agrégation et de vérification ; règles alertes = StrongFather.
+**Hors scope :** l'implÃ©mentation dÃ©taillÃ©e (modÃ¨les prÃ©visionnels) ; la tenue des livres (voir MiyuComptaLedger).
 
-**Règle fondamentale :** Les Tools **lisent** les données KindMother (écritures, factures, échéances) ; pas d'écriture métier (sauf paramètres alertes si définis).
+---
+
+## 3. DÃ©finition canonique
+
+> **MiyuTreasury est une composition officielle d'outils de trÃ©sorerie et prÃ©visionnel (tableau de bord, prÃ©visionnel, alertes), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+
+- MiyuTreasury **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
+- MiyuTreasury **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques d'agrÃ©gation et de vÃ©rification ; rÃ¨gles alertes = StrongFather.
+
+**RÃ¨gle fondamentale :** Les Tools **lisent** les donnÃ©es KindMother (Ã©critures, factures, Ã©chÃ©ances) ; pas d'Ã©criture mÃ©tier (sauf paramÃ¨tres alertes si dÃ©finis).
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.treasury.forecast` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `treasury` |
-| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le détail de chaque outil est décrit dans [MiyuTreasury - Reference Outils](./MiyuTreasury%20-%20Reference%20Outils.md).
+Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuTreasury - Reference Outils](./MiyuTreasury%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
-| `tool.treasury.dashboard.aggregate` | Agrège les indicateurs pour le tableau de bord trésorerie |
-| `tool.treasury.forecast.compute` | Calcule un prévisionnel à partir de données fournies |
-| `tool.treasury.alert.check` | Vérifie les seuils et échéances (exécution ; règles = StrongFather) |
+| `tool.treasury.dashboard.aggregate` | AgrÃ¨ge les indicateurs pour le tableau de bord trÃ©sorerie |
+| `tool.treasury.forecast.compute` | Calcule un prÃ©visionnel Ã  partir de donnÃ©es fournies |
+| `tool.treasury.alert.check` | VÃ©rifie les seuils et Ã©chÃ©ances (exÃ©cution ; rÃ¨gles = StrongFather) |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuTreasury en contient trois.
 
@@ -56,44 +56,46 @@ Le détail de chaque outil est décrit dans [MiyuTreasury - Reference Outils](./
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : règles alertes = StrongFather ; les Tools lisent les données KindMother (pas d'écriture métier sauf paramètres alertes).
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : rÃ¨gles alertes = StrongFather ; les Tools lisent les donnÃ©es KindMother (pas d'Ã©criture mÃ©tier sauf paramÃ¨tres alertes).
 
 ---
 
-## 7. Niveau de sécurité et états
+## 7. Niveau de sÃ©curitÃ© et Ã©tats
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
-| **Niveau de sécurité du kit** | **1 à 2** (données trésorerie sensibles) |
-| **États autorisés** | `HEALTHY`, `DEGRADED` |
-| **États interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
+| **Niveau de sÃ©curitÃ© du kit** | **1 Ã  2** (donnÃ©es trÃ©sorerie sensibles) |
+| **Ã‰tats autorisÃ©s** | `HEALTHY`, `DEGRADED` |
+| **Ã‰tats interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autorité sur les données : écritures, factures, échéances. Les Tools MiyuTreasury **lisent** ces données pour agrégation et prévisionnel ; ils n'écrivent pas (sauf paramètres alertes si définis). Règles alertes = StrongFather.
+**KindMother** est l'autoritÃ© sur les donnÃ©es : Ã©critures, factures, Ã©chÃ©ances. Les Tools MiyuTreasury **lisent** ces donnÃ©es pour agrÃ©gation et prÃ©visionnel ; ils n'Ã©crivent pas (sauf paramÃ¨tres alertes si dÃ©finis). RÃ¨gles alertes = StrongFather.
 
-Les obligations de conformité détaillées sont dans [MiyuTreasury - Tool Governance Compliance Contract](./contracts/governance/MiyuTreasury%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuTreasury - Tool Governance Compliance Contract](./contracts/governance/MiyuTreasury%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuTreasury sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). À l'implémentation, le code fournissant les Tools MiyuTreasury devra être balisé MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit généré selon le [Protocole MIP v1](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+La documentation et la future implÃ©mentation de MiyuTreasury sont conÃ§ues pour Ãªtre **compatibles MIP v1** (Miyukini Index Protocol). Ã€ l'implÃ©mentation, le code fournissant les Tools MiyuTreasury devra Ãªtre balisÃ© MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit gÃ©nÃ©rÃ© selon le [Protocole MIP v1](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
 ---
 
-## 10. Références croisées
+## 10. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Équivalents Comptabilité Indépendants | [Miyukini Conceptual References - Equivalents Comptabilite Independants](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Comptabilite%20Independants.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
+| Ã‰quivalents ComptabilitÃ© IndÃ©pendants | [Miyukini Conceptual References - Equivalents Comptabilite Independants](..//..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence fondateur
+**Statut :** Document de rÃ©fÃ©rence fondateur
+
+

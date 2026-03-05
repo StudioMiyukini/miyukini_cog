@@ -1,520 +1,520 @@
-# Caring Nanny - State Model Contract
+﻿# Caring Nanny - State Model Contract
 
 ## 1. Contexte
 
-Ce document définit le **modèle formel des états** observés et rapportés par Caring Nanny. Il établit les catégories d'états canoniques, leurs caractéristiques, leurs conditions d'entrée/sortie, et les règles qui gouvernent leur usage dans le Miyukini Core System.
+Ce document dÃ©finit le **modÃ¨le formel des Ã©tats** observÃ©s et rapportÃ©s par Caring Nanny. Il Ã©tablit les catÃ©gories d'Ã©tats canoniques, leurs caractÃ©ristiques, leurs conditions d'entrÃ©e/sortie, et les rÃ¨gles qui gouvernent leur usage dans le Miyukini Core System.
 
-Ce contrat étend la Section 4 de la [Documentation Fondatrice](../../foundation/Caring%20Nanny%20-%20Documentation%20Fondatrice.md) en formalisant le modèle d'état comme spécification normative.
+Ce contrat Ã©tend la Section 4 de la [Documentation Fondatrice](../../foundation/Caring%20Nanny%20-%20Documentation%20Fondatrice.md) en formalisant le modÃ¨le d'Ã©tat comme spÃ©cification normative.
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
 Ce document couvre :
-- Les catégories d'état système (healthy, degraded, offline, syncing, error)
-- Les catégories d'état applicatif (états partiels des composants)
-- Les propriétés formelles de chaque état
-- Les conditions d'entrée et de sortie de chaque état
-- Les règles d'agrégation des états partiels en état global
-- Les transitions valides entre états
-- Les états d'isolement conformes à LOI-2
+- Les catÃ©gories d'Ã©tat systÃ¨me (healthy, degraded, offline, syncing, error)
+- Les catÃ©gories d'Ã©tat applicatif (Ã©tats partiels des composants)
+- Les propriÃ©tÃ©s formelles de chaque Ã©tat
+- Les conditions d'entrÃ©e et de sortie de chaque Ã©tat
+- Les rÃ¨gles d'agrÃ©gation des Ã©tats partiels en Ã©tat global
+- Les transitions valides entre Ã©tats
+- Les Ã©tats d'isolement conformes Ã  LOI-2
 
 Ce document **ne couvre pas** :
 - Les flux d'observation (voir Observation Flow Contract)
 - Les flux de propagation (voir Propagation Flow Contract)
-- Les détails d'implémentation
-- Les mécanismes de détection (voir Architecture et Composants)
+- Les dÃ©tails d'implÃ©mentation
+- Les mÃ©canismes de dÃ©tection (voir Architecture et Composants)
 
 ---
 
-## 3. Définitions
+## 3. DÃ©finitions
 
-### 3.1 État
+### 3.1 Ã‰tat
 
-Un **état** est une condition observable et classifiable d'un composant ou du système à un instant donné. Un état est :
-- **Catégorisé** : appartient à une catégorie canonique définie
-- **Horodaté** : associé à un instant de temps local (via le kernel Clock)
-- **Contextualisé** : accompagné d'informations de contexte
-- **Non-interprétable** : Caring Nanny ne donne pas d'opinion sur l'état, elle le rapporte
+Un **Ã©tat** est une condition observable et classifiable d'un composant ou du systÃ¨me Ã  un instant donnÃ©. Un Ã©tat est :
+- **CatÃ©gorisÃ©** : appartient Ã  une catÃ©gorie canonique dÃ©finie
+- **HorodatÃ©** : associÃ© Ã  un instant de temps local (via le kernel Clock)
+- **ContextualisÃ©** : accompagnÃ© d'informations de contexte
+- **Non-interprÃ©table** : Caring Nanny ne donne pas d'opinion sur l'Ã©tat, elle le rapporte
 
-### 3.2 État système
+### 3.2 Ã‰tat systÃ¨me
 
-L'**état système** est la condition globale du Miyukini Core System à un instant donné. C'est une synthèse agrégée de tous les états partiels des composants.
+L'**Ã©tat systÃ¨me** est la condition globale du Miyukini Core System Ã  un instant donnÃ©. C'est une synthÃ¨se agrÃ©gÃ©e de tous les Ã©tats partiels des composants.
 
-**Propriétés :**
-- Unique : un seul état système à un instant T
-- Cohérent : sans contradiction interne
+**PropriÃ©tÃ©s :**
+- Unique : un seul Ã©tat systÃ¨me Ã  un instant T
+- CohÃ©rent : sans contradiction interne
 - Observable : accessible par interrogation
-- Instantané : valide à un moment précis
+- InstantanÃ© : valide Ã  un moment prÃ©cis
 
-### 3.3 État applicatif
+### 3.3 Ã‰tat applicatif
 
-L'**état applicatif** est la condition d'un module ou composant spécifique au sein du système. C'est un état partiel qui contribue à l'état système global.
+L'**Ã©tat applicatif** est la condition d'un module ou composant spÃ©cifique au sein du systÃ¨me. C'est un Ã©tat partiel qui contribue Ã  l'Ã©tat systÃ¨me global.
 
-**Propriétés :**
-- Partiel : concerne un composant spécifique
-- Contributif : participe à l'agrégation de l'état système
-- Autonome : peut être observé indépendamment
-- Spécialisé : sémantique propre au composant
+**PropriÃ©tÃ©s :**
+- Partiel : concerne un composant spÃ©cifique
+- Contributif : participe Ã  l'agrÃ©gation de l'Ã©tat systÃ¨me
+- Autonome : peut Ãªtre observÃ© indÃ©pendamment
+- SpÃ©cialisÃ© : sÃ©mantique propre au composant
 
 ### 3.4 Transition
 
-Une **transition** est le passage d'un état à un autre. Elle est :
-- **Causale** : provoquée par une ou plusieurs conditions
-- **Instantanée** : se produit à un moment précis
-- **Traçable** : enregistrée avec son contexte
-- **Validable** : conforme aux règles de transition
+Une **transition** est le passage d'un Ã©tat Ã  un autre. Elle est :
+- **Causale** : provoquÃ©e par une ou plusieurs conditions
+- **InstantanÃ©e** : se produit Ã  un moment prÃ©cis
+- **TraÃ§able** : enregistrÃ©e avec son contexte
+- **Validable** : conforme aux rÃ¨gles de transition
 
 ---
 
-## 4. Catégories d'état système
+## 4. CatÃ©gories d'Ã©tat systÃ¨me
 
-Caring Nanny reconnaît exactement **cinq catégories d'état système**. Ces catégories sont mutuellement exclusives : à tout instant, le système est dans exactement une de ces catégories.
+Caring Nanny reconnaÃ®t exactement **cinq catÃ©gories d'Ã©tat systÃ¨me**. Ces catÃ©gories sont mutuellement exclusives : Ã  tout instant, le systÃ¨me est dans exactement une de ces catÃ©gories.
 
-### 4.1 État : healthy
+### 4.1 Ã‰tat : healthy
 
-**Définition :** Tous les composants fonctionnent normalement, aucune anomalie n'est détectée, toutes les fonctionnalités sont disponibles.
+**DÃ©finition :** Tous les composants fonctionnent normalement, aucune anomalie n'est dÃ©tectÃ©e, toutes les fonctionnalitÃ©s sont disponibles.
 
-**Caractéristiques :**
+**CaractÃ©ristiques :**
 
-| Propriété | Valeur |
+| PropriÃ©tÃ© | Valeur |
 |-----------|--------|
 | Code | `healthy` |
-| Sévérité | 0 (normale) |
-| Opérations permises | Toutes |
-| Notifications | Aucune (état nominal) |
-| Durée typique | Indéfinie (état cible) |
+| SÃ©vÃ©ritÃ© | 0 (normale) |
+| OpÃ©rations permises | Toutes |
+| Notifications | Aucune (Ã©tat nominal) |
+| DurÃ©e typique | IndÃ©finie (Ã©tat cible) |
 
-**Conditions d'entrée :**
-- Tous les composants critiques rapportent un état nominal
+**Conditions d'entrÃ©e :**
+- Tous les composants critiques rapportent un Ã©tat nominal
 - Aucune anomalie active
 - Aucune synchronisation en cours
-- Connexion disponible (si mode connecté)
+- Connexion disponible (si mode connectÃ©)
 
 **Conditions de sortie :**
-- Détection d'une anomalie → `degraded` ou `error`
-- Perte de connexion → `offline`
-- Démarrage de synchronisation → `syncing`
+- DÃ©tection d'une anomalie â†’ `degraded` ou `error`
+- Perte de connexion â†’ `offline`
+- DÃ©marrage de synchronisation â†’ `syncing`
 
-**Conformité LOI-1 :** L'état `healthy` est atteignable sans dépendance externe. Un système isolé peut être `healthy` s'il fonctionne correctement en mode autonome.
+**ConformitÃ© LOI-1 :** L'Ã©tat `healthy` est atteignable sans dÃ©pendance externe. Un systÃ¨me isolÃ© peut Ãªtre `healthy` s'il fonctionne correctement en mode autonome.
 
 ---
 
-### 4.2 État : degraded
+### 4.2 Ã‰tat : degraded
 
-**Définition :** Certains composants fonctionnent en mode dégradé, le système reste opérationnel mais avec des fonctionnalités réduites ou des performances diminuées.
+**DÃ©finition :** Certains composants fonctionnent en mode dÃ©gradÃ©, le systÃ¨me reste opÃ©rationnel mais avec des fonctionnalitÃ©s rÃ©duites ou des performances diminuÃ©es.
 
-**Caractéristiques :**
+**CaractÃ©ristiques :**
 
-| Propriété | Valeur |
+| PropriÃ©tÃ© | Valeur |
 |-----------|--------|
 | Code | `degraded` |
-| Sévérité | 1 (avertissement) |
-| Opérations permises | Opérations essentielles |
-| Notifications | Changement d'état |
-| Durée typique | Variable |
+| SÃ©vÃ©ritÃ© | 1 (avertissement) |
+| OpÃ©rations permises | OpÃ©rations essentielles |
+| Notifications | Changement d'Ã©tat |
+| DurÃ©e typique | Variable |
 
-**Conditions d'entrée :**
+**Conditions d'entrÃ©e :**
 - Un ou plusieurs composants non-critiques dysfonctionnent
-- Performance dégradée (latence, débit)
-- Ressources limitées (mémoire, CPU)
-- Certaines fonctionnalités indisponibles
+- Performance dÃ©gradÃ©e (latence, dÃ©bit)
+- Ressources limitÃ©es (mÃ©moire, CPU)
+- Certaines fonctionnalitÃ©s indisponibles
 
 **Conditions de sortie :**
-- Résolution de toutes les dégradations → `healthy`
-- Aggravation critique → `error`
-- Perte de connexion (si connecté) → `offline`
+- RÃ©solution de toutes les dÃ©gradations â†’ `healthy`
+- Aggravation critique â†’ `error`
+- Perte de connexion (si connectÃ©) â†’ `offline`
 
-**Sous-catégories informatives (non-canoniques) :**
-- `degraded:performance` : dégradation de performance
-- `degraded:feature` : fonctionnalité indisponible
-- `degraded:resource` : ressources limitées
+**Sous-catÃ©gories informatives (non-canoniques) :**
+- `degraded:performance` : dÃ©gradation de performance
+- `degraded:feature` : fonctionnalitÃ© indisponible
+- `degraded:resource` : ressources limitÃ©es
 
-**Conformité LOI-2 :** L'état `degraded` est un état normal, pas une erreur. Le système fonctionne avec ce qu'il a disponible, conformément à LOI-2 (le système accepte l'isolement comme état normal).
+**ConformitÃ© LOI-2 :** L'Ã©tat `degraded` est un Ã©tat normal, pas une erreur. Le systÃ¨me fonctionne avec ce qu'il a disponible, conformÃ©ment Ã  LOI-2 (le systÃ¨me accepte l'isolement comme Ã©tat normal).
 
 ---
 
-### 4.3 État : offline
+### 4.3 Ã‰tat : offline
 
-**Définition :** Le système fonctionne en mode déconnecté, sans accès aux autorités centrales (DB Mère, nœuds fédérés). C'est un **état normal**, pas une erreur.
+**DÃ©finition :** Le systÃ¨me fonctionne en mode dÃ©connectÃ©, sans accÃ¨s aux autoritÃ©s centrales (DB MÃ¨re, nÅ“uds fÃ©dÃ©rÃ©s). C'est un **Ã©tat normal**, pas une erreur.
 
-**Caractéristiques :**
+**CaractÃ©ristiques :**
 
-| Propriété | Valeur |
+| PropriÃ©tÃ© | Valeur |
 |-----------|--------|
 | Code | `offline` |
-| Sévérité | 0 (normale) |
-| Opérations permises | Opérations locales |
-| Notifications | Transition d'état uniquement |
-| Durée typique | Variable (état normal) |
+| SÃ©vÃ©ritÃ© | 0 (normale) |
+| OpÃ©rations permises | OpÃ©rations locales |
+| Notifications | Transition d'Ã©tat uniquement |
+| DurÃ©e typique | Variable (Ã©tat normal) |
 
-**Conditions d'entrée :**
-- Perte de connexion réseau
-- Indisponibilité de la DB Mère
-- Décision explicite de fonctionnement isolé
-- Démarrage sans connexion disponible
+**Conditions d'entrÃ©e :**
+- Perte de connexion rÃ©seau
+- IndisponibilitÃ© de la DB MÃ¨re
+- DÃ©cision explicite de fonctionnement isolÃ©
+- DÃ©marrage sans connexion disponible
 
 **Conditions de sortie :**
-- Rétablissement de la connexion → `syncing` (puis `healthy`)
-- Détection d'anomalie locale → `degraded` ou `error`
+- RÃ©tablissement de la connexion â†’ `syncing` (puis `healthy`)
+- DÃ©tection d'anomalie locale â†’ `degraded` ou `error`
 
 **Distinctions critiques :**
 
-| Aspect | offline (normal) | error (problème) |
+| Aspect | offline (normal) | error (problÃ¨me) |
 |--------|------------------|------------------|
-| Nature | État souhaité ou accepté | Condition anormale |
-| Fonctionnement | Complet en mode local | Limité ou bloqué |
-| Réaction | Aucune correction requise | Diagnostic/correction |
-| Durée | Indéfinie acceptable | À résoudre |
+| Nature | Ã‰tat souhaitÃ© ou acceptÃ© | Condition anormale |
+| Fonctionnement | Complet en mode local | LimitÃ© ou bloquÃ© |
+| RÃ©action | Aucune correction requise | Diagnostic/correction |
+| DurÃ©e | IndÃ©finie acceptable | Ã€ rÃ©soudre |
 
-**Conformité LOI-2 :** L'état `offline` implémente directement LOI-2 (le système accepte l'isolement comme état normal). L'isolement n'est pas une erreur, c'est un mode de fonctionnement valide et explicitement reconnu.
+**ConformitÃ© LOI-2 :** L'Ã©tat `offline` implÃ©mente directement LOI-2 (le systÃ¨me accepte l'isolement comme Ã©tat normal). L'isolement n'est pas une erreur, c'est un mode de fonctionnement valide et explicitement reconnu.
 
-**Conformité LOI-3 :** En état `offline`, l'état local est souverain. Les décisions prises sont valables localement, les données locales constituent la vérité locale.
+**ConformitÃ© LOI-3 :** En Ã©tat `offline`, l'Ã©tat local est souverain. Les dÃ©cisions prises sont valables localement, les donnÃ©es locales constituent la vÃ©ritÃ© locale.
 
 ---
 
-### 4.4 État : syncing
+### 4.4 Ã‰tat : syncing
 
-**Définition :** Une synchronisation est en cours entre la source locale et une source distante (DB Mère, nœud fédéré). Certaines opérations peuvent être différées ou contraintes.
+**DÃ©finition :** Une synchronisation est en cours entre la source locale et une source distante (DB MÃ¨re, nÅ“ud fÃ©dÃ©rÃ©). Certaines opÃ©rations peuvent Ãªtre diffÃ©rÃ©es ou contraintes.
 
-**Caractéristiques :**
+**CaractÃ©ristiques :**
 
-| Propriété | Valeur |
+| PropriÃ©tÃ© | Valeur |
 |-----------|--------|
 | Code | `syncing` |
-| Sévérité | 0 (normale) |
-| Opérations permises | Lectures, écritures locales |
-| Notifications | Progression, conflits éventuels |
-| Durée typique | Transitoire |
+| SÃ©vÃ©ritÃ© | 0 (normale) |
+| OpÃ©rations permises | Lectures, Ã©critures locales |
+| Notifications | Progression, conflits Ã©ventuels |
+| DurÃ©e typique | Transitoire |
 
-**Conditions d'entrée :**
-- Reconnexion après mode offline
-- Réconciliation programmée
-- Réception de deltas à traiter
+**Conditions d'entrÃ©e :**
+- Reconnexion aprÃ¨s mode offline
+- RÃ©conciliation programmÃ©e
+- RÃ©ception de deltas Ã  traiter
 - Demande explicite de synchronisation
 
 **Conditions de sortie :**
-- Synchronisation terminée avec succès → `healthy`
-- Synchronisation terminée avec résidus → `degraded`
-- Perte de connexion pendant sync → `offline`
-- Erreur critique de synchronisation → `error`
+- Synchronisation terminÃ©e avec succÃ¨s â†’ `healthy`
+- Synchronisation terminÃ©e avec rÃ©sidus â†’ `degraded`
+- Perte de connexion pendant sync â†’ `offline`
+- Erreur critique de synchronisation â†’ `error`
 
-**Sous-états informatifs (non-canoniques) :**
-- `syncing:receiving` : réception de deltas
+**Sous-Ã©tats informatifs (non-canoniques) :**
+- `syncing:receiving` : rÃ©ception de deltas
 - `syncing:applying` : application des changements
-- `syncing:reconciling` : résolution de conflits
+- `syncing:reconciling` : rÃ©solution de conflits
 - `syncing:sending` : envoi de deltas locaux
 
-**Conformité LOI-4 :** La synchronisation ne dépend pas d'un temps global. Les comparaisons utilisent des horloges logiques ou des points de synchronisation, conformément à LOI-4 (pas de temps global requis).
+**ConformitÃ© LOI-4 :** La synchronisation ne dÃ©pend pas d'un temps global. Les comparaisons utilisent des horloges logiques ou des points de synchronisation, conformÃ©ment Ã  LOI-4 (pas de temps global requis).
 
 ---
 
-### 4.5 État : error
+### 4.5 Ã‰tat : error
 
-**Définition :** Une erreur critique a été détectée. Certaines opérations ne sont pas possibles. Le système nécessite une attention ou une intervention.
+**DÃ©finition :** Une erreur critique a Ã©tÃ© dÃ©tectÃ©e. Certaines opÃ©rations ne sont pas possibles. Le systÃ¨me nÃ©cessite une attention ou une intervention.
 
-**Caractéristiques :**
+**CaractÃ©ristiques :**
 
-| Propriété | Valeur |
+| PropriÃ©tÃ© | Valeur |
 |-----------|--------|
 | Code | `error` |
-| Sévérité | 2 (critique) |
-| Opérations permises | Limitées (diagnostic, lecture) |
-| Notifications | Alerte, détails d'erreur |
-| Durée typique | À résoudre |
+| SÃ©vÃ©ritÃ© | 2 (critique) |
+| OpÃ©rations permises | LimitÃ©es (diagnostic, lecture) |
+| Notifications | Alerte, dÃ©tails d'erreur |
+| DurÃ©e typique | Ã€ rÃ©soudre |
 
-**Conditions d'entrée :**
-- Échec d'un composant critique
-- Corruption de données détectée
-- Incohérence non résolvable
-- Erreur système critique
+**Conditions d'entrÃ©e :**
+- Ã‰chec d'un composant critique
+- Corruption de donnÃ©es dÃ©tectÃ©e
+- IncohÃ©rence non rÃ©solvable
+- Erreur systÃ¨me critique
 
 **Conditions de sortie :**
-- Résolution de l'erreur → `healthy` ou `degraded`
-- Redémarrage → état initial selon contexte
+- RÃ©solution de l'erreur â†’ `healthy` ou `degraded`
+- RedÃ©marrage â†’ Ã©tat initial selon contexte
 
-**Sous-catégories informatives (non-canoniques) :**
-- `error:critical` : composant critique défaillant
-- `error:data` : problème de données
-- `error:system` : erreur système
-- `error:unrecoverable` : erreur non récupérable
+**Sous-catÃ©gories informatives (non-canoniques) :**
+- `error:critical` : composant critique dÃ©faillant
+- `error:data` : problÃ¨me de donnÃ©es
+- `error:system` : erreur systÃ¨me
+- `error:unrecoverable` : erreur non rÃ©cupÃ©rable
 
 **Distinction avec offline :**
 
-L'état `error` représente un **problème** à résoudre, tandis que `offline` représente un **mode de fonctionnement** valide. Cette distinction est fondamentale pour la conformité LOI-2.
+L'Ã©tat `error` reprÃ©sente un **problÃ¨me** Ã  rÃ©soudre, tandis que `offline` reprÃ©sente un **mode de fonctionnement** valide. Cette distinction est fondamentale pour la conformitÃ© LOI-2.
 
 ---
 
-## 5. Catégories d'état applicatif
+## 5. CatÃ©gories d'Ã©tat applicatif
 
-Les états applicatifs sont les états partiels des composants individuels. Ils contribuent à l'état système global par agrégation.
+Les Ã©tats applicatifs sont les Ã©tats partiels des composants individuels. Ils contribuent Ã  l'Ã©tat systÃ¨me global par agrÃ©gation.
 
-### 5.1 États KindMother
+### 5.1 Ã‰tats KindMother
 
-| État | Description | Contribution à l'état système |
+| Ã‰tat | Description | Contribution Ã  l'Ã©tat systÃ¨me |
 |------|-------------|------------------------------|
-| `km:available` | Persistance disponible | → healthy |
-| `km:degraded` | Performance réduite | → degraded |
-| `km:syncing` | Synchronisation en cours | → syncing |
-| `km:offline` | Mode local uniquement | → offline |
-| `km:error` | Erreur de persistance | → error |
+| `km:available` | Persistance disponible | â†’ healthy |
+| `km:degraded` | Performance rÃ©duite | â†’ degraded |
+| `km:syncing` | Synchronisation en cours | â†’ syncing |
+| `km:offline` | Mode local uniquement | â†’ offline |
+| `km:error` | Erreur de persistance | â†’ error |
 
-### 5.2 États StrongFather
+### 5.2 Ã‰tats StrongFather
 
-| État | Description | Contribution à l'état système |
+| Ã‰tat | Description | Contribution Ã  l'Ã©tat systÃ¨me |
 |------|-------------|------------------------------|
-| `sf:ready` | Moteur de décision prêt | → healthy |
-| `sf:degraded` | Certaines politiques non disponibles | → degraded |
-| `sf:error` | Erreur du moteur de décision | → error |
+| `sf:ready` | Moteur de dÃ©cision prÃªt | â†’ healthy |
+| `sf:degraded` | Certaines politiques non disponibles | â†’ degraded |
+| `sf:error` | Erreur du moteur de dÃ©cision | â†’ error |
 
-### 5.3 États BondingBrother
+### 5.3 Ã‰tats BondingBrother
 
-| État | Description | Contribution à l'état système |
+| Ã‰tat | Description | Contribution Ã  l'Ã©tat systÃ¨me |
 |------|-------------|------------------------------|
-| `bb:available` | Médiation disponible | → healthy |
-| `bb:degraded` | Canaux partiellement disponibles | → degraded |
-| `bb:offline` | Médiation locale uniquement | → offline |
-| `bb:error` | Erreur de médiation | → error |
+| `bb:available` | MÃ©diation disponible | â†’ healthy |
+| `bb:degraded` | Canaux partiellement disponibles | â†’ degraded |
+| `bb:offline` | MÃ©diation locale uniquement | â†’ offline |
+| `bb:error` | Erreur de mÃ©diation | â†’ error |
 
-### 5.4 États Module SPM
+### 5.4 Ã‰tats Module SPM
 
-| État | Description | Contribution à l'état système |
+| Ã‰tat | Description | Contribution Ã  l'Ã©tat systÃ¨me |
 |------|-------------|------------------------------|
-| `mod:ready` | Module opérationnel | → healthy |
-| `mod:loading` | Module en chargement | → syncing |
-| `mod:degraded` | Fonctionnalités réduites | → degraded |
-| `mod:unavailable` | Module non disponible | → degraded |
-| `mod:error` | Erreur de module | → error |
+| `mod:ready` | Module opÃ©rationnel | â†’ healthy |
+| `mod:loading` | Module en chargement | â†’ syncing |
+| `mod:degraded` | FonctionnalitÃ©s rÃ©duites | â†’ degraded |
+| `mod:unavailable` | Module non disponible | â†’ degraded |
+| `mod:error` | Erreur de module | â†’ error |
 
 ---
 
-## 6. Règles d'agrégation
+## 6. RÃ¨gles d'agrÃ©gation
 
-L'état système global est déterminé par l'agrégation des états applicatifs selon des règles de priorité définies.
+L'Ã©tat systÃ¨me global est dÃ©terminÃ© par l'agrÃ©gation des Ã©tats applicatifs selon des rÃ¨gles de prioritÃ© dÃ©finies.
 
-### 6.1 Règle de priorité
+### 6.1 RÃ¨gle de prioritÃ©
 
-Caring Nanny applique la règle de **priorité par sévérité maximale** :
+Caring Nanny applique la rÃ¨gle de **prioritÃ© par sÃ©vÃ©ritÃ© maximale** :
 
 ```
-État système = max(sévérité(états applicatifs))
+Ã‰tat systÃ¨me = max(sÃ©vÃ©ritÃ©(Ã©tats applicatifs))
 ```
 
-**Ordre de priorité (du plus prioritaire au moins prioritaire) :**
-1. `error` (sévérité 2) : si un composant critique est en erreur
-2. `syncing` (sévérité 0, mais transitoire prioritaire)
-3. `degraded` (sévérité 1)
-4. `offline` (sévérité 0, mode)
-5. `healthy` (sévérité 0, nominal)
+**Ordre de prioritÃ© (du plus prioritaire au moins prioritaire) :**
+1. `error` (sÃ©vÃ©ritÃ© 2) : si un composant critique est en erreur
+2. `syncing` (sÃ©vÃ©ritÃ© 0, mais transitoire prioritaire)
+3. `degraded` (sÃ©vÃ©ritÃ© 1)
+4. `offline` (sÃ©vÃ©ritÃ© 0, mode)
+5. `healthy` (sÃ©vÃ©ritÃ© 0, nominal)
 
-### 6.2 Règles d'agrégation spécifiques
+### 6.2 RÃ¨gles d'agrÃ©gation spÃ©cifiques
 
-| Condition | État système résultant |
+| Condition | Ã‰tat systÃ¨me rÃ©sultant |
 |-----------|------------------------|
 | Au moins un composant critique en `error` | `error` |
 | Synchronisation en cours | `syncing` |
 | Au moins un composant en `degraded`, aucun `error` | `degraded` |
-| Tous les composants `offline` ou mode déconnecté | `offline` |
+| Tous les composants `offline` ou mode dÃ©connectÃ© | `offline` |
 | Tous les composants `healthy` | `healthy` |
 
 ### 6.3 Composants critiques vs non-critiques
 
-La distinction entre composants **critiques** et **non-critiques** influence l'agrégation :
+La distinction entre composants **critiques** et **non-critiques** influence l'agrÃ©gation :
 
 **Composants critiques :**
 - KindMother (persistance)
-- StrongFather (décisions)
+- StrongFather (dÃ©cisions)
 
 **Composants non-critiques :**
 - Modules SPM individuels
-- Canaux de médiation optionnels
+- Canaux de mÃ©diation optionnels
 
-**Règle :** Une erreur sur un composant critique entraîne `error` système. Une erreur sur un composant non-critique entraîne `degraded` (sauf si bloquante).
+**RÃ¨gle :** Une erreur sur un composant critique entraÃ®ne `error` systÃ¨me. Une erreur sur un composant non-critique entraÃ®ne `degraded` (sauf si bloquante).
 
-### 6.4 Résolution des contradictions
+### 6.4 RÃ©solution des contradictions
 
 En cas de contradiction apparente, Caring Nanny applique :
 
-1. **Cohérence temporelle** : l'observation la plus récente prévaut
-2. **Cohérence de sévérité** : la sévérité maximale prévaut
-3. **Cohérence de source** : les composants critiques prévalent
+1. **CohÃ©rence temporelle** : l'observation la plus rÃ©cente prÃ©vaut
+2. **CohÃ©rence de sÃ©vÃ©ritÃ©** : la sÃ©vÃ©ritÃ© maximale prÃ©vaut
+3. **CohÃ©rence de source** : les composants critiques prÃ©valent
 
 **Exemple :**
 - KindMother rapporte `km:available`
 - Module A rapporte `mod:error`
-- Résultat : `degraded` (module non-critique en erreur)
+- RÃ©sultat : `degraded` (module non-critique en erreur)
 
 ---
 
 ## 7. Matrice de transitions valides
 
-### 7.1 Transitions entre états système
+### 7.1 Transitions entre Ã©tats systÃ¨me
 
-| État source | États cibles valides | Transitions directes interdites |
+| Ã‰tat source | Ã‰tats cibles valides | Transitions directes interdites |
 |-------------|---------------------|--------------------------------|
-| `healthy` | `degraded`, `offline`, `syncing`, `error` | — |
+| `healthy` | `degraded`, `offline`, `syncing`, `error` | â€” |
 | `degraded` | `healthy`, `offline`, `error` | `syncing` sans passer par `healthy` |
 | `offline` | `syncing`, `degraded`, `error` | `healthy` sans passer par `syncing` |
-| `syncing` | `healthy`, `degraded`, `offline`, `error` | — |
+| `syncing` | `healthy`, `degraded`, `offline`, `error` | â€” |
 | `error` | `healthy`, `degraded`, `offline` | `syncing` (correction requise d'abord) |
 
 ### 7.2 Diagramme de transitions
 
 ```
-                    ┌─────────────────────────────────────────┐
-                    │                                         │
-                    ▼                                         │
-    ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐   │
-    │ offline │◄──│ healthy │──►│degraded │──►│  error  │───┘
-    └────┬────┘   └────┬────┘   └────┬────┘   └────┬────┘
-         │             │             │             │
-         │             │             │             │
-         │        ┌────▼────┐        │             │
-         └───────►│ syncing │◄───────┘             │
-                  └────┬────┘                      │
-                       │                           │
-                       └───────────────────────────┘
+                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                    â”‚                                         â”‚
+                    â–¼                                         â”‚
+    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+    â”‚ offline â”‚â—„â”€â”€â”‚ healthy â”‚â”€â”€â–ºâ”‚degraded â”‚â”€â”€â–ºâ”‚  error  â”‚â”€â”€â”€â”˜
+    â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜
+         â”‚             â”‚             â”‚             â”‚
+         â”‚             â”‚             â”‚             â”‚
+         â”‚        â”Œâ”€â”€â”€â”€â–¼â”€â”€â”€â”€â”        â”‚             â”‚
+         â””â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚ syncing â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”˜             â”‚
+                  â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜                      â”‚
+                       â”‚                           â”‚
+                       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 7.3 Conditions de transition
 
-| Transition | Condition de déclenchement |
+| Transition | Condition de dÃ©clenchement |
 |------------|---------------------------|
-| `healthy` → `degraded` | Détection de dégradation non-critique |
-| `healthy` → `offline` | Perte de connexion |
-| `healthy` → `syncing` | Démarrage de synchronisation |
-| `healthy` → `error` | Erreur critique détectée |
-| `degraded` → `healthy` | Résolution de toutes les dégradations |
-| `degraded` → `error` | Aggravation critique |
-| `degraded` → `offline` | Perte de connexion |
-| `offline` → `syncing` | Rétablissement de connexion |
-| `offline` → `degraded` | Anomalie locale détectée |
-| `offline` → `error` | Erreur critique locale |
-| `syncing` → `healthy` | Synchronisation réussie |
-| `syncing` → `degraded` | Synchronisation avec résidus |
-| `syncing` → `offline` | Perte de connexion pendant sync |
-| `syncing` → `error` | Erreur de synchronisation |
-| `error` → `healthy` | Résolution complète |
-| `error` → `degraded` | Résolution partielle |
-| `error` → `offline` | Passage en mode isolé après erreur |
+| `healthy` â†’ `degraded` | DÃ©tection de dÃ©gradation non-critique |
+| `healthy` â†’ `offline` | Perte de connexion |
+| `healthy` â†’ `syncing` | DÃ©marrage de synchronisation |
+| `healthy` â†’ `error` | Erreur critique dÃ©tectÃ©e |
+| `degraded` â†’ `healthy` | RÃ©solution de toutes les dÃ©gradations |
+| `degraded` â†’ `error` | Aggravation critique |
+| `degraded` â†’ `offline` | Perte de connexion |
+| `offline` â†’ `syncing` | RÃ©tablissement de connexion |
+| `offline` â†’ `degraded` | Anomalie locale dÃ©tectÃ©e |
+| `offline` â†’ `error` | Erreur critique locale |
+| `syncing` â†’ `healthy` | Synchronisation rÃ©ussie |
+| `syncing` â†’ `degraded` | Synchronisation avec rÃ©sidus |
+| `syncing` â†’ `offline` | Perte de connexion pendant sync |
+| `syncing` â†’ `error` | Erreur de synchronisation |
+| `error` â†’ `healthy` | RÃ©solution complÃ¨te |
+| `error` â†’ `degraded` | RÃ©solution partielle |
+| `error` â†’ `offline` | Passage en mode isolÃ© aprÃ¨s erreur |
 
 ---
 
-## 8. Propriétés formelles des états
+## 8. PropriÃ©tÃ©s formelles des Ã©tats
 
-### 8.1 Propriété d'exclusivité mutuelle
+### 8.1 PropriÃ©tÃ© d'exclusivitÃ© mutuelle
 
-**PF-SM-01 :** À tout instant T, le système est dans exactement un état :
-
-```
-∀T : |{s ∈ {healthy, degraded, offline, syncing, error} : état(T) = s}| = 1
-```
-
-### 8.2 Propriété de complétude
-
-**PF-SM-02 :** Toute condition observable peut être classifiée dans une catégorie d'état :
+**PF-SM-01 :** Ã€ tout instant T, le systÃ¨me est dans exactement un Ã©tat :
 
 ```
-∀c ∈ Conditions : ∃s ∈ États : classifie(c) = s
+âˆ€T : |{s âˆˆ {healthy, degraded, offline, syncing, error} : Ã©tat(T) = s}| = 1
 ```
 
-### 8.3 Propriété de déterminisme
+### 8.2 PropriÃ©tÃ© de complÃ©tude
 
-**PF-SM-03 :** L'agrégation des états partiels produit toujours le même état global :
+**PF-SM-02 :** Toute condition observable peut Ãªtre classifiÃ©e dans une catÃ©gorie d'Ã©tat :
 
 ```
-∀(ep₁, ep₂, ..., epₙ) : agrège(ep₁, ep₂, ..., epₙ) = état_unique
+âˆ€c âˆˆ Conditions : âˆƒs âˆˆ Ã‰tats : classifie(c) = s
 ```
 
-### 8.4 Propriété de transition valide
+### 8.3 PropriÃ©tÃ© de dÃ©terminisme
+
+**PF-SM-03 :** L'agrÃ©gation des Ã©tats partiels produit toujours le mÃªme Ã©tat global :
+
+```
+âˆ€(epâ‚, epâ‚‚, ..., epâ‚™) : agrÃ¨ge(epâ‚, epâ‚‚, ..., epâ‚™) = Ã©tat_unique
+```
+
+### 8.4 PropriÃ©tÃ© de transition valide
 
 **PF-SM-04 :** Toute transition respecte la matrice de transitions valides :
 
 ```
-∀(s₁, s₂) : transition(s₁, s₂) ⟹ (s₁, s₂) ∈ TransitionsValides
+âˆ€(sâ‚, sâ‚‚) : transition(sâ‚, sâ‚‚) âŸ¹ (sâ‚, sâ‚‚) âˆˆ TransitionsValides
 ```
 
-### 8.5 Propriété de traçabilité
+### 8.5 PropriÃ©tÃ© de traÃ§abilitÃ©
 
-**PF-SM-05 :** Toute transition est associée à une cause identifiable :
+**PF-SM-05 :** Toute transition est associÃ©e Ã  une cause identifiable :
 
 ```
-∀transition(s₁, s₂) : ∃cause : provoquée_par(transition, cause)
+âˆ€transition(sâ‚, sâ‚‚) : âˆƒcause : provoquÃ©e_par(transition, cause)
 ```
 
 ---
 
-## 9. États d'isolement (conformité LOI-2)
+## 9. Ã‰tats d'isolement (conformitÃ© LOI-2)
 
-Ce contrat implémente explicitement la conformité à **LOI-2** (le système accepte l'isolement comme état normal).
+Ce contrat implÃ©mente explicitement la conformitÃ© Ã  **LOI-2** (le systÃ¨me accepte l'isolement comme Ã©tat normal).
 
-### 9.1 Reconnaissance des états d'isolement
+### 9.1 Reconnaissance des Ã©tats d'isolement
 
-Caring Nanny reconnaît les états d'isolement suivants comme **états normaux** :
+Caring Nanny reconnaÃ®t les Ã©tats d'isolement suivants comme **Ã©tats normaux** :
 
-| État d'isolement | Code Caring Nanny | Nature |
+| Ã‰tat d'isolement | Code Caring Nanny | Nature |
 |------------------|-------------------|--------|
-| Connecté | `healthy` ou autre selon état | État nominal |
-| Isolé | `offline` | **État normal** |
-| Partiellement synchronisé | `syncing` | État transitoire |
-| Dégradé | `degraded` | État normal |
-| Fédéré | `healthy` avec flag fédération | État nominal |
+| ConnectÃ© | `healthy` ou autre selon Ã©tat | Ã‰tat nominal |
+| IsolÃ© | `offline` | **Ã‰tat normal** |
+| Partiellement synchronisÃ© | `syncing` | Ã‰tat transitoire |
+| DÃ©gradÃ© | `degraded` | Ã‰tat normal |
+| FÃ©dÃ©rÃ© | `healthy` avec flag fÃ©dÃ©ration | Ã‰tat nominal |
 
-### 9.2 Distinction isolé vs erreur
+### 9.2 Distinction isolÃ© vs erreur
 
-**Règle fondamentale (conformité LOI-2) :**
+**RÃ¨gle fondamentale (conformitÃ© LOI-2) :**
 
-> L'isolement (`offline`) n'est **jamais** classifié comme erreur (`error`).
+> L'isolement (`offline`) n'est **jamais** classifiÃ© comme erreur (`error`).
 
-Cette distinction est non-négociable :
+Cette distinction est non-nÃ©gociable :
 
-| Situation | État correct | État INTERDIT |
+| Situation | Ã‰tat correct | Ã‰tat INTERDIT |
 |-----------|--------------|---------------|
-| Pas de connexion réseau | `offline` | `error` |
-| DB Mère injoignable | `offline` | `error` |
-| Démarrage sans réseau | `offline` | `error` |
-| Fonctionnement volontaire isolé | `offline` | `error` |
+| Pas de connexion rÃ©seau | `offline` | `error` |
+| DB MÃ¨re injoignable | `offline` | `error` |
+| DÃ©marrage sans rÃ©seau | `offline` | `error` |
+| Fonctionnement volontaire isolÃ© | `offline` | `error` |
 
-### 9.3 Critères de distinction
+### 9.3 CritÃ¨res de distinction
 
 Pour classifier une situation :
 
-| Critère | → offline | → error |
+| CritÃ¨re | â†’ offline | â†’ error |
 |---------|-----------|---------|
-| Fonctionnement local possible | ✓ | — |
-| Fonctionnement local impossible | — | ✓ |
-| Absence de connexion | ✓ | — |
-| Composant critique défaillant | — | ✓ |
-| Mode choisi explicitement | ✓ | — |
-| Condition anormale | — | ✓ |
+| Fonctionnement local possible | âœ“ | â€” |
+| Fonctionnement local impossible | â€” | âœ“ |
+| Absence de connexion | âœ“ | â€” |
+| Composant critique dÃ©faillant | â€” | âœ“ |
+| Mode choisi explicitement | âœ“ | â€” |
+| Condition anormale | â€” | âœ“ |
 
 ---
 
-## 10. Conformité aux Lois d'Autonomie
+## 10. ConformitÃ© aux Lois d'Autonomie
 
-Ce contrat garantit la conformité aux Lois d'Autonomie définies dans [Miyukini Conceptual References - Lois Autonomie Systeme.md](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md).
+Ce contrat garantit la conformitÃ© aux Lois d'Autonomie dÃ©finies dans [Miyukini Conceptual References - Lois Autonomie Systeme.md](..//..//..//..//miyukini-webway-system//reference//_index.md).
 
-### LOI-1 : Aucune dépendance externe critique
+### LOI-1 : Aucune dÃ©pendance externe critique
 
-**Conformité :** ✅ Le modèle d'état fonctionne localement. La classification des états ne nécessite aucun appel externe.
+**ConformitÃ© :** âœ… Le modÃ¨le d'Ã©tat fonctionne localement. La classification des Ã©tats ne nÃ©cessite aucun appel externe.
 
-### LOI-2 : Le système accepte l'isolement comme état normal
+### LOI-2 : Le systÃ¨me accepte l'isolement comme Ã©tat normal
 
-**Conformité :** ✅ L'état `offline` est explicitement défini comme un état normal (sévérité 0), distinct de l'état `error`.
+**ConformitÃ© :** âœ… L'Ã©tat `offline` est explicitement dÃ©fini comme un Ã©tat normal (sÃ©vÃ©ritÃ© 0), distinct de l'Ã©tat `error`.
 
-### LOI-3 : L'état local est souverain
+### LOI-3 : L'Ã©tat local est souverain
 
-**Conformité :** ✅ Les états sont déterminés à partir de conditions locales. L'état local est la source de vérité pour Caring Nanny.
+**ConformitÃ© :** âœ… Les Ã©tats sont dÃ©terminÃ©s Ã  partir de conditions locales. L'Ã©tat local est la source de vÃ©ritÃ© pour Caring Nanny.
 
 ### LOI-4 : Pas de temps global requis
 
-**Conformité :** ✅ Les horodatages sont locaux (kernel Clock). Aucune comparaison inter-nœuds basée sur un temps global.
+**ConformitÃ© :** âœ… Les horodatages sont locaux (kernel Clock). Aucune comparaison inter-nÅ“uds basÃ©e sur un temps global.
 
-### LOI-5 : Le coût doit être proportionnel au hardware
+### LOI-5 : Le coÃ»t doit Ãªtre proportionnel au hardware
 
-**Conformité :** ✅ Le modèle d'état est léger (5 catégories, règles simples). Pas de structure complexe en mémoire.
+**ConformitÃ© :** âœ… Le modÃ¨le d'Ã©tat est lÃ©ger (5 catÃ©gories, rÃ¨gles simples). Pas de structure complexe en mÃ©moire.
 
-### LOI-6 : L'autonomie n'empêche pas la fédération
+### LOI-6 : L'autonomie n'empÃªche pas la fÃ©dÃ©ration
 
-**Conformité :** ✅ Les états `syncing` et la transition `offline` → `syncing` supportent la fédération optionnelle.
+**ConformitÃ© :** âœ… Les Ã©tats `syncing` et la transition `offline` â†’ `syncing` supportent la fÃ©dÃ©ration optionnelle.
 
 ---
 
@@ -522,26 +522,27 @@ Ce contrat garantit la conformité aux Lois d'Autonomie définies dans [Miyukini
 
 | Section Fondatrice | Couverture dans ce contrat |
 |-------------------|---------------------------|
-| §4 État système | Section 4 (Catégories d'état système) |
-| §4 État applicatif | Section 5 (Catégories d'état applicatif) |
-| §4 Transition d'état | Section 7 (Matrice de transitions) |
-| §4 Condition | Section 3.1 (Définitions) |
-| §10 Conformité LOI-2 | Section 9 (États d'isolement) |
+| Â§4 Ã‰tat systÃ¨me | Section 4 (CatÃ©gories d'Ã©tat systÃ¨me) |
+| Â§4 Ã‰tat applicatif | Section 5 (CatÃ©gories d'Ã©tat applicatif) |
+| Â§4 Transition d'Ã©tat | Section 7 (Matrice de transitions) |
+| Â§4 Condition | Section 3.1 (DÃ©finitions) |
+| Â§10 ConformitÃ© LOI-2 | Section 9 (Ã‰tats d'isolement) |
 
 ---
 
 ## 12. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit le modèle formel des états qui doit être respecté par toute implémentation de Caring Nanny.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit le modÃ¨le formel des Ã©tats qui doit Ãªtre respectÃ© par toute implÃ©mentation de Caring Nanny.
 
-Les catégories d'état, les règles d'agrégation, et les transitions valides sont **non-négociables**. Toute modification nécessite une nouvelle version majeure du contrat.
+Les catÃ©gories d'Ã©tat, les rÃ¨gles d'agrÃ©gation, et les transitions valides sont **non-nÃ©gociables**. Toute modification nÃ©cessite une nouvelle version majeure du contrat.
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-27  
-**Statut :** CONTRAT — Modèle d'état normatif  
-**Dépendances :**  
+**Statut :** CONTRAT â€” ModÃ¨le d'Ã©tat normatif  
+**DÃ©pendances :**  
 - [Documentation Fondatrice](../../foundation/Caring%20Nanny%20-%20Documentation%20Fondatrice.md) v1.6 (Section 4)
 - [Invariants et Garanties](../governance/Caring%20Nanny%20-%20Invariants%20et%20Garanties.md) v1.0
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) v1.1
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) v1.1
+

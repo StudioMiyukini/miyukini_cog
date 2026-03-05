@@ -1,4 +1,4 @@
----
+﻿---
 id: confidential-data
 name: "Confidential Data Constraint"
 category: confidentiality
@@ -80,25 +80,25 @@ When `:confidential-data` is applied:
 
 | Aspect | Normal Mode | Confidential Mode |
 |--------|------------|------------------|
-| **Logging** | ✅ Auto logging | ❌ No logs |
-| **Caching** | ✅ Cache responses | ❌ No caching |
-| **API Calls** | ✅ Stripe, Analytics | ❌ Blocked |
-| **Parallelism** | ✅ 4 agents | ❌ 1 agent (sequential) |
-| **Output Storage** | ✅ Memory files | ❌ Cleared after use |
-| **Testing** | ✅ Auto test | ❌ Manual review |
+| **Logging** | âœ… Auto logging | âŒ No logs |
+| **Caching** | âœ… Cache responses | âŒ No caching |
+| **API Calls** | âœ… Stripe, Analytics | âŒ Blocked |
+| **Parallelism** | âœ… 4 agents | âŒ 1 agent (sequential) |
+| **Output Storage** | âœ… Memory files | âŒ Cleared after use |
+| **Testing** | âœ… Auto test | âŒ Manual review |
 | **Performance** | Fast | -30% (manual mode) |
 | **Cost** | Variable | $0 (no APIs) |
 
 ## Mode Restrictions
 
 ```
-✅ Can use:
+âœ… Can use:
   - Terminal (local commands only)
   - File editing (manual)
   - Code review (no storage)
   - Offline computation
 
-❌ Cannot use:
+âŒ Cannot use:
   - Web search
   - External APIs (Stripe, Analytics, etc.)
   - Cloud storage
@@ -111,18 +111,18 @@ When `:confidential-data` is applied:
 ## Compatibility Matrix
 
 ```
-✅ Compatible with:
+âœ… Compatible with:
   - legal-compliance (legal + confidential = fort Knox)
   - pii-strict (overlaps, reinforces)
   - offline-only (confidential + offline = maximum isolation)
   - tool-locked-* (control access to tool)
 
-⚠️  Conflicts with:
+âš ï¸  Conflicts with:
   - None strictly, but:
     - confidential + parallel_agents = impossible (will disable parallelism)
     - confidential + web_search = impossible (will block search)
 
-❌ Incompatible with:
+âŒ Incompatible with:
   - None (confidential data overrides lower-security constraints)
 ```
 
@@ -133,13 +133,13 @@ When `:confidential-data` is applied:
 When confidential-data is active, all network attempts are logged locally (without logging the data):
 
 ```
-❌ Web request blocked: https://api.stripe.com/v1/charges
+âŒ Web request blocked: https://api.stripe.com/v1/charges
    Reason: external_api blocked by confidential-data
    
-❌ Model upload blocked: /cache/model-response-123.json
+âŒ Model upload blocked: /cache/model-response-123.json
    Reason: caching disabled by confidential-data
    
-✅ Local file edit allowed: src/payment.rs
+âœ… Local file edit allowed: src/payment.rs
    Reason: local file (no network, no cache)
 ```
 
@@ -158,18 +158,18 @@ Maria: "Clearing:
         - Browser cache
         - Clipboard
         
-        ✅ Clean"
+        âœ… Clean"
 ```
 
 ### File Operations
 
 ```
-Manual (✅ allowed):
+Manual (âœ… allowed):
   - User edits file directly in editor
   - User selects what to change
   - User confirms before save
 
-Automatic (❌ blocked):
+Automatic (âŒ blocked):
   - Auto-format on save
   - Auto-test after change
   - Auto-commit to git
@@ -261,10 +261,10 @@ mip_profile create secret-project \
   
 # Maria: "Applying confidential-data constraint.
 #         Your settings:
-#         ✅ Logging: OFF
-#         ✅ Caching: OFF
-#         ✅ External APIs: BLOCKED
-#         ✅ Manual mode: ON
+#         âœ… Logging: OFF
+#         âœ… Caching: OFF
+#         âœ… External APIs: BLOCKED
+#         âœ… Manual mode: ON
 #         
 #         Ready for confidential work."
 ```
@@ -288,10 +288,10 @@ User: "Change payment retry logic"
 
 [BEFORE confidential-data]
 1. Agent: "I'll modify payment.rs and run tests"
-   ✅ Changes made
-   ✅ Auto-tests run
-   ✅ Results cached
-   ✅ Changes logged
+   âœ… Changes made
+   âœ… Auto-tests run
+   âœ… Results cached
+   âœ… Changes logged
    [Leak risk: tests might expose amounts, keys]
 
 [AFTER confidential-data]
@@ -308,7 +308,7 @@ User: "Change payment retry logic"
     - Delete temp files
     - Clear clipboard
     - Clear browser cache
-    - ✅ Done
+    - âœ… Done
 ```
 
 ## Configuration Examples
@@ -379,7 +379,7 @@ Time: 15 minutes
 
 ### Issue: "Agent keeps asking for permission"
 
-→ This is expected! Confidential mode is conservative.
+â†’ This is expected! Confidential mode is conservative.
 
 Solution: Trust the agent more by using `confidential-lite`:
 
@@ -393,13 +393,13 @@ confidential_data:
 
 ### Issue: "Can't copy data to clipboard"
 
-→ Intentional (clipboard access blocked).
+â†’ Intentional (clipboard access blocked).
 
 Solution: Use manual file transfer or encrypted USB.
 
 ### Issue: "Task takes 3x longer"
 
-→ Expected due to manual review + testing.
+â†’ Expected due to manual review + testing.
 
 Solution: 
 - Smaller tasks (T1 instead of T4)
@@ -420,14 +420,15 @@ confidential_data:
 ```
 
 Then:
-- ✅ Agent can cache results (encrypted)
-- ❌ But cache expires in 1 hour
-- ✅ Key stored in OS keyring
-- ❌ Key lost on logout
+- âœ… Agent can cache results (encrypted)
+- âŒ But cache expires in 1 hour
+- âœ… Key stored in OS keyring
+- âŒ Key lost on logout
 
 ## References
 
-- [MANAGEMENT.md](./MANAGEMENT.md) — How to apply constraints
-- [CONSTRAINTS.md](./CONSTRAINTS.md) — All constraint types
-- [Offline-only Constraint](./offline-only.md) — Combine for maximum isolation
-- [PII-strict Constraint](./pii-strict.md) — For PII-specific data
+- [MANAGEMENT.md](..//..//README.md) â€” How to apply constraints
+- [CONSTRAINTS.md](..//..//README.md) â€” All constraint types
+- [Offline-only Constraint](./offline-only.md) â€” Combine for maximum isolation
+- [PII-strict Constraint](..//..//README.md) â€” For PII-specific data
+

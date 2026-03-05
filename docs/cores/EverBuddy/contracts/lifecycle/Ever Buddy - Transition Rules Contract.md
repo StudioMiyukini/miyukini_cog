@@ -1,58 +1,58 @@
-# Ever Buddy - Transition Rules Contract
+﻿# Ever Buddy - Transition Rules Contract
 
 ## Contexte
 
-Ce document définit les **règles contractuelles de transition** entre états de cycle de vie dans l'écosystème Miyukini. Il spécifie la matrice des transitions valides, les périodes minimales obligatoires, les conditions de validation, et les règles de documentation associées.
+Ce document dÃ©finit les **rÃ¨gles contractuelles de transition** entre Ã©tats de cycle de vie dans l'Ã©cosystÃ¨me Miyukini. Il spÃ©cifie la matrice des transitions valides, les pÃ©riodes minimales obligatoires, les conditions de validation, et les rÃ¨gles de documentation associÃ©es.
 
-Ce contrat opérationnalise les principes définis dans la [Documentation Fondatrice d'Ever Buddy](../../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md), Section 4 (Concepts fondamentaux).
+Ce contrat opÃ©rationnalise les principes dÃ©finis dans la [Documentation Fondatrice d'Ever Buddy](../../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md), Section 4 (Concepts fondamentaux).
 
-**Référence canonique :** [Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) — définitions des états de vie (DRAFT, ACTIVE, DEPRECATED, RETIRED, ARCHIVED).
+**RÃ©fÃ©rence canonique :** [Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) â€” dÃ©finitions des Ã©tats de vie (DRAFT, ACTIVE, DEPRECATED, RETIRED, ARCHIVED).
 
 ---
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Applicable à :** Toutes les transitions d'état de cycle de vie dans l'écosystème Miyukini
-- **Audience :** Architectes, développeurs, implémenteurs de cores, opérateurs
-- **Statut :** Contrat opérationnel normatif — NON NÉGOCIABLE
+- **Applicable Ã  :** Toutes les transitions d'Ã©tat de cycle de vie dans l'Ã©cosystÃ¨me Miyukini
+- **Audience :** Architectes, dÃ©veloppeurs, implÃ©menteurs de cores, opÃ©rateurs
+- **Statut :** Contrat opÃ©rationnel normatif â€” NON NÃ‰GOCIABLE
 
 ---
 
 ## 1. Matrice des Transitions Valides
 
-### 1.1 Définition
+### 1.1 DÃ©finition
 
-Une **transition** est le passage d'un état de cycle de vie à un autre. Les transitions sont :
-- **Atomiques** : Un élément passe de l'état A à l'état B sans état transitoire (INV-EB-3)
-- **Documentées** : Chaque transition requiert une documentation obligatoire (INV-EB-7)
-- **Validées** : Ever Buddy vérifie que la transition respecte les règles
+Une **transition** est le passage d'un Ã©tat de cycle de vie Ã  un autre. Les transitions sont :
+- **Atomiques** : Un Ã©lÃ©ment passe de l'Ã©tat A Ã  l'Ã©tat B sans Ã©tat transitoire (INV-EB-3)
+- **DocumentÃ©es** : Chaque transition requiert une documentation obligatoire (INV-EB-7)
+- **ValidÃ©es** : Ever Buddy vÃ©rifie que la transition respecte les rÃ¨gles
 
-### 1.2 Matrice Complète
+### 1.2 Matrice ComplÃ¨te
 
 | Depuis \ Vers | DRAFT | ACTIVE | DEPRECATED | RETIRED | ARCHIVED |
 |---------------|-------|--------|------------|---------|----------|
-| **DRAFT**     | —     | ✓      | ✗          | ✗       | ✓        |
-| **ACTIVE**    | ✗     | —      | ✓          | ✗       | ✗        |
-| **DEPRECATED**| ✗     | ✓*     | —          | ✓       | ✗        |
-| **RETIRED**   | ✗     | ✗      | ✗          | —       | ✓        |
-| **ARCHIVED**  | ✗     | ✗      | ✗          | ✗       | —        |
+| **DRAFT**     | â€”     | âœ“      | âœ—          | âœ—       | âœ“        |
+| **ACTIVE**    | âœ—     | â€”      | âœ“          | âœ—       | âœ—        |
+| **DEPRECATED**| âœ—     | âœ“*     | â€”          | âœ“       | âœ—        |
+| **RETIRED**   | âœ—     | âœ—      | âœ—          | â€”       | âœ“        |
+| **ARCHIVED**  | âœ—     | âœ—      | âœ—          | âœ—       | â€”        |
 
-**Légende :**
-- ✓ = Transition valide
-- ✗ = Transition invalide (structurellement interdite)
-- ✓* = Transition conditionnelle (voir Section 2.3)
-- — = Non applicable (même état)
+**LÃ©gende :**
+- âœ“ = Transition valide
+- âœ— = Transition invalide (structurellement interdite)
+- âœ“* = Transition conditionnelle (voir Section 2.3)
+- â€” = Non applicable (mÃªme Ã©tat)
 
-### 1.3 Transitions Valides Détaillées
+### 1.3 Transitions Valides DÃ©taillÃ©es
 
 | Code | Transition | Description | Condition |
 |------|------------|-------------|-----------|
-| **T-DA** | DRAFT → ACTIVE | Activation | Élément prêt pour production |
-| **T-DAR** | DRAFT → ARCHIVED | Abandon précoce | Élément abandonné avant activation |
-| **T-AD** | ACTIVE → DEPRECATED | Dépréciation | Successeur identifié ou abandon décidé |
-| **T-DE** | DEPRECATED → ACTIVE | Réactivation* | Successeur annulé, élément fonctionnel |
-| **T-DR** | DEPRECATED → RETIRED | Retirement | Période de dépréciation écoulée |
-| **T-RA** | RETIRED → ARCHIVED | Archivage | Période de grâce écoulée |
+| **T-DA** | DRAFT â†’ ACTIVE | Activation | Ã‰lÃ©ment prÃªt pour production |
+| **T-DAR** | DRAFT â†’ ARCHIVED | Abandon prÃ©coce | Ã‰lÃ©ment abandonnÃ© avant activation |
+| **T-AD** | ACTIVE â†’ DEPRECATED | DÃ©prÃ©ciation | Successeur identifiÃ© ou abandon dÃ©cidÃ© |
+| **T-DE** | DEPRECATED â†’ ACTIVE | RÃ©activation* | Successeur annulÃ©, Ã©lÃ©ment fonctionnel |
+| **T-DR** | DEPRECATED â†’ RETIRED | Retirement | PÃ©riode de dÃ©prÃ©ciation Ã©coulÃ©e |
+| **T-RA** | RETIRED â†’ ARCHIVED | Archivage | PÃ©riode de grÃ¢ce Ã©coulÃ©e |
 
 ### 1.4 Transitions Interdites (Exhaustif)
 
@@ -60,135 +60,135 @@ Les transitions suivantes sont **structurellement interdites** :
 
 | Transition | Raison de l'interdiction |
 |------------|-------------------------|
-| DRAFT → DEPRECATED | Un élément non activé ne peut être déprécié |
-| DRAFT → RETIRED | Un élément non activé ne peut être retiré |
-| ACTIVE → DRAFT | Régression interdite — pas de retour en brouillon |
-| ACTIVE → RETIRED | **Passage obligatoire par DEPRECATED** (INV-EB-4) |
-| ACTIVE → ARCHIVED | Séquence obligatoire : ACTIVE → DEPRECATED → RETIRED → ARCHIVED |
-| DEPRECATED → DRAFT | Régression interdite |
-| DEPRECATED → ARCHIVED | Passage obligatoire par RETIRED |
-| RETIRED → DRAFT | Réactivation interdite après retirement |
-| RETIRED → ACTIVE | Réactivation interdite après retirement |
-| RETIRED → DEPRECATED | Régression interdite |
-| ARCHIVED → * | **Aucune sortie possible** — état terminal absolu |
+| DRAFT â†’ DEPRECATED | Un Ã©lÃ©ment non activÃ© ne peut Ãªtre dÃ©prÃ©ciÃ© |
+| DRAFT â†’ RETIRED | Un Ã©lÃ©ment non activÃ© ne peut Ãªtre retirÃ© |
+| ACTIVE â†’ DRAFT | RÃ©gression interdite â€” pas de retour en brouillon |
+| ACTIVE â†’ RETIRED | **Passage obligatoire par DEPRECATED** (INV-EB-4) |
+| ACTIVE â†’ ARCHIVED | SÃ©quence obligatoire : ACTIVE â†’ DEPRECATED â†’ RETIRED â†’ ARCHIVED |
+| DEPRECATED â†’ DRAFT | RÃ©gression interdite |
+| DEPRECATED â†’ ARCHIVED | Passage obligatoire par RETIRED |
+| RETIRED â†’ DRAFT | RÃ©activation interdite aprÃ¨s retirement |
+| RETIRED â†’ ACTIVE | RÃ©activation interdite aprÃ¨s retirement |
+| RETIRED â†’ DEPRECATED | RÃ©gression interdite |
+| ARCHIVED â†’ * | **Aucune sortie possible** â€” Ã©tat terminal absolu |
 
 ---
 
-## 2. Règles de Transition
+## 2. RÃ¨gles de Transition
 
-### 2.1 Règle Fondamentale : Passage Obligatoire par DEPRECATED (INV-EB-4)
+### 2.1 RÃ¨gle Fondamentale : Passage Obligatoire par DEPRECATED (INV-EB-4)
 
-> **Aucun élément ACTIVE ne peut passer directement à RETIRED ou ARCHIVED.**
+> **Aucun Ã©lÃ©ment ACTIVE ne peut passer directement Ã  RETIRED ou ARCHIVED.**
 
-La transition par DEPRECATED est **obligatoire** sans exception. Cette règle protège les consommateurs contre les ruptures brutales.
+La transition par DEPRECATED est **obligatoire** sans exception. Cette rÃ¨gle protÃ¨ge les consommateurs contre les ruptures brutales.
 
-**Séquence obligatoire pour fin de vie :**
+**SÃ©quence obligatoire pour fin de vie :**
 
 ```
-ACTIVE → DEPRECATED → RETIRED → ARCHIVED
+ACTIVE â†’ DEPRECATED â†’ RETIRED â†’ ARCHIVED
 ```
 
-**Violation :** Toute tentative de contournement est rejetée par Ever Buddy.
+**Violation :** Toute tentative de contournement est rejetÃ©e par Ever Buddy.
 
-### 2.2 Règle d'Atomicité des Transitions (INV-EB-3)
+### 2.2 RÃ¨gle d'AtomicitÃ© des Transitions (INV-EB-3)
 
-Chaque élément possède **exactement un** état de cycle de vie à tout moment.
+Chaque Ã©lÃ©ment possÃ¨de **exactement un** Ã©tat de cycle de vie Ã  tout moment.
 
-- ❌ Pas d'état intermédiaire
-- ❌ Pas d'état incertain
-- ❌ Pas d'état non défini
-- ✓ Transitions atomiques uniquement
+- âŒ Pas d'Ã©tat intermÃ©diaire
+- âŒ Pas d'Ã©tat incertain
+- âŒ Pas d'Ã©tat non dÃ©fini
+- âœ“ Transitions atomiques uniquement
 
-### 2.3 Règle de Réactivation Conditionnelle (DEPRECATED → ACTIVE)
+### 2.3 RÃ¨gle de RÃ©activation Conditionnelle (DEPRECATED â†’ ACTIVE)
 
-La transition DEPRECATED → ACTIVE est **conditionnelle**. Elle n'est autorisée que si :
+La transition DEPRECATED â†’ ACTIVE est **conditionnelle**. Elle n'est autorisÃ©e que si :
 
 | Condition | Obligatoire |
 |-----------|-------------|
-| Le successeur prévu est annulé | ✓ |
-| L'élément déprécié est encore fonctionnel | ✓ |
-| La décision de réactivation est documentée avec justification | ✓ |
-| L'historique conserve la trace de la dépréciation temporaire | ✓ |
+| Le successeur prÃ©vu est annulÃ© | âœ“ |
+| L'Ã©lÃ©ment dÃ©prÃ©ciÃ© est encore fonctionnel | âœ“ |
+| La dÃ©cision de rÃ©activation est documentÃ©e avec justification | âœ“ |
+| L'historique conserve la trace de la dÃ©prÃ©ciation temporaire | âœ“ |
 
-**Scénario typique :** Le développement du successeur échoue ou est abandonné, nécessitant le maintien de l'élément déprécié.
+**ScÃ©nario typique :** Le dÃ©veloppement du successeur Ã©choue ou est abandonnÃ©, nÃ©cessitant le maintien de l'Ã©lÃ©ment dÃ©prÃ©ciÃ©.
 
-### 2.4 Règle de Prédictibilité (INV-EB-9)
+### 2.4 RÃ¨gle de PrÃ©dictibilitÃ© (INV-EB-9)
 
-Les règles de transition sont **publiques et stables**.
+Les rÃ¨gles de transition sont **publiques et stables**.
 
 | Garantie | Description |
 |----------|-------------|
-| Transparence | Tout consommateur peut connaître à l'avance les conditions de transition |
-| Stabilité | Les règles ne changent pas fréquemment |
-| Non-rétroactivité | Aucune règle ne peut être modifiée rétroactivement (INV-EB-11) |
+| Transparence | Tout consommateur peut connaÃ®tre Ã  l'avance les conditions de transition |
+| StabilitÃ© | Les rÃ¨gles ne changent pas frÃ©quemment |
+| Non-rÃ©troactivitÃ© | Aucune rÃ¨gle ne peut Ãªtre modifiÃ©e rÃ©troactivement (INV-EB-11) |
 
-### 2.5 Règle de Non-Rétroactivité (INV-EB-11)
+### 2.5 RÃ¨gle de Non-RÃ©troactivitÃ© (INV-EB-11)
 
-Les règles d'évolution s'appliquent aux transitions **futures** uniquement.
+Les rÃ¨gles d'Ã©volution s'appliquent aux transitions **futures** uniquement.
 
-- Un changement de règle ne modifie pas le statut d'éléments déjà en transition
-- Les transitions en cours continuent selon les règles initiales
-- Cette règle protège les transitions en cours de complétion
+- Un changement de rÃ¨gle ne modifie pas le statut d'Ã©lÃ©ments dÃ©jÃ  en transition
+- Les transitions en cours continuent selon les rÃ¨gles initiales
+- Cette rÃ¨gle protÃ¨ge les transitions en cours de complÃ©tion
 
 ---
 
-## 3. Périodes Minimales de Transition
+## 3. PÃ©riodes Minimales de Transition
 
-### 3.1 Définition
+### 3.1 DÃ©finition
 
-Chaque type de transition possède une **période minimale non négociable**. Ces périodes sont des **minimums absolus** — Ever Buddy peut recommander des périodes plus longues selon l'impact et l'adoption.
+Chaque type de transition possÃ¨de une **pÃ©riode minimale non nÃ©gociable**. Ces pÃ©riodes sont des **minimums absolus** â€” Ever Buddy peut recommander des pÃ©riodes plus longues selon l'impact et l'adoption.
 
-### 3.2 Tableau des Périodes Minimales
+### 3.2 Tableau des PÃ©riodes Minimales
 
-| Transition | Période Minimale | Notes |
+| Transition | PÃ©riode Minimale | Notes |
 |------------|------------------|-------|
-| **DRAFT → ACTIVE** | Aucune | Activation immédiate possible |
-| **ACTIVE → DEPRECATED** | 1 cycle de release | Communication préalable obligatoire |
-| **DEPRECATED → RETIRED** | Définie par catégorie | Voir Section 3.3 |
-| **RETIRED → ARCHIVED** | Période de grâce | Pour consommateurs existants |
-| **DRAFT → ARCHIVED** | Aucune | Abandon immédiat possible |
-| **DEPRECATED → ACTIVE** | Aucune | Réactivation immédiate si conditions remplies |
+| **DRAFT â†’ ACTIVE** | Aucune | Activation immÃ©diate possible |
+| **ACTIVE â†’ DEPRECATED** | 1 cycle de release | Communication prÃ©alable obligatoire |
+| **DEPRECATED â†’ RETIRED** | DÃ©finie par catÃ©gorie | Voir Section 3.3 |
+| **RETIRED â†’ ARCHIVED** | PÃ©riode de grÃ¢ce | Pour consommateurs existants |
+| **DRAFT â†’ ARCHIVED** | Aucune | Abandon immÃ©diat possible |
+| **DEPRECATED â†’ ACTIVE** | Aucune | RÃ©activation immÃ©diate si conditions remplies |
 
-### 3.3 Périodes par Catégorie d'Élément
+### 3.3 PÃ©riodes par CatÃ©gorie d'Ã‰lÃ©ment
 
-Les périodes de dépréciation (DEPRECATED → RETIRED) varient selon la catégorie :
+Les pÃ©riodes de dÃ©prÃ©ciation (DEPRECATED â†’ RETIRED) varient selon la catÃ©gorie :
 
-| Catégorie | Description | Période Minimale | Ruptures |
+| CatÃ©gorie | Description | PÃ©riode Minimale | Ruptures |
 |-----------|-------------|------------------|----------|
-| **Contrats Fondateurs (FONDATION)** | Documents contractuels non négociables | Très longue (plusieurs générations) | Quasiment interdites |
-| **Contrats Opérationnels** | Contrats de fonctionnement standard | Standard (plusieurs cycles) | Possibles avec justification |
+| **Contrats Fondateurs (FONDATION)** | Documents contractuels non nÃ©gociables | TrÃ¨s longue (plusieurs gÃ©nÃ©rations) | Quasiment interdites |
+| **Contrats OpÃ©rationnels** | Contrats de fonctionnement standard | Standard (plusieurs cycles) | Possibles avec justification |
 | **Interfaces Techniques** | APIs, surfaces d'appel | Courte (quelques cycles) | Possibles avec documentation |
-| **Éléments Internes** | Composants internes non exposés | Aucune garantie | Sans préavis autorisées |
+| **Ã‰lÃ©ments Internes** | Composants internes non exposÃ©s | Aucune garantie | Sans prÃ©avis autorisÃ©es |
 
 ### 3.4 Facteurs d'Extension
 
-Ever Buddy peut recommander des périodes **plus longues** que les minimums selon :
+Ever Buddy peut recommander des pÃ©riodes **plus longues** que les minimums selon :
 
 | Facteur | Impact |
 |---------|--------|
-| Nombre de consommateurs | Plus de consommateurs = période plus longue |
-| Criticité de l'élément | Élément critique = période plus longue |
-| Complexité de migration | Migration complexe = période plus longue |
-| Taux d'adoption du successeur | Adoption lente = période plus longue |
+| Nombre de consommateurs | Plus de consommateurs = pÃ©riode plus longue |
+| CriticitÃ© de l'Ã©lÃ©ment | Ã‰lÃ©ment critique = pÃ©riode plus longue |
+| ComplexitÃ© de migration | Migration complexe = pÃ©riode plus longue |
+| Taux d'adoption du successeur | Adoption lente = pÃ©riode plus longue |
 
-### 3.5 Période de Grâce
+### 3.5 PÃ©riode de GrÃ¢ce
 
-La **période de grâce** est le temps supplémentaire accordé après la date prévue de retirement.
+La **pÃ©riode de grÃ¢ce** est le temps supplÃ©mentaire accordÃ© aprÃ¨s la date prÃ©vue de retirement.
 
-| Caractéristique | Description |
+| CaractÃ©ristique | Description |
 |-----------------|-------------|
-| Déclenchement | Après période de retirement standard |
+| DÃ©clenchement | AprÃ¨s pÃ©riode de retirement standard |
 | But | Permettre aux consommateurs retardataires de migrer |
-| Attribution | Au cas par cas, sur demande justifiée |
-| Durée | Variable selon la situation |
+| Attribution | Au cas par cas, sur demande justifiÃ©e |
+| DurÃ©e | Variable selon la situation |
 
 ---
 
 ## 4. Documentation Obligatoire des Transitions (INV-EB-7)
 
-### 4.1 Règle Fondamentale
+### 4.1 RÃ¨gle Fondamentale
 
-> **Toute transition d'état doit être documentée. Une transition sans documentation est invalide.**
+> **Toute transition d'Ã©tat doit Ãªtre documentÃ©e. Une transition sans documentation est invalide.**
 
 ### 4.2 Contenu Obligatoire
 
@@ -196,24 +196,24 @@ Chaque transition DOIT inclure :
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `transition_id` | Identifiant unique de la transition | ✓ |
-| `element_id` | Identifiant de l'élément concerné | ✓ |
-| `from_state` | État de départ | ✓ |
-| `to_state` | État d'arrivée | ✓ |
-| `reason` | Raison de la transition | ✓ |
-| `impact` | Impact sur les consommateurs | ✓ |
+| `transition_id` | Identifiant unique de la transition | âœ“ |
+| `element_id` | Identifiant de l'Ã©lÃ©ment concernÃ© | âœ“ |
+| `from_state` | Ã‰tat de dÃ©part | âœ“ |
+| `to_state` | Ã‰tat d'arrivÃ©e | âœ“ |
+| `reason` | Raison de la transition | âœ“ |
+| `impact` | Impact sur les consommateurs | âœ“ |
 | `migration_path` | Chemin de migration (si applicable) | Conditionnel |
-| `effective_date` | Date effective de la transition | ✓ |
-| `requested_by` | Demandeur de la transition | ✓ |
-| `validated_by` | Validateur (Ever Buddy) | ✓ |
+| `effective_date` | Date effective de la transition | âœ“ |
+| `requested_by` | Demandeur de la transition | âœ“ |
+| `validated_by` | Validateur (Ever Buddy) | âœ“ |
 
 ### 4.3 Documentation Additionnelle par Type de Transition
 
 | Transition | Documentation Additionnelle |
 |------------|----------------------------|
-| ACTIVE → DEPRECATED | Successeur identifié, période de dépréciation prévue |
-| DEPRECATED → RETIRED | Taux d'adoption du successeur, consommateurs non migrés |
-| DEPRECATED → ACTIVE | Justification de réactivation, statut du successeur annulé |
+| ACTIVE â†’ DEPRECATED | Successeur identifiÃ©, pÃ©riode de dÃ©prÃ©ciation prÃ©vue |
+| DEPRECATED â†’ RETIRED | Taux d'adoption du successeur, consommateurs non migrÃ©s |
+| DEPRECATED â†’ ACTIVE | Justification de rÃ©activation, statut du successeur annulÃ© |
 
 ---
 
@@ -221,71 +221,71 @@ Chaque transition DOIT inclure :
 
 ### 5.1 Processus de Validation
 
-1. **Demande** : Un core ou produit demande une transition d'état
-2. **Vérification** : Ever Buddy vérifie que la transition est valide selon ce contrat
-3. **Documentation** : Ever Buddy vérifie que la documentation est complète
-4. **Enregistrement** : Si valide, la transition est enregistrée dans l'historique immuable
-5. **Communication** : Ever Buddy communique la transition aux consommateurs concernés
+1. **Demande** : Un core ou produit demande une transition d'Ã©tat
+2. **VÃ©rification** : Ever Buddy vÃ©rifie que la transition est valide selon ce contrat
+3. **Documentation** : Ever Buddy vÃ©rifie que la documentation est complÃ¨te
+4. **Enregistrement** : Si valide, la transition est enregistrÃ©e dans l'historique immuable
+5. **Communication** : Ever Buddy communique la transition aux consommateurs concernÃ©s
 
-### 5.2 Critères de Rejet
+### 5.2 CritÃ¨res de Rejet
 
-Une transition est **rejetée** si :
+Une transition est **rejetÃ©e** si :
 
-| Critère | Description |
+| CritÃ¨re | Description |
 |---------|-------------|
 | Transition invalide | La transition n'est pas dans la matrice des transitions valides |
-| Documentation incomplète | Un champ obligatoire est manquant |
-| Période non respectée | La période minimale n'est pas écoulée |
-| Condition non remplie | Pour les transitions conditionnelles (ex: réactivation) |
+| Documentation incomplÃ¨te | Un champ obligatoire est manquant |
+| PÃ©riode non respectÃ©e | La pÃ©riode minimale n'est pas Ã©coulÃ©e |
+| Condition non remplie | Pour les transitions conditionnelles (ex: rÃ©activation) |
 
 ### 5.3 Message de Rejet
 
 En cas de rejet, Ever Buddy fournit :
 
-- Le code de la transition tentée
+- Le code de la transition tentÃ©e
 - La raison du rejet
-- Les conditions à remplir pour que la transition soit acceptée
-- La référence à ce contrat
+- Les conditions Ã  remplir pour que la transition soit acceptÃ©e
+- La rÃ©fÃ©rence Ã  ce contrat
 
 ---
 
 ## 6. Invariants Applicables
 
-Ce contrat opérationnalise les invariants suivants de la Documentation Fondatrice :
+Ce contrat opÃ©rationnalise les invariants suivants de la Documentation Fondatrice :
 
-| Invariant | Énoncé | Application |
+| Invariant | Ã‰noncÃ© | Application |
 |-----------|--------|-------------|
-| **INV-EB-3** | Aucun état ambigu | Transitions atomiques, un seul état à tout moment |
-| **INV-EB-4** | Période de dépréciation obligatoire | Passage obligatoire par DEPRECATED |
-| **INV-EB-7** | Documentation obligatoire | Chaque transition doit être documentée |
-| **INV-EB-9** | Prédictibilité des transitions | Règles publiques et stables |
-| **INV-EB-11** | Non-rétroactivité | Règles appliquées aux transitions futures |
+| **INV-EB-3** | Aucun Ã©tat ambigu | Transitions atomiques, un seul Ã©tat Ã  tout moment |
+| **INV-EB-4** | PÃ©riode de dÃ©prÃ©ciation obligatoire | Passage obligatoire par DEPRECATED |
+| **INV-EB-7** | Documentation obligatoire | Chaque transition doit Ãªtre documentÃ©e |
+| **INV-EB-9** | PrÃ©dictibilitÃ© des transitions | RÃ¨gles publiques et stables |
+| **INV-EB-11** | Non-rÃ©troactivitÃ© | RÃ¨gles appliquÃ©es aux transitions futures |
 
 ---
 
-## 7. Conformité aux Lois d'Autonomie
+## 7. ConformitÃ© aux Lois d'Autonomie
 
-Ce contrat est conforme aux [Lois d'Autonomie Système](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) :
+Ce contrat est conforme aux [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md) :
 
-| Loi | Conformité | Mécanisme |
+| Loi | ConformitÃ© | MÃ©canisme |
 |-----|------------|-----------|
-| **LOI-1** | ✅ | Validation locale des transitions, pas de dépendance externe |
-| **LOI-2** | ✅ | Transitions validées en mode isolé |
-| **LOI-3** | ✅ | Historique des transitions souverain localement |
-| **LOI-4** | ✅ | Périodes définies en cycles, pas en temps absolu |
+| **LOI-1** | âœ… | Validation locale des transitions, pas de dÃ©pendance externe |
+| **LOI-2** | âœ… | Transitions validÃ©es en mode isolÃ© |
+| **LOI-3** | âœ… | Historique des transitions souverain localement |
+| **LOI-4** | âœ… | PÃ©riodes dÃ©finies en cycles, pas en temps absolu |
 
 ---
 
 ## 8. Exemples de Transitions
 
-### 8.1 Transition Standard : ACTIVE → DEPRECATED
+### 8.1 Transition Standard : ACTIVE â†’ DEPRECATED
 
 ```yaml
 transition_id: "TR-2026-001"
 element_id: "API-USER-V2"
 from_state: "ACTIVE"
 to_state: "DEPRECATED"
-reason: "Nouvelle version V3 disponible avec améliorations de performance"
+reason: "Nouvelle version V3 disponible avec amÃ©liorations de performance"
 impact: "Les consommateurs doivent migrer vers API-USER-V3"
 migration_path: "Guide de migration disponible dans docs/migration/user-api-v2-to-v3.md"
 effective_date: "2026-02-01"
@@ -295,15 +295,15 @@ requested_by: "Core-Architecture"
 validated_by: "Ever Buddy"
 ```
 
-### 8.2 Transition Conditionnelle : DEPRECATED → ACTIVE (Réactivation)
+### 8.2 Transition Conditionnelle : DEPRECATED â†’ ACTIVE (RÃ©activation)
 
 ```yaml
 transition_id: "TR-2026-002"
 element_id: "API-USER-V2"
 from_state: "DEPRECATED"
 to_state: "ACTIVE"
-reason: "Développement du successeur V3 annulé - ressources insuffisantes"
-impact: "API V2 redevient la version supportée"
+reason: "DÃ©veloppement du successeur V3 annulÃ© - ressources insuffisantes"
+impact: "API V2 redevient la version supportÃ©e"
 successor_cancelled: true
 successor_id: "API-USER-V3"
 successor_cancellation_reason: "Contraintes techniques insurmontables"
@@ -315,38 +315,39 @@ validated_by: "Ever Buddy"
 
 ---
 
-## 9. Mini log de génération
+## 9. Mini log de gÃ©nÃ©ration
 
-### Décision D1 : Exhaustivité des transitions interdites
+### DÃ©cision D1 : ExhaustivitÃ© des transitions interdites
 
-**Contexte :** Nécessité de documenter explicitement toutes les transitions interdites, pas seulement celles mentionnées dans la Documentation Fondatrice.
+**Contexte :** NÃ©cessitÃ© de documenter explicitement toutes les transitions interdites, pas seulement celles mentionnÃ©es dans la Documentation Fondatrice.
 
-**Décision :** Lister exhaustivement les 11 transitions interdites avec leur raison.
+**DÃ©cision :** Lister exhaustivement les 11 transitions interdites avec leur raison.
 
-**Justification :** La clarté et la prédictibilité (INV-EB-9) exigent que les interdictions soient explicites, pas implicites.
+**Justification :** La clartÃ© et la prÃ©dictibilitÃ© (INV-EB-9) exigent que les interdictions soient explicites, pas implicites.
 
-### Décision D2 : Format de documentation des transitions
+### DÃ©cision D2 : Format de documentation des transitions
 
-**Contexte :** La Documentation Fondatrice mentionne l'obligation de documentation (INV-EB-7) mais ne définit pas de format.
+**Contexte :** La Documentation Fondatrice mentionne l'obligation de documentation (INV-EB-7) mais ne dÃ©finit pas de format.
 
-**Décision :** Définir un format structuré avec champs obligatoires.
+**DÃ©cision :** DÃ©finir un format structurÃ© avec champs obligatoires.
 
-**Justification :** Un format normalisé facilite la validation automatique et l'audit.
+**Justification :** Un format normalisÃ© facilite la validation automatique et l'audit.
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-**Vérifications effectuées :**
-- ✅ Cohérence avec la matrice de la Documentation Fondatrice (Section 4)
-- ✅ Cohérence avec les invariants INV-EB-3, INV-EB-4, INV-EB-7, INV-EB-9, INV-EB-11
-- ✅ Cohérence avec les catégories d'éléments définies dans la Documentation Fondatrice
-- ✅ Conformité aux Lois d'Autonomie Système
+**VÃ©rifications effectuÃ©es :**
+- âœ… CohÃ©rence avec la matrice de la Documentation Fondatrice (Section 4)
+- âœ… CohÃ©rence avec les invariants INV-EB-3, INV-EB-4, INV-EB-7, INV-EB-9, INV-EB-11
+- âœ… CohÃ©rence avec les catÃ©gories d'Ã©lÃ©ments dÃ©finies dans la Documentation Fondatrice
+- âœ… ConformitÃ© aux Lois d'Autonomie SystÃ¨me
 
-**Conclusion :** Aucune contradiction détectée avec la Documentation Fondatrice.
+**Conclusion :** Aucune contradiction dÃ©tectÃ©e avec la Documentation Fondatrice.
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-27  
-**Statut :** Contrat opérationnel — Normatif  
-**Référence :** [Ever Buddy - Documentation Fondatrice](../../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md) Section 4  
+**Statut :** Contrat opÃ©rationnel â€” Normatif  
+**RÃ©fÃ©rence :** [Ever Buddy - Documentation Fondatrice](../../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md) Section 4  
 **Type :** Contrat de cycle de vie
+

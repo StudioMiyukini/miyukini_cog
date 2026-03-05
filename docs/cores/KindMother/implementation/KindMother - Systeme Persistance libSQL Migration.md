@@ -1,33 +1,33 @@
-# KindMother — Système de Persistance libSQL et Guide de Migration
+﻿# KindMother â€” SystÃ¨me de Persistance libSQL et Guide de Migration
 
 ## 1. Introduction
 
 ### Objet du document
 
-Ce document décrit le **système de persistance sécurisé KindMother** basé sur libSQL avec chiffrement natif, ainsi que le **guide de migration** depuis l'implémentation rusqlite actuelle.
+Ce document dÃ©crit le **systÃ¨me de persistance sÃ©curisÃ© KindMother** basÃ© sur libSQL avec chiffrement natif, ainsi que le **guide de migration** depuis l'implÃ©mentation rusqlite actuelle.
 
 ### Contexte
 
-L'architecture Miyukini COG requiert que KindMother soit le **seul gardien légitime** des données persistées. Pour garantir cette gouvernance de manière technique (et non juste conceptuelle), nous migrons vers :
+L'architecture Miyukini COG requiert que KindMother soit le **seul gardien lÃ©gitime** des donnÃ©es persistÃ©es. Pour garantir cette gouvernance de maniÃ¨re technique (et non juste conceptuelle), nous migrons vers :
 
 1. **libSQL** : Fork de SQLite avec chiffrement natif
-2. **Architecture en processus isolé** : KindMother s'exécute dans un processus séparé
-3. **Communication IPC** : Les Opérateurs communiquent via API authentifiée
+2. **Architecture en processus isolÃ©** : KindMother s'exÃ©cute dans un processus sÃ©parÃ©
+3. **Communication IPC** : Les OpÃ©rateurs communiquent via API authentifiÃ©e
 
-### Portée
+### PortÃ©e
 
 Ce document couvre :
-- Description technique du système libSQL
-- Procédure de migration depuis rusqlite
+- Description technique du systÃ¨me libSQL
+- ProcÃ©dure de migration depuis rusqlite
 - Configuration du chiffrement
-- Déploiement du service isolé
+- DÃ©ploiement du service isolÃ©
 - Troubleshooting
 
-### Prérequis
+### PrÃ©requis
 
 - Rust 1.75+ avec toolchain stable
-- Compréhension de l'architecture COG (voir [Architecture Miyukini](../../../reference/Miyukini%20Conceptual%20References%20-%20Pyramide%20Architecture%20Complete.md))
-- Lecture préalable : [Security - Gouvernance Cores Protection Donnees](../../../security/foundation/Security%20-%20Gouvernance%20Cores%20Protection%20Donnees.md)
+- ComprÃ©hension de l'architecture COG (voir [Architecture Miyukini](..//..//..//miyukini-webway-system//reference//_index.md))
+- Lecture prÃ©alable : [Security - Gouvernance Cores Protection Donnees](..//..//WorrySentinel//_index.md)
 
 ---
 
@@ -36,56 +36,56 @@ Ce document couvre :
 ### 2.1 Vue d'ensemble
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        SYSTÈME KINDMOTHER libSQL                            │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────────────────────────┐    ┌─────────────────────────────────┐ │
-│  │       CRATE PRINCIPAL           │    │     KINDMOTHER-SERVICE          │ │
-│  │                                 │    │                                 │ │
-│  │  ┌───────────────────────────┐  │    │  ┌───────────────────────────┐  │ │
-│  │  │    jayxpose / jaykonta    │  │    │  │     gRPC Server           │  │ │
-│  │  │    (Opérateurs)           │  │    │  │     (tonic)               │  │ │
-│  │  └─────────────┬─────────────┘  │    │  └─────────────┬─────────────┘  │ │
-│  │                │                │    │                │               │ │
-│  │  ┌─────────────▼─────────────┐  │    │  ┌─────────────▼─────────────┐  │ │
-│  │  │   kindmother-client       │  │    │  │    Auth Layer             │  │ │
-│  │  │   (impl Storage trait)    │──┼────┼──│    (token validation)     │  │ │
-│  │  └───────────────────────────┘  │    │  └─────────────┬─────────────┘  │ │
-│  │                                 │    │                │               │ │
-│  └─────────────────────────────────┘    │  ┌─────────────▼─────────────┐  │ │
-│                                         │  │   Permissions Layer       │  │ │
-│                                         │  │   (matrice opérateur)     │  │ │
-│                                         │  └─────────────┬─────────────┘  │ │
-│                                         │                │               │ │
-│                                         │  ┌─────────────▼─────────────┐  │ │
-│                                         │  │   libSQL Engine           │  │ │
-│                                         │  │   + EncryptionConfig      │  │ │
-│                                         │  └─────────────┬─────────────┘  │ │
-│                                         │                │               │ │
-│                                         │  ┌─────────────▼─────────────┐  │ │
-│                                         │  │   *.db (chiffrés AES-256) │  │ │
-│                                         │  │   Permissions: 600        │  │ │
-│                                         │  └───────────────────────────┘  │ │
-│                                         │                                 │ │
-│                                         └─────────────────────────────────┘ │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                        SYSTÃˆME KINDMOTHER libSQL                            â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                             â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚       CRATE PRINCIPAL           â”‚    â”‚     KINDMOTHER-SERVICE          â”‚ â”‚
+â”‚  â”‚                                 â”‚    â”‚                                 â”‚ â”‚
+â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚    â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚ â”‚
+â”‚  â”‚  â”‚    jayxpose / jaykonta    â”‚  â”‚    â”‚  â”‚     gRPC Server           â”‚  â”‚ â”‚
+â”‚  â”‚  â”‚    (OpÃ©rateurs)           â”‚  â”‚    â”‚  â”‚     (tonic)               â”‚  â”‚ â”‚
+â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚    â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚ â”‚
+â”‚  â”‚                â”‚                â”‚    â”‚                â”‚               â”‚ â”‚
+â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚    â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚ â”‚
+â”‚  â”‚  â”‚   kindmother-client       â”‚  â”‚    â”‚  â”‚    Auth Layer             â”‚  â”‚ â”‚
+â”‚  â”‚  â”‚   (impl Storage trait)    â”‚â”€â”€â”¼â”€â”€â”€â”€â”¼â”€â”€â”‚    (token validation)     â”‚  â”‚ â”‚
+â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚    â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚ â”‚
+â”‚  â”‚                                 â”‚    â”‚                â”‚               â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚ â”‚
+â”‚                                         â”‚  â”‚   Permissions Layer       â”‚  â”‚ â”‚
+â”‚                                         â”‚  â”‚   (matrice opÃ©rateur)     â”‚  â”‚ â”‚
+â”‚                                         â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚ â”‚
+â”‚                                         â”‚                â”‚               â”‚ â”‚
+â”‚                                         â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚ â”‚
+â”‚                                         â”‚  â”‚   libSQL Engine           â”‚  â”‚ â”‚
+â”‚                                         â”‚  â”‚   + EncryptionConfig      â”‚  â”‚ â”‚
+â”‚                                         â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚ â”‚
+â”‚                                         â”‚                â”‚               â”‚ â”‚
+â”‚                                         â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚ â”‚
+â”‚                                         â”‚  â”‚   *.db (chiffrÃ©s AES-256) â”‚  â”‚ â”‚
+â”‚                                         â”‚  â”‚   Permissions: 600        â”‚  â”‚ â”‚
+â”‚                                         â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚ â”‚
+â”‚                                         â”‚                                 â”‚ â”‚
+â”‚                                         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 2.2 Composants
 
-| Crate | Rôle | Dépendances |
+| Crate | RÃ´le | DÃ©pendances |
 |-------|------|-------------|
-| `kindmother` | API publique, trait Storage | (inchangé) |
-| `kindmother-client` | Client IPC pour Opérateurs | tonic, prost |
-| `kindmother-service` | Processus isolé avec libSQL | libsql, tonic, argon2 |
+| `kindmother` | API publique, trait Storage | (inchangÃ©) |
+| `kindmother-client` | Client IPC pour OpÃ©rateurs | tonic, prost |
+| `kindmother-service` | Processus isolÃ© avec libSQL | libsql, tonic, argon2 |
 
 ---
 
 ## 3. Configuration libSQL
 
-### 3.1 Dépendances Cargo
+### 3.1 DÃ©pendances Cargo
 
 **Pour kindmother-service/Cargo.toml :**
 
@@ -96,14 +96,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# Base de données avec chiffrement
+# Base de donnÃ©es avec chiffrement
 libsql = { version = "0.9", features = ["core", "encryption"] }
 
 # Serveur IPC
 tonic = "0.12"
 prost = "0.13"
 
-# Dérivation de clé
+# DÃ©rivation de clÃ©
 argon2 = "0.5"
 zeroize = "1.7"
 
@@ -149,20 +149,20 @@ tokio = { version = "1.40", features = ["rt-multi-thread"] }
 rusqlite = { version = "0.32", features = ["bundled"] }
 ```
 
-**Après (crates utilisant kindmother-client) :**
+**AprÃ¨s (crates utilisant kindmother-client) :**
 
 ```toml
-# jayxpose/Cargo.toml - APRÈS
+# jayxpose/Cargo.toml - APRÃˆS
 [dependencies]
 kindmother-client = { path = "../kindmother-client" }
-# rusqlite SUPPRIMÉ - accès uniquement via KindMother
+# rusqlite SUPPRIMÃ‰ - accÃ¨s uniquement via KindMother
 ```
 
 ---
 
-## 4. Implémentation du Chiffrement
+## 4. ImplÃ©mentation du Chiffrement
 
-### 4.1 Dérivation de Clé Maître
+### 4.1 DÃ©rivation de ClÃ© MaÃ®tre
 
 ```rust
 // kindmother-service/src/encryption.rs
@@ -170,16 +170,16 @@ kindmother-client = { path = "../kindmother-client" }
 use argon2::{Argon2, Algorithm, Version, Params};
 use zeroize::Zeroizing;
 
-/// Dérive la clé maître à partir de secrets locaux souverains.
+/// DÃ©rive la clÃ© maÃ®tre Ã  partir de secrets locaux souverains.
 /// 
-/// La clé n'est JAMAIS stockée sur disque.
-/// Elle est recalculée à chaque démarrage du service.
+/// La clÃ© n'est JAMAIS stockÃ©e sur disque.
+/// Elle est recalculÃ©e Ã  chaque dÃ©marrage du service.
 /// 
 /// @id: kindmother_derive_master_key
 /// @do: derive_encryption_key_from_local_secrets
 /// @layer: infra
 pub fn derive_master_key() -> Zeroizing<[u8; 32]> {
-    // 1. Récupérer les composants locaux
+    // 1. RÃ©cupÃ©rer les composants locaux
     let machine_id = get_machine_id();
     let install_secret = get_install_secret();
     let cog_id = get_cog_environment_id();
@@ -192,10 +192,10 @@ pub fn derive_master_key() -> Zeroizing<[u8; 32]> {
         cog_id
     );
     
-    // 3. Paramètres Argon2id (résistant GPU/ASIC)
+    // 3. ParamÃ¨tres Argon2id (rÃ©sistant GPU/ASIC)
     let params = Params::new(
-        65536,      // 64 MiB mémoire
-        3,          // 3 itérations
+        65536,      // 64 MiB mÃ©moire
+        3,          // 3 itÃ©rations
         4,          // 4 threads
         Some(32),   // 32 octets de sortie
     ).expect("Invalid Argon2 params");
@@ -205,7 +205,7 @@ pub fn derive_master_key() -> Zeroizing<[u8; 32]> {
     // 4. Salt fixe (connu, pas secret)
     let salt = b"miyukini-kindmother-v1-2026";
     
-    // 5. Dériver la clé
+    // 5. DÃ©river la clÃ©
     let mut key = Zeroizing::new([0u8; 32]);
     argon2
         .hash_password_into(input.as_bytes(), salt, key.as_mut())
@@ -214,13 +214,13 @@ pub fn derive_master_key() -> Zeroizing<[u8; 32]> {
     key
 }
 
-/// Récupère l'identifiant unique de la machine.
+/// RÃ©cupÃ¨re l'identifiant unique de la machine.
 /// Windows: BIOS UUID via WMI
 /// Linux: /etc/machine-id ou DMI
 fn get_machine_id() -> String {
     #[cfg(target_os = "windows")]
     {
-        // Utiliser WMI pour récupérer le BIOS UUID
+        // Utiliser WMI pour rÃ©cupÃ©rer le BIOS UUID
         use std::process::Command;
         let output = Command::new("wmic")
             .args(["csproduct", "get", "uuid"])
@@ -259,7 +259,7 @@ fn get_machine_id() -> String {
     }
 }
 
-/// Récupère le secret d'installation (généré une fois).
+/// RÃ©cupÃ¨re le secret d'installation (gÃ©nÃ©rÃ© une fois).
 fn get_install_secret() -> String {
     let secret_path = get_data_dir().join(".kindmother_install_secret");
     
@@ -269,11 +269,11 @@ fn get_install_secret() -> String {
             .trim()
             .to_string()
     } else {
-        // Première exécution : générer le secret
+        // PremiÃ¨re exÃ©cution : gÃ©nÃ©rer le secret
         let secret = uuid::Uuid::new_v4().to_string();
         std::fs::write(&secret_path, &secret)
             .expect("Failed to write install secret");
-        // Protéger le fichier
+        // ProtÃ©ger le fichier
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
@@ -285,7 +285,7 @@ fn get_install_secret() -> String {
     }
 }
 
-/// Récupère l'ID de l'environnement COG.
+/// RÃ©cupÃ¨re l'ID de l'environnement COG.
 fn get_cog_environment_id() -> String {
     std::env::var("MIYUKINI_COG_ID")
         .unwrap_or_else(|_| "default-cog-v1".to_string())
@@ -308,18 +308,18 @@ use libsql::{Builder, Cipher, EncryptionConfig, Database, Connection};
 use std::path::Path;
 use zeroize::Zeroizing;
 
-/// Base de données chiffrée KindMother.
+/// Base de donnÃ©es chiffrÃ©e KindMother.
 /// 
 /// @id: kindmother_encrypted_db
 /// @do: manage_encrypted_database_connection
 /// @layer: infra
 pub struct EncryptedDatabase {
     db: Database,
-    _key: Zeroizing<[u8; 32]>, // Garder en mémoire pour la durée de vie
+    _key: Zeroizing<[u8; 32]>, // Garder en mÃ©moire pour la durÃ©e de vie
 }
 
 impl EncryptedDatabase {
-    /// Ouvre ou crée une base de données chiffrée.
+    /// Ouvre ou crÃ©e une base de donnÃ©es chiffrÃ©e.
     /// 
     /// @id: kindmother_db_open
     /// @do: open_encrypted_database_with_derived_key
@@ -339,7 +339,7 @@ impl EncryptedDatabase {
         Ok(Self { db, _key: key })
     }
     
-    /// Ouvre une connexion à la base.
+    /// Ouvre une connexion Ã  la base.
     pub fn connect(&self) -> Result<Connection, DbError> {
         self.db.connect()
             .map_err(|e| DbError(format!("Failed to connect: {}", e)))
@@ -362,7 +362,7 @@ impl std::error::Error for DbError {}
 
 ## 5. Service IPC
 
-### 5.1 Définition Proto
+### 5.1 DÃ©finition Proto
 
 ```protobuf
 // kindmother-service/proto/kindmother.proto
@@ -371,16 +371,16 @@ syntax = "proto3";
 package kindmother;
 
 service KindMotherService {
-    // Requête SQL générique avec validation
+    // RequÃªte SQL gÃ©nÃ©rique avec validation
     rpc Query(QueryRequest) returns (QueryResponse);
     
-    // Lecture d'entité par ID
+    // Lecture d'entitÃ© par ID
     rpc ReadEntity(ReadEntityRequest) returns (ReadEntityResponse);
     
-    // Écriture d'entité
+    // Ã‰criture d'entitÃ©
     rpc WriteEntity(WriteEntityRequest) returns (WriteEntityResponse);
     
-    // Suppression d'entité
+    // Suppression d'entitÃ©
     rpc DeleteEntity(DeleteEntityRequest) returns (DeleteEntityResponse);
     
     // Health check
@@ -417,7 +417,7 @@ message ReadEntityRequest {
 
 message ReadEntityResponse {
     bool found = 1;
-    bytes data = 2;  // JSON sérialisé
+    bytes data = 2;  // JSON sÃ©rialisÃ©
     string error = 3;
 }
 
@@ -426,7 +426,7 @@ message WriteEntityRequest {
     string database = 2;
     string table = 3;
     string id = 4;
-    bytes data = 5;  // JSON sérialisé
+    bytes data = 5;  // JSON sÃ©rialisÃ©
     bool upsert = 6;
 }
 
@@ -510,11 +510,11 @@ impl KindMotherService for KindMotherServer {
         let auth = req.auth.ok_or_else(|| Status::unauthenticated("Missing auth token"))?;
         validate_token(&auth).map_err(|e| Status::unauthenticated(e.to_string()))?;
         
-        // 2. Vérifier les permissions
+        // 2. VÃ©rifier les permissions
         check_permission(&auth.operator_id, &req.database, "query")
             .map_err(|e| Status::permission_denied(e.to_string()))?;
         
-        // 3. Exécuter la requête
+        // 3. ExÃ©cuter la requÃªte
         let databases = self.databases.read().await;
         let db = databases.get(&req.database)
             .ok_or_else(|| Status::not_found(format!("Database {} not found", req.database)))?;
@@ -522,7 +522,7 @@ impl KindMotherService for KindMotherServer {
         let conn = db.connect()
             .map_err(|e| Status::internal(e.to_string()))?;
         
-        // TODO: Exécuter et retourner les résultats
+        // TODO: ExÃ©cuter et retourner les rÃ©sultats
         
         Ok(Response::new(QueryResponse {
             success: true,
@@ -545,7 +545,7 @@ impl KindMotherService for KindMotherServer {
             .map_err(|e| Status::permission_denied(e.to_string()))?;
         
         // Lecture...
-        // TODO: Implémenter
+        // TODO: ImplÃ©menter
         
         Ok(Response::new(ReadEntityResponse {
             found: false,
@@ -558,8 +558,8 @@ impl KindMotherService for KindMotherServer {
         &self,
         request: Request<WriteEntityRequest>,
     ) -> Result<Response<WriteEntityResponse>, Status> {
-        // Validation, permissions, écriture...
-        // TODO: Implémenter
+        // Validation, permissions, Ã©criture...
+        // TODO: ImplÃ©menter
         Ok(Response::new(WriteEntityResponse {
             success: true,
             id: String::new(),
@@ -572,7 +572,7 @@ impl KindMotherService for KindMotherServer {
         request: Request<DeleteEntityRequest>,
     ) -> Result<Response<DeleteEntityResponse>, Status> {
         // Validation, permissions, suppression...
-        // TODO: Implémenter
+        // TODO: ImplÃ©menter
         Ok(Response::new(DeleteEntityResponse {
             success: true,
             error: String::new(),
@@ -591,7 +591,7 @@ impl KindMotherService for KindMotherServer {
     }
 }
 
-/// Point d'entrée du service KindMother.
+/// Point d'entrÃ©e du service KindMother.
 pub async fn run_server(addr: &str) -> Result<(), Box<dyn std::error::Error>> {
     use crate::encryption::derive_master_key;
     
@@ -609,7 +609,7 @@ pub async fn run_server(addr: &str) -> Result<(), Box<dyn std::error::Error>> {
     
     let mut databases = HashMap::new();
     
-    // Ouvrir les bases des différents opérateurs
+    // Ouvrir les bases des diffÃ©rents opÃ©rateurs
     for db_name in ["jayxpose", "jaykonta", "jayfestival"] {
         let db_path = data_dir.join(format!("{}.db", db_name));
         let db = EncryptedDatabase::open(&db_path, master_key.clone()).await?;
@@ -634,7 +634,7 @@ pub async fn run_server(addr: &str) -> Result<(), Box<dyn std::error::Error>> {
 
 ## 6. Client IPC
 
-### 6.1 Client pour Opérateurs
+### 6.1 Client pour OpÃ©rateurs
 
 ```rust
 // kindmother-client/src/lib.rs
@@ -648,9 +648,9 @@ pub mod proto {
 
 use proto::kind_mother_service_client::KindMotherServiceClient;
 
-/// Client KindMother pour les Opérateurs.
+/// Client KindMother pour les OpÃ©rateurs.
 /// 
-/// Implémente le trait Storage de kindmother.
+/// ImplÃ©mente le trait Storage de kindmother.
 /// 
 /// @id: kindmother_client
 /// @do: provide_ipc_client_for_operators
@@ -662,7 +662,7 @@ pub struct KindMotherClient {
 }
 
 impl KindMotherClient {
-    /// Crée un nouveau client connecté au service KindMother.
+    /// CrÃ©e un nouveau client connectÃ© au service KindMother.
     pub async fn connect(
         addr: &str,
         operator_id: &str,
@@ -677,7 +677,7 @@ impl KindMotherClient {
         })
     }
     
-    /// Crée un token d'authentification pour la requête.
+    /// CrÃ©e un token d'authentification pour la requÃªte.
     fn create_auth_token(&self) -> proto::AuthToken {
         proto::AuthToken {
             operator_id: self.operator_id.clone(),
@@ -687,7 +687,7 @@ impl KindMotherClient {
         }
     }
     
-    /// Exécute une requête SQL.
+    /// ExÃ©cute une requÃªte SQL.
     pub async fn query(&mut self, sql: &str) -> Result<Vec<Vec<proto::Value>>, ClientError> {
         let request = proto::QueryRequest {
             auth: Some(self.create_auth_token()),
@@ -707,7 +707,7 @@ impl KindMotherClient {
         Ok(inner.rows.into_iter().map(|r| r.values).collect())
     }
     
-    /// Lit une entité par ID.
+    /// Lit une entitÃ© par ID.
     pub async fn read_entity(&mut self, table: &str, id: &str) -> Result<Option<Vec<u8>>, ClientError> {
         let request = proto::ReadEntityRequest {
             auth: Some(self.create_auth_token()),
@@ -731,7 +731,7 @@ impl KindMotherClient {
         }
     }
     
-    /// Écrit une entité.
+    /// Ã‰crit une entitÃ©.
     pub async fn write_entity(
         &mut self,
         table: &str,
@@ -776,47 +776,47 @@ impl std::error::Error for ClientError {}
 
 ## 7. Guide de Migration
 
-### 7.1 Étapes de Migration
+### 7.1 Ã‰tapes de Migration
 
 | Phase | Action | Effort | Risque |
 |-------|--------|--------|--------|
-| **1** | Créer les crates `kindmother-service` et `kindmother-client` | Moyen | Faible |
-| **2** | Implémenter le service avec libSQL | Élevé | Moyen |
-| **3** | Migrer les Opérateurs vers `kindmother-client` | Moyen | Faible |
-| **4** | Migrer les données existantes | Faible | Moyen |
-| **5** | Supprimer les dépendances rusqlite directes | Faible | Faible |
-| **6** | Déployer en production | Moyen | Moyen |
+| **1** | CrÃ©er les crates `kindmother-service` et `kindmother-client` | Moyen | Faible |
+| **2** | ImplÃ©menter le service avec libSQL | Ã‰levÃ© | Moyen |
+| **3** | Migrer les OpÃ©rateurs vers `kindmother-client` | Moyen | Faible |
+| **4** | Migrer les donnÃ©es existantes | Faible | Moyen |
+| **5** | Supprimer les dÃ©pendances rusqlite directes | Faible | Faible |
+| **6** | DÃ©ployer en production | Moyen | Moyen |
 
-### 7.2 Phase 1 : Créer les Crates
+### 7.2 Phase 1 : CrÃ©er les Crates
 
 ```bash
 # Dans le dossier crates/
 cd crates
 
-# Créer kindmother-service
+# CrÃ©er kindmother-service
 cargo new kindmother-service
 cd kindmother-service
 # Copier le Cargo.toml de la section 3.1
 
-# Créer kindmother-client
+# CrÃ©er kindmother-client
 cd ..
 cargo new kindmother-client --lib
 cd kindmother-client
 # Copier le Cargo.toml de la section 3.1
 ```
 
-### 7.3 Phase 2 : Implémenter le Service
+### 7.3 Phase 2 : ImplÃ©menter le Service
 
-1. Créer le fichier proto (`proto/kindmother.proto`)
+1. CrÃ©er le fichier proto (`proto/kindmother.proto`)
 2. Configurer `build.rs` pour tonic-build
-3. Implémenter `encryption.rs` (dérivation de clé)
-4. Implémenter `database.rs` (connexion libSQL)
-5. Implémenter `auth.rs` (validation tokens)
-6. Implémenter `permissions.rs` (matrice d'accès)
-7. Implémenter `server.rs` (service gRPC)
-8. Implémenter `main.rs` (point d'entrée)
+3. ImplÃ©menter `encryption.rs` (dÃ©rivation de clÃ©)
+4. ImplÃ©menter `database.rs` (connexion libSQL)
+5. ImplÃ©menter `auth.rs` (validation tokens)
+6. ImplÃ©menter `permissions.rs` (matrice d'accÃ¨s)
+7. ImplÃ©menter `server.rs` (service gRPC)
+8. ImplÃ©menter `main.rs` (point d'entrÃ©e)
 
-### 7.4 Phase 3 : Migrer les Opérateurs
+### 7.4 Phase 3 : Migrer les OpÃ©rateurs
 
 **Exemple pour JayXpose :**
 
@@ -837,7 +837,7 @@ impl JayXposeDb {
 ```
 
 ```rust
-// APRÈS (jayxpose/src/data/kindmother_db.rs)
+// APRÃˆS (jayxpose/src/data/kindmother_db.rs)
 use kindmother_client::KindMotherClient;
 
 pub struct JayXposeDb {
@@ -848,8 +848,8 @@ impl JayXposeDb {
     pub async fn connect() -> Result<Self, DbError> {
         let client = KindMotherClient::connect(
             "http://[::1]:50051",  // Adresse du service
-            "jayxpose",             // Identifiant opérateur
-            "jayxpose",             // Base de données
+            "jayxpose",             // Identifiant opÃ©rateur
+            "jayxpose",             // Base de donnÃ©es
         ).await?;
         
         Ok(Self { client })
@@ -868,9 +868,9 @@ impl JayXposeDb {
 }
 ```
 
-### 7.5 Phase 4 : Migration des Données
+### 7.5 Phase 4 : Migration des DonnÃ©es
 
-Script de migration pour convertir les bases SQLite existantes vers libSQL chiffré :
+Script de migration pour convertir les bases SQLite existantes vers libSQL chiffrÃ© :
 
 ```rust
 // tools/migrate_to_encrypted.rs
@@ -883,10 +883,10 @@ async fn migrate_database(
     dest_path: &str,
     encryption_key: &[u8],
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // 1. Ouvrir la source (non chiffrée)
+    // 1. Ouvrir la source (non chiffrÃ©e)
     let source = SqliteConn::open(source_path)?;
     
-    // 2. Créer la destination (chiffrée)
+    // 2. CrÃ©er la destination (chiffrÃ©e)
     let encryption = EncryptionConfig::new(Cipher::Aes256Gcm, encryption_key.to_vec());
     let dest_db = Builder::new_local(dest_path)
         .encryption_config(encryption)
@@ -900,20 +900,20 @@ async fn migrate_database(
     )?.query_map([], |row| row.get(0))?
     .collect::<Result<Vec<_>, _>>()?;
     
-    // 4. Pour chaque table, copier le schéma et les données
+    // 4. Pour chaque table, copier le schÃ©ma et les donnÃ©es
     for table in tables {
-        // Récupérer le schéma
+        // RÃ©cupÃ©rer le schÃ©ma
         let schema: String = source.query_row(
             "SELECT sql FROM sqlite_master WHERE type='table' AND name=?",
             [&table],
             |row| row.get(0),
         )?;
         
-        // Créer la table dans la destination
+        // CrÃ©er la table dans la destination
         dest.execute(&schema, ()).await?;
         
-        // Copier les données (en batches pour les grandes tables)
-        // TODO: Implémenter la copie par batch
+        // Copier les donnÃ©es (en batches pour les grandes tables)
+        // TODO: ImplÃ©menter la copie par batch
         
         println!("Migrated table: {}", table);
     }
@@ -925,13 +925,13 @@ async fn migrate_database(
 
 ### 7.6 Phase 5 : Nettoyage
 
-Après validation de la migration :
+AprÃ¨s validation de la migration :
 
-1. Supprimer `rusqlite` des `Cargo.toml` des Opérateurs
-2. Supprimer les fichiers `*_db.rs` obsolètes
-3. Mettre à jour la documentation
+1. Supprimer `rusqlite` des `Cargo.toml` des OpÃ©rateurs
+2. Supprimer les fichiers `*_db.rs` obsolÃ¨tes
+3. Mettre Ã  jour la documentation
 
-### 7.7 Phase 6 : Déploiement
+### 7.7 Phase 6 : DÃ©ploiement
 
 **Windows (Service) :**
 
@@ -970,36 +970,36 @@ WantedBy=multi-user.target
 
 | Erreur | Cause | Solution |
 |--------|-------|----------|
-| `Failed to derive key` | Impossible de lire machine ID | Vérifier les permissions système |
-| `Database is locked` | Fichier ouvert par un autre processus | Vérifier qu'un seul service tourne |
-| `Decryption failed` | Clé incorrecte ou fichier corrompu | Vérifier que la clé n'a pas changé |
-| `Permission denied` | Opérateur non autorisé | Vérifier la matrice de permissions |
-| `Connection refused` | Service non démarré | Démarrer kindmother-service |
+| `Failed to derive key` | Impossible de lire machine ID | VÃ©rifier les permissions systÃ¨me |
+| `Database is locked` | Fichier ouvert par un autre processus | VÃ©rifier qu'un seul service tourne |
+| `Decryption failed` | ClÃ© incorrecte ou fichier corrompu | VÃ©rifier que la clÃ© n'a pas changÃ© |
+| `Permission denied` | OpÃ©rateur non autorisÃ© | VÃ©rifier la matrice de permissions |
+| `Connection refused` | Service non dÃ©marrÃ© | DÃ©marrer kindmother-service |
 
-### 8.2 Vérification du Chiffrement
+### 8.2 VÃ©rification du Chiffrement
 
-Pour vérifier qu'une base est bien chiffrée :
+Pour vÃ©rifier qu'une base est bien chiffrÃ©e :
 
 ```bash
 # Tenter d'ouvrir avec sqlite3 standard
 sqlite3 jayxpose.db "SELECT * FROM exposants LIMIT 1;"
-# Résultat attendu : "file is not a database"
+# RÃ©sultat attendu : "file is not a database"
 
-# Si ça fonctionne, la base N'EST PAS chiffrée !
+# Si Ã§a fonctionne, la base N'EST PAS chiffrÃ©e !
 ```
 
 ### 8.3 Logs de Diagnostic
 
 ```rust
-// Activer les logs détaillés
+// Activer les logs dÃ©taillÃ©s
 RUST_LOG=kindmother_service=debug cargo run
 ```
 
 ---
 
-## 9. Références
+## 9. RÃ©fÃ©rences
 
-- [Security - Gouvernance Cores Protection Donnees](../../../security/foundation/Security%20-%20Gouvernance%20Cores%20Protection%20Donnees.md)
+- [Security - Gouvernance Cores Protection Donnees](..//..//WorrySentinel//_index.md)
 - [KindMother - Documentation Fondatrice](../foundation/KindMother%20-%20Documentation%20Fondatrice.md)
 - [libSQL Documentation](https://docs.turso.tech/libsql)
 - [Turso Encryption Guide](https://turso.tech/blog/introducing-fast-native-encryption-in-turso-database)
@@ -1008,27 +1008,28 @@ RUST_LOG=kindmother_service=debug cargo run
 
 ---
 
-**Date de création :** 2026-02-08  
+**Date de crÃ©ation :** 2026-02-08  
 **Version :** 1.0  
-**Statut :** IMPLEMENTATION — Guide technique  
+**Statut :** IMPLEMENTATION â€” Guide technique  
 **Auteur :** Architecture Miyukini  
 
 ---
 
-## 10. Mini Log de Génération
+## 10. Mini Log de GÃ©nÃ©ration
 
-### Décisions structurantes
+### DÃ©cisions structurantes
 
-- libSQL choisi pour compatibilité SQLite et chiffrement natif
+- libSQL choisi pour compatibilitÃ© SQLite et chiffrement natif
 - gRPC choisi pour IPC (performance + typage fort)
-- Argon2id choisi pour dérivation de clé (résistance GPU/ASIC)
-- Migration incrémentale en 6 phases
+- Argon2id choisi pour dÃ©rivation de clÃ© (rÃ©sistance GPU/ASIC)
+- Migration incrÃ©mentale en 6 phases
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-- ✅ Cohérence avec le document de sécurité Gouvernance Cores
-- ✅ Cohérence avec l'architecture KindMother existante
-- ✅ Respect des Lois d'Autonomie
-- ✅ Code examples complets et fonctionnels
+- âœ… CohÃ©rence avec le document de sÃ©curitÃ© Gouvernance Cores
+- âœ… CohÃ©rence avec l'architecture KindMother existante
+- âœ… Respect des Lois d'Autonomie
+- âœ… Code examples complets et fonctionnels
 
-**Aucune contradiction détectée.**
+**Aucune contradiction dÃ©tectÃ©e.**
+

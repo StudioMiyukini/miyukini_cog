@@ -1,134 +1,134 @@
-# WorrySentinel - Core Interaction Contract
+﻿# WorrySentinel - Core Interaction Contract
 
 ## 1. Contexte
 
-Ce document formalise les **interactions de WorrySentinel avec les autres Cores** du Miyukini Core System. Il définit les contrats d'interface, les flux d'échange, et les responsabilités de chaque partie dans les interactions impliquant la gouvernance de sécurité.
+Ce document formalise les **interactions de WorrySentinel avec les autres Cores** du Miyukini Core System. Il dÃ©finit les contrats d'interface, les flux d'Ã©change, et les responsabilitÃ©s de chaque partie dans les interactions impliquant la gouvernance de sÃ©curitÃ©.
 
-WorrySentinel, en tant que **core de gouvernance transversale** (Strate 4 — Gouvernance de sécurité), interagit avec tous les autres cores selon deux flux distincts :
+WorrySentinel, en tant que **core de gouvernance transversale** (Strate 4 â€” Gouvernance de sÃ©curitÃ©), interagit avec tous les autres cores selon deux flux distincts :
 - **Flux descendant (gouvernance)** : WorrySentinel impose des contraintes verticales sur les cores fonctionnels
-- **Flux montant (observation)** : WorrySentinel observe et corrèle les signaux remontant des cores
+- **Flux montant (observation)** : WorrySentinel observe et corrÃ¨le les signaux remontant des cores
 
-**Document de référence :** [WorrySentinel - Documentation Fondatrice](../foundation/WorrySentinel%20-%20Documentation%20Fondatrice.md)
-
----
-
-## 2. Portée / Scope
-
-- **Applicable à :** Toute interaction entre WorrySentinel et les autres cores
-- **Audience :** Architectes, développeurs, intégrateurs
-- **Statut :** Document contractuel normatif — CONTRAT D'INTERACTION
+**Document de rÃ©fÃ©rence :** [WorrySentinel - Documentation Fondatrice](../foundation/WorrySentinel%20-%20Documentation%20Fondatrice.md)
 
 ---
 
-## 3. Principes généraux d'interaction
+## 2. PortÃ©e / Scope
+
+- **Applicable Ã  :** Toute interaction entre WorrySentinel et les autres cores
+- **Audience :** Architectes, dÃ©veloppeurs, intÃ©grateurs
+- **Statut :** Document contractuel normatif â€” CONTRAT D'INTERACTION
+
+---
+
+## 3. Principes gÃ©nÃ©raux d'interaction
 
 ### 3.1 Nature des relations
 
-WorrySentinel entretient des relations avec les autres cores qui suivent des patterns spécifiques :
+WorrySentinel entretient des relations avec les autres cores qui suivent des patterns spÃ©cifiques :
 
-| Pattern | Description | Cores concernés |
+| Pattern | Description | Cores concernÃ©s |
 |---------|-------------|-----------------|
-| **Gouvernance** | WorrySentinel impose des contraintes sécuritaires | StrongFather, MasterButler, BorderGuard, LogisticsSteward |
-| **Observation** | WorrySentinel reçoit des signaux pour évaluer l'état | Kernel, CaringNanny, KindMother, BondingBrother |
+| **Gouvernance** | WorrySentinel impose des contraintes sÃ©curitaires | StrongFather, MasterButler, BorderGuard, LogisticsSteward |
+| **Observation** | WorrySentinel reÃ§oit des signaux pour Ã©valuer l'Ã©tat | Kernel, CaringNanny, KindMother, BondingBrother |
 | **Escalade** | WorrySentinel signale le besoin d'intervention humaine | TAMR |
 | **Exposition** | WorrySentinel expose la gouvernance pour consultation | MiyukiniAdmin |
 
 ### 3.2 Invariants d'interaction
 
-**INV-INT-WS-1 : WorrySentinel gouverne mais n'exécute jamais**
+**INV-INT-WS-1 : WorrySentinel gouverne mais n'exÃ©cute jamais**
 
-WorrySentinel impose des contraintes, définit des niveaux, déclare des états, mais n'exécute jamais d'action technique. L'exécution est toujours du ressort des cores fonctionnels.
+WorrySentinel impose des contraintes, dÃ©finit des niveaux, dÃ©clare des Ã©tats, mais n'exÃ©cute jamais d'action technique. L'exÃ©cution est toujours du ressort des cores fonctionnels.
 
-**INV-INT-WS-2 : WorrySentinel n'implémente jamais**
+**INV-INT-WS-2 : WorrySentinel n'implÃ©mente jamais**
 
-WorrySentinel ne définit jamais de mécanisme cryptographique, d'algorithme de sécurité, ou de contrôle technique. Il gouverne le "quoi" mais jamais le "comment".
+WorrySentinel ne dÃ©finit jamais de mÃ©canisme cryptographique, d'algorithme de sÃ©curitÃ©, ou de contrÃ´le technique. Il gouverne le "quoi" mais jamais le "comment".
 
-**INV-INT-WS-3 : Flux explicites et traçables**
+**INV-INT-WS-3 : Flux explicites et traÃ§ables**
 
-Chaque interaction a une direction explicite. Les flux bidirectionnels sont documentés comme deux flux unidirectionnels distincts avec traçabilité complète.
+Chaque interaction a une direction explicite. Les flux bidirectionnels sont documentÃ©s comme deux flux unidirectionnels distincts avec traÃ§abilitÃ© complÃ¨te.
 
-**INV-INT-WS-4 : Aucune modification d'état par WorrySentinel**
+**INV-INT-WS-4 : Aucune modification d'Ã©tat par WorrySentinel**
 
-WorrySentinel ne modifie jamais directement l'état des autres cores. Il déclare des contraintes que les cores doivent appliquer eux-mêmes.
+WorrySentinel ne modifie jamais directement l'Ã©tat des autres cores. Il dÃ©clare des contraintes que les cores doivent appliquer eux-mÃªmes.
 
 **INV-INT-WS-5 : Pression verticale, pas remplacement**
 
-WorrySentinel agit comme une pression verticale sur les cores fonctionnels. Il contraint sans remplacer, gouverne sans se substituer aux responsabilités des autres cores.
+WorrySentinel agit comme une pression verticale sur les cores fonctionnels. Il contraint sans remplacer, gouverne sans se substituer aux responsabilitÃ©s des autres cores.
 
 ---
 
 ## 4. Flux d'interaction globaux
 
-### 4.1 Flux descendant — Gouvernance
+### 4.1 Flux descendant â€” Gouvernance
 
 WorrySentinel impose des contraintes verticales sur tous les cores fonctionnels :
 
 ```
                     WorrySentinel
-                         │
-                         │ impose contraintes
-                         ▼
-    ┌────────────────────┼────────────────────┐
-    │                    │                    │
-    ▼                    ▼                    ▼
-┌──────────┐      ┌──────────┐      ┌──────────┐
-│StrongFather│     │MasterButler│    │BorderGuard│
-│ sévérité  │     │permissions │    │durcissement│
-│ décisions │     │ actives    │    │   I/O      │
-└──────────┘      └──────────┘      └──────────┘
-    │                    │                    │
-    ▼                    ▼                    ▼
-┌──────────┐      ┌──────────┐      ┌──────────┐
-│Logistics │      │   TAMR    │      │  Kernel  │
-│ Steward  │      │  droits   │      │ fréquence│
-│ quotas   │      │  humains  │      │  sondes  │
-└──────────┘      └──────────┘      └──────────┘
+                         â”‚
+                         â”‚ impose contraintes
+                         â–¼
+    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+    â”‚                    â”‚                    â”‚
+    â–¼                    â–¼                    â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚StrongFatherâ”‚     â”‚MasterButlerâ”‚    â”‚BorderGuardâ”‚
+â”‚ sÃ©vÃ©ritÃ©  â”‚     â”‚permissions â”‚    â”‚durcissementâ”‚
+â”‚ dÃ©cisions â”‚     â”‚ actives    â”‚    â”‚   I/O      â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+    â”‚                    â”‚                    â”‚
+    â–¼                    â–¼                    â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚Logistics â”‚      â”‚   TAMR    â”‚      â”‚  Kernel  â”‚
+â”‚ Steward  â”‚      â”‚  droits   â”‚      â”‚ frÃ©quenceâ”‚
+â”‚ quotas   â”‚      â”‚  humains  â”‚      â”‚  sondes  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Principe :** WorrySentinel ne remplace rien. Il contraint tout.
 
-### 4.2 Flux montant — Observation
+### 4.2 Flux montant â€” Observation
 
-WorrySentinel observe et corrèle les signaux remontant des cores :
+WorrySentinel observe et corrÃ¨le les signaux remontant des cores :
 
 ```
-┌──────────┐      ┌──────────┐      ┌──────────┐
-│  Kernel  │      │BorderGuard│     │StrongFather│
-│ signaux  │      │ anomalies │     │ décisions │
-│clock, id │      │    I/O    │     │  refusées │
-└────┬─────┘      └────┬─────┘      └────┬─────┘
-     │                 │                 │
-     │                 ▼                 │
-     │          ┌──────────┐            │
-     │          │KindMother │            │
-     │          │incohérences│           │
-     │          └────┬─────┘            │
-     │               │                   │
-     ▼               ▼                   ▼
-    ┌────────────────┼────────────────────┐
-    │                │                    │
-    │                ▼                    │
-    │     ┌────────────────────┐         │
-    │     │  BondingBrother    │         │
-    │     │  comportements     │         │
-    │     │    produits        │         │
-    │     └────────┬───────────┘         │
-    │              │                      │
-    │              ▼                      │
-    │     ┌────────────────────┐         │
-    │     │   CaringNanny      │         │
-    │     │   consolidation    │         │
-    │     └────────┬───────────┘         │
-    │              │                      │
-    └──────────────┼──────────────────────┘
-                   │
-                   ▼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Kernel  â”‚      â”‚BorderGuardâ”‚     â”‚StrongFatherâ”‚
+â”‚ signaux  â”‚      â”‚ anomalies â”‚     â”‚ dÃ©cisions â”‚
+â”‚clock, id â”‚      â”‚    I/O    â”‚     â”‚  refusÃ©es â”‚
+â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜
+     â”‚                 â”‚                 â”‚
+     â”‚                 â–¼                 â”‚
+     â”‚          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”‚
+     â”‚          â”‚KindMother â”‚            â”‚
+     â”‚          â”‚incohÃ©rencesâ”‚           â”‚
+     â”‚          â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜            â”‚
+     â”‚               â”‚                   â”‚
+     â–¼               â–¼                   â–¼
+    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+    â”‚                â”‚                    â”‚
+    â”‚                â–¼                    â”‚
+    â”‚     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”         â”‚
+    â”‚     â”‚  BondingBrother    â”‚         â”‚
+    â”‚     â”‚  comportements     â”‚         â”‚
+    â”‚     â”‚    produits        â”‚         â”‚
+    â”‚     â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜         â”‚
+    â”‚              â”‚                      â”‚
+    â”‚              â–¼                      â”‚
+    â”‚     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”         â”‚
+    â”‚     â”‚   CaringNanny      â”‚         â”‚
+    â”‚     â”‚   consolidation    â”‚         â”‚
+    â”‚     â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜         â”‚
+    â”‚              â”‚                      â”‚
+    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                   â”‚
+                   â–¼
               WorrySentinel
-           observe, corrèle,
-           déclare un état
+           observe, corrÃ¨le,
+           dÃ©clare un Ã©tat
 ```
 
-**Principe :** WorrySentinel observe, corrèle, et déclare un état global basé sur les signaux consolidés.
+**Principe :** WorrySentinel observe, corrÃ¨le, et dÃ©clare un Ã©tat global basÃ© sur les signaux consolidÃ©s.
 
 ---
 
@@ -140,47 +140,47 @@ WorrySentinel observe et corrèle les signaux remontant des cores :
 
 **Principe fondamental :**
 
-> Le Kernel fournit les signaux de base (clock, id, traces). WorrySentinel observe ces signaux pour évaluer l'état du système mais n'utilise jamais le Kernel directement pour sa logique de gouvernance.
+> Le Kernel fournit les signaux de base (clock, id, traces). WorrySentinel observe ces signaux pour Ã©valuer l'Ã©tat du systÃ¨me mais n'utilise jamais le Kernel directement pour sa logique de gouvernance.
 
-**Responsabilités respectives :**
+**ResponsabilitÃ©s respectives :**
 
 | Aspect | Kernel | WorrySentinel |
 |--------|--------|---------------|
-| Fourniture de signaux | ✅ Autorité | ❌ Consommateur |
-| Horloge logique | ✅ Source | ❌ Utilisateur (traçabilité) |
-| Génération d'identifiants | ✅ Autorité | ❌ Utilisateur (audit) |
-| Fréquence des sondes | ✅ Exécution | ✅ Gouvernance |
+| Fourniture de signaux | âœ… AutoritÃ© | âŒ Consommateur |
+| Horloge logique | âœ… Source | âŒ Utilisateur (traÃ§abilitÃ©) |
+| GÃ©nÃ©ration d'identifiants | âœ… AutoritÃ© | âŒ Utilisateur (audit) |
+| FrÃ©quence des sondes | âœ… ExÃ©cution | âœ… Gouvernance |
 
 **Flux d'interaction :**
 
 ```
-┌─────────────┐                      ┌─────────────┐
-│   Kernel    │  Signaux systeme    │WorrySentinel│
-│             │ ──────────────────► │             │
-│             │                      │             │
-│             │  Contrainte fréquence│             │
-│             │ ◄────────────────── │             │
-│             │                      │             │
-│ (exécute)   │                      │ (gouverne)  │
-└─────────────┘                      └─────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚   Kernel    â”‚  Signaux systeme    â”‚WorrySentinelâ”‚
+â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚             â”‚  Contrainte frÃ©quenceâ”‚             â”‚
+â”‚             â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚ (exÃ©cute)   â”‚                      â”‚ (gouverne)  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Contrat d'interface :**
 
-| Direction | Données échangées | Format |
+| Direction | DonnÃ©es Ã©changÃ©es | Format |
 |-----------|-------------------|--------|
-| K → WS | Signaux système (anomalies, métriques) | `SystemSignal` |
-| K → WS | État des sondes | `ProbeStatus` |
-| WS → K | Fréquence de sondage requise | `ProbeFrequencyConstraint` |
+| K â†’ WS | Signaux systÃ¨me (anomalies, mÃ©triques) | `SystemSignal` |
+| K â†’ WS | Ã‰tat des sondes | `ProbeStatus` |
+| WS â†’ K | FrÃ©quence de sondage requise | `ProbeFrequencyConstraint` |
 
-**Règles de collaboration :**
+**RÃ¨gles de collaboration :**
 
-| ID | Règle |
+| ID | RÃ¨gle |
 |----|-------|
-| **COL-K-1** | WorrySentinel n'appelle jamais directement le Kernel pour ses décisions de gouvernance |
-| **COL-K-2** | Le Kernel exécute les contraintes de fréquence imposées par WorrySentinel |
-| **COL-K-3** | Les signaux du Kernel sont une source d'observation, pas une dépendance fonctionnelle |
-| **COL-K-4** | En mode isolé, WorrySentinel fonctionne sans signaux du Kernel (dégradation gracieuse) |
+| **COL-K-1** | WorrySentinel n'appelle jamais directement le Kernel pour ses dÃ©cisions de gouvernance |
+| **COL-K-2** | Le Kernel exÃ©cute les contraintes de frÃ©quence imposÃ©es par WorrySentinel |
+| **COL-K-3** | Les signaux du Kernel sont une source d'observation, pas une dÃ©pendance fonctionnelle |
+| **COL-K-4** | En mode isolÃ©, WorrySentinel fonctionne sans signaux du Kernel (dÃ©gradation gracieuse) |
 
 ---
 
@@ -190,61 +190,61 @@ WorrySentinel observe et corrèle les signaux remontant des cores :
 
 **Principe fondamental :**
 
-> StrongFather décide si une action est autorisée. WorrySentinel gouverne la sévérité selon laquelle StrongFather doit décider, en fonction du niveau de sécurité et de l'état de confiance.
+> StrongFather dÃ©cide si une action est autorisÃ©e. WorrySentinel gouverne la sÃ©vÃ©ritÃ© selon laquelle StrongFather doit dÃ©cider, en fonction du niveau de sÃ©curitÃ© et de l'Ã©tat de confiance.
 
-**Responsabilités respectives :**
+**ResponsabilitÃ©s respectives :**
 
 | Aspect | StrongFather | WorrySentinel |
 |--------|--------------|---------------|
-| Décision d'autorisation | ✅ Autorité | ❌ Aucune |
-| Sévérité des politiques | ❌ Exécution | ✅ Gouvernance |
-| Évaluation des intentions | ✅ Autorité | ❌ Aucune |
-| Niveau de sécurité applicable | ❌ Consommateur | ✅ Fournisseur |
+| DÃ©cision d'autorisation | âœ… AutoritÃ© | âŒ Aucune |
+| SÃ©vÃ©ritÃ© des politiques | âŒ ExÃ©cution | âœ… Gouvernance |
+| Ã‰valuation des intentions | âœ… AutoritÃ© | âŒ Aucune |
+| Niveau de sÃ©curitÃ© applicable | âŒ Consommateur | âœ… Fournisseur |
 
 **Flux d'interaction :**
 
 ```
-┌─────────────┐                      ┌─────────────┐
-│WorrySentinel│  Niveau sécurité +   │ StrongFather│
-│             │  État confiance      │             │
-│             │ ──────────────────► │             │
-│             │                      │             │
-│             │  Décisions refusées  │             │
-│             │ ◄────────────────── │             │
-│             │                      │             │
-│ (gouverne)  │                      │  (décide)   │
-└─────────────┘                      └─────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚WorrySentinelâ”‚  Niveau sÃ©curitÃ© +   â”‚ StrongFatherâ”‚
+â”‚             â”‚  Ã‰tat confiance      â”‚             â”‚
+â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚             â”‚  DÃ©cisions refusÃ©es  â”‚             â”‚
+â”‚             â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚ (gouverne)  â”‚                      â”‚  (dÃ©cide)   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Contrat d'interface :**
 
-| Direction | Données échangées | Format |
+| Direction | DonnÃ©es Ã©changÃ©es | Format |
 |-----------|-------------------|--------|
-| WS → SF | Niveau de sécurité applicable | `SecurityLevel` (0-4) |
-| WS → SF | État de confiance du système | `TrustState` (T0-T4) |
-| WS → SF | Sévérité requise | `SeverityConstraint` |
-| SF → WS | Décisions refusées (pour observation) | `DecisionRejectionSignal` |
+| WS â†’ SF | Niveau de sÃ©curitÃ© applicable | `SecurityLevel` (0-4) |
+| WS â†’ SF | Ã‰tat de confiance du systÃ¨me | `TrustState` (T0-T4) |
+| WS â†’ SF | SÃ©vÃ©ritÃ© requise | `SeverityConstraint` |
+| SF â†’ WS | DÃ©cisions refusÃ©es (pour observation) | `DecisionRejectionSignal` |
 
 **Impact de la gouvernance sur StrongFather :**
 
-| État de confiance | Impact sur les décisions StrongFather |
+| Ã‰tat de confiance | Impact sur les dÃ©cisions StrongFather |
 |-------------------|--------------------------------------|
-| **T0 (Normal)** | Décisions normales, sévérité standard |
-| **T1 (Instable)** | Logging renforcé, sévérité légèrement accrue |
-| **T2 (Dégradé)** | Décisions plus strictes, capacités non essentielles refusées |
-| **T3 (Restreint)** | Décisions critiques → AMBIGUË / DIFFÉRÉE, TAMR requis |
-| **T4 (Bloqué)** | Plus aucune décision opérationnelle autorisée |
+| **T0 (Normal)** | DÃ©cisions normales, sÃ©vÃ©ritÃ© standard |
+| **T1 (Instable)** | Logging renforcÃ©, sÃ©vÃ©ritÃ© lÃ©gÃ¨rement accrue |
+| **T2 (DÃ©gradÃ©)** | DÃ©cisions plus strictes, capacitÃ©s non essentielles refusÃ©es |
+| **T3 (Restreint)** | DÃ©cisions critiques â†’ AMBIGUÃ‹ / DIFFÃ‰RÃ‰E, TAMR requis |
+| **T4 (BloquÃ©)** | Plus aucune dÃ©cision opÃ©rationnelle autorisÃ©e |
 
-**Règles de collaboration :**
+**RÃ¨gles de collaboration :**
 
-| ID | Règle |
+| ID | RÃ¨gle |
 |----|-------|
-| **COL-SF-1** | WorrySentinel ne prend jamais de décision à la place de StrongFather |
-| **COL-SF-2** | StrongFather adapte sa sévérité selon les contraintes de WorrySentinel |
-| **COL-SF-3** | Les décisions refusées par StrongFather sont observées par WorrySentinel pour corrélation |
-| **COL-SF-4** | StrongFather ne peut pas ignorer un état de confiance T3+ |
+| **COL-SF-1** | WorrySentinel ne prend jamais de dÃ©cision Ã  la place de StrongFather |
+| **COL-SF-2** | StrongFather adapte sa sÃ©vÃ©ritÃ© selon les contraintes de WorrySentinel |
+| **COL-SF-3** | Les dÃ©cisions refusÃ©es par StrongFather sont observÃ©es par WorrySentinel pour corrÃ©lation |
+| **COL-SF-4** | StrongFather ne peut pas ignorer un Ã©tat de confiance T3+ |
 
-**Référence Documentation Fondatrice :** Section 9.2 (Relation avec StrongFather)
+**RÃ©fÃ©rence Documentation Fondatrice :** Section 9.2 (Relation avec StrongFather)
 
 ---
 
@@ -254,89 +254,89 @@ WorrySentinel observe et corrèle les signaux remontant des cores :
 
 **Principe fondamental :**
 
-> KindMother persiste les données. WorrySentinel observe les incohérences détectées par KindMother comme signaux d'intégrité, mais n'accède jamais directement à KindMother.
+> KindMother persiste les donnÃ©es. WorrySentinel observe les incohÃ©rences dÃ©tectÃ©es par KindMother comme signaux d'intÃ©gritÃ©, mais n'accÃ¨de jamais directement Ã  KindMother.
 
-**Responsabilités respectives :**
+**ResponsabilitÃ©s respectives :**
 
 | Aspect | KindMother | WorrySentinel |
 |--------|------------|---------------|
-| Persistance des données | ✅ Autorité | ❌ Aucune |
-| Détection d'incohérences | ✅ Source | ❌ Observateur |
-| Accès aux données | ✅ Autorité | ❌ INTERDIT |
-| Signalement d'anomalies | ✅ Émetteur | ❌ Destinataire (via CaringNanny) |
+| Persistance des donnÃ©es | âœ… AutoritÃ© | âŒ Aucune |
+| DÃ©tection d'incohÃ©rences | âœ… Source | âŒ Observateur |
+| AccÃ¨s aux donnÃ©es | âœ… AutoritÃ© | âŒ INTERDIT |
+| Signalement d'anomalies | âœ… Ã‰metteur | âŒ Destinataire (via CaringNanny) |
 
 **Flux d'interaction :**
 
 ```
-┌─────────────┐                      ┌─────────────┐
-│ KindMother  │  Incohérences       │  CaringNanny │
-│             │ ──────────────────► │  (consolide) │
-│             │                      │              │
-│             │                      └──────┬───────┘
-│             │                             │
-│             │                             ▼
-│             │                      ┌─────────────┐
-│             │                      │WorrySentinel│
-│ (persiste)  │                      │ (observe)   │
-└─────────────┘                      └─────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ KindMother  â”‚  IncohÃ©rences       â”‚  CaringNanny â”‚
+â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚  (consolide) â”‚
+â”‚             â”‚                      â”‚              â”‚
+â”‚             â”‚                      â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜
+â”‚             â”‚                             â”‚
+â”‚             â”‚                             â–¼
+â”‚             â”‚                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚             â”‚                      â”‚WorrySentinelâ”‚
+â”‚ (persiste)  â”‚                      â”‚ (observe)   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-**Règles de collaboration :**
+**RÃ¨gles de collaboration :**
 
-| ID | Règle |
+| ID | RÃ¨gle |
 |----|-------|
 | **COL-KM-1** | WorrySentinel n'appelle jamais KindMother directement (INV-WS-3) |
-| **COL-KM-2** | Les incohérences détectées par KindMother sont relayées via CaringNanny |
-| **COL-KM-3** | WorrySentinel ne peut jamais lire ou modifier des données persistées |
-| **COL-KM-4** | Les signaux d'incohérence contribuent à l'évaluation de l'état de confiance |
+| **COL-KM-2** | Les incohÃ©rences dÃ©tectÃ©es par KindMother sont relayÃ©es via CaringNanny |
+| **COL-KM-3** | WorrySentinel ne peut jamais lire ou modifier des donnÃ©es persistÃ©es |
+| **COL-KM-4** | Les signaux d'incohÃ©rence contribuent Ã  l'Ã©valuation de l'Ã©tat de confiance |
 
-**Référence Documentation Fondatrice :** Section 9.3 (Relation avec KindMother) — INV-WS-3
+**RÃ©fÃ©rence Documentation Fondatrice :** Section 9.3 (Relation avec KindMother) â€” INV-WS-3
 
 ---
 
 ### 5.4 Relation avec CaringNanny
 
-**Type de relation :** Observation consolidée + Proposition
+**Type de relation :** Observation consolidÃ©e + Proposition
 
 **Principe fondamental :**
 
-> CaringNanny consolide les signaux d'intégrité du système. WorrySentinel observe ces signaux consolidés et CaringNanny peut proposer des transitions d'état de confiance.
+> CaringNanny consolide les signaux d'intÃ©gritÃ© du systÃ¨me. WorrySentinel observe ces signaux consolidÃ©s et CaringNanny peut proposer des transitions d'Ã©tat de confiance.
 
-**Responsabilités respectives :**
+**ResponsabilitÃ©s respectives :**
 
 | Aspect | CaringNanny | WorrySentinel |
 |--------|-------------|---------------|
-| Consolidation des signaux | ✅ Autorité | ❌ Consommateur |
-| Évaluation de l'intégrité | ✅ Production | ✅ Décision finale |
-| Proposition de transition | ✅ Émetteur | ❌ Destinataire |
-| Décision de transition | ❌ Aucune | ✅ Autorité |
+| Consolidation des signaux | âœ… AutoritÃ© | âŒ Consommateur |
+| Ã‰valuation de l'intÃ©gritÃ© | âœ… Production | âœ… DÃ©cision finale |
+| Proposition de transition | âœ… Ã‰metteur | âŒ Destinataire |
+| DÃ©cision de transition | âŒ Aucune | âœ… AutoritÃ© |
 
 **Flux d'interaction :**
 
 ```
-┌─────────────┐                      ┌─────────────┐
-│ CaringNanny │  Signaux consolidés  │WorrySentinel│
-│             │ ──────────────────► │             │
-│             │                      │             │
-│             │  Proposition transit.│             │
-│             │ ──────────────────► │             │
-│             │                      │             │
-│             │  État global actuel  │             │
-│             │ ◄────────────────── │             │
-│             │                      │             │
-│(consolide)  │                      │ (gouverne)  │
-└─────────────┘                      └─────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ CaringNanny â”‚  Signaux consolidÃ©s  â”‚WorrySentinelâ”‚
+â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚             â”‚  Proposition transit.â”‚             â”‚
+â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚             â”‚  Ã‰tat global actuel  â”‚             â”‚
+â”‚             â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚(consolide)  â”‚                      â”‚ (gouverne)  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Contrat d'interface :**
 
-| Direction | Données échangées | Format |
+| Direction | DonnÃ©es Ã©changÃ©es | Format |
 |-----------|-------------------|--------|
-| CN → WS | Signaux d'intégrité consolidés | `IntegritySignalBundle` |
-| CN → WS | Proposition de transition d'état | `TransitionProposal` |
-| CN → WS | Indicateurs de santé | `HealthIndicators` |
-| WS → CN | État de confiance actuel | `CurrentTrustState` |
-| WS → CN | Règles de consolidation | `ConsolidationRules` |
+| CN â†’ WS | Signaux d'intÃ©gritÃ© consolidÃ©s | `IntegritySignalBundle` |
+| CN â†’ WS | Proposition de transition d'Ã©tat | `TransitionProposal` |
+| CN â†’ WS | Indicateurs de santÃ© | `HealthIndicators` |
+| WS â†’ CN | Ã‰tat de confiance actuel | `CurrentTrustState` |
+| WS â†’ CN | RÃ¨gles de consolidation | `ConsolidationRules` |
 
 **Structure des propositions de transition :**
 
@@ -345,7 +345,7 @@ interface TransitionProposal {
   // Identification
   proposal_id: UUID;
   
-  // Transition proposée
+  // Transition proposÃ©e
   current_state: TrustState;        // T0-T4
   proposed_state: TrustState;       // T0-T4
   
@@ -358,16 +358,16 @@ interface TransitionProposal {
 }
 ```
 
-**Règles de collaboration :**
+**RÃ¨gles de collaboration :**
 
-| ID | Règle |
+| ID | RÃ¨gle |
 |----|-------|
-| **COL-CN-1** | CaringNanny consolide les signaux de tous les cores et les transmet à WorrySentinel |
-| **COL-CN-2** | CaringNanny peut proposer des transitions mais WorrySentinel décide |
-| **COL-CN-3** | WorrySentinel gouverne les règles selon lesquelles CaringNanny consolide |
-| **COL-CN-4** | Une proposition refusée par WorrySentinel n'est pas appliquée |
+| **COL-CN-1** | CaringNanny consolide les signaux de tous les cores et les transmet Ã  WorrySentinel |
+| **COL-CN-2** | CaringNanny peut proposer des transitions mais WorrySentinel dÃ©cide |
+| **COL-CN-3** | WorrySentinel gouverne les rÃ¨gles selon lesquelles CaringNanny consolide |
+| **COL-CN-4** | Une proposition refusÃ©e par WorrySentinel n'est pas appliquÃ©e |
 
-**Référence Documentation Fondatrice :** Section 9.4 (Relation avec CaringNanny)
+**RÃ©fÃ©rence Documentation Fondatrice :** Section 9.4 (Relation avec CaringNanny)
 
 ---
 
@@ -377,60 +377,60 @@ interface TransitionProposal {
 
 **Principe fondamental :**
 
-> BorderGuard définit les frontières d'intégration. WorrySentinel gouverne le durcissement de ces frontières selon le niveau de sécurité et l'état de confiance.
+> BorderGuard dÃ©finit les frontiÃ¨res d'intÃ©gration. WorrySentinel gouverne le durcissement de ces frontiÃ¨res selon le niveau de sÃ©curitÃ© et l'Ã©tat de confiance.
 
-**Responsabilités respectives :**
+**ResponsabilitÃ©s respectives :**
 
 | Aspect | BorderGuard | WorrySentinel |
 |--------|-------------|---------------|
-| Définition des frontières | ✅ Autorité | ❌ Aucune |
-| Classification de confiance | ✅ Autorité | ❌ Aucune |
-| Durcissement des frontières | ✅ Exécution | ✅ Gouvernance |
-| Signalement d'anomalies I/O | ✅ Émetteur | ❌ Observateur |
+| DÃ©finition des frontiÃ¨res | âœ… AutoritÃ© | âŒ Aucune |
+| Classification de confiance | âœ… AutoritÃ© | âŒ Aucune |
+| Durcissement des frontiÃ¨res | âœ… ExÃ©cution | âœ… Gouvernance |
+| Signalement d'anomalies I/O | âœ… Ã‰metteur | âŒ Observateur |
 
 **Flux d'interaction :**
 
 ```
-┌─────────────┐                      ┌─────────────┐
-│WorrySentinel│  Niveau durcissement │ BorderGuard │
-│             │ ──────────────────► │             │
-│             │                      │             │
-│             │  Anomalies I/O       │             │
-│             │ ◄────────────────── │             │
-│             │                      │             │
-│ (gouverne)  │                      │ (définit)   │
-└─────────────┘                      └─────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚WorrySentinelâ”‚  Niveau durcissement â”‚ BorderGuard â”‚
+â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚             â”‚  Anomalies I/O       â”‚             â”‚
+â”‚             â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚ (gouverne)  â”‚                      â”‚ (dÃ©finit)   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Contrat d'interface :**
 
-| Direction | Données échangées | Format |
+| Direction | DonnÃ©es Ã©changÃ©es | Format |
 |-----------|-------------------|--------|
-| WS → BG | Niveau de durcissement requis | `HardeningLevel` |
-| WS → BG | Frontières à bloquer (état T3+) | `BlockedBoundaries` |
-| BG → WS | Anomalies I/O détectées | `IOAnomalySignal` |
-| BG → WS | Passages vers "hostile" | `HostileDetectionSignal` |
+| WS â†’ BG | Niveau de durcissement requis | `HardeningLevel` |
+| WS â†’ BG | FrontiÃ¨res Ã  bloquer (Ã©tat T3+) | `BlockedBoundaries` |
+| BG â†’ WS | Anomalies I/O dÃ©tectÃ©es | `IOAnomalySignal` |
+| BG â†’ WS | Passages vers "hostile" | `HostileDetectionSignal` |
 
 **Impact de la gouvernance sur BorderGuard :**
 
-| État de confiance | Impact sur BorderGuard |
+| Ã‰tat de confiance | Impact sur BorderGuard |
 |-------------------|------------------------|
-| **T0 (Normal)** | Frontières normales, classification standard |
+| **T0 (Normal)** | FrontiÃ¨res normales, classification standard |
 | **T1 (Instable)** | Surveillance accrue des passages |
-| **T2 (Dégradé)** | Durcissement des règles de franchissement |
-| **T3 (Restreint)** | Fermeture des frontières non essentielles |
-| **T4 (Bloqué)** | Toutes les frontières fermées (mode isolation) |
+| **T2 (DÃ©gradÃ©)** | Durcissement des rÃ¨gles de franchissement |
+| **T3 (Restreint)** | Fermeture des frontiÃ¨res non essentielles |
+| **T4 (BloquÃ©)** | Toutes les frontiÃ¨res fermÃ©es (mode isolation) |
 
-**Règles de collaboration :**
+**RÃ¨gles de collaboration :**
 
-| ID | Règle |
+| ID | RÃ¨gle |
 |----|-------|
-| **COL-BG-1** | WorrySentinel ne définit jamais de frontière (responsabilité de BorderGuard) |
-| **COL-BG-2** | BorderGuard applique le durcissement imposé par WorrySentinel |
-| **COL-BG-3** | Les anomalies I/O détectées par BorderGuard sont observées par WorrySentinel |
-| **COL-BG-4** | En état T3+, BorderGuard doit fermer les frontières non essentielles |
+| **COL-BG-1** | WorrySentinel ne dÃ©finit jamais de frontiÃ¨re (responsabilitÃ© de BorderGuard) |
+| **COL-BG-2** | BorderGuard applique le durcissement imposÃ© par WorrySentinel |
+| **COL-BG-3** | Les anomalies I/O dÃ©tectÃ©es par BorderGuard sont observÃ©es par WorrySentinel |
+| **COL-BG-4** | En Ã©tat T3+, BorderGuard doit fermer les frontiÃ¨res non essentielles |
 
-**Référence Documentation Fondatrice :** Section 9.5 (Relation avec BorderGuard)
+**RÃ©fÃ©rence Documentation Fondatrice :** Section 9.5 (Relation avec BorderGuard)
 
 ---
 
@@ -440,57 +440,57 @@ interface TransitionProposal {
 
 **Principe fondamental :**
 
-> MasterButler expose les capacités disponibles. WorrySentinel gouverne les permissions actives en limitant les capacités accessibles selon le niveau de sécurité et l'état de confiance.
+> MasterButler expose les capacitÃ©s disponibles. WorrySentinel gouverne les permissions actives en limitant les capacitÃ©s accessibles selon le niveau de sÃ©curitÃ© et l'Ã©tat de confiance.
 
-**Responsabilités respectives :**
+**ResponsabilitÃ©s respectives :**
 
 | Aspect | MasterButler | WorrySentinel |
 |--------|--------------|---------------|
-| Catalogue des capacités | ✅ Autorité | ❌ Aucune |
-| Exposition des capacités | ✅ Exécution | ❌ Aucune |
-| Limitation des capacités | ✅ Exécution | ✅ Gouvernance |
-| Permissions actives | ❌ Consommateur | ✅ Définition |
+| Catalogue des capacitÃ©s | âœ… AutoritÃ© | âŒ Aucune |
+| Exposition des capacitÃ©s | âœ… ExÃ©cution | âŒ Aucune |
+| Limitation des capacitÃ©s | âœ… ExÃ©cution | âœ… Gouvernance |
+| Permissions actives | âŒ Consommateur | âœ… DÃ©finition |
 
 **Flux d'interaction :**
 
 ```
-┌─────────────┐                      ┌─────────────┐
-│WorrySentinel│  Capacités limitées  │MasterButler │
-│             │ ──────────────────► │             │
-│             │                      │             │
-│             │  État permissions    │             │
-│             │ ◄────────────────── │             │
-│             │                      │             │
-│ (gouverne)  │                      │ (expose)    │
-└─────────────┘                      └─────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚WorrySentinelâ”‚  CapacitÃ©s limitÃ©es  â”‚MasterButler â”‚
+â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚             â”‚  Ã‰tat permissions    â”‚             â”‚
+â”‚             â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚ (gouverne)  â”‚                      â”‚ (expose)    â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Contrat d'interface :**
 
-| Direction | Données échangées | Format |
+| Direction | DonnÃ©es Ã©changÃ©es | Format |
 |-----------|-------------------|--------|
-| WS → MB | Capacités à limiter | `CapabilityLimitations` |
-| WS → MB | Capacités à bloquer (état T2+) | `BlockedCapabilities` |
-| MB → WS | État des permissions actives | `PermissionStateReport` |
+| WS â†’ MB | CapacitÃ©s Ã  limiter | `CapabilityLimitations` |
+| WS â†’ MB | CapacitÃ©s Ã  bloquer (Ã©tat T2+) | `BlockedCapabilities` |
+| MB â†’ WS | Ã‰tat des permissions actives | `PermissionStateReport` |
 
 **Impact de la gouvernance sur MasterButler :**
 
-| État de confiance | Impact sur MasterButler |
+| Ã‰tat de confiance | Impact sur MasterButler |
 |-------------------|-------------------------|
-| **T0 (Normal)** | Toutes les capacités disponibles |
-| **T1 (Instable)** | Logging renforcé des usages de capacités |
-| **T2 (Dégradé)** | Capacités sensibles limitées |
-| **T3 (Restreint)** | Seules capacités essentielles disponibles |
-| **T4 (Bloqué)** | Aucune capacité disponible (mode diagnostic) |
+| **T0 (Normal)** | Toutes les capacitÃ©s disponibles |
+| **T1 (Instable)** | Logging renforcÃ© des usages de capacitÃ©s |
+| **T2 (DÃ©gradÃ©)** | CapacitÃ©s sensibles limitÃ©es |
+| **T3 (Restreint)** | Seules capacitÃ©s essentielles disponibles |
+| **T4 (BloquÃ©)** | Aucune capacitÃ© disponible (mode diagnostic) |
 
-**Règles de collaboration :**
+**RÃ¨gles de collaboration :**
 
-| ID | Règle |
+| ID | RÃ¨gle |
 |----|-------|
-| **COL-MB-1** | WorrySentinel ne modifie jamais le catalogue de capacités |
-| **COL-MB-2** | MasterButler applique les limitations imposées par WorrySentinel |
-| **COL-MB-3** | MasterButler peut consulter WorrySentinel pour connaître les permissions actives |
-| **COL-MB-4** | Les capacités critiques sont bloquées automatiquement en état T3+ |
+| **COL-MB-1** | WorrySentinel ne modifie jamais le catalogue de capacitÃ©s |
+| **COL-MB-2** | MasterButler applique les limitations imposÃ©es par WorrySentinel |
+| **COL-MB-3** | MasterButler peut consulter WorrySentinel pour connaÃ®tre les permissions actives |
+| **COL-MB-4** | Les capacitÃ©s critiques sont bloquÃ©es automatiquement en Ã©tat T3+ |
 
 ---
 
@@ -500,48 +500,48 @@ interface TransitionProposal {
 
 **Principe fondamental :**
 
-> BondingBrother médiatise les échanges entre produits et écosystème. WorrySentinel observe les comportements des produits via BondingBrother pour détecter des anomalies.
+> BondingBrother mÃ©diatise les Ã©changes entre produits et Ã©cosystÃ¨me. WorrySentinel observe les comportements des produits via BondingBrother pour dÃ©tecter des anomalies.
 
-**Responsabilités respectives :**
+**ResponsabilitÃ©s respectives :**
 
 | Aspect | BondingBrother | WorrySentinel |
 |--------|----------------|---------------|
-| Médiation produits ↔ cores | ✅ Autorité | ❌ Aucune |
-| Transport des décisions | ✅ Exécution | ❌ Aucune |
-| Observation comportements | ✅ Source | ❌ Consommateur |
-| Signalement d'anomalies | ✅ Émetteur | ❌ Observateur |
+| MÃ©diation produits â†” cores | âœ… AutoritÃ© | âŒ Aucune |
+| Transport des dÃ©cisions | âœ… ExÃ©cution | âŒ Aucune |
+| Observation comportements | âœ… Source | âŒ Consommateur |
+| Signalement d'anomalies | âœ… Ã‰metteur | âŒ Observateur |
 
 **Flux d'interaction :**
 
 ```
-┌─────────────┐                      ┌───────────────┐
-│BondingBrother│ Comportements       │ WorrySentinel │
-│             │ produits             │               │
-│             │ ──────────────────► │               │
-│             │                      │               │
-│             │ Contraintes état     │               │
-│             │ ◄────────────────── │               │
-│             │                      │               │
-│ (transporte)│                      │  (observe)    │
-└─────────────┘                      └───────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚BondingBrotherâ”‚ Comportements       â”‚ WorrySentinel â”‚
+â”‚             â”‚ produits             â”‚               â”‚
+â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚               â”‚
+â”‚             â”‚                      â”‚               â”‚
+â”‚             â”‚ Contraintes Ã©tat     â”‚               â”‚
+â”‚             â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚               â”‚
+â”‚             â”‚                      â”‚               â”‚
+â”‚ (transporte)â”‚                      â”‚  (observe)    â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Contrat d'interface :**
 
-| Direction | Données échangées | Format |
+| Direction | DonnÃ©es Ã©changÃ©es | Format |
 |-----------|-------------------|--------|
-| BB → WS | Comportements anormaux des produits | `ProductBehaviorSignal` |
-| BB → WS | Patterns d'usage suspects | `SuspiciousPatternSignal` |
-| WS → BB | Contraintes liées à l'état global | `StateConstraints` |
+| BB â†’ WS | Comportements anormaux des produits | `ProductBehaviorSignal` |
+| BB â†’ WS | Patterns d'usage suspects | `SuspiciousPatternSignal` |
+| WS â†’ BB | Contraintes liÃ©es Ã  l'Ã©tat global | `StateConstraints` |
 
-**Règles de collaboration :**
+**RÃ¨gles de collaboration :**
 
-| ID | Règle |
+| ID | RÃ¨gle |
 |----|-------|
 | **COL-BB-1** | WorrySentinel n'interagit jamais directement avec les produits |
-| **COL-BB-2** | BondingBrother remonte les comportements anormaux à WorrySentinel |
-| **COL-BB-3** | WorrySentinel peut imposer des contraintes sur les échanges en état dégradé |
-| **COL-BB-4** | BondingBrother informe les produits de l'état global (via contraintes) |
+| **COL-BB-2** | BondingBrother remonte les comportements anormaux Ã  WorrySentinel |
+| **COL-BB-3** | WorrySentinel peut imposer des contraintes sur les Ã©changes en Ã©tat dÃ©gradÃ© |
+| **COL-BB-4** | BondingBrother informe les produits de l'Ã©tat global (via contraintes) |
 
 ---
 
@@ -551,74 +551,74 @@ interface TransitionProposal {
 
 **Principe fondamental :**
 
-> LogisticsSteward gouverne l'allocation des ressources. WorrySentinel supervise LogisticsSteward pour détecter les dérives et peut imposer un durcissement des règles d'arbitrage.
+> LogisticsSteward gouverne l'allocation des ressources. WorrySentinel supervise LogisticsSteward pour dÃ©tecter les dÃ©rives et peut imposer un durcissement des rÃ¨gles d'arbitrage.
 
-**Responsabilités respectives :**
+**ResponsabilitÃ©s respectives :**
 
 | Aspect | LogisticsSteward | WorrySentinel |
 |--------|------------------|---------------|
-| Gouvernance des ressources | ✅ Autorité | ❌ Aucune |
-| Arbitrage de quotas | ✅ Autorité | ❌ Aucune |
-| Durcissement des quotas | ✅ Exécution | ✅ Déclenchement |
-| Détection de dérives | ❌ Source | ✅ Observateur |
+| Gouvernance des ressources | âœ… AutoritÃ© | âŒ Aucune |
+| Arbitrage de quotas | âœ… AutoritÃ© | âŒ Aucune |
+| Durcissement des quotas | âœ… ExÃ©cution | âœ… DÃ©clenchement |
+| DÃ©tection de dÃ©rives | âŒ Source | âœ… Observateur |
 
 **Flux d'interaction :**
 
 ```
-┌─────────────┐                      ┌───────────────┐
-│WorrySentinel│                      │LogisticsSteward│
-│             │ ←── signaux alloc ── │               │
-│             │                      │               │
-│             │ ── contraintes ───→ │               │
-│             │                      │               │
-│             │ ── durcissement ──→ │               │
-│             │    (si T1+)          │               │
-│             │                      │               │
-│             │ ←── confirmation ─── │               │
-│             │                      │               │
-│(supervise)  │                      │ (arbitre)     │
-└─────────────┘                      └───────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚WorrySentinelâ”‚                      â”‚LogisticsStewardâ”‚
+â”‚             â”‚ â†â”€â”€ signaux alloc â”€â”€ â”‚               â”‚
+â”‚             â”‚                      â”‚               â”‚
+â”‚             â”‚ â”€â”€ contraintes â”€â”€â”€â†’ â”‚               â”‚
+â”‚             â”‚                      â”‚               â”‚
+â”‚             â”‚ â”€â”€ durcissement â”€â”€â†’ â”‚               â”‚
+â”‚             â”‚    (si T1+)          â”‚               â”‚
+â”‚             â”‚                      â”‚               â”‚
+â”‚             â”‚ â†â”€â”€ confirmation â”€â”€â”€ â”‚               â”‚
+â”‚             â”‚                      â”‚               â”‚
+â”‚(supervise)  â”‚                      â”‚ (arbitre)     â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Contrat d'interface :**
 
-| Direction | Données échangées | Format |
+| Direction | DonnÃ©es Ã©changÃ©es | Format |
 |-----------|-------------------|--------|
-| LS → WS | Signaux d'allocation | `AllocationSignal` |
-| LS → WS | Dérives détectées | `AllocationDrift` |
-| WS → LS | Contraintes sécuritaires | `SecurityConstraints` |
-| WS → LS | Directive de durcissement | `HardeningDirective` |
-| LS → WS | Confirmation d'application | `ApplicationConfirmation` |
+| LS â†’ WS | Signaux d'allocation | `AllocationSignal` |
+| LS â†’ WS | DÃ©rives dÃ©tectÃ©es | `AllocationDrift` |
+| WS â†’ LS | Contraintes sÃ©curitaires | `SecurityConstraints` |
+| WS â†’ LS | Directive de durcissement | `HardeningDirective` |
+| LS â†’ WS | Confirmation d'application | `ApplicationConfirmation` |
 
-**Règles d'interaction (RÈGLE-WS-LS-*) :**
+**RÃ¨gles d'interaction (RÃˆGLE-WS-LS-*) :**
 
-| ID | Règle |
+| ID | RÃ¨gle |
 |----|-------|
-| **RÈGLE-WS-LS-1** | WorrySentinel peut imposer des contraintes sécuritaires sur les décisions d'arbitrage de LogisticsSteward |
-| **RÈGLE-WS-LS-2** | En état T2+, LogisticsSteward doit appliquer des quotas plus restrictifs selon les directives de WorrySentinel |
-| **RÈGLE-WS-LS-3** | WorrySentinel observe les patterns d'allocation de ressources pour détecter des anomalies sécuritaires |
-| **RÈGLE-WS-LS-4** | Toute dérive d'allocation signalée par WorrySentinel doit être traitée par LogisticsSteward |
+| **RÃˆGLE-WS-LS-1** | WorrySentinel peut imposer des contraintes sÃ©curitaires sur les dÃ©cisions d'arbitrage de LogisticsSteward |
+| **RÃˆGLE-WS-LS-2** | En Ã©tat T2+, LogisticsSteward doit appliquer des quotas plus restrictifs selon les directives de WorrySentinel |
+| **RÃˆGLE-WS-LS-3** | WorrySentinel observe les patterns d'allocation de ressources pour dÃ©tecter des anomalies sÃ©curitaires |
+| **RÃˆGLE-WS-LS-4** | Toute dÃ©rive d'allocation signalÃ©e par WorrySentinel doit Ãªtre traitÃ©e par LogisticsSteward |
 
 **Impact de la gouvernance sur LogisticsSteward :**
 
-| État de confiance | Impact sur LogisticsSteward |
+| Ã‰tat de confiance | Impact sur LogisticsSteward |
 |-------------------|----------------------------|
 | **T0 (Normal)** | Arbitrage normal, quotas standards |
 | **T1 (Instable)** | Surveillance accrue des allocations |
-| **T2 (Dégradé)** | Quotas réduits, priorités aplaties |
+| **T2 (DÃ©gradÃ©)** | Quotas rÃ©duits, prioritÃ©s aplaties |
 | **T3 (Restreint)** | Quotas minimaux, ressources essentielles uniquement |
-| **T4 (Bloqué)** | Gel des allocations, mode maintenance |
+| **T4 (BloquÃ©)** | Gel des allocations, mode maintenance |
 
-**Règles de collaboration :**
+**RÃ¨gles de collaboration :**
 
-| ID | Règle |
+| ID | RÃ¨gle |
 |----|-------|
-| **COL-LS-1** | WorrySentinel ne se substitue jamais à LogisticsSteward pour l'arbitrage |
-| **COL-LS-2** | LogisticsSteward reste souverain sur les décisions d'allocation |
+| **COL-LS-1** | WorrySentinel ne se substitue jamais Ã  LogisticsSteward pour l'arbitrage |
+| **COL-LS-2** | LogisticsSteward reste souverain sur les dÃ©cisions d'allocation |
 | **COL-LS-3** | WorrySentinel supervise sans remplacer |
-| **COL-LS-4** | Les directives de durcissement sont obligatoires en état T2+ |
+| **COL-LS-4** | Les directives de durcissement sont obligatoires en Ã©tat T2+ |
 
-**Référence Documentation Fondatrice :** Section 9.6 (Relation avec LogisticsSteward)
+**RÃ©fÃ©rence Documentation Fondatrice :** Section 9.6 (Relation avec LogisticsSteward)
 
 ---
 
@@ -628,65 +628,65 @@ interface TransitionProposal {
 
 **Principe fondamental :**
 
-> TAMR définit quand l'humain intervient. WorrySentinel gouverne les droits humains selon l'état de confiance et signale les situations nécessitant une intervention.
+> TAMR dÃ©finit quand l'humain intervient. WorrySentinel gouverne les droits humains selon l'Ã©tat de confiance et signale les situations nÃ©cessitant une intervention.
 
-**Responsabilités respectives :**
+**ResponsabilitÃ©s respectives :**
 
 | Aspect | TAMR | WorrySentinel |
 |--------|------|---------------|
-| Points d'intervention humaine | ✅ Autorité | ❌ Aucune |
-| Validation humaine | ✅ Exécution | ❌ Aucune |
-| Droits humains actifs | ❌ Exécution | ✅ Gouvernance |
-| Signalement besoin intervention | ❌ Destinataire | ✅ Émetteur |
+| Points d'intervention humaine | âœ… AutoritÃ© | âŒ Aucune |
+| Validation humaine | âœ… ExÃ©cution | âŒ Aucune |
+| Droits humains actifs | âŒ ExÃ©cution | âœ… Gouvernance |
+| Signalement besoin intervention | âŒ Destinataire | âœ… Ã‰metteur |
 
 **Flux d'interaction :**
 
 ```
-┌─────────────┐                      ┌─────────────┐
-│WorrySentinel│  Droits humains      │    TAMR     │
-│             │  applicables         │             │
-│             │ ──────────────────► │             │
-│             │                      │             │
-│             │  Besoin intervention │             │
-│             │ ──────────────────► │             │
-│             │                      │             │
-│             │  Override état       │             │
-│             │ ◄────────────────── │             │
-│             │                      │             │
-│ (gouverne)  │                      │ (valide)    │
-└─────────────┘                      └─────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚WorrySentinelâ”‚  Droits humains      â”‚    TAMR     â”‚
+â”‚             â”‚  applicables         â”‚             â”‚
+â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚             â”‚  Besoin intervention â”‚             â”‚
+â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚             â”‚  Override Ã©tat       â”‚             â”‚
+â”‚             â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚ (gouverne)  â”‚                      â”‚ (valide)    â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Contrat d'interface :**
 
-| Direction | Données échangées | Format |
+| Direction | DonnÃ©es Ã©changÃ©es | Format |
 |-----------|-------------------|--------|
-| WS → TAMR | Droits humains applicables selon état | `HumanRightsConstraints` |
-| WS → TAMR | Demande d'intervention | `InterventionRequest` |
-| TAMR → WS | Override d'état de confiance | `TrustStateOverride` |
-| TAMR → WS | Validation de transition | `TransitionValidation` |
+| WS â†’ TAMR | Droits humains applicables selon Ã©tat | `HumanRightsConstraints` |
+| WS â†’ TAMR | Demande d'intervention | `InterventionRequest` |
+| TAMR â†’ WS | Override d'Ã©tat de confiance | `TrustStateOverride` |
+| TAMR â†’ WS | Validation de transition | `TransitionValidation` |
 
-**Cas nécessitant une escalade vers TAMR :**
+**Cas nÃ©cessitant une escalade vers TAMR :**
 
-| Cas | Description | Sévérité |
+| Cas | Description | SÃ©vÃ©ritÃ© |
 |-----|-------------|----------|
-| Transition vers T3 | Confirmation humaine requise | Élevée |
+| Transition vers T3 | Confirmation humaine requise | Ã‰levÃ©e |
 | Transition vers T4 | Confirmation humaine obligatoire | Critique |
-| Override d'état | Humain souhaite modifier l'état | Variable |
-| Ambiguïté sécuritaire | Signaux contradictoires | Moyenne |
-| Sortie de T4 | Restauration du système | Critique |
+| Override d'Ã©tat | Humain souhaite modifier l'Ã©tat | Variable |
+| AmbiguÃ¯tÃ© sÃ©curitaire | Signaux contradictoires | Moyenne |
+| Sortie de T4 | Restauration du systÃ¨me | Critique |
 
-**Règles de collaboration :**
+**RÃ¨gles de collaboration :**
 
-| ID | Règle |
+| ID | RÃ¨gle |
 |----|-------|
-| **COL-TAMR-1** | WorrySentinel signale automatiquement les cas d'escalade à TAMR |
-| **COL-TAMR-2** | TAMR peut valider ou refuser une transition d'état proposée |
-| **COL-TAMR-3** | En état T3+, TAMR est requis pour toute décision critique |
-| **COL-TAMR-4** | TAMR peut forcer un override d'état (traçabilité obligatoire) |
-| **COL-TAMR-5** | La sortie de T4 nécessite obligatoirement une validation TAMR |
+| **COL-TAMR-1** | WorrySentinel signale automatiquement les cas d'escalade Ã  TAMR |
+| **COL-TAMR-2** | TAMR peut valider ou refuser une transition d'Ã©tat proposÃ©e |
+| **COL-TAMR-3** | En Ã©tat T3+, TAMR est requis pour toute dÃ©cision critique |
+| **COL-TAMR-4** | TAMR peut forcer un override d'Ã©tat (traÃ§abilitÃ© obligatoire) |
+| **COL-TAMR-5** | La sortie de T4 nÃ©cessite obligatoirement une validation TAMR |
 
-**Référence Documentation Fondatrice :** Section 9.5 (Relation avec TAMR)
+**RÃ©fÃ©rence Documentation Fondatrice :** Section 9.5 (Relation avec TAMR)
 
 ---
 
@@ -696,69 +696,69 @@ interface TransitionProposal {
 
 **Principe fondamental :**
 
-> MiyukiniAdmin est l'interface d'administration. WorrySentinel expose la gouvernance de sécurité pour consultation et permet une configuration limitée sous validation StrongFather.
+> MiyukiniAdmin est l'interface d'administration. WorrySentinel expose la gouvernance de sÃ©curitÃ© pour consultation et permet une configuration limitÃ©e sous validation StrongFather.
 
-**Responsabilités respectives :**
+**ResponsabilitÃ©s respectives :**
 
 | Aspect | MiyukiniAdmin | WorrySentinel |
 |--------|---------------|---------------|
-| Interface d'administration | ✅ Autorité | ❌ Aucune |
-| Consultation gouvernance | ✅ Client | ✅ Fournisseur |
-| Configuration gouvernance | ✅ Demandeur | ✅ Sous validation SF |
-| Modification directe | ❌ INTERDIT | ❌ N/A |
+| Interface d'administration | âœ… AutoritÃ© | âŒ Aucune |
+| Consultation gouvernance | âœ… Client | âœ… Fournisseur |
+| Configuration gouvernance | âœ… Demandeur | âœ… Sous validation SF |
+| Modification directe | âŒ INTERDIT | âŒ N/A |
 
 **Flux d'interaction :**
 
 ```
-┌─────────────┐                      ┌─────────────┐
-│MiyukiniAdmin│  Consultation état   │WorrySentinel│
-│             │ ──────────────────► │             │
-│             │                      │             │
-│             │  État + historique   │             │
-│             │ ◄────────────────── │             │
-│             │                      │             │
-│             │  Demande config      │             │
-│             │ ──────────────────► │             │
-│             │       │              │             │
-│             │       ▼              │             │
-│             │  ┌─────────────┐    │             │
-│             │  │ StrongFather│    │             │
-│             │  │ (validation)│    │             │
-│             │  └─────────────┘    │             │
-│             │                      │             │
-│ (administre)│                      │ (expose)    │
-└─────────────┘                      └─────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚MiyukiniAdminâ”‚  Consultation Ã©tat   â”‚WorrySentinelâ”‚
+â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚             â”‚  Ã‰tat + historique   â”‚             â”‚
+â”‚             â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚             â”‚  Demande config      â”‚             â”‚
+â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
+â”‚             â”‚       â”‚              â”‚             â”‚
+â”‚             â”‚       â–¼              â”‚             â”‚
+â”‚             â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”‚             â”‚
+â”‚             â”‚  â”‚ StrongFatherâ”‚    â”‚             â”‚
+â”‚             â”‚  â”‚ (validation)â”‚    â”‚             â”‚
+â”‚             â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â”‚             â”‚
+â”‚             â”‚                      â”‚             â”‚
+â”‚ (administre)â”‚                      â”‚ (expose)    â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Contrat d'interface :**
 
-| Direction | Données échangées | Format |
+| Direction | DonnÃ©es Ã©changÃ©es | Format |
 |-----------|-------------------|--------|
-| MA → WS | Demande état actuel | `StateQuery` |
-| WS → MA | État de confiance + niveau sécurité | `GovernanceState` |
-| WS → MA | Historique des transitions | `TransitionHistory` |
-| MA → WS | Demande de configuration | `ConfigurationRequest` |
-| WS → MA | Résultat de configuration (après validation SF) | `ConfigurationResult` |
+| MA â†’ WS | Demande Ã©tat actuel | `StateQuery` |
+| WS â†’ MA | Ã‰tat de confiance + niveau sÃ©curitÃ© | `GovernanceState` |
+| WS â†’ MA | Historique des transitions | `TransitionHistory` |
+| MA â†’ WS | Demande de configuration | `ConfigurationRequest` |
+| WS â†’ MA | RÃ©sultat de configuration (aprÃ¨s validation SF) | `ConfigurationResult` |
 
-**Interactions autorisées (INTERACTION-ADMIN-*) :**
+**Interactions autorisÃ©es (INTERACTION-ADMIN-*) :**
 
 | ID | Interaction | Validation requise |
 |----|-------------|-------------------|
-| **INTERACTION-ADMIN-1** | Consultation des niveaux de sécurité | Non |
-| **INTERACTION-ADMIN-2** | Consultation des états de confiance | Non |
+| **INTERACTION-ADMIN-1** | Consultation des niveaux de sÃ©curitÃ© | Non |
+| **INTERACTION-ADMIN-2** | Consultation des Ã©tats de confiance | Non |
 | **INTERACTION-ADMIN-3** | Configuration de la gouvernance | Oui (StrongFather) |
 
-**Règles de collaboration :**
+**RÃ¨gles de collaboration :**
 
-| ID | Règle |
+| ID | RÃ¨gle |
 |----|-------|
-| **RÈGLE-ADMIN-1** | Toute configuration de gouvernance par MiyukiniAdmin doit être validée par StrongFather |
-| **RÈGLE-ADMIN-2** | Toute interaction avec MiyukiniAdmin concernant la gouvernance de sécurité est tracée avec identité, moment, et justification |
-| **COL-MA-1** | MiyukiniAdmin peut consulter librement l'état de gouvernance |
-| **COL-MA-2** | MiyukiniAdmin ne peut jamais modifier directement l'état de confiance |
-| **COL-MA-3** | Les configurations sont soumises à validation, pas imposées |
+| **RÃˆGLE-ADMIN-1** | Toute configuration de gouvernance par MiyukiniAdmin doit Ãªtre validÃ©e par StrongFather |
+| **RÃˆGLE-ADMIN-2** | Toute interaction avec MiyukiniAdmin concernant la gouvernance de sÃ©curitÃ© est tracÃ©e avec identitÃ©, moment, et justification |
+| **COL-MA-1** | MiyukiniAdmin peut consulter librement l'Ã©tat de gouvernance |
+| **COL-MA-2** | MiyukiniAdmin ne peut jamais modifier directement l'Ã©tat de confiance |
+| **COL-MA-3** | Les configurations sont soumises Ã  validation, pas imposÃ©es |
 
-**Référence Documentation Fondatrice :** Section 11 (Interaction avec MiyukiniAdmin)
+**RÃ©fÃ©rence Documentation Fondatrice :** Section 11 (Interaction avec MiyukiniAdmin)
 
 ---
 
@@ -766,185 +766,186 @@ interface TransitionProposal {
 
 ### 6.1 Principe fondamental
 
-**Les produits ne parlent jamais directement à WorrySentinel.**
+**Les produits ne parlent jamais directement Ã  WorrySentinel.**
 
-Toute interaction passe par BondingBrother qui médiatise les échanges.
+Toute interaction passe par BondingBrother qui mÃ©diatise les Ã©changes.
 
 ```
-┌─────────────┐                                    ┌─────────────┐
-│  Produits   │ ──────────────────────────────────► │WorrySentinel│
-│             │              ❌ INTERDIT            │             │
-└─────────────┘                                    └─────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Produits   â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚WorrySentinelâ”‚
+â”‚             â”‚              âŒ INTERDIT            â”‚             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
-┌─────────────┐    via     ┌───────────────┐       ┌─────────────┐
-│  Produits   │ ─────────► │BondingBrother │ ────► │WorrySentinel│
-│             │            │               │       │ (observation)│
-└─────────────┘            └───────────────┘       └─────────────┘
-               ✅ AUTORISÉ
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    via     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Produits   â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚BondingBrother â”‚ â”€â”€â”€â”€â–º â”‚WorrySentinelâ”‚
+â”‚             â”‚            â”‚               â”‚       â”‚ (observation)â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+               âœ… AUTORISÃ‰
 ```
 
-### 6.2 Ce que les produits reçoivent (via BondingBrother)
+### 6.2 Ce que les produits reÃ§oivent (via BondingBrother)
 
 | Type | Description |
 |------|-------------|
-| État global | État de confiance actuel (T0-T4) |
-| Contraintes | Limitations actives dues à l'état |
-| Alertes | Notifications de changement d'état |
+| Ã‰tat global | Ã‰tat de confiance actuel (T0-T4) |
+| Contraintes | Limitations actives dues Ã  l'Ã©tat |
+| Alertes | Notifications de changement d'Ã©tat |
 
 ### 6.3 Ce que les produits ne peuvent pas demander
 
 | Demande | Statut |
 |---------|--------|
-| Modification de l'état de confiance | ❌ INTERDIT |
-| Bypass des contraintes de sécurité | ❌ INTERDIT |
-| Configuration directe de WorrySentinel | ❌ INTERDIT |
+| Modification de l'Ã©tat de confiance | âŒ INTERDIT |
+| Bypass des contraintes de sÃ©curitÃ© | âŒ INTERDIT |
+| Configuration directe de WorrySentinel | âŒ INTERDIT |
 
 ---
 
 ## 7. Diagramme d'interaction globale
 
 ```
-                                    ┌────────────────────────────────────────────────┐
-                                    │              WORRY SENTINEL                     │
-                                    │  ┌───────────┐  ┌───────────┐  ┌───────────┐   │
-                                    │  │ Niveaux   │  │  États    │  │Dégradation│   │
-                                    │  │ sécurité  │  │ confiance │  │progressive│   │
-                                    │  │   (0-4)   │  │  (T0-T4)  │  │           │   │
-                                    │  └─────┬─────┘  └─────┬─────┘  └─────┬─────┘   │
-                                    │        │              │              │         │
-                                    │        └──────────────┼──────────────┘         │
-                                    │                       │                        │
-                                    └───────────────────────┼────────────────────────┘
-                                                            │
-           ┌────────────────────────────────────────────────┼────────────────────────────────────────────────┐
-           │                         │                      │                       │                        │
-           │ FLUX DESCENDANT         │                      │                       │         FLUX MONTANT   │
-           │ (gouvernance)           ▼                      │                       ▼         (observation)  │
-           │                 ┌───────────────┐              │               ┌───────────────┐                │
-           │                 │ StrongFather  │              │               │    Kernel     │                │
-           │                 │  (sévérité)   │              │               │  (signaux)    │                │
-           │                 └───────────────┘              │               └───────────────┘                │
-           │                         │                      │                       │                        │
-           ▼                         ▼                      │                       ▼                        │
-   ┌───────────────┐         ┌───────────────┐              │               ┌───────────────┐                │
-   │ MasterButler  │         │  BorderGuard  │              │               │  KindMother   │                │
-   │ (permissions) │         │(durcissement) │              │               │(incohérences) │                │
-   └───────────────┘         └───────────────┘              │               └───────┬───────┘                │
-           │                         │                      │                       │                        │
-           ▼                         ▼                      │                       ▼                        │
-   ┌───────────────┐         ┌───────────────┐              │               ┌───────────────┐                │
-   │Logistics      │         │     TAMR      │              │               │BondingBrother │                │
-   │Steward(quotas)│         │(droits humain)│              │               │ (comportements│                │
-   └───────────────┘         └───────────────┘              │               │   produits)   │                │
-                                                            │               └───────┬───────┘                │
-                                                            │                       │                        │
-                                                            │                       ▼                        │
-                                                            │               ┌───────────────┐                │
-                                                            │               │  CaringNanny  │◄───────────────┘
-                                                            │               │(consolidation)│
-                                                            │               └───────┬───────┘
-                                                            │                       │
-                                                            └───────────────────────┘
+                                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                                    â”‚              WORRY SENTINEL                     â”‚
+                                    â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+                                    â”‚  â”‚ Niveaux   â”‚  â”‚  Ã‰tats    â”‚  â”‚DÃ©gradationâ”‚   â”‚
+                                    â”‚  â”‚ sÃ©curitÃ©  â”‚  â”‚ confiance â”‚  â”‚progressiveâ”‚   â”‚
+                                    â”‚  â”‚   (0-4)   â”‚  â”‚  (T0-T4)  â”‚  â”‚           â”‚   â”‚
+                                    â”‚  â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜   â”‚
+                                    â”‚        â”‚              â”‚              â”‚         â”‚
+                                    â”‚        â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜         â”‚
+                                    â”‚                       â”‚                        â”‚
+                                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                                            â”‚
+           â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+           â”‚                         â”‚                      â”‚                       â”‚                        â”‚
+           â”‚ FLUX DESCENDANT         â”‚                      â”‚                       â”‚         FLUX MONTANT   â”‚
+           â”‚ (gouvernance)           â–¼                      â”‚                       â–¼         (observation)  â”‚
+           â”‚                 â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”              â”‚               â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                â”‚
+           â”‚                 â”‚ StrongFather  â”‚              â”‚               â”‚    Kernel     â”‚                â”‚
+           â”‚                 â”‚  (sÃ©vÃ©ritÃ©)   â”‚              â”‚               â”‚  (signaux)    â”‚                â”‚
+           â”‚                 â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜              â”‚               â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                â”‚
+           â”‚                         â”‚                      â”‚                       â”‚                        â”‚
+           â–¼                         â–¼                      â”‚                       â–¼                        â”‚
+   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”              â”‚               â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                â”‚
+   â”‚ MasterButler  â”‚         â”‚  BorderGuard  â”‚              â”‚               â”‚  KindMother   â”‚                â”‚
+   â”‚ (permissions) â”‚         â”‚(durcissement) â”‚              â”‚               â”‚(incohÃ©rences) â”‚                â”‚
+   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜              â”‚               â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜                â”‚
+           â”‚                         â”‚                      â”‚                       â”‚                        â”‚
+           â–¼                         â–¼                      â”‚                       â–¼                        â”‚
+   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”              â”‚               â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                â”‚
+   â”‚Logistics      â”‚         â”‚     TAMR      â”‚              â”‚               â”‚BondingBrother â”‚                â”‚
+   â”‚Steward(quotas)â”‚         â”‚(droits humain)â”‚              â”‚               â”‚ (comportementsâ”‚                â”‚
+   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜              â”‚               â”‚   produits)   â”‚                â”‚
+                                                            â”‚               â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜                â”‚
+                                                            â”‚                       â”‚                        â”‚
+                                                            â”‚                       â–¼                        â”‚
+                                                            â”‚               â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                â”‚
+                                                            â”‚               â”‚  CaringNanny  â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                                            â”‚               â”‚(consolidation)â”‚
+                                                            â”‚               â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜
+                                                            â”‚                       â”‚
+                                                            â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
                                                                     Propositions
                                                                     de transition
 ```
 
 ---
 
-## 8. Synthèse des contrats d'interface
+## 8. SynthÃ¨se des contrats d'interface
 
 ### 8.1 Matrice des interactions
 
-| Core | Direction | Nature | Données échangées |
+| Core | Direction | Nature | DonnÃ©es Ã©changÃ©es |
 |------|-----------|--------|-------------------|
-| **Kernel** | K → WS, WS → K | Observation | Signaux ↔ Contraintes sondes |
-| **StrongFather** | WS → SF, SF → WS | Gouvernance | Niveaux/états → Décisions refusées |
-| **KindMother** | KM → CN → WS | Observation indirecte | Incohérences (via CaringNanny) |
-| **CaringNanny** | CN ↔ WS | Observation + Proposition | Signaux consolidés ↔ État actuel |
-| **BorderGuard** | WS → BG, BG → WS | Gouvernance | Durcissement ↔ Anomalies I/O |
-| **MasterButler** | WS → MB, MB → WS | Gouvernance | Capacités limitées ↔ État permissions |
-| **BondingBrother** | BB → WS, WS → BB | Observation | Comportements ↔ Contraintes |
-| **LogisticsSteward** | LS ↔ WS | Supervision + Gouvernance | Signaux alloc ↔ Contraintes/Durcissement |
-| **TAMR** | WS → TAMR, TAMR → WS | Escalade + Gouvernance | Droits/Interventions ↔ Overrides |
-| **MiyukiniAdmin** | MA → WS, WS → MA | Exposition | Consultation ↔ État/Configuration |
+| **Kernel** | K â†’ WS, WS â†’ K | Observation | Signaux â†” Contraintes sondes |
+| **StrongFather** | WS â†’ SF, SF â†’ WS | Gouvernance | Niveaux/Ã©tats â†’ DÃ©cisions refusÃ©es |
+| **KindMother** | KM â†’ CN â†’ WS | Observation indirecte | IncohÃ©rences (via CaringNanny) |
+| **CaringNanny** | CN â†” WS | Observation + Proposition | Signaux consolidÃ©s â†” Ã‰tat actuel |
+| **BorderGuard** | WS â†’ BG, BG â†’ WS | Gouvernance | Durcissement â†” Anomalies I/O |
+| **MasterButler** | WS â†’ MB, MB â†’ WS | Gouvernance | CapacitÃ©s limitÃ©es â†” Ã‰tat permissions |
+| **BondingBrother** | BB â†’ WS, WS â†’ BB | Observation | Comportements â†” Contraintes |
+| **LogisticsSteward** | LS â†” WS | Supervision + Gouvernance | Signaux alloc â†” Contraintes/Durcissement |
+| **TAMR** | WS â†’ TAMR, TAMR â†’ WS | Escalade + Gouvernance | Droits/Interventions â†” Overrides |
+| **MiyukiniAdmin** | MA â†’ WS, WS â†’ MA | Exposition | Consultation â†” Ã‰tat/Configuration |
 
 ### 8.2 Garanties de service
 
 | Garantie | Valeur | Condition |
 |----------|--------|-----------|
-| Disponibilité de la gouvernance | 100% | Invariant structural |
-| Traçabilité des interactions | 100% | Invariant INV-WS-8 |
+| DisponibilitÃ© de la gouvernance | 100% | Invariant structural |
+| TraÃ§abilitÃ© des interactions | 100% | Invariant INV-WS-8 |
 | Non-blocage des flux | 100% | Invariant structural |
-| Cohérence inter-états | 100% | Invariant INV-GOV-2 |
+| CohÃ©rence inter-Ã©tats | 100% | Invariant INV-GOV-2 |
 
 ---
 
-## 9. Conformité aux Lois d'Autonomie
+## 9. ConformitÃ© aux Lois d'Autonomie
 
-### 9.1 LOI-1 : Aucune dépendance externe critique
+### 9.1 LOI-1 : Aucune dÃ©pendance externe critique
 
 Toutes les interactions sont locales. WorrySentinel n'a pas besoin de service externe pour interagir avec les autres cores.
 
-### 9.2 LOI-2 : Le système accepte l'isolement
+### 9.2 LOI-2 : Le systÃ¨me accepte l'isolement
 
-En mode isolé, WorrySentinel continue de gouverner la sécurité localement. Les états de confiance sont maintenus sans dépendance externe.
+En mode isolÃ©, WorrySentinel continue de gouverner la sÃ©curitÃ© localement. Les Ã©tats de confiance sont maintenus sans dÃ©pendance externe.
 
-### 9.3 LOI-6 : L'autonomie n'empêche pas la fédération
+### 9.3 LOI-6 : L'autonomie n'empÃªche pas la fÃ©dÃ©ration
 
-Les informations de gouvernance peuvent être partagées entre COG via BondingBrother, avec contraintes de WorrySentinel.
+Les informations de gouvernance peuvent Ãªtre partagÃ©es entre COG via BondingBrother, avec contraintes de WorrySentinel.
 
 ---
 
-## 10. Références
+## 10. RÃ©fÃ©rences
 
 ### Documents fondateurs
 
 - [WorrySentinel - Documentation Fondatrice](../foundation/WorrySentinel%20-%20Documentation%20Fondatrice.md)
 
-### Contrats associés
+### Contrats associÃ©s
 
 - [WorrySentinel - Architecture & Flows](./WorrySentinel%20-%20Architecture%20&%20Flows.md)
 
-### Documents de référence
+### Documents de rÃ©fÃ©rence
 
-- [Miyukini Conceptual References - Security Levels](../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md)
-- [Miyukini Conceptual References - Integrity Degradation System](../../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md)
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+- [Miyukini Conceptual References - Security Levels](..//..//..//miyukini-webway-system//reference//_index.md)
+- [Miyukini Conceptual References - Integrity Degradation System](..//..//..//miyukini-webway-system//reference//_index.md)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 11. Mini log de génération
+## 11. Mini log de gÃ©nÃ©ration
 
-### Décision structurelle D1 : Séparation flux descendant/montant
+### DÃ©cision structurelle D1 : SÃ©paration flux descendant/montant
 
-**Décision prise :** Le document est structuré autour des deux flux fondamentaux de WorrySentinel (gouvernance et observation) pour refléter sa nature de pression verticale transversale.
+**DÃ©cision prise :** Le document est structurÃ© autour des deux flux fondamentaux de WorrySentinel (gouvernance et observation) pour reflÃ©ter sa nature de pression verticale transversale.
 
-**Application :** Section 4 dédiée aux flux globaux, et chaque relation avec un core précise sa direction principale.
+**Application :** Section 4 dÃ©diÃ©e aux flux globaux, et chaque relation avec un core prÃ©cise sa direction principale.
 
-### Décision structurelle D2 : Relations multiples avec certains cores
+### DÃ©cision structurelle D2 : Relations multiples avec certains cores
 
-**Décision prise :** Certains cores ont des relations bidirectionnelles avec WorrySentinel (ex: CaringNanny, LogisticsSteward). Chaque direction est documentée comme flux distinct.
+**DÃ©cision prise :** Certains cores ont des relations bidirectionnelles avec WorrySentinel (ex: CaringNanny, LogisticsSteward). Chaque direction est documentÃ©e comme flux distinct.
 
-**Application :** Contrats d'interface avec directions explicites pour chaque échange.
+**Application :** Contrats d'interface avec directions explicites pour chaque Ã©change.
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-**Vérification effectuée :**
-- ✅ Cohérence avec Documentation Fondatrice : Toutes les relations documentées en Section 9
-- ✅ Respect INV-WS-1 : Aucune autorité sur l'implémentation
-- ✅ Respect INV-WS-2 : Aucune autorité sur l'exécution
-- ✅ Respect INV-WS-3 : Aucune autorité sur la persistance
-- ✅ Respect INV-WS-4 : Aucune modification d'état directe
-- ✅ Respect INV-WS-5 : Aucune logique temporelle technique
-- ✅ Flux descendant conforme : Section 9 (gouvernance)
-- ✅ Flux montant conforme : Section 9 (observation)
-- ✅ Relation LogisticsSteward conforme : RÈGLE-WS-LS-1 à RÈGLE-WS-LS-4
+**VÃ©rification effectuÃ©e :**
+- âœ… CohÃ©rence avec Documentation Fondatrice : Toutes les relations documentÃ©es en Section 9
+- âœ… Respect INV-WS-1 : Aucune autoritÃ© sur l'implÃ©mentation
+- âœ… Respect INV-WS-2 : Aucune autoritÃ© sur l'exÃ©cution
+- âœ… Respect INV-WS-3 : Aucune autoritÃ© sur la persistance
+- âœ… Respect INV-WS-4 : Aucune modification d'Ã©tat directe
+- âœ… Respect INV-WS-5 : Aucune logique temporelle technique
+- âœ… Flux descendant conforme : Section 9 (gouvernance)
+- âœ… Flux montant conforme : Section 9 (observation)
+- âœ… Relation LogisticsSteward conforme : RÃˆGLE-WS-LS-1 Ã  RÃˆGLE-WS-LS-4
 
-**Conclusion :** Aucune contradiction détectée. Le document est cohérent avec la Documentation Fondatrice.
+**Conclusion :** Aucune contradiction dÃ©tectÃ©e. Le document est cohÃ©rent avec la Documentation Fondatrice.
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** Contrat normatif — ARCHITECTURE  
-**Référence :** WorrySentinel - Documentation Fondatrice v1.2, Sections 9 et 11
+**Statut :** Contrat normatif â€” ARCHITECTURE  
+**RÃ©fÃ©rence :** WorrySentinel - Documentation Fondatrice v1.2, Sections 9 et 11
+

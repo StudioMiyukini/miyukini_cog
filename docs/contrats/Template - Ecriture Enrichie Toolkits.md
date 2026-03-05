@@ -1,18 +1,18 @@
-# Template — Écriture enrichie des Toolkits
+﻿# Template â€” Ã‰criture enrichie des Toolkits
 
 **Version :** 1.0  
-**Statut :** Template — à adapter par Toolkit  
+**Statut :** Template â€” Ã  adapter par Toolkit  
 **Date :** 2026-01-30  
 
 ---
 
 ## Contexte
 
-Ce document est la **template maître** pour l'écriture enrichie d'un Kit d'Outils (Toolkit) dans l'écosystème Miyukini. Il regroupe les structures types de chaque livrable : Documentation Fondatrice, Reference Outils, contrats (gouvernance, intégration, sécurité, bornage, dépendances), sécurité, dépendances/relations, et guide d'implémentation.
+Ce document est la **template maÃ®tre** pour l'Ã©criture enrichie d'un Kit d'Outils (Toolkit) dans l'Ã©cosystÃ¨me Miyukini. Il regroupe les structures types de chaque livrable : Documentation Fondatrice, Reference Outils, contrats (gouvernance, intÃ©gration, sÃ©curitÃ©, bornage, dÃ©pendances), sÃ©curitÃ©, dÃ©pendances/relations, et guide d'implÃ©mentation.
 
-**Usage :** Copier les sections concernées dans les fichiers du dossier `docs/tools/<MiyuXXX>/` et remplacer les placeholders `<MiyuXXX>`, `<ToolkitId>`, `<domain>`, etc. par les valeurs du kit.
+**Usage :** Copier les sections concernÃ©es dans les fichiers du dossier `docs/tools/<MiyuXXX>/` et remplacer les placeholders `<MiyuXXX>`, `<ToolkitId>`, `<domain>`, etc. par les valeurs du kit.
 
-**Référence :** [Miyukini Protocol - Ecriture Enrichie Toolkits](./Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md)
+**RÃ©fÃ©rence :** [Miyukini Protocol - Ecriture Enrichie Toolkits](./Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md)
 
 ---
 
@@ -23,70 +23,70 @@ Ce document est la **template maître** pour l'écriture enrichie d'un Kit d'Out
 | 1 | Documentation Fondatrice | Oui | `<MiyuXXX> - Documentation Fondatrice.md` |
 | 2 | Reference Outils | Oui | `<MiyuXXX> - Reference Outils.md` |
 | 3 | Tool Governance Compliance Contract | Oui | `contracts/governance/<MiyuXXX> - Tool Governance Compliance Contract.md` |
-| 4 | KindMother Integration Contract | Si écriture/lecture données métier | `contracts/integration/<MiyuXXX> - KindMother Integration Contract.md` |
-| 5 | Security and States Contract | Si niveau 3–4 ou règles spécifiques | `contracts/security/<MiyuXXX> - Security and States Contract.md` |
+| 4 | KindMother Integration Contract | Si Ã©criture/lecture donnÃ©es mÃ©tier | `contracts/integration/<MiyuXXX> - KindMother Integration Contract.md` |
+| 5 | Security and States Contract | Si niveau 3â€“4 ou rÃ¨gles spÃ©cifiques | `contracts/security/<MiyuXXX> - Security and States Contract.md` |
 | 6 | Runtime Boundary Contract | Si bornage explicite (BOUND-*) | `contracts/boundaries/<MiyuXXX> - Runtime Boundary Contract.md` |
-| 7 | Dependencies Contract | Si liste fermée à formaliser | `contracts/dependencies/<MiyuXXX> - Dependencies Contract.md` |
-| 8 | Reference Implementation Guidelines | Recommandé | `implementation/<MiyuXXX> - Reference Implementation Guidelines.md` |
+| 7 | Dependencies Contract | Si liste fermÃ©e Ã  formaliser | `contracts/dependencies/<MiyuXXX> - Dependencies Contract.md` |
+| 8 | Reference Implementation Guidelines | RecommandÃ© | `implementation/<MiyuXXX> - Reference Implementation Guidelines.md` |
 
 ---
 
-## 2. Template — Documentation Fondatrice
+## 2. Template â€” Documentation Fondatrice
 
 **Fichier :** `docs/tools/<MiyuXXX>/<MiyuXXX> - Documentation Fondatrice.md`
 
 ```markdown
-# <MiyuXXX> — Documentation Fondatrice
+# <MiyuXXX> â€” Documentation Fondatrice
 
 ## 1. Contexte
 
-**<MiyuXXX>** est le **kit d'outils (Toolkit)** de [domaine / description courte] de l'écosystème Miyukini. [Une phrase sur les capacités exposées et l'alignement éventuel avec un document de référence, ex. Équivalents Moteur Forum.]
+**<MiyuXXX>** est le **kit d'outils (Toolkit)** de [domaine / description courte] de l'Ã©cosystÃ¨me Miyukini. [Une phrase sur les capacitÃ©s exposÃ©es et l'alignement Ã©ventuel avec un document de rÃ©fÃ©rence, ex. Ã‰quivalents Moteur Forum.]
 
-L'autorité sur [données / périmètre] appartient à **KindMother** [ou N/A]. <MiyuXXX> expose des capacités d'exécution gouvernée ; les décisions [ex. modification autorisée, règles métier] relèvent de **StrongFather**.
+L'autoritÃ© sur [donnÃ©es / pÃ©rimÃ¨tre] appartient Ã  **KindMother** [ou N/A]. <MiyuXXX> expose des capacitÃ©s d'exÃ©cution gouvernÃ©e ; les dÃ©cisions [ex. modification autorisÃ©e, rÃ¨gles mÃ©tier] relÃ¨vent de **StrongFather**.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-
----
-
-## 2. Portée / Scope
-
-**Ce document définit :** l'identité et la définition canonique de <MiyuXXX>, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother [si applicable].
-
-**Hors scope :** [ex. identité de base MiyuAuth ; affichage MiyuWeb ; implémentation détaillée.]
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 3. Définition canonique
+## 2. PortÃ©e / Scope
 
-> **<MiyuXXX> est une composition officielle d'outils de [domaine / description], déclarée et gouvernée par l'environnement.**
+**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de <MiyuXXX>, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother [si applicable].
 
-- <MiyuXXX> **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
-- <MiyuXXX> **n'ajoute aucune logique métier** : il orchestre des capacités atomiques ; décision [ex. modification, règles] = StrongFather.
+**Hors scope :** [ex. identitÃ© de base MiyuAuth ; affichage MiyuWeb ; implÃ©mentation dÃ©taillÃ©e.]
 
-**Règle fondamentale :** [ex. Toute écriture = **WriteIntent** vers KindMother. Règles métier = StrongFather.]
+---
+
+## 3. DÃ©finition canonique
+
+> **<MiyuXXX> est une composition officielle d'outils de [domaine / description], dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+
+- <MiyuXXX> **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
+- <MiyuXXX> **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques ; dÃ©cision [ex. modification, rÃ¨gles] = StrongFather.
+
+**RÃ¨gle fondamentale :** [ex. Toute Ã©criture = **WriteIntent** vers KindMother. RÃ¨gles mÃ©tier = StrongFather.]
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.<domain>.<name>` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `<domain>` |
-| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le détail de chaque outil est décrit dans [<MiyuXXX> - Reference Outils](./<MiyuXXX> - Reference Outils.md).
+Le dÃ©tail de chaque outil est dÃ©crit dans `<MiyuXXX> - Reference Outils`.
 
 | ToolId | Description courte |
 |--------|---------------------|
 | `tool.<domain>.<action1>` | [Description] |
 | `tool.<domain>.<action2>` | [Description] ; autorisation = StrongFather / WriteIntent KindMother |
-| … | … |
+| â€¦ | â€¦ |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools.
 
@@ -94,214 +94,214 @@ Le détail de chaque outil est décrit dans [<MiyuXXX> - Reference Outils](./<Mi
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini Conceptual References - Tools et Toolkits.md)). Spécificité : [ex. décision = StrongFather ; toute écriture = WriteIntent KindMother.]
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//README.md Conceptual References - Tools et Toolkits.md)). SpÃ©cificitÃ© : [ex. dÃ©cision = StrongFather ; toute Ã©criture = WriteIntent KindMother.]
 
 ---
 
-## 7. Niveau de sécurité et états
+## 7. Niveau de sÃ©curitÃ© et Ã©tats
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
-| **Niveau de sécurité du kit** | **0 à 4** (justifier : public, personnel, sensible, critique) |
-| **États autorisés** | `HEALTHY`, `DEGRADED` |
-| **États interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
+| **Niveau de sÃ©curitÃ© du kit** | **0 Ã  4** (justifier : public, personnel, sensible, critique) |
+| **Ã‰tats autorisÃ©s** | `HEALTHY`, `DEGRADED` |
+| **Ã‰tats interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
 
-[Si niveau 3–4 : renvoi au contrat Security ou doctrine sécurité.]
+[Si niveau 3â€“4 : renvoi au contrat Security ou doctrine sÃ©curitÃ©.]
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autorité sur [données]. Toute création ou mise à jour passe par **WriteIntent** vers KindMother. [Schéma / périmètre = KindMother.]
+**KindMother** est l'autoritÃ© sur [donnÃ©es]. Toute crÃ©ation ou mise Ã  jour passe par **WriteIntent** vers KindMother. [SchÃ©ma / pÃ©rimÃ¨tre = KindMother.]
 
-Les obligations de conformité détaillées sont dans [<MiyuXXX> - Tool Governance Compliance Contract](./contracts/governance/<MiyuXXX> - Tool Governance Compliance Contract.md).
+Les obligations de conformitÃ© dÃ©taillÃ©es sont dans `<MiyuXXX> - Tool Governance Compliance Contract`.
 
-[Si pas de KindMother : « Ce kit ne persiste pas de données métier ; pas de relation KindMother. »]
+[Si pas de KindMother : Â« Ce kit ne persiste pas de donnÃ©es mÃ©tier ; pas de relation KindMother. Â»]
 
 ---
 
-## 9. Dépendances et relations
+## 9. DÃ©pendances et relations
 
-| Type | Dépendance | Rôle |
+| Type | DÃ©pendance | RÃ´le |
 |------|------------|------|
-| Cores | Master Butler, StrongFather, [KindMother / WorrySentinel / Caring Nanny / Ever Buddy] | Catalogue, décision, [données / sécurité / état / cycle de vie] |
+| Cores | Master Butler, StrongFather, [KindMother / WorrySentinel / Caring Nanny / Ever Buddy] | Catalogue, dÃ©cision, [donnÃ©es / sÃ©curitÃ© / Ã©tat / cycle de vie] |
 | Kernel | Id, Logger, Clock, Config, Lifecycle | Technique |
-| Autres Toolkits | [MiyuYYY si consommé] | [Capacité consommée] |
+| Autres Toolkits | [MiyuYYY si consommÃ©] | [CapacitÃ© consommÃ©e] |
 
-**Règle :** Pas de dépendance non déclarée ; pas d'Opérateur comme dépendance directe (flux via BondingBrother).
+**RÃ¨gle :** Pas de dÃ©pendance non dÃ©clarÃ©e ; pas d'OpÃ©rateur comme dÃ©pendance directe (flux via BondingBrother).
 
-[Si liste fermée formalisée : renvoyer au Dependencies Contract.]
+[Si liste fermÃ©e formalisÃ©e : renvoyer au Dependencies Contract.]
 
 ---
 
 ## 10. Alignement MIP
 
-La documentation et la future implémentation de <MiyuXXX> sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). À l'implémentation, le code fournissant les Tools <MiyuXXX> devra être balisé MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit généré selon le [Protocole MIP v1](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+La documentation et la future implÃ©mentation de <MiyuXXX> sont conÃ§ues pour Ãªtre **compatibles MIP v1** (Miyukini Index Protocol). Ã€ l'implÃ©mentation, le code fournissant les Tools <MiyuXXX> devra Ãªtre balisÃ© MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit gÃ©nÃ©rÃ© selon le [Protocole MIP v1](Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
-- **Domaine** : cohérent avec le ToolkitId (ex. `<domain>`).
+- **Domaine** : cohÃ©rent avec le ToolkitId (ex. `<domain>`).
 - **Layer** : Strate 6 (outil / toolkit) dans layers.json.
-- **Blocs** : Chaque Tool = unité logique avec `id`, `do`, `role`, `layer` pour blocks.json.
+- **Blocs** : Chaque Tool = unitÃ© logique avec `id`, `do`, `role`, `layer` pour blocks.json.
 
 ---
 
-## 11. Références croisées
+## 11. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
-| [Document référence métier si applicable] | [Lien] |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//miyukini-webway-system//reference//_index.md) |
+| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](..//miyukini-webway-system//reference//_index.md) |
+| [Document rÃ©fÃ©rence mÃ©tier si applicable] | [Lien] |
 | Master Butler - Tool Governance Contract | [Lien] |
 
 ---
 
-**Date de création :** YYYY-MM-DD  
+**Date de crÃ©ation :** YYYY-MM-DD  
 **Version :** 1.0  
-**Statut :** Document de référence fondateur
+**Statut :** Document de rÃ©fÃ©rence fondateur
 ```
 
 ---
 
-## 3. Template — Reference Outils
+## 3. Template â€” Reference Outils
 
 **Fichier :** `docs/tools/<MiyuXXX>/<MiyuXXX> - Reference Outils.md`
 
 ```markdown
-# <MiyuXXX> — Reference Outils
+# <MiyuXXX> â€” Reference Outils
 
 ## Contexte
 
-Ce document liste les **Outils (Tools)** composant le Toolkit **<MiyuXXX>** (`toolkit.<domain>.<name>`). Chaque outil est une capacité atomique gouvernée ; [décision / persistance] relève de [StrongFather / KindMother].
+Ce document liste les **Outils (Tools)** composant le Toolkit **<MiyuXXX>** (`toolkit.<domain>.<name>`). Chaque outil est une capacitÃ© atomique gouvernÃ©e ; [dÃ©cision / persistance] relÃ¨ve de [StrongFather / KindMother].
 
-**Référence :** [<MiyuXXX> - Documentation Fondatrice](./<MiyuXXX> - Documentation Fondatrice.md)
+**RÃ©fÃ©rence :** `<MiyuXXX> - Documentation Fondatrice`
 
 ---
 
 ## Liste des outils
 
-| ToolId | Action | Niveau sécurité | Note |
+| ToolId | Action | Niveau sÃ©curitÃ© | Note |
 |--------|--------|-----------------|------|
-| `tool.<domain>.<action1>` | [Action courte] | 0–4 | Lecture / WriteIntent KindMother / Autorisation StrongFather |
-| `tool.<domain>.<action2>` | [Action courte] | 0–4 | … |
-| … | … | … | … |
+| `tool.<domain>.<action1>` | [Action courte] | 0â€“4 | Lecture / WriteIntent KindMother / Autorisation StrongFather |
+| `tool.<domain>.<action2>` | [Action courte] | 0â€“4 | â€¦ |
+| â€¦ | â€¦ | â€¦ | â€¦ |
 
 ---
 
-**Invariant :** [Règle clé du kit, ex. Toute écriture = WriteIntent KindMother.]
+**Invariant :** [RÃ¨gle clÃ© du kit, ex. Toute Ã©criture = WriteIntent KindMother.]
 ```
 
 ---
 
-## 4. Template — Tool Governance Compliance Contract (obligatoire)
+## 4. Template â€” Tool Governance Compliance Contract (obligatoire)
 
 **Fichier :** `docs/tools/<MiyuXXX>/contracts/governance/<MiyuXXX> - Tool Governance Compliance Contract.md`
 
 ```markdown
-# <MiyuXXX> — Tool Governance Compliance Contract
+# <MiyuXXX> â€” Tool Governance Compliance Contract
 
 ## Contexte
 
-Conformité aux obligations communes : [Master Butler - Tool Governance Compliance Template](../../../../core/MasterButler/contracts/tools/Master Butler - Tool Governance Compliance Template.md).
+ConformitÃ© aux obligations communes : [Master Butler - Tool Governance Compliance Template](..//_index.md Butler - Tool Governance Compliance Template.md).
 
 **ToolkitId :** `toolkit.<domain>.<name>`
 
 ---
 
-## Obligations spécifiques <MiyuXXX>
+## Obligations spÃ©cifiques <MiyuXXX>
 
-- [Obligation 1 : ex. Décision (modification autorisée) = StrongFather.]
-- [Obligation 2 : ex. Toute écriture = **WriteIntent** vers KindMother.]
-- [Obligation 3 : ex. Schéma / périmètre = KindMother. Règles métier = StrongFather.]
-- [Autres obligations spécifiques au kit.]
+- [Obligation 1 : ex. DÃ©cision (modification autorisÃ©e) = StrongFather.]
+- [Obligation 2 : ex. Toute Ã©criture = **WriteIntent** vers KindMother.]
+- [Obligation 3 : ex. SchÃ©ma / pÃ©rimÃ¨tre = KindMother. RÃ¨gles mÃ©tier = StrongFather.]
+- [Autres obligations spÃ©cifiques au kit.]
 
 ---
 
-**Date de création :** YYYY-MM-DD  
+**Date de crÃ©ation :** YYYY-MM-DD  
 **Version :** 1.0  
-**Statut :** Contrat de conformité
+**Statut :** Contrat de conformitÃ©
 ```
 
 ---
 
-## 5. Template — KindMother Integration Contract (optionnel)
+## 5. Template â€” KindMother Integration Contract (optionnel)
 
 **Fichier :** `docs/tools/<MiyuXXX>/contracts/integration/<MiyuXXX> - KindMother Integration Contract.md`
 
-**À utiliser si :** le kit produit des WriteIntent ou lit des données métier via KindMother.
+**Ã€ utiliser si :** le kit produit des WriteIntent ou lit des donnÃ©es mÃ©tier via KindMother.
 
 ```markdown
-# <MiyuXXX> — KindMother Integration Contract
+# <MiyuXXX> â€” KindMother Integration Contract
 
 ## Contexte
 
-Ce contrat définit les **règles d'intégration** entre le Toolkit <MiyuXXX> et **KindMother** (Core de données). Il complète le [Tool Governance Compliance Contract](../governance/<MiyuXXX> - Tool Governance Compliance Contract.md).
+Ce contrat dÃ©finit les **rÃ¨gles d'intÃ©gration** entre le Toolkit <MiyuXXX> et **KindMother** (Core de donnÃ©es). Il complÃ¨te le `Tool Governance Compliance Contract`.
 
 **ToolkitId :** `toolkit.<domain>.<name>`
 
 ---
 
-## Périmètre des données
+## PÃ©rimÃ¨tre des donnÃ©es
 
-| Donnée / entité | Autorité | Lecture | Écriture |
+| DonnÃ©e / entitÃ© | AutoritÃ© | Lecture | Ã‰criture |
 |-----------------|----------|---------|----------|
-| [Entité 1] | KindMother | [ToolId(s)] | WriteIntent via [ToolId(s)] |
-| [Entité 2] | KindMother | … | … |
+| [EntitÃ© 1] | KindMother | [ToolId(s)] | WriteIntent via [ToolId(s)] |
+| [EntitÃ© 2] | KindMother | â€¦ | â€¦ |
 
 ---
 
-## Règles d'accès
+## RÃ¨gles d'accÃ¨s
 
-- Toute **lecture** de données métier : via flux gouverné (données déjà présentes dans le flux ou requête via KindMother selon contrat environnement).
-- Toute **écriture** : **WriteIntent** vers KindMother ; aucun accès direct à MiyuSQL ou à la base depuis le kit.
-- Schéma / structure des données : définis par KindMother ; le kit ne modifie pas le schéma.
+- Toute **lecture** de donnÃ©es mÃ©tier : via flux gouvernÃ© (donnÃ©es dÃ©jÃ  prÃ©sentes dans le flux ou requÃªte via KindMother selon contrat environnement).
+- Toute **Ã©criture** : **WriteIntent** vers KindMother ; aucun accÃ¨s direct Ã  MiyuSQL ou Ã  la base depuis le kit.
+- SchÃ©ma / structure des donnÃ©es : dÃ©finis par KindMother ; le kit ne modifie pas le schÃ©ma.
 
 ---
 
 ## WriteIntent (si applicable)
 
-- **Types d'écriture** : [ex. création profil, mise à jour champ, suppression douce.]
-- **Validation** : StrongFather décide de l'autorisation ; KindMother valide et persiste.
-- **Traçabilité** : conformément au contrat KindMother et au Logger Kernel.
+- **Types d'Ã©criture** : [ex. crÃ©ation profil, mise Ã  jour champ, suppression douce.]
+- **Validation** : StrongFather dÃ©cide de l'autorisation ; KindMother valide et persiste.
+- **TraÃ§abilitÃ©** : conformÃ©ment au contrat KindMother et au Logger Kernel.
 
 ---
 
-**Date de création :** YYYY-MM-DD  
+**Date de crÃ©ation :** YYYY-MM-DD  
 **Version :** 1.0  
-**Statut :** Contrat d'intégration
+**Statut :** Contrat d'intÃ©gration
 ```
 
 ---
 
-## 6. Template — Security and States Contract (optionnel)
+## 6. Template â€” Security and States Contract (optionnel)
 
 **Fichier :** `docs/tools/<MiyuXXX>/contracts/security/<MiyuXXX> - Security and States Contract.md`
 
-**À utiliser si :** niveau de sécurité 3–4 ou règles spécifiques (sanitization, CSP, audit, états dégradés).
+**Ã€ utiliser si :** niveau de sÃ©curitÃ© 3â€“4 ou rÃ¨gles spÃ©cifiques (sanitization, CSP, audit, Ã©tats dÃ©gradÃ©s).
 
 ```markdown
-# <MiyuXXX> — Security and States Contract
+# <MiyuXXX> â€” Security and States Contract
 
 ## Contexte
 
-Ce contrat définit les **règles de sécurité et d'états** applicables au Toolkit <MiyuXXX>. Il complète le [Tool Governance Compliance Contract](../governance/<MiyuXXX> - Tool Governance Compliance Contract.md) et s'aligne sur [WorrySentinel](../../../../reference/…) et [Caring Nanny](../../../../reference/…).
+Ce contrat dÃ©finit les **rÃ¨gles de sÃ©curitÃ© et d'Ã©tats** applicables au Toolkit <MiyuXXX>. Il complÃ¨te le `Tool Governance Compliance Contract` et s'aligne sur [WorrySentinel](..//_index.md) et [Caring Nanny](..//_index.md).
 
 **ToolkitId :** `toolkit.<domain>.<name>`
 
 ---
 
-## Niveau de sécurité
+## Niveau de sÃ©curitÃ©
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
 | **Niveau du kit** | 0 | 1 | 2 | 3 | 4 |
 | **Justification** | [Public / Standard / Sensitive / Critical / Highest] |
-| **Données concernées** | [Type de données] |
+| **DonnÃ©es concernÃ©es** | [Type de donnÃ©es] |
 
 ---
 
-## États autorisés / interdits
+## Ã‰tats autorisÃ©s / interdits
 
-| État système | Autorisé pour <MiyuXXX> |
+| Ã‰tat systÃ¨me | AutorisÃ© pour <MiyuXXX> |
 |--------------|--------------------------|
 | HEALTHY | Oui |
 | DEGRADED | Oui / Non |
@@ -310,33 +310,33 @@ Ce contrat définit les **règles de sécurité et d'états** applicables au Too
 
 ---
 
-## Règles spécifiques (si applicable)
+## RÃ¨gles spÃ©cifiques (si applicable)
 
-- **Sanitization** : [ex. sortie HTML, CSP, validation entrées.]
-- **Audit** : [ex. traçabilité des appels, pas d'exposition de données sensibles.]
-- **Dégradation** : [ex. en SECURITY_LOCKDOWN, refus d'exécution et signal.]
+- **Sanitization** : [ex. sortie HTML, CSP, validation entrÃ©es.]
+- **Audit** : [ex. traÃ§abilitÃ© des appels, pas d'exposition de donnÃ©es sensibles.]
+- **DÃ©gradation** : [ex. en SECURITY_LOCKDOWN, refus d'exÃ©cution et signal.]
 
 ---
 
-**Date de création :** YYYY-MM-DD  
+**Date de crÃ©ation :** YYYY-MM-DD  
 **Version :** 1.0  
-**Statut :** Contrat de sécurité
+**Statut :** Contrat de sÃ©curitÃ©
 ```
 
 ---
 
-## 7. Template — Runtime Boundary Contract (optionnel)
+## 7. Template â€” Runtime Boundary Contract (optionnel)
 
 **Fichier :** `docs/tools/<MiyuXXX>/contracts/boundaries/<MiyuXXX> - Runtime Boundary Contract.md`
 
-**À utiliser si :** bornage explicite (BOUND-*), interdictions d'accès ou de périmètre.
+**Ã€ utiliser si :** bornage explicite (BOUND-*), interdictions d'accÃ¨s ou de pÃ©rimÃ¨tre.
 
 ```markdown
-# <MiyuXXX> — Runtime Boundary Contract
+# <MiyuXXX> â€” Runtime Boundary Contract
 
 ## Contexte
 
-Ce contrat définit les **bornes d'exécution** du Toolkit <MiyuXXX>. Il formalise les interdictions (BOUND-*) et le périmètre autorisé.
+Ce contrat dÃ©finit les **bornes d'exÃ©cution** du Toolkit <MiyuXXX>. Il formalise les interdictions (BOUND-*) et le pÃ©rimÃ¨tre autorisÃ©.
 
 **ToolkitId :** `toolkit.<domain>.<name>`
 
@@ -344,91 +344,91 @@ Ce contrat définit les **bornes d'exécution** du Toolkit <MiyuXXX>. Il formali
 
 ## Interdictions (BOUND-*)
 
-| Code | Interdiction | Implémentation |
+| Code | Interdiction | ImplÃ©mentation |
 |------|--------------|----------------|
-| BOUND-1 | Pas de décision ALLOW/DENY | Exécution uniquement sur mandat |
-| BOUND-2 | Pas de choix métier | Exécution sur données/paramètres fournis |
-| BOUND-3 | Pas d'accès direct non gouverné | WriteIntent KindMother ou pas de persistance métier |
+| BOUND-1 | Pas de dÃ©cision ALLOW/DENY | ExÃ©cution uniquement sur mandat |
+| BOUND-2 | Pas de choix mÃ©tier | ExÃ©cution sur donnÃ©es/paramÃ¨tres fournis |
+| BOUND-3 | Pas d'accÃ¨s direct non gouvernÃ© | WriteIntent KindMother ou pas de persistance mÃ©tier |
 | BOUND-4 | Pas de modification du contexte d'autorisation | Lecture seule du contexte |
-| BOUND-5 | Pas de connaissance de l'Opérateur appelant | Contexte anonymisé (niveau, permissions) |
-| BOUND-6 | Pas de capacité nouvelle | Uniquement ToolIds déclarés |
+| BOUND-5 | Pas de connaissance de l'OpÃ©rateur appelant | Contexte anonymisÃ© (niveau, permissions) |
+| BOUND-6 | Pas de capacitÃ© nouvelle | Uniquement ToolIds dÃ©clarÃ©s |
 
-[Ajouter bornes spécifiques au kit si besoin.]
-
----
-
-## Périmètre autorisé
-
-- **Entrées** : Contexte gouverné, paramètres fournis par le flux.
-- **Sorties** : Résultat ou erreur contractuelle ; pas d'effet de bord non documenté.
-- **Accès réseau / IO** : [Interdit / limité à …]
+[Ajouter bornes spÃ©cifiques au kit si besoin.]
 
 ---
 
-**Date de création :** YYYY-MM-DD  
+## PÃ©rimÃ¨tre autorisÃ©
+
+- **EntrÃ©es** : Contexte gouvernÃ©, paramÃ¨tres fournis par le flux.
+- **Sorties** : RÃ©sultat ou erreur contractuelle ; pas d'effet de bord non documentÃ©.
+- **AccÃ¨s rÃ©seau / IO** : [Interdit / limitÃ© Ã  â€¦]
+
+---
+
+**Date de crÃ©ation :** YYYY-MM-DD  
 **Version :** 1.0  
 **Statut :** Contrat de bornage
 ```
 
 ---
 
-## 8. Template — Dependencies Contract (optionnel)
+## 8. Template â€” Dependencies Contract (optionnel)
 
 **Fichier :** `docs/tools/<MiyuXXX>/contracts/dependencies/<MiyuXXX> - Dependencies Contract.md`
 
-**À utiliser si :** liste fermée de dépendances (Cores, Kernel, autres Toolkits) à formaliser.
+**Ã€ utiliser si :** liste fermÃ©e de dÃ©pendances (Cores, Kernel, autres Toolkits) Ã  formaliser.
 
 ```markdown
-# <MiyuXXX> — Dependencies Contract
+# <MiyuXXX> â€” Dependencies Contract
 
 ## Contexte
 
-Ce contrat définit la **liste fermée des dépendances** du Toolkit <MiyuXXX>. Aucune dépendance non listée n'est autorisée.
+Ce contrat dÃ©finit la **liste fermÃ©e des dÃ©pendances** du Toolkit <MiyuXXX>. Aucune dÃ©pendance non listÃ©e n'est autorisÃ©e.
 
 **ToolkitId :** `toolkit.<domain>.<name>`
 
 ---
 
-## Dépendances autorisées
+## DÃ©pendances autorisÃ©es
 
 | Type | Composant | Usage |
 |------|-----------|--------|
 | Cores | Master Butler | Catalogue, permissions |
-| Cores | StrongFather | Décision |
-| Cores | KindMother | WriteIntent, lecture données [si applicable] |
-| Cores | WorrySentinel | Niveau sécurité |
-| Cores | Caring Nanny | État système |
+| Cores | StrongFather | DÃ©cision |
+| Cores | KindMother | WriteIntent, lecture donnÃ©es [si applicable] |
+| Cores | WorrySentinel | Niveau sÃ©curitÃ© |
+| Cores | Caring Nanny | Ã‰tat systÃ¨me |
 | Cores | Ever Buddy | Cycle de vie [si applicable] |
 | Kernel | Id, Logger, Clock, Config, Lifecycle | Technique |
-| Toolkit | [MiyuYYY] | [Capacité consommée] |
+| Toolkit | [MiyuYYY] | [CapacitÃ© consommÃ©e] |
 
 ---
 
-## Règles
+## RÃ¨gles
 
-- Aucune dépendance vers un **Opérateur** (flux via BondingBrother).
-- Aucune librairie externe non déclarée dans l'environnement.
-- Modification de la liste = révision du contrat et de la Doc Fondatrice.
+- Aucune dÃ©pendance vers un **OpÃ©rateur** (flux via BondingBrother).
+- Aucune librairie externe non dÃ©clarÃ©e dans l'environnement.
+- Modification de la liste = rÃ©vision du contrat et de la Doc Fondatrice.
 
 ---
 
-**Date de création :** YYYY-MM-DD  
+**Date de crÃ©ation :** YYYY-MM-DD  
 **Version :** 1.0  
-**Statut :** Contrat de dépendances
+**Statut :** Contrat de dÃ©pendances
 ```
 
 ---
 
-## 9. Guide d'implémentation (Reference Implementation Guidelines)
+## 9. Guide d'implÃ©mentation (Reference Implementation Guidelines)
 
 **Fichier :** `docs/tools/<MiyuXXX>/implementation/<MiyuXXX> - Reference Implementation Guidelines.md`
 
-**Source :** Utiliser le [docs_tools - Reference Implementation Guidelines Template](../tools/docs_tools - Reference Implementation Guidelines Template.md) et l'adapter au kit en remplaçant :
+**Source :** Utiliser le [docs_tools - Reference Implementation Guidelines Template](..//tools//_index.md - Reference Implementation Guidelines Template.md) et l'adapter au kit en remplaÃ§ant :
 
 - MiyuXXX, ToolkitId, domaine
 - Liste des contrats sources du kit (Doc Fondatrice, Reference Outils, Governance, KindMother, Security, Boundary, Dependencies)
-- Principes spécifiques (sanitization, niveau sécurité, WriteIntent, etc.)
-- Patterns et spécificités du kit
+- Principes spÃ©cifiques (sanitization, niveau sÃ©curitÃ©, WriteIntent, etc.)
+- Patterns et spÃ©cificitÃ©s du kit
 
 Le guide est **informatif, non normatif** ; les contrats priment toujours.
 
@@ -436,31 +436,35 @@ Le guide est **informatif, non normatif** ; les contrats priment toujours.
 
 ## 10. Checklist finale avant publication
 
-- [ ] Documentation Fondatrice : Contexte, Portée, Définition canonique, Identifiant, Liste outils, Gouvernance, Sécurité/états, KindMother, Dépendances/relations, Alignement MIP, Références, lien vers contrat.
-- [ ] Reference Outils : Liste complète des ToolIds avec action, niveau sécurité, note.
-- [ ] Tool Governance Compliance Contract : Référence template Master Butler + obligations spécifiques.
-- [ ] Contrats optionnels : Rédigés si applicable (KindMother, Security, Boundary, Dependencies).
+- [ ] Documentation Fondatrice : Contexte, PortÃ©e, DÃ©finition canonique, Identifiant, Liste outils, Gouvernance, SÃ©curitÃ©/Ã©tats, KindMother, DÃ©pendances/relations, Alignement MIP, RÃ©fÃ©rences, lien vers contrat.
+- [ ] Reference Outils : Liste complÃ¨te des ToolIds avec action, niveau sÃ©curitÃ©, note.
+- [ ] Tool Governance Compliance Contract : RÃ©fÃ©rence template Master Butler + obligations spÃ©cifiques.
+- [ ] Contrats optionnels : RÃ©digÃ©s si applicable (KindMother, Security, Boundary, Dependencies).
 - [ ] Nomenclature : Fichiers sans accents, format `MiyuXXX - Sujet.md`.
 - [ ] Arborescence : `docs/tools/<MiyuXXX>/` avec contracts/, implementation/ si besoin.
 - [ ] Liens : Tous les liens relatifs valides ; lien MIP v1 vers `protocols/Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol.md`.
-- [ ] Terminologie : Glossaire respecté (Outil, Kit d'Outils, WriteIntent, KindMother, StrongFather, etc.).
+- [ ] Terminologie : Glossaire respectÃ© (Outil, Kit d'Outils, WriteIntent, KindMother, StrongFather, etc.).
 - [ ] ToolkitId : Format `toolkit.<domain>.<name>`.
 - [ ] Au moins deux Tools dans le Toolkit.
 
 ---
 
-## Références croisées
+## RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
 | Protocole Ecriture Enrichie Toolkits | [Miyukini Protocol - Ecriture Enrichie Toolkits](./Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md) |
-| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
-| Glossaire | [Miyukini Conceptual References - Glossaire](../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Master Butler - Tool Governance Compliance Template | [Master Butler - Tool Governance Compliance Template](../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md) |
+| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](..//miyukini-webway-system//reference//_index.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//miyukini-webway-system//reference//_index.md) |
+| Master Butler - Tool Governance Compliance Template | [Master Butler - Tool Governance Compliance Template](..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md) |
 | Reference Implementation Guidelines Template | [docs_tools - Reference Implementation Guidelines Template](../tools/docs_tools%20-%20Reference%20Implementation%20Guidelines%20Template.md) |
 
 ---
 
 **Date du template :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Template — à adapter par Toolkit dans docs/tools/<MiyuXXX>/
+**Statut :** Template â€” Ã  adapter par Toolkit dans docs/tools/<MiyuXXX>/
+
+
+
+

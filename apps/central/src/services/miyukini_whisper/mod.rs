@@ -15,9 +15,9 @@ pub fn MiyukiniWhisperView() -> Element {
     let mut language = use_signal(|| "auto".to_string());
     let mut stt_base_url = use_signal(|| "http://127.0.0.1:3003".to_string());
     let mut tts_base_url = use_signal(|| "http://127.0.0.1:3004".to_string());
-    let mut stt_health = use_signal(|| "Non teste".to_string());
-    let mut tts_health = use_signal(|| "Non teste".to_string());
-    let mut diag_error = use_signal(String::new);
+    let stt_health = use_signal(|| "Non teste".to_string());
+    let tts_health = use_signal(|| "Non teste".to_string());
+    let diag_error = use_signal(String::new);
 
     rsx! {
         div {
@@ -170,16 +170,19 @@ pub fn MiyukiniWhisperView() -> Element {
                             let stt = fetch_health(&stt_url).await;
                             let tts = fetch_health(&tts_url).await;
 
-                            match stt {
-                                Ok(msg) => stt_health_sig.set(msg),
+                            let stt_failed = stt.is_err();
+                            let tts_failed = tts.is_err();
+
+                            match &stt {
+                                Ok(msg) => stt_health_sig.set(msg.clone()),
                                 Err(err) => stt_health_sig.set(format!("Erreur: {err}")),
                             }
-                            match tts {
-                                Ok(msg) => tts_health_sig.set(msg),
+                            match &tts {
+                                Ok(msg) => tts_health_sig.set(msg.clone()),
                                 Err(err) => tts_health_sig.set(format!("Erreur: {err}")),
                             }
 
-                            if stt.is_err() || tts.is_err() {
+                            if stt_failed || tts_failed {
                                 diag_error_sig.set("Un ou plusieurs services sont injoignables.".to_string());
                             }
                         });

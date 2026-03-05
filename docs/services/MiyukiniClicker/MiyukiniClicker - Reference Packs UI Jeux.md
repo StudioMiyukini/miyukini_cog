@@ -1,13 +1,13 @@
-# MiyuClicker — Référence des packs UI jeux (ui/game_ui_pack)
+﻿# MiyuClicker â€” RÃ©fÃ©rence des packs UI jeux (ui/game_ui_pack)
 
 ## Contexte
 
-Le répertoire **`ui/game_ui_pack`** contient des packs d’assets UI et graphiques pour jeux. Ce document les inventorie, précise leur licence et leur contenu, et les **met en correspondance avec les besoins MiyuClicker** (Document Fondateur, Analyse Marché et Besoins Toolkits).
+Le rÃ©pertoire **`ui/game_ui_pack`** contient des packs dâ€™assets UI et graphiques pour jeux. Ce document les inventorie, prÃ©cise leur licence et leur contenu, et les **met en correspondance avec les besoins MiyuClicker** (Document Fondateur, Analyse MarchÃ© et Besoins Toolkits).
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Périmètre :** Inventaire des packs présents sous `ui/game_ui_pack`, licences, contenu, usage recommandé pour MiyuClicker.
-- **Hors périmètre :** Choix définitif d’assets par écran ; modifications des fichiers d’assets.
+- **PÃ©rimÃ¨tre :** Inventaire des packs prÃ©sents sous `ui/game_ui_pack`, licences, contenu, usage recommandÃ© pour MiyuClicker.
+- **Hors pÃ©rimÃ¨tre :** Choix dÃ©finitif dâ€™assets par Ã©cran ; modifications des fichiers dâ€™assets.
 
 ---
 
@@ -15,99 +15,99 @@ Le répertoire **`ui/game_ui_pack`** contient des packs d’assets UI et graphiq
 
 ### 1.1 CatUIFree
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
 | **Chemin** | `ui/game_ui_pack/CatUIFree/` |
 | **Contenu** | 2 PNG (dont `CatUIFree/free.png`) ; structure minimale. |
-| **Licence** | Non documentée dans le pack — **à vérifier** avant usage commercial. |
-| **Usage MiyuClicker** | Réserver pour tests ou vérifier licence ; ne pas utiliser en production sans clarification. |
+| **Licence** | Non documentÃ©e dans le pack â€” **Ã  vÃ©rifier** avant usage commercial. |
+| **Usage MiyuClicker** | RÃ©server pour tests ou vÃ©rifier licence ; ne pas utiliser en production sans clarification. |
 
 ---
 
 ### 1.2 Cute_Fantasy (Kenmi-art)
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
 | **Chemin** | `ui/game_ui_pack/Cute_Fantasy/Cute_Fantasy/` |
-| **Licence** | Usage commercial et non commercial autorisé. Modification autorisée. **Interdiction de redistribution / revente** (même modifié). |
+| **Licence** | Usage commercial et non commercial autorisÃ©. Modification autorisÃ©e. **Interdiction de redistribution / revente** (mÃªme modifiÃ©). |
 | **Source** | read_me.txt ; Kenmi-art, itch.io (Cute Fantasy RPG). |
 
-**Contenu (sprites, tuiles, décors) :**
+**Contenu (sprites, tuiles, dÃ©cors) :**
 
-| Catégorie | Détail | Pertinence MiyuClicker |
+| CatÃ©gorie | DÃ©tail | Pertinence MiyuClicker |
 |-----------|--------|-------------------------|
 | **Animals** | ~98 PNG | Faune, ambiance monde. |
-| **Buildings** | ~179 PNG | Bâtiments ville / cité — **gestion, cités-États**. |
-| **Crops** | Arbres fruitiers, récoltes, vignes | **Ressource nourriture**, fermes. |
-| **Enemies** | ~23 PNG | Ennemis, unités adverses. |
-| **Icons** | Food, Resources, Tools, Other (Outline + No Outline) | **Icônes ressources** (nourriture, matières, outils). |
-| **NPCs (Premade)** | Bartender, Chef, Farmer, Fisherman, Lumberjack, Miner | **« Gens »** par métier (affectation visuelle). |
-| **Outdoor decoration** | ~137 PNG | Décors carte, villages. |
-| **Player** | ~143 PNG | Personnage / unité joueur. |
-| **Tiles** | Beach, Bridge, Cave, Cliff, Cobble_Road, FarmLand, Grass, Water, Waterfall, Wooden_Deck | **Carte stratégique** (tuiles terrain, routes, eau). |
-| **Trees** | Chêne, bouleau, sapin, fruitiers (petit/moyen/grand), particules | Carte, forêts, ralentissements (beta). |
+| **Buildings** | ~179 PNG | BÃ¢timents ville / citÃ© â€” **gestion, citÃ©s-Ã‰tats**. |
+| **Crops** | Arbres fruitiers, rÃ©coltes, vignes | **Ressource nourriture**, fermes. |
+| **Enemies** | ~23 PNG | Ennemis, unitÃ©s adverses. |
+| **Icons** | Food, Resources, Tools, Other (Outline + No Outline) | **IcÃ´nes ressources** (nourriture, matiÃ¨res, outils). |
+| **NPCs (Premade)** | Bartender, Chef, Farmer, Fisherman, Lumberjack, Miner | **Â« Gens Â»** par mÃ©tier (affectation visuelle). |
+| **Outdoor decoration** | ~137 PNG | DÃ©cors carte, villages. |
+| **Player** | ~143 PNG | Personnage / unitÃ© joueur. |
+| **Tiles** | Beach, Bridge, Cave, Cliff, Cobble_Road, FarmLand, Grass, Water, Waterfall, Wooden_Deck | **Carte stratÃ©gique** (tuiles terrain, routes, eau). |
+| **Trees** | ChÃªne, bouleau, sapin, fruitiers (petit/moyen/grand), particules | Carte, forÃªts, ralentissements (beta). |
 | **Weather effects** | Nuages, pluie, vent | Ambiance (optionnel). |
 
-**Usage recommandé :** Sprites monde (bâtiments, tuiles, NPCs, icônes ressources), carte stratégique (tiles), cohérence visuelle « fantasy » pour gestion et conquête.
+**Usage recommandÃ© :** Sprites monde (bÃ¢timents, tuiles, NPCs, icÃ´nes ressources), carte stratÃ©gique (tiles), cohÃ©rence visuelle Â« fantasy Â» pour gestion et conquÃªte.
 
 ---
 
 ### 1.3 Cute_Fantasy_UI (Kenmi-art)
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
 | **Chemin** | `ui/game_ui_pack/Cute_Fantasy_UI/Cute_Fantasy_UI/` |
-| **Licence** | Même principe que Cute_Fantasy : commercial / non commercial, modification OK, **pas de redistribution / revente**. |
+| **Licence** | MÃªme principe que Cute_Fantasy : commercial / non commercial, modification OK, **pas de redistribution / revente**. |
 | **Source** | read_me.txt (Cute Fantasy Dungeons). |
 
 **Contenu (UI) :**
 
-| Fichier / thème | Rôle | Pertinence MiyuClicker |
+| Fichier / thÃ¨me | RÃ´le | Pertinence MiyuClicker |
 |-----------------|------|-------------------------|
 | **Fonts** | Cute_Fantasy_Font_5x9.png, CuteFantasy-5x9.ttf | Typo in-game (Dioxus peut charger TTF). |
-| **UI_ALL.png** | Assemblage UI | Référence layout. |
+| **UI_ALL.png** | Assemblage UI | RÃ©fÃ©rence layout. |
 | **UI_Bars.png** | Barres (vie, ressource, chargement) | **Barres ressources**, moral, troupes. |
 | **UI_Buttons.png** | Boutons | Menus, actions (allouer gens, envoyer troupes). |
-| **UI_Button_Icons.png** | Icônes boutons | Raccourcis, actions. |
-| **UI_Frames.png** | Cadres / fenêtres | Panels, fenêtres modales. |
-| **UI_Icons.png** | Icônes interface | Ressources, états. |
+| **UI_Button_Icons.png** | IcÃ´nes boutons | Raccourcis, actions. |
+| **UI_Frames.png** | Cadres / fenÃªtres | Panels, fenÃªtres modales. |
+| **UI_Icons.png** | IcÃ´nes interface | Ressources, Ã©tats. |
 | **UI_Pop_Up.png** | Pop-ups | Notifications, confirmations. |
-| **UI_Premade.png** | Composants prêts à l’emploi | Blocs d’interface. |
-| **UI_Ribbons.png** | Rubans | Titres, séparateurs. |
-| **UI_Selectors.png** | Sélecteurs | Liste cités, unités. |
+| **UI_Premade.png** | Composants prÃªts Ã  lâ€™emploi | Blocs dâ€™interface. |
+| **UI_Ribbons.png** | Rubans | Titres, sÃ©parateurs. |
+| **UI_Selectors.png** | SÃ©lecteurs | Liste citÃ©s, unitÃ©s. |
 | **UI_Sliders.png** | Sliders | **Allocation de gens** (sliders). |
-| **Book_UI.png** | Interface type livre | Écrans aide / codex (optionnel). |
-| **Loading_Icon.png** | Indicateur chargement | Écran de chargement. |
+| **Book_UI.png** | Interface type livre | Ã‰crans aide / codex (optionnel). |
+| **Loading_Icon.png** | Indicateur chargement | Ã‰cran de chargement. |
 | **Pointer_Click_Anim.png** | Animation clic | Curseur / feedback clic. |
 
-**Usage recommandé :** **Pack UI principal** pour MiyuClicker — barres, boutons, cadres, sliders, icônes ; cohérent avec Cute_Fantasy (même univers visuel).
+**Usage recommandÃ© :** **Pack UI principal** pour MiyuClicker â€” barres, boutons, cadres, sliders, icÃ´nes ; cohÃ©rent avec Cute_Fantasy (mÃªme univers visuel).
 
 ---
 
 ### 1.4 modernuserinterface-win
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
 | **Chemin** | `ui/game_ui_pack/modernuserinterface-win/` |
-| **Licence** | Usage commercial et non commercial autorisé (**sauf NFT**). Modification autorisée. **Interdiction de revendre / redistribuer** les assets. **Crédits requis.** |
+| **Licence** | Usage commercial et non commercial autorisÃ© (**sauf NFT**). Modification autorisÃ©e. **Interdiction de revendre / redistribuer** les assets. **CrÃ©dits requis.** |
 | **Source** | LICENSE.txt, READ_ME.txt. |
 
 **Contenu :**
 
-| Élément | Détail | Pertinence MiyuClicker |
+| Ã‰lÃ©ment | DÃ©tail | Pertinence MiyuClicker |
 |---------|--------|-------------------------|
-| **16x16 / 32x32 / 48x48** | Variantes de résolution | UI adaptable (différentes densités). |
-| **Modern_UI_Style_1 / 2** | Styles UI modernes | Alternative look « moderne » (non fantasy). |
+| **16x16 / 32x32 / 48x48** | Variantes de rÃ©solution | UI adaptable (diffÃ©rentes densitÃ©s). |
+| **Modern_UI_Style_1 / 2** | Styles UI modernes | Alternative look Â« moderne Â» (non fantasy). |
 | **Modern_UI_Gamepad** | Indicateurs manette | Optionnel (support manette). |
-| **Animated (GIF)** | Boutons poubelle (trash) animés | Exemples d’**animations UI** (équivalent possible en spritesheet pour Dioxus). |
-| **Portrait_Generator** | Accessories, Eyes, Hairstyles, Skins (PNG + Aseprite) | **Portraits** unités / héros (beta v1.0). |
-| **Portrait_Generator_ase** | Fichiers .aseprite | Édition / variantes de portraits. |
+| **Animated (GIF)** | Boutons poubelle (trash) animÃ©s | Exemples dâ€™**animations UI** (Ã©quivalent possible en spritesheet pour Dioxus). |
+| **Portrait_Generator** | Accessories, Eyes, Hairstyles, Skins (PNG + Aseprite) | **Portraits** unitÃ©s / hÃ©ros (beta v1.0). |
+| **Portrait_Generator_ase** | Fichiers .aseprite | Ã‰dition / variantes de portraits. |
 
-**Usage recommandé :** UI alternative « moderne » ; **Portrait Generator** pour héros / généraux en beta v1.0 ; référence pour **animations UI** (GIF → spritesheet pour Dioxus).
+**Usage recommandÃ© :** UI alternative Â« moderne Â» ; **Portrait Generator** pour hÃ©ros / gÃ©nÃ©raux en beta v1.0 ; rÃ©fÃ©rence pour **animations UI** (GIF â†’ spritesheet pour Dioxus).
 
-#### Référence 32x32 (implémentation MiyuClicker)
+#### RÃ©fÃ©rence 32x32 (implÃ©mentation MiyuClicker)
 
-Pour l’UI MiyuClicker, le pack **32x32** est la cible recommandée (barres, boutons, cadres, indicateurs Qté actuel/Qté max). Chemins relatifs à la racine du dépôt :
+Pour lâ€™UI MiyuClicker, le pack **32x32** est la cible recommandÃ©e (barres, boutons, cadres, indicateurs QtÃ© actuel/QtÃ© max). Chemins relatifs Ã  la racine du dÃ©pÃ´t :
 
 | Constante / usage | Chemin |
 |-------------------|--------|
@@ -115,102 +115,103 @@ Pour l’UI MiyuClicker, le pack **32x32** est la cible recommandée (barres, bo
 | **Spritesheet Style 1** | `ui/game_ui_pack/modernuserinterface-win/32x32/Modern_UI_Style_1_32x32.png` |
 | **Spritesheet Style 2** | `ui/game_ui_pack/modernuserinterface-win/32x32/Modern_UI_Style_2_32x32.png` |
 | **Gamepad (optionnel)** | `ui/game_ui_pack/modernuserinterface-win/32x32/Modern_UI_Gamepad_32x32.png` |
-| **Animated (GIF, référence)** | `ui/game_ui_pack/modernuserinterface-win/32x32/Animated_32x32/` |
+| **Animated (GIF, rÃ©fÃ©rence)** | `ui/game_ui_pack/modernuserinterface-win/32x32/Animated_32x32/` |
 
-Les spritesheets Style 1 et Style 2 contiennent boutons, barres, cadres et indicateurs (type « Qté actuel / Qté max »). Lors de l’intégration des textures dans Dioxus, utiliser les constantes définies dans le crate (module `ui_assets`) pour résoudre ces chemins.
+Les spritesheets Style 1 et Style 2 contiennent boutons, barres, cadres et indicateurs (type Â« QtÃ© actuel / QtÃ© max Â»). Lors de lâ€™intÃ©gration des textures dans Dioxus, utiliser les constantes dÃ©finies dans le crate (module `ui_assets`) pour rÃ©soudre ces chemins.
 
 ---
 
 ### 1.5 Ultimate Pixel Art Fantasy RPG Icon Pack (Clockwork Raven)
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
 | **Chemin** | `ui/game_ui_pack/UltimatePixelArtFantasyRPGIconPack/` |
-| **Licence** | Usage commercial et non commercial autorisé. Modification autorisée. **Interdiction de revendre / redistribuer** les assets. Attribution bienvenue. |
+| **Licence** | Usage commercial et non commercial autorisÃ©. Modification autorisÃ©e. **Interdiction de revendre / redistribuer** les assets. Attribution bienvenue. |
 | **Source** | Clockwork Raven Studios, itch.io (5600+ Ultimate Pixel Art Fantasy RPG Icon Pack). |
 
-**Contenu :** 5616 icônes fantasy en pixel art (16x16, 24x24, 32x32, 64x64 ; Classic, Dark Outline, Light Outline). Thèmes : Conditions/States, Attributes/Stats, Basic Menu, General Items and Tools, Gems and Jewels, Crafting Materials, Monster Hunting and Drops, Food/Crops and Beverages, Alchemy Materials, Magic Potions, Weapons, Shields, Armor and Clothing, Accessories, Masks.
+**Contenu :** 5616 icÃ´nes fantasy en pixel art (16x16, 24x24, 32x32, 64x64 ; Classic, Dark Outline, Light Outline). ThÃ¨mes : Conditions/States, Attributes/Stats, Basic Menu, General Items and Tools, Gems and Jewels, Crafting Materials, Monster Hunting and Drops, Food/Crops and Beverages, Alchemy Materials, Magic Potions, Weapons, Shields, Armor and Clothing, Accessories, Masks.
 
-**Index et renommage :** Les icônes du dossier **Dark Outline / 32X32** ont été renommées `N.png` → `icon_NNNN.png` (4 chiffres) pour un tri cohérent. Un **index JSON** (`index.json`) et une **documentation d'index** listent les icônes et les noms sémantiques des entrées analysées (ex. `poison_skull`, `bread_food`, `mana`, `gem_cyan`).
+**Index et renommage :** Les icÃ´nes du dossier **Dark Outline / 32X32** ont Ã©tÃ© renommÃ©es `N.png` â†’ `icon_NNNN.png` (4 chiffres) pour un tri cohÃ©rent. Un **index JSON** (`index.json`) et une **documentation d'index** listent les icÃ´nes et les noms sÃ©mantiques des entrÃ©es analysÃ©es (ex. `poison_skull`, `bread_food`, `mana`, `gem_cyan`).
 
-| Élément | Détail |
+| Ã‰lÃ©ment | DÃ©tail |
 |--------|--------|
 | **Index JSON** | `ui/game_ui_pack/UltimatePixelArtFantasyRPGIconPack/index.json` |
-| **Doc index** | [MiyuClicker - UltimatePixelArtFantasyRPGIconPack - Index Icones](MiyuClicker%20-%20UltimatePixelArtFantasyRPGIconPack%20-%20Index%20Icones.md) |
+| **Doc index** | [MiyuClicker - UltimatePixelArtFantasyRPGIconPack - Index Icones](MiyukiniClicker%20-%20UltimatePixelArtFantasyRPGIconPack%20-%20Index%20Icones.md) |
 | **Scripts** | `rename_and_index.py` (Python), `rename_icons.ps1` (PowerShell) pour renommer d'autres dossiers. |
 
-**Usage recommandé :** **Icônes ressources, statuts, menu, objets, potions, armes** pour MiyuClicker ; recherche par id ou par nom sémantique via l'index.
+**Usage recommandÃ© :** **IcÃ´nes ressources, statuts, menu, objets, potions, armes** pour MiyuClicker ; recherche par id ou par nom sÃ©mantique via l'index.
 
 ---
 
 ### 1.6 Tiny RPG Character Asset Pack v1.03b (Full 20 Characters)
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
 | **Chemin** | `ui/game_ui_pack/Tiny RPG Character Asset Pack v1.03b -Full 20 Characters/Tiny RPG Character Asset Pack v1.03 -Full 20 Characters/` |
-| **Licence** | **Non documentée** dans le répertoire analysé — **à vérifier** (origine itch.io ou autre). |
-| **Contenu** | 20 personnages (Archer, Knight, Orc, Skeleton, Priest, Wizard, etc.), projectiles (flèches, magie), fichiers Aseprite. |
+| **Licence** | **Non documentÃ©e** dans le rÃ©pertoire analysÃ© â€” **Ã  vÃ©rifier** (origine itch.io ou autre). |
+| **Contenu** | 20 personnages (Archer, Knight, Orc, Skeleton, Priest, Wizard, etc.), projectiles (flÃ¨ches, magie), fichiers Aseprite. |
 
-**Contenu détaillé :**
+**Contenu dÃ©taillÃ© :**
 
-| Catégorie | Détail | Pertinence MiyuClicker |
+| CatÃ©gorie | DÃ©tail | Pertinence MiyuClicker |
 |-----------|--------|-------------------------|
-| **Characters(100x100)** | ~343 PNG (sprites par personnage) | **Unités** (soldats, types de troupes), **héros** (beta). |
-| **Arrow(Projectile)** | Flèches 100x100 et 32x32 | Projectiles combat (RTS / temps réel beta). |
-| **Magic(Projectile)** | Effets Priest, Wizard | Effets de combat / héros. |
-| **Aseprite file** | 20 .aseprite | Édition, animations, variantes. |
+| **Characters(100x100)** | ~343 PNG (sprites par personnage) | **UnitÃ©s** (soldats, types de troupes), **hÃ©ros** (beta). |
+| **Arrow(Projectile)** | FlÃ¨ches 100x100 et 32x32 | Projectiles combat (RTS / temps rÃ©el beta). |
+| **Magic(Projectile)** | Effets Priest, Wizard | Effets de combat / hÃ©ros. |
+| **Aseprite file** | 20 .aseprite | Ã‰dition, animations, variantes. |
 
-**Usage recommandé :** **Sprites d’unités** (soldats, types) et **héros** ; projectiles pour résolution combat avancée. **Ne pas utiliser en production sans confirmation de licence.**
+**Usage recommandÃ© :** **Sprites dâ€™unitÃ©s** (soldats, types) et **hÃ©ros** ; projectiles pour rÃ©solution combat avancÃ©e. **Ne pas utiliser en production sans confirmation de licence.**
 
 ---
 
 ### 1.7 ui-icn_fantasy-weapons_01 (Misbug)
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
 | **Chemin** | `ui/game_ui_pack/ui-icn_fantasy-weapons_01/` |
-| **Licence** | Contrat dans `Misbug's Assets Licence Agreement.pdf` — **à consulter** pour usage commercial et attribution. |
-| **Contenu** | Icônes d’armes fantasy (basic_Icons, drop_shadow, white_outline) : ~64+ armes (épée, hache, arc, bouclier, etc.). |
+| **Licence** | Contrat dans `Misbug's Assets Licence Agreement.pdf` â€” **Ã  consulter** pour usage commercial et attribution. |
+| **Contenu** | IcÃ´nes dâ€™armes fantasy (basic_Icons, drop_shadow, white_outline) : ~64+ armes (Ã©pÃ©e, hache, arc, bouclier, etc.). |
 
-**Usage recommandé :** **Icônes d’armes** pour équipement, troupes, type d’unité ; cohérence fantasy. Vérifier la licence (PDF) avant usage commercial.
+**Usage recommandÃ© :** **IcÃ´nes dâ€™armes** pour Ã©quipement, troupes, type dâ€™unitÃ© ; cohÃ©rence fantasy. VÃ©rifier la licence (PDF) avant usage commercial.
 
 ---
 
-## 2. Synthèse par besoin MiyuClicker
+## 2. SynthÃ¨se par besoin MiyuClicker
 
-| Besoin | Packs à privilégier | Remarque |
+| Besoin | Packs Ã  privilÃ©gier | Remarque |
 |--------|----------------------|-----------|
-| **UI (barres, boutons, cadres, sliders)** | **Cute_Fantasy_UI** (principal) ; modernuserinterface-win (alternative moderne) | Cute_Fantasy_UI aligné avec Cute_Fantasy. |
-| **Icônes ressources (nourriture, matières, outils)** | **Cute_Fantasy** → Icons ; **UltimatePixelArtFantasyRPGIconPack** (index JSON, nom sémantique) | Spritesheets à découper ou chargement par id/nom via index. |
-| **Carte (tuiles terrain, routes, eau)** | **Cute_Fantasy** → Tiles (Grass, Cobble_Road, Water, Bridge, etc.) | Carte stratégique, checkpoints (beta). |
-| **Bâtiments / cités** | **Cute_Fantasy** → Buildings | Représentation cités-États, gestion. |
-| **« Gens » / métiers** | **Cute_Fantasy** → NPCs (Premade) ; **Tiny RPG** → Characters (si licence OK) | Affectation visuelle par rôle. |
-| **Unités / soldats** | **Tiny RPG** → Characters (si licence OK) ; Cute_Fantasy → Enemies, Player | Troupes, types d’unités. |
-| **Armes / équipement (icônes)** | **ui-icn_fantasy-weapons_01** (après vérif. licence) | Type d’unité, équipement. |
-| **Portraits héros (beta v1.0)** | **modernuserinterface-win** → Portrait_Generator | Généraux, héros. |
-| **Animations UI (feedback)** | Cute_Fantasy_UI → Pointer_Click_Anim ; modernuserinterface-win → GIF (référence spritesheet) | Toolkit animation par frame. |
-| **Polices** | Cute_Fantasy_UI → Fonts (ttf) | Dioxus : chargement de polices. |
+| **UI (barres, boutons, cadres, sliders)** | **Cute_Fantasy_UI** (principal) ; modernuserinterface-win (alternative moderne) | Cute_Fantasy_UI alignÃ© avec Cute_Fantasy. |
+| **IcÃ´nes ressources (nourriture, matiÃ¨res, outils)** | **Cute_Fantasy** â†’ Icons ; **UltimatePixelArtFantasyRPGIconPack** (index JSON, nom sÃ©mantique) | Spritesheets Ã  dÃ©couper ou chargement par id/nom via index. |
+| **Carte (tuiles terrain, routes, eau)** | **Cute_Fantasy** â†’ Tiles (Grass, Cobble_Road, Water, Bridge, etc.) | Carte stratÃ©gique, checkpoints (beta). |
+| **BÃ¢timents / citÃ©s** | **Cute_Fantasy** â†’ Buildings | ReprÃ©sentation citÃ©s-Ã‰tats, gestion. |
+| **Â« Gens Â» / mÃ©tiers** | **Cute_Fantasy** â†’ NPCs (Premade) ; **Tiny RPG** â†’ Characters (si licence OK) | Affectation visuelle par rÃ´le. |
+| **UnitÃ©s / soldats** | **Tiny RPG** â†’ Characters (si licence OK) ; Cute_Fantasy â†’ Enemies, Player | Troupes, types dâ€™unitÃ©s. |
+| **Armes / Ã©quipement (icÃ´nes)** | **ui-icn_fantasy-weapons_01** (aprÃ¨s vÃ©rif. licence) | Type dâ€™unitÃ©, Ã©quipement. |
+| **Portraits hÃ©ros (beta v1.0)** | **modernuserinterface-win** â†’ Portrait_Generator | GÃ©nÃ©raux, hÃ©ros. |
+| **Animations UI (feedback)** | Cute_Fantasy_UI â†’ Pointer_Click_Anim ; modernuserinterface-win â†’ GIF (rÃ©fÃ©rence spritesheet) | Toolkit animation par frame. |
+| **Polices** | Cute_Fantasy_UI â†’ Fonts (ttf) | Dioxus : chargement de polices. |
 
 ---
 
-## 3. Règles d’usage et conformité
+## 3. RÃ¨gles dâ€™usage et conformitÃ©
 
-| Règle | Détail |
+| RÃ¨gle | DÃ©tail |
 |-------|--------|
-| **Pas de redistribution des assets** | Cute_Fantasy, Cute_Fantasy_UI, modernuserinterface-win : interdiction de revendre/redistribuer les fichiers bruts. Les utiliser **dans** le jeu compilé est autorisé selon leurs licences. |
-| **Crédits** | modernuserinterface-win : **crédits requis**. Prévoir écran « Crédits » ou fichier LICENSES avec noms des packs. |
-| **Vérification licence** | CatUIFree, Tiny RPG, ui-icn_fantasy-weapons_01 : confirmer licence (et attribution si nécessaire) avant usage en production. |
-| **Cohérence visuelle** | Pour une démo homogène : **Cute_Fantasy + Cute_Fantasy_UI** (même univers) en cœur ; autres packs en complément selon besoin. |
+| **Pas de redistribution des assets** | Cute_Fantasy, Cute_Fantasy_UI, modernuserinterface-win : interdiction de revendre/redistribuer les fichiers bruts. Les utiliser **dans** le jeu compilÃ© est autorisÃ© selon leurs licences. |
+| **CrÃ©dits** | modernuserinterface-win : **crÃ©dits requis**. PrÃ©voir Ã©cran Â« CrÃ©dits Â» ou fichier LICENSES avec noms des packs. |
+| **VÃ©rification licence** | CatUIFree, Tiny RPG, ui-icn_fantasy-weapons_01 : confirmer licence (et attribution si nÃ©cessaire) avant usage en production. |
+| **CohÃ©rence visuelle** | Pour une dÃ©mo homogÃ¨ne : **Cute_Fantasy + Cute_Fantasy_UI** (mÃªme univers) en cÅ“ur ; autres packs en complÃ©ment selon besoin. |
 
 ---
 
-## 4. Références
+## 4. RÃ©fÃ©rences
 
-- [MiyuClicker - Document Fondateur](MiyuClicker%20-%20Document%20Fondateur.md)
-- [MiyuClicker - Analyse Marche et Besoins Toolkits](MiyuClicker%20-%20Analyse%20Marche%20et%20Besoins%20Toolkits.md)
-- Répertoire physique : `ui/game_ui_pack/`
+- [MiyuClicker - Document Fondateur](MiyukiniClicker%20-%20Document%20Fondateur.md)
+- [MiyuClicker - Analyse Marche et Besoins Toolkits](MiyukiniClicker%20-%20Analyse%20Marche%20et%20Besoins%20Toolkits.md)
+- RÃ©pertoire physique : `ui/game_ui_pack/`
 
 ---
 
-**Document créé le :** 2026-02-01  
-**Statut :** Référence des packs UI jeux pour MiyuClicker
+**Document crÃ©Ã© le :** 2026-02-01  
+**Statut :** RÃ©fÃ©rence des packs UI jeux pour MiyuClicker
+

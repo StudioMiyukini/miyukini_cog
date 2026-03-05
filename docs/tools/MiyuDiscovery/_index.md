@@ -1,8 +1,8 @@
-# MiyuDiscovery — Index de navigation
+﻿# MiyuDiscovery â€” Index de navigation
 
 ## Contexte
 
-**MiyuDiscovery** est le **kit d'outils (Toolkit)** de découverte sociale (hashtags, tendances, explore, recherche). Aligné sur [Équivalents Reseaux Sociaux](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Reseaux%20Sociaux.md).
+**MiyuDiscovery** est le **kit d'outils (Toolkit)** de dÃ©couverte sociale (hashtags, tendances, explore, recherche). AlignÃ© sur [Ã‰quivalents Reseaux Sociaux](..//..//miyukini-webway-system//reference//_index.md).
 
 **Strate :** 6 (Tools & Toolkits)  
 **ToolkitId :** `toolkit.social.discovery`
@@ -13,10 +13,11 @@
 
 | Document | Description |
 |----------|-------------|
-| [Documentation Fondatrice](./MiyuDiscovery%20-%20Documentation%20Fondatrice.md) | Identité, définition canonique, ToolkitId, liste des outils composants, gouvernance |
-| [Reference Outils](./MiyuDiscovery%20-%20Reference%20Outils.md) | Liste exhaustive des Tools : ToolId, action, niveau de sécurité |
-| [Tool Governance Compliance Contract](./contracts/governance/MiyuDiscovery%20-%20Tool%20Governance%20Compliance%20Contract.md) | Obligations de conformité |
+| [Documentation Fondatrice](./MiyuDiscovery%20-%20Documentation%20Fondatrice.md) | IdentitÃ©, dÃ©finition canonique, ToolkitId, liste des outils composants, gouvernance |
+| [Reference Outils](./MiyuDiscovery%20-%20Reference%20Outils.md) | Liste exhaustive des Tools : ToolId, action, niveau de sÃ©curitÃ© |
+| [Tool Governance Compliance Contract](./contracts/governance/MiyuDiscovery%20-%20Tool%20Governance%20Compliance%20Contract.md) | Obligations de conformitÃ© |
 
 ---
 
-**Référence conceptuelle :** [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)
+**RÃ©fÃ©rence conceptuelle :** [Miyukini Conceptual References - Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)
+

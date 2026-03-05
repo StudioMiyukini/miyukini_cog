@@ -518,5 +518,7 @@ Display to user:
 - [ADAPTIVE-MODES.md](../profiles/ADAPTIVE-MODES.md) â€” Mode overview
 - [CAPABILITY-NEGOTIATION.md](../profiles/CAPABILITY-NEGOTIATION.md) â€” User asks
 - [AGENT-CERTIFICATION-PROTOCOL.md](../certifications/agent-certification-protocol/INDEX.md) â€” Agent capacity per mode
-- [Each agent file](../certifications/agents/) â€” Specific fallbacks
+- [Each agent file](../certifications/README.md) â€” Specific fallbacks
+
+
 

@@ -1,62 +1,62 @@
-# MiyuPosLoyalty — Documentation Fondatrice
+﻿# MiyuPosLoyalty â€” Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuPosLoyalty** est le **kit d'outils (Toolkit)** CRM et fidélité PoS de l'écosystème Miyukini. Il intègre les outils de gestion clients (CRUD, adresse, notes) et de programme fidélité (points, solde, carte, octroi/rédemption), alignés sur le document [Équivalents PoS Logiciel Caisse](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20PoS%20Logiciel%20Caisse.md).
+**MiyuPosLoyalty** est le **kit d'outils (Toolkit)** CRM et fidÃ©litÃ© PoS de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils de gestion clients (CRUD, adresse, notes) et de programme fidÃ©litÃ© (points, solde, carte, octroi/rÃ©demption), alignÃ©s sur le document [Ã‰quivalents PoS Logiciel Caisse](..//..//miyukini-webway-system//reference//_index.md).
 
-L'autorité sur les données (clients, adresses, notes, points fidélité) appartient à **KindMother** (Core de données, Strate 4). MiyuPosLoyalty expose des capacités d'exécution gouvernée sans remplacer KindMother ni StrongFather ; les Opérateurs (ex. Opérateur Fidélité/CRM) passent par la gouvernance pour utiliser ces outils. L'octroi et la rédemption de points sont soumis à StrongFather (autorisation).
+L'autoritÃ© sur les donnÃ©es (clients, adresses, notes, points fidÃ©litÃ©) appartient Ã  **KindMother** (Core de donnÃ©es, Strate 4). MiyuPosLoyalty expose des capacitÃ©s d'exÃ©cution gouvernÃ©e sans remplacer KindMother ni StrongFather ; les OpÃ©rateurs (ex. OpÃ©rateur FidÃ©litÃ©/CRM) passent par la gouvernance pour utiliser ces outils. L'octroi et la rÃ©demption de points sont soumis Ã  StrongFather (autorisation).
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-
----
-
-## 2. Portée / Scope
-
-**Ce document définit :** l'identité et la définition canonique de MiyuPosLoyalty, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother, l'alignement MIP.
-
-**Hors scope :** l'implémentation détaillée ; toute décision (octroi/rédemption points) — ressort de StrongFather.
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 3. Définition canonique
+## 2. PortÃ©e / Scope
 
-> **MiyuPosLoyalty est une composition officielle d'outils CRM et fidélité (clients, adresses, notes, points, cartes fidélité, octroi/rédemption), déclarée et gouvernée par l'environnement.**
+**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de MiyuPosLoyalty, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother, l'alignement MIP.
 
-- MiyuPosLoyalty **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
-- MiyuPosLoyalty **n'ajoute aucune logique métier** : il orchestre des capacités atomiques ; l'octroi et la rédemption de points sont autorisés par StrongFather.
+**Hors scope :** l'implÃ©mentation dÃ©taillÃ©e ; toute dÃ©cision (octroi/rÃ©demption points) â€” ressort de StrongFather.
 
-**Règle fondamentale :** Toute écriture (client, points) passe par WriteIntent vers KindMother.
+---
+
+## 3. DÃ©finition canonique
+
+> **MiyuPosLoyalty est une composition officielle d'outils CRM et fidÃ©litÃ© (clients, adresses, notes, points, cartes fidÃ©litÃ©, octroi/rÃ©demption), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+
+- MiyuPosLoyalty **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
+- MiyuPosLoyalty **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques ; l'octroi et la rÃ©demption de points sont autorisÃ©s par StrongFather.
+
+**RÃ¨gle fondamentale :** Toute Ã©criture (client, points) passe par WriteIntent vers KindMother.
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.pos.miyuposloyalty` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `pos` / `crm` / `loyalty` |
-| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le détail de chaque outil est décrit dans [MiyuPosLoyalty - Reference Outils](./MiyuPosLoyalty%20-%20Reference%20Outils.md).
+Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuPosLoyalty - Reference Outils](./MiyuPosLoyalty%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
 | `tool.crm.customer.get` | Retourne un client par identifiant |
 | `tool.crm.customer.list` | Liste les clients (filtres, recherche) |
-| `tool.crm.customer.create` | Crée un client à partir de données fournies |
-| `tool.crm.customer.update` | Met à jour un client |
+| `tool.crm.customer.create` | CrÃ©e un client Ã  partir de donnÃ©es fournies |
+| `tool.crm.customer.update` | Met Ã  jour un client |
 | `tool.crm.customer.address.get` | Retourne l'adresse (livraison) du client |
-| `tool.crm.customer.note.add` | Ajoute une note à un client |
+| `tool.crm.customer.note.add` | Ajoute une note Ã  un client |
 | `tool.crm.customer.note.list` | Liste les notes d'un client |
-| `tool.loyalty.points.grant` | Accorde des points (règles fournies ou gouvernées) |
-| `tool.loyalty.points.redeem` | Déduit des points (échange) ; autorisation = StrongFather |
+| `tool.loyalty.points.grant` | Accorde des points (rÃ¨gles fournies ou gouvernÃ©es) |
+| `tool.loyalty.points.redeem` | DÃ©duit des points (Ã©change) ; autorisation = StrongFather |
 | `tool.loyalty.balance.get` | Retourne le solde points d'un client |
-| `tool.loyalty.card.resolve` | Résout une carte fidélité (code/QR) → client + solde |
+| `tool.loyalty.card.resolve` | RÃ©sout une carte fidÃ©litÃ© (code/QR) â†’ client + solde |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuPosLoyalty en contient onze.
 
@@ -64,44 +64,46 @@ Le détail de chaque outil est décrit dans [MiyuPosLoyalty - Reference Outils](
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : points grant/redeem = autorisation StrongFather ; toute écriture = WriteIntent KindMother.
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : points grant/redeem = autorisation StrongFather ; toute Ã©criture = WriteIntent KindMother.
 
 ---
 
-## 7. Niveau de sécurité et états
+## 7. Niveau de sÃ©curitÃ© et Ã©tats
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
-| **Niveau de sécurité du kit** | **0 à 2** (détail par outil dans Reference Outils) |
-| **États autorisés** | `HEALTHY`, `DEGRADED` |
-| **États interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
+| **Niveau de sÃ©curitÃ© du kit** | **0 Ã  2** (dÃ©tail par outil dans Reference Outils) |
+| **Ã‰tats autorisÃ©s** | `HEALTHY`, `DEGRADED` |
+| **Ã‰tats interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autorité sur toutes les données : clients, adresses, notes, points fidélité. Toute écriture (création/mise à jour client, octroi/rédemption points) passe par **WriteIntent** sous autorité KindMother. MiyuPosLoyalty exécute des capacités atomiques ; l'autorisation d'octroi/rédemption reste à StrongFather.
+**KindMother** est l'autoritÃ© sur toutes les donnÃ©es : clients, adresses, notes, points fidÃ©litÃ©. Toute Ã©criture (crÃ©ation/mise Ã  jour client, octroi/rÃ©demption points) passe par **WriteIntent** sous autoritÃ© KindMother. MiyuPosLoyalty exÃ©cute des capacitÃ©s atomiques ; l'autorisation d'octroi/rÃ©demption reste Ã  StrongFather.
 
-Les obligations de conformité détaillées sont dans [MiyuPosLoyalty - Tool Governance Compliance Contract](./contracts/governance/MiyuPosLoyalty%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuPosLoyalty - Tool Governance Compliance Contract](./contracts/governance/MiyuPosLoyalty%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuPosLoyalty sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). À l'implémentation, le code fournissant les Tools MiyuPosLoyalty devra être balisé MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit généré selon le [Protocole MIP v1](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+La documentation et la future implÃ©mentation de MiyuPosLoyalty sont conÃ§ues pour Ãªtre **compatibles MIP v1** (Miyukini Index Protocol). Ã€ l'implÃ©mentation, le code fournissant les Tools MiyuPosLoyalty devra Ãªtre balisÃ© MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit gÃ©nÃ©rÃ© selon le [Protocole MIP v1](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
 ---
 
-## 10. Références croisées
+## 10. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Équivalents PoS Logiciel Caisse | [Miyukini Conceptual References - Equivalents PoS Logiciel Caisse](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20PoS%20Logiciel%20Caisse.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
+| Ã‰quivalents PoS Logiciel Caisse | [Miyukini Conceptual References - Equivalents PoS Logiciel Caisse](..//..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence fondateur
+**Statut :** Document de rÃ©fÃ©rence fondateur
+
+

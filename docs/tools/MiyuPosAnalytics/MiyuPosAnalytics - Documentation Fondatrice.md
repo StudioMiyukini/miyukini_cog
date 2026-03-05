@@ -1,58 +1,58 @@
-# MiyuPosAnalytics — Documentation Fondatrice
+﻿# MiyuPosAnalytics â€” Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuPosAnalytics** est le **kit d'outils (Toolkit)** d'analytics ventes PoS de l'écosystème Miyukini. Il intègre les outils de tendance ventes, ventes par article, ventes par employé, écart caisse pour un shift, rapport taxes, clôture shift caisse et export tableur, alignés sur le document [Équivalents PoS Logiciel Caisse](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20PoS%20Logiciel%20Caisse.md).
+**MiyuPosAnalytics** est le **kit d'outils (Toolkit)** d'analytics ventes PoS de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils de tendance ventes, ventes par article, ventes par employÃ©, Ã©cart caisse pour un shift, rapport taxes, clÃ´ture shift caisse et export tableur, alignÃ©s sur le document [Ã‰quivalents PoS Logiciel Caisse](..//..//miyukini-webway-system//reference//_index.md).
 
-Les données sources (ventes, reçus, shifts) relèvent de **KindMother**. MiyuPosAnalytics expose des capacités d'agrégation et de rapport en lecture (ou exécution gouvernée pour shift.close) ; les Opérateurs (ex. Opérateur Analytics) passent par la gouvernance pour utiliser ces outils.
+Les donnÃ©es sources (ventes, reÃ§us, shifts) relÃ¨vent de **KindMother**. MiyuPosAnalytics expose des capacitÃ©s d'agrÃ©gation et de rapport en lecture (ou exÃ©cution gouvernÃ©e pour shift.close) ; les OpÃ©rateurs (ex. OpÃ©rateur Analytics) passent par la gouvernance pour utiliser ces outils.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-
----
-
-## 2. Portée / Scope
-
-**Ce document définit :** l'identité et la définition canonique de MiyuPosAnalytics, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother, l'alignement MIP.
-
-**Hors scope :** l'implémentation détaillée ; la décision de clôture shift (StrongFather).
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 3. Définition canonique
+## 2. PortÃ©e / Scope
 
-> **MiyuPosAnalytics est une composition officielle d'outils d'analytics ventes (tendances, par article, par employé, écart caisse, taxes, clôture shift, export tableur), déclarée et gouvernée par l'environnement.**
+**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de MiyuPosAnalytics, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother, l'alignement MIP.
 
-- MiyuPosAnalytics **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
-- MiyuPosAnalytics **n'ajoute aucune logique métier** : il orchestre des capacités atomiques (agrégation, rapport, export) ; la décision de clôture shift appartient à StrongFather.
+**Hors scope :** l'implÃ©mentation dÃ©taillÃ©e ; la dÃ©cision de clÃ´ture shift (StrongFather).
 
-**Règle fondamentale :** Les Tools analytics opèrent sur des données fournies dans le flux ou lues sous autorité KindMother ; toute écriture (shift.close) = WriteIntent vers KindMother.
+---
+
+## 3. DÃ©finition canonique
+
+> **MiyuPosAnalytics est une composition officielle d'outils d'analytics ventes (tendances, par article, par employÃ©, Ã©cart caisse, taxes, clÃ´ture shift, export tableur), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+
+- MiyuPosAnalytics **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
+- MiyuPosAnalytics **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques (agrÃ©gation, rapport, export) ; la dÃ©cision de clÃ´ture shift appartient Ã  StrongFather.
+
+**RÃ¨gle fondamentale :** Les Tools analytics opÃ¨rent sur des donnÃ©es fournies dans le flux ou lues sous autoritÃ© KindMother ; toute Ã©criture (shift.close) = WriteIntent vers KindMother.
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.pos.miyuposanalytics` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `pos` / `analytics` |
-| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le détail de chaque outil est décrit dans [MiyuPosAnalytics - Reference Outils](./MiyuPosAnalytics%20-%20Reference%20Outils.md).
+Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuPosAnalytics - Reference Outils](./MiyuPosAnalytics%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
-| `tool.analytics.sales.trend` | Retourne tendance ventes (période, comparaison) |
+| `tool.analytics.sales.trend` | Retourne tendance ventes (pÃ©riode, comparaison) |
 | `tool.analytics.sales.by_item` | Retourne ventes par article (top N, filtres) |
-| `tool.analytics.sales.by_employee` | Retourne les ventes agrégées par employé |
-| `tool.analytics.cash.discrepancy` | Retourne l'écart caisse pour un shift |
-| `tool.analytics.tax.report` | Retourne rapport taxes (période, filtres) |
-| `tool.pos.shift.close` | Clôture un shift caisse (comptage, écart) ; autorisation = StrongFather |
-| `tool.data.export.spreadsheet` | Exporte des données en format tableur (données fournies) |
+| `tool.analytics.sales.by_employee` | Retourne les ventes agrÃ©gÃ©es par employÃ© |
+| `tool.analytics.cash.discrepancy` | Retourne l'Ã©cart caisse pour un shift |
+| `tool.analytics.tax.report` | Retourne rapport taxes (pÃ©riode, filtres) |
+| `tool.pos.shift.close` | ClÃ´ture un shift caisse (comptage, Ã©cart) ; autorisation = StrongFather |
+| `tool.data.export.spreadsheet` | Exporte des donnÃ©es en format tableur (donnÃ©es fournies) |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuPosAnalytics en contient sept.
 
@@ -60,44 +60,46 @@ Le détail de chaque outil est décrit dans [MiyuPosAnalytics - Reference Outils
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : toute persistance (shift.close) = WriteIntent KindMother.
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : toute persistance (shift.close) = WriteIntent KindMother.
 
 ---
 
-## 7. Niveau de sécurité et états
+## 7. Niveau de sÃ©curitÃ© et Ã©tats
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
-| **Niveau de sécurité du kit** | **0 à 2** (détail par outil dans Reference Outils) |
-| **États autorisés** | `HEALTHY`, `DEGRADED` |
-| **États interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
+| **Niveau de sÃ©curitÃ© du kit** | **0 Ã  2** (dÃ©tail par outil dans Reference Outils) |
+| **Ã‰tats autorisÃ©s** | `HEALTHY`, `DEGRADED` |
+| **Ã‰tats interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autorité sur les données sources (ventes, reçus, shifts). Les Tools analytics (trend, by_item, by_employee, cash.discrepancy, tax.report, export) opèrent en lecture ou sur données fournies ; `tool.pos.shift.close` écrit sous WriteIntent KindMother après autorisation StrongFather.
+**KindMother** est l'autoritÃ© sur les donnÃ©es sources (ventes, reÃ§us, shifts). Les Tools analytics (trend, by_item, by_employee, cash.discrepancy, tax.report, export) opÃ¨rent en lecture ou sur donnÃ©es fournies ; `tool.pos.shift.close` Ã©crit sous WriteIntent KindMother aprÃ¨s autorisation StrongFather.
 
-Les obligations de conformité détaillées sont dans [MiyuPosAnalytics - Tool Governance Compliance Contract](./contracts/governance/MiyuPosAnalytics%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuPosAnalytics - Tool Governance Compliance Contract](./contracts/governance/MiyuPosAnalytics%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuPosAnalytics sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). À l'implémentation, le code fournissant les Tools MiyuPosAnalytics devra être balisé MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit généré selon le [Protocole MIP v1](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+La documentation et la future implÃ©mentation de MiyuPosAnalytics sont conÃ§ues pour Ãªtre **compatibles MIP v1** (Miyukini Index Protocol). Ã€ l'implÃ©mentation, le code fournissant les Tools MiyuPosAnalytics devra Ãªtre balisÃ© MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit gÃ©nÃ©rÃ© selon le [Protocole MIP v1](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
 ---
 
-## 10. Références croisées
+## 10. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Équivalents PoS Logiciel Caisse | [Miyukini Conceptual References - Equivalents PoS Logiciel Caisse](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20PoS%20Logiciel%20Caisse.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
+| Ã‰quivalents PoS Logiciel Caisse | [Miyukini Conceptual References - Equivalents PoS Logiciel Caisse](..//..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence fondateur
+**Statut :** Document de rÃ©fÃ©rence fondateur
+
+

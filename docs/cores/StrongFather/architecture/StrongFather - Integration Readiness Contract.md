@@ -1,135 +1,135 @@
-# StrongFather — Integration Readiness Contract
+﻿# StrongFather â€” Integration Readiness Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **StrongFather — Integration Readiness Contract** : un contrat normatif, non négociable, et de statut FONDATION qui établit les conditions et les règles d'intégration de StrongFather avec les autres composants du système Miyukini, définissant ce qu'un composant doit respecter pour être compatible avec StrongFather dans le système Miyukini Core System v2.4.
+Ce document dÃ©finit le **StrongFather â€” Integration Readiness Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit les conditions et les rÃ¨gles d'intÃ©gration de StrongFather avec les autres composants du systÃ¨me Miyukini, dÃ©finissant ce qu'un composant doit respecter pour Ãªtre compatible avec StrongFather dans le systÃ¨me Miyukini Core System v2.4.
 
-Ce contrat précise les prérequis d'intégration, les interfaces conceptuelles, les responsabilités des intégrateurs, et les règles de conformité.
+Ce contrat prÃ©cise les prÃ©requis d'intÃ©gration, les interfaces conceptuelles, les responsabilitÃ©s des intÃ©grateurs, et les rÃ¨gles de conformitÃ©.
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **toutes les intégrations de StrongFather** et définit de manière absolue :
-- les prérequis d'intégration,
+Ce contrat s'applique Ã  **toutes les intÃ©grations de StrongFather** et dÃ©finit de maniÃ¨re absolue :
+- les prÃ©requis d'intÃ©gration,
 - les interfaces conceptuelles requises,
-- les responsabilités des adaptateurs,
-- les règles de conformité d'intégration,
-- les invariants d'intégration.
+- les responsabilitÃ©s des adaptateurs,
+- les rÃ¨gles de conformitÃ© d'intÃ©gration,
+- les invariants d'intÃ©gration.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complète et respecte les documents contractuels existants :
-- **StrongFather — Documentation Fondatrice** : Positionnement architectural
-- **StrongFather — Boundary & Isolation Contract** : Frontières d'intégration
-- **StrongFather — Conformance & Certification Rules** : Certification des intégrations
-- **[Miyukini Conceptual References - Lois Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Conformité aux lois d'autonomie système
+Ce contrat complÃ¨te et respecte les documents contractuels existants :
+- **StrongFather â€” Documentation Fondatrice** : Positionnement architectural
+- **StrongFather â€” Boundary & Isolation Contract** : FrontiÃ¨res d'intÃ©gration
+- **StrongFather â€” Conformance & Certification Rules** : Certification des intÃ©grations
+- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)** : ConformitÃ© aux lois d'autonomie systÃ¨me
 
-Il n'introduit aucune contradiction, et constitue la définition formelle des règles d'intégration.
+Il n'introduit aucune contradiction, et constitue la dÃ©finition formelle des rÃ¨gles d'intÃ©gration.
 
 ---
 
-## 2. Prérequis d'intégration
+## 2. PrÃ©requis d'intÃ©gration
 
-### 2.1. Compréhension des contrats
+### 2.1. ComprÃ©hension des contrats
 
 **PRE-1 : Connaissance des contrats**
 
-Tout intégrateur DOIT avoir lu et compris l'ensemble des contrats StrongFather avant toute intégration.
+Tout intÃ©grateur DOIT avoir lu et compris l'ensemble des contrats StrongFather avant toute intÃ©gration.
 
-**Contrats obligatoires à connaître :**
+**Contrats obligatoires Ã  connaÃ®tre :**
 
-1. StrongFather — Documentation Fondatrice
-2. StrongFather — Core Decision Contract
-3. StrongFather — Intent Model Contract
-4. StrongFather — Policy Engine Contract
-5. StrongFather — Execution Prohibition Contract
-6. StrongFather — Boundary & Isolation Contract
-7. StrongFather — Violations & Anti-Patterns
+1. StrongFather â€” Documentation Fondatrice
+2. StrongFather â€” Core Decision Contract
+3. StrongFather â€” Intent Model Contract
+4. StrongFather â€” Policy Engine Contract
+5. StrongFather â€” Execution Prohibition Contract
+6. StrongFather â€” Boundary & Isolation Contract
+7. StrongFather â€” Violations & Anti-Patterns
 
 ### 2.2. Architecture conforme
 
 **PRE-2 : Architecture adaptateur-StrongFather**
 
-L'intégration DOIT respecter l'architecture adaptateur-StrongFather définie dans les contrats.
+L'intÃ©gration DOIT respecter l'architecture adaptateur-StrongFather dÃ©finie dans les contrats.
 
-**Règles d'architecture :**
+**RÃ¨gles d'architecture :**
 
 - Seuls les adaptateurs produits peuvent communiquer avec StrongFather
 - Les produits ne communiquent jamais directement avec StrongFather
-- StrongFather ne communique jamais avec KindMother, les modules SPM, ou des systèmes externes
+- StrongFather ne communique jamais avec KindMother, les modules SPM, ou des systÃ¨mes externes
 
-### 2.3. Responsabilités claires
+### 2.3. ResponsabilitÃ©s claires
 
-**PRE-3 : Séparation des responsabilités**
+**PRE-3 : SÃ©paration des responsabilitÃ©s**
 
-L'intégration DOIT respecter la séparation stricte des responsabilités :
+L'intÃ©gration DOIT respecter la sÃ©paration stricte des responsabilitÃ©s :
 
-- **StrongFather** : Évaluation et décision
-- **Adaptateur** : Exécution suite aux décisions
+- **StrongFather** : Ã‰valuation et dÃ©cision
+- **Adaptateur** : ExÃ©cution suite aux dÃ©cisions
 - **KindMother** : Persistance (via l'adaptateur)
 
 ---
 
-## 3. Interface conceptuelle d'intégration
+## 3. Interface conceptuelle d'intÃ©gration
 
 ### 3.1. Soumission d'intention
 
 **Interface de soumission :**
 
-L'adaptateur soumet une intention à StrongFather avec les éléments suivants :
+L'adaptateur soumet une intention Ã  StrongFather avec les Ã©lÃ©ments suivants :
 
-**Éléments obligatoires :**
+**Ã‰lÃ©ments obligatoires :**
 
 - Identifiant de l'intention (unique)
-- Type d'action (CRÉATION, MODIFICATION, SUPPRESSION, LECTURE, ÉVALUATION)
+- Type d'action (CRÃ‰ATION, MODIFICATION, SUPPRESSION, LECTURE, Ã‰VALUATION)
 - Sujet de l'intention
 - Contexte d'appel (appelant, origine, instance)
-- Données de l'intention
+- DonnÃ©es de l'intention
 
-**Éléments optionnels :**
+**Ã‰lÃ©ments optionnels :**
 
-- Priorité demandée
+- PrioritÃ© demandÃ©e
 - Contraintes explicites
-- Métadonnées de traçabilité
-- Références croisées
+- MÃ©tadonnÃ©es de traÃ§abilitÃ©
+- RÃ©fÃ©rences croisÃ©es
 
-### 3.2. Réception de décision
+### 3.2. RÃ©ception de dÃ©cision
 
-**Interface de réception :**
+**Interface de rÃ©ception :**
 
-L'adaptateur reçoit une décision de StrongFather avec les éléments suivants :
+L'adaptateur reÃ§oit une dÃ©cision de StrongFather avec les Ã©lÃ©ments suivants :
 
-**Éléments toujours présents :**
+**Ã‰lÃ©ments toujours prÃ©sents :**
 
 - Identifiant de l'intention
-- Type de décision (ACCEPTÉE, REFUSÉE, AMBIGUË, DIFFÉRÉE)
-- Politiques appliquées
+- Type de dÃ©cision (ACCEPTÃ‰E, REFUSÃ‰E, AMBIGUÃ‹, DIFFÃ‰RÃ‰E)
+- Politiques appliquÃ©es
 - Justification
-- Contexte d'évaluation
+- Contexte d'Ã©valuation
 
-**Éléments spécifiques par type :**
+**Ã‰lÃ©ments spÃ©cifiques par type :**
 
-*Pour ACCEPTÉE :*
-- Priorité établie
+*Pour ACCEPTÃ‰E :*
+- PrioritÃ© Ã©tablie
 - Raison de l'acceptation
 
-*Pour REFUSÉE :*
+*Pour REFUSÃ‰E :*
 - Type de rejet
-- Politiques violées
+- Politiques violÃ©es
 - Raison du refus
 
-*Pour AMBIGUË :*
-- Éléments manquants
+*Pour AMBIGUÃ‹ :*
+- Ã‰lÃ©ments manquants
 - Clarifications requises
 
-*Pour DIFFÉRÉE :*
+*Pour DIFFÃ‰RÃ‰E :*
 - Contexte futur requis
-- Raison de la différation
+- Raison de la diffÃ©ration
 
 ### 3.3. Contrat d'interface
 
@@ -137,17 +137,17 @@ L'adaptateur reçoit une décision de StrongFather avec les éléments suivants 
 
 L'adaptateur DOIT soumettre des intentions conformes au Intent Model Contract.
 
-**R-INT-2 : Traitement de toutes les décisions**
+**R-INT-2 : Traitement de toutes les dÃ©cisions**
 
-L'adaptateur DOIT être capable de traiter tous les types de décisions (ACCEPTÉE, REFUSÉE, AMBIGUË, DIFFÉRÉE).
+L'adaptateur DOIT Ãªtre capable de traiter tous les types de dÃ©cisions (ACCEPTÃ‰E, REFUSÃ‰E, AMBIGUÃ‹, DIFFÃ‰RÃ‰E).
 
-**R-INT-3 : Pas de présupposition de résultat**
+**R-INT-3 : Pas de prÃ©supposition de rÃ©sultat**
 
-L'adaptateur NE DOIT JAMAIS présupposer le résultat d'une évaluation.
+L'adaptateur NE DOIT JAMAIS prÃ©supposer le rÃ©sultat d'une Ã©valuation.
 
 ---
 
-## 4. Responsabilités de l'adaptateur
+## 4. ResponsabilitÃ©s de l'adaptateur
 
 ### 4.1. Avant la soumission
 
@@ -157,97 +157,97 @@ L'adaptateur est responsable de former des intentions valides selon le Intent Mo
 
 **RESP-PRE-2 : Collecte du contexte**
 
-L'adaptateur est responsable de collecter le contexte nécessaire à l'évaluation.
+L'adaptateur est responsable de collecter le contexte nÃ©cessaire Ã  l'Ã©valuation.
 
-**RESP-PRE-3 : Génération d'identifiant**
+**RESP-PRE-3 : GÃ©nÃ©ration d'identifiant**
 
-L'adaptateur est responsable de générer un identifiant unique pour chaque intention.
+L'adaptateur est responsable de gÃ©nÃ©rer un identifiant unique pour chaque intention.
 
-### 4.2. Après la décision
+### 4.2. AprÃ¨s la dÃ©cision
 
-**RESP-POST-1 : Exécution conditionnelle**
+**RESP-POST-1 : ExÃ©cution conditionnelle**
 
-L'adaptateur est responsable d'exécuter les actions si la décision est ACCEPTÉE.
+L'adaptateur est responsable d'exÃ©cuter les actions si la dÃ©cision est ACCEPTÃ‰E.
 
 **RESP-POST-2 : Gestion des refus**
 
-L'adaptateur est responsable de gérer les refus de manière appropriée.
+L'adaptateur est responsable de gÃ©rer les refus de maniÃ¨re appropriÃ©e.
 
-**RESP-POST-3 : Clarification des ambiguïtés**
+**RESP-POST-3 : Clarification des ambiguÃ¯tÃ©s**
 
-L'adaptateur est responsable de clarifier les intentions ambiguës avant re-soumission.
+L'adaptateur est responsable de clarifier les intentions ambiguÃ«s avant re-soumission.
 
 **RESP-POST-4 : Attente de contexte**
 
-L'adaptateur est responsable de gérer les décisions différées et de re-soumettre quand le contexte est disponible.
+L'adaptateur est responsable de gÃ©rer les dÃ©cisions diffÃ©rÃ©es et de re-soumettre quand le contexte est disponible.
 
-### 4.3. Responsabilités générales
+### 4.3. ResponsabilitÃ©s gÃ©nÃ©rales
 
 **RESP-GEN-1 : Pas de contournement**
 
-L'adaptateur NE DOIT JAMAIS contourner les décisions de StrongFather.
+L'adaptateur NE DOIT JAMAIS contourner les dÃ©cisions de StrongFather.
 
-**RESP-GEN-2 : Pas d'exécution sans décision**
+**RESP-GEN-2 : Pas d'exÃ©cution sans dÃ©cision**
 
-L'adaptateur NE DOIT JAMAIS exécuter une action significative sans décision de StrongFather.
+L'adaptateur NE DOIT JAMAIS exÃ©cuter une action significative sans dÃ©cision de StrongFather.
 
-**RESP-GEN-3 : Traçabilité**
+**RESP-GEN-3 : TraÃ§abilitÃ©**
 
-L'adaptateur DOIT conserver les décisions pour traçabilité et audit.
+L'adaptateur DOIT conserver les dÃ©cisions pour traÃ§abilitÃ© et audit.
 
 ---
 
-## 5. Règles de conformité d'intégration
+## 5. RÃ¨gles de conformitÃ© d'intÃ©gration
 
-### 5.1. Conformité structurelle
+### 5.1. ConformitÃ© structurelle
 
-**CONF-STRUCT-1 : Architecture respectée**
+**CONF-STRUCT-1 : Architecture respectÃ©e**
 
-L'intégration respecte l'architecture adaptateur-StrongFather.
+L'intÃ©gration respecte l'architecture adaptateur-StrongFather.
 
-**CONF-STRUCT-2 : Frontières respectées**
+**CONF-STRUCT-2 : FrontiÃ¨res respectÃ©es**
 
-L'intégration respecte les frontières définies dans le Boundary & Isolation Contract.
+L'intÃ©gration respecte les frontiÃ¨res dÃ©finies dans le Boundary & Isolation Contract.
 
 **CONF-STRUCT-3 : Interfaces conformes**
 
-Les interfaces de soumission et de réception sont conformes aux définitions.
+Les interfaces de soumission et de rÃ©ception sont conformes aux dÃ©finitions.
 
-### 5.2. Conformité comportementale
+### 5.2. ConformitÃ© comportementale
 
 **CONF-BEHAV-1 : Intentions valides**
 
 Toutes les intentions soumises sont valides selon le Intent Model Contract.
 
-**CONF-BEHAV-2 : Décisions respectées**
+**CONF-BEHAV-2 : DÃ©cisions respectÃ©es**
 
-Toutes les décisions sont respectées par l'adaptateur.
+Toutes les dÃ©cisions sont respectÃ©es par l'adaptateur.
 
 **CONF-BEHAV-3 : Pas de violation**
 
-Aucune violation du Violations & Anti-Patterns Contract n'est présente.
+Aucune violation du Violations & Anti-Patterns Contract n'est prÃ©sente.
 
-### 5.3. Conformité de traçabilité
+### 5.3. ConformitÃ© de traÃ§abilitÃ©
 
-**CONF-TRACE-1 : Traçabilité bout-en-bout**
+**CONF-TRACE-1 : TraÃ§abilitÃ© bout-en-bout**
 
-La chaîne intention → décision → action est traçable.
+La chaÃ®ne intention â†’ dÃ©cision â†’ action est traÃ§able.
 
-**CONF-TRACE-2 : Décisions conservées**
+**CONF-TRACE-2 : DÃ©cisions conservÃ©es**
 
-Les décisions sont conservées pour audit.
+Les dÃ©cisions sont conservÃ©es pour audit.
 
 ---
 
-## 6. Processus d'intégration
+## 6. Processus d'intÃ©gration
 
-### 6.1. Phase 1 : Préparation
+### 6.1. Phase 1 : PrÃ©paration
 
-**Étapes :**
+**Ã‰tapes :**
 
-1. Lecture et compréhension des contrats StrongFather
+1. Lecture et comprÃ©hension des contrats StrongFather
 2. Conception de l'adaptateur selon l'architecture requise
-3. Définition des intentions à soumettre
+3. DÃ©finition des intentions Ã  soumettre
 4. Identification des politiques applicables
 
 **Livrables :**
@@ -256,49 +256,49 @@ Les décisions sont conservées pour audit.
 - Catalogue des intentions
 - Mapping politiques-intentions
 
-### 6.2. Phase 2 : Implémentation
+### 6.2. Phase 2 : ImplÃ©mentation
 
-**Étapes :**
+**Ã‰tapes :**
 
-1. Implémentation de l'interface de soumission
-2. Implémentation de l'interface de réception
-3. Implémentation de la gestion des différents types de décisions
-4. Implémentation de la traçabilité
+1. ImplÃ©mentation de l'interface de soumission
+2. ImplÃ©mentation de l'interface de rÃ©ception
+3. ImplÃ©mentation de la gestion des diffÃ©rents types de dÃ©cisions
+4. ImplÃ©mentation de la traÃ§abilitÃ©
 
 **Livrables :**
 
 - Adaptateur fonctionnel
-- Tests de conformité
+- Tests de conformitÃ©
 
 ### 6.3. Phase 3 : Validation
 
-**Étapes :**
+**Ã‰tapes :**
 
-1. Vérification de la conformité structurelle
-2. Vérification de la conformité comportementale
-3. Vérification de la conformité de traçabilité
-4. Tests d'intégration
+1. VÃ©rification de la conformitÃ© structurelle
+2. VÃ©rification de la conformitÃ© comportementale
+3. VÃ©rification de la conformitÃ© de traÃ§abilitÃ©
+4. Tests d'intÃ©gration
 
 **Livrables :**
 
-- Rapport de conformité
-- Résultats des tests
+- Rapport de conformitÃ©
+- RÃ©sultats des tests
 
 ### 6.4. Phase 4 : Certification
 
-**Étapes :**
+**Ã‰tapes :**
 
 1. Soumission au processus de certification
-2. Audit de conformité
+2. Audit de conformitÃ©
 3. Certification ou correction
 
 **Livrables :**
 
-- Certificat de conformité (ou rapport de non-conformité)
+- Certificat de conformitÃ© (ou rapport de non-conformitÃ©)
 
 ---
 
-## 7. Invariants d'intégration
+## 7. Invariants d'intÃ©gration
 
 ### 7.1. Invariants structurels
 
@@ -306,53 +306,53 @@ Les décisions sont conservées pour audit.
 
 Toute communication avec StrongFather passe par un adaptateur.
 
-**INV-INTEG-2 : Frontières respectées**
+**INV-INTEG-2 : FrontiÃ¨res respectÃ©es**
 
-Les frontières de StrongFather sont toujours respectées.
+Les frontiÃ¨res de StrongFather sont toujours respectÃ©es.
 
 ### 7.2. Invariants comportementaux
 
-**INV-INTEG-3 : Décisions respectées**
+**INV-INTEG-3 : DÃ©cisions respectÃ©es**
 
-Les décisions de StrongFather sont toujours respectées.
+Les dÃ©cisions de StrongFather sont toujours respectÃ©es.
 
 **INV-INTEG-4 : Pas de contournement**
 
-Aucun contournement des décisions n'est possible.
+Aucun contournement des dÃ©cisions n'est possible.
 
-### 7.3. Invariants de traçabilité
+### 7.3. Invariants de traÃ§abilitÃ©
 
-**INV-INTEG-5 : Traçabilité préservée**
+**INV-INTEG-5 : TraÃ§abilitÃ© prÃ©servÃ©e**
 
-La traçabilité bout-en-bout est toujours préservée.
+La traÃ§abilitÃ© bout-en-bout est toujours prÃ©servÃ©e.
 
 ---
 
-## 8. Règles de fermeture du contrat
+## 8. RÃ¨gles de fermeture du contrat
 
-### 8.1. Contrat fermé
+### 8.1. Contrat fermÃ©
 
-Ce contrat est **fermé**. Seules les règles d'intégration explicitement définies sont valides.
+Ce contrat est **fermÃ©**. Seules les rÃ¨gles d'intÃ©gration explicitement dÃ©finies sont valides.
 
 ### 8.2. Interdiction d'extension implicite
 
-Aucune extension implicite des interfaces ou des responsabilités n'est autorisée.
+Aucune extension implicite des interfaces ou des responsabilitÃ©s n'est autorisÃ©e.
 
 ---
 
 ## 9. Conclusion contractuelle
 
-Ce contrat établit de manière définitive et non négociable les règles d'intégration de StrongFather.
+Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable les rÃ¨gles d'intÃ©gration de StrongFather.
 
 Il garantit que :
-- les prérequis sont explicites,
-- les interfaces sont standardisées,
-- les responsabilités sont claires,
-- les règles de conformité sont définies,
-- les invariants d'intégration sont maintenus,
-- le contrat est fermé et non extensible implicitement.
+- les prÃ©requis sont explicites,
+- les interfaces sont standardisÃ©es,
+- les responsabilitÃ©s sont claires,
+- les rÃ¨gles de conformitÃ© sont dÃ©finies,
+- les invariants d'intÃ©gration sont maintenus,
+- le contrat est fermÃ© et non extensible implicitement.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
 
 ---
 
@@ -360,11 +360,11 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
 
 ### 10.1. Cas conformes
 
-Les cas suivants sont **conformes** à ce contrat :
+Les cas suivants sont **conformes** Ã  ce contrat :
 
-1. **Intégration standard** : Un adaptateur soumet des intentions valides et traite toutes les décisions correctement.
+1. **IntÃ©gration standard** : Un adaptateur soumet des intentions valides et traite toutes les dÃ©cisions correctement.
 
-2. **Gestion des ambiguïtés** : Un adaptateur clarifie les intentions ambiguës et les re-soumet.
+2. **Gestion des ambiguÃ¯tÃ©s** : Un adaptateur clarifie les intentions ambiguÃ«s et les re-soumet.
 
 ### 10.2. Cas de violation
 
@@ -372,45 +372,46 @@ Les cas suivants **violent** ce contrat :
 
 1. **Communication directe** : Un produit communique directement avec StrongFather sans passer par un adaptateur. Viole INV-INTEG-1.
 
-2. **Contournement de décision** : Un adaptateur exécute une action malgré une décision REFUSÉE. Viole INV-INTEG-3.
+2. **Contournement de dÃ©cision** : Un adaptateur exÃ©cute une action malgrÃ© une dÃ©cision REFUSÃ‰E. Viole INV-INTEG-3.
 
 3. **Intention invalide** : Un adaptateur soumet une intention sans identifiant. Viole CONF-BEHAV-1.
 
 ---
 
-**Document créé le :** 2026-01-25  
+**Document crÃ©Ã© le :** 2026-01-25  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
-**Type :** Contrat de préparation à l'intégration non négociable
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
+**Type :** Contrat de prÃ©paration Ã  l'intÃ©gration non nÃ©gociable
 
 ---
 
-## 11. Mini log de génération
+## 11. Mini log de gÃ©nÃ©ration
 
-### Décision éditoriale E1 : Processus d'intégration
+### DÃ©cision Ã©ditoriale E1 : Processus d'intÃ©gration
 
-**Décision prise :** Définition d'un processus d'intégration en 4 phases (Préparation, Implémentation, Validation, Certification).
+**DÃ©cision prise :** DÃ©finition d'un processus d'intÃ©gration en 4 phases (PrÃ©paration, ImplÃ©mentation, Validation, Certification).
 
-**Application :** Section 6 définit les phases avec étapes et livrables.
+**Application :** Section 6 dÃ©finit les phases avec Ã©tapes et livrables.
 
 ### Warning W1 : Interface conceptuelle vs technique
 
-**Warning rencontré :** Risque de définir des interfaces trop techniques.
+**Warning rencontrÃ© :** Risque de dÃ©finir des interfaces trop techniques.
 
-**Décision prise :** Les interfaces sont définies conceptuellement sans présupposer de format technique.
+**DÃ©cision prise :** Les interfaces sont dÃ©finies conceptuellement sans prÃ©supposer de format technique.
 
-**Correction effectuée :** Section 3 définit les interfaces conceptuellement.
+**Correction effectuÃ©e :** Section 3 dÃ©finit les interfaces conceptuellement.
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-**Vérification effectuée :**
-- ✅ Cohérence avec Boundary Contract : Confirmée (frontières respectées)
-- ✅ Cohérence avec Intent Model Contract : Confirmée (éléments de l'intention)
-- ✅ Cohérence avec Core Decision Contract : Confirmée (éléments de la décision)
+**VÃ©rification effectuÃ©e :**
+- âœ… CohÃ©rence avec Boundary Contract : ConfirmÃ©e (frontiÃ¨res respectÃ©es)
+- âœ… CohÃ©rence avec Intent Model Contract : ConfirmÃ©e (Ã©lÃ©ments de l'intention)
+- âœ… CohÃ©rence avec Core Decision Contract : ConfirmÃ©e (Ã©lÃ©ments de la dÃ©cision)
 
-**Conclusion :** Aucune contradiction détectée.
+**Conclusion :** Aucune contradiction dÃ©tectÃ©e.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

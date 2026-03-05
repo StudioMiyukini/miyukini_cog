@@ -1,54 +1,54 @@
-# MiyuNotify — Documentation Fondatrice
+﻿# MiyuNotify â€” Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuNotify** est le **kit d'outils (Toolkit)** de notification de l'écosystème Miyukini. Il intègre les outils d'envoi d'email, d'envoi de notification push, et d'écriture en boîte de réception in-app (inbox), sans logique métier — le destinataire, le contenu et les options sont fournis dans le flux gouverné ; la décision d'envoyer ou non relève de **StrongFather**.
+**MiyuNotify** est le **kit d'outils (Toolkit)** de notification de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils d'envoi d'email, d'envoi de notification push, et d'Ã©criture en boÃ®te de rÃ©ception in-app (inbox), sans logique mÃ©tier â€” le destinataire, le contenu et les options sont fournis dans le flux gouvernÃ© ; la dÃ©cision d'envoyer ou non relÃ¨ve de **StrongFather**.
 
-L'autorité sur les données métier (destinataires, préférences, historique) appartient à **KindMother**. MiyuNotify expose des capacités d'exécution gouvernée (envoyer email, envoyer push, écrire inbox) ; les décisions (à qui envoyer, quand, contenu autorisé) relèvent de **StrongFather** et des Opérateurs.
+L'autoritÃ© sur les donnÃ©es mÃ©tier (destinataires, prÃ©fÃ©rences, historique) appartient Ã  **KindMother**. MiyuNotify expose des capacitÃ©s d'exÃ©cution gouvernÃ©e (envoyer email, envoyer push, Ã©crire inbox) ; les dÃ©cisions (Ã  qui envoyer, quand, contenu autorisÃ©) relÃ¨vent de **StrongFather** et des OpÃ©rateurs.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-
----
-
-## 2. Portée / Scope
-
-**Ce document définit :** l'identité et la définition canonique de MiyuNotify, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother.
-
-**Hors scope :** l'implémentation détaillée (SMTP, FCM, stockage inbox) ; la politique de contenu et les préférences utilisateur (StrongFather / Opérateurs).
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 3. Définition canonique
+## 2. PortÃ©e / Scope
 
-> **MiyuNotify est une composition officielle d'outils de notification (email, push, inbox), déclarée et gouvernée par l'environnement.**
+**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de MiyuNotify, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother.
 
-- MiyuNotify **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
-- MiyuNotify **n'ajoute aucune logique métier** : il orchestre des capacités atomiques (envoyer email, envoyer push, écrire inbox) ; destinataire, contenu et options fournis dans le flux ; décision d'envoi = StrongFather.
+**Hors scope :** l'implÃ©mentation dÃ©taillÃ©e (SMTP, FCM, stockage inbox) ; la politique de contenu et les prÃ©fÃ©rences utilisateur (StrongFather / OpÃ©rateurs).
 
-**Règle fondamentale :** Un Tool MiyuNotify **exécute** l'envoi ou l'écriture ; il **ne décide pas** si l'envoi doit avoir lieu — cela relève de StrongFather.
+---
+
+## 3. DÃ©finition canonique
+
+> **MiyuNotify est une composition officielle d'outils de notification (email, push, inbox), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+
+- MiyuNotify **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
+- MiyuNotify **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques (envoyer email, envoyer push, Ã©crire inbox) ; destinataire, contenu et options fournis dans le flux ; dÃ©cision d'envoi = StrongFather.
+
+**RÃ¨gle fondamentale :** Un Tool MiyuNotify **exÃ©cute** l'envoi ou l'Ã©criture ; il **ne dÃ©cide pas** si l'envoi doit avoir lieu â€” cela relÃ¨ve de StrongFather.
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.notify.miyunotify` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `notify` |
-| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le détail de chaque outil est décrit dans [MiyuNotify - Reference Outils](./MiyuNotify%20-%20Reference%20Outils.md).
+Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuNotify - Reference Outils](./MiyuNotify%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
 | `tool.notify.email.send` | Envoie un email (destinataire, sujet, corps fournis) ; autorisation = StrongFather |
 | `tool.notify.push.send` | Envoie une notification push (device/channel, payload fournis) ; autorisation = StrongFather |
-| `tool.notify.inbox.write` | Écrit une entrée en boîte de réception in-app (destinataire, contenu fournis) ; écriture = WriteIntent KindMother |
+| `tool.notify.inbox.write` | Ã‰crit une entrÃ©e en boÃ®te de rÃ©ception in-app (destinataire, contenu fournis) ; Ã©criture = WriteIntent KindMother |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuNotify en contient trois.
 
@@ -56,44 +56,46 @@ Le détail de chaque outil est décrit dans [MiyuNotify - Reference Outils](./Mi
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : **décision d'envoi = StrongFather** ; pour inbox.write, écriture = WriteIntent KindMother.
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : **dÃ©cision d'envoi = StrongFather** ; pour inbox.write, Ã©criture = WriteIntent KindMother.
 
 ---
 
-## 7. Niveau de sécurité et états
+## 7. Niveau de sÃ©curitÃ© et Ã©tats
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
-| **Niveau de sécurité du kit** | **1 à 3** (données personnelles, envoi externe) |
-| **États autorisés** | Tous sauf restriction WorrySentinel |
-| **États interdits** | Selon politique WorrySentinel (ex. SECURITY_LOCKDOWN peut bloquer envoi externe) |
+| **Niveau de sÃ©curitÃ© du kit** | **1 Ã  3** (donnÃ©es personnelles, envoi externe) |
+| **Ã‰tats autorisÃ©s** | Tous sauf restriction WorrySentinel |
+| **Ã‰tats interdits** | Selon politique WorrySentinel (ex. SECURITY_LOCKDOWN peut bloquer envoi externe) |
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autorité sur les données : destinataires, préférences, historique inbox. L'outil `tool.notify.inbox.write` produit une **WriteIntent** vers KindMother. Les outils email.send et push.send exécutent un envoi externe (pas d'écriture directe en base métier par MiyuNotify ; les logs d'envoi relèvent de l'implémentation).
+**KindMother** est l'autoritÃ© sur les donnÃ©es : destinataires, prÃ©fÃ©rences, historique inbox. L'outil `tool.notify.inbox.write` produit une **WriteIntent** vers KindMother. Les outils email.send et push.send exÃ©cutent un envoi externe (pas d'Ã©criture directe en base mÃ©tier par MiyuNotify ; les logs d'envoi relÃ¨vent de l'implÃ©mentation).
 
-Les obligations de conformité détaillées sont dans [MiyuNotify - Tool Governance Compliance Contract](./contracts/governance/MiyuNotify%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuNotify - Tool Governance Compliance Contract](./contracts/governance/MiyuNotify%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-À l'implémentation : chaque Tool MiyuNotify est une unité logique pouvant devenir un **bloc MSCM** : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
+Ã€ l'implÃ©mentation : chaque Tool MiyuNotify est une unitÃ© logique pouvant devenir un **bloc MSCM** : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
 
 ---
 
-## 10. Références croisées
+## 10. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
+| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence fondateur
+**Statut :** Document de rÃ©fÃ©rence fondateur
+
+

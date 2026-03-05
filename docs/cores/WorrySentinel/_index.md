@@ -1,25 +1,25 @@
-# WorrySentinel — Index de Navigation
+﻿# WorrySentinel â€” Index de Navigation
 
 ## Contexte
 
-WorrySentinel est le **core de gouvernance de sécurité transversale** du Miyukini Core System. Il incarne la capacité conceptuelle du système à définir, maintenir, et faire évoluer les niveaux de sécurité, les états de confiance, et les mécanismes de dégradation progressive.
+WorrySentinel est le **core de gouvernance de sÃ©curitÃ© transversale** du Miyukini Core System. Il incarne la capacitÃ© conceptuelle du systÃ¨me Ã  dÃ©finir, maintenir, et faire Ã©voluer les niveaux de sÃ©curitÃ©, les Ã©tats de confiance, et les mÃ©canismes de dÃ©gradation progressive.
 
-WorrySentinel représente la **volonté sécuritaire** du système : il détermine quels niveaux de sécurité sont applicables, quels états de confiance sont acceptables, comment la dégradation doit progresser — sans jamais posséder d'autorité sur l'implémentation, l'exécution, ou la persistance.
+WorrySentinel reprÃ©sente la **volontÃ© sÃ©curitaire** du systÃ¨me : il dÃ©termine quels niveaux de sÃ©curitÃ© sont applicables, quels Ã©tats de confiance sont acceptables, comment la dÃ©gradation doit progresser â€” sans jamais possÃ©der d'autoritÃ© sur l'implÃ©mentation, l'exÃ©cution, ou la persistance.
 
-**Strate :** 4 (Gouvernance de sécurité)  
-**Rôle :** Gouvernance transversale des niveaux de sécurité et états de confiance  
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Strate :** 4 (Gouvernance de sÃ©curitÃ©)  
+**RÃ´le :** Gouvernance transversale des niveaux de sÃ©curitÃ© et Ã©tats de confiance  
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 ## Question fondamentale
 
-> **"Quel est le niveau de sécurité applicable et quel est l'état de confiance du système ?"**
+> **"Quel est le niveau de sÃ©curitÃ© applicable et quel est l'Ã©tat de confiance du systÃ¨me ?"**
 
-Cette question se décline en :
-- Quel niveau de sécurité (0-4) s'applique à ce produit ou composant ?
-- Quel est l'état de confiance actuel du système (T0-T4) ?
-- Comment le système doit-il dégrader ses capacités selon l'état de confiance ?
+Cette question se dÃ©cline en :
+- Quel niveau de sÃ©curitÃ© (0-4) s'applique Ã  ce produit ou composant ?
+- Quel est l'Ã©tat de confiance actuel du systÃ¨me (T0-T4) ?
+- Comment le systÃ¨me doit-il dÃ©grader ses capacitÃ©s selon l'Ã©tat de confiance ?
 - Quelles contraintes les cores fonctionnels doivent-ils respecter ?
 
 ---
@@ -28,11 +28,11 @@ Cette question se décline en :
 
 ### Foundation
 
-Documents fondateurs définissant l'identité et le rôle de WorrySentinel.
+Documents fondateurs dÃ©finissant l'identitÃ© et le rÃ´le de WorrySentinel.
 
 | Document | Description |
 |----------|-------------|
-| [Documentation Fondatrice](./foundation/WorrySentinel%20-%20Documentation%20Fondatrice.md) | Définition conceptuelle, rôle, positionnement, invariants fondamentaux |
+| [Documentation Fondatrice](./foundation/WorrySentinel%20-%20Documentation%20Fondatrice.md) | DÃ©finition conceptuelle, rÃ´le, positionnement, invariants fondamentaux |
 
 ---
 
@@ -43,71 +43,71 @@ Documentation architecturale.
 | Document | Description |
 |----------|-------------|
 | [Architecture & Flows](./architecture/WorrySentinel%20-%20Architecture%20&%20Flows.md) | Architecture conceptuelle, composants, flux de gouvernance |
-| [Core Interaction Contract](./architecture/WorrySentinel%20-%20Core%20Interaction%20Contract.md) | Modèle d'interaction avec les autres cores |
+| [Core Interaction Contract](./architecture/WorrySentinel%20-%20Core%20Interaction%20Contract.md) | ModÃ¨le d'interaction avec les autres cores |
 
 ---
 
 ### Contracts
 
-Contrats FONDATION normatifs et non négociables.
+Contrats FONDATION normatifs et non nÃ©gociables.
 
 #### Governance
 
 | Document | Description |
 |----------|-------------|
-| [Invariants & Guarantees](./contracts/governance/WorrySentinel%20-%20Invariants%20&%20Guarantees.md) | Catalogue consolidé des invariants INV-WS-1 à INV-WS-8 et INV-GOV-1 à INV-GOV-8 |
-| [Violations & Anti-Patterns](./contracts/governance/WorrySentinel%20-%20Violations%20&%20Anti-Patterns.md) | Violations cataloguées, anti-patterns, comportements interdits |
+| [Invariants & Guarantees](./contracts/governance/WorrySentinel%20-%20Invariants%20&%20Guarantees.md) | Catalogue consolidÃ© des invariants INV-WS-1 Ã  INV-WS-8 et INV-GOV-1 Ã  INV-GOV-8 |
+| [Violations & Anti-Patterns](./contracts/governance/WorrySentinel%20-%20Violations%20&%20Anti-Patterns.md) | Violations cataloguÃ©es, anti-patterns, comportements interdits |
 
 #### Levels
 
 | Document | Description |
 |----------|-------------|
-| [Security Levels Governance Contract](./contracts/levels/WorrySentinel%20-%20Security%20Levels%20Governance%20Contract.md) | Gouvernance des niveaux de sécurité (0-4), attribution, adaptation |
-| [Trust States Governance Contract](./contracts/levels/WorrySentinel%20-%20Trust%20States%20Governance%20Contract.md) | Gouvernance des états de confiance (T0-T4), transitions, règles |
+| [Security Levels Governance Contract](./contracts/levels/WorrySentinel%20-%20Security%20Levels%20Governance%20Contract.md) | Gouvernance des niveaux de sÃ©curitÃ© (0-4), attribution, adaptation |
+| [Trust States Governance Contract](./contracts/levels/WorrySentinel%20-%20Trust%20States%20Governance%20Contract.md) | Gouvernance des Ã©tats de confiance (T0-T4), transitions, rÃ¨gles |
 
 #### Degradation
 
 | Document | Description |
 |----------|-------------|
-| [Progressive Degradation Contract](./contracts/degradation/WorrySentinel%20-%20Progressive%20Degradation%20Contract.md) | Règles de dégradation progressive, interaction niveaux/états |
+| [Progressive Degradation Contract](./contracts/degradation/WorrySentinel%20-%20Progressive%20Degradation%20Contract.md) | RÃ¨gles de dÃ©gradation progressive, interaction niveaux/Ã©tats |
 
 #### Integration
 
 | Document | Description |
 |----------|-------------|
-| [StrongFather Integration Contract](./contracts/integration/WorrySentinel%20-%20StrongFather%20Integration%20Contract.md) | Flux de gouvernance vers StrongFather, sévérité des décisions |
-| [CaringNanny Integration Contract](./contracts/integration/WorrySentinel%20-%20CaringNanny%20Integration%20Contract.md) | Flux de signaux d'intégrité, consolidation des anomalies |
-| [BorderGuard Integration Contract](./contracts/integration/WorrySentinel%20-%20BorderGuard%20Integration%20Contract.md) | Adaptation des frontières selon les niveaux de sécurité |
+| [StrongFather Integration Contract](./contracts/integration/WorrySentinel%20-%20StrongFather%20Integration%20Contract.md) | Flux de gouvernance vers StrongFather, sÃ©vÃ©ritÃ© des dÃ©cisions |
+| [CaringNanny Integration Contract](./contracts/integration/WorrySentinel%20-%20CaringNanny%20Integration%20Contract.md) | Flux de signaux d'intÃ©gritÃ©, consolidation des anomalies |
+| [BorderGuard Integration Contract](./contracts/integration/WorrySentinel%20-%20BorderGuard%20Integration%20Contract.md) | Adaptation des frontiÃ¨res selon les niveaux de sÃ©curitÃ© |
 | [LogisticsSteward Integration Contract](./contracts/integration/WorrySentinel%20-%20LogisticsSteward%20Integration%20Contract.md) | Supervision des allocations, durcissement des quotas |
-| [TAMR Integration Contract](./contracts/integration/WorrySentinel%20-%20TAMR%20Integration%20Contract.md) | Adaptation des interventions humaines selon les états |
+| [TAMR Integration Contract](./contracts/integration/WorrySentinel%20-%20TAMR%20Integration%20Contract.md) | Adaptation des interventions humaines selon les Ã©tats |
 | [MiyukiniAdmin Integration Contract](./contracts/integration/WorrySentinel%20-%20MiyukiniAdmin%20Integration%20Contract.md) | Consultation et configuration de la gouvernance |
 
 #### Security
 
 | Document | Description |
 |----------|-------------|
-| [Threat Model Contract](./contracts/security/WorrySentinel%20-%20Threat%20Model%20Contract.md) | Modèle de menaces pour la gouvernance de sécurité |
+| [Threat Model Contract](./contracts/security/WorrySentinel%20-%20Threat%20Model%20Contract.md) | ModÃ¨le de menaces pour la gouvernance de sÃ©curitÃ© |
 
 ---
 
 ### Implementation
 
-Guides d'implémentation.
+Guides d'implÃ©mentation.
 
 | Document | Description |
 |----------|-------------|
-| [Reference Implementation Guidelines](./implementation/WorrySentinel%20-%20Reference%20Implementation%20Guidelines.md) | Guidelines d'implémentation de référence |
+| [Reference Implementation Guidelines](./implementation/WorrySentinel%20-%20Reference%20Implementation%20Guidelines.md) | Guidelines d'implÃ©mentation de rÃ©fÃ©rence |
 
 ---
 
 ### Reference
 
-Documentation de référence et exemples.
+Documentation de rÃ©fÃ©rence et exemples.
 
 | Document | Description |
 |----------|-------------|
 | [Vocabulary & Glossary](./reference/WorrySentinel%20-%20Vocabulary%20&%20Glossary.md) | Vocabulaire canonique de WorrySentinel |
-| [FAQ & Common Questions](./reference/WorrySentinel%20-%20FAQ%20&%20Common%20Questions.md) | Questions fréquentes |
+| [FAQ & Common Questions](./reference/WorrySentinel%20-%20FAQ%20&%20Common%20Questions.md) | Questions frÃ©quentes |
 | [Examples & Use Cases](./reference/WorrySentinel%20-%20Examples%20&%20Use%20Cases.md) | Exemples et cas d'usage |
 
 ---
@@ -115,39 +115,39 @@ Documentation de référence et exemples.
 ## Position dans la Pyramide Miyukini
 
 ```
-┌──────────────────────────────────────────┐
-│ STRATE 5 — Cores fonctionnels             │
-│ StrongFather · KindMother · MasterButler │
-│ CaringNanny · EverBuddy · BorderGuard    │
-│ TAMR · LogisticsSteward                   │
-└──────────────────────────────────────────┘
-┌──────────────────────────────────────────┐
-│ STRATE 4 — WorrySentinel                  │
-│ Gouvernance de sécurité                   │
-│ Niveaux, états, dégradation               │
-└──────────────────────────────────────────┘
-┌──────────────────────────────────────────┐
-│ STRATE 3 — Kernel Miyukini               │
-│ Identité, Horloge, Logger, Sondes         │
-└──────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 5 â€” Cores fonctionnels             â”‚
+â”‚ StrongFather Â· KindMother Â· MasterButler â”‚
+â”‚ CaringNanny Â· EverBuddy Â· BorderGuard    â”‚
+â”‚ TAMR Â· LogisticsSteward                   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 4 â€” WorrySentinel                  â”‚
+â”‚ Gouvernance de sÃ©curitÃ©                   â”‚
+â”‚ Niveaux, Ã©tats, dÃ©gradation               â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 3 â€” Kernel Miyukini               â”‚
+â”‚ IdentitÃ©, Horloge, Logger, Sondes         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-**Règle architecturale :** WorrySentinel gouverne les cores fonctionnels de la Strate 5, mais ne les remplace jamais. Il contraint leur comportement selon les niveaux de sécurité et les états de confiance.
+**RÃ¨gle architecturale :** WorrySentinel gouverne les cores fonctionnels de la Strate 5, mais ne les remplace jamais. Il contraint leur comportement selon les niveaux de sÃ©curitÃ© et les Ã©tats de confiance.
 
 ---
 
-## Invariants clés
+## Invariants clÃ©s
 
 | Invariant | Description |
 |-----------|-------------|
-| **INV-WS-1** | Aucune autorité sur l'implémentation — WorrySentinel ne code jamais de contrôle |
-| **INV-WS-2** | Aucune autorité sur l'exécution — WorrySentinel ne lance jamais de vérification |
-| **INV-WS-3** | Aucune autorité sur la persistance — WorrySentinel ne persiste jamais |
-| **INV-WS-4** | Aucune modification d'état — WorrySentinel gouverne, ne modifie pas |
-| **INV-WS-5** | Aucune logique temporelle technique — Pas de gestion du temps |
-| **INV-WS-6** | Zero-trust — Aucune confiance présupposée |
-| **INV-WS-7** | Gouvernance explicite — Toutes les règles sont déclaratives |
-| **INV-WS-8** | Traçabilité complète — Toute décision est traçable |
+| **INV-WS-1** | Aucune autoritÃ© sur l'implÃ©mentation â€” WorrySentinel ne code jamais de contrÃ´le |
+| **INV-WS-2** | Aucune autoritÃ© sur l'exÃ©cution â€” WorrySentinel ne lance jamais de vÃ©rification |
+| **INV-WS-3** | Aucune autoritÃ© sur la persistance â€” WorrySentinel ne persiste jamais |
+| **INV-WS-4** | Aucune modification d'Ã©tat â€” WorrySentinel gouverne, ne modifie pas |
+| **INV-WS-5** | Aucune logique temporelle technique â€” Pas de gestion du temps |
+| **INV-WS-6** | Zero-trust â€” Aucune confiance prÃ©supposÃ©e |
+| **INV-WS-7** | Gouvernance explicite â€” Toutes les rÃ¨gles sont dÃ©claratives |
+| **INV-WS-8** | TraÃ§abilitÃ© complÃ¨te â€” Toute dÃ©cision est traÃ§able |
 
 ---
 
@@ -155,48 +155,48 @@ Documentation de référence et exemples.
 
 | Code | Interdiction |
 |------|--------------|
-| **INTERD-WS-1** | WorrySentinel ne peut pas implémenter de contrôle de sécurité |
-| **INTERD-WS-2** | WorrySentinel ne peut pas exécuter de vérification |
-| **INTERD-WS-3** | WorrySentinel ne peut pas persister de données |
-| **INTERD-WS-4** | WorrySentinel ne peut pas modifier l'état du système |
-| **INTERD-WS-5** | WorrySentinel ne peut pas gérer le temps technique |
-| **INTERD-WS-6** | WorrySentinel ne peut pas prendre de décision spécifique |
-| **INTERD-WS-7** | WorrySentinel ne peut pas définir de mécanisme cryptographique |
+| **INTERD-WS-1** | WorrySentinel ne peut pas implÃ©menter de contrÃ´le de sÃ©curitÃ© |
+| **INTERD-WS-2** | WorrySentinel ne peut pas exÃ©cuter de vÃ©rification |
+| **INTERD-WS-3** | WorrySentinel ne peut pas persister de donnÃ©es |
+| **INTERD-WS-4** | WorrySentinel ne peut pas modifier l'Ã©tat du systÃ¨me |
+| **INTERD-WS-5** | WorrySentinel ne peut pas gÃ©rer le temps technique |
+| **INTERD-WS-6** | WorrySentinel ne peut pas prendre de dÃ©cision spÃ©cifique |
+| **INTERD-WS-7** | WorrySentinel ne peut pas dÃ©finir de mÃ©canisme cryptographique |
 | **INTERD-WS-8** | WorrySentinel ne peut pas contourner les invariants FONDATION |
 
 ---
 
-## Niveaux de sécurité
+## Niveaux de sÃ©curitÃ©
 
 | Niveau | Description |
 |--------|-------------|
-| **0 — Public** | Données publiques, aucune contrainte de sécurité stricte |
-| **1 — Standard** | Données standard, contraintes de sécurité de base |
-| **2 — Sensitive** | Données sensibles, contraintes de sécurité renforcées |
-| **3 — Critical** | Données critiques, contraintes de sécurité strictes |
-| **4 — Hardened** | Sécurité maximale, contraintes de sécurité maximales |
+| **0 â€” Public** | DonnÃ©es publiques, aucune contrainte de sÃ©curitÃ© stricte |
+| **1 â€” Standard** | DonnÃ©es standard, contraintes de sÃ©curitÃ© de base |
+| **2 â€” Sensitive** | DonnÃ©es sensibles, contraintes de sÃ©curitÃ© renforcÃ©es |
+| **3 â€” Critical** | DonnÃ©es critiques, contraintes de sÃ©curitÃ© strictes |
+| **4 â€” Hardened** | SÃ©curitÃ© maximale, contraintes de sÃ©curitÃ© maximales |
 
 ---
 
-## États de confiance
+## Ã‰tats de confiance
 
-| État | Description |
+| Ã‰tat | Description |
 |------|-------------|
-| **T0 — Normal** | Système sain, toutes les capacités disponibles |
-| **T1 — Instable** | Anomalie détectée, log renforcé, aucun blocage |
-| **T2 — Dégradé** | Incohérence persistante, certaines capacités désactivées |
-| **T3 — Restreint** | Suspicion forte, gel des produits non essentiels |
-| **T4 — Bloqué** | Intégrité rompue, uniquement diagnostics |
+| **T0 â€” Normal** | SystÃ¨me sain, toutes les capacitÃ©s disponibles |
+| **T1 â€” Instable** | Anomalie dÃ©tectÃ©e, log renforcÃ©, aucun blocage |
+| **T2 â€” DÃ©gradÃ©** | IncohÃ©rence persistante, certaines capacitÃ©s dÃ©sactivÃ©es |
+| **T3 â€” Restreint** | Suspicion forte, gel des produits non essentiels |
+| **T4 â€” BloquÃ©** | IntÃ©gritÃ© rompue, uniquement diagnostics |
 
 ---
 
-## États globaux de l'écosystème
+## Ã‰tats globaux de l'Ã©cosystÃ¨me
 
-| État | Effet | Correspondance T0-T4 |
+| Ã‰tat | Effet | Correspondance T0-T4 |
 |------|-------|---------------------|
 | Nominal | Fonctionnement normal | T0 |
-| Doute | + contrôles, + traces | T1 |
-| Suspect | Fonctions sensibles bridées | T2 |
+| Doute | + contrÃ´les, + traces | T1 |
+| Suspect | Fonctions sensibles bridÃ©es | T2 |
 | Critique | Lecture seule / blocage partiel | T3 |
 | Compromis | Blocage total | T4 |
 
@@ -206,13 +206,13 @@ Documentation de référence et exemples.
 
 | Core | Relation |
 |------|----------|
-| **StrongFather** | Complémentaire — WorrySentinel gouverne les niveaux, StrongFather applique les politiques |
-| **KindMother** | Indépendante — WorrySentinel ne connaît pas KindMother, pas d'accès aux données |
-| **CaringNanny** | Flux montant — CaringNanny consolide les signaux qui influencent les états de confiance |
-| **BorderGuard** | Contrainte — WorrySentinel impose les niveaux de sécurité aux frontières |
-| **LogisticsSteward** | Supervision — WorrySentinel peut durcir les règles d'arbitrage |
-| **TAMR** | Complémentaire — WorrySentinel définit les niveaux, TAMR adapte les interventions humaines |
-| **MiyukiniAdmin** | Configuration — MiyukiniAdmin consulte et configure la gouvernance |
+| **StrongFather** | ComplÃ©mentaire â€” WorrySentinel gouverne les niveaux, StrongFather applique les politiques |
+| **KindMother** | IndÃ©pendante â€” WorrySentinel ne connaÃ®t pas KindMother, pas d'accÃ¨s aux donnÃ©es |
+| **CaringNanny** | Flux montant â€” CaringNanny consolide les signaux qui influencent les Ã©tats de confiance |
+| **BorderGuard** | Contrainte â€” WorrySentinel impose les niveaux de sÃ©curitÃ© aux frontiÃ¨res |
+| **LogisticsSteward** | Supervision â€” WorrySentinel peut durcir les rÃ¨gles d'arbitrage |
+| **TAMR** | ComplÃ©mentaire â€” WorrySentinel dÃ©finit les niveaux, TAMR adapte les interventions humaines |
+| **MiyukiniAdmin** | Configuration â€” MiyukiniAdmin consulte et configure la gouvernance |
 
 ### Diagramme de relations
 
@@ -256,75 +256,76 @@ WorrySentinel impose des contraintes verticales sur tous les cores fonctionnels 
 
 ```
 WorrySentinel
-   ↓ impose contraintes
-StrongFather → sévérité des décisions
-MasterButler → permissions actives
-BorderGuard → durcissement I/O
-LogisticsSteward → durcissement quotas et priorités
-TAMR → droits humains
-Kernel → fréquence sondes
+   â†“ impose contraintes
+StrongFather â†’ sÃ©vÃ©ritÃ© des dÃ©cisions
+MasterButler â†’ permissions actives
+BorderGuard â†’ durcissement I/O
+LogisticsSteward â†’ durcissement quotas et prioritÃ©s
+TAMR â†’ droits humains
+Kernel â†’ frÃ©quence sondes
 ```
 
 ### Flux montant (observation)
 
-WorrySentinel observe et corrèle les signaux remontant des cores :
+WorrySentinel observe et corrÃ¨le les signaux remontant des cores :
 
 ```
-Kernel → signaux (clock, id, trace)
-BorderGuard → anomalies I/O
-StrongFather → décisions refusées
-KindMother → incohérences détectées
-BondingBrother → comportements produits
-LogisticsSteward → dérives allocation ressources
-   ↓
-WorrySentinel observe, corrèle, déclare un état
+Kernel â†’ signaux (clock, id, trace)
+BorderGuard â†’ anomalies I/O
+StrongFather â†’ dÃ©cisions refusÃ©es
+KindMother â†’ incohÃ©rences dÃ©tectÃ©es
+BondingBrother â†’ comportements produits
+LogisticsSteward â†’ dÃ©rives allocation ressources
+   â†“
+WorrySentinel observe, corrÃ¨le, dÃ©clare un Ã©tat
 ```
 
 ---
 
-## Conformité aux Lois d'Autonomie Système
+## ConformitÃ© aux Lois d'Autonomie SystÃ¨me
 
-WorrySentinel est **critique pour l'autonomie** selon les [Lois d'Autonomie Système](../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) :
+WorrySentinel est **critique pour l'autonomie** selon les [Lois d'Autonomie SystÃ¨me](..//..//miyukini-webway-system//reference//_index.md) :
 
-| Loi | Conformité | Note |
+| Loi | ConformitÃ© | Note |
 |-----|------------|------|
-| **LOI-1** | Rôle critique | Gouvernance locale, chargée au démarrage |
-| **LOI-2** | Conformité totale | États de confiance permettent de gérer l'isolement |
-| **LOI-3** | Conformité totale | Niveaux de sécurité locaux et souverains |
-| **LOI-5** | Conformité totale | Core conceptuel léger, sans exécution |
-| **LOI-6** | Rôle critique | Contrôle des niveaux de sécurité pour échanges fédérés |
+| **LOI-1** | RÃ´le critique | Gouvernance locale, chargÃ©e au dÃ©marrage |
+| **LOI-2** | ConformitÃ© totale | Ã‰tats de confiance permettent de gÃ©rer l'isolement |
+| **LOI-3** | ConformitÃ© totale | Niveaux de sÃ©curitÃ© locaux et souverains |
+| **LOI-5** | ConformitÃ© totale | Core conceptuel lÃ©ger, sans exÃ©cution |
+| **LOI-6** | RÃ´le critique | ContrÃ´le des niveaux de sÃ©curitÃ© pour Ã©changes fÃ©dÃ©rÃ©s |
 
 ---
 
-## Concepts clés
+## Concepts clÃ©s
 
 | Concept | Description |
 |---------|-------------|
-| **Niveau de sécurité** | Profil de risque (0-4) attribué à un produit ou composant |
-| **État de confiance** | État d'intégrité du système (T0-T4) |
-| **Dégradation progressive** | Réduction contrôlée des capacités selon l'état de confiance |
-| **Gouvernance explicite** | Toutes les règles sont déclaratives et traçables |
+| **Niveau de sÃ©curitÃ©** | Profil de risque (0-4) attribuÃ© Ã  un produit ou composant |
+| **Ã‰tat de confiance** | Ã‰tat d'intÃ©gritÃ© du systÃ¨me (T0-T4) |
+| **DÃ©gradation progressive** | RÃ©duction contrÃ´lÃ©e des capacitÃ©s selon l'Ã©tat de confiance |
+| **Gouvernance explicite** | Toutes les rÃ¨gles sont dÃ©claratives et traÃ§ables |
 | **Pression verticale** | WorrySentinel contraint sans remplacer les cores |
-| **Transition d'état** | Changement d'état de confiance selon les signaux consolidés |
+| **Transition d'Ã©tat** | Changement d'Ã©tat de confiance selon les signaux consolidÃ©s |
 
 ---
 
 ## Phrase fondatrice
 
-> **WorrySentinel est l'autorité de gouvernance de sécurité qui définit les niveaux de sécurité, gouverne les états de confiance, et orchestre la dégradation progressive, sans jamais posséder d'autorité sur l'implémentation, l'exécution, ou la persistance.**
+> **WorrySentinel est l'autoritÃ© de gouvernance de sÃ©curitÃ© qui dÃ©finit les niveaux de sÃ©curitÃ©, gouverne les Ã©tats de confiance, et orchestre la dÃ©gradation progressive, sans jamais possÃ©der d'autoritÃ© sur l'implÃ©mentation, l'exÃ©cution, ou la persistance.**
 
 ---
 
-## Documents de référence
+## Documents de rÃ©fÃ©rence
 
-- [Miyukini Conceptual References - Security Levels](../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md)
-- [Miyukini Conceptual References - Integrity Degradation System](../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md)
-- [Miyukini Conceptual References - Pyramide Architecture Complete](../../reference/Miyukini%20Conceptual%20References%20-%20Pyramide%20Architecture%20Complete.md)
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
-- [Miyukini Conceptual References - Doctrine Securite Fondamentale](../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md)
+- [Miyukini Conceptual References - Security Levels](..//..//miyukini-webway-system//reference//_index.md)
+- [Miyukini Conceptual References - Integrity Degradation System](..//..//miyukini-webway-system//reference//_index.md)
+- [Miyukini Conceptual References - Pyramide Architecture Complete](..//..//miyukini-webway-system//reference//_index.md)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//miyukini-webway-system//reference//_index.md)
+- [Miyukini Conceptual References - Doctrine Securite Fondamentale](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-**Date de création :** 2026-01-28  
+**Date de crÃ©ation :** 2026-01-28  
 **Version :** 1.0.0  
 **Statut :** Index de navigation
+

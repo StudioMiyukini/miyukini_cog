@@ -1,4 +1,4 @@
-# MiyukiniAdmin — BondingBrother Integration Contract
+﻿# MiyukiniAdmin â€” BondingBrother Integration Contract
 
 ## 1. Contexte
 
@@ -25,12 +25,12 @@ Ce document **ne couvre pas** :
 > **BondingBrother est l'UNIQUE point d'entree pour MiyukiniAdmin vers l'ecosysteme Miyukini.**
 
 ```
-MiyukiniAdmin ──▶ BondingBrother ──▶ [Cores]
-                       │
-                       ├──▶ StrongFather
-                       ├──▶ KindMother
-                       ├──▶ CaringNanny
-                       └──▶ WorrySentinel
+MiyukiniAdmin â”€â”€â–¶ BondingBrother â”€â”€â–¶ [Cores]
+                       â”‚
+                       â”œâ”€â”€â–¶ StrongFather
+                       â”œâ”€â”€â–¶ KindMother
+                       â”œâ”€â”€â–¶ CaringNanny
+                       â””â”€â”€â–¶ WorrySentinel
 ```
 
 ### 3.2 Responsabilites
@@ -47,7 +47,7 @@ MiyukiniAdmin ──▶ BondingBrother ──▶ [Cores]
 
 | Code | Invariant |
 |------|-----------|
-| **INV-BB-INT-1** | Toute interaction MiyukiniAdmin → Cores passe par BondingBrother |
+| **INV-BB-INT-1** | Toute interaction MiyukiniAdmin â†’ Cores passe par BondingBrother |
 | **INV-BB-INT-2** | BondingBrother trace toute requete admin |
 | **INV-BB-INT-3** | BondingBrother valide les capacites avant routage |
 
@@ -179,68 +179,68 @@ BondingBrother expose des capacites reservees pour MiyukiniAdmin :
 
 ```
 MiyukiniAdmin                 BondingBrother              Core
-     │                              │                      │
-     │──AdminRequest────────────────▶│                      │
-     │  (capability: metrics.system) │                      │
-     │                              │                      │
-     │                              │──ValidateCapability   │
-     │                              │  (check permission)   │
-     │                              │                      │
-     │                              │──RouteRequest────────▶│
-     │                              │                      │
-     │                              │◀─CoreResponse────────│
-     │                              │                      │
-     │                              │──LogAudit             │
-     │                              │                      │
-     │◀─AdminResponse───────────────│                      │
-     │                              │                      │
+     â”‚                              â”‚                      â”‚
+     â”‚â”€â”€AdminRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                      â”‚
+     â”‚  (capability: metrics.system) â”‚                      â”‚
+     â”‚                              â”‚                      â”‚
+     â”‚                              â”‚â”€â”€ValidateCapability   â”‚
+     â”‚                              â”‚  (check permission)   â”‚
+     â”‚                              â”‚                      â”‚
+     â”‚                              â”‚â”€â”€RouteRequestâ”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                              â”‚                      â”‚
+     â”‚                              â”‚â—€â”€CoreResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                              â”‚                      â”‚
+     â”‚                              â”‚â”€â”€LogAudit             â”‚
+     â”‚                              â”‚                      â”‚
+     â”‚â—€â”€AdminResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                      â”‚
+     â”‚                              â”‚                      â”‚
 ```
 
 ### 6.2 Flux avec Validation StrongFather
 
 ```
 MiyukiniAdmin           BondingBrother         StrongFather         Core
-     │                        │                      │                │
-     │──AdminRequest──────────▶│                      │                │
-     │  (capability: db.migrate)                      │                │
-     │                        │                      │                │
-     │                        │──ValidateCapability   │                │
-     │                        │                      │                │
-     │                        │──RequestApproval─────▶│                │
-     │                        │                      │                │
-     │                        │◀─ApprovalResponse────│                │
-     │                        │  (APPROVED/DENIED)    │                │
-     │                        │                      │                │
-     │                        │  [Si APPROVED]        │                │
-     │                        │──RouteRequest─────────────────────────▶│
-     │                        │                      │                │
-     │                        │◀─CoreResponse─────────────────────────│
-     │                        │                      │                │
-     │                        │──LogAudit             │                │
-     │                        │                      │                │
-     │◀─AdminResponse─────────│                      │                │
+     â”‚                        â”‚                      â”‚                â”‚
+     â”‚â”€â”€AdminRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                      â”‚                â”‚
+     â”‚  (capability: db.migrate)                      â”‚                â”‚
+     â”‚                        â”‚                      â”‚                â”‚
+     â”‚                        â”‚â”€â”€ValidateCapability   â”‚                â”‚
+     â”‚                        â”‚                      â”‚                â”‚
+     â”‚                        â”‚â”€â”€RequestApprovalâ”€â”€â”€â”€â”€â–¶â”‚                â”‚
+     â”‚                        â”‚                      â”‚                â”‚
+     â”‚                        â”‚â—€â”€ApprovalResponseâ”€â”€â”€â”€â”‚                â”‚
+     â”‚                        â”‚  (APPROVED/DENIED)    â”‚                â”‚
+     â”‚                        â”‚                      â”‚                â”‚
+     â”‚                        â”‚  [Si APPROVED]        â”‚                â”‚
+     â”‚                        â”‚â”€â”€RouteRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                        â”‚                      â”‚                â”‚
+     â”‚                        â”‚â—€â”€CoreResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                        â”‚                      â”‚                â”‚
+     â”‚                        â”‚â”€â”€LogAudit             â”‚                â”‚
+     â”‚                        â”‚                      â”‚                â”‚
+     â”‚â—€â”€AdminResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                      â”‚                â”‚
 ```
 
 ### 6.3 Flux Multi-Core
 
 ```
 MiyukiniAdmin           BondingBrother         CaringNanny      KindMother
-     │                        │                      │               │
-     │──AdminRequest──────────▶│                      │               │
-     │  (capability: metrics.db)                      │               │
-     │                        │                      │               │
-     │                        │──GetSystemMetrics────▶│               │
-     │                        │                      │               │
-     │                        │──GetDBMetrics──────────────────────────▶│
-     │                        │                      │               │
-     │                        │◀─SystemMetrics───────│               │
-     │                        │                      │               │
-     │                        │◀─DBMetrics────────────────────────────│
-     │                        │                      │               │
-     │                        │  [Aggregate results]  │               │
-     │                        │                      │               │
-     │◀─AdminResponse─────────│                      │               │
-     │  (combined data)        │                      │               │
+     â”‚                        â”‚                      â”‚               â”‚
+     â”‚â”€â”€AdminRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                      â”‚               â”‚
+     â”‚  (capability: metrics.db)                      â”‚               â”‚
+     â”‚                        â”‚                      â”‚               â”‚
+     â”‚                        â”‚â”€â”€GetSystemMetricsâ”€â”€â”€â”€â–¶â”‚               â”‚
+     â”‚                        â”‚                      â”‚               â”‚
+     â”‚                        â”‚â”€â”€GetDBMetricsâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                        â”‚                      â”‚               â”‚
+     â”‚                        â”‚â—€â”€SystemMetricsâ”€â”€â”€â”€â”€â”€â”€â”‚               â”‚
+     â”‚                        â”‚                      â”‚               â”‚
+     â”‚                        â”‚â—€â”€DBMetricsâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                        â”‚                      â”‚               â”‚
+     â”‚                        â”‚  [Aggregate results]  â”‚               â”‚
+     â”‚                        â”‚                      â”‚               â”‚
+     â”‚â—€â”€AdminResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                      â”‚               â”‚
+     â”‚  (combined data)        â”‚                      â”‚               â”‚
 ```
 
 ---
@@ -358,7 +358,7 @@ bonding_brother:
 ## 11. Documents Associes
 
 - [MiyukiniAdmin - Core Interaction Contract](../../architecture/MiyukiniAdmin%20-%20Core%20Interaction%20Contract.md)
-- [BondingBrother - Documentation Fondatrice](../../../BondingBrother/foundation/BondingBrother%20-%20Documentation%20Fondatrice.md)
+- [BondingBrother - Documentation Fondatrice](..//..//..//..//cores//BondingBrother//foundation//BondingBrother%20-%20Documentation%20Fondatrice.md)
 - [MiyukiniAdmin - StrongFather Integration Contract](./MiyukiniAdmin%20-%20StrongFather%20Integration%20Contract.md)
 
 ---
@@ -366,3 +366,4 @@ bonding_brother:
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
 **Statut :** Contrat de reference
+

@@ -1,14 +1,14 @@
-# MiyukiniAdmin — Index de Navigation
+﻿# MiyukiniAdmin â€” Index de Navigation
 
 ## Contexte
 
 MiyukiniAdmin est l'**Operateur Souverain** (Strate 9) de l'ecosysteme Miyukini Core System. Il constitue une **exception volontaire** a la logique Operateur standard : une console root autonome, non reutilisable, qui observe, installe, arbitre, mais ne vit pas dans le flux normal.
 
-MiyukiniAdmin represente la **console d'administration** du systeme : il connait l'etat de la maison, il peut intervenir en cas de crise, il supervise les metriques — sans jamais etre un produit metier ni une API publique. Il dispose de **capacites internes propres** et d'un **systeme d'auth dedie** (compte admin, MFA, RBAC) ; il ne consomme pas d'Outil ni de Kit d'Outils (Strate 6). Il est l'**unique Operateur Souverain** (Strate 9).
+MiyukiniAdmin represente la **console d'administration** du systeme : il connait l'etat de la maison, il peut intervenir en cas de crise, il supervise les metriques â€” sans jamais etre un produit metier ni une API publique. Il dispose de **capacites internes propres** et d'un **systeme d'auth dedie** (compte admin, MFA, RBAC) ; il ne consomme pas d'Outil ni de Kit d'Outils (Strate 6). Il est l'**unique Operateur Souverain** (Strate 9).
 
 **Strate :** 9 (Operateur Souverain - Exception)  
 **Role :** Console root d'administration  
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -19,7 +19,7 @@ MiyukiniAdmin represente la **console d'administration** du systeme : il connait
 Cette question se decline en :
 - Comment installer et bootstrapper un environnement Miyukini ?
 - Comment observer l'etat du systeme sans le modifier implicitement ?
-- Comment intervenir en cas de crise avec traçabilite complete ?
+- Comment intervenir en cas de crise avec traÃ§abilite complete ?
 - Comment gerer les niveaux de securite de maniere explicite ?
 
 ---
@@ -82,7 +82,7 @@ Contrats normatifs et non negociables.
 |----------|-------------|
 | [Auth and First-Boot Contract](./contracts/security/MiyukiniAdmin%20-%20Auth%20and%20First-Boot%20Contract.md) | Auth MiyukiniAdmin, premier demarrage, environnement vierge, verrou StrongFather, Futur Admin, compte admin |
 | [Authentication Contract](./contracts/security/MiyukiniAdmin%20-%20Authentication%20Contract.md) | Login, MFA, session, mot de passe, rate limiting, stockage secrets, audit auth |
-| [Permission Contract](./contracts/security/MiyukiniAdmin%20-%20Permission%20Contract.md) | RBAC MiyukiniAdmin : roles (Admin, Recovery, Audit), capacites, matrice role → capacites |
+| [Permission Contract](./contracts/security/MiyukiniAdmin%20-%20Permission%20Contract.md) | RBAC MiyukiniAdmin : roles (Admin, Recovery, Audit), capacites, matrice role â†’ capacites |
 | [Security Level Management Contract](./contracts/security/MiyukiniAdmin%20-%20Security%20Level%20Management%20Contract.md) | Gestion niveaux securite 0-4 |
 | [Threat Model Contract](./contracts/security/MiyukiniAdmin%20-%20Threat%20Model%20Contract.md) | Modele de menaces |
 
@@ -152,10 +152,10 @@ Documentation de reference et exemples. Les capacites de l'interface sont explic
 | [Capacites et Reference](./reference/MiyukiniAdmin%20-%20Capacites%20et%20Reference.md) | Capacites livrees et liens vers docs/reference (MiyukiniAdmin Status, Glossaire, Security Levels, etc.) |
 | [Pages et Outils Reference Supabase](./reference/MiyukiniAdmin%20-%20Pages%20et%20Outils%20Reference%20Supabase.md) | Correspondance Supabase / MiyukiniAdmin (pages, outils, sujets SQL/DB) |
 | [Reference SQL et DB](./reference/MiyukiniAdmin%20-%20Reference%20SQL%20et%20DB.md) | Reference technique SQL et DB (schemas, tables, types, requetes, Realtime, roles) ; service hors-bord, pas de RLS |
-| [Gestion DB type Supabase](./reference/MiyukiniAdmin%20-%20Gestion%20DB%20type%20Supabase.md) | Capacites Supabase transposees en COG, migrations, backups, implémentation |
+| [Gestion DB type Supabase](./reference/MiyukiniAdmin%20-%20Gestion%20DB%20type%20Supabase.md) | Capacites Supabase transposees en COG, migrations, backups, implÃ©mentation |
 | [Vocabulary & Glossary](./reference/MiyukiniAdmin%20-%20Vocabulary%20&%20Glossary.md) | Vocabulaire canonique de MiyukiniAdmin |
-| [FAQ & Common Questions](./reference/MiyukiniAdmin%20-%20FAQ%20&%20Common%20Questions.md) | Questions frequentes |
-| [Examples & Use Cases](./reference/MiyukiniAdmin%20-%20Examples%20&%20Use%20Cases.md) | Exemples et cas d'usage |
+| [FAQ & Common Questions](_index.md) | Questions frequentes |
+| [Examples & Use Cases](_index.md) | Exemples et cas d'usage |
 
 ---
 
@@ -199,7 +199,7 @@ Documentation de reference et exemples. Les capacites de l'interface sont explic
 | **Installation & Bootstrap** | Installation complete, verification hardware/OS, initialisation kernel, generation identites (EIP) |
 | **Monitoring & Metriques** | Lecture passive metriques, traces kernel, statistiques decisions, etats Operateurs, sante DB |
 | **Tests Techniques** | Tests performance, latence, montee en charge, coherence DB, conformite contractuelle ; page Tests avec flux de test des cores |
-| **Tests des modules et cycle de vie** | Tests Kits d'outils, Operateurs, Equipes, Services via manifeste embarqué ; cellule Admin ; integrite TAMR ; ajout, verrouillage/deverrouillage, suppression de modules (voir [Module Testing and Lifecycle Contract](./contracts/testing/MiyukiniAdmin%20-%20Module%20Testing%20and%20Lifecycle%20Contract.md)) |
+| **Tests des modules et cycle de vie** | Tests Kits d'outils, Operateurs, Equipes, Services via manifeste embarquÃ© ; cellule Admin ; integrite TAMR ; ajout, verrouillage/deverrouillage, suppression de modules (voir [Module Testing and Lifecycle Contract](./contracts/testing/MiyukiniAdmin%20-%20Module%20Testing%20and%20Lifecycle%20Contract.md)) |
 | **Securite & Arbitrage** | Lecture etat WorrySentinel, changement niveau securite, modes de degradation, isolation modules |
 | **Acces aux Donnees** | Via KindMother sous autorite StrongFather ; CRUD tables et manipulation des donnees (liste, lecture, creation, mise a jour, suppression) |
 | **Recovery Exceptionnel** | Ecriture DB directe (conditions cumulatives strictes) |
@@ -211,14 +211,14 @@ Documentation de reference et exemples. Les capacites de l'interface sont explic
 
 | Core | Relation |
 |------|----------|
-| **BondingBrother** | Point d'acces exclusif — toute interaction passe par BondingBrother |
+| **BondingBrother** | Point d'acces exclusif â€” toute interaction passe par BondingBrother |
 | **StrongFather** | Validation des actions administratives, decisions sur interventions |
 | **KindMother** | Acces controle aux donnees, validation operations maintenance |
 | **CaringNanny** | Exposition metriques systeme, etats Operateurs, sante globale |
 | **WorrySentinel** | Lecture etat securite, changement niveaux, modes degradation |
 | **Master Butler** | Decouverte des modules (Kits d'outils, Operateurs, Equipes, Services) ; enregistrement/retrait lors du cycle de vie des modules |
-| **TAMR** | Champ d'action integrite — verification d'integrite des modules en collaboration avec MiyukiniAdmin |
-| **LogisticsSteward** | Gouvernance des ressources — MiyukiniAdmin peut demander priorites maximales, soumis a gouvernance globale sauf protocole d'exception |
+| **TAMR** | Champ d'action integrite â€” verification d'integrite des modules en collaboration avec MiyukiniAdmin |
+| **LogisticsSteward** | Gouvernance des ressources â€” MiyukiniAdmin peut demander priorites maximales, soumis a gouvernance globale sauf protocole d'exception |
 
 ### Diagramme de relations
 
@@ -228,16 +228,15 @@ graph TB
         MA[MiyukiniAdmin<br/>Console Root]
     end
 
-    subgraph Strate5[Strate 5 - Liaison]
-        BB[BondingBrother<br/>Mediation]
-    end
-
     subgraph Strate4[Strate 4 - Cores Systeme]
         SF[StrongFather<br/>Decision]
         KM[KindMother<br/>Persistance]
         CN[CaringNanny<br/>Etat]
         WS[WorrySentinel<br/>Securite]
+        BB[BondingBrother*<br/>Mediation]
     end
+
+> **Note :** *BondingBrother est classÃ© avec les Cores mais conserve sa fonction de liaison
 
     subgraph Strate3[Strate 3 - Gouvernance Ressources]
         LS[LogisticsSteward<br/>Ressources]
@@ -256,37 +255,40 @@ graph TB
 
 ## Conformite aux Lois d'Autonomie Systeme
 
-MiyukiniAdmin est **conforme** aux [Lois d'Autonomie Systeme](../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) :
+MiyukiniAdmin est **conforme** aux [Lois d'Autonomie Systeme](..//..//miyukini-webway-system//reference//_index.md) :
 
 | Loi | Conformite | Note |
 |-----|------------|------|
-| **LOI-1** | ✅ | Peut fonctionner offline pour monitoring local |
-| **LOI-2** | ✅ | Reconnait l'isolement comme etat normal |
-| **LOI-3** | ✅ | Auto-suffisant fonctionnellement |
-| **LOI-5** | ✅ | Compatible hardware faible (UI legere) |
-| **LOI-6** | ✅ | Controlle les echanges federes |
+| **LOI-1** | âœ… | Peut fonctionner offline pour monitoring local |
+| **LOI-2** | âœ… | Reconnait l'isolement comme etat normal |
+| **LOI-3** | âœ… | Auto-suffisant fonctionnellement |
+| **LOI-5** | âœ… | Compatible hardware faible (UI legere) |
+| **LOI-6** | âœ… | Controlle les echanges federes |
 
 ---
 
 ## Position dans la Pyramide Miyukini
 
 ```
-┌──────────────────────────────────────────┐
-│ STRATE 9 — MiyukiniAdmin (EXCEPTION)     │ ← Vous etes ici
-│ Operateur Souverain d'administration     │
-└──────────────────────────────────────────┘
-┌──────────────────────────────────────────┐
-│ STRATE 7 — Operateurs                    │
-└──────────────────────────────────────────┘
-┌──────────────────────────────────────────┐
-│ STRATE 6 — Outils & Kits d'Outils        │
-└──────────────────────────────────────────┘
-┌──────────────────────────────────────────┐
-│ STRATE 5 — BondingBrother (Adaptateur)   │
-└──────────────────────────────────────────┘
-┌──────────────────────────────────────────┐
-│ STRATE 4 — Cores Systeme                 │
-└──────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 9 â€” MiyukiniAdmin (EXCEPTION)     â”‚ â† Vous etes ici
+â”‚ Operateur Souverain d'administration     â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 7 â€” Operateurs                    â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 6 â€” Outils & Kits d'Outils        â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 5 â€” Interfaces & Adaptation       â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 4 â€” Cores Systeme                 â”‚
+â”‚         (incluant BondingBrother*)       â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+
+> **Note :** *BondingBrother est classÃ© avec les Cores (strate 4) en raison de son importance critique, mais conserve sa fonction de passerelle (strate 5). Tous les Cores dÃ©pendent de lui.
 ```
 
 **MiyukiniAdmin est au-dessus de la pyramide, pas dedans.**
@@ -302,19 +304,23 @@ MiyukiniAdmin est **conforme** aux [Lois d'Autonomie Systeme](../../reference/Mi
 ## Documents de reference
 
 - [MiyukiniAdmin - Auth and First-Boot Contract](./contracts/security/MiyukiniAdmin%20-%20Auth%20and%20First-Boot%20Contract.md)
-- [MiyukiniAdmin - Environment Identity Protocol EIP](../../protocols/MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md)
-- [Miyukini Conceptual References - MiyukiniAdmin Status](../../reference/Miyukini%20Conceptual%20References%20-%20MiyukiniAdmin%20Status.md)
-- [Miyukini Conceptual References - Security Levels](../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md)
-- [Miyukini Conceptual References - Pyramide Architecture Complete](../../reference/Miyukini%20Conceptual%20References%20-%20Pyramide%20Architecture%20Complete.md)
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
-- [BondingBrother - Documentation Fondatrice](../BondingBrother/foundation/BondingBrother%20-%20Documentation%20Fondatrice.md)
-- [StrongFather - Documentation Fondatrice](../StrongFather/foundation/StrongFather%20-%20Documentation%20Fondatrice.md)
-- [KindMother - Documentation Fondatrice](../KindMother/foundation/KindMother%20-%20Documentation%20Fondatrice.md)
-- [CaringNanny - Documentation Fondatrice](../CaringNanny/foundation/Caring%20Nanny%20-%20Documentation%20Fondatrice.md)
-- [WorrySentinel - Documentation Fondatrice](../WorrySentinel/WorrySentinel%20-%20Documentation%20Fondatrice.md)
+- [MiyukiniAdmin - Environment Identity Protocol EIP](..//..//contrats//MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md)
+- [Miyukini Conceptual References - MiyukiniAdmin Status](..//..//miyukini-webway-system//reference//_index.md)
+- [Miyukini Conceptual References - Security Levels](..//..//miyukini-webway-system//reference//_index.md)
+- [Miyukini Conceptual References - Pyramide Architecture Complete](..//..//miyukini-webway-system//reference//_index.md)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//miyukini-webway-system//reference//_index.md)
+- [BondingBrother - Documentation Fondatrice](..//..//cores//BondingBrother//foundation//BondingBrother%20-%20Documentation%20Fondatrice.md)
+- [StrongFather - Documentation Fondatrice](..//..//cores//StrongFather//foundation//StrongFather%20-%20Documentation%20Fondatrice.md)
+- [KindMother - Documentation Fondatrice](..//..//cores//KindMother//foundation//KindMother%20-%20Documentation%20Fondatrice.md)
+- [CaringNanny - Documentation Fondatrice](..//..//cores//CaringNanny//foundation//Caring%20Nanny%20-%20Documentation%20Fondatrice.md)
+- [WorrySentinel - Documentation Fondatrice](..//..//cores//WorrySentinel//foundation//WorrySentinel%20-%20Documentation%20Fondatrice.md)
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
 **Statut :** Document de reference
+
+
+
+

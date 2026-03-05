@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MIP UI - Setup Wizard</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #111827;
+        --muted: #94a3b8;
+        --text: #e2e8f0;
+        --accent: #22c55e;
+        --line: #334155;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background: radial-gradient(circle at top, #1e293b, var(--bg));
+        color: var(--text);
+      }
+      .app {
+        max-width: 980px;
+        margin: 24px auto;
+        padding: 16px;
+      }
+      .card {
+        background: linear-gradient(180deg, #0b1220, var(--panel));
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 14px;
+      }
+      h1, h2 { margin: 0 0 10px 0; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+      label { color: var(--muted); font-size: 13px; }
+      input, textarea, select {
+        background: #0b1322;
+        color: var(--text);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px;
+      }
+      textarea { min-height: 140px; resize: vertical; }
+      .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+      button {
+        background: #1f2937;
+        color: var(--text);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        cursor: pointer;
+      }
+      button.primary { background: #14532d; border-color: #166534; }
+      .ok { color: #86efac; }
+      .warn { color: #fca5a5; }
+      @media (max-width: 760px) { .row { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+      const WRITE_ALLOWED_PATHS = new Set([
+        "environment.md",
+        "profiles/active",
+        "config/subscriptions.md",
+        "config/mip-configurator.state.json",
+      ]);
+
+      const READ_ALLOWED_EXACT = new Set([
+        "environment.md",
+        "profiles/active",
+        "config/subscriptions.md",
+        "modules/setup.md",
+      ]);
+
+      const READ_ALLOWED_DIRS = new Set(["profiles/builtin", "profiles/custom"]);
+      const READ_ALLOWED_PREFIXES = ["profiles/builtin/", "profiles/custom/"];
+
+      const safeSplit = (relativePath) => {
+        const segments = relativePath.split("/").filter(Boolean);
+        if (segments.some((s) => s === ".." || s.includes("\\"))) {
+          throw new Error("Sortie de .mip interdite");
+        }
+        return segments;
+      };
+
+      const isReadAllowed = (path) => {
+        return (
+          READ_ALLOWED_EXACT.has(path) ||
+          READ_ALLOWED_DIRS.has(path) ||
+          READ_ALLOWED_PREFIXES.some((prefix) => path.startsWith(prefix))
+        );
+      };
+
+      const assertReadAllowed = (path) => {
+        if (!isReadAllowed(path)) throw new Error("Lecture non autorisee");
+      };
+
+      const assertWriteAllowed = (path) => {
+        if (!WRITE_ALLOWED_PATHS.has(path)) throw new Error("Ecriture non autorisee");
+      };
+
+      const getDirectoryHandleByPath = async (rootHandle, relativePath, create = false) => {
+        const parts = safeSplit(relativePath);
+        let current = rootHandle;
+        for (let i = 0; i < parts.length; i++) {
+          current = await current.getDirectoryHandle(parts[i], { create });
+        }
+        return current;
+      };
+
+      const getFileHandle = async (rootHandle, relativePath, create = false, mode = "read") => {
+        if (mode === "read") assertReadAllowed(relativePath);
+        if (mode === "write") assertWriteAllowed(relativePath);
+        const parts = safeSplit(relativePath);
+        let current = rootHandle;
+        for (let i = 0; i < parts.length - 1; i++) {
+          current = await current.getDirectoryHandle(parts[i], { create });
+        }
+        return current.getFileHandle(parts[parts.length - 1], { create });
+      };
+
+      const readText = async (rootHandle, path) => {
+        try {
+          const fh = await getFileHandle(rootHandle, path, false, "read");
+          const f = await fh.getFile();
+          return await f.text();
+        } catch {
+          return "";
+        }
+      };
+
+      const writeText = async (rootHandle, path, content) => {
+        const fh = await getFileHandle(rootHandle, path, true, "write");
+        const ws = await fh.createWritable();
+        await ws.write(content);
+        await ws.close();
+      };
+
+      const today = () => new Date().toISOString().slice(0, 10);
+
+      const DEFAULT_DOC_OPTIONS = {
+        security: ["standard", "durci", "critique"],
+        deployment: ["VPS", "cloud", "PaaS", "self-hosted", "local", "local / VPS"],
+        tool: ["Claude Code CLI", "Cursor IDE", "VS Code", "OpenAI Codex CLI", "Interne"],
+      };
+
+      const parseChoiceList = (value) => {
+        return value
+          .split(",")
+          .map((v) => v.replace(/[{}]/g, "").trim())
+          .filter((v) => v.length > 0);
+      };
+
+      const extractChoicesFromSetup = (raw, key, fallback) => {
+        const re = new RegExp(`${key}[^\\n]*\\(([^\\)]+)\\)`, "i");
+        const m = raw.match(re);
+        if (!m || !m[1]) return fallback;
+        const choices = parseChoiceList(m[1]);
+        return choices.length > 0 ? choices : fallback;
+      };
+
+      const parseSetupOptions = (setupRaw) => {
+        if (!setupRaw) return DEFAULT_DOC_OPTIONS;
+        return {
+          security: extractChoicesFromSetup(setupRaw, "S2\\.8", DEFAULT_DOC_OPTIONS.security),
+          deployment: extractChoicesFromSetup(setupRaw, "S2\\.15", DEFAULT_DOC_OPTIONS.deployment),
+          tool: DEFAULT_DOC_OPTIONS.tool,
+        };
+      };
+
+      const parseProfileFrontmatter = (raw, slug) => {
+        const lines = raw.split("\n");
+        let inFm = false;
+        const map = {};
+        let currentSection = "";
+        for (const line of lines) {
+          const t = line.trim();
+          if (t === "---") {
+            if (!inFm) {
+              inFm = true;
+              continue;
+            }
+            break;
+          }
+          if (!inFm || !t) continue;
+          if (t.endsWith(":") && !t.includes(" ")) {
+            currentSection = t.slice(0, -1);
+            continue;
+          }
+          const idx = t.indexOf(":");
+          if (idx <= 0) continue;
+          const k = t.slice(0, idx).trim();
+          const v = t
+            .slice(idx + 1)
+            .trim()
+            .replace(/^["']|["']$/g, "");
+          map[`${currentSection}.${k}`] = v;
+          map[k] = v;
+        }
+        return {
+          slug,
+          name: map.name || slug,
+          tool: map.name || slug,
+          model: map["llm.model"] || "",
+          provider: map["llm.provider"] || "",
+        };
+      };
+
+      const loadProfiles = async (rootHandle) => {
+        const all = [];
+        for (const dir of ["profiles/builtin", "profiles/custom"]) {
+          let dh = null;
+          try {
+            assertReadAllowed(dir);
+            dh = await getDirectoryHandleByPath(rootHandle, dir, false);
+          } catch {
+            dh = null;
+          }
+          if (!dh) continue;
+          for await (const entry of dh.values()) {
+            if (entry.kind !== "file" || !entry.name.endsWith(".md")) continue;
+            const slug = entry.name.replace(/\.md$/i, "");
+            const raw = await readText(rootHandle, `${dir}/${entry.name}`);
+            all.push(parseProfileFrontmatter(raw, slug));
+          }
+        }
+        all.sort((a, b) => a.slug.localeCompare(b.slug));
+        return all;
+      };
+
+      const defaultForm = {
+        profile: "anthropic-opus",
+        languages: "Rust",
+        frameworks: "Dioxus 0.6, axum",
+        db: "KindMother (SQLite), SQLCipher",
+        build: "cargo build --workspace",
+        test: "cargo test --workspace",
+        lint: "cargo clippy --workspace -- -D warnings",
+        fmt: "cargo fmt --all",
+        security: "standard",
+        deployment: "local / VPS",
+        tool: "Cursor",
+        models: "Claude Sonnet/Opus",
+        budget: "a definir",
+        subscriptionsEnabled: false,
+        subscriptionsYaml:
+          "anthropic:\\n  plan: pro\\n  tokens_period: 5000000\\n  period: monthly\\n  active: true\\n",
+      };
+
+      const renderEnvironment = (f) => `# Configuration environnement MIP
+
+## TL;DR
+
+Genere par MIP UI JSX (sans compilation).
+
+## Metadonnees
+- Date de configuration : ${today()}
+- Version MIP : v2.1
+- Reconfigurable via : \`/mip_setup\`
+
+## Stack technique
+- Langage(s) : ${f.languages}
+- Framework(s) : ${f.frameworks}
+- Base(s) de donnees : ${f.db}
+
+## Commandes standard
+- Build : \`${f.build}\`
+- Test : \`${f.test}\`
+- Lint : \`${f.lint}\`
+- Format : \`${f.fmt}\`
+
+## Securite
+- Niveau : ${f.security}
+
+## Infrastructure
+- Deploiement : ${f.deployment}
+
+## Outil IA
+- Outil principal : ${f.tool}
+- Modele(s) : ${f.models}
+- Budget : ${f.budget}
+- Abonnements : ${f.subscriptionsEnabled ? "`.mip/config/subscriptions.md`" : "desactive"}
+
+## Garde-fou
+- Cette interface n'ecrit que dans \`.mip/\`
+`;
+
+      const App = () => {
+        const [dirHandle, setDirHandle] = React.useState(null);
+        const [status, setStatus] = React.useState("Aucun dossier .mip connecte");
+        const [form, setForm] = React.useState(defaultForm);
+        const [profiles, setProfiles] = React.useState([]);
+        const [docOptions, setDocOptions] = React.useState(DEFAULT_DOC_OPTIONS);
+
+        const setField = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+
+        const applyProfileHints = (nextProfileSlug, profileList) => {
+          const p = profileList.find((x) => x.slug === nextProfileSlug);
+          if (!p) return;
+          setForm((prev) => ({
+            ...prev,
+            profile: nextProfileSlug,
+            tool: p.tool || prev.tool,
+            models: p.model || prev.models,
+          }));
+        };
+
+        const connect = async () => {
+          try {
+            const handle = await window.showDirectoryPicker({ mode: "readwrite" });
+            if (handle.name !== ".mip") throw new Error("Choisir le dossier .mip uniquement.");
+            setDirHandle(handle);
+            setStatus("Dossier .mip connecte.");
+
+            const profileList = await loadProfiles(handle);
+            setProfiles(profileList);
+
+            const setupRaw = await readText(handle, "modules/setup.md");
+            setDocOptions(parseSetupOptions(setupRaw));
+
+            const active = (await readText(handle, "profiles/active")).trim();
+
+            const envRaw = await readText(handle, "environment.md");
+            const readBullet = (k) => {
+              const line = envRaw.split("\n").find((l) => l.trim().startsWith(`- ${k} :`));
+              return line ? line.split(":").slice(1).join(":").trim().replace(/`/g, "") : "";
+            };
+
+            const nextProfile = active || defaultForm.profile;
+            const foundProfile = profileList.find((p) => p.slug === nextProfile);
+
+            setForm((prev) => ({
+              ...prev,
+              profile: nextProfile,
+              languages: readBullet("Langage(s)") || prev.languages,
+              frameworks: readBullet("Framework(s)") || prev.frameworks,
+              db: readBullet("Base(s) de donnees") || prev.db,
+              build: readBullet("Build") || prev.build,
+              test: readBullet("Test") || prev.test,
+              lint: readBullet("Lint") || prev.lint,
+              fmt: readBullet("Format") || prev.fmt,
+              security: readBullet("Niveau") || prev.security,
+              deployment: readBullet("Deploiement") || prev.deployment,
+              tool: readBullet("Outil principal") || (foundProfile && foundProfile.tool) || prev.tool,
+              models: readBullet("Modele(s)") || (foundProfile && foundProfile.model) || prev.models,
+              budget: readBullet("Budget") || prev.budget,
+            }));
+
+            const subsRaw = await readText(handle, "config/subscriptions.md");
+            if (subsRaw) {
+              const m = subsRaw.match(/```yaml([\s\S]*?)```/);
+              if (m && m[1]) setField("subscriptionsYaml", m[1].trim() + "\n");
+            }
+          } catch (e) {
+            setStatus(`Erreur: ${e.message}`);
+          }
+        };
+
+        const saveAll = async () => {
+          if (!dirHandle) return setStatus("Connecte d'abord le dossier .mip.");
+          try {
+            await writeText(dirHandle, "profiles/active", `${form.profile}\n`);
+            await writeText(dirHandle, "environment.md", renderEnvironment(form));
+            if (form.subscriptionsEnabled) {
+              const md = `# Abonnements et quotas tokens\n\nGenere par MIP UI JSX.\n\n\`\`\`yaml\n${form.subscriptionsYaml.trim()}\n\`\`\`\n`;
+              await writeText(dirHandle, "config/subscriptions.md", md);
+            }
+            await writeText(
+              dirHandle,
+              "config/mip-configurator.state.json",
+              JSON.stringify({ cfg: form, saved_at: new Date().toISOString() }, null, 2)
+            );
+            setStatus("Configuration sauvegardee dans .mip.");
+          } catch (e) {
+            setStatus(`Erreur sauvegarde: ${e.message}`);
+          }
+        };
+
+        const modelOptions = Array.from(
+          new Set(profiles.map((p) => p.model).filter((m) => m && m.length > 0))
+        );
+
+        return (
+          <div className="app">
+            <div className="card">
+              <h1>MIP Setup UI (JSX sans build)</h1>
+              <div className="actions">
+                <button className="primary" onClick={connect}>
+                  Connecter dossier .mip
+                </button>
+                <button onClick={saveAll}>Sauvegarder</button>
+              </div>
+              <p className={status.startsWith("Erreur") ? "warn" : "ok"}>{status}</p>
+            </div>
+
+            <div className="card">
+              <h2>Wizard</h2>
+              <div className="row">
+                <div className="field">
+                  <label>Profil actif (depuis .mip/profiles)</label>
+                  <select
+                    value={form.profile}
+                    onChange={(e) => applyProfileHints(e.target.value, profiles)}
+                  >
+                    {profiles.length === 0 && <option value={form.profile}>{form.profile}</option>}
+                    {profiles.map((p) => (
+                      <option key={p.slug} value={p.slug}>
+                        {p.slug} - {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label>Langages</label>
+                  <input
+                    value={form.languages}
+                    onChange={(e) => setField("languages", e.target.value)}
+                  />
+                </div>
+                <div className="field">
+                  <label>Frameworks</label>
+                  <input
+                    value={form.frameworks}
+                    onChange={(e) => setField("frameworks", e.target.value)}
+                  />
+                </div>
+                <div className="field">
+                  <label>Bases de donnees</label>
+                  <input value={form.db} onChange={(e) => setField("db", e.target.value)} />
+                </div>
+                <div className="field">
+                  <label>Build</label>
+                  <input value={form.build} onChange={(e) => setField("build", e.target.value)} />
+                </div>
+                <div className="field">
+                  <label>Test</label>
+                  <input value={form.test} onChange={(e) => setField("test", e.target.value)} />
+                </div>
+                <div className="field">
+                  <label>Lint</label>
+                  <input value={form.lint} onChange={(e) => setField("lint", e.target.value)} />
+                </div>
+                <div className="field">
+                  <label>Format</label>
+                  <input value={form.fmt} onChange={(e) => setField("fmt", e.target.value)} />
+                </div>
+                <div className="field">
+                  <label>Securite (depuis setup.md S2.8)</label>
+                  <select
+                    value={form.security}
+                    onChange={(e) => setField("security", e.target.value)}
+                  >
+                    {docOptions.security.map((v) => (
+                      <option key={v} value={v}>
+                        {v}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label>Deploiement (depuis setup.md S2.15)</label>
+                  <select
+                    value={form.deployment}
+                    onChange={(e) => setField("deployment", e.target.value)}
+                  >
+                    {docOptions.deployment.map((v) => (
+                      <option key={v} value={v}>
+                        {v}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label>Outil IA (doc + profil)</label>
+                  <select value={form.tool} onChange={(e) => setField("tool", e.target.value)}>
+                    {docOptions.tool.map((v) => (
+                      <option key={v} value={v}>
+                        {v}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label>Modeles IA (suggestions profils)</label>
+                  <input
+                    list="models-list"
+                    value={form.models}
+                    onChange={(e) => setField("models", e.target.value)}
+                  />
+                  <datalist id="models-list">
+                    {modelOptions.map((m) => (
+                      <option key={m} value={m} />
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+              <div className="field">
+                <label>Budget IA</label>
+                <input value={form.budget} onChange={(e) => setField("budget", e.target.value)} />
+              </div>
+              <div className="field">
+                <label>Suivi abonnements</label>
+                <select
+                  value={String(form.subscriptionsEnabled)}
+                  onChange={(e) => setField("subscriptionsEnabled", e.target.value === "true")}
+                >
+                  <option value="false">desactive</option>
+                  <option value="true">active</option>
+                </select>
+              </div>
+              {form.subscriptionsEnabled && (
+                <div className="field">
+                  <label>YAML abonnements (sera ecrit dans config/subscriptions.md)</label>
+                  <textarea
+                    value={form.subscriptionsYaml}
+                    onChange={(e) => setField("subscriptionsYaml", e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      };
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+  </body>
+</html>

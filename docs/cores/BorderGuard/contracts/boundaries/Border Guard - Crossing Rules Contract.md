@@ -1,191 +1,191 @@
-# Border Guard - Crossing Rules Contract
+﻿# Border Guard - Crossing Rules Contract
 
 ## 1. Contexte
 
-Ce document définit les **règles de franchissement** gouvernées par Border Guard dans l'écosystème Miyukini. Il spécifie formellement ce qu'est une règle de franchissement, sa structure, ses types, et les conditions d'application selon les frontières et les niveaux de confiance.
+Ce document dÃ©finit les **rÃ¨gles de franchissement** gouvernÃ©es par Border Guard dans l'Ã©cosystÃ¨me Miyukini. Il spÃ©cifie formellement ce qu'est une rÃ¨gle de franchissement, sa structure, ses types, et les conditions d'application selon les frontiÃ¨res et les niveaux de confiance.
 
 **Document fondateur :** [Border Guard - Documentation Fondatrice](../../foundation/Border%20Guard%20-%20Documentation%20Fondatrice.md)
 
-**Statut contractuel :** Ce document est **contractuel, normatif, et non négociable**. Il dérive directement de la Documentation Fondatrice (Section 4 - Concepts fondamentaux : Règle de franchissement).
+**Statut contractuel :** Ce document est **contractuel, normatif, et non nÃ©gociable**. Il dÃ©rive directement de la Documentation Fondatrice (Section 4 - Concepts fondamentaux : RÃ¨gle de franchissement).
 
 ---
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
-- **Applicable à :** Toute interaction traversant une frontière dans l'écosystème Miyukini
-- **Responsable :** Border Guard (responsabilité exclusive d'établissement des règles - Documentation Fondatrice Section 5)
-- **Exécutant :** BondingBrother (application des règles - INV-BG-7)
-- **Consommateurs :** BondingBrother (application), StrongFather (contexte de décision)
-- **Ne couvre pas :** L'application technique des règles (responsabilité de BondingBrother)
+- **Applicable Ã  :** Toute interaction traversant une frontiÃ¨re dans l'Ã©cosystÃ¨me Miyukini
+- **Responsable :** Border Guard (responsabilitÃ© exclusive d'Ã©tablissement des rÃ¨gles - Documentation Fondatrice Section 5)
+- **ExÃ©cutant :** BondingBrother (application des rÃ¨gles - INV-BG-7)
+- **Consommateurs :** BondingBrother (application), StrongFather (contexte de dÃ©cision)
+- **Ne couvre pas :** L'application technique des rÃ¨gles (responsabilitÃ© de BondingBrother)
 
 ---
 
-## 3. Définition canonique de la règle de franchissement
+## 3. DÃ©finition canonique de la rÃ¨gle de franchissement
 
-### 3.1 Qu'est-ce qu'une règle de franchissement ?
+### 3.1 Qu'est-ce qu'une rÃ¨gle de franchissement ?
 
-Une **règle de franchissement** est une condition déclarative qui doit être satisfaite pour qu'une interaction puisse traverser une frontière. Elle exprime **ce qui est requis**, pas **comment le vérifier techniquement**.
+Une **rÃ¨gle de franchissement** est une condition dÃ©clarative qui doit Ãªtre satisfaite pour qu'une interaction puisse traverser une frontiÃ¨re. Elle exprime **ce qui est requis**, pas **comment le vÃ©rifier techniquement**.
 
-**Caractéristiques fondamentales :**
+**CaractÃ©ristiques fondamentales :**
 
-1. **Déclarative** — Exprime une condition, pas une procédure
-2. **Non ambiguë** — Spécifie clairement les conditions sans interprétation possible
-3. **Associée** — Liée à une frontière spécifique ou un ensemble de frontières
-4. **Indépendante** — Ne dépend pas de l'implémentation technique
+1. **DÃ©clarative** â€” Exprime une condition, pas une procÃ©dure
+2. **Non ambiguÃ«** â€” SpÃ©cifie clairement les conditions sans interprÃ©tation possible
+3. **AssociÃ©e** â€” LiÃ©e Ã  une frontiÃ¨re spÃ©cifique ou un ensemble de frontiÃ¨res
+4. **IndÃ©pendante** â€” Ne dÃ©pend pas de l'implÃ©mentation technique
 
-**Ce qu'une règle de franchissement n'est PAS :**
+**Ce qu'une rÃ¨gle de franchissement n'est PAS :**
 
-- ❌ Un algorithme de validation
-- ❌ Un code de vérification
-- ❌ Une procédure d'authentification
-- ❌ Une règle de filtrage technique
+- âŒ Un algorithme de validation
+- âŒ Un code de vÃ©rification
+- âŒ Une procÃ©dure d'authentification
+- âŒ Une rÃ¨gle de filtrage technique
 
-### 3.2 Responsabilité de Border Guard
+### 3.2 ResponsabilitÃ© de Border Guard
 
-Border Guard est **exclusivement responsable** de l'établissement des règles de franchissement. Cette responsabilité inclut :
+Border Guard est **exclusivement responsable** de l'Ã©tablissement des rÃ¨gles de franchissement. Cette responsabilitÃ© inclut :
 
-- Définir les règles associées à chaque frontière
-- Spécifier les conditions de franchissement
-- Établir les exceptions et cas particuliers
-- Maintenir la cohérence des règles entre frontières
+- DÃ©finir les rÃ¨gles associÃ©es Ã  chaque frontiÃ¨re
+- SpÃ©cifier les conditions de franchissement
+- Ã‰tablir les exceptions et cas particuliers
+- Maintenir la cohÃ©rence des rÃ¨gles entre frontiÃ¨res
 
-**Invariant associé :** INV-BG-6 — Toutes les règles de franchissement **doivent** être déclaratives. Aucune règle procédurale ou impérative n'est autorisée.
+**Invariant associÃ© :** INV-BG-6 â€” Toutes les rÃ¨gles de franchissement **doivent** Ãªtre dÃ©claratives. Aucune rÃ¨gle procÃ©durale ou impÃ©rative n'est autorisÃ©e.
 
-### 3.3 Séparation définition/application
+### 3.3 SÃ©paration dÃ©finition/application
 
-**Border Guard définit.** BondingBrother applique.
+**Border Guard dÃ©finit.** BondingBrother applique.
 
-| Responsabilité | Border Guard | BondingBrother |
+| ResponsabilitÃ© | Border Guard | BondingBrother |
 |----------------|--------------|----------------|
-| Définir les règles | ✅ | ❌ |
-| Spécifier les conditions | ✅ | ❌ |
-| Implémenter la vérification | ❌ | ✅ |
-| Exécuter le blocage | ❌ | ✅ |
-| Tracer l'application | ❌ | ✅ |
+| DÃ©finir les rÃ¨gles | âœ… | âŒ |
+| SpÃ©cifier les conditions | âœ… | âŒ |
+| ImplÃ©menter la vÃ©rification | âŒ | âœ… |
+| ExÃ©cuter le blocage | âŒ | âœ… |
+| Tracer l'application | âŒ | âœ… |
 
-**Invariant associé :** INV-BG-7 — La définition des frontières et des règles est **strictement séparée** de leur application.
+**Invariant associÃ© :** INV-BG-7 â€” La dÃ©finition des frontiÃ¨res et des rÃ¨gles est **strictement sÃ©parÃ©e** de leur application.
 
 ---
 
-## 4. Structure d'une règle de franchissement
+## 4. Structure d'une rÃ¨gle de franchissement
 
-### 4.1 Propriétés obligatoires
+### 4.1 PropriÃ©tÃ©s obligatoires
 
-Toute règle de franchissement possède les propriétés suivantes :
+Toute rÃ¨gle de franchissement possÃ¨de les propriÃ©tÃ©s suivantes :
 
-| Propriété | Description | Obligatoire |
+| PropriÃ©tÃ© | Description | Obligatoire |
 |-----------|-------------|-------------|
-| **Identifiant** | Identifiant unique de la règle | ✅ Oui |
-| **Nom** | Nom descriptif de la règle | ✅ Oui |
-| **Description** | Description de ce que la règle vérifie | ✅ Oui |
-| **Frontière(s)** | Frontière(s) à laquelle/lesquelles la règle s'applique | ✅ Oui |
-| **Condition** | Condition déclarative à satisfaire | ✅ Oui |
-| **Type** | Type de règle (niveau, authentification, données, etc.) | ✅ Oui |
-| **Priorité** | Priorité d'évaluation | ✅ Oui |
-| **Action si échec** | Que faire si la condition n'est pas satisfaite | ✅ Oui |
+| **Identifiant** | Identifiant unique de la rÃ¨gle | âœ… Oui |
+| **Nom** | Nom descriptif de la rÃ¨gle | âœ… Oui |
+| **Description** | Description de ce que la rÃ¨gle vÃ©rifie | âœ… Oui |
+| **FrontiÃ¨re(s)** | FrontiÃ¨re(s) Ã  laquelle/lesquelles la rÃ¨gle s'applique | âœ… Oui |
+| **Condition** | Condition dÃ©clarative Ã  satisfaire | âœ… Oui |
+| **Type** | Type de rÃ¨gle (niveau, authentification, donnÃ©es, etc.) | âœ… Oui |
+| **PrioritÃ©** | PrioritÃ© d'Ã©valuation | âœ… Oui |
+| **Action si Ã©chec** | Que faire si la condition n'est pas satisfaite | âœ… Oui |
 
-### 4.2 Propriétés optionnelles
+### 4.2 PropriÃ©tÃ©s optionnelles
 
-| Propriété | Description | Obligatoire |
+| PropriÃ©tÃ© | Description | Obligatoire |
 |-----------|-------------|-------------|
-| **Exceptions** | Cas où la règle ne s'applique pas | ❌ Non |
-| **Conditions préalables** | Autres règles qui doivent être satisfaites avant | ❌ Non |
-| **Niveau de sécurité** | Niveau de sécurité minimum pour appliquer cette règle | ❌ Non |
-| **Métadonnées** | Informations supplémentaires | ❌ Non |
+| **Exceptions** | Cas oÃ¹ la rÃ¨gle ne s'applique pas | âŒ Non |
+| **Conditions prÃ©alables** | Autres rÃ¨gles qui doivent Ãªtre satisfaites avant | âŒ Non |
+| **Niveau de sÃ©curitÃ©** | Niveau de sÃ©curitÃ© minimum pour appliquer cette rÃ¨gle | âŒ Non |
+| **MÃ©tadonnÃ©es** | Informations supplÃ©mentaires | âŒ Non |
 
-### 4.3 Format déclaratif
+### 4.3 Format dÃ©claratif
 
-Une règle est exprimée de manière déclarative selon le format :
+Une rÃ¨gle est exprimÃ©e de maniÃ¨re dÃ©clarative selon le format :
 
 ```
-RÈGLE: <identifiant>
+RÃˆGLE: <identifiant>
 NOM: <nom descriptif>
-FRONTIÈRE: <frontière(s) cible>
-CONDITION: <condition déclarative>
-TYPE: <type de règle>
-PRIORITÉ: <1-100>
-ÉCHEC: <action si échec>
+FRONTIÃˆRE: <frontiÃ¨re(s) cible>
+CONDITION: <condition dÃ©clarative>
+TYPE: <type de rÃ¨gle>
+PRIORITÃ‰: <1-100>
+Ã‰CHEC: <action si Ã©chec>
 ```
 
 **Exemple :**
 
 ```
-RÈGLE: CROSS-EXT-001
-NOM: Niveau de confiance minimum pour frontière externe
-FRONTIÈRE: Frontières externes
-CONDITION: source.trust_level ≥ VERIFIED
+RÃˆGLE: CROSS-EXT-001
+NOM: Niveau de confiance minimum pour frontiÃ¨re externe
+FRONTIÃˆRE: FrontiÃ¨res externes
+CONDITION: source.trust_level â‰¥ VERIFIED
 TYPE: niveau_confiance
-PRIORITÉ: 10
-ÉCHEC: REFUSER
+PRIORITÃ‰: 10
+Ã‰CHEC: REFUSER
 ```
 
 ---
 
-## 5. Types de règles de franchissement
+## 5. Types de rÃ¨gles de franchissement
 
-Border Guard reconnaît cinq types canoniques de règles.
+Border Guard reconnaÃ®t cinq types canoniques de rÃ¨gles.
 
-### 5.1 Règles de niveau de confiance
+### 5.1 RÃ¨gles de niveau de confiance
 
-**Définition :** Règles portant sur le niveau de confiance requis pour franchir une frontière.
+**DÃ©finition :** RÃ¨gles portant sur le niveau de confiance requis pour franchir une frontiÃ¨re.
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
 | **Code type** | `niveau_confiance` |
-| **Condition type** | Comparaison de niveau (≥, =, ≤) |
+| **Condition type** | Comparaison de niveau (â‰¥, =, â‰¤) |
 | **Variables** | `source.trust_level`, `destination.trust_level` |
 
 **Exemples :**
 
-| Règle | Condition | Description |
+| RÃ¨gle | Condition | Description |
 |-------|-----------|-------------|
-| CROSS-TRUST-001 | `source.trust_level ≥ VERIFIED` | Source doit être au moins VERIFIED |
-| CROSS-TRUST-002 | `source.trust_level = TRUSTED` | Source doit être TRUSTED |
-| CROSS-TRUST-003 | `source.trust_level ≠ HOSTILE` | Source ne doit pas être HOSTILE |
+| CROSS-TRUST-001 | `source.trust_level â‰¥ VERIFIED` | Source doit Ãªtre au moins VERIFIED |
+| CROSS-TRUST-002 | `source.trust_level = TRUSTED` | Source doit Ãªtre TRUSTED |
+| CROSS-TRUST-003 | `source.trust_level â‰  HOSTILE` | Source ne doit pas Ãªtre HOSTILE |
 
-### 5.2 Règles d'authentification
+### 5.2 RÃ¨gles d'authentification
 
-**Définition :** Règles portant sur l'état d'authentification requis pour franchir une frontière.
+**DÃ©finition :** RÃ¨gles portant sur l'Ã©tat d'authentification requis pour franchir une frontiÃ¨re.
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
 | **Code type** | `authentification` |
-| **Condition type** | État d'authentification |
+| **Condition type** | Ã‰tat d'authentification |
 | **Variables** | `source.authenticated`, `source.auth_method`, `source.session_valid` |
 
 **Exemples :**
 
-| Règle | Condition | Description |
+| RÃ¨gle | Condition | Description |
 |-------|-----------|-------------|
-| CROSS-AUTH-001 | `source.authenticated = true` | Source doit être authentifiée |
-| CROSS-AUTH-002 | `source.session_valid = true` | Session doit être valide |
-| CROSS-AUTH-003 | `source.auth_method IN [MFA, SSO]` | Méthode d'auth renforcée requise |
+| CROSS-AUTH-001 | `source.authenticated = true` | Source doit Ãªtre authentifiÃ©e |
+| CROSS-AUTH-002 | `source.session_valid = true` | Session doit Ãªtre valide |
+| CROSS-AUTH-003 | `source.auth_method IN [MFA, SSO]` | MÃ©thode d'auth renforcÃ©e requise |
 
-**Note :** Border Guard ne gère pas l'authentification technique. Ces règles vérifient l'**état** d'authentification fourni par le module auth.
+**Note :** Border Guard ne gÃ¨re pas l'authentification technique. Ces rÃ¨gles vÃ©rifient l'**Ã©tat** d'authentification fourni par le module auth.
 
-### 5.3 Règles de données
+### 5.3 RÃ¨gles de donnÃ©es
 
-**Définition :** Règles portant sur les données autorisées à traverser une frontière.
+**DÃ©finition :** RÃ¨gles portant sur les donnÃ©es autorisÃ©es Ã  traverser une frontiÃ¨re.
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
 | **Code type** | `donnees` |
-| **Condition type** | Nature ou classification des données |
+| **Condition type** | Nature ou classification des donnÃ©es |
 | **Variables** | `data.classification`, `data.type`, `data.sensitivity` |
 
 **Exemples :**
 
-| Règle | Condition | Description |
+| RÃ¨gle | Condition | Description |
 |-------|-----------|-------------|
-| CROSS-DATA-001 | `data.classification ≤ PUBLIC` | Seules données publiques autorisées |
-| CROSS-DATA-002 | `data.sensitivity ≠ CRITICAL` | Données critiques interdites |
-| CROSS-DATA-003 | `data.type IN [text, json, image]` | Types de données autorisés |
+| CROSS-DATA-001 | `data.classification â‰¤ PUBLIC` | Seules donnÃ©es publiques autorisÃ©es |
+| CROSS-DATA-002 | `data.sensitivity â‰  CRITICAL` | DonnÃ©es critiques interdites |
+| CROSS-DATA-003 | `data.type IN [text, json, image]` | Types de donnÃ©es autorisÃ©s |
 
-### 5.4 Règles d'action
+### 5.4 RÃ¨gles d'action
 
-**Définition :** Règles portant sur les actions autorisées à traverser une frontière.
+**DÃ©finition :** RÃ¨gles portant sur les actions autorisÃ©es Ã  traverser une frontiÃ¨re.
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
 | **Code type** | `action` |
 | **Condition type** | Nature de l'action |
@@ -193,17 +193,17 @@ Border Guard reconnaît cinq types canoniques de règles.
 
 **Exemples :**
 
-| Règle | Condition | Description |
+| RÃ¨gle | Condition | Description |
 |-------|-----------|-------------|
-| CROSS-ACT-001 | `action.type = READ` | Seule lecture autorisée |
-| CROSS-ACT-002 | `action.impact ≤ LOW` | Actions à faible impact uniquement |
+| CROSS-ACT-001 | `action.type = READ` | Seule lecture autorisÃ©e |
+| CROSS-ACT-002 | `action.impact â‰¤ LOW` | Actions Ã  faible impact uniquement |
 | CROSS-ACT-003 | `action.type NOT IN [DELETE, DROP]` | Actions destructives interdites |
 
-### 5.5 Règles temporelles
+### 5.5 RÃ¨gles temporelles
 
-**Définition :** Règles portant sur les conditions temporelles de franchissement.
+**DÃ©finition :** RÃ¨gles portant sur les conditions temporelles de franchissement.
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
 | **Code type** | `temporel` |
 | **Condition type** | Contraintes de temps |
@@ -211,34 +211,34 @@ Border Guard reconnaît cinq types canoniques de règles.
 
 **Exemples :**
 
-| Règle | Condition | Description |
+| RÃ¨gle | Condition | Description |
 |-------|-----------|-------------|
 | CROSS-TIME-001 | `session.age < 1h` | Session de moins d'une heure |
-| CROSS-TIME-002 | `rate.requests_per_minute ≤ 100` | Limite de débit |
+| CROSS-TIME-002 | `rate.requests_per_minute â‰¤ 100` | Limite de dÃ©bit |
 | CROSS-TIME-003 | `timestamp.hour IN [9, 18]` | Heures ouvrables uniquement |
 
 ---
 
-## 6. Priorités et évaluation
+## 6. PrioritÃ©s et Ã©valuation
 
-### 6.1 Niveaux de priorité
+### 6.1 Niveaux de prioritÃ©
 
-Les règles sont évaluées selon leur priorité (1 = plus haute priorité).
+Les rÃ¨gles sont Ã©valuÃ©es selon leur prioritÃ© (1 = plus haute prioritÃ©).
 
 | Plage | Description | Exemples |
 |-------|-------------|----------|
-| **1-10** | Règles de sécurité critiques | Blocage hostile, rate limiting |
-| **11-30** | Règles de niveau de confiance | Vérification TRUSTED, VERIFIED |
-| **31-50** | Règles d'authentification | Session valide, MFA |
-| **51-70** | Règles de données | Classification, types |
-| **71-90** | Règles d'action | Lecture seule, impact |
-| **91-100** | Règles temporelles et autres | Heures, quotas |
+| **1-10** | RÃ¨gles de sÃ©curitÃ© critiques | Blocage hostile, rate limiting |
+| **11-30** | RÃ¨gles de niveau de confiance | VÃ©rification TRUSTED, VERIFIED |
+| **31-50** | RÃ¨gles d'authentification | Session valide, MFA |
+| **51-70** | RÃ¨gles de donnÃ©es | Classification, types |
+| **71-90** | RÃ¨gles d'action | Lecture seule, impact |
+| **91-100** | RÃ¨gles temporelles et autres | Heures, quotas |
 
-### 6.2 Algorithme d'évaluation
+### 6.2 Algorithme d'Ã©valuation
 
 ```
-POUR chaque règle R ordonnée par priorité :
-    SI R.frontière correspond à la frontière traversée :
+POUR chaque rÃ¨gle R ordonnÃ©e par prioritÃ© :
+    SI R.frontiÃ¨re correspond Ã  la frontiÃ¨re traversÃ©e :
         SI NON satisfaite(R.condition) :
             RETOURNER R.action_echec
         FIN SI
@@ -247,302 +247,303 @@ FIN POUR
 RETOURNER AUTORISER
 ```
 
-**Règle fondamentale :** L'évaluation s'arrête à la première règle non satisfaite.
+**RÃ¨gle fondamentale :** L'Ã©valuation s'arrÃªte Ã  la premiÃ¨re rÃ¨gle non satisfaite.
 
-### 6.3 Combinaison de règles
+### 6.3 Combinaison de rÃ¨gles
 
 | Combinaison | Description | Comportement |
 |-------------|-------------|--------------|
-| **ET (implicite)** | Toutes les règles doivent être satisfaites | Échec si une seule échoue |
-| **OU (explicite)** | Au moins une règle doit être satisfaite | Règles alternatives |
-| **EXCEPTION** | La règle ne s'applique pas dans ce cas | Bypass contrôlé |
+| **ET (implicite)** | Toutes les rÃ¨gles doivent Ãªtre satisfaites | Ã‰chec si une seule Ã©choue |
+| **OU (explicite)** | Au moins une rÃ¨gle doit Ãªtre satisfaite | RÃ¨gles alternatives |
+| **EXCEPTION** | La rÃ¨gle ne s'applique pas dans ce cas | Bypass contrÃ´lÃ© |
 
 ---
 
-## 7. Actions en cas d'échec
+## 7. Actions en cas d'Ã©chec
 
 ### 7.1 Actions canoniques
 
-| Action | Code | Description | Gravité |
+| Action | Code | Description | GravitÃ© |
 |--------|------|-------------|---------|
-| **REFUSER** | `DENY` | Refuser le franchissement | Élevée |
-| **DIFFÉRER** | `DEFER` | Soumettre à StrongFather pour décision | Moyenne |
-| **DÉGRADER** | `DEGRADE` | Autoriser avec restrictions | Faible |
+| **REFUSER** | `DENY` | Refuser le franchissement | Ã‰levÃ©e |
+| **DIFFÃ‰RER** | `DEFER` | Soumettre Ã  StrongFather pour dÃ©cision | Moyenne |
+| **DÃ‰GRADER** | `DEGRADE` | Autoriser avec restrictions | Faible |
 | **ALERTER** | `ALERT` | Autoriser mais alerter | Information |
 | **JOURNALISER** | `LOG` | Autoriser et journaliser | Information |
 
-### 7.2 Matrice action/gravité
+### 7.2 Matrice action/gravitÃ©
 
-| Gravité de la violation | Action recommandée |
+| GravitÃ© de la violation | Action recommandÃ©e |
 |------------------------|-------------------|
 | Critique (HOSTILE, violation grave) | `DENY` |
-| Élevée (règle de sécurité) | `DENY` ou `DEFER` |
-| Moyenne (règle d'authentification) | `DEFER` ou `DEGRADE` |
-| Faible (règle de données/action) | `DEGRADE` ou `ALERT` |
-| Information (règle temporelle) | `ALERT` ou `LOG` |
+| Ã‰levÃ©e (rÃ¨gle de sÃ©curitÃ©) | `DENY` ou `DEFER` |
+| Moyenne (rÃ¨gle d'authentification) | `DEFER` ou `DEGRADE` |
+| Faible (rÃ¨gle de donnÃ©es/action) | `DEGRADE` ou `ALERT` |
+| Information (rÃ¨gle temporelle) | `ALERT` ou `LOG` |
 
 ### 7.3 Escalade
 
 ```
-Échec règle
-    │
-    ├── Gravité critique ───► DENY (immédiat)
-    │
-    ├── Gravité élevée ───► DENY ou DEFER (selon contexte)
-    │
-    ├── Gravité moyenne ───► DEFER à StrongFather
-    │
-    └── Gravité faible ───► DEGRADE ou ALERT
+Ã‰chec rÃ¨gle
+    â”‚
+    â”œâ”€â”€ GravitÃ© critique â”€â”€â”€â–º DENY (immÃ©diat)
+    â”‚
+    â”œâ”€â”€ GravitÃ© Ã©levÃ©e â”€â”€â”€â–º DENY ou DEFER (selon contexte)
+    â”‚
+    â”œâ”€â”€ GravitÃ© moyenne â”€â”€â”€â–º DEFER Ã  StrongFather
+    â”‚
+    â””â”€â”€ GravitÃ© faible â”€â”€â”€â–º DEGRADE ou ALERT
 ```
 
 ---
 
-## 8. Règles par type de frontière
+## 8. RÃ¨gles par type de frontiÃ¨re
 
-### 8.1 Règles pour frontières externes
+### 8.1 RÃ¨gles pour frontiÃ¨res externes
 
-**Objectif :** Protection maximale contre les entrées non autorisées.
+**Objectif :** Protection maximale contre les entrÃ©es non autorisÃ©es.
 
-| Règle | Priorité | Condition | Action échec |
+| RÃ¨gle | PrioritÃ© | Condition | Action Ã©chec |
 |-------|----------|-----------|--------------|
-| `EXT-001` | 1 | `source.trust_level ≠ HOSTILE` | DENY |
-| `EXT-002` | 5 | `rate.requests_per_minute ≤ LIMIT` | DENY + ALERT |
-| `EXT-003` | 15 | `source.trust_level ≥ UNKNOWN` | DENY |
+| `EXT-001` | 1 | `source.trust_level â‰  HOSTILE` | DENY |
+| `EXT-002` | 5 | `rate.requests_per_minute â‰¤ LIMIT` | DENY + ALERT |
+| `EXT-003` | 15 | `source.trust_level â‰¥ UNKNOWN` | DENY |
 | `EXT-004` | 35 | `source.authenticated = true` (si requis) | DEFER |
 | `EXT-005` | 55 | `data.type IN ALLOWED_TYPES` | DENY |
 
-### 8.2 Règles pour frontières internes
+### 8.2 RÃ¨gles pour frontiÃ¨res internes
 
-**Objectif :** Défense en profondeur, cloisonnement des zones.
+**Objectif :** DÃ©fense en profondeur, cloisonnement des zones.
 
-| Règle | Priorité | Condition | Action échec |
+| RÃ¨gle | PrioritÃ© | Condition | Action Ã©chec |
 |-------|----------|-----------|--------------|
-| `INT-001` | 1 | `source.trust_level ≠ HOSTILE` | DENY |
-| `INT-002` | 20 | `source.trust_level ≥ zone.required_level` | DEFER |
+| `INT-001` | 1 | `source.trust_level â‰  HOSTILE` | DENY |
+| `INT-002` | 20 | `source.trust_level â‰¥ zone.required_level` | DEFER |
 | `INT-003` | 40 | `source.session_valid = true` | DENY |
 | `INT-004` | 60 | `action.authorized_in_zone = true` | DEFER |
 
-### 8.3 Règles pour frontières d'intégration
+### 8.3 RÃ¨gles pour frontiÃ¨res d'intÃ©gration
 
-**Objectif :** Contrôle des échanges avec les systèmes intégrés.
+**Objectif :** ContrÃ´le des Ã©changes avec les systÃ¨mes intÃ©grÃ©s.
 
-| Règle | Priorité | Condition | Action échec |
+| RÃ¨gle | PrioritÃ© | Condition | Action Ã©chec |
 |-------|----------|-----------|--------------|
 | `INTEG-001` | 1 | `integration.status = ACTIVE` | DENY |
-| `INTEG-002` | 10 | `source.trust_level ≥ VERIFIED` | DEFER |
+| `INTEG-002` | 10 | `source.trust_level â‰¥ VERIFIED` | DEFER |
 | `INTEG-003` | 30 | `integration.credentials_valid = true` | DENY |
-| `INTEG-004` | 50 | `data.classification ≤ integration.max_classification` | DENY |
+| `INTEG-004` | 50 | `data.classification â‰¤ integration.max_classification` | DENY |
 | `INTEG-005` | 70 | `action.type IN integration.allowed_actions` | DEFER |
 
 ---
 
-## 9. Adaptation selon les niveaux de sécurité
+## 9. Adaptation selon les niveaux de sÃ©curitÃ©
 
-Les règles de franchissement s'adaptent selon le niveau de sécurité déclaré.
+Les rÃ¨gles de franchissement s'adaptent selon le niveau de sÃ©curitÃ© dÃ©clarÃ©.
 
-**Référence :** [Miyukini Conceptual References - Security Levels](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md)
+**RÃ©fÃ©rence :** [Miyukini Conceptual References - Security Levels](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ### 9.1 Adaptation des seuils
 
-| Niveau de sécurité | Niveau confiance min. (externe) | Rate limit | Tolérance erreur |
+| Niveau de sÃ©curitÃ© | Niveau confiance min. (externe) | Rate limit | TolÃ©rance erreur |
 |--------------------|--------------------------------|------------|------------------|
 | **0 - PUBLIC** | UNKNOWN | Haut | Haute |
 | **1 - STANDARD** | UNKNOWN | Standard | Standard |
-| **2 - SENSITIVE** | VERIFIED | Réduit | Faible |
+| **2 - SENSITIVE** | VERIFIED | RÃ©duit | Faible |
 | **3 - CRITICAL** | VERIFIED+ | Strict | Minimale |
-| **4 - HARDENED** | TRUSTED | Ultra-strict | Zéro |
+| **4 - HARDENED** | TRUSTED | Ultra-strict | ZÃ©ro |
 
-### 9.2 Règles spécifiques par niveau
+### 9.2 RÃ¨gles spÃ©cifiques par niveau
 
 #### Niveau 0 - PUBLIC
 
 ```
-# Règles assouplies
-EXT-003: source.trust_level ≥ UNKNOWN (même non authentifié autorisé)
-INT-002: source.trust_level ≥ UNKNOWN (zones ouvertes)
+# RÃ¨gles assouplies
+EXT-003: source.trust_level â‰¥ UNKNOWN (mÃªme non authentifiÃ© autorisÃ©)
+INT-002: source.trust_level â‰¥ UNKNOWN (zones ouvertes)
 ```
 
 #### Niveau 3 - CRITICAL
 
 ```
-# Règles strictes
-EXT-003: source.trust_level ≥ VERIFIED (auth obligatoire)
-EXT-ADD: source.auth_method IN [MFA, SSO] (auth renforcée)
-INT-002: source.trust_level ≥ VERIFIED (cloisonnement strict)
+# RÃ¨gles strictes
+EXT-003: source.trust_level â‰¥ VERIFIED (auth obligatoire)
+EXT-ADD: source.auth_method IN [MFA, SSO] (auth renforcÃ©e)
+INT-002: source.trust_level â‰¥ VERIFIED (cloisonnement strict)
 ```
 
 #### Niveau 4 - HARDENED
 
 ```
-# Règles ultra-strictes
-EXT-003: source.trust_level = TRUSTED (seuls trusted autorisés)
+# RÃ¨gles ultra-strictes
+EXT-003: source.trust_level = TRUSTED (seuls trusted autorisÃ©s)
 INT-002: source.trust_level = TRUSTED (isolement)
 ALL: rate.limit = MINIMAL (quasi aucun trafic)
 ```
 
 ---
 
-## 10. Intégration avec les protocoles de sécurité
+## 10. IntÃ©gration avec les protocoles de sÃ©curitÃ©
 
-**Référence :** [Miyukini Conceptual References - Security Protocols](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Protocols.md)
+**RÃ©fÃ©rence :** [Miyukini Conceptual References - Security Protocols](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
-### 10.1 Protocoles temps réel (RT-SEC)
+### 10.1 Protocoles temps rÃ©el (RT-SEC)
 
-| Protocole | Règles concernées |
+| Protocole | RÃ¨gles concernÃ©es |
 |-----------|-------------------|
-| **RT-SEC-1** (Session éphémère) | Règles de session (`session.age`, `session.valid`) |
-| **RT-SEC-2** (Auth en couches) | Règles d'authentification (`auth_method`, `context`) |
-| **RT-SEC-3** (Validation systématique) | Toutes les règles (aucun bypass) |
-| **RT-SEC-4** (Détection anomalie) | Règles de rate limiting, détection patterns |
+| **RT-SEC-1** (Session Ã©phÃ©mÃ¨re) | RÃ¨gles de session (`session.age`, `session.valid`) |
+| **RT-SEC-2** (Auth en couches) | RÃ¨gles d'authentification (`auth_method`, `context`) |
+| **RT-SEC-3** (Validation systÃ©matique) | Toutes les rÃ¨gles (aucun bypass) |
+| **RT-SEC-4** (DÃ©tection anomalie) | RÃ¨gles de rate limiting, dÃ©tection patterns |
 
 ### 10.2 Protocoles asynchrones (AS-SEC)
 
-| Protocole | Règles concernées |
+| Protocole | RÃ¨gles concernÃ©es |
 |-----------|-------------------|
-| **AS-SEC-1** (Actions non engagées) | Règles d'action (`action.status = PENDING`) |
-| **AS-SEC-2** (Signature locale faible) | Règles de signature (`signature.valid`) |
-| **AS-SEC-3** (Revalidation) | Toutes les règles (réévaluation complète) |
-| **AS-SEC-4** (Anti-replay) | Règles de séquence (`request.id`, `request.timestamp`) |
+| **AS-SEC-1** (Actions non engagÃ©es) | RÃ¨gles d'action (`action.status = PENDING`) |
+| **AS-SEC-2** (Signature locale faible) | RÃ¨gles de signature (`signature.valid`) |
+| **AS-SEC-3** (Revalidation) | Toutes les rÃ¨gles (rÃ©Ã©valuation complÃ¨te) |
+| **AS-SEC-4** (Anti-replay) | RÃ¨gles de sÃ©quence (`request.id`, `request.timestamp`) |
 
 ### 10.3 Flux avec BondingBrother
 
 ```
 Border Guard                          BondingBrother
-     │                                      │
-     │ règles de franchissement             │
-     │ (déclaratives)                       │
-     │ ─────────────────────────────────►   │
-     │                                      │
-     │                                      │ implémentation
-     │                                      │ des vérifications
-     │                                      │
-     │ résultat application                 │
-     │ (pour traçabilité)                   │
-     │ ◄─────────────────────────────────   │
+     â”‚                                      â”‚
+     â”‚ rÃ¨gles de franchissement             â”‚
+     â”‚ (dÃ©claratives)                       â”‚
+     â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º   â”‚
+     â”‚                                      â”‚
+     â”‚                                      â”‚ implÃ©mentation
+     â”‚                                      â”‚ des vÃ©rifications
+     â”‚                                      â”‚
+     â”‚ rÃ©sultat application                 â”‚
+     â”‚ (pour traÃ§abilitÃ©)                   â”‚
+     â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€   â”‚
 ```
 
 ---
 
 ## 11. Exceptions et cas particuliers
 
-### 11.1 Définition d'une exception
+### 11.1 DÃ©finition d'une exception
 
-Une **exception** est un cas où une règle ne s'applique pas, défini de manière explicite et traçable.
+Une **exception** est un cas oÃ¹ une rÃ¨gle ne s'applique pas, dÃ©fini de maniÃ¨re explicite et traÃ§able.
 
-| Propriété | Description | Obligatoire |
+| PropriÃ©tÃ© | Description | Obligatoire |
 |-----------|-------------|-------------|
-| **Identifiant** | Identifiant de l'exception | ✅ Oui |
-| **Règle concernée** | Quelle règle est exceptée | ✅ Oui |
-| **Condition d'exception** | Quand l'exception s'applique | ✅ Oui |
-| **Justification** | Pourquoi cette exception existe | ✅ Oui |
-| **Durée** | Temporaire ou permanente | ✅ Oui |
+| **Identifiant** | Identifiant de l'exception | âœ… Oui |
+| **RÃ¨gle concernÃ©e** | Quelle rÃ¨gle est exceptÃ©e | âœ… Oui |
+| **Condition d'exception** | Quand l'exception s'applique | âœ… Oui |
+| **Justification** | Pourquoi cette exception existe | âœ… Oui |
+| **DurÃ©e** | Temporaire ou permanente | âœ… Oui |
 
-### 11.2 Exceptions autorisées
+### 11.2 Exceptions autorisÃ©es
 
-| Type d'exception | Conditions | Autorité |
+| Type d'exception | Conditions | AutoritÃ© |
 |------------------|------------|----------|
-| **Urgence sécurité** | Faille critique, besoin immédiat | TAMR + StrongFather |
-| **Migration** | Période de transition, compatibilité | EverBuddy |
-| **Maintenance** | Opérations planifiées | Admin + CaringNanny |
+| **Urgence sÃ©curitÃ©** | Faille critique, besoin immÃ©diat | TAMR + StrongFather |
+| **Migration** | PÃ©riode de transition, compatibilitÃ© | EverBuddy |
+| **Maintenance** | OpÃ©rations planifiÃ©es | Admin + CaringNanny |
 | **Test** | Environnement de test uniquement | Environnement non-production |
 
 ### 11.3 Exceptions interdites
 
 | Exception interdite | Raison |
 |--------------------|--------|
-| Exception permanente sans justification | Viole INV-BG-8 (traçabilité) |
-| Exception contournant HOSTILE | Viole sécurité fondamentale |
-| Exception définie par BondingBrother | Viole INV-BG-7 (séparation) |
-| Exception non traçable | Viole INV-BG-8 |
+| Exception permanente sans justification | Viole INV-BG-8 (traÃ§abilitÃ©) |
+| Exception contournant HOSTILE | Viole sÃ©curitÃ© fondamentale |
+| Exception dÃ©finie par BondingBrother | Viole INV-BG-7 (sÃ©paration) |
+| Exception non traÃ§able | Viole INV-BG-8 |
 
 ---
 
-## 12. Traçabilité des règles
+## 12. TraÃ§abilitÃ© des rÃ¨gles
 
-### 12.1 Éléments à tracer
+### 12.1 Ã‰lÃ©ments Ã  tracer
 
-| Élément | Obligatoire | Description |
+| Ã‰lÃ©ment | Obligatoire | Description |
 |---------|-------------|-------------|
-| Règle évaluée | ✅ Oui | Identifiant de la règle |
-| Condition | ✅ Oui | Condition évaluée |
-| Résultat | ✅ Oui | Satisfaite / Non satisfaite |
-| Action | ✅ Oui | Action exécutée si échec |
-| Contexte | ✅ Oui | Contexte de l'évaluation |
-| Timestamp | ✅ Oui | Horodatage |
+| RÃ¨gle Ã©valuÃ©e | âœ… Oui | Identifiant de la rÃ¨gle |
+| Condition | âœ… Oui | Condition Ã©valuÃ©e |
+| RÃ©sultat | âœ… Oui | Satisfaite / Non satisfaite |
+| Action | âœ… Oui | Action exÃ©cutÃ©e si Ã©chec |
+| Contexte | âœ… Oui | Contexte de l'Ã©valuation |
+| Timestamp | âœ… Oui | Horodatage |
 
 ### 12.2 Format de trace
 
 ```
 Crossing Rule Evaluation:
 - rule_id: <identifiant>
-- frontier_id: <frontière traversée>
-- condition: <condition évaluée>
+- frontier_id: <frontiÃ¨re traversÃ©e>
+- condition: <condition Ã©valuÃ©e>
 - result: <PASS|FAIL>
 - action_taken: <si FAIL>
 - context: {source, destination, data, action}
 - timestamp: <ISO 8601>
 ```
 
-**Invariant associé :** INV-BG-8 — Toute évaluation de règle est **traçable**.
+**Invariant associÃ© :** INV-BG-8 â€” Toute Ã©valuation de rÃ¨gle est **traÃ§able**.
 
 ---
 
-## 13. Références croisées
+## 13. RÃ©fÃ©rences croisÃ©es
 
-### Invariants associés (Documentation Fondatrice - Section 7)
+### Invariants associÃ©s (Documentation Fondatrice - Section 7)
 
-| Invariant | Énoncé | Relation |
+| Invariant | Ã‰noncÃ© | Relation |
 |-----------|--------|----------|
-| INV-BG-6 | Règles déclaratives | Fondement de ce contrat |
-| INV-BG-7 | Séparation définition/application | Border Guard définit, BondingBrother applique |
-| INV-BG-8 | Traçabilité complète | Toute règle et évaluation est traçable |
-| INV-BG-9 | Cohérence globale | Pas de contradiction entre règles |
+| INV-BG-6 | RÃ¨gles dÃ©claratives | Fondement de ce contrat |
+| INV-BG-7 | SÃ©paration dÃ©finition/application | Border Guard dÃ©finit, BondingBrother applique |
+| INV-BG-8 | TraÃ§abilitÃ© complÃ¨te | Toute rÃ¨gle et Ã©valuation est traÃ§able |
+| INV-BG-9 | CohÃ©rence globale | Pas de contradiction entre rÃ¨gles |
 
-### Documents associés
+### Documents associÃ©s
 
 | Document | Relation |
 |----------|----------|
 | [Border Guard - Documentation Fondatrice](../../foundation/Border%20Guard%20-%20Documentation%20Fondatrice.md) | Document source |
-| [Border Guard - Boundary Definition Contract](./Border%20Guard%20-%20Boundary%20Definition%20Contract.md) | Frontières auxquelles les règles s'appliquent |
-| [Border Guard - Trust Level Classification Contract](./Border%20Guard%20-%20Trust%20Level%20Classification%20Contract.md) | Niveaux utilisés dans les règles |
-| [Miyukini Conceptual References - Security Levels](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) | Adaptation selon niveau sécurité |
-| [Miyukini Conceptual References - Security Protocols](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Protocols.md) | Protocoles utilisant les règles |
+| [Border Guard - Boundary Definition Contract](./Border%20Guard%20-%20Boundary%20Definition%20Contract.md) | FrontiÃ¨res auxquelles les rÃ¨gles s'appliquent |
+| [Border Guard - Trust Level Classification Contract](./Border%20Guard%20-%20Trust%20Level%20Classification%20Contract.md) | Niveaux utilisÃ©s dans les rÃ¨gles |
+| [Miyukini Conceptual References - Security Levels](..//..//..//..//miyukini-webway-system//reference//_index.md) | Adaptation selon niveau sÃ©curitÃ© |
+| [Miyukini Conceptual References - Security Protocols](..//..//..//..//miyukini-webway-system//reference//_index.md) | Protocoles utilisant les rÃ¨gles |
 
-### Références glossaire
+### RÃ©fÃ©rences glossaire
 
-| Terme | Définition |
+| Terme | DÃ©finition |
 |-------|------------|
-| **Règle de franchissement** | Condition déclarative pour autoriser un franchissement |
-| **Franchissement** | Acte de traverser une frontière |
-| **Condition déclarative** | Expression de ce qui est requis, pas comment le vérifier |
-| **Priorité** | Ordre d'évaluation des règles |
-| **Exception** | Cas où une règle ne s'applique pas |
+| **RÃ¨gle de franchissement** | Condition dÃ©clarative pour autoriser un franchissement |
+| **Franchissement** | Acte de traverser une frontiÃ¨re |
+| **Condition dÃ©clarative** | Expression de ce qui est requis, pas comment le vÃ©rifier |
+| **PrioritÃ©** | Ordre d'Ã©valuation des rÃ¨gles |
+| **Exception** | Cas oÃ¹ une rÃ¨gle ne s'applique pas |
 
-**Source :** [Miyukini Conceptual References - Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Source :** [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 14. Synthèse contractuelle
+## 14. SynthÃ¨se contractuelle
 
 ### Garanties de ce contrat
 
 Ce contrat garantit que :
 
-1. **Les règles sont déclaratives** — Expriment ce qui est requis, pas comment le vérifier (INV-BG-6)
-2. **La séparation est stricte** — Border Guard définit, BondingBrother applique (INV-BG-7)
-3. **Cinq types de règles** — Confiance, authentification, données, action, temporel
-4. **L'évaluation est déterministe** — Priorités claires, algorithme défini
-5. **L'adaptation est automatique** — Les règles s'adaptent au niveau de sécurité
-6. **La traçabilité est complète** — Toute règle et évaluation est traçable
+1. **Les rÃ¨gles sont dÃ©claratives** â€” Expriment ce qui est requis, pas comment le vÃ©rifier (INV-BG-6)
+2. **La sÃ©paration est stricte** â€” Border Guard dÃ©finit, BondingBrother applique (INV-BG-7)
+3. **Cinq types de rÃ¨gles** â€” Confiance, authentification, donnÃ©es, action, temporel
+4. **L'Ã©valuation est dÃ©terministe** â€” PrioritÃ©s claires, algorithme dÃ©fini
+5. **L'adaptation est automatique** â€” Les rÃ¨gles s'adaptent au niveau de sÃ©curitÃ©
+6. **La traÃ§abilitÃ© est complÃ¨te** â€” Toute rÃ¨gle et Ã©valuation est traÃ§able
 
-### Phrase de synthèse
+### Phrase de synthÃ¨se
 
-> **Une règle de franchissement est une condition déclarative, définie exclusivement par Border Guard et appliquée par BondingBrother, qui spécifie ce qui est requis pour traverser une frontière, selon une priorité et avec une action définie en cas d'échec.**
+> **Une rÃ¨gle de franchissement est une condition dÃ©clarative, dÃ©finie exclusivement par Border Guard et appliquÃ©e par BondingBrother, qui spÃ©cifie ce qui est requis pour traverser une frontiÃ¨re, selon une prioritÃ© et avec une action dÃ©finie en cas d'Ã©chec.**
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** Contrat — Normatif  
-**Référence :** Border Guard v1.5, Documentation Fondatrice Section 4 et 5  
-**Type :** Contrat de règles de franchissement
+**Statut :** Contrat â€” Normatif  
+**RÃ©fÃ©rence :** Border Guard v1.5, Documentation Fondatrice Section 4 et 5  
+**Type :** Contrat de rÃ¨gles de franchissement
+

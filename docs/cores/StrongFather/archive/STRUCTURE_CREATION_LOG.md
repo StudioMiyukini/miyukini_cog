@@ -1,116 +1,117 @@
-# Mini log — Création de la structure documentaire StrongFather
+﻿# Mini log â€” CrÃ©ation de la structure documentaire StrongFather
 
 **Date :** 2026-01-25  
-**Action :** Création de la structure documentaire de base pour StrongFather
+**Action :** CrÃ©ation de la structure documentaire de base pour StrongFather
 
 ---
 
-## Fichiers créés
+## Fichiers crÃ©Ã©s
 
-Les 13 fichiers suivants ont été créés avec un header minimal :
+Les 13 fichiers suivants ont Ã©tÃ© crÃ©Ã©s avec un header minimal :
 
-1. ✅ `StrongFather - Core Decision Contract.md`
-2. ✅ `StrongFather - Intent Model Contract.md`
-3. ✅ `StrongFather - Policy Engine Contract.md`
-4. ✅ `StrongFather - Decision Graph Specification.md`
-5. ✅ `StrongFather - Invariants & Guarantees.md`
-6. ✅ `StrongFather - Violations & Anti-Patterns.md`
-7. ✅ `StrongFather - Boundary & Isolation Contract.md`
-8. ✅ `StrongFather - Error & Rejection Model.md`
-9. ✅ `StrongFather - Audit & Trace Contract.md`
-10. ✅ `StrongFather - Execution Prohibition Contract.md`
-11. ✅ `StrongFather - Integration Readiness Contract.md`
-12. ✅ `StrongFather - Conformance & Certification Rules.md`
-13. ✅ `StrongFather - Architecture & Flows.md`
+1. âœ… `StrongFather - Core Decision Contract.md`
+2. âœ… `StrongFather - Intent Model Contract.md`
+3. âœ… `StrongFather - Policy Engine Contract.md`
+4. âœ… `StrongFather - Decision Graph Specification.md`
+5. âœ… `StrongFather - Invariants & Guarantees.md`
+6. âœ… `StrongFather - Violations & Anti-Patterns.md`
+7. âœ… `StrongFather - Boundary & Isolation Contract.md`
+8. âœ… `StrongFather - Error & Rejection Model.md`
+9. âœ… `StrongFather - Audit & Trace Contract.md`
+10. âœ… `StrongFather - Execution Prohibition Contract.md`
+11. âœ… `StrongFather - Integration Readiness Contract.md`
+12. âœ… `StrongFather - Conformance & Certification Rules.md`
+13. âœ… `StrongFather - Architecture & Flows.md`
 
-**Total :** 13 fichiers créés
+**Total :** 13 fichiers crÃ©Ã©s
 
 ---
 
-## Vérifications effectuées
+## VÃ©rifications effectuÃ©es
 
-✅ Tous les fichiers existent dans `docs/core/StrongFather/`  
-✅ Chaque fichier contient uniquement :
+âœ… Tous les fichiers existent dans `docs/core/StrongFather/`  
+âœ… Chaque fichier contient uniquement :
    - Un header H1 avec le nom du document
-   - Un commentaire "_Document contractuel — en attente de rédaction_"
+   - Un commentaire "_Document contractuel â€” en attente de rÃ©daction_"
 
 ---
 
 ## Warnings
 
-Aucun warning rencontré.
+Aucun warning rencontrÃ©.
 
 ---
 
-## Erreurs corrigées
+## Erreurs corrigÃ©es
 
-Aucune erreur rencontrée.
-
----
-
-## État final
-
-- **Fichiers créés :** 13/13
-- **Fichiers vérifiés :** 13/13
-- **Structure prête pour rédaction :** ✅
+Aucune erreur rencontrÃ©e.
 
 ---
 
-**Note :** Le fichier `StrongFather - Documentation Fondatrice.md` existait déjà et n'a pas été modifié.
+## Ã‰tat final
+
+- **Fichiers crÃ©Ã©s :** 13/13
+- **Fichiers vÃ©rifiÃ©s :** 13/13
+- **Structure prÃªte pour rÃ©daction :** âœ…
 
 ---
 
-## Modifications v1.1 — Post-Audit (2026-01-25)
+**Note :** Le fichier `StrongFather - Documentation Fondatrice.md` existait dÃ©jÃ  et n'a pas Ã©tÃ© modifiÃ©.
 
-Suite à l'audit global de StrongFather, les modifications suivantes ont été apportées :
+---
 
-### Nouveau document créé
+## Modifications v1.1 â€” Post-Audit (2026-01-25)
 
-14. ✅ `StrongFather - Policy Source Contract.md` (nouveau)
-   - Définit l'unique origine valide des politiques
-   - Définit le cycle de vie pré-application des politiques
-   - Interdit toute politique injectée dynamiquement
-   - Ferme la lacune C.5 identifiée dans l'audit
+Suite Ã  l'audit global de StrongFather, les modifications suivantes ont Ã©tÃ© apportÃ©es :
 
-### Sous-contrat intégré
+### Nouveau document crÃ©Ã©
+
+14. âœ… `StrongFather - Policy Source Contract.md` (nouveau)
+   - DÃ©finit l'unique origine valide des politiques
+   - DÃ©finit le cycle de vie prÃ©-application des politiques
+   - Interdit toute politique injectÃ©e dynamiquement
+   - Ferme la lacune C.5 identifiÃ©e dans l'audit
+
+### Sous-contrat intÃ©grÃ©
 
 - **Kernel Trace Access Contract** (embedded dans Boundary & Isolation Contract)
-  - Liste exhaustive des appels kernel autorisés (KERN-AUTH-1, 2, 3)
+  - Liste exhaustive des appels kernel autorisÃ©s (KERN-AUTH-1, 2, 3)
   - Interdiction explicite de Clock hors trace passive
-  - Règle de résilience : si trace échoue → décision continue
-  - Neutralise le problème C.2 identifié dans l'audit
+  - RÃ¨gle de rÃ©silience : si trace Ã©choue â†’ dÃ©cision continue
+  - Neutralise le problÃ¨me C.2 identifiÃ© dans l'audit
 
-### Invariants ajoutés
+### Invariants ajoutÃ©s
 
-4 nouveaux invariants consolidés dans `Invariants & Guarantees.md` :
+4 nouveaux invariants consolidÃ©s dans `Invariants & Guarantees.md` :
 
-1. **INV-POL-SOURCE** : Source unique et configurée des politiques
-2. **INV-ID-GLOBAL** : Unicité globale des identifiants d'intention
+1. **INV-POL-SOURCE** : Source unique et configurÃ©e des politiques
+2. **INV-ID-GLOBAL** : UnicitÃ© globale des identifiants d'intention
 3. **INV-TRACE-KERNEL** : Utilisation kernel strictement passive
-4. **INV-DIFF-NOPLAN** : Décision différée sans planification
+4. **INV-DIFF-NOPLAN** : DÃ©cision diffÃ©rÃ©e sans planification
 
-### Documents maîtres désignés
+### Documents maÃ®tres dÃ©signÃ©s
 
-Pour éviter la désynchronisation, les documents suivants sont désignés comme maîtres :
+Pour Ã©viter la dÃ©synchronisation, les documents suivants sont dÃ©signÃ©s comme maÃ®tres :
 
-| Concept | Document maître |
+| Concept | Document maÃ®tre |
 |---------|----------------|
-| Types de décisions | Core Decision Contract |
-| Interdiction d'exécution | Execution Prohibition Contract |
+| Types de dÃ©cisions | Core Decision Contract |
+| Interdiction d'exÃ©cution | Execution Prohibition Contract |
 | Invariants globaux | Invariants & Guarantees |
-| Frontières | Boundary & Isolation Contract |
+| FrontiÃ¨res | Boundary & Isolation Contract |
 
-Les autres documents peuvent référencer ces concepts, mais ne doivent pas les redéfinir.
+Les autres documents peuvent rÃ©fÃ©rencer ces concepts, mais ne doivent pas les redÃ©finir.
 
-### État final v1.1
+### Ã‰tat final v1.1
 
 - **Fichiers total :** 14 (13 + 1 nouveau)
-- **Documents modifiés :** 4 (Boundary & Isolation, Invariants & Guarantees, Core Decision, Execution Prohibition)
-- **Problèmes audit corrigés :** C.2, C.5
-- **Risques audit réduits :** D.1, D.3, D.4, D.5
+- **Documents modifiÃ©s :** 4 (Boundary & Isolation, Invariants & Guarantees, Core Decision, Execution Prohibition)
+- **ProblÃ¨mes audit corrigÃ©s :** C.2, C.5
+- **Risques audit rÃ©duits :** D.1, D.3, D.4, D.5
 
 ---
 
-**Structure documentaire StrongFather : COMPLÈTE et AUDITÉE ✅**
+**Structure documentaire StrongFather : COMPLÃˆTE et AUDITÃ‰E âœ…**
 
-**Conformité autonomie :** La structure documentaire de StrongFather garantit le respect des [Lois d'Autonomie Système](../../../reference/Miyukini%20Framework%20-%20Lois%20Autonomie%20Systeme.md), notamment **LOI-1** (décisions locales sans dépendance externe), **LOI-2** (isolement comme état normal), et **LOI-4** (pas de temps global requis).
+**ConformitÃ© autonomie :** La structure documentaire de StrongFather garantit le respect des [Lois d'Autonomie SystÃ¨me](..//..//..//miyukini-webway-system//reference//_index.md), notamment **LOI-1** (dÃ©cisions locales sans dÃ©pendance externe), **LOI-2** (isolement comme Ã©tat normal), et **LOI-4** (pas de temps global requis).
+

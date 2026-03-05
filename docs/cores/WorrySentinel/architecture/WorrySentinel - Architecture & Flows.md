@@ -1,4 +1,4 @@
-# WorrySentinel - Architecture & Flows
+﻿# WorrySentinel - Architecture & Flows
 
 ## 1. Contexte
 
@@ -27,45 +27,45 @@ Ce document **ne couvre pas** :
 
 ## 3. Positionnement dans la pyramide Miyukini
 
-WorrySentinel est positionne en **Strate 4 — Gouvernance de Securite**, entre le Kernel (infrastructure technique) et les Cores fonctionnels. Cette position est unique : WorrySentinel n'est pas un core fonctionnel, mais un **core de gouvernance transversale**.
+WorrySentinel est positionne en **Strate 4 â€” Gouvernance de Securite**, entre le Kernel (infrastructure technique) et les Cores fonctionnels. Cette position est unique : WorrySentinel n'est pas un core fonctionnel, mais un **core de gouvernance transversale**.
 
 ```
-┌──────────────────────────────────────────────────┐
-│ STRATE 9 — MiyukiniAdmin (EXCEPTION)              │
-│ Operateur Souverain d'administration              │
-└──────────────────────────────────────────────────┘
-          ▲
-          │ (hors pyramide)
-          │
-┌──────────────────────────────────────────────────┐
-│ STRATE 5 — Cores fonctionnels                     │
-│ StrongFather · KindMother · MasterButler          │
-│ CaringNanny · EverBuddy · BorderGuard · TAMR      │
-└──────────────────────────────────────────────────┘
-          ▲
-          │ gouvernes par
-          │
-┌──────────────────────────────────────────────────┐
-│ STRATE 4 — 🛡️ WorrySentinel                        │ ◄── Gouvernance transversale
-│ Gouvernance de securite                           │
-│ Niveaux de securite (0-4), Etats de confiance (T0-T4) │
-│ Degradation progressive                           │
-└──────────────────────────────────────────────────┘
-          ▲
-          │ observe
-          │
-┌──────────────────────────────────────────────────┐
-│ STRATE 3 — Gouvernance Ressources                 │
-│ LogisticsSteward                                  │
-└──────────────────────────────────────────────────┘
-          ▲
-┌──────────────────────────────────────────────────┐
-│ STRATE 2 — Kernel Miyukini                        │
-│ Identite, Horloge, Logger, Sondes                 │
-└──────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 9 â€” MiyukiniAdmin (EXCEPTION)              â”‚
+â”‚ Operateur Souverain d'administration              â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+          â”‚ (hors pyramide)
+          â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 5 â€” Cores fonctionnels                     â”‚
+â”‚ StrongFather Â· KindMother Â· MasterButler          â”‚
+â”‚ CaringNanny Â· EverBuddy Â· BorderGuard Â· TAMR      â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+          â”‚ gouvernes par
+          â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 4 â€” ðŸ›¡ï¸ WorrySentinel                        â”‚ â—„â”€â”€ Gouvernance transversale
+â”‚ Gouvernance de securite                           â”‚
+â”‚ Niveaux de securite (0-4), Etats de confiance (T0-T4) â”‚
+â”‚ Degradation progressive                           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+          â”‚ observe
+          â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 3 â€” Gouvernance Ressources                 â”‚
+â”‚ LogisticsSteward                                  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 2 â€” Kernel Miyukini                        â”‚
+â”‚ Identite, Horloge, Logger, Sondes                 â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-**Regle architecturale fondamentale :** WorrySentinel n'est pas une brique horizontale — c'est une **pression verticale**. Il ne remplace jamais un core, il contraint tous les cores selon les niveaux de securite et les etats de confiance.
+**Regle architecturale fondamentale :** WorrySentinel n'est pas une brique horizontale â€” c'est une **pression verticale**. Il ne remplace jamais un core, il contraint tous les cores selon les niveaux de securite et les etats de confiance.
 
 ---
 
@@ -87,35 +87,35 @@ WorrySentinel est un **gouvernant conceptuel** qui :
 
 | Anti-pattern | Explication |
 |--------------|-------------|
-| ❌ Un core fonctionnel | Il ne traite pas de requetes metier |
-| ❌ Un executeur | Il ne realise aucune action |
-| ❌ Un implementeur | Il ne code aucun controle de securite |
-| ❌ Un persisteur | Il ne stocke aucune donnee |
-| ❌ Un decideur specifique | Il ne prend pas de decisions operationnelles |
+| âŒ Un core fonctionnel | Il ne traite pas de requetes metier |
+| âŒ Un executeur | Il ne realise aucune action |
+| âŒ Un implementeur | Il ne code aucun controle de securite |
+| âŒ Un persisteur | Il ne stocke aucune donnee |
+| âŒ Un decideur specifique | Il ne prend pas de decisions operationnelles |
 
 ### 4.3 Distinction fondamentale
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│               CORES FONCTIONNELS                         │
-│  StrongFather, KindMother, MasterButler, BorderGuard... │
-│  ─────────────────────────────────────────────────────  │
-│  • Traitent des requetes                                 │
-│  • Prennent des decisions                                │
-│  • Executent des operations                              │
-│  • Ont des responsabilites definies                      │
-└─────────────────────────────────────────────────────────┘
-                         │
-                         ▼ gouvernes par
-┌─────────────────────────────────────────────────────────┐
-│               WORRYSENTINEL                              │
-│  ─────────────────────────────────────────────────────  │
-│  • Gouverne les niveaux                                  │
-│  • Declare les etats                                     │
-│  • Contraint les comportements                           │
-│  • Observe les signaux                                   │
-│  • N'execute JAMAIS                                      │
-└─────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚               CORES FONCTIONNELS                         â”‚
+â”‚  StrongFather, KindMother, MasterButler, BorderGuard... â”‚
+â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€  â”‚
+â”‚  â€¢ Traitent des requetes                                 â”‚
+â”‚  â€¢ Prennent des decisions                                â”‚
+â”‚  â€¢ Executent des operations                              â”‚
+â”‚  â€¢ Ont des responsabilites definies                      â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                         â”‚
+                         â–¼ gouvernes par
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚               WORRYSENTINEL                              â”‚
+â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€  â”‚
+â”‚  â€¢ Gouverne les niveaux                                  â”‚
+â”‚  â€¢ Declare les etats                                     â”‚
+â”‚  â€¢ Contraint les comportements                           â”‚
+â”‚  â€¢ Observe les signaux                                   â”‚
+â”‚  â€¢ N'execute JAMAIS                                      â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
@@ -129,74 +129,74 @@ WorrySentinel gouverne selon deux axes independants mais interagissant :
 **Definition :** Profil de risque des Operateurs et produits.
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│             NIVEAUX DE SECURITE (0-4)                    │
-├─────────────────────────────────────────────────────────┤
-│ Niveau 0 — PUBLIC                                        │
-│ • Donnees publiques                                      │
-│ • Aucune contrainte stricte                              │
-│ • Performance maximale                                   │
-├─────────────────────────────────────────────────────────┤
-│ Niveau 1 — STANDARD                                      │
-│ • Donnees standard                                       │
-│ • Contraintes de base                                    │
-│ • Auth simple                                            │
-├─────────────────────────────────────────────────────────┤
-│ Niveau 2 — SENSITIVE DATA                                │
-│ • Donnees sensibles                                      │
-│ • Contraintes renforcees                                 │
-│ • Auth renforcee + signatures                            │
-├─────────────────────────────────────────────────────────┤
-│ Niveau 3 — CRITICAL SYSTEM                               │
-│ • Donnees critiques                                      │
-│ • Contraintes strictes                                   │
-│ • Zero-trust + verifications croisees                    │
-├─────────────────────────────────────────────────────────┤
-│ Niveau 4 — HARDENED / ISOLATED                           │
-│ • Securite maximale                                      │
-│ • Contraintes maximales                                  │
-│ • Controles continus + attestations                      │
-└─────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚             NIVEAUX DE SECURITE (0-4)                    â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Niveau 0 â€” PUBLIC                                        â”‚
+â”‚ â€¢ Donnees publiques                                      â”‚
+â”‚ â€¢ Aucune contrainte stricte                              â”‚
+â”‚ â€¢ Performance maximale                                   â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Niveau 1 â€” STANDARD                                      â”‚
+â”‚ â€¢ Donnees standard                                       â”‚
+â”‚ â€¢ Contraintes de base                                    â”‚
+â”‚ â€¢ Auth simple                                            â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Niveau 2 â€” SENSITIVE DATA                                â”‚
+â”‚ â€¢ Donnees sensibles                                      â”‚
+â”‚ â€¢ Contraintes renforcees                                 â”‚
+â”‚ â€¢ Auth renforcee + signatures                            â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Niveau 3 â€” CRITICAL SYSTEM                               â”‚
+â”‚ â€¢ Donnees critiques                                      â”‚
+â”‚ â€¢ Contraintes strictes                                   â”‚
+â”‚ â€¢ Zero-trust + verifications croisees                    â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Niveau 4 â€” HARDENED / ISOLATED                           â”‚
+â”‚ â€¢ Securite maximale                                      â”‚
+â”‚ â€¢ Contraintes maximales                                  â”‚
+â”‚ â€¢ Controles continus + attestations                      â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-**Reference complete :** [Miyukini Conceptual References - Security Levels](../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md)
+**Reference complete :** [Miyukini Conceptual References - Security Levels](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ### 5.2 Axe 2 : Etats de confiance (T0-T4)
 
 **Definition :** Niveau d'integrite du systeme global.
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│             ETATS DE CONFIANCE (T0-T4)                   │
-├─────────────────────────────────────────────────────────┤
-│ T0 — NORMAL (🟢 Nominal)                                 │
-│ • Systeme sain                                           │
-│ • Toutes capacites disponibles                           │
-│ • Monitoring standard                                    │
-├─────────────────────────────────────────────────────────┤
-│ T1 — INSTABLE (🟡 Doute)                                 │
-│ • Anomalie detectee                                      │
-│ • Log renforce, tracabilite etendue                      │
-│ • Aucun blocage                                          │
-├─────────────────────────────────────────────────────────┤
-│ T2 — DEGRADE (🟠 Suspect)                                │
-│ • Incoherence persistante                                │
-│ • Certaines capacites desactivees                        │
-│ • Monitoring visible                                     │
-├─────────────────────────────────────────────────────────┤
-│ T3 — RESTREINT (🔴 Critique)                             │
-│ • Suspicion forte                                        │
-│ • Gel des produits non essentiels                        │
-│ • TAMR requis pour override                              │
-├─────────────────────────────────────────────────────────┤
-│ T4 — BLOQUE (⛔ Compromis)                               │
-│ • Integrite rompue                                       │
-│ • Plus aucune decision operationnelle                    │
-│ • Uniquement diagnostics                                 │
-└─────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚             ETATS DE CONFIANCE (T0-T4)                   â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ T0 â€” NORMAL (ðŸŸ¢ Nominal)                                 â”‚
+â”‚ â€¢ Systeme sain                                           â”‚
+â”‚ â€¢ Toutes capacites disponibles                           â”‚
+â”‚ â€¢ Monitoring standard                                    â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ T1 â€” INSTABLE (ðŸŸ¡ Doute)                                 â”‚
+â”‚ â€¢ Anomalie detectee                                      â”‚
+â”‚ â€¢ Log renforce, tracabilite etendue                      â”‚
+â”‚ â€¢ Aucun blocage                                          â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ T2 â€” DEGRADE (ðŸŸ  Suspect)                                â”‚
+â”‚ â€¢ Incoherence persistante                                â”‚
+â”‚ â€¢ Certaines capacites desactivees                        â”‚
+â”‚ â€¢ Monitoring visible                                     â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ T3 â€” RESTREINT (ðŸ”´ Critique)                             â”‚
+â”‚ â€¢ Suspicion forte                                        â”‚
+â”‚ â€¢ Gel des produits non essentiels                        â”‚
+â”‚ â€¢ TAMR requis pour override                              â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ T4 â€” BLOQUE (â›” Compromis)                               â”‚
+â”‚ â€¢ Integrite rompue                                       â”‚
+â”‚ â€¢ Plus aucune decision operationnelle                    â”‚
+â”‚ â€¢ Uniquement diagnostics                                 â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-**Reference complete :** [Miyukini Conceptual References - Integrity Degradation System](../../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md)
+**Reference complete :** [Miyukini Conceptual References - Integrity Degradation System](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ### 5.3 Interaction entre les deux axes
 
@@ -205,27 +205,27 @@ Les deux axes sont **independants mais interagissent**. WorrySentinel gouverne c
 ```
                         NIVEAUX DE SECURITE
                     0        1        2        3        4
-                ┌────────┬────────┬────────┬────────┬────────┐
-         T0     │ Normal │ Normal │ Normal │ Normal │ Normal │
-                ├────────┼────────┼────────┼────────┼────────┤
-E   T1     │ Doute  │ Doute  │ Doute+ │ Doute+ │ Doute++│
-T               ├────────┼────────┼────────┼────────┼────────┤
-A   T2     │ Modere │ Modere │ Strict │ Strict │ Strict+│
-T               ├────────┼────────┼────────┼────────┼────────┤
-S   T3     │ Limite │ Restreint│ Gel   │ Gel+   │ Gel++  │
-                ├────────┼────────┼────────┼────────┼────────┤
-         T4     │ Bloque │ Bloque │ Bloque │ Bloque │ Bloque │
-                └────────┴────────┴────────┴────────┴────────┘
+                â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”
+         T0     â”‚ Normal â”‚ Normal â”‚ Normal â”‚ Normal â”‚ Normal â”‚
+                â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+E   T1     â”‚ Doute  â”‚ Doute  â”‚ Doute+ â”‚ Doute+ â”‚ Doute++â”‚
+T               â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+A   T2     â”‚ Modere â”‚ Modere â”‚ Strict â”‚ Strict â”‚ Strict+â”‚
+T               â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+S   T3     â”‚ Limite â”‚ Restreintâ”‚ Gel   â”‚ Gel+   â”‚ Gel++  â”‚
+                â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+         T4     â”‚ Bloque â”‚ Bloque â”‚ Bloque â”‚ Bloque â”‚ Bloque â”‚
+                â””â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
 Legende :
-• Normal    : Fonctionnement standard
-• Doute(+)  : Surveillance renforcee (+ selon niveau)
-• Modere    : Restrictions moderees
-• Strict(+) : Restrictions strictes
-• Limite    : Fonctionnalites limitees
-• Restreint : Mode minimal
-• Gel(+)    : Gel des operations non essentielles
-• Bloque    : Arret operationnel
+â€¢ Normal    : Fonctionnement standard
+â€¢ Doute(+)  : Surveillance renforcee (+ selon niveau)
+â€¢ Modere    : Restrictions moderees
+â€¢ Strict(+) : Restrictions strictes
+â€¢ Limite    : Fonctionnalites limitees
+â€¢ Restreint : Mode minimal
+â€¢ Gel(+)    : Gel des operations non essentielles
+â€¢ Bloque    : Arret operationnel
 ```
 
 **Regle fondamentale :** Les restrictions sont **cumulatives**. Un produit de niveau de securite eleve (3-4) en etat de confiance degrade (T2+) subit les restrictions maximales.
@@ -241,38 +241,38 @@ WorrySentinel opere selon deux flux complementaires et opposes.
 WorrySentinel impose des contraintes verticales sur tous les cores fonctionnels. Ce flux est **unidirectionnel et non negociable**.
 
 ```
-                    ┌─────────────────────────┐
-                    │     WorrySentinel       │
-                    │  Niveau securite : N    │
-                    │  Etat confiance : Tx    │
-                    └───────────┬─────────────┘
-                                │
-        ┌───────────────────────┼───────────────────────┐
-        │                       │                       │
-        ▼                       ▼                       ▼
-┌───────────────┐      ┌───────────────┐      ┌───────────────┐
-│  StrongFather │      │  MasterButler │      │  BorderGuard  │
-│               │      │               │      │               │
-│ Severite des  │      │ Permissions   │      │ Durcissement  │
-│ decisions     │      │ actives       │      │ I/O           │
-└───────────────┘      └───────────────┘      └───────────────┘
-        │                       │                       │
-        ▼                       ▼                       ▼
-┌───────────────┐      ┌───────────────┐      ┌───────────────┐
-│  CaringNanny  │      │   KindMother  │      │ LogisticsSteward│
-│               │      │               │      │               │
-│ Intensite     │      │ Restrictions  │      │ Durcissement  │
-│ monitoring    │      │ acces donnees │      │ quotas        │
-└───────────────┘      └───────────────┘      └───────────────┘
-        │                       │                       │
-        ▼                       ▼                       ▼
-┌───────────────┐      ┌───────────────┐      ┌───────────────┐
-│     TAMR      │      │    Kernel     │      │   EverBuddy   │
-│               │      │               │      │               │
-│ Droits        │      │ Frequence     │      │ Restrictions  │
-│ intervention  │      │ sondes        │      │ contextuelles │
-│ humaine       │      │               │      │               │
-└───────────────┘      └───────────────┘      └───────────────┘
+                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                    â”‚     WorrySentinel       â”‚
+                    â”‚  Niveau securite : N    â”‚
+                    â”‚  Etat confiance : Tx    â”‚
+                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â”‚
+        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+        â”‚                       â”‚                       â”‚
+        â–¼                       â–¼                       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  StrongFather â”‚      â”‚  MasterButler â”‚      â”‚  BorderGuard  â”‚
+â”‚               â”‚      â”‚               â”‚      â”‚               â”‚
+â”‚ Severite des  â”‚      â”‚ Permissions   â”‚      â”‚ Durcissement  â”‚
+â”‚ decisions     â”‚      â”‚ actives       â”‚      â”‚ I/O           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+        â”‚                       â”‚                       â”‚
+        â–¼                       â–¼                       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  CaringNanny  â”‚      â”‚   KindMother  â”‚      â”‚ LogisticsStewardâ”‚
+â”‚               â”‚      â”‚               â”‚      â”‚               â”‚
+â”‚ Intensite     â”‚      â”‚ Restrictions  â”‚      â”‚ Durcissement  â”‚
+â”‚ monitoring    â”‚      â”‚ acces donnees â”‚      â”‚ quotas        â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+        â”‚                       â”‚                       â”‚
+        â–¼                       â–¼                       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚     TAMR      â”‚      â”‚    Kernel     â”‚      â”‚   EverBuddy   â”‚
+â”‚               â”‚      â”‚               â”‚      â”‚               â”‚
+â”‚ Droits        â”‚      â”‚ Frequence     â”‚      â”‚ Restrictions  â”‚
+â”‚ intervention  â”‚      â”‚ sondes        â”‚      â”‚ contextuelles â”‚
+â”‚ humaine       â”‚      â”‚               â”‚      â”‚               â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Tableau des contraintes imposees :**
@@ -296,44 +296,44 @@ WorrySentinel impose des contraintes verticales sur tous les cores fonctionnels.
 WorrySentinel observe et correle les signaux remontant des cores pour determiner l'etat global du systeme. Ce flux est **passif et non intrusif**.
 
 ```
-                    ┌─────────────────────────┐
-                    │     WorrySentinel       │
-                    │                         │
-                    │  Observe, correle,      │
-                    │  declare un etat        │
-                    └───────────┬─────────────┘
-                                ▲
-        ┌───────────────────────┼───────────────────────┐
-        │                       │                       │
-        │                       │                       │
-┌───────────────┐      ┌───────────────┐      ┌───────────────┐
-│    Kernel     │      │ StrongFather  │      │ BorderGuard   │
-│               │      │               │      │               │
-│ • signaux     │      │ • decisions   │      │ • anomalies   │
-│   clock       │      │   refusees    │      │   I/O         │
-│ • signaux id  │      │ • patterns    │      │ • violations  │
-│ • traces      │      │   suspects    │      │   frontieres  │
-└───────────────┘      └───────────────┘      └───────────────┘
-        ▲                       ▲                       ▲
-        │                       │                       │
-┌───────────────┐      ┌───────────────┐      ┌───────────────┐
-│ CaringNanny   │      │  KindMother   │      │LogisticsSteward│
-│               │      │               │      │               │
-│ • signaux     │      │ • incoherences│      │ • derives     │
-│   consolides  │      │   detectees   │      │   allocation  │
-│ • anomalies   │      │ • corruptions │      │ • patterns    │
-│   monitoring  │      │   donnees     │      │   anormaux    │
-└───────────────┘      └───────────────┘      └───────────────┘
-        ▲                       ▲                       ▲
-        │                       │                       │
-┌───────────────┐      ┌───────────────┐      ┌───────────────┐
-│BondingBrother │      │  MasterButler │      │   EverBuddy   │
-│               │      │               │      │               │
-│ • comportements│     │ • tentatives  │      │ • derives     │
-│   produits    │      │   acces       │      │   contextuelles│
-│ • anomalies   │      │   non autorises│     │ • anomalies   │
-│   liaison     │      │               │      │   apprentissage│
-└───────────────┘      └───────────────┘      └───────────────┘
+                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                    â”‚     WorrySentinel       â”‚
+                    â”‚                         â”‚
+                    â”‚  Observe, correle,      â”‚
+                    â”‚  declare un etat        â”‚
+                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                â–²
+        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+        â”‚                       â”‚                       â”‚
+        â”‚                       â”‚                       â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚    Kernel     â”‚      â”‚ StrongFather  â”‚      â”‚ BorderGuard   â”‚
+â”‚               â”‚      â”‚               â”‚      â”‚               â”‚
+â”‚ â€¢ signaux     â”‚      â”‚ â€¢ decisions   â”‚      â”‚ â€¢ anomalies   â”‚
+â”‚   clock       â”‚      â”‚   refusees    â”‚      â”‚   I/O         â”‚
+â”‚ â€¢ signaux id  â”‚      â”‚ â€¢ patterns    â”‚      â”‚ â€¢ violations  â”‚
+â”‚ â€¢ traces      â”‚      â”‚   suspects    â”‚      â”‚   frontieres  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+        â–²                       â–²                       â–²
+        â”‚                       â”‚                       â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ CaringNanny   â”‚      â”‚  KindMother   â”‚      â”‚LogisticsStewardâ”‚
+â”‚               â”‚      â”‚               â”‚      â”‚               â”‚
+â”‚ â€¢ signaux     â”‚      â”‚ â€¢ incoherencesâ”‚      â”‚ â€¢ derives     â”‚
+â”‚   consolides  â”‚      â”‚   detectees   â”‚      â”‚   allocation  â”‚
+â”‚ â€¢ anomalies   â”‚      â”‚ â€¢ corruptions â”‚      â”‚ â€¢ patterns    â”‚
+â”‚   monitoring  â”‚      â”‚   donnees     â”‚      â”‚   anormaux    â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+        â–²                       â–²                       â–²
+        â”‚                       â”‚                       â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚BondingBrother â”‚      â”‚  MasterButler â”‚      â”‚   EverBuddy   â”‚
+â”‚               â”‚      â”‚               â”‚      â”‚               â”‚
+â”‚ â€¢ comportementsâ”‚     â”‚ â€¢ tentatives  â”‚      â”‚ â€¢ derives     â”‚
+â”‚   produits    â”‚      â”‚   acces       â”‚      â”‚   contextuellesâ”‚
+â”‚ â€¢ anomalies   â”‚      â”‚   non autorisesâ”‚     â”‚ â€¢ anomalies   â”‚
+â”‚   liaison     â”‚      â”‚               â”‚      â”‚   apprentissageâ”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Types de signaux observes :**
@@ -350,58 +350,58 @@ WorrySentinel observe et correle les signaux remontant des cores pour determiner
 | **MasterButler** | Tentatives d'acces non autorises |
 | **EverBuddy** | Derives contextuelles, anomalies d'apprentissage |
 
-**Principe :** WorrySentinel observe, correle les signaux, et declare un etat global. Il ne prend jamais de decision operationnelle basee sur ces signaux — cette responsabilite appartient aux cores fonctionnels.
+**Principe :** WorrySentinel observe, correle les signaux, et declare un etat global. Il ne prend jamais de decision operationnelle basee sur ces signaux â€” cette responsabilite appartient aux cores fonctionnels.
 
 ### 6.3 Cycle de gouvernance complet
 
 ```
-┌──────────────────────────────────────────────────────────────────────┐
-│                     CYCLE DE GOUVERNANCE WORRYSENTINEL                │
-└──────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                     CYCLE DE GOUVERNANCE WORRYSENTINEL                â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
 1. OBSERVATION
-   │
-   │  Cores → WorrySentinel
-   │  • Signaux d'integrite
-   │  • Anomalies detectees
-   │  • Decisions refusees
-   ▼
-┌─────────────────┐
-│   CORRELATION   │ ◄─── WorrySentinel correle les signaux multiples
-└────────┬────────┘
-         │
-         ▼
+   â”‚
+   â”‚  Cores â†’ WorrySentinel
+   â”‚  â€¢ Signaux d'integrite
+   â”‚  â€¢ Anomalies detectees
+   â”‚  â€¢ Decisions refusees
+   â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚   CORRELATION   â”‚ â—„â”€â”€â”€ WorrySentinel correle les signaux multiples
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚
+         â–¼
 2. EVALUATION
-   │
-   │  WorrySentinel evalue :
-   │  • Coherence des signaux
-   │  • Persistance des anomalies
-   │  • Correlation inter-cores
-   ▼
-┌─────────────────┐
-│   DECLARATION   │ ◄─── WorrySentinel declare l'etat global (T0-T4)
-└────────┬────────┘
-         │
-         ▼
+   â”‚
+   â”‚  WorrySentinel evalue :
+   â”‚  â€¢ Coherence des signaux
+   â”‚  â€¢ Persistance des anomalies
+   â”‚  â€¢ Correlation inter-cores
+   â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚   DECLARATION   â”‚ â—„â”€â”€â”€ WorrySentinel declare l'etat global (T0-T4)
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚
+         â–¼
 3. GOUVERNANCE
-   │
-   │  WorrySentinel → Cores
-   │  • Contraintes selon etat de confiance
-   │  • Contraintes selon niveau de securite
-   │  • Regles de degradation
-   ▼
-┌─────────────────┐
-│   ADAPTATION    │ ◄─── Chaque core adapte son comportement
-└────────┬────────┘
-         │
-         ▼
+   â”‚
+   â”‚  WorrySentinel â†’ Cores
+   â”‚  â€¢ Contraintes selon etat de confiance
+   â”‚  â€¢ Contraintes selon niveau de securite
+   â”‚  â€¢ Regles de degradation
+   â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚   ADAPTATION    â”‚ â—„â”€â”€â”€ Chaque core adapte son comportement
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚
+         â–¼
 4. TRACABILITE
-   │
-   │  • Etat declare journalise
-   │  • Contraintes imposees tracees
-   │  • Signaux correles archives
-   │
-   └──────────► Retour a 1. OBSERVATION
+   â”‚
+   â”‚  â€¢ Etat declare journalise
+   â”‚  â€¢ Contraintes imposees tracees
+   â”‚  â€¢ Signaux correles archives
+   â”‚
+   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º Retour a 1. OBSERVATION
 ```
 
 ---
@@ -411,53 +411,53 @@ WorrySentinel observe et correle les signaux remontant des cores pour determiner
 WorrySentinel n'est pas structure en couches comme un core fonctionnel. Il est structure en **domaines de gouvernance**.
 
 ```
-┌──────────────────────────────────────────────────────────────────────┐
-│                         WORRYSENTINEL                                 │
-├──────────────────────────────────────────────────────────────────────┤
-│                                                                       │
-│  ┌────────────────────────────────────────────────────────────────┐  │
-│  │             DOMAINE : GOUVERNANCE DES NIVEAUX                   │  │
-│  │  • Definition des niveaux de securite (0-4)                     │  │
-│  │  • Attribution des niveaux aux produits                         │  │
-│  │  • Regles d'adaptation comportementale par niveau               │  │
-│  └────────────────────────────────────────────────────────────────┘  │
-│                              │                                        │
-│                              ▼                                        │
-│  ┌────────────────────────────────────────────────────────────────┐  │
-│  │             DOMAINE : GOUVERNANCE DES ETATS                     │  │
-│  │  • Definition des etats de confiance (T0-T4)                    │  │
-│  │  • Regles de transition entre etats                             │  │
-│  │  • Declaration de l'etat global                                 │  │
-│  └────────────────────────────────────────────────────────────────┘  │
-│                              │                                        │
-│                              ▼                                        │
-│  ┌────────────────────────────────────────────────────────────────┐  │
-│  │             DOMAINE : DEGRADATION PROGRESSIVE                   │  │
-│  │  • Regles de degradation par niveau de confiance                │  │
-│  │  • Interaction niveaux securite × etats confiance               │  │
-│  │  • Orchestration de la degradation                              │  │
-│  └────────────────────────────────────────────────────────────────┘  │
-│                              │                                        │
-│                              ▼                                        │
-│  ┌────────────────────────────────────────────────────────────────┐  │
-│  │             DOMAINE : OBSERVATION ET CORRELATION                │  │
-│  │  • Reception des signaux des cores                              │  │
-│  │  • Correlation des signaux multiples                            │  │
-│  │  • Alimentation des domaines superieurs                         │  │
-│  └────────────────────────────────────────────────────────────────┘  │
-│                              │                                        │
-│                              ▼                                        │
-│  ┌────────────────────────────────────────────────────────────────┐  │
-│  │             DOMAINE : TRACABILITE                               │  │
-│  │  • Journalisation des etats declares                            │  │
-│  │  • Journalisation des contraintes imposees                      │  │
-│  │  • Archivage des signaux correles                               │  │
-│  └────────────────────────────────────────────────────────────────┘  │
-│                                                                       │
-└──────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                         WORRYSENTINEL                                 â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                       â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚             DOMAINE : GOUVERNANCE DES NIVEAUX                   â”‚  â”‚
+â”‚  â”‚  â€¢ Definition des niveaux de securite (0-4)                     â”‚  â”‚
+â”‚  â”‚  â€¢ Attribution des niveaux aux produits                         â”‚  â”‚
+â”‚  â”‚  â€¢ Regles d'adaptation comportementale par niveau               â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                              â”‚                                        â”‚
+â”‚                              â–¼                                        â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚             DOMAINE : GOUVERNANCE DES ETATS                     â”‚  â”‚
+â”‚  â”‚  â€¢ Definition des etats de confiance (T0-T4)                    â”‚  â”‚
+â”‚  â”‚  â€¢ Regles de transition entre etats                             â”‚  â”‚
+â”‚  â”‚  â€¢ Declaration de l'etat global                                 â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                              â”‚                                        â”‚
+â”‚                              â–¼                                        â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚             DOMAINE : DEGRADATION PROGRESSIVE                   â”‚  â”‚
+â”‚  â”‚  â€¢ Regles de degradation par niveau de confiance                â”‚  â”‚
+â”‚  â”‚  â€¢ Interaction niveaux securite Ã— etats confiance               â”‚  â”‚
+â”‚  â”‚  â€¢ Orchestration de la degradation                              â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                              â”‚                                        â”‚
+â”‚                              â–¼                                        â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚             DOMAINE : OBSERVATION ET CORRELATION                â”‚  â”‚
+â”‚  â”‚  â€¢ Reception des signaux des cores                              â”‚  â”‚
+â”‚  â”‚  â€¢ Correlation des signaux multiples                            â”‚  â”‚
+â”‚  â”‚  â€¢ Alimentation des domaines superieurs                         â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                              â”‚                                        â”‚
+â”‚                              â–¼                                        â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚             DOMAINE : TRACABILITE                               â”‚  â”‚
+â”‚  â”‚  â€¢ Journalisation des etats declares                            â”‚  â”‚
+â”‚  â”‚  â€¢ Journalisation des contraintes imposees                      â”‚  â”‚
+â”‚  â”‚  â€¢ Archivage des signaux correles                               â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                       â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-**Important :** Ces domaines sont **conceptuels**, pas des composants techniques. WorrySentinel ne possede pas de logique d'execution — il definit des regles de gouvernance que les autres cores appliquent.
+**Important :** Ces domaines sont **conceptuels**, pas des composants techniques. WorrySentinel ne possede pas de logique d'execution â€” il definit des regles de gouvernance que les autres cores appliquent.
 
 ---
 
@@ -488,9 +488,9 @@ WorrySentinel expose des **interfaces conceptuelles** (pas des APIs techniques) 
 
 | Interface | Description | Direction |
 |-----------|-------------|-----------|
-| `IConstraintImposition` | Imposition de contraintes aux cores | WS → Cores |
-| `IDegradationOrchestration` | Orchestration de la degradation | WS → Cores |
-| `IAdaptationRequirement` | Exigence d'adaptation comportementale | WS → Cores |
+| `IConstraintImposition` | Imposition de contraintes aux cores | WS â†’ Cores |
+| `IDegradationOrchestration` | Orchestration de la degradation | WS â†’ Cores |
+| `IAdaptationRequirement` | Exigence d'adaptation comportementale | WS â†’ Cores |
 
 ---
 
@@ -500,14 +500,14 @@ WorrySentinel expose des **interfaces conceptuelles** (pas des APIs techniques) 
 
 ```
 WorrySentinel                          StrongFather
-     │                                       │
-     │ ─── niveau securite (N) ───────────→ │ (ajuste severite)
-     │                                       │
-     │ ─── etat confiance (Tx) ────────────→ │ (ajuste politique)
-     │                                       │
-     │ ←── decisions refusees ───────────── │ (signaux)
-     │                                       │
-     │ ←── patterns suspects ─────────────── │ (signaux)
+     â”‚                                       â”‚
+     â”‚ â”€â”€â”€ niveau securite (N) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â†’ â”‚ (ajuste severite)
+     â”‚                                       â”‚
+     â”‚ â”€â”€â”€ etat confiance (Tx) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â†’ â”‚ (ajuste politique)
+     â”‚                                       â”‚
+     â”‚ â†â”€â”€ decisions refusees â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚ (signaux)
+     â”‚                                       â”‚
+     â”‚ â†â”€â”€ patterns suspects â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚ (signaux)
 ```
 
 **Nature :** WorrySentinel gouverne la severite de StrongFather sans jamais prendre de decision a sa place. StrongFather applique les politiques selon les contraintes de WorrySentinel.
@@ -516,14 +516,14 @@ WorrySentinel                          StrongFather
 
 ```
 WorrySentinel                          CaringNanny
-     │                                       │
-     │ ─── intensite monitoring ──────────→ │ (ajuste frequence)
-     │                                       │
-     │ ←── signaux consolides ───────────── │ (alimente correlation)
-     │                                       │
-     │ ←── anomalies monitoring ─────────── │ (signaux)
-     │                                       │
-     │ ←── propositions transition etat ─── │ (suggestions)
+     â”‚                                       â”‚
+     â”‚ â”€â”€â”€ intensite monitoring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â†’ â”‚ (ajuste frequence)
+     â”‚                                       â”‚
+     â”‚ â†â”€â”€ signaux consolides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚ (alimente correlation)
+     â”‚                                       â”‚
+     â”‚ â†â”€â”€ anomalies monitoring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚ (signaux)
+     â”‚                                       â”‚
+     â”‚ â†â”€â”€ propositions transition etat â”€â”€â”€ â”‚ (suggestions)
 ```
 
 **Nature :** CaringNanny consolide les signaux et propose des transitions d'etat. WorrySentinel correle et declare l'etat final.
@@ -532,12 +532,12 @@ WorrySentinel                          CaringNanny
 
 ```
 WorrySentinel                          BorderGuard
-     │                                       │
-     │ ─── durcissement frontieres ───────→ │ (ajuste I/O)
-     │                                       │
-     │ ←── anomalies I/O ────────────────── │ (signaux)
-     │                                       │
-     │ ←── violations frontieres ─────────── │ (signaux)
+     â”‚                                       â”‚
+     â”‚ â”€â”€â”€ durcissement frontieres â”€â”€â”€â”€â”€â”€â”€â†’ â”‚ (ajuste I/O)
+     â”‚                                       â”‚
+     â”‚ â†â”€â”€ anomalies I/O â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚ (signaux)
+     â”‚                                       â”‚
+     â”‚ â†â”€â”€ violations frontieres â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚ (signaux)
 ```
 
 **Nature :** WorrySentinel impose le durcissement des frontieres selon l'etat de confiance. BorderGuard signale les anomalies qui alimentent la correlation.
@@ -546,14 +546,14 @@ WorrySentinel                          BorderGuard
 
 ```
 WorrySentinel                          LogisticsSteward
-     │                                       │
-     │ ─── durcissement quotas ───────────→ │ (ajuste regles)
-     │                                       │
-     │ ─── contraintes securitaires ──────→ │ (impose limites)
-     │                                       │
-     │ ←── derives allocation ───────────── │ (signaux)
-     │                                       │
-     │ ←── patterns consommation ─────────── │ (signaux)
+     â”‚                                       â”‚
+     â”‚ â”€â”€â”€ durcissement quotas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â†’ â”‚ (ajuste regles)
+     â”‚                                       â”‚
+     â”‚ â”€â”€â”€ contraintes securitaires â”€â”€â”€â”€â”€â”€â†’ â”‚ (impose limites)
+     â”‚                                       â”‚
+     â”‚ â†â”€â”€ derives allocation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚ (signaux)
+     â”‚                                       â”‚
+     â”‚ â†â”€â”€ patterns consommation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚ (signaux)
 ```
 
 **Nature :** WorrySentinel supervise LogisticsSteward et peut imposer un durcissement des regles d'arbitrage en etat T1+. LogisticsSteward reste souverain sur l'arbitrage mais doit adapter ses decisions selon les contraintes securitaires.
@@ -562,12 +562,12 @@ WorrySentinel                          LogisticsSteward
 
 ```
 WorrySentinel                          TAMR
-     │                                       │
-     │ ─── droits intervention ───────────→ │ (ajuste capacites)
-     │                                       │
-     │ ─── exigence override humain ──────→ │ (en T3+)
-     │                                       │
-     │ ←── interventions effectuees ─────── │ (tracabilite)
+     â”‚                                       â”‚
+     â”‚ â”€â”€â”€ droits intervention â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â†’ â”‚ (ajuste capacites)
+     â”‚                                       â”‚
+     â”‚ â”€â”€â”€ exigence override humain â”€â”€â”€â”€â”€â”€â†’ â”‚ (en T3+)
+     â”‚                                       â”‚
+     â”‚ â†â”€â”€ interventions effectuees â”€â”€â”€â”€â”€â”€â”€ â”‚ (tracabilite)
 ```
 
 **Nature :** WorrySentinel gouverne les droits d'intervention humaine. En T3+, l'intervention TAMR est requise pour tout override.
@@ -576,12 +576,12 @@ WorrySentinel                          TAMR
 
 ```
 WorrySentinel                          MiyukiniAdmin
-     │                                       │
-     │ ←── consultation etat ─────────────── │ (lecture)
-     │                                       │
-     │ ←── configuration gouvernance ─────── │ (via StrongFather)
-     │                                       │
-     │ ─── etat global visible ───────────→ │ (dashboard)
+     â”‚                                       â”‚
+     â”‚ â†â”€â”€ consultation etat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚ (lecture)
+     â”‚                                       â”‚
+     â”‚ â†â”€â”€ configuration gouvernance â”€â”€â”€â”€â”€â”€â”€ â”‚ (via StrongFather)
+     â”‚                                       â”‚
+     â”‚ â”€â”€â”€ etat global visible â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â†’ â”‚ (dashboard)
 ```
 
 **Nature :** MiyukiniAdmin consulte WorrySentinel pour afficher l'etat de securite. Toute configuration passe par StrongFather pour validation.
@@ -664,7 +664,7 @@ Ces elements sont **figes** et non extensibles :
 
 ## 13. Phrase fondatrice architecturale
 
-> **WorrySentinel est une pression verticale, pas une brique horizontale. Il gouverne les niveaux de securite et les etats de confiance de l'ecosysteme entier, observe et correle les signaux de tous les cores, et impose des contraintes adaptatives — sans jamais executer, decider operationnellement, ou persister.**
+> **WorrySentinel est une pression verticale, pas une brique horizontale. Il gouverne les niveaux de securite et les etats de confiance de l'ecosysteme entier, observe et correle les signaux de tous les cores, et impose des contraintes adaptatives â€” sans jamais executer, decider operationnellement, ou persister.**
 
 Cette phrase resume l'architecture : pression verticale (transversal), gouvernance des niveaux et etats (les deux axes), observation et correlation (flux montant), contraintes adaptatives (flux descendant), et les interdits absolus (execution, decision, persistance).
 
@@ -686,13 +686,14 @@ Toute implementation de WorrySentinel doit respecter cette architecture. Toute e
 - [WorrySentinel - Security Levels Governance Contract](../contracts/levels/WorrySentinel%20-%20Security%20Levels%20Governance%20Contract.md)
 - [WorrySentinel - Trust States Governance Contract](../contracts/levels/WorrySentinel%20-%20Trust%20States%20Governance%20Contract.md)
 - [WorrySentinel - Progressive Degradation Contract](../contracts/degradation/WorrySentinel%20-%20Progressive%20Degradation%20Contract.md)
-- [Miyukini Conceptual References - Security Levels](../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md)
-- [Miyukini Conceptual References - Integrity Degradation System](../../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md)
+- [Miyukini Conceptual References - Security Levels](..//..//..//miyukini-webway-system//reference//_index.md)
+- [Miyukini Conceptual References - Integrity Degradation System](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
-**Statut :** ARCHITECTURE — Normatif  
+**Statut :** ARCHITECTURE â€” Normatif  
 **Dependance :** [Documentation Fondatrice v1.2](../foundation/WorrySentinel%20-%20Documentation%20Fondatrice.md)  
 **Reference :** Miyukini Core System v2.4
+

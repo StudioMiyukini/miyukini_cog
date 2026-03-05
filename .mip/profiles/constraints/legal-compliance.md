@@ -1,4 +1,4 @@
----
+﻿---
 id: legal-compliance
 name: "Legal & Compliance Constraint"
 category: legal
@@ -87,17 +87,17 @@ When `:legal-compliance` is applied to a profile:
 ## Compatibility Matrix
 
 ```
-✅ Compatible with:
+âœ… Compatible with:
   - confidential-data (legal + confidential = full control)
   - pii-strict (legal + PII = GDPR-ready)
   - regional-* (legal + region = compliance per jurisdiction)
   - tool-locked-* (legal + tool = controlled environment)
   - All LLM profiles (mistral, claude, copilot, etc.)
 
-⚠️  Conflicts with:
+âš ï¸  Conflicts with:
   - None (legal-compliance is universally applicable)
 
-❌ Incompatible with:
+âŒ Incompatible with:
   - None
 ```
 
@@ -147,10 +147,10 @@ constraints:
 ```
 
 **result**:
-- All transactions logged → audit trail
-- 30-day retention → SOX compliance
-- Immutable logs → court-ready
-- Regional US → no data export
+- All transactions logged â†’ audit trail
+- 30-day retention â†’ SOX compliance
+- Immutable logs â†’ court-ready
+- Regional US â†’ no data export
 
 ### Case 2: Healthcare (Medical)
 
@@ -163,10 +163,10 @@ constraints:
 ```
 
 **result**:
-- Full audit trail → HIPAA ready (6 years)
-- PII redaction → privacy-safe
-- Consent before PHI access → compliance
-- Immutable records → legal protection
+- Full audit trail â†’ HIPAA ready (6 years)
+- PII redaction â†’ privacy-safe
+- Consent before PHI access â†’ compliance
+- Immutable records â†’ legal protection
 
 ### Case 3: EU Enterprise (GDPR)
 
@@ -180,10 +180,10 @@ constraints:
 ```
 
 **result**:
-- Audit trail → Data Processing Agreement (DPA) ready
-- 30-day auto-purge → Right to be forgotten
-- Consent tracking → Consent management
-- EU region → No US data transfer
+- Audit trail â†’ Data Processing Agreement (DPA) ready
+- 30-day auto-purge â†’ Right to be forgotten
+- Consent tracking â†’ Consent management
+- EU region â†’ No US data transfer
 
 ## Activation
 
@@ -206,7 +206,7 @@ mip_profile create myprofile --base mistral-nemo
 mip_profile apply-constraint myprofile legal-compliance
 
 # Maria asks for consent
-# ✅ Active constraints: legal-compliance
+# âœ… Active constraints: legal-compliance
 ```
 
 ### Via CLI
@@ -252,12 +252,12 @@ mip_profile export-audit myprofile --period "2025-01"
 mip_profile compliance-check myprofile
 
 # Output:
-# ✅ Legal compliance enabled
-# ✅ Audit logging active
-# ✅ Immutable logs confirmed
-# ✅ 30-day retention active
-# ✅ Encryption verified
-# ⚠️  Export pending (monthly)
+# âœ… Legal compliance enabled
+# âœ… Audit logging active
+# âœ… Immutable logs confirmed
+# âœ… 30-day retention active
+# âœ… Encryption verified
+# âš ï¸  Export pending (monthly)
 ```
 
 ## Configuration Options
@@ -322,7 +322,7 @@ audit:
 
 ### Issue: "Consent checkpoint appears every time"
 
-→ Solution: Set `strict_consent: false` (default)
+â†’ Solution: Set `strict_consent: false` (default)
 
 ```yaml
 legal_compliance:
@@ -332,7 +332,7 @@ legal_compliance:
 
 ### Issue: "Audit logs taking too much disk"
 
-→ Solution: Reduce retention or enable compression
+â†’ Solution: Reduce retention or enable compression
 
 ```yaml
 legal_compliance:
@@ -342,7 +342,7 @@ legal_compliance:
 
 ### Issue: "Can't delete a log I need removed"
 
-→ Solution: Immutable by design (privacy protection)
+â†’ Solution: Immutable by design (privacy protection)
 
 Use audit redaction instead:
 
@@ -354,6 +354,7 @@ mip_profile redact-audit myprofile \
 
 ## References
 
-- [MANAGEMENT.md](./MANAGEMENT.md) — How to apply constraints
-- [CONSTRAINTS.md](./CONSTRAINTS.md) — All constraint types
+- [MANAGEMENT.md](..//..//README.md) â€” How to apply constraints
+- [CONSTRAINTS.md](..//..//README.md) â€” All constraint types
 - [Compliance Frameworks](https://en.wikipedia.org/wiki/Comparison_of_information_governance_regulations)
+

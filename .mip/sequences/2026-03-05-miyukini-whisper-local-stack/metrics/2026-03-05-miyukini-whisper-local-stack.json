@@ -13,16 +13,16 @@
     "p0_end": "2026-03-05T10:35:00Z",
     "autopilot_start": "2026-03-05T10:40:00Z",
     "p3_start": "2026-03-05T10:40:00Z",
-    "p3_end": null,
-    "p4_start": null,
-    "p4_end": null,
-    "p5_start": null,
-    "p5_end": null,
-    "p5_test_start": null,
-    "p5_test_end": null,
-    "p6_start": null,
-    "p6_end": null,
-    "total_end": null
+    "p3_end": "2026-03-05T13:51:22Z",
+    "p4_start": "2026-03-05T13:51:22Z",
+    "p4_end": "2026-03-05T13:52:29Z",
+    "p5_start": "2026-03-05T13:52:29Z",
+    "p5_end": "2026-03-05T14:12:20Z",
+    "p5_test_start": "2026-03-05T13:56:56Z",
+    "p5_test_end": "2026-03-05T14:12:20Z",
+    "p6_start": "2026-03-05T14:12:20Z",
+    "p6_end": "2026-03-05T14:15:13Z",
+    "total_end": "2026-03-05T14:15:13Z"
   },
   "counters": {
     "lines_written": 0,
@@ -34,15 +34,17 @@
       "miyukini-whisper-app",
       "miyukini-central-native",
       "miyualicia",
-      "miyualicia-api"
+      "miyualicia-api",
+      "kindmother-db-adapter",
+      "mge-pathfinding-labyrinthe"
     ],
     "packages_created": [
       "miyustt",
       "miyutts",
       "miyukini-whisper"
     ],
-    "files_created": 21,
-    "files_modified": 16,
+    "files_created": 31,
+    "files_modified": 28,
     "commits": 0,
     "agents_engaged": [
       "maria",
@@ -57,16 +59,16 @@
       "fabrice"
     ],
     "mip_loops": 1,
-    "unit_tests_total": 62,
+    "unit_tests_total": 73,
     "unit_tests_failed": 0,
     "integration_tests_total": 2,
     "integration_tests_failed": 0,
-    "global_tests_total": 62,
+    "global_tests_total": 73,
     "global_tests_failed": 0,
     "auto_corrections": 0,
     "audits": 1,
     "audit_defects": [],
-    "security_score": null,
+    "security_score": 84,
     "security_defects": [],
     "infra_checks_passed": null,
     "emergency_brakes": 0
@@ -74,5 +76,5 @@
   "human_interventions": [],
   "agent_questions": [],
   "satisfaction": null,
-  "notes": "Gate P0 valide (APPROUVE, mode FULL). P3 en cours: STT ws+fallback, TTS wav, post-process local clean/rewrite timeout, diagnostics Central live. V5 termine (V1 contrat) avec Alicia STT/TTS + tests inter-services. Blocage infra courant: workspace reference `demos/mge-pathfinding-labyrinthe` absente."
+  "notes": "Gate P0 valide (APPROUVE, mode FULL). P3/P4 scopes sequence valides: STT ws+fallback, TTS wav, hardening auth/origin, Alicia STT/TTS, diagnostics Central, clippy strict scope sequence OK. Gate P5 cloture en ACCEPTE AVEC RESERVES (commande utilisateur: Termine la sequence MIP). P6 complete: rapport final + capitalisation memoire. Workspace global reste non vert hors scope sequence (`apps/central/src/services/miyucloud/auth_security.rs`)."
 }

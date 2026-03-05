@@ -1,63 +1,63 @@
-# MiyuPM — Documentation Fondatrice
+﻿# MiyuPM â€” Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuPM** est le **kit d'outils (Toolkit)** de messagerie privée (envoi, dossiers, brouillons, conversation, export) de l'écosystème Miyukini. Il intègre les outils d'envoi, de liste, de gestion des dossiers et brouillons, et d'export des MP, alignés sur [Équivalents Moteur Forum](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Moteur%20Forum.md).
+**MiyuPM** est le **kit d'outils (Toolkit)** de messagerie privÃ©e (envoi, dossiers, brouillons, conversation, export) de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils d'envoi, de liste, de gestion des dossiers et brouillons, et d'export des MP, alignÃ©s sur [Ã‰quivalents Moteur Forum](..//..//miyukini-webway-system//reference//_index.md).
 
-L'autorité sur les données (messages, dossiers, brouillons, conversations) appartient à **KindMother**. MiyuPM expose des capacités d'exécution gouvernée ; les décisions (envoi autorisé, destinataires, quotas) relèvent de **StrongFather**.
+L'autoritÃ© sur les donnÃ©es (messages, dossiers, brouillons, conversations) appartient Ã  **KindMother**. MiyuPM expose des capacitÃ©s d'exÃ©cution gouvernÃ©e ; les dÃ©cisions (envoi autorisÃ©, destinataires, quotas) relÃ¨vent de **StrongFather**.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-
----
-
-## 2. Portée / Scope
-
-**Ce document définit :** l'identité et la définition canonique de MiyuPM, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother.
-
-**Hors scope :** les pièces jointes (MiyuMedia) ; l'anti-spam / flood (MiyuAntiSpam) ; l'implémentation détaillée (stockage).
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 3. Définition canonique
+## 2. PortÃ©e / Scope
 
-> **MiyuPM est une composition officielle d'outils de messagerie privée (envoi, dossiers, brouillons, conversation, export), déclarée et gouvernée par l'environnement.**
+**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de MiyuPM, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother.
 
-- MiyuPM **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
-- MiyuPM **n'ajoute aucune logique métier** : il orchestre des capacités atomiques ; décision d'envoi = StrongFather.
+**Hors scope :** les piÃ¨ces jointes (MiyuMedia) ; l'anti-spam / flood (MiyuAntiSpam) ; l'implÃ©mentation dÃ©taillÃ©e (stockage).
 
-**Règle fondamentale :** Toute écriture (message, dossier, brouillon) = **WriteIntent** vers KindMother.
+---
+
+## 3. DÃ©finition canonique
+
+> **MiyuPM est une composition officielle d'outils de messagerie privÃ©e (envoi, dossiers, brouillons, conversation, export), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+
+- MiyuPM **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
+- MiyuPM **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques ; dÃ©cision d'envoi = StrongFather.
+
+**RÃ¨gle fondamentale :** Toute Ã©criture (message, dossier, brouillon) = **WriteIntent** vers KindMother.
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.communication.pm` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `communication` |
-| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le détail de chaque outil est décrit dans [MiyuPM - Reference Outils](./MiyuPM%20-%20Reference%20Outils.md).
+Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuPM - Reference Outils](./MiyuPM%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
-| `tool.pm.send` | Envoie un message privé (destinataire, contenu fournis) ; autorisation = StrongFather |
+| `tool.pm.send` | Envoie un message privÃ© (destinataire, contenu fournis) ; autorisation = StrongFather |
 | `tool.pm.list` | Liste les messages (dossier, filtres fournis) |
-| `tool.pm.get` | Récupère un message |
+| `tool.pm.get` | RÃ©cupÃ¨re un message |
 | `tool.pm.folder.list` | Liste les dossiers (inbox, sent, etc.) |
-| `tool.pm.folder.create` | Crée un dossier personnalisé |
-| `tool.pm.folder.update` | Met à jour un dossier |
-| `tool.pm.draft.create` | Crée un brouillon |
-| `tool.pm.draft.update` | Met à jour un brouillon |
+| `tool.pm.folder.create` | CrÃ©e un dossier personnalisÃ© |
+| `tool.pm.folder.update` | Met Ã  jour un dossier |
+| `tool.pm.draft.create` | CrÃ©e un brouillon |
+| `tool.pm.draft.update` | Met Ã  jour un brouillon |
 | `tool.pm.draft.list` | Liste les brouillons |
 | `tool.pm.conversation.list` | Liste les conversations |
-| `tool.pm.conversation.get` | Récupère une conversation (fil de messages) |
-| `tool.pm.export` | Exporte les messages (format fourni) ; exécution seule |
+| `tool.pm.conversation.get` | RÃ©cupÃ¨re une conversation (fil de messages) |
+| `tool.pm.export` | Exporte les messages (format fourni) ; exÃ©cution seule |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuPM en contient douze.
 
@@ -65,44 +65,46 @@ Le détail de chaque outil est décrit dans [MiyuPM - Reference Outils](./MiyuPM
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : **décision d'envoi = StrongFather** ; toute écriture = WriteIntent KindMother.
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : **dÃ©cision d'envoi = StrongFather** ; toute Ã©criture = WriteIntent KindMother.
 
 ---
 
-## 7. Niveau de sécurité et états
+## 7. Niveau de sÃ©curitÃ© et Ã©tats
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
-| **Niveau de sécurité du kit** | **2** (données personnelles, messagerie) |
-| **États autorisés** | `HEALTHY`, `DEGRADED` |
-| **États interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
+| **Niveau de sÃ©curitÃ© du kit** | **2** (donnÃ©es personnelles, messagerie) |
+| **Ã‰tats autorisÃ©s** | `HEALTHY`, `DEGRADED` |
+| **Ã‰tats interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autorité sur les données : messages, dossiers, brouillons, conversations. Toute création, mise à jour ou suppression passe par **WriteIntent** vers KindMother.
+**KindMother** est l'autoritÃ© sur les donnÃ©es : messages, dossiers, brouillons, conversations. Toute crÃ©ation, mise Ã  jour ou suppression passe par **WriteIntent** vers KindMother.
 
-Les obligations de conformité détaillées sont dans [MiyuPM - Tool Governance Compliance Contract](./contracts/governance/MiyuPM%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuPM - Tool Governance Compliance Contract](./contracts/governance/MiyuPM%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuPM sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). À l'implémentation, le code fournissant les Tools MiyuPM devra être balisé MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit généré selon le [Protocole MIP v1](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+La documentation et la future implÃ©mentation de MiyuPM sont conÃ§ues pour Ãªtre **compatibles MIP v1** (Miyukini Index Protocol). Ã€ l'implÃ©mentation, le code fournissant les Tools MiyuPM devra Ãªtre balisÃ© MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit gÃ©nÃ©rÃ© selon le [Protocole MIP v1](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
 ---
 
-## 10. Références croisées
+## 10. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Équivalents Moteur Forum | [Miyukini Conceptual References - Equivalents Moteur Forum](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Moteur%20Forum.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
+| Ã‰quivalents Moteur Forum | [Miyukini Conceptual References - Equivalents Moteur Forum](..//..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence fondateur
+**Statut :** Document de rÃ©fÃ©rence fondateur
+
+

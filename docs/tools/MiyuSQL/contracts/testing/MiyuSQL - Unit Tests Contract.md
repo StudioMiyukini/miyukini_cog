@@ -1,10 +1,10 @@
-# MiyuSQL — Unit Tests Contract
+﻿# MiyuSQL â€” Unit Tests Contract
 
 ## 1. Contexte
 
 Ce document definit le contrat pour les **tests unitaires** des Tools du kit MiyuSQL. Les tests unitaires verifient le comportement de chaque Tool (requete, transaction, cache, schema) sans modifier les donnees reelles et sans logique metier.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -116,64 +116,64 @@ Ce document **ne couvre pas** :
 ### 6.1 Execution d'un Test Unitaire MiyuSQL
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ 1. Chargement definition du test                            │
-├─────────────────────────────────────────────────────────────┤
-│ - ID du test (MSQL-*)                                        │
-│ - ToolId concerne                                            │
-│ - Parametres (sandbox, timeout, etc.)                         │
-│ - Criteres de succes                                         │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 2. Preparation (si sandbox)                                  │
-├─────────────────────────────────────────────────────────────┤
-│ - Creation sandbox / table dediee si necessaire              │
-│ - Via gouvernance (WriteIntent, KindMother)                   │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 3. Execution du Tool (via gouvernance)                       │
-├─────────────────────────────────────────────────────────────┤
-│ - BondingBrother → Master Butler → WorrySentinel →           │
-│   Caring Nanny → StrongFather → MiyuSQL Tool                 │
-│ - Collecte resultat ou exception                              │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 4. Nettoyage (si sandbox)                                    │
-├─────────────────────────────────────────────────────────────┤
-│ - Suppression donnees test / tear-down sandbox                │
-│ - Via gouvernance                                            │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 5. Evaluation et rapport                                     │
-├─────────────────────────────────────────────────────────────┤
-│ - Verdict (PASS/WARN/FAIL/SKIP/ERROR)                        │
-│ - Details, duree, tracabilite                                │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 1. Chargement definition du test                            â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - ID du test (MSQL-*)                                        â”‚
+â”‚ - ToolId concerne                                            â”‚
+â”‚ - Parametres (sandbox, timeout, etc.)                         â”‚
+â”‚ - Criteres de succes                                         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â”‚
+                              â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 2. Preparation (si sandbox)                                  â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - Creation sandbox / table dediee si necessaire              â”‚
+â”‚ - Via gouvernance (WriteIntent, KindMother)                   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â”‚
+                              â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 3. Execution du Tool (via gouvernance)                       â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - BondingBrother â†’ Master Butler â†’ WorrySentinel â†’           â”‚
+â”‚   Caring Nanny â†’ StrongFather â†’ MiyuSQL Tool                 â”‚
+â”‚ - Collecte resultat ou exception                              â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â”‚
+                              â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 4. Nettoyage (si sandbox)                                    â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - Suppression donnees test / tear-down sandbox                â”‚
+â”‚ - Via gouvernance                                            â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â”‚
+                              â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 5. Evaluation et rapport                                     â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - Verdict (PASS/WARN/FAIL/SKIP/ERROR)                        â”‚
+â”‚ - Details, duree, tracabilite                                â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 6.2 Flux d'Execution (Schema)
 
 ```
 Test Runner             BondingBrother         StrongFather      KindMother      MiyuSQL Tool
-     │                         │                     │                │                │
-     │──UnitTestRequest────────▶│                     │                │                │
-     │  (test: MSQL-Q-001)      │                     │                │                │
-     │                         │──Validate───────────▶│                │                │
-     │                         │◀─ALLOW──────────────│                │                │
-     │                         │──DataQuery──────────────────────────▶│                │
-     │                         │                     │                │──Execute───────▶│
-     │                         │                     │                │◀─Result────────│
-     │                         │◀─QueryResults─────────────────────────│                │
-     │◀─TestResults────────────│                     │                │                │
-     │  (verdict, details)      │                     │                │                │
+     â”‚                         â”‚                     â”‚                â”‚                â”‚
+     â”‚â”€â”€UnitTestRequestâ”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                     â”‚                â”‚                â”‚
+     â”‚  (test: MSQL-Q-001)      â”‚                     â”‚                â”‚                â”‚
+     â”‚                         â”‚â”€â”€Validateâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                â”‚                â”‚
+     â”‚                         â”‚â—€â”€ALLOWâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                â”‚                â”‚
+     â”‚                         â”‚â”€â”€DataQueryâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                â”‚
+     â”‚                         â”‚                     â”‚                â”‚â”€â”€Executeâ”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                         â”‚                     â”‚                â”‚â—€â”€Resultâ”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                         â”‚â—€â”€QueryResultsâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                â”‚
+     â”‚â—€â”€TestResultsâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                     â”‚                â”‚                â”‚
+     â”‚  (verdict, details)      â”‚                     â”‚                â”‚                â”‚
 ```
 
 ---
@@ -185,8 +185,8 @@ Test Runner             BondingBrother         StrongFather      KindMother     
 | Suite | Tests inclus | Duree estimee | Usage |
 |-------|--------------|---------------|-------|
 | **Quick** | MSQL-Q-001, MSQL-Q-002, MSQL-S-001 | < 1 min | Verification rapide |
-| **Standard** | Tous MSQL-Q, MSQL-S, MSQL-C (sans ecriture metier) | 2–5 min | Verification quotidienne |
-| **Full** | Tous MSQL-* (avec sandbox pour T-*) | 5–10 min | Verification complete |
+| **Standard** | Tous MSQL-Q, MSQL-S, MSQL-C (sans ecriture metier) | 2â€“5 min | Verification quotidienne |
+| **Full** | Tous MSQL-* (avec sandbox pour T-*) | 5â€“10 min | Verification complete |
 
 ### 7.2 Configuration Suite
 
@@ -202,10 +202,11 @@ Les tests d'ecriture (MSQL-T-*, eventuellement MSQL-Q avec INSERT en sandbox) do
 | MiyuSQL - Reference Outils | [MiyuSQL - Reference Outils](../../MiyuSQL%20-%20Reference%20Outils.md) |
 | MiyuSQL - Cycle Tests Contract | [MiyuSQL - Cycle Tests Contract](./MiyuSQL%20-%20Cycle%20Tests%20Contract.md) |
 | MiyuSQL - KindMother Integration Contract | [MiyuSQL - KindMother Integration Contract](../integration/MiyuSQL%20-%20KindMother%20Integration%20Contract.md) |
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) |
 
 ---
 
 **Date de creation :** 2026-01-29  
 **Version :** 1.0  
 **Statut :** Contrat de reference
+

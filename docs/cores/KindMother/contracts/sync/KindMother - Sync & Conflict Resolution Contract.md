@@ -1,386 +1,386 @@
-# KindMother — Sync & Conflict Resolution Contract
+﻿# KindMother â€” Sync & Conflict Resolution Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **KindMother — Sync & Conflict Resolution Contract** : un contrat normatif, non négociable, et de statut FONDATION qui établit les définitions formelles de la synchronisation entre Instance Mère et Instance Fille, ainsi que les règles absolues de résolution des conflits dans le système Miyukini Core System v2.4.
+Ce document dÃ©finit le **KindMother â€” Sync & Conflict Resolution Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit les dÃ©finitions formelles de la synchronisation entre Instance MÃ¨re et Instance Fille, ainsi que les rÃ¨gles absolues de rÃ©solution des conflits dans le systÃ¨me Miyukini Core System v2.4.
 
-Ce contrat établit les fondations conceptuelles nécessaires pour comprendre la synchronisation Mère ↔ Fille, la nature systémique des conflits, et les principes régissant leur résolution.
+Ce contrat Ã©tablit les fondations conceptuelles nÃ©cessaires pour comprendre la synchronisation MÃ¨re â†” Fille, la nature systÃ©mique des conflits, et les principes rÃ©gissant leur rÃ©solution.
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **toutes les synchronisations** entre Instance Mère et Instance Fille et définit de manière absolue :
-- La définition formelle de la synchronisation
-- Les types de conflits conceptuels (autoritaires, temporels, sémantiques)
-- Les règles absolues de résolution des conflits
+Ce contrat s'applique Ã  **toutes les synchronisations** entre Instance MÃ¨re et Instance Fille et dÃ©finit de maniÃ¨re absolue :
+- La dÃ©finition formelle de la synchronisation
+- Les types de conflits conceptuels (autoritaires, temporels, sÃ©mantiques)
+- Les rÃ¨gles absolues de rÃ©solution des conflits
 - Les garanties post-synchronisation
 - Les invariants de synchronisation
 
-Ce contrat se concentre exclusivement sur les concepts systémiques de synchronisation et de résolution de conflits, sans entrer dans les détails d'implémentation, les mécanismes techniques, ou les protocoles de communication.
+Ce contrat se concentre exclusivement sur les concepts systÃ©miques de synchronisation et de rÃ©solution de conflits, sans entrer dans les dÃ©tails d'implÃ©mentation, les mÃ©canismes techniques, ou les protocoles de communication.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des définitions absolues et stables qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des dÃ©finitions absolues et stables qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complète les documents contractuels existants :
+Ce contrat complÃ¨te les documents contractuels existants :
 
-- **KindMother — Instance Model Contract** : Définit les relations Mère/Fille et les responsabilités systémiques
-- **KindMother — Authority Graph & Cross-Domain Contract** : Définit la hiérarchie autoritaire
-- **KindMother — CoreDataAPI Contract** : Définit les opérations de synchronisation
-- **KindMother — Runtime Boundary & Enforcement Contract** : Définit les validations lors de la synchronisation
-- **[Miyukini Conceptual References — Lois Autonomie Système](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Ce contrat respecte **LOI-3** (l'état local est souverain) en garantissant que l'Instance Fille détient l'autorité locale et que la réconciliation avec l'Instance Mère est explicite et traçable. Il respecte également **LOI-4** (pas de temps global requis) en utilisant des deltas et des points de synchronisation plutôt que des timestamps absolus.
+- **KindMother â€” Instance Model Contract** : DÃ©finit les relations MÃ¨re/Fille et les responsabilitÃ©s systÃ©miques
+- **KindMother â€” Authority Graph & Cross-Domain Contract** : DÃ©finit la hiÃ©rarchie autoritaire
+- **KindMother â€” CoreDataAPI Contract** : DÃ©finit les opÃ©rations de synchronisation
+- **KindMother â€” Runtime Boundary & Enforcement Contract** : DÃ©finit les validations lors de la synchronisation
+- **[Miyukini Conceptual References â€” Lois Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Ce contrat respecte **LOI-3** (l'Ã©tat local est souverain) en garantissant que l'Instance Fille dÃ©tient l'autoritÃ© locale et que la rÃ©conciliation avec l'Instance MÃ¨re est explicite et traÃ§able. Il respecte Ã©galement **LOI-4** (pas de temps global requis) en utilisant des deltas et des points de synchronisation plutÃ´t que des timestamps absolus.
 
-**Complémentarité :**
-- Instance Model Contract = relations Mère/Fille et responsabilités
-- Authority Graph Contract = hiérarchie autoritaire
-- CoreDataAPI Contract = opérations de synchronisation
+**ComplÃ©mentaritÃ© :**
+- Instance Model Contract = relations MÃ¨re/Fille et responsabilitÃ©s
+- Authority Graph Contract = hiÃ©rarchie autoritaire
+- CoreDataAPI Contract = opÃ©rations de synchronisation
 - Runtime Boundary Contract = validations lors de la synchronisation
-- Sync & Conflict Resolution Contract = règles de synchronisation et résolution de conflits
+- Sync & Conflict Resolution Contract = rÃ¨gles de synchronisation et rÃ©solution de conflits
 
-Ces contrats forment ensemble le système complet de synchronisation et de résolution de conflits du système Miyukini Core System v2.4.
+Ces contrats forment ensemble le systÃ¨me complet de synchronisation et de rÃ©solution de conflits du systÃ¨me Miyukini Core System v2.4.
 
 **Positionnement :**
-Ce contrat établit les règles formelles de synchronisation et de résolution de conflits. Il précède et complète les contrats qui définissent les mécanismes opérationnels et les détails d'implémentation.
+Ce contrat Ã©tablit les rÃ¨gles formelles de synchronisation et de rÃ©solution de conflits. Il prÃ©cÃ¨de et complÃ¨te les contrats qui dÃ©finissent les mÃ©canismes opÃ©rationnels et les dÃ©tails d'implÃ©mentation.
 
 ---
 
-## 2. Définition formelle de la synchronisation
+## 2. DÃ©finition formelle de la synchronisation
 
-### Définition formelle
+### DÃ©finition formelle
 
-Une **synchronisation** est un processus conceptuel par lequel une Instance Fille et une Instance Mère alignent leurs états respectifs pour garantir la cohérence entre la source d'autorité de référence (Instance Mère) et la copie locale (Instance Fille).
+Une **synchronisation** est un processus conceptuel par lequel une Instance Fille et une Instance MÃ¨re alignent leurs Ã©tats respectifs pour garantir la cohÃ©rence entre la source d'autoritÃ© de rÃ©fÃ©rence (Instance MÃ¨re) et la copie locale (Instance Fille).
 
-### Caractéristiques formelles fondamentales
+### CaractÃ©ristiques formelles fondamentales
 
-**Direction de l'autorité :** La synchronisation respecte la hiérarchie autoritaire établie par l'Instance Model Contract. L'Instance Mère exerce une autorité de référence exclusive (INST-M-1, INST-M-2), et l'Instance Fille reconnaît cette autorité (INST-F-1).
+**Direction de l'autoritÃ© :** La synchronisation respecte la hiÃ©rarchie autoritaire Ã©tablie par l'Instance Model Contract. L'Instance MÃ¨re exerce une autoritÃ© de rÃ©fÃ©rence exclusive (INST-M-1, INST-M-2), et l'Instance Fille reconnaÃ®t cette autoritÃ© (INST-F-1).
 
-**Bidirectionnalité conceptuelle :** La synchronisation est conceptuellement bidirectionnelle :
-- **Fille → Mère :** Soumission des opérations locales de l'Instance Fille à la validation de l'Instance Mère
-- **Mère → Fille :** Propagation des modifications validées de l'Instance Mère vers l'Instance Fille
+**BidirectionnalitÃ© conceptuelle :** La synchronisation est conceptuellement bidirectionnelle :
+- **Fille â†’ MÃ¨re :** Soumission des opÃ©rations locales de l'Instance Fille Ã  la validation de l'Instance MÃ¨re
+- **MÃ¨re â†’ Fille :** Propagation des modifications validÃ©es de l'Instance MÃ¨re vers l'Instance Fille
 
-**Validation obligatoire :** Toute opération soumise lors de la synchronisation Fille → Mère DOIT être validée par l'Instance Mère avant application. La validation traverse les Runtime Boundaries définies dans le Runtime Boundary & Enforcement Contract.
+**Validation obligatoire :** Toute opÃ©ration soumise lors de la synchronisation Fille â†’ MÃ¨re DOIT Ãªtre validÃ©e par l'Instance MÃ¨re avant application. La validation traverse les Runtime Boundaries dÃ©finies dans le Runtime Boundary & Enforcement Contract.
 
-**Cohérence garantie :** Après synchronisation réussie, l'état de l'Instance Fille est cohérent avec l'état de référence de l'Instance Mère, dans les limites autorisées par le système.
+**CohÃ©rence garantie :** AprÃ¨s synchronisation rÃ©ussie, l'Ã©tat de l'Instance Fille est cohÃ©rent avec l'Ã©tat de rÃ©fÃ©rence de l'Instance MÃ¨re, dans les limites autorisÃ©es par le systÃ¨me.
 
-**Traçabilité complète :** Toute synchronisation est tracée de manière complète, permettant l'audit et le debugging.
+**TraÃ§abilitÃ© complÃ¨te :** Toute synchronisation est tracÃ©e de maniÃ¨re complÃ¨te, permettant l'audit et le debugging.
 
 ### Nature conceptuelle
 
-Une synchronisation est un **concept systémique**, pas un mécanisme technique. Elle représente la manière conceptuelle dont les instances alignent leurs états selon la hiérarchie autoritaire, sans présupposer de protocole, de format, ou de mécanisme technique.
+Une synchronisation est un **concept systÃ©mique**, pas un mÃ©canisme technique. Elle reprÃ©sente la maniÃ¨re conceptuelle dont les instances alignent leurs Ã©tats selon la hiÃ©rarchie autoritaire, sans prÃ©supposer de protocole, de format, ou de mÃ©canisme technique.
 
-**Important :** Cette définition est purement conceptuelle et systémique. Elle ne présuppose aucune technologie, aucun protocole de communication, aucune structure de données, ou aucun détail d'implémentation.
+**Important :** Cette dÃ©finition est purement conceptuelle et systÃ©mique. Elle ne prÃ©suppose aucune technologie, aucun protocole de communication, aucune structure de donnÃ©es, ou aucun dÃ©tail d'implÃ©mentation.
 
 ---
 
 ## 3. Types de conflits conceptuels
 
-KindMother reconnaît formellement trois types de conflits conceptuels lors de la synchronisation. Ces conflits sont définis au niveau systémique, pas technique.
+KindMother reconnaÃ®t formellement trois types de conflits conceptuels lors de la synchronisation. Ces conflits sont dÃ©finis au niveau systÃ©mique, pas technique.
 
 ### 3.1. Conflit autoritaire
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
-Un **conflit autoritaire** est une situation où une opération locale de l'Instance Fille entre en contradiction avec une décision définitive de l'Instance Mère. L'Instance Mère a autorité définitive sur la résolution (INST-M-1, INST-M-2).
+Un **conflit autoritaire** est une situation oÃ¹ une opÃ©ration locale de l'Instance Fille entre en contradiction avec une dÃ©cision dÃ©finitive de l'Instance MÃ¨re. L'Instance MÃ¨re a autoritÃ© dÃ©finitive sur la rÃ©solution (INST-M-1, INST-M-2).
 
-**Caractéristiques formelles :**
+**CaractÃ©ristiques formelles :**
 
-- **Autorité définitive de la Mère :** L'Instance Mère exerce une autorité de référence exclusive. Ses décisions sont définitives et non négociables.
-- **Reconnaissance obligatoire :** L'Instance Fille DOIT reconnaître l'autorité supérieure de l'Instance Mère (INST-F-1). Elle ne peut pas contester une décision de l'Instance Mère (I-F-1).
-- **Résolution par la Mère :** Le conflit autoritaire est résolu par l'Instance Mère. Sa décision est définitive.
-- **Application immédiate :** La décision de l'Instance Mère est appliquée immédiatement dans l'Instance Fille.
+- **AutoritÃ© dÃ©finitive de la MÃ¨re :** L'Instance MÃ¨re exerce une autoritÃ© de rÃ©fÃ©rence exclusive. Ses dÃ©cisions sont dÃ©finitives et non nÃ©gociables.
+- **Reconnaissance obligatoire :** L'Instance Fille DOIT reconnaÃ®tre l'autoritÃ© supÃ©rieure de l'Instance MÃ¨re (INST-F-1). Elle ne peut pas contester une dÃ©cision de l'Instance MÃ¨re (I-F-1).
+- **RÃ©solution par la MÃ¨re :** Le conflit autoritaire est rÃ©solu par l'Instance MÃ¨re. Sa dÃ©cision est dÃ©finitive.
+- **Application immÃ©diate :** La dÃ©cision de l'Instance MÃ¨re est appliquÃ©e immÃ©diatement dans l'Instance Fille.
 
 **Exemples conceptuels :**
 
-- L'Instance Fille soumet une modification d'entité, mais l'Instance Mère a déjà supprimé cette entité
-- L'Instance Fille soumet une création d'entité, mais l'Instance Mère a déjà créé une entité avec des contraintes incompatibles
-- L'Instance Fille soumet une modification, mais l'Instance Mère a déjà appliqué une modification contradictoire
+- L'Instance Fille soumet une modification d'entitÃ©, mais l'Instance MÃ¨re a dÃ©jÃ  supprimÃ© cette entitÃ©
+- L'Instance Fille soumet une crÃ©ation d'entitÃ©, mais l'Instance MÃ¨re a dÃ©jÃ  crÃ©Ã© une entitÃ© avec des contraintes incompatibles
+- L'Instance Fille soumet une modification, mais l'Instance MÃ¨re a dÃ©jÃ  appliquÃ© une modification contradictoire
 
-**Résolution :** La décision de l'Instance Mère est appliquée. L'opération locale de l'Instance Fille est annulée ou adaptée selon la décision de l'Instance Mère.
+**RÃ©solution :** La dÃ©cision de l'Instance MÃ¨re est appliquÃ©e. L'opÃ©ration locale de l'Instance Fille est annulÃ©e ou adaptÃ©e selon la dÃ©cision de l'Instance MÃ¨re.
 
 ### 3.2. Conflit temporel
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
-Un **conflit temporel** est une situation où des modifications concurrentes ont été effectuées sur la même entité dans l'Instance Mère et l'Instance Fille, créant une incohérence temporelle.
+Un **conflit temporel** est une situation oÃ¹ des modifications concurrentes ont Ã©tÃ© effectuÃ©es sur la mÃªme entitÃ© dans l'Instance MÃ¨re et l'Instance Fille, crÃ©ant une incohÃ©rence temporelle.
 
-**Caractéristiques formelles :**
+**CaractÃ©ristiques formelles :**
 
-- **Modifications concurrentes :** Des modifications ont été effectuées sur la même entité dans les deux instances, sans que l'une ne soit informée de l'autre.
-- **Incohérence temporelle :** L'ordre temporel des modifications crée une incohérence qui ne peut être résolue par simple application séquentielle.
-- **Autorité de la Mère :** Même dans un conflit temporel, l'Instance Mère a autorité définitive sur la résolution (INST-M-1).
-- **Résolution par la Mère :** Le conflit temporel est résolu par l'Instance Mère selon ses règles de résolution.
+- **Modifications concurrentes :** Des modifications ont Ã©tÃ© effectuÃ©es sur la mÃªme entitÃ© dans les deux instances, sans que l'une ne soit informÃ©e de l'autre.
+- **IncohÃ©rence temporelle :** L'ordre temporel des modifications crÃ©e une incohÃ©rence qui ne peut Ãªtre rÃ©solue par simple application sÃ©quentielle.
+- **AutoritÃ© de la MÃ¨re :** MÃªme dans un conflit temporel, l'Instance MÃ¨re a autoritÃ© dÃ©finitive sur la rÃ©solution (INST-M-1).
+- **RÃ©solution par la MÃ¨re :** Le conflit temporel est rÃ©solu par l'Instance MÃ¨re selon ses rÃ¨gles de rÃ©solution.
 
-**Conformité LOI-4 :** La résolution des conflits temporels ne présuppose pas de temps global synchronisé. Les conflits sont résolus selon l'autorité de l'Instance Mère et les points de synchronisation, pas selon "le plus récent gagne" basé sur des timestamps absolus. Cette approche respecte **LOI-4** (pas de temps global requis) : le système fonctionne même si les horloges des nœuds diffèrent de plusieurs minutes ou heures.
-
-**Exemples conceptuels :**
-
-- L'Instance Fille modifie une entité à T1, l'Instance Mère modifie la même entité à T2, puis la synchronisation se produit à T3
-- L'Instance Fille crée une relation à T1, l'Instance Mère supprime l'entité source à T2, puis la synchronisation se produit à T3
-- L'Instance Fille modifie un attribut à T1, l'Instance Mère modifie le même attribut à T2, puis la synchronisation se produit à T3
-
-**Résolution :** L'Instance Mère résout le conflit temporel selon ses règles. La résolution peut impliquer l'application de la modification de la Mère, l'adaptation de la modification de la Fille, ou l'annulation de la modification de la Fille.
-
-### 3.3. Conflit sémantique
-
-**Définition formelle :**
-
-Un **conflit sémantique** est une situation où une opération locale de l'Instance Fille viole les contraintes de cohérence sémantique établies par l'Instance Mère, même si elle ne contredit pas directement une opération de la Mère.
-
-**Caractéristiques formelles :**
-
-- **Violation de cohérence sémantique :** L'opération locale viole des contraintes de cohérence, des règles métier, ou des invariants établis par l'Instance Mère.
-- **Détection par la Mère :** Le conflit sémantique est détecté par l'Instance Mère lors de la validation de l'opération soumise.
-- **Autorité de la Mère :** L'Instance Mère a autorité définitive sur les règles de cohérence sémantique (INST-M-1).
-- **Rejet ou adaptation :** L'Instance Mère peut rejeter l'opération ou proposer une adaptation conforme aux contraintes.
+**ConformitÃ© LOI-4 :** La rÃ©solution des conflits temporels ne prÃ©suppose pas de temps global synchronisÃ©. Les conflits sont rÃ©solus selon l'autoritÃ© de l'Instance MÃ¨re et les points de synchronisation, pas selon "le plus rÃ©cent gagne" basÃ© sur des timestamps absolus. Cette approche respecte **LOI-4** (pas de temps global requis) : le systÃ¨me fonctionne mÃªme si les horloges des nÅ“uds diffÃ¨rent de plusieurs minutes ou heures.
 
 **Exemples conceptuels :**
 
-- L'Instance Fille crée une entité qui viole une contrainte d'unicité établie par l'Instance Mère
-- L'Instance Fille modifie une entité de manière à violer une règle métier définie par l'Instance Mère
-- L'Instance Fille crée une relation qui viole un invariant de cohérence référentielle
+- L'Instance Fille modifie une entitÃ© Ã  T1, l'Instance MÃ¨re modifie la mÃªme entitÃ© Ã  T2, puis la synchronisation se produit Ã  T3
+- L'Instance Fille crÃ©e une relation Ã  T1, l'Instance MÃ¨re supprime l'entitÃ© source Ã  T2, puis la synchronisation se produit Ã  T3
+- L'Instance Fille modifie un attribut Ã  T1, l'Instance MÃ¨re modifie le mÃªme attribut Ã  T2, puis la synchronisation se produit Ã  T3
 
-**Résolution :** L'Instance Mère rejette l'opération ou propose une adaptation conforme. L'Instance Fille DOIT accepter la décision de l'Instance Mère (I-F-1).
+**RÃ©solution :** L'Instance MÃ¨re rÃ©sout le conflit temporel selon ses rÃ¨gles. La rÃ©solution peut impliquer l'application de la modification de la MÃ¨re, l'adaptation de la modification de la Fille, ou l'annulation de la modification de la Fille.
+
+### 3.3. Conflit sÃ©mantique
+
+**DÃ©finition formelle :**
+
+Un **conflit sÃ©mantique** est une situation oÃ¹ une opÃ©ration locale de l'Instance Fille viole les contraintes de cohÃ©rence sÃ©mantique Ã©tablies par l'Instance MÃ¨re, mÃªme si elle ne contredit pas directement une opÃ©ration de la MÃ¨re.
+
+**CaractÃ©ristiques formelles :**
+
+- **Violation de cohÃ©rence sÃ©mantique :** L'opÃ©ration locale viole des contraintes de cohÃ©rence, des rÃ¨gles mÃ©tier, ou des invariants Ã©tablis par l'Instance MÃ¨re.
+- **DÃ©tection par la MÃ¨re :** Le conflit sÃ©mantique est dÃ©tectÃ© par l'Instance MÃ¨re lors de la validation de l'opÃ©ration soumise.
+- **AutoritÃ© de la MÃ¨re :** L'Instance MÃ¨re a autoritÃ© dÃ©finitive sur les rÃ¨gles de cohÃ©rence sÃ©mantique (INST-M-1).
+- **Rejet ou adaptation :** L'Instance MÃ¨re peut rejeter l'opÃ©ration ou proposer une adaptation conforme aux contraintes.
+
+**Exemples conceptuels :**
+
+- L'Instance Fille crÃ©e une entitÃ© qui viole une contrainte d'unicitÃ© Ã©tablie par l'Instance MÃ¨re
+- L'Instance Fille modifie une entitÃ© de maniÃ¨re Ã  violer une rÃ¨gle mÃ©tier dÃ©finie par l'Instance MÃ¨re
+- L'Instance Fille crÃ©e une relation qui viole un invariant de cohÃ©rence rÃ©fÃ©rentielle
+
+**RÃ©solution :** L'Instance MÃ¨re rejette l'opÃ©ration ou propose une adaptation conforme. L'Instance Fille DOIT accepter la dÃ©cision de l'Instance MÃ¨re (I-F-1).
 
 ---
 
-## 4. Règles absolues de résolution
+## 4. RÃ¨gles absolues de rÃ©solution
 
-### 4.1. Autorité définitive de l'Instance Mère
+### 4.1. AutoritÃ© dÃ©finitive de l'Instance MÃ¨re
 
-**Règle absolue SYNC-1 : Autorité exclusive de la Mère**
+**RÃ¨gle absolue SYNC-1 : AutoritÃ© exclusive de la MÃ¨re**
 
-L'Instance Mère exerce une autorité de référence exclusive sur toutes les décisions de résolution de conflits (INST-M-1, INST-M-2). Ses décisions sont définitives et non négociables.
+L'Instance MÃ¨re exerce une autoritÃ© de rÃ©fÃ©rence exclusive sur toutes les dÃ©cisions de rÃ©solution de conflits (INST-M-1, INST-M-2). Ses dÃ©cisions sont dÃ©finitives et non nÃ©gociables.
 
 **Application :**
-- Toute décision de résolution de conflit est prise par l'Instance Mère
-- L'Instance Fille ne peut pas contester une décision de l'Instance Mère (I-F-1)
-- Les décisions de l'Instance Mère sont appliquées immédiatement
-- Aucune exception n'est autorisée
+- Toute dÃ©cision de rÃ©solution de conflit est prise par l'Instance MÃ¨re
+- L'Instance Fille ne peut pas contester une dÃ©cision de l'Instance MÃ¨re (I-F-1)
+- Les dÃ©cisions de l'Instance MÃ¨re sont appliquÃ©es immÃ©diatement
+- Aucune exception n'est autorisÃ©e
 
-**Non-négociabilité :** Cette règle est absolue et non négociable. Aucune exception n'est autorisée.
+**Non-nÃ©gociabilitÃ© :** Cette rÃ¨gle est absolue et non nÃ©gociable. Aucune exception n'est autorisÃ©e.
 
 ### 4.2. Reconnaissance obligatoire par l'Instance Fille
 
-**Règle absolue SYNC-2 : Acceptation des décisions de la Mère**
+**RÃ¨gle absolue SYNC-2 : Acceptation des dÃ©cisions de la MÃ¨re**
 
-L'Instance Fille DOIT accepter toutes les décisions de résolution de l'Instance Mère sans contestation (INST-F-1, I-F-1).
+L'Instance Fille DOIT accepter toutes les dÃ©cisions de rÃ©solution de l'Instance MÃ¨re sans contestation (INST-F-1, I-F-1).
 
 **Application :**
-- L'Instance Fille accepte les décisions de validation de l'Instance Mère
-- L'Instance Fille accepte les décisions de rejet de l'Instance Mère
-- L'Instance Fille accepte les adaptations proposées par l'Instance Mère
-- L'Instance Fille applique immédiatement les décisions de l'Instance Mère
+- L'Instance Fille accepte les dÃ©cisions de validation de l'Instance MÃ¨re
+- L'Instance Fille accepte les dÃ©cisions de rejet de l'Instance MÃ¨re
+- L'Instance Fille accepte les adaptations proposÃ©es par l'Instance MÃ¨re
+- L'Instance Fille applique immÃ©diatement les dÃ©cisions de l'Instance MÃ¨re
 
-**Non-négociabilité :** Cette règle est absolue et non négociable. Aucune exception n'est autorisée.
+**Non-nÃ©gociabilitÃ© :** Cette rÃ¨gle est absolue et non nÃ©gociable. Aucune exception n'est autorisÃ©e.
 
 ### 4.3. Validation obligatoire avant application
 
-**Règle absolue SYNC-3 : Validation par la Mère**
+**RÃ¨gle absolue SYNC-3 : Validation par la MÃ¨re**
 
-Toute opération soumise lors de la synchronisation Fille → Mère DOIT être validée par l'Instance Mère avant application. Aucune opération non validée ne peut être appliquée.
-
-**Application :**
-- Toute opération locale de l'Instance Fille est soumise à validation
-- La validation traverse les Runtime Boundaries définies dans le Runtime Boundary & Enforcement Contract
-- Seules les opérations validées sont appliquées
-- Les opérations rejetées sont annulées dans l'Instance Fille
-
-**Non-négociabilité :** Cette règle est absolue et non négociable. Aucune exception n'est autorisée.
-
-### 4.4. Cohérence garantie après synchronisation
-
-**Règle absolue SYNC-4 : Cohérence post-synchronisation**
-
-Après synchronisation réussie, l'état de l'Instance Fille est cohérent avec l'état de référence de l'Instance Mère, dans les limites autorisées par le système.
+Toute opÃ©ration soumise lors de la synchronisation Fille â†’ MÃ¨re DOIT Ãªtre validÃ©e par l'Instance MÃ¨re avant application. Aucune opÃ©ration non validÃ©e ne peut Ãªtre appliquÃ©e.
 
 **Application :**
-- L'état de l'Instance Fille reflète les décisions de l'Instance Mère
-- Les opérations rejetées sont annulées dans l'Instance Fille
-- Les opérations validées sont appliquées dans l'Instance Fille
-- La cohérence est garantie immédiatement après synchronisation
+- Toute opÃ©ration locale de l'Instance Fille est soumise Ã  validation
+- La validation traverse les Runtime Boundaries dÃ©finies dans le Runtime Boundary & Enforcement Contract
+- Seules les opÃ©rations validÃ©es sont appliquÃ©es
+- Les opÃ©rations rejetÃ©es sont annulÃ©es dans l'Instance Fille
 
-**Non-négociabilité :** Cette règle est absolue et non négociable. Aucune exception n'est autorisée.
+**Non-nÃ©gociabilitÃ© :** Cette rÃ¨gle est absolue et non nÃ©gociable. Aucune exception n'est autorisÃ©e.
 
-### 4.5. Traçabilité complète
+### 4.4. CohÃ©rence garantie aprÃ¨s synchronisation
 
-**Règle absolue SYNC-5 : Traçabilité de la synchronisation**
+**RÃ¨gle absolue SYNC-4 : CohÃ©rence post-synchronisation**
 
-Toute synchronisation est tracée de manière complète, incluant les opérations soumises, les décisions de validation, les conflits détectés, et les résolutions appliquées.
-
-**Application :**
-- Toutes les opérations soumises sont tracées
-- Toutes les décisions de validation sont tracées
-- Tous les conflits détectés sont tracés avec leur type
-- Toutes les résolutions appliquées sont tracées
-
-**Non-négociabilité :** Cette règle est absolue et non négociable. Aucune exception n'est autorisée.
-
-### 4.6. Atomicité de la synchronisation
-
-**Règle absolue SYNC-6 : Atomicité de la synchronisation**
-
-Une synchronisation est atomique conceptuellement. Elle est complétée entièrement ou pas du tout. Aucune synchronisation partielle n'est autorisée.
+AprÃ¨s synchronisation rÃ©ussie, l'Ã©tat de l'Instance Fille est cohÃ©rent avec l'Ã©tat de rÃ©fÃ©rence de l'Instance MÃ¨re, dans les limites autorisÃ©es par le systÃ¨me.
 
 **Application :**
-- Toutes les opérations soumises sont traitées ensemble
-- Toutes les décisions sont appliquées ensemble
-- Si une synchronisation échoue, l'état reste inchangé
-- Aucune synchronisation partielle n'est laissée
+- L'Ã©tat de l'Instance Fille reflÃ¨te les dÃ©cisions de l'Instance MÃ¨re
+- Les opÃ©rations rejetÃ©es sont annulÃ©es dans l'Instance Fille
+- Les opÃ©rations validÃ©es sont appliquÃ©es dans l'Instance Fille
+- La cohÃ©rence est garantie immÃ©diatement aprÃ¨s synchronisation
 
-**Non-négociabilité :** Cette règle est absolue et non négociable. Aucune exception n'est autorisée.
+**Non-nÃ©gociabilitÃ© :** Cette rÃ¨gle est absolue et non nÃ©gociable. Aucune exception n'est autorisÃ©e.
+
+### 4.5. TraÃ§abilitÃ© complÃ¨te
+
+**RÃ¨gle absolue SYNC-5 : TraÃ§abilitÃ© de la synchronisation**
+
+Toute synchronisation est tracÃ©e de maniÃ¨re complÃ¨te, incluant les opÃ©rations soumises, les dÃ©cisions de validation, les conflits dÃ©tectÃ©s, et les rÃ©solutions appliquÃ©es.
+
+**Application :**
+- Toutes les opÃ©rations soumises sont tracÃ©es
+- Toutes les dÃ©cisions de validation sont tracÃ©es
+- Tous les conflits dÃ©tectÃ©s sont tracÃ©s avec leur type
+- Toutes les rÃ©solutions appliquÃ©es sont tracÃ©es
+
+**Non-nÃ©gociabilitÃ© :** Cette rÃ¨gle est absolue et non nÃ©gociable. Aucune exception n'est autorisÃ©e.
+
+### 4.6. AtomicitÃ© de la synchronisation
+
+**RÃ¨gle absolue SYNC-6 : AtomicitÃ© de la synchronisation**
+
+Une synchronisation est atomique conceptuellement. Elle est complÃ©tÃ©e entiÃ¨rement ou pas du tout. Aucune synchronisation partielle n'est autorisÃ©e.
+
+**Application :**
+- Toutes les opÃ©rations soumises sont traitÃ©es ensemble
+- Toutes les dÃ©cisions sont appliquÃ©es ensemble
+- Si une synchronisation Ã©choue, l'Ã©tat reste inchangÃ©
+- Aucune synchronisation partielle n'est laissÃ©e
+
+**Non-nÃ©gociabilitÃ© :** Cette rÃ¨gle est absolue et non nÃ©gociable. Aucune exception n'est autorisÃ©e.
 
 ---
 
 ## 5. Garanties post-synchronisation
 
-### 5.1. Garantie de cohérence
+### 5.1. Garantie de cohÃ©rence
 
-**Garantie G-SYNC-1 : Cohérence avec la source d'autorité**
+**Garantie G-SYNC-1 : CohÃ©rence avec la source d'autoritÃ©**
 
-Après synchronisation réussie, l'Instance Fille est cohérente avec l'Instance Mère selon les décisions de validation de l'Instance Mère.
+AprÃ¨s synchronisation rÃ©ussie, l'Instance Fille est cohÃ©rente avec l'Instance MÃ¨re selon les dÃ©cisions de validation de l'Instance MÃ¨re.
 
-**Caractéristiques :**
-- L'état de l'Instance Fille reflète les décisions de l'Instance Mère
-- Les opérations validées sont appliquées
-- Les opérations rejetées sont annulées
-- La cohérence est garantie immédiatement
+**CaractÃ©ristiques :**
+- L'Ã©tat de l'Instance Fille reflÃ¨te les dÃ©cisions de l'Instance MÃ¨re
+- Les opÃ©rations validÃ©es sont appliquÃ©es
+- Les opÃ©rations rejetÃ©es sont annulÃ©es
+- La cohÃ©rence est garantie immÃ©diatement
 
-**Conformité LOI-3 :** Cette garantie respecte **LOI-3** (l'état local est souverain) : avant la synchronisation, l'état local de l'Instance Fille est souverain et valable localement. La réconciliation avec l'Instance Mère est explicite et traçable, préservant la souveraineté locale jusqu'à la réconciliation.
+**ConformitÃ© LOI-3 :** Cette garantie respecte **LOI-3** (l'Ã©tat local est souverain) : avant la synchronisation, l'Ã©tat local de l'Instance Fille est souverain et valable localement. La rÃ©conciliation avec l'Instance MÃ¨re est explicite et traÃ§able, prÃ©servant la souverainetÃ© locale jusqu'Ã  la rÃ©conciliation.
 
-**Non-négociabilité :** Cette garantie est absolue et non négociable.
+**Non-nÃ©gociabilitÃ© :** Cette garantie est absolue et non nÃ©gociable.
 
-### 5.2. Garantie de traçabilité
+### 5.2. Garantie de traÃ§abilitÃ©
 
-**Garantie G-SYNC-2 : Traçabilité complète**
+**Garantie G-SYNC-2 : TraÃ§abilitÃ© complÃ¨te**
 
-Toute synchronisation est tracée de manière complète, permettant l'audit et le debugging.
+Toute synchronisation est tracÃ©e de maniÃ¨re complÃ¨te, permettant l'audit et le debugging.
 
-**Caractéristiques :**
-- Toutes les opérations soumises sont tracées
-- Toutes les décisions de validation sont tracées
-- Tous les conflits détectés sont tracés
-- Toutes les résolutions appliquées sont tracées
+**CaractÃ©ristiques :**
+- Toutes les opÃ©rations soumises sont tracÃ©es
+- Toutes les dÃ©cisions de validation sont tracÃ©es
+- Tous les conflits dÃ©tectÃ©s sont tracÃ©s
+- Toutes les rÃ©solutions appliquÃ©es sont tracÃ©es
 
-**Non-négociabilité :** Cette garantie est absolue et non négociable.
+**Non-nÃ©gociabilitÃ© :** Cette garantie est absolue et non nÃ©gociable.
 
-### 5.3. Garantie d'atomicité
+### 5.3. Garantie d'atomicitÃ©
 
-**Garantie G-SYNC-3 : Atomicité de la synchronisation**
+**Garantie G-SYNC-3 : AtomicitÃ© de la synchronisation**
 
-Une synchronisation est atomique. Elle est complétée entièrement ou pas du tout.
+Une synchronisation est atomique. Elle est complÃ©tÃ©e entiÃ¨rement ou pas du tout.
 
-**Caractéristiques :**
-- Toutes les opérations sont traitées ensemble
-- Toutes les décisions sont appliquées ensemble
-- Si une synchronisation échoue, l'état reste inchangé
-- Aucune synchronisation partielle n'est laissée
+**CaractÃ©ristiques :**
+- Toutes les opÃ©rations sont traitÃ©es ensemble
+- Toutes les dÃ©cisions sont appliquÃ©es ensemble
+- Si une synchronisation Ã©choue, l'Ã©tat reste inchangÃ©
+- Aucune synchronisation partielle n'est laissÃ©e
 
-**Non-négociabilité :** Cette garantie est absolue et non négociable.
+**Non-nÃ©gociabilitÃ© :** Cette garantie est absolue et non nÃ©gociable.
 
-### 5.4. Garantie de non-régression
+### 5.4. Garantie de non-rÃ©gression
 
-**Garantie G-SYNC-4 : Non-régression de l'intégrité**
+**Garantie G-SYNC-4 : Non-rÃ©gression de l'intÃ©gritÃ©**
 
-Une synchronisation ne peut jamais compromettre l'intégrité du système. L'intégrité est préservée ou améliorée, jamais dégradée.
+Une synchronisation ne peut jamais compromettre l'intÃ©gritÃ© du systÃ¨me. L'intÃ©gritÃ© est prÃ©servÃ©e ou amÃ©liorÃ©e, jamais dÃ©gradÃ©e.
 
-**Caractéristiques :**
-- L'intégrité est préservée après synchronisation
+**CaractÃ©ristiques :**
+- L'intÃ©gritÃ© est prÃ©servÃ©e aprÃ¨s synchronisation
 - Aucune corruption n'est introduite par la synchronisation
-- Les contraintes de cohérence sont respectées
-- L'intégrité référentielle est maintenue
+- Les contraintes de cohÃ©rence sont respectÃ©es
+- L'intÃ©gritÃ© rÃ©fÃ©rentielle est maintenue
 
-**Non-négociabilité :** Cette garantie est absolue et non négociable.
+**Non-nÃ©gociabilitÃ© :** Cette garantie est absolue et non nÃ©gociable.
 
 ---
 
 ## 6. Interaction avec Instance Model Contract
 
-### 6.1. Respect de la hiérarchie autoritaire
+### 6.1. Respect de la hiÃ©rarchie autoritaire
 
 **Relation formelle :**
 
-La synchronisation respecte strictement la hiérarchie autoritaire définie dans l'Instance Model Contract. L'Instance Mère exerce une autorité de référence exclusive (INST-M-1, INST-M-2), et l'Instance Fille reconnaît cette autorité (INST-F-1).
+La synchronisation respecte strictement la hiÃ©rarchie autoritaire dÃ©finie dans l'Instance Model Contract. L'Instance MÃ¨re exerce une autoritÃ© de rÃ©fÃ©rence exclusive (INST-M-1, INST-M-2), et l'Instance Fille reconnaÃ®t cette autoritÃ© (INST-F-1).
 
 **Points d'interaction :**
-- **INST-M-1 :** Autorité de référence exclusive → Décisions définitives de la Mère lors de la synchronisation
-- **INST-M-2 :** Source de vérité autoritaire → État de référence de la Mère lors de la synchronisation
-- **INST-F-1 :** Reconnaissance de l'autorité de la Mère → Acceptation des décisions lors de la synchronisation
-- **INST-F-2 :** Copie locale synchronisée → Synchronisation périodique avec la Mère
-- **INST-F-3 :** Synchronisation périodique → Responsabilité systémique de l'Instance Fille
+- **INST-M-1 :** AutoritÃ© de rÃ©fÃ©rence exclusive â†’ DÃ©cisions dÃ©finitives de la MÃ¨re lors de la synchronisation
+- **INST-M-2 :** Source de vÃ©ritÃ© autoritaire â†’ Ã‰tat de rÃ©fÃ©rence de la MÃ¨re lors de la synchronisation
+- **INST-F-1 :** Reconnaissance de l'autoritÃ© de la MÃ¨re â†’ Acceptation des dÃ©cisions lors de la synchronisation
+- **INST-F-2 :** Copie locale synchronisÃ©e â†’ Synchronisation pÃ©riodique avec la MÃ¨re
+- **INST-F-3 :** Synchronisation pÃ©riodique â†’ ResponsabilitÃ© systÃ©mique de l'Instance Fille
 
-**Cohérence garantie :**
+**CohÃ©rence garantie :**
 
-La synchronisation garantit que toutes les règles de l'Instance Model Contract sont respectées. Aucune violation des invariants INST-M-1 à INST-M-5 et INST-F-1 à INST-F-5 n'est autorisée.
+La synchronisation garantit que toutes les rÃ¨gles de l'Instance Model Contract sont respectÃ©es. Aucune violation des invariants INST-M-1 Ã  INST-M-5 et INST-F-1 Ã  INST-F-5 n'est autorisÃ©e.
 
-### 6.2. Respect des responsabilités systémiques
+### 6.2. Respect des responsabilitÃ©s systÃ©miques
 
 **Relation formelle :**
 
-La synchronisation respecte les responsabilités systémiques définies dans l'Instance Model Contract.
+La synchronisation respecte les responsabilitÃ©s systÃ©miques dÃ©finies dans l'Instance Model Contract.
 
 **Points d'interaction :**
-- **R-M-4 :** Validation avec autorité définitive → Validation des opérations soumises lors de la synchronisation
-- **R-F-3 :** Synchronisation avec l'Instance Mère → Responsabilité de l'Instance Fille
-- **R-F-5 :** Soumission des opérations à la validation → Soumission lors de la synchronisation
+- **R-M-4 :** Validation avec autoritÃ© dÃ©finitive â†’ Validation des opÃ©rations soumises lors de la synchronisation
+- **R-F-3 :** Synchronisation avec l'Instance MÃ¨re â†’ ResponsabilitÃ© de l'Instance Fille
+- **R-F-5 :** Soumission des opÃ©rations Ã  la validation â†’ Soumission lors de la synchronisation
 
-**Cohérence garantie :**
+**CohÃ©rence garantie :**
 
-La synchronisation garantit que toutes les responsabilités systémiques sont respectées. Aucune violation des responsabilités R-M-1 à R-M-5 et R-F-1 à R-F-5 n'est autorisée.
+La synchronisation garantit que toutes les responsabilitÃ©s systÃ©miques sont respectÃ©es. Aucune violation des responsabilitÃ©s R-M-1 Ã  R-M-5 et R-F-1 Ã  R-F-5 n'est autorisÃ©e.
 
 ---
 
 ## 7. Interaction avec Authority Graph & Cross-Domain Contract
 
-### 7.1. Respect de la hiérarchie locale
+### 7.1. Respect de la hiÃ©rarchie locale
 
 **Relation formelle :**
 
-La synchronisation respecte la hiérarchie locale définie dans l'Authority Graph & Cross-Domain Contract. Les relations mère/fille sont définies au sein d'un même Authority Domain.
+La synchronisation respecte la hiÃ©rarchie locale dÃ©finie dans l'Authority Graph & Cross-Domain Contract. Les relations mÃ¨re/fille sont dÃ©finies au sein d'un mÃªme Authority Domain.
 
 **Points d'interaction :**
-- **DOM-1 :** Racine unique par domaine → Instance Mère racine du domaine
-- **DOM-2 :** Arborescence locale → Hiérarchie Mère/Fille dans le domaine
-- **DOM-5 :** Autorité exclusive de la racine → Autorité de l'Instance Mère
+- **DOM-1 :** Racine unique par domaine â†’ Instance MÃ¨re racine du domaine
+- **DOM-2 :** Arborescence locale â†’ HiÃ©rarchie MÃ¨re/Fille dans le domaine
+- **DOM-5 :** AutoritÃ© exclusive de la racine â†’ AutoritÃ© de l'Instance MÃ¨re
 
-**Cohérence garantie :**
+**CohÃ©rence garantie :**
 
-La synchronisation garantit que la hiérarchie locale est respectée. Aucune synchronisation entre instances de domaines différents n'est autorisée sans passer par des Intentions Certifiées.
+La synchronisation garantit que la hiÃ©rarchie locale est respectÃ©e. Aucune synchronisation entre instances de domaines diffÃ©rents n'est autorisÃ©e sans passer par des Intentions CertifiÃ©es.
 
 ### 7.2. Isolation par domaine
 
 **Relation formelle :**
 
-La synchronisation respecte l'isolation conceptuelle entre Authority Domains définie dans l'Authority Graph & Cross-Domain Contract.
+La synchronisation respecte l'isolation conceptuelle entre Authority Domains dÃ©finie dans l'Authority Graph & Cross-Domain Contract.
 
 **Points d'interaction :**
-- **GRAPH-2 :** Isolation conceptuelle des domaines → Synchronisation limitée au même domaine
-- **DOM-4 :** Isolation des données par domaine → Synchronisation des données du domaine uniquement
+- **GRAPH-2 :** Isolation conceptuelle des domaines â†’ Synchronisation limitÃ©e au mÃªme domaine
+- **DOM-4 :** Isolation des donnÃ©es par domaine â†’ Synchronisation des donnÃ©es du domaine uniquement
 
-**Cohérence garantie :**
+**CohÃ©rence garantie :**
 
-La synchronisation garantit que l'isolation entre domaines est préservée. Aucune synchronisation directe entre instances de domaines différents n'est autorisée.
+La synchronisation garantit que l'isolation entre domaines est prÃ©servÃ©e. Aucune synchronisation directe entre instances de domaines diffÃ©rents n'est autorisÃ©e.
 
 ---
 
 ## 8. Interaction avec CoreDataAPI Contract
 
-### 8.1. Opérations de synchronisation
+### 8.1. OpÃ©rations de synchronisation
 
 **Relation formelle :**
 
-La synchronisation utilise les opérations de synchronisation définies dans le CoreDataAPI Contract (section 5.4).
+La synchronisation utilise les opÃ©rations de synchronisation dÃ©finies dans le CoreDataAPI Contract (section 5.4).
 
 **Points d'interaction :**
-- **Opérations de synchronisation :** Utilisation des opérations CoreDataAPI pour la synchronisation
-- **Validation obligatoire :** Traversée des Runtime Boundaries lors de la synchronisation
-- **Traçabilité complète :** Traçabilité des opérations de synchronisation
+- **OpÃ©rations de synchronisation :** Utilisation des opÃ©rations CoreDataAPI pour la synchronisation
+- **Validation obligatoire :** TraversÃ©e des Runtime Boundaries lors de la synchronisation
+- **TraÃ§abilitÃ© complÃ¨te :** TraÃ§abilitÃ© des opÃ©rations de synchronisation
 
-**Cohérence garantie :**
+**CohÃ©rence garantie :**
 
-La synchronisation garantit que toutes les opérations respectent le contrat CoreDataAPI. Aucune opération non autorisée n'est utilisée.
+La synchronisation garantit que toutes les opÃ©rations respectent le contrat CoreDataAPI. Aucune opÃ©ration non autorisÃ©e n'est utilisÃ©e.
 
 ### 8.2. Respect des garanties CoreDataAPI
 
@@ -389,13 +389,13 @@ La synchronisation garantit que toutes les opérations respectent le contrat Cor
 La synchronisation respecte les garanties offertes par le CoreDataAPI Contract.
 
 **Points d'interaction :**
-- **G-API-1 :** Traitement prévisible → Synchronisation prévisible pour les opérations valides
-- **G-API-4 :** Atomicité garantie → Atomicité de la synchronisation
-- **G-API-8 :** Traçabilité complète → Traçabilité de la synchronisation
+- **G-API-1 :** Traitement prÃ©visible â†’ Synchronisation prÃ©visible pour les opÃ©rations valides
+- **G-API-4 :** AtomicitÃ© garantie â†’ AtomicitÃ© de la synchronisation
+- **G-API-8 :** TraÃ§abilitÃ© complÃ¨te â†’ TraÃ§abilitÃ© de la synchronisation
 
-**Cohérence garantie :**
+**CohÃ©rence garantie :**
 
-La synchronisation garantit que toutes les garanties CoreDataAPI sont respectées. Aucune violation des garanties G-API-1 à G-API-11 n'est autorisée.
+La synchronisation garantit que toutes les garanties CoreDataAPI sont respectÃ©es. Aucune violation des garanties G-API-1 Ã  G-API-11 n'est autorisÃ©e.
 
 ---
 
@@ -405,415 +405,416 @@ La synchronisation garantit que toutes les garanties CoreDataAPI sont respectée
 
 **Relation formelle :**
 
-Toute opération soumise lors de la synchronisation traverse les Runtime Boundaries définies dans le Runtime Boundary & Enforcement Contract.
+Toute opÃ©ration soumise lors de la synchronisation traverse les Runtime Boundaries dÃ©finies dans le Runtime Boundary & Enforcement Contract.
 
 **Points d'interaction :**
 - **Boundary de contexte :** Validation du contexte lors de la synchronisation
 - **Boundary de permissions :** Validation des permissions lors de la synchronisation
-- **Boundary de cohérence :** Validation de la cohérence lors de la synchronisation
-- **Boundary de contournement :** Détection des tentatives de contournement lors de la synchronisation
+- **Boundary de cohÃ©rence :** Validation de la cohÃ©rence lors de la synchronisation
+- **Boundary de contournement :** DÃ©tection des tentatives de contournement lors de la synchronisation
 
-**Cohérence garantie :**
+**CohÃ©rence garantie :**
 
-La synchronisation garantit que toutes les Runtime Boundaries sont respectées. Aucune opération ne contourne les boundaries.
+La synchronisation garantit que toutes les Runtime Boundaries sont respectÃ©es. Aucune opÃ©ration ne contourne les boundaries.
 
-### 9.2. Réponses systémiques lors de la synchronisation
+### 9.2. RÃ©ponses systÃ©miques lors de la synchronisation
 
 **Relation formelle :**
 
-Les réponses systémiques définies dans le Runtime Boundary & Enforcement Contract s'appliquent aux opérations de synchronisation.
+Les rÃ©ponses systÃ©miques dÃ©finies dans le Runtime Boundary & Enforcement Contract s'appliquent aux opÃ©rations de synchronisation.
 
 **Points d'interaction :**
-- **R1 : Rejet :** Rejet des opérations non valides lors de la synchronisation
-- **R3 : Quarantaine :** Mise en quarantaine en cas de violations répétées lors de la synchronisation
-- **R4 : Dégradation contrôlée :** Dégradation contrôlée en cas de charge excessive lors de la synchronisation
+- **R1 : Rejet :** Rejet des opÃ©rations non valides lors de la synchronisation
+- **R3 : Quarantaine :** Mise en quarantaine en cas de violations rÃ©pÃ©tÃ©es lors de la synchronisation
+- **R4 : DÃ©gradation contrÃ´lÃ©e :** DÃ©gradation contrÃ´lÃ©e en cas de charge excessive lors de la synchronisation
 
-**Cohérence garantie :**
+**CohÃ©rence garantie :**
 
-La synchronisation garantit que toutes les réponses systémiques sont appliquées selon le Runtime Boundary & Enforcement Contract. Aucune exception n'est autorisée.
+La synchronisation garantit que toutes les rÃ©ponses systÃ©miques sont appliquÃ©es selon le Runtime Boundary & Enforcement Contract. Aucune exception n'est autorisÃ©e.
 
 ---
 
-## 10. Invariants systémiques de synchronisation
+## 10. Invariants systÃ©miques de synchronisation
 
 ### 10.1. Invariants globaux
 
-**Invariant SYNC-INST-1 : Autorité définitive de la Mère**
+**Invariant SYNC-INST-1 : AutoritÃ© dÃ©finitive de la MÃ¨re**
 
-L'Instance Mère exerce toujours une autorité de référence exclusive sur toutes les décisions de synchronisation. Ses décisions sont définitives et non négociables.
+L'Instance MÃ¨re exerce toujours une autoritÃ© de rÃ©fÃ©rence exclusive sur toutes les dÃ©cisions de synchronisation. Ses dÃ©cisions sont dÃ©finitives et non nÃ©gociables.
 
-**Invariant SYNC-INST-2 : Reconnaissance de l'autorité par la Fille**
+**Invariant SYNC-INST-2 : Reconnaissance de l'autoritÃ© par la Fille**
 
-L'Instance Fille reconnaît toujours l'autorité supérieure de l'Instance Mère et accepte ses décisions sans contestation.
+L'Instance Fille reconnaÃ®t toujours l'autoritÃ© supÃ©rieure de l'Instance MÃ¨re et accepte ses dÃ©cisions sans contestation.
 
 **Invariant SYNC-INST-3 : Validation obligatoire**
 
-Toute opération soumise lors de la synchronisation est toujours validée par l'Instance Mère avant application. Aucune opération non validée n'est appliquée.
+Toute opÃ©ration soumise lors de la synchronisation est toujours validÃ©e par l'Instance MÃ¨re avant application. Aucune opÃ©ration non validÃ©e n'est appliquÃ©e.
 
-**Invariant SYNC-INST-4 : Cohérence post-synchronisation**
+**Invariant SYNC-INST-4 : CohÃ©rence post-synchronisation**
 
-Après synchronisation réussie, l'état de l'Instance Fille est toujours cohérent avec l'état de référence de l'Instance Mère.
+AprÃ¨s synchronisation rÃ©ussie, l'Ã©tat de l'Instance Fille est toujours cohÃ©rent avec l'Ã©tat de rÃ©fÃ©rence de l'Instance MÃ¨re.
 
-**Conformité LOI-3 et LOI-4 :** Cet invariant respecte **LOI-3** (l'état local est souverain) en garantissant que l'état local de l'Instance Fille est valable localement jusqu'à la réconciliation explicite, et **LOI-4** (pas de temps global requis) en utilisant des deltas et des points de synchronisation plutôt que des timestamps absolus pour déterminer la cohérence.
+**ConformitÃ© LOI-3 et LOI-4 :** Cet invariant respecte **LOI-3** (l'Ã©tat local est souverain) en garantissant que l'Ã©tat local de l'Instance Fille est valable localement jusqu'Ã  la rÃ©conciliation explicite, et **LOI-4** (pas de temps global requis) en utilisant des deltas et des points de synchronisation plutÃ´t que des timestamps absolus pour dÃ©terminer la cohÃ©rence.
 
-**Invariant SYNC-INST-5 : Traçabilité complète**
+**Invariant SYNC-INST-5 : TraÃ§abilitÃ© complÃ¨te**
 
-Toute synchronisation est toujours tracée de manière complète, permettant l'audit et le debugging.
+Toute synchronisation est toujours tracÃ©e de maniÃ¨re complÃ¨te, permettant l'audit et le debugging.
 
-**Invariant SYNC-INST-6 : Atomicité de la synchronisation**
+**Invariant SYNC-INST-6 : AtomicitÃ© de la synchronisation**
 
-Une synchronisation est toujours atomique. Elle est complétée entièrement ou pas du tout.
+Une synchronisation est toujours atomique. Elle est complÃ©tÃ©e entiÃ¨rement ou pas du tout.
 
-### 10.2. Invariants de résolution de conflits
+### 10.2. Invariants de rÃ©solution de conflits
 
-**Invariant CONFLICT-INST-1 : Résolution par la Mère**
+**Invariant CONFLICT-INST-1 : RÃ©solution par la MÃ¨re**
 
-Tout conflit est toujours résolu par l'Instance Mère. Sa décision est définitive.
+Tout conflit est toujours rÃ©solu par l'Instance MÃ¨re. Sa dÃ©cision est dÃ©finitive.
 
 **Invariant CONFLICT-INST-2 : Acceptation par la Fille**
 
-L'Instance Fille accepte toujours la résolution de l'Instance Mère sans contestation.
+L'Instance Fille accepte toujours la rÃ©solution de l'Instance MÃ¨re sans contestation.
 
-**Invariant CONFLICT-INST-3 : Traçabilité des conflits**
+**Invariant CONFLICT-INST-3 : TraÃ§abilitÃ© des conflits**
 
-Tout conflit détecté est toujours tracé avec son type et sa résolution.
+Tout conflit dÃ©tectÃ© est toujours tracÃ© avec son type et sa rÃ©solution.
 
 ---
 
-## 11. Schémas ASCII conceptuels
+## 11. SchÃ©mas ASCII conceptuels
 
-### 11.1. Flux de synchronisation Fille → Mère
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│              FLUX DE SYNCHRONISATION FILLE → MÈRE            │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              INSTANCE FILLE                          │   │
-│  │                                                       │   │
-│  │  État local :                                        │   │
-│  │  • Opérations locales appliquées                    │   │
-│  │  • Marquées pour synchronisation                    │   │
-│  │  • En attente de validation définitive              │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                        │                                     │
-│                        │ 1. Déclenchement synchronisation   │
-│                        │    (initié par Fille)               │
-│                        ▼                                     │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              CALCUL DES DIFFÉRENCES                   │   │
-│  │                                                       │   │
-│  │  • Comparaison état local vs état référence          │   │
-│  │  • Identification des opérations à synchroniser      │   │
-│  │  • Préparation des opérations pour validation       │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                        │                                     │
-│                        │ 2. Soumission des opérations       │
-│                        │    (Fille → Mère)                 │
-│                        ▼                                     │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              INSTANCE MÈRE                          │   │
-│  │                                                       │   │
-│  │  3. Validation des opérations :                    │   │
-│  │     ✓ Permissions vérifiées                         │   │
-│  │     ✓ Cohérence validée                             │   │
-│  │     ✓ Contraintes respectées                        │   │
-│  │     ✓ Conflits détectés et résolus                 │   │
-│  │                                                       │   │
-│  │  4. Décision définitive :                            │   │
-│  │     • Opérations validées → Appliquées              │   │
-│  │     • Opérations rejetées → Annulées                │   │
-│  │     • Conflits résolus selon autorité de la Mère    │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                        │                                     │
-│                        │ 5. Retour des décisions            │
-│                        │    (Mère → Fille)                 │
-│                        ▼                                     │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              INSTANCE FILLE                          │   │
-│  │                                                       │   │
-│  │  6. Application des décisions :                      │   │
-│  │     • Opérations validées → Conservées localement  │   │
-│  │     • Opérations rejetées → Annulées localement     │   │
-│  │     • Résolutions de conflits → Appliquées          │   │
-│  │                                                       │   │
-│  │  7. Mise à jour état de synchronisation            │   │
-│  │                                                       │   │
-│  │  État final :                                        │   │
-│  │  • Cohérence avec Instance Mère garantie            │   │
-│  │  • Toutes les opérations validées ou annulées      │   │
-│  │  • Tous les conflits résolus                        │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                              │
-│  PRINCIPE :                                                 │
-│  L'Instance Mère a l'autorité définitive sur toutes        │
-│  les validations et résolutions de conflits. Les          │
-│  décisions de l'Instance Mère sont non négociables et      │
-│  s'appliquent à l'Instance Fille.                          │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### 11.2. Types de conflits et résolution
+### 11.1. Flux de synchronisation Fille â†’ MÃ¨re
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│           TYPES DE CONFLITS ET RÉSOLUTION                    │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  CONFLIT AUTORITAIRE                                 │   │
-│  │  ──────────────────                                  │   │
-│  │                                                       │   │
-│  │  Situation :                                         │   │
-│  │  Opération locale Fille vs décision définitive Mère │   │
-│  │                                                       │   │
-│  │  Exemple :                                           │   │
-│  │  • Fille modifie entité X                            │   │
-│  │  • Mère a supprimé entité X                          │   │
-│  │                                                       │   │
-│  │  Résolution :                                         │   │
-│  │  → Décision de la Mère appliquée                    │   │
-│  │  → Opération de la Fille annulée                    │   │
-│  │  → Autorité définitive de la Mère                  │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  CONFLIT TEMPOREL                                    │   │
-│  │  ────────────────                                    │   │
-│  │                                                       │   │
-│  │  Situation :                                         │   │
-│  │  Modifications concurrentes sur même entité         │   │
-│  │                                                       │   │
-│  │  Exemple :                                           │   │
-│  │  • Fille modifie attribut A à T1                    │   │
-│  │  • Mère modifie attribut A à T2                      │   │
-│  │  • Synchronisation à T3                             │   │
-│  │                                                       │   │
-│  │  Résolution :                                         │   │
-│  │  → Mère résout selon ses règles                    │   │
-│  │  → Application de la Mère ou adaptation            │   │
-│  │  → Autorité définitive de la Mère                  │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  CONFLIT SÉMANTIQUE                                  │   │
-│  │  ──────────────────                                  │   │
-│  │                                                       │   │
-│  │  Situation :                                         │   │
-│  │  Opération Fille viole contraintes de cohérence      │   │
-│  │                                                       │   │
-│  │  Exemple :                                           │   │
-│  │  • Fille crée entité violant contrainte d'unicité   │   │
-│  │  • Mère détecte violation lors validation           │   │
-│  │                                                       │   │
-│  │  Résolution :                                         │   │
-│  │  → Mère rejette ou propose adaptation              │   │
-│  │  → Fille accepte décision de la Mère                │   │
-│  │  → Autorité définitive de la Mère                  │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                              │
-│  PRINCIPE COMMUN :                                          │
-│  ═════════════════                                          │
-│  L'Instance Mère a autorité définitive sur TOUS les        │
-│  conflits. L'Instance Fille accepte TOUTES les décisions. │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚              FLUX DE SYNCHRONISATION FILLE â†’ MÃˆRE            â”‚
+â”‚                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚              INSTANCE FILLE                          â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  Ã‰tat local :                                        â”‚   â”‚
+â”‚  â”‚  â€¢ OpÃ©rations locales appliquÃ©es                    â”‚   â”‚
+â”‚  â”‚  â€¢ MarquÃ©es pour synchronisation                    â”‚   â”‚
+â”‚  â”‚  â€¢ En attente de validation dÃ©finitive              â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚                        â”‚                                     â”‚
+â”‚                        â”‚ 1. DÃ©clenchement synchronisation   â”‚
+â”‚                        â”‚    (initiÃ© par Fille)               â”‚
+â”‚                        â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚              CALCUL DES DIFFÃ‰RENCES                   â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  â€¢ Comparaison Ã©tat local vs Ã©tat rÃ©fÃ©rence          â”‚   â”‚
+â”‚  â”‚  â€¢ Identification des opÃ©rations Ã  synchroniser      â”‚   â”‚
+â”‚  â”‚  â€¢ PrÃ©paration des opÃ©rations pour validation       â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚                        â”‚                                     â”‚
+â”‚                        â”‚ 2. Soumission des opÃ©rations       â”‚
+â”‚                        â”‚    (Fille â†’ MÃ¨re)                 â”‚
+â”‚                        â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚              INSTANCE MÃˆRE                          â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  3. Validation des opÃ©rations :                    â”‚   â”‚
+â”‚  â”‚     âœ“ Permissions vÃ©rifiÃ©es                         â”‚   â”‚
+â”‚  â”‚     âœ“ CohÃ©rence validÃ©e                             â”‚   â”‚
+â”‚  â”‚     âœ“ Contraintes respectÃ©es                        â”‚   â”‚
+â”‚  â”‚     âœ“ Conflits dÃ©tectÃ©s et rÃ©solus                 â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  4. DÃ©cision dÃ©finitive :                            â”‚   â”‚
+â”‚  â”‚     â€¢ OpÃ©rations validÃ©es â†’ AppliquÃ©es              â”‚   â”‚
+â”‚  â”‚     â€¢ OpÃ©rations rejetÃ©es â†’ AnnulÃ©es                â”‚   â”‚
+â”‚  â”‚     â€¢ Conflits rÃ©solus selon autoritÃ© de la MÃ¨re    â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚                        â”‚                                     â”‚
+â”‚                        â”‚ 5. Retour des dÃ©cisions            â”‚
+â”‚                        â”‚    (MÃ¨re â†’ Fille)                 â”‚
+â”‚                        â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚              INSTANCE FILLE                          â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  6. Application des dÃ©cisions :                      â”‚   â”‚
+â”‚  â”‚     â€¢ OpÃ©rations validÃ©es â†’ ConservÃ©es localement  â”‚   â”‚
+â”‚  â”‚     â€¢ OpÃ©rations rejetÃ©es â†’ AnnulÃ©es localement     â”‚   â”‚
+â”‚  â”‚     â€¢ RÃ©solutions de conflits â†’ AppliquÃ©es          â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  7. Mise Ã  jour Ã©tat de synchronisation            â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  Ã‰tat final :                                        â”‚   â”‚
+â”‚  â”‚  â€¢ CohÃ©rence avec Instance MÃ¨re garantie            â”‚   â”‚
+â”‚  â”‚  â€¢ Toutes les opÃ©rations validÃ©es ou annulÃ©es      â”‚   â”‚
+â”‚  â”‚  â€¢ Tous les conflits rÃ©solus                        â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚                                                              â”‚
+â”‚  PRINCIPE :                                                 â”‚
+â”‚  L'Instance MÃ¨re a l'autoritÃ© dÃ©finitive sur toutes        â”‚
+â”‚  les validations et rÃ©solutions de conflits. Les          â”‚
+â”‚  dÃ©cisions de l'Instance MÃ¨re sont non nÃ©gociables et      â”‚
+â”‚  s'appliquent Ã  l'Instance Fille.                          â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### 11.3. Flux de résolution de conflit
+### 11.2. Types de conflits et rÃ©solution
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│              FLUX DE RÉSOLUTION DE CONFLIT                   │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              DÉTECTION DE CONFLIT                     │   │
-│  │                                                       │   │
-│  │  • Type de conflit identifié                        │   │
-│  │    (Autoritaire / Temporel / Sémantique)            │   │
-│  │  • Contexte du conflit analysé                      │   │
-│  │  • Opérations en conflit identifiées                │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                        │                                     │
-│                        │ Conflit détecté                    │
-│                        ▼                                     │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              INSTANCE MÈRE                            │   │
-│  │              (Autorité définitive)                    │   │
-│  │                                                       │   │
-│  │  1. Analyse du conflit :                             │   │
-│  │     • Nature du conflit                              │   │
-│  │     • Impact sur la cohérence                        │   │
-│  │     • Règles de résolution applicables               │   │
-│  │                                                       │   │
-│  │  2. Décision définitive :                            │   │
-│  │     • Application de l'opération Mère               │   │
-│  │     • Annulation de l'opération Fille               │   │
-│  │     • Adaptation de l'opération Fille              │   │
-│  │     • Rejet de l'opération Fille                    │   │
-│  │                                                       │   │
-│  │  3. Traçabilité de la décision :                    │   │
-│  │     • Type de conflit tracé                         │   │
-│  │     • Décision tracée                               │   │
-│  │     • Justification tracée                         │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                        │                                     │
-│                        │ Décision définitive                │
-│                        ▼                                     │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              INSTANCE FILLE                          │   │
-│  │              (Acceptation obligatoire)                │   │
-│  │                                                       │   │
-│  │  4. Réception de la décision :                       │   │
-│  │     • Décision de la Mère reçue                     │   │
-│  │     • Acceptation sans contestation                 │   │
-│  │                                                       │   │
-│  │  5. Application de la décision :                    │   │
-│  │     • Opération Mère appliquée localement          │   │
-│  │     • Opération Fille annulée ou adaptée           │   │
-│  │     • État local mis à jour                        │   │
-│  │                                                       │   │
-│  │  6. Traçabilité de l'acceptation :                  │   │
-│  │     • Acceptation tracée                           │   │
-│  │     • Application tracée                           │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                              │
-│  PRINCIPE :                                                 │
-│  L'Instance Mère décide. L'Instance Fille accepte.         │
-│  Aucune négociation n'est possible.                         │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚           TYPES DE CONFLITS ET RÃ‰SOLUTION                    â”‚
+â”‚                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚  CONFLIT AUTORITAIRE                                 â”‚   â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                                  â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  Situation :                                         â”‚   â”‚
+â”‚  â”‚  OpÃ©ration locale Fille vs dÃ©cision dÃ©finitive MÃ¨re â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  Exemple :                                           â”‚   â”‚
+â”‚  â”‚  â€¢ Fille modifie entitÃ© X                            â”‚   â”‚
+â”‚  â”‚  â€¢ MÃ¨re a supprimÃ© entitÃ© X                          â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  RÃ©solution :                                         â”‚   â”‚
+â”‚  â”‚  â†’ DÃ©cision de la MÃ¨re appliquÃ©e                    â”‚   â”‚
+â”‚  â”‚  â†’ OpÃ©ration de la Fille annulÃ©e                    â”‚   â”‚
+â”‚  â”‚  â†’ AutoritÃ© dÃ©finitive de la MÃ¨re                  â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚  CONFLIT TEMPOREL                                    â”‚   â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                                    â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  Situation :                                         â”‚   â”‚
+â”‚  â”‚  Modifications concurrentes sur mÃªme entitÃ©         â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  Exemple :                                           â”‚   â”‚
+â”‚  â”‚  â€¢ Fille modifie attribut A Ã  T1                    â”‚   â”‚
+â”‚  â”‚  â€¢ MÃ¨re modifie attribut A Ã  T2                      â”‚   â”‚
+â”‚  â”‚  â€¢ Synchronisation Ã  T3                             â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  RÃ©solution :                                         â”‚   â”‚
+â”‚  â”‚  â†’ MÃ¨re rÃ©sout selon ses rÃ¨gles                    â”‚   â”‚
+â”‚  â”‚  â†’ Application de la MÃ¨re ou adaptation            â”‚   â”‚
+â”‚  â”‚  â†’ AutoritÃ© dÃ©finitive de la MÃ¨re                  â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚  CONFLIT SÃ‰MANTIQUE                                  â”‚   â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                                  â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  Situation :                                         â”‚   â”‚
+â”‚  â”‚  OpÃ©ration Fille viole contraintes de cohÃ©rence      â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  Exemple :                                           â”‚   â”‚
+â”‚  â”‚  â€¢ Fille crÃ©e entitÃ© violant contrainte d'unicitÃ©   â”‚   â”‚
+â”‚  â”‚  â€¢ MÃ¨re dÃ©tecte violation lors validation           â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  RÃ©solution :                                         â”‚   â”‚
+â”‚  â”‚  â†’ MÃ¨re rejette ou propose adaptation              â”‚   â”‚
+â”‚  â”‚  â†’ Fille accepte dÃ©cision de la MÃ¨re                â”‚   â”‚
+â”‚  â”‚  â†’ AutoritÃ© dÃ©finitive de la MÃ¨re                  â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚                                                              â”‚
+â”‚  PRINCIPE COMMUN :                                          â”‚
+â”‚  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•                                          â”‚
+â”‚  L'Instance MÃ¨re a autoritÃ© dÃ©finitive sur TOUS les        â”‚
+â”‚  conflits. L'Instance Fille accepte TOUTES les dÃ©cisions. â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```
+
+### 11.3. Flux de rÃ©solution de conflit
+
+```
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚              FLUX DE RÃ‰SOLUTION DE CONFLIT                   â”‚
+â”‚                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚              DÃ‰TECTION DE CONFLIT                     â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  â€¢ Type de conflit identifiÃ©                        â”‚   â”‚
+â”‚  â”‚    (Autoritaire / Temporel / SÃ©mantique)            â”‚   â”‚
+â”‚  â”‚  â€¢ Contexte du conflit analysÃ©                      â”‚   â”‚
+â”‚  â”‚  â€¢ OpÃ©rations en conflit identifiÃ©es                â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚                        â”‚                                     â”‚
+â”‚                        â”‚ Conflit dÃ©tectÃ©                    â”‚
+â”‚                        â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚              INSTANCE MÃˆRE                            â”‚   â”‚
+â”‚  â”‚              (AutoritÃ© dÃ©finitive)                    â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  1. Analyse du conflit :                             â”‚   â”‚
+â”‚  â”‚     â€¢ Nature du conflit                              â”‚   â”‚
+â”‚  â”‚     â€¢ Impact sur la cohÃ©rence                        â”‚   â”‚
+â”‚  â”‚     â€¢ RÃ¨gles de rÃ©solution applicables               â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  2. DÃ©cision dÃ©finitive :                            â”‚   â”‚
+â”‚  â”‚     â€¢ Application de l'opÃ©ration MÃ¨re               â”‚   â”‚
+â”‚  â”‚     â€¢ Annulation de l'opÃ©ration Fille               â”‚   â”‚
+â”‚  â”‚     â€¢ Adaptation de l'opÃ©ration Fille              â”‚   â”‚
+â”‚  â”‚     â€¢ Rejet de l'opÃ©ration Fille                    â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  3. TraÃ§abilitÃ© de la dÃ©cision :                    â”‚   â”‚
+â”‚  â”‚     â€¢ Type de conflit tracÃ©                         â”‚   â”‚
+â”‚  â”‚     â€¢ DÃ©cision tracÃ©e                               â”‚   â”‚
+â”‚  â”‚     â€¢ Justification tracÃ©e                         â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚                        â”‚                                     â”‚
+â”‚                        â”‚ DÃ©cision dÃ©finitive                â”‚
+â”‚                        â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚              INSTANCE FILLE                          â”‚   â”‚
+â”‚  â”‚              (Acceptation obligatoire)                â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  4. RÃ©ception de la dÃ©cision :                       â”‚   â”‚
+â”‚  â”‚     â€¢ DÃ©cision de la MÃ¨re reÃ§ue                     â”‚   â”‚
+â”‚  â”‚     â€¢ Acceptation sans contestation                 â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  5. Application de la dÃ©cision :                    â”‚   â”‚
+â”‚  â”‚     â€¢ OpÃ©ration MÃ¨re appliquÃ©e localement          â”‚   â”‚
+â”‚  â”‚     â€¢ OpÃ©ration Fille annulÃ©e ou adaptÃ©e           â”‚   â”‚
+â”‚  â”‚     â€¢ Ã‰tat local mis Ã  jour                        â”‚   â”‚
+â”‚  â”‚                                                       â”‚   â”‚
+â”‚  â”‚  6. TraÃ§abilitÃ© de l'acceptation :                  â”‚   â”‚
+â”‚  â”‚     â€¢ Acceptation tracÃ©e                           â”‚   â”‚
+â”‚  â”‚     â€¢ Application tracÃ©e                           â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚                                                              â”‚
+â”‚  PRINCIPE :                                                 â”‚
+â”‚  L'Instance MÃ¨re dÃ©cide. L'Instance Fille accepte.         â”‚
+â”‚  Aucune nÃ©gociation n'est possible.                         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
 
 ## 12. Conclusion contractuelle
 
-Ce contrat établit de manière définitive et non négociable les règles de synchronisation et de résolution de conflits entre Instance Mère et Instance Fille dans le système Miyukini Core System v2.4.
+Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable les rÃ¨gles de synchronisation et de rÃ©solution de conflits entre Instance MÃ¨re et Instance Fille dans le systÃ¨me Miyukini Core System v2.4.
 
 Il garantit que :
-- la synchronisation respecte la hiérarchie autoritaire,
-- l'Instance Mère a autorité définitive sur toutes les décisions,
-- l'Instance Fille accepte toutes les décisions sans contestation,
-- la cohérence est garantie après synchronisation,
-- tous les conflits sont résolus selon les règles établies,
-- la traçabilité est complète pour l'audit et le debugging.
+- la synchronisation respecte la hiÃ©rarchie autoritaire,
+- l'Instance MÃ¨re a autoritÃ© dÃ©finitive sur toutes les dÃ©cisions,
+- l'Instance Fille accepte toutes les dÃ©cisions sans contestation,
+- la cohÃ©rence est garantie aprÃ¨s synchronisation,
+- tous les conflits sont rÃ©solus selon les rÃ¨gles Ã©tablies,
+- la traÃ§abilitÃ© est complÃ¨te pour l'audit et le debugging.
 
-Ce contrat est de statut **FONDATION**. Toute évolution du système DOIT s'y conformer. Aucune exception n'est autorisée.
+Ce contrat est de statut **FONDATION**. Toute Ã©volution du systÃ¨me DOIT s'y conformer. Aucune exception n'est autorisÃ©e.
 
 ---
 
-**Document créé le :** 2026-01-25  
+**Document crÃ©Ã© le :** 2026-01-25  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, KindMother Documentation, KindMother Instance Model Contract, KindMother Authority Graph & Cross-Domain Contract, KindMother CoreDataAPI Contract, KindMother Runtime Boundary & Enforcement Contract  
-**Type :** Contrat de synchronisation et résolution de conflits non négociable
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, KindMother Documentation, KindMother Instance Model Contract, KindMother Authority Graph & Cross-Domain Contract, KindMother CoreDataAPI Contract, KindMother Runtime Boundary & Enforcement Contract  
+**Type :** Contrat de synchronisation et rÃ©solution de conflits non nÃ©gociable
 
 ---
 
-## 13. Mini log — erreurs / warnings / ambiguïtés rencontrées et corrigées
+## 13. Mini log â€” erreurs / warnings / ambiguÃ¯tÃ©s rencontrÃ©es et corrigÃ©es
 
-### Ambiguïté A1 : Distinction entre conflit autoritaire et conflit technique
+### AmbiguÃ¯tÃ© A1 : Distinction entre conflit autoritaire et conflit technique
 
-**Ambiguïté rencontrée :**
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
 
-Il était nécessaire de clarifier la distinction entre un conflit autoritaire (résolu par l'autorité de la Mère) et un conflit technique (problème de communication, de format, etc.). Sans cette clarification, il y avait un risque de confusion entre les conflits conceptuels et les problèmes techniques.
+Il Ã©tait nÃ©cessaire de clarifier la distinction entre un conflit autoritaire (rÃ©solu par l'autoritÃ© de la MÃ¨re) et un conflit technique (problÃ¨me de communication, de format, etc.). Sans cette clarification, il y avait un risque de confusion entre les conflits conceptuels et les problÃ¨mes techniques.
 
-**Décision prise :**
+**DÃ©cision prise :**
 
-Définition explicite de trois types de conflits conceptuels (autoritaire, temporel, sémantique) qui sont tous résolus par l'autorité définitive de l'Instance Mère. Les conflits techniques (communication, format, etc.) sont hors périmètre de ce contrat et relèvent des mécanismes d'implémentation.
-
-**Justification :**
-
-Cette distinction garantit que le contrat se concentre sur les conflits conceptuels et systémiques, pas sur les problèmes techniques d'implémentation. Elle préserve la nature conceptuelle du contrat.
-
-**Correction effectuée :**
-
-Section 3 rédigée avec définition explicite des trois types de conflits conceptuels, en excluant explicitement les conflits techniques.
-
-### Ambiguïté A2 : Nature de la résolution de conflit
-
-**Ambiguïté rencontrée :**
-
-Il était nécessaire de clarifier que la résolution de conflit est conceptuelle et que l'Instance Mère peut décider d'appliquer, d'annuler, ou d'adapter une opération, sans prescrire de mécanisme technique de résolution.
-
-**Décision prise :**
-
-Définition de la résolution comme décision conceptuelle de l'Instance Mère, avec possibilité d'application, d'annulation, ou d'adaptation, sans prescrire de mécanisme technique. Les règles absolues garantissent que la Mère décide et que la Fille accepte.
+DÃ©finition explicite de trois types de conflits conceptuels (autoritaire, temporel, sÃ©mantique) qui sont tous rÃ©solus par l'autoritÃ© dÃ©finitive de l'Instance MÃ¨re. Les conflits techniques (communication, format, etc.) sont hors pÃ©rimÃ¨tre de ce contrat et relÃ¨vent des mÃ©canismes d'implÃ©mentation.
 
 **Justification :**
 
-Cette approche garantit que le contrat reste conceptuel et ne prescrit pas de mécanismes techniques de résolution. Elle préserve la flexibilité d'implémentation tout en garantissant l'autorité définitive de la Mère.
+Cette distinction garantit que le contrat se concentre sur les conflits conceptuels et systÃ©miques, pas sur les problÃ¨mes techniques d'implÃ©mentation. Elle prÃ©serve la nature conceptuelle du contrat.
 
-**Correction effectuée :**
+**Correction effectuÃ©e :**
 
-Sections 3 et 4 rédigées avec définition conceptuelle de la résolution, sans mécanismes techniques.
+Section 3 rÃ©digÃ©e avec dÃ©finition explicite des trois types de conflits conceptuels, en excluant explicitement les conflits techniques.
 
-### Ambiguïté A3 : Synchronisation bidirectionnelle vs unidirectionnelle
+### AmbiguÃ¯tÃ© A2 : Nature de la rÃ©solution de conflit
 
-**Ambiguïté rencontrée :**
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
 
-Il était nécessaire de clarifier si la synchronisation est bidirectionnelle (Fille ↔ Mère) ou uniquement Fille → Mère, et comment la propagation Mère → Fille s'intègre dans le modèle.
+Il Ã©tait nÃ©cessaire de clarifier que la rÃ©solution de conflit est conceptuelle et que l'Instance MÃ¨re peut dÃ©cider d'appliquer, d'annuler, ou d'adapter une opÃ©ration, sans prescrire de mÃ©canisme technique de rÃ©solution.
 
-**Décision prise :**
+**DÃ©cision prise :**
 
-Définition de la synchronisation comme conceptuellement bidirectionnelle :
-- Fille → Mère : Soumission des opérations locales à validation
-- Mère → Fille : Propagation des modifications validées
-
-Les deux directions respectent l'autorité définitive de la Mère. La soumission Fille → Mère est la direction principale de résolution de conflits.
+DÃ©finition de la rÃ©solution comme dÃ©cision conceptuelle de l'Instance MÃ¨re, avec possibilitÃ© d'application, d'annulation, ou d'adaptation, sans prescrire de mÃ©canisme technique. Les rÃ¨gles absolues garantissent que la MÃ¨re dÃ©cide et que la Fille accepte.
 
 **Justification :**
 
-Cette définition garantit que la synchronisation couvre à la fois la soumission des opérations locales et la propagation des modifications de la Mère, tout en respectant l'autorité définitive de la Mère.
+Cette approche garantit que le contrat reste conceptuel et ne prescrit pas de mÃ©canismes techniques de rÃ©solution. Elle prÃ©serve la flexibilitÃ© d'implÃ©mentation tout en garantissant l'autoritÃ© dÃ©finitive de la MÃ¨re.
 
-**Correction effectuée :**
+**Correction effectuÃ©e :**
 
-Section 2 rédigée avec clarification de la bidirectionnalité conceptuelle et de l'autorité définitive de la Mère dans les deux directions.
+Sections 3 et 4 rÃ©digÃ©es avec dÃ©finition conceptuelle de la rÃ©solution, sans mÃ©canismes techniques.
 
-### Ambiguïté A4 : Cohérence après synchronisation
+### AmbiguÃ¯tÃ© A3 : Synchronisation bidirectionnelle vs unidirectionnelle
 
-**Ambiguïté rencontrée :**
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
 
-Il était nécessaire de clarifier ce que signifie "cohérence après synchronisation" et si cette cohérence est absolue ou relative aux limites autorisées par le système.
+Il Ã©tait nÃ©cessaire de clarifier si la synchronisation est bidirectionnelle (Fille â†” MÃ¨re) ou uniquement Fille â†’ MÃ¨re, et comment la propagation MÃ¨re â†’ Fille s'intÃ¨gre dans le modÃ¨le.
 
-**Décision prise :**
+**DÃ©cision prise :**
 
-Définition de la cohérence post-synchronisation comme cohérence avec l'état de référence de l'Instance Mère, dans les limites autorisées par le système. La cohérence est garantie immédiatement après synchronisation réussie, mais peut être temporaire si de nouvelles opérations locales sont effectuées avant la prochaine synchronisation.
+DÃ©finition de la synchronisation comme conceptuellement bidirectionnelle :
+- Fille â†’ MÃ¨re : Soumission des opÃ©rations locales Ã  validation
+- MÃ¨re â†’ Fille : Propagation des modifications validÃ©es
 
-**Justification :**
-
-Cette définition garantit que la cohérence est maintenue après synchronisation tout en reconnaissant que l'Instance Fille peut fonctionner de manière autonome entre les synchronisations, créant une cohérence locale temporaire.
-
-**Correction effectuée :**
-
-Sections 4.4 et 5.1 rédigées avec clarification de la cohérence post-synchronisation et de ses limites.
-
-### Ambiguïté A5 : Atomicité de la synchronisation
-
-**Ambiguïté rencontrée :**
-
-Il était nécessaire de clarifier si l'atomicité de la synchronisation signifie que toutes les opérations sont traitées ensemble ou si chaque opération est traitée individuellement de manière atomique.
-
-**Décision prise :**
-
-Définition de l'atomicité comme traitement conceptuel de toutes les opérations soumises ensemble, avec application atomique de toutes les décisions. Si une synchronisation échoue, l'état reste inchangé. Aucune synchronisation partielle n'est laissée.
+Les deux directions respectent l'autoritÃ© dÃ©finitive de la MÃ¨re. La soumission Fille â†’ MÃ¨re est la direction principale de rÃ©solution de conflits.
 
 **Justification :**
 
-Cette définition garantit que la synchronisation est un processus atomique complet, pas une série d'opérations atomiques individuelles. Elle préserve l'intégrité en cas d'échec.
+Cette dÃ©finition garantit que la synchronisation couvre Ã  la fois la soumission des opÃ©rations locales et la propagation des modifications de la MÃ¨re, tout en respectant l'autoritÃ© dÃ©finitive de la MÃ¨re.
 
-**Correction effectuée :**
+**Correction effectuÃ©e :**
 
-Sections 4.6 et 5.3 rédigées avec clarification de l'atomicité de la synchronisation comme processus complet.
+Section 2 rÃ©digÃ©e avec clarification de la bidirectionnalitÃ© conceptuelle et de l'autoritÃ© dÃ©finitive de la MÃ¨re dans les deux directions.
 
-### Vérification de compatibilité
+### AmbiguÃ¯tÃ© A4 : CohÃ©rence aprÃ¨s synchronisation
 
-**Vérification effectuée :**
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
 
-Vérification systématique de la compatibilité avec les contrats existants (Instance Model Contract, Authority Graph & Cross-Domain Contract, CoreDataAPI Contract, Runtime Boundary & Enforcement Contract). Aucune contradiction détectée. Aucun invariant n'a été violé.
+Il Ã©tait nÃ©cessaire de clarifier ce que signifie "cohÃ©rence aprÃ¨s synchronisation" et si cette cohÃ©rence est absolue ou relative aux limites autorisÃ©es par le systÃ¨me.
+
+**DÃ©cision prise :**
+
+DÃ©finition de la cohÃ©rence post-synchronisation comme cohÃ©rence avec l'Ã©tat de rÃ©fÃ©rence de l'Instance MÃ¨re, dans les limites autorisÃ©es par le systÃ¨me. La cohÃ©rence est garantie immÃ©diatement aprÃ¨s synchronisation rÃ©ussie, mais peut Ãªtre temporaire si de nouvelles opÃ©rations locales sont effectuÃ©es avant la prochaine synchronisation.
+
+**Justification :**
+
+Cette dÃ©finition garantit que la cohÃ©rence est maintenue aprÃ¨s synchronisation tout en reconnaissant que l'Instance Fille peut fonctionner de maniÃ¨re autonome entre les synchronisations, crÃ©ant une cohÃ©rence locale temporaire.
+
+**Correction effectuÃ©e :**
+
+Sections 4.4 et 5.1 rÃ©digÃ©es avec clarification de la cohÃ©rence post-synchronisation et de ses limites.
+
+### AmbiguÃ¯tÃ© A5 : AtomicitÃ© de la synchronisation
+
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
+
+Il Ã©tait nÃ©cessaire de clarifier si l'atomicitÃ© de la synchronisation signifie que toutes les opÃ©rations sont traitÃ©es ensemble ou si chaque opÃ©ration est traitÃ©e individuellement de maniÃ¨re atomique.
+
+**DÃ©cision prise :**
+
+DÃ©finition de l'atomicitÃ© comme traitement conceptuel de toutes les opÃ©rations soumises ensemble, avec application atomique de toutes les dÃ©cisions. Si une synchronisation Ã©choue, l'Ã©tat reste inchangÃ©. Aucune synchronisation partielle n'est laissÃ©e.
+
+**Justification :**
+
+Cette dÃ©finition garantit que la synchronisation est un processus atomique complet, pas une sÃ©rie d'opÃ©rations atomiques individuelles. Elle prÃ©serve l'intÃ©gritÃ© en cas d'Ã©chec.
+
+**Correction effectuÃ©e :**
+
+Sections 4.6 et 5.3 rÃ©digÃ©es avec clarification de l'atomicitÃ© de la synchronisation comme processus complet.
+
+### VÃ©rification de compatibilitÃ©
+
+**VÃ©rification effectuÃ©e :**
+
+VÃ©rification systÃ©matique de la compatibilitÃ© avec les contrats existants (Instance Model Contract, Authority Graph & Cross-Domain Contract, CoreDataAPI Contract, Runtime Boundary & Enforcement Contract). Aucune contradiction dÃ©tectÃ©e. Aucun invariant n'a Ã©tÃ© violÃ©.
 
 **Conclusion :**
 
-Le contrat est strictement compatible avec le système contractuel existant. Il complète les contrats existants en définissant formellement les règles de synchronisation et de résolution de conflits.
+Le contrat est strictement compatible avec le systÃ¨me contractuel existant. Il complÃ¨te les contrats existants en dÃ©finissant formellement les rÃ¨gles de synchronisation et de rÃ©solution de conflits.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

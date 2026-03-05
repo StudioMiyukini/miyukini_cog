@@ -1,0 +1,154 @@
+﻿{
+    "identity":  {
+                     "sequence":  "2026-03-05-certifications-academy-rollout",
+                     "date":  "2026-03-05",
+                     "slug":  "certifications-academy-rollout",
+                     "generated_at":  "2026-03-05T15:17:17",
+                     "source":  "retrofit-existing-sequence"
+                 },
+    "tabs":  [
+                 {
+                     "id":  "p0",
+                     "label":  "P0",
+                     "groups":  [
+                                    {
+                                        "label":  "Documents P0",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Brief 2026-03-05-certifications-academy-rollout.md",
+                                                          "path":  "briefs/2026-03-05-certifications-academy-rollout.md"
+                                                      },
+                                                      {
+                                                          "label":  "Spec 2026-03-05-certifications-academy-rollout-spec.md",
+                                                          "path":  "specs/2026-03-05-certifications-academy-rollout-spec.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace p0-trace.md",
+                                                          "path":  "phases/p0-trace.md"
+                                                      }
+                                                  ]
+                                    },
+                                    {
+                                        "label":  "Liste des documents par temps",
+                                        "files":  [
+
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "p3",
+                     "label":  "P3",
+                     "groups":  [
+                                    {
+                                        "label":  "GPI",
+                                        "files":  [
+
+                                                  ]
+                                    },
+                                    {
+                                        "label":  "Taches par etapes",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Plan 2026-03-05-certifications-academy-rollout-plan.md",
+                                                          "path":  "plans_p3/2026-03-05-certifications-academy-rollout-plan.md"
+                                                      },
+                                                      {
+                                                          "label":  "Wave INDEX.md",
+                                                          "path":  "plans_p3/waves/INDEX.md"
+                                                      },
+                                                      {
+                                                          "label":  "Wave wave-01-security-compliance.md",
+                                                          "path":  "plans_p3/waves/wave-01-security-compliance.md"
+                                                      },
+                                                      {
+                                                          "label":  "Wave wave-02-architecture-quality.md",
+                                                          "path":  "plans_p3/waves/wave-02-architecture-quality.md"
+                                                      },
+                                                      {
+                                                          "label":  "Wave wave-03-product-delivery.md",
+                                                          "path":  "plans_p3/waves/wave-03-product-delivery.md"
+                                                      },
+                                                      {
+                                                          "label":  "Wave wave-04-platform-ops.md",
+                                                          "path":  "plans_p3/waves/wave-04-platform-ops.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace p3-trace.md",
+                                                          "path":  "phases/p3-trace.md"
+                                                      }
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "p4",
+                     "label":  "P4",
+                     "groups":  [
+                                    {
+                                        "label":  "Documents P4",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Audit 2026-03-05-certifications-academy-rollout-audit.md",
+                                                          "path":  "audits/2026-03-05-certifications-academy-rollout-audit.md"
+                                                      },
+                                                      {
+                                                          "label":  "Audit 2026-03-05-certifications-academy-rollout-efficiency.md",
+                                                          "path":  "audits/2026-03-05-certifications-academy-rollout-efficiency.md"
+                                                      },
+                                                      {
+                                                          "label":  "Audit 2026-03-05-certifications-academy-rollout-p5-validation.md",
+                                                          "path":  "audits/2026-03-05-certifications-academy-rollout-p5-validation.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace p4-trace.md",
+                                                          "path":  "phases/p4-trace.md"
+                                                      }
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "p5",
+                     "label":  "P5",
+                     "groups":  [
+                                    {
+                                        "label":  "Documents P5",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Validation 2026-03-05-certifications-academy-rollout-p5-validation.md",
+                                                          "path":  "audits/2026-03-05-certifications-academy-rollout-p5-validation.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace p5-trace.md",
+                                                          "path":  "phases/p5-trace.md"
+                                                      }
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "rapport-final",
+                     "label":  "Rapport final",
+                     "groups":  [
+                                    {
+                                        "label":  "Rapport final",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Rapport 2026-03-05-certifications-academy-rollout-report.md",
+                                                          "path":  "rapports_finaux/2026-03-05-certifications-academy-rollout-report.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace p6-trace.md",
+                                                          "path":  "phases/p6-trace.md"
+                                                      },
+                                                      {
+                                                          "label":  "Metrics 2026-03-05-certifications-academy-rollout.json",
+                                                          "path":  "metrics/2026-03-05-certifications-academy-rollout.json"
+                                                      }
+                                                  ]
+                                    }
+                                ]
+                 }
+             ]
+}

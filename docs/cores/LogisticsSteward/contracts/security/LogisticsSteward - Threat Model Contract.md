@@ -1,10 +1,10 @@
-# LogisticsSteward — Threat Model Contract
+﻿# LogisticsSteward â€” Threat Model Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document definit le **LogisticsSteward — Threat Model Contract** : un contrat normatif, non negociable, et de statut FONDATION qui etablit ce que LogisticsSteward considere comme une attaque, definit la surface d'attaque conceptuelle, et categorise les menaces sans jamais proposer de solution technique ou de mitigation.
+Ce document definit le **LogisticsSteward â€” Threat Model Contract** : un contrat normatif, non negociable, et de statut FONDATION qui etablit ce que LogisticsSteward considere comme une attaque, definit la surface d'attaque conceptuelle, et categorise les menaces sans jamais proposer de solution technique ou de mitigation.
 
 Ce contrat precise le modele de menace conceptuel, les types d'attaques reconnus, et leurs caracteristiques, constituant la base pour la securite systemique de LogisticsSteward.
 
@@ -26,12 +26,12 @@ Ce document est **contractuel, normatif, non discutable, et de statut FONDATION*
 ### Relation avec les autres contrats
 
 Ce contrat complete et respecte les documents contractuels existants :
-- **[LogisticsSteward — Documentation Fondatrice](../../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md)** : Definit la nature, le role, et les responsabilites de LogisticsSteward
-- **[LogisticsSteward — Quota Definition Contract](../resources/LogisticsSteward%20-%20Quota%20Definition%20Contract.md)** : Definit le modele des quotas (cible des attaques)
-- **[LogisticsSteward — Priority Management Contract](../resources/LogisticsSteward%20-%20Priority%20Management%20Contract.md)** : Definit le modele des priorites (cible des attaques)
-- **[LogisticsSteward — Resource Arbitration Contract](../resources/LogisticsSteward%20-%20Resource%20Arbitration%20Contract.md)** : Definit le processus d'arbitrage (cible des attaques)
-- **[LogisticsSteward — StrongFather Integration Contract](../integration/LogisticsSteward%20-%20StrongFather%20Integration%20Contract.md)** : Definit la validation des decisions (mecanisme de protection)
-- **[Miyukini Conceptual References — Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Ce contrat respecte **LOI-1** (aucune dependance externe critique) et **LOI-5** (cout proportionnel au hardware).
+- **[LogisticsSteward â€” Documentation Fondatrice](../../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md)** : Definit la nature, le role, et les responsabilites de LogisticsSteward
+- **[LogisticsSteward â€” Quota Definition Contract](../resources/LogisticsSteward%20-%20Quota%20Definition%20Contract.md)** : Definit le modele des quotas (cible des attaques)
+- **[LogisticsSteward â€” Priority Management Contract](../resources/LogisticsSteward%20-%20Priority%20Management%20Contract.md)** : Definit le modele des priorites (cible des attaques)
+- **[LogisticsSteward â€” Resource Arbitration Contract](../resources/LogisticsSteward%20-%20Resource%20Arbitration%20Contract.md)** : Definit le processus d'arbitrage (cible des attaques)
+- **[LogisticsSteward â€” StrongFather Integration Contract](../integration/LogisticsSteward%20-%20StrongFather%20Integration%20Contract.md)** : Definit la validation des decisions (mecanisme de protection)
+- **[Miyukini Conceptual References â€” Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Ce contrat respecte **LOI-1** (aucune dependance externe critique) et **LOI-5** (cout proportionnel au hardware).
 
 Il n'introduit aucune contradiction et constitue le modele de menace formel de LogisticsSteward.
 
@@ -196,7 +196,7 @@ Les elements suivants sont **hors de la surface d'attaque conceptuelle** de ce c
 - Tente de tromper l'evaluation des regles
 - Exploite la confiance dans les demandes
 
-**Gravite :** CRITIQUE — Une demande falsifiee acceptee peut entrainer une allocation indue de ressources.
+**Gravite :** CRITIQUE â€” Une demande falsifiee acceptee peut entrainer une allocation indue de ressources.
 
 ### 4.2. Injection de Regles Non Legitimes
 
@@ -219,7 +219,7 @@ Les elements suivants sont **hors de la surface d'attaque conceptuelle** de ce c
 - Peut avoir des effets durables
 - Impact sur toutes les entites concernees
 
-**Gravite :** CRITIQUE — Des regles falsifiees peuvent compromettre l'equite du systeme d'arbitrage.
+**Gravite :** CRITIQUE â€” Des regles falsifiees peuvent compromettre l'equite du systeme d'arbitrage.
 
 ### 4.3. Manipulation d'Etat Systeme
 
@@ -242,7 +242,7 @@ Les elements suivants sont **hors de la surface d'attaque conceptuelle** de ce c
 - Ne modifie pas les regles mais leur contexte d'application
 - Peut etre difficile a detecter
 
-**Gravite :** ELEVEE — Un etat falsifie peut entrainer des decisions d'arbitrage incorrectes a l'echelle du systeme.
+**Gravite :** ELEVEE â€” Un etat falsifie peut entrainer des decisions d'arbitrage incorrectes a l'echelle du systeme.
 
 ### 4.4. Escalade de Priorite
 
@@ -265,7 +265,7 @@ Les elements suivants sont **hors de la surface d'attaque conceptuelle** de ce c
 - Impact sur l'equite de l'arbitrage
 - Peut creer des situations de famine pour les entites a faible priorite
 
-**Gravite :** ELEVEE — L'escalade de priorite compromet l'equite et peut entrainer des deni de service pour les autres.
+**Gravite :** ELEVEE â€” L'escalade de priorite compromet l'equite et peut entrainer des deni de service pour les autres.
 
 ### 4.5. Exploitation de la Degradation
 
@@ -288,7 +288,7 @@ Les elements suivants sont **hors de la surface d'attaque conceptuelle** de ce c
 - Peut affecter toutes les entites du systeme
 - Impact potentiel sur la stabilite globale
 
-**Gravite :** ELEVEE — L'exploitation de la degradation peut destabiliser l'ensemble de l'ecosysteme.
+**Gravite :** ELEVEE â€” L'exploitation de la degradation peut destabiliser l'ensemble de l'ecosysteme.
 
 ### 4.6. Abus de Privileges MiyukiniAdmin
 
@@ -311,7 +311,7 @@ Les elements suivants sont **hors de la surface d'attaque conceptuelle** de ce c
 - Peut contourner la gouvernance normale
 - Impact potentiel maximal sur le systeme
 
-**Gravite :** CRITIQUE — MiyukiniAdmin compromis peut compromettre tout l'arbitrage.
+**Gravite :** CRITIQUE â€” MiyukiniAdmin compromis peut compromettre tout l'arbitrage.
 
 ### 4.7. Contournement de Validation StrongFather
 
@@ -334,7 +334,7 @@ Les elements suivants sont **hors de la surface d'attaque conceptuelle** de ce c
 - Contourne la separation des responsabilites
 - Compromet l'integrite de l'architecture
 
-**Gravite :** CRITIQUE — Le contournement de StrongFather rompt les garanties du systeme.
+**Gravite :** CRITIQUE â€” Le contournement de StrongFather rompt les garanties du systeme.
 
 ### 4.8. Saturation de l'Arbitrage
 
@@ -357,7 +357,7 @@ Les elements suivants sont **hors de la surface d'attaque conceptuelle** de ce c
 - Peut etre detecte par les patterns d'appels
 - Impact sur toutes les entites du systeme
 
-**Gravite :** MOYENNE — Compromet la disponibilite de l'arbitrage, pas directement son integrite.
+**Gravite :** MOYENNE â€” Compromet la disponibilite de l'arbitrage, pas directement son integrite.
 
 ### 4.9. Replay de Decisions
 
@@ -380,7 +380,7 @@ Les elements suivants sont **hors de la surface d'attaque conceptuelle** de ce c
 - Peut contourner les restrictions temporelles
 - Necessite l'acces a d'anciennes decisions
 
-**Gravite :** MOYENNE — Les decisions rejouees peuvent violer les quotas actuels mais sont detectables.
+**Gravite :** MOYENNE â€” Les decisions rejouees peuvent violer les quotas actuels mais sont detectables.
 
 ---
 
@@ -452,22 +452,22 @@ Les elements suivants sont **hors de la surface d'attaque conceptuelle** de ce c
 ### 5.4. Par impact sur l'ecosysteme
 
 **Impact sur le Kernel :**
-- Decisions d'arbitrage falsifiees → Le Kernel execute des allocations indues
-- Manipulation d'etat → Le Kernel peut recevoir des instructions basees sur un etat faux
+- Decisions d'arbitrage falsifiees â†’ Le Kernel execute des allocations indues
+- Manipulation d'etat â†’ Le Kernel peut recevoir des instructions basees sur un etat faux
 
 **Impact sur StrongFather :**
-- Contournement de validation → StrongFather ne peut plus garantir la conformite
-- Injection de regles → StrongFather doit valider des regles potentiellement corrompues
+- Contournement de validation â†’ StrongFather ne peut plus garantir la conformite
+- Injection de regles â†’ StrongFather doit valider des regles potentiellement corrompues
 
 **Impact sur MasterButler :**
-- Abus de priorite → Les capacites limitees par LogisticsSteward peuvent etre contournees
+- Abus de priorite â†’ Les capacites limitees par LogisticsSteward peuvent etre contournees
 
 **Impact sur WorrySentinel :**
-- Exploitation de degradation → Peut declencher des alertes de securite injustifiees
-- Manipulation d'etat → Peut masquer des situations reellement critiques
+- Exploitation de degradation â†’ Peut declencher des alertes de securite injustifiees
+- Manipulation d'etat â†’ Peut masquer des situations reellement critiques
 
 **Impact sur les Operateurs :**
-- Toutes les attaques → Les operateurs legitimes peuvent etre prives de ressources
+- Toutes les attaques â†’ Les operateurs legitimes peuvent etre prives de ressources
 
 ---
 
@@ -636,215 +636,215 @@ L'arbitrage est **equitable** : les memes regles s'appliquent a toutes les entit
 ### 9.1. Surface d'attaque
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│              SURFACE D'ATTAQUE CONCEPTUELLE                      │
-│                     LOGISTICSSTEWARD                             │
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │                    MONDE EXTERNE                            │ │
-│  │                                                             │ │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │ │
-│  │  │ Operateur    │  │ Operateur    │  │ MiyukiniAdmin│    │ │
-│  │  │ legitime     │  │ malveillant  │  │ (privileges) │    │ │
-│  │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘    │ │
-│  │         │                 │                 │             │ │
-│  └─────────┼─────────────────┼─────────────────┼─────────────┘ │
-│            │                 │                 │                │
-│            ▼                 ▼                 ▼                │
-│  ┌─────────────────────────────────────────────────────────────┐│
-│  │ SURF-LS-1 : Demandes d'Arbitrage                            ││
-│  │ ════════════════════════════════                            ││
-│  │                                                              ││
-│  │ Menaces : Falsification, Saturation, Usurpation             ││
-│  └─────────────────────────────────────────────────────────────┘│
-│            │                                                    │
-│            ▼                                                    │
-│  ┌─────────────────────────────────────────────────────────────┐│
-│  │ SURF-LS-2 : Etat Systeme Abstrait (depuis Kernel)           ││
-│  │ ─────────────────────────────────────────────               ││
-│  │ Menaces : Manipulation d'etat, Injection de faux seuils     ││
-│  └─────────────────────────────────────────────────────────────┘│
-│            │                                                    │
-│            ▼                                                    │
-│  ┌─────────────────────────────────────────────────────────────┐│
-│  │ SURF-LS-3 : Declaration de Regles                           ││
-│  │ ─────────────────────────────                               ││
-│  │ Menaces : Injection de regles, Modification non autorisee   ││
-│  └─────────────────────────────────────────────────────────────┘│
-│            │                                                    │
-│            ▼                                                    │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │                    LOGISTICSSTEWARD                         │ │
-│  │                    (Arbitre pur)                            │ │
-│  │                                                             │ │
-│  │  ┌──────────────────┐  ┌──────────────────┐               │ │
-│  │  │ Moteur           │  │ Regles           │               │ │
-│  │  │ d'Arbitrage      │  │ (Quotas,         │               │ │
-│  │  │ (Cible a         │  │  Priorites)      │               │ │
-│  │  │  proteger)       │  │ (Cible a         │               │ │
-│  │  │                  │  │  proteger)       │               │ │
-│  │  └──────────────────┘  └──────────────────┘               │ │
-│  └────────────────────────────────────────────────────────────┘ │
-│            │                                                    │
-│            ▼                                                    │
-│  ┌─────────────────────────────────────────────────────────────┐│
-│  │ SURF-LS-5 : Validation StrongFather                         ││
-│  │ ───────────────────────────────                             ││
-│  │ Menaces : Contournement, Falsification de validation        ││
-│  └─────────────────────────────────────────────────────────────┘│
-│            │                                                    │
-│            ▼                                                    │
-│  ┌─────────────────────────────────────────────────────────────┐│
-│  │ SURF-LS-6 : Transport BondingBrother                        ││
-│  │ ─────────────────────────────────                           ││
-│  │ Menaces : Interception, Replay, Modification en transit     ││
-│  └─────────────────────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚              SURFACE D'ATTAQUE CONCEPTUELLE                      â”‚
+â”‚                     LOGISTICSSTEWARD                             â”‚
+â”‚                                                                  â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚                    MONDE EXTERNE                            â”‚ â”‚
+â”‚  â”‚                                                             â”‚ â”‚
+â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”‚ â”‚
+â”‚  â”‚  â”‚ Operateur    â”‚  â”‚ Operateur    â”‚  â”‚ MiyukiniAdminâ”‚    â”‚ â”‚
+â”‚  â”‚  â”‚ legitime     â”‚  â”‚ malveillant  â”‚  â”‚ (privileges) â”‚    â”‚ â”‚
+â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜    â”‚ â”‚
+â”‚  â”‚         â”‚                 â”‚                 â”‚             â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚            â”‚                 â”‚                 â”‚                â”‚
+â”‚            â–¼                 â–¼                 â–¼                â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”â”‚
+â”‚  â”‚ SURF-LS-1 : Demandes d'Arbitrage                            â”‚â”‚
+â”‚  â”‚ â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•                            â”‚â”‚
+â”‚  â”‚                                                              â”‚â”‚
+â”‚  â”‚ Menaces : Falsification, Saturation, Usurpation             â”‚â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜â”‚
+â”‚            â”‚                                                    â”‚
+â”‚            â–¼                                                    â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”â”‚
+â”‚  â”‚ SURF-LS-2 : Etat Systeme Abstrait (depuis Kernel)           â”‚â”‚
+â”‚  â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€               â”‚â”‚
+â”‚  â”‚ Menaces : Manipulation d'etat, Injection de faux seuils     â”‚â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜â”‚
+â”‚            â”‚                                                    â”‚
+â”‚            â–¼                                                    â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”â”‚
+â”‚  â”‚ SURF-LS-3 : Declaration de Regles                           â”‚â”‚
+â”‚  â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                               â”‚â”‚
+â”‚  â”‚ Menaces : Injection de regles, Modification non autorisee   â”‚â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜â”‚
+â”‚            â”‚                                                    â”‚
+â”‚            â–¼                                                    â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚                    LOGISTICSSTEWARD                         â”‚ â”‚
+â”‚  â”‚                    (Arbitre pur)                            â”‚ â”‚
+â”‚  â”‚                                                             â”‚ â”‚
+â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”               â”‚ â”‚
+â”‚  â”‚  â”‚ Moteur           â”‚  â”‚ Regles           â”‚               â”‚ â”‚
+â”‚  â”‚  â”‚ d'Arbitrage      â”‚  â”‚ (Quotas,         â”‚               â”‚ â”‚
+â”‚  â”‚  â”‚ (Cible a         â”‚  â”‚  Priorites)      â”‚               â”‚ â”‚
+â”‚  â”‚  â”‚  proteger)       â”‚  â”‚ (Cible a         â”‚               â”‚ â”‚
+â”‚  â”‚  â”‚                  â”‚  â”‚  proteger)       â”‚               â”‚ â”‚
+â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜               â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚            â”‚                                                    â”‚
+â”‚            â–¼                                                    â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”â”‚
+â”‚  â”‚ SURF-LS-5 : Validation StrongFather                         â”‚â”‚
+â”‚  â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                             â”‚â”‚
+â”‚  â”‚ Menaces : Contournement, Falsification de validation        â”‚â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜â”‚
+â”‚            â”‚                                                    â”‚
+â”‚            â–¼                                                    â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”â”‚
+â”‚  â”‚ SURF-LS-6 : Transport BondingBrother                        â”‚â”‚
+â”‚  â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                           â”‚â”‚
+â”‚  â”‚ Menaces : Interception, Replay, Modification en transit     â”‚â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 9.2. Types d'attaques et gravite
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│              TYPES D'ATTAQUES ET GRAVITE                        │
-│                                                                  │
-│  GRAVITE CRITIQUE                                               │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │  FALSIFICATION DEMANDE    INJECTION DE REGLES              │ │
-│  │  ─────────────────────    ───────────────────              │ │
-│  │  • Identite falsifiee     • Quota augmente                 │ │
-│  │  • Contexte manipule      • Priorite elevee                │ │
-│  │  • Allocation indue       • Impact durable                 │ │
-│  ├────────────────────────────────────────────────────────────┤ │
-│  │  ABUS MIYUKINIADMIN       CONTOURNEMENT STRONGFATHER       │ │
-│  │  ──────────────────       ─────────────────────────        │ │
-│  │  • Privileges abuses      • Validation bypassee            │ │
-│  │  • Exceptions non         • Decision non conforme          │ │
-│  │    justifiees               executee                       │ │
-│  └────────────────────────────────────────────────────────────┘ │
-│                                                                  │
-│  GRAVITE ELEVEE                                                 │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │  MANIPULATION ETAT    ESCALADE PRIORITE    EXPLOIT DEGRAD  │ │
-│  │  ─────────────────    ─────────────────    ─────────────── │ │
-│  │  • Etat falsifie      • Priorite indue     • Degradation   │ │
-│  │  • Seuils manipules   • File d'attente     │  declenchee   │ │
-│  │  • Impact systeme       bypassee           • Stabilite     │ │
-│  │                       • Famine autres        compromise    │ │
-│  └────────────────────────────────────────────────────────────┘ │
-│                                                                  │
-│  GRAVITE MOYENNE                                                │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │  SATURATION           REPLAY DECISIONS                     │ │
-│  │  ARBITRAGE            ─────────────────                    │ │
-│  │  ───────────          • Decisions expirees                 │ │
-│  │  • Deni de service    • Quotas actuels                     │ │
-│  │  • Disponibilite        contournes                         │ │
-│  │  • Performances       • Detectable                         │ │
-│  └────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚              TYPES D'ATTAQUES ET GRAVITE                        â”‚
+â”‚                                                                  â”‚
+â”‚  GRAVITE CRITIQUE                                               â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  FALSIFICATION DEMANDE    INJECTION DE REGLES              â”‚ â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€              â”‚ â”‚
+â”‚  â”‚  â€¢ Identite falsifiee     â€¢ Quota augmente                 â”‚ â”‚
+â”‚  â”‚  â€¢ Contexte manipule      â€¢ Priorite elevee                â”‚ â”‚
+â”‚  â”‚  â€¢ Allocation indue       â€¢ Impact durable                 â”‚ â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚  â”‚  ABUS MIYUKINIADMIN       CONTOURNEMENT STRONGFATHER       â”‚ â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€        â”‚ â”‚
+â”‚  â”‚  â€¢ Privileges abuses      â€¢ Validation bypassee            â”‚ â”‚
+â”‚  â”‚  â€¢ Exceptions non         â€¢ Decision non conforme          â”‚ â”‚
+â”‚  â”‚    justifiees               executee                       â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                  â”‚
+â”‚  GRAVITE ELEVEE                                                 â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  MANIPULATION ETAT    ESCALADE PRIORITE    EXPLOIT DEGRAD  â”‚ â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚ â”‚
+â”‚  â”‚  â€¢ Etat falsifie      â€¢ Priorite indue     â€¢ Degradation   â”‚ â”‚
+â”‚  â”‚  â€¢ Seuils manipules   â€¢ File d'attente     â”‚  declenchee   â”‚ â”‚
+â”‚  â”‚  â€¢ Impact systeme       bypassee           â€¢ Stabilite     â”‚ â”‚
+â”‚  â”‚                       â€¢ Famine autres        compromise    â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                  â”‚
+â”‚  GRAVITE MOYENNE                                                â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  SATURATION           REPLAY DECISIONS                     â”‚ â”‚
+â”‚  â”‚  ARBITRAGE            â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                    â”‚ â”‚
+â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€          â€¢ Decisions expirees                 â”‚ â”‚
+â”‚  â”‚  â€¢ Deni de service    â€¢ Quotas actuels                     â”‚ â”‚
+â”‚  â”‚  â€¢ Disponibilite        contournes                         â”‚ â”‚
+â”‚  â”‚  â€¢ Performances       â€¢ Detectable                         â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 9.3. Flux d'une attaque par falsification et impact en cascade
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│           FLUX D'ATTAQUE PAR FALSIFICATION ET IMPACT            │
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │  ATTAQUANT (Operateur Malveillant)                         │ │
-│  └────────────────────────────────────────────────────────────┘ │
-│                            │                                     │
-│                            │ 1. Demande avec identite            │
-│                            │    falsifiee (priorite haute)       │
-│                            ▼                                     │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │  LOGISTICSSTEWARD                                          │ │
-│  │                                                              │ │
-│  │  ┌─────────────────────────────────────────────────────┐   │ │
-│  │  │  Evaluation de la demande                            │   │ │
-│  │  │                                                       │   │ │
-│  │  │  • Verification identite ──────────── OK/REJET       │   │ │
-│  │  │  • Verification quota ─────────────── OK/REJET       │   │ │
-│  │  │  • Verification priorite ──────────── OK/REJET       │   │ │
-│  │  │  • Evaluation regles ──────────────── OK/REJET       │   │ │
-│  │  │                                                       │   │ │
-│  │  │  ┌─────────────────┐  ┌─────────────────────────┐   │   │ │
-│  │  │  │ SI DETECTE      │  │ SI NON DETECTE          │   │   │ │
-│  │  │  │                 │  │                         │   │   │ │
-│  │  │  │ • Rejet         │  │ • Decision favorable    │   │   │ │
-│  │  │  │ • Tracabilite   │  │ • Soumise a             │   │   │ │
-│  │  │  │ • Alerte        │  │   StrongFather          │   │   │ │
-│  │  │  └─────────────────┘  └─────────────────────────┘   │   │ │
-│  │  └─────────────────────────────────────────────────────┘   │ │
-│  └────────────────────────────────────────────────────────────┘ │
-│                                                                  │
-│  ═══════════════════ SI ATTAQUE REUSSIT VALIDATION ═══════════ │
-│                            │                                     │
-│                            │ 2. StrongFather valide              │
-│                            │    (ne detecte pas la falsification)│
-│                            ▼                                     │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │  KERNEL (execute la decision)                              │ │
-│  │                                                              │ │
-│  │  "Allouer ressources selon decision d'arbitrage"           │ │
-│  │  → Allocation de ressources a l'attaquant                  │ │
-│  │  → Basee sur priorite falsifiee                            │ │
-│  └────────────────────────────────────────────────────────────┘ │
-│                            │                                     │
-│                            ▼                                     │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │  CONSEQUENCE : Allocation indue de ressources              │ │
-│  │                                                              │ │
-│  │  • L'attaquant obtient plus que son quota                  │ │
-│  │  • Les autres operateurs sont prives de ressources         │ │
-│  │  • L'equite du systeme est compromise                      │ │
-│  └────────────────────────────────────────────────────────────┘ │
-│                                                                  │
-│  PRINCIPE : La securite de l'allocation depend de l'integrite  │
-│             des demandes et de leur validation                  │
-└─────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚           FLUX D'ATTAQUE PAR FALSIFICATION ET IMPACT            â”‚
+â”‚                                                                  â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  ATTAQUANT (Operateur Malveillant)                         â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                            â”‚                                     â”‚
+â”‚                            â”‚ 1. Demande avec identite            â”‚
+â”‚                            â”‚    falsifiee (priorite haute)       â”‚
+â”‚                            â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  LOGISTICSSTEWARD                                          â”‚ â”‚
+â”‚  â”‚                                                              â”‚ â”‚
+â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚ â”‚
+â”‚  â”‚  â”‚  Evaluation de la demande                            â”‚   â”‚ â”‚
+â”‚  â”‚  â”‚                                                       â”‚   â”‚ â”‚
+â”‚  â”‚  â”‚  â€¢ Verification identite â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ OK/REJET       â”‚   â”‚ â”‚
+â”‚  â”‚  â”‚  â€¢ Verification quota â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ OK/REJET       â”‚   â”‚ â”‚
+â”‚  â”‚  â”‚  â€¢ Verification priorite â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ OK/REJET       â”‚   â”‚ â”‚
+â”‚  â”‚  â”‚  â€¢ Evaluation regles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ OK/REJET       â”‚   â”‚ â”‚
+â”‚  â”‚  â”‚                                                       â”‚   â”‚ â”‚
+â”‚  â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚   â”‚ â”‚
+â”‚  â”‚  â”‚  â”‚ SI DETECTE      â”‚  â”‚ SI NON DETECTE          â”‚   â”‚   â”‚ â”‚
+â”‚  â”‚  â”‚  â”‚                 â”‚  â”‚                         â”‚   â”‚   â”‚ â”‚
+â”‚  â”‚  â”‚  â”‚ â€¢ Rejet         â”‚  â”‚ â€¢ Decision favorable    â”‚   â”‚   â”‚ â”‚
+â”‚  â”‚  â”‚  â”‚ â€¢ Tracabilite   â”‚  â”‚ â€¢ Soumise a             â”‚   â”‚   â”‚ â”‚
+â”‚  â”‚  â”‚  â”‚ â€¢ Alerte        â”‚  â”‚   StrongFather          â”‚   â”‚   â”‚ â”‚
+â”‚  â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚   â”‚ â”‚
+â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                  â”‚
+â”‚  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SI ATTAQUE REUSSIT VALIDATION â•â•â•â•â•â•â•â•â•â•â• â”‚
+â”‚                            â”‚                                     â”‚
+â”‚                            â”‚ 2. StrongFather valide              â”‚
+â”‚                            â”‚    (ne detecte pas la falsification)â”‚
+â”‚                            â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  KERNEL (execute la decision)                              â”‚ â”‚
+â”‚  â”‚                                                              â”‚ â”‚
+â”‚  â”‚  "Allouer ressources selon decision d'arbitrage"           â”‚ â”‚
+â”‚  â”‚  â†’ Allocation de ressources a l'attaquant                  â”‚ â”‚
+â”‚  â”‚  â†’ Basee sur priorite falsifiee                            â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                            â”‚                                     â”‚
+â”‚                            â–¼                                     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  CONSEQUENCE : Allocation indue de ressources              â”‚ â”‚
+â”‚  â”‚                                                              â”‚ â”‚
+â”‚  â”‚  â€¢ L'attaquant obtient plus que son quota                  â”‚ â”‚
+â”‚  â”‚  â€¢ Les autres operateurs sont prives de ressources         â”‚ â”‚
+â”‚  â”‚  â€¢ L'equite du systeme est compromise                      â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                  â”‚
+â”‚  PRINCIPE : La securite de l'allocation depend de l'integrite  â”‚
+â”‚             des demandes et de leur validation                  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 9.4. Categorisation par cible
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│              CATEGORISATION PAR CIBLE                           │
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │  INTEGRITE DE L'ARBITRAGE (decision corrompue)             │ │
-│  │  ════════════════════════                                  │ │
-│  │                                                              │ │
-│  │  • Falsification de demande d'arbitrage ─────── CRITIQUE   │ │
-│  │  • Injection de regles non legitimes ────────── CRITIQUE   │ │
-│  │  • Contournement validation StrongFather ────── CRITIQUE   │ │
-│  └────────────────────────────────────────────────────────────┘ │
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │  EQUITE DU SYSTEME (avantage indu)                         │ │
-│  │  ═════════════════                                         │ │
-│  │                                                              │ │
-│  │  • Escalade de priorite ───────────────────── ELEVEE       │ │
-│  │  • Abus de privileges MiyukiniAdmin ────────── CRITIQUE    │ │
-│  │  • Exploitation de la degradation ─────────── ELEVEE       │ │
-│  └────────────────────────────────────────────────────────────┘ │
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │  FIABILITE DES DECISIONS (contexte corrompu)               │ │
-│  │  ═══════════════════════                                   │ │
-│  │                                                              │ │
-│  │  • Manipulation d'etat systeme ────────────── ELEVEE       │ │
-│  │  • Replay de decisions ────────────────────── MOYENNE      │ │
-│  └────────────────────────────────────────────────────────────┘ │
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │  DISPONIBILITE (perturbation du service)                   │ │
-│  │  ═════════════                                             │ │
-│  │                                                              │ │
-│  │  • Saturation de l'arbitrage ──────────────── MOYENNE      │ │
-│  └────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚              CATEGORISATION PAR CIBLE                           â”‚
+â”‚                                                                  â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  INTEGRITE DE L'ARBITRAGE (decision corrompue)             â”‚ â”‚
+â”‚  â”‚  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•                                  â”‚ â”‚
+â”‚  â”‚                                                              â”‚ â”‚
+â”‚  â”‚  â€¢ Falsification de demande d'arbitrage â”€â”€â”€â”€â”€â”€â”€ CRITIQUE   â”‚ â”‚
+â”‚  â”‚  â€¢ Injection de regles non legitimes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ CRITIQUE   â”‚ â”‚
+â”‚  â”‚  â€¢ Contournement validation StrongFather â”€â”€â”€â”€â”€â”€ CRITIQUE   â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                  â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  EQUITE DU SYSTEME (avantage indu)                         â”‚ â”‚
+â”‚  â”‚  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•                                         â”‚ â”‚
+â”‚  â”‚                                                              â”‚ â”‚
+â”‚  â”‚  â€¢ Escalade de priorite â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ELEVEE       â”‚ â”‚
+â”‚  â”‚  â€¢ Abus de privileges MiyukiniAdmin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ CRITIQUE    â”‚ â”‚
+â”‚  â”‚  â€¢ Exploitation de la degradation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ELEVEE       â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                  â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  FIABILITE DES DECISIONS (contexte corrompu)               â”‚ â”‚
+â”‚  â”‚  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•                                   â”‚ â”‚
+â”‚  â”‚                                                              â”‚ â”‚
+â”‚  â”‚  â€¢ Manipulation d'etat systeme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ELEVEE       â”‚ â”‚
+â”‚  â”‚  â€¢ Replay de decisions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ MOYENNE      â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                  â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  DISPONIBILITE (perturbation du service)                   â”‚ â”‚
+â”‚  â”‚  â•â•â•â•â•â•â•â•â•â•â•â•â•                                             â”‚ â”‚
+â”‚  â”‚                                                              â”‚ â”‚
+â”‚  â”‚  â€¢ Saturation de l'arbitrage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ MOYENNE      â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
@@ -855,13 +855,13 @@ L'arbitrage est **equitable** : les memes regles s'appliquent a toutes les entit
 
 | Document | Description |
 |----------|-------------|
-| [Security - Core Integration Map](../../../../security/architecture/Security%20-%20Core%20Integration%20Map.md) | Cartographie des roles securite des Cores, points de controle |
-| [Doctrine Securite Fondamentale](../../../../reference/Miyukini%20Conceptual%20References%20-%20Doctrine%20Securite%20Fondamentale.md) | Fondation philosophique et architecturale de la securite |
-| [Security - Invariants & Guarantees](../../../../security/contracts/governance/Security%20-%20Invariants%20&%20Guarantees.md) | Lois L1-L6, contraintes C1-C4, garanties par niveau |
+| [Security - Core Integration Map](..//..//..//WorrySentinel//_index.md) | Cartographie des roles securite des Cores, points de controle |
+| [Doctrine Securite Fondamentale](..//..//..//..//miyukini-webway-system//reference//_index.md) | Fondation philosophique et architecturale de la securite |
+| [Security - Invariants & Guarantees](..//..//..//WorrySentinel//_index.md) | Lois L1-L6, contraintes C1-C4, garanties par niveau |
 
 ### Role de LogisticsSteward dans le dispositif de securite
 
-Selon le [Core Integration Map](../../../../security/architecture/Security%20-%20Core%20Integration%20Map.md), LogisticsSteward est le **Gardien des Ressources** avec :
+Selon le [Core Integration Map](..//..//..//WorrySentinel//_index.md), LogisticsSteward est le **Gardien des Ressources** avec :
 - Gestion des ressources : Securise l'acces aux ressources (INV-LS-1)
 - Approvisionnement securise : Valide les sources d'approvisionnement (INV-LS-2)
 - Isolation des stocks : Empeche la contamination des ressources (INV-LS-3)
@@ -892,7 +892,7 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisee.
 
 **Document cree le :** 2026-01-28  
 **Version :** 1.0.0  
-**Statut :** FONDATION — Contrat normatif valide  
+**Statut :** FONDATION â€” Contrat normatif valide  
 **Reference :** Miyukini Core System v2.4, LogisticsSteward Documentation Fondatrice  
 **Type :** Contrat de modele de menace non negociable
 
@@ -906,11 +906,11 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisee.
 - [LogisticsSteward - Resource Arbitration Contract](../resources/LogisticsSteward%20-%20Resource%20Arbitration%20Contract.md)
 - [LogisticsSteward - StrongFather Integration Contract](../integration/LogisticsSteward%20-%20StrongFather%20Integration%20Contract.md)
 - [LogisticsSteward - WorrySentinel Integration Contract](../integration/LogisticsSteward%20-%20WorrySentinel%20Integration%20Contract.md)
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 13. Mini log — erreurs / warnings / ambiguites rencontrees et corrigees
+## 13. Mini log â€” erreurs / warnings / ambiguites rencontrees et corrigees
 
 ### Ambiguite A1 : Nature d'arbitre pur de LogisticsSteward
 
@@ -939,17 +939,18 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisee.
 ### Verification de compatibilite
 
 **Verification effectuee :**
-- ✅ Coherence avec LogisticsSteward Documentation Fondatrice : Confirmee
-- ✅ Coherence avec Quota Definition Contract : Confirmee
-- ✅ Coherence avec Priority Management Contract : Confirmee
-- ✅ Coherence avec Resource Arbitration Contract : Confirmee
-- ✅ Coherence avec StrongFather Integration Contract : Confirmee
-- ✅ Aucune mitigation technique proposee : Confirmee
-- ✅ Modele conceptuel uniquement : Confirmee
-- ✅ Respect LOI-1 et LOI-5 : Confirme
+- âœ… Coherence avec LogisticsSteward Documentation Fondatrice : Confirmee
+- âœ… Coherence avec Quota Definition Contract : Confirmee
+- âœ… Coherence avec Priority Management Contract : Confirmee
+- âœ… Coherence avec Resource Arbitration Contract : Confirmee
+- âœ… Coherence avec StrongFather Integration Contract : Confirmee
+- âœ… Aucune mitigation technique proposee : Confirmee
+- âœ… Modele conceptuel uniquement : Confirmee
+- âœ… Respect LOI-1 et LOI-5 : Confirme
 
 **Conclusion :** Aucune contradiction detectee avec les contrats existants.
 
 ---
 
 *Aucune autre erreur, warning, ou ambiguite rencontree lors de la redaction de ce document.*
+

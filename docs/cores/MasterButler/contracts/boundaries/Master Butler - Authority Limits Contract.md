@@ -1,700 +1,701 @@
-# Master Butler — Authority Limits Contract
+﻿# Master Butler â€” Authority Limits Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **Master Butler Authority Limits Contract** : un contrat normatif, non négociable, et de statut FONDATION qui établit les limites absolues de l'autorité de Master Butler dans le système Miyukini Core System v2.4.
+Ce document dÃ©finit le **Master Butler Authority Limits Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit les limites absolues de l'autoritÃ© de Master Butler dans le systÃ¨me Miyukini Core System v2.4.
 
-Master Butler est le **Capability & Permission Core** (Strate 4). Il recense les capacités, définit les permissions, et fournit ces informations à tous les composants autorisés. Ce contrat définit précisément ce que Master Butler peut faire, ce qu'il ne peut jamais faire, et les frontières de son autorité.
+Master Butler est le **Capability & Permission Core** (Strate 4). Il recense les capacitÃ©s, dÃ©finit les permissions, et fournit ces informations Ã  tous les composants autorisÃ©s. Ce contrat dÃ©finit prÃ©cisÃ©ment ce que Master Butler peut faire, ce qu'il ne peut jamais faire, et les frontiÃ¨res de son autoritÃ©.
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **Master Butler** et définit de manière absolue :
-- Les limites formelles de l'autorité de Master Butler
-- Les frontières entre Master Butler et les autres Cores
+Ce contrat s'applique Ã  **Master Butler** et dÃ©finit de maniÃ¨re absolue :
+- Les limites formelles de l'autoritÃ© de Master Butler
+- Les frontiÃ¨res entre Master Butler et les autres Cores
 - Les actions que Master Butler ne peut jamais entreprendre
-- Les responsabilités exclusives de Master Butler
-- Les responsabilités qui n'appartiennent jamais à Master Butler
-- Les invariants d'autorité non négociables
-- Les schémas de frontières d'autorité
+- Les responsabilitÃ©s exclusives de Master Butler
+- Les responsabilitÃ©s qui n'appartiennent jamais Ã  Master Butler
+- Les invariants d'autoritÃ© non nÃ©gociables
+- Les schÃ©mas de frontiÃ¨res d'autoritÃ©
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues que Master Butler applique sans exception. Ces règles ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues que Master Butler applique sans exception. Ces rÃ¨gles ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complète les documents contractuels existants :
+Ce contrat complÃ¨te les documents contractuels existants :
 
-- **Master Butler - Documentation Fondatrice** : Définit la nature, le rôle, et les responsabilités de Master Butler
-- **Master Butler - Capability Registry Contract** : Définit le modèle du registre des capacités
-- **Master Butler - Permission Registry Contract** : Définit le modèle du registre des permissions
-- **Master Butler - Boundary & Scope Contract** : Définit le périmètre et les frontières fonctionnelles
-- **[Miyukini Conceptual References — Lois Autonomie Système](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Ce contrat respecte **LOI-1** (aucune dépendance externe critique) en garantissant que les limites d'autorité fonctionnent localement.
+- **Master Butler - Documentation Fondatrice** : DÃ©finit la nature, le rÃ´le, et les responsabilitÃ©s de Master Butler
+- **Master Butler - Capability Registry Contract** : DÃ©finit le modÃ¨le du registre des capacitÃ©s
+- **Master Butler - Permission Registry Contract** : DÃ©finit le modÃ¨le du registre des permissions
+- **Master Butler - Boundary & Scope Contract** : DÃ©finit le pÃ©rimÃ¨tre et les frontiÃ¨res fonctionnelles
+- **[Miyukini Conceptual References â€” Lois Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Ce contrat respecte **LOI-1** (aucune dÃ©pendance externe critique) en garantissant que les limites d'autoritÃ© fonctionnent localement.
 
 ---
 
-## 2. Définition formelle des limites d'autorité
+## 2. DÃ©finition formelle des limites d'autoritÃ©
 
-### Définition formelle
+### DÃ©finition formelle
 
-Une **limite d'autorité** est une frontière absolue, non négociable, et permanente qui définit ce que Master Butler peut et ne peut pas faire dans le système Miyukini. Les limites d'autorité sont intrinsèques à la nature de Master Butler et ne dépendent d'aucune configuration ou contexte.
+Une **limite d'autoritÃ©** est une frontiÃ¨re absolue, non nÃ©gociable, et permanente qui dÃ©finit ce que Master Butler peut et ne peut pas faire dans le systÃ¨me Miyukini. Les limites d'autoritÃ© sont intrinsÃ¨ques Ã  la nature de Master Butler et ne dÃ©pendent d'aucune configuration ou contexte.
 
-### Caractéristiques formelles
+### CaractÃ©ristiques formelles
 
-**Absolue :** Une limite d'autorité est absolue et s'applique sans exception. Aucun contexte, aucune urgence, aucune considération pratique ne peut justifier le franchissement d'une limite d'autorité.
+**Absolue :** Une limite d'autoritÃ© est absolue et s'applique sans exception. Aucun contexte, aucune urgence, aucune considÃ©ration pratique ne peut justifier le franchissement d'une limite d'autoritÃ©.
 
-**Non négociable :** Une limite d'autorité ne peut être négociée, relâchée, ou contournée. Le contrat prime sur toute demande externe ou interne.
+**Non nÃ©gociable :** Une limite d'autoritÃ© ne peut Ãªtre nÃ©gociÃ©e, relÃ¢chÃ©e, ou contournÃ©e. Le contrat prime sur toute demande externe ou interne.
 
-**Permanente :** Une limite d'autorité est permanente et s'applique pour toute la durée de vie de Master Butler dans l'environnement.
+**Permanente :** Une limite d'autoritÃ© est permanente et s'applique pour toute la durÃ©e de vie de Master Butler dans l'environnement.
 
-**Intrinsèque :** Une limite d'autorité est intrinsèque à la nature de Master Butler. Elle découle de sa définition fondatrice et de son positionnement dans l'architecture.
+**IntrinsÃ¨que :** Une limite d'autoritÃ© est intrinsÃ¨que Ã  la nature de Master Butler. Elle dÃ©coule de sa dÃ©finition fondatrice et de son positionnement dans l'architecture.
 
-**Vérifiable :** Une limite d'autorité est vérifiable. Toute implémentation peut être auditée pour confirmer le respect des limites.
+**VÃ©rifiable :** Une limite d'autoritÃ© est vÃ©rifiable. Toute implÃ©mentation peut Ãªtre auditÃ©e pour confirmer le respect des limites.
 
 ### Positionnement architectural formel
 
-Master Butler se situe dans la **Strate 4 (Cores Système)** de la pyramide Miyukini. Ses limites d'autorité sont définies par :
+Master Butler se situe dans la **Strate 4 (Cores SystÃ¨me)** de la pyramide Miyukini. Ses limites d'autoritÃ© sont dÃ©finies par :
 
 - **Position horizontale** : Relations avec les autres Cores de Strate 4 (StrongFather, KindMother, etc.)
-- **Position verticale** : Relations avec les strates supérieures (Outils, Opérateurs) et inférieures (Kernel, Hardware)
-- **Nature fondatrice** : Rôle de registre passif, sans pouvoir d'exécution ou de décision
+- **Position verticale** : Relations avec les strates supÃ©rieures (Outils, OpÃ©rateurs) et infÃ©rieures (Kernel, Hardware)
+- **Nature fondatrice** : RÃ´le de registre passif, sans pouvoir d'exÃ©cution ou de dÃ©cision
 
 ---
 
-## 3. Autorité exclusive de Master Butler
+## 3. AutoritÃ© exclusive de Master Butler
 
-Master Butler possède une autorité exclusive dans les domaines suivants. Cette autorité est non partagée et non délégable.
+Master Butler possÃ¨de une autoritÃ© exclusive dans les domaines suivants. Cette autoritÃ© est non partagÃ©e et non dÃ©lÃ©gable.
 
-### AE-1 : Registre central des capacités
+### AE-1 : Registre central des capacitÃ©s
 
-**Autorité exclusive :** Master Butler est l'unique autorité pour le registre des capacités du système.
+**AutoritÃ© exclusive :** Master Butler est l'unique autoritÃ© pour le registre des capacitÃ©s du systÃ¨me.
 
 **Application :**
-- Toute capacité doit être déclarée à Master Butler
-- Aucun autre composant ne maintient de registre des capacités
-- Le registre de Master Butler est la source de vérité unique pour les capacités
+- Toute capacitÃ© doit Ãªtre dÃ©clarÃ©e Ã  Master Butler
+- Aucun autre composant ne maintient de registre des capacitÃ©s
+- Le registre de Master Butler est la source de vÃ©ritÃ© unique pour les capacitÃ©s
 
-**Limite associée :** Master Butler recense les capacités mais ne les implémente jamais, ne les exécute jamais.
+**Limite associÃ©e :** Master Butler recense les capacitÃ©s mais ne les implÃ©mente jamais, ne les exÃ©cute jamais.
 
 ### AE-2 : Registre central des permissions
 
-**Autorité exclusive :** Master Butler est l'unique autorité pour le registre des permissions du système.
+**AutoritÃ© exclusive :** Master Butler est l'unique autoritÃ© pour le registre des permissions du systÃ¨me.
 
 **Application :**
-- Toute permission doit être définie dans Master Butler
-- Aucun autre composant ne définit de permissions
-- Le registre de Master Butler est la source de vérité unique pour les permissions
+- Toute permission doit Ãªtre dÃ©finie dans Master Butler
+- Aucun autre composant ne dÃ©finit de permissions
+- Le registre de Master Butler est la source de vÃ©ritÃ© unique pour les permissions
 
-**Limite associée :** Master Butler définit les permissions mais ne vérifie jamais en temps réel si elles sont accordées, ne prend jamais de décision d'autorisation.
+**Limite associÃ©e :** Master Butler dÃ©finit les permissions mais ne vÃ©rifie jamais en temps rÃ©el si elles sont accordÃ©es, ne prend jamais de dÃ©cision d'autorisation.
 
 ### AE-3 : Catalogue des Outils et Kits d'Outils
 
-**Autorité exclusive :** Master Butler est l'unique catalogue des Outils et Kits d'Outils du système.
+**AutoritÃ© exclusive :** Master Butler est l'unique catalogue des Outils et Kits d'Outils du systÃ¨me.
 
 **Application :**
-- Tout Outil doit être déclaré dans Master Butler
-- Tout Kit d'Outils doit être défini dans Master Butler
-- Les associations Capacité → Outil sont maintenues exclusivement par Master Butler
+- Tout Outil doit Ãªtre dÃ©clarÃ© dans Master Butler
+- Tout Kit d'Outils doit Ãªtre dÃ©fini dans Master Butler
+- Les associations CapacitÃ© â†’ Outil sont maintenues exclusivement par Master Butler
 
-**Limite associée :** Master Butler catalogue les Outils mais ne les implémente jamais, ne les exécute jamais, ne gère jamais leur cycle de vie technique.
+**Limite associÃ©e :** Master Butler catalogue les Outils mais ne les implÃ©mente jamais, ne les exÃ©cute jamais, ne gÃ¨re jamais leur cycle de vie technique.
 
-### AE-4 : API de découverte des capacités
+### AE-4 : API de dÃ©couverte des capacitÃ©s
 
-**Autorité exclusive :** Master Butler est l'unique fournisseur de l'API de découverte des capacités et permissions.
-
-**Application :**
-- Toute découverte de capacités passe par Master Butler
-- Toute découverte de permissions passe par Master Butler
-- Aucun autre composant ne fournit d'API de découverte pour ces domaines
-
-**Limite associée :** Master Butler expose la découverte mais ne filtre jamais selon des critères métier, ne recommande jamais une capacité plutôt qu'une autre.
-
-### AE-5 : Traçabilité des définitions
-
-**Autorité exclusive :** Master Butler est l'unique responsable de la traçabilité des définitions de capacités et permissions.
+**AutoritÃ© exclusive :** Master Butler est l'unique fournisseur de l'API de dÃ©couverte des capacitÃ©s et permissions.
 
 **Application :**
-- Toute création de capacité est tracée par Master Butler
-- Toute définition de permission est tracée par Master Butler
-- L'historique des définitions est maintenu exclusivement par Master Butler
+- Toute dÃ©couverte de capacitÃ©s passe par Master Butler
+- Toute dÃ©couverte de permissions passe par Master Butler
+- Aucun autre composant ne fournit d'API de dÃ©couverte pour ces domaines
 
-**Limite associée :** Master Butler trace les définitions mais ne trace jamais les décisions d'autorisation (StrongFather), ne trace jamais les exécutions (Outils/Opérateurs).
+**Limite associÃ©e :** Master Butler expose la dÃ©couverte mais ne filtre jamais selon des critÃ¨res mÃ©tier, ne recommande jamais une capacitÃ© plutÃ´t qu'une autre.
+
+### AE-5 : TraÃ§abilitÃ© des dÃ©finitions
+
+**AutoritÃ© exclusive :** Master Butler est l'unique responsable de la traÃ§abilitÃ© des dÃ©finitions de capacitÃ©s et permissions.
+
+**Application :**
+- Toute crÃ©ation de capacitÃ© est tracÃ©e par Master Butler
+- Toute dÃ©finition de permission est tracÃ©e par Master Butler
+- L'historique des dÃ©finitions est maintenu exclusivement par Master Butler
+
+**Limite associÃ©e :** Master Butler trace les dÃ©finitions mais ne trace jamais les dÃ©cisions d'autorisation (StrongFather), ne trace jamais les exÃ©cutions (Outils/OpÃ©rateurs).
 
 ---
 
 ## 4. Limites absolues : Ce que Master Butler ne fait JAMAIS
 
-Master Butler ne commet **JAMAIS** les actions suivantes. Ces limites sont absolues, non négociables, et primordiales sur toute considération pratique.
+Master Butler ne commet **JAMAIS** les actions suivantes. Ces limites sont absolues, non nÃ©gociables, et primordiales sur toute considÃ©ration pratique.
 
-### L-1 : Ne décide JAMAIS
+### L-1 : Ne dÃ©cide JAMAIS
 
-**Limite absolue :** Master Butler **ne prend jamais de décision** sur l'autorisation ou le refus d'une action.
+**Limite absolue :** Master Butler **ne prend jamais de dÃ©cision** sur l'autorisation ou le refus d'une action.
 
 **Application :**
-- Aucune méthode de Master Butler ne retourne un booléen d'autorisation
-- Master Butler ne répond jamais "autorisé" ou "refusé"
+- Aucune mÃ©thode de Master Butler ne retourne un boolÃ©en d'autorisation
+- Master Butler ne rÃ©pond jamais "autorisÃ©" ou "refusÃ©"
 - Master Butler fournit des informations, jamais des verdicts
 
-**Justification :** La décision appartient exclusivement à StrongFather. Master Butler expose les possibilités, StrongFather décide.
+**Justification :** La dÃ©cision appartient exclusivement Ã  StrongFather. Master Butler expose les possibilitÃ©s, StrongFather dÃ©cide.
 
-**Violation hypothétique :**
+**Violation hypothÃ©tique :**
 ```
-❌ MasterButler.isAuthorized(user, action) → boolean
-❌ MasterButler.canExecute(context, capability) → boolean
-❌ MasterButler.hasPermission(user, permission) → boolean
+âŒ MasterButler.isAuthorized(user, action) â†’ boolean
+âŒ MasterButler.canExecute(context, capability) â†’ boolean
+âŒ MasterButler.hasPermission(user, permission) â†’ boolean
 ```
 
 **Comportement correct :**
 ```
-✅ MasterButler.getCapabilities(module) → List<Capability>
-✅ MasterButler.getPermissionsForCapability(capability) → List<Permission>
-✅ MasterButler.getCapabilityContext(context) → CapabilityContext
+âœ… MasterButler.getCapabilities(module) â†’ List<Capability>
+âœ… MasterButler.getPermissionsForCapability(capability) â†’ List<Permission>
+âœ… MasterButler.getCapabilityContext(context) â†’ CapabilityContext
 ```
 
-### L-2 : Ne vérifie JAMAIS les permissions en temps réel
+### L-2 : Ne vÃ©rifie JAMAIS les permissions en temps rÃ©el
 
-**Limite absolue :** Master Butler **ne vérifie jamais** si un utilisateur ou un contexte possède effectivement une permission au moment d'une action.
+**Limite absolue :** Master Butler **ne vÃ©rifie jamais** si un utilisateur ou un contexte possÃ¨de effectivement une permission au moment d'une action.
 
 **Application :**
-- Master Butler fournit les définitions de permissions
+- Master Butler fournit les dÃ©finitions de permissions
 - Master Butler ne valide jamais "ce contexte a-t-il cette permission maintenant ?"
-- La vérification en temps réel appartient à StrongFather
+- La vÃ©rification en temps rÃ©el appartient Ã  StrongFather
 
-**Justification :** La vérification des permissions en temps réel implique une décision. Toute décision appartient à StrongFather.
+**Justification :** La vÃ©rification des permissions en temps rÃ©el implique une dÃ©cision. Toute dÃ©cision appartient Ã  StrongFather.
 
-**Violation hypothétique :**
+**Violation hypothÃ©tique :**
 ```
-❌ MasterButler.validatePermission(context, permission) → boolean
-❌ MasterButler.checkAccess(user, resource) → AccessResult
+âŒ MasterButler.validatePermission(context, permission) â†’ boolean
+âŒ MasterButler.checkAccess(user, resource) â†’ AccessResult
 ```
 
-### L-3 : N'exécute JAMAIS
+### L-3 : N'exÃ©cute JAMAIS
 
-**Limite absolue :** Master Butler **n'exécute jamais** d'action fonctionnelle, technique, ou métier.
+**Limite absolue :** Master Butler **n'exÃ©cute jamais** d'action fonctionnelle, technique, ou mÃ©tier.
 
 **Application :**
-- Master Butler ne crée jamais de contenu
-- Master Butler ne modifie jamais de données
+- Master Butler ne crÃ©e jamais de contenu
+- Master Butler ne modifie jamais de donnÃ©es
 - Master Butler n'appelle jamais un Outil
-- Master Butler ne déclenche jamais une opération
+- Master Butler ne dÃ©clenche jamais une opÃ©ration
 
-**Justification :** L'exécution appartient aux Outils et aux Opérateurs. Master Butler est un registre passif.
+**Justification :** L'exÃ©cution appartient aux Outils et aux OpÃ©rateurs. Master Butler est un registre passif.
 
-### L-4 : Ne stocke JAMAIS de données métier
+### L-4 : Ne stocke JAMAIS de donnÃ©es mÃ©tier
 
-**Limite absolue :** Master Butler **ne stocke jamais** de données métier ou applicatives.
-
-**Application :**
-- Master Butler stocke uniquement des métadonnées (capacités, permissions, associations)
-- Aucune donnée utilisateur n'est stockée dans Master Butler
-- Aucune donnée de domaine n'est stockée dans Master Butler
-
-**Justification :** Les données métier appartiennent aux modules et à KindMother. Master Butler ne gère que des métadonnées structurelles.
-
-### L-5 : Ne gère JAMAIS les identités
-
-**Limite absolue :** Master Butler **ne gère jamais** les identités des utilisateurs ou des systèmes.
+**Limite absolue :** Master Butler **ne stocke jamais** de donnÃ©es mÃ©tier ou applicatives.
 
 **Application :**
-- Master Butler connaît les rôles et permissions associées
-- Master Butler ne crée jamais d'identité
-- Master Butler ne valide jamais une identité
+- Master Butler stocke uniquement des mÃ©tadonnÃ©es (capacitÃ©s, permissions, associations)
+- Aucune donnÃ©e utilisateur n'est stockÃ©e dans Master Butler
+- Aucune donnÃ©e de domaine n'est stockÃ©e dans Master Butler
+
+**Justification :** Les donnÃ©es mÃ©tier appartiennent aux modules et Ã  KindMother. Master Butler ne gÃ¨re que des mÃ©tadonnÃ©es structurelles.
+
+### L-5 : Ne gÃ¨re JAMAIS les identitÃ©s
+
+**Limite absolue :** Master Butler **ne gÃ¨re jamais** les identitÃ©s des utilisateurs ou des systÃ¨mes.
+
+**Application :**
+- Master Butler connaÃ®t les rÃ´les et permissions associÃ©es
+- Master Butler ne crÃ©e jamais d'identitÃ©
+- Master Butler ne valide jamais une identitÃ©
 - Master Butler ne stocke jamais de credentials
 
-**Justification :** L'identité appartient au système d'authentification externe et à WorrySentinel pour la gouvernance de sécurité.
+**Justification :** L'identitÃ© appartient au systÃ¨me d'authentification externe et Ã  WorrySentinel pour la gouvernance de sÃ©curitÃ©.
 
-### L-6 : Ne définit JAMAIS de politiques
+### L-6 : Ne dÃ©finit JAMAIS de politiques
 
-**Limite absolue :** Master Butler **ne définit jamais** de politiques de décision ou de règles métier.
-
-**Application :**
-- Master Butler ne définit jamais "quand une permission est accordée"
-- Master Butler ne définit jamais "sous quelles conditions une action est autorisée"
-- Les politiques appartiennent exclusivement à StrongFather
-
-**Justification :** Les politiques sont des règles de décision. Toute décision appartient à StrongFather.
-
-### L-7 : N'applique JAMAIS de contraintes métier
-
-**Limite absolue :** Master Butler **n'applique jamais** de contraintes métier, de règles de domaine, ou de limites fonctionnelles.
+**Limite absolue :** Master Butler **ne dÃ©finit jamais** de politiques de dÃ©cision ou de rÃ¨gles mÃ©tier.
 
 **Application :**
-- Master Butler ne limite jamais "un utilisateur ne peut créer que 10 contenus"
-- Master Butler ne valide jamais des règles de domaine
-- Master Butler ne connaît pas les contraintes applicatives
+- Master Butler ne dÃ©finit jamais "quand une permission est accordÃ©e"
+- Master Butler ne dÃ©finit jamais "sous quelles conditions une action est autorisÃ©e"
+- Les politiques appartiennent exclusivement Ã  StrongFather
 
-**Justification :** Les contraintes métier appartiennent aux modules métier et à StrongFather. Master Butler ignore le domaine.
+**Justification :** Les politiques sont des rÃ¨gles de dÃ©cision. Toute dÃ©cision appartient Ã  StrongFather.
+
+### L-7 : N'applique JAMAIS de contraintes mÃ©tier
+
+**Limite absolue :** Master Butler **n'applique jamais** de contraintes mÃ©tier, de rÃ¨gles de domaine, ou de limites fonctionnelles.
+
+**Application :**
+- Master Butler ne limite jamais "un utilisateur ne peut crÃ©er que 10 contenus"
+- Master Butler ne valide jamais des rÃ¨gles de domaine
+- Master Butler ne connaÃ®t pas les contraintes applicatives
+
+**Justification :** Les contraintes mÃ©tier appartiennent aux modules mÃ©tier et Ã  StrongFather. Master Butler ignore le domaine.
 
 ### L-8 : Ne persiste JAMAIS directement
 
-**Limite absolue :** Master Butler **ne gère jamais** directement la persistance de son registre.
+**Limite absolue :** Master Butler **ne gÃ¨re jamais** directement la persistance de son registre.
 
 **Application :**
-- Master Butler ne manipule jamais directement une base de données
-- Master Butler ne manipule jamais directement un système de fichiers
-- Si le registre doit être persisté, Master Butler utilise KindMother comme support
+- Master Butler ne manipule jamais directement une base de donnÃ©es
+- Master Butler ne manipule jamais directement un systÃ¨me de fichiers
+- Si le registre doit Ãªtre persistÃ©, Master Butler utilise KindMother comme support
 
-**Justification :** La persistance appartient à KindMother. Master Butler est agnostique de la couche de stockage.
+**Justification :** La persistance appartient Ã  KindMother. Master Butler est agnostique de la couche de stockage.
 
-### L-9 : N'implémente JAMAIS d'Outils
+### L-9 : N'implÃ©mente JAMAIS d'Outils
 
-**Limite absolue :** Master Butler **n'implémente jamais** la logique d'un Outil ou d'un Kit d'Outils.
+**Limite absolue :** Master Butler **n'implÃ©mente jamais** la logique d'un Outil ou d'un Kit d'Outils.
 
 **Application :**
 - Master Butler catalogue les Outils mais ne contient pas leur code
-- Master Butler définit les associations mais n'exécute pas les Outils
-- L'implémentation des Outils appartient à la Strate 6
+- Master Butler dÃ©finit les associations mais n'exÃ©cute pas les Outils
+- L'implÃ©mentation des Outils appartient Ã  la Strate 6
 
-**Justification :** Master Butler est un catalogue, pas un exécutant. La séparation catalogue/implémentation est fondamentale.
+**Justification :** Master Butler est un catalogue, pas un exÃ©cutant. La sÃ©paration catalogue/implÃ©mentation est fondamentale.
 
-### L-10 : Ne gère JAMAIS le cycle de vie technique
+### L-10 : Ne gÃ¨re JAMAIS le cycle de vie technique
 
-**Limite absolue :** Master Butler **ne gère jamais** le cycle de vie technique des Outils (versions, dépréciation, migration technique).
+**Limite absolue :** Master Butler **ne gÃ¨re jamais** le cycle de vie technique des Outils (versions, dÃ©prÃ©ciation, migration technique).
 
 **Application :**
-- Master Butler connaît l'existence des Outils
-- La gestion des versions appartient à Ever Buddy
-- La migration technique appartient à Ever Buddy et aux Opérateurs
+- Master Butler connaÃ®t l'existence des Outils
+- La gestion des versions appartient Ã  Ever Buddy
+- La migration technique appartient Ã  Ever Buddy et aux OpÃ©rateurs
 
-**Justification :** Le cycle de vie technique appartient à Ever Buddy. Master Butler maintient un catalogue statique à un instant T.
+**Justification :** Le cycle de vie technique appartient Ã  Ever Buddy. Master Butler maintient un catalogue statique Ã  un instant T.
 
 ---
 
-## 5. Frontières avec les autres Cores
+## 5. FrontiÃ¨res avec les autres Cores
 
-### Frontière Master Butler ↔ StrongFather
+### FrontiÃ¨re Master Butler â†” StrongFather
 
 | Aspect | Master Butler | StrongFather |
 |--------|--------------|--------------|
-| **Question** | "Quelles capacités existent ?" | "Cette action est-elle autorisée ?" |
-| **Responsabilité** | Recenser les possibilités | Décider de leur usage |
-| **Output** | Informations (capacités, permissions) | Décisions (autorisé, refusé) |
-| **Autorité** | Registre (définition) | Décision (évaluation) |
+| **Question** | "Quelles capacitÃ©s existent ?" | "Cette action est-elle autorisÃ©e ?" |
+| **ResponsabilitÃ©** | Recenser les possibilitÃ©s | DÃ©cider de leur usage |
+| **Output** | Informations (capacitÃ©s, permissions) | DÃ©cisions (autorisÃ©, refusÃ©) |
+| **AutoritÃ©** | Registre (dÃ©finition) | DÃ©cision (Ã©valuation) |
 
-**Règle de frontière :** Master Butler fournit les informations, StrongFather les utilise pour décider. Aucun chevauchement n'est permis.
+**RÃ¨gle de frontiÃ¨re :** Master Butler fournit les informations, StrongFather les utilise pour dÃ©cider. Aucun chevauchement n'est permis.
 
 **Flux typique :**
 ```
-1. StrongFather reçoit une intention
-2. StrongFather interroge Master Butler : "Cette capacité existe-t-elle ?"
-3. Master Butler répond avec les informations
-4. StrongFather évalue selon les politiques
-5. StrongFather produit une décision
+1. StrongFather reÃ§oit une intention
+2. StrongFather interroge Master Butler : "Cette capacitÃ© existe-t-elle ?"
+3. Master Butler rÃ©pond avec les informations
+4. StrongFather Ã©value selon les politiques
+5. StrongFather produit une dÃ©cision
 ```
 
-**Interdiction formelle :** Master Butler ne participe jamais à l'étape 4 ou 5. Master Butler ne suggère jamais de décision.
+**Interdiction formelle :** Master Butler ne participe jamais Ã  l'Ã©tape 4 ou 5. Master Butler ne suggÃ¨re jamais de dÃ©cision.
 
-### Frontière Master Butler ↔ KindMother
+### FrontiÃ¨re Master Butler â†” KindMother
 
 | Aspect | Master Butler | KindMother |
 |--------|--------------|------------|
-| **Domaine** | Métadonnées (capacités, permissions) | Données métier |
-| **Responsabilité** | Cataloguer les possibilités | Persister les données |
-| **Stockage** | Registre de métadonnées | Données applicatives |
+| **Domaine** | MÃ©tadonnÃ©es (capacitÃ©s, permissions) | DonnÃ©es mÃ©tier |
+| **ResponsabilitÃ©** | Cataloguer les possibilitÃ©s | Persister les donnÃ©es |
+| **Stockage** | Registre de mÃ©tadonnÃ©es | DonnÃ©es applicatives |
 
-**Règle de frontière :** Master Butler peut utiliser KindMother pour persister son registre, mais ne gère jamais directement la persistance.
+**RÃ¨gle de frontiÃ¨re :** Master Butler peut utiliser KindMother pour persister son registre, mais ne gÃ¨re jamais directement la persistance.
 
-**Interdiction formelle :** Master Butler ne stocke jamais de données métier, ne gère jamais la persistance des données applicatives.
+**Interdiction formelle :** Master Butler ne stocke jamais de donnÃ©es mÃ©tier, ne gÃ¨re jamais la persistance des donnÃ©es applicatives.
 
-### Frontière Master Butler ↔ BondingBrother
+### FrontiÃ¨re Master Butler â†” BondingBrother
 
 | Aspect | Master Butler | BondingBrother |
 |--------|--------------|----------------|
-| **Rôle** | Fournir les informations | Traduire les intentions |
-| **Interaction** | Répond aux interrogations | Interroge pour la traduction |
+| **RÃ´le** | Fournir les informations | Traduire les intentions |
+| **Interaction** | RÃ©pond aux interrogations | Interroge pour la traduction |
 
-**Règle de frontière :** BondingBrother interroge Master Butler pour comprendre les capacités disponibles. Master Butler répond sans interpréter l'intention.
+**RÃ¨gle de frontiÃ¨re :** BondingBrother interroge Master Butler pour comprendre les capacitÃ©s disponibles. Master Butler rÃ©pond sans interprÃ©ter l'intention.
 
 **Flux typique :**
 ```
 1. BondingBrother traduit une intention
-2. BondingBrother demande : "Quelles capacités sont disponibles pour ce module ?"
-3. Master Butler répond avec la liste des capacités
+2. BondingBrother demande : "Quelles capacitÃ©s sont disponibles pour ce module ?"
+3. Master Butler rÃ©pond avec la liste des capacitÃ©s
 4. BondingBrother utilise ces informations pour sa traduction
 ```
 
-### Frontière Master Butler ↔ Ever Buddy
+### FrontiÃ¨re Master Butler â†” Ever Buddy
 
 | Aspect | Master Butler | Ever Buddy |
 |--------|--------------|------------|
-| **Domaine** | Catalogue actuel | Évolution temporelle |
-| **Responsabilité** | Ce qui existe maintenant | Ce qui a été, ce qui sera |
+| **Domaine** | Catalogue actuel | Ã‰volution temporelle |
+| **ResponsabilitÃ©** | Ce qui existe maintenant | Ce qui a Ã©tÃ©, ce qui sera |
 | **Gestion** | Registre statique | Cycle de vie dynamique |
 
-**Règle de frontière :** Master Butler maintient le catalogue actuel. Ever Buddy gère les versions, dépréciations, et migrations.
+**RÃ¨gle de frontiÃ¨re :** Master Butler maintient le catalogue actuel. Ever Buddy gÃ¨re les versions, dÃ©prÃ©ciations, et migrations.
 
-**Interdiction formelle :** Master Butler ne gère jamais le versioning ou la dépréciation des Outils. Cette responsabilité appartient exclusivement à Ever Buddy.
+**Interdiction formelle :** Master Butler ne gÃ¨re jamais le versioning ou la dÃ©prÃ©ciation des Outils. Cette responsabilitÃ© appartient exclusivement Ã  Ever Buddy.
 
-### Frontière Master Butler ↔ WorrySentinel
+### FrontiÃ¨re Master Butler â†” WorrySentinel
 
 | Aspect | Master Butler | WorrySentinel |
 |--------|--------------|---------------|
-| **Domaine** | Capacités et permissions | Sécurité et confiance |
-| **Responsabilité** | Définir les permissions | Gouverner les niveaux de sécurité |
+| **Domaine** | CapacitÃ©s et permissions | SÃ©curitÃ© et confiance |
+| **ResponsabilitÃ©** | DÃ©finir les permissions | Gouverner les niveaux de sÃ©curitÃ© |
 
-**Règle de frontière :** Master Butler définit les permissions disponibles. WorrySentinel gouverne les niveaux de sécurité et peut bloquer certaines capacités selon l'état de confiance.
+**RÃ¨gle de frontiÃ¨re :** Master Butler dÃ©finit les permissions disponibles. WorrySentinel gouverne les niveaux de sÃ©curitÃ© et peut bloquer certaines capacitÃ©s selon l'Ã©tat de confiance.
 
-**Interdiction formelle :** Master Butler ne bloque jamais une capacité pour des raisons de sécurité. Cette responsabilité appartient à WorrySentinel et StrongFather.
+**Interdiction formelle :** Master Butler ne bloque jamais une capacitÃ© pour des raisons de sÃ©curitÃ©. Cette responsabilitÃ© appartient Ã  WorrySentinel et StrongFather.
 
-### Frontière Master Butler ↔ Caring Nanny
+### FrontiÃ¨re Master Butler â†” Caring Nanny
 
 | Aspect | Master Butler | Caring Nanny |
 |--------|--------------|--------------|
-| **Domaine** | Capacités disponibles | État du système |
-| **Responsabilité** | Cataloguer | Observer |
+| **Domaine** | CapacitÃ©s disponibles | Ã‰tat du systÃ¨me |
+| **ResponsabilitÃ©** | Cataloguer | Observer |
 
-**Règle de frontière :** Master Butler catalogue les capacités disponibles. Caring Nanny observe si l'état du système permet leur usage.
+**RÃ¨gle de frontiÃ¨re :** Master Butler catalogue les capacitÃ©s disponibles. Caring Nanny observe si l'Ã©tat du systÃ¨me permet leur usage.
 
-**Interdiction formelle :** Master Butler ne bloque jamais une capacité selon l'état du système. Cette responsabilité appartient à Caring Nanny.
+**Interdiction formelle :** Master Butler ne bloque jamais une capacitÃ© selon l'Ã©tat du systÃ¨me. Cette responsabilitÃ© appartient Ã  Caring Nanny.
 
 ---
 
-## 6. Invariants d'autorité non négociables
+## 6. Invariants d'autoritÃ© non nÃ©gociables
 
-### INV-AL-1 : Séparation registre/décision
+### INV-AL-1 : SÃ©paration registre/dÃ©cision
 
-**Invariant :** La séparation entre le registre (Master Butler) et la décision (StrongFather) est **absolue et non négociable**.
+**Invariant :** La sÃ©paration entre le registre (Master Butler) et la dÃ©cision (StrongFather) est **absolue et non nÃ©gociable**.
 
-**Implication :** Aucune méthode de Master Butler ne peut retourner un verdict d'autorisation. Toute décision appartient à StrongFather.
+**Implication :** Aucune mÃ©thode de Master Butler ne peut retourner un verdict d'autorisation. Toute dÃ©cision appartient Ã  StrongFather.
 
 ### INV-AL-2 : Registre passif
 
-**Invariant :** Master Butler est un **registre passif** qui répond aux interrogations mais ne prend jamais l'initiative.
+**Invariant :** Master Butler est un **registre passif** qui rÃ©pond aux interrogations mais ne prend jamais l'initiative.
 
-**Implication :** Master Butler ne déclenche jamais d'action, ne recommande jamais de capacité, ne suggère jamais de décision.
+**Implication :** Master Butler ne dÃ©clenche jamais d'action, ne recommande jamais de capacitÃ©, ne suggÃ¨re jamais de dÃ©cision.
 
-### INV-AL-3 : Agnosticisme métier
+### INV-AL-3 : Agnosticisme mÃ©tier
 
-**Invariant :** Master Butler est **agnostique du métier** et ne connaît aucune règle de domaine.
+**Invariant :** Master Butler est **agnostique du mÃ©tier** et ne connaÃ®t aucune rÃ¨gle de domaine.
 
-**Implication :** Master Butler ne valide jamais selon des critères métier, ne connaît pas les contraintes applicatives.
+**Implication :** Master Butler ne valide jamais selon des critÃ¨res mÃ©tier, ne connaÃ®t pas les contraintes applicatives.
 
-### INV-AL-4 : Non-exécution
+### INV-AL-4 : Non-exÃ©cution
 
-**Invariant :** Master Butler **n'exécute jamais** d'action fonctionnelle ou technique.
+**Invariant :** Master Butler **n'exÃ©cute jamais** d'action fonctionnelle ou technique.
 
-**Implication :** Master Butler catalogue mais n'implémente pas, recense mais n'exécute pas.
+**Implication :** Master Butler catalogue mais n'implÃ©mente pas, recense mais n'exÃ©cute pas.
 
-### INV-AL-5 : Unicité du registre
+### INV-AL-5 : UnicitÃ© du registre
 
-**Invariant :** Le registre de Master Butler est **l'unique source de vérité** pour les capacités et permissions.
+**Invariant :** Le registre de Master Butler est **l'unique source de vÃ©ritÃ©** pour les capacitÃ©s et permissions.
 
-**Implication :** Aucun autre composant ne maintient de registre concurrent. Toute information sur les capacités provient de Master Butler.
+**Implication :** Aucun autre composant ne maintient de registre concurrent. Toute information sur les capacitÃ©s provient de Master Butler.
 
-### INV-AL-6 : Non-délégation de l'autorité exclusive
+### INV-AL-6 : Non-dÃ©lÃ©gation de l'autoritÃ© exclusive
 
-**Invariant :** L'autorité exclusive de Master Butler sur le registre **ne peut jamais être déléguée**.
+**Invariant :** L'autoritÃ© exclusive de Master Butler sur le registre **ne peut jamais Ãªtre dÃ©lÃ©guÃ©e**.
 
-**Implication :** Aucun composant ne peut devenir le registre des capacités à la place de Master Butler, même temporairement.
+**Implication :** Aucun composant ne peut devenir le registre des capacitÃ©s Ã  la place de Master Butler, mÃªme temporairement.
 
 ---
 
-## 7. Schéma ASCII des frontières d'autorité
+## 7. SchÃ©ma ASCII des frontiÃ¨res d'autoritÃ©
 
-### 7.1. Vue d'ensemble des limites d'autorité
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                      ZONE D'AUTORITÉ MASTER BUTLER                       │
-│                                                                          │
-│  ┌────────────────────────────────────────────────────────────────────┐ │
-│  │  AUTORITÉ EXCLUSIVE                                                 │ │
-│  │                                                                     │ │
-│  │  ✅ Registre des capacités                                         │ │
-│  │  ✅ Registre des permissions                                       │ │
-│  │  ✅ Catalogue des Outils et Kits d'Outils                          │ │
-│  │  ✅ API de découverte                                              │ │
-│  │  ✅ Traçabilité des définitions                                    │ │
-│  │  ✅ Associations Capacité → Outil                                  │ │
-│  │  ✅ Associations Permission → Capacité                             │ │
-│  │                                                                     │ │
-│  │  👉 Master Butler EXPOSE ce qui existe                              │ │
-│  └────────────────────────────────────────────────────────────────────┘ │
-│                                                                          │
-│  ┌────────────────────────────────────────────────────────────────────┐ │
-│  │  LIMITES ABSOLUES — CE QUE MASTER BUTLER NE FAIT JAMAIS            │ │
-│  │                                                                     │ │
-│  │  ❌ Ne décide jamais (autorisation/refus)                          │ │
-│  │  ❌ Ne vérifie jamais les permissions en temps réel                │ │
-│  │  ❌ N'exécute jamais d'action fonctionnelle                        │ │
-│  │  ❌ Ne stocke jamais de données métier                              │ │
-│  │  ❌ Ne gère jamais les identités                                   │ │
-│  │  ❌ Ne définit jamais de politiques                                │ │
-│  │  ❌ N'applique jamais de contraintes métier                        │ │
-│  │  ❌ Ne persiste jamais directement                                 │ │
-│  │  ❌ N'implémente jamais d'Outils                                   │ │
-│  │  ❌ Ne gère jamais le cycle de vie technique                       │ │
-│  │                                                                     │ │
-│  │  👉 Master Butler N'EXÉCUTE et NE DÉCIDE jamais                    │ │
-│  └────────────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-### 7.2. Frontières avec les autres Cores
+### 7.1. Vue d'ensemble des limites d'autoritÃ©
 
 ```
-                            STRATE 4 — CORES SYSTÈME
-┌─────────────────────────────────────────────────────────────────────────┐
-│                                                                          │
-│  ┌──────────────────┐      ┌──────────────────┐      ┌──────────────┐  │
-│  │   StrongFather   │      │   Master Butler  │      │  KindMother  │  │
-│  │                  │      │                  │      │              │  │
-│  │  👑 DÉCIDE       │ ←──→ │  📋 CATALOGUE    │ ←──→ │  💾 PERSISTE │  │
-│  │                  │      │                  │      │              │  │
-│  │  • Politiques    │      │  • Capacités     │      │  • Données   │  │
-│  │  • Autorisations │      │  • Permissions   │      │  • États     │  │
-│  │  • Verdicts      │      │  • Outils        │      │  • Entités   │  │
-│  └──────────────────┘      └──────────────────┘      └──────────────┘  │
-│          │                          │                        │         │
-│          │                          │                        │         │
-│          │         ┌────────────────┴───────────────┐        │         │
-│          │         │                                │        │         │
-│          │         ▼                                ▼        │         │
-│          │  ┌──────────────┐              ┌──────────────┐   │         │
-│          │  │  Ever Buddy  │              │ WorrySentinel│   │         │
-│          │  │              │              │              │   │         │
-│          │  │  🔄 ÉVOLUE   │              │  🛡️ SÉCURISE │   │         │
-│          │  │              │              │              │   │         │
-│          │  │  • Versions  │              │  • Niveaux   │   │         │
-│          │  │  • Migration │              │  • Confiance │   │         │
-│          │  └──────────────┘              └──────────────┘   │         │
-│          │                                                   │         │
-│          └───────────────────────┬───────────────────────────┘         │
-│                                  │                                      │
-│                                  ▼                                      │
-│                     ┌──────────────────────┐                           │
-│                     │    Caring Nanny      │                           │
-│                     │                      │                           │
-│                     │    👁️ OBSERVE        │                           │
-│                     │                      │                           │
-│                     │    • État système    │                           │
-│                     └──────────────────────┘                           │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                      ZONE D'AUTORITÃ‰ MASTER BUTLER                       â”‚
+â”‚                                                                          â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  AUTORITÃ‰ EXCLUSIVE                                                 â”‚ â”‚
+â”‚  â”‚                                                                     â”‚ â”‚
+â”‚  â”‚  âœ… Registre des capacitÃ©s                                         â”‚ â”‚
+â”‚  â”‚  âœ… Registre des permissions                                       â”‚ â”‚
+â”‚  â”‚  âœ… Catalogue des Outils et Kits d'Outils                          â”‚ â”‚
+â”‚  â”‚  âœ… API de dÃ©couverte                                              â”‚ â”‚
+â”‚  â”‚  âœ… TraÃ§abilitÃ© des dÃ©finitions                                    â”‚ â”‚
+â”‚  â”‚  âœ… Associations CapacitÃ© â†’ Outil                                  â”‚ â”‚
+â”‚  â”‚  âœ… Associations Permission â†’ CapacitÃ©                             â”‚ â”‚
+â”‚  â”‚                                                                     â”‚ â”‚
+â”‚  â”‚  ðŸ‘‰ Master Butler EXPOSE ce qui existe                              â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚                                                                          â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  LIMITES ABSOLUES â€” CE QUE MASTER BUTLER NE FAIT JAMAIS            â”‚ â”‚
+â”‚  â”‚                                                                     â”‚ â”‚
+â”‚  â”‚  âŒ Ne dÃ©cide jamais (autorisation/refus)                          â”‚ â”‚
+â”‚  â”‚  âŒ Ne vÃ©rifie jamais les permissions en temps rÃ©el                â”‚ â”‚
+â”‚  â”‚  âŒ N'exÃ©cute jamais d'action fonctionnelle                        â”‚ â”‚
+â”‚  â”‚  âŒ Ne stocke jamais de donnÃ©es mÃ©tier                              â”‚ â”‚
+â”‚  â”‚  âŒ Ne gÃ¨re jamais les identitÃ©s                                   â”‚ â”‚
+â”‚  â”‚  âŒ Ne dÃ©finit jamais de politiques                                â”‚ â”‚
+â”‚  â”‚  âŒ N'applique jamais de contraintes mÃ©tier                        â”‚ â”‚
+â”‚  â”‚  âŒ Ne persiste jamais directement                                 â”‚ â”‚
+â”‚  â”‚  âŒ N'implÃ©mente jamais d'Outils                                   â”‚ â”‚
+â”‚  â”‚  âŒ Ne gÃ¨re jamais le cycle de vie technique                       â”‚ â”‚
+â”‚  â”‚                                                                     â”‚ â”‚
+â”‚  â”‚  ðŸ‘‰ Master Butler N'EXÃ‰CUTE et NE DÃ‰CIDE jamais                    â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```
 
-LÉGENDE DES FRONTIÈRES :
-═══════════════════════
+### 7.2. FrontiÃ¨res avec les autres Cores
 
-┌────────────────────────────────────────────────────────────────────────┐
-│                                                                         │
-│  Master Butler         →    StrongFather                               │
-│  "Voici les capacités"      "J'autorise ou je refuse"                  │
-│                                                                         │
-│  Master Butler         →    KindMother                                 │
-│  "Persiste mon registre"    "Je gère le stockage"                      │
-│                                                                         │
-│  Master Butler         →    Ever Buddy                                 │
-│  "Voici le catalogue"       "Je gère les versions"                     │
-│                                                                         │
-│  Master Butler         →    WorrySentinel                              │
-│  "Voici les permissions"    "Je gouverne la sécurité"                  │
-│                                                                         │
-│  Master Butler         →    Caring Nanny                               │
-│  "Voici ce qui existe"      "J'observe si c'est utilisable"            │
-│                                                                         │
-└────────────────────────────────────────────────────────────────────────┘
+```
+                            STRATE 4 â€” CORES SYSTÃˆME
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                                                                          â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚   StrongFather   â”‚      â”‚   Master Butler  â”‚      â”‚  KindMother  â”‚  â”‚
+â”‚  â”‚                  â”‚      â”‚                  â”‚      â”‚              â”‚  â”‚
+â”‚  â”‚  ðŸ‘‘ DÃ‰CIDE       â”‚ â†â”€â”€â†’ â”‚  ðŸ“‹ CATALOGUE    â”‚ â†â”€â”€â†’ â”‚  ðŸ’¾ PERSISTE â”‚  â”‚
+â”‚  â”‚                  â”‚      â”‚                  â”‚      â”‚              â”‚  â”‚
+â”‚  â”‚  â€¢ Politiques    â”‚      â”‚  â€¢ CapacitÃ©s     â”‚      â”‚  â€¢ DonnÃ©es   â”‚  â”‚
+â”‚  â”‚  â€¢ Autorisations â”‚      â”‚  â€¢ Permissions   â”‚      â”‚  â€¢ Ã‰tats     â”‚  â”‚
+â”‚  â”‚  â€¢ Verdicts      â”‚      â”‚  â€¢ Outils        â”‚      â”‚  â€¢ EntitÃ©s   â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚          â”‚                          â”‚                        â”‚         â”‚
+â”‚          â”‚                          â”‚                        â”‚         â”‚
+â”‚          â”‚         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”        â”‚         â”‚
+â”‚          â”‚         â”‚                                â”‚        â”‚         â”‚
+â”‚          â”‚         â–¼                                â–¼        â”‚         â”‚
+â”‚          â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”              â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚         â”‚
+â”‚          â”‚  â”‚  Ever Buddy  â”‚              â”‚ WorrySentinelâ”‚   â”‚         â”‚
+â”‚          â”‚  â”‚              â”‚              â”‚              â”‚   â”‚         â”‚
+â”‚          â”‚  â”‚  ðŸ”„ Ã‰VOLUE   â”‚              â”‚  ðŸ›¡ï¸ SÃ‰CURISE â”‚   â”‚         â”‚
+â”‚          â”‚  â”‚              â”‚              â”‚              â”‚   â”‚         â”‚
+â”‚          â”‚  â”‚  â€¢ Versions  â”‚              â”‚  â€¢ Niveaux   â”‚   â”‚         â”‚
+â”‚          â”‚  â”‚  â€¢ Migration â”‚              â”‚  â€¢ Confiance â”‚   â”‚         â”‚
+â”‚          â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜              â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚         â”‚
+â”‚          â”‚                                                   â”‚         â”‚
+â”‚          â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜         â”‚
+â”‚                                  â”‚                                      â”‚
+â”‚                                  â–¼                                      â”‚
+â”‚                     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                           â”‚
+â”‚                     â”‚    Caring Nanny      â”‚                           â”‚
+â”‚                     â”‚                      â”‚                           â”‚
+â”‚                     â”‚    ðŸ‘ï¸ OBSERVE        â”‚                           â”‚
+â”‚                     â”‚                      â”‚                           â”‚
+â”‚                     â”‚    â€¢ Ã‰tat systÃ¨me    â”‚                           â”‚
+â”‚                     â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                           â”‚
+â”‚                                                                          â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+
+LÃ‰GENDE DES FRONTIÃˆRES :
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                                                                         â”‚
+â”‚  Master Butler         â†’    StrongFather                               â”‚
+â”‚  "Voici les capacitÃ©s"      "J'autorise ou je refuse"                  â”‚
+â”‚                                                                         â”‚
+â”‚  Master Butler         â†’    KindMother                                 â”‚
+â”‚  "Persiste mon registre"    "Je gÃ¨re le stockage"                      â”‚
+â”‚                                                                         â”‚
+â”‚  Master Butler         â†’    Ever Buddy                                 â”‚
+â”‚  "Voici le catalogue"       "Je gÃ¨re les versions"                     â”‚
+â”‚                                                                         â”‚
+â”‚  Master Butler         â†’    WorrySentinel                              â”‚
+â”‚  "Voici les permissions"    "Je gouverne la sÃ©curitÃ©"                  â”‚
+â”‚                                                                         â”‚
+â”‚  Master Butler         â†’    Caring Nanny                               â”‚
+â”‚  "Voici ce qui existe"      "J'observe si c'est utilisable"            â”‚
+â”‚                                                                         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 7.3. Flux d'information et limites
 
 ```
 INTERROGATION DE MASTER BUTLER
-══════════════════════════════
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-      ┌───────────────────────────────────────┐
-      │         COMPOSANT APPELANT            │
-      │  (StrongFather, BondingBrother,       │
-      │   Opérateur via BondingBrother)       │
-      └───────────────────────────────────────┘
-                          │
-                          │ Interrogation
-                          │ "Quelles capacités ?"
-                          │ "Quelles permissions ?"
-                          │ "Quel contexte ?"
-                          ▼
-      ┌───────────────────────────────────────┐
-      │            MASTER BUTLER              │
-      │                                       │
-      │  ┌─────────────────────────────────┐  │
-      │  │  OPÉRATIONS AUTORISÉES          │  │
-      │  │                                 │  │
-      │  │  • getCapabilities()            │  │
-      │  │  • getPermissions()             │  │
-      │  │  • getCapabilityContext()       │  │
-      │  │  • discoverTools()              │  │
-      │  │  • getAssociations()            │  │
-      │  └─────────────────────────────────┘  │
-      │                                       │
-      │  ┌─────────────────────────────────┐  │
-      │  │  OPÉRATIONS INTERDITES          │  │
-      │  │                                 │  │
-      │  │  ❌ isAuthorized()              │  │
-      │  │  ❌ validatePermission()        │  │
-      │  │  ❌ executeTool()               │  │
-      │  │  ❌ blockCapability()           │  │
-      │  │  ❌ enforcePolicy()             │  │
-      │  └─────────────────────────────────┘  │
-      └───────────────────────────────────────┘
-                          │
-                          │ Réponse
-                          │ (Informations uniquement,
-                          │  jamais de décision)
-                          ▼
-      ┌───────────────────────────────────────┐
-      │         COMPOSANT APPELANT            │
-      │                                       │
-      │  Utilise les informations pour :      │
-      │  • StrongFather : prendre une décision│
-      │  • BondingBrother : traduire          │
-      │  • Opérateur : découvrir              │
-      └───────────────────────────────────────┘
+      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+      â”‚         COMPOSANT APPELANT            â”‚
+      â”‚  (StrongFather, BondingBrother,       â”‚
+      â”‚   OpÃ©rateur via BondingBrother)       â”‚
+      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                          â”‚
+                          â”‚ Interrogation
+                          â”‚ "Quelles capacitÃ©s ?"
+                          â”‚ "Quelles permissions ?"
+                          â”‚ "Quel contexte ?"
+                          â–¼
+      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+      â”‚            MASTER BUTLER              â”‚
+      â”‚                                       â”‚
+      â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+      â”‚  â”‚  OPÃ‰RATIONS AUTORISÃ‰ES          â”‚  â”‚
+      â”‚  â”‚                                 â”‚  â”‚
+      â”‚  â”‚  â€¢ getCapabilities()            â”‚  â”‚
+      â”‚  â”‚  â€¢ getPermissions()             â”‚  â”‚
+      â”‚  â”‚  â€¢ getCapabilityContext()       â”‚  â”‚
+      â”‚  â”‚  â€¢ discoverTools()              â”‚  â”‚
+      â”‚  â”‚  â€¢ getAssociations()            â”‚  â”‚
+      â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+      â”‚                                       â”‚
+      â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+      â”‚  â”‚  OPÃ‰RATIONS INTERDITES          â”‚  â”‚
+      â”‚  â”‚                                 â”‚  â”‚
+      â”‚  â”‚  âŒ isAuthorized()              â”‚  â”‚
+      â”‚  â”‚  âŒ validatePermission()        â”‚  â”‚
+      â”‚  â”‚  âŒ executeTool()               â”‚  â”‚
+      â”‚  â”‚  âŒ blockCapability()           â”‚  â”‚
+      â”‚  â”‚  âŒ enforcePolicy()             â”‚  â”‚
+      â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                          â”‚
+                          â”‚ RÃ©ponse
+                          â”‚ (Informations uniquement,
+                          â”‚  jamais de dÃ©cision)
+                          â–¼
+      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+      â”‚         COMPOSANT APPELANT            â”‚
+      â”‚                                       â”‚
+      â”‚  Utilise les informations pour :      â”‚
+      â”‚  â€¢ StrongFather : prendre une dÃ©cisionâ”‚
+      â”‚  â€¢ BondingBrother : traduire          â”‚
+      â”‚  â€¢ OpÃ©rateur : dÃ©couvrir              â”‚
+      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### 7.4. Matrice des responsabilités et limites
+### 7.4. Matrice des responsabilitÃ©s et limites
 
 ```
-MATRICE DES RESPONSABILITÉS
-═══════════════════════════
+MATRICE DES RESPONSABILITÃ‰S
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-┌────────────────────────┬──────────┬─────────────┬───────────┬──────────┐
-│ ACTION                 │ Master   │ Strong      │ Kind      │ Ever     │
-│                        │ Butler   │ Father      │ Mother    │ Buddy    │
-├────────────────────────┼──────────┼─────────────┼───────────┼──────────┤
-│ Recenser capacités     │ ✅ OUI   │ ❌ Non      │ ❌ Non    │ ❌ Non   │
-│ Définir permissions    │ ✅ OUI   │ ❌ Non      │ ❌ Non    │ ❌ Non   │
-│ Cataloguer Outils      │ ✅ OUI   │ ❌ Non      │ ❌ Non    │ ❌ Non   │
-│ Fournir découverte     │ ✅ OUI   │ ❌ Non      │ ❌ Non    │ ❌ Non   │
-├────────────────────────┼──────────┼─────────────┼───────────┼──────────┤
-│ Décider autorisation   │ ❌ NON   │ ✅ Oui      │ ❌ Non    │ ❌ Non   │
-│ Vérifier permissions   │ ❌ NON   │ ✅ Oui      │ ❌ Non    │ ❌ Non   │
-│ Appliquer politiques   │ ❌ NON   │ ✅ Oui      │ ❌ Non    │ ❌ Non   │
-├────────────────────────┼──────────┼─────────────┼───────────┼──────────┤
-│ Persister données      │ ❌ NON   │ ❌ Non      │ ✅ Oui    │ ❌ Non   │
-│ Gérer cohérence        │ ❌ NON   │ ❌ Non      │ ✅ Oui    │ ❌ Non   │
-├────────────────────────┼──────────┼─────────────┼───────────┼──────────┤
-│ Gérer versions         │ ❌ NON   │ ❌ Non      │ ❌ Non    │ ✅ Oui   │
-│ Gérer dépréciation     │ ❌ NON   │ ❌ Non      │ ❌ Non    │ ✅ Oui   │
-│ Gérer migration        │ ❌ NON   │ ❌ Non      │ ❌ Non    │ ✅ Oui   │
-├────────────────────────┼──────────┼─────────────┼───────────┼──────────┤
-│ Exécuter Outils        │ ❌ NON   │ ❌ Non      │ ❌ Non    │ ❌ Non   │
-│ (→ Strate 6)           │          │             │           │          │
-├────────────────────────┼──────────┼─────────────┼───────────┼──────────┤
-│ Implémenter Outils     │ ❌ NON   │ ❌ Non      │ ❌ Non    │ ❌ Non   │
-│ (→ Strate 6)           │          │             │           │          │
-└────────────────────────┴──────────┴─────────────┴───────────┴──────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ ACTION                 â”‚ Master   â”‚ Strong      â”‚ Kind      â”‚ Ever     â”‚
+â”‚                        â”‚ Butler   â”‚ Father      â”‚ Mother    â”‚ Buddy    â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Recenser capacitÃ©s     â”‚ âœ… OUI   â”‚ âŒ Non      â”‚ âŒ Non    â”‚ âŒ Non   â”‚
+â”‚ DÃ©finir permissions    â”‚ âœ… OUI   â”‚ âŒ Non      â”‚ âŒ Non    â”‚ âŒ Non   â”‚
+â”‚ Cataloguer Outils      â”‚ âœ… OUI   â”‚ âŒ Non      â”‚ âŒ Non    â”‚ âŒ Non   â”‚
+â”‚ Fournir dÃ©couverte     â”‚ âœ… OUI   â”‚ âŒ Non      â”‚ âŒ Non    â”‚ âŒ Non   â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ DÃ©cider autorisation   â”‚ âŒ NON   â”‚ âœ… Oui      â”‚ âŒ Non    â”‚ âŒ Non   â”‚
+â”‚ VÃ©rifier permissions   â”‚ âŒ NON   â”‚ âœ… Oui      â”‚ âŒ Non    â”‚ âŒ Non   â”‚
+â”‚ Appliquer politiques   â”‚ âŒ NON   â”‚ âœ… Oui      â”‚ âŒ Non    â”‚ âŒ Non   â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Persister donnÃ©es      â”‚ âŒ NON   â”‚ âŒ Non      â”‚ âœ… Oui    â”‚ âŒ Non   â”‚
+â”‚ GÃ©rer cohÃ©rence        â”‚ âŒ NON   â”‚ âŒ Non      â”‚ âœ… Oui    â”‚ âŒ Non   â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ GÃ©rer versions         â”‚ âŒ NON   â”‚ âŒ Non      â”‚ âŒ Non    â”‚ âœ… Oui   â”‚
+â”‚ GÃ©rer dÃ©prÃ©ciation     â”‚ âŒ NON   â”‚ âŒ Non      â”‚ âŒ Non    â”‚ âœ… Oui   â”‚
+â”‚ GÃ©rer migration        â”‚ âŒ NON   â”‚ âŒ Non      â”‚ âŒ Non    â”‚ âœ… Oui   â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ ExÃ©cuter Outils        â”‚ âŒ NON   â”‚ âŒ Non      â”‚ âŒ Non    â”‚ âŒ Non   â”‚
+â”‚ (â†’ Strate 6)           â”‚          â”‚             â”‚           â”‚          â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ ImplÃ©menter Outils     â”‚ âŒ NON   â”‚ âŒ Non      â”‚ âŒ Non    â”‚ âŒ Non   â”‚
+â”‚ (â†’ Strate 6)           â”‚          â”‚             â”‚           â”‚          â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
-LÉGENDE :
-✅ OUI = Responsabilité exclusive
-❌ NON = Limite absolue, jamais
+LÃ‰GENDE :
+âœ… OUI = ResponsabilitÃ© exclusive
+âŒ NON = Limite absolue, jamais
 ```
 
 ---
 
-## 8. Violations des limites d'autorité
+## 8. Violations des limites d'autoritÃ©
 
-### Définition d'une violation
+### DÃ©finition d'une violation
 
-Une **violation des limites d'autorité** est toute implémentation, configuration, ou comportement de Master Butler qui franchit les limites définies dans ce contrat.
+Une **violation des limites d'autoritÃ©** est toute implÃ©mentation, configuration, ou comportement de Master Butler qui franchit les limites dÃ©finies dans ce contrat.
 
-### Gravité des violations
+### GravitÃ© des violations
 
-| Catégorie | Exemples | Gravité |
+| CatÃ©gorie | Exemples | GravitÃ© |
 |-----------|----------|---------|
-| **V-CRIT** | Master Butler prend une décision d'autorisation | Critique |
-| **V-CRIT** | Master Butler exécute un Outil | Critique |
-| **V-HIGH** | Master Butler stocke des données métier | Haute |
-| **V-HIGH** | Master Butler applique des contraintes métier | Haute |
+| **V-CRIT** | Master Butler prend une dÃ©cision d'autorisation | Critique |
+| **V-CRIT** | Master Butler exÃ©cute un Outil | Critique |
+| **V-HIGH** | Master Butler stocke des donnÃ©es mÃ©tier | Haute |
+| **V-HIGH** | Master Butler applique des contraintes mÃ©tier | Haute |
 | **V-MED** | Master Butler persiste directement | Moyenne |
-| **V-MED** | Master Butler gère des versions | Moyenne |
+| **V-MED** | Master Butler gÃ¨re des versions | Moyenne |
 
-### Conséquences des violations
+### ConsÃ©quences des violations
 
 **Violations critiques (V-CRIT) :**
-- L'implémentation n'est pas conforme à l'architecture Miyukini
-- L'intégrité du système est compromise
-- Correction immédiate requise
+- L'implÃ©mentation n'est pas conforme Ã  l'architecture Miyukini
+- L'intÃ©gritÃ© du systÃ¨me est compromise
+- Correction immÃ©diate requise
 
 **Violations hautes (V-HIGH) :**
-- L'implémentation dérive de l'architecture
-- Des effets de bord indésirables peuvent survenir
+- L'implÃ©mentation dÃ©rive de l'architecture
+- Des effets de bord indÃ©sirables peuvent survenir
 - Correction prioritaire requise
 
 **Violations moyennes (V-MED) :**
-- L'implémentation contourne les recommandations
-- La maintenabilité est compromise
-- Correction planifiée requise
+- L'implÃ©mentation contourne les recommandations
+- La maintenabilitÃ© est compromise
+- Correction planifiÃ©e requise
 
-### Détection des violations
+### DÃ©tection des violations
 
-Les violations peuvent être détectées par :
-- **Audit de code** : Vérification que les méthodes de Master Butler respectent les limites
-- **Audit d'architecture** : Vérification des flux de données et de décision
-- **Tests d'intégration** : Vérification que Master Butler ne prend jamais de décision
+Les violations peuvent Ãªtre dÃ©tectÃ©es par :
+- **Audit de code** : VÃ©rification que les mÃ©thodes de Master Butler respectent les limites
+- **Audit d'architecture** : VÃ©rification des flux de donnÃ©es et de dÃ©cision
+- **Tests d'intÃ©gration** : VÃ©rification que Master Butler ne prend jamais de dÃ©cision
 
 ---
 
-## 9. Conformité aux Lois d'Autonomie Système
+## 9. ConformitÃ© aux Lois d'Autonomie SystÃ¨me
 
-Ce contrat respecte les Lois d'Autonomie Système définies dans [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md).
+Ce contrat respecte les Lois d'Autonomie SystÃ¨me dÃ©finies dans [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md).
 
-### LOI-1 : Aucune dépendance externe critique à l'exécution
+### LOI-1 : Aucune dÃ©pendance externe critique Ã  l'exÃ©cution
 
-**Conformité :** Conforme
+**ConformitÃ© :** Conforme
 
-Les limites d'autorité de Master Butler fonctionnent entièrement localement :
+Les limites d'autoritÃ© de Master Butler fonctionnent entiÃ¨rement localement :
 
-- **Registre local** : Les capacités et permissions sont maintenues localement
-- **Interrogations locales** : Toutes les interrogations sont traitées localement
-- **Aucune décision externe** : Master Butler ne dépend d'aucun service externe pour ses fonctions fondamentales
+- **Registre local** : Les capacitÃ©s et permissions sont maintenues localement
+- **Interrogations locales** : Toutes les interrogations sont traitÃ©es localement
+- **Aucune dÃ©cision externe** : Master Butler ne dÃ©pend d'aucun service externe pour ses fonctions fondamentales
 
-### LOI-5 : Le coût doit être proportionnel au hardware
+### LOI-5 : Le coÃ»t doit Ãªtre proportionnel au hardware
 
-**Conformité :** Conforme
+**ConformitÃ© :** Conforme
 
-Les limites d'autorité garantissent une empreinte minimale :
+Les limites d'autoritÃ© garantissent une empreinte minimale :
 
-- **Registre de métadonnées** : Données légères, empreinte mémoire prévisible
-- **Pas d'exécution** : Master Butler ne consomme pas de ressources pour l'exécution
-- **Pas de workers** : Pas de processus en arrière-plan
+- **Registre de mÃ©tadonnÃ©es** : DonnÃ©es lÃ©gÃ¨res, empreinte mÃ©moire prÃ©visible
+- **Pas d'exÃ©cution** : Master Butler ne consomme pas de ressources pour l'exÃ©cution
+- **Pas de workers** : Pas de processus en arriÃ¨re-plan
 
-### Synthèse de conformité
+### SynthÃ¨se de conformitÃ©
 
 | Loi | Statut | Raison |
 |-----|--------|--------|
-| LOI-1 | ✅ Conforme | Limites fonctionnent localement, aucune dépendance externe |
-| LOI-5 | ✅ Conforme | Registre passif, empreinte minimale |
+| LOI-1 | âœ… Conforme | Limites fonctionnent localement, aucune dÃ©pendance externe |
+| LOI-5 | âœ… Conforme | Registre passif, empreinte minimale |
 
 ---
 
 ## 10. Conclusion
 
-Ce contrat établit les limites absolues de l'autorité de Master Butler dans le système Miyukini.
+Ce contrat Ã©tablit les limites absolues de l'autoritÃ© de Master Butler dans le systÃ¨me Miyukini.
 
-**Points clés :**
+**Points clÃ©s :**
 
-- **Autorité exclusive** : Registre des capacités et permissions, catalogue des Outils, API de découverte
-- **Limites absolues** : Ne décide jamais, n'exécute jamais, ne stocke pas de données métier
-- **Frontières claires** : Séparation stricte avec StrongFather (décision), KindMother (persistance), Ever Buddy (cycle de vie)
-- **Invariants** : Séparation registre/décision, registre passif, agnosticisme métier
+- **AutoritÃ© exclusive** : Registre des capacitÃ©s et permissions, catalogue des Outils, API de dÃ©couverte
+- **Limites absolues** : Ne dÃ©cide jamais, n'exÃ©cute jamais, ne stocke pas de donnÃ©es mÃ©tier
+- **FrontiÃ¨res claires** : SÃ©paration stricte avec StrongFather (dÃ©cision), KindMother (persistance), Ever Buddy (cycle de vie)
+- **Invariants** : SÃ©paration registre/dÃ©cision, registre passif, agnosticisme mÃ©tier
 
 **Phrase fondatrice :**
 
-> **Master Butler expose ce qui est possible, sans jamais décider de ce qui est autorisé, sans jamais exécuter ce qui est demandé.**
+> **Master Butler expose ce qui est possible, sans jamais dÃ©cider de ce qui est autorisÃ©, sans jamais exÃ©cuter ce qui est demandÃ©.**
 
-**Non-négociabilité :** Ce contrat est absolu et non négociable. Le contrat prime sur toute considération pratique.
+**Non-nÃ©gociabilitÃ© :** Ce contrat est absolu et non nÃ©gociable. Le contrat prime sur toute considÃ©ration pratique.
 
 ---
 
-**Document créé le :** 2026-01-27  
+**Document crÃ©Ã© le :** 2026-01-27  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, Master Butler Documentation, [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)  
-**Type :** Contrat de limites d'autorité non négociable
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, Master Butler Documentation, [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)  
+**Type :** Contrat de limites d'autoritÃ© non nÃ©gociable
 
 ---
 
-## 11. Mini log — erreurs / warnings / ambiguïtés rencontrées et corrigées
+## 11. Mini log â€” erreurs / warnings / ambiguÃ¯tÃ©s rencontrÃ©es et corrigÃ©es
 
-*Aucune erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

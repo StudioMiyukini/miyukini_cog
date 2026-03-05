@@ -1,301 +1,301 @@
-# Caring Nanny - Architecture et Composants
+﻿# Caring Nanny - Architecture et Composants
 
 ## 1. Contexte
 
-Ce document décrit l'architecture technique interne de Caring Nanny et ses composants structurels. Il complète la [Documentation Fondatrice](./Caring%20Nanny%20-%20Documentation%20Fondatrice.md) en détaillant **comment** Caring Nanny est construit, sans jamais remettre en question **pourquoi** il existe ou **ce qu'il fait**.
+Ce document dÃ©crit l'architecture technique interne de Caring Nanny et ses composants structurels. Il complÃ¨te la [Documentation Fondatrice](..//foundation//Caring%20Nanny%20-%20Documentation%20Fondatrice.md) en dÃ©taillant **comment** Caring Nanny est construit, sans jamais remettre en question **pourquoi** il existe ou **ce qu'il fait**.
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
 Ce document couvre :
 - La structure en couches de Caring Nanny
-- Les composants internes et leurs responsabilités
+- Les composants internes et leurs responsabilitÃ©s
 - Les interfaces entre composants
-- Les flux de données internes
+- Les flux de donnÃ©es internes
 
 Ce document **ne couvre pas** :
-- Les règles métier (voir les contrats spécifiques)
-- Les protocoles d'intégration avec les autres membres de la famille (voir les contrats d'intégration)
+- Les rÃ¨gles mÃ©tier (voir les contrats spÃ©cifiques)
+- Les protocoles d'intÃ©gration avec les autres membres de la famille (voir les contrats d'intÃ©gration)
 - Les invariants comportementaux (voir Invariants et Garanties)
 
 ---
 
 ## 3. Architecture en couches
 
-Caring Nanny est organisé en **quatre couches distinctes**, chacune avec une responsabilité unique et des interfaces claires. Cette architecture reflète la nature purement observatrice de Caring Nanny : collecter, classer, propager, historiser — sans jamais modifier ni décider.
+Caring Nanny est organisÃ© en **quatre couches distinctes**, chacune avec une responsabilitÃ© unique et des interfaces claires. Cette architecture reflÃ¨te la nature purement observatrice de Caring Nanny : collecter, classer, propager, historiser â€” sans jamais modifier ni dÃ©cider.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    COUCHE CONSULTATION                       │
-│        (Interface de lecture pour les consommateurs)         │
-├─────────────────────────────────────────────────────────────┤
-│                    COUCHE PROPAGATION                        │
-│   (Diffusion des changements d'état aux composants concernés)│
-├─────────────────────────────────────────────────────────────┤
-│                    COUCHE CLASSIFICATION                     │
-│     (Évaluation, catégorisation et agrégation des états)     │
-├─────────────────────────────────────────────────────────────┤
-│                    COUCHE OBSERVATION                        │
-│      (Collecte des conditions depuis les composants)         │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    COUCHE CONSULTATION                       â”‚
+â”‚        (Interface de lecture pour les consommateurs)         â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                    COUCHE PROPAGATION                        â”‚
+â”‚   (Diffusion des changements d'Ã©tat aux composants concernÃ©s)â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                    COUCHE CLASSIFICATION                     â”‚
+â”‚     (Ã‰valuation, catÃ©gorisation et agrÃ©gation des Ã©tats)     â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                    COUCHE OBSERVATION                        â”‚
+â”‚      (Collecte des conditions depuis les composants)         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 3.1 Couche Observation
 
-**Responsabilité :** Collecter les conditions observables depuis les différents composants du système sans interférer avec leur fonctionnement.
+**ResponsabilitÃ© :** Collecter les conditions observables depuis les diffÃ©rents composants du systÃ¨me sans interfÃ©rer avec leur fonctionnement.
 
 **Composants :**
-- **ConditionCollector** : Point de collecte unique pour toutes les conditions observées
+- **ConditionCollector** : Point de collecte unique pour toutes les conditions observÃ©es
 - **ComponentProbe** : Sonde passive pour chaque type de composant (KindMother, StrongFather, modules SPM)
-- **ConditionNormalizer** : Normalisation des conditions dans un format unifié
-- **TimestampMarker** : Horodatage précis de chaque observation (horodatage local, conforme à **LOI-4** : pas de temps global requis, voir [Miyukini Framework - Lois Autonomie Systeme.md](../../reference/Miyukini%20Framework%20-%20Lois%20Autonomie%20Systeme.md))
+- **ConditionNormalizer** : Normalisation des conditions dans un format unifiÃ©
+- **TimestampMarker** : Horodatage prÃ©cis de chaque observation (horodatage local, conforme Ã  **LOI-4** : pas de temps global requis, voir [Miyukini Framework - Lois Autonomie Systeme.md](..//..//..//miyukini-webway-system//reference//_index.md))
 
-**Interfaces exposées :**
-- `IConditionReception` : Réception des conditions depuis les composants
+**Interfaces exposÃ©es :**
+- `IConditionReception` : RÃ©ception des conditions depuis les composants
 - `IProbeConfiguration` : Configuration des sondes d'observation
-- `IObservationMetadata` : Métadonnées d'observation (source, timestamp, contexte)
+- `IObservationMetadata` : MÃ©tadonnÃ©es d'observation (source, timestamp, contexte)
 
-**Règle architecturale :** Cette couche est strictement passive. Aucune sonde ne peut modifier l'état du composant observé. L'observation est non bloquante et sans effet de bord.
+**RÃ¨gle architecturale :** Cette couche est strictement passive. Aucune sonde ne peut modifier l'Ã©tat du composant observÃ©. L'observation est non bloquante et sans effet de bord.
 
 ### 3.2 Couche Classification
 
-**Responsabilité :** Évaluer les conditions collectées, les catégoriser selon les cinq états définis (healthy, degraded, offline, syncing, error), et les agréger en état système global.
+**ResponsabilitÃ© :** Ã‰valuer les conditions collectÃ©es, les catÃ©goriser selon les cinq Ã©tats dÃ©finis (healthy, degraded, offline, syncing, error), et les agrÃ©ger en Ã©tat systÃ¨me global.
 
-**Conformité LOI-2 :** Cette couche reconnaît explicitement l'état `offline` comme un état normal (isolement accepté), distinct de l'état `error` (anomalie). Cette distinction respecte **LOI-2** (le système accepte l'isolement comme état normal) définie dans [Miyukini Framework - Lois Autonomie Systeme.md](../../reference/Miyukini%20Framework%20-%20Lois%20Autonomie%20Systeme.md).
+**ConformitÃ© LOI-2 :** Cette couche reconnaÃ®t explicitement l'Ã©tat `offline` comme un Ã©tat normal (isolement acceptÃ©), distinct de l'Ã©tat `error` (anomalie). Cette distinction respecte **LOI-2** (le systÃ¨me accepte l'isolement comme Ã©tat normal) dÃ©finie dans [Miyukini Framework - Lois Autonomie Systeme.md](..//..//..//miyukini-webway-system//reference//_index.md).
 
 **Composants :**
-- **StateEvaluator** : Évaluation d'une condition en état partiel
-- **CategoryClassifier** : Classification selon les cinq catégories d'état
-- **StateAggregator** : Agrégation des états partiels en état système global
-- **TransitionDetector** : Détection des changements d'état (transitions)
-- **AnomalyDetector** : Détection des conditions anormales
+- **StateEvaluator** : Ã‰valuation d'une condition en Ã©tat partiel
+- **CategoryClassifier** : Classification selon les cinq catÃ©gories d'Ã©tat
+- **StateAggregator** : AgrÃ©gation des Ã©tats partiels en Ã©tat systÃ¨me global
+- **TransitionDetector** : DÃ©tection des changements d'Ã©tat (transitions)
+- **AnomalyDetector** : DÃ©tection des conditions anormales
 
 **Interfaces internes :**
-- `IStateEvaluation` : Contrat d'évaluation condition → état
-- `ICategoryClassification` : Règles de classification par catégorie
-- `IStateAggregation` : Règles d'agrégation des états partiels
-- `ITransitionDetection` : Détection et enregistrement des transitions
+- `IStateEvaluation` : Contrat d'Ã©valuation condition â†’ Ã©tat
+- `ICategoryClassification` : RÃ¨gles de classification par catÃ©gorie
+- `IStateAggregation` : RÃ¨gles d'agrÃ©gation des Ã©tats partiels
+- `ITransitionDetection` : DÃ©tection et enregistrement des transitions
 
-**Règle architecturale :** La classification est déterministe et reproductible. Une même condition, dans un même contexte, produit toujours le même état. La classification n'interprète pas, elle applique des règles définies.
+**RÃ¨gle architecturale :** La classification est dÃ©terministe et reproductible. Une mÃªme condition, dans un mÃªme contexte, produit toujours le mÃªme Ã©tat. La classification n'interprÃ¨te pas, elle applique des rÃ¨gles dÃ©finies.
 
 ### 3.3 Couche Propagation
 
-**Responsabilité :** Diffuser les changements d'état aux composants concernés via BondingBrother, de manière fidèle et traçable.
+**ResponsabilitÃ© :** Diffuser les changements d'Ã©tat aux composants concernÃ©s via BondingBrother, de maniÃ¨re fidÃ¨le et traÃ§able.
 
 **Composants :**
-- **ChangeNotifier** : Détection des changements d'état à propager
+- **ChangeNotifier** : DÃ©tection des changements d'Ã©tat Ã  propager
 - **RecipientResolver** : Identification des destinataires d'une notification
 - **MessageFormatter** : Construction du message de notification
-- **PropagationDispatcher** : Transmission à BondingBrother pour distribution
-- **PropagationTracker** : Suivi des propagations effectuées
+- **PropagationDispatcher** : Transmission Ã  BondingBrother pour distribution
+- **PropagationTracker** : Suivi des propagations effectuÃ©es
 
 **Interfaces internes :**
 - `IChangeNotification` : Contrat de notification de changement
-- `IRecipientResolution` : Règles d'identification des destinataires
+- `IRecipientResolution` : RÃ¨gles d'identification des destinataires
 - `IMessageFormatting` : Format standard des messages de notification
-- `IPropagationTracking` : Traçabilité des propagations
+- `IPropagationTracking` : TraÃ§abilitÃ© des propagations
 
-**Règle architecturale :** La propagation est passive et fidèle. Caring Nanny informe, elle ne commande pas. Le message transmis est exactement celui observé, sans interprétation ni filtrage.
+**RÃ¨gle architecturale :** La propagation est passive et fidÃ¨le. Caring Nanny informe, elle ne commande pas. Le message transmis est exactement celui observÃ©, sans interprÃ©tation ni filtrage.
 
 ### 3.4 Couche Consultation
 
-**Responsabilité :** Exposer une interface de lecture pour les consommateurs (StrongFather, produits, modules) permettant d'interroger l'état actuel ou l'historique.
+**ResponsabilitÃ© :** Exposer une interface de lecture pour les consommateurs (StrongFather, produits, modules) permettant d'interroger l'Ã©tat actuel ou l'historique.
 
 **Composants :**
-- **StateQueryHandler** : Traitement des requêtes d'état actuel
-- **HistoryQueryHandler** : Traitement des requêtes d'historique
-- **ResponseBuilder** : Construction des réponses avec contexte et métadonnées
-- **CacheManager** : Gestion du cache d'état pour performances
+- **StateQueryHandler** : Traitement des requÃªtes d'Ã©tat actuel
+- **HistoryQueryHandler** : Traitement des requÃªtes d'historique
+- **ResponseBuilder** : Construction des rÃ©ponses avec contexte et mÃ©tadonnÃ©es
+- **CacheManager** : Gestion du cache d'Ã©tat pour performances
 
-**Interfaces exposées :**
-- `IStateQuery` : Interrogation de l'état actuel (global ou spécifique)
+**Interfaces exposÃ©es :**
+- `IStateQuery` : Interrogation de l'Ã©tat actuel (global ou spÃ©cifique)
 - `IHistoryQuery` : Interrogation de l'historique des observations
 - `ITransitionQuery` : Interrogation de l'historique des transitions
 
-**Règle architecturale :** Cette couche est en lecture seule. Aucune consultation ne peut modifier l'état observé. La consultation n'a aucun effet de bord sur le système.
+**RÃ¨gle architecturale :** Cette couche est en lecture seule. Aucune consultation ne peut modifier l'Ã©tat observÃ©. La consultation n'a aucun effet de bord sur le systÃ¨me.
 
 ---
 
 ## 4. Composants transversaux
 
-Ces composants servent plusieurs couches et assurent des fonctions critiques non spécifiques à une couche.
+Ces composants servent plusieurs couches et assurent des fonctions critiques non spÃ©cifiques Ã  une couche.
 
 ### 4.1 HistoryStore
 
-**Responsabilité :** Maintenir l'historique complet des observations, transitions, et propagations pour audit et diagnostic.
+**ResponsabilitÃ© :** Maintenir l'historique complet des observations, transitions, et propagations pour audit et diagnostic.
 
-**Caractéristiques :**
+**CaractÃ©ristiques :**
 - Enregistrement chronologique de toutes les observations
 - Conservation des transitions avec leur cause
 - Indexation pour recherche rapide
-- Gestion de la rétention selon les politiques définies
+- Gestion de la rÃ©tention selon les politiques dÃ©finies
 
 **Ce qu'il ne fait pas :**
-- Ne stocke aucune donnée métier
-- Ne prend aucune décision basée sur l'historique
-- Ne modifie pas les observations enregistrées
+- Ne stocke aucune donnÃ©e mÃ©tier
+- Ne prend aucune dÃ©cision basÃ©e sur l'historique
+- Ne modifie pas les observations enregistrÃ©es
 
 ### 4.2 ConfigurationStore
 
-**Responsabilité :** Stocker et fournir la configuration de Caring Nanny (seuils, règles de classification, politiques de rétention).
+**ResponsabilitÃ© :** Stocker et fournir la configuration de Caring Nanny (seuils, rÃ¨gles de classification, politiques de rÃ©tention).
 
-**Caractéristiques :**
-- Configuration immuable après initialisation
+**CaractÃ©ristiques :**
+- Configuration immuable aprÃ¨s initialisation
 - Pas de configuration dynamique en production
-- Traçabilité complète des valeurs de configuration
+- TraÃ§abilitÃ© complÃ¨te des valeurs de configuration
 
 **Ce qu'il ne fait pas :**
-- Ne stocke aucune donnée métier
-- Ne prend aucune décision basée sur la configuration
-- Ne modifie pas son état après démarrage
+- Ne stocke aucune donnÃ©e mÃ©tier
+- Ne prend aucune dÃ©cision basÃ©e sur la configuration
+- Ne modifie pas son Ã©tat aprÃ¨s dÃ©marrage
 
 ### 4.3 ObservationMetrics
 
-**Responsabilité :** Collecter les métriques de fonctionnement de Caring Nanny sans impacter l'observation.
+**ResponsabilitÃ© :** Collecter les mÃ©triques de fonctionnement de Caring Nanny sans impacter l'observation.
 
-**Métriques collectées :**
-- Nombre de conditions observées par composant
-- Nombre de transitions détectées par catégorie
-- Temps de traitement par étape
-- Volume d'historique et taux de rétention
+**MÃ©triques collectÃ©es :**
+- Nombre de conditions observÃ©es par composant
+- Nombre de transitions dÃ©tectÃ©es par catÃ©gorie
+- Temps de traitement par Ã©tape
+- Volume d'historique et taux de rÃ©tention
 - Latence de propagation
 
-**Conformité LOI-5 :** La collecte de métriques est optimisée pour une consommation minimale de ressources, conforme à **LOI-5** (le coût doit être proportionnel au hardware) définie dans [Miyukini Framework - Lois Autonomie Systeme.md](../../reference/Miyukini%20Framework%20-%20Lois%20Autonomie%20Systeme.md).
+**ConformitÃ© LOI-5 :** La collecte de mÃ©triques est optimisÃ©e pour une consommation minimale de ressources, conforme Ã  **LOI-5** (le coÃ»t doit Ãªtre proportionnel au hardware) dÃ©finie dans [Miyukini Framework - Lois Autonomie Systeme.md](..//..//..//miyukini-webway-system//reference//_index.md).
 
 **Ce qu'il ne fait pas :**
-- Ne prend aucune décision basée sur les métriques
+- Ne prend aucune dÃ©cision basÃ©e sur les mÃ©triques
 - Ne modifie pas le comportement de Caring Nanny
-- Ne stocke pas de données métier
+- Ne stocke pas de donnÃ©es mÃ©tier
 
 ### 4.4 SelfHealthReporter
 
-**Responsabilité :** Rapporter l'état de santé de Caring Nanny lui-même, sans créer de récursion infinie.
+**ResponsabilitÃ© :** Rapporter l'Ã©tat de santÃ© de Caring Nanny lui-mÃªme, sans crÃ©er de rÃ©cursion infinie.
 
-**Vérifications :**
-- État des sondes d'observation (actives, dégradées, en erreur)
-- Capacité de l'historique (espace disponible)
-- Connectivité avec BondingBrother pour propagation
-- Latence des opérations internes
+**VÃ©rifications :**
+- Ã‰tat des sondes d'observation (actives, dÃ©gradÃ©es, en erreur)
+- CapacitÃ© de l'historique (espace disponible)
+- ConnectivitÃ© avec BondingBrother pour propagation
+- Latence des opÃ©rations internes
 
 **Ce qu'il ne fait pas :**
-- Ne s'auto-observe pas de manière récursive
-- Ne répare pas automatiquement
-- Ne masque pas les problèmes
+- Ne s'auto-observe pas de maniÃ¨re rÃ©cursive
+- Ne rÃ©pare pas automatiquement
+- Ne masque pas les problÃ¨mes
 
 ---
 
-## 5. Flux de données internes
+## 5. Flux de donnÃ©es internes
 
-### 5.1 Flux d'observation (Composant → Caring Nanny)
+### 5.1 Flux d'observation (Composant â†’ Caring Nanny)
 
 ```
 Composant (KM, SF, Module SPM)
-         │
-         │ Condition observée
-         ▼
-┌─────────────────┐
-│ ComponentProbe  │ ← Sonde passive spécifique au composant
-└────────┬────────┘
-         │ Condition brute
-         ▼
-┌─────────────────────┐
-│ ConditionNormalizer │ ← Normalisation du format
-└────────┬────────────┘
-         │ Condition normalisée
-         ▼
-┌─────────────────┐
-│ TimestampMarker │ ← Horodatage précis
-└────────┬────────┘
-         │ Condition horodatée
-         ▼
-┌─────────────────┐
-│ConditionCollector│ ← Collecte centralisée
-└────────┬────────┘
-         │ Condition collectée
-         ▼
-┌─────────────────┐
-│ StateEvaluator  │ ← Évaluation condition → état
-└────────┬────────┘
-         │ État partiel
-         ▼
-┌──────────────────┐
-│CategoryClassifier│ ← Classification (healthy, degraded, ...)
-└────────┬─────────┘
-         │ État classifié
-         ▼
-┌─────────────────┐
-│ StateAggregator │ ← Agrégation en état global
-└────────┬────────┘
-         │ État système
-         ▼
-┌──────────────────┐
-│TransitionDetector│ ← Détection de transition
-└────────┬─────────┘
-         │
-    ┌────┴────┐
-    ▼         ▼
+         â”‚
+         â”‚ Condition observÃ©e
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ ComponentProbe  â”‚ â† Sonde passive spÃ©cifique au composant
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚ Condition brute
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ ConditionNormalizer â”‚ â† Normalisation du format
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚ Condition normalisÃ©e
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ TimestampMarker â”‚ â† Horodatage prÃ©cis
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚ Condition horodatÃ©e
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ConditionCollectorâ”‚ â† Collecte centralisÃ©e
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚ Condition collectÃ©e
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ StateEvaluator  â”‚ â† Ã‰valuation condition â†’ Ã©tat
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚ Ã‰tat partiel
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚CategoryClassifierâ”‚ â† Classification (healthy, degraded, ...)
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚ Ã‰tat classifiÃ©
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ StateAggregator â”‚ â† AgrÃ©gation en Ã©tat global
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚ Ã‰tat systÃ¨me
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚TransitionDetectorâ”‚ â† DÃ©tection de transition
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚
+    â”Œâ”€â”€â”€â”€â”´â”€â”€â”€â”€â”
+    â–¼         â–¼
  Historique  Propagation
 ```
 
-### 5.2 Flux de propagation (Caring Nanny → Composants)
+### 5.2 Flux de propagation (Caring Nanny â†’ Composants)
 
 ```
-Transition détectée
-         │
-         ▼
-┌─────────────────┐
-│ ChangeNotifier  │ ← Identification du changement à propager
-└────────┬────────┘
-         │ Changement identifié
-         ▼
-┌──────────────────┐
-│RecipientResolver │ ← Identification des destinataires
-└────────┬─────────┘
-         │ Liste des destinataires
-         ▼
-┌──────────────────┐
-│ MessageFormatter │ ← Construction du message
-└────────┬─────────┘
-         │ Message formaté
-         ▼
-┌─────────────────────┐
-│PropagationDispatcher│ ← Transmission à BondingBrother
-└────────┬────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│ PropagationTracker  │ ← Enregistrement de la propagation
-└────────┬────────────┘
-         │
-         ▼
+Transition dÃ©tectÃ©e
+         â”‚
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ ChangeNotifier  â”‚ â† Identification du changement Ã  propager
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚ Changement identifiÃ©
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚RecipientResolver â”‚ â† Identification des destinataires
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚ Liste des destinataires
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ MessageFormatter â”‚ â† Construction du message
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚ Message formatÃ©
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚PropagationDispatcherâ”‚ â† Transmission Ã  BondingBrother
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ PropagationTracker  â”‚ â† Enregistrement de la propagation
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚
+         â–¼
     BondingBrother
-         │
-         ▼
-   Composants concernés
+         â”‚
+         â–¼
+   Composants concernÃ©s
 ```
 
-### 5.3 Flux de consultation (Consommateur → Caring Nanny)
+### 5.3 Flux de consultation (Consommateur â†’ Caring Nanny)
 
 ```
 Consommateur (SF, Produit, Module)
-         │
-         │ Demande d'état
-         ▼
-┌──────────────────┐
-│ StateQueryHandler │ ← Traitement de la requête
-└────────┬─────────┘
-         │
-    ┌────┴────┐
-    ▼         ▼
-┌────────┐ ┌────────────────┐
-│ Cache  │ │ StateAggregator│ ← Source de l'état
-└───┬────┘ └───────┬────────┘
-    └──────┬───────┘
-           ▼
-┌─────────────────┐
-│ ResponseBuilder │ ← Construction de la réponse
-└────────┬────────┘
-         │ Réponse avec contexte
-         ▼
+         â”‚
+         â”‚ Demande d'Ã©tat
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ StateQueryHandler â”‚ â† Traitement de la requÃªte
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚
+    â”Œâ”€â”€â”€â”€â”´â”€â”€â”€â”€â”
+    â–¼         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Cache  â”‚ â”‚ StateAggregatorâ”‚ â† Source de l'Ã©tat
+â””â”€â”€â”€â”¬â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+    â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜
+           â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ ResponseBuilder â”‚ â† Construction de la rÃ©ponse
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚ RÃ©ponse avec contexte
+         â–¼
     Consommateur
 ```
 
@@ -305,115 +305,115 @@ Consommateur (SF, Produit, Module)
 
 ### 6.1 Principe d'isolation
 
-Chaque couche est **strictement isolée** des autres. Une couche ne peut accéder qu'à :
+Chaque couche est **strictement isolÃ©e** des autres. Une couche ne peut accÃ©der qu'Ã  :
 - Ses propres composants internes
-- Les interfaces exposées par la couche adjacente
+- Les interfaces exposÃ©es par la couche adjacente
 
 **Interdit :**
-- Accès direct d'une couche à une couche non adjacente
-- Partage d'état mutable entre couches
-- Dépendances circulaires entre composants
+- AccÃ¨s direct d'une couche Ã  une couche non adjacente
+- Partage d'Ã©tat mutable entre couches
+- DÃ©pendances circulaires entre composants
 
 ### 6.2 Principe d'encapsulation
 
-Chaque composant **encapsule** son implémentation :
-- L'interface est stable et documentée
-- L'implémentation peut évoluer sans impacter les consommateurs
-- Aucun détail interne n'est exposé
+Chaque composant **encapsule** son implÃ©mentation :
+- L'interface est stable et documentÃ©e
+- L'implÃ©mentation peut Ã©voluer sans impacter les consommateurs
+- Aucun dÃ©tail interne n'est exposÃ©
 
-### 6.3 Frontières de responsabilité
+### 6.3 FrontiÃ¨res de responsabilitÃ©
 
 | Composant | Responsable de | Non responsable de |
 |-----------|----------------|-------------------|
-| ComponentProbe | Observer passivement | Modifier le composant observé |
-| StateEvaluator | Évaluer une condition | Décider d'une action |
-| CategoryClassifier | Classifier selon les règles | Définir les règles |
-| StateAggregator | Agréger les états partiels | Résoudre les conflits métier |
-| ChangeNotifier | Identifier les changements | Décider qui doit réagir |
-| RecipientResolver | Lister les destinataires | Forcer les destinataires à agir |
-| PropagationDispatcher | Transmettre fidèlement | Interpréter le message |
-| HistoryStore | Enregistrer | Interpréter l'historique |
+| ComponentProbe | Observer passivement | Modifier le composant observÃ© |
+| StateEvaluator | Ã‰valuer une condition | DÃ©cider d'une action |
+| CategoryClassifier | Classifier selon les rÃ¨gles | DÃ©finir les rÃ¨gles |
+| StateAggregator | AgrÃ©ger les Ã©tats partiels | RÃ©soudre les conflits mÃ©tier |
+| ChangeNotifier | Identifier les changements | DÃ©cider qui doit rÃ©agir |
+| RecipientResolver | Lister les destinataires | Forcer les destinataires Ã  agir |
+| PropagationDispatcher | Transmettre fidÃ¨lement | InterprÃ©ter le message |
+| HistoryStore | Enregistrer | InterprÃ©ter l'historique |
 
 ---
 
-## 7. Extensibilité
+## 7. ExtensibilitÃ©
 
 ### 7.1 Points d'extension
 
-Caring Nanny peut être étendu **uniquement** aux points suivants :
+Caring Nanny peut Ãªtre Ã©tendu **uniquement** aux points suivants :
 
 | Point d'extension | Type | Contrainte |
 |-------------------|------|------------|
-| Nouvelles sondes (ComponentProbe) | Addition | Doivent être passives et sans effet de bord |
-| Nouvelles règles de classification | Addition | Doivent respecter les cinq catégories définies |
-| Nouveaux critères d'anomalie | Addition | Doivent être définis par le produit ou l'écosystème |
-| Nouvelles requêtes d'historique | Addition | Doivent suivre le contrat IHistoryQuery |
+| Nouvelles sondes (ComponentProbe) | Addition | Doivent Ãªtre passives et sans effet de bord |
+| Nouvelles rÃ¨gles de classification | Addition | Doivent respecter les cinq catÃ©gories dÃ©finies |
+| Nouveaux critÃ¨res d'anomalie | Addition | Doivent Ãªtre dÃ©finis par le produit ou l'Ã©cosystÃ¨me |
+| Nouvelles requÃªtes d'historique | Addition | Doivent suivre le contrat IHistoryQuery |
 | Nouveaux types de notification | Addition | Doivent suivre le contrat IChangeNotification |
 
 ### 7.2 Points non extensibles
 
-Ces éléments sont **figés** et non extensibles :
+Ces Ã©lÃ©ments sont **figÃ©s** et non extensibles :
 
 - Structure en 4 couches
-- Flux de données (direction et ordre des étapes)
-- Rôle de chaque composant
+- Flux de donnÃ©es (direction et ordre des Ã©tapes)
+- RÃ´le de chaque composant
 - Interfaces entre couches
-- Catégories d'état (healthy, degraded, offline, syncing, error)
-- Nature purement observatrice (aucune capacité d'action)
-- Principe de non-décision
+- CatÃ©gories d'Ã©tat (healthy, degraded, offline, syncing, error)
+- Nature purement observatrice (aucune capacitÃ© d'action)
+- Principe de non-dÃ©cision
 
 ---
 
-## 8. Dépendances
+## 8. DÃ©pendances
 
-### 8.1 Dépendances internes (entre composants)
+### 8.1 DÃ©pendances internes (entre composants)
 
 ```
-ComponentProbe ──────► ConditionNormalizer
-                              ▼
+ComponentProbe â”€â”€â”€â”€â”€â”€â–º ConditionNormalizer
+                              â–¼
                        TimestampMarker
-                              ▼
+                              â–¼
                       ConditionCollector
-                              ▼
+                              â–¼
                        StateEvaluator
-                              ▼
+                              â–¼
                       CategoryClassifier
-                              ▼
+                              â–¼
                        StateAggregator
-                              ▼
+                              â–¼
                      TransitionDetector
-                         ▼      ▼
+                         â–¼      â–¼
               HistoryStore    ChangeNotifier
-                                   ▼
+                                   â–¼
                             RecipientResolver
-                                   ▼
+                                   â–¼
                             MessageFormatter
-                                   ▼
+                                   â–¼
                          PropagationDispatcher
-                                   ▼
+                                   â–¼
                           PropagationTracker
 ```
 
-### 8.2 Dépendances externes (vers l'écosystème)
+### 8.2 DÃ©pendances externes (vers l'Ã©cosystÃ¨me)
 
-| Dépendance | Type | Criticité |
+| DÃ©pendance | Type | CriticitÃ© |
 |------------|------|-----------|
 | KindMother | Source d'observation | Haute |
 | StrongFather | Source d'observation + Consommateur | Haute |
 | BondingBrother | Canal de propagation | Haute |
 | Modules SPM | Sources d'observation | Moyenne |
-| Configuration | Paramétrage | Démarrage |
+| Configuration | ParamÃ©trage | DÃ©marrage |
 
-### 8.3 Absence de dépendances
+### 8.3 Absence de dÃ©pendances
 
-Caring Nanny **ne dépend pas** :
-- D'aucun produit spécifique
-- D'aucune base de données métier
+Caring Nanny **ne dÃ©pend pas** :
+- D'aucun produit spÃ©cifique
+- D'aucune base de donnÃ©es mÃ©tier
 - D'aucun service externe autre que les composants du core
-- D'aucune logique métier spécifique
-- D'aucune capacité d'exécution ou de décision
+- D'aucune logique mÃ©tier spÃ©cifique
+- D'aucune capacitÃ© d'exÃ©cution ou de dÃ©cision
 
-Cette absence de dépendances externes critiques garantit que Caring Nanny fonctionne en autonomie complète, conformément à **LOI-1** (aucune dépendance externe critique à l'exécution) définie dans [Miyukini Framework - Lois Autonomie Systeme.md](../../reference/Miyukini%20Framework%20-%20Lois%20Autonomie%20Systeme.md).
+Cette absence de dÃ©pendances externes critiques garantit que Caring Nanny fonctionne en autonomie complÃ¨te, conformÃ©ment Ã  **LOI-1** (aucune dÃ©pendance externe critique Ã  l'exÃ©cution) dÃ©finie dans [Miyukini Framework - Lois Autonomie Systeme.md](..//..//..//miyukini-webway-system//reference//_index.md).
 
 ---
 
@@ -423,43 +423,45 @@ Cette absence de dépendances externes critiques garantit que Caring Nanny fonct
 
 L'architecture garantit que l'observation n'a aucun effet de bord :
 - Les sondes sont passives et en lecture seule
-- Aucun composant observé n'est modifié par l'observation
-- L'observation ne bloque jamais les opérations normales
+- Aucun composant observÃ© n'est modifiÃ© par l'observation
+- L'observation ne bloque jamais les opÃ©rations normales
 
-**Conformité LOI-2 :** Cette garantie d'observation non bloquante permet au système de fonctionner normalement même en isolation, respectant **LOI-2** (le système accepte l'isolement comme état normal) définie dans [Miyukini Framework - Lois Autonomie Systeme.md](../../reference/Miyukini%20Framework%20-%20Lois%20Autonomie%20Systeme.md).
+**ConformitÃ© LOI-2 :** Cette garantie d'observation non bloquante permet au systÃ¨me de fonctionner normalement mÃªme en isolation, respectant **LOI-2** (le systÃ¨me accepte l'isolement comme Ã©tat normal) dÃ©finie dans [Miyukini Framework - Lois Autonomie Systeme.md](..//..//..//miyukini-webway-system//reference//_index.md).
 
-### 9.2 Cohérence de l'état
+### 9.2 CohÃ©rence de l'Ã©tat
 
-L'architecture garantit que l'état rapporté est toujours cohérent :
-- L'agrégation est déterministe et reproductible
-- Aucune contradiction n'est possible dans l'état global
-- Les transitions sont atomiques et ordonnées
+L'architecture garantit que l'Ã©tat rapportÃ© est toujours cohÃ©rent :
+- L'agrÃ©gation est dÃ©terministe et reproductible
+- Aucune contradiction n'est possible dans l'Ã©tat global
+- Les transitions sont atomiques et ordonnÃ©es
 
-### 9.3 Traçabilité complète
+### 9.3 TraÃ§abilitÃ© complÃ¨te
 
-L'architecture garantit une traçabilité complète :
-- Chaque observation est horodatée et contextualisée
-- Chaque transition est enregistrée avec sa cause
-- Chaque propagation est suivie et archivée
+L'architecture garantit une traÃ§abilitÃ© complÃ¨te :
+- Chaque observation est horodatÃ©e et contextualisÃ©e
+- Chaque transition est enregistrÃ©e avec sa cause
+- Chaque propagation est suivie et archivÃ©e
 
-### 9.4 Propagation fidèle
+### 9.4 Propagation fidÃ¨le
 
-L'architecture garantit une propagation fidèle :
-- Le message transmis est exactement celui observé
-- Aucune interprétation ou filtrage n'est appliqué
+L'architecture garantit une propagation fidÃ¨le :
+- Le message transmis est exactement celui observÃ©
+- Aucune interprÃ©tation ou filtrage n'est appliquÃ©
 - La propagation n'attend pas de confirmation d'action
 
 ---
 
 ## 10. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut ARCHITECTURE**. Il établit la structure interne de Caring Nanny qui ne peut être modifiée sans processus formel de versionnement.
+Ce document est **contractuel, normatif, et de statut ARCHITECTURE**. Il Ã©tablit la structure interne de Caring Nanny qui ne peut Ãªtre modifiÃ©e sans processus formel de versionnement.
 
-Toute implémentation de Caring Nanny doit respecter cette architecture. Toute extension doit utiliser les points d'extension définis. Toute modification structurelle nécessite une nouvelle version de ce document.
+Toute implÃ©mentation de Caring Nanny doit respecter cette architecture. Toute extension doit utiliser les points d'extension dÃ©finis. Toute modification structurelle nÃ©cessite une nouvelle version de ce document.
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-26  
-**Statut :** ARCHITECTURE — Normatif  
-**Dépendance :** Documentation Fondatrice v1.0
+**Statut :** ARCHITECTURE â€” Normatif  
+**DÃ©pendance :** Documentation Fondatrice v1.0
+
+

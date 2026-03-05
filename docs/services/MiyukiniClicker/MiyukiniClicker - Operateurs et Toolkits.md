@@ -1,186 +1,188 @@
-# MiyuClicker — Opérateurs et Toolkits (mapping MVP)
+﻿# MiyuClicker â€” OpÃ©rateurs et Toolkits (mapping MVP)
 
 ## Contexte
 
-Ce document décrit le **mapping Opérateurs / Toolkits** pour le MVP MiyuClicker : quels **Toolkits** (Kits d’Outils) et **Outils** (Tools) sont **utilisés** ou **créés**, et par quels **Opérateurs**. Il complète le [MVP Écrans et Mécaniques](MiyuClicker%20-%20MVP%20Ecrans%20et%20Mecaniques.md).
+Ce document dÃ©crit le **mapping OpÃ©rateurs / Toolkits** pour le MVP MiyuClicker : quels **Toolkits** (Kits dâ€™Outils) et **Outils** (Tools) sont **utilisÃ©s** ou **crÃ©Ã©s**, et par quels **OpÃ©rateurs**. Il complÃ¨te le [MVP Ã‰crans et MÃ©caniques](MiyukiniClicker%20-%20MVP%20Ecrans%20et%20Mecaniques.md).
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Périmètre :** Inventaire des Toolkits (existants ou à créer), Outils composants, Opérateurs consommateurs, flux UI → Sim / Save / Carte.
-- **Hors périmètre :** Implémentation technique détaillée (crates, API), contrats de gouvernance formels.
+- **PÃ©rimÃ¨tre :** Inventaire des Toolkits (existants ou Ã  crÃ©er), Outils composants, OpÃ©rateurs consommateurs, flux UI â†’ Sim / Save / Carte.
+- **Hors pÃ©rimÃ¨tre :** ImplÃ©mentation technique dÃ©taillÃ©e (crates, API), contrats de gouvernance formels.
 
 ---
 
-## 1. Vue d’ensemble
+## 1. Vue dâ€™ensemble
 
-| Opérateur | Type | Toolkits consommés | Rôle MVP |
+| OpÃ©rateur | Type | Toolkits consommÃ©s | RÃ´le MVP |
 |-----------|------|--------------------|----------|
-| **MiyuClickerUI** | Opérateur d’Interface | Dioxus, MiyuClickerSprites, MiyuClickerCarte (rendu) | Rendu de tous les écrans, barre, boutons, liste déroulante. |
-| **MiyuClickerSim** | Opérateur de Service | MiyuClickerIdleSim | Tick simulation (ressources, affectations, moral, cap). |
-| **MiyuClickerSave** | Opérateur de Service | MiyuClickerSave (Tools) | Sauvegarde / chargement 3 slots. |
-| **MiyuClickerCombat** | Opérateur de Service / Tool | MiyuClickerCombat (Tool) | Résolution combat (stats + hasard). |
-| **MiyuClickerCarte** | Opérateur de Service | MiyuClickerCarte, MiyuClickerCombat | Modèle carte, déplacements, combats. |
+| **MiyuClickerUI** | OpÃ©rateur dâ€™Interface | Dioxus, MiyuClickerSprites, MiyuClickerCarte (rendu) | Rendu de tous les Ã©crans, barre, boutons, liste dÃ©roulante. |
+| **MiyuClickerSim** | OpÃ©rateur de Service | MiyuClickerIdleSim | Tick simulation (ressources, affectations, moral, cap). |
+| **MiyuClickerSave** | OpÃ©rateur de Service | MiyuClickerSave (Tools) | Sauvegarde / chargement 3 slots. |
+| **MiyuClickerCombat** | OpÃ©rateur de Service / Tool | MiyuClickerCombat (Tool) | RÃ©solution combat (stats + hasard). |
+| **MiyuClickerCarte** | OpÃ©rateur de Service | MiyuClickerCarte, MiyuClickerCombat | ModÃ¨le carte, dÃ©placements, combats. |
 
 ---
 
-## 2. Toolkits — Utiliser
+## 2. Toolkits â€” Utiliser
 
 ### 2.1 Stack UI (Dioxus)
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
 | **Source** | Stack UI officielle Miyukini. |
-| **Référence** | [Miyukini - Stack UI Dioxus](../../ux_ui/Miyukini%20-%20Stack%20UI%20Dioxus.md). |
-| **Rôle** | Fenêtres, panels, boutons, labels, sliders, listes, custom painting (carte). |
-| **Consommé par** | **MiyuClickerUI**. |
-| **Usage MVP** | Tous les écrans (Loading, Landing, Slots, Ma citée, Carte du monde) ; barre 2 lignes ; 4 gros boutons ; liste déroulante ; menu config. |
+| **RÃ©fÃ©rence** | [Miyukini - Stack UI Dioxus](..//..//_index.md). |
+| **RÃ´le** | FenÃªtres, panels, boutons, labels, sliders, listes, custom painting (carte). |
+| **ConsommÃ© par** | **MiyuClickerUI**. |
+| **Usage MVP** | Tous les Ã©crans (Loading, Landing, Slots, Ma citÃ©e, Carte du monde) ; barre 2 lignes ; 4 gros boutons ; liste dÃ©roulante ; menu config. |
 
 ---
 
-## 3. Toolkits — Créer (MVP)
+## 3. Toolkits â€” CrÃ©er (MVP)
 
 ### 3.1 MiyuClickerSprites
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
-| **ToolkitId (proposé)** | `toolkit.miyuclicker.sprites` |
-| **Rôle** | Chargement d’images, spritesheets, cache textures, découpage en frames, animation par frame. |
-| **Outils (Tools) proposés** | `tool.miyuclicker.sprites.load`, `tool.miyuclicker.sprites.frame_rect`, `tool.miyuclicker.sprites.animate` (avancement delta → frame index). |
-| **Consommé par** | **MiyuClickerUI**. |
-| **Sources assets** | `ui/game_ui_pack` (Cute_Fantasy_UI, Cute_Fantasy, etc.) — voir [Reference Packs UI Jeux](MiyuClicker%20-%20Reference%20Packs%20UI%20Jeux.md). |
+| **ToolkitId (proposÃ©)** | `toolkit.miyuclicker.sprites` |
+| **RÃ´le** | Chargement dâ€™images, spritesheets, cache textures, dÃ©coupage en frames, animation par frame. |
+| **Outils (Tools) proposÃ©s** | `tool.miyuclicker.sprites.load`, `tool.miyuclicker.sprites.frame_rect`, `tool.miyuclicker.sprites.animate` (avancement delta â†’ frame index). |
+| **ConsommÃ© par** | **MiyuClickerUI**. |
+| **Sources assets** | `ui/game_ui_pack` (Cute_Fantasy_UI, Cute_Fantasy, etc.) â€” voir [Reference Packs UI Jeux](MiyukiniClicker%20-%20Reference%20Packs%20UI%20Jeux.md). |
 
 ### 3.2 MiyuClickerIdleSim
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
-| **ToolkitId (proposé)** | `toolkit.miyuclicker.idlesim` |
-| **Rôle** | Simulation tick : mise à jour des ressources (production, consommation), moral, fécondité, cap gens, affectations. |
-| **Outils (Tools) proposés** | `tool.miyuclicker.idlesim.tick` (état + delta → nouvel état), `tool.miyuclicker.idlesim.apply_allocation` (affectation gens → production par tick). |
-| **Consommé par** | **MiyuClickerSim** (Opérateur). |
-| **Données** | État du jeu (ressources, gens, soldats, affectations, habitations, moral, etc.) fourni dans le flux ; pas d’accès direct à la persistance. |
+| **ToolkitId (proposÃ©)** | `toolkit.miyuclicker.idlesim` |
+| **RÃ´le** | Simulation tick : mise Ã  jour des ressources (production, consommation), moral, fÃ©conditÃ©, cap gens, affectations. |
+| **Outils (Tools) proposÃ©s** | `tool.miyuclicker.idlesim.tick` (Ã©tat + delta â†’ nouvel Ã©tat), `tool.miyuclicker.idlesim.apply_allocation` (affectation gens â†’ production par tick). |
+| **ConsommÃ© par** | **MiyuClickerSim** (OpÃ©rateur). |
+| **DonnÃ©es** | Ã‰tat du jeu (ressources, gens, soldats, affectations, habitations, moral, etc.) fourni dans le flux ; pas dâ€™accÃ¨s direct Ã  la persistance. |
 
 ### 3.3 MiyuClickerSave
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
-| **ToolkitId (proposé)** | `toolkit.miyuclicker.save` |
-| **Rôle** | Sérialisation / désérialisation de l’état partie ; lecture / écriture des 3 slots (sauvegarde fichier JSON via serde + I/O). |
-| **Outils (Tools) proposés** | `tool.miyuclicker.save.slot_write` (slot_id, état), `tool.miyuclicker.save.slot_read` (slot_id → état), `tool.miyuclicker.save.slot_list` (→ métadonnées 3 slots : date, résumé). |
-| **Consommé par** | **MiyuClickerSave** (Opérateur), **MiyuClickerUI** (affichage slots, déclenchement sauvegarde/chargement). |
+| **ToolkitId (proposÃ©)** | `toolkit.miyuclicker.save` |
+| **RÃ´le** | SÃ©rialisation / dÃ©sÃ©rialisation de lâ€™Ã©tat partie ; lecture / Ã©criture des 3 slots (sauvegarde fichier JSON via serde + I/O). |
+| **Outils (Tools) proposÃ©s** | `tool.miyuclicker.save.slot_write` (slot_id, Ã©tat), `tool.miyuclicker.save.slot_read` (slot_id â†’ Ã©tat), `tool.miyuclicker.save.slot_list` (â†’ mÃ©tadonnÃ©es 3 slots : date, rÃ©sumÃ©). |
+| **ConsommÃ© par** | **MiyuClickerSave** (OpÃ©rateur), **MiyuClickerUI** (affichage slots, dÃ©clenchement sauvegarde/chargement). |
 
 ### 3.4 MiyuClickerCombat
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
-| **Identifiant** | Peut être un **Tool** unique plutôt qu’un Toolkit (une seule capacité : résolution combat). |
-| **ToolId (proposé)** | `tool.miyuclicker.combat.resolve` |
-| **Rôle** | Résolution d’un combat : attaquant (nombre, stats), défenseur (nombre, stats), hasard → vainqueur, troupes restantes (attaquant, défenseur). |
-| **Consommé par** | **MiyuClickerCarte** (Opérateur) — appelé à l’arrivée des troupes sur une cité adverse. |
+| **Identifiant** | Peut Ãªtre un **Tool** unique plutÃ´t quâ€™un Toolkit (une seule capacitÃ© : rÃ©solution combat). |
+| **ToolId (proposÃ©)** | `tool.miyuclicker.combat.resolve` |
+| **RÃ´le** | RÃ©solution dâ€™un combat : attaquant (nombre, stats), dÃ©fenseur (nombre, stats), hasard â†’ vainqueur, troupes restantes (attaquant, dÃ©fenseur). |
+| **ConsommÃ© par** | **MiyuClickerCarte** (OpÃ©rateur) â€” appelÃ© Ã  lâ€™arrivÃ©e des troupes sur une citÃ© adverse. |
 
 ### 3.5 MiyuClickerCarte
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
-| **ToolkitId (proposé)** | `toolkit.miyuclicker.carte` |
-| **Rôle** | Modèle de la carte (nœuds = cités, arêtes = routes) ; déplacements en cours (from, to, progress) ; rendu (éléments SVG/canvas Dioxus) ; hit-test (clic → cité). |
-| **Outils (Tools) proposés** | `tool.miyuclicker.carte.model_update` (déplacements, conquêtes), `tool.miyuclicker.carte.move_troops` (cité_from, cité_to, nombre), `tool.miyuclicker.carte.resolve_arrival` (déplacement arrivé → déclenche combat si cité adverse). |
-| **Consommé par** | **MiyuClickerUI** (rendu, clic), **MiyuClickerCarte** (Opérateur) pour la logique déplacements et combats. |
+| **ToolkitId (proposÃ©)** | `toolkit.miyuclicker.carte` |
+| **RÃ´le** | ModÃ¨le de la carte (nÅ“uds = citÃ©s, arÃªtes = routes) ; dÃ©placements en cours (from, to, progress) ; rendu (Ã©lÃ©ments SVG/canvas Dioxus) ; hit-test (clic â†’ citÃ©). |
+| **Outils (Tools) proposÃ©s** | `tool.miyuclicker.carte.model_update` (dÃ©placements, conquÃªtes), `tool.miyuclicker.carte.move_troops` (citÃ©_from, citÃ©_to, nombre), `tool.miyuclicker.carte.resolve_arrival` (dÃ©placement arrivÃ© â†’ dÃ©clenche combat si citÃ© adverse). |
+| **ConsommÃ© par** | **MiyuClickerUI** (rendu, clic), **MiyuClickerCarte** (OpÃ©rateur) pour la logique dÃ©placements et combats. |
 
 ---
 
-## 4. Opérateurs — Détail
+## 4. OpÃ©rateurs â€” DÃ©tail
 
-### 4.1 MiyuClickerUI (Opérateur d’Interface)
+### 4.1 MiyuClickerUI (OpÃ©rateur dâ€™Interface)
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
-| **Type** | Opérateur d’Interface |
-| **Rôle** | Rendu de tous les écrans ; réception des entrées utilisateur ; envoi des **intentions** vers les autres Opérateurs (Sim, Save, Carte). |
+| **Type** | OpÃ©rateur dâ€™Interface |
+| **RÃ´le** | Rendu de tous les Ã©crans ; rÃ©ception des entrÃ©es utilisateur ; envoi des **intentions** vers les autres OpÃ©rateurs (Sim, Save, Carte). |
 | **Toolkits** | Dioxus (stack), MiyuClickerSprites (assets), MiyuClickerCarte (rendu carte). |
-| **Écrans** | Loading, Landing, Slots, Ma citée (barre + 4 boutons + liste affectation), Carte du monde, menu config (roue). |
-| **Flux sortants** | Clic Champs/Ateliers/Château/Village → intention « gain clic » → Sim ; affectation gens → intention « allocation » → Sim ; sauvegarder / charger → Save ; envoyer troupes → Carte ; tick (timer) → Sim. |
+| **Ã‰crans** | Loading, Landing, Slots, Ma citÃ©e (barre + 4 boutons + liste affectation), Carte du monde, menu config (roue). |
+| **Flux sortants** | Clic Champs/Ateliers/ChÃ¢teau/Village â†’ intention Â« gain clic Â» â†’ Sim ; affectation gens â†’ intention Â« allocation Â» â†’ Sim ; sauvegarder / charger â†’ Save ; envoyer troupes â†’ Carte ; tick (timer) â†’ Sim. |
 
-### 4.2 MiyuClickerSim (Opérateur de Service)
+### 4.2 MiyuClickerSim (OpÃ©rateur de Service)
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
-| **Type** | Opérateur de Service |
-| **Rôle** | Exécution du **tick** de simulation : mise à jour des ressources, consommation nourriture, production selon affectations, moral, cap gens. |
+| **Type** | OpÃ©rateur de Service |
+| **RÃ´le** | ExÃ©cution du **tick** de simulation : mise Ã  jour des ressources, consommation nourriture, production selon affectations, moral, cap gens. |
 | **Toolkits** | MiyuClickerIdleSim |
-| **Entrées** | État courant + delta temps ; éventuellement intention « gain clic » (Champs, Ateliers, etc.) ou « allocation » (affectation gens). |
-| **Sorties** | Nouvel état (ressources, gens, soldats, moral, etc.) ; l’UI lit cet état pour affichage. |
+| **EntrÃ©es** | Ã‰tat courant + delta temps ; Ã©ventuellement intention Â« gain clic Â» (Champs, Ateliers, etc.) ou Â« allocation Â» (affectation gens). |
+| **Sorties** | Nouvel Ã©tat (ressources, gens, soldats, moral, etc.) ; lâ€™UI lit cet Ã©tat pour affichage. |
 
-### 4.3 MiyuClickerSave (Opérateur de Service)
+### 4.3 MiyuClickerSave (OpÃ©rateur de Service)
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
-| **Type** | Opérateur de Service |
-| **Rôle** | Sauvegarde et chargement des 3 slots ; fourniture des métadonnées (date, résumé) pour l’écran Slots. |
+| **Type** | OpÃ©rateur de Service |
+| **RÃ´le** | Sauvegarde et chargement des 3 slots ; fourniture des mÃ©tadonnÃ©es (date, rÃ©sumÃ©) pour lâ€™Ã©cran Slots. |
 | **Toolkits** | MiyuClickerSave (Tools) |
-| **Entrées** | Intention « sauvegarder slot N », « charger slot N », « lister slots ». |
-| **Sorties** | État chargé (pour Sim / Carte) ; liste des métadonnées slots (pour UI). |
+| **EntrÃ©es** | Intention Â« sauvegarder slot N Â», Â« charger slot N Â», Â« lister slots Â». |
+| **Sorties** | Ã‰tat chargÃ© (pour Sim / Carte) ; liste des mÃ©tadonnÃ©es slots (pour UI). |
 
-### 4.4 MiyuClickerCombat (Opérateur de Service / Tool)
+### 4.4 MiyuClickerCombat (OpÃ©rateur de Service / Tool)
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
-| **Type** | Opérateur de Service ou Tool unique |
-| **Rôle** | Résolution d’un combat : attaquant vs défenseur → vainqueur, troupes restantes. |
+| **Type** | OpÃ©rateur de Service ou Tool unique |
+| **RÃ´le** | RÃ©solution dâ€™un combat : attaquant vs dÃ©fenseur â†’ vainqueur, troupes restantes. |
 | **Tool** | `tool.miyuclicker.combat.resolve` |
-| **Consommé par** | MiyuClickerCarte (Opérateur) lors de l’arrivée des troupes sur une cité adverse. |
+| **ConsommÃ© par** | MiyuClickerCarte (OpÃ©rateur) lors de lâ€™arrivÃ©e des troupes sur une citÃ© adverse. |
 
-### 4.5 MiyuClickerCarte (Opérateur de Service)
+### 4.5 MiyuClickerCarte (OpÃ©rateur de Service)
 
-| Attribut | Détail |
+| Attribut | DÃ©tail |
 |----------|--------|
-| **Type** | Opérateur de Service |
-| **Rôle** | Gestion du **modèle** carte (cités, routes, propriété, troupes) ; déplacements en cours ; déclenchement des combats à l’arrivée ; mise à jour après combat (cité conquise, troupes restantes). |
-| **Toolkits** | MiyuClickerCarte (modèle, déplacements), MiyuClickerCombat (résolution). |
-| **Entrées** | Intention « envoyer X soldats de A vers B » ; tick (avancement des déplacements). |
-| **Sorties** | Modèle carte à jour (pour rendu UI) ; événements « combat résolu », « cité conquise ». |
+| **Type** | OpÃ©rateur de Service |
+| **RÃ´le** | Gestion du **modÃ¨le** carte (citÃ©s, routes, propriÃ©tÃ©, troupes) ; dÃ©placements en cours ; dÃ©clenchement des combats Ã  lâ€™arrivÃ©e ; mise Ã  jour aprÃ¨s combat (citÃ© conquise, troupes restantes). |
+| **Toolkits** | MiyuClickerCarte (modÃ¨le, dÃ©placements), MiyuClickerCombat (rÃ©solution). |
+| **EntrÃ©es** | Intention Â« envoyer X soldats de A vers B Â» ; tick (avancement des dÃ©placements). |
+| **Sorties** | ModÃ¨le carte Ã  jour (pour rendu UI) ; Ã©vÃ©nements Â« combat rÃ©solu Â», Â« citÃ© conquise Â». |
 
 ---
 
-## 5. Service MiyuClicker — Agrégat
+## 5. Service MiyuClicker â€” AgrÃ©gat
 
-| Élément | Détail |
+| Ã‰lÃ©ment | DÃ©tail |
 |--------|--------|
 | **Service** | MiyuClicker |
-| **Nature** | Équipe d’Opérateurs (ou agrégat) délivrant le **jeu** (capacité perçue par le joueur). |
-| **Opérateurs** | MiyuClickerUI, MiyuClickerSim, MiyuClickerSave, MiyuClickerCombat, MiyuClickerCarte |
-| **Contrat d’équipe (MVP)** | UI → Sim (tick, clic, allocation) ; UI → Save (sauvegarder, charger, lister) ; UI → Carte (envoyer troupes, afficher carte) ; Carte → Combat (résolution) ; Sim et Carte partagent l’état (ressources, cités, troupes) via flux ou état commun. |
-| **Mandat de permission** | Pour une session de jeu, StrongFather peut émettre un mandat autorisant cette équipe à collaborer ; BondingBrother assure la médiation. Pour le MVP, implémentation simplifiée possible (appels directs sans COG complet). |
+| **Nature** | Ã‰quipe dâ€™OpÃ©rateurs (ou agrÃ©gat) dÃ©livrant le **jeu** (capacitÃ© perÃ§ue par le joueur). |
+| **OpÃ©rateurs** | MiyuClickerUI, MiyuClickerSim, MiyuClickerSave, MiyuClickerCombat, MiyuClickerCarte |
+| **Contrat dâ€™Ã©quipe (MVP)** | UI â†’ Sim (tick, clic, allocation) ; UI â†’ Save (sauvegarder, charger, lister) ; UI â†’ Carte (envoyer troupes, afficher carte) ; Carte â†’ Combat (rÃ©solution) ; Sim et Carte partagent lâ€™Ã©tat (ressources, citÃ©s, troupes) via flux ou Ã©tat commun. |
+| **Mandat de permission** | Pour une session de jeu, StrongFather peut Ã©mettre un mandat autorisant cette Ã©quipe Ã  collaborer ; BondingBrother assure la mÃ©diation. Pour le MVP, implÃ©mentation simplifiÃ©e possible (appels directs sans COG complet). |
 
 ---
 
-## 6. Synthèse — Création / utilisation
+## 6. SynthÃ¨se â€” CrÃ©ation / utilisation
 
-| Élément | Action | Référence |
+| Ã‰lÃ©ment | Action | RÃ©fÃ©rence |
 |--------|--------|-----------|
 | **Dioxus** | Utiliser | Stack UI Miyukini |
-| **MiyuClickerSprites** | Créer | Toolkit + Tools load, frame_rect, animate |
-| **MiyuClickerIdleSim** | Créer | Toolkit + Tools tick, apply_allocation |
-| **MiyuClickerSave** | Créer | Toolkit + Tools slot_write, slot_read, slot_list |
-| **MiyuClickerCombat** | Créer | Tool resolve |
-| **MiyuClickerCarte** | Créer | Toolkit + Tools model_update, move_troops, resolve_arrival |
-| **MiyuClickerUI** | Créer | Opérateur d’Interface |
-| **MiyuClickerSim** | Créer | Opérateur de Service |
-| **MiyuClickerSave (Opérateur)** | Créer | Opérateur de Service |
-| **MiyuClickerCombat (Opérateur)** | Créer | Opérateur de Service / Tool |
-| **MiyuClickerCarte (Opérateur)** | Créer | Opérateur de Service |
-| **Service MiyuClicker** | Créer | Agrégat des Opérateurs ci-dessus |
+| **MiyuClickerSprites** | CrÃ©er | Toolkit + Tools load, frame_rect, animate |
+| **MiyuClickerIdleSim** | CrÃ©er | Toolkit + Tools tick, apply_allocation |
+| **MiyuClickerSave** | CrÃ©er | Toolkit + Tools slot_write, slot_read, slot_list |
+| **MiyuClickerCombat** | CrÃ©er | Tool resolve |
+| **MiyuClickerCarte** | CrÃ©er | Toolkit + Tools model_update, move_troops, resolve_arrival |
+| **MiyuClickerUI** | CrÃ©er | OpÃ©rateur dâ€™Interface |
+| **MiyuClickerSim** | CrÃ©er | OpÃ©rateur de Service |
+| **MiyuClickerSave (OpÃ©rateur)** | CrÃ©er | OpÃ©rateur de Service |
+| **MiyuClickerCombat (OpÃ©rateur)** | CrÃ©er | OpÃ©rateur de Service / Tool |
+| **MiyuClickerCarte (OpÃ©rateur)** | CrÃ©er | OpÃ©rateur de Service |
+| **Service MiyuClicker** | CrÃ©er | AgrÃ©gat des OpÃ©rateurs ci-dessus |
 
 ---
 
-## 7. Références
+## 7. RÃ©fÃ©rences
 
-- [MiyuClicker - MVP Ecrans et Mecaniques](MiyuClicker%20-%20MVP%20Ecrans%20et%20Mecaniques.md)
-- [MiyuClicker - Guide Implementation MVP](MiyuClicker%20-%20Guide%20Implementation%20MVP.md)
-- [MiyuClicker - Document Fondateur](MiyuClicker%20-%20Document%20Fondateur.md)
-- [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) (Opérateur, Toolkit, Service)
+- [MiyuClicker - MVP Ecrans et Mecaniques](MiyukiniClicker%20-%20MVP%20Ecrans%20et%20Mecaniques.md)
+- [MiyuClicker - Guide Implementation MVP](MiyukiniClicker%20-%20Guide%20Implementation%20MVP.md)
+- [MiyuClicker - Document Fondateur](MiyukiniClicker%20-%20Document%20Fondateur.md)
+- [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) (OpÃ©rateur, Toolkit, Service)
 
 ---
 
-**Document créé le :** 2026-02-01  
-**Dernière mise à jour :** 2026-02-11  
-**Statut :** Mapping Opérateurs et Toolkits pour le MVP MiyuClicker
+**Document crÃ©Ã© le :** 2026-02-01  
+**DerniÃ¨re mise Ã  jour :** 2026-02-11  
+**Statut :** Mapping OpÃ©rateurs et Toolkits pour le MVP MiyuClicker
+
+

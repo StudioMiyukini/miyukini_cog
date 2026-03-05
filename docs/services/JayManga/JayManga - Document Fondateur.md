@@ -1,4 +1,4 @@
-# JayManga — Document fondateur
+﻿# JayManga â€” Document fondateur
 
 ## Contexte
 
@@ -10,9 +10,9 @@ Ce document est le **document fondateur** du service : il en fixe la raison d'et
 
 ## Portee / Scope
 
-- **Perimetre** : Definition du service JayManga — positionnement, fonctionnalites (publication, lecture, demonstration, achat, favoris, telechargement hors-ligne, presence vendeur), module de paiement integre, modele de donnees, integration MWS, niveaux de securite.
+- **Perimetre** : Definition du service JayManga â€” positionnement, fonctionnalites (publication, lecture, demonstration, achat, favoris, telechargement hors-ligne, presence vendeur), module de paiement integre, modele de donnees, integration MWS, niveaux de securite.
 - **Hors perimetre** : Specifications techniques detaillees (implementation crate, endpoints API), creation de contenu manga (JayManga ne fournit pas d'editeur de manga), hebergement de fichiers (delegue a KindMother), comptabilite detaillee (JayKonta si necessaire a terme).
-- **References** : Glossaire Miyukini, [MWS - Document Fondateur](../../miyukini-webway-system/MWS%20-%20Document%20Fondateur.md), [Miyukini Conceptual References - Types de Services et Espaces](../../reference/Miyukini%20Conceptual%20References%20-%20Types%20de%20Services%20et%20Espaces.md).
+- **References** : Glossaire Miyukini, [MWS - Document Fondateur](../../miyukini-webway-system/MWS%20-%20Document%20Fondateur.md), [Miyukini Conceptual References - Types de Services et Espaces](..//..//miyukini-webway-system//reference//_index.md).
 
 ### Decisions structurantes (mini log)
 
@@ -33,9 +33,9 @@ Ce document est le **document fondateur** du service : il en fixe la raison d'et
 | **DS-13** | Trois interfaces UI distinctes : Central/Stable (Dioxus natif), Mobile/Terminal (Dioxus natif tactile), Web Portal (HTML/CSS/JS). | Chaque plateforme a des contraintes UX specifiques (clavier/souris vs tactile vs navigateur). Le pattern MWS "Central = COG, Portail = Web" impose la separation. |
 | **DS-14** | Onboarding via Miou et engagement via gamification (progression lecteur). | L'onboarding guide par Miou reduit le time-to-value. La gamification (XP, niveaux, streaks, badges) fidelise les lecteurs. Inspire des leaders du marche (WEBTOON, Duolingo). Les donnees de progression restent sur le COG du lecteur (LOI-3). |
 | **DS-15** | Guide d'implementation technique couvrant la structure crate, les types de domaine, la persistance (feature-gated), les APIs REST, l'integration MWS, les composants UI (Dioxus + Web), la gamification et la securite. | Fournit un cadre technique unifie pour l'ensemble des equipes de developpement, aligne sur les patterns standard des services Jay (miyukini-services, miyukini-rust-patterns). |
-| **DS-16** | Plan d'implementation en 8 phases sequentielles (Fondation → Catalogue → Optimisation → Lecteur → Paiement → Favoris/MWS → Gamification → Portail Agrege) avec dependances, criteres de validation et jalons. | Permet un developpement incremental avec livrables testables a chaque phase. Chaque phase produit un sous-ensemble fonctionnel autonome. |
-| **Dependance systeme** | MWS (presence, decouverte des COGs proposant JayManga). | — |
-| **Dependance optionnelle** | JayKonta (comptabilite avancee, a terme). JayXpose (si le vendeur souhaite lier ses oeuvres a un catalogue vitrine). | — |
+| **DS-16** | Plan d'implementation en 8 phases sequentielles (Fondation â†’ Catalogue â†’ Optimisation â†’ Lecteur â†’ Paiement â†’ Favoris/MWS â†’ Gamification â†’ Portail Agrege) avec dependances, criteres de validation et jalons. | Permet un developpement incremental avec livrables testables a chaque phase. Chaque phase produit un sous-ensemble fonctionnel autonome. |
+| **Dependance systeme** | MWS (presence, decouverte des COGs proposant JayManga). | â€” |
+| **Dependance optionnelle** | JayKonta (comptabilite avancee, a terme). JayXpose (si le vendeur souhaite lier ses oeuvres a un catalogue vitrine). | â€” |
 
 ---
 
@@ -80,7 +80,7 @@ Ce document est le **document fondateur** du service : il en fixe la raison d'et
 
 ### 1.3 Phrase fondatrice
 
-> **JayManga est la surface de lecture et de vente de manga de l'ecosysteme Miyukini. Chaque COG est une librairie souveraine — le lecteur decouvre, lit, achete et emporte ses oeuvres, gouverne par le COG.**
+> **JayManga est la surface de lecture et de vente de manga de l'ecosysteme Miyukini. Chaque COG est une librairie souveraine â€” le lecteur decouvre, lit, achete et emporte ses oeuvres, gouverne par le COG.**
 
 ---
 
@@ -100,9 +100,9 @@ Les sections ci-dessous donnent une vue synthetique de chaque bloc fonctionnel. 
 | [JayManga - UI Mobile Terminal](./JayManga%20-%20UI%20Mobile%20Terminal.md) | Interface Dioxus native pour COG TERMINAL (mobile) : navigation tactile, liseuse gestuelle, sync, notifications. |
 | [JayManga - UI Web Portal](./JayManga%20-%20UI%20Web%20Portal.md) | Interface web pour Portail vendeur et Portail Agrege : responsive, liseuse web, SEO, personnalisation. |
 | [JayManga - Guide Implementation](./JayManga%20-%20Guide%20Implementation.md) | Guide technique : structure crate, types, persistance, APIs, MWS, UI, gamification, securite, tests. |
-| [JayManga - Plan Implementation](./JayManga%20-%20Plan%20Implementation.md) | Plan en 8 phases (Fondation → Portail Agrege) : dependances, modules, criteres, jalons. |
+| [JayManga - Plan Implementation](./JayManga%20-%20Plan%20Implementation.md) | Plan en 8 phases (Fondation â†’ Portail Agrege) : dependances, modules, criteres, jalons. |
 
-### 2.1 Publication et gestion du catalogue (Admin/Vendeur — Central)
+### 2.1 Publication et gestion du catalogue (Admin/Vendeur â€” Central)
 
 | Fonctionnalite | Description |
 |----------------|-------------|
@@ -117,7 +117,7 @@ Les sections ci-dessous donnent une vue synthetique de chaque bloc fonctionnel. 
 | Statut de publication | `draft` (brouillon), `published` (publie), `unlisted` (non liste mais accessible par lien), `archived` (archive). |
 | Gestion des fichiers | Les fichiers manga sont stockes localement via KindMother. L'admin peut reorganiser, remplacer ou supprimer des pages. |
 
-### 2.2 Lecture en ligne (Lecteur — Portail)
+### 2.2 Lecture en ligne (Lecteur â€” Portail)
 
 | Fonctionnalite | Description |
 |----------------|-------------|
@@ -167,10 +167,10 @@ Les sections ci-dessous donnent une vue synthetique de chaque bloc fonctionnel. 
 | Declaration de service | Le COG proposant JayManga declare le service dans son Passeport COG. Les trackers indexent cette information. |
 | Decouverte | Un lecteur peut decouvrir les COGs proposant JayManga via les catalogues des trackers MWS. |
 | API de presence | Endpoint permettant de verifier si un COG vendeur specifique est en ligne. Utilise par la bibliotheque lecteur et le Portail Agrege pour afficher le statut. |
-| **Portail Agrege** | Interface inter-COG (Type 3) hebergee par un COG qui collecte et affiche les catalogues de tous les COGs JayManga connus via le MWS. Le lecteur parcourt un catalogue unifie — les oeuvres de COGs hors-ligne sont visibles (metadonnees en cache) mais grisees. Emule l'experience d'un catalogue en ligne centralise (Mangadraft, Manga.io) tout en restant decentralise. |
+| **Portail Agrege** | Interface inter-COG (Type 3) hebergee par un COG qui collecte et affiche les catalogues de tous les COGs JayManga connus via le MWS. Le lecteur parcourt un catalogue unifie â€” les oeuvres de COGs hors-ligne sont visibles (metadonnees en cache) mais grisees. Emule l'experience d'un catalogue en ligne centralise (Mangadraft, Manga.io) tout en restant decentralise. |
 | API de federation catalogue | Protocole inter-COG permettant a un COG d'exposer un resume de son catalogue (metadonnees, couvertures) pour aggregation par les Portails Agreges. Le vendeur controle l'opt-in. |
 
-### 2.7 Administration des ventes (Admin/Vendeur — Central)
+### 2.7 Administration des ventes (Admin/Vendeur â€” Central)
 
 | Fonctionnalite | Description |
 |----------------|-------------|
@@ -211,50 +211,50 @@ Les sections ci-dessous donnent une vue synthetique de chaque bloc fonctionnel. 
 
 ## 5. Flux utilisateur principaux
 
-### 5.1 Flux vendeur — publication
+### 5.1 Flux vendeur â€” publication
 
 ```
-Admin → Central → JayManga (gestion)
-  → Importer fichiers manga (images par chapitre)
-  → Saisir metadonnees (titre, auteur, genre, synopsis)
-  → Organiser en serie / volumes / chapitres
-  → Definir pages de demonstration (ex. 10 pages)
-  → Fixer le prix (ou gratuit)
-  → Configurer autorisation telechargement
-  → Publier → disponible sur le Portail
+Admin â†’ Central â†’ JayManga (gestion)
+  â†’ Importer fichiers manga (images par chapitre)
+  â†’ Saisir metadonnees (titre, auteur, genre, synopsis)
+  â†’ Organiser en serie / volumes / chapitres
+  â†’ Definir pages de demonstration (ex. 10 pages)
+  â†’ Fixer le prix (ou gratuit)
+  â†’ Configurer autorisation telechargement
+  â†’ Publier â†’ disponible sur le Portail
 ```
 
-### 5.2 Flux lecteur — decouverte et lecture
+### 5.2 Flux lecteur â€” decouverte et lecture
 
 ```
-Lecteur → Portail COG Vendeur (ou decouverte via MWS)
-  → Parcourir le catalogue manga
-  → Ouvrir une fiche oeuvre
-  → Lire les pages de demonstration (liseuse)
-  → [Si interessé] → Ajouter au panier → Checkout → Paiement
-  → Acces complet a l'oeuvre
-  → [Optionnel] Mettre en favoris
-  → [Si autorise] Telecharger sur son COG
+Lecteur â†’ Portail COG Vendeur (ou decouverte via MWS)
+  â†’ Parcourir le catalogue manga
+  â†’ Ouvrir une fiche oeuvre
+  â†’ Lire les pages de demonstration (liseuse)
+  â†’ [Si interessÃ©] â†’ Ajouter au panier â†’ Checkout â†’ Paiement
+  â†’ Acces complet a l'oeuvre
+  â†’ [Optionnel] Mettre en favoris
+  â†’ [Si autorise] Telecharger sur son COG
 ```
 
-### 5.3 Flux lecteur — lecture hors-ligne
+### 5.3 Flux lecteur â€” lecture hors-ligne
 
 ```
-Lecteur → Central (sur son propre COG)
-  → Bibliotheque personnelle
-  → Oeuvres telechargees
-  → Liseuse locale (pas de connexion necessaire)
+Lecteur â†’ Central (sur son propre COG)
+  â†’ Bibliotheque personnelle
+  â†’ Oeuvres telechargees
+  â†’ Liseuse locale (pas de connexion necessaire)
 ```
 
 ### 5.4 Flux presence et favoris
 
 ```
-Lecteur → Central → Bibliotheque (favoris)
-  → Affichage des oeuvres favorites
-  → Pour chaque favori : requete MWS → statut presence COG vendeur
-  → Indicateur : "En ligne" / "Hors ligne"
-  → Si en ligne : lien direct vers la liseuse sur le Portail du vendeur
-  → Si hors-ligne : lecture locale si telecharge, sinon "Indisponible"
+Lecteur â†’ Central â†’ Bibliotheque (favoris)
+  â†’ Affichage des oeuvres favorites
+  â†’ Pour chaque favori : requete MWS â†’ statut presence COG vendeur
+  â†’ Indicateur : "En ligne" / "Hors ligne"
+  â†’ Si en ligne : lien direct vers la liseuse sur le Portail du vendeur
+  â†’ Si hors-ligne : lecture locale si telecharge, sinon "Indisponible"
 ```
 
 ---
@@ -358,7 +358,7 @@ Lecteur → Central → Bibliotheque (favoris)
 | created_at | TEXT | ISO 8601. |
 | completed_at | TEXT (optionnel) | ISO 8601. |
 
-### 6.7 Favori lecteur (ReaderFavorite) — stocke sur le COG du lecteur
+### 6.7 Favori lecteur (ReaderFavorite) â€” stocke sur le COG du lecteur
 
 | Champ | Type | Description |
 |-------|------|-------------|
@@ -373,7 +373,7 @@ Lecteur → Central → Bibliotheque (favoris)
 | last_read_page | INTEGER (optionnel) | Derniere page lue. |
 | reading_progress | REAL | Pourcentage de progression (0.0 a 1.0). |
 | added_at | TEXT | ISO 8601. |
-| last_synced_at | TEXT | ISO 8601 — derniere synchronisation des metadonnees. |
+| last_synced_at | TEXT | ISO 8601 â€” derniere synchronisation des metadonnees. |
 
 ### 6.8 Configuration vendeur (SellerConfig)
 
@@ -393,7 +393,7 @@ Lecteur → Central → Bibliotheque (favoris)
 
 ---
 
-## 7. Integration MWS — Presence et decouverte
+## 7. Integration MWS â€” Presence et decouverte
 
 ### 7.1 Declaration du service dans le Passeport COG
 
@@ -456,7 +456,7 @@ Lorsqu'un lecteur telecharge une oeuvre achetee :
 |-------|-------------|
 | **RM-01** | Un lecteur ne peut acceder aux pages au-dela de la demonstration que s'il possede une licence active pour l'oeuvre. |
 | **RM-02** | Le telechargement n'est possible que si la licence est active ET que le vendeur a autorise le telechargement pour cette oeuvre. |
-| **RM-03** | Les fichiers telecharges restent sur le COG du lecteur meme si le vendeur desactive le telechargement ulterieurement (LOI-3 — etat local souverain). |
+| **RM-03** | Les fichiers telecharges restent sur le COG du lecteur meme si le vendeur desactive le telechargement ulterieurement (LOI-3 â€” etat local souverain). |
 | **RM-04** | Un remboursement total entraine la revocation de la licence. Le lecteur perd l'acces en ligne mais conserve les fichiers deja telecharges (LOI-3). |
 | **RM-05** | Les prix sont en centimes pour eviter les erreurs d'arrondi. |
 | **RM-06** | Un vendeur ne peut pas modifier le prix d'une oeuvre retroactivement pour les licences deja emises. |
@@ -484,17 +484,18 @@ Lorsqu'un lecteur telecharge une oeuvre achetee :
 
 | Document | Role |
 |----------|------|
-| [Miyukini Conceptual References — Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) | Terminologie (Operateur, Mandat, COG, Niveaux de securite). |
+| [Miyukini Conceptual References â€” Glossaire](..//..//miyukini-webway-system//reference//_index.md) | Terminologie (Operateur, Mandat, COG, Niveaux de securite). |
 | [MWS - Document Fondateur](../../miyukini-webway-system/MWS%20-%20Document%20Fondateur.md) | Systeme de presence, decouverte et transport des COGs. |
-| [Miyukini Conceptual References - Types de Services et Espaces](../../reference/Miyukini%20Conceptual%20References%20-%20Types%20de%20Services%20et%20Espaces.md) | Classification Type 1 / Type 2 / Type 3. |
+| [Miyukini Conceptual References - Types de Services et Espaces](..//..//miyukini-webway-system//reference//_index.md) | Classification Type 1 / Type 2 / Type 3. |
 | [JayShop - Document Fondateur](../JayShop/JayShop%20-%20Document%20Fondateur.md) | Reference pour les patterns de vente et paiement. |
 | [JayXpose - Document Fondateur](../JayXpose/JayXpose%20-%20Document%20Fondateur.md) | Reference pour la gestion de catalogue (integration optionnelle). |
 | [JayKonta - Document Fondateur](../JayKonta/JayKonta%20-%20Document%20Fondateur.md) | Reference pour la comptabilite (integration Phase 2). |
-| [Miyukini Conceptual References - Interpolarite Services Jay](../../reference/Miyukini%20Conceptual%20References%20-%20Interpolarite%20Services%20Jay.md) | Principe d'interpolarite et couplage entre services Jay. |
+| [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyukini-webway-system//reference//_index.md) | Principe d'interpolarite et couplage entre services Jay. |
 
 ---
 
-**Document** : JayManga — Document fondateur
+**Document** : JayManga â€” Document fondateur
 **Version** : 1.4
 **Date** : 2026-02-24
-**Statut** : Document de reference — enrichi avec UI/UX, onboarding Miou, gamification, guide et plan d'implementation.
+**Statut** : Document de reference â€” enrichi avec UI/UX, onboarding Miou, gamification, guide et plan d'implementation.
+

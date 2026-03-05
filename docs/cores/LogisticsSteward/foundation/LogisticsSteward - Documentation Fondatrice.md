@@ -1,10 +1,10 @@
-# LogisticsSteward — Documentation Fondatrice
+﻿# LogisticsSteward â€” Documentation Fondatrice
 
 ## 1. Contexte
 
 Ce document definit l'identite, le role et les principes fondamentaux de **LogisticsSteward** : le core responsable de la gouvernance de l'allocation, de la priorisation et de la limitation des ressources au sein d'un environnement Miyukini.
 
-LogisticsSteward arbitre l'usage des ressources selon des regles explicites, des politiques declarees et un etat systeme certifie. Il ne mesure jamais les ressources, ne les controle jamais techniquement — ces responsabilites appartiennent exclusivement au Kernel.
+LogisticsSteward arbitre l'usage des ressources selon des regles explicites, des politiques declarees et un etat systeme certifie. Il ne mesure jamais les ressources, ne les controle jamais techniquement â€” ces responsabilites appartiennent exclusivement au Kernel.
 
 **Principe fondamental :**
 
@@ -166,20 +166,20 @@ Ces regles sont :
 
 ```
 [Demande de ressource]
-       │
-       ▼
+       â”‚
+       â–¼
 [LogisticsSteward]
-  ├── Lecture etat systeme (Kernel)
-  ├── Evaluation des regles
-  ├── Decision d'arbitrage
-       │
-       ▼
+  â”œâ”€â”€ Lecture etat systeme (Kernel)
+  â”œâ”€â”€ Evaluation des regles
+  â”œâ”€â”€ Decision d'arbitrage
+       â”‚
+       â–¼
 [StrongFather]
-  └── Validation / Invalidation
-       │
-       ▼
+  â””â”€â”€ Validation / Invalidation
+       â”‚
+       â–¼
 [Kernel]
-  └── Execution de la decision
+  â””â”€â”€ Execution de la decision
 ```
 
 LogisticsSteward agit **avant l'execution, jamais pendant**.
@@ -325,32 +325,32 @@ En mode recovery systeme :
 ### 10.1 Positionnement
 
 ```
-┌──────────────────────────────────────────┐
-│ STRATE 9 — MiyukiniAdmin (EXCEPTION)     │
-│ Operateur Souverain d'administration     │
-└──────────────────────────────────────────┘
-          ▲
-          │ (hors pyramide)
-          │
-┌──────────────────────────────────────────┐
-│ STRATE 4 — Cores Systeme                 │
-│ StrongFather, KindMother, WorrySentinel  │
-└──────────────────────────────────────────┘
-          ▲
-┌──────────────────────────────────────────┐
-│ STRATE 3 — Gouvernance Ressources        │
-│ LogisticsSteward                         │
-└──────────────────────────────────────────┘
-          ▲
-┌──────────────────────────────────────────┐
-│ STRATE 2 — Capacites                     │
-│ MasterButler                             │
-└──────────────────────────────────────────┘
-          ▲
-┌──────────────────────────────────────────┐
-│ STRATE 1 — Kernel                        │
-│ Infrastructure technique                 │
-└──────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 9 â€” MiyukiniAdmin (EXCEPTION)     â”‚
+â”‚ Operateur Souverain d'administration     â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+          â”‚ (hors pyramide)
+          â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 4 â€” Cores Systeme                 â”‚
+â”‚ StrongFather, KindMother, WorrySentinel  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 3 â€” Gouvernance Ressources        â”‚
+â”‚ LogisticsSteward                         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 2 â€” Capacites                     â”‚
+â”‚ MasterButler                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 1 â€” Kernel                        â”‚
+â”‚ Infrastructure technique                 â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 LogisticsSteward est positionne en **Strate 3**, entre :
@@ -368,11 +368,11 @@ LogisticsSteward est positionne en **Strate 3**, entre :
 
 ## 11. Conformite aux Lois d'Autonomie Systeme
 
-Ce core respecte les **Lois d'Autonomie Systeme** definies dans [Miyukini Conceptual References - Lois Autonomie Systeme.md](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md).
+Ce core respecte les **Lois d'Autonomie Systeme** definies dans [Miyukini Conceptual References - Lois Autonomie Systeme.md](..//..//..//miyukini-webway-system//reference//_index.md).
 
 ### LOI-1 : Aucune dependance externe critique a l'execution
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 LogisticsSteward respecte integralement LOI-1 :
 - Fonctionne avec l'etat systeme local fourni par le Kernel
@@ -382,7 +382,7 @@ LogisticsSteward respecte integralement LOI-1 :
 
 ### LOI-2 : Le systeme accepte l'isolement comme etat normal
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 LogisticsSteward respecte integralement LOI-2 :
 - L'isolement est un etat normal de fonctionnement
@@ -392,7 +392,7 @@ LogisticsSteward respecte integralement LOI-2 :
 
 ### LOI-3 : L'etat local est souverain
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 LogisticsSteward respecte integralement LOI-3 :
 - L'etat systeme local (fourni par le Kernel) est la verite
@@ -402,7 +402,7 @@ LogisticsSteward respecte integralement LOI-3 :
 
 ### LOI-4 : Pas de temps global requis
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 LogisticsSteward respecte integralement LOI-4 :
 - Pas de dependance a une horloge reseau
@@ -412,7 +412,7 @@ LogisticsSteward respecte integralement LOI-4 :
 
 ### LOI-5 : Le cout doit etre proportionnel au hardware
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 LogisticsSteward respecte integralement LOI-5 :
 - Moteur d'arbitrage pur, sans etat persistant massif
@@ -422,7 +422,7 @@ LogisticsSteward respecte integralement LOI-5 :
 
 ### LOI-6 : L'autonomie n'empeche pas la federation
 
-**Conformite :** ✅ **Conforme**
+**Conformite :** âœ… **Conforme**
 
 LogisticsSteward respecte integralement LOI-6 :
 - Peut fonctionner seul ou en federation
@@ -464,7 +464,7 @@ L'**etat systeme abstrait** est une representation normalisee de l'etat des ress
 
 ## 13. Phrase Fondatrice
 
-**LogisticsSteward est le core qui empeche le chaos silencieux en garantissant que chaque entite a droit a ce qui lui est du — ni plus, ni moins — selon des regles explicites, deterministes et auditables, sans jamais executer ni controler techniquement.**
+**LogisticsSteward est le core qui empeche le chaos silencieux en garantissant que chaque entite a droit a ce qui lui est du â€” ni plus, ni moins â€” selon des regles explicites, deterministes et auditables, sans jamais executer ni controler techniquement.**
 
 Cette phrase resume l'essence de LogisticsSteward : arbitre (pas executeur), gouverneur (pas optimiseur), protecteur (pas controleur technique), declaratif (pas implicite), deterministe (pas aleatoire).
 
@@ -504,8 +504,8 @@ Toute implementation de LogisticsSteward doit respecter integralement ce documen
 - [LogisticsSteward - Quota Definition Contract](../contracts/resources/LogisticsSteward%20-%20Quota%20Definition%20Contract.md)
 - [LogisticsSteward - Priority Management Contract](../contracts/resources/LogisticsSteward%20-%20Priority%20Management%20Contract.md)
 - [LogisticsSteward - Degradation Strategy Contract](../contracts/degradation/LogisticsSteward%20-%20Degradation%20Strategy%20Contract.md)
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
-- [Miyukini Conceptual References - Pyramide Architecture Complete](../../../reference/Miyukini%20Conceptual%20References%20-%20Pyramide%20Architecture%20Complete.md)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)
+- [Miyukini Conceptual References - Pyramide Architecture Complete](..//..//..//miyukini-webway-system//reference//_index.md)
 - [StrongFather - Documentation Fondatrice](../../StrongFather/foundation/StrongFather%20-%20Documentation%20Fondatrice.md)
 - [BondingBrother - Documentation Fondatrice](../../BondingBrother/foundation/BondingBrother%20-%20Documentation%20Fondatrice.md)
 
@@ -513,5 +513,6 @@ Toute implementation de LogisticsSteward doit respecter integralement ce documen
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
-**Statut :** FONDATION — Non negociable  
+**Statut :** FONDATION â€” Non negociable  
 **Reference :** Miyukini Core System v2.4
+

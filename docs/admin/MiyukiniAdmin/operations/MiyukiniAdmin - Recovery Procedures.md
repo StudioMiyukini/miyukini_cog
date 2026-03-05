@@ -1,36 +1,36 @@
-# MiyukiniAdmin - Recovery Procedures
+﻿# MiyukiniAdmin - Recovery Procedures
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** Normatif — Procédures de récupération en cas de compromission  
-**Portée :** Mode recovery, écriture DB directe, procédures d'urgence
+**Statut :** Normatif â€” ProcÃ©dures de rÃ©cupÃ©ration en cas de compromission  
+**PortÃ©e :** Mode recovery, Ã©criture DB directe, procÃ©dures d'urgence
 
 ---
 
 ## 1. Contexte
 
-Ce document définit les **procédures de récupération** pour MiyukiniAdmin en cas de compromission système, d'incident critique, ou de nécessité d'intervention d'urgence.
+Ce document dÃ©finit les **procÃ©dures de rÃ©cupÃ©ration** pour MiyukiniAdmin en cas de compromission systÃ¨me, d'incident critique, ou de nÃ©cessitÃ© d'intervention d'urgence.
 
-**Références :**
+**RÃ©fÃ©rences :**
 - [MiyukiniAdmin - Documentation Fondatrice](../foundation/MiyukiniAdmin%20-%20Documentation%20Fondatrice.md) : Section 6.6 Recovery Exceptionnel
 - [MiyukiniAdmin - DB Operations Contract](../contracts/database/MiyukiniAdmin%20-%20DB%20Operations%20Contract.md)
-- [WorrySentinel - Security Levels Governance Contract](../../WorrySentinel/contracts/levels/WorrySentinel%20-%20Security%20Levels%20Governance%20Contract.md)
+- [WorrySentinel - Security Levels Governance Contract](..//..//..//cores//WorrySentinel//contracts//levels//WorrySentinel%20-%20Security%20Levels%20Governance%20Contract.md)
 
 ---
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
-Ce document définit :
+Ce document dÃ©finit :
 - Les conditions d'activation du mode recovery
-- Les procédures d'écriture DB directe
-- Les étapes de récupération post-incident
-- Les vérifications de sécurité post-recovery
-- Les procédures de retour à la normale
+- Les procÃ©dures d'Ã©criture DB directe
+- Les Ã©tapes de rÃ©cupÃ©ration post-incident
+- Les vÃ©rifications de sÃ©curitÃ© post-recovery
+- Les procÃ©dures de retour Ã  la normale
 
 Ce document **ne couvre pas** :
-- Les procédures de backup/restore (voir Backup Contract)
-- Les procédures de migration (voir Migration Contract)
-- Les procédures de mise à jour (voir Versioning Contract)
+- Les procÃ©dures de backup/restore (voir Backup Contract)
+- Les procÃ©dures de migration (voir Migration Contract)
+- Les procÃ©dures de mise Ã  jour (voir Versioning Contract)
 
 ---
 
@@ -38,77 +38,77 @@ Ce document **ne couvre pas** :
 
 ### 3.1 Conditions cumulatives strictes
 
-Le mode recovery ne peut être activé que si **toutes** les conditions suivantes sont remplies :
+Le mode recovery ne peut Ãªtre activÃ© que si **toutes** les conditions suivantes sont remplies :
 
-| Condition | Description | Vérification |
+| Condition | Description | VÃ©rification |
 |-----------|-------------|--------------|
-| **État système ≥ Critique** | Niveau de confiance T3 ou T4 (WorrySentinel) | `worrysentinel get-trust-level` |
-| **Protocole sécurité renforcée** | Mode sécurité renforcée activé explicitement | `miyukini-admin enable-enhanced-security` |
-| **Intervention humaine authentifiée** | Validation manuelle obligatoire avec MFA | Authentification admin + token recovery |
-| **Fenêtre temporelle limitée** | Durée maximale définie (ex. 1 heure) | Timer automatique de désactivation |
-| **Journalisation complète** | Toute opération tracée | Audit log activé |
-| **Revalidation obligatoire** | Vérification post-intervention | Checklist de validation |
+| **Ã‰tat systÃ¨me â‰¥ Critique** | Niveau de confiance T3 ou T4 (WorrySentinel) | `worrysentinel get-trust-level` |
+| **Protocole sÃ©curitÃ© renforcÃ©e** | Mode sÃ©curitÃ© renforcÃ©e activÃ© explicitement | `miyukini-admin enable-enhanced-security` |
+| **Intervention humaine authentifiÃ©e** | Validation manuelle obligatoire avec MFA | Authentification admin + token recovery |
+| **FenÃªtre temporelle limitÃ©e** | DurÃ©e maximale dÃ©finie (ex. 1 heure) | Timer automatique de dÃ©sactivation |
+| **Journalisation complÃ¨te** | Toute opÃ©ration tracÃ©e | Audit log activÃ© |
+| **Revalidation obligatoire** | VÃ©rification post-intervention | Checklist de validation |
 
 ### 3.2 Activation du mode recovery
 
 **Commande :**
 ```bash
-# Vérifier les conditions préalables
+# VÃ©rifier les conditions prÃ©alables
 miyukini-admin check-recovery-conditions
 
-# Activer le mode recovery (nécessite authentification MFA)
+# Activer le mode recovery (nÃ©cessite authentification MFA)
 miyukini-admin activate-recovery-mode \
   --duration 3600 \
-  --reason "Corruption DB critique détectée" \
+  --reason "Corruption DB critique dÃ©tectÃ©e" \
   --admin-token <MFA_TOKEN>
 ```
 
-**Vérifications automatiques :**
-- ✅ Niveau de confiance T3 ou T4
-- ✅ Protocole sécurité renforcée activé
-- ✅ Authentification admin valide
-- ✅ Token recovery valide
-- ✅ Audit log opérationnel
+**VÃ©rifications automatiques :**
+- âœ… Niveau de confiance T3 ou T4
+- âœ… Protocole sÃ©curitÃ© renforcÃ©e activÃ©
+- âœ… Authentification admin valide
+- âœ… Token recovery valide
+- âœ… Audit log opÃ©rationnel
 
-**Résultat :**
-- Mode recovery activé pour la durée spécifiée
-- Blocage des Opérateurs pendant l'opération
-- Journalisation complète activée
-- Timer de désactivation automatique démarré
+**RÃ©sultat :**
+- Mode recovery activÃ© pour la durÃ©e spÃ©cifiÃ©e
+- Blocage des OpÃ©rateurs pendant l'opÃ©ration
+- Journalisation complÃ¨te activÃ©e
+- Timer de dÃ©sactivation automatique dÃ©marrÃ©
 
 ---
 
-## 4. Écriture DB directe en mode recovery
+## 4. Ã‰criture DB directe en mode recovery
 
 ### 4.1 Limitations
 
-**Règle :** L'écriture DB directe n'est autorisée qu'en mode recovery et uniquement pour :
-- Réparation de corruption de données
-- Restauration d'intégrité critique
-- Correction d'erreurs système bloquantes
+**RÃ¨gle :** L'Ã©criture DB directe n'est autorisÃ©e qu'en mode recovery et uniquement pour :
+- RÃ©paration de corruption de donnÃ©es
+- Restauration d'intÃ©gritÃ© critique
+- Correction d'erreurs systÃ¨me bloquantes
 
 **Interdit :**
-- ❌ Modification de données métier normales
-- ❌ Bypass des règles de gouvernance
-- ❌ Modification des politiques StrongFather
-- ❌ Modification des configurations WorrySentinel
+- âŒ Modification de donnÃ©es mÃ©tier normales
+- âŒ Bypass des rÃ¨gles de gouvernance
+- âŒ Modification des politiques StrongFather
+- âŒ Modification des configurations WorrySentinel
 
-### 4.2 Procédure d'écriture DB directe
+### 4.2 ProcÃ©dure d'Ã©criture DB directe
 
-#### Étape 1 : Préparation
+#### Ã‰tape 1 : PrÃ©paration
 
 ```bash
-# Sauvegarder l'état actuel
+# Sauvegarder l'Ã©tat actuel
 miyukini-admin backup-create --label "pre-recovery-$(date +%Y%m%d-%H%M%S)"
 
-# Vérifier l'intégrité de la backup
+# VÃ©rifier l'intÃ©gritÃ© de la backup
 miyukini-admin backup-verify --latest
 
 # Activer le mode recovery
 miyukini-admin activate-recovery-mode --duration 3600
 ```
 
-#### Étape 2 : Analyse
+#### Ã‰tape 2 : Analyse
 
 ```bash
 # Analyser la corruption
@@ -117,165 +117,165 @@ miyukini-admin db-analyze --table <table_name>
 # Identifier les enregistrements corrompus
 miyukini-admin db-verify-integrity
 
-# Générer un rapport d'analyse
+# GÃ©nÃ©rer un rapport d'analyse
 miyukini-admin db-report --output recovery-analysis.json
 ```
 
-#### Étape 3 : Écriture DB directe
+#### Ã‰tape 3 : Ã‰criture DB directe
 
 ```bash
 # Ouvrir une session DB en mode recovery
 miyukini-admin db-recovery-session start
 
-# Exécuter les corrections (exemple)
+# ExÃ©cuter les corrections (exemple)
 miyukini-admin db-recovery-session execute \
   --sql "UPDATE core_registry SET status = 'operational' WHERE id = '...'"
 
-# Vérifier chaque modification
+# VÃ©rifier chaque modification
 miyukini-admin db-recovery-session verify --last-operation
 ```
 
 **Contraintes :**
-- Chaque opération SQL est journalisée
-- Chaque opération nécessite une confirmation explicite
-- Les opérations sont validées avant exécution
-- Les rollback sont possibles pour chaque opération
+- Chaque opÃ©ration SQL est journalisÃ©e
+- Chaque opÃ©ration nÃ©cessite une confirmation explicite
+- Les opÃ©rations sont validÃ©es avant exÃ©cution
+- Les rollback sont possibles pour chaque opÃ©ration
 
-#### Étape 4 : Validation
+#### Ã‰tape 4 : Validation
 
 ```bash
-# Vérifier l'intégrité post-modification
+# VÃ©rifier l'intÃ©gritÃ© post-modification
 miyukini-admin db-verify-integrity
 
-# Vérifier la cohérence avec les cores
+# VÃ©rifier la cohÃ©rence avec les cores
 miyukini-admin verify-core-consistency
 
-# Générer un rapport de validation
+# GÃ©nÃ©rer un rapport de validation
 miyukini-admin db-report --output recovery-validation.json
 ```
 
-#### Étape 5 : Fermeture de la session
+#### Ã‰tape 5 : Fermeture de la session
 
 ```bash
 # Fermer la session recovery
 miyukini-admin db-recovery-session close
 
-# Désactiver le mode recovery
+# DÃ©sactiver le mode recovery
 miyukini-admin deactivate-recovery-mode
 ```
 
 ---
 
-## 5. Procédures de récupération par type d'incident
+## 5. ProcÃ©dures de rÃ©cupÃ©ration par type d'incident
 
-### 5.1 Corruption de base de données
+### 5.1 Corruption de base de donnÃ©es
 
-**Symptômes :**
-- Erreurs SQLite lors des opérations
-- Incohérences dans les données
-- Échec de vérification d'intégrité
+**SymptÃ´mes :**
+- Erreurs SQLite lors des opÃ©rations
+- IncohÃ©rences dans les donnÃ©es
+- Ã‰chec de vÃ©rification d'intÃ©gritÃ©
 
-**Procédure :**
+**ProcÃ©dure :**
 1. Activer le mode recovery
-2. Créer une backup complète
+2. CrÃ©er une backup complÃ¨te
 3. Analyser la corruption (`db-analyze`)
-4. Réparer les enregistrements corrompus (`db-recovery-session execute`)
-5. Vérifier l'intégrité (`db-verify-integrity`)
-6. Désactiver le mode recovery
-7. Vérifier le fonctionnement normal
+4. RÃ©parer les enregistrements corrompus (`db-recovery-session execute`)
+5. VÃ©rifier l'intÃ©gritÃ© (`db-verify-integrity`)
+6. DÃ©sactiver le mode recovery
+7. VÃ©rifier le fonctionnement normal
 
-### 5.2 Perte de connectivité avec les cores
+### 5.2 Perte de connectivitÃ© avec les cores
 
-**Symptômes :**
+**SymptÃ´mes :**
 - Impossible de communiquer avec un core
-- Timeout sur les opérations
-- Erreurs de médiation BondingBrother
+- Timeout sur les opÃ©rations
+- Erreurs de mÃ©diation BondingBrother
 
-**Procédure :**
-1. Vérifier l'état des cores (`list-cores --status`)
-2. Vérifier les logs (`logs core <core_name>`)
-3. Redémarrer le core si nécessaire (`restart-core <core_name>`)
-4. Si échec, réinitialiser le core (`reset-core <core_name>`)
-5. Vérifier la récupération (`verify-core-consistency`)
+**ProcÃ©dure :**
+1. VÃ©rifier l'Ã©tat des cores (`list-cores --status`)
+2. VÃ©rifier les logs (`logs core <core_name>`)
+3. RedÃ©marrer le core si nÃ©cessaire (`restart-core <core_name>`)
+4. Si Ã©chec, rÃ©initialiser le core (`reset-core <core_name>`)
+5. VÃ©rifier la rÃ©cupÃ©ration (`verify-core-consistency`)
 
-**Note :** Pas besoin de mode recovery pour cette procédure.
+**Note :** Pas besoin de mode recovery pour cette procÃ©dure.
 
-### 5.3 Compromission de sécurité
+### 5.3 Compromission de sÃ©curitÃ©
 
-**Symptômes :**
-- Activité suspecte détectée
+**SymptÃ´mes :**
+- ActivitÃ© suspecte dÃ©tectÃ©e
 - Violation d'invariants
-- Niveau de confiance dégradé (T3/T4)
+- Niveau de confiance dÃ©gradÃ© (T3/T4)
 
-**Procédure :**
-1. **Isolation immédiate :**
+**ProcÃ©dure :**
+1. **Isolation immÃ©diate :**
    ```bash
    # Passer en mode isolation
-   miyukini-admin security-isolate --reason "Compromission détectée"
+   miyukini-admin security-isolate --reason "Compromission dÃ©tectÃ©e"
    ```
 
 2. **Analyse de la compromission :**
    ```bash
-   # Analyser les logs de sécurité
+   # Analyser les logs de sÃ©curitÃ©
    miyukini-admin security-audit --since <timestamp>
    
    # Identifier les actions suspectes
    miyukini-admin security-analyze --output compromise-report.json
    ```
 
-3. **Activation du mode recovery si nécessaire :**
+3. **Activation du mode recovery si nÃ©cessaire :**
    ```bash
-   # Si modification DB nécessaire
+   # Si modification DB nÃ©cessaire
    miyukini-admin activate-recovery-mode --duration 1800
    ```
 
 4. **Nettoyage :**
    ```bash
-   # Révoquer les accès compromis
+   # RÃ©voquer les accÃ¨s compromis
    miyukini-admin security-revoke-access --user <user_id>
    
-   # Réinitialiser les tokens
+   # RÃ©initialiser les tokens
    miyukini-admin security-reset-tokens
    ```
 
-5. **Vérification post-récupération :**
+5. **VÃ©rification post-rÃ©cupÃ©ration :**
    ```bash
-   # Vérifier l'intégrité système
+   # VÃ©rifier l'intÃ©gritÃ© systÃ¨me
    miyukini-admin verify-system-integrity
    
-   # Vérifier les invariants
+   # VÃ©rifier les invariants
    miyukini-admin verify-invariants
    ```
 
-### 5.4 Perte de données critiques
+### 5.4 Perte de donnÃ©es critiques
 
-**Symptômes :**
-- Données manquantes dans la DB
-- Échec de restauration depuis backup
-- Incohérences détectées
+**SymptÃ´mes :**
+- DonnÃ©es manquantes dans la DB
+- Ã‰chec de restauration depuis backup
+- IncohÃ©rences dÃ©tectÃ©es
 
-**Procédure :**
+**ProcÃ©dure :**
 1. Activer le mode recovery
-2. Analyser l'étendue de la perte (`db-analyze --missing-data`)
+2. Analyser l'Ã©tendue de la perte (`db-analyze --missing-data`)
 3. Tenter restauration depuis backup (`backup-restore --backup-id <id>`)
-4. Si échec, reconstruction manuelle en mode recovery
-5. Vérification complète post-récupération
-6. Désactivation du mode recovery
+4. Si Ã©chec, reconstruction manuelle en mode recovery
+5. VÃ©rification complÃ¨te post-rÃ©cupÃ©ration
+6. DÃ©sactivation du mode recovery
 
 ---
 
-## 6. Vérifications post-recovery
+## 6. VÃ©rifications post-recovery
 
 ### 6.1 Checklist de validation
 
-**Avant désactivation du mode recovery :**
+**Avant dÃ©sactivation du mode recovery :**
 
-- [ ] Intégrité DB vérifiée (`db-verify-integrity`)
-- [ ] Cohérence avec les cores vérifiée (`verify-core-consistency`)
-- [ ] Invariants respectés (`verify-invariants`)
+- [ ] IntÃ©gritÃ© DB vÃ©rifiÃ©e (`db-verify-integrity`)
+- [ ] CohÃ©rence avec les cores vÃ©rifiÃ©e (`verify-core-consistency`)
+- [ ] Invariants respectÃ©s (`verify-invariants`)
 - [ ] Logs de recovery complets (`logs recovery --verify`)
-- [ ] Backup post-recovery créée (`backup-create`)
-- [ ] Tests de fonctionnement effectués (`test-system`)
+- [ ] Backup post-recovery crÃ©Ã©e (`backup-create`)
+- [ ] Tests de fonctionnement effectuÃ©s (`test-system`)
 
 ### 6.2 Tests de fonctionnement
 
@@ -283,16 +283,16 @@ miyukini-admin deactivate-recovery-mode
 # Tests de base
 miyukini-admin test-system
 
-# Tests spécifiques
+# Tests spÃ©cifiques
 miyukini-admin test-strongfather
 miyukini-admin test-kindmother
 miyukini-admin test-caringnanny
 miyukini-admin test-worrysentinel
 ```
 
-### 6.3 Rapport de récupération
+### 6.3 Rapport de rÃ©cupÃ©ration
 
-**Génération :**
+**GÃ©nÃ©ration :**
 ```bash
 miyukini-admin recovery-report \
   --session-id <session_id> \
@@ -300,111 +300,112 @@ miyukini-admin recovery-report \
 ```
 
 **Contenu du rapport :**
-- Résumé des opérations effectuées
+- RÃ©sumÃ© des opÃ©rations effectuÃ©es
 - Liste des modifications DB
-- Vérifications effectuées
-- Résultats des tests
+- VÃ©rifications effectuÃ©es
+- RÃ©sultats des tests
 - Recommandations post-recovery
 
 ---
 
-## 7. Retour à la normale
+## 7. Retour Ã  la normale
 
-### 7.1 Désactivation du mode recovery
+### 7.1 DÃ©sactivation du mode recovery
 
 **Commande :**
 ```bash
 miyukini-admin deactivate-recovery-mode --verify
 ```
 
-**Vérifications automatiques :**
-- ✅ Intégrité DB vérifiée
-- ✅ Cohérence avec les cores vérifiée
-- ✅ Invariants respectés
-- ✅ Tests de fonctionnement passés
+**VÃ©rifications automatiques :**
+- âœ… IntÃ©gritÃ© DB vÃ©rifiÃ©e
+- âœ… CohÃ©rence avec les cores vÃ©rifiÃ©e
+- âœ… Invariants respectÃ©s
+- âœ… Tests de fonctionnement passÃ©s
 
-**Résultat :**
-- Mode recovery désactivé
-- Opérateurs réactivés
+**RÃ©sultat :**
+- Mode recovery dÃ©sactivÃ©
+- OpÃ©rateurs rÃ©activÃ©s
 - Retour au mode normal
 - Journalisation normale
 
 ### 7.2 Monitoring post-recovery
 
-**Durée :** 24-48 heures après récupération
+**DurÃ©e :** 24-48 heures aprÃ¨s rÃ©cupÃ©ration
 
 **Actions :**
 ```bash
 # Monitoring intensif
 miyukini-admin monitor --intensive --duration 48h
 
-# Vérifications périodiques
+# VÃ©rifications pÃ©riodiques
 miyukini-admin verify-system-integrity --periodic --interval 1h
 ```
 
 ### 7.3 Documentation de l'incident
 
-**Obligatoire :** Documenter l'incident et la récupération
+**Obligatoire :** Documenter l'incident et la rÃ©cupÃ©ration
 
 **Contenu :**
 - Description de l'incident
-- Cause racine identifiée
-- Procédures de récupération appliquées
-- Modifications effectuées
-- Leçons apprises
-- Actions préventives recommandées
+- Cause racine identifiÃ©e
+- ProcÃ©dures de rÃ©cupÃ©ration appliquÃ©es
+- Modifications effectuÃ©es
+- LeÃ§ons apprises
+- Actions prÃ©ventives recommandÃ©es
 
 ---
 
-## 8. Sécurité du mode recovery
+## 8. SÃ©curitÃ© du mode recovery
 
-### 8.1 Authentification renforcée
+### 8.1 Authentification renforcÃ©e
 
 **Exigences :**
 - Authentification admin avec MFA
 - Token recovery unique et temporaire
 - Validation manuelle obligatoire
-- Traçabilité complète
+- TraÃ§abilitÃ© complÃ¨te
 
 ### 8.2 Limitations temporelles
 
-**Règle :** Le mode recovery est limité dans le temps (par défaut 1 heure, maximum 4 heures).
+**RÃ¨gle :** Le mode recovery est limitÃ© dans le temps (par dÃ©faut 1 heure, maximum 4 heures).
 
 **Extension :**
 ```bash
-# Demander une extension (nécessite nouvelle authentification)
+# Demander une extension (nÃ©cessite nouvelle authentification)
 miyukini-admin extend-recovery-mode --duration 3600 --admin-token <NEW_TOKEN>
 ```
 
-### 8.3 Audit et traçabilité
+### 8.3 Audit et traÃ§abilitÃ©
 
 **Journalisation :**
-- Toutes les opérations DB sont journalisées
-- Toutes les commandes sont tracées
-- Tous les accès sont enregistrés
-- Rapports d'audit générés automatiquement
+- Toutes les opÃ©rations DB sont journalisÃ©es
+- Toutes les commandes sont tracÃ©es
+- Tous les accÃ¨s sont enregistrÃ©s
+- Rapports d'audit gÃ©nÃ©rÃ©s automatiquement
 
 **Consultation :**
 ```bash
 # Consulter les logs de recovery
 miyukini-admin logs recovery --session-id <session_id>
 
-# Générer un rapport d'audit
+# GÃ©nÃ©rer un rapport d'audit
 miyukini-admin audit-report --type recovery --session-id <session_id>
 ```
 
 ---
 
-## 9. Références
+## 9. RÃ©fÃ©rences
 
 - [MiyukiniAdmin - Documentation Fondatrice](../foundation/MiyukiniAdmin%20-%20Documentation%20Fondatrice.md)
 - [MiyukiniAdmin - DB Operations Contract](../contracts/database/MiyukiniAdmin%20-%20DB%20Operations%20Contract.md)
-- [WorrySentinel - Security Levels Governance Contract](../../WorrySentinel/contracts/levels/WorrySentinel%20-%20Security%20Levels%20Governance%20Contract.md)
-- [Kernel - Invariants & Guarantees](../../kernel/contracts/Kernel%20-%20Invariants%20%26%20Guarantees.md)
+- [WorrySentinel - Security Levels Governance Contract](..//..//..//cores//WorrySentinel//contracts//levels//WorrySentinel%20-%20Security%20Levels%20Governance%20Contract.md)
+- [Kernel - Invariants & Guarantees](..//..//..//kernel//contracts//Kernel%20-%20Invariants%20%26%20Guarantees.md)
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** Normatif — Procédures de récupération en cas de compromission  
-**Action requise :** Implémenter ces procédures lors du développement de MiyukiniAdmin
+**Statut :** Normatif â€” ProcÃ©dures de rÃ©cupÃ©ration en cas de compromission  
+**Action requise :** ImplÃ©menter ces procÃ©dures lors du dÃ©veloppement de MiyukiniAdmin
+

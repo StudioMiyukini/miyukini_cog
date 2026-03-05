@@ -1,12 +1,12 @@
-# Kernel - Gel et Versionnement v0.1.0
+﻿# Kernel - Gel et Versionnement v0.1.0
 
 ## 1. Contexte
 
-Ce document constitue l'**acte de gel officiel** de la documentation conceptuelle du Kernel, conformement au [Protocole d'ecriture de documentation conceptuelle](../protocols/Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
+Ce document constitue l'**acte de gel officiel** de la documentation conceptuelle du Kernel, conformement au [Protocole d'ecriture de documentation conceptuelle](..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
 **Date de gel :** 28 janvier 2026  
 **Version :** 0.1.0  
-**Statut :** GELE — Documentation de reference
+**Statut :** GELE â€” Documentation de reference
 
 ---
 
@@ -16,21 +16,21 @@ Ce gel s'applique a l'ensemble de la documentation conceptuelle du Kernel, compr
 
 ```
 docs/kernel/
-├── _index.md
-├── Kernel - Audit Phase 3 Verification.md
-├── Kernel - Gel et Versionnement v0.1.md  ← Ce document
-├── Miyukini Core System - Definition Kernel.md
-├── Miyukini Core System - Structure du Kernel.md
-├── Miyukini Core System - Revue Traits API v0.1.md
-├── architecture/
-│   └── Kernel - Architecture & Components.md
-├── contracts/
-│   └── Kernel - Invariants & Guarantees.md
-├── implementation/
-│   └── Kernel - Reference Implementation Guidelines.md
-└── reference/
-    ├── Kernel - FAQ & Common Questions.md
-    └── Kernel - Vocabulary & Glossary.md
+â”œâ”€â”€ _index.md
+â”œâ”€â”€ Kernel - Audit Phase 3 Verification.md
+â”œâ”€â”€ Kernel - Gel et Versionnement v0.1.md  â† Ce document
+â”œâ”€â”€ Miyukini Core System - Definition Kernel.md
+â”œâ”€â”€ Miyukini Core System - Structure du Kernel.md
+â”œâ”€â”€ Miyukini Core System - Revue Traits API v0.1.md
+â”œâ”€â”€ architecture/
+â”‚   â””â”€â”€ Kernel - Architecture & Components.md
+â”œâ”€â”€ contracts/
+â”‚   â””â”€â”€ Kernel - Invariants & Guarantees.md
+â”œâ”€â”€ implementation/
+â”‚   â””â”€â”€ Kernel - Reference Implementation Guidelines.md
+â””â”€â”€ reference/
+    â”œâ”€â”€ Kernel - FAQ & Common Questions.md
+    â””â”€â”€ Kernel - Vocabulary & Glossary.md
 ```
 
 ---
@@ -41,9 +41,9 @@ docs/kernel/
 
 | Document | Version | Statut | Checksum |
 |----------|---------|--------|----------|
-| `Miyukini Core System - Definition Kernel.md` | 0.1 | FONDATION | — |
-| `Miyukini Core System - Structure du Kernel.md` | 0.1 | FONDATION | — |
-| `Miyukini Core System - Revue Traits API v0.1.md` | 0.1 | FONDATION | — |
+| `Miyukini Core System - Definition Kernel.md` | 0.1 | FONDATION | â€” |
+| `Miyukini Core System - Structure du Kernel.md` | 0.1 | FONDATION | â€” |
+| `Miyukini Core System - Revue Traits API v0.1.md` | 0.1 | FONDATION | â€” |
 
 ### 3.2 Documents CONTRACTS (normatifs)
 
@@ -87,26 +87,26 @@ Les 10 invariants suivants sont **definitivement geles** et ne peuvent etre modi
 
 | Invariant | Description |
 |-----------|-------------|
-| **INV-K-1** | Aucune logique metier — Le Kernel ne contient jamais de regles business |
-| **INV-K-2** | Aucune dependance externe critique — Fonctionnement sans appel reseau obligatoire |
-| **INV-K-3** | Primitives locales sures uniquement — Pas d'effets de bord caches |
-| **INV-K-4** | Pas de protocole applicatif — Aucun HTTP, WebSocket, gRPC impose |
+| **INV-K-1** | Aucune logique metier â€” Le Kernel ne contient jamais de regles business |
+| **INV-K-2** | Aucune dependance externe critique â€” Fonctionnement sans appel reseau obligatoire |
+| **INV-K-3** | Primitives locales sures uniquement â€” Pas d'effets de bord caches |
+| **INV-K-4** | Pas de protocole applicatif â€” Aucun HTTP, WebSocket, gRPC impose |
 
 ### 4.2 Invariants d'Observabilite
 
 | Invariant | Description |
 |-----------|-------------|
-| **INV-K-5** | Non-mutation — Le Kernel observe et atteste, mais ne corrige pas (derive de INV-MOC-1) |
-| **INV-K-6** | Determinisme — Meme resultat pour meme etat d'entree (derive de INV-MOC-2) |
-| **INV-K-7** | Explicabilite — Information comprehensible sans connaissance du code (derive de INV-MOC-3) |
-| **INV-K-8** | Souverainete locale — Controles fonctionnels sans dependance externe (derive de INV-MOC-4) |
+| **INV-K-5** | Non-mutation â€” Le Kernel observe et atteste, mais ne corrige pas (derive de INV-MOC-1) |
+| **INV-K-6** | Determinisme â€” Meme resultat pour meme etat d'entree (derive de INV-MOC-2) |
+| **INV-K-7** | Explicabilite â€” Information comprehensible sans connaissance du code (derive de INV-MOC-3) |
+| **INV-K-8** | Souverainete locale â€” Controles fonctionnels sans dependance externe (derive de INV-MOC-4) |
 
 ### 4.3 Invariants d'Autonomie
 
 | Invariant | Description |
 |-----------|-------------|
-| **INV-K-9** | Cout proportionnel au hardware — Fonctionne sur Raspberry Pi 4 avec 4 Go RAM |
-| **INV-K-10** | Gouvernance preservee — Ne contourne jamais la chaine de gouvernance (derive de INV-MOC-5) |
+| **INV-K-9** | Cout proportionnel au hardware â€” Fonctionne sur Raspberry Pi 4 avec 4 Go RAM |
+| **INV-K-10** | Gouvernance preservee â€” Ne contourne jamais la chaine de gouvernance (derive de INV-MOC-5) |
 
 ---
 
@@ -118,8 +118,8 @@ Les 5 garanties suivantes sont **definitivement gelees** :
 |----------|-------------|
 | **Reutilisabilite** | Modules utilisables par tout produit (SaaS, web, mobile, jeu) sans modification |
 | **Stabilite des contrats** | Traits et types exposes stables et versiones |
-| **Minimalisme** | Le Kernel reste minimal et focalise — aucun module sans justification transverse |
-| **Transparence** | Comportement observable et explicable — aucune magie |
+| **Minimalisme** | Le Kernel reste minimal et focalise â€” aucun module sans justification transverse |
+| **Transparence** | Comportement observable et explicable â€” aucune magie |
 | **Autonomie operationnelle** | Fonctionnement sans dependance externe obligatoire |
 
 ---
@@ -178,7 +178,7 @@ Kernel Documentation v0.1.0
 
 | Version | Date | Description |
 |---------|------|-------------|
-| **0.1.0** | 2026-01-28 | Version initiale gelee — Documentation complete v0.1 |
+| **0.1.0** | 2026-01-28 | Version initiale gelee â€” Documentation complete v0.1 |
 
 ### 7.4 Raison de la version 0.1
 
@@ -186,7 +186,7 @@ La version **0.1.0** (et non 1.0.0) indique que :
 
 1. C'est la **premiere version stable** du Kernel
 2. L'API est **gelee mais peut evoluer** (ajout de modules Phase 2)
-3. Les **invariants sont definitifs** — ils ne changeront pas en mineur
+3. Les **invariants sont definitifs** â€” ils ne changeront pas en mineur
 4. Les **signatures** peuvent etre etendues mais pas modifiees
 
 La version 1.0.0 sera atteinte quand :
@@ -215,10 +215,10 @@ La version 1.0.0 sera atteinte quand :
 
 Toute modification d'un document gele **impose un nouveau cycle complet** selon le protocole :
 
-1. **Phase 1** — Planification de la modification
-2. **Phase 2** — Distribution des taches aux agents
-3. **Phase 3** — Verification, corrections et tests
-4. **Phase 4** — Nouveau gel et incrementation de version
+1. **Phase 1** â€” Planification de la modification
+2. **Phase 2** â€” Distribution des taches aux agents
+3. **Phase 3** â€” Verification, corrections et tests
+4. **Phase 4** â€” Nouveau gel et incrementation de version
 
 ### 8.3 Types de modifications autorisees
 
@@ -239,19 +239,19 @@ Toute modification d'un document gele **impose un nouveau cycle complet** selon 
 
 Le degel est autorise uniquement si :
 
-1. **Erreur factuelle** — Une erreur factuelle bloquante est identifiee
-2. **Incoherence critique** — Une incoherence avec un autre core est detectee
-3. **Evolution architecturale** — L'architecture Miyukini evolue de maniere incompatible
-4. **Demande explicite** — Une demande explicite et justifiee est formulee
-5. **Phase 2** — Le module connection/pool est pret pour integration
+1. **Erreur factuelle** â€” Une erreur factuelle bloquante est identifiee
+2. **Incoherence critique** â€” Une incoherence avec un autre core est detectee
+3. **Evolution architecturale** â€” L'architecture Miyukini evolue de maniere incompatible
+4. **Demande explicite** â€” Une demande explicite et justifiee est formulee
+5. **Phase 2** â€” Le module connection/pool est pret pour integration
 
 ### 9.2 Procedure de degel
 
-1. **Identification** — Documenter la raison du degel
-2. **Validation** — Valider la necessite du degel
-3. **Scope** — Definir le perimetre minimal de modification
-4. **Cycle** — Executer un nouveau cycle de documentation
-5. **Regel** — Geler a nouveau avec nouvelle version
+1. **Identification** â€” Documenter la raison du degel
+2. **Validation** â€” Valider la necessite du degel
+3. **Scope** â€” Definir le perimetre minimal de modification
+4. **Cycle** â€” Executer un nouveau cycle de documentation
+5. **Regel** â€” Geler a nouveau avec nouvelle version
 
 ### 9.3 Responsable du degel
 
@@ -267,33 +267,33 @@ Cette documentation est conforme aux documents de reference suivants :
 
 | Document | Version | Conformite |
 |----------|---------|------------|
-| Miyukini Conceptual References - Glossaire | — | ✅ |
-| Miyukini Conceptual References - Pyramide Architecture Complete | 1.0 | ✅ |
-| Miyukini Conceptual References - Kernel Maintenance Observability Contract | 1.0 | ✅ |
-| Miyukini Conceptual References - Lois Autonomie Systeme | 1.1 | ✅ |
+| Miyukini Conceptual References - Glossaire | â€” | âœ… |
+| Miyukini Conceptual References - Pyramide Architecture Complete | 1.0 | âœ… |
+| Miyukini Conceptual References - Kernel Maintenance Observability Contract | 1.0 | âœ… |
+| Miyukini Conceptual References - Lois Autonomie Systeme | 1.1 | âœ… |
 
 ### 10.2 Conformite aux Lois d'Autonomie
 
 | Loi | Description | Conformite |
 |-----|-------------|------------|
-| **LOI-1** | Aucune dependance externe critique | ✅ |
-| **LOI-2** | Isolement comme etat normal | ✅ |
-| **LOI-3** | Etat local souverain | ✅ |
-| **LOI-4** | Pas de temps global requis | ✅ |
-| **LOI-5** | Cout proportionnel au hardware | ✅ |
-| **LOI-6** | Federation explicite et controlee | ✅ |
+| **LOI-1** | Aucune dependance externe critique | âœ… |
+| **LOI-2** | Isolement comme etat normal | âœ… |
+| **LOI-3** | Etat local souverain | âœ… |
+| **LOI-4** | Pas de temps global requis | âœ… |
+| **LOI-5** | Cout proportionnel au hardware | âœ… |
+| **LOI-6** | Federation explicite et controlee | âœ… |
 
 ### 10.3 Relations avec les Cores
 
 | Core | Relation | Conformite |
 |------|----------|------------|
-| StrongFather | Consommateur | ✅ |
-| KindMother | Consommateur | ✅ |
-| BondingBrother | Consommateur | ✅ |
-| CaringNanny | Consommateur | ✅ |
-| BorderGuard | Consommateur | ✅ |
-| MasterButler | Consommateur | ✅ |
-| EverBuddy | Consommateur | ✅ |
+| StrongFather | Consommateur | âœ… |
+| KindMother | Consommateur | âœ… |
+| BondingBrother | Consommateur | âœ… |
+| CaringNanny | Consommateur | âœ… |
+| BorderGuard | Consommateur | âœ… |
+| MasterButler | Consommateur | âœ… |
+| EverBuddy | Consommateur | âœ… |
 
 ---
 
@@ -303,38 +303,38 @@ Cette documentation est conforme aux documents de reference suivants :
 
 | Critere | Statut |
 |---------|--------|
-| Tous les documents sont presents (10/10) | ✅ |
-| Tous les documents sont versiones | ✅ |
-| Tous les invariants sont documentes (10/10) | ✅ |
-| Toutes les garanties sont documentees (5/5) | ✅ |
-| Audit Phase 3 complete | ✅ |
-| Aucun probleme bloquant | ✅ |
-| References croisees valides | ✅ |
-| Conformite aux Lois d'Autonomie (6/6) | ✅ |
-| API v0.1 gelee et documentee | ✅ |
-| Modules documentes (5/5) | ✅ |
+| Tous les documents sont presents (10/10) | âœ… |
+| Tous les documents sont versiones | âœ… |
+| Tous les invariants sont documentes (10/10) | âœ… |
+| Toutes les garanties sont documentees (5/5) | âœ… |
+| Audit Phase 3 complete | âœ… |
+| Aucun probleme bloquant | âœ… |
+| References croisees valides | âœ… |
+| Conformite aux Lois d'Autonomie (6/6) | âœ… |
+| API v0.1 gelee et documentee | âœ… |
+| Modules documentes (5/5) | âœ… |
 
 ### 11.2 Declaration de gel
 
 ```
-╔══════════════════════════════════════════════════════════════════════════╗
-║                                                                          ║
-║   DECLARATION OFFICIELLE DE GEL                                          ║
-║                                                                          ║
-║   La documentation conceptuelle du Kernel est officiellement             ║
-║   GELEE en version 0.1.0 a compter du 28 janvier 2026.                   ║
-║                                                                          ║
-║   Cette documentation constitue la reference contractuelle pour          ║
-║   toute implementation, integration, ou utilisation du Kernel            ║
-║   dans l'ecosysteme Miyukini.                                            ║
-║                                                                          ║
-║   Le Kernel fournit les briques transversales (config, id, time,         ║
-║   log, lifecycle) a tous les produits, respectant 10 invariants          ║
-║   non negociables et offrant 5 garanties formelles.                      ║
-║                                                                          ║
-║   Toute modification impose un nouveau cycle complet de documentation.   ║
-║                                                                          ║
-╚══════════════════════════════════════════════════════════════════════════╝
+â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—
+â•‘                                                                          â•‘
+â•‘   DECLARATION OFFICIELLE DE GEL                                          â•‘
+â•‘                                                                          â•‘
+â•‘   La documentation conceptuelle du Kernel est officiellement             â•‘
+â•‘   GELEE en version 0.1.0 a compter du 28 janvier 2026.                   â•‘
+â•‘                                                                          â•‘
+â•‘   Cette documentation constitue la reference contractuelle pour          â•‘
+â•‘   toute implementation, integration, ou utilisation du Kernel            â•‘
+â•‘   dans l'ecosysteme Miyukini.                                            â•‘
+â•‘                                                                          â•‘
+â•‘   Le Kernel fournit les briques transversales (config, id, time,         â•‘
+â•‘   log, lifecycle) a tous les produits, respectant 10 invariants          â•‘
+â•‘   non negociables et offrant 5 garanties formelles.                      â•‘
+â•‘                                                                          â•‘
+â•‘   Toute modification impose un nouveau cycle complet de documentation.   â•‘
+â•‘                                                                          â•‘
+â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 ```
 
 ---
@@ -359,3 +359,4 @@ Cette documentation est conforme aux documents de reference suivants :
 **Document de gel officiel**  
 **Kernel Documentation v0.1.0**  
 **Miyukini Core System**
+

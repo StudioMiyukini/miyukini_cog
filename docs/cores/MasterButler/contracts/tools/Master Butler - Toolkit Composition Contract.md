@@ -1,101 +1,101 @@
-# Master Butler — Toolkit Composition Contract
+﻿# Master Butler â€” Toolkit Composition Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **Master Butler Toolkit Composition Contract** : un contrat normatif, non négociable, et de statut FONDATION qui établit les règles de composition des Kits d'Outils (Toolkits) dans le système Miyukini Core System v2.4.
+Ce document dÃ©finit le **Master Butler Toolkit Composition Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit les rÃ¨gles de composition des Kits d'Outils (Toolkits) dans le systÃ¨me Miyukini Core System v2.4.
 
-Ce contrat définit :
+Ce contrat dÃ©finit :
 - La structure formelle d'un Toolkit
-- Les règles de composition (quels Tools peuvent être regroupés)
-- Les métadonnées obligatoires et optionnelles
+- Les rÃ¨gles de composition (quels Tools peuvent Ãªtre regroupÃ©s)
+- Les mÃ©tadonnÃ©es obligatoires et optionnelles
 - Les invariants de composition
-- Les opérations autorisées sur les Toolkits
+- Les opÃ©rations autorisÃ©es sur les Toolkits
 - Les contraintes de gouvernance
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **toute instance de Master Butler** et définit de manière absolue :
-- La définition formelle d'un Toolkit
-- Le modèle de composition (Toolkit → Tools)
-- Les règles de déclaration et de validation
-- Les métadonnées des Toolkits
-- Les contraintes de sécurité et d'état
+Ce contrat s'applique Ã  **toute instance de Master Butler** et dÃ©finit de maniÃ¨re absolue :
+- La dÃ©finition formelle d'un Toolkit
+- Le modÃ¨le de composition (Toolkit â†’ Tools)
+- Les rÃ¨gles de dÃ©claration et de validation
+- Les mÃ©tadonnÃ©es des Toolkits
+- Les contraintes de sÃ©curitÃ© et d'Ã©tat
 - Les invariants de composition
-- Les opérations autorisées et interdites
+- Les opÃ©rations autorisÃ©es et interdites
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues que Master Butler applique sans exception. Ces règles ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues que Master Butler applique sans exception. Ces rÃ¨gles ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complète et s'articule avec les documents contractuels existants :
+Ce contrat complÃ¨te et s'articule avec les documents contractuels existants :
 
-- **[Master Butler - Documentation Fondatrice](../../foundation/Master%20Butler%20-%20Documentation%20Fondatrice.md)** : Définit la nature, le rôle, et les responsabilités de Master Butler
-- **Master Butler - Tool Governance Contract** : Définit la gouvernance des Tools individuels (contrat complémentaire)
-- **[Master Butler - Capability Registry Contract](../registry/Master%20Butler%20-%20Capability%20Registry%20Contract.md)** : Définit le registre des capacités
-- **[Miyukini Conceptual References - Tools et Toolkits](../../../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)** : Définit les concepts canoniques de Tool et Toolkit
-- **[Miyukini Framework - Lois Autonomie Systeme](../../../../reference/Miyukini%20Framework%20-%20Lois%20Autonomie%20Systeme.md)** : Ce contrat respecte **LOI-1** (aucune dépendance externe critique) et **LOI-5** (coût proportionnel au hardware) en garantissant que la composition est locale, légère, et autonome.
+- **[Master Butler - Documentation Fondatrice](../../foundation/Master%20Butler%20-%20Documentation%20Fondatrice.md)** : DÃ©finit la nature, le rÃ´le, et les responsabilitÃ©s de Master Butler
+- **Master Butler - Tool Governance Contract** : DÃ©finit la gouvernance des Tools individuels (contrat complÃ©mentaire)
+- **[Master Butler - Capability Registry Contract](../registry/Master%20Butler%20-%20Capability%20Registry%20Contract.md)** : DÃ©finit le registre des capacitÃ©s
+- **[Miyukini Conceptual References - Tools et Toolkits](..//..//..//..//miyukini-webway-system//reference//_index.md)** : DÃ©finit les concepts canoniques de Tool et Toolkit
+- **[Miyukini Framework - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Ce contrat respecte **LOI-1** (aucune dÃ©pendance externe critique) et **LOI-5** (coÃ»t proportionnel au hardware) en garantissant que la composition est locale, lÃ©gÃ¨re, et autonome.
 
-**Complémentarité :**
-- Master Butler Documentation Fondatrice = définition conceptuelle et philosophique
+**ComplÃ©mentaritÃ© :**
+- Master Butler Documentation Fondatrice = dÃ©finition conceptuelle et philosophique
 - Master Butler Tool Governance Contract = gouvernance des Tools individuels
-- Master Butler Toolkit Composition Contract = modèle de composition des Toolkits
+- Master Butler Toolkit Composition Contract = modÃ¨le de composition des Toolkits
 
-Ces contrats forment ensemble le système complet de catalogage et gouvernance des outils du système Miyukini Core System v2.4.
+Ces contrats forment ensemble le systÃ¨me complet de catalogage et gouvernance des outils du systÃ¨me Miyukini Core System v2.4.
 
 ---
 
 ## 2. Doctrine Fondamentale
 
-### Énoncé canonique
+### Ã‰noncÃ© canonique
 
-> **Les Kits d'Outils (Toolkits) sont des compositions officielles d'outils, optimisées pour l'efficience mais jamais pour l'autorité.**
+> **Les Kits d'Outils (Toolkits) sont des compositions officielles d'outils, optimisÃ©es pour l'efficience mais jamais pour l'autoritÃ©.**
 
-### Règle fondamentale
+### RÃ¨gle fondamentale
 
-> **👉 Un Kit d'Outils orchestre, mais n'ajoute pas de capacité.**
+> **ðŸ‘‰ Un Kit d'Outils orchestre, mais n'ajoute pas de capacitÃ©.**
 
 ### Implications directes
 
-| Règle | Description |
+| RÃ¨gle | Description |
 |-------|-------------|
-| **Composition uniquement** | Un Toolkit agrège des Tools existants, il n'en crée pas |
-| **Sans logique métier** | Aucune logique business dans un Toolkit |
-| **Sans décision** | Un Toolkit ne décide jamais |
-| **Sans capacité nouvelle** | Un Toolkit ne possède pas de capacité qui n'existe pas dans ses Tools |
+| **Composition uniquement** | Un Toolkit agrÃ¨ge des Tools existants, il n'en crÃ©e pas |
+| **Sans logique mÃ©tier** | Aucune logique business dans un Toolkit |
+| **Sans dÃ©cision** | Un Toolkit ne dÃ©cide jamais |
+| **Sans capacitÃ© nouvelle** | Un Toolkit ne possÃ¨de pas de capacitÃ© qui n'existe pas dans ses Tools |
 | **Optimisation pure** | Un Toolkit optimise les appels, normalise les flux |
 
 ### Ce qu'un Toolkit N'EST PAS
 
-| ❌ N'est pas | Pourquoi |
+| âŒ N'est pas | Pourquoi |
 |--------------|----------|
-| Un nouvel Outil | Il ne crée pas de capacité nouvelle |
+| Un nouvel Outil | Il ne crÃ©e pas de capacitÃ© nouvelle |
 | Un service | Il n'a pas de logique propre |
-| Un décideur | Il n'a pas d'autorité |
-| Une librairie libre | Il est gouverné |
-| Un raccourci non gouverné | Il passe par la même gouvernance |
+| Un dÃ©cideur | Il n'a pas d'autoritÃ© |
+| Une librairie libre | Il est gouvernÃ© |
+| Un raccourci non gouvernÃ© | Il passe par la mÃªme gouvernance |
 
 ---
 
-## 3. Définitions Formelles
+## 3. DÃ©finitions Formelles
 
 ### 3.1. Kit d'Outils (Toolkit)
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
-Un **Toolkit** est une composition officielle de Tools, validée et déclarée par l'environnement, optimisée pour efficience, cohérence et performance. Il regroupe des Tools existants sans ajouter de capacité nouvelle.
+Un **Toolkit** est une composition officielle de Tools, validÃ©e et dÃ©clarÃ©e par l'environnement, optimisÃ©e pour efficience, cohÃ©rence et performance. Il regroupe des Tools existants sans ajouter de capacitÃ© nouvelle.
 
-**Caractéristiques formelles :**
+**CaractÃ©ristiques formelles :**
 
-- **Identité unique :** Chaque Toolkit possède un identifiant unique et immuable (ToolkitId)
-- **Composition :** Le Toolkit est composé d'un ou plusieurs Tools existants
-- **Officiel :** Le Toolkit est déclaré et validé par l'environnement
-- **Gouverné :** Le Toolkit est soumis à la gouvernance des Cores
-- **Sans capacité nouvelle :** Le Toolkit n'expose que les capacités de ses Tools constituants
-- **Optimisé :** Le Toolkit optimise les appels pour efficience et performance
+- **IdentitÃ© unique :** Chaque Toolkit possÃ¨de un identifiant unique et immuable (ToolkitId)
+- **Composition :** Le Toolkit est composÃ© d'un ou plusieurs Tools existants
+- **Officiel :** Le Toolkit est dÃ©clarÃ© et validÃ© par l'environnement
+- **GouvernÃ© :** Le Toolkit est soumis Ã  la gouvernance des Cores
+- **Sans capacitÃ© nouvelle :** Le Toolkit n'expose que les capacitÃ©s de ses Tools constituants
+- **OptimisÃ© :** Le Toolkit optimise les appels pour efficience et performance
 
 **Structure formelle d'un Toolkit :**
 
@@ -106,25 +106,25 @@ Toolkit {
   description: String,         // Description du Toolkit
   version: Version,            // Version du Toolkit
   tools: Set<ToolId>,          // Ensemble des Tools composant le Toolkit
-  security_level: SecurityLevel, // Niveau de sécurité requis
-  allowed_states: Set<SystemState>, // États système autorisés
-  disallowed_states: Set<SystemState>, // États système interdits
-  metadata: ToolkitMetadata,   // Métadonnées additionnelles
-  created_at: Timestamp,       // Date de création
+  security_level: SecurityLevel, // Niveau de sÃ©curitÃ© requis
+  allowed_states: Set<SystemState>, // Ã‰tats systÃ¨me autorisÃ©s
+  disallowed_states: Set<SystemState>, // Ã‰tats systÃ¨me interdits
+  metadata: ToolkitMetadata,   // MÃ©tadonnÃ©es additionnelles
+  created_at: Timestamp,       // Date de crÃ©ation
   status: ToolkitStatus        // Statut (Active, Deprecated, Removed)
 }
 ```
 
 **Invariants :**
-- INV-TK-1 : Tout Toolkit possède un ToolkitId unique et immuable
+- INV-TK-1 : Tout Toolkit possÃ¨de un ToolkitId unique et immuable
 - INV-TK-2 : Tout Toolkit contient au moins deux Tools
 - INV-TK-3 : Tous les Tools d'un Toolkit existent dans le registre
-- INV-TK-4 : Un Toolkit ne déclare aucune capacité propre
-- INV-TK-5 : Un Toolkit n'ajoute aucune logique métier
+- INV-TK-4 : Un Toolkit ne dÃ©clare aucune capacitÃ© propre
+- INV-TK-5 : Un Toolkit n'ajoute aucune logique mÃ©tier
 
 ### 3.2. Identifiant de Toolkit (ToolkitId)
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
 Un **ToolkitId** est l'identifiant unique et immuable d'un Toolkit dans le registre. Il suit un format canonique qui encode le domaine et la fonction.
 
@@ -136,28 +136,28 @@ Un **ToolkitId** est l'identifiant unique et immuable d'un Toolkit dans le regis
 
 **Exemples :**
 - `ui.standard` : Kit d'Outils UI Standard
-- `data.crud` : Kit d'Outils CRUD de données
-- `media.management` : Kit d'Outils de gestion des médias
+- `data.crud` : Kit d'Outils CRUD de donnÃ©es
+- `media.management` : Kit d'Outils de gestion des mÃ©dias
 - `content.publishing` : Kit d'Outils de publication de contenu
 - `search.full` : Kit d'Outils de recherche complet
 
-**Règles de nommage :**
+**RÃ¨gles de nommage :**
 - R-TKID-1 : Le format est strictement `<domain>.<function>`
 - R-TKID-2 : Tous les segments sont en minuscules, sans accents
-- R-TKID-3 : Les segments sont séparés par des points (.)
+- R-TKID-3 : Les segments sont sÃ©parÃ©s par des points (.)
 - R-TKID-4 : Chaque segment contient uniquement des lettres, chiffres, et underscores
-- R-TKID-5 : L'identifiant est unique dans l'ensemble du système
+- R-TKID-5 : L'identifiant est unique dans l'ensemble du systÃ¨me
 
 **Invariants :**
 - INV-TKID-1 : Tout ToolkitId respecte le format canonique
 - INV-TKID-2 : Tout ToolkitId est unique dans le registre
-- INV-TKID-3 : Un ToolkitId ne peut jamais être modifié après création
+- INV-TKID-3 : Un ToolkitId ne peut jamais Ãªtre modifiÃ© aprÃ¨s crÃ©ation
 
 ### 3.3. Identifiant de Tool (ToolId)
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
-Un **ToolId** identifie un Tool individuel qui peut être inclus dans un Toolkit.
+Un **ToolId** identifie un Tool individuel qui peut Ãªtre inclus dans un Toolkit.
 
 **Format canonique :**
 
@@ -169,242 +169,242 @@ Un **ToolId** identifie un Tool individuel qui peut être inclus dans un Toolkit
 - `layout.render` : Rend un layout
 - `input.capture` : Capture une saisie utilisateur
 - `form.validate` : Valide un formulaire
-- `theme.resolve` : Résout un thème
-- `event.dispatch` : Dispatch un événement
-- `query.execute` : Exécute une requête
-- `cache.get` : Récupère depuis le cache
+- `theme.resolve` : RÃ©sout un thÃ¨me
+- `event.dispatch` : Dispatch un Ã©vÃ©nement
+- `query.execute` : ExÃ©cute une requÃªte
+- `cache.get` : RÃ©cupÃ¨re depuis le cache
 - `file.read` : Lit un fichier
-- `file.write` : Écrit un fichier
+- `file.write` : Ã‰crit un fichier
 
 **Invariants :**
-- INV-TOOL-1 : Tout ToolId référencé dans un Toolkit existe dans le registre des capacités
-- INV-TOOL-2 : Un Tool peut appartenir à plusieurs Toolkits
+- INV-TOOL-1 : Tout ToolId rÃ©fÃ©rencÃ© dans un Toolkit existe dans le registre des capacitÃ©s
+- INV-TOOL-2 : Un Tool peut appartenir Ã  plusieurs Toolkits
 
-### 3.4. Niveau de Sécurité (SecurityLevel)
+### 3.4. Niveau de SÃ©curitÃ© (SecurityLevel)
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
-Le **SecurityLevel** d'un Toolkit définit le niveau de sécurité minimum requis pour utiliser ce Toolkit.
+Le **SecurityLevel** d'un Toolkit dÃ©finit le niveau de sÃ©curitÃ© minimum requis pour utiliser ce Toolkit.
 
-**Niveaux définis :**
+**Niveaux dÃ©finis :**
 
 | Niveau | Description | Contexte |
 |--------|-------------|----------|
-| 0 | Aucune restriction | Opérations publiques |
-| 1 | Authentification requise | Opérations utilisateur de base |
-| 2 | Authentification + rôle | Opérations nécessitant des droits |
-| 3 | Authentification + rôle élevé | Opérations sensibles |
-| 4 | Maximum | Opérations critiques |
+| 0 | Aucune restriction | OpÃ©rations publiques |
+| 1 | Authentification requise | OpÃ©rations utilisateur de base |
+| 2 | Authentification + rÃ´le | OpÃ©rations nÃ©cessitant des droits |
+| 3 | Authentification + rÃ´le Ã©levÃ© | OpÃ©rations sensibles |
+| 4 | Maximum | OpÃ©rations critiques |
 
-**Règle de calcul :**
-- R-SEC-1 : Le SecurityLevel d'un Toolkit est au minimum égal au plus haut SecurityLevel de ses Tools
-- R-SEC-2 : Le SecurityLevel d'un Toolkit peut être supérieur à celui de ses Tools (restriction supplémentaire)
-- R-SEC-3 : Le SecurityLevel d'un Toolkit ne peut jamais être inférieur à celui d'un de ses Tools
+**RÃ¨gle de calcul :**
+- R-SEC-1 : Le SecurityLevel d'un Toolkit est au minimum Ã©gal au plus haut SecurityLevel de ses Tools
+- R-SEC-2 : Le SecurityLevel d'un Toolkit peut Ãªtre supÃ©rieur Ã  celui de ses Tools (restriction supplÃ©mentaire)
+- R-SEC-3 : Le SecurityLevel d'un Toolkit ne peut jamais Ãªtre infÃ©rieur Ã  celui d'un de ses Tools
 
 **Invariants :**
-- INV-SEC-1 : Le SecurityLevel d'un Toolkit ≥ max(SecurityLevel de chaque Tool)
+- INV-SEC-1 : Le SecurityLevel d'un Toolkit â‰¥ max(SecurityLevel de chaque Tool)
 - INV-SEC-2 : WorrySentinel valide le SecurityLevel avant utilisation
 
-### 3.5. États Système (SystemState)
+### 3.5. Ã‰tats SystÃ¨me (SystemState)
 
-**Définition formelle :**
+**DÃ©finition formelle :**
 
-Les **SystemStates** définissent les états dans lesquels un Toolkit peut ou ne peut pas être utilisé.
+Les **SystemStates** dÃ©finissent les Ã©tats dans lesquels un Toolkit peut ou ne peut pas Ãªtre utilisÃ©.
 
-**États système standard :**
+**Ã‰tats systÃ¨me standard :**
 
-| État | Description | Toolkit généralement |
+| Ã‰tat | Description | Toolkit gÃ©nÃ©ralement |
 |------|-------------|---------------------|
-| HEALTHY | Système en fonctionnement normal | Autorisé |
-| DEGRADED | Système en mode dégradé | Autorisé (selon config) |
-| MAINTENANCE | Système en maintenance | Généralement interdit |
-| SECURITY_LOCKDOWN | Verrouillage sécurité | Interdit |
-| OFFLINE | Système hors ligne | Selon conception |
+| HEALTHY | SystÃ¨me en fonctionnement normal | AutorisÃ© |
+| DEGRADED | SystÃ¨me en mode dÃ©gradÃ© | AutorisÃ© (selon config) |
+| MAINTENANCE | SystÃ¨me en maintenance | GÃ©nÃ©ralement interdit |
+| SECURITY_LOCKDOWN | Verrouillage sÃ©curitÃ© | Interdit |
+| OFFLINE | SystÃ¨me hors ligne | Selon conception |
 
-**Règles :**
-- R-STATE-1 : Un Toolkit définit explicitement ses états autorisés
-- R-STATE-2 : Un Toolkit définit explicitement ses états interdits
-- R-STATE-3 : Caring Nanny vérifie l'état système avant autorisation
+**RÃ¨gles :**
+- R-STATE-1 : Un Toolkit dÃ©finit explicitement ses Ã©tats autorisÃ©s
+- R-STATE-2 : Un Toolkit dÃ©finit explicitement ses Ã©tats interdits
+- R-STATE-3 : Caring Nanny vÃ©rifie l'Ã©tat systÃ¨me avant autorisation
 
 **Invariants :**
-- INV-STATE-1 : allowed_states ∩ disallowed_states = ∅ (pas d'intersection)
-- INV-STATE-2 : Un Toolkit sans allowed_states explicites est autorisé dans tous les états non interdits
+- INV-STATE-1 : allowed_states âˆ© disallowed_states = âˆ… (pas d'intersection)
+- INV-STATE-2 : Un Toolkit sans allowed_states explicites est autorisÃ© dans tous les Ã©tats non interdits
 
 ---
 
-## 4. Modèle de Composition
+## 4. ModÃ¨le de Composition
 
 ### 4.1. Principe de Composition
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Un Toolkit est une **agrégation formelle** de Tools existants. La composition ne crée aucune fonctionnalité nouvelle, elle optimise l'accès à des fonctionnalités existantes.
+Un Toolkit est une **agrÃ©gation formelle** de Tools existants. La composition ne crÃ©e aucune fonctionnalitÃ© nouvelle, elle optimise l'accÃ¨s Ã  des fonctionnalitÃ©s existantes.
 
-**Schéma de composition :**
+**SchÃ©ma de composition :**
 
 ```
 Toolkit (composition)
- ├─ Tool A (capacité atomique)
- ├─ Tool B (capacité atomique)
- ├─ Tool C (capacité atomique)
- └─ Tool D (capacité atomique)
+ â”œâ”€ Tool A (capacitÃ© atomique)
+ â”œâ”€ Tool B (capacitÃ© atomique)
+ â”œâ”€ Tool C (capacitÃ© atomique)
+ â””â”€ Tool D (capacitÃ© atomique)
 
-Capacités exposées par le Toolkit = ∪ (Capacités de A, B, C, D)
-Logique ajoutée par le Toolkit = ∅ (ensemble vide)
+CapacitÃ©s exposÃ©es par le Toolkit = âˆª (CapacitÃ©s de A, B, C, D)
+Logique ajoutÃ©e par le Toolkit = âˆ… (ensemble vide)
 ```
 
-**Règles de composition :**
+**RÃ¨gles de composition :**
 - R-COMP-1 : Un Toolkit contient au minimum 2 Tools
 - R-COMP-2 : Un Toolkit ne peut contenir que des Tools existants et actifs
 - R-COMP-3 : Un Toolkit n'ajoute aucune logique entre les Tools
-- R-COMP-4 : L'ordre des Tools dans un Toolkit n'a pas de signification sémantique
-- R-COMP-5 : Un Tool peut appartenir à plusieurs Toolkits
+- R-COMP-4 : L'ordre des Tools dans un Toolkit n'a pas de signification sÃ©mantique
+- R-COMP-5 : Un Tool peut appartenir Ã  plusieurs Toolkits
 
 **Invariants :**
-- INV-COMP-1 : |tools| ≥ 2 (au moins deux Tools)
-- INV-COMP-2 : ∀ tool ∈ tools : exists(tool) ∧ status(tool) ≠ Removed
-- INV-COMP-3 : capabilities(Toolkit) = ∪ capabilities(tool) pour tool ∈ tools
+- INV-COMP-1 : |tools| â‰¥ 2 (au moins deux Tools)
+- INV-COMP-2 : âˆ€ tool âˆˆ tools : exists(tool) âˆ§ status(tool) â‰  Removed
+- INV-COMP-3 : capabilities(Toolkit) = âˆª capabilities(tool) pour tool âˆˆ tools
 
-### 4.2. Cohérence de Composition
+### 4.2. CohÃ©rence de Composition
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Les Tools composant un Toolkit doivent être cohérents entre eux. La composition doit avoir un sens fonctionnel.
+Les Tools composant un Toolkit doivent Ãªtre cohÃ©rents entre eux. La composition doit avoir un sens fonctionnel.
 
-**Critères de cohérence :**
+**CritÃ¨res de cohÃ©rence :**
 
-| Critère | Description | Exemple valide |
+| CritÃ¨re | Description | Exemple valide |
 |---------|-------------|----------------|
-| Domaine commun | Tools du même domaine fonctionnel | UI: layout.render + input.capture |
-| Flux complémentaire | Tools qui s'utilisent ensemble | CRUD: query.execute + cache.get |
-| Optimisation groupée | Tools souvent appelés ensemble | Media: media.upload + media.validate |
+| Domaine commun | Tools du mÃªme domaine fonctionnel | UI: layout.render + input.capture |
+| Flux complÃ©mentaire | Tools qui s'utilisent ensemble | CRUD: query.execute + cache.get |
+| Optimisation groupÃ©e | Tools souvent appelÃ©s ensemble | Media: media.upload + media.validate |
 
-**Contre-exemples (compositions non cohérentes) :**
+**Contre-exemples (compositions non cohÃ©rentes) :**
 
-| ❌ Interdit | Raison |
+| âŒ Interdit | Raison |
 |-------------|--------|
-| auth.login + layout.render | Domaines non liés |
+| auth.login + layout.render | Domaines non liÃ©s |
 | file.read seul | Un seul Tool |
-| Tools dépréciés | Statut invalide |
+| Tools dÃ©prÃ©ciÃ©s | Statut invalide |
 
-**Règles de cohérence :**
-- R-COH-1 : Les Tools d'un Toolkit appartiennent généralement au même domaine
-- R-COH-2 : La composition doit avoir une justification fonctionnelle documentée
+**RÃ¨gles de cohÃ©rence :**
+- R-COH-1 : Les Tools d'un Toolkit appartiennent gÃ©nÃ©ralement au mÃªme domaine
+- R-COH-2 : La composition doit avoir une justification fonctionnelle documentÃ©e
 - R-COH-3 : Un Toolkit ne regroupe pas de Tools sans lien fonctionnel
 
 ### 4.3. Ce que la Composition Apporte
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-La composition en Toolkit apporte des bénéfices d'efficience sans modifier les capacités.
+La composition en Toolkit apporte des bÃ©nÃ©fices d'efficience sans modifier les capacitÃ©s.
 
-**Bénéfices de la composition :**
+**BÃ©nÃ©fices de la composition :**
 
-| Bénéfice | Description |
+| BÃ©nÃ©fice | Description |
 |----------|-------------|
-| **Optimisation des appels** | Réduction des allers-retours de gouvernance |
+| **Optimisation des appels** | RÃ©duction des allers-retours de gouvernance |
 | **Normalisation des flux** | Standardisation des patterns d'appel |
-| **Cohérence garantie** | Ensemble de Tools validé comme fonctionnel |
-| **Documentation groupée** | Point d'entrée unique pour un ensemble cohérent |
-| **Gouvernance simplifiée** | Une seule vérification pour plusieurs Tools |
+| **CohÃ©rence garantie** | Ensemble de Tools validÃ© comme fonctionnel |
+| **Documentation groupÃ©e** | Point d'entrÃ©e unique pour un ensemble cohÃ©rent |
+| **Gouvernance simplifiÃ©e** | Une seule vÃ©rification pour plusieurs Tools |
 
 **Ce que la composition N'apporte PAS :**
 
-| ❌ N'apporte pas | Raison |
+| âŒ N'apporte pas | Raison |
 |-----------------|--------|
-| Nouvelles capacités | Le Toolkit ne crée pas |
-| Logique métier | Le Toolkit ne décide pas |
-| Autorité | Le Toolkit n'autorise pas |
-| Optimisation forcée | L'Opérateur reste libre d'appeler les Tools individuellement |
+| Nouvelles capacitÃ©s | Le Toolkit ne crÃ©e pas |
+| Logique mÃ©tier | Le Toolkit ne dÃ©cide pas |
+| AutoritÃ© | Le Toolkit n'autorise pas |
+| Optimisation forcÃ©e | L'OpÃ©rateur reste libre d'appeler les Tools individuellement |
 
 ---
 
-## 5. Métadonnées des Toolkits
+## 5. MÃ©tadonnÃ©es des Toolkits
 
-### 5.1. Métadonnées Obligatoires
+### 5.1. MÃ©tadonnÃ©es Obligatoires
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Tout Toolkit déclaré doit fournir un ensemble minimal de métadonnées obligatoires.
+Tout Toolkit dÃ©clarÃ© doit fournir un ensemble minimal de mÃ©tadonnÃ©es obligatoires.
 
-**Métadonnées obligatoires :**
+**MÃ©tadonnÃ©es obligatoires :**
 
-| Métadonnée | Type | Description |
+| MÃ©tadonnÃ©e | Type | Description |
 |------------|------|-------------|
 | `id` | ToolkitId | Identifiant unique et immuable |
-| `name` | String | Nom lisible humain (max 100 caractères) |
-| `description` | String | Description du Toolkit (max 500 caractères) |
+| `name` | String | Nom lisible humain (max 100 caractÃ¨res) |
+| `description` | String | Description du Toolkit (max 500 caractÃ¨res) |
 | `version` | Version | Version du Toolkit (semver) |
 | `tools` | Set<ToolId> | Ensemble des Tools (min 2) |
-| `security_level` | SecurityLevel | Niveau de sécurité requis (0-4) |
-| `allowed_states` | Set<SystemState> | États système autorisés |
-| `created_at` | Timestamp | Date et heure de création |
+| `security_level` | SecurityLevel | Niveau de sÃ©curitÃ© requis (0-4) |
+| `allowed_states` | Set<SystemState> | Ã‰tats systÃ¨me autorisÃ©s |
+| `created_at` | Timestamp | Date et heure de crÃ©ation |
 
 **Invariants :**
-- INV-META-1 : Toutes les métadonnées obligatoires sont présentes
-- INV-META-2 : Les métadonnées obligatoires ne peuvent pas être nulles ou vides
-- INV-META-3 : |tools| ≥ 2
+- INV-META-1 : Toutes les mÃ©tadonnÃ©es obligatoires sont prÃ©sentes
+- INV-META-2 : Les mÃ©tadonnÃ©es obligatoires ne peuvent pas Ãªtre nulles ou vides
+- INV-META-3 : |tools| â‰¥ 2
 
-### 5.2. Métadonnées Optionnelles
+### 5.2. MÃ©tadonnÃ©es Optionnelles
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Les Toolkits peuvent fournir des métadonnées additionnelles pour enrichir la documentation et la découverte.
+Les Toolkits peuvent fournir des mÃ©tadonnÃ©es additionnelles pour enrichir la documentation et la dÃ©couverte.
 
-**Métadonnées optionnelles :**
+**MÃ©tadonnÃ©es optionnelles :**
 
-| Métadonnée | Type | Description |
+| MÃ©tadonnÃ©e | Type | Description |
 |------------|------|-------------|
-| `disallowed_states` | Set<SystemState> | États système interdits |
+| `disallowed_states` | Set<SystemState> | Ã‰tats systÃ¨me interdits |
 | `tags` | Set<String> | Tags de classification |
 | `documentation_url` | URL | Lien vers la documentation |
 | `examples` | List<String> | Exemples d'utilisation |
-| `deprecated_at` | Timestamp | Date de dépréciation (si applicable) |
-| `deprecation_reason` | String | Raison de la dépréciation |
-| `successor` | ToolkitId | Toolkit de remplacement (si déprécié) |
-| `custom` | Map<String, Any> | Métadonnées personnalisées |
+| `deprecated_at` | Timestamp | Date de dÃ©prÃ©ciation (si applicable) |
+| `deprecation_reason` | String | Raison de la dÃ©prÃ©ciation |
+| `successor` | ToolkitId | Toolkit de remplacement (si dÃ©prÃ©ciÃ©) |
+| `custom` | Map<String, Any> | MÃ©tadonnÃ©es personnalisÃ©es |
 
-**Règles :**
-- R-OPTMETA-1 : Les métadonnées optionnelles peuvent être nulles ou absentes
-- R-OPTMETA-2 : Les tags sont normalisés (minuscules, sans accents)
-- R-OPTMETA-3 : L'URL de documentation doit être valide si fournie
+**RÃ¨gles :**
+- R-OPTMETA-1 : Les mÃ©tadonnÃ©es optionnelles peuvent Ãªtre nulles ou absentes
+- R-OPTMETA-2 : Les tags sont normalisÃ©s (minuscules, sans accents)
+- R-OPTMETA-3 : L'URL de documentation doit Ãªtre valide si fournie
 
 ### 5.3. Statut de Toolkit
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Tout Toolkit possède un statut qui reflète son état dans le cycle de vie.
+Tout Toolkit possÃ¨de un statut qui reflÃ¨te son Ã©tat dans le cycle de vie.
 
 **Statuts possibles :**
 
 | Statut | Description | Transitions possibles |
 |--------|-------------|----------------------|
-| **Active** | Toolkit disponible et utilisable | → Deprecated, → Removed |
-| **Deprecated** | Toolkit obsolète, utilisation déconseillée | → Removed |
-| **Removed** | Toolkit supprimé, non utilisable | (terminal) |
+| **Active** | Toolkit disponible et utilisable | â†’ Deprecated, â†’ Removed |
+| **Deprecated** | Toolkit obsolÃ¨te, utilisation dÃ©conseillÃ©e | â†’ Removed |
+| **Removed** | Toolkit supprimÃ©, non utilisable | (terminal) |
 
-**Règles de transition :**
-- R-TKST-1 : Un Toolkit nouvellement créé est toujours Active
-- R-TKST-2 : Un Toolkit Active peut être déprécié (→ Deprecated)
-- R-TKST-3 : Un Toolkit Deprecated peut être supprimé (→ Removed)
-- R-TKST-4 : Un Toolkit Active peut être supprimé directement (→ Removed)
-- R-TKST-5 : Un Toolkit Removed ne peut pas être réactivé
-- R-TKST-6 : Une transition de statut est irréversible
+**RÃ¨gles de transition :**
+- R-TKST-1 : Un Toolkit nouvellement crÃ©Ã© est toujours Active
+- R-TKST-2 : Un Toolkit Active peut Ãªtre dÃ©prÃ©ciÃ© (â†’ Deprecated)
+- R-TKST-3 : Un Toolkit Deprecated peut Ãªtre supprimÃ© (â†’ Removed)
+- R-TKST-4 : Un Toolkit Active peut Ãªtre supprimÃ© directement (â†’ Removed)
+- R-TKST-5 : Un Toolkit Removed ne peut pas Ãªtre rÃ©activÃ©
+- R-TKST-6 : Une transition de statut est irrÃ©versible
 
-**Impact de la dépréciation d'un Tool :**
-- R-TKTOOL-1 : Si un Tool est déprécié, les Toolkits qui le contiennent reçoivent un avertissement
-- R-TKTOOL-2 : Si un Tool est supprimé, les Toolkits qui le contiennent deviennent invalides
-- R-TKTOOL-3 : Un Toolkit invalide doit être mis à jour ou supprimé
+**Impact de la dÃ©prÃ©ciation d'un Tool :**
+- R-TKTOOL-1 : Si un Tool est dÃ©prÃ©ciÃ©, les Toolkits qui le contiennent reÃ§oivent un avertissement
+- R-TKTOOL-2 : Si un Tool est supprimÃ©, les Toolkits qui le contiennent deviennent invalides
+- R-TKTOOL-3 : Un Toolkit invalide doit Ãªtre mis Ã  jour ou supprimÃ©
 
 ---
 
-## 6. Opérations sur les Toolkits
+## 6. OpÃ©rations sur les Toolkits
 
-### 6.1. Déclaration de Toolkit (DeclareToolkit)
+### 6.1. DÃ©claration de Toolkit (DeclareToolkit)
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-L'opération **DeclareToolkit** permet de déclarer un nouveau Toolkit dans le registre.
+L'opÃ©ration **DeclareToolkit** permet de dÃ©clarer un nouveau Toolkit dans le registre.
 
 **Signature conceptuelle :**
 
@@ -418,40 +418,40 @@ DeclareToolkit(
   security_level: SecurityLevel,
   allowed_states: Set<SystemState>,
   metadata: ToolkitMetadata?
-) → Result<Toolkit, DeclarationError>
+) â†’ Result<Toolkit, DeclarationError>
 ```
 
-**Préconditions :**
-- PRE-1 : L'identifiant n'existe pas déjà dans le registre
+**PrÃ©conditions :**
+- PRE-1 : L'identifiant n'existe pas dÃ©jÃ  dans le registre
 - PRE-2 : L'identifiant respecte le format canonique
-- PRE-3 : Les métadonnées obligatoires sont fournies et valides
-- PRE-4 : |tools| ≥ 2
+- PRE-3 : Les mÃ©tadonnÃ©es obligatoires sont fournies et valides
+- PRE-4 : |tools| â‰¥ 2
 - PRE-5 : Tous les Tools existent et sont actifs
-- PRE-6 : security_level ≥ max(security_level de chaque Tool)
+- PRE-6 : security_level â‰¥ max(security_level de chaque Tool)
 
 **Postconditions :**
-- POST-1 : Le Toolkit est ajouté au registre avec statut Active
-- POST-2 : Les index sont mis à jour
-- POST-3 : L'historique est mis à jour avec l'événement de création
-- POST-4 : La version du registre est incrémentée
+- POST-1 : Le Toolkit est ajoutÃ© au registre avec statut Active
+- POST-2 : Les index sont mis Ã  jour
+- POST-3 : L'historique est mis Ã  jour avec l'Ã©vÃ©nement de crÃ©ation
+- POST-4 : La version du registre est incrÃ©mentÃ©e
 
 **Erreurs possibles :**
 
 | Erreur | Condition |
 |--------|-----------|
 | `InvalidToolkitId` | Format de l'identifiant invalide |
-| `DuplicateToolkitId` | Identifiant déjà existant |
+| `DuplicateToolkitId` | Identifiant dÃ©jÃ  existant |
 | `InsufficientTools` | Moins de 2 Tools |
 | `ToolNotFound` | Un Tool n'existe pas |
 | `ToolNotActive` | Un Tool n'est pas actif |
 | `SecurityLevelTooLow` | security_level < max des Tools |
-| `MissingMetadata` | Métadonnée obligatoire manquante |
+| `MissingMetadata` | MÃ©tadonnÃ©e obligatoire manquante |
 
 ### 6.2. Interrogation de Toolkit (QueryToolkit)
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-L'opération **QueryToolkit** permet d'interroger le registre pour obtenir les informations sur un ou plusieurs Toolkits.
+L'opÃ©ration **QueryToolkit** permet d'interroger le registre pour obtenir les informations sur un ou plusieurs Toolkits.
 
 **Modes d'interrogation :**
 
@@ -459,7 +459,7 @@ L'opération **QueryToolkit** permet d'interroger le registre pour obtenir les i
 |------|-------------|---------|
 | **ById** | Recherche par identifiant exact | `ui.standard` |
 | **ByTool** | Toolkits contenant un Tool | `layout.render` |
-| **BySecurityLevel** | Toolkits d'un niveau de sécurité | `2` |
+| **BySecurityLevel** | Toolkits d'un niveau de sÃ©curitÃ© | `2` |
 | **ByStatus** | Recherche par statut | `Active` |
 | **ByTags** | Recherche par tags | `["ui", "standard"]` |
 | **All** | Tous les Toolkits | - |
@@ -469,7 +469,7 @@ L'opération **QueryToolkit** permet d'interroger le registre pour obtenir les i
 ```
 QueryToolkit(
   filter: ToolkitFilter
-) → Result<List<Toolkit>, QueryError>
+) â†’ Result<List<Toolkit>, QueryError>
 
 ToolkitFilter {
   id: ToolkitId?,
@@ -480,28 +480,28 @@ ToolkitFilter {
 }
 ```
 
-**Règles :**
+**RÃ¨gles :**
 - R-QUERY-1 : L'interrogation est toujours en lecture seule
-- R-QUERY-2 : Les filtres peuvent être combinés (AND logique)
-- R-QUERY-3 : Une interrogation sans résultat retourne une liste vide
+- R-QUERY-2 : Les filtres peuvent Ãªtre combinÃ©s (AND logique)
+- R-QUERY-3 : Une interrogation sans rÃ©sultat retourne une liste vide
 
-### 6.3. Mise à Jour de Toolkit (UpdateToolkit)
+### 6.3. Mise Ã  Jour de Toolkit (UpdateToolkit)
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-L'opération **UpdateToolkit** permet de modifier un Toolkit existant.
+L'opÃ©ration **UpdateToolkit** permet de modifier un Toolkit existant.
 
-**Modifications autorisées :**
+**Modifications autorisÃ©es :**
 
-| Modification | Autorisée | Condition |
+| Modification | AutorisÃ©e | Condition |
 |--------------|-----------|-----------|
-| Ajouter un Tool | ✅ Oui | Tool existe et est actif |
-| Retirer un Tool | ✅ Oui | |tools| reste ≥ 2 |
-| Modifier metadata | ✅ Oui | Validité préservée |
-| Modifier security_level | ✅ Oui | Respecte R-SEC-1 à R-SEC-3 |
-| Modifier allowed_states | ✅ Oui | Respecte INV-STATE-1 |
-| Modifier id | ❌ Non | Immuable |
-| Modifier created_at | ❌ Non | Immuable |
+| Ajouter un Tool | âœ… Oui | Tool existe et est actif |
+| Retirer un Tool | âœ… Oui | |tools| reste â‰¥ 2 |
+| Modifier metadata | âœ… Oui | ValiditÃ© prÃ©servÃ©e |
+| Modifier security_level | âœ… Oui | Respecte R-SEC-1 Ã  R-SEC-3 |
+| Modifier allowed_states | âœ… Oui | Respecte INV-STATE-1 |
+| Modifier id | âŒ Non | Immuable |
+| Modifier created_at | âŒ Non | Immuable |
 
 **Signature conceptuelle :**
 
@@ -509,7 +509,7 @@ L'opération **UpdateToolkit** permet de modifier un Toolkit existant.
 UpdateToolkit(
   id: ToolkitId,
   changes: ToolkitChanges
-) → Result<Toolkit, UpdateError>
+) â†’ Result<Toolkit, UpdateError>
 
 ToolkitChanges {
   add_tools: Set<ToolId>?,
@@ -521,16 +521,16 @@ ToolkitChanges {
 }
 ```
 
-**Règles :**
-- R-UPD-1 : La mise à jour incrémente la version mineure du Toolkit
+**RÃ¨gles :**
+- R-UPD-1 : La mise Ã  jour incrÃ©mente la version mineure du Toolkit
 - R-UPD-2 : L'historique enregistre les changements
-- R-UPD-3 : Les invariants sont vérifiés après modification
+- R-UPD-3 : Les invariants sont vÃ©rifiÃ©s aprÃ¨s modification
 
-### 6.4. Dépréciation de Toolkit (DeprecateToolkit)
+### 6.4. DÃ©prÃ©ciation de Toolkit (DeprecateToolkit)
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-L'opération **DeprecateToolkit** permet de marquer un Toolkit comme obsolète.
+L'opÃ©ration **DeprecateToolkit** permet de marquer un Toolkit comme obsolÃ¨te.
 
 **Signature conceptuelle :**
 
@@ -539,25 +539,25 @@ DeprecateToolkit(
   id: ToolkitId,
   reason: String,
   successor: ToolkitId?
-) → Result<Toolkit, DeprecationError>
+) â†’ Result<Toolkit, DeprecationError>
 ```
 
-**Préconditions :**
+**PrÃ©conditions :**
 - PRE-1 : Le Toolkit existe dans le registre
 - PRE-2 : Le Toolkit a le statut Active
-- PRE-3 : La raison de dépréciation est fournie
-- PRE-4 : Si un successeur est indiqué, il existe et est Active
+- PRE-3 : La raison de dÃ©prÃ©ciation est fournie
+- PRE-4 : Si un successeur est indiquÃ©, il existe et est Active
 
-**Règles :**
-- R-DEP-1 : Un Toolkit déprécié reste interrogeable
-- R-DEP-2 : Un Toolkit déprécié ne peut pas être redéclaré
-- R-DEP-3 : La dépréciation est irréversible
+**RÃ¨gles :**
+- R-DEP-1 : Un Toolkit dÃ©prÃ©ciÃ© reste interrogeable
+- R-DEP-2 : Un Toolkit dÃ©prÃ©ciÃ© ne peut pas Ãªtre redÃ©clarÃ©
+- R-DEP-3 : La dÃ©prÃ©ciation est irrÃ©versible
 
 ### 6.5. Suppression de Toolkit (RemoveToolkit)
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-L'opération **RemoveToolkit** permet de supprimer définitivement un Toolkit du registre actif.
+L'opÃ©ration **RemoveToolkit** permet de supprimer dÃ©finitivement un Toolkit du registre actif.
 
 **Signature conceptuelle :**
 
@@ -565,18 +565,18 @@ L'opération **RemoveToolkit** permet de supprimer définitivement un Toolkit du
 RemoveToolkit(
   id: ToolkitId,
   reason: String
-) → Result<(), RemovalError>
+) â†’ Result<(), RemovalError>
 ```
 
-**Préconditions :**
+**PrÃ©conditions :**
 - PRE-1 : Le Toolkit existe dans le registre
 - PRE-2 : Le Toolkit a le statut Active ou Deprecated
 
 **Postconditions :**
 - POST-1 : Le Toolkit passe au statut Removed
-- POST-2 : Le Toolkit n'apparaît plus dans les interrogations standard
+- POST-2 : Le Toolkit n'apparaÃ®t plus dans les interrogations standard
 - POST-3 : L'historique conserve la trace du Toolkit
-- POST-4 : L'identifiant est réservé (non réutilisable)
+- POST-4 : L'identifiant est rÃ©servÃ© (non rÃ©utilisable)
 
 ---
 
@@ -584,117 +584,117 @@ RemoveToolkit(
 
 ### 7.1. Flux d'Appel d'un Toolkit
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-L'appel d'un Toolkit suit le même flux de gouvernance que l'appel d'un Tool individuel.
+L'appel d'un Toolkit suit le mÃªme flux de gouvernance que l'appel d'un Tool individuel.
 
-**Séquence :**
+**SÃ©quence :**
 
 ```
-Opérateur (Strate 7)
-    │
-    │ "Je veux utiliser le Kit d'Outils UI"
-    ▼
-┌───────────────────────────────────────┐
-│  BondingBrother (médiation)           │
-│  Traduit la requête                   │
-└───────────────────────────────────────┘
-    │
-    ▼
-┌───────────────────────────────────────┐
-│  Master Butler                        │
-│  "Ce Toolkit existe-t-il ?"           │
-│  "Quels Tools le composent ?"         │
-│  "Quelles permissions sont requises ?"│
-└───────────────────────────────────────┘
-    │
-    ▼
-┌───────────────────────────────────────┐
-│  StrongFather                         │
-│  "L'Opérateur a-t-il le droit ?"      │
-│  (évalue pour chaque Tool)            │
-└───────────────────────────────────────┘
-    │
-    ▼
-┌───────────────────────────────────────┐
-│  WorrySentinel                        │
-│  "Le niveau de sécurité permet-il ?"  │
-│  (vérifie security_level du Toolkit)  │
-└───────────────────────────────────────┘
-    │
-    ▼
-┌───────────────────────────────────────┐
-│  Caring Nanny                         │
-│  "L'état système permet-il ?"         │
-│  (vérifie allowed_states/disallowed)  │
-└───────────────────────────────────────┘
-    │
-    ▼
-┌───────────────────────────────────────┐
-│  Tools du Toolkit (exécution)         │
-│  layout.render, input.capture, ...    │
-└───────────────────────────────────────┘
+OpÃ©rateur (Strate 7)
+    â”‚
+    â”‚ "Je veux utiliser le Kit d'Outils UI"
+    â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  BondingBrother (mÃ©diation)           â”‚
+â”‚  Traduit la requÃªte                   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+    â”‚
+    â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Master Butler                        â”‚
+â”‚  "Ce Toolkit existe-t-il ?"           â”‚
+â”‚  "Quels Tools le composent ?"         â”‚
+â”‚  "Quelles permissions sont requises ?"â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+    â”‚
+    â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  StrongFather                         â”‚
+â”‚  "L'OpÃ©rateur a-t-il le droit ?"      â”‚
+â”‚  (Ã©value pour chaque Tool)            â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+    â”‚
+    â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  WorrySentinel                        â”‚
+â”‚  "Le niveau de sÃ©curitÃ© permet-il ?"  â”‚
+â”‚  (vÃ©rifie security_level du Toolkit)  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+    â”‚
+    â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Caring Nanny                         â”‚
+â”‚  "L'Ã©tat systÃ¨me permet-il ?"         â”‚
+â”‚  (vÃ©rifie allowed_states/disallowed)  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+    â”‚
+    â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Tools du Toolkit (exÃ©cution)         â”‚
+â”‚  layout.render, input.capture, ...    â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-**Règles du flux :**
-- R-FLUX-1 : Un Toolkit passe par la même gouvernance qu'un Tool
-- R-FLUX-2 : L'autorisation est vérifiée pour chaque Tool du Toolkit
-- R-FLUX-3 : Si un Tool est refusé, le Toolkit entier est refusé
-- R-FLUX-4 : L'Opérateur peut toujours appeler les Tools individuellement
+**RÃ¨gles du flux :**
+- R-FLUX-1 : Un Toolkit passe par la mÃªme gouvernance qu'un Tool
+- R-FLUX-2 : L'autorisation est vÃ©rifiÃ©e pour chaque Tool du Toolkit
+- R-FLUX-3 : Si un Tool est refusÃ©, le Toolkit entier est refusÃ©
+- R-FLUX-4 : L'OpÃ©rateur peut toujours appeler les Tools individuellement
 
-### 7.2. Responsabilités des Cores
+### 7.2. ResponsabilitÃ©s des Cores
 
-**Énoncé :**
+**Ã‰noncÃ© :**
 
-Chaque Core a des responsabilités spécifiques dans la gouvernance des Toolkits.
+Chaque Core a des responsabilitÃ©s spÃ©cifiques dans la gouvernance des Toolkits.
 
-| Core | Responsabilité pour les Toolkits |
+| Core | ResponsabilitÃ© pour les Toolkits |
 |------|----------------------------------|
-| **Master Butler** | Déclare, catalogue, fournit les informations |
-| **StrongFather** | Évalue l'autorisation (via politiques) |
-| **WorrySentinel** | Vérifie le niveau de sécurité |
-| **Caring Nanny** | Vérifie l'état système |
-| **Ever Buddy** | Gère le cycle de vie et versions |
-| **BondingBrother** | Traduit les requêtes Opérateur |
+| **Master Butler** | DÃ©clare, catalogue, fournit les informations |
+| **StrongFather** | Ã‰value l'autorisation (via politiques) |
+| **WorrySentinel** | VÃ©rifie le niveau de sÃ©curitÃ© |
+| **Caring Nanny** | VÃ©rifie l'Ã©tat systÃ¨me |
+| **Ever Buddy** | GÃ¨re le cycle de vie et versions |
+| **BondingBrother** | Traduit les requÃªtes OpÃ©rateur |
 
 **Ce que Master Butler fait pour les Toolkits :**
 
 | Action | Oui/Non |
 |--------|---------|
-| Déclare l'existence des Toolkits | ✅ Oui |
-| Catalogue la composition | ✅ Oui |
-| Définit les métadonnées | ✅ Oui |
-| Répond aux interrogations | ✅ Oui |
+| DÃ©clare l'existence des Toolkits | âœ… Oui |
+| Catalogue la composition | âœ… Oui |
+| DÃ©finit les mÃ©tadonnÃ©es | âœ… Oui |
+| RÃ©pond aux interrogations | âœ… Oui |
 
 **Ce que Master Butler NE fait PAS pour les Toolkits :**
 
 | Action | Oui/Non | Responsable |
 |--------|---------|-------------|
-| Décider de l'autorisation | ❌ Non | StrongFather |
-| Exécuter les Tools | ❌ Non | Tools eux-mêmes |
-| Vérifier la sécurité | ❌ Non | WorrySentinel |
-| Vérifier l'état système | ❌ Non | Caring Nanny |
+| DÃ©cider de l'autorisation | âŒ Non | StrongFather |
+| ExÃ©cuter les Tools | âŒ Non | Tools eux-mÃªmes |
+| VÃ©rifier la sÃ©curitÃ© | âŒ Non | WorrySentinel |
+| VÃ©rifier l'Ã©tat systÃ¨me | âŒ Non | Caring Nanny |
 
 ---
 
-## 8. Invariants Non Négociables
+## 8. Invariants Non NÃ©gociables
 
-### 8.1. Non-Création de Capacité
+### 8.1. Non-CrÃ©ation de CapacitÃ©
 
 **Invariant INV-NN-1 :**
 
-> **Un Toolkit n'ajoute jamais de capacité nouvelle. Les capacités exposées sont exactement l'union des capacités de ses Tools.**
+> **Un Toolkit n'ajoute jamais de capacitÃ© nouvelle. Les capacitÃ©s exposÃ©es sont exactement l'union des capacitÃ©s de ses Tools.**
 
-**Vérification formelle :**
+**VÃ©rification formelle :**
 ```
-∀ toolkit ∈ Toolkits :
-  capabilities(toolkit) = ∪ { capabilities(tool) | tool ∈ toolkit.tools }
+âˆ€ toolkit âˆˆ Toolkits :
+  capabilities(toolkit) = âˆª { capabilities(tool) | tool âˆˆ toolkit.tools }
 ```
 
 **Implications :**
-- Pas de logique ajoutée
-- Pas de transformation des données
-- Pas de décision métier
+- Pas de logique ajoutÃ©e
+- Pas de transformation des donnÃ©es
+- Pas de dÃ©cision mÃ©tier
 
 ### 8.2. Composition Minimale
 
@@ -702,195 +702,195 @@ Chaque Core a des responsabilités spécifiques dans la gouvernance des Toolkits
 
 > **Un Toolkit contient au minimum deux Tools.**
 
-**Vérification formelle :**
+**VÃ©rification formelle :**
 ```
-∀ toolkit ∈ Toolkits : |toolkit.tools| ≥ 2
+âˆ€ toolkit âˆˆ Toolkits : |toolkit.tools| â‰¥ 2
 ```
 
 **Justification :**
 - Un seul Tool = pas de composition
 - La valeur du Toolkit est dans le regroupement
 
-### 8.3. Validité des Tools
+### 8.3. ValiditÃ© des Tools
 
 **Invariant INV-NN-3 :**
 
 > **Tous les Tools d'un Toolkit existent dans le registre et sont actifs (non Removed).**
 
-**Vérification formelle :**
+**VÃ©rification formelle :**
 ```
-∀ toolkit ∈ Toolkits :
-  ∀ tool ∈ toolkit.tools :
-    exists(tool) ∧ status(tool) ≠ Removed
+âˆ€ toolkit âˆˆ Toolkits :
+  âˆ€ tool âˆˆ toolkit.tools :
+    exists(tool) âˆ§ status(tool) â‰  Removed
 ```
 
 **Implication :**
 - La suppression d'un Tool invalide les Toolkits qui le contiennent
 
-### 8.4. Cohérence du Niveau de Sécurité
+### 8.4. CohÃ©rence du Niveau de SÃ©curitÃ©
 
 **Invariant INV-NN-4 :**
 
-> **Le niveau de sécurité d'un Toolkit est au minimum égal au plus haut niveau de ses Tools.**
+> **Le niveau de sÃ©curitÃ© d'un Toolkit est au minimum Ã©gal au plus haut niveau de ses Tools.**
 
-**Vérification formelle :**
+**VÃ©rification formelle :**
 ```
-∀ toolkit ∈ Toolkits :
-  toolkit.security_level ≥ max({ tool.security_level | tool ∈ toolkit.tools })
+âˆ€ toolkit âˆˆ Toolkits :
+  toolkit.security_level â‰¥ max({ tool.security_level | tool âˆˆ toolkit.tools })
 ```
 
 **Justification :**
-- Pas de contournement de sécurité via la composition
-- Le Toolkit ne peut pas être moins restrictif que ses composants
+- Pas de contournement de sÃ©curitÃ© via la composition
+- Le Toolkit ne peut pas Ãªtre moins restrictif que ses composants
 
 ### 8.5. Gouvernance Obligatoire
 
 **Invariant INV-NN-5 :**
 
-> **Un Toolkit passe par la même gouvernance qu'un Tool individuel.**
+> **Un Toolkit passe par la mÃªme gouvernance qu'un Tool individuel.**
 
 **Implications :**
 - Pas de raccourci de gouvernance
-- Pas d'appel direct sans vérification
-- BondingBrother est le point d'entrée obligatoire
+- Pas d'appel direct sans vÃ©rification
+- BondingBrother est le point d'entrÃ©e obligatoire
 
 ---
 
-## 9. Schémas ASCII
+## 9. SchÃ©mas ASCII
 
 ### 9.1. Structure d'un Toolkit
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          TOOLKIT : ui.standard                               │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  MÉTADONNÉES                                                         │  │
-│  ├──────────────────────────────────────────────────────────────────────┤  │
-│  │  id: "ui.standard"                                                   │  │
-│  │  name: "Kit d'Outils UI Standard"                                    │  │
-│  │  version: "1.0.0"                                                    │  │
-│  │  security_level: 2                                                   │  │
-│  │  status: Active                                                      │  │
-│  │  allowed_states: [HEALTHY, DEGRADED]                                 │  │
-│  │  disallowed_states: [SECURITY_LOCKDOWN, MAINTENANCE]                 │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                              │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  COMPOSITION (5 Tools)                                               │  │
-│  ├──────────────────────────────────────────────────────────────────────┤  │
-│  │                                                                       │  │
-│  │    ┌──────────────────┐     ┌──────────────────┐                     │  │
-│  │    │  layout.render   │     │  input.capture   │                     │  │
-│  │    │  (sec_level: 1)  │     │  (sec_level: 2)  │                     │  │
-│  │    └──────────────────┘     └──────────────────┘                     │  │
-│  │                                                                       │  │
-│  │    ┌──────────────────┐     ┌──────────────────┐                     │  │
-│  │    │  form.validate   │     │  theme.resolve   │                     │  │
-│  │    │  (sec_level: 1)  │     │  (sec_level: 1)  │                     │  │
-│  │    └──────────────────┘     └──────────────────┘                     │  │
-│  │                                                                       │  │
-│  │    ┌──────────────────┐                                              │  │
-│  │    │  event.dispatch  │                                              │  │
-│  │    │  (sec_level: 1)  │                                              │  │
-│  │    └──────────────────┘                                              │  │
-│  │                                                                       │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                              │
-│  CAPACITÉS EXPOSÉES = ∪ capacités des 5 Tools                               │
-│  LOGIQUE AJOUTÉE = ∅                                                         │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                          TOOLKIT : ui.standard                               â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  MÃ‰TADONNÃ‰ES                                                         â”‚  â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤  â”‚
+â”‚  â”‚  id: "ui.standard"                                                   â”‚  â”‚
+â”‚  â”‚  name: "Kit d'Outils UI Standard"                                    â”‚  â”‚
+â”‚  â”‚  version: "1.0.0"                                                    â”‚  â”‚
+â”‚  â”‚  security_level: 2                                                   â”‚  â”‚
+â”‚  â”‚  status: Active                                                      â”‚  â”‚
+â”‚  â”‚  allowed_states: [HEALTHY, DEGRADED]                                 â”‚  â”‚
+â”‚  â”‚  disallowed_states: [SECURITY_LOCKDOWN, MAINTENANCE]                 â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚  COMPOSITION (5 Tools)                                               â”‚  â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤  â”‚
+â”‚  â”‚                                                                       â”‚  â”‚
+â”‚  â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                     â”‚  â”‚
+â”‚  â”‚    â”‚  layout.render   â”‚     â”‚  input.capture   â”‚                     â”‚  â”‚
+â”‚  â”‚    â”‚  (sec_level: 1)  â”‚     â”‚  (sec_level: 2)  â”‚                     â”‚  â”‚
+â”‚  â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                     â”‚  â”‚
+â”‚  â”‚                                                                       â”‚  â”‚
+â”‚  â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                     â”‚  â”‚
+â”‚  â”‚    â”‚  form.validate   â”‚     â”‚  theme.resolve   â”‚                     â”‚  â”‚
+â”‚  â”‚    â”‚  (sec_level: 1)  â”‚     â”‚  (sec_level: 1)  â”‚                     â”‚  â”‚
+â”‚  â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                     â”‚  â”‚
+â”‚  â”‚                                                                       â”‚  â”‚
+â”‚  â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                                              â”‚  â”‚
+â”‚  â”‚    â”‚  event.dispatch  â”‚                                              â”‚  â”‚
+â”‚  â”‚    â”‚  (sec_level: 1)  â”‚                                              â”‚  â”‚
+â”‚  â”‚    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                                              â”‚  â”‚
+â”‚  â”‚                                                                       â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚                                                                              â”‚
+â”‚  CAPACITÃ‰S EXPOSÃ‰ES = âˆª capacitÃ©s des 5 Tools                               â”‚
+â”‚  LOGIQUE AJOUTÃ‰E = âˆ…                                                         â”‚
+â”‚                                                                              â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### 9.2. Flux de Déclaration de Toolkit
+### 9.2. Flux de DÃ©claration de Toolkit
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                     FLUX DE DÉCLARATION DE TOOLKIT                           │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                     FLUX DE DÃ‰CLARATION DE TOOLKIT                           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
-   DÉCLARANT                      MASTER BUTLER                    REGISTRE
-       │                              │                              │
-       │  DeclareToolkit(             │                              │
-       │    id: "ui.standard",        │                              │
-       │    tools: [layout.render,    │                              │
-       │            input.capture,    │                              │
-       │            form.validate,    │                              │
-       │            theme.resolve,    │                              │
-       │            event.dispatch],  │                              │
-       │    security_level: 2         │                              │
-       │  )                           │                              │
-       ├─────────────────────────────►│                              │
-       │                              │                              │
-       │                              │  1. Valider format id        │
-       │                              │  2. Vérifier unicité         │
-       │                              │  3. Vérifier |tools| ≥ 2     │
-       │                              │  4. Vérifier existence Tools │
-       │                              │  5. Vérifier statut Tools    │
-       │                              │  6. Vérifier security_level  │
-       │                              │                              │
-       │                              │  [Validations OK]            │
-       │                              │                              │
-       │                              │  7. Créer Toolkit            │
-       │                              ├─────────────────────────────►│
-       │                              │                              │
-       │                              │  8. Mettre à jour index      │
-       │                              ├─────────────────────────────►│
-       │                              │                              │
-       │                              │  9. Historiser événement     │
-       │                              ├─────────────────────────────►│
-       │                              │                              │
-       │                              │◄─────────────────────────────┤
-       │                              │      [Toolkit créé]          │
-       │◄─────────────────────────────┤                              │
-       │    Result::Ok(Toolkit)       │                              │
-       │                              │                              │
-       ▼                              ▼                              ▼
+   DÃ‰CLARANT                      MASTER BUTLER                    REGISTRE
+       â”‚                              â”‚                              â”‚
+       â”‚  DeclareToolkit(             â”‚                              â”‚
+       â”‚    id: "ui.standard",        â”‚                              â”‚
+       â”‚    tools: [layout.render,    â”‚                              â”‚
+       â”‚            input.capture,    â”‚                              â”‚
+       â”‚            form.validate,    â”‚                              â”‚
+       â”‚            theme.resolve,    â”‚                              â”‚
+       â”‚            event.dispatch],  â”‚                              â”‚
+       â”‚    security_level: 2         â”‚                              â”‚
+       â”‚  )                           â”‚                              â”‚
+       â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚                              â”‚
+       â”‚                              â”‚                              â”‚
+       â”‚                              â”‚  1. Valider format id        â”‚
+       â”‚                              â”‚  2. VÃ©rifier unicitÃ©         â”‚
+       â”‚                              â”‚  3. VÃ©rifier |tools| â‰¥ 2     â”‚
+       â”‚                              â”‚  4. VÃ©rifier existence Tools â”‚
+       â”‚                              â”‚  5. VÃ©rifier statut Tools    â”‚
+       â”‚                              â”‚  6. VÃ©rifier security_level  â”‚
+       â”‚                              â”‚                              â”‚
+       â”‚                              â”‚  [Validations OK]            â”‚
+       â”‚                              â”‚                              â”‚
+       â”‚                              â”‚  7. CrÃ©er Toolkit            â”‚
+       â”‚                              â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
+       â”‚                              â”‚                              â”‚
+       â”‚                              â”‚  8. Mettre Ã  jour index      â”‚
+       â”‚                              â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
+       â”‚                              â”‚                              â”‚
+       â”‚                              â”‚  9. Historiser Ã©vÃ©nement     â”‚
+       â”‚                              â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
+       â”‚                              â”‚                              â”‚
+       â”‚                              â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+       â”‚                              â”‚      [Toolkit crÃ©Ã©]          â”‚
+       â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤                              â”‚
+       â”‚    Result::Ok(Toolkit)       â”‚                              â”‚
+       â”‚                              â”‚                              â”‚
+       â–¼                              â–¼                              â–¼
 ```
 
-### 9.3. Relation Tool ↔ Toolkit
+### 9.3. Relation Tool â†” Toolkit
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                     RELATION TOOL ↔ TOOLKIT                                  │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                     RELATION TOOL â†” TOOLKIT                                  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
                    TOOLS                              TOOLKITS
-              (capacités atomiques)               (compositions)
+              (capacitÃ©s atomiques)               (compositions)
 
-       ┌──────────────────────┐
-       │    layout.render     │◄─────────────┐
-       └──────────────────────┘              │
-                                             │    ┌────────────────────┐
-       ┌──────────────────────┐              ├────┤   ui.standard      │
-       │    input.capture     │◄─────────────┤    └────────────────────┘
-       └──────────────────────┘              │
-                                             │
-       ┌──────────────────────┐              │
-       │    form.validate     │◄─────────────┤
-       └──────────────────────┘              │
-                                             │
-       ┌──────────────────────┐              │
-       │    theme.resolve     │◄─────────────┤
-       └──────────────────────┘              │
-                                             │
-       ┌──────────────────────┐              │
-       │    event.dispatch    │◄─────────────┘
-       └──────────────────────┘
-              │
-              │                                   ┌────────────────────┐
-              └──────────────────────────────────►│   event.full       │
-                                                  └────────────────────┘
-       ┌──────────────────────┐              │
-       │    event.listen      │◄─────────────┘
-       └──────────────────────┘
+       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+       â”‚    layout.render     â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜              â”‚
+                                             â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”              â”œâ”€â”€â”€â”€â”¤   ui.standard      â”‚
+       â”‚    input.capture     â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜              â”‚
+                                             â”‚
+       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”              â”‚
+       â”‚    form.validate     â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜              â”‚
+                                             â”‚
+       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”              â”‚
+       â”‚    theme.resolve     â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜              â”‚
+                                             â”‚
+       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”              â”‚
+       â”‚    event.dispatch    â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+              â”‚
+              â”‚                                   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+              â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚   event.full       â”‚
+                                                  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”              â”‚
+       â”‚    event.listen      â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
 
-       👉 Un Tool peut appartenir à plusieurs Toolkits
-       👉 Un Toolkit agrège plusieurs Tools
-       👉 Relation N:M (many-to-many)
+       ðŸ‘‰ Un Tool peut appartenir Ã  plusieurs Toolkits
+       ðŸ‘‰ Un Toolkit agrÃ¨ge plusieurs Tools
+       ðŸ‘‰ Relation N:M (many-to-many)
 ```
 
 ---
@@ -928,7 +928,7 @@ toolkit:
     documentation_url: "https://docs.miyukini.dev/toolkits/ui-standard"
 ```
 
-**Déclaration programmatique :**
+**DÃ©claration programmatique :**
 
 ```
 DeclareToolkit(
@@ -950,10 +950,10 @@ DeclareToolkit(
     tags: { "ui", "standard", "frontend" }
   }
 )
-→ Result::Ok(Toolkit { id: "ui.standard", ... })
+â†’ Result::Ok(Toolkit { id: "ui.standard", ... })
 ```
 
-### 10.2. Exemple : Toolkit de Gestion de Données CRUD
+### 10.2. Exemple : Toolkit de Gestion de DonnÃ©es CRUD
 
 **Manifeste YAML :**
 
@@ -962,7 +962,7 @@ toolkit:
   id: "data.crud"
   version: "1.0.0"
   name: "Kit d'Outils CRUD Data"
-  description: "Ensemble de tools pour les opérations CRUD sur les données"
+  description: "Ensemble de tools pour les opÃ©rations CRUD sur les donnÃ©es"
   tools:
     - query.execute
     - query.insert
@@ -994,25 +994,25 @@ toolkit:
 QueryToolkit(
   filter: { contains_tool: "layout.render" }
 )
-→ Result::Ok([
+â†’ Result::Ok([
     Toolkit { id: "ui.standard", ... },
     Toolkit { id: "ui.advanced", ... }
   ])
 ```
 
-**Recherche par niveau de sécurité :**
+**Recherche par niveau de sÃ©curitÃ© :**
 
 ```
 QueryToolkit(
   filter: { security_level: 2, status: Active }
 )
-→ Result::Ok([
+â†’ Result::Ok([
     Toolkit { id: "ui.standard", ... },
     Toolkit { id: "content.publishing", ... }
   ])
 ```
 
-### 10.4. Exemple : Mise à Jour de Toolkit
+### 10.4. Exemple : Mise Ã  Jour de Toolkit
 
 **Ajout d'un Tool :**
 
@@ -1023,31 +1023,31 @@ UpdateToolkit(
     add_tools: { "animation.trigger" }
   }
 )
-→ Result::Ok(Toolkit {
+â†’ Result::Ok(Toolkit {
     id: "ui.standard",
-    version: "1.1.0",  // incrémenté
+    version: "1.1.0",  // incrÃ©mentÃ©
     tools: {
       "layout.render",
       "input.capture",
       "form.validate",
       "theme.resolve",
       "event.dispatch",
-      "animation.trigger"  // ajouté
+      "animation.trigger"  // ajoutÃ©
     },
     ...
   })
 ```
 
-**Modification du niveau de sécurité :**
+**Modification du niveau de sÃ©curitÃ© :**
 
 ```
 UpdateToolkit(
   id: "ui.standard",
   changes: {
-    security_level: 3  // augmenté de 2 à 3
+    security_level: 3  // augmentÃ© de 2 Ã  3
   }
 )
-→ Result::Ok(Toolkit {
+â†’ Result::Ok(Toolkit {
     id: "ui.standard",
     version: "1.2.0",
     security_level: 3,
@@ -1059,96 +1059,97 @@ UpdateToolkit(
 
 ## 11. Conclusion
 
-Ce contrat établit le modèle technique de composition des Toolkits dans Master Butler, définissant de manière absolue :
+Ce contrat Ã©tablit le modÃ¨le technique de composition des Toolkits dans Master Butler, dÃ©finissant de maniÃ¨re absolue :
 
-**Points clés :**
-- **Toolkit :** Composition officielle de Tools, sans capacité nouvelle
+**Points clÃ©s :**
+- **Toolkit :** Composition officielle de Tools, sans capacitÃ© nouvelle
 - **ToolkitId :** Format canonique `<domain>.<function>`
 - **Composition minimale :** Au moins 2 Tools
-- **Security Level :** ≥ max des Tools composants
-- **États système :** allowed_states et disallowed_states explicites
-- **Opérations :** Declare, Query, Update, Deprecate, Remove
-- **Gouvernance :** Même flux qu'un Tool individuel
+- **Security Level :** â‰¥ max des Tools composants
+- **Ã‰tats systÃ¨me :** allowed_states et disallowed_states explicites
+- **OpÃ©rations :** Declare, Query, Update, Deprecate, Remove
+- **Gouvernance :** MÃªme flux qu'un Tool individuel
 
-**Invariants non négociables :**
-- Non-création de capacité
+**Invariants non nÃ©gociables :**
+- Non-crÃ©ation de capacitÃ©
 - Composition minimale de 2 Tools
-- Validité de tous les Tools
-- Cohérence du niveau de sécurité
+- ValiditÃ© de tous les Tools
+- CohÃ©rence du niveau de sÃ©curitÃ©
 - Gouvernance obligatoire via BondingBrother
 
-Ce contrat complète le Tool Governance Contract en définissant comment les Tools peuvent être regroupés en Toolkits pour plus d'efficience, tout en préservant les garanties de gouvernance et de sécurité.
+Ce contrat complÃ¨te le Tool Governance Contract en dÃ©finissant comment les Tools peuvent Ãªtre regroupÃ©s en Toolkits pour plus d'efficience, tout en prÃ©servant les garanties de gouvernance et de sÃ©curitÃ©.
 
-**Non-négociabilité :** Ce contrat est absolu et non négociable. Le contrat prime sur toute considération pratique.
+**Non-nÃ©gociabilitÃ© :** Ce contrat est absolu et non nÃ©gociable. Le contrat prime sur toute considÃ©ration pratique.
 
 ---
 
-**Document créé le :** 2026-01-27  
+**Document crÃ©Ã© le :** 2026-01-27  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, Master Butler Documentation Fondatrice, [Miyukini Conceptual References - Tools et Toolkits](../../../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)  
-**Type :** Contrat de composition non négociable
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, Master Butler Documentation Fondatrice, [Miyukini Conceptual References - Tools et Toolkits](..//..//..//..//miyukini-webway-system//reference//_index.md)  
+**Type :** Contrat de composition non nÃ©gociable
 
 ---
 
-## 12. Mini log — erreurs / warnings / ambiguïtés rencontrées et corrigées
+## 12. Mini log â€” erreurs / warnings / ambiguÃ¯tÃ©s rencontrÃ©es et corrigÃ©es
 
-### Ambiguïté A1 : Format de l'identifiant de Toolkit
+### AmbiguÃ¯tÃ© A1 : Format de l'identifiant de Toolkit
 
-**Ambiguïté rencontrée :**
-La documentation de référence donne un exemple d'identifiant (`ui.standard`) sans définir un format canonique strict.
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
+La documentation de rÃ©fÃ©rence donne un exemple d'identifiant (`ui.standard`) sans dÃ©finir un format canonique strict.
 
-**Décision prise :**
-Format canonique défini : `<domain>.<function>` avec règles de nommage strictes (minuscules, sans accents, segments séparés par points).
+**DÃ©cision prise :**
+Format canonique dÃ©fini : `<domain>.<function>` avec rÃ¨gles de nommage strictes (minuscules, sans accents, segments sÃ©parÃ©s par points).
 
 **Justification :**
-Un format strict garantit la cohérence, évite les collisions, et facilite l'indexation et la recherche.
+Un format strict garantit la cohÃ©rence, Ã©vite les collisions, et facilite l'indexation et la recherche.
 
-**Correction effectuée :**
-Section 3.2 "Identifiant de Toolkit (ToolkitId)" ajoutée avec format canonique et règles de nommage (R-TKID-1 à R-TKID-5).
+**Correction effectuÃ©e :**
+Section 3.2 "Identifiant de Toolkit (ToolkitId)" ajoutÃ©e avec format canonique et rÃ¨gles de nommage (R-TKID-1 Ã  R-TKID-5).
 
-### Ambiguïté A2 : Nombre minimum de Tools
+### AmbiguÃ¯tÃ© A2 : Nombre minimum de Tools
 
-**Ambiguïté rencontrée :**
-La documentation de référence ne spécifie pas explicitement le nombre minimum de Tools dans un Toolkit.
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
+La documentation de rÃ©fÃ©rence ne spÃ©cifie pas explicitement le nombre minimum de Tools dans un Toolkit.
 
-**Décision prise :**
+**DÃ©cision prise :**
 Minimum de 2 Tools obligatoire (INV-NN-2).
 
 **Justification :**
-Un seul Tool ne constitue pas une "composition". La valeur d'un Toolkit réside dans le regroupement cohérent de plusieurs Tools.
+Un seul Tool ne constitue pas une "composition". La valeur d'un Toolkit rÃ©side dans le regroupement cohÃ©rent de plusieurs Tools.
 
-**Correction effectuée :**
-Invariant INV-NN-2 défini avec vérification formelle |toolkit.tools| ≥ 2.
+**Correction effectuÃ©e :**
+Invariant INV-NN-2 dÃ©fini avec vÃ©rification formelle |toolkit.tools| â‰¥ 2.
 
-### Ambiguïté A3 : Calcul du niveau de sécurité
+### AmbiguÃ¯tÃ© A3 : Calcul du niveau de sÃ©curitÃ©
 
-**Ambiguïté rencontrée :**
-La documentation de référence indique un `security_level` pour le Toolkit sans préciser sa relation avec les niveaux des Tools.
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
+La documentation de rÃ©fÃ©rence indique un `security_level` pour le Toolkit sans prÃ©ciser sa relation avec les niveaux des Tools.
 
-**Décision prise :**
-Le SecurityLevel d'un Toolkit ≥ max(SecurityLevel de chaque Tool), formalisé en INV-NN-4.
-
-**Justification :**
-Un Toolkit ne peut pas être moins restrictif que ses composants, sinon il permettrait de contourner les contrôles de sécurité des Tools individuels.
-
-**Correction effectuée :**
-Section 3.4 "Niveau de Sécurité" avec règles R-SEC-1 à R-SEC-3 et invariant INV-NN-4.
-
-### Ambiguïté A4 : Impact de la dépréciation d'un Tool sur les Toolkits
-
-**Ambiguïté rencontrée :**
-La documentation de référence ne précise pas ce qui se passe quand un Tool contenu dans un Toolkit est déprécié ou supprimé.
-
-**Décision prise :**
-Règles R-TKTOOL-1 à R-TKTOOL-3 définies : avertissement si dépréciation, invalidation si suppression.
+**DÃ©cision prise :**
+Le SecurityLevel d'un Toolkit â‰¥ max(SecurityLevel de chaque Tool), formalisÃ© en INV-NN-4.
 
 **Justification :**
-La cohérence du système exige que les Toolkits soient mis à jour ou supprimés si leurs composants deviennent invalides.
+Un Toolkit ne peut pas Ãªtre moins restrictif que ses composants, sinon il permettrait de contourner les contrÃ´les de sÃ©curitÃ© des Tools individuels.
 
-**Correction effectuée :**
-Section 5.3 "Statut de Toolkit" avec règles d'impact.
+**Correction effectuÃ©e :**
+Section 3.4 "Niveau de SÃ©curitÃ©" avec rÃ¨gles R-SEC-1 Ã  R-SEC-3 et invariant INV-NN-4.
+
+### AmbiguÃ¯tÃ© A4 : Impact de la dÃ©prÃ©ciation d'un Tool sur les Toolkits
+
+**AmbiguÃ¯tÃ© rencontrÃ©e :**
+La documentation de rÃ©fÃ©rence ne prÃ©cise pas ce qui se passe quand un Tool contenu dans un Toolkit est dÃ©prÃ©ciÃ© ou supprimÃ©.
+
+**DÃ©cision prise :**
+RÃ¨gles R-TKTOOL-1 Ã  R-TKTOOL-3 dÃ©finies : avertissement si dÃ©prÃ©ciation, invalidation si suppression.
+
+**Justification :**
+La cohÃ©rence du systÃ¨me exige que les Toolkits soient mis Ã  jour ou supprimÃ©s si leurs composants deviennent invalides.
+
+**Correction effectuÃ©e :**
+Section 5.3 "Statut de Toolkit" avec rÃ¨gles d'impact.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

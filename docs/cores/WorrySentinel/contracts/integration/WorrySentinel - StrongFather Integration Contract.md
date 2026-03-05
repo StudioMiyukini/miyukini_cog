@@ -1,4 +1,4 @@
-# WorrySentinel - StrongFather Integration Contract
+﻿# WorrySentinel - StrongFather Integration Contract
 
 ## 1. Contexte
 
@@ -8,10 +8,10 @@ Ce document complete la section "Relations avec les autres Cores" de l'[Index de
 - [WorrySentinel - Documentation Fondatrice](../../foundation/WorrySentinel%20-%20Documentation%20Fondatrice.md) pour la nature de WorrySentinel
 - [WorrySentinel - Core Interaction Contract](../../architecture/WorrySentinel%20-%20Core%20Interaction%20Contract.md) pour le modele d'interaction
 - [StrongFather - Documentation Fondatrice](../../../StrongFather/foundation/StrongFather%20-%20Documentation%20Fondatrice.md) pour la nature de StrongFather
-- [Miyukini Conceptual References - Security Levels](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) pour les niveaux 0-4
-- [Miyukini Conceptual References - Integrity Degradation System](../../../../reference/Miyukini%20Conceptual%20References%20-%20Integrity%20Degradation%20System.md) pour les etats T0-T4
+- [Miyukini Conceptual References - Security Levels](..//..//..//..//miyukini-webway-system//reference//_index.md) pour les niveaux 0-4
+- [Miyukini Conceptual References - Integrity Degradation System](..//..//..//..//miyukini-webway-system//reference//_index.md) pour les etats T0-T4
 
-L'integration respecte les [Lois d'Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) : toutes les interactions sont locales et ne requierent aucune dependance externe (**LOI-1**).
+L'integration respecte les [Lois d'Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) : toutes les interactions sont locales et ne requierent aucune dependance externe (**LOI-1**).
 
 ---
 
@@ -50,7 +50,7 @@ Cette relation garantit que :
 
 ---
 
-## 4. Nature de la relation WorrySentinel — StrongFather
+## 4. Nature de la relation WorrySentinel â€” StrongFather
 
 ### 4.1 Relation de gouvernance-adaptation
 
@@ -78,14 +78,14 @@ WorrySentinel observe les decisions refusees par StrongFather pour alimenter son
 
 | Responsabilite | WorrySentinel | StrongFather |
 |----------------|---------------|--------------|
-| **Definir les niveaux de securite** | ✅ Autorite | ❌ Consommateur |
-| **Gouverner les etats de confiance** | ✅ Autorite | ❌ Consommateur |
-| **Evaluer les intentions** | ❌ Jamais | ✅ Autorite |
-| **Produire des decisions** | ❌ Jamais | ✅ Autorite |
-| **Appliquer des politiques** | ❌ Jamais | ✅ Autorite |
-| **Definir la severite requise** | ✅ Autorite | ❌ Consommateur |
-| **Adapter la severite des politiques** | ❌ Jamais | ✅ Execution |
-| **Observer les decisions refusees** | ✅ Observateur | ✅ Source |
+| **Definir les niveaux de securite** | âœ… Autorite | âŒ Consommateur |
+| **Gouverner les etats de confiance** | âœ… Autorite | âŒ Consommateur |
+| **Evaluer les intentions** | âŒ Jamais | âœ… Autorite |
+| **Produire des decisions** | âŒ Jamais | âœ… Autorite |
+| **Appliquer des politiques** | âŒ Jamais | âœ… Autorite |
+| **Definir la severite requise** | âœ… Autorite | âŒ Consommateur |
+| **Adapter la severite des politiques** | âŒ Jamais | âœ… Execution |
+| **Observer les decisions refusees** | âœ… Observateur | âœ… Source |
 
 **Regle WS-SF-04 : Aucun chevauchement decisif**
 
@@ -94,30 +94,30 @@ WorrySentinel ne decide jamais si une intention est acceptee ou refusee. StrongF
 ### 4.3 Hierarchie des strates
 
 ```
-┌─────────────────────────────────────────┐
-│ STRATE 5 — Cores fonctionnels            │
-│                                          │
-│  ┌────────────────────────────────────┐ │
-│  │  StrongFather                      │ │
-│  │  (moteur de decision)              │ │
-│  │  Decide si une intention est       │ │
-│  │  acceptee/refusee/ambigue          │ │
-│  └────────────────────────────────────┘ │
-└─────────────────────────────────────────┘
-                    ▲
-                    │ adapte severite selon
-                    │ contraintes gouvernance
-                    │
-┌─────────────────────────────────────────┐
-│ STRATE 4 — Gouvernance securite          │
-│                                          │
-│  ┌────────────────────────────────────┐ │
-│  │  WorrySentinel                     │ │
-│  │  (pression verticale)             │ │
-│  │  Gouverne niveaux securite        │ │
-│  │  et etats de confiance            │ │
-│  └────────────────────────────────────┘ │
-└─────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 5 â€” Cores fonctionnels            â”‚
+â”‚                                          â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  StrongFather                      â”‚ â”‚
+â”‚  â”‚  (moteur de decision)              â”‚ â”‚
+â”‚  â”‚  Decide si une intention est       â”‚ â”‚
+â”‚  â”‚  acceptee/refusee/ambigue          â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                    â–²
+                    â”‚ adapte severite selon
+                    â”‚ contraintes gouvernance
+                    â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 4 â€” Gouvernance securite          â”‚
+â”‚                                          â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  WorrySentinel                     â”‚ â”‚
+â”‚  â”‚  (pression verticale)             â”‚ â”‚
+â”‚  â”‚  Gouverne niveaux securite        â”‚ â”‚
+â”‚  â”‚  et etats de confiance            â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Principe :** WorrySentinel exerce une pression verticale sur StrongFather depuis la Strate 4. StrongFather reste l'autorite decisionnelle dans la Strate 5.
@@ -131,33 +131,33 @@ WorrySentinel ne decide jamais si une intention est acceptee ou refusee. StrongF
 WorrySentinel transmet a StrongFather le contexte de securite qui contraint ses decisions :
 
 ```
-┌─────────────────┐
-│  WorrySentinel  │
-│  (gouverne)     │
-└────────┬────────┘
-         │
-         │ ──────────────────────────────────────────┐
-         │  SecurityLevel (0-4)                      │
-         │  TrustState (T0-T4)                       │
-         │  SeverityConstraint                       │
-         │ ──────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────┐
-│  StrongFather   │
-│  (adapte)       │
-└─────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  WorrySentinel  â”‚
+â”‚  (gouverne)     â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚
+         â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+         â”‚  SecurityLevel (0-4)                      â”‚
+         â”‚  TrustState (T0-T4)                       â”‚
+         â”‚  SeverityConstraint                       â”‚
+         â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  StrongFather   â”‚
+â”‚  (adapte)       â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-**Donnees transmises (WS → SF) :**
+**Donnees transmises (WS â†’ SF) :**
 
 | Element | Type | Description | Obligatoire |
 |---------|------|-------------|-------------|
-| `security_level` | `SecurityLevel` (0-4) | Niveau de securite applicable | ✅ Oui |
-| `trust_state` | `TrustState` (T0-T4) | Etat de confiance du systeme | ✅ Oui |
-| `severity_constraint` | `SeverityConstraint` | Severite requise pour les decisions | ✅ Oui |
-| `active_restrictions` | `RestrictionSet` | Restrictions actives (capacites bloquees) | ❌ Optionnel |
-| `timestamp` | `LogicalClock` | Horodatage logique | ✅ Oui |
+| `security_level` | `SecurityLevel` (0-4) | Niveau de securite applicable | âœ… Oui |
+| `trust_state` | `TrustState` (T0-T4) | Etat de confiance du systeme | âœ… Oui |
+| `severity_constraint` | `SeverityConstraint` | Severite requise pour les decisions | âœ… Oui |
+| `active_restrictions` | `RestrictionSet` | Restrictions actives (capacites bloquees) | âŒ Optionnel |
+| `timestamp` | `LogicalClock` | Horodatage logique | âœ… Oui |
 
 **Structure SeverityConstraint :**
 
@@ -184,33 +184,33 @@ interface SeverityConstraint {
 StrongFather transmet a WorrySentinel les signaux de decisions refusees pour observation :
 
 ```
-┌─────────────────┐
-│  WorrySentinel  │
-│  (observe)      │
-└────────▲────────┘
-         │
-         │ ◄─────────────────────────────────────────┐
-         │  DecisionRejectionSignal                  │
-         │  (decisions refusees)                     │
-         │ ◄─────────────────────────────────────────┘
-         │
-┌────────┴────────┐
-│  StrongFather   │
-│  (signale)      │
-└─────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  WorrySentinel  â”‚
+â”‚  (observe)      â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â–²â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚
+         â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+         â”‚  DecisionRejectionSignal                  â”‚
+         â”‚  (decisions refusees)                     â”‚
+         â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+         â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  StrongFather   â”‚
+â”‚  (signale)      â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-**Donnees transmises (SF → WS) :**
+**Donnees transmises (SF â†’ WS) :**
 
 | Element | Type | Description | Obligatoire |
 |---------|------|-------------|-------------|
-| `signal_id` | `UUID` | Identifiant unique du signal | ✅ Oui |
-| `intent_id` | `UUID` | Identifiant de l'intention refusee | ✅ Oui |
-| `rejection_type` | `RejectionType` | Type de refus | ✅ Oui |
-| `rejection_reason` | `string` | Raison du refus | ✅ Oui |
-| `policies_applied` | `PolicyId[]` | Politiques appliquees | ✅ Oui |
-| `severity_at_decision` | `SeverityLevel` | Severite active au moment de la decision | ✅ Oui |
-| `timestamp` | `LogicalClock` | Horodatage logique | ✅ Oui |
+| `signal_id` | `UUID` | Identifiant unique du signal | âœ… Oui |
+| `intent_id` | `UUID` | Identifiant de l'intention refusee | âœ… Oui |
+| `rejection_type` | `RejectionType` | Type de refus | âœ… Oui |
+| `rejection_reason` | `string` | Raison du refus | âœ… Oui |
+| `policies_applied` | `PolicyId[]` | Politiques appliquees | âœ… Oui |
+| `severity_at_decision` | `SeverityLevel` | Severite active au moment de la decision | âœ… Oui |
+| `timestamp` | `LogicalClock` | Horodatage logique | âœ… Oui |
 
 **Types de refus transmis :**
 
@@ -238,82 +238,82 @@ StrongFather ne transmet pas toutes les decisions refusees a WorrySentinel. Seul
 | **T0 (Normal)** | STANDARD | Decisions normales, evaluation standard des politiques |
 | **T1 (Instable)** | ELEVATED | Logging renforce, seuils de refus abaisses, justifications plus detaillees |
 | **T2 (Degrade)** | STRICT | Decisions plus strictes, capacites non essentielles refusees automatiquement |
-| **T3 (Restreint)** | MAXIMUM | Decisions critiques → AMBIGUE / DIFFEREE, TAMR requis pour override |
+| **T3 (Restreint)** | MAXIMUM | Decisions critiques â†’ AMBIGUE / DIFFEREE, TAMR requis pour override |
 | **T4 (Bloque)** | LOCKDOWN | Plus aucune decision operationnelle autorisee, mode diagnostic uniquement |
 
 ### 6.2 Comportements par etat de confiance
 
-**T0 — Normal (Severite STANDARD)**
+**T0 â€” Normal (Severite STANDARD)**
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│ Comportement StrongFather en T0                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│ • Evaluation normale des intentions                                  │
-│ • Politiques appliquees avec seuils standards                       │
-│ • Toutes les capacites disponibles                                  │
-│ • Decisions acceptees/refusees/ambigues selon politiques            │
-│ • Logging standard                                                   │
-└─────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Comportement StrongFather en T0                                     â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ â€¢ Evaluation normale des intentions                                  â”‚
+â”‚ â€¢ Politiques appliquees avec seuils standards                       â”‚
+â”‚ â€¢ Toutes les capacites disponibles                                  â”‚
+â”‚ â€¢ Decisions acceptees/refusees/ambigues selon politiques            â”‚
+â”‚ â€¢ Logging standard                                                   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-**T1 — Instable (Severite ELEVATED)**
+**T1 â€” Instable (Severite ELEVATED)**
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│ Comportement StrongFather en T1                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│ • Logging renforce sur toutes les decisions                         │
-│ • Seuils de refus legerement abaisses (plus de vigilance)           │
-│ • Justifications plus detaillees requises                           │
-│ • Toutes les capacites encore disponibles                           │
-│ • Alertes sur patterns anormaux de refus                            │
-└─────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Comportement StrongFather en T1                                     â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ â€¢ Logging renforce sur toutes les decisions                         â”‚
+â”‚ â€¢ Seuils de refus legerement abaisses (plus de vigilance)           â”‚
+â”‚ â€¢ Justifications plus detaillees requises                           â”‚
+â”‚ â€¢ Toutes les capacites encore disponibles                           â”‚
+â”‚ â€¢ Alertes sur patterns anormaux de refus                            â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-**T2 — Degrade (Severite STRICT)**
+**T2 â€” Degrade (Severite STRICT)**
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│ Comportement StrongFather en T2                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│ • Decisions plus strictes sur toutes les intentions                 │
-│ • Capacites non essentielles refusees automatiquement               │
-│ • Intentions ambigues systematiquement refusees                     │
-│ • Alertes transmises a WorrySentinel                                │
-│ • Seuils de refus significativement abaisses                        │
-│ • Historique detaille de toutes les decisions                       │
-└─────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Comportement StrongFather en T2                                     â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ â€¢ Decisions plus strictes sur toutes les intentions                 â”‚
+â”‚ â€¢ Capacites non essentielles refusees automatiquement               â”‚
+â”‚ â€¢ Intentions ambigues systematiquement refusees                     â”‚
+â”‚ â€¢ Alertes transmises a WorrySentinel                                â”‚
+â”‚ â€¢ Seuils de refus significativement abaisses                        â”‚
+â”‚ â€¢ Historique detaille de toutes les decisions                       â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-**T3 — Restreint (Severite MAXIMUM)**
+**T3 â€” Restreint (Severite MAXIMUM)**
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│ Comportement StrongFather en T3                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│ • Decisions critiques → AMBIGUE ou DIFFEREE                         │
-│ • TAMR requis pour tout override de decision                        │
-│ • Seules les capacites essentielles disponibles                     │
-│ • Intentions non essentielles refusees systematiquement             │
-│ • Chaque decision tracee pour audit complet                         │
-│ • Mode "fail-closed" : en cas de doute, refuser                     │
-└─────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Comportement StrongFather en T3                                     â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ â€¢ Decisions critiques â†’ AMBIGUE ou DIFFEREE                         â”‚
+â”‚ â€¢ TAMR requis pour tout override de decision                        â”‚
+â”‚ â€¢ Seules les capacites essentielles disponibles                     â”‚
+â”‚ â€¢ Intentions non essentielles refusees systematiquement             â”‚
+â”‚ â€¢ Chaque decision tracee pour audit complet                         â”‚
+â”‚ â€¢ Mode "fail-closed" : en cas de doute, refuser                     â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-**T4 — Bloque (Severite LOCKDOWN)**
+**T4 â€” Bloque (Severite LOCKDOWN)**
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│ Comportement StrongFather en T4                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│ • Plus aucune decision operationnelle autorisee                     │
-│ • Toutes les intentions → REFUSEE (sauf diagnostic)                 │
-│ • Mode diagnostic uniquement                                         │
-│ • TAMR obligatoire pour toute action                                 │
-│ • Etat lisible, sortie propre possible                              │
-│ • Aucune capacite disponible                                         │
-└─────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Comportement StrongFather en T4                                     â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ â€¢ Plus aucune decision operationnelle autorisee                     â”‚
+â”‚ â€¢ Toutes les intentions â†’ REFUSEE (sauf diagnostic)                 â”‚
+â”‚ â€¢ Mode diagnostic uniquement                                         â”‚
+â”‚ â€¢ TAMR obligatoire pour toute action                                 â”‚
+â”‚ â€¢ Etat lisible, sortie propre possible                              â”‚
+â”‚ â€¢ Aucune capacite disponible                                         â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 6.3 Impact du niveau de securite (0-4)
@@ -322,11 +322,11 @@ Le niveau de securite (0-4) defini par WorrySentinel s'ajoute a l'etat de confia
 
 | Niveau securite | Impact sur les decisions |
 |-----------------|--------------------------|
-| **Niveau 0 — Public** | Contraintes minimales, politiques souples |
-| **Niveau 1 — Standard** | Contraintes de base, verifications standards |
-| **Niveau 2 — Sensitive** | Contraintes renforcees, verifications supplementaires |
-| **Niveau 3 — Critical** | Contraintes strictes, justification obligatoire |
-| **Niveau 4 — Highest** | Contraintes maximales, validation multi-niveaux |
+| **Niveau 0 â€” Public** | Contraintes minimales, politiques souples |
+| **Niveau 1 â€” Standard** | Contraintes de base, verifications standards |
+| **Niveau 2 â€” Sensitive** | Contraintes renforcees, verifications supplementaires |
+| **Niveau 3 â€” Critical** | Contraintes strictes, justification obligatoire |
+| **Niveau 4 â€” Highest** | Contraintes maximales, validation multi-niveaux |
 
 **Combinaison niveau + etat :**
 
@@ -364,7 +364,7 @@ La severite finale est le maximum entre la severite de l'etat de confiance et ce
 
 StrongFather recoit le contexte de securite de WorrySentinel selon le format standardise :
 
-**Structure de requete contexte (WS → SF) :**
+**Structure de requete contexte (WS â†’ SF) :**
 
 ```typescript
 interface SecurityContextUpdate {
@@ -400,7 +400,7 @@ StrongFather doit toujours avoir un contexte de securite valide. En cas d'absenc
 
 ### 8.2 Transmission des signaux de refus
 
-**Structure de signal de refus (SF → WS) :**
+**Structure de signal de refus (SF â†’ WS) :**
 
 ```typescript
 interface DecisionRejectionSignal {
@@ -541,7 +541,7 @@ Toute interaction entre WorrySentinel et StrongFather est tracable avec contexte
 **Flux :**
 
 ```
-1. WorrySentinel detecte la necessite de transition T1 → T2
+1. WorrySentinel detecte la necessite de transition T1 â†’ T2
 2. WorrySentinel met a jour l'etat de confiance : T2
 3. WorrySentinel transmet le nouveau contexte a StrongFather :
    {
@@ -624,27 +624,27 @@ Toute interaction entre WorrySentinel et StrongFather est tracable avec contexte
 
 | Invariant | Statut | Justification |
 |-----------|--------|---------------|
-| **INV-WS-1** | ✅ Conforme | WorrySentinel n'implemente aucun controle de securite |
-| **INV-WS-2** | ✅ Conforme | WorrySentinel n'execute aucune action |
-| **INV-WS-3** | ✅ Conforme | WorrySentinel n'accede a aucune donnee persistee |
-| **INV-WS-4** | ✅ Conforme | WorrySentinel ne modifie pas l'etat de StrongFather |
-| **INV-WS-5** | ✅ Conforme | Aucune logique temporelle technique |
-| **INV-WS-6** | ✅ Conforme | Zero-trust respecte |
-| **INV-WS-7** | ✅ Conforme | Gouvernance explicite (contexte structure) |
-| **INV-WS-8** | ✅ Conforme | Tracabilite complete de tous les echanges |
+| **INV-WS-1** | âœ… Conforme | WorrySentinel n'implemente aucun controle de securite |
+| **INV-WS-2** | âœ… Conforme | WorrySentinel n'execute aucune action |
+| **INV-WS-3** | âœ… Conforme | WorrySentinel n'accede a aucune donnee persistee |
+| **INV-WS-4** | âœ… Conforme | WorrySentinel ne modifie pas l'etat de StrongFather |
+| **INV-WS-5** | âœ… Conforme | Aucune logique temporelle technique |
+| **INV-WS-6** | âœ… Conforme | Zero-trust respecte |
+| **INV-WS-7** | âœ… Conforme | Gouvernance explicite (contexte structure) |
+| **INV-WS-8** | âœ… Conforme | Tracabilite complete de tous les echanges |
 
 ### 13.2 Respect des invariants StrongFather
 
 | Invariant | Statut | Justification |
 |-----------|--------|---------------|
-| **INV-SF-1** | ✅ Conforme | StrongFather n'execute aucune action |
-| **INV-SF-2** | ✅ Conforme | StrongFather n'accede a aucune donnee persistee |
-| **INV-SF-3** | ✅ Conforme | StrongFather ne modifie pas l'etat du systeme |
-| **INV-SF-4** | ✅ Conforme | Aucune logique temporelle technique |
-| **INV-SF-5** | ✅ Conforme | Zero-trust respecte |
-| **INV-SF-6** | ✅ Conforme | Decisions non ambigues |
-| **INV-SF-7** | ✅ Conforme | Politiques explicites |
-| **INV-SF-8** | ✅ Conforme | Tracabilite complete |
+| **INV-SF-1** | âœ… Conforme | StrongFather n'execute aucune action |
+| **INV-SF-2** | âœ… Conforme | StrongFather n'accede a aucune donnee persistee |
+| **INV-SF-3** | âœ… Conforme | StrongFather ne modifie pas l'etat du systeme |
+| **INV-SF-4** | âœ… Conforme | Aucune logique temporelle technique |
+| **INV-SF-5** | âœ… Conforme | Zero-trust respecte |
+| **INV-SF-6** | âœ… Conforme | Decisions non ambigues |
+| **INV-SF-7** | âœ… Conforme | Politiques explicites |
+| **INV-SF-8** | âœ… Conforme | Tracabilite complete |
 
 ---
 
@@ -658,7 +658,7 @@ Toute implementation de l'integration entre WorrySentinel et StrongFather doit r
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT — Normatif  
+**Statut :** CONTRAT â€” Normatif  
 **Dependances :**
 - WorrySentinel - Documentation Fondatrice v1.2 (Section 9.2)
 - WorrySentinel - Core Interaction Contract v1.0 (Section 5.2)
@@ -692,19 +692,20 @@ Toute implementation de l'integration entre WorrySentinel et StrongFather doit r
 ### Verification de coherence
 
 **Verification effectuee :**
-- ✅ Coherence avec WorrySentinel - Documentation Fondatrice : Section 9.2 respectee
-- ✅ Coherence avec WorrySentinel - Core Interaction Contract : Section 5.2 respectee
-- ✅ Coherence avec StrongFather - Documentation Fondatrice : Relation complementaire confirmee
-- ✅ Respect INV-WS-1 : Aucune autorite sur l'implementation
-- ✅ Respect INV-WS-2 : Aucune autorite sur l'execution
-- ✅ Respect INV-WS-3 : Aucune autorite sur la persistance
-- ✅ Respect INV-SF-1 : StrongFather n'execute pas
-- ✅ Respect INV-SF-2 : StrongFather ne persiste pas
-- ✅ Conformite LOI-1 : Aucune dependance externe
-- ✅ Separation des responsabilites preservee
+- âœ… Coherence avec WorrySentinel - Documentation Fondatrice : Section 9.2 respectee
+- âœ… Coherence avec WorrySentinel - Core Interaction Contract : Section 5.2 respectee
+- âœ… Coherence avec StrongFather - Documentation Fondatrice : Relation complementaire confirmee
+- âœ… Respect INV-WS-1 : Aucune autorite sur l'implementation
+- âœ… Respect INV-WS-2 : Aucune autorite sur l'execution
+- âœ… Respect INV-WS-3 : Aucune autorite sur la persistance
+- âœ… Respect INV-SF-1 : StrongFather n'execute pas
+- âœ… Respect INV-SF-2 : StrongFather ne persiste pas
+- âœ… Conformite LOI-1 : Aucune dependance externe
+- âœ… Separation des responsabilites preservee
 
 **Conclusion :** Aucune contradiction detectee. Le document est coherent avec la documentation fondatrice des deux cores.
 
 ---
 
 *Aucune autre erreur, warning, ou ambiguite rencontree lors de la redaction de ce document.*
+

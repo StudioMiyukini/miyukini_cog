@@ -1,183 +1,183 @@
-# Protocole d'écriture de la documentation conceptuelle et contractuelle d'un nouveau système
+﻿# Protocole d'Ã©criture de la documentation conceptuelle et contractuelle d'un nouveau systÃ¨me
 **Version : v1.0**  
-**Statut : Normatif – Processus contrôlé**  
+**Statut : Normatif â€“ Processus contrÃ´lÃ©**  
 
 ---
 
 ## 1. Contexte
 
-Ce protocole complète le [Protocole d'implémentation générale](./Miyukini%20Framework%20-%20Protocole%20d'implémentation%20générale.md) en définissant les règles spécifiques à la **rédaction de documentation** (et non de code). Il guide l'agents IA *"planificateur"* en mode PLAN pour composer une to-do liste complète qui faciletera l'allocation des tâches aux agents IA.
+Ce protocole complÃ¨te le [Protocole d'implÃ©mentation gÃ©nÃ©rale](..//_index.md) en dÃ©finissant les rÃ¨gles spÃ©cifiques Ã  la **rÃ©daction de documentation** (et non de code). Il guide l'agents IA *"planificateur"* en mode PLAN pour composer une to-do liste complÃ¨te qui faciletera l'allocation des tÃ¢ches aux agents IA.
 
-### 1.1 Portée / Scope
+### 1.1 PortÃ©e / Scope
 
-Ce document définit un **protocole strict d'utilisation d'agents IA** pour l'écriture de la documentation d'un système logiciel — **cette documentation fera référence**.
+Ce document dÃ©finit un **protocole strict d'utilisation d'agents IA** pour l'Ã©criture de la documentation d'un systÃ¨me logiciel â€” **cette documentation fera rÃ©fÃ©rence**.
 
 Le processus :
-- est **suivi et automatisé**,
-- repose sur un **cycle fermé**, déterminé et explicite,
-- impose des **contrôles stricts à chaque étape**,
-- autorise le **travail en parallèle**, sous contraintes,
-- intègre la **gestion des limites de contexte et de coûts LLM**,
-- interdit toute dérive implicite ou interprétation libre.
-- Définie les règles de nomenclature des tâches
+- est **suivi et automatisÃ©**,
+- repose sur un **cycle fermÃ©**, dÃ©terminÃ© et explicite,
+- impose des **contrÃ´les stricts Ã  chaque Ã©tape**,
+- autorise le **travail en parallÃ¨le**, sous contraintes,
+- intÃ¨gre la **gestion des limites de contexte et de coÃ»ts LLM**,
+- interdit toute dÃ©rive implicite ou interprÃ©tation libre.
+- DÃ©finie les rÃ¨gles de nomenclature des tÃ¢ches
 
-## 2. Cycle global d'écriture (obligatoire)
+## 2. Cycle global d'Ã©criture (obligatoire)
 
-Le cycle est **ordonné, fermé et non contournable** :
+Le cycle est **ordonnÃ©, fermÃ© et non contournable** :
 
 1. **Planification**
-2. **Distribution des tâches aux agents**
-3. **Vérification, corrections et tests**
+2. **Distribution des tÃ¢ches aux agents**
+3. **VÃ©rification, corrections et tests**
 4. **Gel et versionnement**
 
-👉 Aucune étape ne peut être sautée ou fusionnée.
+ðŸ‘‰ Aucune Ã©tape ne peut Ãªtre sautÃ©e ou fusionnÃ©e.
 
 ---
 
-## 3. Phase 1 — Planification
+## 3. Phase 1 â€” Planification
 
-### 3.1 Titre de l'étape en cours
+### 3.1 Titre de l'Ã©tape en cours
 
-Renseigner obligatoirement le titre de l'étape de planification active.
+Renseigner obligatoirement le titre de l'Ã©tape de planification active.
 
 ---
 
 ### 3.2 Explication rapide
 
-Description synthétique de :
-- le périmètre couvert,
+Description synthÃ©tique de :
+- le pÃ©rimÃ¨tre couvert,
 - les limites explicites,
-- le maintien de la liste des tâches par l'agent planificateur,
-- le lancement des nouvelles tâches à de nouveaux agents Auto Cursor si les conditions sont réunies.
+- le maintien de la liste des tÃ¢ches par l'agent planificateur,
+- le lancement des nouvelles tÃ¢ches Ã  de nouveaux agents Auto Cursor si les conditions sont rÃ©unies.
 
 ---
 
-### 3.3 Sélection du modèle IA (obligatoire)
+### 3.3 SÃ©lection du modÃ¨le IA (obligatoire)
 
 voir "AI Mode Selector.md"
 
-### 3.4 Prompt engineering — Mode PLAN
+### 3.4 Prompt engineering â€” Mode PLAN
 
 Le prompt de planification DOIT inclure :
 
-#### a) Définition de l'agent
-- Rôle précis
+#### a) DÃ©finition de l'agent
+- RÃ´le prÃ©cis
 - Poste
-- Compétences requises
-- Responsabilités
+- CompÃ©tences requises
+- ResponsabilitÃ©s
 - Ce que l'agent ne doit jamais faire
 
 #### b) Cadre de travail
-- Documentation autorisée (liste fermée)
-- Outils autorisés
+- Documentation autorisÃ©e (liste fermÃ©e)
+- Outils autorisÃ©s
 - Outils interdits
 
 #### c) Construction de la structure
-- 1er document = document "fondateur" si pas déjà présent
-- Création des documents nommés mais vides
+- 1er document = document "fondateur" si pas dÃ©jÃ  prÃ©sent
+- CrÃ©ation des documents nommÃ©s mais vides
 - Respecter la taxonomie et les nomenclatures du projet
 
-Les dépendances doivent être :
-- explicitées,
-- annotées,
-- accompagnées d'un ordre strict si nécessaire
+Les dÃ©pendances doivent Ãªtre :
+- explicitÃ©es,
+- annotÃ©es,
+- accompagnÃ©es d'un ordre strict si nÃ©cessaire
 
 #### d) Contraintes absolues
-- ❌ Ne pas anticiper les étapes suivantes
-- ❌ Ne pas fusionner plusieurs documents
-- ❌ Ne pas corriger hors périmètre
+- âŒ Ne pas anticiper les Ã©tapes suivantes
+- âŒ Ne pas fusionner plusieurs documents
+- âŒ Ne pas corriger hors pÃ©rimÃ¨tre
 
 #### e) Mini log de planification
-- Ambiguïtés détectées
-- Dépendances critiques
-- Décisions structurantes
+- AmbiguÃ¯tÃ©s dÃ©tectÃ©es
+- DÃ©pendances critiques
+- DÃ©cisions structurantes
 
 ---
 
-## 4. Phase 2 — Distribution des tâches
+## 4. Phase 2 â€” Distribution des tÃ¢ches
 
-**Une to-do liste est généré** et **géré**en fonction de ce qui suit :
+**Une to-do liste est gÃ©nÃ©rÃ©** et **gÃ©rÃ©**en fonction de ce qui suit :
 
-Chaque tâche issue du plan est **déléguée par l'agent de planification** à un nouvel agent si les conditions sont réunies.
+Chaque tÃ¢che issue du plan est **dÃ©lÃ©guÃ©e par l'agent de planification** Ã  un nouvel agent si les conditions sont rÃ©unies.
 
 Contexte vierge obligatoire.
-**Pas de tâche impliquant plusieurs documents à écrire**
-**Pas de batch/vague/groupe de tâches**
+**Pas de tÃ¢che impliquant plusieurs documents Ã  Ã©crire**
+**Pas de batch/vague/groupe de tÃ¢ches**
 **1 agent = 1 document**
 
-*Chaque tâche du plan ou to-do a une nomenclature défini* : [xx] - [du document à produire]
-Le [xx] est préfixe de regroupement d'écriture parallèle. Je peux lancer toutes les tâches "01" en même temps avec des agents différents pour chaque tâche.
+*Chaque tÃ¢che du plan ou to-do a une nomenclature dÃ©fini* : [xx] - [du document Ã  produire]
+Le [xx] est prÃ©fixe de regroupement d'Ã©criture parallÃ¨le. Je peux lancer toutes les tÃ¢ches "01" en mÃªme temps avec des agents diffÃ©rents pour chaque tÃ¢che.
 
-Une limite maximale d'agents simultanés est définie à **4**. Donc aucun groupement de préfixe ne doit avoir plus de 4 itérations.
+Une limite maximale d'agents simultanÃ©s est dÃ©finie Ã  **4**. Donc aucun groupement de prÃ©fixe ne doit avoir plus de 4 itÃ©rations.
 
-Lance les agents automatiquement en suivant le plan jusqu'à un arret ou la fin de la tâche
+Lance les agents automatiquement en suivant le plan jusqu'Ã  un arret ou la fin de la tÃ¢che
 
-Il est interdit d'avoir des tâches qui demande l'écriture de plusieurs fichiers.
+Il est interdit d'avoir des tÃ¢ches qui demande l'Ã©criture de plusieurs fichiers.
 
-### 4.1 Règle d'arrêt stricte
+### 4.1 RÃ¨gle d'arrÃªt stricte
 
-Un agent DOIT S'ARRÊTER IMMÉDIATEMENT si :
+Un agent DOIT S'ARRÃŠTER IMMÃ‰DIATEMENT si :
 
-- une ambiguïté bloquante est détectée,
-- une dépendance manquante est rencontrée,
-- la fenêtre de contexte devient insuffisante,
-- la tâche et le test unitaire (si présent) sont terminés et corrects.
+- une ambiguÃ¯tÃ© bloquante est dÃ©tectÃ©e,
+- une dÃ©pendance manquante est rencontrÃ©e,
+- la fenÃªtre de contexte devient insuffisante,
+- la tÃ¢che et le test unitaire (si prÃ©sent) sont terminÃ©s et corrects.
 
-👉 Dans ces cas :
+ðŸ‘‰ Dans ces cas :
 
-- aucun fichier partiel n'est généré,
+- aucun fichier partiel n'est gÃ©nÃ©rÃ©,
 - l'agent informe l'agent planificateur qui continuera son orchestration.
 
 ---
 
-## 5. Phase 3 — Vérification, corrections et tests
+## 5. Phase 3 â€” VÃ©rification, corrections et tests
 
-### 5.1 Vérification globale
+### 5.1 VÃ©rification globale
 
-Le système documentaire est analysé pour :
-- incohérences inter-documents,
-- non-conformités à la documentation de référence,
-- violations de règles ou d'invariants,
-- comportements implicites ou non documentés.
+Le systÃ¨me documentaire est analysÃ© pour :
+- incohÃ©rences inter-documents,
+- non-conformitÃ©s Ã  la documentation de rÃ©fÃ©rence,
+- violations de rÃ¨gles ou d'invariants,
+- comportements implicites ou non documentÃ©s.
 
 ### 5.2 Corrections
 
-Toute correction est traitée comme une nouvelle tâche.  
-Les règles de la Phase 2 s'appliquent intégralement.  
-Aucune correction "rapide" hors protocole n'est autorisée.
+Toute correction est traitÃ©e comme une nouvelle tÃ¢che.  
+Les rÃ¨gles de la Phase 2 s'appliquent intÃ©gralement.  
+Aucune correction "rapide" hors protocole n'est autorisÃ©e.
 
 ### 5.3 Tests
 
-- Exécution des tests de cohérence et de complétude
-- Validation de la structure documentaire complète
-- Aucune validation partielle n'est acceptée
+- ExÃ©cution des tests de cohÃ©rence et de complÃ©tude
+- Validation de la structure documentaire complÃ¨te
+- Aucune validation partielle n'est acceptÃ©e
 
-### 5.4 Audit du système
+### 5.4 Audit du systÃ¨me
 
-Rédaction d'un audit formel incluant :
-- erreurs rencontrées,
-- corrections appliquées,
-- risques évités,
+RÃ©daction d'un audit formel incluant :
+- erreurs rencontrÃ©es,
+- corrections appliquÃ©es,
+- risques Ã©vitÃ©s,
 - points de vigilance futurs.
 
 ---
 
-## 6. Phase 4 — Gel et versionnement
+## 6. Phase 4 â€” Gel et versionnement
 
 ### 6.1 Gel
 
-- Rédaction d'un document de gel officiel
-- Liste exhaustive des éléments gelés
+- RÃ©daction d'un document de gel officiel
+- Liste exhaustive des Ã©lÃ©ments gelÃ©s
 - Interdiction de toute modification implicite
 
 ### 6.2 Versionnement
 
 - Attribution d'une version explicite (ex : v1.2.0)
 - Distinction versions majeures / mineures
-- Règles d'évolution futures
-- Conditions de dégel et de migration
+- RÃ¨gles d'Ã©volution futures
+- Conditions de dÃ©gel et de migration
 
-👉 Après gel :
+ðŸ‘‰ AprÃ¨s gel :
 
 - toute modification impose un nouveau cycle complet
 
@@ -188,16 +188,16 @@ Rédaction d'un audit formel incluant :
 ### 7.1 Modes IA
 
 **AI Mode 1 : Libre**
-- Abonnement non limité
+- Abonnement non limitÃ©
 
-**AI Mode 2 : Dégradé**
-- Budget On Demand limité (50$)
-- → Priorité au mode Auto
+**AI Mode 2 : DÃ©gradÃ©**
+- Budget On Demand limitÃ© (50$)
+- â†’ PrioritÃ© au mode Auto
 
-**AI Mode 3 : Fermé**
+**AI Mode 3 : FermÃ©**
 - Cursor Auto uniquement
 
-### 7.2 Modèles premium accessibles
+### 7.2 ModÃ¨les premium accessibles
 
 - Composer 1
 - Opus 4.5
@@ -208,17 +208,17 @@ Rédaction d'un audit formel incluant :
 - GPT 5.1 mini
 - Kimi K2
 
-### 7.3 Règle de consommation IA
+### 7.3 RÃ¨gle de consommation IA
 
-À chaque [pause], l'agent doit :
+Ã€ chaque [pause], l'agent doit :
 
 - soit continuer explicitement,
-- soit passer la main à un nouvel agent.
+- soit passer la main Ã  un nouvel agent.
 
-Un agent dont la fenêtre de contexte est saturée :
+Un agent dont la fenÃªtre de contexte est saturÃ©e :
 
-- s'arrête,
-- ne génère aucun document, même partiel.
+- s'arrÃªte,
+- ne gÃ©nÃ¨re aucun document, mÃªme partiel.
 
 ---
 
@@ -228,8 +228,9 @@ Ce protocole garantit :
 
 - une documentation conforme aux standards du projet,
 - une discipline stricte des agents IA,
-- une traçabilité complète,
-- une maîtrise des coûts et du contexte,
+- une traÃ§abilitÃ© complÃ¨te,
+- une maÃ®trise des coÃ»ts et du contexte,
 - une base stable pour audit, gel et certification.
 
-Toute rédaction de documentation hors de ce protocole est considérée comme non conforme.
+Toute rÃ©daction de documentation hors de ce protocole est considÃ©rÃ©e comme non conforme.
+

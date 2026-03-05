@@ -1,4 +1,4 @@
-# LogisticsSteward - BondingBrother Integration Contract
+﻿# LogisticsSteward - BondingBrother Integration Contract
 
 ## 1. Contexte
 
@@ -6,7 +6,7 @@ Ce document definit le contrat d'integration entre LogisticsSteward et BondingBr
 
 Ce document complete la Section 8.5 de la [Documentation Fondatrice](../../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md) et s'appuie sur le [Resource Arbitration Contract](../resources/LogisticsSteward%20-%20Resource%20Arbitration%20Contract.md) pour le processus d'arbitrage, et la documentation de BondingBrother pour les specifications du mediateur.
 
-L'integration respecte les [Lois d'Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md) : en mode offline, les decisions sont buffees et synchronisees a la reconnexion (**LOI-2**, **LOI-3**).
+L'integration respecte les [Lois d'Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) : en mode offline, les decisions sont buffees et synchronisees a la reconnexion (**LOI-2**, **LOI-3**).
 
 ## 2. Portee / Scope
 
@@ -257,30 +257,30 @@ Si l'acquittement n'est pas recu dans le delai imparti (configurable, defaut 30s
 
 ```
 [LogisticsSteward]
-       │
-       │ Message avec decision
-       ▼
-┌─────────────────────┐
-│ BondingBrother      │
-│ - Reception         │
-│ - Validation format │
-│ - Ack RECU          │
-└──────────┬──────────┘
-           │
-           │ Traduction si necessaire
-           ▼
-┌─────────────────────┐
-│ BondingBrother      │
-│ - Transmission      │
-│ - Ack TRANSMIS      │
-└──────────┬──────────┘
-           │
-           │ Confirmation destinataire
-           ▼
-┌─────────────────────┐
-│ BondingBrother      │
-│ - Ack DELIVRE       │
-└─────────────────────┘
+       â”‚
+       â”‚ Message avec decision
+       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ BondingBrother      â”‚
+â”‚ - Reception         â”‚
+â”‚ - Validation format â”‚
+â”‚ - Ack RECU          â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+           â”‚
+           â”‚ Traduction si necessaire
+           â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ BondingBrother      â”‚
+â”‚ - Transmission      â”‚
+â”‚ - Ack TRANSMIS      â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+           â”‚
+           â”‚ Confirmation destinataire
+           â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ BondingBrother      â”‚
+â”‚ - Ack DELIVRE       â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
@@ -574,8 +574,8 @@ La reconciliation est un processus explicite, pas une correction silencieuse.
 
 **Etape 1 : Decision emise, BondingBrother indisponible**
 ```
-[LogisticsSteward] → Decision emise
-[Buffer local] ← Decision stockee (BB indisponible)
+[LogisticsSteward] â†’ Decision emise
+[Buffer local] â† Decision stockee (BB indisponible)
 [Log] : "Decision dec-2026-005679 buffee, BB offline"
 ```
 
@@ -607,14 +607,15 @@ Toute implementation de l'integration avec BondingBrother doit respecter ce cont
 - [Kernel Integration Contract](./LogisticsSteward%20-%20Kernel%20Integration%20Contract.md)
 - [BondingBrother - Documentation Fondatrice](../../../BondingBrother/foundation/BondingBrother%20-%20Documentation%20Fondatrice.md)
 - [BondingBrother - Architecture & Flows](../../../BondingBrother/architecture/BondingBrother%20-%20Architecture%20&%20Flows.md)
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 **Version :** 1.0.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT — Normatif  
+**Statut :** CONTRAT â€” Normatif  
 **Dependencies :**
 - [Documentation Fondatrice](../../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md) v1.0.0 (Section 8.5)
 - [BondingBrother - Documentation Fondatrice](../../../BondingBrother/foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) v2.0
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)
+

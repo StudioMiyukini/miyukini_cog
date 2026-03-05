@@ -1,17 +1,15 @@
-# MiyuCMS — Index de navigation
+# MiyuCMS - Index de navigation
 
 ## Contexte
 
-**MiyuCMS** est le **kit d'outils (Toolkit)** de contenu éditorial (posts, pages, médias, révisions, commentaires). Voir [Documentation Fondatrice](./MiyuCMS%20-%20Documentation%20Fondatrice.md) pour la définition complète.
-
-**Strate :** 6 (Tools & Toolkits)  
-**ToolkitId :** `toolkit.content.cms`
-
----
+MiyuCMS est le toolkit de contenu editorial (`toolkit.content.cms`).
 
 ## Structure de la documentation
 
 | Document | Description |
-|----------|-------------|
-| [Documentation Fondatrice](./MiyuCMS%20-%20Documentation%20Fondatrice.md) | Identité, définition canonique, ToolkitId, liste des outils composants, gouvernance |
-| Reference Outils | Prévue (phase ultérieure) |
+|---|---|
+| [MiyuCMS - Documentation Fondatrice](./MiyuCMS%20-%20Documentation%20Fondatrice.md) | Definition canonique, gouvernance, perimetre |
+| [MiyuCMS - Reference Outils](./MiyuCMS%20-%20Reference%20Outils.md) | Liste des ToolIds et role de chaque outil |
+| [MiyuCMS - Notions SPM CMS Consolidees](./MiyuCMS%20-%20Notions%20SPM%20CMS%20Consolidees.md) | Consolidation des notions modules/adaptateurs migrees depuis `docs/spm-cms/` |
+| [MiyuCMS - Reference Implementation Guidelines](./implementation/MiyuCMS%20-%20Reference%20Implementation%20Guidelines.md) | Guide d'implementation non normatif |
+| [MiyuCMS - Tool Governance Compliance Contract](./contracts/governance/MiyuCMS%20-%20Tool%20Governance%20Compliance%20Contract.md) | Regles normatives de conformite |

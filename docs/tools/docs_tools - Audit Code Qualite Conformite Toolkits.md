@@ -3,7 +3,7 @@
 **Version :** 1.0  
 **Statut :** Rapport d'audit  
 **Date :** 2026-01-31  
-**Références :** [docs_tools - Verification Pret Implementation Bornes](./docs_tools%20-%20Verification%20Pret%20Implementation%20Bornes.md), [docs_tools - Audit Qualite Conformite Securite Implementation](./docs_tools%20-%20Audit%20Qualite%20Conformite%20Securite%20Implementation.md), [docs_tools - Reference Implementation Guidelines Template](./docs_tools%20-%20Reference%20Implementation%20Guidelines%20Template.md), [Miyukini Protocol - Ecriture Enrichie Toolkits](../protocols/Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md)
+**Références :** [docs_tools - Verification Pret Implementation Bornes](./docs_tools%20-%20Verification%20Pret%20Implementation%20Bornes.md), [docs_tools - Audit Qualite Conformite Securite Implementation](./docs_tools%20-%20Audit%20Qualite%20Conformite%20Securite%20Implementation.md), [docs_tools - Reference Implementation Guidelines Template](./docs_tools%20-%20Reference%20Implementation%20Guidelines%20Template.md), [Miyukini Protocol - Ecriture Enrichie Toolkits](..//contrats//Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md)
 
 ---
 
@@ -11,7 +11,7 @@
 
 Ce document audite le **code source des crates Toolkits** (crates `miyu*` du workspace) : qualité du code, respect des protocoles (MIP, BOUND-*), bon fonctionnement (compilation, invariants) et déviances éventuelles.
 
-**Périmètre :** crates sous `crates/` de type toolkit (miyauth, miyucalc, miyutext, …), hors Cores et miyukini-admin / miyukini-central / miyukini-kernel. Les outils `tools/mip-generator`, `tools/toolkit-registry-export`, `tools/toolkit-skeleton` sont inclus pour cohérence du pipeline.
+**Périmètre :** crates sous `crates/` de type toolkit (miyauth, miyucalc, miyutext, …), hors Cores et miyukini-admin / miyukini-central / miyukini-kernel. Les outils `tools/mscm-generator`, `tools/toolkit-registry-export`, `tools/toolkit-skeleton` sont inclus pour cohérence du pipeline.
 
 ---
 
@@ -147,7 +147,7 @@ Les **tests** (miyusql, miyukini-kernel, etc.) et la **doc** (exemples dans id.r
 | Vérification prêt implémentation (bornes) | [docs_tools - Verification Pret Implementation Bornes](./docs_tools%20-%20Verification%20Pret%20Implementation%20Bornes.md) |
 | Audit qualité conformité sécurité | [docs_tools - Audit Qualite Conformite Securite Implementation](./docs_tools%20-%20Audit%20Qualite%20Conformite%20Securite%20Implementation.md) |
 | Template Reference Implementation Guidelines | [docs_tools - Reference Implementation Guidelines Template](./docs_tools%20-%20Reference%20Implementation%20Guidelines%20Template.md) |
-| Protocole Ecriture Enrichie Toolkits | [Miyukini Protocol - Ecriture Enrichie Toolkits](../protocols/Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md) |
+| Protocole Ecriture Enrichie Toolkits | [Miyukini Protocol - Ecriture Enrichie Toolkits](..//contrats//Miyukini%20Protocol%20-%20Ecriture%20Enrichie%20Toolkits.md) |
 | Index docs/tools | [_index](./_index.md) |
 
 ---
@@ -155,3 +155,4 @@ Les **tests** (miyusql, miyukini-kernel, etc.) et la **doc** (exemples dans id.r
 **Date de création :** 2026-01-31  
 **Dernière mise à jour :** 2026-01-31 (vérification détaillée BOUND-1, BOUND-3, ALLOW/DENY ; métriques has_mandate et Unimplemented recalculées)  
 **Statut :** Rapport d’audit — à mettre à jour après corrections ou évolution des métriques.
+

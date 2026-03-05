@@ -1,14 +1,14 @@
-# Miyukini Conceptual References - Miyukini Webway Relay
+﻿# Miyukini Conceptual References - Miyukini Webway Relay
 
 ## Contexte
 
-**Origin** est le point d'origine du Miyukini Webway System (MWS). Origin possede les fonctions de **relay** et de **tracker** ; il est la source de verite unique de l'ecosysteme. Les **relays** sont des duplications d'Origin, sous l'autorite d'Origin, qui garantissent la conformite des COGs, la maintenance des environnements et la distribution des versions. Les **trackers** assurent les connexions entre COGs et leur securite par des controles d'identite et **contrôle tracker** (verification du Permis de circulation), comme un douanier. Ce document decrit l'architecture du relay et du maillage MWS : Origin, relays, trackers, flux de verification, passeports, permis de circulation (accord relay), quarantaine, securite et robustesse.
+**Origin** est le point d'origine du Miyukini Webway System (MWS). Origin possede les fonctions de **relay** et de **tracker** ; il est la source de verite unique de l'ecosysteme. Les **relays** sont des duplications d'Origin, sous l'autorite d'Origin, qui garantissent la conformite des COGs, la maintenance des environnements et la distribution des versions. Les **trackers** assurent les connexions entre COGs et leur securite par des controles d'identite et **contrÃ´le tracker** (verification du Permis de circulation), comme un douanier. Ce document decrit l'architecture du relay et du maillage MWS : Origin, relays, trackers, flux de verification, passeports, permis de circulation (accord relay), quarantaine, securite et robustesse.
 
 **Principes fondamentaux :**
 
 - **Origin** est le point d'entree initial de tout COG sur le MWS. Il a les fonctions de relay et de tracker.
 - Les **relays** sont des duplications d'Origin sous son autorite. Ils garantissent la conformite en substance des COGs, la maintenance des environnements et la distribution des versions (mises a jour). Ils possedent la liste officielle des services disponibles aux COGs.
-- Les **trackers** assurent les connexions entre COGs et en assurent la securite par des controles d'identite et **contrôle tracker** (douaniers du reseau). Ils possedent et gerent les whitelists, blacklists et quarantaines. Ils dirigent des **pools par version des Cores** pour ne jamais connecter des COGs avec des versions differentes.
+- Les **trackers** assurent les connexions entre COGs et en assurent la securite par des controles d'identite et **contrÃ´le tracker** (douaniers du reseau). Ils possedent et gerent les whitelists, blacklists et quarantaines. Ils dirigent des **pools par version des Cores** pour ne jamais connecter des COGs avec des versions differentes.
 - Un COG se presente d'abord a Origin ; si Origin est sature, il redirige vers un relay jusqu'a ce qu'un relay accepte la verification.
 - La verification repose sur le **Passeport COG**, la **cle de conformite des Cores** et la **verification par blocs de code** (au sens MIP) des Services.
 - En cas de conformite, un **Permis de circulation** (accord relay) est emis. En cas de non-conformite, une **quarantaine** progressive s'applique.
@@ -21,7 +21,7 @@
 - **Quarantaine et escalade** : escalade progressive (1h, 2h, blacklist), alerte reseau, confinement.
 - **COG blackliste** : auto-destruction, ping Origin, reconstruction, retrait de la blacklist.
 - **Verite distribuee d'Origin** : le relay heberge une copie des criteres Origin, les diffuse aux COGs et aux Trackers.
-- **Separation des roles** : Origin (source de verite), relays (duplication, verification, accord relay), trackers (douaniers, pools, contrôle tracker).
+- **Separation des roles** : Origin (source de verite), relays (duplication, verification, accord relay), trackers (douaniers, pools, contrÃ´le tracker).
 - **Protocole d'enregistrement** : COG -> relay, authentification par token/secret, enregistrement du tunnel.
 - **Routing** par `cog_id` : multi-COG, multi-service, isolation des tunnels.
 - **Versioning COG** : empreinte de version (Cores + Services), verification de compatibilite, mise a jour.
@@ -32,7 +32,7 @@
 - **Robustesse** : reconnexion, timeouts, backpressure, arret propre (graceful shutdown).
 - **Migration COG pere/fils** : parentalite, archivage DB par strates, migration vers COG fils, renforcement du Passeport.
 - **Surface de connexion** : surface stricte, rejet hors surface, limite 100 connexions simultanees (hors ports 80/8080), serveur web embarque.
-- **Services web** : catalogue et **Lobbys** des trackers (port 80), presentation des surfaces au tracker, chemins client→hôte, **Lobbys prives** (mot de passe, 5 echecs puis ban, de-ban manuel), **accord d'hôte**, **favoris**, **amis entre COGs** ; site web des relays et Origin.
+- **Services web** : catalogue et **Lobbys** des trackers (port 80), presentation des surfaces au tracker, chemins clientâ†’hÃ´te, **Lobbys prives** (mot de passe, 5 echecs puis ban, de-ban manuel), **accord d'hÃ´te**, **favoris**, **amis entre COGs** ; site web des relays et Origin.
 - **Integration MWS** : adresses annoncees (relay_host:port + token), decouverte via Tracker.
 
 Ce document **ne specifie pas** le format binaire des messages du protocole relay ; cela releve de [Miyukini Webway Relay Protocol](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md).
@@ -48,7 +48,7 @@ Ce document **ne specifie pas** le format binaire des messages du protocole rela
 | Fonction | Description |
 |----------|-------------|
 | **Fonction relay** | Verification de conformite des COGs, maintenance des environnements, distribution des versions et mises a jour, hebergement du Registre de Services officiel. |
-| **Fonction tracker** | Gestion des connexions entre COGs, controle d'identite et **contrôle tracker**, gestion des whitelists/blacklists/quarantaines, pools par version des Cores. |
+| **Fonction tracker** | Gestion des connexions entre COGs, controle d'identite et **contrÃ´le tracker**, gestion des whitelists/blacklists/quarantaines, pools par version des Cores. |
 | **Source de verite unique** | Toutes les versions des Cores, Services officiels, checksums, politiques de conformite et passeports speciaux emanent d'Origin. |
 | **Point d'entree initial** | Tout COG se presente d'abord a Origin pour sa premiere verification. Si Origin est sature (puissance de calcul / saturation), il redirige vers un relay. |
 
@@ -66,11 +66,11 @@ Les relays sont des **duplications d'Origin**, sous l'autorite d'Origin. Chaque 
 
 ### 1.3 Trackers : les douaniers du reseau
 
-Les trackers assurent les **connexions entre COGs** et en assurent la securite par des controles d'identite et **contrôle tracker**, comme un **douanier** a une frontiere.
+Les trackers assurent les **connexions entre COGs** et en assurent la securite par des controles d'identite et **contrÃ´le tracker**, comme un **douanier** a une frontiere.
 
 | Capacite | Description |
 |----------|-------------|
-| **Contrôle d'identite et contrôle tracker** | Verifier que le COG possede un Permis de circulation valide delivre par un relay (accord relay) avant de le laisser se connecter au maillage. |
+| **ContrÃ´le d'identite et contrÃ´le tracker** | Verifier que le COG possede un Permis de circulation valide delivre par un relay (accord relay) avant de le laisser se connecter au maillage. |
 | **Whitelists / Blacklists / Quarantaines** | Gerer les listes d'autorisation, d'exclusion et de quarantaine pour le reseau. |
 | **Pools par version des Cores** | Diriger des **pools** separes par version des Cores pour ne **jamais** connecter des COGs avec des versions differentes entre eux. |
 | **Monitoring et congestion** | Journaliser et monitorer l'etat du reseau, detecter les points de congestion. Si un COG accumule beaucoup de connexions, renforcer la surveillance. |
@@ -106,7 +106,7 @@ flowchart TB
     O -.->|Sature : redirection| R1
     C1 -->|2. Verification| R1
     R1 -->|3. Permis de circulation delivre| C1
-    C1 -->|4. Connexion (contrôle tracker)| T1
+    C1 -->|4. Connexion (contrÃ´le tracker)| T1
     T1 -->|5. Pool version| C2
     T1 -->|5. Pool version| C3
     O -->|Verite distribuee| R1
@@ -228,7 +228,7 @@ sequenceDiagram
 
 | Resultat | Action |
 |----------|--------|
-| **Conforme** | Un **Permis de circulation** (accord relay) est emis pour une duree et une portee limitees par les intentions du COG (voir section 2.7). Le COG peut se connecter au Webway via les trackers (contrôle tracker). |
+| **Conforme** | Un **Permis de circulation** (accord relay) est emis pour une duree et une portee limitees par les intentions du COG (voir section 2.7). Le COG peut se connecter au Webway via les trackers (contrÃ´le tracker). |
 | **Version en retard (mais valide)** | Pas d'alerte de non-conformite. Une **notification de mise a jour** est envoyee. Le COG garde volontairement sa version et n'utilise que les services compatibles. |
 | **Non-conforme** | Le COG est mis en **quarantaine** (voir section 2.8). |
 
@@ -261,9 +261,9 @@ En cas de conformite, un **Permis de circulation** (accord relay) est emis :
 | `scope` | Portee du permis (intentions declarees par le COG : services a utiliser, COGs a contacter) |
 | `core_version` | Version des Cores validee |
 | `passport_type` | STANDARD ou SPECIAL |
-| `tracker_addresses` | Liste des adresses des **trackers officiels/sûrs** (connus d'Origin) ; le COG ne peut et ne doit se connecter qu'a ces trackers. |
+| `tracker_addresses` | Liste des adresses des **trackers officiels/sÃ»rs** (connus d'Origin) ; le COG ne peut et ne doit se connecter qu'a ces trackers. |
 
-Le Permis est **valable sur tout le reseau** accessible au COG qui le presente. Avec le Permis, le relay remet les **adresses des trackers officiels** ; un COG **ne peut pas et ne doit pas** se connecter a un tracker inconnu d'Origin. Les trackers effectuent le **contrôle tracker** (verification du Permis de circulation) avant d'autoriser les connexions.
+Le Permis est **valable sur tout le reseau** accessible au COG qui le presente. Avec le Permis, le relay remet les **adresses des trackers officiels** ; un COG **ne peut pas et ne doit pas** se connecter a un tracker inconnu d'Origin. Les trackers effectuent le **contrÃ´le tracker** (verification du Permis de circulation) avant d'autoriser les connexions.
 
 ### 2.8 Non-conformite : quarantaine et escalade
 
@@ -320,7 +320,7 @@ Origin heberge et distribue a tous les relays :
 | **Delivrance de Passeports speciaux** | **Oui** (exclusif) | Non | Non |
 | **Distribution des mises a jour** | **Oui** (source) | **Oui** (relais) | Non (redirige vers relay) |
 | **Registre de Services officiel** | **Oui** (maitre) | **Oui** (copie synchronisee) | Non |
-| **Contrôle d'identite et contrôle tracker** | Oui | Oui | **Oui** (role principal) |
+| **ContrÃ´le d'identite et contrÃ´le tracker** | Oui | Oui | **Oui** (role principal) |
 | **Gestion des whitelists / blacklists** | **Oui** (maitre) | Oui (copie synchronisee) | **Oui** (application locale) |
 | **Quarantaine** | Oui | Oui | **Oui** (application) |
 | **Pools par version des Cores** | Non | Non | **Oui** (exclusif) |
@@ -494,7 +494,7 @@ sequenceDiagram
     end
 ```
 
-### 5.8 Migration COG (père/fils) et parentalité
+### 5.8 Migration COG (pÃ¨re/fils) et parentalitÃ©
 
 Un COG peut **preparer sa migration** vers un COG aux Cores plus recents (**COG fils**). Seuls les **Services** sont mis a jour avec des versions compatibles aux Cores du COG ; pour beneficier de Cores plus recents, la migration vers un COG fils est le mecanisme prevu.
 
@@ -508,9 +508,9 @@ Un COG peut **preparer sa migration** vers un COG aux Cores plus recents (**COG 
 **Effet sur la securite et les controles :**
 
 - Le **lien de parentalite** renforce la securite et la force du Passeport lors des controles.
-- Un **COG enfant** d'un COG pere **sûr de longue date** peut passer **plus rapidement** les controles douaniers des trackers (facilitation basee sur la confiance heritee du pere).
+- Un **COG enfant** d'un COG pere **sÃ»r de longue date** peut passer **plus rapidement** les controles douaniers des trackers (facilitation basee sur la confiance heritee du pere).
 
-La parentalite est enregistree et verifiable par les relays et Origin ; elle n'altère pas l'unicite des identites (chaque COG garde son `cog_id` et son Passeport distincts).
+La parentalite est enregistree et verifiable par les relays et Origin ; elle n'altÃ¨re pas l'unicite des identites (chaque COG garde son `cog_id` et son Passeport distincts).
 
 ---
 
@@ -741,7 +741,7 @@ Un COG peut **embarquer un serveur web**. Celui-ci permet a certains Services de
 | Cas d'usage | Description |
 |-------------|-------------|
 | **Site web, SaaS** | Services necessitant une disponibilite web permanente (site vitrine, application web, portail). |
-| **Acces visiteur** | Les utilisateurs « visiteurs » peuvent acceder par navigateur pour faciliter l'acces (ex. COG gerant la disponibilite web de JayFestival). |
+| **Acces visiteur** | Les utilisateurs Â« visiteurs Â» peuvent acceder par navigateur pour faciliter l'acces (ex. COG gerant la disponibilite web de JayFestival). |
 | **Facilitation par les trackers** | Les trackers peuvent faciliter l'acces aux COGs ayant une surface web active et publique (catalogue, redirection) ; voir section 9.1. |
 
 Le serveur web embarque est expose sur les ports 80 et/ou 8080 ; il reste soumis a la politique de surface du COG (seuls les Services autorises sont exposes).
@@ -750,9 +750,9 @@ Le serveur web embarque est expose sur les ports 80 et/ou 8080 ; il reste soumis
 
 ## 9. Services web des trackers et des relays
 
-### 9.1 Catalogue web des trackers (port 80) — services WEB publics uniquement
+### 9.1 Catalogue web des trackers (port 80) â€” services WEB publics uniquement
 
-Les **trackers** disposent d'un **service web de portail** (port 80) qui presente le **catalogue des services WEB publics** des COGs connectes au reseau, a la maniere d'un **moteur de recherche** ; il gere aussi les **adresses URL**. Le catalogue est **global**, mis a jour et diffuse automatiquement. Les COGs n'ont pas besoin de nom de domaine ni d'IP fixe : le tracker agit comme **facilitateur** et gere les URLs/redirections. Les **Lobbys des autres services COG** (jeu, APIs, etc.) **ne sont pas visibles** depuis ce portail. Le **catalogue de Lobbys** pour chaque type de service est **visible depuis ces memes services** (ex. client jeu, client SaaS) — voir section 9.3.
+Les **trackers** disposent d'un **service web de portail** (port 80) qui presente le **catalogue des services WEB publics** des COGs connectes au reseau, a la maniere d'un **moteur de recherche** ; il gere aussi les **adresses URL**. Le catalogue est **global**, mis a jour et diffuse automatiquement. Les COGs n'ont pas besoin de nom de domaine ni d'IP fixe : le tracker agit comme **facilitateur** et gere les URLs/redirections. Les **Lobbys des autres services COG** (jeu, APIs, etc.) **ne sont pas visibles** depuis ce portail. Le **catalogue de Lobbys** pour chaque type de service est **visible depuis ces memes services** (ex. client jeu, client SaaS) â€” voir section 9.3.
 
 #### Controle initial et presentation au tracker
 
@@ -764,11 +764,11 @@ Lorsqu'un COG se presente aux trackers, il montre son **Passeport** pour un **co
 | **Surfaces web publiques** | Services web exposes au catalogue du portail (port 80). |
 | **Attentes et desirs** | Ce que le COG propose (ex. service de jeu, SaaS, portail) et eventuellement ce qu'il cherche a joindre. |
 
-Si le COG **accepte des connexions** pour certains **services** et sur certains **ports**, cela cree un **Lobby** dans le **catalogue de Lobbys** tenu par le tracker. Ce catalogue **n'est pas affiche sur le portail web** : les Lobbys sont **visibles et joignables depuis les services COG** concernes (voir section 9.3). Un **Lobby** est une entree : COG hôte, services exposes, ports, visibilite (publique ou privee).
+Si le COG **accepte des connexions** pour certains **services** et sur certains **ports**, cela cree un **Lobby** dans le **catalogue de Lobbys** tenu par le tracker. Ce catalogue **n'est pas affiche sur le portail web** : les Lobbys sont **visibles et joignables depuis les services COG** concernes (voir section 9.3). Un **Lobby** est une entree : COG hÃ´te, services exposes, ports, visibilite (publique ou privee).
 
 #### Pool par version des Cores et chemins
 
-Le tracker expose la **pool des COGs connectes** en fonction de la **version des Cores** du COG entrant (client). Il **indique les chemins** aux COGs clients pour se connecter aux COGs hôtes (adresses relay, tunnel, ou direct selon la topologie). Le tracker tient le **catalogue de Lobbys** (Lobbys de services exposes) ; ce catalogue est consulte par les **services COG** (pas par le portail web du tracker).
+Le tracker expose la **pool des COGs connectes** en fonction de la **version des Cores** du COG entrant (client). Il **indique les chemins** aux COGs clients pour se connecter aux COGs hÃ´tes (adresses relay, tunnel, ou direct selon la topologie). Le tracker tient le **catalogue de Lobbys** (Lobbys de services exposes) ; ce catalogue est consulte par les **services COG** (pas par le portail web du tracker).
 
 ### 9.2 Lobbys prives (mot de passe, ban, de-ban)
 
@@ -776,41 +776,41 @@ Certaines expositions ou **Lobbys peuvent etre prives** et exiger un **mot de pa
 
 | Regle | Description |
 |-------|-------------|
-| **Acces prive** | Le COG hôte peut proteger un Lobby par mot de passe. Le COG client doit fournir le mot de passe pour rejoindre. |
+| **Acces prive** | Le COG hÃ´te peut proteger un Lobby par mot de passe. Le COG client doit fournir le mot de passe pour rejoindre. |
 | **Limite d'echecs** | **5 echecs maximum** (mot de passe incorrect) ; au-dela, le **COG client est banni** de ce Lobby. |
-| **Notification** | En cas de ban, **notification a l'utilisateur du COG hôte** (proprietaire du Lobby). |
-| **De-ban** | **De-ban manuel uniquement** par l'utilisateur du COG hôte ; aucun de-ban automatique. |
+| **Notification** | En cas de ban, **notification a l'utilisateur du COG hÃ´te** (proprietaire du Lobby). |
+| **De-ban** | **De-ban manuel uniquement** par l'utilisateur du COG hÃ´te ; aucun de-ban automatique. |
 
-Le tracker journalise les tentatives et les bans pour tracabilite et alerte le COG hôte.
+Le tracker journalise les tentatives et les bans pour tracabilite et alerte le COG hÃ´te.
 
-### 9.3 Flow client–hôte : accord d'hôte, consommation, favoris
+### 9.3 Flow clientâ€“hÃ´te : accord d'hÃ´te, consommation, favoris
 
 **Cote utilisateur (depuis le service du COG client) :**
 
 1. L'utilisateur voit la **liste des Lobbys concernes** distribuee par le tracker (filtree par service, par version des Cores, par visibilite).
-2. Il **cherche ou trouve le COG hôte** qu'il desire joindre.
-3. Le **COG client se connecte au COG hôte** en suivant les **protocoles de securite** (Permis de circulation, puis autorisation hôte).
-4. Il **consomme les services exposes** grace à l'**accord d'hôte** delivre par le COG hôte : le COG hôte emet un accord d'hôte (ou mandat) autorisant ce client a utiliser les services du Lobby. L'accord d'hôte est distinct du Permis de circulation (accord relay) ; il regit l'acces aux ressources du hôte.
-5. L'utilisateur peut **ajouter le COG hôte en « favoris »** pour le retrouver plus vite dans les listes du tracker.
+2. Il **cherche ou trouve le COG hÃ´te** qu'il desire joindre.
+3. Le **COG client se connecte au COG hÃ´te** en suivant les **protocoles de securite** (Permis de circulation, puis autorisation hÃ´te).
+4. Il **consomme les services exposes** grace Ã  l'**accord d'hÃ´te** delivre par le COG hÃ´te : le COG hÃ´te emet un accord d'hÃ´te (ou mandat) autorisant ce client a utiliser les services du Lobby. L'accord d'hÃ´te est distinct du Permis de circulation (accord relay) ; il regit l'acces aux ressources du hÃ´te.
+5. L'utilisateur peut **ajouter le COG hÃ´te en Â« favoris Â»** pour le retrouver plus vite dans les listes du tracker.
 
 | Concept | Description |
 |---------|-------------|
-| **Permis de circulation (accord relay)** | Delivre par le relay/Origin ; autorise le COG a circuler sur le Webway et a se presenter aux trackers (contrôle tracker). |
-| **Accord d'hôte** | Delivre par le **COG hôte** ; autorise le COG client a consommer les services exposes par ce hôte (Lobby). |
-| **Favoris** | Liste locale (cote client) ou signalee au tracker : COGs hôtes que l'utilisateur souhaite retrouver rapidement. |
+| **Permis de circulation (accord relay)** | Delivre par le relay/Origin ; autorise le COG a circuler sur le Webway et a se presenter aux trackers (contrÃ´le tracker). |
+| **Accord d'hÃ´te** | Delivre par le **COG hÃ´te** ; autorise le COG client a consommer les services exposes par ce hÃ´te (Lobby). |
+| **Favoris** | Liste locale (cote client) ou signalee au tracker : COGs hÃ´tes que l'utilisateur souhaite retrouver rapidement. |
 
 ### 9.4 Amis entre COGs
 
-Une fonctionnalite **« amis »** entre COGs permet de connecter **deux COGs plus rapidement**, avec des **protocoles de controle allegees** et une **periodicite de re-verification plus longue**.
+Une fonctionnalite **Â« amis Â»** entre COGs permet de connecter **deux COGs plus rapidement**, avec des **protocoles de controle allegees** et une **periodicite de re-verification plus longue**.
 
 | Caracteristique | Description |
 |-----------------|-------------|
 | **Demande et confirmation humaines** | Les demandes d'amis et leur confirmation sont **humaines** : initiees et acceptees par les utilisateurs (pas d'acceptation automatique). |
-| **Controles allegees** | Une fois « amis », les controles douaniers (tracker) et d'acces (hôte) peuvent etre **alleges** pour ces paires (confiance explicite). |
+| **Controles allegees** | Une fois Â« amis Â», les controles douaniers (tracker) et d'acces (hÃ´te) peuvent etre **alleges** pour ces paires (confiance explicite). |
 | **Periodicite** | La periodicite de re-presentation ou de renouvellement de preuves peut etre **plus longue** que pour les COGs non amis. |
 | **Noms / pseudos** | Les COGs peuvent exposer les **noms ou pseudos de leurs utilisateurs** pour faciliter la reconnaissance (affichage dans les listes, demandes d'amis). |
 
-Les COGs amis restent soumis aux regles de surface et de securite ; la relation « amis » est une **facilitation** contractuelle entre deux environnements, pas un contournement des Cores.
+Les COGs amis restent soumis aux regles de surface et de securite ; la relation Â« amis Â» est une **facilitation** contractuelle entre deux environnements, pas un contournement des Cores.
 
 ### 9.5 Site web des relays et d'Origin
 
@@ -873,7 +873,7 @@ Les relays sont **source de verite** pour ces contenus mais restent **toujours s
 
 - **Evenements journalises** : enregistrement de tunnel (succes, echec), deconnexion (normale, timeout, erreur), echec d'authentification (type d'erreur, adresse source sans token), erreurs de routing, rate limiting declenche, blacklist temporaire activee.
 - **Donnees sensibles** : ne **jamais** logger les tokens, secrets, ou le contenu des donnees relayees. Logger uniquement les `cog_id` (ou identifiants opaques), adresses sources (IP), horodatages, types d'evenements et codes d'erreur.
-- **Retention** : conserver les logs selon la politique de retention du deploiement (voir [Hostinger VPS Origin Webway](../../setup/Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) et [MWS - Implementation Origin Hostinger](../deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md) section 12 et [Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md) section 8.5).
+- **Retention** : conserver les logs selon la politique de retention du deploiement (voir [Hostinger VPS Origin Webway](..//setup//Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) et [MWS - Implementation Origin Hostinger](../deploiement/MWS%20-%20Implementation%20Origin%20Hostinger.md) section 12 et [Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md) section 8.5).
 - **Correlation** : chaque connexion et tunnel recoit un identifiant de session unique (ex. UUID) pour permettre la correlation des evenements lies a un meme tunnel ou appelant.
 
 ### 10.6 Securite de la configuration et des secrets
@@ -896,7 +896,7 @@ Les relays sont **source de verite** pour ces contenus mais restent **toujours s
 | **Registre de Services** | Verification de tout service dans le Registre du Relay Origin ; isolation reseau si service non repertorie ; suivi des mises a jour | Obligatoire |
 | **Verification de conformite** | Phase A (cle Cores), Phase B (blocs de code MIP Services), Phase C (sante environnement) | Obligatoire |
 | **Passeport COG** | Transmission obligatoire du Passeport complet (ID, versions, services, sante, previous_permis, type) | Obligatoire |
-| **Permis de circulation (accord relay)** | Delivre apres conformite. Verifie par les trackers (contrôle tracker). Duree et portee limitees. | Obligatoire |
+| **Permis de circulation (accord relay)** | Delivre apres conformite. Verifie par les trackers (contrÃ´le tracker). Duree et portee limitees. | Obligatoire |
 | **Quarantaine / Blacklist** | Escalade progressive (1h, 2h, blacklist au 3eme echec). Auto-destruction et reconstruction pour COGs blacklistes. | Obligatoire |
 | **Passeports speciaux** | Controle allege quotidien, renforce lors des audits. Delivrance exclusive par Origin. | Optionnel (pro/fort trafic) |
 | **Confinement reseau** | Fermeture des connexions inter-COG par les trackers sur alerte des relays. Origin/relays en lecture seule. Reconstruction progressive. | Urgence |
@@ -950,7 +950,7 @@ Les relays sont **source de verite** pour ces contenus mais restent **toujours s
 
 ## 13. Deploiement (orientation)
 
-- **Instance** : un VPS (ex. Hostinger, Debian 13) peut héberger le relay sur le port 7000 et optionnellement le Tracker sur 21000. Voir [Miyukini - Hostinger VPS Origin Webway](../../setup/Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md).
+- **Instance** : un VPS (ex. Hostinger, Debian 13) peut hÃ©berger le relay sur le port 7000 et optionnellement le Tracker sur 21000. Voir [Miyukini - Hostinger VPS Origin Webway](..//setup//Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md).
 - **Binaire** : deploiement du binaire relay (crate Rust), configuration TLS, tokens/secrets, timeouts, rate limiting et logs. Guide pas a pas : [Miyukini - Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md).
 - **DNS** : nom de domaine pointant vers l'IP publique (ex. `webway.studiomiyukini.com`) pour une adresse stable du relay.
 
@@ -967,18 +967,20 @@ Les relays sont **source de verite** pour ces contenus mais restent **toujours s
 
 ### Setup et deploiement
 
-- [Miyukini - Hostinger VPS Origin Webway](../../setup/Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) — instance Origin (Debian 13), règles de sécurité, ports
+- [Miyukini - Hostinger VPS Origin Webway](..//setup//Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) â€” instance Origin (Debian 13), rÃ¨gles de sÃ©curitÃ©, ports
 - [Miyukini - Webway Relay Deployment Guide](../setup/Miyukini%20-%20Webway%20Relay%20Deployment%20Guide.md) -- guide de deploiement complet (VM, TLS, systemd, tests)
 
 ### Connexes
 
 - [Miyukini Webway System](./Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) -- decouverte, Trackers, listes de statuts
-- [MiyuWebwayTracker - Passive Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md) -- contrats systemes passifs Tracker
-- [MiyuWebwayTracker - Active Systems Contract](../tools/MiyuWebwayTracker/contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md) -- contrats systemes actifs Tracker
-- [Connexion Inter-COG](./Miyukini%20Conceptual%20References%20-%20Connexion%20Inter-COG.md) -- visite gouvernee (Passeport, Permis de circulation, Bridge)
-- [Glossaire](./Miyukini%20Conceptual%20References%20-%20Glossaire.md) -- termes MWS et relay
+- [MiyuWebwayTracker - Passive Systems Contract](..//..//tools//MiyuWebwayTracker//contracts//security//MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md) -- contrats systemes passifs Tracker
+- [MiyuWebwayTracker - Active Systems Contract](..//..//tools//MiyuWebwayTracker//contracts//security//MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md) -- contrats systemes actifs Tracker
+- [Connexion Inter-COG](_index.md) -- visite gouvernee (Passeport, Permis de circulation, Bridge)
+- [Glossaire](_index.md) -- termes MWS et relay
 
 ---
 
 *Document cree le 12/02/2026*  
 *Classification : Reference conceptuelle -- Architecture Miyukini Webway Relay*
+
+

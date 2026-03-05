@@ -1,4 +1,4 @@
-# JayKonta - Service comptabilite multi-echelle
+﻿# JayKonta - Service comptabilite multi-echelle
 
 ## Contexte
 
@@ -26,4 +26,5 @@ Il couvre deux points d'entree :
 
 - [Miyukini Festival Service](../JayFestival/JayFestival%20-%20Document%20Fondateur.md)
 - [JayRDV](../JayRDV/JayRDV%20-%20Document%20Fondateur.md)
-- [Politique de residence des donnees sensibles](../../reference/Miyukini%20Conceptual%20References%20-%20Politique%20Residence%20Donnees%20Sensibles.md)
+- [Politique de residence des donnees sensibles](..//..//miyukini-webway-system//reference//_index.md)
+

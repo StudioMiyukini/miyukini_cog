@@ -1,212 +1,212 @@
-# StrongFather — Release & Freeze Contract
+﻿# StrongFather â€” Release & Freeze Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **StrongFather — Release & Freeze Contract** : un contrat normatif, non négociable, et de statut FONDATION qui déclare officiellement le gel de StrongFather en version v1.2.0, établit l'immutabilité absolue des contrats FONDATION gelés, définit les règles d'évolution futures, et garantit la stabilité contractuelle dans le système Miyukini Core System v2.4.
+Ce document dÃ©finit le **StrongFather â€” Release & Freeze Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui dÃ©clare officiellement le gel de StrongFather en version v1.2.0, Ã©tablit l'immutabilitÃ© absolue des contrats FONDATION gelÃ©s, dÃ©finit les rÃ¨gles d'Ã©volution futures, et garantit la stabilitÃ© contractuelle dans le systÃ¨me Miyukini Core System v2.4.
 
-Ce contrat constitue la déclaration officielle de gel et établit les règles absolues qui régissent l'évolution future de StrongFather.
+Ce contrat constitue la dÃ©claration officielle de gel et Ã©tablit les rÃ¨gles absolues qui rÃ©gissent l'Ã©volution future de StrongFather.
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **tous les contrats StrongFather** et définit de manière absolue :
-- la déclaration officielle de gel de StrongFather v1.2.0,
-- l'inventaire exhaustif des documents gelés,
-- l'immutabilité absolue des contrats FONDATION,
-- les règles d'évolution futures (v1.x / v2.0),
+Ce contrat s'applique Ã  **tous les contrats StrongFather** et dÃ©finit de maniÃ¨re absolue :
+- la dÃ©claration officielle de gel de StrongFather v1.2.0,
+- l'inventaire exhaustif des documents gelÃ©s,
+- l'immutabilitÃ© absolue des contrats FONDATION,
+- les rÃ¨gles d'Ã©volution futures (v1.x / v2.0),
 - le processus de changement avec audit obligatoire,
-- les conséquences d'une violation du gel.
+- les consÃ©quences d'une violation du gel.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complète et respecte les documents contractuels existants :
-- **StrongFather — Versioning & Evolution Contract** : Règles de versioning et de gel (R-GEL-*)
-- **StrongFather — Documentation Fondatrice** : Contrat fondateur gelé
+Ce contrat complÃ¨te et respecte les documents contractuels existants :
+- **StrongFather â€” Versioning & Evolution Contract** : RÃ¨gles de versioning et de gel (R-GEL-*)
+- **StrongFather â€” Documentation Fondatrice** : Contrat fondateur gelÃ©
 - **Tous les contrats FONDATION StrongFather** : Tous les contrats sont soumis au gel
-- **[Miyukini Conceptual References - Lois Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Conformité aux lois d'autonomie système préservée dans le gel
+- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)** : ConformitÃ© aux lois d'autonomie systÃ¨me prÃ©servÃ©e dans le gel
 
-Il n'introduit aucune contradiction, et constitue la déclaration formelle et irréversible du gel de StrongFather v1.2.0.
+Il n'introduit aucune contradiction, et constitue la dÃ©claration formelle et irrÃ©versible du gel de StrongFather v1.2.0.
 
 ---
 
-## 2. Déclaration officielle de gel
+## 2. DÃ©claration officielle de gel
 
-### 2.1. Déclaration de version
+### 2.1. DÃ©claration de version
 
-**DÉCLARATION OFFICIELLE :**
+**DÃ‰CLARATION OFFICIELLE :**
 
-StrongFather est **officiellement gelé** en version **v1.2.0** à compter de la date de publication de ce contrat.
+StrongFather est **officiellement gelÃ©** en version **v1.2.0** Ã  compter de la date de publication de ce contrat.
 
 **Date de gel :** 2026-01-26  
-**Version gelée :** 1.2.0  
-**Statut :** GELÉ — Immutabilité absolue garantie
+**Version gelÃ©e :** 1.2.0  
+**Statut :** GELÃ‰ â€” ImmutabilitÃ© absolue garantie
 
-### 2.2. Portée du gel
+### 2.2. PortÃ©e du gel
 
-Le gel s'applique à :
-- **Tous les contrats FONDATION** listés dans la section 3
-- **Tous les invariants** définis dans les contrats FONDATION
-- **Toutes les garanties** définies dans les contrats FONDATION
-- **Toutes les règles contractuelles** définies dans les contrats FONDATION
-- **Tous les types de décisions** définis dans les contrats FONDATION
+Le gel s'applique Ã  :
+- **Tous les contrats FONDATION** listÃ©s dans la section 3
+- **Tous les invariants** dÃ©finis dans les contrats FONDATION
+- **Toutes les garanties** dÃ©finies dans les contrats FONDATION
+- **Toutes les rÃ¨gles contractuelles** dÃ©finies dans les contrats FONDATION
+- **Tous les types de dÃ©cisions** dÃ©finis dans les contrats FONDATION
 
-### 2.3. Irréversibilité du gel
+### 2.3. IrrÃ©versibilitÃ© du gel
 
-**R-FREEZE-1 : Gel irréversible**
+**R-FREEZE-1 : Gel irrÃ©versible**
 
-Le gel de StrongFather v1.2.0 est **irréversible**. Aucune modification, correction, ou évolution n'est autorisée sur les contrats gelés.
+Le gel de StrongFather v1.2.0 est **irrÃ©versible**. Aucune modification, correction, ou Ã©volution n'est autorisÃ©e sur les contrats gelÃ©s.
 
 **R-FREEZE-2 : Aucune exception**
 
-Aucune exception au gel n'est autorisée, même pour :
+Aucune exception au gel n'est autorisÃ©e, mÃªme pour :
 - Corrections d'erreurs documentaires
 - Clarifications de formulation
 - Corrections de typographie
-- Améliorations de lisibilité
+- AmÃ©liorations de lisibilitÃ©
 
-**R-FREEZE-3 : Nouvelle version pour toute évolution**
+**R-FREEZE-3 : Nouvelle version pour toute Ã©volution**
 
-Toute évolution, même mineure, nécessite la création d'une nouvelle version (v1.3.0, v1.4.0, ou v2.0.0 selon les règles de versioning).
+Toute Ã©volution, mÃªme mineure, nÃ©cessite la crÃ©ation d'une nouvelle version (v1.3.0, v1.4.0, ou v2.0.0 selon les rÃ¨gles de versioning).
 
 ---
 
-## 3. Inventaire exhaustif des documents gelés
+## 3. Inventaire exhaustif des documents gelÃ©s
 
-### 3.1. Contrats FONDATION gelés (21 documents)
+### 3.1. Contrats FONDATION gelÃ©s (21 documents)
 
-Les contrats suivants sont **officiellement gelés** en version v1.2.0 :
+Les contrats suivants sont **officiellement gelÃ©s** en version v1.2.0 :
 
 #### 3.1.1. Contrats fondateurs
 
-1. **StrongFather — Documentation Fondatrice**
-   - Version gelée : 1.2.0
-   - Statut : FONDATION — GELÉ
-   - Contenu gelé : Définition du moteur de décision, invariants INV-SF-*, garanties fondamentales
+1. **StrongFather â€” Documentation Fondatrice**
+   - Version gelÃ©e : 1.2.0
+   - Statut : FONDATION â€” GELÃ‰
+   - Contenu gelÃ© : DÃ©finition du moteur de dÃ©cision, invariants INV-SF-*, garanties fondamentales
 
-2. **StrongFather — Invariants & Guarantees**
-   - Version gelée : 1.2.0
-   - Statut : FONDATION — GELÉ
-   - Contenu gelé : Catalogue consolidé de tous les invariants et garanties
+2. **StrongFather â€” Invariants & Guarantees**
+   - Version gelÃ©e : 1.2.0
+   - Statut : FONDATION â€” GELÃ‰
+   - Contenu gelÃ© : Catalogue consolidÃ© de tous les invariants et garanties
 
-#### 3.1.2. Contrats de décision
+#### 3.1.2. Contrats de dÃ©cision
 
-3. **StrongFather — Core Decision Contract**
-   - Version gelée : 1.2.0
-   - Statut : FONDATION — GELÉ
-   - Contenu gelé : Types de décisions (ACCEPTÉE, REFUSÉE, AMBIGUË, DIFFÉRÉE), garanties G-DEC-*
+3. **StrongFather â€” Core Decision Contract**
+   - Version gelÃ©e : 1.2.0
+   - Statut : FONDATION â€” GELÃ‰
+   - Contenu gelÃ© : Types de dÃ©cisions (ACCEPTÃ‰E, REFUSÃ‰E, AMBIGUÃ‹, DIFFÃ‰RÃ‰E), garanties G-DEC-*
 
-4. **StrongFather — Intent Model Contract**
-   - Version gelée : 1.2.0
-   - Statut : FONDATION — GELÉ
-   - Contenu gelé : Structure des intentions, invariants INV-INT-*
+4. **StrongFather â€” Intent Model Contract**
+   - Version gelÃ©e : 1.2.0
+   - Statut : FONDATION â€” GELÃ‰
+   - Contenu gelÃ© : Structure des intentions, invariants INV-INT-*
 
-5. **StrongFather — Decision Graph Specification**
-   - Version gelée : 1.2.0
-   - Statut : FONDATION — GELÉ
-   - Contenu gelé : Spécification du graphe de décision conceptuel
+5. **StrongFather â€” Decision Graph Specification**
+   - Version gelÃ©e : 1.2.0
+   - Statut : FONDATION â€” GELÃ‰
+   - Contenu gelÃ© : SpÃ©cification du graphe de dÃ©cision conceptuel
 
 #### 3.1.3. Contrats de politiques
 
-6. **StrongFather — Policy Engine Contract**
-   - Version gelée : 1.2.0
-   - Statut : FONDATION — GELÉ
-   - Contenu gelé : Types de politiques, application, résolution de conflits
+6. **StrongFather â€” Policy Engine Contract**
+   - Version gelÃ©e : 1.2.0
+   - Statut : FONDATION â€” GELÃ‰
+   - Contenu gelÃ© : Types de politiques, application, rÃ©solution de conflits
 
-7. **StrongFather — Policy Source Contract**
-   - Version gelée : 1.2.0
-   - Statut : FONDATION — GELÉ
-   - Contenu gelé : Source unique des politiques, cycle de vie, invariants INV-SRC-*
+7. **StrongFather â€” Policy Source Contract**
+   - Version gelÃ©e : 1.2.0
+   - Statut : FONDATION â€” GELÃ‰
+   - Contenu gelÃ© : Source unique des politiques, cycle de vie, invariants INV-SRC-*
 
-8. **StrongFather — Policy Language Specification**
-   - Version gelée : 1.2.0
-   - Statut : FONDATION — GELÉ
-   - Contenu gelé : Syntaxe et sémantique formelle du langage de politiques
+8. **StrongFather â€” Policy Language Specification**
+   - Version gelÃ©e : 1.2.0
+   - Statut : FONDATION â€” GELÃ‰
+   - Contenu gelÃ© : Syntaxe et sÃ©mantique formelle du langage de politiques
 
-#### 3.1.4. Contrats de frontières et isolation
+#### 3.1.4. Contrats de frontiÃ¨res et isolation
 
-9. **StrongFather — Boundary & Isolation Contract**
-   - Version gelée : 1.2.0
-   - Statut : FONDATION — GELÉ
-   - Contenu gelé : Frontières de StrongFather, règles d'isolation, invariants INV-TRACE-KERNEL
+9. **StrongFather â€” Boundary & Isolation Contract**
+   - Version gelÃ©e : 1.2.0
+   - Statut : FONDATION â€” GELÃ‰
+   - Contenu gelÃ© : FrontiÃ¨res de StrongFather, rÃ¨gles d'isolation, invariants INV-TRACE-KERNEL
 
-10. **StrongFather — Execution Prohibition Contract**
-    - Version gelée : 1.2.0
-    - Statut : FONDATION — GELÉ
-    - Contenu gelé : Interdiction absolue d'exécution, garanties G-NOEXEC-*
+10. **StrongFather â€” Execution Prohibition Contract**
+    - Version gelÃ©e : 1.2.0
+    - Statut : FONDATION â€” GELÃ‰
+    - Contenu gelÃ© : Interdiction absolue d'exÃ©cution, garanties G-NOEXEC-*
 
-#### 3.1.5. Contrats de gestion d'erreur et traçabilité
+#### 3.1.5. Contrats de gestion d'erreur et traÃ§abilitÃ©
 
-11. **StrongFather — Error & Rejection Model**
-    - Version gelée : 1.2.0
-    - Statut : FONDATION — GELÉ
-    - Contenu gelé : Modèle conceptuel des erreurs et rejets
+11. **StrongFather â€” Error & Rejection Model**
+    - Version gelÃ©e : 1.2.0
+    - Statut : FONDATION â€” GELÃ‰
+    - Contenu gelÃ© : ModÃ¨le conceptuel des erreurs et rejets
 
-12. **StrongFather — Audit & Trace Contract**
-    - Version gelée : 1.2.0
-    - Statut : FONDATION — GELÉ
-    - Contenu gelé : Règles de traçabilité et d'audit, invariants INV-TRACE-*
+12. **StrongFather â€” Audit & Trace Contract**
+    - Version gelÃ©e : 1.2.0
+    - Statut : FONDATION â€” GELÃ‰
+    - Contenu gelÃ© : RÃ¨gles de traÃ§abilitÃ© et d'audit, invariants INV-TRACE-*
 
-#### 3.1.6. Contrats d'intégration et conformité
+#### 3.1.6. Contrats d'intÃ©gration et conformitÃ©
 
-13. **StrongFather — Integration Readiness Contract**
-    - Version gelée : 1.2.0
-    - Statut : FONDATION — GELÉ
-    - Contenu gelé : Conditions et règles d'intégration
+13. **StrongFather â€” Integration Readiness Contract**
+    - Version gelÃ©e : 1.2.0
+    - Statut : FONDATION â€” GELÃ‰
+    - Contenu gelÃ© : Conditions et rÃ¨gles d'intÃ©gration
 
-14. **StrongFather — Conformance & Certification Rules**
-    - Version gelée : 1.2.0
-    - Statut : FONDATION — GELÉ
-    - Contenu gelé : Règles de conformité et de certification
+14. **StrongFather â€” Conformance & Certification Rules**
+    - Version gelÃ©e : 1.2.0
+    - Statut : FONDATION â€” GELÃ‰
+    - Contenu gelÃ© : RÃ¨gles de conformitÃ© et de certification
 
-15. **StrongFather — Architecture & Flows**
-    - Version gelée : 1.2.0
-    - Statut : FONDATION — GELÉ
-    - Contenu gelé : Architecture conceptuelle et flux d'évaluation
+15. **StrongFather â€” Architecture & Flows**
+    - Version gelÃ©e : 1.2.0
+    - Statut : FONDATION â€” GELÃ‰
+    - Contenu gelÃ© : Architecture conceptuelle et flux d'Ã©valuation
 
 #### 3.1.7. Contrats de violation et anti-patterns
 
-16. **StrongFather — Violations & Anti-Patterns**
-    - Version gelée : 1.2.0
-    - Statut : FONDATION — GELÉ
-    - Contenu gelé : Catalogue des violations contractuelles et anti-patterns
+16. **StrongFather â€” Violations & Anti-Patterns**
+    - Version gelÃ©e : 1.2.0
+    - Statut : FONDATION â€” GELÃ‰
+    - Contenu gelÃ© : Catalogue des violations contractuelles et anti-patterns
 
-#### 3.1.8. Contrats d'évolution et migration
+#### 3.1.8. Contrats d'Ã©volution et migration
 
-17. **StrongFather — Versioning & Evolution Contract**
-    - Version gelée : 1.2.0
-    - Statut : FONDATION — GELÉ
-    - Contenu gelé : Règles de versioning, compatibilité, dépréciation, migration, gel
+17. **StrongFather â€” Versioning & Evolution Contract**
+    - Version gelÃ©e : 1.2.0
+    - Statut : FONDATION â€” GELÃ‰
+    - Contenu gelÃ© : RÃ¨gles de versioning, compatibilitÃ©, dÃ©prÃ©ciation, migration, gel
 
-18. **StrongFather — Migration & Compatibility Contract**
-    - Version gelée : 1.2.0
-    - Statut : FONDATION — GELÉ
-    - Contenu gelé : Règles de migration progressive et compatibilité
+18. **StrongFather â€” Migration & Compatibility Contract**
+    - Version gelÃ©e : 1.2.0
+    - Statut : FONDATION â€” GELÃ‰
+    - Contenu gelÃ© : RÃ¨gles de migration progressive et compatibilitÃ©
 
-#### 3.1.9. Contrats de performance, sécurité et tests
+#### 3.1.9. Contrats de performance, sÃ©curitÃ© et tests
 
-19. **StrongFather — Performance & Scalability Contract**
-    - Version gelée : 1.2.0
-    - Statut : FONDATION — GELÉ
-    - Contenu gelé : Contraintes de performance, limites, règles d'optimisation
+19. **StrongFather â€” Performance & Scalability Contract**
+    - Version gelÃ©e : 1.2.0
+    - Statut : FONDATION â€” GELÃ‰
+    - Contenu gelÃ© : Contraintes de performance, limites, rÃ¨gles d'optimisation
 
-20. **StrongFather — Security & Threat Model Contract**
-    - Version gelée : 1.2.0
-    - Statut : FONDATION — GELÉ
-    - Contenu gelé : Modèle de menace, surface d'attaque, réponses de sécurité
+20. **StrongFather â€” Security & Threat Model Contract**
+    - Version gelÃ©e : 1.2.0
+    - Statut : FONDATION â€” GELÃ‰
+    - Contenu gelÃ© : ModÃ¨le de menace, surface d'attaque, rÃ©ponses de sÃ©curitÃ©
 
-21. **StrongFather — Testing & Validation Contract**
-    - Version gelée : 1.2.0
-    - Statut : FONDATION — GELÉ
-    - Contenu gelé : Règles de test et de validation
+21. **StrongFather â€” Testing & Validation Contract**
+    - Version gelÃ©e : 1.2.0
+    - Statut : FONDATION â€” GELÃ‰
+    - Contenu gelÃ© : RÃ¨gles de test et de validation
 
-### 3.2. Documents non-FONDATION (non gelés)
+### 3.2. Documents non-FONDATION (non gelÃ©s)
 
-Les documents suivants sont **informatifs** et **non contractuels**. Ils ne sont **pas gelés** et peuvent évoluer :
+Les documents suivants sont **informatifs** et **non contractuels**. Ils ne sont **pas gelÃ©s** et peuvent Ã©voluer :
 
 - **StrongFather - Implementation Overview** (POST-FONDATION / NON NORMATIF / INFORMATIF)
 - **StrongFather - Implementation Patterns** (POST-FONDATION / NON NORMATIF / INFORMATIF)
@@ -214,183 +214,183 @@ Les documents suivants sont **informatifs** et **non contractuels**. Ils ne sont
 - **StrongFather - Examples Intentions** (informatif)
 - **StrongFather - Examples Policies** (informatif)
 - **StrongFather - Examples Decisions** (informatif)
-- **StrongFather — FAQ & Common Questions** (informatif)
-- **[Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)** (référence globale)
-- **StrongFather — Operational Runbook** (opérationnel)
-- **AUDIT_DOCUMENTATION.md** (archivé)
-- **STRUCTURE_CREATION_LOG.md** (archivé)
+- **StrongFather â€” FAQ & Common Questions** (informatif)
+- **[Miyukini Conceptual References - Glossaire](..//..//..//miyukini-webway-system//reference//_index.md)** (rÃ©fÃ©rence globale)
+- **StrongFather â€” Operational Runbook** (opÃ©rationnel)
+- **AUDIT_DOCUMENTATION.md** (archivÃ©)
+- **STRUCTURE_CREATION_LOG.md** (archivÃ©)
 
-**Note :** Ces documents peuvent être modifiés librement, mais ils ne doivent jamais introduire de contradictions avec les contrats FONDATION gelés.
+**Note :** Ces documents peuvent Ãªtre modifiÃ©s librement, mais ils ne doivent jamais introduire de contradictions avec les contrats FONDATION gelÃ©s.
 
 ---
 
-## 4. Ce qui est gelé pour toujours
+## 4. Ce qui est gelÃ© pour toujours
 
-### 4.1. Immutabilité absolue des contrats FONDATION
+### 4.1. ImmutabilitÃ© absolue des contrats FONDATION
 
-**R-FREEZE-4 : Immutabilité des contrats FONDATION**
+**R-FREEZE-4 : ImmutabilitÃ© des contrats FONDATION**
 
-Aucun contrat FONDATION gelé ne peut être modifié, même pour :
+Aucun contrat FONDATION gelÃ© ne peut Ãªtre modifiÃ©, mÃªme pour :
 - Corrections d'erreurs documentaires
 - Clarifications de formulation
 - Corrections de typographie
-- Améliorations de lisibilité
-- Ajouts de précisions
+- AmÃ©liorations de lisibilitÃ©
+- Ajouts de prÃ©cisions
 
-**R-FREEZE-5 : Immutabilité des invariants**
+**R-FREEZE-5 : ImmutabilitÃ© des invariants**
 
-Aucun invariant défini dans les contrats FONDATION gelés ne peut être :
-- Modifié
-- Supprimé
+Aucun invariant dÃ©fini dans les contrats FONDATION gelÃ©s ne peut Ãªtre :
+- ModifiÃ©
+- SupprimÃ©
 - Affaibli
-- Clarifié (sauf par nouvelle version)
+- ClarifiÃ© (sauf par nouvelle version)
 
-**R-FREEZE-6 : Immutabilité des garanties**
+**R-FREEZE-6 : ImmutabilitÃ© des garanties**
 
-Aucune garantie définie dans les contrats FONDATION gelés ne peut être :
-- Modifiée
-- Supprimée
+Aucune garantie dÃ©finie dans les contrats FONDATION gelÃ©s ne peut Ãªtre :
+- ModifiÃ©e
+- SupprimÃ©e
 - Affaiblie
-- Clarifiée (sauf par nouvelle version)
+- ClarifiÃ©e (sauf par nouvelle version)
 
-**R-FREEZE-7 : Immutabilité des règles contractuelles**
+**R-FREEZE-7 : ImmutabilitÃ© des rÃ¨gles contractuelles**
 
-Aucune règle contractuelle définie dans les contrats FONDATION gelés ne peut être :
-- Modifiée
-- Supprimée
+Aucune rÃ¨gle contractuelle dÃ©finie dans les contrats FONDATION gelÃ©s ne peut Ãªtre :
+- ModifiÃ©e
+- SupprimÃ©e
 - Affaiblie
-- Clarifiée (sauf par nouvelle version)
+- ClarifiÃ©e (sauf par nouvelle version)
 
-**R-FREEZE-8 : Immutabilité des types de décisions**
+**R-FREEZE-8 : ImmutabilitÃ© des types de dÃ©cisions**
 
-Aucun type de décision défini dans les contrats FONDATION gelés ne peut être :
-- Modifié
-- Supprimé
+Aucun type de dÃ©cision dÃ©fini dans les contrats FONDATION gelÃ©s ne peut Ãªtre :
+- ModifiÃ©
+- SupprimÃ©
 - Affaibli
-- Clarifié (sauf par nouvelle version)
+- ClarifiÃ© (sauf par nouvelle version)
 
-### 4.2. Éléments fondamentaux intouchables
+### 4.2. Ã‰lÃ©ments fondamentaux intouchables
 
-Les éléments suivants sont **absolument intouchables** et ne peuvent jamais être modifiés, même dans une version MAJEUR :
+Les Ã©lÃ©ments suivants sont **absolument intouchables** et ne peuvent jamais Ãªtre modifiÃ©s, mÃªme dans une version MAJEUR :
 
-1. **Invariants d'autorité (INV-AUTH-*)** : Définissent l'autorité de StrongFather
-2. **Invariants de comportement fondamentaux (INV-BEHAV-1, INV-BEHAV-2)** : Définissent le comportement fondamental
-3. **Garanties de non-exécution (G-NOEXEC-*)** : Garantissent l'interdiction d'exécution
+1. **Invariants d'autoritÃ© (INV-AUTH-*)** : DÃ©finissent l'autoritÃ© de StrongFather
+2. **Invariants de comportement fondamentaux (INV-BEHAV-1, INV-BEHAV-2)** : DÃ©finissent le comportement fondamental
+3. **Garanties de non-exÃ©cution (G-NOEXEC-*)** : Garantissent l'interdiction d'exÃ©cution
 4. **Garanties de non-persistance (G-NOPERS-*)** : Garantissent l'interdiction de persistance
 5. **Garanties de non-temporisation (G-NOTIME-*)** : Garantissent l'interdiction de temporisation
-6. **Règles de fermeture des contrats** : Définissent la fermeture des contrats
+6. **RÃ¨gles de fermeture des contrats** : DÃ©finissent la fermeture des contrats
 
-**R-FREEZE-9 : Éléments fondamentaux intouchables**
+**R-FREEZE-9 : Ã‰lÃ©ments fondamentaux intouchables**
 
-Les éléments fondamentaux listés ci-dessus ne peuvent jamais être modifiés, supprimés, ou affaiblis, même dans une version MAJEUR. Ils constituent l'essence immuable de StrongFather.
+Les Ã©lÃ©ments fondamentaux listÃ©s ci-dessus ne peuvent jamais Ãªtre modifiÃ©s, supprimÃ©s, ou affaiblis, mÃªme dans une version MAJEUR. Ils constituent l'essence immuable de StrongFather.
 
 ---
 
-## 5. Ce qui peut évoluer sans casser le gel
+## 5. Ce qui peut Ã©voluer sans casser le gel
 
 ### 5.1. Documents non-FONDATION
 
-Les documents suivants peuvent évoluer librement :
+Les documents suivants peuvent Ã©voluer librement :
 
-- **StrongFather - Implementation Overview/Patterns/Prohibitions** : Peut être mis à jour avec de nouveaux patterns d'implémentation
-- **StrongFather - Examples Intentions/Policies/Decisions** : Peut être enrichi avec de nouveaux exemples
-- **StrongFather — FAQ & Common Questions** : Peut être enrichi avec de nouvelles questions
-- **[Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)** : Source unique de terminologie (document global)
-- **StrongFather — Operational Runbook** : Peut être mis à jour avec de nouvelles procédures
+- **StrongFather - Implementation Overview/Patterns/Prohibitions** : Peut Ãªtre mis Ã  jour avec de nouveaux patterns d'implÃ©mentation
+- **StrongFather - Examples Intentions/Policies/Decisions** : Peut Ãªtre enrichi avec de nouveaux exemples
+- **StrongFather â€” FAQ & Common Questions** : Peut Ãªtre enrichi avec de nouvelles questions
+- **[Miyukini Conceptual References - Glossaire](..//..//..//miyukini-webway-system//reference//_index.md)** : Source unique de terminologie (document global)
+- **StrongFather â€” Operational Runbook** : Peut Ãªtre mis Ã  jour avec de nouvelles procÃ©dures
 
-**R-FREEZE-10 : Évolution des documents non-FONDATION**
+**R-FREEZE-10 : Ã‰volution des documents non-FONDATION**
 
-Les documents non-FONDATION peuvent évoluer librement, à condition qu'ils ne contredisent jamais les contrats FONDATION gelés.
+Les documents non-FONDATION peuvent Ã©voluer librement, Ã  condition qu'ils ne contredisent jamais les contrats FONDATION gelÃ©s.
 
 ### 5.2. Nouveaux contrats FONDATION
 
-**R-FREEZE-11 : Création de nouveaux contrats**
+**R-FREEZE-11 : CrÃ©ation de nouveaux contrats**
 
-De nouveaux contrats FONDATION peuvent être créés après le gel, à condition qu'ils :
-- Ne modifient pas les contrats FONDATION gelés
-- Ne contredisent pas les contrats FONDATION gelés
-- Respectent tous les invariants et garanties gelés
-- Soient documentés et versionnés selon les règles de versioning
+De nouveaux contrats FONDATION peuvent Ãªtre crÃ©Ã©s aprÃ¨s le gel, Ã  condition qu'ils :
+- Ne modifient pas les contrats FONDATION gelÃ©s
+- Ne contredisent pas les contrats FONDATION gelÃ©s
+- Respectent tous les invariants et garanties gelÃ©s
+- Soient documentÃ©s et versionnÃ©s selon les rÃ¨gles de versioning
 
-**Exemple :** Un nouveau contrat "StrongFather — Advanced Policy Patterns" peut être créé pour documenter des patterns avancés, sans modifier les contrats existants.
+**Exemple :** Un nouveau contrat "StrongFather â€” Advanced Policy Patterns" peut Ãªtre crÃ©Ã© pour documenter des patterns avancÃ©s, sans modifier les contrats existants.
 
-### 5.3. Évolution par nouvelle version
+### 5.3. Ã‰volution par nouvelle version
 
-**R-FREEZE-12 : Évolution par nouvelle version**
+**R-FREEZE-12 : Ã‰volution par nouvelle version**
 
-Toute évolution des contrats FONDATION gelés nécessite la création d'une nouvelle version selon les règles de versioning :
+Toute Ã©volution des contrats FONDATION gelÃ©s nÃ©cessite la crÃ©ation d'une nouvelle version selon les rÃ¨gles de versioning :
 - **Version MINEUR (v1.3.0, v1.4.0, etc.)** : Ajouts compatibles uniquement
 - **Version MAJEUR (v2.0.0, v3.0.0, etc.)** : Changements incompatibles avec guide de migration
 
-**R-FREEZE-13 : Préservation du gel**
+**R-FREEZE-13 : PrÃ©servation du gel**
 
-Les versions gelées (v1.2.0) restent gelées définitivement. Seules les nouvelles versions peuvent évoluer.
+Les versions gelÃ©es (v1.2.0) restent gelÃ©es dÃ©finitivement. Seules les nouvelles versions peuvent Ã©voluer.
 
 ---
 
-## 6. Conditions strictes d'évolution majeure
+## 6. Conditions strictes d'Ã©volution majeure
 
-### 6.1. Processus d'évolution majeure (v2.0.0+)
+### 6.1. Processus d'Ã©volution majeure (v2.0.0+)
 
-**R-FREEZE-14 : Processus d'évolution majeure obligatoire**
+**R-FREEZE-14 : Processus d'Ã©volution majeure obligatoire**
 
-Toute évolution majeure (passage à v2.0.0+) DOIT suivre le processus suivant :
+Toute Ã©volution majeure (passage Ã  v2.0.0+) DOIT suivre le processus suivant :
 
 #### Phase 1 : Audit obligatoire
 
-1. **Audit complet** : Audit exhaustif de tous les contrats FONDATION gelés
+1. **Audit complet** : Audit exhaustif de tous les contrats FONDATION gelÃ©s
 2. **Identification des changements** : Identification explicite de tous les changements incompatibles
 3. **Justification** : Justification formelle de chaque changement incompatible
-4. **Impact analysis** : Analyse d'impact sur toutes les implémentations existantes
-5. **Validation architecturale** : Validation par l'architecte logiciel senior / Responsable gouvernance système
+4. **Impact analysis** : Analyse d'impact sur toutes les implÃ©mentations existantes
+5. **Validation architecturale** : Validation par l'architecte logiciel senior / Responsable gouvernance systÃ¨me
 
 #### Phase 2 : Documentation obligatoire
 
-1. **Guide de migration** : Guide de migration complet et détaillé
+1. **Guide de migration** : Guide de migration complet et dÃ©taillÃ©
 2. **Changelog exhaustif** : Changelog exhaustif de tous les changements
-3. **Plan de dépréciation** : Plan de dépréciation pour tous les éléments obsolètes
-4. **Période de transition** : Définition de la période de transition et de coexistence
+3. **Plan de dÃ©prÃ©ciation** : Plan de dÃ©prÃ©ciation pour tous les Ã©lÃ©ments obsolÃ¨tes
+4. **PÃ©riode de transition** : DÃ©finition de la pÃ©riode de transition et de coexistence
 
 #### Phase 3 : Validation et certification
 
-1. **Tests de conformité** : Tests de conformité pour la nouvelle version
+1. **Tests de conformitÃ©** : Tests de conformitÃ© pour la nouvelle version
 2. **Tests de migration** : Tests de migration pour valider le guide
-3. **Certification** : Certification de conformité de la nouvelle version
+3. **Certification** : Certification de conformitÃ© de la nouvelle version
 4. **Validation finale** : Validation finale par l'architecte logiciel senior
 
 #### Phase 4 : Publication et gel
 
 1. **Publication** : Publication de la nouvelle version
-2. **Gel** : Gel immédiat de la nouvelle version (si applicable)
-3. **Notification** : Notification de tous les intégrateurs et implémenteurs
+2. **Gel** : Gel immÃ©diat de la nouvelle version (si applicable)
+3. **Notification** : Notification de tous les intÃ©grateurs et implÃ©menteurs
 
-**R-FREEZE-15 : Audit obligatoire avant évolution majeure**
+**R-FREEZE-15 : Audit obligatoire avant Ã©volution majeure**
 
-Aucune évolution majeure ne peut être effectuée sans audit complet et validation architecturale.
+Aucune Ã©volution majeure ne peut Ãªtre effectuÃ©e sans audit complet et validation architecturale.
 
-### 6.2. Règles de compatibilité
+### 6.2. RÃ¨gles de compatibilitÃ©
 
-**R-FREEZE-16 : Compatibilité ascendante pour versions MINEUR**
+**R-FREEZE-16 : CompatibilitÃ© ascendante pour versions MINEUR**
 
-Toute version MINEUR (v1.3.0, v1.4.0, etc.) DOIT être compatible ascendante avec v1.2.0.
+Toute version MINEUR (v1.3.0, v1.4.0, etc.) DOIT Ãªtre compatible ascendante avec v1.2.0.
 
-**R-FREEZE-17 : Incompatibilité autorisée uniquement en version MAJEUR**
+**R-FREEZE-17 : IncompatibilitÃ© autorisÃ©e uniquement en version MAJEUR**
 
-Seules les versions MAJEUR (v2.0.0, v3.0.0, etc.) peuvent introduire des incompatibilités avec v1.2.0.
+Seules les versions MAJEUR (v2.0.0, v3.0.0, etc.) peuvent introduire des incompatibilitÃ©s avec v1.2.0.
 
 **R-FREEZE-18 : Guide de migration obligatoire pour version MAJEUR**
 
-Toute version MAJEUR DOIT inclure un guide de migration complet et détaillé.
+Toute version MAJEUR DOIT inclure un guide de migration complet et dÃ©taillÃ©.
 
-### 6.3. Dépréciation avant suppression
+### 6.3. DÃ©prÃ©ciation avant suppression
 
-**R-FREEZE-19 : Dépréciation obligatoire**
+**R-FREEZE-19 : DÃ©prÃ©ciation obligatoire**
 
-Tout élément supprimé dans une version MAJEUR DOIT avoir été déprécié dans au moins deux versions MINEUR précédentes.
+Tout Ã©lÃ©ment supprimÃ© dans une version MAJEUR DOIT avoir Ã©tÃ© dÃ©prÃ©ciÃ© dans au moins deux versions MINEUR prÃ©cÃ©dentes.
 
-**R-FREEZE-20 : Délai de grâce minimum**
+**R-FREEZE-20 : DÃ©lai de grÃ¢ce minimum**
 
-Tout élément déprécié DOIT rester disponible pendant au moins deux versions MINEUR avant suppression.
+Tout Ã©lÃ©ment dÃ©prÃ©ciÃ© DOIT rester disponible pendant au moins deux versions MINEUR avant suppression.
 
 ---
 
@@ -398,143 +398,143 @@ Tout élément déprécié DOIT rester disponible pendant au moins deux versions
 
 ### 7.1. Invariants absolus du gel
 
-**INV-FREEZE-1 : Immutabilité garantie**
+**INV-FREEZE-1 : ImmutabilitÃ© garantie**
 
-Un contrat FONDATION gelé ne peut jamais être modifié. Aucune exception n'est autorisée.
+Un contrat FONDATION gelÃ© ne peut jamais Ãªtre modifiÃ©. Aucune exception n'est autorisÃ©e.
 
-**INV-FREEZE-2 : Stabilité garantie**
+**INV-FREEZE-2 : StabilitÃ© garantie**
 
-Un contrat FONDATION gelé garantit la stabilité contractuelle absolue pour toutes les implémentations conformes.
+Un contrat FONDATION gelÃ© garantit la stabilitÃ© contractuelle absolue pour toutes les implÃ©mentations conformes.
 
-**INV-FREEZE-3 : Compatibilité préservée**
+**INV-FREEZE-3 : CompatibilitÃ© prÃ©servÃ©e**
 
-Un contrat FONDATION gelé reste compatible avec toutes les implémentations conformes à sa version gelée.
+Un contrat FONDATION gelÃ© reste compatible avec toutes les implÃ©mentations conformes Ã  sa version gelÃ©e.
 
-**INV-FREEZE-4 : Référence permanente**
+**INV-FREEZE-4 : RÃ©fÃ©rence permanente**
 
-Un contrat FONDATION gelé constitue une référence permanente et immuable.
+Un contrat FONDATION gelÃ© constitue une rÃ©fÃ©rence permanente et immuable.
 
-**INV-FREEZE-5 : Irréversibilité du gel**
+**INV-FREEZE-5 : IrrÃ©versibilitÃ© du gel**
 
-Un gel ne peut jamais être annulé. Un contrat gelé reste gelé définitivement.
+Un gel ne peut jamais Ãªtre annulÃ©. Un contrat gelÃ© reste gelÃ© dÃ©finitivement.
 
-**INV-FREEZE-6 : Évolution par nouvelle version uniquement**
+**INV-FREEZE-6 : Ã‰volution par nouvelle version uniquement**
 
-Toute évolution d'un contrat FONDATION gelé nécessite la création d'une nouvelle version.
+Toute Ã©volution d'un contrat FONDATION gelÃ© nÃ©cessite la crÃ©ation d'une nouvelle version.
 
-**INV-FREEZE-7 : Préservation des éléments fondamentaux**
+**INV-FREEZE-7 : PrÃ©servation des Ã©lÃ©ments fondamentaux**
 
-Les éléments fondamentaux (INV-AUTH-*, INV-BEHAV-1, INV-BEHAV-2, G-NOEXEC-*, G-NOPERS-*, G-NOTIME-*) ne peuvent jamais être modifiés, même dans une version MAJEUR.
+Les Ã©lÃ©ments fondamentaux (INV-AUTH-*, INV-BEHAV-1, INV-BEHAV-2, G-NOEXEC-*, G-NOPERS-*, G-NOTIME-*) ne peuvent jamais Ãªtre modifiÃ©s, mÃªme dans une version MAJEUR.
 
 ### 7.2. Garanties du gel
 
-**G-FREEZE-1 : Immutabilité garantie**
+**G-FREEZE-1 : ImmutabilitÃ© garantie**
 
-L'immutabilité des contrats FONDATION gelés est garantie absolument. Aucune modification n'est possible.
+L'immutabilitÃ© des contrats FONDATION gelÃ©s est garantie absolument. Aucune modification n'est possible.
 
-**G-FREEZE-2 : Stabilité garantie**
+**G-FREEZE-2 : StabilitÃ© garantie**
 
-La stabilité contractuelle est garantie pour toutes les implémentations conformes à v1.2.0.
+La stabilitÃ© contractuelle est garantie pour toutes les implÃ©mentations conformes Ã  v1.2.0.
 
-**G-FREEZE-3 : Compatibilité préservée**
+**G-FREEZE-3 : CompatibilitÃ© prÃ©servÃ©e**
 
-La compatibilité avec v1.2.0 est préservée pour toutes les versions MINEUR futures (v1.3.0, v1.4.0, etc.).
+La compatibilitÃ© avec v1.2.0 est prÃ©servÃ©e pour toutes les versions MINEUR futures (v1.3.0, v1.4.0, etc.).
 
-**G-FREEZE-4 : Évolution contrôlée**
+**G-FREEZE-4 : Ã‰volution contrÃ´lÃ©e**
 
-L'évolution future est strictement contrôlée par les règles de versioning et le processus d'audit obligatoire.
+L'Ã©volution future est strictement contrÃ´lÃ©e par les rÃ¨gles de versioning et le processus d'audit obligatoire.
 
-**G-FREEZE-5 : Migration guidée**
+**G-FREEZE-5 : Migration guidÃ©e**
 
-Toute évolution majeure (v2.0.0+) est accompagnée d'un guide de migration complet et détaillé.
+Toute Ã©volution majeure (v2.0.0+) est accompagnÃ©e d'un guide de migration complet et dÃ©taillÃ©.
 
 ---
 
-## 8. Conséquences d'une violation du gel
+## 8. ConsÃ©quences d'une violation du gel
 
 ### 8.1. Violations du gel
 
-**DÉFINITION :** Une violation du gel est toute tentative de :
-- Modifier un contrat FONDATION gelé
-- Supprimer un invariant, une garantie, ou une règle contractuelle gelée
-- Affaiblir un invariant, une garantie, ou une règle contractuelle gelée
-- Contourner les règles de gel par quelque moyen que ce soit
+**DÃ‰FINITION :** Une violation du gel est toute tentative de :
+- Modifier un contrat FONDATION gelÃ©
+- Supprimer un invariant, une garantie, ou une rÃ¨gle contractuelle gelÃ©e
+- Affaiblir un invariant, une garantie, ou une rÃ¨gle contractuelle gelÃ©e
+- Contourner les rÃ¨gles de gel par quelque moyen que ce soit
 
-### 8.2. Conséquences contractuelles
+### 8.2. ConsÃ©quences contractuelles
 
-**R-FREEZE-21 : Nullité de toute modification**
+**R-FREEZE-21 : NullitÃ© de toute modification**
 
-Toute modification d'un contrat FONDATION gelé est **nulle et non avenue**. La modification est considérée comme n'ayant jamais existé.
+Toute modification d'un contrat FONDATION gelÃ© est **nulle et non avenue**. La modification est considÃ©rÃ©e comme n'ayant jamais existÃ©.
 
 **R-FREEZE-22 : Restauration obligatoire**
 
-Toute modification d'un contrat FONDATION gelé DOIT être immédiatement annulée et le contrat restauré à sa version gelée.
+Toute modification d'un contrat FONDATION gelÃ© DOIT Ãªtre immÃ©diatement annulÃ©e et le contrat restaurÃ© Ã  sa version gelÃ©e.
 
 **R-FREEZE-23 : Nouvelle version requise**
 
-Toute évolution souhaitée DOIT être effectuée par création d'une nouvelle version selon les règles de versioning.
+Toute Ã©volution souhaitÃ©e DOIT Ãªtre effectuÃ©e par crÃ©ation d'une nouvelle version selon les rÃ¨gles de versioning.
 
-### 8.3. Conséquences opérationnelles
+### 8.3. ConsÃ©quences opÃ©rationnelles
 
-**R-FREEZE-24 : Non-conformité automatique**
+**R-FREEZE-24 : Non-conformitÃ© automatique**
 
-Toute implémentation basée sur une version modifiée d'un contrat FONDATION gelé est automatiquement **non conforme**.
+Toute implÃ©mentation basÃ©e sur une version modifiÃ©e d'un contrat FONDATION gelÃ© est automatiquement **non conforme**.
 
 **R-FREEZE-25 : Invalidation de certification**
 
-Toute certification basée sur une version modifiée d'un contrat FONDATION gelé est automatiquement **invalide**.
+Toute certification basÃ©e sur une version modifiÃ©e d'un contrat FONDATION gelÃ© est automatiquement **invalide**.
 
-**R-FREEZE-26 : Responsabilité de restauration**
+**R-FREEZE-26 : ResponsabilitÃ© de restauration**
 
-L'auteur d'une modification d'un contrat FONDATION gelé est responsable de la restauration immédiate du contrat à sa version gelée.
+L'auteur d'une modification d'un contrat FONDATION gelÃ© est responsable de la restauration immÃ©diate du contrat Ã  sa version gelÃ©e.
 
 ---
 
-## 9. Règles de versioning futures
+## 9. RÃ¨gles de versioning futures
 
 ### 9.1. Versions MINEUR (v1.3.0, v1.4.0, etc.)
 
-**R-VER-FUTURE-1 : Compatibilité ascendante obligatoire**
+**R-VER-FUTURE-1 : CompatibilitÃ© ascendante obligatoire**
 
-Toute version MINEUR DOIT être compatible ascendante avec v1.2.0.
+Toute version MINEUR DOIT Ãªtre compatible ascendante avec v1.2.0.
 
 **R-VER-FUTURE-2 : Ajouts uniquement**
 
 Une version MINEUR ne peut qu'ajouter :
 - De nouveaux invariants (sans modifier les existants)
 - De nouvelles garanties (sans modifier les existantes)
-- De nouvelles règles contractuelles (sans modifier les existantes)
-- De nouveaux types de décisions (sans modifier les existants)
+- De nouvelles rÃ¨gles contractuelles (sans modifier les existantes)
+- De nouveaux types de dÃ©cisions (sans modifier les existants)
 
 **R-VER-FUTURE-3 : Aucune modification incompatible**
 
-Une version MINEUR ne peut jamais modifier, supprimer, ou affaiblir un élément existant.
+Une version MINEUR ne peut jamais modifier, supprimer, ou affaiblir un Ã©lÃ©ment existant.
 
 ### 9.2. Versions MAJEUR (v2.0.0, v3.0.0, etc.)
 
 **R-VER-FUTURE-4 : Audit obligatoire**
 
-Toute version MAJEUR DOIT être précédée d'un audit complet et d'une validation architecturale.
+Toute version MAJEUR DOIT Ãªtre prÃ©cÃ©dÃ©e d'un audit complet et d'une validation architecturale.
 
 **R-VER-FUTURE-5 : Guide de migration obligatoire**
 
-Toute version MAJEUR DOIT inclure un guide de migration complet et détaillé.
+Toute version MAJEUR DOIT inclure un guide de migration complet et dÃ©taillÃ©.
 
-**R-VER-FUTURE-6 : Dépréciation avant suppression**
+**R-VER-FUTURE-6 : DÃ©prÃ©ciation avant suppression**
 
-Tout élément supprimé dans une version MAJEUR DOIT avoir été déprécié dans au moins deux versions MINEUR précédentes.
+Tout Ã©lÃ©ment supprimÃ© dans une version MAJEUR DOIT avoir Ã©tÃ© dÃ©prÃ©ciÃ© dans au moins deux versions MINEUR prÃ©cÃ©dentes.
 
-**R-VER-FUTURE-7 : Préservation des éléments fondamentaux**
+**R-VER-FUTURE-7 : PrÃ©servation des Ã©lÃ©ments fondamentaux**
 
-Les éléments fondamentaux (INV-AUTH-*, INV-BEHAV-1, INV-BEHAV-2, G-NOEXEC-*, G-NOPERS-*, G-NOTIME-*) ne peuvent jamais être modifiés, même dans une version MAJEUR.
+Les Ã©lÃ©ments fondamentaux (INV-AUTH-*, INV-BEHAV-1, INV-BEHAV-2, G-NOEXEC-*, G-NOPERS-*, G-NOTIME-*) ne peuvent jamais Ãªtre modifiÃ©s, mÃªme dans une version MAJEUR.
 
 ### 9.3. Versions PATCH (v1.2.1, v1.2.2, etc.)
 
-**R-VER-FUTURE-8 : Versions PATCH interdites après gel**
+**R-VER-FUTURE-8 : Versions PATCH interdites aprÃ¨s gel**
 
-Aucune version PATCH n'est autorisée après le gel de v1.2.0. Toute correction nécessite une nouvelle version MINEUR ou MAJEUR.
+Aucune version PATCH n'est autorisÃ©e aprÃ¨s le gel de v1.2.0. Toute correction nÃ©cessite une nouvelle version MINEUR ou MAJEUR.
 
-**Note :** Cette règle garantit que le gel est absolu et qu'aucune modification, même mineure, n'est possible sur la version gelée.
+**Note :** Cette rÃ¨gle garantit que le gel est absolu et qu'aucune modification, mÃªme mineure, n'est possible sur la version gelÃ©e.
 
 ---
 
@@ -542,76 +542,76 @@ Aucune version PATCH n'est autorisée après le gel de v1.2.0. Toute correction 
 
 ### 10.1. Processus pour version MINEUR (v1.3.0+)
 
-**Étape 1 : Proposition**
+**Ã‰tape 1 : Proposition**
 - Proposition formelle de la nouvelle version MINEUR
 - Justification de chaque ajout
-- Vérification de compatibilité ascendante
+- VÃ©rification de compatibilitÃ© ascendante
 
-**Étape 2 : Validation**
+**Ã‰tape 2 : Validation**
 - Validation par l'architecte logiciel senior
-- Vérification de non-contradiction avec les contrats gelés
-- Vérification de compatibilité ascendante
+- VÃ©rification de non-contradiction avec les contrats gelÃ©s
+- VÃ©rification de compatibilitÃ© ascendante
 
-**Étape 3 : Documentation**
-- Documentation des nouveaux éléments
-- Mise à jour de l'historique des versions
+**Ã‰tape 3 : Documentation**
+- Documentation des nouveaux Ã©lÃ©ments
+- Mise Ã  jour de l'historique des versions
 - Publication de la nouvelle version
 
-**Étape 4 : Gel (optionnel)**
-- Gel de la nouvelle version si elle est considérée comme stable
-- Mise à jour de ce contrat si un nouveau gel est effectué
+**Ã‰tape 4 : Gel (optionnel)**
+- Gel de la nouvelle version si elle est considÃ©rÃ©e comme stable
+- Mise Ã  jour de ce contrat si un nouveau gel est effectuÃ©
 
 ### 10.2. Processus pour version MAJEUR (v2.0.0+)
 
-**Étape 1 : Audit obligatoire**
+**Ã‰tape 1 : Audit obligatoire**
 - Audit complet de tous les contrats FONDATION
 - Identification explicite de tous les changements incompatibles
 - Justification formelle de chaque changement
-- Analyse d'impact complète
+- Analyse d'impact complÃ¨te
 
-**Étape 2 : Validation architecturale**
-- Validation par l'architecte logiciel senior / Responsable gouvernance système
-- Approbation formelle de l'évolution majeure
+**Ã‰tape 2 : Validation architecturale**
+- Validation par l'architecte logiciel senior / Responsable gouvernance systÃ¨me
+- Approbation formelle de l'Ã©volution majeure
 - Validation de la justification de chaque changement incompatible
 
-**Étape 3 : Documentation obligatoire**
-- Guide de migration complet et détaillé
+**Ã‰tape 3 : Documentation obligatoire**
+- Guide de migration complet et dÃ©taillÃ©
 - Changelog exhaustif
-- Plan de dépréciation
-- Documentation de la période de transition
+- Plan de dÃ©prÃ©ciation
+- Documentation de la pÃ©riode de transition
 
-**Étape 4 : Implémentation**
-- Création de la nouvelle version
-- Tests de conformité
+**Ã‰tape 4 : ImplÃ©mentation**
+- CrÃ©ation de la nouvelle version
+- Tests de conformitÃ©
 - Tests de migration
 - Validation de la migration
 
-**Étape 5 : Certification**
-- Certification de conformité
+**Ã‰tape 5 : Certification**
+- Certification de conformitÃ©
 - Validation finale
 - Publication de la nouvelle version
 
-**Étape 6 : Gel (optionnel)**
-- Gel de la nouvelle version si elle est considérée comme stable
-- Mise à jour de ce contrat si un nouveau gel est effectué
+**Ã‰tape 6 : Gel (optionnel)**
+- Gel de la nouvelle version si elle est considÃ©rÃ©e comme stable
+- Mise Ã  jour de ce contrat si un nouveau gel est effectuÃ©
 
-### 10.3. Rôles et responsabilités
+### 10.3. RÃ´les et responsabilitÃ©s
 
-**R-FREEZE-27 : Responsable gouvernance système**
+**R-FREEZE-27 : Responsable gouvernance systÃ¨me**
 
-Le Responsable gouvernance système (Owner de la stabilité StrongFather) est le seul autorisé à :
-- Valider une évolution majeure (v2.0.0+)
+Le Responsable gouvernance systÃ¨me (Owner de la stabilitÃ© StrongFather) est le seul autorisÃ© Ã  :
+- Valider une Ã©volution majeure (v2.0.0+)
 - Approuver un audit complet
-- Décider d'un nouveau gel
+- DÃ©cider d'un nouveau gel
 - Modifier ce contrat (Release & Freeze Contract)
 
 **R-FREEZE-28 : Architecte logiciel senior**
 
 L'Architecte logiciel senior est responsable de :
-- Effectuer l'audit complet avant évolution majeure
-- Valider la compatibilité ascendante pour versions MINEUR
-- Vérifier la non-contradiction avec les contrats gelés
-- Certifier la conformité de la nouvelle version
+- Effectuer l'audit complet avant Ã©volution majeure
+- Valider la compatibilitÃ© ascendante pour versions MINEUR
+- VÃ©rifier la non-contradiction avec les contrats gelÃ©s
+- Certifier la conformitÃ© de la nouvelle version
 
 ---
 
@@ -621,202 +621,203 @@ L'Architecte logiciel senior est responsable de :
 
 **VALIDATION OFFICIELLE :**
 
-Le gel de StrongFather v1.2.0 est **officiellement validé** et **irréversible**.
+Le gel de StrongFather v1.2.0 est **officiellement validÃ©** et **irrÃ©versible**.
 
 **Date de validation :** 2026-01-26  
-**Version validée :** 1.2.0  
-**Statut :** GELÉ — Immutabilité absolue garantie
+**Version validÃ©e :** 1.2.0  
+**Statut :** GELÃ‰ â€” ImmutabilitÃ© absolue garantie
 
 ### 11.2. Signature contractuelle
 
 **SIGNATURE :**
 
-Ce contrat est signé par :
-- **Architecte logiciel senior / Responsable gouvernance système**
-- **Owner de la stabilité StrongFather**
+Ce contrat est signÃ© par :
+- **Architecte logiciel senior / Responsable gouvernance systÃ¨me**
+- **Owner de la stabilitÃ© StrongFather**
 
 **Date de signature :** 2026-01-26  
 **Version du contrat :** 1.0.0  
-**Statut :** FONDATION — Contrat normatif validé
+**Statut :** FONDATION â€” Contrat normatif validÃ©
 
 ### 11.3. Engagement contractuel
 
 **ENGAGEMENT :**
 
-En signant ce contrat, les parties s'engagent à :
-- Respecter l'immutabilité absolue des contrats FONDATION gelés
-- Suivre strictement le processus d'évolution défini
-- Garantir la stabilité contractuelle pour toutes les implémentations conformes
-- Préserver les éléments fondamentaux intouchables
-- Valider toute évolution majeure par audit complet
+En signant ce contrat, les parties s'engagent Ã  :
+- Respecter l'immutabilitÃ© absolue des contrats FONDATION gelÃ©s
+- Suivre strictement le processus d'Ã©volution dÃ©fini
+- Garantir la stabilitÃ© contractuelle pour toutes les implÃ©mentations conformes
+- PrÃ©server les Ã©lÃ©ments fondamentaux intouchables
+- Valider toute Ã©volution majeure par audit complet
 
 ---
 
-## 12. Règles de fermeture du contrat
+## 12. RÃ¨gles de fermeture du contrat
 
-### 12.1. Contrat fermé
+### 12.1. Contrat fermÃ©
 
-Ce contrat est **fermé**. Seules les règles de gel, d'évolution, et de versioning explicitement définies sont valides.
+Ce contrat est **fermÃ©**. Seules les rÃ¨gles de gel, d'Ã©volution, et de versioning explicitement dÃ©finies sont valides.
 
 ### 12.2. Interdiction d'extension implicite
 
-Aucune extension implicite des règles de gel n'est autorisée.
+Aucune extension implicite des rÃ¨gles de gel n'est autorisÃ©e.
 
 ### 12.3. Modification de ce contrat
 
 **R-FREEZE-29 : Modification de ce contrat**
 
-Ce contrat (Release & Freeze Contract) peut être modifié uniquement pour :
+Ce contrat (Release & Freeze Contract) peut Ãªtre modifiÃ© uniquement pour :
 - Documenter un nouveau gel (v1.3.0, v1.4.0, v2.0.0, etc.)
-- Corriger des erreurs documentaires (avec incrément de version)
-- Clarifier des règles existantes (avec incrément de version)
+- Corriger des erreurs documentaires (avec incrÃ©ment de version)
+- Clarifier des rÃ¨gles existantes (avec incrÃ©ment de version)
 
-**Note :** Toute modification de ce contrat DOIT respecter les règles de versioning et être validée par le Responsable gouvernance système.
+**Note :** Toute modification de ce contrat DOIT respecter les rÃ¨gles de versioning et Ãªtre validÃ©e par le Responsable gouvernance systÃ¨me.
 
 ---
 
 ## 13. Conclusion contractuelle
 
-Ce contrat établit de manière définitive et non négociable le gel de StrongFather v1.2.0 et les règles d'évolution futures.
+Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable le gel de StrongFather v1.2.0 et les rÃ¨gles d'Ã©volution futures.
 
 Il garantit que :
-- l'immutabilité absolue des contrats FONDATION gelés est garantie,
-- la stabilité contractuelle est préservée pour toutes les implémentations conformes,
-- l'évolution future est strictement contrôlée par les règles de versioning,
-- le processus d'audit obligatoire garantit la qualité des évolutions majeures,
-- les éléments fondamentaux intouchables sont préservés,
-- le contrat est fermé et non extensible implicitement.
+- l'immutabilitÃ© absolue des contrats FONDATION gelÃ©s est garantie,
+- la stabilitÃ© contractuelle est prÃ©servÃ©e pour toutes les implÃ©mentations conformes,
+- l'Ã©volution future est strictement contrÃ´lÃ©e par les rÃ¨gles de versioning,
+- le processus d'audit obligatoire garantit la qualitÃ© des Ã©volutions majeures,
+- les Ã©lÃ©ments fondamentaux intouchables sont prÃ©servÃ©s,
+- le contrat est fermÃ© et non extensible implicitement.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
 
 ---
 
-**Document créé le :** 2026-01-26  
+**Document crÃ©Ã© le :** 2026-01-26  
 **Version :** 1.0.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, StrongFather v1.2.0 (GELÉ)  
-**Type :** Déclaration officielle de gel et règles d'évolution non négociables
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, StrongFather v1.2.0 (GELÃ‰)  
+**Type :** DÃ©claration officielle de gel et rÃ¨gles d'Ã©volution non nÃ©gociables
 
 ---
 
-## 14. Mini log de génération
+## 14. Mini log de gÃ©nÃ©ration
 
-### Warnings rencontrés
+### Warnings rencontrÃ©s
 
 **WARNING-1 : Nombre de contrats FONDATION**
 
-L'audit initial mentionnait 15 contrats FONDATION, mais l'inventaire exhaustif a révélé 21 contrats FONDATION. Tous ont été inclus dans l'inventaire pour garantir l'exhaustivité.
+L'audit initial mentionnait 15 contrats FONDATION, mais l'inventaire exhaustif a rÃ©vÃ©lÃ© 21 contrats FONDATION. Tous ont Ã©tÃ© inclus dans l'inventaire pour garantir l'exhaustivitÃ©.
 
-**Résolution :** Tous les contrats FONDATION identifiés ont été listés dans la section 3.1, organisés par catégorie logique.
+**RÃ©solution :** Tous les contrats FONDATION identifiÃ©s ont Ã©tÃ© listÃ©s dans la section 3.1, organisÃ©s par catÃ©gorie logique.
 
 **WARNING-2 : Documents non-FONDATION**
 
-Certains documents (Reference Implementation Guidelines, Examples, FAQ, etc.) sont explicitement marqués comme non-normatifs. Ils ont été correctement exclus du gel.
+Certains documents (Reference Implementation Guidelines, Examples, FAQ, etc.) sont explicitement marquÃ©s comme non-normatifs. Ils ont Ã©tÃ© correctement exclus du gel.
 
-**Résolution :** Section 3.2 liste explicitement les documents non-FONDATION et précise qu'ils peuvent évoluer librement.
+**RÃ©solution :** Section 3.2 liste explicitement les documents non-FONDATION et prÃ©cise qu'ils peuvent Ã©voluer librement.
 
-### Ambiguïtés résolues
+### AmbiguÃ¯tÃ©s rÃ©solues
 
-**AMBIGUITY-1 : Versions PATCH après gel**
+**AMBIGUITY-1 : Versions PATCH aprÃ¨s gel**
 
-Question : Les versions PATCH (v1.2.1, v1.2.2) sont-elles autorisées après le gel ?
+Question : Les versions PATCH (v1.2.1, v1.2.2) sont-elles autorisÃ©es aprÃ¨s le gel ?
 
-**Résolution :** R-VER-FUTURE-8 interdit explicitement les versions PATCH après gel. Toute correction nécessite une nouvelle version MINEUR ou MAJEUR. Cette règle garantit l'immutabilité absolue de la version gelée.
+**RÃ©solution :** R-VER-FUTURE-8 interdit explicitement les versions PATCH aprÃ¨s gel. Toute correction nÃ©cessite une nouvelle version MINEUR ou MAJEUR. Cette rÃ¨gle garantit l'immutabilitÃ© absolue de la version gelÃ©e.
 
 **AMBIGUITY-2 : Modification de ce contrat**
 
-Question : Ce contrat (Release & Freeze Contract) peut-il être modifié ?
+Question : Ce contrat (Release & Freeze Contract) peut-il Ãªtre modifiÃ© ?
 
-**Résolution :** R-FREEZE-29 autorise la modification de ce contrat uniquement pour documenter un nouveau gel ou corriger des erreurs documentaires, avec validation obligatoire par le Responsable gouvernance système.
+**RÃ©solution :** R-FREEZE-29 autorise la modification de ce contrat uniquement pour documenter un nouveau gel ou corriger des erreurs documentaires, avec validation obligatoire par le Responsable gouvernance systÃ¨me.
 
-**AMBIGUITY-3 : Éléments fondamentaux intouchables**
+**AMBIGUITY-3 : Ã‰lÃ©ments fondamentaux intouchables**
 
-Question : Les éléments fondamentaux peuvent-ils être modifiés dans une version MAJEUR ?
+Question : Les Ã©lÃ©ments fondamentaux peuvent-ils Ãªtre modifiÃ©s dans une version MAJEUR ?
 
-**Résolution :** R-FREEZE-9 et INV-FREEZE-7 interdisent explicitement toute modification des éléments fondamentaux, même dans une version MAJEUR. Ils constituent l'essence immuable de StrongFather.
+**RÃ©solution :** R-FREEZE-9 et INV-FREEZE-7 interdisent explicitement toute modification des Ã©lÃ©ments fondamentaux, mÃªme dans une version MAJEUR. Ils constituent l'essence immuable de StrongFather.
 
-### Décisions éditoriales prises
+### DÃ©cisions Ã©ditoriales prises
 
-**DÉCISION-1 : Organisation par catégories**
+**DÃ‰CISION-1 : Organisation par catÃ©gories**
 
-**Décision prise :** Organisation des contrats FONDATION gelés par catégories logiques (fondateurs, décision, politiques, frontières, etc.) plutôt qu'une liste plate.
+**DÃ©cision prise :** Organisation des contrats FONDATION gelÃ©s par catÃ©gories logiques (fondateurs, dÃ©cision, politiques, frontiÃ¨res, etc.) plutÃ´t qu'une liste plate.
 
-**Justification :** Facilite la compréhension et la navigation dans l'inventaire exhaustif.
+**Justification :** Facilite la comprÃ©hension et la navigation dans l'inventaire exhaustif.
 
-**DÉCISION-2 : Section "Ce qui peut évoluer"**
+**DÃ‰CISION-2 : Section "Ce qui peut Ã©voluer"**
 
-**Décision prise :** Inclusion d'une section explicite listant ce qui peut évoluer sans casser le gel.
+**DÃ©cision prise :** Inclusion d'une section explicite listant ce qui peut Ã©voluer sans casser le gel.
 
-**Justification :** Clarifie les limites du gel et évite toute ambiguïté sur ce qui peut ou ne peut pas évoluer.
+**Justification :** Clarifie les limites du gel et Ã©vite toute ambiguÃ¯tÃ© sur ce qui peut ou ne peut pas Ã©voluer.
 
-**DÉCISION-3 : Processus d'évolution détaillé**
+**DÃ‰CISION-3 : Processus d'Ã©volution dÃ©taillÃ©**
 
-**Décision prise :** Définition d'un processus d'évolution majeure en 4 phases avec étapes détaillées.
+**DÃ©cision prise :** DÃ©finition d'un processus d'Ã©volution majeure en 4 phases avec Ã©tapes dÃ©taillÃ©es.
 
-**Justification :** Garantit que toute évolution majeure est rigoureusement contrôlée et validée.
+**Justification :** Garantit que toute Ã©volution majeure est rigoureusement contrÃ´lÃ©e et validÃ©e.
 
-**DÉCISION-4 : Conséquences de violation**
+**DÃ‰CISION-4 : ConsÃ©quences de violation**
 
-**Décision prise :** Inclusion d'une section explicite sur les conséquences d'une violation du gel.
+**DÃ©cision prise :** Inclusion d'une section explicite sur les consÃ©quences d'une violation du gel.
 
-**Justification :** Détérrent et clarifie les implications contractuelles et opérationnelles d'une violation.
+**Justification :** DÃ©tÃ©rrent et clarifie les implications contractuelles et opÃ©rationnelles d'une violation.
 
-**DÉCISION-5 : Rôles et responsabilités**
+**DÃ‰CISION-5 : RÃ´les et responsabilitÃ©s**
 
-**Décision prise :** Définition explicite des rôles (Responsable gouvernance système, Architecte logiciel senior) et de leurs responsabilités.
+**DÃ©cision prise :** DÃ©finition explicite des rÃ´les (Responsable gouvernance systÃ¨me, Architecte logiciel senior) et de leurs responsabilitÃ©s.
 
-**Justification :** Clarifie qui est autorisé à prendre quelles décisions et garantit la traçabilité des responsabilités.
+**Justification :** Clarifie qui est autorisÃ© Ã  prendre quelles dÃ©cisions et garantit la traÃ§abilitÃ© des responsabilitÃ©s.
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-**VÉRIFICATION-1 : Cohérence avec Versioning & Evolution Contract**
+**VÃ‰RIFICATION-1 : CohÃ©rence avec Versioning & Evolution Contract**
 
-**Vérification effectuée :** Toutes les règles de gel (R-GEL-*) du Versioning & Evolution Contract sont respectées et complétées.
+**VÃ©rification effectuÃ©e :** Toutes les rÃ¨gles de gel (R-GEL-*) du Versioning & Evolution Contract sont respectÃ©es et complÃ©tÃ©es.
 
-**Résultat :** ✅ Cohérence confirmée. Les règles de ce contrat complètent et renforcent les règles du Versioning & Evolution Contract.
+**RÃ©sultat :** âœ… CohÃ©rence confirmÃ©e. Les rÃ¨gles de ce contrat complÃ¨tent et renforcent les rÃ¨gles du Versioning & Evolution Contract.
 
-**VÉRIFICATION-2 : Cohérence avec tous les contrats FONDATION**
+**VÃ‰RIFICATION-2 : CohÃ©rence avec tous les contrats FONDATION**
 
-**Vérification effectuée :** Vérification que tous les contrats FONDATION listés existent et sont bien marqués comme FONDATION.
+**VÃ©rification effectuÃ©e :** VÃ©rification que tous les contrats FONDATION listÃ©s existent et sont bien marquÃ©s comme FONDATION.
 
-**Résultat :** ✅ Tous les contrats listés existent et sont correctement identifiés comme FONDATION.
+**RÃ©sultat :** âœ… Tous les contrats listÃ©s existent et sont correctement identifiÃ©s comme FONDATION.
 
-**VÉRIFICATION-3 : Cohérence des invariants et garanties**
+**VÃ‰RIFICATION-3 : CohÃ©rence des invariants et garanties**
 
-**Vérification effectuée :** Vérification que les invariants et garanties mentionnés (INV-AUTH-*, INV-BEHAV-*, G-NOEXEC-*, etc.) sont bien définis dans les contrats FONDATION.
+**VÃ©rification effectuÃ©e :** VÃ©rification que les invariants et garanties mentionnÃ©s (INV-AUTH-*, INV-BEHAV-*, G-NOEXEC-*, etc.) sont bien dÃ©finis dans les contrats FONDATION.
 
-**Résultat :** ✅ Tous les invariants et garanties mentionnés sont correctement référencés.
+**RÃ©sultat :** âœ… Tous les invariants et garanties mentionnÃ©s sont correctement rÃ©fÃ©rencÃ©s.
 
-**VÉRIFICATION-4 : Cohérence des règles de versioning**
+**VÃ‰RIFICATION-4 : CohÃ©rence des rÃ¨gles de versioning**
 
-**Vérification effectuée :** Vérification que les règles de versioning futures (R-VER-FUTURE-*) sont cohérentes avec le Versioning & Evolution Contract.
+**VÃ©rification effectuÃ©e :** VÃ©rification que les rÃ¨gles de versioning futures (R-VER-FUTURE-*) sont cohÃ©rentes avec le Versioning & Evolution Contract.
 
-**Résultat :** ✅ Cohérence confirmée. Les règles futures respectent et complètent les règles existantes.
+**RÃ©sultat :** âœ… CohÃ©rence confirmÃ©e. Les rÃ¨gles futures respectent et complÃ¨tent les rÃ¨gles existantes.
 
-**VÉRIFICATION-5 : Exhaustivité de l'inventaire**
+**VÃ‰RIFICATION-5 : ExhaustivitÃ© de l'inventaire**
 
-**Vérification effectuée :** Vérification que tous les contrats FONDATION identifiés dans l'audit et dans les fichiers sont inclus dans l'inventaire.
+**VÃ©rification effectuÃ©e :** VÃ©rification que tous les contrats FONDATION identifiÃ©s dans l'audit et dans les fichiers sont inclus dans l'inventaire.
 
-**Résultat :** ✅ Exhaustivité confirmée. Tous les contrats FONDATION ont été identifiés et listés.
+**RÃ©sultat :** âœ… ExhaustivitÃ© confirmÃ©e. Tous les contrats FONDATION ont Ã©tÃ© identifiÃ©s et listÃ©s.
 
-**VÉRIFICATION-6 : Non-contradiction avec les contrats gelés**
+**VÃ‰RIFICATION-6 : Non-contradiction avec les contrats gelÃ©s**
 
-**Vérification effectuée :** Vérification que ce contrat n'introduit aucune contradiction avec les contrats FONDATION gelés.
+**VÃ©rification effectuÃ©e :** VÃ©rification que ce contrat n'introduit aucune contradiction avec les contrats FONDATION gelÃ©s.
 
-**Résultat :** ✅ Aucune contradiction détectée. Ce contrat respecte strictement tous les contrats FONDATION gelés.
+**RÃ©sultat :** âœ… Aucune contradiction dÃ©tectÃ©e. Ce contrat respecte strictement tous les contrats FONDATION gelÃ©s.
 
 ### Conclusion du mini log
 
-**Résultat final :** ✅ **Document cohérent, complet, et non ambigu**
+**RÃ©sultat final :** âœ… **Document cohÃ©rent, complet, et non ambigu**
 
-- Tous les warnings ont été résolus
-- Toutes les ambiguïtés ont été clarifiées
-- Toutes les décisions éditoriales ont été justifiées
-- Toutes les vérifications de cohérence ont été effectuées avec succès
-- Aucune contradiction n'a été détectée
+- Tous les warnings ont Ã©tÃ© rÃ©solus
+- Toutes les ambiguÃ¯tÃ©s ont Ã©tÃ© clarifiÃ©es
+- Toutes les dÃ©cisions Ã©ditoriales ont Ã©tÃ© justifiÃ©es
+- Toutes les vÃ©rifications de cohÃ©rence ont Ã©tÃ© effectuÃ©es avec succÃ¨s
+- Aucune contradiction n'a Ã©tÃ© dÃ©tectÃ©e
 
-**Statut :** Le document est prêt pour validation et signature officielle.
+**Statut :** Le document est prÃªt pour validation et signature officielle.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+

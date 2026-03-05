@@ -1,56 +1,56 @@
-# MiyuSocialProfile — Documentation Fondatrice
+﻿# MiyuSocialProfile â€” Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuSocialProfile** est le **kit d'outils (Toolkit)** de profil social (profil, abonnés, abonnements) de l'écosystème Miyukini. Il intègre les outils de lecture/mise à jour du profil social, de follow/unfollow et de liste des abonnés/abonnements, alignés sur [Équivalents Reseaux Sociaux](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Reseaux%20Sociaux.md).
+**MiyuSocialProfile** est le **kit d'outils (Toolkit)** de profil social (profil, abonnÃ©s, abonnements) de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils de lecture/mise Ã  jour du profil social, de follow/unfollow et de liste des abonnÃ©s/abonnements, alignÃ©s sur [Ã‰quivalents Reseaux Sociaux](..//..//miyukini-webway-system//reference//_index.md).
 
-L'autorité sur les données (profil social, follow, abonnés, abonnements) appartient à **KindMother**. MiyuSocialProfile expose des capacités d'exécution gouvernée ; les décisions (modification autorisée, follow autorisé) relèvent de **StrongFather**.
+L'autoritÃ© sur les donnÃ©es (profil social, follow, abonnÃ©s, abonnements) appartient Ã  **KindMother**. MiyuSocialProfile expose des capacitÃ©s d'exÃ©cution gouvernÃ©e ; les dÃ©cisions (modification autorisÃ©e, follow autorisÃ©) relÃ¨vent de **StrongFather**.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-
----
-
-## 2. Portée / Scope
-
-**Ce document définit :** l'identité et la définition canonique de MiyuSocialProfile, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother.
-
-**Hors scope :** l'identité de base (MiyuAuth) ; le profil étendu forum (MiyuProfile) ; l'affichage (MiyuWeb).
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 3. Définition canonique
+## 2. PortÃ©e / Scope
 
-> **MiyuSocialProfile est une composition officielle d'outils de profil social (profil, abonnés, abonnements), déclarée et gouvernée par l'environnement.**
+**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de MiyuSocialProfile, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother.
 
-- MiyuSocialProfile **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
-- MiyuSocialProfile **n'ajoute aucune logique métier** : il orchestre des capacités atomiques ; décision (modification, follow) = StrongFather.
+**Hors scope :** l'identitÃ© de base (MiyuAuth) ; le profil Ã©tendu forum (MiyuProfile) ; l'affichage (MiyuWeb).
 
-**Règle fondamentale :** Toute écriture (profil, follow) = **WriteIntent** vers KindMother.
+---
+
+## 3. DÃ©finition canonique
+
+> **MiyuSocialProfile est une composition officielle d'outils de profil social (profil, abonnÃ©s, abonnements), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+
+- MiyuSocialProfile **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
+- MiyuSocialProfile **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques ; dÃ©cision (modification, follow) = StrongFather.
+
+**RÃ¨gle fondamentale :** Toute Ã©criture (profil, follow) = **WriteIntent** vers KindMother.
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.social.profile` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `social` |
-| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le détail de chaque outil est décrit dans [MiyuSocialProfile - Reference Outils](./MiyuSocialProfile%20-%20Reference%20Outils.md).
+Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuSocialProfile - Reference Outils](./MiyuSocialProfile%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
-| `tool.social.profile.get` | Récupère le profil social |
-| `tool.social.profile.update` | Met à jour le profil social ; autorisation = StrongFather |
+| `tool.social.profile.get` | RÃ©cupÃ¨re le profil social |
+| `tool.social.profile.update` | Met Ã  jour le profil social ; autorisation = StrongFather |
 | `tool.social.follow.add` | Ajoute un abonnement (follow) ; WriteIntent KindMother |
 | `tool.social.follow.remove` | Supprime un abonnement |
-| `tool.social.followers.list` | Liste les abonnés |
+| `tool.social.followers.list` | Liste les abonnÃ©s |
 | `tool.social.following.list` | Liste les abonnements |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuSocialProfile en contient six.
@@ -59,44 +59,46 @@ Le détail de chaque outil est décrit dans [MiyuSocialProfile - Reference Outil
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)). Spécificité : **décision (modification, follow autorisé) = StrongFather** ; toute écriture = WriteIntent KindMother.
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : **dÃ©cision (modification, follow autorisÃ©) = StrongFather** ; toute Ã©criture = WriteIntent KindMother.
 
 ---
 
-## 7. Niveau de sécurité et états
+## 7. Niveau de sÃ©curitÃ© et Ã©tats
 
-| Élément | Valeur |
+| Ã‰lÃ©ment | Valeur |
 |---------|--------|
-| **Niveau de sécurité du kit** | **1 à 2** (données personnelles) |
-| **États autorisés** | `HEALTHY`, `DEGRADED` |
-| **États interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
+| **Niveau de sÃ©curitÃ© du kit** | **1 Ã  2** (donnÃ©es personnelles) |
+| **Ã‰tats autorisÃ©s** | `HEALTHY`, `DEGRADED` |
+| **Ã‰tats interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autorité sur les données : profil social, follow, abonnés, abonnements. Toute création ou mise à jour passe par **WriteIntent** vers KindMother.
+**KindMother** est l'autoritÃ© sur les donnÃ©es : profil social, follow, abonnÃ©s, abonnements. Toute crÃ©ation ou mise Ã  jour passe par **WriteIntent** vers KindMother.
 
-Les obligations de conformité détaillées sont dans [MiyuSocialProfile - Tool Governance Compliance Contract](./contracts/governance/MiyuSocialProfile%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuSocialProfile - Tool Governance Compliance Contract](./contracts/governance/MiyuSocialProfile%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-La documentation et la future implémentation de MiyuSocialProfile sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). À l'implémentation, le code fournissant les Tools MiyuSocialProfile devra être balisé MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit généré selon le [Protocole MIP v1](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md).
+La documentation et la future implÃ©mentation de MiyuSocialProfile sont conÃ§ues pour Ãªtre **compatibles MIP v1** (Miyukini Index Protocol). Ã€ l'implÃ©mentation, le code fournissant les Tools MiyuSocialProfile devra Ãªtre balisÃ© MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit gÃ©nÃ©rÃ© selon le [Protocole MIP v1](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
 ---
 
-## 10. Références croisées
+## 10. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Équivalents Reseaux Sociaux | [Miyukini Conceptual References - Equivalents Reseaux Sociaux](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Reseaux%20Sociaux.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
+| Ã‰quivalents Reseaux Sociaux | [Miyukini Conceptual References - Equivalents Reseaux Sociaux](..//..//miyukini-webway-system//reference//_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence fondateur
+**Statut :** Document de rÃ©fÃ©rence fondateur
+
+

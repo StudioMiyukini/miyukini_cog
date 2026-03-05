@@ -1,4 +1,4 @@
-# MiyukiniAdmin — Authentication Contract
+﻿# MiyukiniAdmin â€” Authentication Contract
 
 ## 1. Contexte
 
@@ -28,9 +28,9 @@ Ce document definit :
 - L'**audit des evenements d'auth** (login, MFA, session)
 
 Ce document **ne couvre pas** :
-- L'autorisation (roles, permissions) — voir [Permission Contract](./MiyukiniAdmin%20-%20Permission%20Contract.md)
-- Le premier demarrage (Futur Admin, parcours installation) — voir [Auth and First-Boot Contract](./MiyukiniAdmin%20-%20Auth%20and%20First-Boot%20Contract.md)
-- L'identite environnement (EIP) — voir [Environment Identity Protocol EIP](../../../../protocols/MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md)
+- L'autorisation (roles, permissions) â€” voir [Permission Contract](./MiyukiniAdmin%20-%20Permission%20Contract.md)
+- Le premier demarrage (Futur Admin, parcours installation) â€” voir [Auth and First-Boot Contract](./MiyukiniAdmin%20-%20Auth%20and%20First-Boot%20Contract.md)
+- L'identite environnement (EIP) â€” voir [Environment Identity Protocol EIP](..//..//..//..//contrats//MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md)
 
 ---
 
@@ -64,39 +64,39 @@ MiyukiniAdmin maintient un **registre des comptes admin** : liste des identites 
 | Evenement | Action |
 |-----------|--------|
 | **Creation** | Premier compte lors du parcours d'installation (Futur Admin) ; comptes suivants par un admin ayant la capacite `admin.accounts.create`. |
-| **Modification** | Changement mot de passe, activation/desactivation MFA, changement role — par l'admin lui-meme (mot de passe, MFA) ou par un admin avec `admin.accounts.write`. |
+| **Modification** | Changement mot de passe, activation/desactivation MFA, changement role â€” par l'admin lui-meme (mot de passe, MFA) ou par un admin avec `admin.accounts.write`. |
 | **Verrouillage** | Automatique apres N echecs de login (rate limiting) ; manuel par un admin avec `admin.accounts.lock`. |
 | **Deverrouillage** | Automatique apres delai ; manuel par un admin avec `admin.accounts.unlock`. |
-| **Revocation** | Desactivation du compte (plus de login) — par un admin avec `admin.accounts.revoke`. Pas de suppression physique immediate (audit). |
+| **Revocation** | Desactivation du compte (plus de login) â€” par un admin avec `admin.accounts.revoke`. Pas de suppression physique immediate (audit). |
 
 ---
 
 ## 4. Flux de login
 
-### 4.1 Prérequis
+### 4.1 PrÃ©requis
 
 - Environnement **initialise** (pas en mode Futur Admin).
 - Compte admin existant, non revoque, non verrouille (ou verrou expire).
 
-### 4.2 Étapes
+### 4.2 Ã‰tapes
 
 1. **Acces UI** : Utilisateur ouvre l'UI MiyukiniAdmin (ex. `/login`).
 2. **Saisie identifiant + mot de passe** : Formulaire ; pas de pre-remplissage.
-3. **Verification rate limit** : Si l'adresse IP ou le compte est bloque (trop d'echecs), reponse generique « Compte temporairement indisponible » sans indiquer si le compte existe.
-4. **Verification compte** : Recherche par `username` ; si absent ou revoque → echec generique « Identifiants invalides » (pas de fuite d'information).
-5. **Verification mot de passe** : Comparaison avec `password_hash` (Argon2id/bcrypt verify). Si echec → increment `failed_attempts`, potentiel verrouillage, audit, reponse generique.
-6. **Challenge MFA** (si `mfa_enabled`) : Affichage formulaire TOTP ou demande cle materielle. Verification du code/cle. Si echec → audit, reponse generique.
-7. **Succes** : Remise a zero `failed_attempts`, mise a jour `last_login_at`, **creation de session** (voir section 5), redirection vers le dashboard. Audit « login success ».
+3. **Verification rate limit** : Si l'adresse IP ou le compte est bloque (trop d'echecs), reponse generique Â« Compte temporairement indisponible Â» sans indiquer si le compte existe.
+4. **Verification compte** : Recherche par `username` ; si absent ou revoque â†’ echec generique Â« Identifiants invalides Â» (pas de fuite d'information).
+5. **Verification mot de passe** : Comparaison avec `password_hash` (Argon2id/bcrypt verify). Si echec â†’ increment `failed_attempts`, potentiel verrouillage, audit, reponse generique.
+6. **Challenge MFA** (si `mfa_enabled`) : Affichage formulaire TOTP ou demande cle materielle. Verification du code/cle. Si echec â†’ audit, reponse generique.
+7. **Succes** : Remise a zero `failed_attempts`, mise a jour `last_login_at`, **creation de session** (voir section 5), redirection vers le dashboard. Audit Â« login success Â».
 
 ### 4.3 Reponses generiques (anti-fuite)
 
 | Cas | Reponse utilisateur | Audit |
 |-----|----------------------|-------|
-| Compte inexistant | « Identifiants invalides » | Tentative login (username tente, pas de compte) |
-| Mot de passe incorrect | « Identifiants invalides » | Tentative login (account_id, echec mot de passe) |
-| MFA incorrect | « Code invalide » ou « Identifiants invalides » | Tentative login (account_id, echec MFA) |
-| Compte verrouille | « Compte temporairement indisponible » | Tentative login (account_id, compte verrouille) |
-| Compte revoque | « Identifiants invalides » | Tentative login (account_id revoque) |
+| Compte inexistant | Â« Identifiants invalides Â» | Tentative login (username tente, pas de compte) |
+| Mot de passe incorrect | Â« Identifiants invalides Â» | Tentative login (account_id, echec mot de passe) |
+| MFA incorrect | Â« Code invalide Â» ou Â« Identifiants invalides Â» | Tentative login (account_id, echec MFA) |
+| Compte verrouille | Â« Compte temporairement indisponible Â» | Tentative login (account_id, compte verrouille) |
+| Compte revoque | Â« Identifiants invalides Â» | Tentative login (account_id revoque) |
 
 **Regle :** Ne jamais reveler si un username existe ou non ; ne jamais exposer de detail technique dans l'UI.
 
@@ -127,9 +127,9 @@ A chaque requete authentifiee :
 1. **Lecture du token** : Recuperation du `session_id` (cookie ou header).
 2. **Recherche session** : Session existante, non expiree, non revoquee.
 3. **Binding** : Verification optionnelle que l'IP et/ou User-Agent n'ont pas change (politique configurable : strict = refus si changement ; souple = alerte mais accepte).
-4. **Renouvellement** : Si « sliding » activé, mise a jour de `expires_at` dans la fenetre autorisee.
+4. **Renouvellement** : Si Â« sliding Â» activÃ©, mise a jour de `expires_at` dans la fenetre autorisee.
 
-Si une etape echoue → session invalide, redirection vers `/login`, audit « session invalid ».
+Si une etape echoue â†’ session invalide, redirection vers `/login`, audit Â« session invalid Â».
 
 ### 5.3 Timeout et expiration
 
@@ -145,9 +145,9 @@ Si une etape echoue → session invalide, redirection vers `/login`, audit « se
 
 Une session peut etre revoquee :
 
-- **Manuellement** : L'admin se deconnecte (bouton « Deconnexion ») → session supprimee ou marquee invalide.
+- **Manuellement** : L'admin se deconnecte (bouton Â« Deconnexion Â») â†’ session supprimee ou marquee invalide.
 - **Par un autre admin** : Un admin avec la capacite `admin.accounts.revoke_session` peut invalider une session cible (ex. pour bloquer un compte compromis).
-- **Automatiquement** : Lors du changement de mot de passe ou de la revocation du compte → toutes les sessions de ce compte sont invalidees.
+- **Automatiquement** : Lors du changement de mot de passe ou de la revocation du compte â†’ toutes les sessions de ce compte sont invalidees.
 
 ---
 
@@ -164,8 +164,8 @@ Une session peut etre revoquee :
 
 ### 6.2 Hash
 
-- **Algorithme** : Argon2id (recommandé) ou bcrypt.
-- **Parametres** : Coût suffisant (ex. Argon2id : memory 64 MiB, iterations 3 ; bcrypt : cost 12). Aucun sel en clair dans les logs.
+- **Algorithme** : Argon2id (recommandÃ©) ou bcrypt.
+- **Parametres** : CoÃ»t suffisant (ex. Argon2id : memory 64 MiB, iterations 3 ; bcrypt : cost 12). Aucun sel en clair dans les logs.
 
 ### 6.3 Rotation
 
@@ -183,7 +183,7 @@ Lors de la creation du **premier** compte admin (Futur Admin), les memes exigenc
 ### 7.1 Obligation
 
 - **Admin** et **Recovery** : MFA **obligatoire** (pas de compte actif sans MFA apres enrollment).
-- **Audit** : MFA **recommandé** (peut etre impose par politique).
+- **Audit** : MFA **recommandÃ©** (peut etre impose par politique).
 
 ### 7.2 Methodes supportees
 
@@ -194,22 +194,22 @@ Lors de la creation du **premier** compte admin (Futur Admin), les memes exigenc
 
 ### 7.3 Enrollment TOTP
 
-1. Admin (ou premier admin) initie « Activer MFA ».
+1. Admin (ou premier admin) initie Â« Activer MFA Â».
 2. Serveur genere un secret TOTP (aleatoire), affiche QR code + code manuel.
 3. Utilisateur scanne avec l'app et saisit un premier code pour prouver la possession.
 4. Si valide : stockage du secret **chiffre** ; `mfa_enabled = true`. Optionnel : generation de codes de secours (chiffres).
-5. Audit « MFA enabled ».
+5. Audit Â« MFA enabled Â».
 
 ### 7.4 Enrollment WebAuthn
 
-1. Admin initie « Ajouter cle de securite ».
+1. Admin initie Â« Ajouter cle de securite Â».
 2. Navigateur declenche `navigator.credentials.create()` ; l'utilisateur enregistre la cle.
 3. Serveur recoit la public key et le credential ID ; les stocke (pas de secret). Optionnel : plusieurs cles par compte.
-4. Audit « WebAuthn credential registered ».
+4. Audit Â« WebAuthn credential registered Â».
 
 ### 7.5 Challenge au login
 
-- **TOTP** : Utilisateur saisit le code a 6 chiffres ; serveur verifie avec le secret TOTP (fenetre de tolerance raisonnable, ex. ±1 periode).
+- **TOTP** : Utilisateur saisit le code a 6 chiffres ; serveur verifie avec le secret TOTP (fenetre de tolerance raisonnable, ex. Â±1 periode).
 - **WebAuthn** : Serveur envoie challenge ; navigateur `navigator.credentials.get()` ; signature verifiee cote serveur.
 
 Si echec : audit ; pas de fuite sur le fait que le compte existe.
@@ -223,8 +223,8 @@ Si echec : audit ; pas de fuite sur le fait que le compte existe.
 | Seuil | Action |
 |-------|--------|
 | **N echecs par compte** (ex. 5) en fenetre (ex. 5 min) | Verrouillage du compte pendant D (ex. 15 min). Increment `failed_attempts` ; si atteint N, `locked_until = now + D`. |
-| **N echecs par IP** (ex. 10) en fenetre (ex. 5 min) | Blocage temporaire de l'IP (ex. 15 min). Reponse HTTP 429 ou page « Trop de tentatives ». |
-| **Apres verrouillage** | Toute tentative de login pour ce compte ou cette IP retourne « Compte temporairement indisponible » ou 429 sans traiter les credentials. |
+| **N echecs par IP** (ex. 10) en fenetre (ex. 5 min) | Blocage temporaire de l'IP (ex. 15 min). Reponse HTTP 429 ou page Â« Trop de tentatives Â». |
+| **Apres verrouillage** | Toute tentative de login pour ce compte ou cette IP retourne Â« Compte temporairement indisponible Â» ou 429 sans traiter les credentials. |
 
 ### 8.2 Alerte
 
@@ -233,7 +233,7 @@ Si echec : audit ; pas de fuite sur le fait que le compte existe.
 
 ### 8.3 Deverrouillage
 
-- **Automatique** : Apres expiration de `locked_until`, le compte peut tenter à nouveau (sous reserve que l'IP ne soit pas encore bloquee).
+- **Automatique** : Apres expiration de `locked_until`, le compte peut tenter Ã  nouveau (sous reserve que l'IP ne soit pas encore bloquee).
 - **Manuel** : Un admin avec `admin.accounts.unlock` peut lever le verrou d'un compte.
 
 ---
@@ -247,13 +247,13 @@ Si echec : audit ; pas de fuite sur le fait que le compte existe.
 
 ### 9.2 MFA
 
-- **TOTP** : Secret chiffre (AES-256-GCM) avant persistance. Cle de chiffrement derivee (KDF) depuis un secret maître (ex. stocke dans config securisee ou HSM). Pas de secret TOTP en clair.
+- **TOTP** : Secret chiffre (AES-256-GCM) avant persistance. Cle de chiffrement derivee (KDF) depuis un secret maÃ®tre (ex. stocke dans config securisee ou HSM). Pas de secret TOTP en clair.
 - **WebAuthn** : Pas de secret cote serveur ; uniquement public key et credential ID.
 
 ### 9.3 Sessions
 
-- **Token** : Valeur aleatoire (session_id) non previsible. Stockage cote serveur : session_id → account_id, role, expires_at, etc. Pas de mot de passe ni de secret MFA dans le token.
-- **Cookie** : Si cookie utilisé, flags HttpOnly, Secure, SameSite=Strict (ou Lax selon contraintes). Pas de script accessible.
+- **Token** : Valeur aleatoire (session_id) non previsible. Stockage cote serveur : session_id â†’ account_id, role, expires_at, etc. Pas de mot de passe ni de secret MFA dans le token.
+- **Cookie** : Si cookie utilisÃ©, flags HttpOnly, Secure, SameSite=Strict (ou Lax selon contraintes). Pas de script accessible.
 
 ---
 
@@ -299,10 +299,12 @@ Si echec : audit ; pas de fuite sur le fait que le compte existe.
 - [MiyukiniAdmin - Auth and First-Boot Contract](./MiyukiniAdmin%20-%20Auth%20and%20First-Boot%20Contract.md)
 - [MiyukiniAdmin - Permission Contract](./MiyukiniAdmin%20-%20Permission%20Contract.md)
 - [MiyukiniAdmin - Threat Model Contract](./MiyukiniAdmin%20-%20Threat%20Model%20Contract.md)
-- [Miyukini Conceptual References - Security Protocols](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Protocols.md)
+- [Miyukini Conceptual References - Security Protocols](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 **Date de creation :** 2026-01-29  
 **Version :** 1.0.0  
-**Statut :** Contrat normatif — Authentification MiyukiniAdmin
+**Statut :** Contrat normatif â€” Authentification MiyukiniAdmin
+
+

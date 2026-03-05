@@ -1,10 +1,10 @@
-# MiyuSQL — Security and States Contract
+﻿# MiyuSQL â€” Security and States Contract
 
 ## 1. Contexte
 
 Ce document definit le contrat de **securite et d'etats systeme** pour le kit MiyuSQL. Il etablit le niveau de securite du Toolkit, les etats autorises et interdits pour son utilisation, et l'alignement avec WorrySentinel et Caring Nanny.
 
-**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -52,7 +52,7 @@ Ce document **ne couvre pas** :
 
 ---
 
-## 4. Etats Systeme Autorisés
+## 4. Etats Systeme AutorisÃ©s
 
 ### 4.1 Etats Autorises
 
@@ -65,11 +65,11 @@ Ce document **ne couvre pas** :
 
 | Etat confiance | Nom | Description | MiyuSQL |
 |----------------|-----|-------------|---------|
-| **T0** | Normal | Systeme sain | Autorisé |
-| **T1** | Instable | Anomalie detectee | Autorisé avec surveillance |
-| **T2** | Dégradé | Capacites reduites | Autorisé selon politique (lecture prioritaire) |
+| **T0** | Normal | Systeme sain | AutorisÃ© |
+| **T1** | Instable | Anomalie detectee | AutorisÃ© avec surveillance |
+| **T2** | DÃ©gradÃ© | Capacites reduites | AutorisÃ© selon politique (lecture prioritaire) |
 | T3 | Restreint | Suspicion forte | Interdit ou tres restreint |
-| T4 | Bloqué | Integrite rompue | Interdit |
+| T4 | BloquÃ© | Integrite rompue | Interdit |
 
 ---
 
@@ -81,7 +81,7 @@ Ce document **ne couvre pas** :
 |------|-------------|-------|
 | **SECURITY_LOCKDOWN** | Verrouillage securite | Aucun Tool MiyuSQL d'ecriture ; lecture eventuellement restreinte |
 | **MAINTENANCE** | Maintenance en cours | Aucun Tool MiyuSQL utilisable (ou lecture seule selon politique) |
-| **Autres** | Selon [Master Butler - Toolkit Composition Contract](../../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Toolkit%20Composition%20Contract.md) | Les etats disallowed_states du Toolkit s'appliquent |
+| **Autres** | Selon [Master Butler - Toolkit Composition Contract](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Toolkit%20Composition%20Contract.md) | Les etats disallowed_states du Toolkit s'appliquent |
 
 ### 5.2 Regle d'Execution
 
@@ -111,11 +111,13 @@ Si l'une des pre-conditions n'est pas remplie, l'execution est refusee ; le Tool
 |----------|------|
 | MiyuSQL - Documentation Fondatrice | [MiyuSQL - Documentation Fondatrice](../../MiyuSQL%20-%20Documentation%20Fondatrice.md) |
 | MiyuSQL - Tool Governance Compliance Contract | [MiyuSQL - Tool Governance Compliance Contract](../governance/MiyuSQL%20-%20Tool%20Governance%20Compliance%20Contract.md) |
-| Master Butler - Toolkit Composition Contract | [Master Butler - Toolkit Composition Contract](../../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Toolkit%20Composition%20Contract.md) |
-| Glossaire — Etats de confiance, Niveaux de securite | [Miyukini Conceptual References - Glossaire](../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
+| Master Butler - Toolkit Composition Contract | [Master Butler - Toolkit Composition Contract](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Toolkit%20Composition%20Contract.md) |
+| Glossaire â€” Etats de confiance, Niveaux de securite | [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) |
 
 ---
 
 **Date de creation :** 2026-01-29  
 **Version :** 1.0  
 **Statut :** Contrat de reference
+
+

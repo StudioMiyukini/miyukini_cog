@@ -1,12 +1,12 @@
-# MiyuWebwayTracker -- Contrat des systemes actifs
+﻿# MiyuWebwayTracker -- Contrat des systemes actifs
 
 ## Contexte
 
 Les **systemes actifs** du COG Tracker MWS (MiyuWebwayTracker) sont des mecanismes qui **agissent sur les flux** du Webway (annonces, requetes, connexions) pour **filtrer, degrader ou bloquer** en fonction des listes de statuts et des politiques. Ils protegent le maillage en appliquant des decisions de rejet ou de degradation conformes au devoir de protection des Trackers. Ce contrat formalise les **declencheurs, actions et limites** des systemes actifs.
 
-> **Role du Tracker :** Le Tracker est le **douanier du reseau**. Il controle l'identite et le **Permis de circulation** des COGs (contrôle tracker), gere les **whitelists, blacklists et quarantaines**, dirige les **pools par version des Cores**, et peut **fermer des connexions** pour circonscrire les attaques sur annonce des relays. La verification lourde de conformite (Passeport, cle Cores, blocs de code Services) reste du ressort des **relays** qui delivrent les Permis de circulation (accord relay) (voir [Miyukini Webway Relay](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) section 2).
+> **Role du Tracker :** Le Tracker est le **douanier du reseau**. Il controle l'identite et le **Permis de circulation** des COGs (contrÃ´le tracker), gere les **whitelists, blacklists et quarantaines**, dirige les **pools par version des Cores**, et peut **fermer des connexions** pour circonscrire les attaques sur annonce des relays. La verification lourde de conformite (Passeport, cle Cores, blocs de code Services) reste du ressort des **relays** qui delivrent les Permis de circulation (accord relay) (voir [Miyukini Webway Relay](..//..//..//..//miyukini-webway-system//reference//_index.md) section 2).
 
-**Reference conceptuelle :** [Miyukini Conceptual References - Miyukini Webway System](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) (section 5.2).
+**Reference conceptuelle :** [Miyukini Conceptual References - Miyukini Webway System](..//..//..//..//miyukini-webway-system//reference//_index.md) (section 5.2).
 
 ## Portee / Scope
 
@@ -190,12 +190,13 @@ La politique locale et les Cores peuvent restreindre ou etendre les actions auto
 
 ## References
 
-- [Miyukini Conceptual References - Miyukini Webway System](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md) -- section 5.2 (systemes actifs)
-- [Miyukini Webway System - Normes et Standards](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md) -- matrice des statuts, regles d'echange
-- [Miyukini Conceptual References - Miyukini Webway Relay](../../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) -- section 5 : Relay Origin et Registre de Services
+- [Miyukini Conceptual References - Miyukini Webway System](..//..//..//..//miyukini-webway-system//reference//_index.md) -- section 5.2 (systemes actifs)
+- [Miyukini Webway System - Normes et Standards](..//..//..//..//miyukini-webway-system//reference//_index.md) -- matrice des statuts, regles d'echange
+- [Miyukini Conceptual References - Miyukini Webway Relay](..//..//..//..//miyukini-webway-system//reference//_index.md) -- section 5 : Relay Origin et Registre de Services
 - [MiyuWebwayTracker - Passive Systems Contract](MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md) -- systemes passifs (validation, journalisation, verification Registre)
 - [MiyuWebwayTracker - Tool Governance Compliance Contract](../governance/MiyuWebwayTracker%20-%20Tool%20Governance%20Compliance%20Contract.md)
 
 ---
 
 *Document cree pour le contrat des systemes actifs du MiyuWebwayTracker. Classification : Contrat de securite.*
+

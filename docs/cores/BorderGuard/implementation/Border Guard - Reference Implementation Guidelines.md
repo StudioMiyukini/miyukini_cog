@@ -1,16 +1,16 @@
-# Border Guard — Reference Implementation Guidelines
+﻿# Border Guard â€” Reference Implementation Guidelines
 
 ## Statut du document
 
 **POST-FONDATION / NON NORMATIF / INFORMATIF**
 
-Ce document est **informatif, non normatif, et non contractuel**. Il guide un développeur pour implémenter Border Guard correctement, sans violer les contrats FONDATION.
+Ce document est **informatif, non normatif, et non contractuel**. Il guide un dÃ©veloppeur pour implÃ©menter Border Guard correctement, sans violer les contrats FONDATION.
 
-**Objectif pédagogique :** Ce document vise à aider les développeurs à comprendre comment traduire les contrats FONDATION en implémentation, en respectant strictement les invariants, garanties, et interdictions.
+**Objectif pÃ©dagogique :** Ce document vise Ã  aider les dÃ©veloppeurs Ã  comprendre comment traduire les contrats FONDATION en implÃ©mentation, en respectant strictement les invariants, garanties, et interdictions.
 
-**Avertissement :** Ce document ne doit pas être interprété abusivement. Il ne crée aucune nouvelle règle contractuelle et ne modifie aucun contrat existant. Les contrats FONDATION priment toujours sur ce guide.
+**Avertissement :** Ce document ne doit pas Ãªtre interprÃ©tÃ© abusivement. Il ne crÃ©e aucune nouvelle rÃ¨gle contractuelle et ne modifie aucun contrat existant. Les contrats FONDATION priment toujours sur ce guide.
 
-**Relation avec les contrats FONDATION :** Ce document fait référence aux contrats FONDATION existants mais ne les étend pas, ne les modifie pas, et ne crée aucune nouvelle obligation contractuelle.
+**Relation avec les contrats FONDATION :** Ce document fait rÃ©fÃ©rence aux contrats FONDATION existants mais ne les Ã©tend pas, ne les modifie pas, et ne crÃ©e aucune nouvelle obligation contractuelle.
 
 ---
 
@@ -18,510 +18,510 @@ Ce document est **informatif, non normatif, et non contractuel**. Il guide un d�
 
 ### 1.1. Objectif
 
-Ce document fournit des lignes directrices pour implémenter Border Guard de manière conforme aux contrats FONDATION. Il explique comment traduire les concepts contractuels en logique d'implémentation sans interprétation abusive.
+Ce document fournit des lignes directrices pour implÃ©menter Border Guard de maniÃ¨re conforme aux contrats FONDATION. Il explique comment traduire les concepts contractuels en logique d'implÃ©mentation sans interprÃ©tation abusive.
 
 ### 1.2. Nature informative
 
-Ce document est **purement informatif**. Il ne définit pas de nouvelles règles, n'impose pas de technologies, et ne prescrit pas de solutions techniques. Il guide la compréhension et l'application des contrats FONDATION.
+Ce document est **purement informatif**. Il ne dÃ©finit pas de nouvelles rÃ¨gles, n'impose pas de technologies, et ne prescrit pas de solutions techniques. Il guide la comprÃ©hension et l'application des contrats FONDATION.
 
 ### 1.3. Rappel de la mission de Border Guard
 
-Border Guard est le **core de définition des frontières et des règles d'entrée/sortie** du Miyukini Core System. Il répond à la question fondamentale :
+Border Guard est le **core de dÃ©finition des frontiÃ¨res et des rÃ¨gles d'entrÃ©e/sortie** du Miyukini Core System. Il rÃ©pond Ã  la question fondamentale :
 
-> **"Où sont les frontières du système, et quelles règles gouvernent leur franchissement ?"**
+> **"OÃ¹ sont les frontiÃ¨res du systÃ¨me, et quelles rÃ¨gles gouvernent leur franchissement ?"**
 
-Border Guard **définit, classifie, et établit des règles**. Il **ne filtre jamais**, **ne bloque jamais**, **n'exécute jamais**, et **ne décide jamais**.
+Border Guard **dÃ©finit, classifie, et Ã©tablit des rÃ¨gles**. Il **ne filtre jamais**, **ne bloque jamais**, **n'exÃ©cute jamais**, et **ne dÃ©cide jamais**.
 
 ### 1.4. Sources contractuelles
 
 Ce document se base sur les contrats FONDATION, avec un focus particulier sur :
 
-- **Documentation Fondatrice** : Invariants INV-BG-1 à INV-BG-10, responsabilités exclusives, interdictions
-- **Boundary Definition Contract** : Types de frontières, propriétés, taxonomie
+- **Documentation Fondatrice** : Invariants INV-BG-1 Ã  INV-BG-10, responsabilitÃ©s exclusives, interdictions
+- **Boundary Definition Contract** : Types de frontiÃ¨res, propriÃ©tÃ©s, taxonomie
 - **Trust Level Classification Contract** : Niveaux de confiance (trusted, verified, unknown, hostile)
-- **Crossing Rules Contract** : Règles déclaratives de franchissement
-- **Invariants & Guarantees** : Garanties structurelles non négociables
+- **Crossing Rules Contract** : RÃ¨gles dÃ©claratives de franchissement
+- **Invariants & Guarantees** : Garanties structurelles non nÃ©gociables
 - **Violations & Anti-Patterns** : Ce qu'il ne faut jamais faire
-- **[Miyukini Conceptual References — Lois Autonomie Système](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Les lignes directrices d'implémentation doivent respecter les 6 lois d'autonomie, notamment **LOI-1** (aucune dépendance externe critique), **LOI-6** (fédération explicite et réversible).
+- **[Miyukini Conceptual References â€” Lois Autonomie SystÃ¨me](..//..//..//miyukini-webway-system//reference//_index.md)** : Les lignes directrices d'implÃ©mentation doivent respecter les 6 lois d'autonomie, notamment **LOI-1** (aucune dÃ©pendance externe critique), **LOI-6** (fÃ©dÃ©ration explicite et rÃ©versible).
 
 ---
 
-## 2. Principes généraux à respecter absolument
+## 2. Principes gÃ©nÃ©raux Ã  respecter absolument
 
-### 2.1. Aucune capacité d'exécution (INV-BG-1)
+### 2.1. Aucune capacitÃ© d'exÃ©cution (INV-BG-1)
 
 **Principe contractuel :**
 
-L'invariant INV-BG-1 établit que Border Guard ne possède **jamais** la capacité d'exécuter une action : filtrage, blocage, interception, application. Il définit les règles et classifie les sources, mais toute exécution est déléguée aux autorités compétentes.
+L'invariant INV-BG-1 Ã©tablit que Border Guard ne possÃ¨de **jamais** la capacitÃ© d'exÃ©cuter une action : filtrage, blocage, interception, application. Il dÃ©finit les rÃ¨gles et classifie les sources, mais toute exÃ©cution est dÃ©lÃ©guÃ©e aux autoritÃ©s compÃ©tentes.
 
-**Traduction en logique d'implémentation :**
+**Traduction en logique d'implÃ©mentation :**
 
-- **Border Guard DÉFINIT** : Il établit les frontières, les règles de franchissement, les niveaux de confiance.
+- **Border Guard DÃ‰FINIT** : Il Ã©tablit les frontiÃ¨res, les rÃ¨gles de franchissement, les niveaux de confiance.
 - **Border Guard CLASSIFIE** : Il attribue les niveaux de confiance aux sources et destinations.
 - **Border Guard NE FAIT JAMAIS** : Il ne filtre pas, ne bloque pas, n'intercepte pas, n'applique pas.
 
-**Ce que cela signifie concrètement :**
+**Ce que cela signifie concrÃ¨tement :**
 
-- Aucun mécanisme de filtrage ne doit être accessible à Border Guard
-- Le blocage est exécuté par BondingBrother (selon décision de StrongFather)
-- Border Guard fournit les règles déclaratives — jamais l'exécution
+- Aucun mÃ©canisme de filtrage ne doit Ãªtre accessible Ã  Border Guard
+- Le blocage est exÃ©cutÃ© par BondingBrother (selon dÃ©cision de StrongFather)
+- Border Guard fournit les rÃ¨gles dÃ©claratives â€” jamais l'exÃ©cution
 
 ### 2.2. Aucune persistance directe (INV-BG-2)
 
 **Principe contractuel :**
 
-L'invariant INV-BG-2 établit que Border Guard n'accède **jamais** directement à la persistance. Toute définition de frontière ou de règle qui doit être persistée est transmise à KindMother via les canaux appropriés.
+L'invariant INV-BG-2 Ã©tablit que Border Guard n'accÃ¨de **jamais** directement Ã  la persistance. Toute dÃ©finition de frontiÃ¨re ou de rÃ¨gle qui doit Ãªtre persistÃ©e est transmise Ã  KindMother via les canaux appropriÃ©s.
 
-**Traduction en logique d'implémentation :**
+**Traduction en logique d'implÃ©mentation :**
 
-- **Pas d'accès DB** : Border Guard ne contient pas de drivers de base de données.
-- **Pas d'écriture fichier** : Border Guard n'écrit jamais sur le système de fichiers.
-- **Délégation à KindMother** : Les définitions à persister sont transmises à KindMother.
+- **Pas d'accÃ¨s DB** : Border Guard ne contient pas de drivers de base de donnÃ©es.
+- **Pas d'Ã©criture fichier** : Border Guard n'Ã©crit jamais sur le systÃ¨me de fichiers.
+- **DÃ©lÃ©gation Ã  KindMother** : Les dÃ©finitions Ã  persister sont transmises Ã  KindMother.
 
-**Ce que cela signifie concrètement :**
+**Ce que cela signifie concrÃ¨tement :**
 
-- Les définitions de frontières sont maintenues en mémoire par Border Guard
-- La persistance est déléguée via événements ou canaux vers KindMother
-- Aucune importation de bibliothèques de persistance dans Border Guard
+- Les dÃ©finitions de frontiÃ¨res sont maintenues en mÃ©moire par Border Guard
+- La persistance est dÃ©lÃ©guÃ©e via Ã©vÃ©nements ou canaux vers KindMother
+- Aucune importation de bibliothÃ¨ques de persistance dans Border Guard
 
-### 2.3. Aucune décision autonome (INV-BG-3)
+### 2.3. Aucune dÃ©cision autonome (INV-BG-3)
 
 **Principe contractuel :**
 
-L'invariant INV-BG-3 établit que Border Guard ne prend **jamais** de décision de manière autonome. Il informe, il classifie, il définit, mais la décision finale appartient toujours à StrongFather ou aux autorités appropriées.
+L'invariant INV-BG-3 Ã©tablit que Border Guard ne prend **jamais** de dÃ©cision de maniÃ¨re autonome. Il informe, il classifie, il dÃ©finit, mais la dÃ©cision finale appartient toujours Ã  StrongFather ou aux autoritÃ©s appropriÃ©es.
 
-**Traduction en logique d'implémentation :**
+**Traduction en logique d'implÃ©mentation :**
 
-- **Border Guard INFORME** : Il fournit le contexte de confiance à StrongFather.
+- **Border Guard INFORME** : Il fournit le contexte de confiance Ã  StrongFather.
 - **Border Guard CLASSIFIE** : Il attribue un niveau de confiance (trusted, verified, unknown, hostile).
-- **Border Guard NE DÉCIDE JAMAIS** : La décision d'accepter ou refuser appartient à StrongFather.
+- **Border Guard NE DÃ‰CIDE JAMAIS** : La dÃ©cision d'accepter ou refuser appartient Ã  StrongFather.
 
-**Ce que cela signifie concrètement :**
+**Ce que cela signifie concrÃ¨tement :**
 
-- Aucune méthode `decide()`, `allow()`, `deny()` dans Border Guard
+- Aucune mÃ©thode `decide()`, `allow()`, `deny()` dans Border Guard
 - Les classifications sont des informations, pas des verdicts
-- StrongFather consulte Border Guard, puis décide
+- StrongFather consulte Border Guard, puis dÃ©cide
 
 ### 2.4. Classification exhaustive (INV-BG-4)
 
 **Principe contractuel :**
 
-L'invariant INV-BG-4 établit que toute source, destination, ou interaction **doit** être classifiée selon un niveau de confiance. Aucune interaction ne peut exister sans classification. Par défaut, tout ce qui n'est pas explicitement classifié est considéré comme "unknown".
+L'invariant INV-BG-4 Ã©tablit que toute source, destination, ou interaction **doit** Ãªtre classifiÃ©e selon un niveau de confiance. Aucune interaction ne peut exister sans classification. Par dÃ©faut, tout ce qui n'est pas explicitement classifiÃ© est considÃ©rÃ© comme "unknown".
 
-**Traduction en logique d'implémentation :**
+**Traduction en logique d'implÃ©mentation :**
 
-- **Classification systématique** : Toute source qui traverse une frontière a un niveau de confiance.
-- **Défaut = unknown** : Si pas de classification explicite, le niveau est "unknown".
+- **Classification systÃ©matique** : Toute source qui traverse une frontiÃ¨re a un niveau de confiance.
+- **DÃ©faut = unknown** : Si pas de classification explicite, le niveau est "unknown".
 - **Aucune exception** : Pas de traitement "sans classification".
 
-**Ce que cela signifie concrètement :**
+**Ce que cela signifie concrÃ¨tement :**
 
 - Toute API de Border Guard retourne un niveau de confiance (jamais null)
-- Le niveau "unknown" est le défaut sécuritaire
-- Les règles de franchissement s'appliquent selon le niveau retourné
+- Le niveau "unknown" est le dÃ©faut sÃ©curitaire
+- Les rÃ¨gles de franchissement s'appliquent selon le niveau retournÃ©
 
-### 2.5. Frontières explicites (INV-BG-5)
-
-**Principe contractuel :**
-
-L'invariant INV-BG-5 établit que toute frontière **doit** être explicitement définie et documentée. Aucune frontière implicite n'est autorisée. Si une démarcation existe dans le système, elle doit être formalisée par Border Guard.
-
-**Traduction en logique d'implémentation :**
-
-- **Registre exhaustif** : Toutes les frontières sont dans le registre de Border Guard.
-- **Définition formelle** : Chaque frontière a un identifiant, un type, une direction, une perméabilité.
-- **Pas de frontière cachée** : Aucun contrôle de franchissement sans frontière définie.
-
-**Ce que cela signifie concrètement :**
-
-- Le registre des frontières est la source de vérité
-- Toute demande de règles pour une frontière non définie retourne NOT_FOUND
-- Les frontières sont créées explicitement, jamais inférées
-
-### 2.6. Règles déclaratives (INV-BG-6)
+### 2.5. FrontiÃ¨res explicites (INV-BG-5)
 
 **Principe contractuel :**
 
-L'invariant INV-BG-6 établit que toutes les règles de franchissement **doivent** être déclaratives. Aucune règle procédurale ou impérative n'est autorisée. Une règle exprime ce qui est requis, pas comment le vérifier.
+L'invariant INV-BG-5 Ã©tablit que toute frontiÃ¨re **doit** Ãªtre explicitement dÃ©finie et documentÃ©e. Aucune frontiÃ¨re implicite n'est autorisÃ©e. Si une dÃ©marcation existe dans le systÃ¨me, elle doit Ãªtre formalisÃ©e par Border Guard.
 
-**Traduction en logique d'implémentation :**
+**Traduction en logique d'implÃ©mentation :**
 
-- **Conditions, pas procédures** : "Authentification requise" plutôt que "Vérifier le token JWT".
-- **Ce qui est requis, pas comment** : "Niveau verified minimum" plutôt que "Appeler le service auth".
-- **Neutralité technique** : Les règles ne référencent pas de technologies spécifiques.
+- **Registre exhaustif** : Toutes les frontiÃ¨res sont dans le registre de Border Guard.
+- **DÃ©finition formelle** : Chaque frontiÃ¨re a un identifiant, un type, une direction, une permÃ©abilitÃ©.
+- **Pas de frontiÃ¨re cachÃ©e** : Aucun contrÃ´le de franchissement sans frontiÃ¨re dÃ©finie.
 
-**Ce que cela signifie concrètement :**
+**Ce que cela signifie concrÃ¨tement :**
 
-- Les règles sont des expressions de conditions
-- L'implémentation technique des vérifications appartient à BondingBrother
-- Border Guard ne contient jamais de code de vérification
+- Le registre des frontiÃ¨res est la source de vÃ©ritÃ©
+- Toute demande de rÃ¨gles pour une frontiÃ¨re non dÃ©finie retourne NOT_FOUND
+- Les frontiÃ¨res sont crÃ©Ã©es explicitement, jamais infÃ©rÃ©es
 
-### 2.7. Séparation définition/application (INV-BG-7)
+### 2.6. RÃ¨gles dÃ©claratives (INV-BG-6)
 
 **Principe contractuel :**
 
-L'invariant INV-BG-7 établit que la définition des frontières et des règles est **strictement séparée** de leur application. Border Guard définit, BondingBrother applique. Cette séparation est non négociable et ne peut être contournée.
+L'invariant INV-BG-6 Ã©tablit que toutes les rÃ¨gles de franchissement **doivent** Ãªtre dÃ©claratives. Aucune rÃ¨gle procÃ©durale ou impÃ©rative n'est autorisÃ©e. Une rÃ¨gle exprime ce qui est requis, pas comment le vÃ©rifier.
 
-**Traduction en logique d'implémentation :**
+**Traduction en logique d'implÃ©mentation :**
+
+- **Conditions, pas procÃ©dures** : "Authentification requise" plutÃ´t que "VÃ©rifier le token JWT".
+- **Ce qui est requis, pas comment** : "Niveau verified minimum" plutÃ´t que "Appeler le service auth".
+- **NeutralitÃ© technique** : Les rÃ¨gles ne rÃ©fÃ©rencent pas de technologies spÃ©cifiques.
+
+**Ce que cela signifie concrÃ¨tement :**
+
+- Les rÃ¨gles sont des expressions de conditions
+- L'implÃ©mentation technique des vÃ©rifications appartient Ã  BondingBrother
+- Border Guard ne contient jamais de code de vÃ©rification
+
+### 2.7. SÃ©paration dÃ©finition/application (INV-BG-7)
+
+**Principe contractuel :**
+
+L'invariant INV-BG-7 Ã©tablit que la dÃ©finition des frontiÃ¨res et des rÃ¨gles est **strictement sÃ©parÃ©e** de leur application. Border Guard dÃ©finit, BondingBrother applique. Cette sÃ©paration est non nÃ©gociable et ne peut Ãªtre contournÃ©e.
+
+**Traduction en logique d'implÃ©mentation :**
 
 - **Interface claire** : Border Guard expose des APIs de consultation (GET), pas d'action.
-- **Contrat d'interface** : Les règles fournies sont déclaratives, l'application est libre.
-- **Indépendance** : Border Guard peut évoluer sans modifier BondingBrother, et inversement.
+- **Contrat d'interface** : Les rÃ¨gles fournies sont dÃ©claratives, l'application est libre.
+- **IndÃ©pendance** : Border Guard peut Ã©voluer sans modifier BondingBrother, et inversement.
 
-**Ce que cela signifie concrètement :**
+**Ce que cela signifie concrÃ¨tement :**
 
-- Border Guard fournit des règles via des consultations
-- BondingBrother implémente la vérification technique de ces règles
-- Aucune dépendance circulaire entre Border Guard et BondingBrother
+- Border Guard fournit des rÃ¨gles via des consultations
+- BondingBrother implÃ©mente la vÃ©rification technique de ces rÃ¨gles
+- Aucune dÃ©pendance circulaire entre Border Guard et BondingBrother
 
-### 2.8. Traçabilité complète (INV-BG-8)
-
-**Principe contractuel :**
-
-L'invariant INV-BG-8 établit que toute définition de frontière, toute classification de confiance, toute règle établie **doit** être traçable avec son origine, sa date, et sa justification.
-
-**Traduction en logique d'implémentation :**
-
-- **Métadonnées obligatoires** : `createdAt`, `createdBy`, `justification`, `version`.
-- **Historique** : Les modifications sont tracées.
-- **Audit possible** : Toute définition peut être auditée.
-
-**Ce que cela signifie concrètement :**
-
-- Chaque frontière, règle, classification a des métadonnées complètes
-- L'historique des modifications est conservé
-- Les consultations peuvent inclure l'origine de la définition
-
-### 2.9. Cohérence globale (INV-BG-9)
+### 2.8. TraÃ§abilitÃ© complÃ¨te (INV-BG-8)
 
 **Principe contractuel :**
 
-L'invariant INV-BG-9 établit que les définitions de Border Guard **doivent** être globalement cohérentes. Aucune contradiction entre frontières, niveaux de confiance, ou règles n'est autorisée.
+L'invariant INV-BG-8 Ã©tablit que toute dÃ©finition de frontiÃ¨re, toute classification de confiance, toute rÃ¨gle Ã©tablie **doit** Ãªtre traÃ§able avec son origine, sa date, et sa justification.
 
-**Traduction en logique d'implémentation :**
+**Traduction en logique d'implÃ©mentation :**
 
-- **Validation à la création** : Toute nouvelle définition est validée contre l'existant.
-- **Pas de contradiction** : Deux règles ne peuvent pas avoir des résultats opposés.
-- **Hiérarchie respectée** : Les zones de confiance sont cohérentes entre elles.
+- **MÃ©tadonnÃ©es obligatoires** : `createdAt`, `createdBy`, `justification`, `version`.
+- **Historique** : Les modifications sont tracÃ©es.
+- **Audit possible** : Toute dÃ©finition peut Ãªtre auditÃ©e.
 
-**Ce que cela signifie concrètement :**
+**Ce que cela signifie concrÃ¨tement :**
 
-- Un mécanisme de validation de cohérence existe
-- Les créations qui créent des contradictions sont rejetées
-- La cohérence globale peut être auditée
+- Chaque frontiÃ¨re, rÃ¨gle, classification a des mÃ©tadonnÃ©es complÃ¨tes
+- L'historique des modifications est conservÃ©
+- Les consultations peuvent inclure l'origine de la dÃ©finition
 
-### 2.10. Neutralité conceptuelle (INV-BG-10)
+### 2.9. CohÃ©rence globale (INV-BG-9)
 
 **Principe contractuel :**
 
-L'invariant INV-BG-10 établit que Border Guard **ne fait jamais** de supposition sur la technologie d'implémentation. Les définitions sont purement conceptuelles et peuvent être implémentées par n'importe quelle technologie.
+L'invariant INV-BG-9 Ã©tablit que les dÃ©finitions de Border Guard **doivent** Ãªtre globalement cohÃ©rentes. Aucune contradiction entre frontiÃ¨res, niveaux de confiance, ou rÃ¨gles n'est autorisÃ©e.
 
-**Traduction en logique d'implémentation :**
+**Traduction en logique d'implÃ©mentation :**
 
-- **Pas de référence technique** : "Authentification requise", pas "JWT RS256 requis".
-- **Portabilité** : Les définitions fonctionnent indépendamment de la stack technique.
-- **Abstraction** : "Données chiffrées", pas "AES-256-GCM".
+- **Validation Ã  la crÃ©ation** : Toute nouvelle dÃ©finition est validÃ©e contre l'existant.
+- **Pas de contradiction** : Deux rÃ¨gles ne peuvent pas avoir des rÃ©sultats opposÃ©s.
+- **HiÃ©rarchie respectÃ©e** : Les zones de confiance sont cohÃ©rentes entre elles.
 
-**Ce que cela signifie concrètement :**
+**Ce que cela signifie concrÃ¨tement :**
 
-- Aucune bibliothèque technique (crypto, auth, réseau) importée dans Border Guard
-- Les définitions sont des contrats conceptuels
-- L'implémentation technique est du ressort des adaptateurs
+- Un mÃ©canisme de validation de cohÃ©rence existe
+- Les crÃ©ations qui crÃ©ent des contradictions sont rejetÃ©es
+- La cohÃ©rence globale peut Ãªtre auditÃ©e
+
+### 2.10. NeutralitÃ© conceptuelle (INV-BG-10)
+
+**Principe contractuel :**
+
+L'invariant INV-BG-10 Ã©tablit que Border Guard **ne fait jamais** de supposition sur la technologie d'implÃ©mentation. Les dÃ©finitions sont purement conceptuelles et peuvent Ãªtre implÃ©mentÃ©es par n'importe quelle technologie.
+
+**Traduction en logique d'implÃ©mentation :**
+
+- **Pas de rÃ©fÃ©rence technique** : "Authentification requise", pas "JWT RS256 requis".
+- **PortabilitÃ©** : Les dÃ©finitions fonctionnent indÃ©pendamment de la stack technique.
+- **Abstraction** : "DonnÃ©es chiffrÃ©es", pas "AES-256-GCM".
+
+**Ce que cela signifie concrÃ¨tement :**
+
+- Aucune bibliothÃ¨que technique (crypto, auth, rÃ©seau) importÃ©e dans Border Guard
+- Les dÃ©finitions sont des contrats conceptuels
+- L'implÃ©mentation technique est du ressort des adaptateurs
 
 ---
 
-## 3. Comment traduire les contrats en logique sans interprétation abusive
+## 3. Comment traduire les contrats en logique sans interprÃ©tation abusive
 
 ### 3.1. Respecter les invariants comme contraintes absolues
 
 **Principe :**
 
-Les invariants contractuels (INV-BG-*) sont des contraintes absolues qui DOIVENT toujours être vraies. Ils ne sont pas des suggestions ou des recommandations.
+Les invariants contractuels (INV-BG-*) sont des contraintes absolues qui DOIVENT toujours Ãªtre vraies. Ils ne sont pas des suggestions ou des recommandations.
 
 **Traduction :**
 
-- **Vérification systématique** : Chaque invariant DOIT être vérifié à chaque opération.
-- **Préservation garantie** : Toute opération DOIT garantir que les invariants sont préservés après exécution.
-- **Pas d'interprétation** : Les invariants ne peuvent pas être interprétés ou adaptés.
+- **VÃ©rification systÃ©matique** : Chaque invariant DOIT Ãªtre vÃ©rifiÃ© Ã  chaque opÃ©ration.
+- **PrÃ©servation garantie** : Toute opÃ©ration DOIT garantir que les invariants sont prÃ©servÃ©s aprÃ¨s exÃ©cution.
+- **Pas d'interprÃ©tation** : Les invariants ne peuvent pas Ãªtre interprÃ©tÃ©s ou adaptÃ©s.
 
 **Exemple conceptuel :**
 
-Si l'invariant INV-BG-1 (aucune capacité d'exécution) interdit le filtrage, alors aucune méthode de filtrage n'est possible dans Border Guard, même pour des raisons "pratiques" ou de "performance".
+Si l'invariant INV-BG-1 (aucune capacitÃ© d'exÃ©cution) interdit le filtrage, alors aucune mÃ©thode de filtrage n'est possible dans Border Guard, mÃªme pour des raisons "pratiques" ou de "performance".
 
-### 3.2. Séparer strictement définition et application
+### 3.2. SÃ©parer strictement dÃ©finition et application
 
 **Principe :**
 
-La séparation entre définition (Border Guard) et application (BondingBrother) est fondamentale. C'est la règle structurante de toute l'architecture.
+La sÃ©paration entre dÃ©finition (Border Guard) et application (BondingBrother) est fondamentale. C'est la rÃ¨gle structurante de toute l'architecture.
 
 **Traduction :**
 
-- **Border Guard = Quoi** : Quelles sont les règles ? Quel niveau de confiance ?
-- **BondingBrother = Comment** : Comment vérifier techniquement ces règles ?
+- **Border Guard = Quoi** : Quelles sont les rÃ¨gles ? Quel niveau de confiance ?
+- **BondingBrother = Comment** : Comment vÃ©rifier techniquement ces rÃ¨gles ?
 - **Aucun chevauchement** : Border Guard ne fait jamais le travail de BondingBrother.
 
 **Exemple conceptuel :**
 
-Border Guard définit : "La source doit être authentifiée avec un niveau verified minimum."
-BondingBrother applique : "Vérifier le token JWT, valider la signature, vérifier l'expiration."
+Border Guard dÃ©finit : "La source doit Ãªtre authentifiÃ©e avec un niveau verified minimum."
+BondingBrother applique : "VÃ©rifier le token JWT, valider la signature, vÃ©rifier l'expiration."
 
 ### 3.3. Traiter la classification comme un service d'information
 
 **Principe :**
 
-La classification de confiance est une information, pas une décision. Border Guard informe du niveau de confiance ; il ne décide pas des conséquences.
+La classification de confiance est une information, pas une dÃ©cision. Border Guard informe du niveau de confiance ; il ne dÃ©cide pas des consÃ©quences.
 
 **Traduction :**
 
 - **Information pure** : `getTrustLevel(source)` retourne un niveau (trusted, verified, unknown, hostile).
-- **Pas de verdict** : Border Guard ne dit pas "bloqué" ou "autorisé".
-- **StrongFather décide** : La décision basée sur le niveau appartient à StrongFather.
+- **Pas de verdict** : Border Guard ne dit pas "bloquÃ©" ou "autorisÃ©".
+- **StrongFather dÃ©cide** : La dÃ©cision basÃ©e sur le niveau appartient Ã  StrongFather.
 
 **Exemple conceptuel :**
 
-Border Guard : "Cette source est classifiée 'hostile'."
-StrongFather : "Je décide de bloquer cette source."
-BondingBrother : "J'exécute le blocage."
+Border Guard : "Cette source est classifiÃ©e 'hostile'."
+StrongFather : "Je dÃ©cide de bloquer cette source."
+BondingBrother : "J'exÃ©cute le blocage."
 
-### 3.4. Implémenter la traçabilité comme obligation structurelle
+### 3.4. ImplÃ©menter la traÃ§abilitÃ© comme obligation structurelle
 
 **Principe :**
 
-La traçabilité n'est pas une fonctionnalité optionnelle. C'est une obligation structurelle (INV-BG-8) qui s'applique à toute définition.
+La traÃ§abilitÃ© n'est pas une fonctionnalitÃ© optionnelle. C'est une obligation structurelle (INV-BG-8) qui s'applique Ã  toute dÃ©finition.
 
 **Traduction :**
 
-- **Métadonnées obligatoires** : Toute création ou modification a des métadonnées.
-- **Pas d'exception** : Même les définitions "triviales" sont traçables.
-- **Historique immuable** : Les traces ne peuvent pas être supprimées.
+- **MÃ©tadonnÃ©es obligatoires** : Toute crÃ©ation ou modification a des mÃ©tadonnÃ©es.
+- **Pas d'exception** : MÃªme les dÃ©finitions "triviales" sont traÃ§ables.
+- **Historique immuable** : Les traces ne peuvent pas Ãªtre supprimÃ©es.
 
 **Exemple conceptuel :**
 
-Même une frontière interne "technique" entre deux modules doit être traçable avec qui l'a créée, quand, et pourquoi.
+MÃªme une frontiÃ¨re interne "technique" entre deux modules doit Ãªtre traÃ§able avec qui l'a crÃ©Ã©e, quand, et pourquoi.
 
 ---
 
-## 4. Ce qu'un développeur ne doit jamais faire
+## 4. Ce qu'un dÃ©veloppeur ne doit jamais faire
 
-### 4.1. Exécuter un filtrage ou un blocage (INV-BG-1)
+### 4.1. ExÃ©cuter un filtrage ou un blocage (INV-BG-1)
 
 **Interdiction contractuelle :**
 
-L'invariant INV-BG-1 établit que Border Guard ne possède **jamais** la capacité d'exécuter une action.
+L'invariant INV-BG-1 Ã©tablit que Border Guard ne possÃ¨de **jamais** la capacitÃ© d'exÃ©cuter une action.
 
-**Ce qu'un développeur ne doit JAMAIS faire :**
+**Ce qu'un dÃ©veloppeur ne doit JAMAIS faire :**
 
-- Implémenter des méthodes `filter()`, `block()`, `intercept()` dans Border Guard
-- Permettre à Border Guard de rejeter directement une requête
-- Créer des middlewares d'exécution dans Border Guard
+- ImplÃ©menter des mÃ©thodes `filter()`, `block()`, `intercept()` dans Border Guard
+- Permettre Ã  Border Guard de rejeter directement une requÃªte
+- CrÃ©er des middlewares d'exÃ©cution dans Border Guard
 - Lancer des exceptions de blocage depuis Border Guard
 
-**Conséquence de la violation :**
+**ConsÃ©quence de la violation :**
 
-- Violation de l'invariant INV-BG-1 (aucune exécution)
-- Violation de la séparation définition / application
+- Violation de l'invariant INV-BG-1 (aucune exÃ©cution)
+- Violation de la sÃ©paration dÃ©finition / application
 - Compromission de l'architecture fondamentale
 
-### 4.2. Accéder directement à la persistance (INV-BG-2)
+### 4.2. AccÃ©der directement Ã  la persistance (INV-BG-2)
 
 **Interdiction contractuelle :**
 
-L'invariant INV-BG-2 établit que Border Guard n'accède **jamais** directement à la persistance.
+L'invariant INV-BG-2 Ã©tablit que Border Guard n'accÃ¨de **jamais** directement Ã  la persistance.
 
-**Ce qu'un développeur ne doit JAMAIS faire :**
+**Ce qu'un dÃ©veloppeur ne doit JAMAIS faire :**
 
-- Importer des drivers de base de données dans Border Guard
-- Écrire des queries SQL ou NoSQL dans Border Guard
-- Accéder au système de fichiers pour persister des définitions
-- Implémenter un cache persisté dans Border Guard
+- Importer des drivers de base de donnÃ©es dans Border Guard
+- Ã‰crire des queries SQL ou NoSQL dans Border Guard
+- AccÃ©der au systÃ¨me de fichiers pour persister des dÃ©finitions
+- ImplÃ©menter un cache persistÃ© dans Border Guard
 
-**Conséquence de la violation :**
+**ConsÃ©quence de la violation :**
 
 - Violation de l'invariant INV-BG-2 (aucune persistance directe)
-- Violation de la souveraineté de KindMother sur les données
-- Risque de désynchronisation
+- Violation de la souverainetÃ© de KindMother sur les donnÃ©es
+- Risque de dÃ©synchronisation
 
-### 4.3. Prendre des décisions autonomes (INV-BG-3)
+### 4.3. Prendre des dÃ©cisions autonomes (INV-BG-3)
 
 **Interdiction contractuelle :**
 
-L'invariant INV-BG-3 établit que Border Guard ne prend **jamais** de décision de manière autonome.
+L'invariant INV-BG-3 Ã©tablit que Border Guard ne prend **jamais** de dÃ©cision de maniÃ¨re autonome.
 
-**Ce qu'un développeur ne doit JAMAIS faire :**
+**Ce qu'un dÃ©veloppeur ne doit JAMAIS faire :**
 
-- Implémenter des méthodes `decide()`, `allow()`, `deny()` dans Border Guard
+- ImplÃ©menter des mÃ©thodes `decide()`, `allow()`, `deny()` dans Border Guard
 - Retourner des verdicts (accept/reject) depuis Border Guard
-- Créer des logiques if/else décisionnelles dans Border Guard
-- Émettre des décisions d'autorisation depuis Border Guard
+- CrÃ©er des logiques if/else dÃ©cisionnelles dans Border Guard
+- Ã‰mettre des dÃ©cisions d'autorisation depuis Border Guard
 
-**Conséquence de la violation :**
+**ConsÃ©quence de la violation :**
 
-- Violation de l'invariant INV-BG-3 (aucune décision autonome)
-- Usurpation du rôle de StrongFather
+- Violation de l'invariant INV-BG-3 (aucune dÃ©cision autonome)
+- Usurpation du rÃ´le de StrongFather
 - Compromission de l'architecture de gouvernance
 
-### 4.4. Implémenter des règles procédurales (INV-BG-6)
+### 4.4. ImplÃ©menter des rÃ¨gles procÃ©durales (INV-BG-6)
 
 **Interdiction contractuelle :**
 
-L'invariant INV-BG-6 établit que les règles **doivent** être déclaratives.
+L'invariant INV-BG-6 Ã©tablit que les rÃ¨gles **doivent** Ãªtre dÃ©claratives.
 
-**Ce qu'un développeur ne doit JAMAIS faire :**
+**Ce qu'un dÃ©veloppeur ne doit JAMAIS faire :**
 
-- Écrire des règles qui décrivent "comment faire" plutôt que "ce qui est requis"
-- Inclure du pseudo-code ou des séquences d'étapes dans les règles
-- Référencer des technologies spécifiques dans les règles
-- Créer des règles qui contiennent de la logique d'exécution
+- Ã‰crire des rÃ¨gles qui dÃ©crivent "comment faire" plutÃ´t que "ce qui est requis"
+- Inclure du pseudo-code ou des sÃ©quences d'Ã©tapes dans les rÃ¨gles
+- RÃ©fÃ©rencer des technologies spÃ©cifiques dans les rÃ¨gles
+- CrÃ©er des rÃ¨gles qui contiennent de la logique d'exÃ©cution
 
-**Conséquence de la violation :**
+**ConsÃ©quence de la violation :**
 
-- Violation de l'invariant INV-BG-6 (règles déclaratives)
-- Couplage avec l'implémentation technique
-- Impossibilité de portage vers d'autres technologies
+- Violation de l'invariant INV-BG-6 (rÃ¨gles dÃ©claratives)
+- Couplage avec l'implÃ©mentation technique
+- ImpossibilitÃ© de portage vers d'autres technologies
 
-### 4.5. Créer des frontières implicites (INV-BG-5)
-
-**Interdiction contractuelle :**
-
-L'invariant INV-BG-5 établit que les frontières **doivent** être explicites.
-
-**Ce qu'un développeur ne doit JAMAIS faire :**
-
-- Vérifier des permissions sans frontière définie formellement
-- Créer des zones de confiance implicites dans le code
-- Ajouter des points de contrôle non référencés dans Border Guard
-- Inférer l'existence de frontières depuis le comportement du système
-
-**Conséquence de la violation :**
-
-- Violation de l'invariant INV-BG-5 (frontières explicites)
-- Incohérence de sécurité
-- Impossibilité d'audit complet
-
-### 4.6. Omettre la traçabilité (INV-BG-8)
+### 4.5. CrÃ©er des frontiÃ¨res implicites (INV-BG-5)
 
 **Interdiction contractuelle :**
 
-L'invariant INV-BG-8 établit que toute définition **doit** être traçable.
+L'invariant INV-BG-5 Ã©tablit que les frontiÃ¨res **doivent** Ãªtre explicites.
 
-**Ce qu'un développeur ne doit JAMAIS faire :**
+**Ce qu'un dÃ©veloppeur ne doit JAMAIS faire :**
 
-- Créer des définitions sans métadonnées (createdAt, createdBy, justification)
-- Modifier des définitions sans tracer la modification
-- Supprimer l'historique des définitions
-- Omettre la justification pour des définitions "évidentes"
+- VÃ©rifier des permissions sans frontiÃ¨re dÃ©finie formellement
+- CrÃ©er des zones de confiance implicites dans le code
+- Ajouter des points de contrÃ´le non rÃ©fÃ©rencÃ©s dans Border Guard
+- InfÃ©rer l'existence de frontiÃ¨res depuis le comportement du systÃ¨me
 
-**Conséquence de la violation :**
+**ConsÃ©quence de la violation :**
 
-- Violation de l'invariant INV-BG-8 (traçabilité complète)
-- Impossibilité d'audit
-- Perte de responsabilité attribuable
+- Violation de l'invariant INV-BG-5 (frontiÃ¨res explicites)
+- IncohÃ©rence de sÃ©curitÃ©
+- ImpossibilitÃ© d'audit complet
+
+### 4.6. Omettre la traÃ§abilitÃ© (INV-BG-8)
+
+**Interdiction contractuelle :**
+
+L'invariant INV-BG-8 Ã©tablit que toute dÃ©finition **doit** Ãªtre traÃ§able.
+
+**Ce qu'un dÃ©veloppeur ne doit JAMAIS faire :**
+
+- CrÃ©er des dÃ©finitions sans mÃ©tadonnÃ©es (createdAt, createdBy, justification)
+- Modifier des dÃ©finitions sans tracer la modification
+- Supprimer l'historique des dÃ©finitions
+- Omettre la justification pour des dÃ©finitions "Ã©videntes"
+
+**ConsÃ©quence de la violation :**
+
+- Violation de l'invariant INV-BG-8 (traÃ§abilitÃ© complÃ¨te)
+- ImpossibilitÃ© d'audit
+- Perte de responsabilitÃ© attribuable
 
 ---
 
 ## 5. Anti-patterns classiques
 
-### 5.1. Anti-pattern 1 : Filtrage intégré
+### 5.1. Anti-pattern 1 : Filtrage intÃ©grÃ©
 
 **Description :**
 
-Tentative d'implémenter des mécanismes de filtrage directement dans Border Guard.
+Tentative d'implÃ©menter des mÃ©canismes de filtrage directement dans Border Guard.
 
 **Exemple conceptuel :**
 
-Un développeur crée une méthode `filterIncomingRequests()` dans Border Guard qui rejette les requêtes non conformes aux règles.
+Un dÃ©veloppeur crÃ©e une mÃ©thode `filterIncomingRequests()` dans Border Guard qui rejette les requÃªtes non conformes aux rÃ¨gles.
 
-**Conséquence :**
+**ConsÃ©quence :**
 
-- Violation de l'invariant INV-BG-1 (aucune exécution)
-- Violation de l'invariant INV-BG-7 (séparation définition/application)
-- Couplage dangereux entre définition et exécution
+- Violation de l'invariant INV-BG-1 (aucune exÃ©cution)
+- Violation de l'invariant INV-BG-7 (sÃ©paration dÃ©finition/application)
+- Couplage dangereux entre dÃ©finition et exÃ©cution
 
 **Correction :**
 
-Border Guard définit les règles. BondingBrother les consulte et exécute le filtrage.
+Border Guard dÃ©finit les rÃ¨gles. BondingBrother les consulte et exÃ©cute le filtrage.
 
-### 5.2. Anti-pattern 2 : Décision cachée
+### 5.2. Anti-pattern 2 : DÃ©cision cachÃ©e
 
 **Description :**
 
-Tentative de prendre des décisions de manière déguisée en classification.
+Tentative de prendre des dÃ©cisions de maniÃ¨re dÃ©guisÃ©e en classification.
 
 **Exemple conceptuel :**
 
-Un développeur crée une méthode `isAllowed(source)` qui retourne `true` ou `false` plutôt qu'un niveau de confiance.
+Un dÃ©veloppeur crÃ©e une mÃ©thode `isAllowed(source)` qui retourne `true` ou `false` plutÃ´t qu'un niveau de confiance.
 
-**Conséquence :**
+**ConsÃ©quence :**
 
-- Violation de l'invariant INV-BG-3 (aucune décision autonome)
-- Border Guard usurpe le rôle de StrongFather
-- Décisions prises sans vision globale
+- Violation de l'invariant INV-BG-3 (aucune dÃ©cision autonome)
+- Border Guard usurpe le rÃ´le de StrongFather
+- DÃ©cisions prises sans vision globale
 
 **Correction :**
 
-Border Guard retourne `getTrustLevel(source)` qui retourne un niveau de confiance. StrongFather décide si ce niveau permet l'action.
+Border Guard retourne `getTrustLevel(source)` qui retourne un niveau de confiance. StrongFather dÃ©cide si ce niveau permet l'action.
 
-### 5.3. Anti-pattern 3 : Règles techniques
+### 5.3. Anti-pattern 3 : RÃ¨gles techniques
 
 **Description :**
 
-Tentative de définir des règles qui incluent des détails d'implémentation technique.
+Tentative de dÃ©finir des rÃ¨gles qui incluent des dÃ©tails d'implÃ©mentation technique.
 
 **Exemple conceptuel :**
 
-Un développeur crée une règle "Le token JWT doit être signé avec RS256 et avoir un claim 'role' égal à 'admin'".
+Un dÃ©veloppeur crÃ©e une rÃ¨gle "Le token JWT doit Ãªtre signÃ© avec RS256 et avoir un claim 'role' Ã©gal Ã  'admin'".
 
-**Conséquence :**
+**ConsÃ©quence :**
 
-- Violation de l'invariant INV-BG-6 (règles déclaratives)
-- Violation de l'invariant INV-BG-10 (neutralité conceptuelle)
-- Couplage avec une technologie spécifique
+- Violation de l'invariant INV-BG-6 (rÃ¨gles dÃ©claratives)
+- Violation de l'invariant INV-BG-10 (neutralitÃ© conceptuelle)
+- Couplage avec une technologie spÃ©cifique
 
 **Correction :**
 
-La règle devient "Authentification requise avec niveau de privilège administrateur". L'implémentation technique (JWT, SAML, session...) appartient aux adaptateurs.
+La rÃ¨gle devient "Authentification requise avec niveau de privilÃ¨ge administrateur". L'implÃ©mentation technique (JWT, SAML, session...) appartient aux adaptateurs.
 
-### 5.4. Anti-pattern 4 : Frontière à la volée
+### 5.4. Anti-pattern 4 : FrontiÃ¨re Ã  la volÃ©e
 
 **Description :**
 
-Tentative de créer des frontières dynamiquement au moment du besoin sans les formaliser.
+Tentative de crÃ©er des frontiÃ¨res dynamiquement au moment du besoin sans les formaliser.
 
 **Exemple conceptuel :**
 
-Un développeur crée une vérification de permission inline dans le code produit, sans frontière définie dans Border Guard.
+Un dÃ©veloppeur crÃ©e une vÃ©rification de permission inline dans le code produit, sans frontiÃ¨re dÃ©finie dans Border Guard.
 
-**Conséquence :**
+**ConsÃ©quence :**
 
-- Violation de l'invariant INV-BG-5 (frontières explicites)
-- Frontières fantômes non auditables
-- Incohérence de sécurité
+- Violation de l'invariant INV-BG-5 (frontiÃ¨res explicites)
+- FrontiÃ¨res fantÃ´mes non auditables
+- IncohÃ©rence de sÃ©curitÃ©
 
 **Correction :**
 
-Toute démarcation de confiance est d'abord définie formellement dans Border Guard, puis utilisée.
+Toute dÃ©marcation de confiance est d'abord dÃ©finie formellement dans Border Guard, puis utilisÃ©e.
 
 ### 5.5. Anti-pattern 5 : Persistance directe
 
 **Description :**
 
-Tentative de persister les définitions directement depuis Border Guard.
+Tentative de persister les dÃ©finitions directement depuis Border Guard.
 
 **Exemple conceptuel :**
 
-Un développeur ajoute un appel `await db.boundaries.insert(boundary)` dans Border Guard.
+Un dÃ©veloppeur ajoute un appel `await db.boundaries.insert(boundary)` dans Border Guard.
 
-**Conséquence :**
+**ConsÃ©quence :**
 
 - Violation de l'invariant INV-BG-2 (aucune persistance directe)
-- Violation de la souveraineté de KindMother
-- Risque de désynchronisation
+- Violation de la souverainetÃ© de KindMother
+- Risque de dÃ©synchronisation
 
 **Correction :**
 
-Border Guard émet un événement `boundary-defined`. KindMother écoute et persiste.
+Border Guard Ã©met un Ã©vÃ©nement `boundary-defined`. KindMother Ã©coute et persiste.
 
-### 5.6. Anti-pattern 6 : Classification sans défaut
+### 5.6. Anti-pattern 6 : Classification sans dÃ©faut
 
 **Description :**
 
@@ -529,116 +529,116 @@ Tentative de traiter des sources sans les classifier explicitement.
 
 **Exemple conceptuel :**
 
-Un développeur crée un chemin de code qui traite une source sans appeler `getTrustLevel()`, assumant qu'elle est de confiance.
+Un dÃ©veloppeur crÃ©e un chemin de code qui traite une source sans appeler `getTrustLevel()`, assumant qu'elle est de confiance.
 
-**Conséquence :**
+**ConsÃ©quence :**
 
 - Violation de l'invariant INV-BG-4 (classification exhaustive)
-- Faille de sécurité potentielle
-- Sources non classifiées traitées comme de confiance
+- Faille de sÃ©curitÃ© potentielle
+- Sources non classifiÃ©es traitÃ©es comme de confiance
 
 **Correction :**
 
-Toute source est classifiée. Si non classifiée explicitement, le défaut est "unknown".
+Toute source est classifiÃ©e. Si non classifiÃ©e explicitement, le dÃ©faut est "unknown".
 
 ---
 
 ## 6. Bonnes pratiques conceptuelles
 
-### 6.1. Registre de frontières centralisé
+### 6.1. Registre de frontiÃ¨res centralisÃ©
 
 **Pratique :**
 
-Maintenir un registre centralisé des frontières, accessible en lecture par tous les cores mais modifiable uniquement par Border Guard.
+Maintenir un registre centralisÃ© des frontiÃ¨res, accessible en lecture par tous les cores mais modifiable uniquement par Border Guard.
 
 **Justification :**
 
-- Respecte l'autorité exclusive de Border Guard sur les frontières (INV-BG-5)
-- Garantit l'unicité et l'exhaustivité des définitions
+- Respecte l'autoritÃ© exclusive de Border Guard sur les frontiÃ¨res (INV-BG-5)
+- Garantit l'unicitÃ© et l'exhaustivitÃ© des dÃ©finitions
 - Facilite la consultation par les autres cores
 
-**Implémentation conceptuelle :**
+**ImplÃ©mentation conceptuelle :**
 
-- Registre en mémoire avec toutes les frontières définies
+- Registre en mÃ©moire avec toutes les frontiÃ¨res dÃ©finies
 - API de lecture accessible aux autres cores
-- API de modification réservée aux canaux autorisés
+- API de modification rÃ©servÃ©e aux canaux autorisÃ©s
 - Synchronisation de la persistance via KindMother
 
-### 6.2. Classificateur de confiance avec défaut sécuritaire
+### 6.2. Classificateur de confiance avec dÃ©faut sÃ©curitaire
 
 **Pratique :**
 
-Implémenter le classificateur de confiance avec un défaut "unknown" systématique pour toute source non explicitement classifiée.
+ImplÃ©menter le classificateur de confiance avec un dÃ©faut "unknown" systÃ©matique pour toute source non explicitement classifiÃ©e.
 
 **Justification :**
 
 - Respecte l'invariant INV-BG-4 (classification exhaustive)
-- Garantit un comportement sécuritaire par défaut
-- Empêche les failles par omission de classification
+- Garantit un comportement sÃ©curitaire par dÃ©faut
+- EmpÃªche les failles par omission de classification
 
-**Implémentation conceptuelle :**
+**ImplÃ©mentation conceptuelle :**
 
-- Toute requête de classification retourne un niveau
+- Toute requÃªte de classification retourne un niveau
 - Si pas de classification explicite, retour de "unknown"
-- Le niveau "unknown" déclenche les règles restrictives par défaut
+- Le niveau "unknown" dÃ©clenche les rÃ¨gles restrictives par dÃ©faut
 
-### 6.3. Règles structurées en conditions déclaratives
-
-**Pratique :**
-
-Structurer les règles de franchissement comme des ensembles de conditions déclaratives, sans logique procédurale.
-
-**Justification :**
-
-- Respecte l'invariant INV-BG-6 (règles déclaratives)
-- Respecte l'invariant INV-BG-10 (neutralité conceptuelle)
-- Permet l'implémentation technique libre par BondingBrother
-
-**Implémentation conceptuelle :**
-
-- Règle = liste de conditions à satisfaire
-- Chaque condition est une expression déclarative
-- Pas de verbes d'action, pas de séquences d'étapes
-- BondingBrother traduit en vérifications techniques
-
-### 6.4. Validation de cohérence à chaque modification
+### 6.3. RÃ¨gles structurÃ©es en conditions dÃ©claratives
 
 **Pratique :**
 
-Valider la cohérence globale des définitions à chaque création ou modification.
+Structurer les rÃ¨gles de franchissement comme des ensembles de conditions dÃ©claratives, sans logique procÃ©durale.
 
 **Justification :**
 
-- Respecte l'invariant INV-BG-9 (cohérence globale)
-- Empêche les contradictions entre règles
-- Garantit un comportement prévisible
+- Respecte l'invariant INV-BG-6 (rÃ¨gles dÃ©claratives)
+- Respecte l'invariant INV-BG-10 (neutralitÃ© conceptuelle)
+- Permet l'implÃ©mentation technique libre par BondingBrother
 
-**Implémentation conceptuelle :**
+**ImplÃ©mentation conceptuelle :**
 
-- Avant toute création : vérification de non-contradiction
-- Avant toute modification : vérification d'impact sur la cohérence
-- Rejet des modifications qui créent des incohérences
-- Audit périodique de la cohérence globale
+- RÃ¨gle = liste de conditions Ã  satisfaire
+- Chaque condition est une expression dÃ©clarative
+- Pas de verbes d'action, pas de sÃ©quences d'Ã©tapes
+- BondingBrother traduit en vÃ©rifications techniques
 
-### 6.5. Métadonnées de traçabilité systématiques
+### 6.4. Validation de cohÃ©rence Ã  chaque modification
 
 **Pratique :**
 
-Inclure systématiquement les métadonnées de traçabilité sur chaque définition.
+Valider la cohÃ©rence globale des dÃ©finitions Ã  chaque crÃ©ation ou modification.
 
 **Justification :**
 
-- Respecte l'invariant INV-BG-8 (traçabilité complète)
-- Permet l'audit et l'attribution de responsabilité
-- Facilite la compréhension des décisions passées
+- Respecte l'invariant INV-BG-9 (cohÃ©rence globale)
+- EmpÃªche les contradictions entre rÃ¨gles
+- Garantit un comportement prÃ©visible
 
-**Implémentation conceptuelle :**
+**ImplÃ©mentation conceptuelle :**
 
-- Chaque définition inclut : `createdAt`, `createdBy`, `justification`, `version`
-- L'historique des modifications est conservé
-- Les consultations peuvent inclure les métadonnées
+- Avant toute crÃ©ation : vÃ©rification de non-contradiction
+- Avant toute modification : vÃ©rification d'impact sur la cohÃ©rence
+- Rejet des modifications qui crÃ©ent des incohÃ©rences
+- Audit pÃ©riodique de la cohÃ©rence globale
 
-### 6.6. Séparation claire des interfaces
+### 6.5. MÃ©tadonnÃ©es de traÃ§abilitÃ© systÃ©matiques
+
+**Pratique :**
+
+Inclure systÃ©matiquement les mÃ©tadonnÃ©es de traÃ§abilitÃ© sur chaque dÃ©finition.
+
+**Justification :**
+
+- Respecte l'invariant INV-BG-8 (traÃ§abilitÃ© complÃ¨te)
+- Permet l'audit et l'attribution de responsabilitÃ©
+- Facilite la comprÃ©hension des dÃ©cisions passÃ©es
+
+**ImplÃ©mentation conceptuelle :**
+
+- Chaque dÃ©finition inclut : `createdAt`, `createdBy`, `justification`, `version`
+- L'historique des modifications est conservÃ©
+- Les consultations peuvent inclure les mÃ©tadonnÃ©es
+
+### 6.6. SÃ©paration claire des interfaces
 
 **Pratique :**
 
@@ -646,63 +646,63 @@ Exposer des interfaces distinctes pour chaque type de consommateur (StrongFather
 
 **Justification :**
 
-- Respecte les contrats d'intégration avec chaque core
-- Empêche les usages non prévus
-- Facilite l'évolution indépendante
+- Respecte les contrats d'intÃ©gration avec chaque core
+- EmpÃªche les usages non prÃ©vus
+- Facilite l'Ã©volution indÃ©pendante
 
-**Implémentation conceptuelle :**
+**ImplÃ©mentation conceptuelle :**
 
-- Interface StrongFather : contexte de confiance pour décision
-- Interface BondingBrother : règles de franchissement pour application
-- Interface CaringNanny : état des frontières pour observation
+- Interface StrongFather : contexte de confiance pour dÃ©cision
+- Interface BondingBrother : rÃ¨gles de franchissement pour application
+- Interface CaringNanny : Ã©tat des frontiÃ¨res pour observation
 
 ---
 
 ## 7. Check-list mentale avant toute feature
 
-Avant d'implémenter une nouvelle fonctionnalité liée à Border Guard, un développeur DOIT vérifier mentalement :
+Avant d'implÃ©menter une nouvelle fonctionnalitÃ© liÃ©e Ã  Border Guard, un dÃ©veloppeur DOIT vÃ©rifier mentalement :
 
-### 7.1. Vérification des invariants d'identité
+### 7.1. VÃ©rification des invariants d'identitÃ©
 
-- **INV-BG-1 est-il préservé ?** : La fonctionnalité n'exécute-t-elle aucune action (filtrage, blocage, interception) ?
-- **INV-BG-3 est-il préservé ?** : La fonctionnalité ne prend-elle aucune décision autonome ?
+- **INV-BG-1 est-il prÃ©servÃ© ?** : La fonctionnalitÃ© n'exÃ©cute-t-elle aucune action (filtrage, blocage, interception) ?
+- **INV-BG-3 est-il prÃ©servÃ© ?** : La fonctionnalitÃ© ne prend-elle aucune dÃ©cision autonome ?
 
-### 7.2. Vérification des invariants de comportement
+### 7.2. VÃ©rification des invariants de comportement
 
-- **INV-BG-2 est-il préservé ?** : La fonctionnalité n'accède-t-elle pas directement à la persistance ?
-- **INV-BG-4 est-il préservé ?** : Toute source est-elle classifiée (défaut = unknown) ?
-- **INV-BG-5 est-il préservé ?** : Toute frontière est-elle explicitement définie ?
-- **INV-BG-6 est-il préservé ?** : Les règles sont-elles purement déclaratives ?
+- **INV-BG-2 est-il prÃ©servÃ© ?** : La fonctionnalitÃ© n'accÃ¨de-t-elle pas directement Ã  la persistance ?
+- **INV-BG-4 est-il prÃ©servÃ© ?** : Toute source est-elle classifiÃ©e (dÃ©faut = unknown) ?
+- **INV-BG-5 est-il prÃ©servÃ© ?** : Toute frontiÃ¨re est-elle explicitement dÃ©finie ?
+- **INV-BG-6 est-il prÃ©servÃ© ?** : Les rÃ¨gles sont-elles purement dÃ©claratives ?
 
-### 7.3. Vérification des invariants de qualité
+### 7.3. VÃ©rification des invariants de qualitÃ©
 
-- **INV-BG-7 est-il préservé ?** : La définition est-elle strictement séparée de l'application ?
-- **INV-BG-8 est-il préservé ?** : La traçabilité est-elle complète (origine, date, justification) ?
-- **INV-BG-9 est-il préservé ?** : La cohérence globale est-elle maintenue ?
-- **INV-BG-10 est-il préservé ?** : Aucune supposition technique n'est-elle faite ?
+- **INV-BG-7 est-il prÃ©servÃ© ?** : La dÃ©finition est-elle strictement sÃ©parÃ©e de l'application ?
+- **INV-BG-8 est-il prÃ©servÃ© ?** : La traÃ§abilitÃ© est-elle complÃ¨te (origine, date, justification) ?
+- **INV-BG-9 est-il prÃ©servÃ© ?** : La cohÃ©rence globale est-elle maintenue ?
+- **INV-BG-10 est-il prÃ©servÃ© ?** : Aucune supposition technique n'est-elle faite ?
 
-### 7.4. Vérification de la séparation des responsabilités
+### 7.4. VÃ©rification de la sÃ©paration des responsabilitÃ©s
 
-- **Border Guard reste-t-il conceptuel ?** : La fonctionnalité définit-elle sans exécuter ?
-- **L'autorité de KindMother est-elle respectée ?** : Aucune persistance directe ?
-- **L'autorité de StrongFather est-elle respectée ?** : Aucune décision d'autorisation ?
-- **L'autorité de BondingBrother est-elle respectée ?** : Aucune application de règles ?
+- **Border Guard reste-t-il conceptuel ?** : La fonctionnalitÃ© dÃ©finit-elle sans exÃ©cuter ?
+- **L'autoritÃ© de KindMother est-elle respectÃ©e ?** : Aucune persistance directe ?
+- **L'autoritÃ© de StrongFather est-elle respectÃ©e ?** : Aucune dÃ©cision d'autorisation ?
+- **L'autoritÃ© de BondingBrother est-elle respectÃ©e ?** : Aucune application de rÃ¨gles ?
 
-### 7.5. Vérification de la conformité aux Lois d'Autonomie
+### 7.5. VÃ©rification de la conformitÃ© aux Lois d'Autonomie
 
-- **LOI-1 respectée ?** : Aucune dépendance externe critique pour les définitions ?
-- **LOI-2 respectée ?** : Les frontières fonctionnent-elles en mode isolé ?
-- **LOI-6 respectée ?** : La fédération reste-t-elle explicite, contrôlée, réversible ?
+- **LOI-1 respectÃ©e ?** : Aucune dÃ©pendance externe critique pour les dÃ©finitions ?
+- **LOI-2 respectÃ©e ?** : Les frontiÃ¨res fonctionnent-elles en mode isolÃ© ?
+- **LOI-6 respectÃ©e ?** : La fÃ©dÃ©ration reste-t-elle explicite, contrÃ´lÃ©e, rÃ©versible ?
 
-### 7.6. Vérification de la traçabilité et de la cohérence
+### 7.6. VÃ©rification de la traÃ§abilitÃ© et de la cohÃ©rence
 
-- **Toutes les définitions sont-elles traçables ?** : Métadonnées complètes ?
-- **La cohérence globale est-elle vérifiée ?** : Pas de contradiction détectable ?
-- **L'audit est-il possible ?** : Toute définition peut-elle être auditée ?
+- **Toutes les dÃ©finitions sont-elles traÃ§ables ?** : MÃ©tadonnÃ©es complÃ¨tes ?
+- **La cohÃ©rence globale est-elle vÃ©rifiÃ©e ?** : Pas de contradiction dÃ©tectable ?
+- **L'audit est-il possible ?** : Toute dÃ©finition peut-elle Ãªtre auditÃ©e ?
 
 ---
 
-## 8. Interactions avec les autres cores — Guide pratique
+## 8. Interactions avec les autres cores â€” Guide pratique
 
 ### 8.1. Interaction avec StrongFather
 
@@ -711,199 +711,200 @@ Avant d'implémenter une nouvelle fonctionnalité liée à Border Guard, un dév
 **Ce que Border Guard fournit :**
 
 - Niveau de confiance de la source (trusted, verified, unknown, hostile)
-- Frontières traversées par l'intention
-- Règles de franchissement applicables
-- État des intégrations concernées
+- FrontiÃ¨res traversÃ©es par l'intention
+- RÃ¨gles de franchissement applicables
+- Ã‰tat des intÃ©grations concernÃ©es
 
 **Ce que Border Guard ne fait JAMAIS :**
 
-- Décider à la place de StrongFather
+- DÃ©cider Ã  la place de StrongFather
 - Retourner un verdict (accept/reject)
 - Bloquer une intention
 
 **Exemple de flux :**
 
-1. StrongFather évalue une intention
-2. StrongFather demande à Border Guard : "Quel est le contexte de confiance de cette intention ?"
-3. Border Guard retourne : niveau de confiance, frontières, règles
-4. StrongFather utilise ces informations pour prendre sa décision
+1. StrongFather Ã©value une intention
+2. StrongFather demande Ã  Border Guard : "Quel est le contexte de confiance de cette intention ?"
+3. Border Guard retourne : niveau de confiance, frontiÃ¨res, rÃ¨gles
+4. StrongFather utilise ces informations pour prendre sa dÃ©cision
 
 ### 8.2. Interaction avec BondingBrother
 
-**Nature de l'interaction :** Border Guard **définit** les règles que BondingBrother **applique**.
+**Nature de l'interaction :** Border Guard **dÃ©finit** les rÃ¨gles que BondingBrother **applique**.
 
 **Ce que Border Guard fournit :**
 
-- Règles de franchissement pour chaque frontière
+- RÃ¨gles de franchissement pour chaque frontiÃ¨re
 - Niveaux de confiance des sources
-- État des intégrations
-- Frontières identifiées entre source et destination
+- Ã‰tat des intÃ©grations
+- FrontiÃ¨res identifiÃ©es entre source et destination
 
 **Ce que Border Guard ne fait JAMAIS :**
 
 - Filtrer les interactions
-- Appliquer les règles
-- Exécuter des vérifications techniques
-- Bloquer des accès
+- Appliquer les rÃ¨gles
+- ExÃ©cuter des vÃ©rifications techniques
+- Bloquer des accÃ¨s
 
 **Exemple de flux :**
 
-1. BondingBrother reçoit une intention à médier
-2. BondingBrother demande à Border Guard : "Quelles sont les frontières et les règles ?"
-3. Border Guard retourne : frontières traversées, règles déclaratives
-4. BondingBrother applique les règles techniquement
+1. BondingBrother reÃ§oit une intention Ã  mÃ©dier
+2. BondingBrother demande Ã  Border Guard : "Quelles sont les frontiÃ¨res et les rÃ¨gles ?"
+3. Border Guard retourne : frontiÃ¨res traversÃ©es, rÃ¨gles dÃ©claratives
+4. BondingBrother applique les rÃ¨gles techniquement
 
 ### 8.3. Interaction avec CaringNanny
 
-**Nature de l'interaction :** Border Guard **informe** CaringNanny sur l'état des frontières.
+**Nature de l'interaction :** Border Guard **informe** CaringNanny sur l'Ã©tat des frontiÃ¨res.
 
 **Ce que Border Guard fournit :**
 
-- Création/modification/suppression de frontières
-- Changements d'état (intégration suspendue, frontière fermée)
-- Anomalies détectées sur les frontières
+- CrÃ©ation/modification/suppression de frontiÃ¨res
+- Changements d'Ã©tat (intÃ©gration suspendue, frontiÃ¨re fermÃ©e)
+- Anomalies dÃ©tectÃ©es sur les frontiÃ¨res
 
 **Ce que Border Guard ne fait JAMAIS :**
 
-- Modifier l'état global du système
-- Décider de l'état de santé
-- Agir sur l'état observé
+- Modifier l'Ã©tat global du systÃ¨me
+- DÃ©cider de l'Ã©tat de santÃ©
+- Agir sur l'Ã©tat observÃ©
 
 **Exemple de flux :**
 
-1. Border Guard détecte un changement (intégration révoquée)
-2. Border Guard notifie CaringNanny : "L'intégration X est révoquée"
-3. CaringNanny intègre cette information dans l'état global
+1. Border Guard dÃ©tecte un changement (intÃ©gration rÃ©voquÃ©e)
+2. Border Guard notifie CaringNanny : "L'intÃ©gration X est rÃ©voquÃ©e"
+3. CaringNanny intÃ¨gre cette information dans l'Ã©tat global
 
 ### 8.4. Interaction avec KindMother
 
-**Nature de l'interaction :** Border Guard **délègue** la persistance à KindMother.
+**Nature de l'interaction :** Border Guard **dÃ©lÃ¨gue** la persistance Ã  KindMother.
 
 **Ce que Border Guard transmet :**
 
-- Définitions de frontières à persister
-- Classifications de confiance à stocker
+- DÃ©finitions de frontiÃ¨res Ã  persister
+- Classifications de confiance Ã  stocker
 - Historique des modifications
 
 **Ce que Border Guard ne fait JAMAIS :**
 
-- Accéder directement à la base de données
-- Écrire des fichiers
-- Gérer un cache persisté
+- AccÃ©der directement Ã  la base de donnÃ©es
+- Ã‰crire des fichiers
+- GÃ©rer un cache persistÃ©
 
 **Exemple de flux :**
 
-1. Border Guard crée une nouvelle frontière
-2. Border Guard émet un événement : "Frontière X définie"
-3. KindMother reçoit l'événement et persiste la définition
+1. Border Guard crÃ©e une nouvelle frontiÃ¨re
+2. Border Guard Ã©met un Ã©vÃ©nement : "FrontiÃ¨re X dÃ©finie"
+3. KindMother reÃ§oit l'Ã©vÃ©nement et persiste la dÃ©finition
 
 ---
 
 ## 9. Conclusion
 
-Ce document fournit des lignes directrices pour implémenter Border Guard de manière conforme aux contrats FONDATION.
+Ce document fournit des lignes directrices pour implÃ©menter Border Guard de maniÃ¨re conforme aux contrats FONDATION.
 
-**Points clés :**
+**Points clÃ©s :**
 
-- Border Guard **définit, classifie, et établit des règles** — il **n'exécute jamais**
-- Les invariants INV-BG-1 à INV-BG-10 sont des **contraintes absolues**
-- La **séparation définition/application** avec BondingBrother est fondamentale
-- La **traçabilité est obligatoire** et la **cohérence est vérifiée**
-- Les **Lois d'Autonomie** doivent être respectées
+- Border Guard **dÃ©finit, classifie, et Ã©tablit des rÃ¨gles** â€” il **n'exÃ©cute jamais**
+- Les invariants INV-BG-1 Ã  INV-BG-10 sont des **contraintes absolues**
+- La **sÃ©paration dÃ©finition/application** avec BondingBrother est fondamentale
+- La **traÃ§abilitÃ© est obligatoire** et la **cohÃ©rence est vÃ©rifiÃ©e**
+- Les **Lois d'Autonomie** doivent Ãªtre respectÃ©es
 
 **Nature informative :**
 
-Ce document est purement informatif et ne crée aucune nouvelle obligation contractuelle. Il sert uniquement à guider la compréhension et l'application des contrats FONDATION.
+Ce document est purement informatif et ne crÃ©e aucune nouvelle obligation contractuelle. Il sert uniquement Ã  guider la comprÃ©hension et l'application des contrats FONDATION.
 
-**Rappel :** Les contrats FONDATION priment toujours sur ce guide. En cas de doute, se référer à la Documentation Fondatrice et aux contrats spécifiques.
+**Rappel :** Les contrats FONDATION priment toujours sur ce guide. En cas de doute, se rÃ©fÃ©rer Ã  la Documentation Fondatrice et aux contrats spÃ©cifiques.
 
-**Phrase fondatrice à garder en mémoire :**
+**Phrase fondatrice Ã  garder en mÃ©moire :**
 
-> **Border Guard est l'autorité de définition des frontières et des niveaux de confiance qui établit les règles de franchissement sans jamais les appliquer lui-même, séparant strictement la définition conceptuelle de l'exécution technique.**
+> **Border Guard est l'autoritÃ© de dÃ©finition des frontiÃ¨res et des niveaux de confiance qui Ã©tablit les rÃ¨gles de franchissement sans jamais les appliquer lui-mÃªme, sÃ©parant strictement la dÃ©finition conceptuelle de l'exÃ©cution technique.**
 
 ---
 
-**Document créé le :** 2026-01-28  
+**Document crÃ©Ã© le :** 2026-01-28  
 **Version :** 1.0  
-**Statut :** POST-FONDATION — Informatif, non normatif, non contractuel  
-**Référence :** Miyukini Core System v2.4, Border Guard Documentation Fondatrice, Tous les contrats FONDATION  
-**Type :** Guide d'implémentation informatif
+**Statut :** POST-FONDATION â€” Informatif, non normatif, non contractuel  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, Border Guard Documentation Fondatrice, Tous les contrats FONDATION  
+**Type :** Guide d'implÃ©mentation informatif
 
 ---
 
-## 10. Conformité MSCM/MIP
+## 10. ConformitÃ© MSCM/MIP
 
 ### 10.1 Obligation de balisage MSCM
 
-Tout code implémenté pour Border Guard DOIT être balisé selon le protocole MSCM v1.
+Tout code implÃ©mentÃ© pour Border Guard DOIT Ãªtre balisÃ© selon le protocole MSCM v1.
 
-**Référence :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md)
+**RÃ©fÃ©rence :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md)
 
 **Obligations minimales :**
 - Chaque bloc fonctionnel DOIT avoir un identifiant unique (`@id`)
-- Le rôle sémantique DOIT être explicite (`@role`)
-- La couche architecturale DOIT être déclarée (`@layer`)
+- Le rÃ´le sÃ©mantique DOIT Ãªtre explicite (`@role`)
+- La couche architecturale DOIT Ãªtre dÃ©clarÃ©e (`@layer`)
 - Une description humaine DOIT accompagner chaque bloc (`@human`)
 
-### 10.2 Intégration MIP
+### 10.2 IntÃ©gration MIP
 
-Après implémentation, l'index MIP DOIT être régénéré pour :
-- Valider l'intégrité des blocs MSCM
-- Mettre à jour le graphe de dépendances
-- Vérifier la cohérence hiérarchique
+AprÃ¨s implÃ©mentation, l'index MIP DOIT Ãªtre rÃ©gÃ©nÃ©rÃ© pour :
+- Valider l'intÃ©gritÃ© des blocs MSCM
+- Mettre Ã  jour le graphe de dÃ©pendances
+- VÃ©rifier la cohÃ©rence hiÃ©rarchique
 
 ### 10.3 Check-list MSCM
 
-Avant toute livraison, vérifier :
-- [ ] Tous les blocs critiques sont balisés MSCM
+Avant toute livraison, vÃ©rifier :
+- [ ] Tous les blocs critiques sont balisÃ©s MSCM
 - [ ] Les identifiants sont uniques globalement
-- [ ] Les couches (layer) sont cohérentes avec l'architecture
-- [ ] L'index MIP peut être régénéré sans erreur
+- [ ] Les couches (layer) sont cohÃ©rentes avec l'architecture
+- [ ] L'index MIP peut Ãªtre rÃ©gÃ©nÃ©rÃ© sans erreur
 
 ---
 
-## 11. Mini log — erreurs / warnings / arbitrages rencontrés
+## 11. Mini log â€” erreurs / warnings / arbitrages rencontrÃ©s
 
-### Arbitrage A1 : Niveau de détail des exemples
+### Arbitrage A1 : Niveau de dÃ©tail des exemples
 
-**Arbitrage rencontré :** Quel niveau de détail donner aux exemples sans prescrire d'implémentation technique ?
+**Arbitrage rencontrÃ© :** Quel niveau de dÃ©tail donner aux exemples sans prescrire d'implÃ©mentation technique ?
 
-**Décision prise :** Les exemples restent purement conceptuels et narratifs. Aucun code, aucune structure de données spécifique.
+**DÃ©cision prise :** Les exemples restent purement conceptuels et narratifs. Aucun code, aucune structure de donnÃ©es spÃ©cifique.
 
-**Justification :** Ce document est informatif et non normatif. Les choix techniques appartiennent aux équipes d'implémentation.
+**Justification :** Ce document est informatif et non normatif. Les choix techniques appartiennent aux Ã©quipes d'implÃ©mentation.
 
 **Documentation :** Sections 5 (anti-patterns) et 6 (bonnes pratiques) avec exemples conceptuels uniquement.
 
-### Arbitrage A2 : Références aux contrats d'intégration
+### Arbitrage A2 : RÃ©fÃ©rences aux contrats d'intÃ©gration
 
-**Arbitrage rencontré :** Comment référencer les interactions avec les autres cores sans dupliquer les contrats d'intégration ?
+**Arbitrage rencontrÃ© :** Comment rÃ©fÃ©rencer les interactions avec les autres cores sans dupliquer les contrats d'intÃ©gration ?
 
-**Décision prise :** Section 8 fournit un guide pratique des interactions, avec renvoi vers les contrats d'intégration pour les détails.
+**DÃ©cision prise :** Section 8 fournit un guide pratique des interactions, avec renvoi vers les contrats d'intÃ©gration pour les dÃ©tails.
 
-**Justification :** Permet une compréhension rapide sans créer de redondance avec les contrats existants.
+**Justification :** Permet une comprÃ©hension rapide sans crÃ©er de redondance avec les contrats existants.
 
-**Documentation :** Section 8 avec références vers les contrats d'intégration.
+**Documentation :** Section 8 avec rÃ©fÃ©rences vers les contrats d'intÃ©gration.
 
 ### Arbitrage A3 : Check-list exhaustive vs utilisable
 
-**Arbitrage rencontré :** La check-list des 10 invariants + vérifications additionnelles est-elle trop longue ?
+**Arbitrage rencontrÃ© :** La check-list des 10 invariants + vÃ©rifications additionnelles est-elle trop longue ?
 
-**Décision prise :** Conserver la liste complète car chaque invariant est non négociable. Organisation en sous-sections pour faciliter la lecture.
+**DÃ©cision prise :** Conserver la liste complÃ¨te car chaque invariant est non nÃ©gociable. Organisation en sous-sections pour faciliter la lecture.
 
-**Justification :** Omettre des invariants de la check-list risquerait de les faire oublier. La vérification systématique est préférable à une simplification dangereuse.
+**Justification :** Omettre des invariants de la check-list risquerait de les faire oublier. La vÃ©rification systÃ©matique est prÃ©fÃ©rable Ã  une simplification dangereuse.
 
-**Documentation :** Section 7 avec les invariants organisés par catégorie (identité, comportement, qualité).
+**Documentation :** Section 7 avec les invariants organisÃ©s par catÃ©gorie (identitÃ©, comportement, qualitÃ©).
 
-### Arbitrage A4 : Anti-patterns spécifiques vs génériques
+### Arbitrage A4 : Anti-patterns spÃ©cifiques vs gÃ©nÃ©riques
 
-**Arbitrage rencontré :** Fournir des anti-patterns très spécifiques (qui pourraient devenir obsolètes) ou génériques (qui pourraient être trop abstraits) ?
+**Arbitrage rencontrÃ© :** Fournir des anti-patterns trÃ¨s spÃ©cifiques (qui pourraient devenir obsolÃ¨tes) ou gÃ©nÃ©riques (qui pourraient Ãªtre trop abstraits) ?
 
-**Décision prise :** Anti-patterns génériques mais illustrés par des exemples conceptuels spécifiques, en évitant le code technique.
+**DÃ©cision prise :** Anti-patterns gÃ©nÃ©riques mais illustrÃ©s par des exemples conceptuels spÃ©cifiques, en Ã©vitant le code technique.
 
-**Justification :** Les anti-patterns génériques restent valides dans le temps. Les exemples conceptuels aident à la compréhension sans prescrire d'implémentation.
+**Justification :** Les anti-patterns gÃ©nÃ©riques restent valides dans le temps. Les exemples conceptuels aident Ã  la comprÃ©hension sans prescrire d'implÃ©mentation.
 
 **Documentation :** Section 5 avec 6 anti-patterns et corrections conceptuelles.
 
 ---
 
-*Aucune autre erreur, warning, ou arbitrage rencontré lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou arbitrage rencontrÃ© lors de la rÃ©daction de ce document.*
+

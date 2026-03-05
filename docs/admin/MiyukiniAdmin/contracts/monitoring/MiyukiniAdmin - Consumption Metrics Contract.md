@@ -1,4 +1,4 @@
-# MiyukiniAdmin — Consumption Metrics Contract
+﻿# MiyukiniAdmin â€” Consumption Metrics Contract
 
 ## 1. Contexte
 
@@ -316,11 +316,11 @@ Le mode est selectionne en fonction de :
 
 | Metrique | Min | Max | Avg | Sum |
 |----------|-----|-----|-----|-----|
-| CPU usage | ✅ | ✅ | ✅ | ❌ |
-| RAM usage | ✅ | ✅ | ✅ | ❌ |
-| Disk usage | ✅ | ✅ | ✅ | ❌ |
-| Disk I/O | ✅ | ✅ | ✅ | ✅ |
-| Network I/O | ✅ | ✅ | ✅ | ✅ |
+| CPU usage | âœ… | âœ… | âœ… | âŒ |
+| RAM usage | âœ… | âœ… | âœ… | âŒ |
+| Disk usage | âœ… | âœ… | âœ… | âŒ |
+| Disk I/O | âœ… | âœ… | âœ… | âœ… |
+| Network I/O | âœ… | âœ… | âœ… | âœ… |
 
 ---
 
@@ -351,20 +351,20 @@ Le mode est selectionne en fonction de :
 
 ```
 MiyukiniAdmin                 BondingBrother              CaringNanny
-     │                              │                          │
-     │──MetricsRequest──────────────▶│                          │
-     │  (type: consumption)          │                          │
-     │  (interval: 5s)               │                          │
-     │                              │                          │
-     │                              │──ReadMetrics─────────────▶│
-     │                              │                          │
-     │                              │◀─MetricsData─────────────│
-     │                              │  (cpu, ram, disk, net)    │
-     │                              │                          │
-     │◀─MetricsResponse─────────────│                          │
-     │                              │                          │
-     │  (Update Dashboard)          │                          │
-     │                              │                          │
+     â”‚                              â”‚                          â”‚
+     â”‚â”€â”€MetricsRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
+     â”‚  (type: consumption)          â”‚                          â”‚
+     â”‚  (interval: 5s)               â”‚                          â”‚
+     â”‚                              â”‚                          â”‚
+     â”‚                              â”‚â”€â”€ReadMetricsâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                              â”‚                          â”‚
+     â”‚                              â”‚â—€â”€MetricsDataâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                              â”‚  (cpu, ram, disk, net)    â”‚
+     â”‚                              â”‚                          â”‚
+     â”‚â—€â”€MetricsResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                          â”‚
+     â”‚                              â”‚                          â”‚
+     â”‚  (Update Dashboard)          â”‚                          â”‚
+     â”‚                              â”‚                          â”‚
 ```
 
 ---
@@ -421,8 +421,8 @@ Les metriques de consommation contiennent des informations sensibles sur l'infra
 
 ### 12.6 References Securite
 
-- [Security - Core Integration Map](../../../../security/architecture/Security%20-%20Core%20Integration%20Map.md)
-- [Security - Documentation Fondatrice](../../../../security/foundation/Security%20-%20Documentation%20Fondatrice.md)
+- [Security - Core Integration Map](..//..//..//..//cores//WorrySentinel//_index.md)
+- [Security - Documentation Fondatrice](..//..//..//..//cores//WorrySentinel//_index.md)
 
 ---
 
@@ -431,10 +431,12 @@ Les metriques de consommation contiennent des informations sensibles sur l'infra
 - [MiyukiniAdmin - DB Metrics Contract](./MiyukiniAdmin%20-%20DB%20Metrics%20Contract.md)
 - [MiyukiniAdmin - Architecture & Flows](../../architecture/MiyukiniAdmin%20-%20Architecture%20&%20Flows.md)
 - [MiyukiniAdmin - Dashboard & Metrics Display](../../ui/MiyukiniAdmin%20-%20Dashboard%20&%20Metrics%20Display.md)
-- [CaringNanny - Documentation Fondatrice](../../../CaringNanny/foundation/Caring%20Nanny%20-%20Documentation%20Fondatrice.md)
+- [CaringNanny - Documentation Fondatrice](..//..//..//..//cores//CaringNanny//foundation//Caring%20Nanny%20-%20Documentation%20Fondatrice.md)
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
 **Statut :** Contrat de reference
+
+

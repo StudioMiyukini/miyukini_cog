@@ -42,7 +42,7 @@
 
 - Inventaire COG hors MGE : project-file-map, 569 fichiers monolithiques (>400 lignes, règle I-14).
 - Top 10 priorisé : pages.rs (3575L), content.rs (2440L), ui_builder.rs (2204L), etc. Plan découpage dans `<sequence>/plans_p3/`.
-- MSCM index : 1578 blocs, 696 fichiers. mip-generator dans tools/.
+- MSCM index : 1578 blocs, 696 fichiers. mscm-generator dans tools/.
 - Rapport : `.mip/sequences/2026-03-04-central-improve-secure-update/rapports_finaux/`.
 
 ## Services enregistres dans Central (Mar 2026)
@@ -53,6 +53,13 @@ jayxpose, jayfestival, jaykoa, jaykonta, miyukiniwatch, jay1tribu (deprecie par 
 
 - Pattern de parallelisation MIP v2. Chantier T5 livre. Audit George 97/100 CONFORME.
 - 3 couches : Orchestrateur Maria (DAG+Loi9) -> Pool Workers (subagent burst/worktree swarm/team swarm) -> Merge Coordinator Denis.
-- Livres : `.mip/skills/miyukini-mip-workflow/SKILL.md`, `.mip/protocol/conventions.md` (Loi 9 + ref MASS), 8 agents `.mip/agents/*.md`, swarm-template.json.
+- Livres : `.mip/skills/miyukini-mip-workflow/SKILL.md`, `.mip/protocol/conventions.md` (Loi 9 + ref MASS), index agents `.mip/agents/INDEX.md`, swarm-template.json.
 - Metriques : 24 taches, 7 vagues, 79% parallelisme effectif, 0 conflits, 8 commits. Rapport : `.mip/reports/2026-03-02-mass-rapport-final.md`.
 - Anti-patterns AP-08/AP-09 : voir `.mip/memory/patterns-and-lessons.md`.
+
+## Miyukini Whisper local stack (Mar 2026)
+
+- Sequence `2026-03-05-miyukini-whisper-local-stack` cloturee jusqu a P6.
+- Livrables: `miyustt`, `miyutts`, `miyukini-whisper-app`, integration Alicia + Central (scope sequence).
+- Gate P4 valide (score securite 84/100). Gate P5: ACCEPTE AVEC RESERVES.
+- Backlog reserves: hotkey globale, capture/injection texte systeme, rewrite bridge, docs/scripts onboarding.

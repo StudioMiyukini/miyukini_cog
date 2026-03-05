@@ -1,8 +1,10 @@
-# MiyukiniBB
+﻿# MiyukiniBB
 
-**Service forum** Miyukini COG — phpBB adapté, compte forum = profil Central.
+**Service forum** Miyukini COG â€” phpBB adaptÃ©, compte forum = profil Central.
 
 - **Crate** : client Rust pour synchroniser les profils Central vers Origin (`sync_profile`).
-- **Produit** : forum hébergé sur Origin (ex. `forum.miyukini.com`), avec l’extension [StudioMiyukini Central Auth](../../forum/phpBB/ext/studiomiyukini/centralauth/).
+- **Produit** : forum hÃ©bergÃ© sur Origin (ex. `forum.miyukini.com`), avec lâ€™extension [StudioMiyukini Central Auth](../../README.md).
 
 Voir [docs/services/MiyukiniBB/](../../docs/services/MiyukiniBB/_index.md) pour la documentation du service.
+
+

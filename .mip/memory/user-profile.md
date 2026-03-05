@@ -15,3 +15,4 @@
 - Documents max 400 lignes (regle modulaire stricte)
 - Parallelisation agents quand possible (Loi 9)
 - Pas de documents monolithiques
+- Cloture de sequence possible via ordre direct ("Termine la sequence MIP"), avec verdict P5 explicite trace

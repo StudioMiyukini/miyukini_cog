@@ -1,16 +1,16 @@
-# MWS — Chiffrement et TLS
+﻿# MWS â€” Chiffrement et TLS
 
 ## Contexte
 
-Le **chiffrement** est un pilier fondamental de la sécurité du MWS. Toutes les communications entre les acteurs (COGs, relays, trackers, Origin) sont protégées par **TLS** par défaut. Ce document détaille la politique de chiffrement, les exemptions possibles, et les exigences de sécurité.
+Le **chiffrement** est un pilier fondamental de la sÃ©curitÃ© du MWS. Toutes les communications entre les acteurs (COGs, relays, trackers, Origin) sont protÃ©gÃ©es par **TLS** par dÃ©faut. Ce document dÃ©taille la politique de chiffrement, les exemptions possibles, et les exigences de sÃ©curitÃ©.
 
-**Référence fondatrice :** [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
+**RÃ©fÃ©rence fondatrice :** [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 
-## Portée / Scope
+## PortÃ©e / Scope
 
 - TLS obligatoire : versions, cipher suites, certificats
-- Canal de contrôle vs canal de données
-- Exemption temps réel : conditions et règles
+- Canal de contrÃ´le vs canal de donnÃ©es
+- Exemption temps rÃ©el : conditions et rÃ¨gles
 - Authentification et replay protection
 - Gestion des secrets et certificats
 
@@ -18,41 +18,41 @@ Le **chiffrement** est un pilier fondamental de la sécurité du MWS. Toutes les
 
 ## 1. Principe fondamental
 
-> **Le chiffrement n'est pas négociable sur le canal de contrôle. Sur le canal de données, il est obligatoire par défaut avec une exemption strictement encadrée pour les cas temps réel.**
+> **Le chiffrement n'est pas nÃ©gociable sur le canal de contrÃ´le. Sur le canal de donnÃ©es, il est obligatoire par dÃ©faut avec une exemption strictement encadrÃ©e pour les cas temps rÃ©el.**
 
 | Canal | Chiffrement | Exemption possible |
 |-------|-------------|-------------------|
-| **Contrôle** | TLS obligatoire | **Jamais** |
-| **Données** | TLS par défaut | Oui, sous conditions strictes |
+| **ContrÃ´le** | TLS obligatoire | **Jamais** |
+| **DonnÃ©es** | TLS par dÃ©faut | Oui, sous conditions strictes |
 
 ---
 
 ## 2. TLS obligatoire
 
-### 2.1 Versions supportées
+### 2.1 Versions supportÃ©es
 
 | Version | Statut |
 |---------|--------|
-| TLS 1.3 | **Recommandé** |
-| TLS 1.2 | Accepté (minimum) |
-| TLS 1.1 et inférieures | **Refusé** |
+| TLS 1.3 | **RecommandÃ©** |
+| TLS 1.2 | AcceptÃ© (minimum) |
+| TLS 1.1 et infÃ©rieures | **RefusÃ©** |
 
 ### 2.2 Cipher suites
 
-Les cipher suites acceptées doivent garantir :
+Les cipher suites acceptÃ©es doivent garantir :
 
 | Exigence | Description |
 |----------|-------------|
 | **Perfect Forward Secrecy (PFS)** | Obligatoire (ECDHE, DHE) |
-| **Algorithmes sûrs** | AES-GCM, ChaCha20-Poly1305 |
-| **Taille de clé** | Minimum 128 bits (256 recommandé) |
+| **Algorithmes sÃ»rs** | AES-GCM, ChaCha20-Poly1305 |
+| **Taille de clÃ©** | Minimum 128 bits (256 recommandÃ©) |
 
-**Cipher suites recommandées (TLS 1.3) :**
+**Cipher suites recommandÃ©es (TLS 1.3) :**
 - `TLS_AES_256_GCM_SHA384`
 - `TLS_CHACHA20_POLY1305_SHA256`
 - `TLS_AES_128_GCM_SHA256`
 
-**Cipher suites refusées :**
+**Cipher suites refusÃ©es :**
 - RC4, 3DES, DES
 - TLS_RSA_* (pas de PFS)
 - MD5, SHA1 (pour les signatures)
@@ -61,11 +61,11 @@ Les cipher suites acceptées doivent garantir :
 
 | Aspect | Exigence |
 |--------|----------|
-| **Certificat serveur** | Signé par une CA reconnue (Let's Encrypt recommandé) |
-| **Validation côté client** | Obligatoire (chaîne de confiance, nom de domaine) |
-| **Auto-signé** | Uniquement en test, avec certificate pinning |
-| **Durée de validité** | Maximum 1 an (90 jours recommandé avec Let's Encrypt) |
-| **Certificate pinning Origin** | Les clients se connectant à **Origin** doivent implémenter le **certificate pinning** (contremesure R-014) pour limiter les risques de DNS poisoning et MITM. |
+| **Certificat serveur** | SignÃ© par une CA reconnue (Let's Encrypt recommandÃ©) |
+| **Validation cÃ´tÃ© client** | Obligatoire (chaÃ®ne de confiance, nom de domaine) |
+| **Auto-signÃ©** | Uniquement en test, avec certificate pinning |
+| **DurÃ©e de validitÃ©** | Maximum 1 an (90 jours recommandÃ© avec Let's Encrypt) |
+| **Certificate pinning Origin** | Les clients se connectant Ã  **Origin** doivent implÃ©menter le **certificate pinning** (contremesure R-014) pour limiter les risques de DNS poisoning et MITM. |
 
 ### 2.4 Ports et endpoints
 
@@ -78,11 +78,11 @@ Les cipher suites acceptées doivent garantir :
 
 ---
 
-## 3. Canal de contrôle
+## 3. Canal de contrÃ´le
 
-### 3.1 Définition
+### 3.1 DÃ©finition
 
-Le **canal de contrôle** transporte les messages de gestion du MWS :
+Le **canal de contrÃ´le** transporte les messages de gestion du MWS :
 
 | Type de message | Description |
 |-----------------|-------------|
@@ -91,64 +91,64 @@ Le **canal de contrôle** transporte les messages de gestion du MWS :
 | HEARTBEAT | Maintien de connexion |
 | CLOSE | Fermeture de tunnel |
 | ERROR | Erreurs protocolaires |
-| CORE_KEY | Clé de conformité des Cores |
+| CORE_KEY | ClÃ© de conformitÃ© des Cores |
 | SERVICE_BLOCK | Bloc de code des Services |
-| VERIFY_RESULT | Résultat de vérification |
+| VERIFY_RESULT | RÃ©sultat de vÃ©rification |
 | REDIRECT | Redirection vers un autre relay |
 | REGISTRY_QUERY | Interrogation du Registre |
-| UPDATE_AVAILABLE | Notification de mise à jour |
+| UPDATE_AVAILABLE | Notification de mise Ã  jour |
 
 ### 3.2 Chiffrement obligatoire
 
-| Règle | Description |
+| RÃ¨gle | Description |
 |-------|-------------|
 | **TLS toujours actif** | Aucune exception possible |
-| **Pas de mode plaintext** | Aucun endpoint de contrôle non chiffré |
-| **Validation certificat** | Obligatoire des deux côtés |
+| **Pas de mode plaintext** | Aucun endpoint de contrÃ´le non chiffrÃ© |
+| **Validation certificat** | Obligatoire des deux cÃ´tÃ©s |
 
 ---
 
-## 4. Canal de données
+## 4. Canal de donnÃ©es
 
-### 4.1 Définition
+### 4.1 DÃ©finition
 
-Le **canal de données** transporte les données opaques échangées entre COGs :
+Le **canal de donnÃ©es** transporte les donnÃ©es opaques Ã©changÃ©es entre COGs :
 
 | Type de message | Description |
 |-----------------|-------------|
-| DATA | Données relayées (contenu opaque) |
+| DATA | DonnÃ©es relayÃ©es (contenu opaque) |
 
-### 4.2 Chiffrement par défaut
+### 4.2 Chiffrement par dÃ©faut
 
-| Règle | Description |
+| RÃ¨gle | Description |
 |-------|-------------|
-| **TLS par défaut** | Les données sont chiffrées TLS |
+| **TLS par dÃ©faut** | Les donnÃ©es sont chiffrÃ©es TLS |
 | **Exemption possible** | Uniquement sous conditions strictes |
 
 ### 4.3 MAC sur paquets DATA (contremesure R-003)
 
-Même en **mode temps réel non chiffré**, l'intégrité des paquets DATA doit être garantie :
+MÃªme en **mode temps rÃ©el non chiffrÃ©**, l'intÃ©gritÃ© des paquets DATA doit Ãªtre garantie :
 
 | Exigence | Description |
 |----------|-------------|
 | **MAC obligatoire** | Chaque trame DATA inclut un champ **MAC** de 32 octets (HMAC-SHA256) |
-| **Clé de session** | La clé est dérivée lors de la négociation TLS initiale : `session_key = HKDF(tls_master_secret, "MWS-DATA-MAC", session_id)` |
-| **Vérification** | Le récepteur vérifie le MAC avant de traiter ; rejet si invalide |
-| **Format** | Voir [MWS - Protocole Relay](../protocole/MWS%20-%20Protocole%20Relay.md) — format DATA avec champ `mac` |
+| **ClÃ© de session** | La clÃ© est dÃ©rivÃ©e lors de la nÃ©gociation TLS initiale : `session_key = HKDF(tls_master_secret, "MWS-DATA-MAC", session_id)` |
+| **VÃ©rification** | Le rÃ©cepteur vÃ©rifie le MAC avant de traiter ; rejet si invalide |
+| **Format** | Voir [MWS - Protocole Relay](../protocole/MWS%20-%20Protocole%20Relay.md) â€” format DATA avec champ `mac` |
 
 ---
 
-## 5. Exemption temps réel
+## 5. Exemption temps rÃ©el
 
 ### 5.1 Cas d'usage
 
-L'exemption temps réel est prévue pour les scénarios nécessitant une **latence minimale** :
+L'exemption temps rÃ©el est prÃ©vue pour les scÃ©narios nÃ©cessitant une **latence minimale** :
 
 | Cas d'usage | Description |
 |-------------|-------------|
-| **Jeu multijoueur** | Échanges rapides entre joueurs |
-| **Streaming audio/vidéo** | Diffusion en direct |
-| **Interactions temps réel** | Latence critique |
+| **Jeu multijoueur** | Ã‰changes rapides entre joueurs |
+| **Streaming audio/vidÃ©o** | Diffusion en direct |
+| **Interactions temps rÃ©el** | Latence critique |
 
 ### 5.2 Conditions strictes
 
@@ -156,55 +156,55 @@ L'exemption n'est possible que si **toutes** les conditions suivantes sont rempl
 
 | Condition | Description |
 |-----------|-------------|
-| **Négociation préalable** | Les deux COGs ont négocié l'exemption via le canal de contrôle chiffré |
-| **Permis valide** | Les deux COGs possèdent un Permis de circulation valide |
-| **Vérification préalable** | Les deux COGs ont été vérifiés par un relay |
-| **Flux éphémère** | La session non chiffrée est limitée dans le temps |
-| **Durée maximale** | **4 heures** — au-delà, renouvellement obligatoire (contremesure R-008) |
-| **Notification utilisateur** | L'utilisateur est explicitement informé du mode non chiffré |
-| **Journalisation** | La session est journalisée (cog_ids, durée, volume) ; sessions > 1 h font l'objet d'une alerte si ratio non-chiffré/chiffré > 20 % |
+| **NÃ©gociation prÃ©alable** | Les deux COGs ont nÃ©gociÃ© l'exemption via le canal de contrÃ´le chiffrÃ© |
+| **Permis valide** | Les deux COGs possÃ¨dent un Permis de circulation valide |
+| **VÃ©rification prÃ©alable** | Les deux COGs ont Ã©tÃ© vÃ©rifiÃ©s par un relay |
+| **Flux Ã©phÃ©mÃ¨re** | La session non chiffrÃ©e est limitÃ©e dans le temps |
+| **DurÃ©e maximale** | **4 heures** â€” au-delÃ , renouvellement obligatoire (contremesure R-008) |
+| **Notification utilisateur** | L'utilisateur est explicitement informÃ© du mode non chiffrÃ© |
+| **Journalisation** | La session est journalisÃ©e (cog_ids, durÃ©e, volume) ; sessions > 1 h font l'objet d'une alerte si ratio non-chiffrÃ©/chiffrÃ© > 20 % |
 
-### 5.3 Négociation
+### 5.3 NÃ©gociation
 
 ```mermaid
 sequenceDiagram
     participant A as COG A
     participant B as COG B
 
-    Note over A,B: Canal de contrôle TLS
-    A->>B: Demande exemption temps réel
-    B->>B: Vérifier conditions
+    Note over A,B: Canal de contrÃ´le TLS
+    A->>B: Demande exemption temps rÃ©el
+    B->>B: VÃ©rifier conditions
     alt Conditions OK
-        B->>A: Exemption accordée
-        Note over A,B: Canal DATA sans TLS (éphémère)
+        B->>A: Exemption accordÃ©e
+        Note over A,B: Canal DATA sans TLS (Ã©phÃ©mÃ¨re)
     else Conditions non remplies
-        B->>A: Exemption refusée
+        B->>A: Exemption refusÃ©e
         Note over A,B: Canal DATA reste TLS
     end
 ```
 
-### 5.4 Passeports spéciaux
+### 5.4 Passeports spÃ©ciaux
 
-Les COGs avec **Passeport spécial** peuvent négocier l'exemption plus facilement :
+Les COGs avec **Passeport spÃ©cial** peuvent nÃ©gocier l'exemption plus facilement :
 
 | Aspect | Description |
 |--------|-------------|
-| **Risques assumés** | Le hôte professionnel assume les risques |
-| **Contrôles allégés** | Moins de vérifications préalables |
-| **Audit renforcé** | Audits périodiques plus stricts |
+| **Risques assumÃ©s** | Le hÃ´te professionnel assume les risques |
+| **ContrÃ´les allÃ©gÃ©s** | Moins de vÃ©rifications prÃ©alables |
+| **Audit renforcÃ©** | Audits pÃ©riodiques plus stricts |
 
 ### 5.5 Journalisation obligatoire
 
-Toute session en mode temps réel non chiffré est journalisée :
+Toute session en mode temps rÃ©el non chiffrÃ© est journalisÃ©e :
 
 | Champ | Description |
 |-------|-------------|
 | `cog_id_source` | COG initiant l'exemption |
 | `cog_id_destination` | COG acceptant l'exemption |
-| `started_at` | Début de la session |
+| `started_at` | DÃ©but de la session |
 | `ended_at` | Fin de la session |
-| `duration` | Durée totale |
-| `volume_bytes` | Volume échangé |
+| `duration` | DurÃ©e totale |
+| `volume_bytes` | Volume Ã©changÃ© |
 | `reason` | Raison de l'exemption |
 
 ---
@@ -216,7 +216,7 @@ Toute session en mode temps réel non chiffré est journalisée :
 | Exigence | Description |
 |----------|-------------|
 | **Entropie** | Minimum 256 bits d'entropie |
-| **Génération** | Aléatoire cryptographiquement sûr |
+| **GÃ©nÃ©ration** | AlÃ©atoire cryptographiquement sÃ»r |
 | **Transmission** | Une seule fois sur le canal TLS (dans REGISTER) |
 | **Stockage** | Jamais en clair, droits restreints |
 
@@ -230,61 +230,61 @@ sequenceDiagram
     participant R as Relay
 
     COG->>R: Connexion TLS
-    R->>COG: Challenge (nonce aléatoire)
+    R->>COG: Challenge (nonce alÃ©atoire)
     COG->>COG: Calculer HMAC(secret, challenge)
-    COG->>R: Réponse HMAC
-    R->>R: Vérifier HMAC
+    COG->>R: RÃ©ponse HMAC
+    R->>R: VÃ©rifier HMAC
     alt HMAC valide
-        R->>COG: Authentification réussie
+        R->>COG: Authentification rÃ©ussie
     else HMAC invalide
-        R->>COG: Authentification échouée
+        R->>COG: Authentification Ã©chouÃ©e
         R->>R: Fermer connexion
     end
 ```
 
-### 6.3 Échec d'authentification
+### 6.3 Ã‰chec d'authentification
 
 | Action | Description |
 |--------|-------------|
-| **Fermeture immédiate** | Connexion TLS fermée |
-| **Journalisation** | Événement journalisé (sans exposer le token) |
-| **Message générique** | Ne pas révéler si c'est le token ou le cog_id qui est invalide |
+| **Fermeture immÃ©diate** | Connexion TLS fermÃ©e |
+| **Journalisation** | Ã‰vÃ©nement journalisÃ© (sans exposer le token) |
+| **Message gÃ©nÃ©rique** | Ne pas rÃ©vÃ©ler si c'est le token ou le cog_id qui est invalide |
 
 ---
 
 ## 7. Replay protection
 
-### 7.1 Mécanismes
+### 7.1 MÃ©canismes
 
-| Mécanisme | Description |
+| MÃ©canisme | Description |
 |-----------|-------------|
 | **Nonce** | Chaque message critique inclut un nonce unique (min 16 octets) |
-| **Timestamp** | Horodatage avec précision seconde |
-| **Fenêtre d'acceptation** | **±10 secondes** (obligatoire) — contremesure R-006 |
-| **Synchronisation NTP** | Recommandée pour tous les acteurs (drift max 5 s) |
-| **Registre de nonces** | Cache borné des nonces vus récemment |
+| **Timestamp** | Horodatage avec prÃ©cision seconde |
+| **FenÃªtre d'acceptation** | **Â±10 secondes** (obligatoire) â€” contremesure R-006 |
+| **Synchronisation NTP** | RecommandÃ©e pour tous les acteurs (drift max 5 s) |
+| **Registre de nonces** | Cache bornÃ© des nonces vus rÃ©cemment |
 
-### 7.2 Vérification
+### 7.2 VÃ©rification
 
 ```mermaid
 flowchart TB
-    A[Message reçu] --> B{Timestamp dans fenêtre ?}
-    B -->|Non| C[Rejeter : hors fenêtre]
-    B -->|Oui| D{Nonce déjà vu ?}
-    D -->|Oui| E[Rejeter : replay détecté]
+    A[Message reÃ§u] --> B{Timestamp dans fenÃªtre ?}
+    B -->|Non| C[Rejeter : hors fenÃªtre]
+    B -->|Oui| D{Nonce dÃ©jÃ  vu ?}
+    D -->|Oui| E[Rejeter : replay dÃ©tectÃ©]
     D -->|Non| F[Enregistrer nonce]
     F --> G[Traiter message]
 ```
 
-### 7.3 Numéro de séquence
+### 7.3 NumÃ©ro de sÃ©quence
 
 Pour les messages de session active (HEARTBEAT, CLOSE) :
 
 | Exigence | Description |
 |----------|-------------|
-| **Monotonie** | Numéro de séquence incrémenté à chaque message |
-| **Détection** | Détecter les doublons et messages hors-ordre |
-| **Rejet** | Rejeter les numéros de séquence invalides |
+| **Monotonie** | NumÃ©ro de sÃ©quence incrÃ©mentÃ© Ã  chaque message |
+| **DÃ©tection** | DÃ©tecter les doublons et messages hors-ordre |
+| **Rejet** | Rejeter les numÃ©ros de sÃ©quence invalides |
 
 ---
 
@@ -295,7 +295,7 @@ Pour les messages de session active (HEARTBEAT, CLOSE) :
 | Exigence | Description |
 |----------|-------------|
 | **Droits restreints** | `chmod 600` sur les fichiers de secrets |
-| **Propriétaire** | Utilisateur du service uniquement |
+| **PropriÃ©taire** | Utilisateur du service uniquement |
 | **Pas en clair** | Jamais de secrets en clair dans les logs |
 
 ### 8.2 Variables d'environnement
@@ -303,56 +303,57 @@ Pour les messages de session active (HEARTBEAT, CLOSE) :
 | Exigence | Description |
 |----------|-------------|
 | **Non visibles** | Pas visibles dans `/proc/*/environ` |
-| **Pas dans les logs** | Pas dans les logs de démarrage |
+| **Pas dans les logs** | Pas dans les logs de dÃ©marrage |
 
 ### 8.3 Code source
 
 | Exigence | Description |
 |----------|-------------|
-| **Pas de secrets** | Aucun token, clé privée ou secret dans le code |
+| **Pas de secrets** | Aucun token, clÃ© privÃ©e ou secret dans le code |
 | **Git ignore** | Fichiers de secrets dans `.gitignore` |
-| **Audit** | Vérification périodique de l'absence de secrets |
+| **Audit** | VÃ©rification pÃ©riodique de l'absence de secrets |
 
 ### 8.4 Rotation des tokens (contremesure R-007)
 
 | Exigence | Description |
 |----------|-------------|
-| **Révocable** | Les tokens doivent pouvoir être révoqués immédiatement |
+| **RÃ©vocable** | Les tokens doivent pouvoir Ãªtre rÃ©voquÃ©s immÃ©diatement |
 | **Renouvelable** | Renouvellement sans interruption de service |
-| **Transition** | Plusieurs tokens valides simultanés pendant la transition |
+| **Transition** | Plusieurs tokens valides simultanÃ©s pendant la transition |
 | **Rotation automatique** | Tous les **7 jours** ; notification au COG 24 h avant expiration |
-| **Alerte nouvelle IP** | Notifier le COG si son token est utilisé depuis une nouvelle IP (optionnel) |
+| **Alerte nouvelle IP** | Notifier le COG si son token est utilisÃ© depuis une nouvelle IP (optionnel) |
 
 ---
 
-## 9. Résumé des exigences
+## 9. RÃ©sumÃ© des exigences
 
 | Domaine | Exigence | Niveau |
 |---------|----------|--------|
 | **TLS** | TLS 1.2+ obligatoire | **Obligatoire** |
 | **PFS** | Perfect Forward Secrecy | **Obligatoire** |
-| **Cipher suites** | Suites sûres uniquement | **Obligatoire** |
-| **Certificats** | Validation côté client | **Obligatoire** |
-| **Canal contrôle** | TLS sans exception | **Obligatoire** |
-| **Canal données** | TLS par défaut | **Obligatoire** |
-| **Exemption temps réel** | Conditions strictes | **Optionnel** |
+| **Cipher suites** | Suites sÃ»res uniquement | **Obligatoire** |
+| **Certificats** | Validation cÃ´tÃ© client | **Obligatoire** |
+| **Canal contrÃ´le** | TLS sans exception | **Obligatoire** |
+| **Canal donnÃ©es** | TLS par dÃ©faut | **Obligatoire** |
+| **Exemption temps rÃ©el** | Conditions strictes | **Optionnel** |
 | **Token** | 256+ bits d'entropie | **Obligatoire** |
 | **Replay protection** | Nonce + timestamp | **Obligatoire** |
 | **Secrets** | Droits restreints, pas dans le code | **Obligatoire** |
-| **Rotation** | Tokens révocables et renouvelables | **Obligatoire** |
+| **Rotation** | Tokens rÃ©vocables et renouvelables | **Obligatoire** |
 
 ---
 
-## Références
+## RÃ©fÃ©rences
 
 - [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 - [MWS - Relays](../acteurs/MWS%20-%20Relays.md)
-- [MWS - Contre-Mesures de Sécurité](./MWS%20-%20Contre-Mesures%20de%20Securite.md) — R-003, R-006, R-007, R-008, R-014
-- [Miyukini Webway Relay](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay.md) — sections 3.3, 10
-- [Miyukini Webway Relay Protocol](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20Relay%20Protocol.md) — section 2
+- [MWS - Contre-Mesures de SÃ©curitÃ©](./MWS%20-%20Contre-Mesures%20de%20Securite.md) â€” R-003, R-006, R-007, R-008, R-014
+- [Miyukini Webway Relay](..//reference//_index.md) â€” sections 3.3, 10
+- [Miyukini Webway Relay Protocol](..//reference//_index.md) â€” section 2
 
 ---
 
 **Version :** 2.0  
-**Mise à jour :** Intégration contremesures R-003, R-006, R-007, R-008, R-014  
-**Classification :** Documentation MWS — Sécurité
+**Mise Ã  jour :** IntÃ©gration contremesures R-003, R-006, R-007, R-008, R-014  
+**Classification :** Documentation MWS â€” SÃ©curitÃ©
+

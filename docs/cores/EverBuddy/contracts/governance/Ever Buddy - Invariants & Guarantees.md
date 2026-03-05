@@ -1,121 +1,121 @@
-# Ever Buddy — Invariants & Guarantees
+﻿# Ever Buddy â€” Invariants & Guarantees
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **Ever Buddy — Invariants & Guarantees** : un contrat normatif, non négociable, et de statut FONDATION qui consolide et formalise l'ensemble des invariants et garanties d'Ever Buddy, établissant les propriétés absolues qui doivent toujours être vraies et les garanties offertes aux appelants dans le système Miyukini Core System v2.4.
+Ce document dÃ©finit le **Ever Buddy â€” Invariants & Guarantees** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui consolide et formalise l'ensemble des invariants et garanties d'Ever Buddy, Ã©tablissant les propriÃ©tÃ©s absolues qui doivent toujours Ãªtre vraies et les garanties offertes aux appelants dans le systÃ¨me Miyukini Core System v2.4.
 
-Ce contrat constitue la référence unique et consolidée de tous les invariants et garanties d'Ever Buddy.
+Ce contrat constitue la rÃ©fÃ©rence unique et consolidÃ©e de tous les invariants et garanties d'Ever Buddy.
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **toutes les opérations d'Ever Buddy** et définit de manière absolue :
-- la définition formelle d'un invariant Ever Buddy,
-- la définition formelle d'une garantie Ever Buddy,
-- le catalogue complet des 12 invariants fondamentaux (INV-EB-1 à INV-EB-12),
+Ce contrat s'applique Ã  **toutes les opÃ©rations d'Ever Buddy** et dÃ©finit de maniÃ¨re absolue :
+- la dÃ©finition formelle d'un invariant Ever Buddy,
+- la dÃ©finition formelle d'une garantie Ever Buddy,
+- le catalogue complet des 12 invariants fondamentaux (INV-EB-1 Ã  INV-EB-12),
 - le catalogue complet des garanties,
-- les règles de préservation des invariants,
-- les règles d'application des garanties.
+- les rÃ¨gles de prÃ©servation des invariants,
+- les rÃ¨gles d'application des garanties.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat **consolide** les invariants et garanties définis dans :
-- **Ever Buddy — Documentation Fondatrice** : INV-EB-1 à INV-EB-12 (Section 7)
-- **Ever Buddy — Lifecycle States Contract** : Invariants des états de cycle de vie
-- **Ever Buddy — Transition Rules Contract** : Invariants des règles de transition
-- **Ever Buddy — Compatibility Rules Contract** : Invariants de compatibilité
-- **Ever Buddy — Version Semantics Contract** : Invariants de versionnement
+Ce contrat **consolide** les invariants et garanties dÃ©finis dans :
+- **Ever Buddy â€” Documentation Fondatrice** : INV-EB-1 Ã  INV-EB-12 (Section 7)
+- **Ever Buddy â€” Lifecycle States Contract** : Invariants des Ã©tats de cycle de vie
+- **Ever Buddy â€” Transition Rules Contract** : Invariants des rÃ¨gles de transition
+- **Ever Buddy â€” Compatibility Rules Contract** : Invariants de compatibilitÃ©
+- **Ever Buddy â€” Version Semantics Contract** : Invariants de versionnement
 
-Ce contrat est la **référence unique** (document maître) pour tous les invariants et garanties Ever Buddy.
+Ce contrat est la **rÃ©fÃ©rence unique** (document maÃ®tre) pour tous les invariants et garanties Ever Buddy.
 
 ---
 
-## 2. Définitions
+## 2. DÃ©finitions
 
-### 2.1. Définition d'un invariant
+### 2.1. DÃ©finition d'un invariant
 
-Un **invariant** est une propriété qui doit toujours être vraie dans Ever Buddy, quelle que soit la situation, le contexte, ou l'état du système.
+Un **invariant** est une propriÃ©tÃ© qui doit toujours Ãªtre vraie dans Ever Buddy, quelle que soit la situation, le contexte, ou l'Ã©tat du systÃ¨me.
 
-**Caractéristiques d'un invariant :**
+**CaractÃ©ristiques d'un invariant :**
 
 - **Absolu** : Un invariant est toujours vrai, sans exception
-- **Non négociable** : Un invariant ne peut pas être temporairement suspendu
-- **Vérifiable** : Un invariant peut être vérifié conceptuellement
-- **Fondamental** : Un invariant représente une propriété fondamentale du système
+- **Non nÃ©gociable** : Un invariant ne peut pas Ãªtre temporairement suspendu
+- **VÃ©rifiable** : Un invariant peut Ãªtre vÃ©rifiÃ© conceptuellement
+- **Fondamental** : Un invariant reprÃ©sente une propriÃ©tÃ© fondamentale du systÃ¨me
 
-### 2.2. Définition d'une garantie
+### 2.2. DÃ©finition d'une garantie
 
-Une **garantie** est un engagement pris par Ever Buddy envers les appelants, définissant ce qu'ils peuvent attendre du système.
+Une **garantie** est un engagement pris par Ever Buddy envers les appelants, dÃ©finissant ce qu'ils peuvent attendre du systÃ¨me.
 
-**Caractéristiques d'une garantie :**
+**CaractÃ©ristiques d'une garantie :**
 
 - **Contractuelle** : Une garantie est un engagement contractuel
-- **Conditionnelle** : Une garantie s'applique si les conditions sont respectées
+- **Conditionnelle** : Une garantie s'applique si les conditions sont respectÃ©es
 - **Observable** : Une garantie produit un effet observable
-- **Bénéficiaire** : Une garantie bénéficie à l'appelant
+- **BÃ©nÃ©ficiaire** : Une garantie bÃ©nÃ©ficie Ã  l'appelant
 
 ### 2.3. Distinction invariant/garantie
 
 | Aspect | Invariant | Garantie |
 |--------|-----------|----------|
-| Nature | Propriété interne | Engagement externe |
-| Portée | Système Ever Buddy | Appelants (cores, produits) |
+| Nature | PropriÃ©tÃ© interne | Engagement externe |
+| PortÃ©e | SystÃ¨me Ever Buddy | Appelants (cores, produits) |
 | Condition | Toujours vraie | Conditionnelle |
-| Violation | Impossible par conception | Possible si conditions non respectées |
-| Vérification | Interne | Observable par l'appelant |
+| Violation | Impossible par conception | Possible si conditions non respectÃ©es |
+| VÃ©rification | Interne | Observable par l'appelant |
 
 ---
 
 ## 3. Catalogue des invariants fondamentaux
 
-### 3.1. Invariants d'exécution et d'autorité
+### 3.1. Invariants d'exÃ©cution et d'autoritÃ©
 
-**INV-EB-1 : Aucune exécution de migration**
+**INV-EB-1 : Aucune exÃ©cution de migration**
 
-Ever Buddy ne possède **jamais** la capacité d'exécuter une migration, une transformation, ou une modification de données. Il définit les règles et observe les transitions, mais toute exécution est déléguée aux autorités compétentes (KindMother pour les données, produits pour leur code).
+Ever Buddy ne possÃ¨de **jamais** la capacitÃ© d'exÃ©cuter une migration, une transformation, ou une modification de donnÃ©es. Il dÃ©finit les rÃ¨gles et observe les transitions, mais toute exÃ©cution est dÃ©lÃ©guÃ©e aux autoritÃ©s compÃ©tentes (KindMother pour les donnÃ©es, produits pour leur code).
 
-Cet invariant est structurel : Ever Buddy n'a accès à aucun mécanisme d'écriture de données.
-
-*Source : Documentation Fondatrice (Section 7)*
-
-**Conformité LOI-5 :** Cet invariant garantit que Ever Buddy reste léger et prévisible — il observe et gouverne, mais n'exécute jamais.
-
-### 3.2. Invariants de traçabilité
-
-**INV-EB-2 : Traçabilité complète et immuable**
-
-Toute transition d'état de cycle de vie est **obligatoirement** enregistrée et cet enregistrement est **immuable**. L'historique ne peut être ni modifié, ni effacé, ni falsifié.
-
-Cet invariant garantit l'auditabilité et la compréhension des évolutions passées.
+Cet invariant est structurel : Ever Buddy n'a accÃ¨s Ã  aucun mÃ©canisme d'Ã©criture de donnÃ©es.
 
 *Source : Documentation Fondatrice (Section 7)*
 
-**Conformité LOI-3 :** L'historique local constitue une trace d'audit complète et souveraine.
+**ConformitÃ© LOI-5 :** Cet invariant garantit que Ever Buddy reste lÃ©ger et prÃ©visible â€” il observe et gouverne, mais n'exÃ©cute jamais.
 
-### 3.3. Invariants d'état
+### 3.2. Invariants de traÃ§abilitÃ©
 
-**INV-EB-3 : Aucun état ambigu**
+**INV-EB-2 : TraÃ§abilitÃ© complÃ¨te et immuable**
 
-Chaque élément du système possède **exactement un** état de cycle de vie à tout moment. Il n'existe pas d'état intermédiaire, incertain, ou non défini. Les transitions sont atomiques : un élément passe de l'état A à l'état B sans état transitoire.
+Toute transition d'Ã©tat de cycle de vie est **obligatoirement** enregistrÃ©e et cet enregistrement est **immuable**. L'historique ne peut Ãªtre ni modifiÃ©, ni effacÃ©, ni falsifiÃ©.
 
-Cet invariant garantit la clarté et la prédictibilité du système.
+Cet invariant garantit l'auditabilitÃ© et la comprÃ©hension des Ã©volutions passÃ©es.
 
 *Source : Documentation Fondatrice (Section 7)*
 
-**États autorisés :** DRAFT, ACTIVE, DEPRECATED, RETIRED, ARCHIVED — et uniquement ceux-ci.
+**ConformitÃ© LOI-3 :** L'historique local constitue une trace d'audit complÃ¨te et souveraine.
+
+### 3.3. Invariants d'Ã©tat
+
+**INV-EB-3 : Aucun Ã©tat ambigu**
+
+Chaque Ã©lÃ©ment du systÃ¨me possÃ¨de **exactement un** Ã©tat de cycle de vie Ã  tout moment. Il n'existe pas d'Ã©tat intermÃ©diaire, incertain, ou non dÃ©fini. Les transitions sont atomiques : un Ã©lÃ©ment passe de l'Ã©tat A Ã  l'Ã©tat B sans Ã©tat transitoire.
+
+Cet invariant garantit la clartÃ© et la prÃ©dictibilitÃ© du systÃ¨me.
+
+*Source : Documentation Fondatrice (Section 7)*
+
+**Ã‰tats autorisÃ©s :** DRAFT, ACTIVE, DEPRECATED, RETIRED, ARCHIVED â€” et uniquement ceux-ci.
 
 ### 3.4. Invariants de transition
 
-**INV-EB-4 : Période de dépréciation obligatoire**
+**INV-EB-4 : PÃ©riode de dÃ©prÃ©ciation obligatoire**
 
-Aucun élément ACTIVE ne peut passer directement à RETIRED ou ARCHIVED. La transition par DEPRECATED est **obligatoire**. La période de dépréciation minimale est définie par les règles d'Ever Buddy et ne peut être contournée.
+Aucun Ã©lÃ©ment ACTIVE ne peut passer directement Ã  RETIRED ou ARCHIVED. La transition par DEPRECATED est **obligatoire**. La pÃ©riode de dÃ©prÃ©ciation minimale est dÃ©finie par les rÃ¨gles d'Ever Buddy et ne peut Ãªtre contournÃ©e.
 
-Cet invariant protège les consommateurs contre les ruptures brutales.
+Cet invariant protÃ¨ge les consommateurs contre les ruptures brutales.
 
 *Source : Documentation Fondatrice (Section 7)*
 
@@ -123,36 +123,36 @@ Cet invariant protège les consommateurs contre les ruptures brutales.
 
 | Depuis \ Vers | DRAFT | ACTIVE | DEPRECATED | RETIRED | ARCHIVED |
 |---------------|-------|--------|------------|---------|----------|
-| DRAFT         | —     | ✓      | ✗          | ✗       | ✓        |
-| ACTIVE        | ✗     | —      | ✓          | ✗       | ✗        |
-| DEPRECATED    | ✗     | ✓*     | —          | ✓       | ✗        |
-| RETIRED       | ✗     | ✗      | ✗          | —       | ✓        |
-| ARCHIVED      | ✗     | ✗      | ✗          | ✗       | —        |
+| DRAFT         | â€”     | âœ“      | âœ—          | âœ—       | âœ“        |
+| ACTIVE        | âœ—     | â€”      | âœ“          | âœ—       | âœ—        |
+| DEPRECATED    | âœ—     | âœ“*     | â€”          | âœ“       | âœ—        |
+| RETIRED       | âœ—     | âœ—      | âœ—          | â€”       | âœ“        |
+| ARCHIVED      | âœ—     | âœ—      | âœ—          | âœ—       | â€”        |
 
-*La transition DEPRECATED → ACTIVE (réactivation) est possible uniquement si le successeur est annulé et que l'élément déprécié est toujours fonctionnel.
+*La transition DEPRECATED â†’ ACTIVE (rÃ©activation) est possible uniquement si le successeur est annulÃ© et que l'Ã©lÃ©ment dÃ©prÃ©ciÃ© est toujours fonctionnel.
 
-### 3.5. Invariants de compatibilité
+### 3.5. Invariants de compatibilitÃ©
 
-**INV-EB-5 : Rétrocompatibilité par défaut**
+**INV-EB-5 : RÃ©trocompatibilitÃ© par dÃ©faut**
 
-Toute évolution est **présumée rétrocompatible** sauf déclaration explicite contraire. Si une évolution est incompatible, elle doit être explicitement déclarée comme telle, avec justification et plan de transition.
+Toute Ã©volution est **prÃ©sumÃ©e rÃ©trocompatible** sauf dÃ©claration explicite contraire. Si une Ã©volution est incompatible, elle doit Ãªtre explicitement dÃ©clarÃ©e comme telle, avec justification et plan de transition.
 
-Cet invariant favorise la stabilité et la continuité.
+Cet invariant favorise la stabilitÃ© et la continuitÃ©.
 
 *Source : Documentation Fondatrice (Section 7)*
 
-**Niveaux de compatibilité :**
-- **Rétrocompatible** : Le nouveau fonctionne avec l'ancien
+**Niveaux de compatibilitÃ© :**
+- **RÃ©trocompatible** : Le nouveau fonctionne avec l'ancien
 - **Compatible en amont** : L'ancien fonctionne avec le nouveau (rare)
-- **Incompatible** : Migration obligatoire, déclaration explicite requise
+- **Incompatible** : Migration obligatoire, dÃ©claration explicite requise
 
 ### 3.6. Invariants de vision temporelle
 
 **INV-EB-6 : Vision long terme obligatoire**
 
-Toute décision d'évolution doit considérer l'impact sur **au moins deux générations** de versions. Une évolution qui résout un problème immédiat mais crée un problème futur plus grave est invalide.
+Toute dÃ©cision d'Ã©volution doit considÃ©rer l'impact sur **au moins deux gÃ©nÃ©rations** de versions. Une Ã©volution qui rÃ©sout un problÃ¨me immÃ©diat mais crÃ©e un problÃ¨me futur plus grave est invalide.
 
-Cet invariant empêche les solutions court-termistes qui accumulent la dette structurelle.
+Cet invariant empÃªche les solutions court-termistes qui accumulent la dette structurelle.
 
 *Source : Documentation Fondatrice (Section 7)*
 
@@ -160,7 +160,7 @@ Cet invariant empêche les solutions court-termistes qui accumulent la dette str
 
 **INV-EB-7 : Documentation obligatoire**
 
-Toute transition d'état doit être **documentée** avec :
+Toute transition d'Ã©tat doit Ãªtre **documentÃ©e** avec :
 - La raison de la transition
 - L'impact sur les consommateurs
 - Le chemin de migration (si applicable)
@@ -170,53 +170,53 @@ Une transition sans documentation est invalide.
 
 *Source : Documentation Fondatrice (Section 7)*
 
-### 3.8. Invariants d'indépendance
+### 3.8. Invariants d'indÃ©pendance
 
-**INV-EB-8 : Indépendance des décisions**
+**INV-EB-8 : IndÃ©pendance des dÃ©cisions**
 
-Ever Buddy ne peut être contraint par un produit, un adaptateur, ou un utilisateur à modifier ses règles de cycle de vie pour un cas particulier. Les règles sont universelles et s'appliquent à tous.
+Ever Buddy ne peut Ãªtre contraint par un produit, un adaptateur, ou un utilisateur Ã  modifier ses rÃ¨gles de cycle de vie pour un cas particulier. Les rÃ¨gles sont universelles et s'appliquent Ã  tous.
 
-Cet invariant garantit l'équité et la cohérence du système.
+Cet invariant garantit l'Ã©quitÃ© et la cohÃ©rence du systÃ¨me.
 
 *Source : Documentation Fondatrice (Section 7)*
 
-### 3.9. Invariants de prédictibilité
+### 3.9. Invariants de prÃ©dictibilitÃ©
 
-**INV-EB-9 : Prédictibilité des transitions**
+**INV-EB-9 : PrÃ©dictibilitÃ© des transitions**
 
-Les règles de transition sont **publiques et stables**. Tout consommateur peut connaître à l'avance les conditions et les conséquences d'une transition. Aucune règle de transition ne peut être modifiée rétroactivement.
+Les rÃ¨gles de transition sont **publiques et stables**. Tout consommateur peut connaÃ®tre Ã  l'avance les conditions et les consÃ©quences d'une transition. Aucune rÃ¨gle de transition ne peut Ãªtre modifiÃ©e rÃ©troactivement.
 
-Cet invariant permet aux consommateurs de planifier leurs propres évolutions.
+Cet invariant permet aux consommateurs de planifier leurs propres Ã©volutions.
 
 *Source : Documentation Fondatrice (Section 7)*
 
 ### 3.10. Invariants de successeur
 
-**INV-EB-10 : Unicité du successeur déclaré**
+**INV-EB-10 : UnicitÃ© du successeur dÃ©clarÃ©**
 
-Un élément déprécié possède **au plus un** successeur déclaré à tout moment. Si plusieurs successeurs potentiels existent, l'un d'eux doit être désigné comme successeur principal, les autres étant des alternatives documentées.
+Un Ã©lÃ©ment dÃ©prÃ©ciÃ© possÃ¨de **au plus un** successeur dÃ©clarÃ© Ã  tout moment. Si plusieurs successeurs potentiels existent, l'un d'eux doit Ãªtre dÃ©signÃ© comme successeur principal, les autres Ã©tant des alternatives documentÃ©es.
 
-Cet invariant évite la confusion sur le chemin de migration recommandé.
-
-*Source : Documentation Fondatrice (Section 7)*
-
-### 3.11. Invariants de non-rétroactivité
-
-**INV-EB-11 : Non-rétroactivité des changements de règles**
-
-Les règles d'évolution s'appliquent aux transitions **futures**. Un changement de règle ne peut pas modifier le statut d'éléments déjà en transition selon les anciennes règles.
-
-Cet invariant protège les transitions en cours.
+Cet invariant Ã©vite la confusion sur le chemin de migration recommandÃ©.
 
 *Source : Documentation Fondatrice (Section 7)*
 
-### 3.12. Invariants de responsabilité
+### 3.11. Invariants de non-rÃ©troactivitÃ©
 
-**INV-EB-12 : Responsabilité de l'annonce**
+**INV-EB-11 : Non-rÃ©troactivitÃ© des changements de rÃ¨gles**
 
-Ever Buddy est **responsable** de l'annonce des transitions, mais les cores et produits sont **responsables** de réagir à ces annonces. Ever Buddy ne peut être tenu responsable d'un échec de migration si l'annonce a été correctement effectuée.
+Les rÃ¨gles d'Ã©volution s'appliquent aux transitions **futures**. Un changement de rÃ¨gle ne peut pas modifier le statut d'Ã©lÃ©ments dÃ©jÃ  en transition selon les anciennes rÃ¨gles.
 
-Cet invariant clarifie les responsabilités entre Ever Buddy et les consommateurs.
+Cet invariant protÃ¨ge les transitions en cours.
+
+*Source : Documentation Fondatrice (Section 7)*
+
+### 3.12. Invariants de responsabilitÃ©
+
+**INV-EB-12 : ResponsabilitÃ© de l'annonce**
+
+Ever Buddy est **responsable** de l'annonce des transitions, mais les cores et produits sont **responsables** de rÃ©agir Ã  ces annonces. Ever Buddy ne peut Ãªtre tenu responsable d'un Ã©chec de migration si l'annonce a Ã©tÃ© correctement effectuÃ©e.
+
+Cet invariant clarifie les responsabilitÃ©s entre Ever Buddy et les consommateurs.
 
 *Source : Documentation Fondatrice (Section 7)*
 
@@ -226,41 +226,41 @@ Cet invariant clarifie les responsabilités entre Ever Buddy et les consommateur
 
 ### 4.1. Garanties de cycle de vie
 
-**G-CYC-1 : État clair et non ambigu**
+**G-CYC-1 : Ã‰tat clair et non ambigu**
 
-Chaque élément possède un état de cycle de vie clair et non ambigu à tout moment.
-
-*Source : Documentation Fondatrice (Section 11)*
-
-**G-CYC-2 : Transitions validées et documentées**
-
-Chaque transition est validée, documentée, et traçable.
+Chaque Ã©lÃ©ment possÃ¨de un Ã©tat de cycle de vie clair et non ambigu Ã  tout moment.
 
 *Source : Documentation Fondatrice (Section 11)*
 
-**G-CYC-3 : Historique conservé et accessible**
+**G-CYC-2 : Transitions validÃ©es et documentÃ©es**
 
-L'historique des évolutions est conservé et accessible pour audit et compréhension.
-
-*Source : Documentation Fondatrice (Section 11)*
-
-### 4.2. Garanties de compatibilité
-
-**G-COMPAT-1 : Rétrocompatibilité par défaut**
-
-La rétrocompatibilité est le comportement par défaut pour toute évolution.
+Chaque transition est validÃ©e, documentÃ©e, et traÃ§able.
 
 *Source : Documentation Fondatrice (Section 11)*
 
-**G-COMPAT-2 : Ruptures explicites et justifiées**
+**G-CYC-3 : Historique conservÃ© et accessible**
 
-Les ruptures de compatibilité sont explicites, justifiées, et accompagnées de périodes de transition.
+L'historique des Ã©volutions est conservÃ© et accessible pour audit et comprÃ©hension.
 
 *Source : Documentation Fondatrice (Section 11)*
 
-**G-COMPAT-3 : Fenêtre de compatibilité documentée**
+### 4.2. Garanties de compatibilitÃ©
 
-La fenêtre de compatibilité (plage de versions supportées) est documentée pour chaque élément.
+**G-COMPAT-1 : RÃ©trocompatibilitÃ© par dÃ©faut**
+
+La rÃ©trocompatibilitÃ© est le comportement par dÃ©faut pour toute Ã©volution.
+
+*Source : Documentation Fondatrice (Section 11)*
+
+**G-COMPAT-2 : Ruptures explicites et justifiÃ©es**
+
+Les ruptures de compatibilitÃ© sont explicites, justifiÃ©es, et accompagnÃ©es de pÃ©riodes de transition.
+
+*Source : Documentation Fondatrice (Section 11)*
+
+**G-COMPAT-3 : FenÃªtre de compatibilitÃ© documentÃ©e**
+
+La fenÃªtre de compatibilitÃ© (plage de versions supportÃ©es) est documentÃ©e pour chaque Ã©lÃ©ment.
 
 *Source : Compatibility Rules Contract*
 
@@ -268,33 +268,33 @@ La fenêtre de compatibilité (plage de versions supportées) est documentée po
 
 **G-DETTE-1 : Dette visible**
 
-La dette structurelle (éléments DEPRECATED et RETIRED) est visible et mesurable.
+La dette structurelle (Ã©lÃ©ments DEPRECATED et RETIRED) est visible et mesurable.
 
 *Source : Documentation Fondatrice (Section 11)*
 
-**G-DETTE-2 : Dette maîtrisée**
+**G-DETTE-2 : Dette maÃ®trisÃ©e**
 
-La dette structurelle est surveillée et ne peut s'accumuler de manière non contrôlée.
+La dette structurelle est surveillÃ©e et ne peut s'accumuler de maniÃ¨re non contrÃ´lÃ©e.
 
 *Source : Documentation Fondatrice (Section 5)*
 
 **G-DETTE-3 : Alertes de dette excessive**
 
-Ever Buddy alerte quand le debt ratio (DEPRECATED + RETIRED) / ACTIVE dépasse des seuils définis.
+Ever Buddy alerte quand le debt ratio (DEPRECATED + RETIRED) / ACTIVE dÃ©passe des seuils dÃ©finis.
 
 *Source : Documentation Fondatrice (Section 8)*
 
-### 4.4. Garanties de non-exécution
+### 4.4. Garanties de non-exÃ©cution
 
 **G-NOEXEC-1 : Aucune migration directe**
 
-Ever Buddy ne migre jamais directement les données ou les structures.
+Ever Buddy ne migre jamais directement les donnÃ©es ou les structures.
 
 *Source : Documentation Fondatrice (Section 6)*
 
-**G-NOEXEC-2 : Aucune modification de données**
+**G-NOEXEC-2 : Aucune modification de donnÃ©es**
 
-Ever Buddy ne modifie jamais les données gérées par KindMother.
+Ever Buddy ne modifie jamais les donnÃ©es gÃ©rÃ©es par KindMother.
 
 *Source : Documentation Fondatrice (Section 6)*
 
@@ -308,13 +308,13 @@ Ever Buddy influence par la guidance, pas par la contrainte. Il peut recommander
 
 **G-CONSULT-1 : Contexte de cycle de vie disponible**
 
-Les autres cores peuvent consulter Ever Buddy pour obtenir le contexte de cycle de vie de tout élément.
+Les autres cores peuvent consulter Ever Buddy pour obtenir le contexte de cycle de vie de tout Ã©lÃ©ment.
 
 *Source : Documentation Fondatrice (Section 8)*
 
-**G-CONSULT-2 : État et historique fournis**
+**G-CONSULT-2 : Ã‰tat et historique fournis**
 
-Sur consultation, Ever Buddy retourne l'état actuel, l'historique, et les recommandations associées.
+Sur consultation, Ever Buddy retourne l'Ã©tat actuel, l'historique, et les recommandations associÃ©es.
 
 *Source : Documentation Fondatrice (Section 8)*
 
@@ -322,283 +322,284 @@ Sur consultation, Ever Buddy retourne l'état actuel, l'historique, et les recom
 
 **G-AUTO-1 : Fonctionnement offline**
 
-Ever Buddy fonctionne sans aucune dépendance externe critique (LOI-1).
+Ever Buddy fonctionne sans aucune dÃ©pendance externe critique (LOI-1).
 
 *Source : Documentation Fondatrice (Section 12)*
 
-**G-AUTO-2 : Isolement accepté**
+**G-AUTO-2 : Isolement acceptÃ©**
 
-Ever Buddy accepte l'isolement comme état normal de fonctionnement (LOI-2).
-
-*Source : Documentation Fondatrice (Section 12)*
-
-**G-AUTO-3 : État local souverain**
-
-Les états de cycle de vie locaux sont la vérité locale jusqu'à réconciliation explicite (LOI-3).
+Ever Buddy accepte l'isolement comme Ã©tat normal de fonctionnement (LOI-2).
 
 *Source : Documentation Fondatrice (Section 12)*
 
-**G-AUTO-4 : Indépendance temporelle**
+**G-AUTO-3 : Ã‰tat local souverain**
 
-Ever Buddy gouverne par états et transitions, pas par temps absolu (LOI-4).
+Les Ã©tats de cycle de vie locaux sont la vÃ©ritÃ© locale jusqu'Ã  rÃ©conciliation explicite (LOI-3).
+
+*Source : Documentation Fondatrice (Section 12)*
+
+**G-AUTO-4 : IndÃ©pendance temporelle**
+
+Ever Buddy gouverne par Ã©tats et transitions, pas par temps absolu (LOI-4).
 
 *Source : Documentation Fondatrice (Section 12)*
 
 ---
 
-## 5. Règles de préservation des invariants
+## 5. RÃ¨gles de prÃ©servation des invariants
 
-### 5.1. Préservation par conception
+### 5.1. PrÃ©servation par conception
 
 **R-PRES-1 : Invariants par conception**
 
-Les invariants DOIVENT être préservés par conception. Toute implémentation doit garantir structurellement le respect des invariants.
+Les invariants DOIVENT Ãªtre prÃ©servÃ©s par conception. Toute implÃ©mentation doit garantir structurellement le respect des invariants.
 
-**R-PRES-2 : Vérification à la conception**
+**R-PRES-2 : VÃ©rification Ã  la conception**
 
-Les invariants DOIVENT être vérifiables à la conception, pas uniquement à l'exécution.
+Les invariants DOIVENT Ãªtre vÃ©rifiables Ã  la conception, pas uniquement Ã  l'exÃ©cution.
 
-**R-PRES-3 : Impossibilité de violation**
+**R-PRES-3 : ImpossibilitÃ© de violation**
 
-Une implémentation conforme DOIT rendre impossible la violation des invariants.
+Une implÃ©mentation conforme DOIT rendre impossible la violation des invariants.
 
-### 5.2. Détection de violation
+### 5.2. DÃ©tection de violation
 
-**R-DETECT-1 : Détection immédiate**
+**R-DETECT-1 : DÃ©tection immÃ©diate**
 
-Toute violation d'invariant DOIT être détectée immédiatement.
+Toute violation d'invariant DOIT Ãªtre dÃ©tectÃ©e immÃ©diatement.
 
 **R-DETECT-2 : Signalement**
 
-Toute violation détectée DOIT être signalée comme erreur critique.
+Toute violation dÃ©tectÃ©e DOIT Ãªtre signalÃ©e comme erreur critique.
 
 **R-DETECT-3 : Blocage de transition**
 
-Une violation d'invariant DOIT bloquer la transition concernée.
+Une violation d'invariant DOIT bloquer la transition concernÃ©e.
 
-### 5.3. Conséquences de violation
+### 5.3. ConsÃ©quences de violation
 
 **CONSEQ-INV-1 : Erreur critique**
 
 Toute violation d'invariant est une erreur critique.
 
-**CONSEQ-INV-2 : Non-conformité**
+**CONSEQ-INV-2 : Non-conformitÃ©**
 
-Une implémentation qui viole un invariant est non conforme.
+Une implÃ©mentation qui viole un invariant est non conforme.
 
-**CONSEQ-INV-3 : Révision obligatoire**
+**CONSEQ-INV-3 : RÃ©vision obligatoire**
 
-Une violation d'invariant nécessite une révision architecturale.
+Une violation d'invariant nÃ©cessite une rÃ©vision architecturale.
 
 ---
 
-## 6. Règles d'application des garanties
+## 6. RÃ¨gles d'application des garanties
 
 ### 6.1. Conditions d'application
 
 **R-GAR-1 : Conditions explicites**
 
-Les conditions d'application de chaque garantie DOIVENT être explicites.
+Les conditions d'application de chaque garantie DOIVENT Ãªtre explicites.
 
-**R-GAR-2 : Vérification des conditions**
+**R-GAR-2 : VÃ©rification des conditions**
 
-Les conditions d'application DOIVENT être vérifiées avant d'invoquer une garantie.
+Les conditions d'application DOIVENT Ãªtre vÃ©rifiÃ©es avant d'invoquer une garantie.
 
 **R-GAR-3 : Garantie conditionnelle**
 
-Une garantie s'applique uniquement si ses conditions sont respectées.
+Une garantie s'applique uniquement si ses conditions sont respectÃ©es.
 
 ### 6.2. Non-garanties explicites
 
-Les éléments suivants ne sont **pas garantis** par Ever Buddy :
+Les Ã©lÃ©ments suivants ne sont **pas garantis** par Ever Buddy :
 
-**NG-1 : Compatibilité technique**
+**NG-1 : CompatibilitÃ© technique**
 
-Ever Buddy ne garantit pas la compatibilité technique au niveau du code ou des APIs. Il définit les règles conceptuelles, mais la garantie technique est la responsabilité des implémentations.
-
-*Source : Documentation Fondatrice (Section 6)*
-
-**NG-2 : Exécution des migrations**
-
-Ever Buddy ne garantit pas l'exécution des migrations. Il définit les règles, mais l'exécution est déléguée.
+Ever Buddy ne garantit pas la compatibilitÃ© technique au niveau du code ou des APIs. Il dÃ©finit les rÃ¨gles conceptuelles, mais la garantie technique est la responsabilitÃ© des implÃ©mentations.
 
 *Source : Documentation Fondatrice (Section 6)*
 
-**NG-3 : Réaction des consommateurs**
+**NG-2 : ExÃ©cution des migrations**
 
-Ever Buddy ne garantit pas que les consommateurs réagiront correctement aux annonces de transition.
+Ever Buddy ne garantit pas l'exÃ©cution des migrations. Il dÃ©finit les rÃ¨gles, mais l'exÃ©cution est dÃ©lÃ©guÃ©e.
+
+*Source : Documentation Fondatrice (Section 6)*
+
+**NG-3 : RÃ©action des consommateurs**
+
+Ever Buddy ne garantit pas que les consommateurs rÃ©agiront correctement aux annonces de transition.
 
 *Source : INV-EB-12*
 
-**NG-4 : Délais de transition**
+**NG-4 : DÃ©lais de transition**
 
-Ever Buddy ne garantit pas le respect des délais de transition par les consommateurs.
+Ever Buddy ne garantit pas le respect des dÃ©lais de transition par les consommateurs.
 
 *Source : Documentation Fondatrice (Section 8)*
 
-**NG-5 : Résolution automatique de dette**
+**NG-5 : RÃ©solution automatique de dette**
 
-Ever Buddy ne garantit pas la résolution automatique de la dette structurelle. Il alerte et recommande, mais ne nettoie pas automatiquement.
+Ever Buddy ne garantit pas la rÃ©solution automatique de la dette structurelle. Il alerte et recommande, mais ne nettoie pas automatiquement.
 
 *Source : Documentation Fondatrice (Section 5)*
 
 ---
 
-## 7. Synthèse des invariants et garanties
+## 7. SynthÃ¨se des invariants et garanties
 
-### 7.1. Tableau récapitulatif des invariants
-
-| ID | Nom court | Domaine | Description |
-|----|-----------|---------|-------------|
-| INV-EB-1 | Aucune exécution | Exécution | Ne possède jamais la capacité d'exécuter |
-| INV-EB-2 | Traçabilité immuable | Traçabilité | Historique obligatoire et immuable |
-| INV-EB-3 | État non ambigu | État | Exactement un état à tout moment |
-| INV-EB-4 | Dépréciation obligatoire | Transition | Passage par DEPRECATED obligatoire |
-| INV-EB-5 | Rétrocompatibilité par défaut | Compatibilité | Présomption de rétrocompatibilité |
-| INV-EB-6 | Vision long terme | Temporel | Impact sur 2+ générations |
-| INV-EB-7 | Documentation obligatoire | Documentation | Transition documentée obligatoire |
-| INV-EB-8 | Indépendance | Gouvernance | Règles universelles non modifiables |
-| INV-EB-9 | Prédictibilité | Transparence | Règles publiques et stables |
-| INV-EB-10 | Unicité successeur | Successeur | Au plus un successeur déclaré |
-| INV-EB-11 | Non-rétroactivité | Règles | Règles appliquées aux transitions futures |
-| INV-EB-12 | Responsabilité annonce | Responsabilité | Responsabilité partagée annonce/réaction |
-
-### 7.2. Tableau récapitulatif des garanties
+### 7.1. Tableau rÃ©capitulatif des invariants
 
 | ID | Nom court | Domaine | Description |
 |----|-----------|---------|-------------|
-| G-CYC-1 | État clair | Cycle de vie | État non ambigu garanti |
-| G-CYC-2 | Transitions traçables | Cycle de vie | Validation et documentation garanties |
-| G-CYC-3 | Historique accessible | Cycle de vie | Conservation et accessibilité garanties |
-| G-COMPAT-1 | Rétrocompatibilité | Compatibilité | Comportement par défaut garanti |
-| G-COMPAT-2 | Ruptures explicites | Compatibilité | Justification et transition garanties |
-| G-COMPAT-3 | Fenêtre documentée | Compatibilité | Documentation versions supportées |
-| G-DETTE-1 | Dette visible | Dette | Visibilité et mesurabilité garanties |
-| G-DETTE-2 | Dette maîtrisée | Dette | Surveillance et contrôle garantis |
+| INV-EB-1 | Aucune exÃ©cution | ExÃ©cution | Ne possÃ¨de jamais la capacitÃ© d'exÃ©cuter |
+| INV-EB-2 | TraÃ§abilitÃ© immuable | TraÃ§abilitÃ© | Historique obligatoire et immuable |
+| INV-EB-3 | Ã‰tat non ambigu | Ã‰tat | Exactement un Ã©tat Ã  tout moment |
+| INV-EB-4 | DÃ©prÃ©ciation obligatoire | Transition | Passage par DEPRECATED obligatoire |
+| INV-EB-5 | RÃ©trocompatibilitÃ© par dÃ©faut | CompatibilitÃ© | PrÃ©somption de rÃ©trocompatibilitÃ© |
+| INV-EB-6 | Vision long terme | Temporel | Impact sur 2+ gÃ©nÃ©rations |
+| INV-EB-7 | Documentation obligatoire | Documentation | Transition documentÃ©e obligatoire |
+| INV-EB-8 | IndÃ©pendance | Gouvernance | RÃ¨gles universelles non modifiables |
+| INV-EB-9 | PrÃ©dictibilitÃ© | Transparence | RÃ¨gles publiques et stables |
+| INV-EB-10 | UnicitÃ© successeur | Successeur | Au plus un successeur dÃ©clarÃ© |
+| INV-EB-11 | Non-rÃ©troactivitÃ© | RÃ¨gles | RÃ¨gles appliquÃ©es aux transitions futures |
+| INV-EB-12 | ResponsabilitÃ© annonce | ResponsabilitÃ© | ResponsabilitÃ© partagÃ©e annonce/rÃ©action |
+
+### 7.2. Tableau rÃ©capitulatif des garanties
+
+| ID | Nom court | Domaine | Description |
+|----|-----------|---------|-------------|
+| G-CYC-1 | Ã‰tat clair | Cycle de vie | Ã‰tat non ambigu garanti |
+| G-CYC-2 | Transitions traÃ§ables | Cycle de vie | Validation et documentation garanties |
+| G-CYC-3 | Historique accessible | Cycle de vie | Conservation et accessibilitÃ© garanties |
+| G-COMPAT-1 | RÃ©trocompatibilitÃ© | CompatibilitÃ© | Comportement par dÃ©faut garanti |
+| G-COMPAT-2 | Ruptures explicites | CompatibilitÃ© | Justification et transition garanties |
+| G-COMPAT-3 | FenÃªtre documentÃ©e | CompatibilitÃ© | Documentation versions supportÃ©es |
+| G-DETTE-1 | Dette visible | Dette | VisibilitÃ© et mesurabilitÃ© garanties |
+| G-DETTE-2 | Dette maÃ®trisÃ©e | Dette | Surveillance et contrÃ´le garantis |
 | G-DETTE-3 | Alertes dette | Dette | Alertes seuils garanties |
-| G-NOEXEC-1 | Aucune migration | Exécution | Non-exécution garantie |
-| G-NOEXEC-2 | Aucune modification | Exécution | Non-modification données garantie |
-| G-NOEXEC-3 | Guidance sans contrainte | Exécution | Influence par recommandation garantie |
-| G-CONSULT-1 | Contexte disponible | Consultation | Accès contexte garanti |
-| G-CONSULT-2 | État et historique | Consultation | Réponse complète garantie |
-| G-AUTO-1 | Offline | Autonomie | Fonctionnement sans dépendance externe |
+| G-NOEXEC-1 | Aucune migration | ExÃ©cution | Non-exÃ©cution garantie |
+| G-NOEXEC-2 | Aucune modification | ExÃ©cution | Non-modification donnÃ©es garantie |
+| G-NOEXEC-3 | Guidance sans contrainte | ExÃ©cution | Influence par recommandation garantie |
+| G-CONSULT-1 | Contexte disponible | Consultation | AccÃ¨s contexte garanti |
+| G-CONSULT-2 | Ã‰tat et historique | Consultation | RÃ©ponse complÃ¨te garantie |
+| G-AUTO-1 | Offline | Autonomie | Fonctionnement sans dÃ©pendance externe |
 | G-AUTO-2 | Isolement | Autonomie | Acceptation isolement garanti |
-| G-AUTO-3 | Souveraineté locale | Autonomie | État local souverain garanti |
-| G-AUTO-4 | Indépendance temporelle | Autonomie | Gouvernance par états, pas par temps |
+| G-AUTO-3 | SouverainetÃ© locale | Autonomie | Ã‰tat local souverain garanti |
+| G-AUTO-4 | IndÃ©pendance temporelle | Autonomie | Gouvernance par Ã©tats, pas par temps |
 
 ---
 
-## 8. Règles de fermeture du contrat
+## 8. RÃ¨gles de fermeture du contrat
 
-### 8.1. Contrat fermé
+### 8.1. Contrat fermÃ©
 
-Ce contrat est **fermé**. Seuls les invariants et garanties explicitement définis dans ce contrat sont reconnus.
+Ce contrat est **fermÃ©**. Seuls les invariants et garanties explicitement dÃ©finis dans ce contrat sont reconnus.
 
-### 8.2. Référence unique
+### 8.2. RÃ©fÃ©rence unique
 
-Ce contrat est la **référence unique** pour tous les invariants et garanties Ever Buddy. En cas de conflit avec un autre contrat, ce contrat prime pour les invariants et garanties.
+Ce contrat est la **rÃ©fÃ©rence unique** pour tous les invariants et garanties Ever Buddy. En cas de conflit avec un autre contrat, ce contrat prime pour les invariants et garanties.
 
 ### 8.3. Interdiction d'extension implicite
 
-Aucun invariant ou garantie implicite n'est reconnu. Seuls ceux explicitement définis dans ce contrat sont valides.
+Aucun invariant ou garantie implicite n'est reconnu. Seuls ceux explicitement dÃ©finis dans ce contrat sont valides.
 
 ---
 
-## 9. Conformité aux Lois d'Autonomie Système
+## 9. ConformitÃ© aux Lois d'Autonomie SystÃ¨me
 
-Les invariants et garanties d'Ever Buddy sont pleinement conformes aux Lois d'Autonomie Système :
+Les invariants et garanties d'Ever Buddy sont pleinement conformes aux Lois d'Autonomie SystÃ¨me :
 
-| Loi | Conformité | Invariant/Garantie associé |
+| Loi | ConformitÃ© | Invariant/Garantie associÃ© |
 |-----|------------|---------------------------|
-| LOI-1 | ✅ Conforme | G-AUTO-1 : Fonctionnement offline |
-| LOI-2 | ✅ Conforme | G-AUTO-2 : Isolement accepté |
-| LOI-3 | ✅ Conforme | G-AUTO-3, INV-EB-2 : État local souverain, traçabilité immuable |
-| LOI-4 | ✅ Conforme | G-AUTO-4 : Indépendance temporelle |
-| LOI-5 | ✅ Conforme | INV-EB-1 : Observation pure, pas d'exécution |
-| LOI-6 | ✅ Conforme | G-CONSULT-1 : Fédération via consultation optionnelle |
+| LOI-1 | âœ… Conforme | G-AUTO-1 : Fonctionnement offline |
+| LOI-2 | âœ… Conforme | G-AUTO-2 : Isolement acceptÃ© |
+| LOI-3 | âœ… Conforme | G-AUTO-3, INV-EB-2 : Ã‰tat local souverain, traÃ§abilitÃ© immuable |
+| LOI-4 | âœ… Conforme | G-AUTO-4 : IndÃ©pendance temporelle |
+| LOI-5 | âœ… Conforme | INV-EB-1 : Observation pure, pas d'exÃ©cution |
+| LOI-6 | âœ… Conforme | G-CONSULT-1 : FÃ©dÃ©ration via consultation optionnelle |
 
-**Question de validation :** *"Est-ce que Ever Buddy fonctionne encore si le système est seul, lent, et isolé ?"* — **Oui**, Ever Buddy continue d'observer, d'enregistrer et de guider les évolutions locales sans aucune dépendance externe.
+**Question de validation :** *"Est-ce que Ever Buddy fonctionne encore si le systÃ¨me est seul, lent, et isolÃ© ?"* â€” **Oui**, Ever Buddy continue d'observer, d'enregistrer et de guider les Ã©volutions locales sans aucune dÃ©pendance externe.
 
 ---
 
 ## 10. Conclusion contractuelle
 
-Ce contrat établit de manière définitive et non négociable les invariants et garanties d'Ever Buddy.
+Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable les invariants et garanties d'Ever Buddy.
 
 Il garantit que :
-- les 12 invariants fondamentaux sont exhaustivement catalogués,
-- les garanties sont exhaustivement cataloguées,
-- les règles de préservation sont explicites,
-- les règles d'application sont explicites,
-- les non-garanties sont déclarées,
-- le contrat est fermé et constitue la référence unique.
+- les 12 invariants fondamentaux sont exhaustivement cataloguÃ©s,
+- les garanties sont exhaustivement cataloguÃ©es,
+- les rÃ¨gles de prÃ©servation sont explicites,
+- les rÃ¨gles d'application sont explicites,
+- les non-garanties sont dÃ©clarÃ©es,
+- le contrat est fermÃ© et constitue la rÃ©fÃ©rence unique.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
 
 ---
 
 ## 11. Validation conceptuelle
 
-### 11.1. Vérification de complétude
+### 11.1. VÃ©rification de complÃ©tude
 
 Ce document consolide les invariants et garanties de :
-- ✅ Documentation Fondatrice : 12 invariants consolidés (INV-EB-1 à INV-EB-12)
-- ✅ Documentation Fondatrice : Garanties de la Section 11 consolidées
-- ✅ Documentation Fondatrice : Conformité LOI-1 à LOI-6 (Section 12) consolidée
-- ✅ Lifecycle States Contract : Invariants d'état référencés
-- ✅ Transition Rules Contract : Invariants de transition référencés
-- ✅ Compatibility Rules Contract : Invariants de compatibilité référencés
+- âœ… Documentation Fondatrice : 12 invariants consolidÃ©s (INV-EB-1 Ã  INV-EB-12)
+- âœ… Documentation Fondatrice : Garanties de la Section 11 consolidÃ©es
+- âœ… Documentation Fondatrice : ConformitÃ© LOI-1 Ã  LOI-6 (Section 12) consolidÃ©e
+- âœ… Lifecycle States Contract : Invariants d'Ã©tat rÃ©fÃ©rencÃ©s
+- âœ… Transition Rules Contract : Invariants de transition rÃ©fÃ©rencÃ©s
+- âœ… Compatibility Rules Contract : Invariants de compatibilitÃ© rÃ©fÃ©rencÃ©s
 
-### 11.2. Vérification de cohérence
+### 11.2. VÃ©rification de cohÃ©rence
 
-- ✅ Aucune contradiction entre invariants
-- ✅ Aucune contradiction entre garanties
-- ✅ Cohérence invariants/garanties vérifiée
-- ✅ Conformité Lois d'Autonomie vérifiée
+- âœ… Aucune contradiction entre invariants
+- âœ… Aucune contradiction entre garanties
+- âœ… CohÃ©rence invariants/garanties vÃ©rifiÃ©e
+- âœ… ConformitÃ© Lois d'Autonomie vÃ©rifiÃ©e
 
 ---
 
-**Document créé le :** 2026-01-27  
+**Document crÃ©Ã© le :** 2026-01-27  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, Ever Buddy Documentation Fondatrice  
-**Type :** Catalogue consolidé des invariants et garanties (DOCUMENT MAÎTRE pour les invariants globaux Ever Buddy)
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, Ever Buddy Documentation Fondatrice  
+**Type :** Catalogue consolidÃ© des invariants et garanties (DOCUMENT MAÃŽTRE pour les invariants globaux Ever Buddy)
 
-**Références croisées :**
-- [Ever Buddy — Documentation Fondatrice](../../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md)
-- [Miyukini Conceptual References — Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
-- [Miyukini Conceptual References — Lois Autonomie Système](../../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
-- [Ever Buddy — Lifecycle States Contract](../lifecycle/Ever%20Buddy%20-%20Lifecycle%20States%20Contract.md)
-- [Ever Buddy — Transition Rules Contract](../lifecycle/Ever%20Buddy%20-%20Transition%20Rules%20Contract.md)
-- [Ever Buddy — Compatibility Rules Contract](../compatibility/Ever%20Buddy%20-%20Compatibility%20Rules%20Contract.md)
-- [Ever Buddy — Version Semantics Contract](../compatibility/Ever%20Buddy%20-%20Version%20Semantics%20Contract.md)
-
----
-
-## 12. Mini log de génération
-
-### Décision éditoriale E1 : Structure calquée sur StrongFather
-
-**Décision prise :** Adoption de la même structure que StrongFather — Invariants & Guarantees pour cohérence inter-cores.
-
-**Application :** Sections identiques (Définitions, Catalogue invariants, Catalogue garanties, Règles préservation, etc.)
-
-### Décision éditoriale E2 : Catégorisation thématique
-
-**Décision prise :** Organisation des 12 invariants par domaine thématique plutôt que par numéro séquentiel pour faciliter la lecture.
-
-**Application :** Sections 3.1 à 3.12 organisées par : Exécution, Traçabilité, État, Transition, Compatibilité, etc.
-
-### Vérification de cohérence
-
-**Vérification effectuée :**
-- ✅ Tous les 12 invariants de la Section 7 sont inclus
-- ✅ Toutes les garanties de la Section 11 sont dérivées
-- ✅ Conformité LOI-1 à LOI-6 vérifiée
-- ✅ Aucune contradiction détectée
-
-**Conclusion :** Catalogue consolidé complet et cohérent.
+**RÃ©fÃ©rences croisÃ©es :**
+- [Ever Buddy â€” Documentation Fondatrice](../../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md)
+- [Miyukini Conceptual References â€” Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
+- [Miyukini Conceptual References â€” Lois Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md)
+- [Ever Buddy â€” Lifecycle States Contract](../lifecycle/Ever%20Buddy%20-%20Lifecycle%20States%20Contract.md)
+- [Ever Buddy â€” Transition Rules Contract](../lifecycle/Ever%20Buddy%20-%20Transition%20Rules%20Contract.md)
+- [Ever Buddy â€” Compatibility Rules Contract](../compatibility/Ever%20Buddy%20-%20Compatibility%20Rules%20Contract.md)
+- [Ever Buddy â€” Version Semantics Contract](../compatibility/Ever%20Buddy%20-%20Version%20Semantics%20Contract.md)
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée.*
+## 12. Mini log de gÃ©nÃ©ration
+
+### DÃ©cision Ã©ditoriale E1 : Structure calquÃ©e sur StrongFather
+
+**DÃ©cision prise :** Adoption de la mÃªme structure que StrongFather â€” Invariants & Guarantees pour cohÃ©rence inter-cores.
+
+**Application :** Sections identiques (DÃ©finitions, Catalogue invariants, Catalogue garanties, RÃ¨gles prÃ©servation, etc.)
+
+### DÃ©cision Ã©ditoriale E2 : CatÃ©gorisation thÃ©matique
+
+**DÃ©cision prise :** Organisation des 12 invariants par domaine thÃ©matique plutÃ´t que par numÃ©ro sÃ©quentiel pour faciliter la lecture.
+
+**Application :** Sections 3.1 Ã  3.12 organisÃ©es par : ExÃ©cution, TraÃ§abilitÃ©, Ã‰tat, Transition, CompatibilitÃ©, etc.
+
+### VÃ©rification de cohÃ©rence
+
+**VÃ©rification effectuÃ©e :**
+- âœ… Tous les 12 invariants de la Section 7 sont inclus
+- âœ… Toutes les garanties de la Section 11 sont dÃ©rivÃ©es
+- âœ… ConformitÃ© LOI-1 Ã  LOI-6 vÃ©rifiÃ©e
+- âœ… Aucune contradiction dÃ©tectÃ©e
+
+**Conclusion :** Catalogue consolidÃ© complet et cohÃ©rent.
+
+---
+
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e.*
+

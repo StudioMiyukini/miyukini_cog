@@ -1,170 +1,171 @@
-# MiyuBooking — Parcours et intégration services consommateurs
+﻿# MiyuBooking â€” Parcours et intÃ©gration services consommateurs
 
 ## Contexte
 
-Ce document décrit de façon **exhaustive** les **parcours** types (créneaux, réservation, annulation, modification), les **points d'entrée** et le **contrat d'intégration** pour les **services consommateurs** (JayFestival, JayRDV, etc.) qui utilisent MiyuBooking. Il permet une exploitation directe du kit dans ses services : flux d'appel, données échangées, cas d'usage, exemples.
+Ce document dÃ©crit de faÃ§on **exhaustive** les **parcours** types (crÃ©neaux, rÃ©servation, annulation, modification), les **points d'entrÃ©e** et le **contrat d'intÃ©gration** pour les **services consommateurs** (JayFestival, JayRDV, etc.) qui utilisent MiyuBooking. Il permet une exploitation directe du kit dans ses services : flux d'appel, donnÃ©es Ã©changÃ©es, cas d'usage, exemples.
 
-**Références** : [MiyuBooking - Documentation Fondatrice](../MiyuBooking%20-%20Documentation%20Fondatrice.md), [MiyuBooking - Reference Outils](../MiyuBooking%20-%20Reference%20Outils.md), [MiyuBooking - Tool Governance Compliance Contract](../contracts/governance/MiyuBooking%20-%20Tool%20Governance%20Compliance%20Contract.md).
+**RÃ©fÃ©rences** : [MiyuBooking - Documentation Fondatrice](../MiyuBooking%20-%20Documentation%20Fondatrice.md), [MiyuBooking - Reference Outils](../MiyuBooking%20-%20Reference%20Outils.md), [MiyuBooking - Tool Governance Compliance Contract](../contracts/governance/MiyuBooking%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Périmètre** : Parcours utilisateur (réserver, annuler, modifier), flux Opérateur → MiyuBooking → KindMother, données (créneaux, réservations, ressources, tarifs), points d'entrée pour JayFestival (billets, réservations ateliers/visiteur), JayRDV (créneaux RDV), et tout service consommateur.
-- **Hors périmètre** : Implémentation détaillée du moteur de créneaux (fuseaux, récurrence) — référencée dans les Implementation Guidelines.
+- **PÃ©rimÃ¨tre** : Parcours utilisateur (rÃ©server, annuler, modifier), flux OpÃ©rateur â†’ MiyuBooking â†’ KindMother, donnÃ©es (crÃ©neaux, rÃ©servations, ressources, tarifs), points d'entrÃ©e pour JayFestival (billets, rÃ©servations ateliers/visiteur), JayRDV (crÃ©neaux RDV), et tout service consommateur.
+- **Hors pÃ©rimÃ¨tre** : ImplÃ©mentation dÃ©taillÃ©e du moteur de crÃ©neaux (fuseaux, rÃ©currence) â€” rÃ©fÃ©rencÃ©e dans les Implementation Guidelines.
 
 ---
 
 ## 1. Rappel : outils MiyuBooking
 
-| ToolId | Action | Niveau sécurité | Rôle pour le consommateur |
+| ToolId | Action | Niveau sÃ©curitÃ© | RÃ´le pour le consommateur |
 |--------|--------|------------------|----------------------------|
-| `tool.booking.slots.list` | Lister les créneaux disponibles | 0–1 | Afficher les créneaux proposés (ressource, date, durée). |
-| `tool.booking.slots.resolve` | Résoudre un créneau par identifiant | 0–1 | Récupérer le détail d'un créneau (début, fin, ressource). |
-| `tool.booking.create` | Créer une réservation | 1–2 | Enregistrer la réservation (WriteIntent KindMother ; décision StrongFather). |
-| `tool.booking.update` | Mettre à jour une réservation | 1–2 | Déplacer ou prolonger une réservation. |
-| `tool.booking.cancel` | Annuler une réservation | 1–2 | Annuler (décision StrongFather ; WriteIntent KindMother). |
-| `tool.booking.resource.resolve` | Résoudre une ressource (salle, équipement) | 0–1 | Obtenir contraintes et métadonnées de la ressource. |
-| `tool.booking.resource.availability` | Disponibilité d'une ressource sur une plage | 0–1 | Vérifier dispo avant proposition de créneaux. |
-| `tool.booking.price.compute` | Calculer le prix d'une réservation | 0–1 | Afficher prix ou total (règles fournies dans le flux). |
-| `tool.booking.participants.compute` | Places restantes / participants pour un créneau | 0–1 | Afficher capacité restante, éviter surréservation. |
+| `tool.booking.slots.list` | Lister les crÃ©neaux disponibles | 0â€“1 | Afficher les crÃ©neaux proposÃ©s (ressource, date, durÃ©e). |
+| `tool.booking.slots.resolve` | RÃ©soudre un crÃ©neau par identifiant | 0â€“1 | RÃ©cupÃ©rer le dÃ©tail d'un crÃ©neau (dÃ©but, fin, ressource). |
+| `tool.booking.create` | CrÃ©er une rÃ©servation | 1â€“2 | Enregistrer la rÃ©servation (WriteIntent KindMother ; dÃ©cision StrongFather). |
+| `tool.booking.update` | Mettre Ã  jour une rÃ©servation | 1â€“2 | DÃ©placer ou prolonger une rÃ©servation. |
+| `tool.booking.cancel` | Annuler une rÃ©servation | 1â€“2 | Annuler (dÃ©cision StrongFather ; WriteIntent KindMother). |
+| `tool.booking.resource.resolve` | RÃ©soudre une ressource (salle, Ã©quipement) | 0â€“1 | Obtenir contraintes et mÃ©tadonnÃ©es de la ressource. |
+| `tool.booking.resource.availability` | DisponibilitÃ© d'une ressource sur une plage | 0â€“1 | VÃ©rifier dispo avant proposition de crÃ©neaux. |
+| `tool.booking.price.compute` | Calculer le prix d'une rÃ©servation | 0â€“1 | Afficher prix ou total (rÃ¨gles fournies dans le flux). |
+| `tool.booking.participants.compute` | Places restantes / participants pour un crÃ©neau | 0â€“1 | Afficher capacitÃ© restante, Ã©viter surrÃ©servation. |
 
-**Invariants** : Toute écriture = **WriteIntent** KindMother. Toute décision (créer, annuler) = **StrongFather**. Le kit n'accède jamais directement à la persistance.
+**Invariants** : Toute Ã©criture = **WriteIntent** KindMother. Toute dÃ©cision (crÃ©er, annuler) = **StrongFather**. Le kit n'accÃ¨de jamais directement Ã  la persistance.
 
 ---
 
 ## 2. Flux d'appel (gouvernance)
 
 ```
-[Opérateur consommateur] (ex. JayFestival Visiteur, JayRDV Client)
-        ↓ intention (réserver, annuler, lister créneaux)
-[BondingBrother] — traduction intention → requête gouvernée
-        ↓
-[StrongFather] — décision ALLOW/DENY (création, annulation)
-        ↓ si ALLOW
-[Master Butler] — vérification permission, résolution ToolIds
-        ↓
-[MiyuBooking] — exécution Tools (slots.list, create, cancel, …)
-        ↓ si écriture
-[KindMother] — WriteIntent (réservation créée/mise à jour/annulée)
-        ↓
-[Réponse] — succès ou erreur (sans exposer données sensibles)
+[OpÃ©rateur consommateur] (ex. JayFestival Visiteur, JayRDV Client)
+        â†“ intention (rÃ©server, annuler, lister crÃ©neaux)
+[BondingBrother] â€” traduction intention â†’ requÃªte gouvernÃ©e
+        â†“
+[StrongFather] â€” dÃ©cision ALLOW/DENY (crÃ©ation, annulation)
+        â†“ si ALLOW
+[Master Butler] â€” vÃ©rification permission, rÃ©solution ToolIds
+        â†“
+[MiyuBooking] â€” exÃ©cution Tools (slots.list, create, cancel, â€¦)
+        â†“ si Ã©criture
+[KindMother] â€” WriteIntent (rÃ©servation crÃ©Ã©e/mise Ã  jour/annulÃ©e)
+        â†“
+[RÃ©ponse] â€” succÃ¨s ou erreur (sans exposer donnÃ©es sensibles)
 ```
 
-Le **service consommateur** (JayFestival, JayRDV) ne appelle **pas** MiyuBooking directement : il passe par **BondingBrother** avec une intention (ex. « réserver le créneau X pour l'utilisateur Y »). StrongFather décide ; MiyuBooking exécute.
+Le **service consommateur** (JayFestival, JayRDV) ne appelle **pas** MiyuBooking directement : il passe par **BondingBrother** avec une intention (ex. Â« rÃ©server le crÃ©neau X pour l'utilisateur Y Â»). StrongFather dÃ©cide ; MiyuBooking exÃ©cute.
 
 ---
 
-## 3. Données et contrat KindMother
+## 3. DonnÃ©es et contrat KindMother
 
-### 3.1 Données sous autorité KindMother
+### 3.1 DonnÃ©es sous autoritÃ© KindMother
 
-| Entité | Contenu | Rôle |
+| EntitÃ© | Contenu | RÃ´le |
 |--------|---------|------|
-| **Règles de créneaux** | Grille horaire, durée min/max, récurrence (si applicable), exclusions | Définissent les créneaux proposés par `slots.list`. |
-| **Ressources** | Salles, équipements, « slots » logiques (ex. atelier, stand) ; contraintes, capacité | `resource.resolve`, `resource.availability` ; utilisées par `slots.list` et `create`. |
-| **Réservations** | Identifiant, ressource/créneau, participant(s), statut (confirmée, annulée), horodatage | Créées/mises à jour/annulées via WriteIntent (Tools `create`, `update`, `cancel`). |
-| **Tarifs** | Règles de prix (par créneau, par ressource, par participant) | Fournies dans le flux ou par KindMother pour `price.compute`. |
+| **RÃ¨gles de crÃ©neaux** | Grille horaire, durÃ©e min/max, rÃ©currence (si applicable), exclusions | DÃ©finissent les crÃ©neaux proposÃ©s par `slots.list`. |
+| **Ressources** | Salles, Ã©quipements, Â« slots Â» logiques (ex. atelier, stand) ; contraintes, capacitÃ© | `resource.resolve`, `resource.availability` ; utilisÃ©es par `slots.list` et `create`. |
+| **RÃ©servations** | Identifiant, ressource/crÃ©neau, participant(s), statut (confirmÃ©e, annulÃ©e), horodatage | CrÃ©Ã©es/mises Ã  jour/annulÃ©es via WriteIntent (Tools `create`, `update`, `cancel`). |
+| **Tarifs** | RÃ¨gles de prix (par crÃ©neau, par ressource, par participant) | Fournies dans le flux ou par KindMother pour `price.compute`. |
 
-Le **service consommateur** ne détient pas la source de vérité : il envoie des **intentions** (réserver, annuler) et reçoit des **résultats** (succès, identifiant réservation, ou erreur). Les données résident dans KindMother (ou en alpha dans une table « réservations » exposée via le même contrat).
+Le **service consommateur** ne dÃ©tient pas la source de vÃ©ritÃ© : il envoie des **intentions** (rÃ©server, annuler) et reÃ§oit des **rÃ©sultats** (succÃ¨s, identifiant rÃ©servation, ou erreur). Les donnÃ©es rÃ©sident dans KindMother (ou en alpha dans une table Â« rÃ©servations Â» exposÃ©e via le mÃªme contrat).
 
-### 3.2 Contrat d'intégration (résumé)
+### 3.2 Contrat d'intÃ©gration (rÃ©sumÃ©)
 
-| Besoin consommateur | Tool(s) MiyuBooking | Données en entrée (flux) | Données en sortie |
+| Besoin consommateur | Tool(s) MiyuBooking | DonnÃ©es en entrÃ©e (flux) | DonnÃ©es en sortie |
 |---------------------|---------------------|---------------------------|---------------------|
-| Afficher créneaux disponibles | `slots.list` | Contexte : ressource_id (ou équivalent), date (ou plage), durée souhaitée | Liste de créneaux (id, début, fin, ressource) |
-| Détail d'un créneau | `slots.resolve` | slot_id | Créneau (début, fin, ressource, métadonnées) |
-| Réserver | `create` | Données réservation : créneau/slot, participant(s), métadonnées optionnelles | Succès + reservation_id ou erreur |
-| Modifier réservation | `update` | reservation_id, nouvelles données (créneau, durée, etc.) | Succès ou erreur |
-| Annuler réservation | `cancel` | reservation_id | Succès ou erreur |
-| Infos ressource | `resource.resolve` | resource_id | Contraintes, capacité, métadonnées |
-| Disponibilité ressource | `resource.availability` | resource_id, plage (début, fin) | Indicateur dispo ou créneaux déjà pris |
-| Prix | `price.compute` | Réservation (créneau, ressource, participants) + règles (fournies) | Montant (ou détail lignes) |
-| Places restantes | `participants.compute` | slot_id (ou créneau) | Nombre places restantes / participants inscrits |
+| Afficher crÃ©neaux disponibles | `slots.list` | Contexte : ressource_id (ou Ã©quivalent), date (ou plage), durÃ©e souhaitÃ©e | Liste de crÃ©neaux (id, dÃ©but, fin, ressource) |
+| DÃ©tail d'un crÃ©neau | `slots.resolve` | slot_id | CrÃ©neau (dÃ©but, fin, ressource, mÃ©tadonnÃ©es) |
+| RÃ©server | `create` | DonnÃ©es rÃ©servation : crÃ©neau/slot, participant(s), mÃ©tadonnÃ©es optionnelles | SuccÃ¨s + reservation_id ou erreur |
+| Modifier rÃ©servation | `update` | reservation_id, nouvelles donnÃ©es (crÃ©neau, durÃ©e, etc.) | SuccÃ¨s ou erreur |
+| Annuler rÃ©servation | `cancel` | reservation_id | SuccÃ¨s ou erreur |
+| Infos ressource | `resource.resolve` | resource_id | Contraintes, capacitÃ©, mÃ©tadonnÃ©es |
+| DisponibilitÃ© ressource | `resource.availability` | resource_id, plage (dÃ©but, fin) | Indicateur dispo ou crÃ©neaux dÃ©jÃ  pris |
+| Prix | `price.compute` | RÃ©servation (crÃ©neau, ressource, participants) + rÃ¨gles (fournies) | Montant (ou dÃ©tail lignes) |
+| Places restantes | `participants.compute` | slot_id (ou crÃ©neau) | Nombre places restantes / participants inscrits |
 
 ---
 
 ## 4. Parcours types (exploitables par les services)
 
-### 4.1 Parcours « Choisir un créneau et réserver »
+### 4.1 Parcours Â« Choisir un crÃ©neau et rÃ©server Â»
 
-| Étape | Acteur | Action | MiyuBooking / gouvernance |
+| Ã‰tape | Acteur | Action | MiyuBooking / gouvernance |
 |-------|--------|--------|----------------------------|
-| 1 | Utilisateur | Choisit ressource (ex. atelier, créneau RDV) et plage (date, durée) | — |
-| 2 | Service consommateur | Demande créneaux disponibles | Intention → BondingBrother → `slots.list` (contexte ressource, date, durée) |
-| 3 | MiyuBooking | Retourne liste créneaux | Sortie `slots.list` |
-| 4 | Utilisateur | Sélectionne un créneau | — |
-| 5 | Service consommateur | (Optionnel) Demande prix | `price.compute` (créneau, règles) |
-| 6 | Utilisateur | Confirme réservation | — |
-| 7 | Service consommateur | Envoie intention « créer réservation » | BondingBrother → StrongFather (ALLOW) → `create` → WriteIntent KindMother |
-| 8 | Système | Confirmation | reservation_id, succès |
+| 1 | Utilisateur | Choisit ressource (ex. atelier, crÃ©neau RDV) et plage (date, durÃ©e) | â€” |
+| 2 | Service consommateur | Demande crÃ©neaux disponibles | Intention â†’ BondingBrother â†’ `slots.list` (contexte ressource, date, durÃ©e) |
+| 3 | MiyuBooking | Retourne liste crÃ©neaux | Sortie `slots.list` |
+| 4 | Utilisateur | SÃ©lectionne un crÃ©neau | â€” |
+| 5 | Service consommateur | (Optionnel) Demande prix | `price.compute` (crÃ©neau, rÃ¨gles) |
+| 6 | Utilisateur | Confirme rÃ©servation | â€” |
+| 7 | Service consommateur | Envoie intention Â« crÃ©er rÃ©servation Â» | BondingBrother â†’ StrongFather (ALLOW) â†’ `create` â†’ WriteIntent KindMother |
+| 8 | SystÃ¨me | Confirmation | reservation_id, succÃ¨s |
 
-### 4.2 Parcours « Annuler une réservation »
+### 4.2 Parcours Â« Annuler une rÃ©servation Â»
 
-| Étape | Acteur | Action | MiyuBooking / gouvernance |
+| Ã‰tape | Acteur | Action | MiyuBooking / gouvernance |
 |-------|--------|--------|----------------------------|
-| 1 | Utilisateur | Demande annulation | — |
-| 2 | Service consommateur | Envoie intention « annuler réservation » | BondingBrother → StrongFather (ALLOW) → `cancel` → WriteIntent KindMother |
-| 3 | Système | Confirmation annulation | Succès ou erreur |
+| 1 | Utilisateur | Demande annulation | â€” |
+| 2 | Service consommateur | Envoie intention Â« annuler rÃ©servation Â» | BondingBrother â†’ StrongFather (ALLOW) â†’ `cancel` â†’ WriteIntent KindMother |
+| 3 | SystÃ¨me | Confirmation annulation | SuccÃ¨s ou erreur |
 
-### 4.3 Parcours « Modifier une réservation » (déplacer ou prolonger)
+### 4.3 Parcours Â« Modifier une rÃ©servation Â» (dÃ©placer ou prolonger)
 
-| Étape | Acteur | Action | MiyuBooking / gouvernance |
+| Ã‰tape | Acteur | Action | MiyuBooking / gouvernance |
 |-------|--------|--------|----------------------------|
-| 1 | Utilisateur | Demande modification (nouveau créneau ou durée) | — |
-| 2 | Service consommateur | Vérifie créneaux disponibles (si déplacement) | `slots.list` |
-| 3 | Utilisateur | Choisit nouveau créneau | — |
-| 4 | Service consommateur | Envoie intention « mettre à jour réservation » | BondingBrother → StrongFather → `update` → WriteIntent KindMother |
-| 5 | Système | Confirmation | Succès ou erreur |
+| 1 | Utilisateur | Demande modification (nouveau crÃ©neau ou durÃ©e) | â€” |
+| 2 | Service consommateur | VÃ©rifie crÃ©neaux disponibles (si dÃ©placement) | `slots.list` |
+| 3 | Utilisateur | Choisit nouveau crÃ©neau | â€” |
+| 4 | Service consommateur | Envoie intention Â« mettre Ã  jour rÃ©servation Â» | BondingBrother â†’ StrongFather â†’ `update` â†’ WriteIntent KindMother |
+| 5 | SystÃ¨me | Confirmation | SuccÃ¨s ou erreur |
 
 ---
 
-## 5. Points d'entrée par service consommateur
+## 5. Points d'entrÃ©e par service consommateur
 
-### 5.1 JayFestival (visiteur : billets, réservations ateliers)
+### 5.1 JayFestival (visiteur : billets, rÃ©servations ateliers)
 
-| Cas d'usage JayFestival | Tools MiyuBooking utilisés | Données côté JayFestival |
+| Cas d'usage JayFestival | Tools MiyuBooking utilisÃ©s | DonnÃ©es cÃ´tÃ© JayFestival |
 |-------------------------|----------------------------|---------------------------|
-| **Billets / pass événement** | `slots.list` (créneaux d'accès si applicable), `create` (réservation billet/pass), `cancel` | edition_id, visiteur_id, type billet/pass ; liaison édition ↔ ressources (KindMother ou tables alpha). |
-| **Réservation atelier** | `slots.list`, `slots.resolve`, `resource.availability`, `participants.compute`, `create`, `cancel`, `update` | edition_id, atelier_id (ressource), visiteur_id ; créneaux ateliers = ressources avec règles de créneaux. |
-| **Réservation créneau visiteur** (si applicable) | Idem | Même logique ; ressource = « créneau visiteur » pour une édition. |
+| **Billets / pass Ã©vÃ©nement** | `slots.list` (crÃ©neaux d'accÃ¨s si applicable), `create` (rÃ©servation billet/pass), `cancel` | edition_id, visiteur_id, type billet/pass ; liaison Ã©dition â†” ressources (KindMother ou tables alpha). |
+| **RÃ©servation atelier** | `slots.list`, `slots.resolve`, `resource.availability`, `participants.compute`, `create`, `cancel`, `update` | edition_id, atelier_id (ressource), visiteur_id ; crÃ©neaux ateliers = ressources avec rÃ¨gles de crÃ©neaux. |
+| **RÃ©servation crÃ©neau visiteur** (si applicable) | Idem | MÃªme logique ; ressource = Â« crÃ©neau visiteur Â» pour une Ã©dition. |
 
-**Flux typique** : L'Opérateur JayFestival Visiteur envoie les intentions (lister créneaux atelier X pour la date Y, réserver le créneau Z) via BondingBrother ; StrongFather valide ; MiyuBooking exécute ; KindMother persiste. En **alpha**, les réservations peuvent être stockées dans des tables Supabase (atelier_reservations, billets, etc.) en respectant le même contrat logique (WriteIntent équivalent).
+**Flux typique** : L'OpÃ©rateur JayFestival Visiteur envoie les intentions (lister crÃ©neaux atelier X pour la date Y, rÃ©server le crÃ©neau Z) via BondingBrother ; StrongFather valide ; MiyuBooking exÃ©cute ; KindMother persiste. En **alpha**, les rÃ©servations peuvent Ãªtre stockÃ©es dans des tables Supabase (atelier_reservations, billets, etc.) en respectant le mÃªme contrat logique (WriteIntent Ã©quivalent).
 
-### 5.2 JayRDV (créneaux RDV, rendez-vous)
+### 5.2 JayRDV (crÃ©neaux RDV, rendez-vous)
 
-| Cas d'usage JayRDV | Tools MiyuBooking utilisés | Données côté JayRDV |
+| Cas d'usage JayRDV | Tools MiyuBooking utilisÃ©s | DonnÃ©es cÃ´tÃ© JayRDV |
 |--------------------|----------------------------|----------------------|
-| **Créneaux disponibles** | `slots.list`, `slots.resolve` | professionnel_id, lieu/prestation (ressource), date, durée ; règles de créneaux = grille du pro. |
-| **Réserver un RDV** | `create` | client_id, professionnel_id, créneau, prestation, métadonnées. |
+| **CrÃ©neaux disponibles** | `slots.list`, `slots.resolve` | professionnel_id, lieu/prestation (ressource), date, durÃ©e ; rÃ¨gles de crÃ©neaux = grille du pro. |
+| **RÃ©server un RDV** | `create` | client_id, professionnel_id, crÃ©neau, prestation, mÃ©tadonnÃ©es. |
 | **Annuler / modifier RDV** | `cancel`, `update` | reservation_id. |
-| **Prix RDV** (si applicable) | `price.compute` | Règles tarifaires fournies dans le flux ou par KindMother. |
+| **Prix RDV** (si applicable) | `price.compute` | RÃ¨gles tarifaires fournies dans le flux ou par KindMother. |
 
-**Flux typique** : Le client (ou le pro) consulte les créneaux via l'Opérateur JayRDV ; l'intention « réserver » est envoyée ; MiyuBooking exécute `create` ; la réservation est persistée (KindMother ou table alpha `appointments` / `reservations`).
+**Flux typique** : Le client (ou le pro) consulte les crÃ©neaux via l'OpÃ©rateur JayRDV ; l'intention Â« rÃ©server Â» est envoyÃ©e ; MiyuBooking exÃ©cute `create` ; la rÃ©servation est persistÃ©e (KindMother ou table alpha `appointments` / `reservations`).
 
 ### 5.3 Autres services consommateurs
 
-Tout **service** qui a besoin de **créneaux**, **réservations**, **ressources** ou **tarification** peut s'appuyer sur le même contrat : intention → BondingBrother → StrongFather → MiyuBooking → KindMother. Les **points d'entrée** sont les ToolIds listés en § 1 ; les **données** sont définies par le contexte métier du service (ex. édition, atelier, professionnel, prestation) et mappées vers ressource_id, slot_id, reservation_id.
+Tout **service** qui a besoin de **crÃ©neaux**, **rÃ©servations**, **ressources** ou **tarification** peut s'appuyer sur le mÃªme contrat : intention â†’ BondingBrother â†’ StrongFather â†’ MiyuBooking â†’ KindMother. Les **points d'entrÃ©e** sont les ToolIds listÃ©s en Â§ 1 ; les **donnÃ©es** sont dÃ©finies par le contexte mÃ©tier du service (ex. Ã©dition, atelier, professionnel, prestation) et mappÃ©es vers ressource_id, slot_id, reservation_id.
 
 ---
 
-## 6. Alpha / pré-COG : persistance équivalente
+## 6. Alpha / prÃ©-COG : persistance Ã©quivalente
 
-En **alpha** (Supabase ou autre backend pré-COG), la persistance des réservations peut être réalisée par des **tables locales** (ex. `atelier_reservations`, `billets`, `appointments`) et des **services** qui reproduisent le comportement attendu (création, annulation, liste créneaux) sans appeler encore KindMother. Le **contrat logique** reste le même : le service consommateur envoie des intentions ; une couche « réservation » exécute l’équivalent des Tools (liste créneaux, créer, annuler) et écrit en base. À la migration COG-native, cette couche est remplacée par l’appel réel à MiyuBooking + WriteIntent KindMother.
+En **alpha** (Supabase ou autre backend prÃ©-COG), la persistance des rÃ©servations peut Ãªtre rÃ©alisÃ©e par des **tables locales** (ex. `atelier_reservations`, `billets`, `appointments`) et des **services** qui reproduisent le comportement attendu (crÃ©ation, annulation, liste crÃ©neaux) sans appeler encore KindMother. Le **contrat logique** reste le mÃªme : le service consommateur envoie des intentions ; une couche Â« rÃ©servation Â» exÃ©cute lâ€™Ã©quivalent des Tools (liste crÃ©neaux, crÃ©er, annuler) et Ã©crit en base. Ã€ la migration COG-native, cette couche est remplacÃ©e par lâ€™appel rÃ©el Ã  MiyuBooking + WriteIntent KindMother.
 
 ---
 
-## 7. Références
+## 7. RÃ©fÃ©rences
 
-| Document | Rôle |
+| Document | RÃ´le |
 |----------|------|
-| [MiyuBooking - Documentation Fondatrice](../MiyuBooking%20-%20Documentation%20Fondatrice.md) | Identité, ToolkitId, liste Tools, gouvernance. |
-| [MiyuBooking - Reference Outils](../MiyuBooking%20-%20Reference%20Outils.md) | Détail chaque ToolId, niveau sécurité. |
+| [MiyuBooking - Documentation Fondatrice](../MiyuBooking%20-%20Documentation%20Fondatrice.md) | IdentitÃ©, ToolkitId, liste Tools, gouvernance. |
+| [MiyuBooking - Reference Outils](../MiyuBooking%20-%20Reference%20Outils.md) | DÃ©tail chaque ToolId, niveau sÃ©curitÃ©. |
 | [MiyuBooking - Tool Governance Compliance Contract](../contracts/governance/MiyuBooking%20-%20Tool%20Governance%20Compliance%20Contract.md) | Obligations (StrongFather, WriteIntent KindMother). |
-| [MiyuBooking - Reference Implementation Guidelines](../implementation/MiyuBooking%20-%20Reference%20Implementation%20Guidelines.md) | Lignes directrices implémentation. |
-| [Miyukini Conceptual References - Tools et Toolkits](../../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) | Schéma flux gouvernance. |
+| [MiyuBooking - Reference Implementation Guidelines](../implementation/MiyuBooking%20-%20Reference%20Implementation%20Guidelines.md) | Lignes directrices implÃ©mentation. |
+| [Miyukini Conceptual References - Tools et Toolkits](..//..//..//miyukini-webway-system//reference//_index.md) | SchÃ©ma flux gouvernance. |
 
 ---
 
-**Document** : MiyuBooking — Parcours et intégration services consommateurs  
+**Document** : MiyuBooking â€” Parcours et intÃ©gration services consommateurs  
 **Version** : 1.0  
 **Date** : 2026-02-03  
-**Statut** : Document de référence — exploitation directe dans les services
+**Statut** : Document de rÃ©fÃ©rence â€” exploitation directe dans les services
+

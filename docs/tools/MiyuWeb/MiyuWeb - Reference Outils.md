@@ -1,100 +1,102 @@
-# MiyuWeb — Référence des outils
+﻿# MiyuWeb â€” RÃ©fÃ©rence des outils
 
 ## 1. Contexte
 
-Ce document décrit **chaque outil (Tool)** composant le kit MiyuWeb. Il constitue la référence technique des capacités atomiques d'affichage de contenu web (rendu HTML, layout, thème, scripts, assets, formulaires, événements) sans décision de contenu ni accès direct à la base. Les Tools sont gouvernés par les Cores (Master Butler, WorrySentinel, Caring Nanny, StrongFather) ; l'autorité sur les données (templates, assets) appartient à KindMother. MiyuWeb opère sur des **données fournies dans le flux**.
+Ce document dÃ©crit **chaque outil (Tool)** composant le kit MiyuWeb. Il constitue la rÃ©fÃ©rence technique des capacitÃ©s atomiques d'affichage de contenu web (rendu HTML, layout, thÃ¨me, scripts, assets, formulaires, Ã©vÃ©nements) sans dÃ©cision de contenu ni accÃ¨s direct Ã  la base. Les Tools sont gouvernÃ©s par les Cores (Master Butler, WorrySentinel, Caring Nanny, StrongFather) ; l'autoritÃ© sur les donnÃ©es (templates, assets) appartient Ã  KindMother. MiyuWeb opÃ¨re sur des **donnÃ©es fournies dans le flux**.
 
-**Référence du kit :** [MiyuWeb - Documentation Fondatrice](./MiyuWeb%20-%20Documentation%20Fondatrice.md)
+**RÃ©fÃ©rence du kit :** [MiyuWeb - Documentation Fondatrice](./MiyuWeb%20-%20Documentation%20Fondatrice.md)
 
 ---
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
 **Ce document fournit :**
 
 - La liste exhaustive des Tools du kit MiyuWeb
-- Pour chaque Tool : **ToolId**, **nom lisible**, **action** (phrase courte « fait quoi »), **niveau de sécurité** typique, **capability_id** si applicable
+- Pour chaque Tool : **ToolId**, **nom lisible**, **action** (phrase courte Â« fait quoi Â»), **niveau de sÃ©curitÃ©** typique, **capability_id** si applicable
 
 **Hors scope :**
 
-- L'implémentation (moteur de rendu, sandbox JS, CSP)
-- Toute décision de contenu ou de logique métier (Opérateurs, Cores)
-- La lecture ou l'écriture en base (KindMother, MiyuSQL)
+- L'implÃ©mentation (moteur de rendu, sandbox JS, CSP)
+- Toute dÃ©cision de contenu ou de logique mÃ©tier (OpÃ©rateurs, Cores)
+- La lecture ou l'Ã©criture en base (KindMother, MiyuSQL)
 
 ---
 
 ## 3. Tableau des outils
 
-| ToolId | Nom lisible | Action | Niveau sécurité | capability_id (ex.) |
+| ToolId | Nom lisible | Action | Niveau sÃ©curitÃ© | capability_id (ex.) |
 |--------|-------------|--------|------------------|----------------------|
-| `tool.web.html.render` | Rendu HTML | Rend du HTML à partir de données et de template fournis ; ne décide pas du contenu. | 0–2 | `web.html.render` |
-| `tool.web.layout.render` | Rendu layout | Rend un layout (structure de page) à partir de données fournies. | 0–2 | `web.layout.render` |
-| `tool.web.theme.resolve` | Résolution thème | Résout le thème applicable (couleurs, styles) pour un contexte donné. | 0–1 | `web.theme.resolve` |
-| `tool.web.script.execute` | Exécution script | Exécute un script (JS/TS) dans un contexte gouverné et sandboxé. | 1–2 | `web.script.execute` |
-| `tool.web.script.compile` | Compilation script | Compile ou valide un script sans l'exécuter. | 1–2 | `web.script.compile` |
-| `tool.web.asset.serve` | Service asset | Sert un asset (image, CSS, etc.) à partir de données fournies dans le flux. | 0–2 | `web.asset.serve` |
-| `tool.web.form.validate` | Validation formulaire | Valide un formulaire (structure, champs) sans décider des règles métier. | 1–2 | `web.form.validate` |
-| `tool.web.event.dispatch` | Dispatch événement | Dispatche un événement dans le flux gouverné. | 0–2 | `web.event.dispatch` |
-| `tool.web.input.capture` | Capture entrée | Capture une entrée utilisateur (clic, saisie) pour le flux gouverné. | 0–2 | `web.input.capture` |
+| `tool.web.html.render` | Rendu HTML | Rend du HTML Ã  partir de donnÃ©es et de template fournis ; ne dÃ©cide pas du contenu. | 0â€“2 | `web.html.render` |
+| `tool.web.layout.render` | Rendu layout | Rend un layout (structure de page) Ã  partir de donnÃ©es fournies. | 0â€“2 | `web.layout.render` |
+| `tool.web.theme.resolve` | RÃ©solution thÃ¨me | RÃ©sout le thÃ¨me applicable (couleurs, styles) pour un contexte donnÃ©. | 0â€“1 | `web.theme.resolve` |
+| `tool.web.script.execute` | ExÃ©cution script | ExÃ©cute un script (JS/TS) dans un contexte gouvernÃ© et sandboxÃ©. | 1â€“2 | `web.script.execute` |
+| `tool.web.script.compile` | Compilation script | Compile ou valide un script sans l'exÃ©cuter. | 1â€“2 | `web.script.compile` |
+| `tool.web.asset.serve` | Service asset | Sert un asset (image, CSS, etc.) Ã  partir de donnÃ©es fournies dans le flux. | 0â€“2 | `web.asset.serve` |
+| `tool.web.form.validate` | Validation formulaire | Valide un formulaire (structure, champs) sans dÃ©cider des rÃ¨gles mÃ©tier. | 1â€“2 | `web.form.validate` |
+| `tool.web.event.dispatch` | Dispatch Ã©vÃ©nement | Dispatche un Ã©vÃ©nement dans le flux gouvernÃ©. | 0â€“2 | `web.event.dispatch` |
+| `tool.web.input.capture` | Capture entrÃ©e | Capture une entrÃ©e utilisateur (clic, saisie) pour le flux gouvernÃ©. | 0â€“2 | `web.input.capture` |
 
-**Format ToolId :** `tool.web.<sous-domaine>.<action>` ou `tool.web.<action>` — conforme au [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md).
+**Format ToolId :** `tool.web.<sous-domaine>.<action>` ou `tool.web.<action>` â€” conforme au [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md).
 
 ---
 
-## 4. Détail par outil (résumé)
+## 4. DÃ©tail par outil (rÃ©sumÃ©)
 
 ### 4.1 Rendu
 
-- **tool.web.html.render** — Produit du HTML à partir d'un template et de données fournis dans le flux. Ne choisit pas le contenu ; exécute uniquement le rendu. Les templates peuvent provenir d'une lecture KindMother/MiyuSQL en amont, fournis en entrée.
-- **tool.web.layout.render** — Produit la structure de page (layout) à partir de données fournies (zones, placeholders). Ne décide pas du contenu des zones.
+- **tool.web.html.render** â€” Produit du HTML Ã  partir d'un template et de donnÃ©es fournis dans le flux. Ne choisit pas le contenu ; exÃ©cute uniquement le rendu. Les templates peuvent provenir d'une lecture KindMother/MiyuSQL en amont, fournis en entrÃ©e.
+- **tool.web.layout.render** â€” Produit la structure de page (layout) Ã  partir de donnÃ©es fournies (zones, placeholders). Ne dÃ©cide pas du contenu des zones.
 
-### 4.2 Thème
+### 4.2 ThÃ¨me
 
-- **tool.web.theme.resolve** — Détermine le thème applicable (couleurs, variables CSS, styles) pour un contexte donné (ex. mode clair/sombre, identifiant thème). Retourne des données de thème utilisables par les outils de rendu ; ne décide pas de la politique de thème.
+- **tool.web.theme.resolve** â€” DÃ©termine le thÃ¨me applicable (couleurs, variables CSS, styles) pour un contexte donnÃ© (ex. mode clair/sombre, identifiant thÃ¨me). Retourne des donnÃ©es de thÃ¨me utilisables par les outils de rendu ; ne dÃ©cide pas de la politique de thÃ¨me.
 
 ### 4.3 Scripts
 
-- **tool.web.script.execute** — Exécute un script (JavaScript, TypeScript compilé) dans un contexte sandboxé et gouverné. Les entrées (données, contexte) sont fournies dans le flux ; pas d'accès direct à la base ni de décision métier.
-- **tool.web.script.compile** — Compile ou valide un script (syntaxe, types) sans l'exécuter. Utile pour vérification ou préparation.
+- **tool.web.script.execute** â€” ExÃ©cute un script (JavaScript, TypeScript compilÃ©) dans un contexte sandboxÃ© et gouvernÃ©. Les entrÃ©es (donnÃ©es, contexte) sont fournies dans le flux ; pas d'accÃ¨s direct Ã  la base ni de dÃ©cision mÃ©tier.
+- **tool.web.script.compile** â€” Compile ou valide un script (syntaxe, types) sans l'exÃ©cuter. Utile pour vÃ©rification ou prÃ©paration.
 
 ### 4.4 Assets
 
-- **tool.web.asset.serve** — Sert un asset (image, fichier CSS, binaire) à partir de données fournies dans le flux (contenu ou métadonnées). Ne lit pas la base ; l'asset peut avoir été récupéré en amont via MiyuSQL sous KindMother.
+- **tool.web.asset.serve** â€” Sert un asset (image, fichier CSS, binaire) Ã  partir de donnÃ©es fournies dans le flux (contenu ou mÃ©tadonnÃ©es). Ne lit pas la base ; l'asset peut avoir Ã©tÃ© rÃ©cupÃ©rÃ© en amont via MiyuSQL sous KindMother.
 
-### 4.5 Formulaire et événements
+### 4.5 Formulaire et Ã©vÃ©nements
 
-- **tool.web.form.validate** — Valide la structure et les champs d'un formulaire (présence, types, contraintes techniques). Ne définit pas les règles métier ; exécute une validation gouvernée sur des règles fournies.
-- **tool.web.event.dispatch** — Propage un événement dans le flux gouverné (ex. clic, soumission). Ne décide pas du traitement ; dispatche uniquement.
-- **tool.web.input.capture** — Capture une entrée utilisateur (clic, saisie, touche) et la transmet au flux gouverné. Ne décide pas de l'usage ; capture uniquement.
+- **tool.web.form.validate** â€” Valide la structure et les champs d'un formulaire (prÃ©sence, types, contraintes techniques). Ne dÃ©finit pas les rÃ¨gles mÃ©tier ; exÃ©cute une validation gouvernÃ©e sur des rÃ¨gles fournies.
+- **tool.web.event.dispatch** â€” Propage un Ã©vÃ©nement dans le flux gouvernÃ© (ex. clic, soumission). Ne dÃ©cide pas du traitement ; dispatche uniquement.
+- **tool.web.input.capture** â€” Capture une entrÃ©e utilisateur (clic, saisie, touche) et la transmet au flux gouvernÃ©. Ne dÃ©cide pas de l'usage ; capture uniquement.
 
 ---
 
 ## 5. Alignement MIP
 
-Chaque outil listé ci-dessus est conçu pour être une **unité logique** pouvant devenir un **bloc MSCM** à l'implémentation :
+Chaque outil listÃ© ci-dessus est conÃ§u pour Ãªtre une **unitÃ© logique** pouvant devenir un **bloc MSCM** Ã  l'implÃ©mentation :
 
-- **id** : identifiant du bloc (ex. dérivé du ToolId)
-- **do** : description fonctionnelle courte (ex. « rend du HTML à partir de données et template fournis »)
-- **role** : rôle sémantique (ex. `web`)
-- **layer** : couche (Strate 6 — outil / toolkit)
+- **id** : identifiant du bloc (ex. dÃ©rivÃ© du ToolId)
+- **do** : description fonctionnelle courte (ex. Â« rend du HTML Ã  partir de donnÃ©es et template fournis Â»)
+- **role** : rÃ´le sÃ©mantique (ex. `web`)
+- **layer** : couche (Strate 6 â€” outil / toolkit)
 
-À l'implémentation, le code fournissant ces Tools devra être balisé MSCM afin d'alimenter **blocks.json**, **domains.json**, **layers.json** selon le [Protocole MIP v1](../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md) (domaine `web`).
+Ã€ l'implÃ©mentation, le code fournissant ces Tools devra Ãªtre balisÃ© MSCM afin d'alimenter **blocks.json**, **domains.json**, **layers.json** selon le [Protocole MIP v1](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md) (domaine `web`).
 
 ---
 
-## 6. Références croisées
+## 6. RÃ©fÃ©rences croisÃ©es
 
 | Document | Lien |
 |----------|------|
 | Documentation Fondatrice MiyuWeb | [MiyuWeb - Documentation Fondatrice](./MiyuWeb%20-%20Documentation%20Fondatrice.md) |
-| Tool Governance Contract | [Master Butler - Tool Governance Contract](../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
-| Glossaire | [Miyukini Conceptual References - Glossaire](../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md) |
-| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md) |
-| KindMother | [KindMother - Index](../../core/KindMother/_index.md) |
+| Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
+| Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
+| Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md) |
+| KindMother | [KindMother - Index](..//..//cores//KindMother//_index.md) |
 | MiyuSQL - Documentation Fondatrice | [MiyuSQL - Documentation Fondatrice](../MiyuSQL/MiyuSQL%20-%20Documentation%20Fondatrice.md) |
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de référence
+**Statut :** Document de rÃ©fÃ©rence
+
+

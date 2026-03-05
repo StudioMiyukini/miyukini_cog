@@ -1,8 +1,8 @@
-# MiyuProfile — Index de navigation
+﻿# MiyuProfile â€” Index de navigation
 
 ## Contexte
 
-**MiyuProfile** est le **kit d'outils (Toolkit)** de profil étendu (champs, signature, avatar, rangs, préférences). Aligné sur [Équivalents Moteur Forum](../../reference/Miyukini%20Conceptual%20References%20-%20Equivalents%20Moteur%20Forum.md).
+**MiyuProfile** est le **kit d'outils (Toolkit)** de profil Ã©tendu (champs, signature, avatar, rangs, prÃ©fÃ©rences). AlignÃ© sur [Ã‰quivalents Moteur Forum](..//..//miyukini-webway-system//reference//_index.md).
 
 **Strate :** 6 (Tools & Toolkits)  
 **ToolkitId :** `toolkit.identity.profile`
@@ -13,10 +13,11 @@
 
 | Document | Description |
 |----------|-------------|
-| [Documentation Fondatrice](./MiyuProfile%20-%20Documentation%20Fondatrice.md) | Identité, définition canonique, ToolkitId, liste des outils composants, gouvernance |
-| [Reference Outils](./MiyuProfile%20-%20Reference%20Outils.md) | Liste exhaustive des Tools : ToolId, action, niveau de sécurité |
-| [Tool Governance Compliance Contract](./contracts/governance/MiyuProfile%20-%20Tool%20Governance%20Compliance%20Contract.md) | Obligations de conformité |
+| [Documentation Fondatrice](./MiyuProfile%20-%20Documentation%20Fondatrice.md) | IdentitÃ©, dÃ©finition canonique, ToolkitId, liste des outils composants, gouvernance |
+| [Reference Outils](./MiyuProfile%20-%20Reference%20Outils.md) | Liste exhaustive des Tools : ToolId, action, niveau de sÃ©curitÃ© |
+| [Tool Governance Compliance Contract](./contracts/governance/MiyuProfile%20-%20Tool%20Governance%20Compliance%20Contract.md) | Obligations de conformitÃ© |
 
 ---
 
-**Référence conceptuelle :** [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)
+**RÃ©fÃ©rence conceptuelle :** [Miyukini Conceptual References - Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)
+

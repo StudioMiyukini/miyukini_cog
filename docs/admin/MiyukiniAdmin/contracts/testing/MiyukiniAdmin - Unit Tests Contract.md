@@ -1,4 +1,4 @@
-# MiyukiniAdmin — Unit Tests Contract
+﻿# MiyukiniAdmin â€” Unit Tests Contract
 
 ## 1. Contexte
 
@@ -79,59 +79,59 @@ Ce document **ne couvre pas** :
 ### 5.1 Execution d'un Test
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ 1. Chargement definition du test                            │
-├─────────────────────────────────────────────────────────────┤
-│ - ID du test                                                │
-│ - Requete de verification                                   │
-│ - Criteres de succes                                        │
-│ - Seuils d'alerte                                           │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 2. Execution requete (via KindMother)                       │
-├─────────────────────────────────────────────────────────────┤
-│ - Requete en lecture seule                                  │
-│ - Timeout configurable                                      │
-│ - Collecte resultats                                        │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 3. Evaluation resultats                                      │
-├─────────────────────────────────────────────────────────────┤
-│ - Comparaison aux criteres                                  │
-│ - Determination verdict                                     │
-│ - Collecte details echecs                                   │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 4. Generation rapport                                        │
-├─────────────────────────────────────────────────────────────┤
-│ - Verdict (PASS/WARN/FAIL)                                  │
-│ - Details des violations                                    │
-│ - Recommandations                                           │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 1. Chargement definition du test                            â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - ID du test                                                â”‚
+â”‚ - Requete de verification                                   â”‚
+â”‚ - Criteres de succes                                        â”‚
+â”‚ - Seuils d'alerte                                           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â”‚
+                              â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 2. Execution requete (via KindMother)                       â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - Requete en lecture seule                                  â”‚
+â”‚ - Timeout configurable                                      â”‚
+â”‚ - Collecte resultats                                        â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â”‚
+                              â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 3. Evaluation resultats                                      â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - Comparaison aux criteres                                  â”‚
+â”‚ - Determination verdict                                     â”‚
+â”‚ - Collecte details echecs                                   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â”‚
+                              â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ 4. Generation rapport                                        â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ - Verdict (PASS/WARN/FAIL)                                  â”‚
+â”‚ - Details des violations                                    â”‚
+â”‚ - Recommandations                                           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 5.2 Flux d'Execution
 
 ```
 MiyukiniAdmin            BondingBrother              KindMother
-     │                         │                          │
-     │──UnitTestRequest────────▶│                          │
-     │  (test: COH-001)         │                          │
-     │                         │                          │
-     │                         │──VerificationQuery───────▶│
-     │                         │  (SELECT avec contraintes) │
-     │                         │                          │
-     │                         │◀─QueryResults────────────│
-     │                         │                          │
-     │◀─TestResults────────────│                          │
-     │  (verdict, details)      │                          │
-     │                         │                          │
+     â”‚                         â”‚                          â”‚
+     â”‚â”€â”€UnitTestRequestâ”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
+     â”‚  (test: COH-001)         â”‚                          â”‚
+     â”‚                         â”‚                          â”‚
+     â”‚                         â”‚â”€â”€VerificationQueryâ”€â”€â”€â”€â”€â”€â”€â–¶â”‚
+     â”‚                         â”‚  (SELECT avec contraintes) â”‚
+     â”‚                         â”‚                          â”‚
+     â”‚                         â”‚â—€â”€QueryResultsâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
+     â”‚                         â”‚                          â”‚
+     â”‚â—€â”€TestResultsâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                          â”‚
+     â”‚  (verdict, details)      â”‚                          â”‚
+     â”‚                         â”‚                          â”‚
 ```
 
 ---
@@ -518,8 +518,8 @@ En complement des tests COH, CONF et STRUCT, les tests de securite suivants sont
 
 ### 12.6 References Securite
 
-- [Security - Core Integration Map](../../../../security/architecture/Security%20-%20Core%20Integration%20Map.md)
-- [Security - Invariants & Guarantees](../../../../security/contracts/governance/Security%20-%20Invariants%20&%20Guarantees.md)
+- [Security - Core Integration Map](..//..//..//..//cores//WorrySentinel//_index.md)
+- [Security - Invariants & Guarantees](..//..//..//..//cores//WorrySentinel//_index.md)
 - [MiyukiniAdmin - Threat Model Contract](../security/MiyukiniAdmin%20-%20Threat%20Model%20Contract.md)
 
 ---
@@ -528,10 +528,12 @@ En complement des tests COH, CONF et STRUCT, les tests de securite suivants sont
 
 - [MiyukiniAdmin - Cycle Tests Contract](./MiyukiniAdmin%20-%20Cycle%20Tests%20Contract.md)
 - [MiyukiniAdmin - DB Operations Contract](../database/MiyukiniAdmin%20-%20DB%20Operations%20Contract.md)
-- [KindMother - Documentation Fondatrice](../../../KindMother/foundation/KindMother%20-%20Documentation%20Fondatrice.md)
+- [KindMother - Documentation Fondatrice](..//..//..//..//cores//KindMother//foundation//KindMother%20-%20Documentation%20Fondatrice.md)
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
 **Statut :** Contrat de reference
+
+

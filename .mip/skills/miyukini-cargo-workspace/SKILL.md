@@ -59,7 +59,7 @@ members = [
     "apps/central", "apps/origin", "apps/ui-builder", "apps/miyuclicker",
 
     # Tools
-    "tools/mip-generator", "tools/toolkit-skeleton", "tools/toolkit-registry-export",
+    "tools/mscm-generator", "tools/toolkit-skeleton", "tools/toolkit-registry-export",
 ]
 
 # Binaire par defaut

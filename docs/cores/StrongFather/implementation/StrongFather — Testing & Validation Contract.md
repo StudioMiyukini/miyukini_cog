@@ -1,57 +1,57 @@
-# StrongFather — Testing & Validation Contract
+﻿# StrongFather â€” Testing & Validation Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document définit le **StrongFather — Testing & Validation Contract** : un contrat normatif, non négociable, et de statut FONDATION qui établit les règles de test et de validation pour StrongFather, définissant les types de tests requis, les critères de validation, et les méthodes de vérification de conformité dans le système Miyukini Core System v2.4.
+Ce document dÃ©finit le **StrongFather â€” Testing & Validation Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit les rÃ¨gles de test et de validation pour StrongFather, dÃ©finissant les types de tests requis, les critÃ¨res de validation, et les mÃ©thodes de vÃ©rification de conformitÃ© dans le systÃ¨me Miyukini Core System v2.4.
 
-Ce contrat précise la nature conceptuelle des tests, les types de validation requis, les critères de réussite, et les liens avec le processus de certification, sans imposer de framework ou d'outil spécifique.
+Ce contrat prÃ©cise la nature conceptuelle des tests, les types de validation requis, les critÃ¨res de rÃ©ussite, et les liens avec le processus de certification, sans imposer de framework ou d'outil spÃ©cifique.
 
-### Portée
+### PortÃ©e
 
-Ce contrat s'applique à **toutes les implémentations de StrongFather** et définit de manière absolue :
-- la définition formelle des tests de validation,
+Ce contrat s'applique Ã  **toutes les implÃ©mentations de StrongFather** et dÃ©finit de maniÃ¨re absolue :
+- la dÃ©finition formelle des tests de validation,
 - les types de tests requis,
-- les critères de validation des invariants,
-- les tests de non-régression,
-- les tests de sécurité,
+- les critÃ¨res de validation des invariants,
+- les tests de non-rÃ©gression,
+- les tests de sÃ©curitÃ©,
 - les tests de performance conceptuels,
-- les règles de validation de conformité.
+- les rÃ¨gles de validation de conformitÃ©.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complète et respecte les documents contractuels existants :
-- **StrongFather — Conformance & Certification Rules** : Définit le processus de certification et les critères de conformité
-- **StrongFather — Invariants & Guarantees** : Définit les invariants et garanties à valider
-- **StrongFather — Violations & Anti-Patterns** : Définit les violations à détecter
-- **StrongFather — Security & Threat Model Contract** : Définit les menaces de sécurité à tester
-- **StrongFather — Performance & Scalability Contract** : Définit les critères de performance conceptuels
-- **[Miyukini Conceptual References - Lois Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)** : Tests de conformité aux lois d'autonomie système
+Ce contrat complÃ¨te et respecte les documents contractuels existants :
+- **StrongFather â€” Conformance & Certification Rules** : DÃ©finit le processus de certification et les critÃ¨res de conformitÃ©
+- **StrongFather â€” Invariants & Guarantees** : DÃ©finit les invariants et garanties Ã  valider
+- **StrongFather â€” Violations & Anti-Patterns** : DÃ©finit les violations Ã  dÃ©tecter
+- **StrongFather â€” Security & Threat Model Contract** : DÃ©finit les menaces de sÃ©curitÃ© Ã  tester
+- **StrongFather â€” Performance & Scalability Contract** : DÃ©finit les critÃ¨res de performance conceptuels
+- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)** : Tests de conformitÃ© aux lois d'autonomie systÃ¨me
 
-Il n'introduit aucune contradiction, et constitue la définition formelle des tests et validations requis pour StrongFather.
+Il n'introduit aucune contradiction, et constitue la dÃ©finition formelle des tests et validations requis pour StrongFather.
 
 ### Principes de test
 
 **T-1 : Tests conceptuels**
 
-Les tests définis dans ce contrat sont **conceptuels** : ils définissent ce qui doit être testé, pas comment le tester. Aucun framework, outil, ou méthode d'implémentation n'est imposé.
+Les tests dÃ©finis dans ce contrat sont **conceptuels** : ils dÃ©finissent ce qui doit Ãªtre testÃ©, pas comment le tester. Aucun framework, outil, ou mÃ©thode d'implÃ©mentation n'est imposÃ©.
 
 **T-2 : Validation contractuelle**
 
-Les tests valident le respect des contrats StrongFather, pas des détails d'implémentation.
+Les tests valident le respect des contrats StrongFather, pas des dÃ©tails d'implÃ©mentation.
 
-**T-3 : Complétude**
+**T-3 : ComplÃ©tude**
 
-Tous les invariants, garanties, et interdictions doivent être validés par au moins un test.
+Tous les invariants, garanties, et interdictions doivent Ãªtre validÃ©s par au moins un test.
 
-**T-4 : Reproductibilité**
+**T-4 : ReproductibilitÃ©**
 
-Tous les tests doivent être reproductibles : pour une entrée donnée, le résultat attendu est toujours le même.
+Tous les tests doivent Ãªtre reproductibles : pour une entrÃ©e donnÃ©e, le rÃ©sultat attendu est toujours le mÃªme.
 
 ---
 
@@ -59,146 +59,146 @@ Tous les tests doivent être reproductibles : pour une entrée donnée, le résu
 
 ### 2.1. Tests d'invariants
 
-**Définition :**
+**DÃ©finition :**
 
-Les tests d'invariants valident que tous les invariants définis dans le Invariants & Guarantees Contract sont respectés.
+Les tests d'invariants valident que tous les invariants dÃ©finis dans le Invariants & Guarantees Contract sont respectÃ©s.
 
-**Portée :**
+**PortÃ©e :**
 
-Tous les invariants catalogués dans le Invariants & Guarantees Contract doivent être testés :
-- Invariants d'autorité (INV-AUTH-*)
+Tous les invariants cataloguÃ©s dans le Invariants & Guarantees Contract doivent Ãªtre testÃ©s :
+- Invariants d'autoritÃ© (INV-AUTH-*)
 - Invariants de comportement (INV-BEHAV-*)
-- Invariants de décision (INV-DEC-*)
+- Invariants de dÃ©cision (INV-DEC-*)
 - Invariants de politique (INV-POL-*)
 - Invariants d'intention (INV-INT-*)
-- Invariants de traçabilité (INV-TRACE-*)
+- Invariants de traÃ§abilitÃ© (INV-TRACE-*)
 - Invariants d'erreur (INV-ERR-*)
-- Invariants complémentaires (INV-POL-SOURCE, INV-ID-GLOBAL, INV-TRACE-KERNEL, INV-DIFF-NOPLAN)
+- Invariants complÃ©mentaires (INV-POL-SOURCE, INV-ID-GLOBAL, INV-TRACE-KERNEL, INV-DIFF-NOPLAN)
 
-**Critères de validation :**
+**CritÃ¨res de validation :**
 
-- **TV-INV-1** : Chaque invariant est vérifié par au moins un test
-- **TV-INV-2** : Les tests d'invariants vérifient l'absence de violation
+- **TV-INV-1** : Chaque invariant est vÃ©rifiÃ© par au moins un test
+- **TV-INV-2** : Les tests d'invariants vÃ©rifient l'absence de violation
 - **TV-INV-3** : Les tests d'invariants sont reproductibles
 
 **Exemples conceptuels :**
 
-- Test de non-exécution : Vérifier qu'aucune action n'est exécutée lors d'une évaluation
-- Test de non-modification d'état : Vérifier qu'aucun état n'est modifié après une évaluation
-- Test de déterminisme : Vérifier que la même intention produit toujours la même décision
-- Test de terminaison : Vérifier que toute évaluation termine en temps fini
+- Test de non-exÃ©cution : VÃ©rifier qu'aucune action n'est exÃ©cutÃ©e lors d'une Ã©valuation
+- Test de non-modification d'Ã©tat : VÃ©rifier qu'aucun Ã©tat n'est modifiÃ© aprÃ¨s une Ã©valuation
+- Test de dÃ©terminisme : VÃ©rifier que la mÃªme intention produit toujours la mÃªme dÃ©cision
+- Test de terminaison : VÃ©rifier que toute Ã©valuation termine en temps fini
 
 ### 2.2. Tests de garanties
 
-**Définition :**
+**DÃ©finition :**
 
-Les tests de garanties valident que toutes les garanties définies dans le Invariants & Guarantees Contract sont respectées.
+Les tests de garanties valident que toutes les garanties dÃ©finies dans le Invariants & Guarantees Contract sont respectÃ©es.
 
-**Portée :**
+**PortÃ©e :**
 
-Toutes les garanties cataloguées dans le Invariants & Guarantees Contract doivent être testées :
-- Garanties décisionnelles (G-DEC-*)
+Toutes les garanties cataloguÃ©es dans le Invariants & Guarantees Contract doivent Ãªtre testÃ©es :
+- Garanties dÃ©cisionnelles (G-DEC-*)
 - Garanties de justification (G-JUST-*)
-- Garanties de non-exécution (G-NOEXEC-*)
+- Garanties de non-exÃ©cution (G-NOEXEC-*)
 - Garanties de non-persistance (G-NOPERS-*)
 - Garanties temporelles (G-NOTIME-*)
-- Garanties de sécurité (G-ZT-*)
+- Garanties de sÃ©curitÃ© (G-ZT-*)
 - Garanties d'isolation (G-ISOL-*)
 
-**Critères de validation :**
+**CritÃ¨res de validation :**
 
-- **TV-GAR-1** : Chaque garantie est vérifiée par au moins un test
-- **TV-GAR-2** : Les tests de garanties vérifient l'observabilité des garanties
-- **TV-GAR-3** : Les tests de garanties vérifient les conditions d'application
+- **TV-GAR-1** : Chaque garantie est vÃ©rifiÃ©e par au moins un test
+- **TV-GAR-2** : Les tests de garanties vÃ©rifient l'observabilitÃ© des garanties
+- **TV-GAR-3** : Les tests de garanties vÃ©rifient les conditions d'application
 
 **Exemples conceptuels :**
 
-- Test de déterminisme décisionnel : Vérifier que la même intention produit la même décision
-- Test de justification : Vérifier que toute décision contient une justification
-- Test d'isolation : Vérifier qu'aucun effet de bord n'est produit
-- Test d'idempotence : Vérifier que l'évaluation répétée produit le même résultat
+- Test de dÃ©terminisme dÃ©cisionnel : VÃ©rifier que la mÃªme intention produit la mÃªme dÃ©cision
+- Test de justification : VÃ©rifier que toute dÃ©cision contient une justification
+- Test d'isolation : VÃ©rifier qu'aucun effet de bord n'est produit
+- Test d'idempotence : VÃ©rifier que l'Ã©valuation rÃ©pÃ©tÃ©e produit le mÃªme rÃ©sultat
 
-### 2.3. Tests de non-régression
+### 2.3. Tests de non-rÃ©gression
 
-**Définition :**
+**DÃ©finition :**
 
-Les tests de non-régression valident que les modifications n'introduisent pas de régression dans le comportement conforme.
+Les tests de non-rÃ©gression valident que les modifications n'introduisent pas de rÃ©gression dans le comportement conforme.
 
-**Portée :**
+**PortÃ©e :**
 
-Les tests de non-régression couvrent :
-- Les cas de test historiques validés
-- Les scénarios d'usage documentés
-- Les cas limites identifiés
-- Les corrections de bugs précédents
+Les tests de non-rÃ©gression couvrent :
+- Les cas de test historiques validÃ©s
+- Les scÃ©narios d'usage documentÃ©s
+- Les cas limites identifiÃ©s
+- Les corrections de bugs prÃ©cÃ©dents
 
-**Critères de validation :**
+**CritÃ¨res de validation :**
 
 - **TV-REGR-1** : Tous les cas de test historiques sont maintenus
-- **TV-REGR-2** : Les scénarios d'usage documentés restent valides
-- **TV-REGR-3** : Les corrections de bugs précédents ne régressent pas
+- **TV-REGR-2** : Les scÃ©narios d'usage documentÃ©s restent valides
+- **TV-REGR-3** : Les corrections de bugs prÃ©cÃ©dents ne rÃ©gressent pas
 
 **Exemples conceptuels :**
 
-- Test de scénario standard : Vérifier qu'un scénario d'usage documenté produit toujours le résultat attendu
-- Test de cas limite : Vérifier qu'un cas limite identifié est toujours géré correctement
-- Test de correction : Vérifier qu'un bug corrigé ne réapparaît pas
+- Test de scÃ©nario standard : VÃ©rifier qu'un scÃ©nario d'usage documentÃ© produit toujours le rÃ©sultat attendu
+- Test de cas limite : VÃ©rifier qu'un cas limite identifiÃ© est toujours gÃ©rÃ© correctement
+- Test de correction : VÃ©rifier qu'un bug corrigÃ© ne rÃ©apparaÃ®t pas
 
-### 2.4. Tests de sécurité
+### 2.4. Tests de sÃ©curitÃ©
 
-**Définition :**
+**DÃ©finition :**
 
-Les tests de sécurité valident que les menaces identifiées dans le Security & Threat Model Contract sont mitigées.
+Les tests de sÃ©curitÃ© valident que les menaces identifiÃ©es dans le Security & Threat Model Contract sont mitigÃ©es.
 
-**Portée :**
+**PortÃ©e :**
 
-Les tests de sécurité couvrent :
-- Les menaces identifiées dans le Security & Threat Model Contract
-- Les invariants de sécurité (zero-trust, isolation)
-- Les garanties de sécurité
-- Les violations de sécurité potentielles
+Les tests de sÃ©curitÃ© couvrent :
+- Les menaces identifiÃ©es dans le Security & Threat Model Contract
+- Les invariants de sÃ©curitÃ© (zero-trust, isolation)
+- Les garanties de sÃ©curitÃ©
+- Les violations de sÃ©curitÃ© potentielles
 
-**Critères de validation :**
+**CritÃ¨res de validation :**
 
-- **TV-SEC-1** : Chaque menace identifiée est testée
-- **TV-SEC-2** : Les tests de sécurité vérifient l'absence d'exploitation
-- **TV-SEC-3** : Les tests de sécurité vérifient le respect des invariants de sécurité
+- **TV-SEC-1** : Chaque menace identifiÃ©e est testÃ©e
+- **TV-SEC-2** : Les tests de sÃ©curitÃ© vÃ©rifient l'absence d'exploitation
+- **TV-SEC-3** : Les tests de sÃ©curitÃ© vÃ©rifient le respect des invariants de sÃ©curitÃ©
 
 **Exemples conceptuels :**
 
-- Test d'injection de politique : Vérifier qu'aucune politique malveillante ne peut être injectée
-- Test de zero-trust : Vérifier qu'aucun appelant n'est implicitement approuvé
-- Test d'isolation : Vérifier qu'aucune fuite d'information ne se produit
-- Test de validation d'intention : Vérifier que les intentions malformées sont rejetées
+- Test d'injection de politique : VÃ©rifier qu'aucune politique malveillante ne peut Ãªtre injectÃ©e
+- Test de zero-trust : VÃ©rifier qu'aucun appelant n'est implicitement approuvÃ©
+- Test d'isolation : VÃ©rifier qu'aucune fuite d'information ne se produit
+- Test de validation d'intention : VÃ©rifier que les intentions malformÃ©es sont rejetÃ©es
 
 ### 2.5. Tests de performance conceptuels
 
-**Définition :**
+**DÃ©finition :**
 
-Les tests de performance conceptuels valident que les critères conceptuels de performance définis dans le Performance & Scalability Contract sont respectés.
+Les tests de performance conceptuels valident que les critÃ¨res conceptuels de performance dÃ©finis dans le Performance & Scalability Contract sont respectÃ©s.
 
-**Portée :**
+**PortÃ©e :**
 
 Les tests de performance conceptuels couvrent :
-- Les critères de performance conceptuels (pas de métriques absolues)
+- Les critÃ¨res de performance conceptuels (pas de mÃ©triques absolues)
 - Les garanties de terminaison
-- Les propriétés de scalabilité conceptuelles
+- Les propriÃ©tÃ©s de scalabilitÃ© conceptuelles
 
-**Critères de validation :**
+**CritÃ¨res de validation :**
 
-- **TV-PERF-1** : Les tests de performance vérifient la terminaison
-- **TV-PERF-2** : Les tests de performance vérifient l'absence de boucles infinies
-- **TV-PERF-3** : Les tests de performance vérifient les propriétés conceptuelles de scalabilité
+- **TV-PERF-1** : Les tests de performance vÃ©rifient la terminaison
+- **TV-PERF-2** : Les tests de performance vÃ©rifient l'absence de boucles infinies
+- **TV-PERF-3** : Les tests de performance vÃ©rifient les propriÃ©tÃ©s conceptuelles de scalabilitÃ©
 
 **Exemples conceptuels :**
 
-- Test de terminaison : Vérifier que toute évaluation termine
-- Test de complexité conceptuelle : Vérifier que la complexité ne croît pas exponentiellement avec le nombre de politiques
-- Test de scalabilité : Vérifier que le comportement reste cohérent avec un grand nombre de politiques
+- Test de terminaison : VÃ©rifier que toute Ã©valuation termine
+- Test de complexitÃ© conceptuelle : VÃ©rifier que la complexitÃ© ne croÃ®t pas exponentiellement avec le nombre de politiques
+- Test de scalabilitÃ© : VÃ©rifier que le comportement reste cohÃ©rent avec un grand nombre de politiques
 
 **Note importante :**
 
-Les tests de performance sont **conceptuels** : ils valident des propriétés (terminaison, absence de boucles infinies), pas des métriques absolues (temps d'exécution, débit). Aucune métrique de performance absolue n'est garantie par StrongFather.
+Les tests de performance sont **conceptuels** : ils valident des propriÃ©tÃ©s (terminaison, absence de boucles infinies), pas des mÃ©triques absolues (temps d'exÃ©cution, dÃ©bit). Aucune mÃ©trique de performance absolue n'est garantie par StrongFather.
 
 ---
 
@@ -208,60 +208,60 @@ Les tests de performance sont **conceptuels** : ils valident des propriétés (t
 
 **V-INV-1 : Identification des invariants**
 
-Tous les invariants du Invariants & Guarantees Contract doivent être identifiés et listés.
+Tous les invariants du Invariants & Guarantees Contract doivent Ãªtre identifiÃ©s et listÃ©s.
 
-**V-INV-2 : Création de tests**
+**V-INV-2 : CrÃ©ation de tests**
 
-Pour chaque invariant, au moins un test doit être créé pour valider son respect.
+Pour chaque invariant, au moins un test doit Ãªtre crÃ©Ã© pour valider son respect.
 
-**V-INV-3 : Exécution des tests**
+**V-INV-3 : ExÃ©cution des tests**
 
-Tous les tests d'invariants doivent être exécutés et réussir pour valider la conformité.
+Tous les tests d'invariants doivent Ãªtre exÃ©cutÃ©s et rÃ©ussir pour valider la conformitÃ©.
 
-**V-INV-4 : Documentation des résultats**
+**V-INV-4 : Documentation des rÃ©sultats**
 
-Les résultats des tests d'invariants doivent être documentés et traçables.
+Les rÃ©sultats des tests d'invariants doivent Ãªtre documentÃ©s et traÃ§ables.
 
-### 3.2. Catégories d'invariants à valider
+### 3.2. CatÃ©gories d'invariants Ã  valider
 
-**Invariants d'autorité :**
+**Invariants d'autoritÃ© :**
 
-- INV-AUTH-1 : Aucune autorité sur l'exécution
-- INV-AUTH-2 : Aucune autorité sur la persistance
-- INV-AUTH-3 : Aucune autorité sur le temps
+- INV-AUTH-1 : Aucune autoritÃ© sur l'exÃ©cution
+- INV-AUTH-2 : Aucune autoritÃ© sur la persistance
+- INV-AUTH-3 : Aucune autoritÃ© sur le temps
 
 **Invariants de comportement :**
 
-- INV-BEHAV-1 : Non-modification d'état
+- INV-BEHAV-1 : Non-modification d'Ã©tat
 - INV-BEHAV-2 : Zero-trust
-- INV-BEHAV-3 : Pureté fonctionnelle
-- INV-BEHAV-4 : Transparence référentielle
+- INV-BEHAV-3 : PuretÃ© fonctionnelle
+- INV-BEHAV-4 : Transparence rÃ©fÃ©rentielle
 
-**Invariants de décision :**
+**Invariants de dÃ©cision :**
 
-- INV-DEC-1 : Décisions non ambiguës
-- INV-DEC-2 : Décisions justifiées
-- INV-DEC-3 : Unicité de décision
+- INV-DEC-1 : DÃ©cisions non ambiguÃ«s
+- INV-DEC-2 : DÃ©cisions justifiÃ©es
+- INV-DEC-3 : UnicitÃ© de dÃ©cision
 
 **Invariants de politique :**
 
 - INV-POL-1 : Politiques explicites
-- INV-POL-2 : Politiques immutables pendant évaluation
-- INV-POL-3 : Déterminisme d'évaluation
-- INV-POL-SOURCE : Source unique et configurée des politiques
+- INV-POL-2 : Politiques immutables pendant Ã©valuation
+- INV-POL-3 : DÃ©terminisme d'Ã©valuation
+- INV-POL-SOURCE : Source unique et configurÃ©e des politiques
 
 **Invariants d'intention :**
 
 - INV-INT-1 : Identifiant obligatoire
-- INV-INT-2 : Non-exécution des intentions
+- INV-INT-2 : Non-exÃ©cution des intentions
 - INV-INT-3 : Terminaison garantie
-- INV-ID-GLOBAL : Unicité globale des identifiants
+- INV-ID-GLOBAL : UnicitÃ© globale des identifiants
 
-**Invariants de traçabilité :**
+**Invariants de traÃ§abilitÃ© :**
 
-- INV-TRACE-1 : Traçabilité complète
-- INV-TRACE-2 : Association intention-décision
-- INV-TRACE-3 : Politiques référencées
+- INV-TRACE-1 : TraÃ§abilitÃ© complÃ¨te
+- INV-TRACE-2 : Association intention-dÃ©cision
+- INV-TRACE-3 : Politiques rÃ©fÃ©rencÃ©es
 - INV-TRACE-KERNEL : Utilisation kernel strictement passive
 
 **Invariants d'erreur :**
@@ -269,141 +269,141 @@ Les résultats des tests d'invariants doivent être documentés et traçables.
 - INV-ERR-1 : Distinction erreur/rejet
 - INV-ERR-2 : Pas d'effet de bord sur erreur
 
-**Invariants complémentaires :**
+**Invariants complÃ©mentaires :**
 
-- INV-DIFF-NOPLAN : Décision différée sans planification
+- INV-DIFF-NOPLAN : DÃ©cision diffÃ©rÃ©e sans planification
 
-### 3.3. Méthodes de validation conceptuelles
+### 3.3. MÃ©thodes de validation conceptuelles
 
-**Méthode 1 : Vérification par analyse statique**
+**MÃ©thode 1 : VÃ©rification par analyse statique**
 
-Pour les invariants structurels (non-exécution, non-persistance), l'analyse statique peut être utilisée pour vérifier l'absence de code violant l'invariant.
+Pour les invariants structurels (non-exÃ©cution, non-persistance), l'analyse statique peut Ãªtre utilisÃ©e pour vÃ©rifier l'absence de code violant l'invariant.
 
-**Méthode 2 : Vérification par test d'exécution**
+**MÃ©thode 2 : VÃ©rification par test d'exÃ©cution**
 
-Pour les invariants comportementaux (déterminisme, terminaison), des tests d'exécution peuvent être utilisés pour vérifier le comportement.
+Pour les invariants comportementaux (dÃ©terminisme, terminaison), des tests d'exÃ©cution peuvent Ãªtre utilisÃ©s pour vÃ©rifier le comportement.
 
-**Méthode 3 : Vérification par inspection**
+**MÃ©thode 3 : VÃ©rification par inspection**
 
-Pour les invariants conceptuels (politiques explicites, traçabilité), l'inspection peut être utilisée pour vérifier la conformité.
+Pour les invariants conceptuels (politiques explicites, traÃ§abilitÃ©), l'inspection peut Ãªtre utilisÃ©e pour vÃ©rifier la conformitÃ©.
 
-**Méthode 4 : Vérification par preuve conceptuelle**
+**MÃ©thode 4 : VÃ©rification par preuve conceptuelle**
 
-Pour les invariants fondamentaux (unicité, non-ambiguïté), une preuve conceptuelle peut être utilisée pour démontrer le respect.
+Pour les invariants fondamentaux (unicitÃ©, non-ambiguÃ¯tÃ©), une preuve conceptuelle peut Ãªtre utilisÃ©e pour dÃ©montrer le respect.
 
 ---
 
-## 4. Tests de non-régression
+## 4. Tests de non-rÃ©gression
 
-### 4.1. Définition de la non-régression
+### 4.1. DÃ©finition de la non-rÃ©gression
 
-**Définition :**
+**DÃ©finition :**
 
-La non-régression est la propriété selon laquelle les modifications n'introduisent pas de régression dans le comportement conforme.
+La non-rÃ©gression est la propriÃ©tÃ© selon laquelle les modifications n'introduisent pas de rÃ©gression dans le comportement conforme.
 
-**Critères de non-régression :**
+**CritÃ¨res de non-rÃ©gression :**
 
-- **NR-1** : Les cas de test historiques continuent de réussir
-- **NR-2** : Les scénarios d'usage documentés restent valides
-- **NR-3** : Les corrections de bugs précédents ne régressent pas
-- **NR-4** : Les invariants et garanties restent respectés
+- **NR-1** : Les cas de test historiques continuent de rÃ©ussir
+- **NR-2** : Les scÃ©narios d'usage documentÃ©s restent valides
+- **NR-3** : Les corrections de bugs prÃ©cÃ©dents ne rÃ©gressent pas
+- **NR-4** : Les invariants et garanties restent respectÃ©s
 
-### 4.2. Catalogue de tests de non-régression
+### 4.2. Catalogue de tests de non-rÃ©gression
 
-**Catégorie 1 : Tests historiques**
+**CatÃ©gorie 1 : Tests historiques**
 
-Tous les cas de test qui ont été validés dans le passé doivent être maintenus et continuer de réussir.
+Tous les cas de test qui ont Ã©tÃ© validÃ©s dans le passÃ© doivent Ãªtre maintenus et continuer de rÃ©ussir.
 
-**Catégorie 2 : Scénarios d'usage**
+**CatÃ©gorie 2 : ScÃ©narios d'usage**
 
-Tous les scénarios d'usage documentés doivent être testés et continuer de produire les résultats attendus.
+Tous les scÃ©narios d'usage documentÃ©s doivent Ãªtre testÃ©s et continuer de produire les rÃ©sultats attendus.
 
-**Catégorie 3 : Cas limites**
+**CatÃ©gorie 3 : Cas limites**
 
-Tous les cas limites identifiés doivent être testés et continuer d'être gérés correctement.
+Tous les cas limites identifiÃ©s doivent Ãªtre testÃ©s et continuer d'Ãªtre gÃ©rÃ©s correctement.
 
-**Catégorie 4 : Corrections de bugs**
+**CatÃ©gorie 4 : Corrections de bugs**
 
-Tous les bugs corrigés doivent être testés pour éviter la régression.
+Tous les bugs corrigÃ©s doivent Ãªtre testÃ©s pour Ã©viter la rÃ©gression.
 
 ### 4.3. Processus de maintenance
 
 **M-NR-1 : Ajout de tests**
 
-Lorsqu'un nouveau cas de test est validé, il doit être ajouté au catalogue de tests de non-régression.
+Lorsqu'un nouveau cas de test est validÃ©, il doit Ãªtre ajoutÃ© au catalogue de tests de non-rÃ©gression.
 
-**M-NR-2 : Exécution avant modification**
+**M-NR-2 : ExÃ©cution avant modification**
 
-Avant toute modification, les tests de non-régression doivent être exécutés pour établir un état de référence.
+Avant toute modification, les tests de non-rÃ©gression doivent Ãªtre exÃ©cutÃ©s pour Ã©tablir un Ã©tat de rÃ©fÃ©rence.
 
-**M-NR-3 : Exécution après modification**
+**M-NR-3 : ExÃ©cution aprÃ¨s modification**
 
-Après toute modification, les tests de non-régression doivent être exécutés pour vérifier l'absence de régression.
+AprÃ¨s toute modification, les tests de non-rÃ©gression doivent Ãªtre exÃ©cutÃ©s pour vÃ©rifier l'absence de rÃ©gression.
 
-**M-NR-4 : Documentation des régressions**
+**M-NR-4 : Documentation des rÃ©gressions**
 
-Toute régression détectée doit être documentée et corrigée avant validation.
+Toute rÃ©gression dÃ©tectÃ©e doit Ãªtre documentÃ©e et corrigÃ©e avant validation.
 
 ---
 
-## 5. Tests de sécurité
+## 5. Tests de sÃ©curitÃ©
 
-### 5.1. Portée des tests de sécurité
+### 5.1. PortÃ©e des tests de sÃ©curitÃ©
 
-**Menaces à tester :**
+**Menaces Ã  tester :**
 
-Les tests de sécurité doivent couvrir toutes les menaces identifiées dans le Security & Threat Model Contract :
+Les tests de sÃ©curitÃ© doivent couvrir toutes les menaces identifiÃ©es dans le Security & Threat Model Contract :
 - Injection de politiques malveillantes
 - Manipulation d'intentions
 - Fuite d'information
 - Bypass des politiques
-- Violation des invariants de sécurité
+- Violation des invariants de sÃ©curitÃ©
 
-### 5.2. Tests d'invariants de sécurité
+### 5.2. Tests d'invariants de sÃ©curitÃ©
 
 **Test de zero-trust (INV-BEHAV-2) :**
 
-Vérifier que StrongFather ne fait confiance à aucun appelant et évalue toute intention selon les politiques.
+VÃ©rifier que StrongFather ne fait confiance Ã  aucun appelant et Ã©value toute intention selon les politiques.
 
 **Test d'isolation (G-ISOL-*) :**
 
-Vérifier qu'aucun effet de bord n'est produit et qu'aucune fuite d'information ne se produit.
+VÃ©rifier qu'aucun effet de bord n'est produit et qu'aucune fuite d'information ne se produit.
 
 **Test de source de politiques (INV-POL-SOURCE) :**
 
-Vérifier que les politiques proviennent exclusivement d'une source unique et configurée.
+VÃ©rifier que les politiques proviennent exclusivement d'une source unique et configurÃ©e.
 
-### 5.3. Tests de menaces spécifiques
+### 5.3. Tests de menaces spÃ©cifiques
 
 **Test d'injection de politique :**
 
-Vérifier qu'aucune politique malveillante ne peut être injectée dans StrongFather.
+VÃ©rifier qu'aucune politique malveillante ne peut Ãªtre injectÃ©e dans StrongFather.
 
 **Test de manipulation d'intention :**
 
-Vérifier que les intentions malformées ou manipulées sont détectées et rejetées.
+VÃ©rifier que les intentions malformÃ©es ou manipulÃ©es sont dÃ©tectÃ©es et rejetÃ©es.
 
 **Test de bypass de politique :**
 
-Vérifier qu'aucun mécanisme ne permet de contourner les politiques.
+VÃ©rifier qu'aucun mÃ©canisme ne permet de contourner les politiques.
 
 **Test de fuite d'information :**
 
-Vérifier qu'aucune information sensible ne fuit lors de l'évaluation.
+VÃ©rifier qu'aucune information sensible ne fuit lors de l'Ã©valuation.
 
-### 5.4. Critères de validation de sécurité
+### 5.4. CritÃ¨res de validation de sÃ©curitÃ©
 
 **V-SEC-1 : Absence d'exploitation**
 
-Aucune menace identifiée ne doit pouvoir être exploitée.
+Aucune menace identifiÃ©e ne doit pouvoir Ãªtre exploitÃ©e.
 
-**V-SEC-2 : Respect des invariants de sécurité**
+**V-SEC-2 : Respect des invariants de sÃ©curitÃ©**
 
-Tous les invariants de sécurité doivent être respectés.
+Tous les invariants de sÃ©curitÃ© doivent Ãªtre respectÃ©s.
 
-**V-SEC-3 : Respect des garanties de sécurité**
+**V-SEC-3 : Respect des garanties de sÃ©curitÃ©**
 
-Toutes les garanties de sécurité doivent être respectées.
+Toutes les garanties de sÃ©curitÃ© doivent Ãªtre respectÃ©es.
 
 ---
 
@@ -411,67 +411,67 @@ Toutes les garanties de sécurité doivent être respectées.
 
 ### 6.1. Nature des tests de performance
 
-**Conceptuel, pas métrique :**
+**Conceptuel, pas mÃ©trique :**
 
-Les tests de performance sont **conceptuels** : ils valident des propriétés (terminaison, absence de boucles infinies), pas des métriques absolues (temps d'exécution, débit).
+Les tests de performance sont **conceptuels** : ils valident des propriÃ©tÃ©s (terminaison, absence de boucles infinies), pas des mÃ©triques absolues (temps d'exÃ©cution, dÃ©bit).
 
 **Aucune garantie de performance absolue :**
 
-StrongFather ne garantit aucune métrique de performance absolue. Les tests de performance valident uniquement des propriétés conceptuelles.
+StrongFather ne garantit aucune mÃ©trique de performance absolue. Les tests de performance valident uniquement des propriÃ©tÃ©s conceptuelles.
 
-### 6.2. Propriétés à valider
+### 6.2. PropriÃ©tÃ©s Ã  valider
 
-**Propriété 1 : Terminaison**
+**PropriÃ©tÃ© 1 : Terminaison**
 
-Toute évaluation doit terminer en temps fini (INV-CYCLE-1, INV-INT-3).
+Toute Ã©valuation doit terminer en temps fini (INV-CYCLE-1, INV-INT-3).
 
-**Propriété 2 : Absence de boucles infinies**
+**PropriÃ©tÃ© 2 : Absence de boucles infinies**
 
-Aucune évaluation ne doit entrer dans une boucle infinie.
+Aucune Ã©valuation ne doit entrer dans une boucle infinie.
 
-**Propriété 3 : Scalabilité conceptuelle**
+**PropriÃ©tÃ© 3 : ScalabilitÃ© conceptuelle**
 
-Le comportement doit rester cohérent même avec un grand nombre de politiques.
+Le comportement doit rester cohÃ©rent mÃªme avec un grand nombre de politiques.
 
-**Propriété 4 : Déterminisme**
+**PropriÃ©tÃ© 4 : DÃ©terminisme**
 
-Pour une entrée donnée, le résultat doit toujours être le même, indépendamment du temps d'exécution.
+Pour une entrÃ©e donnÃ©e, le rÃ©sultat doit toujours Ãªtre le mÃªme, indÃ©pendamment du temps d'exÃ©cution.
 
 ### 6.3. Tests conceptuels de performance
 
 **Test de terminaison :**
 
-Vérifier que toute évaluation termine, même avec des politiques complexes ou un grand nombre de politiques.
+VÃ©rifier que toute Ã©valuation termine, mÃªme avec des politiques complexes ou un grand nombre de politiques.
 
 **Test d'absence de boucles infinies :**
 
-Vérifier qu'aucune évaluation n'entre dans une boucle infinie, même dans des cas limites.
+VÃ©rifier qu'aucune Ã©valuation n'entre dans une boucle infinie, mÃªme dans des cas limites.
 
-**Test de scalabilité conceptuelle :**
+**Test de scalabilitÃ© conceptuelle :**
 
-Vérifier que le comportement reste cohérent et déterministe même avec un grand nombre de politiques.
+VÃ©rifier que le comportement reste cohÃ©rent et dÃ©terministe mÃªme avec un grand nombre de politiques.
 
-**Test de déterminisme indépendant du temps :**
+**Test de dÃ©terminisme indÃ©pendant du temps :**
 
-Vérifier que le déterminisme est préservé indépendamment du temps d'exécution.
+VÃ©rifier que le dÃ©terminisme est prÃ©servÃ© indÃ©pendamment du temps d'exÃ©cution.
 
-### 6.4. Critères de validation
+### 6.4. CritÃ¨res de validation
 
 **V-PERF-1 : Terminaison garantie**
 
-Tous les tests de terminaison doivent réussir.
+Tous les tests de terminaison doivent rÃ©ussir.
 
 **V-PERF-2 : Absence de boucles infinies**
 
-Aucun test ne doit détecter de boucle infinie.
+Aucun test ne doit dÃ©tecter de boucle infinie.
 
-**V-PERF-3 : Scalabilité conceptuelle**
+**V-PERF-3 : ScalabilitÃ© conceptuelle**
 
-Les tests de scalabilité conceptuelle doivent réussir.
+Les tests de scalabilitÃ© conceptuelle doivent rÃ©ussir.
 
-**V-PERF-4 : Déterminisme préservé**
+**V-PERF-4 : DÃ©terminisme prÃ©servÃ©**
 
-Le déterminisme doit être préservé indépendamment du temps d'exécution.
+Le dÃ©terminisme doit Ãªtre prÃ©servÃ© indÃ©pendamment du temps d'exÃ©cution.
 
 ---
 
@@ -481,152 +481,152 @@ Le déterminisme doit être préservé indépendamment du temps d'exécution.
 
 **Relation :**
 
-Les tests définis dans ce contrat sont utilisés dans le processus de certification défini dans le Conformance & Certification Rules Contract.
+Les tests dÃ©finis dans ce contrat sont utilisÃ©s dans le processus de certification dÃ©fini dans le Conformance & Certification Rules Contract.
 
 **Phase 3 : Audit technique**
 
-Les tests d'invariants, de garanties, et de sécurité sont utilisés dans la Phase 3 (Audit technique) du processus de certification.
+Les tests d'invariants, de garanties, et de sÃ©curitÃ© sont utilisÃ©s dans la Phase 3 (Audit technique) du processus de certification.
 
-**Phase 4 : Tests de conformité**
+**Phase 4 : Tests de conformitÃ©**
 
-Les tests de conformité de la Phase 4 incluent les tests définis dans ce contrat.
+Les tests de conformitÃ© de la Phase 4 incluent les tests dÃ©finis dans ce contrat.
 
-### 7.2. Critères de conformité
+### 7.2. CritÃ¨res de conformitÃ©
 
 **CF-1 : Respect des invariants fondamentaux**
 
-Validé par les tests d'invariants (section 3).
+ValidÃ© par les tests d'invariants (section 3).
 
 **CF-2 : Absence de violations critiques**
 
-Validé par les tests de sécurité et les tests de non-régression (sections 4 et 5).
+ValidÃ© par les tests de sÃ©curitÃ© et les tests de non-rÃ©gression (sections 4 et 5).
 
 **CF-3 : Respect des garanties**
 
-Validé par les tests de garanties (section 2.2).
+ValidÃ© par les tests de garanties (section 2.2).
 
-**CC-1 : Déterminisme**
+**CC-1 : DÃ©terminisme**
 
-Validé par les tests de déterminisme (sections 2.1 et 6).
+ValidÃ© par les tests de dÃ©terminisme (sections 2.1 et 6).
 
 **CC-2 : Terminaison**
 
-Validé par les tests de terminaison (sections 2.1 et 6).
+ValidÃ© par les tests de terminaison (sections 2.1 et 6).
 
-**CC-3 : Pureté fonctionnelle**
+**CC-3 : PuretÃ© fonctionnelle**
 
-Validé par les tests d'isolation et de non-modification d'état (sections 2.1 et 5).
+ValidÃ© par les tests d'isolation et de non-modification d'Ã©tat (sections 2.1 et 5).
 
-**CT-1 : Traçabilité complète**
+**CT-1 : TraÃ§abilitÃ© complÃ¨te**
 
-Validé par les tests de traçabilité (section 3.2).
+ValidÃ© par les tests de traÃ§abilitÃ© (section 3.2).
 
-**CT-2 : Justification des décisions**
+**CT-2 : Justification des dÃ©cisions**
 
-Validé par les tests de justification (section 2.2).
+ValidÃ© par les tests de justification (section 2.2).
 
 ### 7.3. Processus de validation pour certification
 
-**Étape 1 : Exécution des tests**
+**Ã‰tape 1 : ExÃ©cution des tests**
 
-Tous les tests définis dans ce contrat doivent être exécutés.
+Tous les tests dÃ©finis dans ce contrat doivent Ãªtre exÃ©cutÃ©s.
 
-**Étape 2 : Vérification des résultats**
+**Ã‰tape 2 : VÃ©rification des rÃ©sultats**
 
-Tous les tests doivent réussir pour valider la conformité.
+Tous les tests doivent rÃ©ussir pour valider la conformitÃ©.
 
-**Étape 3 : Documentation**
+**Ã‰tape 3 : Documentation**
 
-Les résultats des tests doivent être documentés et fournis dans le processus de certification.
+Les rÃ©sultats des tests doivent Ãªtre documentÃ©s et fournis dans le processus de certification.
 
-**Étape 4 : Décision de certification**
+**Ã‰tape 4 : DÃ©cision de certification**
 
-Les résultats des tests sont utilisés pour prendre la décision de certification.
+Les rÃ©sultats des tests sont utilisÃ©s pour prendre la dÃ©cision de certification.
 
 ---
 
-## 8. Règles de validation
+## 8. RÃ¨gles de validation
 
-### 8.1. Règles générales
+### 8.1. RÃ¨gles gÃ©nÃ©rales
 
-**R-VAL-1 : Complétude**
+**R-VAL-1 : ComplÃ©tude**
 
-Tous les invariants, garanties, et interdictions doivent être validés par au moins un test.
+Tous les invariants, garanties, et interdictions doivent Ãªtre validÃ©s par au moins un test.
 
-**R-VAL-2 : Reproductibilité**
+**R-VAL-2 : ReproductibilitÃ©**
 
-Tous les tests doivent être reproductibles : pour une entrée donnée, le résultat attendu est toujours le même.
+Tous les tests doivent Ãªtre reproductibles : pour une entrÃ©e donnÃ©e, le rÃ©sultat attendu est toujours le mÃªme.
 
 **R-VAL-3 : Documentation**
 
-Tous les tests doivent être documentés avec leur objectif, leurs critères de réussite, et leurs résultats.
+Tous les tests doivent Ãªtre documentÃ©s avec leur objectif, leurs critÃ¨res de rÃ©ussite, et leurs rÃ©sultats.
 
-**R-VAL-4 : Traçabilité**
+**R-VAL-4 : TraÃ§abilitÃ©**
 
-Tous les résultats de tests doivent être traçables et associés aux critères de conformité.
+Tous les rÃ©sultats de tests doivent Ãªtre traÃ§ables et associÃ©s aux critÃ¨res de conformitÃ©.
 
-### 8.2. Règles d'exécution
+### 8.2. RÃ¨gles d'exÃ©cution
 
-**R-EXEC-1 : Exécution avant validation**
+**R-EXEC-1 : ExÃ©cution avant validation**
 
-Tous les tests doivent être exécutés avant de valider une implémentation.
+Tous les tests doivent Ãªtre exÃ©cutÃ©s avant de valider une implÃ©mentation.
 
-**R-EXEC-2 : Tous les tests doivent réussir**
+**R-EXEC-2 : Tous les tests doivent rÃ©ussir**
 
-Tous les tests doivent réussir pour valider la conformité. Un seul test en échec invalide la conformité.
+Tous les tests doivent rÃ©ussir pour valider la conformitÃ©. Un seul test en Ã©chec invalide la conformitÃ©.
 
-**R-EXEC-3 : Exécution après modification**
+**R-EXEC-3 : ExÃ©cution aprÃ¨s modification**
 
-Après toute modification, tous les tests pertinents doivent être réexécutés.
+AprÃ¨s toute modification, tous les tests pertinents doivent Ãªtre rÃ©exÃ©cutÃ©s.
 
-**R-EXEC-4 : Exécution périodique**
+**R-EXEC-4 : ExÃ©cution pÃ©riodique**
 
-Les tests doivent être exécutés périodiquement pour maintenir la conformité.
+Les tests doivent Ãªtre exÃ©cutÃ©s pÃ©riodiquement pour maintenir la conformitÃ©.
 
-### 8.3. Règles de maintenance
+### 8.3. RÃ¨gles de maintenance
 
 **R-MAINT-1 : Ajout de tests**
 
-Lorsqu'un nouvel invariant, garantie, ou interdiction est ajouté, un test correspondant doit être créé.
+Lorsqu'un nouvel invariant, garantie, ou interdiction est ajoutÃ©, un test correspondant doit Ãªtre crÃ©Ã©.
 
-**R-MAINT-2 : Mise à jour des tests**
+**R-MAINT-2 : Mise Ã  jour des tests**
 
-Lorsqu'un contrat est modifié, les tests correspondants doivent être mis à jour.
+Lorsqu'un contrat est modifiÃ©, les tests correspondants doivent Ãªtre mis Ã  jour.
 
 **R-MAINT-3 : Suppression de tests**
 
-Un test ne doit être supprimé que si l'invariant, garantie, ou interdiction correspondant est supprimé.
+Un test ne doit Ãªtre supprimÃ© que si l'invariant, garantie, ou interdiction correspondant est supprimÃ©.
 
 ---
 
-## 9. Règles de fermeture du contrat
+## 9. RÃ¨gles de fermeture du contrat
 
-### 9.1. Contrat fermé
+### 9.1. Contrat fermÃ©
 
-Ce contrat est **fermé**. Seuls les types de tests, critères de validation, et méthodes explicitement définis sont valides.
+Ce contrat est **fermÃ©**. Seuls les types de tests, critÃ¨res de validation, et mÃ©thodes explicitement dÃ©finis sont valides.
 
 ### 9.2. Interdiction d'extension implicite
 
-Aucune extension implicite des types de tests ou des critères de validation n'est autorisée.
+Aucune extension implicite des types de tests ou des critÃ¨res de validation n'est autorisÃ©e.
 
-### 9.3. Aucun framework imposé
+### 9.3. Aucun framework imposÃ©
 
-Ce contrat ne impose aucun framework, outil, ou méthode d'implémentation. Seuls les objectifs et critères de validation sont définis.
+Ce contrat ne impose aucun framework, outil, ou mÃ©thode d'implÃ©mentation. Seuls les objectifs et critÃ¨res de validation sont dÃ©finis.
 
 ---
 
 ## 10. Conclusion contractuelle
 
-Ce contrat établit de manière définitive et non négociable les règles de test et de validation de StrongFather.
+Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable les rÃ¨gles de test et de validation de StrongFather.
 
 Il garantit que :
-- les types de tests requis sont définis,
-- les critères de validation sont explicites,
-- les méthodes de validation sont conceptuelles,
-- les liens avec la certification sont établis,
-- le contrat est fermé et non extensible implicitement.
+- les types de tests requis sont dÃ©finis,
+- les critÃ¨res de validation sont explicites,
+- les mÃ©thodes de validation sont conceptuelles,
+- les liens avec la certification sont Ã©tablis,
+- le contrat est fermÃ© et non extensible implicitement.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
 
 ---
 
@@ -634,67 +634,67 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
 
 ### 11.1. Cas conformes
 
-Les cas suivants sont **conformes** à ce contrat :
+Les cas suivants sont **conformes** Ã  ce contrat :
 
-1. **Validation complète** : Tous les tests définis sont exécutés et réussissent, validant la conformité.
+1. **Validation complÃ¨te** : Tous les tests dÃ©finis sont exÃ©cutÃ©s et rÃ©ussissent, validant la conformitÃ©.
 
-2. **Tests de non-régression** : Les modifications sont validées par les tests de non-régression avant validation.
+2. **Tests de non-rÃ©gression** : Les modifications sont validÃ©es par les tests de non-rÃ©gression avant validation.
 
-3. **Tests de sécurité** : Toutes les menaces identifiées sont testées et mitigées.
+3. **Tests de sÃ©curitÃ©** : Toutes les menaces identifiÃ©es sont testÃ©es et mitigÃ©es.
 
 ### 11.2. Cas de violation
 
 Les cas suivants **violent** ce contrat :
 
-1. **Tests manquants** : Un invariant, garantie, ou interdiction n'est pas testé. Viole R-VAL-1.
+1. **Tests manquants** : Un invariant, garantie, ou interdiction n'est pas testÃ©. Viole R-VAL-1.
 
-2. **Tests en échec** : Un test échoue mais l'implémentation est validée. Viole R-EXEC-2.
+2. **Tests en Ã©chec** : Un test Ã©choue mais l'implÃ©mentation est validÃ©e. Viole R-EXEC-2.
 
 3. **Tests non reproductibles** : Un test n'est pas reproductible. Viole R-VAL-2.
 
 ---
 
-**Document créé le :** 2026-01-26  
+**Document crÃ©Ã© le :** 2026-01-26  
 **Version :** 1.0  
-**Statut :** FONDATION — Contrat normatif validé  
-**Référence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
-**Type :** Règles de test et validation non négociables
+**Statut :** FONDATION â€” Contrat normatif validÃ©  
+**RÃ©fÃ©rence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
+**Type :** RÃ¨gles de test et validation non nÃ©gociables
 
 ---
 
-## 12. Mini log de génération
+## 12. Mini log de gÃ©nÃ©ration
 
-### Décision éditoriale E1 : Nature conceptuelle des tests
+### DÃ©cision Ã©ditoriale E1 : Nature conceptuelle des tests
 
-**Décision prise :** Les tests sont définis de manière conceptuelle, sans imposer de framework ou d'outil.
+**DÃ©cision prise :** Les tests sont dÃ©finis de maniÃ¨re conceptuelle, sans imposer de framework ou d'outil.
 
-**Application :** Section 1.4 (Principes de test) et section 9.3 (Aucun framework imposé) établissent que seuls les objectifs et critères sont définis.
+**Application :** Section 1.4 (Principes de test) et section 9.3 (Aucun framework imposÃ©) Ã©tablissent que seuls les objectifs et critÃ¨res sont dÃ©finis.
 
-### Décision éditoriale E2 : Tests de performance conceptuels
+### DÃ©cision Ã©ditoriale E2 : Tests de performance conceptuels
 
-**Décision prise :** Les tests de performance sont conceptuels et valident des propriétés (terminaison, absence de boucles infinies), pas des métriques absolues.
+**DÃ©cision prise :** Les tests de performance sont conceptuels et valident des propriÃ©tÃ©s (terminaison, absence de boucles infinies), pas des mÃ©triques absolues.
 
-**Application :** Section 6 définit les tests de performance comme conceptuels, sans métriques absolues.
+**Application :** Section 6 dÃ©finit les tests de performance comme conceptuels, sans mÃ©triques absolues.
 
-### Décision éditoriale E3 : Lien avec certification
+### DÃ©cision Ã©ditoriale E3 : Lien avec certification
 
-**Décision prise :** Les tests sont explicitement liés au processus de certification défini dans le Conformance & Certification Rules Contract.
+**DÃ©cision prise :** Les tests sont explicitement liÃ©s au processus de certification dÃ©fini dans le Conformance & Certification Rules Contract.
 
-**Application :** Section 7 établit les liens entre les tests et les phases de certification.
+**Application :** Section 7 Ã©tablit les liens entre les tests et les phases de certification.
 
-### Vérification de cohérence
+### VÃ©rification de cohÃ©rence
 
-**Vérification effectuée :**
-- ✅ Cohérence avec Conformance & Certification Rules : Confirmée (section 7)
-- ✅ Cohérence avec Invariants & Guarantees : Confirmée (sections 2.1, 3)
-- ✅ Cohérence avec Security & Threat Model : Confirmée (section 5)
-- ✅ Cohérence avec Performance & Scalability : Confirmée (section 6)
+**VÃ©rification effectuÃ©e :**
+- âœ… CohÃ©rence avec Conformance & Certification Rules : ConfirmÃ©e (section 7)
+- âœ… CohÃ©rence avec Invariants & Guarantees : ConfirmÃ©e (sections 2.1, 3)
+- âœ… CohÃ©rence avec Security & Threat Model : ConfirmÃ©e (section 5)
+- âœ… CohÃ©rence avec Performance & Scalability : ConfirmÃ©e (section 6)
 
-**Conclusion :** Aucune contradiction détectée.
+**Conclusion :** Aucune contradiction dÃ©tectÃ©e.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
+*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
 
 ---
 
@@ -704,7 +704,7 @@ Les cas suivants **violent** ce contrat :
 
 Tout code implemente pour StrongFather DOIT etre balise selon le protocole MSCM v1.
 
-**Reference :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](../../../protocols/Miyukini%20Prompt%20Protocol%20-%20MIP%20v1%20MSCM%20Index%20Protocol.md)
+**Reference :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md)
 
 **Obligations minimales :**
 - Chaque bloc fonctionnel DOIT avoir un identifiant unique (`@id`)
@@ -726,3 +726,4 @@ Avant toute livraison, verifier :
 - [ ] Les identifiants sont uniques globalement
 - [ ] Les couches (layer) sont coherentes avec l'architecture
 - [ ] L'index MIP peut etre regenere sans erreur
+

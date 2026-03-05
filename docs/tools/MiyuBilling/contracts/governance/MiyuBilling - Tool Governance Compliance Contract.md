@@ -1,23 +1,24 @@
-# MiyuBilling — Tool Governance Compliance Contract
+﻿# MiyuBilling â€” Tool Governance Compliance Contract
 
 ## Contexte
 
-Conformité aux obligations communes : [Master Butler - Tool Governance Compliance Template](../../../../core/MasterButler/contracts/tools/Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
+ConformitÃ© aux obligations communes : [Master Butler - Tool Governance Compliance Template](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
 
 **ToolkitId :** `toolkit.billing.saas`
 
 ---
 
-## Obligations spécifiques MiyuBilling
+## Obligations spÃ©cifiques MiyuBilling
 
-- **Décision** (création souscription, enregistrement paiement, résiliation) = StrongFather ; aucun Tool n'exécute de décision métier.
-- **Toute écriture** (souscription, facture, paiement) = **WriteIntent** vers KindMother ; aucun accès direct à la persistance depuis le kit.
-- **Multi-tenant :** `tool.billing.tenant.resolve` fournit la résolution du contexte tenant (identifiant, périmètre) ; l'isolation des données par tenant relève de KindMother et Border Guard.
-- **Niveau de sécurité :** WorrySentinel applique le niveau facturation ; liste factures 1–2, création souscription / enregistrement paiement 2–3.
-- **Schéma et périmètre** (offres, souscriptions, factures, paiements) = KindMother ; le kit ne modifie pas le schéma.
+- **DÃ©cision** (crÃ©ation souscription, enregistrement paiement, rÃ©siliation) = StrongFather ; aucun Tool n'exÃ©cute de dÃ©cision mÃ©tier.
+- **Toute Ã©criture** (souscription, facture, paiement) = **WriteIntent** vers KindMother ; aucun accÃ¨s direct Ã  la persistance depuis le kit.
+- **Multi-tenant :** `tool.billing.tenant.resolve` fournit la rÃ©solution du contexte tenant (identifiant, pÃ©rimÃ¨tre) ; l'isolation des donnÃ©es par tenant relÃ¨ve de KindMother et Border Guard.
+- **Niveau de sÃ©curitÃ© :** WorrySentinel applique le niveau facturation ; liste factures 1â€“2, crÃ©ation souscription / enregistrement paiement 2â€“3.
+- **SchÃ©ma et pÃ©rimÃ¨tre** (offres, souscriptions, factures, paiements) = KindMother ; le kit ne modifie pas le schÃ©ma.
 
 ---
 
-**Date de création :** 2026-01-30  
+**Date de crÃ©ation :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Contrat de conformité
+**Statut :** Contrat de conformitÃ©
+

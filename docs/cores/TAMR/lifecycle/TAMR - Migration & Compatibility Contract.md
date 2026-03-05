@@ -1,4 +1,4 @@
-# TAMR - Migration & Compatibility Contract
+﻿# TAMR - Migration & Compatibility Contract
 
 ## 1. Introduction
 
@@ -24,7 +24,7 @@ Ce document est **contractuel, normatif, et de statut FONDATION**.
 - [TAMR - Documentation Fondatrice](../foundation/TAMR%20-%20Documentation%20Fondatrice.md)
 - [TAMR - Versioning & Evolution Contract](./TAMR%20-%20Versioning%20&%20Evolution%20Contract.md)
 - [TAMR - Integration Readiness Contract](../architecture/TAMR%20-%20Integration%20Readiness%20Contract.md)
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
@@ -47,7 +47,7 @@ L'objectif est de :
 
 ### 2.3. Contraintes
 
-- **Continuité** : Les interventions existantes doivent pouvoir etre mappees vers les types TAMR sans rupture.
+- **ContinuitÃ©** : Les interventions existantes doivent pouvoir etre mappees vers les types TAMR sans rupture.
 - **Compatibilite** : Les traces historiques (si elles existent) doivent rester lisibles ou migrables.
 - **Progression graduelle** : L'adoption peut etre progressive (par processus ou par type d'intervention).
 
@@ -69,7 +69,7 @@ L'objectif est de :
 
 ### 3.3. Phase 3 - Conformite
 
-1. Verifier les invariants INV-TAMR-* (traçabilite, responsabilite, limites infranchissables, justification override, escalade non bloquante).
+1. Verifier les invariants INV-TAMR-* (traÃ§abilite, responsabilite, limites infranchissables, justification override, escalade non bloquante).
 2. Valider l'adaptation aux niveaux de confiance (T0-T4) et niveaux de securite (0-4) selon [TAMR - Security Contract](../contracts/security/TAMR%20-%20Security%20Contract.md).
 
 ---
@@ -105,3 +105,4 @@ Les migrations vers ou entre versions TAMR DOIVENT preserver la conformite aux L
 **Date :** 2026-01-28  
 **Statut :** FONDATION  
 **Reference :** TAMR Documentation Fondatrice, Versioning & Evolution Contract
+

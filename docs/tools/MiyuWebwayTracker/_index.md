@@ -1,16 +1,16 @@
-# MiyuWebwayTracker — Index de navigation
+﻿# MiyuWebwayTracker â€” Index de navigation
 
 ## Contexte
 
-**MiyuWebwayTracker** est le **Kit d'Outils Tracker Webway (MWS)** pour tenir le rôle Tracker (recevoir, valider, répondre à la découverte, maintenir listes de statuts). Aligné sur [Miyukini Webway System - Outils et Opérateurs](../../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Outils%20et%20Operateurs.md).
+**MiyuWebwayTracker** est le **Kit d'Outils Tracker Webway (MWS)** pour tenir le rÃ´le Tracker (recevoir, valider, rÃ©pondre Ã  la dÃ©couverte, maintenir listes de statuts). AlignÃ© sur [Miyukini Webway System - Outils et OpÃ©rateurs](..//..//miyukini-webway-system//reference//_index.md).
 
 **Strate :** 6 (Tools & Toolkits)  
 **ToolkitId :** `toolkit.webway.tracker`
 
-## Portée / Scope
+## PortÃ©e / Scope
 
 - Index de navigation pour toute la documentation du Kit MiyuWebwayTracker.
-- Liens vers les documents fondateurs, référence outils, contrats de gouvernance et contrats de sécurité (systèmes passifs et actifs).
+- Liens vers les documents fondateurs, rÃ©fÃ©rence outils, contrats de gouvernance et contrats de sÃ©curitÃ© (systÃ¨mes passifs et actifs).
 
 ---
 
@@ -18,12 +18,13 @@
 
 | Document | Description |
 |----------|-------------|
-| [Documentation Fondatrice](./MiyuWebwayTracker%20-%20Documentation%20Fondatrice.md) | Identité, définition canonique, ToolkitId, liste des outils composants, gouvernance |
-| [Reference Outils](./MiyuWebwayTracker%20-%20Reference%20Outils.md) | Liste exhaustive des Outils MWS : ToolId, action, niveau de sécurité |
-| [Tool Governance Compliance Contract](./contracts/governance/MiyuWebwayTracker%20-%20Tool%20Governance%20Compliance%20Contract.md) | Obligations de conformité |
-| [Passive Systems Contract](./contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md) | Contrat des systèmes passifs (validation, journalisation, signalement) |
-| [Active Systems Contract](./contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md) | Contrat des systèmes actifs (blocage, dégradation, alerte) |
+| [Documentation Fondatrice](./MiyuWebwayTracker%20-%20Documentation%20Fondatrice.md) | IdentitÃ©, dÃ©finition canonique, ToolkitId, liste des outils composants, gouvernance |
+| [Reference Outils](./MiyuWebwayTracker%20-%20Reference%20Outils.md) | Liste exhaustive des Outils MWS : ToolId, action, niveau de sÃ©curitÃ© |
+| [Tool Governance Compliance Contract](./contracts/governance/MiyuWebwayTracker%20-%20Tool%20Governance%20Compliance%20Contract.md) | Obligations de conformitÃ© |
+| [Passive Systems Contract](./contracts/security/MiyuWebwayTracker%20-%20Passive%20Systems%20Contract.md) | Contrat des systÃ¨mes passifs (validation, journalisation, signalement) |
+| [Active Systems Contract](./contracts/security/MiyuWebwayTracker%20-%20Active%20Systems%20Contract.md) | Contrat des systÃ¨mes actifs (blocage, dÃ©gradation, alerte) |
 
 ---
 
-**Référence conceptuelle :** [Miyukini Conceptual References - Tools et Toolkits](../../reference/Miyukini%20Conceptual%20References%20-%20Tools%20et%20Toolkits.md)
+**RÃ©fÃ©rence conceptuelle :** [Miyukini Conceptual References - Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)
+

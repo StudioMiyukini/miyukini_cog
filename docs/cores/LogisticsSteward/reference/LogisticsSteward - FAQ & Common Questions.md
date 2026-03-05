@@ -1,4 +1,4 @@
-# LogisticsSteward — FAQ & Common Questions
+﻿# LogisticsSteward â€” FAQ & Common Questions
 
 ## 1. Contexte
 
@@ -30,7 +30,7 @@ Ce document **ne couvre pas** :
 
 ### Q1 : Qu'est-ce que LogisticsSteward en une phrase ?
 
-**R :** LogisticsSteward est le core qui **gouverne l'usage des ressources** en decidant qui a droit a quoi, quand, et a quel niveau de priorite — sans jamais executer ni controler techniquement.
+**R :** LogisticsSteward est le core qui **gouverne l'usage des ressources** en decidant qui a droit a quoi, quand, et a quel niveau de priorite â€” sans jamais executer ni controler techniquement.
 
 ---
 
@@ -44,7 +44,7 @@ Ce document **ne couvre pas** :
 | **Controller** | Implique controle bas niveau | LogisticsSteward n'a aucun pouvoir technique |
 | **Steward** | Implique gouvernance et arbitrage | Exact : il gouverne selon des regles |
 
-Un intendant (steward) sait ce qui est disponible, qui peut utiliser quoi, et selon quelles regles — mais il ne fait pas le travail lui-meme.
+Un intendant (steward) sait ce qui est disponible, qui peut utiliser quoi, et selon quelles regles â€” mais il ne fait pas le travail lui-meme.
 
 ---
 
@@ -64,7 +64,7 @@ Cette question se decline en :
 
 ### Q4 : Dans la metaphore de l'Etat, quel ministere represente LogisticsSteward ?
 
-**R :** LogisticsSteward est le **ministere du budget et des ressources**. Il connait les regles d'allocation, sait qui peut utiliser quoi, definit les priorites et les limites — sans construire les routes (Kernel), appliquer les lois (StrongFather), ou livrer le courrier (BondingBrother).
+**R :** LogisticsSteward est le **ministere du budget et des ressources**. Il connait les regles d'allocation, sait qui peut utiliser quoi, definit les priorites et les limites â€” sans construire les routes (Kernel), appliquer les lois (StrongFather), ou livrer le courrier (BondingBrother).
 
 ---
 
@@ -185,7 +185,7 @@ WorrySentinel peut invalider un etat juge incoherent, demander un durcissement d
 
 **R :** Via **BondingBrother**, jamais directement.
 
-BondingBrother transporte les decisions d'arbitrage vers les entites concernees sans les interpreter. LogisticsSteward ne connait pas les operateurs directement — il produit des decisions, BondingBrother les livre.
+BondingBrother transporte les decisions d'arbitrage vers les entites concernees sans les interpreter. LogisticsSteward ne connait pas les operateurs directement â€” il produit des decisions, BondingBrother les livre.
 
 ---
 
@@ -195,8 +195,8 @@ BondingBrother transporte les decisions d'arbitrage vers les entites concernees 
 
 | Direction | Flux |
 |-----------|------|
-| Kernel → LogisticsSteward | Etat systeme abstrait (lecture seule) |
-| LogisticsSteward → Kernel | Decisions d'arbitrage a executer |
+| Kernel â†’ LogisticsSteward | Etat systeme abstrait (lecture seule) |
+| LogisticsSteward â†’ Kernel | Decisions d'arbitrage a executer |
 
 LogisticsSteward **consomme** l'etat, le Kernel **l'execute**. Jamais l'inverse. LogisticsSteward ne modifie jamais l'etat systeme.
 
@@ -562,13 +562,14 @@ Pour reference rapide, voici les invariants fondamentaux :
 - [LogisticsSteward - Examples & Use Cases](./LogisticsSteward%20-%20Examples%20&%20Use%20Cases.md)
 - [LogisticsSteward - Violations & Anti-Patterns](../contracts/governance/LogisticsSteward%20-%20Violations%20&%20Anti-Patterns.md)
 - [LogisticsSteward - Resource Arbitration Contract](../contracts/resources/LogisticsSteward%20-%20Resource%20Arbitration%20Contract.md)
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
-**Statut :** REFERENCE — Aide a la comprehension  
+**Statut :** REFERENCE â€” Aide a la comprehension  
 **Dependencies :**
 - [Documentation Fondatrice v1.0](../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md)
 - [Index de Navigation](../_index.md)
+

@@ -1,10 +1,10 @@
-# LogisticsSteward - Architecture & Flows
+﻿# LogisticsSteward - Architecture & Flows
 
 ## 1. Contexte
 
 Ce document decrit l'architecture conceptuelle interne de LogisticsSteward, ses composants structurels, et les flux d'arbitrage qui gouvernent l'allocation des ressources. Il complete la [Documentation Fondatrice](../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md) en detaillant **comment** LogisticsSteward est structure et **comment** les decisions d'arbitrage circulent, sans jamais remettre en question **pourquoi** il existe ou **ce qu'il fait**.
 
-Cette architecture respecte les [Lois d'Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md), notamment **LOI-1** (aucune dependance externe critique), **LOI-2** (isolement comme etat normal), et **LOI-5** (cout proportionnel au hardware).
+Cette architecture respecte les [Lois d'Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md), notamment **LOI-1** (aucune dependance externe critique), **LOI-2** (isolement comme etat normal), et **LOI-5** (cout proportionnel au hardware).
 
 ## 2. Portee / Scope
 
@@ -27,40 +27,40 @@ Ce document **ne couvre pas** :
 
 ## 3. Positionnement dans la pyramide Miyukini
 
-LogisticsSteward est positionne en **Strate 3 — Gouvernance des Ressources**, entre le Kernel (infrastructure technique) et les Cores Systeme (autorites).
+LogisticsSteward est positionne en **Strate 3 â€” Gouvernance des Ressources**, entre le Kernel (infrastructure technique) et les Cores Systeme (autorites).
 
 ```
-┌──────────────────────────────────────────┐
-│ STRATE 9 — MiyukiniAdmin (EXCEPTION)     │
-│ Operateur Souverain d'administration     │
-└──────────────────────────────────────────┘
-          ▲
-          │ (hors pyramide)
-          │
-┌──────────────────────────────────────────┐
-│ STRATE 5 — Liaison                       │
-│ BondingBrother                           │
-└──────────────────────────────────────────┘
-          ▲
-┌──────────────────────────────────────────┐
-│ STRATE 4 — Cores Systeme                 │
-│ StrongFather, KindMother, WorrySentinel  │
-└──────────────────────────────────────────┘
-          ▲
-┌──────────────────────────────────────────┐
-│ STRATE 3 — Gouvernance Ressources        │  ◄── LogisticsSteward
-│ Arbitrage, Quotas, Priorites             │
-└──────────────────────────────────────────┘
-          ▲
-┌──────────────────────────────────────────┐
-│ STRATE 2 — Capacites                     │
-│ MasterButler                             │
-└──────────────────────────────────────────┘
-          ▲
-┌──────────────────────────────────────────┐
-│ STRATE 1 — Kernel                        │
-│ Infrastructure technique                 │
-└──────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 9 â€” MiyukiniAdmin (EXCEPTION)     â”‚
+â”‚ Operateur Souverain d'administration     â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+          â”‚ (hors pyramide)
+          â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 5 â€” Liaison                       â”‚
+â”‚ BondingBrother                           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 4 â€” Cores Systeme                 â”‚
+â”‚ StrongFather, KindMother, WorrySentinel  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 3 â€” Gouvernance Ressources        â”‚  â—„â”€â”€ LogisticsSteward
+â”‚ Arbitrage, Quotas, Priorites             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 2 â€” Capacites                     â”‚
+â”‚ MasterButler                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â–²
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ STRATE 1 â€” Kernel                        â”‚
+â”‚ Infrastructure technique                 â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Regles fondamentales de positionnement :**
@@ -77,19 +77,19 @@ LogisticsSteward est positionne en **Strate 3 — Gouvernance des Ressources**, 
 LogisticsSteward est organise en **quatre couches conceptuelles**, chacune avec une responsabilite unique et des interfaces claires.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    COUCHE DECISION                          │
-│    (Generation des decisions d'arbitrage, determinisme)     │
-├─────────────────────────────────────────────────────────────┤
-│                    COUCHE EVALUATION                        │
-│    (Application des regles, calcul des priorites)           │
-├─────────────────────────────────────────────────────────────┤
-│                    COUCHE CONTEXTE                          │
-│    (Lecture etat systeme, resolution contexte entite)       │
-├─────────────────────────────────────────────────────────────┤
-│                    COUCHE RECEPTION                         │
-│    (Entree des demandes, validation structurelle)           │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    COUCHE DECISION                          â”‚
+â”‚    (Generation des decisions d'arbitrage, determinisme)     â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                    COUCHE EVALUATION                        â”‚
+â”‚    (Application des regles, calcul des priorites)           â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                    COUCHE CONTEXTE                          â”‚
+â”‚    (Lecture etat systeme, resolution contexte entite)       â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                    COUCHE RECEPTION                         â”‚
+â”‚    (Entree des demandes, validation structurelle)           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 4.1 Couche Reception
@@ -237,158 +237,158 @@ Ces composants servent plusieurs couches et assurent des fonctions critiques non
 
 ```
 Entite (Operateur / Service / Equipe)
-         │
-         │ Demande de ressource
-         ▼
-┌─────────────────────┐
-│   RequestReceiver   │ ◄── Reception
-└─────────┬───────────┘
-          │ Demande validee structurellement
-          ▼
-┌─────────────────────┐
-│  StructuralValidator│ ◄── Validation forme
-└─────────┬───────────┘
-          │ Demande conforme
-          ▼
-┌─────────────────────┐
-│  EntityIdentifier   │ ◄── Identification demandeur
-└─────────┬───────────┘
-          │ Entite identifiee
-          ▼
-┌─────────────────────┐
-│   RequestLogger     │ ◄── Journalisation demande
-└─────────┬───────────┘
-          │
-          ▼
-┌─────────────────────┐
-│  SystemStateReader  │ ◄── Lecture etat systeme (Kernel)
-└─────────┬───────────┘
-          │ Etat systeme abstrait
-          ▼
-┌─────────────────────┐
-│EntityContextResolver│ ◄── Resolution contexte entite
-└─────────┬───────────┘
-          │ Contexte entite
-          ▼
-┌─────────────────────┐
-│DegradationLevelReader│ ◄── Niveau degradation actuel
-└─────────┬───────────┘
-          │ Niveau degradation
-          ▼
-┌─────────────────────┐
-│  ContextAssembler   │ ◄── Assemblage contexte complet
-└─────────┬───────────┘
-          │ Contexte complet
-          ▼
-┌─────────────────────┐
-│     RuleEngine      │ ◄── Evaluation regles
-└─────────┬───────────┘
-          │ Regles applicables
-          ▼
-┌─────────────────────┐
-│   QuotaEvaluator    │ ◄── Verification quotas
-└─────────┬───────────┘
-          │ Quota OK / Depasse
-          ▼
-┌─────────────────────┐
-│ PriorityCalculator  │ ◄── Calcul priorite effective
-└─────────┬───────────┘
-          │ Priorite calculee
-          ▼
-┌─────────────────────┐
-│  ConflictResolver   │ ◄── Resolution conflits
-└─────────┬───────────┘
-          │ Conflits resolus
-          ▼
-┌─────────────────────┐
-│ DegradationApplier  │ ◄── Application restrictions degradation
-└─────────┬───────────┘
-          │ Restrictions appliquees
-          ▼
-┌─────────────────────┐
-│ DecisionGenerator   │ ◄── Generation decision
-└─────────┬───────────┘
-          │ Decision brute
-          ▼
-┌─────────────────────┐
-│  DecisionFormatter  │ ◄── Formatage decision
-└─────────┬───────────┘
-          │ Decision formatee
-          ▼
-┌─────────────────────┐
-│  DecisionLogger     │ ◄── Journalisation decision
-└─────────┬───────────┘
-          │ Decision journalisee
-          ▼
-┌─────────────────────┐
-│ ValidationPreparer  │ ◄── Preparation validation
-└─────────┬───────────┘
-          │
-          ▼
-    ┌─────────────┐
-    │ StrongFather│ ◄── Validation externe
-    └─────────────┘
-          │
-          │ Validation / Invalidation
-          ▼
-    ┌─────────────┐
-    │   Kernel    │ ◄── Execution (si valide)
-    └─────────────┘
+         â”‚
+         â”‚ Demande de ressource
+         â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚   RequestReceiver   â”‚ â—„â”€â”€ Reception
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Demande validee structurellement
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  StructuralValidatorâ”‚ â—„â”€â”€ Validation forme
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Demande conforme
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  EntityIdentifier   â”‚ â—„â”€â”€ Identification demandeur
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Entite identifiee
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚   RequestLogger     â”‚ â—„â”€â”€ Journalisation demande
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  SystemStateReader  â”‚ â—„â”€â”€ Lecture etat systeme (Kernel)
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Etat systeme abstrait
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚EntityContextResolverâ”‚ â—„â”€â”€ Resolution contexte entite
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Contexte entite
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚DegradationLevelReaderâ”‚ â—„â”€â”€ Niveau degradation actuel
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Niveau degradation
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  ContextAssembler   â”‚ â—„â”€â”€ Assemblage contexte complet
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Contexte complet
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚     RuleEngine      â”‚ â—„â”€â”€ Evaluation regles
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Regles applicables
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚   QuotaEvaluator    â”‚ â—„â”€â”€ Verification quotas
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Quota OK / Depasse
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ PriorityCalculator  â”‚ â—„â”€â”€ Calcul priorite effective
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Priorite calculee
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  ConflictResolver   â”‚ â—„â”€â”€ Resolution conflits
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Conflits resolus
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ DegradationApplier  â”‚ â—„â”€â”€ Application restrictions degradation
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Restrictions appliquees
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ DecisionGenerator   â”‚ â—„â”€â”€ Generation decision
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Decision brute
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  DecisionFormatter  â”‚ â—„â”€â”€ Formatage decision
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Decision formatee
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  DecisionLogger     â”‚ â—„â”€â”€ Journalisation decision
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Decision journalisee
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ ValidationPreparer  â”‚ â—„â”€â”€ Preparation validation
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚
+          â–¼
+    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+    â”‚ StrongFatherâ”‚ â—„â”€â”€ Validation externe
+    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚
+          â”‚ Validation / Invalidation
+          â–¼
+    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+    â”‚   Kernel    â”‚ â—„â”€â”€ Execution (si valide)
+    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 6.2 Flux de consultation : Interrogation quota/priorite
 
 ```
 Entite
-   │
-   │ Interrogation (quota ou priorite)
-   ▼
-┌─────────────────────┐
-│   RequestReceiver   │ ◄── Reception
-└─────────┬───────────┘
-          │
-          ▼
-┌─────────────────────┐
-│  EntityIdentifier   │ ◄── Identification
-└─────────┬───────────┘
-          │
-          ▼
-┌─────────────────────┐
-│EntityContextResolver│ ◄── Resolution contexte
-└─────────┬───────────┘
-          │
-          ▼
-┌─────────────────────┐
-│   QuotaEvaluator /  │ ◄── Lecture valeurs actuelles
-│ PriorityCalculator  │
-└─────────┬───────────┘
-          │
-          ▼
+   â”‚
+   â”‚ Interrogation (quota ou priorite)
+   â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚   RequestReceiver   â”‚ â—„â”€â”€ Reception
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  EntityIdentifier   â”‚ â—„â”€â”€ Identification
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚EntityContextResolverâ”‚ â—„â”€â”€ Resolution contexte
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚   QuotaEvaluator /  â”‚ â—„â”€â”€ Lecture valeurs actuelles
+â”‚ PriorityCalculator  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚
+          â–¼
    Reponse (valeurs actuelles)
 ```
 
 ### 6.3 Flux de degradation : Declenchement par WorrySentinel
 
 ```
-┌─────────────────────┐
-│   WorrySentinel     │ ◄── Detection anomalie
-└─────────┬───────────┘
-          │ Alerte durcissement
-          ▼
-┌─────────────────────┐
-│LogisticsSteward     │
-│(DegradationApplier) │ ◄── Reception alerte
-└─────────┬───────────┘
-          │ Elevation niveau degradation
-          ▼
-┌─────────────────────┐
-│   RuleEngine        │ ◄── Activation regles de degradation
-└─────────┬───────────┘
-          │ Nouvelles restrictions actives
-          ▼
-┌─────────────────────┐
-│  DecisionGenerator  │ ◄── Decisions futures appliquent degradation
-└─────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚   WorrySentinel     â”‚ â—„â”€â”€ Detection anomalie
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Alerte durcissement
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚LogisticsSteward     â”‚
+â”‚(DegradationApplier) â”‚ â—„â”€â”€ Reception alerte
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Elevation niveau degradation
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚   RuleEngine        â”‚ â—„â”€â”€ Activation regles de degradation
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+          â”‚ Nouvelles restrictions actives
+          â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  DecisionGenerator  â”‚ â—„â”€â”€ Decisions futures appliquent degradation
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
@@ -399,17 +399,17 @@ LogisticsSteward produit des decisions d'arbitrage normalisees. Chaque decision 
 
 | Champ | Description | Obligatoire |
 |-------|-------------|-------------|
-| `decision_id` | Identifiant unique de la decision | ✅ |
-| `timestamp` | Horodatage de la decision | ✅ |
-| `entity_id` | Identifiant de l'entite concernee | ✅ |
-| `resource_type` | Type de ressource demandee | ✅ |
-| `decision_type` | Type de decision (voir ci-dessous) | ✅ |
-| `priority_applied` | Niveau de priorite applique | ✅ |
-| `quota_remaining` | Quota restant apres decision | ✅ |
-| `conditions` | Conditions associees a la decision | ❌ |
-| `justification` | Raison de la decision | ✅ |
-| `degradation_level` | Niveau de degradation au moment de la decision | ✅ |
-| `rules_applied` | Liste des regles appliquees | ✅ |
+| `decision_id` | Identifiant unique de la decision | âœ… |
+| `timestamp` | Horodatage de la decision | âœ… |
+| `entity_id` | Identifiant de l'entite concernee | âœ… |
+| `resource_type` | Type de ressource demandee | âœ… |
+| `decision_type` | Type de decision (voir ci-dessous) | âœ… |
+| `priority_applied` | Niveau de priorite applique | âœ… |
+| `quota_remaining` | Quota restant apres decision | âœ… |
+| `conditions` | Conditions associees a la decision | âŒ |
+| `justification` | Raison de la decision | âœ… |
+| `degradation_level` | Niveau de degradation au moment de la decision | âœ… |
+| `rules_applied` | Liste des regles appliquees | âœ… |
 
 ### 7.1 Types de decisions
 
@@ -486,7 +486,7 @@ LogisticsSteward peut etre etendu **uniquement** aux points suivants :
 
 Ces elements sont **figes** et non extensibles :
 
-- Structure en 4 couches (Reception → Contexte → Evaluation → Decision)
+- Structure en 4 couches (Reception â†’ Contexte â†’ Evaluation â†’ Decision)
 - Flux de donnees (direction et ordre des etapes)
 - Principe de validation externe (StrongFather)
 - Separation Kernel/LogisticsSteward
@@ -500,45 +500,45 @@ Ces elements sont **figes** et non extensibles :
 ### 11.1 Dependances internes (entre composants)
 
 ```
-RequestReceiver ──────► StructuralValidator
-                              │
-                              ▼
+RequestReceiver â”€â”€â”€â”€â”€â”€â–º StructuralValidator
+                              â”‚
+                              â–¼
                        EntityIdentifier
-                              │
-                              ▼
-                       SystemStateReader ◄──── Kernel (externe)
-                              │
-                              ▼
+                              â”‚
+                              â–¼
+                       SystemStateReader â—„â”€â”€â”€â”€ Kernel (externe)
+                              â”‚
+                              â–¼
                     EntityContextResolver
-                              │
-                              ▼
+                              â”‚
+                              â–¼
                        ContextAssembler
-                              │
-                              ▼
-                         RuleEngine ◄──── RuleRepository (config)
-                              │
-                              ▼
+                              â”‚
+                              â–¼
+                         RuleEngine â—„â”€â”€â”€â”€ RuleRepository (config)
+                              â”‚
+                              â–¼
                        QuotaEvaluator
-                              │
-                              ▼
+                              â”‚
+                              â–¼
                       PriorityCalculator
-                              │
-                              ▼
+                              â”‚
+                              â–¼
                       DecisionGenerator
-                              │
-                              ▼
-                     ValidationPreparer ────► StrongFather (externe)
+                              â”‚
+                              â–¼
+                     ValidationPreparer â”€â”€â”€â”€â–º StrongFather (externe)
 ```
 
 ### 11.2 Dependances externes (vers l'ecosysteme)
 
 | Dependance | Type | Direction | Criticite |
 |------------|------|-----------|-----------|
-| Kernel | Lecture etat systeme | LS ← K | Haute |
-| StrongFather | Validation decisions | LS → SF | Critique |
-| WorrySentinel | Alertes durcissement | WS → LS | Haute |
-| BondingBrother | Transport decisions | LS → BB | Haute |
-| MasterButler | Catalogue capacites | MB → LS | Moyenne |
+| Kernel | Lecture etat systeme | LS â† K | Haute |
+| StrongFather | Validation decisions | LS â†’ SF | Critique |
+| WorrySentinel | Alertes durcissement | WS â†’ LS | Haute |
+| BondingBrother | Transport decisions | LS â†’ BB | Haute |
+| MasterButler | Catalogue capacites | MB â†’ LS | Moyenne |
 
 ### 11.3 Absence de dependances
 
@@ -584,13 +584,13 @@ En mode completement isole :
 
 | Core | Relation | Direction | Description |
 |------|----------|-----------|-------------|
-| **Kernel** | Fournisseur etat | K → LS | Fournit l'etat systeme abstrait certifie |
-| **StrongFather** | Validateur | LS ↔ SF | Valide ou invalide les decisions |
-| **WorrySentinel** | Surveillant | WS → LS | Declenche durcissement des regles |
-| **MasterButler** | Catalogue | MB → LS | Expose les capacites a limiter |
-| **BondingBrother** | Transporteur | LS → BB | Transporte les decisions validees |
-| **KindMother** | Indirect | — | Aucune relation directe |
-| **MiyukiniAdmin** | Demandeur privilegie | MA → LS | Peut demander priorites maximales |
+| **Kernel** | Fournisseur etat | K â†’ LS | Fournit l'etat systeme abstrait certifie |
+| **StrongFather** | Validateur | LS â†” SF | Valide ou invalide les decisions |
+| **WorrySentinel** | Surveillant | WS â†’ LS | Declenche durcissement des regles |
+| **MasterButler** | Catalogue | MB â†’ LS | Expose les capacites a limiter |
+| **BondingBrother** | Transporteur | LS â†’ BB | Transporte les decisions validees |
+| **KindMother** | Indirect | â€” | Aucune relation directe |
+| **MiyukiniAdmin** | Demandeur privilegie | MA â†’ LS | Peut demander priorites maximales |
 
 ---
 
@@ -620,7 +620,7 @@ En mode completement isole :
 
 ## 15. Phrase fondatrice architecturale
 
-> **LogisticsSteward est structure pour garantir que chaque decision d'arbitrage est explicite, deterministe, tracable, et validee externement — sans jamais executer ni controler techniquement.**
+> **LogisticsSteward est structure pour garantir que chaque decision d'arbitrage est explicite, deterministe, tracable, et validee externement â€” sans jamais executer ni controler techniquement.**
 
 Cette phrase resume l'architecture : separation des couches (explicite), moteur de regles (deterministe), journalisation (tracable), validation StrongFather (externe), lecture seule (pas d'execution).
 
@@ -642,12 +642,13 @@ Toute implementation de LogisticsSteward doit respecter cette architecture. Tout
 - [LogisticsSteward - Quota Definition Contract](../contracts/resources/LogisticsSteward%20-%20Quota%20Definition%20Contract.md)
 - [LogisticsSteward - Priority Management Contract](../contracts/resources/LogisticsSteward%20-%20Priority%20Management%20Contract.md)
 - [LogisticsSteward - Degradation Strategy Contract](../contracts/degradation/LogisticsSteward%20-%20Degradation%20Strategy%20Contract.md)
-- [Miyukini Conceptual References - Lois Autonomie Systeme](../../../reference/Miyukini%20Conceptual%20References%20-%20Lois%20Autonomie%20Systeme.md)
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
-**Statut :** ARCHITECTURE — Normatif  
+**Statut :** ARCHITECTURE â€” Normatif  
 **Dependance :** [Documentation Fondatrice v1.0.0](../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md)  
 **Reference :** Miyukini Core System v2.4
+

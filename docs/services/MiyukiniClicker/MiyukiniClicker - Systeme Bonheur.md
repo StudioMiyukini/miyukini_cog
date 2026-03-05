@@ -1,78 +1,79 @@
-# MiyuClicker — Système de bonheur (moral)
+﻿# MiyuClicker â€” SystÃ¨me de bonheur (moral)
 
 ## Contexte
 
-Ce document décrit le **système de bonheur** (moral) de la population dans MiyuClicker : définition, règles dynamiques, effets sur la population et Game Over. La métrique est affichée en **pourcentage (0–100)** dans l’UI, juste après les points de recherche.
+Ce document dÃ©crit le **systÃ¨me de bonheur** (moral) de la population dans MiyuClicker : dÃ©finition, rÃ¨gles dynamiques, effets sur la population et Game Over. La mÃ©trique est affichÃ©e en **pourcentage (0â€“100)** dans lâ€™UI, juste aprÃ¨s les points de recherche.
 
-## Portée / Scope
+## PortÃ©e / Scope
 
-- **Périmètre :** Bonheur = moral (0–1 en interne, 0–100 % en affichage) ; évolution selon nourriture ; Game Over après 7 jours à 0 nourriture ; affichage dynamique en barre.
-- **Référence code :** `state.moral`, `idlesim.tick` (évolution moral), `app.ui_bar` (Bonheur XX %).
+- **PÃ©rimÃ¨tre :** Bonheur = moral (0â€“1 en interne, 0â€“100 % en affichage) ; Ã©volution selon nourriture ; Game Over aprÃ¨s 7 jours Ã  0 nourriture ; affichage dynamique en barre.
+- **RÃ©fÃ©rence code :** `state.moral`, `idlesim.tick` (Ã©volution moral), `app.ui_bar` (Bonheur XX %).
 
 ---
 
-## 1. Définition
+## 1. DÃ©finition
 
 | Terme | Signification |
 |-------|----------------|
-| **Bonheur** | Métrique affichée à l’utilisateur (pourcentage 0–100). |
-| **Moral** | Variable interne (0–1) ; bonheur = moral × 100. |
+| **Bonheur** | MÃ©trique affichÃ©e Ã  lâ€™utilisateur (pourcentage 0â€“100). |
+| **Moral** | Variable interne (0â€“1) ; bonheur = moral Ã— 100. |
 
-Le bonheur est une **métrique dynamique** : il évolue chaque tick en fonction des réserves de nourriture par rapport à la population.
+Le bonheur est une **mÃ©trique dynamique** : il Ã©volue chaque tick en fonction des rÃ©serves de nourriture par rapport Ã  la population.
 
 ---
 
-## 2. Règles d’évolution (par jour simulé)
+## 2. RÃ¨gles dâ€™Ã©volution (par jour simulÃ©)
 
-Consommation : **1 nourriture / personne / jour**. Les seuils ci-dessous s’appliquent **après** production et consommation du tick (nourriture = stock courant).
+Consommation : **1 nourriture / personne / jour**. Les seuils ci-dessous sâ€™appliquent **aprÃ¨s** production et consommation du tick (nourriture = stock courant).
 
 | Condition nourriture | Effet sur le moral (par jour jeu) |
 |----------------------|------------------------------------|
-| Nourriture ≥ population | Pas de baisse ; le moral peut remonter (ex. +2 %/j jusqu’à 100 %). |
-| Nourriture < population mais > population/2 | **−1 %/jour** (moral baisse). |
-| Nourriture ≤ population/2 | **−5 %/jour** (moral baisse forte). |
-| Nourriture ≤ 0 pendant plus de 7 jours | **Game Over** (mort du seigneur). |
+| Nourriture â‰¥ population | Pas de baisse ; le moral peut remonter (ex. +2 %/j jusquâ€™Ã  100 %). |
+| Nourriture < population mais > population/2 | **âˆ’1 %/jour** (moral baisse). |
+| Nourriture â‰¤ population/2 | **âˆ’5 %/jour** (moral baisse forte). |
+| Nourriture â‰¤ 0 pendant plus de 7 jours | **Game Over** (mort du seigneur). |
 
-- Moral plafonné à **0** et **1** (0 % et 100 %).
-- **Jours à 0 nourriture** : compteur cumulé tant que nourriture ≤ 0 ; remis à 0 dès que nourriture > 0.
+- Moral plafonnÃ© Ã  **0** et **1** (0 % et 100 %).
+- **Jours Ã  0 nourriture** : compteur cumulÃ© tant que nourriture â‰¤ 0 ; remis Ã  0 dÃ¨s que nourriture > 0.
 
 ---
 
 ## 3. Game Over
 
-- **Condition :** Nourriture à 0 (ou sous un seuil minimal) pendant **strictement plus de 7 jours** (en temps simulé).
-- **Effet :** Le seigneur (joueur) meurt → **Game Over**.
-- **Implémentation :** Champ `game_over: bool` dans l’état ; champ `jours_nourriture_zero: f64` pour cumuler les jours à 0. Quand `jours_nourriture_zero > 7`, on pose `game_over = true` et on affiche l’écran Game Over (pas de tick, pas de jeu).
+- **Condition :** Nourriture Ã  0 (ou sous un seuil minimal) pendant **strictement plus de 7 jours** (en temps simulÃ©).
+- **Effet :** Le seigneur (joueur) meurt â†’ **Game Over**.
+- **ImplÃ©mentation :** Champ `game_over: bool` dans lâ€™Ã©tat ; champ `jours_nourriture_zero: f64` pour cumuler les jours Ã  0. Quand `jours_nourriture_zero > 7`, on pose `game_over = true` et on affiche lâ€™Ã©cran Game Over (pas de tick, pas de jeu).
 
 ---
 
-## 4. Effets du bonheur sur la population (référence)
+## 4. Effets du bonheur sur la population (rÃ©fÃ©rence)
 
-- **Bonheur > 50 %** : la population peut augmenter (clic Village + éventuelle natalité).
-- **Bonheur ≤ 50 %** : la population ne peut plus augmenter (blocage croissance).
-- **Bonheur < 10 %** : la population diminue jusqu’à remonter au-dessus de 10 %.
+- **Bonheur > 50 %** : la population peut augmenter (clic Village + Ã©ventuelle natalitÃ©).
+- **Bonheur â‰¤ 50 %** : la population ne peut plus augmenter (blocage croissance).
+- **Bonheur < 10 %** : la population diminue jusquâ€™Ã  remonter au-dessus de 10 %.
 - **Bonheur > 90 %** : la population augmente plus vite (bonus).
 
-*(Détail d’implémentation : voir spécifications population / tick de réserve.)*
+*(DÃ©tail dâ€™implÃ©mentation : voir spÃ©cifications population / tick de rÃ©serve.)*
 
 ---
 
 ## 5. Affichage UI
 
-- **Emplacement :** Première ligne de la barre, **juste après** les points de **Recherche**.
-- **Format :** `Bonheur: XX %` (entier 0–100), métrique mise à jour à chaque frame (dynamique).
-- **Source :** `state.moral * 100.0` arrondi ou tronqué pour l’affichage.
+- **Emplacement :** PremiÃ¨re ligne de la barre, **juste aprÃ¨s** les points de **Recherche**.
+- **Format :** `Bonheur: XX %` (entier 0â€“100), mÃ©trique mise Ã  jour Ã  chaque frame (dynamique).
+- **Source :** `state.moral * 100.0` arrondi ou tronquÃ© pour lâ€™affichage.
 
 ---
 
 ## 6. Sauvegarde
 
-Les champs suivants sont persistés : `moral`, `fecondite`, `game_over`, `jours_nourriture_zero` (dans cap_moral ou meta selon structure). Chargement : valeurs par défaut si absent (rétrocompatibilité).
+Les champs suivants sont persistÃ©s : `moral`, `fecondite`, `game_over`, `jours_nourriture_zero` (dans cap_moral ou meta selon structure). Chargement : valeurs par dÃ©faut si absent (rÃ©trocompatibilitÃ©).
 
 ---
 
-## 7. Références
+## 7. RÃ©fÃ©rences
 
-- [MiyuClicker - MVP Ecrans et Mecaniques](MiyuClicker%20-%20MVP%20Ecrans%20et%20Mecaniques.md) — Barre et ressources.
-- [MiyuClicker - Guide Implementation MVP](MiyuClicker%20-%20Guide%20Implementation%20MVP.md) — Modèle d’état et tick.
+- [MiyuClicker - MVP Ecrans et Mecaniques](MiyukiniClicker%20-%20MVP%20Ecrans%20et%20Mecaniques.md) â€” Barre et ressources.
+- [MiyuClicker - Guide Implementation MVP](MiyukiniClicker%20-%20Guide%20Implementation%20MVP.md) â€” ModÃ¨le dâ€™Ã©tat et tick.
 - Code : `crates/miyuclicker/src/state.rs` (moral), `idlesim.rs` (tick moral), `app.rs` (ui_bar Bonheur).
+

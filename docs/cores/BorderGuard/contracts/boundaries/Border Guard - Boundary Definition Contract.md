@@ -1,364 +1,364 @@
-# Border Guard - Boundary Definition Contract
+﻿# Border Guard - Boundary Definition Contract
 
 ## 1. Contexte
 
-Ce document définit les **types de frontières** reconnus par Border Guard dans l'écosystème Miyukini. Il spécifie formellement ce qu'est une frontière, ses propriétés, ses caractéristiques, et la taxonomie complète des types de frontières.
+Ce document dÃ©finit les **types de frontiÃ¨res** reconnus par Border Guard dans l'Ã©cosystÃ¨me Miyukini. Il spÃ©cifie formellement ce qu'est une frontiÃ¨re, ses propriÃ©tÃ©s, ses caractÃ©ristiques, et la taxonomie complÃ¨te des types de frontiÃ¨res.
 
 **Document fondateur :** [Border Guard - Documentation Fondatrice](../../foundation/Border%20Guard%20-%20Documentation%20Fondatrice.md)
 
-**Statut contractuel :** Ce document est **contractuel, normatif, et non négociable**. Il dérive directement de la Documentation Fondatrice (Section 4 - Concepts fondamentaux : Frontière).
+**Statut contractuel :** Ce document est **contractuel, normatif, et non nÃ©gociable**. Il dÃ©rive directement de la Documentation Fondatrice (Section 4 - Concepts fondamentaux : FrontiÃ¨re).
 
 ---
 
-## 2. Portée / Scope
+## 2. PortÃ©e / Scope
 
-- **Applicable à :** Toute démarcation conceptuelle entre zones de confiance dans l'écosystème Miyukini
-- **Responsable :** Border Guard (responsabilité exclusive de définition des frontières - INV-BG-5)
-- **Consommateurs :** StrongFather (contexte de confiance), BondingBrother (application des règles), CaringNanny (état des frontières)
-- **Ne couvre pas :** L'application technique des frontières (responsabilité de BondingBrother)
-
----
-
-## 3. Définition canonique de la frontière
-
-### 3.1 Qu'est-ce qu'une frontière ?
-
-Une **frontière** est une démarcation conceptuelle qui sépare deux zones de confiance différentes. Elle représente le point de transition entre un niveau de confiance et un autre.
-
-**Caractéristiques fondamentales :**
-
-1. **Conceptuelle** — Une frontière est une abstraction, pas une implémentation technique
-2. **Explicite** — Toute frontière doit être formellement définie et documentée (INV-BG-5)
-3. **Stable** — Une frontière possède une identité unique et pérenne
-4. **Orientée** — Une frontière a une direction (entrée, sortie, bidirectionnelle)
-5. **Perméable** — Une frontière a un niveau de perméabilité définissant sa propension au franchissement
-
-**Ce qu'une frontière n'est PAS :**
-
-- ❌ Un firewall technique
-- ❌ Une règle de filtrage
-- ❌ Un point de contrôle d'authentification
-- ❌ Une implémentation de sécurité
-
-### 3.2 Responsabilité de Border Guard
-
-Border Guard est **exclusivement responsable** de la définition formelle des frontières du système. Cette responsabilité inclut :
-
-- Identifier et nommer chaque frontière
-- Classifier la nature de chaque frontière (externe, interne, intégration)
-- Définir la direction de chaque frontière (entrée, sortie, bidirectionnelle)
-- Établir le niveau de perméabilité de chaque frontière
-- Maintenir le registre exhaustif des frontières du système
-
-**Invariant associé :** INV-BG-5 — Toute frontière **doit** être explicitement définie et documentée. Aucune frontière implicite n'est autorisée.
+- **Applicable Ã  :** Toute dÃ©marcation conceptuelle entre zones de confiance dans l'Ã©cosystÃ¨me Miyukini
+- **Responsable :** Border Guard (responsabilitÃ© exclusive de dÃ©finition des frontiÃ¨res - INV-BG-5)
+- **Consommateurs :** StrongFather (contexte de confiance), BondingBrother (application des rÃ¨gles), CaringNanny (Ã©tat des frontiÃ¨res)
+- **Ne couvre pas :** L'application technique des frontiÃ¨res (responsabilitÃ© de BondingBrother)
 
 ---
 
-## 4. Propriétés d'une frontière
+## 3. DÃ©finition canonique de la frontiÃ¨re
 
-Toute frontière possède les propriétés obligatoires suivantes :
+### 3.1 Qu'est-ce qu'une frontiÃ¨re ?
 
-### 4.1 Identité
+Une **frontiÃ¨re** est une dÃ©marcation conceptuelle qui sÃ©pare deux zones de confiance diffÃ©rentes. Elle reprÃ©sente le point de transition entre un niveau de confiance et un autre.
 
-| Propriété | Description | Obligatoire |
+**CaractÃ©ristiques fondamentales :**
+
+1. **Conceptuelle** â€” Une frontiÃ¨re est une abstraction, pas une implÃ©mentation technique
+2. **Explicite** â€” Toute frontiÃ¨re doit Ãªtre formellement dÃ©finie et documentÃ©e (INV-BG-5)
+3. **Stable** â€” Une frontiÃ¨re possÃ¨de une identitÃ© unique et pÃ©renne
+4. **OrientÃ©e** â€” Une frontiÃ¨re a une direction (entrÃ©e, sortie, bidirectionnelle)
+5. **PermÃ©able** â€” Une frontiÃ¨re a un niveau de permÃ©abilitÃ© dÃ©finissant sa propension au franchissement
+
+**Ce qu'une frontiÃ¨re n'est PAS :**
+
+- âŒ Un firewall technique
+- âŒ Une rÃ¨gle de filtrage
+- âŒ Un point de contrÃ´le d'authentification
+- âŒ Une implÃ©mentation de sÃ©curitÃ©
+
+### 3.2 ResponsabilitÃ© de Border Guard
+
+Border Guard est **exclusivement responsable** de la dÃ©finition formelle des frontiÃ¨res du systÃ¨me. Cette responsabilitÃ© inclut :
+
+- Identifier et nommer chaque frontiÃ¨re
+- Classifier la nature de chaque frontiÃ¨re (externe, interne, intÃ©gration)
+- DÃ©finir la direction de chaque frontiÃ¨re (entrÃ©e, sortie, bidirectionnelle)
+- Ã‰tablir le niveau de permÃ©abilitÃ© de chaque frontiÃ¨re
+- Maintenir le registre exhaustif des frontiÃ¨res du systÃ¨me
+
+**Invariant associÃ© :** INV-BG-5 â€” Toute frontiÃ¨re **doit** Ãªtre explicitement dÃ©finie et documentÃ©e. Aucune frontiÃ¨re implicite n'est autorisÃ©e.
+
+---
+
+## 4. PropriÃ©tÃ©s d'une frontiÃ¨re
+
+Toute frontiÃ¨re possÃ¨de les propriÃ©tÃ©s obligatoires suivantes :
+
+### 4.1 IdentitÃ©
+
+| PropriÃ©tÃ© | Description | Obligatoire |
 |-----------|-------------|-------------|
-| **Identifiant** | Identifiant unique et stable dans le système | ✅ Oui |
-| **Nom** | Nom descriptif et non ambigu | ✅ Oui |
-| **Description** | Description de la frontière et de sa raison d'être | ✅ Oui |
-| **Date de création** | Horodatage de création de la frontière | ✅ Oui |
+| **Identifiant** | Identifiant unique et stable dans le systÃ¨me | âœ… Oui |
+| **Nom** | Nom descriptif et non ambigu | âœ… Oui |
+| **Description** | Description de la frontiÃ¨re et de sa raison d'Ãªtre | âœ… Oui |
+| **Date de crÃ©ation** | Horodatage de crÃ©ation de la frontiÃ¨re | âœ… Oui |
 
 ### 4.2 Classification
 
-| Propriété | Description | Obligatoire |
+| PropriÃ©tÃ© | Description | Obligatoire |
 |-----------|-------------|-------------|
-| **Type** | Type de frontière (externe, interne, intégration) | ✅ Oui |
-| **Zone source** | Zone de confiance côté source | ✅ Oui |
-| **Zone destination** | Zone de confiance côté destination | ✅ Oui |
+| **Type** | Type de frontiÃ¨re (externe, interne, intÃ©gration) | âœ… Oui |
+| **Zone source** | Zone de confiance cÃ´tÃ© source | âœ… Oui |
+| **Zone destination** | Zone de confiance cÃ´tÃ© destination | âœ… Oui |
 
 ### 4.3 Comportement
 
-| Propriété | Description | Obligatoire |
+| PropriÃ©tÃ© | Description | Obligatoire |
 |-----------|-------------|-------------|
-| **Direction** | Direction du flux autorisé (entrée, sortie, bidirectionnelle) | ✅ Oui |
-| **Perméabilité** | Niveau de perméabilité (ouverte, contrôlée, fermée) | ✅ Oui |
-| **Règles associées** | Références aux règles de franchissement applicables | ✅ Oui |
+| **Direction** | Direction du flux autorisÃ© (entrÃ©e, sortie, bidirectionnelle) | âœ… Oui |
+| **PermÃ©abilitÃ©** | Niveau de permÃ©abilitÃ© (ouverte, contrÃ´lÃ©e, fermÃ©e) | âœ… Oui |
+| **RÃ¨gles associÃ©es** | RÃ©fÃ©rences aux rÃ¨gles de franchissement applicables | âœ… Oui |
 
-### 4.4 Traçabilité
+### 4.4 TraÃ§abilitÃ©
 
-| Propriété | Description | Obligatoire |
+| PropriÃ©tÃ© | Description | Obligatoire |
 |-----------|-------------|-------------|
-| **Origine** | Qui a créé cette frontière | ✅ Oui |
-| **Justification** | Pourquoi cette frontière existe | ✅ Oui |
-| **Historique** | Historique des modifications | ✅ Oui |
+| **Origine** | Qui a crÃ©Ã© cette frontiÃ¨re | âœ… Oui |
+| **Justification** | Pourquoi cette frontiÃ¨re existe | âœ… Oui |
+| **Historique** | Historique des modifications | âœ… Oui |
 
-**Invariant associé :** INV-BG-8 — Toute définition de frontière est **traçable** avec son origine, sa date, et sa justification.
+**Invariant associÃ© :** INV-BG-8 â€” Toute dÃ©finition de frontiÃ¨re est **traÃ§able** avec son origine, sa date, et sa justification.
 
 ---
 
-## 5. Taxonomie des types de frontières
+## 5. Taxonomie des types de frontiÃ¨res
 
-Border Guard reconnaît trois types canoniques de frontières.
+Border Guard reconnaÃ®t trois types canoniques de frontiÃ¨res.
 
-### 5.1 Frontière externe
+### 5.1 FrontiÃ¨re externe
 
-**Définition :** Sépare l'écosystème Miyukini du monde extérieur (internet, systèmes tiers, utilisateurs non authentifiés). C'est la limite entre le "dehors" et le "dedans".
+**DÃ©finition :** SÃ©pare l'Ã©cosystÃ¨me Miyukini du monde extÃ©rieur (internet, systÃ¨mes tiers, utilisateurs non authentifiÃ©s). C'est la limite entre le "dehors" et le "dedans".
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
-| **Zone source** | Monde extérieur (unknown ou hostile par défaut) |
-| **Zone destination** | Écosystème Miyukini |
-| **Confiance par défaut** | Unknown (aucune confiance accordée a priori) |
-| **Direction typique** | Entrée (flux venant de l'extérieur vers l'intérieur) |
-| **Perméabilité typique** | Contrôlée (vérifications systématiques) |
+| **Zone source** | Monde extÃ©rieur (unknown ou hostile par dÃ©faut) |
+| **Zone destination** | Ã‰cosystÃ¨me Miyukini |
+| **Confiance par dÃ©faut** | Unknown (aucune confiance accordÃ©e a priori) |
+| **Direction typique** | EntrÃ©e (flux venant de l'extÃ©rieur vers l'intÃ©rieur) |
+| **PermÃ©abilitÃ© typique** | ContrÃ´lÃ©e (vÃ©rifications systÃ©matiques) |
 
-**Exemples de frontières externes :**
+**Exemples de frontiÃ¨res externes :**
 
-- Frontière API publique — Point d'entrée des requêtes HTTP externes
-- Frontière utilisateur non authentifié — Point d'entrée des utilisateurs anonymes
-- Frontière webhook — Point d'entrée des notifications externes
-- Frontière réseau — Point d'entrée des connexions réseau
+- FrontiÃ¨re API publique â€” Point d'entrÃ©e des requÃªtes HTTP externes
+- FrontiÃ¨re utilisateur non authentifiÃ© â€” Point d'entrÃ©e des utilisateurs anonymes
+- FrontiÃ¨re webhook â€” Point d'entrÃ©e des notifications externes
+- FrontiÃ¨re rÃ©seau â€” Point d'entrÃ©e des connexions rÃ©seau
 
 **Implications :**
 
-- Tout ce qui traverse une frontière externe est présumé "unknown" jusqu'à classification
-- Les règles de franchissement sont restrictives par défaut
-- Bonding Brother applique des contrôles systématiques
+- Tout ce qui traverse une frontiÃ¨re externe est prÃ©sumÃ© "unknown" jusqu'Ã  classification
+- Les rÃ¨gles de franchissement sont restrictives par dÃ©faut
+- Bonding Brother applique des contrÃ´les systÃ©matiques
 
-### 5.2 Frontière interne
+### 5.2 FrontiÃ¨re interne
 
-**Définition :** Sépare différentes zones de confiance au sein de l'écosystème (zone admin vs zone utilisateur, module sensible vs module standard, données critiques vs données publiques).
+**DÃ©finition :** SÃ©pare diffÃ©rentes zones de confiance au sein de l'Ã©cosystÃ¨me (zone admin vs zone utilisateur, module sensible vs module standard, donnÃ©es critiques vs donnÃ©es publiques).
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
 | **Zone source** | Zone interne avec niveau de confiance X |
-| **Zone destination** | Zone interne avec niveau de confiance Y (X ≠ Y) |
-| **Confiance par défaut** | Héritée de la zone source |
-| **Direction typique** | Bidirectionnelle (selon les règles) |
-| **Perméabilité typique** | Variable (selon les zones) |
+| **Zone destination** | Zone interne avec niveau de confiance Y (X â‰  Y) |
+| **Confiance par dÃ©faut** | HÃ©ritÃ©e de la zone source |
+| **Direction typique** | Bidirectionnelle (selon les rÃ¨gles) |
+| **PermÃ©abilitÃ© typique** | Variable (selon les zones) |
 
-**Exemples de frontières internes :**
+**Exemples de frontiÃ¨res internes :**
 
-- Frontière admin/utilisateur — Entre l'espace d'administration et l'espace utilisateur
-- Frontière données sensibles — Entre les données critiques et les données standard
-- Frontière cores — Entre différents cores du système (sauf pour les flux explicites)
-- Frontière module critique — Autour d'un module à haute sécurité (niveau 3-4)
+- FrontiÃ¨re admin/utilisateur â€” Entre l'espace d'administration et l'espace utilisateur
+- FrontiÃ¨re donnÃ©es sensibles â€” Entre les donnÃ©es critiques et les donnÃ©es standard
+- FrontiÃ¨re cores â€” Entre diffÃ©rents cores du systÃ¨me (sauf pour les flux explicites)
+- FrontiÃ¨re module critique â€” Autour d'un module Ã  haute sÃ©curitÃ© (niveau 3-4)
 
 **Implications :**
 
-- Les frontières internes permettent la défense en profondeur
-- Chaque zone interne peut avoir ses propres règles de franchissement
+- Les frontiÃ¨res internes permettent la dÃ©fense en profondeur
+- Chaque zone interne peut avoir ses propres rÃ¨gles de franchissement
 - La confiance peut varier entre zones internes
 
-### 5.3 Frontière d'intégration
+### 5.3 FrontiÃ¨re d'intÃ©gration
 
-**Définition :** Sépare l'écosystème d'un système externe avec lequel il interagit de manière contrôlée (API partenaire, service tiers, base de données externe).
+**DÃ©finition :** SÃ©pare l'Ã©cosystÃ¨me d'un systÃ¨me externe avec lequel il interagit de maniÃ¨re contrÃ´lÃ©e (API partenaire, service tiers, base de donnÃ©es externe).
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
-| **Zone source** | Écosystème Miyukini ou système externe intégré |
-| **Zone destination** | Système externe intégré ou écosystème Miyukini |
-| **Confiance par défaut** | Selon classification de l'intégration (verified typiquement) |
-| **Direction typique** | Bidirectionnelle (échanges avec le système intégré) |
-| **Perméabilité typique** | Contrôlée (protocoles d'intégration) |
+| **Zone source** | Ã‰cosystÃ¨me Miyukini ou systÃ¨me externe intÃ©grÃ© |
+| **Zone destination** | SystÃ¨me externe intÃ©grÃ© ou Ã©cosystÃ¨me Miyukini |
+| **Confiance par dÃ©faut** | Selon classification de l'intÃ©gration (verified typiquement) |
+| **Direction typique** | Bidirectionnelle (Ã©changes avec le systÃ¨me intÃ©grÃ©) |
+| **PermÃ©abilitÃ© typique** | ContrÃ´lÃ©e (protocoles d'intÃ©gration) |
 
-**Exemples de frontières d'intégration :**
+**Exemples de frontiÃ¨res d'intÃ©gration :**
 
-- Frontière Supabase — Avec le backend Supabase
-- Frontière API partenaire — Avec une API tierce certifiée
-- Frontière service de paiement — Avec un processeur de paiement (Stripe, etc.)
-- Frontière service d'authentification — Avec un IdP externe (OAuth, SAML)
+- FrontiÃ¨re Supabase â€” Avec le backend Supabase
+- FrontiÃ¨re API partenaire â€” Avec une API tierce certifiÃ©e
+- FrontiÃ¨re service de paiement â€” Avec un processeur de paiement (Stripe, etc.)
+- FrontiÃ¨re service d'authentification â€” Avec un IdP externe (OAuth, SAML)
 
 **Implications :**
 
-- Une intégration peut être classifiée "verified" si elle respecte les protocoles
-- L'état de l'intégration peut être signalé à CaringNanny
-- Les règles de franchissement sont spécifiques à chaque intégration
+- Une intÃ©gration peut Ãªtre classifiÃ©e "verified" si elle respecte les protocoles
+- L'Ã©tat de l'intÃ©gration peut Ãªtre signalÃ© Ã  CaringNanny
+- Les rÃ¨gles de franchissement sont spÃ©cifiques Ã  chaque intÃ©gration
 
 ---
 
-## 6. Niveaux de perméabilité
+## 6. Niveaux de permÃ©abilitÃ©
 
-La perméabilité caractérise la propension d'une frontière à autoriser le franchissement.
+La permÃ©abilitÃ© caractÃ©rise la propension d'une frontiÃ¨re Ã  autoriser le franchissement.
 
-### 6.1 Perméabilité ouverte
+### 6.1 PermÃ©abilitÃ© ouverte
 
-**Définition :** Franchissement libre sous conditions minimales.
+**DÃ©finition :** Franchissement libre sous conditions minimales.
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
-| **Vérification** | Minimale (validation structurelle uniquement) |
-| **Blocage** | Rare (uniquement en cas d'anomalie évidente) |
-| **Usage typique** | Frontières vers des zones publiques |
-| **Niveau de sécurité associé** | 0 (PUBLIC / DISPLAY) |
+| **VÃ©rification** | Minimale (validation structurelle uniquement) |
+| **Blocage** | Rare (uniquement en cas d'anomalie Ã©vidente) |
+| **Usage typique** | FrontiÃ¨res vers des zones publiques |
+| **Niveau de sÃ©curitÃ© associÃ©** | 0 (PUBLIC / DISPLAY) |
 
 **Exemples :**
 
-- Frontière vers une API publique en lecture seule
-- Frontière vers des ressources statiques
-- Frontière vers des données publiques
+- FrontiÃ¨re vers une API publique en lecture seule
+- FrontiÃ¨re vers des ressources statiques
+- FrontiÃ¨re vers des donnÃ©es publiques
 
-### 6.2 Perméabilité contrôlée
+### 6.2 PermÃ©abilitÃ© contrÃ´lÃ©e
 
-**Définition :** Franchissement soumis à vérification selon les règles définies.
+**DÃ©finition :** Franchissement soumis Ã  vÃ©rification selon les rÃ¨gles dÃ©finies.
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
-| **Vérification** | Systématique (selon règles de franchissement) |
-| **Blocage** | Conditionnel (si règles non respectées) |
-| **Usage typique** | Frontières standard, intégrations |
-| **Niveau de sécurité associé** | 1-3 (STANDARD à CRITICAL) |
+| **VÃ©rification** | SystÃ©matique (selon rÃ¨gles de franchissement) |
+| **Blocage** | Conditionnel (si rÃ¨gles non respectÃ©es) |
+| **Usage typique** | FrontiÃ¨res standard, intÃ©grations |
+| **Niveau de sÃ©curitÃ© associÃ©** | 1-3 (STANDARD Ã  CRITICAL) |
 
 **Exemples :**
 
-- Frontière utilisateur authentifié
-- Frontière d'intégration avec API partenaire
-- Frontière vers des données sensibles
+- FrontiÃ¨re utilisateur authentifiÃ©
+- FrontiÃ¨re d'intÃ©gration avec API partenaire
+- FrontiÃ¨re vers des donnÃ©es sensibles
 
-### 6.3 Perméabilité fermée
+### 6.3 PermÃ©abilitÃ© fermÃ©e
 
-**Définition :** Franchissement interdit sauf conditions exceptionnelles.
+**DÃ©finition :** Franchissement interdit sauf conditions exceptionnelles.
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
-| **Vérification** | Maximale (toutes les conditions doivent être satisfaites) |
-| **Blocage** | Par défaut (franchissement exceptionnel) |
-| **Usage typique** | Frontières vers des zones critiques, isolement |
-| **Niveau de sécurité associé** | 4 (HARDENED / ISOLATED) |
+| **VÃ©rification** | Maximale (toutes les conditions doivent Ãªtre satisfaites) |
+| **Blocage** | Par dÃ©faut (franchissement exceptionnel) |
+| **Usage typique** | FrontiÃ¨res vers des zones critiques, isolement |
+| **Niveau de sÃ©curitÃ© associÃ©** | 4 (HARDENED / ISOLATED) |
 
 **Exemples :**
 
-- Frontière vers des clés cryptographiques
-- Frontière en mode quarantaine
-- Frontière vers des zones isolées en mode survie
+- FrontiÃ¨re vers des clÃ©s cryptographiques
+- FrontiÃ¨re en mode quarantaine
+- FrontiÃ¨re vers des zones isolÃ©es en mode survie
 
 ---
 
 ## 7. Direction de franchissement
 
-### 7.1 Entrée (Inbound)
+### 7.1 EntrÃ©e (Inbound)
 
-**Définition :** Flux autorisé uniquement de l'extérieur vers l'intérieur (par rapport à la zone de confiance supérieure).
+**DÃ©finition :** Flux autorisÃ© uniquement de l'extÃ©rieur vers l'intÃ©rieur (par rapport Ã  la zone de confiance supÃ©rieure).
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
-| **Flux autorisé** | Source → Destination uniquement |
-| **Usage typique** | Frontières externes, réception de données |
-| **Contrôle** | Sur ce qui entre |
+| **Flux autorisÃ©** | Source â†’ Destination uniquement |
+| **Usage typique** | FrontiÃ¨res externes, rÃ©ception de donnÃ©es |
+| **ContrÃ´le** | Sur ce qui entre |
 
 ### 7.2 Sortie (Outbound)
 
-**Définition :** Flux autorisé uniquement de l'intérieur vers l'extérieur.
+**DÃ©finition :** Flux autorisÃ© uniquement de l'intÃ©rieur vers l'extÃ©rieur.
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
-| **Flux autorisé** | Destination → Source uniquement |
-| **Usage typique** | Envoi de données vers l'extérieur |
-| **Contrôle** | Sur ce qui sort |
+| **Flux autorisÃ©** | Destination â†’ Source uniquement |
+| **Usage typique** | Envoi de donnÃ©es vers l'extÃ©rieur |
+| **ContrÃ´le** | Sur ce qui sort |
 
 ### 7.3 Bidirectionnel
 
-**Définition :** Flux autorisé dans les deux sens, chaque direction pouvant avoir ses propres règles.
+**DÃ©finition :** Flux autorisÃ© dans les deux sens, chaque direction pouvant avoir ses propres rÃ¨gles.
 
-| Aspect | Spécification |
+| Aspect | SpÃ©cification |
 |--------|---------------|
-| **Flux autorisé** | Source ↔ Destination |
-| **Usage typique** | Intégrations, frontières internes |
-| **Contrôle** | Règles distinctes par direction |
+| **Flux autorisÃ©** | Source â†” Destination |
+| **Usage typique** | IntÃ©grations, frontiÃ¨res internes |
+| **ContrÃ´le** | RÃ¨gles distinctes par direction |
 
 ---
 
 ## 8. Zones de confiance
 
-### 8.1 Définition
+### 8.1 DÃ©finition
 
-Une **zone de confiance** est un espace conceptuel délimité par des frontières, où tous les éléments partagent un même niveau de confiance.
+Une **zone de confiance** est un espace conceptuel dÃ©limitÃ© par des frontiÃ¨res, oÃ¹ tous les Ã©lÃ©ments partagent un mÃªme niveau de confiance.
 
-### 8.2 Propriétés d'une zone
+### 8.2 PropriÃ©tÃ©s d'une zone
 
-| Propriété | Description |
+| PropriÃ©tÃ© | Description |
 |-----------|-------------|
 | **Identifiant** | Identifiant unique de la zone |
-| **Niveau de confiance** | Niveau de confiance homogène (trusted, verified, unknown, hostile) |
-| **Frontières** | Liste des frontières délimitant la zone |
-| **Contenu** | Composants, données, services contenus dans la zone |
+| **Niveau de confiance** | Niveau de confiance homogÃ¨ne (trusted, verified, unknown, hostile) |
+| **FrontiÃ¨res** | Liste des frontiÃ¨res dÃ©limitant la zone |
+| **Contenu** | Composants, donnÃ©es, services contenus dans la zone |
 
-### 8.3 Hiérarchie des zones
+### 8.3 HiÃ©rarchie des zones
 
-Les zones de confiance sont organisées hiérarchiquement :
+Les zones de confiance sont organisÃ©es hiÃ©rarchiquement :
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ ZONE EXTERNE (hostile/unknown)                              │
-│   ┌─────────────────────────────────────────────────────┐   │
-│   │ ZONE PÉRIPHÉRIQUE (unknown/verified)                │   │
-│   │   ┌─────────────────────────────────────────────┐   │   │
-│   │   │ ZONE UTILISATEUR (verified)                 │   │   │
-│   │   │   ┌─────────────────────────────────────┐   │   │   │
-│   │   │   │ ZONE ADMIN (verified+)              │   │   │   │
-│   │   │   │   ┌─────────────────────────────┐   │   │   │   │
-│   │   │   │   │ ZONE SYSTÈME (trusted)      │   │   │   │   │
-│   │   │   │   │   ┌─────────────────────┐   │   │   │   │   │
-│   │   │   │   │   │ ZONE CRITIQUE       │   │   │   │   │   │
-│   │   │   │   │   │ (trusted isolé)     │   │   │   │   │   │
-│   │   │   │   │   └─────────────────────┘   │   │   │   │   │
-│   │   │   │   └─────────────────────────────┘   │   │   │   │
-│   │   │   └─────────────────────────────────────┘   │   │   │
-│   │   └─────────────────────────────────────────────┘   │   │
-│   └─────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ ZONE EXTERNE (hostile/unknown)                              â”‚
+â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚   â”‚ ZONE PÃ‰RIPHÃ‰RIQUE (unknown/verified)                â”‚   â”‚
+â”‚   â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚   â”‚
+â”‚   â”‚   â”‚ ZONE UTILISATEUR (verified)                 â”‚   â”‚   â”‚
+â”‚   â”‚   â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚   â”‚   â”‚
+â”‚   â”‚   â”‚   â”‚ ZONE ADMIN (verified+)              â”‚   â”‚   â”‚   â”‚
+â”‚   â”‚   â”‚   â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚   â”‚   â”‚   â”‚
+â”‚   â”‚   â”‚   â”‚   â”‚ ZONE SYSTÃˆME (trusted)      â”‚   â”‚   â”‚   â”‚   â”‚
+â”‚   â”‚   â”‚   â”‚   â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚   â”‚   â”‚   â”‚   â”‚
+â”‚   â”‚   â”‚   â”‚   â”‚   â”‚ ZONE CRITIQUE       â”‚   â”‚   â”‚   â”‚   â”‚   â”‚
+â”‚   â”‚   â”‚   â”‚   â”‚   â”‚ (trusted isolÃ©)     â”‚   â”‚   â”‚   â”‚   â”‚   â”‚
+â”‚   â”‚   â”‚   â”‚   â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚   â”‚   â”‚   â”‚   â”‚
+â”‚   â”‚   â”‚   â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚   â”‚   â”‚   â”‚
+â”‚   â”‚   â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚   â”‚   â”‚
+â”‚   â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚   â”‚
+â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-**Règle fondamentale :** Chaque frontière sépare exactement deux zones de niveaux de confiance différents.
+**RÃ¨gle fondamentale :** Chaque frontiÃ¨re sÃ©pare exactement deux zones de niveaux de confiance diffÃ©rents.
 
 ---
 
-## 9. Adaptation selon les niveaux de sécurité
+## 9. Adaptation selon les niveaux de sÃ©curitÃ©
 
-Les frontières s'adaptent selon le niveau de sécurité déclaré par l'Opérateur.
+Les frontiÃ¨res s'adaptent selon le niveau de sÃ©curitÃ© dÃ©clarÃ© par l'OpÃ©rateur.
 
-**Référence :** [Miyukini Conceptual References - Security Levels](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md)
+**RÃ©fÃ©rence :** [Miyukini Conceptual References - Security Levels](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ### 9.1 Adaptation par niveau
 
-| Niveau | Perméabilité par défaut | Frontières internes | Frontières externes |
+| Niveau | PermÃ©abilitÃ© par dÃ©faut | FrontiÃ¨res internes | FrontiÃ¨res externes |
 |--------|-------------------------|---------------------|---------------------|
 | **0 - PUBLIC** | Ouverte | Minimales | Assouplies |
-| **1 - STANDARD** | Contrôlée | Standard | Standard |
-| **2 - SENSITIVE** | Contrôlée renforcée | Renforcées | Renforcées |
-| **3 - CRITICAL** | Strictement contrôlée | Strictes | Strictes |
-| **4 - HARDENED** | Fermée par défaut | Maximales, isolement | Maximales, isolement |
+| **1 - STANDARD** | ContrÃ´lÃ©e | Standard | Standard |
+| **2 - SENSITIVE** | ContrÃ´lÃ©e renforcÃ©e | RenforcÃ©es | RenforcÃ©es |
+| **3 - CRITICAL** | Strictement contrÃ´lÃ©e | Strictes | Strictes |
+| **4 - HARDENED** | FermÃ©e par dÃ©faut | Maximales, isolement | Maximales, isolement |
 
-### 9.2 Règles d'adaptation
+### 9.2 RÃ¨gles d'adaptation
 
-| Règle | Description |
+| RÃ¨gle | Description |
 |-------|-------------|
-| **RÈGLE-ADAPT-1** | Le niveau de sécurité influence la perméabilité par défaut des nouvelles frontières |
-| **RÈGLE-ADAPT-2** | Une frontière peut être plus restrictive que le niveau, jamais moins |
-| **RÈGLE-ADAPT-3** | L'élévation du niveau resserre automatiquement les frontières existantes |
-| **RÈGLE-ADAPT-4** | La réduction du niveau ne desserre pas automatiquement les frontières |
+| **RÃˆGLE-ADAPT-1** | Le niveau de sÃ©curitÃ© influence la permÃ©abilitÃ© par dÃ©faut des nouvelles frontiÃ¨res |
+| **RÃˆGLE-ADAPT-2** | Une frontiÃ¨re peut Ãªtre plus restrictive que le niveau, jamais moins |
+| **RÃˆGLE-ADAPT-3** | L'Ã©lÃ©vation du niveau resserre automatiquement les frontiÃ¨res existantes |
+| **RÃˆGLE-ADAPT-4** | La rÃ©duction du niveau ne desserre pas automatiquement les frontiÃ¨res |
 
 ---
 
-## 10. Règles de définition
+## 10. RÃ¨gles de dÃ©finition
 
-### 10.1 Règles obligatoires
+### 10.1 RÃ¨gles obligatoires
 
-| Règle | Description |
+| RÃ¨gle | Description |
 |-------|-------------|
-| **RÈGLE-DEF-1** | Toute frontière doit être explicitement définie (INV-BG-5) |
-| **RÈGLE-DEF-2** | Toute frontière doit avoir une identité unique et stable |
-| **RÈGLE-DEF-3** | Toute frontière doit séparer exactement deux zones de confiance |
-| **RÈGLE-DEF-4** | Toute frontière doit avoir au moins une règle de franchissement associée |
-| **RÈGLE-DEF-5** | Toute définition de frontière est traçable (INV-BG-8) |
+| **RÃˆGLE-DEF-1** | Toute frontiÃ¨re doit Ãªtre explicitement dÃ©finie (INV-BG-5) |
+| **RÃˆGLE-DEF-2** | Toute frontiÃ¨re doit avoir une identitÃ© unique et stable |
+| **RÃˆGLE-DEF-3** | Toute frontiÃ¨re doit sÃ©parer exactement deux zones de confiance |
+| **RÃˆGLE-DEF-4** | Toute frontiÃ¨re doit avoir au moins une rÃ¨gle de franchissement associÃ©e |
+| **RÃˆGLE-DEF-5** | Toute dÃ©finition de frontiÃ¨re est traÃ§able (INV-BG-8) |
 
-### 10.2 Anti-patterns de définition
+### 10.2 Anti-patterns de dÃ©finition
 
 | Anti-pattern | Description | Pourquoi c'est interdit |
 |--------------|-------------|-------------------------|
-| **Frontière implicite** | Frontière non déclarée formellement | Viole INV-BG-5 |
-| **Frontière flottante** | Frontière sans zones clairement définies | Viole RÈGLE-DEF-3 |
-| **Frontière sans règles** | Frontière sans règles de franchissement | Viole RÈGLE-DEF-4 |
-| **Frontière technique** | Frontière définie par l'implémentation | Viole INV-BG-10 |
+| **FrontiÃ¨re implicite** | FrontiÃ¨re non dÃ©clarÃ©e formellement | Viole INV-BG-5 |
+| **FrontiÃ¨re flottante** | FrontiÃ¨re sans zones clairement dÃ©finies | Viole RÃˆGLE-DEF-3 |
+| **FrontiÃ¨re sans rÃ¨gles** | FrontiÃ¨re sans rÃ¨gles de franchissement | Viole RÃˆGLE-DEF-4 |
+| **FrontiÃ¨re technique** | FrontiÃ¨re dÃ©finie par l'implÃ©mentation | Viole INV-BG-10 |
 
 ---
 
@@ -366,86 +366,87 @@ Les frontières s'adaptent selon le niveau de sécurité déclaré par l'Opérat
 
 ### 11.1 Flux vers StrongFather
 
-Border Guard fournit à StrongFather le **contexte de frontière** pour ses décisions :
+Border Guard fournit Ã  StrongFather le **contexte de frontiÃ¨re** pour ses dÃ©cisions :
 
-- Quelles frontières sont traversées par une intention
+- Quelles frontiÃ¨res sont traversÃ©es par une intention
 - Quelle est la zone source de l'intention
 - Quelle est la zone destination de l'intention
-- Quel niveau de confiance est associé aux zones
+- Quel niveau de confiance est associÃ© aux zones
 
 ### 11.2 Flux vers BondingBrother
 
-Border Guard fournit à BondingBrother les **définitions de frontières** :
+Border Guard fournit Ã  BondingBrother les **dÃ©finitions de frontiÃ¨res** :
 
-- Type, direction, perméabilité de chaque frontière
-- Règles de franchissement applicables
-- État actuel des frontières (via CaringNanny)
+- Type, direction, permÃ©abilitÃ© de chaque frontiÃ¨re
+- RÃ¨gles de franchissement applicables
+- Ã‰tat actuel des frontiÃ¨res (via CaringNanny)
 
 ### 11.3 Flux vers CaringNanny
 
-Border Guard informe CaringNanny de l'**état des frontières** :
+Border Guard informe CaringNanny de l'**Ã©tat des frontiÃ¨res** :
 
-- Création, modification, suppression de frontières
-- Changement d'état d'une frontière (ex: passage en mode fermé)
-- Anomalies détectées sur une frontière
+- CrÃ©ation, modification, suppression de frontiÃ¨res
+- Changement d'Ã©tat d'une frontiÃ¨re (ex: passage en mode fermÃ©)
+- Anomalies dÃ©tectÃ©es sur une frontiÃ¨re
 
 ---
 
-## 12. Références croisées
+## 12. RÃ©fÃ©rences croisÃ©es
 
-### Invariants associés (Documentation Fondatrice - Section 7)
+### Invariants associÃ©s (Documentation Fondatrice - Section 7)
 
-| Invariant | Énoncé | Relation |
+| Invariant | Ã‰noncÃ© | Relation |
 |-----------|--------|----------|
-| INV-BG-5 | Frontières explicites | Fondement de ce contrat |
-| INV-BG-8 | Traçabilité complète | Toute frontière est traçable |
-| INV-BG-9 | Cohérence globale | Pas de contradiction entre frontières |
-| INV-BG-10 | Neutralité conceptuelle | Pas de supposition technique |
+| INV-BG-5 | FrontiÃ¨res explicites | Fondement de ce contrat |
+| INV-BG-8 | TraÃ§abilitÃ© complÃ¨te | Toute frontiÃ¨re est traÃ§able |
+| INV-BG-9 | CohÃ©rence globale | Pas de contradiction entre frontiÃ¨res |
+| INV-BG-10 | NeutralitÃ© conceptuelle | Pas de supposition technique |
 
-### Documents associés
+### Documents associÃ©s
 
 | Document | Relation |
 |----------|----------|
 | [Border Guard - Documentation Fondatrice](../../foundation/Border%20Guard%20-%20Documentation%20Fondatrice.md) | Document source |
 | [Border Guard - Trust Level Classification Contract](./Border%20Guard%20-%20Trust%20Level%20Classification%20Contract.md) | Niveaux de confiance des zones |
-| [Border Guard - Crossing Rules Contract](./Border%20Guard%20-%20Crossing%20Rules%20Contract.md) | Règles de franchissement |
-| [Miyukini Conceptual References - Security Levels](../../../../reference/Miyukini%20Conceptual%20References%20-%20Security%20Levels.md) | Adaptation selon niveau sécurité |
+| [Border Guard - Crossing Rules Contract](./Border%20Guard%20-%20Crossing%20Rules%20Contract.md) | RÃ¨gles de franchissement |
+| [Miyukini Conceptual References - Security Levels](..//..//..//..//miyukini-webway-system//reference//_index.md) | Adaptation selon niveau sÃ©curitÃ© |
 
-### Références glossaire
+### RÃ©fÃ©rences glossaire
 
-| Terme | Définition |
+| Terme | DÃ©finition |
 |-------|------------|
-| **Frontière** | Démarcation conceptuelle entre deux zones de confiance différentes |
-| **Zone de confiance** | Espace conceptuel où tous les éléments partagent un niveau de confiance homogène |
-| **Perméabilité** | Propension d'une frontière à autoriser le franchissement |
-| **Frontière externe** | Sépare l'écosystème du monde extérieur |
-| **Frontière interne** | Sépare différentes zones au sein de l'écosystème |
-| **Frontière d'intégration** | Sépare l'écosystème d'un système externe intégré |
+| **FrontiÃ¨re** | DÃ©marcation conceptuelle entre deux zones de confiance diffÃ©rentes |
+| **Zone de confiance** | Espace conceptuel oÃ¹ tous les Ã©lÃ©ments partagent un niveau de confiance homogÃ¨ne |
+| **PermÃ©abilitÃ©** | Propension d'une frontiÃ¨re Ã  autoriser le franchissement |
+| **FrontiÃ¨re externe** | SÃ©pare l'Ã©cosystÃ¨me du monde extÃ©rieur |
+| **FrontiÃ¨re interne** | SÃ©pare diffÃ©rentes zones au sein de l'Ã©cosystÃ¨me |
+| **FrontiÃ¨re d'intÃ©gration** | SÃ©pare l'Ã©cosystÃ¨me d'un systÃ¨me externe intÃ©grÃ© |
 
-**Source :** [Miyukini Conceptual References - Glossaire](../../../../reference/Miyukini%20Conceptual%20References%20-%20Glossaire.md)
+**Source :** [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 13. Synthèse contractuelle
+## 13. SynthÃ¨se contractuelle
 
 ### Garanties de ce contrat
 
 Ce contrat garantit que :
 
-1. **Les frontières sont définies** — Trois types canoniques avec propriétés explicites
-2. **Les zones sont claires** — Chaque frontière sépare exactement deux zones
-3. **La perméabilité est classifiée** — Trois niveaux (ouverte, contrôlée, fermée)
-4. **L'adaptation est automatique** — Les frontières s'adaptent au niveau de sécurité
-5. **La traçabilité est complète** — Toute frontière est documentée et traçable
+1. **Les frontiÃ¨res sont dÃ©finies** â€” Trois types canoniques avec propriÃ©tÃ©s explicites
+2. **Les zones sont claires** â€” Chaque frontiÃ¨re sÃ©pare exactement deux zones
+3. **La permÃ©abilitÃ© est classifiÃ©e** â€” Trois niveaux (ouverte, contrÃ´lÃ©e, fermÃ©e)
+4. **L'adaptation est automatique** â€” Les frontiÃ¨res s'adaptent au niveau de sÃ©curitÃ©
+5. **La traÃ§abilitÃ© est complÃ¨te** â€” Toute frontiÃ¨re est documentÃ©e et traÃ§able
 
-### Phrase de synthèse
+### Phrase de synthÃ¨se
 
-> **Une frontière est une démarcation conceptuelle, explicite et traçable, qui sépare deux zones de confiance différentes et dont la perméabilité s'adapte au niveau de sécurité du système.**
+> **Une frontiÃ¨re est une dÃ©marcation conceptuelle, explicite et traÃ§able, qui sÃ©pare deux zones de confiance diffÃ©rentes et dont la permÃ©abilitÃ© s'adapte au niveau de sÃ©curitÃ© du systÃ¨me.**
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** Contrat — Normatif  
-**Référence :** Border Guard v1.5, Documentation Fondatrice Section 4  
-**Type :** Contrat de définition de frontières
+**Statut :** Contrat â€” Normatif  
+**RÃ©fÃ©rence :** Border Guard v1.5, Documentation Fondatrice Section 4  
+**Type :** Contrat de dÃ©finition de frontiÃ¨res
+

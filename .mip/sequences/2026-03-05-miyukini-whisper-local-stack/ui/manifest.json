@@ -1,0 +1,162 @@
+﻿{
+    "identity":  {
+                     "sequence":  "2026-03-05-miyukini-whisper-local-stack",
+                     "date":  "2026-03-05",
+                     "slug":  "miyukini-whisper-local-stack",
+                     "generated_at":  "2026-03-05T15:17:17",
+                     "source":  "retrofit-existing-sequence"
+                 },
+    "tabs":  [
+                 {
+                     "id":  "p0",
+                     "label":  "P0",
+                     "groups":  [
+                                    {
+                                        "label":  "Documents P0",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Brief 2026-03-05-miyukini-whisper-local-stack.md",
+                                                          "path":  "briefs/2026-03-05-miyukini-whisper-local-stack.md"
+                                                      },
+                                                      {
+                                                          "label":  "Brief 2026-03-05-miyukini-whisper-local-stack-P0-travail.md",
+                                                          "path":  "briefs/2026-03-05-miyukini-whisper-local-stack-P0-travail.md"
+                                                      },
+                                                      {
+                                                          "label":  "Brief 2026-03-05-miyukini-whisper-local-stack-pr-concurrence.md",
+                                                          "path":  "briefs/2026-03-05-miyukini-whisper-local-stack-pr-concurrence.md"
+                                                      },
+                                                      {
+                                                          "label":  "Spec 2026-03-05-miyukini-whisper-local-stack-central-ui-spec.md",
+                                                          "path":  "specs/2026-03-05-miyukini-whisper-local-stack-central-ui-spec.md"
+                                                      },
+                                                      {
+                                                          "label":  "Spec 2026-03-05-miyukini-whisper-local-stack-spec.md",
+                                                          "path":  "specs/2026-03-05-miyukini-whisper-local-stack-spec.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace p0-trace.md",
+                                                          "path":  "phases/p0-trace.md"
+                                                      }
+                                                  ]
+                                    },
+                                    {
+                                        "label":  "Liste des documents par temps",
+                                        "files":  [
+
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "p3",
+                     "label":  "P3",
+                     "groups":  [
+                                    {
+                                        "label":  "GPI",
+                                        "files":  [
+
+                                                  ]
+                                    },
+                                    {
+                                        "label":  "Taches par etapes",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Plan 2026-03-05-miyukini-whisper-local-stack-plan.md",
+                                                          "path":  "plans_p3/2026-03-05-miyukini-whisper-local-stack-plan.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace p3-trace.md",
+                                                          "path":  "phases/p3-trace.md"
+                                                      }
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "p4",
+                     "label":  "P4",
+                     "groups":  [
+                                    {
+                                        "label":  "Documents P4",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Audit 2026-03-05-conformite.md",
+                                                          "path":  "audits/2026-03-05-conformite.md"
+                                                      },
+                                                      {
+                                                          "label":  "Audit 2026-03-05-miyukini-whisper-local-stack.md",
+                                                          "path":  "audits/2026-03-05-miyukini-whisper-local-stack.md"
+                                                      },
+                                                      {
+                                                          "label":  "Audit 2026-03-05-miyukini-whisper-local-stack-efficiency.md",
+                                                          "path":  "audits/2026-03-05-miyukini-whisper-local-stack-efficiency.md"
+                                                      },
+                                                      {
+                                                          "label":  "Audit 2026-03-05-miyukini-whisper-local-stack-pass-0.md",
+                                                          "path":  "audits/2026-03-05-miyukini-whisper-local-stack-pass-0.md"
+                                                      },
+                                                      {
+                                                          "label":  "Audit 2026-03-05-miyukini-whisper-local-stack-pass-01.md",
+                                                          "path":  "audits/2026-03-05-miyukini-whisper-local-stack-pass-01.md"
+                                                      },
+                                                      {
+                                                          "label":  "Audit 2026-03-05-miyukini-whisper-local-stack-pass-02.md",
+                                                          "path":  "audits/2026-03-05-miyukini-whisper-local-stack-pass-02.md"
+                                                      },
+                                                      {
+                                                          "label":  "Audit 2026-03-05-miyukini-whisper-local-stack-pass-03.md",
+                                                          "path":  "audits/2026-03-05-miyukini-whisper-local-stack-pass-03.md"
+                                                      },
+                                                      {
+                                                          "label":  "Audit 2026-03-05-miyukini-whisper-local-stack-ras.md",
+                                                          "path":  "audits/2026-03-05-miyukini-whisper-local-stack-ras.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace p4-trace.md",
+                                                          "path":  "phases/p4-trace.md"
+                                                      }
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "p5",
+                     "label":  "P5",
+                     "groups":  [
+                                    {
+                                        "label":  "Documents P5",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Trace p5-trace.md",
+                                                          "path":  "phases/p5-trace.md"
+                                                      }
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "rapport-final",
+                     "label":  "Rapport final",
+                     "groups":  [
+                                    {
+                                        "label":  "Rapport final",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Rapport 2026-03-05-miyukini-whisper-local-stack-report.md",
+                                                          "path":  "rapports_finaux/2026-03-05-miyukini-whisper-local-stack-report.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace p6-trace.md",
+                                                          "path":  "phases/p6-trace.md"
+                                                      },
+                                                      {
+                                                          "label":  "Metrics 2026-03-05-miyukini-whisper-local-stack.json",
+                                                          "path":  "metrics/2026-03-05-miyukini-whisper-local-stack.json"
+                                                      }
+                                                  ]
+                                    }
+                                ]
+                 }
+             ]
+}
