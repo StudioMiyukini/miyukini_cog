@@ -127,9 +127,6 @@ members = [
     # === MGE (Miyukini Game Engine) ===
     # Workspace MGE indépendant : mge/ (voir mge/Cargo.toml)
 
-    # === Démo MGE ===
-    "demos/mge-pathfinding-labyrinthe",
-
     # === Outils internes ===
     "crates/miyukini-admin",
     "tools/mip-generator",
